@@ -1,0 +1,25 @@
+When you receive this repository on the new PC, perform these tasks in order (automatable):
+
+1) Verify environment: Python 3.11+, Docker (or WSL), Git.
+
+2) Create `backend/.env` (populate `HF_API_KEY`, `REDIS_URL`, `MODERATION_ENABLED`, etc.). Do NOT commit.
+
+3) Start Redis (docker or WSL). Verify `redis-cli ping` returns PONG.
+
+4) Start backend (venv + pip install -r backend/requirements.txt, uvicorn main:app --port 8000).
+
+5) Run health checks: GET /health, /health/redis, /health/hf. If any fail, report and stop.
+
+6) Test hosted model: POST /api/remote_qwen with a short prompt. If 200 OK, record example response.
+
+7) If user requested model download:
+   a) Verify free disk >=120GB. If insufficient, abort and report.
+   b) Confirm license acceptance on the HF model page.
+   c) Run snapshot_download to backend/models/Qwen3.8-27B.
+   d) Run `backend/tools/setup_vllm.sh` to prepare venv and vLLM.
+   e) Start vLLM serve and verify it responds on port 8001.
+   f) Switch proxy (or test) by POSTing to /api/local_chat.
+
+8) Report completion status and any errors with logs.
+
+Security: do not expose tokens or logs publicly. Use secrets for prod.

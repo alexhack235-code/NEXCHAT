@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test App — WebOS Virtual Environment</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --glow: rgba(139, 92, 246, 0.4);
+            --accent: #ec4899;
+            --bg: #0b0f19;
+            --card: rgba(18, 24, 38, 0.8);
+            --border: #27314a;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
+        body { background: radial-gradient(circle at 50% 20%, #171e31 0%, var(--bg) 80%); height: 100vh; overflow: hidden; color: var(--text); user-select: none; position: relative; }
+        
+        .desktop-grid { position: absolute; inset: 0; background-size: 40px 40px; background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); }
+
+        .topbar { height: 32px; background: rgba(10, 14, 25, 0.75); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; font-size: 0.82rem; z-index: 1000; position: relative; }
+        .topbar-left, .topbar-right { display: flex; align-items: center; gap: 1.2rem; }
+        .topbar-brand { font-weight: 800; color: var(--primary); display: flex; align-items: center; gap: 0.4rem; }
+        .topbar-item { color: var(--muted); cursor: pointer; transition: color 0.2s; }
+        .topbar-item:hover { color: var(--text); }
+        
+        .desktop-icons { position: absolute; top: 48px; left: 24px; display: flex; flex-direction: column; gap: 20px; z-index: 10; }
+        .icon-item { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 72px; padding: 8px 4px; border-radius: 8px; cursor: pointer; transition: background 0.2s; text-align: center; }
+        .icon-item:hover { background: rgba(255, 255, 255, 0.08); }
+        .icon-svg { width: 38px; height: 38px; border-radius: 10px; background: var(--card); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .icon-label { font-size: 0.75rem; color: var(--text); text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+
+        .window { position: absolute; background: var(--card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 16px 40px rgba(0,0,0,0.6); overflow: hidden; backdrop-filter: blur(16px); display: flex; flex-direction: column; z-index: 20; min-width: 320px; }
+        .window-header { background: rgba(255, 255, 255, 0.03); border-bottom: 1px solid var(--border); height: 36px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; cursor: move; }
+        .window-controls { display: flex; gap: 7px; }
+        .win-btn { width: 12px; height: 12px; border-radius: 50%; display: inline-block; cursor: pointer; }
+        .win-close { background: #ef4444; }
+        .win-min { background: #f59e0b; }
+        .win-max { background: #10b981; }
+        .window-title { font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+        .window-body { padding: 14px; overflow: auto; flex: 1; }
+
+        #term-body { background: #050811; color: #10b981; font-family: monospace; font-size: 0.85rem; height: 260px; display: flex; flex-direction: column; }
+        .term-history { flex: 1; overflow-y: auto; line-height: 1.5; }
+        .term-input-row { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+        .term-prompt { color: var(--primary); font-weight: bold; }
+        .term-input { background: transparent; border: none; outline: none; color: #fff; font-family: monospace; flex: 1; font-size: 0.85rem; }
+
+        .monitor-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.85rem; }
+        .meter-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+        .meter-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent)); transition: width 0.4s ease; }
+
+        .dock-container { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(20px); border: 1px solid var(--border); padding: 8px 14px; border-radius: 20px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .dock-item { width: 44px; height: 44px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; cursor: pointer; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .dock-item:hover { transform: translateY(-8px) scale(1.15); background: rgba(255, 255, 255, 0.12); border-color: var(--primary); }
+    </style>
+</head>
+<body>
+    <div class="desktop-grid"></div>
+
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="topbar-brand">&#9889; Test App</div>
+            <span class="topbar-item">File</span>
+            <span class="topbar-item">Edit</span>
+            <span class="topbar-item">View</span>
+            <span class="topbar-item">Terminal</span>
+        </div>
+        <div class="topbar-right">
+            <span id="clock" style="font-weight: 600;">12:00 PM</span>
+            <span style="color: #10b981;">&#9679; Online</span>
+        </div>
+    </header>
+
+    <div class="desktop-icons">
+        <div class="icon-item" onclick="toggleWin('win-term')">
+            <div class="icon-svg">&#128187;</div>
+            <span class="icon-label">Terminal</span>
+        </div>
+        <div class="icon-item" onclick="toggleWin('win-monitor')">
+            <div class="icon-svg">&#128202;</div>
+            <span class="icon-label">Monitor</span>
+        </div>
+        <div class="icon-item" onclick="toggleWin('win-notes')">
+            <div class="icon-svg">&#128221;</div>
+            <span class="icon-label">Scratchpad</span>
+        </div>
+    </div>
+
+    <!-- Terminal Window -->
+    <div class="window" id="win-term" style="top: 70px; left: 140px; width: 480px;">
+        <div class="window-header">
+            <div class="window-controls">
+                <span class="win-btn win-close" onclick="toggleWin('win-term')"></span>
+                <span class="win-btn win-min"></span>
+                <span class="win-btn win-max"></span>
+            </div>
+            <span class="window-title">nexium@cloud-os:~</span>
+            <div style="width: 30px;"></div>
+        </div>
+        <div class="window-body" id="term-body">
+            <div class="term-history" id="term-hist">
+                <div>NEXIUM WebOS [Version 2.4.0]</div>
+                <div>Type '<span style="color:var(--primary);">help</span>' or '<span style="color:var(--primary);">status</span>' to begin.</div>
+                <br>
+            </div>
+            <div class="term-input-row">
+                <span class="term-prompt">nexium❯</span>
+                <input class="term-input" id="term-in" autofocus autocomplete="off" />
+            </div>
+        </div>
+    </div>
+
+    <!-- Hardware Monitor Window -->
+    <div class="window" id="win-monitor" style="top: 100px; right: 80px; width: 340px;">
+        <div class="window-header">
+            <div class="window-controls">
+                <span class="win-btn win-close" onclick="toggleWin('win-monitor')"></span>
+                <span class="win-btn win-min"></span>
+                <span class="win-btn win-max"></span>
+            </div>
+            <span class="window-title">System Metrics</span>
+            <div style="width: 30px;"></div>
+        </div>
+        <div class="window-body">
+            <div class="monitor-row">
+                <span>CPU Load (Rust SIMD)</span>
+                <strong id="cpu-val">18%</strong>
+            </div>
+            <div class="meter-bar"><div class="meter-fill" id="cpu-bar" style="width: 18%;"></div></div>
+            
+            <div class="monitor-row" style="margin-top: 14px;">
+                <span>Memory Allocation</span>
+                <strong id="ram-val">42% (3.4 GB)</strong>
+            </div>
+            <div class="meter-bar"><div class="meter-fill" id="ram-bar" style="width: 42%;"></div></div>
+
+            <div class="monitor-row" style="margin-top: 14px;">
+                <span>Vector Cache Throughput</span>
+                <strong style="color: #10b981;">1.8M ops/sec</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scratchpad Window -->
+    <div class="window" id="win-notes" style="top: 360px; left: 320px; width: 380px; display: none;">
+        <div class="window-header">
+            <div class="window-controls">
+                <span class="win-btn win-close" onclick="toggleWin('win-notes')"></span>
+                <span class="win-btn win-min"></span>
+                <span class="win-btn win-max"></span>
+            </div>
+            <span class="window-title">Workspace Notes</span>
+            <div style="width: 30px;"></div>
+        </div>
+        <div class="window-body">
+            <textarea style="width: 100%; height: 160px; background: transparent; border: none; color: var(--text); outline: none; resize: none; font-size: 0.9rem;" placeholder="Write quick autonomous notes or code snippets..."></textarea>
+        </div>
+    </div>
+
+    <!-- Dock -->
+    <div class="dock-container">
+        <div class="dock-item" title="Terminal" onclick="toggleWin('win-term')">&#128187;</div>
+        <div class="dock-item" title="Hardware Monitor" onclick="toggleWin('win-monitor')">&#128202;</div>
+        <div class="dock-item" title="Notepad" onclick="toggleWin('win-notes')">&#128221;</div>
+        <div class="dock-item" title="Settings" onclick="alert('NEXIUM WebOS Active')">&#9881;&#65039;</div>
+    </div>
+
+    <script>
+        function toggleWin(id) {
+            const win = document.getElementById(id);
+            win.style.display = win.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        document.querySelectorAll('.window').forEach(win => {
+            const header = win.querySelector('.window-header');
+            let isDragging = false, startX, startY, initX, initY;
+            header.addEventListener('mousedown', e => {
+                if (e.target.classList.contains('win-btn')) return;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                initX = win.offsetLeft;
+                initY = win.offsetTop;
+                document.querySelectorAll('.window').forEach(w => w.style.zIndex = 20);
+                win.style.zIndex = 30;
+            });
+            document.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                win.style.left = (initX + e.clientX - startX) + 'px';
+                win.style.top = (initY + e.clientY - startY) + 'px';
+            });
+            document.addEventListener('mouseup', () => isDragging = false);
+        });
+
+        const termIn = document.getElementById('term-in');
+        const termHist = document.getElementById('term-hist');
+        termIn.addEventListener('keydown', e => {
+            if (e.key === 'Enter') {
+                const cmd = termIn.value.trim();
+                termIn.value = '';
+                const line = document.createElement('div');
+                line.innerHTML = '<span style="color:var(--primary);">nexium❯</span> ' + cmd;
+                termHist.appendChild(line);
+
+                const res = document.createElement('div');
+                res.style.color = 'var(--muted)';
+                if (cmd === 'help') {
+                    res.innerHTML = 'Commands: status, metrics, clear, echo &lt;msg&gt;, about';
+                } else if (cmd === 'status') {
+                    res.innerHTML = '● All microservices running. Rust SIMD core active.';
+                } else if (cmd === 'clear') {
+                    termHist.innerHTML = '';
+                    return;
+                } else if (cmd.startsWith('echo ')) {
+                    res.innerText = cmd.slice(5);
+                } else if (cmd === 'about') {
+                    res.innerHTML = '⚡ Test App: Autonomous WebOS Desktop';
+                } else if (cmd) {
+                    res.innerHTML = 'Command not found: ' + cmd + '. Type "help".';
+                }
+                termHist.appendChild(res);
+                document.getElementById('term-body').scrollTop = document.getElementById('term-body').scrollHeight;
+            }
+        });
+
+        setInterval(() => {
+            const cpu = Math.floor(15 + Math.random() * 25);
+            const ram = Math.floor(38 + Math.random() * 8);
+            document.getElementById('cpu-val').innerText = cpu + '%';
+            document.getElementById('cpu-bar').style.width = cpu + '%';
+            document.getElementById('ram-val').innerText = ram + '% (' + (ram*0.08).toFixed(1) + ' GB)';
+            document.getElementById('ram-bar').style.width = ram + '%';
+        }, 2500);
+    </script>
+</body>
+</html>

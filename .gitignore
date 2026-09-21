@@ -1,0 +1,53 @@
+# Environments & Virtualenvs
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.cache/
+.*_done
+
+# Rust build artifacts
+target/
+**/target/
+backend/rust_core/target/
+backend/rust_core/.win_libs/
+*.pdb
+*.lib
+*.obj
+*.o
+
+# Node & Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+frontend/build/
+frontend/node_modules/
+
+# Secrets & Environment Variables (CRITICAL)
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
+
+# Large ML Models & Weights
+hub/
+models/
+backend/models/
+*.gguf
+*.bin
+*.pt
+*.safetensors
+
+# Logs & Runtime telemetry
+*.log
+overnight_training.log
+.system_generated/
+.user_uploaded/
+scratch/

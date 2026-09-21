@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test App — Cybernetic Physics Canvas</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --glow: rgba(139, 92, 246, 0.4);
+            --accent: #ec4899;
+            --bg: #0b0f19;
+            --card: rgba(18, 24, 38, 0.8);
+            --border: #27314a;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); overflow: hidden; height: 100vh; position: relative; }
+        canvas { display: block; position: absolute; inset: 0; }
+
+        .hud-panel { position: absolute; top: 24px; left: 24px; background: var(--card); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 16px; padding: 20px 24px; max-width: 380px; box-shadow: 0 12px 36px rgba(0,0,0,0.5); z-index: 10; pointer-events: auto; }
+        h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 6px; background: linear-gradient(135deg, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        p { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+        
+        .control-group { margin-bottom: 12px; }
+        .control-label { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+        input[type="range"] { width: 100%; accent-color: var(--primary); cursor: pointer; }
+
+        .btn-group { display: flex; gap: 8px; margin-top: 16px; }
+        .hud-btn { flex: 1; padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: #fff; font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .hud-btn:hover { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 15px var(--glow); }
+
+        .stats-badge { position: absolute; bottom: 24px; right: 24px; background: var(--card); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 10px; padding: 10px 16px; font-size: 0.8rem; color: var(--muted); z-index: 10; display: flex; gap: 16px; }
+        .stats-badge strong { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+
+    <div class="hud-panel">
+        <h1>Test App</h1>
+        <p>Interactive autonomous particle constellation with vector physics and dynamic link weaving.</p>
+        
+        <div class="control-group">
+            <div class="control-label"><span>Particle Speed</span><span id="speed-lbl">1.5x</span></div>
+            <input type="range" id="speed-slider" min="0.2" max="4.0" step="0.1" value="1.5" />
+        </div>
+
+        <div class="control-group">
+            <div class="control-label"><span>Connection Proximity</span><span id="prox-lbl">120px</span></div>
+            <input type="range" id="prox-slider" min="50" max="220" step="10" value="120" />
+        </div>
+
+        <div class="btn-group">
+            <button class="hud-btn" id="blast-btn">&#9889; Gravity Pulse</button>
+            <button class="hud-btn" id="mode-btn">&#127912; Invert Flow</button>
+        </div>
+    </div>
+
+    <div class="stats-badge">
+        <span>Particles: <strong id="p-count">100</strong></span>
+        <span>FPS: <strong id="fps-count">60</strong></span>
+        <span>Status: <strong style="color:#10b981;">Synthesizing</strong></span>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        });
+
+        let mouse = { x: width / 2, y: height / 2, active: false };
+        window.addEventListener('mousemove', e => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            mouse.active = true;
+        });
+        window.addEventListener('mouseleave', () => mouse.active = false);
+
+        let speedMultiplier = 1.5;
+        let connectionDist = 120;
+        let invertFlow = false;
+
+        document.getElementById('speed-slider').addEventListener('input', e => {
+            speedMultiplier = parseFloat(e.target.value);
+            document.getElementById('speed-lbl').innerText = speedMultiplier.toFixed(1) + 'x';
+        });
+        document.getElementById('prox-slider').addEventListener('input', e => {
+            connectionDist = parseInt(e.target.value);
+            document.getElementById('prox-lbl').innerText = connectionDist + 'px';
+        });
+        document.getElementById('mode-btn').addEventListener('click', () => {
+            invertFlow = !invertFlow;
+        });
+
+        const PARTICLE_COUNT = 100;
+        document.getElementById('p-count').innerText = PARTICLE_COUNT;
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 1.5;
+                this.vy = (Math.random() - 0.5) * 1.5;
+                this.radius = Math.random() * 2 + 1.5;
+            }
+            update() {
+                this.x += this.vx * speedMultiplier;
+                this.y += this.vy * speedMultiplier;
+
+                if (this.x < 0) this.x = width;
+                if (this.x > width) this.x = 0;
+                if (this.y < 0) this.y = height;
+                if (this.y > height) this.y = 0;
+
+                if (mouse.active) {
+                    const dx = mouse.x - this.x;
+                    const dy = mouse.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 180 && dist > 1) {
+                        const force = (180 - dist) / 180 * (invertFlow ? -0.06 : 0.06);
+                        this.vx += (dx / dist) * force;
+                        this.vy += (dy / dist) * force;
+                    }
+                }
+                this.vx *= 0.99;
+                this.vy *= 0.99;
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#8b5cf6';
+                ctx.shadowColor = '#8b5cf6';
+                ctx.shadowBlur = 8;
+                ctx.fill();
+            }
+        }
+
+        const particles = Array.from({ length: PARTICLE_COUNT }, () => new Particle());
+
+        document.getElementById('blast-btn').addEventListener('click', () => {
+            particles.forEach(p => {
+                p.vx += (Math.random() - 0.5) * 15;
+                p.vy += (Math.random() - 0.5) * 15;
+            });
+        });
+
+        let lastTime = performance.now();
+        let frameCount = 0;
+        function animate(now) {
+            ctx.clearRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < connectionDist) {
+                        const alpha = (1 - dist / connectionDist) * 0.4;
+                        ctx.strokeStyle = `rgba(139, 92, 246, ${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            frameCount++;
+            if (now - lastTime >= 1000) {
+                document.getElementById('fps-count').innerText = frameCount;
+                frameCount = 0;
+                lastTime = now;
+            }
+            requestAnimationFrame(animate);
+        }
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

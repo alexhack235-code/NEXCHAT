@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+httpx
+supabase
+pydantic
+huggingface_hub
+pytest
+redis>=4.6.0
+sympy
