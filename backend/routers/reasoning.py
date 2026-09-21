@@ -14,6 +14,7 @@ try:
     from ..emotion_core.engine import emotion_engine
     from ..neural_core.engine import neural_engine
     from ..micro_core.engine import micro_engine
+    from ..autonomous_mind import autonomous_mind
 except ImportError:
     from memory import session_manager, ConversationSession
     from tools_engine import execute_tool, get_tool_descriptions
@@ -22,6 +23,7 @@ except ImportError:
     from emotion_core.engine import emotion_engine
     from neural_core.engine import neural_engine
     from micro_core.engine import micro_engine
+    from autonomous_mind import autonomous_mind
 
 logger = logging.getLogger("nexium.reasoning")
 router = APIRouter()
@@ -255,6 +257,13 @@ async def smart_chat(req: SmartChatRequest):
         session.add_message("user", req.prompt)
         session.add_message("assistant", final_answer_str, thinking=thinking_block)
 
+        # 8. Autonomous Metacognition & Self-Reflection
+        reflection = None
+        try:
+            reflection = autonomous_mind.post_interaction_reflect(req.prompt, final_answer_str, tools_used)
+        except Exception as ref_err:
+            logger.warning(f"Autonomous reflection warning: {ref_err}")
+
         return {
             "session_id": session_id,
             "text": final_answer_str,
@@ -266,6 +275,7 @@ async def smart_chat(req: SmartChatRequest):
             "tools_used": tools_used,
             "critic": critic_result,
             "persona": req.persona,
+            "autonomous_reflection": reflection,
             "rust_accelerated": rust_core.is_native,
         }
     except Exception as e:

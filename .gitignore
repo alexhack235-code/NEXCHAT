@@ -51,3 +51,5 @@ overnight_training.log
 .system_generated/
 .user_uploaded/
 scratch/
+backend/hello_world.py
+*work_folder*
