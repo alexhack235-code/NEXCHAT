@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>NEXCHAT — Link a Device</title>
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="link-device.css">
+</head>
+<body class="link-device-body">
+  <div class="link-device-wrapper">
+    <!-- Header -->
+    <header class="link-device-header">
+      <img src="logo.jpg" alt="NEXCHAT Logo" class="app-logo">
+      <h1 class="title">LINK A DEVICE</h1>
+      <p class="subtitle">Use NEXCHAT on your computer, tablet, or secondary browser without typing your password.</p>
+    </header>
+
+    <!-- Main Card -->
+    <div class="link-card">
+      <div class="qr-section">
+        <div class="qr-frame" id="qrFrame">
+          <img id="qrImage" src="" alt="Pairing QR Code" class="qr-code-img">
+          <div class="qr-scanline"></div>
+          <div id="qrLoading" class="qr-loading-overlay">
+            <div class="cyber-spinner"></div>
+            <span>Generating Secure Key...</span>
+          </div>
+          <div id="qrExpiredOverlay" class="qr-expired-overlay" style="display: none;">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <p>QR Code Expired</p>
+            <button id="refreshQrBtn" class="refresh-btn"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+          </div>
+        </div>
+        <div class="timer-badge">
+          <i class="fa-regular fa-clock"></i>
+          <span id="countdownTimer">05:00</span>
+        </div>
+      </div>
+
+      <div class="instructions-section">
+        <div class="status-indicator" id="statusIndicator">
+          <div class="status-pulse-dot"></div>
+          <span id="statusText">Waiting for scan from your phone...</span>
+        </div>
+
+        <div class="pairing-code-box">
+          <span class="pairing-code-label">Or enter pairing code on your phone:</span>
+          <div class="pairing-code-display">
+            <span id="pairingCodeText">NX-••••</span>
+            <button id="copyCodeBtn" class="copy-btn" title="Copy pairing code"><i class="fa-regular fa-copy"></i></button>
+          </div>
+        </div>
+
+        <ol class="step-list">
+          <li>
+            <div class="step-num">1</div>
+            <div class="step-info">Open <strong>NEXCHAT</strong> on your phone.</div>
+          </li>
+          <li>
+            <div class="step-num">2</div>
+            <div class="step-info">Go to <strong>Settings</strong> &rarr; <strong>Linked Devices</strong>.</div>
+          </li>
+          <li>
+            <div class="step-num">3</div>
+            <div class="step-info">Tap <strong>Link a Device</strong> and point your camera at this screen (or type the code).</div>
+          </li>
+        </ol>
+
+        <div class="link-card-actions">
+          <a href="index.html" class="back-link">
+            <i class="fa-solid fa-arrow-left"></i> Log in with Email & Password
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="link-footer">
+      <p><i class="fa-solid fa-shield-halved"></i> End-to-end encrypted session pairing &bull; NEXO-TECH</p>
+    </footer>
+  </div>
+
+  <div id="linkDeviceToast" class="link-toast" style="display: none;"></div>
+
+  <script type="module">
+    import { createPairingSession } from './src/js/link-device.js';
+
+    let activeSession = null;
+    let timerInterval = null;
+    let timeLeft = 300; // 5 minutes in seconds
+
+    const qrImage = document.getElementById('qrImage');
+    const qrLoading = document.getElementById('qrLoading');
+    const qrExpiredOverlay = document.getElementById('qrExpiredOverlay');
+    const countdownTimer = document.getElementById('countdownTimer');
+    const pairingCodeText = document.getElementById('pairingCodeText');
+    const statusText = document.getElementById('statusText');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const refreshQrBtn = document.getElementById('refreshQrBtn');
+    const copyCodeBtn = document.getElementById('copyCodeBtn');
+    const linkDeviceToast = document.getElementById('linkDeviceToast');
+
+    function showToast(msg) {
+      linkDeviceToast.textContent = msg;
+      linkDeviceToast.style.display = 'block';
+      setTimeout(() => { linkDeviceToast.style.display = 'none'; }, 2500);
+    }
+
+    copyCodeBtn.addEventListener('click', () => {
+      const code = pairingCodeText.textContent;
+      if (code && !code.includes('•')) {
+        navigator.clipboard.writeText(code);
+        showToast('Pairing code copied!');
+      }
+    });
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 300;
+      updateTimerDisplay();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerDisplay();
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          qrExpiredOverlay.style.display = 'flex';
+          statusText.textContent = 'Session timed out. Please refresh the QR code.';
+          statusIndicator.classList.add('expired');
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const m = Math.floor(timeLeft / 60);
+      const s = timeLeft % 60;
+      countdownTimer.textContent = `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    async function initSession() {
+      if (activeSession && activeSession.unsubscribe) {
+        activeSession.unsubscribe();
+      }
+
+      qrExpiredOverlay.style.display = 'none';
+      qrLoading.style.display = 'flex';
+      statusIndicator.classList.remove('expired', 'approved');
+      statusText.textContent = 'Waiting for scan from your phone...';
+
+      try {
+        activeSession = await createPairingSession((status, data) => {
+          if (status === 'approved') {
+            clearInterval(timerInterval);
+            statusIndicator.classList.add('approved');
+            statusText.textContent = 'Device approved! Synchronizing chats...';
+            showToast('✅ Device linked successfully!');
+            setTimeout(() => {
+              window.location.replace('chat.html');
+            }, 1200);
+          } else if (status === 'rejected') {
+            statusText.textContent = 'Authorization was denied by your phone.';
+            showToast('❌ Link request declined.');
+          }
+        });
+
+        qrImage.src = activeSession.qrDataUrl;
+        pairingCodeText.textContent = activeSession.pairingCode;
+        qrLoading.style.display = 'none';
+        startTimer();
+      } catch (err) {
+        console.error('Session error:', err);
+        qrLoading.innerHTML = '<span style="color:#ff4444;">Failed to start pairing session</span>';
+      }
+    }
+
+    refreshQrBtn.addEventListener('click', initSession);
+
+    initSession();
+  </script>
+</body>
+</html>

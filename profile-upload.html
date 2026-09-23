@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#00ff66">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="description" content="Complete your NEXCHAT profile">
+  <meta name="apple-mobile-web-app-title" content="NEXCHAT Profile">
+  <meta name="mobile-web-app-title" content="NEXCHAT Profile">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>☄️ NEXCHAT - Setup Profile ☄️</title>
+  <link rel="stylesheet" href="Profile-upload.css?v=1.0">
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <link rel="apple-touch-icon" href="logo.jpg">
+
+</head>
+
+<body>
+
+  <div class="profile-bg"></div>
+
+  <main class="profile-container" role="main" aria-labelledby="setupTitle">
+    <img src="logo.jpg" class="logo" alt="NEXCHAT Logo">
+    <h2 id="setupTitle">Create Your Professional Profile</h2>
+
+    <!-- Profile Completion Progress -->
+    <div class="progress-container">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width: 33%;"></div>
+      </div>
+      <div class="progress-steps">
+        <span class="step active" data-step="1">Photo</span>
+        <span class="step" data-step="2">Details</span>
+        <span class="step" data-step="3">Complete</span>
+      </div>
+    </div>
+
+    <!-- Step 1: Profile Picture -->
+    <div id="step1" class="profile-step active">
+      <h3>Choose Your Profile Picture</h3>
+      <div class="form-group">
+        <div class="upload-options">
+          <button type="button" class="upload-btn camera-btn" id="cameraBtn" title="Take a professional photo">
+            <span class="btn-icon">📷</span>
+            <span class="btn-text">Camera</span>
+            <span class="btn-subtitle">High quality</span>
+          </button>
+          <button type="button" class="upload-btn gallery-btn" id="galleryBtn" title="Choose from gallery">
+            <span class="btn-icon">🖼️</span>
+            <span class="btn-text">Gallery</span>
+            <span class="btn-subtitle">Select image</span>
+          </button>
+          <button type="button" class="upload-btn ai-btn" id="aiAvatarBtn" title="Choose NEX Avatar"
+            style="background: rgba(0, 204, 255, 0.1); border: 1px solid #00ccff; color: #00ccff;">
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">NEX Avatar</span>
+            <span class="btn-subtitle">AI generated</span>
+          </button>
+        </div>
+        <input type="file" id="profilePic" accept="image/*" required aria-required="true" aria-describedby="fileHelp"
+          style="display: none;">
+        <small id="fileHelp">Supported: JPG, PNG, GIF (Max 5MB) • Best: Square images</small>
+      </div>
+
+      <!-- Image Preview with Editor -->
+      <div id="previewContainer" class="preview-container" aria-hidden="true">
+        <div class="preview-editor">
+          <img id="previewImage" alt="Profile preview" class="preview-image">
+          <div class="preview-overlay">
+            <button type="button" class="edit-btn" id="editAvatarBtn" title="Edit avatar">
+              <span>✏️</span> Edit
+            </button>
+          </div>
+        </div>
+        <p class="preview-text">Profile Picture Preview</p>
+        <p id="profileSelectStatus" class="profile-select-status">No picture selected</p>
+        <div class="preview-actions">
+          <button type="button" class="preview-action-btn" id="rotateLeftBtn">↺ Rotate</button>
+          <button type="button" class="preview-action-btn" id="rotateRightBtn">↻ Rotate</button>
+          <button type="button" class="preview-action-btn" id="cropBtn">✂️ Crop</button>
+        </div>
+      </div>
+
+      <button type="button" class="step-btn" id="nextToStep2">Continue to Details →</button>
+    </div>
+
+    <!-- Step 2: Profile Details -->
+    <div id="step2" class="profile-step">
+      <h3>Personalize Your Profile</h3>
+
+      <div class="form-group">
+        <label for="displayName" class="form-label">Display Name</label>
+        <input type="text" id="displayName" placeholder="Your display name" maxlength="30" aria-describedby="nameHelp">
+        <small id="nameHelp">This is how others will see you (2-30 characters)</small>
+      </div>
+
+      <div class="form-group">
+        <label for="bio" class="form-label">Bio <span class="optional">(Optional)</span></label>
+        <textarea id="bio" placeholder="Tell others about yourself..." maxlength="150" rows="3" aria-describedby="bioHelp"></textarea>
+        <small id="bioHelp">Share a bit about yourself (max 150 characters)</small>
+        <div class="char-counter"><span id="bioCounter">0</span>/150</div>
+      </div>
+
+      <div class="form-group">
+        <label for="status" class="form-label">Status Message <span class="optional">(Optional)</span></label>
+        <input type="text" id="status" placeholder="What's on your mind?" maxlength="50" aria-describedby="statusHelp">
+        <small id="statusHelp">A short status message (max 50 characters)</small>
+        <div class="char-counter"><span id="statusCounter">0</span>/50</div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="step-btn secondary" id="backToStep1">← Back to Photo</button>
+        <button type="button" class="step-btn" id="nextToStep3">Complete Profile →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Completion -->
+    <div id="step3" class="profile-step">
+      <h3>🎉 Profile Complete!</h3>
+      <div class="completion-summary">
+        <div class="final-preview">
+          <img id="finalAvatarPreview" src="" alt="Final profile" class="final-avatar">
+          <div class="final-details">
+            <h4 id="finalNamePreview">Display Name</h4>
+            <p id="finalBioPreview" class="final-bio">Bio will appear here</p>
+            <p id="finalStatusPreview" class="final-status">Status will appear here</p>
+          </div>
+        </div>
+      </div>
+
+      <form id="profileForm" novalidate>
+        <button type="submit" class="auth-btn">🚀 Enter NEXCHAT</button>
+      </form>
+
+      <div class="completion-note">
+        <p>✨ Your profile is ready! You can always edit these details later in settings.</p>
+      </div>
+    </div>
+
+    <p id="result" aria-live="polite" role="status"></p>
+    <div id="timerContainer" style="display: none;">
+      ⏱️ Auto-redirect in <span id="timerCount">30</span>s
+    </div>
+
+    <div id="backToChatContainer">
+      <a href="chat.html">← Back to Chat</a>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { uploadProfilePicture, saveUserProfile } from "./src/js/profile.js";
+
+    // Multi-step form management
+    let currentStep = 1;
+    const totalSteps = 3;
+    let profileData = {
+      avatar: null,
+      avatarFile: null, // Stores the raw binary file
+      displayName: '',
+      bio: '',
+      status: ''
+    };
+
+    const profileForm = document.getElementById('profileForm');
+    const result = document.getElementById('result');
+    const fileInput = document.getElementById('profilePic');
+    const previewImage = document.getElementById('previewImage');
+    const previewContainer = document.getElementById('previewContainer');
+    const timerContainer = document.getElementById('timerContainer');
+    const timerCount = document.getElementById('timerCount');
+    const cameraBtn = document.getElementById('cameraBtn');
+    const galleryBtn = document.getElementById('galleryBtn');
+    const aiAvatarBtn = document.getElementById('aiAvatarBtn');
+
+    // Step navigation
+    function showStep(step) {
+      // Hide all steps
+      document.querySelectorAll('.profile-step').forEach(stepEl => {
+        stepEl.classList.remove('active');
+      });
+
+      // Show current step
+      document.getElementById(`step${step}`).classList.add('active');
+
+      // Update progress bar
+      const progressFill = document.getElementById('progressFill');
+      const progress = (step / totalSteps) * 100;
+      progressFill.style.width = `${progress}%`;
+
+      // Update step indicators
+      document.querySelectorAll('.step').forEach((stepEl, index) => {
+        if (index + 1 <= step) {
+          stepEl.classList.add('active');
+        } else {
+          stepEl.classList.remove('active');
+        }
+      });
+
+      currentStep = step;
+    }
+
+    // Step 1: Photo selection
+    document.getElementById('nextToStep2').addEventListener('click', () => {
+      if (!profileData.avatar) {
+        showMessage(result, 'Please select a profile picture first', 'danger');
+        return;
+      }
+      showStep(2);
+    });
+
+    // Step 2: Profile details
+    document.getElementById('backToStep1').addEventListener('click', () => {
+      showStep(1);
+    });
+
+    document.getElementById('nextToStep3').addEventListener('click', () => {
+      const displayName = document.getElementById('displayName').value.trim();
+      if (!displayName) {
+        showMessage(result, 'Display name is required', 'danger');
+        return;
+      }
+
+      profileData.displayName = displayName;
+      profileData.bio = document.getElementById('bio').value.trim();
+      profileData.status = document.getElementById('status').value.trim();
+
+      // Update completion preview
+      document.getElementById('finalAvatarPreview').src = profileData.avatar;
+      document.getElementById('finalNamePreview').textContent = profileData.displayName;
+      document.getElementById('finalBioPreview').textContent = profileData.bio || 'No bio added';
+      document.getElementById('finalStatusPreview').textContent = profileData.status || 'No status set';
+
+      showStep(3);
+    });
+
+    // Character counters
+    document.getElementById('bio').addEventListener('input', (e) => {
+      const counter = document.getElementById('bioCounter');
+      counter.textContent = e.target.value.length;
+      counter.style.color = e.target.value.length > 140 ? '#ff6b6b' : '#00ff66';
+    });
+
+    document.getElementById('status').addEventListener('input', (e) => {
+      const counter = document.getElementById('statusCounter');
+      counter.textContent = e.target.value.length;
+      counter.style.color = e.target.value.length > 45 ? '#ff6b6b' : '#00ff66';
+    });
+
+    // Avatar editing functions
+    let currentRotation = 0;
+    document.getElementById('rotateLeftBtn').addEventListener('click', () => {
+      currentRotation -= 90;
+      previewImage.style.transform = `rotate(${currentRotation}deg)`;
+    });
+
+    document.getElementById('rotateRightBtn').addEventListener('click', () => {
+      currentRotation += 90;
+      previewImage.style.transform = `rotate(${currentRotation}deg)`;
+    });
+
+    document.getElementById('cropBtn').addEventListener('click', () => {
+      // Basic crop functionality (in a real app, you'd use a proper cropping library)
+      showMessage(result, 'Crop functionality would open a cropping interface', 'info');
+    });
+
+    document.getElementById('editAvatarBtn').addEventListener('click', () => {
+      // Show edit options
+      document.querySelector('.preview-actions').style.display =
+        document.querySelector('.preview-actions').style.display === 'none' ? 'flex' : 'none';
+    });
+
+    let selectedAvatarUrl = null;
+
+    // ============================================================
+    // UPLOAD SOURCE SELECTION (CAMERA vs GALLERY)
+    // ============================================================
+    cameraBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      fileInput.setAttribute('capture', 'environment');
+      fileInput.click();
+    });
+
+    galleryBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      fileInput.removeAttribute('capture');
+      fileInput.click();
+    });
+
+    // ============================================================
+    // AI AVATAR SELECTION
+    // ============================================================
+    aiAvatarBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const width = 1000;
+      const height = 800;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+      window.open('profile-avatars.html', 'ChooseAvatar',
+        `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+    });
+
+    window.addEventListener('message', (event) => {
+      if (event.data.type === 'avatarSelected') {
+        const avatar = event.data.avatar;
+        selectedAvatarUrl = avatar.url || avatar.svg;
+        profileData.avatar = selectedAvatarUrl;
+
+        // Update Preview
+        previewImage.src = selectedAvatarUrl;
+        previewContainer.setAttribute('aria-hidden', 'false');
+        previewContainer.style.display = 'flex';
+
+        // Clear file input
+        fileInput.value = '';
+
+        showMessage(result, `✅ NEX Avatar Selected: ${avatar.name}`, 'success');
+
+        // Update button text and scroll to it to make next step obvious
+        const nextBtn = document.getElementById('nextToStep2');
+        nextBtn.innerHTML = "Continue to Details →";
+        nextBtn.style.background = "linear-gradient(135deg, #00ccff, #00ff66)";
+        nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+
+    // File input change handler
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        // Validate file
+        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+          showMessage(result, 'File size must be less than 5MB', 'danger');
+          return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+          showMessage(result, 'Please select an image file', 'danger');
+          return;
+        }
+
+        // Store the original binary file
+        profileData.avatarFile = file;
+        
+        // Preview using object URL (doesn't convert to massive string in memory)
+        const objectUrl = URL.createObjectURL(file);
+        profileData.avatar = objectUrl;
+
+        previewImage.src = objectUrl;
+        previewImage.style.transform = 'rotate(0deg)';
+        currentRotation = 0;
+        previewContainer.setAttribute('aria-hidden', 'false');
+        previewContainer.style.display = 'flex';
+
+        document.getElementById('profileSelectStatus').textContent = '✅ Picture selected. Proceed to details.';
+
+        showMessage(result, '✅ Image ready for binary indexing', 'success');
+
+        // Update button
+        const nextBtn = document.getElementById('nextToStep2');
+        nextBtn.innerHTML = "Continue to Details →";
+        nextBtn.style.background = "linear-gradient(135deg, #00ccff, #00ff66)";
+      }
+    });
+
+    // ============================================================
+    // FORM SUBMISSION
+    // ============================================================
+    profileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!auth.currentUser) {
+        showMessage(result, 'Please sign in first', 'danger');
+        return;
+      }
+
+      try {
+        showMessage(result, '🚀 Creating your professional profile...', 'info');
+
+        let avatarUrl = profileData.avatar;
+        let isDefaultAvatar = !profileData.avatarFile;
+
+        // Upload custom image via Vercel Blob (free, no Firebase Storage)
+        if (profileData.avatarFile) {
+          try {
+            showMessage(result, '⏳ Uploading profile picture to secure cloud storage...', 'info');
+            avatarUrl = await uploadProfilePicture(profileData.avatarFile, auth.currentUser.uid);
+          } catch (uploadErr) {
+            console.warn('Direct upload error, falling back to local encoding:', uploadErr);
+            avatarUrl = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => resolve(e.target.result);
+              reader.readAsDataURL(profileData.avatarFile);
+            });
+          }
+        }
+
+        // Save profile data (photoURL, avatar, profilePic) to Firestore
+        await saveUserProfile(auth.currentUser.uid, avatarUrl, {
+          displayName: profileData.displayName,
+          bio: profileData.bio,
+          status: profileData.status,
+          isDefaultAvatar: isDefaultAvatar,
+          lastActive: new Date()
+        });
+
+        showMessage(result, '✅ Profile created successfully! Redirecting...', 'success');
+
+        // Start redirect timer
+        startAutoRedirectTimer();
+
+      } catch (error) {
+        console.error('Profile creation error:', error);
+        showMessage(result, '❌ Failed to create profile. Please try again.', 'danger');
+      }
+    });
+
+    // ============================================================
+    // AUTO-REDIRECT TIMER (30 SECONDS)
+    // ============================================================
+    let timerInterval = null;
+    let timeRemaining = 30;
+    let isProfileCreated = false;
+
+    function startAutoRedirectTimer() {
+      timerContainer.style.display = 'block';
+      isProfileCreated = true;
+
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        timerCount.textContent = timeRemaining;
+
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          window.location.href = 'chat.html';
+        }
+      }, 1000);
+    }
+
+    function showMessage(element, message, type) {
+      element.textContent = message;
+      element.style.color = type === 'success' ? '#00ff66' :
+                           type === 'danger' ? '#ff4444' : '#00ccff';
+      element.style.display = 'block';
+    }
+
+    // Initialize first step
+    showStep(1);
+  </script>
+
+</body>
+
+</html>

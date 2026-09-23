@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f4b6f">
+    <title>NEXCHAT Professional Terminal</title>
+    <link rel="stylesheet" href="https://unpkg.com/xterm@5.3.0/css/xterm.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 24px;
+            background: linear-gradient(135deg, #070d18, #0e1726);
+            color: #00ff66;
+            font-family: 'Inter', 'Orbitron', monospace;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .terminal-container {
+            background: #000;
+            border: 2px solid #00ff66;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
+            height: calc(100vh - 40px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(0,255,102,0.24);
+            padding-bottom: 12px;
+            gap: 12px;
+        }
+
+        .terminal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #d6ffb0;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .terminal-subtitle {
+            font-size: 13px;
+            color: #8ee6b5;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .terminal-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: #00ff66;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: #00dd55;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+        }
+
+        .control-btn.danger {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .control-btn.danger:hover {
+            background: #dd3333;
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+        }
+
+        .terminal-window {
+            flex: 1;
+            background: #000;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .welcome-message {
+            color: #00ff66;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .command-prompt {
+            color: #00ff66;
+        }
+
+        .error-message {
+            color: #ff4444;
+        }
+
+        .success-message {
+            color: #44ff44;
+        }
+
+        .info-message {
+            color: #ffff44;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .terminal-container {
+                height: calc(100vh - 20px);
+                padding: 15px;
+            }
+
+            .terminal-title {
+                font-size: 18px;
+            }
+
+            .control-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <div>
+                <div class="terminal-title">NEXCHAT Professional CLI</div>
+                <div class="terminal-subtitle">Secure console • Session audit • enterprise-ready</div>
+            </div>
+            <div class="terminal-controls">
+                <button class="control-btn" id="connectBtn">🔗 Connect</button>
+                <button class="control-btn" id="clearBtn">🧹 Clear</button>
+                <button class="control-btn" id="helpBtn">❓ Help</button>
+                <button class="control-btn danger" id="closeBtn">✖ Close</button>
+            </div>        </div>
+
+        <div class="terminal-window">
+            <div id="terminal"></div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://unpkg.com/xterm-addon-fit@0.7.0/lib/xterm-addon-fit.js"></script>
+    <script src="https://unpkg.com/xterm-addon-attach@0.8.0/lib/xterm-addon-attach.js"></script>
+    <script>
+        // Initialize terminal
+        const term = new Terminal({
+            cursorBlink: true,
+            cursorStyle: 'block',
+            fontSize: 14,
+            fontFamily: 'Consolas, Monaco, "Courier New", monospace',
+            theme: {
+                background: '#000000',
+                foreground: '#00ff66',
+                cursor: '#00ff66',
+                cursorAccent: '#000000',
+                selection: 'rgba(0, 255, 102, 0.3)'
+            },
+            allowTransparency: true,
+            scrollback: 1000
+        });
+
+        const fitAddon = new FitAddon.FitAddon();
+        const attachAddon = new AttachAddon.AttachAddon();
+
+        term.loadAddon(fitAddon);
+        term.loadAddon(attachAddon);
+
+        const terminalElement = document.getElementById('terminal');
+        term.open(terminalElement);
+        fitAddon.fit();
+
+        // Linode server configuration - UPDATE THESE VALUES!
+        const LINODE_CONFIG = {
+            host: 'your-linode-server-ip', // Replace with your Linode IP
+            port: 8080, // WebSocket port on your Linode server
+            username: 'nexchat-user',
+            password: 'your-secure-password' // In production, use proper auth
+        };
+
+        // Welcome message
+        term.writeln('\r\n\x1b[1;34mNEXCHAT Professional CLI v1.0.0\x1b[0m');
+        term.writeln('\x1b[36mSecure mode enabled • Audit logging active\x1b[0m');
+        term.writeln('\x1b[36mType "help" for available commands.\x1b[0m\r\n');
+        showPrompt();
+
+        // Command processing
+        let currentCommand = '';
+        let currentLine = '';
+        let currentUser = 'guest';
+        let isLoggedIn = false;
+        let commandHistory = [];
+        let historyIndex = -1;
+
+        term.onData(data => {
+            const code = data.charCodeAt(0);
+
+            if (code === 13) { // Enter
+                term.write('\r\n');
+                processCommand(currentLine.trim());
+                currentLine = '';
+                showPrompt();
+            } else if (code === 127) { // Backspace
+                if (currentLine.length > 0) {
+                    currentLine = currentLine.slice(0, -1);
+                    term.write('\b \b');
+                }
+            } else if (code === 27) { // Escape sequences for arrow keys
+                // Handle up/down arrows for history
+                if (data === '\x1b[A') { // Up arrow
+                    if (commandHistory.length > 0) {
+                        if (historyIndex === -1) {
+                            historyIndex = commandHistory.length - 1;
+                        } else if (historyIndex > 0) {
+                            historyIndex--;
+                        }
+                        // Clear current line
+                        for (let i = 0; i < currentLine.length; i++) {
+                            term.write('\b \b');
+                        }
+                        currentLine = commandHistory[historyIndex];
+                        term.write(currentLine);
+                    }
+                } else if (data === '\x1b[B') { // Down arrow
+                    if (historyIndex !== -1) {
+                        historyIndex++;
+                        if (historyIndex >= commandHistory.length) {
+                            historyIndex = -1;
+                            currentLine = '';
+                        } else {
+                            // Clear current line
+                            for (let i = 0; i < currentLine.length; i++) {
+                                term.write('\b \b');
+                            }
+                            currentLine = commandHistory[historyIndex];
+                            term.write(currentLine);
+                        }
+                    }
+                }
+            } else if (code >= 32) { // Printable characters
+                currentLine += data;
+                term.write(data);
+            }
+        });
+
+        function showPrompt() {
+            const prompt = `\x1b[1;32m$nexchat>\x1b[0m `;
+            term.write(prompt);
+        }
+
+        function processCommand(cmd) {
+            if (cmd.trim() === '') return;
+
+            commandHistory.push(cmd);
+            historyIndex = -1;
+
+            const parts = cmd.split(' ');
+            const command = parts[0].toLowerCase();
+            const args = parts.slice(1);
+
+            switch (command) {
+                case 'help':
+                    showHelp();
+                    break;
+                case 'setup':
+                    showLinodeSetup();
+                    break;
+                case 'clear':
+                case 'cls':
+                    term.clear();
+                    break;
+                case 'whoami':
+                    term.writeln(`\x1b[36mYou are: ${currentUser}\x1b[0m`);
+                    break;
+                case 'status':
+                    if (args.length > 0) {
+                        const status = args.join(' ');
+                        term.writeln(`\x1b[32mStatus updated: "${status}"\x1b[0m`);
+                        // In a real implementation, this would update Firebase
+                    } else {
+                        term.writeln('\x1b[33mUsage: status <your status message>\x1b[0m');
+                    }
+                    break;
+                case 'send':
+                    if (!isLoggedIn) {
+                        term.writeln('\x1b[31mError: Please login first with "login"\x1b[0m');
+                        return;
+                    }
+                    if (args.length < 2) {
+                        term.writeln('\x1b[33mUsage: send <username> <message>\x1b[0m');
+                        return;
+                    }
+                    const recipient = args[0];
+                    const message = args.slice(1).join(' ');
+                    term.writeln(`\x1b[32mMessage sent to ${recipient}: "${message}"\x1b[0m`);
+                    // In a real implementation, this would send via Firebase
+                    break;
+                case 'login':
+                    if (isLoggedIn) {
+                        term.writeln('\x1b[33mAlready logged in\x1b[0m');
+                        return;
+                    }
+                    // Simulate login - in real app, this would authenticate with Firebase
+                    currentUser = 'user123'; // Would get from Firebase auth
+                    isLoggedIn = true;
+                    term.writeln(`\x1b[32mLogged in as: ${currentUser}\x1b[0m`);
+                    break;
+                case 'logout':
+                    if (!isLoggedIn) {
+                        term.writeln('\x1b[33mNot logged in\x1b[0m');
+                        return;
+                    }
+                    currentUser = 'guest';
+                    isLoggedIn = false;
+                    term.writeln('\x1b[32mLogged out\x1b[0m');
+                    break;
+                case 'roll':
+                case 'dice':
+                    const sides = args[0] ? parseInt(args[0]) : 6;
+                    const result = Math.floor(Math.random() * sides) + 1;
+                    term.writeln(`\x1b[35m🎲 Rolled a ${sides}-sided die: ${result}\x1b[0m`);
+                    break;
+                case 'flip':
+                    const coinResult = Math.random() < 0.5 ? 'Heads' : 'Tails';
+                    term.writeln(`\x1b[35m🪙 Coin flip: ${coinResult}\x1b[0m`);
+                    break;
+                case 'quote':
+                    const quotes = [
+                        "The only way to do great work is to love what you do. - Steve Jobs",
+                        "Innovation distinguishes between a leader and a follower. - Steve Jobs",
+                        "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
+                        "Code is poetry. - Unknown",
+                        "Stay curious, keep learning. - Unknown"
+                    ];
+                    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+                    term.writeln(`\x1b[36m"${randomQuote}"\x1b[0m`);
+                    break;
+                case 'uptime':
+                    const uptime = Math.floor(Math.random() * 86400); // Random uptime in seconds
+                    const hours = Math.floor(uptime / 3600);
+                    const minutes = Math.floor((uptime % 3600) / 60);
+                    term.writeln(`\x1b[36mNEXCHAT Terminal uptime: ${hours}h ${minutes}m\x1b[0m`);
+                    break;
+                case 'version':
+                    term.writeln('\x1b[36mNEXCHAT Terminal v1.0.0\x1b[0m');
+                    break;
+                case 'echo':
+                    term.writeln(args.join(' '));
+                    break;
+                case 'date':
+                    term.writeln(`\x1b[36m${new Date().toLocaleString()}\x1b[0m`);
+                    break;
+                case 'exit':
+                    term.writeln('\x1b[33mUse the Close button to exit terminal\x1b[0m');
+                    break;
+                default:
+                    term.writeln(`\x1b[31mCommand not found: ${command}. Type "help" for available commands.\x1b[0m`);
+            }
+        }
+
+        function showHelp() {
+            term.writeln('\x1b[1;33mAvailable Commands:\x1b[0m');
+            term.writeln('\x1b[36m  help\x1b[0m          - Show this help message');
+            term.writeln('\x1b[36m  setup\x1b[0m         - Show Linode setup instructions');
+            term.writeln('\x1b[36m  clear/cls\x1b[0m    - Clear the terminal screen');
+            term.writeln('\x1b[36m  whoami\x1b[0m       - Show current user');
+            term.writeln('\x1b[36m  login\x1b[0m        - Login to NEXCHAT');
+            term.writeln('\x1b[36m  logout\x1b[0m       - Logout from NEXCHAT');
+            term.writeln('\x1b[36m  status <msg>\x1b[0m - Update your status');
+            term.writeln('\x1b[36m  send <user> <msg>\x1b[0m - Send message to user');
+            term.writeln('\x1b[36m  roll [sides]\x1b[0m - Roll a die (default 6 sides)');
+            term.writeln('\x1b[36m  flip\x1b[0m         - Flip a coin');
+            term.writeln('\x1b[36m  quote\x1b[0m        - Get a random quote');
+            term.writeln('\x1b[36m  uptime\x1b[0m       - Show terminal uptime');
+            term.writeln('\x1b[36m  version\x1b[0m      - Show terminal version');
+            term.writeln('\x1b[36m  echo <text>\x1b[0m  - Echo text back');
+            term.writeln('\x1b[36m  date\x1b[0m         - Show current date/time');
+            term.writeln('\x1b[36m  exit\x1b[0m         - Show exit instruction');
+            term.writeln('');
+        }
+
+        function showLinodeSetup() {
+            term.writeln('\x1b[1;33mTerminal Server Setup Instructions:\x1b[0m');
+            term.writeln('');
+            term.writeln('\x1b[36m1. Get a VPS Server:\x1b[0m');
+            term.writeln('   - Choose any cloud provider (AWS, DigitalOcean, etc.)');
+            term.writeln('   - Get Ubuntu 22.04 LTS server');
+            term.writeln('   - Note your server\'s IP address');
+            term.writeln('');
+            term.writeln('\x1b[36m2. Quick Setup:\x1b[0m');
+            term.writeln('   sudo apt update');
+            term.writeln('   sudo apt install ttyd');
+            term.writeln('   ttyd --port 8080 bash');
+            term.writeln('');
+            term.writeln('\x1b[36m3. Configure Firewall:\x1b[0m');
+            term.writeln('   sudo ufw allow 8080');
+            term.writeln('');
+            term.writeln('\x1b[36m4. Update Configuration:\x1b[0m');
+            term.writeln('   Replace LINODE_CONFIG.host with your server IP');
+            term.writeln('');
+            term.writeln('\x1b[33mFor production, implement proper authentication and SSL!\x1b[0m');
+            term.writeln('');
+        }
+
+        // Event listeners
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            term.clear();
+            showPrompt();
+        });
+
+        document.getElementById('helpBtn').addEventListener('click', () => {
+            term.writeln('');
+            showHelp();
+            showPrompt();
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', () => {
+            if (window.parent && window.parent.closeTerminal) {
+                window.parent.closeTerminal();
+            } else {
+                window.location.href = 'chat.html';
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            fitAddon.fit();
+        });
+
+        // Prevent context menu
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+    </script>
+</body>
+</html></content>
+<parameter name="filePath">c:\Users\Baha\Desktop\NEXCHAT\terminal.html

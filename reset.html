@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#00ff66">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <title>NEXCHAT — Reset Password</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="login.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <link rel="apple-touch-icon" href="logo.jpg">
+</head>
+<body>
+
+<div class="login-container" style="max-width: 440px;">
+  <a href="landing.html" title="NEXCHAT Home">
+    <img src="logo.jpg" class="logo" alt="NEXCHAT Logo">
+  </a>
+  <h2>RESET PASSWORD</h2>
+  <p class="subtitle">Enter your account email. We'll send an official Firebase password reset link straight to your inbox.</p>
+
+  <form id="resetForm" autocomplete="on">
+    <input type="email" id="resetEmail" placeholder="Enter your registered email" autocomplete="email" required>
+    
+    <button type="submit" class="auth-btn">
+      <i class="fa-solid fa-paper-plane"></i>
+      <span>Send Recovery Link</span>
+    </button>
+  </form>
+
+  <p class="auth-note" style="margin-top: 18px; margin-bottom: 22px;">
+    Can't find the email? Please be sure to check your <strong>Spam or Junk</strong> folder.
+  </p>
+
+  <div class="divider">
+    <span>OR</span>
+  </div>
+
+  <div class="page-action-group">
+    <button type="button" class="page-action-btn secondary" onclick="location.href='index.html'">
+      <i class="fa-solid fa-arrow-left"></i> Back to Login
+    </button>
+    <button type="button" class="page-action-btn" onclick="location.href='register.html'">
+      <i class="fa-solid fa-user-plus"></i> New Account
+    </button>
+  </div>
+
+  <div id="result" class="result-box" role="status" aria-live="polite"></div>
+</div>
+
+<footer class="app-footer">
+  <p>CREATED BY <span class="dev-name">NEXO-TECH</span> | POWERED BY <span class="dev-team">NEXCHAT_DEV TEAMS</span></p>
+</footer>
+
+<script type="module" src="app-prompt.js"></script>
+<script type="module" src="pwa-install.js"></script>
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="auth.js"></script>
+</body>
+</html>

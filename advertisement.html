@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#00ff66">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NEXCHAT Ads">
+  <meta name="format-detection" content="telephone=no">
+  <title>NEXCHAT - Marketplace</title>
+  <link rel="stylesheet" href="advertisement.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <link rel="apple-touch-icon" href="logo.jpg">
+</head>
+
+<body>
+  <div class="app">
+    <!-- TOP HEADER BAR -->
+    <header class="top-header">
+      <div class="header-left">
+        <button id="backBtn" class="back-button" title="Back to Chat"><i class="fa-solid fa-arrow-left"></i></button>
+        <div class="nex-logo" id="headerLogoImg" style="cursor: pointer;" onclick="window.location.href='chat.html'">
+          <span class="nex-text">NEXCHAT</span>
+          <span
+            style="font-family: 'Rajdhani', sans-serif; font-size: 14px; color: #888; margin-left: 5px; letter-spacing: 1px;">MARKETPLACE</span>
+        </div>
+      </div>
+      <div class="header-center">
+        <div id="cartBadge" class="cart-badge" title="Items in cart">
+          <span class="badge-icon"><i class="fa-solid fa-cart-shopping"></i></span>
+          <span id="cartCount" class="badge-count">0</span>
+        </div>
+      </div>
+      <div class="header-right-scroll">
+        <div class="header-right">
+          <button id="cartBtn" class="header-icon-btn" title="View Cart"><i class="fa-solid fa-cart-shopping"></i></button>
+          <button id="searchBtn" class="header-icon-btn" title="Search Ads"><i class="fa-solid fa-magnifying-glass"></i></button>
+          <button id="myAdsBtn" class="header-icon-btn" title="My Advertisements"><i class="fa-solid fa-rectangle-list"></i></button>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="ads-main">
+      <!-- UPLOAD AD SECTION -->
+      <section class="upload-ad-section" id="uploadSection">
+        <div class="upload-header">
+          <h2>📦 Post Your Advertisement</h2>
+          <p>Share your products with NEXCHAT users</p>
+        </div>
+
+        <form id="adForm" class="ad-form">
+          <!-- Product Image -->
+          <div class="form-group">
+            <label for="productImage">📸 Product Image</label>
+            <div class="image-upload-area" id="imageUploadArea">
+              <input type="file" id="productImage" accept="image/*" required style="display: none;">
+              <div class="upload-placeholder">
+                <span class="upload-icon">🖼️</span>
+                <p>Click to upload image</p>
+                <small>JPG, PNG, GIF (Max 5MB)</small>
+              </div>
+            </div>
+            <div id="imagePreview" class="image-preview" style="display: none;">
+              <img id="previewImg" src="" alt="Preview">
+              <button type="button" class="remove-image-btn" id="removeImageBtn">✕</button>
+            </div>
+          </div>
+
+          <!-- Product Name -->
+          <div class="form-group">
+            <label for="productName">📛 Product Name <span class="required">*</span></label>
+            <input type="text" id="productName" placeholder="e.g., iPhone 15 Pro Max 256GB" maxlength="100" required aria-describedby="nameHelp">
+            <small id="nameHelp" class="form-help">3-100 characters required</small>
+          </div>
+
+          <!-- Product Description -->
+          <div class="form-group">
+            <label for="productDescription">📝 Description</label>
+            <textarea id="productDescription" placeholder="Describe your product in detail..." maxlength="500" rows="4" aria-describedby="descHelp"></textarea>
+            <small id="descHelp" class="form-help">Optional, max 500 characters</small>
+          </div>
+
+          <!-- Product Price -->
+          <div class="form-group">
+            <label for="productPrice">💰 Price (USD) <span class="required">*</span></label>
+            <input type="number" id="productPrice" placeholder="0.00" min="0" max="999999.99" step="0.01" required aria-describedby="priceHelp">
+            <small id="priceHelp" class="form-help">Enter price in USD (max $999,999.99)</small>
+          </div>
+
+          <!-- Category -->
+          <div class="form-group">
+            <label for="productCategory">📂 Category <span class="required">*</span></label>
+            <select id="productCategory" required aria-describedby="categoryHelp">
+              <option value="">Select a category</option>
+              <option value="electronics">🖥️ Electronics</option>
+              <option value="clothing">👕 Clothing & Fashion</option>
+              <option value="books">📚 Books & Education</option>
+              <option value="sports">⚽ Sports & Outdoors</option>
+              <option value="furniture">🪑 Furniture & Home</option>
+              <option value="food">🍔 Food & Beverages</option>
+              <option value="services">🛠️ Services</option>
+              <option value="automotive">🚗 Automotive</option>
+              <option value="health">🏥 Health & Beauty</option>
+              <option value="other">📦 Other</option>
+            </select>
+            <small id="categoryHelp" class="form-help">Choose the most appropriate category</small>
+          </div>
+
+          <!-- Duration Plan -->
+          <div class="form-group">
+            <label for="durationPlan">⏱️ Advertisement Duration</label>
+            <div class="duration-options">
+              <div class="duration-option">
+                <input type="radio" id="plan48" name="durationPlan" value="48" checked>
+                <label for="plan48" class="duration-label">
+                  <span class="duration-time">48 Hours</span>
+                  <span class="duration-price">⭐ 100 Tokens</span>
+                </label>
+              </div>
+              <div class="duration-option">
+                <input type="radio" id="plan72" name="durationPlan" value="72">
+                <label for="plan72" class="duration-label">
+                  <span class="duration-time">72 Hours</span>
+                  <span class="duration-price">⭐ 150 Tokens</span>
+                </label>
+              </div>
+              <div class="duration-option">
+                <input type="radio" id="plan144" name="durationPlan" value="144">
+                <label for="plan144" class="duration-label">
+                  <span class="duration-time">144 Hours (6 Days)</span>
+                  <span class="duration-price">⭐ 300 Tokens</span>
+                </label>
+              </div>
+              <div class="duration-option">
+                <input type="radio" id="plan168" name="durationPlan" value="168">
+                <label for="plan168" class="duration-label">
+                  <span class="duration-time">168 Hours (7 Days)</span>
+                  <span class="duration-price">⭐ 350 Tokens</span>
+                </label>
+              </div>
+            </div>
+            <div id="tokenWarning" class="token-warning" style="display: none;"></div>
+          </div>
+
+          <!-- Contact Information (Auto-filled) -->
+          <div class="contact-section">
+            <h3>📞 Your Contact Information</h3>
+            <div class="form-group">
+              <label for="nexUsername">NEX Username</label>
+              <input type="text" id="nexUsername" placeholder="Your NEX username" readonly>
+            </div>
+            <div class="form-group">
+              <label for="userEmail">📧 Email</label>
+              <input type="email" id="userEmail" placeholder="Your email" readonly>
+            </div>
+            <div class="form-group">
+              <label for="userUID">User ID (UID)</label>
+              <input type="text" id="userUID" placeholder="Your UID" readonly>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-primary post-ad-btn">🚀 Post Advertisement</button>
+          <div id="uploadStatus" class="status-message" style="display: none;"></div>
+        </form>
+      </section>
+
+      <!-- ADVERTISEMENTS LIST VIEW -->
+      <section class="ads-list-section" id="adsListSection" style="display: none;">
+        <div class="list-header">
+          <h2>🛍️ Available Products</h2>
+          <div class="view-controls">
+            <button id="gridViewBtn" class="view-btn active" title="Grid View">⊞</button>
+            <button id="listViewBtn" class="view-btn" title="List View">≡</button>
+          </div>
+        </div>
+
+        <!-- Search & Filter -->
+        <div class="search-filter-area">
+          <input type="text" id="searchAds" class="search-input" placeholder="Search products...">
+          <select id="filterCategory" class="filter-select">
+            <option value="">All Categories</option>
+            <option value="electronics">🖥️ Electronics</option>
+            <option value="clothing">👕 Clothing</option>
+            <option value="books">📚 Books</option>
+            <option value="sports">⚽ Sports</option>
+            <option value="furniture">🪑 Furniture</option>
+            <option value="food">🍔 Food & Beverages</option>
+            <option value="services">🛠️ Services</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+
+        <!-- Ads Grid/List -->
+        <div id="adsList" class="ads-grid">
+          <div class="empty-state">
+            <p>📭 No advertisements yet</p>
+            <p class="hint">Be the first to post!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- MY ADVERTISEMENTS VIEW -->
+      <section class="my-ads-section" id="myAdsSection" style="display: none;">
+        <div class="section-header">
+          <h2>📝 My Advertisements</h2>
+          <button id="createNewAdBtn" class="btn-primary">➕ New Ad</button>
+        </div>
+
+        <div id="myAdsList" class="ads-grid">
+          <div class="empty-state">
+            <p>📭 No advertisements yet</p>
+            <p class="hint">Create your first advertisement</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CART VIEW -->
+      <section class="cart-section" id="cartSection" style="display: none;">
+        <div class="section-header">
+          <h2>🛒 Shopping Cart</h2>
+        </div>
+
+        <div id="cartItems" class="cart-items-list">
+          <div class="empty-state">
+            <p>🛒 Your cart is empty</p>
+            <p class="hint">Add items to get started</p>
+          </div>
+        </div>
+
+        <div id="cartSummary" class="cart-summary" style="display: none;">
+          <div class="summary-row">
+            <span>Subtotal:</span>
+            <span id="subtotal">$0.00</span>
+          </div>
+          <div class="summary-row">
+            <span>Tax (10%):</span>
+            <span id="taxAmount">$0.00</span>
+          </div>
+          <div class="summary-row total">
+            <span>Total:</span>
+            <span id="totalAmount">$0.00</span>
+          </div>
+
+          <div class="cart-actions">
+            <button id="checkoutBtn" class="btn-primary">💳 Proceed to Checkout</button>
+            <button id="continueShopping" class="btn-secondary">🛍️ Continue Shopping</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- AD DETAIL VIEW -->
+      <section class="ad-detail-section" id="adDetailSection" style="display: none;">
+        <button id="backFromDetailBtn" class="back-button-detail">‹ Back</button>
+
+        <div class="ad-detail-container">
+          <!-- Product Image -->
+          <div class="detail-image-container" id="detailImageContainer">
+            <img id="detailImage" src="" alt="Product">
+            <div class="detail-category-badge" id="detailCategoryBadge"></div>
+          </div>
+
+          <!-- Product Info -->
+          <div class="detail-info">
+            <h2 id="detailName">Product Name</h2>
+            <p id="detailDescription" class="detail-description"></p>
+
+            <div class="detail-price">
+              <span class="price-label">Price:</span>
+              <span class="price-value" id="detailPrice">$0.00</span>
+            </div>
+
+            <div class="detail-category">
+              <span class="category-label">Category:</span>
+              <span class="category-value" id="detailCategory"></span>
+            </div>
+
+            <!-- Seller Info -->
+            <div class="seller-info">
+              <h3>👤 Seller Information</h3>
+              <div class="seller-details">
+                <p><strong>Username:</strong> <span id="detailUsername"></span></p>
+                <p><strong>Email:</strong> <span id="detailEmail"></span></p>
+                <p><strong>UID:</strong> <span id="detailUID"></span></p>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="detail-actions">
+              <button id="addToCartDetailBtn" class="btn-primary">🛒 Add to Cart</button>
+              <button id="contactSellerBtn" class="btn-secondary">💬 Contact Seller</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- OFFLINE INDICATOR -->
+    <div id="offlineIndicator" class="offline-indicator" style="display: none;">
+      <span class="offline-icon">📵</span>
+      <span class="offline-text">You are offline</span>
+    </div>
+  </div>
+
+  <!-- Firebase Scripts -->
+  <script type="module" src="advertisement.js"></script>
+</body>
+
+</html>

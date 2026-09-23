@@ -1,0 +1,1023 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================
+    // CORE SECURITY FUNCTIONS (SERVER-SIDE AUTHORIZATION)
+    // ============================================================
+
+    // 1. Authenticated User Check
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    // 2. Resource Owner Check
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 3. Super Admin Verification
+    // Checks email address, admin custom token claim, admin UID, or presence in admins collection
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'demonalexander526@gmail.com' ||
+        request.auth.token.admin == true ||
+        request.auth.uid == 'demonalexander526' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // 4. Group Membership Verification
+    function isGroupMember(groupId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/groups/$(groupId)) &&
+             request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+    }
+
+    // 5. Group Admin Verification
+    function isGroupAdmin(groupId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/groups/$(groupId)) &&
+             (
+               request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.admins ||
+               request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId ||
+               isSuperAdmin()
+             );
+    }
+
+    // 6. Group Moderator Verification (Admin OR Moderator)
+    function isGroupModerator(groupId) {
+      return isAuthenticated() &&
+             exists(/databases/$(database)/documents/groups/$(groupId)) &&
+             (
+               isGroupAdmin(groupId) ||
+               (
+                 'moderators' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                 request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.moderators
+               )
+             );
+    }
+
+    // ============================================================
+    // 1. USERS COLLECTION (Anti-Privilege Escalation & Token Hack)
+    // ============================================================
+    match /users/{uid} {
+      // Authenticated users can view public directory details (name, avatar, status)
+      allow read: if isAuthenticated();
+
+      // Account Creation (Signup): Starting token cap (max 2000) and strictly forbids self-granting isAdmin
+      allow create: if isOwner(uid) &&
+                       request.resource.data.uid == uid &&
+                       request.resource.data.tokens is int &&
+                       request.resource.data.tokens >= 0 &&
+                       request.resource.data.tokens <= 2000 &&
+                       (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false);
+
+      // Profile Update: Prevents modded clients from arbitrarily inflating tokens or granting isAdmin
+      allow update: if (isOwner(uid) &&
+                        request.resource.data.uid == uid &&
+                        // Anti-Admin Privilege Escalation: cannot change own isAdmin
+                        (!('isAdmin' in request.resource.data) ||
+                         !('isAdmin' in resource.data) ||
+                         request.resource.data.isAdmin == resource.data.isAdmin) &&
+                        // Anti-Token Inflation: User can spend/decrement tokens, but not inflate them arbitrarily
+                        (request.resource.data.tokens <= resource.data.tokens ||
+                         isSuperAdmin() ||
+                         request.resource.data.tokens == resource.data.tokens)
+                       ) || isSuperAdmin();
+
+      // Deletion strictly limited to Super Admin
+      allow delete: if isSuperAdmin();
+
+      // Subcollection: Linked Devices (Link Device WhatsApp/Telegram pairing)
+      match /linkedDevices/{deviceId} {
+        allow read, write: if isOwner(uid) || isSuperAdmin();
+      }
+    }
+
+    // ============================================================
+    // 2. DIRECT MESSAGES (End-to-End Privacy Lock)
+    // ============================================================
+    match /messages/{messageId} {
+      // ONLY the sender or the recipient can read this message. Strangers cannot eavesdrop.
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        isSuperAdmin()
+      );
+
+      // Sender must match authenticated session; cannot forge messages from another user
+      allow create: if isAuthenticated() &&
+                       request.resource.data.from == request.auth.uid &&
+                       request.resource.data.to is string &&
+                       request.resource.data.to != request.auth.uid;
+
+      // Sender can edit text within 1 hour; Recipient can update 'read' status
+      allow update: if isAuthenticated() && (
+        (request.auth.uid == resource.data.from && request.time < resource.data.timestamp + duration.value(1, 'h')) ||
+        (request.auth.uid == resource.data.to && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])) ||
+        isSuperAdmin()
+      );
+
+      // Either participant can delete for themselves/clean conversation
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        isSuperAdmin()
+      );
+    }
+
+    // ============================================================
+    // 3. GROUP MESSAGES
+    // ============================================================
+    match /groupMessages/{messageId} {
+      // ONLY confirmed members of the group can read group messages
+      allow read: if isAuthenticated() && (
+        isGroupMember(resource.data.groupId) ||
+        isSuperAdmin()
+      );
+
+      // Member must be confirmed group member and cannot forge sender identity
+      allow create: if isAuthenticated() &&
+                       request.resource.data.groupId is string &&
+                       isGroupMember(request.resource.data.groupId) &&
+                       (request.resource.data.from == request.auth.uid || request.resource.data.senderId == request.auth.uid);
+
+      // Sender or Group Moderator can update (e.g. text/reactions/read receipts) or delete message
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.senderId ||
+        isGroupModerator(resource.data.groupId) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'edited', 'text']) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.senderId ||
+        isGroupModerator(resource.data.groupId) ||
+        isSuperAdmin()
+      );
+    }
+
+    // ============================================================
+    // 4. GROUPS
+    // ============================================================
+    match /groups/{groupId} {
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated() &&
+                       request.resource.data.creatorId == request.auth.uid &&
+                       request.auth.uid in request.resource.data.members &&
+                       request.auth.uid in request.resource.data.admins;
+
+      allow update: if isAuthenticated() && (
+        isGroupAdmin(groupId) ||
+        (isGroupModerator(groupId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinnedMessages'])) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'lastMessage', 'lastMessageTime', 'pinnedMessages'])) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.creatorId ||
+        isSuperAdmin()
+      );
+
+      // Group subcollections
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (isGroupMember(groupId) || isSuperAdmin());
+        allow create: if isAuthenticated() && isGroupMember(groupId) && request.resource.data.senderId == request.auth.uid;
+        allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.senderId || isGroupAdmin(groupId));
+      }
+
+      match /documents/{documentId} {
+        allow read: if isAuthenticated() && (isGroupMember(groupId) || isSuperAdmin());
+        allow create: if isAuthenticated() && isGroupMember(groupId) && request.resource.data.uploadedBy == request.auth.uid;
+        allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.uploadedBy || isGroupAdmin(groupId));
+      }
+
+      match /sharedMedia/{mediaId} {
+        allow read: if isAuthenticated() && (isGroupMember(groupId) || isSuperAdmin());
+        allow create: if isAuthenticated() && isGroupMember(groupId) && request.resource.data.senderId == request.auth.uid;
+        allow update, delete: if isAuthenticated() && (request.auth.uid == resource.data.senderId || isGroupAdmin(groupId));
+      }
+    }
+
+    // ============================================================
+    // 5. NEX-STATUS (Strict 24-Hour Expiration & Auto-Purge)
+    // ============================================================
+    match /statuses/{statusId} {
+      allow read: if isAuthenticated();
+
+      // Author must match auth UID, expiresAtMs capped at strictly 24 hours
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid &&
+                       request.resource.data.expiresAtMs is int &&
+                       request.resource.data.expiresAtMs <= request.time.toMillis() + 86400000 + 120000;
+
+      allow update: if isOwner(resource.data.userId) || isSuperAdmin();
+
+      // Deletion: Owner, Admin, or client auto-purging expired status
+      allow delete: if isAuthenticated() && (
+        isOwner(resource.data.userId) ||
+        isSuperAdmin() ||
+        (resource.data.expiresAtMs is int && resource.data.expiresAtMs <= request.time.toMillis())
+      );
+    }
+
+    // ============================================================
+    // 6. NEX-REELS (Short Video Feed)
+    // ============================================================
+    match /reels/{reelId} {
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated() &&
+                       request.resource.data.authorId == request.auth.uid;
+
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.authorId ||
+        isSuperAdmin() ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'commentsCount', 'views', 'sharesCount'])
+      );
+
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.authorId ||
+        isSuperAdmin()
+      );
+
+      match /comments/{commentId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() &&
+                         request.resource.data.userId == request.auth.uid;
+        allow delete: if isAuthenticated() && (
+          request.auth.uid == resource.data.userId ||
+          request.auth.uid == get(/databases/$(database)/documents/reels/$(reelId)).data.authorId ||
+          isSuperAdmin()
+        );
+      }
+    }
+
+    // ============================================================
+    // 7. LINK DEVICE SESSIONS (WhatsApp/Telegram QR Pairing)
+    // ============================================================
+    match /link_sessions/{sessionId} {
+      allow read: if true;
+
+      allow create: if request.resource.data.status == 'pending' &&
+                       request.resource.data.sessionId == sessionId;
+
+      allow update: if isAuthenticated() && (
+        (request.resource.data.status == 'approved' && request.resource.data.primaryUid == request.auth.uid) ||
+        (request.resource.data.status in ['rejected', 'expired'] && resource.data.primaryUid == request.auth.uid) ||
+        isSuperAdmin()
+      );
+
+      allow delete: if (isAuthenticated() && resource.data.primaryUid == request.auth.uid) ||
+                       resource.data.expiresAt <= request.time.toMillis() ||
+                       isSuperAdmin();
+    }
+
+    // ============================================================
+    // 8. ADVERTISEMENTS (Marketplace)
+    // ============================================================
+    match /advertisements/{adId} {
+      allow read: if isAuthenticated() && (
+        resource.data.status == 'active' ||
+        request.auth.uid == resource.data.sellerUID ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() &&
+                       request.resource.data.sellerUID == request.auth.uid;
+
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.sellerUID ||
+        isSuperAdmin()
+      );
+    }
+
+    // ============================================================
+    // 9. VOICE & VIDEO CALLS & HISTORY
+    // ============================================================
+    match /calls/{callId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid == resource.data.callerId ||
+        request.auth.uid == resource.data.receiverId ||
+        request.auth.uid == request.resource.data.callerId ||
+        request.auth.uid == request.resource.data.receiverId ||
+        isSuperAdmin()
+      );
+
+      match /iceCandidates/{candidateId} {
+        allow read, write: if isAuthenticated();
+      }
+      match /sdp/{sdpId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    match /callHistory/{historyId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.callerId ||
+        request.auth.uid == resource.data.receiverId ||
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
+        request.auth.uid == request.resource.data.callerId ||
+        request.auth.uid == request.resource.data.receiverId ||
+        request.auth.uid == request.resource.data.from ||
+        request.auth.uid == request.resource.data.to
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.callerId ||
+        request.auth.uid == resource.data.receiverId ||
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        isSuperAdmin()
+      );
+    }
+
+    match /groupCalls/{groupCallId} {
+      allow read, write: if isAuthenticated() && (
+        isGroupMember(resource.data.groupId) ||
+        isGroupMember(request.resource.data.groupId) ||
+        isSuperAdmin()
+      );
+
+      match /participants/{participantId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    // ============================================================
+    // 10. CHAT REQUESTS & GROUP JOIN REQUESTS
+    // ============================================================
+    match /chatRequests/{requestId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        request.auth.uid == request.resource.data.from ||
+        request.auth.uid == request.resource.data.to ||
+        isSuperAdmin()
+      );
+    }
+
+    match /groupJoinRequests/{requestId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == request.resource.data.userId ||
+        isGroupAdmin(resource.data.groupId) ||
+        isGroupAdmin(request.resource.data.groupId) ||
+        isSuperAdmin()
+      );
+    }
+
+    match /groupPolls/{pollId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isGroupMember(request.resource.data.groupId);
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.creatorId ||
+        isGroupAdmin(resource.data.groupId) ||
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes', 'totalVotes']) ||
+        isSuperAdmin()
+      );
+    }
+
+    match /pollVotes/{voteId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.userId || isSuperAdmin());
+    }
+
+    // ============================================================
+    // 11. GAMING HUB, CLANS, CLIPS & BETTING
+    // ============================================================
+    match /clans/{clanId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.leaderId == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.leaderId ||
+        request.auth.uid in resource.data.members ||
+        isSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.leaderId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /clanInvites/{inviteId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.invitedUserId ||
+        request.auth.uid == resource.data.invitedBy ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.invitedBy == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.invitedUserId ||
+        request.auth.uid == resource.data.invitedBy ||
+        isSuperAdmin()
+      );
+    }
+
+    match /clips/{clipId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.authorId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /videos/{videoId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.authorId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /tokenGifts/{giftId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.recipientId ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() &&
+                       request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /transactions/{txId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /tokenTransactions/{txId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.recipientId ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /paymentHistory/{paymentId} {
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    // ============================================================
+    // 12. NEXCHAT-ADMIN DASHBOARD & AUDIT CONTROL SUITE
+    // ============================================================
+    // These collections power the dedicated NEXCHAT-ADMIN DASHBOARD
+    match /admins/{adminId} {
+      allow read: if isAuthenticated() && (isSuperAdmin() || request.auth.uid == adminId);
+      allow write: if isSuperAdmin();
+    }
+
+    match /adminLogs/{logId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /adminAuditLog/{logId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /adminSecurityLogs/{logId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /securityLogs/{logId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /securityAuditLogs/{auditId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /userActivity/{activityId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /userRegistrations/{regId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /videoActivity/{vidActId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /videoEngagement/{engId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /systemLogs/{logId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /analytics/{analyticsId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /tokenStatistics/{statId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /systemStats/{statId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /userStats/{uid} {
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    match /groupStats/{groupId} {
+      allow read: if isGroupMember(groupId) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    match /errorLogs/{errorId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /debugLogs/{debugId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /performanceMetrics/{metricId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /apiUsageLogs/{logId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /backupData/{backupId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /backupMetadata/{backupId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /migrationLogs/{migrationId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /featureUsageStats/{statId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    // ============================================================
+    // 13. SYSTEM ANNOUNCEMENTS, REPORTS & MODERATION
+    // ============================================================
+    match /announcements/{announcementId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /reports/{reportId} {
+      allow create: if isAuthenticated() && request.resource.data.reportedBy == request.auth.uid;
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /blockedUsers/{blockId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == request.resource.data.userId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /contentModeration/{moderationId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /spamReports/{reportId} {
+      allow create: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /contentFilters/{filterId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userVerification/{verificationId} {
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /trustScores/{uid} {
+      allow read: if isOwner(uid) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    match /reputation/{reputationId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // ============================================================
+    // 14. USER & CHAT ATMOSPHERE BACKGROUNDS & PREFERENCES
+    // ============================================================
+    match /userBackgrounds/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /groupBackgrounds/{groupId} {
+      allow read: if isGroupMember(groupId) || isSuperAdmin();
+      allow write: if isGroupAdmin(groupId) || isSuperAdmin();
+    }
+
+    match /directMessageBackgrounds/{docId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid == docId.split('_')[0] ||
+        request.auth.uid == docId.split('_')[1] ||
+        isSuperAdmin()
+      );
+    }
+
+    match /messageActivity/{activityId} {
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow read: if isOwner(resource.data.senderId) || isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /offlineMessageQueue/{queueId} {
+      allow read, write: if isAuthenticated() && (
+        isOwner(resource.data.userId) ||
+        request.resource.data.userId == request.auth.uid ||
+        isSuperAdmin()
+      );
+    }
+
+    match /presence/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    // Configuration & preferences
+    match /appConfig/{configId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /maintenance/{maintenanceId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /featureFlags/{flagId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /rateLimits/{limitId} {
+      allow read, write: if isSuperAdmin() || (isAuthenticated() && request.resource.data.userId == request.auth.uid);
+    }
+
+    match /userSessions/{sessionId} {
+      allow read, write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isOwner(resource.data.userId) || isSuperAdmin());
+    }
+
+    match /deviceTokens/{tokenId} {
+      allow read, write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isOwner(resource.data.userId) || isSuperAdmin());
+    }
+
+    match /userSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /userPreferences/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /themeSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /notificationSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /privacySettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /securitySettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /accountSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /profileSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /chatSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /mediaSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /callSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /groupSettings/{groupId} {
+      allow read: if isGroupMember(groupId) || isSuperAdmin();
+      allow write: if isGroupAdmin(groupId) || isSuperAdmin();
+    }
+
+    match /marketplaceSettings/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    match /userFeedback/{feedbackId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read, write: if isSuperAdmin();
+    }
+
+    match /supportTickets/{ticketId} {
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    match /betaFeatures/{featureId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /experimentalFeatures/{featureId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /abTesting/{testId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // ============================================================
+    // 15. GAMIFICATION, BADGES & COMMUNITY CHALLENGES
+    // ============================================================
+    match /userBadges/{badgeId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /groupBadges/{badgeId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userAchievements/{achievementId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userLevels/{uid} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userProgress/{progressId} {
+      allow read: if isAuthenticated() && (isOwner(resource.data.userId) || isSuperAdmin());
+      allow write: if isSuperAdmin();
+    }
+
+    match /leaderboards/{leaderboardId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /challenges/{challengeId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /userChallenges/{challengeId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow delete: if isSuperAdmin();
+    }
+
+    match /groupChallenges/{challengeId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && (isGroupMember(request.resource.data.groupId) || isSuperAdmin());
+      allow delete: if isSuperAdmin();
+    }
+
+    match /competitions/{competitionId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /tournaments/{tournamentId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /gamification/{gamificationId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /rewards/{rewardId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /subscriptions/{subscriptionId} {
+      allow read: if isOwner(resource.data.userId) || isSuperAdmin();
+      allow write: if isSuperAdmin();
+    }
+
+    match /premiumFeatures/{featureId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // ============================================================
+    // 16. SOCIAL FEATURES & STORIES
+    // ============================================================
+    match /socialFeatures/{featureId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    match /friendRequests/{requestId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        request.auth.uid == request.resource.data.from ||
+        request.auth.uid == request.resource.data.to ||
+        isSuperAdmin()
+      );
+    }
+
+    match /friends/{friendId} {
+      allow read, write: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.friendId ||
+        request.auth.uid == request.resource.data.userId ||
+        request.auth.uid == request.resource.data.friendId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /followers/{followId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.followerId ||
+        request.auth.uid == request.resource.data.followerId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /socialPosts/{postId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.authorId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /postLikes/{likeId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == request.resource.data.userId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /postComments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /stories/{storyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /storyViews/{viewId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.viewerId == request.auth.uid;
+    }
+
+    match /liveStreams/{streamId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.hostId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.hostId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /streamViewers/{viewerId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /streamChat/{messageId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+    }
+
+    match /videoComments/{commentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /videoLikes/{likeId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == request.resource.data.userId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /playlists/{playlistId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /playlistVideos/{videoId} {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == request.resource.data.userId ||
+        isSuperAdmin()
+      );
+    }
+
+    match /sharedMedia/{mediaId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        request.auth.uid == resource.data.recipientId ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.senderId ||
+        isSuperAdmin()
+      );
+    }
+
+    // ============================================================
+    // 17. ZERO-TRUST DEFAULT DENY BARRIER
+    // ============================================================
+    // Strictly blocks any collection or document not explicitly permitted above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

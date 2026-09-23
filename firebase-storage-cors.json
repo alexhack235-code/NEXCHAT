@@ -1,0 +1,19 @@
+[
+  {
+    "origin": [
+      "https://demonalexander526-alt.github.io",
+      "https://nexchat-47326.web.app",
+      "http://localhost:3000",
+      "http://localhost:5500"
+    ],
+    "method": ["GET", "POST", "PUT", "HEAD", "DELETE", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": [
+      "Content-Type",
+      "Authorization",
+      "x-goog-resumable",
+      "x-goog-api-client",
+      "x-goog-user-project"
+    ]
+  }
+]

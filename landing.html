@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050811">
+  <title>NEXCHAT — Next-Gen Encrypted Communication</title>
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <link rel="apple-touch-icon" href="logo.jpg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       NAVIGATION BAR (fixed, transparent → glass on scroll)
+       ═══════════════════════════════════════════════════════════════ -->
+  <nav id="landing-nav" class="landing-nav">
+    <div class="nav-inner">
+      <a href="landing.html" class="nav-logo">
+        <img src="logo.jpg" alt="N" class="nav-logo-img">
+        <span class="nav-logo-text">NEXCHAT</span>
+      </a>
+      <div class="nav-links">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#security" class="nav-link">Security</a>
+        <a href="#ecosystem" class="nav-link">Ecosystem</a>
+      </div>
+      <a href="index.html" class="nav-cta">Launch App <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 1 — HERO (pinned canvas + text reveal)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="hero" class="hero-section">
+    <canvas id="hero-canvas"></canvas>
+
+    <!-- Floating parallax orbs -->
+    <div class="hero-orb orb-1" data-speed="0.3"></div>
+    <div class="hero-orb orb-2" data-speed="0.6"></div>
+    <div class="hero-orb orb-3" data-speed="0.9"></div>
+
+    <div class="hero-content">
+      <p class="hero-eyebrow" data-reveal>INTRODUCING</p>
+      <h1 class="hero-title" data-reveal>
+        <span class="hero-title-line">Communication</span>
+        <span class="hero-title-line gradient-text">Reimagined.</span>
+      </h1>
+      <p class="hero-sub" data-reveal>End-to-end encrypted. Real-time. Unstoppable.</p>
+      <div class="hero-scroll-hint" data-reveal>
+        <div class="scroll-line"></div>
+        <span>Scroll to explore</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 2 — FEATURES (horizontal stagger cards)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="features" class="features-section">
+    <div class="section-header" data-reveal>
+      <p class="section-eyebrow">Core Features</p>
+      <h2 class="section-title">Built for the <span class="gradient-text">future</span> of chat.</h2>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card" data-reveal data-delay="0">
+        <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
+        <h3>Lightning Fast</h3>
+        <p>Messages delivered in under 50ms. Zero lag video calls across continents. Built on Firebase infrastructure.</p>
+      </div>
+      <div class="feature-card" data-reveal data-delay="0.1">
+        <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3>E2E Encrypted</h3>
+        <p>Every message, call, and file transfer is protected by military-grade end-to-end encryption. Always.</p>
+      </div>
+      <div class="feature-card" data-reveal data-delay="0.2">
+        <div class="feature-icon"><i class="fa-solid fa-users-gear"></i></div>
+        <h3>Smart Groups</h3>
+        <p>Admin controls, member management, disappearing messages, mute members, and join-approval workflows.</p>
+      </div>
+      <div class="feature-card" data-reveal data-delay="0.3">
+        <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
+        <h3>AI Auto-Responder</h3>
+        <p>Set up AI-powered auto-replies for selected contacts. Multiple AI profile modes to match your communication style.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 3 — BIG VISUAL (parallax phone mockup / showcase)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="security" class="showcase-section">
+    <div class="showcase-bg-glow"></div>
+
+    <div class="showcase-content">
+      <div class="showcase-text" data-reveal>
+        <p class="section-eyebrow">Privacy First</p>
+        <h2 class="section-title">Your conversations are <span class="gradient-text">untouchable.</span></h2>
+        <p class="showcase-desc">NEXCHAT doesn't store your messages on any server. Everything is end-to-end encrypted with zero-knowledge architecture. Not even we can read your chats.</p>
+        <div class="showcase-stats">
+          <div class="stat-item" data-reveal data-delay="0">
+            <span class="stat-number" data-count="256">0</span>
+            <span class="stat-label">-bit AES Encryption</span>
+          </div>
+          <div class="stat-item" data-reveal data-delay="0.1">
+            <span class="stat-number" data-count="0">0</span>
+            <span class="stat-label">Messages Stored on Servers</span>
+          </div>
+          <div class="stat-item" data-reveal data-delay="0.2">
+            <span class="stat-number" data-count="100">0</span>
+            <span class="stat-label">% Open Audit Trail</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="showcase-visual" data-parallax data-speed="0.15">
+        <div class="phone-mockup">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="mock-header">
+              <div class="mock-avatar"></div>
+              <div class="mock-info">
+                <div class="mock-name"></div>
+                <div class="mock-status"></div>
+              </div>
+              <div class="mock-lock"><i class="fa-solid fa-lock"></i></div>
+            </div>
+            <div class="mock-messages">
+              <div class="mock-bubble received"><div class="mock-text-line w80"></div><div class="mock-text-line w50"></div></div>
+              <div class="mock-bubble sent"><div class="mock-text-line w60"></div></div>
+              <div class="mock-bubble received"><div class="mock-text-line w90"></div><div class="mock-text-line w70"></div><div class="mock-text-line w40"></div></div>
+              <div class="mock-bubble sent"><div class="mock-text-line w75"></div><div class="mock-text-line w55"></div></div>
+            </div>
+            <div class="mock-encrypt-badge"><i class="fa-solid fa-shield-halved"></i> End-to-end encrypted</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 4 — ECOSYSTEM (gaming, marketplace, terminal)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="ecosystem" class="ecosystem-section">
+    <div class="section-header" data-reveal>
+      <p class="section-eyebrow">Beyond Chat</p>
+      <h2 class="section-title">An entire <span class="gradient-text">ecosystem.</span></h2>
+    </div>
+
+    <div class="eco-cards">
+      <div class="eco-card" data-reveal data-delay="0">
+        <div class="eco-card-icon"><i class="fa-solid fa-gamepad"></i></div>
+        <h3>Gaming Hub</h3>
+        <p>Challenge friends to multiplayer games. Earn tokens. Compete on leaderboards.</p>
+      </div>
+      <div class="eco-card" data-reveal data-delay="0.15">
+        <div class="eco-card-icon"><i class="fa-solid fa-shop"></i></div>
+        <h3>Marketplace</h3>
+        <p>Buy, sell, and advertise products directly within your chat ecosystem.</p>
+      </div>
+      <div class="eco-card" data-reveal data-delay="0.3">
+        <div class="eco-card-icon"><i class="fa-solid fa-terminal"></i></div>
+        <h3>NEX Terminal</h3>
+        <p>Power-user CLI for advanced operations, cloud tools, and developer workflows.</p>
+      </div>
+      <div class="eco-card" data-reveal data-delay="0.45">
+        <div class="eco-card-icon"><i class="fa-solid fa-coins"></i></div>
+        <h3>NEX Tokens</h3>
+        <p>Transfer and earn tokens. Built-in economy across gaming, gifting, and marketplace.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 5 — FINAL CTA (launch NEXCHAT)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="cta" class="cta-section">
+    <div class="cta-glow"></div>
+    <div class="cta-content" data-reveal>
+      <h2 class="cta-title">Ready to experience the <span class="gradient-text">future?</span></h2>
+      <p class="cta-sub">Join thousands already on NEXCHAT. Create your account in under 30 seconds.</p>
+      <div class="cta-buttons">
+        <a href="index.html" class="cta-btn primary">
+          <span>Launch NEXCHAT</span>
+          <i class="fa-solid fa-rocket"></i>
+        </a>
+        <a href="profile-upload.html" class="cta-btn secondary">
+          <span>Create Account</span>
+          <i class="fa-solid fa-user-plus"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="logo.jpg" alt="NEXCHAT" class="footer-logo">
+        <span class="footer-brand-text">NEXCHAT</span>
+      </div>
+      <p class="footer-copy">Created by <span class="accent-orange">NEXO-TECH</span> · Powered by <span class="accent-green">NEXCHAT_DEV TEAMS</span></p>
+    </div>
+  </footer>
+
+  <script type="module" src="js/landing-scroll.js"></script>
+</body>
+</html>

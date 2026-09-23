@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#00ff66">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <title> NEXCHAT Login </title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="login.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <link rel="apple-touch-icon" href="logo.jpg">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<div class="login-container">
+  <img src="logo.jpg" class="logo" alt="NEXCHAT Logo">
+  <h2>WELCOME TO NEXCHAT</h2>
+  <p class="subtitle">Sign in fast and securely. Use email, password, or connect with Google for instant access.</p>
+
+  <form id="loginForm" aria-describedby="result" autocomplete="on">
+    <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" required>
+    <div class="password-field">
+      <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
+      <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Show password">Show</button>
+    </div>
+    <button type="submit" class="auth-btn">Login</button>
+  </form>
+
+  <p class="auth-note">Need a faster and password-free option? Google sign-in gets you into NEXCHAT instantly.</p>
+
+  <div id="loginLoaderOverlay" class="login-loader-overlay" aria-hidden="true">
+    <div class="login-loader-card">
+      <div class="loader-icon"></div>
+      <p class="loader-title">Preparing secure login...</p>
+      <p class="loader-text">Authenticating your account and loading your workspace.</p>
+      <div class="loader-progress-bar">
+        <div class="loader-progress-fill"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider">
+    <span>OR</span>
+  </div>
+  <div class="google-signin-block">
+    <div id="googleSignInContainer" class="google-signin-container"></div>
+    <p id="googleConnectLink" class="google-hint">Connect your Google account to NEXCHAT</p>
+  </div>
+
+  <button type="button" class="page-action-btn secondary" onclick="location.href='link-device.html'" style="width: 100%; margin-top: 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; border-color: rgba(0, 255, 102, 0.4); color: #00ff66;">
+    <i class="fa-solid fa-qrcode"></i> Log In with Linked Device
+  </button>
+
+  <div class="page-action-group">
+    <button type="button" class="page-action-btn" onclick="location.href='register.html'"><i class="fa-solid fa-user-plus"></i> Register</button>
+    <button type="button" class="page-action-btn secondary" onclick="location.href='reset.html'"><i class="fa-solid fa-key"></i> Forgot Password?</button>
+  </div>
+
+  <div id="result" class="result-box" role="status" aria-live="polite"></div>
+</div>
+
+<footer class="app-footer">
+  <p>CREATED BY <span class="dev-name">NEXO-TECH</span> | POWERED BY <span class="dev-team">NEXCHAT_DEV TEAMS</span></p>
+</footer>
+
+
+
+<script type="module" src="app-prompt.js"></script>
+<script type="module" src="pwa-install.js"></script>
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="auth.js"></script>
+</body>
+</html>

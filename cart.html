@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#00ff66">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <title>NEXCHAT Store - Buy Tokens</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #04070f 0%, #0d1320 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      overflow-x: hidden;
+      padding-bottom: 24px;
+    }
+
+    .store-container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 24px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    .store-header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 22px 28px;
+      background: rgba(0, 255, 102, 0.08);
+      border: 1px solid rgba(0, 255, 102, 0.18);
+      border-radius: 22px;
+      box-shadow: 0 18px 55px rgba(0, 0, 0, 0.24);
+    }
+
+    .store-header h1 {
+      font-size: 36px;
+      letter-spacing: 0.8px;
+      text-shadow: 0 0 22px rgba(0, 255, 102, 0.28);
+    }
+
+    .back-btn {
+      background: linear-gradient(135deg, rgba(0, 255, 102, 0.12), rgba(0, 255, 102, 0.04));
+      border: 2px solid rgba(0, 255, 102, 0.35);
+      color: #00ff66;
+      padding: 14px 24px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: all 0.28s ease;
+      min-width: 160px;
+    }
+
+    .back-btn:hover {
+      background: rgba(0, 255, 102, 0.16);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 32px rgba(0, 255, 102, 0.12);
+    }
+
+    .user-info {
+      background: rgba(0, 255, 102, 0.06);
+      border: 1px solid rgba(0, 255, 102, 0.18);
+      border-radius: 20px;
+      padding: 28px;
+      margin-bottom: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .user-balance {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .section-title {
+      margin-bottom: 25px;
+      color: #00ff66;
+      text-shadow: 0 0 10px rgba(0, 255, 102, 0.3);
+      font-size: 28px;
+      letter-spacing: 0.4px;
+    }
+
+    .balance-value {
+      color: #ffffff;
+      font-size: 32px;
+      text-shadow: 0 0 20px rgba(0, 255, 102, 0.35);
+    }
+
+    .user-info .user-meta {
+      text-align: right;
+      color: rgba(0, 255, 102, 0.75);
+      font-size: 12px;
+      letter-spacing: 0.4px;
+    }
+
+    .packages-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 22px;
+      margin-bottom: 40px;
+    }
+
+    .package-card {
+      background: rgba(0, 0, 0, 0.32);
+      border: 1px solid rgba(0, 255, 102, 0.18);
+      border-radius: 22px;
+      padding: 28px;
+      text-align: center;
+      transition: all 0.28s ease;
+      cursor: pointer;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 320px;
+      overflow: hidden;
+      box-shadow: inset 0 0 18px rgba(0, 255, 102, 0.04);
+    }
+
+    .package-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 48px rgba(0, 255, 102, 0.18);
+      border-color: #00ff66;
+      background: rgba(0, 255, 102, 0.08);
+    }
+
+    .package-icon {
+      font-size: 48px;
+      margin-bottom: 18px;
+    }
+
+    .package-tokens {
+      font-size: 34px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 10px;
+      letter-spacing: -0.04em;
+    }
+
+    .package-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .package-price {
+      font-size: 22px;
+      font-weight: 800;
+      color: #00ff66;
+      margin-bottom: 4px;
+    }
+
+    .package-currency {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 20px;
+    }
+
+    .buy-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #00ff66 0%, #00cc55 100%);
+      color: #0a0f1a;
+      border: none;
+      padding: 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.28s ease;
+      font-size: 15px;
+      box-shadow: 0 14px 24px rgba(0, 255, 102, 0.18);
+    }
+
+    .buy-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 34px rgba(0, 255, 102, 0.22);
+    }
+
+    .special-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: linear-gradient(135deg, #ff7a00 0%, #ff4d2d 100%);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      box-shadow: 0 8px 20px rgba(255, 102, 0, 0.18);
+    }
+
+    .payment-methods {
+      background: rgba(0, 255, 102, 0.06);
+      border: 1px solid rgba(0, 255, 102, 0.15);
+      border-radius: 20px;
+      padding: 26px;
+      margin-bottom: 30px;
+      box-shadow: inset 0 0 22px rgba(0, 255, 102, 0.05);
+    }
+
+    .payment-methods h3 {
+      margin-bottom: 18px;
+      color: #00ff66;
+      font-size: 18px;
+    }
+
+    .payment-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 18px;
+    }
+
+    .install-offer {
+      background: linear-gradient(135deg, rgba(255, 102, 0, 0.12) 0%, rgba(255, 102, 0, 0.05) 100%);
+      border-color: rgba(255, 102, 0, 0.18);
+    }
+
+    .install-offer h3 {
+      color: #ffb86c;
+    }
+
+    .install-copy {
+      margin-bottom: 18px;
+      color: rgba(255, 224, 180, 0.9);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .install-meta {
+      margin-top: 18px;
+      font-size: 12px;
+      color: rgba(255, 224, 180, 0.8);
+      text-align: center;
+    }
+
+    .payment-option.install-option {
+      border-color: rgba(255, 102, 0, 0.18);
+      background: rgba(255, 102, 0, 0.08);
+    }
+
+    .payment-option.install-option:hover {
+      background: rgba(255, 102, 0, 0.14);
+    }
+
+    .payment-option.install-option .payment-name {
+      color: #ffe7c5;
+    }
+
+    .payment-option {
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(0, 255, 102, 0.14);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.28s ease;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .payment-option:hover {
+      background: rgba(0, 255, 102, 0.12);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 30px rgba(0, 255, 102, 0.12);
+    }
+
+    .payment-option.active {
+      background: rgba(0, 255, 102, 0.17);
+      border-color: #00ff66;
+      box-shadow: 0 14px 36px rgba(0, 255, 102, 0.16);
+    }
+
+    .payment-icon {
+      font-size: 36px;
+      margin-bottom: 10px;
+    }
+
+    .payment-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .faq-section {
+      background: rgba(0, 255, 102, 0.05);
+      border: 1px solid rgba(0, 255, 102, 0.15);
+      border-radius: 20px;
+      padding: 26px;
+      box-shadow: inset 0 0 22px rgba(0, 255, 102, 0.05);
+    }
+
+    .faq-section h3 {
+      margin-bottom: 18px;
+      color: #00ff66;
+    }
+
+    .faq-item {
+      margin-bottom: 18px;
+      padding: 18px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(0, 255, 102, 0.12);
+    }
+
+    .faq-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .faq-question {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #00ff66;
+    }
+
+    .faq-answer {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.7;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(10, 15, 26, 0.95);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #111;
+      border: 2px solid #00ff66;
+      border-radius: 18px;
+      padding: 30px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 50px rgba(0, 255, 102, 0.18);
+    }
+
+    .modal-close {
+      float: right;
+      background: none;
+      border: none;
+      color: #00ff66;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .modal h2 {
+      margin: 18px 0;
+      color: #00ff66;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      background: #0a0f1a;
+      border: 1px solid #00ff66;
+      border-radius: 10px;
+      color: #00ff66;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .modal button {
+      width: 100%;
+      padding: 14px;
+      background: #00ff66;
+      color: #0a0f1a;
+      border: none;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    .modal button:hover {
+      background: #00dd55;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .spinner {
+      border: 3px solid rgba(0, 255, 102, 0.3);
+      border-top: 3px solid #00ff66;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+      .packages-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .store-header {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .user-info {
+        grid-template-columns: 1fr;
+        text-align: left;
+      }
+
+      .user-info .user-meta {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="store-container">
+    <div class="store-header">
+      <h1>💎 NEXCHAT Token Store</h1>
+      <button class="back-btn" onclick="window.location.href='chat.html'">← Back to Chat</button>
+    </div>
+
+    <div class="user-info">
+      <div>
+        <div class="user-balance">Your Balance</div>
+        <div class="balance-value"><span id="currentBalance">0</span> ⭐</div>
+      </div>
+      <div class="user-meta">
+        <p id="userUID">Loading...</p>
+      </div>
+    </div>
+
+    <h2 class="section-title">📦 Token Packages</h2>
+
+    <div class="packages-grid">
+      <div class="package-card" onclick="selectPackage(10000, 3, 'Starter')">
+        <div class="package-icon">🚀</div>
+        <div class="package-tokens">10K</div>
+        <div class="package-label">Starter Pack</div>
+        <div class="package-price">$3</div>
+        <div class="package-currency">USD</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+
+      <div class="package-card" onclick="selectPackage(20000, 4, 'Popular')">
+        <div class="special-badge">⭐ POPULAR</div>
+        <div class="package-icon">⭐</div>
+        <div class="package-tokens">20K</div>
+        <div class="package-label">Popular Pack</div>
+        <div class="package-price">$4</div>
+        <div class="package-currency">USD</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+
+      <div class="package-card" onclick="selectPackage(35000, 7, 'Premium')">
+        <div class="package-icon">💎</div>
+        <div class="package-tokens">35K</div>
+        <div class="package-label">Premium Pack</div>
+        <div class="package-price">$7</div>
+        <div class="package-currency">USD</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+
+      <div class="package-card" onclick="selectPackage(50000, 9, 'Ultimate')">
+        <div class="special-badge">🔥 BEST VALUE</div>
+        <div class="package-icon">👑</div>
+        <div class="package-tokens">50K</div>
+        <div class="package-label">Ultimate Pack</div>
+        <div class="package-price">$9</div>
+        <div class="package-currency">USD</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+
+      <div class="package-card" onclick="selectPackage(100000, 15, 'Mega')">
+        <div class="special-badge">💰 MEGA DEAL</div>
+        <div class="package-icon">🚀</div>
+        <div class="package-tokens">100K</div>
+        <div class="package-label">Mega Pack</div>
+        <div class="package-price">$15</div>
+        <div class="package-currency">USD</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+
+      <div class="package-card" onclick="selectPackage(200000, 25, 'Supreme')">
+        <div class="special-badge">👑 SUPREME</div>
+        <div class="package-icon">💎</div>
+        <div class="package-tokens">200K</div>
+        <div class="package-label">Supreme Pack</div>
+        <div class="package-price">$25</div>
+        <div class="package-currency">USD</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+
+      <div class="package-card" onclick="selectPackage(400000, 40, 'Legendary')">
+        <div class="special-badge">⭐ LEGENDARY</div>
+        <div class="package-icon">✨</div>
+        <div class="package-tokens">400K</div>
+        <div class="package-label">Legendary Pack</div>
+        <div class="package-price">$40</div>
+        <div class="package-currency">USD</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+
+      <div class="package-card" onclick="selectPackage(1000000, 70, 'Infinity')">
+        <div class="special-badge">🔥 INFINITY</div>
+        <div class="package-icon">🌟</div>
+        <div class="package-tokens">1M</div>
+        <div class="package-label">Infinity Pack</div>
+        <div class="package-price">$70</div>
+        <div class="package-currency">USD</div>
+        <button class="buy-btn">Buy Now</button>
+      </div>
+    </div>
+
+    <div class="payment-methods">
+      <h3>� Contact Method</h3>
+      <div class="payment-options">
+        <div class="payment-option active" onclick="selectPayment('whatsapp')">
+          <div class="payment-icon">💬</div>
+          <div class="payment-name">WhatsApp</div>
+        </div>
+      </div>
+      <p style="margin-top: 15px; font-size: 12px; color: rgba(0, 255, 102, 0.7); text-align: center;">
+        📲 You will be redirected to WhatsApp with your purchase details
+      </p>
+    </div>
+
+    <div class="payment-methods install-offer">
+      <h3>📱 Install NEXCHAT App</h3>
+      <p class="install-copy">Get the full NEXCHAT experience on your mobile device!</p>
+      <div class="payment-options">
+        <div class="payment-option install-option" onclick="downloadAPK()">
+          <div class="payment-icon">📥</div>
+          <div class="payment-name">Download APK</div>
+        </div>
+        <div class="payment-option install-option" onclick="openPlayStore()">
+          <div class="payment-icon">🎮</div>
+          <div class="payment-name">Google Play</div>
+        </div>
+      </div>
+      <p class="install-meta">
+        💾 App size: ~45MB | Requires Android 8.0+
+      </p>
+    </div>
+
+    <div class="faq-section">
+      <h3>❓ FAQ</h3>
+      <div class="faq-item">
+        <div class="faq-question">How do I use my tokens?</div>
+        <div class="faq-answer">You can use tokens to transfer to friends, participate in premium features, and more!</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Are purchases refundable?</div>
+        <div class="faq-answer">Please contact support for refund inquiries within 7 days of purchase.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How long does payment take?</div>
+        <div class="faq-answer">Instant! Tokens are added to your account immediately after successful payment.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">Is my payment secure?</div>
+        <div class="faq-answer">Yes! We use industry-leading payment providers (Paystack & Flutterwave) for secure transactions.</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="checkoutModal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <h2>Complete Your Purchase</h2>
+      <p id="packageSummary"></p>
+      
+      <div class="loading" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Processing payment...</p>
+      </div>
+
+      <div id="paymentForm">
+        <input type="text" id="paymentPhone" placeholder="Enter your phone number" required>
+        <button onclick="processPayment()">Pay Now 💰</button>
+        <p style="margin-top: 10px; font-size: 12px; color: rgba(0, 255, 102, 0.6);">
+          You will be redirected to the payment gateway
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "./firebase-config.js";
+    import { getDoc, doc, updateDoc, serverTimestamp, addDoc, collection } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    // ============================================================
+    // BALANCE FORMATTING FUNCTION
+    // ============================================================
+
+    function formatBalanceDisplay(amount) {
+      if (amount >= 1e32) {
+        return '∞';
+      }
+      if (amount >= 1e15) {
+        return 'QUADTRILLION';
+      }
+      if (amount >= 1e12) {
+        return 'TRILLION';
+      }
+      if (amount >= 1e9) {
+        return 'BILLION';
+      }
+      if (amount >= 1e6) {
+        return 'MILLION';
+      }
+      if (amount >= 1e3) {
+        return 'THOUSAND';
+      }
+      return `${amount}`;
+    }
+
+    let currentUser = null;
+    let selectedPackage = null;
+    let selectedPayment = 'whatsapp';
+
+    auth.onAuthStateChanged(async (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+        return;
+      }
+
+      currentUser = user;
+      document.getElementById("userUID").textContent = user.uid;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const tokens = userDoc.data().tokens || 0;
+        document.getElementById("currentBalance").textContent = formatBalanceDisplay(tokens);
+      }
+    });
+
+    window.selectPackage = function(tokens, price, name) {
+      selectedPackage = { tokens, price, name };
+      document.getElementById("packageSummary").innerHTML = `
+        <div style="margin: 20px 0;">
+          <div style="font-size: 28px; font-weight: 700; color: #00ff66; margin-bottom: 10px;">${tokens.toLocaleString()} Tokens</div>
+          <div style="font-size: 16px; margin-bottom: 10px;">₦${price.toLocaleString()}</div>
+          <div style="font-size: 12px; color: rgba(0, 255, 102, 0.7);">${name} Pack</div>
+        </div>
+      `;
+      document.getElementById("checkoutModal").classList.add("active");
+    };
+
+    window.selectPayment = function(method) {
+      selectedPayment = method;
+      document.querySelectorAll(".payment-option").forEach(el => {
+        el.classList.remove("active");
+      });
+      event.target.closest(".payment-option").classList.add("active");
+    };
+
+    window.closeModal = function() {
+      document.getElementById("checkoutModal").classList.remove("active");
+    };
+
+    window.processPayment = async function() {
+      const phone = document.getElementById("paymentPhone").value.trim();
+
+      if (!phone) {
+        alert("❌ Please fill in all fields");
+        return;
+      }
+
+      if (!selectedPackage) {
+        alert("❌ Please select a package first");
+        return;
+      }
+
+      if (!currentUser) {
+        alert("❌ You must be logged in");
+        return;
+      }
+
+      const message = `HELLO DEMON ALEX 👋\n\nI WANT TO PURCHASE THE FOLLOWING TOKENS:\n\n📦 Package: ${selectedPackage.name}\n💎 Tokens: ${selectedPackage.tokens.toLocaleString()}\n💰 Price: ₦${selectedPackage.price.toLocaleString()}\n\n🔐 NEX-UID: ${currentUser.uid}\n📱 Phone: ${phone}\n\nPlease confirm and process my payment. Thank you!`;
+
+      const whatsappLink = `https://wa.me/2349054345858?text=${encodeURIComponent(message)}`;
+
+      window.open(whatsappLink, "_blank");
+      
+      setTimeout(() => {
+        alert("✅ Opening WhatsApp...\n\nPlease send the message to complete your purchase!");
+        closeModal();
+      }, 500);
+    };
+
+    function initializePaystack(email, phone, amount, reference, tokens) {
+      const script = document.createElement("script");
+      script.src = "https://js.paystack.co/v1/inline.js";
+      document.head.appendChild(script);
+
+      script.onload = () => {
+        const handler = PaystackPop.setup({
+          key: "pk_live_YOUR_PAYSTACK_KEY",
+          email: email,
+          amount: amount * 100,
+          ref: reference,
+          onClose: () => {
+            document.getElementById("loadingSpinner").style.display = "none";
+            document.getElementById("paymentForm").style.display = "block";
+            alert("❌ Payment was cancelled");
+          },
+          onSuccess: (response) => {
+            completeTransaction(tokens, reference, "paystack", email);
+          }
+        });
+        handler.openIframe();
+      };
+    }
+
+    function initializeFlutterwave(email, phone, amount, reference, tokens) {
+      const script = document.createElement("script");
+      script.src = "https://checkout.flutterwave.com/v3.js";
+      document.head.appendChild(script);
+
+      script.onload = () => {
+        FlutterwaveCheckout({
+          public_key: "FLWPUBK_TEST_YOUR_FLUTTERWAVE_KEY",
+          tx_ref: reference,
+          amount: amount,
+          currency: "NGN",
+          payment_options: "card,ussd",
+          customer: {
+            email: email,
+            phone_number: phone
+          },
+          callback: (response) => {
+            if (response.status === "successful") {
+              completeTransaction(tokens, reference, "flutterwave", email);
+            } else {
+              document.getElementById("loadingSpinner").style.display = "none";
+              document.getElementById("paymentForm").style.display = "block";
+              alert("❌ Payment failed");
+            }
+          },
+          onclose: () => {
+            document.getElementById("loadingSpinner").style.display = "none";
+            document.getElementById("paymentForm").style.display = "block";
+          }
+        });
+      };
+    }
+
+    function showBankTransferDetails(amount, reference) {
+      alert(`
+🏦 Bank Transfer Details
+━━━━━━━━━━━━━━━━━━━━━━━
+Amount: ₦${amount.toLocaleString()}
+Reference: ${reference}
+
+Please transfer to:
+Account Name: idowu 
+Account Number: 9054345858
+Bank: opay 
+
+After transfer, screenshot proof and send to support@nexchat.com
+Include your username, uid number and reference number.
+
+Tokens will be added within 2 hours! 
+      `);
+      closeModal();
+    }
+
+    async function completeTransaction(tokens, reference, method, email) {
+      try {
+        await updateDoc(doc(db, "users", currentUser.uid), {
+          tokens: (await getDoc(doc(db, "users", currentUser.uid))).data().tokens + tokens,
+          lastPurchase: serverTimestamp()
+        });
+
+        await addDoc(collection(db, "transactions"), {
+          userId: currentUser.uid,
+          email: email,
+          tokens: tokens,
+          amount: selectedPackage.price,
+          method: method,
+          reference: reference,
+          status: "completed",
+          timestamp: serverTimestamp()
+        });
+
+        alert(`✅ Payment successful!\n\n${tokens.toLocaleString()} tokens added to your account!`);
+        setTimeout(() => {
+          window.location.href = "chat.html";
+        }, 1500);
+      } catch (err) {
+        console.error("Transaction error:", err);
+        alert("❌ Error completing transaction: " + err.message);
+        document.getElementById("loadingSpinner").style.display = "none";
+        document.getElementById("paymentForm").style.display = "block";
+      }
+    }
+
+    function downloadAPK() {
+      // Create a download link for the APK file
+      const apkUrl = "nexchat.apk"; // Change this to your actual APK file path
+      const link = document.createElement("a");
+      link.href = apkUrl;
+      link.download = "nexchat.apk";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Alternative: If APK is hosted on a server
+      // window.open("https://your-server.com/nexchat.apk", "_blank");
+    }
+
+    function openPlayStore() {
+      // Open NEXCHAT on Google Play Store
+      // Replace with your actual Play Store link when app is published
+      const playStoreUrl = "https://play.google.com/store/apps/details?id=com.nexchat.app";
+      window.open(playStoreUrl, "_blank");
+      
+      // Fallback message if app isn't on Play Store yet
+      alert("🚀 NEXCHAT will be available on Google Play Store soon!\n\nFor now, you can download the APK directly.");
+    }
+  </script>
+</body>
+</html>

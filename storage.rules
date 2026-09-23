@@ -1,0 +1,203 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isGroupMember(groupId) {
+      return isAuthenticated() &&
+             firestore.exists(/databases/(default)/documents/groups/$(groupId)) &&
+             request.auth.uid in firestore.get(/databases/(default)/documents/groups/$(groupId)).data.members;
+    }
+
+    // ============================================================
+    // AVATAR UPLOADS (Profile Pictures)
+    // ============================================================
+    match /avatars/{userId}/{allPaths=**} {
+      // Only the user can upload/modify their own avatars
+      allow create, write: if isOwner(userId) &&
+                              request.resource.size < 5 * 1024 * 1024 && // 5MB limit
+                              request.resource.contentType.matches('image/.*');
+
+      // Anyone can read avatars
+      allow read: if true;
+
+      // Only owner can delete their avatars
+      allow delete: if isOwner(userId);
+    }
+
+    // ============================================================
+    // SHARED MEDIA UPLOADS
+    // ============================================================
+    match /shared/{allPaths=**} {
+      // Authenticated users can upload shared media
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 50 * 1024 * 1024 && // 50MB limit
+                              (request.resource.contentType.matches('image/.*') ||
+                               request.resource.contentType.matches('video/.*') ||
+                               request.resource.contentType.matches('audio/.*') ||
+                               request.resource.contentType == 'application/pdf');
+
+      // Both sender and recipient can read
+      allow read: if isAuthenticated();
+
+      // Only uploader can delete
+      allow delete: if isAuthenticated() &&
+                       request.auth.uid == resource.metadata.senderId;
+    }
+
+    // ============================================================
+    // GROUP MEDIA UPLOADS
+    // ============================================================
+    match /groups/{groupId}/{allPaths=**} {
+      // Group members can upload media
+      allow create, write: if isGroupMember(groupId) &&
+                              request.resource.size < 50 * 1024 * 1024 && // 50MB limit
+                              (request.resource.contentType.matches('image/.*') ||
+                               request.resource.contentType.matches('video/.*') ||
+                               request.resource.contentType.matches('audio/.*') ||
+                               request.resource.contentType == 'application/pdf');
+
+      // Group members can read
+      allow read: if isGroupMember(groupId);
+
+      // Uploader or group admin can delete
+      allow delete: if isGroupMember(groupId) &&
+                       (request.auth.uid == resource.metadata.uploadedBy ||
+                        request.auth.uid in firestore.get(/databases/(default)/documents/groups/$(groupId)).data.admins);
+    }
+
+    // ============================================================
+    // GROUP DOCUMENTS
+    // ============================================================
+    match /groupdocs/{groupId}/{allPaths=**} {
+      // Group members can upload documents
+      allow create, write: if isGroupMember(groupId) &&
+                              request.resource.size < 10 * 1024 * 1024 && // 10MB limit for docs
+                              (request.resource.contentType == 'application/pdf' ||
+                               request.resource.contentType == 'application/msword' ||
+                               request.resource.contentType == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                               request.resource.contentType == 'text/plain');
+
+      // Group members can read
+      allow read: if isGroupMember(groupId);
+
+      // Uploader or group admin can delete
+      allow delete: if isGroupMember(groupId) &&
+                       (request.auth.uid == resource.metadata.uploadedBy ||
+                        request.auth.uid in firestore.get(/databases/(default)/documents/groups/$(groupId)).data.admins);
+    }
+
+    // ============================================================
+    // ADVERTISEMENT IMAGES
+    // ============================================================
+    match /advertisements/{userId}/{allPaths=**} {
+      // Authenticated users can upload ad images
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 5 * 1024 * 1024 && // 5MB limit
+                              request.resource.contentType.matches('image/.*');
+
+      // Anyone can read ad images
+      allow read: if true;
+
+      // Only seller can delete their ad images
+      allow delete: if isAuthenticated() &&
+                       request.auth.uid == userId;
+    }
+
+    match /ads/{allPaths=**} {
+      // Authenticated users can upload ad images
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 2 * 1024 * 1024 && // 2MB limit
+                              request.resource.contentType.matches('image/.*');
+
+      // Anyone can read ad images
+      allow read: if true;
+
+      // Only seller can delete their ad images
+      allow delete: if isAuthenticated() &&
+                       request.auth.uid == resource.metadata.sellerUID;
+    }
+
+    // ============================================================
+    // STATUS MEDIA (Images/Videos)
+    // ============================================================
+    match /statuses/{allPaths=**} {
+      // Users can upload status media
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 10 * 1024 * 1024 && // 10MB limit
+                              (request.resource.contentType.matches('image/.*') ||
+                               request.resource.contentType.matches('video/.*'));
+
+      // Anyone can read status media
+      allow read: if true;
+
+      // Only owner can delete their status media
+      allow delete: if isAuthenticated() &&
+                       request.auth.uid == resource.metadata.userId;
+    }
+
+    // ============================================================
+    // BACKGROUND IMAGES
+    // ============================================================
+    match /backgrounds/{allPaths=**} {
+      // Users can upload background images
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 3 * 1024 * 1024 && // 3MB limit
+                              request.resource.contentType.matches('image/.*');
+
+      // Appropriate users can read based on type
+      allow read: if true; // Public backgrounds
+
+      // Owner can delete their backgrounds
+      allow delete: if isAuthenticated() &&
+                       request.auth.uid == resource.metadata.userId;
+    }
+
+    // ============================================================
+    // TEMPORARY UPLOADS (For processing)
+    // ============================================================
+    match /temp/{userId}/{allPaths=**} {
+      // Users can upload temporary files
+      allow create, write: if isOwner(userId) &&
+                              request.resource.size < 50 * 1024 * 1024;
+
+      // Only owner can read temp files
+      allow read: if isOwner(userId);
+
+      // Auto-delete after processing or manual delete by owner
+      allow delete: if isOwner(userId);
+    }
+
+    // ============================================================
+    // ADMIN FILES (Logs, backups, etc.)
+    // ============================================================
+    match /admin/{allPaths=**} {
+      // Only super admin can manage admin files
+      allow read, write: if isAuthenticated() &&
+                            (request.auth.token.email == 'demonalexander526@gmail.com' || request.auth.token.admin == true);
+    }
+
+    // ============================================================
+    // PUBLIC ASSETS (Logos, default images, etc.)
+    // ============================================================
+    match /public/{allPaths=**} {
+      // Anyone can read public assets
+      allow read: if true;
+
+      // Only admin can upload public assets
+      allow write: if isAuthenticated() &&
+                      (request.auth.token.email == 'demonalexander526@gmail.com' || request.auth.token.admin == true);
+    }
+  }
+}

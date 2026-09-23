@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#00ff66">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="NEXCHAT - Secure and fast messaging web app with group chat, AI assistant, and real-time status updates.">
+  <meta name="keywords" content="NEXCHAT, chat app, real-time messaging, group chat, AI assistant, Firebase chat">
+  <meta property="og:title" content="NEXCHAT - Messages" />
+  <meta property="og:description" content="NEXCHAT messaging web app with AI assistant and advanced group management." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/chat.html" />
+  <meta property="og:image" content="https://yourdomain.com/logo.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NEXCHAT - Messages" />
+  <meta name="twitter:description" content="Secure messaging with AI support and enhanced group creation." />
+  <meta name="apple-mobile-web-app-title" content="NEXCHAT">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="x-apple-disable-message-reformatting" content="yes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="src/features/group/group-chat.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  <link rel="apple-touch-icon" href="logo.jpg">
+</head>
+
+<body>
+  <div class="app">
+    <!-- TOP HEADER BAR -->
+    <header class="top-header">
+      <div class="header-left">
+        <button id="dashboardBackBtn" class="back-button" title="Back to Dashboard"><i class="fa-solid fa-arrow-left"></i></button>
+        <!-- Header shows NEXCHAT logo by default, contact name when in chat -->
+        <div id="headerLogoContainer">
+          <div class="nex-logo" id="headerLogoImg">
+            <span class="nex-text">NEXCHAT</span>
+          </div>
+        </div>
+        <!-- Active chat contact info (shows when in chat) -->
+        <div id="activeChatHeader" class="active-chat-header" style="display: none;">
+          <img id="activeChatAvatar" src="" alt="Contact" class="active-chat-avatar" style="cursor: pointer;">
+          <div class="active-chat-info">
+            <div id="activeChatName" class="active-chat-name">Contact Name</div>
+            <div id="activeChatStatus" class="active-chat-status">Online</div>
+          </div>
+        </div>
+      </div>
+      <div class="header-center">
+        <div id="tokenDisplay" class="token-display" title="Your tokens">
+          <span class="token-label">Tokens</span>
+          <span id="tokenCount">0</span>
+          <span id="giftBadge" class="gift-badge" aria-live="polite"></span>
+        </div>
+      </div>
+      <div class="header-right-scroll">
+        <div class="header-right">
+          <button id="giftHistoryBtn" class="header-icon-btn" title="Gift History"><i class="fa-solid fa-gift"></i></button>
+          <button id="profile-sticker" class="header-icon-btn profile-sticker" title="Profile"><i class="fa-solid fa-user"></i></button>
+
+          <!-- Dark Mode Sliding Toggle Switch -->
+          <div class="toggle-switch-container" title="Dark/Light Mode">
+            <div class="toggle-switch" id="darkModeToggle">
+              <div class="toggle-slider"></div>
+              <span class="toggle-label dark-label">D</span>
+              <span class="toggle-label light-label">L</span>
+            </div>
+          </div>
+
+          <button id="fullscreen-btn-header" class="header-icon-btn" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+          <button id="reels-btn-header" class="header-icon-btn" title="NEX_REELS" onclick="window.location.href='reels.html'"><i class="fa-solid fa-clapperboard"></i></button>
+          <button id="installHeaderBtn" class="header-icon-btn" title="Install NEXCHAT"><i class="fa-solid fa-download"></i></button>
+          <button id="gaming-btn-header" class="header-icon-btn" title="Gaming/Betting"><i class="fa-solid fa-gamepad"></i></button>
+          <button id="shop-btn-header" class="header-icon-btn" title="Buy Tokens"
+            onclick="window.location.href='cart.html'"><i class="fa-solid fa-cart-shopping"></i></button>
+          <button id="search-btn-header" class="header-icon-btn search-btn-header" title="Search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
+          <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
+        </div>
+      </div>
+    </header>
+
+    <!-- STATUS UPDATES SECTION (only visible in chat list view) -->
+    <div class="nex-status-container" id="statusContainer" style="display: none;">
+      <div class="nex-status-header">
+        <div>
+          <h3>Status Updates</h3>
+          <p class="status-header-subtitle">Share photos, videos, or a quick note. Statuses expire after 24 hours.</p>
+        </div>
+      </div>
+      <div class="status-input-area">
+        <div class="my-status-card">
+          <img id="myStatusPic" src="" alt="Your status" class="status-avatar">
+          <input type="file" id="statusImageInput" style="display: none;" accept="image/*,video/*" />
+          <button id="uploadStatusImageBtn" class="upload-status-btn" title="Upload media">Upload</button>
+          <input type="text" id="statusInput" class="status-input" placeholder="Share a quick update, photo, or video" maxlength="150" />
+          <button id="postStatusBtn" class="status-post-btn" title="Post Status">Post</button>
+        </div>
+      </div>
+      <div id="statusFeed" class="status-feed">
+        <div class="status-empty-state">
+          <p>No statuses from your contacts yet</p>
+        </div>
+      </div>
+      <p id="driveStatusNote" class="status-note">Large uploads are routed through Google Drive once Google sign-in is enabled.</p>
+      <button id="connectDriveBtn" class="status-action-btn" style="margin-top: 10px; background: #5a5a5a; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; cursor: not-allowed;" disabled>Google Drive available after sign-in</button>
+    </div>
+
+    <!-- GROUPS SECTION -->
+    <div class="groups-container" id="groupsContainer" style="display: none;">
+      <div class="groups-header">
+        <h3>Groups</h3>
+        <button id="createNewGroupBtn" class="new-chat-btn" title="Create Group">New</button>
+      </div>
+      <ul id="groupsList" class="groups-list">
+        <li class="empty-state">
+          <p>No groups yet</p>
+          <p class="hint">Create or join a group to get started</p>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ANNOUNCEMENTS SECTION -->
+    <div class="announcements-container" id="announcementsContainer" style="display: none;">
+      <div class="announcements-header">
+        <h3>Announcements</h3>
+      </div>
+      <div id="announcementsFeed" class="announcements-feed">
+        <!-- WELCOME ANNOUNCEMENT BLOCK -->
+        <div class="announcement-item pinned-announcement"
+          style="border: 2px solid #00ff66; background: rgba(0, 255, 102, 0.05);">
+          <div class="announcement-header">
+            <h4 class="announcement-title">WELCOME TO NEXCHAT</h4>
+            <span class="announcement-badge" style="background: #00ff66; color: #000;">NEX-DEV</span>
+          </div>
+          <p class="announcement-content" style="font-weight: 600; color: #fff;">
+            WELCOME TO NEXCHAT THE FUTURE IS INIT I AM DEMON ALEX NEX DEVELOPER....
+          </p>
+          <p class="announcement-content">
+            WE ARE BRINGING YOU NEX_REELS SIMILAR TO TIKTOK/SNAPCHAT BUT IT WILL BE ON NEXCHAT BY NOVEMBER
+            23RD...
+            IF YOU HAVE ANY COMPLAINT KINDLY GO TO NEX SETTINGS AND FILE THEM
+          </p>
+          <div style="margin: 12px 0;">
+            <a href="reels.html" style="display: inline-flex; align-items: center; gap: 8px; background: #00ff66; color: #000; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 12px; padding: 8px 16px; border-radius: 6px; text-decoration: none; box-shadow: 0 0 12px rgba(0,255,102,0.4); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+              <i class="fa-solid fa-play"></i> LAUNCH NEX_REELS
+            </a>
+          </div>
+          <div class="announcement-footer">
+            <span class="announcement-time">IMPORTANT Update</span>
+            <span class="announcement-admin">BEST REGARDS: DEMON ALEX {LINUX-DEVELOPER}</span>
+          </div>
+        </div>
+
+        <div class="announcements-empty-state">
+          <p>No other announcements yet</p>
+          <p class="hint">Stay tuned for updates from NEXCHAT</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALL HISTORY SECTION -->
+    <div class="call-history-container" id="callHistoryContainer" style="display: none;">
+      <div class="call-history-header" style="
+        padding: 20px;
+        background: rgba(0, 255, 102, 0.1);
+        border-bottom: 2px solid #00ff66;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      ">
+        <h3 style="margin: 0; color: #00ff66; font-size: 22px;">
+          Call History
+        </h3>
+        <button id="clearCallHistoryBtn" style="
+          padding: 8px 16px;
+          background: rgba(255,68,68,0.2);
+          border: 1px solid #ff4444;
+          border-radius: 6px;
+          color: #ff4444;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: bold;
+          transition: all 0.2s;
+        ">Clear All</button>
+      </div>
+
+      <div id="callHistoryFeed" class="call-history-feed" style="
+        padding: 15px;
+        overflow-y: auto;
+        max-height: calc(100vh - 200px);
+      ">
+        <!-- Call history items will be populated here -->
+        <div class="call-history-empty-state" style="
+          text-align: center;
+          padding: 60px 20px;
+          color: #888;
+        ">
+          <div style="font-size: 64px; margin-bottom: 20px;">Call</div>
+          <p style="font-size: 18px; color: #aaa; margin-bottom: 10px;">No Calls Yet</p>
+          <p style="font-size: 14px; color: #666;">Your call history will appear here</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CHAT LIST -->
+    <main class="chat-main">
+      <!-- CHAT LIST VIEW -->
+      <div id="chatListView" class="chat-list-view">
+        <!-- Search Bar -->
+        <div class="search-container">
+          <input type="text" id="searchInput" class="search-bar" placeholder="Search chats..." autocomplete="off" />
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" title="All chats">All</button>
+          <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
+          <button class="filter-tab" data-filter="favorites" title="Favorite chats">Favorites</button>
+          <button class="filter-tab" data-filter="groups" title="Group chats">Groups</button>
+          <button class="filter-tab add-chat-tab" id="newChatFromTab" title="New chat"><i class="fa-solid fa-plus"></i></button>
+        </div>
+
+        <!-- Active Chats Section -->
+        <div class="chats-section">
+          <ul id="contactList" class="chat-list">
+            <li class="empty-state">
+              <p>No chats yet</p>
+              <p class="hint">Search for friends to start chatting</p>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Archived Section -->
+        <div class="archived-section">
+          <button class="archived-header" id="archivedToggle">
+            <i class="fa-solid fa-box-archive"></i> Archived Chats <span id="archivedCount" style="font-size: 12px; margin-left: 8px;">0</span>
+          </button>
+          <ul id="archivedList" class="chat-list archived-list" style="display: none;">
+            <li class="empty-state" style="padding: 16px;">
+              <p>No archived chats</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CHAT DETAIL VIEW -->
+      <div id="chatDetailView" class="chat-detail-view" style="display: none;">
+        <!-- Chat Header -->
+        <div class="chat-detail-header">
+          <button id="backBtn" class="back-btn" title="Back to chats"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="chat-header-profile" id="chatHeaderProfile" style="cursor: pointer; position: relative;"
+            title="Click to open group settings">
+            <img id="chatProfilePic" src="" alt="profile" class="header-avatar">
+            <div class="header-text">
+              <h3 id="chatName">User</h3>
+              <p id="statusText" class="status-dot">🟢 Online</p>
+            </div>
+          </div>
+          <button id="menuBtn" class="three-dots-menu" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+
+        <!-- Messages Area -->
+        <div id="chatReloadOverlay" class="chat-reload-overlay" aria-hidden="true">
+          <div class="chat-reload-pill">
+            <span class="chat-reload-progress"></span>
+            <span class="chat-reload-dot"></span>
+            <span class="chat-reload-status">Downloading chat...</span>
+          </div>
+        </div>
+        <div id="pinnedMessagesBar" class="nex-pin-bar-container" style="display: none;"></div>
+        <div class="messages-area" id="messages-area">
+          <div class="messages-list">
+            <div class="empty-state">
+              <p>No messages yet</p>
+              <p class="hint">Start the conversation!</p>
+            </div>
+          </div>
+          <div id="typingIndicator" class="typing-indicator" style="display: none;">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span id="typingIndicatorText" class="typing-text" style="font-size: 12px; color: var(--accent-primary); margin-left: 6px;">User is typing...</span>
+          </div>
+        </div>
+
+        <!-- Chat Options Menu -->
+        <div id="chatOptionsMenu" class="chat-options-dropdown" style="display: none;">
+          <div class="dropdown-header">Options</div>
+          <button id="callBtn" class="option-item call-option">Call User</button>
+          <button id="videoCallBtn" class="option-item video-option">Video Call</button>
+          <button id="groupAdminBtn" class="option-item" style="display: none; background: #00d4ff; color: #000;">Manage Members</button>
+          <button id="groupInviteQrBtn" class="option-item" style="display: none;"><i class="fa-solid fa-qrcode" style="margin-right: 8px;"></i>Invite via QR</button>
+          <div class="dropdown-divider"></div>
+          <button id="blockBtn" class="option-item danger">Block User</button>
+          <button id="unblockBtn" class="option-item success" style="display: none;">Unblock User</button>
+          <button id="reportBtn" class="option-item danger">Report User</button>
+          <button id="deleteBtn" class="option-item danger">Delete Chat</button>
+        </div>
+
+        <!-- Reply Preview -->
+        <div id="replyPreview" class="reply-preview" style="display: none;">
+          <div class="reply-preview-content">
+            <div class="reply-preview-text">
+              <p class="reply-from">Replying to <span id="replyFromName"></span></p>
+              <p class="reply-message" id="replyMessage"></p>
+            </div>
+            <button type="button" id="cancelReplyBtn" class="cancel-reply-btn" title="Cancel reply">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="message-input-area">
+          <!-- User Profile Display (shows in active chat) -->
+          <div id="chatUserProfile" class="chat-user-profile" style="display: none;">
+            <div class="chat-user-info">
+              <img id="chatUserAvatar" src="" alt="User" class="chat-user-avatar">
+              <div class="chat-user-details">
+                <div id="chatUserName" class="chat-user-name">User Name</div>
+                <div id="chatUserStatus" class="chat-user-status">Online</div>
+              </div>
+            </div>
+          </div>
+
+          <form id="message-form" class="message-form">
+            <button type="button" id="attach-btn" class="input-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+            <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,.pdf,.doc,.docx" />
+            <textarea id="message-input" class="message-input" placeholder="Say something..." autocomplete="off" maxlength="1000" rows="1"></textarea>
+            <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
+            <button type="button" id="audio-record-btn" class="input-btn" title="Record audio"><i class="fa-solid fa-microphone"></i></button>
+            <button type="button" id="vision-tester-btn" class="input-btn" title="Image Vision Tester"
+              onclick="window.location.href='image-vision-tester.html'"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+            <button type="button" id="audio-send-btn" class="audio-send-btn" title="Send audio"><i class="fa-solid fa-play"></i></button>
+            <button type="button" class="send-btn" title="Send message"><i class="fa-solid fa-paper-plane"></i></button>
+          </form>
+
+          <!-- Audio Recording UI -->
+          <div id="audioRecordingUI" class="audio-recording-ui" style="display: none;">
+            <div class="audio-record-controls">
+              <button type="button" id="audioStopBtn" class="audio-control-btn stop-btn" title="Stop recording"><i class="fa-solid fa-stop"></i> Stop</button>
+              <div class="audio-timer">
+                <span id="audioTimer">0:00</span>
+              </div>
+              <button type="button" id="audioSendNowBtn" class="audio-control-btn send-btn" title="Send now"><i class="fa-solid fa-paper-plane"></i> Send</button>
+              <button type="button" id="audioCancelBtn" class="audio-control-btn cancel-btn" title="Cancel"><i class="fa-solid fa-xmark"></i> Cancel</button>
+            </div>
+          </div>
+
+          <!-- File attachment preview -->
+          <div id="attachment-preview" class="attachment-preview" style="display: none;">
+            <div class="attachment-item">
+              <span id="attachment-name"><i class="fa-solid fa-paperclip"></i> File selected</span>
+              <button type="button" id="remove-attachment" class="remove-attachment-btn" title="Remove"><i class="fa-solid fa-xmark"></i> Remove</button>
+            </div>
+          </div>
+
+          <!-- Poll Modal -->
+          <div id="pollModal" class="modal" style="display: none;">
+            <div class="modal-content">
+              <span class="close-modal"
+                onclick="document.getElementById('pollModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+              <h2 style="font-family: 'Orbitron', monospace; font-size: 19px; color: var(--accent-primary); margin-bottom: 16px;"><i class="fa-solid fa-square-poll-vertical"></i> Create a Poll</h2>
+              <form id="pollForm">
+                <div class="form-group">
+                  <label class="form-label">Poll Question</label>
+                  <input type="text" id="pollQuestion" class="settings-input" placeholder="Ask a question..." maxlength="100" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Options (one per line)</label>
+                  <textarea id="pollOptions" class="settings-input" placeholder="Option 1&#10;Option 2&#10;Option 3" rows="4"
+                    required></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;"><i class="fa-solid fa-plus"></i> Create Poll</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Emoji Picker -->
+          <div id="emoji-picker" class="emoji-picker-popup" style="display: none;">
+            <div class="emoji-header">
+              <span><i class="fa-regular fa-face-smile"></i> Emojis</span>
+              <button type="button" id="close-emoji-btn" class="close-modal" style="position: static; width: 26px; height: 26px; font-size: 12px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="emoji-grid" class="emoji-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH OVERLAY -->
+      <div id="search-overlay" class="search-overlay" style="display: none;">
+        <div id="search-modal" class="search-modal">
+          <div class="search-header">
+            <input type="text" id="search-input" class="search-input" placeholder="Search by UID, username, or name..."
+              autocomplete="off" />
+            <button id="browse-users-btn" class="search-action-btn" title="Browse all users"><i class="fa-solid fa-users-viewfinder"></i> Browse</button>
+            <button id="close-search-btn" class="close-modal" style="position: static; width: 36px; height: 36px;"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div id="search-results" class="search-results"></div>
+        </div>
+      </div>
+
+      <!-- INFO SIDEBAR (on chat detail) - Enhanced Group Info Panel -->
+      <div id="infoSidebar" class="info-panel" style="display: none;">
+        <div class="info-header">
+          <button id="closeInfoBtn" class="close-btn" style="position: absolute; left: 16px;"><i class="fa-solid fa-chevron-left"></i></button>
+          <button id="closeInfoBtn2" class="close-btn" style="position: absolute; right: 16px;"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+
+        <div class="info-body">
+          <!-- Profile Section -->
+          <div class="info-profile-section">
+            <div class="profile-pic-container">
+              <img id="infoPic" src="" alt="profile" class="info-profile-pic">
+            </div>
+            <h2 id="infoName">Group Name</h2>
+            <p id="infoMemberCount" class="member-count">Group · 0 members</p>
+            <p id="infoDesc" class="section-value" style="text-align: center; margin: 10px auto; max-width: 90%;">
+            </p>
+            <div id="infoBrandLogo" style="display:none; text-align: center; margin-top: 15px;">
+              <div class="nex-logo" style="display: inline-block; transform: scale(0.6);">
+                <span class="nex-text">NEXCHAT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="info-action-buttons">
+            <button id="infoAudioBtn" class="info-action-btn">
+              <i class="fa-solid fa-phone"></i>
+              <span class="action-label">Audio</span>
+            </button>
+            <button id="infoVideoBtn" class="info-action-btn">
+              <i class="fa-solid fa-video"></i>
+              <span class="action-label">Video</span>
+            </button>
+            <button id="infoAddBtn" class="info-action-btn">
+              <i class="fa-solid fa-user-plus"></i>
+              <span class="action-label">Add</span>
+            </button>
+            <button id="infoSearchBtn" class="info-action-btn">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span class="action-label">Search</span>
+            </button>
+          </div>
+
+          <div class="info-section" id="groupAdminActionsSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-shield-halved"></i> Group Admin Actions</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+              <button id="infoAddMemberBtn" class="info-action-btn" style="flex: 1; min-width: 140px;"><i class="fa-solid fa-user-plus"></i> Add Member</button>
+              <button id="infoRemoveAllMembersBtn" class="btn-secondary" style="flex: 1; min-width: 140px; color: var(--accent-gold);"><i class="fa-solid fa-users-slash"></i> Remove All</button>
+              <button id="infoDeleteGroupBtn" class="btn-danger" style="flex: 1; min-width: 140px;"><i class="fa-solid fa-trash"></i> Delete Group</button>
+            </div>
+          </div>
+
+          <div class="info-section" id="groupDisappearingSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Disappearing Messages</div>
+            <div class="section-item" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <div>
+                <div class="section-label">Enable disappearing messages</div>
+                <div class="section-value">Messages will vanish after the selected time.</div>
+              </div>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                <input type="checkbox" id="disappearingToggle" style="width: 18px; height: 18px; cursor: pointer;">
+              </label>
+            </div>
+            <div id="disappearingDurationRow" style="display: none; margin-top: 12px; gap: 10px; display: flex; flex-direction: column;">
+              <select id="disappearingDurationSelect" class="settings-select">
+                <option value="60">1 hour</option>
+                <option value="360">6 hours</option>
+                <option value="1440">24 hours</option>
+                <option value="10080">7 days</option>
+              </select>
+              <button id="saveDisappearingSettingsBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-floppy-disk"></i> Save Disappearing Settings</button>
+            </div>
+          </div>
+
+          <div class="info-section" id="groupMuteMembersSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-volume-xmark"></i> Mute Group Members</div>
+            <button id="openMuteMembersModalBtn" class="btn-secondary" style="width: 100%; color: var(--accent-gold); font-weight: 700;"><i class="fa-solid fa-user-slash"></i> Select members to mute</button>
+          </div>
+
+          <!-- Media Section -->
+          <div class="info-section">
+            <div class="section-header">
+              <span class="section-title">Media, links, and docs</span>
+              <span class="section-count" id="mediaCount">0</span>
+              <span class="section-arrow">›</span>
+            </div>
+            <div id="mediaPreview" class="media-preview">
+              <!-- Media items will be populated here -->
+            </div>
+          </div>
+
+          <!-- Notifications Section -->
+          <div class="info-section">
+            <div class="section-item">
+              <span class="section-icon"><i class="fa-solid fa-bell"></i></span>
+              <div class="section-content">
+                <div class="section-label">Notifications</div>
+                <div class="section-value" id="notificationValue">All</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Media Visibility Section -->
+          <div class="info-section">
+            <div class="section-item">
+              <span class="section-icon"><i class="fa-solid fa-eye"></i></span>
+              <div class="section-content">
+                <div class="section-label">Media visibility</div>
+                <div class="section-value" id="mediaVisibilityValue">Off</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kept Messages Section -->
+          <div class="info-section">
+            <div class="section-item">
+              <span class="section-icon"><i class="fa-solid fa-thumbtack"></i></span>
+              <div class="section-content">
+                <div class="section-label">Kept messages</div>
+                <div class="section-value" id="keptMessagesValue">Only admins can keep or unkeep messages in this group.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Encryption Section -->
+          <div class="info-section">
+            <div class="section-item">
+              <span class="section-icon"><i class="fa-solid fa-lock"></i></span>
+              <div class="section-content">
+                <div class="section-label">Encryption</div>
+                <div class="section-value" id="encryptionValue">Messages and calls are end-to-end encrypted</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mute/Block/Delete Actions -->
+          <div class="info-section">
+            <div class="section-item" id="muteUserItem" style="cursor: pointer;">
+              <span class="section-icon"><i class="fa-solid fa-volume-xmark"></i></span>
+              <div class="section-content" style="flex: 1;">
+                <div class="section-label">Mute User</div>
+              </div>
+              <div class="toggle-switch-small">
+                <input type="checkbox" id="muteUserToggle">
+                <span class="slider round"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-item" id="infoBlockBtn" style="cursor: pointer; color: var(--status-danger);">
+              <span class="section-icon" style="color: var(--status-danger);"><i class="fa-solid fa-ban"></i></span>
+              <div class="section-content">
+                <div class="section-label" style="color: var(--status-danger);">Block User</div>
+              </div>
+            </div>
+            <div class="section-item" id="infoUnblockBtn" style="cursor: pointer; color: var(--accent-primary); display: none;">
+              <span class="section-icon" style="color: var(--accent-primary);"><i class="fa-solid fa-user-check"></i></span>
+              <div class="section-content">
+                <div class="section-label" style="color: var(--accent-primary);">Unblock User</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-item" id="infoDeleteBtn" style="cursor: pointer; color: var(--status-danger);">
+              <span class="section-icon" style="color: var(--status-danger);"><i class="fa-solid fa-trash"></i></span>
+              <div class="section-content">
+                <div class="section-label" style="color: var(--status-danger);">Delete User</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Requests Section (for group admins) -->
+          <div class="info-section" id="groupPendingRequestsSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-hourglass-half"></i> Pending Join Requests</div>
+            <div id="groupPendingRequestsList" class="contact-scroll-box" style="max-height: 200px; margin-top: 10px;">
+              <!-- Pending requests will be populated here -->
+            </div>
+          </div>
+
+          <!-- Members Section (for groups) -->
+          <div class="info-section" id="membersList" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-users"></i> Members</div>
+            <div id="membersListContent" class="contact-scroll-box" style="max-height: 260px; margin-top: 8px;">
+              <!-- Members will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="muteMemberModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+          <span class="close-modal" id="closeMuteMemberModalBtn"><i class="fa-solid fa-xmark"></i></span>
+          <h2 style="margin-bottom: 12px; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;"><i class="fa-solid fa-volume-xmark"></i> Mute Group Members</h2>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">Select the members you want to mute and choose how long they remain muted.</p>
+          <div id="muteMemberList" class="contact-scroll-box" style="max-height: 320px; display: grid; gap: 12px; margin-bottom: 16px;"></div>
+          <button id="saveMuteMemberSettingsBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-floppy-disk"></i> Save Mute Settings</button>
+        </div>
+      </div>
+
+      <!-- STATUS VIEWER MODAL (Used for Profile Pics too) -->
+      <div id="statusViewerModal" class="modal" style="display: none;">
+        <div class="status-viewer-content">
+          <button id="closeStatusViewerBtn" class="close-modal"
+            style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-xmark"></i></button>
+          <div class="status-viewer-image-container" id="statusViewerMediaContainer">
+            <img id="statusViewerImage" src="" alt="Status" class="status-viewer-image" style="display:none;">
+            <video id="statusViewerVideo" class="status-viewer-video" controls style="display:none; max-width:100%; max-height:100%; border-radius:8px;"></video>
+            <div id="statusViewerFallbackText" class="status-viewer-fallback" style="display:none; color:var(--accent-primary); text-align:center; padding:24px; font-size:16px;"></div>
+          </div>
+          <div class="status-viewer-info">
+            <div class="status-viewer-header">
+              <img id="statusViewerAvatar" src="" alt="user" class="status-viewer-avatar">
+              <div class="status-viewer-text">
+                <h3 id="statusViewerName">User Name</h3>
+                <p id="statusViewerTime">Just now</p>
+              </div>
+            </div>
+            <p id="statusViewerCaption" class="status-viewer-caption">Caption text goes here</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW PROFILE PIC MODAL -->
+      <div id="profilePicModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 520px; text-align: center;">
+          <button id="closeProfileModal" class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+          <img id="profileModalImg" src=""
+            style="max-width: 100%; max-height: 65vh; border: 2px solid var(--accent-primary); box-shadow: 0 0 35px var(--accent-primary-dim); border-radius: var(--radius-lg); object-fit: contain; margin-top: 8px;">
+          <h3 id="profileModalName"
+            style="color: var(--accent-primary); text-align: center; margin-top: 15px; font-family: 'Orbitron', monospace; letter-spacing: 1.5px; text-transform: uppercase;">
+            USER</h3>
+          <p id="profileModalDesc"
+            style="color: var(--text-secondary); text-align: center; font-size: 13.5px; margin-top: 8px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.4;">
+          </p>
+          <div id="profileModalBrandWordmark" style="display:none; text-align: center; margin-top: 15px;">
+            <div class="nex-logo" style="display: inline-block; transform: scale(0.8);">
+              <span class="nex-text">NEXCHAT</span>
+            </div>
+          </div>
+          <button id="editProfileBtnModal" class="btn-primary"
+            style="display:none; margin: 14px auto 0; width: 100%;"><i class="fa-solid fa-user-pen"></i> EDIT AVATAR</button>
+        </div>
+      </div>
+
+      <!-- OFFLINE INDICATOR -->
+      <div id="offlineIndicator" class="offline-indicator" style="display: none;">
+        <span class="offline-icon"><i class="fa-solid fa-wifi-slash"></i></span>
+        <span class="offline-text">You are offline — Messages will send when online</span>
+      </div>
+
+      <!-- REELS FUNCTIONALITY REMOVED -->
+
+      <!-- CREATE GROUP MODAL -->
+      <div id="createGroupModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <span class="close-modal"
+            onclick="document.getElementById('createGroupModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+          <h2 style="font-family: 'Orbitron', monospace; font-size: 20px; color: var(--accent-primary); margin-bottom: 20px;"><i class="fa-solid fa-user-group"></i> Create Group</h2>
+          <form id="createGroupForm">
+            <div class="form-group" style="text-align: center; margin-bottom: 20px;">
+              <label class="form-label">Group Icon</label>
+              <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 10px;">
+                <img id="groupIconPreview" src="logo.jpg" alt="Group Icon" class="modal-avatar" style="width: 80px; height: 80px; margin: 0;"
+                  onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDBmZjY2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGNpcmNsZSBjeD0iOS41IiBjeT0iNyIgcj0iNCIvPjxwYXRoIGQ9Ik0zIDIxdi0yYTQgNCAwIDAgMSA0LTRoNWE0IDQgMCAwIDEgNCA0djIiLz48cGF0aCBkPSJNMTYgMy4xM2E0IDQgMCAwIDEgMCA3Ljc1Ii8+PHBhdGggZD0iTTIxIDIxdi0yYTQgNCAwIDAgMC0zLTMuODUiLz48L3N2Zz4='">
+                <div onclick="document.getElementById('groupIconInput').click()"
+                  style="position: absolute; bottom: 0; right: 0; background: var(--accent-primary); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #000; font-weight: bold; border: 2px solid var(--bg-surface);">
+                  <i class="fa-solid fa-plus" style="font-size: 12px;"></i>
+                </div>
+              </div>
+              <input type="file" id="groupIconInput" accept="image/*" style="display: none;"
+                onchange="const file=this.files[0];if(file){const reader=new FileReader();reader.onload=e=>document.getElementById('groupIconPreview').src=e.target.result;reader.readAsDataURL(file);}">
+              <button type="button" id="generateGroupAvatarBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-dice"></i> Generate NEX Avatar</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Group Name</label>
+              <input type="text" id="groupName" class="settings-input" placeholder="Group name..." maxlength="50" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Group Description</label>
+              <textarea id="groupDescription" class="settings-input" placeholder="Group description..." maxlength="200" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Group Privacy</label>
+              <select id="groupPrivacy" class="settings-select">
+                <option value="public">Public</option>
+                <option value="private">Private (Admin approval required)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Group Approval</label>
+              <select id="groupApproval" class="settings-select">
+                <option value="auto">Auto-join</option>
+                <option value="admin">Admin approval</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Add Members (select from contacts)</label>
+              <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <button type="button" id="addAllContactsBtn" class="btn-secondary" style="flex: 1;">Add All Contacts</button>
+                <button type="button" id="clearAllContactsBtn" class="btn-secondary" style="flex: 1;">Clear All</button>
+              </div>
+              <div id="groupMembersList" class="contact-scroll-box">
+                <p style="color: var(--text-muted); text-align: center;">Loading contacts...</p>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Create Group</button>
+            <div id="groupCreateResult" class="result-box" style="margin-top: 15px;"></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- GROUP INFO MODAL -->
+      <div id="groupInfoModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+          <span class="close-modal"
+            onclick="document.getElementById('groupInfoModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+          <div class="modal-avatar-wrapper">
+            <img id="infoGroupIcon" src="" alt="Group Icon" class="modal-avatar">
+            <h2 id="infoGroupName" class="modal-title">Group Name</h2>
+            <p id="infoGroupDesc" class="modal-desc">Description</p>
+          </div>
+
+          <div class="settings-section">
+            <h3>Members (<span id="infoMemberCount">0</span>)</h3>
+            <div id="infoMembersList" class="contact-scroll-box">
+              <!-- Members will be populated here -->
+            </div>
+          </div>
+
+          <div class="settings-section" id="adminActionsSection" style="display: none;">
+            <h3>Admin Actions</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <button id="addMemberBtn" class="btn-secondary">Add Member</button>
+              <button id="deleteGroupBtn" class="btn-danger">Delete Group</button>
+            </div>
+
+            <div class="settings-section" id="groupApprovalSection" style="margin-top: 16px; display: none;">
+              <h3><i class="fa-solid fa-lock"></i> Group Join Approval</h3>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div>
+                  <div class="section-label">Require admin approval for new members</div>
+                  <div class="section-value" id="approvalStatusText" style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Anyone can join freely</div>
+                </div>
+                <label style="display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 700; cursor: pointer;">
+                  <input type="checkbox" id="groupApprovalToggle" style="width: 18px; height: 18px; cursor: pointer;">
+                  Approval
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-section" id="groupPendingRequestsSection" style="margin-top: 16px; display: none;">
+              <h3><i class="fa-solid fa-clock"></i> Pending Join Requests</h3>
+              <div id="groupPendingRequestsList" class="contact-scroll-box">
+                <p style="color: var(--text-muted); text-align: center; padding: 20px;">No pending requests</p>
+              </div>
+            </div>
+          </div>
+
+          <button id="leaveGroupBtn" class="btn-danger" style="width: 100%; margin-top: 18px;">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Leave Group
+          </button>
+        </div>
+      </div>
+
+      <div id="groupJoinModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 520px;">
+          <span class="close-modal" onclick="closeGroupJoinModal()"><i class="fa-solid fa-xmark"></i></span>
+          <div class="modal-avatar-wrapper">
+            <img id="joinGroupIcon" src="logo.jpg" alt="Group Icon" class="modal-avatar">
+            <h2 id="joinGroupName" class="modal-title">Group Name</h2>
+            <p id="joinGroupDesc" class="modal-desc">Group description appears here.</p>
+          </div>
+          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <div class="stat-chip">
+              <div class="stat-chip-label">Members</div>
+              <div id="joinGroupMemberCount" class="stat-chip-val">0</div>
+            </div>
+            <div class="stat-chip">
+              <div class="stat-chip-label">Approval</div>
+              <div id="joinGroupApprovalStatus" class="stat-chip-val">Auto-join</div>
+            </div>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Active members</div>
+            <div id="joinGroupMemberList" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); min-height: 50px;">
+            </div>
+          </div>
+          <p id="joinGroupStatus" style="color: var(--accent-primary); font-size: 13px; margin-bottom: 16px; text-align: center;">Request approval required for this group.</p>
+          <div style="display: flex; gap: 10px;">
+            <button id="joinGroupRequestBtn" class="btn-primary" style="flex: 1;" onclick="submitGroupJoinRequest()">Request to Join Group</button>
+            <button id="cancelGroupRequestBtn" class="btn-secondary" style="flex: 1; display: none;" onclick="cancelGroupJoinRequest()">Cancel Request</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="addGroupMembersModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 520px;">
+          <span class="close-modal" onclick="closeAddGroupMembersModal()"><i class="fa-solid fa-xmark"></i></span>
+          <h2 style="margin-top: 0; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;"><i class="fa-solid fa-user-plus"></i> Add Members to Group</h2>
+          <div id="addGroupMembersInfo" style="color: var(--text-secondary); font-size: 13.5px; margin-bottom: 14px;">Select contacts to add to this group.</div>
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <button id="selectAllGroupAddMembersBtn" class="btn-secondary" type="button" style="flex: 1;">Select All</button>
+            <button id="clearAllGroupAddMembersBtn" class="btn-secondary" type="button" style="flex: 1;">Clear All</button>
+          </div>
+          <div id="addGroupMembersList" class="contact-scroll-box" style="max-height: 280px;">
+            <p style="color: var(--text-muted); text-align: center;">Loading contacts...</p>
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;">
+            <button id="cancelAddGroupMembersBtn" type="button" class="btn-secondary">Cancel</button>
+            <button id="confirmAddGroupMembersBtn" type="button" class="btn-primary" style="min-width: 140px;">Add Selected</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REELS FUNCTIONALITY REMOVED -->
+
+      <!-- UPLOAD PROGRESS MODAL -->
+      <div id="uploadProgressModal" class="upload-progress-modal" style="display: none;">
+        <div class="upload-progress-content">
+          <div class="upload-progress-circle">
+            <svg class="progress-ring" width="120" height="120">
+              <circle class="progress-ring-circle-bg" stroke="#444" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+              <circle class="progress-ring-circle" stroke="#00ff66" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"
+                      stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"/>
+            </svg>
+            <div class="progress-text">
+              <div class="progress-percentage">0%</div>
+              <div class="progress-filename">Uploading...</div>
+              <div class="progress-size">0.00 / 0.00 MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="settingsModal" class="settings-modal" style="display: none;">
+        <div class="settings-modal-content">
+          <div class="settings-header">
+            <h2><i class="fa-solid fa-gear"></i> Settings</h2>
+            <button id="closeSettingsBtn" class="close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="settings-body">
+            <!-- Notifications -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-bell"></i> Notifications</h3>
+              <div class="setting-item">
+                <label>
+                  <input type="checkbox" id="notifToggle" checked>
+                  Enable Notifications
+                </label>
+              </div>
+              <div class="setting-item">
+                <label>
+                  <input type="checkbox" id="soundToggle" checked>
+                  Sound Effects
+                </label>
+              </div>
+            </div>
+
+            <!-- Privacy -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-shield-halved"></i> Privacy</h3>
+              <div class="setting-item">
+                <label>
+                  <input type="checkbox" id="onlineStatusToggle" checked>
+                  Show Online Status
+                </label>
+              </div>
+              <div class="setting-item">
+                <label>
+                  <input type="checkbox" id="readReceiptsToggle" checked>
+                  Read Receipts
+                </label>
+              </div>
+            </div>
+
+            <!-- Theme -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-palette"></i> Theme</h3>
+              <div class="setting-item">
+                <label>
+                  <input type="radio" name="theme" value="light" id="themeLight">
+                  Light Theme
+                </label>
+              </div>
+              <div class="setting-item">
+                <label>
+                  <input type="radio" name="theme" value="dark" id="themeDark" checked>
+                  Dark Theme (Default)
+                </label>
+              </div>
+            </div>
+
+            <!-- Calls -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-phone"></i> Call Settings</h3>
+              <div class="setting-item">
+                <label for="ringtoneSelect"><strong>Ringtone</strong></label>
+                <select id="ringtoneSelect" class="settings-select">
+                  <option value="classic">Classic Ring</option>
+                  <option value="digital">Digital Beep</option>
+                  <option value="soft">Soft Tone</option>
+                  <option value="urgent">Urgent Alert</option>
+                  <option value="skype">Skype Ring</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Typography Adjustments -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-font"></i> Text Element Adjustment</h3>
+              <div class="setting-item">
+                <label for="fontFamilySelect"><strong>Font Family</strong></label>
+                <select id="fontFamilySelect" class="settings-select">
+                  <option value="'Inter', sans-serif">Inter (Default)</option>
+                  <option value="Arial, sans-serif">Arial</option>
+                  <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI</option>
+                  <option value="'Courier New', monospace">Courier New</option>
+                  <option value="Georgia, serif">Georgia</option>
+                  <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
+                </select>
+              </div>
+              <div class="setting-item">
+                <label for="letterSpacingRange"><strong>Letter Spacing: <span id="letterSpacingValue">0</span>px</strong></label>
+                <input type="range" id="letterSpacingRange" min="-2" max="5" value="0" step="0.5" class="settings-input">
+              </div>
+              <div class="setting-item">
+                <label for="lineHeightRange"><strong>Line Height: <span id="lineHeightValue">1.5</span></strong></label>
+                <input type="range" id="lineHeightRange" min="1" max="2.5" value="1.5" step="0.1" class="settings-input">
+              </div>
+              <div class="setting-item">
+                <label><strong>Text Alignment</strong></label>
+                <div class="text-align-control" style="display: flex; gap: 8px;">
+                  <button id="alignLeft" class="btn-secondary" type="button"><i class="fa-solid fa-align-left"></i> Left</button>
+                  <button id="alignCenter" class="btn-secondary" type="button"><i class="fa-solid fa-align-center"></i> Center</button>
+                  <button id="alignRight" class="btn-secondary" type="button"><i class="fa-solid fa-align-right"></i> Right</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Text Size -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-text-height"></i> Chat Text Size</h3>
+              <div class="setting-item">
+                <label>
+                  <input type="radio" name="chatSize" value="small" id="chatSizeSmall">
+                  Small
+                </label>
+              </div>
+              <div class="setting-item">
+                <label>
+                  <input type="radio" name="chatSize" value="medium" id="chatSizeMedium" checked>
+                  Medium (Standard)
+                </label>
+              </div>
+              <div class="setting-item">
+                <label>
+                  <input type="radio" name="chatSize" value="large" id="chatSizeLarge">
+                  Large
+                </label>
+              </div>
+              <div class="setting-item">
+                <label>
+                  <input type="radio" name="chatSize" value="extra-large" id="chatSizeExtraLarge">
+                  Extra Large
+                </label>
+              </div>
+            </div>
+
+            <!-- Global Background -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-image"></i> Global Background</h3>
+              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Personalize the chat canvas with your own background wallpaper.</p>
+              <div class="setting-item">
+                <label for="backgroundImageInput"><strong>Choose Image</strong></label>
+                <input type="file" id="backgroundImageInput" accept="image/*" class="settings-file-input">
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="uploadBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Upload</button>
+                <button id="removeBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Remove</button>
+              </div>
+              <div id="backgroundPreview" class="background-preview"></div>
+            </div>
+
+            <!-- Chat-Specific Background -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-images"></i> Chat-Specific Background</h3>
+              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Set a custom wallpaper for this active conversation only.</p>
+              <div class="setting-item">
+                <label for="chatBackgroundImageInput"><strong>Choose Image</strong></label>
+                <input type="file" id="chatBackgroundImageInput" accept="image/*" class="settings-file-input">
+              </div>
+              <div style="display: flex; gap: 10px; margin-top: 10px;">
+                <button id="uploadChatBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Set Background</button>
+                <button id="removeChatBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Remove</button>
+              </div>
+            </div>
+
+            <!-- Install App -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-mobile-screen-button"></i> Install NEXCHAT App</h3>
+              <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">Get faster access, offline support, and a smooth native desktop/mobile experience.</p>
+              <button id="installAppBtn" class="btn-primary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-download"></i> Install NEXCHAT App</button>
+              <div class="install-platform-grid">
+                <button id="installIOSBtn" type="button"><i class="fa-brands fa-apple"></i> Install on iOS</button>
+                <button id="installMacBtn" type="button"><i class="fa-solid fa-laptop"></i> Install on Mac</button>
+                <button id="installWindowsBtn" type="button"><i class="fa-brands fa-windows"></i> Install on Windows</button>
+                <button id="installLinuxBtn" type="button"><i class="fa-brands fa-linux"></i> Install on Linux</button>
+              </div>
+              <div class="install-files-grid">
+                <a href="build-linux.sh" download><i class="fa-brands fa-linux"></i> Linux Script</a>
+                <a href="build-windows.ps1" download><i class="fa-brands fa-windows"></i> Windows Script</a>
+                <a href="build-mac.sh" download><i class="fa-brands fa-apple"></i> Mac Script</a>
+                <a href="build-ios.md" download><i class="fa-solid fa-book"></i> iOS Guide</a>
+              </div>
+            </div>
+
+            <!-- Support & Feedback -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-headset"></i> Support & Feedback</h3>
+              <p class="description" style="color: var(--text-secondary); font-size: 13px;">If you have any feedback or requests, let the developer team know.</p>
+              <button id="fileComplaintBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-envelope"></i> Send Feedback to NEX_DEV</button>
+            </div>
+
+            <!-- Chat Requests -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-user-clock"></i> Chat Requests</h3>
+              <div id="pendingRequestsList" class="contact-scroll-box" style="max-height: 180px;">
+                <p style="color: var(--text-muted); text-align: center; padding: 14px;">Loading pending requests...</p>
+              </div>
+            </div>
+
+            <!-- Account -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-user-shield"></i> Account</h3>
+              <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
+                <label><strong>Your UID:</strong></label>
+                <p id="userUIDDisplay" class="uid-display-card" style="width: 100%;">Loading...</p>
+                <button id="copyUIDBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-copy"></i> Copy UID</button>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                <button id="changePasswordBtn" class="btn-secondary"><i class="fa-solid fa-key"></i> Change Password</button>
+                <button id="clearCacheBtn" class="btn-secondary"><i class="fa-solid fa-broom"></i> Clear Cache</button>
+              </div>
+              <div class="setting-item" style="margin-top: 14px; flex-direction: column; align-items: flex-start;">
+                <label for="directChatAutoAccept">
+                  <input type="checkbox" id="directChatAutoAccept" />
+                  Allow direct chat with anyone without request
+                </label>
+              </div>
+              <div class="setting-item" style="margin-top: 10px; flex-direction: column; align-items: flex-start;">
+                <label for="antiReloadToggle">
+                  <input type="checkbox" id="antiReloadToggle" />
+                  Anti Reload (confirm before reloading page)
+                </label>
+                <button id="refreshPageBtn" class="btn-secondary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh Page</button>
+              </div>
+
+              <!-- Self AI Auto-Responder -->
+              <div class="settings-section" style="margin-top: 16px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; font-size: 16px; color: #000; font-weight: 800;">AI</div>
+                  <div>
+                    <strong style="color: var(--text-primary);">Self AI Auto-Responder</strong>
+                    <p style="margin: 2px 0 0 0; color: var(--text-secondary); font-size: 12.5px;">Auto-reply to selected contacts with AI.</p>
+                  </div>
+                </div>
+                <div class="setting-item" style="margin-top: 12px;">
+                  <label for="selfAIAutoResponderToggle">
+                    <input type="checkbox" id="selfAIAutoResponderToggle" />
+                    Enable Self AI auto replies
+                  </label>
+                </div>
+                <div id="selfAIUserList" class="contact-scroll-box" style="margin-top: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <strong style="color: var(--accent-primary); font-size: 13px;">Selected Users</strong>
+                    <button id="refreshSelfAIUserListBtn" type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                  </div>
+                  <div id="selfAIUserListItems" style="display: grid; gap: 8px;"></div>
+                  <p id="selfAIUserListHint" style="margin-top: 10px; color: var(--text-muted); font-size: 12px;">Only selected users will receive auto-replies.</p>
+                </div>
+              </div>
+
+              <div class="setting-item" style="margin-top: 14px; flex-direction: column; align-items: flex-start;">
+                <label for="aiModelSelect"><strong>AI Model Profile</strong></label>
+                <select id="aiModelSelect" class="settings-select" style="margin-top: 6px;">
+                  <option value="nexchat-custom">NEXCHAT Custom (Recommended)</option>
+                  <option value="performance">Performance-Optimized</option>
+                  <option value="creative">Creative/Conversational</option>
+                  <option value="safe">Security-Strict</option>
+                </select>
+                <button id="saveAiModelBtn" class="btn-primary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-floppy-disk"></i> Apply AI Model</button>
+              </div>
+            </div>
+
+            <!-- Transfer Tokens -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-coins"></i> Transfer Tokens</h3>
+              <div class="balance-card-glow">
+                <p style="color: var(--text-muted); margin: 0 0 4px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Your Balance</p>
+                <p style="color: var(--accent-primary); margin: 0; font-size: 24px; font-weight: 700; font-family: 'Orbitron', monospace;">
+                  <span id="currentTokenBalance">0</span>
+                  <span style="font-size: 14px; opacity: 0.85;">Tokens</span>
+                </p>
+              </div>
+              <div class="form-group" style="margin-top: 14px;">
+                <label class="form-label">Recipient UID</label>
+                <input type="text" id="recipientUID" placeholder="Paste recipient's UID..." class="settings-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Amount</label>
+                <input type="number" id="transferAmount" placeholder="Enter amount..." min="1" max="99999" class="settings-input">
+              </div>
+              <button id="transferTokensBtn" type="button" class="btn-primary" style="width: 100%; margin-top: 4px;"><i class="fa-solid fa-paper-plane"></i> Send Tokens</button>
+              <div id="transferResult" aria-live="polite" style="min-height: 40px; margin-top: 8px;"></div>
+            </div>
+
+            <!-- Admin Panel (if applicable) -->
+            <div class="settings-section">
+              <button id="adminPanelBtn" class="btn-secondary" style="background: var(--accent-gold); color: #000; font-weight: 700; display: none; width: 100%;"><i class="fa-solid fa-crown"></i> Admin Panel</button>
+            </div>
+
+            <!-- Terminal shortcut -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-terminal"></i> NEXCHAT Terminal</h3>
+              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Access the NEXCHAT command-line interface for advanced operations and cloud tools.</p>
+              <button id="openTerminalBtn" class="btn-primary" style="width: 100%; margin-top: 6px;"><i class="fa-solid fa-terminal"></i> Open Terminal</button>
+            </div>
+
+            <!-- Linked Devices -->
+            <div class="settings-section">
+              <h3><i class="fa-solid fa-laptop-code"></i> Linked Devices</h3>
+              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Manage computers, tablets, and browsers linked to your account.</p>
+              <button id="openLinkDeviceModalBtn" class="btn-primary" type="button" style="width: 100%; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i class="fa-solid fa-qrcode"></i> Link a Device
+              </button>
+              <div id="linkedDevicesContainer" style="margin-top: 14px;">
+                <div class="setting-item" style="border-left: 3px solid var(--accent-primary); padding: 10px; background: rgba(0,255,102,0.06); border-radius: 8px;">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-mobile-screen" style="font-size: 20px; color: var(--accent-primary);"></i>
+                    <div>
+                      <strong style="color: #fff; font-size: 13px;">This Device (Active)</strong>
+                      <p id="currentDeviceLabel" style="margin: 2px 0 0 0; color: var(--text-muted); font-size: 11px;">Current Session</p>
+                    </div>
+                  </div>
+                </div>
+                <div id="otherLinkedDevicesList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+                  <!-- Dynamically populated -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Logout -->
+            <div class="settings-section">
+              <button id="logoutSettingsBtn" class="btn-danger" style="width: 100%;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINK DEVICE MODAL -->
+      <div id="linkDeviceModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 440px;">
+          <span class="close-modal" id="closeLinkDeviceModalBtn"><i class="fa-solid fa-xmark"></i></span>
+          <h2 style="margin-top: 0; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;">
+            <i class="fa-solid fa-qrcode"></i> Link a New Device
+          </h2>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+            Enter the 6-character pairing code displayed on your other device:
+          </p>
+          <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+            <input type="text" id="pairCodeInput" placeholder="NX-XXXX" maxlength="7" class="settings-input" style="text-transform: uppercase; font-family: 'Orbitron', monospace; font-size: 18px; letter-spacing: 2px; text-align: center;">
+            <button id="findPairSessionBtn" class="btn-primary" type="button" style="padding: 0 18px;">Verify</button>
+          </div>
+
+          <div id="pairSessionFoundCard" style="display: none; background: rgba(0, 255, 102, 0.08); border: 1px solid var(--accent-primary); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <i class="fa-solid fa-display" style="font-size: 24px; color: var(--accent-primary);"></i>
+              <div>
+                <strong id="pairFoundDeviceName" style="color: #fff; font-size: 14px;">Chrome on Windows</strong>
+                <p id="pairFoundDeviceMeta" style="margin: 2px 0 0 0; color: var(--text-muted); font-size: 11px;">Waiting for authorization</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+              <button id="rejectPairBtn" type="button" class="btn-secondary" style="flex: 1;">Deny</button>
+              <button id="approvePairBtn" type="button" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-check"></i> Authorize & Link</button>
+            </div>
+          </div>
+
+          <div id="pairStatusFeedback" style="font-size: 12px; text-align: center; min-height: 20px;"></div>
+        </div>
+      </div>
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+      <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chat">
+        <i class="fa-solid fa-comments"></i>
+        <span class="nav-label">Chats</span>
+      </button>
+      <button id="nav-status" class="nav-item" data-nav="updates" title="Status">
+        <i class="fa-solid fa-circle-notch"></i>
+        <span class="nav-label">Status</span>
+      </button>
+      <button id="nav-groups" class="nav-item" data-nav="communities" title="Groups">
+        <i class="fa-solid fa-users"></i>
+        <span class="nav-label">Groups</span>
+      </button>
+      <button id="nav-calls" class="nav-item" data-nav="calls" title="Call History">
+        <i class="fa-solid fa-phone"></i>
+        <span class="nav-label">Calls</span>
+      </button>
+      <button id="nav-announcements" class="nav-item" data-nav="announcements" title="Announcements">
+        <i class="fa-solid fa-bullhorn"></i>
+        <span class="nav-label">News</span>
+      </button>
+      <button id="nav-marketplace" class="nav-item" data-nav="marketplace" title="Advert">
+        <i class="fa-solid fa-shop"></i>
+        <span class="nav-label">Market</span>
+      </button>
+      <button id="nav-games" class="nav-item" data-nav="games" title="Gaming Hub">
+        <i class="fa-solid fa-gamepad"></i>
+        <span class="nav-label">Games</span>
+      </button>
+      <button id="nav-terminal" class="nav-item" data-nav="terminal" title="Terminal">
+        <i class="fa-solid fa-terminal"></i>
+        <span class="nav-label">Terminal</span>
+      </button>
+      <button id="nav-video" class="nav-item" data-nav="video" title="Video" style="display:none;">
+        <i class="fa-solid fa-video"></i>
+        <span class="nav-label">Video</span>
+      </button>
+      <button id="logout-btn" class="nav-item logout" title="Logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span class="nav-label">Logout</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- GIFT RECEIVE DRAWER -->
+  <div id="giftReceiveDrawer" class="bottom-drawer" aria-hidden="true"></div>
+
+  <!-- NOTIFICATION CONTAINER -->
+  <div id="notificationContainer" class="notification-container"></div>
+
+  <script type="module" src="pwa-install.js"></script>
+  <script type="module" src="app-prompt.js"></script>
+  <script type="module" src="messaging-features.js"></script>
+  <script type="module" src="chat-navigation.js"></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script type="module" src="chat.js"></script>
+  <script type="module" src="button-setup.js"></script>
+
+</body>
+
+</html>
