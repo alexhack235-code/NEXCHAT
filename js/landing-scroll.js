@@ -1047,51 +1047,6 @@ function startStageAutoPlay() {
 }
 startStageAutoPlay();
 
-// ─── 8. CHAT WALLPAPER LIVE SWITCHER ───
-const DEMO_WALLPAPERS = {
-  doodle: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340"><rect width="340" height="340" fill="%230b141a"/><g fill="none" stroke="%23ffffff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.08"><path d="M30 40h40a10 10 0 0 1 10 10v20a10 10 0 0 1-10 10h-25l-12 10v-10h-3a10 10 0 0 1-10-10v-20a10 10 0 0 1 10-10z"/><rect x="230" y="45" width="34" height="24" rx="4"/><path d="M30 150l45 15-20 8 10 15 5-10 18-5z"/><rect x="130" y="130" width="22" height="40" rx="4"/><rect x="40" y="240" width="24" height="18" rx="3"/><path d="M46 240v-8a6 6 0 0 1 12 0v8"/><circle cx="245" cy="245" r="14"/></g></svg>',
-  emerald: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340"><rect width="340" height="340" fill="%23060c11"/><g fill="none" stroke="%2300ff88" stroke-width="1.3" opacity="0.14"><rect x="25" y="35" width="46" height="30" rx="5"/><path d="M140 40l16-6 16 6v14c0 10-16 18-16 18s-16-8-16-18z"/><path d="M45 130l-12 18h10l-4 18 16-22h-10z"/><rect x="135" y="135" width="26" height="26" rx="4"/><circle cx="240" cy="145" r="7"/></g></svg>',
-  matrix: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="280" height="280" viewBox="0 0 280 280"><rect width="280" height="280" fill="%23050811"/><g fill="%2300ff88" font-family="monospace" font-size="11" opacity="0.14"><text x="20" y="30">0 1 1 0</text><text x="20" y="60">N E X</text><text x="120" y="45">1 0 0 1</text><text x="120" y="75">A E S</text><text x="200" y="30">E 2 E</text></g></svg>',
-  obsidian: '',
-};
-
-function setDemoWallpaper(type) {
-  const canvasEl = document.getElementById('demoChatCanvas');
-  if (!canvasEl) return;
-
-  document.querySelectorAll('.wp-pill').forEach((pill) => {
-    pill.classList.toggle('active', pill.textContent.toLowerCase() === type);
-  });
-
-  if (type === 'obsidian') {
-    canvasEl.style.backgroundImage = 'none';
-    canvasEl.style.backgroundColor = '#060912';
-  } else {
-    canvasEl.style.backgroundImage = `url('${DEMO_WALLPAPERS[type]}')`;
-    canvasEl.style.backgroundColor = '#0b141a';
-  }
-}
-window.setDemoWallpaper = setDemoWallpaper;
-
-let wpKeys = ['doodle', 'emerald', 'matrix', 'obsidian'];
-let wpCycleIdx = 0;
-function cycleDemoWallpaper() {
-  wpCycleIdx = (wpCycleIdx + 1) % wpKeys.length;
-  setDemoWallpaper(wpKeys[wpCycleIdx]);
-}
-window.cycleDemoWallpaper = cycleDemoWallpaper;
-
-function previewGalleryWallpaper(type, cardEl) {
-  document.querySelectorAll('.wp-gallery-card').forEach(c => c.classList.remove('active'));
-  cardEl?.classList.add('active');
-
-  if (type in DEMO_WALLPAPERS) {
-    setDemoWallpaper(type);
-  }
-  switchStage('chat');
-}
-window.previewGalleryWallpaper = previewGalleryWallpaper;
-
 // ─── 9. 1:1 PHOTO STATUS EDITOR FILTERS ───
 const filterItems = document.querySelectorAll('.filter-circle-item');
 const chandelierGraphic = document.getElementById('statusChandelierGraphic');

@@ -26,11 +26,11 @@ export const CLOUDINARY_VAULT_POOL = [
   },
   {
     id: 3,
-    name: 'Cloudinary Vault 3 (Backup)',
-    cloudName: '',
-    uploadPreset: '',
+    name: 'Cloudinary Vault 3 (NEXVAULT2 - Active)',
+    cloudName: 'bll4dbye',
+    uploadPreset: 'NEXVAULT2',
     folder: 'nexchat-media',
-    active: false,
+    active: true,
   },
   {
     id: 4,
