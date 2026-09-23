@@ -34,19 +34,19 @@ export const CLOUDINARY_VAULT_POOL = [
   },
   {
     id: 4,
-    name: 'Cloudinary Vault 4 (Backup)',
-    cloudName: '',
-    uploadPreset: '',
+    name: 'Cloudinary Vault 4 (NEXVAULT4 - Active)',
+    cloudName: 'w36igvww',
+    uploadPreset: 'NEXVAULT4',
     folder: 'nexchat-media',
-    active: false,
+    active: true,
   },
   {
     id: 5,
-    name: 'Cloudinary Vault 5 (Backup)',
-    cloudName: '',
-    uploadPreset: '',
+    name: 'Cloudinary Vault 5 (NEXVAULT5 - Active)',
+    cloudName: 'l5wrspfy',
+    uploadPreset: 'NEXVAULT5',
     folder: 'nexchat-media',
-    active: false,
+    active: true,
   },
 ];
 
