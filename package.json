@@ -1,6 +1,7 @@
 {
   "name": "nexchat",
   "version": "1.0.0",
+  "type": "module",
   "description": "NEXCHAT - Modern chat application",
   "main": "index.html",
   "scripts": {

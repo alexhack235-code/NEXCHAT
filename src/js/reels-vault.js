@@ -144,7 +144,39 @@ export async function uploadReelVideo(file, options = {}) {
     console.warn(`[NEX-REELS] Video duration (${duration.toFixed(1)}s) exceeds max reel duration (${maxDuration}s).`);
   }
 
-  // Sequential vault progression: 0 -> 1 -> 2 -> 3 -> 4 -> 5
+  // 1. Primary Strategy: Multi-Vault Cloudinary Pipeline (Zero backend, direct CDN streaming)
+  try {
+    console.log('[NEX-REELS] Uploading to Multi-Vault Cloudinary Pipeline...');
+    const cldRes = await uploadVideoToCloudinary(file, {
+      folder: 'nexchat-reels',
+      onProgress: (percent, msg, vaultName) => {
+        if (options.onProgress) {
+          options.onProgress(percent, msg, vaultName || 'Cloudinary Vault Pool');
+        }
+      },
+      onVaultSwitch: options.onVaultSwitch,
+    });
+
+    if (cldRes && (cldRes.secure_url || cldRes.url)) {
+      console.log(`[NEX-REELS] Successfully saved to ${cldRes.vault || 'Cloudinary Vault Pool'}:`, cldRes.secure_url || cldRes.url);
+      return {
+        url: cldRes.secure_url || cldRes.url,
+        rawBlobUrl: cldRes.secure_url || cldRes.url,
+        pathname: cldRes.public_id,
+        vault: cldRes.vault || 'Cloudinary Vault Pool',
+        vaultIndex: 0,
+        access: 'public',
+        duration: cldRes.duration || duration,
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type || 'video/mp4',
+      };
+    }
+  } catch (cldErr) {
+    console.warn('[NEX-REELS] Cloudinary pool warning, trying Blob vaults fallback:', cldErr.message);
+  }
+
+  // 2. Secondary Strategy: Sequential Vercel Blob Vaults (if hosted on Vercel)
   const vaultOrder = [0, 1, 2, 3, 4, 5];
   const startIndex = options.startVault !== undefined ? options.startVault : 0;
   const orderedVaults = [
@@ -173,34 +205,6 @@ export async function uploadReelVideo(file, options = {}) {
       lastError = err;
       // Cascade to the next vault sequentially
     }
-  }
-
-  // Fallback 1: Cloudinary Unsigned Upload
-  console.warn('[NEX-REELS] All primary Blob vaults exhausted. Falling back to Cloudinary storage pipeline...');
-  try {
-    const cldRes = await uploadVideoToCloudinary(file, {
-      folder: 'nexchat-reels',
-      onProgress: (percent, msg) => {
-        if (options.onProgress) {
-          options.onProgress(percent, msg, 'Cloudinary Backup Vault');
-        }
-      },
-    });
-
-    return {
-      url: cldRes.secure_url || cldRes.downloadURL,
-      rawBlobUrl: cldRes.secure_url || cldRes.downloadURL,
-      pathname: cldRes.public_id,
-      vault: 'Cloudinary Global Vault',
-      vaultIndex: -1,
-      access: 'public',
-      duration: cldRes.duration || duration,
-      fileName: file.name,
-      fileSize: file.size,
-      fileType: file.type || 'video/mp4',
-    };
-  } catch (cldErr) {
-    console.warn('[NEX-REELS] Cloudinary backup failed:', cldErr);
   }
 
   // Fallback 2: Local Object URL (ensures client-side testing never hangs)
