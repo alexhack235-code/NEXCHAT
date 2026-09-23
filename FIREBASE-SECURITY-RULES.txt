@@ -89,7 +89,7 @@ service cloud.firestore {
       // Deletion strictly limited to Super Admin
       allow delete: if isSuperAdmin();
 
-      // Subcollection: Linked Devices (Link Device WhatsApp/Telegram pairing)
+      // Subcollection: Linked Devices (Encrypted Device QR pairing)
       match /linkedDevices/{deviceId} {
         allow read, write: if isOwner(uid) || isSuperAdmin();
       }
@@ -258,7 +258,7 @@ service cloud.firestore {
     }
 
     // ============================================================
-    // 7. LINK DEVICE SESSIONS (WhatsApp/Telegram QR Pairing)
+    // 7. LINK DEVICE SESSIONS (Encrypted Device QR Pairing)
     // ============================================================
     match /link_sessions/{sessionId} {
       allow read: if true;

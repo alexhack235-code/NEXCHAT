@@ -1,0 +1,27 @@
+{
+  "name": "nexchat-terminal-app",
+  "version": "1.0.0",
+  "description": "NEXCHAT - A Next-Gen WhatsApp with built-in Hacker Terminal",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.15",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "framer-motion": "^11.11.11",
+    "xterm": "^5.3.0",
+    "xterm-addon-fit": "^0.8.0",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.5.4"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.14",
+    "postcss": "^8.4.47",
+    "autoprefixer": "^10.4.20"
+  }
+}

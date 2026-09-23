@@ -1,453 +1,1230 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#0f4b6f">
-    <title>NEXCHAT Professional Terminal</title>
-    <link rel="stylesheet" href="https://unpkg.com/xterm@5.3.0/css/xterm.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 24px;
-            background: linear-gradient(135deg, #070d18, #0e1726);
-            color: #00ff66;
-            font-family: 'Inter', 'Orbitron', monospace;
-            min-height: 100vh;
-            overflow: hidden;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0e13">
+  <title>NEXCHAT — Chat Beyond | Next-Gen Encrypted Messaging & Hacker Terminal</title>
+  <link rel="icon" type="image/x-icon" href="logo.jpg">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@500;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome & xterm.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/xterm@5.3.0/css/xterm.css">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            'nex-green': '#00FF88',
+            'nex-black': '#0A0E13',
+            'nex-chat-bg': '#101A24',
+            'nex-sidebar': '#111B21',
+            'nex-card': '#202C33',
+            'nex-bubble-me': '#005C4B',
+            'nex-bubble-them': '#202C33',
+            'nex-cyan': '#00D4FF',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            display: ['Orbitron', 'sans-serif'],
+          }
         }
+      }
+    }
+  </script>
 
-        .terminal-container {
-            background: #000;
-            border: 2px solid #00ff66;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
-            height: calc(100vh - 40px);
-            display: flex;
-            flex-direction: column;
-        }
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00FF88; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        .terminal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(0,255,102,0.24);
-            padding-bottom: 12px;
-            gap: 12px;
-        }
+    /* Glitch Animation */
+    @keyframes nexGlitch {
+      0% { transform: translate(0); }
+      20% { transform: translate(-2px, 1px); }
+      40% { transform: translate(-1px, -2px); }
+      60% { transform: translate(2px, 2px); }
+      80% { transform: translate(1px, -1px); }
+      100% { transform: translate(0); }
+    }
+    .glitch-hover:hover { animation: nexGlitch 0.25s infinite; }
 
-        .terminal-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #d6ffb0;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-        }
+    /* Terminal Cursor */
+    @keyframes blinkCursor {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0; }
+    }
+    .term-cursor-blink { animation: blinkCursor 1s step-end infinite; }
 
-        .terminal-subtitle {
-            font-size: 13px;
-            color: #8ee6b5;
-            opacity: 0.9;
-            margin-top: 2px;
-        }
-
-        .terminal-controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        .control-btn {
-            background: #00ff66;
-            color: #000;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-family: 'Orbitron', monospace;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .control-btn:hover {
-            background: #00dd55;
-            box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
-        }
-
-        .control-btn.danger {
-            background: #ff4444;
-            color: #fff;
-        }
-
-        .control-btn.danger:hover {
-            background: #dd3333;
-            box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
-        }
-
-        .terminal-window {
-            flex: 1;
-            background: #000;
-            border-radius: 5px;
-            overflow: hidden;
-        }
-
-        .welcome-message {
-            color: #00ff66;
-            font-size: 14px;
-            margin-bottom: 10px;
-        }
-
-        .command-prompt {
-            color: #00ff66;
-        }
-
-        .error-message {
-            color: #ff4444;
-        }
-
-        .success-message {
-            color: #44ff44;
-        }
-
-        .info-message {
-            color: #ffff44;
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-
-            .terminal-container {
-                height: calc(100vh - 20px);
-                padding: 15px;
-            }
-
-            .terminal-title {
-                font-size: 18px;
-            }
-
-            .control-btn {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-        }
-    </style>
+    /* Matrix Stream Background */
+    .matrix-bg-text {
+      background: linear-gradient(180deg, rgba(0,255,136,0.12) 0%, rgba(0,255,136,0.02) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+  </style>
 </head>
-<body>
-    <div class="terminal-container">
-        <div class="terminal-header">
-            <div>
-                <div class="terminal-title">NEXCHAT Professional CLI</div>
-                <div class="terminal-subtitle">Secure console • Session audit • enterprise-ready</div>
-            </div>
-            <div class="terminal-controls">
-                <button class="control-btn" id="connectBtn">🔗 Connect</button>
-                <button class="control-btn" id="clearBtn">🧹 Clear</button>
-                <button class="control-btn" id="helpBtn">❓ Help</button>
-                <button class="control-btn danger" id="closeBtn">✖ Close</button>
-            </div>        </div>
+<body class="bg-[#0A0E13] text-[#F8FAFC] w-screen h-screen overflow-hidden select-none font-sans flex flex-col">
 
-        <div class="terminal-window">
-            <div id="terminal"></div>
+  <!-- ══════════════════════════════════════════════════════════════════
+       MAIN 3-PANEL VIEWPORT (LEFT 30% | CENTER 40% | RIGHT 30%)
+       ══════════════════════════════════════════════════════════════════ -->
+  <div class="flex-1 flex flex-col lg:flex-row w-full h-full overflow-hidden relative">
+
+    <!-- ──────────────────────────────────────────────────────────────
+         PANEL 1: LEFT SIDEBAR (Cyber Chat List - 30%)
+         ────────────────────────────────────────────────────────────── -->
+    <div id="leftSidebar" class="w-full lg:w-[30%] h-[35vh] lg:h-full flex flex-col bg-[#111B21] border-r border-white/10 z-10 flex-shrink-0">
+      
+      <!-- 1. Header: Logo, Status, Communities, New Chat, Menu -->
+      <div class="h-16 px-4 bg-[#111B21] border-b border-white/5 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="relative cursor-pointer glitch-hover" onclick="logTerminal('[SYSTEM] NEXCHAT Terminal Core v4.8 Active')">
+            <span class="font-display font-black text-xl tracking-wider text-[#00FF88] drop-shadow-[0_0_10px_rgba(0,255,136,0.6)]">
+              NEXCHAT<span class="term-cursor-blink text-white">_</span>
+            </span>
+            <div class="text-[9px] font-mono text-[#00D4FF] tracking-widest -mt-1 uppercase">
+              nexchat.terminal
+            </div>
+          </div>
         </div>
+
+        <div class="flex items-center gap-1 text-white/70">
+          <!-- Status icon with green dot -->
+          <button onclick="openPhotoStatusModal()" class="p-2.5 rounded-full hover:bg-white/10 hover:text-[#00FF88] transition-colors relative" title="Photo Status Editor">
+            <i class="fa-solid fa-circle-notch text-lg"></i>
+            <span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-[#00FF88] animate-pulse"></span>
+          </button>
+
+          <!-- Text Status button -->
+          <button onclick="openTextStatusModal()" class="px-2.5 py-1 rounded-md hover:bg-white/10 hover:text-[#00FF88] transition-colors font-bold text-xs" title="Text Status Creator">
+            Aa
+          </button>
+
+          <!-- Communities -->
+          <button onclick="logTerminal('[COMMUNITY] Synced with Operative Mesh')" class="p-2.5 rounded-full hover:bg-white/10 hover:text-white transition-colors" title="Communities">
+            <i class="fa-solid fa-users text-sm"></i>
+          </button>
+
+          <!-- New Chat -->
+          <button onclick="logTerminal('[CHAT] Ready for new encrypted session')" class="p-2.5 rounded-full hover:bg-white/10 hover:text-white transition-colors" title="New Chat">
+            <i class="fa-solid fa-comment-medical text-sm"></i>
+          </button>
+
+          <!-- Menu -->
+          <button onclick="logTerminal('[MENU] Options Menu opened')" class="p-2.5 rounded-full hover:bg-white/10 hover:text-white transition-colors" title="Menu">
+            <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Search Bar & Filters -->
+      <div class="p-3 bg-[#111B21] flex-shrink-0">
+        <div class="flex items-center gap-2 bg-[#202C33] rounded-lg px-3 py-1.5 border border-white/5 focus-within:border-[#00FF88]/50 transition-colors">
+          <i class="fa-solid fa-magnifying-glass text-white/40 text-xs"></i>
+          <input
+            id="chatSearchInput"
+            type="text"
+            placeholder="Search or start new chat"
+            oninput="handleSearch(this.value)"
+            class="w-full bg-transparent text-sm text-white placeholder-white/40 border-none outline-none font-sans"
+          />
+          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden text-white/40 hover:text-white text-xs">✕</button>
+        </div>
+
+        <!-- Filter Pills: All | Unread | Groups | Terminal Logs -->
+        <div class="flex items-center gap-1.5 mt-2.5 overflow-x-auto pb-1 no-scrollbar text-xs">
+          <button onclick="setFilter('all', this)" class="filter-pill px-3 py-1 rounded-full font-bold bg-[#00a884] text-[#111B21] shadow-md">All</button>
+          <button onclick="setFilter('unread', this)" class="filter-pill px-3 py-1 rounded-full font-medium bg-[#202C33] text-white/60 hover:text-white">Unread</button>
+          <button onclick="setFilter('groups', this)" class="filter-pill px-3 py-1 rounded-full font-medium bg-[#202C33] text-white/60 hover:text-white">Groups</button>
+          <button onclick="setFilter('logs', this)" class="filter-pill px-3 py-1 rounded-full font-medium bg-[#202C33] text-white/60 hover:text-white">Terminal Logs</button>
+        </div>
+      </div>
+
+      <!-- 3. Chat List (15 dummy chats with avatar, NEX green ring, timestamps, blue ticks) -->
+      <div id="chatListContainer" class="flex-1 overflow-y-auto divide-y divide-white/5">
+        <!-- Rendered by JS -->
+      </div>
     </div>
 
-    <script src="https://unpkg.com/xterm@5.3.0/lib/xterm.js"></script>
-    <script src="https://unpkg.com/xterm-addon-fit@0.7.0/lib/xterm-addon-fit.js"></script>
-    <script src="https://unpkg.com/xterm-addon-attach@0.8.0/lib/xterm-addon-attach.js"></script>
-    <script>
-        // Initialize terminal
-        const term = new Terminal({
-            cursorBlink: true,
-            cursorStyle: 'block',
-            fontSize: 14,
-            fontFamily: 'Consolas, Monaco, "Courier New", monospace',
-            theme: {
-                background: '#000000',
-                foreground: '#00ff66',
-                cursor: '#00ff66',
-                cursorAccent: '#000000',
-                selection: 'rgba(0, 255, 102, 0.3)'
-            },
-            allowTransparency: true,
-            scrollback: 1000
-        });
 
-        const fitAddon = new FitAddon.FitAddon();
-        const attachAddon = new AttachAddon.AttachAddon();
+    <!-- ──────────────────────────────────────────────────────────────
+         PANEL 2: CENTER CHAT (Encrypted Message Feed - 40%)
+         ────────────────────────────────────────────────────────────── -->
+    <div id="centerChat" class="w-full lg:w-[40%] h-[40vh] lg:h-full flex flex-col bg-[#101A24] relative overflow-hidden flex-shrink-0 border-r border-white/10">
+      
+      <!-- 1. Top Bar: User avatar, name, online/last seen, Search, Voice Call, Video Call, More -->
+      <div class="h-16 px-4 bg-[#111B21] border-b border-white/5 flex items-center justify-between flex-shrink-0 z-10">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="relative flex-shrink-0 cursor-pointer">
+            <img id="activeChatAvatar" src="logo.jpg" alt="Avatar" class="w-10 h-10 rounded-full object-cover bg-black border border-white/10">
+            <span id="activeChatOnlineDot" class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-[#00FF88] border-2 border-[#111B21]"></span>
+          </div>
 
-        term.loadAddon(fitAddon);
-        term.loadAddon(attachAddon);
+          <div class="min-w-0">
+            <h3 id="activeChatName" class="text-sm font-semibold text-white truncate flex items-center gap-1.5">
+              NEXCHAT SYSTEM
+              <span class="text-[9px] bg-[#00FF88]/20 text-[#00FF88] px-1.5 py-0.5 rounded font-mono font-bold">VERIFIED</span>
+            </h3>
+            <p id="activeChatStatus" class="text-[11px] text-[#00FF88] font-mono truncate">
+              Online (Quantum Relay)
+            </p>
+          </div>
+        </div>
 
-        const terminalElement = document.getElementById('terminal');
-        term.open(terminalElement);
-        fitAddon.fit();
+        <div class="flex items-center gap-1 text-white/70">
+          <button onclick="logTerminal('[CHAT] Search activated in conversation')" class="p-2 rounded-full hover:bg-white/10 hover:text-white" title="Search">
+            <i class="fa-solid fa-magnifying-glass text-sm"></i>
+          </button>
+          
+          <!-- 1:1 Voice Call Screen trigger -->
+          <button onclick="openVoiceCallModal()" class="p-2 rounded-full hover:bg-white/10 hover:text-[#00FF88] transition-colors" title="Voice Call">
+            <i class="fa-solid fa-phone text-sm"></i>
+          </button>
 
-        // Linode server configuration - UPDATE THESE VALUES!
-        const LINODE_CONFIG = {
-            host: 'your-linode-server-ip', // Replace with your Linode IP
-            port: 8080, // WebSocket port on your Linode server
-            username: 'nexchat-user',
-            password: 'your-secure-password' // In production, use proper auth
-        };
+          <!-- Video Call Grid trigger -->
+          <button onclick="openVideoCallModal()" class="p-2 rounded-full hover:bg-white/10 hover:text-[#00FF88] transition-colors" title="Video Call">
+            <i class="fa-solid fa-video text-sm"></i>
+          </button>
 
-        // Welcome message
-        term.writeln('\r\n\x1b[1;34mNEXCHAT Professional CLI v1.0.0\x1b[0m');
-        term.writeln('\x1b[36mSecure mode enabled • Audit logging active\x1b[0m');
-        term.writeln('\x1b[36mType "help" for available commands.\x1b[0m\r\n');
-        showPrompt();
+          <button onclick="logTerminal('[CHAT] Chat options opened')" class="p-2 rounded-full hover:bg-white/10 hover:text-white" title="More">
+            <i class="fa-solid fa-ellipsis-vertical text-sm"></i>
+          </button>
+        </div>
+      </div>
 
-        // Command processing
-        let currentCommand = '';
-        let currentLine = '';
-        let currentUser = 'guest';
-        let isLoggedIn = false;
-        let commandHistory = [];
-        let historyIndex = -1;
+      <!-- 2. Chat Area: Futuristic Vector Doodle + Faint Terminal Code Background -->
+      <div id="chatMessagesArea" class="flex-1 overflow-y-auto p-4 space-y-3 relative">
+        <!-- Doodle Background Pattern -->
+        <div 
+          class="absolute inset-0 pointer-events-none opacity-20"
+          style="background-image: radial-gradient(circle, rgba(0,255,136,0.06) 1px, transparent 1px), radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px); background-size: 26px 26px; background-position: 0 0, 13px 13px;"
+        ></div>
 
-        term.onData(data => {
-            const code = data.charCodeAt(0);
+        <!-- Faint Terminal Stream Pattern -->
+        <div class="absolute inset-0 pointer-events-none opacity-5 font-mono text-[10px] text-[#00FF88] overflow-hidden leading-relaxed p-4 select-none">
+          01001110 01000101 01011000 01000011 01001000 01000001 01010100<br>
+          [RELAY_STATUS] AES-GCM-256 ENCRYPTED PORT 443 -> PEER [OK]<br>
+          nex@NEXCHAT:~$ ping relay.nexchat.terminal<br>
+          64 bytes from 10.0.0.1: icmp_seq=1 ttl=64 time=0.18 ms<br>
+          ZERO_KNOWLEDGE_PROTOCOL: VERIFIED SHA-512
+        </div>
 
-            if (code === 13) { // Enter
-                term.write('\r\n');
-                processCommand(currentLine.trim());
-                currentLine = '';
-                showPrompt();
-            } else if (code === 127) { // Backspace
-                if (currentLine.length > 0) {
-                    currentLine = currentLine.slice(0, -1);
-                    term.write('\b \b');
-                }
-            } else if (code === 27) { // Escape sequences for arrow keys
-                // Handle up/down arrows for history
-                if (data === '\x1b[A') { // Up arrow
-                    if (commandHistory.length > 0) {
-                        if (historyIndex === -1) {
-                            historyIndex = commandHistory.length - 1;
-                        } else if (historyIndex > 0) {
-                            historyIndex--;
-                        }
-                        // Clear current line
-                        for (let i = 0; i < currentLine.length; i++) {
-                            term.write('\b \b');
-                        }
-                        currentLine = commandHistory[historyIndex];
-                        term.write(currentLine);
-                    }
-                } else if (data === '\x1b[B') { // Down arrow
-                    if (historyIndex !== -1) {
-                        historyIndex++;
-                        if (historyIndex >= commandHistory.length) {
-                            historyIndex = -1;
-                            currentLine = '';
-                        } else {
-                            // Clear current line
-                            for (let i = 0; i < currentLine.length; i++) {
-                                term.write('\b \b');
-                            }
-                            currentLine = commandHistory[historyIndex];
-                            term.write(currentLine);
-                        }
-                    }
-                }
-            } else if (code >= 32) { // Printable characters
-                currentLine += data;
-                term.write(data);
-            }
-        });
+        <!-- Security Banner -->
+        <div class="flex justify-center my-2 relative z-10">
+          <div class="bg-[#182229]/90 border border-[#00FF88]/20 rounded-lg px-3.5 py-1.5 text-[11.5px] text-[#00FF88] font-mono text-center max-w-md shadow-md">
+            🔒 Messages and calls are end-to-end encrypted. No one outside this chat can read them.
+          </div>
+        </div>
 
-        function showPrompt() {
-            const prompt = `\x1b[1;32m$nexchat>\x1b[0m `;
-            term.write(prompt);
+        <!-- Message Bubbles Container -->
+        <div id="messagesList" class="space-y-3 relative z-10">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+
+      <!-- 3. Attachment Drawer Popup -->
+      <div id="attachDrawer" class="hidden absolute bottom-16 left-12 bg-[#202C33] border border-white/10 rounded-2xl p-3 shadow-2xl grid grid-cols-3 gap-3 z-30 animate-in fade-in slide-in-from-bottom-2">
+        <button onclick="handleAttachAction('Camera')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 text-center">
+          <span class="w-10 h-10 rounded-full bg-[#111B21] flex items-center justify-center text-lg text-[#00FF88] border border-white/5"><i class="fa-solid fa-camera"></i></span>
+          <span class="text-[11px] text-white/80 font-medium">Camera</span>
+        </button>
+        <button onclick="handleAttachAction('Gallery')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 text-center">
+          <span class="w-10 h-10 rounded-full bg-[#111B21] flex items-center justify-center text-lg text-purple-400 border border-white/5"><i class="fa-solid fa-image"></i></span>
+          <span class="text-[11px] text-white/80 font-medium">Gallery</span>
+        </button>
+        <button onclick="handleAttachAction('Document')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 text-center">
+          <span class="w-10 h-10 rounded-full bg-[#111B21] flex items-center justify-center text-lg text-blue-400 border border-white/5"><i class="fa-solid fa-file"></i></span>
+          <span class="text-[11px] text-white/80 font-medium">Document</span>
+        </button>
+        <button onclick="handleAttachAction('Poll')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 text-center">
+          <span class="w-10 h-10 rounded-full bg-[#111B21] flex items-center justify-center text-lg text-yellow-400 border border-white/5"><i class="fa-solid fa-square-poll-vertical"></i></span>
+          <span class="text-[11px] text-white/80 font-medium">Poll</span>
+        </button>
+        <button onclick="handleAttachAction('Contact')" class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-white/10 text-center">
+          <span class="w-10 h-10 rounded-full bg-[#111B21] flex items-center justify-center text-lg text-cyan-400 border border-white/5"><i class="fa-solid fa-user"></i></span>
+          <span class="text-[11px] text-white/80 font-medium">Contact</span>
+        </button>
+      </div>
+
+      <!-- 4. Bottom Input Bar: Emoji, Attach, Input, Mic / Send -->
+      <form id="chatInputForm" onsubmit="handleSendMessage(event)" class="h-16 px-4 bg-[#111B21] border-t border-white/5 flex items-center gap-2.5 z-10 flex-shrink-0">
+        <button type="button" onclick="toggleEmojiDrawer()" class="p-2 text-white/60 hover:text-white text-lg transition-colors" title="Emoji">
+          <i class="fa-regular fa-face-smile"></i>
+        </button>
+
+        <button type="button" onclick="toggleAttachDrawer()" class="p-2 text-white/60 hover:text-[#00FF88] text-lg transition-colors" title="Attach">
+          <i class="fa-solid fa-paperclip"></i>
+        </button>
+
+        <input
+          id="messageInputField"
+          type="text"
+          placeholder="Type message (*bold*, _italic_, ~strike~, ```code```)"
+          oninput="handleInputTyping(this.value)"
+          class="flex-1 bg-[#2A3942] text-white text-sm px-4 py-2.5 rounded-lg border-none outline-none placeholder-white/40 focus:ring-1 focus:ring-[#00FF88]/50 font-sans"
+        />
+
+        <button
+          id="sendOrMicBtn"
+          type="submit"
+          class="w-10 h-10 rounded-full bg-white/10 hover:bg-[#00FF88] hover:text-black text-white/80 flex items-center justify-center transition-all active:scale-95 flex-shrink-0"
+          title="Voice Note / Send"
+        >
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+      </form>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────────────────────────
+         PANEL 3: RIGHT PANEL - NEXCHAT TERMINAL (30% - THE MAIN TWIST)
+         ────────────────────────────────────────────────────────────── -->
+    <div id="rightTerminal" class="w-full lg:w-[30%] h-[25vh] lg:h-full flex flex-col bg-[#0A0E13] border-l border-[#00FF88]/20 font-mono text-xs text-[#00FF88] select-text relative shadow-2xl flex-shrink-0">
+      
+      <!-- 1. Header: nex@NEXCHAT:~$ + Status + Controls -->
+      <div class="h-12 px-4 bg-[#070b0f] border-b border-[#00FF88]/20 flex items-center justify-between flex-shrink-0 z-10">
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 mr-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block"></span>
+            <span class="w-2.5 h-2.5 rounded-full bg-[#00FF88] inline-block"></span>
+          </div>
+          <span class="text-[#00FF88] font-bold text-xs tracking-wider">nex@NEXCHAT:~$</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-[9px] bg-[#00FF88]/10 text-[#00FF88] px-2 py-0.5 rounded border border-[#00FF88]/30 font-bold uppercase tracking-wider">
+            LIVE SYNC
+          </span>
+          <button onclick="clearTerminal()" class="text-white/40 hover:text-white text-xs px-1.5 py-0.5 rounded hover:bg-white/10" title="Clear Buffer">
+            clear
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Terminal Output Screen -->
+      <div id="terminalScreen" class="flex-1 overflow-y-auto p-4 space-y-2 bg-[#0A0E13] leading-relaxed cursor-text" onclick="focusTermInput()">
+        <!-- Initial welcome -->
+        <div class="text-white/60">NEXCHAT Terminal OS [Version 4.8.1-quantum]</div>
+        <div class="text-white/60">(c) 2026 NEXO-TECH. Full two-way UI synchronized control.</div>
+        <div class="text-[#00FF88]">Type <span class="text-white font-bold underline cursor-pointer" onclick="runCommand('help')">help</span> to list commands or click any button on the left to see live logs.<br></div>
+        
+        <!-- Live Command Output Stream -->
+        <div id="termLogsContainer" class="space-y-1"></div>
+
+        <!-- Active Input Line -->
+        <form id="termForm" onsubmit="handleTermSubmit(event)" class="flex items-center gap-2 pt-2">
+          <span class="text-[#00FF88] font-bold flex-shrink-0">nex@NEXCHAT:~$</span>
+          <input
+            id="termInputField"
+            type="text"
+            spellcheck="false"
+            autocomplete="off"
+            class="flex-1 bg-transparent text-[#00FF88] font-mono text-xs border-none outline-none caret-[#00FF88]"
+          />
+        </form>
+      </div>
+
+      <!-- 3. Quick Command Bar Footer -->
+      <div class="px-3 py-2 bg-[#070b0f] border-t border-[#00FF88]/15 flex items-center gap-1.5 overflow-x-auto text-[10px] no-scrollbar flex-shrink-0">
+        <span class="text-white/40 uppercase tracking-widest text-[9px] mr-1">Quick:</span>
+        <button onclick="runCommand('help')" class="px-2 py-0.5 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88]">help</button>
+        <button onclick="runCommand('ls chats')" class="px-2 py-0.5 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88]">ls chats</button>
+        <button onclick="runCommand('status photo')" class="px-2 py-0.5 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88]">status photo</button>
+        <button onclick="runCommand('status text')" class="px-2 py-0.5 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88]">status text</button>
+        <button onclick="runCommand('call Alex Vance')" class="px-2 py-0.5 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88]">call</button>
+        <button onclick="runCommand('encrypt')" class="px-2 py-0.5 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88]">encrypt</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       1:1 CLONED MODALS (TEXT STATUS, PHOTO STATUS, CALLING, VIDEO)
+       ══════════════════════════════════════════════════════════════════ -->
+
+  <!-- MODAL A: 1:1 TEXT STATUS CREATOR -->
+  <div id="textStatusModal" class="hidden fixed inset-0 z-50 flex flex-col justify-between p-6 transition-all duration-300" style="background-color: #005c4b;">
+    <div class="flex items-center justify-between text-white/90 z-10">
+      <button onclick="closeTextStatusModal()" class="p-2 text-2xl hover:text-[#00FF88]">✕</button>
+      <div class="flex items-center gap-4">
+        <button onclick="cycleStatusPalette()" class="text-xl p-2 rounded-full hover:bg-black/20" title="Color Palette">🎨</button>
+        <button onclick="cycleStatusFont()" class="px-3 py-1 rounded-full bg-white/10 font-bold text-sm" title="Aa Font Selector">Aa</button>
+        <button class="text-lg p-2 rounded-full hover:bg-black/20">@</button>
+        <button onclick="saveTextStatus()" class="px-4 py-1.5 rounded-full bg-[#00FF88] text-black font-bold text-sm hover:brightness-110 shadow-lg">Done</button>
+      </div>
+    </div>
+
+    <div class="flex-1 flex items-center justify-center max-w-xl mx-auto w-full px-4">
+      <textarea
+        id="textStatusInput"
+        rows="4"
+        class="w-full bg-transparent text-center text-3xl md:text-4xl text-white placeholder-white/40 border-none outline-none resize-none leading-relaxed drop-shadow-md font-sans"
+      >Debugging 12k+ lines in chat.js is real 😭💔</textarea>
+    </div>
+
+    <div class="flex items-center justify-between max-w-md mx-auto w-full py-4 text-white/80">
+      <div class="flex items-center gap-2" id="fontPills">
+        <button onclick="setStatusFont('font-sans')" class="px-3 py-1 rounded-md text-xs font-semibold bg-white text-black">Sans</button>
+        <button onclick="setStatusFont('font-serif')" class="px-3 py-1 rounded-md text-xs font-semibold bg-white/10 text-white">Serif</button>
+        <button onclick="setStatusFont('font-mono')" class="px-3 py-1 rounded-md text-xs font-semibold bg-white/10 text-white">Mono</button>
+        <button onclick="setStatusFont('font-display uppercase tracking-widest')" class="px-3 py-1 rounded-md text-xs font-semibold bg-white/10 text-white">Cyber</button>
+      </div>
+      <div class="text-xs text-white/50 font-mono">1:1 Status</div>
+    </div>
+  </div>
+
+
+  <!-- MODAL B: 1:1 PHOTO STATUS EDITOR (CHANDELIER + B&W FILTER HIGHLIGHTED) -->
+  <div id="photoStatusModal" class="hidden fixed inset-0 z-50 bg-[#080D14] flex flex-col justify-between text-white select-none">
+    <!-- Top Bar: Back arrow on left, 3 stacked buttons on right (rotate, bulb, sticker) -->
+    <div class="flex items-center justify-between px-5 py-4 z-10 bg-gradient-to-b from-black/80 to-transparent">
+      <button onclick="closePhotoStatusModal()" class="text-2xl hover:text-[#00FF88] p-1">←</button>
+      <div class="flex items-center gap-3">
+        <button onclick="rotateChandelierPhoto()" class="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center hover:border-[#00FF88] hover:text-[#00FF88] text-base" title="Rotate 90°">
+          ↻
+        </button>
+        <button id="photoBulbBtn" onclick="togglePhotoExposure()" class="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-base" title="Bulb / Exposure">
+          💡
+        </button>
+        <button class="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-base" title="Sticker Mask">
+          🎭
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Chandelier Photo with Live Rotation & Filter -->
+    <div class="flex-1 flex items-center justify-center px-4 overflow-hidden">
+      <div class="relative max-w-sm w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-2xl bg-black border border-white/10 flex items-center justify-center">
+        <div id="chandelierContainer" class="w-full h-full flex flex-col items-center justify-center transition-all duration-300" style="filter: grayscale(1) contrast(1.4) brightness(1.05);">
+          <!-- Ceiling chandelier vector art -->
+          <svg viewBox="0 0 400 500" class="w-full h-full object-contain p-6">
+            <defs>
+              <radialGradient id="chandelierLight" cx="50%" cy="35%" r="50%">
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.95" />
+                <stop offset="50%" stopColor="#9ca3af" stopOpacity="0.5" />
+                <stop offset="100%" stopColor="#111827" stopOpacity="0" />
+              </radialGradient>
+            </defs>
+            <rect width="400" height="500" fill="#030712" />
+            <ellipse cx="200" cy="45" rx="80" ry="20" fill="#1f2937" stroke="#9ca3af" stroke-width="2" />
+            <line x1="200" y1="45" x2="200" y2="110" stroke="#d1d5db" stroke-width="3" />
+            <circle cx="200" cy="220" r="140" fill="url(#chandelierLight)" />
+            <ellipse cx="200" cy="140" rx="60" ry="16" fill="none" stroke="#f3f4f6" stroke-width="3" />
+            <ellipse cx="200" cy="200" rx="110" ry="28" fill="none" stroke="#f9fafb" stroke-width="4" />
+            <ellipse cx="200" cy="260" rx="80" ry="20" fill="none" stroke="#e5e7eb" stroke-width="3" />
+            <g stroke="#d1d5db" stroke-width="1.5">
+              <line x1="100" y1="200" x2="100" y2="240" />
+              <line x1="140" y1="200" x2="140" y2="255" />
+              <line x1="180" y1="200" x2="180" y2="270" />
+              <line x1="220" y1="200" x2="220" y2="270" />
+              <line x1="260" y1="200" x2="260" y2="255" />
+              <line x1="300" y1="200" x2="300" y2="240" />
+            </g>
+            <text x="200" y="440" text-anchor="middle" fill="#9ca3af" font-size="13" font-family="monospace">
+              PHOTO STATUS // CHANDELIER B&W
+            </text>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Filter Carousel: 5 circles (Minus, Peach, B&W SELECTED with white ring, Orange, Cyan) -->
+    <div class="bg-[#050811]/95 backdrop-blur-md border-t border-white/10 pt-4 pb-6 px-4 flex flex-col items-center gap-3">
+      <!-- Label above selected filter: "B&W" in black pill -->
+      <div id="photoFilterLabel" class="bg-black/90 text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20 shadow-md">
+        B&W
+      </div>
+
+      <!-- 5 Circles Carousel -->
+      <div class="flex items-center gap-4 py-1">
+        <button onclick="setPhotoFilter('normal', 'none', 'Normal', this)" class="photo-filter-circle w-12 h-12 rounded-full bg-[#202c33] flex items-center justify-center font-bold text-xs opacity-70 hover:opacity-100 transition-all">
+          —
+        </button>
+        <button onclick="setPhotoFilter('peach', 'sepia(0.35) saturate(1.8) hue-rotate(-20deg)', 'Peach', this)" class="photo-filter-circle w-12 h-12 rounded-full bg-[#fbb6ce] opacity-70 hover:opacity-100 transition-all">
+        </button>
+        <!-- B&W SELECTED with white border 1:1 -->
+        <button onclick="setPhotoFilter('bw', 'grayscale(1) contrast(1.4) brightness(1.05)', 'B&W', this)" class="photo-filter-circle w-12 h-12 rounded-full bg-[#64748b] flex items-center justify-center text-xs font-bold ring-4 ring-white ring-offset-2 ring-offset-black scale-110 shadow-lg">
+          B&W
+        </button>
+        <button onclick="setPhotoFilter('sepia', 'sepia(0.85) contrast(1.15)', 'Sepia', this)" class="photo-filter-circle w-12 h-12 rounded-full bg-[#fb923c] opacity-70 hover:opacity-100 transition-all">
+        </button>
+        <button onclick="setPhotoFilter('cyan', 'hue-rotate(150deg) saturate(2) brightness(0.95)', 'Cyan', this)" class="photo-filter-circle w-12 h-12 rounded-full bg-[#38bdf8] opacity-70 hover:opacity-100 transition-all">
+        </button>
+      </div>
+
+      <!-- Bottom Tabs: Effects, Filters (dot selected), Background -->
+      <div class="flex items-center gap-8 mt-2 text-xs font-semibold text-white/60">
+        <button class="pb-1 hover:text-white">Effects</button>
+        <button class="flex items-center gap-1.5 pb-1 border-b-2 border-[#00FF88] text-white font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#00FF88]"></span>
+          Filters
+        </button>
+        <button class="pb-1 hover:text-white">Background</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL C: 1:1 VOICE CALLING SCREEN (+1 (218) 296-1795) -->
+  <div id="voiceCallModal" class="hidden fixed inset-0 z-50 bg-[#060A12] flex flex-col justify-between text-white select-none overflow-hidden">
+    <!-- Blurred Background with radial vignette -->
+    <div class="absolute inset-0 pointer-events-none opacity-25 filter blur-lg">
+      <div class="w-full h-full bg-gradient-to-b from-blue-900/30 via-emerald-950/20 to-black"></div>
+    </div>
+
+    <!-- Top Center Caller ID + Top Right 3 Circular Stacked Buttons -->
+    <div class="relative z-10 pt-4 px-6 flex justify-between items-start">
+      <div class="text-xs font-mono text-white/50 tracking-wider">
+        <span>20:25</span> · <span>VoLTE</span> · <span>4G</span> · <span>955 B/S</span>
+      </div>
+
+      <!-- 3 Stacked Buttons on Right (Circled in user prompt) -->
+      <div class="flex flex-col gap-3">
+        <button onclick="logTerminal('[CALL] Added participant to voice link')" class="w-11 h-11 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-sm hover:border-[#00FF88] hover:text-[#00FF88] shadow-lg" title="Add Person">
+          <i class="fa-solid fa-user-plus"></i>
+        </button>
+        <button onclick="logTerminal('[CALL] Flipped camera perspective')" class="w-11 h-11 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-sm hover:border-[#00FF88] hover:text-[#00FF88] shadow-lg" title="Flip Camera">
+          <i class="fa-solid fa-camera-rotate"></i>
+        </button>
+        <button onclick="logTerminal('[CALL] Magic wand filters opened')" class="w-11 h-11 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-sm hover:border-[#00FF88] hover:text-[#00FF88] shadow-lg" title="Magic Effects">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Caller Name and Number 1:1 -->
+    <div class="relative z-10 -mt-16 text-center">
+      <h2 id="callTargetPhone" class="text-2xl md:text-3xl font-bold tracking-wide text-white drop-shadow-md">
+        +1 (218) 296-1795
+      </h2>
+      <p id="callTargetName" class="text-sm text-[#00FF88] font-mono mt-0.5 tracking-wider font-semibold">
+        Alex Vance
+      </p>
+      <div class="flex items-center justify-center gap-2 mt-1 text-sm text-white/70 font-medium">
+        <span class="w-2 h-2 rounded-full bg-[#00FF88] animate-ping"></span>
+        <span id="callTimerLabel">Calling...</span>
+      </div>
+    </div>
+
+    <!-- Center Chandelier Graphic & Banner -->
+    <div class="relative z-10 flex-1 flex flex-col items-center justify-center px-4">
+      <!-- Muted notifications banner 1:1 -->
+      <div class="bg-black/70 backdrop-blur-md border border-white/15 px-4 py-2 rounded-full text-xs text-white/80 shadow-lg flex items-center gap-2 mb-8">
+        <i class="fa-solid fa-bell-slash text-[#00FF88]"></i>
+        <span>Calls and notifications will be muted</span>
+      </div>
+
+      <!-- Pulsing Waveform Bars -->
+      <div class="flex items-center gap-1.5 h-12">
+        <span class="w-1.5 bg-[#00FF88] rounded-full h-4 animate-pulse"></span>
+        <span class="w-1.5 bg-[#00FF88] rounded-full h-8 animate-pulse delay-75"></span>
+        <span class="w-1.5 bg-[#00FF88] rounded-full h-12 animate-pulse delay-150"></span>
+        <span class="w-1.5 bg-[#00FF88] rounded-full h-6 animate-pulse delay-100"></span>
+        <span class="w-1.5 bg-[#00FF88] rounded-full h-10 animate-pulse delay-200"></span>
+        <span class="w-1.5 bg-[#00FF88] rounded-full h-5 animate-pulse"></span>
+      </div>
+    </div>
+
+    <!-- Bottom 5 Controls 1:1 (More, Video Off, Speaker ON white, Mute, Red End Call) -->
+    <div class="relative z-10 bg-black/85 backdrop-blur-lg border-t border-white/10 px-6 py-6 flex items-center justify-around max-w-lg mx-auto w-full rounded-t-3xl">
+      <!-- 1. More (3 dots) -->
+      <button onclick="logTerminal('[CALL] Call settings dropdown opened')" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg text-white" title="More">
+        ⋯
+      </button>
+
+      <!-- 2. Video Off -->
+      <button id="callVideoToggle" onclick="toggleCallVideo()" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg text-white" title="Video Off">
+        <i class="fa-solid fa-video-slash"></i>
+      </button>
+
+      <!-- 3. Speaker (WHITE CIRCULAR HIGHLIGHT SELECTED 1:1) -->
+      <button id="callSpeakerToggle" onclick="toggleCallSpeaker()" class="w-14 h-14 rounded-full bg-white text-black font-bold flex items-center justify-center text-xl shadow-xl scale-105" title="Speakerphone (Active)">
+        <i class="fa-solid fa-volume-high"></i>
+      </button>
+
+      <!-- 4. Mute Mic crossed -->
+      <button id="callMicToggle" onclick="toggleCallMic()" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-lg text-white" title="Mute Mic">
+        <i class="fa-solid fa-microphone-slash"></i>
+      </button>
+
+      <!-- 5. Red End Call -->
+      <button onclick="endVoiceCall()" class="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 active:scale-95 flex items-center justify-center text-2xl text-white shadow-xl shadow-red-600/40" title="End Call">
+        <i class="fa-solid fa-phone-slash"></i>
+      </button>
+    </div>
+  </div>
+
+
+  <!-- MODAL D: VIDEO CALL MESH GRID -->
+  <div id="videoCallModal" class="hidden fixed inset-0 z-50 bg-[#070b12] flex flex-col justify-between text-white p-4 select-none">
+    <div class="flex items-center justify-between z-10 bg-black/50 backdrop-blur-md px-4 py-3 rounded-xl border border-white/10">
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 rounded-full bg-[#00FF88] animate-ping"></span>
+        <span class="font-bold text-sm">NEX Encrypted Video Mesh</span>
+        <span id="videoTargetLabel" class="text-xs text-white/50 font-mono">| Alex Vance</span>
+      </div>
+      <button onclick="closeVideoCallModal()" class="text-white/70 hover:text-white text-lg">✕</button>
+    </div>
+
+    <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
+      <div class="relative bg-[#0c1424] rounded-2xl overflow-hidden border border-white/10 flex items-center justify-center">
+        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600" alt="Remote" class="w-full h-full object-cover">
+        <div class="absolute bottom-3 left-3 bg-black/60 px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#00FF88]"></span>
+          <span>Alex Vance</span>
+        </div>
+      </div>
+      <div class="relative bg-[#0a0e17] rounded-2xl overflow-hidden border border-[#00FF88]/30 flex flex-col items-center justify-center shadow-lg shadow-[#00FF88]/10">
+        <div class="w-20 h-20 rounded-full border-2 border-[#00FF88] p-1 mb-2">
+          <img src="logo.jpg" alt="You" class="w-full h-full rounded-full object-cover">
+        </div>
+        <p class="font-mono text-xs text-[#00FF88]">Operative (You)</p>
+        <div class="absolute bottom-3 left-3 bg-black/60 px-3 py-1 rounded-md text-xs font-semibold">You (Encrypted)</div>
+      </div>
+    </div>
+
+    <div class="bg-black/60 backdrop-blur-lg border border-white/10 px-6 py-4 rounded-2xl flex items-center justify-center gap-6 max-w-md mx-auto w-full">
+      <button onclick="logTerminal('[VIDEOCALL] Camera toggled')" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-lg"><i class="fa-solid fa-camera"></i></button>
+      <button onclick="logTerminal('[VIDEOCALL] Mic toggled')" class="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 text-lg"><i class="fa-solid fa-microphone"></i></button>
+      <button onclick="closeVideoCallModal()" class="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 text-xl shadow-lg"><i class="fa-solid fa-phone-slash"></i></button>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       CLIENT LOGIC & TWO-WAY TERMINAL SYNCHRONIZATION ENGINE
+       ══════════════════════════════════════════════════════════════════ -->
+  <script type="module">
+    import { INITIAL_CHATS } from './src/nexchat-app/lib/initialChats.js';
+
+    // ─── LOCAL STORAGE INITIALIZATION ───
+    const STORAGE_KEY = 'nexchat_data_store';
+    let chats = [];
+
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_CHATS));
+        chats = INITIAL_CHATS;
+      } else {
+        chats = JSON.parse(raw);
+      }
+    } catch (e) {
+      chats = INITIAL_CHATS;
+    }
+
+    function saveChats() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(chats));
+      } catch (e) {
+        console.error('Failed to save to localStorage', e);
+      }
+    }
+
+    let activeChatId = 'nexchat-system';
+    let currentFilter = 'all';
+    let callTimerInterval = null;
+    let callDurationSec = 0;
+    let chandelierRotation = 0;
+    let chandelierExposure = false;
+
+    // ─── TERMINAL LOG SYSTEM ───
+    window.logTerminal = function(msg, type = 'info') {
+      const container = document.getElementById('termLogsContainer');
+      if (!container) return;
+
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const row = document.createElement('div');
+      row.className = 'text-[11px] font-mono leading-relaxed';
+      
+      if (type === 'error') {
+        row.innerHTML = `<span class="text-white/30">[${time}]</span> <span class="text-red-400 font-bold">${msg}</span>`;
+      } else if (type === 'success') {
+        row.innerHTML = `<span class="text-white/30">[${time}]</span> <span class="text-[#00FF88] font-bold">${msg}</span>`;
+      } else {
+        row.innerHTML = `<span class="text-white/30">[${time}]</span> <span class="text-[#00D4FF]">${msg}</span>`;
+      }
+
+      container.appendChild(row);
+      const termScreen = document.getElementById('terminalScreen');
+      if (termScreen) termScreen.scrollTop = termScreen.scrollHeight;
+    };
+
+    window.clearTerminal = function() {
+      const container = document.getElementById('termLogsContainer');
+      if (container) container.innerHTML = '';
+      logTerminal('✓ Terminal buffer cleared.', 'success');
+    };
+
+    window.focusTermInput = function() {
+      document.getElementById('termInputField')?.focus();
+    };
+
+    // ─── RENDER CHAT LIST ───
+    function renderChatList() {
+      const container = document.getElementById('chatListContainer');
+      if (!container) return;
+
+      const q = (document.getElementById('chatSearchInput')?.value || '').toLowerCase().trim();
+      
+      const filtered = chats.filter((c) => {
+        if (currentFilter === 'unread' && (!c.unreadCount || c.unreadCount === 0)) return false;
+        if (currentFilter === 'groups' && !c.isGroup) return false;
+        if (currentFilter === 'logs' && c.id !== 'nexchat-system') return false;
+
+        if (q) {
+          const matchName = c.name.toLowerCase().includes(q);
+          const lastMsg = c.messages[c.messages.length - 1];
+          const matchMsg = lastMsg?.text?.toLowerCase().includes(q) || lastMsg?.code?.toLowerCase().includes(q);
+          return matchName || matchMsg;
+        }
+        return true;
+      });
+
+      container.innerHTML = filtered.map((c) => {
+        const isActive = c.id === activeChatId;
+        const lastMsg = c.messages[c.messages.length - 1];
+        let msgSnippet = lastMsg?.text || '';
+        if (lastMsg?.type === 'voice') msgSnippet = '🎤 Voice note (' + lastMsg.duration + ')';
+        if (lastMsg?.type === 'file') msgSnippet = '📄 ' + lastMsg.fileName;
+        if (lastMsg?.type === 'poll') msgSnippet = '📊 ' + lastMsg.question;
+        if (lastMsg?.type === 'code') msgSnippet = '</> Code block';
+
+        return `
+          <div
+            onclick="selectChat('${c.id}')"
+            class="flex items-center gap-3 px-3.5 py-3 cursor-pointer transition-all duration-150 ${
+              isActive ? 'bg-[#2a3942] border-l-4 border-[#00FF88]' : 'hover:bg-[#202c33]/70'
+            }"
+          >
+            <div class="relative flex-shrink-0">
+              <div class="w-12 h-12 rounded-full p-[2px] ${c.statusRing ? 'ring-2 ring-[#00FF88] ring-offset-2 ring-offset-[#111B21]' : ''}">
+                <img src="${c.avatar}" alt="${c.name}" class="w-full h-full rounded-full object-cover bg-black">
+              </div>
+              ${c.isOnline ? '<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#00FF88] border-2 border-[#111B21]"></span>' : ''}
+            </div>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between mb-1">
+                <h4 class="text-sm font-semibold truncate ${isActive ? 'text-white' : 'text-white/90'}">
+                  ${c.id === 'nexchat-system' ? '<span class="text-[#00FF88] font-bold">⚡ NEXCHAT SYSTEM</span>' : c.name}
+                </h4>
+                <span class="text-[11px] font-mono whitespace-nowrap ml-2 ${c.unreadCount > 0 ? 'text-[#00FF88] font-bold' : 'text-white/40'}">
+                  ${lastMsg?.timestamp || '10:00 AM'}
+                </span>
+              </div>
+              <div class="flex items-center justify-between text-xs text-white/50">
+                <span class="truncate pr-2">${msgSnippet}</span>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  ${c.isPinned ? '<span class="text-[10px]">📌</span>' : ''}
+                  ${c.isMuted ? '<span class="text-[10px]">🔇</span>' : ''}
+                  ${c.unreadCount > 0 ? `<span class="bg-[#00a884] text-[#111B21] font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center">${c.unreadCount}</span>` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ─── SELECT ACTIVE CHAT ───
+    window.selectChat = function(id) {
+      activeChatId = id;
+      const target = chats.find(c => c.id === id);
+      if (target) {
+        target.unreadCount = 0;
+        saveChats();
+        renderChatList();
+        renderCenterChat();
+        logTerminal(`[SYSTEM] Opened chat: ${target.name}`, 'info');
+      }
+    };
+
+    // ─── RENDER CENTER CHAT ───
+    function formatChatMessage(str) {
+      if (!str) return '';
+      return str
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/\*([^*]+)\*/g, '<strong class="font-bold text-white">$1</strong>')
+        .replace(/_([^_]+)_/g, '<em class="italic text-white/90">$1</em>')
+        .replace(/~([^~]+)~/g, '<del class="line-through text-white/60">$1</del>');
+    }
+
+    function renderCenterChat() {
+      const active = chats.find(c => c.id === activeChatId) || chats[0];
+      if (!active) return;
+
+      document.getElementById('activeChatAvatar').src = active.avatar;
+      document.getElementById('activeChatName').innerHTML = active.id === 'nexchat-system' 
+        ? `NEXCHAT SYSTEM <span class="text-[9px] bg-[#00FF88]/20 text-[#00FF88] px-1.5 py-0.5 rounded font-mono font-bold">VERIFIED</span>`
+        : active.name;
+      document.getElementById('activeChatStatus').textContent = active.lastSeen || (active.isOnline ? 'Online' : 'Encrypted');
+
+      const dot = document.getElementById('activeChatOnlineDot');
+      if (dot) dot.style.display = active.isOnline ? 'block' : 'none';
+
+      const listContainer = document.getElementById('messagesList');
+      if (!listContainer) return;
+
+      listContainer.innerHTML = active.messages.map((m) => {
+        const isMe = m.sender === 'me';
+        let contentHtml = '';
+
+        if (m.type === 'text') {
+          contentHtml = `<div class="text-sm leading-relaxed whitespace-pre-wrap break-words">${formatChatMessage(m.text)}</div>`;
+        } else if (m.type === 'code') {
+          contentHtml = `
+            <div class="mt-1">
+              <div class="flex items-center justify-between text-[10px] font-mono text-[#00FF88] pb-1 border-b border-white/10 mb-1">
+                <span>// Terminal Code</span>
+                <span class="text-white/40">AES-256</span>
+              </div>
+              <pre class="bg-[#0a0f16] text-[#00FF88] p-2.5 rounded font-mono text-xs overflow-x-auto border border-[#00FF88]/20"><code>${m.code}</code></pre>
+            </div>
+          `;
+        } else if (m.type === 'voice') {
+          contentHtml = `
+            <div class="flex items-center gap-3 py-1 min-w-[210px]">
+              <button onclick="logTerminal('[AUDIO] Playing voice note: ${m.duration}')" class="w-10 h-10 rounded-full bg-[#00FF88] text-black font-bold flex items-center justify-center flex-shrink-0 shadow-md">
+                ▶
+              </button>
+              <div class="flex-1">
+                <div class="flex items-center gap-1 h-5">
+                  <span class="w-1 bg-[#00FF88] h-3 rounded-full"></span>
+                  <span class="w-1 bg-[#00FF88] h-5 rounded-full"></span>
+                  <span class="w-1 bg-[#00FF88] h-2 rounded-full"></span>
+                  <span class="w-1 bg-[#00FF88] h-4 rounded-full"></span>
+                  <span class="w-1 bg-[#00FF88] h-6 rounded-full"></span>
+                  <span class="w-1 bg-[#00FF88] h-3 rounded-full"></span>
+                  <span class="w-1 bg-[#00FF88] h-5 rounded-full"></span>
+                  <span class="w-1 bg-[#00FF88] h-2 rounded-full"></span>
+                </div>
+                <div class="flex justify-between text-[10px] text-white/50 font-mono mt-1">
+                  <span>${m.duration}</span>
+                  <span>🎤 Encrypted PTT</span>
+                </div>
+              </div>
+            </div>
+          `;
+        } else if (m.type === 'poll') {
+          contentHtml = `
+            <div class="min-w-[230px] pt-1">
+              <div class="flex items-center gap-1.5 font-bold text-sm text-white mb-2">
+                <span>📊</span><span>${m.question}</span>
+              </div>
+              <div class="space-y-1.5">
+                ${m.options.map((opt, idx) => `
+                  <button onclick="logTerminal('[POLL] Voted for: ${opt.text}')" class="w-full text-left bg-black/30 hover:bg-black/50 p-2 rounded-lg border border-white/10 text-xs">
+                    <div class="flex justify-between font-medium mb-1">
+                      <span>${opt.text}</span>
+                      <span class="font-mono text-[#00FF88]">${opt.votes}</span>
+                    </div>
+                    <div class="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <div class="h-full bg-[#00FF88]" style="width: ${Math.min(100, opt.votes * 25)}%"></div>
+                    </div>
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        } else if (m.type === 'file') {
+          contentHtml = `
+            <div class="flex items-center gap-3 bg-black/30 p-2 rounded-lg border border-white/10 min-w-[210px]">
+              <span class="text-2xl text-[#00FF88]">📄</span>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-white truncate">${m.fileName}</p>
+                <p class="text-[10px] text-white/50 font-mono">${m.fileSize}</p>
+              </div>
+            </div>
+          `;
+        } else if (m.type === 'system') {
+          contentHtml = `<div class="text-xs text-white/60 font-mono text-center">${m.text}</div>`;
         }
 
-        function processCommand(cmd) {
-            if (cmd.trim() === '') return;
+        return `
+          <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+            <div class="max-w-[80%] rounded-2xl px-3.5 py-2 shadow-md ${
+              isMe ? 'bg-[#005c4b] text-white rounded-tr-xs' : 'bg-[#202c33] text-white rounded-tl-xs'
+            }">
+              ${contentHtml}
+              <div class="flex items-center justify-end gap-1 mt-1 text-[10px] text-white/50 font-mono">
+                <span>${m.timestamp || '10:00 AM'}</span>
+                ${isMe ? '<span class="text-[#53bdeb] text-xs">✓✓</span>' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
 
-            commandHistory.push(cmd);
-            historyIndex = -1;
+      const area = document.getElementById('chatMessagesArea');
+      if (area) area.scrollTop = area.scrollHeight;
+    }
 
-            const parts = cmd.split(' ');
-            const command = parts[0].toLowerCase();
-            const args = parts.slice(1);
+    // ─── SEND MESSAGE ───
+    window.handleSendMessage = function(e) {
+      if (e) e.preventDefault();
+      const input = document.getElementById('messageInputField');
+      const text = input?.value?.trim();
+      if (!text) return;
 
-            switch (command) {
-                case 'help':
-                    showHelp();
-                    break;
-                case 'setup':
-                    showLinodeSetup();
-                    break;
-                case 'clear':
-                case 'cls':
-                    term.clear();
-                    break;
-                case 'whoami':
-                    term.writeln(`\x1b[36mYou are: ${currentUser}\x1b[0m`);
-                    break;
-                case 'status':
-                    if (args.length > 0) {
-                        const status = args.join(' ');
-                        term.writeln(`\x1b[32mStatus updated: "${status}"\x1b[0m`);
-                        // In a real implementation, this would update Firebase
-                    } else {
-                        term.writeln('\x1b[33mUsage: status <your status message>\x1b[0m');
-                    }
-                    break;
-                case 'send':
-                    if (!isLoggedIn) {
-                        term.writeln('\x1b[31mError: Please login first with "login"\x1b[0m');
-                        return;
-                    }
-                    if (args.length < 2) {
-                        term.writeln('\x1b[33mUsage: send <username> <message>\x1b[0m');
-                        return;
-                    }
-                    const recipient = args[0];
-                    const message = args.slice(1).join(' ');
-                    term.writeln(`\x1b[32mMessage sent to ${recipient}: "${message}"\x1b[0m`);
-                    // In a real implementation, this would send via Firebase
-                    break;
-                case 'login':
-                    if (isLoggedIn) {
-                        term.writeln('\x1b[33mAlready logged in\x1b[0m');
-                        return;
-                    }
-                    // Simulate login - in real app, this would authenticate with Firebase
-                    currentUser = 'user123'; // Would get from Firebase auth
-                    isLoggedIn = true;
-                    term.writeln(`\x1b[32mLogged in as: ${currentUser}\x1b[0m`);
-                    break;
-                case 'logout':
-                    if (!isLoggedIn) {
-                        term.writeln('\x1b[33mNot logged in\x1b[0m');
-                        return;
-                    }
-                    currentUser = 'guest';
-                    isLoggedIn = false;
-                    term.writeln('\x1b[32mLogged out\x1b[0m');
-                    break;
-                case 'roll':
-                case 'dice':
-                    const sides = args[0] ? parseInt(args[0]) : 6;
-                    const result = Math.floor(Math.random() * sides) + 1;
-                    term.writeln(`\x1b[35m🎲 Rolled a ${sides}-sided die: ${result}\x1b[0m`);
-                    break;
-                case 'flip':
-                    const coinResult = Math.random() < 0.5 ? 'Heads' : 'Tails';
-                    term.writeln(`\x1b[35m🪙 Coin flip: ${coinResult}\x1b[0m`);
-                    break;
-                case 'quote':
-                    const quotes = [
-                        "The only way to do great work is to love what you do. - Steve Jobs",
-                        "Innovation distinguishes between a leader and a follower. - Steve Jobs",
-                        "The future belongs to those who believe in the beauty of their dreams. - Eleanor Roosevelt",
-                        "Code is poetry. - Unknown",
-                        "Stay curious, keep learning. - Unknown"
-                    ];
-                    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
-                    term.writeln(`\x1b[36m"${randomQuote}"\x1b[0m`);
-                    break;
-                case 'uptime':
-                    const uptime = Math.floor(Math.random() * 86400); // Random uptime in seconds
-                    const hours = Math.floor(uptime / 3600);
-                    const minutes = Math.floor((uptime % 3600) / 60);
-                    term.writeln(`\x1b[36mNEXCHAT Terminal uptime: ${hours}h ${minutes}m\x1b[0m`);
-                    break;
-                case 'version':
-                    term.writeln('\x1b[36mNEXCHAT Terminal v1.0.0\x1b[0m');
-                    break;
-                case 'echo':
-                    term.writeln(args.join(' '));
-                    break;
-                case 'date':
-                    term.writeln(`\x1b[36m${new Date().toLocaleString()}\x1b[0m`);
-                    break;
-                case 'exit':
-                    term.writeln('\x1b[33mUse the Close button to exit terminal\x1b[0m');
-                    break;
-                default:
-                    term.writeln(`\x1b[31mCommand not found: ${command}. Type "help" for available commands.\x1b[0m`);
-            }
+      const active = chats.find(c => c.id === activeChatId);
+      if (!active) return;
+
+      active.messages.push({
+        id: 'msg-' + Date.now(),
+        sender: 'me',
+        type: 'text',
+        text: text,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        status: 'sent'
+      });
+
+      input.value = '';
+      saveChats();
+      renderChatList();
+      renderCenterChat();
+      logTerminal(`[CHAT] Sent to ${active.name}: "${text}"`, 'success');
+    };
+
+    window.handleInputTyping = function(val) {
+      const btn = document.getElementById('sendOrMicBtn');
+      if (!btn) return;
+      if (val.trim()) {
+        btn.innerHTML = '➤';
+        btn.className = 'w-10 h-10 rounded-full bg-[#00a884] hover:bg-[#00FF88] text-black font-bold flex items-center justify-center transition-all flex-shrink-0';
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+        btn.className = 'w-10 h-10 rounded-full bg-white/10 hover:bg-[#00FF88] hover:text-black text-white/80 flex items-center justify-center transition-all flex-shrink-0';
+      }
+    };
+
+    window.toggleAttachDrawer = function() {
+      const d = document.getElementById('attachDrawer');
+      d?.classList.toggle('hidden');
+    };
+
+    window.handleAttachAction = function(name) {
+      document.getElementById('attachDrawer')?.classList.add('hidden');
+      logTerminal(`[ATTACH] Activated: ${name}`);
+    };
+
+    window.toggleEmojiDrawer = function() {
+      logTerminal('[EMOJI] Emoji drawer toggled');
+    };
+
+    // ─── TERMINAL COMMAND RUNNER ───
+    window.handleTermSubmit = function(e) {
+      e?.preventDefault();
+      const input = document.getElementById('termInputField');
+      const cmd = input?.value?.trim();
+      if (!cmd) return;
+      input.value = '';
+      runCommand(cmd);
+    };
+
+    window.runCommand = function(cmd) {
+      logTerminal(`nex@NEXCHAT:~$ ${cmd}`, 'success');
+
+      const parts = cmd.split(' ');
+      const main = parts[0].toLowerCase();
+      const target = parts.slice(1).join(' ').trim();
+
+      if (main === 'help') {
+        logTerminal(`
+Available Commands:
+  help                     - Show command reference
+  ls chats                 - List all conversations
+  ls unread                - List unread messages
+  open <name>              - Open chat (e.g. 'open Alex')
+  send <message>           - Send text to active conversation
+  sendcode <code>          - Send code snippet to active conversation
+  call [name]              - Launch 1:1 Voice Calling screen
+  videocall [name]         - Open Video Call grid
+  status text [text]       - Open 1:1 Text Status creator
+  status photo             - Open 1:1 Photo Status editor
+  pin <name>               - Toggle pinned status
+  mute <name>              - Toggle mute
+  encrypt                  - Execute matrix encryption simulation
+  clear                    - Clear terminal screen
+        `, 'info');
+      } 
+      else if (main === 'clear') {
+        clearTerminal();
+      }
+      else if (main === 'ls') {
+        if (parts[1]?.toLowerCase() === 'unread') {
+          const unread = chats.filter(c => c.unreadCount > 0);
+          if (unread.length === 0) logTerminal('No unread messages.');
+          else unread.forEach(c => logTerminal(`[UNREAD: ${c.unreadCount}] ${c.name}`));
+        } else {
+          chats.forEach((c, idx) => {
+            logTerminal(`${idx + 1}. [${c.isOnline ? 'ONLINE' : 'OFFLINE'}] ${c.name} ${c.isPinned ? '📌' : ''}`);
+          });
         }
-
-        function showHelp() {
-            term.writeln('\x1b[1;33mAvailable Commands:\x1b[0m');
-            term.writeln('\x1b[36m  help\x1b[0m          - Show this help message');
-            term.writeln('\x1b[36m  setup\x1b[0m         - Show Linode setup instructions');
-            term.writeln('\x1b[36m  clear/cls\x1b[0m    - Clear the terminal screen');
-            term.writeln('\x1b[36m  whoami\x1b[0m       - Show current user');
-            term.writeln('\x1b[36m  login\x1b[0m        - Login to NEXCHAT');
-            term.writeln('\x1b[36m  logout\x1b[0m       - Logout from NEXCHAT');
-            term.writeln('\x1b[36m  status <msg>\x1b[0m - Update your status');
-            term.writeln('\x1b[36m  send <user> <msg>\x1b[0m - Send message to user');
-            term.writeln('\x1b[36m  roll [sides]\x1b[0m - Roll a die (default 6 sides)');
-            term.writeln('\x1b[36m  flip\x1b[0m         - Flip a coin');
-            term.writeln('\x1b[36m  quote\x1b[0m        - Get a random quote');
-            term.writeln('\x1b[36m  uptime\x1b[0m       - Show terminal uptime');
-            term.writeln('\x1b[36m  version\x1b[0m      - Show terminal version');
-            term.writeln('\x1b[36m  echo <text>\x1b[0m  - Echo text back');
-            term.writeln('\x1b[36m  date\x1b[0m         - Show current date/time');
-            term.writeln('\x1b[36m  exit\x1b[0m         - Show exit instruction');
-            term.writeln('');
+      }
+      else if (main === 'open') {
+        if (!target) {
+          logTerminal('Usage: open <name>', 'error');
+          return;
         }
-
-        function showLinodeSetup() {
-            term.writeln('\x1b[1;33mTerminal Server Setup Instructions:\x1b[0m');
-            term.writeln('');
-            term.writeln('\x1b[36m1. Get a VPS Server:\x1b[0m');
-            term.writeln('   - Choose any cloud provider (AWS, DigitalOcean, etc.)');
-            term.writeln('   - Get Ubuntu 22.04 LTS server');
-            term.writeln('   - Note your server\'s IP address');
-            term.writeln('');
-            term.writeln('\x1b[36m2. Quick Setup:\x1b[0m');
-            term.writeln('   sudo apt update');
-            term.writeln('   sudo apt install ttyd');
-            term.writeln('   ttyd --port 8080 bash');
-            term.writeln('');
-            term.writeln('\x1b[36m3. Configure Firewall:\x1b[0m');
-            term.writeln('   sudo ufw allow 8080');
-            term.writeln('');
-            term.writeln('\x1b[36m4. Update Configuration:\x1b[0m');
-            term.writeln('   Replace LINODE_CONFIG.host with your server IP');
-            term.writeln('');
-            term.writeln('\x1b[33mFor production, implement proper authentication and SSL!\x1b[0m');
-            term.writeln('');
+        const match = chats.find(c => c.name.toLowerCase().includes(target.toLowerCase()));
+        if (match) {
+          selectChat(match.id);
+        } else {
+          logTerminal(`Contact not found: "${target}"`, 'error');
         }
-
-        // Event listeners
-        document.getElementById('clearBtn').addEventListener('click', () => {
-            term.clear();
-            showPrompt();
+      }
+      else if (main === 'send') {
+        const active = chats.find(c => c.id === activeChatId);
+        if (!active) {
+          logTerminal('No active chat selected. Use "open <name>"', 'error');
+          return;
+        }
+        const text = parts.slice(1).join(' ');
+        if (!text) {
+          logTerminal('Usage: send <message>', 'error');
+          return;
+        }
+        active.messages.push({
+          id: 'msg-' + Date.now(),
+          sender: 'me',
+          type: 'text',
+          text: text,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'sent'
         });
-
-        document.getElementById('helpBtn').addEventListener('click', () => {
-            term.writeln('');
-            showHelp();
-            showPrompt();
+        saveChats();
+        renderCenterChat();
+        renderChatList();
+        logTerminal(`[TERMINAL] Dispatched message to ${active.name}: "${text}"`, 'success');
+      }
+      else if (main === 'sendcode') {
+        const active = chats.find(c => c.id === activeChatId);
+        if (!active) return;
+        const code = parts.slice(1).join(' ') || `// NEX Quantum Cipher\nconst cipher = new NexE2E({ bits: 4096 });\nconsole.log('Zero-knowledge proof complete.');`;
+        active.messages.push({
+          id: 'msg-' + Date.now(),
+          sender: 'me',
+          type: 'code',
+          code: code,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: 'sent'
         });
+        saveChats();
+        renderCenterChat();
+        renderChatList();
+        logTerminal(`[TERMINAL] Code block inserted into ${active.name}`, 'success');
+      }
+      else if (main === 'call') {
+        const name = target || "+1 (218) 296-1795";
+        openVoiceCallModal(name);
+      }
+      else if (main === 'videocall') {
+        openVideoCallModal(target || "Alex Vance");
+      }
+      else if (main === 'status') {
+        if (parts[1]?.toLowerCase() === 'photo') {
+          openPhotoStatusModal();
+        } else if (parts[1]?.toLowerCase() === 'text') {
+          const txt = parts.slice(2).join(' ');
+          openTextStatusModal(txt);
+        } else {
+          logTerminal('Usage: status photo | status text <your status>');
+        }
+      }
+      else if (main === 'pin' || main === 'mute') {
+        const match = chats.find(c => c.name.toLowerCase().includes(target.toLowerCase()));
+        if (match) {
+          if (main === 'pin') match.isPinned = !match.isPinned;
+          if (main === 'mute') match.isMuted = !match.isMuted;
+          saveChats();
+          renderChatList();
+          logTerminal(`✓ Toggled ${main} for ${match.name}`, 'success');
+        } else {
+          logTerminal(`Contact not found: "${target}"`, 'error');
+        }
+      }
+      else if (main === 'encrypt') {
+        logTerminal('[CIPHER] Generating 4096-bit ephemeral keys...', 'info');
+        setTimeout(() => {
+          logTerminal('01001110 01000101 01011000 01000011 01001000 01000001 01010100', 'success');
+          logTerminal('✓ Quantum Key Exchange complete. Socket encrypted.', 'success');
+        }, 1200);
+      }
+      else {
+        logTerminal(`Command not recognized: "${cmd}". Type "help"`, 'error');
+      }
+    };
 
-        document.getElementById('closeBtn').addEventListener('click', () => {
-            if (window.parent && window.parent.closeTerminal) {
-                window.parent.closeTerminal();
-            } else {
-                window.location.href = 'chat.html';
-            }
-        });
+    // ─── SEARCH & FILTERS ───
+    window.handleSearch = function(val) {
+      document.getElementById('clearSearchBtn')?.classList.toggle('hidden', !val);
+      renderChatList();
+    };
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            fitAddon.fit();
-        });
+    window.clearSearch = function() {
+      const input = document.getElementById('chatSearchInput');
+      if (input) input.value = '';
+      document.getElementById('clearSearchBtn')?.classList.add('hidden');
+      renderChatList();
+    };
 
-        // Prevent context menu
-        document.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-        });
-    </script>
+    window.setFilter = function(f, btn) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-pill').forEach(b => {
+        b.className = 'filter-pill px-3 py-1 rounded-full font-medium bg-[#202C33] text-white/60 hover:text-white';
+      });
+      btn.className = 'filter-pill px-3 py-1 rounded-full font-bold bg-[#00a884] text-[#111B21] shadow-md';
+      renderChatList();
+      logTerminal(`[FILTER] Switched to: ${f}`);
+    };
+
+    // ─── MODAL CONTROLLERS ───
+    window.openTextStatusModal = function(initialText) {
+      const m = document.getElementById('textStatusModal');
+      m?.classList.remove('hidden');
+      if (initialText) {
+        document.getElementById('textStatusInput').value = initialText;
+      }
+      logTerminal('[STATUS] Opened 1:1 Text Status Creator');
+    };
+
+    window.closeTextStatusModal = function() {
+      document.getElementById('textStatusModal')?.classList.add('hidden');
+    };
+
+    const STATUS_PALETTES = ['#005c4b', '#59287a', '#792138', '#1b3b5f', '#8f5318', '#0b141a'];
+    let palIdx = 0;
+    window.cycleStatusPalette = function() {
+      palIdx = (palIdx + 1) % STATUS_PALETTES.length;
+      document.getElementById('textStatusModal').style.backgroundColor = STATUS_PALETTES[palIdx];
+      logTerminal('[STATUS] Palette updated');
+    };
+
+    window.setStatusFont = function(fontClass) {
+      const input = document.getElementById('textStatusInput');
+      if (input) input.className = `w-full bg-transparent text-center text-3xl md:text-4xl text-white placeholder-white/40 border-none outline-none resize-none leading-relaxed drop-shadow-md ${fontClass}`;
+      logTerminal('[STATUS] Font updated');
+    };
+
+    window.saveTextStatus = function() {
+      const val = document.getElementById('textStatusInput')?.value;
+      logTerminal(`[STATUS] Published status: "${val?.substring(0, 30)}..."`, 'success');
+      closeTextStatusModal();
+    };
+
+    // Photo Status Modal
+    window.openPhotoStatusModal = function() {
+      document.getElementById('photoStatusModal')?.classList.remove('hidden');
+      logTerminal('[STATUS] Opened 1:1 Photo Status Editor with B&W Chandelier');
+    };
+
+    window.closePhotoStatusModal = function() {
+      document.getElementById('photoStatusModal')?.classList.add('hidden');
+    };
+
+    window.rotateChandelierPhoto = function() {
+      chandelierRotation = (chandelierRotation + 90) % 360;
+      const el = document.getElementById('chandelierContainer');
+      if (el) el.style.transform = `rotate(${chandelierRotation}deg)`;
+      logTerminal(`[STATUS-PHOTO] Rotated chandelier -> ${chandelierRotation}°`);
+    };
+
+    window.togglePhotoExposure = function() {
+      chandelierExposure = !chandelierExposure;
+      const btn = document.getElementById('photoBulbBtn');
+      btn?.classList.toggle('text-[#00FF88]', chandelierExposure);
+      logTerminal(`[STATUS-PHOTO] Light / exposure: ${chandelierExposure ? 'ON' : 'OFF'}`);
+    };
+
+    window.setPhotoFilter = function(id, filterCss, name, btn) {
+      document.querySelectorAll('.photo-filter-circle').forEach(b => {
+        b.className = 'photo-filter-circle w-12 h-12 rounded-full opacity-70 hover:opacity-100 transition-all';
+        if (b.textContent.includes('—')) b.classList.add('bg-[#202c33]');
+        else if (b.textContent.includes('B&W')) b.classList.add('bg-[#64748b]');
+      });
+      btn.className = 'photo-filter-circle w-12 h-12 rounded-full flex items-center justify-center text-xs font-bold ring-4 ring-white ring-offset-2 ring-offset-black scale-110 shadow-lg';
+      
+      const el = document.getElementById('chandelierContainer');
+      if (el) el.style.filter = filterCss;
+      const lbl = document.getElementById('photoFilterLabel');
+      if (lbl) lbl.textContent = name;
+      logTerminal(`[STATUS-PHOTO] Filter selected: ${name}`);
+    };
+
+    // Voice Calling Modal
+    window.openVoiceCallModal = function(name = "+1 (218) 296-1795") {
+      document.getElementById('voiceCallModal')?.classList.remove('hidden');
+      document.getElementById('callTargetPhone').textContent = name.includes('+1') ? name : '+1 (218) 296-1795';
+      document.getElementById('callTargetName').textContent = name;
+      
+      callDurationSec = 0;
+      clearInterval(callTimerInterval);
+      callTimerInterval = setInterval(() => {
+        callDurationSec++;
+        const mins = Math.floor(callDurationSec / 60);
+        const secs = callDurationSec % 60;
+        document.getElementById('callTimerLabel').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      }, 1000);
+
+      logTerminal(`[CALL] Connecting to ${name}... Voice call screen active`, 'success');
+    };
+
+    window.endVoiceCall = function() {
+      clearInterval(callTimerInterval);
+      document.getElementById('voiceCallModal')?.classList.add('hidden');
+      logTerminal('[CALL] Ended voice call', 'error');
+    };
+
+    window.toggleCallSpeaker = function() {
+      const btn = document.getElementById('callSpeakerToggle');
+      btn?.classList.toggle('bg-white');
+      btn?.classList.toggle('text-black');
+      logTerminal('[CALL] Toggled speakerphone');
+    };
+
+    window.toggleCallMic = function() {
+      const btn = document.getElementById('callMicToggle');
+      btn?.classList.toggle('bg-red-500');
+      logTerminal('[CALL] Toggled microphone mute');
+    };
+
+    window.toggleCallVideo = function() {
+      logTerminal('[CALL] Toggled video feed');
+    };
+
+    // Video Calling Modal
+    window.openVideoCallModal = function(name = "Alex Vance") {
+      document.getElementById('videoCallModal')?.classList.remove('hidden');
+      document.getElementById('videoTargetLabel').textContent = `| ${name}`;
+      logTerminal(`[VIDEOCALL] Joined video mesh with ${name}`, 'success');
+    };
+
+    window.closeVideoCallModal = function() {
+      document.getElementById('videoCallModal')?.classList.add('hidden');
+      logTerminal('[VIDEOCALL] Left video mesh');
+    };
+
+    // Initialize View
+    renderChatList();
+    renderCenterChat();
+    logTerminal('⚡ NEXCHAT 3-Panel Terminal Environment initialized.', 'success');
+  </script>
 </body>
-</html></content>
-<parameter name="filePath">c:\Users\Baha\Desktop\NEXCHAT\terminal.html
+</html>

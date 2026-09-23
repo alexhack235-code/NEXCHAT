@@ -711,6 +711,23 @@ html, body {
   z-index: 20;
 }
 
+/* Custom Encrypted Chat Wallpaper Support */
+.app[data-custom-bg="true"] .chat-detail-view {
+  background: transparent !important;
+}
+
+.app[data-custom-bg="true"] .messages-area,
+.messages-area.has-custom-wallpaper {
+  background-color: rgba(6, 10, 20, 0.45) !important;
+  backdrop-filter: blur(1.5px);
+  -webkit-backdrop-filter: blur(1.5px);
+}
+
+.app[data-custom-bg="true"] .nex-virtual-scroller {
+  background: transparent !important;
+}
+
+
 /* Chat Detail Header */
 .chat-detail-header {
   height: 64px;

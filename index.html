@@ -20,9 +20,13 @@
 <body>
 
 <div class="login-container">
+  <a href="landing.html" class="landing-preview-pill" style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(0, 240, 118, 0.08); border: 1px solid rgba(0, 240, 118, 0.3); border-radius: 9999px; color: #00ff88; font-size: 11.5px; font-weight: 600; text-decoration: none; margin-bottom: 16px; transition: all 0.2s;">
+    <i class="fa-solid fa-sparkles"></i> Explore Video Showcase & Features →
+  </a>
   <img src="logo.jpg" class="logo" alt="NEXCHAT Logo">
   <h2>WELCOME TO NEXCHAT</h2>
   <p class="subtitle">Sign in fast and securely. Use email, password, or connect with Google for instant access.</p>
+
 
   <form id="loginForm" aria-describedby="result" autocomplete="on">
     <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" required>
@@ -54,7 +58,11 @@
     <p id="googleConnectLink" class="google-hint">Connect your Google account to NEXCHAT</p>
   </div>
 
-  <button type="button" class="page-action-btn secondary" onclick="location.href='link-device.html'" style="width: 100%; margin-top: 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; border-color: rgba(0, 255, 102, 0.4); color: #00ff66;">
+  <button type="button" class="page-action-btn" onclick="location.href='terminal.html'" style="width: 100%; margin-top: 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #00FF88, #00D4FF); color: #050811; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(0, 255, 136, 0.35);">
+    <i class="fa-solid fa-terminal"></i> Open NEXCHAT Hacker Terminal App
+  </button>
+
+  <button type="button" class="page-action-btn secondary" onclick="location.href='link-device.html'" style="width: 100%; margin-top: 6px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; border-color: rgba(0, 255, 102, 0.4); color: #00ff66;">
     <i class="fa-solid fa-qrcode"></i> Log In with Linked Device
   </button>
 

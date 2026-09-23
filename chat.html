@@ -267,8 +267,12 @@
               <p id="statusText" class="status-dot">🟢 Online</p>
             </div>
           </div>
-          <button id="menuBtn" class="three-dots-menu" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          <div style="display: flex; align-items: center; gap: 4px;">
+            <button id="quickWallpaperBtn" class="header-icon-btn" title="Chat Wallpaper" style="background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s;"><i class="fa-solid fa-palette"></i></button>
+            <button id="menuBtn" class="three-dots-menu" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
         </div>
+
 
         <!-- Messages Area -->
         <div id="chatReloadOverlay" class="chat-reload-overlay" aria-hidden="true">
@@ -983,11 +987,13 @@
             <!-- Global Background -->
             <div class="settings-section">
               <h3><i class="fa-solid fa-image"></i> Global Background</h3>
-              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Personalize the chat canvas with your own background wallpaper.</p>
+              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Personalize the chat canvas with your own background wallpaper or iconic encrypted presets.</p>
+              <button type="button" class="btn-primary" onclick="if(window.openChatWallpaperPicker) window.openChatWallpaperPicker();" style="width: 100%; margin-bottom: 14px; background: linear-gradient(135deg, #00a884, #00ff88); color: #041014; font-weight: 700; border: none; padding: 10px; border-radius: 10px; cursor: pointer;"><i class="fa-solid fa-palette"></i> Browse Chat Wallpaper Presets</button>
               <div class="setting-item">
-                <label for="backgroundImageInput"><strong>Choose Image</strong></label>
+                <label for="backgroundImageInput"><strong>Or Upload Custom Image</strong></label>
                 <input type="file" id="backgroundImageInput" accept="image/*" class="settings-file-input">
               </div>
+
               <div style="display: flex; gap: 10px; margin-top: 10px;">
                 <button id="uploadBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Upload</button>
                 <button id="removeBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Remove</button>

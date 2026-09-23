@@ -1,9 +1,33 @@
 import { put } from '@vercel/blob';
 import { enforceRateLimit, applySecurityHeaders, validatePathname } from './_security.js';
 
+// Primary Storage Tokens
 const TOKENS = {
-  profile: process.env.BLOB_READ_WRITE_TOKEN_PROFILE || 'vercel_blob_rw_6jE4Rmq8yxXdf44A_5LFgLj0KyQo2FJL2ZlfAsZi0sz1TkT',
-  media: process.env.BLOB_READ_WRITE_TOKEN_MEDIA || 'vercel_blob_rw_gtJQxz5ceKzxuHQ4_dSB2eVkAN67doAK5FQCOAskpTim8yJ',
+  default: process.env.BLOB_READ_WRITE_TOKEN || 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO',
+  media: process.env.BLOB_READ_WRITE_TOKEN_MEDIA || 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO',
+  profile: process.env.BLOB_READ_WRITE_TOKEN_PROFILE || 'vercel_blob_rw_1Z4MEej7ip5Jg9Wz_ggfb5Dc875zyDAesscTkLSCJHTAd3x',
+  background: process.env.BLOB_READ_WRITE_TOKEN_BACKGROUNDS || 'vercel_blob_rw_XAJz4dhkF8UAvds3_Vz2gcF2BOX9o6vYTitpsddNVptAM9N',
+};
+
+// 5 General Backup Storage Vaults for Auto-Failover
+const BACKUP_VAULTS = [
+  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_1 || 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46',
+  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_2 || 'vercel_blob_rw_R29NmygDYq5JNlCP_HeT8UNIzVbzaXvlpaWRnlLW5JK1uMW',
+  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_3 || 'vercel_blob_rw_Ml2xzmRr7zfPbbNR_5ledwKe6WoX6FU9Uo3czUBOMTzXph7',
+  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_4 || 'vercel_blob_rw_XqXC45KxrpuccoHS_BfdjMCGndscRb8141ZuH35srLp2ruX',
+  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_5 || 'vercel_blob_rw_SboFYX9ACstEsmLG_dAAe8Nmg8MYaEGDJh2TuyZxM1Loy8l',
+];
+
+// Private Storage Vaults (Served exclusively through secure streaming proxy)
+const PRIVATE_VAULTS = {
+  1: {
+    token: process.env.BLOB_READ_WRITE_TOKEN_PRIVATE_1 || 'vercel_blob_rw_tqRnUFMUwpg0yuA9_uikx2vQ93pZEASEmqbTT4vCg9m8jjE',
+    name: 'PRIVATE VAULT 1',
+  },
+  2: {
+    token: process.env.BLOB_READ_WRITE_TOKEN_PRIVATE_2 || 'vercel_blob_rw_sjHClcYCD5zg7FSx_jyWNaUo5tgKubvWNtYrgmWdwNJzAly',
+    name: 'PRIVATE VAULT 2',
+  },
 };
 
 // NEX-REELS Multi-Vault Storage Configuration (Vault 0 through 5)
@@ -14,7 +38,7 @@ const REELS_VAULTS = {
     name: 'NEX-REELS VAULT 0',
   },
   1: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_1 || '',
+    token: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_1 || 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46',
     access: 'private',
     name: 'NEX-REELS VAULT 1',
   },
@@ -83,7 +107,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1. Security Check: Payload Size Guard (anti-DoS / wallet exhaustion)
+    // 1. Security Check: Payload Size Guard
     const contentLength = req.headers['content-length'];
     if (contentLength && parseInt(contentLength, 10) > MAX_UPLOAD_BYTES) {
       return res.status(413).json({
@@ -96,7 +120,7 @@ export default async function handler(req, res) {
     const uploadType = req.headers['x-upload-type'] || req.query.type || 'media';
     const vaultParam = req.headers['x-vault-index'] !== undefined ? req.headers['x-vault-index'] : req.query.vault;
 
-    // 2. Security Check: Path Traversal & dangerous extension checks
+    // 2. Security Check: Path Traversal
     if (
       rawFilename.includes('..') ||
       rawFilename.includes('\\') ||
@@ -109,7 +133,7 @@ export default async function handler(req, res) {
 
     if (DANGEROUS_EXTENSIONS.test(rawFilename)) {
       return res.status(400).json({
-        error: 'Forbidden file extension. Executable, script, or markup files are strictly prohibited.',
+        error: 'Forbidden file extension. Executable or script files are strictly prohibited.',
         code: 'DANGEROUS_FILE_EXTENSION'
       });
     }
@@ -123,7 +147,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // Clean filename: allow only alphanumeric, underscores, dots, hyphens, and slashes
+    // Clean filename
     const sanitizedFilename = rawFilename.replace(/[^a-zA-Z0-9_\-\.\/]/g, '_');
 
     let token = '';
@@ -143,14 +167,14 @@ export default async function handler(req, res) {
       }
 
       token = vaultConfig.token;
-      accessMode = 'private'; // All status vaults are private
+      accessMode = 'private';
       vaultInfo = {
         name: vaultConfig.name,
         index: vIdx,
         access: 'private',
         category: 'status',
       };
-    } else if (uploadType === 'reels' || uploadType === 'reel' || (vaultParam !== undefined && uploadType !== 'profile')) {
+    } else if (uploadType === 'reels' || uploadType === 'reel' || (vaultParam !== undefined && uploadType !== 'profile' && uploadType !== 'background')) {
       const vIdx = parseInt(vaultParam || '0', 10);
       const vaultConfig = REELS_VAULTS[vIdx];
 
@@ -170,6 +194,25 @@ export default async function handler(req, res) {
         access: vaultConfig.access,
         category: 'reels',
       };
+    } else if (uploadType === 'private') {
+      const pIdx = parseInt(vaultParam || '1', 10);
+      const pConfig = PRIVATE_VAULTS[pIdx] || PRIVATE_VAULTS[1];
+      token = pConfig.token;
+      accessMode = 'private';
+      vaultInfo = {
+        name: pConfig.name,
+        index: pIdx,
+        access: 'private',
+        category: 'private',
+      };
+    } else if (uploadType === 'background' || uploadType === 'chat-background' || uploadType === 'wallpaper') {
+      token = process.env.BLOB_READ_WRITE_TOKEN_BACKGROUNDS || TOKENS.background;
+      accessMode = 'public';
+      vaultInfo = {
+        name: 'NEXCHAT WALLPAPERS',
+        access: 'public',
+        category: 'background',
+      };
     } else if (uploadType === 'profile') {
       token = process.env.BLOB_READ_WRITE_TOKEN_PROFILE || TOKENS.profile;
       accessMode = 'public';
@@ -178,18 +221,45 @@ export default async function handler(req, res) {
     }
 
     if (!token) {
-      return res.status(500).json({ error: 'Storage token is not configured on this server.' });
+      token = TOKENS.default;
     }
 
-    const blob = await put(sanitizedFilename, req, {
-      access: accessMode,
-      token: token,
-    });
+    // Read the entire request body buffer to enable retry/failover across backup vaults
+    const chunks = [];
+    for await (const chunk of req) {
+      chunks.push(chunk);
+    }
+    const bodyBuffer = Buffer.concat(chunks);
 
-    // If private blob (Status Vaults 1-5 or Reels Vaults 1-5), route via secure streaming proxy
+    // Primary attempt + automatic failover to the 5 backup vaults
+    const tokensToTry = [token, ...BACKUP_VAULTS.filter(t => t && t !== token)];
+    let lastError = null;
+    let successfulBlob = null;
+
+    for (const candidateToken of tokensToTry) {
+      try {
+        successfulBlob = await put(sanitizedFilename, bodyBuffer, {
+          access: accessMode,
+          token: candidateToken,
+          contentType: reqContentType || undefined,
+        });
+        if (successfulBlob) break;
+      } catch (err) {
+        console.warn(`[BLOB VAULT WARNING] Upload attempt with token prefix ${candidateToken.slice(0, 20)}... failed:`, err.message);
+        lastError = err;
+      }
+    }
+
+    if (!successfulBlob) {
+      throw lastError || new Error('All storage vaults failed to accept upload.');
+    }
+
+    const blob = successfulBlob;
+
+    // If private blob, route via secure streaming proxy
     let playableUrl = blob.url;
-    if (accessMode === 'private' && vaultInfo) {
-      playableUrl = `/api/serve-blob?type=${vaultInfo.category || uploadType}&vault=${vaultInfo.index}&pathname=${encodeURIComponent(blob.pathname)}`;
+    if (accessMode === 'private') {
+      playableUrl = `/api/serve-blob?type=${vaultInfo ? (vaultInfo.category || uploadType) : uploadType}&vault=${vaultInfo ? vaultInfo.index : 1}&pathname=${encodeURIComponent(blob.pathname)}`;
     }
 
     return res.status(200).json({
@@ -200,7 +270,7 @@ export default async function handler(req, res) {
       contentType: blob.contentType,
       type: uploadType,
       access: accessMode,
-      vault: vaultInfo ? vaultInfo.name : null,
+      vault: vaultInfo ? vaultInfo.name : 'PRIMARY',
       vaultIndex: vaultInfo ? vaultInfo.index : null,
     });
   } catch (error) {

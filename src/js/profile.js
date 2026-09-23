@@ -24,10 +24,11 @@ export async function uploadProfilePicture(file, uid) {
   const filename = `avatars/${safeUid}/${Date.now()}_${cleanName}`;
 
   try {
-    const response = await fetch(`/api/upload?filename=${encodeURIComponent(filename)}`, {
+    const response = await fetch(`/api/upload?type=profile&filename=${encodeURIComponent(filename)}`, {
       method: 'POST',
       headers: {
         'x-filename': filename,
+        'x-upload-type': 'profile',
       },
       body: file,
     });

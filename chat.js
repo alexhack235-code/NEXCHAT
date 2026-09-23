@@ -17,6 +17,8 @@ import {
   findPendingSession, approvePairingSession, rejectPairingSession,
   getLinkedDevices, unlinkDevice, listenForSessionRevocation, detectDeviceInfo
 } from "./src/js/link-device.js";
+import { openWallpaperModal, applyActiveWallpaper, WALLPAPER_PRESETS } from "./src/js/wallpaper-presets.js";
+
 
 const storage = getStorage();
 
@@ -2300,12 +2302,22 @@ async function showChatContextMenu(event, chatId) {
     menu.appendChild(infoBtn);
   }
 
-  const archiveBtn = createMenuBtn("?? Archive", "#00ff66", true);
+  const wallpaperBtn = createMenuBtn("🎨 Wallpaper", "#00ff88", true);
+  wallpaperBtn.onclick = () => {
+    menu.remove();
+    if (typeof window.openChatWallpaperPicker === 'function') {
+      window.openChatWallpaperPicker(chatId, currentChatName, isGroup);
+    }
+  };
+  menu.appendChild(wallpaperBtn);
+
+  const archiveBtn = createMenuBtn("📁 Archive", "#00ff66", true);
   archiveBtn.onclick = async () => {
     await archiveChat(chatId);
     menu.remove();
   };
   menu.appendChild(archiveBtn);
+
 
   const deleteBtn = createMenuBtn("??? Delete", "#ff6b6b", true);
   deleteBtn.onclick = async () => {
@@ -7780,35 +7792,58 @@ function renderPoll(pollId, poll) {
 
 
 function applyBackgroundImage(imageUrl) {
+  applyActiveWallpaper(imageUrl);
   const app = document.querySelector(".app");
   if (app) {
-    app.style.backgroundImage = `url('${imageUrl}')`;
-    app.style.backgroundSize = 'cover';
-    app.style.backgroundPosition = 'center';
-
-    if (typeof isAndroid !== 'undefined' && isAndroid) {
-      app.style.backgroundAttachment = 'scroll';
-      app.style.minHeight = '100dvh'; // Use dynamic viewport height
+    if (imageUrl) {
+      app.style.backgroundImage = `url('${imageUrl}')`;
+      app.style.backgroundSize = imageUrl.startsWith('data:image/svg') ? 'auto' : 'cover';
+      app.style.backgroundPosition = 'center';
+      app.style.backgroundRepeat = imageUrl.startsWith('data:image/svg') ? 'repeat' : 'no-repeat';
+      app.style.backgroundColor = 'transparent';
+      app.setAttribute('data-custom-bg', 'true');
     } else {
-      app.style.backgroundAttachment = 'fixed';
+      app.style.backgroundImage = "none";
+      app.style.backgroundColor = "";
+      app.setAttribute('data-custom-bg', 'false');
     }
-
-    app.style.backgroundRepeat = 'no-repeat';
-    app.style.backgroundColor = 'transparent';
-    app.setAttribute('data-custom-bg', 'true');
-    console.log("? Background applied:", imageUrl, typeof isAndroid !== 'undefined' && isAndroid ? "(Android optimized)" : "");
   }
 }
 
 function removeBackgroundImage() {
+  applyActiveWallpaper(null);
   const app = document.querySelector(".app");
   if (app) {
     app.style.backgroundImage = "none";
-    app.style.backgroundColor = ""; // Reset to default CSS value
+    app.style.backgroundColor = "";
     app.setAttribute('data-custom-bg', 'false');
-    console.log("? Background removed");
   }
 }
+
+window.openChatWallpaperPicker = (chatId, chatName, isGroup) => {
+  openWallpaperModal({
+    chatId: chatId || currentChatUser,
+    chatName: chatName || currentChatName || (isGroup ? 'Group' : 'Chat'),
+    chatType: isGroup ? 'group' : (currentChatType || 'direct'),
+    myUID: myUID,
+    db: db,
+    onUploadCustom: async (file) => {
+      const res = await uploadMediaBlob(file, {
+        folder: 'chat-backgrounds',
+        uid: myUID,
+        access: 'public'
+      });
+      return res.url || res.downloadUrl;
+    },
+    showNotif: showNotif
+  });
+};
+
+document.getElementById('quickWallpaperBtn')?.addEventListener('click', () => {
+  if (typeof window.openChatWallpaperPicker === 'function') {
+    window.openChatWallpaperPicker(currentChatUser, currentChatName, currentChatType === 'group');
+  }
+});
 
 function updateBackgroundPreview(imageUrl) {
   const preview = document.getElementById("backgroundPreview");
@@ -7816,6 +7851,7 @@ function updateBackgroundPreview(imageUrl) {
     preview.style.backgroundImage = `url('${imageUrl}')`;
   }
 }
+
 
 async function loadChatBackground(chatId, chatType) {
   const uid = chatId || currentChatUser;

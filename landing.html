@@ -4,35 +4,87 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#050811">
-  <title>NEXCHAT — Next-Gen Encrypted Communication</title>
+  <title>NEXCHAT — Next-Gen Encrypted Communication & Interactive Platform</title>
   <link rel="icon" type="image/x-icon" href="logo.jpg">
   <link rel="apple-touch-icon" href="logo.jpg">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="landing.css">
+  <!-- Futuristic Core Engines: GSAP, ScrollTrigger, Lenis -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.18/dist/lenis.min.js"></script>
 </head>
 <body>
 
+  <!-- Full-Screen Cyber Matrix Overdrive Canvas Overlay -->
+  <canvas id="matrix-rain-overlay" class="matrix-rain-canvas"></canvas>
+
+  <!-- Floating Holographic Quantum Mesh Radar HUD -->
+  <div class="quantum-radar-hud" id="quantumRadarHud" title="Quantum Mesh Telemetry Radar">
+    <div class="radar-screen">
+      <div class="radar-sweep"></div>
+      <div class="radar-blip blip-1"></div>
+      <div class="radar-blip blip-2"></div>
+      <div class="radar-blip blip-3"></div>
+      <div class="radar-grid"></div>
+    </div>
+    <div class="radar-meta">
+      <div class="radar-header">
+        <span class="radar-pulse-dot"></span>
+        <span class="radar-title">NEX MESH RADAR</span>
+      </div>
+      <div class="radar-stat"><span class="label">NODES:</span> <span class="val" id="radarNodes">2,841 ACTIVE</span></div>
+      <div class="radar-stat"><span class="label">LATENCY:</span> <span class="val" id="radarPing">12ms QKD</span></div>
+      <div class="radar-stat"><span class="label">SEC:</span> <span class="val">QUANTUM-4096</span></div>
+    </div>
+  </div>
+
   <!-- ═══════════════════════════════════════════════════════════════
-       NAVIGATION BAR (fixed, transparent → glass on scroll)
+       NAVIGATION BAR (fixed glass)
        ═══════════════════════════════════════════════════════════════ -->
   <nav id="landing-nav" class="landing-nav">
     <div class="nav-inner">
       <a href="landing.html" class="nav-logo">
-        <img src="logo.jpg" alt="N" class="nav-logo-img">
+        <img src="logo.jpg" alt="NEXCHAT" class="nav-logo-img">
         <span class="nav-logo-text">NEXCHAT</span>
       </a>
       <div class="nav-links">
-        <a href="#features" class="nav-link">Features</a>
+        <a href="#stage" class="nav-link"><i class="fa-solid fa-play"></i> Live Demo</a>
+        <a href="#wallpapers" class="nav-link"><i class="fa-solid fa-palette"></i> Wallpapers</a>
         <a href="#security" class="nav-link">Security</a>
+        <a href="#terminal" class="nav-link">Terminal</a>
         <a href="#ecosystem" class="nav-link">Ecosystem</a>
       </div>
-      <a href="index.html" class="nav-cta">Launch App <i class="fa-solid fa-arrow-right"></i></a>
+      <div class="nav-actions">
+        <!-- Cyber SFX Synthesizer Toggle -->
+        <button id="cyberSfxToggleBtn" class="cyber-sfx-btn" aria-label="Toggle Cyber Sound Effects" title="Toggle Synthesized Cyber SFX">
+          <span class="sfx-wave-bars">
+            <span class="bar"></span><span class="bar"></span><span class="bar"></span><span class="bar"></span>
+          </span>
+          <span id="sfxStatusText">SFX: ON</span>
+        </button>
+
+        <!-- Matrix Overdrive Hyper-Drive Toggle -->
+        <button id="matrixOverdriveBtn" class="matrix-overdrive-btn" aria-label="Toggle Matrix Overdrive" title="Toggle Full-Screen Matrix Overdrive Mode">
+          <i class="fa-solid fa-bolt"></i> OVERDRIVE
+        </button>
+
+        <button id="themeToggleBtn" class="theme-toggle-btn" aria-label="Toggle Light / Dark Mode" title="Toggle Light / Dark Mode">
+          <div class="theme-toggle-track">
+            <i class="fa-solid fa-moon icon-moon"></i>
+            <i class="fa-solid fa-sun icon-sun"></i>
+            <span class="theme-toggle-thumb"></span>
+          </div>
+        </button>
+        <a href="terminal.html" class="nav-terminal-cta" style="color: #00FF88; font-family: monospace; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; text-decoration: none; border: 1px solid rgba(0,255,136,0.3); padding: 8px 14px; border-radius: 9999px; background: rgba(0,255,136,0.08); transition: all 0.2s;"><i class="fa-solid fa-terminal"></i> Hacker Terminal</a>
+        <a href="index.html" class="nav-cta">Launch NEXCHAT <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
     </div>
   </nav>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 1 — HERO (pinned canvas + text reveal)
+       SECTION 1 — HERO (Pinned interactive canvas + cyber animation)
        ═══════════════════════════════════════════════════════════════ -->
   <section id="hero" class="hero-section">
     <canvas id="hero-canvas"></canvas>
@@ -43,98 +95,705 @@
     <div class="hero-orb orb-3" data-speed="0.9"></div>
 
     <div class="hero-content">
-      <p class="hero-eyebrow" data-reveal>INTRODUCING</p>
+      <div class="hero-eyebrow-badge" data-reveal>
+        <span class="badge-pulsing-dot"></span>
+        <span>QUANTUM-SECURE PROTOCOL 2.0</span>
+      </div>
+
       <h1 class="hero-title" data-reveal>
         <span class="hero-title-line">Communication</span>
         <span class="hero-title-line gradient-text">Reimagined.</span>
       </h1>
-      <p class="hero-sub" data-reveal>End-to-end encrypted. Real-time. Unstoppable.</p>
+
+      <p class="hero-sub" data-reveal>
+        End-to-End Encrypted. Authentic Vector Wallpapers. Hacker Terminal CLI. 1:1 Voice Calling & Status Editor. Unstoppable Speed.
+      </p>
+
+      <div class="hero-actions" data-reveal>
+        <a href="index.html" class="hero-btn primary">
+          <span><i class="fa-solid fa-bolt"></i> Launch NEXCHAT</span>
+        </a>
+        <a href="#stage" class="hero-btn secondary">
+          <span><i class="fa-solid fa-play"></i> Experience Live Showcase</span>
+        </a>
+      </div>
+
+      <!-- Live Floating Cyber Terminal Box in Hero -->
+      <div class="hero-terminal-pill" data-reveal data-delay="0.2">
+        <div class="terminal-pill-header">
+          <span class="term-dot red"></span>
+          <span class="term-dot yellow"></span>
+          <span class="term-dot green"></span>
+          <span class="term-title">nex-cipher-engine.sh</span>
+        </div>
+        <div class="terminal-pill-body" id="heroTerminalText">
+          <span class="term-prompt">$</span> <span class="term-cursor">|</span>
+        </div>
+      </div>
+
       <div class="hero-scroll-hint" data-reveal>
         <div class="scroll-line"></div>
-        <span>Scroll to explore</span>
+        <span>Scroll to explore video showcase</span>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 2 — FEATURES (horizontal stagger cards)
+       SECTION 2 — INTERACTIVE VIDEO SHOWCASE STAGE (Feature Switcher)
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="stage" class="showcase-stage-section">
+    <div class="section-header" data-reveal>
+      <div class="stage-badge"><i class="fa-solid fa-video"></i> VIDEO ANIMATION FEATURE STAGE</div>
+      <h2 class="section-title">See every feature in <span class="gradient-text">Action.</span></h2>
+      <p class="section-subtitle">Real interactive UI screens cloned 1:1. Select any tab below or watch the simulation auto-play.</p>
+    </div>
+
+    <div class="stage-container" data-reveal>
+      <!-- Stage Navigation Tabs -->
+      <div class="stage-tabs-list" id="stageTabsList">
+        <button class="stage-tab active" data-stage="chat">
+          <div class="tab-progress-bar"><span class="tab-progress-fill"></span></div>
+          <div class="tab-icon-wrap"><i class="fa-solid fa-comment-dots"></i></div>
+          <div class="tab-meta">
+            <h4>Encrypted E2E Chat</h4>
+            <p>Doodle Wallpapers & Encrypted Relay</p>
+          </div>
+        </button>
+
+        <button class="stage-tab" data-stage="call">
+          <div class="tab-progress-bar"><span class="tab-progress-fill"></span></div>
+          <div class="tab-icon-wrap"><i class="fa-solid fa-phone-volume"></i></div>
+          <div class="tab-meta">
+            <h4>1:1 Voice Calling UI</h4>
+            <p>Caller ID, Floating Controls & Chandelier</p>
+          </div>
+        </button>
+
+        <button class="stage-tab" data-stage="status">
+          <div class="tab-progress-bar"><span class="tab-progress-fill"></span></div>
+          <div class="tab-icon-wrap"><i class="fa-solid fa-camera"></i></div>
+          <div class="tab-meta">
+            <h4>Photo Status Editor</h4>
+            <p>B&W Filters, Rotator & Effects</p>
+          </div>
+        </button>
+
+        <button class="stage-tab" data-stage="terminal">
+          <div class="tab-progress-bar"><span class="tab-progress-fill"></span></div>
+          <div class="tab-icon-wrap"><i class="fa-solid fa-terminal"></i></div>
+          <div class="tab-meta">
+            <h4>Hacker Terminal CLI</h4>
+            <p>Interactive xterm.js Power-Commands</p>
+          </div>
+        </button>
+
+        <button class="stage-tab" data-stage="gaming">
+          <div class="tab-progress-bar"><span class="tab-progress-fill"></span></div>
+          <div class="tab-icon-wrap"><i class="fa-solid fa-gamepad"></i></div>
+          <div class="tab-meta">
+            <h4>Gaming & NEX Tokens</h4>
+            <p>Leaderboards, Clan Wars & Economy</p>
+          </div>
+        </button>
+      </div>
+
+      <!-- Stage Viewport (Dynamic Interactive Display) -->
+      <div class="stage-screen-viewport" id="stageViewport">
+
+        <!-- ──────────────────────────────────────────
+             VIEW 1: ENCRYPTED E2E CHAT
+             ────────────────────────────────────────── -->
+        <!-- ──────────────────────────────────────────
+             VIEW 1: CINEMATIC SHOWCASE (HANDSHAKE → 3D SPIN → CHAT → CREATE GROUP)
+             ────────────────────────────────────────── -->
+        <div class="stage-view active" id="view-chat">
+          <div class="cinematic-showcase-container">
+
+            <!-- Cinema Timeline Header -->
+            <div class="cinema-header-bar">
+              <div class="cinema-status-badge">
+                <span class="live-dot-pulse"></span>
+                <span id="cinemaStepLabel">ACT 1: DUAL-PHONE QUANTUM HANDSHAKE</span>
+              </div>
+              <div class="cinema-controls">
+                <button class="cinema-ctrl-btn" id="cinemaReplayBtn" title="Replay Full Cinematic"><i class="fa-solid fa-rotate-left"></i> Replay</button>
+                <button class="cinema-ctrl-btn" id="cinemaPauseBtn" title="Pause / Resume"><i class="fa-solid fa-pause"></i></button>
+                <button class="cinema-ctrl-btn primary" id="cinemaJumpGroupBtn" title="Jump to Group Creation"><i class="fa-solid fa-users"></i> Jump to Group</button>
+              </div>
+            </div>
+
+            <!-- Matrix Digital Rain Canvas Background in Stage -->
+            <canvas id="stageMatrixBgCanvas" class="stage-matrix-canvas-bg"></canvas>
+
+            <!-- Dual-Phone Live Chatting Stage (Both Phones Visible Side-by-Side) -->
+            <div class="dual-phone-chat-stage" id="dualPhoneChatStage">
+
+              <!-- LEFT PHONE: ALEX VANCE -->
+              <div class="dual-phone-wrapper phone-left" id="phoneAlexWrapper">
+                <div class="phone-badge-tag"><i class="fa-solid fa-user-astronaut"></i> ALEX'S DEVICE (NODE-01)</div>
+
+                <!-- Holographic Reticles & Telemetry -->
+                <div class="hologram-telemetry-chip chip-left-dock">
+                  <i class="fa-solid fa-shield-halved"></i> <span>QKD: 4096-BIT</span>
+                </div>
+
+                <div class="phone-frame full-chat-phone" id="phoneAlexFrame">
+                  <!-- Specular 3D light glare for mouse parallax -->
+                  <div class="phone-glare-reflection" id="phoneGlareAlex"></div>
+                  <div class="phone-speaker-notch"></div>
+
+                  <!-- 3D Backplate Surface (for 360° spin) -->
+                  <div class="phone-backplate-surface">
+                    <div class="backplate-camera-bump"><div class="lens"></div><div class="lens"></div><div class="flash"></div></div>
+                    <div class="backplate-logo-wrap"><img src="logo.jpg" alt="NEX" class="backplate-logo"><span class="backplate-brand">NEX TITANIUM</span></div>
+                  </div>
+
+                  <!-- Inner Chat Screen -->
+                  <div class="phone-inner-screen wp-chat-screen" id="chatCanvasAlex">
+                    <!-- Header -->
+                    <div class="mock-chat-header" id="headerAlex">
+                      <div class="mock-contact-info">
+                        <div class="mock-contact-avatar">
+                          <img src="favicon.png" alt="Mia" id="avatarAlexHeader">
+                          <span class="mock-online-pip"></span>
+                        </div>
+                        <div>
+                          <div class="mock-contact-name" id="alexContactTitle">Mia [Co-Lead]</div>
+                          <div class="mock-contact-status" id="alexContactStatus">online · 24ms WebRTC</div>
+                        </div>
+                      </div>
+                      <div class="mock-header-actions">
+                        <button class="mock-action-btn" title="Voice Call" onclick="switchStage('call')"><i class="fa-solid fa-phone"></i></button>
+                        <button class="mock-action-btn" title="Create Group" id="triggerGroupCreation"><i class="fa-solid fa-user-group"></i></button>
+                      </div>
+                    </div>
+
+                    <!-- Messages Stream -->
+                    <div class="mock-messages-stream" id="messagesStreamAlex">
+                      <div class="mock-date-pill">Today</div>
+                      <div class="mock-system-group-notice">
+                        <i class="fa-solid fa-lock"></i> Messages end-to-end encrypted. QKD-4096 verified.
+                      </div>
+                      <div class="mock-bubble received">
+                        <div class="bubble-text">Alex, are the quantum relays active? ⚡</div>
+                        <div class="bubble-meta">10:44 PM</div>
+                      </div>
+                      <div class="mock-bubble sent">
+                        <div class="bubble-text">Online now. Direct WebRTC tunnel established! 🛰️</div>
+                        <div class="bubble-meta">10:44 PM <i class="fa-solid fa-check-double read-ticks"></i></div>
+                      </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="mock-typing-indicator" id="typingAlex" style="display: none;">
+                      <span class="typing-name">Mia is typing</span>
+                      <span class="typing-dots"><span></span><span></span><span></span></span>
+                    </div>
+
+                    <!-- Wallpaper Bar -->
+                    <div class="mock-wallpaper-quick-bar">
+                      <span>Wallpaper:</span>
+                      <button class="wp-pill active" onclick="setDemoWallpaper('doodle')">Doodle</button>
+                      <button class="wp-pill" onclick="setDemoWallpaper('emerald')">Emerald</button>
+                      <button class="wp-pill" onclick="setDemoWallpaper('matrix')">Matrix</button>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <div class="mock-chat-input-bar">
+                      <button class="input-btn"><i class="fa-regular fa-face-smile"></i></button>
+                      <input type="text" id="inputAlex" placeholder="Alex's message..." value="" autocomplete="off">
+                      <button class="input-mic-btn" id="sendBtnAlex" title="Send (Alex)"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CENTER: QUANTUM RELAY BRIDGE & SPARK -->
+              <div class="quantum-relay-bridge" id="quantumBridge">
+                <div class="bridge-stream-line">
+                  <div class="quantum-pulse-packet packet-to-right" id="packetToRight"></div>
+                  <div class="quantum-pulse-packet packet-to-left" id="packetToLeft"></div>
+                </div>
+
+                <!-- Contact Spark Burst -->
+                <div class="handshake-spark-burst" id="handshakeSpark">
+                  <div class="shockwave-ring ring-1"></div>
+                  <div class="shockwave-ring ring-2"></div>
+                  <div class="spark-core"><i class="fa-solid fa-bolt"></i></div>
+                  <div class="handshake-caption" id="handshakeCaption">PEER LINK ESTABLISHED</div>
+                </div>
+
+                <div class="bridge-stats-badge">
+                  <i class="fa-solid fa-lock"></i> <span>E2E QUANTUM</span>
+                </div>
+              </div>
+
+              <!-- RIGHT PHONE: MIA CHEN -->
+              <div class="dual-phone-wrapper phone-right" id="phoneMiaWrapper">
+                <div class="phone-badge-tag cyan"><i class="fa-solid fa-user-astronaut"></i> MIA'S DEVICE (NODE-02)</div>
+
+                <div class="hologram-telemetry-chip chip-right-dock">
+                  <i class="fa-solid fa-satellite-dish"></i> <span id="telemetryPing">12ms [GEO-ORBIT]</span>
+                </div>
+
+                <div class="phone-frame full-chat-phone" id="phoneMiaFrame">
+                  <div class="phone-glare-reflection" id="phoneGlareMia"></div>
+                  <div class="phone-speaker-notch"></div>
+
+                  <!-- 3D Backplate Surface -->
+                  <div class="phone-backplate-surface">
+                    <div class="backplate-camera-bump"><div class="lens"></div><div class="lens"></div><div class="flash"></div></div>
+                    <div class="backplate-logo-wrap"><img src="logo.jpg" alt="NEX" class="backplate-logo"><span class="backplate-brand">NEX TITANIUM</span></div>
+                  </div>
+
+                  <!-- Inner Chat Screen -->
+                  <div class="phone-inner-screen wp-chat-screen" id="chatCanvasMia">
+                    <!-- Header -->
+                    <div class="mock-chat-header" id="headerMia">
+                      <div class="mock-contact-info">
+                        <div class="mock-contact-avatar">
+                          <img src="logo.jpg" alt="Alex" id="avatarMiaHeader">
+                          <span class="mock-online-pip"></span>
+                        </div>
+                        <div>
+                          <div class="mock-contact-name" id="miaContactTitle">Alex [Lead Dev]</div>
+                          <div class="mock-contact-status" id="miaContactStatus">online · 24ms WebRTC</div>
+                        </div>
+                      </div>
+                      <div class="mock-header-actions">
+                        <button class="mock-action-btn" title="Voice Call" onclick="switchStage('call')"><i class="fa-solid fa-phone"></i></button>
+                        <button class="mock-action-btn" title="Change Wallpaper" onclick="cycleDemoWallpaper()"><i class="fa-solid fa-palette"></i></button>
+                      </div>
+                    </div>
+
+                    <!-- Messages Stream -->
+                    <div class="mock-messages-stream" id="messagesStreamMia">
+                      <div class="mock-date-pill">Today</div>
+                      <div class="mock-system-group-notice">
+                        <i class="fa-solid fa-lock"></i> Messages end-to-end encrypted. QKD-4096 verified.
+                      </div>
+                      <div class="mock-bubble sent">
+                        <div class="bubble-text">Alex, are the quantum relays active? ⚡</div>
+                        <div class="bubble-meta">10:44 PM <i class="fa-solid fa-check-double read-ticks"></i></div>
+                      </div>
+                      <div class="mock-bubble received">
+                        <div class="bubble-text">Online now. Direct WebRTC tunnel established! 🛰️</div>
+                        <div class="bubble-meta">10:44 PM</div>
+                      </div>
+                    </div>
+
+                    <!-- Typing Indicator -->
+                    <div class="mock-typing-indicator" id="typingMia" style="display: none;">
+                      <span class="typing-name">Alex is typing</span>
+                      <span class="typing-dots"><span></span><span></span><span></span></span>
+                    </div>
+
+                    <!-- Wallpaper Bar -->
+                    <div class="mock-wallpaper-quick-bar">
+                      <span>Wallpaper:</span>
+                      <button class="wp-pill active" onclick="setDemoWallpaper('doodle')">Doodle</button>
+                      <button class="wp-pill" onclick="setDemoWallpaper('emerald')">Emerald</button>
+                      <button class="wp-pill" onclick="setDemoWallpaper('matrix')">Matrix</button>
+                    </div>
+
+                    <!-- Input Bar -->
+                    <div class="mock-chat-input-bar">
+                      <button class="input-btn"><i class="fa-regular fa-face-smile"></i></button>
+                      <input type="text" id="inputMia" placeholder="Mia's message..." value="" autocomplete="off">
+                      <button class="input-mic-btn" id="sendBtnMia" title="Send (Mia)"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- In-Phone Animated "Create Group" Modal Drawer -->
+              <div class="in-phone-group-drawer" id="inPhoneGroupDrawer">
+                <div class="group-drawer-handle"></div>
+                <div class="group-drawer-header">
+                  <h4><i class="fa-solid fa-shield-halved"></i> Create New Group</h4>
+                </div>
+
+                <div class="group-drawer-avatar-row">
+                  <div class="group-drawer-avatar-preview">
+                    <i class="fa-solid fa-bolt-lightning"></i>
+                  </div>
+                  <div class="group-drawer-input-wrap">
+                    <label>Group Subject</label>
+                    <input type="text" id="demoGroupNameInput" value="⚡ CYBER SQUAD ELITE ⚡" readonly>
+                  </div>
+                </div>
+
+                <div class="group-drawer-members-list">
+                  <div class="group-member-chip"><img src="logo.jpg" alt="Alex"> Alex [Admin]</div>
+                  <div class="group-member-chip"><img src="favicon.png" alt="Mia"> Mia</div>
+                  <div class="group-member-chip"><img src="chronex-ai.jpg" alt="Chronex"> Chronex AI</div>
+                </div>
+
+                <button class="group-drawer-create-btn" id="btnConfirmGroupCreation">
+                  <span><i class="fa-solid fa-check"></i> Create Group</span>
+                  <span class="btn-spinner" id="groupCreationSpinner" style="display: none;"></span>
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- ──────────────────────────────────────────
+             VIEW 2: VOICE CALLING SCREEN (EXACT 1:1)
+             ────────────────────────────────────────── -->
+        <div class="stage-view" id="view-call">
+          <div class="phone-frame">
+            <div class="phone-speaker-notch"></div>
+            <div class="phone-inner-screen calling-screen">
+              <!-- Android Status Bar Top -->
+              <div class="calling-status-bar">
+                <span class="status-time">20:25</span>
+                <span class="status-net">955 B/S</span>
+                <div class="status-icons">
+                  <span>VoLTE</span>
+                  <span>4G</span>
+                  <i class="fa-solid fa-battery-quarter" style="color: #ffaa00;"></i> 24%
+                </div>
+              </div>
+
+              <!-- Blurred Ceiling Chandelier Background Image -->
+              <div class="calling-chandelier-bg">
+                <div class="chandelier-art-wrap blurred">
+                  <!-- Chandelier Art SVG Embedded -->
+                  <div class="chandelier-svg-container"></div>
+                </div>
+                <div class="calling-vignette-overlay"></div>
+              </div>
+
+              <!-- Top Center: Phone Number & Calling Text -->
+              <div class="calling-top-center">
+                <h3 class="calling-phone-number">+1 (218) 296-1795</h3>
+                <p class="calling-status-label">Calling</p>
+              </div>
+
+              <!-- Top Right: 3 Stacked Circular Buttons -->
+              <div class="calling-top-right-actions">
+                <button class="call-circle-btn" title="Add person"><i class="fa-solid fa-user-plus"></i></button>
+                <button class="call-circle-btn" title="Flip camera"><i class="fa-solid fa-camera-rotate"></i></button>
+                <button class="call-circle-btn" title="Effects"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+              </div>
+
+              <!-- Middle Bottom Banner -->
+              <div class="calling-mute-banner">
+                <i class="fa-solid fa-bell-slash"></i>
+                <span>Calls and notifications will be muted</span>
+              </div>
+
+              <!-- Bottom 5 Call Buttons Bar -->
+              <div class="calling-bottom-controls">
+                <button class="call-ctrl-btn" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                <button class="call-ctrl-btn" title="Video off"><i class="fa-solid fa-video-slash"></i></button>
+                <button class="call-ctrl-btn active-white" title="Speaker"><i class="fa-solid fa-volume-high"></i></button>
+                <button class="call-ctrl-btn" title="Mute mic"><i class="fa-solid fa-microphone-slash"></i></button>
+                <button class="call-ctrl-btn end-call-red" title="End call"><i class="fa-solid fa-phone-slash"></i></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ──────────────────────────────────────────
+             VIEW 3: PHOTO STATUS EDITOR (EXACT 1:1)
+             ────────────────────────────────────────── -->
+        <div class="stage-view" id="view-status">
+          <div class="phone-frame">
+            <div class="phone-speaker-notch"></div>
+            <div class="phone-inner-screen status-editor-screen">
+              <!-- Top Bar -->
+              <div class="status-top-bar">
+                <button class="status-icon-btn" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+                <div class="status-top-right">
+                  <button class="status-icon-btn" title="Rotate" id="statusRotateBtn"><i class="fa-solid fa-rotate-right"></i></button>
+                  <button class="status-icon-btn" title="Light / Glow"><i class="fa-regular fa-lightbulb"></i></button>
+                  <button class="status-icon-btn" title="Stickers & Masks"><i class="fa-solid fa-masks-theater"></i></button>
+                </div>
+              </div>
+
+              <!-- Photo Area: High-Contrast Black and White Ceiling Chandelier -->
+              <div class="status-photo-center" id="statusPhotoCenter">
+                <div class="chandelier-art-wrap" id="statusChandelierGraphic">
+                  <div class="chandelier-svg-container"></div>
+                </div>
+              </div>
+
+              <!-- Selected Filter Pill Label -->
+              <div class="status-filter-pill-label" id="statusFilterName">B&W</div>
+
+              <!-- 5 Filter Circles Carousel -->
+              <div class="status-filter-carousel">
+                <div class="filter-circle-item" data-filter="normal" data-name="Normal">
+                  <div class="filter-circle-disc normal"><i class="fa-solid fa-minus"></i></div>
+                </div>
+                <div class="filter-circle-item" data-filter="peach" data-name="Warm Peach">
+                  <div class="filter-circle-disc peach"></div>
+                </div>
+                <div class="filter-circle-item active" data-filter="bw" data-name="B&W">
+                  <div class="filter-circle-disc bw"></div>
+                </div>
+                <div class="filter-circle-item" data-filter="sepia" data-name="Sepia Glow">
+                  <div class="filter-circle-disc sepia"></div>
+                </div>
+                <div class="filter-circle-item" data-filter="cyan" data-name="Cyber Cyan">
+                  <div class="filter-circle-disc cyan"></div>
+                </div>
+              </div>
+
+              <!-- Bottom Editor Navigation Tabs -->
+              <div class="status-bottom-tabs">
+                <button class="status-tab-item">Effects</button>
+                <button class="status-tab-item active">
+                  <span>Filters</span>
+                  <span class="active-dot"></span>
+                </button>
+                <button class="status-tab-item">Background</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ──────────────────────────────────────────
+             VIEW 4: HACKER TERMINAL CLI (xterm.js)
+             ────────────────────────────────────────── -->
+        <div class="stage-view" id="view-terminal">
+          <div class="terminal-stage-card">
+            <div class="term-stage-header">
+              <div class="term-stage-dots">
+                <span class="dot red"></span>
+                <span class="dot yellow"></span>
+                <span class="dot green"></span>
+              </div>
+              <div class="term-stage-title">NEX-CLI // QUANTUM ENCRYPTED PROTOCOL [ROOT]</div>
+              <div class="term-stage-badges">
+                <span class="cli-badge">SESSION: 0x9AF2</span>
+                <span class="cli-badge live">ONLINE</span>
+              </div>
+            </div>
+
+            <div class="term-stage-terminal" id="stageTerminalConsole">
+              <div class="term-line welcome">============================================================</div>
+              <div class="term-line welcome"> NEXCHAT HACKER TERMINAL v2.4.0 (xterm.js core)</div>
+              <div class="term-line welcome"> Type a command below or click quick action chips.</div>
+              <div class="term-line welcome">============================================================</div>
+              <div class="term-line sys">[SYSTEM] WebRTC Signaling Relay established: latency 24ms</div>
+              <div class="term-line sys">[SYSTEM] Vercel Multi-Vault Partitions 0-5 online: 7 stores active</div>
+              <div class="term-line sys">[SYSTEM] AES-256 GCM Cipher keys generated.</div>
+              <div class="term-line out" id="termLiveHistory"></div>
+              <div class="term-input-line">
+                <span class="term-prompt">nex@root:~$</span>
+                <input type="text" id="stageTerminalInput" placeholder="Type 'help', 'call', 'status photo', 'vault', 'matrix'..." autocomplete="off">
+              </div>
+            </div>
+
+            <!-- Quick Command Chips -->
+            <div class="term-quick-chips">
+              <span>Quick Commands:</span>
+              <button class="term-chip" onclick="executeStageCommand('help')">help</button>
+              <button class="term-chip" onclick="executeStageCommand('call +12182961795')">call</button>
+              <button class="term-chip" onclick="executeStageCommand('status photo')">status photo</button>
+              <button class="term-chip" onclick="executeStageCommand('wallpaper')">wallpaper</button>
+              <button class="term-chip" onclick="executeStageCommand('vault')">vault</button>
+              <button class="term-chip" onclick="executeStageCommand('matrix')">matrix</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ──────────────────────────────────────────
+             VIEW 5: GAMING HUB & NEX ECONOMY
+             ────────────────────────────────────────── -->
+        <div class="stage-view" id="view-gaming">
+          <div class="gaming-stage-card">
+            <div class="gaming-header">
+              <div class="gaming-balance-pill">
+                <i class="fa-solid fa-coins"></i>
+                <span class="balance-amount" id="gamingTokensCounter">2,450</span>
+                <span class="balance-ticker">NEX</span>
+              </div>
+              <div class="gaming-tier-badge">
+                <i class="fa-solid fa-crown"></i> DIAMOND CLAN
+              </div>
+            </div>
+
+            <div class="gaming-content-grid">
+              <div class="game-match-card">
+                <div class="match-badge live">LIVE MULTIPLAYER</div>
+                <h4>Cyber Arena: Clan Showdown</h4>
+                <p>NEX-Clan vs Ghost Squad · 500 NEX Pot</p>
+                <div class="match-score-row">
+                  <div class="team">NEX-CYBER <span>14</span></div>
+                  <div class="vs">VS</div>
+                  <div class="team">GHOSTS <span>11</span></div>
+                </div>
+                <button class="btn-game-join" onclick="alert('Challenge Accepted! Ready to enter arena.')"><i class="fa-solid fa-gamepad"></i> Join Challenge</button>
+              </div>
+
+              <div class="game-leaderboard-card">
+                <h4>Top Operatives</h4>
+                <div class="lb-row gold"><span>#1</span> Alexander (Demonic) <strong>14,890 NEX</strong></div>
+                <div class="lb-row silver"><span>#2</span> ZeroCool_235 <strong>11,420 NEX</strong></div>
+                <div class="lb-row bronze"><span>#3</span> Chronex_AI <strong>9,800 NEX</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 3 — WALLPAPER VAULT & CLOUD STORAGE
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="wallpapers" class="wallpapers-section">
+    <div class="section-header" data-reveal>
+      <p class="section-eyebrow">Visual Atmosphere</p>
+      <h2 class="section-title">Authentic <span class="gradient-text">Chat Wallpapers.</span></h2>
+      <p class="section-subtitle">Personalize your chat canvas with iconic vector doodles, cyber matrix streams, or your own custom uploaded wallpaper backed by Vercel Blob.</p>
+    </div>
+
+    <div class="wallpapers-gallery-grid" data-reveal>
+      <div class="wp-gallery-card active" onclick="previewGalleryWallpaper('doodle', this)">
+        <div class="wp-card-preview wp-classic-doodle"></div>
+        <div class="wp-card-info">
+          <h4>Classic Encrypted Dark Doodle</h4>
+          <p>Authentic vector icons: coffee, chat, locks, rockets, cameras, smileys.</p>
+          <span class="wp-tag">Iconic Standard</span>
+        </div>
+      </div>
+
+      <div class="wp-gallery-card" onclick="previewGalleryWallpaper('emerald', this)">
+        <div class="wp-card-preview wp-emerald-doodle"></div>
+        <div class="wp-card-info">
+          <h4>Cyber Emerald Doodle</h4>
+          <p>NEXCHAT signature glowing neon green cybernetic doodle matrix.</p>
+          <span class="wp-tag green">NEX Edition</span>
+        </div>
+      </div>
+
+      <div class="wp-gallery-card" onclick="previewGalleryWallpaper('matrix', this)">
+        <div class="wp-card-preview wp-matrix-stream"></div>
+        <div class="wp-card-info">
+          <h4>Digital Matrix Stream</h4>
+          <p>Encrypted falling binary data flow and cipher terminal symbols.</p>
+          <span class="wp-tag cyan">Cyberpunk</span>
+        </div>
+      </div>
+
+      <div class="wp-gallery-card" onclick="previewGalleryWallpaper('hex', this)">
+        <div class="wp-card-preview wp-hex-mesh"></div>
+        <div class="wp-card-info">
+          <h4>Hexagonal Carbon Mesh</h4>
+          <p>High-tech dark geometric lattice with subtle cyan rim lighting.</p>
+          <span class="wp-tag">Geometric</span>
+        </div>
+      </div>
+
+      <div class="wp-gallery-card" onclick="previewGalleryWallpaper('chronex', this)">
+        <div class="wp-card-preview wp-chronex-void"></div>
+        <div class="wp-card-info">
+          <h4>Chronex Deep Void</h4>
+          <p>Cosmic interstellar deep space with subtle neural starlight.</p>
+          <span class="wp-tag">Atmospheric</span>
+        </div>
+      </div>
+
+      <div class="wp-gallery-card" onclick="previewGalleryWallpaper('custom', this)">
+        <div class="wp-card-preview wp-custom-upload">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Vercel Blob Powered</span>
+        </div>
+        <div class="wp-card-info">
+          <h4>Custom Upload & Multi-Vault</h4>
+          <p>Upload any high-res wallpaper image. Synced instantly via Vercel Blob.</p>
+          <span class="wp-tag gold">Unlimited Custom</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 4 — CORE ARCHITECTURE & FEATURES
        ═══════════════════════════════════════════════════════════════ -->
   <section id="features" class="features-section">
     <div class="section-header" data-reveal>
-      <p class="section-eyebrow">Core Features</p>
-      <h2 class="section-title">Built for the <span class="gradient-text">future</span> of chat.</h2>
+      <p class="section-eyebrow">Engineered for Perfection</p>
+      <h2 class="section-title">Built for the <span class="gradient-text">Future</span> of Chat.</h2>
     </div>
 
     <div class="features-grid">
       <div class="feature-card" data-reveal data-delay="0">
         <div class="feature-icon"><i class="fa-solid fa-bolt"></i></div>
-        <h3>Lightning Fast</h3>
-        <p>Messages delivered in under 50ms. Zero lag video calls across continents. Built on Firebase infrastructure.</p>
+        <h3>Lightning Fast WebRTC</h3>
+        <p>Direct peer connections ensure sub-50ms message latency and high-definition crystal clear voice & video calls.</p>
       </div>
+
       <div class="feature-card" data-reveal data-delay="0.1">
         <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <h3>E2E Encrypted</h3>
-        <p>Every message, call, and file transfer is protected by military-grade end-to-end encryption. Always.</p>
+        <h3>256-Bit Military Encryption</h3>
+        <p>Full client-side encryption. Messages are ciphered on your device before transmission. Zero server eavesdropping.</p>
       </div>
+
       <div class="feature-card" data-reveal data-delay="0.2">
-        <div class="feature-icon"><i class="fa-solid fa-users-gear"></i></div>
-        <h3>Smart Groups</h3>
-        <p>Admin controls, member management, disappearing messages, mute members, and join-approval workflows.</p>
+        <div class="feature-icon"><i class="fa-solid fa-server"></i></div>
+        <h3>Vercel Multi-Vault Storage</h3>
+        <p>Resilient multi-partition storage across 7 storage vaults with automatic failover, private streaming, and fast CDN delivery.</p>
       </div>
+
       <div class="feature-card" data-reveal data-delay="0.3">
         <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
-        <h3>AI Auto-Responder</h3>
-        <p>Set up AI-powered auto-replies for selected contacts. Multiple AI profile modes to match your communication style.</p>
+        <h3>Chronex AI Companion</h3>
+        <p>Integrated neural assistant for instant smart replies, translation, summaries, and autonomous task assistance.</p>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 3 — BIG VISUAL (parallax phone mockup / showcase)
+       SECTION 5 — SECURITY METRICS & STATS
        ═══════════════════════════════════════════════════════════════ -->
   <section id="security" class="showcase-section">
     <div class="showcase-bg-glow"></div>
 
     <div class="showcase-content">
       <div class="showcase-text" data-reveal>
-        <p class="section-eyebrow">Privacy First</p>
-        <h2 class="section-title">Your conversations are <span class="gradient-text">untouchable.</span></h2>
-        <p class="showcase-desc">NEXCHAT doesn't store your messages on any server. Everything is end-to-end encrypted with zero-knowledge architecture. Not even we can read your chats.</p>
+        <p class="section-eyebrow">Zero-Trust Privacy</p>
+        <h2 class="section-title">Your conversations are <span class="gradient-text">Untouchable.</span></h2>
+        <p class="showcase-desc">NEXCHAT combines client-side cryptographic keys with ephemeral routing. No persistent server message archives. No corporate telemetry.</p>
+        
         <div class="showcase-stats">
           <div class="stat-item" data-reveal data-delay="0">
             <span class="stat-number" data-count="256">0</span>
-            <span class="stat-label">-bit AES Encryption</span>
+            <span class="stat-label">-bit AES-GCM Cipher</span>
           </div>
           <div class="stat-item" data-reveal data-delay="0.1">
             <span class="stat-number" data-count="0">0</span>
-            <span class="stat-label">Messages Stored on Servers</span>
+            <span class="stat-label">Messages Stored on Server</span>
           </div>
           <div class="stat-item" data-reveal data-delay="0.2">
-            <span class="stat-number" data-count="100">0</span>
-            <span class="stat-label">% Open Audit Trail</span>
+            <span class="stat-number" data-count="7">0</span>
+            <span class="stat-label">Vercel Multi-Vaults</span>
+          </div>
+          <div class="stat-item" data-reveal data-delay="0.3">
+            <span class="stat-number" data-count="24">0</span>
+            <span class="stat-label">ms WebRTC Ping</span>
           </div>
         </div>
       </div>
 
       <div class="showcase-visual" data-parallax data-speed="0.15">
-        <div class="phone-mockup">
-          <div class="phone-notch"></div>
-          <div class="phone-screen">
-            <div class="mock-header">
-              <div class="mock-avatar"></div>
-              <div class="mock-info">
-                <div class="mock-name"></div>
-                <div class="mock-status"></div>
-              </div>
-              <div class="mock-lock"><i class="fa-solid fa-lock"></i></div>
+        <div class="security-cube-container">
+          <div class="security-shield-card">
+            <i class="fa-solid fa-lock security-lock-icon"></i>
+            <h3>Zero-Knowledge Architecture</h3>
+            <p>Protected by audited Firestore security barriers and end-to-end ECDH key exchange.</p>
+            <div class="security-status-line">
+              <span class="dot-live"></span> SHIELD ACTIVE
             </div>
-            <div class="mock-messages">
-              <div class="mock-bubble received"><div class="mock-text-line w80"></div><div class="mock-text-line w50"></div></div>
-              <div class="mock-bubble sent"><div class="mock-text-line w60"></div></div>
-              <div class="mock-bubble received"><div class="mock-text-line w90"></div><div class="mock-text-line w70"></div><div class="mock-text-line w40"></div></div>
-              <div class="mock-bubble sent"><div class="mock-text-line w75"></div><div class="mock-text-line w55"></div></div>
-            </div>
-            <div class="mock-encrypt-badge"><i class="fa-solid fa-shield-halved"></i> End-to-end encrypted</div>
           </div>
         </div>
       </div>
@@ -142,54 +801,57 @@
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 4 — ECOSYSTEM (gaming, marketplace, terminal)
+       SECTION 6 — ECOSYSTEM (Gaming, Marketplace, Terminal)
        ═══════════════════════════════════════════════════════════════ -->
   <section id="ecosystem" class="ecosystem-section">
     <div class="section-header" data-reveal>
       <p class="section-eyebrow">Beyond Chat</p>
-      <h2 class="section-title">An entire <span class="gradient-text">ecosystem.</span></h2>
+      <h2 class="section-title">An entire decentralized <span class="gradient-text">Ecosystem.</span></h2>
     </div>
 
     <div class="eco-cards">
       <div class="eco-card" data-reveal data-delay="0">
         <div class="eco-card-icon"><i class="fa-solid fa-gamepad"></i></div>
         <h3>Gaming Hub</h3>
-        <p>Challenge friends to multiplayer games. Earn tokens. Compete on leaderboards.</p>
+        <p>Challenge friends to real-time multiplayer competitions. Bet and earn tokens on live matches.</p>
       </div>
+
       <div class="eco-card" data-reveal data-delay="0.15">
         <div class="eco-card-icon"><i class="fa-solid fa-shop"></i></div>
         <h3>Marketplace</h3>
-        <p>Buy, sell, and advertise products directly within your chat ecosystem.</p>
+        <p>Buy, sell, and broadcast listings directly within your verified chat groups.</p>
       </div>
-      <div class="eco-card" data-reveal data-delay="0.3">
+
+      <div class="eco-card" data-reveal data-delay="0.3" id="terminal">
         <div class="eco-card-icon"><i class="fa-solid fa-terminal"></i></div>
-        <h3>NEX Terminal</h3>
-        <p>Power-user CLI for advanced operations, cloud tools, and developer workflows.</p>
+        <h3>Hacker Terminal CLI</h3>
+        <p>Power-user terminal supporting scriptable messaging, vault management, and sys-status.</p>
       </div>
+
       <div class="eco-card" data-reveal data-delay="0.45">
         <div class="eco-card-icon"><i class="fa-solid fa-coins"></i></div>
-        <h3>NEX Tokens</h3>
-        <p>Transfer and earn tokens. Built-in economy across gaming, gifting, and marketplace.</p>
+        <h3>NEX Tokens & Economy</h3>
+        <p>Gifting, rewards, and staking powered by real-time Firestore transaction ledgers.</p>
       </div>
     </div>
   </section>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       SECTION 5 — FINAL CTA (launch NEXCHAT)
+       SECTION 7 — FINAL CALL TO ACTION
        ═══════════════════════════════════════════════════════════════ -->
   <section id="cta" class="cta-section">
     <div class="cta-glow"></div>
     <div class="cta-content" data-reveal>
-      <h2 class="cta-title">Ready to experience the <span class="gradient-text">future?</span></h2>
-      <p class="cta-sub">Join thousands already on NEXCHAT. Create your account in under 30 seconds.</p>
+      <div class="cta-badge"><i class="fa-solid fa-rocket"></i> READY FOR LAUNCH</div>
+      <h2 class="cta-title">Join the Future of <span class="gradient-text">Communication.</span></h2>
+      <p class="cta-sub">Free. End-to-end encrypted. Authentic vector wallpapers with hacker-grade power. Experience NEXCHAT right now.</p>
       <div class="cta-buttons">
         <a href="index.html" class="cta-btn primary">
           <span>Launch NEXCHAT</span>
-          <i class="fa-solid fa-rocket"></i>
+          <i class="fa-solid fa-arrow-right"></i>
         </a>
-        <a href="profile-upload.html" class="cta-btn secondary">
-          <span>Create Account</span>
-          <i class="fa-solid fa-user-plus"></i>
+        <a href="link-device.html" class="cta-btn secondary">
+          <span><i class="fa-solid fa-qrcode"></i> Pair Linked Device</span>
         </a>
       </div>
     </div>
@@ -202,7 +864,7 @@
         <img src="logo.jpg" alt="NEXCHAT" class="footer-logo">
         <span class="footer-brand-text">NEXCHAT</span>
       </div>
-      <p class="footer-copy">Created by <span class="accent-orange">NEXO-TECH</span> · Powered by <span class="accent-green">NEXCHAT_DEV TEAMS</span></p>
+      <p class="footer-copy">CREATED BY <span class="accent-orange">NEXO-TECH</span> · POWERED BY <span class="accent-green">NEXCHAT_DEV TEAMS</span></p>
     </div>
   </footer>
 
