@@ -191,10 +191,12 @@ function attachRegisterHandler() {
     }
 
     try {
+      showLoginLoader('Creating Account...', 'Detecting network security and checking VPN status.');
       showResult('⏳ Detecting your IP and VPN status...', false);
       const ipInfo = await detectIPAndVPN();
 
       if (ipInfo && ipInfo.isVPN) {
+        hideLoginLoader();
         showResult('⚠️ VPN detected - Registration blocked for security', true);
         console.warn("VPN detected, blocking registration");
         return;
@@ -203,12 +205,14 @@ function attachRegisterHandler() {
       if (ipInfo) {
         const existingUsers = await checkIPRegistration(ipInfo.ip);
         if (existingUsers) {
+          hideLoginLoader();
           showResult(`⚠️ This IP (${ipInfo.ip}) already has accounts: ${existingUsers.join(', ')}`, true);
           console.warn("Duplicate IP detected, blocking registration");
           return;
         }
       }
 
+      showLoginLoader('Creating Account...', 'Registering quantum cipher credentials.');
       showResult('⏳ Creating account...', false);
       await setPersistence(auth, browserLocalPersistence);
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
@@ -219,6 +223,7 @@ function attachRegisterHandler() {
       const randomSticker = getRandomSticker();
       const finalProfilePic = customAvatar || randomSticker;
 
+      showLoginLoader('Configuring Profile...', 'Saving user profile and initializing wallet tokens.');
       showResult('⏳ Saving user data to database...', false);
       const userData = {
         email,
@@ -269,11 +274,14 @@ function attachRegisterHandler() {
         console.warn('⚠️ Realtime Database save failed, but Firestore succeeded:', rtdbErr);
       }
 
+      showLoginLoader('Registration Complete!', 'Redirecting to your avatar setup...');
       showResult('✅ Successfully registered! Redirecting...', false);
       setTimeout(() => {
+        hideLoginLoader();
         window.location.replace('profile-upload.html');
-      }, 1500);
+      }, 1200);
     } catch (err) {
+      hideLoginLoader();
       console.error('❌ Registration error:', err);
       let userFriendlyMessage = err.message || 'Registration failed. Please try again.';
 
@@ -309,11 +317,15 @@ function attachResetHandler() {
       return;
     }
 
+    showLoginLoader('Sending Recovery Link...', 'Dispatching encrypted instructions to your email.');
+
     try {
       await sendPasswordResetEmail(auth, email);
+      hideLoginLoader();
       showResult('✅ Reset link sent! Check your email inbox (or spam folder).', false);
       document.getElementById('resetEmail').value = '';
     } catch (err) {
+      hideLoginLoader();
       console.error('Reset Password Error:', err);
       if (err.code === 'auth/user-not-found') {
         showResult('❌ No account found with this email address.', true);
@@ -369,33 +381,34 @@ if (document.readyState === 'loading') {
 }
 
 const loginForm = document.getElementById('loginForm');
-const loginLoaderOverlay = document.getElementById('loginLoaderOverlay');
 
-function showLoginLoader(message = 'Preparing secure login...') {
-  if (loginLoaderOverlay) {
-    loginLoaderOverlay.classList.add('active');
-    const titleEl = loginLoaderOverlay.querySelector('.loader-title');
-    const textEl = loginLoaderOverlay.querySelector('.loader-text');
+function showLoginLoader(message = 'Preparing secure login...', subtext = 'Authenticating your account and loading your workspace.') {
+  const overlay = document.getElementById('loginLoaderOverlay');
+  if (overlay) {
+    overlay.classList.add('active');
+    const titleEl = overlay.querySelector('.loader-title');
+    const textEl = overlay.querySelector('.loader-text');
     if (titleEl) titleEl.textContent = message;
-    if (textEl) textEl.textContent = 'Authenticating your account and loading your workspace.';
+    if (textEl) textEl.textContent = subtext;
   }
   document.body.classList.add('login-loading');
-  const submitBtn = loginForm?.querySelector('button[type="submit"]');
-  if (submitBtn) {
-    submitBtn.classList.add('loading');
-    submitBtn.disabled = true;
+  const activeSubmitBtn = document.querySelector('form button[type="submit"]');
+  if (activeSubmitBtn) {
+    activeSubmitBtn.classList.add('loading');
+    activeSubmitBtn.disabled = true;
   }
 }
 
 function hideLoginLoader() {
-  if (loginLoaderOverlay) {
-    loginLoaderOverlay.classList.remove('active');
+  const overlay = document.getElementById('loginLoaderOverlay');
+  if (overlay) {
+    overlay.classList.remove('active');
   }
   document.body.classList.remove('login-loading');
-  const submitBtn = loginForm?.querySelector('button[type="submit"]');
-  if (submitBtn) {
-    submitBtn.classList.remove('loading');
-    submitBtn.disabled = false;
+  const activeSubmitBtn = document.querySelector('form button[type="submit"]');
+  if (activeSubmitBtn) {
+    activeSubmitBtn.classList.remove('loading');
+    activeSubmitBtn.disabled = false;
   }
 }
 

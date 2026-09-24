@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#00ff66">
+  <meta name="theme-color" content="#060913">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
   <title>NEXCHAT — Reset Password</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="login.css">
   <link rel="manifest" href="manifest.json">
@@ -18,40 +20,76 @@
 </head>
 <body>
 
-<div class="login-container" style="max-width: 440px;">
-  <a href="landing.html" title="NEXCHAT Home">
-    <img src="logo.jpg" class="logo" alt="NEXCHAT Logo">
-  </a>
-  <h2>RESET PASSWORD</h2>
-  <p class="subtitle">Enter your account email. We'll send an official Firebase password reset link straight to your inbox.</p>
+<div class="ambient-glow ambient-glow-1"></div>
+<div class="ambient-glow ambient-glow-2"></div>
 
-  <form id="resetForm" autocomplete="on">
-    <input type="email" id="resetEmail" placeholder="Enter your registered email" autocomplete="email" required>
-    
-    <button type="submit" class="auth-btn">
-      <i class="fa-solid fa-paper-plane"></i>
-      <span>Send Recovery Link</span>
-    </button>
-  </form>
+<div class="login-wrapper">
+  <main class="login-container">
+    <div class="brand-pill">
+      <span class="status-dot"></span>
+      <span>NEX_RECOVERY • SECURE KEY RESET</span>
+    </div>
 
-  <p class="auth-note" style="margin-top: 18px; margin-bottom: 22px;">
-    Can't find the email? Please be sure to check your <strong>Spam or Junk</strong> folder.
-  </p>
+    <div class="login-header">
+      <div class="logo-wrapper">
+        <a href="landing.html" title="NEXCHAT Showcase">
+          <img src="logo.jpg" class="brand-logo" alt="NEXCHAT Logo">
+        </a>
+      </div>
+      <h1 class="brand-title">RESET PASSWORD</h1>
+      <p class="brand-subtitle">Enter your registered email to receive an official Firebase recovery link.</p>
+    </div>
 
-  <div class="divider">
-    <span>OR</span>
-  </div>
+    <form id="resetForm" aria-describedby="result" autocomplete="on">
+      <div class="input-group">
+        <label for="resetEmail" class="sr-only">Email address</label>
+        <div class="input-field-wrapper">
+          <i class="fa-solid fa-envelope input-icon" aria-hidden="true"></i>
+          <input type="email" id="resetEmail" placeholder="Enter your registered email" autocomplete="email" required>
+        </div>
+      </div>
 
-  <div class="page-action-group">
-    <button type="button" class="page-action-btn secondary" onclick="location.href='index.html'">
-      <i class="fa-solid fa-arrow-left"></i> Back to Login
-    </button>
-    <button type="button" class="page-action-btn" onclick="location.href='register.html'">
-      <i class="fa-solid fa-user-plus"></i> New Account
-    </button>
-  </div>
+      <button type="submit" class="auth-btn" id="resetSubmitBtn">
+        <span class="btn-text">Send Recovery Link</span>
+        <i class="fa-solid fa-paper-plane btn-icon"></i>
+      </button>
+    </form>
 
-  <div id="result" class="result-box" role="status" aria-live="polite"></div>
+    <p class="auth-note">
+      <i class="fa-solid fa-circle-info"></i> Can't find the email? Please be sure to check your <strong>Spam or Junk</strong> folder.
+    </p>
+
+    <div class="divider">
+      <span>OR RETURN TO</span>
+    </div>
+
+    <div class="page-action-group">
+      <a href="index.html" class="page-action-btn secondary">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Back to Login</span>
+      </a>
+      <a href="register.html" class="page-action-btn">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>New Account</span>
+      </a>
+    </div>
+
+    <div id="result" class="result-box" role="status" aria-live="polite"></div>
+
+    <div id="loginLoaderOverlay" class="login-loader-overlay" aria-hidden="true">
+      <div class="login-loader-card">
+        <div class="loader-spinner-wrapper">
+          <div class="loader-icon"></div>
+          <div class="loader-pulse-ring"></div>
+        </div>
+        <p class="loader-title">Sending Link...</p>
+        <p class="loader-text">Dispatching encrypted recovery instructions to your email.</p>
+        <div class="loader-progress-bar">
+          <div class="loader-progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
 <footer class="app-footer">

@@ -3,13 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#00ff66">
+  <meta name="theme-color" content="#060913">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
   <title>NEXCHAT — Create Account</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="login.css">
   <link rel="manifest" href="manifest.json">
@@ -18,50 +20,124 @@
 </head>
 <body>
 
-<div class="login-container" style="max-width: 480px;">
-  <a href="landing.html" title="NEXCHAT Home">
-    <img src="logo.jpg" class="logo" alt="NEXCHAT Logo">
-  </a>
-  <h2>CREATE ACCOUNT</h2>
-  <p class="subtitle">Join NEXCHAT for secure, end-to-end encrypted messaging, calls, and gaming.</p>
+<div class="ambient-glow ambient-glow-1"></div>
+<div class="ambient-glow ambient-glow-2"></div>
 
-  <form id="registerForm" autocomplete="on">
-    <input type="text" id="regName" placeholder="Full Name" autocomplete="name" required minlength="2">
-    <input type="text" id="regUsername" placeholder="Username (letters, numbers, _)" autocomplete="username" required minlength="3" maxlength="20">
-    <input type="email" id="regEmail" placeholder="Email address" autocomplete="email" required>
-    
-    <div class="password-field">
-      <input type="password" id="regPassword" placeholder="Create strong password" autocomplete="new-password" required minlength="8">
-      <button type="button" class="password-toggle" data-target="regPassword" aria-label="Show password">Show</button>
+<div class="login-wrapper wide">
+  <main class="login-container">
+    <div class="brand-pill">
+      <span class="status-dot"></span>
+      <span>NEX_REGISTRATION • ENCRYPTED IDENTITY</span>
     </div>
 
-    <div class="password-field">
-      <input type="password" id="regPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" required minlength="8">
-      <button type="button" class="password-toggle" data-target="regPasswordConfirm" aria-label="Show password">Show</button>
+    <div class="login-header">
+      <div class="logo-wrapper">
+        <a href="landing.html" title="NEXCHAT Showcase">
+          <img src="logo.jpg" class="brand-logo" alt="NEXCHAT Logo">
+        </a>
+      </div>
+      <h1 class="brand-title">CREATE ACCOUNT</h1>
+      <p class="brand-subtitle">Join NEXCHAT for secure messaging, voice calls & cloud vaults.</p>
     </div>
 
-    <button type="submit" class="auth-btn">
-      <i class="fa-solid fa-user-plus"></i>
-      <span>Create Free Account</span>
-    </button>
-  </form>
+    <form id="registerForm" aria-describedby="result" autocomplete="on">
+      <div class="input-group">
+        <label for="regName" class="sr-only">Full Name</label>
+        <div class="input-field-wrapper">
+          <i class="fa-solid fa-user input-icon" aria-hidden="true"></i>
+          <input type="text" id="regName" placeholder="Full name" autocomplete="name" required minlength="2">
+        </div>
+      </div>
 
-  <div class="divider">
-    <span>OR</span>
-  </div>
+      <div class="input-group">
+        <label for="regUsername" class="sr-only">Username</label>
+        <div class="input-field-wrapper">
+          <i class="fa-solid fa-at input-icon" aria-hidden="true"></i>
+          <input type="text" id="regUsername" placeholder="Username (letters, numbers, _)" autocomplete="username" required minlength="3" maxlength="20">
+        </div>
+      </div>
 
-  <div class="google-signin-block">
-    <div id="googleSignInContainer" class="google-signin-container"></div>
-    <p class="google-hint">Sign up instantly with your Google account</p>
-  </div>
+      <div class="input-group">
+        <label for="regEmail" class="sr-only">Email address</label>
+        <div class="input-field-wrapper">
+          <i class="fa-solid fa-envelope input-icon" aria-hidden="true"></i>
+          <input type="email" id="regEmail" placeholder="Email address" autocomplete="email" required>
+        </div>
+      </div>
 
-  <div class="page-action-group" style="grid-template-columns: 1fr;">
-    <button type="button" class="page-action-btn secondary" onclick="location.href='index.html'">
-      <i class="fa-solid fa-arrow-left"></i> Already have an account? <strong>Log In</strong>
-    </button>
-  </div>
+      <div class="input-group">
+        <label for="regPassword" class="sr-only">Create password</label>
+        <div class="input-field-wrapper password-field">
+          <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
+          <input type="password" id="regPassword" placeholder="Create strong password" autocomplete="new-password" required minlength="8">
+          <button type="button" class="password-toggle" data-target="regPassword" aria-label="Toggle password visibility" tabindex="0">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
 
-  <div id="result" class="result-box" role="status" aria-live="polite"></div>
+      <div class="input-group">
+        <label for="regPasswordConfirm" class="sr-only">Confirm password</label>
+        <div class="input-field-wrapper password-field">
+          <i class="fa-solid fa-shield-halved input-icon" aria-hidden="true"></i>
+          <input type="password" id="regPasswordConfirm" placeholder="Confirm password" autocomplete="new-password" required minlength="8">
+          <button type="button" class="password-toggle" data-target="regPasswordConfirm" aria-label="Toggle password visibility" tabindex="0">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="password-hints">
+        <i class="fa-solid fa-circle-info"></i>
+        <span>Min 8 characters with uppercase, lowercase, number & symbol</span>
+      </div>
+
+      <button type="submit" class="auth-btn" id="regSubmitBtn">
+        <span class="btn-text">Create Free Account</span>
+        <i class="fa-solid fa-arrow-right btn-icon"></i>
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>OR CONTINUE WITH</span>
+    </div>
+
+    <div class="google-signin-block">
+      <div id="googleSignInContainer" class="google-signin-container">
+        <button type="button" id="googleLoginBtn" class="google-auth-btn">
+          <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.97 0 12s.45 3.84 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span class="google-btn-text">Sign Up with Google</span>
+        </button>
+      </div>
+      <p id="googleConnectLink" class="google-hint">One-click instant profile creation with Google</p>
+    </div>
+
+    <div class="register-prompt">
+      <span>Already have an account?</span>
+      <a href="index.html" class="register-link">Sign In <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <div id="result" class="result-box" role="status" aria-live="polite"></div>
+
+    <div id="loginLoaderOverlay" class="login-loader-overlay" aria-hidden="true">
+      <div class="login-loader-card">
+        <div class="loader-spinner-wrapper">
+          <div class="loader-icon"></div>
+          <div class="loader-pulse-ring"></div>
+        </div>
+        <p class="loader-title">Creating Account...</p>
+        <p class="loader-text">Configuring security keys and initializing your wallet tokens.</p>
+        <div class="loader-progress-bar">
+          <div class="loader-progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </main>
 </div>
 
 <footer class="app-footer">
