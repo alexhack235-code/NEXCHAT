@@ -457,6 +457,162 @@
         text-align: left;
       }
     }
+
+    /* 3D Cyber Templates in Store */
+    .store-templates-section {
+      background: rgba(0, 255, 102, 0.04);
+      border: 1px solid rgba(0, 255, 102, 0.16);
+      border-radius: 22px;
+      padding: 28px;
+      margin-bottom: 30px;
+      box-shadow: inset 0 0 24px rgba(0, 255, 102, 0.04);
+    }
+
+    .section-title-wrap {
+      margin-bottom: 24px;
+    }
+
+    .section-desc {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+      margin-top: 6px;
+    }
+
+    .store-templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .store-template-card {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(0, 255, 102, 0.18);
+      border-radius: 18px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      position: relative;
+      transition: all 0.28s ease;
+    }
+
+    .store-template-card:hover {
+      transform: translateY(-4px);
+      border-color: #00ff66;
+      box-shadow: 0 14px 34px rgba(0, 255, 102, 0.16);
+    }
+
+    .store-template-card.target-highlight {
+      border-color: #00ff66;
+      box-shadow: 0 0 35px rgba(0, 255, 102, 0.5), inset 0 0 20px rgba(0, 255, 102, 0.15);
+      animation: highlightGlow 2s infinite alternate;
+    }
+
+    @keyframes highlightGlow {
+      0% { box-shadow: 0 0 20px rgba(0, 255, 102, 0.3); }
+      100% { box-shadow: 0 0 45px rgba(0, 255, 102, 0.7); }
+    }
+
+    .store-tpl-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      align-self: flex-start;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .store-tpl-badge.green { background: rgba(0, 255, 102, 0.15); color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.3); }
+    .store-tpl-badge.cyan { background: rgba(0, 212, 255, 0.15); color: #00d4ff; border: 1px solid rgba(0, 212, 255, 0.3); }
+    .store-tpl-badge.pink { background: rgba(255, 0, 127, 0.15); color: #ff007f; border: 1px solid rgba(255, 0, 127, 0.3); }
+    .store-tpl-badge.purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .store-tpl-badge.gold { background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); }
+    .store-tpl-badge.indigo { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.3); }
+
+    .store-tpl-icon {
+      font-size: 38px;
+      margin: 6px 0;
+    }
+    .store-tpl-icon.green { color: #00ff66; }
+    .store-tpl-icon.cyan { color: #00d4ff; }
+    .store-tpl-icon.pink { color: #ff007f; }
+    .store-tpl-icon.purple { color: #c084fc; }
+    .store-tpl-icon.gold { color: #ffd700; }
+    .store-tpl-icon.indigo { color: #a5b4fc; }
+
+    .store-template-card h3 {
+      font-size: 18px;
+      font-family: 'Orbitron', monospace;
+      color: #fff;
+    }
+
+    .store-template-card p {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.5;
+    }
+
+    .store-tpl-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .tpl-unlock-btn {
+      background: linear-gradient(135deg, #00ff66 0%, #00cc55 100%);
+      color: #0a0f1a;
+      border: none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.24s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tpl-unlock-btn:hover {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .tpl-unlock-btn.unlocked {
+      background: rgba(0, 255, 102, 0.15);
+      color: #00ff66;
+      border: 1px solid #00ff66;
+      cursor: default;
+    }
+
+    .tpl-preview-btn {
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      padding: 10px 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 12px;
+      text-decoration: none;
+      transition: all 0.24s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .tpl-preview-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      border-color: #00ff66;
+      color: #00ff66;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
@@ -558,8 +714,116 @@
       </div>
     </div>
 
+        <!-- ═══════════════════════════════════════════════════════════════
+         3D CYBER TEMPLATES & SHADERS VAULT
+         ═══════════════════════════════════════════════════════════════ -->
+    <div class="store-templates-section" id="storeTemplatesSection">
+      <div class="section-title-wrap">
+        <h2 class="section-title"><i class="fa-solid fa-cube"></i> 3D Cyber Templates Vault</h2>
+        <p class="section-desc">Unlock real-time 3D WebGL themes for the landing page and chat canvas using your NEX tokens.</p>
+      </div>
+
+      <div class="store-templates-grid">
+        <!-- Matrix Overdrive 3D -->
+        <div class="store-template-card" id="store-template-matrix-overdrive" data-template="matrix-overdrive">
+          <div class="store-tpl-badge green"><i class="fa-solid fa-terminal"></i> 5,000 NEX</div>
+          <div class="store-tpl-icon green"><i class="fa-solid fa-cube"></i></div>
+          <h3>Matrix Overdrive 3D</h3>
+          <p>Emerald digital rain particle matrix with wireframe polyhedra and hyper-speed rings.</p>
+          <div class="store-tpl-actions">
+            <button class="tpl-unlock-btn" onclick="unlockTemplate('matrix-overdrive', 5000, 'Matrix Overdrive 3D')">
+              <i class="fa-solid fa-lock-open"></i> Unlock Template
+            </button>
+            <a href="landing.html#templates-store" class="tpl-preview-btn">
+              <i class="fa-solid fa-eye"></i> 3D Preview
+            </a>
+          </div>
+        </div>
+
+        <!-- Quantum Stealth QKD -->
+        <div class="store-template-card" id="store-template-quantum-stealth" data-template="quantum-stealth">
+          <div class="store-tpl-badge cyan"><i class="fa-solid fa-shield-halved"></i> 8,000 NEX</div>
+          <div class="store-tpl-icon cyan"><i class="fa-solid fa-atom"></i></div>
+          <h3>Quantum Stealth QKD</h3>
+          <p>Cyan & violet cryptographic orbital rings with refractive crystal core and sub-atomic drift.</p>
+          <div class="store-tpl-actions">
+            <button class="tpl-unlock-btn" onclick="unlockTemplate('quantum-stealth', 8000, 'Quantum Stealth QKD')">
+              <i class="fa-solid fa-lock-open"></i> Unlock Template
+            </button>
+            <a href="landing.html#templates-store" class="tpl-preview-btn">
+              <i class="fa-solid fa-eye"></i> 3D Preview
+            </a>
+          </div>
+        </div>
+
+        <!-- Cyberpunk Night City -->
+        <div class="store-template-card" id="store-template-cyberpunk-neon" data-template="cyberpunk-neon">
+          <div class="store-tpl-badge pink"><i class="fa-solid fa-bolt-lightning"></i> 12,000 NEX</div>
+          <div class="store-tpl-icon pink"><i class="fa-solid fa-fire-flame-curved"></i></div>
+          <h3>Cyberpunk Night City</h3>
+          <p>Magenta & turquoise dual-torus accelerator with pulsing neon flare and energetic light bursts.</p>
+          <div class="store-tpl-actions">
+            <button class="tpl-unlock-btn" onclick="unlockTemplate('cyberpunk-neon', 12000, 'Cyberpunk Night City')">
+              <i class="fa-solid fa-lock-open"></i> Unlock Template
+            </button>
+            <a href="landing.html#templates-store" class="tpl-preview-btn">
+              <i class="fa-solid fa-eye"></i> 3D Preview
+            </a>
+          </div>
+        </div>
+
+        <!-- Aurora Glassmorphism -->
+        <div class="store-template-card" id="store-template-aurora-holographic" data-template="aurora-holographic">
+          <div class="store-tpl-badge purple"><i class="fa-solid fa-wand-magic-sparkles"></i> 15,000 NEX</div>
+          <div class="store-tpl-icon purple"><i class="fa-solid fa-gem"></i></div>
+          <h3>Aurora Glassmorphism</h3>
+          <p>Shimmering polychromatic aurora starlight with floating geodesic sphere and soft dispersion.</p>
+          <div class="store-tpl-actions">
+            <button class="tpl-unlock-btn" onclick="unlockTemplate('aurora-holographic', 15000, 'Aurora Glassmorphism')">
+              <i class="fa-solid fa-lock-open"></i> Unlock Template
+            </button>
+            <a href="landing.html#templates-store" class="tpl-preview-btn">
+              <i class="fa-solid fa-eye"></i> 3D Preview
+            </a>
+          </div>
+        </div>
+
+        <!-- Titanium Armor Defense -->
+        <div class="store-template-card" id="store-template-titanium-armor" data-template="titanium-armor">
+          <div class="store-tpl-badge gold"><i class="fa-solid fa-shield"></i> 20,000 NEX</div>
+          <div class="store-tpl-icon gold"><i class="fa-solid fa-layer-group"></i></div>
+          <h3>Titanium Armor Defense</h3>
+          <p>Metallic tungsten geometry with heavy armored kinetic orbital rings and golden rim lighting.</p>
+          <div class="store-tpl-actions">
+            <button class="tpl-unlock-btn" onclick="unlockTemplate('titanium-armor', 20000, 'Titanium Armor Defense')">
+              <i class="fa-solid fa-lock-open"></i> Unlock Template
+            </button>
+            <a href="landing.html#templates-store" class="tpl-preview-btn">
+              <i class="fa-solid fa-eye"></i> 3D Preview
+            </a>
+          </div>
+        </div>
+
+        <!-- Cosmic Void Infinity -->
+        <div class="store-template-card" id="store-template-cosmic-void" data-template="cosmic-void">
+          <div class="store-tpl-badge indigo"><i class="fa-solid fa-infinity"></i> 25,000 NEX</div>
+          <div class="store-tpl-icon indigo"><i class="fa-solid fa-meteor"></i></div>
+          <h3>Cosmic Void Infinity</h3>
+          <p>Deep space singularity vortex with hyper-speed cosmic particle warp drive and star cluster.</p>
+          <div class="store-tpl-actions">
+            <button class="tpl-unlock-btn" onclick="unlockTemplate('cosmic-void', 25000, 'Cosmic Void Infinity')">
+              <i class="fa-solid fa-lock-open"></i> Unlock Template
+            </button>
+            <a href="landing.html#templates-store" class="tpl-preview-btn">
+              <i class="fa-solid fa-eye"></i> 3D Preview
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="payment-methods">
-      <h3>� Contact Method</h3>
+      <h3><i class="fa-solid fa-address-book"></i> Contact Method</h3>
       <div class="payment-options">
         <div class="payment-option active" onclick="selectPayment('chat')">
           <div class="payment-icon"><i class="fa-solid fa-comments"></i></div>
@@ -864,6 +1128,98 @@ Tokens will be added within 2 hours!
       
       // Fallback message if app isn't on Play Store yet
       alert(" NEXCHAT will be available on Google Play Store soon!\n\nFor now, you can download the APK directly.");
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // 3D CYBER TEMPLATES & SHADERS VAULT LOGIC
+    // ═══════════════════════════════════════════════════════════════
+
+    window.unlockTemplate = async function(templateId, price, name) {
+      let unlocked = JSON.parse(localStorage.getItem('nexchat_unlocked_templates') || '[]');
+      if (unlocked.includes(templateId)) {
+        alert('Template "' + name + '" is already unlocked! You can select and preview it on the 3D Landing page.');
+        window.location.href = 'landing.html#templates-store';
+        return;
+      }
+
+      const balanceText = document.getElementById('currentBalance')?.textContent?.replace(/,/g, '') || '0';
+      const currentBal = Number(balanceText) || 0;
+
+      if (currentBal < price) {
+        const needMore = price - currentBal;
+        alert('Insufficient tokens to unlock ' + name + '.\n\nRequired: ' + price.toLocaleString() + ' NEX\nYour Balance: ' + currentBal.toLocaleString() + ' NEX\nYou need ' + needMore.toLocaleString() + ' more tokens.\n\nPlease choose a token package above to top up!');
+        const pkgs = document.querySelector('.packages-grid');
+        if (pkgs) pkgs.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const confirmUnlock = confirm('Unlock 3D Template "' + name + '" for ' + price.toLocaleString() + ' NEX Tokens?');
+      if (!confirmUnlock) return;
+
+      try {
+        if (currentUser && currentUser.uid) {
+          const userRef = doc(db, "users", currentUser.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) {
+            const liveBal = userSnap.data().tokens || 0;
+            if (liveBal >= price) {
+              await updateDoc(userRef, {
+                tokens: liveBal - price
+              });
+              document.getElementById('currentBalance').textContent = (liveBal - price).toLocaleString();
+            }
+          }
+        }
+
+        unlocked.push(templateId);
+        localStorage.setItem('nexchat_unlocked_templates', JSON.stringify(unlocked));
+        localStorage.setItem('nexchat_active_3d_template', templateId);
+
+        refreshUnlockedTemplatesUI();
+        alert('Success! "' + name + '" has been unlocked!\n\nRedirecting to 3D Landing to activate your new theme...');
+        setTimeout(() => {
+          window.location.href = 'landing.html#templates-store';
+        }, 1200);
+      } catch (err) {
+        console.error("Unlock template error:", err);
+        alert("Error unlocking template: " + err.message);
+      }
+    };
+
+    function refreshUnlockedTemplatesUI() {
+      const unlocked = JSON.parse(localStorage.getItem('nexchat_unlocked_templates') || '[]');
+      document.querySelectorAll('.store-template-card').forEach(card => {
+        const tpl = card.getAttribute('data-template');
+        if (unlocked.includes(tpl)) {
+          const btn = card.querySelector('.tpl-unlock-btn');
+          if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Unlocked';
+            btn.classList.add('unlocked');
+          }
+        }
+      });
+    }
+
+    // Check URL query parameters for pre-selected template
+    function checkUrlForTemplate() {
+      refreshUnlockedTemplatesUI();
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetTpl = urlParams.get('template');
+      if (targetTpl) {
+        const targetCard = document.getElementById('store-template-' + targetTpl);
+        if (targetCard) {
+          setTimeout(() => {
+            targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetCard.classList.add('target-highlight');
+          }, 350);
+        }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', checkUrlForTemplate);
+    } else {
+      checkUrlForTemplate();
     }
   </script>
 </body>

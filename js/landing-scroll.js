@@ -8,6 +8,7 @@
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { initLanding3D, switch3DTemplate, destroyLanding3D } from './landing-3d.js';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -27,6 +28,14 @@ gsap.ticker.add((time) => {
   lenis.raf(time * 1000);
 });
 gsap.ticker.lagSmoothing(0);
+
+// ─── 1.1 INITIALIZE 3D WEBGL ENGINE ───
+try {
+  initLanding3D(lenis);
+  window.switch3DTemplate = switch3DTemplate;
+} catch (e) {
+  console.warn('[3D Engine] Init failed:', e);
+}
 
 // ─── 2. HIGH-PERFORMANCE VIDEO-LIKE CANVAS HERO ───
 const canvas = document.getElementById('hero-canvas');
@@ -1329,8 +1338,20 @@ setInterval(() => {
   }
 }, 3200);
 
+// ─── 3D TEMPLATE PREVIEW BUTTONS ───
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.preview-3d-btn');
+  if (btn) {
+    const templateId = btn.getAttribute('data-template-id');
+    if (templateId) {
+      playCyberClick();
+      switch3DTemplate(templateId, true);
+    }
+  }
+});
+
 // Attach futuristic sound hover to interactive buttons
-document.querySelectorAll('.stage-tab, .cinema-ctrl-btn, .hero-btn, .wp-gallery-card, .nav-link').forEach(btn => {
+document.querySelectorAll('.stage-tab, .cinema-ctrl-btn, .hero-btn, .wp-gallery-card, .nav-link, .preview-3d-btn, .store-access-btn, .template-3d-card').forEach(btn => {
   btn.addEventListener('mouseenter', () => playHoverHum());
   btn.addEventListener('click', () => playCyberClick());
 });
@@ -1340,6 +1361,7 @@ window.addEventListener('beforeunload', () => {
   clearInterval(stageAutoPlayTimer);
   ScrollTrigger.getAll().forEach(t => t.kill());
   lenis.destroy();
+  destroyLanding3D();
 });
 
 console.log(' NEXCHAT Full Cinematic Story & Interactive Engine initialized.');

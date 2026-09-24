@@ -18,6 +18,9 @@
 </head>
 <body>
 
+  <!-- Full-Screen 3D WebGL Interactive Scene Canvas -->
+  <canvas id="webgl-3d-scene" class="webgl-3d-canvas"></canvas>
+
   <!-- Full-Screen Cyber Matrix Overdrive Canvas Overlay -->
   <canvas id="matrix-rain-overlay" class="matrix-rain-canvas"></canvas>
 
@@ -52,6 +55,7 @@
       </a>
       <div class="nav-links">
         <a href="#stage" class="nav-link"><i class="fa-solid fa-play"></i> Live Demo</a>
+        <a href="#templates-store" class="nav-link"><i class="fa-solid fa-cube"></i> 3D Store</a>
         <a href="#wallpapers" class="nav-link"><i class="fa-solid fa-palette"></i> Wallpapers</a>
         <a href="#security" class="nav-link">Security</a>
         <a href="#terminal" class="nav-link">Terminal</a>
@@ -714,6 +718,238 @@
           <p>Upload any high-res wallpaper image. Synced instantly via Vercel Blob.</p>
           <span class="wp-tag gold">Unlimited Custom</span>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       SECTION 3.5 — 3D CYBER TEMPLATES & STORE VAULT
+       ═══════════════════════════════════════════════════════════════ -->
+  <section id="templates-store" class="templates-3d-section">
+    <div class="section-header" data-reveal>
+      <div class="stage-badge"><i class="fa-solid fa-cube"></i> REAL-TIME 3D WEBGL ENGINE & STORE</div>
+      <h2 class="section-title">Next-Gen 3D Templates & <span class="gradient-text">Store Vault.</span></h2>
+      <p class="section-subtitle">Experience interactive 3D WebGL visual themes powered by Three.js. Preview any holographic engine live or acquire them instantly from the NEXCHAT Store.</p>
+    </div>
+
+    <!-- Active 3D Engine Live Controller Bar -->
+    <div class="templates-control-bar" data-reveal>
+      <div class="active-engine-status">
+        <span class="pulse-indicator"></span>
+        <span class="engine-label">CURRENT 3D SCENE:</span>
+        <span class="engine-active-name" id="current3DSceneName">Quantum Stealth QKD</span>
+      </div>
+      <div class="templates-bar-actions">
+        <span class="engine-fps-badge"><i class="fa-solid fa-microchip"></i> 60 FPS WEBGL</span>
+        <a href="cart.html" class="store-quick-link"><i class="fa-solid fa-shop"></i> Open Store</a>
+      </div>
+    </div>
+
+    <!-- 6 Interactive 3D Template Cards -->
+    <div class="templates-3d-grid" data-reveal>
+      
+      <!-- Card 1: Matrix Overdrive -->
+      <div class="template-3d-card" data-template-id="matrix-overdrive">
+        <div class="card-specular-glare"></div>
+        <div class="template-header">
+          <span class="template-badge green"><i class="fa-solid fa-terminal"></i> CYBER HACKER</span>
+          <span class="template-price">5,000 NEX</span>
+        </div>
+        <div class="template-visual-preview matrix-visual">
+          <div class="cube-wire-preview">
+            <i class="fa-solid fa-cube"></i>
+          </div>
+          <div class="template-glow-aura green-glow"></div>
+        </div>
+        <div class="template-details">
+          <h3>Matrix Overdrive 3D</h3>
+          <p>Emerald digital rain particle matrix with cybernetic wireframe polyhedral mesh and hyper-speed rings.</p>
+          <div class="template-specs">
+            <span><i class="fa-solid fa-bolt"></i> 1.8x Spin</span>
+            <span><i class="fa-solid fa-network-wired"></i> Digital Rain</span>
+          </div>
+        </div>
+        <div class="template-actions">
+          <button class="preview-3d-btn" data-template-id="matrix-overdrive">
+            <i class="fa-solid fa-eye"></i> Preview 3D Scene
+          </button>
+          <a href="cart.html?template=matrix-overdrive" class="store-access-btn">
+            <i class="fa-solid fa-cart-shopping"></i> Access in Store
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 2: Quantum Stealth QKD -->
+      <div class="template-3d-card active-3d-preview" data-template-id="quantum-stealth">
+        <div class="card-specular-glare"></div>
+        <div class="template-header">
+          <span class="template-badge cyan"><i class="fa-solid fa-shield-halved"></i> CRYPTOGRAPHIC</span>
+          <span class="template-price">8,000 NEX</span>
+        </div>
+        <div class="template-visual-preview quantum-visual">
+          <div class="cube-wire-preview">
+            <i class="fa-solid fa-atom"></i>
+          </div>
+          <div class="template-glow-aura cyan-glow"></div>
+        </div>
+        <div class="template-details">
+          <h3>Quantum Stealth QKD</h3>
+          <p>Cryptographic cyan & violet quantum orbital rings with refractive crystal core and sub-atomic particle drift.</p>
+          <div class="template-specs">
+            <span><i class="fa-solid fa-shield"></i> QKD Cipher</span>
+            <span><i class="fa-solid fa-circle-nodes"></i> Dual Orbit</span>
+          </div>
+        </div>
+        <div class="template-actions">
+          <button class="preview-3d-btn active" data-template-id="quantum-stealth">
+            <i class="fa-solid fa-circle-check"></i> Active 3D Scene
+          </button>
+          <a href="cart.html?template=quantum-stealth" class="store-access-btn">
+            <i class="fa-solid fa-cart-shopping"></i> Access in Store
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 3: Cyberpunk Night City -->
+      <div class="template-3d-card" data-template-id="cyberpunk-neon">
+        <div class="card-specular-glare"></div>
+        <div class="template-header">
+          <span class="template-badge pink"><i class="fa-solid fa-bolt-lightning"></i> NEON OVERDRIVE</span>
+          <span class="template-price">12,000 NEX</span>
+        </div>
+        <div class="template-visual-preview cyberpunk-visual">
+          <div class="cube-wire-preview">
+            <i class="fa-solid fa-fire-flame-curved"></i>
+          </div>
+          <div class="template-glow-aura pink-glow"></div>
+        </div>
+        <div class="template-details">
+          <h3>Cyberpunk Night City</h3>
+          <p>High-voltage magenta & turquoise dual-torus accelerator with pulsing neon flare and energetic light bursts.</p>
+          <div class="template-specs">
+            <span><i class="fa-solid fa-gauge-high"></i> 2.2x Hyper</span>
+            <span><i class="fa-solid fa-sun"></i> Neon Flare</span>
+          </div>
+        </div>
+        <div class="template-actions">
+          <button class="preview-3d-btn" data-template-id="cyberpunk-neon">
+            <i class="fa-solid fa-eye"></i> Preview 3D Scene
+          </button>
+          <a href="cart.html?template=cyberpunk-neon" class="store-access-btn">
+            <i class="fa-solid fa-cart-shopping"></i> Access in Store
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 4: Aurora Glassmorphism -->
+      <div class="template-3d-card" data-template-id="aurora-holographic">
+        <div class="card-specular-glare"></div>
+        <div class="template-header">
+          <span class="template-badge purple"><i class="fa-solid fa-wand-magic-sparkles"></i> PRISMATIC</span>
+          <span class="template-price">15,000 NEX</span>
+        </div>
+        <div class="template-visual-preview aurora-visual">
+          <div class="cube-wire-preview">
+            <i class="fa-solid fa-gem"></i>
+          </div>
+          <div class="template-glow-aura aurora-glow"></div>
+        </div>
+        <div class="template-details">
+          <h3>Aurora Glassmorphism</h3>
+          <p>Shimmering polychromatic aurora starlight with floating geodesic crystal sphere and soft chromatic dispersion.</p>
+          <div class="template-specs">
+            <span><i class="fa-solid fa-compass-drafting"></i> Crystalline</span>
+            <span><i class="fa-solid fa-palette"></i> Prismatic</span>
+          </div>
+        </div>
+        <div class="template-actions">
+          <button class="preview-3d-btn" data-template-id="aurora-holographic">
+            <i class="fa-solid fa-eye"></i> Preview 3D Scene
+          </button>
+          <a href="cart.html?template=aurora-holographic" class="store-access-btn">
+            <i class="fa-solid fa-cart-shopping"></i> Access in Store
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 5: Titanium Armor Defense -->
+      <div class="template-3d-card" data-template-id="titanium-armor">
+        <div class="card-specular-glare"></div>
+        <div class="template-header">
+          <span class="template-badge gold"><i class="fa-solid fa-shield"></i> HEAVY MILITARY</span>
+          <span class="template-price">20,000 NEX</span>
+        </div>
+        <div class="template-visual-preview titanium-visual">
+          <div class="cube-wire-preview">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <div class="template-glow-aura gold-glow"></div>
+        </div>
+        <div class="template-details">
+          <h3>Titanium Armor Defense</h3>
+          <p>Metallic tungsten geometry with heavy armored kinetic orbital rings, platinum plating, and golden rim lighting.</p>
+          <div class="template-specs">
+            <span><i class="fa-solid fa-lock"></i> Hardened</span>
+            <span><i class="fa-solid fa-crown"></i> Gold Alloy</span>
+          </div>
+        </div>
+        <div class="template-actions">
+          <button class="preview-3d-btn" data-template-id="titanium-armor">
+            <i class="fa-solid fa-eye"></i> Preview 3D Scene
+          </button>
+          <a href="cart.html?template=titanium-armor" class="store-access-btn">
+            <i class="fa-solid fa-cart-shopping"></i> Access in Store
+          </a>
+        </div>
+      </div>
+
+      <!-- Card 6: Cosmic Void Infinity -->
+      <div class="template-3d-card" data-template-id="cosmic-void">
+        <div class="card-specular-glare"></div>
+        <div class="template-header">
+          <span class="template-badge indigo"><i class="fa-solid fa-infinity"></i> DEEP SPACE</span>
+          <span class="template-price">25,000 NEX</span>
+        </div>
+        <div class="template-visual-preview cosmic-visual">
+          <div class="cube-wire-preview">
+            <i class="fa-solid fa-meteor"></i>
+          </div>
+          <div class="template-glow-aura indigo-glow"></div>
+        </div>
+        <div class="template-details">
+          <h3>Cosmic Void Infinity</h3>
+          <p>Deep space singularity vortex with hyper-speed cosmic particle warp drive and starlight cluster emissions.</p>
+          <div class="template-specs">
+            <span><i class="fa-solid fa-meteor"></i> Warp Speed</span>
+            <span><i class="fa-solid fa-star"></i> Singularity</span>
+          </div>
+        </div>
+        <div class="template-actions">
+          <button class="preview-3d-btn" data-template-id="cosmic-void">
+            <i class="fa-solid fa-eye"></i> Preview 3D Scene
+          </button>
+          <a href="cart.html?template=cosmic-void" class="store-access-btn">
+            <i class="fa-solid fa-cart-shopping"></i> Access in Store
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Store Unlock Callout Banner -->
+    <div class="store-vault-banner" data-reveal>
+      <div class="store-banner-content">
+        <div class="store-banner-icon"><i class="fa-solid fa-shop"></i></div>
+        <div class="store-banner-text">
+          <h3>Access Full 3D Templates in the NEXCHAT Store</h3>
+          <p>Purchase NEX Token packages starting from $3. Unlock all 3D themes, exclusive avatars, custom wallpapers, and developer API keys with zero platform fees.</p>
+        </div>
+      </div>
+      <div class="store-banner-action">
+        <a href="cart.html" class="store-banner-btn">
+          <span>Go to Token Store</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </a>
       </div>
     </div>
   </section>
