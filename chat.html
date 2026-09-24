@@ -43,6 +43,7 @@
         <div id="headerLogoContainer">
           <div class="nex-logo" id="headerLogoImg">
             <span class="nex-text">NEXCHAT</span>
+            <span class="nex-online-pulse"></span>
           </div>
         </div>
         <!-- Active chat contact info (shows when in chat) -->
@@ -54,15 +55,20 @@
           </div>
         </div>
       </div>
-      <div class="header-center">
+
+      <!-- Center Token Pill (Desktop only) -->
+      <div class="header-center desktop-only-header">
         <div id="tokenDisplay" class="token-display" title="Your tokens">
           <span class="token-label">Tokens</span>
           <span id="tokenCount">0</span>
           <span id="giftBadge" class="gift-badge" aria-live="polite"></span>
         </div>
       </div>
+
+      <!-- Right Header Actions -->
       <div class="header-right-scroll">
-        <div class="header-right">
+        <!-- Desktop Toolbar (hidden on mobile, visible >= 900px) -->
+        <div class="header-right desktop-header-actions">
           <button id="giftHistoryBtn" class="header-icon-btn" title="Gift History"><i class="fa-solid fa-gift"></i></button>
           <button id="profile-sticker" class="header-icon-btn profile-sticker" title="Profile"><i class="fa-solid fa-user"></i></button>
 
@@ -87,6 +93,49 @@
           <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
           <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
         </div>
+
+        <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
+        <div class="header-right mobile-header-actions">
+          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="NEX Reels & Camera" onclick="window.location.href='reels.html'">
+            <i class="fa-solid fa-camera"></i>
+          </button>
+          <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button id="mobileMenuBtn" class="header-icon-btn mobile-action-btn" title="Menu" aria-label="Menu">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Quick Dropdown Menu -->
+      <div id="mobileDropdownMenu" class="mobile-dropdown-menu" style="display: none;">
+        <button type="button" class="mobile-menu-item" onclick="window.location.href='reels.html'">
+          <i class="fa-solid fa-clapperboard"></i> <span>NEX Reels</span>
+        </button>
+        <button type="button" class="mobile-menu-item" onclick="window.location.href='cart.html'">
+          <i class="fa-solid fa-coins"></i> <span>Tokens & Gifts</span>
+          <span class="mobile-menu-badge" id="mobileTokenBadge">0</span>
+        </button>
+        <button type="button" class="mobile-menu-item" onclick="window.location.href='gaminghub.html'">
+          <i class="fa-solid fa-gamepad"></i> <span>Gaming & Betting</span>
+        </button>
+        <button type="button" class="mobile-menu-item" onclick="window.open('terminal.html','_blank')">
+          <i class="fa-solid fa-terminal"></i> <span>Hacker Terminal</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileLinkDeviceBtn">
+          <i class="fa-solid fa-qrcode"></i> <span>Linked Devices</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileThemeToggleBtn">
+          <i class="fa-solid fa-circle-half-stroke"></i> <span>Toggle Dark / Light</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
+          <i class="fa-solid fa-gear"></i> <span>Settings</span>
+        </button>
+        <div class="mobile-menu-divider"></div>
+        <button type="button" class="mobile-menu-item danger" id="mobileLogoutBtn">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+        </button>
       </div>
     </header>
 
@@ -241,6 +290,11 @@
           </ul>
         </div>
 
+        <!-- Mobile Floating Action Button (FAB) -->
+        <button id="mobileFabNewChat" class="mobile-fab" title="New Chat" aria-label="New Chat">
+          <i class="fa-solid fa-message"></i>
+        </button>
+
         <!-- Archived Section -->
         <div class="archived-section">
           <button class="archived-header" id="archivedToggle">
@@ -267,7 +321,9 @@
               <p id="statusText" class="status-dot">🟢 Online</p>
             </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 4px;">
+          <div class="chat-detail-header-actions">
+            <button id="headerVideoBtn" class="header-icon-btn chat-action-call" title="Video Call"><i class="fa-solid fa-video"></i></button>
+            <button id="headerCallBtn" class="header-icon-btn chat-action-call" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
             <button id="quickWallpaperBtn" class="header-icon-btn" title="Chat Wallpaper" style="background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s;"><i class="fa-solid fa-palette"></i></button>
             <button id="menuBtn" class="three-dots-menu" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
           </div>
@@ -1211,45 +1267,104 @@
       </div>
     </main>
 
+    <!-- MOBILE DISCOVER BOTTOM SHEET -->
+    <div id="mobileMoreSheet" class="mobile-more-sheet" aria-hidden="true">
+      <div class="more-sheet-backdrop" id="closeMoreSheetBackdrop"></div>
+      <div class="more-sheet-panel">
+        <div class="more-sheet-handle"></div>
+        <div class="more-sheet-header">
+          <h3 class="more-sheet-title">NEX Features</h3>
+          <button id="closeMoreSheetBtn" class="close-sheet-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="more-sheet-grid">
+          <button type="button" class="sheet-grid-item" onclick="window.location.href='reels.html'">
+            <div class="sheet-icon-box reels-gradient"><i class="fa-solid fa-clapperboard"></i></div>
+            <span>NEX Reels</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.location.href='cart.html'">
+            <div class="sheet-icon-box token-gradient"><i class="fa-solid fa-coins"></i></div>
+            <span>Buy Tokens</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.location.href='gaminghub.html'">
+            <div class="sheet-icon-box gaming-gradient"><i class="fa-solid fa-gamepad"></i></div>
+            <span>Gaming Hub</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.open('terminal.html','_blank')">
+            <div class="sheet-icon-box terminal-gradient"><i class="fa-solid fa-terminal"></i></div>
+            <span>Terminal</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.location.href='advertisement.html'">
+            <div class="sheet-icon-box market-gradient"><i class="fa-solid fa-shop"></i></div>
+            <span>Marketplace</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.handleNavigation('announcements')">
+            <div class="sheet-icon-box news-gradient"><i class="fa-solid fa-bullhorn"></i></div>
+            <span>News & Alerts</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="document.getElementById('openLinkDeviceModalBtn')?.click()">
+            <div class="sheet-icon-box link-gradient"><i class="fa-solid fa-qrcode"></i></div>
+            <span>Link Device</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="document.getElementById('settings-btn-header')?.click()">
+            <div class="sheet-icon-box settings-gradient"><i class="fa-solid fa-gear"></i></div>
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- BOTTOM NAVIGATION -->
     <nav class="bottom-nav">
+      <!-- 4 Core Tabs for Mobile + 1 Discover Tab -->
       <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chat">
-        <i class="fa-solid fa-comments"></i>
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-comments"></i>
+        </div>
         <span class="nav-label">Chats</span>
       </button>
       <button id="nav-status" class="nav-item" data-nav="updates" title="Status">
-        <i class="fa-solid fa-circle-notch"></i>
-        <span class="nav-label">Status</span>
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-circle-notch"></i>
+        </div>
+        <span class="nav-label">Updates</span>
       </button>
       <button id="nav-groups" class="nav-item" data-nav="communities" title="Groups">
-        <i class="fa-solid fa-users"></i>
-        <span class="nav-label">Groups</span>
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <span class="nav-label">Communities</span>
       </button>
       <button id="nav-calls" class="nav-item" data-nav="calls" title="Call History">
-        <i class="fa-solid fa-phone"></i>
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-phone"></i>
+        </div>
         <span class="nav-label">Calls</span>
       </button>
-      <button id="nav-announcements" class="nav-item" data-nav="announcements" title="Announcements">
+      <button id="nav-more" class="nav-item mobile-only-nav" data-nav="more" title="More Features">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-ellipsis"></i>
+        </div>
+        <span class="nav-label">More</span>
+      </button>
+
+      <!-- Desktop Extra Tabs (visible only on desktop >= 900px) -->
+      <button id="nav-announcements" class="nav-item desktop-only-nav" data-nav="announcements" title="Announcements">
         <i class="fa-solid fa-bullhorn"></i>
         <span class="nav-label">News</span>
       </button>
-      <button id="nav-marketplace" class="nav-item" data-nav="marketplace" title="Advert">
+      <button id="nav-marketplace" class="nav-item desktop-only-nav" data-nav="marketplace" title="Advert">
         <i class="fa-solid fa-shop"></i>
         <span class="nav-label">Market</span>
       </button>
-      <button id="nav-games" class="nav-item" data-nav="games" title="Gaming Hub">
+      <button id="nav-games" class="nav-item desktop-only-nav" data-nav="games" title="Gaming Hub">
         <i class="fa-solid fa-gamepad"></i>
         <span class="nav-label">Games</span>
       </button>
-      <button id="nav-terminal" class="nav-item" data-nav="terminal" title="Terminal">
+      <button id="nav-terminal" class="nav-item desktop-only-nav" data-nav="terminal" title="Terminal">
         <i class="fa-solid fa-terminal"></i>
         <span class="nav-label">Terminal</span>
       </button>
-      <button id="nav-video" class="nav-item" data-nav="video" title="Video" style="display:none;">
-        <i class="fa-solid fa-video"></i>
-        <span class="nav-label">Video</span>
-      </button>
-      <button id="logout-btn" class="nav-item logout" title="Logout">
+      <button id="logout-btn" class="nav-item desktop-only-nav logout" title="Logout">
         <i class="fa-solid fa-right-from-bracket"></i>
         <span class="nav-label">Logout</span>
       </button>

@@ -1933,7 +1933,13 @@ function showChatListView() {
   if (bottomNav) {
     bottomNav.style.display = "flex";
   }
-  hideChatProfileDisplay();
+  const activeChatHeader = document.getElementById('activeChatHeader');
+  const headerLogoContainer = document.getElementById('headerLogoContainer');
+  if (activeChatHeader) activeChatHeader.style.display = 'none';
+  if (headerLogoContainer) headerLogoContainer.style.display = 'flex';
+
+  const fab = document.getElementById('mobileFabNewChat');
+  if (fab) fab.style.display = 'flex';
   hideTypingIndicator();
   clearTypingStatus();
   if (typingStatusUnsubscribe) {
@@ -11321,6 +11327,90 @@ function initializeBasicUI() {
       switchDarkMode();
     }
   });
+
+  setupMobileFeatures();
+}
+
+function setupMobileFeatures() {
+  // Mobile Top 3-Dots Menu Toggle
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const mobileDropdownMenu = document.getElementById('mobileDropdownMenu');
+  
+  if (mobileMenuBtn && mobileDropdownMenu) {
+    mobileMenuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = mobileDropdownMenu.style.display === 'flex';
+      mobileDropdownMenu.style.display = isVisible ? 'none' : 'flex';
+    });
+
+    document.addEventListener('click', (e) => {
+      if (mobileDropdownMenu.style.display === 'flex' && !mobileDropdownMenu.contains(e.target) && e.target !== mobileMenuBtn) {
+        mobileDropdownMenu.style.display = 'none';
+      }
+    });
+  }
+
+  // Mobile Search Button triggers main search overlay
+  document.getElementById('mobileSearchBtn')?.addEventListener('click', () => {
+    document.getElementById('search-btn-header')?.click();
+  });
+
+  // Mobile FAB New Chat button triggers new chat tab
+  document.getElementById('mobileFabNewChat')?.addEventListener('click', () => {
+    document.getElementById('newChatFromTab')?.click();
+  });
+
+  // Chat Detail Header Video Call & Voice Call buttons
+  document.getElementById('headerCallBtn')?.addEventListener('click', () => {
+    document.getElementById('callBtn')?.click();
+  });
+  document.getElementById('headerVideoBtn')?.addEventListener('click', () => {
+    document.getElementById('videoCallBtn')?.click();
+  });
+
+  // Mobile More Sheet Close Handlers
+  const closeMoreSheet = () => {
+    document.getElementById('mobileMoreSheet')?.classList.remove('open');
+  };
+  document.getElementById('closeMoreSheetBtn')?.addEventListener('click', closeMoreSheet);
+  document.getElementById('closeMoreSheetBackdrop')?.addEventListener('click', closeMoreSheet);
+
+  // Mobile Menu shortcuts
+  document.getElementById('mobileLinkDeviceBtn')?.addEventListener('click', () => {
+    if (mobileDropdownMenu) mobileDropdownMenu.style.display = 'none';
+    document.getElementById('openLinkDeviceModalBtn')?.click();
+  });
+
+  document.getElementById('mobileThemeToggleBtn')?.addEventListener('click', () => {
+    if (mobileDropdownMenu) mobileDropdownMenu.style.display = 'none';
+    if (typeof switchDarkMode === 'function') {
+      switchDarkMode();
+    } else {
+      document.getElementById('darkModeToggle')?.click();
+    }
+  });
+
+  document.getElementById('mobileSettingsBtn')?.addEventListener('click', () => {
+    if (mobileDropdownMenu) mobileDropdownMenu.style.display = 'none';
+    document.getElementById('settings-btn-header')?.click();
+  });
+
+  document.getElementById('mobileLogoutBtn')?.addEventListener('click', () => {
+    if (mobileDropdownMenu) mobileDropdownMenu.style.display = 'none';
+    document.getElementById('logout-btn')?.click();
+  });
+
+  // Sync token counter into mobile menu badge
+  const tokenCountEl = document.getElementById('tokenCount');
+  const mobileTokenBadge = document.getElementById('mobileTokenBadge');
+  if (tokenCountEl && mobileTokenBadge) {
+    const updateBadge = () => {
+      mobileTokenBadge.textContent = tokenCountEl.textContent || '0';
+    };
+    const observer = new MutationObserver(updateBadge);
+    observer.observe(tokenCountEl, { childList: true, characterData: true, subtree: true });
+    updateBadge();
+  }
 }
 
 function showChatDetailView() {
@@ -11356,6 +11446,9 @@ function showChatDetailView() {
   const headerLogoContainer = document.getElementById('headerLogoContainer');
   if (activeChatHeader) activeChatHeader.style.display = 'flex';
   if (headerLogoContainer) headerLogoContainer.style.display = 'none';
+
+  const fab = document.getElementById('mobileFabNewChat');
+  if (fab) fab.style.display = 'none';
 }
 
 
