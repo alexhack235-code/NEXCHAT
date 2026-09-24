@@ -251,7 +251,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initializeFirebaseConnection();
 
-  console.log("ðŸŽ® Gaming Hub fully initialized!");
+  console.log("Gaming Hub fully initialized!");
 
   window.viewGameDetail = viewGameDetail;
   window.playGame = playGame;
@@ -428,17 +428,17 @@ function displayGames(games) {
 }
 
 function viewGameDetail(gameId) {
-  console.log("ðŸ” Viewing game detail for ID:", gameId);
+  console.log(" Viewing game detail for ID:", gameId);
   selectedGame = allGames.find((g) => g.id === parseInt(gameId, 10)) || allGames.find((g) => g.id == gameId);
 
   if (!selectedGame) {
-    console.error("âŒ Game not found for ID:", gameId);
+    console.error(" Game not found for ID:", gameId);
     return;
   }
 
   const modal = document.getElementById("game-detail-modal");
   if (!modal) {
-    console.error("âŒ Modal element not found!");
+    console.error(" Modal element not found!");
     return;
   }
 
@@ -452,14 +452,14 @@ function viewGameDetail(gameId) {
   const scoreEl = document.getElementById("game-detail-score");
   const timeEl = document.getElementById("game-detail-time");
 
-  if (imgEl) imgEl.innerHTML = selectedGame.emoji || "ðŸŽ®";
+  if (imgEl) imgEl.innerHTML = selectedGame.emoji || "";
   if (nameEl) nameEl.textContent = selectedGame.name || "Unknown Game";
   if (catEl) {
     const cat = selectedGame.category || "General";
     catEl.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
   }
   if (playEl) playEl.textContent = formatNumber(selectedGame.playersNow || 0);
-  if (ratEl) ratEl.textContent = `${selectedGame.rating || 0} â­`;
+  if (ratEl) ratEl.textContent = `${selectedGame.rating || 0} `;
   if (descEl) descEl.textContent = selectedGame.description || "No description available.";
   if (playingEl) playingEl.textContent = formatNumber(selectedGame.playersNow || 0);
   if (scoreEl) scoreEl.textContent = formatNumber(selectedGame.avgScore || 0);
@@ -501,7 +501,7 @@ function playGame(game) {
 
   closeGameModal();
 
-  console.log(`â–¶ï¸ Playing online game: ${game.name} | URL: ${game.gameUrl}`);
+  console.log(` Playing online game: ${game.name} | URL: ${game.gameUrl}`);
 }
 
 function closeGamePlayer() {
@@ -515,7 +515,7 @@ function closeGamePlayer() {
 }
 
 function shareGame(game) {
-  const shareText = `ðŸŽ® Check out ${game.name}! <i class="${game.icon || "fa-solid fa-gamepad"}"></i>\n\n${game.description}\n\nRate: ${game.rating}â­`;
+  const shareText = `Check out ${game.name}! <i class="${game.icon || "fa-solid fa-gamepad"}"></i>\n\n${game.description}\n\nRate: ${game.rating}`;
 
   if (navigator.share) {
     navigator.share({
@@ -530,7 +530,7 @@ function shareGame(game) {
     textArea.select();
     document.execCommand("copy");
     document.body.removeChild(textArea);
-    showNotification("ðŸ“‹ Game info copied to clipboard!", "success");
+    showNotification("Game info copied to clipboard!", "success");
   }
 }
 
@@ -801,14 +801,14 @@ window.addEventListener("orientationchange", () => {
   }, 100);
 });
 
-console.log("ðŸŽ® Gaming Hub initialized successfully!");
+console.log("Gaming Hub initialized successfully!");
 
 
 const GAMERS_DATABASE = [
   {
     id: 1,
     username: "ShadowNinja",
-    avatar: "ðŸ¥·",
+    avatar: "NEX-1",
     level: 45,
     skill: "advanced",
     mainGame: "Valorant",
@@ -823,7 +823,7 @@ const GAMERS_DATABASE = [
   {
     id: 2,
     username: "PhantomGamer",
-    avatar: "ðŸ‘»",
+    avatar: "NEX-2",
     level: 38,
     skill: "intermediate",
     mainGame: "PUBG Mobile",
@@ -838,7 +838,7 @@ const GAMERS_DATABASE = [
   {
     id: 3,
     username: "IceQueen",
-    avatar: "â„ï¸",
+    avatar: "",
     level: 52,
     skill: "pro",
     mainGame: "Overwatch 2",
@@ -853,7 +853,7 @@ const GAMERS_DATABASE = [
   {
     id: 4,
     username: "NovaStrike",
-    avatar: "âš¡",
+    avatar: "",
     level: 28,
     skill: "beginner",
     mainGame: "Call of Duty Mobile",
@@ -868,7 +868,7 @@ const GAMERS_DATABASE = [
   {
     id: 5,
     username: "VortexKing",
-    avatar: "ðŸ‘‘",
+    avatar: "VIP",
     level: 41,
     skill: "advanced",
     mainGame: "Destiny 2",
@@ -999,14 +999,14 @@ function setupMainNavigation() {
 
         if (gameSearchArea) gameSearchArea.style.display = "block";
         if (categoryTabs) categoryTabs.style.display = "flex";
-        if (gamingTitle) gamingTitle.textContent = "ðŸŽ® Gaming Hub";
+        if (gamingTitle) gamingTitle.textContent = "Gaming Hub";
       }
       else if (section === "gamers") {
         if (gamersSection) gamersSection.style.display = "block";
 
         if (gameSearchArea) gameSearchArea.style.display = "none";
         if (categoryTabs) categoryTabs.style.display = "none";
-        if (gamingTitle) gamingTitle.textContent = "ðŸ‘¾ Gamers";
+        if (gamingTitle) gamingTitle.textContent = "Gamers";
 
         loadGamers();
       }
@@ -1015,7 +1015,7 @@ function setupMainNavigation() {
 
         if (gameSearchArea) gameSearchArea.style.display = "none";
         if (categoryTabs) categoryTabs.style.display = "none";
-        if (gamingTitle) gamingTitle.textContent = "ðŸ° Clans";
+        if (gamingTitle) gamingTitle.textContent = " Clans";
 
         loadClans();
       }
@@ -1033,7 +1033,7 @@ function setupMainNavigation() {
 
         if (gameSearchArea) gameSearchArea.style.display = "none";
         if (categoryTabs) categoryTabs.style.display = "none";
-        if (gamingTitle) gamingTitle.textContent = "ðŸŽ¬ Clips";
+        if (gamingTitle) gamingTitle.textContent = "Clips";
 
         loadClips();
       }
@@ -1042,7 +1042,7 @@ function setupMainNavigation() {
 
         if (gameSearchArea) gameSearchArea.style.display = "none";
         if (categoryTabs) categoryTabs.style.display = "none";
-        if (gamingTitle) gamingTitle.textContent = "ðŸŽ® Sessions";
+        if (gamingTitle) gamingTitle.textContent = "Sessions";
 
         loadSessions();
       }
@@ -1103,7 +1103,7 @@ function displayGamers(gamers) {
       </div>
       <h3 class="gamer-name">${gamer.username}</h3>
       <p class="gamer-level">Level ${gamer.level} | ${gamer.skill}</p>
-      <p class="gamer-game">ðŸŽ® ${gamer.mainGame}</p>
+      <p class="gamer-game">${gamer.mainGame}</p>
       <div class="gamer-stats">
         <span> ${gamer.rating}</span>
         <span> ${gamer.wins} wins</span>
@@ -1119,10 +1119,10 @@ function viewGamerProfile(gamerId) {
 
   const profileHTML = `
     <div class="gamer-profile-modal">
-      <button class="close-modal" onclick="closeGamerProfile()">âœ•</button>
+      <button class="close-modal" onclick="closeGamerProfile()">&times;</button>
       <div class="profile-header" style="background: linear-gradient(135deg, #00ff66, #00ccff);">
         <div class="profile-avatar-large">${gamer.avatar}</div>
-        <div class="profile-status">${gamer.status === 'online' ? 'ðŸŸ¢ Online' : 'âš« Offline'}</div>
+        <div class="profile-status">${gamer.status === 'online' ? 'Online' : 'Offline'}</div>
       </div>
       <div class="profile-body">
         <h2>${gamer.username}</h2>
@@ -1135,7 +1135,7 @@ function viewGamerProfile(gamerId) {
           </div>
           <div class="stat">
             <span class="stat-label">Rating</span>
-            <span class="stat-value">${gamer.rating} â­</span>
+            <span class="stat-value">${gamer.rating} </span>
           </div>
           <div class="stat">
             <span class="stat-label">Wins</span>
@@ -1160,9 +1160,9 @@ function viewGamerProfile(gamerId) {
         </div>
 
         <div class="profile-actions">
-          <button class="action-btn primary" onclick="addFriend(${gamer.id})">ðŸ‘¥ Add Friend</button>
-          <button class="action-btn secondary" onclick="inviteToSquad(${gamer.id})">ðŸŽ–ï¸ Invite to Squad</button>
-          <button class="action-btn secondary" onclick="startSession(${gamer.id})">ðŸŽ® Play Together</button>
+          <button class="action-btn primary" onclick="addFriend(${gamer.id})">Add Friend</button>
+          <button class="action-btn secondary" onclick="inviteToSquad(${gamer.id})"> Invite to Squad</button>
+          <button class="action-btn secondary" onclick="startSession(${gamer.id})">Play Together</button>
         </div>
       </div>
     </div>
@@ -1196,10 +1196,10 @@ function toggleFoldable(sectionId) {
 
   if (foldableStates[sectionId]) {
     content.style.display = 'block';
-    toggle.textContent = 'â–¼';
+    toggle.textContent = '';
   } else {
     content.style.display = 'none';
-    toggle.textContent = 'â–¶';
+    toggle.textContent = '';
   }
 }
 
@@ -1218,7 +1218,7 @@ async function loadClans() {
 
   } catch (error) {
     console.error('Error loading clans:', error);
-    showNotification('âŒ Failed to load clans', 'error');
+    showNotification(' Failed to load clans', 'error');
   }
 }
 
@@ -1258,15 +1258,15 @@ async function loadMyClans() {
       return `
         <div class="clan-card" onclick="viewClan('${clan.id}')">
           <div class="clan-header">
-            <span class="clan-emoji">${clan.emoji || 'ðŸ°'}</span>
+            <span class="clan-emoji">${clan.emoji || ''}</span>
             <span class="clan-skill-badge">${clan.skill?.toUpperCase() || 'CASUAL'}</span>
           </div>
           <h3>${clan.name}</h3>
-          <p class="clan-game">ðŸŽ® ${clan.game}</p>
+          <p class="clan-game">${clan.game}</p>
           <p class="clan-description">${clan.description || 'No description'}</p>
           <div class="clan-stats">
-            <span>ðŸ‘¥ ${clan.members?.length || 0}/${clan.maxMembers || 50}</span>
-            <span>ðŸ† ${clan.wins || 0} wins</span>
+            <span>${clan.members?.length || 0}/${clan.maxMembers || 50}</span>
+            <span> ${clan.wins || 0} wins</span>
           </div>
           <div class="clan-actions">
             <button class="clan-action-btn" onclick="event.stopPropagation(); leaveClan('${clan.id}')">Leave</button>
@@ -1302,17 +1302,17 @@ async function loadSuggestedClans() {
       return `
         <div class="clan-card" onclick="viewClan('${clan.id}')">
           <div class="clan-header">
-            <span class="clan-emoji">${clan.emoji || 'ðŸ°'}</span>
+            <span class="clan-emoji">${clan.emoji || ''}</span>
             <span class="clan-skill-badge">${clan.skill?.toUpperCase() || 'CASUAL'}</span>
           </div>
           <h3>${clan.name}</h3>
-          <p class="clan-game">ðŸŽ® ${clan.game}</p>
+          <p class="clan-game">${clan.game}</p>
           <p class="clan-description">${clan.description || 'No description'}</p>
           <div class="clan-stats">
-            <span>ðŸ‘¥ ${clan.members?.length || 0}/${clan.maxMembers || 50}</span>
-            <span>ðŸ† ${clan.wins || 0} wins</span>
+            <span>${clan.members?.length || 0}/${clan.maxMembers || 50}</span>
+            <span> ${clan.wins || 0} wins</span>
           </div>
-          <button class="clan-action-btn" onclick="event.stopPropagation(); joinClan('${clan.id}')">âž• Join</button>
+          <button class="clan-action-btn" onclick="event.stopPropagation(); joinClan('${clan.id}')"> Join</button>
         </div>
       `;
     }).join('');
@@ -1349,13 +1349,13 @@ async function loadClanInvites() {
       return `
         <div class="invite-card">
           <div class="invite-info">
-            <h4>ðŸ° ${invite.clanName}</h4>
+            <h4> ${invite.clanName}</h4>
             <p>Invited by: ${invite.inviterName}</p>
             <p>Game: ${invite.game}</p>
           </div>
           <div class="invite-actions">
-            <button class="invite-btn accept" onclick="respondToClanInvite('${invite.id}', 'accepted', '${invite.clanId}')">âœ… Accept</button>
-            <button class="invite-btn decline" onclick="respondToClanInvite('${invite.id}', 'declined')">âŒ Decline</button>
+            <button class="invite-btn accept" onclick="respondToClanInvite('${invite.id}', 'accepted', '${invite.clanId}')">[OK] Accept</button>
+            <button class="invite-btn decline" onclick="respondToClanInvite('${invite.id}', 'declined')"> Decline</button>
           </div>
         </div>
       `;
@@ -1372,7 +1372,7 @@ async function loadClanInvites() {
 async function createClan() {
   const userId = auth.currentUser?.uid;
   if (!userId) {
-    showNotification('âŒ Please login to create a clan', 'error');
+    showNotification(' Please login to create a clan', 'error');
     return;
   }
 
@@ -1383,7 +1383,7 @@ async function createClan() {
   const maxMembers = parseInt(document.getElementById('clanMaxMembers').value);
 
   if (!name || !game) {
-    showNotification('âŒ Please fill in all required fields', 'error');
+    showNotification(' Please fill in all required fields', 'error');
     return;
   }
 
@@ -1403,20 +1403,20 @@ async function createClan() {
 
     await addDoc(collection(db, 'clans'), clanData);
 
-    showNotification('âœ… Clan created successfully!', 'success');
+    showNotification('[OK] Clan created successfully!', 'success');
     closeCreateClanModal();
     loadClans();
 
   } catch (error) {
     console.error('Error creating clan:', error);
-    showNotification('âŒ Failed to create clan', 'error');
+    showNotification(' Failed to create clan', 'error');
   }
 }
 
 async function joinClan(clanId) {
   const userId = auth.currentUser?.uid;
   if (!userId) {
-    showNotification('âŒ Please login to join a clan', 'error');
+    showNotification(' Please login to join a clan', 'error');
     return;
   }
 
@@ -1425,19 +1425,19 @@ async function joinClan(clanId) {
     const clanDoc = await getDoc(clanRef);
 
     if (!clanDoc.exists()) {
-      showNotification('âŒ Clan not found', 'error');
+      showNotification(' Clan not found', 'error');
       return;
     }
 
     const clan = clanDoc.data();
 
     if (clan.members.includes(userId)) {
-      showNotification('â„¹ï¸ You are already a member of this clan', 'info');
+      showNotification(' You are already a member of this clan', 'info');
       return;
     }
 
     if (clan.members.length >= clan.maxMembers) {
-      showNotification('âŒ Clan is full', 'error');
+      showNotification(' Clan is full', 'error');
       return;
     }
 
@@ -1445,12 +1445,12 @@ async function joinClan(clanId) {
       members: arrayUnion(userId)
     });
 
-    showNotification('âœ… Successfully joined clan!', 'success');
+    showNotification('[OK] Successfully joined clan!', 'success');
     loadClans();
 
   } catch (error) {
     console.error('Error joining clan:', error);
-    showNotification('âŒ Failed to join clan', 'error');
+    showNotification(' Failed to join clan', 'error');
   }
 }
 
@@ -1467,7 +1467,7 @@ async function leaveClan(clanId) {
     const clan = clanDoc.data();
 
     if (clan.leader === userId) {
-      showNotification('âŒ Clan leaders cannot leave. Transfer leadership or disband the clan first.', 'error');
+      showNotification(' Clan leaders cannot leave. Transfer leadership or disband the clan first.', 'error');
       return;
     }
 
@@ -1475,17 +1475,17 @@ async function leaveClan(clanId) {
       members: arrayRemove(userId)
     });
 
-    showNotification('âœ… Left clan successfully', 'success');
+    showNotification('[OK] Left clan successfully', 'success');
     loadClans();
 
   } catch (error) {
     console.error('Error leaving clan:', error);
-    showNotification('âŒ Failed to leave clan', 'error');
+    showNotification(' Failed to leave clan', 'error');
   }
 }
 
 async function inviteToClan(clanId) {
-  showNotification('ðŸ“¨ Clan invite feature coming soon!', 'info');
+  showNotification('Clan invite feature coming soon!', 'info');
 }
 
 async function respondToClanInvite(inviteId, response, clanId = null) {
@@ -1501,12 +1501,12 @@ async function respondToClanInvite(inviteId, response, clanId = null) {
       await joinClan(clanId);
     }
 
-    showNotification(`âœ… Invite ${response}`, 'success');
+    showNotification(`[OK] Invite ${response}`, 'success');
     loadClanInvites();
 
   } catch (error) {
     console.error('Error responding to invite:', error);
-    showNotification('âŒ Failed to respond to invite', 'error');
+    showNotification(' Failed to respond to invite', 'error');
   }
 }
 
@@ -1579,7 +1579,7 @@ async function loadClips() {
 
   } catch (error) {
     console.error('Error loading clips:', error);
-    showNotification('âŒ Failed to load clips', 'error');
+    showNotification(' Failed to load clips', 'error');
   }
 }
 
@@ -1620,7 +1620,7 @@ async function loadTrendingClips() {
           </div>
           <div class="clip-info">
             <h4>${clip.title}</h4>
-            <p class="clip-meta">ðŸŽ® ${clip.game} â€¢ ðŸ‘¤ ${clip.uploaderName} â€¢ ðŸ‘ï¸ ${clip.views || 0}</p>
+            <p class="clip-meta">${clip.game} - ${clip.uploaderName} -  ${clip.views || 0}</p>
             <p class="clip-description">${clip.description || ''}</p>
           </div>
         </div>
@@ -1664,7 +1664,7 @@ async function loadMyClips() {
           </div>
           <div class="clip-info">
             <h4>${clip.title}</h4>
-            <p class="clip-meta">ðŸŽ® ${clip.game} â€¢ ðŸ‘ï¸ ${clip.views || 0} views</p>
+            <p class="clip-meta">${clip.game} -  ${clip.views || 0} views</p>
             <p class="clip-description">${clip.description || ''}</p>
           </div>
         </div>
@@ -1719,7 +1719,7 @@ async function loadClanClips() {
           </div>
           <div class="clip-info">
             <h4>${clip.title}</h4>
-            <p class="clip-meta">ðŸŽ® ${clip.game} â€¢ ðŸ‘¤ ${clip.uploaderName} â€¢ ðŸ° ${clip.clanName}</p>
+            <p class="clip-meta">${clip.game} - ${clip.uploaderName} -  ${clip.clanName}</p>
             <p class="clip-description">${clip.description || ''}</p>
           </div>
         </div>
@@ -1737,7 +1737,7 @@ async function loadClanClips() {
 async function uploadClip() {
   const userId = auth.currentUser?.uid;
   if (!userId) {
-    showNotification('âŒ Please login to upload clips', 'error');
+    showNotification(' Please login to upload clips', 'error');
     return;
   }
 
@@ -1748,17 +1748,17 @@ async function uploadClip() {
   const clanOnly = document.getElementById('clipClanOnly').checked;
 
   if (!title || !game || !file) {
-    showNotification('âŒ Please fill in all required fields', 'error');
+    showNotification(' Please fill in all required fields', 'error');
     return;
   }
 
   if (file.size > 100 * 1024 * 1024) {
-    showNotification('âŒ File size must be less than 100MB', 'error');
+    showNotification(' File size must be less than 100MB', 'error');
     return;
   }
 
   try {
-    showNotification('ðŸ“¤ Uploading clip...', 'info');
+    showNotification('Uploading clip...', 'info');
 
     let videoUrl = '';
     try {
@@ -1812,13 +1812,13 @@ async function uploadClip() {
 
     await addDoc(collection(db, 'clips'), clipData);
 
-    showNotification('âœ… Clip uploaded successfully!', 'success');
+    showNotification('[OK] Clip uploaded successfully!', 'success');
     closeUploadClipModal();
     loadClips();
 
   } catch (error) {
     console.error('Error uploading clip:', error);
-    showNotification('âŒ Failed to upload clip', 'error');
+    showNotification(' Failed to upload clip', 'error');
   }
 }
 
@@ -1851,7 +1851,7 @@ async function viewClip(clipId) {
         <div class="clip-viewer-info">
           <h4>${clip.title}</h4>
           <p>${clip.description || 'No description provided.'}</p>
-          <p class="clip-meta"> ${clip.game || 'Unknown Game'} •  ${clip.uploaderName || 'Unknown'} •  ${clip.views || 0} views</p>
+          <p class="clip-meta"> ${clip.game || 'Unknown Game'}   ${clip.uploaderName || 'Unknown'}   ${clip.views || 0} views</p>
         </div>
       </div>
     `;
@@ -1906,7 +1906,7 @@ function loadSquads() {
               <span class="squad-emoji">${squad.emoji}</span>
               <div>
                 <h4>${squad.name}</h4>
-                <p>${squad.game} • ${squad.skill}</p>
+                <p>${squad.game}  ${squad.skill}</p>
               </div>
             </div>
             <p>${squad.description}</p>
@@ -1927,7 +1927,7 @@ function loadSquads() {
               <span class="squad-emoji">${squad.emoji}</span>
               <div>
                 <h4>${squad.name}</h4>
-                <p>${squad.game} • ${squad.skill}</p>
+                <p>${squad.game}  ${squad.skill}</p>
               </div>
             </div>
             <p>${squad.description}</p>
@@ -1983,11 +1983,11 @@ function loadSessions() {
 
 function addFriend(gamerId) {
   const gamer = GAMERS_DATABASE.find(g => g.id === gamerId);
-  showNotification(`âœ… Friend request sent to ${gamer.username}!`, "success");
+  showNotification(`[OK] Friend request sent to ${gamer.username}!`, "success");
 }
 
 function inviteToSquad(gamerId) {
-  showNotification("ðŸŽ–ï¸ Squad invite sent!", "success");
+  showNotification(" Squad invite sent!", "success");
 }
 
 function startSession(gamerId) {
@@ -2004,7 +2004,7 @@ function startSession(gamerId) {
 
 function joinSession(sessionId) {
   const session = SESSIONS_DATABASE.find(s => s.id === sessionId);
-  showNotification(`âœ… Joined ${session.game} session! Launching game...`, "success");
+  showNotification(`[OK] Joined ${session.game} session! Launching game...`, "success");
   setTimeout(() => {
     window.open("https://www.google.com", "_blank");
   }, 1000);
@@ -2023,16 +2023,16 @@ function initializeFirebaseConnection() {
 
     checkFirebaseConnection();
 
-    console.log("âœ… Firebase connection monitor started");
+    console.log("[OK] Firebase connection monitor started");
   } catch (error) {
-    console.warn("âš ï¸ Firebase initialization warning:", error.message);
+    console.warn("[WARN] Firebase initialization warning:", error.message);
   }
 }
 
 function checkFirebaseConnection() {
   try {
     if (typeof db !== 'undefined' || typeof auth !== 'undefined') {
-      console.log("âœ… Firebase connection is active");
+      console.log("[OK] Firebase connection is active");
       isFirebaseConnected = true;
 
       if (firebaseConnectionTimeout) {
@@ -2040,7 +2040,7 @@ function checkFirebaseConnection() {
       }
     }
   } catch (error) {
-    console.warn("âš ï¸ Firebase connection check warning:", error.message);
+    console.warn("[WARN] Firebase connection check warning:", error.message);
     isFirebaseConnected = false;
   }
 }
@@ -2048,23 +2048,23 @@ function checkFirebaseConnection() {
 function reconnectFirebase() {
   try {
     if (typeof auth !== 'undefined') {
-      console.log("ðŸ”„ Firebase connection recheck...");
+      console.log("Firebase connection recheck...");
       checkFirebaseConnection();
       return true;
     }
   } catch (error) {
-    console.error("âŒ Firebase recheck warning:", error.message);
+    console.error(" Firebase recheck warning:", error.message);
     return false;
   }
 }
 
 window.addEventListener("online", () => {
-  console.log("ðŸŒ Network restored");
+  console.log(" Network restored");
   reconnectFirebase();
 });
 
 window.addEventListener("offline", () => {
-  console.log("âŒ Network disconnected - Gaming Hub will work offline");
+  console.log(" Network disconnected - Gaming Hub will work offline");
   isFirebaseConnected = false;
 });
 
@@ -2077,7 +2077,7 @@ window.addEventListener("beforeunload", () => {
   }
 });
 
-console.log("ðŸŽ® Gaming Hub Firebase connection management loaded!");
+console.log("Gaming Hub Firebase connection management loaded!");
 
 
 function showCreateSquadModal() {
@@ -2085,8 +2085,8 @@ function showCreateSquadModal() {
     <div class="squad-modal-overlay">
       <div class="squad-modal">
         <div class="squad-modal-header">
-          <h2>ðŸ›¡ï¸ Register New Clan</h2>
-          <button class="close-modal-btn" onclick="closeSquadModal()">âœ•</button>
+          <h2> Register New Clan</h2>
+          <button class="close-modal-btn" onclick="closeSquadModal()">&times;</button>
         </div>
         <form id="createSquadForm" onsubmit="handleSquadCreation(event)">
           <div class="form-group">
@@ -2112,9 +2112,9 @@ function showCreateSquadModal() {
           </div>
           <div class="form-group">
             <label>Clan Logo (Emoji)</label>
-            <input type="text" id="clanLogo" placeholder="ðŸ¦" maxlength="2" value="ðŸ›¡ï¸">
+            <input type="text" id="clanLogo" placeholder="" maxlength="2" value="">
           </div>
-          <button type="submit" class="create-btn">ðŸš€ Register Clan</button>
+          <button type="submit" class="create-btn">[START] Register Clan</button>
         </form>
       </div>
     </div>
@@ -2185,7 +2185,7 @@ window.handleSquadCreation = function (e) {
   const name = document.getElementById('clanName').value;
   const tag = document.getElementById('clanTag').value;
 
-  showNotification(`âœ… Clan "${name}" [${tag}] Registered Successfully!`, "success");
+  showNotification(`[OK] Clan "${name}" [${tag}] Registered Successfully!`, "success");
   closeSquadModal();
 
   const squadsList = document.getElementById("mySquadsList");
@@ -2200,10 +2200,10 @@ window.handleSquadCreation = function (e) {
           <span class="squad-skill-badge">LEADER</span>
         </div>
         <h3>${name} <span style="color:#888;font-size:12px;">${tag}</span></h3>
-        <p class="squad-game">ðŸŽ® ${document.getElementById('clanGame').value}</p>
+        <p class="squad-game">${document.getElementById('clanGame').value}</p>
         <div class="squad-stats">
-          <span>ðŸ‘¥ 1/20</span>
-          <span>ðŸ† 0 wins</span>
+          <span>1/20</span>
+          <span> 0 wins</span>
         </div>
       </div>
     `;

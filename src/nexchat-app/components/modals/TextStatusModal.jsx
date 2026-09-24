@@ -1,3 +1,4 @@
+import { Palette, X } from 'lucide-react';
 import React, { useState } from 'react';
 
 const PALETTES = [
@@ -20,7 +21,7 @@ const FONTS = [
 ];
 
 export default function TextStatusModal({ isOpen, onClose, onSave, onLog }) {
-  const [text, setText] = useState("Debugging 12k+ lines in chat.js is real 😭💔");
+  const [text, setText] = useState("Debugging 12k+ lines in chat.js is real ");
   const [bgIndex, setBgIndex] = useState(1);
   const [fontIndex, setFontIndex] = useState(0);
 
@@ -61,7 +62,7 @@ export default function TextStatusModal({ isOpen, onClose, onSave, onLog }) {
           className="p-2 rounded-full hover:bg-black/20 text-xl transition-colors"
           title="Back"
         >
-          ✕
+          <X className="w-4 h-4 inline" />
         </button>
 
         <div className="flex items-center gap-4">
@@ -70,7 +71,7 @@ export default function TextStatusModal({ isOpen, onClose, onSave, onLog }) {
             className="p-2.5 rounded-full hover:bg-black/20 transition-transform active:scale-90"
             title="Change background color"
           >
-            🎨
+            <Palette className="w-4 h-4 inline" />
           </button>
           <button 
             onClick={cycleFont}

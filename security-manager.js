@@ -95,7 +95,7 @@ export class SecurityManager {
       userAgent: navigator.userAgent
     };
     this.suspiciousActivity.push(log);
-    console.warn('ðŸš¨ Suspicious Activity:', log);
+    console.warn('[SECURITY ALERT] Suspicious Activity:', log);
 
     if (this.suspiciousActivity.length > 10) {
       this.blockedIPs.add(identifier);
@@ -170,7 +170,7 @@ export class SecurityManager {
     
     window.addEventListener('storage', (e) => {
       if (e.key === 'adminToken' && e.newValue === null) {
-        console.log('âš ï¸ Session cleared');
+        console.log('[WARN] Session cleared');
       }
     });
 
@@ -187,7 +187,7 @@ export class SecurityManager {
     setInterval(() => {
       const inactiveTime = Date.now() - lastActivity;
       if (inactiveTime > 30 * 60 * 1000) { // 30 minutes
-        console.warn('âš ï¸ Session inactive for 30 minutes');
+        console.warn('[WARN] Session inactive for 30 minutes');
       }
     }, 60000);
   }

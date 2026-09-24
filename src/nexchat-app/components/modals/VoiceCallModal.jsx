@@ -1,3 +1,4 @@
+import { UserPlus, Camera, Sparkles, Bell, Video, Volume2, Mic, MicOff, PhoneOff } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 
 export default function VoiceCallModal({ isOpen, onClose, contactName, phoneNumber = "+1 (218) 296-1795", onLog }) {
@@ -56,21 +57,21 @@ export default function VoiceCallModal({ isOpen, onClose, contactName, phoneNumb
             title="Add Person to Call"
             onClick={() => onLog?.('[CALL] Add person prompt')}
           >
-            👤+
+            <UserPlus className="w-4 h-4" />
           </button>
           <button 
             className="w-11 h-11 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-lg hover:border-[#00FF88] hover:text-[#00FF88] transition-all"
             title="Flip Camera"
             onClick={() => onLog?.('[CALL] Camera flipped')}
           >
-            📷
+            <Camera className="w-4 h-4" />
           </button>
           <button 
             className="w-11 h-11 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-lg hover:border-[#00FF88] hover:text-[#00FF88] transition-all"
             title="Magic Wand / Visual Effects"
             onClick={() => onLog?.('[CALL] Magic effects opened')}
           >
-            ✨
+            <Sparkles className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -95,7 +96,7 @@ export default function VoiceCallModal({ isOpen, onClose, contactName, phoneNumb
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4">
         {/* Muted Notifications Banner 1:1 */}
         <div className="bg-black/70 backdrop-blur-md border border-white/15 px-4 py-2 rounded-full text-xs text-white/80 shadow-lg flex items-center gap-2 mb-8">
-          <span>🔔</span>
+          <Bell className="w-4 h-4 inline" />
           <span>Calls and notifications will be muted</span>
         </div>
 
@@ -137,7 +138,7 @@ export default function VoiceCallModal({ isOpen, onClose, contactName, phoneNumb
           }`}
           title="Toggle Video"
         >
-          📹
+          <Video className="w-5 h-5" />
         </button>
 
         {/* 3. Speaker (WHITE CIRCLE HIGHLIGHT SELECTED 1:1) */}
@@ -153,7 +154,7 @@ export default function VoiceCallModal({ isOpen, onClose, contactName, phoneNumb
           }`}
           title="Speakerphone (Active)"
         >
-          🔊
+          <Volume2 className="w-5 h-5" />
         </button>
 
         {/* 4. Mute Mic */}
@@ -167,7 +168,7 @@ export default function VoiceCallModal({ isOpen, onClose, contactName, phoneNumb
           }`}
           title="Mute Microphone"
         >
-          {micMuted ? '🔇' : '🎤'}
+          {micMuted ? <MicOff className="w-5 h-5 text-red-500" /> : <Mic className="w-5 h-5" />}
         </button>
 
         {/* 5. End Call Red Button */}
@@ -176,7 +177,7 @@ export default function VoiceCallModal({ isOpen, onClose, contactName, phoneNumb
           className="w-14 h-14 rounded-full bg-red-600 hover:bg-red-700 active:scale-95 flex items-center justify-center text-2xl shadow-xl shadow-red-600/40 transition-all"
           title="End Call"
         >
-          📞
+          <PhoneOff className="w-5 h-5" />
         </button>
       </div>
     </div>

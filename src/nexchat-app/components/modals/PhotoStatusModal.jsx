@@ -1,11 +1,12 @@
+import { Lightbulb, Sparkles, X } from 'lucide-react';
 import React, { useState } from 'react';
 
 const FILTERS = [
   { id: 'normal', name: 'Normal', icon: '—', css: 'none', bg: '#202c33' },
-  { id: 'peach', name: 'Warm', icon: '🍑', css: 'sepia(0.35) saturate(1.7) hue-rotate(-20deg)', bg: '#fbb6ce' },
-  { id: 'bw', name: 'B&W', icon: '⚪', css: 'grayscale(1) contrast(1.4) brightness(1.05)', bg: '#64748b' },
-  { id: 'sepia', name: 'Sepia', icon: '🍂', css: 'sepia(0.85) contrast(1.15)', bg: '#fb923c' },
-  { id: 'cyan', name: 'Cyan', icon: '💎', css: 'hue-rotate(150deg) saturate(2) brightness(0.95)', bg: '#38bdf8' },
+  { id: 'peach', name: 'Warm', label: 'Warm', css: 'sepia(0.35) saturate(1.7) hue-rotate(-20deg)', bg: '#fbb6ce' },
+  { id: 'bw', name: 'B&W', label: 'B&W', css: 'grayscale(1) contrast(1.4) brightness(1.05)', bg: '#64748b' },
+  { id: 'sepia', name: 'Sepia', label: 'Sepia', css: 'sepia(0.85) contrast(1.15)', bg: '#fb923c' },
+  { id: 'cyan', name: 'Cyan', label: 'Cyan', css: 'hue-rotate(150deg) saturate(2) brightness(0.95)', bg: '#38bdf8' },
 ];
 
 export default function PhotoStatusModal({ isOpen, onClose, onLog }) {
@@ -59,13 +60,13 @@ export default function PhotoStatusModal({ isOpen, onClose, onLog }) {
             }`}
             title="Toggle Light / Bulb"
           >
-            💡
+            <Lightbulb className="w-4 h-4 inline" />
           </button>
           <button 
             className="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center hover:border-white/50 transition-all"
             title="Sticker mask"
           >
-            🎭
+            <Sparkles className="w-4 h-4 inline" />
           </button>
         </div>
       </div>

@@ -12,7 +12,7 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 window.addEventListener('appinstalled', () => {
-  console.log('âœ… NEXCHAT installed as PWA successfully');
+  console.log('NEXCHAT installed as PWA successfully');
   deferredPrompt = null;
   removeInstallPrompt();
   localStorage.removeItem('nexchat_install_dismissed');
@@ -21,7 +21,7 @@ window.addEventListener('appinstalled', () => {
 
 window.addEventListener('load', () => {
   if (window.navigator.standalone === true) {
-    console.log('âœ… App is running in standalone mode (already installed)');
+    console.log('App is running in standalone mode (already installed)');
     localStorage.setItem('nexchat_installed', 'true');
   }
 });
@@ -56,7 +56,7 @@ function showInstallPrompt() {
   `;
   
   const message = document.createElement('span');
-  message.textContent = 'ðŸ“± Install NEXCHAT as an app for faster access & offline support';
+  message.innerHTML = '<img src="/favicons/favicon.ico" style="width:18px;height:18px;vertical-align:middle;margin-right:8px;" /> Install NEXCHAT as an app for faster access & offline support';
   
   const buttonContainer = document.createElement('div');
   buttonContainer.style.cssText = 'display: flex; gap: 10px;';
@@ -79,7 +79,7 @@ function showInstallPrompt() {
   installBtn.onclick = handleInstall;
   
   const closeBtn = document.createElement('button');
-  closeBtn.textContent = 'âœ•';
+  closeBtn.textContent = '&times;';
   closeBtn.style.cssText = `
     background: transparent;
     color: #0a0f1a;
@@ -119,7 +119,7 @@ async function handleInstall() {
   const result = await deferredPrompt.userChoice;
   
   if (result.outcome === 'accepted') {
-    console.log('âœ… User accepted install prompt');
+    console.log('User accepted install prompt');
     localStorage.removeItem('nexchat_install_dismissed_time');
   } else {
     console.log('User dismissed install prompt');
@@ -162,7 +162,7 @@ function removeInstallPrompt() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', { scope: './' })
     .then(reg => {
-      console.log('âœ… PWA Service Worker registered successfully:', reg);
+      console.log('PWA Service Worker registered successfully:', reg);
       console.log('Scope:', reg.scope);
       console.log('State:', reg.installing?.state || reg.active?.state);
       
@@ -183,6 +183,6 @@ if ('serviceWorker' in navigator) {
       });
     });
 } else {
-  console.warn('âš ï¸ Service Workers not supported in this browser');
+  console.warn(' Service Workers not supported in this browser');
 }
 

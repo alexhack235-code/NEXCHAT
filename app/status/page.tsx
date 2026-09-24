@@ -107,7 +107,7 @@ const INITIAL_DEMO_STATUSES: UserStatusGroup[] = [
         id: 'sun-1',
         mediaUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1080&q=85',
         mediaType: 'image',
-        caption: 'Early morning tranquility 🌅 Focus mode on.',
+        caption: 'Early morning tranquility Focus mode on.',
         timeFormatted: '03:40 AM',
         expiresIn: 'Expires in 20h',
         timestamp: Date.now() - 1000 * 60 * 55,
@@ -921,9 +921,7 @@ export default function WhatsAppStatusPage() {
               onClick={() => setIsTextModalOpen(false)}
               className="text-white text-2xl p-2"
               title="Cancel"
-            >
-              ✕
-            </button>
+            ><span className="text-lg font-bold">&times;</span></button>
             <div className="flex items-center gap-3">
               {/* Color switcher button */}
               <button
@@ -935,9 +933,7 @@ export default function WhatsAppStatusPage() {
                 }}
                 className="w-8 h-8 rounded-full border-2 border-white/60 shadow flex items-center justify-center font-bold text-xs"
                 title="Change background color"
-              >
-                🎨
-              </button>
+              ><span className="text-xs font-mono">COLOR</span></button>
             </div>
           </div>
 

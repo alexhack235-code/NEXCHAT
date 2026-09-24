@@ -37,7 +37,7 @@ if not exist "%ANDROID_HOME%" (
 echo [1/6] Cleaning previous builds...
 if exist "dist" rmdir /s /q dist
 if exist "android\app\build" rmdir /s /q android\app\build
-echo ✓ Cleaned
+echo [OK] Cleaned
 
 echo.
 echo [2/6] Installing dependencies...
@@ -47,7 +47,7 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-echo ✓ Dependencies installed
+echo [OK] Dependencies installed
 
 echo.
 echo [3/6] Building web application...
@@ -58,7 +58,7 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-echo ✓ Web app built successfully
+echo [OK] Web app built successfully
 
 echo.
 echo [4/6] Checking for Capacitor Android platform...
@@ -72,7 +72,7 @@ if not exist "android" (
         exit /b 1
     )
 )
-echo ✓ Android platform ready
+echo [OK] Android platform ready
 
 echo.
 echo [5/6] Syncing files to Android project...
@@ -84,9 +84,9 @@ if errorlevel 1 (
 )
 if exist "android\app" (
     copy /y "android-security\proguard-rules.pro" "android\app\proguard-rules.pro" >nul
-    echo ✓ ProGuard R8 obfuscation rules applied to Android project
+    echo [OK] ProGuard R8 obfuscation rules applied to Android project
 )
-echo ✓ Files synced
+echo [OK] Files synced
 
 echo.
 echo [6/6] Opening Android Studio...

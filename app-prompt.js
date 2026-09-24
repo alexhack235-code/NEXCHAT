@@ -245,7 +245,7 @@ function initializeAppPrompt() {
   banner.className = 'app-smart-banner';
   banner.innerHTML = `
     <div class="app-banner-content">
-      <div class="app-banner-icon">â˜„ï¸</div>
+      <div class="app-banner-icon"><img src="/favicons/icon-192.png" alt="NEX" style="width:28px;height:28px;border-radius:6px;display:block;" /></div>
       <div class="app-banner-text">
         <h3>Get NEXCHAT App</h3>
         <p>Faster & offline support</p>
@@ -253,7 +253,7 @@ function initializeAppPrompt() {
     </div>
     <div class="app-banner-actions">
       <button class="app-banner-btn app-banner-btn-install">Install</button>
-      <button class="app-banner-btn app-banner-btn-close">âœ•</button>
+      <button class="app-banner-btn app-banner-btn-close" aria-label="Close">&times;</button>
     </div>
   `;
 
@@ -261,12 +261,12 @@ function initializeAppPrompt() {
   modal.className = 'app-download-modal hidden';
   modal.innerHTML = `
     <div class="app-modal-content">
-      <div class="app-modal-icon">â˜„ï¸</div>
-      <h2>Download NEXCHAT</h2>
-      <p>Get the app for a faster, smoother experience with offline support.</p>
+      <img src="/favicons/icon-192.png" alt="NEXCHAT" style="width:64px;height:64px;border-radius:16px;margin:0 auto 14px auto;display:block;box-shadow:0 8px 24px rgba(124,58,237,0.35);border:1px solid rgba(124,58,237,0.4);" />
+      <h2>DOWNLOAD NEXCHAT</h2>
+      <p>Get app for your phone. For you better experience.</p>
       <div class="app-modal-buttons">
         <button class="app-modal-btn app-modal-btn-primary app-download-link">
-          Download on ${isAndroid ? 'Google Play' : 'App Store'}
+          Download on Google Play
         </button>
         <button class="app-modal-btn app-modal-btn-secondary app-modal-close">Later</button>
       </div>

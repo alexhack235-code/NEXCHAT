@@ -233,7 +233,7 @@ async function clearCallHistory() {
     if (!confirmed) return;
 
     try {
-        showNotif('ðŸ—‘ï¸ Clearing call history...', 'info');
+        showNotif(' Clearing call history...', 'info');
 
         const callsQuery1 = query(collection(db, 'callHistory'), where('from', '==', myUID));
         const callsQuery2 = query(collection(db, 'callHistory'), where('to', '==', myUID));

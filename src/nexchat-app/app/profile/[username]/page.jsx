@@ -1,3 +1,4 @@
+import { Heart, Zap, MapPin, Link as LinkIcon, Gamepad2, X } from 'lucide-react';
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -8,7 +9,7 @@ const DEMO_REELS = [
   {
     id: 'demo-reel-1',
     authorName: 'alexandergamedeveloper74',
-    caption: 'Cyberpunk 2077 Night City 4K RTX Overdrive 🚀 Testing NEX 60FPS video engine!',
+    caption: 'Cyberpunk 2077 Night City 4K RTX Overdrive Testing NEX 60FPS video engine!',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
     thumbnailUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=720&q=80',
     likesCount: 14200,
@@ -20,7 +21,7 @@ const DEMO_REELS = [
   {
     id: 'demo-reel-2',
     authorName: 'alexandergamedeveloper74',
-    caption: 'Procedural neon highway animation rendered in Unreal Engine 5.4 ⚡',
+    caption: 'Procedural neon highway animation rendered in Unreal Engine 5.4 ',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
     thumbnailUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=720&q=80',
     likesCount: 9830,
@@ -32,7 +33,7 @@ const DEMO_REELS = [
   {
     id: 'demo-reel-3',
     authorName: 'alexandergamedeveloper74',
-    caption: 'Real-time neural shader test on Android mobile GPU 🎮 #gamedev #nexchat',
+    caption: 'Real-time neural shader test on Android mobile GPU #gamedev #nexchat',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
     thumbnailUrl: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=720&q=80',
     likesCount: 23100,
@@ -44,7 +45,7 @@ const DEMO_REELS = [
   {
     id: 'demo-reel-4',
     authorName: 'alexandergamedeveloper74',
-    caption: 'ChronEX AI auto-routing test across 14 multi-cloud media vaults 🔥',
+    caption: 'ChronEX AI auto-routing test across 14 multi-cloud media vaults ',
     videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyBlazes.mp4',
     thumbnailUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=720&q=80',
     likesCount: 18400,
@@ -114,7 +115,7 @@ export default function CreatorProfilePage({ params }) {
   const [generalAvatar, setGeneralAvatar] = useState('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80');
   const [customAvatar, setCustomAvatar] = useState('');
   const [creatorDisplayName, setCreatorDisplayName] = useState('Alexander Vance');
-  const [creatorBio, setCreatorBio] = useState('🎮 Game Developer & Cyber Visualist • Directing next-gen 4K 60FPS video feeds & multi-vault Cloudinary cloud streams.');
+  const [creatorBio, setCreatorBio] = useState('Game Developer & Cyber Visualist • Directing next-gen 4K 60FPS video feeds & multi-vault Cloudinary cloud streams.');
   const [autoScroll, setAutoScroll] = useState(false);
   const [defaultSound, setDefaultSound] = useState(false);
   const [playbackQuality, setPlaybackQuality] = useState('auto');
@@ -308,9 +309,7 @@ export default function CreatorProfilePage({ params }) {
                 className="w-full h-full rounded-full object-cover bg-black border-2 border-black"
               />
             </div>
-            <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#39FF14] text-black font-black text-xs flex items-center justify-center border-2 border-black shadow-md group-hover:scale-110 transition-transform">
-              ⚡
-            </div>
+            <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#39FF14] text-black font-black text-xs flex items-center justify-center border-2 border-black shadow-md group-hover:scale-110 transition-transform"><Zap className="w-4 h-4 text-black fill-black" /></div>
           </div>
 
           {/* Name & Tag */}
@@ -349,7 +348,7 @@ export default function CreatorProfilePage({ params }) {
                   : 'bg-[#39FF14] text-black shadow-[0_0_16px_rgba(57,255,20,0.4)] hover:brightness-110'
               }`}
             >
-              <span>{isFollowing ? '✓ Following' : '+ Follow'}</span>
+              <span>{isFollowing ? 'Following' : '+ Follow'}</span>
             </button>
 
             <button
@@ -390,11 +389,11 @@ export default function CreatorProfilePage({ params }) {
           {/* Bio Box */}
           <div className="mt-3.5 px-3 py-2 rounded-xl bg-black/40 border border-white/5 text-xs text-gray-300 leading-relaxed text-left w-full">
             <p>
-              🎮 <strong className="text-white">{creatorDisplayName}</strong> • {creatorBio}
+              <strong className="text-white">{creatorDisplayName}</strong> • {creatorBio}
             </p>
             <div className="flex items-center gap-3 mt-2 text-[11px] text-[#39FF14]">
-              <span className="flex items-center gap-1">📍 Night City / NEX-Core</span>
-              <span className="flex items-center gap-1">🔗 nexchat.dev/@{cleanUsername}</span>
+              <span className="flex items-center gap-1">Night City / NEX-Core</span>
+              <span className="flex items-center gap-1">nexchat.dev/@{cleanUsername}</span>
             </div>
           </div>
         </section>
@@ -476,7 +475,7 @@ export default function CreatorProfilePage({ params }) {
 
                   {/* Likes Badge */}
                   <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] font-bold text-pink-400 bg-black/60 px-1.5 py-0.5 rounded-full">
-                    <span>❤️</span>
+                    <Heart className="w-4 h-4 inline fill-red-500 text-red-500" />
                     <span>{formatNum(reel.likesCount)}</span>
                   </div>
                 </motion.div>
@@ -501,7 +500,7 @@ export default function CreatorProfilePage({ params }) {
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-all" />
                   <div className="absolute bottom-1.5 right-1.5 text-[10px] font-bold text-white/90 bg-black/50 px-1.5 py-0.5 rounded">
-                    ❤️ {formatNum(pic.likes)}
+                    <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 inline fill-red-500 text-red-500" /> {formatNum(pic.likes)}</span>
                   </div>
                 </motion.div>
               ))}
@@ -519,7 +518,7 @@ export default function CreatorProfilePage({ params }) {
                 >
                   <img src={reel.thumbnailUrl} alt="Reel" className="w-full h-full object-cover" />
                   <div className="absolute top-2 right-2 text-xs font-bold text-red-500 bg-black/60 px-1.5 py-0.5 rounded-full">
-                    ❤️ {formatNum(reel.likesCount)}
+                    <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 inline fill-red-500 text-red-500" /> {formatNum(reel.likesCount)}</span>
                   </div>
                 </div>
               ))}
@@ -539,9 +538,7 @@ export default function CreatorProfilePage({ params }) {
               <button
                 onClick={() => setActivePlayingReel(null)}
                 className="absolute top-4 right-4 z-50 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg"
-              >
-                ✕
-              </button>
+              ><X className="w-5 h-5 inline" /></button>
 
               <div className="relative w-full max-w-sm aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10">
                 <video
@@ -578,9 +575,7 @@ export default function CreatorProfilePage({ params }) {
               <button
                 onClick={() => setActiveViewingPic(null)}
                 className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 text-white flex items-center justify-center text-lg"
-              >
-                ✕
-              </button>
+              ><X className="w-5 h-5 inline" /></button>
               <img
                 src={activeViewingPic.url}
                 alt={activeViewingPic.caption}
@@ -613,14 +608,12 @@ export default function CreatorProfilePage({ params }) {
                 {/* Modal Header */}
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <h3 className="font-extrabold text-sm tracking-wide text-white flex items-center gap-2">
-                    <span className="text-[#39FF14]">⚡</span> Reels Studio & Settings
+                    <Zap className="w-4 h-4 inline text-[#39FF14] mr-1" /> Reels Studio & Settings
                   </h3>
                   <button
                     onClick={() => setShowSettingsModal(false)}
                     className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-xs"
-                  >
-                    ✕
-                  </button>
+                  ><X className="w-5 h-5 inline" /></button>
                 </div>
 
                 {/* Tabs */}

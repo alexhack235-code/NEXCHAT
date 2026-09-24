@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 
 const HELP_BANNER = `
 ╔═════════════════════════════════════════════════════════════════════╗
-║                   ⚡ NEXCHAT TERMINAL CORE v4.8 ⚡                  ║
+║                   [NEX] NEXCHAT TERMINAL CORE v4.8 [NEX]            ║
 ║                  Control your chats directly via CLI                ║
 ╚═════════════════════════════════════════════════════════════════════╝
 
@@ -86,7 +86,7 @@ export default function TerminalPanel({
       if (sub === 'unread') {
         const unread = chats.filter((c) => c.unreadCount > 0);
         if (unread.length === 0) {
-          updated.push({ type: 'output', text: '✓ No unread messages in queue.' });
+          updated.push({ type: 'output', text: '[OK] No unread messages in queue.' });
         } else {
           const lines = unread.map((c) => `[UNREAD: ${c.unreadCount}] ${c.name} (id: ${c.id})`);
           updated.push({ type: 'output', text: lines.join('\n') });
@@ -94,7 +94,7 @@ export default function TerminalPanel({
       } else {
         const lines = chats.map((c, i) => {
           const status = c.isOnline ? 'ONLINE' : 'OFFLINE';
-          const pin = c.isPinned ? '📌' : '  ';
+          const pin = c.isPinned ? '[PIN]' : '     ';
           const unread = c.unreadCount > 0 ? `(${c.unreadCount} unread)` : '';
           return `${(i + 1).toString().padStart(2, ' ')}. [${status.padEnd(7, ' ')}] ${pin} ${c.name.padEnd(24, ' ')} ${unread}`;
         });
@@ -108,16 +108,16 @@ export default function TerminalPanel({
         const match = chats.find((c) => c.name.toLowerCase().includes(targetName.toLowerCase()) || c.id === targetName);
         if (match) {
           onSelectChat(match.id);
-          updated.push({ type: 'success', text: `✓ Successfully opened chat session: ${match.name}` });
+          updated.push({ type: 'success', text: `[OK] Successfully opened chat session: ${match.name}` });
         } else {
-          updated.push({ type: 'error', text: `✗ Contact not found: "${targetName}"` });
+          updated.push({ type: 'error', text: `[ERR] Contact not found: "${targetName}"` });
         }
       }
     } 
     else if (cmd === 'send') {
       const msgText = args.slice(1).join(' ');
       if (!activeChat) {
-        updated.push({ type: 'error', text: '✗ No active chat open. Use "open <name>" first.' });
+        updated.push({ type: 'error', text: '[ERR] No active chat open. Use "open <name>" first.' });
       } else if (!msgText) {
         updated.push({ type: 'error', text: 'Usage: send <message text>' });
       } else {
@@ -129,13 +129,13 @@ export default function TerminalPanel({
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           status: 'sent',
         });
-        updated.push({ type: 'success', text: `✓ Message dispatched to ${activeChat.name}: "${msgText}"` });
+        updated.push({ type: 'success', text: `[OK] Message dispatched to ${activeChat.name}: "${msgText}"` });
       }
     } 
     else if (cmd === 'sendcode') {
       const codeSnippet = args.slice(1).join(' ');
       if (!activeChat) {
-        updated.push({ type: 'error', text: '✗ No active chat open. Use "open <name>" first.' });
+        updated.push({ type: 'error', text: '[ERR] No active chat open. Use "open <name>" first.' });
       } else {
         onSendMessage({
           id: `msg-${Date.now()}`,
@@ -145,7 +145,7 @@ export default function TerminalPanel({
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           status: 'sent',
         });
-        updated.push({ type: 'success', text: `✓ Code snippet embedded into ${activeChat.name}` });
+        updated.push({ type: 'success', text: `[OK] Code snippet embedded into ${activeChat.name}` });
       }
     } 
     else if (cmd === 'call') {
@@ -162,11 +162,11 @@ export default function TerminalPanel({
       const sub = args[1]?.toLowerCase();
       if (sub === 'photo') {
         onOpenPhotoStatus();
-        updated.push({ type: 'success', text: '✓ Opened 1:1 Photo Status Editor with B&W Chandelier' });
+        updated.push({ type: 'success', text: '[OK] Opened 1:1 Photo Status Editor with B&W Chandelier' });
       } else if (sub === 'text') {
-        const textPayload = args.slice(2).join(' ') || "Debugging 12k+ lines in chat.js is real 😭💔";
+        const textPayload = args.slice(2).join(' ') || "Debugging 12k+ lines in chat.js is real";
         onOpenTextStatus(textPayload);
-        updated.push({ type: 'success', text: `✓ Opened 1:1 Text Status Creator: "${textPayload}"` });
+        updated.push({ type: 'success', text: `[OK] Opened 1:1 Text Status Creator: "${textPayload}"` });
       } else {
         updated.push({ type: 'output', text: 'Usage: status photo | status text <your status>' });
       }
@@ -178,9 +178,9 @@ export default function TerminalPanel({
         const match = chats.find((c) => c.name.toLowerCase().includes(targetName.toLowerCase()));
         if (match) {
           onUpdateChatStatus(match.id, cmd);
-          updated.push({ type: 'success', text: `✓ Toggled ${cmd} for ${match.name}` });
+          updated.push({ type: 'success', text: `[OK] Toggled ${cmd} for ${match.name}` });
         } else {
-          updated.push({ type: 'error', text: `✗ Contact not found: "${targetName}"` });
+          updated.push({ type: 'error', text: `[ERR] Contact not found: "${targetName}"` });
         }
       }
     } 
@@ -191,7 +191,7 @@ export default function TerminalPanel({
         setIsMatrixStreaming(false);
         setHistory((prev) => [
           ...prev,
-          { type: 'success', text: '✓ Quantum Key Exchange complete. Peer cipher verified.' }
+          { type: 'success', text: '[OK] Quantum Key Exchange complete. Peer cipher verified.' }
         ]);
       }, 3500);
     } 
@@ -199,7 +199,7 @@ export default function TerminalPanel({
       const t = args[1]?.toLowerCase();
       if (['hacker', 'nexchat', 'dark'].includes(t)) {
         onThemeChange?.(t);
-        updated.push({ type: 'success', text: `✓ Switched theme mode to: ${t}` });
+        updated.push({ type: 'success', text: `[OK] Switched theme mode to: ${t}` });
       } else {
         updated.push({ type: 'error', text: 'Usage: theme <hacker | nexchat | dark>' });
       }

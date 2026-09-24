@@ -1,3 +1,4 @@
+import { Video, VideoOff, Mic, MicOff, Monitor, PhoneOff, X } from 'lucide-react';
 import React, { useState } from 'react';
 
 export default function VideoCallModal({ isOpen, onClose, contactName = "Alex Vance", onLog }) {
@@ -23,7 +24,7 @@ export default function VideoCallModal({ isOpen, onClose, contactName = "Alex Va
           }} 
           className="text-white/70 hover:text-white text-lg"
         >
-          ✕
+          <X className="w-4 h-4 inline" />
         </button>
       </div>
 
@@ -58,7 +59,7 @@ export default function VideoCallModal({ isOpen, onClose, contactName = "Alex Va
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2 text-white/50 font-mono text-sm">
-              <span>📷 Camera Off</span>
+              <span className="flex items-center gap-1.5"><VideoOff className="w-4 h-4" /> Camera Off</span>
             </div>
           )}
           <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-md text-xs font-semibold">
@@ -79,7 +80,7 @@ export default function VideoCallModal({ isOpen, onClose, contactName = "Alex Va
           }`}
           title="Toggle Camera"
         >
-          {isCameraOn ? '📹' : '🚫'}
+          {isCameraOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5 text-red-500" />}
         </button>
 
         <button 
@@ -92,7 +93,7 @@ export default function VideoCallModal({ isOpen, onClose, contactName = "Alex Va
           }`}
           title="Toggle Mic"
         >
-          {isMuted ? '🔇' : '🎤'}
+          {isMuted ? <MicOff className="w-5 h-5 text-red-500" /> : <Mic className="w-5 h-5" />}
         </button>
 
         <button 
@@ -105,7 +106,7 @@ export default function VideoCallModal({ isOpen, onClose, contactName = "Alex Va
           }`}
           title="Share Screen"
         >
-          🖥️
+          <Monitor className="w-5 h-5" />
         </button>
 
         <button 
@@ -116,7 +117,7 @@ export default function VideoCallModal({ isOpen, onClose, contactName = "Alex Va
           className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 flex items-center justify-center text-xl shadow-lg shadow-red-600/30"
           title="End Video Call"
         >
-          📞
+          <PhoneOff className="w-5 h-5" />
         </button>
       </div>
     </div>

@@ -652,6 +652,13 @@ function renderReels(reelsList) {
     });
 
     // Inline comment submit handlers
+    if (inlineInput) {
+      inlineInput.setAttribute('inputmode', 'text');
+      inlineInput.addEventListener('input', (e) => {
+        e.target.value = e.target.value.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{200D}\u{FE0E}\u{FE0F}]/gu, '');
+      });
+    }
+
     if (inlineInput && inlineSendBtn) {
       inlineInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -669,7 +676,7 @@ function renderReels(reelsList) {
     if (inlineEmojiBtn && inlineInput) {
       inlineEmojiBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const emojis = ['🔥', '❤️', '👏', '😂', '✨'];
+        const emojis = ['Like', 'Love', 'Cheer', 'Fire', 'Star'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
         inlineInput.value += randomEmoji;
         inlineInput.focus();
@@ -1048,7 +1055,7 @@ if (confirmTipBtn) {
     }
 
     triggerCoinBurst();
-    showToast(`⚡ Tipped ${activeTipAmount} Tokens to @${activeTipReel.authorName}!`);
+    showToast(`Tipped ${activeTipAmount} NEX Tokens to @${activeTipReel.authorName}!`);
 
     setTimeout(() => {
       closeTipModal();
@@ -1249,9 +1256,9 @@ function openChronexAiDrawer(reel) {
   // 1-Tap Smart Replies
   if (smartReplyChips) {
     const replies = [
-      `🔥 This lighting in @${author}'s reel is insane!`,
-      `⚡ What render engine / camera rig did you use for this?`,
-      `🤖 ChronEX Neural Score: 99.8% Cyber Masterpiece!`,
+      `This lighting in @${author}'s reel is insane!`,
+      `What render engine / camera rig did you use for this?`,
+      `ChronEX Neural Score: 99.8% Cyber Masterpiece!`,
     ];
 
     smartReplyChips.innerHTML = '';
@@ -1306,13 +1313,13 @@ if (chronexAiAskBtn && chronexAiQuestionInput) {
 
     let ans = '';
     if (q.includes('song') || q.includes('music') || q.includes('audio') || q.includes('sound')) {
-      ans = `🎵 Soundtrack: "${activeAiReel.sound || 'Original Audio'}" uploaded by @${activeAiReel.authorName}. You can tap the spinning disc to open Sound Hub!`;
+      ans = `Soundtrack: "${activeAiReel.sound || 'Original Audio'}" uploaded by @${activeAiReel.authorName}. You can tap the spinning disc to open Sound Hub!`;
     } else if (q.includes('who') || q.includes('author') || q.includes('creator')) {
-      ans = `👤 Creator: @${activeAiReel.authorName}. They stream high-definition reels on NEXCHAT. Tap their handle to view their full portfolio.`;
+      ans = `Creator: @${activeAiReel.authorName}. They stream high-definition reels on NEXCHAT. Tap their handle to view their full portfolio.`;
     } else if (q.includes('quality') || q.includes('resolution') || q.includes('fps')) {
-      ans = `⚡ Quality: High Bitrate Lossless Stream. Encoded in H.264 at 60FPS for maximum clarity on the NEXCHAT Media Engine.`;
+      ans = `Quality: High Bitrate Lossless Stream. Encoded in H.264 at 60FPS for maximum clarity on the NEXCHAT Media Engine.`;
     } else {
-      ans = `🤖 ChronEX Intelligence: Analyzed "${q}" for reel "${activeAiReel.caption || activeAiReel.id}". Video has ${formatNumber(activeAiReel.likesCount || 0)} likes and is currently trending!`;
+      ans = `ChronEX Intelligence: Analyzed "${q}" for reel "${activeAiReel.caption || activeAiReel.id}". Video has ${formatNumber(activeAiReel.likesCount || 0)} likes and is currently trending!`;
     }
 
     if (chronexAiAnswerText) chronexAiAnswerText.textContent = ans;
@@ -1560,7 +1567,7 @@ function openCommentsDrawer(reelId) {
       const item = document.createElement('div');
       item.className = 'comment-item';
       item.innerHTML = `
-        <img src="${c.authorPic || 'favicon.png'}" class="comment-avatar" alt="${c.authorName}">
+        <img src="${c.authorPic || '/favicons/favicon.ico'}" class="comment-avatar" alt="${c.authorName}">
         <div class="comment-body">
           <span class="comment-author">@${escapeHtml(c.authorName || 'user')}</span>
           <span class="comment-text">${escapeHtml(c.text || '')}</span>
@@ -1583,9 +1590,18 @@ function closeCommentsDrawer() {
 closeCommentsBtn.addEventListener('click', closeCommentsDrawer);
 commentsBackdrop.addEventListener('click', closeCommentsDrawer);
 
+if (commentTextInput) {
+  commentTextInput.setAttribute('inputmode', 'text');
+  commentTextInput.setAttribute('autocomplete', 'off');
+  commentTextInput.addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{200D}\u{FE0E}\u{FE0F}]/gu, '');
+  });
+}
+
 commentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const text = commentTextInput.value.trim();
+  const rawText = commentTextInput.value.trim();
+  const text = rawText.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{200D}\u{FE0E}\u{FE0F}]/gu, '');
   if (!text || !activeReelId) return;
 
   if (!myUID) {
@@ -1598,7 +1614,7 @@ commentForm.addEventListener('submit', async (e) => {
     await addDoc(collection(db, 'reels', activeReelId, 'comments'), {
       authorId: myUID,
       authorName: myUsername,
-      authorPic: myProfilePic,
+      authorPic: myProfilePic || '/favicons/favicon.ico',
       text: text,
       createdAt: serverTimestamp(),
     });
@@ -1699,11 +1715,11 @@ if (personaCardCustom) {
 
 // ChronEX AI Viral Caption Generator
 const VIRAL_CYBER_CAPTIONS = [
-  "Exploring Night City procedural shaders in Ultra HD 4K 🚀 Lossless 60FPS stream on NEXCHAT! #nexchat #cyberpunk #gaming #4k60fps",
-  "Dropping high-velocity Cyberpunk telemetry with ChronEX AI companion ⚡ #nexchat #tech #viral #futuristic",
-  "When the neural audio drop aligns with 4K raytracing keyframes 🔥 #gaming #music #cyberpunk #nexchat",
-  "Zero-lag streaming protocol engaged. Pure black OLED cyber aesthetic in action 🤖 #tech #scifi #viral #4k",
-  "Procedural world generation running live on the NEX engine 🎮 Rate this setup 1-10! #gaming #cyberpunk #nexchat",
+  "Exploring Night City procedural shaders in Ultra HD 4K. Lossless 60FPS stream on NEXCHAT! #nexchat #cyberpunk #gaming #4k60fps",
+  "Dropping high-velocity Cyberpunk telemetry with ChronEX AI companion #nexchat #tech #viral #futuristic",
+  "When the neural audio drop aligns with 4K raytracing keyframes #gaming #music #cyberpunk #nexchat",
+  "Zero-lag streaming protocol engaged. Pure black OLED cyber aesthetic in action #tech #scifi #viral #4k",
+  "Procedural world generation running live on the NEX engine. Rate this setup 1-10! #gaming #cyberpunk #nexchat",
 ];
 
 if (chronexAiGenCaptionBtn) {
@@ -1713,7 +1729,7 @@ if (chronexAiGenCaptionBtn) {
       reelCaptionInput.value = randomCaption;
       if (reelCaptionCounter) reelCaptionCounter.textContent = `${randomCaption.length}/300`;
       syncSimulatorPreview();
-      showToast('ChronEX AI generated viral caption! ✨');
+      showToast('ChronEX AI generated viral caption!');
     }
   });
 }
@@ -1946,7 +1962,7 @@ uploadReelForm.addEventListener('submit', async (e) => {
       createdAt: serverTimestamp(),
     });
 
-    showToast(`HD Reel posted successfully! 🚀`);
+    showToast('HD Reel posted successfully!');
     closeCreatorStudio();
   } catch (err) {
     console.error('Reel upload error:', err);
@@ -2043,13 +2059,13 @@ export async function openCreatorProfile(authorName, authorPic = 'favicon.png') 
   if (isMe) {
     if (displayName) displayName.textContent = myCreatorName || authorName.replace(/[0-9_]/g, ' ').trim() || authorName;
     if (avatarImg) avatarImg.src = myProfilePic || authorPic;
-    if (bioText) bioText.textContent = myCreatorBio || `🎮 Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
+    if (bioText) bioText.textContent = myCreatorBio || `Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
     if (editProfileBtn) editProfileBtn.style.display = 'flex';
     if (followBtn) followBtn.style.display = 'none';
   } else {
     if (displayName) displayName.textContent = authorName.replace(/[0-9_]/g, ' ').trim() || authorName;
     if (avatarImg) avatarImg.src = authorPic || 'favicon.png';
-    if (bioText) bioText.textContent = `🎮 Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
+    if (bioText) bioText.textContent = `Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
     if (editProfileBtn) editProfileBtn.style.display = 'none';
     if (followBtn) followBtn.style.display = 'flex';
   }

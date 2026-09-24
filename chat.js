@@ -1216,9 +1216,9 @@ function showNotif(msg, type = "info", duration = 3000) {
     .replace(/^(\?{1,6}\s*)+/, '')
     .replace(/^\?x\s+\?{1,6}\s*/, '')
     .replace(/^\?\?R\s+/, '')
-    .replace(/âœ…/g, '')
-    .replace(/â Œ/g, '')
-    .replace(/ðŸ“ž/g, '')
+    .replace(/[\u{2705}\u{2714}]/gu, '')
+    .replace(/[\u{274C}\u{274E}]/gu, '')
+    .replace(/[\u{1F4DE}]/gu, '')
     .trim();
 
   const iconPrefix = type === 'success' ? '[Success] ' : type === 'error' ? '[Error] ' : type === 'warning' ? '[Warning] ' : '[Info] ';

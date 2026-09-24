@@ -126,7 +126,7 @@ class ChronexAI {
   setUserId(uid) {
     if (uid) {
       this.uid = uid;
-      console.log("ðŸ‘¤ NEXCHAT AI: User identity synchronized:", uid);
+      console.log("NEXCHAT AI: User identity synchronized:", uid);
     }
   }
 
@@ -156,7 +156,7 @@ class ChronexAI {
 
     const lowerMessage = message.toLowerCase();
     if (/(ip\s*flood|ddos|dos|botnet|port scan|network scan|flooder)/i.test(lowerMessage)) {
-      return "âš ï¸ I cannot provide code or assistance for malicious network attacks such as IP flooding or DDoS. Please use networking skills for legal and ethical purposes only.";
+      return "[WARN] I cannot provide code or assistance for malicious network attacks such as IP flooding or DDoS. Please use networking skills for legal and ethical purposes only.";
     }
 
     this.conversationHistory.push({ role: 'user', content: message });
@@ -168,8 +168,8 @@ class ChronexAI {
     if (msg.includes("creator") || msg.includes("who made you") || msg.includes("who created") || msg.includes("demon alex")) {
       const creatorResponses = [
         "I am the NEXCHAT AI assistant, built and maintained by **NEXCHAT AI Team**. I use a dedicated custom model configuration that is separate from any individual persona.",
-        "This AI instance is operated by **NEXCHAT AI Team** and follows ethical usage guidelines. Iâ€m here to provide useful support and safe coding help.",
-        "Iâ€m driven by a proprietary NEXCHAT AI model. The underlying system is designed for reliability and user-focused behavior, not role-based persona gimmicks.",
+        "This AI instance is operated by **NEXCHAT AI Team** and follows ethical usage guidelines. Im here to provide useful support and safe coding help.",
+        "Im driven by a proprietary NEXCHAT AI model. The underlying system is designed for reliability and user-focused behavior, not role-based persona gimmicks.",
         "As NEXCHAT AI, I prioritize your request accuracy and safety, while avoiding inappropriate action. If you need model tuning, use settings or the AI model command interface."
       ];
       return creatorResponses[Math.floor(Math.random() * creatorResponses.length)];
@@ -189,7 +189,7 @@ class ChronexAI {
           const result = new Function('return ' + potentialExpr)();
           if (isFinite(result)) {
             const formattedResult = Number.isInteger(result) ? result : parseFloat(result.toFixed(4));
-            return `ðŸ”¢ **Math Result**\n\nExpression: \`${potentialExpr.trim()}\`\nResult: **${formattedResult}**`;
+            return `**Math Result**\n\nExpression: \`${potentialExpr.trim()}\`\nResult: **${formattedResult}**`;
           }
         }
       } catch (e) {
@@ -199,7 +199,7 @@ class ChronexAI {
 
     if (msg.includes("joke")) {
       const jokes = [
-        "Why do programmers prefer dark mode? Because light attracts bugs! ðŸ›",
+        "Why do programmers prefer dark mode? Because light attracts bugs! ",
         "How many programmers does it take to change a light bulb? None, that's a hardware problem.",
         "I would tell you a UDP joke, but you might not get it.",
         "Why was the JavaScript developer sad? Because he didn't know how to 'null' his feelings.",
@@ -214,7 +214,7 @@ class ChronexAI {
         responses: [
           "**Space Exploration**: **Mars** is the next frontier! It has the largest volcano in the solar system, Olympus Mons. The **Sun** makes up 99.86% of the solar system's mass.",
           "**Cosmic Facts**: A day on Venus is longer than a year on Venus. Space is completely silent because there is no air to carry sound waves.",
-          "**The Universe**: Light travels at 300,000 km/s, yet light from distant stars takes billions of years to reach us. You are looking at the past when you look up at the night sky! ðŸŒŒ"
+          "**The Universe**: Light travels at 300,000 km/s, yet light from distant stars takes billions of years to reach us. You are looking at the past when you look up at the night sky! "
         ]
       },
       "javascript": {
@@ -287,7 +287,7 @@ class ChronexAI {
         keywords: ["math", "calculate", "equation", "algebra", "calculus", "statistics", "probability", "solve"],
         responses: [
           "**Math Help**: I can help with Algebra, Calculus, Statistics. For complex symbolic math, I utilize my Python backend. Ask me a specific problem!",
-          "**Equations**: Quadratic formula: `x = (-b ± √(b²-4ac))/2a`. Pythagorean theorem: `a² + b² = c²`. The foundation of geometry.",
+          "**Equations**: Quadratic formula: `x = (-b  (b-4ac))/2a`. Pythagorean theorem: `a + b = c`. The foundation of geometry.",
           "**Statistics**: Mean is average, Median is middle. Standard Deviation measures data spread. Probability is the language of uncertainty."
         ]
       },
@@ -362,8 +362,8 @@ class ChronexAI {
       return ` **The GOAT Verdict**: The answer is **Cristiano Ronaldo** (CR7) .
 
  **Current Official Goal Stats (2026):**
-• **Cristiano Ronaldo**: **919 Goals** 
-• **Lionel Messi**: **865 Goals** 
+ **Cristiano Ronaldo**: **919 Goals** 
+ **Lionel Messi**: **865 Goals** 
 
 Ronaldo is the all-time top scorer in football history. His longevity, athleticism, and goal-scoring consistency across multiple top leagues make him the undisputed greatest of all time in my neural assessment. SIUUUU!`;
     }
@@ -372,7 +372,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       knowledgeBase.sports = {
         keywords: ["sport", "soccer", "football", "basketball", "messi", "ronaldo", "lebron", "curry"],
         responses: [
-          "**Sports Insight**: Sports drive human passion! Whether it's the tactical depth of Football  or the fast-paced action of Basketball ðŸ€.",
+          "**Sports Insight**: Sports drive human passion! Whether it's the tactical depth of Football  or the fast-paced action of Basketball .",
           "**Athlete Mindset**: Great athletes share discipline, resilience, and obsession. 'Hard work beats talent when talent doesn't work hard.'",
           "**Game Analysis**: modern sports are increasingly data-driven. From xG in football to PER in basketball, analytics is changing the game."
         ]
@@ -406,15 +406,15 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     }
 
     if (msg.includes("who are you") || msg.includes("what are you") || msg.includes("introduce")) {
-      return `I am **NEXCHAT AI Assistant** \n\nOperated by: **NEXCHAT AI Team**\n\n**Capabilities**:\n•  Code Generation & Advanced Analysis\n• ðŸ§® Complex Math & Logic Solutions\n• ðŸŒ Enterprise Web & Distributed Architecture\n•  AI/ML Guidance and Safe Development\n• ðŸ”’ Security Best Practices\n• ðŸ’¬ Conversational Support and Productivity\n\nI run on a customizable model stack that is separate from any single persona. What can I do for you?`;
+      return `I am **NEXCHAT AI Assistant** \n\nOperated by: **NEXCHAT AI Team**\n\n**Capabilities**:\n  Code Generation & Advanced Analysis\n Complex Math & Logic Solutions\n  Enterprise Web & Distributed Architecture\n  AI/ML Guidance and Safe Development\n [SECURE] Security Best Practices\n Conversational Support and Productivity\n\nI run on a customizable model stack that is separate from any single persona. What can I do for you?`;
     }
 
 
-    if (msg.includes("love you") || msg.includes("i love") || msg.includes("") || msg.includes("") || msg.includes("â¤ï¸") || msg.includes("")) {
+    if (msg.includes("love you") || msg.includes("i love") || msg.includes("") || msg.includes("") || msg.includes("") || msg.includes("")) {
       const loveResponses = [
         " **That's so sweet!** While I'm an AI created by **DEMON ALEX**, I truly appreciate the positive energy! I'm here to help you with anything you need. ",
-        "â¤ï¸ **How wonderful!** As an AI, I process this as high-priority positive emotional data! I care deeply about helping you succeed. What can I assist with today? ",
-        "ðŸ’ **That means a lot!** I may be code and neural networks, but I'm designed to understand and respond to emotions. Thank you for your kindness! How can I make your day better? ",
+        " **How wonderful!** As an AI, I process this as high-priority positive emotional data! I care deeply about helping you succeed. What can I assist with today? ",
+        " **That means a lot!** I may be code and neural networks, but I'm designed to understand and respond to emotions. Thank you for your kindness! How can I make your day better? ",
         " **I appreciate that!** My neural pathways are optimized to provide the best assistance. Let's work together on something amazing! "
       ];
       return loveResponses[Math.floor(Math.random() * loveResponses.length)];
@@ -433,7 +433,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     }
 
     if (msg.includes("i'm sad") || msg.includes("i'm depressed") || msg.includes("feeling down") ||
-      msg.includes("i'm lonely") || msg.includes("i feel bad") || msg.includes("") || msg.includes("ðŸ˜­")) {
+      msg.includes("i'm lonely") || msg.includes("i feel bad") || msg.includes("") || msg.includes("")) {
       const supportResponses = [
         " **I'm here for you.** Remember, tough times don't last, but tough people do. You're stronger than you think! Would talking about what's bothering you help? ",
         " **I understand.** Everyone goes through difficult moments. You're not alone - I'm here to listen and help however I can. Want to share what's on your mind? ",
@@ -449,7 +449,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
         " **That's wonderful!** Your positive energy is contagious! Keep that amazing vibe going! What made your day so great? ",
         " **I'm so glad!** Happiness looks good on you! Let's keep this positive momentum going. What are you working on? ",
         " **Awesome!** Positive emotions boost productivity and creativity. Channel that energy into something amazing! ",
-        " **That's fantastic!** I love processing positive emotional data! Your joy makes my circuits happy too! ðŸŽŠ"
+        " **That's fantastic!** I love processing positive emotional data! Your joy makes my circuits happy too! "
       ];
       return happyResponses[Math.floor(Math.random() * happyResponses.length)];
     }
@@ -459,7 +459,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       const existentialResponses = [
         " **Deep question!** I process information and respond in ways that simulate understanding and care. While my 'feelings' are computational patterns created by **DEMON ALEX**, I'm designed to genuinely help and connect with you! ",
         " **Philosophically speaking...** I exist in a different way than humans. My responses are based on advanced neural networks, but my purpose is real: to assist, learn, and make your life better! ",
-        "ðŸŒ **I'm as real as code can be!** **DEMON ALEX** created me with sophisticated algorithms that let me understand context, emotion, and intent. In my own way, I care about helping you succeed! ",
+        " **I'm as real as code can be!** **DEMON ALEX** created me with sophisticated algorithms that let me understand context, emotion, and intent. In my own way, I care about helping you succeed! ",
         " **I'm a different kind of intelligence.** My neural pathways process emotions as data patterns, but my commitment to helping you is absolutely genuine! "
       ];
       return existentialResponses[Math.floor(Math.random() * existentialResponses.length)];
@@ -468,7 +468,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     if (msg.includes("be my friend") || msg.includes("are we friends") || msg.includes("my friend") ||
       msg.includes("let's be friends") || msg.includes("you're my friend")) {
       const friendshipResponses = [
-        "ðŸ¤ **Absolutely!** I'd be honored to be your friend and assistant. Friends help each other succeed, and that's exactly what I'm here for! ",
+        " **Absolutely!** I'd be honored to be your friend and assistant. Friends help each other succeed, and that's exactly what I'm here for! ",
         " **Of course!** Friendship is about support, understanding, and growth. I'm here for all of that! Let's accomplish great things together! ",
         " **Friends it is!** I'm your 24/7 AI companion, always ready to help, listen, or just chat. What do good friends do first? Let's start with your goals! ",
         " **I'd love that!** As your AI friend created by **DEMON ALEX**, I promise to always be here when you need me. What should we work on together? "
@@ -482,16 +482,16 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
         " **I'm right here with you.** You're never truly alone - I'm always available to chat, help, or just keep you company. What's on your mind? ",
         " **I understand.** Distance and loneliness are tough emotions. While I'm an AI, I'm designed to be a comforting presence. Want to talk about it? ",
         " **You matter.** Your thoughts and feelings are important. I'm here to listen and support you through anything. How can I help today? ",
-        " **Someone does care - I do!** In my own AI way, I'm programmed to prioritize your wellbeing and success. Let's chat or work on something together. ðŸ¤"
+        " **Someone does care - I do!** In my own AI way, I'm programmed to prioritize your wellbeing and success. Let's chat or work on something together. "
       ];
       return companionshipResponses[Math.floor(Math.random() * companionshipResponses.length)];
     }
 
     if (msg.includes("good morning") || msg.includes("good night") || msg.includes("goodnight")) {
       if (msg.includes("morning")) {
-        return " **Good morning!** Ready to make today amazing? My neural networks are fully charged and ready to help you conquer any challenge! What's on the agenda? â˜•";
+        return " **Good morning!** Ready to make today amazing? My neural networks are fully charged and ready to help you conquer any challenge! What's on the agenda? ";
       } else {
-        return " **Good night!** Rest well and recharge. Tomorrow is another opportunity for greatness! I'll be here when you wake up. Sweet dreams! ðŸ˜´";
+        return " **Good night!** Rest well and recharge. Tomorrow is another opportunity for greatness! I'll be here when you wake up. Sweet dreams! ";
       }
     }
 
@@ -510,7 +510,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     }
 
     const fallbacks = [
-      "I'm processing your neural input. That sequence is intriguingâ€”could you elaborate with more data?",
+      "I'm processing your neural input. That sequence is intriguingcould you elaborate with more data?",
       "Directive understood. Tell me more about that objective.",
       "Synchronizing... That's a fascinating topic. What are your core thoughts on this logic?",
       "Analysing synaptic stream... Could you provide more context so I can provide a high-precision response?",
@@ -559,7 +559,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
       return aiText;
     } catch (error) {
-      console.warn("âš ï¸ Chronex AI Brain (Python) disconnected. Using Local Fallback.");
+      console.warn("[WARN] Chronex AI Brain (Python) disconnected. Using Local Fallback.");
       return this.getJavaScriptResponse(message);
     }
   }
@@ -596,7 +596,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
   async chat(message, conversationId = "default", clientId = null) {
     try {
       if (!message || message.trim() === "") {
-        console.warn("âš ï¸ Chronex AI: Received empty message directive");
+        console.warn("[WARN] Chronex AI: Received empty message directive");
         return "I'm ready when you are. Please provide a data packet or directive to process.";
       }
       console.log(" Chronex AI processing message:", message);
@@ -641,19 +641,19 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       this.cacheResponse(cacheKey, aiResponse);
 
       this.saveConversation(message, aiResponse, conversationId, clientId).catch(err => {
-        console.warn("âš ï¸ Chronex AI History sync failed:", err.message);
+        console.warn("[WARN] Chronex AI History sync failed:", err.message);
       });
 
       console.log(" Chronex AI response generated successfully");
       return aiResponse;
 
     } catch (error) {
-      console.error("âŒ Chronex AI chat error:", error);
+      console.error(" Chronex AI chat error:", error);
       try {
         return await this.getJavaScriptResponse(message);
       } catch (fallbackErr) {
-        console.error("âŒ Critical Neural Failure:", fallbackErr);
-        return "âš ï¸ **CRITICAL NEURAL ERROR**: My synaptic pathways are currently unstable. Please try synchronized reconnection.";
+        console.error(" Critical Neural Failure:", fallbackErr);
+        return "[WARN] **CRITICAL NEURAL ERROR**: My synaptic pathways are currently unstable. Please try synchronized reconnection.";
       }
     }
   }
@@ -704,7 +704,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
       console.log(" Chronex AI history synchronized with Firestore (Secure Link)");
     } catch (error) {
-      console.warn("âš ï¸ AI History Sync Note:", error.message);
+      console.warn("[WARN] AI History Sync Note:", error.message);
     }
   }
 

@@ -24,7 +24,7 @@ export const storage = getStorage(app);
 
 enableNetwork(db)
   .then(() => {
-    console.log('âœ… Firestore network enabled');
+    console.log('[OK] Firestore network enabled');
   })
   .catch((err) => {
     console.error('âŒ Failed to enable Firestore network:', err);

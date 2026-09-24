@@ -1,4 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { 
+  Search, 
+  Phone, 
+  Video, 
+  MoreVertical, 
+  Lock, 
+  Play, 
+  Pause, 
+  Mic, 
+  BarChart2, 
+  FileText, 
+  Download, 
+  Check, 
+  CheckCheck, 
+  Paperclip, 
+  Send, 
+  Camera, 
+  Image as ImageIcon, 
+  User, 
+  Smile, 
+  Zap, 
+  Heart,
+  Flame,
+  ThumbsUp,
+  Loader2
+} from 'lucide-react';
+
+const EMOJI_REGEX = /[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{200D}\u{FE0E}\u{FE0F}]/gu;
 
 // Formatter for rich text (*bold*, _italic_, ~strike~, ```code```)
 function renderFormattedText(text) {
@@ -69,7 +97,7 @@ export default function CenterChat({
     return (
       <div className="w-full h-full flex flex-col items-center justify-center bg-[#101a24] text-white/60 p-6 select-none">
         <div className="w-20 h-20 rounded-full bg-[#111b21] border border-[#00FF88]/30 flex items-center justify-center text-4xl mb-4 shadow-xl shadow-[#00FF88]/10 animate-pulse">
-          ⚡
+          <Zap className="w-10 h-10 text-[#00FF88]" />
         </div>
         <h3 className="text-xl font-bold font-display text-white">NEXCHAT WEB TERMINAL</h3>
         <p className="text-sm text-white/50 max-w-sm text-center mt-2">
@@ -81,18 +109,19 @@ export default function CenterChat({
 
   const handleSend = (e) => {
     e?.preventDefault();
-    if (!inputText.trim()) return;
+    const cleanText = (inputText || '').replace(EMOJI_REGEX, '').trim();
+    if (!cleanText) return;
 
     onSendMessage({
       id: `msg-${Date.now()}`,
       sender: 'me',
       type: 'text',
-      text: inputText,
+      text: cleanText,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       status: 'sent',
     });
 
-    onLog?.(`[CHAT] Sent message to ${activeChat.name}: "${inputText.substring(0, 30)}"`);
+    onLog?.(`[CHAT] Sent message to ${activeChat.name}: "${cleanText.substring(0, 30)}"`);
     setInputText('');
   };
 
@@ -100,19 +129,19 @@ export default function CenterChat({
     onLog?.(`[POLL] Voted for option #${optIdx + 1} in poll`);
   };
 
-  const handleAddReaction = (msgId, emoji) => {
-    onLog?.(`[REACTION] Reacted with ${emoji} to message ${msgId}`);
+  const handleAddReaction = (msgId, label) => {
+    onLog?.(`[REACTION] Reacted with [${label}] to message ${msgId}`);
     setReactionAnchorId(null);
   };
 
   return (
     <div className="w-full h-full flex flex-col bg-[#101a24] relative overflow-hidden select-none">
-      {/* 1. Top Bar (Avatar, Name, Online/Last Seen, Search, Voice Call, Video Call, More) */}
+      {/* 1. Top Bar */}
       <div className="h-16 px-4 bg-[#111b21] border-b border-white/5 flex items-center justify-between z-10">
         <div className="flex items-center gap-3 min-w-0">
           <div className="relative flex-shrink-0 cursor-pointer">
             <img
-              src={activeChat.avatar}
+              src={activeChat.avatar || '/favicons/icon-192.png'}
               alt={activeChat.name}
               className="w-10 h-10 rounded-full object-cover bg-black"
             />
@@ -143,10 +172,9 @@ export default function CenterChat({
             className="p-2 rounded-full hover:bg-white/10 hover:text-white transition-colors"
             title="Search conversation"
           >
-            🔍
+            <Search className="w-4 h-4" />
           </button>
 
-          {/* Voice Call Button (1:1 with user's calling screen) */}
           <button 
             onClick={() => {
               onLog?.(`[CALL] Triggered voice call with ${activeChat.name}`);
@@ -155,10 +183,9 @@ export default function CenterChat({
             className="p-2 rounded-full hover:bg-white/10 hover:text-[#00FF88] transition-colors"
             title="Voice Call"
           >
-            📞
+            <Phone className="w-4 h-4" />
           </button>
 
-          {/* Video Call Button */}
           <button 
             onClick={() => {
               onLog?.(`[VIDEOCALL] Triggered video mesh with ${activeChat.name}`);
@@ -167,22 +194,21 @@ export default function CenterChat({
             className="p-2 rounded-full hover:bg-white/10 hover:text-[#00FF88] transition-colors"
             title="Video Call"
           >
-            📹
+            <Video className="w-4 h-4" />
           </button>
 
           <button 
             onClick={() => onLog?.('[CHAT] More options clicked')}
-            className="p-2 rounded-full hover:bg-white/10 hover:text-white transition-colors text-lg"
+            className="p-2 rounded-full hover:bg-white/10 hover:text-white transition-colors"
             title="More"
           >
-            ⋮
+            <MoreVertical className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* 2. Chat Area: Encrypted Doodle Background + Faint Terminal Code Pattern */}
+      {/* 2. Chat Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 relative">
-        {/* Layer 1: Encrypted doodle vector background pattern */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-20"
           style={{
@@ -192,21 +218,10 @@ export default function CenterChat({
           }}
         />
 
-        {/* Layer 2: Faint scrolling terminal code background */}
-        <div className="absolute inset-0 pointer-events-none opacity-5 font-mono text-[10px] text-[#00FF88] overflow-hidden leading-relaxed p-4 select-none">
-          {`01001110 01000101 01011000 01000011 01001000 01000001 01010100
-AES-GCM-256 QUANTUM KEY EXCHANGE ESTABLISHED
-NEX_SOCKET_RELAY: PORT 443 -> PEER [OK]
-ZERO_KNOWLEDGE_PROTOCOL: VERIFIED SHA-512
-nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
-64 bytes from 10.0.0.1: icmp_seq=1 ttl=64 time=0.214 ms
-[SYSTEM_AUDIT] BUFFER INTEGRITY: 100% SECURE`.repeat(8)}
-        </div>
-
-        {/* System E2E Security Badge */}
         <div className="flex justify-center my-3 relative z-10">
-          <div className="bg-[#182229]/90 border border-[#00FF88]/20 rounded-lg px-3.5 py-1.5 text-xs text-[#00FF88] font-mono text-center max-w-md shadow-md">
-            🔒 Messages and calls are end-to-end encrypted. No one outside of this chat, not even NEXCHAT, can read or listen to them.
+          <div className="bg-[#182229]/90 border border-[#00FF88]/20 rounded-lg px-3.5 py-1.5 text-xs text-[#00FF88] font-mono text-center max-w-md shadow-md flex items-center justify-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 flex-shrink-0" />
+            <span>Messages and calls are end-to-end encrypted. No one outside of this chat, not even NEXCHAT, can read or listen to them.</span>
           </div>
         </div>
 
@@ -218,7 +233,6 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
               key={msg.id}
               className={`flex flex-col group relative z-10 ${isMe ? 'items-end' : 'items-start'}`}
             >
-              {/* Message Bubble Container */}
               <div
                 className={`max-w-[80%] md:max-w-[70%] rounded-2xl px-3.5 py-2 shadow-md relative transition-transform duration-100 ${
                   isMe
@@ -226,21 +240,18 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
                     : 'bg-[#202c33] text-white rounded-tl-xs'
                 }`}
               >
-                {/* Author for groups */}
                 {activeChat.isGroup && !isMe && msg.author && (
                   <div className="text-[11px] font-bold text-[#00FF88] mb-0.5">
                     {msg.author}
                   </div>
                 )}
 
-                {/* A. TEXT MESSAGE WITH RICH FORMATTING (*bold*, _italic_, ~strike~, ```code```) */}
                 {msg.type === 'text' && (
                   <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                     {renderFormattedText(msg.text)}
                   </div>
                 )}
 
-                {/* B. CODE BLOCK MESSAGE WITH SYNTAX HIGHLIGHT */}
                 {msg.type === 'code' && (
                   <div className="mt-1">
                     <div className="flex items-center justify-between text-[11px] font-mono text-[#00FF88] pb-1 border-b border-white/10 mb-1.5">
@@ -261,7 +272,6 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
                   </div>
                 )}
 
-                {/* C. VOICE NOTE WITH NEON GREEN WAVEFORM */}
                 {msg.type === 'voice' && (
                   <div className="flex items-center gap-3 py-1 min-w-[200px]">
                     <button
@@ -272,11 +282,14 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
                       }}
                       className="w-10 h-10 rounded-full bg-[#00FF88] text-black font-bold flex items-center justify-center flex-shrink-0 shadow-md"
                     >
-                      {activeVoicePlaying === msg.id ? '⏸' : '▶'}
+                      {activeVoicePlaying === msg.id ? (
+                        <Pause className="w-4 h-4 fill-black text-black" />
+                      ) : (
+                        <Play className="w-4 h-4 fill-black text-black ml-0.5" />
+                      )}
                     </button>
 
                     <div className="flex-1">
-                      {/* Neon Waveform Bars */}
                       <div className="flex items-center gap-0.5 h-6">
                         {[12, 20, 16, 24, 18, 14, 22, 26, 12, 18, 24, 16, 20, 14, 22].map((h, i) => (
                           <span
@@ -292,17 +305,16 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
                       </div>
                       <div className="flex justify-between text-[10px] text-white/50 font-mono mt-1">
                         <span>{msg.duration}</span>
-                        <span>🎤 PTT</span>
+                        <span className="flex items-center gap-1"><Mic className="w-3 h-3" /> PTT</span>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* D. POLL MESSAGE WITH SELECTABLE VOTES */}
                 {msg.type === 'poll' && (
                   <div className="min-w-[240px] pt-1">
                     <div className="flex items-center gap-1.5 font-bold text-sm text-white mb-2">
-                      <span>📊</span>
+                      <BarChart2 className="w-4 h-4 text-[#00FF88]" />
                       <span>{msg.question}</span>
                     </div>
                     <div className="space-y-2">
@@ -328,11 +340,10 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
                   </div>
                 )}
 
-                {/* E. FILE ATTACHMENT MESSAGE */}
                 {msg.type === 'file' && (
                   <div className="flex items-center gap-3 bg-black/30 p-2.5 rounded-lg border border-white/10 min-w-[220px]">
                     <div className="w-10 h-10 rounded-lg bg-[#00FF88]/20 border border-[#00FF88]/40 flex items-center justify-center text-xl text-[#00FF88]">
-                      📄
+                      <FileText className="w-5 h-5 text-[#00FF88]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-semibold text-white truncate">{msg.fileName}</p>
@@ -343,41 +354,42 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
                       className="p-1.5 rounded-full hover:bg-white/10 text-white/70 hover:text-white"
                       title="Download File"
                     >
-                      ⬇
+                      <Download className="w-4 h-4" />
                     </button>
                   </div>
                 )}
 
-                {/* Timestamp and Double Blue Ticks */}
                 <div className="flex items-center justify-end gap-1 mt-1 text-[10px] text-white/50 font-mono">
                   <span>{msg.timestamp}</span>
                   {isMe && (
-                    <span className="text-[#53bdeb] text-xs">✓✓</span>
+                    <CheckCheck className="w-3.5 h-3.5 text-blue-500 inline" />
                   )}
                 </div>
 
-                {/* Hover Message Actions / Quick Reaction Bar */}
                 <button
                   onClick={() => setReactionAnchorId(reactionAnchorId === msg.id ? null : msg.id)}
-                  className="absolute -top-3 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#202c33] border border-white/20 px-2 py-0.5 rounded-full text-xs hover:border-[#00FF88] shadow-md"
+                  className="absolute -top-3 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#202c33] border border-white/20 p-1 rounded-full text-xs hover:border-[#00FF88] shadow-md flex items-center justify-center"
                   title="React"
                 >
-                  😀+
+                  <Smile className="w-3.5 h-3.5 text-gray-300" />
                 </button>
               </div>
 
-              {/* Reaction Picker Popover */}
+              {/* Reaction Popover */}
               {reactionAnchorId === msg.id && (
-                <div className="bg-[#202c33] border border-white/20 rounded-full px-3 py-1 shadow-2xl flex items-center gap-2 mt-1 z-20 animate-in fade-in zoom-in-95">
-                  {['👍', '❤️', '😂', '😮', '😢', '🙏', '🔥'].map((em) => (
-                    <button
-                      key={em}
-                      onClick={() => handleAddReaction(msg.id, em)}
-                      className="hover:scale-125 transition-transform text-base p-1"
-                    >
-                      {em}
-                    </button>
-                  ))}
+                <div className="bg-[#202c33] border border-white/20 rounded-full px-3 py-1.5 shadow-2xl flex items-center gap-2 mt-1 z-20">
+                  <button onClick={() => handleAddReaction(msg.id, 'Like')} className="hover:scale-125 transition-transform p-1">
+                    <ThumbsUp className="w-4 h-4 text-blue-400" />
+                  </button>
+                  <button onClick={() => handleAddReaction(msg.id, 'Heart')} className="hover:scale-125 transition-transform p-1">
+                    <Heart className="w-4 h-4 text-purple-500 fill-purple-500" />
+                  </button>
+                  <button onClick={() => handleAddReaction(msg.id, 'Flame')} className="hover:scale-125 transition-transform p-1">
+                    <Flame className="w-4 h-4 text-orange-500 fill-orange-500" />
+                  </button>
+                  <button onClick={() => handleAddReaction(msg.id, 'Smile')} className="hover:scale-125 transition-transform p-1">
+                    <Smile className="w-4 h-4 text-yellow-400" />
+                  </button>
                 </div>
               )}
             </div>
@@ -388,13 +400,13 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
 
       {/* 3. Attachment Popup Menu */}
       {showAttachMenu && (
-        <div className="absolute bottom-16 left-12 bg-[#202c33] border border-white/10 rounded-2xl p-3 shadow-2xl grid grid-cols-3 gap-3 z-30 animate-in fade-in slide-in-from-bottom-2">
+        <div className="absolute bottom-16 left-12 bg-[#202c33] border border-white/10 rounded-2xl p-3 shadow-2xl grid grid-cols-3 gap-3 z-30">
           {[
-            { icon: '📸', label: 'Camera', action: () => onLog?.('[ATTACH] Camera activated') },
-            { icon: '🖼️', label: 'Gallery', action: () => onLog?.('[ATTACH] Image gallery opened') },
-            { icon: '📄', label: 'Document', action: () => onLog?.('[ATTACH] Document picker opened') },
-            { icon: '📊', label: 'Poll', action: () => onLog?.('[ATTACH] Poll creator opened') },
-            { icon: '👤', label: 'Contact', action: () => onLog?.('[ATTACH] Contact shared') },
+            { icon: <Camera className="w-5 h-5 text-[#00FF88]" />, label: 'Camera', action: () => onLog?.('[ATTACH] Camera activated') },
+            { icon: <ImageIcon className="w-5 h-5 text-[#00FF88]" />, label: 'Gallery', action: () => onLog?.('[ATTACH] Image gallery opened') },
+            { icon: <FileText className="w-5 h-5 text-[#00FF88]" />, label: 'Document', action: () => onLog?.('[ATTACH] Document picker opened') },
+            { icon: <BarChart2 className="w-5 h-5 text-[#00FF88]" />, label: 'Poll', action: () => onLog?.('[ATTACH] Poll creator opened') },
+            { icon: <User className="w-5 h-5 text-[#00FF88]" />, label: 'Contact', action: () => onLog?.('[ATTACH] Contact shared') },
           ].map((item, i) => (
             <button
               key={i}
@@ -413,50 +425,48 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
         </div>
       )}
 
-      {/* 4. Bottom Input Bar (Emoji, Attach, Input, Mic / Send) */}
+      {/* 4. Bottom Input Bar */}
       <form onSubmit={handleSend} className="h-16 px-4 bg-[#111b21] border-t border-white/5 flex items-center gap-3 z-10">
-        {/* Emoji Button */}
         <button
           type="button"
           onClick={() => {
             setShowEmojiPicker(!showEmojiPicker);
-            onLog?.('[EMOJI] Emoji drawer toggled');
+            onLog?.('[ACTION] Stamping quick reaction');
           }}
-          className="p-2 text-white/60 hover:text-white text-xl transition-colors"
-          title="Emoji"
+          className="p-2 text-white/60 hover:text-white transition-colors"
+          title="Reaction"
         >
-          😊
+          <Smile className="w-5 h-5" />
         </button>
 
-        {/* Attach Button */}
         <button
           type="button"
           onClick={() => setShowAttachMenu(!showAttachMenu)}
-          className={`p-2 text-xl transition-colors ${
+          className={`p-2 transition-colors ${
             showAttachMenu ? 'text-[#00FF88]' : 'text-white/60 hover:text-white'
           }`}
           title="Attach"
         >
-          📎
+          <Paperclip className="w-5 h-5" />
         </button>
 
-        {/* Text Input with Rich Formatting Support */}
         <input
           type="text"
           value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
+          inputMode="text"
+          autoFocus={false}
+          onChange={(e) => setInputText(e.target.value.replace(EMOJI_REGEX, ''))}
           placeholder="Type a message (supports *bold*, _italic_, ~strike~, ```code```)"
           className="flex-1 bg-[#2a3942] text-white text-sm px-4 py-2.5 rounded-lg border-none outline-none placeholder-white/40 focus:ring-1 focus:ring-[#00FF88]/50 font-sans"
         />
 
-        {/* Send or Mic Button */}
         {inputText.trim() ? (
           <button
             type="submit"
             className="w-10 h-10 rounded-full bg-[#00a884] hover:bg-[#00FF88] text-black font-bold flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-[#00a884]/30"
             title="Send"
           >
-            ➤
+            <Send className="w-4 h-4 text-black" />
           </button>
         ) : (
           <button
@@ -465,7 +475,7 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
             className="w-10 h-10 rounded-full bg-white/10 hover:bg-[#00FF88] hover:text-black text-white/80 flex items-center justify-center transition-all active:scale-95"
             title="Record Voice Note"
           >
-            🎤
+            <Mic className="w-5 h-5" />
           </button>
         )}
       </form>
