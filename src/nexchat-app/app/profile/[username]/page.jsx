@@ -107,15 +107,80 @@ export default function CreatorProfilePage({ params }) {
   const [copiedLink, setCopiedLink] = useState(false);
   const [searchFilter, setSearchFilter] = useState('');
 
-  // Check initial follow state from localStorage
+  // Reels Studio & Settings State
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [settingsTab, setSettingsTab] = useState('creator'); // 'playback' | 'creator' | 'privacy'
+  const [useCustomAvatar, setUseCustomAvatar] = useState(false);
+  const [generalAvatar, setGeneralAvatar] = useState('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80');
+  const [customAvatar, setCustomAvatar] = useState('');
+  const [creatorDisplayName, setCreatorDisplayName] = useState('Alexander Vance');
+  const [creatorBio, setCreatorBio] = useState('🎮 Game Developer & Cyber Visualist • Directing next-gen 4K 60FPS video feeds & multi-vault Cloudinary cloud streams.');
+  const [autoScroll, setAutoScroll] = useState(false);
+  const [defaultSound, setDefaultSound] = useState(false);
+  const [playbackQuality, setPlaybackQuality] = useState('auto');
+  const [allowComments, setAllowComments] = useState(true);
+  const [allowDownloads, setAllowDownloads] = useState(true);
+  const [avatarUploadMsg, setAvatarUploadMsg] = useState('');
+
+  // Load initial settings and follow state from localStorage
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('nex_followed_authors') || '[]');
       if (saved.includes(cleanUsername)) {
         setIsFollowing(true);
       }
+
+      const savedSettings = JSON.parse(localStorage.getItem('nex_reels_settings') || '{}');
+      if (savedSettings.autoScroll !== undefined) setAutoScroll(savedSettings.autoScroll);
+      if (savedSettings.defaultSound !== undefined) setDefaultSound(savedSettings.defaultSound);
+      if (savedSettings.quality) setPlaybackQuality(savedSettings.quality);
+      if (savedSettings.allowComments !== undefined) setAllowComments(savedSettings.allowComments !== 'off');
+      if (savedSettings.allowDownloads !== undefined) setAllowDownloads(savedSettings.allowDownloads !== false);
+
+      const savedCreator = JSON.parse(localStorage.getItem('nex_reels_creator_profile') || '{}');
+      if (savedCreator.useCustomAvatar !== undefined) setUseCustomAvatar(savedCreator.useCustomAvatar);
+      if (savedCreator.customAvatar) setCustomAvatar(savedCreator.customAvatar);
+      if (savedCreator.creatorDisplayName) setCreatorDisplayName(savedCreator.creatorDisplayName);
+      if (savedCreator.creatorBio) setCreatorBio(savedCreator.creatorBio);
     } catch {}
   }, [cleanUsername]);
+
+  const handleSaveSettings = () => {
+    try {
+      const creatorPayload = {
+        useCustomAvatar,
+        customAvatar,
+        creatorDisplayName,
+        creatorBio,
+      };
+      const settingsPayload = {
+        autoScroll,
+        defaultSound,
+        quality: playbackQuality,
+        allowComments: allowComments ? 'all' : 'off',
+        allowDownloads,
+      };
+      localStorage.setItem('nex_reels_creator_profile', JSON.stringify(creatorPayload));
+      localStorage.setItem('nex_reels_settings', JSON.stringify(settingsPayload));
+    } catch {}
+    setShowSettingsModal(false);
+  };
+
+  const handleAvatarFile = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      setAvatarUploadMsg('File exceeds 5MB limit');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setCustomAvatar(ev.target.result);
+      setUseCustomAvatar(true);
+      setAvatarUploadMsg('Custom avatar ready! Click Save to apply.');
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleFollowToggle = () => {
     try {
@@ -201,6 +266,19 @@ export default function CreatorProfilePage({ params }) {
 
           <div className="flex items-center gap-2">
             <button
+              onClick={() => {
+                setSettingsTab('creator');
+                setShowSettingsModal(true);
+              }}
+              className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition-all active:scale-95 hover:text-[#39FF14]"
+              title="Reels Studio & Creator Settings"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
+            <button
               onClick={handleShare}
               className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition-all active:scale-95"
               title="Share Profile"
@@ -215,22 +293,29 @@ export default function CreatorProfilePage({ params }) {
         {/* Hero Section */}
         <section className="flex flex-col items-center px-6 pt-5 pb-4 text-center">
           {/* Avatar with Neon Pulsing Border */}
-          <div className="relative mb-3">
+          <div
+            onClick={() => {
+              setSettingsTab('creator');
+              setShowSettingsModal(true);
+            }}
+            className="relative mb-3 cursor-pointer group"
+            title="Click to customize creator avatar"
+          >
             <div className="w-24 h-24 rounded-full p-[3px] bg-gradient-to-tr from-[#39FF14] via-[#00f3ff] to-[#39FF14] shadow-[0_0_24px_rgba(57,255,20,0.35)] animate-pulse">
               <img
-                src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=240&q=80"
+                src={useCustomAvatar && customAvatar ? customAvatar : generalAvatar}
                 alt="Avatar"
                 className="w-full h-full rounded-full object-cover bg-black border-2 border-black"
               />
             </div>
-            <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#39FF14] text-black font-black text-xs flex items-center justify-center border-2 border-black shadow-md">
+            <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#39FF14] text-black font-black text-xs flex items-center justify-center border-2 border-black shadow-md group-hover:scale-110 transition-transform">
               ⚡
             </div>
           </div>
 
           {/* Name & Tag */}
           <h1 className="text-xl font-black tracking-tight text-white flex items-center gap-1.5">
-            Alexander Vance
+            {creatorDisplayName}
           </h1>
           <span className="text-xs font-semibold text-[#00f3ff] mt-0.5">
             @{cleanUsername}
@@ -254,8 +339,8 @@ export default function CreatorProfilePage({ params }) {
             </div>
           </div>
 
-          {/* Action Buttons: Follow, Message, Link */}
-          <div className="flex items-center gap-2.5 w-full mt-4">
+          {/* Action Buttons: Follow, Edit, Message, Link */}
+          <div className="flex items-center gap-2 w-full mt-4">
             <button
               onClick={handleFollowToggle}
               className={`flex-1 py-2.5 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-lg active:scale-95 ${
@@ -265,6 +350,20 @@ export default function CreatorProfilePage({ params }) {
               }`}
             >
               <span>{isFollowing ? '✓ Following' : '+ Follow'}</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setSettingsTab('creator');
+                setShowSettingsModal(true);
+              }}
+              className="py-2.5 px-3.5 rounded-xl font-bold text-xs bg-white/5 hover:bg-white/10 border border-[#39FF14]/40 text-[#39FF14] flex items-center justify-center gap-1.5 transition-all shadow-md active:scale-95"
+              title="Customize Reels Creator Profile"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              <span>Edit</span>
             </button>
 
             <a
@@ -291,7 +390,7 @@ export default function CreatorProfilePage({ params }) {
           {/* Bio Box */}
           <div className="mt-3.5 px-3 py-2 rounded-xl bg-black/40 border border-white/5 text-xs text-gray-300 leading-relaxed text-left w-full">
             <p>
-              🎮 <strong className="text-white">Game Developer & Cyber Visualist</strong> • Directing next-gen 4K 60FPS video feeds & multi-vault Cloudinary cloud streams.
+              🎮 <strong className="text-white">{creatorDisplayName}</strong> • {creatorBio}
             </p>
             <div className="flex items-center gap-3 mt-2 text-[11px] text-[#39FF14]">
               <span className="flex items-center gap-1">📍 Night City / NEX-Core</span>
@@ -490,6 +589,272 @@ export default function CreatorProfilePage({ params }) {
               <p className="mt-3 text-sm text-gray-300 font-medium">
                 {activeViewingPic.caption}
               </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ─── Reels Settings & Dual Avatar Studio Modal ─── */}
+        <AnimatePresence>
+          {showSettingsModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+              onClick={() => setShowSettingsModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 15 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 15 }}
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-sm bg-[#0e131f] border border-white/15 rounded-2xl p-5 shadow-2xl flex flex-col gap-4 text-left max-h-[85vh] overflow-y-auto"
+              >
+                {/* Modal Header */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <h3 className="font-extrabold text-sm tracking-wide text-white flex items-center gap-2">
+                    <span className="text-[#39FF14]">⚡</span> Reels Studio & Settings
+                  </h3>
+                  <button
+                    onClick={() => setShowSettingsModal(false)}
+                    className="w-7 h-7 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex bg-black/40 p-1 rounded-xl border border-white/5 gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSettingsTab('creator')}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      settingsTab === 'creator'
+                        ? 'bg-[#39FF14] text-black shadow-md'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Avatar & Profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSettingsTab('playback')}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      settingsTab === 'playback'
+                        ? 'bg-[#39FF14] text-black shadow-md'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Playback
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSettingsTab('privacy')}
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                      settingsTab === 'privacy'
+                        ? 'bg-[#39FF14] text-black shadow-md'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Privacy
+                  </button>
+                </div>
+
+                {/* Tab: Creator & Avatar */}
+                {settingsTab === 'creator' && (
+                  <div className="flex flex-col gap-3.5">
+                    <div>
+                      <span className="text-xs font-bold text-gray-200">Reels Avatar System</span>
+                      <p className="text-[11px] text-gray-400 leading-tight mt-0.5">
+                        Choose between your general profile photo or a distinct Reels creator avatar.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                      <label
+                        onClick={() => setUseCustomAvatar(false)}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                          !useCustomAvatar
+                            ? 'bg-[#39FF14]/10 border-[#39FF14]/50 text-white'
+                            : 'bg-white/[0.02] border-white/5 text-gray-400 hover:bg-white/[0.05]'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="avatarMode"
+                          checked={!useCustomAvatar}
+                          onChange={() => setUseCustomAvatar(false)}
+                          className="accent-[#39FF14]"
+                        />
+                        <div className="flex flex-col text-left">
+                          <span className="text-xs font-bold text-white">General NEXCHAT Photo</span>
+                          <span className="text-[10px] text-gray-400">Synced across chats and vaults</span>
+                        </div>
+                      </label>
+
+                      <label
+                        onClick={() => setUseCustomAvatar(true)}
+                        className={`flex items-center gap-3 p-2.5 rounded-xl border cursor-pointer transition-all ${
+                          useCustomAvatar
+                            ? 'bg-[#39FF14]/10 border-[#39FF14]/50 text-white'
+                            : 'bg-white/[0.02] border-white/5 text-gray-400 hover:bg-white/[0.05]'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="avatarMode"
+                          checked={useCustomAvatar}
+                          onChange={() => setUseCustomAvatar(true)}
+                          className="accent-[#39FF14]"
+                        />
+                        <div className="flex flex-col text-left">
+                          <span className="text-xs font-bold text-white">Custom Reels Avatar</span>
+                          <span className="text-[10px] text-gray-400">Distinct avatar for Reels stream</span>
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Preview & Upload Card */}
+                    <div className="p-3 rounded-xl bg-black/50 border border-white/10 flex items-center gap-3">
+                      <img
+                        src={useCustomAvatar && customAvatar ? customAvatar : generalAvatar}
+                        alt="Preview"
+                        className="w-14 h-14 rounded-full object-cover border-2 border-[#39FF14]"
+                      />
+                      <div className="flex-1 flex flex-col gap-1.5">
+                        <label className="cursor-pointer py-1.5 px-3 rounded-lg bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold text-[11px] text-center transition-all inline-block active:scale-95">
+                          <span>Upload New Avatar</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarFile}
+                            className="hidden"
+                          />
+                        </label>
+                        {avatarUploadMsg && (
+                          <span className="text-[10px] text-[#39FF14]">{avatarUploadMsg}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Name & Bio Input */}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-bold text-gray-300">Creator Display Name</label>
+                      <input
+                        type="text"
+                        value={creatorDisplayName}
+                        onChange={(e) => setCreatorDisplayName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-[#39FF14]"
+                        placeholder="Creator Stage Name"
+                        maxLength={30}
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[11px] font-bold text-gray-300">Reels Bio</label>
+                      <textarea
+                        value={creatorBio}
+                        onChange={(e) => setCreatorBio(e.target.value)}
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white text-xs focus:outline-none focus:border-[#39FF14] resize-none"
+                        placeholder="Creator Bio"
+                        maxLength={160}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab: Playback */}
+                {settingsTab === 'playback' && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-white">Autoplay Next Reel</span>
+                        <span className="text-[10px] text-gray-400">Advance when video finishes</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={autoScroll}
+                        onChange={(e) => setAutoScroll(e.target.checked)}
+                        className="w-4 h-4 accent-[#39FF14] cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-white">Default Sound</span>
+                        <span className="text-[10px] text-gray-400">Play video with audio unmuted</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={defaultSound}
+                        onChange={(e) => setDefaultSound(e.target.checked)}
+                        className="w-4 h-4 accent-[#39FF14] cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5 p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <span className="text-xs font-bold text-white">Streaming Quality</span>
+                      <div className="flex gap-1.5 mt-1">
+                        {['auto', '4k', 'saver'].map((q) => (
+                          <button
+                            key={q}
+                            type="button"
+                            onClick={() => setPlaybackQuality(q)}
+                            className={`flex-1 py-1 rounded-lg text-[10px] font-bold uppercase transition-all ${
+                              playbackQuality === q
+                                ? 'bg-[#00f3ff]/20 text-[#00f3ff] border border-[#00f3ff]/50'
+                                : 'bg-white/5 text-gray-400 border border-white/5 hover:bg-white/10'
+                            }`}
+                          >
+                            {q === 'saver' ? '720p' : q === '4k' ? '4K Ultra' : '1080p FHD'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tab: Privacy */}
+                {settingsTab === 'privacy' && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-white">Allow Comments</span>
+                        <span className="text-[10px] text-gray-400">Let viewers comment on reels</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={allowComments}
+                        onChange={(e) => setAllowComments(e.target.checked)}
+                        className="w-4 h-4 accent-[#39FF14] cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-white/[0.02] border border-white/5">
+                      <div className="flex flex-col">
+                        <span className="text-xs font-bold text-white">Allow Video Save</span>
+                        <span className="text-[10px] text-gray-400">Allow downloading reels</span>
+                      </div>
+                      <input
+                        type="checkbox"
+                        checked={allowDownloads}
+                        onChange={(e) => setAllowDownloads(e.target.checked)}
+                        className="w-4 h-4 accent-[#39FF14] cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Save Button */}
+                <button
+                  type="button"
+                  onClick={handleSaveSettings}
+                  className="w-full py-2.5 rounded-xl bg-[#39FF14] hover:brightness-110 text-black font-extrabold text-xs tracking-wide shadow-[0_0_16px_rgba(57,255,20,0.35)] transition-all active:scale-95 mt-1"
+                >
+                  Save & Apply Settings
+                </button>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>

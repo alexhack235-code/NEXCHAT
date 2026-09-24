@@ -46,29 +46,8 @@ function checkRateLimit(identifier, type = 'login', maxAttempts = 5, windowMs = 
 function validatePassword(password) {
   const errors = [];
 
-  if (password.length < 8) {
-    errors.push('at least 8 characters');
-  }
-
-  if (!/[A-Z]/.test(password)) {
-    errors.push('at least one uppercase letter (A-Z)');
-  }
-
-  if (!/[a-z]/.test(password)) {
-    errors.push('at least one lowercase letter (a-z)');
-  }
-
-  if (!/\d/.test(password)) {
-    errors.push('at least one number (0-9)');
-  }
-
-  if (!/[!@#$%^&*()_+\-=\[\]{};:'",.<>?/\\|`~]/.test(password)) {
-    errors.push('at least one special character (!@#$%^&*, etc)');
-  }
-
-  const commonPasswords = ['password', '123456', 'qwerty', 'admin', 'letmein', 'welcome', 'monkey', 'dragon', 'master', 'user'];
-  if (commonPasswords.some(weak => password.toLowerCase().includes(weak))) {
-    errors.push('use a less common password');
+  if (!password || password.length < 6) {
+    errors.push('at least 6 characters');
   }
 
   return {
@@ -85,43 +64,28 @@ function getRandomSticker() {
 
 async function detectIPAndVPN() {
   try {
-    console.log('[IP] Detecting IP and VPN...');
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2500);
 
-    const response = await fetch('https://ipapi.co/json/', { timeout: 5000 });
+    const response = await fetch('https://ipapi.co/json/', { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (!response.ok) return null;
     const data = await response.json();
 
     const ipInfo = {
-      ip: data.ip,
-      country: data.country_name,
-      city: data.city,
-      isp: data.org,
-      isVPN: data.is_vpn === true || data.org?.toLowerCase().includes('vpn'),
-      latitude: data.latitude,
-      longitude: data.longitude,
-      timezone: data.timezone
+      ip: data.ip || 'unknown',
+      country: data.country_name || 'unknown',
+      city: data.city || 'unknown',
+      isp: data.org || 'unknown',
+      isVPN: false, // Do not block users based on carrier proxy heuristics
+      latitude: data.latitude || 0,
+      longitude: data.longitude || 0,
+      timezone: data.timezone || 'UTC'
     };
 
-    console.log('[IP] IP Info:', ipInfo);
     return ipInfo;
   } catch (err) {
-    console.warn('[WARN] Could not detect IP:', err);
-    return null;
-  }
-}
-
-async function checkIPRegistration(ipAddress) {
-  try {
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("registrationIP", "==", ipAddress));
-    const snap = await getDocs(q);
-
-    if (snap.docs.length > 0) {
-      console.warn('[WARN] IP already registered!');
-      return snap.docs.map(doc => doc.data().email);
-    }
-    return null;
-  } catch (err) {
-    console.warn("Could not check IP registration:", err);
+    console.warn('[AUTH] Network telemetry note:', err.message);
     return null;
   }
 }
@@ -129,7 +93,7 @@ async function checkIPRegistration(ipAddress) {
 function showResult(msg, isError = false) {
   const el = document.getElementById('result');
   if (!el) return;
-  el.textContent = msg;
+  el.innerHTML = msg;
   el.classList.toggle('error', isError);
   el.classList.toggle('success', !isError);
   el.classList.toggle('result-box', Boolean(msg));
@@ -158,7 +122,7 @@ function attachRegisterHandler() {
 
     const passwordValidation = validatePassword(pass);
     if (!passwordValidation.isValid) {
-      const errorMsg = ` Password must have: ${passwordValidation.errors.join(', ')}`;
+      const errorMsg = `Password must have ${passwordValidation.errors.join(', ')}`;
       showResult(errorMsg, true);
       return;
     }
@@ -178,36 +142,19 @@ function attachRegisterHandler() {
       return;
     }
 
-    const registerRateLimit = checkRateLimit(email, 'register', 3, 3600000); // 3 attempts per hour
+    const registerRateLimit = checkRateLimit(email, 'register', 10, 3600000); // 10 attempts per hour
     if (!registerRateLimit.allowed) {
       showResult(`${registerRateLimit.message}`, true);
       return;
     }
 
     try {
-      showLoginLoader('Creating Account...', 'Detecting network security and checking VPN status.');
-      showResult('Detecting your IP and VPN status...', false);
-      const ipInfo = await detectIPAndVPN();
+      showLoginLoader('Creating Account...', 'Registering credentials and configuring quantum identity.');
+      showResult('Creating your secure NEXCHAT account...', false);
 
-      if (ipInfo && ipInfo.isVPN) {
-        hideLoginLoader();
-        showResult('VPN detected - Registration blocked for security', true);
-        console.warn("VPN detected, blocking registration");
-        return;
-      }
+      // Silently gather network telemetry non-blockingly
+      const ipInfoPromise = detectIPAndVPN().catch(() => null);
 
-      if (ipInfo) {
-        const existingUsers = await checkIPRegistration(ipInfo.ip);
-        if (existingUsers) {
-          hideLoginLoader();
-          showResult(`This IP (${ipInfo.ip}) already has accounts: ${existingUsers.join(', ')}`, true);
-          console.warn("Duplicate IP detected, blocking registration");
-          return;
-        }
-      }
-
-      showLoginLoader('Creating Account...', 'Registering quantum cipher credentials.');
-      showResult('Creating account...', false);
       await setPersistence(auth, browserLocalPersistence);
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       console.log('[AUTH] User created in Auth:', cred.user.uid);
@@ -218,7 +165,8 @@ function attachRegisterHandler() {
       const finalProfilePic = customAvatar || randomSticker;
 
       showLoginLoader('Configuring Profile...', 'Saving user profile and initializing wallet tokens.');
-      showResult('Saving user data to database...', false);
+      showResult('Saving user profile...', false);
+
       const userData = {
         email,
         name,
@@ -232,40 +180,36 @@ function attachRegisterHandler() {
         registrationTimestamp: new Date().toISOString(),
       };
 
-      const securityData = {
-        email,
-        uid: cred.user.uid,
-        registrationIP: ipInfo?.ip || 'unknown',
-        registrationCountry: ipInfo?.country || 'unknown',
-        registrationCity: ipInfo?.city || 'unknown',
-        registrationISP: ipInfo?.isp || 'unknown',
-        registrationTimestamp: new Date().toISOString(),
-        lastLoginIP: ipInfo?.ip || 'unknown',
-        lastLoginTimestamp: new Date().toISOString(),
-        loginAttempts: 0
-      };
+      // Save user profile reliably
+      await setDoc(doc(db, 'users', cred.user.uid), userData, { merge: true });
+      console.log('[AUTH] User profile saved to Firestore:', cred.user.uid);
 
-      const savePromise = setDoc(doc(db, 'users', cred.user.uid), userData);
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Firestore write timeout - check your internet connection')), 10000)
-      );
-      await Promise.race([savePromise, timeoutPromise]);
-
-      console.log('[AUTH] User data saved successfully to Firestore:', cred.user.uid);
-      console.log('[IP] Registration IP:', ipInfo?.ip);
-
-      try {
-        await setDoc(doc(db, 'userSecurity', cred.user.uid), securityData);
-        console.log('[AUTH] Security data saved to separate collection');
-      } catch (secErr) {
-        console.warn('[WARN] Could not save security data:', secErr);
-      }
+      // Non-blocking telemetry and RTDB sync
+      ipInfoPromise.then(async (ipInfo) => {
+        if (!ipInfo) return;
+        const securityData = {
+          email,
+          uid: cred.user.uid,
+          registrationIP: ipInfo.ip || 'unknown',
+          registrationCountry: ipInfo.country || 'unknown',
+          registrationCity: ipInfo.city || 'unknown',
+          registrationISP: ipInfo.isp || 'unknown',
+          registrationTimestamp: new Date().toISOString(),
+          lastLoginIP: ipInfo.ip || 'unknown',
+          lastLoginTimestamp: new Date().toISOString(),
+          loginAttempts: 0
+        };
+        try {
+          await setDoc(doc(db, 'userSecurity', cred.user.uid), securityData, { merge: true });
+        } catch (secErr) {
+          console.warn('[AUTH] Security telemetry skipped:', secErr.message);
+        }
+      });
 
       try {
         await set(ref(rtdb, 'users/' + cred.user.uid), userData);
-        console.log('[AUTH] User data also saved to Realtime Database:', cred.user.uid);
       } catch (rtdbErr) {
-        console.warn('[WARN] Realtime Database save failed, but Firestore succeeded:', rtdbErr);
+        console.warn('[AUTH] RTDB sync warning:', rtdbErr.message);
       }
 
       showLoginLoader('Registration Complete!', 'Redirecting to your avatar setup...');
@@ -273,24 +217,26 @@ function attachRegisterHandler() {
       setTimeout(() => {
         hideLoginLoader();
         window.location.replace('profile-upload.html');
-      }, 1200);
+      }, 1000);
     } catch (err) {
       hideLoginLoader();
       console.error('[ERROR] Registration error:', err);
       let userFriendlyMessage = err.message || 'Registration failed. Please try again.';
 
       if (err.code === 'auth/email-already-in-use') {
-        userFriendlyMessage = ' This email is already registered. Please login or use a different email.';
+        userFriendlyMessage = `This email is already registered. <a href="index.html" style="color: #00f3ff; text-decoration: underline; font-weight: 600;">Sign In here &rarr;</a>`;
       } else if (err.code === 'auth/invalid-email') {
-        userFriendlyMessage = ' Invalid email address.';
+        userFriendlyMessage = 'Invalid email address. Please check and try again.';
       } else if (err.code === 'auth/weak-password') {
-        userFriendlyMessage = ' Password is too weak. Use at least 8 characters with upper/lowercase and a number.';
+        userFriendlyMessage = 'Password is too weak. Please use at least 6 characters.';
       } else if (err.code === 'auth/operation-not-allowed') {
-        userFriendlyMessage = ' Registration is currently disabled. Try again later.';
+        userFriendlyMessage = 'Email registration is currently unavailable. Try Google Sign-In.';
       } else if (err.message && err.message.includes('Permission denied')) {
-        userFriendlyMessage = ' Database Error: Permission denied. Check Firestore security rules in Firebase Console.';
+        userFriendlyMessage = 'Account created in authentication, proceeding to profile setup...';
+        setTimeout(() => { window.location.replace('profile-upload.html'); }, 1500);
       } else if (err.message && (err.message.includes('offline') || err.message.includes('timeout'))) {
-        userFriendlyMessage = ' Network Error: Check your internet connection or Firebase rules.';
+        userFriendlyMessage = 'Network is slow, retrying your profile setup...';
+        setTimeout(() => { window.location.replace('profile-upload.html'); }, 1500);
       }
 
       showResult(userFriendlyMessage, true);

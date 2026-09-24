@@ -5,7 +5,7 @@
 import "./src/js/security-guard.js";
 import { auth, db } from './firebase-config.js';
 import {
-  collection, doc, addDoc, getDocs, onSnapshot, query, orderBy, limit,
+  collection, doc, getDoc, setDoc, addDoc, getDocs, onSnapshot, query, orderBy, limit,
   updateDoc, increment, arrayUnion, arrayRemove, serverTimestamp, where
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
@@ -18,7 +18,31 @@ let currentUser = null;
 let myUID = null;
 let myUsername = 'NEX_User';
 let myProfilePic = 'favicon.png';
-let isGlobalMuted = true;
+let generalProfilePic = 'favicon.png';
+let customReelsAvatar = '';
+let useCustomReelsAvatar = false;
+let myCreatorName = '';
+let myCreatorBio = '';
+
+// Reels Settings State with LocalStorage Persistence
+let reelsSettings = {
+  autoScroll: false,
+  defaultSound: false,
+  doubleTapLike: true,
+  quality: 'auto',
+  allowComments: 'all',
+  allowDownloads: true,
+  showViews: true,
+};
+
+try {
+  const savedSettings = JSON.parse(localStorage.getItem('nex_reels_settings') || '{}');
+  reelsSettings = { ...reelsSettings, ...savedSettings };
+} catch (e) {
+  console.warn('[REELS] Settings parse error:', e);
+}
+
+let isGlobalMuted = reelsSettings.defaultSound ? false : true;
 let activeReelId = null;
 let currentCommentUnsubscribe = null;
 let selectedReelFile = null;
@@ -150,13 +174,52 @@ export function generateVideoThumbnail(file, seekTime = 1.0) {
   });
 }
 
-// Authentication Sync
+// Authentication Sync & Reels Profile Hydration
 onAuthStateChanged(auth, async (user) => {
   if (user) {
     currentUser = user;
     myUID = user.uid;
     myUsername = user.displayName || user.email?.split('@')[0] || `user_${myUID.substring(0, 5)}`;
-    myProfilePic = user.photoURL || 'favicon.png';
+    generalProfilePic = user.photoURL || 'favicon.png';
+    myProfilePic = generalProfilePic;
+
+    // Fetch user Firestore record for Reels preferences and avatar choice
+    try {
+      const userSnap = await getDoc(doc(db, 'users', user.uid));
+      if (userSnap.exists()) {
+        const udata = userSnap.data();
+        if (udata.profilePic || udata.profilePicUrl || udata.photoURL) {
+          generalProfilePic = udata.profilePic || udata.profilePicUrl || udata.photoURL;
+        }
+        if (udata.reelsAvatar) {
+          customReelsAvatar = udata.reelsAvatar;
+        }
+        if (udata.useCustomReelsAvatar !== undefined) {
+          useCustomReelsAvatar = Boolean(udata.useCustomReelsAvatar);
+        }
+        if (udata.reelsCreatorName) {
+          myCreatorName = udata.reelsCreatorName;
+          myUsername = myCreatorName;
+        }
+        if (udata.reelsCreatorBio) {
+          myCreatorBio = udata.reelsCreatorBio;
+        }
+        if (udata.reelsSettings) {
+          reelsSettings = { ...reelsSettings, ...udata.reelsSettings };
+        }
+
+        // Apply chosen avatar mode
+        if (useCustomReelsAvatar && customReelsAvatar) {
+          myProfilePic = customReelsAvatar;
+        } else {
+          myProfilePic = generalProfilePic;
+        }
+      }
+    } catch (dbErr) {
+      console.warn('[REELS] Could not fetch profile document:', dbErr.message);
+    }
+
+    syncSettingsUI();
   } else {
     currentUser = null;
     myUID = null;
@@ -164,26 +227,34 @@ onAuthStateChanged(auth, async (user) => {
 });
 
 // Sound Toggle Handler
-globalSoundToggle.addEventListener('click', () => {
-  isGlobalMuted = !isGlobalMuted;
-  const icon = globalSoundToggle.querySelector('i');
-  if (isGlobalMuted) {
-    icon.className = 'fa-solid fa-volume-xmark';
-    showToast('Muted');
-  } else {
-    icon.className = 'fa-solid fa-volume-high';
-    showToast('Unmuted');
+if (globalSoundToggle) {
+  // Sync initial sound icon with setting
+  const initialIcon = globalSoundToggle.querySelector('i');
+  if (initialIcon) {
+    initialIcon.className = isGlobalMuted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
   }
 
-  // Update all playing reel videos
-  document.querySelectorAll('.reel-video').forEach((v) => {
-    v.muted = isGlobalMuted;
+  globalSoundToggle.addEventListener('click', () => {
+    isGlobalMuted = !isGlobalMuted;
+    const icon = globalSoundToggle.querySelector('i');
+    if (isGlobalMuted) {
+      icon.className = 'fa-solid fa-volume-xmark';
+      showToast('Muted');
+    } else {
+      icon.className = 'fa-solid fa-volume-high';
+      showToast('Unmuted');
+    }
+
+    // Update all playing reel videos
+    document.querySelectorAll('.reel-video').forEach((v) => {
+      v.muted = isGlobalMuted;
+    });
+
+    if (currentPlayingSoundAudio) {
+      currentPlayingSoundAudio.muted = isGlobalMuted;
+    }
   });
-
-  if (currentPlayingSoundAudio) {
-    currentPlayingSoundAudio.muted = isGlobalMuted;
-  }
-});
+}
 
 // IntersectionObserver for vertical autoplay
 const videoObserver = new IntersectionObserver((entries) => {
@@ -1191,16 +1262,31 @@ export async function openCreatorProfile(authorName, authorPic = 'favicon.png') 
   const handleText = document.getElementById('profileHandleText');
   const bioText = document.getElementById('profileBioText');
   const followBtn = document.getElementById('profileFollowBtn');
+  const editProfileBtn = document.getElementById('editMyReelsProfileBtn');
+
+  const isMe = (myUID && (authorName === myUsername || authorName === myCreatorName)) ||
+               (currentUser && (authorName === currentUser.displayName || authorName === currentUser.email?.split('@')[0]));
 
   if (topUsername) topUsername.textContent = `@${authorName}`;
   if (handleText) handleText.textContent = `@${authorName}`;
-  if (displayName) displayName.textContent = authorName.replace(/[0-9_]/g, ' ').trim() || authorName;
-  if (avatarImg) avatarImg.src = authorPic || 'favicon.png';
-  if (bioText) bioText.textContent = `🎮 Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
+
+  if (isMe) {
+    if (displayName) displayName.textContent = myCreatorName || authorName.replace(/[0-9_]/g, ' ').trim() || authorName;
+    if (avatarImg) avatarImg.src = myProfilePic || authorPic;
+    if (bioText) bioText.textContent = myCreatorBio || `🎮 Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
+    if (editProfileBtn) editProfileBtn.style.display = 'flex';
+    if (followBtn) followBtn.style.display = 'none';
+  } else {
+    if (displayName) displayName.textContent = authorName.replace(/[0-9_]/g, ' ').trim() || authorName;
+    if (avatarImg) avatarImg.src = authorPic || 'favicon.png';
+    if (bioText) bioText.textContent = `🎮 Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
+    if (editProfileBtn) editProfileBtn.style.display = 'none';
+    if (followBtn) followBtn.style.display = 'flex';
+  }
 
   // Update follow button state
   const isFollowing = followedAuthors.has(authorName);
-  if (followBtn) {
+  if (followBtn && !isMe) {
     if (isFollowing) {
       followBtn.classList.add('following');
       followBtn.innerHTML = '<i class="fa-solid fa-user-check"></i> <span>Following</span>';
@@ -1508,6 +1594,339 @@ function checkUrlHashForProfile() {
   }
 }
 setTimeout(checkUrlHashForProfile, 600);
+
+// ============================================================
+// REELS STUDIO & SETTINGS CONTROLLER (DUAL AVATAR + PLAYBACK)
+// ============================================================
+const reelsSettingsModal = document.getElementById('reelsSettingsModal');
+const openReelsSettingsBtn = document.getElementById('openReelsSettingsBtn');
+const closeReelsSettingsBtn = document.getElementById('closeReelsSettingsBtn');
+const editMyReelsProfileBtn = document.getElementById('editMyReelsProfileBtn');
+
+const settingAutoScroll = document.getElementById('settingAutoScroll');
+const settingDefaultSound = document.getElementById('settingDefaultSound');
+const settingDoubleTapLike = document.getElementById('settingDoubleTapLike');
+const settingQualityPills = document.querySelectorAll('.settings-quality-pill');
+
+const avatarModeGeneral = document.getElementById('avatarModeGeneral');
+const avatarModeCustom = document.getElementById('avatarModeCustom');
+const modeCardGeneral = document.getElementById('modeCardGeneral');
+const modeCardCustom = document.getElementById('modeCardCustom');
+const settingsAvatarPreviewImg = document.getElementById('settingsAvatarPreviewImg');
+const settingsAvatarSourceBadge = document.getElementById('settingsAvatarSourceBadge');
+const customReelsAvatarInput = document.getElementById('customReelsAvatarInput');
+const changeReelsAvatarBtn = document.getElementById('changeReelsAvatarBtn');
+const syncGeneralAvatarBtn = document.getElementById('syncGeneralAvatarBtn');
+const avatarUploadStatus = document.getElementById('avatarUploadStatus');
+const settingCreatorName = document.getElementById('settingCreatorName');
+const settingCreatorBio = document.getElementById('settingCreatorBio');
+const saveCreatorProfileSettingsBtn = document.getElementById('saveCreatorProfileSettingsBtn');
+
+const settingAllowComments = document.getElementById('settingAllowComments');
+const settingAllowDownloads = document.getElementById('settingAllowDownloads');
+const settingShowViews = document.getElementById('settingShowViews');
+const clearReelsCacheBtn = document.getElementById('clearReelsCacheBtn');
+
+// Sync UI with state
+function syncSettingsUI() {
+  if (settingAutoScroll) settingAutoScroll.checked = Boolean(reelsSettings.autoScroll);
+  if (settingDefaultSound) settingDefaultSound.checked = Boolean(reelsSettings.defaultSound);
+  if (settingDoubleTapLike) settingDoubleTapLike.checked = reelsSettings.doubleTapLike !== false;
+  if (settingAllowComments) settingAllowComments.checked = reelsSettings.allowComments !== 'off';
+  if (settingAllowDownloads) settingAllowDownloads.checked = reelsSettings.allowDownloads !== false;
+  if (settingShowViews) settingShowViews.checked = reelsSettings.showViews !== false;
+
+  // Sync Quality pills
+  settingQualityPills.forEach((p) => {
+    if (p.dataset.quality === (reelsSettings.quality || 'auto')) {
+      p.classList.add('active');
+    } else {
+      p.classList.remove('active');
+    }
+  });
+
+  // Sync Dual Avatar Mode
+  if (useCustomReelsAvatar) {
+    if (avatarModeCustom) avatarModeCustom.checked = true;
+    if (modeCardCustom) modeCardCustom.classList.add('selected');
+    if (modeCardGeneral) modeCardGeneral.classList.remove('selected');
+    if (settingsAvatarSourceBadge) settingsAvatarSourceBadge.textContent = 'Custom Creator Avatar';
+    if (settingsAvatarPreviewImg) settingsAvatarPreviewImg.src = customReelsAvatar || generalProfilePic || 'favicon.png';
+  } else {
+    if (avatarModeGeneral) avatarModeGeneral.checked = true;
+    if (modeCardGeneral) modeCardGeneral.classList.add('selected');
+    if (modeCardCustom) modeCardCustom.classList.remove('selected');
+    if (settingsAvatarSourceBadge) settingsAvatarSourceBadge.textContent = 'General Profile';
+    if (settingsAvatarPreviewImg) settingsAvatarPreviewImg.src = generalProfilePic || 'favicon.png';
+  }
+
+  if (settingCreatorName) {
+    settingCreatorName.value = myCreatorName || (currentUser?.displayName || myUsername || '');
+  }
+  if (settingCreatorBio) {
+    settingCreatorBio.value = myCreatorBio || '';
+  }
+}
+
+// Open / Close Settings
+export function openReelsSettings(tab = 'playback') {
+  if (!reelsSettingsModal) return;
+  syncSettingsUI();
+  switchSettingsTab(tab);
+  reelsSettingsModal.style.display = 'flex';
+}
+
+export function closeReelsSettings() {
+  if (!reelsSettingsModal) return;
+  reelsSettingsModal.style.display = 'none';
+}
+
+function switchSettingsTab(tabName) {
+  document.querySelectorAll('.settings-tab-btn').forEach((b) => {
+    b.classList.toggle('active', b.dataset.tab === tabName);
+  });
+  const tabPlayback = document.getElementById('settingsTabPlayback');
+  const tabCreator = document.getElementById('settingsTabCreator');
+  const tabPrivacy = document.getElementById('settingsTabPrivacy');
+
+  if (tabPlayback) tabPlayback.style.display = tabName === 'playback' ? 'block' : 'none';
+  if (tabCreator) tabCreator.style.display = tabName === 'creator' ? 'block' : 'none';
+  if (tabPrivacy) tabPrivacy.style.display = tabName === 'privacy' ? 'block' : 'none';
+}
+
+// Tab Button Listeners
+document.querySelectorAll('.settings-tab-btn').forEach((btn) => {
+  btn.addEventListener('click', () => switchSettingsTab(btn.dataset.tab));
+});
+
+if (openReelsSettingsBtn) {
+  openReelsSettingsBtn.addEventListener('click', () => openReelsSettings('playback'));
+}
+
+if (closeReelsSettingsBtn) {
+  closeReelsSettingsBtn.addEventListener('click', closeReelsSettings);
+}
+
+// Edit My Profile button inside drawer opens Creator tab directly
+if (editMyReelsProfileBtn) {
+  editMyReelsProfileBtn.addEventListener('click', () => openReelsSettings('creator'));
+}
+
+// Save Playback setting changes immediately
+function savePlaybackSettings() {
+  localStorage.setItem('nex_reels_settings', JSON.stringify(reelsSettings));
+  if (myUID) {
+    updateDoc(doc(db, 'users', myUID), { reelsSettings }).catch(() => {});
+  }
+}
+
+if (settingAutoScroll) {
+  settingAutoScroll.addEventListener('change', (e) => {
+    reelsSettings.autoScroll = e.target.checked;
+    savePlaybackSettings();
+    showToast(reelsSettings.autoScroll ? 'Autoplay stream enabled' : 'Autoplay stream disabled');
+  });
+}
+
+if (settingDefaultSound) {
+  settingDefaultSound.addEventListener('change', (e) => {
+    reelsSettings.defaultSound = e.target.checked;
+    savePlaybackSettings();
+  });
+}
+
+if (settingDoubleTapLike) {
+  settingDoubleTapLike.addEventListener('change', (e) => {
+    reelsSettings.doubleTapLike = e.target.checked;
+    savePlaybackSettings();
+  });
+}
+
+settingQualityPills.forEach((pill) => {
+  pill.addEventListener('click', () => {
+    settingQualityPills.forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    reelsSettings.quality = pill.dataset.quality;
+    savePlaybackSettings();
+    showToast(`Streaming quality set to: ${pill.textContent}`);
+  });
+});
+
+if (settingAllowComments) {
+  settingAllowComments.addEventListener('change', (e) => {
+    reelsSettings.allowComments = e.target.checked ? 'all' : 'off';
+    savePlaybackSettings();
+  });
+}
+
+if (settingAllowDownloads) {
+  settingAllowDownloads.addEventListener('change', (e) => {
+    reelsSettings.allowDownloads = e.target.checked;
+    savePlaybackSettings();
+  });
+}
+
+if (settingShowViews) {
+  settingShowViews.addEventListener('change', (e) => {
+    reelsSettings.showViews = e.target.checked;
+    savePlaybackSettings();
+  });
+}
+
+// Avatar Mode Switching
+if (modeCardGeneral) {
+  modeCardGeneral.addEventListener('click', () => {
+    useCustomReelsAvatar = false;
+    if (avatarModeGeneral) avatarModeGeneral.checked = true;
+    modeCardGeneral.classList.add('selected');
+    if (modeCardCustom) modeCardCustom.classList.remove('selected');
+    if (settingsAvatarSourceBadge) settingsAvatarSourceBadge.textContent = 'General Profile';
+    if (settingsAvatarPreviewImg) settingsAvatarPreviewImg.src = generalProfilePic || 'favicon.png';
+  });
+}
+
+if (modeCardCustom) {
+  modeCardCustom.addEventListener('click', () => {
+    useCustomReelsAvatar = true;
+    if (avatarModeCustom) avatarModeCustom.checked = true;
+    modeCardCustom.classList.add('selected');
+    if (modeCardGeneral) modeCardGeneral.classList.remove('selected');
+    if (settingsAvatarSourceBadge) settingsAvatarSourceBadge.textContent = 'Custom Creator Avatar';
+    if (settingsAvatarPreviewImg) settingsAvatarPreviewImg.src = customReelsAvatar || generalProfilePic || 'favicon.png';
+  });
+}
+
+// Custom Avatar File Picker
+if (changeReelsAvatarBtn && customReelsAvatarInput) {
+  changeReelsAvatarBtn.addEventListener('click', () => customReelsAvatarInput.click());
+
+  customReelsAvatarInput.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image size must be under 5MB');
+      return;
+    }
+
+    if (avatarUploadStatus) avatarUploadStatus.textContent = 'Optimizing avatar...';
+
+    // Instant local preview
+    const previewUrl = URL.createObjectURL(file);
+    if (settingsAvatarPreviewImg) settingsAvatarPreviewImg.src = previewUrl;
+
+    try {
+      if (avatarUploadStatus) avatarUploadStatus.textContent = 'Uploading to Cloud Storage...';
+      const cldRes = await uploadImageToCloudinary(file, { folder: 'nexchat-avatars' });
+      const uploadedUrl = cldRes?.secure_url || cldRes?.url;
+
+      if (uploadedUrl) {
+        customReelsAvatar = uploadedUrl;
+      } else {
+        // Fallback to base64 data url
+        customReelsAvatar = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (ev) => resolve(ev.target.result);
+          reader.readAsDataURL(file);
+        });
+      }
+
+      useCustomReelsAvatar = true;
+      if (avatarModeCustom) avatarModeCustom.checked = true;
+      if (modeCardCustom) modeCardCustom.classList.add('selected');
+      if (modeCardGeneral) modeCardGeneral.classList.remove('selected');
+      if (settingsAvatarSourceBadge) settingsAvatarSourceBadge.textContent = 'Custom Creator Avatar';
+      if (settingsAvatarPreviewImg) settingsAvatarPreviewImg.src = customReelsAvatar;
+      if (avatarUploadStatus) avatarUploadStatus.textContent = 'Custom avatar ready! Click Save to apply.';
+      showToast('Avatar uploaded successfully!');
+    } catch (err) {
+      console.warn('[REELS] Avatar upload fallback:', err);
+      // Fallback to data URL
+      const dataUrl = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (ev) => resolve(ev.target.result);
+        reader.readAsDataURL(file);
+      });
+      customReelsAvatar = dataUrl;
+      useCustomReelsAvatar = true;
+      if (settingsAvatarPreviewImg) settingsAvatarPreviewImg.src = customReelsAvatar;
+      if (avatarUploadStatus) avatarUploadStatus.textContent = 'Avatar cached. Click Save to apply.';
+    }
+  });
+}
+
+// Revert to General Avatar
+if (syncGeneralAvatarBtn) {
+  syncGeneralAvatarBtn.addEventListener('click', () => {
+    useCustomReelsAvatar = false;
+    if (avatarModeGeneral) avatarModeGeneral.checked = true;
+    if (modeCardGeneral) modeCardGeneral.classList.add('selected');
+    if (modeCardCustom) modeCardCustom.classList.remove('selected');
+    if (settingsAvatarSourceBadge) settingsAvatarSourceBadge.textContent = 'General Profile';
+    if (settingsAvatarPreviewImg) settingsAvatarPreviewImg.src = generalProfilePic || 'favicon.png';
+    if (avatarUploadStatus) avatarUploadStatus.textContent = 'Reverted to general profile photo.';
+    showToast('Reverted to primary profile picture');
+  });
+}
+
+// Save Creator Profile Settings
+if (saveCreatorProfileSettingsBtn) {
+  saveCreatorProfileSettingsBtn.addEventListener('click', async () => {
+    const isCustomMode = avatarModeCustom ? avatarModeCustom.checked : useCustomReelsAvatar;
+    useCustomReelsAvatar = isCustomMode;
+
+    const newCreatorName = settingCreatorName?.value.trim() || myUsername;
+    const newCreatorBio = settingCreatorBio?.value.trim() || '';
+
+    myCreatorName = newCreatorName;
+    myCreatorBio = newCreatorBio;
+    myUsername = newCreatorName;
+
+    if (useCustomReelsAvatar && customReelsAvatar) {
+      myProfilePic = customReelsAvatar;
+    } else {
+      myProfilePic = generalProfilePic || 'favicon.png';
+    }
+
+    saveCreatorProfileSettingsBtn.disabled = true;
+    saveCreatorProfileSettingsBtn.innerHTML = '<div class="cyber-spinner" style="width:14px;height:14px;border-width:2px;display:inline-block;"></div> Saving...';
+
+    try {
+      if (myUID) {
+        await setDoc(doc(db, 'users', myUID), {
+          useCustomReelsAvatar,
+          reelsAvatar: customReelsAvatar || '',
+          reelsCreatorName: myCreatorName,
+          reelsCreatorBio: myCreatorBio,
+        }, { merge: true });
+      }
+
+      showToast('Creator Profile & Avatar saved!');
+      closeReelsSettings();
+
+      // If active profile drawer is open for me, update its view
+      if (activeProfileAuthor === myUsername || (myCreatorName && activeProfileAuthor === myCreatorName)) {
+        openCreatorProfile(myUsername, myProfilePic);
+      }
+    } catch (err) {
+      console.error('[REELS] Save creator profile error:', err);
+      showToast('Profile updated locally.');
+      closeReelsSettings();
+    } finally {
+      saveCreatorProfileSettingsBtn.disabled = false;
+      saveCreatorProfileSettingsBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Creator Profile';
+    }
+  });
+}
+
+// Clear Stream Cache & History
+if (clearReelsCacheBtn) {
+  clearReelsCacheBtn.addEventListener('click', () => {
+    localStorage.removeItem('nex_reels_cache');
+    localStorage.removeItem('nex_watched_reels');
+    showToast('Stream cache and watch history cleared.');
+  });
+}
 
 // Launch feed on startup
 initReelsFeed();

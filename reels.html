@@ -32,6 +32,9 @@
       <button id="globalSoundToggle" class="reels-sound-pill" title="Toggle Sound">
         <i class="fa-solid fa-volume-xmark"></i>
       </button>
+      <button id="openReelsSettingsBtn" class="reels-settings-pill" title="Reels Settings & Preferences">
+        <i class="fa-solid fa-gear"></i>
+      </button>
       <button id="openUploadModalBtn" class="reels-create-pill-btn" title="Create a Reel">
         <i class="fa-solid fa-plus"></i>
         <span>Create</span>
@@ -272,10 +275,13 @@
           </div>
         </div>
 
-        <!-- Action Buttons: Follow, Message, Next.js link -->
+        <!-- Action Buttons: Follow, Message, Edit Profile, Link -->
         <div class="profile-actions-row">
           <button type="button" id="profileFollowBtn" class="profile-follow-main-btn">
             <i class="fa-solid fa-user-plus"></i> <span>Follow</span>
+          </button>
+          <button type="button" id="editMyReelsProfileBtn" class="profile-edit-main-btn" style="display: none;" title="Edit Creator Profile & Avatar">
+            <i class="fa-solid fa-pen-to-square"></i> <span>Edit Profile</span>
           </button>
           <button type="button" id="profileMessageBtn" class="profile-message-main-btn" title="Message Creator">
             <i class="fa-solid fa-comment-dots"></i> <span>Message</span>
@@ -337,6 +343,196 @@
       <button type="button" id="closeLightboxBtn" class="lightbox-close-btn"><i class="fa-solid fa-xmark"></i></button>
       <img id="lightboxImg" src="" alt="Fullscreen Image">
       <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- Reels Settings & Creator Studio Modal -->
+  <div id="reelsSettingsModal" class="reels-modal" style="display: none;">
+    <div class="reels-modal-card reels-settings-card">
+      <div class="reels-modal-header">
+        <h3><i class="fa-solid fa-sliders text-[#39FF14]"></i> Reels Studio & Settings</h3>
+        <button id="closeReelsSettingsBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Settings Navigation Tabs -->
+      <div class="settings-nav-tabs">
+        <button type="button" class="settings-tab-btn active" data-tab="playback">
+          <i class="fa-solid fa-play"></i> <span>Playback</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="creator">
+          <i class="fa-solid fa-id-badge"></i> <span>Profile & Avatar</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="privacy">
+          <i class="fa-solid fa-shield-halved"></i> <span>Privacy</span>
+        </button>
+      </div>
+
+      <div class="settings-modal-body">
+        <!-- TAB 1: Playback & Streaming -->
+        <div id="settingsTabPlayback" class="settings-tab-content active">
+          <div class="settings-group">
+            <h4 class="settings-group-title">Video Stream Preferences</h4>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Autoplay Next Reel</span>
+                <span class="settings-hint">Automatically advance to the next video when current reel ends</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingAutoScroll">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Default Sound Mode</span>
+                <span class="settings-hint">Start reels unmuted with volume enabled by default</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingDefaultSound">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Double-Tap Heart FX</span>
+                <span class="settings-hint">Trigger floating cyber-heart bursts when double-tapping video</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingDoubleTapLike" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-field-block">
+              <label class="settings-label">Default Playback Quality</label>
+              <div class="quality-selector-pills mt-2">
+                <button type="button" class="settings-quality-pill active" data-quality="auto">Auto FHD (1080p)</button>
+                <button type="button" class="settings-quality-pill" data-quality="4k">Ultra HD (4K)</button>
+                <button type="button" class="settings-quality-pill" data-quality="data-saver">Data Saver (720p)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Creator Profile & Avatar System -->
+        <div id="settingsTabCreator" class="settings-tab-content" style="display: none;">
+          <div class="settings-group">
+            <h4 class="settings-group-title">Reels Avatar & Creator Identity</h4>
+            <p class="settings-group-subtitle">Choose whether to use your general NEXCHAT profile picture or a dedicated avatar for Reels.</p>
+
+            <!-- Avatar Source Selector -->
+            <div class="avatar-mode-cards">
+              <label class="avatar-mode-card" id="modeCardGeneral">
+                <input type="radio" name="reelsAvatarMode" id="avatarModeGeneral" value="general" checked>
+                <div class="mode-card-content">
+                  <div class="mode-icon"><i class="fa-solid fa-user"></i></div>
+                  <div class="mode-text">
+                    <strong>General Profile Picture</strong>
+                    <span>Automatically synced with your primary account</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="avatar-mode-card" id="modeCardCustom">
+                <input type="radio" name="reelsAvatarMode" id="avatarModeCustom" value="custom">
+                <div class="mode-card-content">
+                  <div class="mode-icon"><i class="fa-solid fa-bolt"></i></div>
+                  <div class="mode-text">
+                    <strong>Custom Reels Avatar</strong>
+                    <span>Upload a dedicated avatar for your reels creator persona</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Avatar Preview & Uploader Widget -->
+            <div class="reels-avatar-preview-box">
+              <div class="avatar-display-wrapper">
+                <img id="settingsAvatarPreviewImg" src="favicon.png" alt="Active Reels Avatar" class="settings-avatar-img">
+                <div id="settingsAvatarSourceBadge" class="avatar-source-pill">General Profile</div>
+              </div>
+
+              <div class="avatar-actions-column">
+                <input type="file" id="customReelsAvatarInput" accept="image/*" style="display: none;">
+                <button type="button" id="changeReelsAvatarBtn" class="reels-btn-primary" style="font-size: 13px; padding: 8px 14px;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Custom Avatar
+                </button>
+                <button type="button" id="syncGeneralAvatarBtn" class="reels-btn-secondary" style="font-size: 12px; padding: 6px 12px;">
+                  <i class="fa-solid fa-rotate"></i> Sync General Photo
+                </button>
+                <span class="avatar-upload-status" id="avatarUploadStatus">PNG, JPG, WebP supported (Max 5MB)</span>
+              </div>
+            </div>
+
+            <!-- Creator Name and Bio -->
+            <div class="settings-field-block mt-4">
+              <label for="settingCreatorName" class="settings-label">Creator Display Name</label>
+              <input type="text" id="settingCreatorName" class="reels-input" placeholder="Your creator or stage name" maxlength="30">
+            </div>
+
+            <div class="settings-field-block mt-3">
+              <label for="settingCreatorBio" class="settings-label">Reels Bio / Tagline</label>
+              <textarea id="settingCreatorBio" class="reels-textarea" rows="2" placeholder="Tell your audience about your reels..." maxlength="180"></textarea>
+            </div>
+
+            <div class="settings-action-row mt-4">
+              <button type="button" id="saveCreatorProfileSettingsBtn" class="reels-btn-primary w-full">
+                <i class="fa-solid fa-floppy-disk"></i> Save Creator Profile
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Privacy & Data -->
+        <div id="settingsTabPrivacy" class="settings-tab-content" style="display: none;">
+          <div class="settings-group">
+            <h4 class="settings-group-title">Engagement & Privacy</h4>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Allow Comments on My Reels</span>
+                <span class="settings-hint">Let other viewers post comments on your content</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingAllowComments" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Allow Video Downloads</span>
+                <span class="settings-hint">Permit users to save or share your reels</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingAllowDownloads" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Show View Counts</span>
+                <span class="settings-hint">Display live view statistics on your reels</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingShowViews" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-danger-zone mt-6">
+              <h5 class="text-sm font-semibold text-red-400 mb-2">Storage & Cache</h5>
+              <button type="button" id="clearReelsCacheBtn" class="reels-btn-secondary text-red-400 border-red-500/30 hover:bg-red-500/10">
+                <i class="fa-solid fa-trash-can"></i> Clear Stream Cache & History
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
