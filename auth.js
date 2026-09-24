@@ -1,10 +1,12 @@
-﻿import { auth, db, rtdb } from "./firebase-config.js";
+import { auth, db, rtdb } from "./firebase-config.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   signInWithCredential,
   GoogleAuthProvider,
   setPersistence,
@@ -76,27 +78,11 @@ function validatePassword(password) {
 }
 
 const randomStickers = [
-  'ðŸ˜‡', 'ðŸ˜Š', 'ðŸ˜', 'ðŸ¥°', 'ðŸ˜˜', 'ðŸ˜™', 'ðŸ˜š', 'ðŸ˜—', 'ðŸ¤—', 'ðŸ¤©',
-  'ðŸ˜ƒ', 'ðŸ˜„', 'ðŸ˜', 'ðŸ˜†', 'ðŸ˜…', 'ðŸ˜‚', 'ðŸ¤£', 'â˜ºï¸', 'ðŸ™‚', 'ðŸ¤',
-  'ðŸ‘¼', 'ðŸ’š', 'ðŸ’›', 'ðŸ’œ', 'ðŸ’™', 'â¤ï¸', 'ðŸ§¡', 'ðŸ’', 'ðŸ’–', 'ðŸ’—',
-  'ðŸ‘', 'âœ¨', 'ðŸŒŸ', 'â­', 'ðŸŽ‰', 'ðŸŽŠ', 'ðŸŽˆ', 'ðŸŽ', 'ðŸ†', 'ðŸ¥‡',
-  'ðŸ˜ˆ', 'ðŸ˜ ', 'ðŸ˜¡', 'ðŸ¤¬', 'ðŸ˜¤', 'ðŸ˜’', 'ðŸ™', 'ðŸ˜•', 'ðŸ˜”', 'ðŸ˜ž',
-  'ðŸ˜¢', 'ðŸ˜­', 'ðŸ˜«', 'ðŸ˜©', 'ðŸ¥±', 'ðŸ˜ª', 'ðŸ˜´', 'ðŸ˜¬', 'ðŸ¤¥', 'ðŸ˜³',
-  'ðŸ˜¨', 'ðŸ˜°', 'ðŸ˜¥', 'ðŸ˜“', 'ðŸ¤¤', 'ðŸ˜²', 'ðŸ˜¦', 'ðŸ˜§', 'ðŸ¤¯', 'ðŸ¤ª',
-  'ðŸ’”', 'ðŸ’£', 'âš¡', 'â˜ ï¸', 'ðŸ’€', 'ðŸ”¥', 'â›”', 'ðŸš«', 'âŒ', 'âš ï¸',
-  'ðŸ‘¿', 'ðŸ˜ˆ', 'ðŸ˜¹', 'ðŸ˜¾', 'ðŸ‰', 'ðŸ¦—', 'ðŸ›', 'ðŸ•·ï¸', 'ðŸ¦‚', 'ðŸ¦‡',
-  'ðŸ¦‘', 'ðŸ™', 'ðŸ¦ˆ', 'ðŸ', 'ðŸ¦–', 'ðŸ¦•', 'ðŸ”±', 'âš”ï¸', 'ðŸ’€', 'ðŸ¦´',
-  'ðŸ¤”', 'ðŸ¤¨', 'ðŸ˜', 'ðŸ˜‘', 'ðŸ¤ ', 'ðŸ¥¸', 'ðŸ˜Ž', 'ðŸ¤“', 'ðŸ§', 'ðŸ˜',
-  'ðŸ˜œ', 'ðŸ˜', 'ðŸ˜›', 'ðŸ¤‘', 'ðŸ¤’', 'ðŸ¤•', 'ðŸ¤¢', 'ðŸ¤®', 'ðŸ¤§', 'ðŸ¤¨',
-  'ðŸ¶', 'ðŸ±', 'ðŸ­', 'ðŸ¹', 'ðŸ°', 'ðŸ¦Š', 'ðŸ»', 'ðŸ¼', 'ðŸ¨', 'ðŸ¯',
-  'ðŸ¦', 'ðŸ®', 'ðŸ·', 'ðŸ¸', 'ðŸµ', 'ðŸ™ˆ', 'ðŸ™‰', 'ðŸ™Š', 'ðŸ’', 'ðŸ”',
-  'ðŸ§', 'ðŸ¦', 'ðŸ¤', 'ðŸ¦†', 'ðŸ¦…', 'ðŸ¦‰', 'ðŸ¦‡', 'ðŸº', 'ðŸ—', 'ðŸ´',
-  'ðŸ¦„', 'ðŸ', 'ðŸ›', 'ðŸ¦‹', 'ðŸŒ', 'ðŸž', 'ðŸœ', 'ðŸ¦Ÿ', 'ðŸ¦—', 'ðŸ•·ï¸',
-  'ðŸ‘‹', 'ðŸ‘', 'ðŸ™Œ', 'ðŸ‘', 'ðŸ¤', 'ðŸ¤²', 'ðŸ¤ž', 'ðŸ––', 'ðŸ¤˜', 'ðŸ¤Ÿ',
-  'âœŠ', 'ðŸ‘Š', 'âœŒï¸', 'ðŸ¤ž', 'ðŸ«°', 'ðŸ«±', 'ðŸ«²', 'ðŸ’ª', 'ðŸ¦¿',
-  'â¤ï¸', 'ðŸ§¡', 'ðŸ’›', 'ðŸ’š', 'ðŸ’™', 'ðŸ’œ', 'ðŸ–¤', 'ðŸ¤', 'ðŸ¤Ž', 'ðŸ’”',
-  'ðŸ’•', 'ðŸ’ž', 'ðŸ’“', 'ðŸ’—', 'ðŸ’–', 'ðŸ’˜', 'ðŸ’', 'ðŸ’Ÿ', 'ðŸ’Œ', 'ðŸ’‹',
-  'ðŸ”¥', 'âš¡', 'âœ¨', 'ðŸ’«', 'â­', 'ðŸŒŸ', 'ðŸ’¥', 'ðŸ’¢', 'ðŸ’¯', 'ðŸš€'
+  '⚡', '✨', '🔥', '🚀', '🌟', '💎', '👑', '🎯', '🛡️', '⚔️',
+  '🤖', '👾', '🎮', '🎧', '💻', '🔮', '💫', '🌌', '🪐', '🛸',
+  '🦁', '🐺', '🦊', '🦅', '🐉', '🐯', '🐼', '🦄', '🐬', '🦋',
+  '💚', '💙', '💜', '🧡', '❤️', '🤍', '🖤', '💛', '💖', '⭐',
+  '😎', '🥳', '🤩', '🤠', '😇', '🛸', '🎯', '🏆', '🥇', '⚡'
 ];
 
 function getRandomSticker() {
@@ -105,7 +91,7 @@ function getRandomSticker() {
 
 async function detectIPAndVPN() {
   try {
-    console.log("ðŸ” Detecting IP and VPN...");
+    console.log("🔍 Detecting IP and VPN...");
 
     const response = await fetch('https://ipapi.co/json/', { timeout: 5000 });
     const data = await response.json();
@@ -121,10 +107,10 @@ async function detectIPAndVPN() {
       timezone: data.timezone
     };
 
-    console.log("ðŸ“ IP Info:", ipInfo);
+    console.log("📍 IP Info:", ipInfo);
     return ipInfo;
   } catch (err) {
-    console.warn("âš ï¸ Could not detect IP:", err);
+    console.warn("⚠️ Could not detect IP:", err);
     return null;
   }
 }
@@ -136,7 +122,7 @@ async function checkIPRegistration(ipAddress) {
     const snap = await getDocs(q);
 
     if (snap.docs.length > 0) {
-      console.warn("âš ï¸ IP already registered!");
+      console.warn("⚠️ IP already registered!");
       return snap.docs.map(doc => doc.data().email);
     }
     return null;
@@ -153,6 +139,7 @@ function showResult(msg, isError = false) {
   el.classList.toggle('error', isError);
   el.classList.toggle('success', !isError);
   el.classList.toggle('result-box', Boolean(msg));
+  el.style.display = msg ? 'block' : 'none';
   if (!msg) {
     el.classList.remove('error', 'success', 'result-box');
   }
@@ -344,14 +331,27 @@ function attachResetHandler() {
 function initializePasswordToggles() {
   const toggles = document.querySelectorAll('.password-toggle');
   toggles.forEach(button => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', (e) => {
+      e.preventDefault();
       const targetId = button.dataset.target;
       const input = document.getElementById(targetId);
       if (!input) return;
-      const isVisible = input.type === 'text';
-      input.type = isVisible ? 'password' : 'text';
-      button.textContent = isVisible ? 'Show' : 'Hide';
-      button.setAttribute('aria-label', isVisible ? 'Show password' : 'Hide password');
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+
+      const icon = button.querySelector('i');
+      if (icon) {
+        if (isPassword) {
+          icon.classList.remove('fa-eye');
+          icon.classList.add('fa-eye-slash');
+        } else {
+          icon.classList.remove('fa-eye-slash');
+          icon.classList.add('fa-eye');
+        }
+      } else {
+        button.textContent = isPassword ? 'Hide' : 'Show';
+      }
+      button.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
     });
   });
 }
@@ -407,7 +407,7 @@ if (loginForm) {
 
     const loginRateLimit = checkRateLimit(email, 'login', 5, 900000);
     if (!loginRateLimit.allowed) {
-      showResult(`âŒ ${loginRateLimit.message}`, true);
+      showResult(`❌ ${loginRateLimit.message}`, true);
       return;
     }
 
@@ -416,7 +416,16 @@ if (loginForm) {
     try {
       await setPersistence(auth, browserLocalPersistence);
       const cred = await signInWithEmailAndPassword(auth, email, pass);
-      showResult('âœ… Successfully signed in!');
+      showResult('✅ Successfully signed in!');
+
+      // Update online status in Firestore and RTDB
+      try {
+        const userRef = doc(db, 'users', cred.user.uid);
+        await setDoc(userRef, { online: true, lastLogin: new Date().toISOString() }, { merge: true });
+        await set(ref(rtdb, 'users/' + cred.user.uid + '/online'), true);
+      } catch (statusErr) {
+        console.warn('Status update notice:', statusErr);
+      }
 
       setTimeout(() => {
         hideLoginLoader();
@@ -424,81 +433,185 @@ if (loginForm) {
       }, 700);
     } catch (err) {
       hideLoginLoader();
-      showResult(err.message, true);
+      let errorMsg = err.message || 'Login failed. Please verify your credentials.';
+      if (err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        errorMsg = 'Incorrect email or password. Please try again or reset your password.';
+      } else if (err.code === 'auth/too-many-requests') {
+        errorMsg = 'Too many failed login attempts. Please reset your password or try again later.';
+      }
+      showResult(`❌ ${errorMsg}`, true);
     }
   });
 }
 
-
 onAuthStateChanged(auth, user => {
   if (!user) return;
   const path = location.pathname.toLowerCase();
-  if ((path.endsWith('index.html') || path.includes('login')) && !path.includes('profile') && !path.includes('chat')) {
+  const isAuthPage = path === '' || path === '/' || path.endsWith('/') || path.endsWith('index.html') || path.includes('login.html');
+  if (isAuthPage && !path.includes('profile') && !path.includes('chat') && !path.includes('register') && !path.includes('reset')) {
     location.href = 'chat.html';
   }
 });
 
-function initializeGoogleSignIn() {
-  const container = document.getElementById('googleSignInContainer');
-  if (!container) return;
+let googleSignInInitialized = false;
 
-  container.innerHTML = `
-    <button type="button" id="googleLoginBtn" class="google-btn">
-      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="18" height="18" style="margin-right: 8px;">
-      🔐 Sign in with Google
-    </button>
-  `;
+async function processGoogleUser(user, credentialResult) {
+  showLoginLoader('Setting up workspace...');
 
-  async function handleGoogleSignIn() {
-    showLoginLoader('Connecting with Google...');
+  // Save credential access token if provided
+  try {
+    const credential = GoogleAuthProvider.credentialFromResult(credentialResult);
+    if (credential?.accessToken) {
+      localStorage.setItem('driveAccessToken', credential.accessToken);
+      localStorage.setItem('driveAccessTokenExpiry', String(Date.now() + 55 * 60 * 1000));
+    }
+  } catch (tokenErr) {
+    console.warn('Credential token note:', tokenErr);
+  }
+
+  const userRef = doc(db, 'users', user.uid);
+  const userDoc = await getDoc(userRef);
+
+  if (!userDoc.exists()) {
+    const baseName = (user.displayName || user.email.split('@')[0] || 'User')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .slice(0, 12);
+    const randomNum = Math.floor(100 + Math.random() * 900);
+    const username = `${baseName || 'User'}${randomNum}`;
+    const avatar = user.photoURL || getRandomSticker();
+
+    const userData = {
+      uid: user.uid,
+      email: user.email || '',
+      name: user.displayName || 'Google User',
+      username: username,
+      profilePic: avatar,
+      profilePicUrl: avatar,
+      tokens: 2000,
+      createdAt: new Date().toISOString(),
+      registrationTimestamp: new Date().toISOString(),
+      online: true,
+      lastLogin: new Date().toISOString()
+    };
+
+    await setDoc(userRef, userData, { merge: true });
 
     try {
-      await setPersistence(auth, browserLocalPersistence);
-      const provider = new GoogleAuthProvider();
-      provider.addScope('https://www.googleapis.com/auth/drive.file');
-      provider.setCustomParameters({ prompt: 'select_account' });
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const accessToken = credential?.accessToken;
-      if (accessToken) {
-        localStorage.setItem('driveAccessToken', accessToken);
-        localStorage.setItem('driveAccessTokenExpiry', String(Date.now() + 55 * 60 * 1000));
-      }
+      await set(ref(rtdb, 'users/' + user.uid), userData);
+    } catch (rtdbErr) {
+      console.warn('Realtime Database sync warning:', rtdbErr);
+    }
+  } else {
+    // Existing user: preserve existing profile data, update online and lastLogin
+    await setDoc(userRef, {
+      online: true,
+      lastLogin: new Date().toISOString()
+    }, { merge: true });
 
-      showResult('✅ Google sign-in successful! Redirecting...', false);
-
-      const userRef = doc(db, 'users', user.uid);
-      const userDoc = await getDoc(userRef);
-
-      if (!userDoc.exists()) {
-        await setDoc(userRef, {
-          email: user.email,
-          username: (user.displayName || 'User').split(' ')[0] + Math.floor(Math.random() * 1000),
-          name: user.displayName || 'Google User',
-          profilePic: user.photoURL,
-          tokens: 2000,
-          createdAt: new Date().toISOString(),
-          online: true
-        });
-      }
-
-      setTimeout(() => {
-        hideLoginLoader();
-        location.href = 'chat.html';
-      }, 900);
-    } catch (error) {
-      hideLoginLoader();
-      console.error("Google Sign-in Error:", error);
-      let message = error?.message || 'Google sign-in failed. Please try again.';
-      if (error?.code === 'auth/popup-closed-by-user') {
-        message = 'Google sign-in cancelled. Please try again if you want to sign in with Google.';
-      }
-      showResult(`❌ ${message}`, true);
+    try {
+      await set(ref(rtdb, 'users/' + user.uid + '/online'), true);
+      await set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now());
+    } catch (rtdbErr) {
+      console.warn('RTDB online update note:', rtdbErr);
     }
   }
 
-  document.getElementById('googleLoginBtn').addEventListener('click', handleGoogleSignIn);
+  showResult('✅ Google sign-in successful! Redirecting...', false);
+
+  setTimeout(() => {
+    hideLoginLoader();
+    location.href = 'chat.html';
+  }, 700);
+}
+
+async function handleGoogleSignIn() {
+  showLoginLoader('Connecting with Google...');
+
+  try {
+    await setPersistence(auth, browserLocalPersistence);
+    const provider = new GoogleAuthProvider();
+    // Do NOT add drive.file scope here — standard login only needs profile and email
+    provider.setCustomParameters({ prompt: 'select_account' });
+
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      showLoginLoader('Redirecting to Google...');
+      await signInWithRedirect(auth, provider);
+      return;
+    }
+
+    try {
+      const result = await signInWithPopup(auth, provider);
+      await processGoogleUser(result.user, result);
+    } catch (popupErr) {
+      console.warn('Popup attempt notice:', popupErr.code);
+      if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/cancelled-popup-request') {
+        showLoginLoader('Redirecting to Google sign in...');
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      throw popupErr;
+    }
+  } catch (error) {
+    hideLoginLoader();
+    console.error("Google Sign-in Error:", error);
+    let message = error?.message || 'Google sign-in failed. Please try again.';
+    if (error?.code === 'auth/popup-closed-by-user') {
+      message = 'Google sign-in was cancelled.';
+    } else if (error?.code === 'auth/account-exists-with-different-credential') {
+      message = 'An account already exists with this email using a different sign-in method.';
+    }
+    showResult(`❌ ${message}`, true);
+  }
+}
+
+async function checkRedirectAuth() {
+  try {
+    const result = await getRedirectResult(auth);
+    if (result && result.user) {
+      console.log('✅ Google redirect auth successful for:', result.user.uid);
+      await processGoogleUser(result.user, result);
+    }
+  } catch (err) {
+    console.error('Redirect sign-in error:', err);
+    hideLoginLoader();
+    if (err.code !== 'auth/null-user') {
+      showResult(`❌ ${err.message || 'Google sign-in failed'}`, true);
+    }
+  }
+}
+
+function initializeGoogleSignIn() {
+  if (googleSignInInitialized) return;
+  googleSignInInitialized = true;
+
+  // Handle redirect return on page load
+  checkRedirectAuth();
+
+  const container = document.getElementById('googleSignInContainer');
+  let btn = document.getElementById('googleLoginBtn');
+
+  // If container exists but button is not yet inside (e.g. on register.html)
+  if (!btn && container) {
+    container.innerHTML = `
+      <button type="button" id="googleLoginBtn" class="google-auth-btn">
+        <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.97 0 12s.45 3.84 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        <span class="google-btn-text">Continue with Google</span>
+      </button>
+    `;
+    btn = document.getElementById('googleLoginBtn');
+  }
+
+  if (btn) {
+    btn.addEventListener('click', handleGoogleSignIn);
+  }
+
   const googleConnectLink = document.getElementById('googleConnectLink');
   if (googleConnectLink) {
     googleConnectLink.addEventListener('click', (e) => {
@@ -513,6 +626,3 @@ if (document.readyState === 'loading') {
 } else {
   initializeGoogleSignIn();
 }
-
-
-

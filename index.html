@@ -3,82 +3,136 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#00ff66">
+  <meta name="theme-color" content="#060913">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="format-detection" content="telephone=no">
-  <title> NEXCHAT Login </title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <title>NEXCHAT — Neural Cyber Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="login.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="logo.jpg">
   <link rel="apple-touch-icon" href="logo.jpg">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
-<div class="login-container">
-  <a href="landing.html" class="landing-preview-pill" style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: rgba(0, 240, 118, 0.08); border: 1px solid rgba(0, 240, 118, 0.3); border-radius: 9999px; color: #00ff88; font-size: 11.5px; font-weight: 600; text-decoration: none; margin-bottom: 16px; transition: all 0.2s;">
-    <i class="fa-solid fa-sparkles"></i> Explore Video Showcase & Features →
-  </a>
-  <img src="logo.jpg" class="logo" alt="NEXCHAT Logo">
-  <h2>WELCOME TO NEXCHAT</h2>
-  <p class="subtitle">Sign in fast and securely. Use email, password, or connect with Google for instant access.</p>
+<div class="ambient-glow ambient-glow-1"></div>
+<div class="ambient-glow ambient-glow-2"></div>
 
-
-  <form id="loginForm" aria-describedby="result" autocomplete="on">
-    <input type="email" id="loginEmail" placeholder="Email" autocomplete="email" required>
-    <div class="password-field">
-      <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
-      <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Show password">Show</button>
+<div class="login-wrapper">
+  <main class="login-container">
+    <div class="brand-pill">
+      <span class="status-dot"></span>
+      <span>NEX_AUTH v2.5 • QUANTUM SECURED</span>
     </div>
-    <button type="submit" class="auth-btn">Login</button>
-  </form>
 
-  <p class="auth-note">Need a faster and password-free option? Google sign-in gets you into NEXCHAT instantly.</p>
+    <div class="login-header">
+      <div class="logo-wrapper">
+        <img src="logo.jpg" class="brand-logo" alt="NEXCHAT Logo">
+      </div>
+      <h1 class="brand-title">NEXCHAT</h1>
+      <p class="brand-subtitle">Secure neural messaging, calls & decentralized cloud vaults.</p>
+    </div>
 
-  <div id="loginLoaderOverlay" class="login-loader-overlay" aria-hidden="true">
-    <div class="login-loader-card">
-      <div class="loader-icon"></div>
-      <p class="loader-title">Preparing secure login...</p>
-      <p class="loader-text">Authenticating your account and loading your workspace.</p>
-      <div class="loader-progress-bar">
-        <div class="loader-progress-fill"></div>
+    <form id="loginForm" aria-describedby="result" autocomplete="on">
+      <div class="input-group">
+        <label for="loginEmail" class="sr-only">Email address</label>
+        <div class="input-field-wrapper">
+          <i class="fa-solid fa-envelope input-icon" aria-hidden="true"></i>
+          <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" required>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="loginPassword" class="sr-only">Password</label>
+        <div class="input-field-wrapper password-field">
+          <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
+          <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
+          <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Toggle password visibility" tabindex="0">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-row-utility">
+        <label class="remember-label">
+          <input type="checkbox" id="rememberMe" checked>
+          <span class="custom-checkbox"><i class="fa-solid fa-check"></i></span>
+          <span>Remember me</span>
+        </label>
+        <a href="reset.html" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="auth-btn" id="loginSubmitBtn">
+        <span class="btn-text">Sign In</span>
+        <i class="fa-solid fa-arrow-right btn-icon"></i>
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>OR CONTINUE WITH</span>
+    </div>
+
+    <div class="google-signin-block">
+      <div id="googleSignInContainer" class="google-signin-container">
+        <button type="button" id="googleLoginBtn" class="google-auth-btn">
+          <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.97 0 12s.45 3.84 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span class="google-btn-text">Continue with Google</span>
+        </button>
+      </div>
+      <p id="googleConnectLink" class="google-hint">One-click secure Google authentication</p>
+    </div>
+
+    <div class="register-prompt">
+      <span>Don't have an account?</span>
+      <a href="register.html" class="register-link">Create Account <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <nav class="quick-utilities-bar" aria-label="Alternative access methods">
+      <a href="link-device.html" class="quick-chip" title="Log in via QR code scanner">
+        <i class="fa-solid fa-qrcode"></i>
+        <span>Linked Device</span>
+      </a>
+      <a href="terminal.html" class="quick-chip" title="Open Hacker Terminal">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Terminal</span>
+      </a>
+      <a href="landing.html" class="quick-chip" title="Explore video showcase & features">
+        <i class="fa-solid fa-sparkles"></i>
+        <span>Showcase</span>
+      </a>
+    </nav>
+
+    <div id="result" class="result-box" role="status" aria-live="polite"></div>
+
+    <div id="loginLoaderOverlay" class="login-loader-overlay" aria-hidden="true">
+      <div class="login-loader-card">
+        <div class="loader-spinner-wrapper">
+          <div class="loader-icon"></div>
+          <div class="loader-pulse-ring"></div>
+        </div>
+        <p class="loader-title">Authenticating...</p>
+        <p class="loader-text">Securing session and decrypting neural workspace.</p>
+        <div class="loader-progress-bar">
+          <div class="loader-progress-fill"></div>
+        </div>
       </div>
     </div>
-  </div>
-
-  <div class="divider">
-    <span>OR</span>
-  </div>
-  <div class="google-signin-block">
-    <div id="googleSignInContainer" class="google-signin-container"></div>
-    <p id="googleConnectLink" class="google-hint">Connect your Google account to NEXCHAT</p>
-  </div>
-
-  <button type="button" class="page-action-btn" onclick="location.href='terminal.html'" style="width: 100%; margin-top: 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(135deg, #00FF88, #00D4FF); color: #050811; font-weight: 800; border: none; box-shadow: 0 4px 15px rgba(0, 255, 136, 0.35);">
-    <i class="fa-solid fa-terminal"></i> Open NEXCHAT Hacker Terminal App
-  </button>
-
-  <button type="button" class="page-action-btn secondary" onclick="location.href='link-device.html'" style="width: 100%; margin-top: 6px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 8px; border-color: rgba(0, 255, 102, 0.4); color: #00ff66;">
-    <i class="fa-solid fa-qrcode"></i> Log In with Linked Device
-  </button>
-
-  <div class="page-action-group">
-    <button type="button" class="page-action-btn" onclick="location.href='register.html'"><i class="fa-solid fa-user-plus"></i> Register</button>
-    <button type="button" class="page-action-btn secondary" onclick="location.href='reset.html'"><i class="fa-solid fa-key"></i> Forgot Password?</button>
-  </div>
-
-  <div id="result" class="result-box" role="status" aria-live="polite"></div>
+  </main>
 </div>
 
 <footer class="app-footer">
   <p>CREATED BY <span class="dev-name">NEXO-TECH</span> | POWERED BY <span class="dev-team">NEXCHAT_DEV TEAMS</span></p>
 </footer>
-
-
 
 <script type="module" src="app-prompt.js"></script>
 <script type="module" src="pwa-install.js"></script>
