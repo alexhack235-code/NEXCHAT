@@ -48,6 +48,14 @@ export const CLOUDINARY_VAULT_POOL = [
     folder: 'nexchat-media',
     active: true,
   },
+  {
+    id: 6,
+    name: 'Cloudinary Vault 6 (NEXVAULT6 - Active)',
+    cloudName: 'igo9ryhz',
+    uploadPreset: 'NEXVAULT6',
+    folder: 'nexchat-media',
+    active: true,
+  },
 ];
 
 /**
