@@ -3359,3 +3359,591 @@ html, body {
   gap: 8px;
   flex-wrap: wrap;
 }
+
+/* ==========================================================================
+   WHATSAPP ANDROID DARK STATUS SECTION (100% SPEC REWRITE)
+   ========================================================================== */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+.nex-status-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background-color: #0B141A;
+  color: #E9EDEF;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-y: auto;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Top AppBar: Height 60px, bg #202C33, only "Status" h2 19px #E9EDEF font-bold px-4 py-3 */
+.status-top-appbar {
+  height: 60px;
+  min-height: 60px;
+  background-color: #202C33;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.status-appbar-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #E9EDEF;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.status-appbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-icon-btn {
+  background: none;
+  border: none;
+  color: #8696A0;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.status-icon-btn:hover {
+  color: #25D366;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Status Horizontal List Container: flex gap-3 overflow-x-auto scrollbar-hide px-3 py-4 bg-[#111B21] */
+.status-horizontal-list {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 16px 12px;
+  background-color: #111B21;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.status-horizontal-items {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* Items: 64px circles */
+.status-circle-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 72px;
+  flex-shrink: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 1. My Status */
+.my-status-item .status-avatar-wrapper {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  position: relative;
+  transition: transform 0.15s ease;
+}
+
+.my-status-item.has-status .status-avatar-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  padding: 2.5px;
+  background-color: #25D366;
+  box-sizing: border-box;
+}
+
+.status-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.my-status-item.has-status .status-avatar-img {
+  border: 3px solid #111B21;
+}
+
+/* + Badge: absolute bottom-[20px] right-[8px] w-[22px] h-[22px] bg-[#25D366] rounded-full flex items-center justify-center border-[3px] border-[#111B21] -> "+" white 14px bold */
+.status-plus-badge {
+  position: absolute;
+  bottom: 20px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  background-color: #25D366;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #111B21;
+  color: #FFFFFF;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease;
+}
+
+.status-plus-badge:hover {
+  transform: scale(1.1);
+}
+
+.status-item-label {
+  font-size: 12.5px;
+  color: #E9EDEF;
+  margin-top: 4px;
+  width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 400;
+}
+
+/* 2. Other Statuses */
+.status-ring-container {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  padding: 2.5px;
+  box-sizing: border-box;
+  transition: transform 0.15s ease;
+}
+
+.status-ring-container.unread {
+  background-color: #25D366;
+}
+
+.status-ring-container.viewed {
+  background-color: #8696A0;
+}
+
+.status-ring-container .status-inner-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 3px solid #111B21;
+  object-fit: cover;
+  display: block;
+}
+
+.status-circle-item:active {
+  transform: scale(0.95);
+}
+
+/* Recent & Viewed Section */
+.status-updates-body {
+  flex: 1;
+  padding: 16px;
+  background-color: #0B141A;
+}
+
+.status-section-header {
+  font-size: 13px;
+  font-weight: 600;
+  color: #8696A0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 0;
+}
+
+.status-vertical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-row-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 6px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.status-row-item:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.status-row-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  padding: 2.5px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.status-row-avatar.unread {
+  background-color: #25D366;
+}
+
+.status-row-avatar.viewed {
+  background-color: #8696A0;
+}
+
+.status-row-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2.5px solid #0B141A;
+  object-fit: cover;
+}
+
+.status-row-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.status-row-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #E9EDEF;
+  margin: 0 0 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-row-time {
+  font-size: 13px;
+  color: #8696A0;
+  margin: 0;
+}
+
+/* Floating Action Buttons */
+.status-fab-container {
+  position: fixed;
+  bottom: 84px;
+  right: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 30;
+}
+
+.status-fab-mini {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #202C33;
+  color: #8696A0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.status-fab-mini:hover {
+  color: #E9EDEF;
+  transform: scale(1.05);
+}
+
+.status-fab-main {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  background-color: #25D366;
+  color: #0B141A;
+  border: none;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.status-fab-main:hover {
+  filter: brightness(1.08);
+  transform: scale(1.04);
+}
+
+/* ==========================================================================
+   STATUS VIEWER FULL-SCREEN MODAL
+   fixed inset-0 z-50 bg-black
+   ========================================================================== */
+.status-viewer-modal {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #000000;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Progress bars on top */
+.status-viewer-progress-container {
+  display: flex;
+  gap: 6px;
+  padding: 12px 10px 4px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 20;
+}
+
+.status-progress-segment {
+  height: 2.5px;
+  flex: 1;
+  background-color: rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.status-progress-fill {
+  height: 100%;
+  background-color: #FFFFFF;
+  width: 0%;
+  transition: width 0.08s linear;
+}
+
+/* Top Header */
+.status-viewer-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  z-index: 20;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.status-viewer-user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-viewer-back-btn,
+.status-viewer-close-btn {
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-viewer-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  object-fit: cover;
+}
+
+.status-viewer-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-viewer-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #E9EDEF;
+  line-height: 1.2;
+}
+
+.status-viewer-time {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.2;
+}
+
+/* Center Media Stage */
+.status-viewer-media-stage {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.status-tap-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 15;
+  cursor: pointer;
+}
+
+.status-tap-zone.left-zone {
+  left: 0;
+  width: 30%;
+}
+
+.status-tap-zone.right-zone {
+  right: 0;
+  width: 70%;
+}
+
+.status-viewer-media-stage img,
+.status-viewer-media-stage video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.status-viewer-text-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-sizing: border-box;
+  text-align: center;
+  color: #FFFFFF;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.5;
+  background: #005C4B;
+}
+
+/* Bottom Bar */
+.status-viewer-bottom-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px 20px 16px;
+  z-index: 20;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5), transparent);
+}
+
+.status-viewer-caption-card {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 12px 16px;
+  text-align: center;
+  max-width: 580px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.status-viewer-caption-text {
+  font-size: 14.5px;
+  color: #E9EDEF;
+  line-height: 1.5;
+  margin: 0 0 6px 0;
+  font-weight: 500;
+}
+
+.status-viewer-details {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #8696A0;
+}
+
+.status-bullet {
+  color: #8696A0;
+}
+
+.status-expires-text {
+  color: #25D366;
+  font-weight: 600;
+}
+
+.status-viewer-reply-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 580px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.status-reply-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 10px 16px;
+  color: #E9EDEF;
+  font-size: 14px;
+  outline: none;
+}
+
+.status-reply-input:focus {
+  border-color: #25D366;
+}
+
+.status-reply-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #25D366;
+  color: #0B141A;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.status-reply-btn:active {
+  transform: scale(0.92);
+}

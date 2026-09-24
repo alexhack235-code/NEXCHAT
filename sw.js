@@ -100,7 +100,7 @@ self.addEventListener('push', (event) => {
   console.log('Push notification received:', event);
   
   let notificationData = {
-    title: 'â˜„ï¸ NEXCHAT',
+    title: ' NEXCHAT',
     body: 'You have a new message',
     icon: './logo.jpg',
     badge: './logo.jpg',

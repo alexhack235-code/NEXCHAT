@@ -291,12 +291,12 @@ export function highlightMentions(text, mentionedUserIds = [], currentUid = '') 
  */
 function getRoleEmoji(role) {
   const emojis = {
-    creator: '👑',
-    admin: '⚡',
-    moderator: '🛡️',
-    member: '👤'
+    creator: '',
+    admin: '',
+    moderator: '',
+    member: ''
   };
-  return emojis[role] || '👤';
+  return emojis[role] || '';
 }
 
 /**

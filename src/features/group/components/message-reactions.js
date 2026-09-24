@@ -1,10 +1,10 @@
 /**
  * MessageReactions - Emoji reaction picker and display
- * Double-tap for quick ❤️, long-press for picker tray.
+ * Double-tap for quick , long-press for picker tray.
  * Stacked pills below message showing emoji + count.
  */
 
-export const QUICK_REACTIONS = ['❤️', '👍', '😂', '😮', '😢', '🔥'];
+export const QUICK_REACTIONS = ['', '', '', '', '', ''];
 
 let currentPicker = null;
 

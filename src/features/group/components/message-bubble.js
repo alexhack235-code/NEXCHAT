@@ -209,7 +209,7 @@ export function renderMessageBubble(message, container, options) {
       } else {
         const doc = document.createElement('div');
         doc.className = 'nex-attachment-doc';
-        doc.innerHTML = `<span>📎 ${message.attachment.fileName || 'Document'}</span>`;
+        doc.innerHTML = `<span> ${message.attachment.fileName || 'Document'}</span>`;
         attDiv.appendChild(doc);
       }
       bubble.appendChild(attDiv);
@@ -244,9 +244,9 @@ export function renderMessageBubble(message, container, options) {
       const tickSpan = document.createElement('span');
       tickSpan.className = 'nex-msg-tick';
       
-      let tickIcon = '✓'; // Sent
+      let tickIcon = ''; // Sent
       if (message.readBy && message.readBy.length > 0) {
-        tickIcon = '✓✓'; // Read by at least one
+        tickIcon = ''; // Read by at least one
         if (message.readBy.length >= options.totalMembers - 1) {
           tickSpan.classList.add('read-all'); // Read by all
         }
@@ -288,7 +288,7 @@ export function renderMessageBubble(message, container, options) {
     if (message.expiresAt) {
       const expireDiv = document.createElement('div');
       expireDiv.className = 'nex-msg-expires';
-      expireDiv.textContent = '⏳ Disappearing message';
+      expireDiv.textContent = ' Disappearing message';
       contentArea.appendChild(expireDiv);
     }
 

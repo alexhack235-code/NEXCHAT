@@ -18,7 +18,7 @@ export function attachSwipeToReply(element, message, onReply) {
   const isSent = element.classList.contains('nex-msg-sent');
   const icon = document.createElement('div');
   icon.className = 'nex-reply-icon';
-  icon.innerHTML = '↩️';
+  icon.innerHTML = '';
   icon.style.position = 'absolute';
   icon.style.top = '50%';
   icon.style.transform = 'translateY(-50%) scale(0)';
@@ -118,7 +118,7 @@ export function showReplyPreview(message, senderName, onCancel) {
     }
   }
 
-  const text = message.text || (message.type === 'image' ? '🖼️ Image' : 'Message');
+  const text = message.text || (message.type === 'image' ? ' Image' : 'Message');
   const truncatedText = text.length > 50 ? text.substring(0, 50) + '...' : text;
 
   previewEl.innerHTML = `
@@ -200,7 +200,7 @@ export function createQuotedBlock(replyTo, onClick) {
 export function getReplyPayload(message) {
   if (!message) return null;
   
-  const text = message.text || (message.type === 'image' ? '🖼️ Image' : '');
+  const text = message.text || (message.type === 'image' ? ' Image' : '');
   const truncated = text.length > 200 ? text.substring(0, 197) + '...' : text;
   
   return {

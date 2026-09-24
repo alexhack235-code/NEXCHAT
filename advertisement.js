@@ -26,14 +26,14 @@ const DURATION_PLANS = {
 
 // Category Emojis Map
 const CATEGORY_MAP = {
-  'electronics': { emoji: '📱', label: 'Electronics' },
-  'clothing': { emoji: '👕', label: 'Fashion' },
-  'gaming': { emoji: '🎮', label: 'Gaming' },
-  'services': { emoji: '🛠️', label: 'Services' },
-  'books': { emoji: '📚', label: 'Books' },
-  'food': { emoji: '🍔', label: 'Food' },
-  'furniture': { emoji: '🪑', label: 'Home' },
-  'other': { emoji: '📦', label: 'Other' }
+  'electronics': { icon: 'fa-mobile-screen', label: 'Electronics' },
+  'clothing': { icon: 'fa-shirt', label: 'Fashion' },
+  'gaming': { icon: 'fa-gamepad', label: 'Gaming' },
+  'services': { icon: 'fa-wrench', label: 'Services' },
+  'books': { icon: 'fa-book', label: 'Books' },
+  'food': { icon: 'fa-utensils', label: 'Food' },
+  'furniture': { icon: 'fa-couch', label: 'Home' },
+  'other': { icon: 'fa-box', label: 'Other' }
 };
 
 // ============================================================
@@ -241,12 +241,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (isVideo) {
         previewContainer.innerHTML = `
           <video src="${objectUrl}" style="width:100%; max-height:240px; object-fit:cover;" controls autoplay muted playsinline></video>
-          <button type="button" class="remove-image-btn" id="removeImageBtn" title="Remove Media">✕</button>
+          <button type="button" class="remove-image-btn" id="removeImageBtn" title="Remove Media"></button>
         `;
       } else {
         previewContainer.innerHTML = `
           <img src="${objectUrl}" style="width:100%; max-height:240px; object-fit:cover;" alt="Preview">
-          <button type="button" class="remove-image-btn" id="removeImageBtn" title="Remove Media">✕</button>
+          <button type="button" class="remove-image-btn" id="removeImageBtn" title="Remove Media"></button>
         `;
       }
 
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
       previewContainer.style.display = 'none';
       previewContainer.innerHTML = `
         <img id="previewImg" src="" alt="Preview">
-        <button type="button" class="remove-image-btn" id="removeImageBtn" title="Remove Media">✕</button>
+        <button type="button" class="remove-image-btn" id="removeImageBtn" title="Remove Media"></button>
       `;
     }
     if (uploadArea) uploadArea.style.display = 'block';
@@ -453,7 +453,7 @@ function displayAds(ads) {
     const hours = Math.max(0, Math.ceil((exp - new Date()) / 3600000));
     const imageUrl = ad.imageURL || 'logo.jpg';
     const isVideo = ad.mediaType === 'video' || imageUrl.includes('.mp4');
-    const catInfo = CATEGORY_MAP[ad.productCategory] || { emoji: '📦', label: ad.productCategory || 'Other' };
+    const catInfo = CATEGORY_MAP[ad.productCategory] || { emoji: '', label: ad.productCategory || 'Other' };
 
     const mediaHtml = isVideo
       ? `<video src="${imageUrl}" class="ad-card-image" autoplay muted loop playsinline></video>`
@@ -463,7 +463,7 @@ function displayAds(ads) {
       <div class="ad-card" onclick="window.viewAdDetail('${ad.id}')">
         <div class="ad-card-media-wrap">
           ${mediaHtml}
-          <div class="ad-card-category-badge">${catInfo.emoji} ${catInfo.label}</div>
+          <div class="ad-card-category-badge"><i class="fa-solid ${catInfo.icon || 'fa-box'}"></i> ${catInfo.label}</div>
           <div class="ad-card-expiry-badge"><i class="fa-regular fa-clock"></i> ${hours}h</div>
         </div>
         <div class="ad-card-content">
@@ -522,7 +522,7 @@ async function loadUserAds() {
       const hours = Math.max(0, Math.ceil((exp - new Date()) / 3600000));
       const imageUrl = ad.imageURL || 'logo.jpg';
       const isVideo = ad.mediaType === 'video' || imageUrl.includes('.mp4');
-      const catInfo = CATEGORY_MAP[ad.productCategory] || { emoji: '📦', label: ad.productCategory || 'Other' };
+      const catInfo = CATEGORY_MAP[ad.productCategory] || { emoji: '', label: ad.productCategory || 'Other' };
 
       const mediaHtml = isVideo
         ? `<video src="${imageUrl}" class="ad-card-image" autoplay muted loop playsinline></video>`
@@ -532,7 +532,7 @@ async function loadUserAds() {
         <div class="ad-card ${expired ? 'expired' : ''}">
           <div class="ad-card-media-wrap" onclick="window.viewAdDetail('${ad.id}')">
             ${mediaHtml}
-            <div class="ad-card-category-badge">${catInfo.emoji} ${catInfo.label}</div>
+            <div class="ad-card-category-badge"><i class="fa-solid ${catInfo.icon || 'fa-box'}"></i> ${catInfo.label}</div>
             <div class="ad-card-expiry-badge">
               ${expired ? '<i class="fa-solid fa-ban"></i> EXPIRED' : `<i class="fa-regular fa-clock"></i> ${hours}h`}
             </div>
@@ -569,17 +569,17 @@ function viewAdDetail(adId) {
   const detailImgContainer = document.getElementById('detailImageContainer');
   if (detailImgContainer) {
     const isVideo = currentDetailAd.mediaType === 'video' || (currentDetailAd.imageURL && currentDetailAd.imageURL.includes('.mp4'));
-    const catInfo = CATEGORY_MAP[currentDetailAd.productCategory] || { emoji: '📦', label: currentDetailAd.productCategory || 'Other' };
+    const catInfo = CATEGORY_MAP[currentDetailAd.productCategory] || { emoji: '', label: currentDetailAd.productCategory || 'Other' };
     
     if (isVideo) {
       detailImgContainer.innerHTML = `
         <video src="${currentDetailAd.imageURL}" style="width:100%; max-height:380px; object-fit:cover;" controls autoplay playsinline></video>
-        <div class="detail-category-badge">${catInfo.emoji} ${catInfo.label}</div>
+        <div class="detail-category-badge"><i class="fa-solid ${catInfo.icon || 'fa-box'}"></i> ${catInfo.label}</div>
       `;
     } else {
       detailImgContainer.innerHTML = `
         <img src="${currentDetailAd.imageURL || 'logo.jpg'}" id="detailImage" alt="${escapeHtml(currentDetailAd.productName)}" onerror="this.onerror=null;this.src='logo.jpg';">
-        <div class="detail-category-badge">${catInfo.emoji} ${catInfo.label}</div>
+        <div class="detail-category-badge"><i class="fa-solid ${catInfo.icon || 'fa-box'}"></i> ${catInfo.label}</div>
       `;
     }
   }
@@ -980,4 +980,4 @@ window.deleteAd = deleteAd;
 window.updateCartItemQuantity = updateCartItemQuantity;
 window.removeFromCart = removeFromCart;
 
-console.log('✅ NEXCHAT Marketplace Initialized');
+console.log(' NEXCHAT Marketplace Initialized');

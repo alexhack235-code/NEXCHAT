@@ -119,5 +119,4 @@ process.on('SIGINT', () => {
     server.close(() => {
         process.exit(0);
     });
-});</content>
-<parameter name="filePath">c:\Users\Baha\Desktop\NEXCHAT\linode-terminal-server.js
+});

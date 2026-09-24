@@ -52,7 +52,7 @@ export function updatePinnedBar(element, pinnedMessages, currentIndex = 0, onNav
   element.dataset.index = safeIndex.toString();
 
   const iconContainer = document.createElement('div');
-  iconContainer.innerHTML = '📌';
+  iconContainer.innerHTML = '';
   iconContainer.style.marginRight = '12px';
   iconContainer.style.fontSize = '18px';
 
@@ -84,7 +84,7 @@ export function updatePinnedBar(element, pinnedMessages, currentIndex = 0, onNav
   }
 
   const text = document.createElement('div');
-  const msgText = msg.text || (msg.type === 'image' ? '🖼️ Image' : 'Message');
+  const msgText = msg.text || (msg.type === 'image' ? ' Image' : 'Message');
   text.textContent = msgText.length > 60 ? msgText.substring(0, 57) + '...' : msgText;
   text.style.color = '#fff';
   text.style.fontSize = '14px';

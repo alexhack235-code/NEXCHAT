@@ -580,11 +580,11 @@ function resetStreamsToInitial() {
       <i class="fa-solid fa-lock"></i> Messages end-to-end encrypted. QKD-4096 verified.
     </div>
     <div class="mock-bubble received">
-      <div class="bubble-text">Alex, are the quantum relays active? ⚡</div>
+      <div class="bubble-text">Alex, are the quantum relays active? </div>
       <div class="bubble-meta">10:44 PM</div>
     </div>
     <div class="mock-bubble sent">
-      <div class="bubble-text">Online now. Direct WebRTC tunnel established! 🛰️</div>
+      <div class="bubble-text">Online now. Direct WebRTC tunnel established! </div>
       <div class="bubble-meta">10:44 PM <i class="fa-solid fa-check-double read-ticks"></i></div>
     </div>
   `;
@@ -594,11 +594,11 @@ function resetStreamsToInitial() {
       <i class="fa-solid fa-lock"></i> Messages end-to-end encrypted. QKD-4096 verified.
     </div>
     <div class="mock-bubble sent">
-      <div class="bubble-text">Alex, are the quantum relays active? ⚡</div>
+      <div class="bubble-text">Alex, are the quantum relays active? </div>
       <div class="bubble-meta">10:44 PM <i class="fa-solid fa-check-double read-ticks"></i></div>
     </div>
     <div class="mock-bubble received">
-      <div class="bubble-text">Online now. Direct WebRTC tunnel established! 🛰️</div>
+      <div class="bubble-text">Online now. Direct WebRTC tunnel established! </div>
       <div class="bubble-meta">10:44 PM</div>
     </div>
   `;
@@ -707,7 +707,7 @@ function runAct3_ChatBanter() {
   // 1. Alex starts typing letter-by-letter
   scheduleCinemaStep(async () => {
     if (typingMia) typingMia.style.display = 'flex';
-    const msg1 = 'Hey Mia, look at our live encrypted sync! 🚀';
+    const msg1 = 'Hey Mia, look at our live encrypted sync! ';
     await typeTextIntoInput(inputAlex, msg1, 35);
 
     scheduleCinemaStep(() => {
@@ -725,7 +725,7 @@ function runAct3_ChatBanter() {
   // 2. Mia types reply letter-by-letter
   scheduleCinemaStep(async () => {
     if (typingAlex) typingAlex.style.display = 'flex';
-    const msg2 = 'Whoa it synced in 24ms! Watch me morph to Cyber Emerald ⚡';
+    const msg2 = 'Whoa it synced in 24ms! Watch me morph to Cyber Emerald ';
     await typeTextIntoInput(inputMia, msg2, 32);
 
     scheduleCinemaStep(() => {
@@ -755,7 +755,7 @@ function runAct3_ChatBanter() {
   // 5. Mia types follow-up message letter-by-letter
   scheduleCinemaStep(async () => {
     if (typingAlex) typingAlex.style.display = 'flex';
-    const msg3 = 'BRO THAT IS SICK!! 🔥 Setting up our tournament squad group now!';
+    const msg3 = 'BRO THAT IS SICK!!  Setting up our tournament squad group now!';
     await typeTextIntoInput(inputMia, msg3, 28);
 
     scheduleCinemaStep(() => {
@@ -801,8 +801,8 @@ function runAct5_SquadGroupChat() {
   if (cinemaStepLabel) cinemaStepLabel.textContent = 'ACT 5: ACTIVE SQUAD GROUP CHAT ON BOTH PHONES';
 
   // Morph headers on both phones
-  if (alexContactTitle) alexContactTitle.textContent = '⚡ CYBER SQUAD ELITE ⚡';
-  if (miaContactTitle) miaContactTitle.textContent = '⚡ CYBER SQUAD ELITE ⚡';
+  if (alexContactTitle) alexContactTitle.textContent = ' CYBER SQUAD ELITE ';
+  if (miaContactTitle) miaContactTitle.textContent = ' CYBER SQUAD ELITE ';
   if (alexContactStatus) alexContactStatus.textContent = '4 members · Alex, Mia, Leo, Chronex';
   if (miaContactStatus) miaContactStatus.textContent = '4 members · Alex, Mia, Leo, Chronex';
 
@@ -818,26 +818,26 @@ function runAct5_SquadGroupChat() {
 
   // Group message from Alex
   scheduleCinemaStep(() => {
-    addBubbleToStream(messagesStreamAlex, 'sent', 'Welcome squad! Prize pool is 5,000 NEX tokens 🏆', '10:48 PM', { author: 'Alex [Admin]' });
+    addBubbleToStream(messagesStreamAlex, 'sent', 'Welcome squad! Prize pool is 5,000 NEX tokens ', '10:48 PM', { author: 'Alex [Admin]' });
     streakPacket('right');
     scheduleCinemaStep(() => {
-      addBubbleToStream(messagesStreamMia, 'received', 'Welcome squad! Prize pool is 5,000 NEX tokens 🏆', '10:48 PM', { author: 'Alex [Admin]' });
+      addBubbleToStream(messagesStreamMia, 'received', 'Welcome squad! Prize pool is 5,000 NEX tokens ', '10:48 PM', { author: 'Alex [Admin]' });
     }, 350);
   }, 900);
 
   // Group message from Mia
   scheduleCinemaStep(() => {
-    addBubbleToStream(messagesStreamMia, 'sent', "Locked in! Chronex AI, what's our match probability? 💎", '10:49 PM', { author: 'Mia' });
+    addBubbleToStream(messagesStreamMia, 'sent', "Locked in! Chronex AI, what's our match probability? ", '10:49 PM', { author: 'Mia' });
     streakPacket('left');
     scheduleCinemaStep(() => {
-      addBubbleToStream(messagesStreamAlex, 'received', "Locked in! Chronex AI, what's our match probability? 💎", '10:49 PM', { author: 'Mia' });
+      addBubbleToStream(messagesStreamAlex, 'received', "Locked in! Chronex AI, what's our match probability? ", '10:49 PM', { author: 'Mia' });
     }, 350);
   }, 2600);
 
   // Bot message from Chronex AI
   scheduleCinemaStep(() => {
-    addBubbleToStream(messagesStreamAlex, 'received', '⚡ Chronex Neural Analysis: 96.4% victory probability. Strategy deployed.', '10:49 PM', { author: 'Chronex AI [Tactician]' });
-    addBubbleToStream(messagesStreamMia, 'received', '⚡ Chronex Neural Analysis: 96.4% victory probability. Strategy deployed.', '10:49 PM', { author: 'Chronex AI [Tactician]' });
+    addBubbleToStream(messagesStreamAlex, 'received', ' Chronex Neural Analysis: 96.4% victory probability. Strategy deployed.', '10:49 PM', { author: 'Chronex AI [Tactician]' });
+    addBubbleToStream(messagesStreamMia, 'received', ' Chronex Neural Analysis: 96.4% victory probability. Strategy deployed.', '10:49 PM', { author: 'Chronex AI [Tactician]' });
   }, 4400);
 
   // Loop back to Act 1
@@ -964,7 +964,7 @@ window.previewGalleryWallpaper = previewGalleryWallpaper;
 
 // Interactive Manual Send Buttons for both phones
 sendBtnAlex?.addEventListener('click', () => {
-  const text = inputAlex?.value.trim() || 'Alex says: E2E Quantum Link Verified! 🚀';
+  const text = inputAlex?.value.trim() || 'Alex says: E2E Quantum Link Verified! ';
   inputAlex.value = '';
   addBubbleToStream(messagesStreamAlex, 'sent', text, 'Just now');
   streakPacket('right');
@@ -974,7 +974,7 @@ sendBtnAlex?.addEventListener('click', () => {
 });
 
 sendBtnMia?.addEventListener('click', () => {
-  const text = inputMia?.value.trim() || 'Mia replies: Synced 24ms WebRTC! ⚡';
+  const text = inputMia?.value.trim() || 'Mia replies: Synced 24ms WebRTC! ';
   inputMia.value = '';
   addBubbleToStream(messagesStreamMia, 'sent', text, 'Just now');
   streakPacket('left');
@@ -1342,4 +1342,4 @@ window.addEventListener('beforeunload', () => {
   lenis.destroy();
 });
 
-console.log('🟢 NEXCHAT Full Cinematic Story & Interactive Engine initialized.');
+console.log(' NEXCHAT Full Cinematic Story & Interactive Engine initialized.');

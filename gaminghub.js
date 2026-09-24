@@ -26,7 +26,7 @@ const GAMES_DATABASE = [
   {
     id: 1,
     name: "Blood Strike",
-    emoji: "ðŸ©¸",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "Intense multiplayer tactical shooter. Fast-paced combat with various game modes. Free-to-play FPS action!",
     playersNow: 456789,
@@ -40,7 +40,7 @@ const GAMES_DATABASE = [
   {
     id: 2,
     name: "Call of Duty Mobile",
-    emoji: "ðŸ”«",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "COD Mobile - Legendary FPS on mobile! Multiplayer battles, Zombies, Campaign. True COD experience.",
     playersNow: 2345678,
@@ -54,7 +54,7 @@ const GAMES_DATABASE = [
   {
     id: 3,
     name: "PUBG Mobile",
-    emoji: "ðŸŽ¯",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "PUBG Mobile - Battle royale legend! 100 players drop, loot, and fight. Survive to win!",
     playersNow: 3456789,
@@ -68,7 +68,7 @@ const GAMES_DATABASE = [
   {
     id: 4,
     name: "FireLite",
-    emoji: "ðŸ”¥",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "Fast-paced online shooter! Competitive matches with squad-based gameplay. Download and dominate!",
     playersNow: 234567,
@@ -82,7 +82,7 @@ const GAMES_DATABASE = [
   {
     id: 5,
     name: "Fortnite",
-    emoji: "âš¡",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "Epic battle royale! 100 players compete with building mechanics. Free-to-play with seasons & events.",
     playersNow: 5678901,
@@ -96,7 +96,7 @@ const GAMES_DATABASE = [
   {
     id: 6,
     name: "Valorant",
-    emoji: "ðŸŽª",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "Tactical 5v5 competitive shooter! Agent-based abilities with round-based economy system.",
     playersNow: 1234567,
@@ -110,7 +110,7 @@ const GAMES_DATABASE = [
   {
     id: 7,
     name: "Counter-Strike 2",
-    emoji: "ðŸ’¥",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "CS2 - The legendary competitive FPS! Terrorist vs Counter-Terrorist. Pure tactical gameplay.",
     playersNow: 2789012,
@@ -124,7 +124,7 @@ const GAMES_DATABASE = [
   {
     id: 8,
     name: "Apex Legends",
-    emoji: "ðŸŽ®",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "Hero-based battle royale! 3v3 teams with unique legends. Ping system for teamwork.",
     playersNow: 1890234,
@@ -138,7 +138,7 @@ const GAMES_DATABASE = [
   {
     id: 9,
     name: "Warzone 2.0",
-    emoji: "âš”ï¸",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "Call of Duty Warzone - Massive 150-player battle royale. Squads, Solos, Duos modes.",
     playersNow: 3567890,
@@ -152,7 +152,7 @@ const GAMES_DATABASE = [
   {
     id: 10,
     name: "Rainbow Six Siege",
-    emoji: "ðŸ›¡ï¸",
+    icon: "fa-solid fa-gamepad",
     category: "strategy",
     description: "Tactical team-based shooter! 5v5 with destructible environments. Attack & defend objectives.",
     playersNow: 987654,
@@ -166,7 +166,7 @@ const GAMES_DATABASE = [
   {
     id: 11,
     name: "Overwatch 2",
-    emoji: "ðŸŽ¯",
+    icon: "fa-solid fa-gamepad",
     category: "multiplayer",
     description: "Hero shooter 5v5! Team-based gameplay with diverse character abilities. Free-to-play.",
     playersNow: 2345678,
@@ -180,7 +180,7 @@ const GAMES_DATABASE = [
   {
     id: 12,
     name: "Lost Ark",
-    emoji: "âš”ï¸",
+    icon: "fa-solid fa-gamepad",
     category: "multiplayer",
     description: "MMO action RPG! Hardcore PvE raids and PvP combat. Rich story with dungeons and guilds.",
     playersNow: 456789,
@@ -194,7 +194,7 @@ const GAMES_DATABASE = [
   {
     id: 13,
     name: "New World",
-    emoji: "ðŸ—¡ï¸",
+    icon: "fa-solid fa-gamepad",
     category: "multiplayer",
     description: "MMO with large-scale PvP! Territory wars between factions. Crafting, dungeons, raids.",
     playersNow: 234567,
@@ -208,7 +208,7 @@ const GAMES_DATABASE = [
   {
     id: 14,
     name: "Destiny 2",
-    emoji: "ðŸŒ™",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "Sci-fi shooter MMO! PvE strikes & raids. Competitive PvP Crucible matches.",
     playersNow: 1234567,
@@ -222,7 +222,7 @@ const GAMES_DATABASE = [
   {
     id: 15,
     name: "PLAYERUNKNOWN'S BATTLEGROUNDS",
-    emoji: "ðŸ†",
+    icon: "fa-solid fa-gamepad",
     category: "action",
     description: "Original battle royale! 100 players, massive map, intense combat. The game that started it all!",
     playersNow: 2567890,
@@ -405,19 +405,19 @@ function displayGames(games) {
       (game) => `
     <div class="game-card" onclick="viewGameDetail(${game.id})">
       <div class="game-card-image">
-        <span>${game.emoji}</span>
+        <span><i class="${game.icon || "fa-solid fa-gamepad"}"></i></span>
         ${game.badges ? `<div class="game-card-badge">${game.badges}</div>` : ""}
       </div>
       <div class="game-card-info">
         <h3 class="game-card-name">${game.name}</h3>
         <p class="game-card-category">${game.category}</p>
         <div class="game-card-stats">
-          <span class="stat">👥 ${formatNumber(game.playersNow)}</span>
-          <span class="stat">⭐ ${game.rating}</span>
+          <span class="stat"> ${formatNumber(game.playersNow)}</span>
+          <span class="stat"> ${game.rating}</span>
         </div>
         <div class="game-card-rating">
           ${Array(Math.round(game.rating))
-          .fill("★")
+          .fill("")
           .join("")}
         </div>
       </div>
@@ -489,7 +489,7 @@ function playGame(game) {
 
   if (!playerModal || !iframe) return;
 
-  showNotification(`🎮 Launching ${game.name}...`, "success");
+  showNotification(` Launching ${game.name}...`, "success");
 
   if (playerEmoji) playerEmoji.textContent = game.emoji;
   if (playerName) playerName.textContent = game.name;
@@ -515,7 +515,7 @@ function closeGamePlayer() {
 }
 
 function shareGame(game) {
-  const shareText = `ðŸŽ® Check out ${game.name}! ${game.emoji}\n\n${game.description}\n\nRate: ${game.rating}â­`;
+  const shareText = `ðŸŽ® Check out ${game.name}! <i class="${game.icon || "fa-solid fa-gamepad"}"></i>\n\n${game.description}\n\nRate: ${game.rating}â­`;
 
   if (navigator.share) {
     navigator.share({
@@ -605,7 +605,7 @@ function showCreateSessionModal() {
       <div class="modal-content large-modal">
         <div class="modal-header">
           <h3>Start a Gaming Session</h3>
-          <button class="close-modal-btn" onclick="closeSessionModal()">✕</button>
+          <button class="close-modal-btn" onclick="closeSessionModal()"></button>
         </div>
         <div class="modal-body">
           <form id="createSessionForm">
@@ -701,7 +701,7 @@ function viewSquad(squadId) {
       <div class="modal-content large-modal">
         <div class="modal-header">
           <h3>${squad.emoji} ${squad.name}</h3>
-          <button class="close-modal-btn" onclick="closeSquadDetailModal()">✕</button>
+          <button class="close-modal-btn" onclick="closeSquadDetailModal()"></button>
         </div>
         <div class="modal-body">
           <p class="squad-description">${squad.description}</p>
@@ -886,7 +886,7 @@ const SQUADS_DATABASE = [
   {
     id: 1,
     name: "Apex Predators",
-    emoji: "ðŸ¦",
+    icon: "fa-solid fa-gamepad",
     game: "Apex Legends",
     leader: "ShadowNinja",
     members: 8,
@@ -900,7 +900,7 @@ const SQUADS_DATABASE = [
   {
     id: 2,
     name: "Night Hunters",
-    emoji: "ðŸŒ™",
+    icon: "fa-solid fa-gamepad",
     game: "PUBG Mobile",
     leader: "PhantomGamer",
     members: 5,
@@ -914,7 +914,7 @@ const SQUADS_DATABASE = [
   {
     id: 3,
     name: "valorant grinders",
-    emoji: "ðŸ”«",
+    icon: "fa-solid fa-gamepad",
     game: "Valorant",
     leader: "IceQueen",
     members: 15,
@@ -1024,7 +1024,7 @@ function setupMainNavigation() {
 
         if (gameSearchArea) gameSearchArea.style.display = "none";
         if (categoryTabs) categoryTabs.style.display = "none";
-        if (gamingTitle) gamingTitle.textContent = "👥 Squads";
+        if (gamingTitle) gamingTitle.textContent = " Squads";
 
         loadSquads();
       }
@@ -1105,10 +1105,10 @@ function displayGamers(gamers) {
       <p class="gamer-level">Level ${gamer.level} | ${gamer.skill}</p>
       <p class="gamer-game">ðŸŽ® ${gamer.mainGame}</p>
       <div class="gamer-stats">
-        <span>⭐ ${gamer.rating}</span>
-        <span>🏆 ${gamer.wins} wins</span>
+        <span> ${gamer.rating}</span>
+        <span> ${gamer.wins} wins</span>
       </div>
-      <button class="gamer-action-btn" onclick="event.stopPropagation(); addFriend(${gamer.id})">➕ Add Friend</button>
+      <button class="gamer-action-btn" onclick="event.stopPropagation(); addFriend(${gamer.id})"> Add Friend</button>
     </div>
   `).join("");
 }
@@ -1398,7 +1398,7 @@ async function createClan() {
       members: [userId],
       wins: 0,
       createdAt: new Date(),
-      emoji: 'ðŸ°'
+      icon: "fa-solid fa-gamepad"
     };
 
     await addDoc(collection(db, 'clans'), clanData);
@@ -1540,20 +1540,20 @@ async function viewClan(clanId) {
     return;
   }
 
-  title.textContent = `🏰 ${clan.name}`;
+  title.textContent = ` ${clan.name}`;
   content.innerHTML = `
     <div class="clan-detail-header">
-      <div class="clan-detail-icon">${clan.emoji || '🏰'}</div>
+      <div class="clan-detail-icon">${clan.emoji || ''}</div>
       <div>
-        <p class="clan-detail-game">🎮 ${clan.game || clan.name}</p>
+        <p class="clan-detail-game"> ${clan.game || clan.name}</p>
         <p class="clan-detail-leader">Leader: ${clan.leader || 'Unknown'}</p>
       </div>
     </div>
     <p class="clan-detail-description">${clan.description || 'No description available.'}</p>
     <div class="clan-detail-stats">
-      <span>👥 ${clan.members?.length || clan.members || 0}/${clan.maxMembers || 50} members</span>
-      <span>🏆 ${clan.wins || 0} wins</span>
-      <span>⚔️ ${clan.skill?.toUpperCase() || 'CASUAL'}</span>
+      <span> ${clan.members?.length || clan.members || 0}/${clan.maxMembers || 50} members</span>
+      <span> ${clan.wins || 0} wins</span>
+      <span> ${clan.skill?.toUpperCase() || 'CASUAL'}</span>
     </div>
     <div class="clan-detail-actions">
       <button class="action-btn primary" onclick="joinClan('${clan.id}')">Join Clan</button>
@@ -1839,19 +1839,19 @@ async function viewClip(clipId) {
 
     if (!clip) {
       content.innerHTML = `<p class="empty-text">Clip not found.</p>`;
-      title.textContent = '🎬 Clip Viewer';
+      title.textContent = ' Clip Viewer';
       modal.style.display = 'flex';
       return;
     }
 
-    title.textContent = clip.title || '🎬 Clip Viewer';
+    title.textContent = clip.title || ' Clip Viewer';
     content.innerHTML = `
       <div class="clip-viewer-card">
         <video src="${clip.videoUrl}" controls autoplay style="width: 100%; border-radius: 16px; background: #000;"></video>
         <div class="clip-viewer-info">
           <h4>${clip.title}</h4>
           <p>${clip.description || 'No description provided.'}</p>
-          <p class="clip-meta">🎮 ${clip.game || 'Unknown Game'} • 📤 ${clip.uploaderName || 'Unknown'} • 👁️ ${clip.views || 0} views</p>
+          <p class="clip-meta"> ${clip.game || 'Unknown Game'} •  ${clip.uploaderName || 'Unknown'} •  ${clip.views || 0} views</p>
         </div>
       </div>
     `;
@@ -1911,8 +1911,8 @@ function loadSquads() {
             </div>
             <p>${squad.description}</p>
             <div class="squad-meta">
-              <span>👥 ${squad.members}/${squad.maxMembers}</span>
-              <span>🏆 ${squad.wins} wins</span>
+              <span> ${squad.members}/${squad.maxMembers}</span>
+              <span> ${squad.wins} wins</span>
             </div>
           </div>
         `).join('')
@@ -1932,8 +1932,8 @@ function loadSquads() {
             </div>
             <p>${squad.description}</p>
             <div class="squad-meta">
-              <span>👥 ${squad.members}/${squad.maxMembers}</span>
-              <span>🏆 ${squad.wins} wins</span>
+              <span> ${squad.members}/${squad.maxMembers}</span>
+              <span> ${squad.wins} wins</span>
             </div>
             <button class="action-btn primary" onclick="event.stopPropagation(); viewSquad(${squad.id})">View Squad</button>
           </div>
@@ -1964,15 +1964,15 @@ function loadSessions() {
         return `
           <div class="session-card">
             <div class="session-header">
-              <h4>🎮 ${session.game}</h4>
+              <h4> ${session.game}</h4>
               <span class="session-status">${sessionLabel}</span>
             </div>
             <p><strong>Created by:</strong> ${session.createdBy}</p>
             <p><strong>Objective:</strong> ${session.objective}</p>
             <div class="session-info">
-              <span>👥 ${session.participants}/${session.maxParticipants} Players</span>
-              <span>⏱️ ${session.duration}</span>
-              <span>🎯 ${session.skillLevel}</span>
+              <span> ${session.participants}/${session.maxParticipants} Players</span>
+              <span> ${session.duration}</span>
+              <span> ${session.skillLevel}</span>
             </div>
             ${isActive ? joinButton : ''}
           </div>

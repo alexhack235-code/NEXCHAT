@@ -225,7 +225,7 @@ export async function uploadMediaToCloudinary(file, options = {}) {
       }
       console.log(`[CLOUDINARY POOL] Attempting upload to ${vault.name} (${vault.cloudName})...`);
 
-      const result = await uploadToSingleCloudinaryVault(file, vault, resourceType, folder, fileSizeMb, options.onProgress);
+      const result = await uploadToSingleCloudinaryVault(file, vault, resourceType, folder, fileSizeMb, options.onProgress, options);
       console.log(`[CLOUDINARY POOL] Successfully uploaded to ${vault.name}:`, result.secure_url);
       return {
         ...result,
@@ -246,7 +246,7 @@ export async function uploadMediaToCloudinary(file, options = {}) {
  * Executes upload to a specific single Cloudinary vault endpoint.
  * @private
  */
-function uploadToSingleCloudinaryVault(file, vault, resourceType, folder, fileSizeMb, onProgress) {
+function uploadToSingleCloudinaryVault(file, vault, resourceType, folder, fileSizeMb, onProgress, options = {}) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     const endpoint = `https://api.cloudinary.com/v1_1/${encodeURIComponent(vault.cloudName)}/${resourceType}/upload`;
@@ -256,6 +256,25 @@ function uploadToSingleCloudinaryVault(file, vault, resourceType, folder, fileSi
     formData.append('upload_preset', vault.uploadPreset);
     if (folder) {
       formData.append('folder', folder);
+    }
+
+    // High Definition Video / Audio configuration
+    if (resourceType === 'video') {
+      const mime = (file.type || '').toLowerCase();
+      if (!mime.startsWith('audio/')) {
+        // Highest quality video parameters: H.264, auto:best, 5000k+ bitrate, preserve 1080p/4K
+        formData.append('quality', options.quality || 'auto:best');
+        formData.append('fetch_format', options.fetchFormat || 'auto');
+        formData.append('video_codec', options.videoCodec || 'h264');
+        formData.append('bit_rate', options.bitRate || '5000k');
+        if (options.eager) {
+          formData.append('eager', options.eager);
+        }
+      } else {
+        // High quality audio
+        formData.append('audio_codec', 'mp3');
+        formData.append('bit_rate', '320k');
+      }
     }
 
     xhr.open('POST', endpoint, true);

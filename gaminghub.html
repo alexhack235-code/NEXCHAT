@@ -27,13 +27,21 @@
         <button type="button" id="back-to-chat-btn" class="back-btn" title="Back to chat">
           <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
         </button>
-        <h1 class="gaming-title"><i class="fa-solid fa-gamepad"></i> NEX GAMING HUB</h1>
-        <div class="header-spacer"></div>
+        <h1 class="gaming-title"><i class="fa-solid fa-gamepad"></i> NEX CYBER ARCADE</h1>
+        <div class="hub-header-actions">
+          <div class="token-balance-chip" id="hubTokenBalanceChip" title="Your NEX Tokens">
+            <i class="fa-solid fa-coins"></i> <span id="hubTokenBalance">0</span> TOKENS
+          </div>
+          <button type="button" id="hubAudioToggle" class="hub-icon-btn" title="Toggle Sound FX">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Main Navigation Tabs -->
       <div class="main-nav-tabs">
-        <button type="button" class="nav-tab active" data-section="games"><i class="fa-solid fa-gamepad"></i> Games</button>
+        <button type="button" class="nav-tab active" data-section="games"><i class="fa-solid fa-gamepad"></i> Arcade</button>
+        <button type="button" class="nav-tab" data-section="leaderboard"><i class="fa-solid fa-trophy"></i> Leaderboards</button>
         <button type="button" class="nav-tab" data-section="gamers"><i class="fa-solid fa-ghost"></i> Gamers</button>
         <button type="button" class="nav-tab" data-section="clans"><i class="fa-solid fa-shield-halved"></i> Clans</button>
         <button type="button" class="nav-tab" data-section="squads"><i class="fa-solid fa-users"></i> Squads</button>
@@ -78,7 +86,25 @@
       <!-- Loading State -->
       <div id="loading-state" class="loading-state">
         <div class="spinner"></div>
-        <p>Loading games...</p>
+        <p>Loading arcade games...</p>
+      </div>
+    </div>
+
+    <!-- LEADERBOARDS TAB -->
+    <div id="leaderboardSection" class="leaderboard-section" style="display: none;">
+      <div class="leaderboard-header">
+        <h2><i class="fa-solid fa-trophy"></i> Global Leaderboards</h2>
+        <div class="leaderboard-filter-chips">
+          <button type="button" class="lb-chip active" data-game="all">All Games</button>
+          <button type="button" class="lb-chip" data-game="snake">Neon Snake</button>
+          <button type="button" class="lb-chip" data-game="pong">Quantum Pong</button>
+          <button type="button" class="lb-chip" data-game="space">Space Defender</button>
+        </div>
+      </div>
+      <div class="leaderboard-table-wrapper">
+        <div class="leaderboard-list" id="leaderboardList">
+          <div class="lb-loading"><div class="spinner"></div><p>Fetching top arcade champions...</p></div>
+        </div>
       </div>
     </div>
 

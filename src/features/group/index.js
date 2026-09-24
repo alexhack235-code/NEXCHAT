@@ -408,7 +408,7 @@ function _renderItem(item, element, currentUid, options = {}) {
     onPin: async (msg) => {
       try {
         await pinMessage(groupStore.getState().currentGroupId, msg.id);
-        if (options.onNotify) options.onNotify('📌 Message pinned', 'success');
+        if (options.onNotify) options.onNotify(' Message pinned', 'success');
       } catch (e) {
         if (options.onNotify) options.onNotify(e.message, 'error');
       }
@@ -417,7 +417,7 @@ function _renderItem(item, element, currentUid, options = {}) {
       if (confirm('Delete this message?')) {
         try {
           await deleteMessage(msg.id);
-          if (options.onNotify) options.onNotify('🗑️ Message deleted', 'success');
+          if (options.onNotify) options.onNotify(' Message deleted', 'success');
         } catch (e) {
           if (options.onNotify) options.onNotify(e.message, 'error');
         }
@@ -425,7 +425,7 @@ function _renderItem(item, element, currentUid, options = {}) {
     },
     onCopy: (msg) => {
       navigator.clipboard.writeText(msg.text || '').catch(() => {});
-      if (options.onNotify) options.onNotify('📋 Copied', 'success');
+      if (options.onNotify) options.onNotify(' Copied', 'success');
     },
     onQuoteClick: (messageId) => {
       _scroller?.scrollToItem(messageId);
@@ -475,7 +475,7 @@ function _updatePinnedBar(pinnedMessageIds, options) {
     .filter(Boolean)
     .map(m => ({
       id: m.id,
-      text: m.text || '📎 Attachment',
+      text: m.text || ' Attachment',
       senderName: getUserProfile(m.from)?.username || 'Unknown'
     }));
 

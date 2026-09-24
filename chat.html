@@ -139,30 +139,61 @@
       </div>
     </header>
 
-    <!-- STATUS UPDATES SECTION (only visible in chat list view) -->
+    <!-- WHATSAPP DARK STATUS UPDATES SECTION -->
     <div class="nex-status-container" id="statusContainer" style="display: none;">
-      <div class="nex-status-header">
-        <div>
-          <h3>Status Updates</h3>
-          <p class="status-header-subtitle">Share photos, videos, or a quick note. Statuses expire after 24 hours.</p>
+      <!-- Top AppBar: Height 60px, bg #202C33, only "Status" h2 19px #E9EDEF font-bold -->
+      <div class="status-top-appbar">
+        <h2 class="status-appbar-title">Status</h2>
+        <div class="status-appbar-actions">
+          <button type="button" id="statusHeaderCameraBtn" class="status-icon-btn" title="Add status media">
+            <i class="fa-solid fa-camera"></i>
+          </button>
+          <button type="button" class="status-icon-btn" title="Status privacy & options">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
         </div>
       </div>
-      <div class="status-input-area">
-        <div class="my-status-card">
-          <img id="myStatusPic" src="" alt="Your status" class="status-avatar">
-          <input type="file" id="statusImageInput" style="display: none;" accept="image/*,video/*" />
-          <button id="uploadStatusImageBtn" class="upload-status-btn" title="Upload media">Upload</button>
-          <input type="text" id="statusInput" class="status-input" placeholder="Share a quick update, photo, or video" maxlength="150" />
-          <button id="postStatusBtn" class="status-post-btn" title="Post Status">Post</button>
+
+      <!-- Hidden file input for status media upload -->
+      <input type="file" id="statusImageInput" style="display: none;" accept="image/*,video/*" />
+
+      <!-- Status Horizontal List (64px circles) -->
+      <div class="status-horizontal-list scrollbar-hide" id="statusHorizontalList">
+        <!-- 1. My Status -->
+        <div class="status-circle-item my-status-item" id="myStatusCircleItem">
+          <div class="status-avatar-wrapper" id="myStatusAvatarWrapper">
+            <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
+          </div>
+          <button type="button" id="myStatusAddBadge" class="status-plus-badge" title="Add status update">+</button>
+          <span class="status-item-label">My status</span>
+        </div>
+
+        <!-- 2. Other Statuses rendered horizontally here -->
+        <div id="statusHorizontalFeed" class="status-horizontal-items"></div>
+      </div>
+
+      <!-- Recent & Viewed Updates List -->
+      <div class="status-updates-body">
+        <div id="statusRecentSection" class="status-section-block">
+          <h3 class="status-section-header">Recent updates</h3>
+          <div id="statusRecentList" class="status-vertical-list"></div>
+        </div>
+
+        <div id="statusViewedSection" class="status-section-block" style="display: none;">
+          <h3 class="status-section-header">Viewed updates</h3>
+          <div id="statusViewedList" class="status-vertical-list"></div>
         </div>
       </div>
-      <div id="statusFeed" class="status-feed">
-        <div class="status-empty-state">
-          <p>No statuses from your contacts yet</p>
-        </div>
+
+      <!-- Floating Action Buttons: Pencil (Text status) + Camera -->
+      <div class="status-fab-container">
+        <button type="button" id="statusFabText" class="status-fab-mini" title="Type a status">
+          <i class="fa-solid fa-pen"></i>
+        </button>
+        <button type="button" id="statusFabCamera" class="status-fab-main" title="Take or upload status">
+          <i class="fa-solid fa-camera"></i>
+        </button>
       </div>
-      <p id="driveStatusNote" class="status-note">Large uploads are routed through Google Drive once Google sign-in is enabled.</p>
-      <button id="connectDriveBtn" class="status-action-btn" style="margin-top: 10px; background: #5a5a5a; color: #fff; border: none; border-radius: 8px; padding: 10px 16px; cursor: not-allowed;" disabled>Google Drive available after sign-in</button>
     </div>
 
     <!-- GROUPS SECTION -->
@@ -318,7 +349,7 @@
             <img id="chatProfilePic" src="" alt="profile" class="header-avatar">
             <div class="header-text">
               <h3 id="chatName">User</h3>
-              <p id="statusText" class="status-dot">🟢 Online</p>
+              <p id="statusText" class="status-dot">Online</p>
             </div>
           </div>
           <div class="chat-detail-header-actions">
@@ -1370,6 +1401,58 @@
         <span class="nav-label">Logout</span>
       </button>
     </nav>
+  </div>
+
+  <!-- WHATSAPP DARK STATUS VIEWER FULL-SCREEN MODAL -->
+  <div id="statusViewerModal" class="status-viewer-modal" style="display: none;">
+    <!-- Top Progress Bars (Segmented like Instagram / WhatsApp) -->
+    <div id="statusViewerProgressBars" class="status-viewer-progress-container"></div>
+
+    <!-- Top Header: Avatar + Name + Time top-left, Close X top-right -->
+    <div class="status-viewer-top-bar">
+      <div class="status-viewer-user-info">
+        <button type="button" id="closeStatusViewerBtn" class="status-viewer-back-btn" title="Back">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <img id="statusViewerAvatar" src="logo.jpg" alt="Avatar" class="status-viewer-avatar">
+        <div class="status-viewer-meta">
+          <span id="statusViewerName" class="status-viewer-name">User</span>
+          <span id="statusViewerTime" class="status-viewer-time">03:56 AM</span>
+        </div>
+      </div>
+      <button type="button" id="statusViewerCloseIcon" class="status-viewer-close-btn" title="Close">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Center Media Container with Tap Left/Right Controls -->
+    <div class="status-viewer-media-stage" id="statusViewerStage">
+      <div class="status-tap-zone left-zone" id="statusTapPrev" title="Previous status"></div>
+      <div class="status-tap-zone right-zone" id="statusTapNext" title="Next status"></div>
+
+      <img id="statusViewerImage" src="" alt="Status" style="display: none;">
+      <video id="statusViewerVideo" src="" playsinline autoplay muted style="display: none;"></video>
+      <div id="statusViewerFallbackText" class="status-viewer-text-slide" style="display: none;"></div>
+    </div>
+
+    <!-- Bottom Caption & Info Overlay (time "03:56 AM", expires, caption "Multi-vault Cloudinary...") -->
+    <div class="status-viewer-bottom-bar">
+      <div id="statusViewerCaptionBox" class="status-viewer-caption-card">
+        <p id="statusViewerCaption" class="status-viewer-caption-text"></p>
+        <div class="status-viewer-details">
+          <span id="statusViewerDetailsTime"><i class="fa-regular fa-clock"></i> 03:56 AM</span>
+          <span class="status-bullet">•</span>
+          <span id="statusViewerDetailsExpires" class="status-expires-text">Expires in 21h</span>
+        </div>
+      </div>
+
+      <div class="status-viewer-reply-row">
+        <input type="text" id="statusViewerReplyInput" class="status-reply-input" placeholder="Reply..." />
+        <button type="button" id="statusViewerReplySend" class="status-reply-btn" title="Send reply">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- GIFT RECEIVE DRAWER -->

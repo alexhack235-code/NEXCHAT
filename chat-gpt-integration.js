@@ -13,7 +13,7 @@ export async function initializeAI() {
   const apiKey = localStorage.getItem('openai_api_key');
   
   if (!apiKey) {
-    console.log('🔧 No API key found. Prompting user...');
+    console.log(' No API key found. Prompting user...');
     // Option 1: Prompt user in console
     // const key = prompt('Enter your OpenAI API Key:');
     
@@ -24,7 +24,7 @@ export async function initializeAI() {
   
   // Configure ChatGPT
   chronexAI.setOpenAIKey(apiKey);
-  console.log('✅ ChatGPT initialized and ready!');
+  console.log(' ChatGPT initialized and ready!');
   return true;
 }
 
@@ -47,8 +47,8 @@ export async function sendMessage(userMessage) {
     
     return aiResponse;
   } catch (error) {
-    console.error('❌ Error:', error);
-    displayAIMessage(`❌ Error: ${error.message}`);
+    console.error(' Error:', error);
+    displayAIMessage(` Error: ${error.message}`);
   } finally {
     showLoadingIndicator(false);
   }
@@ -92,8 +92,8 @@ export async function sendMessageWithHistory(userMessage) {
     
     return aiResponse;
   } catch (error) {
-    console.error('❌ Error:', error);
-    displayAIMessage(`❌ Error: ${error.message}`);
+    console.error(' Error:', error);
+    displayAIMessage(` Error: ${error.message}`);
   } finally {
     showLoadingIndicator(false);
   }
@@ -105,7 +105,7 @@ export function loadConversationHistory() {
   if (saved) {
     try {
       conversationHistory = JSON.parse(saved);
-      console.log('📚 Previous conversation loaded');
+      console.log(' Previous conversation loaded');
     } catch (e) {
       console.warn('Could not load conversation');
     }
@@ -125,7 +125,7 @@ export function saveConversation(history) {
 export function clearConversation() {
   conversationHistory = [];
   localStorage.removeItem('chat_history');
-  console.log('🧹 Conversation cleared');
+  console.log(' Conversation cleared');
 }
 
 // ============ UI HELPER FUNCTIONS ============
@@ -211,22 +211,22 @@ export function handleSpecialCommands(message) {
     switch (command.toLowerCase()) {
       case 'reset':
         clearConversation();
-        displayAIMessage('✅ Conversation cleared!');
+        displayAIMessage(' Conversation cleared!');
         return true;
         
       case 'clear':
         clearConversation();
-        displayAIMessage('✅ Chat cleared!');
+        displayAIMessage(' Chat cleared!');
         return true;
         
       case 'model':
         const modelName = chronexAI.config.model.name;
-        displayAIMessage(`🧠 Current model: **${modelName}**`);
+        displayAIMessage(` Current model: **${modelName}**`);
         return true;
         
       case 'tokens':
         const maxTokens = chronexAI.config.model.maxTokens;
-        displayAIMessage(`📊 Max tokens: **${maxTokens}**`);
+        displayAIMessage(` Max tokens: **${maxTokens}**`);
         return true;
         
       case 'setup':
@@ -247,7 +247,7 @@ export function handleSpecialCommands(message) {
         return true;
         
       default:
-        displayAIMessage(`❌ Unknown command: /${command}`);
+        displayAIMessage(` Unknown command: /${command}`);
         return true;
     }
   }
@@ -257,7 +257,7 @@ export function handleSpecialCommands(message) {
 // ============ MAIN INITIALIZATION ============
 // Call this when your page loads
 export async function initializeChat() {
-  console.log('🚀 Initializing NEXCHAT with ChatGPT...');
+  console.log(' Initializing NEXCHAT with ChatGPT...');
   
   // Load AI engine
   await initializeAI();
@@ -268,7 +268,7 @@ export async function initializeChat() {
   // Setup input handlers
   setupChatInput();
   
-  console.log('✅ Chat initialized and ready!');
+  console.log(' Chat initialized and ready!');
 }
 
 // Example usage in HTML:

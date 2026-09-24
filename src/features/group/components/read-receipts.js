@@ -1,6 +1,6 @@
 /**
  * ReadReceipts - Message delivery/read status tracking
- * ⏳ pending → ✓ sent → ✓✓ read (some) → ✓✓ read (all)
+ *  pending →  sent →  read (some) →  read (all)
  */
 
 import { writeBatch, doc, arrayUnion, Timestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
@@ -58,19 +58,19 @@ export function updateTickElement(element, newState) {
   
   switch (newState) {
     case TICK_STATES.PENDING:
-      element.innerHTML = '⏳';
+      element.innerHTML = '';
       element.style.color = 'rgba(255,255,255,0.5)';
       break;
     case TICK_STATES.SENT:
-      element.innerHTML = '✓';
+      element.innerHTML = '';
       element.style.color = 'rgba(255,255,255,0.5)';
       break;
     case TICK_STATES.READ:
-      element.innerHTML = '✓✓';
+      element.innerHTML = '';
       element.style.color = 'rgba(255,255,255,0.5)';
       break;
     case TICK_STATES.READ_ALL:
-      element.innerHTML = '✓✓';
+      element.innerHTML = '';
       element.style.color = '#00ff66';
       break;
   }

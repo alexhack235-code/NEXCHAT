@@ -194,10 +194,10 @@ export function demoteToMember(groupData, uid) {
  */
 export function getRoleLabel(role) {
   switch (role) {
-    case ROLES.CREATOR: return '👑 Creator';
-    case ROLES.ADMIN: return '⚡ Admin';
-    case ROLES.MODERATOR: return '🛡️ Moderator';
-    default: return '👤 Member';
+    case ROLES.CREATOR: return ' Creator';
+    case ROLES.ADMIN: return ' Admin';
+    case ROLES.MODERATOR: return ' Moderator';
+    default: return ' Member';
   }
 }
 

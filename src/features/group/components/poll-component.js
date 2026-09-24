@@ -81,7 +81,7 @@ export async function createPoll(db, groupId, creatorId, question, optionTexts) 
   const msgRef = await addDoc(collection(db, 'groupMessages'), {
     groupId,
     from: creatorId,
-    text: `📊 Poll: ${question.trim()}`,
+    text: ` Poll: ${question.trim()}`,
     timestamp: serverTimestamp(),
     isPoll: true,
     pollId: pollRef.id,

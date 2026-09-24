@@ -77,21 +77,15 @@ function validatePassword(password) {
   };
 }
 
-const randomStickers = [
-  '⚡', '✨', '🔥', '🚀', '🌟', '💎', '👑', '🎯', '🛡️', '⚔️',
-  '🤖', '👾', '🎮', '🎧', '💻', '🔮', '💫', '🌌', '🪐', '🛸',
-  '🦁', '🐺', '🦊', '🦅', '🐉', '🐯', '🐼', '🦄', '🐬', '🦋',
-  '💚', '💙', '💜', '🧡', '❤️', '🤍', '🖤', '💛', '💖', '⭐',
-  '😎', '🥳', '🤩', '🤠', '😇', '🛸', '🎯', '🏆', '🥇', '⚡'
-];
+const randomStickers = ['logo.jpg'];
 
 function getRandomSticker() {
-  return randomStickers[Math.floor(Math.random() * randomStickers.length)];
+  return 'logo.jpg';
 }
 
 async function detectIPAndVPN() {
   try {
-    console.log("🔍 Detecting IP and VPN...");
+    console.log('[IP] Detecting IP and VPN...');
 
     const response = await fetch('https://ipapi.co/json/', { timeout: 5000 });
     const data = await response.json();
@@ -107,10 +101,10 @@ async function detectIPAndVPN() {
       timezone: data.timezone
     };
 
-    console.log("📍 IP Info:", ipInfo);
+    console.log('[IP] IP Info:', ipInfo);
     return ipInfo;
   } catch (err) {
-    console.warn("⚠️ Could not detect IP:", err);
+    console.warn('[WARN] Could not detect IP:', err);
     return null;
   }
 }
@@ -122,7 +116,7 @@ async function checkIPRegistration(ipAddress) {
     const snap = await getDocs(q);
 
     if (snap.docs.length > 0) {
-      console.warn("⚠️ IP already registered!");
+      console.warn('[WARN] IP already registered!');
       return snap.docs.map(doc => doc.data().email);
     }
     return null;
@@ -158,46 +152,46 @@ function attachRegisterHandler() {
     const passConfirm = document.getElementById('regPasswordConfirm').value;
 
     if (pass !== passConfirm) {
-      showResult('❌ Passwords do not match!', true);
+      showResult('Passwords do not match!', true);
       return;
     }
 
     const passwordValidation = validatePassword(pass);
     if (!passwordValidation.isValid) {
-      const errorMsg = `❌ Password must have: ${passwordValidation.errors.join(', ')}`;
+      const errorMsg = ` Password must have: ${passwordValidation.errors.join(', ')}`;
       showResult(errorMsg, true);
       return;
     }
 
     if (name.length < 2) {
-      showResult('❌ Name must be at least 2 characters!', true);
+      showResult('Name must be at least 2 characters!', true);
       return;
     }
 
     if (username.length < 3) {
-      showResult('❌ Username must be at least 3 characters!', true);
+      showResult('Username must be at least 3 characters!', true);
       return;
     }
 
     if (username.length > 20) {
-      showResult('❌ Username must be 20 characters or less!', true);
+      showResult('Username must be 20 characters or less!', true);
       return;
     }
 
     const registerRateLimit = checkRateLimit(email, 'register', 3, 3600000); // 3 attempts per hour
     if (!registerRateLimit.allowed) {
-      showResult(`❌ ${registerRateLimit.message}`, true);
+      showResult(`${registerRateLimit.message}`, true);
       return;
     }
 
     try {
       showLoginLoader('Creating Account...', 'Detecting network security and checking VPN status.');
-      showResult('⏳ Detecting your IP and VPN status...', false);
+      showResult('Detecting your IP and VPN status...', false);
       const ipInfo = await detectIPAndVPN();
 
       if (ipInfo && ipInfo.isVPN) {
         hideLoginLoader();
-        showResult('⚠️ VPN detected - Registration blocked for security', true);
+        showResult('VPN detected - Registration blocked for security', true);
         console.warn("VPN detected, blocking registration");
         return;
       }
@@ -206,17 +200,17 @@ function attachRegisterHandler() {
         const existingUsers = await checkIPRegistration(ipInfo.ip);
         if (existingUsers) {
           hideLoginLoader();
-          showResult(`⚠️ This IP (${ipInfo.ip}) already has accounts: ${existingUsers.join(', ')}`, true);
+          showResult(`This IP (${ipInfo.ip}) already has accounts: ${existingUsers.join(', ')}`, true);
           console.warn("Duplicate IP detected, blocking registration");
           return;
         }
       }
 
       showLoginLoader('Creating Account...', 'Registering quantum cipher credentials.');
-      showResult('⏳ Creating account...', false);
+      showResult('Creating account...', false);
       await setPersistence(auth, browserLocalPersistence);
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
-      console.log('✅ User created in Auth:', cred.user.uid);
+      console.log('[AUTH] User created in Auth:', cred.user.uid);
 
       const selectedAvatarInput = document.getElementById('selectedAvatarData');
       const customAvatar = selectedAvatarInput && selectedAvatarInput.value ? selectedAvatarInput.value : null;
@@ -224,7 +218,7 @@ function attachRegisterHandler() {
       const finalProfilePic = customAvatar || randomSticker;
 
       showLoginLoader('Configuring Profile...', 'Saving user profile and initializing wallet tokens.');
-      showResult('⏳ Saving user data to database...', false);
+      showResult('Saving user data to database...', false);
       const userData = {
         email,
         name,
@@ -257,46 +251,46 @@ function attachRegisterHandler() {
       );
       await Promise.race([savePromise, timeoutPromise]);
 
-      console.log('✅ User data saved successfully to Firestore:', cred.user.uid);
-      console.log('🌍 Registration IP:', ipInfo?.ip);
+      console.log('[AUTH] User data saved successfully to Firestore:', cred.user.uid);
+      console.log('[IP] Registration IP:', ipInfo?.ip);
 
       try {
         await setDoc(doc(db, 'userSecurity', cred.user.uid), securityData);
-        console.log('✅ Security data saved to separate collection');
+        console.log('[AUTH] Security data saved to separate collection');
       } catch (secErr) {
-        console.warn('⚠️ Could not save security data:', secErr);
+        console.warn('[WARN] Could not save security data:', secErr);
       }
 
       try {
         await set(ref(rtdb, 'users/' + cred.user.uid), userData);
-        console.log('✅ User data also saved to Realtime Database:', cred.user.uid);
+        console.log('[AUTH] User data also saved to Realtime Database:', cred.user.uid);
       } catch (rtdbErr) {
-        console.warn('⚠️ Realtime Database save failed, but Firestore succeeded:', rtdbErr);
+        console.warn('[WARN] Realtime Database save failed, but Firestore succeeded:', rtdbErr);
       }
 
       showLoginLoader('Registration Complete!', 'Redirecting to your avatar setup...');
-      showResult('✅ Successfully registered! Redirecting...', false);
+      showResult('Successfully registered! Redirecting...', false);
       setTimeout(() => {
         hideLoginLoader();
         window.location.replace('profile-upload.html');
       }, 1200);
     } catch (err) {
       hideLoginLoader();
-      console.error('❌ Registration error:', err);
+      console.error('[ERROR] Registration error:', err);
       let userFriendlyMessage = err.message || 'Registration failed. Please try again.';
 
       if (err.code === 'auth/email-already-in-use') {
-        userFriendlyMessage = '❌ This email is already registered. Please login or use a different email.';
+        userFriendlyMessage = ' This email is already registered. Please login or use a different email.';
       } else if (err.code === 'auth/invalid-email') {
-        userFriendlyMessage = '❌ Invalid email address.';
+        userFriendlyMessage = ' Invalid email address.';
       } else if (err.code === 'auth/weak-password') {
-        userFriendlyMessage = '❌ Password is too weak. Use at least 8 characters with upper/lowercase and a number.';
+        userFriendlyMessage = ' Password is too weak. Use at least 8 characters with upper/lowercase and a number.';
       } else if (err.code === 'auth/operation-not-allowed') {
-        userFriendlyMessage = '❌ Registration is currently disabled. Try again later.';
+        userFriendlyMessage = ' Registration is currently disabled. Try again later.';
       } else if (err.message && err.message.includes('Permission denied')) {
-        userFriendlyMessage = '❌ Database Error: Permission denied. Check Firestore security rules in Firebase Console.';
+        userFriendlyMessage = ' Database Error: Permission denied. Check Firestore security rules in Firebase Console.';
       } else if (err.message && (err.message.includes('offline') || err.message.includes('timeout'))) {
-        userFriendlyMessage = '❌ Network Error: Check your internet connection or Firebase rules.';
+        userFriendlyMessage = ' Network Error: Check your internet connection or Firebase rules.';
       }
 
       showResult(userFriendlyMessage, true);
@@ -313,7 +307,7 @@ function attachResetHandler() {
     const email = document.getElementById('resetEmail').value.trim();
 
     if (!email) {
-      showResult('❌ Please enter your email address!', true);
+      showResult('Please enter your email address!', true);
       return;
     }
 
@@ -322,19 +316,19 @@ function attachResetHandler() {
     try {
       await sendPasswordResetEmail(auth, email);
       hideLoginLoader();
-      showResult('✅ Reset link sent! Check your email inbox (or spam folder).', false);
+      showResult('Reset link sent! Check your email inbox (or spam folder).', false);
       document.getElementById('resetEmail').value = '';
     } catch (err) {
       hideLoginLoader();
       console.error('Reset Password Error:', err);
       if (err.code === 'auth/user-not-found') {
-        showResult('❌ No account found with this email address.', true);
+        showResult('No account found with this email address.', true);
       } else if (err.code === 'auth/invalid-email') {
-        showResult('❌ Please enter a valid email address.', true);
+        showResult('Please enter a valid email address.', true);
       } else if (err.code === 'auth/too-many-requests') {
-        showResult('❌ Too many requests. Please try again later.', true);
+        showResult('Too many requests. Please try again later.', true);
       } else {
-        showResult(`❌ Error: ${err.message}`, true);
+        showResult(`Error: ${err.message}`, true);
       }
     }
   });
@@ -420,7 +414,7 @@ if (loginForm) {
 
     const loginRateLimit = checkRateLimit(email, 'login', 5, 900000);
     if (!loginRateLimit.allowed) {
-      showResult(`❌ ${loginRateLimit.message}`, true);
+      showResult(`${loginRateLimit.message}`, true);
       return;
     }
 
@@ -429,7 +423,7 @@ if (loginForm) {
     try {
       await setPersistence(auth, browserLocalPersistence);
       const cred = await signInWithEmailAndPassword(auth, email, pass);
-      showResult('✅ Successfully signed in!');
+      showResult('Successfully signed in!');
 
       // Update online status in Firestore and RTDB
       try {
@@ -452,7 +446,7 @@ if (loginForm) {
       } else if (err.code === 'auth/too-many-requests') {
         errorMsg = 'Too many failed login attempts. Please reset your password or try again later.';
       }
-      showResult(`❌ ${errorMsg}`, true);
+      showResult(`${errorMsg}`, true);
     }
   });
 }
@@ -529,7 +523,7 @@ async function processGoogleUser(user, credentialResult) {
     }
   }
 
-  showResult('✅ Google sign-in successful! Redirecting...', false);
+  showResult('Google sign-in successful! Redirecting...', false);
 
   setTimeout(() => {
     hideLoginLoader();
@@ -575,7 +569,7 @@ async function handleGoogleSignIn() {
     } else if (error?.code === 'auth/account-exists-with-different-credential') {
       message = 'An account already exists with this email using a different sign-in method.';
     }
-    showResult(`❌ ${message}`, true);
+    showResult(`${message}`, true);
   }
 }
 
@@ -583,14 +577,14 @@ async function checkRedirectAuth() {
   try {
     const result = await getRedirectResult(auth);
     if (result && result.user) {
-      console.log('✅ Google redirect auth successful for:', result.user.uid);
+      console.log('[AUTH] Google redirect auth successful for:', result.user.uid);
       await processGoogleUser(result.user, result);
     }
   } catch (err) {
     console.error('Redirect sign-in error:', err);
     hideLoginLoader();
     if (err.code !== 'auth/null-user') {
-      showResult(`❌ ${err.message || 'Google sign-in failed'}`, true);
+      showResult(`${err.message || 'Google sign-in failed'}`, true);
     }
   }
 }

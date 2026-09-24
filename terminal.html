@@ -143,7 +143,7 @@
             oninput="handleSearch(this.value)"
             class="w-full bg-transparent text-sm text-white placeholder-white/40 border-none outline-none font-sans"
           />
-          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden text-white/40 hover:text-white text-xs">✕</button>
+          <button id="clearSearchBtn" onclick="clearSearch()" class="hidden text-white/40 hover:text-white text-xs"></button>
         </div>
 
         <!-- Filter Pills: All | Unread | Groups | Terminal Logs -->
@@ -227,7 +227,7 @@
         <!-- Security Banner -->
         <div class="flex justify-center my-2 relative z-10">
           <div class="bg-[#182229]/90 border border-[#00FF88]/20 rounded-lg px-3.5 py-1.5 text-[11.5px] text-[#00FF88] font-mono text-center max-w-md shadow-md">
-            🔒 Messages and calls are end-to-end encrypted. No one outside this chat can read them.
+             Messages and calls are end-to-end encrypted. No one outside this chat can read them.
           </div>
         </div>
 
@@ -361,9 +361,9 @@
   <!-- MODAL A: 1:1 TEXT STATUS CREATOR -->
   <div id="textStatusModal" class="hidden fixed inset-0 z-50 flex flex-col justify-between p-6 transition-all duration-300" style="background-color: #005c4b;">
     <div class="flex items-center justify-between text-white/90 z-10">
-      <button onclick="closeTextStatusModal()" class="p-2 text-2xl hover:text-[#00FF88]">✕</button>
+      <button onclick="closeTextStatusModal()" class="p-2 text-2xl hover:text-[#00FF88]"></button>
       <div class="flex items-center gap-4">
-        <button onclick="cycleStatusPalette()" class="text-xl p-2 rounded-full hover:bg-black/20" title="Color Palette">🎨</button>
+        <button onclick="cycleStatusPalette()" class="text-xl p-2 rounded-full hover:bg-black/20" title="Color Palette"></button>
         <button onclick="cycleStatusFont()" class="px-3 py-1 rounded-full bg-white/10 font-bold text-sm" title="Aa Font Selector">Aa</button>
         <button class="text-lg p-2 rounded-full hover:bg-black/20">@</button>
         <button onclick="saveTextStatus()" class="px-4 py-1.5 rounded-full bg-[#00FF88] text-black font-bold text-sm hover:brightness-110 shadow-lg">Done</button>
@@ -375,7 +375,7 @@
         id="textStatusInput"
         rows="4"
         class="w-full bg-transparent text-center text-3xl md:text-4xl text-white placeholder-white/40 border-none outline-none resize-none leading-relaxed drop-shadow-md font-sans"
-      >Debugging 12k+ lines in chat.js is real 😭💔</textarea>
+      >Debugging 12k+ lines in chat.js is real </textarea>
     </div>
 
     <div class="flex items-center justify-between max-w-md mx-auto w-full py-4 text-white/80">
@@ -400,10 +400,10 @@
           ↻
         </button>
         <button id="photoBulbBtn" onclick="togglePhotoExposure()" class="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-base" title="Bulb / Exposure">
-          💡
+          
         </button>
         <button class="w-10 h-10 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-base" title="Sticker Mask">
-          🎭
+          
         </button>
       </div>
     </div>
@@ -579,7 +579,7 @@
         <span class="font-bold text-sm">NEX Encrypted Video Mesh</span>
         <span id="videoTargetLabel" class="text-xs text-white/50 font-mono">| Alex Vance</span>
       </div>
-      <button onclick="closeVideoCallModal()" class="text-white/70 hover:text-white text-lg">✕</button>
+      <button onclick="closeVideoCallModal()" class="text-white/70 hover:text-white text-lg"></button>
     </div>
 
     <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
@@ -669,7 +669,7 @@
     window.clearTerminal = function() {
       const container = document.getElementById('termLogsContainer');
       if (container) container.innerHTML = '';
-      logTerminal('✓ Terminal buffer cleared.', 'success');
+      logTerminal(' Terminal buffer cleared.', 'success');
     };
 
     window.focusTermInput = function() {
@@ -701,9 +701,9 @@
         const isActive = c.id === activeChatId;
         const lastMsg = c.messages[c.messages.length - 1];
         let msgSnippet = lastMsg?.text || '';
-        if (lastMsg?.type === 'voice') msgSnippet = '🎤 Voice note (' + lastMsg.duration + ')';
-        if (lastMsg?.type === 'file') msgSnippet = '📄 ' + lastMsg.fileName;
-        if (lastMsg?.type === 'poll') msgSnippet = '📊 ' + lastMsg.question;
+        if (lastMsg?.type === 'voice') msgSnippet = ' Voice note (' + lastMsg.duration + ')';
+        if (lastMsg?.type === 'file') msgSnippet = ' ' + lastMsg.fileName;
+        if (lastMsg?.type === 'poll') msgSnippet = ' ' + lastMsg.question;
         if (lastMsg?.type === 'code') msgSnippet = '</> Code block';
 
         return `
@@ -723,7 +723,7 @@
             <div class="flex-1 min-w-0">
               <div class="flex items-center justify-between mb-1">
                 <h4 class="text-sm font-semibold truncate ${isActive ? 'text-white' : 'text-white/90'}">
-                  ${c.id === 'nexchat-system' ? '<span class="text-[#00FF88] font-bold">⚡ NEXCHAT SYSTEM</span>' : c.name}
+                  ${c.id === 'nexchat-system' ? '<span class="text-[#00FF88] font-bold"> NEXCHAT SYSTEM</span>' : c.name}
                 </h4>
                 <span class="text-[11px] font-mono whitespace-nowrap ml-2 ${c.unreadCount > 0 ? 'text-[#00FF88] font-bold' : 'text-white/40'}">
                   ${lastMsg?.timestamp || '10:00 AM'}
@@ -732,8 +732,8 @@
               <div class="flex items-center justify-between text-xs text-white/50">
                 <span class="truncate pr-2">${msgSnippet}</span>
                 <div class="flex items-center gap-1.5 flex-shrink-0">
-                  ${c.isPinned ? '<span class="text-[10px]">📌</span>' : ''}
-                  ${c.isMuted ? '<span class="text-[10px]">🔇</span>' : ''}
+                  ${c.isPinned ? '<span class="text-[10px]"></span>' : ''}
+                  ${c.isMuted ? '<span class="text-[10px]"></span>' : ''}
                   ${c.unreadCount > 0 ? `<span class="bg-[#00a884] text-[#111B21] font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center">${c.unreadCount}</span>` : ''}
                 </div>
               </div>
@@ -802,7 +802,7 @@
           contentHtml = `
             <div class="flex items-center gap-3 py-1 min-w-[210px]">
               <button onclick="logTerminal('[AUDIO] Playing voice note: ${m.duration}')" class="w-10 h-10 rounded-full bg-[#00FF88] text-black font-bold flex items-center justify-center flex-shrink-0 shadow-md">
-                ▶
+                
               </button>
               <div class="flex-1">
                 <div class="flex items-center gap-1 h-5">
@@ -817,7 +817,7 @@
                 </div>
                 <div class="flex justify-between text-[10px] text-white/50 font-mono mt-1">
                   <span>${m.duration}</span>
-                  <span>🎤 Encrypted PTT</span>
+                  <span> Encrypted PTT</span>
                 </div>
               </div>
             </div>
@@ -826,7 +826,7 @@
           contentHtml = `
             <div class="min-w-[230px] pt-1">
               <div class="flex items-center gap-1.5 font-bold text-sm text-white mb-2">
-                <span>📊</span><span>${m.question}</span>
+                <span></span><span>${m.question}</span>
               </div>
               <div class="space-y-1.5">
                 ${m.options.map((opt, idx) => `
@@ -846,7 +846,7 @@
         } else if (m.type === 'file') {
           contentHtml = `
             <div class="flex items-center gap-3 bg-black/30 p-2 rounded-lg border border-white/10 min-w-[210px]">
-              <span class="text-2xl text-[#00FF88]">📄</span>
+              <span class="text-2xl text-[#00FF88]"></span>
               <div class="flex-1 min-w-0">
                 <p class="text-xs font-semibold text-white truncate">${m.fileName}</p>
                 <p class="text-[10px] text-white/50 font-mono">${m.fileSize}</p>
@@ -865,7 +865,7 @@
               ${contentHtml}
               <div class="flex items-center justify-end gap-1 mt-1 text-[10px] text-white/50 font-mono">
                 <span>${m.timestamp || '10:00 AM'}</span>
-                ${isMe ? '<span class="text-[#53bdeb] text-xs">✓✓</span>' : ''}
+                ${isMe ? '<span class="text-[#53bdeb] text-xs"></span>' : ''}
               </div>
             </div>
           </div>
@@ -906,7 +906,7 @@
       const btn = document.getElementById('sendOrMicBtn');
       if (!btn) return;
       if (val.trim()) {
-        btn.innerHTML = '➤';
+        btn.innerHTML = '';
         btn.className = 'w-10 h-10 rounded-full bg-[#00a884] hover:bg-[#00FF88] text-black font-bold flex items-center justify-center transition-all flex-shrink-0';
       } else {
         btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
@@ -974,7 +974,7 @@ Available Commands:
           else unread.forEach(c => logTerminal(`[UNREAD: ${c.unreadCount}] ${c.name}`));
         } else {
           chats.forEach((c, idx) => {
-            logTerminal(`${idx + 1}. [${c.isOnline ? 'ONLINE' : 'OFFLINE'}] ${c.name} ${c.isPinned ? '📌' : ''}`);
+            logTerminal(`${idx + 1}. [${c.isOnline ? 'ONLINE' : 'OFFLINE'}] ${c.name} ${c.isPinned ? '' : ''}`);
           });
         }
       }
@@ -1055,7 +1055,7 @@ Available Commands:
           if (main === 'mute') match.isMuted = !match.isMuted;
           saveChats();
           renderChatList();
-          logTerminal(`✓ Toggled ${main} for ${match.name}`, 'success');
+          logTerminal(` Toggled ${main} for ${match.name}`, 'success');
         } else {
           logTerminal(`Contact not found: "${target}"`, 'error');
         }
@@ -1064,7 +1064,7 @@ Available Commands:
         logTerminal('[CIPHER] Generating 4096-bit ephemeral keys...', 'info');
         setTimeout(() => {
           logTerminal('01001110 01000101 01011000 01000011 01001000 01000001 01010100', 'success');
-          logTerminal('✓ Quantum Key Exchange complete. Socket encrypted.', 'success');
+          logTerminal(' Quantum Key Exchange complete. Socket encrypted.', 'success');
         }, 1200);
       }
       else {
@@ -1224,7 +1224,7 @@ Available Commands:
     // Initialize View
     renderChatList();
     renderCenterChat();
-    logTerminal('⚡ NEXCHAT 3-Panel Terminal Environment initialized.', 'success');
+    logTerminal(' NEXCHAT 3-Panel Terminal Environment initialized.', 'success');
   </script>
 </body>
 </html>

@@ -16,11 +16,11 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>☄️ NEXCHAT - Setup Profile ☄️</title>
+  <title> NEXCHAT - Setup Profile </title>
   <link rel="stylesheet" href="Profile-upload.css?v=1.0">
   <link rel="icon" type="image/x-icon" href="logo.jpg">
   <link rel="apple-touch-icon" href="logo.jpg">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
@@ -49,18 +49,18 @@
       <div class="form-group">
         <div class="upload-options">
           <button type="button" class="upload-btn camera-btn" id="cameraBtn" title="Take a professional photo">
-            <span class="btn-icon">📷</span>
+            <span class="btn-icon"><i class="fa-solid fa-camera"></i></span>
             <span class="btn-text">Camera</span>
             <span class="btn-subtitle">High quality</span>
           </button>
           <button type="button" class="upload-btn gallery-btn" id="galleryBtn" title="Choose from gallery">
-            <span class="btn-icon">🖼️</span>
+            <span class="btn-icon"><i class="fa-solid fa-image"></i></span>
             <span class="btn-text">Gallery</span>
             <span class="btn-subtitle">Select image</span>
           </button>
           <button type="button" class="upload-btn ai-btn" id="aiAvatarBtn" title="Choose NEX Avatar"
             style="background: rgba(0, 204, 255, 0.1); border: 1px solid #00ccff; color: #00ccff;">
-            <span class="btn-icon">⚡</span>
+            <span class="btn-icon"><i class="fa-solid fa-robot"></i></span>
             <span class="btn-text">NEX Avatar</span>
             <span class="btn-subtitle">AI generated</span>
           </button>
@@ -76,20 +76,20 @@
           <img id="previewImage" alt="Profile preview" class="preview-image">
           <div class="preview-overlay">
             <button type="button" class="edit-btn" id="editAvatarBtn" title="Edit avatar">
-              <span>✏️</span> Edit
+              <span><i class="fa-solid fa-pen"></i></span> Edit
             </button>
           </div>
         </div>
         <p class="preview-text">Profile Picture Preview</p>
         <p id="profileSelectStatus" class="profile-select-status">No picture selected</p>
         <div class="preview-actions">
-          <button type="button" class="preview-action-btn" id="rotateLeftBtn">↺ Rotate</button>
-          <button type="button" class="preview-action-btn" id="rotateRightBtn">↻ Rotate</button>
-          <button type="button" class="preview-action-btn" id="cropBtn">✂️ Crop</button>
+          <button type="button" class="preview-action-btn" id="rotateLeftBtn"><i class="fa-solid fa-rotate-left"></i> Rotate</button>
+          <button type="button" class="preview-action-btn" id="rotateRightBtn"><i class="fa-solid fa-rotate-right"></i> Rotate</button>
+          <button type="button" class="preview-action-btn" id="cropBtn"><i class="fa-solid fa-crop"></i> Crop</button>
         </div>
       </div>
 
-      <button type="button" class="step-btn" id="nextToStep2">Continue to Details →</button>
+      <button type="button" class="step-btn" id="nextToStep2">Continue to Details <i class="fa-solid fa-arrow-right"></i></button>
     </div>
 
     <!-- Step 2: Profile Details -->
@@ -117,14 +117,14 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class="step-btn secondary" id="backToStep1">← Back to Photo</button>
-        <button type="button" class="step-btn" id="nextToStep3">Complete Profile →</button>
+        <button type="button" class="step-btn secondary" id="backToStep1"><i class="fa-solid fa-arrow-left"></i> Back to Photo</button>
+        <button type="button" class="step-btn" id="nextToStep3">Complete Profile <i class="fa-solid fa-arrow-right"></i></button>
       </div>
     </div>
 
     <!-- Step 3: Completion -->
     <div id="step3" class="profile-step">
-      <h3>🎉 Profile Complete!</h3>
+      <h3><i class="fa-solid fa-circle-check"></i> Profile Complete!</h3>
       <div class="completion-summary">
         <div class="final-preview">
           <img id="finalAvatarPreview" src="" alt="Final profile" class="final-avatar">
@@ -137,21 +137,21 @@
       </div>
 
       <form id="profileForm" novalidate>
-        <button type="submit" class="auth-btn">🚀 Enter NEXCHAT</button>
+        <button type="submit" class="auth-btn"><i class="fa-solid fa-bolt"></i> Enter NEXCHAT</button>
       </form>
 
       <div class="completion-note">
-        <p>✨ Your profile is ready! You can always edit these details later in settings.</p>
+        <p><i class="fa-solid fa-circle-info"></i> Your profile is ready! You can always edit these details later in settings.</p>
       </div>
     </div>
 
     <p id="result" aria-live="polite" role="status"></p>
     <div id="timerContainer" style="display: none;">
-      ⏱️ Auto-redirect in <span id="timerCount">30</span>s
+       Auto-redirect in <span id="timerCount">30</span>s
     </div>
 
     <div id="backToChatContainer">
-      <a href="chat.html">← Back to Chat</a>
+      <a href="chat.html"><i class="fa-solid fa-arrow-left"></i> Back to Chat</a>
     </div>
   </main>
 
@@ -322,7 +322,7 @@
         // Clear file input
         fileInput.value = '';
 
-        showMessage(result, `✅ NEX Avatar Selected: ${avatar.name}`, 'success');
+        showMessage(result, ` NEX Avatar Selected: ${avatar.name}`, 'success');
 
         // Update button text and scroll to it to make next step obvious
         const nextBtn = document.getElementById('nextToStep2');
@@ -360,9 +360,9 @@
         previewContainer.setAttribute('aria-hidden', 'false');
         previewContainer.style.display = 'flex';
 
-        document.getElementById('profileSelectStatus').textContent = '✅ Picture selected. Proceed to details.';
+        document.getElementById('profileSelectStatus').textContent = ' Picture selected. Proceed to details.';
 
-        showMessage(result, '✅ Image ready for binary indexing', 'success');
+        showMessage(result, ' Image ready for binary indexing', 'success');
 
         // Update button
         const nextBtn = document.getElementById('nextToStep2');
@@ -383,7 +383,7 @@
       }
 
       try {
-        showMessage(result, '🚀 Creating your professional profile...', 'info');
+        showMessage(result, ' Creating your professional profile...', 'info');
 
         let avatarUrl = profileData.avatar;
         let isDefaultAvatar = !profileData.avatarFile;
@@ -391,7 +391,7 @@
         // Upload custom image via Vercel Blob (free, no Firebase Storage)
         if (profileData.avatarFile) {
           try {
-            showMessage(result, '⏳ Uploading profile picture to secure cloud storage...', 'info');
+            showMessage(result, ' Uploading profile picture to secure cloud storage...', 'info');
             avatarUrl = await uploadProfilePicture(profileData.avatarFile, auth.currentUser.uid);
           } catch (uploadErr) {
             console.warn('Direct upload error, falling back to local encoding:', uploadErr);
@@ -412,14 +412,14 @@
           lastActive: new Date()
         });
 
-        showMessage(result, '✅ Profile created successfully! Redirecting...', 'success');
+        showMessage(result, ' Profile created successfully! Redirecting...', 'success');
 
         // Start redirect timer
         startAutoRedirectTimer();
 
       } catch (error) {
         console.error('Profile creation error:', error);
-        showMessage(result, '❌ Failed to create profile. Please try again.', 'danger');
+        showMessage(result, ' Failed to create profile. Please try again.', 'danger');
       }
     });
 

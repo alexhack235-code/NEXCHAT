@@ -17,7 +17,7 @@ async function saveCallToHistory(contactId, callType, duration) {
         };
 
         await addDoc(collection(db, 'callHistory'), callRecord);
-        console.log('✅ Call saved to history:', callRecord);
+        console.log(' Call saved to history:', callRecord);
     } catch (error) {
         console.error('âŒ Error saving call to history:', error);
         throw error;
@@ -161,7 +161,7 @@ async function loadCallHistory() {
         }
 
         callHistoryFeed.innerHTML = historyHTML;
-        console.log(`📞 Loaded ${allCalls.length} call(s) from history`);
+        console.log(` Loaded ${allCalls.length} call(s) from history`);
 
     } catch (error) {
         console.error('Error loading call history:', error);
@@ -253,7 +253,7 @@ async function clearCallHistory() {
 
         await Promise.all(deletePromises);
 
-        showNotif('✅ Call history cleared', 'success');
+        showNotif(' Call history cleared', 'success');
         loadCallHistory(); // Reload to show empty state
 
     } catch (error) {

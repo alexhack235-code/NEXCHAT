@@ -493,10 +493,10 @@ export function openWallpaperModal(options = {}) {
           <div style="font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Live Preview</div>
           <div id="wpPreviewStage" class="wp-preview-stage">
             <div class="wp-mock-bubble wp-mock-received">
-              <span>Hey! Check out this new encrypted doodle wallpaper 🚀</span>
+              <span>Hey! Check out this new encrypted doodle wallpaper </span>
             </div>
             <div class="wp-mock-bubble wp-mock-sent">
-              <span>Looks so clean! Encrypted & dark mode ready 🔒</span>
+              <span>Looks so clean! Encrypted & dark mode ready </span>
             </div>
           </div>
         </div>
@@ -637,7 +637,7 @@ export function openWallpaperModal(options = {}) {
       if (uploadedUrl) {
         selectedUrl = uploadedUrl;
         refreshPreview();
-        showNotif('✅ Wallpaper uploaded! Click "Set Wallpaper" to apply.', 'success');
+        showNotif(' Wallpaper uploaded! Click "Set Wallpaper" to apply.', 'success');
       }
     } catch (err) {
       console.error('Wallpaper upload failed:', err);
@@ -648,7 +648,7 @@ export function openWallpaperModal(options = {}) {
   // Apply Button
   document.getElementById('wpApplyBtn')?.addEventListener('click', async () => {
     await setWallpaper(selectedUrl, selectedScope, chatId, chatType, myUID, db);
-    showNotif('✅ Wallpaper applied successfully!', 'success');
+    showNotif(' Wallpaper applied successfully!', 'success');
     modal.remove();
   });
 

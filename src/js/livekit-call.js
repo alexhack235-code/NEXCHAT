@@ -78,7 +78,7 @@ export async function joinCall({
 
   // Handle incoming remote tracks (audio/video from the other chatter)
   activeRoom.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
-    console.log(`📡 Remote track subscribed: ${track.kind} from ${participant.identity}`);
+    console.log(` Remote track subscribed: ${track.kind} from ${participant.identity}`);
     if (remoteMediaEl) {
       track.attach(remoteMediaEl);
     } else {
@@ -102,7 +102,7 @@ export async function joinCall({
   try {
     // 1. Connect to LiveKit Room
     await activeRoom.connect(serverUrl, roomToken);
-    console.log(`✅ Connected to LiveKit Room: ${callId}`);
+    console.log(` Connected to LiveKit Room: ${callId}`);
 
     // 2. Publish local camera & microphone tracks
     localTracks = await createLocalTracks({

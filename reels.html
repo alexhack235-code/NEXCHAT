@@ -3,39 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>NEX_REELS — Short Video Hub</title>
+  <title>NEX_REELS — Cinematic Vertical Video Hub</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="stylesheet" href="reels.css">
 </head>
 <body class="reels-body">
-  <!-- Top Navigation Header -->
+  <!-- Sci-Fi HUD Background Grid -->
+  <div class="hud-grid-overlay" aria-hidden="true"></div>
+
+  <!-- Top Navigation Header: Chats | NEX_REELS • | + Create -->
   <header class="reels-header">
-    <a href="chat.html" class="reels-back-btn" title="Back to NEXCHAT">
-      <i class="fa-solid fa-arrow-left"></i>
-      <span>Chats</span>
-    </a>
-    <div class="reels-branding">
-      <span class="reels-logo-dot"></span>
-      <span class="reels-logo-text">NEX_REELS</span>
+    <div class="reels-nav-group">
+      <a href="chat.html" class="reels-nav-link" title="Back to Chats">Chats</a>
+      <span class="reels-nav-separator">|</span>
+      <div class="reels-nav-active">
+        <span>NEX_REELS</span>
+        <span class="active-dot"></span>
+      </div>
+      <span class="reels-nav-separator">|</span>
     </div>
+
     <div class="reels-header-actions">
-      <button id="openUploadModalBtn" class="reels-upload-btn" title="Upload Short Reel">
+      <button id="globalSoundToggle" class="reels-sound-pill" title="Toggle Sound">
+        <i class="fa-solid fa-volume-xmark"></i>
+      </button>
+      <button id="openUploadModalBtn" class="reels-create-pill-btn" title="Create a Reel">
         <i class="fa-solid fa-plus"></i>
         <span>Create</span>
       </button>
     </div>
   </header>
 
-  <!-- Sound Toggle Control Floating -->
-  <button id="globalSoundToggle" class="reels-sound-btn" title="Mute/Unmute Audio">
-    <i class="fa-solid fa-volume-xmark"></i>
-  </button>
+  <!-- Desktop Side Navigation Floating Controls -->
+  <div class="desktop-nav-controls" id="desktopNavControls">
+    <button id="prevReelBtn" class="desktop-nav-btn" title="Previous Reel (Up Arrow)">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+    <button id="nextReelBtn" class="desktop-nav-btn" title="Next Reel (Down Arrow)">
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+  </div>
 
-  <!-- Fullscreen Vertical Reels Feed Container -->
+  <!-- Fullscreen Vertical Reels Feed Container (100vh x 100vw, Black) -->
   <main id="reelsFeed" class="reels-feed-container">
     <!-- Initial Loading State -->
     <div class="reels-loading-state" id="reelsLoadingState">
@@ -48,8 +61,8 @@
   <div id="uploadReelModal" class="reels-modal" style="display: none;">
     <div class="reels-modal-card">
       <div class="reels-modal-header">
-        <h3><i class="fa-solid fa-clapperboard"></i> Post a Short Reel</h3>
-        <button id="closeUploadModalBtn" class="reels-modal-close"><i class="fa-solid fa-xmark"></i></button>
+        <h3><i class="fa-solid fa-clapperboard"></i> Post a Reel</h3>
+        <button id="closeUploadModalBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
       <form id="uploadReelForm" class="reels-modal-body">
@@ -58,8 +71,8 @@
           <input type="file" id="reelVideoInput" accept="video/mp4,video/webm,video/quicktime,video/*" style="display: none;">
           <div id="reelDropzonePrompt" class="dropzone-prompt">
             <i class="fa-solid fa-cloud-arrow-up"></i>
-            <p><strong>Click to select a video</strong></p>
-            <span class="dropzone-hint">Supports MP4, WEBM (Short video under 90s recommended)</span>
+            <p><strong>Click or Drag Video to Upload</strong></p>
+            <span class="dropzone-hint">Supports MP4, WebM, 1080p, 4K (Short video under 90s recommended)</span>
           </div>
           <div id="reelPreviewContainer" class="reel-preview-container" style="display: none;">
             <video id="reelPreviewVideo" playsinline muted controls></video>
@@ -68,24 +81,50 @@
           </div>
         </div>
 
-        <!-- Video Info Inputs -->
+        <!-- Audio Selection Row -->
         <div class="reels-input-group">
-          <label for="reelCaptionInput">Caption & Hashtags</label>
-          <textarea id="reelCaptionInput" class="reels-textarea" rows="2" placeholder="Tell viewers about this reel... #nexchat #cyberpunk" maxlength="300"></textarea>
-        </div>
-
-        <div class="reels-input-group">
-          <label for="reelSoundInput">Audio / Track Name</label>
-          <input type="text" id="reelSoundInput" class="reels-input" placeholder="Original Sound — @your_handle" maxlength="60">
-        </div>
-
-        <!-- Multi-Vault Storage Strategy -->
-        <div class="reels-input-group">
-          <label>Storage Vault Pipeline</label>
-          <div class="vault-pipeline-display">
-            <span class="vault-badge-pill active"><i class="fa-solid fa-database"></i> NEX-REELS VAULT 0–5 (Auto-Cascade)</span>
+          <label>Audio / Soundtrack</label>
+          <div class="sound-selection-bar">
+            <button type="button" id="openSoundLibraryBtn" class="select-sound-btn">
+              <i class="fa-solid fa-music"></i>
+              <span id="selectedSoundLabel">Original Audio — (Video Sound)</span>
+            </button>
+            <button type="button" id="resetSoundBtn" class="reset-sound-btn" title="Reset to Original Audio">
+              <i class="fa-solid fa-rotate-left"></i>
+            </button>
           </div>
-          <span class="vault-note">Cascades sequentially across all 5 free vaults with instant private streaming proxy.</span>
+          <input type="hidden" id="reelSoundTitle" value="Original Audio">
+          <input type="hidden" id="reelSoundUrl" value="">
+        </div>
+
+        <!-- Video Caption Inputs -->
+        <div class="reels-input-group">
+          <div class="input-label-row">
+            <label for="reelCaptionInput">Caption & Hashtags</label>
+            <span id="reelCaptionCounter" class="caption-counter">0/300</span>
+          </div>
+          <textarea id="reelCaptionInput" class="reels-textarea" rows="2" placeholder="Tell viewers about this reel... #nexchat #cyberpunk" maxlength="300"></textarea>
+          <div class="quick-hashtag-bar">
+            <button type="button" class="hashtag-pill" data-tag="#nexchat">#nexchat</button>
+            <button type="button" class="hashtag-pill" data-tag="#cyberpunk">#cyberpunk</button>
+            <button type="button" class="hashtag-pill" data-tag="#gaming">#gaming</button>
+            <button type="button" class="hashtag-pill" data-tag="#music">#music</button>
+            <button type="button" class="hashtag-pill" data-tag="#tech">#tech</button>
+          </div>
+        </div>
+
+        <!-- Upload Quality Options (Issue 3: Highest Quality HD / 4K) -->
+        <div class="reels-input-group">
+          <label>Upload Quality Mode</label>
+          <div class="quality-selector-pills">
+            <button type="button" class="quality-pill" data-quality="hd">HD 720p</button>
+            <button type="button" class="quality-pill active" data-quality="fhd">Full HD 1080p</button>
+            <button type="button" class="quality-pill" data-quality="4k">Ultra HD 4K</button>
+          </div>
+          <label class="original-quality-checkbox">
+            <input type="checkbox" id="keepOriginalQuality" checked>
+            <span>Preserve Original Quality (Lossless H.264 high-bitrate)</span>
+          </label>
         </div>
 
         <!-- Upload Progress Display -->
@@ -95,7 +134,7 @@
           </div>
           <div class="reels-progress-status">
             <span id="reelProgressPercent">0%</span>
-            <span id="reelProgressVault">Preparing Vault 0...</span>
+            <span id="reelProgressVault">Uploading to Cloud Vault Pool...</span>
           </div>
         </div>
 
@@ -106,6 +145,57 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- Music / Sounds Library Drawer (Issue 4: Royalty-Free Trending Funks/Beats) -->
+  <div id="soundsLibraryModal" class="reels-modal" style="display: none;">
+    <div class="reels-modal-card sounds-library-card">
+      <div class="reels-modal-header">
+        <h3><i class="fa-solid fa-headphones"></i> Trending Audio Library</h3>
+        <button id="closeSoundsLibraryBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="sounds-library-tabs">
+        <button type="button" class="sound-tab active" data-tab="trending">Trending Funks & Beats</button>
+        <button type="button" class="sound-tab" data-tab="original">Original Audio</button>
+      </div>
+      <div class="sounds-list-container" id="soundsListContainer">
+        <!-- Rendered dynamically from reels-sounds.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Reel Modal -->
+  <div id="shareReelModal" class="reels-modal" style="display: none;">
+    <div class="reels-modal-card share-modal-card">
+      <div class="reels-modal-header">
+        <h3><i class="fa-solid fa-share-nodes"></i> Share Reel</h3>
+        <button id="closeShareModalBtn" class="reels-modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="share-modal-body">
+        <div class="share-options-grid">
+          <button type="button" class="share-option-btn" id="shareCopyLinkBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-link"></i></div>
+            <span>Copy Link</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareNativeBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+            <span>Share Via...</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareSendInChatBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-paper-plane"></i></div>
+            <span>Send in Chat</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareDownloadBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-download"></i></div>
+            <span>Save Video</span>
+          </button>
+        </div>
+        <div class="share-link-preview">
+          <input type="text" id="shareLinkInput" readonly value="">
+          <button type="button" id="shareQuickCopyBtn" class="reels-btn-primary" style="padding: 6px 12px; font-size: 12px;">Copy</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -122,7 +212,7 @@
       </div>
       <form id="commentForm" class="comment-input-bar">
         <input type="text" id="commentTextInput" placeholder="Add a comment..." maxlength="200" required>
-        <button type="submit" class="comment-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+        <button type="submit" class="comment-send-btn" title="Post Comment"><i class="fa-solid fa-paper-plane"></i></button>
       </form>
     </div>
   </div>

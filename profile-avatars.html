@@ -492,7 +492,7 @@
         <div class="sidebar">
             <div style="font-size:12px; color:#555; margin-bottom:10px;">SECTOR SELECT</div>
             <button class="filter-btn active" onclick="setFilter('all', event)">ALL_CHROME_UNITS</button>
-            <button class="filter-btn" onclick="setFilter('nex', event)" style="color:#00ffaa; font-weight:bold;">★
+            <button class="filter-btn" onclick="setFilter('nex', event)" style="color:#00ffaa; font-weight:bold;">
                 Chrome-Elite</button>
             <button class="filter-btn" onclick="setFilter('human', event)">Neo-Synth</button>
             <button class="filter-btn" onclick="setFilter('skull', event)">Silver-Sentinel</button>
@@ -513,7 +513,7 @@
     <!-- PREVIEW MODAL -->
     <div class="modal-overlay" id="modal" onclick="if(event.target===this) closeModal()">
         <div class="modal">
-            <div class="close-btn" onclick="closeModal()">✕</div>
+            <div class="close-btn" onclick="closeModal()"></div>
             <div class="preview-large">
                 <img id="modalImg" src="" class="">
             </div>
@@ -576,7 +576,7 @@
             if (!img || img.dataset.failed === 'true') return;
             img.dataset.failed = 'true';
 
-            console.warn(`⚠️ NEX_CORE: Recalibrating Beam Output [${type}]`);
+            console.warn(` NEX_CORE: Recalibrating Beam Output [${type}]`);
 
             // FALLBACK TO A SIMPLIFIED HIGH-REALISM PROMPT INSTEAD OF CARTOONS
             const fallbackPrompt = "hyper-realistic silver chrome robot head, glowing blue eyes, highly detailed metal, cinematic, 8k, machine parts";
@@ -617,7 +617,7 @@
                 }
             });
 
-            console.log(`🚀 NEX_CORE: ${avatars.length} Ultra-Fast Units Online`);
+            console.log(` NEX_CORE: ${avatars.length} Ultra-Fast Units Online`);
             render();
         }
 
@@ -639,7 +639,7 @@
             const filtered = avatars.filter(av => currentFilter === 'all' || av.type === currentFilter);
 
             if (filtered.length === 0) {
-                g.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff6b6b; padding: 50px;">⚠️ NEX_CORE ERROR: SECTOR EMPTY [${currentFilter.toUpperCase()}]</div>`;
+                g.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: #ff6b6b; padding: 50px;"> NEX_CORE ERROR: SECTOR EMPTY [${currentFilter.toUpperCase()}]</div>`;
                 return;
             }
 

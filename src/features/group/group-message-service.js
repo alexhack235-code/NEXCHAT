@@ -337,7 +337,7 @@ export async function sendMessage(params = {}) {
 
     // Update group lastMessage
     await updateDoc(doc(db, 'groups', groupId), {
-      lastMessage: text || (attachment ? '📎 Attachment' : ''),
+      lastMessage: text || (attachment ? ' Attachment' : ''),
       lastMessageTime: serverTimestamp()
     });
 

@@ -50,7 +50,7 @@ export class GeminiKeyPool {
     this.keys = this.loadKeys(keys);
     this.currentIndex = 0;
     this.cooldowns = new Map(); // key -> cooldown expiry timestamp (ms)
-    console.log(`🧠 GeminiKeyPool initialized with ${this.keys.length} API keys.`);
+    console.log(` GeminiKeyPool initialized with ${this.keys.length} API keys.`);
   }
 
   loadKeys(defaultKeys) {
@@ -101,7 +101,7 @@ export class GeminiKeyPool {
       }
     }
 
-    console.warn(`⚠️ All Gemini keys on cooldown. Using key with earliest recovery (${Math.max(0, Math.round((earliestExpiry - now) / 1000))}s remaining).`);
+    console.warn(` All Gemini keys on cooldown. Using key with earliest recovery (${Math.max(0, Math.round((earliestExpiry - now) / 1000))}s remaining).`);
     return { key: earliestKey, index: this.keys.indexOf(earliestKey) };
   }
 
@@ -112,7 +112,7 @@ export class GeminiKeyPool {
     const expiry = Date.now() + durationMs;
     this.cooldowns.set(key, expiry);
     const keyShort = key ? `${key.substring(0, 8)}...` : 'unknown';
-    console.warn(`⏸️ Gemini Key [${keyShort}] placed on cooldown for ${durationMs / 1000}s.`);
+    console.warn(` Gemini Key [${keyShort}] placed on cooldown for ${durationMs / 1000}s.`);
   }
 
   /**

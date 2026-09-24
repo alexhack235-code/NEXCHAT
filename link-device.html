@@ -159,13 +159,13 @@
             clearInterval(timerInterval);
             statusIndicator.classList.add('approved');
             statusText.textContent = 'Device approved! Synchronizing chats...';
-            showToast('✅ Device linked successfully!');
+            showToast(' Device linked successfully!');
             setTimeout(() => {
               window.location.replace('chat.html');
             }, 1200);
           } else if (status === 'rejected') {
             statusText.textContent = 'Authorization was denied by your phone.';
-            showToast('❌ Link request declined.');
+            showToast(' Link request declined.');
           }
         });
 
