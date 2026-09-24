@@ -359,9 +359,6 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'c' || e.key === 'C' || e.key === '+') {
     e.preventDefault();
     openCreatorStudio();
-  } else if (e.key === 'd' || e.key === 'D') {
-    e.preventDefault();
-    openReelsDoc();
   }
 });
 
@@ -378,6 +375,113 @@ function getCurrentActiveCard() {
   return cards[0] || null;
 }
 
+
+// ══════════════════════════════════════════════════
+// CURATED SEED REELS STREAM (Zero-Empty Feed Protection)
+// ══════════════════════════════════════════════════
+export const SEED_REELS = [
+  {
+    id: 'seed-reel-1',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/sea_turtle.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/sea_turtle.jpg',
+    authorName: 'ocean_explorer',
+    authorPic: 'logo.jpg',
+    caption: 'Gliding through pristine blue waters. Pure ocean peace. #ocean #wildlife #nature #peace',
+    likesCount: 14200,
+    likes: [],
+    commentsCount: 3,
+    sharesCount: 2300,
+    views: 89400,
+    sound: 'Quantum Lo-Fi Chill — NEX_Records',
+    audioUrl: '',
+    seedComments: [
+      { authorName: 'marine_biologist', authorPic: 'favicon.png', text: 'The clarity of this water is incredible!' },
+      { authorName: 'alex_travels', authorPic: 'logo.jpg', text: 'Looks like Hawaii or the Maldives. Beautiful shot.' },
+      { authorName: 'sam_nature', authorPic: 'favicon.png', text: 'Sea turtles are so peaceful to watch.' }
+    ]
+  },
+  {
+    id: 'seed-reel-2',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/rafting.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/rafting.jpg',
+    authorName: 'adrenaline_rush',
+    authorPic: 'chronex-ai.jpg',
+    caption: 'Class V rapids ride! Pure adrenaline with the crew today. #adventure #whitewater #rafting #extreme',
+    likesCount: 28400,
+    likes: [],
+    commentsCount: 3,
+    sharesCount: 4600,
+    views: 142000,
+    sound: 'Midnight City Glide — K-Trap Labs',
+    audioUrl: '',
+    seedComments: [
+      { authorName: 'river_runner', authorPic: 'logo.jpg', text: 'That drop looked intense! Great paddle work.' },
+      { authorName: 'jessica_outdoors', authorPic: 'favicon.png', text: 'Bucket list item unlocked! That looks so fun.' },
+      { authorName: 'charlie_k', authorPic: 'chronex-ai.jpg', text: 'High energy! Love the rush.' }
+    ]
+  },
+  {
+    id: 'seed-reel-3',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/dog.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/dog.jpg',
+    authorName: 'golden_tails',
+    authorPic: 'logo.jpg',
+    caption: 'Golden hour zoomies at the dog park. Unlimited energy! #dogsoftiktok #pets #goldenretriever #happy',
+    likesCount: 65100,
+    likes: [],
+    commentsCount: 3,
+    sharesCount: 8900,
+    views: 289000,
+    sound: 'Neon Tokyo Funk 2088 — Future_Wave',
+    audioUrl: '',
+    seedComments: [
+      { authorName: 'puppy_fan', authorPic: 'favicon.png', text: 'The happiest dog on the entire internet!' },
+      { authorName: 'mia_dogs', authorPic: 'logo.jpg', text: 'Look at that smile! Absolutely precious.' },
+      { authorName: 'daniel_b', authorPic: 'chronex-ai.jpg', text: 'Instant mood booster right here.' }
+    ]
+  },
+  {
+    id: 'seed-reel-4',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/elephants.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/elephants.jpg',
+    authorName: 'safari_chronicles',
+    authorPic: 'chronex-ai.jpg',
+    caption: 'Morning river crossing with the herd. Magnificent gentle giants. #wildlife #safari #africa #nature',
+    likesCount: 41800,
+    likes: [],
+    commentsCount: 3,
+    sharesCount: 5400,
+    views: 198000,
+    sound: 'Hyperdrive Synthwave — Retro_Future',
+    audioUrl: '',
+    seedComments: [
+      { authorName: 'david_wild', authorPic: 'logo.jpg', text: 'Such majestic animals. Great camera stabilization.' },
+      { authorName: 'sarah_safari', authorPic: 'favicon.png', text: 'The little calf in the middle! So cute.' },
+      { authorName: 'kenya_tours', authorPic: 'chronex-ai.jpg', text: 'Respect wildlife always. Great clip.' }
+    ]
+  },
+  {
+    id: 'seed-reel-5',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/kitten_fighting.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/kitten_fighting.jpg',
+    authorName: 'kitten_squad',
+    authorPic: 'logo.jpg',
+    caption: 'Heavyweight championship fight of the day. Tiny paws, big drama! #kittens #cats #cute #playtime',
+    likesCount: 88700,
+    likes: [],
+    commentsCount: 3,
+    sharesCount: 12300,
+    views: 395000,
+    sound: 'Cyberpunk Drift Phonk — DEMON_BEATS',
+    audioUrl: '',
+    seedComments: [
+      { authorName: 'cat_whisperer', authorPic: 'favicon.png', text: 'The stealth sneak attack at second 3!' },
+      { authorName: 'oliver_cat', authorPic: 'logo.jpg', text: 'I could watch these two play all day long.' },
+      { authorName: 'nora_k', authorPic: 'chronex-ai.jpg', text: 'Tiny tigers in action!' }
+    ]
+  }
+];
+
 // Subscribe to Firestore Reels Collection
 function initReelsFeed() {
   const reelsQuery = query(
@@ -389,23 +493,27 @@ function initReelsFeed() {
   onSnapshot(reelsQuery, (snapshot) => {
     if (reelsLoadingState) reelsLoadingState.style.display = 'none';
 
-    if (snapshot.empty) {
-      allLoadedReels = [];
-      renderEmptyFeed();
-      return;
-    }
-
-    const reelDocs = snapshot.docs.map((docSnap) => ({
+    const reelDocs = (!snapshot.empty) ? snapshot.docs.map((docSnap) => ({
       id: docSnap.id,
       ...docSnap.data(),
-    }));
+    })) : [];
 
-    allLoadedReels = reelDocs;
+    // Augment with curated seed reels so the feed is never empty or abandoned
+    const firestoreIds = new Set(reelDocs.map(r => r.id));
+    const merged = [...reelDocs];
+    SEED_REELS.forEach(sr => {
+      if (!firestoreIds.has(sr.id)) {
+        merged.push(sr);
+      }
+    });
+
+    allLoadedReels = merged;
     applyFeedFilter();
   }, (err) => {
-    console.error('Error fetching reels:', err);
+    console.warn('Reels stream fallback to seeded content:', err.message);
     if (reelsLoadingState) reelsLoadingState.style.display = 'none';
-    renderEmptyFeed('NEX_REELS stream initializing...');
+    allLoadedReels = [...SEED_REELS];
+    applyFeedFilter();
   });
 }
 
@@ -968,7 +1076,7 @@ function handleBookmarkToggle(reelId, btn) {
       icon.className = 'fa-solid fa-bookmark text-[#FFD700] text-[26px] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)] scale-125';
       setTimeout(() => icon.classList.remove('scale-125'), 200);
     }
-    showToast('Saved to Creator Vault! ⭐');
+    showToast('Saved to Saved Vault');
   }
   localStorage.setItem('nex_bookmarked_reels', JSON.stringify([...bookmarkedReels]));
   updateSavedTabCount();
@@ -1317,7 +1425,7 @@ if (chronexAiAskBtn && chronexAiQuestionInput) {
     } else if (q.includes('who') || q.includes('author') || q.includes('creator')) {
       ans = `Creator: @${activeAiReel.authorName}. They stream high-definition reels on NEXCHAT. Tap their handle to view their full portfolio.`;
     } else if (q.includes('quality') || q.includes('resolution') || q.includes('fps')) {
-      ans = `Quality: High Bitrate Lossless Stream. Encoded in H.264 at 60FPS for maximum clarity on the NEXCHAT Media Engine.`;
+      ans = `Quality: High Definition Video stream with smooth playback.`;
     } else {
       ans = `ChronEX Intelligence: Analyzed "${q}" for reel "${activeAiReel.caption || activeAiReel.id}". Video has ${formatNumber(activeAiReel.likesCount || 0)} likes and is currently trending!`;
     }
@@ -1555,26 +1663,50 @@ function openCommentsDrawer(reelId) {
   );
 
   currentCommentUnsubscribe = onSnapshot(commentsQuery, (snapshot) => {
-    commentsCountHeader.textContent = snapshot.size;
-    if (snapshot.empty) {
+    const activeReelObj = allLoadedReels.find(r => r.id === reelId);
+    const seedComms = (activeReelObj && activeReelObj.seedComments) ? activeReelObj.seedComments : [];
+
+    if (snapshot.empty && seedComms.length === 0) {
+      commentsCountHeader.textContent = '0';
       commentsList.innerHTML = '<div class="comment-empty"><i class="fa-regular fa-comment-dots" style="font-size:28px;margin-bottom:8px;display:block;"></i>No comments yet. Share your thoughts!</div>';
       return;
     }
 
     commentsList.innerHTML = '';
-    snapshot.docs.forEach((docSnap) => {
-      const c = docSnap.data();
-      const item = document.createElement('div');
-      item.className = 'comment-item';
-      item.innerHTML = `
-        <img src="${c.authorPic || '/favicons/favicon.ico'}" class="comment-avatar" alt="${c.authorName}">
-        <div class="comment-body">
-          <span class="comment-author">@${escapeHtml(c.authorName || 'user')}</span>
-          <span class="comment-text">${escapeHtml(c.text || '')}</span>
-        </div>
-      `;
-      commentsList.appendChild(item);
-    });
+    let totalCount = 0;
+
+    if (!snapshot.empty) {
+      totalCount = snapshot.size;
+      snapshot.docs.forEach((docSnap) => {
+        const c = docSnap.data();
+        const item = document.createElement('div');
+        item.className = 'comment-item';
+        item.innerHTML = `
+          <img src="${c.authorPic || 'logo.jpg'}" class="comment-avatar" alt="${c.authorName}">
+          <div class="comment-body">
+            <span class="comment-author">@${escapeHtml(c.authorName || 'user')}</span>
+            <span class="comment-text">${escapeHtml(c.text || '')}</span>
+          </div>
+        `;
+        commentsList.appendChild(item);
+      });
+    } else if (seedComms.length > 0) {
+      totalCount = seedComms.length;
+      seedComms.forEach((c) => {
+        const item = document.createElement('div');
+        item.className = 'comment-item';
+        item.innerHTML = `
+          <img src="${c.authorPic || 'logo.jpg'}" class="comment-avatar" alt="${c.authorName}">
+          <div class="comment-body">
+            <span class="comment-author">@${escapeHtml(c.authorName || 'user')}</span>
+            <span class="comment-text">${escapeHtml(c.text || '')}</span>
+          </div>
+        `;
+        commentsList.appendChild(item);
+      });
+    }
+
+    commentsCountHeader.textContent = totalCount;
     commentsList.scrollTop = commentsList.scrollHeight;
   });
 }
@@ -1972,46 +2104,6 @@ uploadReelForm.addEventListener('submit', async (e) => {
   }
 });
 
-// ══════════════════════════════════════════════════
-// ARCHITECTURE DOCUMENTARY MODAL CONTROLLER
-// ══════════════════════════════════════════════════
-const reelsDocModal = document.getElementById('reelsDocModal');
-const openReelsDocBtn = document.getElementById('openReelsDocBtn');
-const closeReelsDocBtn = document.getElementById('closeReelsDocBtn');
-
-function openReelsDoc() {
-  if (reelsDocModal) {
-    reelsDocModal.style.display = 'flex';
-  }
-}
-
-function closeReelsDoc() {
-  if (reelsDocModal) {
-    reelsDocModal.style.display = 'none';
-  }
-}
-
-if (openReelsDocBtn) openReelsDocBtn.addEventListener('click', openReelsDoc);
-if (closeReelsDocBtn) closeReelsDocBtn.addEventListener('click', closeReelsDoc);
-
-document.querySelectorAll('.doc-tab-btn').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.doc-tab-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    const tab = btn.dataset.tab;
-
-    const paneTiktok = document.getElementById('docPaneTiktok');
-    const paneNexreels = document.getElementById('docPaneNexreels');
-    const paneMatrix = document.getElementById('docPaneMatrix');
-    const paneInnovations = document.getElementById('docPaneInnovations');
-
-    if (paneTiktok) paneTiktok.style.display = tab === 'tiktok' ? 'block' : 'none';
-    if (paneNexreels) paneNexreels.style.display = tab === 'nexreels' ? 'block' : 'none';
-    if (paneMatrix) paneMatrix.style.display = tab === 'matrix' ? 'block' : 'none';
-    if (paneInnovations) paneInnovations.style.display = tab === 'innovations' ? 'block' : 'none';
-  });
-});
-
 function escapeHtml(text) {
   const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
   return String(text).replace(/[&<>"']/g, (m) => map[m]);
@@ -2222,13 +2314,14 @@ async function loadCreatorReels(authorName) {
     if (likesEl) likesEl.textContent = formatNumber(totalLikes || 195200);
 
     if (authorReels.length === 0) {
-      profileReelsGrid.innerHTML = `
-        <div class="profile-empty-grid">
-          <i class="fa-solid fa-clapperboard" style="font-size: 32px; color: var(--neon-green); margin-bottom: 8px; display: block;"></i>
-          <p>No reels published yet by @${escapeHtml(authorName)}</p>
-        </div>
-      `;
-      return;
+      // Check if author matches any seed reel
+      const seedMatches = SEED_REELS.filter(sr => sr.authorName.toLowerCase() === (authorName || '').toLowerCase());
+      if (seedMatches.length > 0) {
+        authorReels.push(...seedMatches);
+      } else {
+        // Fallback to 2 sample clips so creator profile is never abandoned
+        authorReels.push(SEED_REELS[0], SEED_REELS[1]);
+      }
     }
 
     profileReelsGrid.innerHTML = '';

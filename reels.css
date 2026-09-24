@@ -2815,29 +2815,7 @@ html, body {
   box-shadow: 0 0 28px rgba(0, 243, 255, 0.7) !important;
 }
 
-.reels-doc-pill {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 9999px;
-  background: rgba(0, 243, 255, 0.12);
-  border: 1px solid rgba(0, 243, 255, 0.4);
-  color: #00f3ff;
-  font-size: 12px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 12px rgba(0, 243, 255, 0.2);
-}
 
-.reels-doc-pill:hover {
-  background: rgba(0, 243, 255, 0.25);
-  color: #fff;
-  box-shadow: 0 0 20px rgba(0, 243, 255, 0.5);
-  transform: translateY(-1px);
-}
 
 /* ══════════════════════════════════════════════════
    NEX_REELS CREATOR STUDIO PRO (ADD REEL PAGE MODAL)
