@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const PALETTES = [
-  '#0b141a', // Dark WhatsApp / NEX Void
+  '#0b141a', // Dark Obsidian / NEX Void
   '#005c4b', // Classic Emerald Dark
   '#59287a', // Deep Violet
   '#792138', // Crimson Berry

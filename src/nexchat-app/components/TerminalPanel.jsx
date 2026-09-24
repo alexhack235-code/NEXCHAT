@@ -13,14 +13,14 @@ Available Commands:
   open <name>              - Open chat by name or ID (e.g. 'open Alex')
   send <message>           - Send text to active conversation
   sendcode <code>          - Send formatted code snippet to active chat
-  call <name>              - Launch 1:1 WhatsApp Voice Calling screen
+  call <name>              - Launch 1:1 Voice Calling screen
   videocall <name>         - Open encrypted Video Mesh Grid
-  status text [your text]  - Open 1:1 WhatsApp Text Status Creator
+  status text [your text]  - Open 1:1 Text Status Creator
   status photo             - Open 1:1 Photo Status Editor with B&W filters
   pin <name>               - Toggle pinned status for contact
   mute <name>              - Toggle mute notifications
   archive <name>           - Archive specified chat
-  theme <hacker|whatsapp>  - Switch application color theme
+  theme <hacker|nexchat>   - Switch application color theme
   encrypt                  - Execute quantum matrix cipher animation
   clear                    - Wipe terminal buffer
 `;
@@ -197,11 +197,11 @@ export default function TerminalPanel({
     } 
     else if (cmd === 'theme') {
       const t = args[1]?.toLowerCase();
-      if (['hacker', 'whatsapp', 'dark'].includes(t)) {
+      if (['hacker', 'nexchat', 'dark'].includes(t)) {
         onThemeChange?.(t);
         updated.push({ type: 'success', text: `✓ Switched theme mode to: ${t}` });
       } else {
-        updated.push({ type: 'error', text: 'Usage: theme <hacker | whatsapp | dark>' });
+        updated.push({ type: 'error', text: 'Usage: theme <hacker | nexchat | dark>' });
       }
     } 
     else {

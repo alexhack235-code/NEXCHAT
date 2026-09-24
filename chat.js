@@ -8156,29 +8156,39 @@ async function setupInitialization() {
           }
         }
 
-        const fromAd = sessionStorage.getItem('fromAdvertisement');
-        const targetUID = sessionStorage.getItem('targetUserUID');
-        const targetName = sessionStorage.getItem('targetUsername');
-        const productName = sessionStorage.getItem('productName');
+        const urlParams = new URLSearchParams(window.location.search);
+        const chatWithParam = urlParams.get('chatWith');
+        const chatNameParam = urlParams.get('chatName');
+        const productParam = urlParams.get('product');
 
-        if (fromAd === 'true' && targetUID && targetUID !== myUID) {
-          console.log(`??? Redirected from Marketplace to chat with ${targetName}`);
+        const targetUID = chatWithParam || sessionStorage.getItem('targetUserUID');
+        const targetName = chatNameParam || sessionStorage.getItem('targetUsername');
+        const productName = productParam || sessionStorage.getItem('productName');
+        const isFromAd = chatWithParam || (sessionStorage.getItem('fromAdvertisement') === 'true');
+
+        if (isFromAd && targetUID && targetUID !== myUID) {
+          console.log(`✓ Marketplace connect: opening chat with ${targetName}`);
 
           sessionStorage.removeItem('fromAdvertisement');
           sessionStorage.removeItem('targetUserUID');
           sessionStorage.removeItem('targetUsername');
           sessionStorage.removeItem('productName');
 
+          if (chatWithParam) {
+            window.history.replaceState({}, document.title, window.location.pathname);
+          }
+
           setTimeout(async () => {
             const initialText = productName ? `Hi, I'm interested in your advertisement: "${productName}"` : "Hi, I'm interested in your advertisement!";
-            await openChat(targetUID, targetName, null, 'direct');
+            await openChat(targetUID, targetName || 'Seller', null, 'direct');
 
             const messageInput = document.getElementById('message-input');
             if (messageInput) {
               messageInput.value = initialText;
+              if (typeof updateSendButtons === 'function') updateSendButtons();
               messageInput.focus();
             }
-          }, 1000);
+          }, 800);
         }
 
         const tokenSnapshotUnsubscribe = onSnapshot(doc(db, "users", myUID), (userDocSnapshot) => {
@@ -8449,7 +8459,7 @@ if (gamingBtnEl) {
   gamingBtnEl.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
-    window.location.href = 'bet.html';
+    window.location.href = 'gaminghub.html';
   }, false);
 }
 
@@ -9188,7 +9198,7 @@ async function loadStatuses() {
           </div>
           <p class="status-item-text">${escape(status.text)}</p>
           <div class="status-item-footer">
-            <span class="status-expiry-timer" data-expires="${expiryTime.getTime()}">? Expires in ${timeRemaining}</span>
+            <span class="status-expiry-timer" data-expires="${expiryTime.getTime()}"><i class="fa-regular fa-clock"></i> Expires in ${timeRemaining}</span>
           </div>
         `;
 
@@ -9199,7 +9209,7 @@ async function loadStatuses() {
             if (confirm("Delete this status?")) {
               try {
                 await deleteDoc(doc(db, "statuses", docSnap.id));
-                showNotif("? Status deleted", "success", 2000);
+                showNotif("Status deleted", "success", 2000);
               } catch (err) {
                 console.error("Error deleting status:", err);
                 showNotif("Error deleting status", "error");
@@ -9250,7 +9260,7 @@ function startStatusTimerUpdates() {
       const expiresAt = parseInt(timer.dataset.expires);
       const expiryTime = new Date(expiresAt);
       const timeRemaining = getTimeRemaining(expiryTime);
-      timer.textContent = `? Expires in ${timeRemaining}`;
+      timer.innerHTML = `<i class="fa-regular fa-clock"></i> Expires in ${timeRemaining}`;
     });
   }, 60000); // Update every minute
 }
@@ -11194,15 +11204,22 @@ function initializeBasicUI() {
   function updateSendButtons() {
     const input = document.getElementById('message-input');
     const hasText = input && input.value.trim().length > 0;
+    const sendBtn = document.getElementById('sendBtn') || document.querySelector('.send-btn');
+    const audioRecBtn = document.getElementById('audio-record-btn');
+    const audioSendBtn = document.getElementById('audio-send-btn');
+
     if (typeof selectedFile !== 'undefined' && selectedFile) {
       if (sendBtn) sendBtn.style.display = 'none';
       if (audioSendBtn) audioSendBtn.style.display = 'flex';
+      if (audioRecBtn) audioRecBtn.style.display = 'none';
+    } else if (hasText) {
+      if (audioSendBtn) audioSendBtn.style.display = 'none';
+      if (sendBtn) sendBtn.style.display = 'flex';
+      if (audioRecBtn) audioRecBtn.style.display = 'none';
     } else {
       if (audioSendBtn) audioSendBtn.style.display = 'none';
-      if (sendBtn) {
-        sendBtn.style.display = 'flex';
-        if (hasText) sendBtn.classList.add('large'); else sendBtn.classList.remove('large');
-      }
+      if (sendBtn) sendBtn.style.display = 'none';
+      if (audioRecBtn) audioRecBtn.style.display = 'flex';
     }
   }
 
@@ -12535,6 +12552,11 @@ async function clearCallHistory() {
 
 document.getElementById('clearCallHistoryBtn')?.addEventListener('click', clearCallHistory);
 
+window.loadCallHistory = loadCallHistory;
+window.loadStatusFeed = loadStatusFeed;
+window.loadStatuses = loadStatuses;
+window.openChat = openChat;
+window.goBackToDashboard = goBackToDashboard;
 
 
 

@@ -1038,7 +1038,7 @@ html, body {
 .message-form {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
   position: relative;
 }
 
@@ -1053,7 +1053,7 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 17px;
   transition: var(--transition-fast);
   flex-shrink: 0;
 }
@@ -1064,34 +1064,71 @@ html, body {
   border-color: var(--border-accent);
 }
 
-.message-input {
+/* Authentic Capsule Input Wrapper */
+.message-input-wrapper {
   flex: 1;
-  min-height: 44px;
-  max-height: 120px;
-  padding: 12px 18px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
   background: var(--bg-surface-elevated);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border-radius: 24px;
+  padding-right: 6px;
+  min-height: 44px;
+  transition: var(--transition-fast);
+}
+
+.message-input-wrapper:focus-within {
+  border-color: var(--border-accent);
+  box-shadow: 0 0 0 3px var(--accent-primary-dim);
+  background: var(--bg-surface-hover);
+}
+
+.message-input-wrapper .message-input {
+  flex: 1;
+  min-height: 42px;
+  max-height: 120px;
+  padding: 10px 14px;
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   color: var(--text-primary);
   font-size: 14.5px;
   font-family: inherit;
   outline: none;
   resize: none;
-  transition: var(--transition-fast);
   line-height: 1.4;
-}
-
-.message-input:focus {
-  border-color: var(--border-accent);
-  box-shadow: 0 0 0 3px var(--accent-primary-dim);
-  background: var(--bg-surface-hover);
 }
 
 .message-input::placeholder {
   color: var(--text-muted);
 }
 
-.send-btn, .audio-send-btn {
+.input-inline-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  width: 36px;
+  height: 38px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  transition: var(--transition-fast);
+  margin-bottom: 2px;
+  flex-shrink: 0;
+  border-radius: 50%;
+}
+
+.input-inline-btn:hover {
+  color: var(--accent-primary);
+}
+
+.mic-action-btn,
+.send-btn, 
+.audio-send-btn {
   width: 44px;
   height: 44px;
   border-radius: 50%;
@@ -1102,11 +1139,18 @@ html, body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   transition: var(--transition-fast);
   box-shadow: 0 4px 16px var(--accent-primary-glow);
   flex-shrink: 0;
+}
+
+.mic-action-btn:hover,
+.send-btn:hover,
+.audio-send-btn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.04);
 }
 
 .send-btn:hover, .audio-send-btn:hover {

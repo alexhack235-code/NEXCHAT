@@ -1,7 +1,7 @@
 {
   "name": "nexchat-terminal-app",
   "version": "1.0.0",
-  "description": "NEXCHAT - A Next-Gen WhatsApp with built-in Hacker Terminal",
+  "description": "NEXCHAT - A Next-Gen Secure Messaging App with built-in Hacker Terminal",
   "private": true,
   "scripts": {
     "dev": "next dev",

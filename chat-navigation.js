@@ -57,6 +57,15 @@ window.handleNavigation = function (navSection) {
         element.style.display = 'block';
     }
 
+    // Trigger section-specific live data fetchers
+    if (normalized === 'calls' || normalized === 'call') {
+        if (typeof window.loadCallHistory === 'function') window.loadCallHistory();
+    } else if (normalized === 'updates' || normalized === 'status') {
+        if (typeof window.loadStatusFeed === 'function') window.loadStatusFeed();
+    } else if (normalized === 'groups' || normalized === 'communities') {
+        if (typeof window.loadGroups === 'function') window.loadGroups();
+    }
+
     // Update active tab styling
     document.querySelectorAll('.nav-item').forEach((item) => {
         const navAttr = item.getAttribute('data-nav');

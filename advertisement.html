@@ -5,15 +5,18 @@
   <meta charset="UTF-8">
   <meta name="viewport"
     content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#00ff66">
+  <meta name="theme-color" content="#00f076">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="NEXCHAT Ads">
+  <meta name="apple-mobile-web-app-title" content="NEXCHAT Market">
   <meta name="format-detection" content="telephone=no">
   <title>NEXCHAT - Marketplace</title>
-  <link rel="stylesheet" href="advertisement.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="advertisement.css">
   <link rel="icon" type="image/x-icon" href="logo.jpg">
   <link rel="apple-touch-icon" href="logo.jpg">
 </head>
@@ -23,214 +26,259 @@
     <!-- TOP HEADER BAR -->
     <header class="top-header">
       <div class="header-left">
-        <button id="backBtn" class="back-button" title="Back to Chat"><i class="fa-solid fa-arrow-left"></i></button>
-        <div class="nex-logo" id="headerLogoImg" style="cursor: pointer;" onclick="window.location.href='chat.html'">
+        <button id="backBtn" class="back-button" title="Back to Chat" aria-label="Back to Chat">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="nex-logo" id="headerLogoImg" onclick="window.location.href='chat.html'">
           <span class="nex-text">NEXCHAT</span>
-          <span
-            style="font-family: 'Rajdhani', sans-serif; font-size: 14px; color: #888; margin-left: 5px; letter-spacing: 1px;">MARKETPLACE</span>
+          <span class="market-subtext">MARKET</span>
         </div>
       </div>
+
       <div class="header-center">
-        <div id="cartBadge" class="cart-badge" title="Items in cart">
-          <span class="badge-icon"><i class="fa-solid fa-cart-shopping"></i></span>
-          <span id="cartCount" class="badge-count">0</span>
+        <!-- Live Token Balance Pill -->
+        <div id="tokenBadge" class="token-pill" title="Your Token Balance">
+          <i class="fa-solid fa-coins"></i>
+          <span id="headerTokenCount">0</span>
+          <span class="token-unit">Tokens</span>
         </div>
       </div>
-      <div class="header-right-scroll">
-        <div class="header-right">
-          <button id="cartBtn" class="header-icon-btn" title="View Cart"><i class="fa-solid fa-cart-shopping"></i></button>
-          <button id="searchBtn" class="header-icon-btn" title="Search Ads"><i class="fa-solid fa-magnifying-glass"></i></button>
-          <button id="myAdsBtn" class="header-icon-btn" title="My Advertisements"><i class="fa-solid fa-rectangle-list"></i></button>
+
+      <div class="header-right">
+        <!-- Top Nav Switcher for Desktop -->
+        <div class="desktop-nav-tabs">
+          <button type="button" class="top-nav-tab active" data-view="browse" id="topNavBrowse">
+            <i class="fa-solid fa-shop"></i> Explore
+          </button>
+          <button type="button" class="top-nav-tab" data-view="upload" id="topNavUpload">
+            <i class="fa-solid fa-circle-plus"></i> Post Ad
+          </button>
+          <button type="button" class="top-nav-tab" data-view="myads" id="topNavMyAds">
+            <i class="fa-solid fa-rectangle-list"></i> My Ads
+          </button>
         </div>
+
+        <!-- Cart Icon Button with Count Badge -->
+        <button id="cartHeaderBtn" class="header-icon-btn cart-btn-top" title="View Cart" aria-label="View Cart">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span id="cartCount" class="badge-count">0</span>
+        </button>
       </div>
     </header>
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN SCROLLABLE CONTAINER -->
     <main class="ads-main">
-      <!-- UPLOAD AD SECTION -->
-      <section class="upload-ad-section" id="uploadSection">
-        <div class="upload-header">
-          <h2>📦 Post Your Advertisement</h2>
-          <p>Share your products with NEXCHAT users</p>
+
+      <!-- VIEW 1: EXPLORE / BROWSE MARKETPLACE (DEFAULT VIEW) -->
+      <section class="ads-list-section" id="adsListSection">
+        <!-- Search and Controls Row -->
+        <div class="search-bar-wrap">
+          <div class="search-input-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="searchAds" class="search-input" placeholder="Search products, gear, services..." autocomplete="off">
+            <button type="button" id="clearSearchBtn" class="clear-search-btn" style="display: none;" title="Clear Search">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="view-controls">
+            <button id="gridViewBtn" class="view-btn active" title="Grid View"><i class="fa-solid fa-table-cells-large"></i></button>
+            <button id="listViewBtn" class="view-btn" title="List View"><i class="fa-solid fa-list"></i></button>
+          </div>
+        </div>
+
+        <!-- Category Filter Chips (Horizontally Scrollable) -->
+        <div class="category-chips-bar" id="categoryChips">
+          <button type="button" class="chip active" data-category="">All</button>
+          <button type="button" class="chip" data-category="electronics">📱 Electronics</button>
+          <button type="button" class="chip" data-category="clothing">👕 Fashion</button>
+          <button type="button" class="chip" data-category="gaming">🎮 Gaming</button>
+          <button type="button" class="chip" data-category="services">🛠️ Services</button>
+          <button type="button" class="chip" data-category="books">📚 Books</button>
+          <button type="button" class="chip" data-category="food">🍔 Food</button>
+          <button type="button" class="chip" data-category="furniture">🪑 Home</button>
+          <button type="button" class="chip" data-category="other">📦 Other</button>
+        </div>
+
+        <!-- Products Grid / Feed -->
+        <div id="adsList" class="ads-grid">
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-shop"></i></div>
+            <p class="empty-title">Loading Marketplace...</p>
+            <p class="empty-sub">Fetching verified products from NEXCHAT users</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: POST ADVERTISEMENT FORM -->
+      <section class="upload-ad-section" id="uploadSection" style="display: none;">
+        <div class="section-title-card">
+          <h2><i class="fa-solid fa-bullhorn"></i> Post an Advertisement</h2>
+          <p>Broadcast your item or service to all active NEXCHAT users.</p>
         </div>
 
         <form id="adForm" class="ad-form">
-          <!-- Product Image -->
+          <!-- Product Media (Image or Video) -->
           <div class="form-group">
-            <label for="productImage">📸 Product Image</label>
+            <label class="form-label">Product Photo or Video <span class="required">*</span></label>
             <div class="image-upload-area" id="imageUploadArea">
-              <input type="file" id="productImage" accept="image/*" required style="display: none;">
+              <input type="file" id="productImage" accept="image/*,video/*" required style="display: none;">
               <div class="upload-placeholder">
-                <span class="upload-icon">🖼️</span>
-                <p>Click to upload image</p>
-                <small>JPG, PNG, GIF (Max 5MB)</small>
+                <div class="upload-icon-circle"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <p class="upload-main-text">Tap to upload media</p>
+                <small class="upload-sub-text">JPG, PNG, GIF, MP4 (Max 50MB)</small>
               </div>
             </div>
             <div id="imagePreview" class="image-preview" style="display: none;">
               <img id="previewImg" src="" alt="Preview">
-              <button type="button" class="remove-image-btn" id="removeImageBtn">✕</button>
+              <button type="button" class="remove-image-btn" id="removeImageBtn" title="Remove Media">✕</button>
             </div>
           </div>
 
           <!-- Product Name -->
           <div class="form-group">
-            <label for="productName">📛 Product Name <span class="required">*</span></label>
-            <input type="text" id="productName" placeholder="e.g., iPhone 15 Pro Max 256GB" maxlength="100" required aria-describedby="nameHelp">
-            <small id="nameHelp" class="form-help">3-100 characters required</small>
-          </div>
-
-          <!-- Product Description -->
-          <div class="form-group">
-            <label for="productDescription">📝 Description</label>
-            <textarea id="productDescription" placeholder="Describe your product in detail..." maxlength="500" rows="4" aria-describedby="descHelp"></textarea>
-            <small id="descHelp" class="form-help">Optional, max 500 characters</small>
-          </div>
-
-          <!-- Product Price -->
-          <div class="form-group">
-            <label for="productPrice">💰 Price (USD) <span class="required">*</span></label>
-            <input type="number" id="productPrice" placeholder="0.00" min="0" max="999999.99" step="0.01" required aria-describedby="priceHelp">
-            <small id="priceHelp" class="form-help">Enter price in USD (max $999,999.99)</small>
+            <label for="productName" class="form-label">Product / Service Title <span class="required">*</span></label>
+            <input type="text" id="productName" class="form-input" placeholder="e.g. Cyberpunk Mechanical Keyboard RGB" maxlength="100" required>
+            <small class="form-help">3-100 characters</small>
           </div>
 
           <!-- Category -->
           <div class="form-group">
-            <label for="productCategory">📂 Category <span class="required">*</span></label>
-            <select id="productCategory" required aria-describedby="categoryHelp">
+            <label for="productCategory" class="form-label">Category <span class="required">*</span></label>
+            <select id="productCategory" class="form-select" required>
               <option value="">Select a category</option>
-              <option value="electronics">🖥️ Electronics</option>
-              <option value="clothing">👕 Clothing & Fashion</option>
+              <option value="electronics">📱 Electronics & Devices</option>
+              <option value="clothing">👕 Fashion & Apparel</option>
+              <option value="gaming">🎮 Gaming Gear & Accounts</option>
+              <option value="services">🛠️ Professional Services</option>
               <option value="books">📚 Books & Education</option>
-              <option value="sports">⚽ Sports & Outdoors</option>
-              <option value="furniture">🪑 Furniture & Home</option>
+              <option value="furniture">🪑 Home & Furniture</option>
               <option value="food">🍔 Food & Beverages</option>
-              <option value="services">🛠️ Services</option>
-              <option value="automotive">🚗 Automotive</option>
-              <option value="health">🏥 Health & Beauty</option>
-              <option value="other">📦 Other</option>
+              <option value="other">📦 Other Items</option>
             </select>
-            <small id="categoryHelp" class="form-help">Choose the most appropriate category</small>
           </div>
 
-          <!-- Duration Plan -->
+          <!-- Product Price -->
           <div class="form-group">
-            <label for="durationPlan">⏱️ Advertisement Duration</label>
+            <label for="productPrice" class="form-label">Price (USD) <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <span class="input-prefix">$</span>
+              <input type="number" id="productPrice" class="form-input with-prefix" placeholder="0.00" min="0" max="999999.99" step="0.01" required>
+            </div>
+          </div>
+
+          <!-- Product Description -->
+          <div class="form-group">
+            <label for="productDescription" class="form-label">Description</label>
+            <textarea id="productDescription" class="form-textarea" placeholder="Detail condition, features, pickup or delivery options..." maxlength="500" rows="3"></textarea>
+            <small class="form-help">Max 500 characters</small>
+          </div>
+
+          <!-- Duration Plan (Tokens) -->
+          <div class="form-group">
+            <label class="form-label">Advertisement Duration & Token Fee</label>
             <div class="duration-options">
-              <div class="duration-option">
+              <label class="duration-card">
                 <input type="radio" id="plan48" name="durationPlan" value="48" checked>
-                <label for="plan48" class="duration-label">
-                  <span class="duration-time">48 Hours</span>
-                  <span class="duration-price">⭐ 100 Tokens</span>
-                </label>
-              </div>
-              <div class="duration-option">
+                <div class="duration-card-content">
+                  <div class="plan-header">
+                    <span class="plan-hours">48 Hours</span>
+                    <span class="plan-badge">Standard</span>
+                  </div>
+                  <div class="plan-cost"><i class="fa-solid fa-coins"></i> 100 Tokens</div>
+                </div>
+              </label>
+
+              <label class="duration-card">
                 <input type="radio" id="plan72" name="durationPlan" value="72">
-                <label for="plan72" class="duration-label">
-                  <span class="duration-time">72 Hours</span>
-                  <span class="duration-price">⭐ 150 Tokens</span>
-                </label>
-              </div>
-              <div class="duration-option">
+                <div class="duration-card-content">
+                  <div class="plan-header">
+                    <span class="plan-hours">72 Hours (3 Days)</span>
+                    <span class="plan-badge">Popular</span>
+                  </div>
+                  <div class="plan-cost"><i class="fa-solid fa-coins"></i> 150 Tokens</div>
+                </div>
+              </label>
+
+              <label class="duration-card">
                 <input type="radio" id="plan144" name="durationPlan" value="144">
-                <label for="plan144" class="duration-label">
-                  <span class="duration-time">144 Hours (6 Days)</span>
-                  <span class="duration-price">⭐ 300 Tokens</span>
-                </label>
-              </div>
-              <div class="duration-option">
+                <div class="duration-card-content">
+                  <div class="plan-header">
+                    <span class="plan-hours">144 Hours (6 Days)</span>
+                    <span class="plan-badge">Extended</span>
+                  </div>
+                  <div class="plan-cost"><i class="fa-solid fa-coins"></i> 300 Tokens</div>
+                </div>
+              </label>
+
+              <label class="duration-card">
                 <input type="radio" id="plan168" name="durationPlan" value="168">
-                <label for="plan168" class="duration-label">
-                  <span class="duration-time">168 Hours (7 Days)</span>
-                  <span class="duration-price">⭐ 350 Tokens</span>
-                </label>
-              </div>
+                <div class="duration-card-content">
+                  <div class="plan-header">
+                    <span class="plan-hours">168 Hours (7 Days)</span>
+                    <span class="plan-badge best-val">Best Value</span>
+                  </div>
+                  <div class="plan-cost"><i class="fa-solid fa-coins"></i> 350 Tokens</div>
+                </div>
+              </label>
             </div>
             <div id="tokenWarning" class="token-warning" style="display: none;"></div>
           </div>
 
-          <!-- Contact Information (Auto-filled) -->
-          <div class="contact-section">
-            <h3>📞 Your Contact Information</h3>
-            <div class="form-group">
-              <label for="nexUsername">NEX Username</label>
-              <input type="text" id="nexUsername" placeholder="Your NEX username" readonly>
+          <!-- Auto-filled Seller Details (Read-only) -->
+          <div class="seller-meta-box">
+            <div class="seller-meta-row">
+              <span class="meta-label">Seller Account:</span>
+              <span class="meta-value" id="sellerUsernameDisplay">Loading...</span>
             </div>
-            <div class="form-group">
-              <label for="userEmail">📧 Email</label>
-              <input type="email" id="userEmail" placeholder="Your email" readonly>
-            </div>
-            <div class="form-group">
-              <label for="userUID">User ID (UID)</label>
-              <input type="text" id="userUID" placeholder="Your UID" readonly>
-            </div>
+            <input type="hidden" id="nexUsername">
+            <input type="hidden" id="userEmail">
+            <input type="hidden" id="userUID">
           </div>
 
           <!-- Submit Button -->
-          <button type="submit" class="btn-primary post-ad-btn">🚀 Post Advertisement</button>
+          <button type="submit" class="btn-primary post-ad-submit-btn" id="postAdBtn">
+            <i class="fa-solid fa-rocket"></i> Publish Advertisement
+          </button>
           <div id="uploadStatus" class="status-message" style="display: none;"></div>
         </form>
       </section>
 
-      <!-- ADVERTISEMENTS LIST VIEW -->
-      <section class="ads-list-section" id="adsListSection" style="display: none;">
-        <div class="list-header">
-          <h2>🛍️ Available Products</h2>
-          <div class="view-controls">
-            <button id="gridViewBtn" class="view-btn active" title="Grid View">⊞</button>
-            <button id="listViewBtn" class="view-btn" title="List View">≡</button>
-          </div>
-        </div>
-
-        <!-- Search & Filter -->
-        <div class="search-filter-area">
-          <input type="text" id="searchAds" class="search-input" placeholder="Search products...">
-          <select id="filterCategory" class="filter-select">
-            <option value="">All Categories</option>
-            <option value="electronics">🖥️ Electronics</option>
-            <option value="clothing">👕 Clothing</option>
-            <option value="books">📚 Books</option>
-            <option value="sports">⚽ Sports</option>
-            <option value="furniture">🪑 Furniture</option>
-            <option value="food">🍔 Food & Beverages</option>
-            <option value="services">🛠️ Services</option>
-            <option value="other">📦 Other</option>
-          </select>
-        </div>
-
-        <!-- Ads Grid/List -->
-        <div id="adsList" class="ads-grid">
-          <div class="empty-state">
-            <p>📭 No advertisements yet</p>
-            <p class="hint">Be the first to post!</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- MY ADVERTISEMENTS VIEW -->
+      <!-- VIEW 3: MY ADVERTISEMENTS -->
       <section class="my-ads-section" id="myAdsSection" style="display: none;">
-        <div class="section-header">
-          <h2>📝 My Advertisements</h2>
-          <button id="createNewAdBtn" class="btn-primary">➕ New Ad</button>
+        <div class="section-title-row">
+          <div>
+            <h2><i class="fa-solid fa-rectangle-list"></i> My Listings</h2>
+            <p>Track views, expiry time, and manage your products</p>
+          </div>
+          <button type="button" id="createNewAdBtn" class="btn-primary small-btn">
+            <i class="fa-solid fa-plus"></i> New Ad
+          </button>
         </div>
 
         <div id="myAdsList" class="ads-grid">
           <div class="empty-state">
-            <p>📭 No advertisements yet</p>
-            <p class="hint">Create your first advertisement</p>
+            <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+            <p class="empty-title">No listings yet</p>
+            <p class="empty-sub">Tap "New Ad" to post your first product to the Marketplace</p>
           </div>
         </div>
       </section>
 
-      <!-- CART VIEW -->
+      <!-- VIEW 4: SHOPPING CART -->
       <section class="cart-section" id="cartSection" style="display: none;">
-        <div class="section-header">
-          <h2>🛒 Shopping Cart</h2>
+        <div class="section-title-card">
+          <h2><i class="fa-solid fa-cart-shopping"></i> Shopping Cart</h2>
+          <p>Review items before connecting with sellers</p>
         </div>
 
         <div id="cartItems" class="cart-items-list">
           <div class="empty-state">
-            <p>🛒 Your cart is empty</p>
-            <p class="hint">Add items to get started</p>
+            <div class="empty-icon"><i class="fa-solid fa-cart-arrow-down"></i></div>
+            <p class="empty-title">Your cart is empty</p>
+            <p class="empty-sub">Explore the marketplace and tap "Add to Cart" on items you like</p>
+            <button type="button" class="btn-secondary mt-12" onclick="window.showMarketView('browse')">
+              <i class="fa-solid fa-shop"></i> Explore Marketplace
+            </button>
           </div>
         </div>
 
@@ -240,7 +288,7 @@
             <span id="subtotal">$0.00</span>
           </div>
           <div class="summary-row">
-            <span>Tax (10%):</span>
+            <span>Platform Escrow Fee:</span>
             <span id="taxAmount">$0.00</span>
           </div>
           <div class="summary-row total">
@@ -249,69 +297,126 @@
           </div>
 
           <div class="cart-actions">
-            <button id="checkoutBtn" class="btn-primary">💳 Proceed to Checkout</button>
-            <button id="continueShopping" class="btn-secondary">🛍️ Continue Shopping</button>
+            <button id="checkoutBtn" class="btn-primary">
+              <i class="fa-solid fa-comments-dollar"></i> Chat & Purchase from Seller
+            </button>
+            <button id="continueShopping" class="btn-secondary">
+              <i class="fa-solid fa-arrow-left"></i> Continue Browsing
+            </button>
           </div>
         </div>
       </section>
 
-      <!-- AD DETAIL VIEW -->
+      <!-- VIEW 5: AD DETAIL VIEW (MODAL / OVERLAY) -->
       <section class="ad-detail-section" id="adDetailSection" style="display: none;">
-        <button id="backFromDetailBtn" class="back-button-detail">‹ Back</button>
+        <div class="detail-top-nav">
+          <button id="backFromDetailBtn" class="back-button-detail" title="Back to listings">
+            <i class="fa-solid fa-arrow-left"></i> Back to Products
+          </button>
+        </div>
 
         <div class="ad-detail-container">
-          <!-- Product Image -->
+          <!-- Hero Product Image / Video -->
           <div class="detail-image-container" id="detailImageContainer">
-            <img id="detailImage" src="" alt="Product">
-            <div class="detail-category-badge" id="detailCategoryBadge"></div>
+            <img id="detailImage" src="logo.jpg" alt="Product">
+            <div class="detail-category-badge" id="detailCategoryBadge">📦 Other</div>
           </div>
 
           <!-- Product Info -->
           <div class="detail-info">
-            <h2 id="detailName">Product Name</h2>
+            <div class="detail-title-row">
+              <h2 id="detailName">Product Title</h2>
+              <div class="detail-price-tag" id="detailPrice">$0.00</div>
+            </div>
+
             <p id="detailDescription" class="detail-description"></p>
 
-            <div class="detail-price">
-              <span class="price-label">Price:</span>
-              <span class="price-value" id="detailPrice">$0.00</span>
-            </div>
-
-            <div class="detail-category">
-              <span class="category-label">Category:</span>
-              <span class="category-value" id="detailCategory"></span>
-            </div>
-
-            <!-- Seller Info -->
-            <div class="seller-info">
-              <h3>👤 Seller Information</h3>
-              <div class="seller-details">
-                <p><strong>Username:</strong> <span id="detailUsername"></span></p>
-                <p><strong>Email:</strong> <span id="detailEmail"></span></p>
-                <p><strong>UID:</strong> <span id="detailUID"></span></p>
+            <div class="detail-meta-chips">
+              <div class="meta-chip">
+                <i class="fa-solid fa-tag"></i> <span id="detailCategory">Category</span>
+              </div>
+              <div class="meta-chip">
+                <i class="fa-solid fa-clock"></i> <span id="detailExpiry">Active</span>
               </div>
             </div>
 
-            <!-- Action Buttons -->
+            <!-- Seller Information Card -->
+            <div class="seller-card">
+              <div class="seller-card-avatar">
+                <i class="fa-solid fa-user-shield"></i>
+              </div>
+              <div class="seller-card-info">
+                <div class="seller-card-title">Verified Seller</div>
+                <div class="seller-card-name" id="detailUsername">Seller</div>
+                <div class="seller-card-uid" id="detailUID">ID: ...</div>
+              </div>
+            </div>
+
+            <!-- Detail Action Buttons -->
             <div class="detail-actions">
-              <button id="addToCartDetailBtn" class="btn-primary">🛒 Add to Cart</button>
-              <button id="contactSellerBtn" class="btn-secondary">💬 Contact Seller</button>
+              <button id="contactSellerBtn" class="btn-primary chat-seller-btn">
+                <i class="fa-solid fa-comment-dots"></i> Chat with Seller
+              </button>
+              <button id="addToCartDetailBtn" class="btn-secondary add-cart-btn">
+                <i class="fa-solid fa-cart-plus"></i> Add to Cart
+              </button>
             </div>
           </div>
         </div>
       </section>
+
     </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+      <button type="button" class="nav-item active" data-view="browse" id="bottomNavBrowse" title="Explore Marketplace">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-shop"></i>
+        </div>
+        <span class="nav-label">Explore</span>
+      </button>
+
+      <button type="button" class="nav-item" data-view="upload" id="bottomNavUpload" title="Post Advertisement">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-circle-plus"></i>
+        </div>
+        <span class="nav-label">Post Ad</span>
+      </button>
+
+      <button type="button" class="nav-item" data-view="myads" id="bottomNavMyAds" title="My Advertisements">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-rectangle-list"></i>
+        </div>
+        <span class="nav-label">My Ads</span>
+      </button>
+
+      <button type="button" class="nav-item" data-view="cart" id="bottomNavCart" title="Shopping Cart">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span id="bottomCartCount" class="nav-badge" style="display: none;">0</span>
+        </div>
+        <span class="nav-label">Cart</span>
+      </button>
+
+      <button type="button" class="nav-item" onclick="window.location.href='chat.html'" title="Back to NEXCHAT">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-comments"></i>
+        </div>
+        <span class="nav-label">Chats</span>
+      </button>
+    </nav>
 
     <!-- NOTIFICATION CONTAINER -->
     <div id="notificationContainer" class="notification-container"></div>
 
     <!-- OFFLINE INDICATOR -->
     <div id="offlineIndicator" class="offline-indicator" style="display: none;">
-      <span class="offline-icon">📵</span>
-      <span class="offline-text">You are offline</span>
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span class="offline-text">You are currently offline</span>
     </div>
   </div>
 
-  <!-- Firebase Scripts -->
+  <!-- Firebase & Marketplace Logic -->
   <script type="module" src="advertisement.js"></script>
 </body>
 

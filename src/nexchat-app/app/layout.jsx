@@ -2,7 +2,7 @@ import './globals.css';
 
 export const metadata = {
   title: 'NEXCHAT — Chat Beyond',
-  description: 'Next-gen WhatsApp with a built-in Hacker Terminal. End-to-End Encrypted messaging and live CLI control.',
+  description: 'Next-gen secure messaging app with a built-in Hacker Terminal. End-to-End Encrypted messaging and live CLI control.',
   icons: {
     icon: '/logo.jpg',
   },

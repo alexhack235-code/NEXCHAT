@@ -84,7 +84,7 @@
           <button id="fullscreen-btn-header" class="header-icon-btn" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
           <button id="reels-btn-header" class="header-icon-btn" title="NEX_REELS" onclick="window.location.href='reels.html'"><i class="fa-solid fa-clapperboard"></i></button>
           <button id="installHeaderBtn" class="header-icon-btn" title="Install NEXCHAT"><i class="fa-solid fa-download"></i></button>
-          <button id="gaming-btn-header" class="header-icon-btn" title="Gaming/Betting"><i class="fa-solid fa-gamepad"></i></button>
+          <button id="gaming-btn-header" class="header-icon-btn" title="Gaming Hub"><i class="fa-solid fa-gamepad"></i></button>
           <button id="shop-btn-header" class="header-icon-btn" title="Buy Tokens"
             onclick="window.location.href='cart.html'"><i class="fa-solid fa-cart-shopping"></i></button>
           <button id="search-btn-header" class="header-icon-btn search-btn-header" title="Search">
@@ -118,7 +118,7 @@
           <span class="mobile-menu-badge" id="mobileTokenBadge">0</span>
         </button>
         <button type="button" class="mobile-menu-item" onclick="window.location.href='gaminghub.html'">
-          <i class="fa-solid fa-gamepad"></i> <span>Gaming & Betting</span>
+          <i class="fa-solid fa-gamepad"></i> <span>Gaming Hub</span>
         </button>
         <button type="button" class="mobile-menu-item" onclick="window.open('terminal.html','_blank')">
           <i class="fa-solid fa-terminal"></i> <span>Hacker Terminal</span>
@@ -190,7 +190,7 @@
           style="border: 2px solid #00ff66; background: rgba(0, 255, 102, 0.05);">
           <div class="announcement-header">
             <h4 class="announcement-title">WELCOME TO NEXCHAT</h4>
-            <span class="announcement-badge" style="background: #00ff66; color: #000;">NEX-DEV</span>
+            <span class="announcement-badge" style="background: #00ff66; color: #000;"><i class="fa-solid fa-code"></i> NEX-DEV</span>
           </div>
           <p class="announcement-content" style="font-weight: 600; color: #fff;">
             WELCOME TO NEXCHAT THE FUTURE IS INIT I AM DEMON ALEX NEX DEVELOPER....
@@ -393,15 +393,16 @@
           </div>
 
           <form id="message-form" class="message-form">
-            <button type="button" id="attach-btn" class="input-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+            <button type="button" id="emoji-btn" class="input-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+            <div class="message-input-wrapper">
+              <textarea id="message-input" class="message-input" placeholder="Message" autocomplete="off" maxlength="1000" rows="1"></textarea>
+              <button type="button" id="attach-btn" class="input-inline-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+            </div>
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,.pdf,.doc,.docx" />
-            <textarea id="message-input" class="message-input" placeholder="Say something..." autocomplete="off" maxlength="1000" rows="1"></textarea>
             <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
-            <button type="button" id="audio-record-btn" class="input-btn" title="Record audio"><i class="fa-solid fa-microphone"></i></button>
-            <button type="button" id="vision-tester-btn" class="input-btn" title="Image Vision Tester"
-              onclick="window.location.href='image-vision-tester.html'"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-            <button type="button" id="audio-send-btn" class="audio-send-btn" title="Send audio"><i class="fa-solid fa-play"></i></button>
-            <button type="button" class="send-btn" title="Send message"><i class="fa-solid fa-paper-plane"></i></button>
+            <button type="button" id="audio-record-btn" class="mic-action-btn" title="Record voice message"><i class="fa-solid fa-microphone"></i></button>
+            <button type="button" id="audio-send-btn" class="audio-send-btn" title="Send audio" style="display: none;"><i class="fa-solid fa-play"></i></button>
+            <button type="button" class="send-btn" id="sendBtn" title="Send message" style="display: none;"><i class="fa-solid fa-paper-plane"></i></button>
           </form>
 
           <!-- Audio Recording UI -->

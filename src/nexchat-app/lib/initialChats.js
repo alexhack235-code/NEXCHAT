@@ -129,7 +129,7 @@ export const INITIAL_CHATS = [
         id: "mia-2",
         sender: "them",
         type: "code",
-        code: "export function parseWhatsAppFormat(text) {\n  return text\n    .replace(/\\*([^*]+)\\*/g, '<b>$1</b>')\n    .replace(/_([^_]+)_/g, '<i>$1</i>')\n    .replace(/~([^~]+)~/g, '<del>$1</del>');\n}",
+        code: "export function parseMarkdownFormat(text) {\n  return text\n    .replace(/\\*([^*]+)\\*/g, '<b>$1</b>')\n    .replace(/_([^_]+)_/g, '<i>$1</i>')\n    .replace(/~([^~]+)~/g, '<del>$1</del>');\n}",
         timestamp: "09:31 AM",
         status: "read",
       },
@@ -199,7 +199,7 @@ export const INITIAL_CHATS = [
         id: "dev-1",
         sender: "them",
         type: "text",
-        text: "I finished reviewing the 1:1 Voice Calling and Photo Status specs. They match WhatsApp down to the exact pixel.",
+        text: "I finished reviewing the 1:1 Voice Calling and Photo Status specs. They match the design standards down to the exact pixel.",
         timestamp: "Yesterday",
         status: "read",
       }

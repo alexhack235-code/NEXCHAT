@@ -158,7 +158,7 @@ export default function NexchatAppPage() {
       </div>
 
       {/* ─── 1:1 CLONED MODALS ─── */}
-      {/* 1. WhatsApp Text Status Creator 1:1 */}
+      {/* 1. NEXCHAT Text Status Creator */}
       <TextStatusModal
         isOpen={isTextStatusOpen}
         onClose={() => setIsTextStatusOpen(false)}
@@ -166,14 +166,14 @@ export default function NexchatAppPage() {
         onLog={addLog}
       />
 
-      {/* 2. WhatsApp Photo Status Editor with B&W Chandelier 1:1 */}
+      {/* 2. NEXCHAT Photo Status Editor with B&W Chandelier */}
       <PhotoStatusModal
         isOpen={isPhotoStatusOpen}
         onClose={() => setIsPhotoStatusOpen(false)}
         onLog={addLog}
       />
 
-      {/* 3. WhatsApp 1:1 Voice Calling Screen (+1 (218) 296-1795) 1:1 */}
+      {/* 3. NEXCHAT 1:1 Voice Calling Screen (+1 (218) 296-1795) */}
       <VoiceCallModal
         isOpen={isVoiceCallOpen}
         onClose={() => setIsVoiceCallOpen(false)}

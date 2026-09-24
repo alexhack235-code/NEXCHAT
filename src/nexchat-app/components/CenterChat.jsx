@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-// Formatter for WhatsApp text (*bold*, _italic_, ~strike~, ```code```)
+// Formatter for rich text (*bold*, _italic_, ~strike~, ```code```)
 function renderFormattedText(text) {
   if (!text) return null;
 
@@ -180,9 +180,9 @@ export default function CenterChat({
         </div>
       </div>
 
-      {/* 2. Chat Area: WhatsApp Doodle Background + Faint Terminal Code Pattern */}
+      {/* 2. Chat Area: Encrypted Doodle Background + Faint Terminal Code Pattern */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3 relative">
-        {/* Layer 1: WhatsApp doodle vector background pattern */}
+        {/* Layer 1: Encrypted doodle vector background pattern */}
         <div 
           className="absolute inset-0 pointer-events-none opacity-20"
           style={{
@@ -233,7 +233,7 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
                   </div>
                 )}
 
-                {/* A. TEXT MESSAGE WITH WHATSAPP FORMATTING (*bold*, _italic_, ~strike~, ```code```) */}
+                {/* A. TEXT MESSAGE WITH RICH FORMATTING (*bold*, _italic_, ~strike~, ```code```) */}
                 {msg.type === 'text' && (
                   <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                     {renderFormattedText(msg.text)}
@@ -440,7 +440,7 @@ nex@NEXCHAT:~$ ping relay.nexchat.terminal -c 4
           📎
         </button>
 
-        {/* Text Input with WhatsApp Formatting Support */}
+        {/* Text Input with Rich Formatting Support */}
         <input
           type="text"
           value={inputText}
