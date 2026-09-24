@@ -2143,22 +2143,20 @@ function handleNavigation(section) {
       loadGroups();
       break;
     case "announcements":
-      console.log("?? Showing announcements");
+      console.log("📢 Showing announcements");
       if (announcementsContainer) announcementsContainer.style.display = "flex";
       loadAnnouncements();
       break;
     case "games":
-      console.log("?? Opening Gaming Hub");
-      window.open("gaminghub.html", "_blank");
-      showNotif("?? Nex Gaming Hub opened in new window", "success");
+      console.log("🎮 Opening Gaming Hub");
+      window.location.href = "gaminghub.html";
       break;
     case "marketplace":
-      console.log("??? Opening Marketplace");
-      window.open("advertisement.html", "_blank");
-      showNotif("??? Nex Marketplace opened in new window", "success");
+      console.log("🛍️ Opening Marketplace");
+      window.location.href = "advertisement.html";
       break;
     case "calls":
-      console.log("?? Showing call history");
+      console.log("📞 Showing call history");
       if (callHistoryContainer) {
         callHistoryContainer.style.display = "block";
         loadCallHistory();
@@ -8985,10 +8983,10 @@ async function shareGoogleDriveFile(fileId, accessToken) {
     });
     if (!res.ok) {
       const message = await res.text();
-      console.warn('?? Failed to set Drive file permission:', message);
+      console.warn('⚠️ Failed to set Drive file permission:', message);
     }
   } catch (err) {
-    console.warn('?? Drive permission request failed:', err);
+    console.warn('⚠️ Drive permission request failed:', err);
   }
 }
 
@@ -9050,8 +9048,8 @@ function updateDriveStatusUI() {
   const btn = document.getElementById('connectDriveBtn');
   if (note) {
     note.textContent = isGoogleDriveConnected()
-      ? '? Google Drive access is enabled for large status uploads.'
-      : '?? Sign in with Google and allow Drive access to offload large status media to Google Drive when available.';
+      ? '✅ Google Drive access is enabled for status uploads.'
+      : '⚡ Multi-vault Cloudinary cloud storage is active for high-speed media delivery.';
   }
   if (btn) {
     btn.disabled = true;
@@ -9078,9 +9076,9 @@ document.getElementById("statusViewerModal")?.addEventListener("click", (e) => {
 try {
   initOfflineDB();
   monitorConnectivity();
-  console.log("? Offline queue system initialized");
+  console.log("🚀 Offline queue system initialized");
 } catch (error) {
-  console.warn("?? Failed to initialize offline queue:", error);
+  console.warn("⚠️ Failed to initialize offline queue:", error);
 }
 
 
