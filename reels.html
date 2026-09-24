@@ -30,6 +30,10 @@
     </div>
 
     <div class="reels-header-actions">
+      <button id="openReelsDocBtn" class="reels-doc-pill" title="System Documentary: TikTok vs NEX_REELS">
+        <i class="fa-solid fa-film"></i>
+        <span>Documentary</span>
+      </button>
       <button id="toggleFilterBtn" class="reels-filter-pill" title="Cyber Visual Filters">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
       </button>
@@ -39,9 +43,9 @@
       <button id="openReelsSettingsBtn" class="reels-settings-pill" title="Reels Settings & Preferences">
         <i class="fa-solid fa-gear"></i>
       </button>
-      <button id="openUploadModalBtn" class="reels-create-pill-btn" title="Create a Reel">
+      <button id="openUploadModalBtn" class="reels-create-pill-btn reels-create-pill-obvious" title="Create / Post a Reel (C)">
         <i class="fa-solid fa-plus"></i>
-        <span>Create</span>
+        <span>Post Reel</span>
       </button>
     </div>
   </header>
@@ -64,6 +68,18 @@
       <p>Synchronizing NEX_REELS Stream...</p>
     </div>
   </main>
+
+  <!-- Prominent TikTok-Style Floating "Add / Create Reel" Button (Unmistakable & Obvious) -->
+  <div class="floating-create-reel-wrapper" id="floatingCreateReelWrapper">
+    <button type="button" id="floatingCreateReelBtn" class="floating-create-reel-btn" title="Create / Post a Reel (Shortcut: C)">
+      <div class="create-btn-accent-cyan"></div>
+      <div class="create-btn-accent-green"></div>
+      <div class="create-btn-core">
+        <i class="fa-solid fa-plus"></i>
+      </div>
+      <span class="create-btn-badge-text">POST REEL</span>
+    </button>
+  </div>
 
   <!-- Floating 2X Speed HUD Indicator -->
   <div id="speed2xBadge" class="speed-2x-hud-badge" style="display: none;">
@@ -96,95 +112,419 @@
     </div>
   </div>
 
-  <!-- Upload Reel Modal -->
-  <div id="uploadReelModal" class="reels-modal" style="display: none;">
-    <div class="reels-modal-card">
-      <div class="reels-modal-header">
-        <h3><i class="fa-solid fa-clapperboard"></i> Post a Reel</h3>
-        <button id="closeUploadModalBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+  <!-- ══════════════════════════════════════════════════
+       NEX_REELS CREATOR STUDIO PRO (ULTRA-PROFESSIONAL ADD REEL PAGE)
+       ══════════════════════════════════════════════════ -->
+  <div id="uploadReelModal" class="reels-modal creator-studio-modal" style="display: none;">
+    <div class="reels-modal-card creator-studio-card">
+      <!-- Studio Header -->
+      <div class="creator-studio-header">
+        <div class="studio-brand-group">
+          <div class="studio-icon-badge">
+            <i class="fa-solid fa-clapperboard"></i>
+          </div>
+          <div>
+            <h3 class="studio-title">NEX_REELS Creator Studio Pro</h3>
+            <p class="studio-subtitle"><i class="fa-solid fa-bolt text-[#39FF14]"></i> Lossless 60FPS Video Engine • 4K UHD Ingestion</p>
+          </div>
+        </div>
+        <div class="studio-header-right">
+          <span class="studio-quality-tag"><i class="fa-solid fa-shield-halved text-[#00f3ff]"></i> Cloudinary Vault Ready</span>
+          <button id="closeUploadModalBtn" class="reels-modal-close" title="Close Studio"><i class="fa-solid fa-xmark"></i></button>
+        </div>
       </div>
 
-      <form id="uploadReelForm" class="reels-modal-body">
-        <!-- Video Picker & Preview -->
-        <div class="reels-file-dropzone" id="reelDropzone">
-          <input type="file" id="reelVideoInput" accept="video/mp4,video/webm,video/quicktime,video/*" style="display: none;">
-          <div id="reelDropzonePrompt" class="dropzone-prompt">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <p><strong>Click or Drag Video to Upload</strong></p>
-            <span class="dropzone-hint">Supports MP4, WebM, 1080p, 4K (Short video under 90s recommended)</span>
+      <!-- Studio Dual-Pane Layout -->
+      <div class="studio-dual-layout">
+        <!-- LEFT PANE: Real-Time Live Smartphone Reel Simulator -->
+        <aside class="studio-live-simulator">
+          <div class="simulator-phone-bezel">
+            <div class="simulator-speaker"></div>
+            <div class="simulator-screen" id="simulatorScreen">
+              <!-- Live Video Element in Simulator -->
+              <video id="simPreviewVideo" class="sim-video" playsinline muted loop></video>
+              <div id="simPlaceholder" class="sim-placeholder">
+                <i class="fa-solid fa-film text-4xl text-gray-500 mb-2"></i>
+                <span>Live Feed Preview</span>
+                <small class="text-xs text-gray-500 mt-1">Select a video to preview live stream</small>
+              </div>
+
+              <!-- Simulator Right Action Column -->
+              <div class="sim-action-column">
+                <div class="sim-action-item"><i class="fa-solid fa-heart"></i><span>1.2K</span></div>
+                <div class="sim-action-item"><i class="fa-solid fa-comment-dots"></i><span>84</span></div>
+                <div class="sim-action-item"><i class="fa-solid fa-bookmark text-[#FFD700]"></i><span>Save</span></div>
+                <div class="sim-action-item"><i class="fa-solid fa-share"></i><span>Share</span></div>
+                <div class="sim-action-item"><i class="fa-solid fa-coins text-[#FFD700]"></i><span>Tip</span></div>
+                <div class="sim-action-item"><i class="fa-solid fa-robot text-[#00f3ff]"></i></div>
+                <div class="sim-sound-disc-mini"><i class="fa-solid fa-compact-disc"></i></div>
+              </div>
+
+              <!-- Simulator Bottom Metadata -->
+              <div class="sim-bottom-meta">
+                <div class="flex items-center gap-2 mb-1">
+                  <img id="simCreatorAvatar" src="favicon.png" alt="Avatar" class="sim-creator-avatar">
+                  <span id="simCreatorHandle" class="sim-creator-handle">@creator</span>
+                  <span class="sim-follow-tag">Follow</span>
+                </div>
+                <p id="simCaptionText" class="sim-caption-text">Watch my new reel! #nexchat #cyberpunk</p>
+                <div class="sim-sound-row">
+                  <i class="fa-solid fa-music text-[10px]"></i>
+                  <span id="simSoundLabel" class="truncate">Original Audio — @creator</span>
+                </div>
+              </div>
+
+              <!-- Simulator Bottom Scrubber -->
+              <div class="sim-bottom-scrubber">
+                <div class="sim-scrubber-fill" style="width: 35%;"></div>
+              </div>
+
+              <!-- Top Simulator Live Badge -->
+              <div class="sim-top-badge">
+                <span class="sim-live-dot"></span>
+                <span>REAL-TIME STREAM SIMULATOR</span>
+              </div>
+            </div>
           </div>
-          <div id="reelPreviewContainer" class="reel-preview-container" style="display: none;">
-            <video id="reelPreviewVideo" playsinline muted controls></video>
-            <div id="reelDurationBadge" class="reel-duration-badge">0:00</div>
-            <div id="reelHdBadge" class="reel-hd-quality-tag"><i class="fa-solid fa-bolt"></i> <span id="reelHdSpecText">1080p FHD Lossless</span></div>
-            <button type="button" id="removeVideoBtn" class="remove-preview-btn"><i class="fa-solid fa-trash"></i> Change</button>
+        </aside>
+
+        <!-- RIGHT PANE: Studio Controls & Telemetry -->
+        <main class="studio-controls-column">
+          <form id="uploadReelForm" class="studio-form">
+            <!-- Step 1: Video Ingestion & Frame Extractor -->
+            <div class="studio-card-section">
+              <div class="section-title-row">
+                <span class="step-num">1</span>
+                <h4>Video Ingestion & Frame Extractor</h4>
+                <span class="section-badge">Required</span>
+              </div>
+
+              <div class="reels-file-dropzone" id="reelDropzone">
+                <input type="file" id="reelVideoInput" accept="video/mp4,video/webm,video/quicktime,video/*" style="display: none;">
+                <div id="reelDropzonePrompt" class="dropzone-prompt">
+                  <div class="dropzone-cloud-icon">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                  </div>
+                  <p class="dropzone-primary-text">Drag & Drop Video or <span class="text-[#39FF14] underline">Browse Files</span></p>
+                  <div class="dropzone-format-pills">
+                    <span>MP4</span>
+                    <span>WebM</span>
+                    <span>MOV</span>
+                    <span>1080p FHD</span>
+                    <span>4K 60FPS</span>
+                  </div>
+                  <span class="dropzone-hint">Max file size: 250MB • Vertical 9:16 recommended</span>
+                </div>
+
+                <div id="reelPreviewContainer" class="reel-preview-container" style="display: none;">
+                  <video id="reelPreviewVideo" playsinline muted controls></video>
+                  <div class="preview-overlay-chips">
+                    <div id="reelDurationBadge" class="reel-duration-badge">0:00</div>
+                    <div id="reelHdBadge" class="reel-hd-quality-tag"><i class="fa-solid fa-bolt"></i> <span id="reelHdSpecText">1080p FHD Lossless</span></div>
+                  </div>
+                  <button type="button" id="removeVideoBtn" class="remove-preview-btn"><i class="fa-solid fa-rotate-left"></i> Change Video</button>
+                </div>
+              </div>
+
+              <!-- Canvas Poster Thumbnail Extractor Box -->
+              <div class="canvas-poster-box" id="studioThumbBox" style="display: none;">
+                <img id="studioThumbPreviewImg" src="" alt="Frame Poster" class="studio-thumb-img">
+                <div class="thumb-meta-text">
+                  <span class="thumb-label"><i class="fa-solid fa-image text-[#39FF14]"></i> Lossless 4K Frame Captured</span>
+                  <p class="text-xs text-gray-400">Used for 0ms instant feed loading</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 2: Audio & Soundtrack Hub -->
+            <div class="studio-card-section">
+              <div class="section-title-row">
+                <span class="step-num">2</span>
+                <h4>Soundtrack & Audio Hub</h4>
+              </div>
+
+              <div class="sound-selection-bar">
+                <button type="button" id="openSoundLibraryBtn" class="select-sound-btn" title="Browse Audio Library">
+                  <i class="fa-solid fa-music text-[#39FF14]"></i>
+                  <span id="selectedSoundLabel">Original Audio — (Video Sound)</span>
+                  <span class="sound-browse-badge">Change</span>
+                </button>
+                <button type="button" id="resetSoundBtn" class="reset-sound-btn" title="Reset to Original Audio">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+              </div>
+              <input type="hidden" id="reelSoundTitle" value="Original Audio">
+              <input type="hidden" id="reelSoundUrl" value="">
+            </div>
+
+            <!-- Step 3: Caption, Hashtags & ChronEX AI Writer -->
+            <div class="studio-card-section">
+              <div class="section-title-row">
+                <span class="step-num">3</span>
+                <h4>Caption & ChronEX AI Writer</h4>
+                <button type="button" id="chronexAiGenCaptionBtn" class="chronex-gen-caption-btn" title="AI Generate Viral Caption">
+                  <i class="fa-solid fa-wand-magic-sparkles text-[#00f3ff]"></i> ChronEX AI Auto-Caption
+                </button>
+              </div>
+
+              <div class="caption-input-container">
+                <textarea id="reelCaptionInput" class="studio-textarea" rows="2" placeholder="Write a compelling caption... #nexchat #cyberpunk #gaming" maxlength="300"></textarea>
+                <div class="caption-meta-row">
+                  <span id="reelCaptionCounter" class="caption-counter">0/300</span>
+                </div>
+              </div>
+
+              <div class="quick-hashtag-bar">
+                <span class="hashtag-label">Trending:</span>
+                <button type="button" class="hashtag-pill" data-tag="#nexchat">#nexchat</button>
+                <button type="button" class="hashtag-pill" data-tag="#cyberpunk">#cyberpunk</button>
+                <button type="button" class="hashtag-pill" data-tag="#gaming">#gaming</button>
+                <button type="button" class="hashtag-pill" data-tag="#music">#music</button>
+                <button type="button" class="hashtag-pill" data-tag="#tech">#tech</button>
+                <button type="button" class="hashtag-pill" data-tag="#viral">#viral</button>
+                <button type="button" class="hashtag-pill" data-tag="#4k60fps">#4k60fps</button>
+              </div>
+            </div>
+
+            <!-- Step 4: Dual-Avatar Publishing Persona -->
+            <div class="studio-card-section">
+              <div class="section-title-row">
+                <span class="step-num">4</span>
+                <h4>Publishing Identity</h4>
+              </div>
+
+              <div class="persona-choice-row">
+                <label class="persona-choice-card active" id="personaCardGeneral">
+                  <input type="radio" name="studioPersonaRadio" value="general" checked style="display: none;">
+                  <div class="persona-card-radio-dot"></div>
+                  <div class="flex items-center gap-2">
+                    <img id="personaImgGeneral" src="favicon.png" class="persona-mini-avatar" alt="General">
+                    <div class="flex flex-col">
+                      <span class="persona-name">Primary Profile</span>
+                      <span class="persona-sub text-gray-400" id="personaHandleGeneral">@user</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="persona-choice-card" id="personaCardCustom">
+                  <input type="radio" name="studioPersonaRadio" value="custom" style="display: none;">
+                  <div class="persona-card-radio-dot"></div>
+                  <div class="flex items-center gap-2">
+                    <img id="personaImgCustom" src="favicon.png" class="persona-mini-avatar" alt="Creator">
+                    <div class="flex flex-col">
+                      <span class="persona-name">Creator Persona</span>
+                      <span class="persona-sub text-[#39FF14]" id="personaHandleCustom">@creator</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Step 5: Studio Quality & Encoding Engine -->
+            <div class="studio-card-section">
+              <div class="section-title-row">
+                <span class="step-num">5</span>
+                <h4>Quality & Encoding Ladder</h4>
+              </div>
+
+              <div class="quality-selector-pills">
+                <button type="button" class="quality-pill" data-quality="hd">
+                  <span class="quality-title">HD 720p</span>
+                  <span class="quality-rate">5,000 kbps</span>
+                </button>
+                <button type="button" class="quality-pill active" data-quality="fhd">
+                  <span class="quality-title">Full HD 1080p</span>
+                  <span class="quality-rate">8,000 kbps (Best)</span>
+                </button>
+                <button type="button" class="quality-pill" data-quality="4k">
+                  <span class="quality-title">Ultra HD 4K</span>
+                  <span class="quality-rate">14,000 kbps (Cinematic)</span>
+                </button>
+              </div>
+
+              <label class="original-quality-checkbox">
+                <input type="checkbox" id="keepOriginalQuality" checked>
+                <span>Preserve High Bitrate Lossless Stream (H.264 / AV1 60FPS)</span>
+              </label>
+            </div>
+
+            <!-- Step 6: Multi-Stage Telemetry Upload Progress -->
+            <div id="reelUploadProgressWrapper" class="reels-progress-wrapper" style="display: none;">
+              <div class="progress-header-row">
+                <span class="progress-title"><i class="fa-solid fa-spinner fa-spin text-[#39FF14]"></i> Processing Pipeline</span>
+                <span id="reelProgressPercent" class="progress-pct">0%</span>
+              </div>
+              <div class="reels-progress-bar">
+                <div id="reelProgressBarFill" class="reels-progress-fill" style="width: 0%;"></div>
+              </div>
+              <div class="reels-progress-status">
+                <span id="reelProgressVault">Optimizing HD video stream...</span>
+              </div>
+            </div>
+
+            <!-- Studio Action Footer -->
+            <div class="studio-footer-row">
+              <button type="button" id="cancelUploadBtn" class="studio-cancel-btn">Cancel</button>
+              <button type="submit" id="submitReelBtn" class="studio-publish-btn">
+                <i class="fa-solid fa-rocket"></i>
+                <span>Publish Reel to NEX Stream</span>
+              </button>
+            </div>
+          </form>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       NEX_REELS & TIKTOK.COM ARCHITECTURAL DOCUMENTARY MODAL
+       ══════════════════════════════════════════════════ -->
+  <div id="reelsDocModal" class="reels-modal doc-reveal-modal" style="display: none;">
+    <div class="reels-modal-card doc-reveal-card">
+      <div class="doc-reveal-header">
+        <div class="doc-header-brand">
+          <div class="doc-brand-icon"><i class="fa-solid fa-film"></i></div>
+          <div>
+            <h3 class="doc-title">SYSTEM DOCUMENTARY: TIKTOK.COM vs. NEX_REELS</h3>
+            <p class="doc-subtitle">Forensic Architectural Reveal: Recommendation Engine, Viewport Ergonomics & 2026 Viral Pipelines</p>
+          </div>
+        </div>
+        <button id="closeReelsDocBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="doc-tabs-bar">
+        <button type="button" class="doc-tab-btn active" data-tab="tiktok">1. TikTok.com Blueprint</button>
+        <button type="button" class="doc-tab-btn" data-tab="nexreels">2. NEX_REELS Architecture</button>
+        <button type="button" class="doc-tab-btn" data-tab="matrix">3. Head-to-Head Matrix</button>
+        <button type="button" class="doc-tab-btn" data-tab="innovations">4. 2026 Viral Innovations</button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="doc-body-scroll">
+        <!-- TAB 1: TikTok Blueprint -->
+        <div class="doc-tab-pane active" id="docPaneTiktok">
+          <div class="doc-card-block">
+            <span class="doc-section-pill bg-[#fe2c55]/20 text-[#fe2c55] border-[#fe2c55]/40">TikTok.com Web Engine</span>
+            <h4 class="doc-pane-h4">The Anatomy of the World's Most Addictive Feed</h4>
+            <p class="doc-p">TikTok's architecture is engineered around the elimination of human cognitive hesitation. By removing traditional page layouts, navigation menus, and video thumbnails, the user is immersed directly into an endless stream of active media.</p>
+
+            <div class="doc-grid-duo">
+              <div class="doc-subcard">
+                <h5><i class="fa-solid fa-mobile-screen"></i> 9:16 Full-Bleed Snap Physics</h5>
+                <p>Zero letterboxing, zero border radius. Videos occupy 100vh × 100vw. The browser employs <code>scroll-snap-type: y mandatory</code> with discrete swipe commitments, accompanied by DOM virtualization that recycles nodes outside a 3-element sliding window to prevent memory leaks.</p>
+              </div>
+              <div class="doc-subcard">
+                <h5><i class="fa-solid fa-network-wired"></i> The Monolith Real-Time ML Engine</h5>
+                <p>TikTok doesn't use hourly batch recommendations. Its neural sparse parameter servers recalculate user affinity vectors after every individual video interaction (Watch Completion Rate, Loop Factor, Quick Skip, and Audio Disc Ingress).</p>
+              </div>
+            </div>
+
+            <div class="doc-subcard mt-3">
+              <h5><i class="fa-solid fa-music text-[#00f3ff]"></i> Sound as a First-Class Citizen</h5>
+              <p>On TikTok, audio is a viral distribution key rather than an accessory. Every reel links to a spinning vinyl record disc that attributes the creator and provides an instant "Use This Sound" recording trigger, generating memetic participation cycles.</p>
+            </div>
           </div>
         </div>
 
-        <!-- Audio Selection Row -->
-        <div class="reels-input-group">
-          <label>Audio / Soundtrack</label>
-          <div class="sound-selection-bar">
-            <button type="button" id="openSoundLibraryBtn" class="select-sound-btn">
-              <i class="fa-solid fa-music"></i>
-              <span id="selectedSoundLabel">Original Audio — (Video Sound)</span>
-            </button>
-            <button type="button" id="resetSoundBtn" class="reset-sound-btn" title="Reset to Original Audio">
-              <i class="fa-solid fa-rotate-left"></i>
-            </button>
-          </div>
-          <input type="hidden" id="reelSoundTitle" value="Original Audio">
-          <input type="hidden" id="reelSoundUrl" value="">
-        </div>
+        <!-- TAB 2: NEX_REELS Architecture -->
+        <div class="doc-tab-pane" id="docPaneNexreels" style="display: none;">
+          <div class="doc-card-block">
+            <span class="doc-section-pill bg-[#39FF14]/20 text-[#39FF14] border-[#39FF14]/40">NEX_REELS Cyber Protocol</span>
+            <h4 class="doc-pane-h4">The Futuristic Cyberpunk Evolution</h4>
+            <p class="doc-p">NEX_REELS integrates 100% of TikTok's proven interaction ergonomics while upgrading the experience with cyberpunk HUD aesthetics, local-first zero-lag media processing, AI companion intelligence, and creator persona sovereignty.</p>
 
-        <!-- Video Caption Inputs -->
-        <div class="reels-input-group">
-          <div class="input-label-row">
-            <label for="reelCaptionInput">Caption & Hashtags</label>
-            <span id="reelCaptionCounter" class="caption-counter">0/300</span>
-          </div>
-          <textarea id="reelCaptionInput" class="reels-textarea" rows="2" placeholder="Tell viewers about this reel... #nexchat #cyberpunk" maxlength="300"></textarea>
-          <div class="quick-hashtag-bar">
-            <button type="button" class="hashtag-pill" data-tag="#nexchat">#nexchat</button>
-            <button type="button" class="hashtag-pill" data-tag="#cyberpunk">#cyberpunk</button>
-            <button type="button" class="hashtag-pill" data-tag="#gaming">#gaming</button>
-            <button type="button" class="hashtag-pill" data-tag="#music">#music</button>
-            <button type="button" class="hashtag-pill" data-tag="#tech">#tech</button>
+            <div class="doc-grid-trio">
+              <div class="doc-subcard">
+                <h5><i class="fa-solid fa-user-astronaut text-[#39FF14]"></i> Dual-Avatar Engine</h5>
+                <p>Creators switch between their general profile photo and a dedicated creator avatar, solving the identity dilemma between personal chats and public reels.</p>
+              </div>
+              <div class="doc-subcard">
+                <h5><i class="fa-solid fa-robot text-[#00f3ff]"></i> ChronEX AI Companion</h5>
+                <p>Neural video telemetry scanner providing instant 1-tap smart replies and in-stream conversational Q&A directly in the action bar.</p>
+              </div>
+              <div class="doc-subcard">
+                <h5><i class="fa-solid fa-coins text-[#FFD700]"></i> NEX Token Vault</h5>
+                <p>2,000 starting tokens per user, 50-500 token quick-tipping, and an 18-particle 3D holographic coin burst physics simulation.</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- Upload Quality Options (Issue 3: Highest Quality HD / 4K) -->
-        <div class="reels-input-group">
-          <label>Upload Quality Mode</label>
-          <div class="quality-selector-pills">
-            <button type="button" class="quality-pill" data-quality="hd">HD 720p</button>
-            <button type="button" class="quality-pill active" data-quality="fhd">Full HD 1080p</button>
-            <button type="button" class="quality-pill" data-quality="4k">Ultra HD 4K</button>
+        <!-- TAB 3: Head-to-Head Matrix -->
+        <div class="doc-tab-pane" id="docPaneMatrix" style="display: none;">
+          <div class="doc-card-block">
+            <h4 class="doc-pane-h4">Direct Architectural Comparison Matrix</h4>
+            <div class="doc-table-wrapper">
+              <table class="doc-matrix-table">
+                <thead>
+                  <tr>
+                    <th>Capability</th>
+                    <th>TikTok.com (2026)</th>
+                    <th>NEX_REELS (2026)</th>
+                    <th>Advantage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>Visual Aesthetics</strong></td>
+                    <td>Minimalist black overlay</td>
+                    <td>Deep Space `#060913` + Neon Cyber HUD</td>
+                    <td><span class="adv-badge">NEX_REELS</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Creator Identity</strong></td>
+                    <td>Single Unified Avatar</td>
+                    <td>Dual-Avatar (General vs. Creator Persona)</td>
+                    <td><span class="adv-badge">NEX_REELS</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Playback Acceleration</strong></td>
+                    <td>Hold for 2X Speed</td>
+                    <td>Hold for 2X Speed + Glowing HUD Badge & Haptic Pulse</td>
+                    <td><span class="adv-badge">NEX_REELS</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>AI Integration</strong></td>
+                    <td>Basic search captions</td>
+                    <td>ChronEX AI Neural Scanner & 1-Tap Smart Replies</td>
+                    <td><span class="adv-badge">NEX_REELS</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Visual Shaders</strong></td>
+                    <td>None (Static stream)</td>
+                    <td>4 Live Shaders (Matrix, Neon, Night City, Noir)</td>
+                    <td><span class="adv-badge">NEX_REELS</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Poster Extraction</strong></td>
+                    <td>Server-side transcode</td>
+                    <td>Client-Side HTML5 Canvas (0ms Grid Rendering)</td>
+                    <td><span class="adv-badge">NEX_REELS</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <label class="original-quality-checkbox">
-            <input type="checkbox" id="keepOriginalQuality" checked>
-            <span>Preserve Original Quality (Lossless H.264 high-bitrate)</span>
-          </label>
         </div>
 
-        <!-- Upload Progress Display -->
-        <div id="reelUploadProgressWrapper" class="reels-progress-wrapper" style="display: none;">
-          <div class="reels-progress-bar">
-            <div id="reelProgressBarFill" class="reels-progress-fill" style="width: 0%;"></div>
-          </div>
-          <div class="reels-progress-status">
-            <span id="reelProgressPercent">0%</span>
-            <span id="reelProgressVault">Optimizing HD video stream...</span>
+        <!-- TAB 4: 2026 Viral Innovations -->
+        <div class="doc-tab-pane" id="docPaneInnovations" style="display: none;">
+          <div class="doc-card-block">
+            <h4 class="doc-pane-h4">Engineering Innovations in NEX_REELS</h4>
+            <div class="doc-grid-duo">
+              <div class="doc-subcard">
+                <h5><i class="fa-solid fa-wand-magic-sparkles text-[#39FF14]"></i> Live CSS Hardware Shaders</h5>
+                <p>NEX_REELS implements real-time GPU-accelerated video shaders using composite CSS filters (hue-rotate, contrast, saturate, sepia) with zero dropped frames on 60FPS video.</p>
+              </div>
+              <div class="doc-subcard">
+                <h5><i class="fa-solid fa-bolt text-[#00f3ff]"></i> Dual Feed Zero-Lag Caching</h5>
+                <p>Following and For You feeds are synchronized via Firestore snapshot listeners and partitioned in memory, enabling instant switching without re-fetching network video streams.</p>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="reels-modal-footer">
-          <button type="button" id="cancelUploadBtn" class="reels-btn-secondary">Cancel</button>
-          <button type="submit" id="submitReelBtn" class="reels-btn-primary">
-            <i class="fa-solid fa-paper-plane"></i> Publish Reel
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 

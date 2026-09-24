@@ -356,6 +356,12 @@ window.addEventListener('keydown', (e) => {
       const likeCount = currentCard.querySelector('.like-count');
       if (likeBtn) handleLikeToggle(currentCard.dataset.reelId, likeBtn, likeCount);
     }
+  } else if (e.key === 'c' || e.key === 'C' || e.key === '+') {
+    e.preventDefault();
+    openCreatorStudio();
+  } else if (e.key === 'd' || e.key === 'D') {
+    e.preventDefault();
+    openReelsDoc();
   }
 });
 
@@ -1609,19 +1615,108 @@ commentForm.addEventListener('submit', async (e) => {
 // ══════════════════════════════════════════════════
 // UPLOAD REEL MODAL & ISSUE 3: HIGHEST QUALITY HD/4K
 // ══════════════════════════════════════════════════
-openUploadModalBtn.addEventListener('click', () => {
+// ══════════════════════════════════════════════════
+// NEX_REELS CREATOR STUDIO PRO & REAL-TIME SIMULATOR
+// ══════════════════════════════════════════════════
+const floatingCreateReelBtn = document.getElementById('floatingCreateReelBtn');
+const chronexAiGenCaptionBtn = document.getElementById('chronexAiGenCaptionBtn');
+const personaCardGeneral = document.getElementById('personaCardGeneral');
+const personaCardCustom = document.getElementById('personaCardCustom');
+const personaImgGeneral = document.getElementById('personaImgGeneral');
+const personaImgCustom = document.getElementById('personaImgCustom');
+const personaHandleGeneral = document.getElementById('personaHandleGeneral');
+const personaHandleCustom = document.getElementById('personaHandleCustom');
+const simPreviewVideo = document.getElementById('simPreviewVideo');
+const simPlaceholder = document.getElementById('simPlaceholder');
+const simCreatorAvatar = document.getElementById('simCreatorAvatar');
+const simCreatorHandle = document.getElementById('simCreatorHandle');
+const simCaptionText = document.getElementById('simCaptionText');
+const simSoundLabel = document.getElementById('simSoundLabel');
+const studioThumbBox = document.getElementById('studioThumbBox');
+const studioThumbPreviewImg = document.getElementById('studioThumbPreviewImg');
+
+// Open / Close Studio
+function openCreatorStudio() {
+  if (!uploadReelModal) return;
+  if (personaHandleGeneral) personaHandleGeneral.textContent = `@${myUsername}`;
+  if (personaImgGeneral) personaImgGeneral.src = generalProfilePic || 'favicon.png';
+  if (personaHandleCustom) personaHandleCustom.textContent = `@${myCreatorName || myUsername}`;
+  if (personaImgCustom) personaImgCustom.src = customReelsAvatar || generalProfilePic || 'favicon.png';
+
+  syncSimulatorPreview();
   uploadReelModal.style.display = 'flex';
-});
+}
 
-closeUploadModalBtn.addEventListener('click', () => {
-  uploadReelModal.style.display = 'none';
+function closeCreatorStudio() {
+  if (uploadReelModal) uploadReelModal.style.display = 'none';
   resetUploadForm();
-});
+}
 
-cancelUploadBtn.addEventListener('click', () => {
-  uploadReelModal.style.display = 'none';
-  resetUploadForm();
-});
+if (openUploadModalBtn) openUploadModalBtn.addEventListener('click', openCreatorStudio);
+if (floatingCreateReelBtn) floatingCreateReelBtn.addEventListener('click', openCreatorStudio);
+if (closeUploadModalBtn) closeUploadModalBtn.addEventListener('click', closeCreatorStudio);
+if (cancelUploadBtn) cancelUploadBtn.addEventListener('click', closeCreatorStudio);
+
+// Real-Time Simulator Preview Sync
+function syncSimulatorPreview() {
+  if (simCaptionText && reelCaptionInput) {
+    simCaptionText.textContent = reelCaptionInput.value.trim() || 'Watch my new reel! #nexchat #cyberpunk';
+  }
+  if (simSoundLabel) {
+    simSoundLabel.textContent = selectedSound?.title ? `${selectedSound.title}${selectedSound.artist ? ' — ' + selectedSound.artist : ''}` : `Original Audio — @${myUsername}`;
+  }
+
+  const selectedPersona = document.querySelector('input[name="studioPersonaRadio"]:checked')?.value || 'general';
+  if (selectedPersona === 'custom') {
+    if (simCreatorAvatar) simCreatorAvatar.src = customReelsAvatar || generalProfilePic || 'favicon.png';
+    if (simCreatorHandle) simCreatorHandle.textContent = `@${myCreatorName || myUsername}`;
+  } else {
+    if (simCreatorAvatar) simCreatorAvatar.src = generalProfilePic || 'favicon.png';
+    if (simCreatorHandle) simCreatorHandle.textContent = `@${myUsername}`;
+  }
+}
+
+// Persona selection cards
+if (personaCardGeneral) {
+  personaCardGeneral.addEventListener('click', () => {
+    const radio = personaCardGeneral.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+    personaCardGeneral.classList.add('active');
+    if (personaCardCustom) personaCardCustom.classList.remove('active');
+    syncSimulatorPreview();
+  });
+}
+
+if (personaCardCustom) {
+  personaCardCustom.addEventListener('click', () => {
+    const radio = personaCardCustom.querySelector('input[type="radio"]');
+    if (radio) radio.checked = true;
+    personaCardCustom.classList.add('active');
+    if (personaCardGeneral) personaCardGeneral.classList.remove('active');
+    syncSimulatorPreview();
+  });
+}
+
+// ChronEX AI Viral Caption Generator
+const VIRAL_CYBER_CAPTIONS = [
+  "Exploring Night City procedural shaders in Ultra HD 4K 🚀 Lossless 60FPS stream on NEXCHAT! #nexchat #cyberpunk #gaming #4k60fps",
+  "Dropping high-velocity Cyberpunk telemetry with ChronEX AI companion ⚡ #nexchat #tech #viral #futuristic",
+  "When the neural audio drop aligns with 4K raytracing keyframes 🔥 #gaming #music #cyberpunk #nexchat",
+  "Zero-lag streaming protocol engaged. Pure black OLED cyber aesthetic in action 🤖 #tech #scifi #viral #4k",
+  "Procedural world generation running live on the NEX engine 🎮 Rate this setup 1-10! #gaming #cyberpunk #nexchat",
+];
+
+if (chronexAiGenCaptionBtn) {
+  chronexAiGenCaptionBtn.addEventListener('click', () => {
+    const randomCaption = VIRAL_CYBER_CAPTIONS[Math.floor(Math.random() * VIRAL_CYBER_CAPTIONS.length)];
+    if (reelCaptionInput) {
+      reelCaptionInput.value = randomCaption;
+      if (reelCaptionCounter) reelCaptionCounter.textContent = `${randomCaption.length}/300`;
+      syncSimulatorPreview();
+      showToast('ChronEX AI generated viral caption! ✨');
+    }
+  });
+}
 
 reelDropzone.addEventListener('click', () => {
   reelVideoInput.click();
@@ -1632,6 +1727,7 @@ if (reelCaptionInput && reelCaptionCounter) {
   reelCaptionInput.addEventListener('input', () => {
     const len = reelCaptionInput.value.length;
     reelCaptionCounter.textContent = `${len}/300`;
+    syncSimulatorPreview();
   });
 }
 
@@ -1642,6 +1738,7 @@ document.querySelectorAll('.hashtag-pill').forEach((pill) => {
     if (!reelCaptionInput.value.includes(tag)) {
       reelCaptionInput.value = (reelCaptionInput.value ? reelCaptionInput.value + ' ' : '') + tag;
       if (reelCaptionCounter) reelCaptionCounter.textContent = `${reelCaptionInput.value.length}/300`;
+      syncSimulatorPreview();
     }
   });
 });
@@ -1668,7 +1765,18 @@ reelVideoInput.addEventListener('change', async (e) => {
   selectedReelFile = file;
   reelDropzonePrompt.style.display = 'none';
   reelPreviewContainer.style.display = 'flex';
-  reelPreviewVideo.src = URL.createObjectURL(file);
+  const videoObjUrl = URL.createObjectURL(file);
+  reelPreviewVideo.src = videoObjUrl;
+
+  // Real-time live simulator playback
+  if (simPreviewVideo) {
+    simPreviewVideo.src = videoObjUrl;
+    simPreviewVideo.style.display = 'block';
+    simPreviewVideo.play().catch(() => {});
+  }
+  if (simPlaceholder) {
+    simPlaceholder.style.display = 'none';
+  }
 
   const duration = await getVideoDuration(file);
   const minutes = Math.floor(duration / 60);
@@ -1691,6 +1799,12 @@ reelVideoInput.addEventListener('change', async (e) => {
       const resCategory = thumbData.width >= 3800 ? '4K Ultra HD' : (thumbData.width >= 1000 ? '1080p FHD' : '720p HD');
       if (reelHdSpecText) {
         reelHdSpecText.textContent = `${thumbData.width}x${thumbData.height} ${resCategory} • Lossless H.264`;
+      }
+      if (studioThumbPreviewImg) {
+        studioThumbPreviewImg.src = thumbData.dataUrl;
+      }
+      if (studioThumbBox) {
+        studioThumbBox.style.display = 'flex';
       }
       showToast(`Analyzed: ${resCategory} (${thumbData.width}x${thumbData.height})`);
     }
@@ -1716,6 +1830,17 @@ function resetVideoPicker() {
   reelPreviewVideo.pause();
   reelPreviewVideo.src = '';
   reelPreviewContainer.style.display = 'none';
+  if (simPreviewVideo) {
+    simPreviewVideo.pause();
+    simPreviewVideo.src = '';
+    simPreviewVideo.style.display = 'none';
+  }
+  if (simPlaceholder) {
+    simPlaceholder.style.display = 'flex';
+  }
+  if (studioThumbBox) {
+    studioThumbBox.style.display = 'none';
+  }
   const reelHdBadge = document.getElementById('reelHdBadge');
   if (reelHdBadge) reelHdBadge.style.display = 'none';
   reelDropzonePrompt.style.display = 'block';
@@ -1730,7 +1855,8 @@ function resetUploadForm() {
   selectedSound = { title: 'Original Audio', artist: '', url: '' };
   selectedSoundLabel.textContent = 'Original Audio — (Video Sound)';
   submitReelBtn.disabled = false;
-  submitReelBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Publish Reel';
+  submitReelBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Publish Reel to NEX Stream';
+  syncSimulatorPreview();
 }
 
 // Publish Reel to Cloudinary Pool with Highest HD/4K Parameters
@@ -1746,7 +1872,7 @@ uploadReelForm.addEventListener('submit', async (e) => {
   const soundTrackName = document.getElementById('reelSoundTitle').value || `Original Audio — @${myUsername}`;
   const customAudioUrl = document.getElementById('reelSoundUrl').value || '';
 
-  // Determine Bitrate and Quality based on user selection: highest HD / 4K without compression
+  // Determine Bitrate and Quality based on user selection
   let bitRate = '8000k';
   if (selectedQualityMode === '4k') {
     bitRate = '14000k';
@@ -1754,8 +1880,13 @@ uploadReelForm.addEventListener('submit', async (e) => {
     bitRate = '5000k';
   }
 
+  // Determine publishing identity based on user persona radio selection
+  const chosenPersona = document.querySelector('input[name="studioPersonaRadio"]:checked')?.value || 'general';
+  const publishAuthorName = (chosenPersona === 'custom' && myCreatorName) ? myCreatorName : myUsername;
+  const publishAuthorPic = (chosenPersona === 'custom' && customReelsAvatar) ? customReelsAvatar : (generalProfilePic || myProfilePic || 'favicon.png');
+
   submitReelBtn.disabled = true;
-  submitReelBtn.innerHTML = '<div class="cyber-spinner" style="width:16px;height:16px;border-width:2px;"></div> Uploading HD...';
+  submitReelBtn.innerHTML = '<div class="cyber-spinner" style="width:16px;height:16px;border-width:2px;"></div> Uploading HD Stream...';
   reelUploadProgressWrapper.style.display = 'flex';
 
   try {
@@ -1775,7 +1906,6 @@ uploadReelForm.addEventListener('submit', async (e) => {
 
     console.log('[NEX_REELS] HD Video Saved to Cloudinary Vault:', uploadResult.vault);
 
-    // If a high-res poster thumbnail was generated via canvas, upload to Cloudinary for 0ms profile grid loading
     let thumbnailUrl = '';
     if (selectedReelThumbnailBlob) {
       try {
@@ -1806,8 +1936,8 @@ uploadReelForm.addEventListener('submit', async (e) => {
       sound: soundTrackName,
       audioUrl: customAudioUrl,
       authorId: myUID || 'anonymous',
-      authorName: myUsername,
-      authorPic: myProfilePic,
+      authorName: publishAuthorName,
+      authorPic: publishAuthorPic,
       likes: [],
       likesCount: 0,
       commentsCount: 0,
@@ -1816,15 +1946,54 @@ uploadReelForm.addEventListener('submit', async (e) => {
       createdAt: serverTimestamp(),
     });
 
-    showToast(`HD Reel posted successfully!`);
-    uploadReelModal.style.display = 'none';
-    resetUploadForm();
+    showToast(`HD Reel posted successfully! 🚀`);
+    closeCreatorStudio();
   } catch (err) {
     console.error('Reel upload error:', err);
     showToast(`Upload failed: ${err.message}`);
     submitReelBtn.disabled = false;
-    submitReelBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Try Again';
+    submitReelBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Try Again';
   }
+});
+
+// ══════════════════════════════════════════════════
+// ARCHITECTURE DOCUMENTARY MODAL CONTROLLER
+// ══════════════════════════════════════════════════
+const reelsDocModal = document.getElementById('reelsDocModal');
+const openReelsDocBtn = document.getElementById('openReelsDocBtn');
+const closeReelsDocBtn = document.getElementById('closeReelsDocBtn');
+
+function openReelsDoc() {
+  if (reelsDocModal) {
+    reelsDocModal.style.display = 'flex';
+  }
+}
+
+function closeReelsDoc() {
+  if (reelsDocModal) {
+    reelsDocModal.style.display = 'none';
+  }
+}
+
+if (openReelsDocBtn) openReelsDocBtn.addEventListener('click', openReelsDoc);
+if (closeReelsDocBtn) closeReelsDocBtn.addEventListener('click', closeReelsDoc);
+
+document.querySelectorAll('.doc-tab-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.doc-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+
+    const paneTiktok = document.getElementById('docPaneTiktok');
+    const paneNexreels = document.getElementById('docPaneNexreels');
+    const paneMatrix = document.getElementById('docPaneMatrix');
+    const paneInnovations = document.getElementById('docPaneInnovations');
+
+    if (paneTiktok) paneTiktok.style.display = tab === 'tiktok' ? 'block' : 'none';
+    if (paneNexreels) paneNexreels.style.display = tab === 'nexreels' ? 'block' : 'none';
+    if (paneMatrix) paneMatrix.style.display = tab === 'matrix' ? 'block' : 'none';
+    if (paneInnovations) paneInnovations.style.display = tab === 'innovations' ? 'block' : 'none';
+  });
 });
 
 function escapeHtml(text) {
