@@ -17,7 +17,7 @@ async function saveCallToHistory(contactId, callType, duration) {
         };
 
         await addDoc(collection(db, 'callHistory'), callRecord);
-        console.log('âœ… Call saved to history:', callRecord);
+        console.log('✅ Call saved to history:', callRecord);
     } catch (error) {
         console.error('âŒ Error saving call to history:', error);
         throw error;
@@ -36,7 +36,7 @@ async function loadCallHistory() {
 
     callHistoryFeed.innerHTML = `
     <div style="text-align: center; padding: 40px; color: #00ff66;">
-      <div style="font-size: 48px; margin-bottom: 15px;">ðŸ“ž</div>
+      <div style="font-size: 40px; margin-bottom: 14px;"><i class="fa-solid fa-phone fa-bounce" style="color: #00ff66;"></i></div>
       <p>Loading call history...</p>
     </div>
   `;
@@ -90,7 +90,7 @@ async function loadCallHistory() {
           padding: 60px 20px;
           color: #888;
         ">
-          <div style="font-size: 64px; margin-bottom: 20px;">ðŸ“ž</div>
+          <div style="font-size: 52px; margin-bottom: 16px; color: #444;"><i class="fa-solid fa-phone-slash"></i></div>
           <p style="font-size: 18px; color: #aaa; margin-bottom: 10px;">No Calls Yet</p>
           <p style="font-size: 14px; color: #666;">Your call history will appear here</p>
         </div>
@@ -104,8 +104,9 @@ async function loadCallHistory() {
             const contactId = call.isOutgoing ? call.to : call.from;
             const contactInfo = await getContactInfo(contactId);
 
-            const callIcon = call.type === 'video' ? 'ðŸ“¹' : 'ðŸ“ž';
-            const directionIcon = call.isOutgoing ? 'ðŸ“¤' : 'ðŸ“¥';
+            const isVideo = call.type === 'video';
+            const callIcon = isVideo ? '<i class="fa-solid fa-video"></i>' : '<i class="fa-solid fa-phone"></i>';
+            const directionIcon = call.isOutgoing ? '<i class="fa-solid fa-arrow-up-right-from-square"></i>' : '<i class="fa-solid fa-arrow-down-left-and-up-right-to-center"></i>';
             const directionText = call.isOutgoing ? 'Outgoing' : 'Incoming';
             const directionColor = call.isOutgoing ? '#00ff66' : '#00aaff';
 
@@ -146,7 +147,7 @@ async function loadCallHistory() {
             
             <div style="display: flex; align-items: center; gap: 10px; font-size: 13px; color: #888;">
               <span style="color: ${directionColor};">${callIcon} ${directionText} ${call.type}</span>
-              <span>â€¢</span>
+              <span>•</span>
               <span>${duration}</span>
             </div>
           </div>
@@ -160,7 +161,7 @@ async function loadCallHistory() {
         }
 
         callHistoryFeed.innerHTML = historyHTML;
-        console.log(`ðŸ“ž Loaded ${allCalls.length} call(s) from history`);
+        console.log(`📞 Loaded ${allCalls.length} call(s) from history`);
 
     } catch (error) {
         console.error('Error loading call history:', error);
@@ -252,7 +253,7 @@ async function clearCallHistory() {
 
         await Promise.all(deletePromises);
 
-        showNotif('âœ… Call history cleared', 'success');
+        showNotif('✅ Call history cleared', 'success');
         loadCallHistory(); // Reload to show empty state
 
     } catch (error) {

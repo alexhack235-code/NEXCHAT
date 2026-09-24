@@ -5,6 +5,20 @@
  */
 
 import { doc, setDoc, updateDoc, serverTimestamp, getFirestore } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+import { uploadImageToCloudinary } from './cloudinary.js';
+
+/**
+ * Escapes HTML special characters to prevent template injection / XSS.
+ */
+function escapeHTML(str) {
+  return String(str || '').replace(/[&<>'"]/g, tag => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    "'": '&#39;',
+    '"': '&quot;'
+  }[tag] || tag));
+}
 
 // SVG Doodle Pattern Generators (Optimized Data URIs)
 // Classic Encrypted Dark Doodle: Authentic chat doodles (bubbles, phones, coffee, paper planes, locks, hearts, stars)
@@ -94,6 +108,15 @@ export const WALLPAPER_PRESETS = [
     description: 'Ultra deep pure black with zero glare.'
   }
 ];
+
+/**
+ * Filter presets array to sanitize against unsafe injection strings (');, --, <, <script)
+ */
+export const SAFE_WALLPAPER_PRESETS = WALLPAPER_PRESETS.filter(p => {
+  if (!p) return false;
+  const str = `${p.id || ''} ${p.name || ''} ${p.url || ''}`;
+  return !str.includes("');") && !str.includes('--') && !str.includes('<script');
+});
 
 /**
  * Applies a wallpaper to the active chat screen and messages container.
@@ -483,7 +506,7 @@ export function openWallpaperModal(options = {}) {
           <div style="font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Apply To</div>
           <div class="wp-scope-switch">
             <button type="button" class="wp-scope-btn ${selectedScope === 'chat' ? 'active' : ''}" id="wpScopeChatBtn">
-              <i class="fa-solid fa-comment"></i> This Chat Only (${chatName})
+              <i class="fa-solid fa-comment"></i> This Chat Only (${escapeHTML(chatName)})
             </button>
             <button type="button" class="wp-scope-btn ${selectedScope === 'global' ? 'active' : ''}" id="wpScopeGlobalBtn">
               <i class="fa-solid fa-globe"></i> All Chats (Default)
@@ -496,14 +519,14 @@ export function openWallpaperModal(options = {}) {
           <div style="font-size: 12px; font-weight: 600; color: #94a3b8; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Curated Presets</div>
           <div class="wp-grid" id="wpPresetGrid">
             <!-- Upload Custom Card -->
-            <label class="wp-upload-tile" for="wpCustomUploadInput" title="Upload custom image to Vercel Blob">
+            <label class="wp-upload-tile" for="wpCustomUploadInput" title="Upload custom wallpaper image">
               <i class="fa-solid fa-cloud-arrow-up" style="font-size: 18px;"></i>
               <span>Upload Custom</span>
               <input type="file" id="wpCustomUploadInput" accept="image/*" style="display: none;">
             </label>
-            ${WALLPAPER_PRESETS.map((p) => `
-              <div class="wp-preset-tile ${p.url === selectedUrl ? 'active' : ''}" data-url="${p.url}" data-solid="${p.solidColor || ''}" style="background-color: ${p.previewBg}; ${p.url ? `background-image: url('${p.url}'); background-size: ${p.url.startsWith('data:image/svg') ? 'auto' : 'cover'};` : ''}">
-                <div class="wp-tile-label">${p.name}</div>
+            ${SAFE_WALLPAPER_PRESETS.map((p) => `
+              <div class="wp-preset-tile ${p.url === selectedUrl ? 'active' : ''}" data-preset-id="${escapeHTML(p.id)}">
+                <div class="wp-tile-label">${escapeHTML(p.name)}</div>
               </div>
             `).join('')}
           </div>
@@ -524,13 +547,34 @@ export function openWallpaperModal(options = {}) {
 
   document.body.appendChild(modal);
 
+  // Safely assign background styles programmatically to prevent template injection
+  const presetMap = new Map(SAFE_WALLPAPER_PRESETS.map(p => [p.id, p]));
+  modal.querySelectorAll('.wp-preset-tile[data-preset-id]').forEach((tile) => {
+    const preset = presetMap.get(tile.dataset.presetId);
+    if (!preset) return;
+    tile.style.backgroundColor = preset.previewBg || '#0b141a';
+    if (preset.url) {
+      tile.style.backgroundImage = `url("${preset.url.replace(/"/g, '\\"')}")`;
+      tile.style.backgroundSize = preset.url.startsWith('data:image/svg') ? 'auto' : 'cover';
+      tile.style.backgroundRepeat = preset.url.startsWith('data:image/svg') ? 'repeat' : 'no-repeat';
+      tile.style.backgroundPosition = 'center';
+    }
+    tile.addEventListener('click', () => {
+      modal.querySelectorAll('.wp-preset-tile').forEach(t => t.classList.remove('active'));
+      tile.classList.add('active');
+      selectedUrl = preset.url || '';
+      refreshPreview();
+    });
+  });
+
   // Update preview stage visually
   function refreshPreview() {
     const stage = document.getElementById('wpPreviewStage');
     if (!stage) return;
     if (selectedUrl) {
-      stage.style.backgroundImage = `url('${selectedUrl}')`;
+      stage.style.backgroundImage = `url("${selectedUrl.replace(/"/g, '\\"')}")`;
       stage.style.backgroundSize = selectedUrl.startsWith('data:image/svg') ? 'auto' : 'cover';
+      stage.style.backgroundRepeat = selectedUrl.startsWith('data:image/svg') ? 'repeat' : 'no-repeat';
       stage.style.backgroundPosition = 'center';
       stage.style.backgroundColor = '#0b141a';
     } else {
@@ -554,44 +598,50 @@ export function openWallpaperModal(options = {}) {
     scopeChatBtn.classList.remove('active');
   });
 
-  // Preset Selection Click Handlers
-  document.querySelectorAll('.wp-preset-tile').forEach((tile) => {
-    tile.addEventListener('click', () => {
-      document.querySelectorAll('.wp-preset-tile').forEach(t => t.classList.remove('active'));
-      tile.classList.add('active');
-      selectedUrl = tile.dataset.url || '';
-      refreshPreview();
-    });
-  });
-
-  // Custom Upload Handler (Vercel Blob)
+  // Custom Upload Handler (Cloudinary Primary)
   const customInput = document.getElementById('wpCustomUploadInput');
   customInput?.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    showNotif('Uploading wallpaper to Vercel Blob...', 'info');
+    showNotif('Uploading wallpaper to secure vault...', 'info');
 
     try {
-      if (typeof onUploadCustom === 'function') {
-        const url = await onUploadCustom(file);
-        if (url) {
-          selectedUrl = url;
-          refreshPreview();
-          showNotif('Wallpaper uploaded! Click "Set Wallpaper" to apply.', 'success');
+      let uploadedUrl = null;
+
+      // 1. Primary: Cloudinary multi-vault upload
+      try {
+        const cRes = await uploadImageToCloudinary(file, { folder: 'nexchat-wallpapers' });
+        if (cRes && (cRes.secure_url || cRes.url)) {
+          uploadedUrl = cRes.secure_url || cRes.url;
         }
-      } else {
-        // Fallback local reader
-        const reader = new FileReader();
-        reader.onload = (re) => {
-          selectedUrl = re.target.result;
-          refreshPreview();
-        };
-        reader.readAsDataURL(file);
+      } catch (cErr) {
+        console.warn('[WALLPAPER] Cloudinary upload notice:', cErr?.message || cErr);
+      }
+
+      // 2. Secondary fallback: onUploadCustom if provided
+      if (!uploadedUrl && typeof onUploadCustom === 'function') {
+        uploadedUrl = await onUploadCustom(file);
+      }
+
+      // 3. Last resort fallback: local FileReader
+      if (!uploadedUrl) {
+        uploadedUrl = await new Promise((res, rej) => {
+          const reader = new FileReader();
+          reader.onload = (re) => res(re.target.result);
+          reader.onerror = rej;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (uploadedUrl) {
+        selectedUrl = uploadedUrl;
+        refreshPreview();
+        showNotif('✅ Wallpaper uploaded! Click "Set Wallpaper" to apply.', 'success');
       }
     } catch (err) {
       console.error('Wallpaper upload failed:', err);
-      showNotif('Failed to upload wallpaper: ' + err.message, 'error');
+      showNotif('Failed to upload wallpaper: ' + (err.message || 'Upload error'), 'error');
     }
   });
 

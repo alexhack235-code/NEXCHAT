@@ -1,8 +1,20 @@
-/**
- * Media, Voice Note, and Document Upload Service for NEXCHAT
- * Uses Vercel Blob storage (media token) with progress tracking.
- */
-import { uploadVideoToCloudinary } from './cloudinary.js';
+import {
+  uploadMediaToCloudinary,
+  uploadVideoToCloudinary,
+  uploadImageToCloudinary,
+  uploadAudioToCloudinary,
+  uploadDocumentToCloudinary,
+  getActiveCloudinaryVaults
+} from './cloudinary.js';
+
+export {
+  uploadMediaToCloudinary,
+  uploadVideoToCloudinary,
+  uploadImageToCloudinary,
+  uploadAudioToCloudinary,
+  uploadDocumentToCloudinary,
+  getActiveCloudinaryVaults
+};
 export { uploadReelVideo, REELS_VAULTS } from './reels-vault.js';
 export { uploadStatusMedia, STATUS_VAULTS } from './status-vault.js';
 
@@ -100,60 +112,65 @@ export async function uploadMediaBlob(file, options = {}) {
 
 /**
  * Universal media uploader for NEXCHAT.
- * Automatically delegates videos to Cloudinary (free, handles large files)
- * and images/voice notes/documents to Vercel Blob, with seamless base64/dataURL fallback.
+ * Makes Cloudinary Multi-Vault PRIMARY for all media uploads (images, audio, voice notes,
+ * documents, videos) with automatic sequential rotation across all 5 vaults.
+ * Uses Vercel Blob only as secondary fallback, and local base64/objectURL as last resort.
  * 
  * @param {File|Blob} file
  * @param {object} [options]
- * @returns {Promise<{url: string, downloadUrl?: string, fileName: string, fileSize: number, fileType: string}>}
+ * @returns {Promise<{url: string, downloadUrl?: string, fileName: string, fileSize: number, fileType: string, public_id?: string, duration?: number, vault?: string}>}
  */
 export async function uploadAnyMedia(file, options = {}) {
   if (!file) throw new Error('No file provided for upload');
   
-  const isVideo = file.type && file.type.startsWith('video/');
-  if (isVideo) {
-    try {
-      const res = await uploadVideoToCloudinary(file, options);
-      return {
-        url: res.secure_url || res.downloadURL,
-        downloadUrl: res.secure_url || res.downloadURL,
-        public_id: res.public_id,
-        duration: res.duration || 0,
-        fileName: res.fileName || file.name,
-        fileSize: res.bytes || file.size,
-        fileType: res.fileType || file.type || 'video/mp4'
-      };
-    } catch (err) {
-      console.warn('Cloudinary upload warning, trying Vercel Media Blob fallback:', err);
-    }
+  // 1. Primary: Cloudinary Multi-Vault (All file types: Images, Audio, Voice, Docs, Videos)
+  try {
+    const res = await uploadMediaToCloudinary(file, options);
+    return {
+      url: res.secure_url || res.downloadURL || res.url,
+      downloadUrl: res.secure_url || res.downloadURL || res.url,
+      public_id: res.public_id,
+      duration: res.duration || 0,
+      fileName: res.fileName || file.name || 'file',
+      fileSize: res.bytes || file.size,
+      fileType: res.fileType || file.type || 'application/octet-stream',
+      vault: res.vault || 'Cloudinary',
+    };
+  } catch (err) {
+    console.warn('[STORAGE] Cloudinary pool upload notice, attempting secondary storage fallback:', err?.message || err);
   }
 
+  // 2. Secondary Fallback: Vercel Blob (if serverless API route available)
   try {
     return await uploadMediaBlob(file, options);
   } catch (err) {
-    console.warn('Media blob upload warning, falling back to local base64 encoding:', err);
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        resolve({
-          url: e.target.result,
-          downloadUrl: e.target.result,
-          fileName: file.name || 'attachment',
-          fileSize: file.size,
-          fileType: file.type || 'application/octet-stream'
-        });
-      };
-      reader.onerror = () => {
-        const objUrl = URL.createObjectURL(file);
-        resolve({
-          url: objUrl,
-          downloadUrl: objUrl,
-          fileName: file.name || 'attachment',
-          fileSize: file.size,
-          fileType: file.type || 'application/octet-stream'
-        });
-      };
-      reader.readAsDataURL(file);
-    });
+    console.warn('[STORAGE] Vercel Media Blob notice, falling back to local encoding:', err?.message || err);
   }
+
+  // 3. Last Resort Fallback: Local Base64 / Object URL
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      resolve({
+        url: e.target.result,
+        downloadUrl: e.target.result,
+        fileName: file.name || 'attachment',
+        fileSize: file.size,
+        fileType: file.type || 'application/octet-stream',
+        vault: 'LocalBase64',
+      });
+    };
+    reader.onerror = () => {
+      const objUrl = URL.createObjectURL(file);
+      resolve({
+        url: objUrl,
+        downloadUrl: objUrl,
+        fileName: file.name || 'attachment',
+        fileSize: file.size,
+        fileType: file.type || 'application/octet-stream',
+        vault: 'LocalObjectURL',
+      });
+    };
+    reader.readAsDataURL(file);
+  });
 }

@@ -120,13 +120,15 @@ body.light-mode {
 
 html, body {
   width: 100%;
+  max-width: 100vw;
   height: 100%;
   background-color: var(--bg-app);
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
+  overflow-x: hidden !important;
   user-select: none;
 }
 
@@ -158,6 +160,8 @@ html, body {
   height: 100vh;
   height: 100dvh;
   width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden !important;
   position: relative;
   background-color: var(--bg-app);
   background-image: 
@@ -225,6 +229,8 @@ html, body {
   cursor: pointer;
   user-select: none;
   transition: var(--transition-fast);
+  flex-shrink: 0;
+  min-width: max-content;
 }
 
 .nex-logo:hover {
@@ -240,6 +246,8 @@ html, body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 20px var(--accent-primary-glow);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Active chat header info (in header) */
@@ -2988,14 +2996,26 @@ html, body {
     display: none !important;
   }
 
+  /* Hide back to dashboard button on mobile chat view so logo is never clipped */
+  #dashboardBackBtn {
+    display: none !important;
+  }
+
   .mobile-header-actions,
   .mobile-only-nav {
     display: flex !important;
   }
 
   .top-header {
-    padding: 0 14px;
+    padding: 0 12px;
     height: var(--header-height);
+    overflow: hidden;
+  }
+
+  .header-left {
+    min-width: 0;
+    flex: 1;
+    overflow: hidden;
   }
 
   .nex-text {
@@ -3057,6 +3077,32 @@ html, body {
   }
 }
 
+/* 360px standard mobile optimization */
+@media (max-width: 380px) {
+  .top-header {
+    padding: 0 8px !important;
+  }
+  .header-left {
+    gap: 4px !important;
+  }
+  .nex-text {
+    font-size: 15px !important;
+    letter-spacing: 1px !important;
+  }
+  .header-icon-btn {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+  }
+  .mobile-header-actions {
+    gap: 4px !important;
+  }
+  .filter-tab {
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
 @media (min-width: 900px) {
   .mobile-header-actions,
   .mobile-only-nav,
@@ -3071,4 +3117,201 @@ html, body {
   .desktop-only-nav {
     display: flex !important;
   }
+}
+
+/* Universal Card & Modal Width Limiter for Mobile (360px Safe) */
+.announcement-item,
+.modal-content,
+.settings-content,
+.wallpaper-card,
+.status-content,
+.reels-upload-card,
+.card,
+.call-modal-content,
+.group-modal-content {
+  max-width: min(92vw, 540px) !important;
+  box-sizing: border-box !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Chat list items and avatar placeholder styles */
+.chat-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.chat-list-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chat-list-item.active {
+  background: rgba(0, 255, 136, 0.08);
+}
+
+.chat-avatar-container {
+  position: relative;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.chat-avatar-container .chat-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+}
+
+.avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1a2730 !important;
+  color: #00ff88 !important;
+  font-weight: 700;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  user-select: none;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.chat-avatar.group-avatar,
+.group-avatar {
+  background: #1a2730;
+  color: #00ff88;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.chat-item-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.chat-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.chat-preview {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.chat-time-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.chat-item-time {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.chat-menu-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chat-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  opacity: 1;
+}
+
+/* Announcements feed styles */
+.announcements-container {
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.announcement-item {
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.announcement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.announcement-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  word-break: break-word;
+}
+
+.announcement-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.announcement-content {
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  word-break: break-word;
+}
+
+.announcement-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--text-muted);
+  gap: 8px;
+  flex-wrap: wrap;
 }

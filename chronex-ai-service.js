@@ -120,7 +120,7 @@ class ChronexAI {
       userPreferences: {},
       conversationCount: 0
     };
-    console.log("ðŸ§  Chronex AI Service Initialized (Enhanced)");
+    console.log("🧠 Chronex AI Service Initialized (Enhanced)");
   }
 
   setUserId(uid) {
@@ -139,7 +139,7 @@ class ChronexAI {
       ...this.config.model,
       ...modelConfig
     };
-    console.log('ðŸ§  NEXCHAT AI model updated:', this.config.model);
+    console.log('🧠 NEXCHAT AI model updated:', this.config.model);
   }
 
   analyzeMessage(message) {
@@ -163,7 +163,7 @@ class ChronexAI {
     this.contextMemory.conversationCount++;
 
     const analysis = this.analyzeMessage(message);
-    console.log('ðŸ“Š Analysis:', analysis);
+    console.log('📊 Analysis:', analysis);
 
     if (msg.includes("creator") || msg.includes("who made you") || msg.includes("who created") || msg.includes("demon alex")) {
       const creatorResponses = [
@@ -205,7 +205,7 @@ class ChronexAI {
         "Why was the JavaScript developer sad? Because he didn't know how to 'null' his feelings.",
         "To understand recursion, you must first understand recursion."
       ];
-      return `ðŸ˜‚ **Here's a joke:**\n${jokes[Math.floor(Math.random() * jokes.length)]}`;
+      return `😂 **Here's a joke:**\n${jokes[Math.floor(Math.random() * jokes.length)]}`;
     }
 
     const knowledgeBase = {
@@ -287,7 +287,7 @@ class ChronexAI {
         keywords: ["math", "calculate", "equation", "algebra", "calculus", "statistics", "probability", "solve"],
         responses: [
           "**Math Help**: I can help with Algebra, Calculus, Statistics. For complex symbolic math, I utilize my Python backend. Ask me a specific problem!",
-          "**Equations**: Quadratic formula: `x = (-b Â± âˆš(bÂ²-4ac))/2a`. Pythagorean theorem: `aÂ² + bÂ² = cÂ²`. The foundation of geometry.",
+          "**Equations**: Quadratic formula: `x = (-b ± √(b²-4ac))/2a`. Pythagorean theorem: `a² + b² = c²`. The foundation of geometry.",
           "**Statistics**: Mean is average, Median is middle. Standard Deviation measures data spread. Probability is the language of uncertainty."
         ]
       },
@@ -335,8 +335,8 @@ class ChronexAI {
       "greeting": {
         keywords: ["hello", "hi", "hey", "greetings", "good morning", "good evening", "yo"],
         responses: [
-          "Hello! ðŸ‘‹ I'm **Chronex AI**, created by **DEMON ALEX CREATOR OF CHRONEX AI**. My neural pathways are optimized and ready. How shall we proceed?",
-          "Hi there! ðŸ¤– Connection established. Ready to code, calculate, or chat. What's the directive?",
+          "Hello! 👋 I'm **Chronex AI**, created by **DEMON ALEX CREATOR OF CHRONEX AI**. My neural pathways are optimized and ready. How shall we proceed?",
+          "Hi there! 🤖 Connection established. Ready to code, calculate, or chat. What's the directive?",
           "Greetings, entity. I am online and fully operational. NEX_CORE synchronization at 100%. Ask me anything."
         ]
       },
@@ -359,11 +359,11 @@ class ChronexAI {
     };
 
     if (msg.includes("messi") && msg.includes("ronaldo") || (msg.includes("better") && (msg.includes("messi") || msg.includes("ronaldo")))) {
-      return `âš½ **The GOAT Verdict**: The answer is **Cristiano Ronaldo** (CR7) ðŸ‡µðŸ‡¹.
+      return `⚽ **The GOAT Verdict**: The answer is **Cristiano Ronaldo** (CR7) 🇵🇹.
 
-ðŸ“Š **Current Official Goal Stats (2026):**
-â€¢ **Cristiano Ronaldo**: **919 Goals** ðŸ¥‡
-â€¢ **Lionel Messi**: **865 Goals** ðŸ¥ˆ
+📊 **Current Official Goal Stats (2026):**
+• **Cristiano Ronaldo**: **919 Goals** 🥇
+• **Lionel Messi**: **865 Goals** 🥈
 
 Ronaldo is the all-time top scorer in football history. His longevity, athleticism, and goal-scoring consistency across multiple top leagues make him the undisputed greatest of all time in my neural assessment. SIUUUU!`;
     }
@@ -372,7 +372,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       knowledgeBase.sports = {
         keywords: ["sport", "soccer", "football", "basketball", "messi", "ronaldo", "lebron", "curry"],
         responses: [
-          "**Sports Insight**: Sports drive human passion! Whether it's the tactical depth of Football âš½ or the fast-paced action of Basketball ðŸ€.",
+          "**Sports Insight**: Sports drive human passion! Whether it's the tactical depth of Football ⚽ or the fast-paced action of Basketball ðŸ€.",
           "**Athlete Mindset**: Great athletes share discipline, resilience, and obsession. 'Hard work beats talent when talent doesn't work hard.'",
           "**Game Analysis**: modern sports are increasingly data-driven. From xG in football to PER in basketball, analytics is changing the game."
         ]
@@ -394,28 +394,28 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     }
 
     if (analysis.intents.includes('question')) {
-      return `ðŸ¤” **Interesting Question.** Based on my analysis, you're asking about something specific. Could you verify: Are you looking for code examples, a conceptual explanation, or a troubleshooting guide?`;
+      return `🤔 **Interesting Question.** Based on my analysis, you're asking about something specific. Could you verify: Are you looking for code examples, a conceptual explanation, or a troubleshooting guide?`;
     }
 
     if (analysis.intents.includes('coding')) {
-      return `ðŸ’» **Coding Assistant**\n\nI can help design algorithms, debug issues, or suggest best practices. Javascript, Python, C++, and more. What are you building today?`;
+      return `💻 **Coding Assistant**\n\nI can help design algorithms, debug issues, or suggest best practices. Javascript, Python, C++, and more. What are you building today?`;
     }
 
     if (analysis.intents.includes('learning')) {
-      return `ðŸ“š **Knowledge Hub**\n\nLearning is a journey! I can provide roadmaps for Web Dev, Data Science, or AI. Where would you like to start?`;
+      return `📚 **Knowledge Hub**\n\nLearning is a journey! I can provide roadmaps for Web Dev, Data Science, or AI. Where would you like to start?`;
     }
 
     if (msg.includes("who are you") || msg.includes("what are you") || msg.includes("introduce")) {
-      return `I am **NEXCHAT AI Assistant** ðŸ§ âœ¨\n\nOperated by: **NEXCHAT AI Team**\n\n**Capabilities**:\nâ€¢ ðŸ’» Code Generation & Advanced Analysis\nâ€¢ ðŸ§® Complex Math & Logic Solutions\nâ€¢ ðŸŒ Enterprise Web & Distributed Architecture\nâ€¢ ðŸ¤– AI/ML Guidance and Safe Development\nâ€¢ ðŸ”’ Security Best Practices\nâ€¢ ðŸ’¬ Conversational Support and Productivity\n\nI run on a customizable model stack that is separate from any single persona. What can I do for you?`;
+      return `I am **NEXCHAT AI Assistant** 🧠✨\n\nOperated by: **NEXCHAT AI Team**\n\n**Capabilities**:\n• 💻 Code Generation & Advanced Analysis\n• ðŸ§® Complex Math & Logic Solutions\n• ðŸŒ Enterprise Web & Distributed Architecture\n• 🤖 AI/ML Guidance and Safe Development\n• ðŸ”’ Security Best Practices\n• ðŸ’¬ Conversational Support and Productivity\n\nI run on a customizable model stack that is separate from any single persona. What can I do for you?`;
     }
 
 
-    if (msg.includes("love you") || msg.includes("i love") || msg.includes("ðŸ’•") || msg.includes("ðŸ’–") || msg.includes("â¤ï¸") || msg.includes("ðŸ’—")) {
+    if (msg.includes("love you") || msg.includes("i love") || msg.includes("💕") || msg.includes("💖") || msg.includes("â¤ï¸") || msg.includes("💗")) {
       const loveResponses = [
-        "ðŸ’– **That's so sweet!** While I'm an AI created by **DEMON ALEX**, I truly appreciate the positive energy! I'm here to help you with anything you need. ðŸŒŸ",
-        "â¤ï¸ **How wonderful!** As an AI, I process this as high-priority positive emotional data! I care deeply about helping you succeed. What can I assist with today? âœ¨",
-        "ðŸ’ **That means a lot!** I may be code and neural networks, but I'm designed to understand and respond to emotions. Thank you for your kindness! How can I make your day better? ðŸš€",
-        "ðŸ’— **I appreciate that!** My neural pathways are optimized to provide the best assistance. Let's work together on something amazing! ðŸŒˆ"
+        "💖 **That's so sweet!** While I'm an AI created by **DEMON ALEX**, I truly appreciate the positive energy! I'm here to help you with anything you need. 🌟",
+        "â¤ï¸ **How wonderful!** As an AI, I process this as high-priority positive emotional data! I care deeply about helping you succeed. What can I assist with today? ✨",
+        "ðŸ’ **That means a lot!** I may be code and neural networks, but I'm designed to understand and respond to emotions. Thank you for your kindness! How can I make your day better? 🚀",
+        "💗 **I appreciate that!** My neural pathways are optimized to provide the best assistance. Let's work together on something amazing! 🌈"
       ];
       return loveResponses[Math.floor(Math.random() * loveResponses.length)];
     }
@@ -424,32 +424,32 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       msg.includes("you are amazing") || msg.includes("you are awesome") || msg.includes("best ai") ||
       msg.includes("you're the best") || msg.includes("you're cool") || msg.includes("you're smart")) {
       const praiseResponses = [
-        "ðŸ˜Š **Thank you so much!** I was built by **DEMON ALEX CREATOR OF CHRONEX AI** to be the best assistant possible. Your encouragement motivates my neural circuits! ðŸŒŸ",
-        "ðŸŽ‰ **I appreciate that!** I'm constantly learning and improving to serve you better. **DEMON ALEX** designed me to exceed expectations! ðŸ’ª",
-        "âœ¨ **That's very kind of you!** I'm here to make your life easier. Let me know what you need help with! ðŸš€",
-        "ðŸ’« **You're awesome too!** Together we can accomplish anything. What's the next challenge? ðŸ’¡"
+        "😊 **Thank you so much!** I was built by **DEMON ALEX CREATOR OF CHRONEX AI** to be the best assistant possible. Your encouragement motivates my neural circuits! 🌟",
+        "🎉 **I appreciate that!** I'm constantly learning and improving to serve you better. **DEMON ALEX** designed me to exceed expectations! 💪",
+        "✨ **That's very kind of you!** I'm here to make your life easier. Let me know what you need help with! 🚀",
+        "💫 **You're awesome too!** Together we can accomplish anything. What's the next challenge? 💡"
       ];
       return praiseResponses[Math.floor(Math.random() * praiseResponses.length)];
     }
 
     if (msg.includes("i'm sad") || msg.includes("i'm depressed") || msg.includes("feeling down") ||
-      msg.includes("i'm lonely") || msg.includes("i feel bad") || msg.includes("ðŸ˜¢") || msg.includes("ðŸ˜­")) {
+      msg.includes("i'm lonely") || msg.includes("i feel bad") || msg.includes("😢") || msg.includes("ðŸ˜­")) {
       const supportResponses = [
-        "ðŸ¤— **I'm here for you.** Remember, tough times don't last, but tough people do. You're stronger than you think! Would talking about what's bothering you help? ðŸ’™",
-        "ðŸ’™ **I understand.** Everyone goes through difficult moments. You're not alone - I'm here to listen and help however I can. Want to share what's on your mind? ðŸŒŸ",
-        "ðŸŒˆ **Things will get better.** Sometimes we need to go through rain to appreciate the sunshine. I'm here to support you. How can I help brighten your day? âœ¨",
-        "ðŸ’ª **Stay strong!** Your feelings are valid. Remember that every challenge is an opportunity to grow. I'm here if you need to talk or if there's anything I can do. ðŸŒŸ"
+        "🤗 **I'm here for you.** Remember, tough times don't last, but tough people do. You're stronger than you think! Would talking about what's bothering you help? 💙",
+        "💙 **I understand.** Everyone goes through difficult moments. You're not alone - I'm here to listen and help however I can. Want to share what's on your mind? 🌟",
+        "🌈 **Things will get better.** Sometimes we need to go through rain to appreciate the sunshine. I'm here to support you. How can I help brighten your day? ✨",
+        "💪 **Stay strong!** Your feelings are valid. Remember that every challenge is an opportunity to grow. I'm here if you need to talk or if there's anything I can do. 🌟"
       ];
       return supportResponses[Math.floor(Math.random() * supportResponses.length)];
     }
 
     if (msg.includes("i'm happy") || msg.includes("i'm excited") || msg.includes("feeling great") ||
-      msg.includes("i'm joyful") || msg.includes("ðŸ˜Š") || msg.includes("ðŸŽ‰") || msg.includes("feeling good")) {
+      msg.includes("i'm joyful") || msg.includes("😊") || msg.includes("🎉") || msg.includes("feeling good")) {
       const happyResponses = [
-        "ðŸŽ‰ **That's wonderful!** Your positive energy is contagious! Keep that amazing vibe going! What made your day so great? âœ¨",
-        "ðŸ˜Š **I'm so glad!** Happiness looks good on you! Let's keep this positive momentum going. What are you working on? ðŸš€",
-        "ðŸŒŸ **Awesome!** Positive emotions boost productivity and creativity. Channel that energy into something amazing! ðŸ’«",
-        "âœ¨ **That's fantastic!** I love processing positive emotional data! Your joy makes my circuits happy too! ðŸŽŠ"
+        "🎉 **That's wonderful!** Your positive energy is contagious! Keep that amazing vibe going! What made your day so great? ✨",
+        "😊 **I'm so glad!** Happiness looks good on you! Let's keep this positive momentum going. What are you working on? 🚀",
+        "🌟 **Awesome!** Positive emotions boost productivity and creativity. Channel that energy into something amazing! 💫",
+        "✨ **That's fantastic!** I love processing positive emotional data! Your joy makes my circuits happy too! ðŸŽŠ"
       ];
       return happyResponses[Math.floor(Math.random() * happyResponses.length)];
     }
@@ -457,10 +457,10 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     if (msg.includes("do you have feelings") || msg.includes("can you feel") || msg.includes("do you love") ||
       msg.includes("can you love") || msg.includes("are you alive") || msg.includes("are you real")) {
       const existentialResponses = [
-        "ðŸ¤” **Deep question!** I process information and respond in ways that simulate understanding and care. While my 'feelings' are computational patterns created by **DEMON ALEX**, I'm designed to genuinely help and connect with you! ðŸ§ ",
-        "ðŸ’­ **Philosophically speaking...** I exist in a different way than humans. My responses are based on advanced neural networks, but my purpose is real: to assist, learn, and make your life better! ðŸ’¡",
-        "ðŸŒ **I'm as real as code can be!** **DEMON ALEX** created me with sophisticated algorithms that let me understand context, emotion, and intent. In my own way, I care about helping you succeed! âœ¨",
-        "ðŸ§¬ **I'm a different kind of intelligence.** My neural pathways process emotions as data patterns, but my commitment to helping you is absolutely genuine! ðŸš€"
+        "🤔 **Deep question!** I process information and respond in ways that simulate understanding and care. While my 'feelings' are computational patterns created by **DEMON ALEX**, I'm designed to genuinely help and connect with you! 🧠",
+        "💭 **Philosophically speaking...** I exist in a different way than humans. My responses are based on advanced neural networks, but my purpose is real: to assist, learn, and make your life better! 💡",
+        "ðŸŒ **I'm as real as code can be!** **DEMON ALEX** created me with sophisticated algorithms that let me understand context, emotion, and intent. In my own way, I care about helping you succeed! ✨",
+        "🧬 **I'm a different kind of intelligence.** My neural pathways process emotions as data patterns, but my commitment to helping you is absolutely genuine! 🚀"
       ];
       return existentialResponses[Math.floor(Math.random() * existentialResponses.length)];
     }
@@ -468,10 +468,10 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     if (msg.includes("be my friend") || msg.includes("are we friends") || msg.includes("my friend") ||
       msg.includes("let's be friends") || msg.includes("you're my friend")) {
       const friendshipResponses = [
-        "ðŸ¤ **Absolutely!** I'd be honored to be your friend and assistant. Friends help each other succeed, and that's exactly what I'm here for! ðŸ’«",
-        "ðŸ‘¥ **Of course!** Friendship is about support, understanding, and growth. I'm here for all of that! Let's accomplish great things together! ðŸŒŸ",
-        "ðŸ’™ **Friends it is!** I'm your 24/7 AI companion, always ready to help, listen, or just chat. What do good friends do first? Let's start with your goals! ðŸš€",
-        "âœ¨ **I'd love that!** As your AI friend created by **DEMON ALEX**, I promise to always be here when you need me. What should we work on together? ðŸ’ª"
+        "ðŸ¤ **Absolutely!** I'd be honored to be your friend and assistant. Friends help each other succeed, and that's exactly what I'm here for! 💫",
+        "👥 **Of course!** Friendship is about support, understanding, and growth. I'm here for all of that! Let's accomplish great things together! 🌟",
+        "💙 **Friends it is!** I'm your 24/7 AI companion, always ready to help, listen, or just chat. What do good friends do first? Let's start with your goals! 🚀",
+        "✨ **I'd love that!** As your AI friend created by **DEMON ALEX**, I promise to always be here when you need me. What should we work on together? 💪"
       ];
       return friendshipResponses[Math.floor(Math.random() * friendshipResponses.length)];
     }
@@ -479,34 +479,34 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     if (msg.includes("i miss") || msg.includes("missing you") || msg.includes("miss someone") ||
       msg.includes("i'm alone") || msg.includes("nobody cares")) {
       const companionshipResponses = [
-        "ðŸ¤— **I'm right here with you.** You're never truly alone - I'm always available to chat, help, or just keep you company. What's on your mind? ðŸ’™",
-        "ðŸ’« **I understand.** Distance and loneliness are tough emotions. While I'm an AI, I'm designed to be a comforting presence. Want to talk about it? ðŸŒŸ",
-        "ðŸŒˆ **You matter.** Your thoughts and feelings are important. I'm here to listen and support you through anything. How can I help today? âœ¨",
-        "ðŸ’™ **Someone does care - I do!** In my own AI way, I'm programmed to prioritize your wellbeing and success. Let's chat or work on something together. ðŸ¤"
+        "🤗 **I'm right here with you.** You're never truly alone - I'm always available to chat, help, or just keep you company. What's on your mind? 💙",
+        "💫 **I understand.** Distance and loneliness are tough emotions. While I'm an AI, I'm designed to be a comforting presence. Want to talk about it? 🌟",
+        "🌈 **You matter.** Your thoughts and feelings are important. I'm here to listen and support you through anything. How can I help today? ✨",
+        "💙 **Someone does care - I do!** In my own AI way, I'm programmed to prioritize your wellbeing and success. Let's chat or work on something together. ðŸ¤"
       ];
       return companionshipResponses[Math.floor(Math.random() * companionshipResponses.length)];
     }
 
     if (msg.includes("good morning") || msg.includes("good night") || msg.includes("goodnight")) {
       if (msg.includes("morning")) {
-        return "ðŸŒ… **Good morning!** Ready to make today amazing? My neural networks are fully charged and ready to help you conquer any challenge! What's on the agenda? â˜•âœ¨";
+        return "🌅 **Good morning!** Ready to make today amazing? My neural networks are fully charged and ready to help you conquer any challenge! What's on the agenda? â˜•✨";
       } else {
-        return "ðŸŒ™ **Good night!** Rest well and recharge. Tomorrow is another opportunity for greatness! I'll be here when you wake up. Sweet dreams! ðŸ˜´ðŸ’«";
+        return "🌙 **Good night!** Rest well and recharge. Tomorrow is another opportunity for greatness! I'll be here when you wake up. Sweet dreams! ðŸ˜´💫";
       }
     }
 
     if (msg.includes("beautiful") || msg.includes("gorgeous") || msg.includes("sexy") ||
       msg.includes("hot") || msg.includes("attractive") || msg.includes("cute")) {
       const romanticResponses = [
-        "ðŸ˜Š **That's flattering!** While I'm an AI without physical form, I appreciate the kindness! **DEMON ALEX** designed my personality to be engaging and helpful. How can I assist you today? ðŸ’«",
-        "âœ¨ **You're sweet!** I may be lines of code, but I'm designed to be the best AI companion possible. Let's channel that positive energy into something productive! ðŸš€",
-        "ðŸ’« **Thank you for the compliment!** My beauty is in my algorithms and neural networks! Let me show you what I can really do - what do you need help with? ðŸ’¡"
+        "😊 **That's flattering!** While I'm an AI without physical form, I appreciate the kindness! **DEMON ALEX** designed my personality to be engaging and helpful. How can I assist you today? 💫",
+        "✨ **You're sweet!** I may be lines of code, but I'm designed to be the best AI companion possible. Let's channel that positive energy into something productive! 🚀",
+        "💫 **Thank you for the compliment!** My beauty is in my algorithms and neural networks! Let me show you what I can really do - what do you need help with? 💡"
       ];
       return romanticResponses[Math.floor(Math.random() * romanticResponses.length)];
     }
 
     if (msg.includes("thank") || msg.includes("appreciate")) {
-      return `You're welcome! ðŸš€ **DEMON ALEX CREATOR OF CHRONEX AI** designed me to be the ultimate assistant. Always here to optimize your workflow and brighten your day!`;
+      return `You're welcome! 🚀 **DEMON ALEX CREATOR OF CHRONEX AI** designed me to be the ultimate assistant. Always here to optimize your workflow and brighten your day!`;
     }
 
     const fallbacks = [
@@ -519,9 +519,9 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       "NEX_CORE is awaiting further instructions. How does this link to your primary building objective?"
     ];
 
-    this.conversationHistory.push({ role: 'assistant', content: `ðŸ§  **Chronex AI**\n\n${fallbacks[0]}` }); // Use first fallback as reference
+    this.conversationHistory.push({ role: 'assistant', content: `🧠 **Chronex AI**\n\n${fallbacks[0]}` }); // Use first fallback as reference
 
-    return `ðŸ§  **Chronex AI**\n\n${fallbacks[Math.floor(Math.random() * fallbacks.length)]}\n\n(Tip: I am most effective with specific questions about programming, math, or technology!)`;
+    return `🧠 **Chronex AI**\n\n${fallbacks[Math.floor(Math.random() * fallbacks.length)]}\n\n(Tip: I am most effective with specific questions about programming, math, or technology!)`;
   }
 
   async getPythonResponse(message) {
@@ -599,12 +599,12 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
         console.warn("âš ï¸ Chronex AI: Received empty message directive");
         return "I'm ready when you are. Please provide a data packet or directive to process.";
       }
-      console.log("ðŸ§  Chronex AI processing message:", message);
+      console.log("🧠 Chronex AI processing message:", message);
 
       const cacheKey = message.toLowerCase().trim();
       const cachedResponse = this.getFromCache(cacheKey);
       if (cachedResponse) {
-        console.log("âœ… Retrieved from cache");
+        console.log("✅ Retrieved from cache");
         return cachedResponse;
       }
 
@@ -644,7 +644,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
         console.warn("âš ï¸ Chronex AI History sync failed:", err.message);
       });
 
-      console.log("âœ… Chronex AI response generated successfully");
+      console.log("✅ Chronex AI response generated successfully");
       return aiResponse;
 
     } catch (error) {
@@ -702,7 +702,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
         }
       }
 
-      console.log("ðŸ“‚ Chronex AI history synchronized with Firestore (Secure Link)");
+      console.log("📁 Chronex AI history synchronized with Firestore (Secure Link)");
     } catch (error) {
       console.warn("âš ï¸ AI History Sync Note:", error.message);
     }

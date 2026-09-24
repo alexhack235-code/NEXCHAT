@@ -129,7 +129,17 @@ export async function uploadMediaToCloudinary(file, options = {}) {
     throw new Error('No active Cloudinary vaults are configured in the pool.');
   }
 
-  const resourceType = options.resourceType || (file.type && file.type.startsWith('video/') ? 'video' : 'image');
+  let resourceType = options.resourceType;
+  if (!resourceType) {
+    const mime = (file.type || '').toLowerCase();
+    if (mime.startsWith('video/') || mime.startsWith('audio/')) {
+      resourceType = 'video'; // Cloudinary processes audio under video endpoints
+    } else if (mime.startsWith('image/')) {
+      resourceType = 'image';
+    } else {
+      resourceType = 'auto'; // Handles documents, PDFs, zip, etc.
+    }
+  }
   const folder = options.folder || 'nexchat-media';
   const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
 
@@ -246,6 +256,28 @@ export async function uploadImageToCloudinary(file, options = {}) {
     ...options,
     resourceType: 'image',
     folder: options.folder || 'nexchat-avatars',
+  });
+}
+
+/**
+ * Convenience wrapper for audio uploads (Voice Notes, Audio Files)
+ */
+export async function uploadAudioToCloudinary(file, options = {}) {
+  return uploadMediaToCloudinary(file, {
+    ...options,
+    resourceType: 'video',
+    folder: options.folder || 'nexchat-voice',
+  });
+}
+
+/**
+ * Convenience wrapper for document uploads (PDF, TXT, DOCX, ZIP)
+ */
+export async function uploadDocumentToCloudinary(file, options = {}) {
+  return uploadMediaToCloudinary(file, {
+    ...options,
+    resourceType: 'auto',
+    folder: options.folder || 'nexchat-docs',
   });
 }
 
