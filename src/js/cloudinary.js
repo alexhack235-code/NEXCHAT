@@ -72,6 +72,22 @@ export const CLOUDINARY_VAULT_POOL = [
     folder: 'nexchat-media',
     active: true,
   },
+  {
+    id: 9,
+    name: 'Cloudinary Vault 8 (NEXVUALT8 - Active)',
+    cloudName: 'amcjyisj',
+    uploadPreset: 'NEXVUALT8',
+    folder: 'nexchat-media',
+    active: true,
+  },
+  {
+    id: 10,
+    name: 'Cloudinary Vault 8 Fallback (NEXVAULT8 - Active)',
+    cloudName: 'amcjyisj',
+    uploadPreset: 'NEXVAULT8',
+    folder: 'nexchat-media',
+    active: true,
+  },
 ];
 
 /**
