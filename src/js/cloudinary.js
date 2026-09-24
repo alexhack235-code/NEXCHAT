@@ -56,6 +56,22 @@ export const CLOUDINARY_VAULT_POOL = [
     folder: 'nexchat-media',
     active: true,
   },
+  {
+    id: 7,
+    name: 'Cloudinary Vault 7 (NEXVUALT7 - Active)',
+    cloudName: 'eicyrgp1',
+    uploadPreset: 'NEXVUALT7',
+    folder: 'nexchat-media',
+    active: true,
+  },
+  {
+    id: 8,
+    name: 'Cloudinary Vault 7 Fallback (NEXVAULT7 - Active)',
+    cloudName: 'eicyrgp1',
+    uploadPreset: 'NEXVAULT7',
+    folder: 'nexchat-media',
+    active: true,
+  },
 ];
 
 /**
