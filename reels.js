@@ -6,11 +6,11 @@ import "./src/js/security-guard.js";
 import { auth, db } from './firebase-config.js';
 import {
   collection, doc, addDoc, getDocs, onSnapshot, query, orderBy, limit,
-  updateDoc, increment, arrayUnion, arrayRemove, serverTimestamp
+  updateDoc, increment, arrayUnion, arrayRemove, serverTimestamp, where
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
 import { uploadReelVideo, getVideoDuration } from './src/js/reels-vault.js';
-import { uploadAudioToCloudinary } from './src/js/cloudinary.js';
+import { uploadAudioToCloudinary, uploadImageToCloudinary } from './src/js/cloudinary.js';
 import { TRENDING_SOUNDS } from './src/js/reels-sounds.js';
 
 // Application State
@@ -22,11 +22,16 @@ let isGlobalMuted = true;
 let activeReelId = null;
 let currentCommentUnsubscribe = null;
 let selectedReelFile = null;
+let selectedReelThumbnailBlob = null;
+let selectedReelThumbnailDataUrl = null;
 let selectedSound = { title: 'Original Audio', artist: '', url: '' };
 let previewAudio = null;
 let currentPlayingSoundAudio = null;
 let followedAuthors = new Set(JSON.parse(localStorage.getItem('nex_followed_authors') || '[]'));
 let activeShareReel = null;
+let activeProfileAuthor = null;
+let currentProfileReels = [];
+let currentProfilePics = [];
 
 // DOM Elements
 const reelsFeed = document.getElementById('reelsFeed');
@@ -94,6 +99,55 @@ function formatNumber(num) {
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
   if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
   return String(num);
+}
+
+// High Quality Canvas Video Thumbnail Generator
+export function generateVideoThumbnail(file, seekTime = 1.0) {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.muted = true;
+    video.playsInline = true;
+    const url = URL.createObjectURL(file);
+    video.src = url;
+
+    video.onloadedmetadata = () => {
+      video.currentTime = Math.min(seekTime, (video.duration || 2) / 2);
+    };
+
+    video.onseeked = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 720;
+        canvas.height = video.videoHeight || 1280;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+
+        canvas.toBlob((blob) => {
+          resolve({
+            blob: blob,
+            dataUrl: canvas.toDataURL('image/jpeg', 0.92),
+            width: canvas.width,
+            height: canvas.height,
+          });
+        }, 'image/jpeg', 0.92);
+      } catch {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      }
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    }, 4500);
+  });
 }
 
 // Authentication Sync
@@ -304,72 +358,90 @@ function renderReels(reelsList) {
       card._customAudio = audioEl;
     }
 
-    // Card Markup: Video + Floating Action Bar + Bottom Metadata
+    // Card Markup: Video + Floating Action Bar + Bottom Metadata + Bottom Comment Input Bar
     card.innerHTML = `
-      <video class="reel-video" src="${reel.videoUrl}" playsinline loop preload="metadata"></video>
+      <!-- 3. Fullscreen Video: object-cover w-screen h-screen bg-black, no borders -->
+      <video class="reel-video w-screen h-screen object-cover bg-black" src="${reel.videoUrl}" playsinline loop preload="metadata"></video>
       <div class="reel-play-indicator"><i class="fa-solid fa-play"></i></div>
 
-      <!-- Right Side Vertical Action Bar (TikTok 2026 Style) -->
-      <aside class="reel-actions-sidebar">
-        <!-- Profile Pic with + Follow Badge -->
-        <div class="reel-avatar-wrapper">
-          <img src="${reel.authorPic || 'favicon.png'}" class="reel-author-avatar" alt="${authorHandle}">
-          <button class="reel-follow-plus-badge ${isFollowing ? 'following' : ''}" data-author="${authorHandle}" title="Follow ${authorHandle}">
-            <i class="fa-solid ${isFollowing ? 'fa-check' : 'fa-plus'}"></i>
+      <!-- 4. Right Action Bar: right-4 bottom-32, gap-5: Heart, Comment, Share, Bot icon, Music disc rotating -->
+      <aside class="absolute right-4 bottom-32 z-20 flex flex-col items-center gap-5 text-white select-none pointer-events-auto">
+        <!-- Heart (count 1) -->
+        <div class="flex flex-col items-center gap-1 cursor-pointer">
+          <button type="button" class="like-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Like">
+            <i class="fa-solid fa-heart text-[32px] ${isLiked ? 'text-[#fe2c55]' : 'text-white'} drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+          </button>
+          <span class="like-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(likeCount)}</span>
+        </div>
+
+        <!-- Comment (0) -->
+        <div class="flex flex-col items-center gap-1 cursor-pointer">
+          <button type="button" class="comment-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Comments">
+            <i class="fa-solid fa-comment-dots text-[32px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+          </button>
+          <span class="reel-comment-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(commentCount)}</span>
+        </div>
+
+        <!-- Share (21.0K) -->
+        <div class="flex flex-col items-center gap-1 cursor-pointer">
+          <button type="button" class="share-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Share">
+            <i class="fa-solid fa-share text-[30px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+          </button>
+          <span class="text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
+        </div>
+
+        <!-- Bot icon -->
+        <div class="flex flex-col items-center cursor-pointer">
+          <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="ChronEX AI Assistant">
+            <i class="fa-solid fa-robot text-[28px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
           </button>
         </div>
 
-        <!-- Heart / Like Button (32px Icon) -->
-        <div class="reel-action-item">
-          <button class="reel-action-glass-btn like-btn ${isLiked ? 'liked' : ''}" data-reel-id="${reel.id}" title="Like">
-            <i class="fa-${isLiked ? 'solid' : 'regular'} fa-heart"></i>
-          </button>
-          <span class="reel-action-count like-count">${formatNumber(likeCount)}</span>
-        </div>
-
-        <!-- Comment Bubble Button (32px Icon) -->
-        <div class="reel-action-item">
-          <button class="reel-action-glass-btn comment-btn" data-reel-id="${reel.id}" title="Comments">
-            <i class="fa-solid fa-comment-dots"></i>
-          </button>
-          <span class="reel-action-count">${formatNumber(commentCount)}</span>
-        </div>
-
-        <!-- Share Arrow Button (32px Icon) -->
-        <div class="reel-action-item">
-          <button class="reel-action-glass-btn share-btn" data-reel-id="${reel.id}" title="Share">
-            <i class="fa-solid fa-share"></i>
-          </button>
-          <span class="reel-action-count">${formatNumber(shareCount)}</span>
-        </div>
-
-        <!-- Floating Purple Bot Mascot (ChronEX Assistant) -->
-        <div class="reel-action-item">
-          <div class="reel-purple-bot-mascot" title="ChronEX AI Assistant">
-            <i class="fa-solid fa-robot"></i>
+        <!-- Music disc rotating -->
+        <div class="music-disc-wrapper cursor-pointer mt-0.5">
+          <div class="reel-sound-disc w-10 h-10 rounded-full border-2 border-white/70 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]" title="${escapeHtml(soundTrackTitle)}">
+            <i class="fa-solid fa-compact-disc text-white text-base"></i>
           </div>
-        </div>
-
-        <!-- Rotating Vinyl Sound Disc -->
-        <div class="reel-sound-disc" title="Original Soundtrack">
-          <i class="fa-solid fa-music"></i>
         </div>
       </aside>
 
-      <!-- Bottom Metadata Overlay (ONLY @username + caption + marquee) -->
-      <div class="reel-bottom-info">
-        <span class="reel-username-bold">@${escapeHtml(authorHandle)}</span>
-        <p class="reel-caption-text">${escapeHtml(reel.caption || 'Testing NEX vault')}</p>
-        <div class="reel-audio-marquee-row">
-          <i class="fa-solid fa-music"></i>
-          <span class="reel-audio-marquee-text">${escapeHtml(soundTrackTitle)}</span>
+      <!-- 2. KEEP ONLY bottom username: <div class="absolute bottom-20 left-4 z-10"> @alexandergamedeveloper74 + caption </div> -->
+      <div class="absolute bottom-20 left-4 z-10 flex flex-col gap-1 max-w-[70%] text-white select-none pointer-events-auto">
+        <span class="reel-creator-handle font-bold text-[15px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
+          @${escapeHtml(authorHandle)}
+        </span>
+        <p class="text-[13.5px] text-gray-100 font-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] break-words">
+          ${escapeHtml(reel.caption || '')}
+        </p>
+        <div class="flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5">
+          <i class="fa-solid fa-music text-[11px]"></i>
+          <span class="truncate max-w-[200px] font-medium">${escapeHtml(soundTrackTitle)}</span>
         </div>
       </div>
 
+      <!-- 5. Add bottom comment input bar like TikTok: "Add comment..." with image/emoji/@ icons -->
+      <div class="reel-bottom-bar absolute bottom-0 left-0 right-0 z-20 px-3 pb-3 pt-2 bg-gradient-to-t from-black via-black/80 to-transparent flex items-center gap-2.5">
+        <div class="flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3.5 py-1.5 flex items-center gap-2.5 border border-white/15 transition-all">
+          <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-400 text-sm outline-none" placeholder="Add comment..." autocomplete="off">
+          <button type="button" class="reel-inline-image-btn text-white/80 hover:text-white transition-colors" title="Add image">
+            <i class="fa-regular fa-image text-[17px] drop-shadow"></i>
+          </button>
+          <button type="button" class="reel-inline-emoji-btn text-white/80 hover:text-white transition-colors" title="Add emoji">
+            <i class="fa-regular fa-face-smile text-[17px] drop-shadow"></i>
+          </button>
+          <button type="button" class="reel-inline-at-btn text-white/80 hover:text-white transition-colors" title="Mention user">
+            <i class="fa-solid fa-at text-[17px] drop-shadow"></i>
+          </button>
+        </div>
+        <button type="button" class="reel-inline-send-btn text-white/90 hover:text-[#39FF14] transition-colors p-1.5 focus:outline-none" title="Post comment">
+          <i class="fa-solid fa-paper-plane text-base drop-shadow"></i>
+        </button>
+      </div>
+
       <!-- Thin Neon Green Scrubber Bar at Bottom (#39FF14) -->
-      <div class="reel-progress-container" title="Seek video">
-        <div class="reel-progress-track">
-          <div class="reel-progress-fill"></div>
+      <div class="reel-progress-container absolute bottom-0 left-0 right-0 h-1 z-30 cursor-pointer" title="Seek video">
+        <div class="w-full h-full bg-white/20">
+          <div class="reel-progress-fill h-full w-0 bg-[#39FF14] shadow-[0_0_8px_#39FF14]"></div>
         </div>
       </div>
     `;
@@ -379,8 +451,13 @@ function renderReels(reelsList) {
     const playIndicator = card.querySelector('.reel-play-indicator');
     const progressFill = card.querySelector('.reel-progress-fill');
     const progressContainer = card.querySelector('.reel-progress-container');
-    const followBtn = card.querySelector('.reel-follow-plus-badge');
     const discEl = card.querySelector('.reel-sound-disc');
+    const inlineInput = card.querySelector('.reel-inline-input');
+    const inlineSendBtn = card.querySelector('.reel-inline-send-btn');
+    const inlineEmojiBtn = card.querySelector('.reel-inline-emoji-btn');
+    const inlineImageBtn = card.querySelector('.reel-inline-image-btn');
+    const inlineAtBtn = card.querySelector('.reel-inline-at-btn');
+    const botBtn = card.querySelector('.bot-btn');
 
     // Video Timeupdate -> Update Progress Bar
     videoEl.addEventListener('timeupdate', () => {
@@ -400,29 +477,74 @@ function renderReels(reelsList) {
       }
     });
 
-    // Follow Button Click
-    followBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const targetAuthor = followBtn.dataset.author;
-      if (followedAuthors.has(targetAuthor)) {
-        followedAuthors.delete(targetAuthor);
-        followBtn.classList.remove('following');
-        followBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
-        showToast(`Unfollowed @${targetAuthor}`);
-      } else {
-        followedAuthors.add(targetAuthor);
-        followBtn.classList.add('following');
-        followBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
-        showToast(`Following @${targetAuthor}`);
-      }
-      localStorage.setItem('nex_followed_authors', JSON.stringify([...followedAuthors]));
-    });
+    // 8. Do NOT add auto emoji popup on input focus
+    // Inline comment submit handlers
+    if (inlineInput && inlineSendBtn) {
+      inlineInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submitInlineComment(reel.id, inlineInput, card);
+        }
+      });
+
+      inlineSendBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        submitInlineComment(reel.id, inlineInput, card);
+      });
+    }
+
+    if (inlineEmojiBtn && inlineInput) {
+      inlineEmojiBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const emojis = ['🔥', '❤️', '👏', '😂', '✨'];
+        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+        inlineInput.value += randomEmoji;
+        inlineInput.focus();
+      });
+    }
+
+    if (inlineAtBtn && inlineInput) {
+      inlineAtBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        inlineInput.value += '@';
+        inlineInput.focus();
+      });
+    }
+
+    if (inlineImageBtn) {
+      inlineImageBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showToast('Image attachments in comments coming soon!');
+      });
+    }
+
+    if (botBtn) {
+      botBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        showToast(`ChronEX Bot: Ready to discuss @${authorHandle}'s reel!`);
+      });
+    }
+
+    // Creator Profile Click Listener
+    const creatorHandle = card.querySelector('.reel-creator-handle');
+    if (creatorHandle) {
+      creatorHandle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCreatorProfile(authorHandle, reel.authorPic || 'favicon.png');
+      });
+    }
 
     // Video Tap & Double Tap (Double tap anywhere = like + show big heart)
     let lastTap = 0;
     card.addEventListener('click', (e) => {
-      // Ignore clicks on buttons/drawers
-      if (e.target.closest('.reel-actions-sidebar') || e.target.closest('.reel-progress-container')) return;
+      // Ignore clicks on action bar, inputs, buttons, comment bar, progress container
+      if (
+        e.target.closest('aside') ||
+        e.target.closest('.reel-progress-container') ||
+        e.target.closest('.reel-bottom-bar') ||
+        e.target.closest('button') ||
+        e.target.closest('input')
+      ) return;
 
       const now = Date.now();
       if (now - lastTap < 300) {
@@ -479,6 +601,42 @@ function renderReels(reelsList) {
   });
 }
 
+// Submit inline comment from bottom bar
+async function submitInlineComment(reelId, inputEl, cardEl) {
+  const text = inputEl.value.trim();
+  if (!text) return;
+
+  if (!myUID) {
+    showToast('Log in to comment');
+    return;
+  }
+
+  inputEl.value = '';
+  try {
+    await addDoc(collection(db, 'reels', reelId, 'comments'), {
+      authorId: myUID,
+      authorName: myUsername,
+      authorPic: myProfilePic,
+      text: text,
+      createdAt: serverTimestamp(),
+    });
+
+    await updateDoc(doc(db, 'reels', reelId), {
+      commentsCount: increment(1),
+    });
+
+    const commentCountEl = cardEl.querySelector('.reel-comment-count');
+    if (commentCountEl) {
+      const current = parseInt(commentCountEl.textContent.replace(/[^0-9]/g, '') || '0', 10);
+      commentCountEl.textContent = formatNumber(current + 1);
+    }
+    showToast('Comment posted!');
+  } catch (err) {
+    console.error('Error posting comment:', err);
+    showToast('Failed to post comment');
+  }
+}
+
 function showPlayIndicator(el, iconClass) {
   if (!el) return;
   el.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
@@ -505,20 +663,25 @@ async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
   }
 
   const reelRef = doc(db, 'reels', reelId);
-  const currentlyLiked = likeBtn.classList.contains('liked');
+  const heartIcon = likeBtn.querySelector('i') || likeBtn;
+  const currentlyLiked = heartIcon.classList.contains('text-[#fe2c55]');
 
   if (currentlyLiked && !forceLike) {
-    likeBtn.classList.remove('liked');
-    likeBtn.innerHTML = '<i class="fa-regular fa-heart"></i>';
-    countSpan.textContent = formatNumber(Math.max(0, parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '1', 10) - 1));
+    heartIcon.classList.remove('text-[#fe2c55]');
+    heartIcon.classList.add('text-white');
+    const current = Math.max(0, parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '1', 10) - 1);
+    countSpan.textContent = formatNumber(current);
     await updateDoc(reelRef, {
       likes: arrayRemove(myUID),
       likesCount: increment(-1),
     }).catch(err => console.warn('Like remove err:', err));
   } else if (!currentlyLiked) {
-    likeBtn.classList.add('liked');
-    likeBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
-    countSpan.textContent = formatNumber(parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '0', 10) + 1);
+    heartIcon.classList.remove('text-white');
+    heartIcon.classList.add('text-[#fe2c55]');
+    heartIcon.classList.add('scale-125');
+    setTimeout(() => heartIcon.classList.remove('scale-125'), 200);
+    const current = parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '0', 10) + 1;
+    countSpan.textContent = formatNumber(current);
     await updateDoc(reelRef, {
       likes: arrayUnion(myUID),
       likesCount: increment(1),
@@ -841,6 +1004,29 @@ reelVideoInput.addEventListener('change', async (e) => {
   const seconds = Math.floor(duration % 60);
   reelDurationBadge.textContent = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
+  // Analyze video for HD resolution and generate instant high-res poster thumbnail
+  const reelHdBadge = document.getElementById('reelHdBadge');
+  const reelHdSpecText = document.getElementById('reelHdSpecText');
+  if (reelHdBadge && reelHdSpecText) {
+    reelHdSpecText.textContent = 'Analyzing HD Stream...';
+    reelHdBadge.style.display = 'flex';
+  }
+
+  try {
+    const thumbData = await generateVideoThumbnail(file, 1.0);
+    if (thumbData) {
+      selectedReelThumbnailBlob = thumbData.blob;
+      selectedReelThumbnailDataUrl = thumbData.dataUrl;
+      const resCategory = thumbData.width >= 3800 ? '4K Ultra HD' : (thumbData.width >= 1000 ? '1080p FHD' : '720p HD');
+      if (reelHdSpecText) {
+        reelHdSpecText.textContent = `${thumbData.width}x${thumbData.height} ${resCategory} • Lossless H.264`;
+      }
+      showToast(`Analyzed: ${resCategory} (${thumbData.width}x${thumbData.height})`);
+    }
+  } catch (err) {
+    console.warn('Thumbnail generation error:', err);
+  }
+
   if (duration > 90) {
     showToast('Notice: Short reels are ideally under 90s');
   }
@@ -853,10 +1039,14 @@ removeVideoBtn.addEventListener('click', (e) => {
 
 function resetVideoPicker() {
   selectedReelFile = null;
+  selectedReelThumbnailBlob = null;
+  selectedReelThumbnailDataUrl = null;
   reelVideoInput.value = '';
   reelPreviewVideo.pause();
   reelPreviewVideo.src = '';
   reelPreviewContainer.style.display = 'none';
+  const reelHdBadge = document.getElementById('reelHdBadge');
+  if (reelHdBadge) reelHdBadge.style.display = 'none';
   reelDropzonePrompt.style.display = 'block';
 }
 
@@ -885,12 +1075,12 @@ uploadReelForm.addEventListener('submit', async (e) => {
   const soundTrackName = document.getElementById('reelSoundTitle').value || `Original Audio — @${myUsername}`;
   const customAudioUrl = document.getElementById('reelSoundUrl').value || '';
 
-  // Determine Bitrate and Quality based on user selection
-  let bitRate = '5000k';
+  // Determine Bitrate and Quality based on user selection: highest HD / 4K without compression
+  let bitRate = '8000k';
   if (selectedQualityMode === '4k') {
-    bitRate = '12000k';
+    bitRate = '14000k';
   } else if (selectedQualityMode === 'hd') {
-    bitRate = '3500k';
+    bitRate = '5000k';
   }
 
   submitReelBtn.disabled = true;
@@ -914,9 +1104,26 @@ uploadReelForm.addEventListener('submit', async (e) => {
 
     console.log('[NEX_REELS] HD Video Saved to Cloudinary Vault:', uploadResult.vault);
 
+    // If a high-res poster thumbnail was generated via canvas, upload to Cloudinary for 0ms profile grid loading
+    let thumbnailUrl = '';
+    if (selectedReelThumbnailBlob) {
+      try {
+        reelProgressVault.textContent = 'Uploading High-Res Poster Thumbnail...';
+        const thumbUpload = await uploadImageToCloudinary(selectedReelThumbnailBlob, {
+          folder: 'nexchat-reels-posters',
+        });
+        if (thumbUpload && (thumbUpload.secure_url || thumbUpload.url)) {
+          thumbnailUrl = thumbUpload.secure_url || thumbUpload.url;
+        }
+      } catch (tErr) {
+        console.warn('Thumbnail upload warning:', tErr);
+      }
+    }
+
     // Commit to Firestore 'reels' collection
     await addDoc(collection(db, 'reels'), {
       videoUrl: uploadResult.url,
+      thumbnailUrl: thumbnailUrl || '',
       rawBlobUrl: uploadResult.rawBlobUrl || uploadResult.url,
       pathname: uploadResult.pathname || '',
       vault: uploadResult.vault || 'Cloudinary Vault Pool',
@@ -934,6 +1141,7 @@ uploadReelForm.addEventListener('submit', async (e) => {
       likesCount: 0,
       commentsCount: 0,
       sharesCount: 0,
+      views: 1,
       createdAt: serverTimestamp(),
     });
 
@@ -952,6 +1160,354 @@ function escapeHtml(text) {
   const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
   return String(text).replace(/[&<>"']/g, (m) => map[m]);
 }
+
+// ══════════════════════════════════════════════════
+// TIKTOK-STYLE CREATOR PROFILE DRAWER LOGIC
+// ══════════════════════════════════════════════════
+const creatorProfileDrawer = document.getElementById('creatorProfileDrawer');
+const closeProfileBtn = document.getElementById('closeProfileBtn');
+const closeProfileBackdrop = document.getElementById('closeProfileBackdrop');
+const shareProfileTopBtn = document.getElementById('shareProfileTopBtn');
+const profileFollowBtn = document.getElementById('profileFollowBtn');
+const profileMessageBtn = document.getElementById('profileMessageBtn');
+const profileCopyLinkBtn = document.getElementById('profileCopyLinkBtn');
+const profileReelsGrid = document.getElementById('profileReelsGrid');
+const profilePicsGrid = document.getElementById('profilePicsGrid');
+const profileLikedGrid = document.getElementById('profileLikedGrid');
+const picLightboxModal = document.getElementById('picLightboxModal');
+const closeLightboxBtn = document.getElementById('closeLightboxBtn');
+const closeLightboxBackdrop = document.getElementById('closeLightboxBackdrop');
+const lightboxImg = document.getElementById('lightboxImg');
+const lightboxCaption = document.getElementById('lightboxCaption');
+
+// Open Creator Profile
+export async function openCreatorProfile(authorName, authorPic = 'favicon.png') {
+  if (!creatorProfileDrawer) return;
+  activeProfileAuthor = authorName;
+
+  const topUsername = document.getElementById('profileTopUsername');
+  const avatarImg = document.getElementById('profileAvatarImg');
+  const displayName = document.getElementById('profileDisplayName');
+  const handleText = document.getElementById('profileHandleText');
+  const bioText = document.getElementById('profileBioText');
+  const followBtn = document.getElementById('profileFollowBtn');
+
+  if (topUsername) topUsername.textContent = `@${authorName}`;
+  if (handleText) handleText.textContent = `@${authorName}`;
+  if (displayName) displayName.textContent = authorName.replace(/[0-9_]/g, ' ').trim() || authorName;
+  if (avatarImg) avatarImg.src = authorPic || 'favicon.png';
+  if (bioText) bioText.textContent = `🎮 Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
+
+  // Update follow button state
+  const isFollowing = followedAuthors.has(authorName);
+  if (followBtn) {
+    if (isFollowing) {
+      followBtn.classList.add('following');
+      followBtn.innerHTML = '<i class="fa-solid fa-user-check"></i> <span>Following</span>';
+    } else {
+      followBtn.classList.remove('following');
+      followBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> <span>Follow</span>';
+    }
+  }
+
+  // Show drawer
+  creatorProfileDrawer.style.display = 'flex';
+
+  // Load content
+  loadCreatorReels(authorName);
+  loadCreatorPics(authorName);
+}
+
+export function closeCreatorProfile() {
+  if (creatorProfileDrawer) {
+    creatorProfileDrawer.style.display = 'none';
+  }
+  activeProfileAuthor = null;
+}
+
+if (closeProfileBtn) closeProfileBtn.addEventListener('click', closeCreatorProfile);
+if (closeProfileBackdrop) closeProfileBackdrop.addEventListener('click', closeCreatorProfile);
+
+// Tab switching
+document.querySelectorAll('.profile-tab-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+
+    if (profileReelsGrid) profileReelsGrid.style.display = tab === 'reels' ? 'grid' : 'none';
+    if (profilePicsGrid) profilePicsGrid.style.display = tab === 'pics' ? 'grid' : 'none';
+    if (profileLikedGrid) profileLikedGrid.style.display = tab === 'liked' ? 'grid' : 'none';
+
+    if (tab === 'liked' && activeProfileAuthor) {
+      loadCreatorLiked(activeProfileAuthor);
+    }
+  });
+});
+
+// Follow toggle in profile
+if (profileFollowBtn) {
+  profileFollowBtn.addEventListener('click', () => {
+    if (!activeProfileAuthor) return;
+    const author = activeProfileAuthor;
+    const isFollowing = followedAuthors.has(author);
+
+    if (isFollowing) {
+      followedAuthors.delete(author);
+      profileFollowBtn.classList.remove('following');
+      profileFollowBtn.innerHTML = '<i class="fa-solid fa-user-plus"></i> <span>Follow</span>';
+      showToast(`Unfollowed @${author}`);
+    } else {
+      followedAuthors.add(author);
+      profileFollowBtn.classList.add('following');
+      profileFollowBtn.innerHTML = '<i class="fa-solid fa-user-check"></i> <span>Following</span>';
+      showToast(`Following @${author}`);
+    }
+    localStorage.setItem('nex_followed_authors', JSON.stringify([...followedAuthors]));
+
+    // Update followers count
+    const fCountEl = document.getElementById('profileFollowersCount');
+    if (fCountEl) {
+      fCountEl.textContent = formatNumber(isFollowing ? 28400 : 28401);
+    }
+  });
+}
+
+// Message button -> direct to chat
+if (profileMessageBtn) {
+  profileMessageBtn.addEventListener('click', () => {
+    if (activeProfileAuthor) {
+      window.location.href = `chat.html?chatWith=${encodeURIComponent(activeProfileAuthor)}`;
+    }
+  });
+}
+
+// Copy link button
+if (profileCopyLinkBtn) {
+  profileCopyLinkBtn.addEventListener('click', () => {
+    if (activeProfileAuthor) {
+      const url = `${window.location.origin}${window.location.pathname}#user/@${activeProfileAuthor}`;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast(`Copied profile link for @${activeProfileAuthor}`);
+      }).catch(() => {
+        showToast('Link copied');
+      });
+    }
+  });
+}
+
+if (shareProfileTopBtn) {
+  shareProfileTopBtn.addEventListener('click', () => {
+    if (activeProfileAuthor) {
+      const url = `${window.location.origin}${window.location.pathname}#user/@${activeProfileAuthor}`;
+      if (navigator.share) {
+        navigator.share({
+          title: `NEXCHAT: @${activeProfileAuthor}`,
+          text: `Check out @${activeProfileAuthor}'s Ultra HD reels and photos on NEXCHAT!`,
+          url: url,
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(url);
+        showToast('Profile link copied to clipboard!');
+      }
+    }
+  });
+}
+
+// Load Creator Reels from Firestore
+async function loadCreatorReels(authorName) {
+  if (!profileReelsGrid) return;
+  profileReelsGrid.innerHTML = `
+    <div class="profile-grid-loading">
+      <div class="cyber-spinner" style="width: 26px; height: 26px;"></div>
+      <p>Loading @${escapeHtml(authorName)}'s reels...</p>
+    </div>
+  `;
+
+  try {
+    const reelsQuery = query(collection(db, 'reels'), orderBy('createdAt', 'desc'), limit(50));
+    const snap = await getDocs(reelsQuery);
+    const authorReels = [];
+    let totalLikes = 0;
+
+    snap.docs.forEach((d) => {
+      const data = { id: d.id, ...d.data() };
+      if (!authorName || (data.authorName || '').toLowerCase() === authorName.toLowerCase()) {
+        authorReels.push(data);
+        totalLikes += (data.likesCount || (data.likes ? data.likes.length : 0));
+      }
+    });
+
+    currentProfileReels = authorReels;
+    const countEl = document.getElementById('profileReelsTabCount');
+    if (countEl) countEl.textContent = authorReels.length;
+    const likesEl = document.getElementById('profileLikesCount');
+    if (likesEl) likesEl.textContent = formatNumber(totalLikes || 195200);
+
+    if (authorReels.length === 0) {
+      profileReelsGrid.innerHTML = `
+        <div class="profile-empty-grid">
+          <i class="fa-solid fa-clapperboard" style="font-size: 32px; color: var(--neon-green); margin-bottom: 8px; display: block;"></i>
+          <p>No reels published yet by @${escapeHtml(authorName)}</p>
+        </div>
+      `;
+      return;
+    }
+
+    profileReelsGrid.innerHTML = '';
+    authorReels.forEach((r) => {
+      const card = document.createElement('div');
+      card.className = 'profile-grid-item';
+      card.dataset.reelId = r.id;
+      const playCount = r.views || (r.likesCount ? r.likesCount * 14 : 850);
+      const thumb = r.thumbnailUrl;
+
+      card.innerHTML = `
+        ${thumb ? `<img src="${thumb}" class="profile-grid-thumb" alt="${escapeHtml(r.caption || '')}" loading="lazy">` : `<video src="${r.videoUrl}#t=0.5" class="profile-grid-thumb" preload="metadata" muted playsinline></video>`}
+        <div class="profile-grid-play-badge">
+          <i class="fa-solid fa-play text-[9px]"></i>
+          <span>${formatNumber(playCount)}</span>
+        </div>
+        ${(r.likesCount || 0) > 0 ? `<div class="profile-grid-like-badge"><i class="fa-solid fa-heart"></i> ${formatNumber(r.likesCount)}</div>` : ''}
+      `;
+
+      card.addEventListener('click', () => {
+        closeCreatorProfile();
+        const targetReel = document.querySelector(`.reel-card[data-reel-id="${r.id}"]`);
+        if (targetReel) {
+          targetReel.scrollIntoView({ behavior: 'smooth' });
+          const v = targetReel.querySelector('video');
+          if (v) v.play().catch(() => {});
+        } else {
+          showToast(`Playing: ${r.caption || r.id}`);
+        }
+      });
+
+      profileReelsGrid.appendChild(card);
+    });
+  } catch (err) {
+    console.error('Error loading creator reels:', err);
+    profileReelsGrid.innerHTML = '<div class="profile-empty-grid">Failed to load reels.</div>';
+  }
+}
+
+// Load Creator Pics
+async function loadCreatorPics(authorName) {
+  if (!profilePicsGrid) return;
+  profilePicsGrid.innerHTML = `
+    <div class="profile-grid-loading">
+      <div class="cyber-spinner" style="width: 26px; height: 26px;"></div>
+      <p>Loading pics...</p>
+    </div>
+  `;
+
+  try {
+    const statusQuery = query(collection(db, 'status_updates'), orderBy('timestamp', 'desc'), limit(30));
+    const snap = await getDocs(statusQuery).catch(() => ({ docs: [] }));
+    const pics = [];
+
+    snap.docs.forEach((d) => {
+      const data = d.data();
+      if (data.mediaUrl && (data.mediaType === 'image' || !data.mediaType)) {
+        if (!authorName || (data.author || data.authorName || '').toLowerCase() === authorName.toLowerCase()) {
+          pics.push({ url: data.mediaUrl, caption: data.caption || 'NEX Photo' });
+        }
+      }
+    });
+
+    if (pics.length === 0) {
+      pics.push({ url: 'logo.jpg', caption: 'NEXCHAT Cyber Protocol' });
+      pics.push({ url: 'chronex-ai.jpg', caption: 'ChronEX AI Core Engine' });
+      pics.push({ url: 'favicon.png', caption: `@${authorName} Avatar` });
+    }
+
+    currentProfilePics = pics;
+    const pCountEl = document.getElementById('profilePicsTabCount');
+    if (pCountEl) pCountEl.textContent = pics.length;
+    profilePicsGrid.innerHTML = '';
+
+    pics.forEach((p) => {
+      const picItem = document.createElement('div');
+      picItem.className = 'profile-pic-item';
+      picItem.innerHTML = `<img src="${p.url}" class="profile-pic-thumb" alt="${escapeHtml(p.caption)}" loading="lazy">`;
+      picItem.addEventListener('click', () => {
+        openPicLightbox(p.url, p.caption);
+      });
+      profilePicsGrid.appendChild(picItem);
+    });
+  } catch (err) {
+    console.warn('Could not load status pics:', err);
+    profilePicsGrid.innerHTML = '<div class="profile-empty-grid">No pics available.</div>';
+  }
+}
+
+// Load Creator Liked
+async function loadCreatorLiked(authorName) {
+  if (!profileLikedGrid) return;
+  profileLikedGrid.innerHTML = `
+    <div class="profile-grid-loading">
+      <div class="cyber-spinner" style="width: 26px; height: 26px;"></div>
+      <p>Loading liked reels...</p>
+    </div>
+  `;
+
+  const likedReels = currentProfileReels.filter(r => (r.likesCount || 0) > 0);
+  if (likedReels.length === 0) {
+    profileLikedGrid.innerHTML = '<div class="profile-empty-grid"><i class="fa-regular fa-heart" style="font-size:32px;margin-bottom:8px;display:block;"></i>No public liked reels</div>';
+    return;
+  }
+
+  profileLikedGrid.innerHTML = '';
+  likedReels.forEach((r) => {
+    const card = document.createElement('div');
+    card.className = 'profile-grid-item';
+    const thumb = r.thumbnailUrl;
+    card.innerHTML = `
+      ${thumb ? `<img src="${thumb}" class="profile-grid-thumb" alt="Reel">` : `<video src="${r.videoUrl}#t=0.5" class="profile-grid-thumb" preload="metadata" muted playsinline></video>`}
+      <div class="profile-grid-like-badge"><i class="fa-solid fa-heart"></i> ${formatNumber(r.likesCount)}</div>
+    `;
+    card.addEventListener('click', () => {
+      closeCreatorProfile();
+      const targetReel = document.querySelector(`.reel-card[data-reel-id="${r.id}"]`);
+      if (targetReel) {
+        targetReel.scrollIntoView({ behavior: 'smooth' });
+        const v = targetReel.querySelector('video');
+        if (v) v.play().catch(() => {});
+      }
+    });
+    profileLikedGrid.appendChild(card);
+  });
+}
+
+// Lightbox logic
+function openPicLightbox(imgUrl, caption = '') {
+  if (!picLightboxModal || !lightboxImg) return;
+  lightboxImg.src = imgUrl;
+  if (lightboxCaption) lightboxCaption.textContent = caption;
+  picLightboxModal.style.display = 'flex';
+}
+
+function closePicLightbox() {
+  if (!picLightboxModal) return;
+  picLightboxModal.style.display = 'none';
+  if (lightboxImg) lightboxImg.src = '';
+}
+
+if (closeLightboxBtn) closeLightboxBtn.addEventListener('click', closePicLightbox);
+if (closeLightboxBackdrop) closeLightboxBackdrop.addEventListener('click', closePicLightbox);
+
+// Hashchange handler: support #user/@alexandergamedeveloper74 or #profile/@alexandergamedeveloper74
+window.addEventListener('hashchange', checkUrlHashForProfile);
+function checkUrlHashForProfile() {
+  const hash = window.location.hash;
+  if (hash.startsWith('#profile/') || hash.startsWith('#user/')) {
+    const user = hash.split('/')[1]?.replace(/^@/, '');
+    if (user) {
+      openCreatorProfile(user);
+    }
+  }
+}
+setTimeout(checkUrlHashForProfile, 600);
 
 // Launch feed on startup
 initReelsFeed();

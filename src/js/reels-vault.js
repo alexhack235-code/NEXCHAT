@@ -149,6 +149,11 @@ export async function uploadReelVideo(file, options = {}) {
     console.log('[NEX-REELS] Uploading to Multi-Vault Cloudinary Pipeline...');
     const cldRes = await uploadVideoToCloudinary(file, {
       folder: 'nexchat-reels',
+      quality: options.quality || 'auto:best',
+      fetchFormat: options.fetchFormat || 'auto',
+      videoCodec: options.videoCodec || 'h264',
+      bitRate: options.bitRate || '8000k',
+      eager: options.eager || 'q_auto:best',
       onProgress: (percent, msg, vaultName) => {
         if (options.onProgress) {
           options.onProgress(percent, msg, vaultName || 'Cloudinary Vault Pool');

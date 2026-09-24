@@ -262,11 +262,11 @@ function uploadToSingleCloudinaryVault(file, vault, resourceType, folder, fileSi
     if (resourceType === 'video') {
       const mime = (file.type || '').toLowerCase();
       if (!mime.startsWith('audio/')) {
-        // Highest quality video parameters: H.264, auto:best, 5000k+ bitrate, preserve 1080p/4K
+        // Highest quality video parameters: H.264, auto:best, 8000k+ bitrate, preserve 1080p/4K
         formData.append('quality', options.quality || 'auto:best');
         formData.append('fetch_format', options.fetchFormat || 'auto');
         formData.append('video_codec', options.videoCodec || 'h264');
-        formData.append('bit_rate', options.bitRate || '5000k');
+        formData.append('bit_rate', options.bitRate || '8000k');
         if (options.eager) {
           formData.append('eager', options.eager);
         }
