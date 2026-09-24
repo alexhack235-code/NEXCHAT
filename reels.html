@@ -16,19 +16,23 @@
   <!-- Sci-Fi HUD Background Grid -->
   <div class="hud-grid-overlay" aria-hidden="true"></div>
 
-  <!-- Top Navigation Header: Chats | NEX_REELS • | + Create -->
+  <!-- Top Navigation Header: Chats | Following / For You | Filters | Sound | Settings | + Create -->
   <header class="reels-header">
     <div class="reels-nav-group">
       <a href="chat.html" class="reels-nav-link" title="Back to Chats">Chats</a>
       <span class="reels-nav-separator">|</span>
-      <div class="reels-nav-active">
-        <span>NEX_REELS</span>
-        <span class="active-dot"></span>
+      <div class="reels-feed-tabs" id="reelsFeedTabs">
+        <button type="button" class="feed-tab-btn" data-feed="following" id="tabFollowing">Following</button>
+        <span class="feed-tab-dot"></span>
+        <button type="button" class="feed-tab-btn active" data-feed="foryou" id="tabForYou">For You</button>
       </div>
       <span class="reels-nav-separator">|</span>
     </div>
 
     <div class="reels-header-actions">
+      <button id="toggleFilterBtn" class="reels-filter-pill" title="Cyber Visual Filters">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+      </button>
       <button id="globalSoundToggle" class="reels-sound-pill" title="Toggle Sound">
         <i class="fa-solid fa-volume-xmark"></i>
       </button>
@@ -60,6 +64,37 @@
       <p>Synchronizing NEX_REELS Stream...</p>
     </div>
   </main>
+
+  <!-- Floating 2X Speed HUD Indicator -->
+  <div id="speed2xBadge" class="speed-2x-hud-badge" style="display: none;">
+    <i class="fa-solid fa-forward-fast text-[#39FF14]"></i>
+    <span>2X SPEED</span>
+  </div>
+
+  <!-- Cyber Visual Filter Ribbon Drawer -->
+  <div id="cyberFilterRibbon" class="cyber-filter-ribbon" style="display: none;">
+    <div class="filter-ribbon-header">
+      <span><i class="fa-solid fa-wand-magic-sparkles text-[#39FF14]"></i> Cyber Visual Shaders</span>
+      <button type="button" id="closeFilterRibbonBtn" class="filter-close-btn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="filter-ribbon-pills">
+      <button type="button" class="filter-shader-btn active" data-filter="normal">
+        <span class="shader-dot bg-white"></span> Normal HD
+      </button>
+      <button type="button" class="filter-shader-btn" data-filter="matrix">
+        <span class="shader-dot bg-[#39FF14]"></span> Matrix CRT
+      </button>
+      <button type="button" class="filter-shader-btn" data-filter="cyber-neon">
+        <span class="shader-dot bg-[#00f3ff]"></span> Cyber Neon
+      </button>
+      <button type="button" class="filter-shader-btn" data-filter="night-city">
+        <span class="shader-dot bg-[#f59e0b]"></span> Night City Amber
+      </button>
+      <button type="button" class="filter-shader-btn" data-filter="noir">
+        <span class="shader-dot bg-gray-400"></span> Glitch Noir
+      </button>
+    </div>
+  </div>
 
   <!-- Upload Reel Modal -->
   <div id="uploadReelModal" class="reels-modal" style="display: none;">
@@ -297,7 +332,7 @@
         </div>
       </div>
 
-      <!-- Unique 3-Tab Navigator: Reels, Pics, Liked -->
+      <!-- Unique 4-Tab Navigator: Reels, Pics, Liked, Saved -->
       <div class="profile-tabs-nav">
         <button type="button" class="profile-tab-btn active" data-tab="reels">
           <i class="fa-solid fa-table-cells"></i>
@@ -310,6 +345,10 @@
         <button type="button" class="profile-tab-btn" data-tab="liked">
           <i class="fa-regular fa-heart"></i>
           <span>Liked</span>
+        </button>
+        <button type="button" class="profile-tab-btn" data-tab="saved">
+          <i class="fa-regular fa-bookmark"></i>
+          <span>Saved</span>
         </button>
       </div>
 
@@ -332,6 +371,11 @@
         <div id="profileLikedGrid" class="profile-media-grid" style="display: none;">
           <!-- Dynamically populated -->
         </div>
+
+        <!-- Tab 4: Saved Vault Grid -->
+        <div id="profileSavedGrid" class="profile-media-grid" style="display: none;">
+          <!-- Dynamically populated -->
+        </div>
       </div>
     </div>
   </div>
@@ -345,6 +389,155 @@
       <div id="lightboxCaption" class="lightbox-caption"></div>
     </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SOUND HUB DRAWER ("Use This Sound" & Track Details)
+       ══════════════════════════════════════════════════ -->
+  <div id="soundHubDrawer" class="reels-modal sound-hub-modal" style="display: none;">
+    <div class="reels-modal-card sound-hub-card">
+      <div class="sound-hub-header">
+        <button type="button" id="closeSoundHubBtn" class="sound-hub-back-btn" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+        <span class="sound-hub-title"><i class="fa-solid fa-music text-[#39FF14]"></i> Sound Hub</span>
+        <button type="button" id="shareSoundTopBtn" class="sound-hub-back-btn" title="Share Sound"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+      </div>
+
+      <div class="sound-hub-hero">
+        <div class="sound-vinyl-wrapper">
+          <div class="sound-vinyl-disc" id="soundHubDisc">
+            <div class="sound-vinyl-center"></div>
+          </div>
+        </div>
+        <div class="sound-hub-details">
+          <h3 id="soundHubTrackTitle" class="sound-track-title">Original Audio</h3>
+          <p id="soundHubArtistName" class="sound-artist-name">@creator</p>
+          <div class="sound-reels-count-badge">
+            <i class="fa-solid fa-video"></i> <span id="soundHubUsageCount">12.4K</span> videos
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button: Use This Sound -->
+      <div class="sound-hub-action-box">
+        <button type="button" id="useThisSoundDrawerBtn" class="use-sound-main-btn">
+          <i class="fa-solid fa-bolt"></i> <span>Use This Sound</span>
+        </button>
+      </div>
+
+      <!-- Audio Preview Player Bar -->
+      <div class="sound-hub-audio-player">
+        <button type="button" id="soundHubPlayPauseBtn" class="sound-hub-play-btn"><i class="fa-solid fa-play"></i></button>
+        <div class="sound-hub-wave-bar">
+          <div class="sound-hub-wave-fill" id="soundHubWaveFill"></div>
+        </div>
+      </div>
+
+      <!-- Videos using this sound grid -->
+      <div class="sound-hub-grid-header">
+        <span>Videos using this sound</span>
+      </div>
+      <div id="soundHubReelsGrid" class="profile-media-grid sound-reels-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       CHRONEX AI REEL INTELLIGENCE DRAWER
+       ══════════════════════════════════════════════════ -->
+  <div id="chronexAiDrawer" class="reels-modal chronex-ai-modal" style="display: none;">
+    <div class="reels-modal-card chronex-ai-card">
+      <div class="chronex-ai-header">
+        <div class="chronex-ai-avatar">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="chronex-title">ChronEX AI Intelligence</h3>
+          <p class="chronex-subtitle">Neural Reel Analysis & Smart Cyber-Comments</p>
+        </div>
+        <button id="closeChronexAiBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="chronex-ai-body">
+        <!-- Analysis Card -->
+        <div class="chronex-analysis-box">
+          <div class="chronex-badge"><i class="fa-solid fa-bolt"></i> Real-Time Analysis</div>
+          <p id="chronexAiSummaryText" class="chronex-summary-text">Analyzing stream telemetry, audio waveform, and creator metadata...</p>
+          <div class="chronex-tags-row" id="chronexAiTagsRow">
+            <span class="chronex-tag">#cyberpunk</span>
+            <span class="chronex-tag">#gaming</span>
+            <span class="chronex-tag">#4K60FPS</span>
+          </div>
+        </div>
+
+        <!-- 1-Click Smart Replies -->
+        <div class="chronex-smart-replies-section">
+          <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+            <i class="fa-solid fa-wand-magic-sparkles text-[#39FF14]"></i> 1-Tap Smart Replies
+          </h4>
+          <div class="smart-reply-chips" id="smartReplyChips">
+            <button type="button" class="smart-reply-chip">🔥 This 4K lighting in Night City is insane!</button>
+            <button type="button" class="smart-reply-chip">⚡ What game engine was used for this procedural scene?</button>
+            <button type="button" class="smart-reply-chip">🚀 NEXCHAT 60FPS video engine is butter smooth!</button>
+          </div>
+        </div>
+
+        <!-- Ask ChronEX about this reel -->
+        <div class="chronex-ask-section">
+          <div class="chronex-input-wrapper">
+            <input type="text" id="chronexAiQuestionInput" placeholder="Ask ChronEX about this video..." maxlength="150">
+            <button type="button" id="chronexAiAskBtn" class="chronex-ask-btn"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+          <div id="chronexAiAnswerBox" class="chronex-answer-box" style="display: none;">
+            <p id="chronexAiAnswerText"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       CREATOR TOKEN TIP MODAL (2,000 Starting Token Economy)
+       ══════════════════════════════════════════════════ -->
+  <div id="tipCreatorModal" class="reels-modal tip-creator-modal" style="display: none;">
+    <div class="reels-modal-card tip-creator-card">
+      <div class="reels-modal-header">
+        <h3 class="flex items-center gap-2"><i class="fa-solid fa-coins text-[#FFD700]"></i> Tip Creator Tokens</h3>
+        <button id="closeTipModalBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="tip-creator-body">
+        <!-- Recipient Card -->
+        <div class="tip-recipient-row">
+          <img id="tipRecipientAvatar" src="favicon.png" alt="Creator" class="tip-recipient-avatar">
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-white" id="tipRecipientName">Alexander Game Dev</span>
+            <span class="text-xs text-gray-400" id="tipRecipientHandle">@alexandergamedeveloper74</span>
+          </div>
+        </div>
+
+        <!-- Balance Info -->
+        <div class="tip-balance-box">
+          <span class="tip-balance-label">Your Vault Balance:</span>
+          <span class="tip-balance-val"><i class="fa-solid fa-coins text-[#FFD700]"></i> <span id="tipUserBalance">2,000</span> Tokens</span>
+        </div>
+
+        <!-- Tip Selector Pills -->
+        <div class="tip-amount-pills">
+          <button type="button" class="tip-pill active" data-amount="50">50 ⚡</button>
+          <button type="button" class="tip-pill" data-amount="100">100 ⚡</button>
+          <button type="button" class="tip-pill" data-amount="250">250 ⚡</button>
+          <button type="button" class="tip-pill" data-amount="500">500 ⚡</button>
+        </div>
+
+        <button type="button" id="confirmTipBtn" class="confirm-tip-main-btn">
+          <i class="fa-solid fa-bolt"></i> Send <span id="tipBtnAmount">50</span> Tokens
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Holographic Coin Burst Floating Animation Layer -->
+  <div id="coinBurstLayer" class="coin-burst-layer" style="display: none;"></div>
 
   <!-- Reels Settings & Creator Studio Modal -->
   <div id="reelsSettingsModal" class="reels-modal" style="display: none;">

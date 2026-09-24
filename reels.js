@@ -57,6 +57,16 @@ let activeProfileAuthor = null;
 let currentProfileReels = [];
 let currentProfilePics = [];
 
+// Features A, B, C, D, E Application State
+let activeFeedMode = 'foryou'; // 'foryou' | 'following'
+let allLoadedReels = [];
+let bookmarkedReels = new Set(JSON.parse(localStorage.getItem('nex_bookmarked_reels') || '[]'));
+let userTokenBalance = parseInt(localStorage.getItem('nex_user_tokens') || '2000', 10);
+let activeFilterShader = 'normal';
+let activeAiReel = null;
+let activeTipReel = null;
+let activeTipAmount = 50;
+
 // DOM Elements
 const reelsFeed = document.getElementById('reelsFeed');
 const reelsLoadingState = document.getElementById('reelsLoadingState');
@@ -207,6 +217,13 @@ onAuthStateChanged(auth, async (user) => {
         if (udata.reelsSettings) {
           reelsSettings = { ...reelsSettings, ...udata.reelsSettings };
         }
+        if (udata.tokens !== undefined) {
+          userTokenBalance = Number(udata.tokens);
+        } else {
+          userTokenBalance = 2000;
+          setDoc(doc(db, 'users', user.uid), { tokens: 2000 }, { merge: true }).catch(() => {});
+        }
+        localStorage.setItem('nex_user_tokens', String(userTokenBalance));
 
         // Apply chosen avatar mode
         if (useCustomReelsAvatar && customReelsAvatar) {
@@ -367,6 +384,7 @@ function initReelsFeed() {
     if (reelsLoadingState) reelsLoadingState.style.display = 'none';
 
     if (snapshot.empty) {
+      allLoadedReels = [];
       renderEmptyFeed();
       return;
     }
@@ -376,11 +394,68 @@ function initReelsFeed() {
       ...docSnap.data(),
     }));
 
-    renderReels(reelDocs);
+    allLoadedReels = reelDocs;
+    applyFeedFilter();
   }, (err) => {
     console.error('Error fetching reels:', err);
     if (reelsLoadingState) reelsLoadingState.style.display = 'none';
     renderEmptyFeed('NEX_REELS stream initializing...');
+  });
+}
+
+function applyFeedFilter() {
+  if (activeFeedMode === 'following') {
+    const followingReels = allLoadedReels.filter(r => followedAuthors.has(r.authorName));
+    if (followingReels.length === 0) {
+      renderEmptyFollowingFeed();
+      return;
+    }
+    renderReels(followingReels);
+  } else {
+    renderReels(allLoadedReels);
+  }
+}
+
+function renderEmptyFollowingFeed() {
+  videoObserver.disconnect();
+  reelsFeed.innerHTML = `
+    <div class="reels-empty-state">
+      <i class="fa-solid fa-user-group" style="font-size: 54px; color: var(--neon-green); margin-bottom: 12px;"></i>
+      <h3 style="color: #fff; font-size: 18px; font-weight: 800;">Following Stream Empty</h3>
+      <p style="font-size: 13px; color: var(--text-muted); max-width: 320px;">You are not following any creators yet or they haven't posted reels. Switch to For You to explore cyber creators!</p>
+      <button class="reels-btn-primary" style="margin-top: 14px;" id="switchBackForYouBtn">
+        <i class="fa-solid fa-compass"></i> Explore For You
+      </button>
+    </div>
+  `;
+  const btn = document.getElementById('switchBackForYouBtn');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const tabFY = document.getElementById('tabForYou');
+      if (tabFY) tabFY.click();
+    });
+  }
+}
+
+// Following vs For You Tab Switchers
+const tabFollowing = document.getElementById('tabFollowing');
+const tabForYou = document.getElementById('tabForYou');
+
+if (tabFollowing && tabForYou) {
+  tabFollowing.addEventListener('click', () => {
+    if (activeFeedMode === 'following') return;
+    activeFeedMode = 'following';
+    tabFollowing.classList.add('active');
+    tabForYou.classList.remove('active');
+    applyFeedFilter();
+  });
+
+  tabForYou.addEventListener('click', () => {
+    if (activeFeedMode === 'foryou') return;
+    activeFeedMode = 'foryou';
+    tabForYou.classList.add('active');
+    tabFollowing.classList.remove('active');
+    applyFeedFilter();
   });
 }
 
@@ -407,6 +482,7 @@ function renderReels(reelsList) {
 
   reelsList.forEach((reel) => {
     const isLiked = myUID && reel.likes && Array.isArray(reel.likes) && reel.likes.includes(myUID);
+    const isBookmarked = bookmarkedReels.has(reel.id);
     const likeCount = reel.likesCount || (reel.likes ? reel.likes.length : 0);
     const commentCount = reel.commentsCount || 0;
     const shareCount = reel.sharesCount || 21000;
@@ -429,54 +505,72 @@ function renderReels(reelsList) {
       card._customAudio = audioEl;
     }
 
+    const filterClass = activeFilterShader && activeFilterShader !== 'normal' ? `filter-${activeFilterShader}` : '';
+
     // Card Markup: Video + Floating Action Bar + Bottom Metadata + Bottom Comment Input Bar
     card.innerHTML = `
       <!-- 3. Fullscreen Video: object-cover w-screen h-screen bg-black, no borders -->
-      <video class="reel-video w-screen h-screen object-cover bg-black" src="${reel.videoUrl}" playsinline loop preload="metadata"></video>
+      <video class="reel-video w-screen h-screen object-cover bg-black ${filterClass}" src="${reel.videoUrl}" playsinline loop preload="metadata"></video>
       <div class="reel-play-indicator"><i class="fa-solid fa-play"></i></div>
 
-      <!-- 4. Right Action Bar: right-4 bottom-32, gap-5: Heart, Comment, Share, Bot icon, Music disc rotating -->
-      <aside class="absolute right-4 bottom-32 z-20 flex flex-col items-center gap-5 text-white select-none pointer-events-auto">
-        <!-- Heart (count 1) -->
+      <!-- 4. Right Action Bar: Heart, Comment, Bookmark, Share, Tip, Bot, Music disc -->
+      <aside class="absolute right-4 bottom-28 z-20 flex flex-col items-center gap-4 text-white select-none pointer-events-auto">
+        <!-- Heart (Like) -->
         <div class="flex flex-col items-center gap-1 cursor-pointer">
           <button type="button" class="like-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Like">
-            <i class="fa-solid fa-heart text-[32px] ${isLiked ? 'text-[#fe2c55]' : 'text-white'} drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            <i class="fa-solid fa-heart text-[30px] ${isLiked ? 'text-[#fe2c55]' : 'text-white'} drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
           </button>
           <span class="like-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(likeCount)}</span>
         </div>
 
-        <!-- Comment (0) -->
+        <!-- Comment -->
         <div class="flex flex-col items-center gap-1 cursor-pointer">
           <button type="button" class="comment-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Comments">
-            <i class="fa-solid fa-comment-dots text-[32px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            <i class="fa-solid fa-comment-dots text-[30px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
           </button>
           <span class="reel-comment-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(commentCount)}</span>
         </div>
 
-        <!-- Share (21.0K) -->
+        <!-- Bookmark / Vault -->
+        <div class="flex flex-col items-center gap-1 cursor-pointer">
+          <button type="button" class="bookmark-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Save to Vault">
+            <i class="${isBookmarked ? 'fa-solid fa-bookmark text-[#FFD700]' : 'fa-regular fa-bookmark text-white'} text-[26px] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+          </button>
+          <span class="text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Save</span>
+        </div>
+
+        <!-- Share -->
         <div class="flex flex-col items-center gap-1 cursor-pointer">
           <button type="button" class="share-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Share">
-            <i class="fa-solid fa-share text-[30px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            <i class="fa-solid fa-share text-[28px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
           </button>
           <span class="text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
         </div>
 
-        <!-- Bot icon -->
+        <!-- Tip Tokens -->
+        <div class="flex flex-col items-center gap-1 cursor-pointer">
+          <button type="button" class="tip-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Tip Creator Tokens">
+            <i class="fa-solid fa-coins text-[25px] text-[#FFD700] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+          </button>
+          <span class="text-xs font-bold text-[#FFD700] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Tip</span>
+        </div>
+
+        <!-- Bot icon (ChronEX AI) -->
         <div class="flex flex-col items-center cursor-pointer">
           <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="ChronEX AI Assistant">
-            <i class="fa-solid fa-robot text-[28px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            <i class="fa-solid fa-robot text-[25px] text-[#00f3ff] drop-shadow-[0_2px_5px_rgba(0,243,255,0.7)]"></i>
           </button>
         </div>
 
         <!-- Music disc rotating -->
-        <div class="music-disc-wrapper cursor-pointer mt-0.5">
-          <div class="reel-sound-disc w-10 h-10 rounded-full border-2 border-white/70 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]" title="${escapeHtml(soundTrackTitle)}">
+        <div class="music-disc-wrapper cursor-pointer mt-0.5" title="${escapeHtml(soundTrackTitle)}">
+          <div class="reel-sound-disc w-10 h-10 rounded-full border-2 border-white/70 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
             <i class="fa-solid fa-compact-disc text-white text-base"></i>
           </div>
         </div>
       </aside>
 
-      <!-- 2. KEEP ONLY bottom username: <div class="absolute bottom-20 left-4 z-10"> @alexandergamedeveloper74 + caption </div> -->
+      <!-- 2. Bottom Creator Handle + Caption + Sound Hub Row -->
       <div class="absolute bottom-20 left-4 z-10 flex flex-col gap-1 max-w-[70%] text-white select-none pointer-events-auto">
         <span class="reel-creator-handle font-bold text-[15px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
           @${escapeHtml(authorHandle)}
@@ -484,13 +578,13 @@ function renderReels(reelsList) {
         <p class="text-[13.5px] text-gray-100 font-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] break-words">
           ${escapeHtml(reel.caption || '')}
         </p>
-        <div class="flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5">
+        <div class="reel-sound-row flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5 cursor-pointer hover:text-[#39FF14] transition-colors" title="Open Sound Hub">
           <i class="fa-solid fa-music text-[11px]"></i>
           <span class="truncate max-w-[200px] font-medium">${escapeHtml(soundTrackTitle)}</span>
         </div>
       </div>
 
-      <!-- 5. Add bottom comment input bar like TikTok: "Add comment..." with image/emoji/@ icons -->
+      <!-- 5. Bottom comment input bar like TikTok -->
       <div class="reel-bottom-bar absolute bottom-0 left-0 right-0 z-20 px-3 pb-3 pt-2 bg-gradient-to-t from-black via-black/80 to-transparent flex items-center gap-2.5">
         <div class="flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3.5 py-1.5 flex items-center gap-2.5 border border-white/15 transition-all">
           <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-400 text-sm outline-none" placeholder="Add comment..." autocomplete="off">
@@ -523,12 +617,15 @@ function renderReels(reelsList) {
     const progressFill = card.querySelector('.reel-progress-fill');
     const progressContainer = card.querySelector('.reel-progress-container');
     const discEl = card.querySelector('.reel-sound-disc');
+    const soundRowEl = card.querySelector('.reel-sound-row');
     const inlineInput = card.querySelector('.reel-inline-input');
     const inlineSendBtn = card.querySelector('.reel-inline-send-btn');
     const inlineEmojiBtn = card.querySelector('.reel-inline-emoji-btn');
     const inlineImageBtn = card.querySelector('.reel-inline-image-btn');
     const inlineAtBtn = card.querySelector('.reel-inline-at-btn');
     const botBtn = card.querySelector('.bot-btn');
+    const bookmarkBtn = card.querySelector('.bookmark-btn');
+    const tipBtn = card.querySelector('.tip-btn');
 
     // Video Timeupdate -> Update Progress Bar
     videoEl.addEventListener('timeupdate', () => {
@@ -548,7 +645,6 @@ function renderReels(reelsList) {
       }
     });
 
-    // 8. Do NOT add auto emoji popup on input focus
     // Inline comment submit handlers
     if (inlineInput && inlineSendBtn) {
       inlineInput.addEventListener('keydown', (e) => {
@@ -589,10 +685,42 @@ function renderReels(reelsList) {
       });
     }
 
+    // Bot Button -> Open ChronEX AI Companion Drawer
     if (botBtn) {
       botBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        showToast(`ChronEX Bot: Ready to discuss @${authorHandle}'s reel!`);
+        openChronexAiDrawer(reel);
+      });
+    }
+
+    // Bookmark Button -> Toggle Saved Vault
+    if (bookmarkBtn) {
+      bookmarkBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        handleBookmarkToggle(reel.id, bookmarkBtn);
+      });
+    }
+
+    // Tip Button -> Open Tip Creator Modal
+    if (tipBtn) {
+      tipBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openTipModal(reel);
+      });
+    }
+
+    // Sound Disc & Sound Row Click -> Open Sound Hub
+    if (discEl) {
+      discEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openSoundHub(reel);
+      });
+    }
+
+    if (soundRowEl) {
+      soundRowEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openSoundHub(reel);
       });
     }
 
@@ -605,6 +733,53 @@ function renderReels(reelsList) {
       });
     }
 
+    // Hold-to-2X Speed Feature (Pointer events)
+    let holdTimer = null;
+    let is2xActive = false;
+    let hasHoldTriggered = false;
+    const speed2xBadge = document.getElementById('speed2xBadge');
+
+    const startHoldSpeed = (e) => {
+      // Don't trigger when clicking buttons or interactive areas
+      if (
+        e.target.closest('aside') ||
+        e.target.closest('.reel-progress-container') ||
+        e.target.closest('.reel-bottom-bar') ||
+        e.target.closest('button') ||
+        e.target.closest('input') ||
+        e.target.closest('.reel-creator-handle') ||
+        e.target.closest('.reel-sound-row')
+      ) return;
+
+      hasHoldTriggered = false;
+      holdTimer = setTimeout(() => {
+        is2xActive = true;
+        hasHoldTriggered = true;
+        videoEl.playbackRate = 2.0;
+        if (card._customAudio) card._customAudio.playbackRate = 2.0;
+        if (speed2xBadge) speed2xBadge.style.display = 'flex';
+        if (navigator.vibrate) navigator.vibrate(30);
+      }, 220);
+    };
+
+    const stopHoldSpeed = () => {
+      if (holdTimer) {
+        clearTimeout(holdTimer);
+        holdTimer = null;
+      }
+      if (is2xActive) {
+        is2xActive = false;
+        videoEl.playbackRate = 1.0;
+        if (card._customAudio) card._customAudio.playbackRate = 1.0;
+        if (speed2xBadge) speed2xBadge.style.display = 'none';
+      }
+    };
+
+    card.addEventListener('pointerdown', startHoldSpeed);
+    card.addEventListener('pointerup', stopHoldSpeed);
+    card.addEventListener('pointercancel', stopHoldSpeed);
+    card.addEventListener('mouseleave', stopHoldSpeed);
+
     // Video Tap & Double Tap (Double tap anywhere = like + show big heart)
     let lastTap = 0;
     card.addEventListener('click', (e) => {
@@ -616,6 +791,11 @@ function renderReels(reelsList) {
         e.target.closest('button') ||
         e.target.closest('input')
       ) return;
+
+      if (hasHoldTriggered) {
+        hasHoldTriggered = false;
+        return;
+      }
 
       const now = Date.now();
       if (now - lastTap < 300) {
@@ -759,6 +939,426 @@ async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
     }).catch(err => console.warn('Like add err:', err));
   }
 }
+
+// ══════════════════════════════════════════════════
+// FEATURE B: BOOKMARKS / SAVED VAULT LOGIC
+// ══════════════════════════════════════════════════
+function handleBookmarkToggle(reelId, btn) {
+  const icon = btn.querySelector('i');
+  if (bookmarkedReels.has(reelId)) {
+    bookmarkedReels.delete(reelId);
+    if (icon) icon.className = 'fa-regular fa-bookmark text-white text-[26px] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]';
+    showToast('Removed from Saved Vault');
+  } else {
+    bookmarkedReels.add(reelId);
+    if (icon) {
+      icon.className = 'fa-solid fa-bookmark text-[#FFD700] text-[26px] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)] scale-125';
+      setTimeout(() => icon.classList.remove('scale-125'), 200);
+    }
+    showToast('Saved to Creator Vault! ⭐');
+  }
+  localStorage.setItem('nex_bookmarked_reels', JSON.stringify([...bookmarkedReels]));
+  updateSavedTabCount();
+}
+
+function updateSavedTabCount() {
+  const savedCountEl = document.getElementById('profileSavedTabCount');
+  if (savedCountEl) savedCountEl.textContent = bookmarkedReels.size;
+}
+
+// ══════════════════════════════════════════════════
+// FEATURE B: CREATOR TOKEN TIPPING & COIN BURST
+// ══════════════════════════════════════════════════
+const tipCreatorModal = document.getElementById('tipCreatorModal');
+const closeTipModalBtn = document.getElementById('closeTipModalBtn');
+const tipRecipientAvatar = document.getElementById('tipRecipientAvatar');
+const tipRecipientName = document.getElementById('tipRecipientName');
+const tipRecipientHandle = document.getElementById('tipRecipientHandle');
+const tipUserBalance = document.getElementById('tipUserBalance');
+const confirmTipBtn = document.getElementById('confirmTipBtn');
+const tipBtnAmount = document.getElementById('tipBtnAmount');
+const coinBurstLayer = document.getElementById('coinBurstLayer');
+
+function openTipModal(reel) {
+  activeTipReel = reel;
+  activeTipAmount = 50;
+
+  if (tipRecipientAvatar) tipRecipientAvatar.src = reel.authorPic || 'favicon.png';
+  if (tipRecipientName) tipRecipientName.textContent = reel.authorName || 'Creator';
+  if (tipRecipientHandle) tipRecipientHandle.textContent = `@${reel.authorName || 'creator'}`;
+  if (tipUserBalance) tipUserBalance.textContent = formatNumber(userTokenBalance);
+  if (tipBtnAmount) tipBtnAmount.textContent = '50';
+
+  document.querySelectorAll('.tip-pill').forEach((pill) => {
+    pill.classList.toggle('active', pill.dataset.amount === '50');
+  });
+
+  if (tipCreatorModal) tipCreatorModal.style.display = 'flex';
+}
+
+function closeTipModal() {
+  if (tipCreatorModal) tipCreatorModal.style.display = 'none';
+  activeTipReel = null;
+}
+
+if (closeTipModalBtn) closeTipModalBtn.addEventListener('click', closeTipModal);
+
+document.querySelectorAll('.tip-pill').forEach((pill) => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.tip-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    activeTipAmount = parseInt(pill.dataset.amount, 10);
+    if (tipBtnAmount) tipBtnAmount.textContent = activeTipAmount;
+  });
+});
+
+if (confirmTipBtn) {
+  confirmTipBtn.addEventListener('click', async () => {
+    if (!activeTipReel) return;
+    if (userTokenBalance < activeTipAmount) {
+      showToast('Insufficient token balance!');
+      return;
+    }
+
+    userTokenBalance -= activeTipAmount;
+    localStorage.setItem('nex_user_tokens', String(userTokenBalance));
+    if (tipUserBalance) tipUserBalance.textContent = formatNumber(userTokenBalance);
+
+    // Update in Firestore
+    if (myUID) {
+      updateDoc(doc(db, 'users', myUID), {
+        tokens: increment(-activeTipAmount),
+      }).catch(err => console.warn('Token deduct error:', err));
+    }
+    if (activeTipReel.authorId && activeTipReel.authorId !== myUID) {
+      updateDoc(doc(db, 'users', activeTipReel.authorId), {
+        tokens: increment(activeTipAmount),
+      }).catch(err => console.warn('Token credit error:', err));
+    }
+    if (activeTipReel.id) {
+      updateDoc(doc(db, 'reels', activeTipReel.id), {
+        tokensTipped: increment(activeTipAmount),
+      }).catch(err => console.warn('Reel tip increment error:', err));
+    }
+
+    triggerCoinBurst();
+    showToast(`⚡ Tipped ${activeTipAmount} Tokens to @${activeTipReel.authorName}!`);
+
+    setTimeout(() => {
+      closeTipModal();
+    }, 700);
+  });
+}
+
+function triggerCoinBurst() {
+  if (!coinBurstLayer) return;
+  coinBurstLayer.innerHTML = '';
+  coinBurstLayer.style.display = 'block';
+
+  for (let i = 0; i < 18; i++) {
+    const coin = document.createElement('div');
+    coin.className = 'floating-coin';
+    coin.innerHTML = '<i class="fa-solid fa-coins"></i>';
+    const left = 20 + Math.random() * 60;
+    const delay = Math.random() * 0.4;
+    coin.style.left = `${left}%`;
+    coin.style.animationDelay = `${delay}s`;
+    coinBurstLayer.appendChild(coin);
+  }
+
+  setTimeout(() => {
+    coinBurstLayer.style.display = 'none';
+    coinBurstLayer.innerHTML = '';
+  }, 1600);
+}
+
+// ══════════════════════════════════════════════════
+// FEATURE C: SOUND HUB DRAWER ("Use This Sound")
+// ══════════════════════════════════════════════════
+const soundHubDrawer = document.getElementById('soundHubDrawer');
+const closeSoundHubBtn = document.getElementById('closeSoundHubBtn');
+const soundHubTrackTitle = document.getElementById('soundHubTrackTitle');
+const soundHubArtistName = document.getElementById('soundHubArtistName');
+const soundHubUsageCount = document.getElementById('soundHubUsageCount');
+const soundHubDisc = document.getElementById('soundHubDisc');
+const useThisSoundDrawerBtn = document.getElementById('useThisSoundDrawerBtn');
+const soundHubPlayPauseBtn = document.getElementById('soundHubPlayPauseBtn');
+const soundHubWaveFill = document.getElementById('soundHubWaveFill');
+const soundHubReelsGrid = document.getElementById('soundHubReelsGrid');
+const shareSoundTopBtn = document.getElementById('shareSoundTopBtn');
+
+let soundHubAudioEl = null;
+let soundHubAudioInterval = null;
+
+function openSoundHub(reel) {
+  const soundName = reel.sound || `Original Audio — @${reel.authorName || 'creator'}`;
+  const authorName = reel.authorName || 'creator';
+
+  if (soundHubTrackTitle) soundHubTrackTitle.textContent = soundName;
+  if (soundHubArtistName) soundHubArtistName.textContent = `@${authorName}`;
+
+  // Find all reels using this sound
+  const matchingReels = allLoadedReels.filter(r => (r.sound && r.sound === reel.sound) || (!r.sound && !reel.sound && r.authorName === reel.authorName));
+  const usageCount = Math.max(matchingReels.length * 142 + 23, 1420);
+  if (soundHubUsageCount) soundHubUsageCount.textContent = formatNumber(usageCount);
+
+  // Render matching videos
+  if (soundHubReelsGrid) {
+    soundHubReelsGrid.innerHTML = '';
+    matchingReels.forEach((r) => {
+      const item = document.createElement('div');
+      item.className = 'profile-grid-item';
+      const thumb = r.thumbnailUrl;
+      item.innerHTML = `
+        ${thumb ? `<img src="${thumb}" class="profile-grid-thumb" alt="Reel">` : `<video src="${r.videoUrl}#t=0.5" class="profile-grid-thumb" preload="metadata" muted playsinline></video>`}
+        <div class="profile-grid-play-badge"><i class="fa-solid fa-play text-[9px]"></i> ${formatNumber(r.views || 850)}</div>
+      `;
+      item.addEventListener('click', () => {
+        closeSoundHub();
+        const target = document.querySelector(`.reel-card[data-reel-id="${r.id}"]`);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth' });
+          const v = target.querySelector('video');
+          if (v) v.play().catch(() => {});
+        }
+      });
+      soundHubReelsGrid.appendChild(item);
+    });
+  }
+
+  // Audio preview preparation
+  const audioSrc = reel.audioUrl || reel.videoUrl;
+  if (soundHubAudioEl) {
+    soundHubAudioEl.pause();
+    soundHubAudioEl = null;
+  }
+  if (audioSrc) {
+    soundHubAudioEl = new Audio(audioSrc);
+  }
+
+  if (soundHubDrawer) soundHubDrawer.style.display = 'flex';
+}
+
+function closeSoundHub() {
+  if (soundHubAudioEl) {
+    soundHubAudioEl.pause();
+    soundHubAudioEl = null;
+  }
+  if (soundHubAudioInterval) {
+    clearInterval(soundHubAudioInterval);
+    soundHubAudioInterval = null;
+  }
+  if (soundHubPlayPauseBtn) soundHubPlayPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+  if (soundHubWaveFill) soundHubWaveFill.style.width = '0%';
+  if (soundHubDisc) soundHubDisc.style.animationPlayState = 'paused';
+  if (soundHubDrawer) soundHubDrawer.style.display = 'none';
+}
+
+if (closeSoundHubBtn) closeSoundHubBtn.addEventListener('click', closeSoundHub);
+
+if (soundHubPlayPauseBtn) {
+  soundHubPlayPauseBtn.addEventListener('click', () => {
+    if (!soundHubAudioEl) return;
+    if (soundHubAudioEl.paused) {
+      soundHubAudioEl.play().catch(() => {});
+      soundHubPlayPauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+      if (soundHubDisc) soundHubDisc.style.animationPlayState = 'running';
+      soundHubAudioInterval = setInterval(() => {
+        if (soundHubAudioEl && soundHubAudioEl.duration) {
+          const pct = (soundHubAudioEl.currentTime / soundHubAudioEl.duration) * 100;
+          if (soundHubWaveFill) soundHubWaveFill.style.width = `${pct}%`;
+        }
+      }, 100);
+      soundHubAudioEl.onended = () => {
+        soundHubPlayPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        if (soundHubWaveFill) soundHubWaveFill.style.width = '0%';
+        if (soundHubDisc) soundHubDisc.style.animationPlayState = 'paused';
+        clearInterval(soundHubAudioInterval);
+      };
+    } else {
+      soundHubAudioEl.pause();
+      soundHubPlayPauseBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+      if (soundHubDisc) soundHubDisc.style.animationPlayState = 'paused';
+      clearInterval(soundHubAudioInterval);
+    }
+  });
+}
+
+if (useThisSoundDrawerBtn) {
+  useThisSoundDrawerBtn.addEventListener('click', () => {
+    const title = soundHubTrackTitle ? soundHubTrackTitle.textContent : 'Original Audio';
+    const artist = soundHubArtistName ? soundHubArtistName.textContent : '';
+    const audioUrl = soundHubAudioEl ? soundHubAudioEl.src : '';
+
+    selectedSound = { title, artist, url: audioUrl };
+    if (selectedSoundLabel) selectedSoundLabel.textContent = `${title} — ${artist}`;
+    const reelSoundTitle = document.getElementById('reelSoundTitle');
+    const reelSoundUrl = document.getElementById('reelSoundUrl');
+    if (reelSoundTitle) reelSoundTitle.value = title;
+    if (reelSoundUrl) reelSoundUrl.value = audioUrl;
+
+    closeSoundHub();
+    if (uploadReelModal) uploadReelModal.style.display = 'flex';
+    showToast(`Sound applied: ${title}`);
+  });
+}
+
+if (shareSoundTopBtn) {
+  shareSoundTopBtn.addEventListener('click', () => {
+    const title = soundHubTrackTitle?.textContent || 'Sound';
+    navigator.clipboard.writeText(`${window.location.origin}${window.location.pathname}#sound/${encodeURIComponent(title)}`).then(() => {
+      showToast('Sound link copied to clipboard!');
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════
+// FEATURE D: CHRONEX AI COMPANION DRAWER
+// ══════════════════════════════════════════════════
+const chronexAiDrawer = document.getElementById('chronexAiDrawer');
+const closeChronexAiBtn = document.getElementById('closeChronexAiBtn');
+const chronexAiSummaryText = document.getElementById('chronexAiSummaryText');
+const chronexAiTagsRow = document.getElementById('chronexAiTagsRow');
+const smartReplyChips = document.getElementById('smartReplyChips');
+const chronexAiQuestionInput = document.getElementById('chronexAiQuestionInput');
+const chronexAiAskBtn = document.getElementById('chronexAiAskBtn');
+const chronexAiAnswerBox = document.getElementById('chronexAiAnswerBox');
+const chronexAiAnswerText = document.getElementById('chronexAiAnswerText');
+
+function openChronexAiDrawer(reel) {
+  activeAiReel = reel;
+  const author = reel.authorName || 'creator';
+  const caption = reel.caption || '';
+
+  if (chronexAiSummaryText) {
+    chronexAiSummaryText.innerHTML = `<strong>Neural Video Scanner:</strong> Detected high dynamic range cyberpunk stream by <strong>@${escapeHtml(author)}</strong>. Real-time visual telemetry indicates high virality potential. Audio soundtrack is synchronized with visual keyframes.`;
+  }
+
+  // Extract or generate tags
+  if (chronexAiTagsRow) {
+    const tags = caption.match(/#[a-zA-Z0-9_]+/g) || ['#cyberpunk', '#viral', '#NEX_REELS', '#4K60FPS'];
+    chronexAiTagsRow.innerHTML = tags.map(t => `<span class="chronex-tag">${escapeHtml(t)}</span>`).join('');
+  }
+
+  // 1-Tap Smart Replies
+  if (smartReplyChips) {
+    const replies = [
+      `🔥 This lighting in @${author}'s reel is insane!`,
+      `⚡ What render engine / camera rig did you use for this?`,
+      `🤖 ChronEX Neural Score: 99.8% Cyber Masterpiece!`,
+    ];
+
+    smartReplyChips.innerHTML = '';
+    replies.forEach((rep) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'smart-reply-chip';
+      btn.textContent = rep;
+      btn.addEventListener('click', async () => {
+        if (!myUID) {
+          showToast('Log in to comment');
+          return;
+        }
+        try {
+          await addDoc(collection(db, 'reels', reel.id, 'comments'), {
+            authorId: myUID,
+            authorName: myUsername,
+            authorPic: myProfilePic,
+            text: rep,
+            createdAt: serverTimestamp(),
+          });
+          await updateDoc(doc(db, 'reels', reel.id), {
+            commentsCount: increment(1),
+          });
+          showToast('Smart comment posted!');
+          closeChronexAiDrawer();
+        } catch (err) {
+          console.warn('AI reply post err:', err);
+          showToast('Failed to post reply');
+        }
+      });
+      smartReplyChips.appendChild(btn);
+    });
+  }
+
+  if (chronexAiAnswerBox) chronexAiAnswerBox.style.display = 'none';
+  if (chronexAiQuestionInput) chronexAiQuestionInput.value = '';
+  if (chronexAiDrawer) chronexAiDrawer.style.display = 'flex';
+}
+
+function closeChronexAiDrawer() {
+  if (chronexAiDrawer) chronexAiDrawer.style.display = 'none';
+  activeAiReel = null;
+}
+
+if (closeChronexAiBtn) closeChronexAiBtn.addEventListener('click', closeChronexAiDrawer);
+
+if (chronexAiAskBtn && chronexAiQuestionInput) {
+  const handleAiQuestion = () => {
+    const q = chronexAiQuestionInput.value.trim().toLowerCase();
+    if (!q || !activeAiReel) return;
+
+    let ans = '';
+    if (q.includes('song') || q.includes('music') || q.includes('audio') || q.includes('sound')) {
+      ans = `🎵 Soundtrack: "${activeAiReel.sound || 'Original Audio'}" uploaded by @${activeAiReel.authorName}. You can tap the spinning disc to open Sound Hub!`;
+    } else if (q.includes('who') || q.includes('author') || q.includes('creator')) {
+      ans = `👤 Creator: @${activeAiReel.authorName}. They stream high-definition reels on NEXCHAT. Tap their handle to view their full portfolio.`;
+    } else if (q.includes('quality') || q.includes('resolution') || q.includes('fps')) {
+      ans = `⚡ Quality: High Bitrate Lossless Stream. Encoded in H.264 at 60FPS for maximum clarity on the NEXCHAT Media Engine.`;
+    } else {
+      ans = `🤖 ChronEX Intelligence: Analyzed "${q}" for reel "${activeAiReel.caption || activeAiReel.id}". Video has ${formatNumber(activeAiReel.likesCount || 0)} likes and is currently trending!`;
+    }
+
+    if (chronexAiAnswerText) chronexAiAnswerText.textContent = ans;
+    if (chronexAiAnswerBox) chronexAiAnswerBox.style.display = 'block';
+  };
+
+  chronexAiAskBtn.addEventListener('click', handleAiQuestion);
+  chronexAiQuestionInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAiQuestion();
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════
+// FEATURE E: CYBER VISUAL FILTERS / SHADERS RIBBON
+// ══════════════════════════════════════════════════
+const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+const cyberFilterRibbon = document.getElementById('cyberFilterRibbon');
+const closeFilterRibbonBtn = document.getElementById('closeFilterRibbonBtn');
+
+if (toggleFilterBtn && cyberFilterRibbon) {
+  toggleFilterBtn.addEventListener('click', () => {
+    const isShowing = cyberFilterRibbon.style.display !== 'none';
+    cyberFilterRibbon.style.display = isShowing ? 'none' : 'flex';
+  });
+}
+
+if (closeFilterRibbonBtn && cyberFilterRibbon) {
+  closeFilterRibbonBtn.addEventListener('click', () => {
+    cyberFilterRibbon.style.display = 'none';
+  });
+}
+
+document.querySelectorAll('.filter-shader-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-shader-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilterShader = btn.dataset.filter;
+
+    // Apply or remove filter classes on all reel videos
+    document.querySelectorAll('.reel-video').forEach((v) => {
+      v.classList.remove('filter-matrix', 'filter-cyber-neon', 'filter-night-city', 'filter-noir');
+      if (activeFilterShader !== 'normal') {
+        v.classList.add(`filter-${activeFilterShader}`);
+      }
+    });
+
+    showToast(`Visual Filter: ${btn.textContent.trim()}`);
+  });
+});
 
 // ══════════════════════════════════════════════════
 // ISSUE 4: MUSIC & SOUNDS LIBRARY LOGIC
@@ -1245,6 +1845,7 @@ const profileCopyLinkBtn = document.getElementById('profileCopyLinkBtn');
 const profileReelsGrid = document.getElementById('profileReelsGrid');
 const profilePicsGrid = document.getElementById('profilePicsGrid');
 const profileLikedGrid = document.getElementById('profileLikedGrid');
+const profileSavedGrid = document.getElementById('profileSavedGrid');
 const picLightboxModal = document.getElementById('picLightboxModal');
 const closeLightboxBtn = document.getElementById('closeLightboxBtn');
 const closeLightboxBackdrop = document.getElementById('closeLightboxBackdrop');
@@ -1296,6 +1897,8 @@ export async function openCreatorProfile(authorName, authorPic = 'favicon.png') 
     }
   }
 
+  updateSavedTabCount();
+
   // Show drawer
   creatorProfileDrawer.style.display = 'flex';
 
@@ -1324,9 +1927,12 @@ document.querySelectorAll('.profile-tab-btn').forEach((btn) => {
     if (profileReelsGrid) profileReelsGrid.style.display = tab === 'reels' ? 'grid' : 'none';
     if (profilePicsGrid) profilePicsGrid.style.display = tab === 'pics' ? 'grid' : 'none';
     if (profileLikedGrid) profileLikedGrid.style.display = tab === 'liked' ? 'grid' : 'none';
+    if (profileSavedGrid) profileSavedGrid.style.display = tab === 'saved' ? 'grid' : 'none';
 
     if (tab === 'liked' && activeProfileAuthor) {
       loadCreatorLiked(activeProfileAuthor);
+    } else if (tab === 'saved') {
+      loadCreatorSaved();
     }
   });
 });
@@ -1562,6 +2168,46 @@ async function loadCreatorLiked(authorName) {
       }
     });
     profileLikedGrid.appendChild(card);
+  });
+}
+
+// Load Creator Saved Reels from Vault
+function loadCreatorSaved() {
+  if (!profileSavedGrid) return;
+  updateSavedTabCount();
+
+  const savedReels = allLoadedReels.filter(r => bookmarkedReels.has(r.id));
+  if (savedReels.length === 0) {
+    profileSavedGrid.innerHTML = `
+      <div class="profile-empty-grid">
+        <i class="fa-regular fa-bookmark" style="font-size: 32px; color: #FFD700; margin-bottom: 8px; display: block;"></i>
+        <p>No saved reels in vault. Tap Save on any video to store it here!</p>
+      </div>
+    `;
+    return;
+  }
+
+  profileSavedGrid.innerHTML = '';
+  savedReels.forEach((r) => {
+    const card = document.createElement('div');
+    card.className = 'profile-grid-item';
+    const thumb = r.thumbnailUrl;
+    card.innerHTML = `
+      ${thumb ? `<img src="${thumb}" class="profile-grid-thumb" alt="Reel">` : `<video src="${r.videoUrl}#t=0.5" class="profile-grid-thumb" preload="metadata" muted playsinline></video>`}
+      <div class="profile-grid-play-badge"><i class="fa-solid fa-bookmark text-[#FFD700]"></i> Saved</div>
+    `;
+    card.addEventListener('click', () => {
+      closeCreatorProfile();
+      const targetReel = document.querySelector(`.reel-card[data-reel-id="${r.id}"]`);
+      if (targetReel) {
+        targetReel.scrollIntoView({ behavior: 'smooth' });
+        const v = targetReel.querySelector('video');
+        if (v) v.play().catch(() => {});
+      } else {
+        showToast(`Playing saved reel: ${r.caption || r.id}`);
+      }
+    });
+    profileSavedGrid.appendChild(card);
   });
 }
 
