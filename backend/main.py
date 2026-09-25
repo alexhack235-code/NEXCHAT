@@ -541,8 +541,10 @@ include_optional_router(app, "routers.factory", "router", prefix="/api", tags=["
 include_optional_router(app, "routers.health", "router", prefix="/api", tags=["Health Checks"])
 include_optional_router(app, "routers.web_studio", "router", prefix="/api", tags=["Web Studio"])
 include_optional_router(app, "routers.remote_qwen", "router", prefix="/api", tags=["Remote Models"])
+include_optional_router(app, "routers.remote_model", "router", prefix="/api", tags=["Remote Models Adapter"])
 include_optional_router(app, "routers.vllm_proxy", "router", prefix="/api", tags=["vLLM Proxy"])
 include_optional_router(app, "routers.autonomous_mind", "router", prefix="/api", tags=["Autonomous Thinking"])
+include_optional_router(app, "routers.code_doctor", "router", prefix="/api", tags=["Code Doctor & Heavy Systems"])
 
 # Register Subsystems
 include_optional_router(app, "neural_core.router", "router", prefix="/api", tags=["Neural Synaptic Core"])

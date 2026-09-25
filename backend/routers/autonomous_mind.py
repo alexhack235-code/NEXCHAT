@@ -11,8 +11,14 @@ from pydantic import BaseModel, Field
 
 try:
     from ..autonomous_mind import autonomous_mind
+    from ..tool_synthesizer import tool_synthesizer
+    from ..consolidation_engine import cognitive_consolidator
+    from ..tools_engine import list_registered_tools, execute_tool
 except ImportError:
     from autonomous_mind import autonomous_mind
+    from tool_synthesizer import tool_synthesizer
+    from consolidation_engine import cognitive_consolidator
+    from tools_engine import list_registered_tools, execute_tool
 
 router = APIRouter()
 
@@ -111,3 +117,69 @@ async def post_interaction_reflection(req: ReflectRequest):
         return autonomous_mind.post_interaction_reflect(req.query, req.response, req.tools_used)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# ============================================================================
+# Dynamic Tool Synthesis & Execution Endpoints
+# ============================================================================
+class ToolSynthesizeRequest(BaseModel):
+    name: str = Field(..., description="Unique tool identifier")
+    code: str = Field(..., description="Python code implementation")
+    entry_func: str = Field(..., description="Function name to execute")
+    description: str = Field(..., description="Human-readable description")
+    parameters: Optional[Dict[str, str]] = Field(default=None)
+    test_kwargs: Optional[Dict[str, Any]] = Field(default=None)
+
+class ToolExecuteRequest(BaseModel):
+    tool: str = Field(..., description="Tool name")
+    arguments: Dict[str, Any] = Field(default_factory=dict, description="Keyword arguments")
+
+@router.get("/mind/tools")
+async def get_all_tools():
+    """List all registered and dynamically synthesized tools."""
+    return {"tools": list_registered_tools()}
+
+@router.post("/mind/tools/synthesize")
+async def synthesize_tool(req: ToolSynthesizeRequest):
+    """Synthesize, sandbox verify, and register a new tool live."""
+    res = tool_synthesizer.synthesize_and_register(
+        name=req.name,
+        code_str=req.code,
+        entry_func_name=req.entry_func,
+        description=req.description,
+        parameters=req.parameters,
+        test_kwargs=req.test_kwargs,
+    )
+    if not res.get("success"):
+        raise HTTPException(status_code=400, detail=res.get("error", "Tool synthesis failed"))
+    return res
+
+@router.post("/mind/tools/execute")
+async def execute_dynamic_tool(req: ToolExecuteRequest):
+    """Execute any tool (built-in or synthesized) with keyword arguments."""
+    res = execute_tool(req.tool, **req.arguments)
+    return res
+
+# ============================================================================
+# Autonomous Dream & Cognitive Consolidation Endpoints
+# ============================================================================
+@router.post("/mind/dream")
+async def trigger_dream_cycle():
+    """Trigger an autonomous cognitive consolidation dream cycle."""
+    try:
+        res = await cognitive_consolidator.dream_cycle()
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/mind/epiphanies")
+async def get_epiphanies(limit: int = 10):
+    """Retrieve synthesized mental models and emergent epiphanies."""
+    try:
+        return {
+            "summary": cognitive_consolidator.get_consolidation_summary(),
+            "epiphanies": cognitive_consolidator.get_epiphanies(limit=limit),
+            "mental_models": cognitive_consolidator.get_mental_models(limit=limit),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+

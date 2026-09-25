@@ -144,3 +144,75 @@ def test_api_mind_endpoints(client):
     })
     assert reflect_res.status_code == 200
     assert "metacognition" in reflect_res.json()
+
+def test_dynamic_tool_synthesis(client):
+    # 1. Built-in dynamic tools
+    hash_res = client.post("/api/mind/tools/execute", json={
+        "tool": "crypto_hash",
+        "arguments": {"data": "NEXIUM_OMNI_CORE", "algorithm": "sha256"}
+    })
+    assert hash_res.status_code == 200
+    assert hash_res.json()["success"] is True
+    assert len(hash_res.json()["hash"]) == 64
+
+    # 2. Text Analyzer tool
+    text_res = client.post("/api/mind/tools/execute", json={
+        "tool": "text_analyzer",
+        "arguments": {"text": "Autonomous high-performance cognitive neural systems."}
+    })
+    assert text_res.status_code == 200
+    assert text_res.json()["shannon_entropy"] > 0
+
+    # 3. Unit converter tool
+    unit_res = client.post("/api/mind/tools/execute", json={
+        "tool": "unit_converter",
+        "arguments": {"value": 100, "from_unit": "c", "to_unit": "f"}
+    })
+    assert unit_res.status_code == 200
+    assert unit_res.json()["value"] == 212.0
+
+    # 4. Live Synthesis of a new tool
+    custom_code = (
+        "def collatz_steps(n: int):\n"
+        "    steps = 0\n"
+        "    val = n\n"
+        "    while val > 1:\n"
+        "        val = val // 2 if val % 2 == 0 else 3 * val + 1\n"
+        "        steps += 1\n"
+        "    return {'success': True, 'number': n, 'steps': steps}\n"
+    )
+    synth_res = client.post("/api/mind/tools/synthesize", json={
+        "name": "collatz_conjecture",
+        "code": custom_code,
+        "entry_func": "collatz_steps",
+        "description": "Calculate Collatz Conjecture steps to reach 1.",
+        "parameters": {"n": "int"},
+        "test_kwargs": {"n": 6}
+    })
+    assert synth_res.status_code == 200
+    assert synth_res.json()["registered"] is True
+
+    # 5. Execute the synthesized tool
+    exec_res = client.post("/api/mind/tools/execute", json={
+        "tool": "collatz_conjecture",
+        "arguments": {"n": 27}
+    })
+    assert exec_res.status_code == 200
+    assert exec_res.json()["steps"] == 111
+
+def test_cognitive_consolidation_and_dream(client):
+    # Trigger dream consolidation cycle
+    dream_res = client.post("/api/mind/dream")
+    assert dream_res.status_code == 200
+    dream_data = dream_res.json()
+    assert dream_data["cycle"] >= 1
+    assert "model" in dream_data
+    assert "epiphany" in dream_data
+
+    # Retrieve epiphanies
+    epi_res = client.get("/api/mind/epiphanies?limit=5")
+    assert epi_res.status_code == 200
+    epi_data = epi_res.json()
+    assert len(epi_data["epiphanies"]) > 0
+    assert epi_data["summary"]["total_cycles"] >= 1
+

@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "summary": "Optimistic Verification vs Pre-emptive Locking",
+    "statement": "Atomic CAS (Compare-and-Swap) mirrors biological enzymatic receptor binding: verify state at the microsecond boundary rather than incurring the global energetic penalty of a mutex fence.",
+    "domains": [
+      "Concurrency & Lock-Free Systems",
+      "Biological Cellular Transport"
+    ],
+    "timestamp": "2026-09-21T21:00:27.501097"
+  },
+  {
+    "id": 2,
+    "summary": "Heuristic Pruning & A* Search in Cognitive Latent Space",
+    "statement": "Tree-of-Thought (ToT) reasoning is isomorphic to A* search over a state space: admissible heuristics prune unviable branches before combinatorial explosion occurs.",
+    "domains": [
+      "Graph Theory (Shortest Paths)",
+      "Neural Reasoning Trajectories"
+    ],
+    "timestamp": "2026-09-25T20:24:37.410258"
+  }
+]

@@ -58,5 +58,25 @@
     "active_goals_count": 4,
     "latency_ms": 0.02,
     "timestamp": "2026-09-21T20:50:53.823167"
+  },
+  {
+    "id": 7,
+    "text": "My knowledge base currently has 5013 items. To reach the next milestone, I should focus on ingesting more content about quantum computing.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5013,
+    "active_goals_count": 3,
+    "latency_ms": 0.02,
+    "timestamp": "2026-09-21T20:59:29.955105"
+  },
+  {
+    "id": 8,
+    "text": "I've processed 7 conversations. My strongest area is multi-language code synthesis. I should work on expanding my understanding of emerging topics.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5044,
+    "active_goals_count": 4,
+    "latency_ms": 0.03,
+    "timestamp": "2026-09-25T20:23:41.912565"
   }
 ]

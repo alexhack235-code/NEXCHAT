@@ -1,4 +1,4 @@
-﻿import math
+import math
 import ast
 import operator
 import datetime
@@ -351,11 +351,39 @@ def tool_device_task(action: str, **params) -> Dict[str, Any]:
     except Exception as e:
         return {"success": False, "action": action, "error": str(e)}
 
+def tool_code_doctor(code: str, language: str = "python", action: str = "repair") -> Dict[str, Any]:
+    try:
+        from .code_doctor import code_doctor
+    except ImportError:
+        from code_doctor import code_doctor
+
+    if action == "diagnose":
+        return code_doctor.diagnose_code(code, language=language)
+    return code_doctor.repair_code(code, language=language)
+
+def tool_heavy_code(blueprint_id: str) -> Dict[str, Any]:
+    try:
+        from .heavy_code_engine import heavy_code_engine
+    except ImportError:
+        from heavy_code_engine import heavy_code_engine
+
+    return heavy_code_engine.synthesize_heavy_system(blueprint_id)
+
 TOOL_REGISTRY = {
     "calculate": {
         "func": tool_calculate,
         "description": "Calculate exact mathematical expressions (arithmetic, powers, sqrt, sin, log, exp, etc.).",
         "parameters": {"expression": "string, e.g. 'sqrt(144) + 15 * 3'"},
+    },
+    "code_doctor": {
+        "func": tool_code_doctor,
+        "description": "Autonomous Code Doctor: inspects, diagnoses, and repairs bugs, syntax errors, and leaks in code.",
+        "parameters": {"code": "string", "language": "optional string default 'python'", "action": "repair | diagnose"},
+    },
+    "heavy_code": {
+        "func": tool_heavy_code,
+        "description": "Synthesizes heavy enterprise architectures: 'raft_consensus_engine', 'lockfree_slab_arena', 'async_reactor_event_loop', 'simd_hnsw_vector_indexer', 'bytecode_compiler_vm', 'saga_orchestrator_microservice'.",
+        "parameters": {"blueprint_id": "string"},
     },
     "solve_equation": {
         "func": tool_solve_equation,
@@ -409,9 +437,33 @@ def execute_tool(name: str, **kwargs) -> Dict[str, Any]:
         logger.exception(f"Tool execution failed for {name}")
         return {"success": False, "error": str(e)}
 
+def register_custom_tool(name: str, func: Any, description: str, parameters: Optional[Dict[str, str]] = None) -> bool:
+    """Dynamically register a synthesized tool into the active runtime."""
+    TOOL_REGISTRY[name] = {
+        "func": func,
+        "description": description,
+        "parameters": parameters or {},
+        "custom": True,
+    }
+    logger.info(f"Custom tool '{name}' successfully registered into NEXIUM tools engine.")
+    return True
+
+def list_registered_tools() -> Dict[str, Any]:
+    """List all currently active and synthesized tools."""
+    return {
+        name: {
+            "description": info["description"],
+            "parameters": info["parameters"],
+            "custom": info.get("custom", False),
+        }
+        for name, info in TOOL_REGISTRY.items()
+    }
+
 def get_tool_descriptions() -> str:
     lines = ["Available Tools:"]
     for name, info in TOOL_REGISTRY.items():
         params = ", ".join([f"{k}: {v}" for k, v in info["parameters"].items()])
-        lines.append(f"- {name}({params}): {info['description']}")
+        custom_tag = " [DYNAMIC SYNTHESIZED]" if info.get("custom") else ""
+        lines.append(f"- {name}({params}){custom_tag}: {info['description']}")
     return "\n".join(lines)
+
