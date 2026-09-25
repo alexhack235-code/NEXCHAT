@@ -186,6 +186,7 @@ html, body {
 .reel-card {
   width: 100vw;
   height: 100vh;
+  min-height: 100vh;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   position: relative;
@@ -196,29 +197,141 @@ html, body {
   overflow: hidden;
 }
 
+/* Ambient glow on desktop behind the phone frame */
+.reel-ambient-bg {
+  position: absolute;
+  inset: -15%;
+  width: 130%;
+  height: 130%;
+  background-size: cover;
+  background-position: center;
+  filter: blur(60px) brightness(0.25);
+  opacity: 0.7;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.5s ease;
+}
+
+/* Central Phone-Proportioned Reel Stage */
+.reel-stage {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: min(450px, calc((100vh - 36px) * 9 / 16));
+  height: min(840px, calc(100vh - 36px));
+  aspect-ratio: 9 / 16;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .reel-ambient-bg {
+    display: none;
+  }
+  .reel-stage {
+    max-width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+/* Dual-Layer Video Stage: Full-Sized Video + Ambient Blur Backdrop */
+.reel-video-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #050505;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reel-ambient-backdrop {
+  position: absolute;
+  inset: -15px;
+  width: calc(100% + 30px);
+  height: calc(100% + 30px);
+  background-size: cover;
+  background-position: center;
+  filter: blur(24px) brightness(0.35);
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: 1;
+}
+
 .reel-video {
-  width: 100vw !important;
-  height: 100vh !important;
-  max-width: 100vw !important;
-  max-height: 100vh !important;
-  object-fit: cover !important;
+  position: relative;
+  z-index: 2;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important; /* Full video visible without cropping! */
   cursor: pointer;
-  background: #000000 !important;
+  background: transparent !important;
   border: none !important;
   border-radius: 0 !important;
   box-shadow: none !important;
 }
 
-@media (min-width: 768px) {
-  .reel-video {
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    border-radius: 0 !important;
-    border: none !important;
-    box-shadow: none !important;
-  }
+.reel-video.is-vertical {
+  object-fit: cover !important; /* If native 9:16 vertical, fill edge-to-edge seamlessly */
+}
+
+/* Action column inside stage */
+.reel-actions-column {
+  position: absolute;
+  right: 12px;
+  bottom: 84px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Bottom info metadata inside stage */
+.reel-bottom-info {
+  position: absolute;
+  bottom: 64px;
+  left: 14px;
+  right: 76px;
+  max-width: calc(100% - 88px);
+  z-index: 15;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.95);
+  pointer-events: auto;
+}
+
+/* Bottom comment bar inside stage */
+.reel-bottom-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 25;
+  padding: 8px 12px 14px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.6) 70%, transparent 100%);
+}
+
+/* Scrubber bar inside stage */
+.reel-progress-container {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 30;
+  cursor: pointer;
 }
 
 /* Center Play/Pause Ripple Indicator */
@@ -1079,13 +1192,13 @@ html, body {
 /* Desktop Controls */
 .desktop-nav-controls {
   position: fixed;
-  right: calc(50% - 280px);
+  right: max(16px, calc(50% - 290px));
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   z-index: 60;
 }
 

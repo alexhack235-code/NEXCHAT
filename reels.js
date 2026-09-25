@@ -381,103 +381,103 @@ function getCurrentActiveCard() {
 // ══════════════════════════════════════════════════
 export const SEED_REELS = [
   {
-    id: 'seed-reel-1',
-    videoUrl: 'https://res.cloudinary.com/demo/video/upload/sea_turtle.mp4',
-    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/sea_turtle.jpg',
-    authorName: 'ocean_explorer',
-    authorPic: 'logo.jpg',
-    caption: 'Gliding through pristine blue waters. Pure ocean peace. #ocean #wildlife #nature #peace',
-    likesCount: 14200,
-    likes: [],
-    commentsCount: 3,
-    sharesCount: 2300,
-    views: 89400,
-    sound: 'Quantum Lo-Fi Chill — NEX_Records',
-    audioUrl: '',
-    seedComments: [
-      { authorName: 'marine_biologist', authorPic: 'favicon.png', text: 'The clarity of this water is incredible!' },
-      { authorName: 'alex_travels', authorPic: 'logo.jpg', text: 'Looks like Hawaii or the Maldives. Beautiful shot.' },
-      { authorName: 'sam_nature', authorPic: 'favicon.png', text: 'Sea turtles are so peaceful to watch.' }
-    ]
-  },
-  {
-    id: 'seed-reel-2',
-    videoUrl: 'https://res.cloudinary.com/demo/video/upload/rafting.mp4',
-    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/rafting.jpg',
-    authorName: 'adrenaline_rush',
+    id: 'seed-reel-chronex-ai',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/hourglass_timer.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/hourglass_timer.jpg',
+    authorName: 'chronex_ai',
     authorPic: 'chronex-ai.jpg',
-    caption: 'Class V rapids ride! Pure adrenaline with the crew today. #adventure #whitewater #rafting #extreme',
-    likesCount: 28400,
+    caption: 'ChronEX AI v4.0 is now live across NEXCHAT! Real-time neural models, code debugging, and instant multi-language translation in chats and reels. #ChronEX #AI #FutureTech #NEXCHAT',
+    likesCount: 48200,
     likes: [],
     commentsCount: 3,
-    sharesCount: 4600,
-    views: 142000,
-    sound: 'Midnight City Glide — K-Trap Labs',
+    sharesCount: 9100,
+    views: 194000,
+    sound: 'Quantum Neural Drift — NEX_Records',
     audioUrl: '',
     seedComments: [
-      { authorName: 'river_runner', authorPic: 'logo.jpg', text: 'That drop looked intense! Great paddle work.' },
-      { authorName: 'jessica_outdoors', authorPic: 'favicon.png', text: 'Bucket list item unlocked! That looks so fun.' },
-      { authorName: 'charlie_k', authorPic: 'chronex-ai.jpg', text: 'High energy! Love the rush.' }
+      { authorName: 'dev_sarah', authorPic: 'favicon.png', text: 'The response latency on ChronEX v4 is insanely fast! Love the streaming markdown support.' },
+      { authorName: 'cyber_mark', authorPic: 'logo.jpg', text: 'Can it generate Three.js shaders directly? Testing it today.' },
+      { authorName: 'nex_fan', authorPic: 'chronex-ai.jpg', text: 'NEXCHAT AI integration keeps getting better and better.' }
     ]
   },
   {
-    id: 'seed-reel-3',
-    videoUrl: 'https://res.cloudinary.com/demo/video/upload/dog.mp4',
-    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/dog.jpg',
-    authorName: 'golden_tails',
-    authorPic: 'logo.jpg',
-    caption: 'Golden hour zoomies at the dog park. Unlimited energy! #dogsoftiktok #pets #goldenretriever #happy',
-    likesCount: 65100,
-    likes: [],
-    commentsCount: 3,
-    sharesCount: 8900,
-    views: 289000,
-    sound: 'Neon Tokyo Funk 2088 — Future_Wave',
-    audioUrl: '',
-    seedComments: [
-      { authorName: 'puppy_fan', authorPic: 'favicon.png', text: 'The happiest dog on the entire internet!' },
-      { authorName: 'mia_dogs', authorPic: 'logo.jpg', text: 'Look at that smile! Absolutely precious.' },
-      { authorName: 'daniel_b', authorPic: 'chronex-ai.jpg', text: 'Instant mood booster right here.' }
-    ]
-  },
-  {
-    id: 'seed-reel-4',
-    videoUrl: 'https://res.cloudinary.com/demo/video/upload/elephants.mp4',
-    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/elephants.jpg',
-    authorName: 'safari_chronicles',
+    id: 'seed-reel-gaming-hub',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/finish_line.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/finish_line.jpg',
+    authorName: 'pixel_warlord',
     authorPic: 'chronex-ai.jpg',
-    caption: 'Morning river crossing with the herd. Magnificent gentle giants. #wildlife #safari #africa #nature',
-    likesCount: 41800,
+    caption: 'Sprint to the finish in the NEX Gaming Hub Grand Finals! Down to 0.2 seconds on the clock. Who wants a rematch in the arcade lobby tonight? #GamingHub #Esports #Clutch #Speedrun #NEXCHAT',
+    likesCount: 72400,
     likes: [],
     commentsCount: 3,
-    sharesCount: 5400,
-    views: 198000,
-    sound: 'Hyperdrive Synthwave — Retro_Future',
-    audioUrl: '',
-    seedComments: [
-      { authorName: 'david_wild', authorPic: 'logo.jpg', text: 'Such majestic animals. Great camera stabilization.' },
-      { authorName: 'sarah_safari', authorPic: 'favicon.png', text: 'The little calf in the middle! So cute.' },
-      { authorName: 'kenya_tours', authorPic: 'chronex-ai.jpg', text: 'Respect wildlife always. Great clip.' }
-    ]
-  },
-  {
-    id: 'seed-reel-5',
-    videoUrl: 'https://res.cloudinary.com/demo/video/upload/kitten_fighting.mp4',
-    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/kitten_fighting.jpg',
-    authorName: 'kitten_squad',
-    authorPic: 'logo.jpg',
-    caption: 'Heavyweight championship fight of the day. Tiny paws, big drama! #kittens #cats #cute #playtime',
-    likesCount: 88700,
-    likes: [],
-    commentsCount: 3,
-    sharesCount: 12300,
-    views: 395000,
+    sharesCount: 14800,
+    views: 320000,
     sound: 'Cyberpunk Drift Phonk — DEMON_BEATS',
     audioUrl: '',
     seedComments: [
-      { authorName: 'cat_whisperer', authorPic: 'favicon.png', text: 'The stealth sneak attack at second 3!' },
-      { authorName: 'oliver_cat', authorPic: 'logo.jpg', text: 'I could watch these two play all day long.' },
-      { authorName: 'nora_k', authorPic: 'chronex-ai.jpg', text: 'Tiny tigers in action!' }
+      { authorName: 'arcade_king', authorPic: 'favicon.png', text: 'That final sprint timing was clutch! GG!' },
+      { authorName: 'steve_fps', authorPic: 'logo.jpg', text: 'Challenge accepted! Meet me on the Gaming Hub leaderboard.' },
+      { authorName: 'nova_gamer', authorPic: 'chronex-ai.jpg', text: 'The intensity was crazy, unreal reflex speed.' }
+    ]
+  },
+  {
+    id: 'seed-reel-motion-design',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/wave.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/wave.jpg',
+    authorName: 'motion_nexus',
+    authorPic: 'logo.jpg',
+    caption: 'Liquid neon physics simulation rendered with GPU particles. 60 FPS fluid dynamics study for our new NEX UI theme. Tap like if you want dark mode liquid wallpapers! #MotionDesign #3D #Blender #UIUX #CyberAesthetics',
+    likesCount: 56100,
+    likes: [],
+    commentsCount: 3,
+    sharesCount: 8700,
+    views: 242000,
+    sound: 'Midnight City Glide — K-Trap Labs',
+    audioUrl: '',
+    seedComments: [
+      { authorName: 'ui_designer', authorPic: 'favicon.png', text: 'Please release this as an animated chat wallpaper!' },
+      { authorName: 'render_bot', authorPic: 'logo.jpg', text: 'The fluid refraction index is dialed in perfectly.' },
+      { authorName: 'crypto_artist', authorPic: 'chronex-ai.jpg', text: 'Liquid aesthetics on another level.' }
+    ]
+  },
+  {
+    id: 'seed-reel-cyber-runner',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/forest_bike.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/forest_bike.jpg',
+    authorName: 'cyber_rider',
+    authorPic: 'chronex-ai.jpg',
+    caption: 'Full throttle mountain descent at sunset! High speed POV with gyro stabilization. Where should we ride next? Tag your crew below! #Extreme #ActionCam #Speed #Adventure #POV',
+    likesCount: 61800,
+    likes: [],
+    commentsCount: 3,
+    sharesCount: 11300,
+    views: 275000,
+    sound: 'Hyperdrive Synthwave — Retro_Future',
+    audioUrl: '',
+    seedComments: [
+      { authorName: 'speed_demon', authorPic: 'favicon.png', text: 'That camera stabilization is doing work, looks so smooth!' },
+      { authorName: 'rider_mike', authorPic: 'logo.jpg', text: 'Fast lines through those trees. Pure adrenaline!' },
+      { authorName: 'adventures_with_leo', authorPic: 'chronex-ai.jpg', text: 'Awesome trail, need the GPS coordinates for this spot.' }
+    ]
+  },
+  {
+    id: 'seed-reel-synthwave-drone',
+    videoUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/snow_horses.mp4',
+    thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/snow_horses.jpg',
+    authorName: 'frost_cinematics',
+    authorPic: 'logo.jpg',
+    caption: 'Cinematic 4K FPV Drone Reel captured at 60 FPS in the Alpine Frost Zone. Testing real-time gyro stabilization algorithms. Drop your thoughts below! #Drone #FPV #Cinematic #Tech #NEXCHAT',
+    likesCount: 52400,
+    likes: [],
+    commentsCount: 3,
+    sharesCount: 8300,
+    views: 215000,
+    sound: 'Neon Tokyo Funk 2088 — Future_Wave',
+    audioUrl: '',
+    seedComments: [
+      { authorName: 'drone_pilot', authorPic: 'favicon.png', text: 'The tracking on those subjects at speed is immaculate!' },
+      { authorName: 'film_maker', authorPic: 'logo.jpg', text: 'What shutter speed and ND filter was this shot on? Looks cinematic.' },
+      { authorName: 'tech_gear', authorPic: 'chronex-ai.jpg', text: 'Smooth 60fps playback, love this feed!' }
     ]
   }
 ];
@@ -622,111 +622,135 @@ function renderReels(reelsList) {
     const filterClass = activeFilterShader && activeFilterShader !== 'normal' ? `filter-${activeFilterShader}` : '';
 
     // Card Markup: Video + Floating Action Bar + Bottom Metadata + Bottom Comment Input Bar
+    const posterUrl = reel.thumbnailUrl || (reel.videoUrl ? reel.videoUrl.replace(/\.[^.]+$/, '.jpg') : 'logo.jpg');
+
+    // Professional Video Player: Ambient Theater BG + Centered Phone-Ratio Stage (9:16)
     card.innerHTML = `
-      <!-- 3. Fullscreen Video: object-cover w-screen h-screen bg-black, no borders -->
-      <video class="reel-video w-screen h-screen object-cover bg-black ${filterClass}" src="${reel.videoUrl}" playsinline loop preload="metadata"></video>
-      <div class="reel-play-indicator"><i class="fa-solid fa-play"></i></div>
+      <!-- Ambient background for desktop theater experience -->
+      <div class="reel-ambient-bg" style="background-image: url('${posterUrl}');"></div>
 
-      <!-- 4. Right Action Bar: Heart, Comment, Bookmark, Share, Tip, Bot, Music disc -->
-      <aside class="absolute right-4 bottom-28 z-20 flex flex-col items-center gap-4 text-white select-none pointer-events-auto">
-        <!-- Heart (Like) -->
-        <div class="flex flex-col items-center gap-1 cursor-pointer">
-          <button type="button" class="like-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Like">
-            <i class="fa-solid fa-heart text-[30px] ${isLiked ? 'text-[#fe2c55]' : 'text-white'} drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-          </button>
-          <span class="like-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(likeCount)}</span>
+      <!-- Central Phone-Proportioned Reel Stage (9:16) -->
+      <div class="reel-stage">
+        <!-- Dual-Layer Video Stage: Full-Sized Video + Ambient Blur Backdrop -->
+        <div class="reel-video-wrapper">
+          <div class="reel-ambient-backdrop" style="background-image: url('${posterUrl}');"></div>
+          <video class="reel-video ${filterClass}" src="${reel.videoUrl}" poster="${posterUrl}" playsinline loop preload="metadata"></video>
+          <div class="reel-play-indicator"><i class="fa-solid fa-play"></i></div>
         </div>
 
-        <!-- Comment -->
-        <div class="flex flex-col items-center gap-1 cursor-pointer">
-          <button type="button" class="comment-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Comments">
-            <i class="fa-solid fa-comment-dots text-[30px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-          </button>
-          <span class="reel-comment-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(commentCount)}</span>
-        </div>
+        <!-- Right Action Bar: Heart, Comment, Bookmark, Share, Tip, Bot, Music disc -->
+        <aside class="reel-actions-column select-none pointer-events-auto">
+          <!-- Heart (Like) -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="like-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Like">
+              <i class="fa-solid fa-heart text-[28px] ${isLiked ? 'text-[#fe2c55]' : 'text-white'} drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="like-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(likeCount)}</span>
+          </div>
 
-        <!-- Bookmark / Vault -->
-        <div class="flex flex-col items-center gap-1 cursor-pointer">
-          <button type="button" class="bookmark-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Save to Vault">
-            <i class="${isBookmarked ? 'fa-solid fa-bookmark text-[#FFD700]' : 'fa-regular fa-bookmark text-white'} text-[26px] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-          </button>
-          <span class="text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Save</span>
-        </div>
+          <!-- Comment -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="comment-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Comments">
+              <i class="fa-solid fa-comment-dots text-[28px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="reel-comment-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(commentCount)}</span>
+          </div>
 
-        <!-- Share -->
-        <div class="flex flex-col items-center gap-1 cursor-pointer">
-          <button type="button" class="share-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Share">
-            <i class="fa-solid fa-share text-[28px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-          </button>
-          <span class="text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
-        </div>
+          <!-- Bookmark / Vault -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="bookmark-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Save to Vault">
+              <i class="${isBookmarked ? 'fa-solid fa-bookmark text-[#FFD700]' : 'fa-regular fa-bookmark text-white'} text-[25px] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Save</span>
+          </div>
 
-        <!-- Tip Tokens -->
-        <div class="flex flex-col items-center gap-1 cursor-pointer">
-          <button type="button" class="tip-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Tip Creator Tokens">
-            <i class="fa-solid fa-coins text-[25px] text-[#FFD700] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-          </button>
-          <span class="text-xs font-bold text-[#FFD700] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Tip</span>
-        </div>
+          <!-- Share -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="share-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Share">
+              <i class="fa-solid fa-share text-[26px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
+          </div>
 
-        <!-- Bot icon (ChronEX AI) -->
-        <div class="flex flex-col items-center cursor-pointer">
-          <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="ChronEX AI Assistant">
-            <i class="fa-solid fa-robot text-[25px] text-[#00f3ff] drop-shadow-[0_2px_5px_rgba(0,243,255,0.7)]"></i>
-          </button>
-        </div>
+          <!-- Tip Tokens -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="tip-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Tip Creator Tokens">
+              <i class="fa-solid fa-coins text-[24px] text-[#FFD700] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="text-[11px] font-bold text-[#FFD700] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Tip</span>
+          </div>
 
-        <!-- Music disc rotating -->
-        <div class="music-disc-wrapper cursor-pointer mt-0.5" title="${escapeHtml(soundTrackTitle)}">
-          <div class="reel-sound-disc w-10 h-10 rounded-full border-2 border-white/70 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-            <i class="fa-solid fa-compact-disc text-white text-base"></i>
+          <!-- Bot icon (ChronEX AI) -->
+          <div class="flex flex-col items-center cursor-pointer">
+            <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="ChronEX AI Assistant">
+              <i class="fa-solid fa-robot text-[24px] text-[#00f3ff] drop-shadow-[0_2px_5px_rgba(0,243,255,0.7)]"></i>
+            </button>
+          </div>
+
+          <!-- Music disc rotating -->
+          <div class="music-disc-wrapper cursor-pointer mt-0.5" title="${escapeHtml(soundTrackTitle)}">
+            <div class="reel-sound-disc w-9 h-9 rounded-full border-2 border-white/70 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+              <i class="fa-solid fa-compact-disc text-white text-sm"></i>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Bottom Creator Handle + Caption + Sound Hub Row -->
+        <div class="reel-bottom-info flex flex-col gap-1 text-white select-none pointer-events-auto">
+          <span class="reel-creator-handle font-bold text-[14.5px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
+            @${escapeHtml(authorHandle)}
+          </span>
+          <p class="text-[13px] text-gray-100 font-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] break-words">
+            ${escapeHtml(reel.caption || '')}
+          </p>
+          <div class="reel-sound-row flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5 cursor-pointer hover:text-[#39FF14] transition-colors" title="Open Sound Hub">
+            <i class="fa-solid fa-music text-[11px]"></i>
+            <span class="truncate max-w-[200px] font-medium">${escapeHtml(soundTrackTitle)}</span>
           </div>
         </div>
-      </aside>
 
-      <!-- 2. Bottom Creator Handle + Caption + Sound Hub Row -->
-      <div class="absolute bottom-20 left-4 z-10 flex flex-col gap-1 max-w-[70%] text-white select-none pointer-events-auto">
-        <span class="reel-creator-handle font-bold text-[15px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
-          @${escapeHtml(authorHandle)}
-        </span>
-        <p class="text-[13.5px] text-gray-100 font-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] break-words">
-          ${escapeHtml(reel.caption || '')}
-        </p>
-        <div class="reel-sound-row flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5 cursor-pointer hover:text-[#39FF14] transition-colors" title="Open Sound Hub">
-          <i class="fa-solid fa-music text-[11px]"></i>
-          <span class="truncate max-w-[200px] font-medium">${escapeHtml(soundTrackTitle)}</span>
-        </div>
-      </div>
-
-      <!-- 5. Bottom comment input bar like TikTok -->
-      <div class="reel-bottom-bar absolute bottom-0 left-0 right-0 z-20 px-3 pb-3 pt-2 bg-gradient-to-t from-black via-black/80 to-transparent flex items-center gap-2.5">
-        <div class="flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3.5 py-1.5 flex items-center gap-2.5 border border-white/15 transition-all">
-          <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-400 text-sm outline-none" placeholder="Add comment..." autocomplete="off">
-          <button type="button" class="reel-inline-image-btn text-white/80 hover:text-white transition-colors" title="Add image">
-            <i class="fa-regular fa-image text-[17px] drop-shadow"></i>
-          </button>
-          <button type="button" class="reel-inline-emoji-btn text-white/80 hover:text-white transition-colors" title="Add emoji">
-            <i class="fa-regular fa-face-smile text-[17px] drop-shadow"></i>
-          </button>
-          <button type="button" class="reel-inline-at-btn text-white/80 hover:text-white transition-colors" title="Mention user">
-            <i class="fa-solid fa-at text-[17px] drop-shadow"></i>
+        <!-- Bottom comment input bar like TikTok -->
+        <div class="reel-bottom-bar flex items-center gap-2">
+          <div class="flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-white/15 transition-all">
+            <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-400 text-xs outline-none" placeholder="Add comment..." autocomplete="off">
+            <button type="button" class="reel-inline-image-btn text-white/80 hover:text-white transition-colors" title="Add image">
+              <i class="fa-regular fa-image text-[15px] drop-shadow"></i>
+            </button>
+            <button type="button" class="reel-inline-emoji-btn text-white/80 hover:text-white transition-colors" title="Add emoji">
+              <i class="fa-regular fa-face-smile text-[15px] drop-shadow"></i>
+            </button>
+            <button type="button" class="reel-inline-at-btn text-white/80 hover:text-white transition-colors" title="Mention user">
+              <i class="fa-solid fa-at text-[15px] drop-shadow"></i>
+            </button>
+          </div>
+          <button type="button" class="reel-inline-send-btn text-white/90 hover:text-[#39FF14] transition-colors p-1.5 focus:outline-none" title="Post comment">
+            <i class="fa-solid fa-paper-plane text-sm drop-shadow"></i>
           </button>
         </div>
-        <button type="button" class="reel-inline-send-btn text-white/90 hover:text-[#39FF14] transition-colors p-1.5 focus:outline-none" title="Post comment">
-          <i class="fa-solid fa-paper-plane text-base drop-shadow"></i>
-        </button>
-      </div>
 
-      <!-- Thin Neon Green Scrubber Bar at Bottom (#39FF14) -->
-      <div class="reel-progress-container absolute bottom-0 left-0 right-0 h-1 z-30 cursor-pointer" title="Seek video">
-        <div class="w-full h-full bg-white/20">
-          <div class="reel-progress-fill h-full w-0 bg-[#39FF14] shadow-[0_0_8px_#39FF14]"></div>
+        <!-- Thin Neon Green Scrubber Bar at Bottom (#39FF14) -->
+        <div class="reel-progress-container cursor-pointer" title="Seek video">
+          <div class="w-full h-full bg-white/20">
+            <div class="reel-progress-fill h-full w-0 bg-[#39FF14] shadow-[0_0_8px_#39FF14]"></div>
+          </div>
         </div>
       </div>
     `;
 
     // Elements inside card
     const videoEl = card.querySelector('.reel-video');
+    // Dynamic Aspect-Ratio Detection: If vertical 9:16, fill edge-to-edge; otherwise show full-sized without cropping
+    videoEl.addEventListener('loadedmetadata', () => {
+      if (videoEl.videoWidth && videoEl.videoHeight) {
+        const ratio = videoEl.videoHeight / videoEl.videoWidth;
+        if (ratio >= 1.35) {
+          videoEl.classList.add('is-vertical');
+        } else {
+          videoEl.classList.remove('is-vertical');
+        }
+      }
+    });
+
     const playIndicator = card.querySelector('.reel-play-indicator');
     const progressFill = card.querySelector('.reel-progress-fill');
     const progressContainer = card.querySelector('.reel-progress-container');
