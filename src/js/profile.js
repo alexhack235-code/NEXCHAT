@@ -6,6 +6,7 @@
 import { db } from '../../firebase-config.js';
 import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { uploadImageToCloudinary } from './cloudinary.js';
+import { storageApiClient } from './storage-api-client.js';
 
 /**
  * Uploads a profile picture directly to Cloudinary (no backend/Vercel required).
@@ -20,7 +21,22 @@ export async function uploadProfilePicture(file, uid) {
     throw new Error('No file provided for upload');
   }
 
-  // 1. Primary Strategy: Direct Client-Side Cloudinary Upload (Zero backend, no 405 error)
+  // 1. Primary Strategy: Standalone Storage API Gateway (Vercel Blob via HTTPS microservice)
+  try {
+    const res = await storageApiClient.uploadProfile(file, {
+      userId: uid || 'guest',
+      fileName: file.name || 'avatar.jpg',
+      type: 'avatar',
+    });
+    if (res && res.success && res.url) {
+      console.log('[PROFILE] Avatar saved via Storage API Gateway:', res.url);
+      return res.url;
+    }
+  } catch (apiErr) {
+    console.warn('[PROFILE] Storage API Gateway notice, falling back to direct Cloudinary:', apiErr.message);
+  }
+
+  // 2. Secondary Strategy: Direct Client-Side Cloudinary Upload
   try {
     const cldRes = await uploadImageToCloudinary(file, {
       folder: 'nexchat-avatars',
