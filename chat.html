@@ -488,16 +488,47 @@
         </div>
       </div>
 
-      <!-- SEARCH OVERLAY -->
+      <!-- SEARCH OVERLAY (Reconstructed Ultra-Sleek Hub) -->
       <div id="search-overlay" class="search-overlay" style="display: none;">
-        <div id="search-modal" class="search-modal">
-          <div class="search-header">
-            <input type="text" id="search-input" class="search-input" placeholder="Search by UID, username, or name..."
-              autocomplete="off" />
-            <button id="browse-users-btn" class="search-action-btn" title="Browse all users"><i class="fa-solid fa-users-viewfinder"></i> Browse</button>
-            <button id="close-search-btn" class="close-modal" style="position: static; width: 36px; height: 36px;"><i class="fa-solid fa-xmark"></i></button>
+        <div id="search-modal" class="search-modal reconstructed-search-modal">
+          <!-- Modal Top Header -->
+          <div class="search-modal-header">
+            <div class="search-modal-title">
+              <i class="fa-solid fa-compass text-[#00ff66]"></i>
+              <span>Explore NEXCHAT</span>
+            </div>
+            <button id="close-search-btn" class="search-modal-close-btn" title="Close">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
-          <div id="search-results" class="search-results"></div>
+
+          <!-- Live Search Bar -->
+          <div class="search-bar-container">
+            <i class="fa-solid fa-magnifying-glass search-bar-icon"></i>
+            <input type="text" id="search-input" class="search-input-modern" placeholder="Search people, handles, or groups..." autocomplete="off" />
+            <button id="clear-search-btn" class="search-clear-btn" style="display: none;" title="Clear search">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="search-category-tabs">
+            <button type="button" class="search-tab-pill active" data-filter="all">
+              <i class="fa-solid fa-globe"></i> All
+            </button>
+            <button type="button" class="search-tab-pill" data-filter="users">
+              <i class="fa-solid fa-user"></i> People
+            </button>
+            <button type="button" class="search-tab-pill" data-filter="groups">
+              <i class="fa-solid fa-users"></i> Groups
+            </button>
+            <button type="button" id="browse-users-btn" class="search-tab-pill search-tab-refresh" title="Reload network">
+              <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+          </div>
+
+          <!-- Search Results Stream -->
+          <div id="search-results" class="search-results-container"></div>
         </div>
       </div>
 

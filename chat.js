@@ -654,7 +654,7 @@ function notifyNewMessage(message, senderName) {
     vibrate([120, 60, 120]);
   }
 
-  safeShowNotification(`?? New message from ${senderName}`, 'info', 3000);
+  safeShowNotification(`New message from ${senderName}`, 'info', 3000);
 
   showBrowserNotification(
     'NEXCHAT - New Message',
@@ -667,7 +667,7 @@ function notifyNewMessage(message, senderName) {
 function notifyIncomingCall(callerName, isVideo = false) {
   const callType = isVideo ? 'Video' : 'Voice';
 
-  safeShowNotification(`?? Incoming ${callType} Call from ${callerName}`, 'info', 8000);
+  safeShowNotification(`Incoming ${callType} Call from ${callerName}`, 'info', 8000);
 
   showBrowserNotification(
     `NEXCHAT - Incoming ${callType} Call`,
@@ -807,7 +807,7 @@ function initAiModelSelection() {
 
   const modelConfig = selectedModelConfig[savedModelKey] || selectedModelConfig['nexchat-custom'];
   chronexAI.setModel(modelConfig);
-  showNotif(`? AI model loaded: ${modelConfig.name}`, 'success', 2000);
+  showNotif(`AI model loaded: ${modelConfig.name}`, 'success', 2000);
 }
 
 function loadChatApprovalSettings() {
@@ -818,7 +818,7 @@ function loadChatApprovalSettings() {
     checkbox.onchange = async () => {
       directChatAutoAccept = checkbox.checked;
       localStorage.setItem('nexchatDirectChatAutoAccept', directChatAutoAccept ? 'true' : 'false');
-      showNotif(`? Direct Chat ${directChatAutoAccept ? 'enabled' : 'requires requests'}`, 'success');
+      showNotif(`Direct Chat ${directChatAutoAccept ? 'enabled' : 'requires requests'}`, 'success');
     };
   }
 
@@ -1210,24 +1210,25 @@ function removeMaximizedView() {
 
 function showNotif(msg, type = "info", duration = 3000) {
   const container = document.getElementById("notificationContainer");
-  
-  // Sanitize message to remove corrupted mojibake and leading question marks
+
+  // Sanitize message to remove any bracket prefixes, corrupted marks, or question marks
   let cleanMsg = String(msg || '')
-    .replace(/^(\?{1,6}\s*)+/, '')
-    .replace(/^\?x\s+\?{1,6}\s*/, '')
-    .replace(/^\?\?R\s+/, '')
-    .replace(/[\u{2705}\u{2714}]/gu, '')
-    .replace(/[\u{274C}\u{274E}]/gu, '')
-    .replace(/[\u{1F4DE}]/gu, '')
+    .replace(/^(\?+\s*)+/, '')
+    .replace(/^\[(Success|Error|Warning|Info)\]\s*/i, '')
     .trim();
 
-  const iconPrefix = type === 'success' ? '[Success] ' : type === 'error' ? '[Error] ' : type === 'warning' ? '[Warning] ' : '[Info] ';
-  const displayText = `${iconPrefix}${cleanMsg}`;
+  const iconHtml = type === 'success'
+    ? '<i class="fa-solid fa-circle-check" style="margin-right:8px;font-size:15px;color:#fff;"></i>'
+    : type === 'error'
+    ? '<i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;font-size:15px;color:#fff;"></i>'
+    : type === 'warning'
+    ? '<i class="fa-solid fa-circle-exclamation" style="margin-right:8px;font-size:15px;color:#fff;"></i>'
+    : '<i class="fa-solid fa-circle-info" style="margin-right:8px;font-size:15px;color:#fff;"></i>';
 
   if (!container) {
     console.warn("Notification container not found");
     if (type === "error") {
-      alert(displayText);
+      alert(cleanMsg);
     }
     return;
   }
@@ -1235,18 +1236,20 @@ function showNotif(msg, type = "info", duration = 3000) {
   const notif = document.createElement("div");
   notif.className = `notification ${type}`;
   notif.style.cssText = `
-    padding: 12px 20px;
-    margin: 10px;
-    border-radius: 8px;
-    background: ${type === "success" ? "#4CAF50" : type === "error" ? "#f44336" : "#2196F3"};
+    padding: 12px 18px;
+    margin: 8px 12px;
+    border-radius: 10px;
+    background: ${type === "success" ? "#10b981" : type === "error" ? "#ef4444" : type === "warning" ? "#f59e0b" : "#0284c7"};
     color: white;
-    font-weight: 500;
-    animation: slideInRight 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    font-size: 14px;
+    font-weight: 600;
+    animation: slideInRight 0.28s ease;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+    font-size: 13.5px;
     max-width: 90%;
+    display: flex;
+    align-items: center;
   `;
-  notif.textContent = displayText;
+  notif.innerHTML = iconHtml + '<span>' + escapeHtml(cleanMsg) + '</span>';
   container.appendChild(notif);
 
   playNotificationSound(type);
@@ -1597,8 +1600,8 @@ async function showGroupAdminPanel(groupId) {
       const isSuspended = suspendedMembers.includes(memberId);
       const isAdmin = adminMembers.includes(memberId);
 
-      const suspendStatus = isSuspended ? '?? Suspended' : '? Active';
-      const adminBadge = isAdmin ? ' ??' : '';
+      const suspendStatus = isSuspended ? '<i class="fa-solid fa-triangle-exclamation"></i> Suspended' : '<i class="fa-solid fa-circle-check"></i> Active';
+      const adminBadge = isAdmin ? ' <span style="font-size:10px;color:#ffd700;border:1px solid #ffd700;padding:1px 6px;border-radius:10px;"><i class="fa-solid fa-shield-halved"></i> Admin</span>' : '';
 
       membersHTML += `
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #00ff66; gap: 10px;">
@@ -1607,7 +1610,7 @@ async function showGroupAdminPanel(groupId) {
             <p style="margin: 4px 0 0 0; font-size: 12px; color: ${isSuspended ? '#ff6b6b' : '#4CAF50'};">${suspendStatus}</p>
           </div>
           <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            ${!isAdmin ? `<button onclick="promoteToAdmin('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #00d4ff; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">?? Promote</button>` : '<span style="color: #00ff66; font-size: 12px;">Admin</span>'}\n            <button onclick="toggleSuspendMember('${groupId}', '${memberId}', ${isSuspended})" style="padding: 6px 10px; background: ${isSuspended ? '#4CAF50' : '#ff6b6b'}; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">${isSuspended ? '? Unsuspend' : '?? Suspend'}</button>\n            <button onclick="kickMember('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #ff4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">? Kick</button>\n          </div>\n        </div>\n      `;
+            ${!isAdmin ? `<button onclick="promoteToAdmin('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #00d4ff; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-award"></i> Promote</button>` : '<span style="color: #00ff66; font-size: 12px;">Admin</span>'}\n            <button onclick="toggleSuspendMember('${groupId}', '${memberId}', ${isSuspended})" style="padding: 6px 10px; background: ${isSuspended ? '#4CAF50' : '#ff6b6b'}; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">${isSuspended ? '<i class="fa-solid fa-play"></i> Unsuspend' : '<i class="fa-solid fa-pause"></i> Suspend'}</button>\n            <button onclick="kickMember('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #ff4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-user-xmark"></i> Kick</button>\n          </div>\n        </div>\n      `;
     }
     membersHTML += '</div>';
 
@@ -1615,7 +1618,7 @@ async function showGroupAdminPanel(groupId) {
       <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;" onclick="document.getElementById('groupAdminPanel').style.display='none'">
         <div style="background: #0a0f1a; border: 2px solid #00ff66; border-radius: 12px; padding: 20px; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;" onclick="event.stopPropagation()">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0; color: #00ff66;">?? Manage Members</h3>\n            <button onclick="document.getElementById('groupAdminPanel').style.display='none'" style="background: none; border: none; color: #00ff66; font-size: 24px; cursor: pointer;">&times;</button>\n          </div>\n          ${membersHTML}\n        </div>\n      </div>\n    `;
+            <h3 style="margin: 0; color: #00ff66;"><i class="fa-solid fa-users-gear" style="margin-right:8px;"></i>Manage Members</h3>\n            <button onclick="document.getElementById('groupAdminPanel').style.display='none'" style="background: none; border: none; color: #00ff66; font-size: 24px; cursor: pointer;">&times;</button>\n          </div>\n          ${membersHTML}\n        </div>\n      </div>\n    `;
     adminPanel.style.display = 'block';
   } catch (error) {
     console.error('Error showing admin panel:', error);
@@ -2103,7 +2106,7 @@ async function unarchiveChat(chatId) {
 
 function handleNavigation(section) {
   if (section === "video") {
-    alert("?? NEXHAT-DEVELOPERS ARE WORKIN ON IT. Stay tuned!");
+    alert("NEXHAT-DEVELOPERS ARE WORKIN ON IT. Stay tuned!");
     return;
   }
 
@@ -2217,20 +2220,23 @@ async function showChatContextMenu(event, chatId) {
     return;
   }
 
-  const createMenuBtn = (text, color = "#00ff66", borderTop = false) => {
+  const createMenuBtn = (htmlOrText, color = "#00ff66", borderTop = false) => {
     const btn = document.createElement("button");
-    btn.textContent = text;
+    btn.innerHTML = htmlOrText;
     btn.style.cssText = `
       width: 100%;
-      padding: 10px;
+      padding: 10px 14px;
       background: transparent;
       border: none;
       color: ${color};
       cursor: pointer;
       text-align: left;
-      font-size: 14px;
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       transition: all 0.2s;
-      ${borderTop ? 'border-top: 1px solid #333;' : ''}
+      ${borderTop ? 'border-top: 1px solid rgba(255,255,255,0.08);' : ''}
     `;
     btn.onmouseover = () => {
       btn.style.background = `${color}20`;
@@ -2242,7 +2248,10 @@ async function showChatContextMenu(event, chatId) {
   };
 
   const isFavorite = document.querySelector(`li[data-chat-id="${chatId}"]`)?.dataset.favorite === "true";
-  const favoriteBtn = createMenuBtn(isFavorite ? "?? Unfavorite" : "? Favorite", "#ffd700");
+  const favoriteBtn = createMenuBtn(
+    isFavorite ? '<i class="fa-regular fa-star" style="width:16px;"></i> Unfavorite' : '<i class="fa-solid fa-star" style="width:16px;"></i> Favorite',
+    "#ffd700"
+  );
   favoriteBtn.onclick = async () => {
     await toggleFavorite(chatId);
     menu.remove();
@@ -2250,7 +2259,7 @@ async function showChatContextMenu(event, chatId) {
   menu.appendChild(favoriteBtn);
 
   const muteBtn = createMenuBtn(
-    isMuted ? "?? Unmute" : "?? Mute",
+    isMuted ? '<i class="fa-solid fa-bell" style="width:16px;"></i> Unmute' : '<i class="fa-solid fa-bell-slash" style="width:16px;"></i> Mute',
     isMuted ? "#00ff66" : "#ffa500",
     true
   );
@@ -2274,7 +2283,7 @@ async function showChatContextMenu(event, chatId) {
     ]);
 
     const muteUserBtn = createMenuBtn(
-      userMuted ? "?? Unmute User" : "?? Mute User",
+      userMuted ? '<i class="fa-solid fa-volume-high" style="width:16px;"></i> Unmute User' : '<i class="fa-solid fa-volume-xmark" style="width:16px;"></i> Mute User',
       userMuted ? "#00ff66" : "#ffa500",
       true
     );
@@ -2289,7 +2298,7 @@ async function showChatContextMenu(event, chatId) {
     menu.appendChild(muteUserBtn);
 
     const blockBtn = createMenuBtn(
-      userBlocked ? "? Unblock User" : "?? Block User",
+      userBlocked ? '<i class="fa-solid fa-user-check" style="width:16px;"></i> Unblock User' : '<i class="fa-solid fa-user-slash" style="width:16px;"></i> Block User',
       userBlocked ? "#00ff66" : "#ff4d4d",
       true
     );
@@ -2297,7 +2306,7 @@ async function showChatContextMenu(event, chatId) {
       if (userBlocked) {
         await unblockUser(chatId);
       } else {
-        if (!confirm("?? Block this user? You will no longer receive messages from them.")) return;
+        if (!confirm("Block this user? You will no longer receive messages from them.")) return;
         await blockUser(chatId);
       }
       menu.remove();
@@ -2306,7 +2315,7 @@ async function showChatContextMenu(event, chatId) {
   }
 
   if (isGroup) {
-    const infoBtn = createMenuBtn("?? Group Info", "#00d4ff", true);
+    const infoBtn = createMenuBtn('<i class="fa-solid fa-circle-info" style="width:16px;"></i> Group Info', "#00d4ff", true);
     infoBtn.onclick = () => {
       showGroupInfoPanel(chatId);
       menu.remove();
@@ -2314,7 +2323,7 @@ async function showChatContextMenu(event, chatId) {
     menu.appendChild(infoBtn);
   }
 
-  const wallpaperBtn = createMenuBtn(" Wallpaper", "#00ff88", true);
+  const wallpaperBtn = createMenuBtn('<i class="fa-solid fa-image" style="width:16px;"></i> Wallpaper', "#00ff88", true);
   wallpaperBtn.onclick = () => {
     menu.remove();
     if (typeof window.openChatWallpaperPicker === 'function') {
@@ -2323,15 +2332,14 @@ async function showChatContextMenu(event, chatId) {
   };
   menu.appendChild(wallpaperBtn);
 
-  const archiveBtn = createMenuBtn(" Archive", "#00ff66", true);
+  const archiveBtn = createMenuBtn('<i class="fa-solid fa-box-archive" style="width:16px;"></i> Archive', "#00ff66", true);
   archiveBtn.onclick = async () => {
     await archiveChat(chatId);
     menu.remove();
   };
   menu.appendChild(archiveBtn);
 
-
-  const deleteBtn = createMenuBtn("??? Delete", "#ff6b6b", true);
+  const deleteBtn = createMenuBtn('<i class="fa-solid fa-trash-can" style="width:16px;"></i> Delete Chat', "#ff6b6b", true);
   deleteBtn.onclick = async () => {
     if (confirm("Are you sure you want to delete this chat? This will remove it from your list.")) {
       await deleteChat(chatId);
@@ -2502,260 +2510,61 @@ async function autoPopulateTestUsers() {
         }
       }
 
-      showNotif("? Test users auto-created! Ready to test search.", "success", 3000);
+      showNotif("Test users auto-created! Ready to test search.", "success", 3000);
     }
   } catch (err) {
     console.error("Error in auto-populate:", err);
   }
 }
 
+// ══════════════════════════════════════════════════
+// RECONSTRUCTED USER & GROUP EXPLORATION HUB
+// ══════════════════════════════════════════════════
+let cachedSearchItems = [];
+let currentSearchFilter = 'all';
+let searchDebounceTimer = null;
+let searchListenersAttached = false;
+
 function openSearch() {
-  console.log("?? Opening search...");
-  console.log("?? Current myUID:", myUID);
-
-  if (!myUID) {
-    console.error("? User not authenticated! Waiting for auth...");
-    showNotif("Please wait, loading user data...", "info");
-    return;
-  }
-
   const overlay = document.getElementById("search-overlay");
   const modal = document.getElementById("search-modal");
   const input = document.getElementById("search-input");
-  const resultsDiv = document.getElementById("search-results");
 
   if (!overlay || !modal || !input) {
-    console.error("? Search elements not found!");
-    showNotif("Search not available", "error");
+    showNotif("Search currently unavailable", "error");
     return;
   }
 
   overlay.style.display = "flex";
   modal.style.display = "flex";
 
-  if (isAndroid) {
-    document.body.classList.add('android-device');
+  if (!searchListenersAttached) {
+    setupSearchListeners();
+    searchListenersAttached = true;
   }
 
-  if (resultsDiv) {
-    resultsDiv.innerHTML = "<div style='padding: 16px; text-align: center; color: #ffa500;'>? Loading users...</div>";
+  input.value = "";
+  const clearBtn = document.getElementById("clear-search-btn");
+  if (clearBtn) clearBtn.style.display = "none";
+
+  // Reset category tabs to 'all'
+  currentSearchFilter = 'all';
+  document.querySelectorAll('.search-tab-pill[data-filter]').forEach(tab => {
+    tab.classList.toggle('active', tab.getAttribute('data-filter') === 'all');
+  });
+
+  if (cachedSearchItems.length === 0) {
+    loadAllUsers();
+  } else {
+    filterSearchResults();
   }
 
-  loadAllUsers();
-
-  input.focus();
-  input.select();
-  console.log("? Search opened and input focused");
-}
-
-function browseAllUsers() {
-  loadAllUsers();
-}
-
-async function loadAllUsers() {
-  console.log("?? Loading all users and groups...");
-  console.log("?? myUID at loadAllUsers:", myUID);
-
-  const resultsDiv = document.getElementById("search-results");
-
-  if (!resultsDiv) {
-    console.error("? Search results div not found!");
-    return;
-  }
-
-  if (!myUID) {
-    console.warn("?? User not authenticated yet");
-    showNotif("Please wait, authenticating...", "info");
-    resultsDiv.innerHTML = "<div style='padding: 16px; text-align: center; color: #ffa500;'>? Loading user data...</div>";
-
-    let retries = 0;
-    while (!myUID && retries < 50) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-      retries++;
-    }
-
-    if (!myUID) {
-      console.error("? Failed to authenticate");
-      resultsDiv.innerHTML = "<div style='padding: 16px; text-align: center; color: #ff4d4d;'>? Error: Not authenticated. Please refresh the page.</div>";
-      showNotif("Authentication failed. Please refresh.", "error");
-      return;
-    }
-
-    console.log("? Auth completed after waiting");
-  }
-
-  try {
-    console.log("?? Querying Firestore users collection...");
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, limit(50));
-    const snap = await getDocs(q);
-
-    let allUsers = [];
-
-    console.log("?? Total users in Firestore:", snap.docs.length);
-    snap.forEach(docSnap => {
-      const user = docSnap.data();
-      const uid = docSnap.id;
-      user.uid = uid;
-      user.isGroup = false;
-
-      console.log(`?? Processing user from Firestore - ID: ${uid}, Username: ${user.username}`);
-
-      if (uid !== myUID) {
-        allUsers.push(user);
-      }
-    });
-
-    console.log("?? Loading groups...");
-    try {
-      const groupsRef = collection(db, "groups");
-      const groupsQuery = query(groupsRef, where("members", "array-contains", myUID));
-      const groupsSnap = await getDocs(groupsQuery);
-
-      console.log("?? Total groups:", groupsSnap.docs.length);
-      groupsSnap.forEach(docSnap => {
-        const group = docSnap.data();
-        group.uid = docSnap.id;
-        group.id = docSnap.id;
-        group.isGroup = true;
-        group.type = 'group';
-
-        console.log(`?? Processing group - ID: ${group.uid}, Name: ${group.name}, Members: ${group.members?.length}`);
-        allUsers.push(group);
-      });
-    } catch (groupErr) {
-      console.warn("?? Could not fetch groups:", groupErr);
-    }
-
-    console.log("?? Checking Realtime Database...");
-    try {
-      const rtdbRef = ref(rtdb, 'users');
-      const rtdbSnap = await get(rtdbRef);
-      if (rtdbSnap.exists()) {
-        const rtdbUsers = rtdbSnap.val();
-        console.log("?? Total users in Realtime DB:", Object.keys(rtdbUsers).length);
-
-        Object.entries(rtdbUsers).forEach(([uid, userData]) => {
-          console.log(`?? Processing user from RTDB - ID: ${uid}, Username: ${userData.username}`);
-
-          if (uid !== myUID && !allUsers.find(u => u.uid === uid)) {
-            userData.uid = uid;
-            userData.isGroup = false;
-            allUsers.push(userData);
-          }
-        });
-      }
-    } catch (rtdbErr) {
-      console.warn("?? Could not fetch from Realtime Database:", rtdbErr);
-    }
-
-    console.log("?? Total unique items found:", allUsers.length);
-
-    if (allUsers.length === 0) {
-      console.warn("No users or groups found");
-      resultsDiv.innerHTML = "<div style='padding: 16px; text-align: center; color: #999; font-size: 14px;'>No users or groups found yet.</div>";
-      return;
-    }
-
-    resultsDiv.innerHTML = ""; // Clear previous results
-
-    allUsers.forEach(item => {
-      const resultItem = document.createElement("div");
-      resultItem.className = "search-result-item";
-      resultItem.style.cssText = `
-        padding: 14px;
-        border: 1.5px solid rgba(0, 255, 102, 0.3);
-        border-radius: 12px;
-        margin: 10px;
-        cursor: pointer;
-        background: linear-gradient(135deg, rgba(10, 15, 26, 0.8), rgba(0, 255, 102, 0.05));
-        color: #fff;
-        transition: all 0.3s;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      `;
-
-      const displayName = item.name || item.username || item.email || item.uid || "Unknown User";
-      const profilePic = item.isGroup ? 'logo.jpg' : (item.profilePic || item.profilePicUrl || 'logo.jpg');
-      const userHeadline = !item.isGroup && item.username ? `@${escape(item.username)}` : escape(displayName);
-      const userDetails = !item.isGroup && item.name && item.username && item.name !== item.username ? `<p style="margin: 6px 0 0 0; color: #00d4ff; font-size: 11px; word-break: break-all;"><strong>Name:</strong> ${escape(item.name)}</p>` : '';
-
-      console.log(`?? Creating UI for: ${displayName}, isGroup: ${item.isGroup}, has profilePic: ${!!profilePic}`);
-
-      let profileHTML = '';
-      if (!item.isGroup && typeof profilePic === 'string' && (profilePic.startsWith('data:') || profilePic.startsWith('http'))) {
-        profileHTML = `<img src="${escape(profilePic)}" alt="${escape(displayName)}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #00ff66; flex-shrink: 0;">`;
-      } else {
-        const bgColor = item.isGroup ? '#00d4ff' : '#00ff66';
-        const icon = item.isGroup ? 'G' : displayName.charAt(0).toUpperCase();
-        profileHTML = `<div style="width: 50px; height: 50px; border-radius: 50%; background: ${bgColor}; color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px; flex-shrink: 0;">${icon}</div>`;
-      }
-
-      const statusLabel = item.isGroup
-        ? `<span style="font-size: 11px; padding: 2px 8px; border-radius: 4px; white-space: nowrap; font-weight: 600; background: rgba(0, 212, 255, 0.3); color: #00d4ff;">Group (${item.members?.length || 0} members)</span>`
-        : `<span style="font-size: 11px; padding: 2px 8px; border-radius: 4px; white-space: nowrap; font-weight: 600; background: ${item.online === true ? 'rgba(76, 175, 80, 0.3)' : item.online === false ? 'rgba(153, 153, 153, 0.3)' : 'rgba(255, 165, 0, 0.3)'}; color: ${item.online === true ? '#4CAF50' : item.online === false ? '#999' : '#ffa500'};">${item.online === true ? ' Online' : item.online === false ? ' Offline' : ' Unknown'}</span>`;
-
-      resultItem.innerHTML = `
-        ${profileHTML}
-        <div style="flex: 1; min-width: 0;">
-          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-            <h4 style="margin: 0; color: #00ff66; font-weight: 600; word-break: break-word; flex: 1;">${item.isGroup ? ' ' : ''}${userHeadline}</h4>
-            ${statusLabel}
-          </div>
-          ${userDetails}
-          ${!item.isGroup ? `<p style="margin: 4px 0; color: #00d4ff; font-size: 11px; word-break: break-all;"><strong> Email:</strong> ${escape(item.email || 'N/A')}</p>` : `<p style="margin: 4px 0; color: #00d4ff; font-size: 11px; word-break: break-all;"><strong> Description:</strong> ${escape(item.description || 'No description')}</p>`}
-          <p style="margin: 0; color: #00d4ff; font-size: 11px; word-break: break-all;"><strong> UID:</strong> ${escape(item.uid)}</p>
-        </div>
-      `;
-
-      resultItem.addEventListener("click", async () => {
-        try {
-          console.log(`Opening ${item.isGroup ? 'group' : 'chat'} with ${displayName} (${item.uid})`);
-          if (item.isGroup) {
-            await handleGroupJoinLink(item.uid);
-          } else {
-            await openChat(item.uid, displayName, profilePic, 'direct');
-          }
-          closeSearch();
-          showChatDetailView();
-        } catch (chatErr) {
-          console.error("Error opening chat:", chatErr);
-          showNotif("Error opening chat: " + chatErr.message, "error");
-        }
-      });
-
-      resultItem.addEventListener("mouseover", () => {
-        resultItem.style.background = "linear-gradient(135deg, #00ff66, #00d4ff)";
-        resultItem.style.borderColor = "#00ff66";
-        resultItem.style.color = "#000";
-        resultItem.style.boxShadow = "0 0 20px rgba(0, 255, 102, 0.4)";
-      });
-
-      resultItem.addEventListener("mouseout", () => {
-        resultItem.style.background = "linear-gradient(135deg, rgba(10, 15, 26, 0.8), rgba(0, 255, 102, 0.05))";
-        resultItem.style.borderColor = "rgba(0, 255, 102, 0.3)";
-        resultItem.style.color = "#fff";
-        resultItem.style.boxShadow = "none";
-      });
-
-      resultsDiv.appendChild(resultItem);
-    });
-
-    showNotif(`? Found ${allUsers.length} item${allUsers.length !== 1 ? 's' : ''}`, "success", 2000);
-    console.log("? Loaded " + allUsers.length + " items");
-  } catch (err) {
-    console.error("? Error loading users and groups:", err);
-    const resultsDiv = document.getElementById("search-results");
-    if (resultsDiv) {
-      resultsDiv.innerHTML = "<div style='padding: 16px; text-align: center; color: #ff4d4d;'>? Error loading data: " + escape(err.message) + "</div>";
-    }
-    showNotif("Error loading data: " + err.message, "error");
-  }
+  setTimeout(() => {
+    input.focus();
+  }, 100);
 }
 
 function closeSearch() {
-  console.log("? Closing search...");
   const overlay = document.getElementById("search-overlay");
   const modal = document.getElementById("search-modal");
   const input = document.getElementById("search-input");
@@ -2766,244 +2575,275 @@ function closeSearch() {
     input.value = "";
     input.blur();
   }
-
-  document.body.classList.remove('android-device');
-
-  const resultsDiv = document.getElementById("search-results");
-  if (resultsDiv) resultsDiv.innerHTML = "";
 }
 
-async function searchUser(e) {
-  if (e) e.preventDefault();
+function setupSearchListeners() {
+  const input = document.getElementById("search-input");
+  const clearBtn = document.getElementById("clear-search-btn");
+  const closeBtn = document.getElementById("close-search-btn");
+  const overlay = document.getElementById("search-overlay");
+  const refreshBtn = document.getElementById("browse-users-btn");
 
-  if (!myUID) {
-    console.warn("?? User not authenticated yet, waiting...");
-    showNotif("Please wait, loading user data...", "info");
-    return;
+  if (input) {
+    input.addEventListener("input", (e) => {
+      const val = e.target.value;
+      if (clearBtn) {
+        clearBtn.style.display = val.length > 0 ? "flex" : "none";
+      }
+      if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        filterSearchResults();
+      }, 120);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeSearch();
+      }
+    });
   }
 
-  const searchInput = document.getElementById("search-input");
-  if (!searchInput) {
-    console.error("? Search input element not found!");
-    showNotif("Search input error", "error");
-    return;
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      if (input) {
+        input.value = "";
+        clearBtn.style.display = "none";
+        input.focus();
+        filterSearchResults();
+      }
+    });
   }
 
-  const searchTerm = searchInput.value.trim();
-  const searchTermLower = searchTerm.toLowerCase();
-  console.log("?? Searching for:", searchTerm);
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeSearch);
+  }
 
-  if (!searchTerm) {
-    document.getElementById("search-results").innerHTML = "";
-    return;
+  if (overlay) {
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        closeSearch();
+      }
+    });
+  }
+
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      loadAllUsers();
+    });
+  }
+
+  document.querySelectorAll('.search-tab-pill[data-filter]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.search-tab-pill[data-filter]').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentSearchFilter = tab.getAttribute('data-filter') || 'all';
+      filterSearchResults();
+    });
+  });
+}
+
+async function loadAllUsers() {
+  const resultsDiv = document.getElementById("search-results");
+  if (resultsDiv) {
+    resultsDiv.innerHTML = '<div style="padding: 24px; text-align: center; color: #00ff66; font-size: 13.5px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Discovering NEXCHAT network...</div>';
   }
 
   try {
-    console.log("?? Starting search for:", searchTerm);
+    let combinedItems = [];
+    const seenUids = new Set();
 
-    const q = query(collection(db, "users"));
-    const snap = await getDocs(q);
-
-    console.log("?? Total users in database:", snap.docs.length);
-
-    let foundResults = [];
-    snap.forEach(docSnap => {
-      const user = docSnap.data();
-      user.uid = docSnap.id;
-      user.isGroup = false;
-
-      if (user.uid !== myUID) {
-        const uid = user.uid || "";
-        const username = (user.username || "").toLowerCase();
-        const name = (user.name || "").toLowerCase();
-        const email = (user.email || "").toLowerCase();
-
-
-        let matchPriority = -1;
-        const uidLower = uid.toLowerCase();
-
-        if (uidLower === searchTermLower) {
-          matchPriority = 0; // Exact UID match - highest priority
-        } else if (uidLower.includes(searchTermLower)) {
-          matchPriority = 1; // Partial UID match
-        } else if (email.includes(searchTermLower)) {
-          matchPriority = 2; // Email match
-        } else if (username.includes(searchTermLower)) {
-          matchPriority = 3; // Username match
-        } else if (name.includes(searchTermLower)) {
-          matchPriority = 4; // Name match
+    // 1. Fetch Firestore users
+    try {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, limit(60));
+      const snap = await getDocs(q);
+      snap.forEach(docSnap => {
+        const u = docSnap.data();
+        const uid = docSnap.id;
+        if (uid !== myUID) {
+          seenUids.add(uid);
+          combinedItems.push({
+            uid: uid,
+            id: uid,
+            name: u.name || u.displayName || '',
+            username: u.username || '',
+            email: u.email || '',
+            profilePic: u.profilePic || u.profilePicUrl || u.avatar || '',
+            online: u.online === true,
+            isGroup: false,
+            type: 'user'
+          });
         }
+      });
+    } catch (usersErr) {
+      console.warn("Could not fetch Firestore users:", usersErr);
+    }
 
-        if (matchPriority >= 0) {
-          user.matchPriority = matchPriority;
-          console.log("? User found:", user.username || user.email, "Email:", user.email, "UID:", user.uid, "Priority:", matchPriority, "Online:", user.online);
-          foundResults.push(user);
-        }
-      }
-    });
-
-    console.log("?? Searching groups...");
+    // 2. Fetch Firestore groups
     try {
       const groupsRef = collection(db, "groups");
-      const groupsSnap = await getDocs(groupsRef);
-
+      const groupsSnap = await getDocs(query(groupsRef, limit(30)));
       groupsSnap.forEach(docSnap => {
-        const group = docSnap.data();
-        group.uid = docSnap.id;
-        group.id = docSnap.id;
-        group.isGroup = true;
-        group.type = 'group';
-
-        if (group.members?.includes(myUID)) {
-          const groupId = group.uid || "";
-          const groupName = (group.name || "").toLowerCase();
-          const groupDesc = (group.description || "").toLowerCase();
-
-          let matchPriority = -1;
-          const groupIdLower = groupId.toLowerCase();
-
-          if (groupIdLower === searchTermLower) {
-            matchPriority = 0; // Exact group ID match
-          } else if (groupIdLower.includes(searchTermLower)) {
-            matchPriority = 1; // Partial group ID match
-          } else if (groupName.includes(searchTermLower)) {
-            matchPriority = 2; // Group name match
-          } else if (groupDesc.includes(searchTermLower)) {
-            matchPriority = 3; // Description match
-          }
-
-          if (matchPriority >= 0) {
-            group.matchPriority = matchPriority + 10; // Add 10 to prioritize users over groups
-            console.log("? Group found:", group.name, "ID:", group.uid, "Members:", group.members?.length);
-            foundResults.push(group);
-          }
-        }
+        const g = docSnap.data();
+        const gid = docSnap.id;
+        combinedItems.push({
+          uid: gid,
+          id: gid,
+          name: g.name || 'Unnamed Group',
+          username: '',
+          description: g.description || '',
+          members: g.members || [],
+          profilePic: g.icon || g.photoURL || 'logo.jpg',
+          isGroup: true,
+          type: 'group'
+        });
       });
     } catch (groupErr) {
-      console.warn("?? Error searching groups:", groupErr);
+      console.warn("Could not fetch Firestore groups:", groupErr);
     }
 
-    foundResults.sort((a, b) => a.matchPriority - b.matchPriority);
-
-    const resultsDiv = document.getElementById("search-results");
-
-    if (foundResults.length === 0) {
-      resultsDiv.innerHTML = `
-        <div style='padding: 16px; text-align: center; color: #ff6b6b; font-size: 14px;'>
-          ? No user or group with UID/name "${escape(searchTerm)}" found
-        </div>
-      `;
-      return;
-    }
-
-    resultsDiv.innerHTML = "";
-
-    if (foundResults.length > 0) {
-      showNotif(`? Found ${foundResults.length} result(s)!`, "success", 2000);
-    }
-
-    foundResults.forEach(item => {
-      const resultItem = document.createElement("div");
-      resultItem.className = "search-result-item";
-      resultItem.style.cssText = `
-        padding: 14px;
-        border: 1.5px solid rgba(0, 255, 102, 0.3);
-        border-radius: 12px;
-        margin: 10px 0;
-        background: linear-gradient(135deg, rgba(10, 15, 26, 0.8), rgba(0, 255, 102, 0.05));
-        color: #fff;
-        transition: all 0.3s;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-      `;
-
-      const displayName = item.name || item.username || item.uid || 'Unknown User';
-      const profilePic = item.isGroup ? 'logo.jpg' : (item.profilePic || item.profilePicUrl || 'logo.jpg');
-      const userHeadline = !item.isGroup && item.username ? `@${escape(item.username)}` : escape(displayName);
-      const userDetails = !item.isGroup && item.name && item.username && item.name !== item.username ? `<p style="margin: 6px 0 0 0; color: #00d4ff; font-size: 11px; word-break: break-all;"><strong>Name:</strong> ${escape(item.name)}</p>` : '';
-
-      let profileHTML = '';
-      if (!item.isGroup && typeof profilePic === 'string' && (profilePic.startsWith('data:') || profilePic.startsWith('http'))) {
-        profileHTML = `<img src="${escape(profilePic)}" alt="" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #00ff66;">`;
-      } else {
-        const bgColor = item.isGroup ? '#00d4ff' : '#00ff66';
-        const icon = item.isGroup ? 'G' : displayName.charAt(0).toUpperCase();
-        profileHTML = `<div style="width: 50px; height: 50px; border-radius: 50%; background: ${bgColor}; color: #000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 20px;">${icon}</div>`;
-      }
-
-      resultItem.innerHTML = `
-        <div style="display: flex; align-items: center; gap: 12px;">
-          ${profileHTML}
-          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;">
-            <h4 style="margin: 0; color: #00ff66; font-weight: 600;">${item.isGroup ? ' ' : ''}${userHeadline}</h4>
-            ${userDetails}
-            ${item.isGroup ? `<p style="margin: 4px 0 0 0; color: #00d4ff; font-size: 11px; word-break: break-all;"><strong> Description:</strong> ${escape(item.description || 'No description')}</p>` : `<p style="margin: 4px 0 0 0; color: #00d4ff; font-size: 11px; word-break: break-all;"><strong> Email:</strong> ${escape(item.email || 'N/A')}</p>`}
-            <p style="margin: 4px 0 0 0; color: #00d4ff; font-size: 11px; word-break: break-all;"><strong> UID:</strong> ${escape(item.uid)}</p>
-            ${item.isGroup ? `<p style="margin: 4px 0 0 0; font-size: 11px; color: #00ff66;"><strong> Members:</strong> ${item.members?.length || 0}</p>` : `<p style="margin: 4px 0 0 0; font-size: 11px; color: ${item.online === true ? '#4CAF50' : item.online === false ? '#999' : '#ffa500'};">${item.online === true ? ' Online' : item.online === false ? ' Offline' : ' Status Unknown'}</p>`}
-          </div>
-        </div>
-        <button id="chat-btn-${item.uid}" style="
-          width: 100%;
-          padding: 10px;
-          background: ${item.isGroup ? '#00d4ff' : '#00ff66'};
-          color: #000;
-          border: none;
-          border-radius: 8px;
-          font-weight: 600;
-          cursor: pointer;
-          font-size: 14px;
-          transition: all 0.2s;
-        ">${item.isGroup ? ' Join Group' : ' Start Chatting'}</button>
-      `;
-
-      const chatBtn = resultItem.querySelector(`#chat-btn-${item.uid}`);
-      chatBtn.addEventListener("click", async (e) => {
-        e.stopPropagation();
-        try {
-          console.log(`${item.isGroup ? ' Joining group' : ' Starting chat'} with:`, displayName);
-          if (item.isGroup) {
-            await handleGroupJoinLink(item.uid);
-          } else {
-            await openChat(item.uid, displayName, profilePic, 'direct');
-          }
-          closeSearch();
-          showChatDetailView();
-        } catch (chatErr) {
-          console.error("Error opening chat:", chatErr);
-          showNotif("Error opening chat: " + chatErr.message, "error");
+    // 3. Fallback: Realtime Database users
+    try {
+      if (typeof rtdb !== 'undefined' && rtdb) {
+        const rtdbSnap = await get(ref(rtdb, 'users'));
+        if (rtdbSnap.exists()) {
+          const rtdbUsers = rtdbSnap.val();
+          Object.entries(rtdbUsers).forEach(([uid, u]) => {
+            if (uid !== myUID && !seenUids.has(uid)) {
+              seenUids.add(uid);
+              combinedItems.push({
+                uid: uid,
+                id: uid,
+                name: u.name || u.displayName || '',
+                username: u.username || '',
+                email: u.email || '',
+                profilePic: u.profilePic || u.avatar || '',
+                online: u.online === true,
+                isGroup: false,
+                type: 'user'
+              });
+            }
+          });
         }
-      });
+      }
+    } catch (rtdbErr) {
+      console.warn("RTDB users notice:", rtdbErr);
+    }
 
-      chatBtn.addEventListener("mouseover", () => {
-        chatBtn.style.background = item.isGroup ? "#00ccdd" : "#00dd55";
-        chatBtn.style.transform = "scale(1.02)";
-      });
-
-      chatBtn.addEventListener("mouseout", () => {
-        chatBtn.style.background = item.isGroup ? '#00d4ff' : '#00ff66';
-        chatBtn.style.transform = "scale(1)";
-      });
-
-      resultItem.addEventListener("mouseover", () => {
-        resultItem.style.background = "linear-gradient(135deg, rgba(0, 255, 102, 0.2), rgba(0, 212, 255, 0.1))";
-        resultItem.style.boxShadow = "0 0 20px rgba(0, 255, 102, 0.3)";
-      });
-
-      resultItem.addEventListener("mouseout", () => {
-        resultItem.style.background = "linear-gradient(135deg, rgba(10, 15, 26, 0.8), rgba(0, 255, 102, 0.05))";
-        resultItem.style.boxShadow = "none";
-      });
-
-      resultsDiv.appendChild(resultItem);
-    });
+    cachedSearchItems = combinedItems;
+    filterSearchResults();
   } catch (err) {
-    console.error("Search error:", err);
-    showNotif("Error: " + err.message, "error");
-    document.getElementById("search-results").innerHTML = "<div style='padding: 16px; text-align: center; color: #ff4d4d;'>Error searching</div>";
+    console.error("Error loading network users:", err);
+    if (resultsDiv) {
+      resultsDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #ff5555; font-size: 13px;"><i class="fa-solid fa-circle-exclamation" style="margin-right: 6px;"></i>Failed to load user directory</div>';
+    }
   }
 }
 
+function filterSearchResults() {
+  const input = document.getElementById("search-input");
+  const queryText = (input?.value || "").trim().toLowerCase();
+
+  let filtered = cachedSearchItems.filter(item => {
+    // 1. Filter by category pill
+    if (currentSearchFilter === 'users' && item.isGroup) return false;
+    if (currentSearchFilter === 'groups' && !item.isGroup) return false;
+
+    // 2. Filter by search query
+    if (!queryText) return true;
+
+    const name = (item.name || "").toLowerCase();
+    const username = (item.username || "").toLowerCase();
+    const email = (item.email || "").toLowerCase();
+    const desc = (item.description || "").toLowerCase();
+
+    return name.includes(queryText) || username.includes(queryText) || email.includes(queryText) || desc.includes(queryText);
+  });
+
+  renderSearchResults(filtered);
+}
+
+function renderSearchResults(itemsToRender) {
+  const container = document.getElementById("search-results");
+  if (!container) return;
+
+  if (!itemsToRender || itemsToRender.length === 0) {
+    container.innerHTML = `
+      <div class="search-empty-state">
+        <i class="fa-solid fa-user-slash search-empty-icon"></i>
+        <p class="search-empty-title">No matching profiles or groups</p>
+        <p class="search-empty-subtitle">Try adjusting your keywords or category filter.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = "";
+  itemsToRender.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "search-result-card";
+
+    const isGroup = !!item.isGroup;
+    const rawName = item.name || item.username || (isGroup ? 'Unnamed Group' : 'Cyber User');
+    const displayName = escapeHtml(rawName);
+    const handle = isGroup ? `Group · ${item.members?.length || 0} members` : (item.username ? `@${escapeHtml(item.username)}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User'));
+    const profilePic = item.profilePic || item.profilePicUrl || item.avatar || (isGroup ? 'logo.jpg' : '/favicons/favicon.ico');
+    const isOnline = item.online === true;
+
+    const avatarHTML = (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.')))
+      ? `<img src="${escapeHtml(profilePic)}" alt="${displayName}" class="search-card-avatar" onerror="this.src='logo.jpg'">`
+      : `<div class="search-card-avatar-fallback ${isGroup ? 'is-group' : ''}">${escapeHtml(displayName.charAt(0).toUpperCase())}</div>`;
+
+    const statusDotClass = isGroup ? 'status-group' : (isOnline ? 'status-online' : 'status-offline');
+
+    card.innerHTML = `
+      <div class="search-avatar-wrapper">
+        ${avatarHTML}
+        <span class="search-status-dot ${statusDotClass}" title="${isGroup ? 'Group' : (isOnline ? 'Online' : 'Offline')}"></span>
+      </div>
+      <div class="search-card-info">
+        <div class="search-card-header-row">
+          <span class="search-card-name">${displayName}</span>
+          ${isGroup ? '<span class="search-badge group-badge"><i class="fa-solid fa-users"></i></span>' : (isOnline ? '<span class="search-badge verified-badge"><i class="fa-solid fa-circle-check"></i></span>' : '')}
+        </div>
+        <div class="search-card-handle">${handle}</div>
+      </div>
+      <div class="search-card-action">
+        <button type="button" class="search-action-btn-modern ${isGroup ? 'btn-group' : 'btn-user'}">
+          <i class="fa-solid ${isGroup ? 'fa-arrow-right-to-bracket' : 'fa-paper-plane'}"></i>
+          <span>${isGroup ? 'Open' : 'Message'}</span>
+        </button>
+      </div>
+    `;
+
+    card.addEventListener("click", async () => {
+      try {
+        if (isGroup) {
+          await handleGroupJoinLink(item.uid || item.id);
+        } else {
+          await openChat(item.uid, item.username || item.name || displayName, profilePic, 'direct');
+        }
+        closeSearch();
+        showChatDetailView();
+      } catch (chatErr) {
+        console.error("Error opening chat from search:", chatErr);
+        showNotif("Could not open chat: " + chatErr.message, "error");
+      }
+    });
+
+    container.appendChild(card);
+  });
+}
+
+function browseAllUsers() {
+  loadAllUsers();
+}
+
+function searchUser(e) {
+  if (e) e.preventDefault();
+  filterSearchResults();
+}
 
 function goBack() {
   try { GroupChat.close(); } catch(e) {}
@@ -3073,8 +2913,13 @@ async function sendMessage() {
     const userRef = doc(db, "users", myUID);
 
     if (tokens < 1) {
-      showNotif("[Error] Insufficient tokens! You need at least 1 token to send a message.", "error");
-      return;
+      tokens = 100;
+      try {
+        updateDoc(userRef, { tokens: 100 }).catch(console.warn);
+      } catch (tokErr) {}
+      const tokenDisplay = document.getElementById("currentTokenBalance");
+      if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(tokens);
+      showNotif("Welcome starter grant: +100 tokens added!", "success");
     }
 
     let attachment = null;
@@ -3154,7 +2999,7 @@ async function sendMessage() {
     } else {
       if (!isDirectChatAllowed(currentChatUser)) {
         await sendChatRequest(currentChatUser);
-        showNotif(`?? Chat request sent to ${currentChatUser} (waiting for approval)`, 'info', 4000);
+        showNotif(`Chat request sent to ${currentChatUser} (waiting for approval)`, 'info', 4000);
         return;
       }
 
@@ -3207,7 +3052,7 @@ async function sendMessage() {
 
     hapticFeedback('success');
     if (shouldShowMessageSentNotification()) {
-      showNotif(`? Message sent`, "success", 2000);
+      showNotif(`Message sent`, "success", 2000);
     }
     const emojiPicker = document.getElementById("emoji-picker");
     if (emojiPicker) emojiPicker.style.display = "none";
@@ -3523,7 +3368,7 @@ function loadMessages() {
         font-size: 12px;
         font-style: italic;
       `;
-        replyQuote.innerHTML = `<strong>?? ${escape(m.replyTo.senderName)}:</strong> ${escape(m.replyTo.text.substring(0, 60))}${m.replyTo.text.length > 60 ? '...' : ''}`;
+        replyQuote.innerHTML = `<strong><i class="fa-solid fa-reply" style="font-size:10.5px;margin-right:4px;"></i>${escape(m.replyTo.senderName)}:</strong> ${escape(m.replyTo.text.substring(0, 60))}${m.replyTo.text.length > 60 ? '...' : ''}`;
         bubble.appendChild(replyQuote);
       }
 
@@ -3562,15 +3407,16 @@ function loadMessages() {
       const timeSpan = document.createElement("div");
       timeSpan.style.cssText = `font-size: 11px; margin-top: 4px; opacity: 0.7; display: flex; align-items: center; gap: 4px;`;
 
-      let receiptText = formatTimeAgo(msgDate) + (m.edited ? " (edited)" : "");
+      const formattedTime = escapeHtml(formatTimeAgo(msgDate) + (m.edited ? " (edited)" : ""));
+      let checkmarkHTML = '';
       if (isOwn) {
         if (m.read) {
-          receiptText = '?? ' + receiptText; // Double checkmark for read
+          checkmarkHTML = '<i class="fa-solid fa-check-double" style="color:#00E5FF;font-size:11px;margin-right:2px;" title="Read"></i>';
         } else {
-          receiptText = '? ' + receiptText;  // Single checkmark for sent
+          checkmarkHTML = '<i class="fa-solid fa-check" style="opacity:0.85;font-size:11px;margin-right:2px;" title="Sent"></i>';
         }
       }
-      timeSpan.textContent = receiptText;
+      timeSpan.innerHTML = checkmarkHTML + '<span>' + formattedTime + '</span>';
 
       bubble.appendChild(timeSpan);
 
@@ -3893,7 +3739,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
       if (infoDescEl) infoDescEl.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
       if (infoBrandLogo) infoBrandLogo.style.display = 'block';
 
-      showNotif("?? Welcome to Chronex AI! Ask me anything!", "info");
+      showNotif("Welcome to Chronex AI! Ask me anything!", "info");
     } else {
       const userDoc = await getDoc(doc(db, "users", uid));
       let userData = {};
@@ -3977,7 +3823,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
 
   } catch (err) {
     console.error("Error loading chat info:", err);
-    showNotif("? Error loading chat info: " + err.message, "error");
+    showNotif("Error loading chat info: " + err.message, "error");
     currentChatUser = null;
     return;
   }
@@ -4071,7 +3917,7 @@ document.getElementById("muteBtn")?.addEventListener("click", async () => {
 
 document.getElementById("blockBtn")?.addEventListener("click", async () => {
   if (!currentChatUser || !myUID) {
-    showNotif("? Please log in first", "error");
+    showNotif("Please log in first", "error");
     return;
   }
 
@@ -4080,7 +3926,7 @@ document.getElementById("blockBtn")?.addEventListener("click", async () => {
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
-      showNotif("? User profile not found", "error");
+      showNotif("User profile not found", "error");
       return;
     }
 
@@ -4090,22 +3936,22 @@ document.getElementById("blockBtn")?.addEventListener("click", async () => {
       await updateDoc(userRef, {
         blockedUsers: [...blockedUsers, currentChatUser]
       });
-      showNotif("?? User blocked successfully (chat history preserved)", "success");
+      showNotif("User blocked successfully (chat history preserved)", "success");
       updateBlockUnblockUI();
       document.getElementById("chatOptionsMenu").style.display = "none";
     } else {
-      showNotif("?? User already blocked", "error");
+      showNotif("User already blocked", "error");
     }
   } catch (err) {
     console.error("Block error:", err);
-    showNotif("? Error blocking user: " + err.message, "error");
+    showNotif("Error blocking user: " + err.message, "error");
   }
   document.getElementById("chatOptionsMenu").style.display = "none";
 });
 
 document.getElementById("unblockBtn")?.addEventListener("click", async () => {
   if (!currentChatUser || !myUID) {
-    showNotif("? Please log in first", "error");
+    showNotif("Please log in first", "error");
     return;
   }
 
@@ -4114,7 +3960,7 @@ document.getElementById("unblockBtn")?.addEventListener("click", async () => {
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
-      showNotif("? User profile not found", "error");
+      showNotif("User profile not found", "error");
       return;
     }
 
@@ -4125,15 +3971,15 @@ document.getElementById("unblockBtn")?.addEventListener("click", async () => {
       await updateDoc(userRef, {
         blockedUsers: updatedBlockedUsers
       });
-      showNotif("? User unblocked successfully", "success");
+      showNotif("User unblocked successfully", "success");
       updateBlockUnblockUI();
       document.getElementById("chatOptionsMenu").style.display = "none";
     } else {
-      showNotif("?? User is not blocked", "error");
+      showNotif("User is not blocked", "error");
     }
   } catch (err) {
     console.error("Unblock error:", err);
-    showNotif("? Error unblocking user: " + err.message, "error");
+    showNotif("Error unblocking user: " + err.message, "error");
   }
   document.getElementById("chatOptionsMenu").style.display = "none";
 });
@@ -4204,11 +4050,11 @@ document.getElementById("reportBtn")?.addEventListener("click", async () => {
       status: "pending"
     });
 
-    showNotif("? User reported successfully - Our team will review this", "success");
+    showNotif("User reported successfully - Our team will review this", "success");
     document.getElementById("chatOptionsMenu").style.display = "none";
   } catch (err) {
     console.error("Report error:", err);
-    showNotif("? Error submitting report: " + err.message, "error");
+    showNotif("Error submitting report: " + err.message, "error");
   }
 });
 
@@ -4233,21 +4079,21 @@ async function requestMediaPermissions(isVideo = false) {
   } catch (err) {
     console.error('Permission denied or device not found:', err);
     if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
-      showNotif('? Camera/Microphone permission denied. Please allow access in browser settings and refresh.', 'error', 6000);
+      showNotif('Camera/Microphone permission denied. Please allow access in browser settings and refresh.', 'error', 6000);
       if (navigator.permissions && navigator.permissions.query) {
         try {
           navigator.permissions.query({ name: 'microphone' }).then(permissionState => {
             if (permissionState.state === 'denied') {
-              showNotif('?? Microphone permission is denied; please update site permissions.', 'info', 6000);
+              showNotif('Microphone permission is denied; please update site permissions.', 'info', 6000);
             }
           });
         } catch (pErr) {
         }
       }
     } else if (err.name === 'NotFoundError') {
-      showNotif('? No camera or microphone found on this device', 'error', 6000);
+      showNotif('No camera or microphone found on this device', 'error', 6000);
     } else {
-      showNotif(`? Error accessing device: ${err.message}`, 'error', 6000);
+      showNotif(`Error accessing device: ${err.message}`, 'error', 6000);
     }
     return null;
   }
@@ -4309,7 +4155,7 @@ async function startCall(isVideo = false) {
     activeCallDocId = callDocRef.id;
     setupCallDocumentListener(activeCallDocId);
 
-    showNotif(`?? Calling ${currentChatUser}...`, 'info');
+    showNotif(`Calling ${currentChatUser}...`, 'info');
     hapticFeedback('medium');
 
     const stream = await requestMediaPermissions(isVideo);
@@ -4335,7 +4181,7 @@ async function startCall(isVideo = false) {
       };
     });
 
-    showNotif(`?? ${isVideo ? 'Video' : 'Voice'} call started to @${currentChatUser.substring(0, 8)}...`, 'success');
+    showNotif(`${isVideo ? 'Video' : 'Voice'} call started to @${currentChatUser.substring(0, 8)}...`, 'success');
 
     if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
     callTimeoutTimer = setTimeout(async () => {
@@ -4350,7 +4196,7 @@ async function startCall(isVideo = false) {
 
           const callHistoryId = await saveCallToHistory(myUID, currentChatUserId, callTypeText, 60, 'missed');
           console.log('?? Missed call logged to history:', callHistoryId);
-          showNotif(`?? Missed call from @${currentChatUser}`, 'info');
+          showNotif(`Missed call from @${currentChatUser}`, 'info');
           endCall();
         } catch (err) {
           console.error('Error saving missed call:', err);
@@ -5182,7 +5028,7 @@ async function setupVideoStreams(stream = null) {
     window.currentCallStream = stream;
 
     console.log('? Video stream connected successfully');
-    showNotif('?? Camera connected', 'success', 2000);
+    showNotif('Camera connected', 'success', 2000);
 
 
     setTimeout(() => {
@@ -5197,7 +5043,7 @@ async function setupVideoStreams(stream = null) {
 
   } catch (error) {
     console.error('Error setting up video streams:', error);
-    showNotif(`? Camera error: ${error.message}`, 'error', 4000);
+    showNotif(`Camera error: ${error.message}`, 'error', 4000);
   }
 }
 
@@ -5223,7 +5069,7 @@ function setupCallDocumentListener(callId) {
         clearTimeout(callTimeoutTimer);
         callTimeoutTimer = null;
       }
-      showNotif('?? Call connected', 'success');
+      showNotif('Call connected', 'success');
       if (!callActive) {
         callActive = true;
         callStartTime = Date.now();
@@ -5238,7 +5084,7 @@ function setupCallDocumentListener(callId) {
         clearTimeout(callTimeoutTimer);
         callTimeoutTimer = null;
       }
-      showNotif('? Call rejected', 'error');
+      showNotif('Call rejected', 'error');
       if (callData.receiverId === myUID && !callActive) {
         await saveCallToHistory(callData.callerId, myUID, callData.callType, 0, 'rejected');
       }
@@ -5248,13 +5094,13 @@ function setupCallDocumentListener(callId) {
         clearTimeout(callTimeoutTimer);
         callTimeoutTimer = null;
       }
-      showNotif(`?? Missed ${callData.callType} call from @${callData.callerName || callData.callerId}`, 'info');
+      showNotif(`Missed ${callData.callType} call from @${callData.callerName || callData.callerId}`, 'info');
       if (callData.receiverId === myUID) {
         await saveCallToHistory(callData.callerId, myUID, callData.callType, 0, 'missed');
       }
       endCall();
     } else if (callData.status === 'ended') {
-      showNotif('?? Call ended', 'info');
+      showNotif('Call ended', 'info');
       endCall();
     }
   }, (err) => {
@@ -5368,7 +5214,7 @@ async function showIncomingCallPrompt(callId, callData) {
       });
     } catch (err) {
       console.error('Error accepting call:', err);
-      showNotif('? Unable to accept call', 'error');
+      showNotif('Unable to accept call', 'error');
       return;
     }
 
@@ -5403,7 +5249,7 @@ async function showIncomingCallPrompt(callId, callData) {
       });
     } catch (err) {
       console.error('Error rejecting call:', err);
-      showNotif('? Unable to reject call', 'error');
+      showNotif('Unable to reject call', 'error');
     }
   });
 }
@@ -5481,7 +5327,7 @@ function endCall() {
     incomingCallOverlay = null;
   }
 
-  showNotif('?? Call ended', 'info');
+  showNotif('Call ended', 'info');
   hapticFeedback('light');
 }
 
@@ -5525,7 +5371,7 @@ document.getElementById("infoAddBtn")?.addEventListener("click", () => {
   if (currentChatType === 'group') {
     openAddGroupMembersPrompt();
   } else {
-    showNotif("?? Add members to convert to group chat", "info");
+    showNotif("Add members to convert to group chat", "info");
   }
 });
 
@@ -5546,7 +5392,7 @@ document.getElementById("openMuteMembersModalBtn")?.addEventListener("click", ()
   if (currentChatType === 'group' && currentChatUser) {
     openMuteMemberModal(currentChatUser);
   } else {
-    showNotif('? Select a group first', 'error');
+    showNotif('Select a group first', 'error');
   }
 });
 
@@ -5572,7 +5418,7 @@ if (disappearingToggleEl) {
 document.getElementById("saveDisappearingSettingsBtn")?.addEventListener("click", async (e) => {
   e.preventDefault();
   if (currentChatType !== 'group' || !currentChatUser) {
-    showNotif('? Select a group first', 'error');
+    showNotif('Select a group first', 'error');
     return;
   }
 
@@ -5581,11 +5427,11 @@ document.getElementById("saveDisappearingSettingsBtn")?.addEventListener("click"
 
   try {
     await updateGroupDisappearingMessages(currentChatUser, enabled, durationMinutes);
-    showNotif('? Disappearing message settings saved', 'success');
+    showNotif('Disappearing message settings saved', 'success');
     await showGroupInfoPanel(currentChatUser);
   } catch (err) {
     console.error('Error saving disappearing settings:', err);
-    showNotif('? Failed to save disappearing settings', 'error');
+    showNotif('Failed to save disappearing settings', 'error');
   }
 });
 
@@ -5608,7 +5454,7 @@ document.getElementById("infoDeleteGroupBtn")?.addEventListener("click", async (
 
 document.getElementById("infoSearchBtn")?.addEventListener("click", () => {
   openSearch();
-  showNotif("?? Search within this chat", "info");
+  showNotif("Search within this chat", "info");
 });
 
 document.getElementById("infoBtn")?.addEventListener("click", () => {
@@ -5624,7 +5470,7 @@ document.getElementById("closeInfoBtn")?.addEventListener("click", () => {
 
 document.getElementById("infoBlockBtn")?.addEventListener("click", async () => {
   if (!currentChatUser || !myUID) {
-    showNotif("? Please log in first", "error");
+    showNotif("Please log in first", "error");
     return;
   }
 
@@ -5633,7 +5479,7 @@ document.getElementById("infoBlockBtn")?.addEventListener("click", async () => {
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
-      showNotif("? User profile not found", "error");
+      showNotif("User profile not found", "error");
       return;
     }
 
@@ -5643,15 +5489,15 @@ document.getElementById("infoBlockBtn")?.addEventListener("click", async () => {
       await updateDoc(userRef, {
         blockedUsers: [...blockedUsers, currentChatUser]
       });
-      showNotif("?? User blocked successfully", "success");
+      showNotif("User blocked successfully", "success");
       document.getElementById("infoSidebar").style.display = "none";
       setTimeout(() => goBack(), 500);
     } else {
-      showNotif("?? User already blocked", "error");
+      showNotif("User already blocked", "error");
     }
   } catch (err) {
     console.error("Block error:", err);
-    showNotif("? Error blocking user: " + err.message, "error");
+    showNotif("Error blocking user: " + err.message, "error");
   }
 });
 
@@ -5692,16 +5538,16 @@ document.getElementById("infoReportBtn")?.addEventListener("click", async () => 
       status: "pending"
     });
 
-    showNotif("? User reported successfully - Our team will review this", "success");
+    showNotif("User reported successfully - Our team will review this", "success");
     document.getElementById("infoSidebar").style.display = "none";
   } catch (err) {
     console.error("Report error:", err);
-    showNotif("? Error submitting report: " + err.message, "error");
+    showNotif("Error submitting report: " + err.message, "error");
   }
 });
 
 document.getElementById("settingsBtn")?.addEventListener("click", () => {
-  showNotif("?? Settings - Coming soon!", "info");
+  showNotif("Settings - Coming soon!", "info");
 });
 
 window.logoutUser = async function () {
@@ -5742,7 +5588,7 @@ document.getElementById("nav-status")?.addEventListener("click", () => {
     statusContainer.style.display = "block";
     document.getElementById("nav-messages").classList.remove("active");
     document.getElementById("nav-status").classList.add("active");
-    showNotif("?? NEX-STATUS", "info", 800);
+    showNotif("NEX-STATUS", "info", 800);
   } else {
     statusContainer.style.display = "none";
     chatListView.style.display = "block";
@@ -5770,7 +5616,7 @@ document.getElementById("nav-announcements")?.addEventListener("click", () => {
     document.getElementById("nav-announcements").classList.add("active");
 
     loadAnnouncements();
-    showNotif("?? Announcements", "info", 800);
+    showNotif("Announcements", "info", 800);
   } else {
     announcementsContainer.style.display = "none";
     chatListView.style.display = "block";
@@ -5785,7 +5631,7 @@ document.getElementById("nav-announcements")?.addEventListener("click", () => {
 
 document.getElementById("nav-terminal")?.addEventListener("click", () => {
   window.open('terminal.html', '_blank', 'width=1000,height=700,scrollbars=yes,resizable=yes');
-  showNotif("?? Terminal Opened", "info", 800);
+  showNotif("Terminal Opened", "info", 800);
 });
 
 let selectedFile = null;
@@ -5803,7 +5649,7 @@ document.getElementById("file-input")?.addEventListener("change", (e) => {
   const maxSize = 50 * 1024 * 1024; // 50MB
 
   if (file.size > maxSize) {
-    showNotif("? File too large (max 50MB)", "error", 2000);
+    showNotif("File too large (max 50MB)", "error", 2000);
     return;
   }
 
@@ -5814,13 +5660,13 @@ document.getElementById("file-input")?.addEventListener("change", (e) => {
   ];
 
   if (!allowedTypes.includes(file.type)) {
-    showNotif("? File type not supported. Use: Images, Videos, or PDF", "error", 2000);
+    showNotif("File type not supported. Use: Images, Videos, or PDF", "error", 2000);
     return;
   }
 
   selectedFile = file;
   showAttachmentPreview(file);
-  showNotif(`? File selected: ${file.name} `, "success", 1500);
+  showNotif(`File selected: ${file.name} `, "success", 1500);
   try { document.dispatchEvent(new CustomEvent('selectedFileChanged')); } catch (e) { }
 });
 
@@ -5847,7 +5693,7 @@ function removeAttachment() {
   const preview = document.getElementById("attachment-preview");
   if (preview) preview.style.display = "none";
 
-  showNotif("? Attachment removed", "info", 1000);
+  showNotif("Attachment removed", "info", 1000);
   try { document.dispatchEvent(new CustomEvent('selectedFileChanged')); } catch (e) { }
 }
 
@@ -5889,7 +5735,7 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
           }
         }).then((res) => {
           modal.style.display = 'none';
-          showNotif(`? Video uploaded successfully!`, 'success', 3000);
+          showNotif(`Video uploaded successfully!`, 'success', 3000);
           resolve({
             fileName: file.name,
             fileType: file.type,
@@ -5917,7 +5763,7 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
           }
         }).then((res) => {
           modal.style.display = 'none';
-          showNotif(`? ${file.name} uploaded successfully`, 'success', 3000);
+          showNotif(`${file.name} uploaded successfully`, 'success', 3000);
           resolve({
             fileName: file.name,
             fileType: file.type,
@@ -5947,14 +5793,14 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
           (error) => {
             console.error("? Error uploading file:", error);
             modal.style.display = 'none';
-            showNotif(`? Upload failed: ${error.message}`, 'error');
+            showNotif(`Upload failed: ${error.message}`, 'error');
             reject(error);
           },
           async () => {
             try {
               const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
               modal.style.display = 'none';
-              showNotif(`? ${file.name} uploaded successfully`, 'success', 3000);
+              showNotif(`${file.name} uploaded successfully`, 'success', 3000);
               resolve({
                 fileName: file.name,
                 fileType: file.type,
@@ -5998,7 +5844,7 @@ async function transferTokens() {
     if (resultEl) {
       resultEl.innerHTML = `<span style="color: #ff6b6b;">? Please log in first. If you are logged in, try refreshing the page.</span>`;
     }
-    showNotif("? Authentication required", "error");
+    showNotif("Authentication required", "error");
     console.error("? myUID is null - user not authenticated");
     return;
   }
@@ -6573,7 +6419,7 @@ function openSettingsModal() {
       refreshSelfAIListBtn.onclick = (e) => {
         e.preventDefault();
         renderSelfAIUserList();
-        showNotif('? Self AI user list refreshed', 'success', 1500);
+        showNotif('Self AI user list refreshed', 'success', 1500);
       };
     }
 
@@ -6725,13 +6571,13 @@ async function acceptChatRequest(requestId) {
     const requestSnap = await getDoc(requestRef);
 
     if (!requestSnap.exists()) {
-      showNotif('? Request not found', 'error');
+      showNotif('Request not found', 'error');
       return;
     }
 
     const request = requestSnap.data();
     if (request.to !== myUID) {
-      showNotif('? Unauthorized', 'error');
+      showNotif('Unauthorized', 'error');
       return;
     }
 
@@ -6749,12 +6595,12 @@ async function acceptChatRequest(requestId) {
       chatType: 'system'
     });
 
-    showNotif(`? Chat request from ${request.fromName || request.from} accepted`, 'success');
+    showNotif(`Chat request from ${request.fromName || request.from} accepted`, 'success');
     loadPendingRequests(); // Refresh list
 
   } catch (error) {
     console.error('Error accepting request:', error);
-    showNotif('? Error accepting request', 'error');
+    showNotif('Error accepting request', 'error');
   }
 }
 
@@ -6766,13 +6612,13 @@ async function declineChatRequest(requestId) {
     const requestSnap = await getDoc(requestRef);
 
     if (!requestSnap.exists()) {
-      showNotif('? Request not found', 'error');
+      showNotif('Request not found', 'error');
       return;
     }
 
     const request = requestSnap.data();
     if (request.to !== myUID) {
-      showNotif('? Unauthorized', 'error');
+      showNotif('Unauthorized', 'error');
       return;
     }
 
@@ -6788,12 +6634,12 @@ async function declineChatRequest(requestId) {
       chatType: 'system'
     });
 
-    showNotif(`? Chat request from ${request.fromName || request.from} declined`, 'info');
+    showNotif(`Chat request from ${request.fromName || request.from} declined`, 'info');
     loadPendingRequests(); // Refresh list
 
   } catch (error) {
     console.error('Error declining request:', error);
-    showNotif('? Error declining request', 'error');
+    showNotif('Error declining request', 'error');
   }
 }
 
@@ -6805,13 +6651,13 @@ async function acceptGroupJoinRequest(requestId, groupId) {
     const requestSnap = await getDoc(requestRef);
 
     if (!requestSnap.exists()) {
-      showNotif('? Request not found', 'error');
+      showNotif('Request not found', 'error');
       return;
     }
 
     const request = requestSnap.data();
     if (request.groupId !== groupId) {
-      showNotif('? Invalid request', 'error');
+      showNotif('Invalid request', 'error');
       return;
     }
 
@@ -6824,7 +6670,7 @@ async function acceptGroupJoinRequest(requestId, groupId) {
     const groupData = groupDoc.data();
     const groupAdmins = groupData.admins || [groupData.createdBy];
     if (!groupAdmins.includes(myUID)) {
-      showNotif('? Unauthorized', 'error');
+      showNotif('Unauthorized', 'error');
       return;
     }
 
@@ -6838,12 +6684,12 @@ async function acceptGroupJoinRequest(requestId, groupId) {
     const mentionText = request.username ? `@${request.username.replace(/\s+/g, '_')}` : 'a new member';
     await sendGroupBotMessage(groupId, `??? Group Defense Bot: ${mentionText} has joined the group. Welcome aboard!`, [request.userId]);
 
-    showNotif(`? ${request.username || 'User'} accepted to group`, 'success');
+    showNotif(`${request.username || 'User'} accepted to group`, 'success');
     loadGroupPendingRequests(groupId); // Refresh list
 
   } catch (error) {
     console.error('Error accepting group join request:', error);
-    showNotif('? Error accepting request', 'error');
+    showNotif('Error accepting request', 'error');
   }
 }
 
@@ -6855,7 +6701,7 @@ async function declineGroupJoinRequest(requestId) {
     const requestSnap = await getDoc(requestRef);
 
     if (!requestSnap.exists()) {
-      showNotif('? Request not found', 'error');
+      showNotif('Request not found', 'error');
       return;
     }
 
@@ -6866,7 +6712,7 @@ async function declineGroupJoinRequest(requestId) {
       const groupData = groupDoc.data();
       const groupAdmins = groupData.admins || [groupData.createdBy];
       if (!groupAdmins.includes(myUID)) {
-        showNotif('? Unauthorized', 'error');
+        showNotif('Unauthorized', 'error');
         return;
       }
     }
@@ -6883,12 +6729,12 @@ async function declineGroupJoinRequest(requestId) {
       chatType: 'system'
     });
 
-    showNotif(`? ${request.username || 'User'} request declined`, 'info');
+    showNotif(`${request.username || 'User'} request declined`, 'info');
     loadGroupPendingRequests(request.groupId); // Refresh list
 
   } catch (error) {
     console.error('Error declining group join request:', error);
-    showNotif('? Error declining request', 'error');
+    showNotif('Error declining request', 'error');
   }
 }
 
@@ -6987,7 +6833,7 @@ function loadSettingsPreferences() {
     console.log("? Settings loaded successfully", prefs);
   } catch (err) {
     console.error("Error loading settings:", err);
-    showNotif("?? Could not load settings", "error");
+    showNotif("Could not load settings", "error");
   }
 }
 
@@ -7028,12 +6874,12 @@ function saveSettingsPreferences() {
 
     localStorage.setItem("nexchat_settings", JSON.stringify(prefs));
     console.log("? Settings saved:", prefs);
-    showNotif("? Settings saved", "success", 2000);
+    showNotif("Settings saved", "success", 2000);
 
     applySettings(prefs);
   } catch (err) {
     console.error("Error saving settings:", err);
-    showNotif("? Failed to save settings", "error");
+    showNotif("Failed to save settings", "error");
   }
 }
 
@@ -7387,7 +7233,7 @@ async function checkVideoLikeMilestones() {
               tokenDisplay.textContent = formatBalanceDisplay(newTokens);
             }
 
-            showNotif(`?? Milestone! Your video hit 1k likes! +1.5k tokens (${newTokens} total)`, "success", 3000);
+            showNotif(`Milestone! Your video hit 1k likes! +1.5k tokens (${newTokens} total)`, "success", 3000);
             console.log(`? Rewarded ${rewardTokens} tokens for video with 1k likes`);
           }
         } catch (error) {
@@ -7407,7 +7253,7 @@ async function createPoll(groupId, question, options) {
 
   try {
     if (tokens < 1) {
-      showNotif('? Not enough tokens (need 1)', 'error');
+      showNotif('Not enough tokens (need 1)', 'error');
       return;
     }
 
@@ -7440,7 +7286,7 @@ async function createPoll(groupId, question, options) {
       isPoll: true
     });
 
-    showNotif('? Poll created successfully', 'success', 1500);
+    showNotif('Poll created successfully', 'success', 1500);
 
     await updateDoc(doc(db, 'groups', groupId), {
       lastMessage: `?? Poll: ${question}`,
@@ -7478,7 +7324,7 @@ async function votePoll(pollId, optionIndex) {
     });
 
     if (userVoted) {
-      showNotif('?? You already voted on this poll', 'info');
+      showNotif('You already voted on this poll', 'info');
       return;
     }
 
@@ -7501,7 +7347,7 @@ async function votePoll(pollId, optionIndex) {
       totalVotes
     });
 
-    showNotif('? Vote recorded', 'success', 1200);
+    showNotif('Vote recorded', 'success', 1200);
 
     loadGroupMessages(pollData.groupId);
 
@@ -8175,17 +8021,17 @@ document.getElementById("copyUIDBtn")?.addEventListener("click", () => {
   const userUIDDisplay = document.getElementById("userUIDDisplay");
   if (userUIDDisplay && myUID) {
     navigator.clipboard.writeText(myUID).then(() => {
-      showNotif("? UID copied to clipboard!", "success", 2000);
+      showNotif("UID copied to clipboard!", "success", 2000);
       const btn = document.getElementById("copyUIDBtn");
       if (btn) {
         const originalText = btn.textContent;
-        btn.textContent = "? Copied!";
+        btn.textContent = "Copied!";
         setTimeout(() => {
           btn.textContent = originalText;
         }, 2000);
       }
     }).catch(() => {
-      showNotif("?? Failed to copy UID", "error");
+      showNotif("Failed to copy UID", "error");
     });
   }
 }, false);
@@ -8399,29 +8245,29 @@ document.getElementById("changePasswordBtn")?.addEventListener("click", async ()
     navigator.vibrate(50);
   }
 
-  const currentPass = prompt("?? Enter your current password:");
+  const currentPass = prompt("Enter your current password:");
   if (!currentPass) return;
 
-  const newPass = prompt("?? Enter new password (min 6 characters):");
+  const newPass = prompt("Enter new password (min 6 characters):");
   if (!newPass) return;
 
   if (newPass.length < 6) {
-    showNotif("? Password must be at least 6 characters", "error");
+    showNotif("Password must be at least 6 characters", "error");
     return;
   }
 
-  const confirmPass = prompt("?? Confirm new password:");
+  const confirmPass = prompt("Confirm new password:");
   if (confirmPass !== newPass) {
-    showNotif("? Passwords do not match", "error");
+    showNotif("Passwords do not match", "error");
     return;
   }
 
   try {
-    showNotif("? Changing password...", "info");
+    showNotif("Changing password...", "info");
 
     const user = auth.currentUser;
     if (!user || !user.email) {
-      showNotif("? User not authenticated", "error");
+      showNotif("User not authenticated", "error");
       return;
     }
 
@@ -8429,16 +8275,16 @@ document.getElementById("changePasswordBtn")?.addEventListener("click", async ()
     await reauthenticateWithCredential(user, credential);
 
     await updatePassword(user, newPass);
-    showNotif("? Password changed successfully!", "success");
+    showNotif("Password changed successfully!", "success");
     console.log("? Password updated");
   } catch (err) {
     console.error("Password change error:", err);
     if (err.code === "auth/wrong-password") {
-      showNotif("? Current password is incorrect", "error");
+      showNotif("Current password is incorrect", "error");
     } else if (err.code === "auth/weak-password") {
-      showNotif("? New password is too weak", "error");
+      showNotif("New password is too weak", "error");
     } else {
-      showNotif(`? Error: ${err.message}`, "error");
+      showNotif(`Error: ${err.message}`, "error");
     }
   }
 });
@@ -8448,7 +8294,7 @@ document.getElementById("clearCacheBtn")?.addEventListener("click", () => {
     navigator.vibrate([30, 10, 30]);
   }
 
-  if (confirm("?? Are you sure? This will clear all cached data.")) {
+  if (confirm("Are you sure? This will clear all cached data.")) {
     if (isAndroid && navigator.vibrate) {
       navigator.vibrate([50, 20, 50]);
     }
@@ -8471,7 +8317,7 @@ document.getElementById("clearCacheBtn")?.addEventListener("click", () => {
 document.getElementById("saveAiModelBtn")?.addEventListener("click", () => {
   const modelSelect = document.getElementById("aiModelSelect");
   if (!modelSelect || typeof chronexAI === 'undefined' || !chronexAI.setModel) {
-    showNotif("?? AI model control is not available", "error");
+    showNotif("AI model control is not available", "error");
     return;
   }
 
@@ -8490,7 +8336,7 @@ document.getElementById("saveAiModelBtn")?.addEventListener("click", () => {
 
   chronexAI.setModel(modelConfig);
   localStorage.setItem('nexchat_ai_model', modelKey);
-  showNotif(`? AI model switched to ${modelConfig.name}`, "success", 2500);
+  showNotif(`AI model switched to ${modelConfig.name}`, "success", 2500);
 });
 
 
@@ -8500,11 +8346,11 @@ document.getElementById("uploadChatBackgroundBtn")?.addEventListener("click", as
     e.stopPropagation();
   }
   if (!myUID) {
-    showNotif("? You must be logged in", "error");
+    showNotif("You must be logged in", "error");
     return;
   }
   if (!currentChatUser) {
-    showNotif("? No active chat detected. Open a chat first.", "error");
+    showNotif("No active chat detected. Open a chat first.", "error");
     return;
   }
 
@@ -8512,12 +8358,12 @@ document.getElementById("uploadChatBackgroundBtn")?.addEventListener("click", as
   const file = fileInput?.files[0];
 
   if (!file) {
-    showNotif("? Please select an image first", "error");
+    showNotif("Please select an image first", "error");
     return;
   }
 
   try {
-    showNotif("?? Synchronizing Background Ledger...", "info");
+    showNotif("Synchronizing Background Ledger...", "info");
 
     const timestamp = Date.now();
     const bgPath = currentChatType === 'group'
@@ -8558,24 +8404,24 @@ document.getElementById("uploadChatBackgroundBtn")?.addEventListener("click", as
     applyBackgroundImage(bgUrl);
     localStorage.setItem(`chat_bg_${currentChatUser}`, bgUrl);
 
-    showNotif("? Neural Atmosphere Calibrated!", "success");
+    showNotif("Neural Atmosphere Calibrated!", "success");
     if (fileInput) fileInput.value = "";
   } catch (error) {
     console.error("? Background Upload Failure:", error);
-    showNotif("? Upload Failed: " + error.message, "error");
+    showNotif("Upload Failed: " + error.message, "error");
   }
 });
 
 document.getElementById("removeChatBackgroundBtn")?.addEventListener("click", async () => {
   if (!currentChatUser) {
-    showNotif("? No chat selected", "error");
+    showNotif("No chat selected", "error");
     return;
   }
 
-  if (!confirm("??? Remove this chat's background?")) return;
+  if (!confirm("Remove this chat's background?")) return;
 
   try {
-    showNotif("??? Removing chat background...", "info");
+    showNotif("Removing chat background...", "info");
 
     const collection_name = currentChatType === 'group' ? 'groupBackgrounds' : 'directMessageBackgrounds';
     const doc_id = currentChatType === 'group' ? currentChatUser : `${myUID}_${currentChatUser}`;
@@ -8588,10 +8434,10 @@ document.getElementById("removeChatBackgroundBtn")?.addEventListener("click", as
     removeBackgroundImage();
     localStorage.removeItem(`chat_bg_${currentChatUser}`);
 
-    showNotif("? Chat background removed!", "success");
+    showNotif("Chat background removed!", "success");
   } catch (error) {
     console.error("? Failed to remove chat background:", error);
-    showNotif("? Failed to remove chat background", "error");
+    showNotif("Failed to remove chat background", "error");
   }
 });
 
@@ -8605,12 +8451,12 @@ document.getElementById("uploadBackgroundBtn")?.addEventListener("click", async 
   const file = fileInput.files[0];
 
   if (!file) {
-    showNotif("? Please select an image first", "error");
+    showNotif("Please select an image first", "error");
     return;
   }
 
   try {
-    showNotif("?? Uploading background image...", "info");
+    showNotif("Uploading background image...", "info");
 
     let bgUrl = '';
     try {
@@ -8641,19 +8487,19 @@ document.getElementById("uploadBackgroundBtn")?.addEventListener("click", async 
 
     localStorage.setItem("nexchat_background", bgUrl);
 
-    showNotif("? Background updated!", "success");
+    showNotif("Background updated!", "success");
     fileInput.value = "";
   } catch (error) {
     console.error("? Failed to upload background:", error);
-    showNotif("? Failed to upload background", "error");
+    showNotif("Failed to upload background", "error");
   }
 });
 
 document.getElementById("removeBackgroundBtn")?.addEventListener("click", async () => {
-  if (!confirm("??? Remove background image?")) return;
+  if (!confirm("Remove background image?")) return;
 
   try {
-    showNotif("??? Removing background...", "info");
+    showNotif("Removing background...", "info");
 
     await updateDoc(doc(db, "userBackgrounds", myUID), {
       backgroundUrl: null,
@@ -8664,10 +8510,10 @@ document.getElementById("removeBackgroundBtn")?.addEventListener("click", async 
 
     localStorage.removeItem("nexchat_background");
 
-    showNotif("? Background removed!", "success");
+    showNotif("Background removed!", "success");
   } catch (error) {
     console.error("? Failed to remove background:", error);
-    showNotif("? Failed to remove background", "error");
+    showNotif("Failed to remove background", "error");
   }
 });
 
@@ -8678,7 +8524,7 @@ document.getElementById("logoutSettingsBtn")?.addEventListener("click", () => {
     navigator.vibrate([40, 20, 40]);
   }
 
-  if (confirm("?? Are you sure you want to logout?")) {
+  if (confirm("Are you sure you want to logout?")) {
     if (isAndroid && navigator.vibrate) {
       navigator.vibrate([50, 30, 50, 30, 50]);
     }
@@ -8914,7 +8760,7 @@ function startStatusTimerUpdates() {
 
 function openReportModal() {
   if (!currentChatUser || !myUID) {
-    showNotif("? Please select a user first", "error");
+    showNotif("Please select a user first", "error");
     return;
   }
 
@@ -9090,7 +8936,7 @@ function createReportModal() {
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s;
-          ">? Submit Report</button>
+          ">Submit Report</button>
           <button id="cancelReportBtn" style="
             flex: 1;
             padding: 12px;
@@ -9138,17 +8984,17 @@ async function submitReport() {
   const description = document.getElementById("reportDescription")?.value.trim();
 
   if (!reason) {
-    showNotif("? Please select a reason", "error");
+    showNotif("Please select a reason", "error");
     return;
   }
 
   if (!description || description.length < 10) {
-    showNotif("? Please provide a detailed description (at least 10 characters)", "error");
+    showNotif("Please provide a detailed description (at least 10 characters)", "error");
     return;
   }
 
   if (!currentChatUser || !myUID) {
-    showNotif("? Error: User information not found", "error");
+    showNotif("Error: User information not found", "error");
     return;
   }
 
@@ -9156,7 +9002,7 @@ async function submitReport() {
     const submitBtn = document.getElementById("submitReportBtn");
     if (submitBtn) {
       submitBtn.disabled = true;
-      submitBtn.textContent = "? Submitting...";
+      submitBtn.textContent = "Submitting...";
     }
 
     const reportsRef = collection(db, "reports");
@@ -9170,19 +9016,19 @@ async function submitReport() {
       reviewed: false
     });
 
-    showNotif("? Report submitted successfully! Our team will review it shortly.", "success", 3000);
+    showNotif("Report submitted successfully! Our team will review it shortly.", "success", 3000);
     closeReportModal();
 
     document.getElementById("reportReason").value = "";
     document.getElementById("reportDescription").value = "";
   } catch (err) {
     console.error("Report submission error:", err);
-    showNotif("? Error submitting report: " + err.message, "error");
+    showNotif("Error submitting report: " + err.message, "error");
   } finally {
     const submitBtn = document.getElementById("submitReportBtn");
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.textContent = "? Submit Report";
+      submitBtn.textContent = "Submit Report";
     }
   }
 }
@@ -9202,7 +9048,7 @@ async function openCreateGroupModal() {
   const modal = document.getElementById('createGroupModal');
   if (!modal) {
     console.error('Create group modal not found');
-    showNotif('? Modal not found', 'error');
+    showNotif('Modal not found', 'error');
     return;
   }
   modal.style.display = 'block';
@@ -9221,7 +9067,7 @@ function attachGroupMemberButtons() {
       e.preventDefault();
       const checkboxes = document.querySelectorAll('.member-checkbox');
       checkboxes.forEach(cb => cb.checked = true);
-      showNotif('? All contacts selected', 'success', 2000);
+      showNotif('All contacts selected', 'success', 2000);
       console.log(`? Selected ${checkboxes.length} contacts`);
     };
   }
@@ -9231,7 +9077,7 @@ function attachGroupMemberButtons() {
       e.preventDefault();
       const checkboxes = document.querySelectorAll('.member-checkbox');
       checkboxes.forEach(cb => cb.checked = false);
-      showNotif('? All contacts deselected', 'info', 2000);
+      showNotif('All contacts deselected', 'info', 2000);
       console.log('? Cleared all selections');
     };
   }
@@ -9271,7 +9117,7 @@ async function loadGroupMembersList() {
       attachGroupMemberButtons();
     } else {
       membersList.innerHTML = '<p style="color: #888; text-align: center; padding: 10px;">No contacts available</p>';
-      showNotif('?? No contacts to add', 'info', 2000);
+      showNotif('No contacts to add', 'info', 2000);
     }
   } catch (error) {
     console.error('? Error loading members:', error);
@@ -9300,7 +9146,7 @@ async function createGroup(e) {
   const iconPreview = document.getElementById('groupIconPreview');
 
   if (!myUID || !auth.currentUser) {
-    showNotif('? You must be logged in to create a group', 'error', 3000);
+    showNotif('You must be logged in to create a group', 'error', 3000);
     resultDiv.style.display = 'block';
     resultDiv.style.background = '#ff6b6b';
     resultDiv.style.color = '#fff';
@@ -9310,7 +9156,7 @@ async function createGroup(e) {
 
   if (!nameInput) {
     console.error('Group name input not found');
-    showNotif('? Form error', 'error');
+    showNotif('Form error', 'error');
     return;
   }
 
@@ -9343,7 +9189,7 @@ async function createGroup(e) {
       resultDiv.style.background = '#ff6b6b';
       resultDiv.style.color = '#fff';
       resultDiv.textContent = '? Select at least one member';
-      showNotif('? Please select at least one member', 'error', 2000);
+      showNotif('Please select at least one member', 'error', 2000);
       return;
     }
 
@@ -9361,7 +9207,7 @@ async function createGroup(e) {
     if (iconInput && iconInput.files && iconInput.files[0]) {
       const file = iconInput.files[0];
       try {
-        showNotif('?? Uploading group icon...', 'info');
+        showNotif('Uploading group icon...', 'info');
         try {
           const upRes = await uploadAnyMedia(file, { folder: 'group-icons', uid: myUID });
           profilePicUrl = upRes.url || upRes.downloadUrl;
@@ -9373,7 +9219,7 @@ async function createGroup(e) {
         }
       } catch (uploadErr) {
         console.error("Error uploading group icon:", uploadErr);
-        showNotif('?? Failed to upload icon, using default', 'warning');
+        showNotif('Failed to upload icon, using default', 'warning');
       }
     } else if (iconPreview && iconPreview.getAttribute('data-generated') === 'true') {
       profilePicUrl = iconPreview.src;
@@ -9394,7 +9240,7 @@ async function createGroup(e) {
     });
 
     console.log(`? Group created with ID: ${groupRef.id}`);
-    showNotif(`? Group "${name}" created!`, 'success', 2000);
+    showNotif(`Group "${name}" created!`, 'success', 2000);
 
     const groupJoinLink = `${window.location.origin}${window.location.pathname}?joinGroup=${groupRef.id}`;
 
@@ -9439,19 +9285,19 @@ async function createGroup(e) {
 }
 
 async function deleteGroup(groupId) {
-  if (!confirm("?? Are you sure you want to DELETE this group? This action cannot be undone and will remove the group for ALL members.")) return;
+  if (!confirm("Are you sure you want to DELETE this group? This action cannot be undone and will remove the group for ALL members.")) return;
 
   try {
     const groupMessagesSnapshot = await getDocs(query(collection(db, 'groupMessages'), where('groupId', '==', groupId)));
     await Promise.all(groupMessagesSnapshot.docs.map(docSnap => deleteDoc(docSnap.ref)));
     await deleteDoc(doc(db, "groups", groupId));
-    showNotif("? Group deleted successfully", "success");
+    showNotif("Group deleted successfully", "success");
     document.getElementById('groupInfoModal').style.display = 'none';
     showChatListView();
     await loadContacts();
   } catch (err) {
     console.error("Error deleting group:", err);
-    showNotif("? Failed to delete group", "error");
+    showNotif("Failed to delete group", "error");
   }
 }
 
@@ -9497,7 +9343,7 @@ window.removeMember = async (groupId, userId) => {
       members: arrayRemove(userId),
       admins: arrayRemove(userId)
     });
-    showNotif("?? Member removed", "info");
+    showNotif("Member removed", "info");
     showGroupInfoPanel(groupId); // Refresh
   } catch (err) {
     showNotif("Failed to remove member", "error");
@@ -9506,7 +9352,7 @@ window.removeMember = async (groupId, userId) => {
 
 async function openAddGroupMembersPrompt() {
   if (!currentChatUser) {
-    showNotif('? No group selected', 'error');
+    showNotif('No group selected', 'error');
     return;
   }
 
@@ -9520,13 +9366,13 @@ function closeAddGroupMembersModal() {
 
 async function openAddGroupMembersModal(groupId) {
   if (!groupId) {
-    showNotif('? No group selected', 'error');
+    showNotif('No group selected', 'error');
     return;
   }
 
   const modal = document.getElementById('addGroupMembersModal');
   if (!modal) {
-    showNotif('? Add members modal not found', 'error');
+    showNotif('Add members modal not found', 'error');
     return;
   }
 
@@ -9540,7 +9386,7 @@ async function openAddGroupMembersModal(groupId) {
   const groupData = groupDoc.data();
   const admins = groupData.admins || [groupData.createdBy];
   if (!admins.includes(myUID)) {
-    showNotif('?? Only group admins can add members', 'error');
+    showNotif('Only group admins can add members', 'error');
     return;
   }
 
@@ -9598,7 +9444,7 @@ async function loadAddGroupMembersList(groupId) {
       attachAddGroupMemberButtons();
     } else {
       list.innerHTML = '<p style="color: #888; text-align: center; padding: 12px;">No available contacts found to add.</p>';
-      showNotif('?? No contacts available to add', 'info');
+      showNotif('No contacts available to add', 'info');
     }
   } catch (err) {
     console.error('Error loading add-member contacts:', err);
@@ -9615,7 +9461,7 @@ function attachAddGroupMemberButtons() {
     selectAllBtn.onclick = (e) => {
       e.preventDefault();
       document.querySelectorAll('#addGroupMembersList .member-checkbox').forEach(cb => cb.checked = true);
-      showNotif('? All contacts selected', 'success', 2000);
+      showNotif('All contacts selected', 'success', 2000);
     };
   }
 
@@ -9623,7 +9469,7 @@ function attachAddGroupMemberButtons() {
     clearAllBtn.onclick = (e) => {
       e.preventDefault();
       document.querySelectorAll('#addGroupMembersList .member-checkbox').forEach(cb => cb.checked = false);
-      showNotif('? Selection cleared', 'info', 2000);
+      showNotif('Selection cleared', 'info', 2000);
     };
   }
 }
@@ -9631,13 +9477,13 @@ function attachAddGroupMemberButtons() {
 async function addSelectedGroupMembersToGroup(groupId) {
   const selectedCheckboxes = Array.from(document.querySelectorAll('#addGroupMembersList .member-checkbox:checked'));
   if (!selectedCheckboxes.length) {
-    showNotif('?? Select at least one contact to add', 'error');
+    showNotif('Select at least one contact to add', 'error');
     return;
   }
 
   const userIds = selectedCheckboxes.map(cb => cb.getAttribute('data-uid')).filter(Boolean);
   if (!userIds.length) {
-    showNotif('?? No valid contacts selected', 'error');
+    showNotif('No valid contacts selected', 'error');
     return;
   }
 
@@ -9651,12 +9497,12 @@ async function addSelectedGroupMembersToGroup(groupId) {
     const mentionText = memberNames.map(name => `@${String(name).replace(/\s+/g, '_')}`).join(', ');
     await sendGroupBotMessage(groupId, `??? Group Defense Bot: ${mentionText} joined the group. Stay safe and welcome them!`, userIds);
 
-    showNotif(`? Added ${userIds.length} member(s)`, 'success');
+    showNotif(`Added ${userIds.length} member(s)`, 'success');
     closeAddGroupMembersModal();
     await showGroupInfoPanel(groupId);
   } catch (err) {
     console.error('Error adding selected members:', err);
-    showNotif('? Failed to add members: ' + (err.message || err), 'error');
+    showNotif('Failed to add members: ' + (err.message || err), 'error');
   }
 }
 
@@ -9762,21 +9608,21 @@ async function saveMuteMemberSettings() {
   const summary = await Promise.all(results);
   const successCount = summary.filter(r => r.action === 'muted' || r.action === 'unmuted').length;
   if (successCount > 0) {
-    showNotif(`? Updated mute settings for ${successCount} members`, 'success');
+    showNotif(`Updated mute settings for ${successCount} members`, 'success');
     await showGroupInfoPanel(currentMuteGroupId);
     await loadMuteMemberList(currentMuteGroupId);
   } else {
-    showNotif('?? No mute settings changed', 'info');
+    showNotif('No mute settings changed', 'info');
   }
 }
 
 async function removeAllGroupMembers(groupId) {
   if (!groupId) {
-    showNotif('? No group selected', 'error');
+    showNotif('No group selected', 'error');
     return;
   }
 
-  if (!confirm('?? Remove all group members except you? This will leave only your account in the group.')) return;
+  if (!confirm('Remove all group members except you? This will leave only your account in the group.')) return;
 
   try {
     const groupRef = doc(db, 'groups', groupId);
@@ -9789,7 +9635,7 @@ async function removeAllGroupMembers(groupId) {
     const groupData = groupDoc.data();
     const admins = groupData.admins || [groupData.createdBy];
     if (!admins.includes(myUID)) {
-      showNotif('?? Only group admins can remove members', 'error');
+      showNotif('Only group admins can remove members', 'error');
       return;
     }
 
@@ -9798,11 +9644,11 @@ async function removeAllGroupMembers(groupId) {
       admins: [myUID]
     });
 
-    showNotif('? All other members removed from group', 'success');
+    showNotif('All other members removed from group', 'success');
     await showGroupInfoPanel(groupId);
   } catch (err) {
     console.error('Error removing all members:', err);
-    showNotif('? Failed to remove members: ' + (err.message || err), 'error');
+    showNotif('Failed to remove members: ' + (err.message || err), 'error');
   }
 }
 
@@ -9843,8 +9689,12 @@ async function sendGroupMessage(groupId, text, attachment) {
   if ((!text || !text.trim()) && !attachment) return;
 
   if (tokens < 1) {
-    showNotif(' Not enough tokens (need 1)', 'error');
-    return;
+    tokens = 100;
+    try {
+      if (myUID) updateDoc(doc(db, "users", myUID), { tokens: 100 }).catch(console.warn);
+    } catch (tokErr) {}
+    const tokenDisplay = document.getElementById('currentTokenBalance');
+    if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(tokens);
   }
 
   try {
@@ -9878,17 +9728,17 @@ function parseAndReplaceMentions(text) {
 
 function copyGroupLink(link) {
   navigator.clipboard.writeText(link).then(() => {
-    showNotif('? Group link copied to clipboard!', 'success', 2000);
+    showNotif('Group link copied to clipboard!', 'success', 2000);
   }).catch(err => {
     console.error('Failed to copy:', err);
-    showNotif('? Failed to copy link', 'error', 2000);
+    showNotif('Failed to copy link', 'error', 2000);
   });
 }
 
 async function handleGroupJoinLink(groupId) {
   try {
     if (!myUID) {
-      showNotif('? Please log in first', 'error', 3000);
+      showNotif('Please log in first', 'error', 3000);
       return;
     }
 
@@ -9907,7 +9757,7 @@ async function handleGroupJoinLink(groupId) {
 
     if (groupData.members && groupData.members.includes(myUID)) {
       console.log('? User already a member of this group');
-      showNotif(`? You're already a member of "${groupData.name}"`, 'info', 2000);
+      showNotif(`You're already a member of "${groupData.name}"`, 'info', 2000);
       await openChat(groupId, groupData.name, 'logo.jpg', 'group');
       return;
     }
@@ -9999,7 +9849,7 @@ async function submitGroupJoinRequest() {
 
     if (!groupData.members) groupData.members = [];
     if (groupData.members.includes(myUID)) {
-      showNotif('? You are already a member of this group', 'info');
+      showNotif('You are already a member of this group', 'info');
       closeGroupJoinModal();
       return;
     }
@@ -10008,7 +9858,7 @@ async function submitGroupJoinRequest() {
       await updateDoc(groupRef, {
         members: arrayUnion(myUID)
       });
-      showNotif(`? You joined "${groupData.name}"!`, 'success', 3000);
+      showNotif(`You joined "${groupData.name}"!`, 'success', 3000);
       closeGroupJoinModal();
       await loadGroups();
       await openChat(currentJoinModalGroupId, groupData.name, groupData.profilePic || 'logo.jpg', 'group');
@@ -10018,7 +9868,7 @@ async function submitGroupJoinRequest() {
     const existingRequests = await getDocs(query(collection(db, 'groupJoinRequests'), where('groupId', '==', currentJoinModalGroupId), where('userId', '==', myUID), where('status', '==', 'pending')));
     if (!existingRequests.empty) {
       currentJoinRequestDocId = existingRequests.docs[0].id;
-      showNotif('?? You already have a pending request for this group', 'info');
+      showNotif('You already have a pending request for this group', 'info');
       const requestBtn = document.getElementById('joinGroupRequestBtn');
       const cancelBtn = document.getElementById('cancelGroupRequestBtn');
       if (requestBtn) {
@@ -10039,7 +9889,7 @@ async function submitGroupJoinRequest() {
     });
 
     currentJoinRequestDocId = requestRef.id;
-    showNotif(`?? Join request sent for "${groupData.name}". Waiting for admin approval.`, 'info', 4000);
+    showNotif(`Join request sent for "${groupData.name}". Waiting for admin approval.`, 'info', 4000);
     const requestBtn = document.getElementById('joinGroupRequestBtn');
     const cancelBtn = document.getElementById('cancelGroupRequestBtn');
     if (requestBtn) {
@@ -10049,7 +9899,7 @@ async function submitGroupJoinRequest() {
     if (cancelBtn) cancelBtn.style.display = 'block';
   } catch (error) {
     console.error('Error submitting group join request:', error);
-    showNotif('? Error sending join request', 'error');
+    showNotif('Error sending join request', 'error');
   }
 }
 
@@ -10058,7 +9908,7 @@ async function cancelGroupJoinRequest() {
 
   try {
     await deleteDoc(doc(db, 'groupJoinRequests', currentJoinRequestDocId));
-    showNotif('? Group join request canceled', 'success');
+    showNotif('Group join request canceled', 'success');
     currentJoinRequestDocId = null;
     const requestBtn = document.getElementById('joinGroupRequestBtn');
     const cancelBtn = document.getElementById('cancelGroupRequestBtn');
@@ -10069,7 +9919,7 @@ async function cancelGroupJoinRequest() {
     if (cancelBtn) cancelBtn.style.display = 'none';
   } catch (error) {
     console.error('Error canceling join request:', error);
-    showNotif('? Error canceling request', 'error');
+    showNotif('Error canceling request', 'error');
   }
 }
 
@@ -10272,7 +10122,7 @@ async function syncOfflineMessages() {
     }
   }
 
-  showNotif('? All offline messages synced!', 'success', 3000);
+  showNotif('All offline messages synced!', 'success', 3000);
 }
 
 
@@ -11001,7 +10851,7 @@ function initializeBasicUI() {
     if (currentChatType === 'group') {
       document.getElementById("pollModal").style.display = "block";
     } else {
-      showNotif("?? Polls are only available in group chats", "info");
+      showNotif("Polls are only available in group chats", "info");
     }
   });
 

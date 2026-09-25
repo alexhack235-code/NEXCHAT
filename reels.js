@@ -17,6 +17,78 @@ import { TRENDING_SOUNDS } from './src/js/reels-sounds.js';
 let currentUser = null;
 let myUID = null;
 let myUsername = 'NEX_User';
+
+// ══════════════════════════════════════════════════
+// USER IDENTITY & LOCAL COMMENT PERSISTENCE HELPERS
+// ══════════════════════════════════════════════════
+function getEffectiveUser() {
+  if (myUID && myUsername) {
+    return {
+      uid: myUID,
+      username: myUsername,
+      pic: myProfilePic || '/favicons/favicon.ico'
+    };
+  }
+  try {
+    const raw = localStorage.getItem('nexchat_user') || localStorage.getItem('user');
+    if (raw) {
+      const u = JSON.parse(raw);
+      const uid = u.uid || u.id || ('user_' + Math.random().toString(36).substring(2, 8));
+      const username = u.displayName || u.username || u.name || ('User_' + uid.substring(0, 5));
+      const pic = u.photoURL || u.profilePic || '/favicons/favicon.ico';
+      myUID = uid;
+      myUsername = username;
+      myProfilePic = pic;
+      return { uid, username, pic };
+    }
+  } catch (e) {}
+
+  let guestId = localStorage.getItem('nex_guest_uid');
+  let guestName = localStorage.getItem('nex_guest_name');
+  if (!guestId) {
+    guestId = 'guest_' + Math.random().toString(36).substring(2, 8);
+    localStorage.setItem('nex_guest_uid', guestId);
+  }
+  if (!guestName) {
+    guestName = 'CyberUser_' + Math.floor(100 + Math.random() * 900);
+    localStorage.setItem('nex_guest_name', guestName);
+  }
+  myUID = guestId;
+  myUsername = guestName;
+  myProfilePic = '/favicons/favicon.ico';
+  return { uid: guestId, username: guestName, pic: myProfilePic };
+}
+
+function getLocalReelComments(reelId) {
+  try {
+    const raw = localStorage.getItem('nex_reel_comments_' + reelId);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveLocalReelComment(reelId, comment) {
+  try {
+    const list = getLocalReelComments(reelId);
+    list.push(comment);
+    localStorage.setItem('nex_reel_comments_' + reelId, JSON.stringify(list));
+    return list;
+  } catch (e) {
+    return [];
+  }
+}
+
+async function safeIncrementReelCommentCount(reelId) {
+  try {
+    await setDoc(doc(db, 'reels', reelId), {
+      commentsCount: increment(1)
+    }, { merge: true });
+  } catch (err) {
+    console.warn('safeIncrementReelCommentCount notice:', err);
+  }
+}
+
 let myProfilePic = 'favicon.png';
 let generalProfilePic = 'favicon.png';
 let customReelsAvatar = '';
@@ -1001,35 +1073,39 @@ function renderReels(reelsList) {
 async function submitInlineComment(reelId, inputEl, cardEl) {
   const text = inputEl.value.trim();
   if (!text) return;
-
-  if (!myUID) {
-    showToast('Log in to comment');
-    return;
-  }
-
   inputEl.value = '';
+
+  const user = getEffectiveUser();
+  const localComment = {
+    id: 'local_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    authorId: user.uid,
+    authorName: user.username,
+    authorPic: user.pic,
+    text: text,
+    createdAt: Date.now()
+  };
+  saveLocalReelComment(reelId, localComment);
+
+  // Optimistic UI update on the reel card
+  const commentCountEl = cardEl?.querySelector('.reel-comment-count');
+  if (commentCountEl) {
+    const current = parseInt(commentCountEl.textContent.replace(/[^0-9]/g, '') || '0', 10);
+    commentCountEl.textContent = formatNumber(current + 1);
+  }
+  showToast('Comment posted!');
+
+  // Non-blocking sync to Firestore
   try {
     await addDoc(collection(db, 'reels', reelId, 'comments'), {
-      authorId: myUID,
-      authorName: myUsername,
-      authorPic: myProfilePic,
+      authorId: user.uid,
+      authorName: user.username,
+      authorPic: user.pic,
       text: text,
       createdAt: serverTimestamp(),
     });
-
-    await updateDoc(doc(db, 'reels', reelId), {
-      commentsCount: increment(1),
-    });
-
-    const commentCountEl = cardEl.querySelector('.reel-comment-count');
-    if (commentCountEl) {
-      const current = parseInt(commentCountEl.textContent.replace(/[^0-9]/g, '') || '0', 10);
-      commentCountEl.textContent = formatNumber(current + 1);
-    }
-    showToast('Comment posted!');
+    await safeIncrementReelCommentCount(reelId);
   } catch (err) {
-    console.error('Error posting comment:', err);
-    showToast('Failed to post comment');
+    console.warn('Firestore comment synced locally:', err);
   }
 }
 
@@ -1400,26 +1476,28 @@ function openChronexAiDrawer(reel) {
       btn.className = 'smart-reply-chip';
       btn.textContent = rep;
       btn.addEventListener('click', async () => {
-        if (!myUID) {
-          showToast('Log in to comment');
-          return;
-        }
+        const user = getEffectiveUser();
+        saveLocalReelComment(reel.id, {
+          id: 'ai_reply_' + Date.now(),
+          authorId: user.uid,
+          authorName: user.username,
+          authorPic: user.pic,
+          text: rep,
+          createdAt: Date.now()
+        });
+        showToast('Smart comment posted!');
+        closeChronexAiDrawer();
         try {
           await addDoc(collection(db, 'reels', reel.id, 'comments'), {
-            authorId: myUID,
-            authorName: myUsername,
-            authorPic: myProfilePic,
+            authorId: user.uid,
+            authorName: user.username,
+            authorPic: user.pic,
             text: rep,
             createdAt: serverTimestamp(),
           });
-          await updateDoc(doc(db, 'reels', reel.id), {
-            commentsCount: increment(1),
-          });
-          showToast('Smart comment posted!');
-          closeChronexAiDrawer();
+          await safeIncrementReelCommentCount(reel.id);
         } catch (err) {
-          console.warn('AI reply post err:', err);
-          showToast('Failed to post reply');
+          console.warn('AI reply synced locally:', err);
         }
       });
       smartReplyChips.appendChild(btn);
@@ -1670,8 +1748,79 @@ if (shareDownloadBtn) {
 }
 
 // ══════════════════════════════════════════════════
-// COMMENTS DRAWER
+// COMMENTS DRAWER (Merged Seed + Local + Firestore)
 // ══════════════════════════════════════════════════
+function renderCommentsList(seedComms, localComms, firestoreDocs) {
+  const allComments = [];
+  const seenKeys = new Set();
+
+  // 1. Seed comments
+  seedComms.forEach((c, idx) => {
+    const key = (c.authorName || '') + '|' + (c.text || '');
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      allComments.push({
+        id: 'seed_' + idx,
+        authorName: c.authorName || 'user',
+        authorPic: c.authorPic || 'logo.jpg',
+        text: c.text || ''
+      });
+    }
+  });
+
+  // 2. Firestore live comments
+  firestoreDocs.forEach((docSnap) => {
+    const c = docSnap.data();
+    const key = (c.authorName || '') + '|' + (c.text || '');
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      allComments.push({
+        id: docSnap.id,
+        authorName: c.authorName || 'user',
+        authorPic: c.authorPic || '/favicons/favicon.ico',
+        text: c.text || ''
+      });
+    }
+  });
+
+  // 3. Local saved comments
+  localComms.forEach((c) => {
+    const key = (c.authorName || '') + '|' + (c.text || '');
+    if (!seenKeys.has(key)) {
+      seenKeys.add(key);
+      allComments.push({
+        id: c.id || ('local_' + Math.random()),
+        authorName: c.authorName || 'user',
+        authorPic: c.authorPic || '/favicons/favicon.ico',
+        text: c.text || ''
+      });
+    }
+  });
+
+  if (allComments.length === 0) {
+    commentsCountHeader.textContent = '0';
+    commentsList.innerHTML = '<div class="comment-empty"><i class="fa-regular fa-comment-dots" style="font-size:28px;margin-bottom:8px;display:block;"></i>No comments yet. Share your thoughts!</div>';
+    return;
+  }
+
+  commentsList.innerHTML = '';
+  allComments.forEach((c) => {
+    const item = document.createElement('div');
+    item.className = 'comment-item';
+    item.innerHTML = `
+      <img src="${c.authorPic || 'logo.jpg'}" class="comment-avatar" alt="${escapeHtml(c.authorName)}">
+      <div class="comment-body">
+        <span class="comment-author">@${escapeHtml(c.authorName)}</span>
+        <span class="comment-text">${escapeHtml(c.text)}</span>
+      </div>
+    `;
+    commentsList.appendChild(item);
+  });
+
+  commentsCountHeader.textContent = String(allComments.length);
+  commentsList.scrollTop = commentsList.scrollHeight;
+}
+
 function openCommentsDrawer(reelId) {
   activeReelId = reelId;
   commentsModal.style.display = 'flex';
@@ -1681,58 +1830,28 @@ function openCommentsDrawer(reelId) {
     currentCommentUnsubscribe = null;
   }
 
-  const commentsQuery = query(
-    collection(db, 'reels', reelId, 'comments'),
-    orderBy('createdAt', 'asc')
-  );
+  const activeReelObj = allLoadedReels.find(r => r.id === reelId);
+  const seedComms = (activeReelObj && activeReelObj.seedComments) ? activeReelObj.seedComments : [];
+  const initialLocal = getLocalReelComments(reelId);
 
-  currentCommentUnsubscribe = onSnapshot(commentsQuery, (snapshot) => {
-    const activeReelObj = allLoadedReels.find(r => r.id === reelId);
-    const seedComms = (activeReelObj && activeReelObj.seedComments) ? activeReelObj.seedComments : [];
+  // Render immediately with seed + local
+  renderCommentsList(seedComms, initialLocal, []);
 
-    if (snapshot.empty && seedComms.length === 0) {
-      commentsCountHeader.textContent = '0';
-      commentsList.innerHTML = '<div class="comment-empty"><i class="fa-regular fa-comment-dots" style="font-size:28px;margin-bottom:8px;display:block;"></i>No comments yet. Share your thoughts!</div>';
-      return;
-    }
+  try {
+    const commentsQuery = query(
+      collection(db, 'reels', reelId, 'comments'),
+      orderBy('createdAt', 'asc')
+    );
 
-    commentsList.innerHTML = '';
-    let totalCount = 0;
-
-    if (!snapshot.empty) {
-      totalCount = snapshot.size;
-      snapshot.docs.forEach((docSnap) => {
-        const c = docSnap.data();
-        const item = document.createElement('div');
-        item.className = 'comment-item';
-        item.innerHTML = `
-          <img src="${c.authorPic || 'logo.jpg'}" class="comment-avatar" alt="${c.authorName}">
-          <div class="comment-body">
-            <span class="comment-author">@${escapeHtml(c.authorName || 'user')}</span>
-            <span class="comment-text">${escapeHtml(c.text || '')}</span>
-          </div>
-        `;
-        commentsList.appendChild(item);
-      });
-    } else if (seedComms.length > 0) {
-      totalCount = seedComms.length;
-      seedComms.forEach((c) => {
-        const item = document.createElement('div');
-        item.className = 'comment-item';
-        item.innerHTML = `
-          <img src="${c.authorPic || 'logo.jpg'}" class="comment-avatar" alt="${c.authorName}">
-          <div class="comment-body">
-            <span class="comment-author">@${escapeHtml(c.authorName || 'user')}</span>
-            <span class="comment-text">${escapeHtml(c.text || '')}</span>
-          </div>
-        `;
-        commentsList.appendChild(item);
-      });
-    }
-
-    commentsCountHeader.textContent = totalCount;
-    commentsList.scrollTop = commentsList.scrollHeight;
-  });
+    currentCommentUnsubscribe = onSnapshot(commentsQuery, (snapshot) => {
+      const freshLocal = getLocalReelComments(reelId);
+      renderCommentsList(seedComms, freshLocal, snapshot.docs);
+    }, (err) => {
+      console.warn('Realtime comments subscription notice (using local/seed):', err);
+    });
+  } catch (err) {
+    console.warn('Could not subscribe to comments Firestore:', err);
+  }
 }
 
 function closeCommentsDrawer() {
@@ -1760,27 +1879,62 @@ commentForm.addEventListener('submit', async (e) => {
   const text = rawText.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{200D}\u{FE0E}\u{FE0F}]/gu, '');
   if (!text || !activeReelId) return;
 
-  if (!myUID) {
-    showToast('Log in to comment');
-    return;
+  const user = getEffectiveUser();
+  commentTextInput.value = '';
+
+  const localComment = {
+    id: 'local_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    authorId: user.uid,
+    authorName: user.username,
+    authorPic: user.pic,
+    text: text,
+    createdAt: Date.now()
+  };
+  saveLocalReelComment(activeReelId, localComment);
+
+  // Optimistically append comment item to list
+  const emptyEl = commentsList.querySelector('.comment-empty, .comments-empty');
+  if (emptyEl) emptyEl.remove();
+
+  const item = document.createElement('div');
+  item.className = 'comment-item';
+  item.innerHTML = `
+    <img src="${user.pic || '/favicons/favicon.ico'}" class="comment-avatar" alt="${escapeHtml(user.username)}">
+    <div class="comment-body">
+      <span class="comment-author">@${escapeHtml(user.username)}</span>
+      <span class="comment-text">${escapeHtml(text)}</span>
+    </div>
+  `;
+  commentsList.appendChild(item);
+  commentsList.scrollTop = commentsList.scrollHeight;
+
+  const curCount = parseInt(commentsCountHeader.textContent.replace(/[^0-9]/g, '') || '0', 10);
+  commentsCountHeader.textContent = String(curCount + 1);
+
+  // Update card comment counter if present in DOM
+  const activeCard = document.querySelector(`.reel-card[data-reel-id="${activeReelId}"]`);
+  if (activeCard) {
+    const countEl = activeCard.querySelector('.reel-comment-count');
+    if (countEl) {
+      const c = parseInt(countEl.textContent.replace(/[^0-9]/g, '') || '0', 10);
+      countEl.textContent = formatNumber(c + 1);
+    }
   }
 
-  commentTextInput.value = '';
+  showToast('Comment posted!');
+
+  // Sync to Firestore in background
   try {
     await addDoc(collection(db, 'reels', activeReelId, 'comments'), {
-      authorId: myUID,
-      authorName: myUsername,
-      authorPic: myProfilePic || '/favicons/favicon.ico',
+      authorId: user.uid,
+      authorName: user.username,
+      authorPic: user.pic,
       text: text,
       createdAt: serverTimestamp(),
     });
-
-    await updateDoc(doc(db, 'reels', activeReelId), {
-      commentsCount: increment(1),
-    });
+    await safeIncrementReelCommentCount(activeReelId);
   } catch (err) {
-    console.error('Error posting comment:', err);
-    showToast('Failed to post comment');
+    console.warn('Firestore comment synced locally:', err);
   }
 });
 
