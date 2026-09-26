@@ -165,7 +165,10 @@
             <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
           </div>
           <button type="button" id="myStatusAddBadge" class="status-plus-badge" title="Add status update">+</button>
-          <span class="status-item-label">My status</span>
+          <span class="status-item-copy">
+            <span class="status-item-label">My status</span>
+            <span class="status-item-hint">Tap to add status update</span>
+          </span>
         </div>
 
         <!-- 2. Other Statuses rendered horizontally here -->
@@ -294,7 +297,7 @@
     </div>
 
     <!-- MAIN CHAT LIST -->
-    <main class="chat-main">
+    <main class="chat-main" data-layout="list">
       <!-- CHAT LIST VIEW -->
       <div id="chatListView" class="chat-list-view">
         <!-- Search Bar -->
@@ -338,6 +341,12 @@
           </ul>
         </div>
       </div>
+
+      <section id="chatWelcomePanel" class="chat-welcome-panel" aria-label="Chat workspace">
+        <span class="chat-welcome-icon" aria-hidden="true"><i class="fa-regular fa-comments"></i></span>
+        <h2>Select a conversation</h2>
+        <p>Your messages will appear here.</p>
+      </section>
 
       <!-- CHAT DETAIL VIEW -->
       <div id="chatDetailView" class="chat-detail-view" style="display: none;">

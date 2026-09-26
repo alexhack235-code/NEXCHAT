@@ -6,6 +6,7 @@ import {
   uploadDocumentToCloudinary,
   getActiveCloudinaryVaults
 } from './cloudinary.js';
+import { getFirebaseAuthorizationHeaders } from './firebase-auth-header.js';
 
 export {
   uploadMediaToCloudinary,
@@ -38,6 +39,7 @@ export async function uploadMediaBlob(file, options = {}) {
   const cleanName = (file.name || 'file').replace(/[^a-zA-Z0-9._-]/g, '_');
   const filename = `${folder}/${uid}/${Date.now()}_${cleanName}`;
   const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
+  const authHeaders = await getFirebaseAuthorizationHeaders();
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -47,6 +49,7 @@ export async function uploadMediaBlob(file, options = {}) {
     xhr.setRequestHeader('x-filename', filename);
     xhr.setRequestHeader('x-upload-type', 'media');
     xhr.setRequestHeader('x-access-mode', access);
+    xhr.setRequestHeader('Authorization', authHeaders.Authorization);
 
     if (file.type) {
       xhr.setRequestHeader('Content-Type', file.type);

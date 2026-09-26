@@ -2,45 +2,38 @@ import { get } from '@vercel/blob';
 import { enforceRateLimit, applySecurityHeaders, validatePathname } from './_security.js';
 
 // Primary Storage Tokens
+const readBlobToken = (name, fallback = '') => process.env[name] || fallback;
 const TOKENS = {
-  default: process.env.BLOB_READ_WRITE_TOKEN || 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO',
-  media: process.env.BLOB_READ_WRITE_TOKEN_MEDIA || 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO',
-  profile: process.env.BLOB_READ_WRITE_TOKEN_PROFILE || 'vercel_blob_rw_1Z4MEej7ip5Jg9Wz_ggfb5Dc875zyDAesscTkLSCJHTAd3x',
-  background: process.env.BLOB_READ_WRITE_TOKEN_BACKGROUNDS || 'vercel_blob_rw_XAJz4dhkF8UAvds3_Vz2gcF2BOX9o6vYTitpsddNVptAM9N',
+  default: readBlobToken('BLOB_READ_WRITE_TOKEN', 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO'),
+  media: readBlobToken('BLOB_READ_WRITE_TOKEN_MEDIA', 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO'),
+  profile: readBlobToken('BLOB_READ_WRITE_TOKEN_PROFILE', 'vercel_blob_rw_1Z4MEej7ip5Jg9Wz_ggfb5Dc875zyDAesscTkLSCJHTAd3x'),
+  background: readBlobToken('BLOB_READ_WRITE_TOKEN_BACKGROUNDS', 'vercel_blob_rw_XAJz4dhkF8UAvds3_Vz2gcF2BOX9o6vYTitpsddNVptAM9N'),
 };
-
-// 5 General Backup Storage Tokens
 const BACKUP_TOKENS = [
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_1 || 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46',
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_2 || 'vercel_blob_rw_R29NmygDYq5JNlCP_HeT8UNIzVbzaXvlpaWRnlLW5JK1uMW',
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_3 || 'vercel_blob_rw_Ml2xzmRr7zfPbbNR_5ledwKe6WoX6FU9Uo3czUBOMTzXph7',
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_4 || 'vercel_blob_rw_XqXC45KxrpuccoHS_BfdjMCGndscRb8141ZuH35srLp2ruX',
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_5 || 'vercel_blob_rw_SboFYX9ACstEsmLG_dAAe8Nmg8MYaEGDJh2TuyZxM1Loy8l',
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_1', 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46'),
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_2', 'vercel_blob_rw_R29NmygDYq5JNlCP_HeT8UNIzVbzaXvlpaWRnlLW5JK1uMW'),
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_3', 'vercel_blob_rw_Ml2xzmRr7zfPbbNR_5ledwKe6WoX6FU9Uo3czUBOMTzXph7'),
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_4', 'vercel_blob_rw_XqXC45KxrpuccoHS_BfdjMCGndscRb8141ZuH35srLp2ruX'),
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_5', 'vercel_blob_rw_SboFYX9ACstEsmLG_dAAe8Nmg8MYaEGDJh2TuyZxM1Loy8l'),
 ];
-
-// Dedicated Private Storage Tokens
 const PRIVATE_TOKENS = {
-  1: process.env.BLOB_READ_WRITE_TOKEN_PRIVATE_1 || 'vercel_blob_rw_tqRnUFMUwpg0yuA9_uikx2vQ93pZEASEmqbTT4vCg9m8jjE',
-  2: process.env.BLOB_READ_WRITE_TOKEN_PRIVATE_2 || 'vercel_blob_rw_sjHClcYCD5zg7FSx_jyWNaUo5tgKubvWNtYrgmWdwNJzAly',
+  1: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_1', 'vercel_blob_rw_tqRnUFMUwpg0yuA9_uikx2vQ93pZEASEmqbTT4vCg9m8jjE'),
+  2: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_2', 'vercel_blob_rw_sjHClcYCD5zg7FSx_jyWNaUo5tgKubvWNtYrgmWdwNJzAly'),
 };
-
-// NEX-REELS Multi-Vault Storage Tokens (Vault 0 through 5)
 const REELS_VAULT_TOKENS = {
-  0: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_0 || 'vercel_blob_rw_BhENzDN0lLwjdIAc_FeCMjgQ6ASj6UV0CRO2WVISkvZreOS',
-  1: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_1 || 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46',
-  2: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_2 || 'vercel_blob_rw_41fMTewMnneecj66_m9wzI7Hq1VRyGgavZImXnXPaW0qj4Z',
-  3: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_3 || 'vercel_blob_rw_ltFBt2fWKQe9Wzdh_CPdwwVqNJ2GhFNjGRPZX27fLOIcd1e',
-  4: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_4 || 'vercel_blob_rw_6Yh5YOITkL5nf0IK_xkUI0EI90M0cMPw2VB51U6mFYfIxcr',
-  5: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_5 || 'vercel_blob_rw_y1HadAzcNfzpiVWe_lYPjiveKnhMBRrW87gn88HbK3qTQPj',
+  0: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_0', 'vercel_blob_rw_BhENzDN0lLwjdIAc_FeCMjgQ6ASj6UV0CRO2WVISkvZreOS'),
+  1: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_1', 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46'),
+  2: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_2', 'vercel_blob_rw_41fMTewMnneecj66_m9wzI7Hq1VRyGgavZImXnXPaW0qj4Z'),
+  3: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_3', 'vercel_blob_rw_ltFBt2fWKQe9Wzdh_CPdwwVqNJ2GhFNjGRPZX27fLOIcd1e'),
+  4: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_4', 'vercel_blob_rw_6Yh5YOITkL5nf0IK_xkUI0EI90M0cMPw2VB51U6mFYfIxcr'),
+  5: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_5', 'vercel_blob_rw_y1HadAzcNfzpiVWe_lYPjiveKnhMBRrW87gn88HbK3qTQPj'),
 };
-
-// NEX-STATUS Multi-Vault Storage Tokens (Vault 1 through 5)
 const STATUS_VAULT_TOKENS = {
-  1: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_1 || 'vercel_blob_rw_jCNrgY96DrgBtoUm_INH2vNcllZzjIqVnvsdaRoz5tqs4eW',
-  2: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_2 || 'vercel_blob_rw_7IvHQcdI5lb3oN8t_KaHnvD4QZ7X5HN6pnyD2ZbaBHhc3Ge',
-  3: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_3 || 'vercel_blob_rw_J0e8RZ3glwBgsqKQ_nDWdloFydWRjlWLMWTu4K0TkZrchVc',
-  4: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_4 || 'vercel_blob_rw_aiBRkSDHg0K7Hq8g_CIwlPJETUqINLvIOUluiH9oKpAAJLp',
-  5: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_5 || 'vercel_blob_rw_b9u0Ll5xZBhFcaAD_CCX5iYxp0wLqESQ3JxfLDCSVpV5bwT',
+  1: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_1', 'vercel_blob_rw_jCNrgY96DrgBtoUm_INH2vNcllZzjIqVnvsdaRoz5tqs4eW'),
+  2: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_2', 'vercel_blob_rw_7IvHQcdI5lb3oN8t_KaHnvD4QZ7X5HN6pnyD2ZbaBHhc3Ge'),
+  3: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_3', 'vercel_blob_rw_J0e8RZ3glwBgsqKQ_nDWdloFydWRjlWLMWTu4K0TkZrchVc'),
+  4: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_4', 'vercel_blob_rw_aiBRkSDHg0K7Hq8g_CIwlPJETUqINLvIOUluiH9oKpAAJLp'),
+  5: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_5', 'vercel_blob_rw_b9u0Ll5xZBhFcaAD_CCX5iYxp0wLqESQ3JxfLDCSVpV5bwT'),
 };
 
 // Security constants

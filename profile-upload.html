@@ -15,7 +15,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title> NEXCHAT - Setup Profile </title>
+  <title>NEXCHAT — Professional Profile Setup</title>
   <link rel="stylesheet" href="Profile-upload.css?v=1.0">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
@@ -24,147 +24,177 @@
 </head>
 
 <body>
+  <div class="profile-bg">
+    <div class="orb orb-one"></div>
+    <div class="orb orb-two"></div>
+    <div class="orb orb-three"></div>
+  </div>
 
-  <div class="profile-bg"></div>
-
-  <main class="profile-container" role="main" aria-labelledby="setupTitle">
-    <img src="logo.jpg" class="logo" alt="NEXCHAT Logo">
-    <h2 id="setupTitle">Create Your Professional Profile</h2>
-
-    <!-- Profile Completion Progress -->
-    <div class="progress-container">
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width: 33%;"></div>
-      </div>
-      <div class="progress-steps">
-        <span class="step active" data-step="1">Photo</span>
-        <span class="step" data-step="2">Details</span>
-        <span class="step" data-step="3">Complete</span>
-      </div>
-    </div>
-
-    <!-- Step 1: Profile Picture -->
-    <div id="step1" class="profile-step active">
-      <h3>Choose Your Profile Picture</h3>
-      <div class="form-group">
-        <div class="upload-options">
-          <button type="button" class="upload-btn camera-btn" id="cameraBtn" title="Take a professional photo">
-            <span class="btn-icon"><i class="fa-solid fa-camera"></i></span>
-            <span class="btn-text">Camera</span>
-            <span class="btn-subtitle">High quality</span>
-          </button>
-          <button type="button" class="upload-btn gallery-btn" id="galleryBtn" title="Choose from gallery">
-            <span class="btn-icon"><i class="fa-solid fa-image"></i></span>
-            <span class="btn-text">Gallery</span>
-            <span class="btn-subtitle">Select image</span>
-          </button>
-          <button type="button" class="upload-btn ai-btn" id="aiAvatarBtn" title="Choose NEX Avatar"
-            style="background: rgba(0, 204, 255, 0.1); border: 1px solid #00ccff; color: #00ccff;">
-            <span class="btn-icon"><i class="fa-solid fa-robot"></i></span>
-            <span class="btn-text">NEX Avatar</span>
-            <span class="btn-subtitle">AI generated</span>
-          </button>
+  <main class="profile-shell" role="main" aria-labelledby="setupTitle">
+    <aside class="profile-aside">
+      <div class="brand-line">
+        <img src="logo.jpg" class="brand-logo" alt="NEXCHAT logo">
+        <div>
+          <span class="brand-kicker">NEXCHAT</span>
+          <strong>Profile Studio</strong>
         </div>
-        <input type="file" id="profilePic" accept="image/*" required aria-required="true" aria-describedby="fileHelp"
-          style="display: none;">
-        <small id="fileHelp">Supported: JPG, PNG, GIF (Max 5MB) • Best: Square images</small>
       </div>
 
-      <!-- Image Preview with Editor -->
-      <div id="previewContainer" class="preview-container" aria-hidden="true">
-        <div class="preview-editor">
-          <img id="previewImage" alt="Profile preview" class="preview-image">
-          <div class="preview-overlay">
-            <button type="button" class="edit-btn" id="editAvatarBtn" title="Edit avatar">
-              <span><i class="fa-solid fa-pen"></i></span> Edit
+      <div class="aside-badge">Trusted identity</div>
+      <h1>Build a profile people instantly recognize.</h1>
+      <p class="aside-copy">Set up your professional identity, refine your presence, and start engaging with confidence.</p>
+
+      <ul class="feature-list">
+        <li><i class="fa-solid fa-shield-check"></i> Verified personal identity</li>
+        <li><i class="fa-solid fa-wand-sparkles"></i> Premium avatar options</li>
+        <li><i class="fa-solid fa-bolt"></i> Fast, polished onboarding</li>
+      </ul>
+
+      <div class="mini-card">
+        <div class="mini-card-header">
+          <span>Channel ready</span>
+          <span class="live-dot"></span>
+        </div>
+        <strong>Profile quality</strong>
+        <div class="mini-meter">
+          <span></span>
+        </div>
+        <small>Optimized for chats, groups, reels, and status updates.</small>
+      </div>
+    </aside>
+
+    <section class="profile-panel" aria-labelledby="setupTitle">
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Create your profile</p>
+          <h2 id="setupTitle">Professional identity setup</h2>
+        </div>
+        <a href="chat.html" class="back-link"><i class="fa-solid fa-arrow-left"></i> Back to chat</a>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill" style="width: 33%;"></div>
+        </div>
+        <div class="progress-steps">
+          <span class="step active" data-step="1">Photo</span>
+          <span class="step" data-step="2">Details</span>
+          <span class="step" data-step="3">Complete</span>
+        </div>
+      </div>
+
+      <div id="step1" class="profile-step active">
+        <h3>Choose your profile photo</h3>
+        <div class="form-group">
+          <div class="upload-options">
+            <button type="button" class="upload-btn camera-btn" id="cameraBtn" title="Take a professional photo">
+              <span class="btn-icon"><i class="fa-solid fa-camera"></i></span>
+              <span class="btn-text">Camera</span>
+              <span class="btn-subtitle">HD capture</span>
+            </button>
+            <button type="button" class="upload-btn gallery-btn" id="galleryBtn" title="Choose from gallery">
+              <span class="btn-icon"><i class="fa-solid fa-image"></i></span>
+              <span class="btn-text">Gallery</span>
+              <span class="btn-subtitle">Select image</span>
+            </button>
+            <button type="button" class="upload-btn ai-btn" id="aiAvatarBtn" title="Choose NEX Avatar">
+              <span class="btn-icon"><i class="fa-solid fa-robot"></i></span>
+              <span class="btn-text">NEX Avatar</span>
+              <span class="btn-subtitle">AI generated</span>
             </button>
           </div>
+          <input type="file" id="profilePic" accept="image/*" required aria-required="true" aria-describedby="fileHelp" style="display: none;">
+          <small id="fileHelp">JPG, PNG, GIF • max 5MB • square images recommended</small>
         </div>
-        <p class="preview-text">Profile Picture Preview</p>
-        <p id="profileSelectStatus" class="profile-select-status">No picture selected</p>
-        <div class="preview-actions">
-          <button type="button" class="preview-action-btn" id="rotateLeftBtn"><i class="fa-solid fa-rotate-left"></i> Rotate</button>
-          <button type="button" class="preview-action-btn" id="rotateRightBtn"><i class="fa-solid fa-rotate-right"></i> Rotate</button>
-          <button type="button" class="preview-action-btn" id="cropBtn"><i class="fa-solid fa-crop"></i> Crop</button>
-        </div>
-      </div>
 
-      <button type="button" class="step-btn" id="nextToStep2">Continue to Details <i class="fa-solid fa-arrow-right"></i></button>
-    </div>
-
-    <!-- Step 2: Profile Details -->
-    <div id="step2" class="profile-step">
-      <h3>Personalize Your Profile</h3>
-
-      <div class="form-group">
-        <label for="displayName" class="form-label">Display Name</label>
-        <input type="text" id="displayName" placeholder="Your display name" maxlength="30" aria-describedby="nameHelp">
-        <small id="nameHelp">This is how others will see you (2-30 characters)</small>
-      </div>
-
-      <div class="form-group">
-        <label for="bio" class="form-label">Bio <span class="optional">(Optional)</span></label>
-        <textarea id="bio" placeholder="Tell others about yourself..." maxlength="150" rows="3" aria-describedby="bioHelp"></textarea>
-        <small id="bioHelp">Share a bit about yourself (max 150 characters)</small>
-        <div class="char-counter"><span id="bioCounter">0</span>/150</div>
-      </div>
-
-      <div class="form-group">
-        <label for="status" class="form-label">Status Message <span class="optional">(Optional)</span></label>
-        <input type="text" id="status" placeholder="What's on your mind?" maxlength="50" aria-describedby="statusHelp">
-        <small id="statusHelp">A short status message (max 50 characters)</small>
-        <div class="char-counter"><span id="statusCounter">0</span>/50</div>
-      </div>
-
-      <div class="form-actions">
-        <button type="button" class="step-btn secondary" id="backToStep1"><i class="fa-solid fa-arrow-left"></i> Back to Photo</button>
-        <button type="button" class="step-btn" id="nextToStep3">Complete Profile <i class="fa-solid fa-arrow-right"></i></button>
-      </div>
-    </div>
-
-    <!-- Step 3: Completion -->
-    <div id="step3" class="profile-step">
-      <h3><i class="fa-solid fa-circle-check"></i> Profile Complete!</h3>
-      <div class="completion-summary">
-        <div class="final-preview">
-          <img id="finalAvatarPreview" src="" alt="Final profile" class="final-avatar">
-          <div class="final-details">
-            <h4 id="finalNamePreview">Display Name</h4>
-            <p id="finalBioPreview" class="final-bio">Bio will appear here</p>
-            <p id="finalStatusPreview" class="final-status">Status will appear here</p>
+        <div id="previewContainer" class="preview-container" aria-hidden="true">
+          <div class="preview-editor">
+            <img id="previewImage" alt="Profile preview" class="preview-image">
+            <div class="preview-overlay">
+              <button type="button" class="edit-btn" id="editAvatarBtn" title="Edit avatar">
+                <span><i class="fa-solid fa-pen"></i></span> Edit
+              </button>
+            </div>
+          </div>
+          <p class="preview-text">Profile picture preview</p>
+          <p id="profileSelectStatus" class="profile-select-status">No picture selected yet</p>
+          <div class="preview-actions">
+            <button type="button" class="preview-action-btn" id="rotateLeftBtn"><i class="fa-solid fa-rotate-left"></i> Rotate</button>
+            <button type="button" class="preview-action-btn" id="rotateRightBtn"><i class="fa-solid fa-rotate-right"></i> Rotate</button>
+            <button type="button" class="preview-action-btn" id="cropBtn"><i class="fa-solid fa-crop"></i> Crop</button>
           </div>
         </div>
+
+        <button type="button" class="step-btn" id="nextToStep2">Continue to details <i class="fa-solid fa-arrow-right"></i></button>
       </div>
 
-      <form id="profileForm" novalidate>
-        <button type="submit" class="auth-btn"><i class="fa-solid fa-bolt"></i> Enter NEXCHAT</button>
-      </form>
+      <div id="step2" class="profile-step">
+        <h3>Personalize your profile</h3>
 
-      <div class="completion-note">
-        <p><i class="fa-solid fa-circle-info"></i> Your profile is ready! You can always edit these details later in settings.</p>
+        <div class="form-group">
+          <label for="displayName" class="form-label">Display name</label>
+          <input type="text" id="displayName" placeholder="Your display name" maxlength="30" aria-describedby="nameHelp">
+          <small id="nameHelp">People will see this in chats, groups, and reels.</small>
+        </div>
+
+        <div class="form-group">
+          <label for="bio" class="form-label">Bio <span class="optional">(Optional)</span></label>
+          <textarea id="bio" placeholder="Tell others about yourself..." maxlength="150" rows="3" aria-describedby="bioHelp"></textarea>
+          <small id="bioHelp">Share a short personal description.</small>
+          <div class="char-counter"><span id="bioCounter">0</span>/150</div>
+        </div>
+
+        <div class="form-group">
+          <label for="status" class="form-label">Status message <span class="optional">(Optional)</span></label>
+          <input type="text" id="status" placeholder="What's on your mind?" maxlength="50" aria-describedby="statusHelp">
+          <small id="statusHelp">Keep it sharp and memorable.</small>
+          <div class="char-counter"><span id="statusCounter">0</span>/50</div>
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="step-btn secondary" id="backToStep1"><i class="fa-solid fa-arrow-left"></i> Back</button>
+          <button type="button" class="step-btn" id="nextToStep3">Complete profile <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
       </div>
-    </div>
 
-    <p id="result" aria-live="polite" role="status"></p>
-    <div id="timerContainer" style="display: none;">
-       Auto-redirect in <span id="timerCount">30</span>s
-    </div>
+      <div id="step3" class="profile-step">
+        <h3><i class="fa-solid fa-circle-check"></i> Profile complete</h3>
+        <div class="completion-summary">
+          <div class="final-preview">
+            <img id="finalAvatarPreview" src="" alt="Final profile" class="final-avatar">
+            <div class="final-details">
+              <h4 id="finalNamePreview">Display name</h4>
+              <p id="finalBioPreview" class="final-bio">Bio preview</p>
+              <p id="finalStatusPreview" class="final-status">Status preview</p>
+            </div>
+          </div>
+        </div>
 
-    <div id="backToChatContainer">
-      <a href="chat.html"><i class="fa-solid fa-arrow-left"></i> Back to Chat</a>
-    </div>
+        <form id="profileForm" novalidate>
+          <button type="submit" class="auth-btn"><i class="fa-solid fa-bolt"></i> Enter NEXCHAT</button>
+        </form>
+
+        <div class="completion-note">
+          <p><i class="fa-solid fa-circle-info"></i> Your profile is ready. You can update it later in settings.</p>
+        </div>
+      </div>
+
+      <p id="result" aria-live="polite" role="status"></p>
+      <div id="timerContainer" style="display: none;">
+        Auto-redirect in <span id="timerCount">30</span>s
+      </div>
+    </section>
   </main>
 
   <script type="module">
     import { auth, db } from "./firebase-config.js";
     import { uploadProfilePicture, saveUserProfile } from "./src/js/profile.js";
 
-    // Multi-step form management
     let currentStep = 1;
     const totalSteps = 3;
     let profileData = {
       avatar: null,
-      avatarFile: null, // Stores the raw binary file
+      avatarFile: null,
       displayName: '',
       bio: '',
       status: ''
@@ -181,34 +211,21 @@
     const galleryBtn = document.getElementById('galleryBtn');
     const aiAvatarBtn = document.getElementById('aiAvatarBtn');
 
-    // Step navigation
     function showStep(step) {
-      // Hide all steps
-      document.querySelectorAll('.profile-step').forEach(stepEl => {
-        stepEl.classList.remove('active');
-      });
-
-      // Show current step
+      document.querySelectorAll('.profile-step').forEach(stepEl => stepEl.classList.remove('active'));
       document.getElementById(`step${step}`).classList.add('active');
 
-      // Update progress bar
       const progressFill = document.getElementById('progressFill');
       const progress = (step / totalSteps) * 100;
       progressFill.style.width = `${progress}%`;
 
-      // Update step indicators
       document.querySelectorAll('.step').forEach((stepEl, index) => {
-        if (index + 1 <= step) {
-          stepEl.classList.add('active');
-        } else {
-          stepEl.classList.remove('active');
-        }
+        stepEl.classList.toggle('active', index + 1 <= step);
       });
 
       currentStep = step;
     }
 
-    // Step 1: Photo selection
     document.getElementById('nextToStep2').addEventListener('click', () => {
       if (!profileData.avatar) {
         showMessage(result, 'Please select a profile picture first', 'danger');
@@ -217,10 +234,7 @@
       showStep(2);
     });
 
-    // Step 2: Profile details
-    document.getElementById('backToStep1').addEventListener('click', () => {
-      showStep(1);
-    });
+    document.getElementById('backToStep1').addEventListener('click', () => showStep(1));
 
     document.getElementById('nextToStep3').addEventListener('click', () => {
       const displayName = document.getElementById('displayName').value.trim();
@@ -233,7 +247,6 @@
       profileData.bio = document.getElementById('bio').value.trim();
       profileData.status = document.getElementById('status').value.trim();
 
-      // Update completion preview
       document.getElementById('finalAvatarPreview').src = profileData.avatar;
       document.getElementById('finalNamePreview').textContent = profileData.displayName;
       document.getElementById('finalBioPreview').textContent = profileData.bio || 'No bio added';
@@ -242,20 +255,18 @@
       showStep(3);
     });
 
-    // Character counters
     document.getElementById('bio').addEventListener('input', (e) => {
       const counter = document.getElementById('bioCounter');
       counter.textContent = e.target.value.length;
-      counter.style.color = e.target.value.length > 140 ? '#ff6b6b' : '#00ff66';
+      counter.style.color = e.target.value.length > 140 ? '#ff6b6b' : '#8ef3c5';
     });
 
     document.getElementById('status').addEventListener('input', (e) => {
       const counter = document.getElementById('statusCounter');
       counter.textContent = e.target.value.length;
-      counter.style.color = e.target.value.length > 45 ? '#ff6b6b' : '#00ff66';
+      counter.style.color = e.target.value.length > 45 ? '#ff6b6b' : '#8ef3c5';
     });
 
-    // Avatar editing functions
     let currentRotation = 0;
     document.getElementById('rotateLeftBtn').addEventListener('click', () => {
       currentRotation -= 90;
@@ -268,21 +279,16 @@
     });
 
     document.getElementById('cropBtn').addEventListener('click', () => {
-      // Basic crop functionality (in a real app, you'd use a proper cropping library)
-      showMessage(result, 'Crop functionality would open a cropping interface', 'info');
+      showMessage(result, 'Cropping tools can be added in a future pass', 'info');
     });
 
     document.getElementById('editAvatarBtn').addEventListener('click', () => {
-      // Show edit options
-      document.querySelector('.preview-actions').style.display =
-        document.querySelector('.preview-actions').style.display === 'none' ? 'flex' : 'none';
+      const previewActions = document.querySelector('.preview-actions');
+      previewActions.style.display = previewActions.style.display === 'none' ? 'flex' : 'none';
     });
 
     let selectedAvatarUrl = null;
 
-    // ============================================================
-    // UPLOAD SOURCE SELECTION (CAMERA vs GALLERY)
-    // ============================================================
     cameraBtn.addEventListener('click', (e) => {
       e.preventDefault();
       fileInput.setAttribute('capture', 'environment');
@@ -295,9 +301,6 @@
       fileInput.click();
     });
 
-    // ============================================================
-    // AI AVATAR SELECTION
-    // ============================================================
     aiAvatarBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const width = 1000;
@@ -314,30 +317,24 @@
         selectedAvatarUrl = avatar.url || avatar.svg;
         profileData.avatar = selectedAvatarUrl;
 
-        // Update Preview
         previewImage.src = selectedAvatarUrl;
         previewContainer.setAttribute('aria-hidden', 'false');
         previewContainer.style.display = 'flex';
-
-        // Clear file input
         fileInput.value = '';
 
-        showMessage(result, ` NEX Avatar Selected: ${avatar.name}`, 'success');
+        showMessage(result, `NEX Avatar selected: ${avatar.name}`, 'success');
 
-        // Update button text and scroll to it to make next step obvious
         const nextBtn = document.getElementById('nextToStep2');
-        nextBtn.innerHTML = "Continue to Details →";
-        nextBtn.style.background = "linear-gradient(135deg, #00ccff, #00ff66)";
+        nextBtn.innerHTML = 'Continue to details <i class="fa-solid fa-arrow-right"></i>';
+        nextBtn.style.background = 'linear-gradient(135deg, #00d4ff, #00ff66)';
         nextBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     });
 
-    // File input change handler
     fileInput.addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (file) {
-        // Validate file
-        if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        if (file.size > 5 * 1024 * 1024) {
           showMessage(result, 'File size must be less than 5MB', 'danger');
           return;
         }
@@ -347,10 +344,7 @@
           return;
         }
 
-        // Store the original binary file
         profileData.avatarFile = file;
-        
-        // Preview using object URL (doesn't convert to massive string in memory)
         const objectUrl = URL.createObjectURL(file);
         profileData.avatar = objectUrl;
 
@@ -360,20 +354,15 @@
         previewContainer.setAttribute('aria-hidden', 'false');
         previewContainer.style.display = 'flex';
 
-        document.getElementById('profileSelectStatus').textContent = ' Picture selected. Proceed to details.';
+        document.getElementById('profileSelectStatus').textContent = 'Picture selected. Proceed to details.';
+        showMessage(result, 'Image ready for profile upload', 'success');
 
-        showMessage(result, ' Image ready for binary indexing', 'success');
-
-        // Update button
         const nextBtn = document.getElementById('nextToStep2');
-        nextBtn.innerHTML = "Continue to Details →";
-        nextBtn.style.background = "linear-gradient(135deg, #00ccff, #00ff66)";
+        nextBtn.innerHTML = 'Continue to details <i class="fa-solid fa-arrow-right"></i>';
+        nextBtn.style.background = 'linear-gradient(135deg, #00d4ff, #00ff66)';
       }
     });
 
-    // ============================================================
-    // FORM SUBMISSION
-    // ============================================================
     profileForm.addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -383,15 +372,14 @@
       }
 
       try {
-        showMessage(result, ' Creating your professional profile...', 'info');
+        showMessage(result, 'Creating your professional profile...', 'info');
 
         let avatarUrl = profileData.avatar;
         let isDefaultAvatar = !profileData.avatarFile;
 
-        // Upload custom image via Vercel Blob (free, no Firebase Storage)
         if (profileData.avatarFile) {
           try {
-            showMessage(result, ' Uploading profile picture to secure cloud storage...', 'info');
+            showMessage(result, 'Uploading profile picture to secure cloud storage...', 'info');
             avatarUrl = await uploadProfilePicture(profileData.avatarFile, auth.currentUser.uid);
           } catch (uploadErr) {
             console.warn('Direct upload error, falling back to local encoding:', uploadErr);
@@ -403,7 +391,6 @@
           }
         }
 
-        // Save profile data (photoURL, avatar, profilePic) to Firestore
         await saveUserProfile(auth.currentUser.uid, avatarUrl, {
           displayName: profileData.displayName,
           bio: profileData.bio,
@@ -412,27 +399,19 @@
           lastActive: new Date()
         });
 
-        showMessage(result, ' Profile created successfully! Redirecting...', 'success');
-
-        // Start redirect timer
+        showMessage(result, 'Profile created successfully! Redirecting...', 'success');
         startAutoRedirectTimer();
-
       } catch (error) {
         console.error('Profile creation error:', error);
-        showMessage(result, ' Failed to create profile. Please try again.', 'danger');
+        showMessage(result, 'Failed to create profile. Please try again.', 'danger');
       }
     });
 
-    // ============================================================
-    // AUTO-REDIRECT TIMER (30 SECONDS)
-    // ============================================================
     let timerInterval = null;
     let timeRemaining = 30;
-    let isProfileCreated = false;
 
     function startAutoRedirectTimer() {
       timerContainer.style.display = 'block';
-      isProfileCreated = true;
 
       timerInterval = setInterval(() => {
         timeRemaining--;
@@ -447,15 +426,12 @@
 
     function showMessage(element, message, type) {
       element.textContent = message;
-      element.style.color = type === 'success' ? '#00ff66' :
-                           type === 'danger' ? '#ff4444' : '#00ccff';
+      element.style.color = type === 'success' ? '#8ef3c5' : type === 'danger' ? '#ff7689' : '#7fe6ff';
       element.style.display = 'block';
     }
 
-    // Initialize first step
     showStep(1);
   </script>
-
 </body>
 
 </html>

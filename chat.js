@@ -1918,6 +1918,10 @@ function showChatListView() {
   const announcementsContainer = document.getElementById("announcementsContainer");
   const callHistoryContainer = document.getElementById("callHistoryContainer");
   const bottomNav = document.querySelector(".bottom-nav");
+  const chatMain = document.querySelector(".chat-main");
+  if (chatMain) chatMain.dataset.layout = "list";
+  const app = document.querySelector(".app");
+  if (app) app.dataset.activeSection = "chats";
   if (listView) {
     listView.classList.remove("hidden");
     listView.style.display = "flex";
@@ -2116,6 +2120,11 @@ function handleNavigation(section) {
   const announcementsContainer = document.getElementById("announcementsContainer");
   const chatDetailView = document.getElementById("chatDetailView");
   const callHistoryContainer = document.getElementById("callHistoryContainer");
+  const chatMain = document.querySelector(".chat-main");
+  const app = document.querySelector(".app");
+
+  if (chatMain) chatMain.dataset.layout = section === "chats" ? "list" : "section";
+  if (app) app.dataset.activeSection = section;
 
   if (chatListView) chatListView.style.display = "none";
   if (statusContainer) statusContainer.style.display = "none";
@@ -2127,11 +2136,11 @@ function handleNavigation(section) {
   switch (section) {
     case "chats":
       console.log("?? Showing chats");
-      if (chatListView) chatListView.style.display = "block";
+      if (chatListView) chatListView.style.display = "flex";
       break;
     case "updates":
       console.log("? Showing statuses");
-      if (statusContainer) statusContainer.style.display = "block";
+      if (statusContainer) statusContainer.style.display = "flex";
       loadStatusFeed();
       break;
     case "communities":
@@ -2442,15 +2451,34 @@ async function isChatMuted(chatId) {
   }
 }
 
+function applyThemeMode(themeMode = "dark") {
+  const resolvedTheme = themeMode === "light" ? "light" : "dark";
+  const body = document.body;
+
+  body.classList.toggle("dark-mode", resolvedTheme === "dark");
+  body.classList.toggle("light-mode", resolvedTheme === "light");
+  body.classList.toggle("dark-theme", resolvedTheme === "dark");
+  body.classList.toggle("light-theme", resolvedTheme === "light");
+  document.documentElement.style.colorScheme = resolvedTheme;
+
+  const darkToggle = document.getElementById("darkModeToggle");
+  if (darkToggle) {
+    darkToggle.classList.toggle("active", resolvedTheme === "dark");
+  }
+
+  const themeRadios = document.querySelectorAll('input[name="theme"]');
+  themeRadios.forEach(radio => {
+    radio.checked = radio.value === resolvedTheme;
+  });
+
+  localStorage.setItem("darkMode", String(resolvedTheme === "dark"));
+
+  return resolvedTheme;
+}
+
 window.addEventListener("load", () => {
   const savedDarkMode = localStorage.getItem("darkMode");
-  if (savedDarkMode === "true") {
-    document.body.classList.add("dark-mode");
-    document.body.classList.remove("light-mode");
-  } else {
-    document.body.classList.add("light-mode");
-    document.body.classList.remove("dark-mode");
-  }
+  applyThemeMode(savedDarkMode === "true" ? "dark" : "light");
 });
 
 async function autoPopulateTestUsers() {
@@ -5582,16 +5610,24 @@ document.getElementById("nav-messages")?.addEventListener("click", () => {
 document.getElementById("nav-status")?.addEventListener("click", () => {
   const statusContainer = document.getElementById("statusContainer");
   const chatListView = document.getElementById("chatListView");
+  const chatDetailView = document.getElementById("chatDetailView");
+  const chatMain = document.querySelector(".chat-main");
+  const app = document.querySelector(".app");
 
   if (statusContainer.style.display === "none") {
     chatListView.style.display = "none";
-    statusContainer.style.display = "block";
+    chatDetailView.style.display = "none";
+    chatMain.dataset.layout = "section";
+    statusContainer.style.display = "flex";
+    if (app) app.dataset.activeSection = "updates";
     document.getElementById("nav-messages").classList.remove("active");
     document.getElementById("nav-status").classList.add("active");
     showNotif("NEX-STATUS", "info", 800);
   } else {
     statusContainer.style.display = "none";
-    chatListView.style.display = "block";
+    if (app) app.dataset.activeSection = "chats";
+    chatListView.style.display = "flex";
+    chatMain.dataset.layout = "list";
     document.getElementById("nav-status").classList.remove("active");
     document.getElementById("nav-messages").classList.add("active");
     showNotif("Messages", "info", 800);
@@ -5603,11 +5639,17 @@ document.getElementById("nav-announcements")?.addEventListener("click", () => {
   const chatListView = document.getElementById("chatListView");
   const statusContainer = document.getElementById("statusContainer");
   const groupsContainer = document.getElementById("groupsContainer");
+  const chatDetailView = document.getElementById("chatDetailView");
+  const chatMain = document.querySelector(".chat-main");
+  const app = document.querySelector(".app");
 
   if (announcementsContainer.style.display === "none") {
     chatListView.style.display = "none";
     statusContainer.style.display = "none";
     groupsContainer.style.display = "none";
+    chatDetailView.style.display = "none";
+    chatMain.dataset.layout = "section";
+    if (app) app.dataset.activeSection = "announcements";
     announcementsContainer.style.display = "flex";
 
     document.getElementById("nav-messages").classList.remove("active");
@@ -5619,7 +5661,9 @@ document.getElementById("nav-announcements")?.addEventListener("click", () => {
     showNotif("Announcements", "info", 800);
   } else {
     announcementsContainer.style.display = "none";
-    chatListView.style.display = "block";
+    if (app) app.dataset.activeSection = "chats";
+    chatListView.style.display = "flex";
+    chatMain.dataset.layout = "list";
     document.getElementById("nav-announcements").classList.remove("active");
     document.getElementById("nav-messages").classList.add("active");
     showNotif("Messages", "info", 800);
@@ -6792,6 +6836,7 @@ function loadSettingsPreferences() {
     const theme = prefs.theme || "dark";
     const themeEl = document.getElementById("theme" + theme.charAt(0).toUpperCase() + theme.slice(1));
     if (themeEl) themeEl.checked = true;
+    applyThemeMode(theme);
 
     selectedRingtone = prefs.ringtone || 'classic';
     const ringtoneSelect = document.getElementById("ringtoneSelect");
@@ -6889,15 +6934,8 @@ function applySettings(prefs) {
       console.log("?? Notifications disabled");
     }
 
-    if (prefs.theme === "light") {
-      document.documentElement.style.colorScheme = "light";
-      document.body.classList.add("light-theme");
-      document.body.classList.remove("dark-theme");
-    } else {
-      document.documentElement.style.colorScheme = "dark";
-      document.body.classList.add("dark-theme");
-      document.body.classList.remove("light-theme");
-    }
+    const targetTheme = prefs.theme === "light" ? "light" : "dark";
+    applyThemeMode(targetTheme);
 
     if (prefs.antiReload) {
       window.onbeforeunload = function (event) {
@@ -11273,6 +11311,10 @@ function showChatDetailView() {
   
   const chatDetailView = document.getElementById('chatDetailView');
   const bottomNav = document.querySelector('.bottom-nav');
+  const chatMain = document.querySelector('.chat-main');
+  if (chatMain) chatMain.dataset.layout = 'conversation';
+  const app = document.querySelector('.app');
+  if (app) app.dataset.activeSection = 'chats';
   if (chatDetailView) {
     chatDetailView.style.display = 'flex';
     chatDetailView.classList.remove('hidden');
@@ -11394,25 +11436,21 @@ function applyFilter(filterType) {
 }
 
 function switchDarkMode() {
-  const body = document.body;
-  const toggle = document.getElementById("darkModeToggle");
-  const isDark = body.classList.contains("dark-mode");
+  const isDark = document.body.classList.contains("dark-mode");
+  const nextTheme = isDark ? "light" : "dark";
 
-  if (isDark) {
-    body.classList.remove("dark-mode");
-    body.classList.add("light-mode");
-    toggle?.classList.remove("active");
-    localStorage.setItem("darkMode", "false");
-    saveSettingsPreferences();
-    showNotif(" Light Mode Enabled", "success");
-  } else {
-    body.classList.remove("light-mode");
-    body.classList.add("dark-mode");
-    toggle?.classList.add("active");
-    localStorage.setItem("darkMode", "true");
-    saveSettingsPreferences();
-    showNotif(" Dark Mode Enabled", "success");
+  applyThemeMode(nextTheme);
+
+  try {
+    const settings = JSON.parse(localStorage.getItem("nexchat_settings") || "{}");
+    settings.theme = nextTheme;
+    localStorage.setItem("nexchat_settings", JSON.stringify(settings));
+  } catch (err) {
+    console.warn("Unable to sync theme into nexchat_settings:", err);
   }
+
+  saveSettingsPreferences();
+  showNotif(nextTheme === "dark" ? " Dark Mode Enabled" : " Light Mode Enabled", "success");
 }
 
 window.toggleFullscreen = toggleFullscreen;

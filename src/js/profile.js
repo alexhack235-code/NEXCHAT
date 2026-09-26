@@ -7,6 +7,7 @@ import { db } from '../../firebase-config.js';
 import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { uploadImageToCloudinary } from './cloudinary.js';
 import { storageApiClient } from './storage-api-client.js';
+import { getFirebaseAuthorizationHeaders } from './firebase-auth-header.js';
 
 /**
  * Uploads a profile picture directly to Cloudinary (no backend/Vercel required).
@@ -60,6 +61,7 @@ export async function uploadProfilePicture(file, uid) {
       headers: {
         'x-filename': filename,
         'x-upload-type': 'profile',
+        ...await getFirebaseAuthorizationHeaders(),
       },
       body: file,
     });

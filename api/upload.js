@@ -1,96 +1,39 @@
 import { put } from '@vercel/blob';
-import { enforceRateLimit, applySecurityHeaders, validatePathname } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, validatePathname, verifyFirebaseIdToken } from './_security.js';
 
 // Primary Storage Tokens
+const readBlobToken = (name, fallback = '') => process.env[name] || fallback;
 const TOKENS = {
-  default: process.env.BLOB_READ_WRITE_TOKEN || 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO',
-  media: process.env.BLOB_READ_WRITE_TOKEN_MEDIA || 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO',
-  profile: process.env.BLOB_READ_WRITE_TOKEN_PROFILE || 'vercel_blob_rw_1Z4MEej7ip5Jg9Wz_ggfb5Dc875zyDAesscTkLSCJHTAd3x',
-  background: process.env.BLOB_READ_WRITE_TOKEN_BACKGROUNDS || 'vercel_blob_rw_XAJz4dhkF8UAvds3_Vz2gcF2BOX9o6vYTitpsddNVptAM9N',
+  default: readBlobToken('BLOB_READ_WRITE_TOKEN', 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO'),
+  media: readBlobToken('BLOB_READ_WRITE_TOKEN_MEDIA', 'vercel_blob_rw_R4RmXAAr4Lb0ofNq_2XNk166CeMNYPUChKxuBlukPMkj0XO'),
+  profile: readBlobToken('BLOB_READ_WRITE_TOKEN_PROFILE', 'vercel_blob_rw_1Z4MEej7ip5Jg9Wz_ggfb5Dc875zyDAesscTkLSCJHTAd3x'),
+  background: readBlobToken('BLOB_READ_WRITE_TOKEN_BACKGROUNDS', 'vercel_blob_rw_XAJz4dhkF8UAvds3_Vz2gcF2BOX9o6vYTitpsddNVptAM9N'),
 };
-
-// 5 General Backup Storage Vaults for Auto-Failover
 const BACKUP_VAULTS = [
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_1 || 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46',
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_2 || 'vercel_blob_rw_R29NmygDYq5JNlCP_HeT8UNIzVbzaXvlpaWRnlLW5JK1uMW',
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_3 || 'vercel_blob_rw_Ml2xzmRr7zfPbbNR_5ledwKe6WoX6FU9Uo3czUBOMTzXph7',
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_4 || 'vercel_blob_rw_XqXC45KxrpuccoHS_BfdjMCGndscRb8141ZuH35srLp2ruX',
-  process.env.BLOB_READ_WRITE_TOKEN_BACKUP_5 || 'vercel_blob_rw_SboFYX9ACstEsmLG_dAAe8Nmg8MYaEGDJh2TuyZxM1Loy8l',
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_1', 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46'),
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_2', 'vercel_blob_rw_R29NmygDYq5JNlCP_HeT8UNIzVbzaXvlpaWRnlLW5JK1uMW'),
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_3', 'vercel_blob_rw_Ml2xzmRr7zfPbbNR_5ledwKe6WoX6FU9Uo3czUBOMTzXph7'),
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_4', 'vercel_blob_rw_XqXC45KxrpuccoHS_BfdjMCGndscRb8141ZuH35srLp2ruX'),
+  readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_5', 'vercel_blob_rw_SboFYX9ACstEsmLG_dAAe8Nmg8MYaEGDJh2TuyZxM1Loy8l'),
 ];
-
-// Private Storage Vaults (Served exclusively through secure streaming proxy)
 const PRIVATE_VAULTS = {
-  1: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_PRIVATE_1 || 'vercel_blob_rw_tqRnUFMUwpg0yuA9_uikx2vQ93pZEASEmqbTT4vCg9m8jjE',
-    name: 'PRIVATE VAULT 1',
-  },
-  2: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_PRIVATE_2 || 'vercel_blob_rw_sjHClcYCD5zg7FSx_jyWNaUo5tgKubvWNtYrgmWdwNJzAly',
-    name: 'PRIVATE VAULT 2',
-  },
+  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_1', 'vercel_blob_rw_tqRnUFMUwpg0yuA9_uikx2vQ93pZEASEmqbTT4vCg9m8jjE'), name: 'PRIVATE VAULT 1' },
+  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_2', 'vercel_blob_rw_sjHClcYCD5zg7FSx_jyWNaUo5tgKubvWNtYrgmWdwNJzAly'), name: 'PRIVATE VAULT 2' },
 };
-
-// NEX-REELS Multi-Vault Storage Configuration (Vault 0 through 5)
 const REELS_VAULTS = {
-  0: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_0 || 'vercel_blob_rw_BhENzDN0lLwjdIAc_FeCMjgQ6ASj6UV0CRO2WVISkvZreOS',
-    access: 'public',
-    name: 'NEX-REELS VAULT 0',
-  },
-  1: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_1 || 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46',
-    access: 'private',
-    name: 'NEX-REELS VAULT 1',
-  },
-  2: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_2 || 'vercel_blob_rw_41fMTewMnneecj66_m9wzI7Hq1VRyGgavZImXnXPaW0qj4Z',
-    access: 'private',
-    name: 'NEX-REELS VAULT 2',
-  },
-  3: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_3 || 'vercel_blob_rw_ltFBt2fWKQe9Wzdh_CPdwwVqNJ2GhFNjGRPZX27fLOIcd1e',
-    access: 'private',
-    name: 'NEX-REELS VAULT 3',
-  },
-  4: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_4 || 'vercel_blob_rw_6Yh5YOITkL5nf0IK_xkUI0EI90M0cMPw2VB51U6mFYfIxcr',
-    access: 'private',
-    name: 'NEX-REELS VAULT 4',
-  },
-  5: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_REELS_VAULT_5 || 'vercel_blob_rw_y1HadAzcNfzpiVWe_lYPjiveKnhMBRrW87gn88HbK3qTQPj',
-    access: 'private',
-    name: 'NEX-REELS VAULT 5',
-  },
+  0: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_0', 'vercel_blob_rw_BhENzDN0lLwjdIAc_FeCMjgQ6ASj6UV0CRO2WVISkvZreOS'), access: 'public', name: 'NEX-REELS VAULT 0' },
+  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_1', 'vercel_blob_rw_qcdPawgue5dGCBux_gJOdIRUwQuPubNnqhyQGsJEz8rRL46'), access: 'private', name: 'NEX-REELS VAULT 1' },
+  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_2', 'vercel_blob_rw_41fMTewMnneecj66_m9wzI7Hq1VRyGgavZImXnXPaW0qj4Z'), access: 'private', name: 'NEX-REELS VAULT 2' },
+  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_3', 'vercel_blob_rw_ltFBt2fWKQe9Wzdh_CPdwwVqNJ2GhFNjGRPZX27fLOIcd1e'), access: 'private', name: 'NEX-REELS VAULT 3' },
+  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_4', 'vercel_blob_rw_6Yh5YOITkL5nf0IK_xkUI0EI90M0cMPw2VB51U6mFYfIxcr'), access: 'private', name: 'NEX-REELS VAULT 4' },
+  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_5', 'vercel_blob_rw_y1HadAzcNfzpiVWe_lYPjiveKnhMBRrW87gn88HbK3qTQPj'), access: 'private', name: 'NEX-REELS VAULT 5' },
 };
-
-// NEX-STATUS Multi-Vault Storage Configuration (Vault 1 through 5, all private)
 const STATUS_VAULTS = {
-  1: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_1 || 'vercel_blob_rw_jCNrgY96DrgBtoUm_INH2vNcllZzjIqVnvsdaRoz5tqs4eW',
-    access: 'private',
-    name: 'NEX-STATUS VAULT 1',
-  },
-  2: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_2 || 'vercel_blob_rw_7IvHQcdI5lb3oN8t_KaHnvD4QZ7X5HN6pnyD2ZbaBHhc3Ge',
-    access: 'private',
-    name: 'NEX-STATUS VAULT 2',
-  },
-  3: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_3 || 'vercel_blob_rw_J0e8RZ3glwBgsqKQ_nDWdloFydWRjlWLMWTu4K0TkZrchVc',
-    access: 'private',
-    name: 'NEX-STATUS VAULT 3',
-  },
-  4: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_4 || 'vercel_blob_rw_aiBRkSDHg0K7Hq8g_CIwlPJETUqINLvIOUluiH9oKpAAJLp',
-    access: 'private',
-    name: 'NEX-STATUS VAULT 4',
-  },
-  5: {
-    token: process.env.BLOB_READ_WRITE_TOKEN_STATUS_VAULT_5 || 'vercel_blob_rw_b9u0Ll5xZBhFcaAD_CCX5iYxp0wLqESQ3JxfLDCSVpV5bwT',
-    access: 'private',
-    name: 'NEX-STATUS VAULT 5',
-  },
+  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_1', 'vercel_blob_rw_jCNrgY96DrgBtoUm_INH2vNcllZzjIqVnvsdaRoz5tqs4eW'), access: 'private', name: 'NEX-STATUS VAULT 1' },
+  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_2', 'vercel_blob_rw_7IvHQcdI5lb3oN8t_KaHnvD4QZ7X5HN6pnyD2ZbaBHhc3Ge'), access: 'private', name: 'NEX-STATUS VAULT 2' },
+  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_3', 'vercel_blob_rw_J0e8RZ3glwBgsqKQ_nDWdloFydWRjlWLMWTu4K0TkZrchVc'), access: 'private', name: 'NEX-STATUS VAULT 3' },
+  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_4', 'vercel_blob_rw_aiBRkSDHg0K7Hq8g_CIwlPJETUqINLvIOUluiH9oKpAAJLp'), access: 'private', name: 'NEX-STATUS VAULT 4' },
+  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_STATUS_VAULT_5', 'vercel_blob_rw_b9u0Ll5xZBhFcaAD_CCX5iYxp0wLqESQ3JxfLDCSVpV5bwT'), access: 'private', name: 'NEX-STATUS VAULT 5' },
 };
 
 // Security constants
@@ -106,6 +49,17 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed. Only POST is supported.' });
   }
 
+  let authenticatedUser;
+  try {
+    authenticatedUser = await verifyFirebaseIdToken(req);
+  } catch (error) {
+    console.error('Firebase token verification unavailable:', error.message);
+    return res.status(503).json({ error: 'Authentication service is temporarily unavailable.' });
+  }
+  if (!authenticatedUser) {
+    return res.status(401).json({ error: 'Sign in is required to upload files.' });
+  }
+
   try {
     // 1. Security Check: Payload Size Guard
     const contentLength = req.headers['content-length'];
@@ -119,6 +73,10 @@ export default async function handler(req, res) {
     const rawFilename = req.headers['x-filename'] || req.query.filename || `upload_${Date.now()}`;
     const uploadType = req.headers['x-upload-type'] || req.query.type || 'media';
     const vaultParam = req.headers['x-vault-index'] !== undefined ? req.headers['x-vault-index'] : req.query.vault;
+
+    if (!rawFilename.split('/').includes(authenticatedUser.uid)) {
+      return res.status(403).json({ error: 'Uploads must be stored under the signed-in user ID.' });
+    }
 
     // 2. Security Check: Path Traversal
     if (
@@ -223,6 +181,10 @@ export default async function handler(req, res) {
     if (!token) {
       token = TOKENS.default;
     }
+    const tokensToTry = [token, ...BACKUP_VAULTS.filter(t => t && t !== token)].filter(Boolean);
+    if (!tokensToTry.length) {
+      return res.status(503).json({ error: 'Blob storage is not configured on the server.' });
+    }
 
     // Read the entire request body buffer to enable retry/failover across backup vaults
     const chunks = [];
@@ -232,7 +194,6 @@ export default async function handler(req, res) {
     const bodyBuffer = Buffer.concat(chunks);
 
     // Primary attempt + automatic failover to the 5 backup vaults
-    const tokensToTry = [token, ...BACKUP_VAULTS.filter(t => t && t !== token)];
     let lastError = null;
     let successfulBlob = null;
 

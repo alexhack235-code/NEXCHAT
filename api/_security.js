@@ -4,6 +4,8 @@
  * unauthorized access, and malicious file injection.
  */
 
+import { firebaseConfig } from '../firebase-public-config.js';
+
 // Sliding window IP rate limit store: Map<ip, { count: number, resetAt: number }>
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
@@ -66,6 +68,23 @@ export function enforceRateLimit(req, res, maxLimit = MAX_REQUESTS_PER_WINDOW) {
   }
 
   return true;
+}
+
+export async function verifyFirebaseIdToken(req) {
+  const authorization = req.headers.authorization || '';
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  if (!match) return null;
+
+  const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(firebaseConfig.apiKey)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ idToken: match[1] }),
+  });
+  if (!response.ok) return null;
+
+  const payload = await response.json();
+  const user = payload.users?.[0];
+  return user?.localId ? { uid: user.localId, email: user.email || null } : null;
 }
 
 /**

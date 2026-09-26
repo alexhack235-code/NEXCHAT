@@ -3,6 +3,7 @@
  * Manages uploading short videos to NEX-REELS VAULT 0 through 5 with sequential failover.
  */
 import { uploadVideoToCloudinary } from './cloudinary.js';
+import { getFirebaseAuthorizationHeaders } from './firebase-auth-header.js';
 
 export const REELS_VAULTS = [
   { index: 0, name: 'NEX-REELS VAULT 0', access: 'public', configured: true },
@@ -51,12 +52,13 @@ export function getVideoDuration(file) {
  * Attempts upload to a specific vault index via /api/upload.
  * @private
  */
-function uploadToSingleVault(file, vaultIndex, options = {}) {
+async function uploadToSingleVault(file, vaultIndex, options = {}) {
   const cleanName = (file.name || 'reel.mp4').replace(/[^a-zA-Z0-9._-]/g, '_');
   const uid = options.uid || 'anon';
   const filename = `reels/${uid}/${Date.now()}_${cleanName}`;
   const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
   const vault = REELS_VAULTS[vaultIndex] || { name: `NEX-REELS VAULT ${vaultIndex}`, access: 'public' };
+  const authHeaders = await getFirebaseAuthorizationHeaders();
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -67,6 +69,7 @@ function uploadToSingleVault(file, vaultIndex, options = {}) {
     xhr.setRequestHeader('x-upload-type', 'reels');
     xhr.setRequestHeader('x-vault-index', String(vaultIndex));
     xhr.setRequestHeader('x-access-mode', vault.access);
+    xhr.setRequestHeader('Authorization', authHeaders.Authorization);
 
     if (file.type) {
       xhr.setRequestHeader('Content-Type', file.type);

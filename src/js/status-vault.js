@@ -4,6 +4,7 @@
  * All Status Vaults are configured as private blob partitions with proxy streaming.
  */
 import { uploadVideoToCloudinary } from './cloudinary.js';
+import { getFirebaseAuthorizationHeaders } from './firebase-auth-header.js';
 
 export const STATUS_VAULTS = [
   { index: 1, name: 'NEX-STATUS VAULT 1', access: 'private', configured: true },
@@ -17,12 +18,13 @@ export const STATUS_VAULTS = [
  * Uploads status media to a specific Status Vault via /api/upload.
  * @private
  */
-function uploadToSingleStatusVault(file, vaultIndex, options = {}) {
+async function uploadToSingleStatusVault(file, vaultIndex, options = {}) {
   const cleanName = (file.name || 'status_media').replace(/[^a-zA-Z0-9._-]/g, '_');
   const uid = options.uid || 'anon';
   const filename = `status/${uid}/${Date.now()}_${cleanName}`;
   const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
   const vault = STATUS_VAULTS.find(v => v.index === vaultIndex) || { name: `NEX-STATUS VAULT ${vaultIndex}`, access: 'private' };
+  const authHeaders = await getFirebaseAuthorizationHeaders();
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -33,6 +35,7 @@ function uploadToSingleStatusVault(file, vaultIndex, options = {}) {
     xhr.setRequestHeader('x-upload-type', 'status');
     xhr.setRequestHeader('x-vault-index', String(vaultIndex));
     xhr.setRequestHeader('x-access-mode', 'private');
+    xhr.setRequestHeader('Authorization', authHeaders.Authorization);
 
     if (file.type) {
       xhr.setRequestHeader('Content-Type', file.type);
