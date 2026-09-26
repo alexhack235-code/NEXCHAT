@@ -9,25 +9,25 @@
    1. DESIGN TOKENS & CSS VARIABLES
    -------------------------------------------------------------------------- */
 :root {
-  /* Color Palette - Deep Cyber Dark */
-  --bg-app: #060912;
-  --bg-surface: #0b111e;
-  --bg-surface-elevated: #111a2e;
-  --bg-surface-hover: #16223b;
-  --bg-glass: rgba(11, 17, 30, 0.78);
-  --bg-glass-heavy: rgba(8, 13, 24, 0.92);
-  --bg-glass-card: rgba(17, 26, 46, 0.65);
+  /* Color Palette - Deep Luxury Dark */
+  --bg-app: #070b11;
+  --bg-surface: #0d141b;
+  --bg-surface-elevated: #121d28;
+  --bg-surface-hover: #172533;
+  --bg-glass: rgba(12, 18, 25, 0.8);
+  --bg-glass-heavy: rgba(9, 14, 22, 0.9);
+  --bg-glass-card: rgba(17, 24, 34, 0.66);
   
   /* Accents */
-  --accent-primary: #00f076;
-  --accent-primary-hover: #00ff84;
-  --accent-primary-glow: rgba(0, 240, 118, 0.35);
-  --accent-primary-dim: rgba(0, 240, 118, 0.12);
-  --accent-secondary: #00d4ff;
-  --accent-secondary-glow: rgba(0, 212, 255, 0.3);
-  --accent-secondary-dim: rgba(0, 212, 255, 0.12);
-  --accent-gold: #fbbf24;
-  --accent-gold-dim: rgba(251, 191, 36, 0.15);
+  --accent-primary: #7fe1af;
+  --accent-primary-hover: #9feac4;
+  --accent-primary-glow: rgba(127, 225, 175, 0.22);
+  --accent-primary-dim: rgba(127, 225, 175, 0.1);
+  --accent-secondary: #a8d2ff;
+  --accent-secondary-glow: rgba(168, 210, 255, 0.18);
+  --accent-secondary-dim: rgba(168, 210, 255, 0.1);
+  --accent-gold: #d9b66c;
+  --accent-gold-dim: rgba(217, 182, 108, 0.12);
 
   /* Status Colors */
   --status-online: #00f076;
@@ -82,18 +82,18 @@
 
 /* Light Theme Variables */
 body.light-mode {
-  --bg-app: #f1f5f9;
+  --bg-app: #f3f6f9;
   --bg-surface: #ffffff;
-  --bg-surface-elevated: #f8fafc;
-  --bg-surface-hover: #e2e8f0;
-  --bg-glass: rgba(255, 255, 255, 0.85);
-  --bg-glass-heavy: rgba(248, 250, 252, 0.95);
+  --bg-surface-elevated: #f7fafc;
+  --bg-surface-hover: #e8edf2;
+  --bg-glass: rgba(255, 255, 255, 0.8);
+  --bg-glass-heavy: rgba(248, 250, 252, 0.96);
   --bg-glass-card: rgba(255, 255, 255, 0.9);
   
-  --accent-primary: #059669;
-  --accent-primary-hover: #10b981;
-  --accent-primary-glow: rgba(5, 150, 105, 0.2);
-  --accent-primary-dim: rgba(5, 150, 105, 0.1);
+  --accent-primary: #3a8f72;
+  --accent-primary-hover: #5aa887;
+  --accent-primary-glow: rgba(58, 143, 114, 0.14);
+  --accent-primary-dim: rgba(58, 143, 114, 0.08);
   
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -165,8 +165,8 @@ html, body {
   position: relative;
   background-color: var(--bg-app);
   background-image: 
-    radial-gradient(circle at 10% 20%, rgba(0, 240, 118, 0.04) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(0, 212, 255, 0.04) 0%, transparent 40%);
+    radial-gradient(circle at 10% 20%, rgba(127, 225, 175, 0.03) 0%, transparent 38%),
+    radial-gradient(circle at 90% 80%, rgba(168, 210, 255, 0.025) 0%, transparent 35%);
   overflow: hidden;
 }
 
@@ -179,15 +179,15 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  background: linear-gradient(180deg, rgba(7, 12, 20, 0.92) 0%, rgba(7, 12, 20, 0.8) 100%);
+  padding: 0 18px 0 16px;
+  background: linear-gradient(180deg, rgba(9, 14, 21, 0.9) 0%, rgba(9, 14, 21, 0.76) 100%);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
   position: relative;
   z-index: 100;
-  gap: 16px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  gap: 14px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.08);
 }
 
 .header-left {
@@ -984,11 +984,11 @@ html, body {
    9. MESSAGE INPUT & COMPOSER
    -------------------------------------------------------------------------- */
 .message-input-area {
-  padding: 12px 18px;
-  background: var(--bg-glass);
+  padding: 10px 16px 12px;
+  background: rgba(10, 15, 21, 0.82);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid rgba(255,255,255,0.06);
   position: relative;
   z-index: 30;
 }
@@ -1044,7 +1044,7 @@ html, body {
 .message-form {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 7px;
   position: relative;
 }
 
@@ -1076,9 +1076,9 @@ html, body {
   position: relative;
   display: flex;
   align-items: flex-end;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: 24px;
+  background: rgba(17, 23, 31, 0.92);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 22px;
   padding-right: 6px;
   min-height: 44px;
   transition: var(--transition-fast);

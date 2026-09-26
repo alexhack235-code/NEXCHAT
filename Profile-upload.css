@@ -1,19 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@600;700;800&display=swap');
 
 :root {
-  --bg-space: #050b12;
-  --bg-panel: rgba(8, 15, 25, 0.82);
-  --panel-alt: rgba(14, 22, 34, 0.9);
-  --panel-soft: rgba(255, 255, 255, 0.04);
-  --card-border: rgba(138, 255, 206, 0.24);
-  --accent-emerald: #00f076;
-  --accent-emerald-soft: rgba(0, 240, 118, 0.14);
-  --accent-cyan: #00d4ff;
+  --bg-space: #070c13;
+  --bg-panel: rgba(10, 16, 23, 0.8);
+  --panel-alt: rgba(16, 24, 34, 0.9);
+  --panel-soft: rgba(255, 255, 255, 0.035);
+  --card-border: rgba(175, 210, 220, 0.15);
+  --accent-emerald: #8ae0b4;
+  --accent-emerald-soft: rgba(138, 224, 180, 0.12);
+  --accent-cyan: #b9d6ff;
   --text-primary: #f4fbff;
   --text-secondary: #c7d5e6;
-  --text-muted: #7a8ca6;
-  --input-bg: rgba(11, 19, 29, 0.92);
-  --input-border: rgba(255, 255, 255, 0.12);
+  --text-muted: #7d8ca1;
+  --input-bg: rgba(12, 18, 27, 0.9);
+  --input-border: rgba(255, 255, 255, 0.1);
   --radius-xs: 10px;
   --radius-sm: 14px;
   --radius-md: 18px;
@@ -46,9 +46,9 @@ body {
   overflow-x: hidden;
   color: var(--text-primary);
   background:
-    radial-gradient(circle at 20% 15%, rgba(0, 240, 118, 0.13), transparent 18%),
-    radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.12), transparent 20%),
-    radial-gradient(circle at 50% 80%, rgba(101, 77, 255, 0.12), transparent 18%),
+    radial-gradient(circle at 20% 15%, rgba(138, 224, 180, 0.08), transparent 20%),
+    radial-gradient(circle at 80% 20%, rgba(185, 214, 255, 0.06), transparent 18%),
+    radial-gradient(circle at 50% 80%, rgba(127, 86, 255, 0.05), transparent 22%),
     linear-gradient(135deg, #050b12 0%, #0a1320 100%);
 }
 
@@ -100,9 +100,9 @@ body {
   grid-template-columns: 0.9fr 1.3fr;
   background: rgba(6, 11, 18, 0.68);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 32px;
+  border-radius: 28px;
   overflow: hidden;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.64), 0 0 28px rgba(0, 240, 118, 0.12);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(22px);
 }
 
@@ -255,7 +255,7 @@ body {
 }
 
 .profile-panel {
-  padding: 26px 28px 30px;
+  padding: 22px 24px 28px;
   background: rgba(8, 13, 20, 0.72);
 }
 
@@ -263,8 +263,8 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: 14px;
+  margin-bottom: 16px;
 }
 
 .eyebrow {
@@ -360,13 +360,13 @@ body {
 }
 
 .profile-step h3 {
-  font-size: 1.22rem;
-  margin-bottom: 20px;
+  font-size: 1.18rem;
+  margin-bottom: 18px;
   color: var(--text-primary);
 }
 
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
   text-align: left;
 }
 
@@ -382,9 +382,9 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  padding: 18px 10px;
-  border-radius: 18px;
+  gap: 6px;
+  padding: 16px 10px 15px;
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-primary);

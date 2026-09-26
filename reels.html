@@ -132,62 +132,9 @@
         </div>
       </div>
 
-      <!-- Studio Dual-Pane Layout -->
+      <!-- Studio Workspace -->
       <div class="studio-dual-layout">
-        <!-- LEFT PANE: Real-Time Live Smartphone Reel Simulator -->
-        <aside class="studio-live-simulator">
-          <div class="simulator-phone-bezel">
-            <div class="simulator-speaker"></div>
-            <div class="simulator-screen" id="simulatorScreen">
-              <!-- Live Video Element in Simulator -->
-              <video id="simPreviewVideo" class="sim-video" playsinline muted loop></video>
-              <div id="simPlaceholder" class="sim-placeholder">
-                <i class="fa-solid fa-film text-4xl text-gray-500 mb-2"></i>
-                <span>Live Feed Preview</span>
-                <small class="text-xs text-gray-500 mt-1">Select a video to preview live stream</small>
-              </div>
-
-              <!-- Simulator Right Action Column -->
-              <div class="sim-action-column">
-                <div class="sim-action-item"><i class="fa-solid fa-heart"></i><span>1.2K</span></div>
-                <div class="sim-action-item"><i class="fa-solid fa-comment-dots"></i><span>84</span></div>
-                <div class="sim-action-item"><i class="fa-solid fa-bookmark text-[#FFD700]"></i><span>Save</span></div>
-                <div class="sim-action-item"><i class="fa-solid fa-share"></i><span>Share</span></div>
-                <div class="sim-action-item"><i class="fa-solid fa-coins text-[#FFD700]"></i><span>Tip</span></div>
-                <div class="sim-action-item"><i class="fa-solid fa-robot text-[#00f3ff]"></i></div>
-                <div class="sim-sound-disc-mini"><i class="fa-solid fa-compact-disc"></i></div>
-              </div>
-
-              <!-- Simulator Bottom Metadata -->
-              <div class="sim-bottom-meta">
-                <div class="flex items-center gap-2 mb-1">
-                  <img id="simCreatorAvatar" src="favicon.png" alt="Avatar" class="sim-creator-avatar">
-                  <span id="simCreatorHandle" class="sim-creator-handle">@creator</span>
-                  <span class="sim-follow-tag">Follow</span>
-                </div>
-                <p id="simCaptionText" class="sim-caption-text">Watch my new reel! #nexchat #cyberpunk</p>
-                <div class="sim-sound-row">
-                  <i class="fa-solid fa-music text-[10px]"></i>
-                  <span id="simSoundLabel" class="truncate">Original Audio — @creator</span>
-                </div>
-              </div>
-
-              <!-- Simulator Bottom Scrubber -->
-              <div class="sim-bottom-scrubber">
-                <div class="sim-scrubber-fill" style="width: 35%;"></div>
-              </div>
-
-              <!-- Top Simulator Live Badge -->
-              <div class="sim-top-badge">
-                <span class="sim-live-dot"></span>
-                <span>LIVE PREVIEW</span>
-              </div>
-            </div>
-          </div>
-        </aside>
-
-        <!-- RIGHT PANE: Studio Controls & Telemetry -->
-        <main class="studio-controls-column">
+        <main class="studio-controls-column studio-single-column">
           <form id="uploadReelForm" class="studio-form">
             <!-- Step 1: Upload Video -->
             <div class="studio-card-section">
