@@ -2,7 +2,10 @@
 When you receive this repository on a new machine or environment, perform these tasks in order:
 
 1) Verify environment: Python 3.11+, Rust 1.75+, Docker (or WSL), Git.
-2) NEX 3D Studio: Open `nex-3d-studio.html` directly in any modern browser for immediate real-time 3D generation, or run Next.js 14 at `/app/studio` with the backend at port 8001.
+2) NEX Studio Labs:
+   - 3D Web Studio: Open `nex-3d-studio.html` or `/studio`
+   - App Forge (v0 + Bolt): `/studio/apps` (Type idea -> Live app -> Vercel/NEX Store)
+   - Game Dev Lab (Unreal Engine 5): `/studio/games` (Impossible animations, inverted gravity, 10k particle NEX logo)
 
 3) Create `backend/.env` (populate `HF_API_KEY`, `REDIS_URL`, `MODERATION_ENABLED`, etc.). Do NOT commit.
 

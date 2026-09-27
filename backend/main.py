@@ -546,6 +546,7 @@ include_optional_router(app, "routers.vllm_proxy", "router", prefix="/api", tags
 include_optional_router(app, "routers.autonomous_mind", "router", prefix="/api", tags=["Autonomous Thinking"])
 include_optional_router(app, "routers.code_doctor", "router", prefix="/api", tags=["Code Doctor & Heavy Systems"])
 include_optional_router(app, "routers.nex_3d_studio", "router", prefix="/api", tags=["NEX 3D Studio"])
+include_optional_router(app, "routers.nex_studio_labs", "router", prefix="/api", tags=["NEX Studio Labs"])
 
 # Register Subsystems
 include_optional_router(app, "neural_core.router", "router", prefix="/api", tags=["Neural Synaptic Core"])
