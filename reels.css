@@ -2927,9 +2927,7 @@ html, body {
 
 @media (max-width: 640px) {
   .floating-create-reel-wrapper {
-    bottom: 20px;
-    right: 50%;
-    transform: translateX(50%);
+    display: none; /* TikTok style: top header or bottom nav handles reel creation; no button blocking comments */
   }
 }
 
@@ -3631,5 +3629,165 @@ html, body {
   background: rgba(57, 255, 20, 0.15);
   color: #39FF14;
   border: 1px solid rgba(57, 255, 20, 0.3);
+}
+
+/* ══════════════════════════════════════════════════
+   BUG FIX: Quality pill disabled state (no upscale)
+   ══════════════════════════════════════════════════ */
+.quality-pill.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-color: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.quality-pill .quality-warning {
+  font-size: 9px;
+  font-weight: 600;
+  color: #f59e0b;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* ══════════════════════════════════════════════════
+   BUG FIX: Multi-phase upload progress
+   ══════════════════════════════════════════════════ */
+.upload-phase-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  margin-bottom: 4px;
+}
+
+.upload-phase-label .phase-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--neon-green);
+  box-shadow: 0 0 6px var(--neon-green);
+  animation: pulse-dot 1.5s infinite;
+}
+
+.upload-phase-label .phase-dot.phase-done {
+  background: var(--neon-green);
+  animation: none;
+}
+
+.upload-phase-label .phase-dot.phase-waiting {
+  background: rgba(255, 255, 255, 0.2);
+  animation: none;
+  box-shadow: none;
+}
+
+.upload-eta-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+/* ══════════════════════════════════════════════════
+   BUG FIX: Dropzone drag-over animation
+   ══════════════════════════════════════════════════ */
+.reels-file-dropzone.drag-over {
+  border-color: var(--neon-green) !important;
+  background: rgba(57, 255, 20, 0.12) !important;
+  box-shadow: inset 0 0 24px rgba(57, 255, 20, 0.15);
+  transform: scale(1.01);
+}
+
+/* ══════════════════════════════════════════════════
+   Upload success state
+   ══════════════════════════════════════════════════ */
+.upload-success-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.upload-success-state .success-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(57, 255, 20, 0.15);
+  border: 2px solid var(--neon-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--neon-green);
+  animation: success-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes success-pop {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.upload-success-state h4 {
+  font-size: 16px;
+  font-weight: 800;
+  color: #fff;
+}
+
+.upload-success-state p {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════════════════
+   BUG FIX: Hashtag bar overflow on mobile
+   ══════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .quick-hashtag-bar {
+    flex-wrap: wrap;
+    overflow: visible;
+    max-width: 100%;
+  }
+
+  .hashtag-pill {
+    flex-shrink: 0;
+  }
+
+  .persona-choice-row {
+    grid-template-columns: 1fr;
+  }
+
+  .quality-selector-pills {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+}
+
+/* ══════════════════════════════════════════════════
+   Ready to Post button states
+   ══════════════════════════════════════════════════ */
+.studio-publish-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.studio-publish-btn:disabled:hover {
+  transform: none;
+}
+
+/* File validation error state */
+.dropzone-error-msg {
+  color: #ef4444;
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 

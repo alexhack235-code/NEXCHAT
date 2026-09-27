@@ -123,6 +123,13 @@ let selectedReelThumbnailDataUrl = null;
 let selectedSound = { title: 'Original Audio', artist: '', url: '' };
 let previewAudio = null;
 let currentPlayingSoundAudio = null;
+
+// BUG FIX: Upload state management
+let uploadAbortController = null;   // AbortController for canceling uploads
+let detectedVideoWidth = 0;         // Source video width (for quality gating)
+let detectedVideoHeight = 0;        // Source video height (for quality gating)
+let uploadStartTime = 0;            // Timestamp for ETA calculation
+let currentUploadXHR = null;        // XHR reference for aborting
 let followedAuthors = new Set(JSON.parse(localStorage.getItem('nex_followed_authors') || '[]'));
 let activeShareReel = null;
 let activeProfileAuthor = null;
@@ -744,18 +751,10 @@ function renderReels(reelsList) {
             <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
           </div>
 
-          <!-- Tip Tokens -->
+          <!-- More Actions (TikTok 5-icon Clean Specification) -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="tip-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Tip Creator Tokens">
-              <i class="fa-solid fa-coins text-[24px] text-[#FFD700] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-            </button>
-            <span class="text-[11px] font-bold text-[#FFD700] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Tip</span>
-          </div>
-
-          <!-- Bot icon (ChronEX AI) -->
-          <div class="flex flex-col items-center cursor-pointer">
-            <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="ChronEX AI Assistant">
-              <i class="fa-solid fa-robot text-[24px] text-[#00f3ff] drop-shadow-[0_2px_5px_rgba(0,243,255,0.7)]"></i>
+            <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="More Actions (AI & Tips)">
+              <i class="fa-solid fa-ellipsis text-[22px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
             </button>
           </div>
 
@@ -1030,7 +1029,7 @@ function renderReels(reelsList) {
         isGlobalMuted = false;
         globalSoundToggle.querySelector('i').className = 'fa-solid fa-volume-high';
         if (card._customAudio) card._customAudio.muted = false;
-        showToast('Sound Unmuted');
+        showPlayIndicator(playIndicator, 'fa-volume-high');
       }
 
       if (videoEl.paused) {
@@ -1981,7 +1980,15 @@ function closeCreatorStudio() {
 if (openUploadModalBtn) openUploadModalBtn.addEventListener('click', openCreatorStudio);
 if (floatingCreateReelBtn) floatingCreateReelBtn.addEventListener('click', openCreatorStudio);
 if (closeUploadModalBtn) closeUploadModalBtn.addEventListener('click', closeCreatorStudio);
-if (cancelUploadBtn) cancelUploadBtn.addEventListener('click', closeCreatorStudio);
+if (cancelUploadBtn) cancelUploadBtn.addEventListener('click', () => {
+  // BUG FIX: Actually abort in-progress upload before closing
+  if (currentUploadXHR) {
+    currentUploadXHR.abort();
+    currentUploadXHR = null;
+    showToast('Upload cancelled');
+  }
+  closeCreatorStudio();
+});
 
 // Real-Time Simulator Preview Sync
 function syncSimulatorPreview() {
@@ -2048,6 +2055,57 @@ reelDropzone.addEventListener('click', () => {
   reelVideoInput.click();
 });
 
+// BUG FIX: Drag & drop support for video files
+reelDropzone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  reelDropzone.classList.add('drag-over');
+});
+
+reelDropzone.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  reelDropzone.classList.remove('drag-over');
+});
+
+reelDropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  reelDropzone.classList.remove('drag-over');
+  const files = e.dataTransfer?.files;
+  if (files && files.length > 0) {
+    const file = files[0];
+    if (validateVideoFile(file)) {
+      // Trigger the same handler as file input change
+      reelVideoInput.files = e.dataTransfer.files;
+      reelVideoInput.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+  }
+});
+
+// BUG FIX: File validation (max size 250MB, valid video type)
+const MAX_VIDEO_SIZE_BYTES = 250 * 1024 * 1024; // 250MB
+const VALID_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v', 'video/avi'];
+
+function validateVideoFile(file) {
+  if (!file) return false;
+
+  // Type check
+  if (!file.type.startsWith('video/') && !VALID_VIDEO_TYPES.includes(file.type)) {
+    showToast('Invalid file type. Please select MP4, WebM, or MOV.');
+    return false;
+  }
+
+  // Size check
+  if (file.size > MAX_VIDEO_SIZE_BYTES) {
+    const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+    showToast(`File too large (${sizeMb} MB). Maximum is 250 MB.`);
+    return false;
+  }
+
+  return true;
+}
+
 // Character counter for Caption
 if (reelCaptionInput && reelCaptionCounter) {
   reelCaptionInput.addEventListener('input', () => {
@@ -2073,18 +2131,97 @@ document.querySelectorAll('.hashtag-pill').forEach((pill) => {
 let selectedQualityMode = 'fhd';
 document.querySelectorAll('.quality-pill').forEach((btn) => {
   btn.addEventListener('click', () => {
+    // BUG FIX: Don't allow selecting disabled (upscale) quality pills
+    if (btn.classList.contains('disabled')) return;
     document.querySelectorAll('.quality-pill').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     selectedQualityMode = btn.dataset.quality;
   });
 });
 
+// BUG FIX: Auto-detect resolution and gate quality pills to prevent upscaling
+function updateQualityPillsForResolution(width, height) {
+  const qualityPills = document.querySelectorAll('.quality-pill');
+  const maxDim = Math.max(width, height);
+
+  qualityPills.forEach((pill) => {
+    const q = pill.dataset.quality;
+    // Remove any existing warning labels
+    const existingWarn = pill.querySelector('.quality-warning');
+    if (existingWarn) existingWarn.remove();
+
+    pill.classList.remove('disabled');
+
+    if (q === '4k' && maxDim < 2160) {
+      pill.classList.add('disabled');
+      pill.classList.remove('active');
+      const warn = document.createElement('span');
+      warn.className = 'quality-warning';
+      warn.textContent = `Source is ${maxDim >= 1080 ? '1080p' : maxDim >= 720 ? '720p' : maxDim + 'p'} — upscaling won't improve quality`;
+      pill.appendChild(warn);
+    }
+
+    if (q === 'fhd' && maxDim < 1080) {
+      pill.classList.add('disabled');
+      pill.classList.remove('active');
+      const warn = document.createElement('span');
+      warn.className = 'quality-warning';
+      warn.textContent = `Source is ${maxDim >= 720 ? '720p' : maxDim + 'p'}`;
+      pill.appendChild(warn);
+    }
+  });
+
+  // BUG FIX: Auto-select best MATCHING quality based on source resolution
+  autoSelectBestQuality(maxDim);
+}
+
+// Auto-select the highest quality that matches the source resolution
+function autoSelectBestQuality(maxDim) {
+  const qualityPills = document.querySelectorAll('.quality-pill');
+  const keepOriginal = document.getElementById('keepOriginalQuality');
+
+  // Determine best matching quality
+  let bestQuality = 'hd'; // default fallback
+  if (maxDim >= 2160) bestQuality = '4k';
+  else if (maxDim >= 1080) bestQuality = 'fhd';
+  else bestQuality = 'hd';
+
+  // If "Upload in highest available quality" is checked, auto-select
+  if (keepOriginal && keepOriginal.checked) {
+    qualityPills.forEach(p => p.classList.remove('active'));
+    const targetPill = [...qualityPills].find(p => p.dataset.quality === bestQuality);
+    if (targetPill && !targetPill.classList.contains('disabled')) {
+      targetPill.classList.add('active');
+      selectedQualityMode = bestQuality;
+    } else {
+      // Fallback: select the highest non-disabled pill
+      const available = [...qualityPills].filter(p => !p.classList.contains('disabled'));
+      if (available.length > 0) {
+        qualityPills.forEach(p => p.classList.remove('active'));
+        available[available.length - 1].classList.add('active');
+        selectedQualityMode = available[available.length - 1].dataset.quality;
+      }
+    }
+  }
+}
+
+// BUG FIX: "Upload in highest available quality" checkbox auto-selects best
+const keepOriginalQualityCb = document.getElementById('keepOriginalQuality');
+if (keepOriginalQualityCb) {
+  keepOriginalQualityCb.addEventListener('change', () => {
+    if (detectedVideoHeight > 0 || detectedVideoWidth > 0) {
+      autoSelectBestQuality(Math.max(detectedVideoWidth, detectedVideoHeight));
+    }
+  });
+}
+
 reelVideoInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  if (!file.type.startsWith('video/')) {
-    showToast('Please select a valid video file (.mp4, .webm, .mov)');
+  // BUG FIX: Validate file type and size before processing
+  if (!validateVideoFile(file)) {
+    reelVideoInput.value = '';
     return;
   }
 
@@ -2122,6 +2259,11 @@ reelVideoInput.addEventListener('change', async (e) => {
     if (thumbData) {
       selectedReelThumbnailBlob = thumbData.blob;
       selectedReelThumbnailDataUrl = thumbData.dataUrl;
+
+      // BUG FIX: Store detected resolution for quality gating
+      detectedVideoWidth = thumbData.width;
+      detectedVideoHeight = thumbData.height;
+
       const resCategory = thumbData.width >= 3800 ? '4K Ultra HD' : (thumbData.width >= 1000 ? '1080p FHD' : '720p HD');
       if (reelHdSpecText) {
         reelHdSpecText.textContent = `${thumbData.width}x${thumbData.height} ${resCategory} • Lossless H.264`;
@@ -2132,6 +2274,10 @@ reelVideoInput.addEventListener('change', async (e) => {
       if (studioThumbBox) {
         studioThumbBox.style.display = 'flex';
       }
+
+      // BUG FIX: Update quality pills based on detected source resolution
+      updateQualityPillsForResolution(thumbData.width, thumbData.height);
+
       showToast(`Analyzed: ${resCategory} (${thumbData.width}x${thumbData.height})`);
     }
   } catch (err) {
@@ -2156,6 +2302,15 @@ function resetVideoPicker() {
   reelPreviewVideo.pause();
   reelPreviewVideo.src = '';
   reelPreviewContainer.style.display = 'none';
+
+  // BUG FIX: Reset detected resolution and quality pill states
+  detectedVideoWidth = 0;
+  detectedVideoHeight = 0;
+  document.querySelectorAll('.quality-pill').forEach((pill) => {
+    pill.classList.remove('disabled');
+    const warn = pill.querySelector('.quality-warning');
+    if (warn) warn.remove();
+  });
   if (simPreviewVideo) {
     simPreviewVideo.pause();
     simPreviewVideo.src = '';
@@ -2182,15 +2337,39 @@ function resetUploadForm() {
   selectedSoundLabel.textContent = 'Original Audio — (Video Sound)';
   submitReelBtn.disabled = false;
   submitReelBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Publish Reel to NEX Stream';
+
+  // BUG FIX: Reset upload success state and progress labels
+  const successState = document.getElementById('uploadSuccessState');
+  if (successState) successState.style.display = 'none';
+  const etaLabel = document.getElementById('reelProgressEta');
+  if (etaLabel) etaLabel.textContent = '';
+  const phaseText = document.getElementById('uploadPhaseText');
+  if (phaseText) phaseText.textContent = 'Phase 1: Uploading video...';
+  const progressLabel = document.getElementById('reelProgressLabel');
+  if (progressLabel) progressLabel.textContent = 'Uploading your reel...';
+
+  // BUG FIX: Abort any in-progress upload
+  if (currentUploadXHR) {
+    currentUploadXHR.abort();
+    currentUploadXHR = null;
+  }
+
   syncSimulatorPreview();
 }
 
-// Publish Reel to Cloudinary Pool with Highest HD/4K Parameters
+// Publish Reel — BUG FIX: Proper 2-phase upload progress + ETA + Cancel
 uploadReelForm.addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (!selectedReelFile) {
     showToast('Please select a video file first');
+    return;
+  }
+
+  // BUG FIX: Validate that identity is selected
+  const chosenPersona = document.querySelector('input[name="studioPersonaRadio"]:checked')?.value || 'general';
+  if (!chosenPersona) {
+    showToast('Please select a publishing identity');
     return;
   }
 
@@ -2206,16 +2385,31 @@ uploadReelForm.addEventListener('submit', async (e) => {
     bitRate = '5000k';
   }
 
-  // Determine publishing identity based on user persona radio selection
-  const chosenPersona = document.querySelector('input[name="studioPersonaRadio"]:checked')?.value || 'general';
+  // BUG FIX: Determine publishing identity correctly
   const publishAuthorName = (chosenPersona === 'custom' && myCreatorName) ? myCreatorName : myUsername;
   const publishAuthorPic = (chosenPersona === 'custom' && customReelsAvatar) ? customReelsAvatar : (generalProfilePic || myProfilePic || 'favicon.png');
 
   submitReelBtn.disabled = true;
-  submitReelBtn.innerHTML = '<div class="cyber-spinner" style="width:16px;height:16px;border-width:2px;"></div> Uploading HD Stream...';
+  submitReelBtn.innerHTML = '<div class="cyber-spinner" style="width:16px;height:16px;border-width:2px;"></div> Uploading...';
   reelUploadProgressWrapper.style.display = 'flex';
 
+  // BUG FIX: Phase 1 — Real upload progress with ETA
+  const phaseText = document.getElementById('uploadPhaseText');
+  const phaseDot = document.getElementById('uploadPhaseDot');
+  const progressLabel = document.getElementById('reelProgressLabel');
+  const etaLabel = document.getElementById('reelProgressEta');
+  const successState = document.getElementById('uploadSuccessState');
+
+  if (phaseText) phaseText.textContent = 'Phase 1: Uploading video...';
+  if (phaseDot) { phaseDot.className = 'phase-dot'; }
+  if (progressLabel) progressLabel.textContent = 'Uploading your reel...';
+  if (etaLabel) etaLabel.textContent = '';
+  if (successState) successState.style.display = 'none';
+
+  uploadStartTime = Date.now();
+
   try {
+    // Phase 1: Upload with true upload progress
     const uploadResult = await uploadReelVideo(selectedReelFile, {
       uid: myUID || 'anon',
       quality: 'auto:best',
@@ -2223,19 +2417,45 @@ uploadReelForm.addEventListener('submit', async (e) => {
       videoCodec: 'h264',
       bitRate: bitRate,
       eager: 'q_auto:best',
+      // BUG FIX: Store XHR reference for abort support
+      onXHRCreated: (xhr) => { currentUploadXHR = xhr; },
       onProgress: (percent, msg, vaultName) => {
+        // BUG FIX: Show TRUE upload progress (bytes sent to server)
         reelProgressBarFill.style.width = `${percent}%`;
         reelProgressPercent.textContent = `${percent}%`;
-        reelProgressVault.textContent = `Optimizing HD stream (${msg})`;
+        reelProgressVault.textContent = `Uploading (${msg})`;
+        if (progressLabel) progressLabel.textContent = `Uploading your reel... ${percent}%`;
+
+        // BUG FIX: Calculate and display ETA
+        if (percent > 0 && percent < 100 && uploadStartTime) {
+          const elapsed = (Date.now() - uploadStartTime) / 1000;
+          const totalEstimate = (elapsed / percent) * 100;
+          const remaining = Math.max(0, totalEstimate - elapsed);
+          if (remaining > 60) {
+            if (etaLabel) etaLabel.textContent = `~${Math.ceil(remaining / 60)} min remaining`;
+          } else if (remaining > 0) {
+            if (etaLabel) etaLabel.textContent = `~${Math.ceil(remaining)}s remaining`;
+          }
+        }
       },
     });
 
+    // Phase 1 complete — transition to Phase 2
+    reelProgressBarFill.style.width = '100%';
+    reelProgressPercent.textContent = '100%';
+    if (phaseText) phaseText.textContent = 'Phase 2: Processing...';
+    if (progressLabel) progressLabel.textContent = 'Processing uploaded video...';
+    if (phaseDot) { phaseDot.className = 'phase-dot phase-done'; }
+    if (etaLabel) etaLabel.textContent = '';
+    reelProgressVault.textContent = 'Server-side optimization in progress...';
+
     console.log('[NEX_REELS] HD Video Saved to Cloudinary Vault:', uploadResult.vault);
 
+    // Phase 2: Upload thumbnail (non-blocking progress)
     let thumbnailUrl = '';
     if (selectedReelThumbnailBlob) {
       try {
-        reelProgressVault.textContent = 'Uploading High-Res Poster Thumbnail...';
+        reelProgressVault.textContent = 'Uploading poster thumbnail...';
         const thumbUpload = await uploadImageToCloudinary(selectedReelThumbnailBlob, {
           folder: 'nexchat-reels-posters',
         });
@@ -2247,8 +2467,9 @@ uploadReelForm.addEventListener('submit', async (e) => {
       }
     }
 
-    // Commit to Firestore 'reels' collection
-    await addDoc(collection(db, 'reels'), {
+    // Phase 2: Commit to Firestore 'reels' collection
+    reelProgressVault.textContent = 'Publishing to NEX_REELS stream...';
+    const reelDocRef = await addDoc(collection(db, 'reels'), {
       videoUrl: uploadResult.url,
       thumbnailUrl: thumbnailUrl || '',
       rawBlobUrl: uploadResult.rawBlobUrl || uploadResult.url,
@@ -2264,6 +2485,7 @@ uploadReelForm.addEventListener('submit', async (e) => {
       authorId: myUID || 'anonymous',
       authorName: publishAuthorName,
       authorPic: publishAuthorPic,
+      publishingIdentity: chosenPersona,  // BUG FIX: Include selected identity in payload
       likes: [],
       likesCount: 0,
       commentsCount: 0,
@@ -2272,13 +2494,35 @@ uploadReelForm.addEventListener('submit', async (e) => {
       createdAt: serverTimestamp(),
     });
 
+    // BUG FIX: Show success state instead of immediately closing
+    if (successState) successState.style.display = 'flex';
+    if (phaseText) phaseText.textContent = 'Complete!';
+    if (phaseDot) { phaseDot.className = 'phase-dot phase-done'; }
+    if (progressLabel) progressLabel.textContent = 'Reel posted successfully!';
+    reelProgressVault.textContent = '';
+    if (etaLabel) etaLabel.textContent = '';
+    submitReelBtn.innerHTML = '<i class="fa-solid fa-check"></i> Posted!';
     showToast('HD Reel posted successfully!');
-    closeCreatorStudio();
+
+    // Auto-close after 2.5 seconds
+    setTimeout(() => {
+      closeCreatorStudio();
+    }, 2500);
+
   } catch (err) {
-    console.error('Reel upload error:', err);
-    showToast(`Upload failed: ${err.message}`);
+    // BUG FIX: Better error handling with retry
+    if (err.name === 'AbortError' || err.message?.includes('abort')) {
+      showToast('Upload cancelled');
+    } else {
+      console.error('Reel upload error:', err);
+      showToast(`Upload failed: ${err.message}`);
+    }
     submitReelBtn.disabled = false;
-    submitReelBtn.innerHTML = '<i class="fa-solid fa-rocket"></i> Try Again';
+    submitReelBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Retry Upload';
+    if (etaLabel) etaLabel.textContent = '';
+    if (phaseText) phaseText.textContent = 'Upload failed';
+    if (phaseDot) phaseDot.className = 'phase-dot';
+    currentUploadXHR = null;
   }
 });
 

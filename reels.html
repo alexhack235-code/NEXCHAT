@@ -293,10 +293,15 @@
               </label>
             </div>
 
-            <!-- Step 6: Multi-Stage Telemetry Upload Progress -->
+            <!-- Step 6: Multi-Phase Upload Progress (BUG FIX: Separated upload vs processing) -->
             <div id="reelUploadProgressWrapper" class="reels-progress-wrapper" style="display: none;">
+              <!-- Phase indicator -->
+              <div class="upload-phase-label">
+                <span class="phase-dot" id="uploadPhaseDot"></span>
+                <span id="uploadPhaseText">Phase 1: Uploading video...</span>
+              </div>
               <div class="progress-header-row">
-                <span class="progress-title"><i class="fa-solid fa-spinner fa-spin text-[#39FF14]"></i> Uploading your reel...</span>
+                <span class="progress-title"><i class="fa-solid fa-spinner fa-spin text-[#39FF14]"></i> <span id="reelProgressLabel">Uploading your reel...</span></span>
                 <span id="reelProgressPercent" class="progress-pct">0%</span>
               </div>
               <div class="reels-progress-bar">
@@ -304,6 +309,13 @@
               </div>
               <div class="reels-progress-status">
                 <span id="reelProgressVault">Uploading video...</span>
+                <span id="reelProgressEta" class="upload-eta-label"></span>
+              </div>
+              <!-- Success state (shown after upload completes) -->
+              <div id="uploadSuccessState" class="upload-success-state" style="display: none;">
+                <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+                <h4>Reel Posted Successfully!</h4>
+                <p>Your reel is now live on NEX_REELS</p>
               </div>
             </div>
 

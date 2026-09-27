@@ -64,6 +64,11 @@ async function uploadToSingleVault(file, vaultIndex, options = {}) {
     const xhr = new XMLHttpRequest();
     const endpoint = `/api/upload?type=reels&vault=${vaultIndex}&filename=${encodeURIComponent(filename)}`;
 
+    // BUG FIX: Expose XHR for abort support
+    if (options.onXHRCreated) {
+      options.onXHRCreated(xhr);
+    }
+
     xhr.open('POST', endpoint, true);
     xhr.setRequestHeader('x-filename', filename);
     xhr.setRequestHeader('x-upload-type', 'reels');
@@ -84,6 +89,11 @@ async function uploadToSingleVault(file, vaultIndex, options = {}) {
         }
       };
     }
+
+    // BUG FIX: Handle abort event
+    xhr.onabort = () => {
+      reject(new DOMException('Upload aborted by user', 'AbortError'));
+    };
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
