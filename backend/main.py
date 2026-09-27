@@ -5,13 +5,20 @@ import subprocess
 import tempfile
 import logging
 from pathlib import Path
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse
 from dotenv import load_dotenv
 import httpx
 
 load_dotenv()
 logger = logging.getLogger("nexium.main")
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+CHAT_HTML_PATH = PROJECT_ROOT / "chat.html"
+STUDIO_HTML_PATH = PROJECT_ROOT / "nex-3d-studio.html"
+CSS_PATH = PROJECT_ROOT / "css"
 
 try:
     from .rust_engine import engine as rust_core
@@ -23,6 +30,10 @@ except ImportError:
 
 app = FastAPI(title="NEXIUM AI - Autonomous Workstation", version="3.0.0")
 
+# Mount CSS directory if it exists
+if CSS_PATH.exists():
+    app.mount("/css", StaticFiles(directory=str(CSS_PATH)), name="css")
+
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
@@ -32,9 +43,228 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Root endpoint
+# Root endpoint: Returns Master Launch Deck for browser, or JSON for API clients
 @app.get("/")
-async def root():
+async def root(request: Request):
+    accept_header = request.headers.get("accept", "")
+    if "text/html" in accept_header:
+        html_dashboard = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXIUM // Master Autonomous Cockpit</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            background: #08080c;
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2.5rem 1.5rem;
+        }}
+        .container {{ max-width: 1100px; margin: 0 auto; width: 100%; }}
+        .header {{ text-align: center; margin-bottom: 3rem; }}
+        .badge {{
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 9999px;
+            color: #00F0FF;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 1rem;
+        }}
+        .badge .dot {{ width: 8px; height: 8px; border-radius: 50%; background: #00FF88; box-shadow: 0 0 10px #00FF88; animation: pulse 2s infinite; }}
+        @keyframes pulse {{ 0%, 100% {{ opacity: 1; }} 50% {{ opacity: 0.4; }} }}
+        h1 {{
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff 40%, #a1a1aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }}
+        .subtitle {{ color: #71717a; font-size: 1rem; max-width: 600px; margin: 0 auto; }}
+        .grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 3rem;
+        }}
+        .card {{
+            background: rgba(18, 18, 24, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.25rem;
+            padding: 1.75rem;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }}
+        .card:hover {{
+            transform: translateY(-4px);
+            border-color: rgba(255, 255, 255, 0.25);
+            background: rgba(24, 24, 32, 0.85);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+        }}
+        .card-icon {{
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1.25rem;
+        }}
+        .card h2 {{ font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #ffffff; }}
+        .card p {{ font-size: 0.85rem; color: #a1a1aa; line-height: 1.5; margin-bottom: 1.5rem; flex-grow: 1; }}
+        .card-footer {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }}
+        .cta-btn {{
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: 0.2s;
+        }}
+        .card:hover .cta-btn {{ background: #ffffff; color: #000000; }}
+        footer {{
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #52525b;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="badge">
+                <span class="dot"></span>
+                <span>NEXIUM 3.8 HIGH // LIVE ON LOCALHOST:8001</span>
+            </div>
+            <h1>NEX Web Creation & AI Cockpit</h1>
+            <p class="subtitle">Autonomous AI coding, real-time 3D synthesis, and physics-defying game animation engine running locally on your hardware.</p>
+        </header>
+
+        <div class="grid">
+            <!-- NEXCHAT Workstation -->
+            <a href="/chat" class="card">
+                <div>
+                    <div class="card-icon" style="background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3);">💬</div>
+                    <h2>NEXCHAT Web Creation Engine</h2>
+                    <p>The primary full-stack development workstation with autonomous file synthesis, Code Doctor diagnostic tools, and live terminal interaction.</p>
+                </div>
+                <div class="card-footer">
+                    <span style="color: #00F0FF;">PORT 8001 /chat</span>
+                    <span class="cta-btn">Launch Station →</span>
+                </div>
+            </a>
+
+            <!-- NEX 3D Studio -->
+            <a href="/studio" class="card">
+                <div>
+                    <div class="card-icon" style="background: rgba(254, 44, 85, 0.15); border: 1px solid rgba(254, 44, 85, 0.3);">⚡</div>
+                    <h2>NEX 3D Studio</h2>
+                    <p>Prompt-to-3D website generator in &lt;3 seconds. React Three Fiber, WebGL shaders, OrbitControls, and 3 Midjourney-style 3D variants.</p>
+                </div>
+                <div class="card-footer">
+                    <span style="color: #FE2C55;">PORT 8001 /studio</span>
+                    <span class="cta-btn">Open Studio →</span>
+                </div>
+            </a>
+
+            <!-- App Forge -->
+            <a href="/chat" class="card">
+                <div>
+                    <div class="card-icon" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3);">🛠️</div>
+                    <h2>NEX App Forge</h2>
+                    <p>v0 + Bolt.new style in-browser app creator with virtual WebContainer memory filesystem, multi-file code editor, and 1-click deployment.</p>
+                </div>
+                <div class="card-footer">
+                    <span style="color: #a855f7;">v0 + Bolt Engine</span>
+                    <span class="cta-btn">Forge App →</span>
+                </div>
+            </a>
+
+            <!-- Game Dev Lab -->
+            <a href="/studio" class="card">
+                <div>
+                    <div class="card-icon" style="background: rgba(0, 255, 136, 0.15); border: 1px solid rgba(0, 255, 136, 0.3);">🎮</div>
+                    <h2>Game Dev Lab</h2>
+                    <p>Unreal Engine 5 impossible animations in browser: inverted gravity (-9.8 m/s²), 0.05x bullet time, and 10k particle NEX logo assembly.</p>
+                </div>
+                <div class="card-footer">
+                    <span style="color: #00FF88;">Unreal Mode ON</span>
+                    <span class="cta-btn">Enter Lab →</span>
+                </div>
+            </a>
+
+            <!-- 3D Reels Feed -->
+            <a href="/chat" class="card">
+                <div>
+                    <div class="card-icon" style="background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3);">📱</div>
+                    <h2>NEX Reels 3D Feed</h2>
+                    <p>TikTok-style vertical snap-scrolling 3D feed with Paystack tipping jar, interactive sound waves, and 1-swipe lab remixing.</p>
+                </div>
+                <div class="card-footer">
+                    <span style="color: #FFD700;">TikTok 3D Snap</span>
+                    <span class="cta-btn">Watch Reels →</span>
+                </div>
+            </a>
+
+            <!-- Swagger OpenAPI Docs -->
+            <a href="/docs" class="card">
+                <div>
+                    <div class="card-icon" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);">📖</div>
+                    <h2>REST & SSE API Docs</h2>
+                    <p>Interactive OpenAPI documentation for all 3D compilation, Web Factory, Autonomous Mind, and Code Doctor endpoints.</p>
+                </div>
+                <div class="card-footer">
+                    <span style="color: #71717a;">OpenAPI v3</span>
+                    <span class="cta-btn">View Docs →</span>
+                </div>
+            </a>
+        </div>
+
+        <footer>
+            NEXIUM-AI • Powered by Rust SIMD Core + Ollama + Three.js • Lagos Senior Dev Grade ⚡
+        </footer>
+    </div>
+</body>
+</html>"""
+        return HTMLResponse(content=html_dashboard, status_code=200)
+
     return {
         "status": "online",
         "service": "NEXIUM AI",
@@ -42,7 +272,24 @@ async def root():
         "rust_engine": rust_core.get_version() if rust_core else "Python Fallback",
         "is_native_rust": rust_core.is_native if rust_core else False,
         "docs_url": "/docs",
+        "cockpit_url": "http://localhost:8001/",
+        "chat_url": "http://localhost:8001/chat",
+        "studio_url": "http://localhost:8001/studio",
     }
+
+# Dedicated endpoints to serve HTML applications
+@app.get("/chat")
+async def serve_chat():
+    if CHAT_HTML_PATH.exists():
+        return FileResponse(str(CHAT_HTML_PATH), media_type="text/html")
+    return HTMLResponse("<h1>chat.html not found</h1>", status_code=404)
+
+@app.get("/studio")
+async def serve_studio():
+    if STUDIO_HTML_PATH.exists():
+        return FileResponse(str(STUDIO_HTML_PATH), media_type="text/html")
+    return HTMLResponse("<h1>nex-3d-studio.html not found</h1>", status_code=404)
+
 
 # Health check endpoints
 @app.get("/health")
