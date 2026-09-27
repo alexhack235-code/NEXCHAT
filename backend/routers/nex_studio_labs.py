@@ -227,3 +227,27 @@ async def export_game_project(req: GameExportRequest):
             "format": fmt,
             "status": "ready"
         }
+
+# ============================================================================
+# Paystack Tip Jar Endpoints
+# ============================================================================
+class PaystackTipRequest(BaseModel):
+    email: str = Field(..., description="Supporter email address")
+    amount: int = Field(..., description="Amount in kobo (NGN) or cents (USD)")
+    currency: Optional[str] = Field(default="NGN")
+    recipient: Optional[str] = Field(default="alexander")
+
+@router.post("/paystack/tip")
+async def initialize_paystack_tip(req: PaystackTipRequest):
+    """Initializes a Paystack tip jar payment reference."""
+    ref = f"NEX-TIP-{uuid.uuid4().hex[:10].upper()}"
+    return {
+        "success": True,
+        "reference": ref,
+        "amount": req.amount,
+        "currency": req.currency,
+        "recipient": req.recipient,
+        "checkout_url": f"https://checkout.paystack.com/{ref}",
+        "status": "initialized"
+    }
+
