@@ -251,3 +251,50 @@ async def initialize_paystack_tip(req: PaystackTipRequest):
         "status": "initialized"
     }
 
+# ============================================================================
+# NEX Reels Feed API
+# ============================================================================
+@router.get("/reels/feed")
+async def get_reels_feed():
+    """Returns curated TikTok-style 3D reels with deep links to Studio labs."""
+    feed = [
+        {
+            "id": "reel_freeze_test",
+            "title": "iPhone 18 vs Samsung S26: -50°C Liquid Nitrogen Test ❄️",
+            "author": "alexandergamedeveloper74",
+            "studio_type": "apps",
+            "studio_link": "/studio/apps/iphone-compare",
+            "likes": 54200,
+            "theme_color": "#00F0FF"
+        },
+        {
+            "id": "reel_unreal_flip",
+            "title": "1080° Matrix Backflip into NEX Logo Shatter 🎮",
+            "author": "alexandergamedeveloper74",
+            "studio_type": "games",
+            "studio_link": "/studio/games",
+            "likes": 89400,
+            "theme_color": "#00FF88"
+        },
+        {
+            "id": "reel_cyberpunk_city",
+            "title": "Neo-Tokyo 2099: Cyberpunk City Landing Page in <3s ⚡",
+            "author": "cyber_architect_99",
+            "studio_type": "studio",
+            "studio_link": "/studio",
+            "likes": 38100,
+            "theme_color": "#FE2C55"
+        },
+        {
+            "id": "reel_crypto_tracker",
+            "title": "TikTok-Style Crypto Live Price Tracker & Instant Swap 📈",
+            "author": "lagos_crypto_dev",
+            "studio_type": "apps",
+            "studio_link": "/studio/apps",
+            "likes": 29700,
+            "theme_color": "#FFD700"
+        }
+    ]
+    return {"reels": feed, "count": len(feed)}
+
+
