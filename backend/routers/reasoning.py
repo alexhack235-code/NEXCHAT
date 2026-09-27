@@ -53,7 +53,19 @@ def detect_and_run_tools(prompt: str) -> List[Dict[str, Any]]:
         res = execute_tool("get_time")
         tools_used.append({"tool": "get_time", "result": res})
 
-    # 2. Equation Solving (e.g., "solve x^2 - 5x + 6 = 0", "find roots of x^3 - 8 = 0", "solve 2x + 4 = 10 for x")
+    # 2. Heavy systems and production architecture design
+    try:
+        from ..heavy_code_engine import heavy_code_engine
+    except ImportError:
+        from heavy_code_engine import heavy_code_engine
+
+    selected_blueprint = heavy_code_engine.select_blueprint_for_prompt(prompt)
+    if selected_blueprint and not any(tool_info.get("tool") == "heavy_code" for tool_info in tools_used):
+        res = execute_tool("heavy_code", blueprint_id=selected_blueprint)
+        if res.get("success"):
+            tools_used.append({"tool": "heavy_code", "input": selected_blueprint, "result": res})
+
+    # 3. Equation Solving (e.g., "solve x^2 - 5x + 6 = 0", "find roots of x^3 - 8 = 0", "solve 2x + 4 = 10 for x")
     solve_match = re.search(r"(?:solve|find roots of|find solutions? (?:to|for))\s+([a-zA-Z0-9\+\-\*\/\^\(\)\.\s\=]+?)(?:\s+for\s+([a-zA-Z]))?$", prompt, re.IGNORECASE)
     if solve_match:
         eq_str = solve_match.group(1).strip()

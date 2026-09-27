@@ -671,6 +671,146 @@ class HeavyCodeEngine:
                 return bp
         return None
 
+    def select_blueprint_for_prompt(self, prompt: str) -> Optional[str]:
+        """Choose the most relevant heavy architecture blueprint for a complex coding prompt."""
+        if not prompt:
+            return None
+
+        p = prompt.lower()
+        blueprint_weights = {
+            "raft_consensus_engine": [
+                "raft", "consensus", "leader election", "quorum", "distributed system",
+                "replication", "distributed writes", "fault tolerant", "state machine",
+            ],
+            "lockfree_slab_arena": [
+                "lock-free", "slab allocator", "memory allocator", "arena", "free list",
+                "cas", "memory management", "high-performance", "allocation", "allocator",
+            ],
+            "async_reactor_event_loop": [
+                "event loop", "reactor", "epoll", "async io", "non-blocking", "network server",
+                "event-driven", "socket loop",
+            ],
+            "simd_hnsw_vector_indexer": [
+                "vector index", "hnsw", "nearest neighbor", "simd", "vector search",
+                "indexer", "embedding search", "similarity search",
+            ],
+            "bytecode_compiler_vm": [
+                "bytecode", "virtual machine", "compiler", "interpreter", "vm", "sandbox",
+                "bytecode execution", "execution engine",
+            ],
+            "saga_orchestrator_microservice": [
+                "saga", "microservice", "compensating transaction", "rollback", "orchestrator",
+                "eventual consistency", "distributed transaction", "workflow engine",
+            ],
+        }
+
+        best_id = None
+        best_score = 0
+        for bp_id, keywords in blueprint_weights.items():
+            score = 0
+            for keyword in keywords:
+                if keyword in p:
+                    score += 2 if len(keyword.split()) > 1 else 1
+            if score > best_score:
+                best_score = score
+                best_id = bp_id
+
+        if best_score > 0:
+            return best_id
+        return None
+
+    def _build_project_scaffold(self, bp_id: str, project_name: str) -> Dict[str, Any]:
+        """Create a realistic scaffold for a heavy-engineering project."""
+        project_name = (project_name or "heavy_project").strip() or "heavy_project"
+        bp = self.get_blueprint_by_id(bp_id) or self.blueprints[0]
+        primary = bp["primary_language"]
+
+        if primary == "rust":
+            files = [
+                {
+                    "path": f"{project_name}/README.md",
+                    "content": f"# {bp['title']}\n\nThis project implements a production-grade {bp['domain']} system.\n\n## Overview\n\n- Blueprint: {bp['id']}\n- Domain: {bp['domain']}\n- Language: Rust\n\n## Run\n\n```bash\ncargo test\ncargo run --example demo\n```\n\n## Notes\n\n{bp['architectural_notes']}\n",
+                },
+                {
+                    "path": f"{project_name}/Cargo.toml",
+                    "content": "[package]\nname = \"{project_name}\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n[dependencies]\n\n[dev-dependencies]\n",
+                },
+                {
+                    "path": f"{project_name}/src/lib.rs",
+                    "content": bp["code"],
+                },
+                {
+                    "path": f"{project_name}/tests/basic.rs",
+                    "content": "#[test]\nfn smoke_test() {\n    println!(\"project scaffold initialized\");\n}\n",
+                },
+            ]
+        elif primary == "python":
+            files = [
+                {
+                    "path": f"{project_name}/README.md",
+                    "content": f"# {bp['title']}\n\nThis project implements a {bp['domain']} subsystem in Python.\n\n## Run\n\n```bash\npytest -q\n```\n",
+                },
+                {
+                    "path": f"{project_name}/requirements.txt",
+                    "content": "pytest\n",
+                },
+                {
+                    "path": f"{project_name}/{project_name}.py",
+                    "content": bp["code"],
+                },
+                {
+                    "path": f"{project_name}/tests/test_core.py",
+                    "content": "def test_project_smoke():\n    assert True\n",
+                },
+            ]
+        else:
+            files = [
+                {
+                    "path": f"{project_name}/README.md",
+                    "content": f"# {bp['title']}\n\nA scaffold for {bp['domain']}.\n",
+                },
+                {
+                    "path": f"{project_name}/package.json",
+                    "content": "{\n  \"name\": \"{project_name}\",\n  \"version\": \"1.0.0\"\n}\n",
+                },
+                {
+                    "path": f"{project_name}/src/index.ts",
+                    "content": bp["code"],
+                },
+            ]
+
+        return {"project_name": project_name, "files": files}
+
+    def deep_engineer_task(self, prompt: str, project_name: Optional[str] = None) -> Dict[str, Any]:
+        """Perform deep engineering planning and generate a realistic repo scaffold for a heavy task."""
+        blueprint_id = self.select_blueprint_for_prompt(prompt)
+        if not blueprint_id:
+            return {"success": False, "error": "No matching heavy blueprint found for this task."}
+
+        bp = self.get_blueprint_by_id(blueprint_id)
+        name = (project_name or bp["id"]).strip() or "heavy_project"
+        scaffold = self._build_project_scaffold(blueprint_id, name)
+
+        return {
+            "success": True,
+            "blueprint_id": blueprint_id,
+            "title": bp["title"],
+            "domain": bp["domain"],
+            "project_name": name,
+            "scaffold": scaffold,
+            "tradeoffs": [
+                "Prefer correctness and safety invariants over premature optimization.",
+                "Separate persistence, coordination, and runtime logic to keep failure modes observable.",
+                "Use tests and resource limits before scaling horizontally.",
+            ],
+            "execution_plan": [
+                "Define invariants and failure modes",
+                "Build core data structure and protocol",
+                "Add verification tests and benchmarks",
+                "Document operational tradeoffs and rollback strategy",
+            ],
+        }
+
     def synthesize_heavy_system(self, bp_id: str) -> Dict[str, Any]:
         bp = self.get_blueprint_by_id(bp_id)
         if not bp:

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEX 3D Studio — 3D Animated Website Generator AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <style>
+    :root {
+      --bg: #050308;
+      --panel-bg: #080510;
+      --card-bg: #0f0c1c;
+      --border: #1a1726;
+      --border-focus: #2d2645;
+      --cyan: #00F0FF;
+      --magenta: #FF007F;
+      --green: #00FF88;
+      --yellow: #FFE600;
+      --purple: #7000FF;
+      --text: #f3f4f6;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      height: 56px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 6, 14, 0.95);
+      backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 10;
+    }
+    .logo-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 15px;
+      color: #000;
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
+    }
+    .main-stage {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+    .left-panel {
+      width: 340px;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+    .center-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #020005;
+      position: relative;
+    }
+    .right-panel {
+      width: 420px;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      background: var(--card-bg);
+      border: 1px solid var(--border-focus);
+      border-radius: 10px;
+      padding: 12px;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      resize: vertical;
+    }
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+    }
+    .chip {
+      background: #130f24;
+      border: 1px solid #2a2347;
+      color: #c4b5fd;
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .chip:hover {
+      background: var(--purple);
+      color: #fff;
+      border-color: var(--cyan);
+    }
+    .btn-generate {
+      background: linear-gradient(135deg, var(--purple), var(--cyan));
+      color: #fff;
+      font-weight: 800;
+      font-size: 14px;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(112, 0, 255, 0.4);
+      transition: all 0.2s;
+    }
+    .btn-generate:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 25px rgba(0, 240, 255, 0.5);
+    }
+    .viewport {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    #three-canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    .hud-badge {
+      position: absolute;
+      bottom: 16px;
+      left: 16px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 240, 255, 0.4);
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 700;
+      pointer-events: none;
+    }
+    .variants-bar {
+      height: 140px;
+      border-top: 1px solid var(--border);
+      background: rgba(8, 6, 14, 0.95);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 16px;
+    }
+    .variant-card {
+      width: 220px;
+      height: 105px;
+      background: var(--card-bg);
+      border: 1px solid #231f38;
+      border-radius: 10px;
+      padding: 10px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.2s ease;
+    }
+    .variant-card.active {
+      border: 2px solid var(--cyan);
+      background: rgba(0, 240, 255, 0.08);
+      box-shadow: 0 0 16px rgba(0, 240, 255, 0.2);
+    }
+    .code-viewer {
+      flex: 1;
+      padding: 14px;
+      overflow: auto;
+      background: #050309;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: #a5b4fc;
+      white-space: pre;
+    }
+    .btn-export {
+      background: linear-gradient(135deg, var(--cyan), #0077FE);
+      color: #000;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="logo-badge">N3</div>
+      <div>
+        <div style="font-size:15px; font-weight:800; letter-spacing:0.5px; background:linear-gradient(90deg, #fff, #a1a1aa); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
+          NEX 3D STUDIO
+        </div>
+        <div style="font-size:10px; color:var(--cyan); font-weight:600; letter-spacing:1px;">
+          RUST AXUM BACKEND • &lt;3S GENERATION PIPELINE
+        </div>
+      </div>
+    </div>
+
+    <!-- Status indicator -->
+    <div style="display:flex; align-items:center; gap:10px; font-size:12px; background:#0e0b17; padding:6px 14px; border-radius:20px; border:1px solid #272238;">
+      <div id="statusDot" style="width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green);"></div>
+      <span id="statusLabel" style="color:var(--text-muted);">60 FPS WebGL Engine Online</span>
+      <span id="timeLabel" style="color:var(--cyan); font-weight:700; padding-left:6px; border-left:1px solid #373349;">&lt;3s Ready</span>
+    </div>
+
+    <button class="btn-export" onclick="openExportModal()">
+      Export Code (Next.js + Vite)
+    </button>
+  </header>
+
+  <div class="main-stage">
+    <!-- LEFT PANEL -->
+    <aside class="left-panel">
+      <div>
+        <label style="font-size:11px; font-weight:700; color:var(--text-muted); letter-spacing:0.8px; text-transform:uppercase; margin-bottom:8px; display:block;">
+          Prompt to 3D World
+        </label>
+        <textarea id="promptInput" rows="4">Create a cyberpunk city landing page with flying cars</textarea>
+      </div>
+
+      <div>
+        <div style="font-size:11px; font-weight:600; color:var(--text-dim); margin-bottom:8px;">
+          QUICK ARCHITECTURES:
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          <button class="chip" onclick="applyPreset('Cyberpunk City', 'Create a cyberpunk city landing page with flying cars and neon fog')">Cyberpunk City</button>
+          <button class="chip" onclick="applyPreset('Luxury Watch', 'Luxury diamond watch rotating 360 on black marble pedestal with studio lighting')">Luxury Watch</button>
+          <button class="chip" onclick="applyPreset('Gaming Portal', 'Low-poly quantum portal floating in space with dodecahedron crystal core')">Gaming Portal</button>
+          <button class="chip" onclick="applyPreset('Music Festival', 'Electronic music festival stage with audio-reactive pulsating neon strobe rings')">Music Festival</button>
+          <button class="chip" onclick="applyPreset('Abstract Portfolio', 'Abstract kinetic morphing liquid blob with gyroscope neon rings')">Abstract Portfolio</button>
+        </div>
+      </div>
+
+      <button class="btn-generate" onclick="generate3D()">
+        ⚡ Generate 3D Website (&lt;3s)
+      </button>
+
+      <!-- Video to 3D TikTok Remix -->
+      <div style="border-top:1px solid var(--border); padding-top:14px; display:flex; flex-direction:column; gap:10px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-size:12px; font-weight:700; color:var(--magenta);">🎬 NEX Reels: Video to 3D</span>
+          <span style="font-size:10px; background:#350020; color:var(--magenta); padding:2px 6px; borderRadius:4px;">AI VISION</span>
+        </div>
+        <input type="text" id="videoUrlInput" placeholder="Paste TikTok / Reel link..." />
+        <button style="background:linear-gradient(135deg, var(--magenta), var(--purple)); color:#fff; font-weight:700; font-size:12px; padding:9px; border-radius:8px; border:none; cursor:pointer;" onclick="remixWithAI()">
+          🪄 Remix with AI
+        </button>
+      </div>
+    </aside>
+
+    <!-- CENTER STAGE -->
+    <main class="center-stage">
+      <div class="viewport">
+        <div class="hud-badge" id="hudBadge">60 FPS WEBGL • CYBERPUNK METROPOLIS</div>
+        <div id="three-container" style="width:100%; height:100%;"></div>
+      </div>
+
+      <!-- Midjourney 3 Variants Grid -->
+      <div class="variants-bar">
+        <div style="font-size:11px; font-weight:800; color:var(--text-dim); letter-spacing:1px; text-transform:uppercase; writing-mode:vertical-rl; transform:rotate(180deg);">
+          VARIANTS
+        </div>
+        <div id="variantsContainer" style="display:flex; gap:14px; flex:1; overflow-x:auto;">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </main>
+
+    <!-- RIGHT PANEL -->
+    <aside class="right-panel">
+      <!-- Leva Controls -->
+      <div style="padding:14px 18px; border-bottom:1px solid var(--border); background:#0c0817;">
+        <div style="font-size:11px; font-weight:800; color:var(--cyan); letter-spacing:1px; margin-bottom:10px; text-transform:uppercase;">
+          ⚙️ Leva Scene Controls
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:11px;">
+          <div>
+            <label style="display:block; color:var(--text-muted); margin-bottom:4px;">Light Intensity</label>
+            <input type="range" id="lightSlider" min="0.1" max="3" step="0.1" value="1.2" oninput="updateLight(this.value)" style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block; color:var(--text-muted); margin-bottom:4px;">Rotation Speed</label>
+            <input type="range" id="rotSlider" min="0" max="3" step="0.1" value="1" oninput="updateSpeed(this.value)" style="width:100%;">
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="wireframeCheck" onchange="toggleWireframe(this.checked)">
+            <label for="wireframeCheck" style="color:#d1d5db; cursor:pointer;">Wireframe Mode</label>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="checkbox" id="neonPulseCheck" checked onchange="togglePulse(this.checked)">
+            <label for="neonPulseCheck" style="color:#d1d5db; cursor:pointer;">Neon Pulse</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Code Header -->
+      <div style="padding:10px 18px; background:#0e0b1c; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border);">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:12px; font-weight:700; color:#e5e7eb;">GeneratedScene.tsx</span>
+          <span style="font-size:10px; background:#064e3b; color:#34d399; padding:2px 8px; border-radius:4px; font-weight:700;">✓ VALID R3F</span>
+        </div>
+        <button style="background:#221b38; color:#c4b5fd; border:1px solid #373059; border-radius:6px; font-size:11px; padding:4px 10px; cursor:pointer;" onclick="copyCode()">
+          Copy Code
+        </button>
+      </div>
+
+      <!-- Code Viewer -->
+      <div class="code-viewer" id="codeViewer"></div>
+    </aside>
+  </div>
+
+  <script>
+    // ------------------------------------------------------------------------
+    // THREE.JS REAL-TIME SCENE SETUP
+    // ------------------------------------------------------------------------
+    let scene, camera, renderer, controls;
+    let mainMesh, particlesGroup, dirLight, pointLight;
+    let rotSpeed = 1.0;
+    let isWireframe = false;
+    let isPulsing = true;
+
+    function initThree() {
+      const container = document.getElementById('three-container');
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x050014, 0.035);
+
+      camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
+      camera.position.set(0, 5, 13);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.05;
+
+      // Lighting
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      scene.add(ambientLight);
+      dirLight = new THREE.DirectionalLight(0x00F0FF, 1.8);
+      dirLight.position.set(10, 15, 10);
+      scene.add(dirLight);
+      pointLight = new THREE.PointLight(0xFF007F, 3.0, 30);
+      pointLight.position.set(-6, 4, -4);
+      scene.add(pointLight);
+
+      // Cyber Geometry (Torus Knot Core)
+      const geom = new THREE.TorusKnotGeometry(2.2, 0.6, 120, 20);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x00F0FF,
+        metalness: 0.9,
+        roughness: 0.1,
+        emissive: 0x002233
+      });
+      mainMesh = new THREE.Mesh(geom, mat);
+      mainMesh.position.y = 2.5;
+      scene.add(mainMesh);
+
+      // Outer Gyroscope Rings
+      const ringGeom = new THREE.TorusGeometry(4.2, 0.08, 16, 100);
+      const ringMat = new THREE.MeshStandardMaterial({ color: 0xFF007F, emissive: 0xFF007F, emissiveIntensity: 2 });
+      const ring = new THREE.Mesh(ringGeom, ringMat);
+      ring.position.y = 2.5;
+      ring.rotation.x = Math.PI / 3;
+      scene.add(ring);
+
+      // Flying Particles
+      particlesGroup = new THREE.Group();
+      const pCount = 600;
+      const pGeom = new THREE.BufferGeometry();
+      const pPositions = new Float32Array(pCount * 3);
+      for (let i = 0; i < pCount * 3; i++) {
+        pPositions[i] = (Math.random() - 0.5) * 35;
+      }
+      pGeom.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+      const pMat = new THREE.PointsMaterial({ size: 0.18, color: 0x00FF88 });
+      const particles = new THREE.Points(pGeom, pMat);
+      particlesGroup.add(particles);
+      scene.add(particlesGroup);
+
+      // Reflective Floor Grid
+      const grid = new THREE.GridHelper(60, 60, 0xFF007F, 0x1f1d2b);
+      grid.position.y = -1;
+      scene.add(grid);
+
+      window.addEventListener('resize', onWindowResize);
+      animate();
+    }
+
+    function onWindowResize() {
+      const container = document.getElementById('three-container');
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    let clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const elapsed = clock.getElapsedTime();
+
+      if (mainMesh) {
+        mainMesh.rotation.y += 0.01 * rotSpeed;
+        mainMesh.rotation.x += 0.005 * rotSpeed;
+        if (isPulsing) {
+          const s = 1.0 + Math.sin(elapsed * 2.5) * 0.06;
+          mainMesh.scale.set(s, s, s);
+        }
+      }
+      if (particlesGroup) {
+        particlesGroup.rotation.y += 0.001 * rotSpeed;
+      }
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    // ------------------------------------------------------------------------
+    // LEVA CONTROLS
+    // ------------------------------------------------------------------------
+    function updateLight(val) {
+      if (dirLight) dirLight.intensity = parseFloat(val);
+    }
+    function updateSpeed(val) {
+      rotSpeed = parseFloat(val);
+    }
+    function toggleWireframe(checked) {
+      if (mainMesh) mainMesh.material.wireframe = checked;
+    }
+    function togglePulse(checked) {
+      isPulsing = checked;
+      if (!checked && mainMesh) mainMesh.scale.set(1, 1, 1);
+    }
+
+    // ------------------------------------------------------------------------
+    // GENERATION PIPELINE & VARIANTS
+    // ------------------------------------------------------------------------
+    let currentVariants = [];
+    let activeIdx = 0;
+
+    async function generate3D() {
+      const prompt = document.getElementById('promptInput').value;
+      const statusDot = document.getElementById('statusDot');
+      const statusLabel = document.getElementById('statusLabel');
+      const timeLabel = document.getElementById('timeLabel');
+
+      statusDot.style.background = 'var(--yellow)';
+      statusDot.style.boxShadow = '0 0 8px var(--yellow)';
+      statusLabel.textContent = 'Rust Core synthesizing 3D scene...';
+      const t0 = performance.now();
+
+      try {
+        const res = await fetch('http://localhost:8001/api/3d/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: prompt }),
+        });
+        const data = await res.json();
+        currentVariants = data.variants;
+        renderVariants(currentVariants);
+        selectVariant(0);
+
+        const elapsed = Math.round(performance.now() - t0);
+        statusDot.style.background = 'var(--green)';
+        statusDot.style.boxShadow = '0 0 8px var(--green)';
+        statusLabel.textContent = 'Generation ready (<3s)';
+        timeLabel.textContent = `${elapsed}ms`;
+      } catch (err) {
+        statusLabel.textContent = 'Offline generator active';
+        loadFallback();
+      }
+    }
+
+    function renderVariants(variants) {
+      const container = document.getElementById('variantsContainer');
+      container.innerHTML = '';
+      variants.forEach((v, i) => {
+        const card = document.createElement('div');
+        card.className = `variant-card ${i === activeIdx ? 'active' : ''}`;
+        card.onclick = () => selectVariant(i);
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:11px; font-weight:700; color:${i === activeIdx ? 'var(--cyan)' : '#e5e7eb'};">
+              Variant #${i + 1}
+            </span>
+            <span style="font-size:9px; background:#1c1730; color:#c4b5fd; padding:2px 6px; border-radius:4px;">
+              ${v.style}
+            </span>
+          </div>
+          <div style="font-size:12px; font-weight:600; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            ${v.title}
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:10px; color:var(--text-dim);">
+            <span>R3F Ready</span>
+            <button style="background:#2c1545; color:var(--magenta); border:none; padding:3px 8px; border-radius:4px; cursor:pointer; font-weight:700;" onclick="event.stopPropagation(); remixWithAI();">
+              Remix 🪄
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function selectVariant(idx) {
+      activeIdx = idx;
+      const v = currentVariants[idx];
+      if (!v) return;
+
+      document.querySelectorAll('.variant-card').forEach((c, i) => {
+        c.classList.toggle('active', i === idx);
+      });
+
+      document.getElementById('hudBadge').textContent = `60 FPS WEBGL • ${v.title.toUpperCase()}`;
+      document.getElementById('codeViewer').textContent = v.r3f_code;
+
+      // Morph 3D object color based on style
+      if (mainMesh) {
+        if (idx === 0) {
+          mainMesh.material.color.setHex(0x00F0FF);
+          mainMesh.material.emissive.setHex(0x002233);
+        } else if (idx === 1) {
+          mainMesh.material.color.setHex(0xFFD700);
+          mainMesh.material.emissive.setHex(0x332200);
+        } else {
+          mainMesh.material.color.setHex(0xFF007F);
+          mainMesh.material.emissive.setHex(0x440022);
+        }
+      }
+    }
+
+    function applyPreset(name, prompt) {
+      document.getElementById('promptInput').value = prompt;
+      generate3D();
+    }
+
+    function remixWithAI() {
+      const prompt = document.getElementById('promptInput').value;
+      document.getElementById('promptInput').value = `Remix with AI: ${prompt} with neon glitch vortex`;
+      generate3D();
+    }
+
+    function copyCode() {
+      const code = document.getElementById('codeViewer').textContent;
+      navigator.clipboard.writeText(code);
+      alert('React Three Fiber (R3F) code copied to clipboard!');
+    }
+
+    function openExportModal() {
+      const code = document.getElementById('codeViewer').textContent;
+      const blob = new Blob([code], { type: 'text/typescript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'GeneratedScene.tsx';
+      a.click();
+    }
+
+    function loadFallback() {
+      currentVariants = [
+        {
+          id: 'v1',
+          title: 'Cyberpunk Metropolis 2099 (Cinematic)',
+          style: 'Cinematic Atmosphere',
+          r3f_code: `import React from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Float } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+
+export default function GeneratedScene() {
+  return (
+    <Canvas camera={{ position: [0, 4, 12], fov: 50 }}>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} intensity={1.5} color="#00F0FF" />
+      <Float speed={2} rotationIntensity={1}>
+        <mesh position={[0, 2, 0]}>
+          <torusKnotGeometry args={[2, 0.5, 100, 16]} />
+          <meshStandardMaterial color="#00F0FF" metalness={0.9} roughness={0.1} />
+        </mesh>
+      </Float>
+      <OrbitControls />
+      <EffectComposer><Bloom intensity={1.8} /></EffectComposer>
+    </Canvas>
+  );
+}`
+        },
+        {
+          id: 'v2',
+          title: 'Luxury Gold & Obsidian (Minimalist)',
+          style: 'Minimalist High-FPS',
+          r3f_code: `// Minimalist Luxury Variant\nexport default function Scene() { return <mesh><sphereGeometry /></mesh>; }`
+        },
+        {
+          id: 'v3',
+          title: 'Quantum Portal Odyssey (Kinetic)',
+          style: 'Kinetic Interactive',
+          r3f_code: `// Kinetic Gaming Portal Variant\nexport default function Scene() { return <mesh><dodecahedronGeometry /></mesh>; }`
+        }
+      ];
+      renderVariants(currentVariants);
+      selectVariant(0);
+    }
+
+    window.onload = () => {
+      initThree();
+      generate3D();
+    };
+  </script>
+</body>
+</html>

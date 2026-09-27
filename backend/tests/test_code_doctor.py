@@ -5,6 +5,8 @@ from main import app
 from heavy_code_engine import heavy_code_engine
 from code_doctor import code_doctor
 from tools_engine import execute_tool
+from routers.reasoning import detect_and_run_tools
+from heavy_code_engine import heavy_code_engine
 
 @pytest.fixture
 def client():
@@ -108,3 +110,26 @@ def test_tools_engine_integration():
     heavy_res = execute_tool("heavy_code", blueprint_id="lockfree_slab_arena")
     assert heavy_res["success"] is True
     assert "LockFreeSlabArena" in heavy_res["code"]
+
+
+def test_detect_and_run_tools_heavy_code_escalation():
+    prompt = "Design a production-grade lock-free slab allocator with CAS-based free lists for a Rust service."
+    tools = detect_and_run_tools(prompt)
+    assert any(t["tool"] == "heavy_code" and t["result"]["success"] for t in tools)
+
+
+def test_select_best_blueprint_for_prompt():
+    blueprint_id = heavy_code_engine.select_blueprint_for_prompt(
+        "Build a Raft consensus cluster for distributed writes with leader election and quorum"
+    )
+    assert blueprint_id == "raft_consensus_engine"
+
+
+def test_generate_heavy_project_scaffold():
+    result = heavy_code_engine.deep_engineer_task(
+        "Create a full repo for a lock-free slab allocator in Rust with tests and a README",
+        project_name="rust_slab_repo",
+    )
+    assert result["success"] is True
+    assert result["blueprint_id"] == "lockfree_slab_arena"
+    assert result["scaffold"]["files"][0]["path"].endswith("README.md")
