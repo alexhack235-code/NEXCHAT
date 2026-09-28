@@ -243,6 +243,19 @@ async def root(request: Request):
                 </div>
             </a>
 
+            <!-- NEX-CODER 3.8 HIGH Coding Agent -->
+            <a href="/api/coder/status" class="card">
+                <div>
+                    <div class="card-icon" style="background: rgba(0, 255, 136, 0.15); border: 1px solid rgba(0, 255, 136, 0.3);">🤖</div>
+                    <h2>NEX-CODER 3.8 HIGH Superintelligence</h2>
+                    <p>Autonomous coding agent with AST symbol search, compile check, pytest runner, recursive self-repair, atomic diff patching, and UE5 architecture validation.</p>
+                </div>
+                <div class="card-footer">
+                    <span style="color: #00FF88;">Autonomous Loop Ready</span>
+                    <span class="cta-btn">Inspect Engine →</span>
+                </div>
+            </a>
+
             <!-- Swagger OpenAPI Docs -->
             <a href="/docs" class="card">
                 <div>
@@ -794,6 +807,7 @@ include_optional_router(app, "routers.autonomous_mind", "router", prefix="/api",
 include_optional_router(app, "routers.code_doctor", "router", prefix="/api", tags=["Code Doctor & Heavy Systems"])
 include_optional_router(app, "routers.nex_3d_studio", "router", prefix="/api", tags=["NEX 3D Studio"])
 include_optional_router(app, "routers.nex_studio_labs", "router", prefix="/api", tags=["NEX Studio Labs"])
+include_optional_router(app, "routers.coding_agent", "router", prefix="/api", tags=["Autonomous Coding Agent"])
 
 # Register Subsystems
 include_optional_router(app, "neural_core.router", "router", prefix="/api", tags=["Neural Synaptic Core"])

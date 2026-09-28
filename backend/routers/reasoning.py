@@ -156,6 +156,51 @@ def detect_and_run_tools(prompt: str) -> List[Dict[str, Any]]:
         res = execute_tool("device_task", action="system_info")
         tools_used.append({"tool": "device_task", "action": "system_info", "result": res})
 
+    # 10. Autonomous Coding Agent Tools:
+    # 10a. Symbol Search (e.g. "search symbol X", "where is class X defined", "find function X")
+    sym_m = re.search(r"(?:search symbol|find symbol|where is (?:class|function|def|struct|interface))\s+([A-Za-z0-9_]+)", prompt, re.IGNORECASE)
+    if sym_m and not any(t.get("tool") == "symbol_search" for t in tools_used):
+        query_sym = sym_m.group(1).strip()
+        res = execute_tool("symbol_search", query=query_sym, max_results=10)
+        tools_used.append({"tool": "symbol_search", "query": query_sym, "result": res})
+
+    # 10b. Test Suite Runner (e.g. "run tests", "run pytest", "test the suite")
+    if any(k in p_lower for k in ("run tests", "run pytest", "execute tests", "test suite")):
+        target = None
+        target_m = re.search(r"(?:run tests? on|test)\s+([a-zA-Z0-9_\-\.\/]+)", prompt, re.IGNORECASE)
+        if target_m and target_m.group(1).lower() not in ("suite", "code", "it", "all", "the"):
+            target = target_m.group(1)
+        res = execute_tool("run_tests", test_target=target)
+        tools_used.append({"tool": "run_tests", "result": res})
+
+    # 10c. Git Diff & Working Tree (e.g. "git diff", "show changes", "what changed", "git status")
+    if any(k in p_lower for k in ("git diff", "show git diff", "show changes", "what did i change", "what changed in git")):
+        res = execute_tool("git_diff")
+        tools_used.append({"tool": "git_diff", "result": res})
+
+    # 10d. AST Outline / File Map (e.g. "ast of backend/tools_engine.py", "outline of main.py")
+    ast_m = re.search(r"(?:ast of|outline of|map file)\s+([a-zA-Z0-9_\-\.\/]+)", prompt, re.IGNORECASE)
+    if ast_m:
+        fpath = ast_m.group(1).strip()
+        res = execute_tool("ast_map", file_path=fpath)
+        tools_used.append({"tool": "ast_map", "file": fpath, "result": res})
+
+    # 10e. Unreal Engine 5 Validation (e.g. "validate ue5", "check unreal class")
+    if ("ue5" in p_lower or "unreal" in p_lower) and any(k in p_lower for k in ("validate", "check", "uclass", "blueprint")):
+        res = execute_tool("ue5_validator", code=prompt)
+        tools_used.append({"tool": "ue5_validator", "result": res})
+
+    # 10f. Project Memory Persistence (e.g. "remember that X is Y", "save to memory")
+    mem_m = re.search(r"(?:remember that|save to memory|store memory)\s+([a-zA-Z0-9_]+)\s*(?:is|=|as)\s*(.*)", prompt, re.IGNORECASE)
+    if mem_m:
+        k = mem_m.group(1).strip()
+        v = mem_m.group(2).strip()
+        res = execute_tool("project_memory", action="set", key=k, value=v)
+        tools_used.append({"tool": "project_memory", "key": k, "result": res})
+    elif any(k in p_lower for k in ("list memory", "project memory", "show memory")):
+        res = execute_tool("project_memory", action="list")
+        tools_used.append({"tool": "project_memory", "result": res})
+
     return tools_used
 
 @router.post("/smart_chat")

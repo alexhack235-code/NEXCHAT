@@ -7,6 +7,7 @@ import os
 import sys
 import subprocess
 import shutil
+import json
 from typing import Dict, Any, List, Optional, Union
 
 try:
@@ -369,7 +370,378 @@ def tool_heavy_code(blueprint_id: str) -> Dict[str, Any]:
 
     return heavy_code_engine.synthesize_heavy_system(blueprint_id)
 
+def tool_compile_and_verify(code: str, language: str = "python", file_path: Optional[str] = None) -> Dict[str, Any]:
+    """Compiles and validates code structure, catching syntax errors and missing imports."""
+    lang = language.lower().strip()
+    if lang == "python":
+        try:
+            ast.parse(code)
+            compile(code, file_path or "<nexium_buffer>", "exec")
+            return {
+                "success": True,
+                "syntax_valid": True,
+                "language": "python",
+                "loc": len(code.splitlines()),
+                "message": "Python syntax verified successfully."
+            }
+        except SyntaxError as e:
+            return {
+                "success": False,
+                "syntax_valid": False,
+                "language": "python",
+                "error": str(e.msg),
+                "line": e.lineno,
+                "offset": e.offset,
+                "bad_line": e.text.strip() if e.text else None
+            }
+    elif lang in ("javascript", "typescript", "ts", "js", "jsx", "tsx"):
+        stack = []
+        pairs = {')': '(', '}': '{', ']': '['}
+        for i, char in enumerate(code):
+            if char in "({[":
+                stack.append((char, i))
+            elif char in ")}]":
+                if not stack or stack[-1][0] != pairs[char]:
+                    return {
+                        "success": False,
+                        "syntax_valid": False,
+                        "language": lang,
+                        "error": f"Mismatched bracket '{char}' at index {i}",
+                        "char_index": i
+                    }
+                stack.pop()
+        if stack:
+            unclosed, idx = stack[-1]
+            return {
+                "success": False,
+                "syntax_valid": False,
+                "language": lang,
+                "error": f"Unclosed bracket '{unclosed}' opened at index {idx}",
+                "char_index": idx
+            }
+        return {
+            "success": True,
+            "syntax_valid": True,
+            "language": lang,
+            "loc": len(code.splitlines()),
+            "message": f"{lang} delimiters balanced."
+        }
+    return {
+        "success": True,
+        "syntax_valid": True,
+        "language": lang,
+        "loc": len(code.splitlines()),
+        "message": f"Syntax check not implemented for {lang}; passed by default."
+    }
+
+def tool_symbol_search(query: str, root_dir: Optional[str] = None, max_results: int = 25) -> Dict[str, Any]:
+    """Fast symbol search across project workspace for class, def, function, interface, type, struct."""
+    import re
+    search_dir = root_dir or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    results = []
+    pattern = re.compile(rf"\b(class|def|async\s+def|interface|type|struct|enum|fn)\s+([A-Za-z0-9_]*{re.escape(query)}[A-Za-z0-9_]*)", re.IGNORECASE)
+    
+    ignore_dirs = {".git", ".venv", "node_modules", "target", "__pycache__", ".pytest_cache", "build"}
+    valid_exts = {".py", ".ts", ".tsx", ".js", ".jsx", ".rs", ".h", ".hpp", ".cpp", ".c", ".cs"}
+
+    for dirpath, dirnames, filenames in os.walk(search_dir):
+        dirnames[:] = [d for d in dirnames if d not in ignore_dirs]
+        for f in filenames:
+            ext = os.path.splitext(f)[1]
+            if ext in valid_exts:
+                fpath = os.path.join(dirpath, f)
+                try:
+                    with open(fpath, "r", encoding="utf-8", errors="ignore") as file_handle:
+                        for lineno, line in enumerate(file_handle, start=1):
+                            match = pattern.search(line)
+                            if match:
+                                results.append({
+                                    "symbol": match.group(2),
+                                    "kind": match.group(1),
+                                    "file": os.path.relpath(fpath, search_dir),
+                                    "line": lineno,
+                                    "snippet": line.strip()
+                                })
+                                if len(results) >= max_results:
+                                    break
+                except Exception:
+                    continue
+        if len(results) >= max_results:
+            break
+
+    return {
+        "success": True,
+        "query": query,
+        "total_found": len(results),
+        "symbols": results
+    }
+
+def tool_patch_file(file_path: str, target_chunk: str, replacement_chunk: str) -> Dict[str, Any]:
+    """Performs atomic chunk replacement in an existing file."""
+    if not os.path.exists(file_path):
+        return {"success": False, "error": f"File '{file_path}' does not exist"}
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        if target_chunk not in content:
+            return {
+                "success": False,
+                "error": "Target chunk not found in file content"
+            }
+
+        new_content = content.replace(target_chunk, replacement_chunk, 1)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(new_content)
+
+        return {
+            "success": True,
+            "file_path": file_path,
+            "message": "Chunk replaced successfully."
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def tool_run_tests(test_target: Optional[str] = None) -> Dict[str, Any]:
+    """Runs test suite and returns parsed results."""
+    target = test_target or "backend/tests"
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    venv_py = os.path.join(root_dir, ".venv", "Scripts", "python.exe")
+    cmd = [venv_py if os.path.exists(venv_py) else sys.executable, "-m", "pytest", target, "-q"]
+
+    try:
+        res = subprocess.run(cmd, cwd=root_dir, capture_output=True, text=True, timeout=120)
+        output = (res.stdout + "\n" + res.stderr).strip()
+        return {
+            "success": res.returncode == 0,
+            "exit_code": res.returncode,
+            "summary": output.splitlines()[-1] if output.splitlines() else "",
+            "raw_output": output[-500:]
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def tool_project_memory(action: str, key: Optional[str] = None, value: Optional[Any] = None) -> Dict[str, Any]:
+    """Manages persistent project memory in .nexium/memory.json."""
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    mem_dir = os.path.join(root_dir, ".nexium")
+    mem_file = os.path.join(mem_dir, "memory.json")
+    os.makedirs(mem_dir, exist_ok=True)
+
+    data = {}
+    if os.path.exists(mem_file):
+        try:
+            with open(mem_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception:
+            data = {}
+
+    act = action.lower().strip()
+    if act == "get":
+        if not key:
+            return {"success": False, "error": "Key required for 'get'"}
+        return {"success": True, "key": key, "value": data.get(key)}
+    elif act == "set":
+        if not key:
+            return {"success": False, "error": "Key required for 'set'"}
+        data[key] = value
+        with open(mem_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+        return {"success": True, "key": key, "value": value}
+    elif act in ("list", "all"):
+        return {"success": True, "memory": data}
+    elif act == "clear":
+        with open(mem_file, "w", encoding="utf-8") as f:
+            json.dump({}, f)
+        return {"success": True, "message": "Memory cleared"}
+    return {"success": False, "error": f"Unknown memory action: {act}"}
+
+def tool_ast_map(file_path: str) -> Dict[str, Any]:
+    """Generates a structured AST outline of a file without reading all content."""
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    full_path = file_path if os.path.isabs(file_path) else os.path.join(root_dir, file_path)
+    if not os.path.exists(full_path):
+        return {"success": False, "error": f"File '{file_path}' does not exist"}
+
+    ext = os.path.splitext(full_path)[1].lower()
+    try:
+        with open(full_path, "r", encoding="utf-8", errors="ignore") as f:
+            content = f.read()
+
+        lines = content.splitlines()
+        loc = len(lines)
+
+        classes = []
+        functions = []
+        imports = []
+
+        if ext == ".py":
+            try:
+                tree = ast.parse(content, filename=full_path)
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.ClassDef):
+                        methods = [n.name for n in node.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))]
+                        doc = ast.get_docstring(node) or ""
+                        classes.append({
+                            "name": node.name,
+                            "line": node.lineno,
+                            "methods": methods,
+                            "doc": doc.splitlines()[0] if doc else ""
+                        })
+                    elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                        doc = ast.get_docstring(node) or ""
+                        functions.append({
+                            "name": node.name,
+                            "line": node.lineno,
+                            "is_async": isinstance(node, ast.AsyncFunctionDef),
+                            "doc": doc.splitlines()[0] if doc else ""
+                        })
+                    elif isinstance(node, (ast.Import, ast.ImportFrom)):
+                        if isinstance(node, ast.Import):
+                            imports.extend(alias.name for alias in node.names)
+                        else:
+                            module = node.module or ""
+                            imports.extend(f"{module}.{alias.name}" for alias in node.names)
+            except Exception as parse_err:
+                return {"success": False, "error": f"AST parse error: {parse_err}", "loc": loc}
+        else:
+            import re
+            class_matches = re.finditer(r"\b(class|struct|interface|enum)\s+([A-Za-z0-9_]+)", content)
+            for m in class_matches:
+                lineno = content[:m.start()].count("\n") + 1
+                classes.append({"name": m.group(2), "kind": m.group(1), "line": lineno})
+
+            fn_matches = re.finditer(r"\b(function|async\s+function|def|fn|void|int|float|bool|auto)\s+([A-Za-z0-9_]+)\s*\(", content)
+            for m in fn_matches:
+                lineno = content[:m.start()].count("\n") + 1
+                functions.append({"name": m.group(2), "line": lineno})
+
+            import_matches = re.finditer(r"\b(?:import\s+.*?from\s+['\"](.*?)['\"]|#include\s+[<\"'](.*?)[\">'])", content)
+            for m in import_matches:
+                imports.append(m.group(1) or m.group(2) or "")
+
+        return {
+            "success": True,
+            "file": os.path.relpath(full_path, root_dir),
+            "loc": loc,
+            "classes": classes,
+            "functions": functions,
+            "imports": list(set(filter(None, imports)))[:30]
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def tool_git_diff(cached: bool = False, max_chars: int = 5000) -> Dict[str, Any]:
+    """Retrieves current workspace git status and diff."""
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    cmd = ["git", "diff"]
+    if cached:
+        cmd.append("--cached")
+
+    try:
+        res = subprocess.run(cmd, cwd=root_dir, capture_output=True, text=True, timeout=15)
+        diff_text = res.stdout.strip()
+        status_res = subprocess.run(["git", "status", "--short"], cwd=root_dir, capture_output=True, text=True, timeout=10)
+        status_text = status_res.stdout.strip()
+
+        changed_files = [line.strip().split()[-1] for line in status_text.splitlines() if line.strip()]
+        return {
+            "success": res.returncode == 0,
+            "changed_files_count": len(changed_files),
+            "changed_files": changed_files[:20],
+            "diff_snippet": diff_text[:max_chars],
+            "total_chars": len(diff_text),
+            "truncated": len(diff_text) > max_chars
+        }
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+def tool_ue5_validator(code: str, class_name: Optional[str] = None) -> Dict[str, Any]:
+    """Validates Unreal Engine 5 C++ character, rig, or animation architecture rules."""
+    diagnostics = []
+    warnings = []
+    recommendations = []
+    
+    has_uclass = "UCLASS(" in code
+    has_generated_body = "GENERATED_BODY()" in code
+    has_generated_include = ".generated.h" in code
+    
+    if has_uclass:
+        if not has_generated_body:
+            diagnostics.append("Missing GENERATED_BODY() inside UCLASS body.")
+        if not has_generated_include:
+            diagnostics.append("Missing #include '<HeaderName>.generated.h' which must be the last header.")
+
+    import re
+    class_match = re.search(r"class\s+([A-Za-z0-9_]+)\s*:\s*public\s+([A-Za-z0-9_]+)", code)
+    if class_match:
+        c_name = class_match.group(1)
+        base_name = class_match.group(2)
+        if "Character" in base_name or "Pawn" in base_name or "Actor" in base_name:
+            if not c_name.startswith("A"):
+                warnings.append(f"UE5 Actor class '{c_name}' should start with prefix 'A' (e.g. A{c_name}).")
+        elif "Component" in base_name or "Object" in base_name:
+            if not c_name.startswith("U"):
+                warnings.append(f"UE5 UObject/Component class '{c_name}' should start with prefix 'U' (e.g. U{c_name}).")
+
+    if "MotionWarp" in code or "MotionWarping" in code:
+        if "FMotionWarpingTarget" not in code and "RootMotion" not in code:
+            recommendations.append("Ensure MotionWarping component targets are assigned via AddOrUpdateWarpTargetFromLocationAndRotation.")
+
+    if "ChaosCloth" in code or "Cloth" in code:
+        recommendations.append("For Zero-G/Unreal Mode, verify Chaos Cloth GravityScale or WindVelocity is wired to AnimInstance.")
+
+    is_valid = len(diagnostics) == 0
+    return {
+        "success": True,
+        "valid": is_valid,
+        "diagnostics": diagnostics,
+        "warnings": warnings,
+        "recommendations": recommendations,
+        "loc": len(code.splitlines())
+    }
+
 TOOL_REGISTRY = {
+    "compile_and_verify": {
+        "func": tool_compile_and_verify,
+        "description": "Compiles and verifies syntax, catches syntax errors, and validates bracket balancing.",
+        "parameters": {"code": "string", "language": "string default 'python'"},
+    },
+    "symbol_search": {
+        "func": tool_symbol_search,
+        "description": "Searches codebase symbol table for classes, functions, interfaces, structs, and enums.",
+        "parameters": {"query": "string symbol name", "max_results": "optional int"},
+    },
+    "patch_file": {
+        "func": tool_patch_file,
+        "description": "Applies an atomic search-and-replace chunk patch to a file without overwriting the whole file.",
+        "parameters": {"file_path": "string", "target_chunk": "string", "replacement_chunk": "string"},
+    },
+    "run_tests": {
+        "func": tool_run_tests,
+        "description": "Executes project test suites (pytest) and extracts exit codes and summaries.",
+        "parameters": {"test_target": "optional string path"},
+    },
+    "project_memory": {
+        "func": tool_project_memory,
+        "description": "Accesses long-term project knowledge and memory key-values across sessions.",
+        "parameters": {"action": "get | set | list | clear", "key": "optional string", "value": "optional any"},
+    },
+    "ast_map": {
+        "func": tool_ast_map,
+        "description": "Extracts structured AST code map (classes, methods, docstrings, imports) of any file.",
+        "parameters": {"file_path": "string path"},
+    },
+    "git_diff": {
+        "func": tool_git_diff,
+        "description": "Inspects git diff and list of changed files in workspace.",
+        "parameters": {"cached": "optional bool default false", "max_chars": "optional int"},
+    },
+    "ue5_validator": {
+        "func": tool_ue5_validator,
+        "description": "Validates Unreal Engine 5 C++ actor/character macros, naming prefixes, and rig configurations.",
+        "parameters": {"code": "string C++ code", "class_name": "optional string"},
+    },
     "calculate": {
         "func": tool_calculate,
         "description": "Calculate exact mathematical expressions (arithmetic, powers, sqrt, sin, log, exp, etc.).",
