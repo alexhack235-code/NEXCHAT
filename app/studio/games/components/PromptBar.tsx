@@ -46,6 +46,12 @@ export default function PromptBar({ onAnimate, isAnimating, unrealMode }: Prompt
       icon: '🦘',
       name: 'Giant Jump',
       prompt: 'Character jumps 50 meters high with 3x squash and stretch, defying gravitational pull and creating a ground shockwave'
+    },
+    {
+      id: 'flying_car_sim',
+      icon: '🏎️',
+      name: 'Flying Car Flight',
+      prompt: 'Cyberpunk flying car weaves through skyscraper canyons at supersonic speed, banks into 180° turns, with neon plasma thrusters and chase camera'
     }
   ];
 

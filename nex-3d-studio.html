@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEX 3D Studio — 3D Animated Website Generator AI</title>
+  <title>NEX 3D Studio — 3D Animated Website Generator & Aerocar Simulation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -83,7 +83,7 @@
       position: relative;
     }
     .right-panel {
-      width: 420px;
+      width: 430px;
       background: var(--panel-bg);
       border-left: 1px solid var(--border);
       display: flex;
@@ -141,7 +141,7 @@
       position: relative;
       overflow: hidden;
     }
-    #three-canvas {
+    #three-container {
       width: 100%;
       height: 100%;
       display: block;
@@ -150,15 +150,51 @@
       position: absolute;
       bottom: 16px;
       left: 16px;
-      background: rgba(0, 0, 0, 0.7);
+      background: rgba(4, 2, 10, 0.85);
       backdrop-filter: blur(8px);
       padding: 8px 14px;
       border-radius: 8px;
       border: 1px solid rgba(0, 240, 255, 0.4);
       color: var(--cyan);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
       pointer-events: none;
+      z-index: 5;
+    }
+    .hud-cam-bar {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 10;
+      display: flex;
+      gap: 6px;
+      background: rgba(8, 6, 16, 0.88);
+      backdrop-filter: blur(10px);
+      padding: 5px 8px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+    .cam-btn {
+      background: #181329;
+      color: #c4b5fd;
+      border: 1px solid #2f2747;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cam-btn:hover {
+      background: #271f42;
+      color: #fff;
+    }
+    .cam-btn.active {
+      background: var(--cyan);
+      color: #000;
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
     }
     .variants-bar {
       height: 140px;
@@ -182,6 +218,7 @@
       flex-direction: column;
       justify-content: space-between;
       transition: all 0.2s ease;
+      flex-shrink: 0;
     }
     .variant-card.active {
       border: 2px solid var(--cyan);
@@ -220,7 +257,7 @@
           NEX 3D STUDIO
         </div>
         <div style="font-size:10px; color:var(--cyan); font-weight:600; letter-spacing:1px;">
-          RUST AXUM BACKEND • &lt;3S GENERATION PIPELINE
+          RUST AXUM BACKEND • LIVE WEBGL 3D WORLD SIMULATION
         </div>
       </div>
     </div>
@@ -228,7 +265,7 @@
     <!-- Status indicator -->
     <div style="display:flex; align-items:center; gap:10px; font-size:12px; background:#0e0b17; padding:6px 14px; border-radius:20px; border:1px solid #272238;">
       <div id="statusDot" style="width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green);"></div>
-      <span id="statusLabel" style="color:var(--text-muted);">60 FPS WebGL Engine Online</span>
+      <span id="statusLabel" style="color:var(--text-muted);">60 FPS Aerocar Simulation Active</span>
       <span id="timeLabel" style="color:var(--cyan); font-weight:700; padding-left:6px; border-left:1px solid #373349;">&lt;3s Ready</span>
     </div>
 
@@ -268,7 +305,7 @@
       <div style="border-top:1px solid var(--border); padding-top:14px; display:flex; flex-direction:column; gap:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span style="font-size:12px; font-weight:700; color:var(--magenta);">🎬 NEX Reels: Video to 3D</span>
-          <span style="font-size:10px; background:#350020; color:var(--magenta); padding:2px 6px; borderRadius:4px;">AI VISION</span>
+          <span style="font-size:10px; background:#350020; color:var(--magenta); padding:2px 6px; border-radius:4px;">AI VISION</span>
         </div>
         <input type="text" id="videoUrlInput" placeholder="Paste TikTok / Reel link..." />
         <button style="background:linear-gradient(135deg, var(--magenta), var(--purple)); color:#fff; font-weight:700; font-size:12px; padding:9px; border-radius:8px; border:none; cursor:pointer;" onclick="remixWithAI()">
@@ -280,8 +317,13 @@
     <!-- CENTER STAGE -->
     <main class="center-stage">
       <div class="viewport">
-        <div class="hud-badge" id="hudBadge">60 FPS WEBGL • CYBERPUNK METROPOLIS</div>
-        <div id="three-container" style="width:100%; height:100%;"></div>
+        <div class="hud-badge" id="hudBadge">60 FPS WEBGL • CYBERPUNK AEROCAR TRAFFIC SIMULATION</div>
+        <div class="hud-cam-bar">
+          <button class="cam-btn active" id="camOrbitBtn" onclick="setCameraMode('orbit')">🎥 Orbit</button>
+          <button class="cam-btn" id="camChaseBtn" onclick="setCameraMode('chase')">🏎️ Chase Car</button>
+          <button class="cam-btn" id="camFlyBtn" onclick="setCameraMode('flythrough')">🏙️ Canyon Flyby</button>
+        </div>
+        <div id="three-container"></div>
       </div>
 
       <!-- Midjourney 3 Variants Grid -->
@@ -304,20 +346,28 @@
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:11px;">
           <div>
-            <label style="display:block; color:var(--text-muted); margin-bottom:4px;">Light Intensity</label>
-            <input type="range" id="lightSlider" min="0.1" max="3" step="0.1" value="1.2" oninput="updateLight(this.value)" style="width:100%;">
+            <label style="display:block; color:var(--text-muted); margin-bottom:4px;">Vehicle Speed</label>
+            <input type="range" id="carSpeedSlider" min="0.2" max="3.5" step="0.1" value="1.2" oninput="updateCarSpeed(this.value)" style="width:100%;">
           </div>
           <div>
-            <label style="display:block; color:var(--text-muted); margin-bottom:4px;">Rotation Speed</label>
-            <input type="range" id="rotSlider" min="0" max="3" step="0.1" value="1" oninput="updateSpeed(this.value)" style="width:100%;">
+            <label style="display:block; color:var(--text-muted); margin-bottom:4px;">Aerocar Traffic</label>
+            <input type="range" id="trafficSlider" min="1" max="8" step="1" value="5" oninput="updateTrafficCount(this.value)" style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block; color:var(--text-muted); margin-bottom:4px;">Light Intensity</label>
+            <input type="range" id="lightSlider" min="0.1" max="3" step="0.1" value="1.6" oninput="updateLight(this.value)" style="width:100%;">
+          </div>
+          <div>
+            <label style="display:block; color:var(--text-muted); margin-bottom:4px;">Neon Glow Intensity</label>
+            <input type="range" id="glowSlider" min="0.5" max="3.0" step="0.1" value="1.8" oninput="updateGlow(this.value)" style="width:100%;">
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
             <input type="checkbox" id="wireframeCheck" onchange="toggleWireframe(this.checked)">
             <label for="wireframeCheck" style="color:#d1d5db; cursor:pointer;">Wireframe Mode</label>
           </div>
           <div style="display:flex; align-items:center; gap:8px;">
-            <input type="checkbox" id="neonPulseCheck" checked onchange="togglePulse(this.checked)">
-            <label for="neonPulseCheck" style="color:#d1d5db; cursor:pointer;">Neon Pulse</label>
+            <input type="checkbox" id="nitroBoostCheck" onchange="toggleNitro(this.checked)">
+            <label for="nitroBoostCheck" style="color:#00FF88; font-weight:700; cursor:pointer;">🚀 Nitro Afterburner</label>
           </div>
         </div>
       </div>
@@ -340,79 +390,78 @@
 
   <script>
     // ------------------------------------------------------------------------
-    // THREE.JS REAL-TIME SCENE SETUP
+    // THREE.JS HIGH-FIDELITY SCENE ENGINE
     // ------------------------------------------------------------------------
     let scene, camera, renderer, controls;
-    let mainMesh, particlesGroup, dirLight, pointLight;
-    let rotSpeed = 1.0;
+    let worldGroup, particlesGroup, dirLight, pointLight, floorGrid;
+    let flyingCars = [];
+    let carSpeedMult = 1.2;
     let isWireframe = false;
-    let isPulsing = true;
+    let isNitro = false;
+    let cameraMode = 'orbit'; // 'orbit' | 'chase' | 'flythrough'
+    let currentTheme = 'cyberpunk_city';
+    let clock = new THREE.Clock();
 
     function initThree() {
       const container = document.getElementById('three-container');
       scene = new THREE.Scene();
-      scene.fog = new THREE.FogExp2(0x050014, 0.035);
+      scene.background = new THREE.Color(0x020008);
+      scene.fog = new THREE.FogExp2(0x050014, 0.025);
 
       camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
-      camera.position.set(0, 5, 13);
+      camera.position.set(0, 8, 20);
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
       renderer.setSize(container.clientWidth, container.clientHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.3;
       container.appendChild(renderer.domElement);
 
       controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.05;
+      controls.maxPolarAngle = Math.PI / 2 - 0.03;
 
-      // Lighting
-      const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+      // Base Lighting Rig
+      const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
       scene.add(ambientLight);
+
       dirLight = new THREE.DirectionalLight(0x00F0FF, 1.8);
-      dirLight.position.set(10, 15, 10);
+      dirLight.position.set(15, 25, 10);
       scene.add(dirLight);
-      pointLight = new THREE.PointLight(0xFF007F, 3.0, 30);
-      pointLight.position.set(-6, 4, -4);
+
+      pointLight = new THREE.PointLight(0xFF007F, 3.5, 50);
+      pointLight.position.set(-10, 8, -5);
       scene.add(pointLight);
 
-      // Cyber Geometry (Torus Knot Core)
-      const geom = new THREE.TorusKnotGeometry(2.2, 0.6, 120, 20);
-      const mat = new THREE.MeshStandardMaterial({
-        color: 0x00F0FF,
-        metalness: 0.9,
-        roughness: 0.1,
-        emissive: 0x002233
-      });
-      mainMesh = new THREE.Mesh(geom, mat);
-      mainMesh.position.y = 2.5;
-      scene.add(mainMesh);
-
-      // Outer Gyroscope Rings
-      const ringGeom = new THREE.TorusGeometry(4.2, 0.08, 16, 100);
-      const ringMat = new THREE.MeshStandardMaterial({ color: 0xFF007F, emissive: 0xFF007F, emissiveIntensity: 2 });
-      const ring = new THREE.Mesh(ringGeom, ringMat);
-      ring.position.y = 2.5;
-      ring.rotation.x = Math.PI / 3;
-      scene.add(ring);
-
-      // Flying Particles
+      // Starfield / Cyber Dust
       particlesGroup = new THREE.Group();
-      const pCount = 600;
+      const pCount = 1200;
       const pGeom = new THREE.BufferGeometry();
       const pPositions = new Float32Array(pCount * 3);
-      for (let i = 0; i < pCount * 3; i++) {
-        pPositions[i] = (Math.random() - 0.5) * 35;
+      for (let i = 0; i < pCount * 3; i += 3) {
+        pPositions[i] = (Math.random() - 0.5) * 80;
+        pPositions[i + 1] = Math.random() * 35;
+        pPositions[i + 2] = (Math.random() - 0.5) * 80;
       }
       pGeom.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-      const pMat = new THREE.PointsMaterial({ size: 0.18, color: 0x00FF88 });
+      const pMat = new THREE.PointsMaterial({ size: 0.16, color: 0x00F0FF, transparent: true, opacity: 0.8 });
       const particles = new THREE.Points(pGeom, pMat);
       particlesGroup.add(particles);
       scene.add(particlesGroup);
 
-      // Reflective Floor Grid
-      const grid = new THREE.GridHelper(60, 60, 0xFF007F, 0x1f1d2b);
-      grid.position.y = -1;
-      scene.add(grid);
+      // Dynamic World Container
+      worldGroup = new THREE.Group();
+      scene.add(worldGroup);
+
+      // Reflective Street Grid
+      floorGrid = new THREE.GridHelper(80, 80, 0x00F0FF, 0x161326);
+      floorGrid.position.y = 0;
+      scene.add(floorGrid);
+
+      // Build initial Cyberpunk Flying Car Simulation
+      build3DCyberpunkCity(5);
 
       window.addEventListener('resize', onWindowResize);
       animate();
@@ -420,50 +469,612 @@
 
     function onWindowResize() {
       const container = document.getElementById('three-container');
+      if (!container) return;
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
     }
 
-    let clock = new THREE.Clock();
+    // ------------------------------------------------------------------------
+    // PROCEDURAL FLYING CAR FACTORY (AEROCARS)
+    // ------------------------------------------------------------------------
+    function createFlyingCar(cfg) {
+      const carGroup = new THREE.Group();
+
+      // 1. Sleek Aerodynamic Wedge Chassis
+      const bodyGeom = new THREE.BoxGeometry(1.6, 0.45, 3.6);
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: cfg.color,
+        metalness: 0.95,
+        roughness: 0.15,
+        wireframe: isWireframe
+      });
+      const bodyMesh = new THREE.Mesh(bodyGeom, bodyMat);
+      bodyMesh.position.y = 0.25;
+      carGroup.add(bodyMesh);
+
+      // 2. Cyberpunk Cockpit Canopy
+      const canopyGeom = new THREE.BoxGeometry(1.1, 0.38, 1.8);
+      const canopyMat = new THREE.MeshStandardMaterial({
+        color: 0x00F0FF,
+        emissive: 0x00F0FF,
+        emissiveIntensity: 1.2,
+        transparent: true,
+        opacity: 0.85,
+        metalness: 0.9,
+        roughness: 0.1,
+        wireframe: isWireframe
+      });
+      const canopy = new THREE.Mesh(canopyGeom, canopyMat);
+      canopy.position.set(0, 0.55, -0.1);
+      carGroup.add(canopy);
+
+      // 3. Swept Aerodynamic Delta Wings
+      const wingGeom = new THREE.BoxGeometry(0.7, 0.06, 1.4);
+      const wingMat = new THREE.MeshStandardMaterial({ color: 0x0d0b17, metalness: 0.9, roughness: 0.2 });
+      
+      const leftWing = new THREE.Mesh(wingGeom, wingMat);
+      leftWing.position.set(-1.05, 0.25, -0.3);
+      leftWing.rotation.y = -0.2;
+      carGroup.add(leftWing);
+
+      const rightWing = new THREE.Mesh(wingGeom, wingMat);
+      rightWing.position.set(1.05, 0.25, -0.3);
+      rightWing.rotation.y = 0.2;
+      carGroup.add(rightWing);
+
+      // Glowing Wingtip Runners
+      const tipGeom = new THREE.BoxGeometry(0.08, 0.08, 1.2);
+      const tipMat = new THREE.MeshBasicMaterial({ color: cfg.neonColor });
+      const leftTip = new THREE.Mesh(tipGeom, tipMat);
+      leftTip.position.set(-1.4, 0.25, -0.3);
+      carGroup.add(leftTip);
+      const rightTip = new THREE.Mesh(tipGeom, tipMat);
+      rightTip.position.set(1.4, 0.25, -0.3);
+      carGroup.add(rightTip);
+
+      // 4. Dual Rear Plasma Thrusters
+      const thrusterFlares = [];
+      const engineGeom = new THREE.CylinderGeometry(0.18, 0.22, 0.5, 16);
+      engineGeom.rotateX(Math.PI / 2);
+      const engineMat = new THREE.MeshStandardMaterial({ color: 0x1a1a24, metalness: 0.95 });
+
+      [-0.45, 0.45].forEach(xOff => {
+        const eng = new THREE.Mesh(engineGeom, engineMat);
+        eng.position.set(xOff, 0.25, -1.8);
+        carGroup.add(eng);
+
+        // Exhaust Inner Jet Flame
+        const flareGeom = new THREE.ConeGeometry(0.18, 0.9, 16);
+        flareGeom.rotateX(-Math.PI / 2);
+        const flareMat = new THREE.MeshBasicMaterial({ color: cfg.thrusterColor });
+        const flare = new THREE.Mesh(flareGeom, flareMat);
+        flare.position.set(xOff, 0.25, -2.3);
+        carGroup.add(flare);
+        thrusterFlares.push(flare);
+      });
+
+      // Rear Point Light for Exhaust Glow
+      const rearLight = new THREE.PointLight(cfg.thrusterColor, 2.5, 10);
+      rearLight.position.set(0, 0.25, -2.5);
+      carGroup.add(rearLight);
+
+      // 5. Forward Projecting Cyber Headlights
+      const headSphereGeom = new THREE.SphereGeometry(0.1, 12, 12);
+      const headMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      [-0.5, 0.5].forEach(xOff => {
+        const hLight = new THREE.Mesh(headSphereGeom, headMat);
+        hLight.position.set(xOff, 0.2, 1.8);
+        carGroup.add(hLight);
+      });
+
+      const forwardSpot = new THREE.SpotLight(0x00F0FF, 3.5, 30, Math.PI / 7, 0.4);
+      forwardSpot.position.set(0, 0.3, 1.9);
+      forwardSpot.target.position.set(0, -0.5, 12);
+      carGroup.add(forwardSpot);
+      carGroup.add(forwardSpot.target);
+
+      worldGroup.add(carGroup);
+
+      return {
+        group: carGroup,
+        color: cfg.color,
+        altitude: cfg.altitude,
+        radiusX: cfg.radiusX,
+        radiusZ: cfg.radiusZ,
+        speed: cfg.speed,
+        phase: cfg.phase,
+        curveFactor: cfg.curveFactor,
+        thrusterFlares: thrusterFlares,
+        rearLight: rearLight,
+        velocity: new THREE.Vector3(0, 0, 1),
+        currentRoll: 0
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // CYBERPUNK MEGAPOLIS & FLYING CAR WORLD BUILDER
+    // ------------------------------------------------------------------------
+    function build3DCyberpunkCity(carCount = 5) {
+      clearWorld();
+      currentTheme = 'cyberpunk_city';
+      document.getElementById('hudBadge').textContent = `60 FPS WEBGL • CYBERPUNK METROPOLIS [${carCount} AEROCARS IN TRAFFIC]`;
+
+      scene.fog = new THREE.FogExp2(0x050014, 0.022);
+      scene.background = new THREE.Color(0x020008);
+      floorGrid.visible = true;
+
+      // 1. Procedural Cyberpunk Skyscrapers (22 towers)
+      const buildingColors = [0x00F0FF, 0xFF007F, 0x00FF88, 0xFFE600, 0x7000FF];
+      const gridCoords = [
+        [-14, -14], [-14, -4], [-14, 6], [-14, 16],
+        [-6, -18], [-6, 18],
+        [6, -18], [6, 18],
+        [14, -14], [14, -4], [14, 6], [14, 16],
+        [-22, -10], [-22, 10], [22, -10], [22, 10],
+        [-10, -26], [10, -26], [-10, 26], [10, 26],
+        [-20, 0], [20, 0]
+      ];
+
+      gridCoords.forEach((coord, i) => {
+        const height = 9 + Math.random() * 18;
+        const width = 3.5 + Math.random() * 2.5;
+        const depth = 3.5 + Math.random() * 2.5;
+
+        const bGroup = new THREE.Group();
+        bGroup.position.set(coord[0], 0, coord[1]);
+
+        // Main Monolith
+        const bGeom = new THREE.BoxGeometry(width, height, depth);
+        const bMat = new THREE.MeshStandardMaterial({
+          color: 0x070610,
+          metalness: 0.95,
+          roughness: 0.2,
+          wireframe: isWireframe
+        });
+        const bMesh = new THREE.Mesh(bGeom, bMat);
+        bMesh.position.y = height / 2;
+        bGroup.add(bMesh);
+
+        // Neon Accent Band / Window Grid
+        const accentCol = buildingColors[i % buildingColors.length];
+        const bandGeom = new THREE.BoxGeometry(width + 0.1, 0.6, depth + 0.1);
+        const bandMat = new THREE.MeshStandardMaterial({
+          color: accentCol,
+          emissive: accentCol,
+          emissiveIntensity: 2.2,
+          wireframe: isWireframe
+        });
+        const band = new THREE.Mesh(bandGeom, bandMat);
+        band.position.y = height * 0.75;
+        bGroup.add(band);
+
+        // Lower Band
+        if (height > 15) {
+          const lowerBand = new THREE.Mesh(bandGeom, bandMat);
+          lowerBand.position.y = height * 0.35;
+          bGroup.add(lowerBand);
+        }
+
+        // Rooftop Antenna Spire & Blinking Beacon
+        const spireGeom = new THREE.CylinderGeometry(0.06, 0.12, 3.5, 8);
+        const spireMat = new THREE.MeshStandardMaterial({ color: 0x333344, metalness: 0.9 });
+        const spire = new THREE.Mesh(spireGeom, spireMat);
+        spire.position.y = height + 1.75;
+        bGroup.add(spire);
+
+        const beaconGeom = new THREE.SphereGeometry(0.18, 12, 12);
+        const beaconMat = new THREE.MeshBasicMaterial({ color: accentCol });
+        const beacon = new THREE.Mesh(beaconGeom, beaconMat);
+        beacon.position.y = height + 3.5;
+        bGroup.add(beacon);
+
+        // High-Rise Holographic Spinning Ring (on select towers)
+        if (i % 3 === 0) {
+          const ringGeom = new THREE.TorusGeometry(width * 0.7, 0.1, 16, 40);
+          const ringMat = new THREE.MeshStandardMaterial({
+            color: accentCol,
+            emissive: accentCol,
+            emissiveIntensity: 2.5
+          });
+          const ringMesh = new THREE.Mesh(ringGeom, ringMat);
+          ringMesh.position.y = height + 1.2;
+          ringMesh.rotation.x = Math.PI / 2;
+          bGroup.add(ringMesh);
+        }
+
+        worldGroup.add(bGroup);
+      });
+
+      // 2. Spawn Fleet of High-Speed Flying Cars (Aerocars)
+      flyingCars = [];
+      const carPalettes = [
+        { color: 0x00F0FF, neonColor: 0x00F0FF, thrusterColor: 0x00F0FF }, // Cyan Cyberpunk
+        { color: 0xFF007F, neonColor: 0xFF007F, thrusterColor: 0xFF007F }, // Magenta Rogue
+        { color: 0xFFE600, neonColor: 0xFFE600, thrusterColor: 0xFF8800 }, // Neon Yellow Taxi
+        { color: 0x00FF88, neonColor: 0x00FF88, thrusterColor: 0x00FF88 }, // Hyper Green
+        { color: 0x7000FF, neonColor: 0x00F0FF, thrusterColor: 0x7000FF }, // Royal Purple
+        { color: 0xFF3300, neonColor: 0xFF5500, thrusterColor: 0xFF0055 }, // Crimson Turbo
+        { color: 0xFFFFFF, neonColor: 0x00F0FF, thrusterColor: 0x00FFFF }, // Platinum Police
+        { color: 0x00E5FF, neonColor: 0xFF0055, thrusterColor: 0x00FFCC }  // Matrix Stealth
+      ];
+
+      for (let i = 0; i < carCount; i++) {
+        const palette = carPalettes[i % carPalettes.length];
+        const car = createFlyingCar({
+          color: palette.color,
+          neonColor: palette.neonColor,
+          thrusterColor: palette.thrusterColor,
+          altitude: 4.5 + (i * 2.0) % 9.0,
+          radiusX: 11.0 + (i * 3.5),
+          radiusZ: 8.5 + (i * 2.8),
+          speed: (0.75 + (i * 0.2)) * (i % 2 === 0 ? 1 : -1),
+          phase: (i * Math.PI * 2) / carCount,
+          curveFactor: 1.0 + (i * 0.15)
+        });
+        flyingCars.push(car);
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // LUXURY WATCH WORLD BUILDER
+    // ------------------------------------------------------------------------
+    let watchHands = [];
+    function build3DWatch() {
+      clearWorld();
+      currentTheme = 'luxury_watch';
+      document.getElementById('hudBadge').textContent = '60 FPS WEBGL • LUXURY CHRONOMETER 360';
+      scene.fog = new THREE.FogExp2(0x06060c, 0.03);
+      scene.background = new THREE.Color(0x06060c);
+      floorGrid.visible = false;
+
+      // Marble Pedestal
+      const pedGeom = new THREE.CylinderGeometry(4.5, 5.0, 1.5, 48);
+      const pedMat = new THREE.MeshStandardMaterial({ color: 0x111116, metalness: 0.9, roughness: 0.1 });
+      const ped = new THREE.Mesh(pedGeom, pedMat);
+      ped.position.y = -0.75;
+      worldGroup.add(ped);
+
+      // Gold Watch Case
+      const caseGeom = new THREE.CylinderGeometry(3.0, 3.0, 0.8, 64);
+      const caseMat = new THREE.MeshStandardMaterial({
+        color: 0xFFD700,
+        metalness: 0.98,
+        roughness: 0.12,
+        wireframe: isWireframe
+      });
+      const caseMesh = new THREE.Mesh(caseGeom, caseMat);
+      caseMesh.position.y = 2.0;
+      worldGroup.add(caseMesh);
+
+      // Bezel with Diamond Ring
+      const bezelGeom = new THREE.TorusGeometry(3.0, 0.22, 24, 64);
+      const bezelMat = new THREE.MeshStandardMaterial({ color: 0xFFEA80, metalness: 1.0, roughness: 0.05 });
+      const bezel = new THREE.Mesh(bezelGeom, bezelMat);
+      bezel.position.y = 2.45;
+      bezel.rotation.x = Math.PI / 2;
+      worldGroup.add(bezel);
+
+      // Obsidian Dial Face
+      const dialGeom = new THREE.CircleGeometry(2.7, 64);
+      const dialMat = new THREE.MeshStandardMaterial({ color: 0x030308, metalness: 0.9, roughness: 0.2 });
+      const dial = new THREE.Mesh(dialGeom, dialMat);
+      dial.position.y = 2.43;
+      dial.rotation.x = -Math.PI / 2;
+      worldGroup.add(dial);
+
+      // Watch Hands
+      watchHands = [];
+      const handMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 });
+
+      // Hour Hand
+      const hGeom = new THREE.BoxGeometry(0.12, 0.04, 1.4);
+      hGeom.translate(0, 0, 0.7);
+      const hHand = new THREE.Mesh(hGeom, handMat);
+      hHand.position.set(0, 2.46, 0);
+      worldGroup.add(hHand);
+      watchHands.push({ mesh: hHand, speed: 0.1 });
+
+      // Minute Hand
+      const mGeom = new THREE.BoxGeometry(0.09, 0.04, 2.1);
+      mGeom.translate(0, 0, 1.05);
+      const mHand = new THREE.Mesh(mGeom, handMat);
+      mHand.position.set(0, 2.48, 0);
+      worldGroup.add(mHand);
+      watchHands.push({ mesh: mHand, speed: 1.0 });
+
+      // Second Hand (Cyan Neon)
+      const sGeom = new THREE.BoxGeometry(0.04, 0.04, 2.3);
+      sGeom.translate(0, 0, 1.15);
+      const sHand = new THREE.Mesh(sGeom, new THREE.MeshBasicMaterial({ color: 0x00F0FF }));
+      sHand.position.set(0, 2.50, 0);
+      worldGroup.add(sHand);
+      watchHands.push({ mesh: sHand, speed: 6.0 });
+
+      // Sapphire Glass
+      const glassGeom = new THREE.CylinderGeometry(2.85, 2.85, 0.08, 48);
+      const glassMat = new THREE.MeshPhysicalMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.35,
+        roughness: 0.05,
+        transmission: 0.9
+      });
+      const glass = new THREE.Mesh(glassGeom, glassMat);
+      glass.position.y = 2.55;
+      worldGroup.add(glass);
+    }
+
+    // ------------------------------------------------------------------------
+    // QUANTUM PORTAL WORLD BUILDER
+    // ------------------------------------------------------------------------
+    let portalCore = null;
+    function build3DPortal() {
+      clearWorld();
+      currentTheme = 'gaming_portal';
+      document.getElementById('hudBadge').textContent = '60 FPS WEBGL • QUANTUM VORTEX PORTAL';
+      scene.fog = new THREE.FogExp2(0x04050d, 0.025);
+      scene.background = new THREE.Color(0x04050d);
+      floorGrid.visible = true;
+
+      portalCore = new THREE.Group();
+      portalCore.position.y = 3.5;
+
+      // Inner Crystalline Dodecahedron
+      const d1Geom = new THREE.DodecahedronGeometry(2.2, 0);
+      const d1Mat = new THREE.MeshStandardMaterial({
+        color: 0x00FF88,
+        emissive: 0x00FF88,
+        emissiveIntensity: 2.5,
+        wireframe: isWireframe
+      });
+      const d1 = new THREE.Mesh(d1Geom, d1Mat);
+      portalCore.add(d1);
+
+      // Outer Inverted Dodecahedron
+      const d2Geom = new THREE.DodecahedronGeometry(3.4, 0);
+      const d2Mat = new THREE.MeshStandardMaterial({
+        color: 0x00F0FF,
+        emissive: 0x0044AA,
+        emissiveIntensity: 1.5,
+        wireframe: true
+      });
+      const d2 = new THREE.Mesh(d2Geom, d2Mat);
+      portalCore.add(d2);
+
+      // Orbiting Monolith Crystals
+      for (let i = 0; i < 8; i++) {
+        const shardGeom = new THREE.TetrahedronGeometry(0.7, 0);
+        const shardMat = new THREE.MeshStandardMaterial({ color: 0xFF007F, emissive: 0xFF007F, emissiveIntensity: 2.0 });
+        const shard = new THREE.Mesh(shardGeom, shardMat);
+        const ang = (i * Math.PI * 2) / 8;
+        shard.position.set(Math.cos(ang) * 5.5, (Math.random() - 0.5) * 2, Math.sin(ang) * 5.5);
+        portalCore.add(shard);
+      }
+
+      worldGroup.add(portalCore);
+    }
+
+    // ------------------------------------------------------------------------
+    // MUSIC FESTIVAL WORLD BUILDER
+    // ------------------------------------------------------------------------
+    let eqBars = [];
+    function build3DMusicFestival() {
+      clearWorld();
+      currentTheme = 'music_festival';
+      document.getElementById('hudBadge').textContent = '60 FPS WEBGL • AUDIO-REACTIVE STROBE STAGE';
+      scene.fog = new THREE.FogExp2(0x020206, 0.025);
+      scene.background = new THREE.Color(0x020206);
+      floorGrid.visible = true;
+
+      // Center Stage Truss
+      const stageGeom = new THREE.CylinderGeometry(8, 9, 1.2, 32);
+      const stageMat = new THREE.MeshStandardMaterial({ color: 0x0a0a14, metalness: 0.9, roughness: 0.1 });
+      const stage = new THREE.Mesh(stageGeom, stageMat);
+      stage.position.y = 0.6;
+      worldGroup.add(stage);
+
+      // Equalizer Visualizer Towers
+      eqBars = [];
+      const barCount = 18;
+      const barColors = [0xFF007F, 0x00F0FF, 0x00FF88, 0xFFE600];
+
+      for (let i = 0; i < barCount; i++) {
+        const bGeom = new THREE.BoxGeometry(0.6, 6.0, 0.6);
+        const col = barColors[i % barColors.length];
+        const bMat = new THREE.MeshStandardMaterial({
+          color: col,
+          emissive: col,
+          emissiveIntensity: 2.5,
+          wireframe: isWireframe
+        });
+        const bar = new THREE.Mesh(bGeom, bMat);
+        const ang = (i / barCount) * Math.PI * 2;
+        bar.position.set(Math.cos(ang) * 6.5, 3.0, Math.sin(ang) * 6.5);
+        worldGroup.add(bar);
+        eqBars.push({ mesh: bar, baseHeight: 3.0, phase: i * 0.4 });
+      }
+    }
+
+    function clearWorld() {
+      flyingCars = [];
+      watchHands = [];
+      eqBars = [];
+      portalCore = null;
+      while (worldGroup.children.length > 0) {
+        const obj = worldGroup.children[0];
+        worldGroup.remove(obj);
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // DYNAMIC WORLD SELECTOR BASED ON USER PROMPT
+    // ------------------------------------------------------------------------
+    function build3DWorldFromPrompt(prompt) {
+      const p = prompt.toLowerCase();
+      if (p.includes('car') || p.includes('flying') || p.includes('cyberpunk') || p.includes('city') || p.includes('vehicle') || p.includes('traffic')) {
+        build3DCyberpunkCity(parseInt(document.getElementById('trafficSlider').value) || 5);
+      } else if (p.includes('watch') || p.includes('luxury') || p.includes('diamond') || p.includes('product')) {
+        build3DWatch();
+      } else if (p.includes('portal') || p.includes('gaming') || p.includes('odyssey') || p.includes('quantum')) {
+        build3DPortal();
+      } else if (p.includes('festival') || p.includes('music') || p.includes('stage') || p.includes('concert')) {
+        build3DMusicFestival();
+      } else {
+        build3DCyberpunkCity(4);
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // MASTER ANIMATION LOOP
+    // ------------------------------------------------------------------------
     function animate() {
       requestAnimationFrame(animate);
       const elapsed = clock.getElapsedTime();
+      const delta = clock.getDelta();
 
-      if (mainMesh) {
-        mainMesh.rotation.y += 0.01 * rotSpeed;
-        mainMesh.rotation.x += 0.005 * rotSpeed;
-        if (isPulsing) {
-          const s = 1.0 + Math.sin(elapsed * 2.5) * 0.06;
-          mainMesh.scale.set(s, s, s);
+      // 1. Update Flying Cars Aerodynamics & Trajectory
+      if (flyingCars.length > 0) {
+        const speedFactor = isNitro ? carSpeedMult * 2.4 : carSpeedMult;
+
+        flyingCars.forEach((car, idx) => {
+          const t = elapsed * speedFactor * (car.speed * 0.35) + car.phase;
+          
+          // Lissajous / Elliptical Orbit
+          const x = Math.sin(t) * car.radiusX;
+          const z = Math.cos(t * car.curveFactor) * car.radiusZ;
+          const bob = Math.sin(elapsed * 3.0 + idx) * 0.35;
+          const y = car.altitude + bob;
+
+          // Next position to calculate tangent velocity vector & banking roll
+          const dt = 0.05;
+          const nextX = Math.sin(t + dt) * car.radiusX;
+          const nextZ = Math.cos((t + dt) * car.curveFactor) * car.radiusZ;
+          const dirX = nextX - x;
+          const dirZ = nextZ - z;
+
+          car.group.position.set(x, y, z);
+          car.velocity.set(dirX, 0, dirZ);
+
+          // Heading Yaw rotation
+          const yaw = Math.atan2(dirX, dirZ);
+          car.group.rotation.y = yaw;
+
+          // Realistic Aerodynamic Banking (Roll into turn)
+          const curvature = (dirX * Math.cos(t) - dirZ * Math.sin(t));
+          const targetRoll = Math.max(-0.45, Math.min(0.45, -dirX * 0.12));
+          car.currentRoll += (targetRoll - car.currentRoll) * 0.1;
+          car.group.rotation.z = car.currentRoll;
+
+          // Thruster Jet Flare Pulsing & Nitro elongation
+          const flameScale = (isNitro ? 2.5 : 1.0) + Math.sin(elapsed * 20.0 + idx) * 0.25;
+          car.thrusterFlares.forEach(fl => {
+            fl.scale.set(1.0, flameScale, 1.0);
+          });
+        });
+
+        // 2. Dynamic Camera Modes
+        if (cameraMode === 'chase' && flyingCars[0]) {
+          const lead = flyingCars[0].group;
+          const fwd = flyingCars[0].velocity.clone().normalize();
+          const desiredCamPos = lead.position.clone()
+            .sub(fwd.clone().multiplyScalar(7.5))
+            .add(new THREE.Vector3(0, 2.8, 0));
+
+          camera.position.lerp(desiredCamPos, 0.08);
+          camera.lookAt(lead.position.clone().add(fwd.clone().multiplyScalar(12)));
+        } else if (cameraMode === 'flythrough') {
+          const camT = elapsed * 0.18;
+          camera.position.x = Math.sin(camT) * 16;
+          camera.position.z = Math.cos(camT) * 16;
+          camera.position.y = 8 + Math.sin(camT * 2) * 2;
+          camera.lookAt(0, 5, 0);
+        } else {
+          controls.update();
         }
+      } else {
+        controls.update();
       }
+
+      // 3. Theme-Specific Animations
+      if (currentTheme === 'luxury_watch' && watchHands.length > 0) {
+        watchHands.forEach(h => {
+          h.mesh.rotation.y = -elapsed * h.speed;
+        });
+      } else if (currentTheme === 'gaming_portal' && portalCore) {
+        portalCore.children[0].rotation.y += 0.015;
+        portalCore.children[0].rotation.x += 0.008;
+        portalCore.children[1].rotation.y -= 0.01;
+        portalCore.children[1].rotation.z += 0.005;
+      } else if (currentTheme === 'music_festival' && eqBars.length > 0) {
+        eqBars.forEach((bar, i) => {
+          const scaleY = 0.5 + Math.abs(Math.sin(elapsed * 4.0 + bar.phase)) * 2.2;
+          bar.mesh.scale.y = scaleY;
+          bar.mesh.position.y = (bar.baseHeight * scaleY) / 2;
+        });
+      }
+
+      // Starfield subtle rotation
       if (particlesGroup) {
-        particlesGroup.rotation.y += 0.001 * rotSpeed;
+        particlesGroup.rotation.y += 0.0006;
       }
-      controls.update();
+
       renderer.render(scene, camera);
     }
 
     // ------------------------------------------------------------------------
-    // LEVA CONTROLS
+    // CAMERA MODE SWITCHING
     // ------------------------------------------------------------------------
-    function updateLight(val) {
-      if (dirLight) dirLight.intensity = parseFloat(val);
-    }
-    function updateSpeed(val) {
-      rotSpeed = parseFloat(val);
-    }
-    function toggleWireframe(checked) {
-      if (mainMesh) mainMesh.material.wireframe = checked;
-    }
-    function togglePulse(checked) {
-      isPulsing = checked;
-      if (!checked && mainMesh) mainMesh.scale.set(1, 1, 1);
+    function setCameraMode(mode) {
+      cameraMode = mode;
+      document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
+
+      if (mode === 'orbit') {
+        document.getElementById('camOrbitBtn').classList.add('active');
+        controls.enabled = true;
+        camera.position.set(0, 8, 20);
+        camera.lookAt(0, 4, 0);
+      } else if (mode === 'chase') {
+        document.getElementById('camChaseBtn').classList.add('active');
+        controls.enabled = false;
+      } else if (mode === 'flythrough') {
+        document.getElementById('camFlyBtn').classList.add('active');
+        controls.enabled = false;
+      }
     }
 
     // ------------------------------------------------------------------------
-    // GENERATION PIPELINE & VARIANTS
+    // LEVA SCENE CONTROLS
+    // ------------------------------------------------------------------------
+    function updateCarSpeed(val) {
+      carSpeedMult = parseFloat(val);
+    }
+    function updateTrafficCount(val) {
+      const count = parseInt(val);
+      if (currentTheme === 'cyberpunk_city') {
+        build3DCyberpunkCity(count);
+      }
+    }
+    function updateLight(val) {
+      if (dirLight) dirLight.intensity = parseFloat(val);
+    }
+    function updateGlow(val) {
+      if (pointLight) pointLight.intensity = parseFloat(val) * 2.0;
+    }
+    function toggleWireframe(checked) {
+      isWireframe = checked;
+      worldGroup.traverse(child => {
+        if (child.isMesh && child.material) {
+          child.material.wireframe = checked;
+        }
+      });
+    }
+    function toggleNitro(checked) {
+      isNitro = checked;
+    }
+
+    // ------------------------------------------------------------------------
+    // GENERATION PIPELINE & BACKEND API INTERACTION
     // ------------------------------------------------------------------------
     let currentVariants = [];
     let activeIdx = 0;
@@ -476,28 +1087,38 @@
 
       statusDot.style.background = 'var(--yellow)';
       statusDot.style.boxShadow = '0 0 8px var(--yellow)';
-      statusLabel.textContent = 'Rust Core synthesizing 3D scene...';
+      statusLabel.textContent = 'Synthesizing 3D Aerocar World...';
       const t0 = performance.now();
 
+      // Immediately build the interactive 3D world in the viewport!
+      build3DWorldFromPrompt(prompt);
+
       try {
-        const res = await fetch('http://localhost:8001/api/3d/generate', {
+        const apiUrl = window.location.origin + '/api/3d/generate';
+        const res = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: prompt }),
         });
+
+        if (!res.ok) throw new Error('Backend HTTP ' + res.status);
         const data = await res.json();
-        currentVariants = data.variants;
+        currentVariants = data.variants || [];
         renderVariants(currentVariants);
         selectVariant(0);
 
         const elapsed = Math.round(performance.now() - t0);
         statusDot.style.background = 'var(--green)';
         statusDot.style.boxShadow = '0 0 8px var(--green)';
-        statusLabel.textContent = 'Generation ready (<3s)';
+        statusLabel.textContent = 'Aerocar Simulation Live';
         timeLabel.textContent = `${elapsed}ms`;
       } catch (err) {
-        statusLabel.textContent = 'Offline generator active';
-        loadFallback();
+        console.warn('Using client-side accelerated generator:', err);
+        statusDot.style.background = 'var(--green)';
+        statusDot.style.boxShadow = '0 0 8px var(--green)';
+        statusLabel.textContent = 'Local 3D Engine Active';
+        timeLabel.textContent = '<3s Ready';
+        loadFallback(prompt);
       }
     }
 
@@ -514,7 +1135,7 @@
               Variant #${i + 1}
             </span>
             <span style="font-size:9px; background:#1c1730; color:#c4b5fd; padding:2px 6px; border-radius:4px;">
-              ${v.style}
+              ${v.style || 'R3F Ready'}
             </span>
           </div>
           <div style="font-size:12px; font-weight:600; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
@@ -540,21 +1161,17 @@
         c.classList.toggle('active', i === idx);
       });
 
-      document.getElementById('hudBadge').textContent = `60 FPS WEBGL • ${v.title.toUpperCase()}`;
       document.getElementById('codeViewer').textContent = v.r3f_code;
 
-      // Morph 3D object color based on style
-      if (mainMesh) {
-        if (idx === 0) {
-          mainMesh.material.color.setHex(0x00F0FF);
-          mainMesh.material.emissive.setHex(0x002233);
-        } else if (idx === 1) {
-          mainMesh.material.color.setHex(0xFFD700);
-          mainMesh.material.emissive.setHex(0x332200);
-        } else {
-          mainMesh.material.color.setHex(0xFF007F);
-          mainMesh.material.emissive.setHex(0x440022);
-        }
+      // Re-trigger world generation for the variant theme if needed
+      if (idx === 1 && currentTheme === 'cyberpunk_city') {
+        // Variant 2: Minimalist Night Grid
+        document.getElementById('hudBadge').textContent = `60 FPS WEBGL • ${v.title.toUpperCase()}`;
+        if (dirLight) dirLight.color.setHex(0xFFD700);
+      } else if (idx === 2 && currentTheme === 'cyberpunk_city') {
+        // Variant 3: Kinetic Hyper-Speed
+        document.getElementById('hudBadge').textContent = `60 FPS WEBGL • ${v.title.toUpperCase()}`;
+        if (dirLight) dirLight.color.setHex(0xFF007F);
       }
     }
 
@@ -565,7 +1182,7 @@
 
     function remixWithAI() {
       const prompt = document.getElementById('promptInput').value;
-      document.getElementById('promptInput').value = `Remix with AI: ${prompt} with neon glitch vortex`;
+      document.getElementById('promptInput').value = `Remix with AI: ${prompt} with nitro vortex afterburners`;
       generate3D();
     }
 
@@ -585,45 +1202,71 @@
       a.click();
     }
 
-    function loadFallback() {
+    function loadFallback(userPrompt = '') {
       currentVariants = [
         {
           id: 'v1',
           title: 'Cyberpunk Metropolis 2099 (Cinematic)',
           style: 'Cinematic Atmosphere',
-          r3f_code: `import React from 'react';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Float } from '@react-three/drei';
+          r3f_code: `import React, { useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Float, Stars, Box, Cylinder } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import * as THREE from 'three';
+
+function FlyingVehicles() {
+  const group = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (group.current) {
+      const t = clock.getElapsedTime() * 1.5;
+      group.current.position.x = Math.sin(t) * 9;
+      group.current.position.z = Math.cos(t * 0.8) * 6;
+      group.current.rotation.y = Math.atan2(Math.cos(t) * 9, -Math.sin(t * 0.8) * 4.8);
+      group.current.rotation.z = -Math.cos(t) * 0.3; // Banking
+    }
+  });
+
+  return (
+    <group ref={group} position={[0, 5, 0]}>
+      <Box args={[1.6, 0.45, 3.6]}>
+        <meshStandardMaterial color="#00F0FF" metalness={0.95} roughness={0.15} />
+      </Box>
+      <Box args={[1.0, 0.35, 1.8]} position={[0, 0.35, -0.1]}>
+        <meshStandardMaterial color="#00F0FF" emissive="#00F0FF" emissiveIntensity={2} />
+      </Box>
+      <pointLight color="#00F0FF" intensity={3} distance={8} />
+    </group>
+  );
+}
 
 export default function GeneratedScene() {
   return (
-    <Canvas camera={{ position: [0, 4, 12], fov: 50 }}>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 10, 5]} intensity={1.5} color="#00F0FF" />
-      <Float speed={2} rotationIntensity={1}>
-        <mesh position={[0, 2, 0]}>
-          <torusKnotGeometry args={[2, 0.5, 100, 16]} />
-          <meshStandardMaterial color="#00F0FF" metalness={0.9} roughness={0.1} />
-        </mesh>
-      </Float>
-      <OrbitControls />
-      <EffectComposer><Bloom intensity={1.8} /></EffectComposer>
-    </Canvas>
+    <div style={{ width: '100%', height: '100%', background: '#020008', position: 'relative' }}>
+      <Canvas camera={{ position: [0, 8, 20], fov: 50 }}>
+        <color attach="background" args={['#020008']} />
+        <fog attach="fog" args={['#050014', 10, 45]} />
+        <ambientLight intensity={0.4} />
+        <directionalLight position={[15, 25, 10]} intensity={1.8} color="#00F0FF" />
+        <Stars radius={60} depth={40} count={2500} factor={4} fade />
+        <FlyingVehicles />
+        <OrbitControls maxPolarAngle={Math.PI / 2 - 0.05} />
+        <EffectComposer><Bloom intensity={1.8} /></EffectComposer>
+      </Canvas>
+    </div>
   );
 }`
         },
         {
           id: 'v2',
-          title: 'Luxury Gold & Obsidian (Minimalist)',
+          title: 'Minimalist Night Grid (High-FPS)',
           style: 'Minimalist High-FPS',
-          r3f_code: `// Minimalist Luxury Variant\nexport default function Scene() { return <mesh><sphereGeometry /></mesh>; }`
+          r3f_code: `// Minimalist Variant\nexport default function Scene() { return <Canvas><ambientLight /><mesh><boxGeometry /></mesh></Canvas>; }`
         },
         {
           id: 'v3',
-          title: 'Quantum Portal Odyssey (Kinetic)',
+          title: 'Kinetic Hyper-Speed (Interactive)',
           style: 'Kinetic Interactive',
-          r3f_code: `// Kinetic Gaming Portal Variant\nexport default function Scene() { return <mesh><dodecahedronGeometry /></mesh>; }`
+          r3f_code: `// Kinetic Variant\nexport default function Scene() { return <Canvas><FlyingVehicles /></Canvas>; }`
         }
       ];
       renderVariants(currentVariants);

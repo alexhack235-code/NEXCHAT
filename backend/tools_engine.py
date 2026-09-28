@@ -510,7 +510,7 @@ def tool_run_tests(test_target: Optional[str] = None) -> Dict[str, Any]:
     cmd = [venv_py if os.path.exists(venv_py) else sys.executable, "-m", "pytest", target, "-q"]
 
     try:
-        res = subprocess.run(cmd, cwd=root_dir, capture_output=True, text=True, timeout=120)
+        res = subprocess.run(cmd, cwd=root_dir, capture_output=True, text=True, encoding="utf-8", errors="ignore", timeout=120)
         output = (res.stdout + "\n" + res.stderr).strip()
         return {
             "success": res.returncode == 0,
@@ -639,9 +639,9 @@ def tool_git_diff(cached: bool = False, max_chars: int = 5000) -> Dict[str, Any]
         cmd.append("--cached")
 
     try:
-        res = subprocess.run(cmd, cwd=root_dir, capture_output=True, text=True, timeout=15)
+        res = subprocess.run(cmd, cwd=root_dir, capture_output=True, text=True, encoding="utf-8", errors="ignore", timeout=15)
         diff_text = res.stdout.strip()
-        status_res = subprocess.run(["git", "status", "--short"], cwd=root_dir, capture_output=True, text=True, timeout=10)
+        status_res = subprocess.run(["git", "status", "--short"], cwd=root_dir, capture_output=True, text=True, encoding="utf-8", errors="ignore", timeout=10)
         status_text = status_res.stdout.strip()
 
         changed_files = [line.strip().split()[-1] for line in status_text.splitlines() if line.strip()]
