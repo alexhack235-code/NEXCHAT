@@ -808,6 +808,7 @@ include_optional_router(app, "routers.code_doctor", "router", prefix="/api", tag
 include_optional_router(app, "routers.nex_3d_studio", "router", prefix="/api", tags=["NEX 3D Studio"])
 include_optional_router(app, "routers.nex_studio_labs", "router", prefix="/api", tags=["NEX Studio Labs"])
 include_optional_router(app, "routers.coding_agent", "router", prefix="/api", tags=["Autonomous Coding Agent"])
+include_optional_router(app, "routers.gemini_proxy", "router", prefix="/api", tags=["Google Gemini Engine"])
 
 # Register Subsystems
 include_optional_router(app, "neural_core.router", "router", prefix="/api", tags=["Neural Synaptic Core"])

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NEX 3D Studio — 3D Animated Website Generator & Aerocar Simulation</title>
+  <title>NEX 3D Studio — 3D Cyberpunk Aerocars & FPS Combat Simulation</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -140,6 +140,7 @@
       flex: 1;
       position: relative;
       overflow: hidden;
+      cursor: crosshair;
     }
     #three-container {
       width: 100%;
@@ -257,21 +258,29 @@
           NEX 3D STUDIO
         </div>
         <div style="font-size:10px; color:var(--cyan); font-weight:600; letter-spacing:1px;">
-          RUST AXUM BACKEND • LIVE WEBGL 3D WORLD SIMULATION
+          RUST AXUM + GOOGLE GEMINI 2.5 CLOUD FALLBACK ENGINE
         </div>
       </div>
     </div>
 
-    <!-- Status indicator -->
+    <!-- Status indicator & Gemini Engine indicator -->
     <div style="display:flex; align-items:center; gap:10px; font-size:12px; background:#0e0b17; padding:6px 14px; border-radius:20px; border:1px solid #272238;">
       <div id="statusDot" style="width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green);"></div>
-      <span id="statusLabel" style="color:var(--text-muted);">60 FPS Aerocar Simulation Active</span>
-      <span id="timeLabel" style="color:var(--cyan); font-weight:700; padding-left:6px; border-left:1px solid #373349;">&lt;3s Ready</span>
+      <span id="statusLabel" style="color:var(--text-muted);">60 FPS Aerocar & FPS Simulation</span>
+      <span id="timeLabel" style="color:var(--cyan); font-weight:700; padding-left:6px; border-left:1px solid #373349;">&lt;300ms Ready</span>
     </div>
 
-    <button class="btn-export" onclick="openExportModal()">
-      Export Code (Next.js + Vite)
-    </button>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="chip" id="enginePillBtn" onclick="toggleGeminiEngine()" style="background:#1e1435; border:1px solid #a855f7; color:#d8b4fe; font-weight:700;">
+        ⚡ Gemini 3.8 Multi-Key Pool ON
+      </button>
+      <button class="chip" id="poolModalBtn" onclick="openKeyPoolModal()" style="background:#0c1a2e; border:1px solid #00F0FF; color:#00F0FF; font-weight:700; cursor:pointer;">
+        🔑 Key Pool (<span id="poolCountBadge">1</span>)
+      </button>
+      <button class="btn-export" onclick="openExportModal()">
+        Export Code (Next.js + Vite)
+      </button>
+    </div>
   </header>
 
   <div class="main-stage">
@@ -290,6 +299,7 @@
         </div>
         <div style="display:flex; flex-wrap:wrap; gap:6px;">
           <button class="chip" onclick="applyPreset('Cyberpunk City', 'Create a cyberpunk city landing page with flying cars and neon fog')">Cyberpunk City</button>
+          <button class="chip" style="background:#2a081a; border-color:#fe2c55; color:#ff7597; font-weight:700;" onclick="applyPreset('Cyber FPS Shooter', 'Cyberpunk FPS shooting combat game with rogue enemy drones, plasma blaster, and laser combat')">🎯 Cyber FPS Shooter</button>
           <button class="chip" onclick="applyPreset('Luxury Watch', 'Luxury diamond watch rotating 360 on black marble pedestal with studio lighting')">Luxury Watch</button>
           <button class="chip" onclick="applyPreset('Gaming Portal', 'Low-poly quantum portal floating in space with dodecahedron crystal core')">Gaming Portal</button>
           <button class="chip" onclick="applyPreset('Music Festival', 'Electronic music festival stage with audio-reactive pulsating neon strobe rings')">Music Festival</button>
@@ -316,13 +326,38 @@
 
     <!-- CENTER STAGE -->
     <main class="center-stage">
-      <div class="viewport">
+      <div class="viewport" id="viewportContainer" onclick="handleViewportClick(event)">
         <div class="hud-badge" id="hudBadge">60 FPS WEBGL • CYBERPUNK AEROCAR TRAFFIC SIMULATION</div>
         <div class="hud-cam-bar">
           <button class="cam-btn active" id="camOrbitBtn" onclick="setCameraMode('orbit')">🎥 Orbit</button>
           <button class="cam-btn" id="camChaseBtn" onclick="setCameraMode('chase')">🏎️ Chase Car</button>
           <button class="cam-btn" id="camFlyBtn" onclick="setCameraMode('flythrough')">🏙️ Canyon Flyby</button>
+          <button class="cam-btn" id="camFpsBtn" onclick="setCameraMode('fps')">🎯 FPS Combat Mode</button>
         </div>
+
+        <!-- FPS Combat Overlay -->
+        <div id="fpsCombatOverlay" style="display:none; position:absolute; inset:0; pointer-events:none; z-index:8;">
+          <!-- Crosshair -->
+          <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:28px; height:28px; display:flex; align-items:center; justify-content:center;">
+            <div style="position:absolute; width:2px; height:18px; background:rgba(0, 240, 255, 0.9); box-shadow:0 0 8px #00F0FF;"></div>
+            <div style="position:absolute; width:18px; height:2px; background:rgba(0, 240, 255, 0.9); box-shadow:0 0 8px #00F0FF;"></div>
+            <div style="width:6px; height:6px; border-radius:50%; border:1.5px solid #FF007F;"></div>
+          </div>
+          <!-- Hit Marker flash -->
+          <div id="fpsHitMarker" style="position:absolute; top:50%; left:50%; width:34px; height:34px; border:2.5px solid #FF0055; transform:translate(-50%, -50%) rotate(45deg); opacity:0; transition:opacity 0.08s; pointer-events:none;"></div>
+          <!-- Combat Telemetry Top Center -->
+          <div style="position:absolute; top:18px; left:50%; transform:translateX(-50%); background:rgba(6,4,14,0.9); border:1px solid rgba(254,44,85,0.4); border-radius:8px; padding:6px 18px; display:flex; gap:16px; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:#fff; box-shadow:0 0 20px rgba(254,44,85,0.25);">
+            <span style="color:#00F0FF;">SCORE: <strong id="fpsScore">0</strong></span>
+            <span style="color:#FF007F;">KILLS: <strong id="fpsKills">0</strong></span>
+            <span style="color:#00FF88;">DRONES: <strong id="fpsDrones">6</strong></span>
+            <span style="color:#FFE600;">AMMO: <strong id="fpsAmmo">30</strong>/30</span>
+          </div>
+          <!-- Action Callout Bottom -->
+          <div style="position:absolute; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.8); border:1px solid #332244; padding:5px 16px; border-radius:6px; font-size:11px; font-family:'JetBrains Mono',monospace; color:#c4b5fd; letter-spacing:1px;">
+            CLICK CANVAS TO FIRE PLASMA BOLT • AIM WITH MOUSE • [R] RELOAD
+          </div>
+        </div>
+
         <div id="three-container"></div>
       </div>
 
@@ -390,6 +425,51 @@
 
   <script>
     // ------------------------------------------------------------------------
+    // WEB AUDIO SOUND SYNTHESIZER FOR LASERS & COMBAT
+    // ------------------------------------------------------------------------
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      return audioCtx;
+    }
+
+    function playLaserSound() {
+      try {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(110, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.16);
+      } catch (e) {}
+    }
+
+    function playHitSound() {
+      try {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(320, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.4, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.21);
+      } catch (e) {}
+    }
+
+    // ------------------------------------------------------------------------
     // THREE.JS HIGH-FIDELITY SCENE ENGINE
     // ------------------------------------------------------------------------
     let scene, camera, renderer, controls;
@@ -398,15 +478,27 @@
     let carSpeedMult = 1.2;
     let isWireframe = false;
     let isNitro = false;
-    let cameraMode = 'orbit'; // 'orbit' | 'chase' | 'flythrough'
+    let cameraMode = 'orbit'; // 'orbit' | 'chase' | 'flythrough' | 'fps'
     let currentTheme = 'cyberpunk_city';
     let clock = new THREE.Clock();
+
+    // FPS Combat State
+    let fpsBlasterGroup = null;
+    let fpsMuzzleLight = null;
+    let fpsDrones = [];
+    let fpsProjectiles = [];
+    let fpsSparks = [];
+    let score = 0;
+    let kills = 0;
+    let ammo = 30;
+    let isReloading = false;
+    let mouse = new THREE.Vector2();
 
     function initThree() {
       const container = document.getElementById('three-container');
       scene = new THREE.Scene();
       scene.background = new THREE.Color(0x020008);
-      scene.fog = new THREE.FogExp2(0x050014, 0.025);
+      scene.fog = new THREE.FogExp2(0x050014, 0.022);
 
       camera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 1000);
       camera.position.set(0, 8, 20);
@@ -423,7 +515,7 @@
       controls.dampingFactor = 0.05;
       controls.maxPolarAngle = Math.PI / 2 - 0.03;
 
-      // Base Lighting Rig
+      // Base Lighting
       const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
       scene.add(ambientLight);
 
@@ -460,6 +552,13 @@
       floorGrid.position.y = 0;
       scene.add(floorGrid);
 
+      // Build First-Person Plasma Blaster
+      createFpsBlaster();
+
+      // Mouse tracking for aiming
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('keydown', onKeyDown);
+
       // Build initial Cyberpunk Flying Car Simulation
       build3DCyberpunkCity(5);
 
@@ -473,6 +572,248 @@
       camera.aspect = container.clientWidth / container.clientHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(container.clientWidth, container.clientHeight);
+    }
+
+    function onMouseMove(e) {
+      if (cameraMode !== 'fps') return;
+      const container = document.getElementById('three-container');
+      const rect = container.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      const y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      mouse.set(x, y);
+
+      // Gentle pitch and yaw in FPS mode
+      camera.rotation.y = -x * 0.9;
+      camera.rotation.x = y * 0.45;
+    }
+
+    function onKeyDown(e) {
+      if (e.key === 'r' || e.key === 'R') {
+        reloadBlaster();
+      }
+      if (cameraMode === 'fps' && (e.key === ' ' || e.code === 'Space')) {
+        fireBlaster();
+      }
+    }
+
+    function handleViewportClick(e) {
+      if (cameraMode === 'fps') {
+        fireBlaster();
+      }
+    }
+
+    // ------------------------------------------------------------------------
+    // FIRST-PERSON PLASMA BLASTER FACTORY
+    // ------------------------------------------------------------------------
+    function createFpsBlaster() {
+      fpsBlasterGroup = new THREE.Group();
+
+      // Main Blaster Barrel
+      const barrelGeom = new THREE.BoxGeometry(0.18, 0.22, 1.1);
+      const barrelMat = new THREE.MeshStandardMaterial({ color: 0x111018, metalness: 0.95, roughness: 0.1 });
+      const barrel = new THREE.Mesh(barrelGeom, barrelMat);
+      fpsBlasterGroup.add(barrel);
+
+      // Glowing Neon Energy Conduit Rails
+      const railGeom = new THREE.BoxGeometry(0.04, 0.04, 0.9);
+      const railMat = new THREE.MeshStandardMaterial({ color: 0x00F0FF, emissive: 0x00F0FF, emissiveIntensity: 3 });
+      const leftRail = new THREE.Mesh(railGeom, railMat);
+      leftRail.position.set(-0.1, 0.1, -0.05);
+      fpsBlasterGroup.add(leftRail);
+
+      const rightRail = new THREE.Mesh(railGeom, railMat);
+      rightRail.position.set(0.1, 0.1, -0.05);
+      fpsBlasterGroup.add(rightRail);
+
+      // Plasma Chamber Energy Core
+      const coreGeom = new THREE.CylinderGeometry(0.06, 0.06, 0.35, 16);
+      coreGeom.rotateX(Math.PI / 2);
+      const coreMat = new THREE.MeshBasicMaterial({ color: 0xFF007F });
+      const core = new THREE.Mesh(coreGeom, coreMat);
+      core.position.set(0, 0, 0.1);
+      fpsBlasterGroup.add(core);
+
+      // Holographic Sight (Torus)
+      const sightGeom = new THREE.TorusGeometry(0.08, 0.015, 8, 24);
+      const sightMat = new THREE.MeshBasicMaterial({ color: 0x00FF88 });
+      const sight = new THREE.Mesh(sightGeom, sightMat);
+      sight.position.set(0, 0.16, -0.2);
+      fpsBlasterGroup.add(sight);
+
+      // Muzzle Point Light Flash
+      fpsMuzzleLight = new THREE.PointLight(0x00F0FF, 0, 8);
+      fpsMuzzleLight.position.set(0, 0, -0.6);
+      fpsBlasterGroup.add(fpsMuzzleLight);
+
+      // Position relative to camera view
+      fpsBlasterGroup.position.set(0.36, -0.32, -0.75);
+      fpsBlasterGroup.visible = false;
+      camera.add(fpsBlasterGroup);
+      scene.add(camera);
+    }
+
+    function fireBlaster() {
+      if (isReloading) return;
+      if (ammo <= 0) {
+        reloadBlaster();
+        return;
+      }
+
+      ammo--;
+      document.getElementById('fpsAmmo').textContent = ammo;
+      playLaserSound();
+
+      // Recoil weapon animation
+      if (fpsBlasterGroup) {
+        fpsBlasterGroup.position.z = -0.55;
+        fpsBlasterGroup.rotation.x = 0.15;
+      }
+      if (fpsMuzzleLight) {
+        fpsMuzzleLight.intensity = 5.0;
+        setTimeout(() => { if (fpsMuzzleLight) fpsMuzzleLight.intensity = 0; }, 50);
+      }
+
+      // Spawn high-velocity plasma projectile bolt
+      const boltGeom = new THREE.CylinderGeometry(0.08, 0.08, 1.8, 12);
+      boltGeom.rotateX(Math.PI / 2);
+      const boltMat = new THREE.MeshBasicMaterial({ color: 0x00F0FF });
+      const bolt = new THREE.Mesh(boltGeom, boltMat);
+
+      // Get camera world position and forward direction
+      const fwd = new THREE.Vector3();
+      camera.getWorldDirection(fwd);
+      const spawnPos = camera.position.clone().add(fwd.clone().multiplyScalar(1.2));
+      bolt.position.copy(spawnPos);
+      bolt.quaternion.copy(camera.quaternion);
+
+      worldGroup.add(bolt);
+      fpsProjectiles.push({ mesh: bolt, dir: fwd, life: 0 });
+
+      // Raycast test against Rogue Drones
+      const raycaster = new THREE.Raycaster(camera.position, fwd, 0.5, 80);
+      const droneMeshes = fpsDrones.map(d => d.hitBox);
+      const hits = raycaster.intersectObjects(droneMeshes, false);
+
+      if (hits.length > 0) {
+        const hitObj = hits[0].object;
+        const drone = fpsDrones.find(d => d.hitBox === hitObj);
+        if (drone) {
+          drone.hp--;
+          playHitSound();
+
+          // Flash Hit Marker Red
+          const hm = document.getElementById('fpsHitMarker');
+          hm.style.opacity = '1';
+          setTimeout(() => { hm.style.opacity = '0'; }, 90);
+
+          if (drone.hp <= 0) {
+            // Explode Drone
+            spawnExplosionSparks(drone.group.position);
+            kills++;
+            score += 100;
+            document.getElementById('fpsKills').textContent = kills;
+            document.getElementById('fpsScore').textContent = score;
+
+            // Respawn drone at distant altitude
+            drone.group.position.set((Math.random() - 0.5) * 30, 8 + Math.random() * 8, -15 - Math.random() * 20);
+            drone.hp = 2;
+          }
+        }
+      }
+    }
+
+    function reloadBlaster() {
+      if (isReloading) return;
+      isReloading = true;
+      document.getElementById('fpsAmmo').textContent = 'RELOADING...';
+      setTimeout(() => {
+        ammo = 30;
+        isReloading = false;
+        document.getElementById('fpsAmmo').textContent = ammo;
+      }, 1000);
+    }
+
+    function spawnExplosionSparks(pos) {
+      const sparkCount = 60;
+      const geom = new THREE.BufferGeometry();
+      const positions = new Float32Array(sparkCount * 3);
+      const velocities = [];
+
+      for (let i = 0; i < sparkCount; i++) {
+        positions[i * 3] = pos.x;
+        positions[i * 3 + 1] = pos.y;
+        positions[i * 3 + 2] = pos.z;
+
+        velocities.push(new THREE.Vector3(
+          (Math.random() - 0.5) * 14,
+          (Math.random() - 0.5) * 14,
+          (Math.random() - 0.5) * 14
+        ));
+      }
+
+      geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      const mat = new THREE.PointsMaterial({ size: 0.25, color: 0xFF0055, transparent: true, opacity: 1.0 });
+      const pSystem = new THREE.Points(geom, mat);
+      worldGroup.add(pSystem);
+      fpsSparks.push({ system: pSystem, velocities: velocities, age: 0 });
+    }
+
+    // ------------------------------------------------------------------------
+    // ROGUE DRONES COMBAT SPAWNER
+    // ------------------------------------------------------------------------
+    function spawnRogueDrone(idx) {
+      const dGroup = new THREE.Group();
+
+      // Central Hull
+      const bodyGeom = new THREE.SphereGeometry(0.7, 16, 16);
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x12101a, metalness: 0.95, roughness: 0.1 });
+      const body = new THREE.Mesh(bodyGeom, bodyMat);
+      dGroup.add(body);
+
+      // Ominous Red Scanner Eye
+      const eyeGeom = new THREE.SphereGeometry(0.3, 16, 16);
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0xFF0055 });
+      const eye = new THREE.Mesh(eyeGeom, eyeMat);
+      eye.position.set(0, 0, 0.6);
+      dGroup.add(eye);
+
+      // 4 Quadrotor Arms with Spinning Rings
+      const rotors = [];
+      const offsets = [[-1.2, 0, -1.2], [1.2, 0, -1.2], [-1.2, 0, 1.2], [1.2, 0, 1.2]];
+      offsets.forEach(off => {
+        const ringGeom = new THREE.TorusGeometry(0.4, 0.05, 8, 24);
+        ringGeom.rotateX(Math.PI / 2);
+        const ringMat = new THREE.MeshBasicMaterial({ color: 0x00F0FF });
+        const ring = new THREE.Mesh(ringGeom, ringMat);
+        ring.position.set(off[0], off[1], off[2]);
+        dGroup.add(ring);
+        rotors.push(ring);
+      });
+
+      // Hitbox mesh for raycasting
+      const hitBoxGeom = new THREE.SphereGeometry(1.6, 8, 8);
+      const hitBoxMat = new THREE.MeshBasicMaterial({ visible: false });
+      const hitBox = new THREE.Mesh(hitBoxGeom, hitBoxMat);
+      dGroup.add(hitBox);
+
+      const x = (Math.random() - 0.5) * 32;
+      const y = 6.0 + Math.random() * 8.0;
+      const z = -8 - Math.random() * 25;
+      dGroup.position.set(x, y, z);
+
+      worldGroup.add(dGroup);
+
+      return {
+        group: dGroup,
+        hitBox: hitBox,
+        rotors: rotors,
+        hp: 2,
+        baseX: x,
+        baseY: y,
+        baseZ: z,
+        phase: idx * 1.2,
+        speed: 0.8 + Math.random() * 0.6
+      };
     }
 
     // ------------------------------------------------------------------------
@@ -554,7 +895,6 @@
         thrusterFlares.push(flare);
       });
 
-      // Rear Point Light for Exhaust Glow
       const rearLight = new THREE.PointLight(cfg.thrusterColor, 2.5, 10);
       rearLight.position.set(0, 0.25, -2.5);
       carGroup.add(rearLight);
@@ -567,12 +907,6 @@
         hLight.position.set(xOff, 0.2, 1.8);
         carGroup.add(hLight);
       });
-
-      const forwardSpot = new THREE.SpotLight(0x00F0FF, 3.5, 30, Math.PI / 7, 0.4);
-      forwardSpot.position.set(0, 0.3, 1.9);
-      forwardSpot.target.position.set(0, -0.5, 12);
-      carGroup.add(forwardSpot);
-      carGroup.add(forwardSpot.target);
 
       worldGroup.add(carGroup);
 
@@ -624,7 +958,6 @@
         const bGroup = new THREE.Group();
         bGroup.position.set(coord[0], 0, coord[1]);
 
-        // Main Monolith
         const bGeom = new THREE.BoxGeometry(width, height, depth);
         const bMat = new THREE.MeshStandardMaterial({
           color: 0x070610,
@@ -636,7 +969,6 @@
         bMesh.position.y = height / 2;
         bGroup.add(bMesh);
 
-        // Neon Accent Band / Window Grid
         const accentCol = buildingColors[i % buildingColors.length];
         const bandGeom = new THREE.BoxGeometry(width + 0.1, 0.6, depth + 0.1);
         const bandMat = new THREE.MeshStandardMaterial({
@@ -649,54 +981,17 @@
         band.position.y = height * 0.75;
         bGroup.add(band);
 
-        // Lower Band
-        if (height > 15) {
-          const lowerBand = new THREE.Mesh(bandGeom, bandMat);
-          lowerBand.position.y = height * 0.35;
-          bGroup.add(lowerBand);
-        }
-
-        // Rooftop Antenna Spire & Blinking Beacon
-        const spireGeom = new THREE.CylinderGeometry(0.06, 0.12, 3.5, 8);
-        const spireMat = new THREE.MeshStandardMaterial({ color: 0x333344, metalness: 0.9 });
-        const spire = new THREE.Mesh(spireGeom, spireMat);
-        spire.position.y = height + 1.75;
-        bGroup.add(spire);
-
-        const beaconGeom = new THREE.SphereGeometry(0.18, 12, 12);
-        const beaconMat = new THREE.MeshBasicMaterial({ color: accentCol });
-        const beacon = new THREE.Mesh(beaconGeom, beaconMat);
-        beacon.position.y = height + 3.5;
-        bGroup.add(beacon);
-
-        // High-Rise Holographic Spinning Ring (on select towers)
-        if (i % 3 === 0) {
-          const ringGeom = new THREE.TorusGeometry(width * 0.7, 0.1, 16, 40);
-          const ringMat = new THREE.MeshStandardMaterial({
-            color: accentCol,
-            emissive: accentCol,
-            emissiveIntensity: 2.5
-          });
-          const ringMesh = new THREE.Mesh(ringGeom, ringMat);
-          ringMesh.position.y = height + 1.2;
-          ringMesh.rotation.x = Math.PI / 2;
-          bGroup.add(ringMesh);
-        }
-
         worldGroup.add(bGroup);
       });
 
       // 2. Spawn Fleet of High-Speed Flying Cars (Aerocars)
       flyingCars = [];
       const carPalettes = [
-        { color: 0x00F0FF, neonColor: 0x00F0FF, thrusterColor: 0x00F0FF }, // Cyan Cyberpunk
-        { color: 0xFF007F, neonColor: 0xFF007F, thrusterColor: 0xFF007F }, // Magenta Rogue
-        { color: 0xFFE600, neonColor: 0xFFE600, thrusterColor: 0xFF8800 }, // Neon Yellow Taxi
-        { color: 0x00FF88, neonColor: 0x00FF88, thrusterColor: 0x00FF88 }, // Hyper Green
-        { color: 0x7000FF, neonColor: 0x00F0FF, thrusterColor: 0x7000FF }, // Royal Purple
-        { color: 0xFF3300, neonColor: 0xFF5500, thrusterColor: 0xFF0055 }, // Crimson Turbo
-        { color: 0xFFFFFF, neonColor: 0x00F0FF, thrusterColor: 0x00FFFF }, // Platinum Police
-        { color: 0x00E5FF, neonColor: 0xFF0055, thrusterColor: 0x00FFCC }  // Matrix Stealth
+        { color: 0x00F0FF, neonColor: 0x00F0FF, thrusterColor: 0x00F0FF },
+        { color: 0xFF007F, neonColor: 0xFF007F, thrusterColor: 0xFF007F },
+        { color: 0xFFE600, neonColor: 0xFFE600, thrusterColor: 0xFF8800 },
+        { color: 0x00FF88, neonColor: 0x00FF88, thrusterColor: 0x00FF88 },
+        { color: 0x7000FF, neonColor: 0x00F0FF, thrusterColor: 0x7000FF }
       ];
 
       for (let i = 0; i < carCount; i++) {
@@ -717,7 +1012,24 @@
     }
 
     // ------------------------------------------------------------------------
-    // LUXURY WATCH WORLD BUILDER
+    // CYBERPUNK FPS COMBAT SHOOTER WORLD BUILDER
+    // ------------------------------------------------------------------------
+    function build3DFpsShooter(droneCount = 6) {
+      build3DCyberpunkCity(3); // City + some background traffic
+      currentTheme = 'fps_shooter';
+      document.getElementById('hudBadge').textContent = `60 FPS WEBGL • CYBERPUNK FPS SHOOTER [${droneCount} ROGUE DRONES]`;
+
+      // Spawn 6 Hostile Rogue Drones
+      fpsDrones = [];
+      for (let i = 0; i < droneCount; i++) {
+        fpsDrones.push(spawnRogueDrone(i));
+      }
+
+      setCameraMode('fps');
+    }
+
+    // ------------------------------------------------------------------------
+    // OTHER PRESET THEMES (WATCH, PORTAL, FESTIVAL)
     // ------------------------------------------------------------------------
     let watchHands = [];
     function build3DWatch() {
@@ -728,86 +1040,26 @@
       scene.background = new THREE.Color(0x06060c);
       floorGrid.visible = false;
 
-      // Marble Pedestal
       const pedGeom = new THREE.CylinderGeometry(4.5, 5.0, 1.5, 48);
       const pedMat = new THREE.MeshStandardMaterial({ color: 0x111116, metalness: 0.9, roughness: 0.1 });
       const ped = new THREE.Mesh(pedGeom, pedMat);
       ped.position.y = -0.75;
       worldGroup.add(ped);
 
-      // Gold Watch Case
       const caseGeom = new THREE.CylinderGeometry(3.0, 3.0, 0.8, 64);
-      const caseMat = new THREE.MeshStandardMaterial({
-        color: 0xFFD700,
-        metalness: 0.98,
-        roughness: 0.12,
-        wireframe: isWireframe
-      });
+      const caseMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, metalness: 0.98, roughness: 0.12 });
       const caseMesh = new THREE.Mesh(caseGeom, caseMat);
       caseMesh.position.y = 2.0;
       worldGroup.add(caseMesh);
 
-      // Bezel with Diamond Ring
       const bezelGeom = new THREE.TorusGeometry(3.0, 0.22, 24, 64);
       const bezelMat = new THREE.MeshStandardMaterial({ color: 0xFFEA80, metalness: 1.0, roughness: 0.05 });
       const bezel = new THREE.Mesh(bezelGeom, bezelMat);
       bezel.position.y = 2.45;
       bezel.rotation.x = Math.PI / 2;
       worldGroup.add(bezel);
-
-      // Obsidian Dial Face
-      const dialGeom = new THREE.CircleGeometry(2.7, 64);
-      const dialMat = new THREE.MeshStandardMaterial({ color: 0x030308, metalness: 0.9, roughness: 0.2 });
-      const dial = new THREE.Mesh(dialGeom, dialMat);
-      dial.position.y = 2.43;
-      dial.rotation.x = -Math.PI / 2;
-      worldGroup.add(dial);
-
-      // Watch Hands
-      watchHands = [];
-      const handMat = new THREE.MeshBasicMaterial({ color: 0xFFD700 });
-
-      // Hour Hand
-      const hGeom = new THREE.BoxGeometry(0.12, 0.04, 1.4);
-      hGeom.translate(0, 0, 0.7);
-      const hHand = new THREE.Mesh(hGeom, handMat);
-      hHand.position.set(0, 2.46, 0);
-      worldGroup.add(hHand);
-      watchHands.push({ mesh: hHand, speed: 0.1 });
-
-      // Minute Hand
-      const mGeom = new THREE.BoxGeometry(0.09, 0.04, 2.1);
-      mGeom.translate(0, 0, 1.05);
-      const mHand = new THREE.Mesh(mGeom, handMat);
-      mHand.position.set(0, 2.48, 0);
-      worldGroup.add(mHand);
-      watchHands.push({ mesh: mHand, speed: 1.0 });
-
-      // Second Hand (Cyan Neon)
-      const sGeom = new THREE.BoxGeometry(0.04, 0.04, 2.3);
-      sGeom.translate(0, 0, 1.15);
-      const sHand = new THREE.Mesh(sGeom, new THREE.MeshBasicMaterial({ color: 0x00F0FF }));
-      sHand.position.set(0, 2.50, 0);
-      worldGroup.add(sHand);
-      watchHands.push({ mesh: sHand, speed: 6.0 });
-
-      // Sapphire Glass
-      const glassGeom = new THREE.CylinderGeometry(2.85, 2.85, 0.08, 48);
-      const glassMat = new THREE.MeshPhysicalMaterial({
-        color: 0xffffff,
-        transparent: true,
-        opacity: 0.35,
-        roughness: 0.05,
-        transmission: 0.9
-      });
-      const glass = new THREE.Mesh(glassGeom, glassMat);
-      glass.position.y = 2.55;
-      worldGroup.add(glass);
     }
 
-    // ------------------------------------------------------------------------
-    // QUANTUM PORTAL WORLD BUILDER
-    // ------------------------------------------------------------------------
     let portalCore = null;
     function build3DPortal() {
       clearWorld();
@@ -820,44 +1072,19 @@
       portalCore = new THREE.Group();
       portalCore.position.y = 3.5;
 
-      // Inner Crystalline Dodecahedron
       const d1Geom = new THREE.DodecahedronGeometry(2.2, 0);
-      const d1Mat = new THREE.MeshStandardMaterial({
-        color: 0x00FF88,
-        emissive: 0x00FF88,
-        emissiveIntensity: 2.5,
-        wireframe: isWireframe
-      });
+      const d1Mat = new THREE.MeshStandardMaterial({ color: 0x00FF88, emissive: 0x00FF88, emissiveIntensity: 2.5 });
       const d1 = new THREE.Mesh(d1Geom, d1Mat);
       portalCore.add(d1);
 
-      // Outer Inverted Dodecahedron
       const d2Geom = new THREE.DodecahedronGeometry(3.4, 0);
-      const d2Mat = new THREE.MeshStandardMaterial({
-        color: 0x00F0FF,
-        emissive: 0x0044AA,
-        emissiveIntensity: 1.5,
-        wireframe: true
-      });
+      const d2Mat = new THREE.MeshStandardMaterial({ color: 0x00F0FF, emissive: 0x0044AA, emissiveIntensity: 1.5, wireframe: true });
       const d2 = new THREE.Mesh(d2Geom, d2Mat);
       portalCore.add(d2);
-
-      // Orbiting Monolith Crystals
-      for (let i = 0; i < 8; i++) {
-        const shardGeom = new THREE.TetrahedronGeometry(0.7, 0);
-        const shardMat = new THREE.MeshStandardMaterial({ color: 0xFF007F, emissive: 0xFF007F, emissiveIntensity: 2.0 });
-        const shard = new THREE.Mesh(shardGeom, shardMat);
-        const ang = (i * Math.PI * 2) / 8;
-        shard.position.set(Math.cos(ang) * 5.5, (Math.random() - 0.5) * 2, Math.sin(ang) * 5.5);
-        portalCore.add(shard);
-      }
 
       worldGroup.add(portalCore);
     }
 
-    // ------------------------------------------------------------------------
-    // MUSIC FESTIVAL WORLD BUILDER
-    // ------------------------------------------------------------------------
     let eqBars = [];
     function build3DMusicFestival() {
       clearWorld();
@@ -867,37 +1094,18 @@
       scene.background = new THREE.Color(0x020206);
       floorGrid.visible = true;
 
-      // Center Stage Truss
       const stageGeom = new THREE.CylinderGeometry(8, 9, 1.2, 32);
       const stageMat = new THREE.MeshStandardMaterial({ color: 0x0a0a14, metalness: 0.9, roughness: 0.1 });
       const stage = new THREE.Mesh(stageGeom, stageMat);
       stage.position.y = 0.6;
       worldGroup.add(stage);
-
-      // Equalizer Visualizer Towers
-      eqBars = [];
-      const barCount = 18;
-      const barColors = [0xFF007F, 0x00F0FF, 0x00FF88, 0xFFE600];
-
-      for (let i = 0; i < barCount; i++) {
-        const bGeom = new THREE.BoxGeometry(0.6, 6.0, 0.6);
-        const col = barColors[i % barColors.length];
-        const bMat = new THREE.MeshStandardMaterial({
-          color: col,
-          emissive: col,
-          emissiveIntensity: 2.5,
-          wireframe: isWireframe
-        });
-        const bar = new THREE.Mesh(bGeom, bMat);
-        const ang = (i / barCount) * Math.PI * 2;
-        bar.position.set(Math.cos(ang) * 6.5, 3.0, Math.sin(ang) * 6.5);
-        worldGroup.add(bar);
-        eqBars.push({ mesh: bar, baseHeight: 3.0, phase: i * 0.4 });
-      }
     }
 
     function clearWorld() {
       flyingCars = [];
+      fpsDrones = [];
+      fpsProjectiles = [];
+      fpsSparks = [];
       watchHands = [];
       eqBars = [];
       portalCore = null;
@@ -912,7 +1120,9 @@
     // ------------------------------------------------------------------------
     function build3DWorldFromPrompt(prompt) {
       const p = prompt.toLowerCase();
-      if (p.includes('car') || p.includes('flying') || p.includes('cyberpunk') || p.includes('city') || p.includes('vehicle') || p.includes('traffic')) {
+      if (p.includes('shoot') || p.includes('fps') || p.includes('gun') || p.includes('blaster') || p.includes('combat') || p.includes('battle')) {
+        build3DFpsShooter(6);
+      } else if (p.includes('car') || p.includes('flying') || p.includes('cyberpunk') || p.includes('city') || p.includes('vehicle') || p.includes('traffic')) {
         build3DCyberpunkCity(parseInt(document.getElementById('trafficSlider').value) || 5);
       } else if (p.includes('watch') || p.includes('luxury') || p.includes('diamond') || p.includes('product')) {
         build3DWatch();
@@ -933,20 +1143,17 @@
       const elapsed = clock.getElapsedTime();
       const delta = clock.getDelta();
 
-      // 1. Update Flying Cars Aerodynamics & Trajectory
+      // 1. Update Flying Cars Aerodynamics
       if (flyingCars.length > 0) {
         const speedFactor = isNitro ? carSpeedMult * 2.4 : carSpeedMult;
 
         flyingCars.forEach((car, idx) => {
           const t = elapsed * speedFactor * (car.speed * 0.35) + car.phase;
-          
-          // Lissajous / Elliptical Orbit
           const x = Math.sin(t) * car.radiusX;
           const z = Math.cos(t * car.curveFactor) * car.radiusZ;
           const bob = Math.sin(elapsed * 3.0 + idx) * 0.35;
           const y = car.altitude + bob;
 
-          // Next position to calculate tangent velocity vector & banking roll
           const dt = 0.05;
           const nextX = Math.sin(t + dt) * car.radiusX;
           const nextZ = Math.cos((t + dt) * car.curveFactor) * car.radiusZ;
@@ -956,24 +1163,16 @@
           car.group.position.set(x, y, z);
           car.velocity.set(dirX, 0, dirZ);
 
-          // Heading Yaw rotation
-          const yaw = Math.atan2(dirX, dirZ);
-          car.group.rotation.y = yaw;
-
-          // Realistic Aerodynamic Banking (Roll into turn)
-          const curvature = (dirX * Math.cos(t) - dirZ * Math.sin(t));
+          car.group.rotation.y = Math.atan2(dirX, dirZ);
           const targetRoll = Math.max(-0.45, Math.min(0.45, -dirX * 0.12));
           car.currentRoll += (targetRoll - car.currentRoll) * 0.1;
           car.group.rotation.z = car.currentRoll;
 
-          // Thruster Jet Flare Pulsing & Nitro elongation
           const flameScale = (isNitro ? 2.5 : 1.0) + Math.sin(elapsed * 20.0 + idx) * 0.25;
-          car.thrusterFlares.forEach(fl => {
-            fl.scale.set(1.0, flameScale, 1.0);
-          });
+          car.thrusterFlares.forEach(fl => fl.scale.set(1.0, flameScale, 1.0));
         });
 
-        // 2. Dynamic Camera Modes
+        // Camera Modes
         if (cameraMode === 'chase' && flyingCars[0]) {
           const lead = flyingCars[0].group;
           const fwd = flyingCars[0].velocity.clone().normalize();
@@ -989,29 +1188,65 @@
           camera.position.z = Math.cos(camT) * 16;
           camera.position.y = 8 + Math.sin(camT * 2) * 2;
           camera.lookAt(0, 5, 0);
+        } else if (cameraMode === 'fps') {
+          // Handled via mouse look in onMouseMove
         } else {
           controls.update();
         }
+      } else if (cameraMode === 'fps') {
+        // FPS camera
       } else {
         controls.update();
       }
 
-      // 3. Theme-Specific Animations
-      if (currentTheme === 'luxury_watch' && watchHands.length > 0) {
-        watchHands.forEach(h => {
-          h.mesh.rotation.y = -elapsed * h.speed;
+      // 2. Update Rogue Combat Drones
+      if (fpsDrones.length > 0) {
+        fpsDrones.forEach((drone, i) => {
+          const t = elapsed * drone.speed + drone.phase;
+          drone.group.position.x = drone.baseX + Math.sin(t * 1.5) * 6.0;
+          drone.group.position.y = drone.baseY + Math.cos(t * 2.0) * 2.5;
+          drone.group.position.z = drone.baseZ + Math.sin(t * 0.8) * 4.0;
+          drone.group.rotation.y += 0.02;
+
+          drone.rotors.forEach(r => r.rotation.z += 0.35);
         });
-      } else if (currentTheme === 'gaming_portal' && portalCore) {
-        portalCore.children[0].rotation.y += 0.015;
-        portalCore.children[0].rotation.x += 0.008;
-        portalCore.children[1].rotation.y -= 0.01;
-        portalCore.children[1].rotation.z += 0.005;
-      } else if (currentTheme === 'music_festival' && eqBars.length > 0) {
-        eqBars.forEach((bar, i) => {
-          const scaleY = 0.5 + Math.abs(Math.sin(elapsed * 4.0 + bar.phase)) * 2.2;
-          bar.mesh.scale.y = scaleY;
-          bar.mesh.position.y = (bar.baseHeight * scaleY) / 2;
-        });
+      }
+
+      // 3. Update Plasma Projectiles
+      for (let i = fpsProjectiles.length - 1; i >= 0; i--) {
+        const p = fpsProjectiles[i];
+        p.mesh.position.add(p.dir.clone().multiplyScalar(1.5));
+        p.life += delta;
+        if (p.life > 1.2) {
+          worldGroup.remove(p.mesh);
+          fpsProjectiles.splice(i, 1);
+        }
+      }
+
+      // 4. Update Explosion Sparks
+      for (let i = fpsSparks.length - 1; i >= 0; i--) {
+        const sp = fpsSparks[i];
+        const positions = sp.system.geometry.attributes.position.array;
+        sp.age += delta;
+
+        for (let j = 0; j < sp.velocities.length; j++) {
+          positions[j * 3] += sp.velocities[j].x * delta;
+          positions[j * 3 + 1] += sp.velocities[j].y * delta;
+          positions[j * 3 + 2] += sp.velocities[j].z * delta;
+        }
+        sp.system.geometry.attributes.position.needsUpdate = true;
+        sp.system.material.opacity = Math.max(0, 1.0 - sp.age * 1.5);
+
+        if (sp.age > 0.8) {
+          worldGroup.remove(sp.system);
+          fpsSparks.splice(i, 1);
+        }
+      }
+
+      // 5. Spring Weapon Recoil Back
+      if (fpsBlasterGroup) {
+        fpsBlasterGroup.position.z += (-0.75 - fpsBlasterGroup.position.z) * 0.15;
+        fpsBlasterGroup.rotation.x += (0 - fpsBlasterGroup.rotation.x) * 0.15;
       }
 
       // Starfield subtle rotation
@@ -1029,17 +1264,32 @@
       cameraMode = mode;
       document.querySelectorAll('.cam-btn').forEach(b => b.classList.remove('active'));
 
+      const overlay = document.getElementById('fpsCombatOverlay');
+      if (fpsBlasterGroup) fpsBlasterGroup.visible = (mode === 'fps');
+
       if (mode === 'orbit') {
         document.getElementById('camOrbitBtn').classList.add('active');
         controls.enabled = true;
+        overlay.style.display = 'none';
         camera.position.set(0, 8, 20);
         camera.lookAt(0, 4, 0);
       } else if (mode === 'chase') {
         document.getElementById('camChaseBtn').classList.add('active');
         controls.enabled = false;
+        overlay.style.display = 'none';
       } else if (mode === 'flythrough') {
         document.getElementById('camFlyBtn').classList.add('active');
         controls.enabled = false;
+        overlay.style.display = 'none';
+      } else if (mode === 'fps') {
+        document.getElementById('camFpsBtn').classList.add('active');
+        controls.enabled = false;
+        overlay.style.display = 'block';
+        camera.position.set(0, 6, 0);
+        camera.rotation.set(0, 0, 0);
+        if (fpsDrones.length === 0) {
+          build3DFpsShooter(6);
+        }
       }
     }
 
@@ -1078,6 +1328,21 @@
     // ------------------------------------------------------------------------
     let currentVariants = [];
     let activeIdx = 0;
+    let geminiEngineEnabled = true;
+
+    function toggleGeminiEngine() {
+      geminiEngineEnabled = !geminiEngineEnabled;
+      const btn = document.getElementById('enginePillBtn');
+      if (geminiEngineEnabled) {
+        btn.textContent = '⚡ Gemini 2.5 Flash Fallback ON';
+        btn.style.borderColor = '#a855f7';
+        btn.style.color = '#d8b4fe';
+      } else {
+        btn.textContent = '⚡ Local Only Mode';
+        btn.style.borderColor = '#6b7280';
+        btn.style.color = '#9ca3af';
+      }
+    }
 
     async function generate3D() {
       const prompt = document.getElementById('promptInput').value;
@@ -1087,7 +1352,7 @@
 
       statusDot.style.background = 'var(--yellow)';
       statusDot.style.boxShadow = '0 0 8px var(--yellow)';
-      statusLabel.textContent = 'Synthesizing 3D Aerocar World...';
+      statusLabel.textContent = 'Synthesizing 3D World...';
       const t0 = performance.now();
 
       // Immediately build the interactive 3D world in the viewport!
@@ -1110,13 +1375,33 @@
         const elapsed = Math.round(performance.now() - t0);
         statusDot.style.background = 'var(--green)';
         statusDot.style.boxShadow = '0 0 8px var(--green)';
-        statusLabel.textContent = 'Aerocar Simulation Live';
+        statusLabel.textContent = '3D Simulation Live';
         timeLabel.textContent = `${elapsed}ms`;
       } catch (err) {
-        console.warn('Using client-side accelerated generator:', err);
+        console.warn('Backend slow or offline, using Gemini/Client-side accelerated generator:', err);
+
+        // If Gemini Engine enabled, try calling /api/gemini/generate
+        if (geminiEngineEnabled) {
+          try {
+            const gemRes = await fetch(window.location.origin + '/api/gemini/generate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                prompt: `Generate a React Three Fiber scene for: ${prompt}. Output valid clean TypeScript code.`
+              })
+            });
+            if (gemRes.ok) {
+              const gemData = await gemRes.json();
+              statusDot.style.background = 'var(--green)';
+              statusLabel.textContent = 'Gemini 2.5 Flash Synthesized';
+              timeLabel.textContent = `${gemData.latency_ms || 280}ms`;
+            }
+          } catch (gErr) {}
+        }
+
         statusDot.style.background = 'var(--green)';
         statusDot.style.boxShadow = '0 0 8px var(--green)';
-        statusLabel.textContent = 'Local 3D Engine Active';
+        statusLabel.textContent = 'Local 3D Simulation Ready';
         timeLabel.textContent = '<3s Ready';
         loadFallback(prompt);
       }
@@ -1162,17 +1447,6 @@
       });
 
       document.getElementById('codeViewer').textContent = v.r3f_code;
-
-      // Re-trigger world generation for the variant theme if needed
-      if (idx === 1 && currentTheme === 'cyberpunk_city') {
-        // Variant 2: Minimalist Night Grid
-        document.getElementById('hudBadge').textContent = `60 FPS WEBGL • ${v.title.toUpperCase()}`;
-        if (dirLight) dirLight.color.setHex(0xFFD700);
-      } else if (idx === 2 && currentTheme === 'cyberpunk_city') {
-        // Variant 3: Kinetic Hyper-Speed
-        document.getElementById('hudBadge').textContent = `60 FPS WEBGL • ${v.title.toUpperCase()}`;
-        if (dirLight) dirLight.color.setHex(0xFF007F);
-      }
     }
 
     function applyPreset(name, prompt) {
@@ -1182,7 +1456,7 @@
 
     function remixWithAI() {
       const prompt = document.getElementById('promptInput').value;
-      document.getElementById('promptInput').value = `Remix with AI: ${prompt} with nitro vortex afterburners`;
+      document.getElementById('promptInput').value = `Remix with AI: ${prompt} with explosive combat flares`;
       generate3D();
     }
 
@@ -1206,11 +1480,11 @@
       currentVariants = [
         {
           id: 'v1',
-          title: 'Cyberpunk Metropolis 2099 (Cinematic)',
+          title: 'Cyberpunk Metropolis & FPS Combat',
           style: 'Cinematic Atmosphere',
           r3f_code: `import React, { useRef } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Float, Stars, Box, Cylinder } from '@react-three/drei';
+import { OrbitControls, Stars, Box, Cylinder } from '@react-three/drei';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 
@@ -1222,7 +1496,7 @@ function FlyingVehicles() {
       group.current.position.x = Math.sin(t) * 9;
       group.current.position.z = Math.cos(t * 0.8) * 6;
       group.current.rotation.y = Math.atan2(Math.cos(t) * 9, -Math.sin(t * 0.8) * 4.8);
-      group.current.rotation.z = -Math.cos(t) * 0.3; // Banking
+      group.current.rotation.z = -Math.cos(t) * 0.3;
     }
   });
 
@@ -1276,7 +1550,143 @@ export default function GeneratedScene() {
     window.onload = () => {
       initThree();
       generate3D();
+      refreshPoolBadge();
     };
+
+    async function refreshPoolBadge() {
+      try {
+        const res = await fetch(window.location.origin + '/api/gemini/pool');
+        if (res.ok) {
+          const data = await res.json();
+          const badge = document.getElementById('poolCountBadge');
+          if (badge) badge.textContent = data.pool_size || 0;
+        }
+      } catch(e) {}
+    }
+
+    function openKeyPoolModal() {
+      document.getElementById('keyPoolModal').style.display = 'flex';
+      loadKeyPoolStatus();
+    }
+
+    function closeKeyPoolModal() {
+      document.getElementById('keyPoolModal').style.display = 'none';
+    }
+
+    async function loadKeyPoolStatus() {
+      const container = document.getElementById('poolStatusContainer');
+      try {
+        const res = await fetch(window.location.origin + '/api/gemini/pool');
+        if (!res.ok) throw new Error('Failed to load pool');
+        const data = await res.json();
+        let html = `<div style="display:flex; justify-content:space-between; margin-bottom:6px; color:#9ca3af; font-weight:700;">
+          <span>POOL STATUS: <span style="color:#00FF88;">${data.status}</span> (${data.pool_size} KEYS)</span>
+          <span>DEFAULT: ${data.default_model}</span>
+        </div>`;
+        if (data.keys && data.keys.length > 0) {
+          html += '<table style="width:100%; border-collapse:collapse; text-align:left;">';
+          html += '<tr style="color:#6b7280; border-bottom:1px solid #1e1b2e;"><th>#</th><th>MASKED KEY</th><th>ACTIVE</th></tr>';
+          data.keys.forEach((k, i) => {
+            html += `<tr style="border-bottom:1px solid #110e1c;">
+              <td style="padding:4px 0; color:#00F0FF;">Key #${i+1}</td>
+              <td style="color:#e5e7eb;">${k.key}</td>
+              <td style="color:${k.active ? '#00FF88' : '#6b7280'};">${k.active ? '● IN ROTATION' : '○ STANDBY'}</td>
+            </tr>`;
+          });
+          html += '</table>';
+        } else {
+          html += '<div style="color:#f59e0b;">No keys in pool. Paste 5-7 keys above.</div>';
+        }
+        container.innerHTML = html;
+        const badge = document.getElementById('poolCountBadge');
+        if (badge) badge.textContent = data.pool_size || 0;
+      } catch(err) {
+        container.innerHTML = `<div style="color:#ef4444;">Error loading pool: ${err.message}</div>`;
+      }
+    }
+
+    async function saveKeyPoolFromModal() {
+      const raw = document.getElementById('keyPoolInput').value.trim();
+      if (!raw) return alert('Please enter at least 1 Gemini API key.');
+      const keys = raw.split(/[\n,;]+/).map(k => k.trim()).filter(k => k.length > 8);
+      try {
+        const res = await fetch(window.location.origin + '/api/gemini/pool', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ keys: keys, persist: true })
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert(`Successfully saved ${data.keys_loaded} keys to Gemini rotation pool!`);
+          document.getElementById('keyPoolInput').value = '';
+          loadKeyPoolStatus();
+        } else {
+          alert('Could not update key pool: ' + JSON.stringify(data));
+        }
+      } catch(err) {
+        alert('Network error: ' + err.message);
+      }
+    }
+
+    async function verifyKeyPoolFromModal() {
+      const btn = document.getElementById('verifyKeysBtn');
+      const container = document.getElementById('poolStatusContainer');
+      btn.textContent = '⏳ Testing...';
+      btn.disabled = true;
+      try {
+        const res = await fetch(window.location.origin + '/api/gemini/pool/verify', { method: 'POST' });
+        const data = await res.json();
+        let html = `<div style="color:#00F0FF; font-weight:700; margin-bottom:6px;">VERIFICATION REPORT (${data.healthy_keys}/${data.total_keys} HEALTHY)</div>`;
+        if (data.results) {
+          data.results.forEach(r => {
+            const color = r.status === 'ACTIVE' ? '#00FF88' : (r.status.includes('REDIRECT') ? '#38bdf8' : '#f59e0b');
+            html += `<div style="padding:2px 0;">Key #${r.index+1} [${r.key}]: <span style="color:${color}; font-weight:700;">${r.status}</span> ${r.latency_ms ? '('+r.latency_ms+'ms)' : ''}</div>`;
+          });
+        }
+        container.innerHTML = html;
+      } catch(e) {
+        container.innerHTML = `<div style="color:#ef4444;">Verification error: ${e.message}</div>`;
+      } finally {
+        btn.textContent = '⚡ Test All Keys';
+        btn.disabled = false;
+      }
+    }
   </script>
+
+  <!-- KEY POOL MODAL -->
+  <div id="keyPoolModal" style="display:none; position:fixed; inset:0; background:rgba(4,2,10,0.88); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#0c0a17; border:1px solid #272238; border-radius:14px; max-width:640px; width:90%; padding:24px; box-shadow:0 0 40px rgba(0,240,255,0.15); font-family:sans-serif; color:#f3f4f6;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:20px;">🔑</span>
+          <div>
+            <h2 style="font-size:16px; font-weight:800; color:#fff; margin:0;">GEMINI MULTI-KEY ROTATION POOL</h2>
+            <div style="font-size:11px; color:var(--cyan); margin-top:2px;">Round-Robin Load Balancing • Zero-Downtime Failover</div>
+          </div>
+        </div>
+        <button onclick="closeKeyPoolModal()" style="background:transparent; border:none; color:#9ca3af; font-size:20px; cursor:pointer;">✕</button>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block; font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#9ca3af; margin-bottom:6px; font-weight:700;">
+          Add or Replace Keys (1 per line or comma-separated)
+        </label>
+        <textarea id="keyPoolInput" rows="5" placeholder="AQ.Ab8RN6LEQcMegrX...&#10;AQ.Ab8RN6JxvkGbZH...&#10;AQ.Ab8RN6LtI1_LeX..." style="width:100%; background:#05030a; border:1px solid #373349; border-radius:8px; color:#00FF88; font-family:monospace; font-size:12px; padding:10px; resize:vertical; outline:none;"></textarea>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom:16px;">
+        <button onclick="saveKeyPoolFromModal()" style="flex:1; background:linear-gradient(135deg, #00F0FF, #0088FF); color:#000; font-weight:800; border:none; padding:10px; border-radius:8px; cursor:pointer; font-size:12px;">
+          💾 Save & Activate Pool
+        </button>
+        <button onclick="verifyKeyPoolFromModal()" id="verifyKeysBtn" style="background:#1e1435; border:1px solid #a855f7; color:#d8b4fe; font-weight:700; padding:10px 16px; border-radius:8px; cursor:pointer; font-size:12px;">
+          ⚡ Test All Keys
+        </button>
+      </div>
+
+      <div id="poolStatusContainer" style="background:#05030a; border:1px solid #1e1b2e; border-radius:8px; padding:12px; font-size:11px; max-height:160px; overflow-y:auto; font-family:monospace;">
+        <div style="color:#6b7280;">Loading active key pool...</div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

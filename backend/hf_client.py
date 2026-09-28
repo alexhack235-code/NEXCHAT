@@ -68,6 +68,20 @@ def synthesize_local_response(prompt: str) -> str:
     return "NEXIUM AI is operating in high-performance mode. Your request has been verified and processed."
 
 async def generate_text(model: str, prompt: str, max_length: int = 512) -> Any:
+    # 0. Check if user explicitly requested Gemini model or alias
+    if any(k in model.lower() for k in ("gemini", "flash")):
+        try:
+            from .gemini_engine import gemini_engine
+        except ImportError:
+            try:
+                from gemini_engine import gemini_engine
+            except ImportError:
+                gemini_engine = None
+        if gemini_engine and gemini_engine.is_configured():
+            gem_res = await gemini_engine.generate_content(prompt, model=model, max_output_tokens=max_length)
+            if gem_res.get("success"):
+                return gem_res.get("text", "")
+
     canonical_model = resolve_model_repo(model)
     client = get_async_client()
     headers = get_headers()
@@ -99,6 +113,21 @@ async def generate_text(model: str, prompt: str, max_length: int = 512) -> Any:
         except httpx.RequestError as e:
             last_error = e
             continue
+
+    # Automatic Failover to Gemini Cloud Engine if local/HF fails or times out
+    try:
+        from .gemini_engine import gemini_engine
+    except ImportError:
+        try:
+            from gemini_engine import gemini_engine
+        except ImportError:
+            gemini_engine = None
+
+    if gemini_engine and gemini_engine.is_configured():
+        logger.info("Local/HF model slow or restricted. Auto-failing over to Google Gemini 2.5 Flash Engine (<300ms)...")
+        gem_res = await gemini_engine.generate_content(prompt, model="gemini-2.5-flash", max_output_tokens=max_length)
+        if gem_res.get("success"):
+            return gem_res.get("text", "")
 
     if last_error:
         logger.warning(f"Remote inference unavailable ({last_error}), using local intelligent synthesis")

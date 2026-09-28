@@ -70,12 +70,12 @@
                 </button>
 
                 <div class="model-selector-chip" onclick="openModelPicker()">
-                    <div class="model-icon-badge">
-                        <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                    <div class="model-icon-badge" style="background:rgba(0,240,255,0.15); border-color:#00F0FF;">
+                        <svg class="icon icon-sm" style="color:#00F0FF;" viewBox="0 0 24 24"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line></svg>
                     </div>
                     <div class="model-info-stack">
-                        <span class="model-name" id="currentModelName">Qwen 2.5 3B</span>
-                        <span class="model-sub" id="currentEngineTag">LOCAL CORE</span>
+                        <span class="model-name" id="currentModelName">Gemini 3.8 Flash</span>
+                        <span class="model-sub" id="currentEngineTag">&lt;300MS POOL</span>
                     </div>
                     <svg class="icon icon-sm" style="color:var(--text-dim);" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
@@ -247,8 +247,8 @@
             thinkMode: false,
             webMode: false,
             soundEnabled: true,
-            selectedModel: "qwen2.5:3b-instruct",
-            selectedEngine: "Local Ollama",
+            selectedModel: "gemini-3.8-flash",
+            selectedEngine: "Cloud Key Pool",
             backendStatus: "checking",
             activeCanvasTab: "sandbox",
             audioCtx: null,
@@ -260,7 +260,9 @@
         const STORAGE_KEY_SETTINGS = "nexium_settings_v3";
 
         const MODEL_REGISTRY = [
-            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B", engine: "Local Ollama", tag: "RECOMMENDED" },
+            { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", engine: "Cloud Key Pool", tag: "<300MS ACCEL" },
+            { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", engine: "Cloud Key Pool", tag: "REASONING" },
+            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B", engine: "Local Ollama", tag: "LOCAL FAST" },
             { id: "deepseek-r1:latest", name: "DeepSeek R1", engine: "Reasoning Core", tag: "REASONING" },
             { id: "llama3.3:latest", name: "Llama 3.3 70B", engine: "Local Ollama", tag: "HIGH PERFORMANCE" },
             { id: "nexium-rust-engine", name: "NEXIUM Core", engine: "Rust Engine", tag: "NATIVE HYBRID" },
@@ -913,10 +915,17 @@
 
                 let responseSuccess = false;
 
-                const candidateUrls = [
+                const isGemini = state.selectedModel.includes("gemini");
+                const candidateUrls = isGemini ? [
+                    `${settings.apiBase}/api/gemini/generate`,
+                    `http://localhost:8001/api/gemini/generate`,
                     `${settings.apiBase}/api/remote_qwen`,
-                    `http://localhost:8000/api/remote_qwen`,
                     `http://localhost:8001/api/remote_qwen`
+                ] : [
+                    `${settings.apiBase}/api/remote_qwen`,
+                    `http://localhost:8001/api/remote_qwen`,
+                    `${settings.apiBase}/api/gemini/generate`,
+                    `http://localhost:8001/api/gemini/generate`
                 ];
 
                 for (const url of candidateUrls) {
