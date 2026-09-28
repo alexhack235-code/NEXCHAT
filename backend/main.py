@@ -28,11 +28,25 @@ except ImportError:
     except ImportError:
         rust_core = None
 
+try:
+    from .gemini_engine import gemini_engine
+except ImportError:
+    try:
+        from gemini_engine import gemini_engine
+    except ImportError:
+        gemini_engine = None
+
 app = FastAPI(title="NEXIUM AI - Autonomous Workstation", version="3.0.0")
 
 # Mount CSS directory if it exists
 if CSS_PATH.exists():
     app.mount("/css", StaticFiles(directory=str(CSS_PATH)), name="css")
+
+FPS_ASSET_DIR = Path("C:/Users/Baha/Desktop/ASSET")
+if not FPS_ASSET_DIR.exists():
+    FPS_ASSET_DIR = PROJECT_ROOT / "frontend" / "assets" / "luxury_fps"
+if FPS_ASSET_DIR.exists():
+    app.mount("/fps-assets", StaticFiles(directory=str(FPS_ASSET_DIR)), name="fps-assets")
 
 # CORS configuration
 app.add_middleware(
@@ -303,6 +317,14 @@ async def serve_studio():
         return FileResponse(str(STUDIO_HTML_PATH), media_type="text/html")
     return HTMLResponse("<h1>nex-3d-studio.html not found</h1>", status_code=404)
 
+@app.get("/fps")
+@app.get("/luxury-fps")
+async def serve_luxury_fps():
+    index_file = FPS_ASSET_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file), media_type="text/html")
+    return HTMLResponse("<h1>Luxury FPS Asset not found</h1>", status_code=404)
+
 
 # Health check endpoints
 @app.get("/health")
@@ -403,47 +425,103 @@ def resolve_user_path(raw_path: str) -> str:
 
 @app.post("/api/remote_qwen")
 async def remote_qwen(request_data: dict):
-    """Call local Ollama model with autonomous thinking and action execution."""
+    """Call model with automatic Ollama <-> Google Gemini multi-key pool failover."""
     prompt = request_data.get("prompt", "")
     max_tokens = request_data.get("max_tokens", 2048)
-    model = request_data.get("model", "qwen2.5:3b-instruct")
+    model = request_data.get("model", "gemini-3.8-flash")
     temperature = request_data.get("temperature", 0.7)
 
     if not prompt:
         return {"error": "prompt is required"}
 
-    enhanced_prompt = f"{NEXIUM_SUPER_SYSTEM_PROMPT}\n\nUser: {prompt}\n\nAI: "
+    model_lower = str(model).lower()
+    is_gemini_requested = "gemini" in model_lower or "flash" in model_lower or "pro" in model_lower
 
-    try:
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(
-                OLLAMA_API_URL,
-                json={
-                    "model": model,
-                    "prompt": enhanced_prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": float(temperature),
-                        "num_predict": int(max_tokens),
+    # Route 1: Directly route to Google Gemini Multi-Key Pool if requested
+    if is_gemini_requested and gemini_engine and gemini_engine.is_configured():
+        target_model = model if "gemini" in model_lower else "gemini-3.8-flash"
+        gem_res = await gemini_engine.generate_content(
+            prompt=prompt,
+            model=target_model,
+            system_instruction=NEXIUM_SUPER_SYSTEM_PROMPT,
+            temperature=float(temperature),
+            max_output_tokens=int(max_tokens)
+        )
+        if gem_res.get("success"):
+            return {
+                "text": gem_res.get("text", ""),
+                "response": gem_res.get("text", ""),
+                "creator": "NEXO-TECH",
+                "ai_name": "NEXIUM",
+                "model": gem_res.get("model", target_model),
+                "latency_ms": gem_res.get("latency_ms", 0),
+                "engine": "gemini-pool"
+            }
+
+    # Route 2: Try local Ollama if specific local model requested
+    ollama_error_msg = ""
+    if not is_gemini_requested:
+        try:
+            enhanced_prompt = f"{NEXIUM_SUPER_SYSTEM_PROMPT}\n\nUser: {prompt}\n\nAI: "
+            async with httpx.AsyncClient(timeout=httpx.Timeout(3.0, connect=1.5)) as client:
+                response = await client.post(
+                    OLLAMA_API_URL,
+                    json={
+                        "model": model,
+                        "prompt": enhanced_prompt,
+                        "stream": False,
+                        "options": {
+                            "temperature": float(temperature),
+                            "num_predict": int(max_tokens),
+                        }
                     }
-                }
-            )
+                )
+                if response.status_code == 200:
+                    result = response.json()
+                    text = result.get("response", "No response from model")
+                    return {
+                        "text": text,
+                        "response": text,
+                        "creator": "NEXO-TECH",
+                        "ai_name": "NEXIUM",
+                        "model": model,
+                        "engine": "ollama"
+                    }
+                else:
+                    ollama_error_msg = f"Ollama HTTP {response.status_code}"
+        except Exception as e:
+            ollama_error_msg = str(e)
 
-            if response.status_code == 200:
-                result = response.json()
-                text = result.get("response", "No response from model")
-                return {"text": text, "creator": "NEXO-TECH", "ai_name": "NEXIUM", "model": model}
-            else:
-                return {"error": f"Ollama error: {response.status_code}", "details": response.text}
-    except Exception as e:
-        return {
-            "error": f"Connection to Ollama failed: {str(e)}",
-            "hint": "Ensure Ollama is running locally via 'ollama serve' or configure Ollama Host URL."
-        }
+    # Route 3: Seamless Cloud Fallback to Gemini Multi-Key Pool
+    if gemini_engine and gemini_engine.is_configured():
+        logger.info(f"Routing to Gemini Multi-Key Pool (Ollama status: {ollama_error_msg or 'bypassed'})...")
+        gem_res = await gemini_engine.generate_content(
+            prompt=prompt,
+            model="gemini-3.8-flash",
+            system_instruction=NEXIUM_SUPER_SYSTEM_PROMPT,
+            temperature=float(temperature),
+            max_output_tokens=int(max_tokens)
+        )
+        if gem_res.get("success"):
+            return {
+                "text": gem_res.get("text", ""),
+                "response": gem_res.get("text", ""),
+                "creator": "NEXO-TECH",
+                "ai_name": "NEXIUM",
+                "model": "gemini-3.8-flash",
+                "latency_ms": gem_res.get("latency_ms", 0),
+                "engine": "gemini-pool-fallback",
+                "notice": "Generated via Google Gemini Multi-Key Pool"
+            }
+
+    return {
+        "error": f"AI Engine unavailable. Ollama: {ollama_error_msg}",
+        "hint": "Ensure Gemini API keys or Ollama instance is configured."
+    }
 
 @app.post("/api/chat")
 async def chat(request_data: dict):
-    """Chat endpoint - forwards to remote_qwen."""
+    """Chat endpoint - forwards to multi-engine remote_qwen."""
     return await remote_qwen(request_data)
 
 # File and Folder Management Endpoints

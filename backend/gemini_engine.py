@@ -175,11 +175,17 @@ class GeminiEngine:
                 "fallback_available": True
             }
 
-        target_model = model or self.default_model
-        if target_model in ("gemini", "flash", "gemini-flash", "gemini-2.5-flash"):
-            target_model = "gemini-3.8-flash"
-        elif target_model in ("pro", "gemini-pro", "gemini-2.5-pro"):
-            target_model = "gemini-3.1-pro-preview"
+        requested_model = model or self.default_model
+        if requested_model in ("gemini", "flash", "gemini-flash", "gemini-2.5-flash"):
+            requested_model = "gemini-3.8-flash"
+        elif requested_model in ("pro", "gemini-pro", "gemini-2.5-pro"):
+            requested_model = "gemini-3.1-pro-preview"
+
+        # Model cascade: Primary -> fallbacks -> guaranteed cloud gemma-4-26b-a4b-it
+        model_cascade = [requested_model]
+        for m_fallback in ["gemini-3.8-flash", "gemini-flash-latest", "gemma-4-26b-a4b-it"]:
+            if m_fallback not in model_cascade:
+                model_cascade.append(m_fallback)
 
         payload: Dict[str, Any] = {
             "contents": [{"parts": [{"text": prompt}]}],
@@ -195,54 +201,78 @@ class GeminiEngine:
         last_error = ""
         total_t0 = time.perf_counter()
 
-        for attempt in range(pool_size):
-            with self._lock:
-                active_idx = (self._key_index + attempt) % pool_size
-                current_key = self.api_keys[active_idx]
+        for target_model in model_cascade:
+            for attempt in range(pool_size):
+                with self._lock:
+                    active_idx = (self._key_index + attempt) % pool_size
+                    current_key = self.api_keys[active_idx]
 
-            url = f"{GEMINI_BASE_URL}/{target_model}:generateContent?key={current_key}"
-            t0 = time.perf_counter()
+                url = f"{GEMINI_BASE_URL}/{target_model}:generateContent?key={current_key}"
+                t0 = time.perf_counter()
 
-            try:
-                resp = await self.client.post(url, json=payload)
-                elapsed_ms = round((time.perf_counter() - t0) * 1000)
+                try:
+                    resp = await self.client.post(url, json=payload)
+                    elapsed_ms = round((time.perf_counter() - t0) * 1000)
 
-                if resp.status_code == 200:
-                    data = resp.json()
-                    candidates = data.get("candidates", [])
-                    if candidates:
-                        text_parts = candidates[0].get("content", {}).get("parts", [])
-                        output_text = "".join(p.get("text", "") for p in text_parts)
-                        usage = data.get("usageMetadata", {})
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        candidates = data.get("candidates", [])
+                        if candidates:
+                            text_parts = candidates[0].get("content", {}).get("parts", [])
+                            output_text = "".join(p.get("text", "") for p in text_parts)
+                            usage = data.get("usageMetadata", {})
 
-                        # Advance index on success for round-robin balancing
-                        self._rotate_key()
+                            clean_text = output_text
+                            thought_text = ""
+                            if "gemma" in target_model.lower() and output_text.startswith("*"):
+                                lines = output_text.split("\n")
+                                body_lines = []
+                                think_lines = []
+                                hit_content = False
+                                for line in lines:
+                                    if not hit_content and (line.strip().startswith("*") or line.strip().startswith("-") or not line.strip()):
+                                        think_lines.append(line)
+                                    else:
+                                        hit_content = True
+                                        body_lines.append(line)
+                                if body_lines:
+                                    clean_text = "\n".join(body_lines).strip()
+                                    thought_text = "\n".join(think_lines).strip()
 
-                        return {
-                            "success": True,
-                            "text": output_text,
-                            "model": target_model,
-                            "key_index": active_idx,
-                            "attempts": attempt + 1,
-                            "latency_ms": elapsed_ms,
-                            "prompt_tokens": usage.get("promptTokenCount", 0),
-                            "completion_tokens": usage.get("candidatesTokenCount", 0)
-                        }
+                            # Advance index on success for round-robin balancing
+                            self._rotate_key()
 
-                # If 429 (rate limit) or 403 (quota / permission), record error and fail over to next key
-                last_error = f"Key #{active_idx} HTTP {resp.status_code}: {resp.text}"
-                logger.warning(f"Gemini Key #{active_idx} returned {resp.status_code}. Auto-failing over to next key...")
-                continue
+                            return {
+                                "success": True,
+                                "text": clean_text,
+                                "thought": thought_text,
+                                "model": target_model,
+                                "key_index": active_idx,
+                                "attempts": attempt + 1,
+                                "latency_ms": elapsed_ms,
+                                "prompt_tokens": usage.get("promptTokenCount", 0),
+                                "completion_tokens": usage.get("candidatesTokenCount", 0)
+                            }
 
-            except Exception as e:
-                last_error = f"Key #{active_idx} connection exception: {e}"
-                logger.warning(f"Gemini Key #{active_idx} exception: {e}. Trying next key...")
-                continue
+                    # If model is unavailable (503 high demand or 404 deprecated), cascade immediately to next model
+                    if resp.status_code in (503, 404):
+                        logger.info(f"Model {target_model} returned {resp.status_code}. Cascading to next model in pool...")
+                        break
+
+                    # If 429 (rate limit) or 403 (quota / permission), fail over to next key
+                    last_error = f"Key #{active_idx} HTTP {resp.status_code}: {resp.text[:120]}"
+                    logger.warning(f"Gemini Key #{active_idx} on {target_model} returned {resp.status_code}. Auto-failing over to next key...")
+                    continue
+
+                except Exception as e:
+                    last_error = f"Key #{active_idx} connection exception: {e}"
+                    logger.warning(f"Gemini Key #{active_idx} exception: {e}. Trying next key...")
+                    continue
 
         total_elapsed_ms = round((time.perf_counter() - total_t0) * 1000)
         return {
             "success": False,
-            "error": f"All {pool_size} Gemini keys failed or rate-limited. Last: {last_error}",
+            "error": f"All {pool_size} Gemini keys and cascade models failed. Last: {last_error}",
             "pool_size": pool_size,
             "latency_ms": total_elapsed_ms,
             "fallback_available": True

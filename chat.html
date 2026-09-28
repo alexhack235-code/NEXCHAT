@@ -199,7 +199,7 @@
             <div class="modal-body">
                 <div class="setting-field-group">
                     <label class="setting-field-label">API Base Endpoint</label>
-                    <input type="text" id="settingApiBase" class="setting-input" value="http://localhost:8000">
+                    <input type="text" id="settingApiBase" class="setting-input" value="http://localhost:8001">
                 </div>
 
                 <div class="setting-field-group">
@@ -919,13 +919,17 @@
                 const candidateUrls = isGemini ? [
                     `${settings.apiBase}/api/gemini/generate`,
                     `http://localhost:8001/api/gemini/generate`,
+                    `/api/gemini/generate`,
                     `${settings.apiBase}/api/remote_qwen`,
-                    `http://localhost:8001/api/remote_qwen`
+                    `http://localhost:8001/api/remote_qwen`,
+                    `/api/remote_qwen`
                 ] : [
                     `${settings.apiBase}/api/remote_qwen`,
                     `http://localhost:8001/api/remote_qwen`,
+                    `/api/remote_qwen`,
                     `${settings.apiBase}/api/gemini/generate`,
-                    `http://localhost:8001/api/gemini/generate`
+                    `http://localhost:8001/api/gemini/generate`,
+                    `/api/gemini/generate`
                 ];
 
                 for (const url of candidateUrls) {
@@ -944,7 +948,12 @@
 
                         if (res.ok) {
                             const data = await res.json();
-                            aiText = data.text || data.response || JSON.stringify(data);
+                            // If backend returned an error structure without generation, continue to next fallback
+                            if (data.error && !data.text && !data.response) {
+                                console.warn(`[NEXIUM] Candidate ${url} returned error:`, data.error);
+                                continue;
+                            }
+                            aiText = data.text || data.response || (typeof data === 'string' ? data : JSON.stringify(data));
                             responseSuccess = true;
                             state.backendStatus = "online";
                             updateStatusPill();
@@ -1269,50 +1278,100 @@ You can customize generation parameters, backend routing, and system prompts in 
 
         function initSpeechRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
+            if (!SpeechRecognition) {
+                console.warn("[NEXIUM] SpeechRecognition is not available in this browser.");
+                return null;
+            }
 
-            state.speechRecognition = new SpeechRecognition();
-            state.speechRecognition.continuous = false;
-            state.speechRecognition.interimResults = true;
+            try {
+                const rec = new SpeechRecognition();
+                rec.continuous = true;
+                rec.interimResults = true;
+                rec.lang = 'en-US';
 
-            state.speechRecognition.onresult = (e) => {
-                let transcript = "";
-                for (let i = e.resultIndex; i < e.results.length; ++i) {
-                    transcript += e.results[i][0].transcript;
-                }
-                const textarea = document.getElementById("promptTextarea");
-                if (textarea) {
-                    textarea.value = transcript;
-                    autoExpandTextarea(textarea);
-                }
-            };
+                rec.onstart = () => {
+                    setVoiceRecordingState(true);
+                };
 
-            state.speechRecognition.onend = () => {
-                setVoiceRecordingState(false);
-            };
+                rec.onresult = (e) => {
+                    let transcript = "";
+                    for (let i = e.resultIndex; i < e.results.length; ++i) {
+                        transcript += e.results[i][0].transcript;
+                    }
+                    const textarea = document.getElementById("promptTextarea");
+                    if (textarea && transcript.trim()) {
+                        textarea.value = transcript;
+                        autoExpandTextarea(textarea);
+                    }
+                };
 
-            state.speechRecognition.onerror = () => {
-                setVoiceRecordingState(false);
-            };
+                rec.onend = () => {
+                    setVoiceRecordingState(false);
+                };
+
+                rec.onerror = (e) => {
+                    console.warn("[NEXIUM] Speech recognition error:", e.error);
+                    setVoiceRecordingState(false);
+                    if (e.error === 'not-allowed') {
+                        alert("Microphone Access Blocked: Please allow microphone access in your browser settings (click the microphone or lock icon in your address bar).");
+                    }
+                };
+
+                state.speechRecognition = rec;
+                return rec;
+            } catch (err) {
+                console.error("[NEXIUM] SpeechRecognition initialization error:", err);
+                return null;
+            }
         }
 
-        function toggleVoiceDictation() {
+        async function toggleVoiceDictation() {
             playHoloSound('click');
-            if (!state.speechRecognition) {
-                alert("Speech recognition is not supported in this browser. Use Chrome, Edge, or a WebSpeech-compatible browser.");
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert("Voice dictation requires Google Chrome, Microsoft Edge, or a browser with the Web Speech API enabled.");
                 return;
             }
 
+            if (!state.speechRecognition) {
+                initSpeechRecognition();
+            }
+
             if (state.isRecordingVoice) {
-                state.speechRecognition.stop();
-                setVoiceRecordingState(false);
-            } else {
                 try {
-                    state.speechRecognition.start();
-                    setVoiceRecordingState(true);
-                } catch (e) {
-                    setVoiceRecordingState(false);
+                    state.speechRecognition.stop();
+                } catch(e) {}
+                setVoiceRecordingState(false);
+                return;
+            }
+
+            // Explicitly request microphone stream to ensure browser permissions are primed
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    // Immediately release the audio stream so the speech engine can acquire it cleanly
+                    stream.getTracks().forEach(track => track.stop());
+                } catch (micErr) {
+                    console.warn("[NEXIUM] Microphone permission check failed:", micErr);
+                    alert("Microphone Access Required: Please click the lock or camera/mic icon in the browser address bar and set Microphone to 'Allow'.");
+                    return;
                 }
+            }
+
+            try {
+                state.speechRecognition.start();
+                setVoiceRecordingState(true);
+            } catch (e) {
+                console.warn("[NEXIUM] Speech start retrying:", e);
+                try { state.speechRecognition.stop(); } catch(_) {}
+                setTimeout(() => {
+                    try {
+                        state.speechRecognition.start();
+                        setVoiceRecordingState(true);
+                    } catch(err2) {
+                        setVoiceRecordingState(false);
+                    }
+                }, 200);
             }
         }
 
@@ -1402,10 +1461,17 @@ You can customize generation parameters, backend routing, and system prompts in 
             document.getElementById("settingsModal").classList.remove("open");
         }
 
+        function getDefaultApiBase() {
+            if (window.location.origin && window.location.origin !== "null" && !window.location.origin.startsWith("file:")) {
+                return window.location.origin;
+            }
+            return "http://localhost:8001";
+        }
+
         function saveSettings() {
             playHoloSound('click');
             const settings = {
-                apiBase: document.getElementById("settingApiBase").value.trim() || "http://localhost:8001",
+                apiBase: document.getElementById("settingApiBase").value.trim() || getDefaultApiBase(),
                 ollamaUrl: document.getElementById("settingOllamaUrl").value.trim() || "http://localhost:11434",
                 apiKey: document.getElementById("settingApiKey").value.trim(),
                 temperature: document.getElementById("settingTemperature").value,
@@ -1422,7 +1488,13 @@ You can customize generation parameters, backend routing, and system prompts in 
                 const stored = localStorage.getItem(STORAGE_KEY_SETTINGS);
                 if (stored) {
                     const parsed = JSON.parse(stored);
-                    if (parsed.apiBase) document.getElementById("settingApiBase").value = parsed.apiBase;
+                    if (parsed.apiBase) {
+                        // Migrate legacy port 8000 to 8001 or current origin
+                        if (parsed.apiBase === "http://localhost:8000") {
+                            parsed.apiBase = getDefaultApiBase();
+                        }
+                        document.getElementById("settingApiBase").value = parsed.apiBase;
+                    }
                     if (parsed.ollamaUrl) document.getElementById("settingOllamaUrl").value = parsed.ollamaUrl;
                     if (parsed.apiKey) document.getElementById("settingApiKey").value = parsed.apiKey;
                     if (parsed.temperature) {
@@ -1430,17 +1502,21 @@ You can customize generation parameters, backend routing, and system prompts in 
                         document.getElementById("tempValueLabel").textContent = parsed.temperature;
                     }
                     if (parsed.systemPrompt) document.getElementById("settingSystemPrompt").value = parsed.systemPrompt;
+                } else {
+                    document.getElementById("settingApiBase").value = getDefaultApiBase();
                 }
             } catch (e) {}
         }
 
         function getSettings() {
+            const rawBase = document.getElementById("settingApiBase") ? document.getElementById("settingApiBase").value.trim() : "";
+            const apiBase = (rawBase && rawBase !== "http://localhost:8000") ? rawBase : getDefaultApiBase();
             return {
-                apiBase: document.getElementById("settingApiBase").value.trim() || "http://localhost:8000",
-                ollamaUrl: document.getElementById("settingOllamaUrl").value.trim() || "http://localhost:11434",
-                apiKey: document.getElementById("settingApiKey").value.trim(),
-                temperature: document.getElementById("settingTemperature").value || "0.7",
-                systemPrompt: document.getElementById("settingSystemPrompt").value.trim()
+                apiBase: apiBase,
+                ollamaUrl: (document.getElementById("settingOllamaUrl") && document.getElementById("settingOllamaUrl").value.trim()) || "http://localhost:11434",
+                apiKey: (document.getElementById("settingApiKey") && document.getElementById("settingApiKey").value.trim()) || "",
+                temperature: (document.getElementById("settingTemperature") && document.getElementById("settingTemperature").value) || "0.7",
+                systemPrompt: (document.getElementById("settingSystemPrompt") && document.getElementById("settingSystemPrompt").value.trim()) || ""
             };
         }
 
