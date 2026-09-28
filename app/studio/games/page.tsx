@@ -71,13 +71,29 @@ export default function GameLabPage() {
     }
   };
 
-  // AI Animation generation from prompt
+  // AI Animation generation from prompt via Gemini Game Engine
   const handleAnimatePrompt = async (promptText: string, style: string) => {
     setIsAnimating(true);
-    await new Promise((r) => setTimeout(r, 600));
-
-    const anim = generateAnimationFromPrompt(promptText, style, unrealMode);
-    setDuration(anim.durationSeconds);
+    try {
+      const res = await fetch('/api/game-lab/animate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: promptText, style, unrealMode })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setDuration(data.duration || 6.0);
+        if (data.physics?.timeScale) {
+          setTimeScale(data.physics.timeScale);
+        }
+      } else {
+        const anim = generateAnimationFromPrompt(promptText, style, unrealMode);
+        setDuration(anim.durationSeconds);
+      }
+    } catch (e) {
+      const anim = generateAnimationFromPrompt(promptText, style, unrealMode);
+      setDuration(anim.durationSeconds);
+    }
     setCurrentTime(0.0);
     setIsPlaying(true);
     setIsAnimating(false);
