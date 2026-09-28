@@ -371,7 +371,7 @@ async def health_supabase():
     return {"supabase_configured": bool(url and key)}
 
 # Direct AI endpoint (Ollama Local)
-OLLAMA_API_URL = os.getenv("OLLAMA_HOST", "http://localhost:11434") + "/api/generate"
+OLLAMA_API_URL = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/") + "/api/generate"
 HF_API_KEY = os.getenv("HF_API_KEY")
 
 NEXIUM_SUPER_SYSTEM_PROMPT = """You are NEXIUM, an elite autonomous AI workstation created by NEXO-TECH.
@@ -423,6 +423,41 @@ def resolve_user_path(raw_path: str) -> str:
         p = os.path.join(desktop_dir, p[8:])
     return os.path.abspath(p)
 
+@app.get("/api/local_models")
+@app.get("/api/local_status")
+async def get_local_models():
+    """Detect models installed locally on the host machine (e.g. Ollama)."""
+    ollama_base = os.getenv("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/")
+    try:
+        async with httpx.AsyncClient(timeout=httpx.Timeout(4.0, connect=1.5)) as client:
+            res = await client.get(f"{ollama_base}/api/tags")
+            if res.status_code == 200:
+                data = res.json()
+                raw_models = data.get("models", [])
+                models = []
+                for m in raw_models:
+                    m_name = m.get("name", "")
+                    clean_name = m_name.split(":")[0].replace("-", " ").capitalize()
+                    size_gb = round(m.get("size", 0) / (1024**3), 1)
+                    models.append({
+                        "id": m_name,
+                        "name": f"{clean_name} (Local PC)",
+                        "size": f"{size_gb} GB",
+                        "engine": "Local Host PC",
+                        "tag": "HOST PC ACTIVE",
+                        "is_local": True
+                    })
+                return {
+                    "online": True,
+                    "engine": "ollama",
+                    "host": ollama_base,
+                    "models": models,
+                    "count": len(models)
+                }
+    except Exception as e:
+        return {"online": False, "engine": "ollama", "host": ollama_base, "models": [], "error": str(e)}
+    return {"online": False, "engine": "ollama", "host": ollama_base, "models": []}
+
 @app.post("/api/remote_qwen")
 async def remote_qwen(request_data: dict):
     """Call model with automatic Ollama <-> Google Gemini multi-key pool failover."""
@@ -463,7 +498,7 @@ async def remote_qwen(request_data: dict):
     if not is_gemini_requested:
         try:
             enhanced_prompt = f"{NEXIUM_SUPER_SYSTEM_PROMPT}\n\nUser: {prompt}\n\nAI: "
-            async with httpx.AsyncClient(timeout=httpx.Timeout(3.0, connect=1.5)) as client:
+            async with httpx.AsyncClient(timeout=httpx.Timeout(60.0, connect=5.0)) as client:
                 response = await client.post(
                     OLLAMA_API_URL,
                     json={
@@ -485,12 +520,14 @@ async def remote_qwen(request_data: dict):
                         "creator": "NEXO-TECH",
                         "ai_name": "NEXIUM",
                         "model": model,
-                        "engine": "ollama"
+                        "engine": "ollama-local-pc"
                     }
                 else:
-                    ollama_error_msg = f"Ollama HTTP {response.status_code}"
+                    ollama_error_msg = f"Ollama HTTP {response.status_code}: {response.text}"
+                    logger.warning(f"[Ollama Status] {ollama_error_msg}")
         except Exception as e:
             ollama_error_msg = str(e)
+            logger.warning(f"[Ollama Connection] {ollama_error_msg}")
 
     # Route 3: Seamless Cloud Fallback to Gemini Multi-Key Pool
     if gemini_engine and gemini_engine.is_configured():

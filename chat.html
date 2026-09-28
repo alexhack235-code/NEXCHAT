@@ -8,6 +8,63 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/nexium-omni.css">
+    <style>
+        .voice-selector-chip {
+            background: var(--bg-surface-elevated, #161822);
+            border: 1px solid var(--border-medium, rgba(255,255,255,0.08));
+            border-radius: var(--radius-md, 8px);
+            padding: 4px 10px 4px 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .voice-selector-chip:hover {
+            border-color: #b44bff;
+            background: rgba(180,75,255,0.08);
+        }
+        .voice-selector-chip.speaking {
+            border-color: #00F0FF;
+            box-shadow: 0 0 12px rgba(0,240,255,0.3);
+            animation: pulse-voice 1.5s infinite;
+        }
+        @keyframes pulse-voice {
+            0% { border-color: #b44bff; }
+            50% { border-color: #00F0FF; }
+            100% { border-color: #b44bff; }
+        }
+        .msg-act-btn.active {
+            color: #00F0FF !important;
+            border-color: #00F0FF !important;
+            background: rgba(0, 240, 255, 0.15) !important;
+            animation: pulse-glow 1s infinite alternate;
+        }
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 4px rgba(0,240,255,0.4); }
+            to { box-shadow: 0 0 10px rgba(0,240,255,0.8); }
+        }
+        .voice-wave-mini {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            height: 12px;
+        }
+        .voice-wave-mini span {
+            width: 2px;
+            height: 100%;
+            background: #b44bff;
+            border-radius: 1px;
+            animation: wave-bar 0.8s ease-in-out infinite alternate;
+        }
+        .voice-wave-mini span:nth-child(2) { animation-delay: 0.15s; }
+        .voice-wave-mini span:nth-child(3) { animation-delay: 0.3s; }
+        .voice-wave-mini span:nth-child(4) { animation-delay: 0.45s; }
+        @keyframes wave-bar {
+            0% { transform: scaleY(0.2); }
+            100% { transform: scaleY(1); }
+        }
+    </style>
 </head>
 <body>
     <aside class="sidebar" id="sidebar">
@@ -74,8 +131,8 @@
                         <svg class="icon icon-sm" style="color:#00F0FF;" viewBox="0 0 24 24"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line></svg>
                     </div>
                     <div class="model-info-stack">
-                        <span class="model-name" id="currentModelName">Gemini 3.8 Flash</span>
-                        <span class="model-sub" id="currentEngineTag">&lt;300MS POOL</span>
+                        <span class="model-name" id="currentModelName">Qwen 2.5 3B (Local PC)</span>
+                        <span class="model-sub" id="currentEngineTag">🟢 ON YOUR PC</span>
                     </div>
                     <svg class="icon icon-sm" style="color:var(--text-dim);" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
@@ -96,6 +153,20 @@
                     <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="15" y1="3" x2="15" y2="21"></line></svg>
                     <span>Canvas</span>
                 </button>
+
+                <div class="voice-selector-chip" id="voiceSelectorChip" title="AI Voice Persona (Click to Cycle, or configure in Settings)" onclick="cycleVoicePersona()">
+                    <div class="model-icon-badge" style="background:rgba(180,75,255,0.15); border-color:#b44bff;">
+                        <svg class="icon icon-sm" style="color:#b44bff;" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                    </div>
+                    <div class="model-info-stack">
+                        <span class="model-name" id="currentVoiceName">AURA-7</span>
+                        <span class="model-sub" id="currentVoiceTag">FEMALE AI</span>
+                    </div>
+                    <div class="voice-wave-mini" id="aiSpeakingWave" style="display:none; margin-left:2px;">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                    <svg class="icon icon-sm" style="color:var(--text-dim);" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
 
                 <button class="nav-btn" id="soundToggleBtn" title="Sound Synthesizer" onclick="toggleSound()">
                     <svg class="icon" id="soundIcon" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
@@ -224,6 +295,63 @@
                     <label class="setting-field-label">Autonomous System Directives</label>
                     <textarea id="settingSystemPrompt" class="setting-input setting-textarea">You are NEXIUM, an advanced AI system created by NEXO-TECH. You operate with absolute precision, high-speed logical deduction, and clean code generation. Never use emojis. Provide clean, well-structured technical solutions with modern practices.</textarea>
                 </div>
+
+                <div class="setting-field-group" style="border-top: 1px solid var(--border-subtle, rgba(255,255,255,0.06)); padding-top: 14px; margin-top: 14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <label class="setting-field-label" style="margin-bottom:0; font-weight:600; color:#b44bff;">
+                            🔊 AI Voice Synthesis Engine
+                        </label>
+                        <button type="button" class="tool-chip-btn" id="testVoiceBtn" onclick="testCurrentVoice()" style="padding: 3px 10px; font-size: 11px;">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                            Preview Voice
+                        </button>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label class="setting-field-label" style="font-size:11px;">Voice Persona</label>
+                            <select id="settingVoicePersona" class="setting-input" onchange="onVoicePersonaSelectChanged(this.value)">
+                                <option value="aura-7">AURA-7 (Female Tactical AI)</option>
+                                <option value="titan-ix">TITAN-IX (Deep Cybernetic Male)</option>
+                                <option value="jarvis-x">JARVIS-X (British Intelligence)</option>
+                                <option value="neo-synth">NEO-SYNTH (Vocoder Hyper-Speed)</option>
+                                <option value="kira">KIRA (Soft Neural Whisper)</option>
+                                <option value="custom">Custom Host OS Voice</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="setting-field-label" style="font-size:11px;">Host System Voice</label>
+                            <select id="settingSystemVoice" class="setting-input" onchange="onSystemVoiceSelectChanged(this.value)">
+                                <option value="">Auto-Detecting System Voices...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                        <div>
+                            <label class="setting-field-label" style="font-size:11px; display:flex; justify-content:space-between;">
+                                <span>Voice Speed (Rate)</span>
+                                <span id="voiceRateLabel">1.05x</span>
+                            </label>
+                            <input type="range" id="settingVoiceRate" min="0.5" max="1.8" step="0.05" value="1.05" oninput="document.getElementById('voiceRateLabel').textContent = this.value + 'x'; state.voiceRate = parseFloat(this.value);">
+                        </div>
+                        <div>
+                            <label class="setting-field-label" style="font-size:11px; display:flex; justify-content:space-between;">
+                                <span>Voice Pitch</span>
+                                <span id="voicePitchLabel">1.0x</span>
+                            </label>
+                            <input type="range" id="settingVoicePitch" min="0.5" max="1.8" step="0.05" value="1.0" oninput="document.getElementById('voicePitchLabel').textContent = this.value + 'x'; state.voicePitch = parseFloat(this.value);">
+                        </div>
+                    </div>
+
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding: 4px 0;">
+                        <label class="setting-field-label" style="margin-bottom:0; cursor:pointer;" for="settingAutoSpeak">
+                            <span>Auto-Read AI Replies Aloud</span>
+                            <div style="font-size:11px; color:var(--text-dim);">Automatically speaks answers using selected AI voice</div>
+                        </label>
+                        <input type="checkbox" id="settingAutoSpeak" onchange="state.autoSpeak = this.checked;" style="width:18px; height:18px; accent-color: #00F0FF; cursor:pointer;">
+                    </div>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -247,26 +375,97 @@
             thinkMode: false,
             webMode: false,
             soundEnabled: true,
-            selectedModel: "gemini-3.8-flash",
-            selectedEngine: "Cloud Key Pool",
+            selectedModel: "qwen2.5:3b-instruct",
+            selectedEngine: "Local Host PC",
             backendStatus: "checking",
             activeCanvasTab: "sandbox",
             audioCtx: null,
             speechRecognition: null,
-            isRecordingVoice: false
+            isRecordingVoice: false,
+            selectedVoicePersona: "aura-7",
+            selectedSystemVoiceUri: "",
+            voiceRate: 1.05,
+            voicePitch: 1.0,
+            autoSpeak: false,
+            isSpeaking: false,
+            currentlySpeakingBtn: null,
+            availableVoices: []
         };
 
         const STORAGE_KEY_SESSIONS = "nexium_sessions_v3";
         const STORAGE_KEY_SETTINGS = "nexium_settings_v3";
 
+        const VOICE_PERSONAS = [
+            {
+                id: "aura-7",
+                name: "AURA-7",
+                tag: "FEMALE AI",
+                gender: "female",
+                desc: "Sleek, razor-sharp synthetic female tactical assistant",
+                defaultPitch: 1.15,
+                defaultRate: 1.1,
+                keywords: ["zira", "female", "samantha", "aria", "jenny", "eva", "catherine"]
+            },
+            {
+                id: "titan-ix",
+                name: "TITAN-IX",
+                tag: "DEEP MALE",
+                gender: "male",
+                desc: "Deep, resonant cybernetic commander",
+                defaultPitch: 0.72,
+                defaultRate: 0.95,
+                keywords: ["david", "mark", "guy", "male", "george", "richard", "james"]
+            },
+            {
+                id: "jarvis-x",
+                name: "JARVIS-X",
+                tag: "UK MAJORDOMO",
+                gender: "male",
+                desc: "Refined, articulate British technical intelligence",
+                defaultPitch: 1.0,
+                defaultRate: 1.02,
+                keywords: ["hazel", "george", "oliver", "en-gb", "united kingdom", "daniel", "brian"]
+            },
+            {
+                id: "neo-synth",
+                name: "NEO-SYNTH",
+                tag: "VOCODER FAST",
+                gender: "neutral",
+                desc: "High-throughput overclocked cyber vocoder",
+                defaultPitch: 0.85,
+                defaultRate: 1.35,
+                keywords: ["desktop", "synth", "microsoft", "google"]
+            },
+            {
+                id: "kira",
+                name: "KIRA",
+                tag: "SOFT WHISPER",
+                gender: "female",
+                desc: "Calm, gentle neural whisper frequency",
+                defaultPitch: 1.25,
+                defaultRate: 0.92,
+                keywords: ["zira", "female", "samantha", "karen", "moira", "victoria"]
+            },
+            {
+                id: "custom",
+                name: "OS NATIVE",
+                tag: "SYSTEM VOICE",
+                gender: "custom",
+                desc: "Direct host Windows operating system voice with custom pitch & speed",
+                defaultPitch: 1.0,
+                defaultRate: 1.0,
+                keywords: []
+            }
+        ];
+
         const MODEL_REGISTRY = [
-            { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", engine: "Cloud Key Pool", tag: "<300MS ACCEL" },
-            { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", engine: "Cloud Key Pool", tag: "REASONING" },
-            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B", engine: "Local Ollama", tag: "LOCAL FAST" },
-            { id: "deepseek-r1:latest", name: "DeepSeek R1", engine: "Reasoning Core", tag: "REASONING" },
-            { id: "llama3.3:latest", name: "Llama 3.3 70B", engine: "Local Ollama", tag: "HIGH PERFORMANCE" },
-            { id: "nexium-rust-engine", name: "NEXIUM Core", engine: "Rust Engine", tag: "NATIVE HYBRID" },
-            { id: "cloud-gpt4o", name: "GPT-4o Omni", engine: "Cloud API", tag: "CLOUD PROXY" }
+            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B (Local PC)", engine: "Local Host PC", tag: "🟢 ON YOUR PC", isLocal: true },
+            { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", engine: "Cloud Key Pool", tag: "<300MS ACCEL", isLocal: false },
+            { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", engine: "Cloud Key Pool", tag: "REASONING", isLocal: false },
+            { id: "deepseek-r1:latest", name: "DeepSeek R1", engine: "Reasoning Core", tag: "REASONING", isLocal: false },
+            { id: "llama3.3:latest", name: "Llama 3.3 70B", engine: "Local Host PC", tag: "HIGH PERFORMANCE", isLocal: true },
+            { id: "nexium-rust-engine", name: "NEXIUM Core", engine: "Rust Engine", tag: "NATIVE HYBRID", isLocal: false },
+            { id: "cloud-gpt4o", name: "GPT-4o Omni", engine: "Cloud API", tag: "CLOUD PROXY", isLocal: false }
         ];
 
         function playHoloSound(toneType) {
@@ -321,6 +520,8 @@
             loadSessions();
             checkBackendHealth();
             initSpeechRecognition();
+            initVoiceSynthesis();
+            detectLocalModels();
 
             window.addEventListener("keydown", (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === "b") {
@@ -692,7 +893,7 @@
             speakBtn.className = "msg-act-btn";
             speakBtn.title = "Read aloud (Text-to-Speech)";
             speakBtn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
-            speakBtn.onclick = () => speakMessage(msg.content);
+            speakBtn.onclick = () => speakMessage(msg.content, speakBtn);
 
             actions.appendChild(copyBtn);
             actions.appendChild(speakBtn);
@@ -1023,6 +1224,10 @@
                 saveSessions();
                 renderChat();
                 playHoloSound('receive');
+
+                if (state.autoSpeak && aiText) {
+                    setTimeout(() => speakMessage(aiText), 250);
+                }
 
             } catch (err) {
                 const activeRow = document.getElementById("activeLoadingRow");
@@ -1385,20 +1590,262 @@ You can customize generation parameters, backend routing, and system prompts in 
             if (btn) btn.classList.toggle("active", isRec);
         }
 
-        function speakMessage(text) {
+        function initVoiceSynthesis() {
+            if (!('speechSynthesis' in window)) return;
+            populateSystemVoices();
+            if (speechSynthesis.onvoiceschanged !== undefined) {
+                speechSynthesis.onvoiceschanged = () => {
+                    populateSystemVoices();
+                };
+            }
+            updateVoiceChipDisplay();
+        }
+
+        function populateSystemVoices() {
+            if (!('speechSynthesis' in window)) return;
+            const voices = window.speechSynthesis.getVoices();
+            state.availableVoices = voices;
+
+            const select = document.getElementById("settingSystemVoice");
+            if (!select) return;
+
+            const currentVal = state.selectedSystemVoiceUri || select.value;
+            select.innerHTML = '<option value="">-- Auto-Match via Persona --</option>';
+            voices.forEach((v) => {
+                const opt = document.createElement("option");
+                opt.value = v.voiceURI || v.name;
+                opt.textContent = `${v.name} [${v.lang}]${v.default ? ' (System Default)' : ''}`;
+                if (opt.value === currentVal) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+        }
+
+        function getVoiceForPersona(personaId) {
+            const persona = VOICE_PERSONAS.find(p => p.id === personaId) || VOICE_PERSONAS[0];
+            const voices = state.availableVoices.length > 0 ? state.availableVoices : (window.speechSynthesis ? window.speechSynthesis.getVoices() : []);
+            if (!voices || voices.length === 0) return null;
+
+            // Direct custom voice if selected
+            if (state.selectedSystemVoiceUri) {
+                const picked = voices.find(v => v.voiceURI === state.selectedSystemVoiceUri || v.name === state.selectedSystemVoiceUri);
+                if (picked && (personaId === 'custom' || !persona.keywords || persona.keywords.length === 0)) return picked;
+            }
+
+            // Keyword match (e.g. Zira, David, Hazel, Samantha)
+            for (const kw of persona.keywords) {
+                const match = voices.find(v => (v.name && v.name.toLowerCase().includes(kw)) || (v.voiceURI && v.voiceURI.toLowerCase().includes(kw)));
+                if (match) return match;
+            }
+
+            // Gender / Characteristic fallback
+            if (persona.gender === 'female') {
+                const fem = voices.find(v => /female|woman|zira|samantha|aria|jenny|catherine|linda/i.test(v.name));
+                if (fem) return fem;
+            } else if (persona.gender === 'male') {
+                const male = voices.find(v => /male|man|david|mark|guy|george|richard/i.test(v.name));
+                if (male) return male;
+            }
+
+            // Fallback: English voice
+            const enVoice = voices.find(v => v.lang && v.lang.startsWith("en"));
+            return enVoice || voices[0];
+        }
+
+        function cycleVoicePersona() {
             playHoloSound('click');
-            if (!window.speechSynthesis) return;
-            window.speechSynthesis.cancel();
+            const currentIndex = VOICE_PERSONAS.findIndex(p => p.id === state.selectedVoicePersona);
+            const nextIndex = (currentIndex + 1) % VOICE_PERSONAS.length;
+            setVoicePersona(VOICE_PERSONAS[nextIndex].id);
+        }
+
+        function setVoicePersona(personaId) {
+            const persona = VOICE_PERSONAS.find(p => p.id === personaId) || VOICE_PERSONAS[0];
+            state.selectedVoicePersona = persona.id;
+            state.voicePitch = persona.defaultPitch;
+            state.voiceRate = persona.defaultRate;
+
+            updateVoiceChipDisplay();
+
+            // Sync with settings inputs
+            const selectPersona = document.getElementById("settingVoicePersona");
+            if (selectPersona) selectPersona.value = persona.id;
+
+            const pitchInput = document.getElementById("settingVoicePitch");
+            const pitchLabel = document.getElementById("voicePitchLabel");
+            if (pitchInput) pitchInput.value = state.voicePitch;
+            if (pitchLabel) pitchLabel.textContent = state.voicePitch + "x";
+
+            const rateInput = document.getElementById("settingVoiceRate");
+            const rateLabel = document.getElementById("voiceRateLabel");
+            if (rateInput) rateInput.value = state.voiceRate;
+            if (rateLabel) rateLabel.textContent = state.voiceRate + "x";
+
+            // Persist
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY_SETTINGS);
+                const s = stored ? JSON.parse(stored) : {};
+                s.voicePersona = state.selectedVoicePersona;
+                s.voicePitch = state.voicePitch;
+                s.voiceRate = state.voiceRate;
+                localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(s));
+            } catch(e) {}
+        }
+
+        function updateVoiceChipDisplay() {
+            const persona = VOICE_PERSONAS.find(p => p.id === state.selectedVoicePersona) || VOICE_PERSONAS[0];
+            const nameEl = document.getElementById("currentVoiceName");
+            const tagEl = document.getElementById("currentVoiceTag");
+            if (nameEl) nameEl.textContent = persona.name;
+            if (tagEl) tagEl.textContent = persona.tag;
+        }
+
+        function onVoicePersonaSelectChanged(val) {
+            setVoicePersona(val);
+        }
+
+        function onSystemVoiceSelectChanged(val) {
+            state.selectedSystemVoiceUri = val;
+            if (val) {
+                const persona = VOICE_PERSONAS.find(p => p.id === 'custom');
+                if (persona) {
+                    state.selectedVoicePersona = 'custom';
+                    const selectPersona = document.getElementById("settingVoicePersona");
+                    if (selectPersona) selectPersona.value = 'custom';
+                    updateVoiceChipDisplay();
+                }
+            }
+        }
+
+        function speakMessage(text, btnElement = null) {
+            playHoloSound('click');
+            if (!('speechSynthesis' in window)) {
+                alert("Speech Synthesis (Text-to-Speech) is not supported in this browser.");
+                return;
+            }
+
+            // If already speaking and clicking the same message button, halt speech
+            if (state.isSpeaking) {
+                window.speechSynthesis.cancel();
+                stopSpeakingAnimation();
+                if (state.currentlySpeakingBtn === btnElement && btnElement) {
+                    state.isSpeaking = false;
+                    state.currentlySpeakingBtn = null;
+                    return;
+                }
+            }
 
             const clean = text
                 .replace(/```[\s\S]*?```/g, "Code block omitted.")
-                .replace(/[#*`_~>]/g, "")
+                .replace(/ACTION:\s*\{[\s\S]*?\}/g, "")
+                .replace(/https?:\/\/[^\s]+/g, "link")
+                .replace(/[#*`_~>|]/g, " ")
                 .trim();
 
+            if (!clean) return;
+
             const utterance = new SpeechSynthesisUtterance(clean);
-            utterance.rate = 1.05;
-            utterance.pitch = 1.0;
+            const persona = VOICE_PERSONAS.find(p => p.id === state.selectedVoicePersona) || VOICE_PERSONAS[0];
+            const voice = getVoiceForPersona(persona.id);
+            if (voice) utterance.voice = voice;
+
+            const rate = state.voiceRate || persona.defaultRate || 1.05;
+            const pitch = state.voicePitch || persona.defaultPitch || 1.0;
+            utterance.rate = Math.max(0.5, Math.min(2.0, rate));
+            utterance.pitch = Math.max(0.5, Math.min(2.0, pitch));
+
+            utterance.onstart = () => {
+                state.isSpeaking = true;
+                state.currentlySpeakingBtn = btnElement;
+                startSpeakingAnimation(btnElement);
+            };
+
+            utterance.onend = () => {
+                state.isSpeaking = false;
+                state.currentlySpeakingBtn = null;
+                stopSpeakingAnimation();
+            };
+
+            utterance.onerror = (e) => {
+                console.warn("[NEXIUM Voice] TTS utterance ended or interrupted:", e);
+                state.isSpeaking = false;
+                state.currentlySpeakingBtn = null;
+                stopSpeakingAnimation();
+            };
+
             window.speechSynthesis.speak(utterance);
+        }
+
+        function startSpeakingAnimation(btnElement) {
+            const wave = document.getElementById("aiSpeakingWave");
+            if (wave) wave.style.display = "flex";
+            const chip = document.getElementById("voiceSelectorChip");
+            if (chip) chip.classList.add("speaking");
+
+            if (btnElement) {
+                btnElement.classList.add("active");
+                btnElement.title = "Stop speaking";
+                btnElement.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor"></rect></svg>';
+            }
+        }
+
+        function stopSpeakingAnimation() {
+            const wave = document.getElementById("aiSpeakingWave");
+            if (wave) wave.style.display = "none";
+            const chip = document.getElementById("voiceSelectorChip");
+            if (chip) chip.classList.remove("speaking");
+
+            document.querySelectorAll(".msg-act-btn.active").forEach(btn => {
+                btn.classList.remove("active");
+                btn.title = "Read aloud (Text-to-Speech)";
+                btn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+            });
+        }
+
+        function testCurrentVoice() {
+            const persona = VOICE_PERSONAS.find(p => p.id === state.selectedVoicePersona) || VOICE_PERSONAS[0];
+            speakMessage(`Greetings. NEXIUM voice channel ${persona.name} is online and operational. Ready to architect systems and synthesize high-performance code on your workstation.`);
+        }
+
+        async function detectLocalModels() {
+            const settings = getSettings();
+            try {
+                const res = await fetch(`${settings.apiBase}/api/local_models`, {
+                    signal: AbortSignal.timeout(3000)
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.online && Array.isArray(data.models) && data.models.length > 0) {
+                        data.models.forEach(localM => {
+                            const existingIndex = MODEL_REGISTRY.findIndex(m => m.id === localM.id);
+                            if (existingIndex >= 0) {
+                                MODEL_REGISTRY[existingIndex].tag = "🟢 ON YOUR PC";
+                                MODEL_REGISTRY[existingIndex].engine = "Local Host PC";
+                                MODEL_REGISTRY[existingIndex].name = `${localM.name}`;
+                            } else {
+                                MODEL_REGISTRY.unshift({
+                                    id: localM.id,
+                                    name: localM.name,
+                                    engine: "Local Host PC",
+                                    tag: "🟢 ON YOUR PC",
+                                    isLocal: true
+                                });
+                            }
+                        });
+                        console.log("[NEXIUM] Local PC model detected & mounted:", data.models);
+                        const cur = MODEL_REGISTRY.find(m => m.id === state.selectedModel);
+                        if (cur) {
+                            const nameEl = document.getElementById("currentModelName");
+                            const tagEl = document.getElementById("currentEngineTag");
+                            if (nameEl) nameEl.textContent = cur.name;
+                            if (tagEl) tagEl.textContent = cur.tag;
+                        }
+                    }
+                }
+            } catch (e) {
+                // Background check, fail silently if offline
+            }
         }
 
         function toggleThinkMode() {
@@ -1470,15 +1917,27 @@ You can customize generation parameters, backend routing, and system prompts in 
 
         function saveSettings() {
             playHoloSound('click');
+            state.selectedVoicePersona = (document.getElementById("settingVoicePersona") && document.getElementById("settingVoicePersona").value) || state.selectedVoicePersona;
+            state.voicePitch = (document.getElementById("settingVoicePitch") && parseFloat(document.getElementById("settingVoicePitch").value)) || state.voicePitch;
+            state.voiceRate = (document.getElementById("settingVoiceRate") && parseFloat(document.getElementById("settingVoiceRate").value)) || state.voiceRate;
+            state.selectedSystemVoiceUri = (document.getElementById("settingSystemVoice") && document.getElementById("settingSystemVoice").value) || state.selectedSystemVoiceUri;
+            state.autoSpeak = (document.getElementById("settingAutoSpeak") && document.getElementById("settingAutoSpeak").checked) || false;
+
             const settings = {
                 apiBase: document.getElementById("settingApiBase").value.trim() || getDefaultApiBase(),
-                ollamaUrl: document.getElementById("settingOllamaUrl").value.trim() || "http://localhost:11434",
+                ollamaUrl: document.getElementById("settingOllamaUrl").value.trim() || "http://127.0.0.1:11434",
                 apiKey: document.getElementById("settingApiKey").value.trim(),
                 temperature: document.getElementById("settingTemperature").value,
-                systemPrompt: document.getElementById("settingSystemPrompt").value.trim()
+                systemPrompt: document.getElementById("settingSystemPrompt").value.trim(),
+                voicePersona: state.selectedVoicePersona,
+                voicePitch: state.voicePitch,
+                voiceRate: state.voiceRate,
+                systemVoiceUri: state.selectedSystemVoiceUri,
+                autoSpeak: state.autoSpeak
             };
 
             localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+            updateVoiceChipDisplay();
             closeSettingsModal();
             checkBackendHealth();
         }
@@ -1502,6 +1961,21 @@ You can customize generation parameters, backend routing, and system prompts in 
                         document.getElementById("tempValueLabel").textContent = parsed.temperature;
                     }
                     if (parsed.systemPrompt) document.getElementById("settingSystemPrompt").value = parsed.systemPrompt;
+                    if (parsed.voicePersona) state.selectedVoicePersona = parsed.voicePersona;
+                    if (parsed.voicePitch) state.voicePitch = parseFloat(parsed.voicePitch);
+                    if (parsed.voiceRate) state.voiceRate = parseFloat(parsed.voiceRate);
+                    if (parsed.systemVoiceUri) state.selectedSystemVoiceUri = parsed.systemVoiceUri;
+                    if (parsed.autoSpeak !== undefined) state.autoSpeak = Boolean(parsed.autoSpeak);
+
+                    if (document.getElementById("settingVoicePersona")) document.getElementById("settingVoicePersona").value = state.selectedVoicePersona;
+                    if (document.getElementById("settingVoicePitch")) document.getElementById("settingVoicePitch").value = state.voicePitch;
+                    if (document.getElementById("voicePitchLabel")) document.getElementById("voicePitchLabel").textContent = state.voicePitch + "x";
+                    if (document.getElementById("settingVoiceRate")) document.getElementById("settingVoiceRate").value = state.voiceRate;
+                    if (document.getElementById("voiceRateLabel")) document.getElementById("voiceRateLabel").textContent = state.voiceRate + "x";
+                    if (document.getElementById("settingAutoSpeak")) document.getElementById("settingAutoSpeak").checked = state.autoSpeak;
+                    if (document.getElementById("settingSystemVoice") && state.selectedSystemVoiceUri) document.getElementById("settingSystemVoice").value = state.selectedSystemVoiceUri;
+
+                    updateVoiceChipDisplay();
                 } else {
                     document.getElementById("settingApiBase").value = getDefaultApiBase();
                 }
@@ -1513,7 +1987,7 @@ You can customize generation parameters, backend routing, and system prompts in 
             const apiBase = (rawBase && rawBase !== "http://localhost:8000") ? rawBase : getDefaultApiBase();
             return {
                 apiBase: apiBase,
-                ollamaUrl: (document.getElementById("settingOllamaUrl") && document.getElementById("settingOllamaUrl").value.trim()) || "http://localhost:11434",
+                ollamaUrl: (document.getElementById("settingOllamaUrl") && document.getElementById("settingOllamaUrl").value.trim()) || "http://127.0.0.1:11434",
                 apiKey: (document.getElementById("settingApiKey") && document.getElementById("settingApiKey").value.trim()) || "",
                 temperature: (document.getElementById("settingTemperature") && document.getElementById("settingTemperature").value) || "0.7",
                 systemPrompt: (document.getElementById("settingSystemPrompt") && document.getElementById("settingSystemPrompt").value.trim()) || ""
