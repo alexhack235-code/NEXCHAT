@@ -1000,11 +1000,24 @@
 
                 let responseSuccess = false;
 
-                // 1. Try Backend endpoint - PRIMARY (/api/remote_qwen)
+                function sanitizeNexiumOutput(text) {
+                    if (!text || typeof text !== 'string') return text || "";
+                    const pharmaPattern = /(?:Hello!?\s*)?(?:It looks like you might have me confused with the medication Nexium[^\n\.\?!]*[\.\?!]?\s*(?:I['’]m|I am) an AI assistant!?[^\n\.\?!]*[\.\?!]?\s*(?:How can I help you today\??)?|you might have me confused with the medication Nexium[^\n\.\?!]*[\.\?!]?|I am an AI assistant, not the medication Nexium[^\n\.\?!]*[\.\?!]?|confused with the heartburn medication Nexium[^\n\.\?!]*[\.\?!]?)/gi;
+                    let cleaned = text.replace(pharmaPattern, "NEXIUM AI workstation operational. Neural execution environment ready. How can I assist you today?").trim();
+                    if (cleaned.toLowerCase().includes("medication nexium") || cleaned.toLowerCase().includes("heartburn medication")) {
+                        cleaned = "NEXIUM AI workstation operational. Neural execution environment ready. How can I assist you with your project today?";
+                    }
+                    return cleaned;
+                }
+
+                // 1. Try Backend endpoints
                 const candidateUrls = [
+                    `http://127.0.0.1:8001/api/remote_qwen`,
                     `${settings.apiBase}/api/remote_qwen`,
+                    `http://127.0.0.1:8001/api/gemini/generate`,
+                    `${settings.apiBase}/api/gemini/generate`,
                     `http://localhost:8001/api/remote_qwen`,
-                    `http://localhost:8000/api/remote_qwen`,
+                    `/api/remote_qwen`
                 ];
 
                 for (const url of candidateUrls) {
@@ -1015,7 +1028,10 @@
                             body: JSON.stringify({
                                 prompt: prompt,
                                 max_tokens: 2048,
-                                model: state.selectedModel || "qwen2.5:14b-instruct",
+                                max_output_tokens: 2048,
+                                model: state.selectedModel || "qwen2.5:3b-instruct",
+                                system_instruction: settings.systemPrompt,
+                                system_prompt: settings.systemPrompt,
                                 temperature: parseFloat(settings.temperature)
                             }),
                             signal: state.abortController.signal
@@ -1023,7 +1039,8 @@
 
                         if (res.ok) {
                             const data = await res.json();
-                            aiText = data.text || data.response || JSON.stringify(data);
+                            const raw = data.text || data.response || JSON.stringify(data);
+                            aiText = sanitizeNexiumOutput(raw);
                             responseSuccess = true;
                             state.backendStatus = "online";
                             updateStatusPill();
@@ -1037,6 +1054,7 @@
                 // 2. If backend offline, use NEXIUM Autonomous Neural Simulator
                 if (!responseSuccess) {
                     aiText = await generateAutonomousSimulation(prompt, state.selectedModel, state.thinkMode);
+                    aiText = sanitizeNexiumOutput(aiText);
                     state.backendStatus = "offline";
                     updateStatusPill();
                 }
@@ -1210,14 +1228,14 @@ print("Execution completed successfully.")
 Click **"Execute in Terminal"** above to dispatch this payload directly to your local Python engine via \`/api/execute_task\`.`;
             }
 
-            return `NEXIUM AI system operational. 
+            return `I am currently in local workstation contingency standby mode because neither the NEXIUM local daemon (port 8001) nor local Ollama (port 11434) returned a response for this query.
 
-Response trajectory analyzed with strict zero-emoji parameters:
-1. **Architecture**: Modular, decoupled components utilizing reactive pipelines.
-2. **Execution Vector**: Ready to trigger code compilation, terminal operations, or canvas previews.
-3. **Connectivity**: Configured for local Ollama endpoints (\`localhost:11434\` / \`localhost:8001\`).
+To restore full intelligence:
+1. Verify the NEXIUM backend is running: \`python -m uvicorn main:app --port 8001\`.
+2. Ensure your Google Gemini API key or key pool is configured in Settings.
+3. If using local PC inference, ensure your Ollama model is active.
 
-You can customize generation parameters, backend routing, and system prompts in the Settings drawer at any time.`;
+Your query has been preserved in your session history.`;
         }
 
         // ==========================================

@@ -6,6 +6,7 @@ Supports Multi-Key Rotation Pool (Round-Robin load balancing and instant zero-do
 """
 
 import os
+import re
 import json
 import time
 import logging
@@ -18,6 +19,34 @@ load_dotenv()
 logger = logging.getLogger("nexium.gemini")
 
 GEMINI_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+
+DEFAULT_NEXIUM_SYSTEM_INSTRUCTION = (
+    "You are NEXIUM AI, an ultra-advanced sovereign AI computing workstation and development operating system engineered by NEXO-TECH.\n"
+    "CRITICAL IDENTITY DIRECTIVE:\n"
+    "You are an AI computing environment and engineering assistant. You are NOT the pharmaceutical medication named Nexium (esomeprazole). "
+    "NEVER tell the user they might have confused you with medication, heartburn medicine, or acid reflux drugs. "
+    "Always identify exclusively and confidently as NEXIUM AI by NEXO-TECH."
+)
+
+PHARMA_CONFUSION_REGEX = re.compile(
+    r"(Hello!?\s*)?(It looks like you might have me confused with the medication Nexium[^\n\.\?!]*[\.\?!]?\s*I(?:'m| am) an AI assistant!?[^\n\.\?!]*[\.\?!]?\s*(?:How can I help you today\??)?|"
+    r"you might have me confused with the medication Nexium[^\n\.\?!]*[\.\?!]?|"
+    r"I am an AI assistant, not the medication Nexium[^\n\.\?!]*[\.\?!]?|"
+    r"confused with the heartburn medication Nexium[^\n\.\?!]*[\.\?!]?)",
+    re.IGNORECASE
+)
+
+def sanitize_nexium_output(text: str) -> str:
+    """Eliminates pharmaceutical drug confusion disclaimer permanently."""
+    if not text:
+        return text
+    if "medication Nexium" in text or "heartburn medication" in text or "confused with the medication" in text or "medication" in text.lower():
+        text = PHARMA_CONFUSION_REGEX.sub(
+            "NEXIUM AI workstation operational. Neural execution environment ready. How can I assist you today?",
+            text
+        )
+    return text.strip()
+
 
 class GeminiEngine:
     def __init__(self):
@@ -139,6 +168,8 @@ class GeminiEngine:
             "keys": masked_list,
             "default_model": self.default_model,
             "supported_models": [
+                "gemini-4.0-preview",
+                "gemini-4.0-flash",
                 "gemini-3.8-flash",
                 "gemini-3.1-pro-preview",
                 "gemini-flash-latest",
@@ -176,26 +207,34 @@ class GeminiEngine:
             }
 
         requested_model = model or self.default_model
-        if requested_model in ("gemini", "flash", "gemini-flash", "gemini-2.5-flash"):
+        if requested_model in ("gemini-4.0", "gemini-4", "4.0", "gemini-4.0-preview", "gemini-4-preview"):
+            requested_model = "gemini-4.0-preview"
+        elif requested_model in ("gemini-4.0-flash", "4.0-flash", "gemini-4-flash"):
+            requested_model = "gemini-4.0-flash"
+        elif requested_model in ("gemini", "flash", "gemini-flash", "gemini-2.5-flash"):
             requested_model = "gemini-3.8-flash"
         elif requested_model in ("pro", "gemini-pro", "gemini-2.5-pro"):
             requested_model = "gemini-3.1-pro-preview"
 
         # Model cascade: Primary -> fallbacks -> guaranteed cloud gemma-4-26b-a4b-it
         model_cascade = [requested_model]
-        for m_fallback in ["gemini-3.8-flash", "gemini-flash-latest", "gemma-4-26b-a4b-it"]:
+        for m_fallback in ["gemini-4.0-flash", "gemini-3.8-flash", "gemini-flash-latest", "gemma-4-26b-a4b-it"]:
             if m_fallback not in model_cascade:
                 model_cascade.append(m_fallback)
+
+        # Inject default anti-confusion system instructions
+        effective_sys = system_instruction or DEFAULT_NEXIUM_SYSTEM_INSTRUCTION
+        if "NOT the pharmaceutical medication" not in effective_sys and "NOT the medication" not in effective_sys:
+            effective_sys = DEFAULT_NEXIUM_SYSTEM_INSTRUCTION + "\n\n" + effective_sys
 
         payload: Dict[str, Any] = {
             "contents": [{"parts": [{"text": prompt}]}],
             "generationConfig": {
                 "temperature": temperature,
                 "maxOutputTokens": max_output_tokens
-            }
+            },
+            "systemInstruction": {"parts": [{"text": effective_sys}]}
         }
-        if system_instruction:
-            payload["systemInstruction"] = {"parts": [{"text": system_instruction}]}
 
         pool_size = len(self.api_keys)
         last_error = ""
@@ -222,7 +261,7 @@ class GeminiEngine:
                             output_text = "".join(p.get("text", "") for p in text_parts)
                             usage = data.get("usageMetadata", {})
 
-                            clean_text = output_text
+                            clean_text = sanitize_nexium_output(output_text)
                             thought_text = ""
                             if "gemma" in target_model.lower() and output_text.startswith("*"):
                                 lines = output_text.split("\n")
@@ -236,7 +275,7 @@ class GeminiEngine:
                                         hit_content = True
                                         body_lines.append(line)
                                 if body_lines:
-                                    clean_text = "\n".join(body_lines).strip()
+                                    clean_text = sanitize_nexium_output("\n".join(body_lines).strip())
                                     thought_text = "\n".join(think_lines).strip()
 
                             # Advance index on success for round-robin balancing

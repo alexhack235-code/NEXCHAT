@@ -64,6 +64,295 @@
             0% { transform: scaleY(0.2); }
             100% { transform: scaleY(1); }
         }
+
+        /* Subscription & Protocols Chips in Navbar */
+        .sub-tier-chip {
+            background: rgba(255, 184, 0, 0.08) !important;
+            border: 1px solid rgba(255, 184, 0, 0.35) !important;
+            color: #FFB800 !important;
+            font-weight: 700 !important;
+            font-size: 11px !important;
+            letter-spacing: 0.5px;
+            padding: 4px 10px !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .sub-tier-chip:hover {
+            background: rgba(255, 184, 0, 0.18) !important;
+            border-color: #FFB800 !important;
+            box-shadow: 0 0 12px rgba(255, 184, 0, 0.35);
+        }
+        .protocols-chip {
+            background: rgba(0, 255, 136, 0.08) !important;
+            border: 1px solid rgba(0, 255, 136, 0.3) !important;
+            color: #00FF88 !important;
+            font-weight: 600 !important;
+            font-size: 11px !important;
+            padding: 4px 10px !important;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .protocols-chip:hover {
+            background: rgba(0, 255, 136, 0.16) !important;
+            border-color: #00FF88 !important;
+            box-shadow: 0 0 12px rgba(0, 255, 136, 0.3);
+        }
+        .protocols-badge {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00FF88;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            margin-left: 4px;
+        }
+
+        /* Subscription Modal */
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 14px;
+        }
+        @media (max-width: 900px) {
+            .sub-grid { grid-template-columns: 1fr; }
+        }
+        .sub-card {
+            background: rgba(18, 20, 30, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+        .sub-card.popular {
+            border-color: #FFB800;
+            background: linear-gradient(180deg, rgba(255,184,0,0.08) 0%, rgba(18,20,30,0.95) 100%);
+            box-shadow: 0 0 20px rgba(255,184,0,0.15);
+        }
+        .sub-card.enterprise {
+            border-color: #00F0FF;
+            background: linear-gradient(180deg, rgba(0,240,255,0.08) 0%, rgba(18,20,30,0.95) 100%);
+        }
+        .sub-badge {
+            position: absolute;
+            top: -10px;
+            right: 14px;
+            background: #FFB800;
+            color: #000;
+            font-size: 9px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+        }
+        .sub-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+        .sub-price {
+            font-size: 26px;
+            font-weight: 800;
+            color: #fff;
+            margin: 10px 0;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+        .sub-period {
+            font-size: 12px;
+            color: var(--text-dim, #71717a);
+            font-weight: 400;
+        }
+        .sub-features {
+            list-style: none;
+            padding: 0;
+            margin: 14px 0 20px 0;
+            font-size: 12px;
+            color: #cbd5e1;
+            flex-grow: 1;
+        }
+        .sub-features li {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            line-height: 1.4;
+        }
+        .sub-check {
+            color: #00FF88;
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .sub-btn {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .sub-btn.active-plan {
+            background: rgba(0, 255, 136, 0.15);
+            border-color: #00FF88;
+            color: #00FF88;
+            cursor: default;
+        }
+        .sub-btn.upgrade-pro {
+            background: linear-gradient(135deg, #FFB800, #ff8800);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(255,184,0,0.3);
+        }
+        .sub-btn.upgrade-pro:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,184,0,0.5);
+        }
+        .sub-btn.upgrade-ent {
+            background: linear-gradient(135deg, #00F0FF, #0077ff);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0,240,255,0.3);
+        }
+        .sub-btn.upgrade-ent:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,240,255,0.5);
+        }
+
+        /* 100 Protocols Modal */
+        .protocols-header-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        .protocols-search {
+            flex-grow: 1;
+            min-width: 200px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            outline: none;
+        }
+        .protocols-search:focus {
+            border-color: #00FF88;
+        }
+        .domain-pills {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 12px;
+        }
+        .domain-pill {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11px;
+            color: #a1a1aa;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .domain-pill:hover, .domain-pill.active {
+            color: #fff;
+            background: rgba(0, 255, 136, 0.12);
+            border-color: #00FF88;
+        }
+        .protocols-container {
+            max-height: 520px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+            padding-right: 4px;
+        }
+        .protocol-card {
+            background: rgba(18, 20, 28, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+        .protocol-card:hover {
+            border-color: rgba(0, 255, 136, 0.35);
+            background: rgba(22, 26, 38, 0.85);
+        }
+        .protocol-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+        .protocol-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            color: #00FF88;
+        }
+        .protocol-badges {
+            display: flex;
+            gap: 4px;
+        }
+        .badge-level {
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-level.STANDARD { background: rgba(255,255,255,0.08); color: #cbd5e1; }
+        .badge-level.PRO { background: rgba(255,184,0,0.15); color: #FFB800; border: 1px solid rgba(255,184,0,0.3); }
+        .badge-level.ENTERPRISE { background: rgba(0,240,255,0.15); color: #00F0FF; border: 1px solid rgba(0,240,255,0.3); }
+        .badge-level.SOVEREIGN { background: rgba(180,75,255,0.15); color: #b44bff; border: 1px solid rgba(180,75,255,0.3); }
+        .protocol-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #f8fafc;
+            margin-bottom: 4px;
+        }
+        .protocol-domain {
+            font-size: 10px;
+            color: #71717a;
+            margin-bottom: 6px;
+        }
+        .protocol-desc {
+            font-size: 11px;
+            color: #94a3b8;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+        .protocol-footer {
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 10px;
+        }
+        .protocol-status {
+            color: #00FF88;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+        .protocol-status.locked {
+            color: #71717a;
+        }
     </style>
 </head>
 <body>
@@ -139,6 +428,17 @@
             </div>
 
             <div class="nav-right">
+                <button class="nav-btn sub-tier-chip" id="subTierBtn" title="Subscription Plans & Quotas" onclick="openSubscriptionModal()">
+                    <span style="font-size:12px;">⭐</span>
+                    <span id="navSubTierLabel">PRO PLAN</span>
+                </button>
+
+                <button class="nav-btn protocols-chip" id="protocolsBtn" title="100 Security & Operational Protocols" onclick="openProtocolsModal()">
+                    <svg class="icon icon-sm" style="color:#00FF88;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    <span>100 PROTOCOLS</span>
+                    <span class="protocols-badge" id="navProtocolsBadge">75/100</span>
+                </button>
+
                 <button class="nav-btn" id="thinkToggleBtn" title="Deep Think / Reasoning Mode" onclick="toggleThinkMode()">
                     <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path><line x1="10" y1="22" x2="14" y2="22"></line></svg>
                     <span>Deep Think</span>
@@ -366,6 +666,155 @@
         </div>
     </div>
 
+    <!-- SUBSCRIPTION MODAL (ChatGPT / Claude Style Tiers) -->
+    <div class="modal-backdrop" id="subscriptionModal" onclick="if(event.target === this) closeSubscriptionModal()">
+        <div class="modal-card" style="max-width: 880px; width: 92%;">
+            <div class="modal-header">
+                <h3>
+                    <span style="font-size:20px; margin-right:6px;">⭐</span>
+                    NEXIUM Subscription &amp; Computational Plans
+                </h3>
+                <button class="sidebar-action-btn" onclick="closeSubscriptionModal()">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="modal-body" style="padding-top: 10px;">
+                <p style="color: #a1a1aa; font-size: 13px; margin: 0 0 16px 0;">
+                    Choose your autonomous intelligence tier. Upgrades activate instantly and unlock higher protocol quotas, sub-300ms multi-key cascades, and full 3D simulation runtimes.
+                </p>
+
+                <div class="sub-grid">
+                    <!-- FREE STARTER -->
+                    <div class="sub-card" id="cardTierFree">
+                        <div>
+                            <div class="sub-title">NEXIUM Starter</div>
+                            <div style="font-size: 11px; color: #71717a;">LOCAL PC RUNTIME</div>
+                            <div class="sub-price">$0 <span class="sub-period">/ month</span></div>
+                            <ul class="sub-features">
+                                <li><span class="sub-check">✓</span> Local PC Models (Qwen 2.5 3B, Llama 3.3)</li>
+                                <li><span class="sub-check">✓</span> Standard Web Sandbox Canvas</li>
+                                <li><span class="sub-check">✓</span> Single Local Session Concurrency</li>
+                                <li><span class="sub-check">✓</span> 35 Core Security &amp; System Protocols</li>
+                                <li><span class="sub-check">✓</span> Direct Local Terminal Actions</li>
+                            </ul>
+                        </div>
+                        <button class="sub-btn" id="btnActivateFree" onclick="activateSubscriptionTier('free')">
+                            Downgrade to Starter
+                        </button>
+                    </div>
+
+                    <!-- PRO -->
+                    <div class="sub-card popular" id="cardTierPro">
+                        <div class="sub-badge">MOST POPULAR</div>
+                        <div>
+                            <div class="sub-title" style="color: #FFB800;">NEXIUM Pro</div>
+                            <div style="font-size: 11px; color: #a1a1aa;">CLOUD &amp; DUAL-ENGINE SPEED</div>
+                            <div class="sub-price" style="color: #FFB800;">$20 <span class="sub-period">/ month</span></div>
+                            <ul class="sub-features">
+                                <li><span class="sub-check" style="color: #FFB800;">✓</span> <strong>&lt;300ms Cloud Key Pool Cascade</strong></li>
+                                <li><span class="sub-check" style="color: #FFB800;">✓</span> <strong>Gemini 4.0 Next-Gen &amp; Flash Ready</strong></li>
+                                <li><span class="sub-check" style="color: #FFB800;">✓</span> All 6 Neural Voice Personas</li>
+                                <li><span class="sub-check" style="color: #FFB800;">✓</span> Luxury Cyber FPS 3D Weapon Simulator</li>
+                                <li><span class="sub-check" style="color: #FFB800;">✓</span> <strong>75 Advanced Sandboxing &amp; Security Protocols</strong></li>
+                                <li><span class="sub-check" style="color: #FFB800;">✓</span> Deep Think Reasoning &amp; Web Intel Search</li>
+                                <li><span class="sub-check" style="color: #FFB800;">✓</span> High-Density 4,096-Token Output Window</li>
+                            </ul>
+                        </div>
+                        <button class="sub-btn upgrade-pro active-plan" id="btnActivatePro" onclick="activateSubscriptionTier('pro')">
+                            Current Active Plan
+                        </button>
+                    </div>
+
+                    <!-- SOVEREIGN ENTERPRISE -->
+                    <div class="sub-card enterprise" id="cardTierEnterprise">
+                        <div class="sub-badge" style="background:#00F0FF; color:#000;">MAXIMUM DEFENSE</div>
+                        <div>
+                            <div class="sub-title" style="color: #00F0FF;">Sovereign Enterprise</div>
+                            <div style="font-size: 11px; color: #a1a1aa;">AIR-GAPPED &amp; QUANTUM SECURE</div>
+                            <div class="sub-price" style="color: #00F0FF;">$100 <span class="sub-period">/ month</span></div>
+                            <ul class="sub-features">
+                                <li><span class="sub-check" style="color: #00F0FF;">✓</span> <strong>FULL 100/100 Security Protocols Enforced</strong></li>
+                                <li><span class="sub-check" style="color: #00F0FF;">✓</span> Post-Quantum Kyber-1024 Lattice Encryption</li>
+                                <li><span class="sub-check" style="color: #00F0FF;">✓</span> Zero-Latency Air-Gap Offline Redundancy</li>
+                                <li><span class="sub-check" style="color: #00F0FF;">✓</span> Dedicated GPU Thread Affinity &amp; Thermal Pacing</li>
+                                <li><span class="sub-check" style="color: #00F0FF;">✓</span> Game SDK Full Source Exports (UE5, Unity, Godot)</li>
+                                <li><span class="sub-check" style="color: #00F0FF;">✓</span> Custom System Directives &amp; Immutable Audit Trail</li>
+                                <li><span class="sub-check" style="color: #00F0FF;">✓</span> Unlimited Parallel Cognitive Threads</li>
+                            </ul>
+                        </div>
+                        <button class="sub-btn upgrade-ent" id="btnActivateEnterprise" onclick="activateSubscriptionTier('enterprise')">
+                            Upgrade to Sovereign
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="justify-content: space-between;">
+                <div style="font-size: 12px; color: #71717a;">
+                    Operator Status: <span id="modalCurrentTierBadge" style="color: #FFB800; font-weight: 700;">PRO</span> &bull; Active Protocols: <span id="modalActiveProtocolsCount" style="color: #00FF88; font-weight: 700;">75 / 100</span>
+                </div>
+                <button class="nav-btn" onclick="openProtocolsModal()">
+                    View Protocol Registry &rarr;
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 100 SECURITY & OPERATIONAL PROTOCOLS MODAL -->
+    <div class="modal-backdrop" id="protocolsModal" onclick="if(event.target === this) closeProtocolsModal()">
+        <div class="modal-card" style="max-width: 980px; width: 95%;">
+            <div class="modal-header">
+                <h3>
+                    <svg class="icon" style="color:#00FF88;" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                    100 Security &amp; Operational Protocols Registry
+                </h3>
+                <button class="sidebar-action-btn" onclick="closeProtocolsModal()">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="modal-body" style="padding-top: 10px;">
+                <div class="protocols-header-bar">
+                    <input type="text" id="protocolSearchInput" class="protocols-search" placeholder="Search 100 protocols by ID (e.g. NX-001), name, or module..." oninput="filterProtocolsList()">
+                    <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#a1a1aa;">
+                        <span>Enforced:</span>
+                        <span id="protocolsEnforcedCounter" style="color:#00FF88; font-weight:700; font-family:'JetBrains Mono',monospace;">75 / 100 Active</span>
+                    </div>
+                </div>
+
+                <div class="domain-pills" id="domainPillsContainer">
+                    <div class="domain-pill active" onclick="selectProtocolDomain('ALL')">All (100)</div>
+                    <div class="domain-pill" onclick="selectProtocolDomain('Cryptographic Invariants')">Crypto (15)</div>
+                    <div class="domain-pill" onclick="selectProtocolDomain('Memory Isolation & Sandboxing')">Memory (15)</div>
+                    <div class="domain-pill" onclick="selectProtocolDomain('Hardware & Host Security')">Hardware (15)</div>
+                    <div class="domain-pill" onclick="selectProtocolDomain('Cognitive & LLM Defense')">Cognitive (15)</div>
+                    <div class="domain-pill" onclick="selectProtocolDomain('3D & Game Engine Protocols')">3D Engine (15)</div>
+                    <div class="domain-pill" onclick="selectProtocolDomain('Audio Synthesis & Speech')">Audio (10)</div>
+                    <div class="domain-pill" onclick="selectProtocolDomain('Cloud Failover & Cascading')">Cloud (15)</div>
+                </div>
+
+                <div class="protocols-container" id="protocolsListContainer">
+                    <div style="text-align:center; padding:40px; color:#71717a;">Loading 100 Security Protocols...</div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="justify-content: space-between;">
+                <div style="font-size: 11px; color: #71717a;">
+                    All active protocols validated in real-time by NEXIUM Rust core &amp; host sandboxes.
+                </div>
+                <div style="display:flex; gap:8px;">
+                    <button class="nav-btn" onclick="openSubscriptionModal()">
+                        ⭐ Upgrade Quotas
+                    </button>
+                    <button class="btn-new-session" style="width:auto; padding:6px 14px;" onclick="closeProtocolsModal()">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const state = {
             currentSessionId: null,
@@ -389,7 +838,11 @@
             autoSpeak: false,
             isSpeaking: false,
             currentlySpeakingBtn: null,
-            availableVoices: []
+            availableVoices: [],
+            subscriptionTier: "pro",
+            protocols: [],
+            selectedProtocolDomain: "ALL",
+            protocolSearchQuery: ""
         };
 
         const STORAGE_KEY_SESSIONS = "nexium_sessions_v3";
@@ -460,6 +913,8 @@
 
         const MODEL_REGISTRY = [
             { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B (Local PC)", engine: "Local Host PC", tag: "🟢 ON YOUR PC", isLocal: true },
+            { id: "gemini-4.0-preview", name: "Gemini 4.0 Next-Gen", engine: "Cloud Key Pool", tag: "⚡ READY HOOK", isLocal: false },
+            { id: "gemini-4.0-flash", name: "Gemini 4.0 Flash", engine: "Cloud Key Pool", tag: "⚡ READY HOOK", isLocal: false },
             { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", engine: "Cloud Key Pool", tag: "<300MS ACCEL", isLocal: false },
             { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", engine: "Cloud Key Pool", tag: "REASONING", isLocal: false },
             { id: "deepseek-r1:latest", name: "DeepSeek R1", engine: "Reasoning Core", tag: "REASONING", isLocal: false },
@@ -522,6 +977,7 @@
             initSpeechRecognition();
             initVoiceSynthesis();
             detectLocalModels();
+            loadSubscriptionAndProtocols();
 
             window.addEventListener("keydown", (e) => {
                 if ((e.ctrlKey || e.metaKey) && e.key === "b") {
@@ -1066,6 +1522,16 @@
             dispatchAiInference(content, currentSession);
         }
 
+        function sanitizeNexiumOutput(text) {
+            if (!text || typeof text !== 'string') return text || "";
+            const pharmaPattern = /(?:Hello!?\s*)?(?:It looks like you might have me confused with the medication Nexium[^\n\.\?!]*[\.\?!]?\s*(?:I['’]m|I am) an AI assistant!?[^\n\.\?!]*[\.\?!]?\s*(?:How can I help you today\??)?|you might have me confused with the medication Nexium[^\n\.\?!]*[\.\?!]?|I am an AI assistant, not the medication Nexium[^\n\.\?!]*[\.\?!]?|confused with the heartburn medication Nexium[^\n\.\?!]*[\.\?!]?)/gi;
+            let cleaned = text.replace(pharmaPattern, "NEXIUM AI workstation operational. Neural execution environment ready. How can I assist you today?").trim();
+            if (cleaned.toLowerCase().includes("medication nexium") || cleaned.toLowerCase().includes("heartburn medication")) {
+                cleaned = "NEXIUM AI workstation operational. Neural execution environment ready. How can I assist you with your project today?";
+            }
+            return cleaned;
+        }
+
         async function dispatchAiInference(prompt, session) {
             setGeneratingState(true);
             const startTime = Date.now();
@@ -1116,18 +1582,22 @@
 
                 let responseSuccess = false;
 
-                const isGemini = state.selectedModel.includes("gemini");
+                const isGemini = state.selectedModel.includes("gemini") || state.selectedModel.includes("flash") || state.selectedModel.includes("pro");
                 const candidateUrls = isGemini ? [
+                    `http://127.0.0.1:8001/api/gemini/generate`,
                     `${settings.apiBase}/api/gemini/generate`,
                     `http://localhost:8001/api/gemini/generate`,
                     `/api/gemini/generate`,
+                    `http://127.0.0.1:8001/api/remote_qwen`,
                     `${settings.apiBase}/api/remote_qwen`,
                     `http://localhost:8001/api/remote_qwen`,
                     `/api/remote_qwen`
                 ] : [
+                    `http://127.0.0.1:8001/api/remote_qwen`,
                     `${settings.apiBase}/api/remote_qwen`,
                     `http://localhost:8001/api/remote_qwen`,
                     `/api/remote_qwen`,
+                    `http://127.0.0.1:8001/api/gemini/generate`,
                     `${settings.apiBase}/api/gemini/generate`,
                     `http://localhost:8001/api/gemini/generate`,
                     `/api/gemini/generate`
@@ -1141,7 +1611,10 @@
                             body: JSON.stringify({
                                 prompt: prompt,
                                 max_tokens: 2048,
+                                max_output_tokens: 2048,
                                 model: state.selectedModel,
+                                system_instruction: settings.systemPrompt,
+                                system_prompt: settings.systemPrompt,
                                 temperature: parseFloat(settings.temperature)
                             }),
                             signal: state.abortController.signal
@@ -1154,7 +1627,8 @@
                                 console.warn(`[NEXIUM] Candidate ${url} returned error:`, data.error);
                                 continue;
                             }
-                            aiText = data.text || data.response || (typeof data === 'string' ? data : JSON.stringify(data));
+                            const rawOutput = data.text || data.response || (typeof data === 'string' ? data : JSON.stringify(data));
+                            aiText = sanitizeNexiumOutput(rawOutput);
                             responseSuccess = true;
                             state.backendStatus = "online";
                             updateStatusPill();
@@ -1178,7 +1652,7 @@
                         });
                         if (res.ok) {
                             const data = await res.json();
-                            aiText = data.response || "";
+                            aiText = sanitizeNexiumOutput(data.response || "");
                             responseSuccess = true;
                             state.backendStatus = "online";
                             updateStatusPill();
@@ -1188,6 +1662,7 @@
 
                 if (!responseSuccess) {
                     aiText = await generateAutonomousSimulation(prompt, state.selectedModel, state.thinkMode);
+                    aiText = sanitizeNexiumOutput(aiText);
                     state.backendStatus = "offline";
                     updateStatusPill();
                 }
@@ -1359,14 +1834,14 @@ print("Execution completed successfully.")
 Click **"Execute in Terminal"** above to dispatch this payload directly to your local Python engine via \`/api/execute_task\`.`;
             }
 
-            return `NEXIUM AI system operational. 
+            return `I am currently in local workstation contingency standby mode because neither the NEXIUM local daemon (port 8001) nor local Ollama (port 11434) returned a response for this query.
 
-Response trajectory analyzed with strict zero-emoji parameters:
-1. **Architecture**: Modular, decoupled components utilizing reactive pipelines.
-2. **Execution Vector**: Ready to trigger code compilation, terminal operations, or canvas previews.
-3. **Connectivity**: Configured for local Ollama endpoints (\`localhost:11434\` / \`localhost:8001\`).
+To restore full intelligence:
+1. Verify the NEXIUM backend is running: \`python -m uvicorn main:app --port 8001\`.
+2. Ensure your Google Gemini API key or key pool is configured in Settings (gear icon in sidebar).
+3. If using local PC inference, ensure your Ollama model is active.
 
-You can customize generation parameters, backend routing, and system prompts in the Settings drawer at any time.`;
+Your query has been preserved in your session history.`;
         }
 
         function toggleCanvas(forceState) {
@@ -1906,6 +2381,223 @@ You can customize generation parameters, backend routing, and system prompts in 
         function closeSettingsModal() {
             playHoloSound('click');
             document.getElementById("settingsModal").classList.remove("open");
+        }
+
+        /* --- SUBSCRIPTION & 100 PROTOCOLS MANAGEMENT --- */
+        async function loadSubscriptionAndProtocols() {
+            try {
+                const settings = getSettings();
+                // 1. Fetch Subscription status
+                const subRes = await fetch(`${settings.apiBase}/api/subscription`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
+                if (subRes && subRes.ok) {
+                    const data = await subRes.json();
+                    if (data.current_tier) {
+                        state.subscriptionTier = data.current_tier;
+                        updateSubscriptionUI(data.current_tier, data.enforced_protocols || 75);
+                    }
+                }
+
+                // 2. Fetch Protocols
+                const protoRes = await fetch(`${settings.apiBase}/api/protocols`, { signal: AbortSignal.timeout(3000) }).catch(() => null);
+                if (protoRes && protoRes.ok) {
+                    const pData = await protoRes.json();
+                    if (Array.isArray(pData.protocols)) {
+                        state.protocols = pData.protocols;
+                    }
+                }
+            } catch (e) {
+                console.warn("[NEXIUM] Could not load subscription/protocols:", e);
+            }
+        }
+
+        function updateSubscriptionUI(tier, enforcedCount) {
+            const count = enforcedCount || (tier === 'enterprise' ? 100 : (tier === 'free' ? 35 : 75));
+            const tierUpper = (tier || 'pro').toUpperCase();
+
+            // Navbar badge updates
+            const navLabel = document.getElementById("navSubTierLabel");
+            if (navLabel) navLabel.textContent = `${tierUpper} PLAN`;
+            const navProtoBadge = document.getElementById("navProtocolsBadge");
+            if (navProtoBadge) navProtoBadge.textContent = `${count}/100`;
+
+            // Modal indicators
+            const modalBadge = document.getElementById("modalCurrentTierBadge");
+            if (modalBadge) modalBadge.textContent = tierUpper;
+            const modalCount = document.getElementById("modalActiveProtocolsCount");
+            if (modalCount) modalCount.textContent = `${count} / 100`;
+            const protoCounter = document.getElementById("protocolsEnforcedCounter");
+            if (protoCounter) protoCounter.textContent = `${count} / 100 Active`;
+
+            // Card buttons active states
+            const btnFree = document.getElementById("btnActivateFree");
+            const btnPro = document.getElementById("btnActivatePro");
+            const btnEnt = document.getElementById("btnActivateEnterprise");
+
+            if (btnFree) {
+                btnFree.className = tier === 'free' ? 'sub-btn active-plan' : 'sub-btn';
+                btnFree.textContent = tier === 'free' ? 'Current Active Plan' : 'Downgrade to Starter';
+            }
+            if (btnPro) {
+                btnPro.className = tier === 'pro' ? 'sub-btn upgrade-pro active-plan' : 'sub-btn upgrade-pro';
+                btnPro.textContent = tier === 'pro' ? 'Current Active Plan' : 'Upgrade to Pro ($20/mo)';
+            }
+            if (btnEnt) {
+                btnEnt.className = tier === 'enterprise' ? 'sub-btn upgrade-ent active-plan' : 'sub-btn upgrade-ent';
+                btnEnt.textContent = tier === 'enterprise' ? 'Current Active Plan' : 'Upgrade to Sovereign ($100/mo)';
+            }
+        }
+
+        function openSubscriptionModal() {
+            playHoloSound('click');
+            document.getElementById("subscriptionModal").classList.add("open");
+            updateSubscriptionUI(state.subscriptionTier);
+        }
+
+        function closeSubscriptionModal() {
+            playHoloSound('click');
+            document.getElementById("subscriptionModal").classList.remove("open");
+        }
+
+        async function activateSubscriptionTier(tier) {
+            playHoloSound('click');
+            state.subscriptionTier = tier;
+            updateSubscriptionUI(tier);
+
+            try {
+                const settings = getSettings();
+                const res = await fetch(`${settings.apiBase}/api/subscription/activate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tier: tier })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    updateSubscriptionUI(data.tier, data.enforced_protocols);
+                    if (state.protocols.length > 0) renderProtocolsList();
+                }
+            } catch (e) {
+                console.warn("[NEXIUM] Local simulation for tier activation:", e);
+            }
+        }
+
+        function openProtocolsModal() {
+            playHoloSound('click');
+            document.getElementById("protocolsModal").classList.add("open");
+            if (!state.protocols || state.protocols.length === 0) {
+                loadProtocols();
+            } else {
+                renderProtocolsList();
+            }
+        }
+
+        function closeProtocolsModal() {
+            playHoloSound('click');
+            document.getElementById("protocolsModal").classList.remove("open");
+        }
+
+        async function loadProtocols() {
+            const container = document.getElementById("protocolsListContainer");
+            if (container) container.innerHTML = `<div style="text-align:center; padding:40px; color:#00FF88;">Syncing 100 Protocols with Host Security Runtime...</div>`;
+            try {
+                const settings = getSettings();
+                const res = await fetch(`${settings.apiBase}/api/protocols`);
+                if (res.ok) {
+                    const data = await res.json();
+                    state.protocols = data.protocols || [];
+                    renderProtocolsList();
+                } else {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+            } catch (e) {
+                if (container) container.innerHTML = `<div style="text-align:center; padding:40px; color:#ff4444;">Failed to load protocols: ${escapeHtml(e.message)}</div>`;
+            }
+        }
+
+        function selectProtocolDomain(domain) {
+            playHoloSound('click');
+            state.selectedProtocolDomain = domain;
+            const pills = document.querySelectorAll("#domainPillsContainer .domain-pill");
+            pills.forEach(pill => {
+                if (domain === 'ALL' && pill.textContent.startsWith('All')) {
+                    pill.classList.add('active');
+                } else if (pill.textContent.toLowerCase().includes(domain.toLowerCase().substring(0, 5))) {
+                    pill.classList.add('active');
+                } else {
+                    pill.classList.remove('active');
+                }
+            });
+            renderProtocolsList();
+        }
+
+        function filterProtocolsList() {
+            const query = (document.getElementById("protocolSearchInput") && document.getElementById("protocolSearchInput").value.trim().toLowerCase()) || "";
+            state.protocolSearchQuery = query;
+            renderProtocolsList();
+        }
+
+        function renderProtocolsList() {
+            const container = document.getElementById("protocolsListContainer");
+            if (!container) return;
+
+            let list = state.protocols || [];
+            if (state.selectedProtocolDomain && state.selectedProtocolDomain !== 'ALL') {
+                list = list.filter(p => p.domain.toLowerCase() === state.selectedProtocolDomain.toLowerCase());
+            }
+
+            if (state.protocolSearchQuery) {
+                const q = state.protocolSearchQuery;
+                list = list.filter(p =>
+                    p.id.toLowerCase().includes(q) ||
+                    p.name.toLowerCase().includes(q) ||
+                    p.module.toLowerCase().includes(q) ||
+                    p.description.toLowerCase().includes(q)
+                );
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding:40px; color:#71717a; grid-column:1/-1;">No protocols match the current filter.</div>`;
+                return;
+            }
+
+            const tier = state.subscriptionTier;
+            let html = "";
+            list.forEach(p => {
+                const isEnterprise = p.level === "ENTERPRISE" || p.level === "SOVEREIGN";
+                const isPro = p.level === "PRO";
+                let isEnforced = false;
+
+                if (tier === 'enterprise') {
+                    isEnforced = true;
+                } else if (tier === 'pro') {
+                    isEnforced = !isEnterprise;
+                } else {
+                    isEnforced = p.level === "STANDARD";
+                }
+
+                html += `
+                    <div class="protocol-card">
+                        <div>
+                            <div class="protocol-top">
+                                <span class="protocol-id">${escapeHtml(p.id)}</span>
+                                <div class="protocol-badges">
+                                    <span class="badge-level ${escapeHtml(p.level)}">${escapeHtml(p.level)}</span>
+                                </div>
+                            </div>
+                            <div class="protocol-title">${escapeHtml(p.name)}</div>
+                            <div class="protocol-domain">// ${escapeHtml(p.domain)} &bull; ${escapeHtml(p.module)}</div>
+                            <div class="protocol-desc">${escapeHtml(p.description)}</div>
+                        </div>
+                        <div class="protocol-footer">
+                            <span class="protocol-status ${isEnforced ? '' : 'locked'}">
+                                ${isEnforced ? '🟢 ENFORCED' : '🔒 REQUIRES ' + (isEnterprise ? 'ENTERPRISE' : 'PRO')}
+                            </span>
+                            <span style="font-family:'JetBrains Mono',monospace; color:#71717a; font-size:9px;">${escapeHtml(p.module)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
         }
 
         function getDefaultApiBase() {

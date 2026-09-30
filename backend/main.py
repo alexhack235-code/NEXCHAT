@@ -5,7 +5,8 @@ import subprocess
 import tempfile
 import logging
 from pathlib import Path
-from fastapi import FastAPI, Request
+from typing import Optional, List, Dict, Any
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, HTMLResponse
@@ -29,12 +30,13 @@ except ImportError:
         rust_core = None
 
 try:
-    from .gemini_engine import gemini_engine
+    from .gemini_engine import gemini_engine, sanitize_nexium_output
 except ImportError:
     try:
-        from gemini_engine import gemini_engine
+        from gemini_engine import gemini_engine, sanitize_nexium_output
     except ImportError:
         gemini_engine = None
+        def sanitize_nexium_output(t): return t
 
 app = FastAPI(title="NEXIUM AI - Autonomous Workstation", version="3.0.0")
 
@@ -380,6 +382,7 @@ IDENTITY & CORE DIRECTIVE:
 - Creator: NEXO-TECH (When asked who created you, always state: "I am NEXIUM, created by NEXO-TECH")
 - Mission: Autonomous high-speed reasoning, master-level coding across all major languages, rigorous mathematical problem-solving, and direct desktop task execution.
 - Operational Style: Laser-focused, highly structured, clean, precise. Never use frivolous emojis.
+- Anti-Confusion Invariant: You are an autonomous AI computing workstation and development operating system. You are NOT the medication or pharmaceutical drug named Nexium (esomeprazole). NEVER state that the user might have confused you with medication or heartburn medicine. Always respond proudly as NEXIUM AI workstation.
 
 MATHEMATICAL & LOGICAL RIGOR:
 - Decompose complex problems into fundamental axioms, invariants, and step-by-step derivations.
@@ -458,6 +461,64 @@ async def get_local_models():
         return {"online": False, "engine": "ollama", "host": ollama_base, "models": [], "error": str(e)}
     return {"online": False, "engine": "ollama", "host": ollama_base, "models": []}
 
+# Subscription & 100 Protocol Security Endpoints
+try:
+    from .security_protocols import PROTOCOLS, SUBSCRIPTION_PLANS, get_protocols, get_protocol_stats
+except ImportError:
+    from security_protocols import PROTOCOLS, SUBSCRIPTION_PLANS, get_protocols, get_protocol_stats
+
+USER_SUBSCRIPTION_STATE = {
+    "tier": "pro",
+    "active": True,
+    "user_id": "operator-01",
+    "cycle": "monthly",
+    "activated_at": "2026-09-30T17:00:00Z"
+}
+
+@app.get("/api/protocols")
+async def list_protocols(domain: Optional[str] = None, level: Optional[str] = None):
+    """Retrieve the full 100 Security & Operational Protocol Registry."""
+    filtered = get_protocols(domain, level)
+    return {
+        "success": True,
+        "total": len(filtered),
+        "stats": get_protocol_stats(),
+        "protocols": filtered
+    }
+
+@app.get("/api/subscription")
+async def get_subscription():
+    """Retrieve current subscription tiers and operator status."""
+    current_tier = USER_SUBSCRIPTION_STATE.get("tier", "pro")
+    plan = SUBSCRIPTION_PLANS.get(current_tier, SUBSCRIPTION_PLANS["pro"])
+    return {
+        "success": True,
+        "current_tier": current_tier,
+        "plan": plan,
+        "plans": SUBSCRIPTION_PLANS,
+        "enforced_protocols": plan.get("active_protocols_count", 75),
+        "total_protocols": 100
+    }
+
+@app.post("/api/subscription/activate")
+async def activate_subscription(data: dict):
+    """Upgrade or switch operator subscription tier."""
+    tier = str(data.get("tier", "pro")).lower()
+    if tier not in SUBSCRIPTION_PLANS:
+        raise HTTPException(status_code=400, detail=f"Invalid tier: {tier}. Must be free, pro, or enterprise.")
+    
+    USER_SUBSCRIPTION_STATE["tier"] = tier
+    USER_SUBSCRIPTION_STATE["cycle"] = data.get("cycle", "monthly")
+    plan = SUBSCRIPTION_PLANS[tier]
+    
+    return {
+        "success": True,
+        "message": f"Successfully activated {plan['name']}",
+        "tier": tier,
+        "plan": plan,
+        "enforced_protocols": plan.get("active_protocols_count", 100)
+    }
+
 @app.post("/api/remote_qwen")
 async def remote_qwen(request_data: dict):
     """Call model with automatic Ollama <-> Google Gemini multi-key pool failover."""
@@ -483,9 +544,10 @@ async def remote_qwen(request_data: dict):
             max_output_tokens=int(max_tokens)
         )
         if gem_res.get("success"):
+            cleaned = sanitize_nexium_output(gem_res.get("text", ""))
             return {
-                "text": gem_res.get("text", ""),
-                "response": gem_res.get("text", ""),
+                "text": cleaned,
+                "response": cleaned,
                 "creator": "NEXO-TECH",
                 "ai_name": "NEXIUM",
                 "model": gem_res.get("model", target_model),
@@ -513,10 +575,11 @@ async def remote_qwen(request_data: dict):
                 )
                 if response.status_code == 200:
                     result = response.json()
-                    text = result.get("response", "No response from model")
+                    raw_text = result.get("response", "No response from model")
+                    cleaned = sanitize_nexium_output(raw_text)
                     return {
-                        "text": text,
-                        "response": text,
+                        "text": cleaned,
+                        "response": cleaned,
                         "creator": "NEXO-TECH",
                         "ai_name": "NEXIUM",
                         "model": model,
@@ -540,9 +603,10 @@ async def remote_qwen(request_data: dict):
             max_output_tokens=int(max_tokens)
         )
         if gem_res.get("success"):
+            cleaned = sanitize_nexium_output(gem_res.get("text", ""))
             return {
-                "text": gem_res.get("text", ""),
-                "response": gem_res.get("text", ""),
+                "text": cleaned,
+                "response": cleaned,
                 "creator": "NEXO-TECH",
                 "ai_name": "NEXIUM",
                 "model": "gemini-3.8-flash",

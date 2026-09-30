@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXIUM // High-Luxury FPS Shooter Game Asset</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>NEXIUM // High-Luxury FPS Shooter Game Asset Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
     <style>
@@ -13,8 +13,10 @@
             --gold-bright: #FFE55C;
             --gold-dark: #B8860B;
             --cyan: #00F0FF;
+            --emerald: #00FF88;
+            --rose: #FF007F;
             --bg: #07070a;
-            --panel: rgba(14, 14, 20, 0.85);
+            --panel: rgba(14, 14, 20, 0.88);
             --border: rgba(255, 215, 0, 0.25);
         }
 
@@ -70,6 +72,7 @@
             align-items: center;
             gap: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
         }
 
         .brand-logo {
@@ -100,35 +103,56 @@
             color: var(--gold);
         }
 
-        .stats-deck {
+        .hud-metrics {
             display: flex;
-            gap: 14px;
+            gap: 12px;
         }
 
-        .stat-card {
+        .metric-card {
             background: var(--panel);
             border: 1px solid var(--border);
             padding: 8px 16px;
             border-radius: 8px;
-            backdrop-filter: blur(10px);
             text-align: right;
+            backdrop-filter: blur(12px);
         }
 
-        .stat-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 10px;
-            color: #9ca3af;
-            text-transform: uppercase;
-        }
-
-        .stat-value {
+        .metric-val {
             font-family: 'JetBrains Mono', monospace;
             font-size: 18px;
             font-weight: 800;
             color: var(--gold-bright);
         }
 
-        /* Crosshair */
+        .metric-lbl {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9ca3af;
+        }
+
+        /* Wave Banner */
+        .wave-banner {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--gold);
+            padding: 8px 24px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gold-bright);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* Center Crosshair */
         .crosshair-container {
             position: absolute;
             top: 50%;
@@ -137,7 +161,7 @@
             width: 40px;
             height: 40px;
             pointer-events: none;
-            transition: all 0.15s ease-out;
+            transition: transform 0.15s ease, opacity 0.15s ease;
         }
 
         .crosshair-dot {
@@ -146,7 +170,7 @@
             left: 50%;
             width: 4px;
             height: 4px;
-            background: var(--gold);
+            background: var(--gold-bright);
             border-radius: 50%;
             transform: translate(-50%, -50%);
             box-shadow: 0 0 8px var(--gold);
@@ -154,8 +178,9 @@
 
         .crosshair-line {
             position: absolute;
-            background: rgba(255, 215, 0, 0.7);
+            background: rgba(255, 215, 0, 0.75);
             box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+            transition: all 0.1s ease;
         }
         .ch-top { top: 2px; left: 19px; width: 2px; height: 10px; }
         .ch-bottom { bottom: 2px; left: 19px; width: 2px; height: 10px; }
@@ -163,8 +188,51 @@
         .ch-right { right: 2px; top: 19px; width: 10px; height: 2px; }
 
         .crosshair-container.ads {
-            opacity: 0.15;
-            transform: translate(-50%, -50%) scale(0.5);
+            opacity: 0.2;
+            transform: translate(-50%, -50%) scale(0.4);
+        }
+
+        /* Hitmarker */
+        .hitmarker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.05s ease;
+        }
+        .hitmarker.active {
+            opacity: 1;
+        }
+        .hm-line {
+            position: absolute;
+            width: 10px;
+            height: 2px;
+            background: #FF0055;
+            box-shadow: 0 0 8px #FF0055;
+        }
+        .hm-1 { top: 0; left: 0; transform: rotate(45deg); }
+        .hm-2 { top: 0; right: 0; transform: rotate(-45deg); }
+        .hm-3 { bottom: 0; left: 0; transform: rotate(-45deg); }
+        .hm-4 { bottom: 0; right: 0; transform: rotate(45deg); }
+
+        /* Floating Score Alert */
+        .score-float {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            text-shadow: 0 0 16px rgba(255, 215, 0, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease-out;
         }
 
         /* Footer Controls */
@@ -180,7 +248,37 @@
             padding: 14px 20px;
             border-radius: 12px;
             backdrop-filter: blur(12px);
-            max-width: 380px;
+            max-width: 440px;
+            pointer-events: auto;
+        }
+
+        /* Skin Selector Bar */
+        .skin-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        .skin-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #9ca3af;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .skin-btn:hover {
+            border-color: var(--gold);
+            color: #fff;
+        }
+        .skin-btn.active {
+            background: rgba(255, 215, 0, 0.18);
+            border-color: var(--gold);
+            color: var(--gold-bright);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
         }
 
         .weapon-name {
@@ -268,7 +366,7 @@
             position: absolute;
             width: 100vw;
             height: 100vh;
-            background: rgba(5, 5, 8, 0.85);
+            background: rgba(5, 5, 8, 0.88);
             backdrop-filter: blur(16px);
             z-index: 100;
             display: flex;
@@ -280,14 +378,14 @@
             background: #0d0d14;
             border: 1px solid var(--border);
             border-radius: 16px;
-            padding: 40px;
+            padding: 36px 40px;
             text-align: center;
-            max-width: 540px;
+            max-width: 580px;
             box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.15);
         }
 
         #instructions h1 {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 800;
             color: var(--gold);
             margin-bottom: 8px;
@@ -304,8 +402,8 @@
         .key-guide {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 30px;
+            gap: 10px;
+            margin-bottom: 26px;
             text-align: left;
         }
 
@@ -347,10 +445,82 @@
             box-shadow: 0 0 24px rgba(255, 215, 0, 0.5);
             transition: all 0.2s ease;
         }
-
         .play-btn:hover {
-            transform: scale(1.04);
-            box-shadow: 0 0 32px rgba(255, 215, 0, 0.7);
+            transform: scale(1.03);
+            box-shadow: 0 0 32px rgba(255, 215, 0, 0.8);
+        }
+
+        /* Export SDK Modal */
+        #exportModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(14px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        #exportModal.open {
+            display: flex;
+        }
+        .export-card {
+            background: #0e0f18;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        }
+        .export-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .export-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .export-tab {
+            background: none;
+            border: 1px solid transparent;
+            color: #9ca3af;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .export-tab.active {
+            background: rgba(255,215,0,0.15);
+            border-color: var(--gold);
+            color: var(--gold-bright);
+        }
+        .export-code-box {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #d1d5db;
+            background: #08080d;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        .export-footer {
+            padding: 14px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
         }
     </style>
 </head>
@@ -362,19 +532,29 @@
             <div class="brand-badge">
                 <div class="brand-logo">N</div>
                 <div>
-                    <div class="brand-title">AURUM-IX LUXURY RAILGUN</div>
-                    <div class="brand-subtitle">HIGH-LUXURY FPS GAME ASSET // 24K GOLD &amp; TITANIUM</div>
+                    <div class="brand-title">NEXIUM // LUXURY FPS SIMULATOR</div>
+                    <div class="brand-subtitle">RAILGUN TACTICAL ASSET SUITE • 60+ FPS WEBGL</div>
                 </div>
             </div>
 
-            <div class="stats-deck">
-                <div class="stat-card">
-                    <div class="stat-label">TARGETS ELIMINATED</div>
-                    <div class="stat-value" id="hudScore">00</div>
+            <div class="wave-banner" id="waveBanner">WAVE 01 // PURGE HOSTILES</div>
+
+            <div class="hud-metrics">
+                <div class="metric-card">
+                    <div class="metric-val" id="hudWave">01</div>
+                    <div class="metric-lbl">Wave</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">FPS ENGINE</div>
-                    <div class="stat-value" id="hudFps" style="color: var(--cyan);">60</div>
+                <div class="metric-card">
+                    <div class="metric-val" id="hudTargets">05</div>
+                    <div class="metric-lbl">Targets</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-val" id="hudScore">00</div>
+                    <div class="metric-lbl">Combat Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-val" id="hudFps">60</div>
+                    <div class="metric-lbl">Engine FPS</div>
                 </div>
             </div>
         </div>
@@ -387,121 +567,175 @@
             <div class="crosshair-line ch-right"></div>
         </div>
 
+        <div class="hitmarker" id="hitmarker">
+            <div class="hm-line hm-1"></div>
+            <div class="hm-line hm-2"></div>
+            <div class="hm-line hm-3"></div>
+            <div class="hm-line hm-4"></div>
+        </div>
+
+        <div class="score-float" id="scoreFloat">+100</div>
+
         <div class="hud-footer">
             <div class="weapon-dossier">
+                <div class="skin-bar">
+                    <span style="font-size:10px; color:#888; font-family:'JetBrains Mono'; margin-right:4px;">SKIN [1-4]:</span>
+                    <button class="skin-btn active" id="skinBtn1" onclick="switchSkin(1)">1: 24K Gold</button>
+                    <button class="skin-btn" id="skinBtn2" onclick="switchSkin(2)">2: Chrome</button>
+                    <button class="skin-btn" id="skinBtn3" onclick="switchSkin(3)">3: Damascus</button>
+                    <button class="skin-btn" id="skinBtn4" onclick="switchSkin(4)">4: Rose Gold</button>
+                </div>
                 <div class="weapon-name">
-                    <span>AURUM-IX TITANIUM</span>
-                    <span class="weapon-tier-badge">LUXURY SPEC</span>
+                    <span>NEX-01 // LUXURY RAILGUN</span>
+                    <span class="weapon-tier-badge" id="skinBadge">OBSIDIAN GOLD</span>
                 </div>
                 <div class="weapon-specs">
-                    CHASSIS: 24-Karat Gold Plated Damascene<br>
-                    BARREL: Solid Obsidian Accelerator Tube<br>
-                    OPTIC: Holographic Diamond Crystal Sight
+                    High-Frequency Plasma Discharge • Triple-Coil Rail Acceleration<br>
+                    Damage: 35/shot • Fire Rate: 720 RPM • ADS Zoom: 1.8x
                 </div>
                 <div class="ammo-gauge">
                     <span class="ammo-current" id="hudAmmo">24</span>
-                    <span class="ammo-max">/ 24 PLASMA CELLS</span>
+                    <span class="ammo-max">/ 24 HIGH-CAP</span>
                 </div>
             </div>
 
             <div class="action-tray">
-                <button class="btn-luxury" onclick="inspectWeapon()">[F] Inspect Weapon</button>
-                <button class="btn-luxury" onclick="reloadWeapon()">[R] Reload</button>
-                <a href="models/luxury_plasma_railgun.glb" download="luxury_plasma_railgun.glb" class="btn-luxury">⬇ Download .GLB</a>
+                <button class="btn-luxury" onclick="openExportModal()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export Game SDKs
+                </button>
+                <a href="/chat" class="btn-luxury">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    NEXIUM AI Cockpit
+                </a>
             </div>
         </div>
     </div>
 
-    <!-- PointerLock Blocker Modal -->
+    <!-- Instructions Overlay -->
     <div id="blocker">
         <div id="instructions">
-            <h1>AURUM-IX LUXURY FPS</h1>
-            <p>A precision high-luxury FPS shooter game asset crafted with 24-karat gold, brushed titanium, procedural recoil dynamics, and holographic sights.</p>
-
+            <h1>NEXIUM COMBAT ARENA</h1>
+            <p>High-Luxury Procedural FPS Weapon Asset System with Dynamic Skins, Plasma Physics & Hostile Drone AI.</p>
             <div class="key-guide">
                 <div class="key-item">
-                    <span class="key-desc">Move Around</span>
-                    <span class="key-badge">W A S D</span>
+                    <span class="key-desc">Move Tactical</span>
+                    <span class="key-badge">W, A, S, D</span>
                 </div>
                 <div class="key-item">
                     <span class="key-desc">Fire Plasma</span>
-                    <span class="key-badge">LEFT CLICK</span>
+                    <span class="key-badge">Left Click</span>
                 </div>
                 <div class="key-item">
-                    <span class="key-desc">Aim Down Sight (ADS)</span>
-                    <span class="key-badge">RIGHT CLICK</span>
+                    <span class="key-desc">Aim Down Sights</span>
+                    <span class="key-badge">Right Click (Hold)</span>
                 </div>
                 <div class="key-item">
-                    <span class="key-desc">Inspect Weapon</span>
-                    <span class="key-badge">F KEY</span>
+                    <span class="key-desc">Tactical Reload</span>
+                    <span class="key-badge">R</span>
                 </div>
                 <div class="key-item">
-                    <span class="key-desc">Reload Cells</span>
-                    <span class="key-badge">R KEY</span>
+                    <span class="key-desc">Inspect Luxury Model</span>
+                    <span class="key-badge">F</span>
                 </div>
                 <div class="key-item">
-                    <span class="key-desc">Look Around</span>
-                    <span class="key-badge">MOUSE</span>
+                    <span class="key-desc">Switch Weapon Skin</span>
+                    <span class="key-badge">1, 2, 3, 4</span>
                 </div>
             </div>
+            <button class="play-btn" id="startBtn">ENGAGE WEAPON SIMULATOR</button>
+        </div>
+    </div>
 
-            <button class="play-btn" id="startBtn">ENGAGE WEAPON</button>
+    <!-- Export SDK Modal -->
+    <div id="exportModal">
+        <div class="export-card">
+            <div class="export-header">
+                <h3 style="color:var(--gold); font-size:16px;">📦 NEXIUM Luxury FPS Asset SDK Export</h3>
+                <button class="skin-btn" onclick="closeExportModal()">✕ Close</button>
+            </div>
+            <div class="export-tabs">
+                <button class="export-tab active" onclick="switchExportTab('unreal')">Unreal Engine 5 (C++)</button>
+                <button class="export-tab" onclick="switchExportTab('unity')">Unity 6 (C#)</button>
+                <button class="export-tab" onclick="switchExportTab('godot')">Godot 4 (GDScript)</button>
+                <button class="export-tab" onclick="switchExportTab('r3f')">React Three Fiber (TSX)</button>
+            </div>
+            <div class="export-code-box" id="exportCode">Loading SDK code...</div>
+            <div class="export-footer">
+                <button class="btn-luxury" onclick="copySdkCode()">Copy Code to Clipboard</button>
+            </div>
         </div>
     </div>
 
     <script>
         // ====================================================================
-        // LUXURY PROCEDURAL AUDIO SYNTHESIZER (Web Audio API - 0 external files)
+        // PROCEDURAL AUDIO SYNTHESIZER
         // ====================================================================
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
 
-        function playFireSound() {
+        function playFireSound(freq = 1200) {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const now = audioCtx.currentTime;
 
-            // 1. Heavy Titanium Punch (Sub-bass transient)
-            const punchOsc = audioCtx.createOscillator();
-            const punchGain = audioCtx.createGain();
-            punchOsc.type = "sine";
-            punchOsc.frequency.setValueAtTime(140, now);
-            punchOsc.frequency.exponentialRampToValueAtTime(25, now + 0.18);
-            punchGain.gain.setValueAtTime(0.7, now);
-            punchGain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
-            punchOsc.connect(punchGain);
-            punchGain.connect(audioCtx.destination);
-            punchOsc.start(now);
-            punchOsc.stop(now + 0.25);
+            // Plasma Crack
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.16);
 
-            // 2. High-Frequency Luxury Plasma Zap
-            const zapOsc = audioCtx.createOscillator();
-            const zapGain = audioCtx.createGain();
-            zapOsc.type = "sawtooth";
-            zapOsc.frequency.setValueAtTime(1200, now);
-            zapOsc.frequency.exponentialRampToValueAtTime(160, now + 0.12);
-            zapGain.gain.setValueAtTime(0.35, now);
-            zapGain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-            zapOsc.connect(zapGain);
-            zapGain.connect(audioCtx.destination);
-            zapOsc.start(now);
-            zapOsc.stop(now + 0.18);
+            // Sub Thump
+            const sub = audioCtx.createOscillator();
+            const subGain = audioCtx.createGain();
+            sub.type = "sine";
+            sub.frequency.setValueAtTime(160, now);
+            sub.frequency.exponentialRampToValueAtTime(30, now + 0.2);
+            subGain.gain.setValueAtTime(0.5, now);
+            subGain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+            sub.connect(subGain);
+            subGain.connect(audioCtx.destination);
+            sub.start(now);
+            sub.stop(now + 0.25);
         }
 
         function playHitSound() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const now = audioCtx.currentTime;
-            // Golden Chime Harmonics
-            [880, 1320, 1760].forEach((freq, idx) => {
+            [2200, 3100].forEach((freq, idx) => {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = "sine";
                 osc.frequency.setValueAtTime(freq, now + idx * 0.02);
                 gain.gain.setValueAtTime(0.25, now + idx * 0.02);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start(now + idx * 0.02);
-                osc.stop(now + 0.5);
+                osc.stop(now + 0.14);
             });
+        }
+
+        function playExplosionSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const sub = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            sub.type = "triangle";
+            sub.frequency.setValueAtTime(120, now);
+            sub.frequency.exponentialRampToValueAtTime(25, now + 0.5);
+            gain.gain.setValueAtTime(0.6, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+            sub.connect(gain);
+            gain.connect(audioCtx.destination);
+            sub.start(now);
+            sub.stop(now + 0.65);
         }
 
         function playMechSound(tone = 350) {
@@ -512,7 +746,7 @@
             osc.type = "triangle";
             osc.frequency.setValueAtTime(tone, now);
             osc.frequency.exponentialRampToValueAtTime(tone * 1.5, now + 0.06);
-            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.setValueAtTime(0.25, now);
             gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
             osc.connect(gain);
             gain.connect(audioCtx.destination);
@@ -534,13 +768,13 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.25;
+        renderer.toneMappingExposure = 1.35;
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
         // Lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.45);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambientLight);
 
         const keyGoldLight = new THREE.DirectionalLight(0xffd700, 1.8);
@@ -548,53 +782,112 @@
         keyGoldLight.castShadow = true;
         scene.add(keyGoldLight);
 
-        const rimCyanLight = new THREE.PointLight(0x00f0ff, 2.5, 40);
+        const rimCyanLight = new THREE.PointLight(0x00f0ff, 2.5, 45);
         rimCyanLight.position.set(-8, 5, -10);
         scene.add(rimCyanLight);
 
         // Ground Arena: Dark Obsidian Grid with Gold Edges
-        const gridGeo = new THREE.PlaneGeometry(80, 80, 40, 40);
+        const gridGeo = new THREE.PlaneGeometry(100, 100, 40, 40);
         const gridMat = new THREE.MeshStandardMaterial({
             color: 0x0c0c14,
             roughness: 0.15,
-            metalness: 0.85,
-            wireframe: false
+            metalness: 0.85
         });
         const ground = new THREE.Mesh(gridGeo, gridMat);
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
         scene.add(ground);
 
-        // Grid lines overlay
-        const gridHelper = new THREE.GridHelper(80, 40, 0xffd700, 0x1f1f2e);
+        const gridHelper = new THREE.GridHelper(100, 50, 0xffd700, 0x1a1a28);
         gridHelper.position.y = 0.01;
         scene.add(gridHelper);
 
         // Floating Luxury Pillars
-        for (let i = 0; i < 12; i++) {
-            const angle = (i / 12) * Math.PI * 2;
-            const dist = 18 + (i % 2) * 5;
-            const pillarGeo = new THREE.BoxGeometry(0.8, 8, 0.8);
+        for (let i = 0; i < 16; i++) {
+            const angle = (i / 16) * Math.PI * 2;
+            const dist = 22 + (i % 2) * 6;
+            const pillarGeo = new THREE.BoxGeometry(0.9, 10, 0.9);
             const pillarMat = new THREE.MeshStandardMaterial({
                 color: 0x12121c,
                 metalness: 0.9,
                 roughness: 0.2
             });
             const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-            pillar.position.set(Math.cos(angle) * dist, 4, Math.sin(angle) * dist);
+            pillar.position.set(Math.cos(angle) * dist, 5, Math.sin(angle) * dist);
             scene.add(pillar);
 
-            // Gold Cap
-            const capGeo = new THREE.BoxGeometry(1.0, 0.3, 1.0);
+            const capGeo = new THREE.BoxGeometry(1.2, 0.35, 1.2);
             const capMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1.0, roughness: 0.1 });
             const cap = new THREE.Mesh(capGeo, capMat);
-            cap.position.set(Math.cos(angle) * dist, 8.1, Math.sin(angle) * dist);
+            cap.position.set(Math.cos(angle) * dist, 10.1, Math.sin(angle) * dist);
             scene.add(cap);
         }
 
         // ====================================================================
-        // PROCEDURAL HIGH-LUXURY 3D WEAPON MESH
+        // WEAPON SKINS DEFINITION
         // ====================================================================
+        const WEAPON_SKINS = {
+            1: {
+                name: "Obsidian 24K Gold",
+                badge: "OBSIDIAN GOLD",
+                goldColor: 0xffd700,
+                goldMetal: 1.0,
+                goldRough: 0.08,
+                bodyColor: 0x050508,
+                bodyMetal: 0.92,
+                bodyRough: 0.12,
+                plasmaColor: 0x00f0ff,
+                plasmaIntensity: 3.0,
+                flashColor: 0x00f0ff,
+                soundFreq: 1200
+            },
+            2: {
+                name: "Cyber-Neon Chrome",
+                badge: "CYBER CHROME",
+                goldColor: 0x00f0ff,
+                goldMetal: 0.95,
+                goldRough: 0.05,
+                bodyColor: 0xd8e0e8,
+                bodyMetal: 1.0,
+                bodyRough: 0.02,
+                plasmaColor: 0x00ff88,
+                plasmaIntensity: 3.8,
+                flashColor: 0x00ff88,
+                soundFreq: 1450
+            },
+            3: {
+                name: "Damascus Titanium",
+                badge: "DAMASCUS VIOLET",
+                goldColor: 0x9d4edd,
+                goldMetal: 0.95,
+                goldRough: 0.15,
+                bodyColor: 0x181828,
+                bodyMetal: 0.9,
+                bodyRough: 0.2,
+                plasmaColor: 0xff007f,
+                plasmaIntensity: 3.5,
+                flashColor: 0xff007f,
+                soundFreq: 1050
+            },
+            4: {
+                name: "Rose Gold Void",
+                badge: "ROSE GOLD VOID",
+                goldColor: 0xb76e79,
+                goldMetal: 0.88,
+                goldRough: 0.12,
+                bodyColor: 0x120c10,
+                bodyMetal: 0.85,
+                bodyRough: 0.25,
+                plasmaColor: 0xffd700,
+                plasmaIntensity: 3.2,
+                flashColor: 0xffd700,
+                soundFreq: 1300
+            }
+        };
+
+        let currentSkinId = 1;
+
+        // Weapon Hierarchy
         const weaponPivot = new THREE.Group();
         camera.add(weaponPivot);
         scene.add(camera);
@@ -602,30 +895,23 @@
         const weaponMesh = new THREE.Group();
         weaponPivot.add(weaponMesh);
 
-        // Materials
+        // Base Materials
         const goldMat = new THREE.MeshStandardMaterial({
-            color: 0xffd700,
-            metalness: 1.0,
-            roughness: 0.1,
-            envMapIntensity: 2.0
+            color: WEAPON_SKINS[1].goldColor,
+            metalness: WEAPON_SKINS[1].goldMetal,
+            roughness: WEAPON_SKINS[1].goldRough
         });
 
-        const titaniumMat = new THREE.MeshStandardMaterial({
-            color: 0x22242a,
-            metalness: 0.95,
-            roughness: 0.25
-        });
-
-        const obsidianMat = new THREE.MeshStandardMaterial({
-            color: 0x050508,
-            metalness: 0.9,
-            roughness: 0.05
+        const bodyMat = new THREE.MeshStandardMaterial({
+            color: WEAPON_SKINS[1].bodyColor,
+            metalness: WEAPON_SKINS[1].bodyMetal,
+            roughness: WEAPON_SKINS[1].bodyRough
         });
 
         const plasmaCoreMat = new THREE.MeshStandardMaterial({
-            color: 0x00f0ff,
-            emissive: 0x00f0ff,
-            emissiveIntensity: 2.5,
+            color: WEAPON_SKINS[1].plasmaColor,
+            emissive: WEAPON_SKINS[1].plasmaColor,
+            emissiveIntensity: WEAPON_SKINS[1].plasmaIntensity,
             roughness: 0.1
         });
 
@@ -637,121 +923,178 @@
             transmission: 0.8
         });
 
-        // 1. Receiver
+        // Construct Weapon Components
         const bodyGeo = new THREE.BoxGeometry(0.08, 0.12, 0.42);
-        const body = new THREE.Mesh(bodyGeo, titaniumMat);
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.userData = { type: "body" };
         weaponMesh.add(body);
 
-        // 2. 24K Gold Outer Shroud
         const shroudGeo = new THREE.BoxGeometry(0.065, 0.085, 0.55);
         const shroud = new THREE.Mesh(shroudGeo, goldMat);
         shroud.position.set(0, 0.02, 0.38);
+        shroud.userData = { type: "gold" };
         weaponMesh.add(shroud);
 
-        // 3. Accelerator Barrel
         const barrelGeo = new THREE.CylinderGeometry(0.022, 0.022, 0.65, 18);
         barrelGeo.rotateX(Math.PI / 2);
-        const barrel = new THREE.Mesh(barrelGeo, obsidianMat);
+        const barrel = new THREE.Mesh(barrelGeo, bodyMat);
         barrel.position.set(0, 0.02, 0.44);
+        barrel.userData = { type: "body" };
         weaponMesh.add(barrel);
 
-        // 4. Muzzle Compensator (Gold)
         const muzzleGeo = new THREE.BoxGeometry(0.07, 0.09, 0.12);
         const muzzle = new THREE.Mesh(muzzleGeo, goldMat);
         muzzle.position.set(0, 0.02, 0.74);
+        muzzle.userData = { type: "gold" };
         weaponMesh.add(muzzle);
 
-        // 5. Glowing Plasma Cell Core
         const coreGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.22, 16);
         coreGeo.rotateX(Math.PI / 2);
         const core = new THREE.Mesh(coreGeo, plasmaCoreMat);
         core.position.set(0, 0.01, 0.02);
+        core.userData = { type: "plasma" };
         weaponMesh.add(core);
 
-        // 6. Picatinny Rail
         const railGeo = new THREE.BoxGeometry(0.04, 0.02, 0.32);
         const rail = new THREE.Mesh(railGeo, goldMat);
         rail.position.set(0, 0.08, 0.05);
+        rail.userData = { type: "gold" };
         weaponMesh.add(rail);
 
-        // 7. Holographic Sight Housing
         const sightGeo = new THREE.BoxGeometry(0.055, 0.06, 0.15);
-        const sight = new THREE.Mesh(sightGeo, obsidianMat);
+        const sight = new THREE.Mesh(sightGeo, bodyMat);
         sight.position.set(0, 0.12, 0.06);
+        sight.userData = { type: "body" };
         weaponMesh.add(sight);
 
-        // 8. Diamond Reticle Glass
         const reticleLens = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.045, 0.005), lensMat);
         reticleLens.position.set(0, 0.12, 0.08);
         weaponMesh.add(reticleLens);
 
-        // 9. Grip
         const gripGeo = new THREE.BoxGeometry(0.048, 0.16, 0.08);
-        const grip = new THREE.Mesh(gripGeo, obsidianMat);
+        const grip = new THREE.Mesh(gripGeo, bodyMat);
         grip.position.set(0, -0.12, -0.06);
         grip.rotation.x = -0.25;
+        grip.userData = { type: "body" };
         weaponMesh.add(grip);
 
-        // 10. Gold Trigger & Guard
         const guardGeo = new THREE.BoxGeometry(0.052, 0.015, 0.12);
         const guard = new THREE.Mesh(guardGeo, goldMat);
         guard.position.set(0, -0.07, 0.02);
+        guard.userData = { type: "gold" };
         weaponMesh.add(guard);
 
-        // Default Hip-Fire Position
+        // Hip & ADS Positions
         const HIP_POS = new THREE.Vector3(0.24, -0.22, -0.5);
         const ADS_POS = new THREE.Vector3(0.0, -0.12, -0.38);
         weaponPivot.position.copy(HIP_POS);
 
+        function switchSkin(skinId) {
+            if (!WEAPON_SKINS[skinId]) return;
+            currentSkinId = skinId;
+            const skin = WEAPON_SKINS[skinId];
+            playMechSound(700);
+
+            // Update Materials
+            goldMat.color.setHex(skin.goldColor);
+            goldMat.metalness = skin.goldMetal;
+            goldMat.roughness = skin.goldRough;
+
+            bodyMat.color.setHex(skin.bodyColor);
+            bodyMat.metalness = skin.bodyMetal;
+            bodyMat.roughness = skin.bodyRough;
+
+            plasmaCoreMat.color.setHex(skin.plasmaColor);
+            plasmaCoreMat.emissive.setHex(skin.plasmaColor);
+            plasmaCoreMat.emissiveIntensity = skin.plasmaIntensity;
+
+            // Update UI buttons & badge
+            document.querySelectorAll(".skin-btn").forEach((btn, idx) => {
+                btn.classList.toggle("active", (idx + 1) === skinId);
+            });
+            document.getElementById("skinBadge").textContent = skin.badge;
+            document.getElementById("hudAmmo").style.color = `#${skin.plasmaColor.toString(16).padStart(6, '0')}`;
+        }
+
         // ====================================================================
-        // COMBAT TARGET DRONES
+        // HOSTILE DRONES & WAVE SYSTEM
         // ====================================================================
-        const drones = [];
+        let currentWave = 1;
+        let drones = [];
+        let debrisParticles = [];
+        let plasmaTracers = [];
 
         function spawnDrone(x, y, z) {
             const droneGroup = new THREE.Group();
             droneGroup.position.set(x, y, z);
 
-            // Core
+            const titaniumMat = new THREE.MeshStandardMaterial({ color: 0x1e2028, metalness: 0.9, roughness: 0.2 });
             const dCore = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.2, 16), titaniumMat);
             droneGroup.add(dCore);
 
-            // Eye
-            const dEye = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), new THREE.MeshStandardMaterial({
-                color: 0xff0044,
-                emissive: 0xff0044,
-                emissiveIntensity: 2.0
-            }));
+            const eyeMat = new THREE.MeshStandardMaterial({ color: 0xff0044, emissive: 0xff0044, emissiveIntensity: 2.5 });
+            const dEye = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), eyeMat);
             dEye.position.set(0, 0, 0.22);
             droneGroup.add(dEye);
 
-            // Rotating Gold Ring
             const ringGeo = new THREE.TorusGeometry(0.38, 0.03, 12, 32);
             const ring = new THREE.Mesh(ringGeo, goldMat);
             ring.rotation.x = Math.PI / 2;
             droneGroup.add(ring);
 
+            // Holographic Shield Mesh (hidden until hit)
+            const shieldGeo = new THREE.SphereGeometry(0.55, 16, 16);
+            const shieldMat = new THREE.MeshBasicMaterial({
+                color: 0x00f0ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.0
+            });
+            const shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+            droneGroup.add(shieldMesh);
+
             droneGroup.userData = {
                 ring: ring,
+                shield: shieldMesh,
                 baseY: y,
+                baseX: x,
                 seed: Math.random() * 100,
                 health: 100,
-                isHit: false
+                maxHealth: 100,
+                strafing: currentWave > 1
             };
 
             scene.add(droneGroup);
             drones.push(droneGroup);
         }
 
-        // Spawn initial targets
-        spawnDrone(0, 2.5, -12);
-        spawnDrone(-6, 3.2, -15);
-        spawnDrone(6, 2.8, -14);
-        spawnDrone(-10, 4.0, -20);
-        spawnDrone(10, 3.5, -22);
+        function initWave(waveNum) {
+            currentWave = waveNum;
+            document.getElementById("hudWave").textContent = String(waveNum).padStart(2, '0');
+            document.getElementById("waveBanner").textContent = `WAVE ${String(waveNum).padStart(2, '0')} // PURGE HOSTILES`;
+            document.getElementById("waveBanner").style.borderColor = "var(--gold)";
+
+            // Clear old drones if any
+            drones.forEach(d => scene.remove(d));
+            drones = [];
+
+            const count = 3 + waveNum * 2;
+            document.getElementById("hudTargets").textContent = String(count).padStart(2, '0');
+
+            for (let i = 0; i < count; i++) {
+                const angle = ((i - count / 2) / count) * 1.6;
+                const dist = 14 + (i % 3) * 4;
+                const x = Math.sin(angle) * dist;
+                const z = -Math.cos(angle) * dist;
+                const y = 2.0 + Math.random() * 2.5;
+                spawnDrone(x, y, z);
+            }
+        }
+
+        initWave(1);
 
         // ====================================================================
-        // WEAPON DYNAMICS: RECOIL, SWAY, ADS & SHOOTING
+        // COMBAT SYSTEM: SHOOTING, TRACERS, FX
         // ====================================================================
         let score = 0;
         let ammo = 24;
@@ -759,13 +1102,7 @@
         let isInspecting = false;
         let isReloading = false;
 
-        const recoil = {
-            rotX: 0,
-            rotY: 0,
-            posZ: 0,
-            recoverSpeed: 10.0
-        };
-
+        const recoil = { rotX: 0, rotY: 0, posZ: 0, recoverSpeed: 11.0 };
         const mouseSway = { x: 0, y: 0 };
 
         function shoot() {
@@ -776,45 +1113,105 @@
 
             ammo--;
             document.getElementById("hudAmmo").textContent = ammo;
-            playFireSound();
+            const currentSkin = WEAPON_SKINS[currentSkinId];
+            playFireSound(currentSkin.soundFreq);
 
-            // Procedural Recoil Kick
+            // Recoil
             recoil.posZ = isAiming ? 0.05 : 0.12;
             recoil.rotX = isAiming ? 0.08 : 0.22;
             recoil.rotY = (Math.random() - 0.5) * 0.04;
 
-            // Flash Muzzle Light
-            const flash = new THREE.PointLight(0x00f0ff, 6.0, 12);
+            // Dynamic Muzzle Light
+            const flash = new THREE.PointLight(currentSkin.flashColor, 6.0, 12);
             flash.position.set(0, 0.02, 0.9);
             weaponMesh.add(flash);
-            setTimeout(() => weaponMesh.remove(flash), 40);
+            setTimeout(() => weaponMesh.remove(flash), 45);
 
-            // Raycast Bullet
+            // Raycast Hit
             const raycaster = new THREE.Raycaster();
             raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
 
-            // Check hit against drones
+            let hitPoint = raycaster.ray.origin.clone().add(raycaster.ray.direction.clone().multiplyScalar(50));
+            let hitDrone = null;
+
             for (let i = 0; i < drones.length; i++) {
                 const d = drones[i];
                 const hits = raycaster.intersectObjects(d.children, true);
                 if (hits.length > 0) {
-                    playHitSound();
-                    score += 100;
-                    document.getElementById("hudScore").textContent = String(score).padStart(2, '0');
-
-                    // Drone hit impulse
-                    d.position.z -= 1.2;
-                    d.rotation.y += Math.PI;
-
-                    // Spark explosion
-                    createSparkExplosion(hits[0].point);
+                    hitPoint = hits[0].point;
+                    hitDrone = d;
                     break;
                 }
             }
+
+            // Spawn Plasma Tracer Beam
+            spawnPlasmaTracer(barrel.getWorldPosition(new THREE.Vector3()), hitPoint, currentSkin.plasmaColor);
+
+            if (hitDrone) {
+                playHitSound();
+                showHitmarker();
+
+                // Shield Hit Visual
+                hitDrone.userData.shield.material.opacity = 0.8;
+                hitDrone.position.z -= 0.6;
+                hitDrone.userData.health -= 35;
+
+                createSparkExplosion(hitPoint, currentSkin.plasmaColor);
+
+                if (hitDrone.userData.health <= 0) {
+                    // Destroy Drone
+                    playExplosionSound();
+                    score += 250;
+                    showScoreFloat("+250 ELIMINATED");
+                    createDroneDebris(hitDrone.position);
+                    scene.remove(hitDrone);
+                    drones = drones.filter(d => d !== hitDrone);
+                    document.getElementById("hudTargets").textContent = String(drones.length).padStart(2, '0');
+
+                    if (drones.length === 0) {
+                        setTimeout(() => {
+                            initWave(currentWave + 1);
+                        }, 1200);
+                    }
+                } else {
+                    score += 100;
+                    showScoreFloat("+100 HIT");
+                }
+
+                document.getElementById("hudScore").textContent = String(score).padStart(2, '0');
+            }
         }
 
-        function createSparkExplosion(pos) {
-            const count = 16;
+        function spawnPlasmaTracer(startPos, endPos, colorHex) {
+            const dir = new THREE.Vector3().subVectors(endPos, startPos);
+            const dist = dir.length();
+            const beamGeo = new THREE.CylinderGeometry(0.025, 0.025, dist, 8);
+            beamGeo.rotateX(Math.PI / 2);
+
+            const beamMat = new THREE.MeshBasicMaterial({
+                color: colorHex,
+                transparent: true,
+                opacity: 0.95
+            });
+
+            const beam = new THREE.Mesh(beamGeo, beamMat);
+            beam.position.copy(startPos).add(dir.clone().multiplyScalar(0.5));
+            beam.lookAt(endPos);
+            scene.add(beam);
+
+            let opacity = 0.95;
+            const fade = setInterval(() => {
+                opacity -= 0.15;
+                beam.material.opacity = Math.max(0, opacity);
+                if (opacity <= 0) {
+                    clearInterval(fade);
+                    scene.remove(beam);
+                }
+            }, 16);
+        }
+
+        function createSparkExplosion(pos, colorHex = 0xffd700) {
+            const count = 18;
             const geom = new THREE.BufferGeometry();
             const positions = new Float32Array(count * 3);
             const velocities = [];
@@ -824,14 +1221,14 @@
                 positions[i * 3 + 1] = pos.y;
                 positions[i * 3 + 2] = pos.z;
                 velocities.push(new THREE.Vector3(
-                    (Math.random() - 0.5) * 6,
-                    Math.random() * 6,
-                    (Math.random() - 0.5) * 6
+                    (Math.random() - 0.5) * 8,
+                    Math.random() * 8,
+                    (Math.random() - 0.5) * 8
                 ));
             }
 
             geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const pMat = new THREE.PointsMaterial({ color: 0xffd700, size: 0.12 });
+            const pMat = new THREE.PointsMaterial({ color: colorHex, size: 0.14 });
             const particles = new THREE.Points(geom, pMat);
             scene.add(particles);
 
@@ -847,11 +1244,45 @@
                 }
                 particles.geometry.attributes.position.needsUpdate = true;
 
-                if (age > 0.4) {
+                if (age > 0.35) {
                     clearInterval(pInterval);
                     scene.remove(particles);
                 }
             }, 16);
+        }
+
+        function createDroneDebris(pos) {
+            const count = 8;
+            for (let i = 0; i < count; i++) {
+                const shardGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+                const shardMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 });
+                const shard = new THREE.Mesh(shardGeo, shardMat);
+                shard.position.copy(pos);
+                scene.add(shard);
+                debrisParticles.push({
+                    mesh: shard,
+                    vel: new THREE.Vector3((Math.random() - 0.5) * 7, Math.random() * 6 + 2, (Math.random() - 0.5) * 7),
+                    rot: new THREE.Vector3(Math.random() * 10, Math.random() * 10, 0),
+                    life: 1.2
+                });
+            }
+        }
+
+        function showHitmarker() {
+            const hm = document.getElementById("hitmarker");
+            hm.classList.add("active");
+            setTimeout(() => hm.classList.remove("active"), 120);
+        }
+
+        function showScoreFloat(text) {
+            const sf = document.getElementById("scoreFloat");
+            sf.textContent = text;
+            sf.style.opacity = "1";
+            sf.style.transform = "translate(-50%, -80%)";
+            setTimeout(() => {
+                sf.style.opacity = "0";
+                sf.style.transform = "translate(-50%, -50%)";
+            }, 500);
         }
 
         function reloadWeapon() {
@@ -859,7 +1290,6 @@
             isReloading = true;
             playMechSound(400);
 
-            // Ejection animation
             let reloadTimer = 0;
             const reloadInterval = setInterval(() => {
                 reloadTimer += 0.05;
@@ -919,6 +1349,10 @@
             if (e.code === "KeyD") keys.d = true;
             if (e.code === "KeyR") reloadWeapon();
             if (e.code === "KeyF") inspectWeapon();
+            if (e.code === "Digit1") switchSkin(1);
+            if (e.code === "Digit2") switchSkin(2);
+            if (e.code === "Digit3") switchSkin(3);
+            if (e.code === "Digit4") switchSkin(4);
         });
 
         document.addEventListener("keyup", (e) => {
@@ -956,6 +1390,108 @@
         window.addEventListener("contextmenu", (e) => e.preventDefault());
 
         // ====================================================================
+        // SDK EXPORT MODAL LOGIC
+        // ====================================================================
+        const SDK_SNIPPETS = {
+            unreal: `// Unreal Engine 5: LuxuryWeaponActor.h & .cpp
+#pragma once
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "LuxuryWeaponActor.generated.h"
+
+UCLASS()
+class ALuxuryWeaponActor : public AActor
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
+    USkeletalMeshComponent* WeaponMesh;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    float BaseDamage = 35.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    float FireRateRPM = 720.0f;
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void FirePlasmaDischarge();
+};`,
+            unity: `// Unity 6: LuxuryFPSController.cs
+using UnityEngine;
+
+public class LuxuryFPSController : MonoBehaviour
+{
+    [Header("Weapon Config")]
+    public float damage = 35f;
+    public float fireRate = 0.083f;
+    public Transform muzzlePoint;
+    public ParticleSystem plasmaMuzzleFlash;
+
+    public void Fire()
+    {
+        Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+        {
+            Instantiate(plasmaMuzzleFlash, muzzlePoint.position, muzzlePoint.rotation);
+        }
+    }
+}`,
+            godot: `# Godot 4: luxury_fps_weapon.gd
+extends Node3D
+
+@export var damage: float = 35.0
+@export var fire_rate: float = 0.083
+@onready var muzzle = $MuzzlePoint
+
+func fire_plasma():
+    var space_state = get_world_3d().direct_space_state
+    var camera = get_viewport().get_camera_3d()
+    var ray_query = PhysicsRayQueryParameters3D.create(
+        camera.global_position, 
+        camera.global_position - camera.global_transform.basis.z * 100.0
+    )
+    var result = space_state.intersect_ray(ray_query)`,
+            r3f: `// React Three Fiber: LuxuryFPSWeapon.tsx
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
+
+export function LuxuryFPSWeapon(props) {
+    const group = useRef();
+    const { nodes, materials } = useGLTF('/models/luxury_plasma_railgun.glb');
+    return (
+        <group ref={group} {...props} dispose={null}>
+            <mesh geometry={nodes.Shroud.geometry} material={materials.Gold24K} />
+            <mesh geometry={nodes.Receiver.geometry} material={materials.Obsidian} />
+        </group>
+    );
+}`
+        };
+
+        let currentSdkTab = 'unreal';
+
+        function openExportModal() {
+            document.getElementById("exportModal").classList.add("open");
+            switchExportTab('unreal');
+        }
+
+        function closeExportModal() {
+            document.getElementById("exportModal").classList.remove("open");
+        }
+
+        function switchExportTab(tab) {
+            currentSdkTab = tab;
+            document.querySelectorAll(".export-tab").forEach(t => t.classList.remove("active"));
+            event.target.classList.add("active");
+            document.getElementById("exportCode").textContent = SDK_SNIPPETS[tab];
+        }
+
+        function copySdkCode() {
+            navigator.clipboard.writeText(SDK_SNIPPETS[currentSdkTab]);
+            alert("SDK Code copied to clipboard!");
+        }
+
+        // ====================================================================
         // 60/120 FPS GAME LOOP
         // ====================================================================
         let lastTime = performance.now();
@@ -968,7 +1504,6 @@
             const delta = Math.min((now - lastTime) / 1000, 0.1);
             lastTime = now;
 
-            // FPS Counter
             frameCount++;
             if (now - lastFpsUpdate > 1000) {
                 document.getElementById("hudFps").textContent = frameCount;
@@ -976,26 +1511,25 @@
                 lastFpsUpdate = now;
             }
 
-            // WASD Walking
-            const moveSpeed = 6.0;
+            // WASD Movement
+            const moveSpeed = 6.5;
             if (keys.w) controls.moveForward(moveSpeed * delta);
             if (keys.s) controls.moveForward(-moveSpeed * delta);
             if (keys.a) controls.moveRight(-moveSpeed * delta);
             if (keys.d) controls.moveRight(moveSpeed * delta);
 
-            // Keep player on ground plane
             camera.position.y = 1.7;
 
-            // Recoil Recovery (Spring Damper)
+            // Recoil Recovery
             recoil.posZ = THREE.MathUtils.lerp(recoil.posZ, 0, recoil.recoverSpeed * delta);
             recoil.rotX = THREE.MathUtils.lerp(recoil.rotX, 0, recoil.recoverSpeed * delta);
             recoil.rotY = THREE.MathUtils.lerp(recoil.rotY, 0, recoil.recoverSpeed * delta);
 
-            // Weapon Sway Recovery
+            // Sway Recovery
             mouseSway.x = THREE.MathUtils.lerp(mouseSway.x, 0, 5.0 * delta);
             mouseSway.y = THREE.MathUtils.lerp(mouseSway.y, 0, 5.0 * delta);
 
-            // ADS FOV & Weapon Position Interpolation
+            // ADS FOV & Positioning
             const targetPos = isAiming ? ADS_POS : HIP_POS;
             const targetFov = isAiming ? 45 : 75;
 
@@ -1013,10 +1547,31 @@
 
             // Animate Drones
             for (let d of drones) {
-                d.userData.ring.rotation.z += 1.5 * delta;
-                d.position.y = d.userData.baseY + Math.sin(now * 0.002 + d.userData.seed) * 0.35;
-                // Gently face the player
+                d.userData.ring.rotation.z += 1.8 * delta;
+                d.position.y = d.userData.baseY + Math.sin(now * 0.002 + d.userData.seed) * 0.45;
+                if (d.userData.strafing) {
+                    d.position.x = d.userData.baseX + Math.sin(now * 0.0015 + d.userData.seed) * 3.0;
+                }
                 d.lookAt(camera.position.x, d.position.y, camera.position.z);
+
+                // Shield fade out
+                if (d.userData.shield.material.opacity > 0) {
+                    d.userData.shield.material.opacity -= 2.0 * delta;
+                }
+            }
+
+            // Animate Destruction Debris Particles
+            for (let i = debrisParticles.length - 1; i >= 0; i--) {
+                const p = debrisParticles[i];
+                p.mesh.position.addScaledVector(p.vel, delta);
+                p.vel.y -= 9.8 * delta;
+                p.mesh.rotation.x += p.rot.x * delta;
+                p.mesh.rotation.y += p.rot.y * delta;
+                p.life -= delta;
+                if (p.life <= 0) {
+                    scene.remove(p.mesh);
+                    debrisParticles.splice(i, 1);
+                }
             }
 
             renderer.render(scene, camera);

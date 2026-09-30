@@ -21,10 +21,12 @@ router = APIRouter()
 
 class GeminiGenerateRequest(BaseModel):
     prompt: str = Field(..., description="Prompt or query for Gemini")
-    model: str = Field(default="gemini-3.8-flash", description="gemini-3.8-flash, gemini-3.1-pro-preview, gemini-flash-latest")
+    model: str = Field(default="gemini-3.8-flash", description="gemini-4.0-preview, gemini-3.8-flash, gemini-3.1-pro-preview, gemini-flash-latest")
     system_instruction: Optional[str] = Field(default=None)
+    system_prompt: Optional[str] = Field(default=None)
     temperature: float = Field(default=0.7, ge=0.0, le=2.0)
-    max_output_tokens: int = Field(default=1024, ge=1, le=8192)
+    max_output_tokens: int = Field(default=2048, ge=1, le=8192)
+    max_tokens: Optional[int] = Field(default=None)
 
 class SetApiKeyRequest(BaseModel):
     api_key: str = Field(..., description="Single Google Gemini API key")
@@ -113,12 +115,14 @@ async def verify_key_pool():
 @router.post("/gemini/generate")
 async def generate_with_gemini(req: GeminiGenerateRequest):
     """Direct inference via Google Gemini API pool."""
+    effective_instruction = req.system_instruction or req.system_prompt
+    effective_tokens = req.max_tokens if req.max_tokens is not None else req.max_output_tokens
     res = await gemini_engine.generate_content(
         prompt=req.prompt,
         model=req.model,
-        system_instruction=req.system_instruction,
+        system_instruction=effective_instruction,
         temperature=req.temperature,
-        max_output_tokens=req.max_output_tokens
+        max_output_tokens=effective_tokens
     )
     if not res.get("success"):
         raise HTTPException(status_code=400, detail=res.get("error", "Gemini generation failed"))
