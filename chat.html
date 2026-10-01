@@ -2186,7 +2186,7 @@
                     const p2 = particles[j];
                     const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
                     if (dist < 130) {
-                        ctx.strokeStyle = `rgba(0, 240, 255, ${0.18 * (1 - dist / 130)})`;
+                        ctx.strokeStyle = 'rgba(0, 240, 255, ' + (0.18 * (1 - dist / 130)) + ')';
                         ctx.lineWidth = 0.8;
                         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
                     }
@@ -2209,7 +2209,7 @@
             const tps = Math.floor(270 + Math.random() * 45);
             document.getElementById('metricLatency').innerHTML = tps + '<span class="metric-unit">t/s</span>';
         }
-    </script>
+    <\/script>
 </body>
 </html>
 \`\`\`
