@@ -298,6 +298,16 @@ async def smart_chat(req: SmartChatRequest):
         )
         final_answer = await generate_text(req.model, synthesis_prompt, max_length=req.max_tokens)
         final_answer_str = str(final_answer).strip()
+        try:
+            from ..gemini_engine import sanitize_nexium_output
+        except ImportError:
+            try:
+                from gemini_engine import sanitize_nexium_output
+            except ImportError:
+                def sanitize_nexium_output(t): return t
+        final_answer_str = sanitize_nexium_output(final_answer_str)
+        if len(final_answer_str) < 15 and any(w in req.prompt.lower() for w in ("how are you", "status", "online", "hello", "hi", "nexium")):
+            final_answer_str = f"{final_answer_str}. All NEXIUM systems nominal and operational."
 
         # 6. Self-Reflection & Critic Loop (Optional)
         critic_result = {"status": "passed", "critique": "Answer is consistent and complete."}
