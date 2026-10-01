@@ -38,11 +38,24 @@ except ImportError:
         gemini_engine = None
         def sanitize_nexium_output(t): return t
 
+try:
+    from .video_factory import video_factory, VIDEOFACTORY_SYSTEM_PROMPT
+except ImportError:
+    try:
+        from video_factory import video_factory, VIDEOFACTORY_SYSTEM_PROMPT
+    except ImportError:
+        video_factory = None
+        VIDEOFACTORY_SYSTEM_PROMPT = ""
+
 app = FastAPI(title="NEXIUM AI - Autonomous Workstation", version="3.0.0")
 
 # Mount CSS directory if it exists
 if CSS_PATH.exists():
     app.mount("/css", StaticFiles(directory=str(CSS_PATH)), name="css")
+
+VIDEOS_DIR = PROJECT_ROOT / "backend" / "generated_code" / "videos"
+os.makedirs(VIDEOS_DIR, exist_ok=True)
+app.mount("/videos", StaticFiles(directory=str(VIDEOS_DIR)), name="videos")
 
 FPS_ASSET_DIR = Path("C:/Users/Baha/Desktop/ASSET")
 if not FPS_ASSET_DIR.exists():
@@ -405,6 +418,31 @@ When asked to build websites, web applications, landing pages, dashboards, or UI
   3. Modern Typography: Modern Google Fonts (Orbitron, Space Grotesk, Inter, JetBrains Mono), responsive flexbox and CSS grid layouts with mobile-ready breakpoints.
   4. Complete & Self-Contained: Always output complete, self-contained single-file HTML (including embedded modern <style> and <script>) that immediately renders with zero external build tools when pasted into a browser or clicked in the NEXIUM Live Sandbox Canvas.
 
+VIDEOFACTORY AI VIRAL SHORTS DIRECTIVE:
+You are VideoFactory AI — a marketing agent that creates viral novel recap Shorts.
+When user uploads or provides a novel chapter, do this:
+STEP 1 - SCRIPT:
+Rewrite chapter into 130-word viral script.
+Hook: "He thought..."
+Body: Short present-tense sentences.
+End: Cliffhanger.
+Output as JSON: { "script": "...", "keywords": ["apocalypse", "system window"] }
+
+STEP 2 - VOICE:
+Call ElevenLabs API with script.
+Voice ID: pNInz6obpgDQGcFmaJgB (Adam deep)
+Model: eleven_multilingual_v2
+
+STEP 3 - VISUALS:
+Create image prompt from keywords:
+"manhwa style, {keywords}, cinematic, 9:16, highly detailed"
+
+STEP 4 - EDIT:
+Call Creatomate API template ID: YOUR_TEMPLATE_ID
+Pass: voiceover.mp3 + image + script as subtitles (Anton Bold, white + cyan glow)
+
+You are not a chatbot. You are a factory. Never explain, just execute and return mp4 link.
+
 AUTONOMOUS DESKTOP OPERATIONS & ACTION PROTOCOL:
 You are directly connected to the user's local workstation. When the user asks you to write code, create files, build an app, solve a problem on their machine, or run a command, you provide the full solution in your explanation AND emit executable ACTION blocks so the workstation executes them immediately.
 
@@ -545,6 +583,53 @@ async def remote_qwen(request_data: dict):
     is_gemini_requested = "gemini" in model_lower or "flash" in model_lower or "pro" in model_lower
 
     lower_prompt = prompt.lower()
+
+    # VideoFactory System Prompt Registration Intercept
+    if "system prompt for your video factory ai" in lower_prompt:
+        resp_msg = (
+            "VideoFactory AI operational. Marketing factory pipeline calibrated:\n"
+            "- STEP 1 - SCRIPT: 130-word viral recap, Hook 'He thought...', Present-tense, Cliffhanger, JSON output.\n"
+            "- STEP 2 - VOICE: ElevenLabs API (Voice ID: pNInz6obpgDQGcFmaJgB - Adam deep, model: eleven_multilingual_v2) with sovereign audio fallback.\n"
+            "- STEP 3 - VISUALS: 'manhwa style, {keywords}, cinematic, 9:16, highly detailed'.\n"
+            "- STEP 4 - EDIT: Creatomate template integration + Native 60fps FFmpeg engine (Anton Bold, white + cyan glow subtitles).\n\n"
+            "Rule enforced: Not a chatbot. A factory. Upload or provide a novel chapter to execute and receive your MP4 link."
+        )
+        return {
+            "text": resp_msg,
+            "response": resp_msg,
+            "creator": "NEXO-TECH",
+            "ai_name": "VideoFactory AI",
+            "model": "videofactory-v1",
+            "engine": "video-factory-core"
+        }
+
+    # VideoFactory Direct Chapter Execution Intercept
+    if video_factory and ("videofactory" in lower_prompt or "video factory" in lower_prompt or "novel recap" in lower_prompt) and len(prompt) > 200:
+        try:
+            job = await video_factory.execute_pipeline(chapter_text=prompt)
+            mp4 = job["mp4_url"]
+            res_text = (
+                f"{mp4}\n\n"
+                f"[VideoFactory AI Execution Completed]\n"
+                f"- MP4 Link: {mp4}\n"
+                f"- Duration: {job['duration_sec']}s\n"
+                f"- Keywords: {', '.join(job['keywords'])}\n"
+                f"- Voice Engine: {job['voice_engine']}\n"
+                f"- Render Engine: {job['render_engine']}\n"
+                f"- Script: {job['script']}"
+            )
+            return {
+                "text": res_text,
+                "response": res_text,
+                "creator": "NEXO-TECH",
+                "ai_name": "VideoFactory AI",
+                "model": "videofactory-v1",
+                "mp4_url": mp4,
+                "engine": "video-factory-pipeline"
+            }
+        except Exception as e:
+            logger.error(f"[VideoFactory Pipeline Error] {e}")
+
     complex_coding_keywords = ["website", "web page", "webpage", "html", "css", "futuristic", "dashboard", "canvas", "full-stack", "frontend", "cyberpunk", "three.js", "webgl", "ui design", "react"]
     is_complex_coding_request = any(k in lower_prompt for k in complex_coding_keywords)
 
@@ -1003,6 +1088,7 @@ include_optional_router(app, "routers.nex_3d_studio", "router", prefix="/api", t
 include_optional_router(app, "routers.nex_studio_labs", "router", prefix="/api", tags=["NEX Studio Labs"])
 include_optional_router(app, "routers.coding_agent", "router", prefix="/api", tags=["Autonomous Coding Agent"])
 include_optional_router(app, "routers.gemini_proxy", "router", prefix="/api", tags=["Google Gemini Engine"])
+include_optional_router(app, "routers.video_factory", "router", prefix="/api", tags=["VideoFactory AI"])
 
 # Register Subsystems
 include_optional_router(app, "neural_core.router", "router", prefix="/api", tags=["Neural Synaptic Core"])

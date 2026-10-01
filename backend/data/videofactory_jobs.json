@@ -1,0 +1,22 @@
+{
+  "f1bb8cf527": {
+    "job_id": "f1bb8cf527",
+    "status": "COMPLETED",
+    "mp4_url": "http://127.0.0.1:8001/api/video/stream/short_f1bb8cf527.mp4",
+    "filename": "short_f1bb8cf527.mp4",
+    "script": "He thought the morning was normal. Chapter 1: The Descent of the Absolute Kang Jin-woo rubbed his bloodshot eyes, staring at the fluorescent monitor in the empty convenience store It was 3:42 AM when the sky shattered like cheap glass A crimson system window violently materializes before his retinas. Reality fractures into glass. The global leaderboard updates. His name appears in sovereign gold at rank one. Behind him, the air turns to ice as a dimensional gate rips wide open.",
+    "keywords": [
+      "apocalypse",
+      "system window",
+      "dimensional gate",
+      "sovereign rank"
+    ],
+    "image_prompt": "manhwa style, apocalypse, system window, dimensional gate, sovereign rank, cinematic, 9:16, highly detailed, dramatic lighting, dark fantasy, solo leveling aesthetic",
+    "voice_engine": "Native Sovereign SAPI Synth (Male)",
+    "visual_engine": "Pollinations AI (9:16 Manhwa Neural)",
+    "render_engine": "Native Sovereign FFmpeg Compositor",
+    "duration_sec": 32.64,
+    "elapsed_sec": 57.67,
+    "timestamp": 1790815354.7454824
+  }
+}
