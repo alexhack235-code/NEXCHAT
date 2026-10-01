@@ -283,76 +283,157 @@ $synth.Dispose()
             "voice_id": "null"
         }
 
+    def _make_local_manhwa_panel(
+        self,
+        scene_idx: int,
+        theme_name: str,
+        primary_col: tuple,
+        accent_col: tuple,
+        headline: str,
+        subtext: str,
+        keywords: List[str],
+        job_id: str
+    ) -> str:
+        """Synthesize high-definition 9:16 cybernetic manhwa artwork panel."""
+        panel_path = os.path.join(self.output_dir, f"visual_act_{scene_idx}_{job_id}.png")
+        img = Image.new("RGB", (720, 1280), color=(10, 12, 22))
+        draw = ImageDraw.Draw(img)
+
+        # 1. Vertical Cyber Gradient
+        for y in range(1280):
+            factor = y / 1280.0
+            r = int(primary_col[0] * 0.25 + factor * (primary_col[0] * 0.65))
+            g = int(primary_col[1] * 0.25 + factor * (primary_col[1] * 0.65))
+            b = int(primary_col[2] * 0.25 + factor * (primary_col[2] * 0.65))
+            draw.line([(0, y), (720, y)], fill=(r, g, b))
+
+        # 2. Tech grid & scanline coordinates
+        for x in range(40, 700, 80):
+            draw.line([(x, 0), (x, 1280)], fill=(accent_col[0] // 7, accent_col[1] // 7, accent_col[2] // 7))
+        for y in range(80, 1200, 100):
+            draw.line([(0, y), (720, y)], fill=(accent_col[0] // 7, accent_col[1] // 7, accent_col[2] // 7))
+
+        # 3. Outer HUD border & cyber corners
+        draw.rectangle([(30, 50), (690, 1230)], outline=accent_col, width=3)
+        draw.rectangle([(42, 62), (678, 1218)], outline=(60, 70, 95), width=1)
+
+        for cx, cy in [(30, 50), (690, 50), (30, 1230), (690, 1230)]:
+            draw.rectangle([(cx - 10, cy - 10), (cx + 10, cy + 10)], fill=accent_col)
+
+        # 4. Central System Notification Window
+        win_top = 180
+        draw.rectangle([(60, win_top), (660, win_top + 160)], fill=(12, 16, 32), outline=accent_col, width=2)
+        draw.text((85, win_top + 25), f"[ {theme_name.upper()} ]", fill=accent_col)
+        draw.text((85, win_top + 65), headline.upper(), fill=(255, 255, 255))
+        draw.text((85, win_top + 105), subtext, fill=(180, 195, 220))
+
+        # 5. Core energy vortex glyph in center
+        core_y = 620
+        for rad in range(180, 20, -25):
+            alpha_col = (
+                int(accent_col[0] * (rad / 180)),
+                int(accent_col[1] * (rad / 180)),
+                int(accent_col[2] * (rad / 180))
+            )
+            draw.ellipse([(360 - rad, core_y - rad), (360 + rad, core_y + rad)], outline=alpha_col, width=2)
+
+        draw.text((305, core_y - 10), f"ACT {scene_idx} / 3", fill=(255, 255, 255))
+
+        # 6. Keyword tags at bottom
+        kw_y = 880
+        for kw in keywords[:3]:
+            draw.rectangle([(80, kw_y), (640, kw_y + 45)], fill=(15, 20, 38), outline=accent_col, width=1)
+            draw.text((105, kw_y + 12), f">> PROTOCOL: {kw.upper()}", fill=accent_col)
+            kw_y += 60
+
+        img.save(panel_path)
+        return panel_path
+
     async def step3_generate_visuals(self, keywords: List[str], job_id: str) -> Dict[str, Any]:
         """
         STEP 3 - VISUALS:
-        Create image prompt from keywords:
-        "manhwa style, {keywords}, cinematic, 9:16, highly detailed"
+        Generates 3 distinct 9:16 manhwa scenes (The Hook, The Rift Escalation, The Sovereign Climax)
+        for dynamic multi-scene video montage and continuous camera choreography.
         """
-        logger.info("[VideoFactory] Executing Step 3: Visuals Generation...")
+        logger.info("[VideoFactory] Executing Step 3: Multi-Scene Visuals Generation...")
         keywords_str = ", ".join(keywords) if keywords else "apocalypse, system window"
-        image_prompt = f"manhwa style, {keywords_str}, cinematic, 9:16, highly detailed, dramatic lighting, dark fantasy, solo leveling aesthetic"
-        image_filename = f"visual_{job_id}.png"
-        image_path = os.path.join(self.output_dir, image_filename)
 
-        # Attempt high-res 9:16 online generation via Pollinations
-        try:
-            encoded_prompt = urllib.parse.quote(image_prompt)
-            url = f"https://image.pollinations.ai/prompt/{encoded_prompt}?width=720&height=1280&nologo=true&seed={int(time.time()) % 100000}"
-            logger.info(f"[VideoFactory] Downloading 9:16 Manhwa visual from Pollinations...")
-            async with httpx.AsyncClient(timeout=30.0, follow_redirects=True) as client:
-                res = await client.get(url)
-                if res.status_code == 200 and len(res.content) > 10000:
-                    with open(image_path, "wb") as f:
-                        f.write(res.content)
-                    logger.info(f"[VideoFactory] Visual downloaded successfully: {len(res.content)} bytes")
-                    return {
-                        "prompt": image_prompt,
-                        "path": image_path,
-                        "filename": image_filename,
-                        "engine": "Pollinations AI (9:16 Manhwa Neural)"
-                    }
-        except Exception as e:
-            logger.warning(f"[VideoFactory] Online visual generation failed: {e}")
+        scene_configs = [
+            {
+                "idx": 1,
+                "theme": "System Awakening",
+                "primary": (0, 100, 180),
+                "accent": (0, 240, 255),
+                "headline": "Sovereign Awakening Activated",
+                "subtext": "Dimensional core synchronized. Rank assigned.",
+                "prompt": f"manhwa style, protagonist in city awakening, glowing cyan system window, {keywords_str}, cinematic, 9:16, solo leveling aesthetic"
+            },
+            {
+                "idx": 2,
+                "theme": "Dimensional Rift",
+                "primary": (160, 20, 60),
+                "accent": (255, 60, 90),
+                "headline": "Warning: Dimensional Gate Collapse",
+                "subtext": "Class-S entities approaching rapidly through breach.",
+                "prompt": f"manhwa style, dimensional rift tearing space, purple lightning, shadow monsters, {keywords_str}, cinematic, 9:16, intense action"
+            },
+            {
+                "idx": 3,
+                "theme": "Monarch Ascension",
+                "primary": (180, 140, 0),
+                "accent": (255, 215, 0),
+                "headline": "Monarch Rank Verified",
+                "subtext": "All dimensional barriers surrendered to host.",
+                "prompt": f"manhwa style, sovereign monarch awakening, golden eyes, immense power aura, {keywords_str}, cinematic, 9:16, epic cliffhanger"
+            }
+        ]
 
-        # Local Manhwa Graphics Generator Fallback (Pillow)
-        logger.info("[VideoFactory] Synthesizing local 9:16 cybernetic manhwa canvas...")
-        img = Image.new("RGB", (720, 1280), color=(8, 10, 18))
-        draw = ImageDraw.Draw(img)
+        scene_paths = []
+        online_count = 0
 
-        # Draw deep cyber-dark vertical gradient
-        for y in range(1280):
-            r = int(6 + (y / 1280) * 12)
-            g = int(8 + (y / 1280) * 18)
-            b = int(18 + (y / 1280) * 45)
-            draw.line([(0, y), (720, y)], fill=(r, g, b))
+        for sc in scene_configs:
+            idx = sc["idx"]
+            dest_img = os.path.join(self.output_dir, f"visual_act_{idx}_{job_id}.png")
+            downloaded = False
 
-        # Manhwa HUD frame
-        draw.rectangle([(40, 60), (680, 1220)], outline=(0, 240, 255), width=3)
-        draw.rectangle([(50, 70), (670, 1210)], outline=(139, 92, 246), width=1)
+            # Fast online attempt with 5s timeout
+            try:
+                enc = urllib.parse.quote(sc["prompt"])
+                url = f"https://image.pollinations.ai/prompt/{enc}?width=720&height=1280&nologo=true&seed={idx + int(time.time()) % 10000}"
+                async with httpx.AsyncClient(timeout=5.0, follow_redirects=True) as client:
+                    res = await client.get(url)
+                    if res.status_code == 200 and len(res.content) > 10000:
+                        with open(dest_img, "wb") as f:
+                            f.write(res.content)
+                        scene_paths.append(dest_img)
+                        online_count += 1
+                        downloaded = True
+                        logger.info(f"[VideoFactory] Downloaded AI visual for Scene {idx}")
+            except Exception:
+                pass
 
-        # Cyber corners
-        for x, y in [(40, 60), (680, 60), (40, 1220), (680, 1220)]:
-            draw.rectangle([(x-8, y-8), (x+8, y+8)], fill=(0, 240, 255))
+            if not downloaded:
+                panel = self._make_local_manhwa_panel(
+                    scene_idx=idx,
+                    theme_name=sc["theme"],
+                    primary_col=sc["primary"],
+                    accent_col=sc["accent"],
+                    headline=sc["headline"],
+                    subtext=sc["subtext"],
+                    keywords=keywords,
+                    job_id=job_id
+                )
+                scene_paths.append(panel)
 
-        # System window banner
-        draw.rectangle([(70, 180), (650, 310)], fill=(15, 23, 42), outline=(0, 255, 136), width=2)
-        draw.text((100, 210), "[ SYSTEM NOTIFICATION ]", fill=(0, 255, 136))
-        draw.text((100, 250), "SOVEREIGN AWAKENING: ACTIVATED", fill=(255, 255, 255))
+        main_path = scene_paths[0] if scene_paths else ""
+        engine_label = f"Dynamic Multi-Scene Engine ({online_count}/3 Neural, {3 - online_count}/3 Sovereign HUD)"
 
-        # Keywords tags
-        kw_y = 380
-        for kw in keywords[:4]:
-            draw.rectangle([(80, kw_y), (640, kw_y + 44)], fill=(20, 25, 45), outline=(0, 240, 255), width=1)
-            draw.text((100, kw_y + 12), f">> {kw.upper()}", fill=(0, 240, 255))
-            kw_y += 60
-
-        img.save(image_path)
         return {
-            "prompt": image_prompt,
-            "path": image_path,
-            "filename": image_filename,
-            "engine": "Local Sovereign Cyber Canvas (720x1280)"
+            "prompt": f"manhwa style, {keywords_str}, cinematic, 9:16, 3-act sequence",
+            "path": main_path,
+            "scenes": scene_paths,
+            "filename": os.path.basename(main_path),
+            "engine": engine_label
         }
 
     def _get_audio_duration(self, audio_path: str) -> float:
@@ -374,24 +455,27 @@ $synth.Dispose()
         audio_path: str,
         image_path: str,
         job_id: str,
+        scene_paths: Optional[List[str]] = None,
         creatomate_key: Optional[str] = None,
         template_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         STEP 4 - EDIT:
-        Call Creatomate API template ID: YOUR_TEMPLATE_ID
-        Pass: voiceover.mp3 + image + script as subtitles (Anton Bold, white + cyan glow)
-        Seamlessly falls back to local hardware-accelerated 60fps FFmpeg compositor!
+        Executes dynamic camera animations (Ken Burns zoom-in, dynamic lateral pan/drift, and climax push-pulse)
+        across 3 sequenced manhwa scenes with Anton Bold white+cyan glow subtitles.
         """
-        logger.info("[VideoFactory] Executing Step 4: Video Editing & Subtitle Composition...")
+        logger.info("[VideoFactory] Executing Step 4: Dynamic Animation & Video Composition...")
         key = creatomate_key or self.config.get("creatomate_api_key")
         tmpl_id = template_id or self.config.get("creatomate_template_id")
         video_filename = f"short_{job_id}.mp4"
         video_path = os.path.join(self.output_dir, video_filename)
 
         duration = self._get_audio_duration(audio_path)
+        valid_scenes = [p for p in (scene_paths or [image_path]) if os.path.exists(p)]
+        if not valid_scenes:
+            valid_scenes = [image_path]
 
-        # 1. Creatomate Cloud API
+        # 1. Creatomate Cloud API (if explicitly configured)
         if key and tmpl_id and len(key) >= 10:
             try:
                 logger.info(f"[VideoFactory] Submitting render to Creatomate API (Template: {tmpl_id})...")
@@ -429,23 +513,22 @@ $synth.Dispose()
             except Exception as e:
                 logger.warning(f"[VideoFactory] Creatomate cloud render error: {e}")
 
-        # 2. Native FFmpeg Compositor (Anton Bold, white + cyan glow subtitles)
-        logger.info("[VideoFactory] Assembling 9:16 vertical video via native FFmpeg engine...")
+        # 2. Native Dynamic Animation FFmpeg Compositor
+        logger.info("[VideoFactory] Assembling animated 9:16 vertical video with dynamic camera motion...")
         ass_path = os.path.join(self.output_dir, f"subtitles_{job_id}.ass")
-        
+
         # Split script into ~4-word dynamic subtitle chunks
         words = script.split()
         chunk_size = 4
-        chunks = [" ".join(words[i:i+chunk_size]) for i in range(0, len(words), chunk_size)]
-        
+        chunks = [" ".join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
+
         dialogue_lines = []
         if chunks:
             time_per_chunk = duration / len(chunks)
             for idx, c in enumerate(chunks):
                 t_start = idx * time_per_chunk
                 t_end = (idx + 1) * time_per_chunk
-                
-                # Format to 0:00:00.00
+
                 m_s, s_s = divmod(t_start, 60)
                 m_e, s_e = divmod(t_end, 60)
                 start_str = f"0:{int(m_s):02d}:{s_s:05.2f}"
@@ -453,6 +536,7 @@ $synth.Dispose()
                 clean_text = c.upper().replace("{", "").replace("}", "")
                 dialogue_lines.append(f"Dialogue: 0,{start_str},{end_str},Default,,0,0,0,,{clean_text}")
 
+        # Anton Bold, white text, cyan neon glow outline (&H00FFF000), margin 240
         ass_content = f"""[Script Info]
 Title: VideoFactory Viral Short
 ScriptType: v4.00+
@@ -471,45 +555,86 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             f.write(ass_content)
 
         clean_ass = ass_path.replace('\\', '/').replace(':', '\\:')
-        clean_img = image_path.replace('\\', '/')
+        fps = 30
 
-        # FFmpeg command: subtle Ken-Burns zoom on 9:16 canvas + Anton Bold subtitles
-        cmd = [
-            "ffmpeg", "-y",
-            "-loop", "1", "-i", clean_img,
-            "-i", audio_path,
-            "-vf", f"scale=720:1280,subtitles='{clean_ass}'",
-            "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac", "-b:a", "192k",
-            "-pix_fmt", "yuv420p",
-            "-shortest",
-            video_path
-        ]
+        # Multi-Scene Animated Compilation
+        if len(valid_scenes) >= 3:
+            scene_dur = duration / 3.0
+            n_frames = max(1, int(scene_dur * fps))
+            step1 = 0.25 / n_frames
+            step3 = 0.28 / n_frames
 
-        logger.info(f"[VideoFactory] Running FFmpeg compilation: {' '.join(cmd)}")
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-        
-        if res.returncode != 0:
-            logger.error(f"[VideoFactory] FFmpeg error: {res.stderr}")
-            # Fallback without subtitles filter if libass plugin had issue
-            cmd_simple = [
+            filtergraph = (
+                f"[0:v]zoompan=z='min(zoom+{step1:.6f},1.28)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)+sin(on/22)*7':d={n_frames}:s=720x1280:fps={fps}[v0];"
+                f"[1:v]zoompan=z='1.22+sin(on/30)*0.04':x='iw/2-(iw/zoom/2)+sin(on/18)*25':y='ih/2-(ih/zoom/2)+cos(on/25)*10':d={n_frames}:s=720x1280:fps={fps}[v1];"
+                f"[2:v]zoompan=z='min(zoom+{step3:.6f},1.38)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)+sin(on/10)*5':d={n_frames}:s=720x1280:fps={fps}[v2];"
+                f"[v0][v1][v2]concat=n=3:v=1:a=0[vcat];"
+                f"[vcat]subtitles='{clean_ass}'[vout]"
+            )
+
+            cmd = [
                 "ffmpeg", "-y",
-                "-loop", "1", "-i", clean_img,
-                "-i", audio_path,
-                "-vf", "scale=720:1280",
-                "-c:v", "libx264", "-c:a", "aac", "-b:a", "192k",
+                "-i", valid_scenes[0].replace('\\', '/'),
+                "-i", valid_scenes[1].replace('\\', '/'),
+                "-i", valid_scenes[2].replace('\\', '/'),
+                "-i", audio_path.replace('\\', '/'),
+                "-filter_complex", filtergraph,
+                "-map", "[vout]",
+                "-map", "3:a",
+                "-c:v", "libx264", "-preset", "veryfast", "-c:a", "aac", "-b:a", "192k",
                 "-pix_fmt", "yuv420p",
-                "-shortest",
+                "-t", str(duration),
                 video_path
             ]
-            subprocess.run(cmd_simple, capture_output=True, timeout=30)
+        else:
+            # Single / Dual scene dynamic zoom & pan
+            total_frames = max(1, int(duration * fps))
+            step = 0.30 / total_frames
+            vf = (
+                f"zoompan=z='min(zoom+{step:.6f},1.35)':x='iw/2-(iw/zoom/2)+sin(on/20)*15':"
+                f"y='ih/2-(ih/zoom/2)+cos(on/25)*10':d={total_frames}:s=720x1280:fps={fps},"
+                f"subtitles='{clean_ass}'"
+            )
+            cmd = [
+                "ffmpeg", "-y",
+                "-i", valid_scenes[0].replace('\\', '/'),
+                "-i", audio_path.replace('\\', '/'),
+                "-vf", vf,
+                "-c:v", "libx264", "-preset", "veryfast", "-c:a", "aac", "-b:a", "192k",
+                "-pix_fmt", "yuv420p",
+                "-t", str(duration),
+                video_path
+            ]
+
+        logger.info(f"[VideoFactory] Dispatching dynamic motion render...")
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=90)
+
+        if res.returncode != 0:
+            logger.warning(f"[VideoFactory] Complex motion failed ({res.stderr[:200]}), falling back to linear motion...")
+            total_frames = max(1, int(duration * fps))
+            step = 0.25 / total_frames
+            fallback_vf = f"zoompan=z='min(zoom+{step:.6f},1.30)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={total_frames}:s=720x1280:fps={fps}"
+            cmd_fallback = [
+                "ffmpeg", "-y",
+                "-i", valid_scenes[0].replace('\\', '/'),
+                "-i", audio_path.replace('\\', '/'),
+                "-vf", fallback_vf,
+                "-c:v", "libx264", "-preset", "veryfast", "-c:a", "aac", "-b:a", "192k",
+                "-pix_fmt", "yuv420p",
+                "-t", str(duration),
+                video_path
+            ]
+            subprocess.run(cmd_fallback, capture_output=True, timeout=60)
 
         # Cleanup subtitle temp
         if os.path.exists(ass_path):
-            try: os.remove(ass_path)
-            except Exception: pass
+            try:
+                os.remove(ass_path)
+            except Exception:
+                pass
 
         return {
-            "engine": "Native Sovereign FFmpeg Compositor",
+            "engine": "Native Sovereign Animated FFmpeg Engine (3-Act Dynamic Motion)",
             "video_url": f"/api/video/stream/{video_filename}",
             "duration_sec": round(duration, 2),
             "filename": video_filename,
@@ -563,6 +688,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         # STEP 3: VISUALS
         visual_res = await self.step3_generate_visuals(keywords, job_id)
         image_path = visual_res.get("path")
+        scene_paths = visual_res.get("scenes", [image_path])
 
         # STEP 4: EDIT
         render_res = await self.step4_render_video(
@@ -570,6 +696,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             audio_path=audio_path,
             image_path=image_path,
             job_id=job_id,
+            scene_paths=scene_paths,
             creatomate_key=creatomate_key,
             template_id=template_id
         )

@@ -54,3 +54,12 @@ overnight_training.log
 scratch/
 backend/hello_world.py
 *work_folder*
+
+# Generated Video Factory & Website artifacts
+backend/generated_code/videos/*.mp4
+backend/generated_code/videos/*.mp3
+backend/generated_code/videos/*.wav
+backend/generated_code/videos/*.png
+backend/generated_code/videos/*.ass
+backend/generated_code/websites/
+

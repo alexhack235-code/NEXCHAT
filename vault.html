@@ -237,6 +237,7 @@
             </div>
             <div class="telemetry-row">
                 <span class="badge" id="vaultProviderBadge">STORAGE: LOCALHOST</span>
+                <span class="badge" style="color:var(--cyan); border-color:rgba(0,240,255,0.4);">MOTION: 3-ACT DYNAMIC ANIMATION (30 FPS)</span>
                 <span class="badge emerald" id="userTierBadge">TIER: FREE (0/2 used)</span>
                 <a href="/chat" class="btn btn-outline" style="padding:5px 12px; font-size:11px;">Open Workstation →</a>
             </div>
@@ -257,30 +258,30 @@
             <div class="card">
                 <h2>
                     <span>Active Video Short</span>
-                    <span id="activeVideoDuration" style="font-size:11px; color:var(--emerald);">32.64s</span>
+                    <span id="activeVideoDuration" style="font-size:11px; color:var(--emerald);">31.66s</span>
                 </h2>
 
                 <div class="video-box">
-                    <video id="player" controls autoplay loop playsinline src="/api/video/stream/short_f1bb8cf527.mp4"></video>
+                    <video id="player" controls autoplay loop playsinline src="/api/video/stream/short_02eb74b725.mp4"></video>
                 </div>
 
                 <div class="script-box" id="scriptContent">
-                    <strong>VIRAL RECAP SCRIPT (Anton Bold Subtitles):</strong><br>
-                    He thought the morning was normal. Chapter 1: The Descent of the Absolute Kang Jin-woo rubbed his bloodshot eyes, staring at the fluorescent monitor in the empty convenience store It was 3:42 AM when the sky shattered like cheap glass A crimson system window violently materializes before his retinas. Reality fractures into glass. The global leaderboard updates. His name appears in sovereign gold at rank one. Behind him, the air turns to ice as a dimensional gate rips wide open.
+                    <strong>VIRAL RECAP SCRIPT (Anton Bold Subtitles + Dynamic Motion):</strong><br>
+                    He thought he was just an ordinary junior hunter working in the low-rank mines. A crimson system window violently materializes before his retinas. Reality fractures into glass. The global leaderboard updates. His name appears in sovereign gold at rank one. Behind him, the air turns to ice as a dimensional gate rips wide open.
                 </div>
 
                 <div class="meta-tags" id="tagsWrap">
-                    <span class="tag">#apocalypse</span>
-                    <span class="tag">#system-window</span>
-                    <span class="tag">#dimensional-gate</span>
-                    <span class="tag">#sovereign-rank</span>
-                    <span class="tag">#adam-voice</span>
-                    <span class="tag">#60fps-ffmpeg</span>
+                    <span class="tag">#3-act-dynamic-motion</span>
+                    <span class="tag">#ken-burns-zoom</span>
+                    <span class="tag">#lateral-pan-drift</span>
+                    <span class="tag">#climax-push-pulse</span>
+                    <span class="tag">#anton-bold-glow</span>
+                    <span class="tag">#30fps-ffmpeg</span>
                 </div>
 
                 <div class="btn-group">
-                    <a id="downloadLink" href="/api/video/stream/short_f1bb8cf527.mp4" download class="btn btn-primary" style="flex:1;">
-                        Download 9:16 MP4 (1.14 MB)
+                    <a id="downloadLink" href="/api/video/stream/short_02eb74b725.mp4" download class="btn btn-primary" style="flex:1;">
+                        Download 9:16 MP4 (3.62 MB)
                     </a>
                     <button onclick="copyStreamUrl()" class="btn btn-outline">
                         Copy Link
@@ -338,8 +339,11 @@
                 if (res.ok) {
                     const data = await res.json();
                     const list = document.getElementById("pastJobsList");
-                    list.innerHTML = "";
-                    (data.jobs || []).forEach(job => {
+                    const jobs = data.jobs || [];
+                    if (jobs.length > 0) {
+                        loadVideoToPlayer(jobs[0]);
+                    }
+                    jobs.forEach(job => {
                         const div = document.createElement("div");
                         div.style.cssText = "background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:6px; font-size:11px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;";
                         div.innerHTML = `
@@ -362,7 +366,7 @@
             document.getElementById("player").src = job.mp4_url;
             document.getElementById("downloadLink").href = job.mp4_url;
             document.getElementById("activeVideoDuration").textContent = job.duration_sec + "s";
-            document.getElementById("scriptContent").innerHTML = `<strong>VIRAL RECAP SCRIPT (Anton Bold Subtitles):</strong><br>${job.script}`;
+            document.getElementById("scriptContent").innerHTML = `<strong>VIRAL RECAP SCRIPT (Anton Bold Subtitles + Dynamic Motion):</strong><br>${job.script}`;
             const tagsWrap = document.getElementById("tagsWrap");
             tagsWrap.innerHTML = "";
             (job.keywords || []).forEach(k => {
@@ -419,13 +423,13 @@
                 bar.style.width = p + "%";
                 if (p >= 40 && p < 60) {
                     step.textContent = "STEP 2/4";
-                    label.textContent = "Generating Adam deep audio narration...";
+                    label.textContent = "Synthesizing Adam deep audio narration...";
                 } else if (p >= 60 && p < 80) {
                     step.textContent = "STEP 3/4";
-                    label.textContent = "Generating 9:16 manhwa graphics...";
+                    label.textContent = "Generating 3-act cinematic manhwa visuals (Hook, Rift, Monarch)...";
                 } else if (p >= 80) {
                     step.textContent = "STEP 4/4";
-                    label.textContent = "Compiling 60fps MP4 with Anton Bold subtitles...";
+                    label.textContent = "Compiling 3-act dynamic camera motion (zoom/pan/drift) + subtitles...";
                 }
             }, 3000);
 

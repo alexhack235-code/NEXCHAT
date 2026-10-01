@@ -213,12 +213,52 @@ async def trigger_daily_reset() -> Dict[str, Any]:
         "reset_count": count
     }
 
+class CloudinarySetupRequest(BaseModel):
+    presets: List[Dict[str, Any]] = Field(default=[], description="List of Cloudinary configurations (up to 5)")
+    raw_text: Optional[str] = Field(default=None, description="Raw text or Cloudinary URLs to parse")
+
 @router.get("/vault-status")
 async def get_vault_status() -> Dict[str, Any]:
     """Returns active cloud storage vault configuration and status."""
     if not cloud_vault:
         return {"active_provider": "LOCAL_DISK_VAULT", "configured": False}
     return cloud_vault.get_vault_status()
+
+@router.post("/vault/setup-cloudinary")
+async def setup_cloudinary_vault(req: CloudinarySetupRequest) -> Dict[str, Any]:
+    """Registers up to 5 Cloudinary upload presets or credentials into the persistent vault."""
+    if not cloud_vault:
+        raise HTTPException(status_code=500, detail="Cloud vault adapter not loaded.")
+
+    accounts = list(req.presets)
+    if req.raw_text:
+        for line in req.raw_text.strip().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("cloudinary://"):
+                parsed = cloud_vault.parse_cloudinary_url(line)
+                if parsed:
+                    accounts.append(parsed)
+            elif "," in line:
+                parts = [p.strip() for p in line.split(",")]
+                if len(parts) >= 2:
+                    accounts.append({
+                        "id": f"preset_{len(accounts)+1}",
+                        "cloud_name": parts[0],
+                        "upload_preset": parts[1]
+                    })
+
+    if not accounts:
+        raise HTTPException(status_code=400, detail="No valid Cloudinary presets or credentials provided.")
+
+    count = cloud_vault.register_cloudinary_accounts(accounts)
+    return {
+        "status": "success",
+        "message": f"Successfully registered {count} Cloudinary vault presets into load balancer.",
+        "active_provider": cloud_vault.active_provider,
+        "vault_status": cloud_vault.get_vault_status()
+    }
 
 @router.get("/stream/{filename}")
 @router.head("/stream/{filename}")

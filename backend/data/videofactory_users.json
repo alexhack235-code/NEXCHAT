@@ -1,0 +1,54 @@
+{
+  "http_test_user": {
+    "user_id": "http_test_user",
+    "tier": "free",
+    "tokens": 0,
+    "videos_today": 0,
+    "last_reset_date": "2026-10-01",
+    "total_videos_created": 0,
+    "created_at": 1790816917.1525364,
+    "transactions": []
+  },
+  "default_user": {
+    "user_id": "default_user",
+    "tier": "elite",
+    "tokens": 665,
+    "videos_today": 0,
+    "last_reset_date": "2026-10-01",
+    "total_videos_created": 1,
+    "created_at": 1790816925.3509243,
+    "transactions": [
+      {
+        "pack": "starter",
+        "amount_usd": 5,
+        "tokens_added": 100,
+        "timestamp": 1790816925.3553956,
+        "paystack_ref": "pstk_0c564f7352"
+      },
+      {
+        "pack": "pro",
+        "amount_usd": 20,
+        "tokens_added": 500,
+        "timestamp": 1790883721.77245,
+        "paystack_ref": "pstk_b6458609f0"
+      },
+      {
+        "pack": "starter",
+        "amount_usd": 5,
+        "tokens_added": 100,
+        "timestamp": 1790883722.9352233,
+        "paystack_ref": "pstk_e4eea7891e"
+      }
+    ]
+  },
+  "test_motion_verifier": {
+    "user_id": "test_motion_verifier",
+    "tier": "free",
+    "tokens": 0,
+    "videos_today": 1,
+    "last_reset_date": "2026-10-01",
+    "total_videos_created": 1,
+    "created_at": 1790884483.3831582,
+    "transactions": []
+  }
+}
