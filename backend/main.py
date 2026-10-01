@@ -20,6 +20,7 @@ logger = logging.getLogger("nexium.main")
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 CHAT_HTML_PATH = PROJECT_ROOT / "chat.html"
 STUDIO_HTML_PATH = PROJECT_ROOT / "nex-3d-studio.html"
+VAULT_HTML_PATH = PROJECT_ROOT / "vault.html"
 CSS_PATH = PROJECT_ROOT / "css"
 
 try:
@@ -342,6 +343,13 @@ async def serve_chat():
     if CHAT_HTML_PATH.exists():
         return FileResponse(str(CHAT_HTML_PATH), media_type="text/html")
     return HTMLResponse("<h1>chat.html not found</h1>", status_code=404)
+
+@app.get("/vault")
+@app.get("/videos-vault")
+async def serve_vault():
+    if VAULT_HTML_PATH.exists():
+        return FileResponse(str(VAULT_HTML_PATH), media_type="text/html")
+    return HTMLResponse("<h1>vault.html not found</h1>", status_code=404)
 
 @app.get("/studio")
 async def serve_studio():
