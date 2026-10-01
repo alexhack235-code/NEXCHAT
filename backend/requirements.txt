@@ -8,3 +8,7 @@ huggingface_hub
 pytest
 redis>=4.6.0
 sympy
+pillow
+aiofiles
+python-multipart
+tzdata

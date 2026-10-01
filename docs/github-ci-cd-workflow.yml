@@ -1,0 +1,72 @@
+name: NEXIUM AI & VideoFactory CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  security-audit:
+    name: Defense & Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check for Exposed Sensitive Secrets
+        run: |
+          echo "Scanning repository for leaked credentials..."
+          # Block build if raw API keys are committed in source
+          if grep -rnw . -e 'sk-[a-zA-Z0-9]\{20,\}' -e 'pstk_[a-zA-Z0-9]\{20,\}' --exclude-dir={.git,.venv,__pycache__}; then
+            echo "CRITICAL: Potential unencrypted API keys detected in repository source!"
+            exit 1
+          fi
+          echo "Secret scan passed."
+
+  test-and-verify:
+    name: Token System & Pipeline Verification
+    needs: security-audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install System Dependencies (FFmpeg & tzdata)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg tzdata
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Execute Token & Limit System Test Suite
+        run: |
+          python test_token_system.py
+
+  docker-build:
+    name: Container Build & Verification
+    needs: test-and-verify
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker Container Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: false
+          tags: nexium-ai:latest
