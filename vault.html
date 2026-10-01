@@ -296,13 +296,21 @@
                 </h2>
 
                 <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
-                    Paste any novel chapter. The engine will rewrite it into a 130-word viral script, generate speech, render 9:16 graphics, and compile subtitles automatically.
+                    Upload any storybook or chapter file. The engine rewrites it into a 130-word viral recap script, synthesizes speech, renders 9:16 visuals, and compiles the video with Anton Bold subtitles automatically.
                 </p>
 
-                <textarea id="chapterInput" placeholder="Paste Chapter 2 or new novel text here..."></textarea>
+                <!-- Drag and Drop Storybook Upload Box -->
+                <div id="dropZone" onclick="document.getElementById('fileUploadInput').click()" style="border: 2px dashed rgba(0, 240, 255, 0.35); border-radius: 12px; padding: 18px; text-align: center; background: rgba(0, 240, 255, 0.04); cursor: pointer; margin-bottom: 14px; transition: all 0.2s;">
+                    <div style="font-size: 26px; margin-bottom: 6px;">📂</div>
+                    <div id="uploadTitle" style="font-size: 13px; font-weight: 700; color: var(--cyan);">Click to Upload Storybook File or Drag & Drop Here</div>
+                    <div id="uploadSub" style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Supports .txt, .md, novel text files (or paste below)</div>
+                    <input type="file" id="fileUploadInput" accept=".txt,.md,.text" style="display:none;" onchange="handleFileSelect(event)">
+                </div>
 
-                <button id="synthBtn" onclick="synthesizeFromVault()" class="btn btn-primary" style="width:100%; padding:12px; font-size:13px; margin-bottom:15px;">
-                    ⚡ Synthesize & Save to Vault
+                <textarea id="chapterInput" placeholder="Or paste novel chapter / storybook text here directly..."></textarea>
+
+                <button id="synthBtn" onclick="synthesizeFromVault()" class="btn btn-primary" style="width:100%; padding:13px; font-size:13px; margin-bottom:15px; cursor:pointer;">
+                    ⚡ Convert Storybook to 9:16 Viral Video
                 </button>
 
                 <div class="progress-box" id="progressBox">
@@ -360,6 +368,30 @@
             (job.keywords || []).forEach(k => {
                 tagsWrap.innerHTML += `<span class="tag">#${k}</span>`;
             });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            readFile(file);
+        }
+
+        function readFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                document.getElementById("chapterInput").value = text;
+                const words = text.trim().split(/\s+/).length;
+                document.getElementById("uploadTitle").innerHTML = `<span style="color:var(--emerald);">Loaded: ${escapeHtml(file.name)}</span>`;
+                document.getElementById("uploadSub").textContent = `${words.toLocaleString()} words loaded from storybook. Click button below to convert!`;
+            };
+            reader.readAsText(file);
+        }
+
+        function escapeHtml(str) {
+            const d = document.createElement("div");
+            d.textContent = str;
+            return d.innerHTML;
         }
 
         async function synthesizeFromVault() {
@@ -447,6 +479,31 @@
                     document.getElementById("userTierBadge").textContent = `TIER: ${uData.tier.toUpperCase()} (${uData.videos_today}/2 used)`;
                 }
             } catch(e) {}
+        }
+
+        // Setup Drag and Drop Listeners
+        const dropZone = document.getElementById("dropZone");
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(name => {
+                dropZone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = "var(--emerald)";
+                    dropZone.style.background = "rgba(0, 255, 136, 0.08)";
+                }, false);
+            });
+            ['dragleave', 'drop'].forEach(name => {
+                dropZone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = "rgba(0, 240, 255, 0.35)";
+                    dropZone.style.background = "rgba(0, 240, 255, 0.04)";
+                }, false);
+            });
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files && files.length) {
+                    readFile(files[0]);
+                }
+            }, false);
         }
 
         loadJobs();
