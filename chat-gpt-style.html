@@ -85,8 +85,8 @@
                         <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
                     </div>
                     <div class="model-info-stack">
-                        <span class="model-name" id="currentModelName">Qwen 2.5 3B</span>
-                        <span class="model-sub" id="currentEngineTag">LOCAL CORE</span>
+                        <span class="model-name" id="currentModelName">Gemini 3.8 Flash</span>
+                        <span class="model-sub" id="currentEngineTag">&lt;300MS ACCEL</span>
                     </div>
                     <svg class="icon icon-sm" style="color:var(--text-dim);" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
@@ -228,7 +228,7 @@
             <div class="modal-body">
                 <div class="setting-field-group">
                     <label class="setting-field-label">API Base Endpoint</label>
-                    <input type="text" id="settingApiBase" class="setting-input" value="http://localhost:8000">
+                    <input type="text" id="settingApiBase" class="setting-input" value="http://localhost:8001">
                 </div>
 
                 <div class="setting-field-group">
@@ -251,7 +251,7 @@
 
                 <div class="setting-field-group">
                     <label class="setting-field-label">Autonomous System Directives</label>
-                    <textarea id="settingSystemPrompt" class="setting-input setting-textarea">You are NEXIUM, an advanced AI system created by NEXO-TECH. You operate with absolute precision, high-speed logical deduction, and clean code generation. Never use emojis. Provide clean, well-structured technical solutions with modern practices.</textarea>
+                    <textarea id="settingSystemPrompt" class="setting-input setting-textarea">You are NEXIUM, an advanced sovereign AI system created by NEXO-TECH. You operate with absolute precision, high-speed logical deduction, and clean code generation. Never use emojis. When generating web components or websites, always deliver elite, production-grade futuristic web applications with deep dark cyber aesthetics, glassmorphic HUD telemetry, HTML5 Canvas particle systems, electric neon accents, and interactive JavaScript.</textarea>
                 </div>
             </div>
 
@@ -280,8 +280,8 @@
             thinkMode: false,
             webMode: false,
             soundEnabled: true,
-            selectedModel: "qwen2.5:3b-instruct",
-            selectedEngine: "Local Ollama",
+            selectedModel: "gemini-3.8-flash",
+            selectedEngine: "Cloud Key Pool",
             backendStatus: "checking", // online | offline | standby
             activeCanvasTab: "sandbox",
             audioCtx: null,
@@ -295,10 +295,13 @@
 
         // Preset Models
         const MODEL_REGISTRY = [
-            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B", engine: "Local Ollama", tag: "RECOMMENDED" },
+            { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", engine: "Cloud Key Pool", tag: "<300MS ACCEL" },
+            { id: "gemini-4.0-preview", name: "Gemini 4.0 Next-Gen", engine: "Cloud Key Pool", tag: "⚡ READY HOOK" },
+            { id: "gemini-4.0-flash", name: "Gemini 4.0 Flash", engine: "Cloud Key Pool", tag: "⚡ READY HOOK" },
+            { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", engine: "Cloud Key Pool", tag: "REASONING" },
+            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B (Local PC)", engine: "Local Host PC", tag: "🟢 ON YOUR PC" },
             { id: "deepseek-r1:latest", name: "DeepSeek R1", engine: "Reasoning Core", tag: "REASONING" },
             { id: "llama3.3:latest", name: "Llama 3.3 70B", engine: "Local Ollama", tag: "HIGH PERFORMANCE" },
-            { id: "qwen2.5:3b-instruct", name: "NEXIUM Core (Qwen 2.5 3B)", engine: "Local Ollama", tag: "NATIVE HYBRID" },
             { id: "cloud-gpt4o", name: "GPT-4o Omni", engine: "Cloud API", tag: "CLOUD PROXY" }
         ];
 
@@ -357,6 +360,7 @@
             loadSettings();
             loadSessions();
             checkBackendHealth();
+            detectGeminiStatus();
             initSpeechRecognition();
 
             // Keyboard Shortcuts
@@ -1027,9 +1031,9 @@
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({
                                 prompt: prompt,
-                                max_tokens: 2048,
-                                max_output_tokens: 2048,
-                                model: state.selectedModel || "qwen2.5:3b-instruct",
+                                max_tokens: 4096,
+                                max_output_tokens: 4096,
+                                model: state.selectedModel || "gemini-3.8-flash",
                                 system_instruction: settings.systemPrompt,
                                 system_prompt: settings.systemPrompt,
                                 temperature: parseFloat(settings.temperature)
@@ -1138,71 +1142,361 @@
 
             const lower = prompt.toLowerCase();
 
-            if (lower.includes("react") || lower.includes("html") || lower.includes("canvas") || lower.includes("dashboard") || lower.includes("ui")) {
-                return `Here is a complete, self-contained interactive component configured for instant rendering in the NEXIUM Live Sandbox Canvas:
+            if (lower.includes("react") || lower.includes("html") || lower.includes("website") || lower.includes("web") || lower.includes("canvas") || lower.includes("dashboard") || lower.includes("ui") || lower.includes("futuristic")) {
+                return `Here is a complete, production-grade high-futuristic web application with interactive 3D particle mesh, glassmorphic HUD telemetry, real-time quantum frequency controls, and cybernetic styling configured for instant rendering in the NEXIUM Canvas:
 
 \`\`\`html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXIUM // Quantum Autonomous Core</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Space+Grotesk:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-deep: #030712;
+            --bg-card: rgba(13, 17, 28, 0.75);
+            --border-glow: rgba(0, 240, 255, 0.35);
+            --cyan-glow: #00F0FF;
+            --emerald-glow: #00FF88;
+            --purple-glow: #8B5CF6;
+            --gold-glow: #FFB800;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
-            margin: 0;
-            padding: 24px;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #090a10;
-            color: #f1f5f9;
+            background-color: var(--bg-deep);
+            color: #f8fafc;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        #starfieldCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .cyber-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+        .hex-indicator {
+            width: 28px;
+            height: 28px;
+            background: rgba(0,240,255,0.15);
+            border: 1px solid var(--cyan-glow);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 14px rgba(0,240,255,0.5);
+            animation: pulse-hex 2s infinite alternate;
+        }
+        @keyframes pulse-hex { from { transform: scale(1); } to { transform: scale(1.1); box-shadow: 0 0 20px #00F0FF; } }
+        .nav-telemetry {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        .telemetry-chip {
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.3);
+            color: var(--emerald-glow);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-glow); box-shadow: 0 0 8px var(--emerald-glow); animation: blink 1.2s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .hero {
+            text-align: center;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .hero-badge {
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--cyan-glow);
+            background: rgba(0,240,255,0.08);
+            border: 1px solid rgba(0,240,255,0.3);
+            padding: 6px 16px;
+            border-radius: 100px;
+            text-transform: uppercase;
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4.2rem);
+            font-weight: 900;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff 30%, #00F0FF 70%, #8B5CF6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 50px rgba(0,240,255,0.35);
+        }
+        .hero p {
+            max-width: 680px;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn-cyber {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid transparent;
+            text-transform: uppercase;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00F0FF, #0077FF);
+            color: #030712;
+            box-shadow: 0 0 25px rgba(0,240,255,0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(0,240,255,0.7);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.15);
+            color: #fff;
+            backdrop-filter: blur(10px);
+        }
+        .btn-secondary:hover {
+            border-color: var(--cyan-glow);
+            background: rgba(0,240,255,0.08);
+            transform: translateY(-2px);
+        }
+        .hud-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
         }
         .hud-card {
-            background: #12141f;
-            border: 1px solid rgba(0, 240, 255, 0.25);
-            border-radius: 12px;
-            padding: 20px;
-            max-width: 420px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .hud-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--cyan-glow);
+            box-shadow: 0 16px 40px rgba(0,240,255,0.15);
+        }
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
         }
         .hud-title {
-            font-size: 14px;
+            font-family: 'Orbitron', monospace;
+            font-size: 13px;
             font-weight: 700;
-            letter-spacing: 0.08em;
+            color: var(--cyan-glow);
+            letter-spacing: 1px;
             text-transform: uppercase;
-            color: #00f0ff;
+        }
+        .metric-hero {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
             margin-bottom: 8px;
         }
-        .metric-value {
-            font-size: 32px;
-            font-weight: 800;
-            color: #00ff9d;
-            margin-bottom: 12px;
+        .metric-unit { font-size: 1rem; color: #64748b; font-weight: 400; }
+        .hud-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 16px 0;
         }
-        .action-button {
-            background: #00f0ff;
-            border: none;
-            color: #000;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: transform 0.1s;
+        .hud-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00F0FF, #00FF88);
+            width: 88%;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(0,255,136,0.6);
+            transition: width 0.5s ease;
         }
-        .action-button:hover {
-            transform: scale(1.03);
+        .hud-meta {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
-    <div class="hud-card">
-        <div class="hud-title">Quantum Processing Core</div>
-        <div class="metric-value" id="val">99.98%</div>
-        <button class="action-button" onclick="document.getElementById('val').textContent = (99 + Math.random()).toFixed(2) + '%'">
-            Cycle Frequency
-        </button>
+    <canvas id="starfieldCanvas"></canvas>
+    <div class="app-shell">
+        <nav class="cyber-nav">
+            <div class="brand">
+                <div class="hex-indicator">NX</div>
+                <span>NEXIUM OS</span>
+            </div>
+            <div class="nav-telemetry">
+                <div class="telemetry-chip">
+                    <span class="pulse-dot"></span>
+                    <span>QUANTUM SYNAPSE ACTIVE</span>
+                </div>
+                <div style="color: #64748b;" id="clockDisplay">00:00:00 UTC</div>
+            </div>
+        </nav>
+        <section class="hero">
+            <div class="hero-badge">Next-Generation Sovereign Computing</div>
+            <h1>BEYOND SILICON INTELLIGENCE</h1>
+            <p>High-density cognitive reasoning engine powered by bare-metal vector pipelines and quantum lattice cryptography.</p>
+            <div class="hero-actions">
+                <button class="btn-cyber btn-primary" onclick="pulseCore()">Initialize Core</button>
+                <button class="btn-cyber btn-secondary" onclick="cycleFrequency()">Cycle Harmonics</button>
+            </div>
+        </section>
+        <div class="hud-grid">
+            <div class="hud-card">
+                <div class="hud-header">
+                    <span class="hud-title">Quantum Coherence</span>
+                    <span style="color:#00FF88; font-size:11px; font-family:'JetBrains Mono';">STABLE</span>
+                </div>
+                <div class="metric-hero" id="metricCoherence">99.98<span class="metric-unit">%</span></div>
+                <div class="hud-bar"><div class="hud-fill" id="barFill" style="width: 99.98%;"></div></div>
+                <p class="hud-meta">Active lattice stability verified via post-quantum Kyber encapsulation.</p>
+            </div>
+            <div class="hud-card">
+                <div class="hud-header">
+                    <span class="hud-title">Vector Inference Speed</span>
+                    <span style="color:#00F0FF; font-size:11px; font-family:'JetBrains Mono';">&lt;120ms</span>
+                </div>
+                <div class="metric-hero" id="metricLatency">284<span class="metric-unit">t/s</span></div>
+                <div class="hud-bar"><div class="hud-fill" style="width: 84%; background: linear-gradient(90deg, #8B5CF6, #00F0FF);"></div></div>
+                <p class="hud-meta">Sub-millisecond Rust AVX2 vectorized tensor throughput across 8 parallel streams.</p>
+            </div>
+            <div class="hud-card">
+                <div class="hud-header">
+                    <span class="hud-title">Cognitive Memory Lattice</span>
+                    <span style="color:#FFB800; font-size:11px; font-family:'JetBrains Mono';">SOVEREIGN</span>
+                </div>
+                <div class="metric-hero">1.2<span class="metric-unit">TB/s</span></div>
+                <div class="hud-bar"><div class="hud-fill" style="width: 92%; background: linear-gradient(90deg, #FFB800, #FF3366);"></div></div>
+                <p class="hud-meta">Zero-leak immutable memory rings safeguarded by hardware-level AppContainer.</p>
+            </div>
+        </div>
     </div>
+    <script>
+        const canvas = document.getElementById('starfieldCanvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+        function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+        for (let i = 0; i < 75; i++) {
+            particles.push({
+                x: Math.random() * w, y: Math.random() * h,
+                vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+                r: Math.random() * 1.8 + 0.8
+            });
+        }
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.6)';
+            particles.forEach((p, idx) => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+                for (let j = idx + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 130) {
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${0.18 * (1 - dist / 130)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clockDisplay').textContent = now.toISOString().substring(11, 19) + ' UTC';
+        }
+        setInterval(updateClock, 1000); updateClock();
+        function pulseCore() {
+            const val = (99.7 + Math.random() * 0.28).toFixed(2);
+            document.getElementById('metricCoherence').innerHTML = val + '<span class="metric-unit">%</span>';
+            document.getElementById('barFill').style.width = val + '%';
+        }
+        function cycleFrequency() {
+            const tps = Math.floor(270 + Math.random() * 45);
+            document.getElementById('metricLatency').innerHTML = tps + '<span class="metric-unit">t/s</span>';
+        }
+    </script>
 </body>
 </html>
 \`\`\`
 
-Click **"Run in Canvas"** on the code block above to preview and interact with this component directly in the split-screen sandbox.`;
+Click **"Run in Canvas"** on the code block above to preview and interact with this futuristic website directly in the split-screen sandbox.`;
             }
 
             if (lower.includes("python") || lower.includes("algorithm") || lower.includes("terminal") || lower.includes("execute")) {
@@ -1467,6 +1761,7 @@ Your query has been preserved in your session history.`;
 
             state.selectedModel = selected.id;
             state.selectedEngine = selected.engine;
+            localStorage.setItem("nexium_selected_model", selected.id);
 
             document.getElementById("currentModelName").textContent = selected.name;
             document.getElementById("currentEngineTag").textContent = selected.tag;
@@ -1482,10 +1777,17 @@ Your query has been preserved in your session history.`;
             document.getElementById("settingsModal").classList.remove("open");
         }
 
+        function getDefaultApiBase() {
+            if (window.location.origin && window.location.origin !== "null" && !window.location.origin.startsWith("file:")) {
+                return window.location.origin;
+            }
+            return "http://localhost:8001";
+        }
+
         function saveSettings() {
             playHoloSound('click');
             const settings = {
-                apiBase: document.getElementById("settingApiBase").value.trim() || "http://localhost:8001",
+                apiBase: document.getElementById("settingApiBase").value.trim() || getDefaultApiBase(),
                 ollamaUrl: document.getElementById("settingOllamaUrl").value.trim() || "http://localhost:11434",
                 apiKey: document.getElementById("settingApiKey").value.trim(),
                 temperature: document.getElementById("settingTemperature").value,
@@ -1502,7 +1804,12 @@ Your query has been preserved in your session history.`;
                 const stored = localStorage.getItem(STORAGE_KEY_SETTINGS);
                 if (stored) {
                     const parsed = JSON.parse(stored);
-                    if (parsed.apiBase) document.getElementById("settingApiBase").value = parsed.apiBase;
+                    if (parsed.apiBase) {
+                        if (parsed.apiBase === "http://localhost:8000") {
+                            parsed.apiBase = getDefaultApiBase();
+                        }
+                        document.getElementById("settingApiBase").value = parsed.apiBase;
+                    }
                     if (parsed.ollamaUrl) document.getElementById("settingOllamaUrl").value = parsed.ollamaUrl;
                     if (parsed.apiKey) document.getElementById("settingApiKey").value = parsed.apiKey;
                     if (parsed.temperature) {
@@ -1510,17 +1817,65 @@ Your query has been preserved in your session history.`;
                         document.getElementById("tempValueLabel").textContent = parsed.temperature;
                     }
                     if (parsed.systemPrompt) document.getElementById("settingSystemPrompt").value = parsed.systemPrompt;
+                } else {
+                    document.getElementById("settingApiBase").value = getDefaultApiBase();
+                }
+                const savedModel = localStorage.getItem("nexium_selected_model");
+                if (savedModel) {
+                    const found = MODEL_REGISTRY.find(m => m.id === savedModel);
+                    if (found) {
+                        state.selectedModel = found.id;
+                        state.selectedEngine = found.engine;
+                        const nameEl = document.getElementById("currentModelName");
+                        const tagEl = document.getElementById("currentEngineTag");
+                        if (nameEl) nameEl.textContent = found.name;
+                        if (tagEl) tagEl.textContent = found.tag;
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function detectGeminiStatus() {
+            const settings = getSettings();
+            try {
+                const res = await fetch(`${settings.apiBase}/api/gemini/status`, {
+                    signal: AbortSignal.timeout(3000)
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.configured && (data.status === "ONLINE" || data.pool_size > 0)) {
+                        console.log("[NEXIUM] Gemini Multi-Key Pool active:", data);
+                        MODEL_REGISTRY.forEach(m => {
+                            if (m.id.includes("gemini")) {
+                                m.tag = `⚡ ${data.pool_size || 6} KEYS ACTIVE`;
+                            }
+                        });
+                        const savedModel = localStorage.getItem("nexium_selected_model");
+                        if (!savedModel) {
+                            const geminiModel = MODEL_REGISTRY.find(m => m.id === "gemini-3.8-flash") || MODEL_REGISTRY.find(m => m.id.includes("gemini"));
+                            if (geminiModel) {
+                                state.selectedModel = geminiModel.id;
+                                state.selectedEngine = geminiModel.engine;
+                                const nameEl = document.getElementById("currentModelName");
+                                const tagEl = document.getElementById("currentEngineTag");
+                                if (nameEl) nameEl.textContent = geminiModel.name;
+                                if (tagEl) tagEl.textContent = geminiModel.tag;
+                            }
+                        }
+                    }
                 }
             } catch (e) {}
         }
 
         function getSettings() {
+            const rawBase = document.getElementById("settingApiBase") ? document.getElementById("settingApiBase").value.trim() : "";
+            const apiBase = (rawBase && rawBase !== "http://localhost:8000") ? rawBase : getDefaultApiBase();
             return {
-                apiBase: document.getElementById("settingApiBase").value.trim() || "http://localhost:8000",
-                ollamaUrl: document.getElementById("settingOllamaUrl").value.trim() || "http://localhost:11434",
-                apiKey: document.getElementById("settingApiKey").value.trim(),
-                temperature: document.getElementById("settingTemperature").value || "0.7",
-                systemPrompt: document.getElementById("settingSystemPrompt").value.trim()
+                apiBase: apiBase,
+                ollamaUrl: (document.getElementById("settingOllamaUrl") && document.getElementById("settingOllamaUrl").value.trim()) || "http://localhost:11434",
+                apiKey: (document.getElementById("settingApiKey") && document.getElementById("settingApiKey").value.trim()) || "",
+                temperature: (document.getElementById("settingTemperature") && document.getElementById("settingTemperature").value) || "0.7",
+                systemPrompt: (document.getElementById("settingSystemPrompt") && document.getElementById("settingSystemPrompt").value.trim()) || ""
             };
         }
 

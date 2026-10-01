@@ -25,7 +25,7 @@
     "category": "self_improvement",
     "priority": "high",
     "status": "active",
-    "progress_pct": 40,
+    "progress_pct": 45,
     "created_at": "2026-09-21T20:32:58.646370",
     "completed_at": null,
     "reflections": [
@@ -60,6 +60,10 @@
       {
         "text": "Knowledge base grew to 5044 items.",
         "timestamp": "2026-09-25T20:23:41.913562"
+      },
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.630965"
       }
     ]
   },
@@ -177,7 +181,7 @@
     "category": "performance",
     "priority": "critical",
     "status": "active",
-    "progress_pct": 80,
+    "progress_pct": 85,
     "created_at": "2026-09-21T20:59:38.133635",
     "completed_at": null,
     "reflections": [
@@ -188,6 +192,10 @@
       {
         "text": "Knowledge base grew to 5044 items.",
         "timestamp": "2026-09-25T20:23:41.918548"
+      },
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.632923"
       }
     ]
   },
@@ -197,13 +205,17 @@
     "category": "self_improvement",
     "priority": "high",
     "status": "active",
-    "progress_pct": 5,
+    "progress_pct": 10,
     "created_at": "2026-09-21T21:00:27.506083",
     "completed_at": null,
     "reflections": [
       {
         "text": "Knowledge base grew to 5044 items.",
         "timestamp": "2026-09-25T20:23:41.920544"
+      },
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.633921"
       }
     ]
   },
@@ -213,13 +225,17 @@
     "category": "performance",
     "priority": "critical",
     "status": "active",
-    "progress_pct": 75,
+    "progress_pct": 80,
     "created_at": "2026-09-25T20:23:50.101616",
     "completed_at": null,
     "reflections": [
       {
         "text": "AVX-512 intrinsic benchmarks verified.",
         "timestamp": "2026-09-25T20:23:59.074567"
+      },
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.634917"
       }
     ]
   },
@@ -229,8 +245,40 @@
     "category": "self_improvement",
     "priority": "high",
     "status": "active",
-    "progress_pct": 0,
+    "progress_pct": 5,
     "created_at": "2026-09-25T20:24:37.413254",
+    "completed_at": null,
+    "reflections": [
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.636913"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Optimize SIMD vector dot product",
+    "category": "performance",
+    "priority": "critical",
+    "status": "active",
+    "progress_pct": 75,
+    "created_at": "2026-10-01T00:42:51.798058",
+    "completed_at": null,
+    "reflections": [
+      {
+        "text": "AVX-512 intrinsic benchmarks verified.",
+        "timestamp": "2026-10-01T00:42:59.970532"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "title": "Deepen knowledge: Quorum Invariants & Partition Tolerance",
+    "category": "self_improvement",
+    "priority": "high",
+    "status": "active",
+    "progress_pct": 0,
+    "created_at": "2026-10-01T00:43:35.446662",
     "completed_at": null,
     "reflections": []
   }

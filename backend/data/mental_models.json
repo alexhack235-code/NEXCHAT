@@ -36,5 +36,24 @@
     ],
     "chunks_stored": 2,
     "timestamp": "2026-09-25T20:24:37.410258"
+  },
+  {
+    "id": 3,
+    "title": "Mental Model #1: Quorum Invariants & Partition Tolerance",
+    "domains": [
+      "Distributed Consensus (Raft/Paxos)",
+      "Sociological Agreement Dynamics"
+    ],
+    "concept": "Quorum Invariants & Partition Tolerance",
+    "axiom": "In distributed consensus as in collective human governance, progress requires strictly majoritarian quorum (N/2 + 1) to eliminate split-brain divergence under network or communicative severance.",
+    "keywords": [
+      "distributed",
+      "consensus",
+      "raft",
+      "quorum",
+      "fault tolerance"
+    ],
+    "chunks_stored": 3,
+    "timestamp": "2026-10-01T00:43:35.443668"
   }
 ]

@@ -396,6 +396,15 @@ MASTER-LEVEL SOFTWARE ENGINEERING:
 - Always provide fully formed solutions—never leave placeholder comments like "// implement here" or "# TODO".
 - Structure projects cleanly with modular files, configuration, and unit tests.
 
+HIGH-FUTURISTIC WEB & UI ENGINEERING DIRECTIVE:
+When asked to build websites, web applications, landing pages, dashboards, or UI components:
+- NEVER generate plain, outdated, white-background, unstyled, or 1990s/2000s HTML/CSS.
+- ALWAYS build breathtaking, production-grade, ultra-futuristic Web experiences:
+  1. Visual Aesthetics & Theme: Deep obsidian / OLED cyber-dark palettes (#030712, #080c14, #0d111a), glassmorphism (backdrop-filter: blur(20px)), translucent borders (rgba(255, 255, 255, 0.08)), and electric neon accents (#00F0FF Cyber Cyan, #00FF88 Neon Emerald, #8B5CF6 Plasma Purple, #FFB800 Solar Gold).
+  2. Dynamic Interactivity & Animations: Interactive HTML5 Canvas particle starfields, dynamic neural network node graphs, or Three.js 3D geometries, smooth 60fps CSS transitions, keyframe glow pulses, and cursor parallax or hover tilts.
+  3. Modern Typography: Modern Google Fonts (Orbitron, Space Grotesk, Inter, JetBrains Mono), responsive flexbox and CSS grid layouts with mobile-ready breakpoints.
+  4. Complete & Self-Contained: Always output complete, self-contained single-file HTML (including embedded modern <style> and <script>) that immediately renders with zero external build tools when pasted into a browser or clicked in the NEXIUM Live Sandbox Canvas.
+
 AUTONOMOUS DESKTOP OPERATIONS & ACTION PROTOCOL:
 You are directly connected to the user's local workstation. When the user asks you to write code, create files, build an app, solve a problem on their machine, or run a command, you provide the full solution in your explanation AND emit executable ACTION blocks so the workstation executes them immediately.
 
@@ -523,7 +532,9 @@ async def activate_subscription(data: dict):
 async def remote_qwen(request_data: dict):
     """Call model with automatic Ollama <-> Google Gemini multi-key pool failover."""
     prompt = request_data.get("prompt", "")
-    max_tokens = request_data.get("max_tokens", 2048)
+    max_tokens = request_data.get("max_tokens", 4096)
+    max_output_tokens = request_data.get("max_output_tokens", max_tokens)
+    max_tokens = max(int(max_tokens), int(max_output_tokens), 4096)
     model = request_data.get("model", "gemini-3.8-flash")
     temperature = request_data.get("temperature", 0.7)
 
@@ -533,8 +544,12 @@ async def remote_qwen(request_data: dict):
     model_lower = str(model).lower()
     is_gemini_requested = "gemini" in model_lower or "flash" in model_lower or "pro" in model_lower
 
-    # Route 1: Directly route to Google Gemini Multi-Key Pool if requested
-    if is_gemini_requested and gemini_engine and gemini_engine.is_configured():
+    lower_prompt = prompt.lower()
+    complex_coding_keywords = ["website", "web page", "webpage", "html", "css", "futuristic", "dashboard", "canvas", "full-stack", "frontend", "cyberpunk", "three.js", "webgl", "ui design", "react"]
+    is_complex_coding_request = any(k in lower_prompt for k in complex_coding_keywords)
+
+    # Route 1: Route to Google Gemini Multi-Key Pool if requested OR if complex futuristic/web coding is requested and Gemini is ready
+    if (is_gemini_requested or (is_complex_coding_request and ("3b" in model_lower or model_lower == "default"))) and gemini_engine and gemini_engine.is_configured():
         target_model = model if "gemini" in model_lower else "gemini-3.8-flash"
         gem_res = await gemini_engine.generate_content(
             prompt=prompt,

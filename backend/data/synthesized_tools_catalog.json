@@ -7,8 +7,8 @@
       "n": "int"
     },
     "code": "def collatz_steps(n: int):\n    steps = 0\n    val = n\n    while val > 1:\n        val = val // 2 if val % 2 == 0 else 3 * val + 1\n        steps += 1\n    return {'success': True, 'number': n, 'steps': steps}\n",
-    "synthesized_at": 1790364263.659019,
+    "synthesized_at": 1790811804.466001,
     "rust_verified": true,
-    "latency_ms": 1.09
+    "latency_ms": 1.16
   }
 }

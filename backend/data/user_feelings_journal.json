@@ -64,5 +64,38 @@
     "arousal": 0.6,
     "intensity": 0.7,
     "empathy_score": 0.98
+  },
+  {
+    "id": 7,
+    "timestamp": 1790811960.733049,
+    "formatted_time": "2026-10-01 00:46:00",
+    "user_excerpt": "I am absolutely thrilled with how this works! Incredible work!",
+    "primary": "High Anticipation & Eager Hope",
+    "valence": 0.6,
+    "arousal": 0.85,
+    "intensity": 0.9,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 8,
+    "timestamp": 1790811960.7375126,
+    "formatted_time": "2026-10-01 00:46:00",
+    "user_excerpt": "I am feeling overwhelmed and frustrated, nothing is working and I am stuck.",
+    "primary": "Frustration & Urgency",
+    "valence": -0.7,
+    "arousal": 0.85,
+    "intensity": 0.7,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 9,
+    "timestamp": 1790811964.852875,
+    "formatted_time": "2026-10-01 00:46:04",
+    "user_excerpt": "I am curious to see how the supercomputer performs.",
+    "primary": "Curiosity & Wonder",
+    "valence": 0.65,
+    "arousal": 0.6,
+    "intensity": 0.7,
+    "empathy_score": 0.98
   }
 ]

@@ -78,5 +78,15 @@
     "active_goals_count": 4,
     "latency_ms": 0.03,
     "timestamp": "2026-09-25T20:23:41.912565"
+  },
+  {
+    "id": 9,
+    "text": "My knowledge base currently has 5049 items. To reach the next milestone, I should focus on ingesting more content about compiler design.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5049,
+    "active_goals_count": 5,
+    "latency_ms": 0.02,
+    "timestamp": "2026-10-01T00:42:43.629969"
   }
 ]
