@@ -4,6 +4,7 @@ import shutil
 import subprocess
 import tempfile
 import logging
+import asyncio
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, Request, HTTPException
@@ -47,7 +48,23 @@ except ImportError:
         video_factory = None
         VIDEOFACTORY_SYSTEM_PROMPT = ""
 
+try:
+    from .video_tokens import token_manager, UPGRADE_MENU_TEXT, midnight_wat_cron_worker
+except ImportError:
+    try:
+        from video_tokens import token_manager, UPGRADE_MENU_TEXT, midnight_wat_cron_worker
+    except ImportError:
+        token_manager = None
+        UPGRADE_MENU_TEXT = ""
+        midnight_wat_cron_worker = None
+
 app = FastAPI(title="NEXIUM AI - Autonomous Workstation", version="3.0.0")
+
+@app.on_event("startup")
+async def on_startup():
+    if midnight_wat_cron_worker:
+        asyncio.create_task(midnight_wat_cron_worker())
+        logger.info("[NEXIUM] VideoFactory midnight Africa/Lagos (WAT) cron worker initialized.")
 
 # Mount CSS directory if it exists
 if CSS_PATH.exists():
@@ -583,6 +600,31 @@ async def remote_qwen(request_data: dict):
     is_gemini_requested = "gemini" in model_lower or "flash" in model_lower or "pro" in model_lower
 
     lower_prompt = prompt.lower()
+    clean_prompt = prompt.strip()
+    upper_prompt = clean_prompt.upper()
+
+    # VideoFactory Token System: UPGRADE / BUY TOKENS Intercept
+    if upper_prompt in ["UPGRADE", "BUY TOKENS", "PLANS", "PRICING", "VIEW PLANS", "SHOW PLANS"]:
+        return {
+            "text": UPGRADE_MENU_TEXT,
+            "response": UPGRADE_MENU_TEXT,
+            "creator": "NEXO-TECH",
+            "ai_name": "VideoFactory AI",
+            "model": "videofactory-v1"
+        }
+
+    # VideoFactory Token System: BUY 5 / BUY 20 / BUY 50 Intercept
+    if upper_prompt in ["BUY 5", "BUY 20", "BUY 50"] or (upper_prompt.startswith("BUY ") and any(x in upper_prompt for x in ["STARTER", "PRO", "AGENCY", "5", "20", "50"])):
+        if token_manager:
+            ok, msg, u = token_manager.purchase_pack(user_id="default_user", pack_identifier=clean_prompt)
+            return {
+                "text": msg,
+                "response": msg,
+                "creator": "NEXO-TECH",
+                "ai_name": "VideoFactory AI",
+                "model": "videofactory-v1",
+                "user": u
+            }
 
     # VideoFactory System Prompt Registration Intercept
     if "system prompt for your video factory ai" in lower_prompt:
@@ -606,10 +648,23 @@ async def remote_qwen(request_data: dict):
     # VideoFactory Direct Chapter Execution Intercept
     if video_factory and ("videofactory" in lower_prompt or "video factory" in lower_prompt or "novel recap" in lower_prompt) and len(prompt) > 200:
         try:
-            job = await video_factory.execute_pipeline(chapter_text=prompt)
+            job = await video_factory.execute_pipeline(chapter_text=prompt, user_id="default_user")
+            if job.get("status") == "BLOCKED":
+                reply = job.get("quota_reply", job.get("error", "Generation limit reached."))
+                return {
+                    "text": reply,
+                    "response": reply,
+                    "creator": "NEXO-TECH",
+                    "ai_name": "VideoFactory AI",
+                    "model": "videofactory-v1",
+                    "status": "BLOCKED"
+                }
+
             mp4 = job["mp4_url"]
+            quota_reply = job.get("quota_reply", "")
             res_text = (
                 f"{mp4}\n\n"
+                f"{quota_reply}\n\n"
                 f"[VideoFactory AI Execution Completed]\n"
                 f"- MP4 Link: {mp4}\n"
                 f"- Duration: {job['duration_sec']}s\n"

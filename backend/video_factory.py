@@ -24,6 +24,15 @@ from PIL import Image, ImageDraw, ImageFont
 
 logger = logging.getLogger("nexium.video_factory")
 
+try:
+    from .video_tokens import token_manager, UPGRADE_MENU_TEXT
+except ImportError:
+    try:
+        from video_tokens import token_manager, UPGRADE_MENU_TEXT
+    except ImportError:
+        token_manager = None
+        UPGRADE_MENU_TEXT = ""
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 VIDEOS_DIR = os.path.join(ROOT_DIR, "generated_code", "videos")
 JOBS_DATA_FILE = os.path.join(ROOT_DIR, "data", "videofactory_jobs.json")
@@ -507,6 +516,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     async def execute_pipeline(
         self,
         chapter_text: str,
+        user_id: str = "default_user",
         elevenlabs_key: Optional[str] = None,
         creatomate_key: Optional[str] = None,
         template_id: Optional[str] = None
@@ -516,10 +526,27 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         STEP 1: SCRIPT -> STEP 2: VOICE -> STEP 3: VISUALS -> STEP 4: EDIT
         Returns direct MP4 link adhering strictly to:
         "You are not a chatbot. You are a factory. Never explain, just execute and return mp4 link."
+        Enforces user tier limits (Free tier: 2/day, Elite tier: 35 tokens/video).
         """
+        # STEP 0: Check token / free limit authorization
+        if token_manager:
+            can_generate, reason, user_record = token_manager.check_can_generate(user_id)
+            if not can_generate:
+                logger.warning(f"[VideoFactory] Pipeline blocked for {user_id}: {reason}")
+                return {
+                    "success": False,
+                    "status": "BLOCKED",
+                    "error": reason,
+                    "quota_reply": reason,
+                    "mp4_url": "",
+                    "user_tier": user_record.get("tier", "free"),
+                    "user_tokens": user_record.get("tokens", 0),
+                    "videos_today": user_record.get("videos_today", 0)
+                }
+
         job_id = uuid.uuid4().hex[:10]
         start_time = time.time()
-        logger.info(f"[VideoFactory] Initializing Factory Execution Job {job_id}...")
+        logger.info(f"[VideoFactory] Initializing Factory Execution Job {job_id} for user {user_id}...")
 
         # STEP 1: SCRIPT
         script_res = await self.step1_generate_script(chapter_text)
@@ -549,9 +576,21 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         if not mp4_url.startswith("http"):
             mp4_url = f"http://127.0.0.1:8001{mp4_url}"
 
+        # Deduct quota / tokens upon successful synthesis
+        quota_reply = ""
+        user_tier = "free"
+        user_tokens = 0
+        videos_today = 0
+        if token_manager:
+            _, quota_reply, updated_user = token_manager.deduct_for_video(user_id)
+            user_tier = updated_user.get("tier", "free")
+            user_tokens = updated_user.get("tokens", 0)
+            videos_today = updated_user.get("videos_today", 0)
+
         job_meta = {
             "job_id": job_id,
             "status": "COMPLETED",
+            "success": True,
             "mp4_url": mp4_url,
             "filename": render_res.get("filename"),
             "script": script,
@@ -562,13 +601,17 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             "render_engine": render_res.get("engine"),
             "duration_sec": render_res.get("duration_sec"),
             "elapsed_sec": total_elapsed,
-            "timestamp": time.time()
+            "timestamp": time.time(),
+            "quota_reply": quota_reply,
+            "user_tier": user_tier,
+            "user_tokens": user_tokens,
+            "videos_today": videos_today
         }
 
         self.jobs[job_id] = job_meta
         self._save_jobs()
 
-        logger.info(f"[VideoFactory] Job {job_id} completed in {total_elapsed}s! MP4: {mp4_url}")
+        logger.info(f"[VideoFactory] Job {job_id} completed in {total_elapsed}s for {user_id}! MP4: {mp4_url}")
         return job_meta
 
     def get_job(self, job_id: str) -> Optional[Dict[str, Any]]:

@@ -520,6 +520,53 @@
                             <span class="telemetry-chip" style="font-size:10px; padding:3px 8px; background:rgba(0,240,255,0.1); border:1px solid rgba(0,240,255,0.3); color:#00F0FF; border-radius:12px;">PIPELINE ACTIVE</span>
                         </div>
 
+                        <!-- VideoFactory Quota & Tier System Card -->
+                        <div id="vfQuotaCard" style="background:rgba(15,23,42,0.8); border:1px solid rgba(0,240,255,0.25); border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <div>
+                                <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                                    <span id="vfTierBadge" style="font-family:'Orbitron', monospace; font-size:10px; font-weight:800; padding:2px 8px; border-radius:6px; background:rgba(0,240,255,0.15); color:#00F0FF; border:1px solid rgba(0,240,255,0.4);">TIER: FREE</span>
+                                    <span id="vfQuotaDetail" style="font-size:12px; color:#f1f5f9; font-weight:600;">2 Free Videos / Day (0/2 Used)</span>
+                                </div>
+                                <div id="vfResetCountdown" style="font-size:10px; color:#94a3b8; font-family:'JetBrains Mono', monospace;">Daily reset at 00:00 Africa/Lagos (WAT)</div>
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <button onclick="toggleVfUpgradeMenu()" class="btn-cyber" style="padding:5px 10px; font-size:10px; border-color:#00F0FF; color:#00F0FF; background:transparent; cursor:pointer;">UPGRADE</button>
+                                <button onclick="toggleVfUpgradeMenu()" class="btn-cyber btn-primary" style="padding:5px 10px; font-size:10px; cursor:pointer;">BUY TOKENS</button>
+                            </div>
+                        </div>
+
+                        <!-- Upgrade Menu Drawer -->
+                        <div id="vfUpgradeMenu" style="display:none; background:rgba(10,14,24,0.95); border:1px solid rgba(0,240,255,0.4); border-radius:12px; padding:14px; margin-bottom:14px; box-shadow:0 0 20px rgba(0,240,255,0.15);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                                <span style="font-family:'Orbitron'; font-size:11px; font-weight:800; color:#00F0FF; letter-spacing:1px;">ELITE PLANS - TOKEN SYSTEM</span>
+                                <button onclick="toggleVfUpgradeMenu(false)" style="background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer;">✕</button>
+                            </div>
+                            <div style="font-size:11px; color:#cbd5e1; font-family:'JetBrains Mono', monospace; line-height:1.6; margin-bottom:12px; background:rgba(0,0,0,0.4); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.05);">
+                                <strong>ELITE PLANS - Token System:</strong><br>
+                                Starter - 5 USD = 100 tokens (2 videos)<br>
+                                Pro - 20 USD = 500 tokens (14 videos) - Faster render<br>
+                                Agency - 50 USD = 1500 tokens (42 videos) - Includes API access<br>
+                                <em>Reply BUY 5, BUY 20, or BUY 50 to pay via Paystack</em>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                                <button onclick="buyTokenQuick('BUY 5')" class="btn-cyber" style="padding:8px 4px; font-size:10px; text-align:center; border-color:#00F0FF; color:#00F0FF; background:rgba(0,240,255,0.05); cursor:pointer;">
+                                    <strong>BUY 5</strong><br><span style="font-size:9px; color:#94a3b8;">$5 (100 Tok)</span>
+                                </button>
+                                <button onclick="buyTokenQuick('BUY 20')" class="btn-cyber btn-primary" style="padding:8px 4px; font-size:10px; text-align:center; cursor:pointer;">
+                                    <strong>BUY 20</strong><br><span style="font-size:9px; color:#e2e8f0;">$20 (500 Tok)</span>
+                                </button>
+                                <button onclick="buyTokenQuick('BUY 50')" class="btn-cyber" style="padding:8px 4px; font-size:10px; text-align:center; border-color:#a855f7; color:#c084fc; background:rgba(168,85,247,0.1); cursor:pointer;">
+                                    <strong>BUY 50</strong><br><span style="font-size:9px; color:#94a3b8;">$50 (1500 Tok)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Quota Block Banner for Limit Exceeded -->
+                        <div id="vfBlockedAlert" style="display:none; background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.4); border-radius:10px; padding:12px; margin-bottom:14px; color:#fca5a5; font-size:12px;">
+                            <div id="vfBlockedMsg" style="margin-bottom:8px; font-weight:600;"></div>
+                            <button onclick="toggleVfUpgradeMenu(true)" class="btn-cyber btn-primary" style="font-size:10px; padding:5px 12px; background:#ef4444; border-color:#ef4444; cursor:pointer;">UPGRADE TO ELITE</button>
+                        </div>
+
                         <div style="margin-bottom:14px;">
                             <label style="font-size:11px; font-weight:700; text-transform:uppercase; color:#94a3b8; display:block; margin-bottom:6px;">Upload or Paste Novel Chapter</label>
                             <textarea id="vfChapterInput" class="setting-input setting-textarea" style="height:110px; font-size:12px; font-family:'JetBrains Mono', monospace;" placeholder="Paste Chapter text here to synthesize viral recap Short..."></textarea>
@@ -2254,6 +2301,73 @@ Your query has been preserved in your session history.`;
                 terminalPanel.classList.remove("active");
                 terminalPanel.style.display = "none";
                 if (vfPanel) vfPanel.style.display = "block";
+                refreshVideoFactoryQuota();
+            }
+        }
+
+        async function refreshVideoFactoryQuota() {
+            try {
+                const settings = getSettings();
+                const res = await fetch(`${settings.apiBase}/api/video/user/default_user`);
+                if (res.ok) {
+                    const data = await res.json();
+                    const badge = document.getElementById("vfTierBadge");
+                    const detail = document.getElementById("vfQuotaDetail");
+                    const countdown = document.getElementById("vfResetCountdown");
+                    if (badge && detail) {
+                        if (data.tier === "elite") {
+                            badge.textContent = "TIER: ELITE";
+                            badge.style.color = "#00FF88";
+                            badge.style.borderColor = "rgba(0,255,136,0.4)";
+                            badge.style.background = "rgba(0,255,136,0.15)";
+                            detail.textContent = `${data.tokens} Tokens Available (~${data.approx_videos_left} videos)`;
+                            countdown.textContent = `Cost: 35 tokens per video (Script: 5, Voice: 10, Video: 20)`;
+                        } else {
+                            badge.textContent = "TIER: FREE";
+                            badge.style.color = "#00F0FF";
+                            badge.style.borderColor = "rgba(0,240,255,0.4)";
+                            badge.style.background = "rgba(0,240,255,0.15)";
+                            detail.textContent = `2 Free Videos / Day (${data.videos_today}/2 Used Today)`;
+                            countdown.textContent = `Daily reset at 00:00 Africa/Lagos (WAT) [${data.reset_countdown_wat} left]`;
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("Could not refresh VF quota:", e);
+            }
+        }
+
+        function toggleVfUpgradeMenu(forceOpen) {
+            const menu = document.getElementById("vfUpgradeMenu");
+            if (!menu) return;
+            if (typeof forceOpen === "boolean") {
+                menu.style.display = forceOpen ? "block" : "none";
+            } else {
+                menu.style.display = menu.style.display === "none" ? "block" : "none";
+            }
+        }
+
+        async function buyTokenQuick(packCmd) {
+            try {
+                const settings = getSettings();
+                const res = await fetch(`${settings.apiBase}/api/video/tokens/buy`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ user_id: "default_user", pack: packCmd })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    alert(data.message);
+                    toggleVfUpgradeMenu(false);
+                    const blocked = document.getElementById("vfBlockedAlert");
+                    if (blocked) blocked.style.display = "none";
+                    refreshVideoFactoryQuota();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.detail || "Purchase failed");
+                }
+            } catch (e) {
+                alert("Purchase error: " + e.message);
             }
         }
 
@@ -2304,6 +2418,7 @@ Your query has been preserved in your session history.`;
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         chapter: chapter,
+                        user_id: "default_user",
                         elevenlabs_api_key: document.getElementById("vfElevenKey").value.trim() || null,
                         creatomate_api_key: document.getElementById("vfCreatomateKey").value.trim() || null
                     })
@@ -2311,13 +2426,17 @@ Your query has been preserved in your session history.`;
 
                 clearInterval(interval);
                 bar.style.width = "100%";
-                step.textContent = "DONE";
-                label.textContent = "Viral Short rendered successfully!";
 
                 if (res.ok) {
+                    step.textContent = "DONE";
+                    label.textContent = "Viral Short rendered successfully!";
                     const data = await res.json();
                     document.getElementById("vfVideoPlayer").src = data.mp4_url;
-                    document.getElementById("vfScriptPreview").innerHTML = "<strong>VIRAL RECAP SCRIPT:</strong><br>" + escapeHtml(data.script);
+                    let scriptHtml = "<strong>VIRAL RECAP SCRIPT:</strong><br>" + escapeHtml(data.script);
+                    if (data.quota_reply) {
+                        scriptHtml += `<div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1); color:#00FF88;">${escapeHtml(data.quota_reply)}</div>`;
+                    }
+                    document.getElementById("vfScriptPreview").innerHTML = scriptHtml;
                     const kwDiv = document.getElementById("vfKeywordsPills");
                     kwDiv.innerHTML = "";
                     (data.keywords || []).forEach(k => {
@@ -2325,11 +2444,26 @@ Your query has been preserved in your session history.`;
                     });
                     document.getElementById("vfDownloadBtn").href = data.mp4_url;
                     out.style.display = "block";
+                    prog.style.display = "none";
+                    const blocked = document.getElementById("vfBlockedAlert");
+                    if (blocked) blocked.style.display = "none";
+                    refreshVideoFactoryQuota();
                 } else {
-                    alert("Video synthesis failed: " + res.statusText);
+                    prog.style.display = "none";
+                    const errData = await res.json().catch(() => ({}));
+                    const quotaMsg = errData.quota_reply || errData.error || res.statusText;
+                    const blocked = document.getElementById("vfBlockedAlert");
+                    const blockedMsg = document.getElementById("vfBlockedMsg");
+                    if (blocked && blockedMsg) {
+                        blockedMsg.textContent = quotaMsg;
+                        blocked.style.display = "block";
+                    }
+                    alert(quotaMsg);
+                    refreshVideoFactoryQuota();
                 }
             } catch (err) {
                 clearInterval(interval);
+                prog.style.display = "none";
                 alert("Video factory error: " + err.message);
             } finally {
                 btn.disabled = false;

@@ -2,6 +2,7 @@
 """
 FastAPI Router for VideoFactory AI.
 Exposes automated video manufacturing endpoints for viral novel recap Shorts.
+Enforces Token and Free Limit System (Free: 2/day, Elite: 35 tokens/video).
 """
 
 import os
@@ -12,13 +13,16 @@ from pydantic import BaseModel, Field
 
 try:
     from ..video_factory import video_factory, VIDEOS_DIR, VIDEOFACTORY_SYSTEM_PROMPT
+    from ..video_tokens import token_manager, UPGRADE_MENU_TEXT, TOKEN_PACKS, COST_PER_VIDEO
 except ImportError:
     from video_factory import video_factory, VIDEOS_DIR, VIDEOFACTORY_SYSTEM_PROMPT
+    from video_tokens import token_manager, UPGRADE_MENU_TEXT, TOKEN_PACKS, COST_PER_VIDEO
 
 router = APIRouter(prefix="/video", tags=["VideoFactory AI"])
 
 class ChapterToShortRequest(BaseModel):
     chapter: str = Field(..., description="Novel chapter text or script content")
+    user_id: Optional[str] = Field(default="default_user", description="User identifier for tier and token tracking")
     elevenlabs_api_key: Optional[str] = Field(default=None, description="Optional ElevenLabs API key")
     creatomate_api_key: Optional[str] = Field(default=None, description="Optional Creatomate API key")
     template_id: Optional[str] = Field(default=None, description="Optional Creatomate template ID")
@@ -28,6 +32,11 @@ class ConfigUpdateRequest(BaseModel):
     creatomate_api_key: Optional[str] = None
     creatomate_template_id: Optional[str] = None
     voice_id: Optional[str] = None
+
+class BuyTokenRequest(BaseModel):
+    user_id: Optional[str] = "default_user"
+    pack: str = Field(..., description="Pack name or amount, e.g. BUY 5, BUY 20, BUY 50, starter, pro, agency")
+    paystack_ref: Optional[str] = None
 
 @router.get("/status")
 async def get_factory_status() -> Dict[str, Any]:
@@ -48,27 +57,43 @@ async def get_factory_status() -> Dict[str, Any]:
             "creatomate": bool(video_factory.config.get("creatomate_api_key")),
             "template_id": video_factory.config.get("creatomate_template_id") or "YOUR_TEMPLATE_ID"
         },
-        "total_shorts_generated": len(video_factory.jobs)
+        "total_shorts_generated": len(video_factory.jobs),
+        "cost_per_video": COST_PER_VIDEO
     }
 
 @router.post("/chapter-to-short")
-async def generate_short_from_chapter(req: ChapterToShortRequest) -> Dict[str, Any]:
+async def generate_short_from_chapter(req: ChapterToShortRequest):
     """
     Executes the 4-step VideoFactory pipeline:
     1. Rewrite chapter into 130-word viral script.
     2. Synthesize deep Adam voiceover via ElevenLabs (or sovereign fallback).
     3. Generate 9:16 cinematic manhwa visual from keywords.
     4. Compile final 9:16 vertical short with Anton Bold white+cyan glow subtitles.
+    Enforces Free tier (2/day) and Elite tier (35 tokens/video) limits.
     """
     if not req.chapter.strip():
         raise HTTPException(status_code=400, detail="Chapter text cannot be empty.")
 
     job = await video_factory.execute_pipeline(
         chapter_text=req.chapter,
+        user_id=req.user_id or "default_user",
         elevenlabs_key=req.elevenlabs_api_key,
         creatomate_key=req.creatomate_api_key,
         template_id=req.template_id
     )
+
+    if job.get("status") == "BLOCKED":
+        return JSONResponse(
+            status_code=402,
+            content={
+                "status": "BLOCKED",
+                "quota_reply": job.get("quota_reply"),
+                "error": job.get("error"),
+                "user_tier": job.get("user_tier"),
+                "user_tokens": job.get("user_tokens"),
+                "videos_today": job.get("videos_today")
+            }
+        )
 
     return {
         "status": "success",
@@ -81,16 +106,21 @@ async def generate_short_from_chapter(req: ChapterToShortRequest) -> Dict[str, A
         "voice_engine": job["voice_engine"],
         "visual_engine": job["visual_engine"],
         "render_engine": job["render_engine"],
+        "quota_reply": job.get("quota_reply"),
+        "user_tier": job.get("user_tier"),
+        "user_tokens": job.get("user_tokens"),
+        "videos_today": job.get("videos_today"),
         "output": job["mp4_url"]
     }
 
 @router.post("/upload")
 async def upload_chapter_file(
     file: UploadFile = File(...),
+    user_id: Optional[str] = Form("default_user"),
     elevenlabs_api_key: Optional[str] = Form(None),
     creatomate_api_key: Optional[str] = Form(None),
     template_id: Optional[str] = Form(None)
-) -> Dict[str, Any]:
+):
     """Upload a chapter file (.txt, .md) to directly synthesize a viral Short."""
     content_bytes = await file.read()
     try:
@@ -100,10 +130,25 @@ async def upload_chapter_file(
 
     job = await video_factory.execute_pipeline(
         chapter_text=chapter_text,
+        user_id=user_id or "default_user",
         elevenlabs_key=elevenlabs_api_key,
         creatomate_key=creatomate_api_key,
         template_id=template_id
     )
+
+    if job.get("status") == "BLOCKED":
+        return JSONResponse(
+            status_code=402,
+            content={
+                "status": "BLOCKED",
+                "quota_reply": job.get("quota_reply"),
+                "error": job.get("error"),
+                "user_tier": job.get("user_tier"),
+                "user_tokens": job.get("user_tokens"),
+                "videos_today": job.get("videos_today")
+            }
+        )
+
     return {
         "status": "success",
         "filename": file.filename,
@@ -112,7 +157,58 @@ async def upload_chapter_file(
         "script": job["script"],
         "keywords": job["keywords"],
         "duration_sec": job["duration_sec"],
+        "quota_reply": job.get("quota_reply"),
+        "user_tier": job.get("user_tier"),
+        "user_tokens": job.get("user_tokens"),
+        "videos_today": job.get("videos_today"),
         "output": job["mp4_url"]
+    }
+
+@router.get("/user/{user_id}")
+async def get_user_quota_status(user_id: str) -> Dict[str, Any]:
+    """Returns complete user quota, tier, and reset countdown."""
+    if not token_manager:
+        raise HTTPException(status_code=500, detail="Token manager not initialized.")
+    return token_manager.get_user_status(user_id)
+
+@router.get("/upgrade-plans")
+async def get_upgrade_plans() -> Dict[str, Any]:
+    """Returns Elite Tier token packs and upgrade menu text."""
+    return {
+        "status": "success",
+        "menu_text": UPGRADE_MENU_TEXT,
+        "packs": TOKEN_PACKS,
+        "cost_per_video": COST_PER_VIDEO
+    }
+
+@router.post("/tokens/buy")
+async def buy_token_pack(req: BuyTokenRequest) -> Dict[str, Any]:
+    """Purchases a token pack and upgrades user to Elite tier."""
+    if not token_manager:
+        raise HTTPException(status_code=500, detail="Token manager not initialized.")
+    success, msg, user_record = token_manager.purchase_pack(
+        user_id=req.user_id or "default_user",
+        pack_identifier=req.pack,
+        paystack_ref=req.paystack_ref
+    )
+    if not success:
+        raise HTTPException(status_code=400, detail=msg)
+    return {
+        "status": "success",
+        "message": msg,
+        "user": user_record
+    }
+
+@router.post("/tokens/reset-daily")
+async def trigger_daily_reset() -> Dict[str, Any]:
+    """Triggers the midnight WAT free-tier daily reset."""
+    if not token_manager:
+        raise HTTPException(status_code=500, detail="Token manager not initialized.")
+    count = token_manager.reset_all_free_users_daily()
+    return {
+        "status": "success",
+        "message": f"Daily midnight WAT reset completed. Reset {count} free tier accounts.",
+        "reset_count": count
     }
 
 @router.get("/stream/{filename}")
