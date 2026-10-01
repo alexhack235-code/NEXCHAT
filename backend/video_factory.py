@@ -196,21 +196,46 @@ JSON ONLY:"""
                 pass
         return None
 
+    def _master_audio_track(self, raw_path: str, out_path: str) -> bool:
+        """Apply cinematic trailer audio DSP: bass warmth (110Hz), vocal clarity presence (4kHz), and broadcast loudnorm compression."""
+        af = "equalizer=f=110:width_type=h:width=100:g=3.5,equalizer=f=4000:width_type=h:width=1200:g=2.0,loudnorm=I=-16:TP=-1.5:LRA=9"
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", raw_path,
+            "-af", af,
+            "-c:a", "libmp3lame", "-b:a", "256k",
+            out_path
+        ]
+        try:
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=20)
+            return res.returncode == 0 and os.path.exists(out_path) and os.path.getsize(out_path) > 1000
+        except Exception as e:
+            logger.warning(f"[VideoFactory] Audio mastering failed: {e}")
+            if os.path.exists(raw_path):
+                try:
+                    import shutil
+                    shutil.copy2(raw_path, out_path)
+                    return True
+                except Exception:
+                    pass
+            return False
+
     async def step2_generate_voice(self, script: str, job_id: str, elevenlabs_key: Optional[str] = None) -> Dict[str, Any]:
         """
         STEP 2 - VOICE:
-        Call ElevenLabs API with script.
-        Voice ID: pNInz6obpgDQGcFmaJgB (Adam deep)
-        Model: eleven_multilingual_v2
-        Falls back seamlessly to native SAPI synthesis if no key is present.
+        Ultra-realistic cinematic voiceover synthesis.
+        1. ElevenLabs API (Adam deep / eleven_multilingual_v2) if API key provided.
+        2. Microsoft Azure Neural TTS (Christopher Deep Dramatic Storyteller) with studio audio DSP mastering.
+        3. Native fallback if offline.
         """
-        logger.info("[VideoFactory] Executing Step 2: Voiceover Synthesis...")
+        logger.info("[VideoFactory] Executing Step 2: Realistic Voiceover Synthesis...")
         key = elevenlabs_key or self.config.get("elevenlabs_api_key")
         audio_filename = f"voiceover_{job_id}.mp3"
         audio_path = os.path.join(self.output_dir, audio_filename)
         voice_id = self.config.get("voice_id", "pNInz6obpgDQGcFmaJgB")
         model_id = self.config.get("voice_model", "eleven_multilingual_v2")
 
+        # 1. ElevenLabs API if key is present
         if key and len(key) >= 15:
             try:
                 logger.info(f"[VideoFactory] Querying ElevenLabs API (Voice: {voice_id})...")
@@ -232,11 +257,17 @@ JSON ONLY:"""
                 async with httpx.AsyncClient(timeout=45.0) as client:
                     resp = await client.post(url, headers=headers, json=payload)
                     if resp.status_code == 200:
-                        with open(audio_path, "wb") as f:
+                        raw_temp = os.path.join(self.output_dir, f"raw_el_{job_id}.mp3")
+                        with open(raw_temp, "wb") as f:
                             f.write(resp.content)
-                        logger.info(f"[VideoFactory] ElevenLabs voiceover saved: {audio_path} ({len(resp.content)} bytes)")
+                        self._master_audio_track(raw_temp, audio_path)
+                        try:
+                            os.remove(raw_temp)
+                        except Exception:
+                            pass
+                        logger.info(f"[VideoFactory] ElevenLabs voiceover mastered & saved: {audio_path}")
                         return {
-                            "engine": "ElevenLabs (Adam deep)",
+                            "engine": "ElevenLabs (Adam Deep Multilingual + Studio DSP)",
                             "path": audio_path,
                             "filename": audio_filename,
                             "voice_id": voice_id
@@ -246,7 +277,33 @@ JSON ONLY:"""
             except Exception as e:
                 logger.warning(f"[VideoFactory] ElevenLabs request failed: {e}")
 
-        # Native SAPI Synth Fallback
+        # 2. Ultra-Realistic Microsoft Neural Voice (Christopher Deep Dramatic Narrator)
+        try:
+            import edge_tts
+            logger.info("[VideoFactory] Activating Ultra-Realistic Neural Engine (en-US-ChristopherNeural)...")
+            raw_neural = os.path.join(self.output_dir, f"raw_neural_{job_id}.mp3")
+            # en-US-ChristopherNeural: Deep, rich baritone trailer/recap narrator
+            comm = edge_tts.Communicate(script, "en-US-ChristopherNeural", rate="+3%", pitch="-2Hz")
+            await comm.save(raw_neural)
+
+            if os.path.exists(raw_neural) and os.path.getsize(raw_neural) > 1000:
+                mastered = self._master_audio_track(raw_neural, audio_path)
+                try:
+                    os.remove(raw_neural)
+                except Exception:
+                    pass
+                if mastered:
+                    logger.info(f"[VideoFactory] Neural narrator mastered & saved: {audio_path}")
+                    return {
+                        "engine": "Ultra-Realistic Neural Narrator (Christopher Deep Dramatic + Studio DSP)",
+                        "path": audio_path,
+                        "filename": audio_filename,
+                        "voice_id": "en-US-ChristopherNeural"
+                    }
+        except Exception as e:
+            logger.warning(f"[VideoFactory] Neural TTS generation failed: {e}")
+
+        # 3. Native SAPI Synth Fallback
         logger.info("[VideoFactory] Activating native sovereign TTS synthesizer fallback...")
         temp_wav = os.path.join(self.output_dir, f"temp_{job_id}.wav")
         safe_script = script.replace("'", "''").replace('"', '""').replace("\n", " ")
@@ -262,7 +319,7 @@ $synth.Dispose()
         try:
             p = subprocess.run(["powershell", "-NoProfile", "-Command", ps_cmd], capture_output=True, text=True, timeout=25)
             if os.path.exists(temp_wav) and os.path.getsize(temp_wav) > 1000:
-                subprocess.run(["ffmpeg", "-y", "-i", temp_wav, "-c:a", "libmp3lame", "-b:a", "192k", audio_path], capture_output=True, timeout=15)
+                self._master_audio_track(temp_wav, audio_path)
                 if os.path.exists(temp_wav):
                     os.remove(temp_wav)
                 return {

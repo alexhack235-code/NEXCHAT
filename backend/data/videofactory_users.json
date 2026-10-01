@@ -50,5 +50,15 @@
     "total_videos_created": 1,
     "created_at": 1790884483.3831582,
     "transactions": []
+  },
+  "test_voice_verifier": {
+    "user_id": "test_voice_verifier",
+    "tier": "free",
+    "tokens": 0,
+    "videos_today": 1,
+    "last_reset_date": "2026-10-01",
+    "total_videos_created": 1,
+    "created_at": 1790887993.3078144,
+    "transactions": []
   }
 }
