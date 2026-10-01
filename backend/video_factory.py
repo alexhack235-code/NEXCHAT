@@ -26,12 +26,15 @@ logger = logging.getLogger("nexium.video_factory")
 
 try:
     from .video_tokens import token_manager, UPGRADE_MENU_TEXT
+    from .video_storage import cloud_vault
 except ImportError:
     try:
         from video_tokens import token_manager, UPGRADE_MENU_TEXT
+        from video_storage import cloud_vault
     except ImportError:
         token_manager = None
         UPGRADE_MENU_TEXT = ""
+        cloud_vault = None
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 VIDEOS_DIR = os.path.join(ROOT_DIR, "generated_code", "videos")
@@ -572,7 +575,24 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         )
 
         total_elapsed = round(time.time() - start_time, 2)
+        video_local_path = render_res.get("path")
         mp4_url = render_res.get("video_url")
+        vault_provider = "Local Host Vault"
+
+        # Cloud Vault Upload
+        if cloud_vault and video_local_path and os.path.exists(video_local_path):
+            try:
+                vault_res = await cloud_vault.upload_video(
+                    local_filepath=video_local_path,
+                    user_id=user_id,
+                    filename=render_res.get("filename")
+                )
+                if vault_res.get("success"):
+                    mp4_url = vault_res.get("public_url")
+                    vault_provider = vault_res.get("provider")
+            except Exception as e:
+                logger.error(f"[VideoFactory] Cloud vault upload error: {e}")
+
         if not mp4_url.startswith("http"):
             mp4_url = f"http://127.0.0.1:8001{mp4_url}"
 
@@ -592,6 +612,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             "status": "COMPLETED",
             "success": True,
             "mp4_url": mp4_url,
+            "vault_provider": vault_provider,
             "filename": render_res.get("filename"),
             "script": script,
             "keywords": keywords,

@@ -14,9 +14,11 @@ from pydantic import BaseModel, Field
 try:
     from ..video_factory import video_factory, VIDEOS_DIR, VIDEOFACTORY_SYSTEM_PROMPT
     from ..video_tokens import token_manager, UPGRADE_MENU_TEXT, TOKEN_PACKS, COST_PER_VIDEO
+    from ..video_storage import cloud_vault
 except ImportError:
     from video_factory import video_factory, VIDEOS_DIR, VIDEOFACTORY_SYSTEM_PROMPT
     from video_tokens import token_manager, UPGRADE_MENU_TEXT, TOKEN_PACKS, COST_PER_VIDEO
+    from video_storage import cloud_vault
 
 router = APIRouter(prefix="/video", tags=["VideoFactory AI"])
 
@@ -210,6 +212,13 @@ async def trigger_daily_reset() -> Dict[str, Any]:
         "message": f"Daily midnight WAT reset completed. Reset {count} free tier accounts.",
         "reset_count": count
     }
+
+@router.get("/vault-status")
+async def get_vault_status() -> Dict[str, Any]:
+    """Returns active cloud storage vault configuration and status."""
+    if not cloud_vault:
+        return {"active_provider": "LOCAL_DISK_VAULT", "configured": False}
+    return cloud_vault.get_vault_status()
 
 @router.get("/stream/{filename}")
 @router.head("/stream/{filename}")
