@@ -1,15 +1,17 @@
-﻿
-const CACHE_NAME = 'nexchat-v3';
+
+const CACHE_NAME = 'nexchat-v4-steady';
 const STATIC_FILES = [
   './',
   './index.html',
   './chat.html',
+  './reels.html',
   './profile-upload.html',
   './advertisement.html',
   './gaminghub.html',
   './terminal.html',
   './cart.html',
   './chat.css',
+  './reels.css',
   './login.css',
   './register.css',
   './reset.css',

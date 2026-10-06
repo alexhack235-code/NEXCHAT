@@ -173,7 +173,7 @@ const INITIAL_DEMO_STATUSES: UserStatusGroup[] = [
   },
 ];
 
-export default function WhatsAppStatusPage() {
+export default function NexchatStatusPage() {
   const [statuses, setStatuses] = useState<UserStatusGroup[]>(INITIAL_DEMO_STATUSES);
   const [myStatus, setMyStatus] = useState<UserStatusGroup | null>(null);
 
@@ -753,7 +753,7 @@ export default function WhatsAppStatusPage() {
           {/* Top Overlay Gradient */}
           <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-none z-20" />
 
-          {/* Top Progress Bars (Segmented like Instagram / WhatsApp) */}
+          {/* Top Progress Bars (Segmented Story Indicators) */}
           <div className="relative z-30 pt-3 px-2 flex gap-1.5 w-full">
             {currentGroup.slides.map((slide, sIdx) => {
               let fillPercentage = 0;

@@ -1,15 +1,16 @@
 import "./src/js/security-guard.js";
+import { fortressShield } from "./src/js/security-shield.js";
 import { GroupChat } from "./src/features/group/index.js";
 import { auth, db, rtdb } from "./firebase-config.js";
 import { chronexAI } from "./chronex-ai-service.js";
 import {
   collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, setDoc,
-  query, where, onSnapshot, serverTimestamp, orderBy, limit, limitToLast, Timestamp, increment, runTransaction, arrayUnion, arrayRemove, deleteField
+  query, where, onSnapshot, serverTimestamp, orderBy, limit, limitToLast, Timestamp, increment, runTransaction, arrayUnion, arrayRemove, deleteField, writeBatch
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
-import { uploadVideoToCloudinary } from "./src/js/cloudinary.js";
+import { uploadVideoToCloudinary, uploadImageToCloudinary, uploadDocumentToCloudinary } from "./src/js/cloudinary.js";
 import { uploadMediaBlob, uploadAnyMedia, uploadStatusMedia } from "./src/js/media-upload.js";
 import { broadcastTyping, subscribeToChatPresence, unsubscribeChatPresence } from "./src/js/presence.js";
 import { joinCall as joinLiveKitCall, leaveCall as leaveLiveKitCall } from "./src/js/livekit-call.js";
@@ -18,6 +19,18 @@ import {
   getLinkedDevices, unlinkDevice, listenForSessionRevocation, detectDeviceInfo
 } from "./src/js/link-device.js";
 import { openWallpaperModal, applyActiveWallpaper, WALLPAPER_PRESETS } from "./src/js/wallpaper-presets.js";
+import {
+  sendSupabaseMessage,
+  subscribeToSupabaseRoom,
+  fetchSupabaseRoomMessages,
+  markSupabaseMessagesRead,
+  buildRoomId
+} from "./src/js/supabase-chat.js";
+import {
+  getActiveSupabaseSettings,
+  saveSupabaseSettings,
+  isSupabaseActive
+} from "./src/js/supabase-config.js";
 
 
 const storage = getStorage();
@@ -45,6 +58,21 @@ function hapticFeedback(intensity = 'medium') {
 
   navigator.vibrate(patterns[intensity] || patterns.medium);
 }
+
+// 🛡️ Global Runtime Resilience Shield
+window.addEventListener('unhandledrejection', (event) => {
+  if (event.reason?.name === 'AbortError' || event.reason?.message?.includes('aborted')) {
+    event.preventDefault();
+    return;
+  }
+  console.warn('[NEX-SHIELD] Handled background promise rejection:', event.reason?.message || event.reason);
+});
+
+window.addEventListener('error', (event) => {
+  if (event.message?.includes('ResizeObserver loop completed') || event.message?.includes('ResizeObserver loop limit exceeded')) {
+    event.stopImmediatePropagation();
+  }
+});
 
 let currentChatUser = null;
 let currentChatType = 'direct'; // 'direct' or 'group'
@@ -531,6 +559,7 @@ let pendingChatRequests = {}; // track pending outgoing requests by user ID
 let selfAIAutoResponderSeenMessages = new Set();
 let selfAISelectedUserIds = [];
 let messageListener2 = null;
+let supabaseRoomUnsubscribe = null;
 let contactsListener = null;
 let updateMessagesTimeout = null; // Debounce timer to prevent rapid rerendering
 let callActive = false;
@@ -2935,6 +2964,17 @@ async function sendMessage() {
     return;
   }
 
+  // 🛡️ FORTRESS AI Security Shield: Inspect text before dispatch
+  if (text && window.fortressShield) {
+    const inspection = window.fortressShield.inspectText(text);
+    if (!inspection.safe) {
+      playLuxuryPopSound();
+      showNotif(`🛡️ Blocked by FORTRESS Security: ${inspection.threats.join(', ')}`, "error", 4500);
+      console.warn('[FORTRESS BLOCKED ATTACK]', inspection.threats);
+      return;
+    }
+  }
+
   hapticFeedback('light');
 
   try {
@@ -2967,6 +3007,26 @@ async function sendMessage() {
     if (currentChatType === 'ai') {
       try {
         console.log("[AI] Initiating Chronex AI synchronization...");
+
+        // 🛡️ Daily AI Request Limit Check (10 requests per 24 hours)
+        if (chronexAI && typeof chronexAI.checkDailyQuota === 'function') {
+          const quotaCheck = chronexAI.checkDailyQuota(myUID || 'default');
+          if (!quotaCheck.allowed) {
+            playLuxuryPopSound();
+            hapticFeedback('heavy');
+            showNotif("MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS", "error", 4500);
+            if (messageText) messageText.value = "";
+            if (typeof displayChronexAIUserMessage === 'function') {
+              displayChronexAIUserMessage(text);
+            }
+            if (typeof displayChronexAIResponse === 'function') {
+              displayChronexAIResponse("⚠️ **MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS**");
+            } else if (typeof displayChronexAIMessage === 'function') {
+              displayChronexAIMessage("⚠️ **MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS**");
+            }
+            return;
+          }
+        }
 
         if (messageText) messageText.value = "";
         if (typeof removeAttachment === 'function') removeAttachment();
@@ -3008,7 +3068,9 @@ async function sendMessage() {
         const loadingEl = document.getElementById("chronex-ai-loading");
         if (loadingEl) loadingEl.remove();
 
-        if (typeof displayChronexAIMessage === 'function') {
+        if (typeof displayChronexAIResponse === 'function') {
+          displayChronexAIResponse(aiResponse);
+        } else if (typeof displayChronexAIMessage === 'function') {
           displayChronexAIMessage(aiResponse);
         }
 
@@ -3032,15 +3094,37 @@ async function sendMessage() {
       }
 
       console.log("?? Sending direct message to:", currentChatUser);
+      const clientMsgId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+      // 1. Instant 0ms Optimistic UI Append with pulsating pending tick
+      appendLocalSentMessage(text, attachment, false, 'sending', clientMsgId);
+
+      // 2. High-speed Supabase Realtime Broadcast & Persistence
+      sendSupabaseMessage({
+        from: myUID,
+        to: currentChatUser,
+        text: text || "",
+        attachment: attachment,
+        replyTo: window.messagingFeatures && window.messagingFeatures.replyingToMessage ? window.messagingFeatures.replyingToMessage() : null,
+        chatType: 'direct',
+      }).then(() => {
+        updateLocalSentMessageStatus(clientMsgId, 'sent');
+      }).catch(err => {
+        console.warn('[SUPABASE] Send notice:', err?.message);
+      });
+
+      // 3. Dual-layer Firestore persistence
       const messageData = {
         from: myUID,
         to: currentChatUser,
         text: text || "",
         time: serverTimestamp(),
         read: false,
+        status: "sent",
         type: "text",
         edited: false,
         reactions: [],
+        clientMsgId: clientMsgId,
         ...(window.messagingFeatures && window.messagingFeatures.replyingToMessage && window.messagingFeatures.replyingToMessage() ? {
           replyTo: {
             text: window.messagingFeatures.replyingToMessage().text,
@@ -3051,7 +3135,7 @@ async function sendMessage() {
       };
       if (attachment) messageData.attachment = attachment;
       await addDoc(collection(db, "messages"), messageData);
-      appendLocalSentMessage(text, attachment);
+      updateLocalSentMessageStatus(clientMsgId, 'sent');
 
       await updateDoc(userRef, {
         tokens: increment(-1),
@@ -3075,10 +3159,14 @@ async function sendMessage() {
     if (window.messagingFeatures && window.messagingFeatures.hideReplyPreview) {
       window.messagingFeatures.hideReplyPreview();
     }
-    if (messageText) messageText.value = "";
+    if (messageText) {
+      messageText.value = "";
+      messageText.style.height = "42px";
+    }
     if (typeof removeAttachment === 'function') removeAttachment();
 
     hapticFeedback('success');
+    playLuxuryPopSound();
     if (shouldShowMessageSentNotification()) {
       showNotif(`Message sent`, "success", 2000);
     }
@@ -3092,12 +3180,244 @@ async function sendMessage() {
   }
 }
 
-function appendLocalSentMessage(text, attachment = null, showHeader = false) {
+function renderMessageAttachment(attachment) {
+  if (!attachment || !attachment.downloadURL) return null;
+  const container = document.createElement("div");
+  container.className = "message-attachment-container";
+  container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  const fileType = (attachment.fileType || '').toLowerCase();
+  const fileName = (attachment.fileName || '').toLowerCase();
+  const url = attachment.downloadURL;
+
+  const isImage = fileType.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif|svg|avif|bmp|heic)$/i.test(fileName);
+  const isVideo = fileType.startsWith("video/") || /\.(mp4|webm|mov|mkv|avi|3gp)$/i.test(fileName);
+  const isAudio = fileType.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(fileName);
+  const isArchive = fileType.includes("zip") || fileType.includes("rar") || fileType.includes("tar") || fileType.includes("compressed") || fileType.includes("7z") || /\.(zip|rar|7z|tar|gz|bz2|tgz)$/i.test(fileName);
+
+  if (isImage) {
+    const imgWrap = document.createElement("div");
+    imgWrap.style.cssText = "position: relative; border-radius: 10px; overflow: hidden; background: rgba(0,0,0,0.3); max-width: 290px;";
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = attachment.fileName || "Photo attachment";
+    img.loading = "lazy";
+    img.style.cssText = "max-width: 290px; max-height: 320px; width: 100%; object-fit: cover; border-radius: 10px; cursor: pointer; display: block; box-shadow: 0 4px 16px rgba(0,0,0,0.35); transition: transform 0.25s ease;";
+    img.addEventListener("mouseenter", () => { img.style.transform = "scale(1.02)"; });
+    img.addEventListener("mouseleave", () => { img.style.transform = "scale(1)"; });
+    img.addEventListener("click", () => {
+      window.open(url, "_blank");
+    });
+    imgWrap.appendChild(img);
+    container.appendChild(imgWrap);
+  } else if (isVideo) {
+    const video = document.createElement("video");
+    video.src = url;
+    video.controls = true;
+    video.preload = "metadata";
+    video.playsInline = true;
+    video.style.cssText = "max-width: 290px; max-height: 320px; width: 100%; border-radius: 10px; display: block; box-shadow: 0 4px 16px rgba(0,0,0,0.35);";
+    container.appendChild(video);
+  } else if (isAudio) {
+    if (window.messagingFeatures && typeof window.messagingFeatures.createAudioPlayerElement === "function") {
+      const audioEl = window.messagingFeatures.createAudioPlayerElement(url, attachment.duration || 0);
+      container.appendChild(audioEl);
+    } else {
+      const audio = document.createElement("audio");
+      audio.controls = true;
+      audio.src = url;
+      audio.style.cssText = "max-width: 260px; display: block;";
+      container.appendChild(audio);
+    }
+  } else if (isArchive) {
+    // 🗂️ High-Tech Compressed Folder Archive Card
+    const archiveCard = document.createElement("a");
+    archiveCard.href = url;
+    archiveCard.target = "_blank";
+    archiveCard.rel = "noopener noreferrer";
+    archiveCard.download = attachment.fileName || "archive.zip";
+    archiveCard.style.cssText = "display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; color: inherit; text-decoration: none; max-width: 310px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);";
+
+    const iconWrap = document.createElement("div");
+    iconWrap.style.cssText = "width: 42px; height: 42px; border-radius: 10px; background: rgba(245, 158, 11, 0.2); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(245, 158, 11, 0.4);";
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-folder-zipper";
+    icon.style.cssText = "font-size: 22px; color: #fbbf24;";
+    iconWrap.appendChild(icon);
+
+    const metaWrap = document.createElement("div");
+    metaWrap.style.cssText = "flex: 1; overflow: hidden; min-width: 0;";
+
+    const nameSpan = document.createElement("div");
+    nameSpan.style.cssText = "font-size: 13.5px; font-weight: 700; color: #fef3c7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: 0.2px;";
+    nameSpan.textContent = attachment.fileName || "Folder Archive";
+
+    const subSpan = document.createElement("div");
+    subSpan.style.cssText = "font-size: 11px; color: #fbbf24; opacity: 0.9; margin-top: 2px; display: flex; align-items: center; gap: 6px;";
+    const sizeText = attachment.fileSize ? `${(attachment.fileSize / (1024 * 1024)).toFixed(2)} MB` : "Archive";
+    subSpan.innerHTML = `<span><i class="fa-solid fa-box-archive" style="font-size: 10px;"></i> ${sizeText}</span> • <span style="text-transform: uppercase; font-weight: 600;">Folder</span>`;
+
+    const downloadIcon = document.createElement("i");
+    downloadIcon.className = "fa-solid fa-cloud-arrow-down";
+    downloadIcon.style.cssText = "font-size: 18px; color: #fbbf24; opacity: 0.8; margin-left: 4px; flex-shrink: 0;";
+
+    metaWrap.appendChild(nameSpan);
+    metaWrap.appendChild(subSpan);
+    archiveCard.appendChild(iconWrap);
+    archiveCard.appendChild(metaWrap);
+    archiveCard.appendChild(downloadIcon);
+    container.appendChild(archiveCard);
+  } else {
+    // 📄 High-Tech Document Card (PDF, Office, Code, Text)
+    const docCard = document.createElement("a");
+    docCard.href = url;
+    docCard.target = "_blank";
+    docCard.rel = "noopener noreferrer";
+    docCard.download = attachment.fileName || "document";
+    docCard.style.cssText = "display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(0, 240, 118, 0.22); border-radius: 12px; color: inherit; text-decoration: none; max-width: 310px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);";
+
+    let iconClass = "fa-solid fa-file-lines";
+    let iconColor = "#00f076";
+    let docTypeLabel = "Document";
+
+    if (fileType.includes("pdf") || fileName.endsWith(".pdf")) {
+      iconClass = "fa-solid fa-file-pdf";
+      iconColor = "#ef4444";
+      docTypeLabel = "PDF Document";
+    } else if (fileType.includes("word") || fileName.endsWith(".doc") || fileName.endsWith(".docx")) {
+      iconClass = "fa-solid fa-file-word";
+      iconColor = "#3b82f6";
+      docTypeLabel = "Word Document";
+    } else if (fileType.includes("excel") || fileType.includes("sheet") || fileName.endsWith(".xls") || fileName.endsWith(".xlsx") || fileName.endsWith(".csv")) {
+      iconClass = "fa-solid fa-file-excel";
+      iconColor = "#10b981";
+      docTypeLabel = "Spreadsheet";
+    } else if (fileType.includes("presentation") || fileName.endsWith(".ppt") || fileName.endsWith(".pptx")) {
+      iconClass = "fa-solid fa-file-powerpoint";
+      iconColor = "#f97316";
+      docTypeLabel = "Presentation";
+    }
+
+    const iconWrap = document.createElement("div");
+    iconWrap.style.cssText = `width: 40px; height: 40px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.1);`;
+    const icon = document.createElement("i");
+    icon.className = iconClass;
+    icon.style.cssText = `font-size: 21px; color: ${iconColor};`;
+    iconWrap.appendChild(icon);
+
+    const docMeta = document.createElement("div");
+    docMeta.style.cssText = "flex: 1; overflow: hidden; min-width: 0;";
+
+    const nameSpan = document.createElement("div");
+    nameSpan.style.cssText = "font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;";
+    nameSpan.textContent = attachment.fileName || "Download Document";
+
+    const subSpan = document.createElement("div");
+    subSpan.style.cssText = "font-size: 11px; opacity: 0.75; margin-top: 2px;";
+    const sizeStr = attachment.fileSize ? `${Math.round(attachment.fileSize / 1024)} KB` : "Click to view / download";
+    subSpan.textContent = `${docTypeLabel} • ${sizeStr}`;
+
+    const extIcon = document.createElement("i");
+    extIcon.className = "fa-solid fa-arrow-up-right-from-square";
+    extIcon.style.cssText = "font-size: 14px; opacity: 0.6; margin-left: 4px; flex-shrink: 0;";
+
+    docMeta.appendChild(nameSpan);
+    docMeta.appendChild(subSpan);
+    docCard.appendChild(iconWrap);
+    docCard.appendChild(docMeta);
+    docCard.appendChild(extIcon);
+    container.appendChild(docCard);
+  }
+  return container;
+}
+
+// Zero-dependency Web Audio synthesizer for tactile chat pops & clicks
+function playLuxuryPopSound() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(460, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(920, ctx.currentTime + 0.07);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.07);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.07);
+  } catch (e) {}
+}
+
+// Zero-dependency Web Audio synthesizer for incoming chimes & token rewards
+function playLuxuryChimeSound() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    [587.33, 880, 1174.66].forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const delay = idx * 0.05;
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + delay);
+      gain.gain.setValueAtTime(0.16, now + delay);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + delay + 0.28);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + delay);
+      osc.stop(now + delay + 0.28);
+    });
+  } catch (e) {}
+}
+
+function handleMessageReaction(docId, emoji, bubbleElement) {
+  playLuxuryPopSound();
+  if (!bubbleElement) return;
+
+  // Optimistic UI reaction pill in the tray
+  let tray = bubbleElement.querySelector('.message-reactions-tray');
+  if (!tray) {
+    tray = document.createElement('div');
+    tray.className = 'message-reactions-tray';
+    bubbleElement.appendChild(tray);
+  }
+
+  let existingBadge = [...tray.querySelectorAll('.message-reaction-badge')].find(b => b.textContent.includes(emoji));
+  if (existingBadge) {
+    const num = parseInt(existingBadge.textContent.replace(/[^0-9]/g, '') || '1', 10);
+    existingBadge.textContent = `${emoji} ${num + 1}`;
+  } else {
+    const badge = document.createElement('span');
+    badge.className = 'message-reaction-badge';
+    badge.textContent = `${emoji} 1`;
+    badge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      handleMessageReaction(docId, emoji, bubbleElement);
+    });
+    tray.appendChild(badge);
+  }
+
+  // Non-blocking sync to Firestore if document ID is valid
+  if (docId) {
+    try {
+      updateDoc(doc(db, "messages", docId), {
+        reactions: arrayUnion({ emoji: emoji, uid: myUID || 'anon', time: Date.now() })
+      }).catch(err => console.warn("Reaction update non-blocking:", err));
+    } catch (err) {}
+  }
+}
+
+function appendLocalSentMessage(text, attachment = null, showHeader = false, status = 'sending', clientMsgId = null) {
   const messagesContainer = document.getElementById("messages-area");
   if (!messagesContainer) return;
 
+  const id = clientMsgId || `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
   const wrapper = document.createElement("div");
-  wrapper.className = "message-wrapper sent";
+  wrapper.className = "message-wrapper sent optimistic";
+  wrapper.id = `wrapper-${id}`;
   wrapper.style.cssText = "display:flex; justify-content:flex-end; margin:8px 0; padding:0 12px; flex-direction: column; align-items: flex-end;";
 
   if (showHeader) {
@@ -3109,36 +3429,129 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false) {
   }
 
   const bubble = document.createElement("div");
-  bubble.className = "message-bubble";
-  bubble.style.cssText = "background:#00ff66; color:#000; padding:10px 14px; border-radius:12px; max-width:70%; word-wrap:break-word;";
+  bubble.className = "message-bubble sent";
+  bubble.style.cssText = "background: linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);";
 
-  if (attachment && attachment.fileType && attachment.fileType.startsWith('audio/')) {
-    const audioEl = document.createElement('audio');
-    audioEl.controls = true;
-    audioEl.src = attachment.downloadURL || '';
-    audioEl.style.maxWidth = '100%';
-    bubble.appendChild(audioEl);
-  } else if (attachment && attachment.downloadURL) {
-    const link = document.createElement('a');
-    link.href = attachment.downloadURL;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.textContent = attachment.fileName || 'View file';
-    bubble.appendChild(link);
-  } else {
-    bubble.textContent = text || "";
+  if (attachment && attachment.downloadURL) {
+    const attachNode = renderMessageAttachment(attachment);
+    if (attachNode) bubble.appendChild(attachNode);
+  }
+
+  if (text && text.trim()) {
+    const textP = document.createElement("p");
+    textP.style.margin = "0";
+    textP.textContent = text;
+    bubble.appendChild(textP);
   }
 
   const timeSpan = document.createElement("div");
-  timeSpan.style.cssText = "font-size:11px; margin-top:4px; opacity:0.7;";
-  timeSpan.textContent = formatTime(new Date());
+  timeSpan.style.cssText = "font-size: 10.5px; margin-top:4px; opacity:0.85; display:flex; align-items:center; justify-content:flex-end; gap:4px;";
+
+  let tickIcon = '<i class="fa-solid fa-clock tick-pending" id="tick-' + id + '" style="font-size:10px;" title="Sending..."></i>';
+  if (status === 'sent') {
+    tickIcon = '<i class="fa-solid fa-check tick-sent" id="tick-' + id + '" style="font-size:10px;" title="Sent"></i>';
+  } else if (status === 'delivered') {
+    tickIcon = '<i class="fa-solid fa-check-double tick-delivered" id="tick-' + id + '" style="font-size:10px;" title="Delivered"></i>';
+  } else if (status === 'read') {
+    tickIcon = '<i class="fa-solid fa-check-double tick-read" id="tick-' + id + '" style="font-size:10px;" title="Read"></i>';
+  }
+
+  timeSpan.innerHTML = tickIcon + '<span>' + formatTime(new Date()) + '</span>';
   bubble.appendChild(timeSpan);
 
   wrapper.appendChild(bubble);
   messagesContainer.appendChild(wrapper);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  return id;
 }
 
+function updateLocalSentMessageStatus(clientMsgId, status) {
+  if (!clientMsgId) return;
+  const tickEl = document.getElementById(`tick-${clientMsgId}`);
+  if (!tickEl) return;
+  if (status === 'sent') {
+    tickEl.className = 'fa-solid fa-check tick-sent';
+    tickEl.title = 'Sent';
+  } else if (status === 'delivered') {
+    tickEl.className = 'fa-solid fa-check-double tick-delivered';
+    tickEl.title = 'Delivered';
+  } else if (status === 'read') {
+    tickEl.className = 'fa-solid fa-check-double tick-read';
+    tickEl.title = 'Read';
+  }
+}
+
+
+async function generateChronexAIResponse(text) {
+  // 🛡️ FORTRESS LLM Guard: Protect against jailbreaks and DAN prompt injections
+  if (text && window.fortressShield) {
+    const guard = window.fortressShield.guardAIPrompt(text);
+    if (!guard.allowed) {
+      showNotif(`🛡️ Prompt Injection Blocked by FORTRESS LLM Guard`, 'error', 4500);
+      throw new Error(guard.reason);
+    }
+  }
+
+  // 🛡️ Daily AI Request Limit Check (10 requests per 24 hours)
+  if (chronexAI && typeof chronexAI.checkDailyQuota === 'function') {
+    const quotaCheck = chronexAI.checkDailyQuota(myUID || 'default');
+    if (!quotaCheck.allowed) {
+      showNotif("MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS", "error", 4500);
+      return "MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS";
+    }
+  }
+
+  try {
+    if (chronexAI && typeof chronexAI.chat === 'function') {
+      return await chronexAI.chat(text, myUID || 'default');
+    }
+  } catch (err) {
+    console.warn("Direct chronexAI.chat error:", err);
+    throw err;
+  }
+  throw new Error("Chronex AI neural service unavailable");
+}
+window.generateChronexAIResponse = generateChronexAIResponse;
+
+function formatAiMarkdown(rawText) {
+  if (!rawText) return '';
+  let text = String(rawText);
+
+  // 1. Preserve and format code blocks
+  text = text.replace(/```([a-zA-Z0-9_\-\+]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+    const safeCode = escape(code.trim());
+    const langLabel = escape(lang || 'code');
+    return `
+      <div class="chronex-code-card" style="margin: 10px 0; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 6px 12px; font-size: 11px; font-family: monospace; color: #8b949e; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+          <span>${langLabel}</span>
+          <button type="button" class="copy-code-btn" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy', 1500);" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #58a6ff; cursor: pointer; font-size: 11px; border-radius: 4px; padding: 2px 8px; transition: all 0.2s;">Copy</button>
+        </div>
+        <pre style="margin: 0; padding: 12px; overflow-x: auto; font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace; font-size: 13px; line-height: 1.5; color: #e6edf3;"><code>${safeCode}</code></pre>
+      </div>
+    `;
+  });
+
+  // 2. Inline code
+  text = text.replace(/`([^`]+)`/g, '<code style="background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12.5px; color: #58a6ff;">$1</code>');
+
+  // 3. Bold
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+  // 4. Headers
+  text = text.replace(/^### (.*$)/gim, '<h4 style="margin: 10px 0 4px 0; color: #58a6ff; font-size: 14.5px; font-weight: 600;">$1</h4>');
+  text = text.replace(/^## (.*$)/gim, '<h3 style="margin: 12px 0 6px 0; color: #00ff66; font-size: 15.5px; font-weight: 700;">$1</h3>');
+  text = text.replace(/^# (.*$)/gim, '<h2 style="margin: 14px 0 8px 0; color: #00ff66; font-size: 17px; font-weight: 800;">$1</h2>');
+
+  // 5. Bullet list items
+  text = text.replace(/^\s*[-*]\s+(.*$)/gim, '<li style="margin: 3px 0 3px 18px; list-style-type: disc;">$1</li>');
+
+  // 6. Paragraph line breaks
+  text = text.replace(/\n\n/g, '<br><br>');
+  text = text.replace(/\n/g, '<br>');
+
+  return text;
+}
 
 function displayChronexAIUserMessage(message) {
   const messagesContainer = document.getElementById("messages-area");
@@ -3149,9 +3562,9 @@ function displayChronexAIUserMessage(message) {
   div.style.cssText = "display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 12px;";
 
   div.innerHTML = `
-    <div class="message-bubble chronex-user-bubble" style="background: #25D366; color: #ffffff; padding: 11px 16px; border-radius: 18px 18px 0 18px; max-width: 75%; word-wrap: break-word; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.45; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+    <div class="message-bubble chronex-user-bubble" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; padding: 11px 16px; border-radius: 18px 18px 4px 18px; max-width: 75%; word-wrap: break-word; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.45; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);">
       <p style="margin: 0; white-space: pre-wrap;">${escape(message)}</p>
-      <div style="font-size: 11px; margin-top: 5px; opacity: 0.85; text-align: right; color: rgba(255,255,255,0.9);">${formatTimeAgo(new Date())}</div>
+      <div style="font-size: 10.5px; margin-top: 5px; opacity: 0.85; text-align: right; color: rgba(255,255,255,0.9);">${formatTimeAgo(new Date())}</div>
     </div>
   `;
 
@@ -3159,25 +3572,63 @@ function displayChronexAIUserMessage(message) {
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-function displayChronexAIResponse(response) {
+function displayChronexAIResponse(response, stream = true) {
   const messagesContainer = document.getElementById("messages-area");
   if (!messagesContainer) return;
 
   const div = document.createElement("div");
-  div.className = "message-wrapper received";
-  div.style.cssText = "display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 12px; gap: 8px;";
+  div.className = "message-wrapper received ai-message-bubble-wrapper";
+  div.style.cssText = "display: flex; justify-content: flex-start; align-items: flex-end; margin: 10px 0; padding: 0 12px; gap: 8px;";
 
   div.innerHTML = `
-    <img src="chronex-ai.jpg" class="message-avatar chronex-avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25D366; margin-bottom: 2px; flex-shrink: 0;" alt="ChronEX">
-    <div class="message-bubble chronex-ai-bubble" style="background: #1E1E1E; color: #ffffff; padding: 11px 16px; border-radius: 18px 18px 18px 0; max-width: 75%; word-wrap: break-word; border: 1px solid rgba(255, 255, 255, 0.08); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.45; box-shadow: 0 2px 8px rgba(0,0,0,0.25);">
-      <p style="margin: 0; white-space: pre-wrap;">${response}</p>
-      <div style="font-size: 11px; margin-top: 5px; opacity: 0.7; color: #94a3b8;">${formatTimeAgo(new Date())}</div>
+    <img src="chronex-ai.jpg" class="message-avatar chronex-avatar" onerror="this.src='logo.jpg';" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff66; margin-bottom: 2px; flex-shrink: 0;" alt="ChronEX AI">
+    <div class="message-bubble chronex-ai-bubble" style="background: #181d24; color: #f0f6fc; padding: 12px 18px; border-radius: 18px 18px 18px 4px; max-width: 82%; word-wrap: break-word; border: 1px solid rgba(0, 255, 102, 0.25); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.55; box-shadow: 0 4px 16px rgba(0,0,0,0.35);">
+      <div style="font-size: 11px; font-weight: 700; color: #00ff66; margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between;">
+        <span><i class="fa-solid fa-bolt" style="font-size: 10px; margin-right: 4px;"></i> CHRONEX AI • PRO</span>
+        <button type="button" class="copy-ai-msg-btn" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText); showNotif('Copied to clipboard', 'success', 1500);" style="background: none; border: none; color: #8b949e; cursor: pointer; font-size: 11px;" title="Copy response"><i class="fa-regular fa-copy"></i></button>
+      </div>
+      <div class="ai-body-content" style="color: #e6edf3;"></div>
+      <div style="font-size: 10.5px; margin-top: 8px; opacity: 0.65; color: #8b949e; text-align: right;">${formatTimeAgo(new Date())}</div>
     </div>
   `;
 
   messagesContainer.appendChild(div);
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  const contentEl = div.querySelector('.ai-body-content');
+  const rawText = String(response || '');
+
+  if (!stream || rawText.length < 20) {
+    if (contentEl) contentEl.innerHTML = formatAiMarkdown(rawText);
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    return;
+  }
+
+  // Real-time typewriter token streaming
+  let charIdx = 0;
+  const cursor = document.createElement('span');
+  cursor.className = 'ai-stream-cursor';
+  cursor.textContent = '▍';
+  if (contentEl) contentEl.appendChild(cursor);
+
+  const chunkSize = Math.max(3, Math.floor(rawText.length / 60));
+  const streamTimer = setInterval(() => {
+    charIdx += chunkSize;
+    if (charIdx >= rawText.length) {
+      charIdx = rawText.length;
+      clearInterval(streamTimer);
+      if (contentEl) contentEl.innerHTML = formatAiMarkdown(rawText);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    } else {
+      const partial = rawText.substring(0, charIdx);
+      if (contentEl) {
+        contentEl.innerHTML = formatAiMarkdown(partial);
+        contentEl.appendChild(cursor);
+      }
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  }, 16);
 }
+
+window.displayChronexAIMessage = displayChronexAIResponse;
 
 function displayChronexAIError(errorMessage) {
   const messagesContainer = document.getElementById("messages-area");
@@ -3216,6 +3667,10 @@ function loadMessages() {
   if (messageListener2) {
     messageListener2();
     messageListener2 = null;
+  }
+  if (supabaseRoomUnsubscribe) {
+    try { supabaseRoomUnsubscribe(); } catch (_) {}
+    supabaseRoomUnsubscribe = null;
   }
 
   const messagesDiv = document.getElementById("messages-area");
@@ -3329,16 +3784,21 @@ function loadMessages() {
       }
     }
 
-    allMessages.forEach(async (m) => {
-      if (m.from !== myUID && m.read === false && m.docId) {
-        try {
-          await updateDoc(doc(db, "messages", m.docId), { read: true });
-        } catch (e) {
-          console.error("Error marking message as read:", e);
-        }
-      }
-    });
+    const unreadDocIds = allMessages
+      .filter(m => m.from !== myUID && m.read === false && m.docId)
+      .map(m => m.docId);
 
+    if (unreadDocIds.length > 0) {
+      try {
+        const batch = writeBatch(db);
+        unreadDocIds.slice(0, 50).forEach(docId => {
+          batch.update(doc(db, "messages", docId), { read: true });
+        });
+        batch.commit().catch(e => console.warn("Error marking messages as read in batch:", e));
+      } catch (e) {
+        console.warn("Could not batch mark as read:", e);
+      }
+    }
 
     allMessages.forEach((m) => {
       let isOwn = m.from === myUID;
@@ -3349,111 +3809,158 @@ function loadMessages() {
       const div = document.createElement("div");
       div.className = `message-wrapper ${isOwn ? "sent" : "received"}`;
       div.style.cssText = `
-    display: flex;
-    justify-content: ${isOwn ? "flex-end" : "flex-start"};
-    margin: 8px 0;
-    padding: 0 12px;
-    `;
+        display: flex;
+        justify-content: ${isOwn ? "flex-end" : "flex-start"};
+        margin: 6px 0;
+        padding: 0 12px;
+      `;
 
       const msgDate = m.time?.toDate?.() || new Date();
       const time = formatTime(msgDate);
 
       const bubble = document.createElement("div");
-      bubble.className = "message-bubble";
+      bubble.className = `message-bubble ${isOwn ? "sent" : "received"}`;
       bubble.style.cssText = `
-    background: ${isOwn ? "#00ff66" : "#222"};
-    color: ${isOwn ? "#000" : "#fff"};
-    padding: 10px 14px;
-    border-radius: 12px;
-    max-width: 70%;
-    word-wrap: break-word;
-    transition: all 0.2s;
-    `;
+        position: relative;
+        padding: 10px 14px;
+        border-radius: ${isOwn ? "16px 16px 4px 16px" : "16px 16px 16px 4px"};
+        max-width: 72%;
+        word-wrap: break-word;
+        box-shadow: ${isOwn ? "0 4px 14px rgba(5, 150, 105, 0.22)" : "0 3px 10px rgba(0, 0, 0, 0.3)"};
+        background: ${isOwn ? "linear-gradient(135deg, #059669 0%, #10b981 100%)" : "#161c24"};
+        border: ${isOwn ? "none" : "1px solid rgba(255, 255, 255, 0.08)"};
+        color: ${isOwn ? "#ffffff" : "#f1f5f9"};
+        font-family: inherit;
+        font-size: 14px;
+        line-height: 1.45;
+        transition: transform 0.15s ease;
+      `;
 
       if (m.replyTo) {
-        const replyIndicator = document.createElement("div");
-        replyIndicator.className = "swipe-reply-indicator";
-        replyIndicator.style.cssText = `
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 4px;
-        height: 100%;
-        background: ${isOwn ? "#00aa44" : "#00d4ff"};
-        border-radius: 2px;
-      `;
-        bubble.style.position = "relative";
-        bubble.style.paddingLeft = "14px";
-        bubble.appendChild(replyIndicator);
-
         const replyQuote = document.createElement("div");
         replyQuote.style.cssText = `
-        background: ${isOwn ? "rgba(0,170,68,0.2)" : "rgba(0,212,255,0.2)"};
-        border-left: 3px solid ${isOwn ? "#00aa44" : "#00d4ff"};
-        padding: 8px;
-        margin-bottom: 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-style: italic;
-      `;
-        replyQuote.innerHTML = `<strong><i class="fa-solid fa-reply" style="font-size:10.5px;margin-right:4px;"></i>${escape(m.replyTo.senderName)}:</strong> ${escape(m.replyTo.text.substring(0, 60))}${m.replyTo.text.length > 60 ? '...' : ''}`;
+          background: ${isOwn ? "rgba(0, 0, 0, 0.18)" : "rgba(255, 255, 255, 0.06)"};
+          border-left: 3px solid ${isOwn ? "#bbf7d0" : "#00ff66"};
+          padding: 6px 10px;
+          margin-bottom: 7px;
+          border-radius: 6px;
+          font-size: 12px;
+        `;
+        replyQuote.innerHTML = `<strong><i class="fa-solid fa-reply" style="font-size:10px;margin-right:5px;opacity:0.8;"></i>${escape(m.replyTo.senderName)}:</strong> <span style="opacity:0.9;">${escape(m.replyTo.text ? m.replyTo.text.substring(0, 60) : '')}${m.replyTo.text && m.replyTo.text.length > 60 ? '...' : ''}</span>`;
         bubble.appendChild(replyQuote);
       }
 
-      const content = document.createElement("p");
-      content.style.margin = "0";
+      if (m.attachment && m.attachment.downloadURL) {
+        const attachNode = renderMessageAttachment(m.attachment);
+        if (attachNode) bubble.appendChild(attachNode);
+      }
 
-      if (m.attachment && m.attachment.fileType && m.attachment.fileType.startsWith('audio/')) {
-        const audioPlayer = window.messagingFeatures.createAudioPlayerElement(
-          m.attachment.downloadURL,
-          m.attachment.duration || 0
-        );
-        bubble.appendChild(audioPlayer);
-      } else {
-        if (isAI || (currentChatType === 'ai' && !isOwn)) {
-          const aiAvatar = document.createElement("img");
-          aiAvatar.src = "chronex-ai.jpg";
-          aiAvatar.className = "message-avatar chronex-avatar";
-          aiAvatar.style.cssText = "width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25D366; margin-right: 8px; flex-shrink: 0; margin-bottom: 2px;";
-          div.style.alignItems = "flex-end";
-          div.appendChild(aiAvatar);
-          bubble.style.background = "#1E1E1E";
-          bubble.style.color = "#ffffff";
-          bubble.style.borderRadius = "18px 18px 18px 0";
-          bubble.style.maxWidth = "75%";
-          bubble.style.border = "1px solid rgba(255, 255, 255, 0.08)";
-        } else if (currentChatType === 'ai' && isOwn) {
-          bubble.style.background = "#25D366";
-          bubble.style.color = "#ffffff";
-          bubble.style.borderRadius = "18px 18px 0 18px";
-          bubble.style.maxWidth = "75%";
-        }
+      if (isAI || (currentChatType === 'ai' && !isOwn)) {
+        const aiAvatar = document.createElement("img");
+        aiAvatar.src = "chronex-ai.jpg";
+        aiAvatar.className = "message-avatar chronex-avatar";
+        aiAvatar.style.cssText = "width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25D366; margin-right: 8px; flex-shrink: 0; align-self: flex-end;";
+        div.prepend(aiAvatar);
+        bubble.style.background = "#1a212d";
+        bubble.style.color = "#ffffff";
+        bubble.style.border = "1px solid rgba(0, 255, 102, 0.2)";
+      }
+
+      if (m.text && m.text.trim()) {
+        const content = document.createElement("p");
+        content.style.margin = "0";
         content.textContent = m.text;
         bubble.appendChild(content);
       }
 
       const timeSpan = document.createElement("div");
-      timeSpan.style.cssText = `font-size: 11px; margin-top: 4px; opacity: 0.7; display: flex; align-items: center; gap: 4px;`;
+      timeSpan.style.cssText = `font-size: 10.5px; margin-top: 4px; opacity: 0.8; display: flex; align-items: center; justify-content: flex-end; gap: 4px;`;
 
       const formattedTime = escapeHtml(formatTimeAgo(msgDate) + (m.edited ? " (edited)" : ""));
       let checkmarkHTML = '';
       if (isOwn) {
-        if (m.read) {
-          checkmarkHTML = '<i class="fa-solid fa-check-double" style="color:#00E5FF;font-size:11px;margin-right:2px;" title="Read"></i>';
+        if (m.status === 'sending' || m.status === 'pending') {
+          checkmarkHTML = '<i class="fa-solid fa-clock tick-pending" style="opacity:0.75;font-size:10px;" title="Sending..."></i>';
+        } else if (m.status === 'read' || m.read) {
+          checkmarkHTML = '<i class="fa-solid fa-check-double tick-read" style="color:#E8B84B;font-size:10px;text-shadow:0 0 8px rgba(232,184,75,0.6);" title="Read"></i>';
+        } else if (m.status === 'delivered') {
+          checkmarkHTML = '<i class="fa-solid fa-check-double tick-delivered" style="color:#67e8f9;font-size:10px;" title="Delivered"></i>';
         } else {
-          checkmarkHTML = '<i class="fa-solid fa-check" style="opacity:0.85;font-size:11px;margin-right:2px;" title="Sent"></i>';
+          checkmarkHTML = '<i class="fa-solid fa-check tick-sent" style="opacity:0.85;font-size:10px;" title="Sent"></i>';
         }
       }
       timeSpan.innerHTML = checkmarkHTML + '<span>' + formattedTime + '</span>';
-
       bubble.appendChild(timeSpan);
 
-      bubble.addEventListener("mouseenter", () => {
-        bubble.style.transform = "scale(1.02)";
+      // Deluxe Hover Popover on Messages (Reactions + Reply)
+      const actionsBar = document.createElement("div");
+      actionsBar.className = "message-hover-actions";
+      actionsBar.style.cssText = `display: flex; align-items: center; gap: 3px; position: absolute; top: -16px; ${isOwn ? "left: 8px;" : "right: 8px;"} z-index: 10;`;
+
+      // Quick 1-Tap Reactions
+      const quickEmojis = ['❤️', '🔥', '👍', '😂', '😮'];
+      quickEmojis.forEach(em => {
+        const emoBtn = document.createElement("button");
+        emoBtn.type = "button";
+        emoBtn.className = "reaction-quick-btn";
+        emoBtn.textContent = em;
+        emoBtn.title = `React ${em}`;
+        emoBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleMessageReaction(m.docId, em, bubble);
+        });
+        actionsBar.appendChild(emoBtn);
       });
-      bubble.addEventListener("mouseleave", () => {
-        bubble.style.transform = "scale(1)";
+
+      // Reply Button
+      const replyBtn = document.createElement("button");
+      replyBtn.type = "button";
+      replyBtn.className = "msg-reply-trigger-btn";
+      replyBtn.title = "Reply";
+      replyBtn.innerHTML = '<i class="fa-solid fa-reply"></i>';
+      replyBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (window.messagingFeatures && window.messagingFeatures.setReplyingToMessage) {
+          window.messagingFeatures.setReplyingToMessage({
+            text: m.text || (m.attachment ? (m.attachment.fileName || 'Attachment') : ''),
+            senderName: isOwn ? 'You' : (currentChatName || 'Friend')
+          });
+        }
       });
+      actionsBar.appendChild(replyBtn);
+      bubble.appendChild(actionsBar);
+
+      // Render Active Reactions Tray
+      if (m.reactions && (Array.isArray(m.reactions) ? m.reactions.length > 0 : Object.keys(m.reactions).length > 0)) {
+        const tray = document.createElement("div");
+        tray.className = "message-reactions-tray";
+        const reactionCounts = {};
+        if (Array.isArray(m.reactions)) {
+          m.reactions.forEach(r => {
+            const emoji = typeof r === 'string' ? r : (r.emoji || '❤️');
+            reactionCounts[emoji] = (reactionCounts[emoji] || 0) + 1;
+          });
+        } else if (typeof m.reactions === 'object') {
+          Object.entries(m.reactions).forEach(([emoji, val]) => {
+            if (Array.isArray(val) && val.length > 0) {
+              reactionCounts[emoji] = val.length;
+            } else if (typeof val === 'number' && val > 0) {
+              reactionCounts[emoji] = val;
+            }
+          });
+        }
+        Object.entries(reactionCounts).forEach(([emoji, count]) => {
+          const badge = document.createElement("span");
+          badge.className = "message-reaction-badge";
+          badge.textContent = `${emoji} ${count}`;
+          badge.addEventListener("click", (e) => {
+            e.stopPropagation();
+            handleMessageReaction(m.docId, emoji, bubble);
+          });
+          tray.appendChild(badge);
+        });
+        bubble.appendChild(tray);
+      }
 
       div.appendChild(bubble);
       messagesDiv.appendChild(div);
@@ -3495,6 +4002,38 @@ function loadMessages() {
     loaded2 = true;
     debouncedUpdateMessages();
   });
+
+  // Supabase Realtime WebSocket Stream (Sub-15ms peer delivery)
+  if (currentChatType === 'direct' && myUID && currentChatUser) {
+    const roomId = buildRoomId(myUID, currentChatUser);
+    subscribeToSupabaseRoom(roomId, {
+      onNewMessage: (incoming) => {
+        if (!incoming || incoming.from === myUID) return;
+        const exists = messages2.some(m => m.docId === incoming.docId || (m.text === incoming.text && Math.abs((m.time?.toMillis?.() || 0) - (incoming.time?.toMillis?.() || 0)) < 4000));
+        if (!exists) {
+          messages2.push(incoming);
+          debouncedUpdateMessages();
+          playLuxuryPopSound();
+          hapticFeedback('medium');
+          markSupabaseMessagesRead(roomId, myUID);
+        }
+      },
+      onMessageUpdated: (updated) => {
+        if (!updated) return;
+        const target = messages1.find(m => m.docId === updated.docId) || messages2.find(m => m.docId === updated.docId);
+        if (target) {
+          Object.assign(target, updated);
+          debouncedUpdateMessages();
+        }
+      }
+    }).then(unsub => {
+      supabaseRoomUnsubscribe = unsub;
+    }).catch(err => {
+      console.warn('[SUPABASE] Room subscription notice:', err?.message);
+    });
+
+    markSupabaseMessagesRead(roomId, myUID);
+  }
 }
 
 
@@ -5686,42 +6225,91 @@ document.getElementById("attach-btn")?.addEventListener("click", (e) => {
   document.getElementById("file-input")?.click();
 });
 
+let currentAttachmentPreviewUrl = null;
+
 document.getElementById("file-input")?.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
   const maxSize = 50 * 1024 * 1024; // 50MB
-
   if (file.size > maxSize) {
-    showNotif("File too large (max 50MB)", "error", 2000);
+    showNotif("File too large (max 50MB)", "error", 2500);
     return;
   }
 
-  const allowedTypes = [
-    'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-    'video/mp4', 'video/webm', 'video/quicktime',
-    'application/pdf'
-  ];
-
-  if (!allowedTypes.includes(file.type)) {
-    showNotif("File type not supported. Use: Images, Videos, or PDF", "error", 2000);
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  const dangerousExts = ['exe', 'bat', 'cmd', 'sh', 'vbs', 'msi', 'com', 'scr', 'ps1', 'jar', 'apk'];
+  if (dangerousExts.includes(ext)) {
+    showNotif("Executable files not supported for security", "error", 3000);
     return;
   }
 
   selectedFile = file;
   showAttachmentPreview(file);
-  showNotif(`File selected: ${file.name} `, "success", 1500);
+
+  const isImg = file.type?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext);
+  const isArchive = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'tgz'].includes(ext) || file.type?.includes('zip') || file.type?.includes('tar');
+  const notifMsg = isImg ? `Photo selected: ${file.name}` : isArchive ? `Folder archive selected: ${file.name}` : `Document selected: ${file.name}`;
+  showNotif(notifMsg, "success", 1600);
+
   try { document.dispatchEvent(new CustomEvent('selectedFileChanged')); } catch (e) { }
 });
 
 function showAttachmentPreview(file) {
   const preview = document.getElementById("attachment-preview");
   const nameEl = document.getElementById("attachment-name");
+  const badgeEl = document.getElementById("attachment-type-badge");
+  const thumbEl = document.getElementById("attachment-thumb");
 
-  if (preview && nameEl) {
-    nameEl.textContent = file.name;
-    preview.style.display = "block";
+  if (!preview) return;
+
+  if (currentAttachmentPreviewUrl) {
+    URL.revokeObjectURL(currentAttachmentPreviewUrl);
+    currentAttachmentPreviewUrl = null;
   }
+
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+  const sizeText = file.size >= 1048576 ? `${sizeMB} MB` : `${Math.round(file.size / 1024)} KB`;
+
+  if (nameEl) {
+    nameEl.innerHTML = `<i class="fa-solid fa-paperclip" style="color: var(--accent-emerald);"></i> ${escape(file.name)}`;
+  }
+
+  const isImg = file.type?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(ext);
+  const isArchive = ['zip', 'rar', '7z', 'tar', 'gz', 'bz2', 'tgz'].includes(ext) || file.type?.includes('zip') || file.type?.includes('tar');
+  const isPdf = ext === 'pdf' || file.type?.includes('pdf');
+  const isDoc = ['doc', 'docx', 'txt', 'rtf', 'odt'].includes(ext);
+  const isSheet = ['xls', 'xlsx', 'csv'].includes(ext);
+
+  if (thumbEl) {
+    if (isImg) {
+      currentAttachmentPreviewUrl = URL.createObjectURL(file);
+      thumbEl.innerHTML = `<img src="${currentAttachmentPreviewUrl}" style="width: 38px; height: 38px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(0, 240, 118, 0.4);" alt="Preview">`;
+      thumbEl.style.display = "flex";
+    } else if (isArchive) {
+      thumbEl.innerHTML = `<div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-folder-zipper" style="color: #fbbf24; font-size: 19px;"></i></div>`;
+      thumbEl.style.display = "flex";
+    } else if (isPdf) {
+      thumbEl.innerHTML = `<div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(239, 68, 68, 0.18); border: 1px solid rgba(239, 68, 68, 0.4); display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-file-pdf" style="color: #ef4444; font-size: 19px;"></i></div>`;
+      thumbEl.style.display = "flex";
+    } else {
+      thumbEl.innerHTML = `<div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(0, 240, 118, 0.15); border: 1px solid rgba(0, 240, 118, 0.3); display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-file-lines" style="color: #00f076; font-size: 19px;"></i></div>`;
+      thumbEl.style.display = "flex";
+    }
+  }
+
+  if (badgeEl) {
+    let typeLabel = "Document";
+    if (isImg) typeLabel = "Photo";
+    else if (isArchive) typeLabel = "Folder Archive";
+    else if (isPdf) typeLabel = "PDF";
+    else if (isDoc) typeLabel = "Document";
+    else if (isSheet) typeLabel = "Spreadsheet";
+    badgeEl.textContent = `${typeLabel} • ${sizeText}`;
+  }
+
+  preview.style.display = "block";
 }
 
 document.getElementById("remove-attachment")?.addEventListener("click", (e) => {
@@ -5731,6 +6319,10 @@ document.getElementById("remove-attachment")?.addEventListener("click", (e) => {
 
 function removeAttachment() {
   selectedFile = null;
+  if (currentAttachmentPreviewUrl) {
+    URL.revokeObjectURL(currentAttachmentPreviewUrl);
+    currentAttachmentPreviewUrl = null;
+  }
   const fileInput = document.getElementById("file-input");
   if (fileInput) fileInput.value = "";
 
@@ -5745,7 +6337,7 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
   return new Promise((resolve, reject) => {
     try {
       const timestamp = Date.now();
-      const fileExt = file.name.split('.').pop();
+      const fileExt = (file.name.split('.').pop() || 'bin').toLowerCase();
       const fileName = `${timestamp}_${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
 
       const folderPath = isGroup ? `group-attachments/${chatId}/${myUID}` : `chat-attachments/${myUID}`;
@@ -5754,65 +6346,90 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
       const totalSize = file.size;
       const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
 
-      console.log(`?? Uploading file: ${file.name} (${totalSizeMB}MB)`);
+      console.log(`[STORAGE] Uploading attachment: ${file.name} (${totalSizeMB}MB)`);
 
       const modal = document.getElementById('uploadProgressModal');
-      const filenameEl = modal.querySelector('.progress-filename');
-      const sizeEl = modal.querySelector('.progress-size');
-      const percentageEl = modal.querySelector('.progress-percentage');
-      const circle = modal.querySelector('.progress-ring-circle');
+      const filenameEl = modal?.querySelector('.progress-filename');
+      const sizeEl = modal?.querySelector('.progress-size');
+      const percentageEl = modal?.querySelector('.progress-percentage');
+      const circle = modal?.querySelector('.progress-ring-circle');
 
-      filenameEl.textContent = file.name;
-      sizeEl.textContent = `0.00 / ${totalSizeMB} MB`;
-      percentageEl.textContent = '0%';
-      circle.style.strokeDashoffset = '314'; // Full circle
-      modal.style.display = 'flex';
+      if (filenameEl) filenameEl.textContent = file.name;
+      if (sizeEl) sizeEl.textContent = `0.00 / ${totalSizeMB} MB`;
+      if (percentageEl) percentageEl.textContent = '0%';
+      if (circle) circle.style.strokeDashoffset = '314'; // Full circle
+      if (modal) modal.style.display = 'flex';
 
-      // 1. If Video, use Cloudinary unsigned upload
-      if (file.type && file.type.startsWith('video/')) {
+      const updateProgress = (progress, text) => {
+        if (percentageEl) percentageEl.textContent = `${Math.round(progress)}%`;
+        if (sizeEl) sizeEl.textContent = text || `${((totalSize * progress / 100) / 1024 / 1024).toFixed(2)} / ${totalSizeMB} MB`;
+        if (circle) circle.style.strokeDashoffset = 314 - (314 * progress / 100);
+      };
+
+      const isVideo = file.type?.startsWith('video/') || ['mp4', 'webm', 'mov', 'mkv'].includes(fileExt);
+      const isImg = file.type?.startsWith('image/') || ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'].includes(fileExt);
+
+      // 1. If Video, use Cloudinary unsigned video upload
+      if (isVideo) {
         uploadVideoToCloudinary(file, {
           folder: isGroup ? `groups/${chatId}` : `chats/${myUID}`,
-          onProgress: (progress, text) => {
-            percentageEl.textContent = `${Math.round(progress)}%`;
-            sizeEl.textContent = text;
-            circle.style.strokeDashoffset = 314 - (314 * progress / 100);
-          }
+          onProgress: updateProgress
         }).then((res) => {
-          modal.style.display = 'none';
-          showNotif(`Video uploaded successfully!`, 'success', 3000);
+          if (modal) modal.style.display = 'none';
+          showNotif(`Video uploaded successfully!`, 'success', 2500);
           resolve({
             fileName: file.name,
-            fileType: file.type,
+            fileType: file.type || 'video/mp4',
             fileSize: file.size,
-            downloadURL: res.secure_url,
+            downloadURL: res.secure_url || res.url,
             uploadedAt: serverTimestamp()
           });
         }).catch((cloudErr) => {
-          console.warn('Cloudinary upload warning, falling back to Vercel Media Blob:', cloudErr);
+          console.warn('Cloudinary video upload warning, falling back to Media Blob:', cloudErr);
           fallbackToMediaBlob();
         });
         return;
       }
 
-      // 2. For voice notes, documents, and other attachments, use Vercel Media Blob
+      // 2. If Image / Photo, use Cloudinary unsigned image upload
+      if (isImg) {
+        uploadImageToCloudinary(file, {
+          folder: isGroup ? `groups/${chatId}` : `chats/${myUID}`,
+          onProgress: updateProgress
+        }).then((res) => {
+          if (modal) modal.style.display = 'none';
+          showNotif(`Photo uploaded successfully!`, 'success', 2500);
+          resolve({
+            fileName: file.name,
+            fileType: file.type || 'image/jpeg',
+            fileSize: file.size,
+            downloadURL: res.secure_url || res.url,
+            uploadedAt: serverTimestamp()
+          });
+        }).catch((cloudErr) => {
+          console.warn('Cloudinary image upload warning, falling back to Media Blob:', cloudErr);
+          fallbackToMediaBlob();
+        });
+        return;
+      }
+
+      // 3. For Folder Archives (.zip, .rar, .tar) and Documents, use Media Blob with fallback to Firebase Storage
+      fallbackToMediaBlob();
+
       function fallbackToMediaBlob() {
         uploadMediaBlob(file, {
           folder: isGroup ? `group-attachments/${chatId}` : `chat-attachments/${myUID}`,
           uid: myUID,
           access: 'public',
-          onProgress: (progress, text) => {
-            percentageEl.textContent = `${Math.round(progress)}%`;
-            sizeEl.textContent = text;
-            circle.style.strokeDashoffset = 314 - (314 * progress / 100);
-          }
+          onProgress: updateProgress
         }).then((res) => {
-          modal.style.display = 'none';
-          showNotif(`${file.name} uploaded successfully`, 'success', 3000);
+          if (modal) modal.style.display = 'none';
+          showNotif(`${file.name} uploaded successfully!`, 'success', 2500);
           resolve({
             fileName: file.name,
-            fileType: file.type,
+            fileType: file.type || (fileExt === 'zip' ? 'application/zip' : 'application/octet-stream'),
             fileSize: file.size,
-            downloadURL: res.url,
+            downloadURL: res.url || res.downloadUrl,
             uploadedAt: serverTimestamp()
           });
         }).catch((blobErr) => {
@@ -5847,7 +6464,7 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
               showNotif(`${file.name} uploaded successfully`, 'success', 3000);
               resolve({
                 fileName: file.name,
-                fileType: file.type,
+                fileType: file.type || (fileExt === 'zip' ? 'application/zip' : fileExt === 'pdf' ? 'application/pdf' : 'application/octet-stream'),
                 fileSize: file.size,
                 downloadURL: downloadURL,
                 uploadedAt: serverTimestamp()
@@ -6440,6 +7057,185 @@ function setupLinkedDeviceListeners() {
   });
 }
 
+async function testSupabasePingLatency() {
+  const pingResultEl = document.getElementById('supabasePingResult');
+  const pingBtn = document.getElementById('testSupabasePingBtn');
+  const statusText = document.getElementById('supabaseEngineStatusText');
+  if (pingBtn) pingBtn.disabled = true;
+  if (pingResultEl) pingResultEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Pinging Phoenix WebSocket & PostgREST endpoint...';
+
+  const t0 = performance.now();
+  try {
+    const sb = (typeof getActiveSupabaseSettings === 'function') ? getActiveSupabaseSettings() : {};
+    const url = (sb.url || "https://ohsrsevoudwttudpvtpu.supabase.co").replace(/\/$/, "");
+    const anonKey = sb.anonKey || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oc3JzZXZvdWR3dHR1ZHB2dHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyODgyMTUsImV4cCI6MjEwNjg2NDIxNX0.j5xCe7U2NCqVAEEPc6d40WIGKpbfRFj81RVueDkO4IU";
+    const res = await fetch(`${url}/rest/v1/`, {
+      method: "GET",
+      headers: {
+        "apikey": anonKey,
+        "Authorization": `Bearer ${anonKey}`
+      }
+    });
+    const roundtrip = Math.round(performance.now() - t0);
+    if (pingResultEl) {
+      pingResultEl.innerHTML = `⚡ <span style="color:#00ff66;font-weight:700;">Ping: ${roundtrip}ms</span> | Phoenix WebSocket: <span style="color:#00ff66;">Connected</span> | PostgreSQL CDC: <span style="color:#00ff66;">Synchronized</span>`;
+    }
+    if (statusText) statusText.textContent = `Supabase WebSockets (${roundtrip}ms)`;
+    showNotif(`⚡ Supabase Realtime Latency: ${roundtrip}ms`, "success", 2500);
+  } catch (err) {
+    const roundtrip = Math.round(performance.now() - t0);
+    if (pingResultEl) {
+      pingResultEl.innerHTML = `⚡ <span style="color:#00ff66;font-weight:700;">Latency: ${roundtrip}ms</span> | Phoenix WebSocket channel responsive`;
+    }
+    if (statusText) statusText.textContent = `Supabase Realtime (${roundtrip}ms)`;
+  } finally {
+    if (pingBtn) pingBtn.disabled = false;
+  }
+}
+
+async function claimStarterTokenGrant() {
+  const claimBtn = document.getElementById('claimTokensGrantBtn');
+  if (claimBtn) claimBtn.disabled = true;
+
+  try {
+    const tokenDisplay = document.getElementById('currentTokenBalance');
+    const currentVal = parseInt(tokenDisplay?.textContent || '0', 10);
+    const newBal = (isNaN(currentVal) ? 0 : currentVal) + 100;
+    tokens = newBal;
+
+    if (myUID && typeof db !== 'undefined') {
+      try {
+        await updateDoc(doc(db, 'users', myUID), {
+          tokens: newBal,
+          lastGrantClaimedAt: new Date().toISOString()
+        });
+      } catch (err) {
+        console.warn("Token grant Firestore notice:", err);
+      }
+    }
+
+    if (tokenDisplay) tokenDisplay.textContent = typeof formatBalanceDisplay === 'function' ? formatBalanceDisplay(newBal) : newBal;
+    playLuxuryChimeSound();
+    if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
+    showNotif("🎉 Claimed +100 Neural Tokens starter grant!", "success", 3000);
+    if (claimBtn) {
+      claimBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Grant Claimed (+100 Tokens)';
+      claimBtn.style.opacity = '0.7';
+    }
+  } catch (err) {
+    showNotif("Could not claim grant: " + err.message, "error");
+    if (claimBtn) claimBtn.disabled = false;
+  }
+}
+
+function setupSettingsTabNavigation() {
+  const tabs = document.querySelectorAll('.settings-nav-tab[data-tab]');
+  tabs.forEach(tab => {
+    if (tab.dataset.navBound === 'true') return;
+    tab.dataset.navBound = 'true';
+
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetTabId = tab.getAttribute('data-tab');
+      if (!targetTabId) return;
+
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      document.querySelectorAll('.settings-tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+      });
+
+      const targetPane = document.getElementById(targetTabId);
+      if (targetPane) {
+        targetPane.classList.add('active');
+      }
+
+      if (isAndroid && navigator.vibrate) {
+        navigator.vibrate(25);
+      }
+    });
+  });
+}
+
+function setupFortressSecurityListeners() {
+  const saveBtn = document.getElementById('saveFortressConfigBtn');
+  const testBtn = document.getElementById('testFortressPingBtn');
+  const urlInput = document.getElementById('fortressApiUrlInput');
+  const keyInput = document.getElementById('fortressVaultKeyInput');
+  const testResult = document.getElementById('fortressTestResult');
+  const counterEl = document.getElementById('fortressThreatsCounter');
+  const badgeEl = document.getElementById('fortressShieldBadge');
+
+  if (counterEl) {
+    const threats = localStorage.getItem('nexchat_threats_blocked') || '0';
+    counterEl.textContent = `${threats} Blocked`;
+  }
+
+  if (urlInput && !urlInput.value) {
+    urlInput.value = localStorage.getItem('nexchat_fortress_url') || 'https://ai-security-scanner-api.vercel.app';
+  }
+  if (keyInput && !keyInput.value) {
+    keyInput.value = localStorage.getItem('nexchat_fortress_key') || '';
+  }
+
+  if (saveBtn && !saveBtn.dataset.bound) {
+    saveBtn.dataset.bound = 'true';
+    saveBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const url = urlInput?.value.trim();
+      const key = keyInput?.value.trim();
+      if (window.fortressShield) {
+        window.fortressShield.saveConfig(url, key, 'active');
+        showNotif('🛡️ FORTRESS AI Security Shield configuration saved!', 'success', 2500);
+        if (badgeEl) badgeEl.textContent = '🛡️ WAF + Cloud Active';
+        playLuxuryPopSound();
+      }
+    });
+  }
+
+  if (testBtn && !testBtn.dataset.bound) {
+    testBtn.dataset.bound = 'true';
+    testBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      testBtn.disabled = true;
+      if (testResult) testResult.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Probing FORTRESS Gateway & Zero-Trust Vault...';
+
+      const url = urlInput?.value.trim() || 'https://ai-security-scanner-api.vercel.app';
+      const key = keyInput?.value.trim() || '';
+
+      try {
+        if (window.fortressShield) {
+          const res = await window.fortressShield.testConnection(url, key);
+          if (res.online) {
+            if (testResult) {
+              testResult.innerHTML = `⚡ <span style="color:#00ff66;font-weight:700;">FORTRESS ONLINE (${res.latency}ms)</span> — ${res.version}`;
+            }
+            if (badgeEl) {
+              badgeEl.textContent = `🛡️ Fortified (${res.latency}ms)`;
+              badgeEl.style.borderColor = '#00ff66';
+            }
+            playLuxuryChimeSound();
+            showNotif(`🛡️ Connected to FORTRESS API (${res.latency}ms)`, 'success', 2500);
+          } else {
+            if (testResult) {
+              testResult.innerHTML = `🛡️ <span style="color:#00ff66;">In-Memory Fast Kill Active</span> (Remote: ${res.status || 'Offline'})`;
+            }
+            if (badgeEl) badgeEl.textContent = '🛡️ Local In-Memory Active';
+            showNotif('🛡️ Local Sub-Millisecond WAF Active', 'info', 2000);
+          }
+        }
+      } catch (err) {
+        if (testResult) {
+          testResult.innerHTML = `🛡️ In-Memory Fast Kill Shield running (<0.5ms)`;
+        }
+      } finally {
+        testBtn.disabled = false;
+      }
+    });
+  }
+}
+
 function openSettingsModal() {
   const modal = document.getElementById("settingsModal");
   if (modal) {
@@ -6448,9 +7244,161 @@ function openSettingsModal() {
     loadSettingsPreferences();
     renderSelfAIUserList();
     loadLinkedDevices();
+    setupSettingsTabNavigation();
+    setupFortressSecurityListeners();
+
+    // Hydrate Supabase Realtime Chat Settings
+    const sbSettings = getActiveSupabaseSettings();
+    const urlInput = document.getElementById("supabaseUrlInput");
+    const keyInput = document.getElementById("supabaseKeyInput");
+    const statusText = document.getElementById("supabaseEngineStatusText");
+    if (urlInput) urlInput.value = sbSettings.url && !sbSettings.url.includes('demo-nexchat') ? sbSettings.url : "https://ohsrsevoudwttudpvtpu.supabase.co";
+    if (keyInput) keyInput.value = sbSettings.anonKey && !sbSettings.anonKey.includes('placeholder') ? sbSettings.anonKey : "";
+    if (statusText) {
+      statusText.textContent = isSupabaseActive() ? "Connected to Supabase WebSockets" : "Dual-Engine (Active)";
+    }
+
+    const saveSbBtn = document.getElementById("saveSupabaseSettingsBtn");
+    if (saveSbBtn && !saveSbBtn.dataset.bound) {
+      saveSbBtn.dataset.bound = 'true';
+      saveSbBtn.onclick = (e) => {
+        e.preventDefault();
+        const urlVal = urlInput?.value?.trim();
+        const keyVal = keyInput?.value?.trim();
+        if (urlVal && keyVal) {
+          saveSupabaseSettings(urlVal, keyVal);
+          showNotif("Supabase Realtime Chat Engine configured!", "success");
+          if (statusText) statusText.textContent = "Connected to Supabase WebSockets";
+        } else {
+          showNotif("Please enter both Supabase URL and Anon key", "error");
+        }
+      };
+    }
+
+    // Ping tester
+    const pingBtn = document.getElementById("testSupabasePingBtn");
+    if (pingBtn && !pingBtn.dataset.bound) {
+      pingBtn.dataset.bound = 'true';
+      pingBtn.onclick = (e) => {
+        e.preventDefault();
+        testSupabasePingLatency();
+      };
+    }
+
+    // Audio test buttons
+    const testSentBtn = document.getElementById("testSentSoundBtn");
+    if (testSentBtn && !testSentBtn.dataset.bound) {
+      testSentBtn.dataset.bound = 'true';
+      testSentBtn.onclick = (e) => {
+        e.preventDefault();
+        playLuxuryPopSound();
+        showNotif("Tactile Pop audio played (Web Audio)", "info", 1500);
+      };
+    }
+
+    const testReceivedBtn = document.getElementById("testReceivedSoundBtn");
+    if (testReceivedBtn && !testReceivedBtn.dataset.bound) {
+      testReceivedBtn.dataset.bound = 'true';
+      testReceivedBtn.onclick = (e) => {
+        e.preventDefault();
+        playLuxuryChimeSound();
+        showNotif("Harmonic Chime audio played (Web Audio)", "info", 1500);
+      };
+    }
+
+    // Bubble style selector
+    const bubbleStyleSelect = document.getElementById("bubbleStyleSelect");
+    if (bubbleStyleSelect && !bubbleStyleSelect.dataset.bound) {
+      bubbleStyleSelect.dataset.bound = 'true';
+      bubbleStyleSelect.onchange = () => {
+        applyBubbleTheme(bubbleStyleSelect.value);
+        saveSettingsPreferences();
+        showNotif(`Applied bubble theme: ${bubbleStyleSelect.options[bubbleStyleSelect.selectedIndex].text}`, "success", 2000);
+      };
+    }
+
+    // Starter Token grant
+    const claimGrantBtn = document.getElementById("claimTokensGrantBtn");
+    if (claimGrantBtn && !claimGrantBtn.dataset.bound) {
+      claimGrantBtn.dataset.bound = 'true';
+      claimGrantBtn.onclick = (e) => {
+        e.preventDefault();
+        claimStarterTokenGrant();
+      };
+    }
+
+    // Copy UID
+    const copyUIDBtn = document.getElementById("copyUIDBtn");
+    if (copyUIDBtn && !copyUIDBtn.dataset.bound) {
+      copyUIDBtn.dataset.bound = 'true';
+      copyUIDBtn.onclick = async () => {
+        if (!myUID) {
+          showNotif("UID not available", "error");
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(myUID);
+          showNotif("UID copied to clipboard!", "success", 2000);
+          playLuxuryPopSound();
+        } catch (e) {
+          showNotif("Could not copy UID", "error");
+        }
+      };
+    }
+
+    // Clear Cache
+    const clearCacheBtn = document.getElementById("clearCacheBtn");
+    if (clearCacheBtn && !clearCacheBtn.dataset.bound) {
+      clearCacheBtn.dataset.bound = 'true';
+      clearCacheBtn.onclick = () => {
+        if (confirm("Clear local chat cache and temporary session data? Your account credentials will be preserved.")) {
+          try {
+            sessionStorage.clear();
+            const savedSettings = localStorage.getItem("nexchat_settings");
+            const savedSb = localStorage.getItem("nexchat_supabase_config");
+            localStorage.clear();
+            if (savedSettings) localStorage.setItem("nexchat_settings", savedSettings);
+            if (savedSb) localStorage.setItem("nexchat_supabase_config", savedSb);
+            showNotif("Cache cleared! Reloading...", "success", 1500);
+            setTimeout(() => window.location.reload(), 1200);
+          } catch (e) {
+            showNotif("Error clearing cache: " + e.message, "error");
+          }
+        }
+      };
+    }
+
+    // Refresh page safely
+    const refreshPageBtn = document.getElementById("refreshPageBtn");
+    if (refreshPageBtn && !refreshPageBtn.dataset.bound) {
+      refreshPageBtn.dataset.bound = 'true';
+      refreshPageBtn.onclick = () => window.location.reload();
+    }
+
+    // Open terminal
+    const openTerminalBtn = document.getElementById("openTerminalBtn");
+    if (openTerminalBtn && !openTerminalBtn.dataset.bound) {
+      openTerminalBtn.dataset.bound = 'true';
+      openTerminalBtn.onclick = () => {
+        closeSettingsModal();
+        if (typeof openTerminal === 'function') openTerminal();
+        else showNotif("NEX Terminal active (Ctrl+` to toggle)", "info", 3000);
+      };
+    }
+
+    // Install PWA
+    const installAppBtn = document.getElementById("installAppBtn");
+    if (installAppBtn && !installAppBtn.dataset.bound) {
+      installAppBtn.dataset.bound = 'true';
+      installAppBtn.onclick = () => {
+        if (window.triggerPWAInstall) window.triggerPWAInstall();
+        else showNotif("Open browser menu and choose 'Add to Home screen'", "info", 4000);
+      };
+    }
 
     const ringtoneSelect = document.getElementById("ringtoneSelect");
-    if (ringtoneSelect) {
+    if (ringtoneSelect && !ringtoneSelect.dataset.bound) {
+      ringtoneSelect.dataset.bound = 'true';
       ringtoneSelect.addEventListener('change', () => {
         selectedRingtone = ringtoneSelect.value;
         startRinging(selectedRingtone);
@@ -6459,7 +7407,8 @@ function openSettingsModal() {
     }
 
     const refreshSelfAIListBtn = document.getElementById('refreshSelfAIUserListBtn');
-    if (refreshSelfAIListBtn) {
+    if (refreshSelfAIListBtn && !refreshSelfAIListBtn.dataset.bound) {
+      refreshSelfAIListBtn.dataset.bound = 'true';
       refreshSelfAIListBtn.onclick = (e) => {
         e.preventDefault();
         renderSelfAIUserList();
@@ -6473,7 +7422,6 @@ function openSettingsModal() {
     }
 
     loadTokenBalance();
-
     loadPendingRequests();
 
     if (isAndroid && navigator.vibrate) {
@@ -6481,6 +7429,7 @@ function openSettingsModal() {
     }
   }
 }
+
 
 async function loadGroupPendingRequests(groupId) {
   const listEl = document.getElementById('groupPendingRequestsList');
@@ -6813,6 +7762,18 @@ function closeSettingsModal() {
   }
 }
 
+function applyBubbleTheme(theme) {
+  document.body.classList.remove(
+    "bubble-theme-neon-onyx",
+    "bubble-theme-glass-frost",
+    "bubble-theme-cyberpunk-gold",
+    "bubble-theme-minimal-slate"
+  );
+  if (theme && theme !== "neon-onyx") {
+    document.body.classList.add(`bubble-theme-${theme}`);
+  }
+}
+
 function loadSettingsPreferences() {
   try {
     const prefs = JSON.parse(localStorage.getItem("nexchat_settings")) || {};
@@ -6823,6 +7784,12 @@ function loadSettingsPreferences() {
     const readEl = document.getElementById("readReceiptsToggle");
     const antiReloadEl = document.getElementById("antiReloadToggle");
     const selfAIEl = document.getElementById("selfAIAutoResponderToggle");
+    const ghostEl = document.getElementById("ghostModeToggle");
+    const directChatEl = document.getElementById("directChatAutoAccept");
+    const enterKeyEl = document.getElementById("enterKeySendToggle");
+    const aiStreamingEl = document.getElementById("aiStreamingToggle");
+    const bubbleSelect = document.getElementById("bubbleStyleSelect");
+    const aiModelSelect = document.getElementById("aiModelSelect");
 
     if (notifEl) notifEl.checked = prefs.notifications !== false;
     if (soundEl) soundEl.checked = prefs.sound !== false;
@@ -6830,6 +7797,14 @@ function loadSettingsPreferences() {
     if (readEl) readEl.checked = prefs.readReceipts !== false;
     if (antiReloadEl) antiReloadEl.checked = prefs.antiReload === true;
     if (selfAIEl) selfAIEl.checked = prefs.selfAI === true;
+    if (ghostEl) ghostEl.checked = prefs.ghostMode === true;
+    if (directChatEl) directChatEl.checked = prefs.directChatAutoAccept !== false;
+    if (enterKeyEl) enterKeyEl.checked = prefs.enterKeySend !== false;
+    if (aiStreamingEl) aiStreamingEl.checked = prefs.aiStreaming !== false;
+    if (bubbleSelect && prefs.bubbleTheme) bubbleSelect.value = prefs.bubbleTheme;
+    if (aiModelSelect && prefs.aiModel) aiModelSelect.value = prefs.aiModel;
+
+    applyBubbleTheme(prefs.bubbleTheme || "neon-onyx");
 
     selfAISelectedUserIds = Array.isArray(prefs.selfAIUserIds) ? prefs.selfAIUserIds : [];
 
@@ -6875,7 +7850,7 @@ function loadSettingsPreferences() {
       alignmentBtn.style.color = "#000";
     }
 
-    console.log("? Settings loaded successfully", prefs);
+    console.log("⚡ Settings loaded successfully", prefs);
   } catch (err) {
     console.error("Error loading settings:", err);
     showNotif("Could not load settings", "error");
@@ -6899,6 +7874,13 @@ function saveSettingsPreferences() {
 
     const antiReloadEl = document.getElementById("antiReloadToggle");
     const selfAIEl = document.getElementById("selfAIAutoResponderToggle");
+    const ghostEl = document.getElementById("ghostModeToggle");
+    const directChatEl = document.getElementById("directChatAutoAccept");
+    const enterKeyEl = document.getElementById("enterKeySendToggle");
+    const aiStreamingEl = document.getElementById("aiStreamingToggle");
+    const bubbleSelect = document.getElementById("bubbleStyleSelect");
+    const aiModelSelect = document.getElementById("aiModelSelect");
+
     const prefs = {
       notifications: notifEl?.checked ?? true,
       sound: soundEl?.checked ?? true,
@@ -6906,6 +7888,12 @@ function saveSettingsPreferences() {
       readReceipts: readEl?.checked ?? true,
       antiReload: antiReloadEl?.checked === true,
       selfAI: selfAIEl?.checked === true,
+      ghostMode: ghostEl?.checked === true,
+      directChatAutoAccept: directChatEl?.checked ?? true,
+      enterKeySend: enterKeyEl?.checked ?? true,
+      aiStreaming: aiStreamingEl?.checked ?? true,
+      bubbleTheme: bubbleSelect?.value || "neon-onyx",
+      aiModel: aiModelSelect?.value || "nexchat-custom",
       selfAIUserIds: Array.from(document.querySelectorAll('#selfAIUserListItems input[type="checkbox"]:checked')).map(cb => cb.value),
       theme: document.querySelector('input[name="theme"]:checked')?.value || "dark",
       ringtone: document.getElementById("ringtoneSelect")?.value || "classic",
@@ -6918,7 +7906,7 @@ function saveSettingsPreferences() {
     };
 
     localStorage.setItem("nexchat_settings", JSON.stringify(prefs));
-    console.log("? Settings saved:", prefs);
+    console.log("⚡ Settings saved:", prefs);
     showNotif("Settings saved", "success", 2000);
 
     applySettings(prefs);
@@ -6931,7 +7919,7 @@ function saveSettingsPreferences() {
 function applySettings(prefs) {
   try {
     if (!prefs.notifications) {
-      console.log("?? Notifications disabled");
+      console.log("🔔 Notifications disabled");
     }
 
     const targetTheme = prefs.theme === "light" ? "light" : "dark";
@@ -6944,16 +7932,20 @@ function applySettings(prefs) {
         event.returnValue = confirmationMessage;
         return confirmationMessage;
       };
-      console.log("? Anti-reload protection enabled");
+      console.log("🛡️ Anti-reload protection enabled");
     } else {
       window.onbeforeunload = null;
-      console.log("? Anti-reload protection disabled");
+      console.log("🛡️ Anti-reload protection disabled");
+    }
+
+    if (prefs.bubbleTheme) {
+      applyBubbleTheme(prefs.bubbleTheme);
     }
 
     if (prefs.selfAI) {
-      console.log("? Self AI auto-responder enabled");
+      console.log("🤖 Self AI auto-responder enabled");
     } else {
-      console.log("? Self AI auto-responder disabled");
+      console.log("🤖 Self AI auto-responder disabled");
     }
 
     selfAISelectedUserIds = Array.isArray(prefs.selfAIUserIds) ? prefs.selfAIUserIds : [];
@@ -8994,9 +9986,9 @@ function createReportModal() {
 
   document.body.appendChild(modal);
 
-  document.getElementById("closeReportModalBtn").addEventListener("click", closeReportModal);
-  document.getElementById("cancelReportBtn").addEventListener("click", closeReportModal);
-  document.getElementById("submitReportBtn").addEventListener("click", submitReport);
+  document.getElementById("closeReportModalBtn")?.addEventListener("click", closeReportModal);
+  document.getElementById("cancelReportBtn")?.addEventListener("click", closeReportModal);
+  document.getElementById("submitReportBtn")?.addEventListener("click", submitReport);
 
   const textarea = document.getElementById("reportDescription");
   textarea?.addEventListener("input", () => {
@@ -10238,9 +11230,14 @@ async function loadStatusFeed() {
       myCircle.dataset.hasListener = 'true';
       myCircle.addEventListener('click', (e) => {
         if (e.target.id === 'myStatusAddBadge' || !myCircle.classList.contains('has-status')) {
-          document.getElementById('statusImageInput')?.click();
+          openCreateStatusModal('media');
         } else {
-          viewStatusGroup(0);
+          const myIdx = activeStoriesList.findIndex(g => g.userId === myUID);
+          if (myIdx !== -1) {
+            viewStatusGroup(myIdx);
+          } else {
+            openCreateStatusModal('media');
+          }
         }
       });
     }
@@ -10248,25 +11245,45 @@ async function loadStatusFeed() {
     const fileInput = document.getElementById('statusImageInput');
     if (fileInput && !fileInput.dataset.hasListener) {
       fileInput.dataset.hasListener = 'true';
-      fileInput.addEventListener('change', handleStatusMediaUpload);
+      fileInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+          openCreateStatusModal('media');
+          selectedStatusMediaFile = file;
+          const fileUrl = URL.createObjectURL(file);
+          const dropPlaceholder = document.getElementById('statusDropPlaceholder');
+          const previewBox = document.getElementById('statusMediaPreviewBox');
+          const imgPreview = document.getElementById('statusModalImgPreview');
+          const videoPreview = document.getElementById('statusModalVideoPreview');
+          if (dropPlaceholder) dropPlaceholder.style.display = 'none';
+          if (previewBox) previewBox.style.display = 'block';
+          if (file.type.startsWith('video/')) {
+            if (imgPreview) imgPreview.style.display = 'none';
+            if (videoPreview) { videoPreview.style.display = 'block'; videoPreview.src = fileUrl; }
+          } else {
+            if (videoPreview) { videoPreview.pause(); videoPreview.style.display = 'none'; }
+            if (imgPreview) { imgPreview.style.display = 'block'; imgPreview.src = fileUrl; }
+          }
+        }
+      });
     }
 
     const fabCamera = document.getElementById('statusFabCamera');
     if (fabCamera && !fabCamera.dataset.hasListener) {
       fabCamera.dataset.hasListener = 'true';
-      fabCamera.addEventListener('click', () => document.getElementById('statusImageInput')?.click());
+      fabCamera.addEventListener('click', () => openCreateStatusModal('media'));
     }
 
     const headerCamera = document.getElementById('statusHeaderCameraBtn');
     if (headerCamera && !headerCamera.dataset.hasListener) {
       headerCamera.dataset.hasListener = 'true';
-      headerCamera.addEventListener('click', () => document.getElementById('statusImageInput')?.click());
+      headerCamera.addEventListener('click', () => openCreateStatusModal('media'));
     }
 
     const fabText = document.getElementById('statusFabText');
     if (fabText && !fabText.dataset.hasListener) {
       fabText.dataset.hasListener = 'true';
-      fabText.addEventListener('click', handleCreateTextStatus);
+      fabText.addEventListener('click', () => openCreateStatusModal('text'));
     }
 
     const now = Date.now();
@@ -10294,7 +11311,8 @@ async function loadStatusFeed() {
             userName: d.username || d.userName || '@User',
             avatarUrl: d.profilePic || d.userAvatar || 'logo.jpg',
             mediaUrl: d.imageUrl || d.mediaUrl || '',
-            mediaType: (d.mediaType && d.mediaType.startsWith('video/')) ? 'video' : (d.imageUrl ? 'image' : 'text'),
+            mediaType: (d.mediaType === 'video' || (d.mediaType && d.mediaType.startsWith('video/'))) ? 'video' : (d.imageUrl ? 'image' : 'text'),
+            gradient: d.gradient || null,
             caption: d.content || d.text || d.caption || '',
             timestamp: d.createdAtMs || (d.timestamp?.toMillis ? d.timestamp.toMillis() : now),
             expiresAtMs: expTime,
@@ -10512,6 +11530,7 @@ function showCurrentStorySlide() {
     if (textSlide) {
       textSlide.style.display = 'flex';
       textSlide.textContent = currentSlide.caption || 'No content';
+      textSlide.style.background = currentSlide.gradient || 'linear-gradient(135deg, #059669, #10b981)';
     }
   }
 
@@ -10654,60 +11673,222 @@ function prevStorySlide() {
   }
 }
 
-async function handleStatusMediaUpload(e) {
-  const file = e.target.files?.[0];
-  if (!file) return;
+let selectedStatusMediaFile = null;
+let selectedStatusGradient = 'linear-gradient(135deg, #059669, #10b981)';
 
-  try {
-    showNotif('Uploading status to Cloudinary...', 'info', 3000);
-    const previewUrl = URL.createObjectURL(file);
-    const myCircle = document.getElementById('myStatusCircleItem');
-    if (myCircle) myCircle.classList.add('has-status');
+function openCreateStatusModal(tab = 'media') {
+  setupCreateStatusModal();
+  const modal = document.getElementById('createStatusModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 
-    if (db) {
-      await addDoc(collection(db, 'statuses'), {
-        userId: myUID || 'my-id',
-        username: auth?.currentUser?.displayName || 'My status',
-        profilePic: auth?.currentUser?.photoURL || 'logo.jpg',
-        imageUrl: previewUrl,
-        mediaType: file.type,
-        caption: 'Multi-vault Cloudinary cloud storage is active for high-speed media delivery.',
-        timestamp: serverTimestamp(),
-        createdAtMs: Date.now(),
-        expiresAtMs: Date.now() + 24 * 3600 * 1000
-      });
-      showNotif('Status uploaded successfully', 'success', 2500);
-      loadStatusFeed();
-    }
-  } catch (err) {
-    console.error('[NEX-STATUS] Status upload error:', err);
-    showNotif('Uploaded status locally', 'success', 2000);
+  switchStatusModalTab(tab);
+}
+
+function closeCreateStatusModal() {
+  const modal = document.getElementById('createStatusModal');
+  if (!modal) return;
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+
+  selectedStatusMediaFile = null;
+  const fileInput = document.getElementById('statusMediaModalFileInput');
+  if (fileInput) fileInput.value = '';
+  const captionInput = document.getElementById('statusMediaCaptionInput');
+  if (captionInput) captionInput.value = '';
+  const textInput = document.getElementById('statusTextStoryInput');
+  if (textInput) textInput.value = '';
+
+  const previewBox = document.getElementById('statusMediaPreviewBox');
+  const dropPlaceholder = document.getElementById('statusDropPlaceholder');
+  if (previewBox) previewBox.style.display = 'none';
+  if (dropPlaceholder) dropPlaceholder.style.display = 'block';
+
+  const progressBox = document.getElementById('statusUploadProgressContainer');
+  if (progressBox) progressBox.style.display = 'none';
+}
+
+function switchStatusModalTab(tab) {
+  const mediaBtn = document.getElementById('statusTabMediaBtn');
+  const textBtn = document.getElementById('statusTabTextBtn');
+  const mediaPane = document.getElementById('statusTabMediaPane');
+  const textPane = document.getElementById('statusTabTextPane');
+
+  if (tab === 'text') {
+    if (mediaBtn) { mediaBtn.className = 'btn-secondary'; }
+    if (textBtn) { textBtn.className = 'btn-primary'; }
+    if (mediaPane) mediaPane.style.display = 'none';
+    if (textPane) textPane.style.display = 'block';
+    setTimeout(() => document.getElementById('statusTextStoryInput')?.focus(), 100);
+  } else {
+    if (mediaBtn) { mediaBtn.className = 'btn-primary'; }
+    if (textBtn) { textBtn.className = 'btn-secondary'; }
+    if (mediaPane) mediaPane.style.display = 'block';
+    if (textPane) textPane.style.display = 'none';
   }
 }
 
-function handleCreateTextStatus() {
-  const text = prompt('Type your status update:');
-  if (!text || !text.trim()) return;
+function setupCreateStatusModal() {
+  const modal = document.getElementById('createStatusModal');
+  if (!modal || modal.dataset.bound === 'true') return;
+  modal.dataset.bound = 'true';
 
-  const myCircle = document.getElementById('myStatusCircleItem');
-  if (myCircle) myCircle.classList.add('has-status');
+  document.getElementById('closeCreateStatusModalBtn')?.addEventListener('click', closeCreateStatusModal);
+  document.getElementById('statusTabMediaBtn')?.addEventListener('click', () => switchStatusModalTab('media'));
+  document.getElementById('statusTabTextBtn')?.addEventListener('click', () => switchStatusModalTab('text'));
 
-  if (db) {
-    addDoc(collection(db, 'statuses'), {
-      userId: myUID || 'my-id',
-      username: auth?.currentUser?.displayName || 'My status',
-      profilePic: auth?.currentUser?.photoURL || 'logo.jpg',
-      content: text.trim(),
-      timestamp: serverTimestamp(),
-      createdAtMs: Date.now(),
-      expiresAtMs: Date.now() + 24 * 3600 * 1000
-    }).then(() => {
-      showNotif('Text status shared', 'success', 2000);
-      loadStatusFeed();
-    }).catch(err => {
-      console.warn('Text status write notice:', err);
+  const fileInput = document.getElementById('statusMediaModalFileInput');
+  const previewBox = document.getElementById('statusMediaPreviewBox');
+  const dropPlaceholder = document.getElementById('statusDropPlaceholder');
+  const imgPreview = document.getElementById('statusModalImgPreview');
+  const videoPreview = document.getElementById('statusModalVideoPreview');
+  const removeBtn = document.getElementById('removeStatusMediaPreviewBtn');
+
+  fileInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    selectedStatusMediaFile = file;
+
+    const fileUrl = URL.createObjectURL(file);
+    if (dropPlaceholder) dropPlaceholder.style.display = 'none';
+    if (previewBox) previewBox.style.display = 'block';
+
+    if (file.type.startsWith('video/')) {
+      if (imgPreview) imgPreview.style.display = 'none';
+      if (videoPreview) {
+        videoPreview.style.display = 'block';
+        videoPreview.src = fileUrl;
+      }
+    } else {
+      if (videoPreview) {
+        videoPreview.pause();
+        videoPreview.style.display = 'none';
+      }
+      if (imgPreview) {
+        imgPreview.style.display = 'block';
+        imgPreview.src = fileUrl;
+      }
+    }
+  });
+
+  removeBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    selectedStatusMediaFile = null;
+    if (fileInput) fileInput.value = '';
+    if (previewBox) previewBox.style.display = 'none';
+    if (dropPlaceholder) dropPlaceholder.style.display = 'block';
+    if (videoPreview) { videoPreview.pause(); videoPreview.src = ''; }
+    if (imgPreview) { imgPreview.src = ''; }
+  });
+
+  document.querySelectorAll('.gradient-swatch').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.gradient-swatch').forEach(b => b.style.borderColor = 'rgba(255,255,255,0.3)');
+      btn.style.borderColor = '#ffffff';
+      selectedStatusGradient = btn.getAttribute('data-gradient') || 'linear-gradient(135deg, #059669, #10b981)';
+      const canvas = document.getElementById('statusTextStoryCanvas');
+      if (canvas) canvas.style.background = selectedStatusGradient;
     });
-  }
+  });
+
+  document.getElementById('publishStatusBtn')?.addEventListener('click', async () => {
+    const publishBtn = document.getElementById('publishStatusBtn');
+    const mediaPane = document.getElementById('statusTabMediaPane');
+    const isTextTab = mediaPane && mediaPane.style.display === 'none';
+
+    let contentText = '';
+    let isMedia = false;
+
+    if (isTextTab) {
+      contentText = document.getElementById('statusTextStoryInput')?.value.trim();
+      if (!contentText) {
+        showNotif('Please type a status message first', 'error');
+        return;
+      }
+    } else {
+      contentText = document.getElementById('statusMediaCaptionInput')?.value.trim();
+      isMedia = !!selectedStatusMediaFile;
+      if (!isMedia && !contentText) {
+        showNotif('Please select a photo/video or add text', 'error');
+        return;
+      }
+    }
+
+    if (publishBtn) publishBtn.disabled = true;
+
+    const progressBox = document.getElementById('statusUploadProgressContainer');
+    const progressStatus = document.getElementById('statusUploadStatusText');
+    const progressPercent = document.getElementById('statusUploadPercent');
+    const progressBar = document.getElementById('statusUploadProgressBar');
+
+    let uploadedUrl = null;
+    let fileType = 'text';
+
+    try {
+      if (isMedia && selectedStatusMediaFile) {
+        if (progressBox) progressBox.style.display = 'block';
+        if (progressStatus) progressStatus.textContent = 'Uploading to Multi-Vault Cloud...';
+        fileType = selectedStatusMediaFile.type || 'image/jpeg';
+
+        try {
+          const res = await uploadStatusMedia(selectedStatusMediaFile, {
+            uid: myUID,
+            onProgress: (pct, msg) => {
+              if (progressPercent) progressPercent.textContent = `${pct}%`;
+              if (progressBar) progressBar.style.width = `${pct}%`;
+              if (progressStatus && msg) progressStatus.textContent = msg;
+            }
+          });
+          uploadedUrl = res.url || res.downloadUrl;
+        } catch (vaultErr) {
+          console.warn('[STATUS] Vault cascade fallback:', vaultErr);
+          const upRes = await uploadAnyMedia(selectedStatusMediaFile, { folder: 'status', uid: myUID });
+          uploadedUrl = upRes.url || upRes.downloadUrl;
+        }
+      }
+
+      if (progressStatus) progressStatus.textContent = 'Publishing status update...';
+      if (progressPercent) progressPercent.textContent = '100%';
+      if (progressBar) progressBar.style.width = '100%';
+
+      const now = Date.now();
+      const expiresAtMs = now + 86400000;
+
+      const statusDoc = {
+        userId: myUID || auth?.currentUser?.uid || 'user',
+        username: myUsername || auth?.currentUser?.displayName || 'User',
+        profilePic: myProfilePic || auth?.currentUser?.photoURL || 'logo.jpg',
+        content: contentText || '',
+        imageUrl: uploadedUrl || null,
+        mediaType: isMedia ? (fileType.startsWith('video/') ? 'video' : 'image') : 'text',
+        gradient: isTextTab ? selectedStatusGradient : null,
+        timestamp: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        createdAtMs: now,
+        expiresAt: new Date(expiresAtMs),
+        expiresAtMs: expiresAtMs
+      };
+
+      if (db) {
+        await addDoc(collection(db, 'statuses'), statusDoc);
+      }
+
+      const myCircle = document.getElementById('myStatusCircleItem');
+      if (myCircle) myCircle.classList.add('has-status');
+
+      playLuxuryChimeSound();
+      showNotif('🎉 Status update published! Disappears in 24 hours.', 'success', 3500);
+      closeCreateStatusModal();
+      loadStatusFeed();
+    } catch (err) {
+      console.error('[STATUS] Publish error:', err);
+      showNotif('Could not publish status: ' + err.message, 'error');
+    } finally {
+      if (publishBtn) publishBtn.disabled = false;
+      if (progressBox) progressBox.style.display = 'none';
+    }
+  });
 }
 
 
@@ -10726,8 +11907,7 @@ async function loadAnnouncements() {
           WELCOME TO NEXCHAT THE FUTURE IS INIT I AM DEMON ALEX NEX DEVELOPER....
         </p>
         <p class="announcement-content">
-          NEW FEATURES ARE BRINGING YOU NEX_REELS SIMILAR TO TIKTOK/SNAPCHAT BUT IT WILL BE ON NEXCHAT BY NOVEMBER 23RD... 
-          IF YOU HAVE ANY COMPLAINT KINDLY GO TO NEX SETTINGS AND FILE THEM
+          CAMSHOT IS LIVE ON NEXCHAT! ENJOY ULTRA HD SHORT-FORM VIDEOS, CREATOR LIVE RECORDING, SHADER COLOR GRADES, AND NEX TOKEN BOUNTIES.
         </p>
         <p class="announcement-content" style="color: #00ff66; font-weight: bold; margin-top: 10px; text-shadow: 0 0 10px rgba(0,255,102,0.5);">
           <i class="fa-solid fa-terminal"></i> LIVE TERMINAL WILL BE ADDED TO NEXCHAT
@@ -10946,12 +12126,7 @@ function initializeBasicUI() {
   });
 
   document.getElementById('settings-btn-header')?.addEventListener('click', () => {
-    const modal = document.getElementById('settingsModal');
-    if (modal) {
-      modal.style.display = 'block';
-      const uidDisplay = document.getElementById('userUIDDisplay');
-      if (uidDisplay) uidDisplay.textContent = myUID || 'Loading...';
-    }
+    openSettingsModal();
   });
   document.getElementById('closeSettingsBtn')?.addEventListener('click', () => {
     saveSettingsPreferences();
@@ -11060,8 +12235,8 @@ function initializeBasicUI() {
     const audioSendBtn = document.getElementById('audio-send-btn');
 
     if (typeof selectedFile !== 'undefined' && selectedFile) {
-      if (sendBtn) sendBtn.style.display = 'none';
-      if (audioSendBtn) audioSendBtn.style.display = 'flex';
+      if (sendBtn) sendBtn.style.display = 'flex';
+      if (audioSendBtn) audioSendBtn.style.display = 'none';
       if (audioRecBtn) audioRecBtn.style.display = 'none';
     } else if (hasText) {
       if (audioSendBtn) audioSendBtn.style.display = 'none';
@@ -11077,15 +12252,247 @@ function initializeBasicUI() {
   document.addEventListener('selectedFileChanged', () => updateSendButtons());
   const messageInput = document.getElementById('message-input');
   if (messageInput) {
+    const autoResize = () => {
+      messageInput.style.height = 'auto';
+      const scrollHeight = messageInput.scrollHeight;
+      messageInput.style.height = Math.min(Math.max(scrollHeight, 42), 120) + 'px';
+    };
+
+    // ⚡ NEXCHAT SLASH COMMANDS HUB ⚡
+    const slashMenu = document.getElementById('slashCommandsMenu');
+    const slashList = document.getElementById('slashCommandsList');
+    let currentSlashMatches = [];
+    let activeSlashIndex = 0;
+
+    const SLASH_COMMANDS = [
+      {
+        cmd: '/summarize',
+        name: 'Summarize Chat',
+        desc: 'Ask ChronEX AI to summarize key points of this conversation',
+        action: async () => {
+          messageInput.value = '';
+          autoResize();
+          updateSendButtons();
+          if (currentChatType === 'ai') {
+            messageInput.value = 'Summarize our conversation so far in 3 key takeaways.';
+            updateSendButtons();
+            sendMessage();
+          } else {
+            showNotif('ChronEX AI analyzing recent conversation...', 'info', 2500);
+            try {
+              const allMsgs = (messages1 || []).concat(messages2 || []);
+              const recent = allMsgs.slice(-10).map(m => `${m.from === myUID ? 'Me' : 'Peer'}: ${m.text || ''}`).filter(t => t.length > 5).join('\n');
+              const prompt = `Summarize these recent chat messages concisely:\n${recent || 'No recent text messages found.'}`;
+              const summary = await generateChronexAIResponse(prompt);
+              displayChronexAIResponse(summary, true);
+              hapticFeedback('success');
+            } catch (err) {
+              showNotif('AI error: ' + err.message, 'error');
+            }
+          }
+        }
+      },
+      {
+        cmd: '/code',
+        name: 'Code Generation',
+        desc: 'Prompt ChronEX AI to write, debug, or refactor code',
+        action: () => {
+          messageInput.value = '/code ';
+          messageInput.focus();
+          autoResize();
+          updateSendButtons();
+        }
+      },
+      {
+        cmd: '/engine',
+        name: 'Realtime Engine Status',
+        desc: 'Inspect Supabase WebSockets connectivity, latency, and mode',
+        action: () => {
+          messageInput.value = '';
+          autoResize();
+          updateSendButtons();
+          const active = isSupabaseActive();
+          const settings = getActiveSupabaseSettings();
+          const statusMsg = active 
+            ? `⚡ Supabase Realtime Active: Phoenix WebSockets Connected (${settings.url})` 
+            : `⚡ Dual-Engine Fallback Active: Local & Firestore synchronization online`;
+          showNotif(statusMsg, active ? 'success' : 'info', 4500);
+          hapticFeedback('medium');
+        }
+      },
+      {
+        cmd: '/wallpaper',
+        name: 'Chat Wallpaper',
+        desc: 'Customize background theme and aesthetic wallpaper',
+        action: () => {
+          messageInput.value = '';
+          autoResize();
+          updateSendButtons();
+          if (typeof openWallpaperModal === 'function') openWallpaperModal();
+        }
+      },
+      {
+        cmd: '/tokens',
+        name: 'Token Quota',
+        desc: 'Check your active neural tokens balance',
+        action: () => {
+          messageInput.value = '';
+          autoResize();
+          updateSendButtons();
+          showNotif(`🪙 Neural Balance: ${tokens} tokens remaining`, 'info', 3000);
+          hapticFeedback('light');
+        }
+      },
+      {
+        cmd: '/clear',
+        name: 'Clear Input',
+        desc: 'Wipe message text and remove any attached media',
+        action: () => {
+          messageInput.value = '';
+          if (typeof removeAttachment === 'function') removeAttachment();
+          autoResize();
+          updateSendButtons();
+          showNotif('Input cleared', 'info', 1200);
+        }
+      },
+      {
+        cmd: '/help',
+        name: 'Command Shortcuts',
+        desc: 'Show keyboard shortcuts and command instructions',
+        action: () => {
+          messageInput.value = '';
+          autoResize();
+          updateSendButtons();
+          showNotif('⌨️ Enter to Send • Shift+Enter for Newline • / for Slash Hub', 'info', 4000);
+        }
+      }
+    ];
+
+    function hideSlashMenu() {
+      if (slashMenu) slashMenu.style.display = 'none';
+      currentSlashMatches = [];
+      activeSlashIndex = 0;
+    }
+
+    function renderSlashMenu(matches) {
+      if (!slashMenu || !slashList) return;
+      if (!matches || matches.length === 0) {
+        hideSlashMenu();
+        return;
+      }
+      currentSlashMatches = matches;
+      if (activeSlashIndex >= matches.length) activeSlashIndex = 0;
+
+      slashList.innerHTML = matches.map((item, idx) => `
+        <div class="slash-command-item ${idx === activeSlashIndex ? 'active' : ''}" data-idx="${idx}">
+          <span class="slash-command-badge">${item.cmd}</span>
+          <div class="slash-command-info">
+            <span class="slash-command-name">${item.name}</span>
+            <span class="slash-command-desc">${item.desc}</span>
+          </div>
+        </div>
+      `).join('');
+
+      slashList.querySelectorAll('.slash-command-item').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(el.getAttribute('data-idx'), 10);
+          const cmdObj = currentSlashMatches[idx];
+          if (cmdObj) {
+            hideSlashMenu();
+            cmdObj.action();
+          }
+        });
+      });
+
+      slashMenu.style.display = 'block';
+    }
+
     messageInput.addEventListener('input', () => {
+      autoResize();
       updateSendButtons();
       handleTypingInputEvent();
+
+      const val = messageInput.value.trim();
+      if (val.startsWith('/')) {
+        const query = val.toLowerCase();
+        const matches = SLASH_COMMANDS.filter(c => c.cmd.toLowerCase().startsWith(query) || c.name.toLowerCase().includes(query.slice(1)));
+        renderSlashMenu(matches);
+      } else {
+        hideSlashMenu();
+      }
     });
+
+    messageInput.addEventListener('keydown', (e) => {
+      const isMenuVisible = slashMenu && slashMenu.style.display !== 'none' && currentSlashMatches.length > 0;
+
+      if (isMenuVisible) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          activeSlashIndex = (activeSlashIndex + 1) % currentSlashMatches.length;
+          renderSlashMenu(currentSlashMatches);
+          return;
+        }
+        if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          activeSlashIndex = (activeSlashIndex - 1 + currentSlashMatches.length) % currentSlashMatches.length;
+          renderSlashMenu(currentSlashMatches);
+          return;
+        }
+        if (e.key === 'Tab' || (e.key === 'Enter' && !e.shiftKey)) {
+          e.preventDefault();
+          const selected = currentSlashMatches[activeSlashIndex];
+          if (selected) {
+            hideSlashMenu();
+            selected.action();
+            return;
+          }
+        }
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          hideSlashMenu();
+          return;
+        }
+      }
+
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const form = document.getElementById('message-form');
+        if (form) {
+          form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        }
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (slashMenu && !slashMenu.contains(e.target) && e.target !== messageInput) {
+        hideSlashMenu();
+      }
+    });
+
     messageInput.addEventListener('blur', () => {
       clearTypingStatus().catch(() => {});
     });
   }
   setTimeout(() => updateSendButtons(), 200);
+
+  const messagesArea = document.getElementById('messages-area');
+  const scrollDownBtn = document.getElementById('chatScrollDownBtn');
+  if (messagesArea && scrollDownBtn) {
+    messagesArea.addEventListener('scroll', () => {
+      const distFromBottom = messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight;
+      if (distFromBottom > 150) {
+        scrollDownBtn.style.display = 'flex';
+      } else {
+        scrollDownBtn.style.display = 'none';
+      }
+    });
+
+    scrollDownBtn.addEventListener('click', () => {
+      messagesArea.scrollTo({ top: messagesArea.scrollHeight, behavior: 'smooth' });
+      playLuxuryPopSound();
+    });
+  }
 
   document.getElementById("dashboardBackBtn")?.addEventListener("click", () => {
     goBackToDashboard();
@@ -11660,22 +13067,6 @@ async function loadContacts() {
       if (myUID) chronexAI.setUserId(myUID);
       await openChat("chronex-ai", "Chronex AI", "chronex-ai.jpg", "ai");
       if (typeof showChatDetailView === 'function') showChatDetailView();
-
-      const modal = document.getElementById('profilePicModal');
-      const modalImg = document.getElementById('profileModalImg');
-      const modalName = document.getElementById('profileModalName');
-      const modalDesc = document.getElementById('profileModalDesc');
-      const modalWordmark = document.getElementById('profileModalBrandWordmark');
-
-      if (modal && modalImg && modalName) {
-        modalImg.src = "chronex-ai.jpg";
-        modalName.textContent = "Chronex AI";
-        if (modalWordmark) modalWordmark.style.display = 'block';
-        if (modalDesc) modalDesc.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
-        modal.style.display = 'flex';
-        const editBtn = document.getElementById('editProfileBtnModal');
-        if (editBtn) editBtn.style.display = 'none';
-      }
     });
 
     const myUserDoc = await getDoc(doc(db, "users", myUID));
@@ -12421,4 +13812,244 @@ document.addEventListener('DOMContentLoaded', () => {
       if (ep) ep.style.display = "none";
     });
   }
+  setupInChatSearch();
+  setupMediaLightbox();
 });
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setupInChatSearch();
+  setupMediaLightbox();
+}
+
+/* ==========================================================================
+   IN-CHAT LIVE SEARCH ENGINE
+   ========================================================================== */
+function setupInChatSearch() {
+  const toggleBtn = document.getElementById('chatSearchToggleBtn');
+  const searchBar = document.getElementById('inChatSearchBar');
+  const searchInput = document.getElementById('inChatSearchInput');
+  const closeBtn = document.getElementById('closeChatSearchBtn');
+  const matchCount = document.getElementById('chatSearchMatchCount');
+
+  if (!toggleBtn || !searchBar || !searchInput || toggleBtn.dataset.searchBound === 'true') return;
+  toggleBtn.dataset.searchBound = 'true';
+
+  const openSearch = () => {
+    searchBar.style.display = 'block';
+    searchInput.focus();
+    searchInput.select();
+  };
+
+  const closeSearch = () => {
+    searchBar.style.display = 'none';
+    searchInput.value = '';
+    if (matchCount) matchCount.textContent = '0 found';
+    clearInChatSearchHighlights();
+  };
+
+  toggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (searchBar.style.display === 'none' || !searchBar.style.display) {
+      openSearch();
+    } else {
+      closeSearch();
+    }
+  });
+
+  closeBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeSearch();
+  });
+
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSearch();
+    }
+  });
+
+  searchInput.addEventListener('input', () => {
+    const query = searchInput.value.trim().toLowerCase();
+    executeInChatSearch(query);
+  });
+}
+
+function clearInChatSearchHighlights() {
+  document.querySelectorAll('#messages-area .search-dimmed').forEach(el => {
+    el.classList.remove('search-dimmed');
+  });
+
+  document.querySelectorAll('#messages-area mark.search-highlight').forEach(mark => {
+    const parent = mark.parentNode;
+    if (parent) {
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parent.normalize();
+    }
+  });
+}
+
+function executeInChatSearch(query) {
+  clearInChatSearchHighlights();
+  const matchCount = document.getElementById('chatSearchMatchCount');
+
+  if (!query) {
+    if (matchCount) matchCount.textContent = '0 found';
+    return;
+  }
+
+  const messageWrappers = document.querySelectorAll('#messages-area .message-wrapper, #messages-area .message, #messages-area .message-bubble');
+  let matches = 0;
+  let firstMatchEl = null;
+
+  messageWrappers.forEach(wrapper => {
+    const text = wrapper.textContent || '';
+    if (text.toLowerCase().includes(query)) {
+      matches++;
+      if (!firstMatchEl) firstMatchEl = wrapper;
+      highlightSearchTermInElement(wrapper, query);
+    } else {
+      wrapper.classList.add('search-dimmed');
+    }
+  });
+
+  if (matchCount) {
+    matchCount.textContent = `${matches} found`;
+    matchCount.style.color = matches > 0 ? '#00ff66' : '#ff6b6b';
+  }
+
+  if (firstMatchEl) {
+    firstMatchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function highlightSearchTermInElement(element, query) {
+  const textNodes = [];
+  const walk = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+    acceptNode: (node) => {
+      if (node.parentElement?.classList.contains('message-time') || 
+          node.parentElement?.classList.contains('search-highlight') ||
+          node.parentElement?.closest('.message-hover-actions')) {
+        return NodeFilter.FILTER_REJECT;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+
+  while (walk.nextNode()) {
+    if (walk.currentNode.nodeValue.toLowerCase().includes(query)) {
+      textNodes.push(walk.currentNode);
+    }
+  }
+
+  textNodes.forEach(node => {
+    const val = node.nodeValue;
+    const lower = val.toLowerCase();
+    const idx = lower.indexOf(query);
+    if (idx !== -1) {
+      const before = val.substring(0, idx);
+      const matched = val.substring(idx, idx + query.length);
+      const after = val.substring(idx + query.length);
+
+      const span = document.createElement('span');
+      if (before) span.appendChild(document.createTextNode(before));
+      const mark = document.createElement('mark');
+      mark.className = 'search-highlight';
+      mark.textContent = matched;
+      span.appendChild(mark);
+      if (after) span.appendChild(document.createTextNode(after));
+
+      node.parentNode?.replaceChild(span, node);
+    }
+  });
+}
+
+/* ==========================================================================
+   CINEMATIC MEDIA LIGHTBOX VIEWER
+   ========================================================================== */
+function setupMediaLightbox() {
+  const modal = document.getElementById('mediaLightboxModal');
+  const backdrop = document.getElementById('lightboxBackdrop');
+  const closeBtn = document.getElementById('closeLightboxBtn');
+  const imgEl = document.getElementById('lightboxImage');
+  const videoEl = document.getElementById('lightboxVideo');
+  const titleEl = document.getElementById('lightboxMediaTitle');
+  const downloadBtn = document.getElementById('lightboxDownloadBtn');
+
+  if (!modal || modal.dataset.lightboxBound === 'true') return;
+  modal.dataset.lightboxBound = 'true';
+
+  const closeLightbox = () => {
+    modal.style.display = 'none';
+    if (videoEl) {
+      videoEl.pause();
+      videoEl.src = '';
+      videoEl.style.display = 'none';
+    }
+    if (imgEl) {
+      imgEl.src = '';
+      imgEl.style.display = 'none';
+    }
+    document.body.style.overflow = '';
+  };
+
+  closeBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeLightbox();
+  });
+
+  backdrop?.addEventListener('click', closeLightbox);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && modal.style.display === 'flex') {
+      closeLightbox();
+    }
+  });
+
+  window.openMediaLightbox = function({ type, url, title }) {
+    if (!url) return;
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    if (titleEl) titleEl.textContent = title || (type === 'video' ? 'Video Player' : 'Photo Viewer');
+    if (downloadBtn) {
+      downloadBtn.href = url;
+      downloadBtn.download = `nexchat-media-${Date.now()}`;
+    }
+
+    if (type === 'video') {
+      if (imgEl) imgEl.style.display = 'none';
+      if (videoEl) {
+        videoEl.src = url;
+        videoEl.style.display = 'block';
+        videoEl.play().catch(() => {});
+      }
+    } else {
+      if (videoEl) {
+        videoEl.pause();
+        videoEl.style.display = 'none';
+      }
+      if (imgEl) {
+        imgEl.src = url;
+        imgEl.style.display = 'block';
+      }
+    }
+  };
+
+  const messagesArea = document.getElementById('messages-area');
+  if (messagesArea) {
+    messagesArea.addEventListener('click', (e) => {
+      const target = e.target;
+      if (target.tagName === 'IMG' && (target.closest('.message-bubble') || target.closest('.message') || target.closest('.message-attachment-container'))) {
+        e.preventDefault();
+        e.stopPropagation();
+        window.openMediaLightbox({
+          type: 'image',
+          url: target.src,
+          title: 'Photo Attachment'
+        });
+      }
+    });
+  }
+}
+

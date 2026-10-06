@@ -19,6 +19,7 @@ window.handleNavigation = function (navSection) {
         games: 'gaminghub.html',
         gaming: 'gaminghub.html',
         terminal: 'terminal.html',
+        camshot: 'reels.html',
         reels: 'reels.html',
         video: 'chat.html'
     };

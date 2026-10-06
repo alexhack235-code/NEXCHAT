@@ -28,7 +28,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       status: 'online',
-      service: 'NEX_REELS Stream Ingestion API',
+      service: 'CamShot Stream Ingestion API',
       timestamp: Date.now(),
     });
   }
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
       return res.status(201).json({
         success: true,
         id: reelId,
-        message: 'Reel published to NEX_REELS stream successfully',
+        message: 'Reel published to CamShot stream successfully',
         reel: reelRecord,
       });
     } catch (err) {

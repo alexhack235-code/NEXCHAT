@@ -43,6 +43,14 @@ const TRENDING_SOUNDS = [
   { title: 'Neural Static (Bass Boost)', artist: 'Vortex Protocol', duration: '0:50' },
 ];
 
+const CLOUDINARY_VAULTS = [
+  { cloudName: 'kkiyeyj8', uploadPreset: 'ml_default', name: 'Cloudinary Vault 1' },
+  { cloudName: 'l7roj4t8', uploadPreset: 'NEX-VAULT', name: 'Cloudinary Vault 2' },
+  { cloudName: 'bll4dbye', uploadPreset: 'NEXVAULT2', name: 'Cloudinary Vault 3' },
+  { cloudName: 'w36igvww', uploadPreset: 'NEXVAULT4', name: 'Cloudinary Vault 4' },
+  { cloudName: 'l5wrspfy', uploadPreset: 'NEXVAULT5', name: 'Cloudinary Vault 5' },
+];
+
 const MAX_FILE_SIZE_BYTES = 250 * 1024 * 1024; // 250 MB
 const VALID_MIMES = ['video/mp4', 'video/webm', 'video/quicktime', 'video/x-m4v'];
 
@@ -288,65 +296,155 @@ export default function UploadReelPage() {
 
     try {
       // ----------------------------------------------------
-      // PHASE 1: Real Binary Upload (XHR with onprogress)
+      // PHASE 1: Real Binary Upload (Multi-Vault Pipeline)
       // ----------------------------------------------------
-      const uploadResult = await new Promise<{ url: string; pathname: string }>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhrRef.current = xhr;
+      let uploadResult: { url: string; pathname: string; vault: string } | null = null;
+      let uploadError: any = null;
 
-        const cleanName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-        const filename = `reels/${username}/${Date.now()}_${cleanName}`;
-        const endpoint = `/api/upload?type=reels&vault=0&filename=${encodeURIComponent(filename)}`;
+      // Strategy 1: Sequential Cloudinary Vaults (Fastest & direct CDN streaming)
+      for (const vault of CLOUDINARY_VAULTS) {
+        try {
+          const res = await new Promise<{ url: string; pathname: string; vault: string }>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhrRef.current = xhr;
+            const endpoint = `https://api.cloudinary.com/v1_1/${vault.cloudName}/video/upload`;
+            const formData = new FormData();
+            formData.append('file', videoFile);
+            formData.append('upload_preset', vault.uploadPreset);
+            formData.append('folder', 'nexchat-reels');
 
-        xhr.open('POST', endpoint, true);
-        xhr.setRequestHeader('x-filename', filename);
-        xhr.setRequestHeader('x-upload-type', 'reels');
-        xhr.setRequestHeader('x-access-mode', 'public');
-        if (videoFile.type) xhr.setRequestHeader('Content-Type', videoFile.type);
+            xhr.open('POST', endpoint, true);
 
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percent = Math.round((event.loaded / event.total) * 100);
-            const loadedMb = (event.loaded / (1024 * 1024)).toFixed(2);
-            setUploadPercent(percent);
-            setUploadedBytesFormatted(`${loadedMb} / ${fileSizeMb} MB`);
+            xhr.upload.onprogress = (event) => {
+              if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                const loadedMb = (event.loaded / (1024 * 1024)).toFixed(2);
+                setUploadPercent(percent);
+                setUploadedBytesFormatted(`${loadedMb} / ${fileSizeMb} MB`);
 
-            // ETA Calculation
-            const elapsedSeconds = (Date.now() - uploadStartTimeRef.current) / 1000;
-            if (percent > 0 && percent < 100) {
-              const totalSec = (elapsedSeconds / percent) * 100;
-              const remaining = Math.max(0, Math.round(totalSec - elapsedSeconds));
-              setEtaRemaining(remaining > 60 ? `~${Math.ceil(remaining / 60)}m left` : `~${remaining}s left`);
-            }
+                const elapsedSeconds = (Date.now() - uploadStartTimeRef.current) / 1000;
+                if (percent > 0 && percent < 100) {
+                  const totalSec = (elapsedSeconds / percent) * 100;
+                  const remaining = Math.max(0, Math.round(totalSec - elapsedSeconds));
+                  setEtaRemaining(remaining > 60 ? `~${Math.ceil(remaining / 60)}m left` : `~${remaining}s left`);
+                }
+              }
+            };
+
+            xhr.onload = () => {
+              xhrRef.current = null;
+              if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                  const data = JSON.parse(xhr.responseText);
+                  resolve({
+                    url: data.secure_url || data.url,
+                    pathname: data.public_id || videoFile.name,
+                    vault: vault.name,
+                  });
+                } catch (e: any) {
+                  reject(e);
+                }
+              } else {
+                reject(new Error(`Vault status ${xhr.status}`));
+              }
+            };
+
+            xhr.onerror = () => {
+              xhrRef.current = null;
+              reject(new Error(`Network error on ${vault.name}`));
+            };
+
+            xhr.onabort = () => {
+              xhrRef.current = null;
+              reject(new DOMException('Upload aborted by user', 'AbortError'));
+            };
+
+            xhr.send(formData);
+          });
+
+          if (res && res.url) {
+            uploadResult = res;
+            break;
           }
-        };
+        } catch (err: any) {
+          if (err.name === 'AbortError') throw err;
+          uploadError = err;
+        }
+      }
 
-        xhr.onload = () => {
-          xhrRef.current = null;
-          if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const res = JSON.parse(xhr.responseText);
-              resolve({ url: res.url || res.downloadUrl, pathname: res.pathname || filename });
-            } catch (err: any) {
-              reject(new Error('Failed to parse upload server response'));
-            }
-          } else {
-            resolve({ url: videoUrl, pathname: filename });
+      // Strategy 2: Vercel Blob /api/upload Fallback
+      if (!uploadResult) {
+        try {
+          const res = await new Promise<{ url: string; pathname: string; vault: string }>((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhrRef.current = xhr;
+            const cleanName = videoFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+            const filename = `reels/public/${Date.now()}_${cleanName}`;
+            const endpoint = `/api/upload?type=reels&vault=0&filename=${encodeURIComponent(filename)}`;
+
+            xhr.open('POST', endpoint, true);
+            xhr.setRequestHeader('x-filename', filename);
+            xhr.setRequestHeader('x-upload-type', 'reels');
+            xhr.setRequestHeader('x-access-mode', 'public');
+            if (videoFile.type) xhr.setRequestHeader('Content-Type', videoFile.type);
+
+            xhr.upload.onprogress = (event) => {
+              if (event.lengthComputable) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                const loadedMb = (event.loaded / (1024 * 1024)).toFixed(2);
+                setUploadPercent(percent);
+                setUploadedBytesFormatted(`${loadedMb} / ${fileSizeMb} MB`);
+              }
+            };
+
+            xhr.onload = () => {
+              xhrRef.current = null;
+              if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                  const data = JSON.parse(xhr.responseText);
+                  resolve({
+                    url: data.url || data.downloadUrl,
+                    pathname: data.pathname || filename,
+                    vault: data.vault || 'NEX-REELS VAULT 0',
+                  });
+                } catch (e: any) {
+                  reject(e);
+                }
+              } else {
+                reject(new Error(`/api/upload status ${xhr.status}`));
+              }
+            };
+
+            xhr.onerror = () => {
+              xhrRef.current = null;
+              reject(new Error('Network error on /api/upload'));
+            };
+
+            xhr.onabort = () => {
+              xhrRef.current = null;
+              reject(new DOMException('Upload aborted by user', 'AbortError'));
+            };
+
+            xhr.send(videoFile);
+          });
+
+          if (res && res.url) {
+            uploadResult = res;
           }
-        };
+        } catch (err: any) {
+          if (err.name === 'AbortError') throw err;
+          uploadError = err;
+        }
+      }
 
-        xhr.onerror = () => {
-          xhrRef.current = null;
-          resolve({ url: videoUrl, pathname: filename });
+      // Strategy 3: Object URL Local Fallback
+      if (!uploadResult) {
+        uploadResult = {
+          url: videoUrl,
+          pathname: videoFile.name,
+          vault: 'Local Storage Fallback',
         };
-
-        xhr.onabort = () => {
-          xhrRef.current = null;
-          reject(new DOMException('Upload aborted by user', 'AbortError'));
-        };
-
-        xhr.send(videoFile);
-      });
+      }
 
       // ----------------------------------------------------
       // PHASE 2: Transcoding Polling (/api/transcode)
@@ -392,13 +490,37 @@ export default function UploadReelPage() {
       // ----------------------------------------------------
       // PHASE 3: Commit Metadata to POST /api/reels
       // ----------------------------------------------------
+      let finalThumbUrl = '';
+      if (thumbnailBlob) {
+        try {
+          const thumbForm = new FormData();
+          thumbForm.append('file', thumbnailBlob);
+          thumbForm.append('upload_preset', CLOUDINARY_VAULTS[0].uploadPreset);
+          thumbForm.append('folder', 'nexchat-reels-posters');
+          const thumbRes = await fetch(
+            `https://api.cloudinary.com/v1_1/${CLOUDINARY_VAULTS[0].cloudName}/image/upload`,
+            { method: 'POST', body: thumbForm }
+          );
+          if (thumbRes.ok) {
+            const thumbData = await thumbRes.json();
+            finalThumbUrl = thumbData.secure_url || thumbData.url || '';
+          }
+        } catch (tErr) {
+          console.warn('Poster thumbnail upload warning:', tErr);
+        }
+      }
+
+      if (!finalThumbUrl && uploadResult?.url) {
+        finalThumbUrl = uploadResult.url.replace(/\.[^.]+$/, '.jpg');
+      }
+
       const author = selectedIdentity === 'creator' ? creatorName : username;
       const response = await fetch('/api/reels', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           videoUrl: uploadResult.url,
-          thumbnailUrl,
+          thumbnailUrl: finalThumbUrl || '',
           duration: videoMetadata?.duration || 0,
           qualityMode: selectedQuality,
           caption: caption.trim() || 'Watch my new reel on NEXCHAT! #nexchat',
@@ -465,8 +587,8 @@ export default function UploadReelPage() {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-base font-bold text-white tracking-wide">Creator Studio Pro</h1>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#00FF88]/15 border border-[#00FF88]/30 text-[#00FF88]">
-                NEX_REELS
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#E8B84B]/15 border border-[#E8B84B]/30 text-[#E8B84B]">
+                CamShot
               </span>
             </div>
             <p className="text-xs text-white/50 hidden sm:block">Upload Lossless HD & 4K Vertical Video Stream</p>
@@ -902,7 +1024,7 @@ export default function UploadReelPage() {
                   ✓
                 </div>
                 <h3 className="text-lg font-bold text-white">Reel Successfully Published!</h3>
-                <p className="text-xs text-white/60">Your vertical stream has been transcoded and deployed live to NEX_REELS.</p>
+                <p className="text-xs text-white/60">Your vertical stream has been transcoded and deployed live to CamShot.</p>
                 <div className="flex items-center gap-3 mt-2">
                   <Link href="/reels" className="text-xs font-bold px-4 py-2.5 rounded-xl bg-[#00FF88] text-black">
                     View in Feed

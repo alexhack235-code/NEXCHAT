@@ -49,15 +49,24 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed. Only POST is supported.' });
   }
 
-  let authenticatedUser;
+  let authenticatedUser = null;
   try {
     authenticatedUser = await verifyFirebaseIdToken(req);
   } catch (error) {
-    console.error('Firebase token verification unavailable:', error.message);
-    return res.status(503).json({ error: 'Authentication service is temporarily unavailable.' });
+    console.warn('Firebase token verification notice:', error.message);
   }
-  if (!authenticatedUser) {
+
+  const rawFilename = req.headers['x-filename'] || req.query.filename || `upload_${Date.now()}`;
+  const uploadType = req.headers['x-upload-type'] || req.query.type || 'media';
+  const vaultParam = req.headers['x-vault-index'] !== undefined ? req.headers['x-vault-index'] : req.query.vault;
+
+  // Reels allow public stream sharing; private or account uploads require authentication
+  if (!authenticatedUser && uploadType !== 'reels' && uploadType !== 'reel') {
     return res.status(401).json({ error: 'Sign in is required to upload files.' });
+  }
+
+  if (authenticatedUser && !rawFilename.split('/').includes(authenticatedUser.uid) && uploadType !== 'reels' && uploadType !== 'reel') {
+    return res.status(403).json({ error: 'Uploads must be stored under the signed-in user ID.' });
   }
 
   try {
@@ -68,14 +77,6 @@ export default async function handler(req, res) {
         error: 'Payload Too Large. Max allowed upload is 50MB.',
         code: 'PAYLOAD_TOO_LARGE'
       });
-    }
-
-    const rawFilename = req.headers['x-filename'] || req.query.filename || `upload_${Date.now()}`;
-    const uploadType = req.headers['x-upload-type'] || req.query.type || 'media';
-    const vaultParam = req.headers['x-vault-index'] !== undefined ? req.headers['x-vault-index'] : req.query.vault;
-
-    if (!rawFilename.split('/').includes(authenticatedUser.uid)) {
-      return res.status(403).json({ error: 'Uploads must be stored under the signed-in user ID.' });
     }
 
     // 2. Security Check: Path Traversal

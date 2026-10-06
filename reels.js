@@ -1,6 +1,6 @@
 /**
- * NEX_REELS — 100% TikTok 2026 Experience
- * Pure Black • Sci-Fi HUD Lines • Neon Green #39FF14 • Zero Middle Watermarks • Zero Debug Badges
+ * CamShot — Premium Short-Form Video Platform
+ * Cinematic Luxury • Warm Gold #E8B84B • Frosted Glass • Pure Elegance
  */
 import "./src/js/security-guard.js";
 import { auth, db } from './firebase-config.js';
@@ -17,6 +17,21 @@ import { TRENDING_SOUNDS } from './src/js/reels-sounds.js';
 let currentUser = null;
 let myUID = null;
 let myUsername = 'NEX_User';
+
+// 🛡️ Global CamShot Runtime Resilience Shield
+window.addEventListener('unhandledrejection', (event) => {
+  if (event.reason?.name === 'AbortError' || event.reason?.message?.includes('aborted') || event.reason?.message?.includes('play()')) {
+    event.preventDefault();
+    return;
+  }
+  console.warn('[CAMSHOT-SHIELD] Handled background promise rejection:', event.reason?.message || event.reason);
+});
+
+window.addEventListener('error', (event) => {
+  if (event.message?.includes('ResizeObserver loop') || event.message?.includes('play() request was interrupted')) {
+    event.stopImmediatePropagation();
+  }
+});
 
 // ══════════════════════════════════════════════════
 // USER IDENTITY & LOCAL COMMENT PERSISTENCE HELPERS
@@ -108,10 +123,10 @@ let reelsSettings = {
 };
 
 try {
-  const savedSettings = JSON.parse(localStorage.getItem('nex_reels_settings') || '{}');
+  const savedSettings = JSON.parse(localStorage.getItem('camshot_settings') || localStorage.getItem('nex_reels_settings') || '{}');
   reelsSettings = { ...reelsSettings, ...savedSettings };
 } catch (e) {
-  console.warn('[REELS] Settings parse error:', e);
+  console.warn('[CAMSHOT] Settings parse error:', e);
 }
 
 let isGlobalMuted = reelsSettings.defaultSound ? false : true;
@@ -473,6 +488,15 @@ export const SEED_REELS = [
     views: 194000,
     sound: 'Quantum Neural Drift — NEX_Records',
     audioUrl: '',
+    poll: {
+      question: 'Which ChronEX AI model do you use most?',
+      options: [
+        { text: '⚡ Ultra Fast (Lite)', votes: 142 },
+        { text: '🧠 Deep Neural (Flash)', votes: 89 }
+      ]
+    },
+    hasBounty: true,
+    bountyAmount: 10,
     seedComments: [
       { authorName: 'dev_sarah', authorPic: 'favicon.png', text: 'The response latency on ChronEX v4 is insanely fast! Love the streaming markdown support.' },
       { authorName: 'cyber_mark', authorPic: 'logo.jpg', text: 'Can it generate Three.js shaders directly? Testing it today.' },
@@ -493,6 +517,15 @@ export const SEED_REELS = [
     views: 320000,
     sound: 'Cyberpunk Drift Phonk — DEMON_BEATS',
     audioUrl: '',
+    poll: {
+      question: 'Who wins the rematch tonight?',
+      options: [
+        { text: '🎮 Pixel Warlord', votes: 68 },
+        { text: '🔥 Steve FPS', votes: 44 }
+      ]
+    },
+    hasBounty: true,
+    bountyAmount: 10,
     seedComments: [
       { authorName: 'arcade_king', authorPic: 'favicon.png', text: 'That final sprint timing was clutch! GG!' },
       { authorName: 'steve_fps', authorPic: 'logo.jpg', text: 'Challenge accepted! Meet me on the Gaming Hub leaderboard.' },
@@ -513,6 +546,13 @@ export const SEED_REELS = [
     views: 242000,
     sound: 'Midnight City Glide — K-Trap Labs',
     audioUrl: '',
+    poll: {
+      question: 'Want liquid neon live wallpapers in NEXCHAT?',
+      options: [
+        { text: '💎 YES 100%', votes: 312 },
+        { text: '🖤 Keep Onyx Dark', votes: 28 }
+      ]
+    },
     seedComments: [
       { authorName: 'ui_designer', authorPic: 'favicon.png', text: 'Please release this as an animated chat wallpaper!' },
       { authorName: 'render_bot', authorPic: 'logo.jpg', text: 'The fluid refraction index is dialed in perfectly.' },
@@ -613,9 +653,9 @@ function renderEmptyFollowingFeed() {
   videoObserver.disconnect();
   reelsFeed.innerHTML = `
     <div class="reels-empty-state">
-      <i class="fa-solid fa-user-group" style="font-size: 54px; color: var(--neon-green); margin-bottom: 12px;"></i>
-      <h3 style="color: #fff; font-size: 18px; font-weight: 800;">Following Stream Empty</h3>
-      <p style="font-size: 13px; color: var(--text-muted); max-width: 320px;">You are not following any creators yet or they haven't posted reels. Switch to For You to explore cyber creators!</p>
+      <i class="fa-solid fa-user-group" style="font-size: 54px; color: var(--cs-gold); margin-bottom: 12px;"></i>
+      <h3 style="color: #fff; font-size: 18px; font-weight: 800; font-family: var(--cs-font-display);">Following Stream Empty</h3>
+      <p style="font-size: 13px; color: var(--cs-text-muted); max-width: 320px;">You are not following any creators yet or they haven't posted reels. Switch to For You to explore creators!</p>
       <button class="reels-btn-primary" style="margin-top: 14px;" id="switchBackForYouBtn">
         <i class="fa-solid fa-compass"></i> Explore For You
       </button>
@@ -652,12 +692,12 @@ if (tabFollowing && tabForYou) {
   });
 }
 
-function renderEmptyFeed(msg = 'No reels yet. Be the first to post a TikTok reel!') {
+function renderEmptyFeed(msg = 'No reels yet. Be the first to post a CamShot reel!') {
   reelsFeed.innerHTML = `
     <div class="reels-empty-state">
-      <i class="fa-solid fa-clapperboard" style="font-size: 54px; color: var(--neon-green); margin-bottom: 12px;"></i>
-      <h3 style="color: #fff; font-size: 18px; font-weight: 800;">NEX_REELS Stream Empty</h3>
-      <p style="font-size: 13px; color: var(--text-muted); max-width: 280px;">${msg}</p>
+      <i class="fa-solid fa-clapperboard" style="font-size: 54px; color: var(--cs-gold); margin-bottom: 12px;"></i>
+      <h3 style="color: #fff; font-size: 18px; font-weight: 800; font-family: var(--cs-font-display);">CamShot Stream Empty</h3>
+      <p style="font-size: 13px; color: var(--cs-text-muted); max-width: 280px;">${msg}</p>
       <button class="reels-btn-primary" style="margin-top: 14px;" onclick="document.getElementById('openUploadModalBtn').click()">
         <i class="fa-solid fa-plus"></i> Create First Reel
       </button>
@@ -666,7 +706,7 @@ function renderEmptyFeed(msg = 'No reels yet. Be the first to post a TikTok reel
 }
 
 // ══════════════════════════════════════════════════
-// RENDER REELS: 100% TIKTOK 2026 SPECIFICATION
+// RENDER REELS: CAMSHOT ULTRA STREAM ARCHITECTURE
 // NO MIDDLE WATERMARKS • NO DEBUG BADGES • ULTRA CLEAN
 // ══════════════════════════════════════════════════
 function renderReels(reelsList) {
@@ -683,8 +723,8 @@ function renderReels(reelsList) {
     const isFollowing = followedAuthors.has(authorHandle);
     const soundTrackTitle = reel.sound || `Original Audio — @${authorHandle}`;
 
-    // Debug logging to console ONLY (Issue 2 requirement)
-    console.log(`[NEX_REELS] Mounted Reel ID: ${reel.id} | Vault: ${reel.vault || 'Cloudinary Pool'}`);
+    // Debug logging to console ONLY
+    console.log(`[CamShot] Mounted Reel ID: ${reel.id} | Vault: ${reel.vault || 'Cloudinary Pool'}`);
 
     const card = document.createElement('div');
     card.className = 'reel-card';
@@ -751,15 +791,17 @@ function renderReels(reelsList) {
             <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
           </div>
 
-          <!-- More Actions (TikTok 5-icon Clean Specification) -->
+          <!-- More Actions (CamShot Stream Controls) -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
             <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="More Actions (AI & Tips)">
               <i class="fa-solid fa-ellipsis text-[22px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
             </button>
           </div>
 
-          <!-- Music disc rotating -->
-          <div class="music-disc-wrapper cursor-pointer mt-0.5" title="${escapeHtml(soundTrackTitle)}">
+          <!-- Music disc rotating with floating notes -->
+          <div class="music-disc-wrapper cursor-pointer mt-0.5" title="${escapeHtml(soundTrackTitle)}" style="position: relative;">
+            <div class="music-note-float">♪</div>
+            <div class="music-note-float" style="animation-delay: 1.2s; color: #ff2d55;">♫</div>
             <div class="reel-sound-disc w-9 h-9 rounded-full border-2 border-white/70 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
               <i class="fa-solid fa-compact-disc text-white text-sm"></i>
             </div>
@@ -768,19 +810,24 @@ function renderReels(reelsList) {
 
         <!-- Bottom Creator Handle + Caption + Sound Hub Row -->
         <div class="reel-bottom-info flex flex-col gap-1 text-white select-none pointer-events-auto">
-          <span class="reel-creator-handle font-bold text-[14.5px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
-            @${escapeHtml(authorHandle)}
-          </span>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="reel-creator-handle font-bold text-[14.5px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
+              @${escapeHtml(authorHandle)}
+            </span>
+            <button type="button" class="reel-follow-pill ${isFollowing ? 'following' : ''}" data-author="${escapeHtml(authorHandle)}" title="Follow creator">
+              ${isFollowing ? '<i class="fa-solid fa-check"></i> Following' : '<i class="fa-solid fa-plus"></i> Follow'}
+            </button>
+          </div>
           <p class="text-[13px] text-gray-100 font-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] break-words">
             ${escapeHtml(reel.caption || '')}
           </p>
-          <div class="reel-sound-row flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5 cursor-pointer hover:text-[#39FF14] transition-colors" title="Open Sound Hub">
+          <div class="reel-sound-row flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5 cursor-pointer hover:text-[var(--cs-gold-soft)] transition-colors" title="Open Sound Hub">
             <i class="fa-solid fa-music text-[11px]"></i>
             <span class="truncate max-w-[200px] font-medium">${escapeHtml(soundTrackTitle)}</span>
           </div>
         </div>
 
-        <!-- Bottom comment input bar like TikTok -->
+        <!-- Bottom inline comment input bar -->
         <div class="reel-bottom-bar flex items-center gap-2">
           <div class="flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-white/15 transition-all">
             <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-400 text-xs outline-none" placeholder="Add comment..." autocomplete="off">
@@ -794,19 +841,100 @@ function renderReels(reelsList) {
               <i class="fa-solid fa-at text-[15px] drop-shadow"></i>
             </button>
           </div>
-          <button type="button" class="reel-inline-send-btn text-white/90 hover:text-[#39FF14] transition-colors p-1.5 focus:outline-none" title="Post comment">
+          <button type="button" class="reel-inline-send-btn text-white/90 hover:text-[var(--cs-gold)] transition-colors p-1.5 focus:outline-none" title="Post comment">
             <i class="fa-solid fa-paper-plane text-sm drop-shadow"></i>
           </button>
         </div>
 
-        <!-- Thin Neon Green Scrubber Bar at Bottom (#39FF14) -->
+        <!-- Premium Gold Scrubber Bar at Bottom -->
         <div class="reel-progress-container cursor-pointer" title="Seek video">
-          <div class="w-full h-full bg-white/20">
-            <div class="reel-progress-fill h-full w-0 bg-[#39FF14] shadow-[0_0_8px_#39FF14]"></div>
+          <div class="reel-progress-track">
+            <div class="reel-progress-fill"></div>
           </div>
         </div>
       </div>
     `;
+
+    // ── INTERACTIVE CYBER OVERLAYS (Live Polls & Token Bounties) ──
+    const stageEl = card.querySelector('.reel-stage');
+    if (stageEl && reel.poll && reel.poll.question) {
+      const pollBox = document.createElement('div');
+      pollBox.className = 'camshot-poll-sticker';
+      const votedKey = `camshot_poll_${reel.id}`;
+      const userChoice = localStorage.getItem(votedKey);
+      const opt1 = reel.poll.options?.[0]?.text || 'Option A';
+      const opt2 = reel.poll.options?.[1]?.text || 'Option B';
+      let v1 = Number(reel.poll.options?.[0]?.votes || 4);
+      let v2 = Number(reel.poll.options?.[1]?.votes || 2);
+      const total = v1 + v2;
+      const pct1 = Math.round((v1 / total) * 100);
+      const pct2 = 100 - pct1;
+
+      pollBox.innerHTML = `
+        <div class="poll-question-header"><i class="fa-solid fa-square-poll-vertical" style="color:var(--cs-gold);margin-right:6px;"></i>${escapeHtml(reel.poll.question)}</div>
+        <div class="poll-options-stack">
+          <button type="button" class="poll-option-btn ${userChoice === '1' ? 'voted' : ''}" data-choice="1">
+            <div class="poll-fill-bar" style="width: ${userChoice ? pct1 : 0}%;"></div>
+            <span class="poll-text-label">${escapeHtml(opt1)}</span>
+            <span class="poll-pct-label" style="display:${userChoice ? 'inline' : 'none'};">${pct1}%</span>
+          </button>
+          <button type="button" class="poll-option-btn ${userChoice === '2' ? 'voted' : ''}" data-choice="2">
+            <div class="poll-fill-bar" style="width: ${userChoice ? pct2 : 0}%;"></div>
+            <span class="poll-text-label">${escapeHtml(opt2)}</span>
+            <span class="poll-pct-label" style="display:${userChoice ? 'inline' : 'none'};">${pct2}%</span>
+          </button>
+        </div>
+      `;
+
+      pollBox.querySelectorAll('.poll-option-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (localStorage.getItem(votedKey)) return;
+          const choice = btn.getAttribute('data-choice');
+          localStorage.setItem(votedKey, choice);
+          btn.classList.add('voted');
+          if (choice === '1') v1++; else v2++;
+          const tot = v1 + v2;
+          const p1 = Math.round((v1 / tot) * 100);
+          const p2 = 100 - p1;
+          const fills = pollBox.querySelectorAll('.poll-fill-bar');
+          const pcts = pollBox.querySelectorAll('.poll-pct-label');
+          if (fills[0]) fills[0].style.width = `${p1}%`;
+          if (fills[1]) fills[1].style.width = `${p2}%`;
+          if (pcts[0]) { pcts[0].textContent = `${p1}%`; pcts[0].style.display = 'inline'; }
+          if (pcts[1]) { pcts[1].textContent = `${p2}%`; pcts[1].style.display = 'inline'; }
+          playLuxuryPopSound();
+          showToast('🗳️ Live vote submitted!');
+        });
+      });
+      stageEl.appendChild(pollBox);
+    }
+
+    if (stageEl && reel.hasBounty) {
+      const bountyKey = `camshot_bounty_${reel.id}`;
+      const isClaimed = Boolean(localStorage.getItem(bountyKey));
+      const bountyBadge = document.createElement('div');
+      bountyBadge.className = `camshot-bounty-badge ${isClaimed ? 'claimed' : ''}`;
+      bountyBadge.innerHTML = isClaimed 
+        ? `<i class="fa-solid fa-check"></i> <span>Claimed</span>`
+        : `<i class="fa-solid fa-gift fa-bounce" style="color:#00ff66;"></i> <span>10 TOKENS</span>`;
+
+      bountyBadge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (localStorage.getItem(bountyKey)) {
+          showToast('You already claimed this bounty!');
+          return;
+        }
+        localStorage.setItem(bountyKey, 'true');
+        bountyBadge.className = 'camshot-bounty-badge claimed';
+        bountyBadge.innerHTML = `<i class="fa-solid fa-check"></i> <span>Claimed</span>`;
+        const currentTokens = parseInt(localStorage.getItem('nex_tokens') || '0', 10);
+        localStorage.setItem('nex_tokens', String(currentTokens + 10));
+        playLuxuryPopSound();
+        showToast('🎉 Claimed 10 NEX Tokens Bounty from this CamShot!');
+      });
+      stageEl.appendChild(bountyBadge);
+    }
 
     // Elements inside card
     const videoEl = card.querySelector('.reel-video');
@@ -855,13 +983,6 @@ function renderReels(reelsList) {
     });
 
     // Inline comment submit handlers
-    if (inlineInput) {
-      inlineInput.setAttribute('inputmode', 'text');
-      inlineInput.addEventListener('input', (e) => {
-        e.target.value = e.target.value.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{200D}\u{FE0E}\u{FE0F}]/gu, '');
-      });
-    }
-
     if (inlineInput && inlineSendBtn) {
       inlineInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -879,7 +1000,7 @@ function renderReels(reelsList) {
     if (inlineEmojiBtn && inlineInput) {
       inlineEmojiBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const emojis = ['Like', 'Love', 'Cheer', 'Fire', 'Star'];
+        const emojis = ['🔥', '❤️', '👏', '😂', '✨', '💯', '😍', '🙌'];
         const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
         inlineInput.value += randomEmoji;
         inlineInput.focus();
@@ -1063,6 +1184,28 @@ function renderReels(reelsList) {
       openShareModal(reel);
     });
 
+    // Follow Creator Pill Button
+    const followBtn = card.querySelector('.reel-follow-pill');
+    if (followBtn) {
+      followBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        playLuxuryPopSound();
+        const author = followBtn.getAttribute('data-author');
+        if (followedAuthors.has(author)) {
+          followedAuthors.delete(author);
+          followBtn.classList.remove('following');
+          followBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Follow';
+          showToast(`Unfollowed @${author}`);
+        } else {
+          followedAuthors.add(author);
+          followBtn.classList.add('following');
+          followBtn.innerHTML = '<i class="fa-solid fa-check"></i> Following';
+          showToast(`Following @${author}`);
+        }
+        localStorage.setItem('nex_followed_authors', JSON.stringify([...followedAuthors]));
+      });
+    }
+
     reelsFeed.appendChild(card);
     videoObserver.observe(card);
   });
@@ -1115,21 +1258,64 @@ function showPlayIndicator(el, iconClass) {
   setTimeout(() => el.classList.remove('show'), 400);
 }
 
-// Double Tap Big Heart Burst
+// Zero-dependency Web Audio synthesizer for tactile pops & clicks
+function playLuxuryPopSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(420, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(860, ctx.currentTime + 0.08);
+    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.08);
+  } catch (e) {}
+}
+
+// Deluxe Double Tap Heart Burst + Radiant Particle Dispersion
 function triggerHeartBurst(x, y) {
-  if (!heartBurst) return;
-  const clone = heartBurst.cloneNode(true);
-  clone.style.display = 'block';
-  clone.style.left = `${x}px`;
-  clone.style.top = `${y}px`;
-  document.body.appendChild(clone);
-  setTimeout(() => clone.remove(), 850);
+  playLuxuryPopSound();
+  const posX = (typeof x === 'number' && !isNaN(x) && x > 0) ? x : (window.innerWidth / 2);
+  const posY = (typeof y === 'number' && !isNaN(y) && y > 0) ? y : (window.innerHeight / 2);
+
+  // Big central 3D heart with bounce and glow
+  const bigHeart = document.createElement('div');
+  bigHeart.className = 'heart-burst-deluxe';
+  bigHeart.innerHTML = '<i class="fa-solid fa-heart"></i>';
+  bigHeart.style.left = `${posX}px`;
+  bigHeart.style.top = `${posY}px`;
+  document.body.appendChild(bigHeart);
+  setTimeout(() => bigHeart.remove(), 950);
+
+  // Floating sparkling particle explosion
+  const emojis = ['❤️', '✨', '🔥', '💖', '⭐', '💫', '💥'];
+  for (let i = 0; i < 7; i++) {
+    const p = document.createElement('div');
+    p.className = 'heart-particle-particle';
+    p.textContent = emojis[i % emojis.length];
+    const angle = (Math.PI * 2 * i) / 7 + (Math.random() * 0.3 - 0.15);
+    const dist = 55 + Math.random() * 65;
+    const destX = Math.cos(angle) * dist;
+    const destY = Math.sin(angle) * dist - 40;
+    p.style.setProperty('--dx', `${destX}px`);
+    p.style.setProperty('--dy', `${destY}px`);
+    p.style.left = `${posX}px`;
+    p.style.top = `${posY}px`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 850);
+  }
 }
 
 // Like Toggle Logic
 async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
   if (!myUID) {
-    showToast('Log in to like reels');
+    showToast('Log in to like CamShots');
     return;
   }
 
@@ -1451,21 +1637,21 @@ function openChronexAiDrawer(reel) {
   const caption = reel.caption || '';
 
   if (chronexAiSummaryText) {
-    chronexAiSummaryText.innerHTML = `<strong>Neural Video Scanner:</strong> Detected high dynamic range cyberpunk stream by <strong>@${escapeHtml(author)}</strong>. Real-time visual telemetry indicates high virality potential. Audio soundtrack is synchronized with visual keyframes.`;
+    chronexAiSummaryText.innerHTML = `<strong>Neural Video Scanner:</strong> Detected high dynamic range cinematic stream by <strong>@${escapeHtml(author)}</strong>. Real-time visual telemetry indicates high virality potential. Audio soundtrack is synchronized with visual keyframes.`;
   }
 
   // Extract or generate tags
   if (chronexAiTagsRow) {
-    const tags = caption.match(/#[a-zA-Z0-9_]+/g) || ['#cyberpunk', '#viral', '#NEX_REELS', '#4K60FPS'];
+    const tags = caption.match(/#[a-zA-Z0-9_]+/g) || ['#CamShot', '#viral', '#cinematic', '#trending', '#4K'];
     chronexAiTagsRow.innerHTML = tags.map(t => `<span class="chronex-tag">${escapeHtml(t)}</span>`).join('');
   }
 
   // 1-Tap Smart Replies
   if (smartReplyChips) {
     const replies = [
-      `This lighting in @${author}'s reel is insane!`,
-      `What render engine / camera rig did you use for this?`,
-      `ChronEX Neural Score: 99.8% Cyber Masterpiece!`,
+      `This lighting in @${author}'s reel is immaculate!`,
+      `What camera rig or grading LUT did you use for this?`,
+      `CamShot AI Score: 99.8% Cinematic Masterpiece!`,
     ];
 
     smartReplyChips.innerHTML = '';
@@ -1693,7 +1879,7 @@ if (shareCopyLinkBtn) {
   shareCopyLinkBtn.addEventListener('click', () => {
     if (shareLinkInput.value) {
       navigator.clipboard.writeText(shareLinkInput.value);
-      showToast('Reel link copied!');
+      showToast('CamShot link copied!');
       closeShareModal();
     }
   });
@@ -1703,7 +1889,7 @@ if (shareQuickCopyBtn) {
   shareQuickCopyBtn.addEventListener('click', () => {
     if (shareLinkInput.value) {
       navigator.clipboard.writeText(shareLinkInput.value);
-      showToast('Reel link copied!');
+      showToast('CamShot link copied!');
       closeShareModal();
     }
   });
@@ -1713,8 +1899,8 @@ if (shareNativeBtn) {
   shareNativeBtn.addEventListener('click', () => {
     if (navigator.share && activeShareReel) {
       navigator.share({
-        title: `NEX_REELS: @${activeShareReel.authorName}`,
-        text: activeShareReel.caption || 'Watch this reel on NEXCHAT!',
+        title: `CamShot: @${activeShareReel.authorName}`,
+        text: activeShareReel.caption || 'Watch this reel on CamShot!',
         url: shareLinkInput.value,
       }).catch(() => {});
       closeShareModal();
@@ -1730,12 +1916,53 @@ if (shareSendInChatBtn) {
   });
 }
 
+const shareWhatsAppBtn = document.getElementById('shareWhatsAppBtn');
+if (shareWhatsAppBtn) {
+  shareWhatsAppBtn.addEventListener('click', () => {
+    const url = encodeURIComponent(shareLinkInput.value);
+    const text = encodeURIComponent('Watch this video on CamShot: ');
+    window.open(`https://api.whatsapp.com/send?text=${text}${url}`, '_blank');
+    closeShareModal();
+  });
+}
+
+const shareTelegramBtn = document.getElementById('shareTelegramBtn');
+if (shareTelegramBtn) {
+  shareTelegramBtn.addEventListener('click', () => {
+    const url = encodeURIComponent(shareLinkInput.value);
+    const text = encodeURIComponent('Watch this video on CamShot!');
+    window.open(`https://t.me/share/url?url=${url}&text=${text}`, '_blank');
+    closeShareModal();
+  });
+}
+
+const shareTwitterBtn = document.getElementById('shareTwitterBtn');
+if (shareTwitterBtn) {
+  shareTwitterBtn.addEventListener('click', () => {
+    const url = encodeURIComponent(shareLinkInput.value);
+    const text = encodeURIComponent('Check out this CamShot video!');
+    window.open(`https://twitter.com/intent/tweet?url=${url}&text=${text}`, '_blank');
+    closeShareModal();
+  });
+}
+
+const cancelCommentReplyBtn = document.getElementById('cancelCommentReplyBtn');
+if (cancelCommentReplyBtn) {
+  cancelCommentReplyBtn.addEventListener('click', () => {
+    const replyBarEl = document.getElementById('commentReplyBar');
+    if (replyBarEl) replyBarEl.style.display = 'none';
+    if (commentTextInput && commentTextInput.value.startsWith('@')) {
+      commentTextInput.value = '';
+    }
+  });
+}
+
 if (shareDownloadBtn) {
   shareDownloadBtn.addEventListener('click', () => {
     if (activeShareReel && activeShareReel.videoUrl) {
       const a = document.createElement('a');
       a.href = activeShareReel.videoUrl;
-      a.download = `NEX_REEL_${activeShareReel.id}.mp4`;
+      a.download = `CAMSHOT_${activeShareReel.id}.mp4`;
       a.target = '_blank';
       document.body.appendChild(a);
       a.click();
@@ -1747,11 +1974,35 @@ if (shareDownloadBtn) {
 }
 
 // ══════════════════════════════════════════════════
-// COMMENTS DRAWER (Merged Seed + Local + Firestore)
 // ══════════════════════════════════════════════════
+// COMMENTS DRAWER — HIGH CLASS & CAMSHOT SPEC
+// ══════════════════════════════════════════════════
+const commentInputUserAvatar = document.getElementById('commentInputUserAvatar');
+const commentsQuickEmojis = document.getElementById('commentsQuickEmojis');
+const commentLikedSet = new Set(JSON.parse(localStorage.getItem('camshot_liked_comments') || '[]'));
+
+function formatCommentRelativeTime(timestamp) {
+  if (!timestamp) return 'Just now';
+  let ms = 0;
+  if (typeof timestamp === 'number') ms = timestamp;
+  else if (timestamp.toMillis) ms = timestamp.toMillis();
+  else if (timestamp.toDate) ms = timestamp.toDate().getTime();
+  else if (timestamp instanceof Date) ms = timestamp.getTime();
+  else return 'Just now';
+
+  const diffSec = Math.floor((Date.now() - ms) / 1000);
+  if (diffSec < 45) return 'Just now';
+  if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+  if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+  if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
+  return new Date(ms).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
 function renderCommentsList(seedComms, localComms, firestoreDocs) {
   const allComments = [];
   const seenKeys = new Set();
+  const activeReelObj = allLoadedReels.find(r => r.id === activeReelId);
+  const reelCreatorHandle = activeReelObj?.authorName || '';
 
   // 1. Seed comments
   seedComms.forEach((c, idx) => {
@@ -1762,7 +2013,9 @@ function renderCommentsList(seedComms, localComms, firestoreDocs) {
         id: 'seed_' + idx,
         authorName: c.authorName || 'user',
         authorPic: c.authorPic || 'logo.jpg',
-        text: c.text || ''
+        text: c.text || '',
+        createdAt: Date.now() - (idx + 1) * 3600000,
+        likesCount: c.likesCount || Math.floor(Math.random() * 24) + 1
       });
     }
   });
@@ -1777,7 +2030,9 @@ function renderCommentsList(seedComms, localComms, firestoreDocs) {
         id: docSnap.id,
         authorName: c.authorName || 'user',
         authorPic: c.authorPic || '/favicons/favicon.ico',
-        text: c.text || ''
+        text: c.text || '',
+        createdAt: c.createdAt || Date.now(),
+        likesCount: c.likesCount || 0
       });
     }
   });
@@ -1791,14 +2046,21 @@ function renderCommentsList(seedComms, localComms, firestoreDocs) {
         id: c.id || ('local_' + Math.random()),
         authorName: c.authorName || 'user',
         authorPic: c.authorPic || '/favicons/favicon.ico',
-        text: c.text || ''
+        text: c.text || '',
+        createdAt: c.createdAt || Date.now(),
+        likesCount: c.likesCount || 0
       });
     }
   });
 
   if (allComments.length === 0) {
     commentsCountHeader.textContent = '0';
-    commentsList.innerHTML = '<div class="comment-empty"><i class="fa-regular fa-comment-dots" style="font-size:28px;margin-bottom:8px;display:block;"></i>No comments yet. Share your thoughts!</div>';
+    commentsList.innerHTML = `
+      <div class="comments-empty">
+        <i class="fa-regular fa-comment-dots"></i>
+        <p>No comments yet</p>
+        <span>Be the first to share your thoughts on this CamShot reel!</span>
+      </div>`;
     return;
   }
 
@@ -1806,13 +2068,73 @@ function renderCommentsList(seedComms, localComms, firestoreDocs) {
   allComments.forEach((c) => {
     const item = document.createElement('div');
     item.className = 'comment-item';
+    item.dataset.commentId = c.id;
+
+    const isCreator = (c.authorName && c.authorName.toLowerCase() === reelCreatorHandle.toLowerCase());
+    const isLiked = commentLikedSet.has(c.id);
+    const likes = (c.likesCount || 0) + (isLiked ? 1 : 0);
+
     item.innerHTML = `
-      <img src="${c.authorPic || 'logo.jpg'}" class="comment-avatar" alt="${escapeHtml(c.authorName)}">
+      <img src="${c.authorPic || 'logo.jpg'}" class="comment-avatar" alt="${escapeHtml(c.authorName)}" onerror="this.src='favicon.png'">
       <div class="comment-body">
-        <span class="comment-author">@${escapeHtml(c.authorName)}</span>
-        <span class="comment-text">${escapeHtml(c.text)}</span>
+        <div class="comment-header-row">
+          <span class="comment-author">@${escapeHtml(c.authorName)}</span>
+          ${isCreator ? '<span class="comment-creator-badge">Creator</span>' : ''}
+          <span class="comment-time">${formatCommentRelativeTime(c.createdAt)}</span>
+        </div>
+        <div class="comment-text">${escapeHtml(c.text)}</div>
+        <div class="comment-actions-row">
+          <button type="button" class="comment-reply-btn" data-reply-to="${escapeHtml(c.authorName)}">Reply</button>
+        </div>
+      </div>
+      <div class="comment-like-wrapper">
+        <button type="button" class="comment-like-btn ${isLiked ? 'liked' : ''}" data-comment-id="${c.id}" title="Like comment">
+          <i class="${isLiked ? 'fa-solid' : 'fa-regular'} fa-heart"></i>
+        </button>
+        <span class="comment-like-count">${likes > 0 ? formatNumber(likes) : ''}</span>
       </div>
     `;
+
+    // Reply click handler
+    const replyBtn = item.querySelector('.comment-reply-btn');
+    if (replyBtn) {
+      replyBtn.addEventListener('click', () => {
+        if (commentTextInput) {
+          commentTextInput.value = `@${c.authorName} `;
+          const replyUserEl = document.getElementById('commentReplyUser');
+          const replyBarEl = document.getElementById('commentReplyBar');
+          if (replyUserEl && replyBarEl) {
+            replyUserEl.textContent = `@${c.authorName}`;
+            replyBarEl.style.display = 'flex';
+          }
+          commentTextInput.focus();
+        }
+      });
+    }
+
+    // Like comment toggle
+    const likeBtn = item.querySelector('.comment-like-btn');
+    const likeCountSpan = item.querySelector('.comment-like-count');
+    if (likeBtn) {
+      likeBtn.addEventListener('click', () => {
+        const id = c.id;
+        if (commentLikedSet.has(id)) {
+          commentLikedSet.delete(id);
+          likeBtn.classList.remove('liked');
+          likeBtn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+          const newLikes = Math.max(0, (c.likesCount || 0));
+          likeCountSpan.textContent = newLikes > 0 ? formatNumber(newLikes) : '';
+        } else {
+          commentLikedSet.add(id);
+          likeBtn.classList.add('liked');
+          likeBtn.innerHTML = '<i class="fa-solid fa-heart"></i>';
+          const newLikes = (c.likesCount || 0) + 1;
+          likeCountSpan.textContent = formatNumber(newLikes);
+        }
+        localStorage.setItem('camshot_liked_comments', JSON.stringify([...commentLikedSet]));
+      });
+    }
+
     commentsList.appendChild(item);
   });
 
@@ -1823,6 +2145,12 @@ function renderCommentsList(seedComms, localComms, firestoreDocs) {
 function openCommentsDrawer(reelId) {
   activeReelId = reelId;
   commentsModal.style.display = 'flex';
+
+  // Update composer avatar with current user profile
+  const user = getEffectiveUser();
+  if (commentInputUserAvatar) {
+    commentInputUserAvatar.src = user.pic || 'favicon.png';
+  }
 
   if (currentCommentUnsubscribe) {
     currentCommentUnsubscribe();
@@ -1864,18 +2192,20 @@ function closeCommentsDrawer() {
 closeCommentsBtn.addEventListener('click', closeCommentsDrawer);
 commentsBackdrop.addEventListener('click', closeCommentsDrawer);
 
-if (commentTextInput) {
-  commentTextInput.setAttribute('inputmode', 'text');
-  commentTextInput.setAttribute('autocomplete', 'off');
-  commentTextInput.addEventListener('input', (e) => {
-    e.target.value = e.target.value.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{200D}\u{FE0E}\u{FE0F}]/gu, '');
+// Quick 1-Tap Reaction Emojis
+if (commentsQuickEmojis && commentTextInput) {
+  commentsQuickEmojis.querySelectorAll('.quick-emoji-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const emoji = btn.dataset.emoji || btn.textContent.trim();
+      commentTextInput.value += emoji;
+      commentTextInput.focus();
+    });
   });
 }
 
 commentForm.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const rawText = commentTextInput.value.trim();
-  const text = rawText.replace(/[\u{1F600}-\u{1F6FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}\u{2300}-\u{23FF}\u{200D}\u{FE0E}\u{FE0F}]/gu, '');
+  const text = commentTextInput.value.trim();
   if (!text || !activeReelId) return;
 
   const user = getEffectiveUser();
@@ -1887,7 +2217,8 @@ commentForm.addEventListener('submit', async (e) => {
     authorName: user.username,
     authorPic: user.pic,
     text: text,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    likesCount: 0
   };
   saveLocalReelComment(activeReelId, localComment);
 
@@ -1895,13 +2226,30 @@ commentForm.addEventListener('submit', async (e) => {
   const emptyEl = commentsList.querySelector('.comment-empty, .comments-empty');
   if (emptyEl) emptyEl.remove();
 
+  const activeReelObj = allLoadedReels.find(r => r.id === activeReelId);
+  const isCreator = (user.username && user.username.toLowerCase() === (activeReelObj?.authorName || '').toLowerCase());
+
   const item = document.createElement('div');
   item.className = 'comment-item';
+  item.dataset.commentId = localComment.id;
   item.innerHTML = `
-    <img src="${user.pic || '/favicons/favicon.ico'}" class="comment-avatar" alt="${escapeHtml(user.username)}">
+    <img src="${user.pic || 'favicon.png'}" class="comment-avatar" alt="${escapeHtml(user.username)}" onerror="this.src='favicon.png'">
     <div class="comment-body">
-      <span class="comment-author">@${escapeHtml(user.username)}</span>
-      <span class="comment-text">${escapeHtml(text)}</span>
+      <div class="comment-header-row">
+        <span class="comment-author">@${escapeHtml(user.username)}</span>
+        ${isCreator ? '<span class="comment-creator-badge">Creator</span>' : ''}
+        <span class="comment-time">Just now</span>
+      </div>
+      <div class="comment-text">${escapeHtml(text)}</div>
+      <div class="comment-actions-row">
+        <button type="button" class="comment-reply-btn" data-reply-to="${escapeHtml(user.username)}">Reply</button>
+      </div>
+    </div>
+    <div class="comment-like-wrapper">
+      <button type="button" class="comment-like-btn" data-comment-id="${localComment.id}" title="Like comment">
+        <i class="fa-regular fa-heart"></i>
+      </button>
+      <span class="comment-like-count"></span>
     </div>
   `;
   commentsList.appendChild(item);
@@ -1941,7 +2289,7 @@ commentForm.addEventListener('submit', async (e) => {
 // UPLOAD REEL MODAL & ISSUE 3: HIGHEST QUALITY HD/4K
 // ══════════════════════════════════════════════════
 // ══════════════════════════════════════════════════
-// NEX_REELS CREATOR STUDIO PRO & REAL-TIME SIMULATOR
+// CAMSHOT CREATOR STUDIO PRO & REAL-TIME SIMULATOR
 // ══════════════════════════════════════════════════
 const floatingCreateReelBtn = document.getElementById('floatingCreateReelBtn');
 const chronexAiGenCaptionBtn = document.getElementById('chronexAiGenCaptionBtn');
@@ -1973,6 +2321,7 @@ function openCreatorStudio() {
 }
 
 function closeCreatorStudio() {
+  stopCameraStream();
   if (uploadReelModal) uploadReelModal.style.display = 'none';
   resetUploadForm();
 }
@@ -2082,6 +2431,331 @@ reelDropzone.addEventListener('drop', (e) => {
     }
   }
 });
+
+// ══════════════════════════════════════════════════
+// CAMSHOT LIVE CAMERA STUDIO CONTROLLER
+// ══════════════════════════════════════════════════
+const sourceUploadFileBtn = document.getElementById('sourceUploadFileBtn');
+const sourceLiveCamBtn = document.getElementById('sourceLiveCamBtn');
+const liveCameraStudioStage = document.getElementById('liveCameraStudioStage');
+const liveCamStreamVideo = document.getElementById('liveCamStreamVideo');
+const liveCamTimerBadge = document.getElementById('liveCamTimerBadge');
+const liveCamTimerText = document.getElementById('liveCamTimerText');
+const flipLiveCameraBtn = document.getElementById('flipLiveCameraBtn');
+const startLiveRecordBtn = document.getElementById('startLiveRecordBtn');
+const stopLiveRecordBtn = document.getElementById('stopLiveRecordBtn');
+const enablePollStickerCheckbox = document.getElementById('enablePollStickerCheckbox');
+const pollInputsContainer = document.getElementById('pollInputsContainer');
+const enableBountyCheckbox = document.getElementById('enableBountyCheckbox');
+
+let liveCamStream = null;
+let liveMediaRecorder = null;
+let recordedCamChunks = [];
+let liveRecordTimerInterval = null;
+let liveRecordSeconds = 0;
+let currentFacingMode = 'user';
+let currentLiveShader = 'normal';
+
+function applyLiveShaderToVideo(shaderName) {
+  currentLiveShader = shaderName;
+  if (!liveCamStreamVideo) return;
+  liveCamStreamVideo.className = '';
+  if (shaderName === 'matrix') {
+    liveCamStreamVideo.classList.add('video-shader-matrix');
+  } else if (shaderName === 'cyber') {
+    liveCamStreamVideo.classList.add('video-shader-cyber');
+  } else if (shaderName === 'gold') {
+    liveCamStreamVideo.classList.add('video-shader-gold');
+  } else if (shaderName === 'noir') {
+    liveCamStreamVideo.classList.add('video-shader-noir');
+  }
+}
+
+async function startCameraStream() {
+  stopCameraStream();
+  try {
+    const constraints = {
+      video: {
+        facingMode: currentFacingMode,
+        width: { ideal: 1080 },
+        height: { ideal: 1920 }
+      },
+      audio: true
+    };
+    try {
+      liveCamStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (audioErr) {
+      console.warn('Audio permission denied or unavailable, falling back to video only:', audioErr);
+      liveCamStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: currentFacingMode },
+        audio: false
+      });
+    }
+
+    if (liveCamStreamVideo) {
+      liveCamStreamVideo.srcObject = liveCamStream;
+      applyLiveShaderToVideo(currentLiveShader);
+      await liveCamStreamVideo.play().catch(() => {});
+    }
+  } catch (err) {
+    console.error('Camera stream access failed:', err);
+    showToast('Camera access denied or unavailable: ' + (err.message || 'Error'));
+  }
+}
+
+function stopCameraStream() {
+  if (liveRecordTimerInterval) {
+    clearInterval(liveRecordTimerInterval);
+    liveRecordTimerInterval = null;
+  }
+  if (liveMediaRecorder && liveMediaRecorder.state !== 'inactive') {
+    try { liveMediaRecorder.stop(); } catch (_) {}
+  }
+  if (liveCamStream) {
+    liveCamStream.getTracks().forEach(track => {
+      try { track.stop(); } catch (_) {}
+    });
+    liveCamStream = null;
+  }
+  if (liveCamStreamVideo) {
+    liveCamStreamVideo.srcObject = null;
+  }
+  if (liveCamTimerBadge) liveCamTimerBadge.style.display = 'none';
+  if (startLiveRecordBtn) startLiveRecordBtn.style.display = 'inline-flex';
+  if (stopLiveRecordBtn) stopLiveRecordBtn.style.display = 'none';
+}
+
+async function startLiveRecord() {
+  if (!liveCamStream || !liveCamStream.active) {
+    await startCameraStream();
+  }
+  if (!liveCamStream) return;
+
+  recordedCamChunks = [];
+  let mimeType = 'video/webm';
+  if (typeof MediaRecorder !== 'undefined') {
+    if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+      mimeType = 'video/webm;codecs=vp9,opus';
+    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8,opus')) {
+      mimeType = 'video/webm;codecs=vp8,opus';
+    } else if (MediaRecorder.isTypeSupported('video/webm')) {
+      mimeType = 'video/webm';
+    } else if (MediaRecorder.isTypeSupported('video/mp4')) {
+      mimeType = 'video/mp4';
+    }
+  } else {
+    showToast('MediaRecorder not supported on this browser');
+    return;
+  }
+
+  try {
+    liveMediaRecorder = new MediaRecorder(liveCamStream, { mimeType });
+  } catch (e) {
+    liveMediaRecorder = new MediaRecorder(liveCamStream);
+  }
+
+  liveMediaRecorder.ondataavailable = (event) => {
+    if (event.data && event.data.size > 0) {
+      recordedCamChunks.push(event.data);
+    }
+  };
+
+  liveMediaRecorder.onstop = handleLiveRecordStop;
+  liveMediaRecorder.start(250);
+
+  // UI state
+  liveRecordSeconds = 0;
+  if (liveCamTimerText) liveCamTimerText.textContent = '00:00';
+  if (liveCamTimerBadge) liveCamTimerBadge.style.display = 'inline-flex';
+  if (startLiveRecordBtn) startLiveRecordBtn.style.display = 'none';
+  if (stopLiveRecordBtn) stopLiveRecordBtn.style.display = 'inline-flex';
+
+  playLuxuryPopSound();
+  showToast('🔴 Recording live CamShot...');
+
+  liveRecordTimerInterval = setInterval(() => {
+    liveRecordSeconds++;
+    const mins = Math.floor(liveRecordSeconds / 60);
+    const secs = liveRecordSeconds % 60;
+    if (liveCamTimerText) {
+      liveCamTimerText.textContent = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+    if (liveRecordSeconds >= 90) {
+      showToast('90s CamShot limit reached!');
+      stopLiveRecord();
+    }
+  }, 1000);
+}
+
+function stopLiveRecord() {
+  if (liveRecordTimerInterval) {
+    clearInterval(liveRecordTimerInterval);
+    liveRecordTimerInterval = null;
+  }
+  if (liveCamTimerBadge) liveCamTimerBadge.style.display = 'none';
+  if (startLiveRecordBtn) startLiveRecordBtn.style.display = 'inline-flex';
+  if (stopLiveRecordBtn) stopLiveRecordBtn.style.display = 'none';
+
+  if (liveMediaRecorder && liveMediaRecorder.state !== 'inactive') {
+    liveMediaRecorder.stop();
+  }
+}
+
+async function handleLiveRecordStop() {
+  if (recordedCamChunks.length === 0) {
+    showToast('No video recorded');
+    return;
+  }
+
+  const mimeType = liveMediaRecorder?.mimeType || 'video/webm';
+  const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+  const recordedBlob = new Blob(recordedCamChunks, { type: mimeType });
+  const recordedFile = new File([recordedBlob], `camshot_studio_${Date.now()}.${ext}`, { type: mimeType });
+
+  selectedReelFile = recordedFile;
+  const videoObjUrl = URL.createObjectURL(recordedBlob);
+
+  reelPreviewVideo.src = videoObjUrl;
+  reelPreviewContainer.style.display = 'flex';
+  reelDropzonePrompt.style.display = 'none';
+
+  if (simPreviewVideo) {
+    simPreviewVideo.src = videoObjUrl;
+    simPreviewVideo.style.display = 'block';
+    simPreviewVideo.play().catch(() => {});
+  }
+  if (simPlaceholder) simPlaceholder.style.display = 'none';
+
+  const mins = Math.floor(liveRecordSeconds / 60);
+  const secs = liveRecordSeconds % 60;
+  reelDurationBadge.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+  try {
+    const thumbData = await generateVideoThumbnail(recordedFile, 0.2);
+    if (thumbData) {
+      selectedReelThumbnailBlob = thumbData.blob;
+      selectedReelThumbnailDataUrl = thumbData.dataUrl;
+      detectedVideoWidth = thumbData.width;
+      detectedVideoHeight = thumbData.height;
+
+      if (studioThumbPreviewImg) studioThumbPreviewImg.src = thumbData.dataUrl;
+      if (studioThumbBox) studioThumbBox.style.display = 'flex';
+
+      const reelHdSpecText = document.getElementById('reelHdSpecText');
+      const reelHdBadge = document.getElementById('reelHdBadge');
+      if (reelHdBadge && reelHdSpecText) {
+        reelHdSpecText.textContent = `${thumbData.width}x${thumbData.height} Live HD Studio • 60 FPS`;
+        reelHdBadge.style.display = 'flex';
+      }
+      updateQualityPillsForResolution(thumbData.width, thumbData.height);
+    }
+  } catch (thumbErr) {
+    console.warn('Live thumbnail generation notice:', thumbErr);
+  }
+
+  // Stop camera hardware stream so user webcam light turns off
+  stopCameraStream();
+
+  // Switch UI view back to preview
+  if (sourceUploadFileBtn && sourceLiveCamBtn) {
+    sourceUploadFileBtn.classList.add('active');
+    sourceUploadFileBtn.style.background = 'rgba(232, 184, 75, 0.15)';
+    sourceUploadFileBtn.style.borderColor = 'var(--cs-gold)';
+    sourceUploadFileBtn.style.color = '#fff';
+
+    sourceLiveCamBtn.classList.remove('active');
+    sourceLiveCamBtn.style.background = 'rgba(255, 255, 255, 0.05)';
+    sourceLiveCamBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+    sourceLiveCamBtn.style.color = '#a1a1aa';
+  }
+  reelDropzone.style.display = 'block';
+  liveCameraStudioStage.style.display = 'none';
+
+  playLuxuryPopSound();
+  showToast('🎉 Live CamShot captured! Ready to publish.');
+}
+
+// Source Mode Switcher Listeners
+if (sourceUploadFileBtn) {
+  sourceUploadFileBtn.addEventListener('click', () => {
+    sourceUploadFileBtn.classList.add('active');
+    sourceUploadFileBtn.style.background = 'rgba(232, 184, 75, 0.15)';
+    sourceUploadFileBtn.style.borderColor = 'var(--cs-gold)';
+    sourceUploadFileBtn.style.color = '#fff';
+
+    if (sourceLiveCamBtn) {
+      sourceLiveCamBtn.classList.remove('active');
+      sourceLiveCamBtn.style.background = 'rgba(255, 255, 255, 0.05)';
+      sourceLiveCamBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+      sourceLiveCamBtn.style.color = '#a1a1aa';
+    }
+
+    reelDropzone.style.display = 'block';
+    if (liveCameraStudioStage) liveCameraStudioStage.style.display = 'none';
+    stopCameraStream();
+  });
+}
+
+if (sourceLiveCamBtn) {
+  sourceLiveCamBtn.addEventListener('click', () => {
+    sourceLiveCamBtn.classList.add('active');
+    sourceLiveCamBtn.style.background = 'rgba(0, 255, 102, 0.15)';
+    sourceLiveCamBtn.style.borderColor = '#00ff66';
+    sourceLiveCamBtn.style.color = '#fff';
+
+    if (sourceUploadFileBtn) {
+      sourceUploadFileBtn.classList.remove('active');
+      sourceUploadFileBtn.style.background = 'rgba(255, 255, 255, 0.05)';
+      sourceUploadFileBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+      sourceUploadFileBtn.style.color = '#a1a1aa';
+    }
+
+    reelDropzone.style.display = 'none';
+    if (liveCameraStudioStage) liveCameraStudioStage.style.display = 'flex';
+    startCameraStream();
+  });
+}
+
+// Live Camera Shaders
+document.querySelectorAll('.cam-shader-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.cam-shader-pill').forEach(p => {
+      p.classList.remove('active');
+      p.style.background = 'rgba(255,255,255,0.05)';
+    });
+    pill.classList.add('active');
+    pill.style.background = 'rgba(255,255,255,0.25)';
+    const shader = pill.dataset.shader || 'normal';
+    applyLiveShaderToVideo(shader);
+    showToast(`Color Grade: ${shader.toUpperCase()}`);
+  });
+});
+
+// Live Camera Flip
+if (flipLiveCameraBtn) {
+  flipLiveCameraBtn.addEventListener('click', () => {
+    currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+    startCameraStream();
+    showToast(`Camera: ${currentFacingMode === 'user' ? 'Front' : 'Back'}`);
+  });
+}
+
+// Live Record Trigger Buttons
+if (startLiveRecordBtn) {
+  startLiveRecordBtn.addEventListener('click', startLiveRecord);
+}
+if (stopLiveRecordBtn) {
+  stopLiveRecordBtn.addEventListener('click', stopLiveRecord);
+}
+
+// Interactive Poll Sticker Toggle
+if (enablePollStickerCheckbox) {
+  enablePollStickerCheckbox.addEventListener('change', () => {
+    if (pollInputsContainer) {
+      pollInputsContainer.style.display = enablePollStickerCheckbox.checked ? 'flex' : 'none';
+    }
+  });
+}
 
 // BUG FIX: File validation (max size 250MB, valid video type)
 const MAX_VIDEO_SIZE_BYTES = 250 * 1024 * 1024; // 250MB
@@ -2285,7 +2959,7 @@ reelVideoInput.addEventListener('change', async (e) => {
   }
 
   if (duration > 90) {
-    showToast('Notice: Short reels are ideally under 90s');
+    showToast('Notice: Short CamShots are ideally under 90s');
   }
 });
 
@@ -2354,6 +3028,36 @@ function resetUploadForm() {
     currentUploadXHR = null;
   }
 
+  // Reset overlay toggles
+  const pollCb = document.getElementById('enablePollStickerCheckbox');
+  if (pollCb) pollCb.checked = false;
+  const pollInputs = document.getElementById('pollInputsContainer');
+  if (pollInputs) pollInputs.style.display = 'none';
+  const bountyCb = document.getElementById('enableBountyCheckbox');
+  if (bountyCb) bountyCb.checked = false;
+
+  // Reset live camera stream
+  stopCameraStream();
+
+  // Reset source mode to Upload File
+  const srcUploadBtn = document.getElementById('sourceUploadFileBtn');
+  const srcCamBtn = document.getElementById('sourceLiveCamBtn');
+  const dropzoneEl = document.getElementById('reelDropzone');
+  const liveStageEl = document.getElementById('liveCameraStudioStage');
+  if (srcUploadBtn && srcCamBtn) {
+    srcUploadBtn.classList.add('active');
+    srcUploadBtn.style.background = 'rgba(232, 184, 75, 0.15)';
+    srcUploadBtn.style.borderColor = 'var(--cs-gold)';
+    srcUploadBtn.style.color = '#fff';
+
+    srcCamBtn.classList.remove('active');
+    srcCamBtn.style.background = 'rgba(255, 255, 255, 0.05)';
+    srcCamBtn.style.borderColor = 'rgba(255, 255, 255, 0.15)';
+    srcCamBtn.style.color = '#a1a1aa';
+  }
+  if (dropzoneEl) dropzoneEl.style.display = 'block';
+  if (liveStageEl) liveStageEl.style.display = 'none';
+
   syncSimulatorPreview();
 }
 
@@ -2410,23 +3114,20 @@ uploadReelForm.addEventListener('submit', async (e) => {
 
   try {
     // Phase 1: Upload with true upload progress
+    const effectiveUID = auth.currentUser?.uid || myUID || 'anon';
     const uploadResult = await uploadReelVideo(selectedReelFile, {
-      uid: myUID || 'anon',
+      uid: effectiveUID,
       quality: 'auto:best',
       fetchFormat: 'auto',
       videoCodec: 'h264',
       bitRate: bitRate,
-      eager: 'q_auto:best',
-      // BUG FIX: Store XHR reference for abort support
       onXHRCreated: (xhr) => { currentUploadXHR = xhr; },
       onProgress: (percent, msg, vaultName) => {
-        // BUG FIX: Show TRUE upload progress (bytes sent to server)
         reelProgressBarFill.style.width = `${percent}%`;
         reelProgressPercent.textContent = `${percent}%`;
         reelProgressVault.textContent = `Uploading (${msg})`;
         if (progressLabel) progressLabel.textContent = `Uploading your reel... ${percent}%`;
 
-        // BUG FIX: Calculate and display ETA
         if (percent > 0 && percent < 100 && uploadStartTime) {
           const elapsed = (Date.now() - uploadStartTime) / 1000;
           const totalEstimate = (elapsed / percent) * 100;
@@ -2449,9 +3150,9 @@ uploadReelForm.addEventListener('submit', async (e) => {
     if (etaLabel) etaLabel.textContent = '';
     reelProgressVault.textContent = 'Server-side optimization in progress...';
 
-    console.log('[NEX_REELS] HD Video Saved to Cloudinary Vault:', uploadResult.vault);
+    console.log('[CamShot] HD Video Saved to Vault:', uploadResult.vault);
 
-    // Phase 2: Upload thumbnail (non-blocking progress)
+    // Phase 2: Upload thumbnail
     let thumbnailUrl = '';
     if (selectedReelThumbnailBlob) {
       try {
@@ -2467,9 +3168,10 @@ uploadReelForm.addEventListener('submit', async (e) => {
       }
     }
 
-    // Phase 2: Commit to Firestore 'reels' collection
-    reelProgressVault.textContent = 'Publishing to NEX_REELS stream...';
-    const reelDocRef = await addDoc(collection(db, 'reels'), {
+    // Phase 3: Commit to CamShot stream
+    reelProgressVault.textContent = 'Publishing to CamShot stream...';
+    const realAuthorId = auth.currentUser?.uid || myUID || 'user_anon';
+    const reelData = {
       videoUrl: uploadResult.url,
       thumbnailUrl: thumbnailUrl || '',
       rawBlobUrl: uploadResult.rawBlobUrl || uploadResult.url,
@@ -2482,32 +3184,97 @@ uploadReelForm.addEventListener('submit', async (e) => {
       caption: caption,
       sound: soundTrackName,
       audioUrl: customAudioUrl,
-      authorId: myUID || 'anonymous',
+      authorId: realAuthorId,
       authorName: publishAuthorName,
       authorPic: publishAuthorPic,
-      publishingIdentity: chosenPersona,  // BUG FIX: Include selected identity in payload
+      publishingIdentity: chosenPersona,
       likes: [],
       likesCount: 0,
       commentsCount: 0,
       sharesCount: 0,
       views: 1,
-      createdAt: serverTimestamp(),
-    });
+    };
 
-    // BUG FIX: Show success state instead of immediately closing
+    // Extract interactive poll sticker and token bounty if creator enabled them
+    const enablePollSticker = document.getElementById('enablePollStickerCheckbox')?.checked;
+    const pollQ = document.getElementById('pollQuestionInput')?.value.trim();
+    const pollO1 = document.getElementById('pollOption1Input')?.value.trim();
+    const pollO2 = document.getElementById('pollOption2Input')?.value.trim();
+    if (enablePollSticker && pollQ) {
+      reelData.poll = {
+        question: pollQ,
+        options: [
+          { text: pollO1 || '🔥 Insane', votes: 0 },
+          { text: pollO2 || '⚡ Mid', votes: 0 },
+        ],
+      };
+    }
+
+    const enableBounty = document.getElementById('enableBountyCheckbox')?.checked;
+    if (enableBounty) {
+      reelData.hasBounty = true;
+      reelData.bountyAmount = 10;
+    }
+
+    let publishedReelId = null;
+    let committedSuccessfully = false;
+
+    // Dual-strategy commit: 1. Firestore (if authenticated), 2. Serverless ingestion API fallback
+    if (auth.currentUser && realAuthorId === auth.currentUser.uid) {
+      try {
+        const reelDocRef = await addDoc(collection(db, 'reels'), {
+          ...reelData,
+          createdAt: serverTimestamp(),
+        });
+        publishedReelId = reelDocRef.id;
+        committedSuccessfully = true;
+        console.log('[CamShot] Saved reel to Firestore:', publishedReelId);
+      } catch (fErr) {
+        console.warn('[CamShot] Direct Firestore write bypassed:', fErr.message);
+      }
+    }
+
+    if (!committedSuccessfully) {
+      try {
+        const ingestRes = await fetch('/api/reels', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(reelData),
+        });
+        if (ingestRes.ok) {
+          const ingestJson = await ingestRes.json();
+          publishedReelId = ingestJson.id;
+          committedSuccessfully = true;
+          console.log('[CamShot] Ingested reel via serverless API:', publishedReelId);
+        }
+      } catch (apiErr) {
+        console.warn('[CamShot] Ingestion API fallback notice:', apiErr.message);
+      }
+    }
+
+    // Immediately push to local client feed so user sees their reel in stream
+    const localReel = {
+      id: publishedReelId || `reel_${Date.now()}`,
+      ...reelData,
+      createdAt: { toMillis: () => Date.now(), seconds: Math.floor(Date.now() / 1000) },
+    };
+    allLoadedReels.unshift(localReel);
+    applyFeedFilter();
+
+    // Show success state
     if (successState) successState.style.display = 'flex';
     if (phaseText) phaseText.textContent = 'Complete!';
     if (phaseDot) { phaseDot.className = 'phase-dot phase-done'; }
-    if (progressLabel) progressLabel.textContent = 'Reel posted successfully!';
+    if (progressLabel) progressLabel.textContent = 'CamShot posted successfully!';
     reelProgressVault.textContent = '';
     if (etaLabel) etaLabel.textContent = '';
     submitReelBtn.innerHTML = '<i class="fa-solid fa-check"></i> Posted!';
-    showToast('HD Reel posted successfully!');
+    showToast('HD CamShot posted successfully!');
 
-    // Auto-close after 2.5 seconds
+    // Auto-close after 2 seconds
     setTimeout(() => {
       closeCreatorStudio();
-    }, 2500);
+    }, 2000);
 
   } catch (err) {
     // BUG FIX: Better error handling with retry
@@ -2532,7 +3299,7 @@ function escapeHtml(text) {
 }
 
 // ══════════════════════════════════════════════════
-// TIKTOK-STYLE CREATOR PROFILE DRAWER LOGIC
+// CAMSHOT CREATOR PROFILE DRAWER LOGIC
 // ══════════════════════════════════════════════════
 const creatorProfileDrawer = document.getElementById('creatorProfileDrawer');
 const closeProfileBtn = document.getElementById('closeProfileBtn');
@@ -2573,13 +3340,13 @@ export async function openCreatorProfile(authorName, authorPic = 'favicon.png') 
   if (isMe) {
     if (displayName) displayName.textContent = myCreatorName || authorName.replace(/[0-9_]/g, ' ').trim() || authorName;
     if (avatarImg) avatarImg.src = myProfilePic || authorPic;
-    if (bioText) bioText.textContent = myCreatorBio || `Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
+    if (bioText) bioText.textContent = myCreatorBio || `Creator @${authorName} • Streaming Ultra HD 4K CamShot • Built on NEXCHAT Protocol`;
     if (editProfileBtn) editProfileBtn.style.display = 'flex';
     if (followBtn) followBtn.style.display = 'none';
   } else {
     if (displayName) displayName.textContent = authorName.replace(/[0-9_]/g, ' ').trim() || authorName;
     if (avatarImg) avatarImg.src = authorPic || 'favicon.png';
-    if (bioText) bioText.textContent = `Creator @${authorName} • Streaming Ultra HD 4K NEX_REELS • Built on NEXCHAT Protocol`;
+    if (bioText) bioText.textContent = `Creator @${authorName} • Streaming Ultra HD 4K CamShot • Built on NEXCHAT Protocol`;
     if (editProfileBtn) editProfileBtn.style.display = 'none';
     if (followBtn) followBtn.style.display = 'flex';
   }
@@ -3060,6 +3827,7 @@ if (editMyReelsProfileBtn) {
 
 // Save Playback setting changes immediately
 function savePlaybackSettings() {
+  localStorage.setItem('camshot_settings', JSON.stringify(reelsSettings));
   localStorage.setItem('nex_reels_settings', JSON.stringify(reelsSettings));
   if (myUID) {
     updateDoc(doc(db, 'users', myUID), { reelsSettings }).catch(() => {});
@@ -3268,6 +4036,7 @@ if (saveCreatorProfileSettingsBtn) {
 // Clear Stream Cache & History
 if (clearReelsCacheBtn) {
   clearReelsCacheBtn.addEventListener('click', () => {
+    localStorage.removeItem('camshot_cache');
     localStorage.removeItem('nex_reels_cache');
     localStorage.removeItem('nex_watched_reels');
     showToast('Stream cache and watch history cleared.');

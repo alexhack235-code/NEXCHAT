@@ -23,8 +23,12 @@ async function uploadToSingleStatusVault(file, vaultIndex, options = {}) {
   const uid = options.uid || 'anon';
   const filename = `status/${uid}/${Date.now()}_${cleanName}`;
   const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
-  const vault = STATUS_VAULTS.find(v => v.index === vaultIndex) || { name: `NEX-STATUS VAULT ${vaultIndex}`, access: 'private' };
-  const authHeaders = await getFirebaseAuthorizationHeaders();
+  let authHeaders = { Authorization: '' };
+  try {
+    authHeaders = await getFirebaseAuthorizationHeaders();
+  } catch (authErr) {
+    console.warn('[STATUS VAULT] Auth notice:', authErr?.message);
+  }
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();

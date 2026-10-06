@@ -21,6 +21,127 @@
 </head>
 <body>
 
+<!-- ============================================================
+     NEXSHOT FUSION CINEMATIC INTRO OVERLAY
+     NEXCHAT (Cyan/Emerald) × CAMSHOT (Gold/Iris) => NEXSHOT
+     "THE FUTURE IS RIGHT HERE"
+     ============================================================ -->
+<div id="nexshotFusionOverlay" class="nexshot-fusion-overlay" aria-label="NEXSHOT Fusion Cinematic Intro">
+  <canvas id="fusionCanvas" class="fusion-canvas"></canvas>
+  <div class="fusion-radial-nebula"></div>
+  <div class="fusion-scanline"></div>
+
+  <!-- Top Controls Bar -->
+  <header class="fusion-topbar">
+    <div class="fusion-sys-badge">
+      <span class="fusion-pulse-dot"></span>
+      <span>CONVERGENCE PROTOCOL // ACTIVE</span>
+    </div>
+    <div class="fusion-top-actions">
+      <button type="button" id="fusionAudioBtn" class="fusion-action-btn" title="Toggle Cinematic Sound">
+        <i class="fa-solid fa-volume-high"></i>
+      </button>
+      <button type="button" id="fusionSkipBtn" class="fusion-action-btn fusion-skip-chip" title="Skip to Login">
+        <span>Skip Intro</span>
+        <i class="fa-solid fa-forward-step"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Convergence Stage -->
+  <main class="fusion-stage">
+    
+    <!-- Streams Container (NEXCHAT left, CAMSHOT right) -->
+    <div class="fusion-streams" id="fusionStreams">
+      
+      <!-- Left Stream: NEXCHAT -->
+      <div class="fusion-stream stream-left" id="streamNexchat">
+        <div class="stream-glow-orb stream-glow-cyan"></div>
+        <div class="stream-card stream-card-cyan">
+          <div class="stream-icon-badge">
+            <i class="fa-solid fa-comments"></i>
+          </div>
+          <div class="stream-title">NEXCHAT</div>
+          <div class="stream-tag">NEURAL CHAT</div>
+          <div class="stream-features">
+            <span><i class="fa-solid fa-bolt"></i> Realtime Fast</span>
+            <span><i class="fa-solid fa-shield-halved"></i> Quantum Encrypted</span>
+          </div>
+        </div>
+        <div class="stream-laser-beam beam-left"></div>
+      </div>
+
+      <!-- Center Orbital Collision Node -->
+      <div class="fusion-core-node" id="fusionCoreNode">
+        <div class="core-orbit ring-1"></div>
+        <div class="core-orbit ring-2"></div>
+        <div class="core-orbit ring-3"></div>
+        <div class="core-symbol">
+          <span class="symbol-mult">✕</span>
+        </div>
+        <div class="core-flare"></div>
+      </div>
+
+      <!-- Right Stream: CAMSHOT -->
+      <div class="fusion-stream stream-right" id="streamCamshot">
+        <div class="stream-glow-orb stream-glow-gold"></div>
+        <div class="stream-card stream-card-gold">
+          <div class="stream-icon-badge">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <div class="stream-title">CAMSHOT</div>
+          <div class="stream-tag">NEXT-GEN REELS</div>
+          <div class="stream-features">
+            <span><i class="fa-solid fa-film"></i> 4K Studio Reels</span>
+            <span><i class="fa-solid fa-sliders"></i> Pro Lens Shutter</span>
+          </div>
+        </div>
+        <div class="stream-laser-beam beam-right"></div>
+      </div>
+
+    </div>
+
+    <!-- Fusion Singularity Burst -->
+    <div class="fusion-singularity" id="fusionSingularity">
+      <div class="singularity-shockwave wave-1"></div>
+      <div class="singularity-shockwave wave-2"></div>
+      <div class="singularity-flash"></div>
+    </div>
+
+    <!-- Final Unified NEXSHOT Master Brand Reveal -->
+    <div class="fusion-reveal" id="fusionReveal">
+      <div class="fusion-crest-wrapper">
+        <div class="crest-halo"></div>
+        <div class="crest-ring"></div>
+        <div class="fusion-emblem">
+          <span class="emblem-glyph"><i class="fa-solid fa-bolt"></i></span>
+        </div>
+      </div>
+
+      <div class="fusion-formula-badge">
+        <span class="f-cyan">NEXCHAT</span>
+        <span class="f-x">✕</span>
+        <span class="f-gold">CAMSHOT</span>
+      </div>
+
+      <h1 class="fusion-master-title">NEXSHOT</h1>
+      
+      <div class="fusion-future-banner">
+        <span class="future-bracket">[</span>
+        <span class="future-text">THE FUTURE IS RIGHT HERE</span>
+        <span class="future-bracket">]</span>
+      </div>
+
+      <p class="fusion-reveal-sub">Neural Instant Messaging Merged with Pro Cinematic Reels</p>
+
+      <div class="fusion-progress-track">
+        <div class="fusion-progress-fill" id="fusionProgressBar"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
 <div class="ambient-glow ambient-glow-1"></div>
 <div class="ambient-glow ambient-glow-2"></div>
 
@@ -29,6 +150,9 @@
     <div class="brand-pill">
       <span class="status-dot"></span>
       <span>NEX_AUTH v2.5 • QUANTUM SECURED</span>
+      <button type="button" id="replayFusionBtn" class="replay-intro-btn" title="Replay NEXSHOT Fusion Intro">
+        <i class="fa-solid fa-play"></i> Replay
+      </button>
     </div>
 
     <div class="login-header">

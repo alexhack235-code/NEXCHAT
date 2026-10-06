@@ -57,8 +57,12 @@ async function uploadToSingleVault(file, vaultIndex, options = {}) {
   const uid = options.uid || 'anon';
   const filename = `reels/${uid}/${Date.now()}_${cleanName}`;
   const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
-  const vault = REELS_VAULTS[vaultIndex] || { name: `NEX-REELS VAULT ${vaultIndex}`, access: 'public' };
-  const authHeaders = await getFirebaseAuthorizationHeaders();
+  let authHeaders = { Authorization: '' };
+  try {
+    authHeaders = await getFirebaseAuthorizationHeaders();
+  } catch (authErr) {
+    console.warn('[NEX-REELS] Optional auth check bypassed:', authErr?.message);
+  }
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
@@ -159,14 +163,9 @@ export async function uploadReelVideo(file, options = {}) {
 
   // 1. Primary Strategy: Multi-Vault Cloudinary Pipeline (Zero backend, direct CDN streaming)
   try {
-    console.log('[NEX-REELS] Uploading to Multi-Vault Cloudinary Pipeline...');
     const cldRes = await uploadVideoToCloudinary(file, {
       folder: 'nexchat-reels',
-      quality: options.quality || 'auto:best',
-      fetchFormat: options.fetchFormat || 'auto',
-      videoCodec: options.videoCodec || 'h264',
-      bitRate: options.bitRate || '8000k',
-      eager: options.eager || 'q_auto:best',
+      onXHRCreated: options.onXHRCreated,
       onProgress: (percent, msg, vaultName) => {
         if (options.onProgress) {
           options.onProgress(percent, msg, vaultName || 'Cloudinary Vault Pool');

@@ -75,6 +75,42 @@ function vercelApiDevPlugin() {
       return;
     }
 
+    if (rawUrl.startsWith('/api/reels')) {
+      try {
+        const parsedUrl = new URL(rawUrl, `http://${req.headers.host || 'localhost'}`);
+        req.query = Object.fromEntries(parsedUrl.searchParams.entries());
+        if (!res.status) {
+          res.status = function(code) {
+            this.statusCode = code;
+            return this;
+          };
+        }
+        if (!res.json) {
+          res.json = function(data) {
+            this.setHeader('Content-Type', 'application/json');
+            this.end(JSON.stringify(data));
+            return this;
+          };
+        }
+        if (!req.body && (req.method === 'POST' || req.method === 'PUT')) {
+          const buffers = [];
+          for await (const chunk of req) {
+            buffers.push(chunk);
+          }
+          const rawBody = Buffer.concat(buffers).toString();
+          try { req.body = JSON.parse(rawBody); } catch (_) { req.body = {}; }
+        }
+        const { default: reelsHandler } = await import('./api/reels.js');
+        await reelsHandler(req, res);
+      } catch (err) {
+        console.error('[Vite Dev API] /api/reels error:', err);
+        res.statusCode = 500;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ error: err.message }));
+      }
+      return;
+    }
+
     next();
   };
 

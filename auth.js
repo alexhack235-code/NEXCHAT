@@ -575,7 +575,291 @@ function initializeGoogleSignIn() {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeGoogleSignIn);
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeGoogleSignIn();
+    initNexshotFusionIntro();
+  });
 } else {
   initializeGoogleSignIn();
+  initNexshotFusionIntro();
+}
+
+/* ============================================================
+   NEXSHOT FUSION CINEMATIC INTRO CONTROLLER
+   NEXCHAT × CAMSHOT = NEXSHOT // "THE FUTURE IS RIGHT HERE"
+   ============================================================ */
+function initNexshotFusionIntro() {
+  const overlay = document.getElementById('nexshotFusionOverlay');
+  if (!overlay) return;
+
+  const canvas = document.getElementById('fusionCanvas');
+  const skipBtn = document.getElementById('fusionSkipBtn');
+  const audioBtn = document.getElementById('fusionAudioBtn');
+  const replayBtn = document.getElementById('replayFusionBtn');
+  const streams = document.getElementById('fusionStreams');
+  const singularity = document.getElementById('fusionSingularity');
+  const reveal = document.getElementById('fusionReveal');
+  const progressBar = document.getElementById('fusionProgressBar');
+
+  let animationTimers = [];
+  let isMuted = false;
+  let audioCtx = null;
+  let canvasAnimId = null;
+
+  function getAudio() {
+    if (!audioCtx) {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (AudioContext) audioCtx = new AudioContext();
+    }
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
+    return audioCtx;
+  }
+
+  function playSynthTone(freq, type = 'sine', duration = 0.5, gainVal = 0.15) {
+    if (isMuted) return;
+    try {
+      const ctx = getAudio();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      gain.gain.setValueAtTime(gainVal, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch (_) {}
+  }
+
+  function playCollisionBoom() {
+    if (isMuted) return;
+    try {
+      const ctx = getAudio();
+      if (!ctx) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(38, ctx.currentTime + 0.8);
+      gain.gain.setValueAtTime(0.28, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.9);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.9);
+    } catch (_) {}
+  }
+
+  function playMajesticChord() {
+    if (isMuted) return;
+    // Harmonious quantum chord: C4, G4, C5, E5, G5
+    const freqs = [261.63, 392.00, 523.25, 659.25, 783.99];
+    freqs.forEach((f, idx) => {
+      setTimeout(() => {
+        playSynthTone(f, 'sine', 1.6, 0.12 - (idx * 0.015));
+      }, idx * 60);
+    });
+  }
+
+  // Particle Starfield Canvas Engine
+  function initParticleCanvas() {
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      if (overlay.classList.contains('fusion-completed')) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const particles = [];
+    const count = 70;
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 1.2,
+        vy: (Math.random() - 0.5) * 1.2,
+        size: Math.random() * 2 + 0.8,
+        color: Math.random() > 0.5 ? '#00f076' : '#fbbf24',
+        alpha: Math.random() * 0.6 + 0.2
+      });
+    }
+
+    function renderParticles() {
+      if (overlay.classList.contains('fusion-completed')) {
+        cancelAnimationFrame(canvasAnimId);
+        return;
+      }
+      ctx.clearRect(0, 0, width, height);
+
+      particles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+        if (p.y < 0) p.y = height;
+        if (p.y > height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = p.color;
+        ctx.fill();
+      });
+      ctx.globalAlpha = 1;
+
+      canvasAnimId = requestAnimationFrame(renderParticles);
+    }
+
+    renderParticles();
+  }
+
+  function clearAllTimers() {
+    animationTimers.forEach(t => clearTimeout(t));
+    animationTimers = [];
+  }
+
+  function startAnimation(forced = false) {
+    clearAllTimers();
+    overlay.style.display = 'flex';
+    overlay.classList.remove('fusion-completed');
+
+    // Reset streams & reveal
+    if (streams) {
+      streams.style.opacity = '1';
+      streams.style.transform = 'scale(1)';
+      streams.style.filter = 'blur(0px)';
+    }
+    if (singularity) {
+      singularity.style.opacity = '0';
+    }
+    if (reveal) {
+      reveal.style.opacity = '0';
+      reveal.style.transform = 'translate(-50%, -50%) scale(0.85)';
+    }
+    if (progressBar) {
+      progressBar.style.transition = 'none';
+      progressBar.style.width = '0%';
+    }
+
+    initParticleCanvas();
+
+    // Step 1: Initial chime at start
+    animationTimers.push(setTimeout(() => {
+      playSynthTone(523.25, 'sine', 0.6, 0.1);
+    }, 150));
+
+    // Step 2: Streams surge & converge (T = 1.7s)
+    animationTimers.push(setTimeout(() => {
+      if (streams) {
+        streams.style.transition = 'all 0.55s cubic-bezier(0.55, 0.055, 0.675, 0.19)';
+        streams.style.transform = 'scale(0.15)';
+        streams.style.opacity = '0';
+        streams.style.filter = 'blur(10px)';
+      }
+    }, 1650));
+
+    // Step 3: Singularity Collision Supernova (T = 2.1s)
+    animationTimers.push(setTimeout(() => {
+      if (singularity) {
+        singularity.style.opacity = '1';
+        const shock = singularity.querySelector('.singularity-shockwave');
+        const flash = singularity.querySelector('.singularity-flash');
+        if (shock) {
+          shock.style.transition = 'all 0.6s ease-out';
+          shock.style.transform = 'translate(-50%, -50%) scale(5)';
+          shock.style.opacity = '0';
+        }
+        if (flash) {
+          flash.style.transition = 'all 0.4s ease-out';
+          flash.style.opacity = '1';
+          flash.style.transform = 'translate(-50%, -50%) scale(3)';
+          setTimeout(() => { flash.style.opacity = '0'; }, 350);
+        }
+      }
+      playCollisionBoom();
+    }, 2100));
+
+    // Step 4: Manifestation of NEXSHOT Master Brand (T = 2.45s)
+    animationTimers.push(setTimeout(() => {
+      if (reveal) {
+        reveal.style.opacity = '1';
+        reveal.style.transform = 'translate(-50%, -50%) scale(1)';
+      }
+      if (progressBar) {
+        progressBar.style.transition = 'width 2.1s linear';
+        progressBar.style.width = '100%';
+      }
+      playMajesticChord();
+    }, 2450));
+
+    // Step 5: Smooth exit into Login Screen (T = 4.7s)
+    animationTimers.push(setTimeout(() => {
+      dismissOverlay();
+    }, 4700));
+  }
+
+  function dismissOverlay() {
+    clearAllTimers();
+    overlay.classList.add('fusion-completed');
+    try { sessionStorage.setItem('nexshot_fusion_seen', 'true'); } catch (_) {}
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      if (canvasAnimId) cancelAnimationFrame(canvasAnimId);
+    }, 700);
+  }
+
+  // Event Listeners
+  if (skipBtn) {
+    skipBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      dismissOverlay();
+    });
+  }
+
+  if (audioBtn) {
+    audioBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      isMuted = !isMuted;
+      audioBtn.innerHTML = isMuted 
+        ? '<i class="fa-solid fa-volume-xmark" style="color: #ef4444;"></i>' 
+        : '<i class="fa-solid fa-volume-high" style="color: var(--accent-emerald);"></i>';
+      if (!isMuted) getAudio();
+    });
+  }
+
+  if (replayBtn) {
+    replayBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      startAnimation(true);
+    });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !overlay.classList.contains('fusion-completed')) {
+      dismissOverlay();
+    }
+  });
+
+  // Check if previously seen in this session
+  let alreadySeen = false;
+  try {
+    alreadySeen = sessionStorage.getItem('nexshot_fusion_seen') === 'true';
+  } catch (_) {}
+
+  if (!alreadySeen) {
+    startAnimation(false);
+  } else {
+    overlay.classList.add('fusion-completed');
+    overlay.style.display = 'none';
+  }
 }

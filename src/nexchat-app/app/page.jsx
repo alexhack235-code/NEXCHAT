@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import LeftSidebar from '../components/LeftSidebar.jsx';
 import CenterChat from '../components/CenterChat.jsx';

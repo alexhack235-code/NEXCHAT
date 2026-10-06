@@ -32,3 +32,5 @@ Thumbs.db
 *.sln
 *.sw?
 .system_generated/
+*.backup.*
+logo_legacy_backup.jpg

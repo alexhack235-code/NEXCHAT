@@ -593,6 +593,62 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     return cached.value;
   }
 
+  checkDailyQuota(identifier = "default") {
+    try {
+      const key = `nexchat_ai_daily_quota_${identifier || 'default'}`;
+      const raw = localStorage.getItem(key);
+      const now = Date.now();
+      const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+      if (!raw) {
+        return { allowed: true, count: 0, remaining: 10, resetInHours: 24 };
+      }
+
+      const data = JSON.parse(raw);
+      if (now - (data.firstTimestamp || 0) >= ONE_DAY_MS) {
+        localStorage.removeItem(key);
+        return { allowed: true, count: 0, remaining: 10, resetInHours: 24 };
+      }
+
+      const count = data.count || 0;
+      if (count >= 10) {
+        const resetInHours = Math.max(1, Math.ceil((data.firstTimestamp + ONE_DAY_MS - now) / (1000 * 60 * 60)));
+        return { allowed: false, count: count, remaining: 0, resetInHours: resetInHours };
+      }
+
+      return { allowed: true, count: count, remaining: 10 - count };
+    } catch (_) {
+      return { allowed: true, count: 0, remaining: 10 };
+    }
+  }
+
+  recordDailyRequest(identifier = "default") {
+    try {
+      const key = `nexchat_ai_daily_quota_${identifier || 'default'}`;
+      const raw = localStorage.getItem(key);
+      const now = Date.now();
+      const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+      if (!raw) {
+        localStorage.setItem(key, JSON.stringify({ count: 1, firstTimestamp: now, lastTimestamp: now }));
+        return 1;
+      }
+
+      const data = JSON.parse(raw);
+      if (now - (data.firstTimestamp || 0) >= ONE_DAY_MS) {
+        localStorage.setItem(key, JSON.stringify({ count: 1, firstTimestamp: now, lastTimestamp: now }));
+        return 1;
+      }
+
+      data.count = (data.count || 0) + 1;
+      data.lastTimestamp = now;
+      localStorage.setItem(key, JSON.stringify(data));
+      return data.count;
+    } catch (_) {
+      return 1;
+    }
+  }
+
   async chat(message, conversationId = "default", clientId = null) {
     try {
       if (!message || message.trim() === "") {
@@ -600,6 +656,14 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
         return "I'm ready when you are. Please provide a data packet or directive to process.";
       }
       console.log(" Chronex AI processing message:", message);
+
+      // 🛡️ Daily AI Request Quota: 10 requests per 24 hours
+      const quotaId = clientId || conversationId || 'default';
+      const quotaCheck = this.checkDailyQuota(quotaId);
+      if (!quotaCheck.allowed) {
+        console.warn(`[QUOTA] Daily limit reached (${quotaCheck.count}/10) for ${quotaId}`);
+        return "MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS";
+      }
 
       const cacheKey = message.toLowerCase().trim();
       const cachedResponse = this.getFromCache(cacheKey);
@@ -638,6 +702,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
         this.conversationHistory.push({ role: 'assistant', content: aiResponse });
       }
 
+      this.recordDailyRequest(quotaId);
       this.cacheResponse(cacheKey, aiResponse);
 
       this.saveConversation(message, aiResponse, conversationId, clientId).catch(err => {
@@ -737,11 +802,44 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
   }
 
   // ===== GOOGLE GEMINI INTEGRATION WITH SMART KEY POOL =====
+  // ===== GOOGLE GEMINI INTEGRATION WITH SMART KEY POOL & VERCEL ENDPOINT =====
   async callGemini(message, conversationHistory = []) {
     if (!this.config.backends.gemini || !this.config.backends.gemini.enabled) {
       return null;
     }
 
+    // 1. Try Vercel Serverless Gateway (/api/ai) if running over HTTP/HTTPS
+    if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+      try {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timeoutTimer = controller ? setTimeout(() => controller.abort(), 10000) : null;
+
+        const serverResp = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, history: conversationHistory }),
+          signal: controller?.signal
+        });
+
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+
+        if (serverResp.ok) {
+          const serverData = await serverResp.json();
+          if (serverData?.success && serverData?.response) {
+            console.log(" Chronex AI: Response received from Vercel Serverless AI Gateway (/api/ai)");
+            return serverData.response;
+          }
+        }
+      } catch (serverErr) {
+        // Fall through immediately to direct client pool
+      }
+    }
+
+    // 2. Client-side Smart Key Pool (8 keys with round-robin rotation & cooldown failover)
+    return await this.callGeminiDirect(message, conversationHistory);
+  }
+
+  async callGeminiDirect(message, conversationHistory = []) {
     const pool = this.config.backends.gemini.pool;
     const geminiConfig = this.config.backends.gemini.config;
     const totalKeys = pool ? pool.getTotalKeys() : 0;
@@ -778,7 +876,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       generationConfig: geminiConfig.generationConfig
     };
 
-    const models = geminiConfig.models || ['gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-pro-latest'];
+    const models = geminiConfig.models || ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
 
     // Try keys with auto-failover across the pool
     for (let attempt = 0; attempt < totalKeys; attempt++) {
@@ -787,6 +885,9 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       const { key, index } = keyInfo;
 
       for (const model of models) {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const fetchTimer = controller ? setTimeout(() => controller.abort(), 9000) : null;
+
         try {
           const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
           const response = await fetch(endpoint, {
@@ -794,8 +895,11 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
             headers: {
               'Content-Type': 'application/json'
             },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(payload),
+            signal: controller?.signal
           });
+
+          if (fetchTimer) clearTimeout(fetchTimer);
 
           if (response.ok) {
             const data = await response.json();
@@ -825,7 +929,8 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
             break;
           }
         } catch (fetchErr) {
-          console.warn(` Gemini network error [Key #${index + 1}]:`, fetchErr.message);
+          if (fetchTimer) clearTimeout(fetchTimer);
+          console.warn(` Gemini network/timeout error [Key #${index + 1}]:`, fetchErr.message);
           break; // Break model loop, try next key
         }
       }

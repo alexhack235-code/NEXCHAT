@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>NEX_REELS — Vertical Video Hub</title>
+  <title>CamShot — Premium Short-Form Videos</title>
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind removed: pure CSS design system -->
   <link rel="stylesheet" href="reels.css">
 </head>
 <body class="reels-body">
-  <!-- Sci-Fi HUD Background Grid -->
+  <!-- Ambient Luxury Background Grid -->
   <div class="hud-grid-overlay" aria-hidden="true"></div>
 
   <!-- Top Navigation Header: Chats | Following / For You | Filters | Sound | Settings | + Create -->
   <header class="reels-header">
     <div class="reels-nav-group">
-      <a href="chat.html" class="reels-nav-link" title="Back to Chats">Chats</a>
+      <a href="chat.html" class="reels-nav-link" title="Back to Chats"><i class="fa-solid fa-arrow-left"></i> Chats</a>
+      <span class="reels-nav-separator">|</span>
+      <div class="camshot-header-brand" style="display: inline-flex; align-items: center; gap: 7px;">
+        <img src="logo.jpg" alt="CamShot" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover; border: 1px solid rgba(0,255,102,0.4);">
+        <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 13.5px; background: linear-gradient(135deg, #00FF66, #00D2FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px;">CAMSHOT</span>
+      </div>
       <span class="reels-nav-separator">|</span>
       <div class="reels-feed-tabs" id="reelsFeedTabs">
         <button type="button" class="feed-tab-btn" data-feed="following" id="tabFollowing">Following</button>
@@ -41,19 +46,19 @@
       <button id="openReelsSettingsBtn" class="reels-settings-pill" title="Settings & Preferences">
         <i class="fa-solid fa-gear"></i>
       </button>
-      <button id="openUploadModalBtn" class="reels-create-pill-btn reels-create-pill-obvious" title="Create / Post a Reel (C)">
+      <button id="openUploadModalBtn" class="reels-create-pill-btn reels-create-pill-obvious" title="Create / Post a CamShot (C)">
         <i class="fa-solid fa-plus"></i>
-        <span>Post Reel</span>
+        <span>Create</span>
       </button>
     </div>
   </header>
 
   <!-- Desktop Side Navigation Floating Controls -->
   <div class="desktop-nav-controls" id="desktopNavControls">
-    <button id="prevReelBtn" class="desktop-nav-btn" title="Previous Reel (Up Arrow)">
+    <button id="prevReelBtn" class="desktop-nav-btn" title="Previous CamShot (Up Arrow)">
       <i class="fa-solid fa-chevron-up"></i>
     </button>
-    <button id="nextReelBtn" class="desktop-nav-btn" title="Next Reel (Down Arrow)">
+    <button id="nextReelBtn" class="desktop-nav-btn" title="Next CamShot (Down Arrow)">
       <i class="fa-solid fa-chevron-down"></i>
     </button>
   </div>
@@ -63,55 +68,55 @@
     <!-- Initial Loading State -->
     <div class="reels-loading-state" id="reelsLoadingState">
       <div class="cyber-spinner"></div>
-      <p>Loading Reels...</p>
+      <p>Loading CamShots...</p>
     </div>
   </main>
 
-  <!-- Prominent TikTok-Style Floating "Add / Create Reel" Button (Unmistakable & Obvious) -->
+  <!-- Prominent Floating "Create CamShot" Button (Shortcut: C) -->
   <div class="floating-create-reel-wrapper" id="floatingCreateReelWrapper">
-    <button type="button" id="floatingCreateReelBtn" class="floating-create-reel-btn" title="Create / Post a Reel (Shortcut: C)">
+    <button type="button" id="floatingCreateReelBtn" class="floating-create-reel-btn" title="Create / Post a CamShot (Shortcut: C)">
       <div class="create-btn-accent-cyan"></div>
       <div class="create-btn-accent-green"></div>
       <div class="create-btn-core">
         <i class="fa-solid fa-plus"></i>
       </div>
-      <span class="create-btn-badge-text">POST REEL</span>
+      <span class="create-btn-badge-text">CREATE</span>
     </button>
   </div>
 
   <!-- Floating 2X Speed HUD Indicator -->
   <div id="speed2xBadge" class="speed-2x-hud-badge" style="display: none;">
-    <i class="fa-solid fa-forward-fast text-[#39FF14]"></i>
+    <i class="fa-solid fa-forward-fast" style="color: var(--cs-gold);"></i>
     <span>2X SPEED</span>
   </div>
 
-  <!-- Cyber Visual Filter Ribbon Drawer -->
+  <!-- Cinematic Visual Filter Ribbon Drawer -->
   <div id="cyberFilterRibbon" class="cyber-filter-ribbon" style="display: none;">
     <div class="filter-ribbon-header">
-      <span><i class="fa-solid fa-wand-magic-sparkles text-[#39FF14]"></i> Cyber Visual Shaders</span>
+      <span><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--cs-gold);"></i> Cinematic Color Grades</span>
       <button type="button" id="closeFilterRibbonBtn" class="filter-close-btn"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="filter-ribbon-pills">
       <button type="button" class="filter-shader-btn active" data-filter="normal">
-        <span class="shader-dot bg-white"></span> Normal HD
+        <span class="shader-dot" style="background: white"></span> Normal HD
       </button>
       <button type="button" class="filter-shader-btn" data-filter="matrix">
-        <span class="shader-dot bg-[#39FF14]"></span> Matrix CRT
+        <span class="shader-dot" style="background: var(--cs-emerald)"></span> Matrix CRT
       </button>
       <button type="button" class="filter-shader-btn" data-filter="cyber-neon">
-        <span class="shader-dot bg-[#00f3ff]"></span> Cyber Neon
+        <span class="shader-dot" style="background: var(--cs-cyan)"></span> Cyber Neon
       </button>
       <button type="button" class="filter-shader-btn" data-filter="night-city">
-        <span class="shader-dot bg-[#f59e0b]"></span> Night City Amber
+        <span class="shader-dot" style="background: var(--cs-gold)"></span> Night City Amber
       </button>
       <button type="button" class="filter-shader-btn" data-filter="noir">
-        <span class="shader-dot bg-gray-400"></span> Glitch Noir
+        <span class="shader-dot" style="background: #9CA3AF"></span> Glitch Noir
       </button>
     </div>
   </div>
 
   <!-- ══════════════════════════════════════════════════
-       NEX_REELS CREATOR STUDIO PRO (ULTRA-PROFESSIONAL ADD REEL PAGE)
+       CAMSHOT CREATOR STUDIO PRO
        ══════════════════════════════════════════════════ -->
   <div id="uploadReelModal" class="reels-modal creator-studio-modal" style="display: none;">
     <div class="reels-modal-card creator-studio-card">
@@ -122,12 +127,12 @@
             <i class="fa-solid fa-clapperboard"></i>
           </div>
           <div>
-            <h3 class="studio-title">Upload Reel</h3>
-            <p class="studio-subtitle"><i class="fa-solid fa-sparkles text-[#39FF14]"></i> Share your video with the community</p>
+            <h3 class="studio-title">Upload to CamShot</h3>
+            <p class="studio-subtitle"><i class="fa-solid fa-sparkles" style="color: var(--cs-gold)"></i> Share your video with the community</p>
           </div>
         </div>
         <div class="studio-header-right">
-          <span class="studio-quality-tag"><i class="fa-solid fa-shield-halved text-[#00f3ff]"></i> Ready to Post</span>
+          <span class="studio-quality-tag"><i class="fa-solid fa-shield-halved" style="color: var(--cs-violet)"></i> Ready to Post</span>
           <button id="closeUploadModalBtn" class="reels-modal-close" title="Close Studio"><i class="fa-solid fa-xmark"></i></button>
         </div>
       </div>
@@ -136,21 +141,32 @@
       <div class="studio-dual-layout">
         <main class="studio-controls-column studio-single-column">
           <form id="uploadReelForm" class="studio-form">
-            <!-- Step 1: Upload Video -->
+            <!-- Step 1: Upload Video or Record Live CamShot -->
             <div class="studio-card-section">
               <div class="section-title-row">
                 <span class="step-num">1</span>
-                <h4>Video Ingestion & Frame Extractor</h4>
+                <h4>Video Ingestion & Live Camera Studio</h4>
                 <span class="section-badge">Required</span>
               </div>
 
+              <!-- Source Mode Switcher: Upload File vs Record Live -->
+              <div class="studio-source-mode-selector" style="display: flex; gap: 8px; margin-bottom: 14px;">
+                <button type="button" id="sourceUploadFileBtn" class="source-mode-btn active" style="flex: 1; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(232, 184, 75, 0.15); border: 1.5px solid var(--cs-gold); color: #fff; cursor: pointer; transition: all 0.2s;">
+                  <i class="fa-solid fa-cloud-arrow-up" style="color: var(--cs-gold);"></i> Upload Video File
+                </button>
+                <button type="button" id="sourceLiveCamBtn" class="source-mode-btn" style="flex: 1; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.15); color: #a1a1aa; cursor: pointer; transition: all 0.2s;">
+                  <i class="fa-solid fa-camera" style="color: #00ff66;"></i> Record Live CamShot
+                </button>
+              </div>
+
+              <!-- Mode A: File Dropzone -->
               <div class="reels-file-dropzone" id="reelDropzone">
                 <input type="file" id="reelVideoInput" accept="video/mp4,video/webm,video/quicktime,video/*" style="display: none;">
                 <div id="reelDropzonePrompt" class="dropzone-prompt">
                   <div class="dropzone-cloud-icon">
                     <i class="fa-solid fa-cloud-arrow-up"></i>
                   </div>
-                  <p class="dropzone-primary-text">Drag & Drop Video or <span class="text-[#39FF14] underline">Browse Files</span></p>
+                  <p class="dropzone-primary-text">Drag & Drop Video or <span style="color: var(--cs-gold); text-decoration: underline;">Browse Files</span></p>
                   <div class="dropzone-format-pills">
                     <span>MP4</span>
                     <span>WebM</span>
@@ -171,11 +187,47 @@
                 </div>
               </div>
 
+              <!-- Mode B: Live In-Browser Camera Studio Stage -->
+              <div id="liveCameraStudioStage" class="live-cam-stage" style="display: none; flex-direction: column; gap: 12px; background: #000; border-radius: 16px; overflow: hidden; border: 1.5px solid rgba(0, 255, 102, 0.3); padding: 12px; position: relative;">
+                <!-- Live Shaders Selector Ribbon -->
+                <div class="live-cam-shaders-bar" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;">
+                  <button type="button" class="cam-shader-pill active" data-shader="normal" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; white-space: nowrap;">✨ Normal</button>
+                  <button type="button" class="cam-shader-pill" data-shader="matrix" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(0,255,102,0.1); color: #00ff66; border: 1px solid rgba(0,255,102,0.3); cursor: pointer; white-space: nowrap;">⚡ Matrix CRT</button>
+                  <button type="button" class="cam-shader-pill" data-shader="cyber" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(0,210,255,0.1); color: #00d2ff; border: 1px solid rgba(0,210,255,0.3); cursor: pointer; white-space: nowrap;">🌐 Cyber Neon</button>
+                  <button type="button" class="cam-shader-pill" data-shader="gold" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(232,184,75,0.1); color: var(--cs-gold); border: 1px solid rgba(232,184,75,0.3); cursor: pointer; white-space: nowrap;">🏆 Gold Luxury</button>
+                  <button type="button" class="cam-shader-pill" data-shader="noir" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,0.05); color: #aaa; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; white-space: nowrap;">🎬 Noir Film</button>
+                </div>
+
+                <!-- Camera Stream Viewport -->
+                <div style="position: relative; width: 100%; aspect-ratio: 9/16; max-height: 400px; background: #0a0f1a; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                  <video id="liveCamStreamVideo" playsinline autoplay muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                  <!-- HUD Recording Timer Overlay -->
+                  <div id="liveCamTimerBadge" style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 999px; display: none; align-items: center; gap: 6px; font-family: monospace; font-size: 12px; font-weight: 700; color: #fff;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #fe2c55; animation: ping 1s infinite;"></span>
+                    <span id="liveCamTimerText">00:00</span>
+                  </div>
+                  <!-- Camera Flip Button -->
+                  <button type="button" id="flipLiveCameraBtn" title="Switch Camera" style="position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="fa-solid fa-camera-rotate"></i>
+                  </button>
+                </div>
+
+                <!-- Camera Action Controls Row -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 14px; padding: 6px 0;">
+                  <button type="button" id="startLiveRecordBtn" style="padding: 10px 24px; border-radius: 999px; background: linear-gradient(135deg, #fe2c55, #ff007f); color: #fff; border: none; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(254,44,85,0.4);">
+                    <i class="fa-solid fa-circle"></i> Start Recording
+                  </button>
+                  <button type="button" id="stopLiveRecordBtn" style="display: none; padding: 10px 24px; border-radius: 999px; background: #fff; color: #000; border: none; font-weight: 800; font-size: 13.5px; cursor: pointer; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(255,255,255,0.3);">
+                    <i class="fa-solid fa-square"></i> Stop & Use
+                  </button>
+                </div>
+              </div>
+
               <!-- Canvas Poster Thumbnail Extractor Box -->
               <div class="canvas-poster-box" id="studioThumbBox" style="display: none;">
                 <img id="studioThumbPreviewImg" src="" alt="Frame Poster" class="studio-thumb-img">
                 <div class="thumb-meta-text">
-                  <span class="thumb-label"><i class="fa-solid fa-image text-[#39FF14]"></i> Cover Image Selected</span>
+                  <span class="thumb-label"><i class="fa-solid fa-image" style="color: var(--cs-gold)"></i> Cover Image Selected</span>
                   <p class="text-xs text-gray-400">Thumbnail preview for your reel</p>
                 </div>
               </div>
@@ -190,7 +242,7 @@
 
               <div class="sound-selection-bar">
                 <button type="button" id="openSoundLibraryBtn" class="select-sound-btn" title="Browse Audio Library">
-                  <i class="fa-solid fa-music text-[#39FF14]"></i>
+                  <i class="fa-solid fa-music" style="color: var(--cs-gold)"></i>
                   <span id="selectedSoundLabel">Original Audio — (Video Sound)</span>
                   <span class="sound-browse-badge">Change</span>
                 </button>
@@ -208,7 +260,7 @@
                 <span class="step-num">3</span>
                 <h4>Caption & Hashtags</h4>
                 <button type="button" id="chronexAiGenCaptionBtn" class="chronex-gen-caption-btn" title="AI Generate Viral Caption">
-                  <i class="fa-solid fa-wand-magic-sparkles text-[#00f3ff]"></i> Suggest Caption
+                  <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--cs-violet)"></i> Suggest Caption
                 </button>
               </div>
 
@@ -258,7 +310,7 @@
                     <img id="personaImgCustom" src="favicon.png" class="persona-mini-avatar" alt="Creator">
                     <div class="flex flex-col">
                       <span class="persona-name">Creator Persona</span>
-                      <span class="persona-sub text-[#39FF14]" id="personaHandleCustom">@creator</span>
+                      <span class="persona-sub" style="color: var(--cs-gold)" id="personaHandleCustom">@creator</span>
                     </div>
                   </div>
                 </label>
@@ -293,7 +345,45 @@
               </label>
             </div>
 
-            <!-- Step 6: Multi-Phase Upload Progress (BUG FIX: Separated upload vs processing) -->
+            <!-- Step 6: Interactive Cyber Overlays & Token Bounties -->
+            <div class="studio-card-section">
+              <div class="section-title-row">
+                <span class="step-num">6</span>
+                <h4>Interactive Overlays & Bounties</h4>
+                <span class="section-badge" style="background: rgba(0, 255, 102, 0.15); color: #00ff66; border-color: rgba(0, 255, 102, 0.3);">Optional</span>
+              </div>
+
+              <!-- Interactive Live Poll Sticker Toggle -->
+              <div class="overlay-toggle-box" style="margin-bottom: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: #fff;">
+                    <input type="checkbox" id="enablePollStickerCheckbox" style="accent-color: var(--cs-gold); width: 16px; height: 16px;">
+                    <i class="fa-solid fa-square-poll-vertical" style="color: var(--cs-gold);"></i> Add Interactive Poll Sticker
+                  </label>
+                  <span style="font-size: 11px; color: #8696A0;">Live viewer votes</span>
+                </div>
+                <div id="pollInputsContainer" style="display: none; flex-direction: column; gap: 8px; margin-top: 10px;">
+                  <input type="text" id="pollQuestionInput" placeholder="Poll question (e.g. Rate this setup?)" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12.5px;">
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" id="pollOption1Input" placeholder="Option A (e.g. 🔥 Insane)" value="🔥 Insane" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px;">
+                    <input type="text" id="pollOption2Input" placeholder="Option B (e.g. ⚡ Mid)" value="⚡ Mid" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px;">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Token Bounty Chest Toggle -->
+              <div class="overlay-toggle-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: #fff;">
+                    <input type="checkbox" id="enableBountyCheckbox" style="accent-color: #00ff66; width: 16px; height: 16px;">
+                    <i class="fa-solid fa-gift" style="color: #00ff66;"></i> Drop NEX Token Bounty (10 Tokens)
+                  </label>
+                  <span style="font-size: 11px; color: #00ff66; font-weight: 600;">Reward viewer on tap</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Progress Wrapper -->
             <div id="reelUploadProgressWrapper" class="reels-progress-wrapper" style="display: none;">
               <!-- Phase indicator -->
               <div class="upload-phase-label">
@@ -301,7 +391,7 @@
                 <span id="uploadPhaseText">Phase 1: Uploading video...</span>
               </div>
               <div class="progress-header-row">
-                <span class="progress-title"><i class="fa-solid fa-spinner fa-spin text-[#39FF14]"></i> <span id="reelProgressLabel">Uploading your reel...</span></span>
+                <span class="progress-title"><i class="fa-solid fa-spinner fa-spin" style="color: var(--cs-gold)"></i> <span id="reelProgressLabel">Uploading your reel...</span></span>
                 <span id="reelProgressPercent" class="progress-pct">0%</span>
               </div>
               <div class="reels-progress-bar">
@@ -314,8 +404,8 @@
               <!-- Success state (shown after upload completes) -->
               <div id="uploadSuccessState" class="upload-success-state" style="display: none;">
                 <div class="success-icon"><i class="fa-solid fa-check"></i></div>
-                <h4>Reel Posted Successfully!</h4>
-                <p>Your reel is now live on NEX_REELS</p>
+                <h4>CamShot Posted Successfully!</h4>
+                <p>Your video is now live on CamShot</p>
               </div>
             </div>
 
@@ -324,7 +414,7 @@
               <button type="button" id="cancelUploadBtn" class="studio-cancel-btn">Cancel</button>
               <button type="submit" id="submitReelBtn" class="studio-publish-btn">
                 <i class="fa-solid fa-rocket"></i>
-                <span>Post Reel</span>
+                <span>Post CamShot</span>
               </button>
             </div>
           </form>
@@ -354,7 +444,7 @@
   <div id="shareReelModal" class="reels-modal" style="display: none;">
     <div class="reels-modal-card share-modal-card">
       <div class="reels-modal-header">
-        <h3><i class="fa-solid fa-share-nodes"></i> Share Reel</h3>
+        <h3><i class="fa-solid fa-share-nodes"></i> Share CamShot</h3>
         <button id="closeShareModalBtn" class="reels-modal-close"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="share-modal-body">
@@ -363,13 +453,25 @@
             <div class="share-icon-circle"><i class="fa-solid fa-link"></i></div>
             <span>Copy Link</span>
           </button>
-          <button type="button" class="share-option-btn" id="shareNativeBtn">
-            <div class="share-icon-circle"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
-            <span>Share Via...</span>
+          <button type="button" class="share-option-btn" id="shareWhatsAppBtn" title="Share on WhatsApp">
+            <div class="share-icon-circle" style="color: #25D366;"><i class="fa-brands fa-whatsapp"></i></div>
+            <span>WhatsApp</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareTelegramBtn" title="Share on Telegram">
+            <div class="share-icon-circle" style="color: #229ED9;"><i class="fa-brands fa-telegram"></i></div>
+            <span>Telegram</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareTwitterBtn" title="Share on X / Twitter">
+            <div class="share-icon-circle" style="color: #fff;"><i class="fa-brands fa-x-twitter"></i></div>
+            <span>X / Twitter</span>
           </button>
           <button type="button" class="share-option-btn" id="shareSendInChatBtn">
             <div class="share-icon-circle"><i class="fa-solid fa-paper-plane"></i></div>
             <span>Send in Chat</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareNativeBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+            <span>More Apps</span>
           </button>
           <button type="button" class="share-option-btn" id="shareDownloadBtn">
             <div class="share-icon-circle"><i class="fa-solid fa-download"></i></div>
@@ -378,26 +480,60 @@
         </div>
         <div class="share-link-preview">
           <input type="text" id="shareLinkInput" readonly value="">
-          <button type="button" id="shareQuickCopyBtn" class="reels-btn-primary" style="padding: 6px 12px; font-size: 12px;">Copy</button>
+          <button type="button" id="shareQuickCopyBtn" class="reels-btn-primary" style="padding: 6px 14px; font-size: 12px; font-weight: 700;">Copy</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Reel Comments Drawer -->
+  <!-- Reel Comments Drawer (Professional Bottom Sheet) -->
   <div id="commentsModal" class="reels-comments-drawer" style="display: none;">
     <div class="comments-backdrop" id="commentsBackdrop"></div>
     <div class="comments-card">
+      <div class="drawer-drag-pill"></div>
       <div class="comments-header">
-        <h4>Comments (<span id="commentsCountHeader">0</span>)</h4>
-        <button id="closeCommentsBtn" class="comments-close-btn"><i class="fa-solid fa-xmark"></i></button>
+        <div class="comments-title-group">
+          <h4>Comments</h4>
+          <span id="commentsCountHeader" class="comments-count-badge">0</span>
+        </div>
+        <button id="closeCommentsBtn" class="comments-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
+
       <div id="commentsList" class="comments-list">
-        <div class="comments-empty">Be the first to comment on this reel!</div>
+        <div class="comments-empty">
+          <i class="fa-regular fa-comment-dots"></i>
+          <p>No comments yet</p>
+          <span>Be the first to share your thoughts on this CamShot!</span>
+        </div>
       </div>
+
+      <!-- Quick 1-Tap Reaction Emojis -->
+      <div class="comments-quick-emojis" id="commentsQuickEmojis">
+        <button type="button" class="quick-emoji-btn" data-emoji="🔥" title="Fire">🔥</button>
+        <button type="button" class="quick-emoji-btn" data-emoji="❤️" title="Heart">❤️</button>
+        <button type="button" class="quick-emoji-btn" data-emoji="👏" title="Applause">👏</button>
+        <button type="button" class="quick-emoji-btn" data-emoji="😂" title="Laugh">😂</button>
+        <button type="button" class="quick-emoji-btn" data-emoji="😍" title="Love">😍</button>
+        <button type="button" class="quick-emoji-btn" data-emoji="💯" title="100">💯</button>
+        <button type="button" class="quick-emoji-btn" data-emoji="✨" title="Sparkle">✨</button>
+        <button type="button" class="quick-emoji-btn" data-emoji="🤯" title="Mind Blown">🤯</button>
+      </div>
+
+      <!-- Comment Reply Indicator Bar -->
+      <div id="commentReplyBar" class="comment-reply-bar" style="display: none;">
+        <span>Replying to <b id="commentReplyUser">@user</b></span>
+        <button type="button" id="cancelCommentReplyBtn" class="comment-reply-cancel-btn" title="Cancel Reply"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Comment Composer Bar -->
       <form id="commentForm" class="comment-input-bar">
-        <input type="text" id="commentTextInput" placeholder="Add a comment..." maxlength="200" required>
-        <button type="submit" class="comment-send-btn" title="Post Comment"><i class="fa-solid fa-paper-plane"></i></button>
+        <img id="commentInputUserAvatar" src="favicon.png" class="comment-input-avatar" alt="Avatar">
+        <div class="comment-input-field-wrapper">
+          <input type="text" id="commentTextInput" placeholder="Add a comment..." maxlength="300" autocomplete="off" required>
+        </div>
+        <button type="submit" class="comment-send-btn" title="Post Comment">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
       </form>
     </div>
   </div>
@@ -407,7 +543,7 @@
     <i class="fa-solid fa-heart"></i>
   </div>
 
-  <!-- TikTok-Style Creator Profile Drawer (Cyber-HUD Edition) -->
+  <!-- CamShot Creator Profile Drawer -->
   <div id="creatorProfileDrawer" class="creator-profile-drawer" style="display: none;">
     <div class="profile-drawer-backdrop" id="closeProfileBackdrop"></div>
     <div class="profile-drawer-content">
@@ -421,7 +557,7 @@
         </button>
         <div class="profile-top-handle">
           <span id="profileTopUsername">@creator</span>
-          <i class="fa-solid fa-circle-check text-[#39FF14] text-xs" title="Verified Creator"></i>
+          <i class="fa-solid fa-circle-check" style="color: var(--cs-gold); font-size: 12px;" title="Verified Creator"></i>
         </div>
         <button type="button" id="shareProfileTopBtn" class="profile-top-btn" title="Share Profile">
           <i class="fa-solid fa-arrow-up-from-bracket"></i>
@@ -542,7 +678,7 @@
     <div class="reels-modal-card sound-hub-card">
       <div class="sound-hub-header">
         <button type="button" id="closeSoundHubBtn" class="sound-hub-back-btn" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
-        <span class="sound-hub-title"><i class="fa-solid fa-music text-[#39FF14]"></i> Sound Hub</span>
+        <span class="sound-hub-title"><i class="fa-solid fa-music" style="color: var(--cs-gold)"></i> Sound Hub</span>
         <button type="button" id="shareSoundTopBtn" class="sound-hub-back-btn" title="Share Sound"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
       </div>
 
@@ -616,8 +752,8 @@
 
         <!-- 1-Click Smart Replies -->
         <div class="chronex-smart-replies-section">
-          <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-            <i class="fa-solid fa-wand-magic-sparkles text-[#39FF14]"></i> 1-Tap Smart Replies
+          <h4 class="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style="color: var(--cs-text-secondary);">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--cs-gold)"></i> 1-Tap Smart Replies
           </h4>
           <div class="smart-reply-chips" id="smartReplyChips">
             <button type="button" class="smart-reply-chip">This 4K lighting in Night City is insane!</button>
@@ -646,7 +782,7 @@
   <div id="tipCreatorModal" class="reels-modal tip-creator-modal" style="display: none;">
     <div class="reels-modal-card tip-creator-card">
       <div class="reels-modal-header">
-        <h3 class="flex items-center gap-2"><i class="fa-solid fa-coins text-[#FFD700]"></i> Tip Creator Tokens</h3>
+        <h3 class="flex items-center gap-2"><i class="fa-solid fa-coins" style="color: var(--cs-gold)"></i> Tip Creator Tokens</h3>
         <button id="closeTipModalBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -663,7 +799,7 @@
         <!-- Balance Info -->
         <div class="tip-balance-box">
           <span class="tip-balance-label">Your Vault Balance:</span>
-          <span class="tip-balance-val"><i class="fa-solid fa-coins text-[#FFD700]"></i> <span id="tipUserBalance">2,000</span> Tokens</span>
+          <span class="tip-balance-val"><i class="fa-solid fa-coins" style="color: var(--cs-gold)"></i> <span id="tipUserBalance">2,000</span> Tokens</span>
         </div>
 
         <!-- Tip Selector Pills -->
@@ -688,7 +824,7 @@
   <div id="reelsSettingsModal" class="reels-modal" style="display: none;">
     <div class="reels-modal-card reels-settings-card">
       <div class="reels-modal-header">
-        <h3><i class="fa-solid fa-sliders text-[#39FF14]"></i> Reels Studio & Settings</h3>
+        <h3><i class="fa-solid fa-sliders" style="color: var(--cs-gold)"></i> CamShot Studio & Settings</h3>
         <button id="closeReelsSettingsBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
@@ -713,8 +849,8 @@
 
             <div class="settings-toggle-row">
               <div class="settings-label-block">
-                <span class="settings-label">Autoplay Next Reel</span>
-                <span class="settings-hint">Automatically advance to the next video when current reel ends</span>
+                <span class="settings-label">Autoplay Next CamShot</span>
+                <span class="settings-hint">Automatically advance to the next video when current CamShot ends</span>
               </div>
               <label class="cyber-switch">
                 <input type="checkbox" id="settingAutoScroll">

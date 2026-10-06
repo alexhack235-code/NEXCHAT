@@ -1,5 +1,5 @@
 /**
- * NEX_REELS Royalty-Free Audio & Trending Sounds Library
+ * CamShot Royalty-Free Audio & Trending Sounds Library
  * Curated 20 trending funks, phonk, synthwave, trap, and lo-fi beats
  * 
  * COPYRIGHT NOTICE:
@@ -8,8 +8,8 @@
  * 
  * SCALING EXTENSION POINT:
  * When scaling NEXCHAT to millions of users, replace or augment this local pool with:
- * 1. Spotify Web API (Track metadata & 30s preview streams): https://developer.spotify.com/documentation/web-api
- * 2. TikTok Commercial Music Library (TCML API): https://ads.tiktok.com/marketing_api/docs?id=1738740523091970
+ * 1. Open Audio / Music APIs (Track metadata & 30s preview streams)
+ * 2. Royalty-Free Commercial Music Audio Engine (Soundtrack API)
  * 3. Audius Web3 Music Streaming API: https://docs.audius.org/
  */
 

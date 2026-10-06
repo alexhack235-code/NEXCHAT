@@ -38,8 +38,12 @@ export async function uploadMediaBlob(file, options = {}) {
   const access = options.access || 'public';
   const cleanName = (file.name || 'file').replace(/[^a-zA-Z0-9._-]/g, '_');
   const filename = `${folder}/${uid}/${Date.now()}_${cleanName}`;
-  const fileSizeMb = (file.size / (1024 * 1024)).toFixed(2);
-  const authHeaders = await getFirebaseAuthorizationHeaders();
+  let authHeaders = { Authorization: '' };
+  try {
+    authHeaders = await getFirebaseAuthorizationHeaders();
+  } catch (authErr) {
+    console.warn('[MEDIA UPLOAD] Auth notice:', authErr?.message);
+  }
 
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();

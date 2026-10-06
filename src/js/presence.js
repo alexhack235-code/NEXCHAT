@@ -6,8 +6,8 @@
 
 // Default configuration (can be customized via window.SUPABASE_CONFIG)
 const DEFAULT_SUPABASE = {
-  url: window.SUPABASE_CONFIG?.url || 'https://demo-nexchat.supabase.co',
-  anonKey: window.SUPABASE_CONFIG?.anonKey || 'public-anon-key-placeholder',
+  url: window.SUPABASE_CONFIG?.url || 'https://ohsrsevoudwttudpvtpu.supabase.co',
+  anonKey: window.SUPABASE_CONFIG?.anonKey || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oc3JzZXZvdWR3dHR1ZHB2dHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyODgyMTUsImV4cCI6MjEwNjg2NDIxNX0.j5xCe7U2NCqVAEEPc6d40WIGKpbfRFj81RVueDkO4IU',
 };
 
 let supabaseClient = null;

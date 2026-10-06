@@ -42,7 +42,11 @@
         <!-- Header shows NEXCHAT logo by default, contact name when in chat -->
         <div id="headerLogoContainer">
           <div class="nex-logo" id="headerLogoImg">
-            <span class="nex-text">NEXCHAT</span>
+            <img src="logo.jpg" alt="NEXCHAT & CAMSHOT" class="nex-header-logo-badge" style="width: 28px; height: 28px; border-radius: 7px; object-fit: cover; border: 1.5px solid rgba(0, 255, 102, 0.4); box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);">
+            <div style="display: flex; flex-direction: column; line-height: 1.1;">
+              <span class="nex-text" style="font-size: 17px; font-weight: 800; letter-spacing: 1.5px;">NEXCHAT</span>
+              <span style="font-family: 'Outfit', sans-serif; font-size: 8px; font-weight: 800; letter-spacing: 2px; color: #00D2FF; text-transform: uppercase;">CAMSHOT ENGINE</span>
+            </div>
             <span class="nex-online-pulse"></span>
           </div>
         </div>
@@ -82,7 +86,7 @@
           </div>
 
           <button id="fullscreen-btn-header" class="header-icon-btn" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
-          <button id="reels-btn-header" class="header-icon-btn" title="NEX_REELS" onclick="window.location.href='reels.html'"><i class="fa-solid fa-clapperboard"></i></button>
+          <button id="reels-btn-header" class="header-icon-btn" title="CamShot" onclick="window.location.href='reels.html'"><i class="fa-solid fa-clapperboard"></i></button>
           <button id="installHeaderBtn" class="header-icon-btn" title="Install NEXCHAT"><i class="fa-solid fa-download"></i></button>
           <button id="gaming-btn-header" class="header-icon-btn" title="Gaming Hub"><i class="fa-solid fa-gamepad"></i></button>
           <button id="shop-btn-header" class="header-icon-btn" title="Buy Tokens"
@@ -96,7 +100,7 @@
 
         <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
         <div class="header-right mobile-header-actions">
-          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="NEX Reels & Camera" onclick="window.location.href='reels.html'">
+          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="CamShot & Camera" onclick="window.location.href='reels.html'">
             <i class="fa-solid fa-camera"></i>
           </button>
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
@@ -111,7 +115,7 @@
       <!-- Mobile Quick Dropdown Menu -->
       <div id="mobileDropdownMenu" class="mobile-dropdown-menu" style="display: none;">
         <button type="button" class="mobile-menu-item" onclick="window.location.href='reels.html'">
-          <i class="fa-solid fa-clapperboard"></i> <span>NEX Reels</span>
+          <i class="fa-solid fa-clapperboard"></i> <span>CamShot</span>
         </button>
         <button type="button" class="mobile-menu-item" onclick="window.location.href='cart.html'">
           <i class="fa-solid fa-coins"></i> <span>Tokens & Gifts</span>
@@ -139,7 +143,7 @@
       </div>
     </header>
 
-    <!-- WHATSAPP DARK STATUS UPDATES SECTION -->
+    <!-- NEXCHAT CYBER STATUS UPDATES SECTION -->
     <div class="nex-status-container" id="statusContainer" style="display: none;">
       <!-- Top AppBar: Height 60px, bg #202C33, only "Status" h2 19px #E9EDEF font-bold -->
       <div class="status-top-appbar">
@@ -230,13 +234,12 @@
             WELCOME TO NEXCHAT THE FUTURE IS INIT I AM DEMON ALEX NEX DEVELOPER....
           </p>
           <p class="announcement-content">
-            WE ARE BRINGING YOU NEX_REELS SIMILAR TO TIKTOK/SNAPCHAT BUT IT WILL BE ON NEXCHAT BY NOVEMBER
-            23RD...
-            IF YOU HAVE ANY COMPLAINT KINDLY GO TO NEX SETTINGS AND FILE THEM
+            EXPERIENCE CAMSHOT — OUR EXCLUSIVE HIGH-DEFINITION SHORT-FORM VIDEO PLATFORM LIVE ON NEXCHAT.
+            EXPLORE THE FEED, RECORD LIVE IN THE STUDIO, AND EARN BOUNTY TOKENS!
           </p>
           <div style="margin: 12px 0;">
-            <a href="reels.html" style="display: inline-flex; align-items: center; gap: 8px; background: #00ff66; color: #000; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 12px; padding: 8px 16px; border-radius: 6px; text-decoration: none; box-shadow: 0 0 12px rgba(0,255,102,0.4); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-              <i class="fa-solid fa-play"></i> LAUNCH NEX_REELS
+            <a href="reels.html" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #E8B84B, #C9972E); color: #000; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 12.5px; padding: 9px 18px; border-radius: 9999px; text-decoration: none; box-shadow: 0 4px 16px rgba(232,184,75,0.35); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+              <i class="fa-solid fa-play"></i> LAUNCH CAMSHOT
             </a>
           </div>
           <div class="announcement-footer">
@@ -362,10 +365,21 @@
             </div>
           </div>
           <div class="chat-detail-header-actions">
+            <button id="chatSearchToggleBtn" class="header-icon-btn" title="Search in Chat"><i class="fa-solid fa-magnifying-glass"></i></button>
             <button id="headerVideoBtn" class="header-icon-btn chat-action-call" title="Video Call"><i class="fa-solid fa-video"></i></button>
             <button id="headerCallBtn" class="header-icon-btn chat-action-call" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
             <button id="quickWallpaperBtn" class="header-icon-btn" title="Chat Wallpaper" style="background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s;"><i class="fa-solid fa-palette"></i></button>
             <button id="menuBtn" class="three-dots-menu" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+        </div>
+
+        <!-- In-Chat Live Search Bar -->
+        <div id="inChatSearchBar" class="in-chat-search-bar" style="display: none;">
+          <div class="in-chat-search-inner">
+            <i class="fa-solid fa-magnifying-glass" style="color: #00ff66; font-size: 13px;"></i>
+            <input type="text" id="inChatSearchInput" placeholder="Search in this conversation..." autocomplete="off">
+            <span id="chatSearchMatchCount" class="search-match-count">0 found</span>
+            <button type="button" id="closeChatSearchBtn" class="close-search-btn" title="Close Search"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -392,6 +406,10 @@
             <span class="typing-dot"></span>
             <span id="typingIndicatorText" class="typing-text" style="font-size: 12px; color: var(--accent-primary); margin-left: 6px;">User is typing...</span>
           </div>
+          <!-- Floating Scroll-To-Bottom Button -->
+          <button type="button" id="chatScrollDownBtn" class="chat-scroll-down-btn" style="display: none;" title="Scroll to latest">
+            <i class="fa-solid fa-arrow-down"></i>
+          </button>
         </div>
 
         <!-- Chat Options Menu -->
@@ -432,13 +450,22 @@
             </div>
           </div>
 
+          <!-- Slash Commands Autocomplete Hub -->
+          <div id="slashCommandsMenu" class="slash-commands-menu" style="display: none;">
+            <div class="slash-commands-header">
+              <span class="slash-title"><i class="fa-solid fa-terminal"></i> Command Hub</span>
+              <span class="slash-hint">Tab/Click to select &bull; Esc to dismiss</span>
+            </div>
+            <div class="slash-commands-list" id="slashCommandsList"></div>
+          </div>
+
           <form id="message-form" class="message-form">
             <button type="button" id="emoji-btn" class="input-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
             <div class="message-input-wrapper">
               <textarea id="message-input" class="message-input" placeholder="Message" autocomplete="off" maxlength="1000" rows="1"></textarea>
               <button type="button" id="attach-btn" class="input-inline-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
             </div>
-            <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,.pdf,.doc,.docx" />
+            <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
             <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
             <button type="button" id="audio-record-btn" class="mic-action-btn" title="Record voice message"><i class="fa-solid fa-microphone"></i></button>
             <button type="button" id="audio-send-btn" class="audio-send-btn" title="Send audio" style="display: none;"><i class="fa-solid fa-play"></i></button>
@@ -448,20 +475,30 @@
           <!-- Audio Recording UI -->
           <div id="audioRecordingUI" class="audio-recording-ui" style="display: none;">
             <div class="audio-record-controls">
-              <button type="button" id="audioStopBtn" class="audio-control-btn stop-btn" title="Stop recording"><i class="fa-solid fa-stop"></i> Stop</button>
-              <div class="audio-timer">
-                <span id="audioTimer">0:00</span>
+              <div class="audio-record-meta">
+                <span class="audio-recording-beacon"></span>
+                <span id="audioTimer" class="audio-timer">0:00</span>
               </div>
-              <button type="button" id="audioSendNowBtn" class="audio-control-btn send-btn" title="Send now"><i class="fa-solid fa-paper-plane"></i> Send</button>
-              <button type="button" id="audioCancelBtn" class="audio-control-btn cancel-btn" title="Cancel"><i class="fa-solid fa-xmark"></i> Cancel</button>
+              <div class="audio-waveform-bars">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="audio-record-actions">
+                <button type="button" id="audioCancelBtn" class="audio-control-btn cancel-btn" title="Cancel recording"><i class="fa-solid fa-xmark"></i></button>
+                <button type="button" id="audioStopBtn" class="audio-control-btn stop-btn" title="Stop"><i class="fa-solid fa-stop"></i></button>
+                <button type="button" id="audioSendNowBtn" class="audio-control-btn send-btn" title="Send voice note"><i class="fa-solid fa-paper-plane"></i></button>
+              </div>
             </div>
           </div>
 
           <!-- File attachment preview -->
           <div id="attachment-preview" class="attachment-preview" style="display: none;">
             <div class="attachment-item">
-              <span id="attachment-name"><i class="fa-solid fa-paperclip"></i> File selected</span>
-              <button type="button" id="remove-attachment" class="remove-attachment-btn" title="Remove"><i class="fa-solid fa-xmark"></i> Remove</button>
+              <div id="attachment-thumb" class="attachment-thumb-box" style="display: none;"></div>
+              <div class="attachment-meta-info">
+                <span id="attachment-name" class="attachment-filename"><i class="fa-solid fa-paperclip"></i> File selected</span>
+                <span id="attachment-type-badge" class="attachment-badge"></span>
+              </div>
+              <button type="button" id="remove-attachment" class="remove-attachment-btn" title="Remove attachment"><i class="fa-solid fa-xmark"></i></button>
             </div>
           </div>
 
@@ -744,8 +781,8 @@
         </div>
       </div>
 
-      <!-- STATUS VIEWER MODAL (Used for Profile Pics too) -->
-      <div id="statusViewerModal" class="modal" style="display: none;">
+      <!-- STATUS VIEWER MODAL (Legacy profile pic viewer) -->
+      <div id="legacyProfileStatusViewerModal" class="modal" style="display: none;">
         <div class="status-viewer-content">
           <button id="closeStatusViewerBtn" class="close-modal"
             style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-xmark"></i></button>
@@ -978,328 +1015,517 @@
           </div>
         </div>
       </div>
+      <!-- LUXURY CONTROL CENTER & SETTINGS SUITE -->
       <div id="settingsModal" class="settings-modal" style="display: none;">
-        <div class="settings-modal-content">
+        <div class="settings-modal-content luxury-settings-suite">
           <div class="settings-header">
-            <h2><i class="fa-solid fa-gear"></i> Settings</h2>
+            <div class="settings-header-left">
+              <h2><i class="fa-solid fa-sliders" style="color: #00ff66;"></i> Control Center & Settings</h2>
+              <span class="settings-subtitle">Supercharged with Supabase Realtime & Phoenix WebSockets</span>
+            </div>
             <button id="closeSettingsBtn" class="close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
           </div>
-          <div class="settings-body">
-            <!-- Notifications -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-bell"></i> Notifications</h3>
-              <div class="setting-item">
-                <label>
-                  <input type="checkbox" id="notifToggle" checked>
-                  Enable Notifications
-                </label>
-              </div>
-              <div class="setting-item">
-                <label>
-                  <input type="checkbox" id="soundToggle" checked>
-                  Sound Effects
-                </label>
-              </div>
-            </div>
 
-            <!-- Privacy -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-shield-halved"></i> Privacy</h3>
-              <div class="setting-item">
-                <label>
-                  <input type="checkbox" id="onlineStatusToggle" checked>
-                  Show Online Status
-                </label>
-              </div>
-              <div class="setting-item">
-                <label>
-                  <input type="checkbox" id="readReceiptsToggle" checked>
-                  Read Receipts
-                </label>
-              </div>
-            </div>
+          <div class="settings-layout">
+            <!-- Sidebar Navigation Tabs -->
+            <nav class="settings-sidebar" id="settingsSidebar">
+              <button type="button" class="settings-nav-tab active" data-tab="tab-profile"><i class="fa-solid fa-user-astronaut"></i> Profile & Identity</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-chats"><i class="fa-solid fa-comments"></i> Chat & Bubbles</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-appearance"><i class="fa-solid fa-palette"></i> Themes & Wallpapers</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-sounds"><i class="fa-solid fa-volume-high"></i> Sounds & Alerts</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-privacy"><i class="fa-solid fa-shield-halved"></i> Privacy & Security</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-cloud"><i class="fa-solid fa-bolt" style="color: #00ff66;"></i> Realtime Engine</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-ai"><i class="fa-solid fa-robot" style="color: #67e8f9;"></i> ChronEX AI Studio</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-tokens"><i class="fa-solid fa-coins" style="color: #ffd700;"></i> Token Vault</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-devices"><i class="fa-solid fa-laptop-code"></i> Linked Devices</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-apps"><i class="fa-solid fa-mobile-screen-button"></i> Install App</button>
+              <button type="button" class="settings-nav-tab" data-tab="tab-support"><i class="fa-solid fa-headset"></i> Support & Terminal</button>
+              <div class="settings-sidebar-spacer"></div>
+              <button type="button" id="logoutSettingsBtn" class="settings-nav-tab logout-tab"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </nav>
 
-            <!-- Theme -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-palette"></i> Theme</h3>
-              <div class="setting-item">
-                <label>
-                  <input type="radio" name="theme" value="light" id="themeLight">
-                  Light Theme
-                </label>
-              </div>
-              <div class="setting-item">
-                <label>
-                  <input type="radio" name="theme" value="dark" id="themeDark" checked>
-                  Dark Theme (Default)
-                </label>
-              </div>
-            </div>
-
-            <!-- Calls -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-phone"></i> Call Settings</h3>
-              <div class="setting-item">
-                <label for="ringtoneSelect"><strong>Ringtone</strong></label>
-                <select id="ringtoneSelect" class="settings-select">
-                  <option value="classic">Classic Ring</option>
-                  <option value="digital">Digital Beep</option>
-                  <option value="soft">Soft Tone</option>
-                  <option value="urgent">Urgent Alert</option>
-                  <option value="skype">Skype Ring</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Typography Adjustments -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-font"></i> Text Element Adjustment</h3>
-              <div class="setting-item">
-                <label for="fontFamilySelect"><strong>Font Family</strong></label>
-                <select id="fontFamilySelect" class="settings-select">
-                  <option value="'Inter', sans-serif">Inter (Default)</option>
-                  <option value="Arial, sans-serif">Arial</option>
-                  <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI</option>
-                  <option value="'Courier New', monospace">Courier New</option>
-                  <option value="Georgia, serif">Georgia</option>
-                  <option value="'Trebuchet MS', sans-serif">Trebuchet MS</option>
-                </select>
-              </div>
-              <div class="setting-item">
-                <label for="letterSpacingRange"><strong>Letter Spacing: <span id="letterSpacingValue">0</span>px</strong></label>
-                <input type="range" id="letterSpacingRange" min="-2" max="5" value="0" step="0.5" class="settings-input">
-              </div>
-              <div class="setting-item">
-                <label for="lineHeightRange"><strong>Line Height: <span id="lineHeightValue">1.5</span></strong></label>
-                <input type="range" id="lineHeightRange" min="1" max="2.5" value="1.5" step="0.1" class="settings-input">
-              </div>
-              <div class="setting-item">
-                <label><strong>Text Alignment</strong></label>
-                <div class="text-align-control" style="display: flex; gap: 8px;">
-                  <button id="alignLeft" class="btn-secondary" type="button"><i class="fa-solid fa-align-left"></i> Left</button>
-                  <button id="alignCenter" class="btn-secondary" type="button"><i class="fa-solid fa-align-center"></i> Center</button>
-                  <button id="alignRight" class="btn-secondary" type="button"><i class="fa-solid fa-align-right"></i> Right</button>
+            <!-- Main Scrollable Pane for Selected Tab -->
+            <div class="settings-pane-container" id="settingsPaneContainer">
+              
+              <!-- TAB 1: PROFILE & IDENTITY -->
+              <div class="settings-tab-pane active" id="tab-profile">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-user-astronaut"></i> Profile & Identity</h3>
+                  <p>Manage your account credentials, public card, and security status.</p>
                 </div>
-              </div>
-            </div>
 
-            <!-- Chat Text Size -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-text-height"></i> Chat Text Size</h3>
-              <div class="setting-item">
-                <label>
-                  <input type="radio" name="chatSize" value="small" id="chatSizeSmall">
-                  Small
-                </label>
-              </div>
-              <div class="setting-item">
-                <label>
-                  <input type="radio" name="chatSize" value="medium" id="chatSizeMedium" checked>
-                  Medium (Standard)
-                </label>
-              </div>
-              <div class="setting-item">
-                <label>
-                  <input type="radio" name="chatSize" value="large" id="chatSizeLarge">
-                  Large
-                </label>
-              </div>
-              <div class="setting-item">
-                <label>
-                  <input type="radio" name="chatSize" value="extra-large" id="chatSizeExtraLarge">
-                  Extra Large
-                </label>
-              </div>
-            </div>
-
-            <!-- Global Background -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-image"></i> Global Background</h3>
-              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Personalize the chat canvas with your own background wallpaper or iconic encrypted presets.</p>
-              <button type="button" class="btn-primary" onclick="if(window.openChatWallpaperPicker) window.openChatWallpaperPicker();" style="width: 100%; margin-bottom: 14px; background: linear-gradient(135deg, #00a884, #00ff88); color: #041014; font-weight: 700; border: none; padding: 10px; border-radius: 10px; cursor: pointer;"><i class="fa-solid fa-palette"></i> Browse Chat Wallpaper Presets</button>
-              <div class="setting-item">
-                <label for="backgroundImageInput"><strong>Or Upload Custom Image</strong></label>
-                <input type="file" id="backgroundImageInput" accept="image/*" class="settings-file-input">
-              </div>
-
-              <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="uploadBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Upload</button>
-                <button id="removeBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Remove</button>
-              </div>
-              <div id="backgroundPreview" class="background-preview"></div>
-            </div>
-
-            <!-- Chat-Specific Background -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-images"></i> Chat-Specific Background</h3>
-              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Set a custom wallpaper for this active conversation only.</p>
-              <div class="setting-item">
-                <label for="chatBackgroundImageInput"><strong>Choose Image</strong></label>
-                <input type="file" id="chatBackgroundImageInput" accept="image/*" class="settings-file-input">
-              </div>
-              <div style="display: flex; gap: 10px; margin-top: 10px;">
-                <button id="uploadChatBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Set Background</button>
-                <button id="removeChatBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Remove</button>
-              </div>
-            </div>
-
-            <!-- Install App -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-mobile-screen-button"></i> Install NEXCHAT App</h3>
-              <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.5;">Get faster access, offline support, and a smooth native desktop/mobile experience.</p>
-              <button id="installAppBtn" class="btn-primary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-download"></i> Install NEXCHAT App</button>
-              <div class="install-platform-grid">
-                <button id="installIOSBtn" type="button"><i class="fa-brands fa-apple"></i> Install on iOS</button>
-                <button id="installMacBtn" type="button"><i class="fa-solid fa-laptop"></i> Install on Mac</button>
-                <button id="installWindowsBtn" type="button"><i class="fa-brands fa-windows"></i> Install on Windows</button>
-                <button id="installLinuxBtn" type="button"><i class="fa-brands fa-linux"></i> Install on Linux</button>
-              </div>
-              <div class="install-files-grid">
-                <a href="build-linux.sh" download><i class="fa-brands fa-linux"></i> Linux Script</a>
-                <a href="build-windows.ps1" download><i class="fa-brands fa-windows"></i> Windows Script</a>
-                <a href="build-mac.sh" download><i class="fa-brands fa-apple"></i> Mac Script</a>
-                <a href="build-ios.md" download><i class="fa-solid fa-book"></i> iOS Guide</a>
-              </div>
-            </div>
-
-            <!-- Support & Feedback -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-headset"></i> Support & Feedback</h3>
-              <p class="description" style="color: var(--text-secondary); font-size: 13px;">If you have any feedback or requests, let the developer team know.</p>
-              <button id="fileComplaintBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-envelope"></i> Send Feedback to NEX_DEV</button>
-            </div>
-
-            <!-- Chat Requests -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-user-clock"></i> Chat Requests</h3>
-              <div id="pendingRequestsList" class="contact-scroll-box" style="max-height: 180px;">
-                <p style="color: var(--text-muted); text-align: center; padding: 14px;">Loading pending requests...</p>
-              </div>
-            </div>
-
-            <!-- Account -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-user-shield"></i> Account</h3>
-              <div class="setting-item" style="flex-direction: column; align-items: flex-start;">
-                <label><strong>Your UID:</strong></label>
-                <p id="userUIDDisplay" class="uid-display-card" style="width: 100%;">Loading...</p>
-                <button id="copyUIDBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-copy"></i> Copy UID</button>
-              </div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                <button id="changePasswordBtn" class="btn-secondary"><i class="fa-solid fa-key"></i> Change Password</button>
-                <button id="clearCacheBtn" class="btn-secondary"><i class="fa-solid fa-broom"></i> Clear Cache</button>
-              </div>
-              <div class="setting-item" style="margin-top: 14px; flex-direction: column; align-items: flex-start;">
-                <label for="directChatAutoAccept">
-                  <input type="checkbox" id="directChatAutoAccept" />
-                  Allow direct chat with anyone without request
-                </label>
-              </div>
-              <div class="setting-item" style="margin-top: 10px; flex-direction: column; align-items: flex-start;">
-                <label for="antiReloadToggle">
-                  <input type="checkbox" id="antiReloadToggle" />
-                  Anti Reload (confirm before reloading page)
-                </label>
-                <button id="refreshPageBtn" class="btn-secondary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh Page</button>
-              </div>
-
-              <!-- Self AI Auto-Responder -->
-              <div class="settings-section" style="margin-top: 16px;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                  <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary)); display: flex; align-items: center; justify-content: center; font-size: 16px; color: #000; font-weight: 800;">AI</div>
-                  <div>
-                    <strong style="color: var(--text-primary);">Self AI Auto-Responder</strong>
-                    <p style="margin: 2px 0 0 0; color: var(--text-secondary); font-size: 12.5px;">Auto-reply to selected contacts with AI.</p>
-                  </div>
+                <div class="settings-card">
+                  <label><strong>Account UID</strong></label>
+                  <p id="userUIDDisplay" class="uid-display-card">Loading...</p>
+                  <button id="copyUIDBtn" class="btn-primary" style="width: 100%; margin-top: 6px;"><i class="fa-solid fa-copy"></i> Copy UID</button>
                 </div>
-                <div class="setting-item" style="margin-top: 12px;">
-                  <label for="selfAIAutoResponderToggle">
-                    <input type="checkbox" id="selfAIAutoResponderToggle" />
-                    Enable Self AI auto replies
-                  </label>
+
+                <div class="settings-card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <button id="changePasswordBtn" class="btn-secondary"><i class="fa-solid fa-key"></i> Change Password</button>
+                  <button id="clearCacheBtn" class="btn-secondary"><i class="fa-solid fa-broom"></i> Clear Cache</button>
                 </div>
-                <div id="selfAIUserList" class="contact-scroll-box" style="margin-top: 12px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <strong style="color: var(--accent-primary); font-size: 13px;">Selected Users</strong>
-                    <button id="refreshSelfAIUserListBtn" type="button" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
-                  </div>
-                  <div id="selfAIUserListItems" style="display: grid; gap: 8px;"></div>
-                  <p id="selfAIUserListHint" style="margin-top: 10px; color: var(--text-muted); font-size: 12px;">Only selected users will receive auto-replies.</p>
-                </div>
-              </div>
 
-              <div class="setting-item" style="margin-top: 14px; flex-direction: column; align-items: flex-start;">
-                <label for="aiModelSelect"><strong>AI Model Profile</strong></label>
-                <select id="aiModelSelect" class="settings-select" style="margin-top: 6px;">
-                  <option value="nexchat-custom">NEXCHAT Custom (Recommended)</option>
-                  <option value="performance">Performance-Optimized</option>
-                  <option value="creative">Creative/Conversational</option>
-                  <option value="safe">Security-Strict</option>
-                </select>
-                <button id="saveAiModelBtn" class="btn-primary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-floppy-disk"></i> Apply AI Model</button>
-              </div>
-            </div>
-
-            <!-- Transfer Tokens -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-coins"></i> Transfer Tokens</h3>
-              <div class="balance-card-glow">
-                <p style="color: var(--text-muted); margin: 0 0 4px 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Your Balance</p>
-                <p style="color: var(--accent-primary); margin: 0; font-size: 24px; font-weight: 700; font-family: 'Orbitron', monospace;">
-                  <span id="currentTokenBalance">0</span>
-                  <span style="font-size: 14px; opacity: 0.85;">Tokens</span>
-                </p>
-              </div>
-              <div class="form-group" style="margin-top: 14px;">
-                <label class="form-label">Recipient UID</label>
-                <input type="text" id="recipientUID" placeholder="Paste recipient's UID..." class="settings-input">
-              </div>
-              <div class="form-group">
-                <label class="form-label">Amount</label>
-                <input type="number" id="transferAmount" placeholder="Enter amount..." min="1" max="99999" class="settings-input">
-              </div>
-              <button id="transferTokensBtn" type="button" class="btn-primary" style="width: 100%; margin-top: 4px;"><i class="fa-solid fa-paper-plane"></i> Send Tokens</button>
-              <div id="transferResult" aria-live="polite" style="min-height: 40px; margin-top: 8px;"></div>
-            </div>
-
-            <!-- Admin Panel (if applicable) -->
-            <div class="settings-section">
-              <button id="adminPanelBtn" class="btn-secondary" style="background: var(--accent-gold); color: #000; font-weight: 700; display: none; width: 100%;"><i class="fa-solid fa-crown"></i> Admin Panel</button>
-            </div>
-
-            <!-- Terminal shortcut -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-terminal"></i> NEXCHAT Terminal</h3>
-              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Access the NEXCHAT command-line interface for advanced operations and cloud tools.</p>
-              <button id="openTerminalBtn" class="btn-primary" style="width: 100%; margin-top: 6px;"><i class="fa-solid fa-terminal"></i> Open Terminal</button>
-            </div>
-
-            <!-- Linked Devices -->
-            <div class="settings-section">
-              <h3><i class="fa-solid fa-laptop-code"></i> Linked Devices</h3>
-              <p class="description" style="color: var(--text-secondary); font-size: 13px;">Manage computers, tablets, and browsers linked to your account.</p>
-              <button id="openLinkDeviceModalBtn" class="btn-primary" type="button" style="width: 100%; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <i class="fa-solid fa-qrcode"></i> Link a Device
-              </button>
-              <div id="linkedDevicesContainer" style="margin-top: 14px;">
-                <div class="setting-item" style="border-left: 3px solid var(--accent-primary); padding: 10px; background: rgba(0,255,102,0.06); border-radius: 8px;">
-                  <div style="display: flex; align-items: center; gap: 10px;">
-                    <i class="fa-solid fa-mobile-screen" style="font-size: 20px; color: var(--accent-primary);"></i>
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
                     <div>
-                      <strong style="color: #fff; font-size: 13px;">This Device (Active)</strong>
-                      <p id="currentDeviceLabel" style="margin: 2px 0 0 0; color: var(--text-muted); font-size: 11px;">Current Session</p>
+                      <strong>Open Direct Chats</strong>
+                      <p>Allow anyone to start a direct message with you without a prior approval request.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="directChatAutoAccept">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Anti-Reload Protection</strong>
+                      <p>Confirm before reloading to prevent accidental disconnection during voice notes or calls.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="antiReloadToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <button id="refreshPageBtn" class="btn-secondary" style="width: 100%; margin-top: 10px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh Page Safely</button>
+                </div>
+              </div>
+
+              <!-- TAB 2: CHAT & BUBBLES -->
+              <div class="settings-tab-pane" id="tab-chats">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-comments"></i> Chat Experience & Bubbles</h3>
+                  <p>Fine-tune typography, bubble aesthetics, and input behaviors.</p>
+                </div>
+
+                <div class="settings-card">
+                  <label for="bubbleStyleSelect"><strong>Message Bubble Theme</strong></label>
+                  <select id="bubbleStyleSelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="neon-onyx">Neon Onyx (Default Cyber)</option>
+                    <option value="glass-frost">Glassmorphic Frost (Blur & Translucent)</option>
+                    <option value="cyberpunk-gold">Cyberpunk Gold (High Luxury)</option>
+                    <option value="minimal-slate">Minimalist Slate (Clean & Muted)</option>
+                  </select>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Chat Text Size</strong></label>
+                  <div class="radio-pill-group" style="display: flex; gap: 8px; margin-top: 8px;">
+                    <label class="radio-pill"><input type="radio" name="chatSize" value="small" id="chatSizeSmall"> Small</label>
+                    <label class="radio-pill"><input type="radio" name="chatSize" value="medium" id="chatSizeMedium" checked> Medium</label>
+                    <label class="radio-pill"><input type="radio" name="chatSize" value="large" id="chatSizeLarge"> Large</label>
+                    <label class="radio-pill"><input type="radio" name="chatSize" value="extra-large" id="chatSizeExtraLarge"> Extra Large</label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label for="fontFamilySelect"><strong>Font Family</strong></label>
+                  <select id="fontFamilySelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="'Inter', sans-serif">Inter (Modern & Clean)</option>
+                    <option value="'Fira Code', monospace">Fira Code (Hacker Monospace)</option>
+                    <option value="'Segoe UI', Tahoma, sans-serif">Segoe UI</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="Georgia, serif">Georgia</option>
+                  </select>
+
+                  <div style="margin-top: 12px;">
+                    <label for="letterSpacingRange"><strong>Letter Spacing: <span id="letterSpacingValue">0</span>px</strong></label>
+                    <input type="range" id="letterSpacingRange" min="-2" max="5" value="0" step="0.5" class="settings-input" style="width: 100%;">
+                  </div>
+
+                  <div style="margin-top: 12px;">
+                    <label for="lineHeightRange"><strong>Line Height: <span id="lineHeightValue">1.5</span></strong></label>
+                    <input type="range" id="lineHeightRange" min="1" max="2.5" value="1.5" step="0.1" class="settings-input" style="width: 100%;">
+                  </div>
+
+                  <div style="margin-top: 12px;">
+                    <label><strong>Text Alignment</strong></label>
+                    <div style="display: flex; gap: 8px; margin-top: 6px;">
+                      <button id="alignLeft" class="btn-secondary" type="button" style="flex: 1;"><i class="fa-solid fa-align-left"></i> Left</button>
+                      <button id="alignCenter" class="btn-secondary" type="button" style="flex: 1;"><i class="fa-solid fa-align-center"></i> Center</button>
+                      <button id="alignRight" class="btn-secondary" type="button" style="flex: 1;"><i class="fa-solid fa-align-right"></i> Right</button>
                     </div>
                   </div>
                 </div>
-                <div id="otherLinkedDevicesList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
-                  <!-- Dynamically populated -->
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Enter Key Sends Message</strong>
+                      <p>Press Enter to send, Shift+Enter for new line. Uncheck to make Enter insert a new line.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="enterKeySendToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Logout -->
-            <div class="settings-section">
-              <button id="logoutSettingsBtn" class="btn-danger" style="width: 100%;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+              <!-- TAB 3: APPEARANCE & THEMES -->
+              <div class="settings-tab-pane" id="tab-appearance">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-palette"></i> Appearance & Wallpapers</h3>
+                  <p>Transform the visual aura of your chat application.</p>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Base Theme Mode</strong></label>
+                  <div class="radio-pill-group" style="display: flex; gap: 8px; margin-top: 8px;">
+                    <label class="radio-pill"><input type="radio" name="theme" value="dark" id="themeDark" checked> 🌑 Dark (Onyx)</label>
+                    <label class="radio-pill"><input type="radio" name="theme" value="light" id="themeLight"> ☀️ Light Theme</label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Global Chat Wallpaper</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Select from encrypted ambient presets or upload your own wallpaper.</p>
+                  <button type="button" class="btn-primary" onclick="if(window.openChatWallpaperPicker) window.openChatWallpaperPicker(); else if(window.openWallpaperModal) window.openWallpaperModal();" style="width: 100%; background: linear-gradient(135deg, #00ff66, #00d4ff); color: #000; font-weight: 700; margin-bottom: 12px;">
+                    <i class="fa-solid fa-palette"></i> Browse 12+ Wallpaper Presets
+                  </button>
+                  <label for="backgroundImageInput" style="font-size: 12px; color: #ccc;">Custom Image Upload:</label>
+                  <input type="file" id="backgroundImageInput" accept="image/*" class="settings-file-input" style="margin-top: 6px;">
+                  <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="uploadBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Apply Image</button>
+                    <button id="removeBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Remove</button>
+                  </div>
+                  <div id="backgroundPreview" class="background-preview" style="margin-top: 10px;"></div>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Chat-Specific Wallpaper</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Set an exclusive background for the currently open conversation.</p>
+                  <input type="file" id="chatBackgroundImageInput" accept="image/*" class="settings-file-input">
+                  <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="uploadChatBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Set Active Chat</button>
+                    <button id="removeChatBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Clear</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 4: SOUNDS & ALERTS -->
+              <div class="settings-tab-pane" id="tab-sounds">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-volume-high"></i> Sounds & Haptics</h3>
+                  <p>Fine-tune message pops, incoming rings, and tactile feedback.</p>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Sound Effects</strong>
+                      <p>Play audio feedback when sending, receiving, or reacting to messages.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="soundToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Desktop Notifications</strong>
+                      <p>Show push banner notifications when messages arrive.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="notifToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Audio FX Synthesizer Test</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Zero-latency Web Audio pops and chimes.</p>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button type="button" id="testSentSoundBtn" class="btn-secondary"><i class="fa-solid fa-paper-plane"></i> Test Sent Pop</button>
+                    <button type="button" id="testReceivedSoundBtn" class="btn-secondary"><i class="fa-solid fa-bell"></i> Test Received Chime</button>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label for="ringtoneSelect"><strong>Call Ringtone</strong></label>
+                  <select id="ringtoneSelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="classic">Classic Ring</option>
+                    <option value="digital">Digital Beep</option>
+                    <option value="soft">Soft Tone</option>
+                    <option value="urgent">Urgent Alert</option>
+                    <option value="skype">Skype Tone</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- TAB 5: PRIVACY & SECURITY -->
+              <div class="settings-tab-pane" id="tab-privacy">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-shield-halved"></i> Privacy & Security</h3>
+                  <p>Control presence visibility, read receipts, and incoming requests.</p>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Show Online Status</strong>
+                      <p>Let contacts know when you are currently active in NEXCHAT.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="onlineStatusToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Read Receipts</strong>
+                      <p>Send double ticks (✓✓) and luxury gold marks when you open messages.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="readReceiptsToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Incognito / Ghost Mode</strong>
+                      <p>Hides your typing indicators and online presence across all channels.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="ghostModeToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card" style="border: 1px solid rgba(0, 240, 255, 0.3); background: rgba(0, 240, 255, 0.04);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fa-solid fa-shield-halved" style="color: #00f0ff; font-size: 16px;"></i>
+                      <strong style="color: #00f0ff; font-size: 13.5px;">FORTRESS AI Security Shield</strong>
+                    </div>
+                    <span id="fortressShieldBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 255, 102, 0.15); color: #00ff66; font-weight: 700; border: 1px solid rgba(0, 255, 102, 0.3);">
+                      🛡️ WAF Active (&lt; 0.5ms)
+                    </span>
+                  </div>
+                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
+                    Connected to <a href="https://github.com/alexhack235-code/AI-Security-Scanner-API" target="_blank" style="color: #00f0ff; text-decoration: underline;">AI-Security-Scanner-API</a>. Blocks XSS, SQLi, Prompt Injections, and Bot Flood.
+                  </p>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">Threats Blocked</span>
+                      <div id="fortressThreatsCounter" style="font-size: 16px; font-weight: 800; color: #00ff66; font-family: monospace;">0 Attacks</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">LLM Guard</span>
+                      <div style="font-size: 13px; font-weight: 700; color: #00f0ff; margin-top: 2px;">DAN / Anti-Inject</div>
+                    </div>
+                  </div>
+
+                  <label for="fortressApiUrlInput" style="font-size: 11.5px; color: #ccc;">API Gateway Endpoint:</label>
+                  <input type="text" id="fortressApiUrlInput" placeholder="https://ai-security-scanner-api.vercel.app" class="settings-input" style="width: 100%; box-sizing: border-box; padding: 7px 10px; margin-top: 4px; font-size: 12px;">
+
+                  <label for="fortressVaultKeyInput" style="font-size: 11.5px; color: #ccc; margin-top: 8px; display: block;">Zero-Trust Vault Key (x-vault-key):</label>
+                  <input type="password" id="fortressVaultKeyInput" placeholder="vlt_live_9f8e7d6c..." class="settings-input" style="width: 100%; box-sizing: border-box; padding: 7px 10px; margin-top: 4px; font-size: 12px;">
+
+                  <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button type="button" id="saveFortressConfigBtn" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
+                      <i class="fa-solid fa-floppy-disk"></i> Save Shield
+                    </button>
+                    <button type="button" id="testFortressPingBtn" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
+                      <i class="fa-solid fa-bolt"></i> Test Gateway
+                    </button>
+                  </div>
+                  <div id="fortressTestResult" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Pending Chat Requests</strong></label>
+                  <div id="pendingRequestsList" class="contact-scroll-box" style="max-height: 160px; margin-top: 8px;">
+                    <p style="color: var(--text-muted); text-align: center; padding: 14px;">Loading pending requests...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 6: REALTIME CLOUD ENGINE (SUPABASE) -->
+              <div class="settings-tab-pane" id="tab-cloud">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-bolt" style="color: #00ff66;"></i> Realtime Cloud Engine</h3>
+                  <p>Sub-15ms Phoenix WebSockets with PostgreSQL CDC and dual-engine durability.</p>
+                </div>
+
+                <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.3); background: rgba(0, 255, 102, 0.04);">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span id="supabaseEngineStatus" style="font-size: 13px; color: #00ff66; display: flex; align-items: center; gap: 8px; font-weight: 700;">
+                      <i class="fa-solid fa-circle-check"></i> <span id="supabaseEngineStatusText">Connected to Supabase WebSockets</span>
+                    </span>
+                    <button type="button" id="testSupabasePingBtn" class="btn-primary" style="padding: 5px 12px; font-size: 11px;">
+                      <i class="fa-solid fa-wave-square"></i> Test Latency
+                    </button>
+                  </div>
+                  <div id="supabasePingResult" style="font-size: 11.5px; color: #67e8f9; margin-top: 6px; font-family: monospace;">
+                    ⚡ Phoenix WebSocket channel: active & synchronized
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label for="supabaseUrlInput" style="font-size: 12px; color: #ccc;"><strong>Project URL</strong></label>
+                  <input type="text" id="supabaseUrlInput" placeholder="https://your-project.supabase.co" class="settings-input" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-top: 4px;">
+
+                  <label for="supabaseKeyInput" style="font-size: 12px; color: #ccc; margin-top: 10px; display: block;"><strong>Anon Public Key</strong></label>
+                  <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1Ni..." class="settings-input" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-top: 4px;">
+
+                  <button type="button" id="saveSupabaseSettingsBtn" class="btn-primary" style="width: 100%; margin-top: 12px; font-weight: 700;">
+                    Save Engine Configuration
+                  </button>
+                </div>
+              </div>
+
+              <!-- TAB 7: CHRONEX AI STUDIO -->
+              <div class="settings-tab-pane" id="tab-ai">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-robot" style="color: #67e8f9;"></i> ChronEX AI Studio</h3>
+                  <p>Configure model personality, typewriter token streaming, and autonomous responders.</p>
+                </div>
+
+                <div class="settings-card">
+                  <label for="aiModelSelect"><strong>AI Personality & Model Profile</strong></label>
+                  <select id="aiModelSelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="nexchat-custom">NEXCHAT Custom Pro (Multi-modal & Coding)</option>
+                    <option value="performance">Speed-Optimized (Rapid Token Streaming)</option>
+                    <option value="creative">Creative & Conversational Genius</option>
+                    <option value="safe">Security & Strict Mode</option>
+                  </select>
+                  <button id="saveAiModelBtn" class="btn-primary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-floppy-disk"></i> Apply Model Profile</button>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>60 FPS Token Streaming</strong>
+                      <p>Simulates smooth typewriter streaming token-by-token with glowing neon cursor.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="aiStreamingToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Self AI Auto-Responder</strong>
+                      <p>Automatically reply to selected incoming messages with personalized AI.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="selfAIAutoResponderToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div id="selfAIUserList" class="contact-scroll-box" style="margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                      <strong style="color: #00ff66; font-size: 12px;">Allowed Contacts</strong>
+                      <button id="refreshSelfAIUserListBtn" type="button" class="btn-secondary" style="padding: 3px 8px; font-size: 11px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                    </div>
+                    <div id="selfAIUserListItems" style="display: grid; gap: 6px;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 8: TOKEN VAULT & GRANTS -->
+              <div class="settings-tab-pane" id="tab-tokens">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-coins" style="color: #ffd700;"></i> Neural Token Vault</h3>
+                  <p>Manage tokens used for ChronEX AI generation and premium perks.</p>
+                </div>
+
+                <div class="settings-card" style="text-align: center; padding: 20px;">
+                  <span style="font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Available Balance</span>
+                  <div style="font-size: 36px; font-weight: 800; color: #00ff66; font-family: 'Orbitron', monospace; margin: 4px 0;">
+                    <span id="currentTokenBalance">0</span> <span style="font-size: 16px; opacity: 0.8;">Tokens</span>
+                  </div>
+                  <button type="button" id="claimTokensGrantBtn" class="btn-primary" style="margin-top: 10px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 700;">
+                    <i class="fa-solid fa-gift"></i> Claim Starter Grant (+100 Tokens)
+                  </button>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Peer Token Transfer</strong></label>
+                  <input type="text" id="recipientUID" placeholder="Paste recipient UID..." class="settings-input" style="width: 100%; box-sizing: border-box; margin-top: 6px;">
+                  <input type="number" id="transferAmount" placeholder="Amount (e.g. 20)" min="1" max="99999" class="settings-input" style="width: 100%; box-sizing: border-box; margin-top: 8px;">
+                  <button id="transferTokensBtn" type="button" class="btn-primary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-paper-plane"></i> Send Tokens</button>
+                  <div id="transferResult" aria-live="polite" style="min-height: 24px; margin-top: 8px; font-size: 12px;"></div>
+                </div>
+              </div>
+
+              <!-- TAB 9: LINKED DEVICES -->
+              <div class="settings-tab-pane" id="tab-devices">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-laptop-code"></i> Linked Devices</h3>
+                  <p>Inspect active paired sessions across laptops, tablets, and phones.</p>
+                </div>
+
+                <div class="settings-card">
+                  <button id="openLinkDeviceModalBtn" class="btn-primary" type="button" style="width: 100%; font-weight: 700;">
+                    <i class="fa-solid fa-qrcode"></i> Link New Device via QR Code
+                  </button>
+                  <div id="linkedDevicesContainer" style="margin-top: 14px;">
+                    <div class="setting-item" style="border-left: 3px solid #00ff66; padding: 10px; background: rgba(0,255,102,0.06); border-radius: 8px;">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-mobile-screen" style="font-size: 20px; color: #00ff66;"></i>
+                        <div>
+                          <strong style="color: #fff; font-size: 13px;">This Device (Active)</strong>
+                          <p id="currentDeviceLabel" style="margin: 2px 0 0 0; color: #8b949e; font-size: 11px;">Current Web Session</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="otherLinkedDevicesList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 10: INSTALL APP -->
+              <div class="settings-tab-pane" id="tab-apps">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-mobile-screen-button"></i> Install NEXCHAT Native</h3>
+                  <p>Install on desktop, iOS, Android, and Linux for instant launch.</p>
+                </div>
+
+                <div class="settings-card">
+                  <button id="installAppBtn" class="btn-primary" style="width: 100%; font-weight: 700; margin-bottom: 12px;"><i class="fa-solid fa-download"></i> Install PWA App</button>
+                  <div class="install-platform-grid">
+                    <button id="installIOSBtn" type="button"><i class="fa-brands fa-apple"></i> iOS Guide</button>
+                    <button id="installMacBtn" type="button"><i class="fa-solid fa-laptop"></i> Mac</button>
+                    <button id="installWindowsBtn" type="button"><i class="fa-brands fa-windows"></i> Windows</button>
+                    <button id="installLinuxBtn" type="button"><i class="fa-brands fa-linux"></i> Linux</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 11: SUPPORT & TERMINAL -->
+              <div class="settings-tab-pane" id="tab-support">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-headset"></i> Support & Terminal</h3>
+                  <p>Developer tools, diagnostics, and issue reporting.</p>
+                </div>
+
+                <div class="settings-card">
+                  <button id="openTerminalBtn" class="btn-primary" style="width: 100%; font-weight: 700; margin-bottom: 10px;"><i class="fa-solid fa-terminal"></i> Open NEXCHAT Terminal</button>
+                  <button id="fileComplaintBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-envelope"></i> Send Feedback to NEX_DEV</button>
+                  <button id="adminPanelBtn" class="btn-secondary" style="background: #ffd700; color: #000; font-weight: 700; display: none; width: 100%; margin-top: 10px;"><i class="fa-solid fa-crown"></i> Admin Panel</button>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
@@ -1335,6 +1561,75 @@
           </div>
 
           <div id="pairStatusFeedback" style="font-size: 12px; text-align: center; min-height: 20px;"></div>
+      <!-- CREATE STATUS MODAL (NEXCHAT 24H STORY CREATOR) -->
+      <div id="createStatusModal" class="modal create-status-modal" style="display: none;">
+        <div class="modal-content create-status-content" style="max-width: 520px; padding: 22px;">
+          <div class="create-status-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+            <div class="create-status-tabs" style="display: flex; gap: 8px;">
+              <button type="button" class="btn-primary" id="statusTabMediaBtn" style="padding: 7px 14px; font-size: 12.5px; border-radius: 20px;">
+                <i class="fa-solid fa-photo-film"></i> Photo / Video
+              </button>
+              <button type="button" class="btn-secondary" id="statusTabTextBtn" style="padding: 7px 14px; font-size: 12.5px; border-radius: 20px;">
+                <i class="fa-solid fa-font"></i> Text Story
+              </button>
+            </div>
+            <button type="button" class="close-btn" id="closeCreateStatusModalBtn" title="Close" style="position: static; width: 30px; height: 30px; font-size: 14px;"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- TAB 1: Media Story (Photo/Video + Caption) -->
+          <div class="create-status-tab-pane" id="statusTabMediaPane">
+            <div class="status-drop-zone" id="statusMediaDropZone" style="border: 2px dashed rgba(0, 255, 102, 0.4); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; background: rgba(0, 255, 102, 0.03); transition: all 0.2s;">
+              <input type="file" id="statusMediaModalFileInput" accept="image/*,video/*" style="display: none;">
+              <div id="statusDropPlaceholder">
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 38px; color: #00ff66; margin-bottom: 8px;"></i>
+                <div style="font-size: 14px; font-weight: 700; color: #fff;">Click to select Photo or Video</div>
+                <div style="font-size: 11.5px; color: #8b949e; margin-top: 4px;">Supports PNG, JPG, GIF, MP4 (saved to multi-vault cloud)</div>
+              </div>
+              <div id="statusMediaPreviewBox" style="display: none; position: relative;">
+                <img id="statusModalImgPreview" src="" alt="Preview" style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; object-fit: contain; margin: 0 auto;">
+                <video id="statusModalVideoPreview" src="" controls playsinline style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; margin: 0 auto;"></video>
+                <button type="button" id="removeStatusMediaPreviewBtn" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;" title="Remove media"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+            </div>
+            <div style="margin-top: 14px;">
+              <input type="text" id="statusMediaCaptionInput" placeholder="Add a caption... (optional)" class="settings-input" style="width: 100%; box-sizing: border-box; font-size: 13.5px; padding: 10px 14px;">
+            </div>
+          </div>
+
+          <!-- TAB 2: Text Story (Custom Gradients + Big Typography) -->
+          <div class="create-status-tab-pane" id="statusTabTextPane" style="display: none;">
+            <div id="statusTextStoryCanvas" class="status-text-canvas" style="border-radius: 14px; min-height: 180px; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #059669, #10b981); transition: background 0.3s;">
+              <textarea id="statusTextStoryInput" placeholder="Type your status update..." maxlength="280" style="width: 100%; background: transparent; border: none; outline: none; color: #ffffff; font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; text-align: center; resize: none; min-height: 120px;"></textarea>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; justify-content: center;">
+              <span style="font-size: 11px; color: #8b949e; font-weight: 600;">GRADIENT:</span>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #059669, #10b981)" style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; background: linear-gradient(135deg, #059669, #10b981); cursor: pointer;" title="Emerald"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #7c3aed, #a855f7)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #7c3aed, #a855f7); cursor: pointer;" title="Purple"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #0284c7, #06b6d4)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #0284c7, #06b6d4); cursor: pointer;" title="Cyber Blue"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #ea580c, #f59e0b)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #ea580c, #f59e0b); cursor: pointer;" title="Sunset"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #e11d48, #f43f5e)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #e11d48, #f43f5e); cursor: pointer;" title="Crimson"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #0f172a, #1e293b)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #0f172a, #1e293b); cursor: pointer;" title="Onyx Dark"></button>
+            </div>
+          </div>
+
+          <!-- Status Post Footer -->
+          <div style="margin-top: 18px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+            <div id="statusUploadProgressContainer" style="display: none; width: 100%; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #00ff66; margin-bottom: 4px;">
+                <span id="statusUploadStatusText">Uploading to vault...</span>
+                <span id="statusUploadPercent">0%</span>
+              </div>
+              <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                <div id="statusUploadProgressBar" style="height: 100%; width: 0%; background: #00ff66; transition: width 0.2s;"></div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span style="font-size: 12px; color: #8b949e;"><i class="fa-solid fa-clock-rotate-left"></i> Disappears in 24 hours</span>
+              <button type="button" id="publishStatusBtn" class="btn-primary" style="padding: 10px 24px; font-weight: 700;">
+                <i class="fa-solid fa-paper-plane"></i> Share Status
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -1351,7 +1646,7 @@
         <div class="more-sheet-grid">
           <button type="button" class="sheet-grid-item" onclick="window.location.href='reels.html'">
             <div class="sheet-icon-box reels-gradient"><i class="fa-solid fa-clapperboard"></i></div>
-            <span>NEX Reels</span>
+            <span>CamShot</span>
           </button>
           <button type="button" class="sheet-grid-item" onclick="window.location.href='cart.html'">
             <div class="sheet-icon-box token-gradient"><i class="fa-solid fa-coins"></i></div>
@@ -1443,9 +1738,9 @@
     </nav>
   </div>
 
-  <!-- WHATSAPP DARK STATUS VIEWER FULL-SCREEN MODAL -->
+  <!-- NEXCHAT DARK STATUS VIEWER FULL-SCREEN MODAL -->
   <div id="statusViewerModal" class="status-viewer-modal" style="display: none;">
-    <!-- Top Progress Bars (Segmented like Instagram / WhatsApp) -->
+    <!-- Top Progress Bars (Segmented Story Indicators) -->
     <div id="statusViewerProgressBars" class="status-viewer-progress-container"></div>
 
     <!-- Top Header: Avatar + Name + Time top-left, Close X top-right -->
@@ -1497,6 +1792,25 @@
 
   <!-- GIFT RECEIVE DRAWER -->
   <div id="giftReceiveDrawer" class="bottom-drawer" aria-hidden="true"></div>
+
+  <!-- CINEMATIC MEDIA LIGHTBOX MODAL -->
+  <div id="mediaLightboxModal" class="media-lightbox-modal" style="display: none;">
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <div class="lightbox-toolbar">
+      <div class="lightbox-meta">
+        <i class="fa-solid fa-photo-film" style="color: #00ff66;"></i>
+        <span id="lightboxMediaTitle" class="lightbox-title">Media Viewer</span>
+      </div>
+      <div class="lightbox-actions">
+        <a id="lightboxDownloadBtn" href="" download target="_blank" class="lightbox-action-btn" title="Download File"><i class="fa-solid fa-download"></i></a>
+        <button id="closeLightboxBtn" type="button" class="lightbox-action-btn close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div class="lightbox-stage" id="lightboxStage">
+      <img id="lightboxImage" src="" alt="Enlarged media" style="display: none;" />
+      <video id="lightboxVideo" src="" controls playsinline autoplay style="display: none;"></video>
+    </div>
+  </div>
 
   <!-- NOTIFICATION CONTAINER -->
   <div id="notificationContainer" class="notification-container"></div>

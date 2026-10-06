@@ -112,6 +112,46 @@ export default function ReelsFeedPage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
+  // Load dynamic reels from /api/reels API
+  useEffect(() => {
+    async function fetchApiReels() {
+      try {
+        const res = await fetch('/api/reels');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.reels && Array.isArray(data.reels) && data.reels.length > 0) {
+            const mapped: ReelItem[] = data.reels.map((r: any) => ({
+              id: r.id,
+              videoUrl: r.videoUrl,
+              thumbnailUrl: r.thumbnailUrl || undefined,
+              authorId: r.authorId || 'creator',
+              authorName: r.authorName || 'Creator',
+              authorHandle: r.authorName || 'creator',
+              authorAvatar: r.authorPic || 'favicon.png',
+              caption: r.caption || '',
+              hashtags: r.caption?.match(/#[a-zA-Z0-9_]+/g) || ['#nexchat'],
+              soundTitle: r.sound || 'Original Audio',
+              soundArtist: r.authorName || 'Creator',
+              likesCount: r.likesCount || 0,
+              commentsCount: r.commentsCount || 0,
+              bookmarksCount: 0,
+              sharesCount: r.sharesCount || 0,
+              qualityBadge: r.qualityMode === '4k' ? '4K 60FPS' : '1080p FHD',
+            }));
+            setReels((prev) => {
+              const existingIds = new Set(prev.map((item) => item.id));
+              const newItems = mapped.filter((item) => !existingIds.has(item.id));
+              return newItems.length > 0 ? [...newItems, ...prev] : prev;
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Could not fetch /api/reels:', err);
+      }
+    }
+    fetchApiReels();
+  }, []);
+
   // --------------------------------------------------------------------------
   // INTERSECTION OBSERVER: PLAY ONLY CURRENT VISIBLE REEL & PRELOAD NEXT
   // --------------------------------------------------------------------------
@@ -240,7 +280,7 @@ export default function ReelsFeedPage() {
           </Link>
         </div>
 
-        {/* Center: Centered Tabs (TikTok Specification) */}
+        {/* Center: Centered Tabs (CamShot Feed Mode) */}
         <div className="pointer-events-auto flex items-center gap-5 text-sm font-semibold tracking-wide">
           <button
             type="button"
@@ -329,7 +369,7 @@ export default function ReelsFeedPage() {
       </div>
 
       {/* ===================================================================== */}
-      {/* 3. TIKTOK CLEAN BOTTOM NAVIGATION (Home | Friends | + | Inbox | Me)   */}
+      {/* 3. CAMSHOT CLEAN BOTTOM NAVIGATION (Home | Friends | + | Inbox | Me)  */}
       {/* ===================================================================== */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 h-14 bg-black/90 backdrop-blur-xl border-t border-white/[0.08] flex items-center justify-around px-2 text-white">
         <Link href="/reels" className="flex flex-col items-center gap-0.5 text-white">
@@ -347,7 +387,7 @@ export default function ReelsFeedPage() {
           <span className="text-[10px] font-semibold">Friends</span>
         </Link>
 
-        {/* Center TikTok Accent "+" Button */}
+        {/* Center Accent "+" Create Button */}
         <Link
           href="/upload"
           className="relative group active:scale-90 transition-transform flex items-center justify-center"
@@ -661,7 +701,7 @@ function ReelCard({
         <div className="absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-black/90 via-black/40 to-transparent pointer-events-none z-10" />
 
         {/* ------------------------------------------------------------------- */}
-        {/* RIGHT ACTION RAIL: EXACTLY 5 ICONS (TikTok Specification)           */}
+        {/* RIGHT ACTION RAIL: CAMSHOT 5-ACTION STREAM INTERACTION               */}
         {/* All white, subtle drop-shadow, count in white below icon, 24px gap  */}
         {/* ------------------------------------------------------------------- */}
         <div
@@ -831,7 +871,7 @@ function ReelCard({
             </span>
           </div>
 
-          {/* Search Row (Matching TikTok: Q Search • Anonymous >) */}
+          {/* Search Row: Q Search • Hashtag > */}
           <div className="mt-1 flex items-center justify-between px-2.5 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/10 text-[11px] text-white/70 max-w-[240px]">
             <div className="flex items-center gap-1.5 truncate">
               <span className="font-bold text-white/90">Q</span>
