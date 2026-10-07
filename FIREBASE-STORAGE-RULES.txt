@@ -1,0 +1,157 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.email == 'demonalexander526@gmail.com' ||
+        request.auth.token.admin == true
+      );
+    }
+
+    // 1. AVATARS
+    match /avatars/{userId}/{allPaths=**} {
+      allow create, write: if isOwner(userId) &&
+                              request.resource.size < 15 * 1024 * 1024 &&
+                              request.resource.contentType.matches('image/.*');
+      allow read: if true;
+      allow delete: if isOwner(userId) || isSuperAdmin();
+    }
+
+    match /avatars/{fileName} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 15 * 1024 * 1024 &&
+                              request.resource.contentType.matches('image/.*');
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    // 2. REELS & CLIPS
+    match /reels/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 150 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /clips/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 150 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    // 3. STATUS MEDIA
+    match /status/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 50 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /statuses/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 50 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    // 4. ATTACHMENTS & CHAT MEDIA
+    match /shared/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /attachments/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /chats/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /audio/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 50 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /documents/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 50 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    // 5. GROUPS
+    match /groups/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /groupdocs/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 50 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    // 6. BACKGROUNDS & ADVERTISEMENTS
+    match /backgrounds/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 15 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /advertisements/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 15 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /ads/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 15 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    // 7. TEMP & PUBLIC
+    match /temp/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
+    match /admin/{allPaths=**} {
+      allow read, write: if isSuperAdmin();
+    }
+  }
+}
