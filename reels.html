@@ -137,135 +137,109 @@
         </div>
       </div>
 
-      <!-- Studio Workspace -->
+      <!-- Studio Workspace: Modern Unboxed Fluid Studio -->
       <div class="studio-dual-layout">
-        <main class="studio-controls-column studio-single-column">
-          <form id="uploadReelForm" class="studio-form">
-            <!-- Step 1: Upload Video or Record Live CamShot -->
-            <div class="studio-card-section">
-              <div class="section-title-row">
-                <span class="step-num">1</span>
-                <h4>Video Ingestion & Live Camera Studio</h4>
-                <span class="section-badge">Required</span>
+        <form id="uploadReelForm" class="studio-form studio-modern-grid">
+          <!-- Left Column: Video Viewport / Dropzone / Live Camera Studio -->
+          <div class="studio-video-viewport-col">
+            <!-- Source Mode Switcher: Upload File vs Record Live -->
+            <div class="studio-source-mode-selector">
+              <button type="button" id="sourceUploadFileBtn" class="source-mode-btn active">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Video File
+              </button>
+              <button type="button" id="sourceLiveCamBtn" class="source-mode-btn">
+                <i class="fa-solid fa-camera"></i> Record Live CamShot
+              </button>
+            </div>
+
+            <!-- Mode A: 9:16 Vertical Video Dropzone -->
+            <div class="reels-file-dropzone" id="reelDropzone">
+              <input type="file" id="reelVideoInput" accept="video/mp4,video/webm,video/quicktime,video/*" style="display: none;">
+              <div id="reelDropzonePrompt" class="dropzone-prompt">
+                <div class="dropzone-cloud-icon">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <p class="dropzone-primary-text">Select video to upload</p>
+                <p class="dropzone-secondary-text">Or drag and drop video file</p>
+                <div class="dropzone-format-pills">
+                  <span>MP4</span>
+                  <span>WebM</span>
+                  <span>MOV</span>
+                  <span>1080p FHD</span>
+                </div>
+                <span class="dropzone-hint">720x1280 or higher • Up to 250MB • Vertical 9:16</span>
+                <button type="button" class="dropzone-browse-pill-btn">Browse Video</button>
               </div>
 
-              <!-- Source Mode Switcher: Upload File vs Record Live -->
-              <div class="studio-source-mode-selector" style="display: flex; gap: 8px; margin-bottom: 14px;">
-                <button type="button" id="sourceUploadFileBtn" class="source-mode-btn active" style="flex: 1; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(232, 184, 75, 0.15); border: 1.5px solid var(--cs-gold); color: #fff; cursor: pointer; transition: all 0.2s;">
-                  <i class="fa-solid fa-cloud-arrow-up" style="color: var(--cs-gold);"></i> Upload Video File
-                </button>
-                <button type="button" id="sourceLiveCamBtn" class="source-mode-btn" style="flex: 1; padding: 10px 14px; border-radius: 12px; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(255, 255, 255, 0.05); border: 1.5px solid rgba(255, 255, 255, 0.15); color: #a1a1aa; cursor: pointer; transition: all 0.2s;">
-                  <i class="fa-solid fa-camera" style="color: #00ff66;"></i> Record Live CamShot
-                </button>
-              </div>
-
-              <!-- Mode A: File Dropzone -->
-              <div class="reels-file-dropzone" id="reelDropzone">
-                <input type="file" id="reelVideoInput" accept="video/mp4,video/webm,video/quicktime,video/*" style="display: none;">
-                <div id="reelDropzonePrompt" class="dropzone-prompt">
-                  <div class="dropzone-cloud-icon">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                  </div>
-                  <p class="dropzone-primary-text">Drag & Drop Video or <span style="color: var(--cs-gold); text-decoration: underline;">Browse Files</span></p>
-                  <div class="dropzone-format-pills">
-                    <span>MP4</span>
-                    <span>WebM</span>
-                    <span>MOV</span>
-                    <span>1080p FHD</span>
-                    <span>High Quality</span>
-                  </div>
-                  <span class="dropzone-hint">Max file size: 250MB • Vertical 9:16 recommended</span>
+              <div id="reelPreviewContainer" class="reel-preview-container" style="display: none;">
+                <video id="reelPreviewVideo" playsinline muted controls></video>
+                <div class="preview-overlay-chips">
+                  <div id="reelDurationBadge" class="reel-duration-badge">0:00</div>
+                  <div id="reelHdBadge" class="reel-hd-quality-tag"><i class="fa-solid fa-bolt"></i> <span id="reelHdSpecText">High Definition</span></div>
                 </div>
-
-                <div id="reelPreviewContainer" class="reel-preview-container" style="display: none;">
-                  <video id="reelPreviewVideo" playsinline muted controls></video>
-                  <div class="preview-overlay-chips">
-                    <div id="reelDurationBadge" class="reel-duration-badge">0:00</div>
-                    <div id="reelHdBadge" class="reel-hd-quality-tag"><i class="fa-solid fa-bolt"></i> <span id="reelHdSpecText">High Definition</span></div>
-                  </div>
-                  <button type="button" id="removeVideoBtn" class="remove-preview-btn"><i class="fa-solid fa-rotate-left"></i> Change Video</button>
-                </div>
-              </div>
-
-              <!-- Mode B: Live In-Browser Camera Studio Stage -->
-              <div id="liveCameraStudioStage" class="live-cam-stage" style="display: none; flex-direction: column; gap: 12px; background: #000; border-radius: 16px; overflow: hidden; border: 1.5px solid rgba(0, 255, 102, 0.3); padding: 12px; position: relative;">
-                <!-- Live Shaders Selector Ribbon -->
-                <div class="live-cam-shaders-bar" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 6px;">
-                  <button type="button" class="cam-shader-pill active" data-shader="normal" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,0.2); color: #fff; border: 1px solid rgba(255,255,255,0.3); cursor: pointer; white-space: nowrap;">✨ Normal</button>
-                  <button type="button" class="cam-shader-pill" data-shader="matrix" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(0,255,102,0.1); color: #00ff66; border: 1px solid rgba(0,255,102,0.3); cursor: pointer; white-space: nowrap;">⚡ Matrix CRT</button>
-                  <button type="button" class="cam-shader-pill" data-shader="cyber" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(0,210,255,0.1); color: #00d2ff; border: 1px solid rgba(0,210,255,0.3); cursor: pointer; white-space: nowrap;">🌐 Cyber Neon</button>
-                  <button type="button" class="cam-shader-pill" data-shader="gold" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(232,184,75,0.1); color: var(--cs-gold); border: 1px solid rgba(232,184,75,0.3); cursor: pointer; white-space: nowrap;">🏆 Gold Luxury</button>
-                  <button type="button" class="cam-shader-pill" data-shader="noir" style="padding: 5px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; background: rgba(255,255,255,0.05); color: #aaa; border: 1px solid rgba(255,255,255,0.2); cursor: pointer; white-space: nowrap;">🎬 Noir Film</button>
-                </div>
-
-                <!-- Camera Stream Viewport -->
-                <div style="position: relative; width: 100%; aspect-ratio: 9/16; max-height: 400px; background: #0a0f1a; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                  <video id="liveCamStreamVideo" playsinline autoplay muted style="width: 100%; height: 100%; object-fit: cover;"></video>
-                  <!-- HUD Recording Timer Overlay -->
-                  <div id="liveCamTimerBadge" style="position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 999px; display: none; align-items: center; gap: 6px; font-family: monospace; font-size: 12px; font-weight: 700; color: #fff;">
-                    <span style="width: 8px; height: 8px; border-radius: 50%; background: #fe2c55; animation: ping 1s infinite;"></span>
-                    <span id="liveCamTimerText">00:00</span>
-                  </div>
-                  <!-- Camera Flip Button -->
-                  <button type="button" id="flipLiveCameraBtn" title="Switch Camera" style="position: absolute; top: 12px; right: 12px; width: 34px; height: 34px; border-radius: 50%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;">
-                    <i class="fa-solid fa-camera-rotate"></i>
-                  </button>
-                </div>
-
-                <!-- Camera Action Controls Row -->
-                <div style="display: flex; align-items: center; justify-content: center; gap: 14px; padding: 6px 0;">
-                  <button type="button" id="startLiveRecordBtn" style="padding: 10px 24px; border-radius: 999px; background: linear-gradient(135deg, #fe2c55, #ff007f); color: #fff; border: none; font-weight: 800; font-size: 13.5px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(254,44,85,0.4);">
-                    <i class="fa-solid fa-circle"></i> Start Recording
-                  </button>
-                  <button type="button" id="stopLiveRecordBtn" style="display: none; padding: 10px 24px; border-radius: 999px; background: #fff; color: #000; border: none; font-weight: 800; font-size: 13.5px; cursor: pointer; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(255,255,255,0.3);">
-                    <i class="fa-solid fa-square"></i> Stop & Use
-                  </button>
-                </div>
-              </div>
-
-              <!-- Canvas Poster Thumbnail Extractor Box -->
-              <div class="canvas-poster-box" id="studioThumbBox" style="display: none;">
-                <img id="studioThumbPreviewImg" src="" alt="Frame Poster" class="studio-thumb-img">
-                <div class="thumb-meta-text">
-                  <span class="thumb-label"><i class="fa-solid fa-image" style="color: var(--cs-gold)"></i> Cover Image Selected</span>
-                  <p class="text-xs text-gray-400">Thumbnail preview for your reel</p>
-                </div>
+                <button type="button" id="removeVideoBtn" class="remove-preview-btn"><i class="fa-solid fa-rotate-left"></i> Change Video</button>
               </div>
             </div>
 
-            <!-- Step 2: Audio & Soundtrack Hub -->
-            <div class="studio-card-section">
-              <div class="section-title-row">
-                <span class="step-num">2</span>
-                <h4>Soundtrack & Audio Hub</h4>
+            <!-- Mode B: Live In-Browser Camera Studio Stage -->
+            <div id="liveCameraStudioStage" class="live-cam-stage" style="display: none;">
+              <!-- Live Shaders Selector Ribbon -->
+              <div class="live-cam-shaders-bar">
+                <button type="button" class="cam-shader-pill active" data-shader="normal">✨ Normal</button>
+                <button type="button" class="cam-shader-pill" data-shader="matrix">⚡ Matrix CRT</button>
+                <button type="button" class="cam-shader-pill" data-shader="cyber">🌐 Cyber Neon</button>
+                <button type="button" class="cam-shader-pill" data-shader="gold">🏆 Gold Luxury</button>
+                <button type="button" class="cam-shader-pill" data-shader="noir">🎬 Noir Film</button>
               </div>
 
-              <div class="sound-selection-bar">
-                <button type="button" id="openSoundLibraryBtn" class="select-sound-btn" title="Browse Audio Library">
-                  <i class="fa-solid fa-music" style="color: var(--cs-gold)"></i>
-                  <span id="selectedSoundLabel">Original Audio — (Video Sound)</span>
-                  <span class="sound-browse-badge">Change</span>
-                </button>
-                <button type="button" id="resetSoundBtn" class="reset-sound-btn" title="Reset to Original Audio">
-                  <i class="fa-solid fa-rotate-left"></i>
+              <!-- Camera Stream Viewport -->
+              <div class="live-cam-viewport-box">
+                <video id="liveCamStreamVideo" playsinline autoplay muted></video>
+                <!-- HUD Recording Timer Overlay -->
+                <div id="liveCamTimerBadge">
+                  <span class="timer-record-dot"></span>
+                  <span id="liveCamTimerText">00:00</span>
+                </div>
+                <!-- Camera Flip Button -->
+                <button type="button" id="flipLiveCameraBtn" title="Switch Camera">
+                  <i class="fa-solid fa-camera-rotate"></i>
                 </button>
               </div>
-              <input type="hidden" id="reelSoundTitle" value="Original Audio">
-              <input type="hidden" id="reelSoundUrl" value="">
+
+              <!-- Camera Action Controls Row -->
+              <div class="live-cam-actions-row">
+                <button type="button" id="startLiveRecordBtn">
+                  <i class="fa-solid fa-circle"></i> Start Recording
+                </button>
+                <button type="button" id="stopLiveRecordBtn" style="display: none;">
+                  <i class="fa-solid fa-square"></i> Stop & Use
+                </button>
+              </div>
             </div>
 
-            <!-- Step 3: Caption, Hashtags & ChronEX AI Writer -->
-            <div class="studio-card-section">
-              <div class="section-title-row">
-                <span class="step-num">3</span>
-                <h4>Caption & Hashtags</h4>
+            <!-- Canvas Poster Thumbnail Extractor Box -->
+            <div class="canvas-poster-box" id="studioThumbBox" style="display: none;">
+              <img id="studioThumbPreviewImg" src="" alt="Frame Poster" class="studio-thumb-img">
+              <div class="thumb-meta-text">
+                <span class="thumb-label"><i class="fa-solid fa-image" style="color: var(--cs-gold)"></i> Cover Frame Selected</span>
+                <p class="text-xs text-gray-400">Thumbnail preview for your reel</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Clean Publishing Controls & Settings -->
+          <div class="studio-details-col">
+            <!-- Caption & Hashtags -->
+            <div class="studio-field-group">
+              <div class="field-label-row">
+                <label for="reelCaptionInput" class="field-title">Description & Caption</label>
                 <button type="button" id="chronexAiGenCaptionBtn" class="chronex-gen-caption-btn" title="AI Generate Viral Caption">
-                  <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--cs-violet)"></i> Suggest Caption
+                  <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--cs-violet)"></i> AI Suggest
                 </button>
               </div>
 
               <div class="caption-input-container">
-                <textarea id="reelCaptionInput" class="studio-textarea" rows="2" placeholder="Write a compelling caption... #nexchat #cyberpunk #gaming" maxlength="300"></textarea>
+                <textarea id="reelCaptionInput" class="studio-textarea" rows="3" placeholder="Write a compelling caption... #nexchat #cyberpunk #gaming" maxlength="300"></textarea>
                 <div class="caption-meta-row">
                   <span id="reelCaptionCounter" class="caption-counter">0/300</span>
                 </div>
@@ -283,13 +257,26 @@
               </div>
             </div>
 
-            <!-- Step 4: Dual-Avatar Publishing Persona -->
-            <div class="studio-card-section">
-              <div class="section-title-row">
-                <span class="step-num">4</span>
-                <h4>Publishing Identity</h4>
+            <!-- Soundtrack Selection -->
+            <div class="studio-field-group">
+              <label class="field-title">Soundtrack & Audio</label>
+              <div class="sound-selection-bar">
+                <button type="button" id="openSoundLibraryBtn" class="select-sound-btn" title="Browse Audio Library">
+                  <i class="fa-solid fa-music" style="color: var(--cs-gold)"></i>
+                  <span id="selectedSoundLabel">Original Audio — (Video Sound)</span>
+                  <span class="sound-browse-badge">Change</span>
+                </button>
+                <button type="button" id="resetSoundBtn" class="reset-sound-btn" title="Reset to Original Audio">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
               </div>
+              <input type="hidden" id="reelSoundTitle" value="Original Audio">
+              <input type="hidden" id="reelSoundUrl" value="">
+            </div>
 
+            <!-- Publishing Persona -->
+            <div class="studio-field-group">
+              <label class="field-title">Publish As</label>
               <div class="persona-choice-row">
                 <label class="persona-choice-card active" id="personaCardGeneral">
                   <input type="radio" name="studioPersonaRadio" value="general" checked style="display: none;">
@@ -317,13 +304,9 @@
               </div>
             </div>
 
-            <!-- Step 5: Studio Quality & Encoding Engine -->
-            <div class="studio-card-section">
-              <div class="section-title-row">
-                <span class="step-num">5</span>
-                <h4>Video Quality</h4>
-              </div>
-
+            <!-- Video Quality Selection -->
+            <div class="studio-field-group">
+              <label class="field-title">Quality & Resolution</label>
               <div class="quality-selector-pills">
                 <button type="button" class="quality-pill" data-quality="hd">
                   <span class="quality-title">HD 720p</span>
@@ -335,7 +318,7 @@
                 </button>
                 <button type="button" class="quality-pill" data-quality="4k">
                   <span class="quality-title">Ultra HD 4K</span>
-                  <span class="quality-rate">14,000 kbps (Cinematic)</span>
+                  <span class="quality-rate">14,000 kbps</span>
                 </button>
               </div>
 
@@ -345,20 +328,14 @@
               </label>
             </div>
 
-            <!-- Step 6: Interactive Cyber Overlays & Token Bounties -->
-            <div class="studio-card-section">
-              <div class="section-title-row">
-                <span class="step-num">6</span>
-                <h4>Interactive Overlays & Bounties</h4>
-                <span class="section-badge" style="background: rgba(0, 255, 102, 0.15); color: #00ff66; border-color: rgba(0, 255, 102, 0.3);">Optional</span>
-              </div>
-
-              <!-- Interactive Live Poll Sticker Toggle -->
-              <div class="overlay-toggle-box" style="margin-bottom: 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px;">
+            <!-- Interactive Overlays & Bounties -->
+            <div class="studio-field-group">
+              <label class="field-title">Interactive Overlays</label>
+              <div class="overlay-toggle-box">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: #fff;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: #fff;">
                     <input type="checkbox" id="enablePollStickerCheckbox" style="accent-color: var(--cs-gold); width: 16px; height: 16px;">
-                    <i class="fa-solid fa-square-poll-vertical" style="color: var(--cs-gold);"></i> Add Interactive Poll Sticker
+                    <i class="fa-solid fa-square-poll-vertical" style="color: var(--cs-gold);"></i> Interactive Poll Sticker
                   </label>
                   <span style="font-size: 11px; color: #8696A0;">Live viewer votes</span>
                 </div>
@@ -371,12 +348,11 @@
                 </div>
               </div>
 
-              <!-- Token Bounty Chest Toggle -->
-              <div class="overlay-toggle-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px;">
+              <div class="overlay-toggle-box" style="margin-top: 8px;">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
-                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13.5px; font-weight: 700; color: #fff;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: #fff;">
                     <input type="checkbox" id="enableBountyCheckbox" style="accent-color: #00ff66; width: 16px; height: 16px;">
-                    <i class="fa-solid fa-gift" style="color: #00ff66;"></i> Drop NEX Token Bounty (10 Tokens)
+                    <i class="fa-solid fa-gift" style="color: #00ff66;"></i> NEX Token Bounty (10 Tokens)
                   </label>
                   <span style="font-size: 11px; color: #00ff66; font-weight: 600;">Reward viewer on tap</span>
                 </div>
@@ -385,7 +361,6 @@
 
             <!-- Upload Progress Wrapper -->
             <div id="reelUploadProgressWrapper" class="reels-progress-wrapper" style="display: none;">
-              <!-- Phase indicator -->
               <div class="upload-phase-label">
                 <span class="phase-dot" id="uploadPhaseDot"></span>
                 <span id="uploadPhaseText">Phase 1: Uploading video...</span>
@@ -401,7 +376,6 @@
                 <span id="reelProgressVault">Uploading video...</span>
                 <span id="reelProgressEta" class="upload-eta-label"></span>
               </div>
-              <!-- Success state (shown after upload completes) -->
               <div id="uploadSuccessState" class="upload-success-state" style="display: none;">
                 <div class="success-icon"><i class="fa-solid fa-check"></i></div>
                 <h4>CamShot Posted Successfully!</h4>
@@ -411,14 +385,14 @@
 
             <!-- Studio Action Footer -->
             <div class="studio-footer-row">
-              <button type="button" id="cancelUploadBtn" class="studio-cancel-btn">Cancel</button>
+              <button type="button" id="cancelUploadBtn" class="studio-cancel-btn">Discard</button>
               <button type="submit" id="submitReelBtn" class="studio-publish-btn">
-                <i class="fa-solid fa-rocket"></i>
+                <i class="fa-solid fa-cloud-arrow-up"></i>
                 <span>Post CamShot</span>
               </button>
             </div>
-          </form>
-        </main>
+          </div>
+        </form>
       </div>
     </div>
   </div>
