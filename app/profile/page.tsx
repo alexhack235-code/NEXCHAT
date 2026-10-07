@@ -1,5 +1,8 @@
 'use client';
 
-import DefaultProfilePage from '../../src/nexchat-app/app/profile/page';
+import React from 'react';
+import CreatorProfilePage from './[username]/page';
 
-export default DefaultProfilePage;
+export default function DefaultProfilePage() {
+  return <CreatorProfilePage params={{ username: 'alexandergamedeveloper74' }} />;
+}

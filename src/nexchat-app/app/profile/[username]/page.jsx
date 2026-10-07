@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+
+// Zero-dependency Framer Motion shim for seamless client rendering
+const motion = {
+  div: React.forwardRef(({ layoutId, initial, animate, exit, transition, ...props }, ref) => (
+    <div ref={ref} {...props} />
+  )),
+};
+const AnimatePresence = ({ children }) => <>{children}</>;
 
 // Self-contained SVG Icon Components (Zero uninstalled package dependencies)
 const Heart = ({ className = 'w-4 h-4' }) => (

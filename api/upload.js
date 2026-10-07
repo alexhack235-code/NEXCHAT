@@ -39,7 +39,21 @@ const STATUS_VAULTS = {
 // Security constants
 const MAX_UPLOAD_BYTES = 50 * 1024 * 1024; // 50MB per file limit
 const DANGEROUS_EXTENSIONS = /\.(html?|php\d?|phtml|exe|bat|cmd|sh|cgi|pl|py|js|ts|jsx|tsx|jar|msi|vbs|svg|asp|aspx|jsp)$/i;
-const ALLOWED_MIME_PREFIXES = ['image/', 'video/', 'audio/', 'application/pdf', 'application/octet-stream'];
+const ALLOWED_MIME_PREFIXES = [
+  'image/',
+  'video/',
+  'audio/',
+  'text/',
+  'application/pdf',
+  'application/octet-stream',
+  'application/vnd.',
+  'application/msword',
+  'application/zip',
+  'application/x-zip',
+  'application/x-rar',
+  'application/x-7z',
+  'application/json'
+];
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);

@@ -73,18 +73,15 @@ export default async function handler(req, res) {
         });
       }
 
-      if (!publishingIdentity || !['primary', 'creator', 'general', 'custom'].includes(publishingIdentity)) {
-        return res.status(400).json({
-          error: 'Invalid publishingIdentity. Must be "primary" or "creator".',
-          code: 'INVALID_IDENTITY',
-        });
-      }
+      const safePublishingIdentity = (publishingIdentity && ['primary', 'creator', 'general', 'custom'].includes(publishingIdentity))
+        ? (publishingIdentity === 'creator' || publishingIdentity === 'custom' ? 'creator' : 'primary')
+        : 'primary';
 
       // Generate Reel ID
       const reelId = `reel_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
       const effectiveAuthorId = authUser?.uid || authorId || 'user_anon';
-      const effectiveAuthorName = authorName || (publishingIdentity === 'creator' ? 'Creator Persona' : 'Primary Profile');
+      const effectiveAuthorName = authorName || (safePublishingIdentity === 'creator' ? 'Creator Persona' : 'Primary Profile');
 
       const reelRecord = {
         id: reelId,
