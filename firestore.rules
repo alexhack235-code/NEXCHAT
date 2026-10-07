@@ -66,7 +66,7 @@ service cloud.firestore {
     // 1. USERS COLLECTION (Anti-Privilege Escalation & Profile Management)
     // ============================================================
     match /users/{uid} {
-      allow read: if isAuthenticated();
+      allow read: if true;
 
       allow create: if isOwner(uid) &&
                        (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false);

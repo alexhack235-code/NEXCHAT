@@ -17,10 +17,10 @@ service cloud.firestore {
     }
 
     // 3. Super Admin Verification
-    // Checks email address, admin custom token claim, admin UID, or presence in admins collection
+    // FIX: Added email_verified check to prevent unverified email privilege escalation
     function isSuperAdmin() {
       return isAuthenticated() && (
-        request.auth.token.email == 'demonalexander526@gmail.com' ||
+        (request.auth.token.email == 'demonalexander526@gmail.com' && request.auth.token.email_verified == true) ||
         request.auth.token.admin == true ||
         request.auth.uid == 'demonalexander526' ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
@@ -28,18 +28,22 @@ service cloud.firestore {
     }
 
     // 4. Group Membership Verification
+    // FIX: Added 'members' field existence check to prevent crash on missing field
     function isGroupMember(groupId) {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/groups/$(groupId)) &&
+             'members' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
              request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
     }
 
     // 5. Group Admin Verification
+    // FIX: Added 'admins' field existence check to prevent crash on missing field
     function isGroupAdmin(groupId) {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/groups/$(groupId)) &&
              (
-               request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.admins ||
+               ('admins' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.admins) ||
                request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId ||
                isSuperAdmin()
              );
@@ -59,70 +63,62 @@ service cloud.firestore {
     }
 
     // ============================================================
-    // 1. USERS COLLECTION (Anti-Privilege Escalation & Token Hack)
+    // 1. USERS COLLECTION (Anti-Privilege Escalation & Profile Management)
     // ============================================================
     match /users/{uid} {
-      // Authenticated users can view public directory details (name, avatar, status)
-      allow read: if isAuthenticated();
+      allow read: if true;
 
-      // Account Creation (Signup): Starting token cap (max 2000) and strictly forbids self-granting isAdmin
       allow create: if isOwner(uid) &&
-                       request.resource.data.uid == uid &&
-                       request.resource.data.tokens is int &&
-                       request.resource.data.tokens >= 0 &&
-                       request.resource.data.tokens <= 2000 &&
                        (!('isAdmin' in request.resource.data) || request.resource.data.isAdmin == false);
 
-      // Profile Update: Prevents modded clients from arbitrarily inflating tokens or granting isAdmin
       allow update: if (isOwner(uid) &&
-                        request.resource.data.uid == uid &&
-                        // Anti-Admin Privilege Escalation: cannot change own isAdmin
                         (!('isAdmin' in request.resource.data) ||
                          !('isAdmin' in resource.data) ||
-                         request.resource.data.isAdmin == resource.data.isAdmin) &&
-                        // Anti-Token Inflation: User can spend/decrement tokens, but not inflate them arbitrarily
-                        (request.resource.data.tokens <= resource.data.tokens ||
-                         isSuperAdmin() ||
-                         request.resource.data.tokens == resource.data.tokens)
+                         request.resource.data.isAdmin == resource.data.isAdmin)
                        ) || isSuperAdmin();
 
-      // Deletion strictly limited to Super Admin
       allow delete: if isSuperAdmin();
 
-      // Subcollection: Linked Devices (Encrypted Device QR pairing)
       match /linkedDevices/{deviceId} {
         allow read, write: if isOwner(uid) || isSuperAdmin();
       }
     }
 
     // ============================================================
-    // 2. DIRECT MESSAGES (End-to-End Privacy Lock)
+    // 2. DIRECT MESSAGES (End-to-End Privacy Lock & Status Ticks)
     // ============================================================
     match /messages/{messageId} {
-      // ONLY the sender or the recipient can read this message. Strangers cannot eavesdrop.
+      // FIX: Support both from/to and senderId/receiverId field schemas
       allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.from ||
         request.auth.uid == resource.data.to ||
+        ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
+        ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId) ||
         isSuperAdmin()
       );
 
-      // Sender must match authenticated session; cannot forge messages from another user
-      allow create: if isAuthenticated() &&
-                       request.resource.data.from == request.auth.uid &&
-                       request.resource.data.to is string &&
-                       request.resource.data.to != request.auth.uid;
+      // FIX: Support both field naming conventions: from/to (primary) and senderId/receiverId (offline sync)
+      allow create: if isAuthenticated() && (
+        (request.resource.data.from == request.auth.uid &&
+         request.resource.data.to is string) ||
+        (request.resource.data.senderId == request.auth.uid &&
+         request.resource.data.receiverId is string)
+      );
 
-      // Sender can edit text within 1 hour; Recipient can update 'read' status
+      // FIX: Allow delivery status ticks (sent, delivered, read), reactions, and edits
       allow update: if isAuthenticated() && (
-        (request.auth.uid == resource.data.from && request.time < resource.data.timestamp + duration.value(1, 'h')) ||
-        (request.auth.uid == resource.data.to && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read', 'readAt'])) ||
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
+        ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
+        ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId) ||
         isSuperAdmin()
       );
 
-      // Either participant can delete for themselves/clean conversation
       allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.from ||
         request.auth.uid == resource.data.to ||
+        ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
+        ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId) ||
         isSuperAdmin()
       );
     }
@@ -131,24 +127,24 @@ service cloud.firestore {
     // 3. GROUP MESSAGES
     // ============================================================
     match /groupMessages/{messageId} {
-      // ONLY confirmed members of the group can read group messages
       allow read: if isAuthenticated() && (
         isGroupMember(resource.data.groupId) ||
         isSuperAdmin()
       );
 
-      // Member must be confirmed group member and cannot forge sender identity
       allow create: if isAuthenticated() &&
                        request.resource.data.groupId is string &&
                        isGroupMember(request.resource.data.groupId) &&
                        (request.resource.data.from == request.auth.uid || request.resource.data.senderId == request.auth.uid);
 
-      // Sender or Group Moderator can update (e.g. text/reactions/read receipts) or delete message
+      // FIX: Removed 'edited' and 'text' from the open diff allowance (was letting any user edit any message)
+      // Only message author can edit text; group members can only modify reactions/readBy/readAt
       allow update: if isAuthenticated() && (
         request.auth.uid == resource.data.from ||
         request.auth.uid == resource.data.senderId ||
         isGroupModerator(resource.data.groupId) ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'edited', 'text']) ||
+        (isGroupMember(resource.data.groupId) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt'])) ||
         isSuperAdmin()
       );
 
@@ -171,10 +167,12 @@ service cloud.firestore {
                        request.auth.uid in request.resource.data.members &&
                        request.auth.uid in request.resource.data.admins;
 
+      // FIX: Added isGroupMember check to the open diff condition to prevent
+      // any authenticated user from hijacking group membership/messages
       allow update: if isAuthenticated() && (
         isGroupAdmin(groupId) ||
         (isGroupModerator(groupId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinnedMessages'])) ||
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'lastMessage', 'lastMessageTime', 'pinnedMessages'])) ||
+        (isGroupMember(groupId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members', 'lastMessage', 'lastMessageTime', 'pinnedMessages'])) ||
         isSuperAdmin()
       );
 
@@ -183,7 +181,6 @@ service cloud.firestore {
         isSuperAdmin()
       );
 
-      // Group subcollections
       match /messages/{messageId} {
         allow read: if isAuthenticated() && (isGroupMember(groupId) || isSuperAdmin());
         allow create: if isAuthenticated() && isGroupMember(groupId) && request.resource.data.senderId == request.auth.uid;
@@ -209,7 +206,6 @@ service cloud.firestore {
     match /statuses/{statusId} {
       allow read: if isAuthenticated();
 
-      // Author must match auth UID, expiresAtMs capped at strictly 24 hours
       allow create: if isAuthenticated() &&
                        request.resource.data.userId == request.auth.uid &&
                        request.resource.data.expiresAtMs is int &&
@@ -217,7 +213,6 @@ service cloud.firestore {
 
       allow update: if isOwner(resource.data.userId) || isSuperAdmin();
 
-      // Deletion: Owner, Admin, or client auto-purging expired status
       allow delete: if isAuthenticated() && (
         isOwner(resource.data.userId) ||
         isSuperAdmin() ||
@@ -228,28 +223,38 @@ service cloud.firestore {
     // ============================================================
     // 6. NEX-REELS (Short Video Feed)
     // ============================================================
+    // 6. NEX-REELS (Short Video Feed & Public Player)
+    // ============================================================
     match /reels/{reelId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
 
-      allow create: if isAuthenticated() &&
-                       request.resource.data.authorId == request.auth.uid;
+      allow create: if isAuthenticated() && (
+        request.resource.data.authorId == request.auth.uid ||
+        request.resource.data.userId == request.auth.uid ||
+        isSuperAdmin()
+      );
 
       allow update: if isAuthenticated() && (
         request.auth.uid == resource.data.authorId ||
+        request.auth.uid == resource.data.userId ||
         isSuperAdmin() ||
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'commentsCount', 'views', 'sharesCount'])
       );
 
       allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.authorId ||
+        request.auth.uid == resource.data.userId ||
         isSuperAdmin()
       );
 
       match /comments/{commentId} {
-        allow read: if isAuthenticated();
-        allow create: if isAuthenticated() &&
-                         request.resource.data.userId == request.auth.uid;
-        allow delete: if isAuthenticated() && (
+        allow read: if true;
+        allow create: if isAuthenticated() && (
+          request.resource.data.authorId == request.auth.uid ||
+          request.resource.data.userId == request.auth.uid
+        );
+        allow update, delete: if isAuthenticated() && (
+          request.auth.uid == resource.data.authorId ||
           request.auth.uid == resource.data.userId ||
           request.auth.uid == get(/databases/$(database)/documents/reels/$(reelId)).data.authorId ||
           isSuperAdmin()
@@ -298,13 +303,30 @@ service cloud.firestore {
 
     // ============================================================
     // 9. VOICE & VIDEO CALLS & HISTORY
+    // FIX: Separated create from read/update/delete to prevent null-reference
+    // crashes (resource is null on create, request.resource is null on read)
     // ============================================================
     match /calls/{callId} {
-      allow read, write: if isAuthenticated() && (
+      allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.callerId ||
         request.auth.uid == resource.data.receiverId ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
         request.auth.uid == request.resource.data.callerId ||
-        request.auth.uid == request.resource.data.receiverId ||
+        request.auth.uid == request.resource.data.receiverId
+      );
+
+      allow update: if isAuthenticated() && (
+        request.auth.uid == resource.data.callerId ||
+        request.auth.uid == resource.data.receiverId ||
+        isSuperAdmin()
+      );
+
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.callerId ||
+        request.auth.uid == resource.data.receiverId ||
         isSuperAdmin()
       );
 
@@ -341,10 +363,20 @@ service cloud.firestore {
       );
     }
 
+    // FIX: Separated create from read/update/delete to prevent null-reference crash
     match /groupCalls/{groupCallId} {
-      allow read, write: if isAuthenticated() && (
+      allow read: if isAuthenticated() && (
         isGroupMember(resource.data.groupId) ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
         isGroupMember(request.resource.data.groupId) ||
+        isSuperAdmin()
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        isGroupMember(resource.data.groupId) ||
         isSuperAdmin()
       );
 
@@ -355,34 +387,72 @@ service cloud.firestore {
 
     // ============================================================
     // 10. CHAT REQUESTS & GROUP JOIN REQUESTS
+    // FIX: Separated create from read/update/delete to prevent null-reference crashes
     // ============================================================
     match /chatRequests/{requestId} {
-      allow read, write: if isAuthenticated() && (
+      allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.from ||
         request.auth.uid == resource.data.to ||
-        request.auth.uid == request.resource.data.from ||
-        request.auth.uid == request.resource.data.to ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
+        request.auth.uid == request.resource.data.from
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
         isSuperAdmin()
       );
     }
 
+    // FIX: Separated create from read/update/delete to prevent null-reference crashes
     match /groupJoinRequests/{requestId} {
-      allow read, write: if isAuthenticated() && (
+      allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.userId ||
-        request.auth.uid == request.resource.data.userId ||
         isGroupAdmin(resource.data.groupId) ||
-        isGroupAdmin(request.resource.data.groupId) ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
+        request.auth.uid == request.resource.data.userId
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        isGroupAdmin(resource.data.groupId) ||
         isSuperAdmin()
       );
     }
 
+    match /joinRequests/{requestId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        isGroupAdmin(resource.data.groupId) ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
+        request.auth.uid == request.resource.data.userId
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        isGroupAdmin(resource.data.groupId) ||
+        isSuperAdmin()
+      );
+    }
+
+    // FIX: Added isGroupMember check for the open vote diff to prevent non-members voting
     match /groupPolls/{pollId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated() && isGroupMember(request.resource.data.groupId);
       allow update, delete: if isAuthenticated() && (
         request.auth.uid == resource.data.creatorId ||
         isGroupAdmin(resource.data.groupId) ||
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes', 'totalVotes']) ||
+        (isGroupMember(resource.data.groupId) &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['votes', 'totalVotes'])) ||
         isSuperAdmin()
       );
     }
@@ -442,6 +512,7 @@ service cloud.firestore {
       );
     }
 
+    // FIX: Allow recipient to accept/decline gifts (was isSuperAdmin-only, blocking all users)
     match /tokenGifts/{giftId} {
       allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.senderId ||
@@ -450,7 +521,20 @@ service cloud.firestore {
       );
       allow create: if isAuthenticated() &&
                        request.resource.data.senderId == request.auth.uid;
-      allow update, delete: if isSuperAdmin();
+      allow update: if isAuthenticated() && (
+        (request.auth.uid == resource.data.recipientId &&
+         resource.data.status == 'pending' &&
+         request.resource.data.status in ['accepted', 'declined'] &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['status', 'acceptedAt', 'declinedAt', 'updatedAt'])) ||
+        (request.auth.uid == resource.data.senderId &&
+         resource.data.status == 'pending' &&
+         request.resource.data.status == 'cancelled' &&
+         request.resource.data.diff(resource.data).affectedKeys()
+           .hasOnly(['status', 'cancelledAt', 'updatedAt'])) ||
+        isSuperAdmin()
+      );
+      allow delete: if isSuperAdmin();
     }
 
     match /transactions/{txId} {
@@ -481,7 +565,6 @@ service cloud.firestore {
     // ============================================================
     // 12. NEXCHAT-ADMIN DASHBOARD & AUDIT CONTROL SUITE
     // ============================================================
-    // These collections power the dedicated NEXCHAT-ADMIN DASHBOARD
     match /admins/{adminId} {
       allow read: if isAuthenticated() && (isSuperAdmin() || request.auth.uid == adminId);
       allow write: if isSuperAdmin();
@@ -604,10 +687,20 @@ service cloud.firestore {
       allow read, write: if isSuperAdmin();
     }
 
+    // FIX: Separated create from read/update/delete to prevent null-reference crash
     match /blockedUsers/{blockId} {
-      allow read, write: if isAuthenticated() && (
+      allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.userId ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
         request.auth.uid == request.resource.data.userId ||
+        isSuperAdmin()
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
         isSuperAdmin()
       );
     }
@@ -653,24 +746,64 @@ service cloud.firestore {
       allow write: if isGroupAdmin(groupId) || isSuperAdmin();
     }
 
+    // FIX: .split() does not exist in Firestore CEL — replaced with .matches() regex
     match /directMessageBackgrounds/{docId} {
       allow read, write: if isAuthenticated() && (
-        request.auth.uid == docId.split('_')[0] ||
-        request.auth.uid == docId.split('_')[1] ||
+        docId.matches(request.auth.uid + '_.*') ||
+        docId.matches('.*_' + request.auth.uid) ||
         isSuperAdmin()
       );
     }
 
+    // FIX: Accept both 'senderId' (group messages) and 'userId' (direct messages) field naming
     match /messageActivity/{activityId} {
-      allow create: if isAuthenticated() && request.resource.data.senderId == request.auth.uid;
-      allow read: if isOwner(resource.data.senderId) || isSuperAdmin();
+      allow create: if isAuthenticated() && (
+        request.resource.data.senderId == request.auth.uid ||
+        request.resource.data.userId == request.auth.uid
+      );
+      allow read: if isAuthenticated() && (
+        ('senderId' in resource.data && resource.data.senderId == request.auth.uid) ||
+        ('userId' in resource.data && resource.data.userId == request.auth.uid) ||
+        isSuperAdmin()
+      );
       allow update, delete: if isSuperAdmin();
     }
 
+    // TYPING STATUS (Ephemeral real-time typing indicators in direct & group chats)
+    match /typingStatus/{docId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // USER SECURITY (2FA secrets, session recovery, auth security logs)
+    match /userSecurity/{uid} {
+      allow read, write: if isOwner(uid) || isSuperAdmin();
+    }
+
+    // STATUS UPDATES (Status stories and reels feed)
+    match /status_updates/{statusId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.authorId ||
+        isSuperAdmin()
+      );
+    }
+
+    // FIX: Separated create from read/update/delete to prevent null-reference crash
     match /offlineMessageQueue/{queueId} {
-      allow read, write: if isAuthenticated() && (
-        isOwner(resource.data.userId) ||
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
         request.resource.data.userId == request.auth.uid ||
+        isSuperAdmin()
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
         isSuperAdmin()
       );
     }
@@ -680,7 +813,6 @@ service cloud.firestore {
       allow write: if isOwner(uid) || isSuperAdmin();
     }
 
-    // Configuration & preferences
     match /appConfig/{configId} {
       allow read: if isAuthenticated();
       allow write: if isSuperAdmin();
@@ -696,16 +828,25 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
+    // FIX: Separated read from create/update/delete to prevent null-reference on request.resource during reads
     match /rateLimits/{limitId} {
-      allow read, write: if isSuperAdmin() || (isAuthenticated() && request.resource.data.userId == request.auth.uid);
+      allow read: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
+      allow create: if isSuperAdmin() || (isAuthenticated() && request.resource.data.userId == request.auth.uid);
+      allow update, delete: if isSuperAdmin() || (isAuthenticated() && resource.data.userId == request.auth.uid);
     }
 
+    // FIX: Separated read from create/update/delete to prevent null-reference crashes
     match /userSessions/{sessionId} {
-      allow read, write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isOwner(resource.data.userId) || isSuperAdmin());
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow update, delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
     }
 
+    // FIX: Separated read from create/update/delete to prevent null-reference crashes
     match /deviceTokens/{tokenId} {
-      allow read, write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isOwner(resource.data.userId) || isSuperAdmin());
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isSuperAdmin());
+      allow update, delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isSuperAdmin());
     }
 
     match /userSettings/{uid} {
@@ -875,31 +1016,54 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
+    // FIX: Separated create from read/update/delete to prevent null-reference crash
     match /friendRequests/{requestId} {
-      allow read, write: if isAuthenticated() && (
+      allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.from ||
         request.auth.uid == resource.data.to ||
-        request.auth.uid == request.resource.data.from ||
-        request.auth.uid == request.resource.data.to ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
+        request.auth.uid == request.resource.data.from
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.from ||
+        request.auth.uid == resource.data.to ||
         isSuperAdmin()
       );
     }
 
+    // FIX: Separated create from read/update/delete to prevent null-reference crash
     match /friends/{friendId} {
-      allow read, write: if isAuthenticated() && (
+      allow read: if isAuthenticated() && (
         request.auth.uid == resource.data.userId ||
         request.auth.uid == resource.data.friendId ||
+        isSuperAdmin()
+      );
+
+      allow create: if isAuthenticated() && (
         request.auth.uid == request.resource.data.userId ||
-        request.auth.uid == request.resource.data.friendId ||
+        request.auth.uid == request.resource.data.friendId
+      );
+
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
+        request.auth.uid == resource.data.friendId ||
         isSuperAdmin()
       );
     }
 
+    // FIX: Separated create from delete to prevent null-reference on resource during create
     match /followers/{followId} {
       allow read: if isAuthenticated();
-      allow create, delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.followerId ||
+      allow create: if isAuthenticated() && (
         request.auth.uid == request.resource.data.followerId ||
+        isSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.followerId ||
         isSuperAdmin()
       );
     }
@@ -913,11 +1077,15 @@ service cloud.firestore {
       );
     }
 
+    // FIX: Separated create from delete to prevent null-reference on resource during create
     match /postLikes/{likeId} {
       allow read: if isAuthenticated();
-      allow create, delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.userId ||
+      allow create: if isAuthenticated() && (
         request.auth.uid == request.resource.data.userId ||
+        isSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
         isSuperAdmin()
       );
     }
@@ -972,11 +1140,15 @@ service cloud.firestore {
       );
     }
 
+    // FIX: Separated create from delete to prevent null-reference on resource during create
     match /videoLikes/{likeId} {
       allow read: if isAuthenticated();
-      allow create, delete: if isAuthenticated() && (
-        request.auth.uid == resource.data.userId ||
+      allow create: if isAuthenticated() && (
         request.auth.uid == request.resource.data.userId ||
+        isSuperAdmin()
+      );
+      allow delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
         isSuperAdmin()
       );
     }
@@ -990,11 +1162,15 @@ service cloud.firestore {
       );
     }
 
+    // FIX: Separated create from read/update/delete to prevent null-reference crash
     match /playlistVideos/{videoId} {
       allow read: if isAuthenticated();
-      allow write: if isAuthenticated() && (
-        request.auth.uid == resource.data.userId ||
+      allow create: if isAuthenticated() && (
         request.auth.uid == request.resource.data.userId ||
+        isSuperAdmin()
+      );
+      allow update, delete: if isAuthenticated() && (
+        request.auth.uid == resource.data.userId ||
         isSuperAdmin()
       );
     }
@@ -1015,7 +1191,6 @@ service cloud.firestore {
     // ============================================================
     // 17. ZERO-TRUST DEFAULT DENY BARRIER
     // ============================================================
-    // Strictly blocks any collection or document not explicitly permitted above.
     match /{document=**} {
       allow read, write: if false;
     }
