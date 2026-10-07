@@ -125,7 +125,12 @@
           </div>
         </div>
 
-        <button type="button" class="step-btn" id="nextToStep2">Continue to details <i class="fa-solid fa-arrow-right"></i></button>
+        <div style="display: flex; gap: 12px; margin-top: 18px;">
+          <button type="button" class="step-btn" id="nextToStep2" style="flex: 1;">Continue to details <i class="fa-solid fa-arrow-right"></i></button>
+          <a href="chat.html" class="step-btn secondary" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>Skip to Chat</span> <i class="fa-solid fa-angles-right"></i>
+          </a>
+        </div>
       </div>
 
       <div id="step2" class="profile-step">
@@ -228,8 +233,15 @@
 
     document.getElementById('nextToStep2').addEventListener('click', () => {
       if (!profileData.avatar) {
-        showMessage(result, 'Please select a profile picture first', 'danger');
-        return;
+        profileData.avatar = 'logo.jpg';
+        profileData.avatarFile = null;
+        if (previewImage) previewImage.src = 'logo.jpg';
+        if (previewContainer) {
+          previewContainer.setAttribute('aria-hidden', 'false');
+          previewContainer.style.display = 'flex';
+        }
+        const statusEl = document.getElementById('profileSelectStatus');
+        if (statusEl) statusEl.textContent = 'Default NEX Avatar selected.';
       }
       showStep(2);
     });
@@ -429,6 +441,14 @@
       element.style.color = type === 'success' ? '#8ef3c5' : type === 'danger' ? '#ff7689' : '#7fe6ff';
       element.style.display = 'block';
     }
+
+    try {
+      const cachedName = localStorage.getItem('auth_name') || localStorage.getItem('auth_username') || '';
+      const dispInput = document.getElementById('displayName');
+      if (cachedName && dispInput && !dispInput.value) {
+        dispInput.value = cachedName;
+      }
+    } catch (_) {}
 
     showStep(1);
   </script>

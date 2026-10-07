@@ -149,13 +149,12 @@ function attachRegisterHandler() {
     }
 
     try {
-      showLoginLoader('Creating Account...', 'Registering credentials and configuring quantum identity.');
+      showLoginLoader('Creating Account...', 'Registering credentials and configuring secure workspace.');
       showResult('Creating your secure NEXCHAT account...', false);
 
-      // Silently gather network telemetry non-blockingly
-      const ipInfoPromise = detectIPAndVPN().catch(() => null);
+      // Non-blocking persistence initialization
+      setPersistence(auth, browserLocalPersistence).catch(() => {});
 
-      await setPersistence(auth, browserLocalPersistence);
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       console.log('[AUTH] User created in Auth:', cred.user.uid);
 
@@ -180,12 +179,29 @@ function attachRegisterHandler() {
         registrationTimestamp: new Date().toISOString(),
       };
 
-      // Save user profile reliably
-      await setDoc(doc(db, 'users', cred.user.uid), userData, { merge: true });
-      console.log('[AUTH] User profile saved to Firestore:', cred.user.uid);
+      // 1. Immediately store to localStorage for zero-latency session continuity
+      try {
+        localStorage.setItem('currentUser', JSON.stringify(userData));
+        localStorage.setItem('auth_uid', cred.user.uid);
+        localStorage.setItem('auth_name', name);
+        localStorage.setItem('auth_email', email);
+        localStorage.setItem('auth_username', username);
+        localStorage.setItem('auth_avatar', finalProfilePic);
+      } catch (_) {}
 
-      // Non-blocking telemetry and RTDB sync
-      ipInfoPromise.then(async (ipInfo) => {
+      // 2. Save user profile to Firestore with 2.5s safety timeout race (never hang on slow connections)
+      try {
+        await Promise.race([
+          setDoc(doc(db, 'users', cred.user.uid), userData, { merge: true }),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore write timeout')), 2500))
+        ]);
+        console.log('[AUTH] User profile saved to Firestore:', cred.user.uid);
+      } catch (docErr) {
+        console.warn('[AUTH] Firestore profile write continuing in background:', docErr.message);
+      }
+
+      // 3. Telemetry in background (completely non-blocking)
+      detectIPAndVPN().then(async (ipInfo) => {
         if (!ipInfo) return;
         const securityData = {
           email,
@@ -204,20 +220,24 @@ function attachRegisterHandler() {
         } catch (secErr) {
           console.warn('[AUTH] Security telemetry skipped:', secErr.message);
         }
-      });
+      }).catch(() => {});
 
+      // 4. Realtime Database sync - STRICTLY NON-BLOCKING! NEVER AWAIT!
       try {
-        await set(ref(rtdb, 'users/' + cred.user.uid), userData);
+        set(ref(rtdb, 'users/' + cred.user.uid), userData).catch(rtdbErr => {
+          console.warn('[AUTH] RTDB sync skipped:', rtdbErr?.message);
+        });
       } catch (rtdbErr) {
-        console.warn('[AUTH] RTDB sync warning:', rtdbErr.message);
+        console.warn('[AUTH] RTDB set skipped:', rtdbErr?.message);
       }
 
-      showLoginLoader('Registration Complete!', 'Redirecting to your avatar setup...');
+      // 5. Instantly notify & redirect
+      showLoginLoader('Registration Complete!', 'Redirecting to your workspace...');
       showResult('Successfully registered! Redirecting...', false);
       setTimeout(() => {
         hideLoginLoader();
         window.location.replace('profile-upload.html');
-      }, 1000);
+      }, 500);
     } catch (err) {
       hideLoginLoader();
       console.error('[ERROR] Registration error:', err);
@@ -322,7 +342,10 @@ if (document.readyState === 'loading') {
 
 const loginForm = document.getElementById('loginForm');
 
+let loaderWatchdog = null;
+
 function showLoginLoader(message = 'Preparing secure login...', subtext = 'Authenticating your account and loading your workspace.') {
+  if (loaderWatchdog) clearTimeout(loaderWatchdog);
   const overlay = document.getElementById('loginLoaderOverlay');
   if (overlay) {
     overlay.classList.add('active');
@@ -337,9 +360,19 @@ function showLoginLoader(message = 'Preparing secure login...', subtext = 'Authe
     activeSubmitBtn.classList.add('loading');
     activeSubmitBtn.disabled = true;
   }
+
+  // Safety watchdog: auto-hide after 8 seconds so the UI NEVER stays frozen
+  loaderWatchdog = setTimeout(() => {
+    console.warn('[AUTH] Loader watchdog triggered after 8s - auto-hiding loader');
+    hideLoginLoader();
+  }, 8000);
 }
 
 function hideLoginLoader() {
+  if (loaderWatchdog) {
+    clearTimeout(loaderWatchdog);
+    loaderWatchdog = null;
+  }
   const overlay = document.getElementById('loginLoaderOverlay');
   if (overlay) {
     overlay.classList.remove('active');
@@ -367,15 +400,26 @@ if (loginForm) {
     showLoginLoader('Checking credentials...');
 
     try {
-      await setPersistence(auth, browserLocalPersistence);
+      setPersistence(auth, browserLocalPersistence).catch(() => {});
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       showResult('Successfully signed in!');
 
-      // Update online status in Firestore and RTDB
+      // Cache session UID immediately
+      try {
+        localStorage.setItem('auth_uid', cred.user.uid);
+        localStorage.setItem('auth_email', email);
+      } catch (_) {}
+
+      // Update online status in Firestore (with 2s race) and non-blocking RTDB
       try {
         const userRef = doc(db, 'users', cred.user.uid);
-        await setDoc(userRef, { online: true, lastLogin: new Date().toISOString() }, { merge: true });
-        await set(ref(rtdb, 'users/' + cred.user.uid + '/online'), true);
+        Promise.race([
+          setDoc(userRef, { online: true, lastLogin: new Date().toISOString() }, { merge: true }),
+          new Promise(res => setTimeout(res, 2000))
+        ]).catch(() => {});
+
+        // RTDB online update: NEVER AWAIT
+        set(ref(rtdb, 'users/' + cred.user.uid + '/online'), true).catch(() => {});
       } catch (statusErr) {
         console.warn('Status update notice:', statusErr);
       }
@@ -383,7 +427,7 @@ if (loginForm) {
       setTimeout(() => {
         hideLoginLoader();
         location.href = 'chat.html';
-      }, 700);
+      }, 400);
     } catch (err) {
       hideLoginLoader();
       let errorMsg = err.message || 'Login failed. Please verify your credentials.';
@@ -447,23 +491,25 @@ async function processGoogleUser(user, credentialResult) {
       lastLogin: new Date().toISOString()
     };
 
-    await setDoc(userRef, userData, { merge: true });
+    setDoc(userRef, userData, { merge: true }).catch(() => {});
 
     try {
-      await set(ref(rtdb, 'users/' + user.uid), userData);
+      set(ref(rtdb, 'users/' + user.uid), userData).catch(rtdbErr => {
+        console.warn('Realtime Database sync warning:', rtdbErr);
+      });
     } catch (rtdbErr) {
       console.warn('Realtime Database sync warning:', rtdbErr);
     }
   } else {
     // Existing user: preserve existing profile data, update online and lastLogin
-    await setDoc(userRef, {
+    setDoc(userRef, {
       online: true,
       lastLogin: new Date().toISOString()
-    }, { merge: true });
+    }, { merge: true }).catch(() => {});
 
     try {
-      await set(ref(rtdb, 'users/' + user.uid + '/online'), true);
-      await set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now());
+      set(ref(rtdb, 'users/' + user.uid + '/online'), true).catch(() => {});
+      set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now()).catch(() => {});
     } catch (rtdbErr) {
       console.warn('RTDB online update note:', rtdbErr);
     }
@@ -474,7 +520,7 @@ async function processGoogleUser(user, credentialResult) {
   setTimeout(() => {
     hideLoginLoader();
     location.href = 'chat.html';
-  }, 700);
+  }, 400);
 }
 
 async function handleGoogleSignIn() {
