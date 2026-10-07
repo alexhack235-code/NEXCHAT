@@ -308,13 +308,13 @@ html, body {
   width: 100%;
   height: 100vh;
   height: 100dvh;
-  max-width: min(540px, calc(100vh * 9 / 16));
+  max-width: min(560px, calc(100vh * 9 / 16));
   aspect-ratio: 9 / 16;
-  border-radius: 14px;
+  border-radius: 0 !important;
   overflow: hidden;
   background: #000;
   border: none !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.85);
+  box-shadow: none !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -348,7 +348,7 @@ html, body {
 
 .reel-card:hover .reel-stage {
   transform: none;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+  box-shadow: none !important;
 }
 
 @media (max-width: 767px) {
@@ -971,20 +971,20 @@ html, body {
 
 /* ─── Dropzone ─── */
 .reels-file-dropzone {
-  border: 2px dashed rgba(232, 184, 75, 0.3);
+  border: 1.5px dashed rgba(255, 255, 255, 0.16);
   border-radius: var(--cs-radius-lg);
   padding: 28px 24px;
   text-align: center;
   cursor: pointer;
-  background: rgba(232, 184, 75, 0.02);
+  background: rgba(255, 255, 255, 0.02);
   transition: all var(--cs-duration) var(--cs-ease);
   position: relative;
 }
 
 .reels-file-dropzone:hover {
   border-color: var(--cs-gold);
-  background: rgba(232, 184, 75, 0.06);
-  box-shadow: inset 0 0 30px rgba(232, 184, 75, 0.03);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 24px rgba(232, 184, 75, 0.12);
 }
 
 .dropzone-prompt i {
@@ -3486,9 +3486,9 @@ html, body {
 .reels-file-dropzone {
   flex: 1;
   min-height: 380px;
-  border: 2px dashed rgba(232, 184, 75, 0.35);
+  border: 1.5px dashed rgba(255, 255, 255, 0.16);
   border-radius: 18px;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(255, 255, 255, 0.02);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -3504,7 +3504,7 @@ html, body {
 .reels-file-dropzone:hover,
 .reels-file-dropzone.drag-over {
   border-color: var(--cs-gold);
-  background: rgba(232, 184, 75, 0.04);
+  background: rgba(255, 255, 255, 0.04);
   box-shadow: 0 0 24px rgba(232, 184, 75, 0.15);
 }
 
@@ -3616,7 +3616,7 @@ html, body {
   background: #000;
   border-radius: 18px;
   overflow: hidden;
-  border: 1.5px solid rgba(0, 255, 102, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 12px;
   box-sizing: border-box;
 }

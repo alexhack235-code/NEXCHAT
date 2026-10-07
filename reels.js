@@ -802,7 +802,7 @@ function renderReels(reelsList) {
           <div class="music-disc-wrapper cursor-pointer mt-0.5" title="${escapeHtml(soundTrackTitle)}" style="position: relative;">
             <div class="music-note-float">♪</div>
             <div class="music-note-float" style="animation-delay: 1.2s; color: #ff2d55;">♫</div>
-            <div class="reel-sound-disc w-9 h-9 rounded-full border-2 border-white/70 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
+            <div class="reel-sound-disc w-9 h-9 rounded-full border border-white/20 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
               <i class="fa-solid fa-compact-disc text-white text-sm"></i>
             </div>
           </div>
@@ -829,7 +829,7 @@ function renderReels(reelsList) {
 
         <!-- Bottom inline comment input bar -->
         <div class="reel-bottom-bar flex items-center gap-2">
-          <div class="flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-white/15 transition-all">
+          <div class="flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border-0 transition-all">
             <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-400 text-xs outline-none" placeholder="Add comment..." autocomplete="off">
             <button type="button" class="reel-inline-image-btn text-white/80 hover:text-white transition-colors" title="Add image">
               <i class="fa-regular fa-image text-[15px] drop-shadow"></i>

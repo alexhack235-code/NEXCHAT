@@ -452,10 +452,90 @@ onAuthStateChanged(auth, user => {
 
 let googleSignInInitialized = false;
 
+window.quickGuestLogin = function() {
+  const guestUid = 'guest_' + Math.floor(100000 + Math.random() * 900000);
+  const guestName = 'Guest Explorer';
+  const guestUser = {
+    uid: guestUid,
+    email: 'guest@nexchat.io',
+    name: guestName,
+    username: 'Guest' + Math.floor(100 + Math.random() * 900),
+    profilePic: 'favicon.png',
+    profilePicUrl: 'favicon.png',
+    tokens: 2000,
+    isGuest: true,
+    online: true,
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString()
+  };
+
+  try {
+    localStorage.setItem('auth_uid', guestUid);
+    localStorage.setItem('auth_email', guestUser.email);
+    localStorage.setItem('auth_name', guestUser.name);
+    localStorage.setItem('auth_username', guestUser.username);
+    localStorage.setItem('auth_avatar', guestUser.profilePic);
+    localStorage.setItem('currentUser', JSON.stringify(guestUser));
+  } catch (_) {}
+
+  showResult('Signed in as Guest Explorer! Launching NEXCHAT...', false);
+  showLoginLoader('Setting up guest workspace...');
+
+  setTimeout(() => {
+    hideLoginLoader();
+    location.href = 'chat.html';
+  }, 400);
+};
+
+window.signInWithRedirectFallback = async function() {
+  showLoginLoader('Redirecting to Google...');
+  try {
+    const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
+    await signInWithRedirect(auth, provider);
+  } catch (err) {
+    hideLoginLoader();
+    showResult(`Redirect Error: ${err.message || 'Unable to redirect.'}`, true);
+  }
+};
+
 async function processGoogleUser(user, credentialResult) {
   showLoginLoader('Setting up workspace...');
 
-  // Save credential access token if provided
+  // 1. Immediately cache session locally for instant authentication
+  const baseName = (user.displayName || user.email?.split('@')[0] || 'User')
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .slice(0, 12);
+  const randomNum = Math.floor(100 + Math.random() * 900);
+  const username = `${baseName || 'User'}${randomNum}`;
+  const avatar = user.photoURL || getRandomSticker();
+
+  const primaryUserData = {
+    uid: user.uid,
+    email: user.email || '',
+    name: user.displayName || 'Google User',
+    username: username,
+    profilePic: avatar,
+    profilePicUrl: avatar,
+    tokens: 2000,
+    createdAt: new Date().toISOString(),
+    registrationTimestamp: new Date().toISOString(),
+    online: true,
+    lastLogin: new Date().toISOString()
+  };
+
+  try {
+    localStorage.setItem('auth_uid', user.uid);
+    localStorage.setItem('auth_email', user.email || '');
+    localStorage.setItem('auth_name', user.displayName || 'Google User');
+    localStorage.setItem('auth_username', username);
+    localStorage.setItem('auth_avatar', avatar);
+    localStorage.setItem('currentUser', JSON.stringify(primaryUserData));
+  } catch (storageErr) {
+    console.warn('[AUTH] Local storage session notice:', storageErr);
+  }
+
+  // Save credential access token if available
   try {
     const credential = GoogleAuthProvider.credentialFromResult(credentialResult);
     if (credential?.accessToken) {
@@ -463,56 +543,35 @@ async function processGoogleUser(user, credentialResult) {
       localStorage.setItem('driveAccessTokenExpiry', String(Date.now() + 55 * 60 * 1000));
     }
   } catch (tokenErr) {
-    console.warn('Credential token note:', tokenErr);
+    console.warn('[AUTH] Credential token note:', tokenErr);
   }
 
-  const userRef = doc(db, 'users', user.uid);
-  const userDoc = await getDoc(userRef);
+  // 2. Safe, non-blocking sync with Firestore & Realtime Database
+  try {
+    const userRef = doc(db, 'users', user.uid);
+    const userDoc = await Promise.race([
+      getDoc(userRef),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000))
+    ]).catch(() => null);
 
-  if (!userDoc.exists()) {
-    const baseName = (user.displayName || user.email.split('@')[0] || 'User')
-      .replace(/[^a-zA-Z0-9]/g, '')
-      .slice(0, 12);
-    const randomNum = Math.floor(100 + Math.random() * 900);
-    const username = `${baseName || 'User'}${randomNum}`;
-    const avatar = user.photoURL || getRandomSticker();
+    if (!userDoc || !userDoc.exists()) {
+      setDoc(userRef, primaryUserData, { merge: true }).catch(() => {});
+      try {
+        set(ref(rtdb, 'users/' + user.uid), primaryUserData).catch(() => {});
+      } catch (_) {}
+    } else {
+      setDoc(userRef, {
+        online: true,
+        lastLogin: new Date().toISOString()
+      }, { merge: true }).catch(() => {});
 
-    const userData = {
-      uid: user.uid,
-      email: user.email || '',
-      name: user.displayName || 'Google User',
-      username: username,
-      profilePic: avatar,
-      profilePicUrl: avatar,
-      tokens: 2000,
-      createdAt: new Date().toISOString(),
-      registrationTimestamp: new Date().toISOString(),
-      online: true,
-      lastLogin: new Date().toISOString()
-    };
-
-    setDoc(userRef, userData, { merge: true }).catch(() => {});
-
-    try {
-      set(ref(rtdb, 'users/' + user.uid), userData).catch(rtdbErr => {
-        console.warn('Realtime Database sync warning:', rtdbErr);
-      });
-    } catch (rtdbErr) {
-      console.warn('Realtime Database sync warning:', rtdbErr);
+      try {
+        set(ref(rtdb, 'users/' + user.uid + '/online'), true).catch(() => {});
+        set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now()).catch(() => {});
+      } catch (_) {}
     }
-  } else {
-    // Existing user: preserve existing profile data, update online and lastLogin
-    setDoc(userRef, {
-      online: true,
-      lastLogin: new Date().toISOString()
-    }, { merge: true }).catch(() => {});
-
-    try {
-      set(ref(rtdb, 'users/' + user.uid + '/online'), true).catch(() => {});
-      set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now()).catch(() => {});
-    } catch (rtdbErr) {
-      console.warn('RTDB online update note:', rtdbErr);
-    }
+  } catch (syncErr) {
+    console.warn('[AUTH] Background cloud sync note:', syncErr);
   }
 
   showResult('Google sign-in successful! Redirecting...', false);
@@ -520,31 +579,24 @@ async function processGoogleUser(user, credentialResult) {
   setTimeout(() => {
     hideLoginLoader();
     location.href = 'chat.html';
-  }, 400);
+  }, 350);
 }
 
 async function handleGoogleSignIn() {
   showLoginLoader('Connecting with Google...');
 
   try {
-    await setPersistence(auth, browserLocalPersistence);
+    // DO NOT await setPersistence synchronously right before popup!
+    setPersistence(auth, browserLocalPersistence).catch(() => {});
+
     const provider = new GoogleAuthProvider();
-    // Do NOT add drive.file scope here — standard login only needs profile and email
     provider.setCustomParameters({ prompt: 'select_account' });
 
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    if (isMobile) {
-      showLoginLoader('Redirecting to Google...');
-      await signInWithRedirect(auth, provider);
-      return;
-    }
-
+    let result;
     try {
-      const result = await signInWithPopup(auth, provider);
-      await processGoogleUser(result.user, result);
+      result = await signInWithPopup(auth, provider);
     } catch (popupErr) {
-      console.warn('Popup attempt notice:', popupErr.code);
+      console.warn('[AUTH] Popup attempt notice:', popupErr.code, popupErr.message);
       if (popupErr.code === 'auth/popup-blocked' || popupErr.code === 'auth/cancelled-popup-request') {
         showLoginLoader('Redirecting to Google sign in...');
         await signInWithRedirect(auth, provider);
@@ -552,16 +604,77 @@ async function handleGoogleSignIn() {
       }
       throw popupErr;
     }
+
+    if (result && result.user) {
+      await processGoogleUser(result.user, result);
+    }
   } catch (error) {
     hideLoginLoader();
     console.error("Google Sign-in Error:", error);
-    let message = error?.message || 'Google sign-in failed. Please try again.';
-    if (error?.code === 'auth/popup-closed-by-user') {
-      message = 'Google sign-in was cancelled.';
-    } else if (error?.code === 'auth/account-exists-with-different-credential') {
-      message = 'An account already exists with this email using a different sign-in method.';
+
+    let errorHtml = '';
+    const errCode = error?.code || '';
+
+    if (errCode === 'auth/unauthorized-domain') {
+      const currentHost = location.hostname || 'this domain';
+      errorHtml = `
+        <div class="auth-error-detail">
+          <strong><i class="fa-solid fa-triangle-exclamation"></i> Domain Unauthorized in Firebase</strong>
+          <p style="margin: 6px 0 8px; font-size: 12px; line-height: 1.4;">
+            Domain <code>${currentHost}</code> is not in your Firebase Authorized Domains list.<br>
+            Add it in <b>Firebase Console &gt; Authentication &gt; Settings &gt; Authorized Domains</b>.
+          </p>
+          <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
+            <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
+          </button>
+        </div>
+      `;
+    } else if (errCode === 'auth/operation-not-allowed') {
+      errorHtml = `
+        <div class="auth-error-detail">
+          <strong><i class="fa-solid fa-triangle-exclamation"></i> Google Sign-In Disabled</strong>
+          <p style="margin: 6px 0 8px; font-size: 12px;">
+            Google Provider is not enabled in Firebase.<br>
+            Enable it in <b>Firebase Console &gt; Authentication &gt; Sign-in method &gt; Google</b>.
+          </p>
+          <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
+            <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
+          </button>
+        </div>
+      `;
+    } else if (errCode === 'auth/popup-closed-by-user') {
+      errorHtml = 'Google sign-in popup was closed before completing.';
+    } else if (errCode === 'auth/popup-blocked') {
+      errorHtml = `
+        <div class="auth-error-detail">
+          <strong>Popup Blocked</strong>
+          <p style="margin: 4px 0 8px; font-size: 12px;">Please allow popups for this site, or try redirect sign-in.</p>
+          <button type="button" class="quick-guest-btn" onclick="window.signInWithRedirectFallback()">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Try Redirect Sign-In
+          </button>
+        </div>
+      `;
+    } else if (errCode === 'auth/cancelled-popup-request') {
+      errorHtml = 'Sign-in request was cancelled.';
+    } else if (errCode === 'auth/account-exists-with-different-credential') {
+      errorHtml = 'An account already exists with this email address using another login method.';
+    } else if (errCode === 'auth/network-request-failed') {
+      errorHtml = 'Network connection failed. Please check your internet connection.';
+    } else {
+      let rawMsg = error?.message || 'Google sign-in failed. Please try again.';
+      rawMsg = rawMsg.replace(/^Firebase:\s*Error\s*\(([^)]+)\)\.?/i, '$1:').trim();
+      errorHtml = `
+        <div class="auth-error-detail">
+          <strong>Authentication Notice (${errCode || 'Info'})</strong>
+          <p style="margin: 4px 0 8px; font-size: 12px;">${rawMsg}</p>
+          <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
+            <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
+          </button>
+        </div>
+      `;
     }
-    showResult(`${message}`, true);
+
+    showResult(errorHtml, true);
   }
 }
 
@@ -576,7 +689,17 @@ async function checkRedirectAuth() {
     console.error('Redirect sign-in error:', err);
     hideLoginLoader();
     if (err.code !== 'auth/null-user') {
-      showResult(`${err.message || 'Google sign-in failed'}`, true);
+      let rawMsg = err.message || 'Google sign-in failed';
+      rawMsg = rawMsg.replace(/^Firebase:\s*Error\s*\(([^)]+)\)\.?/i, '$1:').trim();
+      showResult(`
+        <div class="auth-error-detail">
+          <strong>Google Sign-In (${err.code || 'Notice'})</strong>
+          <p style="margin: 4px 0 8px; font-size: 12px;">${rawMsg}</p>
+          <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
+            <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
+          </button>
+        </div>
+      `, true);
     }
   }
 }
