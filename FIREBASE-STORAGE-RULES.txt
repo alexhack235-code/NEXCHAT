@@ -100,6 +100,20 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
+    match /chat-attachments/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /group-attachments/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 100 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
     // 5. GROUPS
     match /groups/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
@@ -120,6 +134,13 @@ service firebase.storage {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 15 * 1024 * 1024;
       allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /chatBackgrounds/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 25 * 1024 * 1024;
+      allow read: if isAuthenticated();
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
@@ -152,6 +173,14 @@ service firebase.storage {
 
     match /admin/{allPaths=**} {
       allow read, write: if isSuperAdmin();
+    }
+
+    // 8. UNIVERSAL AUTHENTICATED FALLBACK
+    match /{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 150 * 1024 * 1024;
+      allow read: if isAuthenticated();
+      allow delete: if isAuthenticated() || isSuperAdmin();
     }
   }
 }
