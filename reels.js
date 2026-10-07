@@ -1119,6 +1119,7 @@ function renderReels(reelsList) {
 
     // Video Tap & Double Tap (Double tap anywhere = like + show big heart)
     let lastTap = 0;
+    let singleTapTimeout = null;
     card.addEventListener('click', (e) => {
       // Ignore clicks on action bar, inputs, buttons, comment bar, progress container
       if (
@@ -1135,8 +1136,12 @@ function renderReels(reelsList) {
       }
 
       const now = Date.now();
-      if (now - lastTap < 300) {
-        // Double Tap -> Heart Burst + Like
+      if (now - lastTap < 280) {
+        // Double Tap -> Heart Burst + Like without jitter
+        if (singleTapTimeout) {
+          clearTimeout(singleTapTimeout);
+          singleTapTimeout = null;
+        }
         triggerHeartBurst(e.clientX, e.clientY);
         handleLikeToggle(reel.id, card.querySelector('.like-btn'), card.querySelector('.like-count'), true);
         lastTap = 0;
@@ -1144,26 +1149,30 @@ function renderReels(reelsList) {
       }
       lastTap = now;
 
-      // Single Tap -> Play/Pause & Tap to Unmute
-      if (videoEl.muted) {
-        videoEl.muted = false;
-        isGlobalMuted = false;
-        globalSoundToggle.querySelector('i').className = 'fa-solid fa-volume-high';
-        if (card._customAudio) card._customAudio.muted = false;
-        showPlayIndicator(playIndicator, 'fa-volume-high');
-      }
+      // Single Tap -> Play/Pause with clean 250ms debounce
+      singleTapTimeout = setTimeout(() => {
+        if (videoEl.muted) {
+          videoEl.muted = false;
+          isGlobalMuted = false;
+          const sndIcon = globalSoundToggle?.querySelector('i');
+          if (sndIcon) sndIcon.className = 'fa-solid fa-volume-high';
+          if (card._customAudio) card._customAudio.muted = false;
+          showPlayIndicator(playIndicator, 'fa-volume-high');
+        }
 
-      if (videoEl.paused) {
-        videoEl.play();
-        showPlayIndicator(playIndicator, 'fa-play');
-        discEl.style.animationPlayState = 'running';
-        if (card._customAudio) card._customAudio.play().catch(() => {});
-      } else {
-        videoEl.pause();
-        showPlayIndicator(playIndicator, 'fa-pause');
-        discEl.style.animationPlayState = 'paused';
-        if (card._customAudio) card._customAudio.pause();
-      }
+        if (videoEl.paused) {
+          videoEl.play().catch(() => {});
+          showPlayIndicator(playIndicator, 'fa-play');
+          if (discEl) discEl.style.animationPlayState = 'running';
+          if (card._customAudio) card._customAudio.play().catch(() => {});
+        } else {
+          videoEl.pause();
+          showPlayIndicator(playIndicator, 'fa-pause');
+          if (discEl) discEl.style.animationPlayState = 'paused';
+          if (card._customAudio) card._customAudio.pause();
+        }
+        singleTapTimeout = null;
+      }, 250);
     });
 
     // Like Button

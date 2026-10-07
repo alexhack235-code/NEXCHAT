@@ -11280,6 +11280,12 @@ async function loadStatusFeed() {
       headerCamera.addEventListener('click', () => openCreateStatusModal('media'));
     }
 
+    const headerText = document.getElementById('statusHeaderTextBtn');
+    if (headerText && !headerText.dataset.hasListener) {
+      headerText.dataset.hasListener = 'true';
+      headerText.addEventListener('click', () => openCreateStatusModal('text'));
+    }
+
     const fabText = document.getElementById('statusFabText');
     if (fabText && !fabText.dataset.hasListener) {
       fabText.dataset.hasListener = 'true';
@@ -11324,13 +11330,13 @@ async function loadStatusFeed() {
       console.warn('[NEX-STATUS] Live Firestore query notice:', fsErr);
     }
 
-    // Realistic WhatsApp Android statuses fallback matching user context
+    // Realistic statuses fallback matching user context
     if (statusesData.length === 0) {
       statusesData = [
         {
           id: 'status-alex-1',
           userId: 'alexander-id',
-          userName: '@ALEXANDER',
+          userName: 'ALEXANDER',
           avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&h=200&q=80',
           mediaUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1080&q=85',
           mediaType: 'image',
@@ -11366,7 +11372,7 @@ async function loadStatusFeed() {
         {
           id: 'status-elena-1',
           userId: 'elena-id',
-          userName: 'Elena Vance',
+          userName: 'Elena_Vance',
           avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80',
           mediaUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1080&q=85',
           mediaType: 'image',
@@ -11399,25 +11405,25 @@ async function loadStatusFeed() {
 
     activeStoriesList = Array.from(userGroupsMap.values());
 
-    // 1. Render Horizontal List (64px circles)
+    // 1. Render Horizontal List (Cyber Node Mesh)
     if (horizontalFeed) {
       horizontalFeed.innerHTML = '';
       activeStoriesList.forEach((grp, idx) => {
         const circleDiv = document.createElement('div');
         circleDiv.className = 'status-circle-item';
-        circleDiv.title = grp.userName;
+        circleDiv.title = `NODE://${grp.userName}`;
         circleDiv.innerHTML = `
           <div class="status-ring-container ${grp.isViewed ? 'viewed' : 'unread'}">
             <img src="${grp.avatarUrl}" alt="${escape(grp.userName)}" class="status-inner-img" onerror="this.src='logo.jpg'" />
           </div>
-          <span class="status-item-label">${escape(grp.userName)}</span>
+          <span class="status-item-label terminal-node-name">[${escape(grp.userName)}]</span>
         `;
         circleDiv.addEventListener('click', () => viewStatusGroup(idx));
         horizontalFeed.appendChild(circleDiv);
       });
     }
 
-    // 2. Render Vertical List (Recent & Viewed updates)
+    // 2. Render Vertical List (Telemetry Stream: Recent & Viewed updates)
     if (recentList && viewedList) {
       recentList.innerHTML = '';
       viewedList.innerHTML = '';
@@ -11430,14 +11436,23 @@ async function loadStatusFeed() {
         row.className = 'status-row-item';
         const dateObj = new Date(grp.lastUpdated);
         const timeFormatted = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const latestSlide = grp.slides?.[grp.slides.length - 1];
+        const payloadType = latestSlide?.mediaType === 'video' ? 'VIDEO_STREAM' : (latestSlide?.mediaType === 'image' ? 'PHOTO_PAYLOAD' : 'TEXT_CIPHER');
+        const remHours = Math.max(1, Math.round(((latestSlide?.expiresAtMs || Date.now() + 86400000) - Date.now()) / 3600000));
 
         row.innerHTML = `
           <div class="status-row-avatar ${grp.isViewed ? 'viewed' : 'unread'}">
             <img src="${grp.avatarUrl}" alt="${escape(grp.userName)}" onerror="this.src='logo.jpg'" />
           </div>
           <div class="status-row-info">
-            <h4 class="status-row-name">${escape(grp.userName)}</h4>
-            <p class="status-row-time">Today, ${timeFormatted}</p>
+            <h4 class="status-row-name">
+              <span>NODE://${escape(grp.userName)}</span>
+              <span class="status-payload-badge">[${payloadType}]</span>
+            </h4>
+            <p class="status-row-time">
+              <span><i class="fa-solid fa-clock-rotate-left"></i> T-${timeFormatted}</span>
+              <span style="color:#00FF88;">&bull; TTL: ${remHours}h</span>
+            </p>
           </div>
         `;
         row.addEventListener('click', () => viewStatusGroup(idx));
@@ -11452,7 +11467,7 @@ async function loadStatusFeed() {
       });
 
       if (!hasRecent && recentList) {
-        recentList.innerHTML = '<p style="color: #8696A0; font-size: 13.5px; padding: 4px;">No recent status updates</p>';
+        recentList.innerHTML = '<p style="color: #8696A0; font-size: 12px; font-family: \'JetBrains Mono\', monospace; padding: 12px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">[NO_ACTIVE_NODES_IN_MESH] &bull; DEPLOY_NEW_STATUS_ABOVE</p>';
       }
 
       if (viewedSection) {
@@ -11502,8 +11517,8 @@ function showCurrentStorySlide() {
   const expiresInLabel = remHours > 0 ? `Expires in ${remHours}h` : `Expires in ${remMins}m`;
 
   if (avatar) avatar.src = currentGrp.avatarUrl || 'logo.jpg';
-  if (name) name.textContent = currentGrp.userName || 'User';
-  if (time) time.textContent = timeFormatted;
+  if (name) name.textContent = `NODE://${currentGrp.userName || 'USER'}`;
+  if (time) time.textContent = `T-${timeFormatted}`;
 
   // Media
   if (currentSlide.mediaType === 'video' && currentSlide.mediaUrl) {
@@ -11530,7 +11545,7 @@ function showCurrentStorySlide() {
     if (textSlide) {
       textSlide.style.display = 'flex';
       textSlide.textContent = currentSlide.caption || 'No content';
-      textSlide.style.background = currentSlide.gradient || 'linear-gradient(135deg, #059669, #10b981)';
+      textSlide.style.background = currentSlide.gradient || 'linear-gradient(135deg, #0a0e13, #111b21)';
     }
   }
 
@@ -11540,7 +11555,7 @@ function showCurrentStorySlide() {
       captionBox.style.display = 'block';
       caption.textContent = currentSlide.caption;
       if (detailsTime) detailsTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${timeFormatted}`;
-      if (detailsExpires) detailsExpires.textContent = expiresInLabel;
+      if (detailsExpires) detailsExpires.textContent = `TTL: ${expiresInLabel}`;
     } else {
       captionBox.style.display = 'none';
     }
@@ -11564,7 +11579,7 @@ function showCurrentStorySlide() {
 
   modal.style.display = 'flex';
 
-  // Set up listeners for tapping left/right and close
+  // Set up listeners for tapping left/right, keys, and close
   setupViewerControls();
 
   // Start progress bar animation
@@ -11577,6 +11592,8 @@ function setupViewerControls() {
   const closeIcon = document.getElementById('statusViewerCloseIcon');
   const tapPrev = document.getElementById('statusTapPrev');
   const tapNext = document.getElementById('statusTapNext');
+  const replyInput = document.getElementById('statusViewerReplyInput');
+  const replySend = document.getElementById('statusViewerReplySend');
 
   const closeViewer = () => {
     clearInterval(storyProgressTimer);
@@ -11607,6 +11624,47 @@ function setupViewerControls() {
     modal.dataset.hasPauseListeners = 'true';
     modal.addEventListener('pointerdown', () => { isStoryPaused = true; });
     modal.addEventListener('pointerup', () => { isStoryPaused = false; });
+  }
+
+  // Terminal keyboard hotkeys (ArrowLeft, ArrowRight, Space, Escape)
+  if (modal && !modal.dataset.hasKeyListeners) {
+    modal.dataset.hasKeyListeners = 'true';
+    window.addEventListener('keydown', (e) => {
+      if (modal.style.display === 'none') return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevStorySlide();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        nextStorySlide();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeViewer();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        isStoryPaused = !isStoryPaused;
+      }
+    });
+  }
+
+  // Reply Transmission
+  if (replySend && !replySend.dataset.hasListener) {
+    replySend.dataset.hasListener = 'true';
+    const sendReply = () => {
+      const txt = replyInput?.value.trim();
+      if (!txt) return;
+      const currentGrp = activeStoriesList[currentStoryGroupIndex];
+      showNotif(`[TRANSMIT] Encrypted response sent to ${currentGrp?.userName || 'operative'}: "${txt.substring(0, 30)}"`, 'success', 3500);
+      if (replyInput) replyInput.value = '';
+    };
+    replySend.onclick = sendReply;
+    replyInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendReply();
+      }
+    });
   }
 }
 

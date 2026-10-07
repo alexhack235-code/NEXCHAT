@@ -222,6 +222,43 @@ html, body {
   box-shadow: 0 8px 24px rgba(232, 184, 75, 0.12);
 }
 
+@media (max-width: 768px) {
+  .reels-header {
+    height: 54px;
+    padding: 0 12px;
+  }
+  .reels-nav-group {
+    gap: 8px;
+    font-size: 13px;
+  }
+  .reels-header-actions {
+    gap: 4px;
+  }
+  .reels-create-pill-btn {
+    padding: 6px 12px;
+    font-size: 11.5px;
+    gap: 5px;
+    display: inline-flex !important;
+    visibility: visible !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .reels-filter-pill,
+  .reels-settings-pill {
+    display: none !important; /* Keep sound & upload button front and center so upload is never pushed off */
+  }
+  .reels-create-pill-btn {
+    display: inline-flex !important;
+    visibility: visible !important;
+    background: linear-gradient(135deg, rgba(232, 184, 75, 0.3), rgba(0, 255, 102, 0.2)) !important;
+    border-color: var(--cs-gold) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+    box-shadow: 0 0 14px rgba(232, 184, 75, 0.35);
+  }
+}
+
 /* ══════════════════════════════════════════════════
    VERTICAL FULLSCREEN FEED — Snap Scroll
    ══════════════════════════════════════════════════ */
@@ -3186,14 +3223,20 @@ html, body {
   position: fixed;
   bottom: 28px;
   right: 28px;
-  z-index: 40;
-  display: flex;
+  z-index: 99 !important;
+  display: flex !important;
   align-items: center;
   justify-content: center;
+  pointer-events: auto;
 }
 
-@media (max-width: 640px) {
-  .floating-create-reel-wrapper { display: none; }
+@media (max-width: 767px) {
+  .floating-create-reel-wrapper {
+    bottom: 20px;
+    right: 18px;
+    z-index: 99 !important;
+    display: flex !important;
+  }
 }
 
 .floating-create-reel-btn {
@@ -4281,13 +4324,17 @@ html, body {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 48;
+  z-index: 99 !important;
+  display: flex !important;
+  pointer-events: auto;
 }
 
 @media (max-width: 767px) {
   .floating-create-reel-wrapper {
-    bottom: 18px;
+    bottom: 20px;
     right: 18px;
+    z-index: 99 !important;
+    display: flex !important;
   }
 }
 
@@ -4296,8 +4343,8 @@ html, body {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: linear-gradient(135deg, rgba(22, 25, 36, 0.95), rgba(12, 14, 20, 0.95));
-  border: 1px solid var(--cs-border-gold);
+  background: linear-gradient(135deg, rgba(22, 25, 36, 0.98), rgba(12, 14, 20, 0.98));
+  border: 1.5px solid var(--cs-gold);
   padding: 8px 18px 8px 10px;
   border-radius: var(--cs-radius-pill);
   cursor: pointer;
@@ -4305,9 +4352,19 @@ html, body {
   -webkit-backdrop-filter: blur(20px);
   box-shadow:
     0 12px 32px rgba(0, 0, 0, 0.6),
-    0 0 24px rgba(232, 184, 75, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 0 20px rgba(232, 184, 75, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   transition: all var(--cs-duration) var(--cs-ease-bounce);
+  animation: cs-fab-glow-pulse 3s infinite ease-in-out;
+}
+
+@keyframes cs-fab-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 18px rgba(232, 184, 75, 0.35);
+  }
+  50% {
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.7), 0 0 28px rgba(0, 255, 102, 0.5);
+  }
 }
 
 .floating-create-reel-btn:hover {

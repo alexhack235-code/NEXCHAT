@@ -19,6 +19,7 @@ export const STATUS_VAULTS = [
  * @private
  */
 async function uploadToSingleStatusVault(file, vaultIndex, options = {}) {
+  const vault = STATUS_VAULTS.find(v => v.index === vaultIndex) || { name: `NEX-STATUS VAULT ${vaultIndex}` };
   const cleanName = (file.name || 'status_media').replace(/[^a-zA-Z0-9._-]/g, '_');
   const uid = options.uid || 'anon';
   const filename = `status/${uid}/${Date.now()}_${cleanName}`;

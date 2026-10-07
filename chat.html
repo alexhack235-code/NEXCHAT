@@ -86,6 +86,7 @@
           </div>
 
           <button id="fullscreen-btn-header" class="header-icon-btn" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+          <button id="status-btn-header" class="header-icon-btn" title="Status Vault" onclick="window.handleNavigation('status')"><i class="fa-solid fa-circle-notch"></i></button>
           <button id="reels-btn-header" class="header-icon-btn" title="CamShot" onclick="window.location.href='reels.html'"><i class="fa-solid fa-clapperboard"></i></button>
           <button id="installHeaderBtn" class="header-icon-btn" title="Install NEXCHAT"><i class="fa-solid fa-download"></i></button>
           <button id="gaming-btn-header" class="header-icon-btn" title="Gaming Hub"><i class="fa-solid fa-gamepad"></i></button>
@@ -143,17 +144,35 @@
       </div>
     </header>
 
-    <!-- NEXCHAT CYBER STATUS UPDATES SECTION -->
-    <div class="nex-status-container" id="statusContainer" style="display: none;">
-      <!-- Top AppBar: Height 60px, bg #202C33, only "Status" h2 19px #E9EDEF font-bold -->
-      <div class="status-top-appbar">
-        <h2 class="status-appbar-title">Status</h2>
-        <div class="status-appbar-actions">
-          <button type="button" id="statusHeaderCameraBtn" class="status-icon-btn" title="Add status media">
+    <!-- NEXCHAT CYBER HACKER TERMINAL STATUS VAULT SECTION -->
+    <div class="nex-status-container hacker-terminal-status" id="statusContainer" style="display: none;">
+      <!-- Terminal Status HUD Header -->
+      <div class="status-top-appbar terminal-status-appbar">
+        <div class="terminal-status-header-brand">
+          <div class="terminal-status-brand-line">
+            <span class="terminal-prompt-prefix">&gt;</span>
+            <h2 class="status-appbar-title terminal-hud-title">STATUS_VAULT<span class="term-cursor-blink">_</span></h2>
+          </div>
+          <div class="terminal-telemetry-meta">
+            <span class="telemetry-badge active-mesh"><i class="fa-solid fa-signal"></i> MESH: ONLINE</span>
+            <span class="telemetry-badge cipher-badge"><i class="fa-solid fa-shield-halved"></i> 24H_EPHEMERAL</span>
+          </div>
+        </div>
+
+        <div class="status-appbar-actions terminal-actions">
+          <!-- Big Obvious Upload Button in Header -->
+          <button type="button" id="statusHeaderCameraBtn" class="terminal-upload-pill-btn" title="Deploy Photo / Video Status">
             <i class="fa-solid fa-camera"></i>
+            <span>+ UPLOAD</span>
           </button>
-          <button type="button" class="status-icon-btn" title="Status privacy & options">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
+          <!-- Text Story Creator Button in Header -->
+          <button type="button" id="statusHeaderTextBtn" class="terminal-text-pill-btn" title="Transmit Encrypted Text Story">
+            <i class="fa-solid fa-terminal"></i>
+            <span>Aa TRANSMIT</span>
+          </button>
+          <!-- Terminal Launcher Icon -->
+          <button type="button" onclick="window.open('terminal.html','_blank')" class="status-icon-btn terminal-quick-btn" title="Launch Full Hacker Terminal">
+            <i class="fa-solid fa-code"></i>
           </button>
         </div>
       </div>
@@ -161,17 +180,24 @@
       <!-- Hidden file input for status media upload -->
       <input type="file" id="statusImageInput" style="display: none;" accept="image/*,video/*" />
 
-      <!-- Status Horizontal List (64px circles) -->
+      <!-- Status Sub-header Telemetry Bar -->
+      <div class="terminal-telemetry-banner">
+        <span class="telemetry-stream-label"><i class="fa-solid fa-satellite-dish fa-fade"></i> ACTIVE_NODES_FEED</span>
+        <span class="telemetry-vault-mode"><i class="fa-solid fa-server"></i> VAULTS: MULTI-BLOB (1-5)</span>
+      </div>
+
+      <!-- Status Horizontal List (Hacker Cyber Nodes Stream) -->
       <div class="status-horizontal-list scrollbar-hide" id="statusHorizontalList">
-        <!-- 1. My Status -->
-        <div class="status-circle-item my-status-item" id="myStatusCircleItem">
-          <div class="status-avatar-wrapper" id="myStatusAvatarWrapper">
+        <!-- 1. My Status Node -->
+        <div class="status-circle-item my-status-item terminal-node-card" id="myStatusCircleItem">
+          <div class="status-avatar-wrapper terminal-avatar-wrapper" id="myStatusAvatarWrapper">
             <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
+            <span class="terminal-node-beacon"></span>
           </div>
-          <button type="button" id="myStatusAddBadge" class="status-plus-badge" title="Add status update">+</button>
+          <button type="button" id="myStatusAddBadge" class="status-plus-badge terminal-plus-badge" title="Deploy Status Node">+</button>
           <span class="status-item-copy">
-            <span class="status-item-label">My status</span>
-            <span class="status-item-hint">Tap to add status update</span>
+            <span class="status-item-label terminal-node-name">[MY_NODE]</span>
+            <span class="status-item-hint">Tap to deploy</span>
           </span>
         </div>
 
@@ -179,26 +205,38 @@
         <div id="statusHorizontalFeed" class="status-horizontal-items"></div>
       </div>
 
-      <!-- Recent & Viewed Updates List -->
-      <div class="status-updates-body">
+      <!-- Recent & Viewed Updates List (Hacker Telemetry Stream) -->
+      <div class="status-updates-body terminal-feed-body">
         <div id="statusRecentSection" class="status-section-block">
-          <h3 class="status-section-header">Recent updates</h3>
-          <div id="statusRecentList" class="status-vertical-list"></div>
+          <div class="terminal-section-heading">
+            <span class="heading-bracket">[//</span>
+            <h3 class="status-section-header">LIVE_TELEMETRY_STREAM</h3>
+            <span class="heading-bracket">]</span>
+            <div class="heading-divider-line"></div>
+          </div>
+          <div id="statusRecentList" class="status-vertical-list terminal-card-list"></div>
         </div>
 
         <div id="statusViewedSection" class="status-section-block" style="display: none;">
-          <h3 class="status-section-header">Viewed updates</h3>
-          <div id="statusViewedList" class="status-vertical-list"></div>
+          <div class="terminal-section-heading">
+            <span class="heading-bracket">[//</span>
+            <h3 class="status-section-header">ARCHIVED_STREAM_NODES</h3>
+            <span class="heading-bracket">]</span>
+            <div class="heading-divider-line"></div>
+          </div>
+          <div id="statusViewedList" class="status-vertical-list terminal-card-list"></div>
         </div>
       </div>
 
-      <!-- Floating Action Buttons: Pencil (Text status) + Camera -->
-      <div class="status-fab-container">
-        <button type="button" id="statusFabText" class="status-fab-mini" title="Type a status">
-          <i class="fa-solid fa-pen"></i>
+      <!-- Floating Action Buttons: Always-visible Terminal Cyber FABs with Glowing Ring -->
+      <div class="status-fab-container terminal-fab-container">
+        <button type="button" id="statusFabText" class="status-fab-mini terminal-fab-btn" title="Create Terminal Text Story">
+          <i class="fa-solid fa-terminal"></i>
+          <span class="fab-hover-tip">TEXT</span>
         </button>
-        <button type="button" id="statusFabCamera" class="status-fab-main" title="Take or upload status">
+        <button type="button" id="statusFabCamera" class="status-fab-main terminal-fab-main-btn" title="Deploy Status Photo / Video">
           <i class="fa-solid fa-camera"></i>
+          <span class="fab-pulse-ring"></span>
         </button>
       </div>
     </div>
@@ -1561,72 +1599,83 @@
           </div>
 
           <div id="pairStatusFeedback" style="font-size: 12px; text-align: center; min-height: 20px;"></div>
-      <!-- CREATE STATUS MODAL (NEXCHAT 24H STORY CREATOR) -->
-      <div id="createStatusModal" class="modal create-status-modal" style="display: none;">
-        <div class="modal-content create-status-content" style="max-width: 520px; padding: 22px;">
-          <div class="create-status-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 12px;">
+      <!-- CREATE STATUS MODAL (NEXCHAT HACKER TERMINAL STORY TRANSMITTER) -->
+      <div id="createStatusModal" class="modal create-status-modal terminal-create-modal" style="display: none;">
+        <div class="modal-content create-status-content terminal-modal-box" style="max-width: 540px; padding: 22px;">
+          <div class="create-status-header terminal-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding-bottom: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800;">[NEX//TRANSMITTER]</span>
+                <span class="term-cursor-blink" style="color: #00FF88;">_</span>
+              </div>
+              <span style="font-size: 10.5px; color: #8696A0; font-family: 'JetBrains Mono', monospace;">EPHEMERAL_24H_BROADCAST_NODE</span>
+            </div>
             <div class="create-status-tabs" style="display: flex; gap: 8px;">
-              <button type="button" class="btn-primary" id="statusTabMediaBtn" style="padding: 7px 14px; font-size: 12.5px; border-radius: 20px;">
-                <i class="fa-solid fa-photo-film"></i> Photo / Video
+              <button type="button" class="btn-primary terminal-tab-btn active" id="statusTabMediaBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
+                <i class="fa-solid fa-photo-film"></i> [MEDIA_NODE]
               </button>
-              <button type="button" class="btn-secondary" id="statusTabTextBtn" style="padding: 7px 14px; font-size: 12.5px; border-radius: 20px;">
-                <i class="fa-solid fa-font"></i> Text Story
+              <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabTextBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
+                <i class="fa-solid fa-font"></i> [TEXT_CIPHER]
               </button>
             </div>
-            <button type="button" class="close-btn" id="closeCreateStatusModalBtn" title="Close" style="position: static; width: 30px; height: 30px; font-size: 14px;"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" class="close-btn terminal-modal-close" id="closeCreateStatusModalBtn" title="Close" style="position: static; width: 30px; height: 30px; font-size: 14px;"><i class="fa-solid fa-xmark"></i></button>
           </div>
 
           <!-- TAB 1: Media Story (Photo/Video + Caption) -->
           <div class="create-status-tab-pane" id="statusTabMediaPane">
-            <div class="status-drop-zone" id="statusMediaDropZone" style="border: 2px dashed rgba(0, 255, 102, 0.4); border-radius: 12px; padding: 24px; text-align: center; cursor: pointer; background: rgba(0, 255, 102, 0.03); transition: all 0.2s;">
+            <div class="status-drop-zone terminal-drop-zone" id="statusMediaDropZone" style="border: 2px dashed rgba(0, 255, 136, 0.4); border-radius: 10px; padding: 26px 16px; text-align: center; cursor: pointer; background: rgba(0, 255, 136, 0.03); transition: all 0.2s;">
               <input type="file" id="statusMediaModalFileInput" accept="image/*,video/*" style="display: none;">
               <div id="statusDropPlaceholder">
-                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 38px; color: #00ff66; margin-bottom: 8px;"></i>
-                <div style="font-size: 14px; font-weight: 700; color: #fff;">Click to select Photo or Video</div>
-                <div style="font-size: 11.5px; color: #8b949e; margin-top: 4px;">Supports PNG, JPG, GIF, MP4 (saved to multi-vault cloud)</div>
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 38px; color: #00ff88; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(0,255,136,0.4));"></i>
+                <div style="font-size: 14px; font-weight: 700; color: #fff; font-family: 'JetBrains Mono', monospace;">CLICK OR DRAG MEDIA PAYLOAD</div>
+                <div style="font-size: 11.5px; color: #8b949e; margin-top: 4px; font-family: 'JetBrains Mono', monospace;">Supports MP4, MOV, PNG, JPG &bull; Cascades to NEX-STATUS VAULT 1-5</div>
               </div>
               <div id="statusMediaPreviewBox" style="display: none; position: relative;">
-                <img id="statusModalImgPreview" src="" alt="Preview" style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; object-fit: contain; margin: 0 auto;">
-                <video id="statusModalVideoPreview" src="" controls playsinline style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; margin: 0 auto;"></video>
+                <img id="statusModalImgPreview" src="" alt="Preview" style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; object-fit: contain; margin: 0 auto; border: 1px solid rgba(0,255,136,0.3);">
+                <video id="statusModalVideoPreview" src="" controls playsinline style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; margin: 0 auto; border: 1px solid rgba(0,255,136,0.3);"></video>
                 <button type="button" id="removeStatusMediaPreviewBtn" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;" title="Remove media"><i class="fa-solid fa-xmark"></i></button>
               </div>
             </div>
             <div style="margin-top: 14px;">
-              <input type="text" id="statusMediaCaptionInput" placeholder="Add a caption... (optional)" class="settings-input" style="width: 100%; box-sizing: border-box; font-size: 13.5px; padding: 10px 14px;">
+              <div style="display: flex; align-items: center; gap: 6px; background: rgba(16, 26, 36, 0.95); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 8px; padding: 4px 12px;">
+                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 12px;">&gt;</span>
+                <input type="text" id="statusMediaCaptionInput" placeholder="Add status decryption caption... (optional)" class="settings-input" style="width: 100%; border: none; background: transparent; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 8px 0; outline: none;">
+              </div>
             </div>
           </div>
 
           <!-- TAB 2: Text Story (Custom Gradients + Big Typography) -->
           <div class="create-status-tab-pane" id="statusTabTextPane" style="display: none;">
-            <div id="statusTextStoryCanvas" class="status-text-canvas" style="border-radius: 14px; min-height: 180px; display: flex; align-items: center; justify-content: center; padding: 20px; background: linear-gradient(135deg, #059669, #10b981); transition: background 0.3s;">
-              <textarea id="statusTextStoryInput" placeholder="Type your status update..." maxlength="280" style="width: 100%; background: transparent; border: none; outline: none; color: #ffffff; font-family: 'Inter', sans-serif; font-size: 18px; font-weight: 600; text-align: center; resize: none; min-height: 120px;"></textarea>
+            <div id="statusTextStoryCanvas" class="status-text-canvas terminal-text-canvas" style="border-radius: 10px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; padding: 20px; background: linear-gradient(135deg, #0a0e13, #111b21); border: 1px solid rgba(0, 255, 136, 0.3); transition: background 0.3s; position: relative;">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00FF88; margin-bottom: 8px; opacity: 0.7;">root@nexchat/status:~$ transmit --message</div>
+              <textarea id="statusTextStoryInput" placeholder="Type your terminal status dispatch..." maxlength="280" style="width: 100%; background: transparent; border: none; outline: none; color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; text-align: center; resize: none; min-height: 100px; text-shadow: 0 0 10px rgba(0,255,136,0.5);"></textarea>
             </div>
             <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; justify-content: center;">
-              <span style="font-size: 11px; color: #8b949e; font-weight: 600;">GRADIENT:</span>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #059669, #10b981)" style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #fff; background: linear-gradient(135deg, #059669, #10b981); cursor: pointer;" title="Emerald"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #7c3aed, #a855f7)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #7c3aed, #a855f7); cursor: pointer;" title="Purple"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #0284c7, #06b6d4)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #0284c7, #06b6d4); cursor: pointer;" title="Cyber Blue"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #ea580c, #f59e0b)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #ea580c, #f59e0b); cursor: pointer;" title="Sunset"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #e11d48, #f43f5e)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #e11d48, #f43f5e); cursor: pointer;" title="Crimson"></button>
-              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #0f172a, #1e293b)" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.3); background: linear-gradient(135deg, #0f172a, #1e293b); cursor: pointer;" title="Onyx Dark"></button>
+              <span style="font-size: 10.5px; color: #8b949e; font-family: 'JetBrains Mono', monospace; font-weight: 700;">PALETTE:</span>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #0a0e13, #111b21)" style="width: 24px; height: 24px; border-radius: 4px; border: 2px solid #00FF88; background: #0A0E13;" title="Matrix Void"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #022c22, #065f46)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #065F46;" title="Cyber Emerald"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #082f49, #0284c7)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #0284C7;" title="Cyan Quantum"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #451a03, #d97706)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #D97706;" title="Amber CRT"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #4c0519, #e11d48)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #E11D48;" title="Purge Crimson"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #3b0764, #9333ea)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #9333EA;" title="Neon Violet"></button>
             </div>
           </div>
 
           <!-- Status Post Footer -->
-          <div style="margin-top: 18px; border-top: 1px solid var(--border-subtle); padding-top: 14px;">
+          <div style="margin-top: 18px; border-top: 1px solid rgba(0, 255, 136, 0.2); padding-top: 14px;">
             <div id="statusUploadProgressContainer" style="display: none; width: 100%; margin-bottom: 10px;">
-              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #00ff66; margin-bottom: 4px;">
-                <span id="statusUploadStatusText">Uploading to vault...</span>
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #00ff88; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">
+                <span id="statusUploadStatusText">[UPLOADING_TO_VAULT...]</span>
                 <span id="statusUploadPercent">0%</span>
               </div>
               <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                <div id="statusUploadProgressBar" style="height: 100%; width: 0%; background: #00ff66; transition: width 0.2s;"></div>
+                <div id="statusUploadProgressBar" style="height: 100%; width: 0%; background: #00ff88; box-shadow: 0 0 10px #00ff88; transition: width 0.2s;"></div>
               </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-              <span style="font-size: 12px; color: #8b949e;"><i class="fa-solid fa-clock-rotate-left"></i> Disappears in 24 hours</span>
-              <button type="button" id="publishStatusBtn" class="btn-primary" style="padding: 10px 24px; font-weight: 700;">
-                <i class="fa-solid fa-paper-plane"></i> Share Status
+              <span style="font-size: 11px; color: #8b949e; font-family: 'JetBrains Mono', monospace;"><i class="fa-solid fa-clock-rotate-left"></i> TTL: 24 HOURS (EPHEMERAL)</span>
+              <button type="button" id="publishStatusBtn" class="btn-primary terminal-publish-btn" style="padding: 10px 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, #00FF88, #00D4FF); color: #000; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0,255,136,0.4);">
+                <i class="fa-solid fa-paper-plane"></i> [TRANSMIT_TO_MESH]
               </button>
             </div>
           </div>
@@ -1738,53 +1787,75 @@
     </nav>
   </div>
 
-  <!-- NEXCHAT DARK STATUS VIEWER FULL-SCREEN MODAL -->
-  <div id="statusViewerModal" class="status-viewer-modal" style="display: none;">
-    <!-- Top Progress Bars (Segmented Story Indicators) -->
-    <div id="statusViewerProgressBars" class="status-viewer-progress-container"></div>
+  <!-- NEXCHAT HACKER TERMINAL STATUS VIEWER FULL-SCREEN MODAL -->
+  <div id="statusViewerModal" class="status-viewer-modal terminal-viewer-modal" style="display: none;">
+    <!-- CRT Matrix Scanlines & HUD Vignette -->
+    <div class="terminal-viewer-scanlines" aria-hidden="true"></div>
 
-    <!-- Top Header: Avatar + Name + Time top-left, Close X top-right -->
-    <div class="status-viewer-top-bar">
-      <div class="status-viewer-user-info">
-        <button type="button" id="closeStatusViewerBtn" class="status-viewer-back-btn" title="Back">
+    <!-- Top Laser Progress Bars (Segmented Story Indicators) -->
+    <div id="statusViewerProgressBars" class="status-viewer-progress-container terminal-progress-container"></div>
+
+    <!-- Top Header: Avatar + Name + Telemetry + Terminate button -->
+    <div class="status-viewer-top-bar terminal-viewer-header">
+      <div class="status-viewer-user-info terminal-viewer-user">
+        <button type="button" id="closeStatusViewerBtn" class="status-viewer-back-btn terminal-viewer-nav-btn" title="Back (Esc)">
           <i class="fa-solid fa-arrow-left"></i>
         </button>
-        <img id="statusViewerAvatar" src="logo.jpg" alt="Avatar" class="status-viewer-avatar">
-        <div class="status-viewer-meta">
-          <span id="statusViewerName" class="status-viewer-name">User</span>
-          <span id="statusViewerTime" class="status-viewer-time">03:56 AM</span>
+        <div class="terminal-viewer-avatar-wrap">
+          <img id="statusViewerAvatar" src="logo.jpg" alt="Avatar" class="status-viewer-avatar terminal-avatar-ring">
+        </div>
+        <div class="status-viewer-meta terminal-viewer-meta">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="statusViewerName" class="status-viewer-name terminal-node-title">NODE://USER</span>
+            <span class="terminal-cipher-chip">[AES_GCM_256]</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00FF88;">
+            <span id="statusViewerTime" class="status-viewer-time">T-00:00:00</span>
+            <span class="status-bullet">&bull;</span>
+            <span id="statusViewerDetailsExpires" class="status-expires-text">TTL: 24h</span>
+          </div>
         </div>
       </div>
-      <button type="button" id="statusViewerCloseIcon" class="status-viewer-close-btn" title="Close">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="terminal-hud-status-badge"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> LIVE_STREAM</span>
+        <button type="button" id="statusViewerCloseIcon" class="status-viewer-close-btn terminal-terminate-btn" title="Terminate Stream (Esc)">
+          <i class="fa-solid fa-xmark"></i> <span>[TERMINATE]</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Center Media Container with Tap Left/Right Controls -->
-    <div class="status-viewer-media-stage" id="statusViewerStage">
-      <div class="status-tap-zone left-zone" id="statusTapPrev" title="Previous status"></div>
-      <div class="status-tap-zone right-zone" id="statusTapNext" title="Next status"></div>
+    <!-- Center Media Container with Tap Left/Right Controls and HUD Reticles -->
+    <div class="status-viewer-media-stage terminal-media-stage" id="statusViewerStage">
+      <!-- HUD Reticle Corner Brackets -->
+      <div class="terminal-corner tl"></div>
+      <div class="terminal-corner tr"></div>
+      <div class="terminal-corner bl"></div>
+      <div class="terminal-corner br"></div>
+
+      <div class="status-tap-zone left-zone" id="statusTapPrev" title="Previous Status Slide (Left Arrow)"></div>
+      <div class="status-tap-zone right-zone" id="statusTapNext" title="Next Status Slide (Right Arrow)"></div>
 
       <img id="statusViewerImage" src="" alt="Status" style="display: none;">
       <video id="statusViewerVideo" src="" playsinline autoplay muted style="display: none;"></video>
-      <div id="statusViewerFallbackText" class="status-viewer-text-slide" style="display: none;"></div>
+      <div id="statusViewerFallbackText" class="status-viewer-text-slide terminal-text-slide" style="display: none;"></div>
     </div>
 
-    <!-- Bottom Caption & Info Overlay (time "03:56 AM", expires, caption "Multi-vault Cloudinary...") -->
-    <div class="status-viewer-bottom-bar">
-      <div id="statusViewerCaptionBox" class="status-viewer-caption-card">
-        <p id="statusViewerCaption" class="status-viewer-caption-text"></p>
-        <div class="status-viewer-details">
-          <span id="statusViewerDetailsTime"><i class="fa-regular fa-clock"></i> 03:56 AM</span>
-          <span class="status-bullet">•</span>
-          <span id="statusViewerDetailsExpires" class="status-expires-text">Expires in 21h</span>
+    <!-- Bottom Caption Console & Terminal Transmitter Row -->
+    <div class="status-viewer-bottom-bar terminal-viewer-bottom">
+      <div id="statusViewerCaptionBox" class="status-viewer-caption-card terminal-caption-console">
+        <div class="terminal-console-header">
+          <span class="terminal-console-prompt">root@nexchat/status:~$ cat payload.txt</span>
+          <span id="statusViewerDetailsTime" class="terminal-console-time"><i class="fa-regular fa-clock"></i> 03:56 AM</span>
         </div>
+        <p id="statusViewerCaption" class="status-viewer-caption-text terminal-console-body"></p>
       </div>
 
-      <div class="status-viewer-reply-row">
-        <input type="text" id="statusViewerReplyInput" class="status-reply-input" placeholder="Reply..." />
-        <button type="button" id="statusViewerReplySend" class="status-reply-btn" title="Send reply">
+      <div class="status-viewer-reply-row terminal-reply-row">
+        <span class="terminal-reply-prompt">&gt;</span>
+        <input type="text" id="statusViewerReplyInput" class="status-reply-input terminal-reply-input" placeholder="Transmit encrypted reply to operative..." autocomplete="off" />
+        <button type="button" id="statusViewerReplySend" class="status-reply-btn terminal-reply-send-btn" title="Transmit Reply">
           <i class="fa-solid fa-paper-plane"></i>
+          <span>[TRANSMIT]</span>
         </button>
       </div>
     </div>

@@ -4047,122 +4047,287 @@ html, body {
   scrollbar-width: none !important;
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   HACKER TERMINAL STATUS VAULT — SYSTEM ARCHITECTURE
+   OLED Black • Cyber Neon Green (#00FF88) • Cyan (#00D4FF) • Monospace HUD
+   ══════════════════════════════════════════════════════════════════ */
 .nex-status-container {
   display: flex;
   flex-direction: column;
   flex: 1;
   width: 100%;
-  height: auto;
+  height: 100%;
   min-height: 0;
   padding: 0;
-  background: linear-gradient(180deg, #0b141a 0%, #0f172a 100%);
-  color: #E9EDEF;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #0A0E13;
+  color: #F8FAFC;
+  font-family: 'JetBrains Mono', 'Inter', monospace;
   overflow-y: auto;
   position: relative;
   box-sizing: border-box;
+}
+
+.hacker-terminal-status {
+  background: radial-gradient(circle at 50% 0%, rgba(0, 255, 136, 0.04) 0%, transparent 60%),
+              linear-gradient(180deg, #0A0E13 0%, #06090D 100%);
 }
 
 .app[data-active-section="updates"] > .top-header {
   display: none;
 }
 
-/* Top AppBar: Height 60px, bg #202C33, only "Status" h2 19px #E9EDEF font-bold px-4 py-3 */
-.status-top-appbar {
-  height: 60px;
-  min-height: 60px;
-  background-color: #202C33;
+/* ─── Top Terminal Status AppBar ─── */
+.status-top-appbar.terminal-status-appbar {
+  height: 64px;
+  min-height: 64px;
+  background: rgba(17, 27, 33, 0.95);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 12px 16px;
+  padding: 0 18px;
   box-sizing: border-box;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.18);
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 30;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(0, 255, 136, 0.1);
 }
 
-.status-appbar-title {
-  font-size: 19px;
-  font-weight: 700;
-  color: #E9EDEF;
-  margin: 0;
-  line-height: 1.2;
+.terminal-status-header-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.status-appbar-actions {
+.terminal-status-brand-line {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 6px;
 }
 
-.status-icon-btn {
-  background: none;
-  border: none;
+.terminal-prompt-prefix {
+  color: #00FF88;
+  font-weight: 800;
+  font-size: 16px;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
+}
+
+.terminal-hud-title {
+  font-size: 17px;
+  font-weight: 800;
+  font-family: 'Orbitron', 'JetBrains Mono', sans-serif;
+  color: #00FF88;
+  letter-spacing: 1.2px;
+  margin: 0;
+  line-height: 1.2;
+  text-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
+}
+
+.terminal-telemetry-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
   color: #8696A0;
-  font-size: 18px;
+}
+
+.telemetry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+}
+
+.telemetry-badge.active-mesh {
+  color: #00FF88;
+  border-color: rgba(0, 255, 136, 0.3);
+  background: rgba(0, 255, 136, 0.06);
+}
+
+.telemetry-badge.cipher-badge {
+  color: #00D4FF;
+  border-color: rgba(0, 212, 255, 0.3);
+  background: rgba(0, 212, 255, 0.06);
+}
+
+/* ─── Header Action Buttons (Upload & Transmit) ─── */
+.terminal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-upload-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.22), rgba(0, 255, 136, 0.1));
+  border: 1.5px solid #00FF88;
+  color: #00FF88;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 15px;
+  border-radius: 9999px;
   cursor: pointer;
-  padding: 6px;
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.3);
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.terminal-upload-pill-btn:hover {
+  background: #00FF88;
+  color: #000;
+  box-shadow: 0 0 24px rgba(0, 255, 136, 0.7);
+  transform: translateY(-1px);
+}
+
+.terminal-text-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: #00D4FF;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 7px 13px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.terminal-text-pill-btn:hover {
+  background: #00D4FF;
+  color: #000;
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+.terminal-quick-btn {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8696A0;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.15s ease, background 0.15s ease;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.status-icon-btn:hover {
-  color: #25D366;
-  background: rgba(255, 255, 255, 0.05);
+.terminal-quick-btn:hover {
+  color: #00FF88;
+  border-color: #00FF88;
+  background: rgba(0, 255, 136, 0.1);
 }
 
-/* Status Horizontal List Container: flex gap-3 overflow-x-auto scrollbar-hide px-3 py-4 bg-[#111B21] */
-.status-horizontal-list {
+/* ─── Telemetry Sub-header Banner ─── */
+.terminal-telemetry-banner {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  overflow-x: auto;
-  padding: 16px 12px;
-  background-color: #111B21;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 18px;
+  background: rgba(10, 14, 19, 0.9);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 10.5px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #8696A0;
+}
+
+.telemetry-stream-label {
+  color: #00FF88;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.telemetry-vault-mode {
+  color: #00D4FF;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── Status Horizontal List (Hacker Cyber Nodes Stream) ─── */
+.status-horizontal-list {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 18px 16px;
+  background: rgba(17, 27, 33, 0.7);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.12);
   box-sizing: border-box;
   width: 100%;
+  scrollbar-width: none;
+}
+
+.status-horizontal-list::-webkit-scrollbar {
+  display: none;
 }
 
 .status-horizontal-items {
-  display: flex;
+  display: flex !important;
   align-items: flex-start;
-  gap: 12px;
+  gap: 16px;
 }
 
-/* Items: 64px circles */
+/* Cyber Node Items */
 .status-circle-item {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 72px;
+  width: 76px;
   flex-shrink: 0;
   cursor: pointer;
   user-select: none;
+  transition: transform 0.18s ease;
 }
 
-/* 1. My Status */
-.my-status-item .status-avatar-wrapper {
-  width: 56px;
-  height: 56px;
+.status-circle-item:hover {
+  transform: translateY(-2px);
+}
+
+.status-circle-item:active {
+  transform: scale(0.95);
+}
+
+/* My Status Node */
+.terminal-avatar-wrapper {
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   position: relative;
-  transition: transform 0.15s ease;
+  padding: 2.5px;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.8), rgba(0, 212, 255, 0.8));
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.45);
+  box-sizing: border-box;
 }
 
-.my-status-item.has-status .status-avatar-wrapper {
-  width: 60px;
-  height: 60px;
+.terminal-node-beacon {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  padding: 2.5px;
-  background-color: #25D366;
-  box-sizing: border-box;
+  background: #00FF88;
+  border: 2px solid #0A0E13;
+  box-shadow: 0 0 8px #00FF88;
+  animation: cs-breathe 2s infinite ease-in-out;
 }
 
 .status-avatar-img {
@@ -4171,147 +4336,171 @@ html, body {
   border-radius: 50%;
   object-fit: cover;
   display: block;
+  border: 2px solid #0A0E13;
 }
 
-.my-status-item.has-status .status-avatar-img {
-  border: 3px solid #111B21;
-}
-
-/* + Badge: absolute bottom-[20px] right-[8px] w-[22px] h-[22px] bg-[#25D366] rounded-full flex items-center justify-center border-[3px] border-[#111B21] -> "+" white 14px bold */
-.status-plus-badge {
+.terminal-plus-badge {
   position: absolute;
   bottom: 20px;
   right: 8px;
-  width: 22px;
-  height: 22px;
-  background-color: #25D366;
+  width: 24px;
+  height: 24px;
+  background: #00FF88;
+  color: #000;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 3px solid #111B21;
-  color: #FFFFFF;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
+  border: 2.5px solid #0A0E13;
+  font-size: 15px;
+  font-weight: 900;
   cursor: pointer;
-  padding: 0;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.7);
   transition: transform 0.15s ease;
 }
 
-.status-plus-badge:hover {
-  transform: scale(1.1);
+.terminal-plus-badge:hover {
+  transform: scale(1.15) rotate(90deg);
 }
 
-.status-item-label {
-  font-size: 12.5px;
-  color: #E9EDEF;
-  margin-top: 4px;
+.terminal-node-name {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #00FF88;
+  margin-top: 6px;
   width: 100%;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-weight: 400;
+  font-weight: 700;
+  text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
 }
 
 .status-item-hint {
-  display: none;
+  font-size: 9.5px;
+  color: #8696A0;
 }
 
-/* 2. Other Statuses */
+/* Other Stories: Rings */
 .status-ring-container {
-  width: 60px;
-  height: 60px;
+  width: 62px;
+  height: 62px;
   border-radius: 50%;
   padding: 2.5px;
   box-sizing: border-box;
-  transition: transform 0.15s ease;
+  transition: all 0.2s ease;
 }
 
 .status-ring-container.unread {
-  background-color: #25D366;
+  background: linear-gradient(135deg, #00FF88, #00D4FF);
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.55);
 }
 
 .status-ring-container.viewed {
-  background-color: #8696A0;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .status-ring-container .status-inner-img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 3px solid #111B21;
+  border: 2px solid #0A0E13;
   object-fit: cover;
   display: block;
 }
 
-.status-circle-item:active {
-  transform: scale(0.95);
+/* ─── Recent & Viewed Telemetry Stream Section ─── */
+.terminal-feed-body {
+  flex: 1;
+  padding: 20px 18px 100px 18px;
+  background: transparent;
 }
 
-/* Recent & Viewed Section */
-.status-updates-body {
-  flex: 1;
-  padding: 16px;
-  background-color: #0B141A;
+.terminal-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.heading-bracket {
+  color: #00FF88;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 13px;
 }
 
 .status-section-header {
-  font-size: 13px;
-  font-weight: 600;
-  color: #8696A0;
+  font-size: 12.5px;
+  font-weight: 800;
+  font-family: 'JetBrains Mono', monospace;
+  color: #00FF88;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 12px 0;
+  letter-spacing: 0.8px;
+  margin: 0;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
 }
 
-.status-vertical-list {
+.heading-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(0, 255, 136, 0.3) 0%, transparent 100%);
+  margin-left: 8px;
+}
+
+.terminal-card-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
+/* Hacker Telemetry Cards */
 .status-row-item {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 10px 12px;
-  border-radius: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-  border: 1px solid transparent;
+  background: rgba(17, 27, 33, 0.6);
+  border: 1px solid rgba(0, 255, 136, 0.12);
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
 }
 
 .status-row-item:hover {
-  background: rgba(255,255,255,0.03);
-  border-color: rgba(0,240,118,0.12);
-  transform: translateX(2px);
+  background: rgba(17, 27, 33, 0.95);
+  border-color: rgba(0, 255, 136, 0.45);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(0, 255, 136, 0.15);
+  transform: translateX(4px);
 }
 
 .status-row-avatar {
-  width: 52px;
-  height: 52px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  padding: 2.5px;
+  padding: 2px;
   box-sizing: border-box;
   flex-shrink: 0;
+  position: relative;
 }
 
 .status-row-avatar.unread {
-  background-color: #25D366;
+  background: linear-gradient(135deg, #00FF88, #00D4FF);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.45);
 }
 
 .status-row-avatar.viewed {
-  background-color: #8696A0;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .status-row-avatar img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 2.5px solid #0B141A;
+  border: 2px solid #0A0E13;
   object-fit: cover;
 }
 
@@ -4321,265 +4510,276 @@ html, body {
 }
 
 .status-row-name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #E9EDEF;
-  margin: 0 0 2px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #F8FAFC;
+  margin: 0 0 4px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .status-row-time {
-  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
   color: #8696A0;
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-/* Floating Action Buttons */
-.status-fab-container {
+.status-payload-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 255, 136, 0.1);
+  color: #00FF88;
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── Floating Action Buttons (Always Visible on Status) ─── */
+.terminal-fab-container {
   position: fixed;
   bottom: 84px;
-  right: 18px;
-  display: flex;
+  right: 20px;
+  display: flex !important;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  z-index: 30;
+  z-index: 99 !important;
+  pointer-events: auto;
 }
 
-.status-fab-mini {
-  width: 40px;
-  height: 40px;
+.terminal-fab-btn {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background-color: #202C33;
-  color: #8696A0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  background: rgba(17, 27, 33, 0.95);
+  color: #00D4FF;
+  border: 1.5px solid rgba(0, 212, 255, 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 212, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
   cursor: pointer;
-  transition: transform 0.15s ease, color 0.15s ease;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(12px);
 }
 
-.status-fab-mini:hover {
-  color: #E9EDEF;
-  transform: scale(1.05);
+.terminal-fab-btn:hover {
+  background: #00D4FF;
+  color: #000;
+  transform: scale(1.1);
+  box-shadow: 0 8px 26px rgba(0, 212, 255, 0.6);
 }
 
-.status-fab-main {
-  width: 56px;
-  height: 56px;
-  border-radius: 18px;
-  background-color: #25D366;
-  color: #0B141A;
-  border: none;
-  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+.terminal-fab-main-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00FF88, #00D4FF);
+  color: #000;
+  border: 2px solid #00FF88;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 255, 136, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 22px;
   cursor: pointer;
-  transition: transform 0.15s ease, filter 0.15s ease;
+  position: relative;
+  transition: all 0.2s ease;
+  animation: cs-fab-glow-pulse 2.5s infinite ease-in-out;
 }
 
-.status-fab-main:hover {
-  filter: brightness(1.08);
-  transform: scale(1.04);
+.terminal-fab-main-btn:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 10px 36px rgba(0, 255, 136, 0.85);
 }
 
-@media (max-width: 899px) {
-  .status-top-appbar {
-    height: calc(60px + env(safe-area-inset-top, 0px));
-    min-height: calc(60px + env(safe-area-inset-top, 0px));
-    padding-top: calc(12px + env(safe-area-inset-top, 0px));
+@keyframes cs-fab-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 18px rgba(0, 255, 136, 0.5);
   }
-
-  .status-horizontal-list {
-    align-items: center;
-    padding: 10px 16px;
-    background: #0B141A;
-  }
-
-  .my-status-item {
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    gap: 12px;
-    text-align: left;
-  }
-
-  .my-status-item .status-avatar-wrapper {
-    width: 48px;
-    height: 48px;
-    flex: 0 0 48px;
-  }
-
-  .my-status-item.has-status .status-avatar-wrapper {
-    width: 52px;
-    height: 52px;
-    flex-basis: 52px;
-  }
-
-  .my-status-item .status-plus-badge {
-    right: auto;
-    bottom: 0;
-    left: 34px;
-  }
-
-  .status-item-copy {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-  }
-
-  .status-item-label {
-    width: auto;
-    margin: 0;
-    text-align: left;
-    font-size: 15px;
-    font-weight: 600;
-  }
-
-  .status-item-hint {
-    display: block;
-    color: #8696A0;
-    font-size: 13px;
-  }
-
-  #statusHorizontalFeed {
-    display: none;
-  }
-
-  .status-updates-body {
-    flex: 1;
-    min-height: 0;
-    padding: 12px 0 calc(20px + env(safe-area-inset-bottom, 0px));
-  }
-
-  .status-section-header {
-    padding: 0 16px;
-    margin-bottom: 8px;
-    font-size: 13px;
-    text-transform: none;
-    letter-spacing: 0;
-  }
-
-  .status-row-item {
-    gap: 12px;
-    padding: 10px 16px;
-    border-radius: 0;
-  }
-
-  .status-fab-container {
-    bottom: calc(var(--bottom-nav-height) + 16px + env(safe-area-inset-bottom, 0px));
+  50% {
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7), 0 0 32px rgba(0, 212, 255, 0.7);
   }
 }
 
-/* ==========================================================================
-   STATUS VIEWER FULL-SCREEN MODAL
-   fixed inset-0 z-50 bg-black
-   ========================================================================== */
-.status-viewer-modal {
+/* ══════════════════════════════════════════════════════════════════
+   HACKER TERMINAL STATUS VIEWER (FULL-SCREEN HUD)
+   ══════════════════════════════════════════════════════════════════ */
+.terminal-viewer-modal {
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
-  background-color: #000000;
+  height: 100dvh;
+  background: #05080C;
   z-index: 99999;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
   user-select: none;
+  font-family: 'JetBrains Mono', monospace;
 }
 
-/* Progress bars on top */
-.status-viewer-progress-container {
+.terminal-viewer-scanlines {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+              linear-gradient(90deg, rgba(0, 255, 136, 0.02), rgba(0, 212, 255, 0.01));
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+  z-index: 25;
+  opacity: 0.8;
+}
+
+/* Laser progress indicators */
+.terminal-progress-container {
   display: flex;
   gap: 6px;
-  padding: 12px 10px 4px 10px;
+  padding: 12px 14px 4px 14px;
   width: 100%;
   box-sizing: border-box;
-  z-index: 20;
+  z-index: 30;
 }
 
 .status-progress-segment {
-  height: 2.5px;
+  height: 3px;
   flex: 1;
-  background-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .status-progress-fill {
   height: 100%;
-  background-color: #FFFFFF;
+  background: #00FF88;
+  box-shadow: 0 0 10px #00FF88;
   width: 0%;
   transition: width 0.08s linear;
 }
 
-/* Top Header */
-.status-viewer-top-bar {
+/* Header */
+.terminal-viewer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  z-index: 20;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent);
+  padding: 8px 16px;
+  z-index: 30;
+  background: linear-gradient(180deg, rgba(5, 8, 12, 0.95) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(0, 255, 136, 0.15);
 }
 
-.status-viewer-user-info {
+.terminal-viewer-user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.status-viewer-back-btn,
-.status-viewer-close-btn {
-  background: none;
-  border: none;
-  color: #FFFFFF;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 6px;
+.terminal-viewer-nav-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #00FF88;
+  font-size: 16px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
 }
 
-.status-viewer-avatar {
-  width: 38px;
-  height: 38px;
+.terminal-viewer-nav-btn:hover {
+  background: #00FF88;
+  color: #000;
+  box-shadow: 0 0 14px rgba(0, 255, 136, 0.6);
+}
+
+.terminal-viewer-avatar-wrap {
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  padding: 2px;
+  background: linear-gradient(135deg, #00FF88, #00D4FF);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
+}
+
+.terminal-avatar-ring {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
   object-fit: cover;
+  border: 1.5px solid #05080C;
 }
 
-.status-viewer-meta {
-  display: flex;
-  flex-direction: column;
+.terminal-node-title {
+  font-family: 'Orbitron', 'JetBrains Mono', sans-serif;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #00FF88;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
 }
 
-.status-viewer-name {
-  font-size: 15px;
-  font-weight: 600;
-  color: #E9EDEF;
-  line-height: 1.2;
+.terminal-cipher-chip {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #00D4FF;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.3);
 }
 
-.status-viewer-time {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
-  line-height: 1.2;
+.terminal-hud-status-badge {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #00FF88;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.25);
 }
 
-/* Center Media Stage */
-.status-viewer-media-stage {
+.terminal-terminate-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.terminal-terminate-btn:hover {
+  background: #ef4444;
+  color: #fff;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+}
+
+/* Media Stage with Reticles */
+.terminal-media-stage {
   flex: 1;
   position: relative;
   display: flex;
@@ -4588,142 +4788,138 @@ html, body {
   overflow: hidden;
   width: 100%;
   height: 100%;
+  background: #000;
 }
 
-.status-tap-zone {
+.terminal-corner {
   position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 15;
-  cursor: pointer;
-}
-
-.status-tap-zone.left-zone {
-  left: 0;
-  width: 30%;
-}
-
-.status-tap-zone.right-zone {
-  right: 0;
-  width: 70%;
-}
-
-.status-viewer-media-stage img,
-.status-viewer-media-stage video {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 16px;
+  height: 16px;
   pointer-events: none;
+  z-index: 22;
 }
 
-.status-viewer-text-slide {
+.terminal-corner.tl { top: 20px; left: 20px; border-top: 2px solid #00FF88; border-left: 2px solid #00FF88; }
+.terminal-corner.tr { top: 20px; right: 20px; border-top: 2px solid #00FF88; border-right: 2px solid #00FF88; }
+.terminal-corner.bl { bottom: 20px; left: 20px; border-bottom: 2px solid #00FF88; border-left: 2px solid #00FF88; }
+.terminal-corner.br { bottom: 20px; right: 20px; border-bottom: 2px solid #00FF88; border-right: 2px solid #00FF88; }
+
+.terminal-text-slide {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  padding: 40px;
   box-sizing: border-box;
   text-align: center;
-  color: #FFFFFF;
-  font-size: 24px;
+  color: #00FF88;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 26px;
   font-weight: 700;
-  line-height: 1.5;
-  background: #005C4B;
+  line-height: 1.6;
+  text-shadow: 0 0 14px rgba(0, 255, 136, 0.6);
 }
 
-/* Bottom Bar */
-.status-viewer-bottom-bar {
+/* Bottom Console Caption & Reply */
+.terminal-viewer-bottom {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px 16px 20px 16px;
-  z-index: 20;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.5), transparent);
+  gap: 12px;
+  padding: 14px 20px 24px 20px;
+  z-index: 30;
+  background: linear-gradient(0deg, rgba(5, 8, 12, 0.98) 0%, rgba(5, 8, 12, 0.75) 60%, transparent 100%);
+  border-top: 1px solid rgba(0, 255, 136, 0.15);
 }
 
-.status-viewer-caption-card {
-  background: rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 16px;
-  padding: 12px 16px;
-  text-align: center;
-  max-width: 580px;
+.terminal-caption-console {
+  background: rgba(10, 14, 19, 0.85);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  border-radius: 10px;
+  padding: 10px 16px;
+  max-width: 680px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
-.status-viewer-caption-text {
+.terminal-console-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.terminal-console-prompt {
+  color: #00FF88;
+  font-weight: 700;
+}
+
+.terminal-console-time {
+  color: #8696A0;
+}
+
+.terminal-console-body {
   font-size: 14.5px;
-  color: #E9EDEF;
+  color: #F8FAFC;
   line-height: 1.5;
-  margin: 0 0 6px 0;
+  margin: 0;
   font-weight: 500;
 }
 
-.status-viewer-details {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #8696A0;
-}
-
-.status-bullet {
-  color: #8696A0;
-}
-
-.status-expires-text {
-  color: #25D366;
-  font-weight: 600;
-}
-
-.status-viewer-reply-row {
+.terminal-reply-row {
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 580px;
+  max-width: 680px;
   margin: 0 auto;
   width: 100%;
+  background: rgba(16, 26, 36, 0.9);
+  border: 1.5px solid rgba(0, 255, 136, 0.35);
+  border-radius: 8px;
+  padding: 4px 12px;
+  box-sizing: border-box;
 }
 
-.status-reply-input {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
-  padding: 10px 16px;
-  color: #E9EDEF;
+.terminal-reply-prompt {
+  color: #00FF88;
+  font-weight: 800;
   font-size: 14px;
-  outline: none;
 }
 
-.status-reply-input:focus {
-  border-color: #25D366;
-}
-
-.status-reply-btn {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background-color: #25D366;
-  color: #0B141A;
+.terminal-reply-input {
+  flex: 1;
+  background: transparent;
   border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 16px;
-  cursor: pointer;
-  flex-shrink: 0;
-  transition: transform 0.15s ease;
+  color: #F8FAFC;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13.5px;
+  outline: none;
+  padding: 8px 4px;
 }
 
-.status-reply-btn:active {
-  transform: scale(0.92);
+.terminal-reply-send-btn {
+  background: linear-gradient(135deg, #00FF88, #00D4FF);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
+  transition: all 0.2s ease;
+}
+
+.terminal-reply-send-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(0, 255, 136, 0.7);
 }
 
 /* ============================================================
