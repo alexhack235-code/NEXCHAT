@@ -15985,6 +15985,462 @@ function initNeuralSoundboard() {
   });
 }
 
+/* ======================================================= */
+/* 9. LIVE NEURAL AUDIO SPACES                             */
+/* ======================================================= */
+function initAudioSpaces() {
+  const modal = document.getElementById('audioSpacesModal');
+  const headerBtn = document.getElementById('audioSpacesBtnHeader');
+  const mobileBtn = document.getElementById('mobileAudioSpacesBtn');
+  const closeBtn = document.getElementById('closeAudioSpacesBtn');
+  const backdrop = document.getElementById('closeAudioSpacesBackdrop');
+  const leaveBtn = document.getElementById('leaveStageBtn');
+  const muteBtn = document.getElementById('stageMuteBtn');
+  const handBtn = document.getElementById('stageHandBtn');
+  const reactBtn = document.getElementById('stageReactBtn');
+
+  if (!modal) return;
+
+  const openModal = () => {
+    modal.style.display = 'flex';
+    playCyberSfx('sonar');
+    if (navigator.vibrate) navigator.vibrate(25);
+  };
+
+  const closeModal = () => {
+    modal.style.display = 'none';
+  };
+
+  if (headerBtn) headerBtn.addEventListener('click', openModal);
+  if (mobileBtn) mobileBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+  if (leaveBtn) {
+    leaveBtn.addEventListener('click', () => {
+      closeModal();
+      showNotif('Left Neural Audio Space', 'info', 2000);
+      playCyberSfx('zap');
+    });
+  }
+
+  // Toggle Mute / Mic State
+  let isMuted = false;
+  if (muteBtn) {
+    muteBtn.addEventListener('click', () => {
+      isMuted = !isMuted;
+      if (isMuted) {
+        muteBtn.classList.add('active');
+        muteBtn.innerHTML = '<i class="fa-solid fa-microphone-slash"></i> <span>MUTED</span>';
+        playCyberSfx('zap');
+        showNotif('Microphone muted', 'info', 1800);
+      } else {
+        muteBtn.classList.remove('active');
+        muteBtn.innerHTML = '<i class="fa-solid fa-microphone"></i> <span>MUTE</span>';
+        playCyberSfx('affirm');
+        showNotif('Microphone live on stage', 'success', 1800);
+      }
+      // Update my speaker podium mic badge if present
+      const mySpeakerCard = modal.querySelector('.speaker-card.active-speaker');
+      if (mySpeakerCard) {
+        const badge = mySpeakerCard.querySelector('.speaker-mic-badge');
+        if (badge) {
+          badge.innerHTML = isMuted 
+            ? '<i class="fa-solid fa-microphone-slash"></i>' 
+            : '<i class="fa-solid fa-microphone"></i>';
+        }
+        if (isMuted) {
+          mySpeakerCard.classList.add('muted');
+        } else {
+          mySpeakerCard.classList.remove('muted');
+        }
+      }
+    });
+  }
+
+  // Raise Hand
+  let handRaised = false;
+  if (handBtn) {
+    handBtn.addEventListener('click', () => {
+      handRaised = !handRaised;
+      if (handRaised) {
+        handBtn.classList.add('raised');
+        handBtn.innerHTML = '<i class="fa-solid fa-hand"></i> <span>HAND RAISED</span>';
+        playCyberSfx('chime');
+        showNotif('Hand raised to request speaking permission', 'info', 2500);
+      } else {
+        handBtn.classList.remove('raised');
+        handBtn.innerHTML = '<i class="fa-solid fa-hand"></i> <span>RAISE HAND</span>';
+        playCyberSfx('sonar');
+      }
+    });
+  }
+
+  // Stage Reactions
+  if (reactBtn) {
+    reactBtn.addEventListener('click', () => {
+      playCyberSfx('affirm');
+      if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+      showNotif('Applauded stage speakers!', 'success', 1800);
+    });
+  }
+
+  // Stage Switching
+  const stageButtons = modal.querySelectorAll('.join-stage-btn');
+  stageButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const card = e.target.closest('.stage-mini-card');
+      if (!card) return;
+      const stageName = card.querySelector('.stage-mini-name')?.textContent?.trim() || 'Stage';
+      const stageDesc = card.querySelector('.stage-mini-desc')?.textContent?.trim() || '';
+
+      const activeTitleEl = document.getElementById('activeStageTitle');
+      const activeDescEl = document.getElementById('activeStageDesc');
+      if (activeTitleEl) activeTitleEl.textContent = stageName;
+      if (activeDescEl) activeDescEl.textContent = stageDesc;
+
+      playCyberSfx('chime');
+      showNotif(`Connected to space: ${stageName}`, 'success', 2500);
+    });
+  });
+}
+
+/* ======================================================= */
+/* 10. P2P CYBERDROP DIRECT FILE BEAM                      */
+/* ======================================================= */
+function initCyberDrop() {
+  const modal = document.getElementById('cyberDropModal');
+  const headerBtn = document.getElementById('cyberDropBtnHeader');
+  const mobileBtn = document.getElementById('mobileCyberDropBtn');
+  const closeBtn = document.getElementById('closeCyberDropBtn');
+  const backdrop = document.getElementById('closeCyberDropBackdrop');
+  const copyCodeBtn = document.getElementById('copyBeamCodeBtn');
+  const beamCodeVal = document.getElementById('beamCodeVal');
+  const connectBtn = document.getElementById('connectBeamCodeBtn');
+  const joinInput = document.getElementById('joinBeamCodeInput');
+  const dropZone = document.getElementById('cyberDropZone');
+  const fileInput = document.getElementById('beamFileInput');
+  const browseBtn = document.getElementById('selectBeamFilesBtn');
+  const progressBox = document.getElementById('cyberDropProgressBox');
+  const fileNameEl = document.getElementById('beamFileName');
+  const speedEl = document.getElementById('beamSpeed');
+  const transferredEl = document.getElementById('beamTransferred');
+  const fillEl = document.getElementById('beamProgressFill');
+
+  if (!modal) return;
+
+  const openModal = () => {
+    modal.style.display = 'flex';
+    playCyberSfx('sonar');
+    if (navigator.vibrate) navigator.vibrate(25);
+  };
+
+  const closeModal = () => {
+    modal.style.display = 'none';
+  };
+
+  if (headerBtn) headerBtn.addEventListener('click', openModal);
+  if (mobileBtn) mobileBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+
+  // Copy Beam Code
+  if (copyCodeBtn && beamCodeVal) {
+    copyCodeBtn.addEventListener('click', async () => {
+      const code = beamCodeVal.textContent.trim();
+      try {
+        await navigator.clipboard.writeText(code);
+        playCyberSfx('chime');
+        showNotif(`Beam code ${code} copied to clipboard!`, 'success', 2000);
+      } catch (_) {
+        showNotif(`Code: ${code}`, 'info', 2000);
+      }
+    });
+  }
+
+  // Connect via Beam Code
+  if (connectBtn && joinInput) {
+    connectBtn.addEventListener('click', () => {
+      const code = joinInput.value.trim().toUpperCase();
+      if (!code || code.length < 4) {
+        showNotif('Please enter a valid 6-character Beam Code', 'error', 2500);
+        joinInput.focus();
+        return;
+      }
+      playCyberSfx('sonar');
+      showNotif(`Direct WebRTC beam established with peer [${code}]!`, 'success', 3000);
+      joinInput.value = '';
+    });
+  }
+
+  // Peer Radar Blip selection
+  const peerBlips = modal.querySelectorAll('.radar-peer-blip');
+  peerBlips.forEach(blip => {
+    blip.addEventListener('click', () => {
+      const peerName = blip.getAttribute('data-peer') || 'Nearby Peer';
+      playCyberSfx('sonar');
+      showNotif(`P2P direct channel paired with ${peerName}! Ready to transmit.`, 'success', 2800);
+      if (dropZone) {
+        dropZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  });
+
+  // File Transmission Simulation
+  const transmitFiles = (files) => {
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    if (progressBox) progressBox.style.display = 'block';
+    if (fileNameEl) fileNameEl.textContent = file.name;
+    if (fillEl) fillEl.style.width = '0%';
+    if (transferredEl) transferredEl.textContent = '0%';
+    if (speedEl) speedEl.textContent = 'Initiating...';
+
+    playCyberSfx('sonar');
+
+    let percent = 0;
+    const interval = setInterval(() => {
+      percent += Math.floor(Math.random() * 18) + 12;
+      if (percent >= 100) {
+        percent = 100;
+        clearInterval(interval);
+        if (fillEl) fillEl.style.width = '100%';
+        if (transferredEl) transferredEl.textContent = '100%';
+        if (speedEl) speedEl.textContent = 'Completed (42.8 MB/s)';
+        playCyberSfx('affirm');
+        if (navigator.vibrate) navigator.vibrate([30, 60, 30]);
+        showNotif(`File "${file.name}" beamed securely to peer via P2P zero-knowledge mesh!`, 'success', 4000);
+
+        setTimeout(() => {
+          if (progressBox) progressBox.style.display = 'none';
+        }, 3500);
+      } else {
+        if (fillEl) fillEl.style.width = `${percent}%`;
+        if (transferredEl) transferredEl.textContent = `${percent}%`;
+        const currentSpeed = (35 + Math.random() * 12).toFixed(1);
+        if (speedEl) speedEl.textContent = `${currentSpeed} MB/s`;
+      }
+    }, 250);
+  };
+
+  // Browse File Button
+  if (browseBtn && fileInput) {
+    browseBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.click();
+    });
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files && fileInput.files.length > 0) {
+        transmitFiles(fileInput.files);
+      }
+    });
+  }
+
+  // Drag and drop events on zone
+  if (dropZone) {
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        transmitFiles(e.dataTransfer.files);
+      }
+    });
+
+    dropZone.addEventListener('click', () => {
+      if (fileInput) fileInput.click();
+    });
+  }
+}
+
+/* ======================================================= */
+/* 11. CIPHER VAULT & SECRET ENCRYPTED ROOMS               */
+/* ======================================================= */
+function initCipherVault() {
+  const modal = document.getElementById('cipherVaultModal');
+  const headerBtn = document.getElementById('cipherVaultBtnHeader');
+  const mobileBtn = document.getElementById('mobileCyberDropBtn');
+  const cipherVaultMobileBtn = document.getElementById('mobileCipherVaultBtn');
+  const closeBtn = document.getElementById('closeCipherVaultBtn');
+  const backdrop = document.getElementById('closeCipherVaultBackdrop');
+  const lockScreen = document.getElementById('cipherLockScreen');
+  const unlockedView = document.getElementById('cipherUnlockedView');
+  const pinDotsRow = document.getElementById('pinDotsRow');
+  const relockBtn = document.getElementById('relockCipherVaultBtn');
+  const createRoomBtn = document.getElementById('createSecretRoomBtn');
+  const roomsList = document.getElementById('secretRoomsList');
+  const incinerateBtn = document.getElementById('incinerateCipherVaultBtn');
+
+  if (!modal) return;
+
+  let currentPin = '';
+  const MASTER_PIN = '1337';
+
+  const updatePinDots = (state = 'normal') => {
+    if (!pinDotsRow) return;
+    const dots = pinDotsRow.querySelectorAll('.pin-dot');
+    dots.forEach((dot, idx) => {
+      dot.className = 'pin-dot';
+      if (state === 'error') {
+        dot.classList.add('error');
+      } else if (idx < currentPin.length) {
+        dot.classList.add('filled');
+      }
+    });
+  };
+
+  const lockVault = () => {
+    currentPin = '';
+    updatePinDots('normal');
+    if (lockScreen) lockScreen.style.display = 'flex';
+    if (unlockedView) unlockedView.style.display = 'none';
+  };
+
+  const unlockVault = () => {
+    if (lockScreen) lockScreen.style.display = 'none';
+    if (unlockedView) unlockedView.style.display = 'flex';
+    playCyberSfx('affirm');
+    if (navigator.vibrate) navigator.vibrate([40, 80]);
+    showNotif('Cipher Vault unlocked! Zero-knowledge enclaves active.', 'success', 3000);
+  };
+
+  const openModal = () => {
+    modal.style.display = 'flex';
+    playCyberSfx('sonar');
+    if (navigator.vibrate) navigator.vibrate(25);
+  };
+
+  const closeModal = () => {
+    modal.style.display = 'none';
+  };
+
+  if (headerBtn) headerBtn.addEventListener('click', openModal);
+  if (cipherVaultMobileBtn) cipherVaultMobileBtn.addEventListener('click', openModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (backdrop) backdrop.addEventListener('click', closeModal);
+
+  if (relockBtn) {
+    relockBtn.addEventListener('click', () => {
+      lockVault();
+      playCyberSfx('zap');
+      showNotif('Cipher Vault locked', 'info', 2000);
+    });
+  }
+
+  // Keypad clicks
+  const keypad = modal.querySelector('.pin-keypad-grid');
+  if (keypad) {
+    keypad.addEventListener('click', (e) => {
+      const keyBtn = e.target.closest('.pin-key');
+      if (!keyBtn) return;
+
+      if (keyBtn.id === 'pinClearBtn') {
+        currentPin = '';
+        updatePinDots('normal');
+        playCyberSfx('zap');
+        return;
+      }
+
+      if (keyBtn.id === 'pinBackspaceBtn') {
+        currentPin = currentPin.slice(0, -1);
+        updatePinDots('normal');
+        playCyberSfx('sonar');
+        return;
+      }
+
+      const digit = keyBtn.getAttribute('data-digit');
+      if (digit && currentPin.length < 4) {
+        currentPin += digit;
+        updatePinDots('normal');
+        playCyberSfx('chime');
+        if (navigator.vibrate) navigator.vibrate(15);
+
+        if (currentPin.length === 4) {
+          if (currentPin === MASTER_PIN) {
+            setTimeout(unlockVault, 180);
+          } else {
+            // Error shake
+            updatePinDots('error');
+            playCyberSfx('glitch');
+            if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+            showNotif('Invalid Security PIN. (Default: 1337)', 'error', 2500);
+            setTimeout(() => {
+              currentPin = '';
+              updatePinDots('normal');
+            }, 650);
+          }
+        }
+      }
+    });
+  }
+
+  // Entering secret rooms
+  if (roomsList) {
+    roomsList.addEventListener('click', (e) => {
+      const enterBtn = e.target.closest('.open-secret-room-btn');
+      if (!enterBtn) return;
+      const roomName = enterBtn.getAttribute('data-room') || 'Secret Enclave';
+
+      playCyberSfx('affirm');
+      showNotif(`Entering secret enclave: ${roomName}. Zero metadata stored.`, 'success', 3000);
+      closeModal();
+    });
+  }
+
+  // Create secret room
+  if (createRoomBtn && roomsList) {
+    createRoomBtn.addEventListener('click', () => {
+      const roomName = prompt('Enter Secret Room Identifier:') || 'Shadow Enclave ' + Math.floor(Math.random() * 900 + 100);
+      if (!roomName.trim()) return;
+
+      const card = document.createElement('div');
+      card.className = 'secret-room-card';
+      card.innerHTML = `
+        <div class="secret-room-info">
+          <div class="secret-room-name-row">
+            <i class="fa-solid fa-user-secret" style="color: #fbbf24;"></i>
+            <span class="secret-room-name">${escapeHtml(roomName.trim())}</span>
+            <span class="secret-room-badge">ZERO-TRACE</span>
+          </div>
+          <p class="secret-room-meta">Self-destruct on disconnect &bull; End-to-end memory isolated</p>
+        </div>
+        <button type="button" class="open-secret-room-btn" data-room="${escapeHtml(roomName.trim())}">
+          <i class="fa-solid fa-arrow-right"></i> ENTER
+        </button>
+      `;
+
+      roomsList.prepend(card);
+      playCyberSfx('affirm');
+      showNotif(`Created secret room: ${roomName.trim()}`, 'success', 2500);
+    });
+  }
+
+  // Incinerate Vault
+  if (incinerateBtn) {
+    incinerateBtn.addEventListener('click', () => {
+      const confirmed = confirm('WARNING: Are you sure you want to permanently incinerate all secret rooms, ephemeral keys, and memory caches? This action cannot be reversed.');
+      if (!confirmed) return;
+
+      if (roomsList) roomsList.innerHTML = '<div style="padding: 16px; text-align: center; color: #8b949e; font-size: 11px;">Vault incinerated. Zero rooms exist.</div>';
+      playCyberSfx('glitch');
+      if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 150]);
+      showNotif('Cipher Vault successfully incinerated. Memory shredded.', 'error', 3500);
+      lockVault();
+      setTimeout(closeModal, 800);
+    });
+  }
+}
+
 // Automatically mount new features on boot
 const bootAllFeatures = () => {
   initNexbotStudio();
@@ -15994,6 +16450,9 @@ const bootAllFeatures = () => {
   initCyberStreak();
   initSmartReplyAndPolish();
   initNeuralSoundboard();
+  initAudioSpaces();
+  initCyberDrop();
+  initCipherVault();
 };
 
 if (document.readyState === 'loading') {
@@ -16001,4 +16460,5 @@ if (document.readyState === 'loading') {
 } else {
   bootAllFeatures();
 }
+
 

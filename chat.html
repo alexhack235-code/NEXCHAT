@@ -104,6 +104,9 @@
           <button id="nexbotStudioBtnHeader" class="header-icon-btn" title="NEXBOT Studio &amp; WhatsApp Architect"><i class="fa-solid fa-robot"></i></button>
           <button id="vipVaultBtnHeader" class="header-icon-btn" title="VIP Token Vault &amp; Licenses"><i class="fa-solid fa-crown"></i></button>
           <button id="cyberStreakBtnHeader" class="header-icon-btn" title="Daily Cyber Streak Matrix"><i class="fa-solid fa-bolt" style="color: #ffd700;"></i></button>
+          <button id="audioSpacesBtnHeader" class="header-icon-btn" title="Live Neural Audio Spaces"><i class="fa-solid fa-podcast"></i></button>
+          <button id="cyberDropBtnHeader" class="header-icon-btn" title="P2P CyberDrop Direct File Beam"><i class="fa-solid fa-share-nodes"></i></button>
+          <button id="cipherVaultBtnHeader" class="header-icon-btn" title="Cipher Vault &amp; Secret Rooms"><i class="fa-solid fa-key"></i></button>
           <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
           <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
         </div>
@@ -155,6 +158,15 @@
         <button type="button" class="mobile-menu-item" id="mobileStreakBtn">
           <i class="fa-solid fa-bolt" style="color: #ffd700;"></i> <span>Cyber Streak Hub</span>
           <span class="mobile-menu-badge" id="mobileStreakBadge">1 DAY</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileAudioSpacesBtn">
+          <i class="fa-solid fa-podcast"></i> <span>Live Audio Spaces</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileCyberDropBtn">
+          <i class="fa-solid fa-share-nodes"></i> <span>CyberDrop P2P Beam</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileCipherVaultBtn">
+          <i class="fa-solid fa-key"></i> <span>Cipher Secret Rooms</span>
         </button>
         <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
           <i class="fa-solid fa-gear"></i> <span>Settings</span>
@@ -2744,6 +2756,371 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         <button type="button" id="claimStreakRewardBtn" class="streak-claim-action-btn">
           <i class="fa-solid fa-bolt"></i> CLAIM DAILY REWARD (+25 TOKENS)
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 5. LIVE NEURAL AUDIO SPACES & STAGES       -->
+  <!-- ========================================== -->
+  <div id="audioSpacesModal" class="audio-spaces-modal" style="display: none;">
+    <div class="spaces-modal-backdrop" id="closeAudioSpacesBackdrop"></div>
+    <div class="spaces-modal-container">
+      <div class="spaces-modal-header">
+        <div class="spaces-brand">
+          <div class="spaces-icon-box"><i class="fa-solid fa-podcast"></i></div>
+          <div>
+            <h2 class="spaces-title">NEURAL AUDIO SPACES</h2>
+            <div class="spaces-subtitle">DECENTRALIZED VOICE STAGES &bull; LIVE AUDIO PODIUMS</div>
+          </div>
+        </div>
+        <div class="spaces-header-actions">
+          <button type="button" class="spaces-create-btn" id="openCreateSpaceModalBtn">
+            <i class="fa-solid fa-plus"></i> START STAGE
+          </button>
+          <button type="button" class="spaces-close-btn" id="closeAudioSpacesBtn" title="Close Spaces">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Stage Broadcast HUD -->
+      <div class="active-stage-card" id="activeStageCard">
+        <div class="stage-top-meta">
+          <div class="stage-status-indicator">
+            <span class="live-dot-pulse"></span>
+            <span class="stage-tag-badge">LIVE STAGE</span>
+            <span class="stage-title-text" id="currentStageTitle">Cyber Security Briefing: Zero-Day Guard</span>
+          </div>
+          <div class="stage-listener-badge">
+            <i class="fa-solid fa-headphones"></i> <span id="currentStageListenersCount">148</span> Listening
+          </div>
+        </div>
+
+        <!-- Live Equalizer Spectrum Visualizer -->
+        <div class="stage-audio-spectrum" id="stageAudioSpectrum">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <!-- Speaker Podium Grid -->
+        <div class="podium-speakers-grid" id="podiumSpeakersGrid">
+          <div class="podium-speaker active-speaking">
+            <div class="speaker-avatar-wrap">
+              <img src="logo.jpg" alt="Host" class="speaker-avatar">
+              <span class="speaker-role-badge host"><i class="fa-solid fa-crown"></i></span>
+            </div>
+            <span class="speaker-name">Alex [Host]</span>
+            <span class="speaker-freq">880 Hz</span>
+          </div>
+          <div class="podium-speaker">
+            <div class="speaker-avatar-wrap">
+              <img src="chronex-ai.jpg" alt="AI Co-Host" class="speaker-avatar">
+              <span class="speaker-role-badge ai"><i class="fa-solid fa-robot"></i></span>
+            </div>
+            <span class="speaker-name">ChronEX AI</span>
+            <span class="speaker-freq">Neural</span>
+          </div>
+          <div class="podium-speaker">
+            <div class="speaker-avatar-wrap">
+              <img src="favicon.png" alt="Guest" class="speaker-avatar">
+              <span class="speaker-role-badge speaker"><i class="fa-solid fa-microphone"></i></span>
+            </div>
+            <span class="speaker-name">Guest Node</span>
+            <span class="speaker-freq">Co-Host</span>
+          </div>
+        </div>
+
+        <!-- Listener Gallery -->
+        <div class="stage-listener-gallery">
+          <span class="gallery-label">LISTENERS:</span>
+          <div class="gallery-avatars" id="galleryAvatars">
+            <img src="favicon.png" class="gallery-avatar" title="Listener 1">
+            <img src="logo.jpg" class="gallery-avatar" title="Listener 2">
+            <img src="chronex-ai.jpg" class="gallery-avatar" title="Listener 3">
+            <span class="gallery-more-badge">+145</span>
+          </div>
+        </div>
+
+        <!-- Interactive Stage Toolbar -->
+        <div class="stage-controls-toolbar">
+          <button type="button" class="stage-btn mic-btn" id="stageMicToggleBtn" title="Toggle Microphone">
+            <i class="fa-solid fa-microphone"></i> <span>Mute</span>
+          </button>
+          <button type="button" class="stage-btn hand-btn" id="stageHandRaiseBtn" title="Request to Speak">
+            <i class="fa-solid fa-hand"></i> <span>Raise Hand</span>
+          </button>
+          <button type="button" class="stage-btn sfx-btn" id="stageReactionSfxBtn" title="Send Audio Reaction">
+            <i class="fa-solid fa-volume-high"></i> <span>React</span>
+          </button>
+          <button type="button" class="stage-btn leave-btn" id="stageLeaveBtn" title="Leave Stage">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Leave</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Discover Spaces Feed -->
+      <div class="spaces-feed-section">
+        <h3 class="spaces-section-heading">EXPLORE LIVE STAGES</h3>
+        <div class="spaces-cards-grid" id="spacesCardsGrid">
+          <div class="space-room-card active-room" data-room-id="room-sec" data-title="Cyber Security Briefing: Zero-Day Guard">
+            <div class="room-card-header">
+              <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> ACTIVE</span>
+              <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 148</span>
+            </div>
+            <h4 class="room-card-title">Cyber Security Briefing: Zero-Day Guard</h4>
+            <p class="room-card-desc">Architecting zero-trust perimeter defenses and quantum cryptographic mesh.</p>
+            <div class="room-card-footer">
+              <span class="room-host-tag"><i class="fa-solid fa-crown"></i> Alex</span>
+              <button type="button" class="join-space-btn" data-room="room-sec">TUNED IN</button>
+            </div>
+          </div>
+
+          <div class="space-room-card" data-room-id="room-ai" data-title="ChronEX AI Devs & Builders Lounge">
+            <div class="room-card-header">
+              <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> LIVE</span>
+              <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 92</span>
+            </div>
+            <h4 class="room-card-title">ChronEX AI Devs &amp; Builders Lounge</h4>
+            <p class="room-card-desc">Fine-tuning custom persona bots and Baileys WhatsApp bridges.</p>
+            <div class="room-card-footer">
+              <span class="room-host-tag"><i class="fa-solid fa-robot"></i> ChronEX</span>
+              <button type="button" class="join-space-btn" data-room="room-ai">TUNE IN</button>
+            </div>
+          </div>
+
+          <div class="space-room-card" data-room-id="room-gaming" data-title="Gaming Hub Champions Round">
+            <div class="room-card-header">
+              <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> LIVE</span>
+              <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 210</span>
+            </div>
+            <h4 class="room-card-title">Gaming Hub Champions Round</h4>
+            <p class="room-card-desc">Speedrun showdown commentary and multi-arena leaderboard tournaments.</p>
+            <div class="room-card-footer">
+              <span class="room-host-tag"><i class="fa-solid fa-gamepad"></i> Nova</span>
+              <button type="button" class="join-space-btn" data-room="room-gaming">TUNE IN</button>
+            </div>
+          </div>
+
+          <div class="space-room-card" data-room-id="room-ambient" data-title="Night Drift Ambient Cyber Lounge">
+            <div class="room-card-header">
+              <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> LIVE</span>
+              <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 64</span>
+            </div>
+            <h4 class="room-card-title">Night Drift Ambient Cyber Lounge</h4>
+            <p class="room-card-desc">Low-frequency sub-bass synths and open community chat channel.</p>
+            <div class="room-card-footer">
+              <span class="room-host-tag"><i class="fa-solid fa-music"></i> DEMON_BEATS</span>
+              <button type="button" class="join-space-btn" data-room="room-ambient">TUNE IN</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6. CYBERDROP P2P DIRECT FILE BEAM          -->
+  <!-- ========================================== -->
+  <div id="cyberDropModal" class="cyber-drop-modal" style="display: none;">
+    <div class="cyberdrop-modal-backdrop" id="closeCyberDropBackdrop"></div>
+    <div class="cyberdrop-modal-container">
+      <div class="cyberdrop-modal-header">
+        <div class="cyberdrop-brand">
+          <div class="cyberdrop-icon-box"><i class="fa-solid fa-share-nodes"></i></div>
+          <div>
+            <h2 class="cyberdrop-title">CYBERDROP P2P BEAM</h2>
+            <div class="cyberdrop-subtitle">ZERO-SERVER BANDWIDTH &bull; GIGABIT WEBRTC MESH BEAM</div>
+          </div>
+        </div>
+        <button type="button" class="cyberdrop-close-btn" id="closeCyberDropBtn" title="Close CyberDrop">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Discovery Radar & Passcode Row -->
+      <div class="cyberdrop-top-row">
+        <div class="cyberdrop-radar-box">
+          <div class="cyberdrop-radar-sweep"></div>
+          <div class="cyberdrop-peer-node self" title="Your Node">
+            <i class="fa-solid fa-laptop"></i>
+          </div>
+          <div class="cyberdrop-peer-node peer-1" title="Peer 192.168.1.14 (Deck)">
+            <i class="fa-solid fa-mobile-screen"></i>
+          </div>
+          <div class="cyberdrop-peer-node peer-2" title="Peer Titan-HQ">
+            <i class="fa-solid fa-server"></i>
+          </div>
+          <span class="cyberdrop-radar-status">Scanning Mesh Network...</span>
+        </div>
+
+        <div class="cyberdrop-code-box">
+          <span class="beam-code-label">YOUR ONE-TIME BEAM CODE:</span>
+          <div class="beam-code-display" id="myBeamCodeDisplay">849-210</div>
+          <p class="beam-code-hint">Share this code with nearby peers to beam files directly.</p>
+          <div class="remote-code-input-row">
+            <input type="text" id="remoteBeamCodeInput" placeholder="Enter peer beam code..." maxlength="7">
+            <button type="button" id="connectBeamCodeBtn" class="beam-connect-btn">
+              <i class="fa-solid fa-link"></i> CONNECT
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- File Drop Target Station -->
+      <div class="cyberdrop-zone" id="cyberDropZone">
+        <i class="fa-solid fa-cloud-arrow-up cyberdrop-zone-icon"></i>
+        <div class="cyberdrop-zone-title">DRAG &amp; DROP FILES TO BEAM</div>
+        <p class="cyberdrop-zone-desc">High-speed P2P transmission &bull; Unlimited file size &bull; Direct encryption</p>
+        <button type="button" class="select-beam-files-btn" id="selectBeamFilesBtn">
+          <i class="fa-solid fa-folder-open"></i> BROWSE FILES
+        </button>
+        <input type="file" id="beamFileInput" style="display: none;" multiple>
+      </div>
+
+      <!-- Active Beam Transfer Progress Strip -->
+      <div class="cyberdrop-progress-box" id="cyberDropProgressBox" style="display: none;">
+        <div class="beam-file-meta">
+          <div class="beam-file-name-row">
+            <i class="fa-solid fa-file-zipper"></i>
+            <span id="beamFileName">firmware_v4.tar.gz</span>
+          </div>
+          <div class="beam-metrics">
+            <span id="beamSpeed">38.4 MB/s</span> &bull; <span id="beamTransferred">0%</span>
+          </div>
+        </div>
+        <div class="beam-progress-bar">
+          <div class="beam-progress-fill" id="beamProgressFill" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 7. CIPHER VAULT & ENCRYPTED SECRET ROOMS   -->
+  <!-- ========================================== -->
+  <div id="cipherVaultModal" class="cipher-vault-modal" style="display: none;">
+    <div class="cipher-modal-backdrop" id="closeCipherVaultBackdrop"></div>
+    <div class="cipher-modal-container">
+      <div class="cipher-modal-header">
+        <div class="cipher-brand">
+          <div class="cipher-icon-box"><i class="fa-solid fa-key"></i></div>
+          <div>
+            <h2 class="cipher-title">CIPHER VAULT</h2>
+            <div class="cipher-subtitle">ZERO-KNOWLEDGE HIDDEN ROOMS &bull; END-TO-END AES-256</div>
+          </div>
+        </div>
+        <button type="button" class="cipher-close-btn" id="closeCipherVaultBtn" title="Close Vault">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Lock Keypad Screen (Visible until unlocked) -->
+      <div class="cipher-lock-screen" id="cipherLockScreen">
+        <div class="lock-shield-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3 class="lock-screen-title">ENTER CIPHER SECURITY PIN</h3>
+        <p class="lock-screen-desc">Access to encrypted invisible rooms requires vault master PIN (Default: 1337)</p>
+
+        <!-- PIN Dots -->
+        <div class="pin-dots-row" id="pinDotsRow">
+          <span class="pin-dot"></span>
+          <span class="pin-dot"></span>
+          <span class="pin-dot"></span>
+          <span class="pin-dot"></span>
+        </div>
+
+        <!-- Numeric Keypad -->
+        <div class="pin-keypad-grid">
+          <button type="button" class="pin-key" data-digit="1">1</button>
+          <button type="button" class="pin-key" data-digit="2">2</button>
+          <button type="button" class="pin-key" data-digit="3">3</button>
+          <button type="button" class="pin-key" data-digit="4">4</button>
+          <button type="button" class="pin-key" data-digit="5">5</button>
+          <button type="button" class="pin-key" data-digit="6">6</button>
+          <button type="button" class="pin-key" data-digit="7">7</button>
+          <button type="button" class="pin-key" data-digit="8">8</button>
+          <button type="button" class="pin-key" data-digit="9">9</button>
+          <button type="button" class="pin-key clear" id="pinClearBtn"><i class="fa-solid fa-xmark"></i></button>
+          <button type="button" class="pin-key" data-digit="0">0</button>
+          <button type="button" class="pin-key backspace" id="pinBackspaceBtn"><i class="fa-solid fa-delete-left"></i></button>
+        </div>
+      </div>
+
+      <!-- Unlocked Vault View (Hidden until PIN is verified) -->
+      <div class="cipher-unlocked-view" id="cipherUnlockedView" style="display: none;">
+        <div class="cipher-telemetry-banner">
+          <div class="cipher-status-indicator">
+            <i class="fa-solid fa-lock"></i>
+            <span>ENCRYPTED MESH: AES-256-GCM ACTIVE &bull; MEMORY RESIDENT ONLY</span>
+          </div>
+          <button type="button" class="cipher-lock-btn" id="relockCipherVaultBtn">
+            <i class="fa-solid fa-lock"></i> LOCK VAULT
+          </button>
+        </div>
+
+        <div class="secret-rooms-section">
+          <div class="secret-rooms-header">
+            <h4>HIDDEN SECRET ROOMS</h4>
+            <button type="button" class="create-secret-room-btn" id="createSecretRoomBtn">
+              <i class="fa-solid fa-plus"></i> NEW SECRET ROOM
+            </button>
+          </div>
+
+          <div class="secret-rooms-list" id="secretRoomsList">
+            <div class="secret-room-card" data-room-id="sr-obsidian">
+              <div class="secret-room-info">
+                <div class="secret-room-name-row">
+                  <i class="fa-solid fa-eye-slash" style="color: #c084fc;"></i>
+                  <span class="secret-room-name">Project Obsidian</span>
+                  <span class="secret-room-badge">CIPHER-LOCKED</span>
+                </div>
+                <p class="secret-room-meta">Zero metadata logs &bull; 24h auto-rotation &bull; 2 participants</p>
+              </div>
+              <button type="button" class="open-secret-room-btn" data-room="Project Obsidian">
+                <i class="fa-solid fa-arrow-right"></i> ENTER
+              </button>
+            </div>
+
+            <div class="secret-room-card" data-room-id="sr-phantom">
+              <div class="secret-room-info">
+                <div class="secret-room-name-row">
+                  <i class="fa-solid fa-ghost" style="color: #67e8f9;"></i>
+                  <span class="secret-room-name">Phantom Mesh Vault</span>
+                  <span class="secret-room-badge">EPHEMERAL</span>
+                </div>
+                <p class="secret-room-meta">End-to-end client salted key &bull; Burn on close</p>
+              </div>
+              <button type="button" class="open-secret-room-btn" data-room="Phantom Mesh Vault">
+                <i class="fa-solid fa-arrow-right"></i> ENTER
+              </button>
+            </div>
+
+            <div class="secret-room-card" data-room-id="sr-ledger">
+              <div class="secret-room-info">
+                <div class="secret-room-name-row">
+                  <i class="fa-solid fa-fingerprint" style="color: #00ff66;"></i>
+                  <span class="secret-room-name">Quantum Ledger HQ</span>
+                  <span class="secret-room-badge">ENCLAVE</span>
+                </div>
+                <p class="secret-room-meta">Biometric requirement &bull; Off-grid cache only</p>
+              </div>
+              <button type="button" class="open-secret-room-btn" data-room="Quantum Ledger HQ">
+                <i class="fa-solid fa-arrow-right"></i> ENTER
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incinerator Emergency Wipe -->
+        <div class="cipher-incinerator-box">
+          <div class="incinerator-text">
+            <strong>EMERGENCY VAULT INCINERATOR</strong>
+            <p>Permanently deletes all secret rooms, ephemeral keys, and cached logs with zero recovery.</p>
+          </div>
+          <button type="button" class="incinerator-action-btn" id="incinerateCipherVaultBtn">
+            <i class="fa-solid fa-fire"></i> INCINERATE VAULT
+          </button>
+        </div>
       </div>
     </div>
   </div>
