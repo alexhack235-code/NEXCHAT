@@ -5888,3 +5888,2052 @@ body.chat-size-extra-large .message-bubble {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ==========================================================================
+   CHRONEX AI PRO & RESTRUCTURED SETTINGS SUITE ENHANCEMENTS
+   ========================================================================== */
+
+/* ── 1. Settings Fast-Filter Search Bar ── */
+.settings-search-bar-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 320px;
+  width: 100%;
+  margin: 0 16px;
+}
+
+.settings-search-bar-wrap .search-bar-icon {
+  position: absolute;
+  left: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.settings-search-input {
+  width: 100%;
+  padding: 8px 32px 8px 32px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill, 9999px);
+  color: #fff;
+  font-size: 12px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.settings-search-input:focus {
+  outline: none;
+  border-color: #00ff66;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.25);
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.settings-search-clear-btn {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 2px 4px;
+}
+
+.settings-search-clear-btn:hover {
+  color: #fff;
+}
+
+/* ── 2. Settings Nav Categorized Groups & Badges ── */
+.settings-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.settings-nav-group-title {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: rgba(255, 255, 255, 0.4);
+  padding: 6px 14px 2px;
+  font-family: 'Orbitron', monospace;
+}
+
+.settings-tab-microbadge {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.settings-tab-microbadge.ai-badge {
+  background: rgba(103, 232, 249, 0.15);
+  color: #67e8f9;
+  border: 1px solid rgba(103, 232, 249, 0.3);
+}
+
+.settings-tab-microbadge.token-badge {
+  background: rgba(255, 215, 0, 0.15);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.settings-nav-tab.ai-featured-tab {
+  background: rgba(103, 232, 249, 0.05);
+  border: 1px solid rgba(103, 232, 249, 0.15);
+}
+
+.settings-nav-tab.ai-featured-tab:hover,
+.settings-nav-tab.ai-featured-tab.active {
+  background: rgba(103, 232, 249, 0.15);
+  border-color: #67e8f9;
+  color: #67e8f9;
+  box-shadow: 0 0 16px rgba(103, 232, 249, 0.2);
+}
+
+/* ── 3. ChronEX Header Controls & Dropdown ── */
+.chronex-header-controls {
+  display: flex;
+  align-items: center;
+}
+
+.chronex-header-model-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  background: rgba(103, 232, 249, 0.1);
+  border: 1px solid rgba(103, 232, 249, 0.3);
+  color: #fff;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chronex-header-model-pill:hover {
+  background: rgba(103, 232, 249, 0.2);
+  border-color: #67e8f9;
+  box-shadow: 0 0 12px rgba(103, 232, 249, 0.3);
+}
+
+.chronex-model-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: rgba(13, 20, 28, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(103, 232, 249, 0.3);
+  border-radius: 14px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1000;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(103, 232, 249, 0.15);
+  animation: cs-pop-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chronex-model-drop-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #f0f6fc;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.18s ease;
+  width: 100%;
+}
+
+.chronex-model-drop-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.chronex-model-drop-item.active {
+  background: rgba(103, 232, 249, 0.12);
+  border-color: rgba(103, 232, 249, 0.35);
+}
+
+.chronex-model-drop-item i {
+  font-size: 16px;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.model-drop-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.model-drop-text strong {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.model-drop-text small {
+  font-size: 10.5px;
+  color: #8b949e;
+}
+
+/* ── 4. VIP ChronEX Item in Contact List ── */
+.chat-list-item.chronex-ai-item {
+  background: linear-gradient(90deg, rgba(0, 255, 102, 0.08), rgba(103, 232, 249, 0.04));
+  border: 1px solid rgba(0, 255, 102, 0.22);
+  margin-bottom: 8px;
+  border-radius: 14px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.chat-list-item.chronex-ai-item:hover,
+.chat-list-item.chronex-ai-item.active {
+  background: linear-gradient(90deg, rgba(0, 255, 102, 0.16), rgba(103, 232, 249, 0.09));
+  border-color: #00ff66;
+  box-shadow: 0 4px 20px rgba(0, 255, 102, 0.2);
+  transform: translateY(-1px);
+}
+
+.chronex-vip-pill {
+  font-size: 9px;
+  font-weight: 800;
+  color: #000;
+  background: #00ff66;
+  padding: 1px 6px;
+  border-radius: 4px;
+  margin-left: 6px;
+  letter-spacing: 0.5px;
+}
+
+/* ── 5. ChronEX Neural Welcome Stage (Empty State) ── */
+.chronex-welcome-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 36px 20px 24px;
+  max-width: 680px;
+  margin: auto;
+  animation: cs-fade-in 0.3s ease;
+}
+
+.chronex-neural-core {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.neural-core-ring {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.neural-core-ring.ring-1 {
+  inset: -6px;
+  border: 1.5px solid rgba(0, 255, 102, 0.45);
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.3);
+  animation: spinSlow 12s linear infinite;
+}
+
+.neural-core-ring.ring-2 {
+  inset: -14px;
+  border: 1px dashed rgba(103, 232, 249, 0.4);
+  animation: spinSlowReverse 18s linear infinite;
+}
+
+.neural-core-ring.ring-3 {
+  inset: -22px;
+  border: 1px solid rgba(0, 255, 102, 0.15);
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+@keyframes spinSlow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes spinSlowReverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.08); opacity: 0.8; }
+}
+
+.chronex-hero-avatar {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #00ff66;
+  box-shadow: 0 0 24px rgba(0, 255, 102, 0.5);
+  z-index: 2;
+}
+
+.chronex-hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  background: rgba(0, 255, 102, 0.1);
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  color: #00ff66;
+  font-family: 'Orbitron', monospace;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+.neural-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00ff66;
+  box-shadow: 0 0 10px #00ff66;
+  animation: pulseGlow 1.8s infinite;
+}
+
+.chronex-hero-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 24px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1px;
+  margin: 0 0 8px 0;
+  text-shadow: 0 0 20px rgba(0, 255, 102, 0.4);
+}
+
+.chronex-hero-desc {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0 0 22px 0;
+  max-width: 520px;
+}
+
+/* ChronEX Hero Model Mode Chips */
+.chronex-model-mode-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.chronex-mode-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary);
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.chronex-mode-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.chronex-mode-chip.active {
+  background: rgba(103, 232, 249, 0.18);
+  border-color: #67e8f9;
+  color: #67e8f9;
+  box-shadow: 0 0 14px rgba(103, 232, 249, 0.3);
+}
+
+/* ChronEX Spark Action Prompts Grid */
+.chronex-spark-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+.chronex-spark-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(20, 27, 36, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #f0f6fc;
+}
+
+.chronex-spark-card:hover {
+  background: rgba(25, 35, 48, 0.95);
+  border-color: rgba(0, 255, 102, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 14px rgba(0, 255, 102, 0.18);
+}
+
+.spark-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 255, 102, 0.12);
+  border: 1px solid rgba(0, 255, 102, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  color: #00ff66;
+  flex-shrink: 0;
+}
+
+.spark-card-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.spark-card-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.spark-card-desc {
+  font-size: 11px;
+  color: #8b949e;
+  line-height: 1.35;
+}
+
+/* ── 6. Visual AI Model Architecture Cards in Settings Tab 7 ── */
+.ai-model-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ai-model-card {
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.ai-model-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(103, 232, 249, 0.35);
+  transform: translateY(-1px);
+}
+
+.ai-model-card.active {
+  background: rgba(103, 232, 249, 0.1);
+  border-color: #67e8f9;
+  box-shadow: 0 0 20px rgba(103, 232, 249, 0.22);
+}
+
+.ai-model-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ai-model-card-top i {
+  font-size: 18px;
+}
+
+.ai-model-card-badge {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+.ai-model-card.active .ai-model-card-badge {
+  background: #67e8f9;
+  color: #000;
+}
+
+.ai-model-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 4px 0;
+}
+
+.ai-model-card-desc {
+  font-size: 11px;
+  color: #8b949e;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* ── 7. ChronEX Telemetry & Quota Card ── */
+.chronex-telemetry-card {
+  background: linear-gradient(135deg, rgba(0, 255, 102, 0.05), rgba(103, 232, 249, 0.05));
+  border: 1px solid rgba(0, 255, 102, 0.25);
+  padding: 14px 18px;
+}
+
+.chronex-telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.telemetry-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.telemetry-label {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #8b949e;
+  font-family: 'Orbitron', monospace;
+}
+
+.telemetry-value {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: monospace;
+}
+
+.text-emerald { color: #00ff66; }
+.text-cyan { color: #67e8f9; }
+.text-gold { color: #ffd700; }
+
+/* ── 8. In-Studio Neural Sandbox Playground ── */
+.chronex-sandbox-card {
+  border: 1px solid rgba(103, 232, 249, 0.25);
+  background: rgba(103, 232, 249, 0.03);
+}
+
+.sandbox-run-btn {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+  .chronex-spark-grid,
+  .ai-model-cards-grid,
+  .chronex-telemetry-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-search-bar-wrap {
+    max-width: 100%;
+    margin: 8px 0;
+  }
+}
+
+
+/* ==========================================================================
+   NEXBOT STUDIO // WHATSAPP BOT ARCHITECT & NEURAL RADAR DISCOVERY SUITE
+   ========================================================================== */
+
+/* ── More Sheet Gradient Badges ── */
+.sheet-icon-box.radar-gradient {
+  background: linear-gradient(135deg, #00f0ff 0%, #00ff66 100%);
+  color: #04080e;
+}
+.sheet-icon-box.bot-gradient {
+  background: linear-gradient(135deg, #8b5cf6 0%, #3b82f6 100%);
+  color: #ffffff;
+}
+.sheet-icon-box.vault-gradient {
+  background: linear-gradient(135deg, #ffd700 0%, #f59e0b 100%);
+  color: #0a0e14;
+}
+
+/* ==========================================================================
+   1. NEXBOT STUDIO MODAL
+   ========================================================================== */
+.nexbot-studio-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(4, 7, 12, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nexbot-modal-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.nexbot-modal-container {
+  position: relative;
+  width: 100%;
+  max-width: 1220px;
+  max-height: 92vh;
+  background: #090d14;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8), 0 0 32px rgba(139, 92, 246, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2;
+}
+
+/* Studio Header */
+.nexbot-studio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: rgba(13, 18, 28, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nexbot-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nexbot-header-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.2));
+  border: 1px solid rgba(139, 92, 246, 0.5);
+  color: #a78bfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  box-shadow: 0 0 16px rgba(139, 92, 246, 0.25);
+}
+
+.nexbot-header-title {
+  margin: 0;
+  font-family: 'Space Grotesk', 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: 0.5px;
+}
+
+.nexbot-header-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.nexbot-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nexbot-header-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+.nexbot-header-badge.active {
+  background: rgba(0, 255, 102, 0.12);
+  border-color: rgba(0, 255, 102, 0.35);
+  color: #00ff66;
+}
+
+.nexbot-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.nexbot-close-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* Studio Main Grid */
+.nexbot-studio-grid {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr;
+  flex: 1;
+  overflow: hidden;
+  background: #090d14;
+}
+
+.nexbot-config-col {
+  padding: 20px 24px;
+  overflow-y: auto;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Studio Nav Tabs */
+.nexbot-nav-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 12px;
+  overflow-x: auto;
+}
+
+.nexbot-nav-tab {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.nexbot-nav-tab:hover {
+  background: rgba(139, 92, 246, 0.08);
+  color: #f1f5f9;
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+.nexbot-nav-tab.active {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(59, 130, 246, 0.15));
+  border-color: #8b5cf6;
+  color: #c4b5fd;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.2);
+}
+
+.nexbot-tab-pane {
+  display: none;
+  flex: 1;
+}
+
+.nexbot-tab-pane.active {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Form Groups */
+.nexbot-form-group {
+  margin-bottom: 18px;
+}
+
+.nexbot-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.nexbot-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #cbd5e1;
+  margin-bottom: 6px;
+}
+
+.nexbot-value-pill {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+}
+
+.nexbot-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.nexbot-input-icon {
+  position: absolute;
+  left: 14px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.nexbot-input {
+  width: 100%;
+  background: #0f1622;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 14px 10px 38px;
+  color: #f1f5f9;
+  font-size: 13.5px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.nexbot-input:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+  background: #121b2a;
+}
+
+.nexbot-textarea {
+  width: 100%;
+  background: #0f1622;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #f1f5f9;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  line-height: 1.5;
+  resize: vertical;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+.nexbot-textarea:focus {
+  outline: none;
+  border-color: #8b5cf6;
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.25);
+}
+
+.nexbot-select {
+  width: 100%;
+  background: #0f1622;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #f1f5f9;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.nexbot-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  accent-color: #8b5cf6;
+  cursor: pointer;
+}
+
+.nexbot-help-text {
+  font-size: 11.5px;
+  color: #64748b;
+  margin: 6px 0 0;
+  line-height: 1.4;
+}
+
+/* Archetype Grid */
+.nexbot-archetype-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+}
+
+.archetype-btn {
+  background: rgba(15, 22, 34, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+
+.archetype-btn i {
+  font-size: 16px;
+  color: #94a3b8;
+  margin-bottom: 2px;
+}
+
+.archetype-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.archetype-desc {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.archetype-btn:hover {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.06);
+}
+
+.archetype-btn.active {
+  border-color: #8b5cf6;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(59, 130, 246, 0.1));
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.25);
+}
+
+.archetype-btn.active i {
+  color: #c4b5fd;
+}
+
+/* Prompt Sparks */
+.nexbot-prompt-sparks {
+  display: flex;
+  gap: 6px;
+}
+
+.spark-fill-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.spark-fill-btn:hover {
+  background: rgba(139, 92, 246, 0.15);
+  color: #c4b5fd;
+  border-color: rgba(139, 92, 246, 0.35);
+}
+
+/* Copy Row */
+.nexbot-copy-row {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-copy-code {
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-copy-code:hover {
+  background: #8b5cf6;
+  color: #ffffff;
+}
+
+/* Code Card */
+.nexbot-code-card {
+  background: #06090e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 14px;
+}
+
+.nexbot-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.nexbot-code-block {
+  margin: 0;
+  padding: 14px;
+  font-family: 'JetBrains Mono', Consolas, monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #94a3b8;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+/* Config Footer */
+.nexbot-config-footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  gap: 10px;
+}
+
+.nexbot-btn {
+  padding: 10px 18px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.nexbot-btn.primary {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  border: 1px solid #a78bfa;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.35);
+}
+
+.nexbot-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(139, 92, 246, 0.45);
+}
+
+.nexbot-btn.secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+}
+
+.nexbot-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nexbot-btn.accent {
+  background: rgba(0, 255, 102, 0.15);
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  color: #00ff66;
+}
+
+.nexbot-btn.accent:hover {
+  background: #00ff66;
+  color: #000000;
+}
+
+/* ==========================================================================
+   WHATSAPP PHONE SIMULATOR
+   ========================================================================== */
+.nexbot-sim-col {
+  padding: 24px;
+  background: #070a10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.whatsapp-phone-mockup {
+  width: 100%;
+  max-width: 330px;
+  height: 600px;
+  background: #0b141a;
+  border-radius: 36px;
+  border: 8px solid #1f2937;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(0, 255, 102, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.sim-phone-notch {
+  height: 28px;
+  background: #0b141a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.sim-speaker {
+  width: 48px;
+  height: 4px;
+  background: #1f2937;
+  border-radius: 999px;
+}
+
+.sim-icons {
+  display: flex;
+  gap: 5px;
+  font-size: 9px;
+}
+
+.sim-appbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #1f2c34;
+  color: #aebac1;
+}
+
+.sim-appbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sim-back-icon {
+  font-size: 13px;
+  color: #aebac1;
+}
+
+.sim-avatar-wrap {
+  position: relative;
+}
+
+.sim-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #8b5cf6;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.sim-online-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #25d366;
+  border: 1.5px solid #1f2c34;
+}
+
+.sim-bot-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e9edef;
+  line-height: 1.2;
+}
+
+.sim-bot-status {
+  font-size: 10px;
+  color: #25d366;
+}
+
+.sim-appbar-right {
+  display: flex;
+  gap: 14px;
+  font-size: 13px;
+  color: #aebac1;
+}
+
+.sim-messages-area {
+  flex: 1;
+  padding: 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #0b141a url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png') repeat;
+  background-size: 260px;
+}
+
+.sim-encryption-pill {
+  align-self: center;
+  background: rgba(24, 34, 41, 0.9);
+  color: #ffd279;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  text-align: center;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.sim-msg {
+  max-width: 82%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  word-wrap: break-word;
+  position: relative;
+}
+
+.sim-msg p {
+  margin: 0;
+}
+
+.sim-msg.received {
+  align-self: flex-start;
+  background: #1f2c34;
+  color: #e9edef;
+  border-top-left-radius: 2px;
+}
+
+.sim-msg.sent {
+  align-self: flex-end;
+  background: #005c4b;
+  color: #e9edef;
+  border-top-right-radius: 2px;
+}
+
+.sim-msg-time {
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.5);
+  float: right;
+  margin: 4px 0 0 8px;
+}
+
+.sim-input-bar {
+  padding: 8px 10px;
+  background: #1f2c34;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sim-icon-btn {
+  background: none;
+  border: none;
+  color: #8696a0;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.sim-input {
+  flex: 1;
+  background: #2a3942;
+  border: none;
+  border-radius: 20px;
+  padding: 7px 14px;
+  color: #e9edef;
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+
+.sim-send-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #00a884;
+  border: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: transform 0.15s ease;
+}
+
+.sim-send-btn:hover {
+  transform: scale(1.08);
+}
+
+/* ==========================================================================
+   2. NEURAL RADAR DISCOVERY MODAL
+   ========================================================================== */
+.neural-radar-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(3, 7, 12, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.radar-modal-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.radar-modal-container {
+  position: relative;
+  width: 100%;
+  max-width: 820px;
+  background: #06090e;
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9), 0 0 36px rgba(0, 255, 102, 0.15);
+  overflow: hidden;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.radar-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: rgba(8, 14, 22, 0.9);
+  border-bottom: 1px solid rgba(0, 255, 102, 0.15);
+}
+
+.radar-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.radar-brand-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(0, 255, 102, 0.15);
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  color: #00ff66;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  box-shadow: 0 0 16px rgba(0, 255, 102, 0.25);
+}
+
+.radar-brand-title {
+  margin: 0;
+  font-family: 'Space Grotesk', 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: 0.5px;
+}
+
+.radar-brand-sub {
+  font-size: 10.5px;
+  color: #00ff66;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  margin-top: 2px;
+}
+
+.radar-header-telemetry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.radar-telemetry-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+}
+
+.radar-telemetry-badge.active {
+  background: rgba(0, 255, 102, 0.15);
+  border-color: rgba(0, 255, 102, 0.4);
+  color: #00ff66;
+}
+
+.radar-close-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radar-close-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* Radar Display Stage */
+.radar-display-stage {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: radial-gradient(circle at center, #09121c 0%, #03060a 100%);
+  min-height: 440px;
+}
+
+.radar-screen {
+  position: relative;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 255, 102, 0.4);
+  background: radial-gradient(circle, rgba(0, 255, 102, 0.05) 0%, rgba(0, 255, 102, 0.01) 70%, transparent 100%);
+  box-shadow: 0 0 32px rgba(0, 255, 102, 0.12), inset 0 0 32px rgba(0, 255, 102, 0.08);
+  overflow: hidden;
+}
+
+.radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 255, 102, 0.2);
+  pointer-events: none;
+}
+
+.ring-label {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  color: rgba(0, 255, 102, 0.5);
+  font-family: monospace;
+}
+
+.ring-100m { width: 90px; height: 90px; }
+.ring-500m { width: 180px; height: 180px; }
+.ring-2km  { width: 270px; height: 270px; }
+.ring-5km  { width: 360px; height: 360px; border-style: solid; border-color: rgba(0, 255, 102, 0.3); }
+
+.radar-crosshair-x {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(0, 255, 102, 0.2);
+  pointer-events: none;
+}
+
+.radar-crosshair-y {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(0, 255, 102, 0.2);
+  pointer-events: none;
+}
+
+.radar-deg-label {
+  position: absolute;
+  font-size: 8.5px;
+  color: rgba(0, 255, 102, 0.4);
+  font-family: monospace;
+}
+.deg-0   { top: 6px; left: 52%; }
+.deg-90  { right: 6px; top: 52%; }
+.deg-180 { bottom: 6px; left: 52%; }
+.deg-270 { left: 6px; top: 52%; }
+
+/* Sweeping Beam */
+.radar-sweep-beam {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 190px;
+  height: 190px;
+  transform-origin: 0 0;
+  background: conic-gradient(from 0deg, rgba(0, 255, 102, 0.35) 0deg, rgba(0, 255, 102, 0.08) 35deg, transparent 60deg);
+  border-top-right-radius: 100%;
+  animation: radarSweep 4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes radarSweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Center Origin */
+.radar-center-origin {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #00ff66;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  box-shadow: 0 0 12px #00ff66;
+  z-index: 5;
+}
+
+.origin-ping {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #00ff66;
+  animation: radarPing 2s ease-out infinite;
+}
+
+@keyframes radarPing {
+  0% { transform: scale(1); opacity: 0.9; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+
+/* Blips Layer */
+.radar-blips-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.radar-blip {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  z-index: 6;
+}
+
+.radar-blip:hover {
+  transform: translate(-50%, -50%) scale(1.6);
+}
+
+.radar-blip.peer {
+  background: #00ff66;
+  box-shadow: 0 0 10px #00ff66;
+}
+
+.radar-blip.bot {
+  background: #a855f7;
+  box-shadow: 0 0 10px #a855f7;
+}
+
+.radar-blip.channel {
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b;
+}
+
+.radar-blip::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.6;
+  animation: radarPing 2.4s ease-out infinite;
+}
+
+/* Floating Selected Node Card */
+.radar-node-card {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 280px;
+  background: rgba(13, 20, 30, 0.95);
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 255, 102, 0.15);
+  backdrop-filter: blur(12px);
+  z-index: 10;
+  animation: fadeIn 0.2s ease;
+}
+
+.node-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.node-card-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.node-card-meta {
+  flex: 1;
+}
+
+.node-card-name {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.node-card-type {
+  font-size: 10px;
+  color: #00ff66;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.node-card-close {
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.node-card-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.node-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-lbl {
+  font-size: 9px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.stat-val {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.node-card-desc {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin: 0 0 12px;
+  line-height: 1.4;
+}
+
+.node-action-btn {
+  width: 100%;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.node-action-btn.primary {
+  background: #00ff66;
+  border: none;
+  color: #04080e;
+  box-shadow: 0 4px 12px rgba(0, 255, 102, 0.3);
+}
+
+/* Radar Control Strip */
+.radar-control-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  background: rgba(8, 14, 22, 0.95);
+  border-top: 1px solid rgba(0, 255, 102, 0.12);
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.radar-filter-group {
+  display: flex;
+  gap: 6px;
+}
+
+.radar-filter-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.radar-filter-pill.active {
+  background: rgba(0, 255, 102, 0.15);
+  border-color: rgba(0, 255, 102, 0.4);
+  color: #00ff66;
+}
+
+.radar-action-group {
+  display: flex;
+  gap: 8px;
+}
+
+.radar-action-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+}
+
+.radar-action-btn.primary {
+  background: linear-gradient(135deg, #00ff66, #00d4ff);
+  border: none;
+  color: #04080e;
+  box-shadow: 0 4px 14px rgba(0, 255, 102, 0.35);
+}
+
+/* ==========================================================================
+   3. VIP TOKEN VAULT & COMMERCIAL LICENSES MODAL
+   ========================================================================== */
+.vip-vault-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(4, 7, 12, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.vault-modal-backdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.vault-modal-container {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  max-height: 90vh;
+  background: #090e17;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9), 0 0 36px rgba(255, 215, 0, 0.15);
+  overflow-y: auto;
+  z-index: 2;
+  padding: 24px;
+}
+
+.vault-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.vault-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vault-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  color: #ffd700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.vault-title {
+  margin: 0;
+  font-family: 'Space Grotesk', 'Orbitron', sans-serif;
+  font-size: 19px;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.vault-subtitle {
+  font-size: 11px;
+  color: #ffd700;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  margin-top: 2px;
+}
+
+.vault-balance-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  background: rgba(255, 215, 0, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.25);
+}
+
+.vault-balance-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+}
+
+.vault-balance-val {
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffd700;
+}
+
+.vault-close-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  margin-left: 6px;
+  font-size: 14px;
+}
+
+.vault-tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.vault-tier-card {
+  background: rgba(15, 23, 38, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.vault-tier-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+}
+
+.vault-tier-card.highlight {
+  border-color: rgba(255, 215, 0, 0.6);
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.06) 0%, rgba(15, 23, 38, 0.9) 100%);
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.15);
+}
+
+.tier-pill-badge {
+  align-self: flex-start;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.tier-pill-badge.current { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; }
+.tier-pill-badge.hot     { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); }
+.tier-pill-badge.pro     { background: rgba(255, 215, 0, 0.2); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.4); }
+.tier-pill-badge.enterprise { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); }
+
+.tier-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #f1f5f9;
+  letter-spacing: 0.4px;
+}
+
+.tier-price {
+  font-size: 24px;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 6px 0 16px;
+}
+
+.tier-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.tier-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tier-features li {
+  font-size: 12px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tier-features li i {
+  font-size: 11px;
+  color: #00ff66;
+}
+
+.tier-action-btn {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.tier-action-btn.disabled {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #64748b;
+  cursor: default;
+}
+
+.tier-action-btn.primary {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  border: none;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+}
+
+.tier-action-btn.gold {
+  background: linear-gradient(135deg, #ffd700, #f59e0b);
+  border: none;
+  color: #000000;
+  box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .nexbot-studio-grid {
+    grid-template-columns: 1fr;
+  }
+  .nexbot-sim-col {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .radar-screen {
+    width: 300px;
+    height: 300px;
+  }
+  .ring-100m { width: 70px; height: 70px; }
+  .ring-500m { width: 140px; height: 140px; }
+  .ring-2km  { width: 210px; height: 210px; }
+  .ring-5km  { width: 280px; height: 280px; }
+  .radar-node-card {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    width: 100%;
+    margin-top: 14px;
+  }
+  .radar-display-stage {
+    flex-direction: column;
+  }
+}

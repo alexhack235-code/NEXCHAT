@@ -18,40 +18,67 @@
   <!-- Ambient Luxury Background Grid -->
   <div class="hud-grid-overlay" aria-hidden="true"></div>
 
-  <!-- Top Navigation Header: Chats | Following / For You | Filters | Sound | Settings | + Create -->
+  <!-- Top Navigation Header: Left Brand/Back | Center Feed Switcher | Right Controls -->
   <header class="reels-header">
-    <div class="reels-nav-group">
-      <a href="chat.html" class="reels-nav-link" title="Back to Chats"><i class="fa-solid fa-arrow-left"></i> Chats</a>
-      <span class="reels-nav-separator">|</span>
-      <div class="camshot-header-brand" style="display: inline-flex; align-items: center; gap: 7px;">
-        <img src="logo.jpg" alt="CamShot" style="width: 24px; height: 24px; border-radius: 6px; object-fit: cover;">
-        <span style="font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 13.5px; background: linear-gradient(135deg, #00FF66, #00D2FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 1px;">CAMSHOT</span>
+    <div class="reels-header-left">
+      <a href="chat.html" class="reels-header-back-btn" title="Back to Chats">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Chats</span>
+      </a>
+      <div class="camshot-header-brand" title="CamShot Video Stream">
+        <img src="logo.jpg" alt="CamShot" class="camshot-brand-logo">
+        <span class="camshot-brand-name">CAMSHOT</span>
+        <span class="camshot-brand-badge">PRO</span>
       </div>
-      <span class="reels-nav-separator">|</span>
-      <div class="reels-feed-tabs" id="reelsFeedTabs">
-        <button type="button" class="feed-tab-btn" data-feed="following" id="tabFollowing">Following</button>
-        <span class="feed-tab-dot"></span>
-        <button type="button" class="feed-tab-btn active" data-feed="foryou" id="tabForYou">For You</button>
-      </div>
-      <span class="reels-nav-separator">|</span>
     </div>
 
-    <div class="reels-header-actions">
-      <button id="toggleFilterBtn" class="reels-filter-pill" title="Visual Filters">
+    <div class="reels-header-center">
+      <div class="reels-feed-tabs" id="reelsFeedTabs">
+        <button type="button" class="feed-tab-btn" data-feed="following" id="tabFollowing">Following</button>
+        <span class="feed-tab-divider"></span>
+        <button type="button" class="feed-tab-btn active" data-feed="foryou" id="tabForYou">For You</button>
+      </div>
+    </div>
+
+    <div class="reels-header-right">
+      <button id="zenModeToggleBtn" class="reels-header-icon-btn" title="Clean Screen Mode (Hide UI Overlays)">
+        <i class="fa-regular fa-eye-slash"></i>
+      </button>
+      <button id="pipToggleBtn" class="reels-header-icon-btn" title="Picture-in-Picture Mini-Player">
+        <i class="fa-solid fa-clone"></i>
+      </button>
+      <button id="toggleFilterBtn" class="reels-header-icon-btn" title="Cinematic Filters">
         <i class="fa-solid fa-wand-magic-sparkles"></i>
       </button>
-      <button id="globalSoundToggle" class="reels-sound-pill" title="Toggle Sound">
+      <button id="globalSoundToggle" class="reels-header-icon-btn" title="Toggle Sound">
         <i class="fa-solid fa-volume-xmark"></i>
       </button>
-      <button id="openReelsSettingsBtn" class="reels-settings-pill" title="Settings & Preferences">
+      <button id="openReelsSettingsBtn" class="reels-header-icon-btn" title="Settings & Preferences">
         <i class="fa-solid fa-gear"></i>
       </button>
-      <button id="openUploadModalBtn" class="reels-create-pill-btn reels-create-pill-obvious" title="Create / Post a CamShot (C)">
+      <button id="openUploadModalBtn" class="reels-create-main-btn" title="Create / Post a CamShot (Shortcut: C)">
         <i class="fa-solid fa-plus"></i>
         <span>Create</span>
       </button>
     </div>
   </header>
+
+  <!-- Trending Hashtags & Topic Filter Ribbon -->
+  <div class="trending-tags-ribbon-wrapper" id="trendingTagsRibbonWrapper">
+    <div class="trending-tags-ribbon" id="trendingTagsRibbon">
+      <button type="button" class="tag-filter-pill active" data-tag="all"><i class="fa-solid fa-fire text-amber-400"></i> All</button>
+      <button type="button" class="tag-filter-pill" data-tag="tech"><i class="fa-solid fa-bolt text-cyan-400"></i> Tech</button>
+      <button type="button" class="tag-filter-pill" data-tag="gaming"><i class="fa-solid fa-gamepad text-emerald-400"></i> Gaming</button>
+      <button type="button" class="tag-filter-pill" data-tag="music"><i class="fa-solid fa-headphones text-purple-400"></i> Music</button>
+      <button type="button" class="tag-filter-pill" data-tag="cyber"><i class="fa-solid fa-microchip text-yellow-400"></i> Cyber</button>
+      <button type="button" class="tag-filter-pill" data-tag="ai"><i class="fa-solid fa-robot text-pink-400"></i> AI</button>
+      <button type="button" class="tag-filter-pill" data-tag="cinema"><i class="fa-solid fa-film text-blue-400"></i> Cinema</button>
+      <button type="button" class="tag-filter-pill" data-tag="lifestyle"><i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Lifestyle</button>
+    </div>
+  </div>
+
+  <!-- Camera Shutter White Flash Animation Layer -->
+  <div id="snapshotFlashLayer" class="snapshot-flash-layer" style="display: none;"></div>
 
   <!-- Desktop Side Navigation Floating Controls -->
   <div class="desktop-nav-controls" id="desktopNavControls">
@@ -65,12 +92,85 @@
 
   <!-- Fullscreen Vertical Reels Feed Container (100vh x 100vw, Black) -->
   <main id="reelsFeed" class="reels-feed-container">
+    <!-- Pull-to-Refresh Indicator (Mobile) -->
+    <div id="pullToRefreshIndicator" class="pull-to-refresh-indicator" style="display: none;">
+      <div class="ptr-spinner-icon"><i class="fa-solid fa-rotate"></i></div>
+      <span id="ptrText" class="ptr-text">Pull to refresh</span>
+    </div>
+
     <!-- Initial Loading State -->
     <div class="reels-loading-state" id="reelsLoadingState">
       <div class="cyber-spinner"></div>
       <p>Loading CamShots...</p>
     </div>
   </main>
+
+  <!-- Mobile Floating Bottom Dock (TikTok / Instagram Reels Native Experience) -->
+  <nav class="mobile-bottom-dock" id="mobileBottomDock" aria-label="Mobile Navigation">
+    <button type="button" class="mobile-dock-btn active" id="mobileDockHomeBtn" title="Feed">
+      <i class="fa-solid fa-house"></i>
+      <span>Feed</span>
+    </button>
+    <a href="chat.html" class="mobile-dock-btn" id="mobileDockChatsBtn" title="Chats">
+      <i class="fa-solid fa-comments"></i>
+      <span>Chats</span>
+    </a>
+    <button type="button" class="mobile-dock-create-btn" id="mobileDockCreateBtn" title="Create CamShot">
+      <div class="dock-create-ring"></div>
+      <i class="fa-solid fa-plus"></i>
+    </button>
+    <button type="button" class="mobile-dock-btn" id="mobileDockActivityBtn" title="Activity">
+      <i class="fa-solid fa-bell"></i>
+      <span>Activity</span>
+    </button>
+    <button type="button" class="mobile-dock-btn" id="mobileDockProfileBtn" title="My Profile">
+      <img src="favicon.png" id="mobileDockAvatarImg" class="dock-avatar-icon" alt="Profile">
+      <span>Profile</span>
+    </button>
+  </nav>
+
+  <!-- Floating Time & Video Thumbnail Preview Bubble for Scrubber Dragging -->
+  <div id="scrubberTimeBubble" class="scrubber-time-bubble" style="display: none;">
+    <div class="scrubber-preview-thumb-box" id="scrubberThumbBox" style="display: none;">
+      <video id="scrubberCloneVideo" muted playsinline preload="auto" class="scrubber-clone-video"></video>
+    </div>
+    <div class="scrubber-time-row flex items-center">
+      <i class="fa-solid fa-clock" style="color: var(--cs-gold); margin-right: 4px;"></i>
+      <span id="scrubberTimeText">0:00 / 0:00</span>
+    </div>
+  </div>
+
+  <!-- Touch Pinch-to-Zoom Reset Floating HUD Pill -->
+  <button type="button" id="videoZoomResetPill" class="video-zoom-reset-pill" style="display: none;" title="Reset Zoom">
+    <i class="fa-solid fa-magnifying-glass-minus"></i>
+    <span id="videoZoomLevelText">1.0x Zoom</span>
+    <span class="zoom-reset-hint">Tap to Reset</span>
+  </button>
+
+  <!-- Clean Screen / Zen Mode Floating Exit Pill -->
+  <button type="button" id="exitZenModePill" class="exit-zen-pill" style="display: none;" title="Restore UI Overlays">
+    <i class="fa-solid fa-eye"></i>
+    <span>Exit Clean Screen</span>
+  </button>
+
+  <!-- Left / Right 10s Skip & Rewind Animated HUD Badges -->
+  <div id="seekLeftBadge" class="seek-ripple-badge seek-left" style="display: none;">
+    <div class="seek-ripple-icon"><i class="fa-solid fa-rotate-left"></i></div>
+    <span>10s</span>
+  </div>
+  <div id="seekRightBadge" class="seek-ripple-badge seek-right" style="display: none;">
+    <div class="seek-ripple-icon"><i class="fa-solid fa-rotate-right"></i></div>
+    <span>10s</span>
+  </div>
+
+  <!-- Floating Volume HUD Level Indicator -->
+  <div id="floatingVolumeHud" class="floating-volume-hud" style="display: none;">
+    <i id="hudVolIcon" class="fa-solid fa-volume-high"></i>
+    <div class="hud-vol-bar">
+      <div id="hudVolFill" class="hud-vol-fill" style="width: 100%;"></div>
+    </div>
+    <span id="hudVolText">100%</span>
+  </div>
 
   <!-- Prominent Floating "Create CamShot" Button (Shortcut: C) -->
   <div class="floating-create-reel-wrapper" id="floatingCreateReelWrapper">
@@ -185,11 +285,11 @@
             <div id="liveCameraStudioStage" class="live-cam-stage" style="display: none;">
               <!-- Live Shaders Selector Ribbon -->
               <div class="live-cam-shaders-bar">
-                <button type="button" class="cam-shader-pill active" data-shader="normal">✨ Normal</button>
-                <button type="button" class="cam-shader-pill" data-shader="matrix">⚡ Matrix CRT</button>
-                <button type="button" class="cam-shader-pill" data-shader="cyber">🌐 Cyber Neon</button>
-                <button type="button" class="cam-shader-pill" data-shader="gold">🏆 Gold Luxury</button>
-                <button type="button" class="cam-shader-pill" data-shader="noir">🎬 Noir Film</button>
+                <button type="button" class="cam-shader-pill active" data-shader="normal"><i class="fa-solid fa-wand-magic-sparkles"></i> Normal</button>
+                <button type="button" class="cam-shader-pill" data-shader="matrix"><i class="fa-solid fa-terminal"></i> Matrix CRT</button>
+                <button type="button" class="cam-shader-pill" data-shader="cyber"><i class="fa-solid fa-globe"></i> Cyber Neon</button>
+                <button type="button" class="cam-shader-pill" data-shader="gold"><i class="fa-solid fa-trophy"></i> Gold Luxury</button>
+                <button type="button" class="cam-shader-pill" data-shader="noir"><i class="fa-solid fa-film"></i> Noir Film</button>
               </div>
 
               <!-- Camera Stream Viewport -->
@@ -342,8 +442,8 @@
                 <div id="pollInputsContainer" style="display: none; flex-direction: column; gap: 8px; margin-top: 10px;">
                   <input type="text" id="pollQuestionInput" placeholder="Poll question (e.g. Rate this setup?)" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12.5px;">
                   <div style="display: flex; gap: 8px;">
-                    <input type="text" id="pollOption1Input" placeholder="Option A (e.g. 🔥 Insane)" value="🔥 Insane" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px;">
-                    <input type="text" id="pollOption2Input" placeholder="Option B (e.g. ⚡ Mid)" value="⚡ Mid" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px;">
+                    <input type="text" id="pollOption1Input" placeholder="Option A (e.g. Yes)" value="Yes" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px;">
+                    <input type="text" id="pollOption2Input" placeholder="Option B (e.g. No)" value="No" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px;">
                   </div>
                 </div>
               </div>
@@ -455,6 +555,14 @@
         <div class="share-link-preview">
           <input type="text" id="shareLinkInput" readonly value="">
           <button type="button" id="shareQuickCopyBtn" class="reels-btn-primary" style="padding: 6px 14px; font-size: 12px; font-weight: 700;">Copy</button>
+        </div>
+        <!-- Dynamic QR Code Card -->
+        <div class="share-qr-wrapper mt-3 flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+          <img id="shareQrImage" src="" alt="Scan QR Code" class="w-16 h-16 rounded-lg bg-white p-1 shrink-0" style="display: none;">
+          <div class="share-qr-meta flex flex-col gap-0.5 text-left">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5"><i class="fa-solid fa-qrcode text-[var(--cs-gold)]"></i> Scan with Phone</span>
+            <span class="text-[11px] text-gray-400">Point your camera to watch this CamShot instantly</span>
+          </div>
         </div>
       </div>
     </div>
@@ -603,7 +711,7 @@
         </button>
         <button type="button" class="profile-tab-btn" data-tab="saved">
           <i class="fa-regular fa-bookmark"></i>
-          <span>Saved</span>
+          <span>Saved (<span id="profileSavedTabCount">0</span>)</span>
         </button>
       </div>
 
@@ -676,6 +784,31 @@
         <button type="button" id="useThisSoundDrawerBtn" class="use-sound-main-btn">
           <i class="fa-solid fa-bolt"></i> <span>Use This Sound</span>
         </button>
+      </div>
+
+      <!-- Sound Equalizer FX Presets -->
+      <div class="sound-hub-fx-row flex flex-col gap-2 p-3 my-2 rounded-xl bg-white/5 border border-white/10">
+        <span class="text-xs font-bold text-gray-200 flex items-center gap-1.5"><i class="fa-solid fa-sliders text-[var(--cs-gold)]"></i> Live Audio DSP Presets:</span>
+        <div class="sound-fx-pills flex flex-wrap gap-2">
+          <button type="button" class="sound-fx-pill active" data-fx="normal">Studio Clean</button>
+          <button type="button" class="sound-fx-pill" data-fx="bass">Bass Boost</button>
+          <button type="button" class="sound-fx-pill" data-fx="echo">Cyber Echo</button>
+          <button type="button" class="sound-fx-pill" data-fx="lofi">Lo-Fi Warmth</button>
+          <button type="button" class="sound-fx-pill" data-fx="nightcore">Nightcore</button>
+        </div>
+      </div>
+
+      <!-- Dual Audio Balance Mixer -->
+      <div id="audioBalanceMixerBox" class="sound-hub-balance-row flex flex-col gap-1.5 p-3 my-2 rounded-xl bg-white/5 border border-white/10">
+        <div class="flex items-center justify-between text-xs font-bold text-gray-200">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-volume-high text-[var(--cs-gold)]"></i> Audio Balance</span>
+          <span id="audioBalanceLabel" class="text-[11px] text-[var(--cs-gold)] font-mono">50% Voice / 50% Music</span>
+        </div>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="text-[11px] text-gray-400">Voice</span>
+          <input type="range" id="audioBalanceSlider" min="0" max="100" value="50" class="flex-1 accent-[var(--cs-gold)] cursor-pointer h-1.5 bg-white/20 rounded-lg">
+          <span class="text-[11px] text-gray-400">Music</span>
+        </div>
       </div>
 
       <!-- Audio Preview Player Bar -->
@@ -862,6 +995,38 @@
                 <button type="button" class="settings-quality-pill" data-quality="data-saver">Data Saver (720p)</button>
               </div>
             </div>
+
+            <!-- Reel Loop Count Limiter -->
+            <div class="settings-field-block mt-3">
+              <label class="settings-label"><i class="fa-solid fa-arrows-rotate text-[var(--cs-gold)]"></i> Reel Loop Limit</label>
+              <span class="settings-hint">How many times a video loops before auto-advancing</span>
+              <div id="loopCountLimiter" class="sleep-timer-pills mt-2 flex flex-wrap gap-2">
+                <button type="button" class="settings-loop-pill active" data-loops="infinite">Infinite</button>
+                <button type="button" class="settings-loop-pill" data-loops="1">1 Loop</button>
+                <button type="button" class="settings-loop-pill" data-loops="2">2 Loops</button>
+                <button type="button" class="settings-loop-pill" data-loops="3">3 Loops</button>
+              </div>
+            </div>
+
+            <!-- Digital Wellbeing Sleep Timer -->
+            <div class="settings-field-block mt-3">
+              <label class="settings-label"><i class="fa-solid fa-moon text-[var(--cs-gold)]"></i> Screen Time / Sleep Timer</label>
+              <span class="settings-hint">Pause playback and remind you to rest after browsing</span>
+              <div class="sleep-timer-pills mt-2 flex flex-wrap gap-2">
+                <button type="button" class="settings-sleep-pill active" data-minutes="0">Off</button>
+                <button type="button" class="settings-sleep-pill" data-minutes="15">15 Min</button>
+                <button type="button" class="settings-sleep-pill" data-minutes="30">30 Min</button>
+                <button type="button" class="settings-sleep-pill" data-minutes="45">45 Min</button>
+                <button type="button" class="settings-sleep-pill" data-minutes="60">60 Min</button>
+              </div>
+            </div>
+
+            <!-- Keyboard Hotkeys Guide Trigger -->
+            <div class="settings-field-block mt-4">
+              <button type="button" id="openKeyboardShortcutsBtn" class="reels-btn-secondary w-full text-xs py-2 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-keyboard"></i> View Keyboard Shortcuts (?)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -972,6 +1137,29 @@
               </label>
             </div>
 
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Resume Playback Position</span>
+                <span class="settings-hint">Remember timestamp when returning to a previously watched reel</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingResumePlayback" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Watch History Tracker Stats -->
+            <div class="settings-toggle-row mt-2">
+              <div class="settings-label-block">
+                <span class="settings-label">Watch History Activity</span>
+                <span class="settings-hint">Total reels viewed this session</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="watchHistoryCountBadge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-white/10 text-[var(--cs-gold)] border border-[var(--cs-gold)]/30">0 Reels</span>
+                <button type="button" id="clearWatchHistoryBtn" class="text-xs px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10" title="Reset Session History">Reset</button>
+              </div>
+            </div>
+
             <div class="settings-danger-zone mt-6">
               <h5 class="text-sm font-semibold text-red-400 mb-2">Storage & Cache</h5>
               <button type="button" id="clearReelsCacheBtn" class="reels-btn-secondary text-red-400 border-red-500/30 hover:bg-red-500/10">
@@ -980,6 +1168,82 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Guide Modal -->
+  <div id="keyboardShortcutsModal" class="reels-modal-overlay" style="display: none;">
+    <div class="reels-shortcuts-card">
+      <div class="reels-shortcuts-header flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-keyboard text-[var(--cs-gold)] text-lg"></i>
+          <h3 class="text-base font-bold text-white">Keyboard Hotkeys</h3>
+        </div>
+        <button type="button" id="closeShortcutsModalBtn" class="text-gray-400 hover:text-white transition-colors" title="Close"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="reels-shortcuts-grid mt-4 grid grid-cols-2 gap-2.5 text-xs">
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Next CamShot</span>
+          <kbd class="shortcut-key">↓ or J</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Previous CamShot</span>
+          <kbd class="shortcut-key">↑ or K</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Play / Pause</span>
+          <kbd class="shortcut-key">Space</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Mute / Unmute</span>
+          <kbd class="shortcut-key">M</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Like CamShot</span>
+          <kbd class="shortcut-key">L</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Open Studio</span>
+          <kbd class="shortcut-key">C</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Clean Screen (Zen)</span>
+          <kbd class="shortcut-key">Z</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Picture-in-Picture</span>
+          <kbd class="shortcut-key">P</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Close / Dismiss</span>
+          <kbd class="shortcut-key">Esc</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">View Shortcuts</span>
+          <kbd class="shortcut-key">?</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Digital Wellbeing Sleep Reminder Modal -->
+  <div id="sleepReminderModal" class="reels-modal-overlay" style="display: none;">
+    <div class="sleep-reminder-card p-6 text-center max-w-sm rounded-2xl bg-zinc-950/95 border border-[var(--cs-border-gold)] shadow-2xl backdrop-blur-2xl">
+      <div class="w-14 h-14 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 text-2xl mb-3">
+        <i class="fa-solid fa-moon"></i>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-1">Time for a Screen Break</h3>
+      <p class="text-xs text-gray-300 mb-5 leading-relaxed" id="sleepReminderMessage">
+        You've reached your digital wellbeing browsing limit. Take a moment to rest your eyes and stretch!
+      </p>
+      <div class="flex items-center gap-3">
+        <button type="button" id="sleepBreakDismissBtn" class="reels-btn-secondary flex-1 py-2 text-xs">
+          Take a Break
+        </button>
+        <button type="button" id="sleepBreakSnoozeBtn" class="reels-btn-primary flex-1 py-2 text-xs">
+          Snooze 10m
+        </button>
       </div>
     </div>
   </div>

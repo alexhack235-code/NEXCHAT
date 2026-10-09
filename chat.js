@@ -815,28 +815,298 @@ function generateClientId(length = 12) {
   return [...Array(length)].map(() => Math.random().toString(36).charAt(2)).join('');
 }
 
-function initAiModelSelection() {
-  const modelSelect = document.getElementById('aiModelSelect');
-  if (!modelSelect || typeof chronexAI === 'undefined' || !chronexAI.setModel) return;
+const CHRONEX_MODELS = {
+  'nexchat-custom': {
+    name: 'NEX Custom Neural',
+    fullName: 'NEXCHAT Custom Neural Model',
+    shortName: 'NEX Custom',
+    desc: 'Adaptive neural intelligence for complex problem solving & code',
+    badge: 'DEFAULT',
+    temperature: 0.7,
+    maxTokens: 2000,
+    topP: 0.9,
+    frequencyPenalty: 0.6,
+    presencePenalty: 0.6
+  },
+  'performance': {
+    name: 'Performance Turbo',
+    fullName: 'NEXCHAT Performance Model',
+    shortName: 'Turbo',
+    desc: 'Low-latency real-time responses with optimized token throughput',
+    badge: 'TURBO',
+    temperature: 0.2,
+    maxTokens: 1200,
+    topP: 0.6,
+    frequencyPenalty: 0.3,
+    presencePenalty: 0.3
+  },
+  'creative': {
+    name: 'Creative Synthesizer',
+    fullName: 'NEXCHAT Creative Model',
+    shortName: 'Creative',
+    desc: 'High-divergence model for brainstorms, copywriting & design',
+    badge: 'EXPANDED',
+    temperature: 0.9,
+    maxTokens: 2200,
+    topP: 0.95,
+    frequencyPenalty: 0.8,
+    presencePenalty: 0.8
+  },
+  'safe': {
+    name: 'Safe Guard',
+    fullName: 'NEXCHAT Safe Guard',
+    shortName: 'Safe Guard',
+    desc: 'Deterministic outputs with strict factual compliance & safety',
+    badge: 'STRICT',
+    temperature: 0.4,
+    maxTokens: 1500,
+    topP: 0.5,
+    frequencyPenalty: 0.8,
+    presencePenalty: 0.8
+  }
+};
 
-  const savedModelKey = localStorage.getItem('nexchat_ai_model') || 'nexchat-custom';
-  modelSelect.value = savedModelKey;
+function getActiveChronexModelKey() {
+  return localStorage.getItem('nexchat_ai_model') || 'nexchat-custom';
+}
 
-  modelSelect.addEventListener('change', () => {
-    const selected = modelSelect.value;
-    localStorage.setItem('nexchat_ai_model', selected);
+function syncChronexHeaderModelDisplay(modelKey) {
+  const key = modelKey || getActiveChronexModelKey();
+  const config = CHRONEX_MODELS[key] || CHRONEX_MODELS['nexchat-custom'];
+  const labelEl = document.getElementById('chronexHeaderModelLabel');
+  if (labelEl) {
+    labelEl.textContent = config.shortName;
+  }
+  document.querySelectorAll('.chronex-model-drop-item').forEach(item => {
+    item.classList.toggle('active', item.getAttribute('data-model') === key);
   });
+}
 
-  const selectedModelConfig = {
-    'performance': { name: 'NEXCHAT Performance Model', temperature: 0.2, maxTokens: 1200, topP: 0.6 },
-    'creative': { name: 'NEXCHAT Creative Model', temperature: 0.9, maxTokens: 2200, topP: 0.95 },
-    'safe': { name: 'NEXCHAT Safe Guard', temperature: 0.4, maxTokens: 1500, topP: 0.5, frequencyPenalty: 0.8, presencePenalty: 0.8 },
-    'nexchat-custom': { name: 'NEXCHAT Custom Neural Model', temperature: 0.7, maxTokens: 2000, topP: 0.9, frequencyPenalty: 0.6, presencePenalty: 0.6 }
+function syncSettingsAiModelCards(modelKey) {
+  const key = modelKey || getActiveChronexModelKey();
+  document.querySelectorAll('.ai-model-card').forEach(card => {
+    card.classList.toggle('active', card.getAttribute('data-model') === key);
+  });
+}
+
+function syncWelcomeStageModelChips(modelKey) {
+  const key = modelKey || getActiveChronexModelKey();
+  document.querySelectorAll('.chronex-mode-chip').forEach(chip => {
+    chip.classList.toggle('active', chip.getAttribute('data-model') === key);
+  });
+}
+
+function switchChronexModel(modelKey, silent = false) {
+  if (!CHRONEX_MODELS[modelKey]) modelKey = 'nexchat-custom';
+  const config = CHRONEX_MODELS[modelKey];
+
+  const savedTemp = localStorage.getItem('nexchat_ai_temp');
+  const temp = savedTemp !== null ? parseFloat(savedTemp) : config.temperature;
+
+  const modelConfig = {
+    name: config.fullName,
+    temperature: temp,
+    maxTokens: config.maxTokens,
+    topP: config.topP,
+    frequencyPenalty: config.frequencyPenalty || 0.5,
+    presencePenalty: config.presencePenalty || 0.5
   };
 
-  const modelConfig = selectedModelConfig[savedModelKey] || selectedModelConfig['nexchat-custom'];
-  chronexAI.setModel(modelConfig);
-  showNotif(`AI model loaded: ${modelConfig.name}`, 'success', 2000);
+  localStorage.setItem('nexchat_ai_model', modelKey);
+
+  if (typeof chronexAI !== 'undefined' && chronexAI.setModel) {
+    chronexAI.setModel(modelConfig);
+  }
+
+  const modelSelect = document.getElementById('aiModelSelect');
+  if (modelSelect) modelSelect.value = modelKey;
+
+  syncChronexHeaderModelDisplay(modelKey);
+  syncSettingsAiModelCards(modelKey);
+  syncWelcomeStageModelChips(modelKey);
+
+  if (!silent) {
+    if (typeof showNotif === 'function') {
+      showNotif(`Neural Model Switched: ${config.name}`, 'success', 2000);
+    }
+    if (typeof playLuxuryPopSound === 'function') {
+      playLuxuryPopSound();
+    }
+  }
+}
+
+function initChronexHeaderControls() {
+  const btn = document.getElementById('chronexHeaderModelBtn');
+  const menu = document.getElementById('chronexHeaderModelMenu');
+  if (!btn || !menu || btn.dataset.bound === 'true') return;
+  btn.dataset.bound = 'true';
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = menu.style.display === 'flex';
+    menu.style.display = isVisible ? 'none' : 'flex';
+  });
+
+  menu.querySelectorAll('.chronex-model-drop-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const targetModel = item.getAttribute('data-model');
+      if (targetModel) {
+        switchChronexModel(targetModel);
+      }
+      menu.style.display = 'none';
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#chronexHeaderControls')) {
+      if (menu) menu.style.display = 'none';
+    }
+  });
+}
+
+function renderChronexWelcomeStage(container) {
+  if (!container) return;
+  const activeKey = getActiveChronexModelKey();
+
+  container.innerHTML = `
+    <div class="chronex-welcome-stage">
+      <div class="chronex-neural-core">
+        <div class="neural-core-ring ring-1"></div>
+        <div class="neural-core-ring ring-2"></div>
+        <div class="neural-core-ring ring-3"></div>
+        <div class="neural-core-glow"></div>
+        <div class="neural-core-inner">
+          <i class="fa-solid fa-brain"></i>
+        </div>
+      </div>
+
+      <div class="chronex-hero-content">
+        <div class="chronex-hero-badge">
+          <i class="fa-solid fa-bolt"></i> NEURAL ENGINE v4.2 &bull; ACTIVE
+        </div>
+        <h2 class="chronex-hero-title">CHRONEX AI ASSISTANT</h2>
+        <p class="chronex-hero-desc">
+          High-performance cognitive architecture engineered for instantaneous code synthesis, architectural reasoning, and real-time execution.
+        </p>
+
+        <div class="chronex-mode-chips" id="chronexHeroChips">
+          <button class="chronex-mode-chip ${activeKey === 'nexchat-custom' ? 'active' : ''}" data-model="nexchat-custom">
+            <i class="fa-solid fa-microchip"></i> NEX Custom
+          </button>
+          <button class="chronex-mode-chip ${activeKey === 'performance' ? 'active' : ''}" data-model="performance">
+            <i class="fa-solid fa-bolt"></i> Turbo Fast
+          </button>
+          <button class="chronex-mode-chip ${activeKey === 'creative' ? 'active' : ''}" data-model="creative">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Creative
+          </button>
+          <button class="chronex-mode-chip ${activeKey === 'safe' ? 'active' : ''}" data-model="safe">
+            <i class="fa-solid fa-shield-halved"></i> Safe Guard
+          </button>
+        </div>
+      </div>
+
+      <div class="chronex-sparks-section">
+        <div class="chronex-sparks-header">
+          <span><i class="fa-solid fa-lightbulb"></i> 1-TAP PROMPT SPARKS</span>
+        </div>
+        <div class="chronex-spark-grid">
+          <div class="chronex-spark-card" data-prompt="Analyze code architecture and provide high-efficiency optimization patterns for web performance.">
+            <div class="spark-card-top">
+              <div class="spark-card-icon"><i class="fa-solid fa-code"></i></div>
+              <span class="spark-badge">CODE ARCHITECTURE</span>
+            </div>
+            <div class="spark-card-title">Analyze &amp; Optimize Code</div>
+            <div class="spark-card-desc">Review memory patterns, reduce render lag, and elevate algorithmic efficiency.</div>
+          </div>
+
+          <div class="chronex-spark-card" data-prompt="Help me design a resilient, low-latency client-side architecture for a real-time messaging application.">
+            <div class="spark-card-top">
+              <div class="spark-card-icon"><i class="fa-solid fa-network-wired"></i></div>
+              <span class="spark-badge">SYSTEMS</span>
+            </div>
+            <div class="spark-card-title">Design Realtime Architecture</div>
+            <div class="spark-card-desc">Architect scalable WebSockets, caching strategies, and fallback channels.</div>
+          </div>
+
+          <div class="chronex-spark-card" data-prompt="Break down our product roadmap and outline strategic milestones with technical dependencies.">
+            <div class="spark-card-top">
+              <div class="spark-card-icon"><i class="fa-solid fa-compass"></i></div>
+              <span class="spark-badge">STRATEGY</span>
+            </div>
+            <div class="spark-card-title">Strategic Roadmap Synthesis</div>
+            <div class="spark-card-desc">Condense objectives into precise technical milestones and deliverables.</div>
+          </div>
+
+          <div class="chronex-spark-card" data-prompt="Generate 5 innovative, addictive feature concepts that would elevate user retention in NEXCHAT.">
+            <div class="spark-card-top">
+              <div class="spark-card-icon"><i class="fa-solid fa-fire"></i></div>
+              <span class="spark-badge">INNOVATION</span>
+            </div>
+            <div class="spark-card-title">Addictive Feature Brainstorm</div>
+            <div class="spark-card-desc">Devise high-engagement mechanics, tactile audio cues, and seamless interactions.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chronex-telemetry-strip">
+        <div class="telemetry-pill">
+          <i class="fa-solid fa-stopwatch"></i> Latency: <strong>14ms</strong>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fa-solid fa-shield-halved"></i> Guard: <strong>Active</strong>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fa-solid fa-gauge-high"></i> Uptime: <strong>99.99%</strong>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fa-solid fa-coins"></i> Tokens: <strong>Daily Active</strong>
+        </div>
+      </div>
+    </div>
+  `;
+
+  container.querySelectorAll('.chronex-spark-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const prompt = card.getAttribute('data-prompt');
+      if (!prompt) return;
+      const messageInput = document.getElementById('message-input');
+      if (messageInput) {
+        messageInput.value = prompt;
+        messageInput.focus();
+        messageInput.dispatchEvent(new Event('input', { bubbles: true }));
+        if (typeof adjustTextareaHeight === 'function') adjustTextareaHeight();
+        if (isAndroid && navigator.vibrate) navigator.vibrate(20);
+        if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+      }
+    });
+  });
+
+  container.querySelectorAll('.chronex-mode-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const modelKey = chip.getAttribute('data-model');
+      if (modelKey) {
+        switchChronexModel(modelKey);
+      }
+    });
+  });
+}
+
+function initAiModelSelection() {
+  const modelSelect = document.getElementById('aiModelSelect');
+  const savedModelKey = getActiveChronexModelKey();
+  if (modelSelect) {
+    modelSelect.value = savedModelKey;
+    if (!modelSelect.dataset.bound) {
+      modelSelect.dataset.bound = 'true';
+      modelSelect.addEventListener('change', () => {
+        switchChronexModel(modelSelect.value);
+      });
+    }
+  }
+
+  switchChronexModel(savedModelKey, true);
+  initChronexHeaderControls();
 }
 
 function loadChatApprovalSettings() {
@@ -2969,7 +3239,7 @@ async function sendMessage() {
     const inspection = window.fortressShield.inspectText(text);
     if (!inspection.safe) {
       playLuxuryPopSound();
-      showNotif(`🛡️ Blocked by FORTRESS Security: ${inspection.threats.join(', ')}`, "error", 4500);
+      showNotif(`Blocked by FORTRESS Security: ${inspection.threats.join(', ')}`, "error", 4500);
       console.warn('[FORTRESS BLOCKED ATTACK]', inspection.threats);
       return;
     }
@@ -3008,7 +3278,7 @@ async function sendMessage() {
       try {
         console.log("[AI] Initiating Chronex AI synchronization...");
 
-        // 🛡️ Daily AI Request Limit Check (10 requests per 24 hours)
+        // Daily AI Request Limit Check (10 requests per 24 hours)
         if (chronexAI && typeof chronexAI.checkDailyQuota === 'function') {
           const quotaCheck = chronexAI.checkDailyQuota(myUID || 'default');
           if (!quotaCheck.allowed) {
@@ -3020,9 +3290,9 @@ async function sendMessage() {
               displayChronexAIUserMessage(text);
             }
             if (typeof displayChronexAIResponse === 'function') {
-              displayChronexAIResponse("⚠️ **MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS**");
+              displayChronexAIResponse("**[QUOTA REACHED] MODEL QUOTA REACHED. WILL BE REFRESHED WITHIN 24 HRS**");
             } else if (typeof displayChronexAIMessage === 'function') {
-              displayChronexAIMessage("⚠️ **MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS**");
+              displayChronexAIMessage("**[QUOTA REACHED] MODEL QUOTA REACHED. WILL BE REFRESHED WITHIN 24 HRS**");
             }
             return;
           }
@@ -3483,11 +3753,11 @@ function updateLocalSentMessageStatus(clientMsgId, status) {
 
 
 async function generateChronexAIResponse(text) {
-  // 🛡️ FORTRESS LLM Guard: Protect against jailbreaks and DAN prompt injections
+  // FORTRESS LLM Guard: Protect against jailbreaks and DAN prompt injections
   if (text && window.fortressShield) {
     const guard = window.fortressShield.guardAIPrompt(text);
     if (!guard.allowed) {
-      showNotif(`🛡️ Prompt Injection Blocked by FORTRESS LLM Guard`, 'error', 4500);
+      showNotif(`Prompt Injection Blocked by FORTRESS LLM Guard`, 'error', 4500);
       throw new Error(guard.reason);
     }
   }
@@ -3556,6 +3826,9 @@ function formatAiMarkdown(rawText) {
 function displayChronexAIUserMessage(message) {
   const messagesContainer = document.getElementById("messages-area");
   if (!messagesContainer) return;
+
+  const welcomeStage = messagesContainer.querySelector('.chronex-welcome-stage');
+  if (welcomeStage) welcomeStage.remove();
 
   const div = document.createElement("div");
   div.className = "message-wrapper sent";
@@ -3756,12 +4029,17 @@ function loadMessages() {
     if (allMessages.length === 0) {
       if (!isInitialLoadComplete) {
         messagesDiv.innerHTML = currentChatType === 'ai'
-          ? "<p style='text-align: center; color: #00ff66; padding: 20px; font-family: Orbitron;'>?? Synchronizing Neural Uplink...</p>"
+          ? "<p style='text-align: center; color: #00ff66; padding: 20px; font-family: Orbitron;'><i class='fa-solid fa-circle-notch fa-spin'></i> Synchronizing Neural Uplink...</p>"
           : "<p style='text-align: center; color: #888; padding: 20px;'>Loading messages...</p>";
         return;
       }
 
-      console.log("?? No messages found between users");
+      if (currentChatType === 'ai') {
+        renderChronexWelcomeStage(messagesDiv);
+        return;
+      }
+
+      console.log("No messages found between users");
       messagesDiv.innerHTML = `
       <div class="empty-state">
           <div class="empty-icon"><i class="fa-regular fa-paper-plane"></i></div>
@@ -4306,7 +4584,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
       if (infoDescEl) infoDescEl.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
       if (infoBrandLogo) infoBrandLogo.style.display = 'block';
 
-      showNotif("Welcome to Chronex AI! Ask me anything!", "info");
+      showNotif("ChronEX AI Neural Interface Active", "info", 2000);
     } else {
       const userDoc = await getDoc(doc(db, "users", uid));
       let userData = {};
@@ -4380,12 +4658,29 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
     }
 
     const pollBtn = document.getElementById('poll-btn');
+    const chronexControls = document.getElementById('chronexHeaderControls');
+    const headerVideoBtn = document.getElementById('headerVideoBtn');
+    const headerCallBtn = document.getElementById('headerCallBtn');
 
     if (chatType === 'group') {
       if (pollBtn) pollBtn.style.display = 'block';
     } else {
       if (pollBtn) pollBtn.style.display = 'none';
       setTimeout(() => updateBlockUnblockUI(), 100);
+    }
+
+    if (chatType === 'ai') {
+      if (chronexControls) {
+        chronexControls.style.display = 'flex';
+        initChronexHeaderControls();
+        syncChronexHeaderModelDisplay();
+      }
+      if (headerVideoBtn) headerVideoBtn.style.display = 'none';
+      if (headerCallBtn) headerCallBtn.style.display = 'none';
+    } else {
+      if (chronexControls) chronexControls.style.display = 'none';
+      if (headerVideoBtn) headerVideoBtn.style.display = '';
+      if (headerCallBtn) headerCallBtn.style.display = '';
     }
 
   } catch (err) {
@@ -4439,6 +4734,10 @@ document.getElementById("menuBtn")?.addEventListener("click", (e) => {
     if (inviteQrBtn) {
       inviteQrBtn.style.display = currentChatType === 'group' ? 'block' : 'none';
     }
+    const groupLeaveBtn = document.getElementById("groupLeaveBtn");
+    if (groupLeaveBtn) {
+      groupLeaveBtn.style.display = currentChatType === 'group' ? 'block' : 'none';
+    }
   }
 });
 
@@ -4462,9 +4761,22 @@ document.getElementById("groupInviteQrBtn")?.addEventListener("click", () => {
   if (currentChatType === 'group' && currentChatUser) {
     document.getElementById("chatOptionsMenu").style.display = "none";
     GroupChat.showInviteModal(currentChatUser, currentChatName || 'Group', {
-      onCopy: () => showNotif(' Invite link copied!', 'success'),
-      onShare: () => showNotif(' Shared invite link!', 'info')
+      onCopy: () => showNotif('Invite link copied!', 'success'),
+      onShare: () => showNotif('Shared invite link!', 'info')
     });
+  }
+});
+
+document.getElementById("groupLeaveBtn")?.addEventListener("click", () => {
+  if (currentChatType === 'group' && currentChatUser) {
+    document.getElementById("chatOptionsMenu").style.display = "none";
+    handleLeaveGroup(currentChatUser);
+  }
+});
+
+document.getElementById("leaveGroupBtn")?.addEventListener("click", () => {
+  if (currentChatUser) {
+    handleLeaveGroup(currentChatUser);
   }
 });
 
@@ -7078,14 +7390,14 @@ async function testSupabasePingLatency() {
     });
     const roundtrip = Math.round(performance.now() - t0);
     if (pingResultEl) {
-      pingResultEl.innerHTML = `⚡ <span style="color:#00ff66;font-weight:700;">Ping: ${roundtrip}ms</span> | Phoenix WebSocket: <span style="color:#00ff66;">Connected</span> | PostgreSQL CDC: <span style="color:#00ff66;">Synchronized</span>`;
+      pingResultEl.innerHTML = `<i class="fa-solid fa-bolt"></i> <span style="color:#00ff66;font-weight:700;">Ping: ${roundtrip}ms</span> | Phoenix WebSocket: <span style="color:#00ff66;">Connected</span> | PostgreSQL CDC: <span style="color:#00ff66;">Synchronized</span>`;
     }
     if (statusText) statusText.textContent = `Supabase WebSockets (${roundtrip}ms)`;
-    showNotif(`⚡ Supabase Realtime Latency: ${roundtrip}ms`, "success", 2500);
+    showNotif(`Supabase Realtime Latency: ${roundtrip}ms`, "success", 2500);
   } catch (err) {
     const roundtrip = Math.round(performance.now() - t0);
     if (pingResultEl) {
-      pingResultEl.innerHTML = `⚡ <span style="color:#00ff66;font-weight:700;">Latency: ${roundtrip}ms</span> | Phoenix WebSocket channel responsive`;
+      pingResultEl.innerHTML = `<i class="fa-solid fa-bolt"></i> <span style="color:#00ff66;font-weight:700;">Latency: ${roundtrip}ms</span> | Phoenix WebSocket channel responsive`;
     }
     if (statusText) statusText.textContent = `Supabase Realtime (${roundtrip}ms)`;
   } finally {
@@ -7117,7 +7429,7 @@ async function claimStarterTokenGrant() {
     if (tokenDisplay) tokenDisplay.textContent = typeof formatBalanceDisplay === 'function' ? formatBalanceDisplay(newBal) : newBal;
     playLuxuryChimeSound();
     if (navigator.vibrate) navigator.vibrate([40, 60, 40]);
-    showNotif("🎉 Claimed +100 Neural Tokens starter grant!", "success", 3000);
+    showNotif("Claimed +100 Neural Tokens starter grant!", "success", 3000);
     if (claimBtn) {
       claimBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Grant Claimed (+100 Tokens)';
       claimBtn.style.opacity = '0.7';
@@ -7126,6 +7438,201 @@ async function claimStarterTokenGrant() {
     showNotif("Could not claim grant: " + err.message, "error");
     if (claimBtn) claimBtn.disabled = false;
   }
+}
+
+function setupSettingsSearchFilter() {
+  const searchInput = document.getElementById('settingsSearchInput');
+  const clearBtn = document.getElementById('clearSettingsSearchBtn');
+  if (!searchInput || searchInput.dataset.bound === 'true') return;
+  searchInput.dataset.bound = 'true';
+
+  const filterSettings = (query) => {
+    const term = (query || '').trim().toLowerCase();
+
+    if (clearBtn) {
+      clearBtn.style.display = term ? 'flex' : 'none';
+    }
+
+    const tabs = document.querySelectorAll('.settings-nav-tab[data-tab]');
+    const groups = document.querySelectorAll('.settings-nav-group');
+    const panes = document.querySelectorAll('.settings-tab-pane');
+
+    if (!term) {
+      tabs.forEach(t => t.style.display = 'flex');
+      groups.forEach(g => g.style.display = 'block');
+      panes.forEach(pane => {
+        pane.querySelectorAll('.settings-card, .settings-group-card').forEach(card => {
+          card.style.display = '';
+        });
+      });
+      return;
+    }
+
+    let firstMatchingTab = null;
+
+    tabs.forEach(tab => {
+      const tabId = tab.getAttribute('data-tab');
+      const tabText = tab.textContent.toLowerCase();
+      const pane = document.getElementById(tabId);
+      const paneText = pane ? pane.textContent.toLowerCase() : '';
+
+      const isMatch = tabText.includes(term) || paneText.includes(term);
+      tab.style.display = isMatch ? 'flex' : 'none';
+
+      if (isMatch && !firstMatchingTab) {
+        firstMatchingTab = tab;
+      }
+
+      if (pane) {
+        const cards = pane.querySelectorAll('.settings-card, .settings-group-card');
+        if (cards.length > 0) {
+          cards.forEach(card => {
+            const cardText = card.textContent.toLowerCase();
+            card.style.display = (!tabText.includes(term) && !cardText.includes(term)) ? 'none' : '';
+          });
+        }
+      }
+    });
+
+    groups.forEach(group => {
+      const visibleTabs = group.querySelectorAll('.settings-nav-tab[data-tab]:not([style*="display: none"])');
+      group.style.display = visibleTabs.length > 0 ? 'block' : 'none';
+    });
+
+    const activeTab = document.querySelector('.settings-nav-tab.active');
+    if (activeTab && activeTab.style.display === 'none' && firstMatchingTab) {
+      firstMatchingTab.click();
+    }
+  };
+
+  searchInput.addEventListener('input', (e) => {
+    filterSettings(e.target.value);
+  });
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      filterSettings('');
+      searchInput.focus();
+    });
+  }
+}
+
+function updateChronexStudioTelemetry() {
+  const quotaDisplay = document.getElementById('aiStudioQuotaDisplay');
+  if (!quotaDisplay) return;
+
+  if (typeof chronexAI !== 'undefined' && typeof chronexAI.checkDailyQuota === 'function') {
+    const quota = chronexAI.checkDailyQuota(myUID || 'default');
+    if (quota) {
+      const remaining = typeof quota.remaining === 'number' ? quota.remaining : 100;
+      const total = typeof quota.limit === 'number' ? quota.limit : 100;
+      const percent = Math.max(0, Math.min(100, Math.round((remaining / total) * 100)));
+      quotaDisplay.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-size: 12px; color: #8b949e;"><i class="fa-solid fa-gauge-high"></i> Daily Neural Allocation:</span>
+          <span style="font-size: 13px; font-weight: 700; color: #00ff66;">${remaining} / ${total} Tokens</span>
+        </div>
+        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;">
+          <div style="width: ${percent}%; height: 100%; background: linear-gradient(90deg, #00ff66, #00e5ff); transition: width 0.3s ease;"></div>
+        </div>
+      `;
+    }
+  }
+}
+
+function setupChronexAiStudioSettings() {
+  const cards = document.querySelectorAll('.ai-model-card');
+  const tempSlider = document.getElementById('aiTemperatureSlider');
+  const tempValue = document.getElementById('aiTemperatureValue');
+  const sandboxInput = document.getElementById('aiSandboxInput');
+  const sandboxRunBtn = document.getElementById('aiSandboxRunBtn');
+  const sandboxOutput = document.getElementById('aiSandboxOutput');
+  const sandboxOutputText = document.getElementById('aiSandboxOutputText');
+  const activeKey = getActiveChronexModelKey();
+
+  syncSettingsAiModelCards(activeKey);
+
+  cards.forEach(card => {
+    if (card.dataset.bound === 'true') return;
+    card.dataset.bound = 'true';
+    card.addEventListener('click', () => {
+      const modelKey = card.getAttribute('data-model');
+      if (modelKey) {
+        switchChronexModel(modelKey);
+        if (isAndroid && navigator.vibrate) navigator.vibrate(15);
+      }
+    });
+  });
+
+  if (tempSlider && !tempSlider.dataset.bound) {
+    tempSlider.dataset.bound = 'true';
+    const savedTemp = localStorage.getItem('nexchat_ai_temp');
+    if (savedTemp !== null) {
+      tempSlider.value = savedTemp;
+      if (tempValue) tempValue.textContent = savedTemp;
+    }
+
+    tempSlider.addEventListener('input', (e) => {
+      if (tempValue) tempValue.textContent = e.target.value;
+    });
+
+    tempSlider.addEventListener('change', (e) => {
+      const val = parseFloat(e.target.value);
+      localStorage.setItem('nexchat_ai_temp', val.toString());
+      if (typeof chronexAI !== 'undefined' && chronexAI.config && chronexAI.config.model) {
+        chronexAI.config.model.temperature = val;
+      }
+      showNotif(`Neural Temperature adjusted to ${val}`, 'info', 1500);
+    });
+  }
+
+  if (sandboxRunBtn && !sandboxRunBtn.dataset.bound) {
+    sandboxRunBtn.dataset.bound = 'true';
+    sandboxRunBtn.addEventListener('click', async () => {
+      const prompt = sandboxInput ? sandboxInput.value.trim() : '';
+      if (!prompt) {
+        showNotif('Please enter a prompt or instruction for the sandbox', 'error');
+        if (sandboxInput) sandboxInput.focus();
+        return;
+      }
+
+      if (sandboxOutput) sandboxOutput.style.display = 'block';
+      if (sandboxOutputText) {
+        sandboxOutputText.innerHTML = '<div style="color: #00ff66; font-family: monospace; padding: 10px 0;"><i class="fa-solid fa-circle-notch fa-spin"></i> Neural Engine computing inference...</div>';
+      }
+
+      sandboxRunBtn.disabled = true;
+      const startTime = performance.now();
+
+      try {
+        let reply = '';
+        if (typeof chronexAI !== 'undefined' && typeof chronexAI.chat === 'function') {
+          reply = await chronexAI.chat(prompt, myUID || 'sandbox_user');
+        } else if (typeof generateChronexAIResponse === 'function') {
+          reply = await generateChronexAIResponse(prompt);
+        } else {
+          reply = "ChronEX AI Sandbox is active. Neural Engine response generation confirmed.";
+        }
+
+        const elapsed = Math.round(performance.now() - startTime);
+        if (sandboxOutputText) {
+          sandboxOutputText.innerHTML = formatAiMarkdown(reply);
+        }
+        showNotif(`Inference executed in ${elapsed}ms`, 'success', 2500);
+      } catch (err) {
+        if (sandboxOutputText) {
+          sandboxOutputText.innerHTML = `<span style="color: #ff4d4d;"><i class="fa-solid fa-triangle-exclamation"></i> Sandbox Error: ${escapeHtml(err.message || 'Inference failed')}</span>`;
+        }
+        showNotif('Sandbox error: ' + (err.message || err), 'error');
+      } finally {
+        sandboxRunBtn.disabled = false;
+        updateChronexStudioTelemetry();
+      }
+    });
+  }
+
+  updateChronexStudioTelemetry();
 }
 
 function setupSettingsTabNavigation() {
@@ -7156,6 +7663,9 @@ function setupSettingsTabNavigation() {
       }
     });
   });
+
+  setupSettingsSearchFilter();
+  setupChronexAiStudioSettings();
 }
 
 function setupFortressSecurityListeners() {
@@ -7187,8 +7697,8 @@ function setupFortressSecurityListeners() {
       const key = keyInput?.value.trim();
       if (window.fortressShield) {
         window.fortressShield.saveConfig(url, key, 'active');
-        showNotif('🛡️ FORTRESS AI Security Shield configuration saved!', 'success', 2500);
-        if (badgeEl) badgeEl.textContent = '🛡️ WAF + Cloud Active';
+        showNotif('FORTRESS AI Security Shield configuration saved!', 'success', 2500);
+        if (badgeEl) badgeEl.textContent = 'WAF + Cloud Active';
         playLuxuryPopSound();
       }
     });
@@ -7209,25 +7719,25 @@ function setupFortressSecurityListeners() {
           const res = await window.fortressShield.testConnection(url, key);
           if (res.online) {
             if (testResult) {
-              testResult.innerHTML = `⚡ <span style="color:#00ff66;font-weight:700;">FORTRESS ONLINE (${res.latency}ms)</span> — ${res.version}`;
+              testResult.innerHTML = `<i class="fa-solid fa-bolt"></i> <span style="color:#00ff66;font-weight:700;">FORTRESS ONLINE (${res.latency}ms)</span> — ${res.version}`;
             }
             if (badgeEl) {
-              badgeEl.textContent = `🛡️ Fortified (${res.latency}ms)`;
+              badgeEl.textContent = `Fortified (${res.latency}ms)`;
               badgeEl.style.borderColor = '#00ff66';
             }
             playLuxuryChimeSound();
-            showNotif(`🛡️ Connected to FORTRESS API (${res.latency}ms)`, 'success', 2500);
+            showNotif(`Connected to FORTRESS API (${res.latency}ms)`, 'success', 2500);
           } else {
             if (testResult) {
-              testResult.innerHTML = `🛡️ <span style="color:#00ff66;">In-Memory Fast Kill Active</span> (Remote: ${res.status || 'Offline'})`;
+              testResult.innerHTML = `<i class="fa-solid fa-shield-halved"></i> <span style="color:#00ff66;">In-Memory Fast Kill Active</span> (Remote: ${res.status || 'Offline'})`;
             }
-            if (badgeEl) badgeEl.textContent = '🛡️ Local In-Memory Active';
-            showNotif('🛡️ Local Sub-Millisecond WAF Active', 'info', 2000);
+            if (badgeEl) badgeEl.textContent = 'Local In-Memory Active';
+            showNotif('Local Sub-Millisecond WAF Active', 'info', 2000);
           }
         }
       } catch (err) {
         if (testResult) {
-          testResult.innerHTML = `🛡️ In-Memory Fast Kill Shield running (<0.5ms)`;
+          testResult.innerHTML = `<i class="fa-solid fa-shield-halved"></i> In-Memory Fast Kill Shield running (<0.5ms)`;
         }
       } finally {
         testBtn.disabled = false;
@@ -9351,22 +9861,8 @@ document.getElementById("saveAiModelBtn")?.addEventListener("click", () => {
     return;
   }
 
-  const modelKey = modelSelect.value;
-  let modelConfig;
-
-  if (modelKey === 'performance') {
-    modelConfig = { name: "NEXCHAT Performance Model", temperature: 0.2, maxTokens: 1200, topP: 0.6 };
-  } else if (modelKey === 'creative') {
-    modelConfig = { name: "NEXCHAT Creative Model", temperature: 0.9, maxTokens: 2200, topP: 0.95 };
-  } else if (modelKey === 'safe') {
-    modelConfig = { name: "NEXCHAT Safe Guard", temperature: 0.4, maxTokens: 1500, topP: 0.5, frequencyPenalty: 0.8, presencePenalty: 0.8 };
-  } else {
-    modelConfig = { name: "NEXCHAT Custom Neural Model", temperature: 0.7, maxTokens: 2000, topP: 0.9, frequencyPenalty: 0.6, presencePenalty: 0.6 };
-  }
-
-  chronexAI.setModel(modelConfig);
-  localStorage.setItem('nexchat_ai_model', modelKey);
-  showNotif(`AI model switched to ${modelConfig.name}`, "success", 2500);
+  const modelKey = modelSelect.value || 'nexchat-custom';
+  switchChronexModel(modelKey);
 });
 
 
@@ -10379,6 +10875,104 @@ window.removeMember = async (groupId, userId) => {
     showNotif("Failed to remove member", "error");
   }
 };
+
+async function handleLeaveGroup(groupId) {
+  const gId = groupId || currentChatUser;
+  if (!gId) {
+    showNotif("No group selected", "error");
+    return;
+  }
+
+  if (!myUID) {
+    showNotif("You must be logged in to leave a group", "error");
+    return;
+  }
+
+  const confirmed = confirm("Are you sure you want to leave this group? You will no longer receive group messages.");
+  if (!confirmed) return;
+
+  try {
+    const groupRef = doc(db, "groups", gId);
+    const groupSnap = await getDoc(groupRef);
+    if (!groupSnap.exists()) {
+      showNotif("Group not found", "error");
+      return;
+    }
+
+    const groupData = groupSnap.data();
+    if (groupData.creator === myUID || groupData.createdBy === myUID) {
+      alert("As the group creator, you cannot leave the group. You must transfer ownership or delete the group.");
+      return;
+    }
+
+    if (typeof GroupChat !== 'undefined' && typeof GroupChat.leaveGroup === 'function') {
+      try {
+        await GroupChat.leaveGroup(gId);
+      } catch (gcErr) {
+        console.warn("GroupChat.leaveGroup fallback:", gcErr);
+        await updateDoc(groupRef, {
+          members: arrayRemove(myUID),
+          admins: arrayRemove(myUID),
+          moderators: arrayRemove(myUID)
+        });
+      }
+    } else {
+      await updateDoc(groupRef, {
+        members: arrayRemove(myUID),
+        admins: arrayRemove(myUID),
+        moderators: arrayRemove(myUID)
+      });
+    }
+
+    try {
+      const userRef = doc(db, "users", myUID);
+      await updateDoc(userRef, {
+        contacts: arrayRemove(gId)
+      });
+    } catch (_) {}
+
+    showNotif("Left group successfully", "success", 2500);
+    if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+
+    const groupInfoModal = document.getElementById("groupInfoModal");
+    if (groupInfoModal) groupInfoModal.style.display = "none";
+    const chatOptionsMenu = document.getElementById("chatOptionsMenu");
+    if (chatOptionsMenu) chatOptionsMenu.style.display = "none";
+
+    try { GroupChat.close(); } catch (_) {}
+
+    currentChatUser = null;
+    currentChatType = null;
+    currentChatName = null;
+
+    const messagesDiv = document.getElementById("messages-area");
+    if (messagesDiv) {
+      messagesDiv.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon"><i class="fa-solid fa-comments"></i></div>
+          <p>Select a chat or community to begin messaging</p>
+        </div>
+      `;
+    }
+
+    const chatNameEl = document.getElementById("chatName");
+    if (chatNameEl) chatNameEl.textContent = "NEXCHAT";
+    const statusTextEl = document.getElementById("statusText");
+    if (statusTextEl) statusTextEl.textContent = "Select a conversation";
+
+    if (typeof showChatListView === 'function') {
+      showChatListView();
+    }
+
+    if (typeof loadGroups === 'function') loadGroups();
+    if (typeof loadContacts === 'function') loadContacts();
+
+  } catch (err) {
+    console.error("Error leaving group:", err);
+    showNotif("Failed to leave group: " + err.message, "error");
+  }
+}
+window.handleLeaveGroup = handleLeaveGroup;
 
 async function openAddGroupMembersPrompt() {
   if (!currentChatUser) {
@@ -11936,7 +12530,7 @@ function setupCreateStatusModal() {
       if (myCircle) myCircle.classList.add('has-status');
 
       playLuxuryChimeSound();
-      showNotif('🎉 Status update published! Disappears in 24 hours.', 'success', 3500);
+      showNotif('Status update published! Disappears in 24 hours.', 'success', 3500);
       closeCreateStatusModal();
       loadStatusFeed();
     } catch (err) {
@@ -12372,8 +12966,8 @@ function initializeBasicUI() {
           const active = isSupabaseActive();
           const settings = getActiveSupabaseSettings();
           const statusMsg = active 
-            ? `⚡ Supabase Realtime Active: Phoenix WebSockets Connected (${settings.url})` 
-            : `⚡ Dual-Engine Fallback Active: Local & Firestore synchronization online`;
+            ? `Supabase Realtime Active: Phoenix WebSockets Connected (${settings.url})` 
+            : `Dual-Engine Fallback Active: Local & Firestore synchronization online`;
           showNotif(statusMsg, active ? 'success' : 'info', 4500);
           hapticFeedback('medium');
         }
@@ -13105,17 +13699,21 @@ async function loadContacts() {
     chronexLi.className = "chat-list-item chronex-ai-item";
     chronexLi.setAttribute('data-chat-id', 'chronex-ai');
     chronexLi.innerHTML = `
-      <div class="chat-avatar-container">
-        <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 2px solid #00ff66;">
+      <div class="chat-avatar-container" style="position: relative;">
+        <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #00ff66; box-shadow: 0 0 14px rgba(0,255,102,0.35);">
+        <span class="chronex-status-pulse" style="position: absolute; bottom: 2px; right: 2px; width: 11px; height: 11px; border-radius: 50%; background: #00ff66; border: 2px solid #0a0e14; box-shadow: 0 0 8px #00ff66;"></span>
       </div>
       <div class="chat-item-content">
-        <div class="chat-item-header">
-          <span class="chat-name">Chronex AI</span>
+        <div class="chat-item-header" style="display: flex; align-items: center; gap: 6px;">
+          <span class="chat-name" style="color: #e6edf3; font-weight: 700; font-family: 'Space Grotesk', sans-serif;">Chronex AI</span>
+          <span class="chronex-vip-pill"><i class="fa-solid fa-bolt"></i> NEURAL CORE</span>
         </div>
-        <p class="chat-preview">AI Assistant</p>
+        <p class="chat-preview" style="color: #00ff66; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
+          <i class="fa-solid fa-microchip" style="font-size: 10px;"></i> Ready &bull; Latency 14ms
+        </p>
       </div>
       <div class="chat-time-container">
-        <span class="chat-item-time">Now</span>
+        <span class="chat-item-time" style="color: #00ff66; font-weight: 600; font-size: 11px;">ONLINE</span>
       </div>
       <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
     `;
@@ -14111,3 +14709,744 @@ function setupMediaLightbox() {
   }
 }
 
+
+/* ==========================================================================
+   NEXBOT STUDIO // WHATSAPP BOT ARCHITECT, NEURAL RADAR, & VIP VAULT
+   ========================================================================== */
+
+function initNexbotStudio() {
+  const modal = document.getElementById('nexbotStudioModal');
+  const openBtns = [
+    document.getElementById('nexbotStudioBtnHeader'),
+    document.getElementById('mobileNexbotStudioBtn'),
+    document.getElementById('sheetNexbotBtn')
+  ];
+  const closeBtn = document.getElementById('closeNexbotStudioBtn');
+  const backdrop = document.getElementById('closeNexbotStudioBackdrop');
+
+  const openModal = () => {
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      syncNexbotFleetList();
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+    }
+  };
+
+  const closeModal = () => {
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  };
+
+  openBtns.forEach(btn => {
+    if (btn && !btn.dataset.bound) {
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+      });
+    }
+  });
+
+  if (closeBtn && !closeBtn.dataset.bound) {
+    closeBtn.dataset.bound = 'true';
+    closeBtn.addEventListener('click', closeModal);
+  }
+  if (backdrop && !backdrop.dataset.bound) {
+    backdrop.dataset.bound = 'true';
+    backdrop.addEventListener('click', closeModal);
+  }
+
+  // Tabs
+  const tabs = document.querySelectorAll('.nexbot-nav-tab[data-bot-tab]');
+  tabs.forEach(tab => {
+    if (tab.dataset.bound) return;
+    tab.dataset.bound = 'true';
+    tab.addEventListener('click', () => {
+      const targetId = tab.getAttribute('data-bot-tab');
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelectorAll('.nexbot-tab-pane').forEach(p => p.classList.remove('active'));
+      const targetPane = document.getElementById(targetId);
+      if (targetPane) targetPane.classList.add('active');
+    });
+  });
+
+  // Archetypes
+  const archetypes = {
+    support: {
+      name: 'ApexSupport AI',
+      prompt: 'You are ApexSupport AI, an autonomous customer service agent for WhatsApp. You answer questions politely, concisely, and resolve user issues with professional precision.',
+      temp: 0.5,
+      greeting: 'Hello! I am your autonomous AI assistant. How can I assist you today?'
+    },
+    sales: {
+      name: 'ApexCloser AI',
+      prompt: 'You are ApexCloser AI, a high-converting sales representative on WhatsApp. You ask sharp qualifying questions, highlight key product benefits, overcome hesitation with social proof, and invite the user to book a call or purchase.',
+      temp: 0.7,
+      greeting: 'Hi there! Looking to scale your business or upgrade your tech stack? Let me show you our high-performance solutions.'
+    },
+    engineer: {
+      name: 'NexusEngineer AI',
+      prompt: 'You are NexusEngineer AI, a principal full-stack engineer and coding mentor on WhatsApp. You write clean, production-grade code, analyze bugs, explain system architectures, and provide robust technical answers.',
+      temp: 0.3,
+      greeting: 'NexusEngineer online. Paste your code or state your architectural requirement.'
+    },
+    crypto: {
+      name: 'AlphaRadar AI',
+      prompt: 'You are AlphaRadar AI, a quantitative crypto analyst. You analyze token metrics, macro market movements, on-chain liquidity, and provide disciplined risk-management frameworks without financial advice.',
+      temp: 0.6,
+      greeting: 'AlphaRadar synced. What market pair or token vector are you tracking?'
+    },
+    twin: {
+      name: 'NexusTwin AI',
+      prompt: 'You are NexusTwin AI, an authentic personal AI twin. You reply in a friendly, conversational tone with natural wit and speedy assistance.',
+      temp: 0.8,
+      greeting: 'Yo! What is up? I am currently mobile but I am right here to help you out.'
+    }
+  };
+
+  const nameInput = document.getElementById('nexbotNameInput');
+  const promptTextarea = document.getElementById('nexbotSystemPrompt');
+  const tempSlider = document.getElementById('nexbotTempSlider');
+  const tempVal = document.getElementById('nexbotTempVal');
+  const delaySlider = document.getElementById('nexbotDelaySlider');
+  const delayVal = document.getElementById('nexbotDelayVal');
+  const greetingInput = document.getElementById('nexbotGreetingInput');
+  const simBotName = document.getElementById('simBotName');
+  const simInitialGreeting = document.getElementById('simInitialGreeting');
+
+  if (promptTextarea && !promptTextarea.value) {
+    promptTextarea.value = archetypes.support.prompt;
+  }
+
+  document.querySelectorAll('.archetype-btn[data-archetype]').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = 'true';
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.archetype-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const arch = archetypes[btn.getAttribute('data-archetype')];
+      if (arch) {
+        if (nameInput) nameInput.value = arch.name;
+        if (promptTextarea) promptTextarea.value = arch.prompt;
+        if (tempSlider) {
+          tempSlider.value = arch.temp;
+          if (tempVal) tempVal.textContent = arch.temp;
+        }
+        if (greetingInput) greetingInput.value = arch.greeting;
+        if (simBotName) simBotName.textContent = arch.name;
+        if (simInitialGreeting) {
+          const p = simInitialGreeting.querySelector('p');
+          if (p) p.textContent = arch.greeting;
+        }
+        if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+      }
+    });
+  });
+
+  // Prompt Sparks
+  document.querySelectorAll('.spark-fill-btn[data-template]').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = 'true';
+    btn.addEventListener('click', () => {
+      const tmpl = btn.getAttribute('data-template');
+      if (promptTextarea) {
+        if (tmpl === 'support') {
+          promptTextarea.value = 'You are a 24/7 WhatsApp Customer Support Representative. Keep answers concise (under 3 sentences), polite, and actionable. Provide order lookup and tracking guidance.';
+        } else if (tmpl === 'sales') {
+          promptTextarea.value = 'You are an Elite B2B Sales Representative. Identify the client pain point, propose the optimal solution tier, and guide them to complete checkout or schedule a consultation.';
+        } else if (tmpl === 'concierge') {
+          promptTextarea.value = 'You are a Luxury VIP Concierge. Address clients with utmost discretion and elegance, offering tailored hospitality and exclusive reservation management.';
+        }
+        if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+      }
+    });
+  });
+
+  if (tempSlider && !tempSlider.dataset.bound) {
+    tempSlider.dataset.bound = 'true';
+    tempSlider.addEventListener('input', (e) => {
+      if (tempVal) tempVal.textContent = e.target.value;
+    });
+  }
+
+  if (delaySlider && !delaySlider.dataset.bound) {
+    delaySlider.dataset.bound = 'true';
+    delaySlider.addEventListener('input', (e) => {
+      if (delayVal) delayVal.textContent = e.target.value + 's';
+    });
+  }
+
+  // Sync to simulator button
+  const syncBtn = document.getElementById('syncToSimulatorBtn');
+  if (syncBtn && !syncBtn.dataset.bound) {
+    syncBtn.dataset.bound = 'true';
+    syncBtn.addEventListener('click', () => {
+      if (simBotName && nameInput) simBotName.textContent = nameInput.value || 'ApexSupport AI';
+      if (simInitialGreeting && greetingInput) {
+        const p = simInitialGreeting.querySelector('p');
+        if (p) p.textContent = greetingInput.value || 'Hello! How can I help you today?';
+      }
+      showNotif('Bot configuration synced to live WhatsApp simulator!', 'success', 2000);
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+    });
+  }
+
+  // Save Bot Profile
+  const saveBotBtn = document.getElementById('saveNexbotBtn');
+  if (saveBotBtn && !saveBotBtn.dataset.bound) {
+    saveBotBtn.dataset.bound = 'true';
+    saveBotBtn.addEventListener('click', () => {
+      const bot = {
+        id: 'bot_' + Date.now(),
+        name: nameInput?.value || 'ApexSupport AI',
+        prompt: promptTextarea?.value || '',
+        temp: parseFloat(tempSlider?.value || 0.6),
+        delay: parseFloat(delaySlider?.value || 1.2),
+        keywords: document.getElementById('nexbotKeywordsInput')?.value || '',
+        greeting: greetingInput?.value || '',
+        createdAt: new Date().toISOString()
+      };
+      const saved = JSON.parse(localStorage.getItem('nexchat_saved_bots') || '[]');
+      saved.push(bot);
+      localStorage.setItem('nexchat_saved_bots', JSON.stringify(saved));
+      syncNexbotFleetList();
+      showNotif(`NEXBOT [${bot.name}] saved to local fleet!`, 'success', 2500);
+      if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+    });
+  }
+
+  // Copy Webhook
+  const copyWebhookBtn = document.getElementById('copyNexbotWebhookBtn');
+  if (copyWebhookBtn && !copyWebhookBtn.dataset.bound) {
+    copyWebhookBtn.dataset.bound = 'true';
+    copyWebhookBtn.addEventListener('click', () => {
+      const urlInput = document.getElementById('nexbotWebhookUrl');
+      if (urlInput) {
+        navigator.clipboard.writeText(urlInput.value);
+        showNotif('WhatsApp Webhook URL copied to clipboard!', 'success', 1800);
+      }
+    });
+  }
+
+  // Copy Baileys Script
+  const copyScriptBtn = document.getElementById('copyBaileysScriptBtn');
+  const exportScriptBtn = document.getElementById('exportNexbotBtn');
+  const getFullBaileysScript = () => {
+    const bName = nameInput?.value || 'ApexSupport AI';
+    const bPrompt = promptTextarea?.value || 'You are an autonomous WhatsApp AI assistant.';
+    return `// ==========================================================
+// NEXBOT Autonomous WhatsApp Runner (Baileys Engine)
+// Generated by NEXCHAT Studio v2.4
+// Run: npm install @whiskeysockets/baileys qrcode-terminal axios
+// ==========================================================
+
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const qrcode = require('qrcode-terminal');
+
+const BOT_NAME = "${bName.replace(/"/g, '\\"')}";
+const SYSTEM_PROMPT = "${bPrompt.replace(/\n/g, ' ').replace(/"/g, '\\"')}";
+
+async function startBot() {
+  const { state, saveCreds } = await useMultiFileAuthState('nexbot_auth_session');
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: true,
+    browser: [BOT_NAME, 'Chrome', '1.0.0']
+  });
+
+  sock.ev.on('creds.update', saveCreds);
+
+  sock.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect, qr } = update;
+    if (qr) qrcode.generate(qr, { small: true });
+    if (connection === 'close') {
+      const reason = lastDisconnect?.error?.output?.statusCode;
+      if (reason !== DisconnectReason.loggedOut) startBot();
+    } else if (connection === 'open') {
+      console.log('[NEXBOT] Connected to WhatsApp Mesh as ' + BOT_NAME);
+    }
+  });
+
+  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    if (type !== 'notify') return;
+    for (const msg of messages) {
+      if (!msg.message || msg.key.fromMe) continue;
+      const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
+      if (!text) continue;
+
+      console.log('[INCOMING]', text);
+      try {
+        const response = "Thank you for reaching out to " + BOT_NAME + ". We received your inquiry: \\"" + text + "\\". Automated neural response queued.";
+        await sock.sendMessage(msg.key.remoteJid, { text: response });
+      } catch (err) {
+        console.error('[BOT ERROR]', err);
+      }
+    }
+  });
+}
+
+startBot();`;
+  };
+
+  [copyScriptBtn, exportScriptBtn].forEach(btn => {
+    if (btn && !btn.dataset.bound) {
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', () => {
+        const code = getFullBaileysScript();
+        navigator.clipboard.writeText(code);
+        showNotif('Node.js Baileys WhatsApp Runner script copied!', 'success', 2500);
+        if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+      });
+    }
+  });
+
+  function syncNexbotFleetList() {
+    const listEl = document.getElementById('nexbotFleetList');
+    const countEl = document.getElementById('botFleetCount');
+    if (!listEl) return;
+    const saved = JSON.parse(localStorage.getItem('nexchat_saved_bots') || '[]');
+    if (countEl) countEl.textContent = (saved.length + 1).toString();
+
+    let html = `
+      <div style="background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-weight: 800; font-size: 13.5px; color: #f1f5f9;"><i class="fa-solid fa-robot"></i> ApexSupport AI (Default)</div>
+          <div style="font-size: 11px; color: #00ff66; margin-top: 3px;"><i class="fa-solid fa-bolt"></i> Active &bull; 0 / 100 Quota Used</div>
+        </div>
+        <span style="font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 6px; background: rgba(0, 255, 102, 0.2); color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.4);">RUNNING</span>
+      </div>
+    `;
+
+    saved.forEach((bot, idx) => {
+      html += `
+        <div style="background: rgba(15, 23, 38, 0.8); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-weight: 800; font-size: 13.5px; color: #f1f5f9;"><i class="fa-solid fa-microchip"></i> ${escapeHtml(bot.name)}</div>
+            <div style="font-size: 11px; color: #94a3b8; margin-top: 3px;">Temp ${bot.temp} &bull; Latency ${bot.delay}s &bull; Custom Triggers</div>
+          </div>
+          <button type="button" class="load-bot-fleet-btn" data-bot-idx="${idx}" style="background: rgba(139, 92, 246, 0.2); border: 1px solid rgba(139, 92, 246, 0.4); color: #c4b5fd; padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer;">
+            Load
+          </button>
+        </div>
+      `;
+    });
+
+    listEl.innerHTML = html;
+
+    listEl.querySelectorAll('.load-bot-fleet-btn').forEach(loadBtn => {
+      loadBtn.addEventListener('click', () => {
+        const idx = parseInt(loadBtn.getAttribute('data-bot-idx'), 10);
+        const bot = saved[idx];
+        if (bot) {
+          if (nameInput) nameInput.value = bot.name;
+          if (promptTextarea) promptTextarea.value = bot.prompt;
+          if (tempSlider) {
+            tempSlider.value = bot.temp;
+            if (tempVal) tempVal.textContent = bot.temp;
+          }
+          if (greetingInput) greetingInput.value = bot.greeting;
+          if (simBotName) simBotName.textContent = bot.name;
+          showNotif(`Loaded [${bot.name}] into workspace`, 'info', 1800);
+          if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+        }
+      });
+    });
+  }
+
+  // Live WhatsApp Simulator Chat Runner
+  const simInput = document.getElementById('simMessageInput');
+  const simSendBtn = document.getElementById('simSendBtn');
+  const simMessagesArea = document.getElementById('simMessagesArea');
+  const simBotStatus = document.getElementById('simBotStatus');
+
+  const executeSimMessage = async () => {
+    if (!simInput) return;
+    const text = simInput.value.trim();
+    if (!text) return;
+    simInput.value = '';
+
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    // Append User Message
+    const userDiv = document.createElement('div');
+    userDiv.className = 'sim-msg sent';
+    userDiv.innerHTML = `<p>${escapeHtml(text)}</p><span class="sim-msg-time">${nowTime} <i class="fa-solid fa-check-double" style="color:#53bdeb;font-size:9px;"></i></span>`;
+    simMessagesArea.appendChild(userDiv);
+    simMessagesArea.scrollTop = simMessagesArea.scrollHeight;
+    if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+
+    if (simBotStatus) simBotStatus.textContent = 'typing...';
+
+    const delaySeconds = parseFloat(delaySlider?.value || 1.2);
+    await new Promise(r => setTimeout(r, Math.min(2500, delaySeconds * 1000)));
+
+    try {
+      const botSysPrompt = promptTextarea?.value || 'You are an autonomous AI representative.';
+      const fullPrompt = `${botSysPrompt}\n\nClient incoming message: "${text}"\nRespond directly as the bot.`;
+
+      let reply = '';
+      if (typeof generateChronexAIResponse === 'function') {
+        reply = await generateChronexAIResponse(fullPrompt);
+      } else if (typeof chronexAI !== 'undefined' && typeof chronexAI.chat === 'function') {
+        reply = await chronexAI.chat(fullPrompt, myUID || 'sim');
+      } else {
+        reply = `Hello! Thank you for your inquiry: "${text}". How else may I assist you?`;
+      }
+
+      const botDiv = document.createElement('div');
+      botDiv.className = 'sim-msg received';
+      botDiv.innerHTML = `<p>${escapeHtml(reply)}</p><span class="sim-msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>`;
+      simMessagesArea.appendChild(botDiv);
+      simMessagesArea.scrollTop = simMessagesArea.scrollHeight;
+      if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+    } catch (err) {
+      const errDiv = document.createElement('div');
+      errDiv.className = 'sim-msg received';
+      errDiv.style.color = '#ef4444';
+      errDiv.innerHTML = `<p>Error: ${escapeHtml(err.message || 'Simulation timeout')}</p>`;
+      simMessagesArea.appendChild(errDiv);
+    } finally {
+      if (simBotStatus) simBotStatus.textContent = 'online';
+    }
+  };
+
+  if (simSendBtn && !simSendBtn.dataset.bound) {
+    simSendBtn.dataset.bound = 'true';
+    simSendBtn.addEventListener('click', executeSimMessage);
+  }
+
+  if (simInput && !simInput.dataset.bound) {
+    simInput.dataset.bound = 'true';
+    simInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        executeSimMessage();
+      }
+    });
+  }
+}
+
+function initNeuralRadar() {
+  const modal = document.getElementById('neuralRadarModal');
+  const openBtns = [
+    document.getElementById('radarBtnHeader'),
+    document.getElementById('mobileRadarBtn'),
+    document.getElementById('sheetRadarBtn')
+  ];
+  const closeBtn = document.getElementById('closeNeuralRadarBtn');
+  const backdrop = document.getElementById('closeNeuralRadarBackdrop');
+  const blipsLayer = document.getElementById('radarBlipsLayer');
+  const nodeCard = document.getElementById('radarNodeCard');
+  const rescanBtn = document.getElementById('radarRescanBtn');
+  const soundToggleBtn = document.getElementById('radarSoundToggleBtn');
+  let soundEnabled = true;
+
+  const playSonarChime = () => {
+    if (!soundEnabled) return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.36);
+    } catch (e) {}
+  };
+
+  const RADAR_NODES = [
+    { id: 'node_1', name: 'Operative_Kaelen', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '120m', latency: '14ms', signal: '-38 dBm', desc: 'Fullstack Dev & Crypto Researcher. Node active.', r: 55, deg: 35 },
+    { id: 'node_2', name: 'Elena_Valkyrie', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '340m', latency: '18ms', signal: '-49 dBm', desc: 'UI/UX Architect & Cyber Artist. Node active.', r: 95, deg: 110 },
+    { id: 'node_3', name: 'CyberMarcus', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '850m', latency: '22ms', signal: '-62 dBm', desc: 'Penetration Tester & Mesh Builder.', r: 130, deg: 215 },
+    { id: 'node_4', name: 'CipherZero', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '1.4km', latency: '29ms', signal: '-74 dBm', desc: 'Autonomous systems architect.', r: 160, deg: 310 },
+    { id: 'node_5', name: 'ApexSupport_Bot_01', type: 'bot', typeLabel: 'NEXBOT AUTONOMOUS', dist: '220m', latency: '9ms', signal: '-41 dBm', desc: 'Autonomous WhatsApp customer support node.', r: 75, deg: 280 },
+    { id: 'node_6', name: 'CodeSynthesizer_Bot', type: 'bot', typeLabel: 'NEXBOT AUTONOMOUS', dist: '620m', latency: '12ms', signal: '-58 dBm', desc: 'Autonomous algorithm refactoring agent.', r: 115, deg: 160 },
+    { id: 'node_7', name: 'AlphaTrading_AI', type: 'bot', typeLabel: 'NEXBOT AUTONOMOUS', dist: '1.8km', latency: '11ms', signal: '-69 dBm', desc: 'Real-time liquidity and momentum signals agent.', r: 150, deg: 70 },
+    { id: 'node_8', name: 'NEURAL_BUILDERS', type: 'channel', typeLabel: 'COMMUNITY NODE', dist: '450m', latency: '15ms', signal: '-52 dBm', desc: 'Public channel: AI developers, model engineers & hackers.', r: 100, deg: 235 },
+    { id: 'node_9', name: 'CYBERPUNK_CODERS', type: 'channel', typeLabel: 'COMMUNITY NODE', dist: '980m', latency: '19ms', signal: '-65 dBm', desc: 'Public channel: High-speed web applications and shaders.', r: 135, deg: 345 },
+    { id: 'node_10', name: 'CRYPTO_ALPHA_HUB', type: 'channel', typeLabel: 'COMMUNITY NODE', dist: '2.2km', latency: '24ms', signal: '-78 dBm', desc: 'Decentralized trading & on-chain analysis group.', r: 165, deg: 140 }
+  ];
+
+  let activeFilter = 'all';
+
+  const renderBlips = () => {
+    if (!blipsLayer) return;
+    blipsLayer.innerHTML = '';
+    const center = 190;
+
+    RADAR_NODES.forEach(node => {
+      if (activeFilter !== 'all') {
+        if (activeFilter === 'peers' && node.type !== 'peer') return;
+        if (activeFilter === 'bots' && node.type !== 'bot') return;
+        if (activeFilter === 'channels' && node.type !== 'channel') return;
+      }
+
+      const rad = (node.deg * Math.PI) / 180;
+      const x = center + node.r * Math.cos(rad);
+      const y = center + node.r * Math.sin(rad);
+
+      const blipEl = document.createElement('div');
+      blipEl.className = `radar-blip ${node.type}`;
+      blipEl.style.left = `${x}px`;
+      blipEl.style.top = `${y}px`;
+      blipEl.title = `${node.name} (${node.dist})`;
+
+      blipEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        inspectNode(node);
+        if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+      });
+
+      blipsLayer.appendChild(blipEl);
+    });
+  };
+
+  const inspectNode = (node) => {
+    if (!nodeCard) return;
+    nodeCard.style.display = 'block';
+    const nameEl = document.getElementById('nodeCardName');
+    const typeEl = document.getElementById('nodeCardType');
+    const distEl = document.getElementById('nodeCardDist');
+    const latEl = document.getElementById('nodeCardLatency');
+    const sigEl = document.getElementById('nodeCardSignal');
+    const descEl = document.getElementById('nodeCardDesc');
+    const iconEl = document.getElementById('nodeCardAvatar');
+    const connBtn = document.getElementById('nodeCardConnectBtn');
+
+    if (nameEl) nameEl.textContent = node.name;
+    if (typeEl) typeEl.textContent = node.typeLabel;
+    if (distEl) distEl.textContent = node.dist;
+    if (latEl) latEl.textContent = node.latency;
+    if (sigEl) sigEl.textContent = node.signal;
+    if (descEl) descEl.textContent = node.desc;
+
+    if (iconEl) {
+      if (node.type === 'peer') iconEl.innerHTML = '<i class="fa-solid fa-user"></i>';
+      else if (node.type === 'bot') iconEl.innerHTML = '<i class="fa-solid fa-robot"></i>';
+      else iconEl.innerHTML = '<i class="fa-solid fa-users"></i>';
+    }
+
+    if (connBtn) {
+      connBtn.onclick = () => {
+        closeModal();
+        if (node.type === 'peer') {
+          showNotif(`Opening uplink to operative ${node.name}...`, 'info', 2000);
+          if (typeof openChat === 'function') openChat(node.id, node.name, 'logo.jpg', 'direct');
+        } else if (node.type === 'bot') {
+          showNotif(`Synchronizing with autonomous node ${node.name}...`, 'info', 2000);
+          if (typeof openChat === 'function') openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');
+        } else {
+          showNotif(`Joining community frequency: ${node.name}`, 'success', 2500);
+          if (typeof openChat === 'function') openChat(node.id, node.name, 'logo.jpg', 'group');
+        }
+      };
+    }
+  };
+
+  const openModal = () => {
+    if (modal) {
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      renderBlips();
+      playSonarChime();
+    }
+  };
+
+  const closeModal = () => {
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+      if (nodeCard) nodeCard.style.display = 'none';
+    }
+  };
+
+  openBtns.forEach(btn => {
+    if (btn && !btn.dataset.bound) {
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+      });
+    }
+  });
+
+  if (closeBtn && !closeBtn.dataset.bound) {
+    closeBtn.dataset.bound = 'true';
+    closeBtn.addEventListener('click', closeModal);
+  }
+  if (backdrop && !backdrop.dataset.bound) {
+    backdrop.dataset.bound = 'true';
+    backdrop.addEventListener('click', closeModal);
+  }
+
+  const closeNodeCardBtn = document.getElementById('closeNodeCardBtn');
+  if (closeNodeCardBtn && !closeNodeCardBtn.dataset.bound) {
+    closeNodeCardBtn.dataset.bound = 'true';
+    closeNodeCardBtn.addEventListener('click', () => {
+      if (nodeCard) nodeCard.style.display = 'none';
+    });
+  }
+
+  // Filter pills
+  document.querySelectorAll('.radar-filter-pill[data-filter]').forEach(pill => {
+    if (pill.dataset.bound) return;
+    pill.dataset.bound = 'true';
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.radar-filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeFilter = pill.getAttribute('data-filter');
+      renderBlips();
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+    });
+  });
+
+  // Sound toggle
+  if (soundToggleBtn && !soundToggleBtn.dataset.bound) {
+    soundToggleBtn.dataset.bound = 'true';
+    soundToggleBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundToggleBtn.innerHTML = soundEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+      showNotif(`Sonar Audio: ${soundEnabled ? 'Enabled' : 'Muted'}`, 'info', 1500);
+    });
+  }
+
+  // Rescan button
+  if (rescanBtn && !rescanBtn.dataset.bound) {
+    rescanBtn.dataset.bound = 'true';
+    rescanBtn.addEventListener('click', () => {
+      rescanBtn.disabled = true;
+      rescanBtn.innerHTML = '<i class="fa-solid fa-rotate fa-spin"></i> SCANNING...';
+      playSonarChime();
+      setTimeout(() => {
+        RADAR_NODES.forEach(n => {
+          n.deg = (n.deg + Math.floor(Math.random() * 40 - 20) + 360) % 360;
+          n.r = Math.max(40, Math.min(168, n.r + Math.floor(Math.random() * 20 - 10)));
+        });
+        renderBlips();
+        rescanBtn.disabled = false;
+        rescanBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> RESCAN SPECTRUM';
+        showNotif('Spectrum re-scanned: 10 active mesh nodes acquired', 'success', 2000);
+      }, 700);
+    });
+  }
+}
+
+function initVipVault() {
+  const modal = document.getElementById('vipVaultModal');
+  const openBtns = [
+    document.getElementById('vipVaultBtnHeader'),
+    document.getElementById('mobileVipVaultBtn'),
+    document.getElementById('sheetVipVaultBtn')
+  ];
+  const closeBtn = document.getElementById('closeVipVaultBtn');
+  const backdrop = document.getElementById('closeVipVaultBackdrop');
+  const balanceVal = document.getElementById('vaultModalTokensVal');
+
+  const updateBalance = () => {
+    if (balanceVal) {
+      balanceVal.textContent = typeof tokens !== 'undefined' ? tokens.toString() : '100';
+    }
+  };
+
+  const openModal = () => {
+    if (modal) {
+      updateBalance();
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+    }
+  };
+
+  const closeModal = () => {
+    if (modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  };
+
+  openBtns.forEach(btn => {
+    if (btn && !btn.dataset.bound) {
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal();
+      });
+    }
+  });
+
+  if (closeBtn && !closeBtn.dataset.bound) {
+    closeBtn.dataset.bound = 'true';
+    closeBtn.addEventListener('click', closeModal);
+  }
+  if (backdrop && !backdrop.dataset.bound) {
+    backdrop.dataset.bound = 'true';
+    backdrop.addEventListener('click', closeModal);
+  }
+
+  // Tier Recharge Buttons
+  document.querySelectorAll('.tier-action-btn[data-tokens]').forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = 'true';
+    btn.addEventListener('click', async () => {
+      const addTokens = parseInt(btn.getAttribute('data-tokens'), 10) || 500;
+      const planName = btn.getAttribute('data-plan') || 'pioneer';
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Provisioning...';
+
+      try {
+        tokens = (typeof tokens === 'number' ? tokens : 100) + addTokens;
+
+        if (myUID && typeof db !== 'undefined') {
+          try {
+            await updateDoc(doc(db, 'users', myUID), {
+              tokens: tokens,
+              vipPlan: planName,
+              lastUpgradeAt: new Date().toISOString()
+            });
+          } catch (e) {
+            console.warn('[VIP VAULT] Firestore update notice:', e);
+          }
+        }
+
+        const currentTokenBalanceEl = document.getElementById('currentTokenBalance');
+        if (currentTokenBalanceEl) currentTokenBalanceEl.textContent = formatBalanceDisplay(tokens);
+        const tokenCountEl = document.getElementById('tokenCount');
+        if (tokenCountEl) tokenCountEl.textContent = tokens.toString();
+
+        updateBalance();
+        if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+        if (navigator.vibrate) navigator.vibrate([60, 80, 60]);
+
+        showNotif(`Success! +${addTokens} Neural Tokens added. Commercial license active.`, 'success', 3500);
+      } catch (err) {
+        showNotif('Provisioning error: ' + err.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i class="fa-solid fa-bolt"></i> RECHARGE ${addTokens}`;
+      }
+    });
+  });
+}
+
+// Automatically mount new features on boot
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initNexbotStudio();
+    initNeuralRadar();
+    initVipVault();
+  });
+} else {
+  initNexbotStudio();
+  initNeuralRadar();
+  initVipVault();
+}

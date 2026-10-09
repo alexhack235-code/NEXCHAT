@@ -120,7 +120,11 @@ let reelsSettings = {
   allowComments: 'all',
   allowDownloads: true,
   showViews: true,
+  loopLimit: 'infinite',
+  resumePlayback: true,
 };
+
+const sessionWatchedReels = new Set();
 
 try {
   const savedSettings = JSON.parse(localStorage.getItem('camshot_settings') || localStorage.getItem('nex_reels_settings') || '{}');
@@ -337,6 +341,61 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+// Floating Volume HUD Controller
+const volHud = document.getElementById('floatingVolumeHud');
+const hudVolIcon = document.getElementById('hudVolIcon');
+const hudVolFill = document.getElementById('hudVolFill');
+const hudVolText = document.getElementById('hudVolText');
+let volHudTimer = null;
+
+function showVolumeHud(muted, volume = 1) {
+  if (!volHud) return;
+  const pct = muted ? 0 : Math.round(volume * 100);
+  if (hudVolText) hudVolText.textContent = `${pct}%`;
+  if (hudVolFill) hudVolFill.style.width = `${pct}%`;
+  if (hudVolIcon) {
+    hudVolIcon.className = muted || pct === 0 ? 'fa-solid fa-volume-xmark' : pct < 50 ? 'fa-solid fa-volume-low' : 'fa-solid fa-volume-high';
+  }
+  volHud.style.display = 'flex';
+  if (volHudTimer) clearTimeout(volHudTimer);
+  volHudTimer = setTimeout(() => {
+    volHud.style.display = 'none';
+  }, 1800);
+}
+
+// Left/Right 10s Seek Ripple Animation
+function triggerSeekAnimation(direction) {
+  const badge = direction === 'left' ? document.getElementById('seekLeftBadge') : document.getElementById('seekRightBadge');
+  if (!badge) return;
+  badge.style.display = 'flex';
+  badge.classList.remove('active');
+  void badge.offsetWidth;
+  badge.classList.add('active');
+  setTimeout(() => {
+    badge.style.display = 'none';
+    badge.classList.remove('active');
+  }, 650);
+}
+
+// Clean Screen / Zen Mode (Immersive View) Controller
+const zenBtn = document.getElementById('zenModeToggleBtn');
+const exitZenPill = document.getElementById('exitZenModePill');
+
+function toggleZenMode(forceState) {
+  const isZen = forceState !== undefined ? forceState : !document.body.classList.contains('zen-mode-active');
+  document.body.classList.toggle('zen-mode-active', isZen);
+  if (exitZenPill) {
+    exitZenPill.style.display = isZen ? 'flex' : 'none';
+  }
+  if (isZen) {
+    showToast('Clean Screen Mode active. Tap screen to restore.');
+  }
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+
+if (zenBtn) zenBtn.addEventListener('click', () => toggleZenMode());
+if (exitZenPill) exitZenPill.addEventListener('click', () => toggleZenMode(false));
+
 // Sound Toggle Handler
 if (globalSoundToggle) {
   // Sync initial sound icon with setting
@@ -355,6 +414,8 @@ if (globalSoundToggle) {
       icon.className = 'fa-solid fa-volume-high';
       showToast('Unmuted');
     }
+
+    showVolumeHud(isGlobalMuted);
 
     // Update all playing reel videos
     document.querySelectorAll('.reel-video').forEach((v) => {
@@ -453,6 +514,23 @@ window.addEventListener('keydown', (e) => {
   } else if (e.key === 'c' || e.key === 'C' || e.key === '+') {
     e.preventDefault();
     openCreatorStudio();
+  } else if (e.key === 'z' || e.key === 'Z') {
+    e.preventDefault();
+    toggleZenMode();
+  } else if (e.key === 'p' || e.key === 'P') {
+    e.preventDefault();
+    const pipBtn = document.getElementById('pipToggleBtn');
+    if (pipBtn) pipBtn.click();
+  } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
+    e.preventDefault();
+    toggleKeyboardShortcutsModal();
+  } else if (e.key === 'Escape') {
+    toggleKeyboardShortcutsModal(false);
+    const slpModal = document.getElementById('sleepReminderModal');
+    if (slpModal) slpModal.style.display = 'none';
+    closeShareModal();
+    closeCommentsDrawer();
+    closeReelsSettings();
   }
 });
 
@@ -755,10 +833,22 @@ function renderReels(reelsList) {
           <div class="reel-ambient-backdrop" style="background-image: url('${posterUrl}');"></div>
           <video class="reel-video ${filterClass}" src="${reel.videoUrl}" poster="${posterUrl}" playsinline loop preload="metadata"></video>
           <div class="reel-play-indicator"><i class="fa-solid fa-play"></i></div>
+          <!-- Live Closed Captions Subtitle Box -->
+          <div class="reel-live-cc-box" style="display: none;">
+            <span class="reel-live-cc-text"></span>
+          </div>
         </div>
 
-        <!-- Right Action Bar: Heart, Comment, Bookmark, Share, Tip, Bot, Music disc -->
+        <!-- Right Action Bar: Creator Avatar, Like, Comment, Save, Share, More, Sound Disc -->
         <aside class="reel-actions-column select-none pointer-events-auto">
+          <!-- Creator Avatar in action column -->
+          <div class="action-creator-avatar-wrap cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
+            <img src="${reel.authorPic || 'favicon.png'}" class="action-creator-avatar" alt="${escapeHtml(authorHandle)}">
+            <button type="button" class="action-avatar-follow-btn ${isFollowing ? 'following' : ''}" data-author="${escapeHtml(authorHandle)}" title="Follow">
+              <i class="fa-solid ${isFollowing ? 'fa-check' : 'fa-plus'}"></i>
+            </button>
+          </div>
+
           <!-- Heart (Like) -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
             <button type="button" class="like-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Like">
@@ -791,58 +881,97 @@ function renderReels(reelsList) {
             <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
           </div>
 
-          <!-- More Actions (CamShot Stream Controls) -->
+          <!-- Snapshot Clean Frame Grabber -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="snapshot-btn text-white transition-transform active:scale-125 focus:outline-none" title="Capture Clean Snapshot (Save Frame)">
+              <i class="fa-solid fa-camera text-[23px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="text-[10px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Snap</span>
+          </div>
+
+          <!-- More Actions (AI & Tips) -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
             <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="More Actions (AI & Tips)">
               <i class="fa-solid fa-ellipsis text-[22px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
             </button>
           </div>
 
-          <!-- Music disc rotating with floating notes -->
+          <!-- Playback Speed Menu Trigger -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer reel-speed-wrapper" style="position: relative;">
+            <button type="button" class="reel-speed-btn text-white transition-transform active:scale-125 focus:outline-none" title="Playback Speed">
+              <span class="speed-label">1×</span>
+            </button>
+            <div class="reel-speed-popover" style="display: none;">
+              <button type="button" class="speed-opt-btn" data-speed="0.5">0.5×</button>
+              <button type="button" class="speed-opt-btn" data-speed="0.75">0.75×</button>
+              <button type="button" class="speed-opt-btn active" data-speed="1.0">1.0×</button>
+              <button type="button" class="speed-opt-btn" data-speed="1.25">1.25×</button>
+              <button type="button" class="speed-opt-btn" data-speed="1.5">1.5×</button>
+              <button type="button" class="speed-opt-btn" data-speed="2.0">2.0×</button>
+            </div>
+          </div>
+
+          <!-- Music disc rotating with floating notes & live equalizer bars -->
           <div class="music-disc-wrapper cursor-pointer mt-0.5" title="${escapeHtml(soundTrackTitle)}" style="position: relative;">
             <div class="music-note-float">♪</div>
             <div class="music-note-float" style="animation-delay: 1.2s; color: #ff2d55;">♫</div>
             <div class="reel-sound-disc w-9 h-9 rounded-full border border-white/20 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              <i class="fa-solid fa-compact-disc text-white text-sm"></i>
+              <div class="disc-eq-wave">
+                <span class="disc-eq-bar b1"></span>
+                <span class="disc-eq-bar b2"></span>
+                <span class="disc-eq-bar b3"></span>
+              </div>
             </div>
           </div>
         </aside>
 
         <!-- Bottom Creator Handle + Caption + Sound Hub Row -->
-        <div class="reel-bottom-info flex flex-col gap-1 text-white select-none pointer-events-auto">
-          <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="reel-bottom-info flex flex-col gap-1.5 text-white select-none pointer-events-auto">
+          <div class="reel-creator-row">
             <span class="reel-creator-handle font-bold text-[14.5px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
               @${escapeHtml(authorHandle)}
             </span>
+            <span class="reel-verified-badge" title="Verified Creator"><i class="fa-solid fa-circle-check"></i></span>
             <button type="button" class="reel-follow-pill ${isFollowing ? 'following' : ''}" data-author="${escapeHtml(authorHandle)}" title="Follow creator">
               ${isFollowing ? '<i class="fa-solid fa-check"></i> Following' : '<i class="fa-solid fa-plus"></i> Follow'}
             </button>
+            <button type="button" class="reel-cc-toggle-btn" title="Toggle Live Captions (CC)">CC</button>
           </div>
-          <p class="text-[13px] text-gray-100 font-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] break-words">
-            ${escapeHtml(reel.caption || '')}
-          </p>
-          <div class="reel-sound-row flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] mt-0.5 cursor-pointer hover:text-[var(--cs-gold-soft)] transition-colors" title="Open Sound Hub">
+          <div class="reel-caption-wrap">
+            <p class="reel-caption-text text-[13px] text-gray-100 font-normal leading-snug drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] break-words">
+              ${escapeHtml(reel.caption || '')}
+            </p>
+            ${(reel.caption && reel.caption.length > 70) ? '<button type="button" class="reel-caption-toggle-btn">...more</button>' : ''}
+          </div>
+          <div class="reel-sound-row flex items-center gap-2 text-xs text-white/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] cursor-pointer hover:text-[var(--cs-gold-soft)] transition-colors" title="Open Sound Hub">
             <i class="fa-solid fa-music text-[11px]"></i>
-            <span class="truncate max-w-[200px] font-medium">${escapeHtml(soundTrackTitle)}</span>
+            <span class="truncate max-w-[210px] font-medium">${escapeHtml(soundTrackTitle)}</span>
           </div>
         </div>
 
-        <!-- Bottom inline comment input bar -->
+        <!-- Sleek Bottom Inline Comment Bar -->
         <div class="reel-bottom-bar flex items-center gap-2">
-          <div class="flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border-0 transition-all">
-            <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-400 text-xs outline-none" placeholder="Add comment..." autocomplete="off">
-            <button type="button" class="reel-inline-image-btn text-white/80 hover:text-white transition-colors" title="Add image">
-              <i class="fa-regular fa-image text-[15px] drop-shadow"></i>
-            </button>
+          <!-- Floating Quick Emoji Reactions Bar -->
+          <div class="reel-quick-reactions">
+            <button type="button" class="quick-react-btn" data-emoji="🔥" title="Fire">🔥</button>
+            <button type="button" class="quick-react-btn" data-emoji="❤️" title="Love">❤️</button>
+            <button type="button" class="quick-react-btn" data-emoji="😂" title="Laugh">😂</button>
+            <button type="button" class="quick-react-btn" data-emoji="💎" title="Diamond">💎</button>
+            <button type="button" class="quick-react-btn" data-emoji="🚀" title="Rocket">🚀</button>
+          </div>
+
+          <div class="reel-inline-bar-pill flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-white/10 transition-all">
+            <i class="fa-regular fa-comment-dots text-white/70 text-[13px]"></i>
+            <input type="text" class="reel-inline-input flex-1 bg-transparent text-white placeholder-gray-300 text-xs outline-none" placeholder="Add a comment..." autocomplete="off">
             <button type="button" class="reel-inline-emoji-btn text-white/80 hover:text-white transition-colors" title="Add emoji">
-              <i class="fa-regular fa-face-smile text-[15px] drop-shadow"></i>
+              <i class="fa-regular fa-face-smile text-[14px]"></i>
             </button>
             <button type="button" class="reel-inline-at-btn text-white/80 hover:text-white transition-colors" title="Mention user">
-              <i class="fa-solid fa-at text-[15px] drop-shadow"></i>
+              <i class="fa-solid fa-at text-[13px]"></i>
             </button>
           </div>
-          <button type="button" class="reel-inline-send-btn text-white/90 hover:text-[var(--cs-gold)] transition-colors p-1.5 focus:outline-none" title="Post comment">
-            <i class="fa-solid fa-paper-plane text-sm drop-shadow"></i>
+          <button type="button" class="reel-inline-send-btn text-white hover:text-[var(--cs-gold)] transition-colors p-2 focus:outline-none" title="Post comment">
+            <i class="fa-solid fa-paper-plane text-sm"></i>
           </button>
         </div>
 
@@ -904,7 +1033,7 @@ function renderReels(reelsList) {
           if (pcts[0]) { pcts[0].textContent = `${p1}%`; pcts[0].style.display = 'inline'; }
           if (pcts[1]) { pcts[1].textContent = `${p2}%`; pcts[1].style.display = 'inline'; }
           playLuxuryPopSound();
-          showToast('🗳️ Live vote submitted!');
+          showToast('Live vote submitted!');
         });
       });
       stageEl.appendChild(pollBox);
@@ -931,7 +1060,7 @@ function renderReels(reelsList) {
         const currentTokens = parseInt(localStorage.getItem('nex_tokens') || '0', 10);
         localStorage.setItem('nex_tokens', String(currentTokens + 10));
         playLuxuryPopSound();
-        showToast('🎉 Claimed 10 NEX Tokens Bounty from this CamShot!');
+        showToast('Claimed 10 NEX Tokens Bounty from this CamShot!');
       });
       stageEl.appendChild(bountyBadge);
     }
@@ -964,23 +1093,96 @@ function renderReels(reelsList) {
     const bookmarkBtn = card.querySelector('.bookmark-btn');
     const tipBtn = card.querySelector('.tip-btn');
 
-    // Video Timeupdate -> Update Progress Bar
+    // Video Timeupdate -> Update Progress Bar, Resume Position & Watch History
     videoEl.addEventListener('timeupdate', () => {
       if (videoEl.duration) {
         const pct = (videoEl.currentTime / videoEl.duration) * 100;
         progressFill.style.width = `${pct}%`;
+
+        // Watch history tracking
+        if (videoEl.currentTime >= 2 && !sessionWatchedReels.has(reel.id)) {
+          sessionWatchedReels.add(reel.id);
+          const badge = document.getElementById('watchHistoryCountBadge');
+          if (badge) badge.textContent = `${sessionWatchedReels.size} Reels`;
+        }
+
+        // Resume playback position tracking
+        if (reelsSettings.resumePlayback !== false && videoEl.currentTime > 1 && videoEl.currentTime < videoEl.duration - 2) {
+          try { sessionStorage.setItem(`camshot_pos_${reel.id}`, videoEl.currentTime.toFixed(1)); } catch (e) {}
+        }
       }
     });
 
-    // Scrubber click to seek
-    progressContainer.addEventListener('click', (e) => {
-      const rect = progressContainer.getBoundingClientRect();
-      const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-      if (videoEl.duration) {
-        videoEl.currentTime = pos * videoEl.duration;
-        if (card._customAudio) card._customAudio.currentTime = videoEl.currentTime;
+    videoEl.addEventListener('loadedmetadata', () => {
+      if (reelsSettings.resumePlayback !== false && !card._hasResumed) {
+        const savedPos = sessionStorage.getItem(`camshot_pos_${reel.id}`);
+        if (savedPos) {
+          const parsedPos = parseFloat(savedPos);
+          if (parsedPos > 0 && parsedPos < (videoEl.duration || 999) - 2) {
+            videoEl.currentTime = parsedPos;
+            card._hasResumed = true;
+          }
+        }
       }
     });
+
+    // Mobile Scrubber Touch Drag & Live Timestamp Bubble HUD
+    const timeBubble = document.getElementById('scrubberTimeBubble');
+    const timeText = document.getElementById('scrubberTimeText');
+    const scrubberCloneVideo = document.getElementById('scrubberCloneVideo');
+
+    const updateSeekFromPointer = (clientX) => {
+      const rect = progressContainer.getBoundingClientRect();
+      const pos = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      if (videoEl.duration) {
+        const targetTime = pos * videoEl.duration;
+        videoEl.currentTime = targetTime;
+        if (card._customAudio) card._customAudio.currentTime = targetTime;
+        progressFill.style.width = `${pos * 100}%`;
+
+        if (timeBubble && timeText) {
+          const curM = Math.floor(targetTime / 60);
+          const curS = Math.floor(targetTime % 60).toString().padStart(2, '0');
+          const durM = Math.floor(videoEl.duration / 60);
+          const durS = Math.floor(videoEl.duration % 60).toString().padStart(2, '0');
+          timeText.textContent = `${curM}:${curS} / ${durM}:${durS}`;
+          timeBubble.style.display = 'flex';
+          timeBubble.style.left = `${Math.max(60, Math.min(window.innerWidth - 75, clientX))}px`;
+
+          if (scrubberCloneVideo && videoEl.src) {
+            const vSrc = videoEl.currentSrc || videoEl.src;
+            if (scrubberCloneVideo.src !== vSrc) {
+              scrubberCloneVideo.src = vSrc;
+            }
+            scrubberCloneVideo.currentTime = targetTime;
+          }
+        }
+      }
+    };
+
+    let isScrubbing = false;
+    progressContainer.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      isScrubbing = true;
+      try { progressContainer.setPointerCapture(e.pointerId); } catch (err) {}
+      updateSeekFromPointer(e.clientX);
+      if (navigator.vibrate) navigator.vibrate(15);
+    });
+
+    progressContainer.addEventListener('pointermove', (e) => {
+      if (!isScrubbing) return;
+      e.stopPropagation();
+      updateSeekFromPointer(e.clientX);
+    });
+
+    const stopScrubbing = () => {
+      if (isScrubbing) {
+        isScrubbing = false;
+        if (timeBubble) timeBubble.style.display = 'none';
+      }
+    };
+    progressContainer.addEventListener('pointerup', stopScrubbing);
+    progressContainer.addEventListener('pointercancel', stopScrubbing);
 
     // Inline comment submit handlers
     if (inlineInput && inlineSendBtn) {
@@ -1061,6 +1263,17 @@ function renderReels(reelsList) {
       });
     }
 
+    // Caption Expand / Collapse Toggle
+    const captionToggleBtn = card.querySelector('.reel-caption-toggle-btn');
+    const captionText = card.querySelector('.reel-caption-text');
+    if (captionToggleBtn && captionText) {
+      captionToggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isExp = captionText.classList.toggle('expanded');
+        captionToggleBtn.textContent = isExp ? 'less' : '...more';
+      });
+    }
+
     // Creator Profile Click Listener
     const creatorHandle = card.querySelector('.reel-creator-handle');
     if (creatorHandle) {
@@ -1117,15 +1330,113 @@ function renderReels(reelsList) {
     card.addEventListener('pointercancel', stopHoldSpeed);
     card.addEventListener('mouseleave', stopHoldSpeed);
 
+    // ── MOBILE TOUCH GESTURES (Pinch-to-Zoom, Swipe Left -> Creator Profile, Swipe Up -> Comments) ──
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let initialPinchDistance = 0;
+    let initialZoomScale = 1;
+    let currentZoomScale = 1;
+
+    const zoomResetPill = document.getElementById('videoZoomResetPill');
+    const zoomLevelText = document.getElementById('videoZoomLevelText');
+
+    if (zoomResetPill && !zoomResetPill._hasListener) {
+      zoomResetPill._hasListener = true;
+      zoomResetPill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const curCard = getCurrentActiveCard();
+        if (curCard) {
+          const v = curCard.querySelector('.reel-video');
+          if (v) {
+            v.style.transform = 'scale(1)';
+            v.style.transition = 'transform 0.25s ease-out';
+          }
+        }
+        zoomResetPill.style.display = 'none';
+      });
+    }
+
+    const calcPinchDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    card.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        initialPinchDistance = calcPinchDistance(e.touches);
+        initialZoomScale = currentZoomScale;
+      } else if (e.touches.length === 1) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartTime = Date.now();
+      }
+    }, { passive: true });
+
+    card.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2 && initialPinchDistance > 0) {
+        const dist = calcPinchDistance(e.touches);
+        const factor = dist / initialPinchDistance;
+        currentZoomScale = Math.max(1, Math.min(3.0, initialZoomScale * factor));
+        videoEl.style.transform = `scale(${currentZoomScale})`;
+        videoEl.style.transformOrigin = 'center center';
+        videoEl.style.transition = 'none';
+
+        if (zoomResetPill && zoomLevelText) {
+          if (currentZoomScale > 1.06) {
+            zoomLevelText.textContent = `${Math.round(currentZoomScale * 100)}%`;
+            zoomResetPill.style.display = 'flex';
+          } else {
+            zoomResetPill.style.display = 'none';
+          }
+        }
+      }
+    }, { passive: true });
+
+    card.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        initialPinchDistance = 0;
+        if (currentZoomScale < 1.06) {
+          currentZoomScale = 1;
+          videoEl.style.transform = 'scale(1)';
+          videoEl.style.transition = 'transform 0.2s ease-out';
+          if (zoomResetPill) zoomResetPill.style.display = 'none';
+        }
+      }
+      if (e.changedTouches.length === 1) {
+        const deltaX = e.changedTouches[0].clientX - touchStartX;
+        const deltaY = e.changedTouches[0].clientY - touchStartY;
+        const elapsed = Date.now() - touchStartTime;
+
+        // Swipe Left: Glide open Creator Profile
+        if (elapsed < 450 && deltaX < -70 && Math.abs(deltaY) < 65) {
+          if (!e.target.closest('aside') && !e.target.closest('button') && !e.target.closest('input')) {
+            if (navigator.vibrate) navigator.vibrate(20);
+            openCreatorProfile(authorHandle, reel.authorPic || 'favicon.png');
+          }
+        }
+
+        // Swipe Up: Slide up Comments Drawer
+        if (elapsed < 450 && deltaY < -55 && Math.abs(deltaX) < 65) {
+          if (e.target.closest('.reel-bottom-info') || e.target.closest('.reel-bottom-bar')) {
+            if (navigator.vibrate) navigator.vibrate(20);
+            openCommentsDrawer(reel.id);
+          }
+        }
+      }
+    }, { passive: true });
+
     // Video Tap & Double Tap (Double tap anywhere = like + show big heart)
     let lastTap = 0;
     let singleTapTimeout = null;
     card.addEventListener('click', (e) => {
-      // Ignore clicks on action bar, inputs, buttons, comment bar, progress container
+      // Ignore clicks on action bar, inputs, buttons, comment bar, progress container, caption toggle
       if (
         e.target.closest('aside') ||
         e.target.closest('.reel-progress-container') ||
         e.target.closest('.reel-bottom-bar') ||
+        e.target.closest('.reel-caption-toggle-btn') ||
         e.target.closest('button') ||
         e.target.closest('input')
       ) return;
@@ -1135,15 +1446,44 @@ function renderReels(reelsList) {
         return;
       }
 
+      // If zen mode is active, any tap exits zen mode
+      if (document.body.classList.contains('zen-mode-active')) {
+        toggleZenMode(false);
+        return;
+      }
+
       const now = Date.now();
-      if (now - lastTap < 280) {
-        // Double Tap -> Heart Burst + Like without jitter
+      if (now - lastTap < 320) {
+        // Double Tap: Check position for Seek Rewind (left), Seek Forward (right), or Like (center)
         if (singleTapTimeout) {
           clearTimeout(singleTapTimeout);
           singleTapTimeout = null;
         }
-        triggerHeartBurst(e.clientX, e.clientY);
-        handleLikeToggle(reel.id, card.querySelector('.like-btn'), card.querySelector('.like-count'), true);
+
+        const rect = card.getBoundingClientRect();
+        const relX = (e.clientX - rect.left) / rect.width;
+
+        if (relX < 0.32) {
+          // Double Tap Left 32% -> Rewind 10s
+          const targetTime = Math.max(0, videoEl.currentTime - 10);
+          videoEl.currentTime = targetTime;
+          if (card._customAudio) card._customAudio.currentTime = targetTime;
+          triggerSeekAnimation('left');
+          if (navigator.vibrate) navigator.vibrate(20);
+        } else if (relX > 0.68) {
+          // Double Tap Right 32% -> Fast-Forward 10s
+          const dur = videoEl.duration || 60;
+          const targetTime = Math.min(dur, videoEl.currentTime + 10);
+          videoEl.currentTime = targetTime;
+          if (card._customAudio) card._customAudio.currentTime = targetTime;
+          triggerSeekAnimation('right');
+          if (navigator.vibrate) navigator.vibrate(20);
+        } else {
+          // Double Tap Center 36% -> Heart Burst + Like
+          triggerHeartBurst(e.clientX, e.clientY);
+          handleLikeToggle(reel.id, card.querySelector('.like-btn'), card.querySelector('.like-count'), true);
+          if (navigator.vibrate) navigator.vibrate([25, 40, 25]);
+        }
         lastTap = 0;
         return;
       }
@@ -1187,14 +1527,185 @@ function renderReels(reelsList) {
       openCommentsDrawer(reel.id);
     });
 
-    // Share Button
-    card.querySelector('.share-btn').addEventListener('click', (e) => {
+    // Share Button with Native Web Share API + Deep Link
+    card.querySelector('.share-btn').addEventListener('click', async (e) => {
       e.stopPropagation();
+      const shareUrl = `${window.location.origin}${window.location.pathname}?id=${reel.id}`;
+      if (navigator.share && /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) {
+        try {
+          await navigator.share({
+            title: `CamShot by @${reel.authorName || 'creator'}`,
+            text: reel.caption || 'Watch this CamShot!',
+            url: shareUrl,
+          });
+          return;
+        } catch (err) {
+          if (err.name !== 'AbortError') openShareModal(reel);
+          return;
+        }
+      }
       openShareModal(reel);
     });
 
-    // Follow Creator Pill Button
+    // Playback Speed Selector Popover
+    const speedBtn = card.querySelector('.reel-speed-btn');
+    const speedPopover = card.querySelector('.reel-speed-popover');
+    const speedLabel = card.querySelector('.speed-label');
+    if (speedBtn && speedPopover) {
+      speedBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isOpen = speedPopover.style.display === 'flex';
+        document.querySelectorAll('.reel-speed-popover').forEach(p => p.style.display = 'none');
+        speedPopover.style.display = isOpen ? 'none' : 'flex';
+      });
+
+      card.querySelectorAll('.speed-opt-btn').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const spd = parseFloat(btn.dataset.speed) || 1.0;
+          videoEl.playbackRate = spd;
+          if (card._customAudio) card._customAudio.playbackRate = spd;
+          if (speedLabel) speedLabel.textContent = `${spd}×`;
+          card.querySelectorAll('.speed-opt-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          speedPopover.style.display = 'none';
+          showToast(`Speed set to ${spd}×`);
+          if (navigator.vibrate) navigator.vibrate(15);
+        });
+      });
+    }
+
+    // Quick Floating Emoji Reactions Cannon
+    card.querySelectorAll('.quick-react-btn').forEach((rBtn) => {
+      rBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const emoji = rBtn.getAttribute('data-emoji') || '🔥';
+        const rect = rBtn.getBoundingClientRect();
+        spawnReactionCannon(emoji, rect);
+      });
+    });
+
+    // Hands-Free Auto-Scroll on Video End & Reel Loop Limiter
+    card._currentLoops = 0;
+    videoEl.loop = false;
+    videoEl.addEventListener('ended', () => {
+      card._currentLoops = (card._currentLoops || 0) + 1;
+      const loopLimit = reelsSettings.loopLimit || 'infinite';
+      const shouldAdvance = reelsSettings.autoScroll || (loopLimit !== 'infinite' && card._currentLoops >= parseInt(loopLimit, 10));
+
+      if (shouldAdvance && reelsFeed) {
+        card._currentLoops = 0;
+        reelsFeed.scrollBy({ top: reelsFeed.clientHeight, behavior: 'smooth' });
+      } else {
+        videoEl.currentTime = 0;
+        videoEl.play().catch(() => {});
+        if (card._customAudio) {
+          card._customAudio.currentTime = 0;
+          card._customAudio.play().catch(() => {});
+        }
+      }
+    });
+
+    // Snapshot Clean Frame Grabber
+    const snapBtn = card.querySelector('.snapshot-btn');
+    const flashLayer = document.getElementById('snapshotFlashLayer');
+    if (snapBtn) {
+      snapBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        try {
+          playLuxuryPopSound();
+          if (flashLayer) {
+            flashLayer.classList.add('active');
+            setTimeout(() => { flashLayer.classList.remove('active'); }, 180);
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = videoEl.videoWidth || 1080;
+          canvas.height = videoEl.videoHeight || 1920;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob((blob) => {
+            if (!blob) {
+              showToast('Could not grab frame');
+              return;
+            }
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `CamShot_${reel.id}_wallpaper.png`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 2500);
+            showToast('Clean snapshot wallpaper saved!');
+            if (navigator.vibrate) navigator.vibrate([25, 45]);
+          }, 'image/png');
+        } catch (err) {
+          console.warn('[CamShot] Snapshot error:', err);
+          showToast('Frame captured!');
+        }
+      });
+    }
+
+    // 🎙️ Live Closed Captions (Subtitles) Controller
+    const ccBtn = card.querySelector('.reel-cc-toggle-btn');
+    const ccBox = card.querySelector('.reel-live-cc-box');
+    const ccTextEl = card.querySelector('.reel-live-cc-text');
+    let isCCActive = false;
+
+    // Parse caption into subtitle chunks
+    const captionWords = (reel.caption || '').split(/\s+/).filter(Boolean);
+    const ccChunks = [];
+    for (let i = 0; i < captionWords.length; i += 4) {
+      ccChunks.push(captionWords.slice(i, i + 4).join(' '));
+    }
+    if (ccChunks.length === 0) ccChunks.push('♪ Instrumental Soundtrack ♪');
+
+    if (ccBtn && ccBox) {
+      ccBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isCCActive = !isCCActive;
+        ccBtn.classList.toggle('active', isCCActive);
+        ccBox.style.display = isCCActive ? 'flex' : 'none';
+        if (isCCActive && ccTextEl) {
+          ccTextEl.textContent = ccChunks[0] || '♪ Captions Enabled ♪';
+          showToast('Live Subtitles (CC) Enabled');
+        } else {
+          showToast('Live Subtitles (CC) Disabled');
+        }
+        if (navigator.vibrate) navigator.vibrate(15);
+      });
+    }
+
+    videoEl.addEventListener('timeupdate', () => {
+      if (isCCActive && videoEl.duration && ccChunks.length > 0) {
+        const progressRatio = videoEl.currentTime / videoEl.duration;
+        const chunkIndex = Math.min(ccChunks.length - 1, Math.floor(progressRatio * ccChunks.length));
+        if (ccTextEl && ccTextEl.textContent !== ccChunks[chunkIndex]) {
+          ccTextEl.textContent = ccChunks[chunkIndex];
+        }
+      }
+    });
+
+    // Follow Creator Pill Button & Avatar Follow Badge
     const followBtn = card.querySelector('.reel-follow-pill');
+    const avatarFollowBtn = card.querySelector('.action-avatar-follow-btn');
+    const avatarWrap = card.querySelector('.action-creator-avatar-wrap');
+
+    if (avatarWrap) {
+      avatarWrap.addEventListener('click', (e) => {
+        if (e.target.closest('.action-avatar-follow-btn')) return;
+        e.stopPropagation();
+        openCreatorProfile(authorHandle, reel.authorPic || 'favicon.png');
+      });
+    }
+
+    if (avatarFollowBtn && followBtn) {
+      avatarFollowBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        followBtn.click();
+      });
+    }
+
     if (followBtn) {
       followBtn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1204,11 +1715,19 @@ function renderReels(reelsList) {
           followedAuthors.delete(author);
           followBtn.classList.remove('following');
           followBtn.innerHTML = '<i class="fa-solid fa-plus"></i> Follow';
+          if (avatarFollowBtn) {
+            avatarFollowBtn.classList.remove('following');
+            avatarFollowBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
+          }
           showToast(`Unfollowed @${author}`);
         } else {
           followedAuthors.add(author);
           followBtn.classList.add('following');
           followBtn.innerHTML = '<i class="fa-solid fa-check"></i> Following';
+          if (avatarFollowBtn) {
+            avatarFollowBtn.classList.add('following');
+            avatarFollowBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
+          }
           showToast(`Following @${author}`);
         }
         localStorage.setItem('nex_followed_authors', JSON.stringify([...followedAuthors]));
@@ -1218,7 +1737,43 @@ function renderReels(reelsList) {
     reelsFeed.appendChild(card);
     videoObserver.observe(card);
   });
+
+  // Check for deep-linked reel (?id=xyz or #xyz)
+  checkUrlForDeepLinkedReel();
 }
+
+let hasProcessedInitialDeepLink = false;
+function checkUrlForDeepLinkedReel() {
+  if (hasProcessedInitialDeepLink) return;
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramId = urlParams.get('id') || urlParams.get('reel');
+  const hashId = window.location.hash?.replace(/^#reel_|^#/, '');
+  const targetId = paramId || (hashId && !hashId.includes('/') ? hashId : null);
+
+  if (targetId) {
+    const targetCard = document.querySelector(`.reel-card[data-reel-id="${targetId}"]`);
+    if (targetCard) {
+      hasProcessedInitialDeepLink = true;
+      setTimeout(() => {
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const video = targetCard.querySelector('video');
+        if (video) video.play().catch(() => {});
+      }, 350);
+    }
+  }
+}
+
+window.addEventListener('hashchange', () => {
+  const hashId = window.location.hash?.replace(/^#reel_|^#/, '');
+  if (hashId && !hashId.startsWith('profile/') && !hashId.startsWith('user/')) {
+    const card = document.querySelector(`.reel-card[data-reel-id="${hashId}"]`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const v = card.querySelector('video');
+      if (v) v.play().catch(() => {});
+    }
+  }
+});
 
 // Submit inline comment from bottom bar
 async function submitInlineComment(reelId, inputEl, cardEl) {
@@ -1319,6 +1874,35 @@ function triggerHeartBurst(x, y) {
     document.body.appendChild(p);
     setTimeout(() => p.remove(), 850);
   }
+}
+
+// Floating Emoji Reaction Burst Cannon
+function spawnReactionCannon(emoji, rect) {
+  playLuxuryPopSound();
+  const count = 7;
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'reaction-burst-particle';
+    el.textContent = emoji;
+    const startX = rect ? (rect.left + rect.width / 2 + (Math.random() * 40 - 20)) : (window.innerWidth - 60 + (Math.random() * 30 - 15));
+    const startY = rect ? (rect.top - 10) : (window.innerHeight - 120);
+    const driftX = (Math.random() * 90 - 45);
+    const size = 22 + Math.floor(Math.random() * 16);
+    const dur = 1.0 + Math.random() * 0.4;
+    const rot = Math.random() * 60 - 30;
+
+    el.style.left = `${startX}px`;
+    el.style.top = `${startY}px`;
+    el.style.fontSize = `${size}px`;
+    el.style.setProperty('--drift-x', `${driftX}px`);
+    el.style.setProperty('--rot-deg', `${rot}deg`);
+    el.style.animationDuration = `${dur}s`;
+
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), (dur * 1000) + 100);
+  }
+  if (navigator.vibrate) navigator.vibrate([15, 25, 15]);
+  showToast(`${emoji} Reaction sent!`);
 }
 
 // Like Toggle Logic
@@ -1599,6 +2183,25 @@ if (soundHubPlayPauseBtn) {
   });
 }
 
+const audioBalanceSlider = document.getElementById('audioBalanceSlider');
+const audioBalanceLabel = document.getElementById('audioBalanceLabel');
+if (audioBalanceSlider && audioBalanceLabel) {
+  audioBalanceSlider.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value, 10);
+    const voicePct = 100 - val;
+    const musicPct = val;
+    audioBalanceLabel.textContent = `${voicePct}% Voice / ${musicPct}% Music`;
+
+    const curCard = getCurrentActiveCard();
+    if (curCard) {
+      const v = curCard.querySelector('.reel-video');
+      const customAudio = curCard._customAudio;
+      if (v) v.volume = isGlobalMuted ? 0 : Math.min(1, Math.max(0, voicePct / 50));
+      if (customAudio) customAudio.volume = isGlobalMuted ? 0 : Math.min(1, Math.max(0, musicPct / 50));
+    }
+  });
+}
+
 if (useThisSoundDrawerBtn) {
   useThisSoundDrawerBtn.addEventListener('click', () => {
     const title = soundHubTrackTitle ? soundHubTrackTitle.textContent : 'Original Audio';
@@ -1872,14 +2475,21 @@ if (resetSoundBtn) {
 // ══════════════════════════════════════════════════
 function openShareModal(reel) {
   activeShareReel = reel;
-  const reelUrl = `${window.location.origin}${window.location.pathname}#${reel.id}`;
+  const reelUrl = `${window.location.origin}${window.location.pathname}?id=${reel.id}`;
   shareLinkInput.value = reelUrl;
+  const qrImg = document.getElementById('shareQrImage');
+  if (qrImg) {
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(reelUrl)}`;
+    qrImg.style.display = 'block';
+  }
   shareReelModal.style.display = 'flex';
 }
 
 function closeShareModal() {
   shareReelModal.style.display = 'none';
   activeShareReel = null;
+  const qrImg = document.getElementById('shareQrImage');
+  if (qrImg) qrImg.style.display = 'none';
 }
 
 if (closeShareModalBtn) closeShareModalBtn.addEventListener('click', closeShareModal);
@@ -2580,7 +3190,7 @@ async function startLiveRecord() {
   if (stopLiveRecordBtn) stopLiveRecordBtn.style.display = 'inline-flex';
 
   playLuxuryPopSound();
-  showToast('🔴 Recording live CamShot...');
+  showToast('Recording live CamShot...');
 
   liveRecordTimerInterval = setInterval(() => {
     liveRecordSeconds++;
@@ -2681,7 +3291,7 @@ async function handleLiveRecordStop() {
   liveCameraStudioStage.style.display = 'none';
 
   playLuxuryPopSound();
-  showToast('🎉 Live CamShot captured! Ready to publish.');
+  showToast('Live CamShot captured! Ready to publish.');
 }
 
 // Source Mode Switcher Listeners
@@ -3747,6 +4357,9 @@ const saveCreatorProfileSettingsBtn = document.getElementById('saveCreatorProfil
 const settingAllowComments = document.getElementById('settingAllowComments');
 const settingAllowDownloads = document.getElementById('settingAllowDownloads');
 const settingShowViews = document.getElementById('settingShowViews');
+const settingResumePlayback = document.getElementById('settingResumePlayback');
+const watchHistoryCountBadge = document.getElementById('watchHistoryCountBadge');
+const clearWatchHistoryBtn = document.getElementById('clearWatchHistoryBtn');
 const clearReelsCacheBtn = document.getElementById('clearReelsCacheBtn');
 
 // Sync UI with state
@@ -3757,6 +4370,8 @@ function syncSettingsUI() {
   if (settingAllowComments) settingAllowComments.checked = reelsSettings.allowComments !== 'off';
   if (settingAllowDownloads) settingAllowDownloads.checked = reelsSettings.allowDownloads !== false;
   if (settingShowViews) settingShowViews.checked = reelsSettings.showViews !== false;
+  if (settingResumePlayback) settingResumePlayback.checked = reelsSettings.resumePlayback !== false;
+  if (watchHistoryCountBadge) watchHistoryCountBadge.textContent = `${sessionWatchedReels.size} Reels`;
 
   // Sync Quality pills
   settingQualityPills.forEach((p) => {
@@ -3765,6 +4380,11 @@ function syncSettingsUI() {
     } else {
       p.classList.remove('active');
     }
+  });
+
+  // Sync Loop Limit pills
+  document.querySelectorAll('.settings-loop-pill').forEach((p) => {
+    p.classList.toggle('active', p.dataset.loops === (reelsSettings.loopLimit || 'infinite'));
   });
 
   // Sync Dual Avatar Mode
@@ -3893,6 +4513,32 @@ if (settingShowViews) {
   settingShowViews.addEventListener('change', (e) => {
     reelsSettings.showViews = e.target.checked;
     savePlaybackSettings();
+  });
+}
+
+if (settingResumePlayback) {
+  settingResumePlayback.addEventListener('change', (e) => {
+    reelsSettings.resumePlayback = e.target.checked;
+    savePlaybackSettings();
+    showToast(reelsSettings.resumePlayback ? 'Resume playback position enabled' : 'Resume playback position disabled');
+  });
+}
+
+document.querySelectorAll('.settings-loop-pill').forEach((pill) => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.settings-loop-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    reelsSettings.loopLimit = pill.dataset.loops;
+    savePlaybackSettings();
+    showToast(`Loop limit set to: ${pill.textContent}`);
+  });
+});
+
+if (clearWatchHistoryBtn) {
+  clearWatchHistoryBtn.addEventListener('click', () => {
+    sessionWatchedReels.clear();
+    if (watchHistoryCountBadge) watchHistoryCountBadge.textContent = '0 Reels';
+    showToast('Session watch history reset');
   });
 }
 
@@ -4051,6 +4697,362 @@ if (clearReelsCacheBtn) {
     showToast('Stream cache and watch history cleared.');
   });
 }
+
+// ══════════════════════════════════════════════════
+// MOBILE-FIRST FEATURE SUITE
+// ══════════════════════════════════════════════════
+
+// 1. Picture-in-Picture Mini-Player
+const pipBtn = document.getElementById('pipToggleBtn');
+if (pipBtn) {
+  pipBtn.addEventListener('click', async () => {
+    try {
+      const curCard = getCurrentActiveCard();
+      const video = curCard ? curCard.querySelector('video') : null;
+      if (!video) {
+        showToast('No active video for Picture-in-Picture');
+        return;
+      }
+      if (document.pictureInPictureElement) {
+        await document.exitPictureInPicture();
+        showToast('Exited Picture-in-Picture');
+      } else if (video.requestPictureInPicture) {
+        await video.requestPictureInPicture();
+        showToast('Picture-in-Picture Mini-Player activated!');
+        if (navigator.vibrate) navigator.vibrate(25);
+      } else {
+        showToast('Picture-in-Picture is not supported on this device');
+      }
+    } catch (err) {
+      console.warn('[CamShot] PiP error:', err);
+      showToast('Picture-in-Picture could not be started');
+    }
+  });
+}
+
+// 2. Mobile Floating Bottom Dock (TikTok / Instagram Native Navigation)
+const dockHomeBtn = document.getElementById('mobileDockHomeBtn');
+const dockCreateBtn = document.getElementById('mobileDockCreateBtn');
+const dockActivityBtn = document.getElementById('mobileDockActivityBtn');
+const dockProfileBtn = document.getElementById('mobileDockProfileBtn');
+
+if (dockHomeBtn) {
+  dockHomeBtn.addEventListener('click', () => {
+    if (reelsFeed) {
+      reelsFeed.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    if (navigator.vibrate) navigator.vibrate(15);
+  });
+}
+
+if (dockCreateBtn) {
+  dockCreateBtn.addEventListener('click', () => {
+    openCreatorStudio();
+    if (navigator.vibrate) navigator.vibrate(25);
+  });
+}
+
+if (dockActivityBtn) {
+  dockActivityBtn.addEventListener('click', () => {
+    const curCard = getCurrentActiveCard();
+    if (curCard && curCard.dataset.reelId) {
+      openCommentsDrawer(curCard.dataset.reelId);
+    } else {
+      showToast('Select a CamShot to view comments and activity');
+    }
+    if (navigator.vibrate) navigator.vibrate(15);
+  });
+}
+
+if (dockProfileBtn) {
+  dockProfileBtn.addEventListener('click', () => {
+    openCreatorProfile(myUsername || 'creator', myProfilePic);
+    if (navigator.vibrate) navigator.vibrate(20);
+  });
+}
+
+// Sync avatar on mobile dock
+const mobileDockAvatar = document.getElementById('mobileDockAvatarImg');
+if (mobileDockAvatar) {
+  if (myProfilePic) mobileDockAvatar.src = myProfilePic;
+}
+
+// 3. Mobile Screen WakeLock (Keep screen on while watching)
+let screenWakeLock = null;
+async function requestScreenWakeLock() {
+  if ('wakeLock' in navigator) {
+    try {
+      screenWakeLock = await navigator.wakeLock.request('screen');
+      console.log('[CamShot] Mobile Screen WakeLock active');
+    } catch (err) {
+      console.warn('[CamShot] WakeLock error:', err?.message);
+    }
+  }
+}
+requestScreenWakeLock();
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    requestScreenWakeLock();
+  }
+});
+
+// ── 4. Mobile Pull-Down-to-Refresh Controller ──
+const ptrIndicator = document.getElementById('pullToRefreshIndicator');
+const ptrText = document.getElementById('ptrText');
+const ptrIcon = ptrIndicator?.querySelector('.ptr-spinner-icon');
+
+let ptrStartY = 0;
+let ptrIsPulling = false;
+let ptrDist = 0;
+
+if (reelsFeed && ptrIndicator) {
+  reelsFeed.addEventListener('touchstart', (e) => {
+    if (reelsFeed.scrollTop <= 5 && e.touches.length === 1) {
+      ptrStartY = e.touches[0].clientY;
+      ptrIsPulling = true;
+      ptrDist = 0;
+    }
+  }, { passive: true });
+
+  reelsFeed.addEventListener('touchmove', (e) => {
+    if (!ptrIsPulling || e.touches.length !== 1) return;
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - ptrStartY;
+    if (diff > 10 && reelsFeed.scrollTop <= 5) {
+      ptrDist = Math.min(85, diff * 0.45);
+      ptrIndicator.style.display = 'flex';
+      ptrIndicator.style.transform = `translateX(-50%) translateY(${ptrDist}px)`;
+      if (ptrIcon) ptrIcon.style.transform = `rotate(${ptrDist * 5}deg)`;
+      if (ptrText) ptrText.textContent = ptrDist > 55 ? 'Release to refresh' : 'Pull to refresh';
+    }
+  }, { passive: true });
+
+  reelsFeed.addEventListener('touchend', async () => {
+    if (!ptrIsPulling) return;
+    ptrIsPulling = false;
+    if (ptrDist > 55) {
+      if (ptrText) ptrText.textContent = 'Refreshing CamShot...';
+      if (ptrIcon) {
+        ptrIcon.classList.add('spinning');
+        ptrIcon.style.transform = 'none';
+      }
+      if (navigator.vibrate) navigator.vibrate(25);
+      await loadReelsFromFirestore(activeFeedMode);
+      showToast('Feed updated with latest CamShots');
+      setTimeout(() => {
+        ptrIndicator.style.display = 'none';
+        ptrIndicator.style.transform = 'translateX(-50%)';
+        if (ptrIcon) ptrIcon.classList.remove('spinning');
+      }, 400);
+    } else {
+      ptrIndicator.style.display = 'none';
+      ptrIndicator.style.transform = 'translateX(-50%)';
+    }
+  }, { passive: true });
+}
+
+// ── 5. Digital Wellbeing Sleep Timer Controller ──
+let sleepTimerId = null;
+let activeSleepMinutes = 0;
+
+function setSleepTimer(minutes) {
+  if (sleepTimerId) {
+    clearTimeout(sleepTimerId);
+    sleepTimerId = null;
+  }
+  activeSleepMinutes = minutes;
+  if (minutes > 0) {
+    showToast(`Sleep timer set for ${minutes} minutes`);
+    sleepTimerId = setTimeout(() => {
+      triggerSleepBreakReminder();
+    }, minutes * 60 * 1000);
+  } else {
+    showToast('Sleep timer disabled');
+  }
+}
+
+function triggerSleepBreakReminder() {
+  const currentCard = getCurrentActiveCard();
+  if (currentCard) {
+    const v = currentCard.querySelector('video');
+    if (v) v.pause();
+  }
+  const modal = document.getElementById('sleepReminderModal');
+  const msg = document.getElementById('sleepReminderMessage');
+  if (msg) {
+    msg.textContent = `You've reached your digital wellbeing browsing limit (${activeSleepMinutes}m). Take a moment to rest your eyes!`;
+  }
+  if (modal) modal.style.display = 'flex';
+  if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+}
+
+const sleepDismissBtn = document.getElementById('sleepBreakDismissBtn');
+const sleepSnoozeBtn = document.getElementById('sleepBreakSnoozeBtn');
+const sleepModal = document.getElementById('sleepReminderModal');
+
+if (sleepDismissBtn) {
+  sleepDismissBtn.addEventListener('click', () => {
+    if (sleepModal) sleepModal.style.display = 'none';
+  });
+}
+
+if (sleepSnoozeBtn) {
+  sleepSnoozeBtn.addEventListener('click', () => {
+    if (sleepModal) sleepModal.style.display = 'none';
+    setSleepTimer(10);
+    showToast('Snoozed for 10 minutes');
+  });
+}
+
+document.querySelectorAll('.settings-sleep-pill').forEach((pill) => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.settings-sleep-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    const mins = parseInt(pill.dataset.minutes, 10) || 0;
+    setSleepTimer(mins);
+  });
+});
+
+// ── 6. Keyboard Shortcuts Guide Modal Controller ──
+const shortcutsModal = document.getElementById('keyboardShortcutsModal');
+const openShortcutsBtn = document.getElementById('openKeyboardShortcutsBtn');
+const closeShortcutsBtn = document.getElementById('closeShortcutsModalBtn');
+
+function toggleKeyboardShortcutsModal(forceState) {
+  if (!shortcutsModal) return;
+  const isShow = forceState !== undefined ? forceState : shortcutsModal.style.display === 'none';
+  shortcutsModal.style.display = isShow ? 'flex' : 'none';
+}
+
+if (openShortcutsBtn) openShortcutsBtn.addEventListener('click', () => toggleKeyboardShortcutsModal(true));
+if (closeShortcutsBtn) closeShortcutsBtn.addEventListener('click', () => toggleKeyboardShortcutsModal(false));
+
+// ── 7. Trending Tags & Topic Filter Ribbon Controller ──
+let activeTopicTag = 'all';
+
+function initTrendingTagsRibbon() {
+  const ribbon = document.getElementById('trendingTagsRibbon');
+  if (!ribbon) return;
+
+  ribbon.querySelectorAll('.tag-filter-pill').forEach((pill) => {
+    pill.addEventListener('click', () => {
+      ribbon.querySelectorAll('.tag-filter-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeTopicTag = pill.getAttribute('data-tag') || 'all';
+
+      if (navigator.vibrate) navigator.vibrate(15);
+
+      if (activeTopicTag === 'all') {
+        applyFeedFilter();
+        showToast('Showing all CamShots');
+      } else {
+        const filtered = allLoadedReels.filter((r) => {
+          const text = `${r.caption || ''} ${r.sound || ''} ${r.authorName || ''}`.toLowerCase();
+          return text.includes(activeTopicTag.toLowerCase());
+        });
+        if (filtered.length > 0) {
+          renderReels(filtered);
+          showToast(`Filtered by #${activeTopicTag.toUpperCase()} (${filtered.length} reels)`);
+        } else {
+          showToast(`No reels matching #${activeTopicTag} yet. Showing all!`);
+          applyFeedFilter();
+        }
+      }
+    });
+  });
+}
+initTrendingTagsRibbon();
+
+// ── 8. Web Audio DSP Equalizer Presets Engine ──
+let globalAudioCtx = null;
+
+function applyAudioFxToElement(mediaElement, fxType) {
+  if (!mediaElement) return;
+  try {
+    if (!globalAudioCtx) {
+      globalAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (globalAudioCtx.state === 'suspended') {
+      globalAudioCtx.resume();
+    }
+
+    if (!mediaElement._audioSourceNode) {
+      mediaElement._audioSourceNode = globalAudioCtx.createMediaElementSource(mediaElement);
+    }
+
+    try { mediaElement._audioSourceNode.disconnect(); } catch (e) {}
+    if (mediaElement._filterNode) {
+      try { mediaElement._filterNode.disconnect(); } catch (e) {}
+    }
+
+    if (fxType === 'bass') {
+      const biquad = globalAudioCtx.createBiquadFilter();
+      biquad.type = 'lowshelf';
+      biquad.frequency.value = 160;
+      biquad.gain.value = 12;
+      mediaElement._audioSourceNode.connect(biquad);
+      biquad.connect(globalAudioCtx.destination);
+      mediaElement._filterNode = biquad;
+      mediaElement.playbackRate = 1.0;
+    } else if (fxType === 'lofi') {
+      const biquad = globalAudioCtx.createBiquadFilter();
+      biquad.type = 'lowpass';
+      biquad.frequency.value = 2400;
+      mediaElement._audioSourceNode.connect(biquad);
+      biquad.connect(globalAudioCtx.destination);
+      mediaElement._filterNode = biquad;
+      mediaElement.playbackRate = 0.95;
+    } else if (fxType === 'echo') {
+      const delay = globalAudioCtx.createDelay();
+      delay.delayTime.value = 0.22;
+      const feedback = globalAudioCtx.createGain();
+      feedback.gain.value = 0.38;
+      delay.connect(feedback);
+      feedback.connect(delay);
+      mediaElement._audioSourceNode.connect(globalAudioCtx.destination);
+      mediaElement._audioSourceNode.connect(delay);
+      delay.connect(globalAudioCtx.destination);
+      mediaElement._filterNode = delay;
+      mediaElement.playbackRate = 1.0;
+    } else if (fxType === 'nightcore') {
+      const biquad = globalAudioCtx.createBiquadFilter();
+      biquad.type = 'highshelf';
+      biquad.frequency.value = 3500;
+      biquad.gain.value = 6;
+      mediaElement._audioSourceNode.connect(biquad);
+      biquad.connect(globalAudioCtx.destination);
+      mediaElement._filterNode = biquad;
+      mediaElement.playbackRate = 1.25;
+    } else {
+      mediaElement._audioSourceNode.connect(globalAudioCtx.destination);
+      mediaElement.playbackRate = 1.0;
+    }
+  } catch (err) {
+    console.warn('[CamShot] WebAudio FX Notice:', err);
+    if (fxType === 'nightcore') mediaElement.playbackRate = 1.25;
+    else if (fxType === 'lofi') mediaElement.playbackRate = 0.95;
+    else mediaElement.playbackRate = 1.0;
+  }
+}
+
+document.querySelectorAll('.sound-fx-pill').forEach((pill) => {
+  pill.addEventListener('click', () => {
+    document.querySelectorAll('.sound-fx-pill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    const fxType = pill.getAttribute('data-fx') || 'normal';
+    if (soundHubAudioEl) {
+      applyAudioFxToElement(soundHubAudioEl, fxType);
+    }
+    const curCard = getCurrentActiveCard();
+    if (curCard) {
+      const v = curCard.querySelector('video');
+      if (v) applyAudioFxToElement(v, fxType);
+      if (curCard._customAudio) applyAudioFxToElement(curCard._customAudio, fxType);
+    }
+    showToast(`Audio DSP: ${pill.textContent.trim()}`);
+    if (navigator.vibrate) navigator.vibrate(20);
+  });
+});
 
 // Launch feed on startup
 initReelsFeed();

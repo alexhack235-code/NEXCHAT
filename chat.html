@@ -95,6 +95,9 @@
           <button id="search-btn-header" class="header-icon-btn search-btn-header" title="Search">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
+          <button id="radarBtnHeader" class="header-icon-btn" title="Neural Radar Scanner"><i class="fa-solid fa-satellite-dish"></i></button>
+          <button id="nexbotStudioBtnHeader" class="header-icon-btn" title="NEXBOT Studio &amp; WhatsApp Architect"><i class="fa-solid fa-robot"></i></button>
+          <button id="vipVaultBtnHeader" class="header-icon-btn" title="VIP Token Vault &amp; Licenses"><i class="fa-solid fa-crown"></i></button>
           <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
           <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
         </div>
@@ -133,6 +136,15 @@
         </button>
         <button type="button" class="mobile-menu-item" id="mobileThemeToggleBtn">
           <i class="fa-solid fa-circle-half-stroke"></i> <span>Toggle Dark / Light</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileRadarBtn">
+          <i class="fa-solid fa-satellite-dish"></i> <span>Neural Radar</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileNexbotStudioBtn">
+          <i class="fa-solid fa-robot"></i> <span>NEXBOT Studio</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileVipVaultBtn">
+          <i class="fa-solid fa-crown"></i> <span>VIP Vault &amp; Licenses</span>
         </button>
         <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
           <i class="fa-solid fa-gear"></i> <span>Settings</span>
@@ -403,6 +415,45 @@
             </div>
           </div>
           <div class="chat-detail-header-actions">
+            <!-- ChronEX Neural Quick Model Switcher in Header -->
+            <div id="chronexHeaderControls" class="chronex-header-controls" style="display: none; position: relative;">
+              <button type="button" id="chronexHeaderModelBtn" class="chronex-header-model-pill" title="Switch AI Model Profile">
+                <i class="fa-solid fa-microchip" style="color: #67e8f9;"></i>
+                <span id="chronexHeaderModelLabel">Neural Pro</span>
+                <i class="fa-solid fa-chevron-down" style="font-size: 9px; opacity: 0.7;"></i>
+              </button>
+              <div id="chronexHeaderModelMenu" class="chronex-model-dropdown-menu" style="display: none;">
+                <button type="button" class="chronex-model-drop-item active" data-model="nexchat-custom">
+                  <i class="fa-solid fa-brain" style="color: #67e8f9;"></i>
+                  <div class="model-drop-text">
+                    <strong>NEXCHAT Custom Pro</strong>
+                    <small>Multi-modal & Coding</small>
+                  </div>
+                </button>
+                <button type="button" class="chronex-model-drop-item" data-model="performance">
+                  <i class="fa-solid fa-bolt" style="color: #00ff66;"></i>
+                  <div class="model-drop-text">
+                    <strong>Speed-Optimized</strong>
+                    <small>Rapid Token Stream</small>
+                  </div>
+                </button>
+                <button type="button" class="chronex-model-drop-item" data-model="creative">
+                  <i class="fa-solid fa-wand-magic-sparkles" style="color: #ffd700;"></i>
+                  <div class="model-drop-text">
+                    <strong>Creative Genius</strong>
+                    <small>Conversational Synthesis</small>
+                  </div>
+                </button>
+                <button type="button" class="chronex-model-drop-item" data-model="safe">
+                  <i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i>
+                  <div class="model-drop-text">
+                    <strong>Strict Shield</strong>
+                    <small>Security & Guarded</small>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             <button id="chatSearchToggleBtn" class="header-icon-btn" title="Search in Chat"><i class="fa-solid fa-magnifying-glass"></i></button>
             <button id="headerVideoBtn" class="header-icon-btn chat-action-call" title="Video Call"><i class="fa-solid fa-video"></i></button>
             <button id="headerCallBtn" class="header-icon-btn chat-action-call" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
@@ -457,6 +508,7 @@
           <button id="videoCallBtn" class="option-item video-option">Video Call</button>
           <button id="groupAdminBtn" class="option-item" style="display: none; background: #00d4ff; color: #000;">Manage Members</button>
           <button id="groupInviteQrBtn" class="option-item" style="display: none;"><i class="fa-solid fa-qrcode" style="margin-right: 8px;"></i>Invite via QR</button>
+          <button id="groupLeaveBtn" class="option-item danger" style="display: none;"><i class="fa-solid fa-arrow-right-from-bracket" style="margin-right: 8px;"></i>Leave Group</button>
           <div class="dropdown-divider"></div>
           <button id="blockBtn" class="option-item danger">Block User</button>
           <button id="unblockBtn" class="option-item success" style="display: none;">Unblock User</button>
@@ -1061,25 +1113,86 @@
               <h2><i class="fa-solid fa-sliders" style="color: #00ff66;"></i> Control Center & Settings</h2>
               <span class="settings-subtitle">Supercharged with Supabase Realtime & Phoenix WebSockets</span>
             </div>
+            <!-- Live Fast-Filter Search Bar -->
+            <div class="settings-search-bar-wrap">
+              <i class="fa-solid fa-magnifying-glass search-bar-icon"></i>
+              <input type="text" id="settingsSearchInput" class="settings-search-input" placeholder="Quick search settings..." autocomplete="off">
+              <button type="button" id="clearSettingsSearchBtn" class="settings-search-clear-btn" style="display: none;" title="Clear"><i class="fa-solid fa-xmark"></i></button>
+            </div>
             <button id="closeSettingsBtn" class="close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
           </div>
 
           <div class="settings-layout">
             <!-- Sidebar Navigation Tabs -->
             <nav class="settings-sidebar" id="settingsSidebar">
-              <button type="button" class="settings-nav-tab active" data-tab="tab-profile"><i class="fa-solid fa-user-astronaut"></i> Profile & Identity</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-chats"><i class="fa-solid fa-comments"></i> Chat & Bubbles</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-appearance"><i class="fa-solid fa-palette"></i> Themes & Wallpapers</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-sounds"><i class="fa-solid fa-volume-high"></i> Sounds & Alerts</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-privacy"><i class="fa-solid fa-shield-halved"></i> Privacy & Security</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-cloud"><i class="fa-solid fa-bolt" style="color: #00ff66;"></i> Realtime Engine</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-ai"><i class="fa-solid fa-robot" style="color: #67e8f9;"></i> ChronEX AI Studio</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-tokens"><i class="fa-solid fa-coins" style="color: #ffd700;"></i> Token Vault</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-devices"><i class="fa-solid fa-laptop-code"></i> Linked Devices</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-apps"><i class="fa-solid fa-mobile-screen-button"></i> Install App</button>
-              <button type="button" class="settings-nav-tab" data-tab="tab-support"><i class="fa-solid fa-headset"></i> Support & Terminal</button>
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">IDENTITY & ASSETS</span>
+                <button type="button" class="settings-nav-tab active" data-tab="tab-profile">
+                  <i class="fa-solid fa-user-astronaut"></i>
+                  <span>Profile & Identity</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-tokens">
+                  <i class="fa-solid fa-coins" style="color: #ffd700;"></i>
+                  <span>Token Vault</span>
+                  <span class="settings-tab-microbadge token-badge">Tokens</span>
+                </button>
+              </div>
+
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">NEURAL INTELLIGENCE</span>
+                <button type="button" class="settings-nav-tab ai-featured-tab" data-tab="tab-ai">
+                  <i class="fa-solid fa-robot" style="color: #67e8f9;"></i>
+                  <span>ChronEX AI Studio</span>
+                  <span class="settings-tab-microbadge ai-badge">60 FPS</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-cloud">
+                  <i class="fa-solid fa-bolt" style="color: #00ff66;"></i>
+                  <span>Realtime Engine</span>
+                </button>
+              </div>
+
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">EXPERIENCE & MEDIA</span>
+                <button type="button" class="settings-nav-tab" data-tab="tab-chats">
+                  <i class="fa-solid fa-comments"></i>
+                  <span>Chat & Bubbles</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-appearance">
+                  <i class="fa-solid fa-palette"></i>
+                  <span>Themes & Wallpapers</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-sounds">
+                  <i class="fa-solid fa-volume-high"></i>
+                  <span>Sounds & Alerts</span>
+                </button>
+              </div>
+
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">SECURITY & HARDWARE</span>
+                <button type="button" class="settings-nav-tab" data-tab="tab-privacy">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span>Privacy & Security</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-devices">
+                  <i class="fa-solid fa-laptop-code"></i>
+                  <span>Linked Devices</span>
+                </button>
+              </div>
+
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">ECOSYSTEM</span>
+                <button type="button" class="settings-nav-tab" data-tab="tab-apps">
+                  <i class="fa-solid fa-mobile-screen-button"></i>
+                  <span>Install App</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-support">
+                  <i class="fa-solid fa-headset"></i>
+                  <span>Support & Terminal</span>
+                </button>
+              </div>
+
               <div class="settings-sidebar-spacer"></div>
-              <button type="button" id="logoutSettingsBtn" class="settings-nav-tab logout-tab"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+              <button type="button" id="logoutSettingsBtn" class="settings-nav-tab logout-tab"><i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span></button>
             </nav>
 
             <!-- Main Scrollable Pane for Selected Tab -->
@@ -1212,8 +1325,8 @@
                 <div class="settings-card">
                   <label><strong>Base Theme Mode</strong></label>
                   <div class="radio-pill-group" style="display: flex; gap: 8px; margin-top: 8px;">
-                    <label class="radio-pill"><input type="radio" name="theme" value="dark" id="themeDark" checked> 🌑 Dark (Onyx)</label>
-                    <label class="radio-pill"><input type="radio" name="theme" value="light" id="themeLight"> ☀️ Light Theme</label>
+                    <label class="radio-pill"><input type="radio" name="theme" value="dark" id="themeDark" checked> <i class="fa-solid fa-moon"></i> Dark (Onyx)</label>
+                    <label class="radio-pill"><input type="radio" name="theme" value="light" id="themeLight"> <i class="fa-solid fa-sun"></i> Light Theme</label>
                   </div>
                 </div>
 
@@ -1350,7 +1463,7 @@
                       <strong style="color: #00f0ff; font-size: 13.5px;">FORTRESS AI Security Shield</strong>
                     </div>
                     <span id="fortressShieldBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 255, 102, 0.15); color: #00ff66; font-weight: 700; border: 1px solid rgba(0, 255, 102, 0.3);">
-                      🛡️ WAF Active (&lt; 0.5ms)
+                      <i class="fa-solid fa-shield-halved"></i> WAF Active (&lt; 0.5ms)
                     </span>
                   </div>
                   <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
@@ -1410,7 +1523,7 @@
                     </button>
                   </div>
                   <div id="supabasePingResult" style="font-size: 11.5px; color: #67e8f9; margin-top: 6px; font-family: monospace;">
-                    ⚡ Phoenix WebSocket channel: active & synchronized
+                    <i class="fa-solid fa-bolt" style="color: #67e8f9;"></i> Phoenix WebSocket channel: active & synchronized
                   </div>
                 </div>
 
@@ -1431,25 +1544,106 @@
               <div class="settings-tab-pane" id="tab-ai">
                 <div class="settings-pane-header">
                   <h3><i class="fa-solid fa-robot" style="color: #67e8f9;"></i> ChronEX AI Studio</h3>
-                  <p>Configure model personality, typewriter token streaming, and autonomous responders.</p>
+                  <p>Autonomous neural cognition engine. Configure multi-model routing, 60 FPS streaming, and interactive playground.</p>
                 </div>
 
+                <!-- Neural Telemetry & Quota Status Card -->
+                <div class="settings-card chronex-telemetry-card">
+                  <div class="chronex-telemetry-grid">
+                    <div class="telemetry-stat">
+                      <span class="telemetry-label">NEURAL STATUS</span>
+                      <span class="telemetry-value text-emerald"><i class="fa-solid fa-circle-dot"></i> ONLINE & SYNCED</span>
+                    </div>
+                    <div class="telemetry-stat">
+                      <span class="telemetry-label">FREE DAILY QUOTA</span>
+                      <span class="telemetry-value text-cyan" id="aiStudioQuotaDisplay">10 / 10 REQUESTS</span>
+                    </div>
+                    <div class="telemetry-stat">
+                      <span class="telemetry-label">PIPELINE LATENCY</span>
+                      <span class="telemetry-value text-gold"><i class="fa-solid fa-bolt"></i> ~14ms STREAM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Interactive Visual Model Architecture Cards -->
                 <div class="settings-card">
-                  <label for="aiModelSelect"><strong>AI Personality & Model Profile</strong></label>
-                  <select id="aiModelSelect" class="settings-select" style="margin-top: 6px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label><strong>AI Neural Model Architecture</strong></label>
+                    <span style="font-size: 11px; color: var(--text-muted);">1-Tap Quick Switch</span>
+                  </div>
+
+                  <!-- Visual Grid of Model Cards -->
+                  <div class="ai-model-cards-grid" id="aiModelCardsGrid">
+                    <div class="ai-model-card active" data-model="nexchat-custom">
+                      <div class="ai-model-card-top">
+                        <i class="fa-solid fa-brain" style="color: #67e8f9;"></i>
+                        <span class="ai-model-card-badge">RECOMMENDED</span>
+                      </div>
+                      <h4 class="ai-model-card-title">NEXCHAT Custom Pro</h4>
+                      <p class="ai-model-card-desc">Deep Multi-Modal Reasoning, Complex Problem Solving & Code Architecture.</p>
+                    </div>
+
+                    <div class="ai-model-card" data-model="performance">
+                      <div class="ai-model-card-top">
+                        <i class="fa-solid fa-bolt" style="color: #00ff66;"></i>
+                        <span class="ai-model-card-badge">ULTRA FAST</span>
+                      </div>
+                      <h4 class="ai-model-card-title">Speed-Optimized</h4>
+                      <p class="ai-model-card-desc">Sub-15ms Token Velocity. Instant responses with minimal token footprint.</p>
+                    </div>
+
+                    <div class="ai-model-card" data-model="creative">
+                      <div class="ai-model-card-top">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color: #ffd700;"></i>
+                        <span class="ai-model-card-badge">CREATIVE</span>
+                      </div>
+                      <h4 class="ai-model-card-title">Creative Genius</h4>
+                      <p class="ai-model-card-desc">Conversational Brilliance, Brainstorming, Copywriting & Narrative Flow.</p>
+                    </div>
+
+                    <div class="ai-model-card" data-model="safe">
+                      <div class="ai-model-card-top">
+                        <i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i>
+                        <span class="ai-model-card-badge">SECURE</span>
+                      </div>
+                      <h4 class="ai-model-card-title">Strict Shield</h4>
+                      <p class="ai-model-card-desc">Sandboxed Execution, Threat Verification & Compliance Hardened.</p>
+                    </div>
+                  </div>
+
+                  <!-- Hidden Select for 100% backward compatibility -->
+                  <select id="aiModelSelect" class="settings-select" style="display: none;">
                     <option value="nexchat-custom">NEXCHAT Custom Pro (Multi-modal & Coding)</option>
                     <option value="performance">Speed-Optimized (Rapid Token Streaming)</option>
                     <option value="creative">Creative & Conversational Genius</option>
                     <option value="safe">Security & Strict Mode</option>
                   </select>
-                  <button id="saveAiModelBtn" class="btn-primary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-floppy-disk"></i> Apply Model Profile</button>
+                  <button id="saveAiModelBtn" class="btn-primary" style="display: none;"><i class="fa-solid fa-floppy-disk"></i> Apply Model Profile</button>
                 </div>
 
+                <!-- Neural Flux & Creativity Index Slider -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong>Neural Temperature / Flux Index</strong>
+                      <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Balance strict algorithmic precision vs creative divergence</p>
+                    </div>
+                    <span id="aiTemperatureValue" style="font-size: 12px; font-family: monospace; font-weight: 700; color: #67e8f9;">0.7 Balanced</span>
+                  </div>
+                  <input type="range" id="aiTemperatureSlider" min="0.1" max="1.0" step="0.1" value="0.7" class="cyber-range-slider" style="width: 100%; margin-top: 10px; accent-color: #67e8f9; cursor: pointer;">
+                  <div class="slider-scale-labels" style="display: flex; justify-content: space-between; font-size: 10px; color: #8b949e; margin-top: 4px;">
+                    <span>0.1 Deterministic</span>
+                    <span>0.5 Balanced</span>
+                    <span>1.0 Maximum Flux</span>
+                  </div>
+                </div>
+
+                <!-- 60 FPS Token Streaming Toggle -->
                 <div class="settings-card">
                   <div class="luxury-toggle-row">
                     <div>
-                      <strong>60 FPS Token Streaming</strong>
-                      <p>Simulates smooth typewriter streaming token-by-token with glowing neon cursor.</p>
+                      <strong>60 FPS Typewriter Streaming</strong>
+                      <p>Simulates ultra-smooth real-time token stream with neon pulsing cursor</p>
                     </div>
                     <label class="luxury-switch">
                       <input type="checkbox" id="aiStreamingToggle" checked>
@@ -1458,11 +1652,33 @@
                   </div>
                 </div>
 
+                <!-- Interactive In-Studio Neural Sandbox Playground -->
+                <div class="settings-card chronex-sandbox-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label><strong style="color: #67e8f9;"><i class="fa-solid fa-terminal"></i> In-Studio Neural Sandbox</strong></label>
+                    <span style="font-size: 11px; color: var(--text-muted);">Test response speed live</span>
+                  </div>
+                  <div class="sandbox-input-row" style="display: flex; gap: 8px;">
+                    <input type="text" id="aiSandboxInput" class="settings-input" placeholder="Enter test query..." value="Explain why asynchronous concurrency matters in 2 sentences." style="flex: 1;">
+                    <button type="button" id="aiSandboxRunBtn" class="btn-primary sandbox-run-btn" style="white-space: nowrap; padding: 8px 16px;">
+                      <i class="fa-solid fa-play"></i> Run
+                    </button>
+                  </div>
+                  <div id="aiSandboxOutput" class="sandbox-output-terminal" style="display: none; margin-top: 10px;">
+                    <div class="sandbox-terminal-header" style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; margin-bottom: 6px;">
+                      <span style="color: #00ff66; font-weight: 700;"><i class="fa-solid fa-bolt"></i> CHRONEX OUTPUT STREAM</span>
+                      <span id="aiSandboxLatencyTag" style="font-size: 11px; font-family: monospace; color: #67e8f9;">-- ms</span>
+                    </div>
+                    <div id="aiSandboxOutputText" class="sandbox-terminal-body" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(103, 232, 249, 0.2); border-radius: 8px; padding: 12px; font-size: 12.5px; color: #e6edf3; line-height: 1.5; font-family: 'Inter', sans-serif;"></div>
+                  </div>
+                </div>
+
+                <!-- Self AI Auto-Responder -->
                 <div class="settings-card">
                   <div class="luxury-toggle-row">
                     <div>
-                      <strong>Self AI Auto-Responder</strong>
-                      <p>Automatically reply to selected incoming messages with personalized AI.</p>
+                      <strong>Self AI Autonomous Responder</strong>
+                      <p>Automatically reply to selected peer messages when away or busy</p>
                     </div>
                     <label class="luxury-switch">
                       <input type="checkbox" id="selfAIAutoResponderToggle">
@@ -1721,6 +1937,18 @@
             <div class="sheet-icon-box link-gradient"><i class="fa-solid fa-qrcode"></i></div>
             <span>Link Device</span>
           </button>
+          <button type="button" class="sheet-grid-item" id="sheetRadarBtn">
+            <div class="sheet-icon-box radar-gradient"><i class="fa-solid fa-satellite-dish"></i></div>
+            <span>Neural Radar</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetNexbotBtn">
+            <div class="sheet-icon-box bot-gradient"><i class="fa-solid fa-robot"></i></div>
+            <span>NEXBOT Studio</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetVipVaultBtn">
+            <div class="sheet-icon-box vault-gradient"><i class="fa-solid fa-crown"></i></div>
+            <span>VIP Vault</span>
+          </button>
           <button type="button" class="sheet-grid-item" onclick="document.getElementById('settings-btn-header')?.click()">
             <div class="sheet-icon-box settings-gradient"><i class="fa-solid fa-gear"></i></div>
             <span>Settings</span>
@@ -1880,6 +2108,443 @@
     <div class="lightbox-stage" id="lightboxStage">
       <img id="lightboxImage" src="" alt="Enlarged media" style="display: none;" />
       <video id="lightboxVideo" src="" controls playsinline autoplay style="display: none;"></video>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. NEXBOT STUDIO // WHATSAPP BOT ARCHITECT -->
+  <!-- ========================================== -->
+  <div id="nexbotStudioModal" class="nexbot-studio-modal" style="display: none;">
+    <div class="nexbot-modal-backdrop" id="closeNexbotStudioBackdrop"></div>
+    <div class="nexbot-modal-container">
+      <!-- Studio Header -->
+      <div class="nexbot-studio-header">
+        <div class="nexbot-header-left">
+          <div class="nexbot-header-icon"><i class="fa-solid fa-robot"></i></div>
+          <div>
+            <h2 class="nexbot-header-title">NEXBOT STUDIO</h2>
+            <div class="nexbot-header-subtitle">WHATSAPP BOT ARCHITECT &bull; AUTONOMOUS AI ENGINE</div>
+          </div>
+        </div>
+        <div class="nexbot-header-right">
+          <span class="nexbot-header-badge"><i class="fa-brands fa-whatsapp"></i> WA CLOUD API</span>
+          <span class="nexbot-header-badge active"><i class="fa-solid fa-bolt"></i> TURBO 14ms</span>
+          <button type="button" class="nexbot-close-btn" id="closeNexbotStudioBtn" title="Close Studio">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Studio Main Grid: Left Config, Right Simulator -->
+      <div class="nexbot-studio-grid">
+        <!-- LEFT: Config Workspace -->
+        <div class="nexbot-config-col">
+          <!-- Studio Nav Tabs -->
+          <div class="nexbot-nav-tabs">
+            <button type="button" class="nexbot-nav-tab active" data-bot-tab="bot-tab-persona">
+              <i class="fa-solid fa-brain"></i> Persona &amp; Brain
+            </button>
+            <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-triggers">
+              <i class="fa-solid fa-bolt"></i> Triggers &amp; Rules
+            </button>
+            <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-whatsapp">
+              <i class="fa-brands fa-whatsapp"></i> WhatsApp Cloud
+            </button>
+            <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-fleet">
+              <i class="fa-solid fa-list-check"></i> Bot Fleet (<span id="botFleetCount">1</span>)
+            </button>
+          </div>
+
+          <!-- TAB 1: Persona & Brain -->
+          <div class="nexbot-tab-pane active" id="bot-tab-persona">
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Bot Identity Name</label>
+              <div class="nexbot-input-wrap">
+                <i class="fa-solid fa-signature nexbot-input-icon"></i>
+                <input type="text" id="nexbotNameInput" class="nexbot-input" value="ApexSupport AI" placeholder="e.g. NexusAgent, ApexSales Bot" />
+              </div>
+            </div>
+
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Persona Archetype</label>
+              <div class="nexbot-archetype-grid">
+                <button type="button" class="archetype-btn active" data-archetype="support">
+                  <i class="fa-solid fa-headset"></i>
+                  <span class="archetype-title">Customer Support</span>
+                  <span class="archetype-desc">Fast solutions, polite FAQs</span>
+                </button>
+                <button type="button" class="archetype-btn" data-archetype="sales">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span class="archetype-title">Sales Closer</span>
+                  <span class="archetype-desc">Handles leads, books calls</span>
+                </button>
+                <button type="button" class="archetype-btn" data-archetype="engineer">
+                  <i class="fa-solid fa-code"></i>
+                  <span class="archetype-title">Code Assistant</span>
+                  <span class="archetype-desc">Architecture, syntax &amp; debug</span>
+                </button>
+                <button type="button" class="archetype-btn" data-archetype="crypto">
+                  <i class="fa-solid fa-coins"></i>
+                  <span class="archetype-title">Crypto Alpha</span>
+                  <span class="archetype-desc">Market analysis &amp; alerts</span>
+                </button>
+                <button type="button" class="archetype-btn" data-archetype="twin">
+                  <i class="fa-solid fa-user-astronaut"></i>
+                  <span class="archetype-title">Personal Twin</span>
+                  <span class="archetype-desc">Witty auto-replies</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="nexbot-form-group">
+              <div class="nexbot-label-row">
+                <label class="nexbot-label">System Brain Instructions</label>
+                <div class="nexbot-prompt-sparks">
+                  <button type="button" class="spark-fill-btn" data-template="support">FAQ Support</button>
+                  <button type="button" class="spark-fill-btn" data-template="sales">Sales Booking</button>
+                  <button type="button" class="spark-fill-btn" data-template="concierge">Luxury Concierge</button>
+                </div>
+              </div>
+              <textarea id="nexbotSystemPrompt" class="nexbot-textarea" rows="4" placeholder="You are ApexSupport AI, an autonomous WhatsApp representative..."></textarea>
+            </div>
+
+            <div class="nexbot-form-group">
+              <div class="nexbot-label-row">
+                <label class="nexbot-label">Creativity Index (Temperature)</label>
+                <span class="nexbot-value-pill" id="nexbotTempVal">0.6</span>
+              </div>
+              <input type="range" id="nexbotTempSlider" class="nexbot-slider" min="0" max="1" step="0.05" value="0.6" />
+            </div>
+          </div>
+
+          <!-- TAB 2: Triggers & Rules -->
+          <div class="nexbot-tab-pane" id="bot-tab-triggers">
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Trigger Keywords (Comma Separated)</label>
+              <input type="text" id="nexbotKeywordsInput" class="nexbot-input" value="hi, hello, price, support, order, quote, help" placeholder="hi, help, quote, book..." />
+              <p class="nexbot-help-text">When an incoming WhatsApp message contains any of these keywords, the bot activates.</p>
+            </div>
+
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Default Greeting Message</label>
+              <input type="text" id="nexbotGreetingInput" class="nexbot-input" value="Hello! I am your autonomous AI assistant. How can I assist you today?" />
+            </div>
+
+            <div class="nexbot-form-group">
+              <div class="nexbot-label-row">
+                <label class="nexbot-label">Simulated Typing Latency</label>
+                <span class="nexbot-value-pill" id="nexbotDelayVal">1.2s</span>
+              </div>
+              <input type="range" id="nexbotDelaySlider" class="nexbot-slider" min="0.2" max="3.0" step="0.1" value="1.2" />
+              <p class="nexbot-help-text">Simulates natural human typing pause before dispatching WhatsApp reply.</p>
+            </div>
+
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Fallback Behaviour</label>
+              <select id="nexbotFallbackSelect" class="nexbot-select">
+                <option value="neural">Delegate to ChronEX Neural Engine (Smart AI reply)</option>
+                <option value="transfer">Prompt human operator escalation</option>
+                <option value="silent">Stay silent on unknown triggers</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- TAB 3: WhatsApp Cloud API Integration -->
+          <div class="nexbot-tab-pane" id="bot-tab-whatsapp">
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Webhook Callback URL</label>
+              <div class="nexbot-copy-row">
+                <input type="text" id="nexbotWebhookUrl" class="nexbot-input" value="https://api.nexchat.io/v1/whatsapp/webhook" readonly />
+                <button type="button" class="btn-copy-code" id="copyNexbotWebhookBtn"><i class="fa-solid fa-copy"></i> Copy</button>
+              </div>
+            </div>
+
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Verification Token</label>
+              <input type="text" id="nexbotVerifyToken" class="nexbot-input" value="nexchat_sec_token_89a" readonly />
+            </div>
+
+            <div class="nexbot-code-card">
+              <div class="nexbot-code-header">
+                <span><i class="fa-brands fa-node-js"></i> 1-Tap Node.js / Baileys WhatsApp Runner</span>
+                <button type="button" class="btn-copy-code" id="copyBaileysScriptBtn"><i class="fa-solid fa-copy"></i> Copy Script</button>
+              </div>
+              <pre class="nexbot-code-block"><code id="nexbotScriptCode">// Ready-to-run Baileys / WhatsApp Web Bot
+// Run: npm install @whiskeysockets/baileys qrcode-terminal
+const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+// Connects to ChronEX AI engine via secure WebSocket API</code></pre>
+            </div>
+          </div>
+
+          <!-- TAB 4: Bot Fleet -->
+          <div class="nexbot-tab-pane" id="bot-tab-fleet">
+            <div class="nexbot-fleet-list" id="nexbotFleetList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Config Footer Actions -->
+          <div class="nexbot-config-footer">
+            <button type="button" class="nexbot-btn primary" id="saveNexbotBtn">
+              <i class="fa-solid fa-floppy-disk"></i> Save Bot Profile
+            </button>
+            <button type="button" class="nexbot-btn secondary" id="exportNexbotBtn">
+              <i class="fa-solid fa-file-code"></i> Export Script
+            </button>
+            <button type="button" class="nexbot-btn accent" id="syncToSimulatorBtn">
+              <i class="fa-solid fa-play"></i> Sync to Simulator
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT: WhatsApp Phone Simulator -->
+        <div class="nexbot-sim-col">
+          <div class="whatsapp-phone-mockup">
+            <!-- Phone Notch / Status Bar -->
+            <div class="sim-phone-notch">
+              <span class="sim-time">10:30</span>
+              <div class="sim-speaker"></div>
+              <div class="sim-icons">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-full"></i>
+              </div>
+            </div>
+
+            <!-- WhatsApp App Bar -->
+            <div class="sim-appbar">
+              <div class="sim-appbar-left">
+                <i class="fa-solid fa-arrow-left sim-back-icon"></i>
+                <div class="sim-avatar-wrap">
+                  <div class="sim-avatar" id="simBotAvatar"><i class="fa-solid fa-robot"></i></div>
+                  <span class="sim-online-dot"></span>
+                </div>
+                <div class="sim-user-info">
+                  <div class="sim-bot-name" id="simBotName">ApexSupport AI</div>
+                  <div class="sim-bot-status" id="simBotStatus">online</div>
+                </div>
+              </div>
+              <div class="sim-appbar-right">
+                <i class="fa-solid fa-video"></i>
+                <i class="fa-solid fa-phone"></i>
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </div>
+            </div>
+
+            <!-- WhatsApp Chat Stream -->
+            <div class="sim-messages-area" id="simMessagesArea">
+              <div class="sim-encryption-pill">
+                <i class="fa-solid fa-lock"></i> Messages are encrypted with ChronEX AI engine.
+              </div>
+              <div class="sim-msg received" id="simInitialGreeting">
+                <p>Hello! I am your autonomous AI assistant. How can I assist you today?</p>
+                <span class="sim-msg-time">10:30 AM</span>
+              </div>
+            </div>
+
+            <!-- Simulator Typing Bar -->
+            <div class="sim-input-bar">
+              <button type="button" class="sim-icon-btn"><i class="fa-solid fa-plus"></i></button>
+              <input type="text" id="simMessageInput" class="sim-input" placeholder="Type a message..." autocomplete="off" />
+              <button type="button" class="sim-icon-btn"><i class="fa-solid fa-camera"></i></button>
+              <button type="button" class="sim-send-btn" id="simSendBtn" title="Send message">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. NEURAL RADAR // SPECTRUM DISCOVERY      -->
+  <!-- ========================================== -->
+  <div id="neuralRadarModal" class="neural-radar-modal" style="display: none;">
+    <div class="radar-modal-backdrop" id="closeNeuralRadarBackdrop"></div>
+    <div class="radar-modal-container">
+      <!-- Radar Header -->
+      <div class="radar-modal-header">
+        <div class="radar-header-brand">
+          <div class="radar-brand-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+          <div>
+            <h2 class="radar-brand-title">NEURAL RADAR</h2>
+            <div class="radar-brand-sub">SPECTRUM FREQUENCY SCANNER // ACTIVE MESH</div>
+          </div>
+        </div>
+        <div class="radar-header-telemetry">
+          <span class="radar-telemetry-badge"><i class="fa-solid fa-wave-square"></i> 2.45 GHz</span>
+          <span class="radar-telemetry-badge"><i class="fa-solid fa-location-crosshairs"></i> 5.0 KM RANGE</span>
+          <span class="radar-telemetry-badge active" id="radarNodesCountBadge"><i class="fa-solid fa-circle-dot"></i> 14 NODES ACTIVE</span>
+          <button type="button" class="radar-close-btn" id="closeNeuralRadarBtn" title="Close Radar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Radar Display Stage -->
+      <div class="radar-display-stage">
+        <div class="radar-screen" id="radarScreen">
+          <!-- Concentric Distance Rings -->
+          <div class="radar-ring ring-100m"><span class="ring-label">100m</span></div>
+          <div class="radar-ring ring-500m"><span class="ring-label">500m</span></div>
+          <div class="radar-ring ring-2km"><span class="ring-label">2.5km</span></div>
+          <div class="radar-ring ring-5km"><span class="ring-label">5.0km</span></div>
+
+          <!-- Crosshair Grid Axes -->
+          <div class="radar-crosshair-x"></div>
+          <div class="radar-crosshair-y"></div>
+          <div class="radar-deg-label deg-0">000°</div>
+          <div class="radar-deg-label deg-90">090°</div>
+          <div class="radar-deg-label deg-180">180°</div>
+          <div class="radar-deg-label deg-270">270°</div>
+
+          <!-- Sweeping Beam Line -->
+          <div class="radar-sweep-beam" id="radarSweepBeam"></div>
+
+          <!-- Center Node Indicator (User) -->
+          <div class="radar-center-origin">
+            <div class="origin-ping"></div>
+            <i class="fa-solid fa-crosshairs"></i>
+          </div>
+
+          <!-- Interactive Discovered Blips Container -->
+          <div class="radar-blips-layer" id="radarBlipsLayer">
+            <!-- Dynamic blips injected here -->
+          </div>
+        </div>
+
+        <!-- Floating Selected Node Inspector Card -->
+        <div class="radar-node-card" id="radarNodeCard" style="display: none;">
+          <div class="node-card-header">
+            <div class="node-card-avatar" id="nodeCardAvatar"><i class="fa-solid fa-user"></i></div>
+            <div class="node-card-meta">
+              <div class="node-card-name" id="nodeCardName">Operative_Alpha</div>
+              <div class="node-card-type" id="nodeCardType">PEER OPERATIVE</div>
+            </div>
+            <button type="button" class="node-card-close" id="closeNodeCardBtn"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="node-card-stats">
+            <div class="node-stat"><span class="stat-lbl">DISTANCE</span><span class="stat-val" id="nodeCardDist">180m</span></div>
+            <div class="node-stat"><span class="stat-lbl">LATENCY</span><span class="stat-val" id="nodeCardLatency">14ms</span></div>
+            <div class="node-stat"><span class="stat-lbl">SIGNAL</span><span class="stat-val" id="nodeCardSignal">-42 dBm</span></div>
+          </div>
+          <p class="node-card-desc" id="nodeCardDesc">Active neural peer synced to NEXCHAT mesh network.</p>
+          <div class="node-card-actions">
+            <button type="button" class="node-action-btn primary" id="nodeCardConnectBtn">
+              <i class="fa-solid fa-comment-dots"></i> Initiate Uplink
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radar Control Strip -->
+      <div class="radar-control-strip">
+        <div class="radar-filter-group">
+          <button type="button" class="radar-filter-pill active" data-filter="all">ALL FREQUENCIES</button>
+          <button type="button" class="radar-filter-pill" data-filter="peers"><i class="fa-solid fa-user"></i> PEERS</button>
+          <button type="button" class="radar-filter-pill" data-filter="bots"><i class="fa-solid fa-robot"></i> NEXBOTS</button>
+          <button type="button" class="radar-filter-pill" data-filter="channels"><i class="fa-solid fa-users"></i> CHANNELS</button>
+        </div>
+        <div class="radar-action-group">
+          <button type="button" class="radar-action-btn" id="radarSoundToggleBtn" title="Toggle Sonar Audio">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+          <button type="button" class="radar-action-btn primary" id="radarRescanBtn">
+            <i class="fa-solid fa-rotate"></i> RESCAN SPECTRUM
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. VIP TOKEN VAULT & COMMERCIAL LICENSES   -->
+  <!-- ========================================== -->
+  <div id="vipVaultModal" class="vip-vault-modal" style="display: none;">
+    <div class="vault-modal-backdrop" id="closeVipVaultBackdrop"></div>
+    <div class="vault-modal-container">
+      <div class="vault-modal-header">
+        <div class="vault-brand">
+          <div class="vault-icon"><i class="fa-solid fa-crown"></i></div>
+          <div>
+            <h2 class="vault-title">VIP TOKEN VAULT</h2>
+            <div class="vault-subtitle">COMMERCIAL LICENSES &bull; NEURAL POWERPACKS</div>
+          </div>
+        </div>
+        <div class="vault-balance-badge">
+          <span class="vault-balance-label">AVAILABLE TOKENS:</span>
+          <span class="vault-balance-val" id="vaultModalTokensVal">100</span>
+          <button type="button" class="vault-close-btn" id="closeVipVaultBtn" title="Close Vault">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="vault-tiers-grid">
+        <!-- TIER 1 -->
+        <div class="vault-tier-card current">
+          <div class="tier-pill-badge current">CURRENT ACTIVE</div>
+          <div class="tier-name">STARTER MESH</div>
+          <div class="tier-price">FREE</div>
+          <ul class="tier-features">
+            <li><i class="fa-solid fa-check"></i> 100 Starter Neural Tokens</li>
+            <li><i class="fa-solid fa-check"></i> 1 Active NEXBOT Deployment</li>
+            <li><i class="fa-solid fa-check"></i> Standard ChronEX Model</li>
+            <li><i class="fa-solid fa-check"></i> 5.0 KM Radar Spectrum</li>
+          </ul>
+          <button type="button" class="tier-action-btn disabled">CURRENT TIER</button>
+        </div>
+
+        <!-- TIER 2 -->
+        <div class="vault-tier-card">
+          <div class="tier-pill-badge hot">POPULAR</div>
+          <div class="tier-name">CYBER PIONEER</div>
+          <div class="tier-price">$4.99 <span class="tier-sub">/ one-time</span></div>
+          <ul class="tier-features">
+            <li><i class="fa-solid fa-check"></i> +500 Neural Tokens</li>
+            <li><i class="fa-solid fa-check"></i> 2 Concurrent NEXBOTs</li>
+            <li><i class="fa-solid fa-check"></i> Turbo 14ms Latency Engine</li>
+            <li><i class="fa-solid fa-check"></i> Custom Persona Tuning</li>
+          </ul>
+          <button type="button" class="tier-action-btn primary" data-tokens="500" data-plan="pioneer">
+            <i class="fa-solid fa-bolt"></i> RECHARGE 500
+          </button>
+        </div>
+
+        <!-- TIER 3 -->
+        <div class="vault-tier-card highlight">
+          <div class="tier-pill-badge pro">BEST VALUE</div>
+          <div class="tier-name">NEURAL TITAN</div>
+          <div class="tier-price">$19.99 <span class="tier-sub">/ one-time</span></div>
+          <ul class="tier-features">
+            <li><i class="fa-solid fa-check"></i> +2,500 Neural Tokens</li>
+            <li><i class="fa-solid fa-check"></i> 5 Concurrent NEXBOTs</li>
+            <li><i class="fa-solid fa-check"></i> WhatsApp Cloud API Webhooks</li>
+            <li><i class="fa-solid fa-check"></i> Radar Long-Range &amp; Stealth Mode</li>
+            <li><i class="fa-solid fa-check"></i> Gold VIP Badge in All Chats</li>
+          </ul>
+          <button type="button" class="tier-action-btn gold" data-tokens="2500" data-plan="titan">
+            <i class="fa-solid fa-crown"></i> RECHARGE 2,500
+          </button>
+        </div>
+
+        <!-- TIER 4 -->
+        <div class="vault-tier-card">
+          <div class="tier-pill-badge enterprise">COMMERCIAL</div>
+          <div class="tier-name">ENTERPRISE MESH</div>
+          <div class="tier-price">$49.99 <span class="tier-sub">/ one-time</span></div>
+          <ul class="tier-features">
+            <li><i class="fa-solid fa-check"></i> +10,000 Neural Tokens</li>
+            <li><i class="fa-solid fa-check"></i> Unlimited WhatsApp Deployments</li>
+            <li><i class="fa-solid fa-check"></i> Full Baileys Commercial License</li>
+            <li><i class="fa-solid fa-check"></i> Dedicated Model Server Cluster</li>
+          </ul>
+          <button type="button" class="tier-action-btn primary" data-tokens="10000" data-plan="enterprise">
+            <i class="fa-solid fa-rocket"></i> RECHARGE 10,000
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 

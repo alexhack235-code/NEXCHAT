@@ -153,7 +153,7 @@ function attachRegisterHandler() {
       showResult('Creating your secure NEXCHAT account...', false);
 
       // Non-blocking persistence initialization
-      setPersistence(auth, browserLocalPersistence).catch(() => {});
+      setPersistence(auth, browserLocalPersistence).catch(() => { });
 
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       console.log('[AUTH] User created in Auth:', cred.user.uid);
@@ -187,7 +187,7 @@ function attachRegisterHandler() {
         localStorage.setItem('auth_email', email);
         localStorage.setItem('auth_username', username);
         localStorage.setItem('auth_avatar', finalProfilePic);
-      } catch (_) {}
+      } catch (_) { }
 
       // 2. Save user profile to Firestore with 2.5s safety timeout race (never hang on slow connections)
       try {
@@ -220,7 +220,7 @@ function attachRegisterHandler() {
         } catch (secErr) {
           console.warn('[AUTH] Security telemetry skipped:', secErr.message);
         }
-      }).catch(() => {});
+      }).catch(() => { });
 
       // 4. Realtime Database sync - STRICTLY NON-BLOCKING! NEVER AWAIT!
       try {
@@ -400,7 +400,7 @@ if (loginForm) {
     showLoginLoader('Checking credentials...');
 
     try {
-      setPersistence(auth, browserLocalPersistence).catch(() => {});
+      setPersistence(auth, browserLocalPersistence).catch(() => { });
       const cred = await signInWithEmailAndPassword(auth, email, pass);
       showResult('Successfully signed in!');
 
@@ -408,7 +408,7 @@ if (loginForm) {
       try {
         localStorage.setItem('auth_uid', cred.user.uid);
         localStorage.setItem('auth_email', email);
-      } catch (_) {}
+      } catch (_) { }
 
       // Update online status in Firestore (with 2s race) and non-blocking RTDB
       try {
@@ -416,10 +416,10 @@ if (loginForm) {
         Promise.race([
           setDoc(userRef, { online: true, lastLogin: new Date().toISOString() }, { merge: true }),
           new Promise(res => setTimeout(res, 2000))
-        ]).catch(() => {});
+        ]).catch(() => { });
 
         // RTDB online update: NEVER AWAIT
-        set(ref(rtdb, 'users/' + cred.user.uid + '/online'), true).catch(() => {});
+        set(ref(rtdb, 'users/' + cred.user.uid + '/online'), true).catch(() => { });
       } catch (statusErr) {
         console.warn('Status update notice:', statusErr);
       }
@@ -452,7 +452,7 @@ onAuthStateChanged(auth, user => {
 
 let googleSignInInitialized = false;
 
-window.quickGuestLogin = function() {
+window.quickGuestLogin = function () {
   const guestUid = 'guest_' + Math.floor(100000 + Math.random() * 900000);
   const guestName = 'Guest Explorer';
   const guestUser = {
@@ -476,7 +476,7 @@ window.quickGuestLogin = function() {
     localStorage.setItem('auth_username', guestUser.username);
     localStorage.setItem('auth_avatar', guestUser.profilePic);
     localStorage.setItem('currentUser', JSON.stringify(guestUser));
-  } catch (_) {}
+  } catch (_) { }
 
   showResult('Signed in as Guest Explorer! Launching NEXCHAT...', false);
   showLoginLoader('Setting up guest workspace...');
@@ -487,7 +487,7 @@ window.quickGuestLogin = function() {
   }, 400);
 };
 
-window.signInWithRedirectFallback = async function() {
+window.signInWithRedirectFallback = async function () {
   showLoginLoader('Redirecting to Google...');
   try {
     const provider = new GoogleAuthProvider();
@@ -555,20 +555,20 @@ async function processGoogleUser(user, credentialResult) {
     ]).catch(() => null);
 
     if (!userDoc || !userDoc.exists()) {
-      setDoc(userRef, primaryUserData, { merge: true }).catch(() => {});
+      setDoc(userRef, primaryUserData, { merge: true }).catch(() => { });
       try {
-        set(ref(rtdb, 'users/' + user.uid), primaryUserData).catch(() => {});
-      } catch (_) {}
+        set(ref(rtdb, 'users/' + user.uid), primaryUserData).catch(() => { });
+      } catch (_) { }
     } else {
       setDoc(userRef, {
         online: true,
         lastLogin: new Date().toISOString()
-      }, { merge: true }).catch(() => {});
+      }, { merge: true }).catch(() => { });
 
       try {
-        set(ref(rtdb, 'users/' + user.uid + '/online'), true).catch(() => {});
-        set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now()).catch(() => {});
-      } catch (_) {}
+        set(ref(rtdb, 'users/' + user.uid + '/online'), true).catch(() => { });
+        set(ref(rtdb, 'users/' + user.uid + '/lastLogin'), Date.now()).catch(() => { });
+      } catch (_) { }
     }
   } catch (syncErr) {
     console.warn('[AUTH] Background cloud sync note:', syncErr);
@@ -587,7 +587,7 @@ async function handleGoogleSignIn() {
 
   try {
     // DO NOT await setPersistence synchronously right before popup!
-    setPersistence(auth, browserLocalPersistence).catch(() => {});
+    setPersistence(auth, browserLocalPersistence).catch(() => { });
 
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
@@ -781,7 +781,7 @@ function initNexshotFusionIntro() {
       if (AudioContext) audioCtx = new AudioContext();
     }
     if (audioCtx && audioCtx.state === 'suspended') {
-      audioCtx.resume().catch(() => {});
+      audioCtx.resume().catch(() => { });
     }
     return audioCtx;
   }
@@ -801,7 +801,7 @@ function initNexshotFusionIntro() {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + duration);
-    } catch (_) {}
+    } catch (_) { }
   }
 
   function playCollisionBoom() {
@@ -820,7 +820,7 @@ function initNexshotFusionIntro() {
       gain.connect(ctx.destination);
       osc.start();
       osc.stop(ctx.currentTime + 0.9);
-    } catch (_) {}
+    } catch (_) { }
   }
 
   function playMajesticChord() {
@@ -980,7 +980,7 @@ function initNexshotFusionIntro() {
   function dismissOverlay() {
     clearAllTimers();
     overlay.classList.add('fusion-completed');
-    try { sessionStorage.setItem('nexshot_fusion_seen', 'true'); } catch (_) {}
+    try { sessionStorage.setItem('nexshot_fusion_seen', 'true'); } catch (_) { }
     setTimeout(() => {
       overlay.style.display = 'none';
       if (canvasAnimId) cancelAnimationFrame(canvasAnimId);
@@ -999,8 +999,8 @@ function initNexshotFusionIntro() {
     audioBtn.addEventListener('click', (e) => {
       e.preventDefault();
       isMuted = !isMuted;
-      audioBtn.innerHTML = isMuted 
-        ? '<i class="fa-solid fa-volume-xmark" style="color: #ef4444;"></i>' 
+      audioBtn.innerHTML = isMuted
+        ? '<i class="fa-solid fa-volume-xmark" style="color: #ef4444;"></i>'
         : '<i class="fa-solid fa-volume-high" style="color: var(--accent-emerald);"></i>';
       if (!isMuted) getAudio();
     });
@@ -1023,7 +1023,7 @@ function initNexshotFusionIntro() {
   let alreadySeen = false;
   try {
     alreadySeen = sessionStorage.getItem('nexshot_fusion_seen') === 'true';
-  } catch (_) {}
+  } catch (_) { }
 
   if (!alreadySeen) {
     startAnimation(false);
