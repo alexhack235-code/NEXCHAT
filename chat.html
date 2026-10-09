@@ -1247,6 +1247,11 @@
                   <i class="fa-solid fa-bolt" style="color: #00ff66;"></i>
                   <span>Realtime Engine</span>
                 </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-mesh">
+                  <i class="fa-solid fa-network-wired" style="color: #c084fc;"></i>
+                  <span>Neural Protocols &amp; Mesh</span>
+                  <span class="settings-tab-microbadge token-badge" style="background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3);">MESH</span>
+                </button>
               </div>
 
               <div class="settings-nav-group">
@@ -1794,6 +1799,97 @@
                 </div>
               </div>
 
+              <!-- TAB: NEURAL PROTOCOLS & MESH -->
+              <div class="settings-tab-pane" id="tab-mesh">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-network-wired" style="color: #c084fc;"></i> Neural Protocols &amp; Security Mesh</h3>
+                  <p>Configure Ghost ephemeral countdown, Cipher Vault security master PIN, P2P CyberDrop beam discovery, and Live Audio Spaces.</p>
+                </div>
+
+                <!-- Ghost Protocol Configuration -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Ghost Ephemeral Countdown Protocol</strong>
+                      <p>Default self-destruct countdown for ephemeral messages. Messages dissolve into quantum particles and are permanently purged from database memory.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsGhostProtocolToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 12px;">
+                    <label for="settingsGhostDurationSelect"><strong>Default Ghost Self-Destruct Timer</strong></label>
+                    <select id="settingsGhostDurationSelect" class="settings-select" style="margin-top: 6px;">
+                      <option value="10">10 Seconds (Rapid Dissolve)</option>
+                      <option value="30" selected>30 Seconds (Default)</option>
+                      <option value="300">5 Minutes</option>
+                      <option value="3600">1 Hour</option>
+                      <option value="86400">24 Hours</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Cipher Vault Master PIN & Security Preferences -->
+                <div class="settings-card">
+                  <label><strong>Cipher Vault Master Security PIN</strong></label>
+                  <p style="font-size: 11.5px; color: #8b949e; margin: 4px 0 10px;">Customize your 4-digit numeric vault PIN to access hidden rooms and zero-knowledge enclaves (Default: 1337).</p>
+                  <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <input type="password" id="settingsCipherPinInput" maxlength="4" placeholder="1337" class="settings-input" style="width: 130px; font-family: 'Orbitron', monospace; letter-spacing: 4px; text-align: center;">
+                    <button type="button" id="saveCipherPinBtn" class="btn-primary" style="white-space: nowrap;"><i class="fa-solid fa-key"></i> Update PIN</button>
+                    <button type="button" id="openCipherFromSettingsBtn" class="btn-secondary" style="white-space: nowrap;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Vault</button>
+                  </div>
+                </div>
+
+                <!-- P2P CyberDrop Direct Beam Configuration -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>P2P CyberDrop Radar Visibility</strong>
+                      <p>Allow nearby peer nodes on the local encrypted mesh to discover your transceiver and initiate direct zero-knowledge file beams.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsCyberDropVisibilityToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 12px;">
+                    <button type="button" id="openCyberDropFromSettingsBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-share-nodes"></i> Launch P2P CyberDrop Beam Station</button>
+                  </div>
+                </div>
+
+                <!-- Live Neural Audio Spaces Configuration -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>High-Fidelity 48kHz Audio Spaces Processing</strong>
+                      <p>Enables ultra-low latency spatial voice telemetry with live 16-bar real-time spectrum equalizers.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsAudioSpacesHiFiToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 12px;">
+                    <button type="button" id="openAudioSpacesFromSettingsBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-podcast"></i> Join Live Neural Audio Spaces</button>
+                  </div>
+                </div>
+
+                <!-- Tactical Soundboard Dock Preferences -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Neural Soundboard Dock Trigger</strong>
+                      <p>Show audio reaction soundboard button in the chat composer bar for quick tactile audio cues.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsSoundboardDockToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
               <!-- TAB 8: TOKEN VAULT & GRANTS -->
               <div class="settings-tab-pane" id="tab-tokens">
                 <div class="settings-pane-header">
@@ -1913,6 +2009,9 @@
           </div>
 
           <div id="pairStatusFeedback" style="font-size: 12px; text-align: center; min-height: 20px;"></div>
+        </div>
+      </div>
+
       <!-- CREATE STATUS MODAL (NEXCHAT HACKER TERMINAL STORY TRANSMITTER) -->
       <div id="createStatusModal" class="modal create-status-modal terminal-create-modal" style="display: none;">
         <div class="modal-content create-status-content terminal-modal-box" style="max-width: 540px; padding: 22px;">

@@ -16366,14 +16366,15 @@ function initCipherVault() {
         if (navigator.vibrate) navigator.vibrate(15);
 
         if (currentPin.length === 4) {
-          if (currentPin === MASTER_PIN) {
+          const masterPin = localStorage.getItem('nexchat_cipher_pin') || '1337';
+          if (currentPin === masterPin) {
             setTimeout(unlockVault, 180);
           } else {
             // Error shake
             updatePinDots('error');
             playCyberSfx('glitch');
             if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
-            showNotif('Invalid Security PIN. (Default: 1337)', 'error', 2500);
+            showNotif(`Invalid Security PIN. (Default: ${masterPin})`, 'error', 2500);
             setTimeout(() => {
               currentPin = '';
               updatePinDots('normal');
@@ -16441,6 +16442,94 @@ function initCipherVault() {
   }
 }
 
+/* ======================================================= */
+/* 12. NEURAL PROTOCOLS & MESH SETTINGS CONTROLLER         */
+/* ======================================================= */
+function initMeshSettings() {
+  const cipherPinInput = document.getElementById('settingsCipherPinInput');
+  const saveCipherPinBtn = document.getElementById('saveCipherPinBtn');
+  const openCipherBtn = document.getElementById('openCipherFromSettingsBtn');
+  const openCyberDropBtn = document.getElementById('openCyberDropFromSettingsBtn');
+  const openAudioSpacesBtn = document.getElementById('openAudioSpacesFromSettingsBtn');
+  const ghostDurationSelect = document.getElementById('settingsGhostDurationSelect');
+  const soundboardToggle = document.getElementById('settingsSoundboardDockToggle');
+  const soundboardBtn = document.getElementById('soundboardToggleBtn');
+
+  // Load existing PIN into settings
+  if (cipherPinInput) {
+    const savedPin = localStorage.getItem('nexchat_cipher_pin') || '1337';
+    cipherPinInput.value = savedPin;
+  }
+
+  // Save new PIN
+  if (saveCipherPinBtn && cipherPinInput) {
+    saveCipherPinBtn.addEventListener('click', () => {
+      const pin = cipherPinInput.value.trim();
+      if (!/^\d{4}$/.test(pin)) {
+        showNotif('PIN must be exactly 4 digits (e.g. 1337)', 'error', 2500);
+        cipherPinInput.focus();
+        return;
+      }
+      localStorage.setItem('nexchat_cipher_pin', pin);
+      playCyberSfx('affirm');
+      if (navigator.vibrate) navigator.vibrate(30);
+      showNotif('Cipher Vault master PIN updated successfully!', 'success', 2500);
+    });
+  }
+
+  // Quick launch shortcuts from settings
+  if (openCipherBtn) {
+    openCipherBtn.addEventListener('click', () => {
+      if (typeof closeSettingsModal === 'function') closeSettingsModal();
+      const modal = document.getElementById('cipherVaultModal');
+      if (modal) modal.style.display = 'flex';
+      playCyberSfx('sonar');
+    });
+  }
+
+  if (openCyberDropBtn) {
+    openCyberDropBtn.addEventListener('click', () => {
+      if (typeof closeSettingsModal === 'function') closeSettingsModal();
+      const modal = document.getElementById('cyberDropModal');
+      if (modal) modal.style.display = 'flex';
+      playCyberSfx('sonar');
+    });
+  }
+
+  if (openAudioSpacesBtn) {
+    openAudioSpacesBtn.addEventListener('click', () => {
+      if (typeof closeSettingsModal === 'function') closeSettingsModal();
+      const modal = document.getElementById('audioSpacesModal');
+      if (modal) modal.style.display = 'flex';
+      playCyberSfx('sonar');
+    });
+  }
+
+  // Ghost duration selection
+  if (ghostDurationSelect) {
+    const savedDuration = localStorage.getItem('nexchat_ghost_default_seconds') || '30';
+    ghostDurationSelect.value = savedDuration;
+    ghostDurationSelect.addEventListener('change', () => {
+      localStorage.setItem('nexchat_ghost_default_seconds', ghostDurationSelect.value);
+      showNotif(`Ghost self-destruct default set to ${ghostDurationSelect.options[ghostDurationSelect.selectedIndex].text}`, 'info', 2000);
+    });
+  }
+
+  // Soundboard dock toggle
+  if (soundboardToggle) {
+    const isSoundboardEnabled = localStorage.getItem('nexchat_soundboard_enabled') !== 'false';
+    soundboardToggle.checked = isSoundboardEnabled;
+    if (soundboardBtn) soundboardBtn.style.display = isSoundboardEnabled ? 'flex' : 'none';
+
+    soundboardToggle.addEventListener('change', () => {
+      const enabled = soundboardToggle.checked;
+      localStorage.setItem('nexchat_soundboard_enabled', enabled ? 'true' : 'false');
+      if (soundboardBtn) soundboardBtn.style.display = enabled ? 'flex' : 'none';
+      showNotif(enabled ? 'Tactile Soundboard dock enabled' : 'Tactile Soundboard dock disabled', 'info', 1800);
+    });
+  }
+}
+
 // Automatically mount new features on boot
 const bootAllFeatures = () => {
   initNexbotStudio();
@@ -16453,6 +16542,7 @@ const bootAllFeatures = () => {
   initAudioSpaces();
   initCyberDrop();
   initCipherVault();
+  initMeshSettings();
 };
 
 if (document.readyState === 'loading') {

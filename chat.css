@@ -5424,6 +5424,10 @@ html, body {
 /* ==========================================================================
    LUXURY SETTINGS SUITE (11-TAB TELEGRAM/DISCORD CALIBER CONTROL CENTER)
    ========================================================================== */
+.settings-modal {
+  z-index: 9990 !important;
+}
+
 .luxury-settings-suite {
   max-width: 980px !important;
   width: 95vw !important;
@@ -5847,6 +5851,37 @@ body.chat-size-extra-large .message-bubble {
     border-radius: 0 !important;
     border: none !important;
   }
+
+  .luxury-settings-suite .settings-header {
+    padding: 12px 14px !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .settings-header-left {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .settings-header-left h2 {
+    font-size: 15px !important;
+  }
+
+  .settings-subtitle {
+    display: none !important;
+  }
+
+  .settings-search-bar-wrap {
+    order: 3;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 4px 0 0 !important;
+  }
+
+  #closeSettingsBtn {
+    flex-shrink: 0;
+    margin-left: auto;
+  }
   
   .settings-layout {
     flex-direction: column;
@@ -5854,26 +5889,56 @@ body.chat-size-extra-large .message-bubble {
   
   .settings-sidebar {
     width: 100%;
+    display: flex;
     flex-direction: row;
+    align-items: center;
     overflow-x: auto;
     overflow-y: hidden;
-    padding: 8px 12px;
+    padding: 8px 10px;
+    gap: 6px;
+    flex-shrink: 0;
     border-right: none;
     border-bottom: 1px solid var(--border-subtle);
-    gap: 8px;
-    flex-shrink: 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .settings-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .settings-nav-group {
+    display: contents;
+  }
+
+  .settings-nav-group-title {
+    display: none;
   }
   
   .settings-nav-tab {
     white-space: nowrap;
     width: auto;
-    padding: 8px 12px;
-    font-size: 12px;
+    padding: 7px 12px;
+    font-size: 11.5px;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
   
   .settings-nav-tab.active {
-    border-left: none;
-    border-bottom: 2px solid #00ff66;
+    border: 1px solid #00ff66 !important;
+    border-bottom: 1px solid #00ff66 !important;
+    background: rgba(0, 255, 102, 0.12) !important;
+    color: #00ff66 !important;
+    box-shadow: 0 0 12px rgba(0, 255, 102, 0.2);
+  }
+
+  .settings-tab-microbadge {
+    display: none;
   }
   
   .settings-sidebar-spacer {
@@ -5881,11 +5946,24 @@ body.chat-size-extra-large .message-bubble {
   }
   
   .settings-pane-container {
-    padding: 16px;
+    padding: 14px 12px;
+  }
+
+  .settings-card {
+    padding: 14px;
   }
 
   .install-platform-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-card[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  .radio-pill-group {
+    flex-wrap: wrap !important;
   }
 }
 
