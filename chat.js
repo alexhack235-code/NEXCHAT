@@ -59,7 +59,7 @@ function hapticFeedback(intensity = 'medium') {
   navigator.vibrate(patterns[intensity] || patterns.medium);
 }
 
-// 🛡️ Global Runtime Resilience Shield
+// [Global Runtime Resilience Shield]
 window.addEventListener('unhandledrejection', (event) => {
   if (event.reason?.name === 'AbortError' || event.reason?.message?.includes('aborted')) {
     event.preventDefault();
@@ -3234,7 +3234,7 @@ async function sendMessage() {
     return;
   }
 
-  // 🛡️ FORTRESS AI Security Shield: Inspect text before dispatch
+  // [FORTRESS AI Security Shield: Inspect text before dispatch]
   if (text && window.fortressShield) {
     const inspection = window.fortressShield.inspectText(text);
     if (!inspection.safe) {
@@ -3404,8 +3404,16 @@ async function sendMessage() {
         } : {})
       };
       if (attachment) messageData.attachment = attachment;
-      await addDoc(collection(db, "messages"), messageData);
+      if (window.activeGhostTtl > 0) {
+        messageData.ephemeral = true;
+        messageData.ttl = window.activeGhostTtl;
+      }
+      const addedDoc = await addDoc(collection(db, "messages"), messageData);
       updateLocalSentMessageStatus(clientMsgId, 'sent');
+      if (window.activeGhostTtl > 0 && typeof attachGhostCountdown === 'function') {
+        const optimisticWrapper = document.getElementById(`wrapper-${clientMsgId}`);
+        if (optimisticWrapper) attachGhostCountdown(optimisticWrapper, window.activeGhostTtl, addedDoc?.id);
+      }
 
       await updateDoc(userRef, {
         tokens: increment(-1),
@@ -3501,7 +3509,7 @@ function renderMessageAttachment(attachment) {
       container.appendChild(audio);
     }
   } else if (isArchive) {
-    // 🗂️ High-Tech Compressed Folder Archive Card
+    // High-Tech Compressed Folder Archive Card
     const archiveCard = document.createElement("a");
     archiveCard.href = url;
     archiveCard.target = "_blank";
@@ -3539,7 +3547,7 @@ function renderMessageAttachment(attachment) {
     archiveCard.appendChild(downloadIcon);
     container.appendChild(archiveCard);
   } else {
-    // 📄 High-Tech Document Card (PDF, Office, Code, Text)
+    // High-Tech Document Card (PDF, Office, Code, Text)
     const docCard = document.createElement("a");
     docCard.href = url;
     docCard.target = "_blank";
@@ -3730,6 +3738,9 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   bubble.appendChild(timeSpan);
 
   wrapper.appendChild(bubble);
+  if (window.activeGhostTtl > 0 && typeof attachGhostCountdown === 'function') {
+    attachGhostCountdown(wrapper, window.activeGhostTtl);
+  }
   messagesContainer.appendChild(wrapper);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
   return id;
@@ -3762,7 +3773,7 @@ async function generateChronexAIResponse(text) {
     }
   }
 
-  // 🛡️ Daily AI Request Limit Check (10 requests per 24 hours)
+  // [Daily AI Request Limit Check: 10 requests per 24 hours]
   if (chronexAI && typeof chronexAI.checkDailyQuota === 'function') {
     const quotaCheck = chronexAI.checkDailyQuota(myUID || 'default');
     if (!quotaCheck.allowed) {
@@ -4170,22 +4181,36 @@ function loadMessages() {
       timeSpan.innerHTML = checkmarkHTML + '<span>' + formattedTime + '</span>';
       bubble.appendChild(timeSpan);
 
+      // Ghost Protocol Ephemeral Dissolution
+      if (m.ephemeral && m.ttl && typeof attachGhostCountdown === 'function') {
+        attachGhostCountdown(div, m.ttl, m.docId);
+      }
+      if (!isOwn && m.text && typeof window.updateSmartReplySuggestions === 'function') {
+        window.updateSmartReplySuggestions(m.text);
+      }
+
       // Deluxe Hover Popover on Messages (Reactions + Reply)
       const actionsBar = document.createElement("div");
       actionsBar.className = "message-hover-actions";
       actionsBar.style.cssText = `display: flex; align-items: center; gap: 3px; position: absolute; top: -16px; ${isOwn ? "left: 8px;" : "right: 8px;"} z-index: 10;`;
 
-      // Quick 1-Tap Reactions
-      const quickEmojis = ['❤️', '🔥', '👍', '😂', '😮'];
-      quickEmojis.forEach(em => {
+      // Quick 1-Tap Vector Reactions
+      const quickReactions = [
+        { key: 'heart', icon: '<i class="fa-solid fa-heart" style="color:#ef4444;"></i>', title: 'Heart' },
+        { key: 'fire', icon: '<i class="fa-solid fa-fire" style="color:#f97316;"></i>', title: 'Fire' },
+        { key: 'like', icon: '<i class="fa-solid fa-thumbs-up" style="color:#3b82f6;"></i>', title: 'Like' },
+        { key: 'star', icon: '<i class="fa-solid fa-star" style="color:#eab308;"></i>', title: 'Star' },
+        { key: 'bolt', icon: '<i class="fa-solid fa-bolt" style="color:#00ff66;"></i>', title: 'Bolt' }
+      ];
+      quickReactions.forEach(r => {
         const emoBtn = document.createElement("button");
         emoBtn.type = "button";
         emoBtn.className = "reaction-quick-btn";
-        emoBtn.textContent = em;
-        emoBtn.title = `React ${em}`;
+        emoBtn.innerHTML = r.icon;
+        emoBtn.title = `React ${r.title}`;
         emoBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          handleMessageReaction(m.docId, em, bubble);
+          handleMessageReaction(m.docId, r.key, bubble);
         });
         actionsBar.appendChild(emoBtn);
       });
@@ -4215,25 +4240,33 @@ function loadMessages() {
         const reactionCounts = {};
         if (Array.isArray(m.reactions)) {
           m.reactions.forEach(r => {
-            const emoji = typeof r === 'string' ? r : (r.emoji || '❤️');
-            reactionCounts[emoji] = (reactionCounts[emoji] || 0) + 1;
+            const reactionKey = typeof r === 'string' ? r : (r.emoji || r.key || 'star');
+            reactionCounts[reactionKey] = (reactionCounts[reactionKey] || 0) + 1;
           });
         } else if (typeof m.reactions === 'object') {
-          Object.entries(m.reactions).forEach(([emoji, val]) => {
+          Object.entries(m.reactions).forEach(([reactionKey, val]) => {
             if (Array.isArray(val) && val.length > 0) {
-              reactionCounts[emoji] = val.length;
+              reactionCounts[reactionKey] = val.length;
             } else if (typeof val === 'number' && val > 0) {
-              reactionCounts[emoji] = val;
+              reactionCounts[reactionKey] = val;
             }
           });
         }
-        Object.entries(reactionCounts).forEach(([emoji, count]) => {
+        const reactionIconMap = {
+          heart: '<i class="fa-solid fa-heart" style="color:#ef4444;font-size:11px;"></i>',
+          fire: '<i class="fa-solid fa-fire" style="color:#f97316;font-size:11px;"></i>',
+          like: '<i class="fa-solid fa-thumbs-up" style="color:#3b82f6;font-size:11px;"></i>',
+          star: '<i class="fa-solid fa-star" style="color:#eab308;font-size:11px;"></i>',
+          bolt: '<i class="fa-solid fa-bolt" style="color:#00ff66;font-size:11px;"></i>'
+        };
+        Object.entries(reactionCounts).forEach(([rKey, count]) => {
           const badge = document.createElement("span");
           badge.className = "message-reaction-badge";
-          badge.textContent = `${emoji} ${count}`;
+          const iconMarkup = reactionIconMap[rKey] || '<i class="fa-solid fa-star" style="color:#eab308;font-size:11px;"></i>';
+          badge.innerHTML = `${iconMarkup} <span>${count}</span>`;
           badge.addEventListener("click", (e) => {
             e.stopPropagation();
-            handleMessageReaction(m.docId, emoji, bubble);
+            handleMessageReaction(m.docId, rKey, bubble);
           });
           tray.appendChild(badge);
         });
@@ -8360,7 +8393,7 @@ function loadSettingsPreferences() {
       alignmentBtn.style.color = "#000";
     }
 
-    console.log("⚡ Settings loaded successfully", prefs);
+    console.log("Settings loaded successfully", prefs);
   } catch (err) {
     console.error("Error loading settings:", err);
     showNotif("Could not load settings", "error");
@@ -8416,7 +8449,7 @@ function saveSettingsPreferences() {
     };
 
     localStorage.setItem("nexchat_settings", JSON.stringify(prefs));
-    console.log("⚡ Settings saved:", prefs);
+    console.log("Settings saved:", prefs);
     showNotif("Settings saved", "success", 2000);
 
     applySettings(prefs);
@@ -8429,7 +8462,7 @@ function saveSettingsPreferences() {
 function applySettings(prefs) {
   try {
     if (!prefs.notifications) {
-      console.log("🔔 Notifications disabled");
+      console.log("Notifications disabled");
     }
 
     const targetTheme = prefs.theme === "light" ? "light" : "dark";
@@ -8442,10 +8475,10 @@ function applySettings(prefs) {
         event.returnValue = confirmationMessage;
         return confirmationMessage;
       };
-      console.log("🛡️ Anti-reload protection enabled");
+      console.log("Anti-reload protection enabled");
     } else {
       window.onbeforeunload = null;
-      console.log("🛡️ Anti-reload protection disabled");
+      console.log("Anti-reload protection disabled");
     }
 
     if (prefs.bubbleTheme) {
@@ -8453,9 +8486,9 @@ function applySettings(prefs) {
     }
 
     if (prefs.selfAI) {
-      console.log("🤖 Self AI auto-responder enabled");
+      console.log("Self AI auto-responder enabled");
     } else {
-      console.log("🤖 Self AI auto-responder disabled");
+      console.log("Self AI auto-responder disabled");
     }
 
     selfAISelectedUserIds = Array.isArray(prefs.selfAIUserIds) ? prefs.selfAIUserIds : [];
@@ -12910,7 +12943,7 @@ function initializeBasicUI() {
       messageInput.style.height = Math.min(Math.max(scrollHeight, 42), 120) + 'px';
     };
 
-    // ⚡ NEXCHAT SLASH COMMANDS HUB ⚡
+    // NEXCHAT SLASH COMMANDS HUB 
     const slashMenu = document.getElementById('slashCommandsMenu');
     const slashList = document.getElementById('slashCommandsList');
     let currentSlashMatches = [];
@@ -15438,15 +15471,534 @@ function initVipVault() {
   });
 }
 
-// Automatically mount new features on boot
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    initNexbotStudio();
-    initNeuralRadar();
-    initVipVault();
+/* ======================================================= */
+/* 4. WEB AUDIO SYNTHESIZER & TACTILE AUDIO FX ENGINE      */
+/* ======================================================= */
+function playCyberSfx(type) {
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  try {
+    if (type === 'sonar') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, now);
+      osc.frequency.exponentialRampToValueAtTime(320, now + 0.85);
+      gain.gain.setValueAtTime(0.25, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.9);
+    } else if (type === 'chime') {
+      [523.25, 659.25, 783.99].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.04);
+        gain.gain.setValueAtTime(0.18, now + idx * 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.04);
+        osc.stop(now + 1.3);
+      });
+    } else if (type === 'zap') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(2400, now);
+      osc.frequency.exponentialRampToValueAtTime(160, now + 0.22);
+      gain.gain.setValueAtTime(0.2, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.25);
+    } else if (type === 'glitch') {
+      [140, 480, 95, 310].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.04);
+        gain.gain.setValueAtTime(0.12, now + idx * 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.04 + 0.035);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.04);
+        osc.stop(now + idx * 0.04 + 0.04);
+      });
+    } else if (type === 'subbass') {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(65, now);
+      osc.frequency.exponentialRampToValueAtTime(32, now + 0.8);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.85);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.9);
+    } else if (type === 'affirm') {
+      [440, 554.37, 659.25, 880].forEach((freq, idx) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+        gain.gain.setValueAtTime(0.2, now + idx * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.25);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + idx * 0.06);
+        osc.stop(now + idx * 0.06 + 0.3);
+      });
+    }
+  } catch (err) {
+    console.warn('[Audio SFX Error]', err);
+  }
+}
+
+/* ======================================================= */
+/* 5. GHOST PROTOCOL (EPHEMERAL MESSAGES ENGINE)           */
+/* ======================================================= */
+window.activeGhostTtl = 0;
+
+function attachGhostCountdown(wrapperEl, ttlSeconds, docId = null) {
+  if (!wrapperEl || ttlSeconds <= 0) return;
+  const bubble = wrapperEl.querySelector('.message-bubble');
+  if (!bubble) return;
+
+  const pill = document.createElement('span');
+  pill.className = 'ghost-countdown-pill';
+  pill.innerHTML = `<i class="fa-solid fa-hourglass-half"></i> <span class="ghost-timer-sec">${ttlSeconds}</span>s`;
+  bubble.appendChild(pill);
+
+  let remaining = ttlSeconds;
+  const timerSecEl = pill.querySelector('.ghost-timer-sec');
+
+  const intervalId = setInterval(() => {
+    remaining--;
+    if (timerSecEl) timerSecEl.textContent = remaining;
+    if (remaining <= 0) {
+      clearInterval(intervalId);
+      playCyberSfx('zap');
+      wrapperEl.classList.add('ephemeral-dissolve');
+      setTimeout(() => {
+        if (wrapperEl.parentNode) wrapperEl.parentNode.removeChild(wrapperEl);
+      }, 580);
+      if (docId) {
+        try {
+          deleteDoc(doc(db, 'messages', docId)).catch(() => {});
+        } catch (_) {}
+      }
+    }
+  }, 1000);
+}
+
+function initGhostProtocol() {
+  const ghostBtn = document.getElementById('ghostProtocolBtn');
+  const ghostMenu = document.getElementById('ghostProtocolMenu');
+  const ghostBanner = document.getElementById('ghostActiveBanner');
+  const ghostTtlLabel = document.getElementById('ghostTtlLabel');
+  const closeGhostBannerBtn = document.getElementById('closeGhostBannerBtn');
+  const messageInput = document.getElementById('message-input');
+
+  if (!ghostBtn || !ghostMenu) return;
+
+  ghostBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = ghostMenu.style.display === 'block';
+    ghostMenu.style.display = isVisible ? 'none' : 'block';
   });
-} else {
+
+  document.addEventListener('click', (e) => {
+    if (!ghostMenu.contains(e.target) && e.target !== ghostBtn) {
+      ghostMenu.style.display = 'none';
+    }
+  });
+
+  const updateGhostUi = (ttl) => {
+    window.activeGhostTtl = ttl;
+    if (ttl > 0) {
+      ghostBtn.classList.add('active');
+      if (ghostBanner) ghostBanner.style.display = 'flex';
+      if (ghostTtlLabel) ghostTtlLabel.textContent = ttl + 's';
+      if (messageInput) messageInput.style.borderColor = 'rgba(192, 132, 252, 0.6)';
+      showNotif(`Ghost Protocol Engaged: ${ttl}s self-destruct`, 'info', 2500);
+    } else {
+      ghostBtn.classList.remove('active');
+      if (ghostBanner) ghostBanner.style.display = 'none';
+      if (messageInput) messageInput.style.borderColor = '';
+      showNotif('Ghost Protocol Disengaged: standard persistent messages', 'info', 2000);
+    }
+  };
+
+  const opts = ghostMenu.querySelectorAll('.ghost-opt');
+  opts.forEach(opt => {
+    opt.addEventListener('click', () => {
+      opts.forEach(o => o.classList.remove('active'));
+      opt.classList.add('active');
+      ghostMenu.style.display = 'none';
+      const ttl = parseInt(opt.getAttribute('data-ttl') || '0', 10);
+      updateGhostUi(ttl);
+      playCyberSfx('chime');
+    });
+  });
+
+  if (closeGhostBannerBtn) {
+    closeGhostBannerBtn.addEventListener('click', () => {
+      opts.forEach(o => o.classList.remove('active'));
+      const offOpt = ghostMenu.querySelector('.ghost-opt[data-ttl="0"]');
+      if (offOpt) offOpt.classList.add('active');
+      updateGhostUi(0);
+    });
+  }
+}
+
+/* ======================================================= */
+/* 6. CYBER STREAK & RETENTION MATRIX HUB                  */
+/* ======================================================= */
+const STREAK_REWARDS = [25, 50, 75, 100, 150, 250, 500];
+
+function getCyberStreakData() {
+  try {
+    const raw = localStorage.getItem('nexchat_cyber_streak');
+    if (raw) return JSON.parse(raw);
+  } catch (_) {}
+  return {
+    streak: 1,
+    lastClaimDate: null,
+    longestStreak: 1,
+    totalClaimed: 0,
+    shieldActive: true
+  };
+}
+
+function saveCyberStreakData(data) {
+  try {
+    localStorage.setItem('nexchat_cyber_streak', JSON.stringify(data));
+  } catch (_) {}
+}
+
+function initCyberStreak() {
+  const modal = document.getElementById('cyberStreakModal');
+  const closeBtn = document.getElementById('closeCyberStreakBtn');
+  const closeBackdrop = document.getElementById('closeCyberStreakBackdrop');
+  const claimBtn = document.getElementById('claimStreakRewardBtn');
+
+  const streakData = getCyberStreakData();
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const yesterdayStr = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+  // Streak verification logic
+  if (streakData.lastClaimDate && streakData.lastClaimDate !== todayStr && streakData.lastClaimDate !== yesterdayStr) {
+    if (streakData.shieldActive && streakData.streak > 1) {
+      streakData.shieldActive = false;
+      showNotif('Streak Shield Saved: Cyber Streak preserved!', 'info', 3500);
+    } else {
+      streakData.streak = 1;
+    }
+    saveCyberStreakData(streakData);
+  }
+
+  const alreadyClaimedToday = streakData.lastClaimDate === todayStr;
+
+  const updateStreakUi = () => {
+    const currentStreak = Math.min(Math.max(streakData.streak, 1), 7);
+    const rewardForToday = STREAK_REWARDS[currentStreak - 1];
+
+    // Header badge
+    const headerCount = document.getElementById('streakCountHeader');
+    if (headerCount) headerCount.textContent = currentStreak.toString();
+    const mobileBadge = document.getElementById('mobileStreakBadge');
+    if (mobileBadge) mobileBadge.textContent = `${currentStreak} DAY${currentStreak > 1 ? 'S' : ''}`;
+
+    // Modal elements
+    const modalStreakCount = document.getElementById('modalStreakCount');
+    if (modalStreakCount) modalStreakCount.textContent = currentStreak.toString();
+
+    const multiplierBadge = document.getElementById('modalStreakMultiplier');
+    if (multiplierBadge) {
+      const mult = (1.0 + (currentStreak - 1) * 0.25).toFixed(1);
+      multiplierBadge.textContent = `${mult}x MULTIPLIER`;
+    }
+
+    const longestVal = document.getElementById('longestStreakVal');
+    if (longestVal) longestVal.textContent = `${Math.max(streakData.longestStreak || 1, currentStreak)} Days`;
+
+    const totalClaimedVal = document.getElementById('totalClaimedVal');
+    if (totalClaimedVal) totalClaimedVal.textContent = `${streakData.totalClaimed || 0} Tokens`;
+
+    const countdownVal = document.getElementById('streakCountdownVal');
+    if (countdownVal) {
+      countdownVal.textContent = alreadyClaimedToday ? 'Claimed Today' : 'Ready to Claim';
+    }
+
+    // 7-day cards
+    const dayCards = document.querySelectorAll('.streak-day-card');
+    dayCards.forEach(card => {
+      const dayNum = parseInt(card.getAttribute('data-day') || '1', 10);
+      const pill = card.querySelector('.day-status-pill');
+      card.classList.remove('claimed', 'active-today');
+
+      if (dayNum < currentStreak || (dayNum === currentStreak && alreadyClaimedToday)) {
+        card.classList.add('claimed');
+        if (pill) pill.textContent = 'CLAIMED';
+      } else if (dayNum === currentStreak && !alreadyClaimedToday) {
+        card.classList.add('active-today');
+        if (pill) pill.textContent = 'CLAIMABLE';
+      } else {
+        if (pill) pill.textContent = dayNum === 7 ? 'GOLD VIP' : 'LOCKED';
+      }
+    });
+
+    // Claim button
+    if (claimBtn) {
+      if (alreadyClaimedToday) {
+        claimBtn.disabled = true;
+        claimBtn.innerHTML = '<i class="fa-solid fa-check"></i> CLAIMED TODAY &bull; RESET AT MIDNIGHT';
+      } else {
+        claimBtn.disabled = false;
+        claimBtn.innerHTML = `<i class="fa-solid fa-bolt"></i> CLAIM DAY ${currentStreak} REWARD (+${rewardForToday} TOKENS)`;
+      }
+    }
+  };
+
+  updateStreakUi();
+
+  const openStreakModal = () => {
+    updateStreakUi();
+    if (modal) modal.style.display = 'flex';
+    playCyberSfx('sonar');
+  };
+
+  const closeStreakModal = () => {
+    if (modal) modal.style.display = 'none';
+  };
+
+  // Open triggers
+  ['cyberStreakBtn', 'cyberStreakBtnHeader', 'mobileStreakBtn'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('click', openStreakModal);
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeStreakModal);
+  if (closeBackdrop) closeBackdrop.addEventListener('click', closeStreakModal);
+
+  // Claim action
+  if (claimBtn) {
+    claimBtn.addEventListener('click', async () => {
+      if (alreadyClaimedToday) return;
+      const currentStreak = Math.min(Math.max(streakData.streak, 1), 7);
+      const addTokens = STREAK_REWARDS[currentStreak - 1];
+
+      try {
+        claimBtn.disabled = true;
+        claimBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> CLAIMING...';
+
+        streakData.lastClaimDate = todayStr;
+        streakData.totalClaimed = (streakData.totalClaimed || 0) + addTokens;
+        streakData.longestStreak = Math.max(streakData.longestStreak || 1, currentStreak);
+        if (currentStreak < 7) {
+          streakData.streak = currentStreak + 1;
+        }
+        saveCyberStreakData(streakData);
+
+        // Credit tokens
+        tokens = (tokens || 0) + addTokens;
+        if (myUID) {
+          try {
+            await updateDoc(doc(db, 'users', myUID), {
+              tokens: increment(addTokens),
+              cyberStreak: currentStreak,
+              lastStreakClaim: serverTimestamp()
+            });
+          } catch (_) {}
+        }
+
+        const tokenCountEl = document.getElementById('tokenCount');
+        if (tokenCountEl) tokenCountEl.textContent = tokens.toString();
+        const currentTokenBalanceEl = document.getElementById('currentTokenBalance');
+        if (currentTokenBalanceEl) currentTokenBalanceEl.textContent = formatBalanceDisplay(tokens);
+
+        playCyberSfx('affirm');
+        if (navigator.vibrate) navigator.vibrate([40, 80, 40]);
+        showNotif(`Success! +${addTokens} Neural Tokens claimed! Streak: Day ${currentStreak}`, 'success', 3500);
+
+        updateStreakUi();
+      } catch (err) {
+        showNotif('Claim failed: ' + err.message, 'error');
+        claimBtn.disabled = false;
+      }
+    });
+  }
+}
+
+/* ======================================================= */
+/* 7. SMART REPLY BAR & AI POLISH CONSOLE                  */
+/* ======================================================= */
+function initSmartReplyAndPolish() {
+  const chipsWrapper = document.getElementById('smartChipsWrapper');
+  const messageInput = document.getElementById('message-input');
+  const sendBtn = document.getElementById('sendBtn');
+  const polishBtn = document.getElementById('aiPolishBtn');
+
+  // Handle chip clicks
+  if (chipsWrapper && messageInput) {
+    chipsWrapper.addEventListener('click', (e) => {
+      const chip = e.target.closest('.smart-chip');
+      if (!chip) return;
+      const text = chip.getAttribute('data-text') || chip.textContent.trim();
+      messageInput.value = text;
+      messageInput.focus();
+      if (sendBtn) sendBtn.style.display = 'flex';
+      playCyberSfx('chime');
+      if (navigator.vibrate) navigator.vibrate(15);
+    });
+  }
+
+  // Dynamic context-aware chips generator
+  window.updateSmartReplySuggestions = function(lastMsgText) {
+    if (!chipsWrapper || !lastMsgText) return;
+    const lower = lastMsgText.toLowerCase();
+    let suggestions = [];
+
+    if (lower.includes('?') || lower.includes('when') || lower.includes('time') || lower.includes('where')) {
+      suggestions = [
+        { text: 'Understood. Reviewing schedule now.', icon: 'fa-calendar-check' },
+        { text: 'Checking telemetry details shortly.', icon: 'fa-satellite-dish' },
+        { text: 'Let us connect at 3:00 PM.', icon: 'fa-clock' }
+      ];
+    } else if (lower.includes('thanks') || lower.includes('thank you') || lower.includes('appreciate')) {
+      suggestions = [
+        { text: 'Anytime! Ready for next task.', icon: 'fa-check' },
+        { text: 'Glad to collaborate on this.', icon: 'fa-handshake' },
+        { text: 'Standard protocol executed.', icon: 'fa-shield-halved' }
+      ];
+    } else if (lower.includes('hello') || lower.includes('hey') || lower.includes('hi')) {
+      suggestions = [
+        { text: 'Greetings. Uplink active.', icon: 'fa-bolt' },
+        { text: 'Ready when you are.', icon: 'fa-circle-check' },
+        { text: 'What is the objective today?', icon: 'fa-magnifying-glass' }
+      ];
+    } else {
+      suggestions = [
+        { text: 'Understood. Let us proceed.', icon: 'fa-bolt' },
+        { text: 'Could you provide more details?', icon: 'fa-magnifying-glass' },
+        { text: 'Acknowledged. Executing now.', icon: 'fa-check' },
+        { text: 'Sounds great, appreciate the update.', icon: 'fa-thumbs-up' }
+      ];
+    }
+
+    chipsWrapper.innerHTML = suggestions.map(s => `
+      <button type="button" class="smart-chip" data-text="${escapeHtml(s.text)}">
+        <i class="fa-solid ${s.icon}"></i> <span>${escapeHtml(s.text)}</span>
+      </button>
+    `).join('');
+  };
+
+  // AI Polish Console Handler
+  if (polishBtn && messageInput) {
+    polishBtn.addEventListener('click', async () => {
+      const rawText = messageInput.value.trim();
+      if (!rawText) {
+        showNotif('Type a draft message first to polish with ChronEX AI', 'info', 2500);
+        messageInput.focus();
+        return;
+      }
+
+      polishBtn.disabled = true;
+      polishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Polishing...</span>';
+
+      try {
+        let polished = rawText;
+        if (chronexAI && typeof chronexAI.chat === 'function') {
+          const prompt = `Rewrite the following message draft into a crisp, articulate, high-clarity professional tone. Keep it concise, natural, and polite. Return ONLY the rewritten text without commentary, quotes, or markdown:\n\n"${rawText}"`;
+          try {
+            const aiResp = await chronexAI.chat(prompt, myUID || 'default');
+            if (aiResp && aiResp.trim().length > 0) {
+              polished = aiResp.replace(/^["']|["']$/g, '').trim();
+            }
+          } catch (_) {
+            polished = rawText.charAt(0).toUpperCase() + rawText.slice(1);
+            if (!/[.!?]$/.test(polished)) polished += '.';
+          }
+        } else {
+          polished = rawText.charAt(0).toUpperCase() + rawText.slice(1);
+          if (!/[.!?]$/.test(polished)) polished += '.';
+        }
+
+        messageInput.value = polished;
+        messageInput.style.borderColor = 'var(--accent-primary)';
+        setTimeout(() => { messageInput.style.borderColor = ''; }, 1200);
+
+        if (sendBtn) sendBtn.style.display = 'flex';
+        playCyberSfx('chime');
+        showNotif('Draft polished with ChronEX AI', 'success', 2000);
+      } catch (err) {
+        showNotif('Polish error: ' + err.message, 'error');
+      } finally {
+        polishBtn.disabled = false;
+        polishBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Polish</span>';
+      }
+    });
+  }
+}
+
+/* ======================================================= */
+/* 8. NEURAL SOUNDBOARD & AUDIO REACTION DOCK              */
+/* ======================================================= */
+function initNeuralSoundboard() {
+  const toggleBtn = document.getElementById('soundboardToggleBtn');
+  const dock = document.getElementById('soundboardDock');
+  const closeBtn = document.getElementById('closeSoundboardBtn');
+
+  if (!dock) return;
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = dock.style.display === 'block';
+      dock.style.display = isVisible ? 'none' : 'block';
+      if (!isVisible) playCyberSfx('sonar');
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      dock.style.display = 'none';
+    });
+  }
+
+  const sfxBtns = dock.querySelectorAll('.soundboard-fx-btn');
+  sfxBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const soundType = btn.getAttribute('data-sound') || 'sonar';
+      playCyberSfx(soundType);
+      btn.style.transform = 'scale(1.15)';
+      setTimeout(() => { btn.style.transform = ''; }, 180);
+      if (navigator.vibrate) navigator.vibrate(20);
+    });
+  });
+}
+
+// Automatically mount new features on boot
+const bootAllFeatures = () => {
   initNexbotStudio();
   initNeuralRadar();
   initVipVault();
+  initGhostProtocol();
+  initCyberStreak();
+  initSmartReplyAndPolish();
+  initNeuralSoundboard();
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bootAllFeatures);
+} else {
+  bootAllFeatures();
 }
+

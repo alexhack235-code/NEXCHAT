@@ -18,7 +18,7 @@ let currentUser = null;
 let myUID = null;
 let myUsername = 'NEX_User';
 
-// 🛡️ Global CamShot Runtime Resilience Shield
+// Global CamShot Runtime Resilience Shield
 window.addEventListener('unhandledrejection', (event) => {
   if (event.reason?.name === 'AbortError' || event.reason?.message?.includes('aborted') || event.reason?.message?.includes('play()')) {
     event.preventDefault();
@@ -569,8 +569,8 @@ export const SEED_REELS = [
     poll: {
       question: 'Which ChronEX AI model do you use most?',
       options: [
-        { text: '⚡ Ultra Fast (Lite)', votes: 142 },
-        { text: '🧠 Deep Neural (Flash)', votes: 89 }
+        { text: 'Ultra Fast (Lite)', votes: 142 },
+        { text: 'Deep Neural (Flash)', votes: 89 }
       ]
     },
     hasBounty: true,
@@ -598,8 +598,8 @@ export const SEED_REELS = [
     poll: {
       question: 'Who wins the rematch tonight?',
       options: [
-        { text: '🎮 Pixel Warlord', votes: 68 },
-        { text: '🔥 Steve FPS', votes: 44 }
+        { text: 'Pixel Warlord', votes: 68 },
+        { text: 'Steve FPS', votes: 44 }
       ]
     },
     hasBounty: true,
@@ -627,8 +627,8 @@ export const SEED_REELS = [
     poll: {
       question: 'Want liquid neon live wallpapers in NEXCHAT?',
       options: [
-        { text: '💎 YES 100%', votes: 312 },
-        { text: '🖤 Keep Onyx Dark', votes: 28 }
+        { text: 'YES 100%', votes: 312 },
+        { text: 'Keep Onyx Dark', votes: 28 }
       ]
     },
     seedComments: [
@@ -913,8 +913,8 @@ function renderReels(reelsList) {
 
           <!-- Music disc rotating with floating notes & live equalizer bars -->
           <div class="music-disc-wrapper cursor-pointer mt-0.5" title="${escapeHtml(soundTrackTitle)}" style="position: relative;">
-            <div class="music-note-float">♪</div>
-            <div class="music-note-float" style="animation-delay: 1.2s; color: #ff2d55;">♫</div>
+            <div class="music-note-float"><i class="fa-solid fa-music"></i></div>
+            <div class="music-note-float" style="animation-delay: 1.2s; color: #ff2d55;"><i class="fa-solid fa-music"></i></div>
             <div class="reel-sound-disc w-9 h-9 rounded-full border border-white/20 bg-gradient-to-tr from-gray-950 via-zinc-900 to-black flex items-center justify-center drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
               <div class="disc-eq-wave">
                 <span class="disc-eq-bar b1"></span>
@@ -953,11 +953,11 @@ function renderReels(reelsList) {
         <div class="reel-bottom-bar flex items-center gap-2">
           <!-- Floating Quick Emoji Reactions Bar -->
           <div class="reel-quick-reactions">
-            <button type="button" class="quick-react-btn" data-emoji="🔥" title="Fire">🔥</button>
-            <button type="button" class="quick-react-btn" data-emoji="❤️" title="Love">❤️</button>
-            <button type="button" class="quick-react-btn" data-emoji="😂" title="Laugh">😂</button>
-            <button type="button" class="quick-react-btn" data-emoji="💎" title="Diamond">💎</button>
-            <button type="button" class="quick-react-btn" data-emoji="🚀" title="Rocket">🚀</button>
+            <button type="button" class="quick-react-btn" data-react="fire" data-icon="fa-fire" data-color="#f97316" title="Fire"><i class="fa-solid fa-fire" style="color:#f97316;"></i></button>
+            <button type="button" class="quick-react-btn" data-react="love" data-icon="fa-heart" data-color="#fe2c55" title="Love"><i class="fa-solid fa-heart" style="color:#fe2c55;"></i></button>
+            <button type="button" class="quick-react-btn" data-react="star" data-icon="fa-star" data-color="#facc15" title="Star"><i class="fa-solid fa-star" style="color:#facc15;"></i></button>
+            <button type="button" class="quick-react-btn" data-react="gem" data-icon="fa-gem" data-color="#67e8f9" title="Diamond"><i class="fa-solid fa-gem" style="color:#67e8f9;"></i></button>
+            <button type="button" class="quick-react-btn" data-react="rocket" data-icon="fa-rocket" data-color="#a78bfa" title="Rocket"><i class="fa-solid fa-rocket" style="color:#a78bfa;"></i></button>
           </div>
 
           <div class="reel-inline-bar-pill flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-white/10 transition-all">
@@ -1202,9 +1202,9 @@ function renderReels(reelsList) {
     if (inlineEmojiBtn && inlineInput) {
       inlineEmojiBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const emojis = ['🔥', '❤️', '👏', '😂', '✨', '💯', '😍', '🙌'];
-        const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
-        inlineInput.value += randomEmoji;
+        const quickPhrases = ['Legendary', 'Clean edit', 'Pure fire', 'Masterclass', 'Underrated', 'W content', 'Sheesh', 'On repeat'];
+        const phrase = quickPhrases[Math.floor(Math.random() * quickPhrases.length)];
+        inlineInput.value = (inlineInput.value ? inlineInput.value.trimEnd() + ' ' : '') + phrase;
         inlineInput.focus();
       });
     }
@@ -1575,13 +1575,17 @@ function renderReels(reelsList) {
       });
     }
 
-    // Quick Floating Emoji Reactions Cannon
+    // Quick Floating Vector Reactions Cannon
     card.querySelectorAll('.quick-react-btn').forEach((rBtn) => {
       rBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const emoji = rBtn.getAttribute('data-emoji') || '🔥';
+        const reaction = {
+          icon: rBtn.getAttribute('data-icon') || 'fa-fire',
+          color: rBtn.getAttribute('data-color') || '#f97316',
+          label: rBtn.getAttribute('title') || 'Reaction'
+        };
         const rect = rBtn.getBoundingClientRect();
-        spawnReactionCannon(emoji, rect);
+        spawnReactionCannon(reaction, rect);
       });
     });
 
@@ -1646,7 +1650,7 @@ function renderReels(reelsList) {
       });
     }
 
-    // 🎙️ Live Closed Captions (Subtitles) Controller
+    // Live Closed Captions (Subtitles) Controller
     const ccBtn = card.querySelector('.reel-cc-toggle-btn');
     const ccBox = card.querySelector('.reel-live-cc-box');
     const ccTextEl = card.querySelector('.reel-live-cc-text');
@@ -1658,7 +1662,7 @@ function renderReels(reelsList) {
     for (let i = 0; i < captionWords.length; i += 4) {
       ccChunks.push(captionWords.slice(i, i + 4).join(' '));
     }
-    if (ccChunks.length === 0) ccChunks.push('♪ Instrumental Soundtrack ♪');
+    if (ccChunks.length === 0) ccChunks.push('[Instrumental Soundtrack]');
 
     if (ccBtn && ccBox) {
       ccBtn.addEventListener('click', (e) => {
@@ -1667,7 +1671,7 @@ function renderReels(reelsList) {
         ccBtn.classList.toggle('active', isCCActive);
         ccBox.style.display = isCCActive ? 'flex' : 'none';
         if (isCCActive && ccTextEl) {
-          ccTextEl.textContent = ccChunks[0] || '♪ Captions Enabled ♪';
+          ccTextEl.textContent = ccChunks[0] || '[Captions Enabled]';
           showToast('Live Subtitles (CC) Enabled');
         } else {
           showToast('Live Subtitles (CC) Disabled');
@@ -1858,11 +1862,15 @@ function triggerHeartBurst(x, y) {
   setTimeout(() => bigHeart.remove(), 950);
 
   // Floating sparkling particle explosion
-  const emojis = ['❤️', '✨', '🔥', '💖', '⭐', '💫', '💥'];
+  const particleIcons = [
+    ['fa-heart', '#fe2c55'], ['fa-star', '#facc15'], ['fa-fire', '#f97316'],
+    ['fa-heart', '#ff6b9d'], ['fa-star', '#fde047'], ['fa-bolt', '#00ff66'], ['fa-gem', '#67e8f9']
+  ];
   for (let i = 0; i < 7; i++) {
     const p = document.createElement('div');
     p.className = 'heart-particle-particle';
-    p.textContent = emojis[i % emojis.length];
+    const [pIcon, pColor] = particleIcons[i % particleIcons.length];
+    p.innerHTML = `<i class="fa-solid ${pIcon}" style="color:${pColor};"></i>`;
     const angle = (Math.PI * 2 * i) / 7 + (Math.random() * 0.3 - 0.15);
     const dist = 55 + Math.random() * 65;
     const destX = Math.cos(angle) * dist;
@@ -1876,14 +1884,22 @@ function triggerHeartBurst(x, y) {
   }
 }
 
-// Floating Emoji Reaction Burst Cannon
-function spawnReactionCannon(emoji, rect) {
+// Floating Vector Reaction Burst Cannon
+function spawnReactionCannon(reaction, rect) {
   playLuxuryPopSound();
+  const isDescriptor = reaction && typeof reaction === 'object';
   const count = 7;
   for (let i = 0; i < count; i++) {
     const el = document.createElement('div');
     el.className = 'reaction-burst-particle';
-    el.textContent = emoji;
+    if (isDescriptor) {
+      const icon = document.createElement('i');
+      icon.className = `fa-solid ${reaction.icon}`;
+      icon.style.color = reaction.color;
+      el.appendChild(icon);
+    } else {
+      el.textContent = String(reaction || '');
+    }
     const startX = rect ? (rect.left + rect.width / 2 + (Math.random() * 40 - 20)) : (window.innerWidth - 60 + (Math.random() * 30 - 15));
     const startY = rect ? (rect.top - 10) : (window.innerHeight - 120);
     const driftX = (Math.random() * 90 - 45);
@@ -1902,8 +1918,9 @@ function spawnReactionCannon(emoji, rect) {
     setTimeout(() => el.remove(), (dur * 1000) + 100);
   }
   if (navigator.vibrate) navigator.vibrate([15, 25, 15]);
-  showToast(`${emoji} Reaction sent!`);
+  showToast(`${isDescriptor ? reaction.label : 'Reaction'} sent`);
 }
+
 
 // Like Toggle Logic
 async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
@@ -3823,8 +3840,8 @@ uploadReelForm.addEventListener('submit', async (e) => {
       reelData.poll = {
         question: pollQ,
         options: [
-          { text: pollO1 || '🔥 Insane', votes: 0 },
-          { text: pollO2 || '⚡ Mid', votes: 0 },
+          { text: pollO1 || 'Option A', votes: 0 },
+          { text: pollO2 || 'Option B', votes: 0 },
         ],
       };
     }

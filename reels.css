@@ -4162,3 +4162,271 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   border-radius: 12px;
 }
 
+
+/* ══════════════════════════════════════════════════
+   22. ANTI-OVERLAP LAYOUT LAYER (final override)
+   Reserves dedicated zones so header, topic ribbon,
+   action rail, metadata, overlays and dock never collide.
+   ══════════════════════════════════════════════════ */
+
+/* Desktop: stage sits fully below header + topic ribbon */
+@media (min-width: 769px) {
+  .reel-card {
+    padding-top: 100px;
+    padding-bottom: 14px;
+    box-sizing: border-box;
+  }
+
+  .reel-stage {
+    height: calc(100vh - 114px);
+    height: calc(100dvh - 114px);
+    max-width: min(500px, calc((100dvh - 114px) * 9 / 16));
+  }
+}
+
+/* Mid-width desktops / tablets: declutter header so center tabs never collide */
+@media (min-width: 769px) and (max-width: 1100px) {
+  .camshot-brand-name,
+  .camshot-brand-badge,
+  .reels-header-back-btn span,
+  .reels-create-main-btn span {
+    display: none;
+  }
+
+  .reels-create-main-btn {
+    padding: 10px 12px;
+  }
+
+  .reels-header-right {
+    gap: 6px;
+  }
+}
+
+/* Action rail: tighter rhythm, consistent icon sizing */
+.reel-actions-column {
+  gap: 10px;
+}
+
+.reel-actions-column > div {
+  gap: 2px !important;
+}
+
+.reel-actions-column .like-btn,
+.reel-actions-column .comment-btn,
+.reel-actions-column .bookmark-btn,
+.reel-actions-column .share-btn,
+.reel-actions-column .bot-btn,
+.reel-actions-column .snapshot-btn {
+  width: 42px;
+  height: 42px;
+  font-size: 19px;
+}
+
+.reel-actions-column .snapshot-btn {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.reel-actions-column span {
+  font-size: 10.5px;
+  line-height: 1.1;
+}
+
+/* Bottom metadata never runs under the action rail */
+.reel-bottom-info {
+  right: 72px;
+  max-width: calc(100% - 86px);
+}
+
+.reel-bottom-bar {
+  right: 70px;
+  min-width: 0;
+}
+
+.reel-inline-bar-pill {
+  min-width: 0;
+}
+
+.reel-quick-reactions {
+  flex-shrink: 0;
+}
+
+.quick-react-btn {
+  font-size: 13px;
+  padding: 3px 4px;
+}
+
+/* Bounty badge moves to the top-left of the stage (rail owns the right side) */
+.camshot-bounty-badge {
+  top: 16px;
+  right: auto;
+  left: 14px;
+}
+
+/* Poll sticker: left-aligned and narrower so it clears the action rail */
+.camshot-poll-sticker {
+  top: 38%;
+  left: 14px;
+  transform: translateY(-50%);
+  width: min(calc(100% - 96px), 320px);
+}
+
+/* Live captions float in the open middle band, clear of metadata and rail */
+.reel-live-cc-box {
+  bottom: auto;
+  top: 58%;
+  max-width: calc(100% - 150px);
+}
+
+/* Reaction particles render vector icons cleanly */
+.reaction-burst-particle i {
+  display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+}
+
+.music-note-float i {
+  font-size: 11px;
+}
+
+/* ─── Mobile (<= 768px) ─── */
+@media (max-width: 768px) {
+  .trending-tags-ribbon-wrapper {
+    top: 52px;
+  }
+
+  /* Rail drops to just above the dock; bottom bar stays left of it */
+  .reel-actions-column {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 66px) !important;
+    right: 10px;
+    gap: 8px;
+    max-height: calc(100% - 66px - 150px - env(safe-area-inset-bottom, 0px));
+  }
+
+  .reel-actions-column .like-btn,
+  .reel-actions-column .comment-btn,
+  .reel-actions-column .bookmark-btn,
+  .reel-actions-column .share-btn,
+  .reel-actions-column .bot-btn,
+  .reel-actions-column .snapshot-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .action-creator-avatar-wrap,
+  .action-creator-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .music-disc-wrapper,
+  .reel-sound-disc {
+    width: 36px;
+    height: 36px;
+  }
+
+  .reel-bottom-bar {
+    left: 10px;
+    right: 62px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 62px) !important;
+  }
+
+  .reel-bottom-info {
+    left: 12px;
+    right: 62px;
+    max-width: calc(100% - 74px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 112px) !important;
+  }
+
+  .camshot-bounty-badge {
+    top: 140px;
+  }
+}
+
+/* ─── Narrow phones (<= 600px): feed tabs get their own row ─── */
+@media (max-width: 600px) {
+  .reels-header-center {
+    position: fixed;
+    top: 52px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 61;
+  }
+
+  .trending-tags-ribbon-wrapper {
+    top: 90px;
+  }
+
+  .camshot-brand-name {
+    font-size: 12.5px;
+    letter-spacing: 0.8px;
+  }
+
+  .camshot-bounty-badge {
+    top: 140px;
+    padding: 5px 11px;
+    font-size: 11px;
+  }
+
+  .pull-to-refresh-indicator {
+    top: calc(env(safe-area-inset-top, 0px) + 132px);
+  }
+
+  .floating-volume-hud {
+    top: calc(env(safe-area-inset-top, 0px) + 132px);
+  }
+}
+
+/* Very narrow phones: drop the brand wordmark and secondary comment-bar buttons */
+@media (max-width: 400px) {
+  .camshot-brand-name {
+    display: none;
+  }
+
+  .reel-inline-at-btn {
+    display: none;
+  }
+
+  .reel-quick-reactions {
+    padding: 2px 4px;
+    gap: 1px;
+  }
+
+  .quick-react-btn {
+    padding: 2px 3px;
+    font-size: 12px;
+  }
+}
+
+/* Short viewports: rail becomes a scrollable strip instead of spilling into the header */
+@media (max-height: 680px) {
+  .reel-actions-column {
+    overflow-y: auto;
+    overflow-x: visible;
+    scrollbar-width: none;
+    padding: 4px 0;
+  }
+
+  .reel-actions-column::-webkit-scrollbar {
+    display: none;
+  }
+
+  .reel-actions-column > div > span {
+    display: none;
+  }
+
+  .reel-actions-column .like-count,
+  .reel-actions-column .reel-comment-count {
+    display: inline !important;
+  }
+
+  .reel-speed-popover {
+    position: fixed;
+    right: 64px;
+    top: 50%;
+  }
+}

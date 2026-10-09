@@ -67,6 +67,11 @@
           <span id="tokenCount">0</span>
           <span id="giftBadge" class="gift-badge" aria-live="polite"></span>
         </div>
+        <button type="button" id="cyberStreakBtn" class="cyber-streak-btn" title="Daily Cyber Streak: Tap to Claim Rewards">
+          <i class="fa-solid fa-bolt" style="color: #ffd700;"></i>
+          <span class="streak-btn-label">STREAK</span>
+          <span id="streakCountHeader" class="streak-btn-count">1</span>
+        </button>
       </div>
 
       <!-- Right Header Actions -->
@@ -98,6 +103,7 @@
           <button id="radarBtnHeader" class="header-icon-btn" title="Neural Radar Scanner"><i class="fa-solid fa-satellite-dish"></i></button>
           <button id="nexbotStudioBtnHeader" class="header-icon-btn" title="NEXBOT Studio &amp; WhatsApp Architect"><i class="fa-solid fa-robot"></i></button>
           <button id="vipVaultBtnHeader" class="header-icon-btn" title="VIP Token Vault &amp; Licenses"><i class="fa-solid fa-crown"></i></button>
+          <button id="cyberStreakBtnHeader" class="header-icon-btn" title="Daily Cyber Streak Matrix"><i class="fa-solid fa-bolt" style="color: #ffd700;"></i></button>
           <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
           <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
         </div>
@@ -145,6 +151,10 @@
         </button>
         <button type="button" class="mobile-menu-item" id="mobileVipVaultBtn">
           <i class="fa-solid fa-crown"></i> <span>VIP Vault &amp; Licenses</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileStreakBtn">
+          <i class="fa-solid fa-bolt" style="color: #ffd700;"></i> <span>Cyber Streak Hub</span>
+          <span class="mobile-menu-badge" id="mobileStreakBadge">1 DAY</span>
         </button>
         <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
           <i class="fa-solid fa-gear"></i> <span>Settings</span>
@@ -458,6 +468,21 @@
             <button id="headerVideoBtn" class="header-icon-btn chat-action-call" title="Video Call"><i class="fa-solid fa-video"></i></button>
             <button id="headerCallBtn" class="header-icon-btn chat-action-call" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
             <button id="quickWallpaperBtn" class="header-icon-btn" title="Chat Wallpaper" style="background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s;"><i class="fa-solid fa-palette"></i></button>
+            <!-- Ghost Protocol Ephemeral Button & Dropdown -->
+            <div id="ghostProtocolControl" class="ghost-protocol-control" style="position: relative; display: inline-flex;">
+              <button type="button" id="ghostProtocolBtn" class="header-icon-btn ghost-toggle-btn" title="Ghost Protocol (Ephemeral Self-Destruct Messages)">
+                <i class="fa-solid fa-ghost"></i>
+              </button>
+              <div id="ghostProtocolMenu" class="ghost-dropdown-menu" style="display: none;">
+                <div class="ghost-menu-header"><i class="fa-solid fa-ghost"></i> GHOST PROTOCOL</div>
+                <div class="ghost-menu-desc">Self-destruct timer for messages:</div>
+                <button type="button" class="ghost-opt active" data-ttl="0"><i class="fa-solid fa-ban"></i> Off (Persistent)</button>
+                <button type="button" class="ghost-opt" data-ttl="10"><i class="fa-solid fa-stopwatch"></i> 10 Seconds</button>
+                <button type="button" class="ghost-opt" data-ttl="30"><i class="fa-solid fa-stopwatch"></i> 30 Seconds</button>
+                <button type="button" class="ghost-opt" data-ttl="60"><i class="fa-solid fa-stopwatch"></i> 1 Minute</button>
+                <button type="button" class="ghost-opt" data-ttl="300"><i class="fa-solid fa-stopwatch"></i> 5 Minutes</button>
+              </div>
+            </div>
             <button id="menuBtn" class="three-dots-menu" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
           </div>
         </div>
@@ -470,6 +495,17 @@
             <span id="chatSearchMatchCount" class="search-match-count">0 found</span>
             <button type="button" id="closeChatSearchBtn" class="close-search-btn" title="Close Search"><i class="fa-solid fa-xmark"></i></button>
           </div>
+        </div>
+
+        <!-- Ghost Protocol Active Banner -->
+        <div id="ghostActiveBanner" class="ghost-active-banner" style="display: none;">
+          <div class="ghost-banner-content">
+            <i class="fa-solid fa-ghost" style="color: #c084fc;"></i>
+            <span>GHOST PROTOCOL ENGAGED &bull; Disintegrating in <strong id="ghostTtlLabel">30s</strong></span>
+          </div>
+          <button type="button" id="closeGhostBannerBtn" class="close-ghost-banner-btn" title="Disable Ghost Mode">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
 
 
@@ -549,6 +585,55 @@
             <div class="slash-commands-list" id="slashCommandsList"></div>
           </div>
 
+          <!-- Smart Reply & ChronEX Quick Spark Bar -->
+          <div id="smartReplyBar" class="smart-reply-bar">
+            <div class="smart-chips-wrapper" id="smartChipsWrapper">
+              <button type="button" class="smart-chip" data-text="Understood. Let's proceed.">
+                <i class="fa-solid fa-bolt"></i> <span>Understood. Let's proceed.</span>
+              </button>
+              <button type="button" class="smart-chip" data-text="Could you provide more details?">
+                <i class="fa-solid fa-magnifying-glass"></i> <span>More details?</span>
+              </button>
+              <button type="button" class="smart-chip" data-text="Acknowledged. Executing now.">
+                <i class="fa-solid fa-check"></i> <span>Executing now.</span>
+              </button>
+              <button type="button" class="smart-chip" data-text="Sounds great, appreciate the update.">
+                <i class="fa-solid fa-thumbs-up"></i> <span>Appreciate update.</span>
+              </button>
+            </div>
+            <button type="button" id="aiPolishBtn" class="smart-polish-action-btn" title="AI Polish: Elevate rough draft with ChronEX AI">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Polish</span>
+            </button>
+          </div>
+
+          <!-- Neural Soundboard Dock (Micro-Dock) -->
+          <div id="soundboardDock" class="soundboard-dock" style="display: none;">
+            <div class="soundboard-header">
+              <span class="soundboard-title"><i class="fa-solid fa-volume-high"></i> TACTILE SOUNDBOARD FX</span>
+              <button type="button" id="closeSoundboardBtn" class="close-soundboard-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="soundboard-grid">
+              <button type="button" class="soundboard-fx-btn" data-sound="sonar">
+                <i class="fa-solid fa-satellite-dish"></i> <span>Sonar Ping</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="chime">
+                <i class="fa-solid fa-gem"></i> <span>Crystal Chime</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="zap">
+                <i class="fa-solid fa-bolt"></i> <span>Quantum Zap</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="glitch">
+                <i class="fa-solid fa-terminal"></i> <span>Matrix Glitch</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="subbass">
+                <i class="fa-solid fa-wave-square"></i> <span>Sub Bass</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="affirm">
+                <i class="fa-solid fa-shield-halved"></i> <span>Affirm</span>
+              </button>
+            </div>
+          </div>
+
           <form id="message-form" class="message-form">
             <button type="button" id="emoji-btn" class="input-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
             <div class="message-input-wrapper">
@@ -557,6 +642,7 @@
             </div>
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
             <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
+            <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX"><i class="fa-solid fa-volume-high"></i></button>
             <button type="button" id="audio-record-btn" class="mic-action-btn" title="Record voice message"><i class="fa-solid fa-microphone"></i></button>
             <button type="button" id="audio-send-btn" class="audio-send-btn" title="Send audio" style="display: none;"><i class="fa-solid fa-play"></i></button>
             <button type="button" class="send-btn" id="sendBtn" title="Send message" style="display: none;"><i class="fa-solid fa-paper-plane"></i></button>
@@ -1434,7 +1520,7 @@
                   <div class="luxury-toggle-row">
                     <div>
                       <strong>Read Receipts</strong>
-                      <p>Send double ticks (✓✓) and luxury gold marks when you open messages.</p>
+                      <p>Send double ticks and luxury gold marks when you open messages.</p>
                     </div>
                     <label class="luxury-switch">
                       <input type="checkbox" id="readReceiptsToggle" checked>
@@ -2544,6 +2630,120 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
             <i class="fa-solid fa-rocket"></i> RECHARGE 10,000
           </button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. CYBER STREAK & DAILY REWARDS MATRIX     -->
+  <!-- ========================================== -->
+  <div id="cyberStreakModal" class="cyber-streak-modal" style="display: none;">
+    <div class="streak-modal-backdrop" id="closeCyberStreakBackdrop"></div>
+    <div class="streak-modal-container">
+      <div class="streak-modal-header">
+        <div class="streak-brand">
+          <div class="streak-icon-box"><i class="fa-solid fa-bolt"></i></div>
+          <div>
+            <h2 class="streak-title">CYBER STREAK MATRIX</h2>
+            <div class="streak-subtitle">DAILY LOGIN FREQUENCY &bull; NEURAL MULTIPLIERS</div>
+          </div>
+        </div>
+        <button type="button" class="streak-close-btn" id="closeCyberStreakBtn" title="Close Streak Matrix">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Hero Streak Status Banner -->
+      <div class="streak-hero-card">
+        <div class="streak-hero-left">
+          <div class="streak-hero-count-row">
+            <span class="streak-hero-num" id="modalStreakCount">1</span>
+            <div class="streak-hero-labels">
+              <span class="streak-hero-unit">DAYS ACTIVE</span>
+              <span class="streak-multiplier-badge" id="modalStreakMultiplier">1.0x MULTIPLIER</span>
+            </div>
+          </div>
+          <p class="streak-hero-desc">Maintain consecutive daily uplinks to scale your multiplier. Reach Day 7 to unlock Golden VIP status!</p>
+        </div>
+        <div class="streak-hero-right">
+          <div class="streak-shield-status">
+            <i class="fa-solid fa-shield-halved"></i>
+            <div class="shield-text">
+              <span class="shield-label">STREAK SHIELD</span>
+              <span class="shield-val" id="streakShieldStatus">ACTIVE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-Day Matrix Trajectory Cards -->
+      <div class="streak-matrix-strip" id="streakMatrixStrip">
+        <div class="streak-day-card" data-day="1">
+          <div class="day-num">DAY 1</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-coins"></i></div>
+          <div class="day-tokens">+25</div>
+          <div class="day-status-pill">CLAIMABLE</div>
+        </div>
+        <div class="streak-day-card" data-day="2">
+          <div class="day-num">DAY 2</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-coins"></i></div>
+          <div class="day-tokens">+50</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card" data-day="3">
+          <div class="day-num">DAY 3</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-coins"></i></div>
+          <div class="day-tokens">+75</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card" data-day="4">
+          <div class="day-num">DAY 4</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-coins"></i></div>
+          <div class="day-tokens">+100</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card" data-day="5">
+          <div class="day-num">DAY 5</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-bolt"></i></div>
+          <div class="day-tokens">+150</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card" data-day="6">
+          <div class="day-num">DAY 6</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-bolt"></i></div>
+          <div class="day-tokens">+250</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card jackpot" data-day="7">
+          <div class="day-badge">JACKPOT</div>
+          <div class="day-num">DAY 7</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-crown"></i></div>
+          <div class="day-tokens">+500</div>
+          <div class="day-status-pill">GOLD VIP</div>
+        </div>
+      </div>
+
+      <!-- Streak Telemetry -->
+      <div class="streak-telemetry-row">
+        <div class="telemetry-box">
+          <span class="telemetry-label">LONGEST STREAK</span>
+          <span class="telemetry-val" id="longestStreakVal">1 Day</span>
+        </div>
+        <div class="telemetry-box">
+          <span class="telemetry-label">TOTAL CLAIMED</span>
+          <span class="telemetry-val" id="totalClaimedVal">0 Tokens</span>
+        </div>
+        <div class="telemetry-box">
+          <span class="telemetry-label">STATUS</span>
+          <span class="telemetry-val" id="streakCountdownVal">Ready to Claim</span>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="streak-modal-footer">
+        <button type="button" id="claimStreakRewardBtn" class="streak-claim-action-btn">
+          <i class="fa-solid fa-bolt"></i> CLAIM DAILY REWARD (+25 TOKENS)
+        </button>
       </div>
     </div>
   </div>
