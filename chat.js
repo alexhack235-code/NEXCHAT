@@ -1,3 +1,28 @@
+/**
+ * =============================================================================
+ * NEXCHAT - NEXT-GENERATION ENTERPRISE MESSAGING ARCHITECTURE (v2.4)
+ * Cyber-Glassmorphism Engine • Zero-Drift Mobile Viewport • High-Resilience Core
+ * =============================================================================
+ * 
+ * ARCHITECTURAL MODULE REGISTRY:
+ * 01. Runtime Resilience Shield & Dynamic Visual Viewport Engine
+ * 02. Firebase Firestore & Supabase Failover Synchronization
+ * 03. LiveKit Real-Time Audio & Video Call Matrix
+ * 04. Cloudinary & Firebase Media Upload Subsystem
+ * 05. Realtime Presence & Typing Status Broadcast Engine
+ * 06. Device Pairing & Multi-Session Encryption Guard
+ * 07. ChronEx Conversational Intelligence & Smart Replies
+ * 08. Chat Virtualization, Message Streaming & Caching
+ * 09. Ephemeral Status Vault & Multi-Blob Story Subsystem
+ * 10. CamShot Reels Integration & Cross-Platform Navigation
+ * 11. Group Defense Bot & Community Governance Core
+ * 12. Audio Spaces & P2P CyberDrop Direct Beam Subsystem
+ * 13. Ghost Protocol Self-Destruct Timers & Cipher Vault
+ * 14. Wallpaper Engine & Luxury Theme Customization
+ * 15. UI Modals, Haptics & Notification Dispatcher
+ * =============================================================================
+ */
+
 import "./src/js/security-guard.js";
 import { fortressShield } from "./src/js/security-shield.js";
 import { GroupChat } from "./src/features/group/index.js";
@@ -73,6 +98,40 @@ window.addEventListener('error', (event) => {
     event.stopImmediatePropagation();
   }
 });
+
+// ─────────────────────────────────────────────────────────────
+// [NEX-VIEWPORT] Dynamic Visual Viewport & Keyboard Resizing Engine
+// Neutralizes mobile address-bar collapse, virtual keyboard shifts,
+// and eliminates overflowing pixels across Reels, Status & Chat.
+// ─────────────────────────────────────────────────────────────
+function initNexDynamicViewportEngine() {
+  const syncViewport = () => {
+    try {
+      const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      document.documentElement.style.setProperty('--visual-viewport-height', `${vh}px`);
+
+      // Keep active message list anchored when virtual keyboard toggles
+      const messagesArea = document.getElementById('messages-area');
+      const messageInput = document.getElementById('message-input');
+      if (messagesArea && document.activeElement === messageInput) {
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+      }
+    } catch (err) {
+      // Graceful fallback
+    }
+  };
+
+  if (typeof window !== 'undefined') {
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', syncViewport);
+      window.visualViewport.addEventListener('scroll', syncViewport);
+    }
+    window.addEventListener('resize', syncViewport);
+    window.addEventListener('orientationchange', () => setTimeout(syncViewport, 120));
+    syncViewport();
+  }
+}
+initNexDynamicViewportEngine();
 
 let currentChatUser = null;
 let currentChatType = 'direct'; // 'direct' or 'group'
@@ -1502,7 +1561,7 @@ function removeMaximizedView() {
   const app = document.querySelector('.app');
   if (app && app.dataset.maximized === 'true') {
     app.dataset.maximized = 'false';
-    document.body.style.overflow = 'auto';
+    document.body.style.overflow = '';
     console.log('Fullscreen removed');
   }
 }
@@ -1662,7 +1721,8 @@ async function showGroupInfoPanel(groupId) {
         }
       });
 
-      document.getElementById('mediaCount').textContent = mediaCount;
+      const mediaCountEl = document.getElementById('mediaCount');
+      if (mediaCountEl) mediaCountEl.textContent = mediaCount;
       const mediaPreview = document.getElementById('mediaPreview');
       if (mediaPreview) mediaPreview.innerHTML = '';
 
@@ -1855,11 +1915,13 @@ async function showUserInfoPanel(userId) {
 }
 
 document.getElementById('closeInfoBtn')?.addEventListener('click', () => {
-  document.getElementById('infoSidebar').style.display = 'none';
+  const infoSidebar = document.getElementById('infoSidebar');
+  if (infoSidebar) infoSidebar.style.display = 'none';
 });
 
 document.getElementById('closeInfoBtn2')?.addEventListener('click', () => {
-  document.getElementById('infoSidebar').style.display = 'none';
+  const infoSidebar = document.getElementById('infoSidebar');
+  if (infoSidebar) infoSidebar.style.display = 'none';
 });
 
 async function showGroupAdminPanel(groupId) {
@@ -2409,7 +2471,7 @@ async function unarchiveChat(chatId) {
 
 function handleNavigation(section) {
   if (section === "video") {
-    alert("NEXHAT-DEVELOPERS ARE WORKIN ON IT. Stay tuned!");
+    alert("NEXCHAT developers are working on it. Stay tuned!");
     return;
   }
 
@@ -2422,7 +2484,7 @@ function handleNavigation(section) {
   const chatMain = document.querySelector(".chat-main");
   const app = document.querySelector(".app");
 
-  if (chatMain) chatMain.dataset.layout = section === "chats" ? "list" : "section";
+  if (chatMain) chatMain.dataset.layout = (section === "chats" || section === "messages") ? "list" : "section";
   if (app) app.dataset.activeSection = section;
 
   if (chatListView) chatListView.style.display = "none";
@@ -2434,40 +2496,51 @@ function handleNavigation(section) {
 
   switch (section) {
     case "chats":
-      console.log("?? Showing chats");
+    case "messages":
+      console.log("[NEXCHAT] Showing chats list");
       if (chatListView) chatListView.style.display = "flex";
       break;
+    case "status":
     case "updates":
-      console.log("? Showing statuses");
+      console.log("[NEXCHAT] Showing status updates vault");
       if (statusContainer) statusContainer.style.display = "flex";
-      loadStatusFeed();
+      if (typeof loadStatusFeed === "function") loadStatusFeed();
+      break;
+    case "reels":
+    case "camshot":
+      console.log("[NEXCHAT] Navigating to CamShot Reels");
+      window.location.href = "reels.html";
       break;
     case "communities":
-      console.log("?? Showing groups");
+    case "groups":
+      console.log("[NEXCHAT] Showing groups communities");
       if (groupsContainer) groupsContainer.style.display = "block";
-      loadGroups();
+      if (typeof loadGroups === "function") loadGroups();
       break;
     case "announcements":
-      console.log(" Showing announcements");
+      console.log("[NEXCHAT] Showing announcements");
       if (announcementsContainer) announcementsContainer.style.display = "flex";
-      loadAnnouncements();
+      if (typeof loadAnnouncements === "function") loadAnnouncements();
       break;
     case "games":
-      console.log(" Opening Gaming Hub");
+      console.log("[NEXCHAT] Opening Gaming Hub");
       window.location.href = "gaminghub.html";
       break;
     case "marketplace":
-      console.log(" Opening Marketplace");
+      console.log("[NEXCHAT] Opening Marketplace");
       window.location.href = "advertisement.html";
       break;
     case "calls":
-      console.log(" Showing call history");
+      console.log("[NEXCHAT] Showing call history");
       if (callHistoryContainer) {
         callHistoryContainer.style.display = "block";
-        loadCallHistory();
+        if (typeof loadCallHistory === "function") loadCallHistory();
       }
       break;
   }
+}
+if (typeof window !== "undefined") {
+  window.handleNavigation = handleNavigation;
 }
 
 async function showChatContextMenu(event, chatId) {
@@ -2750,6 +2823,70 @@ async function isChatMuted(chatId) {
   }
 }
 
+
+const CYBER_THEMES = {
+  emerald: {
+    primary: '#00ff66',
+    hover: '#33ff85',
+    glow: 'rgba(0, 255, 102, 0.28)',
+    dim: 'rgba(0, 255, 102, 0.12)',
+    name: 'Matrix Emerald'
+  },
+  violet: {
+    primary: '#c084fc',
+    hover: '#d8b4fe',
+    glow: 'rgba(192, 132, 252, 0.3)',
+    dim: 'rgba(192, 132, 252, 0.12)',
+    name: 'Neon Violet'
+  },
+  gold: {
+    primary: '#ffd700',
+    hover: '#ffe033',
+    glow: 'rgba(255, 215, 0, 0.3)',
+    dim: 'rgba(255, 215, 0, 0.12)',
+    name: 'Solar Gold'
+  },
+  cyan: {
+    primary: '#00f0ff',
+    hover: '#33f3ff',
+    glow: 'rgba(0, 240, 255, 0.3)',
+    dim: 'rgba(0, 240, 255, 0.12)',
+    name: 'Cyan Frost'
+  },
+  crimson: {
+    primary: '#ff4d4d',
+    hover: '#ff7070',
+    glow: 'rgba(255, 77, 77, 0.3)',
+    dim: 'rgba(255, 77, 77, 0.12)',
+    name: 'Crimson Stealth'
+  }
+};
+
+function applyCyberAccentTheme(themeKey = 'emerald', notify = false) {
+  const theme = CYBER_THEMES[themeKey] || CYBER_THEMES.emerald;
+  const root = document.documentElement;
+
+  root.style.setProperty('--accent-primary', theme.primary);
+  root.style.setProperty('--accent-primary-hover', theme.hover);
+  root.style.setProperty('--accent-primary-glow', theme.glow);
+  root.style.setProperty('--accent-primary-dim', theme.dim);
+
+  document.querySelectorAll('.cyber-swatch-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.theme === themeKey);
+  });
+
+  localStorage.setItem('nexchat_accent_theme', themeKey);
+
+  if (notify) {
+    showNotif(`Aura Frequency: ${theme.name} Applied`, 'info', 1800);
+    if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+  }
+
+  return themeKey;
+}
+
+window.applyCyberAccentTheme = applyCyberAccentTheme;
+
 function applyThemeMode(themeMode = "dark") {
   const resolvedTheme = themeMode === "light" ? "light" : "dark";
   const body = document.body;
@@ -2778,6 +2915,8 @@ function applyThemeMode(themeMode = "dark") {
 window.addEventListener("load", () => {
   const savedDarkMode = localStorage.getItem("darkMode");
   applyThemeMode(savedDarkMode === "true" ? "dark" : "light");
+  const savedAccent = localStorage.getItem("nexchat_accent_theme") || "emerald";
+  applyCyberAccentTheme(savedAccent, false);
 });
 
 async function autoPopulateTestUsers() {
@@ -3185,9 +3324,12 @@ function goBack() {
       </div>
     `;
   }
-  document.getElementById("chatName").textContent = "Select a chat";
-  document.getElementById("chatProfilePic").src = "";
-  document.getElementById("statusText").textContent = "Offline";
+  const chatNameEl = document.getElementById("chatName");
+  if (chatNameEl) chatNameEl.textContent = "Select a chat";
+  const chatProfilePicEl = document.getElementById("chatProfilePic");
+  if (chatProfilePicEl) chatProfilePicEl.src = "";
+  const statusTextEl = document.getElementById("statusText");
+  if (statusTextEl) statusTextEl.textContent = "Offline";
   if (messageListener) {
     messageListener();
     messageListener = null;
@@ -4783,16 +4925,21 @@ document.addEventListener("click", (e) => {
   }
 });
 
+const closeChatOptionsMenu = () => {
+  const menu = document.getElementById("chatOptionsMenu");
+  if (menu) menu.style.display = "none";
+};
+
 document.getElementById("groupAdminBtn")?.addEventListener("click", () => {
   if (currentChatType === 'group' && currentChatUser) {
     showGroupAdminPanel(currentChatUser);
-    document.getElementById("chatOptionsMenu").style.display = "none";
+    closeChatOptionsMenu();
   }
 });
 
 document.getElementById("groupInviteQrBtn")?.addEventListener("click", () => {
   if (currentChatType === 'group' && currentChatUser) {
-    document.getElementById("chatOptionsMenu").style.display = "none";
+    closeChatOptionsMenu();
     GroupChat.showInviteModal(currentChatUser, currentChatName || 'Group', {
       onCopy: () => showNotif('Invite link copied!', 'success'),
       onShare: () => showNotif('Shared invite link!', 'info')
@@ -4802,7 +4949,7 @@ document.getElementById("groupInviteQrBtn")?.addEventListener("click", () => {
 
 document.getElementById("groupLeaveBtn")?.addEventListener("click", () => {
   if (currentChatType === 'group' && currentChatUser) {
-    document.getElementById("chatOptionsMenu").style.display = "none";
+    closeChatOptionsMenu();
     handleLeaveGroup(currentChatUser);
   }
 });
@@ -4824,7 +4971,7 @@ document.getElementById("chatHeaderProfile")?.addEventListener("click", () => {
 document.getElementById("muteBtn")?.addEventListener("click", async () => {
   if (!currentChatUser) return;
   showNotif("Chat muted", "success");
-  document.getElementById("chatOptionsMenu").style.display = "none";
+  closeChatOptionsMenu();
 });
 
 document.getElementById("blockBtn")?.addEventListener("click", async () => {
@@ -4850,7 +4997,7 @@ document.getElementById("blockBtn")?.addEventListener("click", async () => {
       });
       showNotif("User blocked successfully (chat history preserved)", "success");
       updateBlockUnblockUI();
-      document.getElementById("chatOptionsMenu").style.display = "none";
+      closeChatOptionsMenu();
     } else {
       showNotif("User already blocked", "error");
     }
@@ -4858,7 +5005,7 @@ document.getElementById("blockBtn")?.addEventListener("click", async () => {
     console.error("Block error:", err);
     showNotif("Error blocking user: " + err.message, "error");
   }
-  document.getElementById("chatOptionsMenu").style.display = "none";
+  closeChatOptionsMenu();
 });
 
 document.getElementById("unblockBtn")?.addEventListener("click", async () => {
@@ -4885,7 +5032,7 @@ document.getElementById("unblockBtn")?.addEventListener("click", async () => {
       });
       showNotif("User unblocked successfully", "success");
       updateBlockUnblockUI();
-      document.getElementById("chatOptionsMenu").style.display = "none";
+      closeChatOptionsMenu();
     } else {
       showNotif("User is not blocked", "error");
     }
@@ -4893,7 +5040,7 @@ document.getElementById("unblockBtn")?.addEventListener("click", async () => {
     console.error("Unblock error:", err);
     showNotif("Error unblocking user: " + err.message, "error");
   }
-  document.getElementById("chatOptionsMenu").style.display = "none";
+  closeChatOptionsMenu();
 });
 
 async function updateBlockUnblockUI() {
@@ -4946,7 +5093,7 @@ document.getElementById("deleteBtn")?.addEventListener("click", async () => {
   } catch (err) {
     showNotif("Error deleting chat: " + err.message, "error");
   }
-  document.getElementById("chatOptionsMenu").style.display = "none";
+  closeChatOptionsMenu();
 });
 
 document.getElementById("reportBtn")?.addEventListener("click", async () => {
@@ -4963,7 +5110,7 @@ document.getElementById("reportBtn")?.addEventListener("click", async () => {
     });
 
     showNotif("User reported successfully - Our team will review this", "success");
-    document.getElementById("chatOptionsMenu").style.display = "none";
+    closeChatOptionsMenu();
   } catch (err) {
     console.error("Report error:", err);
     showNotif("Error submitting report: " + err.message, "error");
@@ -6377,7 +6524,8 @@ document.getElementById("infoBtn")?.addEventListener("click", () => {
 });
 
 document.getElementById("closeInfoBtn")?.addEventListener("click", () => {
-  document.getElementById("infoSidebar").style.display = "none";
+  const sidebar = document.getElementById("infoSidebar");
+  if (sidebar) sidebar.style.display = "none";
 });
 
 document.getElementById("infoBlockBtn")?.addEventListener("click", async () => {
@@ -6402,7 +6550,8 @@ document.getElementById("infoBlockBtn")?.addEventListener("click", async () => {
         blockedUsers: [...blockedUsers, currentChatUser]
       });
       showNotif("User blocked successfully", "success");
-      document.getElementById("infoSidebar").style.display = "none";
+      const infoSidebarEl = document.getElementById("infoSidebar");
+      if (infoSidebarEl) infoSidebarEl.style.display = "none";
       setTimeout(() => goBack(), 500);
     } else {
       showNotif("User already blocked", "error");
@@ -6451,7 +6600,8 @@ document.getElementById("infoReportBtn")?.addEventListener("click", async () => 
     });
 
     showNotif("User reported successfully - Our team will review this", "success");
-    document.getElementById("infoSidebar").style.display = "none";
+    const infoSidebarEl = document.getElementById("infoSidebar");
+    if (infoSidebarEl) infoSidebarEl.style.display = "none";
   } catch (err) {
     console.error("Report error:", err);
     showNotif("Error submitting report: " + err.message, "error");
@@ -6498,22 +6648,23 @@ document.getElementById("nav-status")?.addEventListener("click", () => {
   const chatMain = document.querySelector(".chat-main");
   const app = document.querySelector(".app");
 
+  if (!statusContainer) return;
   if (statusContainer.style.display === "none") {
-    chatListView.style.display = "none";
-    chatDetailView.style.display = "none";
-    chatMain.dataset.layout = "section";
+    if (chatListView) chatListView.style.display = "none";
+    if (chatDetailView) chatDetailView.style.display = "none";
+    if (chatMain) chatMain.dataset.layout = "section";
     statusContainer.style.display = "flex";
     if (app) app.dataset.activeSection = "updates";
-    document.getElementById("nav-messages").classList.remove("active");
-    document.getElementById("nav-status").classList.add("active");
+    document.getElementById("nav-messages")?.classList.remove("active");
+    document.getElementById("nav-status")?.classList.add("active");
     showNotif("NEX-STATUS", "info", 800);
   } else {
     statusContainer.style.display = "none";
     if (app) app.dataset.activeSection = "chats";
-    chatListView.style.display = "flex";
-    chatMain.dataset.layout = "list";
-    document.getElementById("nav-status").classList.remove("active");
-    document.getElementById("nav-messages").classList.add("active");
+    if (chatListView) chatListView.style.display = "flex";
+    if (chatMain) chatMain.dataset.layout = "list";
+    document.getElementById("nav-status")?.classList.remove("active");
+    document.getElementById("nav-messages")?.classList.add("active");
     showNotif("Messages", "info", 800);
   }
 });
@@ -6527,29 +6678,30 @@ document.getElementById("nav-announcements")?.addEventListener("click", () => {
   const chatMain = document.querySelector(".chat-main");
   const app = document.querySelector(".app");
 
+  if (!announcementsContainer) return;
   if (announcementsContainer.style.display === "none") {
-    chatListView.style.display = "none";
-    statusContainer.style.display = "none";
-    groupsContainer.style.display = "none";
-    chatDetailView.style.display = "none";
-    chatMain.dataset.layout = "section";
+    if (chatListView) chatListView.style.display = "none";
+    if (statusContainer) statusContainer.style.display = "none";
+    if (groupsContainer) groupsContainer.style.display = "none";
+    if (chatDetailView) chatDetailView.style.display = "none";
+    if (chatMain) chatMain.dataset.layout = "section";
     if (app) app.dataset.activeSection = "announcements";
     announcementsContainer.style.display = "flex";
 
-    document.getElementById("nav-messages").classList.remove("active");
-    document.getElementById("nav-status").classList.remove("active");
-    document.getElementById("nav-groups").classList.remove("active");
-    document.getElementById("nav-announcements").classList.add("active");
+    document.getElementById("nav-messages")?.classList.remove("active");
+    document.getElementById("nav-status")?.classList.remove("active");
+    document.getElementById("nav-groups")?.classList.remove("active");
+    document.getElementById("nav-announcements")?.classList.add("active");
 
     loadAnnouncements();
     showNotif("Announcements", "info", 800);
   } else {
     announcementsContainer.style.display = "none";
     if (app) app.dataset.activeSection = "chats";
-    chatListView.style.display = "flex";
-    chatMain.dataset.layout = "list";
-    document.getElementById("nav-announcements").classList.remove("active");
-    document.getElementById("nav-messages").classList.add("active");
+    if (chatListView) chatListView.style.display = "flex";
+    if (chatMain) chatMain.dataset.layout = "list";
+    document.getElementById("nav-announcements")?.classList.remove("active");
+    document.getElementById("nav-messages")?.classList.add("active");
     showNotif("Messages", "info", 800);
   }
 });
@@ -6954,8 +7106,10 @@ async function transferTokens() {
     `;
 
     showNotif(`Gift request created for ${result.recipientName}`, 'success', 3000);
-    document.getElementById("recipientUID").value = "";
-    document.getElementById("transferAmount").value = "";
+    const recipientUIDEl = document.getElementById("recipientUID");
+    if (recipientUIDEl) recipientUIDEl.value = "";
+    const transferAmountEl = document.getElementById("transferAmount");
+    if (transferAmountEl) transferAmountEl.value = "";
 
     setTimeout(() => {
       if (transferBtn) {
@@ -7188,42 +7342,46 @@ function updateGiftBadge(count = 0) {
 
 async function showGiftHistory() {
   if (!myUID) return;
-  const historyQuery = query(
-    collection(db, 'tokenGifts'),
-    where('recipientId', '==', myUID),
-    orderBy('createdAt', 'desc'),
-    limit(8)
-  );
+  try {
+    const historyQuery = query(
+      collection(db, 'tokenGifts'),
+      where('recipientId', '==', myUID),
+      orderBy('createdAt', 'desc'),
+      limit(8)
+    );
 
-  const snapshot = await getDocs(historyQuery);
-  const gifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  const drawer = document.getElementById('giftReceiveDrawer');
-  if (!drawer) return;
+    const snapshot = await getDocs(historyQuery);
+    const gifts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const drawer = document.getElementById('giftReceiveDrawer');
+    if (!drawer) return;
 
-  const rows = gifts.length
-    ? gifts.map((gift) => `
-        <div class="history-row">
-          <span>${escape(gift.senderName || gift.senderId)}</span>
-          <span>${gift.amount} tokens</span>
-          <span>${gift.status || 'pending'}</span>
+    const rows = gifts.length
+      ? gifts.map((gift) => `
+          <div class="history-row">
+            <span>${escape(gift.senderName || gift.senderId)}</span>
+            <span>${gift.amount} tokens</span>
+            <span>${gift.status || 'pending'}</span>
+          </div>
+        `).join('')
+      : '<p class="drawer-text">No gifts received yet.</p>';
+
+    drawer.innerHTML = `
+      <div class="drawer-card">
+        <div class="drawer-handle"></div>
+        <h3 class="drawer-title">Gift history</h3>
+        ${gifts.length ? `<div class="gift-history-list">${rows}</div>` : ''}
+        <div class="drawer-actions">
+          <button class="drawer-btn accept" id="closeGiftHistoryBtn">Close</button>
         </div>
-      `).join('')
-    : '<p class="drawer-text">No gifts received yet.</p>';
-
-  drawer.innerHTML = `
-    <div class="drawer-card">
-      <div class="drawer-handle"></div>
-      <h3 class="drawer-title">Gift history</h3>
-      ${gifts.length ? `<div class="gift-history-list">${rows}</div>` : ''}
-      <div class="drawer-actions">
-        <button class="drawer-btn accept" id="closeGiftHistoryBtn">Close</button>
       </div>
-    </div>
-  `;
+    `;
 
-  drawer.classList.add('show');
-  drawer.setAttribute('aria-hidden', 'false');
-  document.getElementById('closeGiftHistoryBtn')?.addEventListener('click', closeGiftReceiveDrawer);
+    drawer.classList.add('show');
+    drawer.setAttribute('aria-hidden', 'false');
+    document.getElementById('closeGiftHistoryBtn')?.addEventListener('click', closeGiftReceiveDrawer);
+  } catch (err) {
+    console.error('Error fetching gift history:', err);
+  }
 }
 
 let currentPendingPairSession = null;
@@ -7697,6 +7855,20 @@ function setupSettingsTabNavigation() {
     });
   });
 
+  
+  document.querySelectorAll('.cyber-swatch-btn').forEach(btn => {
+    if (btn.dataset.bound === 'true') return;
+    btn.dataset.bound = 'true';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const themeKey = btn.dataset.theme;
+      if (themeKey) {
+        applyCyberAccentTheme(themeKey, true);
+        saveSettingsPreferences();
+      }
+    });
+  });
+
   setupSettingsSearchFilter();
   setupChronexAiStudioSettings();
 }
@@ -7784,7 +7956,13 @@ function openSettingsModal() {
   if (modal) {
     modal.style.display = "flex";
     document.body.style.overflow = "hidden";
+    try {
+      if (!history.state || history.state.nexchatModal !== 'settings') {
+        history.pushState({ nexchatModal: 'settings' }, '');
+      }
+    } catch (_) {}
     loadSettingsPreferences();
+    loadBlockedUsersList();
     renderSelfAIUserList();
     loadLinkedDevices();
     setupSettingsTabNavigation();
@@ -8293,17 +8471,48 @@ function getTimeAgo(date) {
   return date.toLocaleDateString();
 }
 
-function closeSettingsModal() {
+function closeSettingsModal(updateHistory = true) {
   const modal = document.getElementById("settingsModal");
   if (modal) {
     modal.style.display = "none";
-    document.body.style.overflow = "auto";
+    document.body.style.overflow = "";
+
+    if (updateHistory) {
+      try {
+        if (history.state && history.state.nexchatModal === 'settings') {
+          history.back();
+        }
+      } catch (_) {}
+    }
 
     if (isAndroid && navigator.vibrate) {
       navigator.vibrate(30);
     }
   }
 }
+
+window.addEventListener('popstate', (e) => {
+  const settingsModal = document.getElementById("settingsModal");
+  if (settingsModal && settingsModal.style.display === "flex") {
+    closeSettingsModal(false);
+    return;
+  }
+
+  const statusViewer = document.getElementById("statusViewerModal");
+  if (statusViewer && statusViewer.style.display === "flex") {
+    if (typeof storyProgressTimer !== 'undefined') clearInterval(storyProgressTimer);
+    statusViewer.style.display = "none";
+    const video = document.getElementById('statusViewerVideo');
+    if (video) video.pause();
+    return;
+  }
+
+  const createStatusModal = document.getElementById("createStatusModal");
+  if (createStatusModal && createStatusModal.style.display === "block") {
+    createStatusModal.style.display = "none";
+    return;
+  }
+});
 
 function applyBubbleTheme(theme) {
   document.body.classList.remove(
@@ -8316,6 +8525,88 @@ function applyBubbleTheme(theme) {
     document.body.classList.add(`bubble-theme-${theme}`);
   }
 }
+
+
+async function loadBlockedUsersList() {
+  const container = document.getElementById("blockedUsersContainer");
+  if (!container) return;
+  if (!myUID) {
+    container.innerHTML = '<p style="color: var(--text-muted); text-align: center; font-size: 12px; padding: 12px 0;">Please log in to view blocked contacts.</p>';
+    return;
+  }
+
+  container.innerHTML = '<p style="color: var(--text-muted); text-align: center; font-size: 12px; padding: 12px 0;"><i class="fa-solid fa-spinner fa-spin"></i> Reading shielded radar...</p>';
+
+  try {
+    const userDoc = await getDoc(doc(db, "users", myUID));
+    if (!userDoc.exists()) {
+      container.innerHTML = '<p style="color: var(--text-muted); text-align: center; font-size: 12px; padding: 12px 0;">User profile not found.</p>';
+      return;
+    }
+
+    const blockedIds = userDoc.data()?.blockedUsers || [];
+    if (!Array.isArray(blockedIds) || blockedIds.length === 0) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 12.5px;">
+          <i class="fa-solid fa-shield-halved" style="font-size: 26px; color: #00ff66; margin-bottom: 8px; display: block; opacity: 0.85;"></i>
+          <span style="color: #fff; font-weight: 600;">Zero Blocked Contacts</span>
+          <p style="margin: 4px 0 0 0; font-size: 11px; color: var(--text-muted);">Your contact radar and direct communication channels are completely open.</p>
+        </div>
+      `;
+      return;
+    }
+
+    let rowsHtml = '';
+    for (const blockedId of blockedIds) {
+      let displayName = 'Unknown User';
+      let avatarUrl = 'logo.jpg';
+      try {
+        const targetDoc = await getDoc(doc(db, "users", blockedId));
+        if (targetDoc.exists()) {
+          const targetData = targetDoc.data();
+          displayName = targetData.username || targetData.name || targetData.email || 'User';
+          avatarUrl = targetData.profilePicUrl || 'logo.jpg';
+        }
+      } catch (_) {}
+
+      rowsHtml += `
+        <div class="blocked-user-item">
+          <div class="blocked-user-meta">
+            <img src="${escape(avatarUrl)}" class="blocked-user-avatar" onerror="this.src='logo.jpg'">
+            <div class="blocked-user-info">
+              <span class="blocked-user-name">${escape(displayName)}</span>
+              <span class="blocked-user-uid">ID: ${escape(blockedId.slice(0, 10))}...</span>
+            </div>
+          </div>
+          <button type="button" class="unblock-btn" data-uid="${escape(blockedId)}" data-name="${escape(displayName)}">
+            <i class="fa-solid fa-unlock"></i> Unblock
+          </button>
+        </div>
+      `;
+    }
+
+    container.innerHTML = rowsHtml;
+
+    container.querySelectorAll('.unblock-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const targetUid = btn.dataset.uid;
+        const targetName = btn.dataset.name;
+        if (!targetUid) return;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Unblocking...';
+        await unblockUser(targetUid);
+        await loadBlockedUsersList();
+      });
+    });
+
+  } catch (err) {
+    console.error("Error loading blocked users:", err);
+    container.innerHTML = '<p style="color: #ff6b6b; text-align: center; font-size: 12px; padding: 12px 0;">Failed to load blocked contacts.</p>';
+  }
+}
+
+
 
 function loadSettingsPreferences() {
   try {
@@ -8349,12 +8640,24 @@ function loadSettingsPreferences() {
 
     applyBubbleTheme(prefs.bubbleTheme || "neon-onyx");
 
+    const lastSeenSelect = document.getElementById("lastSeenPrivacySelect");
+    if (lastSeenSelect && prefs.lastSeenPrivacy) {
+      lastSeenSelect.value = prefs.lastSeenPrivacy;
+    }
+
+    const ghostTimerSelect = document.getElementById("ghostDefaultTimerSelect");
+    if (ghostTimerSelect && prefs.ghostDefaultTimer) {
+      ghostTimerSelect.value = prefs.ghostDefaultTimer;
+    }
+
     selfAISelectedUserIds = Array.isArray(prefs.selfAIUserIds) ? prefs.selfAIUserIds : [];
 
     const theme = prefs.theme || "dark";
     const themeEl = document.getElementById("theme" + theme.charAt(0).toUpperCase() + theme.slice(1));
     if (themeEl) themeEl.checked = true;
     applyThemeMode(theme);
+    const currentAccent = prefs.accentTheme || localStorage.getItem("nexchat_accent_theme") || "emerald";
+    applyCyberAccentTheme(currentAccent, false);
 
     selectedRingtone = prefs.ringtone || 'classic';
     const ringtoneSelect = document.getElementById("ringtoneSelect");
@@ -8365,7 +8668,17 @@ function loadSettingsPreferences() {
     const chatSizeEl = document.getElementById("chatSize" + chatSizeFormatted);
     if (chatSizeEl) chatSizeEl.checked = true;
 
-    const fontFamilySelect = document.getElementById("fontFamilySelect");
+    const lastSeenEl = document.getElementById("lastSeenPrivacySelect");
+    if (lastSeenEl && prefs.lastSeenPrivacy) {
+      lastSeenEl.value = prefs.lastSeenPrivacy;
+    }
+
+    const ghostTimerEl = document.getElementById("ghostDefaultTimerSelect");
+    if (ghostTimerEl && prefs.ghostDefaultTimer) {
+      ghostTimerEl.value = prefs.ghostDefaultTimer;
+    }
+
+  const fontFamilySelect = document.getElementById("fontFamilySelect");
     if (fontFamilySelect && prefs.fontFamily) {
       fontFamilySelect.value = prefs.fontFamily;
     }
@@ -8373,13 +8686,15 @@ function loadSettingsPreferences() {
     const letterSpacingRange = document.getElementById("letterSpacingRange");
     if (letterSpacingRange && prefs.letterSpacing !== undefined) {
       letterSpacingRange.value = prefs.letterSpacing;
-      document.getElementById("letterSpacingValue").textContent = prefs.letterSpacing;
+      const letterSpacingValEl = document.getElementById("letterSpacingValue");
+      if (letterSpacingValEl) letterSpacingValEl.textContent = prefs.letterSpacing;
     }
 
     const lineHeightRange = document.getElementById("lineHeightRange");
     if (lineHeightRange && prefs.lineHeight !== undefined) {
       lineHeightRange.value = prefs.lineHeight;
-      document.getElementById("lineHeightValue").textContent = prefs.lineHeight;
+      const lineHeightValEl = document.getElementById("lineHeightValue");
+      if (lineHeightValEl) lineHeightValEl.textContent = prefs.lineHeight;
     }
 
     const alignButtons = document.querySelectorAll(".text-align-btn");
@@ -8430,6 +8745,9 @@ function saveSettingsPreferences() {
       onlineStatus: onlineEl?.checked ?? true,
       readReceipts: readEl?.checked ?? true,
       antiReload: antiReloadEl?.checked === true,
+      accentTheme: localStorage.getItem("nexchat_accent_theme") || "emerald",
+      lastSeenPrivacy: document.getElementById("lastSeenPrivacySelect")?.value || "everyone",
+      ghostDefaultTimer: document.getElementById("ghostDefaultTimerSelect")?.value || "off",
       selfAI: selfAIEl?.checked === true,
       ghostMode: ghostEl?.checked === true,
       directChatAutoAccept: directChatEl?.checked ?? true,
@@ -8664,7 +8982,7 @@ function validateSettingsIntegrity() {
   try {
     const stored = localStorage.getItem("nexchat_settings");
     if (!stored) {
-      console.log("?? No settings found, using defaults");
+      console.log("[Info] No settings found, using defaults");
       return true;
     }
 
@@ -8673,12 +8991,12 @@ function validateSettingsIntegrity() {
     const valid = required.every(key => key in parsed);
 
     if (!valid) {
-      console.warn("?? Settings missing required fields, resetting");
+      console.warn("[Warn] Settings missing required fields, resetting");
       localStorage.removeItem("nexchat_settings");
       return false;
     }
 
-    console.log("? Settings integrity check passed");
+    console.log("[Success] Settings integrity check passed");
     return true;
   } catch (err) {
     console.error("Error validating settings:", err);
@@ -9257,7 +9575,8 @@ async function setupInitialization() {
           const closeProfileModal = document.getElementById('closeProfileModal');
           if (closeProfileModal) {
             closeProfileModal.onclick = () => {
-              document.getElementById('profilePicModal').style.display = 'none';
+              const modal = document.getElementById('profilePicModal');
+              if (modal) modal.style.display = 'none';
             };
           }
 
@@ -9765,15 +10084,52 @@ const setupSettingsListeners = () => {
     radio.addEventListener("change", saveSettingsPreferences, false);
   });
 
+  const lastSeenSelect = document.getElementById("lastSeenPrivacySelect");
+  if (lastSeenSelect && !lastSeenSelect.dataset.bound) {
+    lastSeenSelect.dataset.bound = "true";
+    lastSeenSelect.addEventListener("change", (e) => {
+      saveSettingsPreferences();
+      if (myUID) {
+        updateDoc(doc(db, "users", myUID), { privacyLastSeen: e.target.value }).catch(() => {});
+      }
+    }, false);
+  }
+
+  const ghostTimerSelect = document.getElementById("ghostDefaultTimerSelect");
+  if (ghostTimerSelect && !ghostTimerSelect.dataset.bound) {
+    ghostTimerSelect.dataset.bound = "true";
+    ghostTimerSelect.addEventListener("change", saveSettingsPreferences, false);
+  }
+
+  const refreshBlockedBtn = document.getElementById("refreshBlockedUsersBtn");
+  if (refreshBlockedBtn && !refreshBlockedBtn.dataset.bound) {
+    refreshBlockedBtn.dataset.bound = "true";
+    refreshBlockedBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      loadBlockedUsersList();
+    }, false);
+  }
+
+  const backNavBtn = document.getElementById("settingsBackNavBtn");
+  if (backNavBtn && !backNavBtn.dataset.bound) {
+    backNavBtn.dataset.bound = "true";
+    backNavBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeSettingsModal();
+    }, false);
+  }
+
   const fontFamilySelect = document.getElementById("fontFamilySelect");
-  if (fontFamilySelect) {
+  if (fontFamilySelect && !fontFamilySelect.dataset.bound) {
+    fontFamilySelect.dataset.bound = "true";
     fontFamilySelect.addEventListener("change", saveSettingsPreferences, false);
   }
 
   const letterSpacingRange = document.getElementById("letterSpacingRange");
   if (letterSpacingRange) {
     letterSpacingRange.addEventListener("input", (e) => {
-      document.getElementById("letterSpacingValue").textContent = e.target.value;
+      const valEl = document.getElementById("letterSpacingValue");
+      if (valEl) valEl.textContent = e.target.value;
       saveSettingsPreferences();
     }, false);
   }
@@ -9781,7 +10137,8 @@ const setupSettingsListeners = () => {
   const lineHeightRange = document.getElementById("lineHeightRange");
   if (lineHeightRange) {
     lineHeightRange.addEventListener("input", (e) => {
-      document.getElementById("lineHeightValue").textContent = e.target.value;
+      const valEl = document.getElementById("lineHeightValue");
+      if (valEl) valEl.textContent = e.target.value;
       saveSettingsPreferences();
     }, false);
   }
@@ -10222,7 +10579,13 @@ document.getElementById("closeStatusViewerBtn")?.addEventListener("click", () =>
   if (modal) {
     modal.style.display = "none";
   }
-  showChatListView();
+  const video = document.getElementById('statusViewerVideo');
+  if (video) video.pause();
+  try {
+    if (history.state && history.state.nexchatModal === 'statusViewer') {
+      history.back();
+    }
+  } catch (_) {}
 });
 
 document.getElementById("statusViewerModal")?.addEventListener("click", (e) => {
@@ -10278,8 +10641,12 @@ async function getChattedUsers(userId) {
 }
 
 async function loadStatuses() {
-  if (typeof window.loadStatusFeed === 'function') {
-    return window.loadStatusFeed();
+  try {
+    if (typeof window.loadStatusFeed === 'function') {
+      return await window.loadStatusFeed();
+    }
+  } catch (err) {
+    console.error("Error loading statuses:", err);
   }
 }
 
@@ -10337,7 +10704,7 @@ function closeReportModal() {
   const reportModal = document.getElementById("reportModal");
   if (reportModal) {
     reportModal.style.display = "none";
-    document.body.style.overflow = "auto";
+    document.body.style.overflow = "";
   }
 }
 
@@ -10578,8 +10945,10 @@ async function submitReport() {
     showNotif("Report submitted successfully! Our team will review it shortly.", "success", 3000);
     closeReportModal();
 
-    document.getElementById("reportReason").value = "";
-    document.getElementById("reportDescription").value = "";
+    const reportReasonEl = document.getElementById("reportReason");
+    if (reportReasonEl) reportReasonEl.value = "";
+    const reportDescEl = document.getElementById("reportDescription");
+    if (reportDescEl) reportDescEl.value = "";
   } catch (err) {
     console.error("Report submission error:", err);
     showNotif("Error submitting report: " + err.message, "error");
@@ -10594,7 +10963,7 @@ async function submitReport() {
 
 document.getElementById("reportBtn")?.addEventListener("click", (e) => {
   e.stopPropagation();
-  document.getElementById("chatOptionsMenu").style.display = "none";
+  closeChatOptionsMenu();
   openReportModal();
 });
 
@@ -10611,10 +10980,15 @@ async function openCreateGroupModal() {
     return;
   }
   modal.style.display = 'block';
-  document.getElementById('groupCreateResult').style.display = 'none';
-  await loadGroupMembersList();
-
-  attachGroupMemberButtons();
+  const groupCreateResult = document.getElementById('groupCreateResult');
+  if (groupCreateResult) groupCreateResult.style.display = 'none';
+  try {
+    await loadGroupMembersList();
+    attachGroupMemberButtons();
+  } catch (err) {
+    console.error('Error opening create group modal:', err);
+    showNotif('Failed to load contacts for group', 'error');
+  }
 }
 
 function attachGroupMemberButtons() {
@@ -10820,7 +11194,8 @@ async function createGroup(e) {
     }
 
     document.getElementById('createGroupForm')?.reset();
-    document.getElementById('createGroupModal').style.display = 'none';
+    const createGroupModal = document.getElementById('createGroupModal');
+    if (createGroupModal) createGroupModal.style.display = 'none';
 
     if (iconPreview) {
       iconPreview.src = "logo.jpg";
@@ -10832,12 +11207,12 @@ async function createGroup(e) {
     await openChat(groupRef.id, name, profilePicUrl || 'logo.jpg', 'group');
 
   } catch (error) {
-    console.error('? Error creating group:', error);
+    console.error('[Error] Error creating group:', error);
     if (resultDiv) {
       resultDiv.style.display = 'block';
       resultDiv.style.background = '#ff6b6b';
       resultDiv.style.color = '#fff';
-      resultDiv.textContent = `? Error: ${error.message || 'Unknown error'}`;
+      resultDiv.textContent = `Error: ${error.message || 'Unknown error'}`;
     }
     showNotif(`Error creating group: ${error.message}`, 'error', 3000);
   }
@@ -10851,7 +11226,8 @@ async function deleteGroup(groupId) {
     await Promise.all(groupMessagesSnapshot.docs.map(docSnap => deleteDoc(docSnap.ref)));
     await deleteDoc(doc(db, "groups", groupId));
     showNotif("Group deleted successfully", "success");
-    document.getElementById('groupInfoModal').style.display = 'none';
+    const groupInfoModal = document.getElementById('groupInfoModal');
+    if (groupInfoModal) groupInfoModal.style.display = 'none';
     showChatListView();
     await loadContacts();
   } catch (err) {
@@ -11013,7 +11389,12 @@ async function openAddGroupMembersPrompt() {
     return;
   }
 
-  await openAddGroupMembersModal(currentChatUser);
+  try {
+    await openAddGroupMembersModal(currentChatUser);
+  } catch (err) {
+    console.error('Error opening add group members prompt:', err);
+    showNotif('Failed to open add members modal', 'error');
+  }
 }
 
 function closeAddGroupMembersModal() {
@@ -11033,24 +11414,29 @@ async function openAddGroupMembersModal(groupId) {
     return;
   }
 
-  const groupRef = doc(db, 'groups', groupId);
-  const groupDoc = await getDoc(groupRef);
-  if (!groupDoc.exists()) {
-    showNotif('Group not found', 'error');
-    return;
-  }
+  try {
+    const groupRef = doc(db, 'groups', groupId);
+    const groupDoc = await getDoc(groupRef);
+    if (!groupDoc.exists()) {
+      showNotif('Group not found', 'error');
+      return;
+    }
 
-  const groupData = groupDoc.data();
-  const admins = groupData.admins || [groupData.createdBy];
-  if (!admins.includes(myUID)) {
-    showNotif('Only group admins can add members', 'error');
-    return;
-  }
+    const groupData = groupDoc.data();
+    const admins = groupData.admins || [groupData.createdBy];
+    if (!admins.includes(myUID)) {
+      showNotif('Only group admins can add members', 'error');
+      return;
+    }
 
-  modal.style.display = 'block';
-  const info = document.getElementById('addGroupMembersInfo');
-  if (info) info.textContent = 'Select contacts to add to this group. Existing group members are hidden.';
-  await loadAddGroupMembersList(groupId);
+    modal.style.display = 'block';
+    const info = document.getElementById('addGroupMembersInfo');
+    if (info) info.textContent = 'Select contacts to add to this group. Existing group members are hidden.';
+    await loadAddGroupMembersList(groupId);
+  } catch (err) {
+    console.error('Error in openAddGroupMembersModal:', err);
+    showNotif('Failed to open group modal: ' + err.message, 'error');
+  }
 }
 
 async function loadAddGroupMembersList(groupId) {
@@ -11610,30 +11996,40 @@ function checkGroupJoinLink() {
 
 async function initOfflineDB() {
   return new Promise((resolve, reject) => {
-    const request = indexedDB.open('NEXCHATOfflineDB', 1);
+    if (typeof indexedDB === 'undefined') {
+      console.warn('IndexedDB not available in current context');
+      resolve(null);
+      return;
+    }
+    try {
+      const request = indexedDB.open('NEXCHATOfflineDB', 1);
 
-    request.onerror = () => {
-      console.error('? Failed to open offline DB:', request.error);
-      reject(request.error);
-    };
+      request.onerror = () => {
+        console.error('Failed to open offline DB:', request.error);
+        reject(request.error);
+      };
 
-    request.onsuccess = () => {
-      offlineDB = request.result;
-      console.log('? Offline DB initialized');
-      resolve(offlineDB);
-    };
+      request.onsuccess = () => {
+        offlineDB = request.result;
+        console.log('Offline DB initialized successfully');
+        resolve(offlineDB);
+      };
 
-    request.onupgradeneeded = (event) => {
-      const db = event.target.result;
+      request.onupgradeneeded = (event) => {
+        const db = event.target.result;
 
-      if (!db.objectStoreNames.contains('offlineMessages')) {
-        db.createObjectStore('offlineMessages', { keyPath: 'id', autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains('statuses')) {
-        db.createObjectStore('statuses', { keyPath: 'id', autoIncrement: true });
-      }
-      console.log('? Offline DB schema created');
-    };
+        if (!db.objectStoreNames.contains('offlineMessages')) {
+          db.createObjectStore('offlineMessages', { keyPath: 'id', autoIncrement: true });
+        }
+        if (!db.objectStoreNames.contains('statuses')) {
+          db.createObjectStore('statuses', { keyPath: 'id', autoIncrement: true });
+        }
+        console.log('Offline DB schema created');
+      };
+    } catch (err) {
+      console.error('Exception opening offline DB:', err);
+      reject(err);
+    }
   });
 }
 
@@ -12205,6 +12601,11 @@ function showCurrentStorySlide() {
   }
 
   modal.style.display = 'flex';
+  try {
+    if (!history.state || history.state.nexchatModal !== 'statusViewer') {
+      history.pushState({ nexchatModal: 'statusViewer' }, '');
+    }
+  } catch (_) {}
 
   // Set up listeners for tapping left/right, keys, and close
   setupViewerControls();
@@ -12752,7 +13153,8 @@ function initializeBasicUI() {
   document.getElementById("poll-btn")?.addEventListener("click", (e) => {
     e.preventDefault();
     if (currentChatType === 'group') {
-      document.getElementById("pollModal").style.display = "block";
+      const pollModal = document.getElementById("pollModal");
+      if (pollModal) pollModal.style.display = "block";
     } else {
       showNotif("Polls are only available in group chats", "info");
     }
@@ -12761,8 +13163,10 @@ function initializeBasicUI() {
   document.getElementById("pollForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const question = document.getElementById("pollQuestion").value.trim();
-    const optionsText = document.getElementById("pollOptions").value.trim();
+    const questionInput = document.getElementById("pollQuestion");
+    const optionsInput = document.getElementById("pollOptions");
+    const question = questionInput ? questionInput.value.trim() : "";
+    const optionsText = optionsInput ? optionsInput.value.trim() : "";
 
     if (!question || !optionsText) {
       showNotif("Please fill in all poll fields", "error");
@@ -12778,8 +13182,10 @@ function initializeBasicUI() {
 
     await createPoll(currentChatUser, question, options);
 
-    document.getElementById("pollModal").style.display = "none";
-    document.getElementById("pollForm").reset();
+    const pollModal = document.getElementById("pollModal");
+    if (pollModal) pollModal.style.display = "none";
+    const pollForm = document.getElementById("pollForm");
+    if (pollForm) pollForm.reset();
   });
 
   document.getElementById("dashboardBackBtn")?.addEventListener("click", goBackToDashboard);
@@ -12870,7 +13276,8 @@ function initializeBasicUI() {
   });
 
   document.getElementById('closeSettingsBtn')?.addEventListener('click', () => {
-    document.getElementById('settingsModal').style.display = 'none';
+    const settingsModal = document.getElementById('settingsModal');
+    if (settingsModal) settingsModal.style.display = 'none';
   });
 
   document.getElementById('logoutSettingsBtn')?.addEventListener('click', () => {
@@ -14100,8 +14507,10 @@ document.getElementById('infoBlockBtn')?.addEventListener('click', async () => {
     });
 
     showNotif('User blocked', 'success');
-    document.getElementById('infoBlockBtn').style.display = 'none';
-    document.getElementById('infoUnblockBtn').style.display = 'flex';
+    const blockBtn = document.getElementById('infoBlockBtn');
+    if (blockBtn) blockBtn.style.display = 'none';
+    const unblockBtn = document.getElementById('infoUnblockBtn');
+    if (unblockBtn) unblockBtn.style.display = 'flex';
   } catch (err) {
     console.error('Error blocking user:', err);
     showNotif('Failed to block user', 'error');
@@ -14118,8 +14527,10 @@ document.getElementById('infoUnblockBtn')?.addEventListener('click', async () =>
     });
 
     showNotif('User unblocked', 'success');
-    document.getElementById('infoBlockBtn').style.display = 'flex';
-    document.getElementById('infoUnblockBtn').style.display = 'none';
+    const blockBtn = document.getElementById('infoBlockBtn');
+    if (blockBtn) blockBtn.style.display = 'flex';
+    const unblockBtn = document.getElementById('infoUnblockBtn');
+    if (unblockBtn) unblockBtn.style.display = 'none';
   } catch (err) {
     console.error('Error unblocking user:', err);
     showNotif('Failed to unblock user', 'error');
@@ -14943,9 +15354,18 @@ function initNexbotStudio() {
         greeting: greetingInput?.value || '',
         createdAt: new Date().toISOString()
       };
-      const saved = JSON.parse(localStorage.getItem('nexchat_saved_bots') || '[]');
+      let saved = [];
+      try {
+        saved = JSON.parse(localStorage.getItem('nexchat_saved_bots') || '[]');
+      } catch (_) {
+        saved = [];
+      }
       saved.push(bot);
-      localStorage.setItem('nexchat_saved_bots', JSON.stringify(saved));
+      try {
+        localStorage.setItem('nexchat_saved_bots', JSON.stringify(saved));
+      } catch (e) {
+        console.warn('Could not persist saved bot:', e);
+      }
       syncNexbotFleetList();
       showNotif(`NEXBOT [${bot.name}] saved to local fleet!`, 'success', 2500);
       if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
@@ -15041,7 +15461,12 @@ startBot();`;
     const listEl = document.getElementById('nexbotFleetList');
     const countEl = document.getElementById('botFleetCount');
     if (!listEl) return;
-    const saved = JSON.parse(localStorage.getItem('nexchat_saved_bots') || '[]');
+    let saved = [];
+    try {
+      saved = JSON.parse(localStorage.getItem('nexchat_saved_bots') || '[]');
+    } catch (_) {
+      saved = [];
+    }
     if (countEl) countEl.textContent = (saved.length + 1).toString();
 
     let html = `
@@ -16532,17 +16957,26 @@ function initMeshSettings() {
 
 // Automatically mount new features on boot
 const bootAllFeatures = () => {
-  initNexbotStudio();
-  initNeuralRadar();
-  initVipVault();
-  initGhostProtocol();
-  initCyberStreak();
-  initSmartReplyAndPolish();
-  initNeuralSoundboard();
-  initAudioSpaces();
-  initCyberDrop();
-  initCipherVault();
-  initMeshSettings();
+  const subsystems = [
+    ['NexbotStudio', initNexbotStudio],
+    ['NeuralRadar', initNeuralRadar],
+    ['VipVault', initVipVault],
+    ['GhostProtocol', initGhostProtocol],
+    ['CyberStreak', initCyberStreak],
+    ['SmartReplyAndPolish', initSmartReplyAndPolish],
+    ['NeuralSoundboard', initNeuralSoundboard],
+    ['AudioSpaces', initAudioSpaces],
+    ['CyberDrop', initCyberDrop],
+    ['CipherVault', initCipherVault],
+    ['MeshSettings', initMeshSettings]
+  ];
+  subsystems.forEach(([name, fn]) => {
+    try {
+      if (typeof fn === 'function') fn();
+    } catch (err) {
+      console.warn(`[NexChat Boot] Subsystem ${name} init skipped:`, err);
+    }
+  });
 };
 
 if (document.readyState === 'loading') {

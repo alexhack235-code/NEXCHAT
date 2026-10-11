@@ -72,10 +72,12 @@
 }
 
 html, body {
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  overflow-x: hidden !important;
   background-color: var(--cs-bg-void);
   color: var(--cs-text-primary);
   font-family: var(--cs-font-body);
@@ -314,10 +316,12 @@ body.reels-body {
    VERTICAL FULLSCREEN FEED & DESKTOP THEATER CANVAS
    ══════════════════════════════════════════════════ */
 .reels-feed-container {
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 100vh;
   height: 100dvh;
   overflow-y: scroll;
+  overflow-x: hidden;
   scroll-snap-type: y mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -362,11 +366,13 @@ body.reels-body {
 
 /* ─── Reel Card (Desktop Theater Centered & Mobile Immersive) ─── */
 .reel-card {
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   height: 100vh;
   height: 100dvh;
   min-height: 100vh;
   min-height: 100dvh;
+  overflow-x: hidden;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   position: relative;
@@ -663,15 +669,22 @@ body.reels-body {
    ══════════════════════════════════════════════════ */
 .reel-bottom-info {
   position: absolute;
-  bottom: calc(max(14px, env(safe-area-inset-bottom, 0px)) + 52px);
+  bottom: calc(max(10px, env(safe-area-inset-bottom, 0px)) + 58px);
   left: 14px;
   right: 76px;
-  max-width: calc(100% - 86px);
+  max-width: calc(100% - 90px);
+  max-height: calc(100% - 240px);
+  overflow-y: auto;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
   z-index: 20;
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
   pointer-events: auto;
+}
+.reel-bottom-info::-webkit-scrollbar {
+  display: none;
 }
 
 /* Creator Row */
@@ -792,9 +805,9 @@ body.reels-body {
 /* Sleek Bottom Inline Comment Bar */
 .reel-bottom-bar {
   position: absolute;
-  bottom: calc(max(8px, env(safe-area-inset-bottom, 0px)) + 6px);
+  bottom: calc(max(10px, env(safe-area-inset-bottom, 0px)) + 8px);
   left: 12px;
-  right: 74px;
+  right: 76px;
   z-index: 22;
   display: flex;
   align-items: center;
@@ -2567,7 +2580,8 @@ body.reels-body {
   }
 
   .creator-studio-card {
-    width: 100vw;
+    width: 100%;
+    max-width: 100%;
     height: 100vh;
     height: 100dvh;
     max-height: 100vh;
@@ -2581,8 +2595,8 @@ body.reels-body {
   }
 
   .reel-stage {
-    width: 100vw !important;
-    max-width: 100vw !important;
+    width: 100% !important;
+    max-width: 100% !important;
     height: 100vh !important;
     height: 100dvh !important;
     border-radius: 0 !important;
@@ -4330,16 +4344,27 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   }
 
   .reel-bottom-bar {
-    left: 10px;
-    right: 62px;
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 62px) !important;
+    left: 10px !important;
+    right: 64px !important;
+    bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 8px) !important;
+    z-index: 22 !important;
   }
 
   .reel-bottom-info {
-    left: 12px;
-    right: 62px;
-    max-width: calc(100% - 74px);
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 112px) !important;
+    left: 12px !important;
+    right: 64px !important;
+    max-width: calc(100% - 76px) !important;
+    bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 58px) !important;
+    max-height: calc(100% - 54px - env(safe-area-inset-bottom, 0px) - 210px) !important;
+    overflow-y: auto !important;
+    scrollbar-width: none !important;
+    z-index: 20 !important;
+  }
+
+  .reel-actions-column {
+    right: 8px !important;
+    bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 14px) !important;
+    z-index: 26 !important;
   }
 
   .camshot-bounty-badge {
@@ -4429,4 +4454,89 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
     right: 64px;
     top: 50%;
   }
+}
+
+/* ==========================================================================
+   REELS OVERLAY DIV CARDS ZERO-COLLISION RESTRUCTURING SUITE
+   ========================================================================== */
+.reel-stage {
+  contain: layout style;
+}
+
+/* Ensure caption text cleanly wraps without pushing container boundary */
+.reel-caption-wrap {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+}
+
+.reel-caption-text {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-height: 1.35 !important;
+}
+
+/* Modal and Drawer Overlay Card Stacking & Containment */
+.reels-modal {
+  z-index: 90 !important;
+  overscroll-behavior: contain !important;
+}
+
+.reels-comments-drawer,
+.creator-profile-drawer,
+.sound-hub-modal,
+.chronex-ai-modal,
+.tip-creator-modal {
+  z-index: 92 !important;
+  overscroll-behavior: contain !important;
+}
+
+.creator-studio-card {
+  width: min(94vw, 1060px) !important;
+  max-height: min(90vh, 840px) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  overscroll-behavior: contain !important;
+}
+
+.comments-card {
+  width: 100% !important;
+  max-width: 520px !important;
+  height: 72vh !important;
+  max-height: 640px !important;
+  border-radius: 26px 26px 0 0 !important;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.85) !important;
+  overscroll-behavior: contain !important;
+}
+
+.profile-drawer-content {
+  width: 100% !important;
+  max-width: 520px !important;
+  height: 86vh !important;
+  max-height: 800px !important;
+  border-radius: 26px 26px 0 0 !important;
+  box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.9) !important;
+  overscroll-behavior: contain !important;
+}
+
+.share-modal-card,
+.sound-hub-card,
+.chronex-ai-card,
+.tip-creator-card,
+.reels-settings-card {
+  width: min(92vw, 480px) !important;
+  max-height: 85vh !important;
+  border-radius: 22px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+  overscroll-behavior: contain !important;
+}
+
+/* Protect quick reaction pills from clipping */
+.reel-quick-reactions {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+}
+
+.reel-inline-bar-pill {
+  min-width: 0 !important;
 }

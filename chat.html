@@ -1207,6 +1207,7 @@
       <div id="settingsModal" class="settings-modal" style="display: none;">
         <div class="settings-modal-content luxury-settings-suite">
           <div class="settings-header">
+            <button id="settingsBackNavBtn" class="settings-back-btn mobile-only" title="Back to Chats"><i class="fa-solid fa-arrow-left"></i></button>
             <div class="settings-header-left">
               <h2><i class="fa-solid fa-sliders" style="color: #00ff66;"></i> Control Center & Settings</h2>
               <span class="settings-subtitle">Supercharged with Supabase Realtime & Phoenix WebSockets</span>
@@ -1433,6 +1434,34 @@
                   </div>
                 </div>
 
+                <!-- CYBER ACCENT AURA & PALETTE -->
+                <div class="settings-card">
+                  <label><strong>Cyber Accent Aura &amp; Energy Palette</strong></label>
+                  <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 10px;">Select your primary visual frequency for buttons, radar glows, active tabs, and story rings.</p>
+                  <div class="cyber-palette-grid">
+                    <button type="button" class="cyber-swatch-btn active" data-theme="emerald" style="--swatch-color: #00ff66;">
+                      <span class="swatch-dot" style="background: #00ff66;"></span>
+                      <span>Matrix Emerald</span>
+                    </button>
+                    <button type="button" class="cyber-swatch-btn" data-theme="violet" style="--swatch-color: #c084fc;">
+                      <span class="swatch-dot" style="background: #c084fc;"></span>
+                      <span>Neon Violet</span>
+                    </button>
+                    <button type="button" class="cyber-swatch-btn" data-theme="gold" style="--swatch-color: #ffd700;">
+                      <span class="swatch-dot" style="background: #ffd700;"></span>
+                      <span>Solar Gold</span>
+                    </button>
+                    <button type="button" class="cyber-swatch-btn" data-theme="cyan" style="--swatch-color: #00f0ff;">
+                      <span class="swatch-dot" style="background: #00f0ff;"></span>
+                      <span>Cyan Frost</span>
+                    </button>
+                    <button type="button" class="cyber-swatch-btn" data-theme="crimson" style="--swatch-color: #ff4d4d;">
+                      <span class="swatch-dot" style="background: #ff4d4d;"></span>
+                      <span>Crimson Stealth</span>
+                    </button>
+                  </div>
+                </div>
+
                 <div class="settings-card">
                   <label><strong>Global Chat Wallpaper</strong></label>
                   <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Select from encrypted ambient presets or upload your own wallpaper.</p>
@@ -1556,6 +1585,51 @@
                       <input type="checkbox" id="ghostModeToggle">
                       <span class="slider"></span>
                     </label>
+                  </div>
+                </div>
+
+                <!-- LAST-SEEN & PRESENCE PRIVACY -->
+                <div class="settings-card">
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: var(--text-primary);"><i class="fa-solid fa-eye-slash" style="color: #67e8f9; margin-right: 6px;"></i> Last Seen &amp; Presence Privacy</strong>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Control who can view your active session timestamp, status beam, and online heartbeat.</p>
+                  </div>
+                  <select id="lastSeenPrivacySelect" class="settings-select" style="width: 100%; margin-top: 6px;">
+                    <option value="everyone">Everyone (Public Radar)</option>
+                    <option value="contacts">My Direct Contacts Only</option>
+                    <option value="nobody">Nobody (Maximum Stealth)</option>
+                  </select>
+                </div>
+
+                <!-- GHOST PROTOCOL DISAPPEARING MESSAGE DEFAULTS -->
+                <div class="settings-card">
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: var(--text-primary);"><i class="fa-solid fa-ghost" style="color: #c084fc; margin-right: 6px;"></i> Ghost Protocol Default Lifetime</strong>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Automatically vaporize transmitted messages across all direct rooms after the configured timer.</p>
+                  </div>
+                  <select id="ghostDefaultTimerSelect" class="settings-select" style="width: 100%; margin-top: 6px;">
+                    <option value="off">Off (Persistent Messages)</option>
+                    <option value="15s">15 Seconds (Self-Destruct)</option>
+                    <option value="1m">1 Minute (Ephemeral Node)</option>
+                    <option value="5m">5 Minutes (Ghost Vault)</option>
+                    <option value="1h">1 Hour (Session Expire)</option>
+                    <option value="24h">24 Hours (Daily Scrub)</option>
+                  </select>
+                </div>
+
+                <!-- BLOCKED CONTACTS & SHIELDED RADAR -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                      <strong style="color: var(--text-primary);"><i class="fa-solid fa-user-slash" style="color: #ff6b6b; margin-right: 6px;"></i> Blocked Users Manager</strong>
+                      <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Manage contacts blocked from messaging, calls, or viewing your stories.</p>
+                    </div>
+                    <button type="button" id="refreshBlockedUsersBtn" class="btn-secondary" style="padding: 5px 12px; font-size: 11.5px;">
+                      <i class="fa-solid fa-rotate"></i> Refresh
+                    </button>
+                  </div>
+                  <div id="blockedUsersContainer" class="contact-scroll-box" style="max-height: 180px; margin-top: 8px; overflow-y: auto;">
+                    <p style="color: var(--text-muted); text-align: center; font-size: 12px; padding: 12px 0;">Loading blocked contacts...</p>
                   </div>
                 </div>
 

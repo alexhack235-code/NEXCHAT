@@ -34,3 +34,5 @@ Thumbs.db
 .system_generated/
 *.backup.*
 logo_legacy_backup.jpg
+.backup_clean/
+*.tsbuildinfo

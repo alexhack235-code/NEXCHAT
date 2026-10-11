@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>NEX 3D Cyber Metropolis - NEXCHAT</title>
+  <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Three.js r128 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #02060b;
+      font-family: 'Rajdhani', sans-serif;
+      color: #ffffff;
+    }
+
+    #game-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+
+    /* Crosshair & HUD Overlay */
+    #hud-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+    }
+
+    .crosshair-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+    }
+
+    .crosshair-dot {
+      width: 4px;
+      height: 4px;
+      background: #00f2ff;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #00f2ff;
+    }
+
+    .crosshair-line {
+      position: absolute;
+      background: rgba(0, 242, 255, 0.75);
+    }
+    .crosshair-line.top { top: 0; width: 2px; height: 8px; }
+    .crosshair-line.bottom { bottom: 0; width: 2px; height: 8px; }
+    .crosshair-line.left { left: 0; width: 8px; height: 2px; }
+    .crosshair-line.right { right: 0; width: 8px; height: 2px; }
+
+    /* Top Status Bar */
+    .hud-top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      pointer-events: auto;
+      gap: 16px;
+    }
+
+    .hud-chip {
+      background: rgba(6, 15, 25, 0.88);
+      border: 1px solid rgba(0, 242, 255, 0.35);
+      backdrop-filter: blur(8px);
+      padding: 8px 14px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    .hud-btn {
+      background: rgba(6, 15, 25, 0.85);
+      border: 1px solid rgba(0, 242, 255, 0.4);
+      color: #00f2ff;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+    }
+
+    .hud-btn:hover {
+      background: rgba(0, 242, 255, 0.2);
+      border-color: #00f2ff;
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+    }
+
+    .hud-btn.active {
+      background: #00f2ff;
+      color: #000000;
+      border-color: #00f2ff;
+    }
+
+    /* Subterranean Indicator */
+    .depth-badge {
+      background: rgba(255, 183, 0, 0.15);
+      border: 1px solid #ffb700;
+      color: #ffb700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+    .depth-badge.underground {
+      background: rgba(0, 242, 255, 0.2);
+      border-color: #00f2ff;
+      color: #00f2ff;
+      animation: pulse 1.8s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.7; }
+      50% { opacity: 1; text-shadow: 0 0 10px #00f2ff; }
+      100% { opacity: 0.7; }
+    }
+
+    /* Bottom Status Section */
+    .hud-bottom-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: auto;
+      gap: 16px;
+    }
+
+    .vitals-panel {
+      background: rgba(6, 15, 25, 0.9);
+      border: 1px solid rgba(0, 242, 255, 0.35);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 280px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    }
+
+    .bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .bar-label-group {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      transition: width 0.15s ease-out;
+    }
+    .bar-health { background: linear-gradient(90deg, #ff3366, #ff6699); }
+    .bar-shield { background: linear-gradient(90deg, #00f2ff, #33bbff); }
+    .bar-stamina { background: linear-gradient(90deg, #00ff88, #55ffaa); }
+    .bar-jetpack { background: linear-gradient(90deg, #ffb700, #ffea00); }
+
+    .weapon-panel {
+      background: rgba(6, 15, 25, 0.9);
+      border: 1px solid rgba(0, 242, 255, 0.35);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      min-width: 220px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    }
+
+    .weapon-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      color: #00f2ff;
+      letter-spacing: 1px;
+    }
+
+    .ammo-count {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+    }
+    .ammo-reserve {
+      font-size: 14px;
+      color: #8899aa;
+    }
+
+    /* Modal dialogs */
+    .cyber-modal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(6, 15, 25, 0.96);
+      border: 2px solid #00f2ff;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 580px;
+      width: 90%;
+      z-index: 100;
+      box-shadow: 0 0 40px rgba(0, 242, 255, 0.35);
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .cyber-modal.visible {
+      display: flex;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(0, 242, 255, 0.3);
+      padding-bottom: 12px;
+    }
+
+    .modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: #00f2ff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: #8899aa;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    .modal-close-btn:hover { color: #ff3366; }
+
+    /* Interaction Prompt */
+    .interact-toast {
+      position: absolute;
+      bottom: 130px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(6, 15, 25, 0.95);
+      border: 2px solid #00f2ff;
+      border-radius: 12px;
+      padding: 10px 24px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      display: none;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 0 25px rgba(0, 242, 255, 0.5);
+      z-index: 50;
+      pointer-events: none;
+    }
+
+    .interact-key {
+      background: #00f2ff;
+      color: #000;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 900;
+    }
+
+    /* Start / Instructions Screen */
+    #start-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(2, 6, 11, 0.92);
+      backdrop-filter: blur(12px);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .start-card {
+      background: rgba(6, 15, 25, 0.95);
+      border: 2px solid #00f2ff;
+      border-radius: 20px;
+      padding: 36px 40px;
+      max-width: 680px;
+      width: 100%;
+      box-shadow: 0 0 50px rgba(0, 242, 255, 0.3);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .start-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 1.5px;
+      text-shadow: 0 0 20px rgba(0, 242, 255, 0.6);
+    }
+
+    .start-desc {
+      color: #8fa3b8;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      text-align: left;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 13px;
+    }
+
+    .ctrl-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ctrl-key {
+      background: rgba(0, 242, 255, 0.15);
+      border: 1px solid #00f2ff;
+      color: #00f2ff;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-size: 11px;
+    }
+
+    .start-play-btn {
+      background: linear-gradient(90deg, #00f2ff, #00ff88);
+      color: #000000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      padding: 16px 32px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 0 25px rgba(0, 242, 255, 0.5);
+      transition: all 0.2s;
+    }
+
+    .start-play-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 35px rgba(0, 255, 136, 0.7);
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD OVERLAY -->
+  <div id="hud-layer">
+    <!-- Top Bar -->
+    <div class="hud-top-bar">
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <a href="gaminghub.html" class="hud-btn" title="Return to Arcade">
+          <i class="fa-solid fa-arrow-left"></i> ARCADE HUB
+        </a>
+        <div class="hud-chip">
+          <i class="fa-solid fa-coins" style="color: #00ff88;"></i>
+          <span><strong id="hud-tokens">1,250</strong> NEX</span>
+        </div>
+        <div class="hud-chip" id="hud-depth-container">
+          <span class="depth-badge" id="hud-depth-badge">// SURFACE: 0.0M</span>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" class="hud-btn" id="btn-toggle-nuclear">
+          <i class="fa-solid fa-atom"></i> [N] NUCLEAR
+        </button>
+        <button type="button" class="hud-btn" id="btn-toggle-metro">
+          <i class="fa-solid fa-train-subway"></i> [F] METRO
+        </button>
+        <button type="button" class="hud-btn" id="btn-toggle-starship">
+          <i class="fa-solid fa-rocket"></i> [B] STARSHIP
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Crosshair -->
+    <div class="crosshair-container">
+      <div class="crosshair-dot"></div>
+      <div class="crosshair-line top"></div>
+      <div class="crosshair-line bottom"></div>
+      <div class="crosshair-line left"></div>
+      <div class="crosshair-line right"></div>
+    </div>
+
+    <!-- Interaction Toast Prompt -->
+    <div class="interact-toast" id="interact-prompt">
+      <span class="interact-key" id="prompt-key">F</span>
+      <span id="prompt-text">DESCEND INTO SUBTERRANEAN METRO (-22M)</span>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="hud-bottom-bar">
+      <!-- Vitals (Health / Shield / Stamina / Jetpack) -->
+      <div class="vitals-panel">
+        <div class="bar-row">
+          <div class="bar-label-group">
+            <span style="color: #ff3366;"><i class="fa-solid fa-heart-pulse"></i> VITAL INTEGRITY</span>
+            <span id="label-health">100%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-health" id="fill-health" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-label-group">
+            <span style="color: #00f2ff;"><i class="fa-solid fa-shield-halved"></i> ENERGY SHIELD</span>
+            <span id="label-shield">100%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-shield" id="fill-shield" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-label-group">
+            <span style="color: #00ff88;"><i class="fa-solid fa-bolt"></i> STAMINA</span>
+            <span id="label-stamina">100%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-stamina" id="fill-stamina" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-label-group">
+            <span style="color: #ffb700;"><i class="fa-solid fa-jet-fighter"></i> IONIC JETPACK</span>
+            <span id="label-jetpack">100%</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill bar-jetpack" id="fill-jetpack" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Weapon & Tactical Info -->
+      <div class="weapon-panel">
+        <div class="weapon-title" id="hud-weapon-name">TACTICAL RIFLE</div>
+        <div style="display: flex; align-items: baseline; gap: 4px;">
+          <span class="ammo-count" id="hud-ammo-cur">30</span>
+          <span class="ammo-reserve">/ <span id="hud-ammo-max">180</span></span>
+        </div>
+        <div style="font-size: 11px; color: #8fa3b8; font-family: 'Orbitron', sans-serif;">
+          [1-4] SELECT WEAPON // [R] RELOAD
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NUCLEAR POWER CONSOLE MODAL -->
+  <div class="cyber-modal" id="modal-nuclear">
+    <div class="modal-header">
+      <div class="modal-title">
+        <i class="fa-solid fa-atom" style="color: #00f2ff;"></i>
+        2,400 MWE NUCLEAR FISSION CONSOLE
+      </div>
+      <button type="button" class="modal-close-btn" onclick="toggleNuclearModal()">&times;</button>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 14px; font-size: 14px;">
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+        <div style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,242,255,0.2);">
+          <div style="color: #8fa3b8; font-size: 11px;">REACTOR THERMAL TEMP</div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: #00f2ff;" id="nuke-temp">312.4 °C</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,255,136,0.2);">
+          <div style="color: #8fa3b8; font-size: 11px;">GENERATOR OUTPUT</div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: #00ff88;" id="nuke-output">2,400 MW</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border: 1px solid rgba(255,183,0,0.2);">
+          <div style="color: #8fa3b8; font-size: 11px;">CONTROL ROD INSERTION</div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: #ffb700;" id="nuke-rods">72%</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border: 1px solid rgba(0,242,255,0.2);">
+          <div style="color: #8fa3b8; font-size: 11px;">COOLANT PUMP FLOW</div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 20px; font-weight: 800; color: #00f2ff;" id="nuke-coolant">94%</div>
+        </div>
+      </div>
+      <div style="background: rgba(0, 242, 255, 0.08); border: 1px solid #00f2ff; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-weight: 700; color: #00f2ff;">TECHNICIAN SHIFT DIVIDEND</div>
+          <div style="font-size: 12px; color: #8fa3b8;">Earn passive NEX Tokens by sustaining grid stability</div>
+        </div>
+        <div style="font-family: 'Orbitron', sans-serif; font-weight: 900; color: #00ff88; font-size: 16px;">
+          +8.5 NEX/s
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="start-play-btn" style="flex: 1; padding: 10px;" onclick="claimNuclearShift()">
+          <i class="fa-solid fa-bolt"></i> CLAIM POWER DIVIDEND
+        </button>
+        <button type="button" class="hud-btn" style="border-color: #ff3366; color: #ff3366;" onclick="scramReactor()">
+          <i class="fa-solid fa-triangle-exclamation"></i> EMERGENCY SCRAM
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- START / CONTROLS OVERLAY -->
+  <div id="start-overlay">
+    <div class="start-card">
+      <div>
+        <div style="display: inline-block; background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 800; letter-spacing: 1px; margin-bottom: 8px;">
+          NEXCHAT NEXT-GEN 3D ENGINE
+        </div>
+        <h1 class="start-title">NEX 3D CYBER METROPOLIS</h1>
+        <p class="start-desc">
+          High-fidelity Newtonian physics 3D world. Explore the 2,400 MWe Nuclear Power Plant, Real-World Underground Metro Subway (-22m), SpaceX Starship & Mechazilla, Armed Combat Rovers, Supersonic Jets, and Zombie Apocalypse Horde!
+        </p>
+      </div>
+
+      <div class="controls-grid">
+        <div class="ctrl-item"><span class="ctrl-key">WASD</span> Walk / Drive / Steer</div>
+        <div class="ctrl-item"><span class="ctrl-key">MOUSE</span> Look / Aim Orbit</div>
+        <div class="ctrl-item"><span class="ctrl-key">SPACE</span> Jump / Jetpack Boost</div>
+        <div class="ctrl-item"><span class="ctrl-key">SHIFT</span> Tactical Sprint</div>
+        <div class="ctrl-item"><span class="ctrl-key">LEFT CLICK</span> Fire Weapon / Cannon</div>
+        <div class="ctrl-item"><span class="ctrl-key">RIGHT CLICK</span> ADS Precision Reticle</div>
+        <div class="ctrl-item"><span class="ctrl-key">F</span> Enter/Exit Underground Metro</div>
+        <div class="ctrl-item"><span class="ctrl-key">V</span> Enter/Exit Combat Rover</div>
+        <div class="ctrl-item"><span class="ctrl-key">N</span> Nuclear Power Console</div>
+        <div class="ctrl-item"><span class="ctrl-key">1 - 4</span> Switch Weapons</div>
+      </div>
+
+      <button type="button" class="start-play-btn" id="btn-start-game">
+        <i class="fa-solid fa-play"></i> ENTER METROPOLIS [PLAY NOW]
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // NEX 3D METROPOLIS - PROCEDURAL WEB AUDIO SYNTHESIZER
+    // Zero external audio file dependencies
+    // ============================================================
+    class CyberAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterVolume = 0.65;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.ctx = new AudioContextClass();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      playGunshot() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(45, now + 0.12);
+        gain.gain.setValueAtTime(0.35 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+
+      playLaser() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.18);
+        gain.gain.setValueAtTime(0.25 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+
+      playGeigerClick() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1800 + Math.random() * 600, now);
+        gain.gain.setValueAtTime(0.12 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.025);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.03);
+      }
+
+      playSubwayRumble() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(42, now);
+        osc.frequency.linearRampToValueAtTime(58, now + 0.8);
+        gain.gain.setValueAtTime(0.22 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 1.25);
+      }
+
+      playRocketRoar() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(65, now);
+        osc.frequency.linearRampToValueAtTime(110, now + 2.5);
+        gain.gain.setValueAtTime(0.4 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 3.0);
+      }
+
+      playLootChime() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+          gain.gain.setValueAtTime(0.18 * this.masterVolume, now + idx * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.22);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.07);
+          osc.stop(now + idx * 0.07 + 0.25);
+        });
+      }
+    }
+
+    const cyberAudio = new CyberAudioEngine();
+
+    // ============================================================
+    // STATE MACHINE & TELEMETRY
+    // ============================================================
+    const gameState = {
+      tokens: 1250,
+      health: 100,
+      shield: 100,
+      stamina: 100,
+      jetpackFuel: 100,
+      isUnderground: false,
+      inVehicle: false,
+      isAiming: false,
+      currentWeapon: 'rifle',
+      weapons: {
+        rifle: { name: 'TACTICAL RIFLE', ammo: 30, maxAmmo: 30, reserve: 180, damage: 32, rate: 0.12 },
+        railgun: { name: 'QUANTUM RAILGUN', ammo: 8, maxAmmo: 8, reserve: 32, damage: 120, rate: 0.8 },
+        plasma: { name: 'DUAL PLASMA', ammo: 40, maxAmmo: 40, reserve: 240, damage: 24, rate: 0.09 },
+        rpg: { name: 'HEAVY RPG', ammo: 4, maxAmmo: 4, reserve: 16, damage: 250, rate: 1.2 }
+      },
+      nuclear: {
+        temp: 312.4,
+        output: 2400,
+        rods: 72,
+        coolant: 94,
+        lastDividendTime: Date.now()
+      },
+      starship: {
+        isLaunching: false,
+        altitude: 0,
+        thrustPercent: 0
+      }
+    };
+
+    // ============================================================
+    // THREE.JS SCENE SETUP
+    // ============================================================
+    const canvas = document.getElementById('game-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x060c14);
+    scene.fog = new THREE.FogExp2(0x060c14, 0.0075);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 3.2, 10);
+
+    // Ambient & Directional Lighting
+    const ambientLight = new THREE.AmbientLight(0x223344, 0.9);
+    scene.add(ambientLight);
+
+    const sunLight = new THREE.DirectionalLight(0xddeeff, 1.4);
+    sunLight.position.set(60, 120, 50);
+    sunLight.castShadow = true;
+    sunLight.shadow.mapSize.width = 2048;
+    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.camera.near = 10;
+    sunLight.shadow.camera.far = 300;
+    sunLight.shadow.camera.left = -120;
+    sunLight.shadow.camera.right = 120;
+    sunLight.shadow.camera.top = 120;
+    sunLight.shadow.camera.bottom = -120;
+    scene.add(sunLight);
+
+    // Ground Plane Surface (Y = 0)
+    const groundGeo = new THREE.PlaneGeometry(600, 600, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({
+      color: 0x0a0f16,
+      roughness: 0.9,
+      metalness: 0.2
+    });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
+
+    // ============================================================
+    // 1. PROCEDURAL 3D CYBER METROPOLIS
+    // ============================================================
+    const buildingsGroup = new THREE.Group();
+    scene.add(buildingsGroup);
+
+    const buildingMatDark = new THREE.MeshStandardMaterial({ color: 0x0e1722, roughness: 0.7, metalness: 0.4 });
+    const buildingMatGlass = new THREE.MeshStandardMaterial({ color: 0x07111c, roughness: 0.2, metalness: 0.85 });
+    const neonCyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+    const neonLimeMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+
+    // Grid of modern skyscrapers
+    const cityColliders = [];
+    for (let bx = -4; bx <= 4; bx++) {
+      for (let bz = -4; bz <= 4; bz++) {
+        if (Math.abs(bx) <= 1 && Math.abs(bz) <= 1) continue; // Open plaza center
+        if (bx <= -2 && bz <= -2) continue; // Nuclear Plant clearing
+        if (bx >= 2 && bz <= -2) continue; // Spaceport clearing
+
+        const posX = bx * 34;
+        const posZ = bz * 34;
+        const width = 18 + Math.random() * 8;
+        const depth = 18 + Math.random() * 8;
+        const height = 45 + Math.random() * 75;
+
+        const bGroup = new THREE.Group();
+        bGroup.position.set(posX, 0, posZ);
+
+        const bMesh = new THREE.Mesh(new THREE.BoxGeometry(width, height, depth), buildingMatDark);
+        bMesh.position.y = height / 2;
+        bMesh.castShadow = true;
+        bMesh.receiveShadow = true;
+        bGroup.add(bMesh);
+
+        // Glass curtain bands
+        const bandCount = Math.floor(height / 12);
+        for (let b = 1; b < bandCount; b++) {
+          const band = new THREE.Mesh(new THREE.BoxGeometry(width + 0.2, 2.5, depth + 0.2), buildingMatGlass);
+          band.position.y = b * 12;
+          bGroup.add(band);
+        }
+
+        // Roof Helipad or Spire
+        if (Math.random() > 0.4) {
+          const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.8, 18, 8), neonCyanMat);
+          spire.position.y = height + 9;
+          bGroup.add(spire);
+        }
+
+        buildingsGroup.add(bGroup);
+        cityColliders.push({ x: posX, z: posZ, hw: width / 2, hd: depth / 2 });
+      }
+    }
+
+    // Street Network & Road Markings
+    const roadMat = new THREE.MeshStandardMaterial({ color: 0x080b10, roughness: 0.95 });
+    const roadMarkMat = new THREE.MeshBasicMaterial({ color: 0xffea00 });
+    for (let r = -120; r <= 120; r += 34) {
+      // X-Road
+      const rX = new THREE.Mesh(new THREE.PlaneGeometry(360, 10), roadMat);
+      rX.rotation.x = -Math.PI / 2;
+      rX.position.set(0, 0.02, r);
+      rX.receiveShadow = true;
+      scene.add(rX);
+
+      // Z-Road
+      const rZ = new THREE.Mesh(new THREE.PlaneGeometry(10, 360), roadMat);
+      rZ.rotation.x = -Math.PI / 2;
+      rZ.position.set(r, 0.02, 0);
+      rZ.receiveShadow = true;
+      scene.add(rZ);
+    }
+
+    // ============================================================
+    // 2. 2,400 MWE NUCLEAR POWER PLANT COMPLEX (-150, 0, -140)
+    // ============================================================
+    const nukeGroup = new THREE.Group();
+    nukeGroup.position.set(-150, 0, -140);
+    scene.add(nukeGroup);
+
+    const nukeConcreteMat = new THREE.MeshStandardMaterial({ color: 0x161e28, roughness: 0.85, metalness: 0.3 });
+    const nukeSteelMat = new THREE.MeshStandardMaterial({ color: 0x0e141c, metalness: 0.9, roughness: 0.2 });
+    const cherenkovMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.85 });
+
+    // Reactor Containment Dome
+    const containmentDome = new THREE.Mesh(new THREE.CylinderGeometry(18, 18, 24, 32), nukeConcreteMat);
+    containmentDome.position.y = 12;
+    containmentDome.castShadow = true;
+    nukeGroup.add(containmentDome);
+
+    const domeCap = new THREE.Mesh(new THREE.SphereGeometry(18, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), nukeConcreteMat);
+    domeCap.position.y = 24;
+    nukeGroup.add(domeCap);
+
+    // Glowing Cherenkov Blue Core Inspection Pool
+    const cherenkovCore = new THREE.Mesh(new THREE.CylinderGeometry(6, 6, 8, 24), cherenkovMat);
+    cherenkovCore.position.set(0, 10, 0);
+    nukeGroup.add(cherenkovCore);
+
+    // Twin Hyperbolic Cooling Towers
+    const coolingTowers = [];
+    const towerOffsets = [{ x: -38, z: -18 }, { x: -38, z: 28 }];
+    towerOffsets.forEach((pos) => {
+      const tower = new THREE.Group();
+      tower.position.set(pos.x, 0, pos.z);
+
+      const s1 = new THREE.Mesh(new THREE.CylinderGeometry(13, 17, 20, 28, 1, true), nukeConcreteMat);
+      s1.position.y = 10;
+      tower.add(s1);
+
+      const s2 = new THREE.Mesh(new THREE.CylinderGeometry(10.5, 13, 18, 28, 1, true), nukeConcreteMat);
+      s2.position.y = 29;
+      tower.add(s2);
+
+      const s3 = new THREE.Mesh(new THREE.CylinderGeometry(12.5, 10.5, 16, 28, 1, true), nukeConcreteMat);
+      s3.position.y = 46;
+      tower.add(s3);
+
+      // Billowing Radioactive Steam Vapor Ring
+      const steamRing = new THREE.Mesh(
+        new THREE.TorusGeometry(11.5, 2.2, 8, 24),
+        new THREE.MeshBasicMaterial({ color: 0xccf0ff, transparent: true, opacity: 0.45 })
+      );
+      steamRing.rotation.x = Math.PI / 2;
+      steamRing.position.y = 54;
+      tower.add(steamRing);
+
+      coolingTowers.push(steamRing);
+      nukeGroup.add(tower);
+    });
+
+    // Steam Turbine Hall
+    const turbineHall = new THREE.Mesh(new THREE.BoxGeometry(38, 14, 22), nukeSteelMat);
+    turbineHall.position.set(28, 7, 0);
+    turbineHall.castShadow = true;
+    nukeGroup.add(turbineHall);
+
+    // High Voltage Substation Transformers
+    for (let tr = 0; tr < 3; tr++) {
+      const trans = new THREE.Mesh(new THREE.BoxGeometry(3.6, 4.2, 3.6), nukeSteelMat);
+      trans.position.set(tr * 6 + 18, 2.1, 22);
+      nukeGroup.add(trans);
+    }
+
+    // 36m Lattice Electricity Transmission Pylon
+    const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 3.2, 36, 4), nukeSteelMat);
+    pylon.position.set(28, 18, 36);
+    nukeGroup.add(pylon);
+
+    // ============================================================
+    // 3. REAL-WORLD UNDERGROUND SUBTERRANEAN METRO (-22M DEPTH)
+    // ============================================================
+    const undergroundGroup = new THREE.Group();
+    undergroundGroup.position.set(20, -22, 20);
+    scene.add(undergroundGroup);
+
+    const metroFloorMat = new THREE.MeshStandardMaterial({ color: 0x141a24, roughness: 0.85 });
+    const metroWallMat = new THREE.MeshStandardMaterial({ color: 0x0f151e, roughness: 0.9 });
+    const trackRailMat = new THREE.MeshStandardMaterial({ color: 0x8899aa, metalness: 0.95, roughness: 0.2 });
+    const trainMat = new THREE.MeshStandardMaterial({ color: 0x0b1118, metalness: 0.9, roughness: 0.25 });
+
+    // Massive Subterranean Platform Floor (120m x 42m)
+    const subwayFloor = new THREE.Mesh(new THREE.BoxGeometry(120, 1.0, 42), metroFloorMat);
+    subwayFloor.position.y = -0.5;
+    subwayFloor.receiveShadow = true;
+    undergroundGroup.add(subwayFloor);
+
+    // Cavern Concrete Ceiling (Separates subterranean from surface)
+    const subwayCeiling = new THREE.Mesh(new THREE.BoxGeometry(120, 1.0, 42), metroWallMat);
+    subwayCeiling.position.y = 8.5;
+    undergroundGroup.add(subwayCeiling);
+
+    // Perimeter Tunnel Walls
+    const wallBack = new THREE.Mesh(new THREE.BoxGeometry(120, 9.0, 1.2), metroWallMat);
+    wallBack.position.set(0, 4.0, -21);
+    undergroundGroup.add(wallBack);
+
+    const wallFront = new THREE.Mesh(new THREE.BoxGeometry(120, 9.0, 1.2), metroWallMat);
+    wallFront.position.set(0, 4.0, 21);
+    undergroundGroup.add(wallFront);
+
+    // Support Columns
+    for (let colX = -48; colX <= 48; colX += 24) {
+      const c1 = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 8.0, 16), metroWallMat);
+      c1.position.set(colX, 4.0, -4);
+      undergroundGroup.add(c1);
+
+      const c2 = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 8.0, 16), metroWallMat);
+      c2.position.set(colX, 4.0, 4);
+      undergroundGroup.add(c2);
+    }
+
+    // Dual Heavy Railway Tracks
+    [-0.8, 0.8].forEach((rOffset) => {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(110, 0.25, 0.15), trackRailMat);
+      rail.position.set(0, 0.15, -12 + rOffset);
+      undergroundGroup.add(rail);
+    });
+
+    // 3-Car Cyber Subway Metro Train
+    const metroTrain = new THREE.Group();
+    metroTrain.position.set(0, 0.2, -12);
+    for (let car = -1; car <= 1; car++) {
+      const cGroup = new THREE.Group();
+      cGroup.position.set(car * 15.5, 0, 0);
+
+      const body = new THREE.Mesh(new THREE.BoxGeometry(14.5, 3.2, 3.2), trainMat);
+      body.position.y = 1.6;
+      cGroup.add(body);
+
+      // Windows
+      const winL = new THREE.Mesh(new THREE.PlaneGeometry(13.5, 0.8), neonCyanMat);
+      winL.position.set(0, 2.0, 1.62);
+      cGroup.add(winL);
+
+      const winR = new THREE.Mesh(new THREE.PlaneGeometry(13.5, 0.8), neonCyanMat);
+      winR.rotation.y = Math.PI;
+      winR.position.set(0, 2.0, -1.62);
+      cGroup.add(winR);
+
+      metroTrain.add(cGroup);
+    }
+    undergroundGroup.add(metroTrain);
+
+    // Surface Subway Entrance Headhouse at (18, 0, 25)
+    const subwayEntrance = new THREE.Group();
+    subwayEntrance.position.set(18, 0, 25);
+    scene.add(subwayEntrance);
+
+    const headhouseMat = new THREE.MeshStandardMaterial({ color: 0x091018, metalness: 0.8 });
+    const hhMesh = new THREE.Mesh(new THREE.BoxGeometry(6, 4, 8), headhouseMat);
+    hhMesh.position.y = 2;
+    subwayEntrance.add(hhMesh);
+
+    const signBoard = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.8, 0.2), neonCyanMat);
+    signBoard.position.set(0, 3.6, 4.05);
+    subwayEntrance.add(signBoard);
+
+    // ============================================================
+    // 4. SPACEX STARSHIP & MECHAZILLA TOWER (120, 0, -100)
+    // ============================================================
+    const spaceportGroup = new THREE.Group();
+    spaceportGroup.position.set(120, 0, -100);
+    scene.add(spaceportGroup);
+
+    const stainlessSteelMat = new THREE.MeshStandardMaterial({ color: 0xc8d4e0, metalness: 0.95, roughness: 0.15 });
+    const heatshieldMat = new THREE.MeshStandardMaterial({ color: 0x111317, roughness: 0.9 });
+    const mechazillaSteelMat = new THREE.MeshStandardMaterial({ color: 0x242830, metalness: 0.85, roughness: 0.4 });
+
+    // 145m Mechazilla Tower
+    const towerMast = new THREE.Mesh(new THREE.BoxGeometry(8, 145, 8), mechazillaSteelMat);
+    towerMast.position.set(-16, 72.5, 0);
+    towerMast.castShadow = true;
+    spaceportGroup.add(towerMast);
+
+    // Dual Catch Chopstick Arms
+    const chopstickArm = new THREE.Mesh(new THREE.BoxGeometry(22, 2.4, 2.4), mechazillaSteelMat);
+    chopstickArm.position.set(-4, 98, 6);
+    spaceportGroup.add(chopstickArm);
+
+    // 120m Starship Rocket Stack
+    const rocketStack = new THREE.Group();
+    rocketStack.position.set(0, 0, 0);
+    spaceportGroup.add(rocketStack);
+
+    // Super Heavy Booster (71m, 9m diameter)
+    const booster = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 71, 32), stainlessSteelMat);
+    booster.position.y = 35.5;
+    booster.castShadow = true;
+    rocketStack.add(booster);
+
+    // Starship Upper Stage (50m, 9m diameter with nosecone)
+    const starshipBody = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 36, 32), stainlessSteelMat);
+    starshipBody.position.y = 71 + 18;
+    starshipBody.castShadow = true;
+    rocketStack.add(starshipBody);
+
+    const starshipNose = new THREE.Mesh(new THREE.ConeGeometry(4.5, 14, 32), stainlessSteelMat);
+    starshipNose.position.y = 71 + 36 + 7;
+    rocketStack.add(starshipNose);
+
+    // Raptor Exhaust Flame
+    const flameGeo = new THREE.ConeGeometry(4.8, 28, 16);
+    const flameMat = new THREE.MeshBasicMaterial({ color: 0xff7700, transparent: true, opacity: 0 });
+    const raptorFlame = new THREE.Mesh(flameGeo, flameMat);
+    raptorFlame.rotation.x = Math.PI;
+    raptorFlame.position.y = -14;
+    rocketStack.add(raptorFlame);
+
+    // ============================================================
+    // 5. COMBAT ROVER VEHICLE (0, 0, 15)
+    // ============================================================
+    const roverGroup = new THREE.Group();
+    roverGroup.position.set(0, 0, 15);
+    scene.add(roverGroup);
+
+    const roverArmorMat = new THREE.MeshStandardMaterial({ color: 0x162230, metalness: 0.85, roughness: 0.3 });
+    const roverTireMat = new THREE.MeshStandardMaterial({ color: 0x05070a, roughness: 0.95 });
+
+    const chassis = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 4.4), roverArmorMat);
+    chassis.position.y = 0.8;
+    chassis.castShadow = true;
+    roverGroup.add(chassis);
+
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.8, 2.2), roverArmorMat);
+    cabin.position.set(0, 1.5, -0.3);
+    roverGroup.add(cabin);
+
+    // 4 Heavy All-Terrain Tires
+    const tirePositions = [
+      { x: -1.35, z: 1.4 }, { x: 1.35, z: 1.4 },
+      { x: -1.35, z: -1.4 }, { x: 1.35, z: -1.4 }
+    ];
+    tirePositions.forEach(p => {
+      const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.5, 16), roverTireMat);
+      tire.rotation.z = Math.PI / 2;
+      tire.position.set(p.x, 0.55, p.z);
+      roverGroup.add(tire);
+    });
+
+    // Roof Autocannon Turret
+    const turret = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.4, 1.2), nukeSteelMat);
+    turret.position.set(0, 2.05, -0.3);
+    roverGroup.add(turret);
+
+    const cannonBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.0, 8), nukeSteelMat);
+    cannonBarrel.rotation.x = Math.PI / 2;
+    cannonBarrel.position.set(0, 2.05, 0.9);
+    roverGroup.add(cannonBarrel);
+
+    // ============================================================
+    // 6. ZOMBIE QUARANTINE HORDE
+    // ============================================================
+    const zombies = [];
+    const zombieSkinMat = new THREE.MeshStandardMaterial({ color: 0x243928, roughness: 0.9 });
+    const zombieClothMat = new THREE.MeshStandardMaterial({ color: 0x1f2730, roughness: 0.95 });
+    const zombieEyeMat = new THREE.MeshBasicMaterial({ color: 0xff0044 });
+
+    function createZombie(seedX, seedZ) {
+      const zGroup = new THREE.Group();
+      zGroup.position.set(seedX, 0, seedZ);
+
+      // Body & Limbs
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.65, 0.3), zombieClothMat);
+      torso.position.y = 1.1;
+      torso.castShadow = true;
+      zGroup.add(torso);
+
+      const head = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.35, 0.32), zombieSkinMat);
+      head.position.set(0, 1.6, 0.05);
+      zGroup.add(head);
+
+      const eyeL = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), zombieEyeMat);
+      eyeL.position.set(-0.08, 1.65, 0.2);
+      zGroup.add(eyeL);
+
+      const eyeR = new THREE.Mesh(new THREE.SphereGeometry(0.05, 6, 6), zombieEyeMat);
+      eyeR.position.set(0.08, 1.65, 0.2);
+      zGroup.add(eyeR);
+
+      // Reaching Arms
+      const armL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.5, 0.14), zombieSkinMat);
+      armL.position.set(-0.35, 1.1, 0.25);
+      armL.rotation.x = -Math.PI / 2.3;
+      zGroup.add(armL);
+
+      const armR = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.5, 0.14), zombieSkinMat);
+      armR.position.set(0.35, 1.1, 0.25);
+      armR.rotation.x = -Math.PI / 2.1;
+      zGroup.add(armR);
+
+      const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.75, 0.18), zombieClothMat);
+      legL.position.set(-0.16, 0.4, 0);
+      zGroup.add(legL);
+
+      const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.75, 0.18), zombieClothMat);
+      legR.position.set(0.16, 0.4, 0);
+      zGroup.add(legR);
+
+      scene.add(zGroup);
+
+      return {
+        mesh: zGroup,
+        legL,
+        legR,
+        alive: true,
+        health: 60,
+        speed: 2.2 + Math.random() * 1.4,
+        seed: Math.random() * 10
+      };
+    }
+
+    // Spawn 22 Humanoid Zombies
+    for (let i = 0; i < 22; i++) {
+      const ang = Math.random() * Math.PI * 2;
+      const dist = 35 + Math.random() * 45;
+      const zx = Math.cos(ang) * dist;
+      const zz = Math.sin(ang) * dist;
+      zombies.push(createZombie(zx, zz));
+    }
+
+    // ============================================================
+    // 7. WEAPON PROJECTILES & BULLETS
+    // ============================================================
+    const projectiles = [];
+    function spawnProjectile(pos, dir, type) {
+      const geo = new THREE.SphereGeometry(0.12, 8, 8);
+      const mat = new THREE.MeshBasicMaterial({ color: type === 'railgun' ? 0x00f2ff : 0x00ff88 });
+      const bullet = new THREE.Mesh(geo, mat);
+      bullet.position.copy(pos);
+      scene.add(bullet);
+
+      projectiles.push({
+        mesh: bullet,
+        dir: dir.clone().normalize(),
+        speed: type === 'railgun' ? 120 : 65,
+        damage: gameState.weapons[gameState.currentWeapon].damage,
+        life: 1.8
+      });
+    }
+
+    // ============================================================
+    // 8. PLAYER CONTROLLER & INPUT ENGINE
+    // ============================================================
+    const keys = {};
+    const player = {
+      pos: new THREE.Vector3(0, 1.2, 0),
+      vel: new THREE.Vector3(0, 0, 0),
+      yaw: 0,
+      pitch: 0,
+      isGrounded: true,
+      lastShoot: 0
+    };
+
+    window.addEventListener('keydown', (e) => {
+      cyberAudio.init();
+      keys[e.code] = true;
+
+      if (e.code === 'Digit1') switchWeapon('rifle');
+      if (e.code === 'Digit2') switchWeapon('railgun');
+      if (e.code === 'Digit3') switchWeapon('plasma');
+      if (e.code === 'Digit4') switchWeapon('rpg');
+
+      if (e.code === 'KeyR') reloadWeapon();
+      if (e.code === 'KeyN') toggleNuclearModal();
+      if (e.code === 'KeyB') triggerStarshipLaunch();
+      if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'KeyV') toggleVehicleMode();
+    });
+
+    window.addEventListener('keyup', (e) => {
+      keys[e.code] = false;
+    });
+
+    let isPointerLocked = false;
+    canvas.addEventListener('click', () => {
+      cyberAudio.init();
+      if (!isPointerLocked) {
+        canvas.requestPointerLock();
+      } else {
+        shootWeapon();
+      }
+    });
+
+    canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    canvas.addEventListener('mousedown', (e) => {
+      if (e.button === 2) {
+        gameState.isAiming = true;
+        camera.fov = 42;
+        camera.updateProjectionMatrix();
+      }
+    });
+
+    canvas.addEventListener('mouseup', (e) => {
+      if (e.button === 2) {
+        gameState.isAiming = false;
+        camera.fov = 65;
+        camera.updateProjectionMatrix();
+      }
+    });
+
+    document.addEventListener('pointerlockchange', () => {
+      isPointerLocked = document.pointerLockElement === canvas;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isPointerLocked) return;
+      const sensitivity = gameState.isAiming ? 0.0012 : 0.0022;
+      player.yaw -= e.movementX * sensitivity;
+      player.pitch -= e.movementY * sensitivity;
+      player.pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.pitch));
+    });
+
+    // ============================================================
+    // 9. GAME ACTIONS & MECHANICS
+    // ============================================================
+    function switchWeapon(type) {
+      if (!gameState.weapons[type]) return;
+      gameState.currentWeapon = type;
+      updateWeaponHUD();
+    }
+
+    function shootWeapon() {
+      const now = performance.now();
+      const wep = gameState.weapons[gameState.currentWeapon];
+      if (now - player.lastShoot < wep.rate * 1000) return;
+      if (wep.ammo <= 0) {
+        reloadWeapon();
+        return;
+      }
+
+      player.lastShoot = now;
+      wep.ammo--;
+      updateWeaponHUD();
+
+      if (gameState.currentWeapon === 'railgun') cyberAudio.playLaser();
+      else cyberAudio.playGunshot();
+
+      // Forward direction
+      const dir = new THREE.Vector3(
+        -Math.sin(player.yaw) * Math.cos(player.pitch),
+        Math.sin(player.pitch),
+        -Math.cos(player.yaw) * Math.cos(player.pitch)
+      );
+
+      const spawnPos = player.pos.clone().add(new THREE.Vector3(0, 0.4, 0)).add(dir.clone().multiplyScalar(0.8));
+      spawnProjectile(spawnPos, dir, gameState.currentWeapon);
+    }
+
+    function reloadWeapon() {
+      const wep = gameState.weapons[gameState.currentWeapon];
+      if (wep.ammo === wep.maxAmmo || wep.reserve <= 0) return;
+      const needed = wep.maxAmmo - wep.ammo;
+      const toTake = Math.min(needed, wep.reserve);
+      wep.ammo += toTake;
+      wep.reserve -= toTake;
+      updateWeaponHUD();
+    }
+
+    function handleInteractions() {
+      const distToSubwayHeadhouse = player.pos.distanceTo(new THREE.Vector3(18, 0, 25));
+      if (distToSubwayHeadhouse < 7.0 || gameState.isUnderground) {
+        // Toggle Underground Transit
+        if (!gameState.isUnderground) {
+          // Descend to -22m
+          gameState.isUnderground = true;
+          player.pos.set(20, -21.0, 20);
+          player.vel.set(0, 0, 0);
+          cyberAudio.playSubwayRumble();
+          document.getElementById('hud-depth-badge').textContent = '// SUBTERRANEAN: -22.0M';
+          document.getElementById('hud-depth-badge').classList.add('underground');
+        } else {
+          // Ascend to surface
+          gameState.isUnderground = false;
+          player.pos.set(18, 1.2, 28);
+          player.vel.set(0, 0, 0);
+          cyberAudio.playSubwayRumble();
+          document.getElementById('hud-depth-badge').textContent = '// SURFACE: 0.0M';
+          document.getElementById('hud-depth-badge').classList.remove('underground');
+        }
+      }
+    }
+
+    function toggleVehicleMode() {
+      const distToRover = player.pos.distanceTo(roverGroup.position);
+      if (distToRover < 5.0 && !gameState.inVehicle) {
+        gameState.inVehicle = true;
+      } else if (gameState.inVehicle) {
+        gameState.inVehicle = false;
+        player.pos.copy(roverGroup.position).add(new THREE.Vector3(2.5, 1.2, 0));
+      }
+    }
+
+    function toggleNuclearModal() {
+      const modal = document.getElementById('modal-nuclear');
+      modal.classList.toggle('visible');
+    }
+
+    function claimNuclearShift() {
+      gameState.tokens += 120;
+      cyberAudio.playLootChime();
+      document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
+      toggleNuclearModal();
+    }
+
+    function scramReactor() {
+      gameState.nuclear.rods = 100;
+      gameState.nuclear.temp = 85.0;
+      gameState.nuclear.output = 0;
+      document.getElementById('nuke-rods').textContent = '100% (SCRAM)';
+      document.getElementById('nuke-temp').textContent = '85.0 °C';
+      document.getElementById('nuke-output').textContent = '0 MW';
+      cyberAudio.playGeigerClick();
+    }
+
+    function triggerStarshipLaunch() {
+      if (gameState.starship.isLaunching) return;
+      gameState.starship.isLaunching = true;
+      raptorFlame.material.opacity = 0.9;
+      cyberAudio.playRocketRoar();
+    }
+
+    // UI Wireups
+    document.getElementById('btn-toggle-nuclear').addEventListener('click', toggleNuclearModal);
+    document.getElementById('btn-toggle-metro').addEventListener('click', handleInteractions);
+    document.getElementById('btn-toggle-starship').addEventListener('click', triggerStarshipLaunch);
+
+    document.getElementById('btn-start-game').addEventListener('click', () => {
+      document.getElementById('start-overlay').style.display = 'none';
+      cyberAudio.init();
+      canvas.requestPointerLock();
+    });
+
+    function updateWeaponHUD() {
+      const wep = gameState.weapons[gameState.currentWeapon];
+      document.getElementById('hud-weapon-name').textContent = wep.name;
+      document.getElementById('hud-ammo-cur').textContent = wep.ammo;
+      document.getElementById('hud-ammo-max').textContent = wep.reserve;
+    }
+
+    // ============================================================
+    // 10. MAIN ANIMATION & PHYSICS GAME LOOP
+    // ============================================================
+    let lastTime = performance.now();
+    let geigerTimer = 0;
+
+    function gameLoop(now) {
+      requestAnimationFrame(gameLoop);
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      // Billow Cooling Tower Steam
+      coolingTowers.forEach((ring, idx) => {
+        ring.rotation.z += delta * (0.8 + idx * 0.4);
+        ring.scale.setScalar(1 + Math.sin(now * 0.002 + idx) * 0.08);
+      });
+
+      // Starship Rocket Ascent Simulation
+      if (gameState.starship.isLaunching) {
+        gameState.starship.altitude += delta * 32.0;
+        rocketStack.position.y = gameState.starship.altitude;
+        raptorFlame.scale.set(
+          1 + (Math.random() - 0.5) * 0.15,
+          1 + Math.sin(now * 0.02) * 0.2,
+          1 + (Math.random() - 0.5) * 0.15
+        );
+      }
+
+      // Proximity Geiger Counter Audio Click Check
+      const distToReactor = player.pos.distanceTo(new THREE.Vector3(-150, 0, -140));
+      if (distToReactor < 80.0) {
+        geigerTimer += delta;
+        const clickInterval = Math.max(0.08, distToReactor / 160.0);
+        if (geigerTimer > clickInterval) {
+          geigerTimer = 0;
+          cyberAudio.playGeigerClick();
+        }
+      }
+
+      // Metro Entrance Prompt
+      const distToMetroEntrance = player.pos.distanceTo(new THREE.Vector3(18, 0, 25));
+      const promptEl = document.getElementById('interact-prompt');
+      if ((distToMetroEntrance < 7.0 && !gameState.isUnderground) || gameState.isUnderground) {
+        promptEl.style.display = 'flex';
+        document.getElementById('prompt-text').textContent = gameState.isUnderground
+          ? 'ASCEND TO SURFACE METROPOLIS [F]'
+          : 'DESCEND INTO SUBTERRANEAN METRO (-22M) [F]';
+      } else {
+        promptEl.style.display = 'none';
+      }
+
+      // Player Movement Physics
+      if (!gameState.inVehicle) {
+        const moveX = (keys['KeyD'] ? 1 : 0) - (keys['KeyA'] ? 1 : 0);
+        const moveZ = (keys['KeyS'] ? 1 : 0) - (keys['KeyW'] ? 1 : 0);
+        const isSprinting = keys['ShiftLeft'] || keys['ShiftRight'];
+        const speed = isSprinting ? 12.0 : 6.5;
+
+        // Yaw orientation
+        const fwd = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+        const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+        const moveDir = fwd.clone().multiplyScalar(-moveZ).add(right.clone().multiplyScalar(moveX)).normalize();
+
+        if (moveDir.lengthSq() > 0) {
+          player.vel.x = THREE.MathUtils.lerp(player.vel.x, moveDir.x * speed, 0.2);
+          player.vel.z = THREE.MathUtils.lerp(player.vel.z, moveDir.z * speed, 0.2);
+        } else {
+          player.vel.x *= 0.8;
+          player.vel.z *= 0.8;
+        }
+
+        // Jump & Jetpack
+        if (keys['Space']) {
+          if (player.isGrounded) {
+            player.vel.y = 8.5;
+            player.isGrounded = false;
+          } else if (gameState.jetpackFuel > 0) {
+            player.vel.y += 24.0 * delta;
+            gameState.jetpackFuel = Math.max(0, gameState.jetpackFuel - delta * 30);
+            document.getElementById('fill-jetpack').style.width = gameState.jetpackFuel + '%';
+            document.getElementById('label-jetpack').textContent = Math.round(gameState.jetpackFuel) + '%';
+          }
+        } else {
+          // Regenerate jetpack
+          if (gameState.jetpackFuel < 100) {
+            gameState.jetpackFuel = Math.min(100, gameState.jetpackFuel + delta * 15);
+            document.getElementById('fill-jetpack').style.width = gameState.jetpackFuel + '%';
+            document.getElementById('label-jetpack').textContent = Math.round(gameState.jetpackFuel) + '%';
+          }
+        }
+
+        // Gravity
+        player.vel.y -= 19.6 * delta;
+
+        // Apply velocity
+        player.pos.x += player.vel.x * delta;
+        player.pos.y += player.vel.y * delta;
+        player.pos.z += player.vel.z * delta;
+
+        // Floor collision
+        const floorY = gameState.isUnderground ? -21.0 : 1.2;
+        if (player.pos.y <= floorY) {
+          player.pos.y = floorY;
+          player.vel.y = 0;
+          player.isGrounded = true;
+        }
+
+        // Building Box Collisions (Surface only)
+        if (!gameState.isUnderground) {
+          cityColliders.forEach(c => {
+            if (
+              player.pos.x > c.x - c.hw - 0.8 && player.pos.x < c.x + c.hw + 0.8 &&
+              player.pos.z > c.z - c.hd - 0.8 && player.pos.z < c.z + c.hd + 0.8
+            ) {
+              const dx = player.pos.x - c.x;
+              const dz = player.pos.z - c.z;
+              if (Math.abs(dx) > Math.abs(dz)) {
+                player.pos.x = c.x + Math.sign(dx) * (c.hw + 0.85);
+              } else {
+                player.pos.z = c.z + Math.sign(dz) * (c.hd + 0.85);
+              }
+            }
+          });
+        }
+
+        // Camera sync
+        camera.position.copy(player.pos);
+        const lookTarget = player.pos.clone().add(
+          new THREE.Vector3(
+            -Math.sin(player.yaw) * Math.cos(player.pitch),
+            Math.sin(player.pitch),
+            -Math.cos(player.yaw) * Math.cos(player.pitch)
+          )
+        );
+        camera.lookAt(lookTarget);
+
+      } else {
+        // Driving Vehicle Mode
+        const steer = (keys['KeyA'] ? 1 : 0) - (keys['KeyD'] ? 1 : 0);
+        const throttle = (keys['KeyW'] ? 1 : 0) - (keys['KeyS'] ? 1 : 0);
+        roverGroup.rotation.y += steer * delta * 2.2;
+        const forward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), roverGroup.rotation.y);
+        roverGroup.position.add(forward.multiplyScalar(throttle * delta * 18.0));
+
+        player.pos.copy(roverGroup.position).add(new THREE.Vector3(0, 1.8, 0));
+
+        // Follow Cam
+        const camOffset = new THREE.Vector3(0, 3.8, -8.0).applyAxisAngle(new THREE.Vector3(0, 1, 0), roverGroup.rotation.y);
+        camera.position.copy(roverGroup.position).add(camOffset);
+        camera.lookAt(roverGroup.position.x, roverGroup.position.y + 1.2, roverGroup.position.z);
+      }
+
+      // Update Zombies AI
+      zombies.forEach(z => {
+        if (!z.alive) return;
+        const dist = z.mesh.position.distanceTo(player.pos);
+
+        // Chase player
+        if (dist < 40.0 && dist > 1.4) {
+          const dir = player.pos.clone().sub(z.mesh.position).normalize();
+          dir.y = 0;
+          z.mesh.position.add(dir.multiplyScalar(z.speed * delta));
+          z.mesh.rotation.y = Math.atan2(dir.x, dir.z);
+
+          // Leg running animation
+          z.legL.rotation.x = Math.sin(now * 0.008 + z.seed) * 0.6;
+          z.legR.rotation.x = -Math.sin(now * 0.008 + z.seed) * 0.6;
+        }
+
+        // Melee attack player
+        if (dist <= 1.5) {
+          gameState.health = Math.max(0, gameState.health - delta * 15);
+          document.getElementById('fill-health').style.width = gameState.health + '%';
+          document.getElementById('label-health').textContent = Math.round(gameState.health) + '%';
+        }
+      });
+
+      // Update Projectiles
+      for (let i = projectiles.length - 1; i >= 0; i--) {
+        const p = projectiles[i];
+        p.life -= delta;
+        p.mesh.position.add(p.dir.clone().multiplyScalar(p.speed * delta));
+
+        if (p.life <= 0) {
+          scene.remove(p.mesh);
+          projectiles.splice(i, 1);
+          continue;
+        }
+
+        // Check zombie hits
+        for (let j = 0; j < zombies.length; j++) {
+          const z = zombies[j];
+          if (!z.alive) continue;
+          if (p.mesh.position.distanceTo(z.mesh.position.clone().add(new THREE.Vector3(0, 1.0, 0))) < 1.3) {
+            z.health -= p.damage;
+            scene.remove(p.mesh);
+            projectiles.splice(i, 1);
+
+            if (z.health <= 0) {
+              z.alive = false;
+              z.mesh.rotation.x = -Math.PI / 2;
+              z.mesh.position.y = 0.2;
+              gameState.tokens += 45;
+              cyberAudio.playLootChime();
+              document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
+            }
+            break;
+          }
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    requestAnimationFrame(gameLoop);
+
+    // Responsive Canvas Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

@@ -24,6 +24,20 @@ import { uploadAnyMedia } from "./src/js/media-upload.js";
 
 const GAMES_DATABASE = [
   {
+    id: 100,
+    name: "NEX 3D Cyber Metropolis",
+    icon: "fa-solid fa-rocket",
+    category: "action",
+    description: "Next-gen 3D Newtonian physics world. 120m SpaceX Starship & 145m Mechazilla tower, 2400 MWe Nuclear Power Plant, Real-World Underground Metro Subway & Bio-Bunker, Supersonic Stealth Fighter Jet, Armed Rover, and Zombie Apocalypse!",
+    playersNow: 8945200,
+    avgScore: 99800,
+    avgTime: 45,
+    rating: 5.0,
+    badges: "FEATURED 3D",
+    gameUrl: "game.html",
+    type: "simulation-action"
+  },
+  {
     id: 1,
     name: "Blood Strike",
     icon: "fa-solid fa-gamepad",
