@@ -742,10 +742,10 @@
     }
 
     /* ============================================================
-       BLOOD STRIKE MAIN MENU / LOBBY (IMAGE 1 REPLICA)
+       ASTRO SHIFT: BEYOND EARTH MAIN LOBBY
        Z-INDEX 200
        ============================================================ */
-    #bloodstrike-lobby {
+    #astroshift-lobby {
       position: fixed;
       inset: 0;
       z-index: 200;
@@ -760,7 +760,7 @@
       background: linear-gradient(to bottom, rgba(5, 10, 18, 0.65) 0%, rgba(3, 7, 12, 0.2) 50%, rgba(3, 7, 12, 0.8) 100%);
     }
 
-    #bloodstrike-lobby * {
+    #astroshift-lobby * {
       pointer-events: auto;
     }
 
@@ -1517,7 +1517,7 @@
     }
 
     /* ============================================================
-       BLOOD STRIKE HIGH-CONTRAST SETTINGS MODAL (IMAGE 2 REPLICA)
+       ASTRO SHIFT: BEYOND EARTH HIGH-CONTRAST SETTINGS MODAL
        Z-INDEX 550
        ============================================================ */
     #modal-settings {
@@ -1659,7 +1659,7 @@
       border-bottom: 2px solid #e6ff00;
     }
 
-    /* Segmented Option Row (Blood Strike style) */
+    /* Segmented Option Row (Clean Layout style) */
     .bs-option-row {
       display: flex;
       justify-content: space-between;
@@ -1729,7 +1729,7 @@
     }
 
     /* ============================================================
-       BLOOD STRIKE IN-GAME MOBILE HUD (IMAGE 3 REPLICA)
+       ASTRO SHIFT: BEYOND EARTH IN-GAME MOBILE HUD
        ============================================================ */
     /* Golden Angled Diamond Joystick (Bottom-Left) */
     #golden-joystick-container {
@@ -2134,7 +2134,7 @@
 
     /* ============================================================
        RESPONSIVE MOBILE / ANDROID ULTRA-CLEAN UI OVERRIDES
-       Matches Blood Strike In-Game Layout (Image 3)
+       Matches Astro Shift: Beyond Earth Clean Mobile Layout
        ============================================================ */
     @media (max-width: 1024px), (hover: none) and (pointer: coarse) {
       .hud-top-bar,
@@ -2512,8 +2512,8 @@
     </div>
   </div>
 
-  <!-- BLOOD STRIKE CLEAN LOBBY (IMAGE 1 REPLICA) -->
-  <div id="bloodstrike-lobby" style="display: none;">
+  <!-- ASTRO SHIFT: BEYOND EARTH CLEAN LOBBY -->
+  <div id="astroshift-lobby" style="display: none;">
     <!-- Top Bar -->
     <div class="bs-top-bar">
       <!-- Player Profile Card (Left) -->
@@ -2585,7 +2585,7 @@
       <div class="bs-pass-card">
         <div class="bs-pass-lvl">23</div>
         <div style="display: flex; flex-direction: column;">
-          <span style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffffff;">STRIKE PASS</span>
+          <span style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffffff;">ASTRO PASS</span>
           <span style="font-size: 9px; color: #00f2ff;">TIER UNLOCKED</span>
         </div>
       </div>
@@ -2598,6 +2598,11 @@
 
     <!-- Right Side Match & Big Yellow Play Deck -->
     <div class="bs-right-deck">
+      <div style="text-align: right; margin-bottom: 6px;">
+        <span style="font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #00f2ff; letter-spacing: 2px; text-shadow: 0 0 15px rgba(0, 242, 255, 0.6); display: block;">ASTRO SHIFT</span>
+        <span style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 800; color: #ffd700; letter-spacing: 3px; display: block;">BEYOND EARTH</span>
+      </div>
+
       <div class="bs-rank-pill">
         <i class="fa-solid fa-shield-halved" style="color: #00f2ff;"></i>
         <span>Legendary Odyssey II</span>
@@ -2628,11 +2633,12 @@
         <i class="fa-solid fa-globe"></i>
         <span>★ محاجب</span>
         <span style="color: #556677;">— OEM</span>
+        <div style="font-size: 10px; color: #556677; font-family: monospace; margin-top: 3px;">ASTRO SHIFT: BEYOND EARTH · UID: 1400256883930943910141352</div>
       </div>
 
       <div class="bs-bottom-tabs">
         <div class="bs-tab-item"><i class="fa-solid fa-table-cells-large"></i></div>
-        <div class="bs-tab-item">STRIKER</div>
+        <div class="bs-tab-item">OPERATIVE</div>
         <div class="bs-tab-item">VAULT <span class="bs-tab-red-dot"></span></div>
         <div class="bs-tab-item">WEAPON <span class="bs-tab-red-dot"></span></div>
         <div class="bs-tab-item active">MATCH</div>
@@ -3016,7 +3022,7 @@
 
     <!-- Center-Bottom Quick Action Buttons (About & Balance Announcement Image 3) -->
     <div class="mobile-center-announcements">
-      <button type="button" class="mobile-center-sub-btn" onclick="cyberAudio.playLootChime(); alert('BLOOD STRIKE: CENTRAL STADIUM COLISEUM\nHigh-Performance 60 FPS Mobile Combat Engine');" title="About">
+      <button type="button" class="mobile-center-sub-btn" onclick="cyberAudio.playLootChime(); alert('ASTRO SHIFT: BEYOND EARTH\nCentral Stadium Coliseum // High-Performance 60 FPS Mobile Combat Engine');" title="About">
         <div class="sub-icon-circle">
           <i class="fa-solid fa-file-lines"></i>
         </div>
@@ -3091,8 +3097,8 @@
       </button>
     </div>
 
-    <!-- Blood Strike Watermark (Image 3) -->
-    <div class="bs-watermark">BLOOD STRIKE PING: 56ms FPS: 60</div>
+    <!-- Astro Shift In-Game Watermark -->
+    <div class="bs-watermark">ASTRO SHIFT: BEYOND EARTH · PING: 56ms · FPS: 60</div>
 
     <!-- Dedicated Starship Cockpit Flight Controls (Active when piloting Starship) -->
     <div id="starship-mobile-controls" style="display: none;">
@@ -3167,7 +3173,7 @@
     </div>
   </div>
 
-  <!-- BLOOD STRIKE SETTINGS MODAL (IMAGE 2 REPLICA) -->
+  <!-- ASTRO SHIFT: BEYOND EARTH SETTINGS MODAL -->
   <div id="modal-settings">
     <!-- Header -->
     <div class="bs-settings-header">
@@ -3396,7 +3402,7 @@
     <!-- Footer -->
     <div class="bs-settings-footer">
       <button type="button" class="bs-reset-btn" onclick="resetSettingsToDefault()">Reset</button>
-      <span style="font-size: 11px; color: #556677; font-family: monospace;">BLOOD STRIKE 1400256883930943910141352</span>
+      <span style="font-size: 11px; color: #556677; font-family: monospace;">ASTRO SHIFT: BEYOND EARTH · UID: 1400256883930943910141352</span>
       <button type="button" class="bs-reset-btn" style="background: #e6ff00; color: #000;" onclick="toggleSettingsModal()">Confirm</button>
     </div>
   </div>
@@ -3540,7 +3546,7 @@
 
       cyberAudio.init();
       cyberAudio.playLootChime();
-      alert(`[PRE-REGISTRATION CONFIRMED]\nCallsign: ${callsign}\nFounder Rewards Allocated:\n- 100,000 Strike Tokens\n- Exclusive [FOUNDER] Clan Tag\n- Central Stadium VIP Clearance\n\nGame unlocks on countdown completion!`);
+      alert(`[PRE-REGISTRATION CONFIRMED]\nCallsign: ${callsign}\nFounder Rewards Allocated:\n- 100,000 NEX Tokens\n- Exclusive [FOUNDER] Clan Tag\n- Central Stadium VIP Clearance\n\nGame unlocks on countdown completion!`);
     }
 
     function bypassLaunchLock() {
@@ -3566,7 +3572,7 @@
         lockOverlay.style.transition = 'opacity 0.4s ease';
         setTimeout(() => {
           lockOverlay.style.display = 'none';
-          const lobby = document.getElementById('bloodstrike-lobby');
+          const lobby = document.getElementById('astroshift-lobby');
           if (lobby) lobby.style.display = 'flex';
           if (!isEngineInitialized) boot3DEngine();
         }, 400);
@@ -3581,7 +3587,7 @@
       cyberAudio.init();
       cyberAudio.playLootChime();
 
-      const lobby = document.getElementById('bloodstrike-lobby');
+      const lobby = document.getElementById('astroshift-lobby');
       if (lobby) {
         lobby.style.opacity = '0';
         lobby.style.transition = 'opacity 0.4s ease';
@@ -3635,7 +3641,7 @@
     }
 
     // ============================================================
-    // BLOOD STRIKE SETTINGS CONTROLLER (IMAGE 2)
+    // ASTRO SHIFT: BEYOND EARTH SETTINGS CONTROLLER
     // ============================================================
     function bsSwitchSettingsTab(tabName) {
       const tabs = ['basic', 'gameplay', 'controls', 'controller', 'sens', 'graphics', 'language', 'account'];
@@ -9195,7 +9201,7 @@
       updateStarshipReentryEffects(now);
       drawTacticalMinimapRadar(now);
 
-      // Synchronize Blood Strike Mobile In-Game HUD (Image 3)
+      // Synchronize Astro Shift Mobile In-Game HUD
       if (player && player.vel) {
         const mobHp = document.getElementById('mobile-fill-hp');
         if (mobHp) mobHp.style.width = Math.max(0, Math.min(100, gameState.health)) + '%';
@@ -9878,7 +9884,7 @@
         window.addEventListener('touchcancel', endAim, { passive: true });
       }
 
-      // 4. BLOOD STRIKE MOBILE ACTION BUTTONS (IMAGE 3)
+      // 4. ASTRO SHIFT MOBILE ACTION BUTTONS
       const btnActionAim = document.getElementById('btn-action-aim') || document.getElementById('touch-btn-aim');
       if (btnActionAim) {
         const toggleAim = (e) => {
@@ -10494,7 +10500,7 @@
       if (callsignInput) callsignInput.value = savedCallsign;
 
       const launchLockOverlay = document.getElementById('launch-lock-overlay');
-      const lobbyEl = document.getElementById('bloodstrike-lobby');
+      const lobbyEl = document.getElementById('astroshift-lobby');
       const startOverlay = document.getElementById('start-overlay');
       if (startOverlay) startOverlay.style.display = 'none';
 
