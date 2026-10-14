@@ -2441,6 +2441,289 @@
       0% { opacity: 0; transform: translate(-50%, -20px) scale(0.95); }
       100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
     }
+
+    /* ============================================================
+       NEXUS GRAND MALL & SHOPPING GALLERIA MODAL (Z-INDEX 560)
+       ============================================================ */
+    #modal-store {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 94%;
+      max-width: 960px;
+      height: 90vh;
+      max-height: 620px;
+      background: #0b0f15;
+      border: 1.5px solid rgba(255, 204, 0, 0.45);
+      border-radius: 12px;
+      z-index: 560;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(255, 204, 0, 0.2);
+      font-family: 'Rajdhani', sans-serif;
+    }
+    #modal-store.visible { display: flex; }
+
+    .store-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #0f1520;
+      border-bottom: 1.5px solid rgba(255, 204, 0, 0.3);
+    }
+    .store-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .store-title i { color: #ffd700; }
+
+    .store-balance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 215, 0, 0.12);
+      border: 1px solid #ffd700;
+      color: #ffd700;
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-family: 'Orbitron', monospace;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .store-close-btn {
+      background: transparent;
+      border: none;
+      color: #8fa3b8;
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 4px 8px;
+      transition: color 0.15s;
+    }
+    .store-close-btn:hover { color: #ffffff; }
+
+    .store-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Store Left Navigation Sidebar */
+    .store-sidebar {
+      width: 210px;
+      background: #080c12;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      padding: 12px 0;
+      overflow-y: auto;
+      gap: 4px;
+    }
+    .store-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 18px;
+      background: transparent;
+      border: none;
+      border-left: 3px solid transparent;
+      color: #7d8ea3;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+    .store-tab-btn:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .store-tab-btn.active {
+      color: #ffd700;
+      background: rgba(255, 215, 0, 0.08);
+      border-left-color: #ffd700;
+    }
+    .store-tab-btn i { font-size: 14px; width: 20px; }
+
+    /* Store Right Content Pane */
+    .store-content-pane {
+      flex: 1;
+      padding: 18px 24px;
+      overflow-y: auto;
+      background: #0b0f15;
+    }
+    .store-section { display: none; }
+    .store-section.active { display: block; }
+
+    /* Store Items Grid */
+    .store-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+      margin-top: 14px;
+    }
+    .store-card {
+      background: rgba(14, 20, 30, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      transition: all 0.2s;
+    }
+    .store-card:hover {
+      border-color: #ffd700;
+      transform: translateY(-2px);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+    .store-card.equipped {
+      border-color: #00f2ff;
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.25);
+    }
+    .store-card-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(0, 242, 255, 0.15);
+      color: #00f2ff;
+      border: 1px solid #00f2ff;
+    }
+    .store-card-icon {
+      font-size: 32px;
+      color: #ffd700;
+      text-align: center;
+      padding: 12px 0;
+    }
+    .store-card-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+    .store-card-desc {
+      font-size: 11px;
+      color: #8fa3b8;
+      line-height: 1.4;
+      flex: 1;
+    }
+    .store-stats-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 10px;
+      font-family: monospace;
+      color: #94a3b8;
+    }
+    .store-stat-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .store-stat-fill {
+      height: 100%;
+      background: #00f2ff;
+    }
+    .store-card-btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .store-card-btn.primary {
+      background: #ffd700;
+      color: #000000;
+    }
+    .store-card-btn.primary:hover {
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    }
+    .store-card-btn.active-btn {
+      background: rgba(0, 242, 255, 0.2);
+      border: 1px solid #00f2ff;
+      color: #00f2ff;
+      cursor: default;
+    }
+
+    /* Floating In-Game Store Interaction Prompt (3D World Overworld) */
+    #store-interact-prompt {
+      position: fixed;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(8, 14, 24, 0.94);
+      border: 1.5px solid #ffd700;
+      border-radius: 30px;
+      padding: 10px 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      z-index: 250;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
+      cursor: pointer;
+      user-select: none;
+      animation: promptPulse 1.8s infinite alternate;
+      transition: all 0.2s;
+    }
+    #store-interact-prompt:hover {
+      transform: translateX(-50%) scale(1.04);
+      background: rgba(14, 24, 38, 0.98);
+    }
+    @keyframes promptPulse {
+      0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.3); }
+      100% { box-shadow: 0 0 35px rgba(255, 215, 0, 0.7); }
+    }
+    .store-prompt-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #ffd700;
+      color: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .store-prompt-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: 1px;
+    }
+    .store-prompt-sub {
+      font-size: 10px;
+      color: #ffd700;
+      letter-spacing: 1.5px;
+    }
   </style>
 </head>
 <body>
@@ -3034,6 +3317,12 @@
         </div>
         <span>Balance Announcement</span>
       </button>
+      <button type="button" class="mobile-center-sub-btn" style="border-color: #ffd700;" onclick="openStoreModal('armory')" title="Nexus Grand Mall">
+        <div class="sub-icon-circle" style="color: #ffd700; border-color: #ffd700;">
+          <i class="fa-solid fa-shop"></i>
+        </div>
+        <span style="color: #ffd700;">Mall</span>
+      </button>
     </div>
 
     <!-- Compact Operative Vitals Pill (Bottom-Center Image 3) -->
@@ -3404,6 +3693,315 @@
       <button type="button" class="bs-reset-btn" onclick="resetSettingsToDefault()">Reset</button>
       <span style="font-size: 11px; color: #556677; font-family: monospace;">ASTROSHIFT: BEYOND EARTH · UID: 1400256883930943910141352</span>
       <button type="button" class="bs-reset-btn" style="background: #e6ff00; color: #000;" onclick="toggleSettingsModal()">Confirm</button>
+    </div>
+  </div>
+
+  <!-- NEXUS GRAND MALL & SHOPPING GALLERIA MODAL -->
+  <div id="modal-store">
+    <!-- Header -->
+    <div class="store-header">
+      <div class="store-title">
+        <i class="fa-solid fa-shop"></i>
+        <span>NEXUS GRAND MALL // CENTRAL METROPOLIS GALLERIA</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div class="store-balance-badge">
+          <i class="fa-solid fa-coins"></i> <span id="store-token-display">1,250</span> NEX
+        </div>
+        <button type="button" class="store-close-btn" onclick="toggleStoreModal()" title="Close Mall">&times;</button>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="store-body">
+      <!-- Left Sidebar Tabs -->
+      <div class="store-sidebar">
+        <button type="button" class="store-tab-btn active" id="store-tab-armory" onclick="switchStoreTab('armory')">
+          <i class="fa-solid fa-gun"></i> CYBER-ARMORY
+        </button>
+        <button type="button" class="store-tab-btn" id="store-tab-suits" onclick="switchStoreTab('suits')">
+          <i class="fa-solid fa-user-ninja"></i> EXO-SUITS
+        </button>
+        <button type="button" class="store-tab-btn" id="store-tab-vehicles" onclick="switchStoreTab('vehicles')">
+          <i class="fa-solid fa-car-side"></i> SHOWROOM
+        </button>
+        <button type="button" class="store-tab-btn" id="store-tab-medbay" onclick="switchStoreTab('medbay')">
+          <i class="fa-solid fa-heart-pulse"></i> BIO-STIM MED-BAY
+        </button>
+        <button type="button" class="store-tab-btn" id="store-tab-arcade" onclick="switchStoreTab('arcade')">
+          <i class="fa-solid fa-gamepad"></i> STARDUST CAFE
+        </button>
+      </div>
+
+      <!-- Right Content Pane -->
+      <div class="store-content-pane">
+        <!-- 1. CYBER-ARMORY TAB -->
+        <div class="store-section active" id="store-sec-armory">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #ffd700; letter-spacing: 1.5px;">
+              <i class="fa-solid fa-shield-halved"></i> ADVANCED TACTICAL WEAPON PROCUREMENT
+            </h3>
+            <span style="font-size: 11px; color: #8fa3b8; font-family: monospace;">INSTANT ORDNANCE SYNCHRONIZATION</span>
+          </div>
+
+          <div class="store-grid">
+            <!-- Weapon 1: Tactical Assault Rifle -->
+            <div class="store-card" id="card-wep-rifle">
+              <span class="store-card-badge">AUTO</span>
+              <div class="store-card-icon"><i class="fa-solid fa-gun"></i></div>
+              <div class="store-card-title">TAC-9 ASSAULT RIFLE</div>
+              <div class="store-card-desc">Standard-issue high-cadence kinetic rifle with holographic red-dot optic.</div>
+              <div class="store-stats-row">
+                <div style="display: flex; justify-content: space-between;"><span>DAMAGE</span> <span>32 / 100</span></div>
+                <div class="store-stat-bar"><div class="store-stat-fill" style="width: 32%;"></div></div>
+                <div style="display: flex; justify-content: space-between;"><span>FIRE RATE</span> <span>92%</span></div>
+                <div class="store-stat-bar"><div class="store-stat-fill" style="width: 92%;"></div></div>
+              </div>
+              <button type="button" class="store-card-btn primary" onclick="equipWeaponFromStore('rifle')">
+                <i class="fa-solid fa-check"></i> EQUIP WEAPON
+              </button>
+            </div>
+
+            <!-- Weapon 2: Quantum Railgun -->
+            <div class="store-card" id="card-wep-railgun">
+              <span class="store-card-badge" style="color: #ffd700; border-color: #ffd700;">HEAVY</span>
+              <div class="store-card-icon" style="color: #00f2ff;"><i class="fa-solid fa-bolt-lightning"></i></div>
+              <div class="store-card-title">QUANTUM RAILGUN MK-IV</div>
+              <div class="store-card-desc">Long-range hyper-velocity particle beam. Pierces armor with lethal energy discharge.</div>
+              <div class="store-stats-row">
+                <div style="display: flex; justify-content: space-between;"><span>DAMAGE</span> <span>120 / 100</span></div>
+                <div class="store-stat-bar"><div class="store-stat-fill" style="width: 100%; background: #ffd700;"></div></div>
+                <div style="display: flex; justify-content: space-between;"><span>FIRE RATE</span> <span>25%</span></div>
+                <div class="store-stat-bar"><div class="store-stat-fill" style="width: 25%;"></div></div>
+              </div>
+              <button type="button" class="store-card-btn primary" onclick="equipWeaponFromStore('railgun')">
+                <i class="fa-solid fa-bolt"></i> EQUIP RAILGUN
+              </button>
+            </div>
+
+            <!-- Weapon 3: Dual Plasma Blasters -->
+            <div class="store-card" id="card-wep-plasma">
+              <span class="store-card-badge" style="color: #ff0055; border-color: #ff0055;">ENERGY</span>
+              <div class="store-card-icon" style="color: #ff0055;"><i class="fa-solid fa-fire-burner"></i></div>
+              <div class="store-card-title">DUAL PLASMA REPEATERS</div>
+              <div class="store-card-desc">Superheated ionized gas pulses. Melts mutant carapaces and shield barriers.</div>
+              <div class="store-stats-row">
+                <div style="display: flex; justify-content: space-between;"><span>DAMAGE</span> <span>24 / 100</span></div>
+                <div class="store-stat-bar"><div class="store-stat-fill" style="width: 24%; background: #ff0055;"></div></div>
+                <div style="display: flex; justify-content: space-between;"><span>FIRE RATE</span> <span>98%</span></div>
+                <div class="store-stat-bar"><div class="store-stat-fill" style="width: 98%;"></div></div>
+              </div>
+              <button type="button" class="store-card-btn primary" onclick="equipWeaponFromStore('plasma')">
+                <i class="fa-solid fa-fire"></i> EQUIP PLASMA
+              </button>
+            </div>
+
+            <!-- Weapon 4: Heavy RPG -->
+            <div class="store-card" id="card-wep-rpg">
+              <span class="store-card-badge" style="color: #ffaa00; border-color: #ffaa00;">EXPLOSIVE</span>
+              <div class="store-card-icon" style="color: #ffaa00;"><i class="fa-solid fa-rocket"></i></div>
+              <div class="store-card-title">TITAN VORTEX RPG</div>
+              <div class="store-card-desc">Heavy ordnance launcher. Delivers massive AOE shockwave to hostile clusters.</div>
+              <div class="store-stats-row">
+                <div style="display: flex; justify-content: space-between;"><span>DAMAGE</span> <span>250 / 100</span></div>
+                <div class="store-stat-bar"><div class="store-stat-fill" style="width: 100%; background: #ffaa00;"></div></div>
+                <div style="display: flex; justify-content: space-between;"><span>FIRE RATE</span> <span>15%</span></div>
+                <div class="store-stat-bar"><div class="store-stat-fill" style="width: 15%;"></div></div>
+              </div>
+              <button type="button" class="store-card-btn primary" onclick="equipWeaponFromStore('rpg')">
+                <i class="fa-solid fa-rocket"></i> EQUIP RPG
+              </button>
+            </div>
+
+            <!-- Ammo Supply Pack -->
+            <div class="store-card" style="border-color: rgba(0, 255, 136, 0.4);">
+              <span class="store-card-badge" style="color: #00ff88; border-color: #00ff88;">SUPPLY</span>
+              <div class="store-card-icon" style="color: #00ff88;"><i class="fa-solid fa-boxes-stacked"></i></div>
+              <div class="store-card-title">NEXUS AMMO CRATE</div>
+              <div class="store-card-desc">Refills +120 reserve ammunition for all kinetic and energy armaments.</div>
+              <div style="font-family: 'Orbitron', monospace; font-size: 13px; color: #ffd700; font-weight: 800; margin-top: auto;">
+                PRICE: 100 NEX
+              </div>
+              <button type="button" class="store-card-btn primary" style="background: #00ff88; color: #000;" onclick="buyAmmoPack()">
+                <i class="fa-solid fa-cart-shopping"></i> BUY AMMO CRATE
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. EXO-SUITS & CAMO TAB -->
+        <div class="store-section" id="store-sec-suits">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #ffd700; letter-spacing: 1.5px;">
+              <i class="fa-solid fa-user-ninja"></i> OPERATIVE EXO-SUIT & CAMO ATELIER
+            </h3>
+            <span style="font-size: 11px; color: #8fa3b8; font-family: monospace;">REAL-TIME 3D SUIT RE-TEXTURE</span>
+          </div>
+
+          <div class="store-grid">
+            <!-- Suit 1: Ghost Stealth -->
+            <div class="store-card">
+              <span class="store-card-badge">STEALTH</span>
+              <div class="store-card-icon" style="color: #00f2ff;"><i class="fa-solid fa-ghost"></i></div>
+              <div class="store-card-title">GHOST INFILTRATOR</div>
+              <div class="store-card-desc">Matte obsidian carbon weave with glowing cyan LED optic channels.</div>
+              <button type="button" class="store-card-btn primary" onclick="setPlayerSuitCamo('ghost')">
+                <i class="fa-solid fa-shirt"></i> EQUIP GHOST SUIT
+              </button>
+            </div>
+
+            <!-- Suit 2: Titan Juggernaut -->
+            <div class="store-card">
+              <span class="store-card-badge" style="color: #ffd700; border-color: #ffd700;">CHAMPION</span>
+              <div class="store-card-icon" style="color: #ffd700;"><i class="fa-solid fa-shield-halved"></i></div>
+              <div class="store-card-title">TITAN JUGGERNAUT</div>
+              <div class="store-card-desc">High-density gold titanium alloy plates and carbon ceramic composite.</div>
+              <button type="button" class="store-card-btn primary" onclick="setPlayerSuitCamo('titan')">
+                <i class="fa-solid fa-crown"></i> EQUIP TITAN SUIT
+              </button>
+            </div>
+
+            <!-- Suit 3: Crimson Vanguard -->
+            <div class="store-card">
+              <span class="store-card-badge" style="color: #ff3366; border-color: #ff3366;">ASSAULT</span>
+              <div class="store-card-icon" style="color: #ff3366;"><i class="fa-solid fa-skull"></i></div>
+              <div class="store-card-title">CRIMSON VANGUARD</div>
+              <div class="store-card-desc">Aggressive blood-crimson ballistic coat with dark metallic accents.</div>
+              <button type="button" class="store-card-btn primary" onclick="setPlayerSuitCamo('crimson')">
+                <i class="fa-solid fa-crosshairs"></i> EQUIP CRIMSON SUIT
+              </button>
+            </div>
+
+            <!-- Suit 4: Cobalt Odyssey -->
+            <div class="store-card">
+              <span class="store-card-badge" style="color: #00c8ff; border-color: #00c8ff;">ORBITAL</span>
+              <div class="store-card-icon" style="color: #00c8ff;"><i class="fa-solid fa-shuttle-space"></i></div>
+              <div class="store-card-title">COBALT ODYSSEY</div>
+              <div class="store-card-desc">Pure orbital frost-white thermal shielding with royal deep blue accents.</div>
+              <button type="button" class="store-card-btn primary" onclick="setPlayerSuitCamo('cobalt')">
+                <i class="fa-solid fa-rocket"></i> EQUIP COBALT SUIT
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. SHOWROOM TAB (VEHICLES) -->
+        <div class="store-section" id="store-sec-vehicles">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #ffd700; letter-spacing: 1.5px;">
+              <i class="fa-solid fa-car-side"></i> HYPERION MOTORS // VEHICLE SHOWROOM
+            </h3>
+            <span style="font-size: 11px; color: #8fa3b8; font-family: monospace;">INSTANT METROPOLIS DEPLOYMENT</span>
+          </div>
+
+          <div class="store-grid">
+            <!-- Rover 1 -->
+            <div class="store-card">
+              <span class="store-card-badge" style="color: #00ff88; border-color: #00ff88;">ARMORED</span>
+              <div class="store-card-icon" style="color: #00ff88;"><i class="fa-solid fa-truck-monster"></i></div>
+              <div class="store-card-title">QUANTUM 6X6 COMBAT ROVER</div>
+              <div class="store-card-desc">Heavy exploration cruiser. Independent 6-wheel suspension and dual plasma roof turret.</div>
+              <div style="font-size: 11px; color: #ffd700; font-family: monospace;">TOP SPEED: 110 KM/H · 4-PASSENGER</div>
+              <button type="button" class="store-card-btn primary" onclick="spawnVehicleAtMall('rover')">
+                <i class="fa-solid fa-location-arrow"></i> SPAWN ROVER AT MALL PLAZA
+              </button>
+            </div>
+
+            <!-- Hoverbike 2 -->
+            <div class="store-card">
+              <span class="store-card-badge" style="color: #00f2ff; border-color: #00f2ff;">ANTI-GRAV</span>
+              <div class="store-card-icon" style="color: #00f2ff;"><i class="fa-solid fa-motorcycle"></i></div>
+              <div class="store-card-title">CYBER HOVERBIKE INTERCEPTOR</div>
+              <div class="store-card-desc">Ultra-responsive repulsorcraft. Glides effortlessly across roadways and rocky terrain.</div>
+              <div style="font-size: 11px; color: #ffd700; font-family: monospace;">TOP SPEED: 180 KM/H · REPULSOR GLIDE</div>
+              <button type="button" class="store-card-btn primary" onclick="spawnVehicleAtMall('hoverbike')">
+                <i class="fa-solid fa-bolt"></i> DEPLOY HOVERBIKE AT PLAZA
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. BIO-STIM MED-BAY TAB -->
+        <div class="store-section" id="store-sec-medbay">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #00ff88; letter-spacing: 1.5px;">
+              <i class="fa-solid fa-heart-pulse"></i> BIO-STIM REGENERATION LAB &amp; PHARMACY
+            </h3>
+            <span style="font-size: 11px; color: #8fa3b8; font-family: monospace;">VITALS RECOVERY PROTOCOLS</span>
+          </div>
+
+          <div class="store-grid">
+            <div class="store-card" style="border-color: rgba(0, 255, 136, 0.4);">
+              <span class="store-card-badge" style="color: #00ff88; border-color: #00ff88;">HEALTH</span>
+              <div class="store-card-icon" style="color: #00ff88;"><i class="fa-solid fa-syringe"></i></div>
+              <div class="store-card-title">NANO-STIM INJECTION</div>
+              <div class="store-card-desc">Cellular regeneration serum. Instantly restores operative to 100% full health.</div>
+              <button type="button" class="store-card-btn primary" style="background: #00ff88; color: #000;" onclick="administerMedKit('hp')">
+                <i class="fa-solid fa-heart"></i> RESTORE 100 HP (FREE)
+              </button>
+            </div>
+
+            <div class="store-card" style="border-color: rgba(0, 242, 255, 0.4);">
+              <span class="store-card-badge" style="color: #00f2ff; border-color: #00f2ff;">SHIELD</span>
+              <div class="store-card-icon" style="color: #00f2ff;"><i class="fa-solid fa-shield-halved"></i></div>
+              <div class="store-card-title">IONIC MATRIX CELL</div>
+              <div class="store-card-desc">Kinetic overcharge capacitor. Recharges tactical suit shield barrier to 100%.</div>
+              <button type="button" class="store-card-btn primary" style="background: #00f2ff; color: #000;" onclick="administerMedKit('shield')">
+                <i class="fa-solid fa-shield"></i> RECHARGE 100 SHIELD (FREE)
+              </button>
+            </div>
+
+            <div class="store-card" style="border-color: rgba(255, 215, 0, 0.4);">
+              <span class="store-card-badge" style="color: #ffd700; border-color: #ffd700;">MAX PACK</span>
+              <div class="store-card-icon" style="color: #ffd700;"><i class="fa-solid fa-kit-medical"></i></div>
+              <div class="store-card-title">OVERDRIVE ADRENALINE RIG</div>
+              <div class="store-card-desc">Full 100% HP + 100% Shield + 100% Jetpack Fuel replenishment.</div>
+              <button type="button" class="store-card-btn primary" onclick="administerMedKit('all')">
+                <i class="fa-solid fa-bolt"></i> FULL RECOVERY (MAX ALL)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. STARDUST CAFE & ARCADE TAB -->
+        <div class="store-section" id="store-sec-arcade">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h3 style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #ff00ff; letter-spacing: 1.5px;">
+              <i class="fa-solid fa-gamepad"></i> STARDUST CAFE &amp; RETRO ARCADE
+            </h3>
+            <span style="font-size: 11px; color: #ffd700; font-family: monospace;">WIN BONUS NEX TOKENS</span>
+          </div>
+
+          <div style="background: rgba(10, 16, 26, 0.85); border: 1.5px solid rgba(255, 0, 255, 0.4); border-radius: 12px; padding: 18px; margin-top: 14px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
+            <div style="display: flex; justify-content: space-between; width: 100%; font-family: 'Orbitron', sans-serif; font-size: 12px;">
+              <span style="color: #00f2ff;">ASTEROID DEFENDER 2099</span>
+              <span style="color: #ffd700;">SCORE: <strong id="arcade-score">0</strong></span>
+            </div>
+            
+            <canvas id="arcade-canvas" width="460" height="180" style="background: #040810; border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 8px; width: 100%; max-width: 480px;"></canvas>
+
+            <div style="display: flex; gap: 10px; width: 100%; max-width: 480px;">
+              <button type="button" class="store-card-btn primary" style="background: #ff00ff; color: #fff;" onclick="startArcadeGame()">
+                <i class="fa-solid fa-play"></i> START BLASTING ASTEROIDS
+              </button>
+              <button type="button" class="store-card-btn primary" style="background: #ffd700; color: #000;" onclick="claimArcadeReward()">
+                <i class="fa-solid fa-coins"></i> CLAIM +50 NEX TOKENS
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLOATING IN-GAME STORE PROXIMITY INTERACTION PROMPT -->
+  <div id="store-interact-prompt" style="display: none;" onclick="openStoreFromPrompt()">
+    <div class="store-prompt-icon">
+      <i class="fa-solid fa-shop"></i>
+    </div>
+    <div>
+      <div class="store-prompt-title" id="store-prompt-title">NEXUS GRAND MALL</div>
+      <div class="store-prompt-sub">[E] / [TAP] VISIT STORE</div>
     </div>
   </div>
 
@@ -4169,6 +4767,14 @@
     let trafficGroup;
     let cityTrafficVehicles = [];
     let aviationBeacons = [];
+    let cityElevators = [];
+    let citySpinners = [];
+    let mallStoreRotatingPedestals = [];
+    let mallHoloPlaza = null;
+    let mallCryoBeacons = [];
+    let nearbyStoreAction = null;
+    let playerJacketMat = null, playerPantsMat = null, playerTitaniumMat = null, playerVisorMat = null;
+    let footstepDustParticles = [];
     let roverWheels = [];
     let roverFrontSteerPivots = [];
     let roverHeadlightLight;
@@ -4783,7 +5389,13 @@
         roughness: 0.22,
         metalness: 0.92
       });
-      const neonCyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const neonCyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.88 });
+
+      // Expose operative suit materials for dynamic Camo Atelier customization
+      playerJacketMat = jacketMat;
+      playerPantsMat = cargoPantsMat;
+      playerTitaniumMat = titaniumMat;
+      playerVisorMat = neonCyanMat;
 
       // 1. Anatomical Human Head & Realistic Sculpted Face
       playerHeadMesh = new THREE.Group();
@@ -4819,6 +5431,13 @@
         const pupil = new THREE.Mesh(new THREE.CircleGeometry(0.005, 12), eyePupilMat);
         pupil.position.set(ex, 0.025, 0.133);
         playerHeadMesh.add(pupil);
+
+        // Tactical Holographic Cyber-Visor / HUD Optic
+        if (!playerHelmetVisor) {
+          playerHelmetVisor = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.026, 0.04), neonCyanMat);
+          playerHelmetVisor.position.set(0, 0.025, 0.134);
+          playerHeadMesh.add(playerHelmetVisor);
+        }
 
         // Eyebrow
         const brow = new THREE.Mesh(new THREE.BoxGeometry(0.038, 0.008, 0.015), hairMat);
@@ -5567,6 +6186,7 @@
             if (Math.abs(bx) <= 2 && Math.abs(bz) <= 2) continue; // Grand Stadium Coliseum Arena clearing (136m diameter)
             if (bx <= -2 && bz <= -2) continue; // Nuclear Plant clearing
             if (bx >= 2 && bz <= -2) continue; // Spaceport clearing
+            if (Math.abs(bx) <= 1 && (bz === 3 || bz === 4)) continue; // Reserved for Nexus Grand Mall & Shopping Galleria
 
             const posX = bx * 34;
             const posZ = bz * 34;
@@ -7664,6 +8284,11 @@
         worldParticleSystem = new THREE.Points(partGeo, partMat);
         scene.add(worldParticleSystem);
 
+        // Build Nexus Grand Mall & Shopping Galleria and Alive City Dynamics
+        buildShoppingMall();
+        buildCityLivelinessElements();
+        initFootstepDustPool();
+
         // Initialize Autonomous Metropolis Cyber Traffic System
         initCityTraffic();
 
@@ -7674,6 +8299,710 @@
       } catch (err) {
         console.error('[AstroShift: Beyond Earth] Initialization error:', err);
         showDiagnostic('ENGINE ERROR: ' + err.message);
+      }
+    }
+
+    // ============================================================
+    // NEXUS GRAND MALL & SHOPPING GALLERIA ARCHITECTURE
+    // ============================================================
+    function buildShoppingMall() {
+      const mallGroup = new THREE.Group();
+      scene.add(mallGroup);
+
+      // Shared High-Tech Materials
+      const mallFloorMat = new THREE.MeshStandardMaterial({
+        color: 0x141a26,
+        roughness: 0.28,
+        metalness: 0.65
+      });
+      const mallGlassMat = new THREE.MeshStandardMaterial({
+        color: 0x00f2ff,
+        transparent: true,
+        opacity: 0.32,
+        roughness: 0.1,
+        metalness: 0.8
+      });
+      const mallTrimMat = new THREE.MeshStandardMaterial({
+        color: 0x080d16,
+        roughness: 0.35,
+        metalness: 0.88
+      });
+      const neonYellowMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+      const neonCyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const neonGreenMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+      const neonMagentaMat = new THREE.MeshBasicMaterial({ color: 0xff007f });
+      const neonOrangeMat = new THREE.MeshBasicMaterial({ color: 0xff6600 });
+
+      // 1. Grand Atrium Main Floor (68m x 62m, centered at x: 0, z: 122)
+      const floorMesh = new THREE.Mesh(new THREE.BoxGeometry(68, 0.5, 62), mallFloorMat);
+      floorMesh.position.set(0, 0.25, 122);
+      floorMesh.receiveShadow = true;
+      mallGroup.add(floorMesh);
+
+      // Illuminated Main Walkway Concourse (North-South Promenade)
+      const walkwayMat = new THREE.MeshBasicMaterial({ color: 0x00d9ff, transparent: true, opacity: 0.35 });
+      const mainWalkway = new THREE.Mesh(new THREE.PlaneGeometry(12, 60), walkwayMat);
+      mainWalkway.rotation.x = -Math.PI / 2;
+      mainWalkway.position.set(0, 0.51, 122);
+      mallGroup.add(mainWalkway);
+
+      // Cross Walkway Connecting East & West Wings
+      const crossWalkway = new THREE.Mesh(new THREE.PlaneGeometry(64, 8), walkwayMat);
+      crossWalkway.rotation.x = -Math.PI / 2;
+      crossWalkway.position.set(0, 0.512, 122);
+      mallGroup.add(crossWalkway);
+
+      // 2. Translucent Glass Arched Barrel-Vault Ceiling (Height: 18m)
+      const archTrussGeo = new THREE.TorusGeometry(32, 0.45, 8, 24, Math.PI);
+      for (let az = 94; az <= 150; az += 14) {
+        const truss = new THREE.Mesh(archTrussGeo, mallTrimMat);
+        truss.position.set(0, 0.5, az);
+        truss.rotation.z = Math.PI;
+        mallGroup.add(truss);
+      }
+      const roofCyl = new THREE.CylinderGeometry(32, 32, 58, 24, 1, true, 0, Math.PI);
+      const roofMesh = new THREE.Mesh(roofCyl, mallGlassMat);
+      roofMesh.rotation.z = Math.PI / 2;
+      roofMesh.rotation.y = Math.PI / 2;
+      roofMesh.position.set(0, 0.5, 122);
+      mallGroup.add(roofMesh);
+
+      // 3. Grand Entrance Portico & Holographic Signage at z = 92
+      const portalL = new THREE.Mesh(new THREE.BoxGeometry(4, 14, 4), mallTrimMat);
+      portalL.position.set(-16, 7, 92);
+      mallGroup.add(portalL);
+      const portalR = new THREE.Mesh(new THREE.BoxGeometry(4, 14, 4), mallTrimMat);
+      portalR.position.set(16, 7, 92);
+      mallGroup.add(portalR);
+      const portalBeam = new THREE.Mesh(new THREE.BoxGeometry(36, 3, 4), mallTrimMat);
+      portalBeam.position.set(0, 14, 92);
+      mallGroup.add(portalBeam);
+
+      // Canvas-Generated 3D Header Signboard
+      const signCanvas = document.createElement('canvas');
+      signCanvas.width = 1024;
+      signCanvas.height = 128;
+      const sctx = signCanvas.getContext('2d');
+      if (sctx) {
+        sctx.fillStyle = '#060c18';
+        sctx.fillRect(0, 0, 1024, 128);
+        sctx.strokeStyle = '#00f2ff';
+        sctx.lineWidth = 6;
+        sctx.strokeRect(6, 6, 1012, 116);
+        sctx.fillStyle = '#ffd700';
+        sctx.font = 'bold 44px Orbitron, sans-serif';
+        sctx.textAlign = 'center';
+        sctx.textBaseline = 'middle';
+        sctx.fillText('⚡ NEXUS GRAND MALL & GALLERIA ⚡', 512, 50);
+        sctx.fillStyle = '#00f2ff';
+        sctx.font = '22px Orbitron, monospace';
+        sctx.fillText('CYBER-ARMORY // EXO-SUITS // MOTORS // MED-BAY // ARCADE', 512, 94);
+      }
+      const signTex = new THREE.CanvasTexture(signCanvas);
+      const signMesh = new THREE.Mesh(new THREE.PlaneGeometry(32, 4), new THREE.MeshBasicMaterial({ map: signTex, transparent: true }));
+      signMesh.position.set(0, 14, 94.1);
+      mallGroup.add(signMesh);
+
+      const signMeshBack = signMesh.clone();
+      signMeshBack.rotation.y = Math.PI;
+      signMeshBack.position.set(0, 14, 89.9);
+      mallGroup.add(signMeshBack);
+
+      // 4. Central Concourse Plaza (x: 0, z: 122)
+      // Floating Holographic Planetarium Globe
+      const globeGeo = new THREE.SphereGeometry(2.4, 16, 16);
+      const globeMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.65 });
+      mallHoloPlaza = new THREE.Mesh(globeGeo, globeMat);
+      mallHoloPlaza.position.set(0, 4.8, 122);
+      mallGroup.add(mallHoloPlaza);
+
+      const fountainMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.8, 1.0, 16), mallTrimMat);
+      fountainMesh.position.set(0, 0.75, 122);
+      mallGroup.add(fountainMesh);
+
+      const fountainRing = new THREE.Mesh(new THREE.TorusGeometry(4.4, 0.14, 8, 24), neonCyanMat);
+      fountainRing.rotation.x = Math.PI / 2;
+      fountainRing.position.set(0, 1.25, 122);
+      mallGroup.add(fountainRing);
+
+      // 5. Store 1: CYBER-ARMORY (West Wing 1: x = -20, z = 110)
+      buildStoreArmory(mallGroup, -20, 110);
+
+      // 6. Store 2: EXO-CORE ATELIER (East Wing 1: x = 20, z = 110)
+      buildStoreExoSuits(mallGroup, 20, 110);
+
+      // 7. Store 3: HYPERION MOTORS SHOWROOM (West Wing 2: x = -20, z = 135)
+      buildStoreMotors(mallGroup, -20, 135);
+
+      // 8. Store 4: BIO-STIM MED-BAY (East Wing 2: x = 20, z = 135)
+      buildStoreMedBay(mallGroup, 20, 135);
+
+      // 9. Store 5: STARDUST CAFE & RETRO ARCADE (North Concourse: x = 0, z = 146)
+      buildStoreArcade(mallGroup, 0, 146);
+
+      // Register Mall perimeter colliders
+      registerCityCollider({ x: -34, z: 122, hw: 2, hd: 31, doorW: 0 }); // West outer wall
+      registerCityCollider({ x: 34, z: 122, hw: 2, hd: 31, doorW: 0 });  // East outer wall
+      registerCityCollider({ x: 0, z: 153, hw: 34, hd: 2, doorW: 0 });   // North back wall
+      registerCityCollider({ x: 0, z: 91, hw: 34, hd: 2, doorW: 14 });   // South front wall with 14m entrance doorway
+    }
+
+    // STORE 1: CYBER-ARMORY
+    function buildStoreArmory(parent, sx, sz) {
+      const storeGroup = new THREE.Group();
+      storeGroup.position.set(sx, 0, sz);
+      parent.add(storeGroup);
+
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x121822, roughness: 0.4, metalness: 0.8 });
+      const orangeMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+
+      // Store Signboard
+      const signMesh = new THREE.Mesh(new THREE.BoxGeometry(16, 2.2, 0.6), frameMat);
+      signMesh.position.set(0, 6.5, 5);
+      storeGroup.add(signMesh);
+
+      const signGlow = new THREE.Mesh(new THREE.BoxGeometry(15.6, 1.8, 0.7), orangeMat);
+      signGlow.position.set(0, 6.5, 5);
+      storeGroup.add(signGlow);
+
+      // Weapon display pedestals (3 pedestals with floating tactical weapons)
+      [-4.5, 0, 4.5].forEach((px, i) => {
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.2, 1.1, 14), frameMat);
+        base.position.set(px, 0.55, 0);
+        storeGroup.add(base);
+
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(1.02, 0.08, 8, 16), orangeMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.set(px, 1.1, 0);
+        storeGroup.add(ring);
+
+        // Weapon mesh
+        const wepGroup = new THREE.Group();
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 1.4, 8), frameMat);
+        barrel.rotation.z = Math.PI / 2;
+        wepGroup.add(barrel);
+        const stock = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.18, 0.1), frameMat);
+        stock.position.set(-0.6, -0.05, 0);
+        wepGroup.add(stock);
+        const scope = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.45, 8), orangeMat);
+        scope.rotation.z = Math.PI / 2;
+        scope.position.set(0, 0.14, 0);
+        wepGroup.add(scope);
+
+        wepGroup.position.set(px, 1.7, 0);
+        storeGroup.add(wepGroup);
+
+        mallStoreRotatingPedestals.push({
+          mesh: wepGroup,
+          baseY: 1.7,
+          rotSpeed: 1.2,
+          bobAmp: 0.08,
+          phase: i * 1.6
+        });
+      });
+
+      // Terminal Console
+      const desk = new THREE.Mesh(new THREE.BoxGeometry(3.5, 1.1, 1.4), frameMat);
+      desk.position.set(0, 0.55, 3.5);
+      storeGroup.add(desk);
+
+      const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 0.9), orangeMat);
+      screen.rotation.x = -Math.PI / 6;
+      screen.position.set(0, 1.35, 3.3);
+      storeGroup.add(screen);
+    }
+
+    // STORE 2: EXO-CORE ATELIER
+    function buildStoreExoSuits(parent, sx, sz) {
+      const storeGroup = new THREE.Group();
+      storeGroup.position.set(sx, 0, sz);
+      parent.add(storeGroup);
+
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x121822, roughness: 0.4, metalness: 0.8 });
+      const cyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+      // Signboard
+      const signMesh = new THREE.Mesh(new THREE.BoxGeometry(16, 2.2, 0.6), frameMat);
+      signMesh.position.set(0, 6.5, 5);
+      storeGroup.add(signMesh);
+
+      const signGlow = new THREE.Mesh(new THREE.BoxGeometry(15.6, 1.8, 0.7), cyanMat);
+      signGlow.position.set(0, 6.5, 5);
+      storeGroup.add(signGlow);
+
+      // Mannequin Plinths (Left: Ghost Stealth, Right: Titan Juggernaut)
+      [-3.5, 3.5].forEach((mx, i) => {
+        const plinth = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.5, 0.4, 16), frameMat);
+        plinth.position.set(mx, 0.2, 0);
+        storeGroup.add(plinth);
+
+        const glowRing = new THREE.Mesh(new THREE.TorusGeometry(1.32, 0.08, 8, 20), cyanMat);
+        glowRing.rotation.x = Math.PI / 2;
+        glowRing.position.set(mx, 0.42, 0);
+        storeGroup.add(glowRing);
+
+        // Holographic Mannequin Silhouette
+        const suitMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.22, 1.4, 12),
+          new THREE.MeshBasicMaterial({ color: i === 0 ? 0x00f2ff : 0xffd700, wireframe: true, transparent: true, opacity: 0.55 })
+        );
+        suitMesh.position.set(mx, 1.25, 0);
+        storeGroup.add(suitMesh);
+
+        const headMesh = new THREE.Mesh(new THREE.SphereGeometry(0.18, 12, 12),
+          new THREE.MeshBasicMaterial({ color: i === 0 ? 0x00f2ff : 0xffd700, transparent: true, opacity: 0.75 })
+        );
+        headMesh.position.set(mx, 2.1, 0);
+        storeGroup.add(headMesh);
+
+        mallStoreRotatingPedestals.push({
+          mesh: suitMesh,
+          baseY: 1.25,
+          rotSpeed: 0.6,
+          bobAmp: 0.04,
+          phase: i * 2.0
+        });
+      });
+
+      // Central Calibrator Pedestal
+      const desk = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 1.0, 16), frameMat);
+      desk.position.set(0, 0.5, 3.5);
+      storeGroup.add(desk);
+
+      const calibRing = new THREE.Mesh(new THREE.TorusGeometry(1.25, 0.06, 8, 20), cyanMat);
+      calibRing.rotation.x = Math.PI / 2;
+      calibRing.position.set(0, 1.02, 3.5);
+      storeGroup.add(calibRing);
+    }
+
+    // STORE 3: HYPERION MOTORS SHOWROOM
+    function buildStoreMotors(parent, sx, sz) {
+      const storeGroup = new THREE.Group();
+      storeGroup.position.set(sx, 0, sz);
+      parent.add(storeGroup);
+
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x121822, roughness: 0.4, metalness: 0.8 });
+      const goldMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+
+      // Signboard
+      const signMesh = new THREE.Mesh(new THREE.BoxGeometry(16, 2.2, 0.6), frameMat);
+      signMesh.position.set(0, 6.5, 5);
+      storeGroup.add(signMesh);
+
+      const signGlow = new THREE.Mesh(new THREE.BoxGeometry(15.6, 1.8, 0.7), goldMat);
+      signGlow.position.set(0, 6.5, 5);
+      storeGroup.add(signGlow);
+
+      // Large Rotating Vehicle Turntable (radius: 4.8m)
+      const turntableGroup = new THREE.Group();
+      turntableGroup.position.set(0, 0.3, 0);
+      storeGroup.add(turntableGroup);
+
+      const tableBase = new THREE.Mesh(new THREE.CylinderGeometry(4.8, 5.0, 0.5, 24), frameMat);
+      tableBase.position.y = 0.25;
+      turntableGroup.add(tableBase);
+
+      const tableRing = new THREE.Mesh(new THREE.TorusGeometry(4.82, 0.09, 8, 28), goldMat);
+      tableRing.rotation.x = Math.PI / 2;
+      tableRing.position.y = 0.51;
+      turntableGroup.add(tableRing);
+
+      // Concept 6x6 Rover Model (Scale Model)
+      const miniRover = new THREE.Group();
+      miniRover.position.set(-1.8, 0.7, 0);
+      const rBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.7, 1.3),
+        new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.3, metalness: 0.8 })
+      );
+      miniRover.add(rBody);
+      const rTurret = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.3, 10), goldMat);
+      rTurret.position.set(0.2, 0.5, 0);
+      miniRover.add(rTurret);
+      turntableGroup.add(miniRover);
+
+      // Concept Hoverbike Model (Scale Model)
+      const miniBike = new THREE.Group();
+      miniBike.position.set(1.8, 0.75, 0);
+      const bBody = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.8, 8),
+        new THREE.MeshStandardMaterial({ color: 0x00f2ff, roughness: 0.2, metalness: 0.9 })
+      );
+      bBody.rotation.z = Math.PI / 2;
+      miniBike.add(bBody);
+      const bRing = new THREE.Mesh(new THREE.TorusGeometry(0.38, 0.06, 6, 16), goldMat);
+      bRing.rotation.y = Math.PI / 2;
+      miniBike.add(bRing);
+      turntableGroup.add(miniBike);
+
+      mallStoreRotatingPedestals.push({
+        mesh: turntableGroup,
+        baseY: 0.3,
+        rotSpeed: 0.45,
+        bobAmp: 0,
+        phase: 0
+      });
+    }
+
+    // STORE 4: BIO-STIM MED-BAY & PHARMACY
+    function buildStoreMedBay(parent, sx, sz) {
+      const storeGroup = new THREE.Group();
+      storeGroup.position.set(sx, 0, sz);
+      parent.add(storeGroup);
+
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x121822, roughness: 0.4, metalness: 0.8 });
+      const greenMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+
+      // Signboard
+      const signMesh = new THREE.Mesh(new THREE.BoxGeometry(16, 2.2, 0.6), frameMat);
+      signMesh.position.set(0, 6.5, 5);
+      storeGroup.add(signMesh);
+
+      const signGlow = new THREE.Mesh(new THREE.BoxGeometry(15.6, 1.8, 0.7), greenMat);
+      signGlow.position.set(0, 6.5, 5);
+      storeGroup.add(signGlow);
+
+      // Cryo-Regeneration Capsules (Left & Right)
+      [-4.0, 4.0].forEach(cx => {
+        const podBase = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.1, 0.6, 16), frameMat);
+        podBase.position.set(cx, 0.3, -1);
+        storeGroup.add(podBase);
+
+        const glassTube = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 2.8, 16),
+          new THREE.MeshStandardMaterial({ color: 0x00ff88, transparent: true, opacity: 0.38, roughness: 0.1, metalness: 0.7 })
+        );
+        glassTube.position.set(cx, 1.8, -1);
+        storeGroup.add(glassTube);
+
+        const podCap = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 0.9, 0.5, 16), frameMat);
+        podCap.position.set(cx, 3.3, -1);
+        storeGroup.add(podCap);
+
+        const innerCore = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 2.4, 8), greenMat);
+        innerCore.position.set(cx, 1.8, -1);
+        storeGroup.add(innerCore);
+        mallCryoBeacons.push(innerCore);
+      });
+
+      // Walk-in Bio-Stim Floor Healing Ring (Stepping inside regenerates player vitals)
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.65 });
+      const floorRing = new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.15, 8, 24), ringMat);
+      floorRing.rotation.x = Math.PI / 2;
+      floorRing.position.set(0, 0.52, 2.0);
+      storeGroup.add(floorRing);
+      mallCryoBeacons.push(floorRing);
+
+      const padMesh = new THREE.Mesh(new THREE.CircleGeometry(2.1, 20),
+        new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.18 })
+      );
+      padMesh.rotation.x = -Math.PI / 2;
+      padMesh.position.set(0, 0.51, 2.0);
+      storeGroup.add(padMesh);
+    }
+
+    // STORE 5: STARDUST CAFE & RETRO ARCADE
+    function buildStoreArcade(parent, sx, sz) {
+      const storeGroup = new THREE.Group();
+      storeGroup.position.set(sx, 0, sz);
+      parent.add(storeGroup);
+
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x121822, roughness: 0.4, metalness: 0.8 });
+      const pinkMat = new THREE.MeshBasicMaterial({ color: 0xff007f });
+      const cyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+      // Signboard
+      const signMesh = new THREE.Mesh(new THREE.BoxGeometry(22, 2.2, 0.6), frameMat);
+      signMesh.position.set(0, 6.5, -4);
+      storeGroup.add(signMesh);
+
+      const signGlow = new THREE.Mesh(new THREE.BoxGeometry(21.6, 1.8, 0.7), pinkMat);
+      signGlow.position.set(0, 6.5, -4);
+      storeGroup.add(signGlow);
+
+      // Cyber Bar Counter
+      const barMesh = new THREE.Mesh(new THREE.BoxGeometry(8, 1.1, 1.2), frameMat);
+      barMesh.position.set(-4, 0.55, 0);
+      storeGroup.add(barMesh);
+
+      const barNeon = new THREE.Mesh(new THREE.BoxGeometry(8.1, 0.08, 0.1), pinkMat);
+      barNeon.position.set(-4, 1.05, 0.6);
+      storeGroup.add(barNeon);
+
+      // Stools
+      [-6, -4, -2].forEach(bx => {
+        const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.75, 10), cyanMat);
+        stool.position.set(bx, 0.38, 1.2);
+        storeGroup.add(stool);
+      });
+
+      // 2 Retro 3D Arcade Cabinets
+      [3.0, 5.2].forEach((ax, i) => {
+        const cab = new THREE.Group();
+        cab.position.set(ax, 0, 0);
+
+        const cabBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.0), frameMat);
+        cabBody.position.y = 1.1;
+        cab.add(cabBody);
+
+        const screen = new THREE.Mesh(new THREE.PlaneGeometry(0.85, 0.65), i === 0 ? cyanMat : pinkMat);
+        screen.position.set(0, 1.4, 0.51);
+        cab.add(screen);
+
+        const marquee = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.3, 0.3), i === 0 ? pinkMat : cyanMat);
+        marquee.position.set(0, 2.1, 0.45);
+        cab.add(marquee);
+
+        storeGroup.add(cab);
+      });
+    }
+
+    // ============================================================
+    // CITY LIVELINESS: ELEVATORS, SPINNERS & CYBER-TREES
+    // ============================================================
+    function buildCityLivelinessElements() {
+      const liveGroup = new THREE.Group();
+      scene.add(liveGroup);
+
+      const chromeMat = new THREE.MeshStandardMaterial({ color: 0x8294a6, roughness: 0.2, metalness: 0.9 });
+      const glassMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.42, roughness: 0.1, metalness: 0.8 });
+      const yellowMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+      const cyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+      // 1. Exterior Glass Skyscraper Elevators (4 Primary Landmarks)
+      const elevatorLocations = [
+        { x: -68, z: -68, minY: 4, maxY: 110, speed: 0.9, offset: 0 },
+        { x: 68, z: -68, minY: 4, maxY: 125, speed: 1.1, offset: 1.8 },
+        { x: -68, z: 68, minY: 4, maxY: 95, speed: 0.85, offset: 3.4 },
+        { x: 68, z: 68, minY: 4, maxY: 130, speed: 1.2, offset: 4.9 }
+      ];
+
+      elevatorLocations.forEach(loc => {
+        // Vertical exterior guide rail track
+        const trackGeo = new THREE.BoxGeometry(0.8, loc.maxY - loc.minY + 12, 0.8);
+        const track = new THREE.Mesh(trackGeo, chromeMat);
+        track.position.set(loc.x, (loc.minY + loc.maxY) / 2, loc.z);
+        liveGroup.add(track);
+
+        // Moving Glass Elevator Cab
+        const cab = new THREE.Group();
+        cab.position.set(loc.x, loc.minY, loc.z);
+
+        const cabFrame = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.8, 3.6), glassMat);
+        cab.add(cabFrame);
+
+        const cabRoof = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.4, 3.8), chromeMat);
+        cabRoof.position.y = 1.9;
+        cab.add(cabRoof);
+
+        const cabFloor = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.4, 3.8), chromeMat);
+        cabFloor.position.y = -1.9;
+        cab.add(cabFloor);
+
+        const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 8), yellowMat);
+        beacon.position.set(0, -2.1, 1.8);
+        cab.add(beacon);
+
+        liveGroup.add(cab);
+
+        cityElevators.push({
+          mesh: cab,
+          minY: loc.minY,
+          maxY: loc.maxY,
+          speed: loc.speed,
+          offset: loc.offset,
+          beacon: beacon
+        });
+      });
+
+      // 2. Rotating Rooftop Radar Dishes & HVAC Turbines
+      const spinnerLocations = [
+        { x: -102, y: 135, z: -102, type: 'radar' },
+        { x: 102, y: 145, z: -102, type: 'radar' },
+        { x: -102, y: 128, z: 102, type: 'turbine' },
+        { x: 102, y: 155, z: 102, type: 'radar' },
+        { x: -34, y: 115, z: -102, type: 'turbine' },
+        { x: 34, y: 120, z: -102, type: 'turbine' },
+        { x: -34, y: 110, z: 68, type: 'radar' }
+      ];
+
+      spinnerLocations.forEach((s, i) => {
+        if (s.type === 'radar') {
+          const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.28, 5, 8), chromeMat);
+          mast.position.set(s.x, s.y + 2.5, s.z);
+          liveGroup.add(mast);
+
+          const dishGroup = new THREE.Group();
+          dishGroup.position.set(s.x, s.y + 5.2, s.z);
+
+          const dish = new THREE.Mesh(new THREE.ConeGeometry(2.4, 0.8, 16, 1, true), chromeMat);
+          dish.rotation.x = Math.PI / 3;
+          dishGroup.add(dish);
+
+          const dishFeed = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.2, 6), cyanMat);
+          dishFeed.position.set(0, 0.4, 0.4);
+          dishGroup.add(dishFeed);
+
+          liveGroup.add(dishGroup);
+          citySpinners.push({ mesh: dishGroup, speed: 0.8 + (i % 3) * 0.4, axis: 'y' });
+
+        } else {
+          // Industrial HVAC Rooftop Turbine
+          const housing = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.4, 2.0, 14), chromeMat);
+          housing.position.set(s.x, s.y + 1.0, s.z);
+          liveGroup.add(housing);
+
+          const blades = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.15, 0.6), chromeMat);
+          blades.position.set(s.x, s.y + 2.05, s.z);
+          liveGroup.add(blades);
+
+          citySpinners.push({ mesh: blades, speed: 4.5 + (i % 3) * 1.5, axis: 'y' });
+        }
+      });
+
+      // 3. Holographic Bioluminescent Cyber-Trees along North Promenade
+      [-14, 14].forEach(tx => {
+        [66, 78, 88].forEach((tz, j) => {
+          const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.35, 4.2, 8), chromeMat);
+          trunk.position.set(tx, 2.1, tz);
+          liveGroup.add(trunk);
+
+          const trunkLine = new THREE.Mesh(new THREE.BoxGeometry(0.06, 3.8, 0.4), cyanMat);
+          trunkLine.position.set(tx, 2.1, tz);
+          liveGroup.add(trunkLine);
+
+          const canopyGeo = new THREE.DodecahedronGeometry(1.6, 1);
+          const canopyMat = new THREE.MeshStandardMaterial({
+            color: j % 2 === 0 ? 0x00f2ff : 0x00ff88,
+            transparent: true,
+            opacity: 0.68,
+            roughness: 0.2,
+            metalness: 0.8
+          });
+          const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+          canopy.position.set(tx, 4.8, tz);
+          liveGroup.add(canopy);
+
+          citySpinners.push({ mesh: canopy, speed: 0.35, axis: 'y' });
+        });
+      });
+    }
+
+    // ============================================================
+    // FOOTSTEP DUST PARTICLE POOL
+    // ============================================================
+    function initFootstepDustPool() {
+      const dustGeo = new THREE.CircleGeometry(0.28, 8);
+      const dustMat = new THREE.MeshBasicMaterial({
+        color: 0x8fa3b8,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false
+      });
+      for (let i = 0; i < 16; i++) {
+        const mesh = new THREE.Mesh(dustGeo, dustMat.clone());
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.visible = false;
+        scene.add(mesh);
+        footstepDustParticles.push({
+          mesh: mesh,
+          life: 0,
+          maxLife: 0.4
+        });
+      }
+    }
+
+    let lastDustTime = 0;
+    function triggerFootstepDust(pos, xOffset) {
+      const now = performance.now();
+      if (now - lastDustTime < 180) return;
+      lastDustTime = now;
+
+      const p = footstepDustParticles.find(d => d.life <= 0);
+      if (!p) return;
+
+      p.mesh.position.set(pos.x + xOffset, 0.04, pos.z);
+      p.mesh.scale.set(0.2, 0.2, 0.2);
+      p.mesh.material.opacity = 0.55;
+      p.mesh.visible = true;
+      p.life = p.maxLife;
+    }
+
+    function updateFootstepDust(dt) {
+      footstepDustParticles.forEach(p => {
+        if (p.life > 0) {
+          p.life -= dt;
+          const prog = 1 - (p.life / p.maxLife);
+          const s = 0.2 + prog * 0.65;
+          p.mesh.scale.set(s, s, s);
+          p.mesh.material.opacity = (1 - prog) * 0.55;
+          if (p.life <= 0) p.mesh.visible = false;
+        }
+      });
+    }
+
+    // ============================================================
+    // MALL & STORE PROXIMITY DETECTION
+    // ============================================================
+    function checkMallStoreProximity() {
+      if (!player.pos) return;
+
+      const stores = [
+        { id: 'armory', title: 'CYBER-ARMORY', prompt: '[E] / [TAP] BROWSE WEAPONS & AMMO', x: -20, z: 110, r: 6.0 },
+        { id: 'suits', title: 'EXO-SUITS ATELIER', prompt: '[E] / [TAP] CUSTOMIZE SUIT CAMO', x: 20, z: 110, r: 6.0 },
+        { id: 'vehicles', title: 'HYPERION MOTORS', prompt: '[E] / [TAP] VIEW VEHICLE SHOWROOM', x: -20, z: 135, r: 6.0 },
+        { id: 'medbay', title: 'BIO-STIM MED-BAY', prompt: '[E] / [TAP] RECHARGE VITALS & SHIELD', x: 20, z: 135, r: 6.0 },
+        { id: 'arcade', title: 'STARDUST CAFE & ARCADE', prompt: '[E] / [TAP] PLAY ARCADE & CHILL', x: 0, z: 146, r: 6.0 },
+        { id: 'armory', title: 'NEXUS GRAND MALL', prompt: '[E] / [TAP] ENTER SHOPPING MALL', x: 0, z: 92, r: 7.0 }
+      ];
+
+      let nearest = null;
+      let minDist = 999;
+      stores.forEach(s => {
+        const dx = player.pos.x - s.x;
+        const dz = player.pos.z - s.z;
+        const d = Math.sqrt(dx * dx + dz * dz);
+        if (d < s.r && d < minDist) {
+          minDist = d;
+          nearest = s;
+        }
+      });
+
+      const promptEl = document.getElementById('store-interact-prompt');
+      const titleEl = document.getElementById('store-prompt-title');
+
+      if (nearest) {
+        nearbyStoreAction = nearest;
+        if (promptEl) {
+          promptEl.style.display = 'flex';
+          if (titleEl) titleEl.textContent = nearest.title;
+          const subEl = promptEl.querySelector('.store-prompt-sub');
+          if (subEl) subEl.textContent = nearest.prompt;
+        }
+
+        // Med-Bay walk-in auto-healing ring
+        if (nearest.id === 'medbay' && minDist < 3.2) {
+          if (gameState.health < 100 || gameState.shield < 100) {
+            gameState.health = Math.min(100, (gameState.health || 100) + 0.35);
+            gameState.shield = Math.min(100, (gameState.shield || 100) + 0.35);
+            const hpBar = document.getElementById('hud-hp-bar');
+            const hpVal = document.getElementById('hud-hp-val');
+            const shBar = document.getElementById('hud-shield-bar');
+            const shVal = document.getElementById('hud-shield-val');
+            if (hpBar) hpBar.style.width = gameState.health + '%';
+            if (hpVal) hpVal.textContent = Math.round(gameState.health);
+            if (shBar) shBar.style.width = gameState.shield + '%';
+            if (shVal) shVal.textContent = Math.round(gameState.shield);
+          }
+        }
+
+        // Open on key E
+        if (keys['KeyE'] || keys['Keye'] || keys['e'] || keys['E']) {
+          keys['KeyE'] = false;
+          keys['Keye'] = false;
+          keys['e'] = false;
+          keys['E'] = false;
+          toggleStoreModal(true, nearest.id);
+        }
+
+      } else {
+        nearbyStoreAction = null;
+        if (promptEl) promptEl.style.display = 'none';
       }
     }
 
@@ -8644,6 +9973,53 @@
         }
       }
 
+      // Dynamic Exterior Glass Skyscraper Elevators
+      if (cityElevators.length > 0) {
+        cityElevators.forEach(e => {
+          const t = (now * 0.0006 * e.speed + e.offset) % (Math.PI * 2);
+          const norm = 0.5 + 0.5 * Math.sin(t);
+          e.mesh.position.y = e.minY + norm * (e.maxY - e.minY);
+          if (e.beacon && e.beacon.material) {
+            e.beacon.material.opacity = (Math.sin(now * 0.012 + e.offset) > 0) ? 1.0 : 0.2;
+          }
+        });
+      }
+
+      // Rooftop Radar Dishes, HVAC Turbines & Cyber-Tree Rotations
+      if (citySpinners.length > 0) {
+        citySpinners.forEach(s => {
+          if (s.mesh) s.mesh.rotation[s.axis || 'y'] += s.speed * delta;
+        });
+      }
+
+      // Nexus Grand Mall Holographic Pedestals & Concourse Planetarium
+      if (mallStoreRotatingPedestals.length > 0) {
+        mallStoreRotatingPedestals.forEach(p => {
+          if (p.mesh) {
+            p.mesh.rotation.y += p.rotSpeed * delta;
+            if (p.bobAmp) {
+              p.mesh.position.y = p.baseY + Math.sin(now * 0.003 + p.phase) * p.bobAmp;
+            }
+          }
+        });
+      }
+      if (mallHoloPlaza) {
+        mallHoloPlaza.rotation.y += delta * 0.45;
+        mallHoloPlaza.rotation.x = Math.sin(now * 0.001) * 0.2;
+      }
+      if (mallCryoBeacons.length > 0) {
+        const cryoPulse = 0.55 + 0.45 * Math.sin(now * 0.006);
+        mallCryoBeacons.forEach(b => {
+          if (b.material) b.material.opacity = cryoPulse;
+        });
+      }
+
+      // Footstep Dust Particles Update
+      updateFootstepDust(delta);
+
+      // Check Proximity to Mall Stores & Interactive Terminals
+      checkMallStoreProximity();
+
       // Detached Booster Automated Boost-Back Descent & Landing
       if (detachedBooster && detachedBooster.mesh) {
         detachedBooster.altitude = Math.max(0, detachedBooster.altitude - delta * 24.0);
@@ -9009,9 +10385,11 @@
           gameState.weaponSwayX = THREE.MathUtils.lerp(gameState.weaponSwayX || 0, 0, 0.12);
           gameState.weaponSwayY = THREE.MathUtils.lerp(gameState.weaponSwayY || 0, 0, 0.12);
 
+          const fpBreatheY = Math.sin(now * 0.003) * 0.006;
+          const fpBreatheX = Math.sin(now * 0.0015) * 0.003;
           const targetPos = gameState.isAiming
-            ? new THREE.Vector3(0.0, -0.16, -0.38 + (gameState.recoilKick || 0))
-            : new THREE.Vector3(0.26 + bobX + (gameState.weaponSwayX || 0), -0.24 - bobY - (gameState.weaponSwayY || 0), -0.52 + (gameState.recoilKick || 0));
+            ? new THREE.Vector3(0.0 + fpBreatheX * 0.4, -0.16 + fpBreatheY * 0.5, -0.38 + (gameState.recoilKick || 0))
+            : new THREE.Vector3(0.26 + bobX + fpBreatheX + (gameState.weaponSwayX || 0), -0.24 - bobY + fpBreatheY - (gameState.weaponSwayY || 0), -0.52 + (gameState.recoilKick || 0));
 
           if (fpsViewModel && fpsViewModel.visible) {
             fpsViewModel.position.lerp(targetPos, 0.25);
@@ -9024,27 +10402,125 @@
           if (fpsViewModel) fpsViewModel.visible = false;
           if (playerModelGroup) {
             playerModelGroup.visible = true;
-            playerModelGroup.position.copy(player.pos);
-            playerModelGroup.rotation.y = player.yaw + Math.PI;
 
             // Aim head up/down with pitch
             if (playerHeadMesh) {
               playerHeadMesh.rotation.x = -player.pitch * 0.55;
             }
 
-            // Animated legs & arms stride based on speed
             const speed = Math.sqrt(player.vel.x * player.vel.x + player.vel.z * player.vel.z);
-            if (speed > 0.2 && player.isGrounded) {
-              const legStride = Math.sin(now * 0.01 * speed) * 0.55;
-              if (playerLegL) playerLegL.rotation.x = legStride;
-              if (playerLegR) playerLegR.rotation.x = -legStride;
-              if (playerArmL) playerArmL.rotation.x = -legStride * 0.65;
-              if (playerArmR) playerArmR.rotation.x = -Math.PI / 3.2 + legStride * 0.35;
+            const isMoving = speed > 0.25;
+            const isSprinting = isMoving && (keys['ShiftLeft'] || keys['ShiftRight']);
+            const strideRate = isSprinting ? 0.016 : 0.011;
+
+            if (player.isGrounded) {
+              if (isMoving) {
+                // WALKING / SPRINTING ACTIVE STRIDE CYCLE
+                const stride = now * strideRate * Math.min(speed, 6.0);
+                const legAmp = isSprinting ? 0.75 : 0.52;
+                const armAmp = isSprinting ? 0.85 : 0.58;
+
+                const sinStride = Math.sin(stride);
+                const cosStride = Math.cos(stride);
+
+                // Alternating realistic leg swing
+                if (playerLegL) playerLegL.rotation.x = sinStride * legAmp;
+                if (playerLegR) playerLegR.rotation.x = -sinStride * legAmp;
+
+                // Natural arm swing with weapon compensation
+                if (playerArmL) playerArmL.rotation.x = -sinStride * armAmp;
+                if (playerArmR) playerArmR.rotation.x = -Math.PI / 3.2 + sinStride * (armAmp * 0.45);
+
+                // Organic vertical hip bobbing (hips drop on stride, rise on pass)
+                const hipBounce = Math.abs(Math.sin(stride)) * (isSprinting ? 0.065 : 0.042);
+                playerModelGroup.position.set(player.pos.x, player.pos.y + hipBounce, player.pos.z);
+
+                // Torso counter-rotation (biomechanical core twist)
+                if (playerTorso) {
+                  playerTorso.rotation.y = -sinStride * 0.12;
+                  playerTorso.rotation.z = -cosStride * 0.03;
+                  playerTorso.position.y = 1.14;
+                  playerTorso.scale.set(1, 1, 1);
+                }
+
+                // Head stays focused forward with micro-dampening
+                if (playerHeadMesh) {
+                  playerHeadMesh.rotation.y = sinStride * 0.04;
+                  playerHeadMesh.rotation.z = 0;
+                }
+
+                // Spawn Footstep Dust Puffs on foot strike
+                if (Math.abs(cosStride) > 0.94) {
+                  triggerFootstepDust(player.pos, sinStride > 0 ? -0.16 : 0.16);
+                }
+
+              } else {
+                // ALIVE IDLE CYCLE: Breathing, weight shifting & curiosity glances
+                const idleBreathe = Math.sin(now * 0.0035);
+                const idleSway = Math.sin(now * 0.0018);
+                const idleGlance = Math.sin(now * 0.0009);
+
+                playerModelGroup.position.copy(player.pos);
+
+                // Legs gently return to relaxed standing stance
+                if (playerLegL) playerLegL.rotation.x = THREE.MathUtils.lerp(playerLegL.rotation.x, 0.02, 0.15);
+                if (playerLegR) playerLegR.rotation.x = THREE.MathUtils.lerp(playerLegR.rotation.x, -0.02, 0.15);
+
+                // Chest expands and rises with breathing
+                if (playerTorso) {
+                  playerTorso.rotation.y = THREE.MathUtils.lerp(playerTorso.rotation.y, idleSway * 0.02, 0.1);
+                  playerTorso.rotation.z = THREE.MathUtils.lerp(playerTorso.rotation.z, 0, 0.1);
+                  playerTorso.position.y = 1.14 + idleBreathe * 0.012;
+                  const breatheScale = 1.0 + idleBreathe * 0.015;
+                  playerTorso.scale.set(breatheScale, 1.0, breatheScale);
+                }
+
+                // Arms sway with breathing in idle ready stance
+                if (playerArmL) playerArmL.rotation.x = THREE.MathUtils.lerp(playerArmL.rotation.x, -Math.PI / 2.7 + idleBreathe * 0.025, 0.15);
+                if (playerArmR) playerArmR.rotation.x = THREE.MathUtils.lerp(playerArmR.rotation.x, -Math.PI / 3.2 + idleBreathe * 0.02, 0.15);
+
+                // Natural human micro-glances: head occasionally tilts and looks around
+                if (playerHeadMesh) {
+                  const lookTargetY = (Math.abs(idleGlance) > 0.65) ? (idleGlance * 0.22) : 0;
+                  const tiltTargetZ = (Math.abs(idleGlance) > 0.65) ? (idleGlance * 0.05) : 0;
+                  playerHeadMesh.rotation.y = THREE.MathUtils.lerp(playerHeadMesh.rotation.y, lookTargetY, 0.06);
+                  playerHeadMesh.rotation.z = THREE.MathUtils.lerp(playerHeadMesh.rotation.z, tiltTargetZ, 0.06);
+                }
+              }
+
+              // Banking / leaning into turns
+              const isSteeringLeft = keys['KeyA'] || keys['ArrowLeft'];
+              const isSteeringRight = keys['KeyD'] || keys['ArrowRight'];
+              const targetBank = isSteeringLeft ? 0.08 : (isSteeringRight ? -0.08 : 0);
+              playerModelGroup.rotation.z = THREE.MathUtils.lerp(playerModelGroup.rotation.z, targetBank, 0.15);
+
             } else {
-              if (playerLegL) playerLegL.rotation.x = THREE.MathUtils.lerp(playerLegL.rotation.x, 0, 0.2);
-              if (playerLegR) playerLegR.rotation.x = THREE.MathUtils.lerp(playerLegR.rotation.x, 0, 0.2);
-              if (playerArmL) playerArmL.rotation.x = THREE.MathUtils.lerp(playerArmL.rotation.x, -Math.PI / 2.7, 0.2);
-              if (playerArmR) playerArmR.rotation.x = THREE.MathUtils.lerp(playerArmR.rotation.x, -Math.PI / 3.2, 0.2);
+              // AIRBORNE DYNAMIC JUMP / FALL POSING
+              playerModelGroup.position.copy(player.pos);
+              playerModelGroup.rotation.z = THREE.MathUtils.lerp(playerModelGroup.rotation.z, 0, 0.2);
+
+              const jumpYVel = player.vel ? player.vel.y : 0;
+              if (jumpYVel > 0.5) {
+                // Ascending: legs tuck slightly up, arms balance outwards
+                if (playerLegL) playerLegL.rotation.x = THREE.MathUtils.lerp(playerLegL.rotation.x, -0.45, 0.2);
+                if (playerLegR) playerLegR.rotation.x = THREE.MathUtils.lerp(playerLegR.rotation.x, 0.35, 0.2);
+                if (playerArmL) playerArmL.rotation.z = THREE.MathUtils.lerp(playerArmL.rotation.z, -0.4, 0.2);
+                if (playerArmR) playerArmR.rotation.z = THREE.MathUtils.lerp(playerArmR.rotation.z, 0.4, 0.2);
+              } else {
+                // Descending / landing preparation: legs extend downward
+                if (playerLegL) playerLegL.rotation.x = THREE.MathUtils.lerp(playerLegL.rotation.x, -0.15, 0.2);
+                if (playerLegR) playerLegR.rotation.x = THREE.MathUtils.lerp(playerLegR.rotation.x, 0.15, 0.2);
+                if (playerArmL) playerArmL.rotation.z = THREE.MathUtils.lerp(playerArmL.rotation.z, -0.2, 0.2);
+                if (playerArmR) playerArmR.rotation.z = THREE.MathUtils.lerp(playerArmR.rotation.z, 0.2, 0.2);
+              }
+            }
+
+            // Always align yaw
+            playerModelGroup.rotation.y = player.yaw + Math.PI;
+
+            // Tactical Visor Glow Pulse
+            if (playerHelmetVisor && playerHelmetVisor.material) {
+              playerHelmetVisor.material.opacity = 0.75 + 0.25 * Math.sin(now * 0.005);
             }
 
             // Jetpack thruster flame particle emission
@@ -10507,6 +11983,349 @@
       } else {
         modal.classList.remove('visible');
       }
+    }
+
+    // ============================================================
+    // NEXUS GRAND MALL & SHOPPING GALLERIA CONTROLLER
+    // ============================================================
+    let currentStoreTab = 'armory';
+
+    function toggleStoreModal(forceOpen, startTab) {
+      const modal = document.getElementById('modal-store');
+      if (!modal) return;
+
+      const willShow = (forceOpen !== undefined) ? forceOpen : !modal.classList.contains('visible');
+
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        modal.classList.add('visible');
+        if (startTab) switchStoreTab(startTab);
+        else switchStoreTab(currentStoreTab || 'armory');
+
+        // Update token balance display
+        const tokenEl = document.getElementById('store-token-display');
+        if (tokenEl) tokenEl.textContent = Number(gameState.tokens || 1250).toLocaleString();
+
+        cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+        stopArcadeGame();
+      }
+    }
+
+    function switchStoreTab(tabName) {
+      currentStoreTab = tabName;
+      const tabs = ['armory', 'suits', 'vehicles', 'medbay', 'arcade'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('store-tab-' + t);
+        const sec = document.getElementById('store-sec-' + t);
+        if (btn) btn.classList.toggle('active', t === tabName);
+        if (sec) sec.classList.toggle('active', t === tabName);
+      });
+
+      if (tabName === 'arcade') {
+        initArcadeCanvas();
+      } else {
+        stopArcadeGame();
+      }
+      cyberAudio.playLootChime();
+    }
+
+    function openStoreFromPrompt() {
+      const tab = nearbyStoreAction ? nearbyStoreAction.id : 'armory';
+      toggleStoreModal(true, tab);
+    }
+
+    // 1. Equip Weapon From Store
+    function equipWeaponFromStore(weaponType) {
+      gameState.currentWeapon = weaponType;
+
+      const wepBadge = document.getElementById('hud-weapon-name') || document.getElementById('weapon-current-name');
+      const wepNames = {
+        rifle: 'TAC-9 ASSAULT RIFLE',
+        railgun: 'QUANTUM RAILGUN MK-IV',
+        plasma: 'DUAL PLASMA REPEATERS',
+        rpg: 'TITAN VORTEX RPG'
+      };
+      if (wepBadge) wepBadge.textContent = wepNames[weaponType] || weaponType.toUpperCase();
+
+      cyberAudio.playLootChime();
+      showStoreNotification('WEAPON EQUIPPED: ' + (wepNames[weaponType] || weaponType.toUpperCase()));
+    }
+
+    // Buy Ammo Pack
+    function buyAmmoPack() {
+      const price = 100;
+      const currentTokens = gameState.tokens || 1250;
+      if (currentTokens < price) {
+        showStoreNotification('INSUFFICIENT NEX TOKENS!', true);
+        return;
+      }
+      gameState.tokens = currentTokens - price;
+      gameState.ammo = (gameState.ammo || 300) + 120;
+
+      const tokenEl = document.getElementById('store-token-display');
+      if (tokenEl) tokenEl.textContent = Number(gameState.tokens).toLocaleString();
+
+      const ammoEl = document.getElementById('hud-ammo-val');
+      if (ammoEl) ammoEl.textContent = gameState.ammo;
+
+      cyberAudio.playLootChime();
+      showStoreNotification('+120 AMMUNITION CRATE ACQUIRED!');
+    }
+
+    // 2. Exo-Suit & Camouflage Atelier
+    function setPlayerSuitCamo(camoName) {
+      if (!playerJacketMat || !playerPantsMat) {
+        showStoreNotification('EXO-SUIT CALIBRATED: ' + camoName.toUpperCase());
+        return;
+      }
+
+      switch (camoName) {
+        case 'ghost':
+          playerJacketMat.color.setHex(0x161c24);
+          playerJacketMat.roughness = 0.55;
+          playerJacketMat.metalness = 0.35;
+          playerPantsMat.color.setHex(0x222b38);
+          if (playerVisorMat) playerVisorMat.color.setHex(0x00f2ff);
+          if (playerTitaniumMat) playerTitaniumMat.color.setHex(0x708294);
+          break;
+
+        case 'titan':
+          playerJacketMat.color.setHex(0xd4af37);
+          playerJacketMat.roughness = 0.22;
+          playerJacketMat.metalness = 0.92;
+          playerPantsMat.color.setHex(0x2d2415);
+          if (playerVisorMat) playerVisorMat.color.setHex(0xffd700);
+          if (playerTitaniumMat) playerTitaniumMat.color.setHex(0xffd700);
+          break;
+
+        case 'crimson':
+          playerJacketMat.color.setHex(0xbb1428);
+          playerJacketMat.roughness = 0.45;
+          playerJacketMat.metalness = 0.40;
+          playerPantsMat.color.setHex(0x16161e);
+          if (playerVisorMat) playerVisorMat.color.setHex(0xff2255);
+          if (playerTitaniumMat) playerTitaniumMat.color.setHex(0x3a3f48);
+          break;
+
+        case 'cobalt':
+          playerJacketMat.color.setHex(0x1055cc);
+          playerJacketMat.roughness = 0.32;
+          playerJacketMat.metalness = 0.70;
+          playerPantsMat.color.setHex(0xd0d8e8);
+          if (playerVisorMat) playerVisorMat.color.setHex(0x00e1ff);
+          if (playerTitaniumMat) playerTitaniumMat.color.setHex(0x9cb0cc);
+          break;
+      }
+
+      cyberAudio.playLootChime();
+      showStoreNotification('EXO-SUIT RE-TEXTURED: ' + camoName.toUpperCase() + ' CAMO');
+    }
+
+    // 3. Vehicle Showroom Deployment
+    function spawnVehicleAtMall(vehicleType) {
+      if (roverGroup) {
+        const spawnX = (vehicleType === 'rover') ? 0 : -8;
+        roverGroup.position.set(spawnX, 0, 92);
+        roverGroup.rotation.y = Math.PI;
+        roverCurrentSpeed = 0;
+        roverSteerAngle = 0;
+
+        if (vehicleType === 'rover') {
+          showStoreNotification('QUANTUM 6X6 ROVER DELIVERED TO MALL ENTRANCE PLAZA!');
+        } else {
+          showStoreNotification('CYBER CRUISER DEPLOYED OUTSIDE MALL PLAZA!');
+        }
+      }
+
+      cyberAudio.playLootChime();
+      toggleStoreModal(false);
+    }
+
+    // 4. Bio-Stim Med-Bay Recovery
+    function administerMedKit(mode) {
+      if (mode === 'hp') {
+        gameState.health = 100;
+        showStoreNotification('BIO-STIM APPLIED: 100% HEALTH RESTORED');
+      } else if (mode === 'shield') {
+        gameState.shield = 100;
+        showStoreNotification('IONIC SHIELD CAPACITOR RECHARGED 100%');
+      } else {
+        gameState.health = 100;
+        gameState.shield = 100;
+        gameState.jetpackFuel = 100;
+        showStoreNotification('OVERDRIVE PROTOCOL: MAX HEALTH + SHIELD + FUEL');
+      }
+
+      const hpBar = document.getElementById('hud-hp-bar');
+      const hpVal = document.getElementById('hud-hp-val');
+      const shBar = document.getElementById('hud-shield-bar');
+      const shVal = document.getElementById('hud-shield-val');
+      if (hpBar) hpBar.style.width = '100%';
+      if (hpVal) hpVal.textContent = '100';
+      if (shBar) shBar.style.width = '100%';
+      if (shVal) shVal.textContent = '100';
+
+      cyberAudio.playLootChime();
+    }
+
+    // 5. Stardust Cafe & Retro Arcade Mini-Game: Asteroid Defender 2099
+    let arcadeAnimId = null;
+    let arcadeScore = 0;
+    let arcadeShip = { x: 230, speed: 0 };
+    let arcadeAsteroids = [];
+    let arcadeLasers = [];
+
+    function initArcadeCanvas() {
+      const cvs = document.getElementById('arcade-canvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      if (!ctx) return;
+
+      arcadeScore = 0;
+      arcadeShip = { x: cvs.width / 2, speed: 0 };
+      arcadeAsteroids = [];
+      arcadeLasers = [];
+
+      const scoreEl = document.getElementById('arcade-score');
+      if (scoreEl) scoreEl.textContent = '0';
+
+      cvs.onpointerdown = (e) => {
+        const rect = cvs.getBoundingClientRect();
+        const clickX = (e.clientX - rect.left) * (cvs.width / rect.width);
+        arcadeShip.x = clickX;
+        arcadeLasers.push({ x: clickX, y: 155, vy: -7 });
+      };
+
+      startArcadeGame();
+    }
+
+    function startArcadeGame() {
+      stopArcadeGame();
+      const cvs = document.getElementById('arcade-canvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      if (!ctx) return;
+
+      let lastSpawn = performance.now();
+
+      function loop(now) {
+        arcadeAnimId = requestAnimationFrame(loop);
+
+        ctx.fillStyle = '#050a14';
+        ctx.fillRect(0, 0, cvs.width, cvs.height);
+
+        ctx.fillStyle = 'rgba(0, 242, 255, 0.4)';
+        for (let i = 0; i < 20; i++) {
+          const sx = (i * 37 + (now * 0.05)) % cvs.width;
+          const sy = (i * 23) % cvs.height;
+          ctx.fillRect(sx, sy, 2, 2);
+        }
+
+        if (now - lastSpawn > 650) {
+          lastSpawn = now;
+          arcadeAsteroids.push({
+            x: 20 + Math.random() * (cvs.width - 40),
+            y: -10,
+            r: 10 + Math.random() * 8,
+            vy: 1.5 + Math.random() * 1.8
+          });
+        }
+
+        ctx.fillStyle = '#00f2ff';
+        for (let i = arcadeLasers.length - 1; i >= 0; i--) {
+          const l = arcadeLasers[i];
+          l.y += l.vy;
+          ctx.fillRect(l.x - 2, l.y, 4, 10);
+          if (l.y < -10) arcadeLasers.splice(i, 1);
+        }
+
+        for (let i = arcadeAsteroids.length - 1; i >= 0; i--) {
+          const a = arcadeAsteroids[i];
+          a.y += a.vy;
+
+          ctx.fillStyle = '#ff007f';
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
+          ctx.fill();
+
+          for (let j = arcadeLasers.length - 1; j >= 0; j--) {
+            const l = arcadeLasers[j];
+            const dist = Math.hypot(a.x - l.x, a.y - l.y);
+            if (dist < a.r + 4) {
+              arcadeAsteroids.splice(i, 1);
+              arcadeLasers.splice(j, 1);
+              arcadeScore += 10;
+              const scoreEl = document.getElementById('arcade-score');
+              if (scoreEl) scoreEl.textContent = arcadeScore;
+              break;
+            }
+          }
+
+          if (a && a.y > cvs.height + 20) {
+            arcadeAsteroids.splice(i, 1);
+          }
+        }
+
+        ctx.fillStyle = '#ffd700';
+        ctx.beginPath();
+        ctx.moveTo(arcadeShip.x, 150);
+        ctx.lineTo(arcadeShip.x - 12, 172);
+        ctx.lineTo(arcadeShip.x + 12, 172);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      arcadeAnimId = requestAnimationFrame(loop);
+    }
+
+    function stopArcadeGame() {
+      if (arcadeAnimId) {
+        cancelAnimationFrame(arcadeAnimId);
+        arcadeAnimId = null;
+      }
+    }
+
+    function claimArcadeReward() {
+      gameState.tokens = (gameState.tokens || 1250) + 50;
+      const tokenEl = document.getElementById('store-token-display');
+      if (tokenEl) tokenEl.textContent = Number(gameState.tokens).toLocaleString();
+      cyberAudio.playLootChime();
+      showStoreNotification('ARCADE BONUS: +50 NEX TOKENS CLAIMED!');
+    }
+
+    function showStoreNotification(msg, isWarning = false) {
+      let toast = document.getElementById('store-notification-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'store-notification-toast';
+        toast.style.position = 'fixed';
+        toast.style.bottom = '85px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = 'rgba(6, 12, 22, 0.94)';
+        toast.style.border = '1.5px solid #00f2ff';
+        toast.style.borderRadius = '8px';
+        toast.style.padding = '10px 22px';
+        toast.style.color = '#fff';
+        toast.style.fontFamily = "'Orbitron', sans-serif";
+        toast.style.fontSize = '12px';
+        toast.style.letterSpacing = '1px';
+        toast.style.zIndex = '999999';
+        toast.style.boxShadow = '0 0 20px rgba(0, 242, 255, 0.5)';
+        toast.style.pointerEvents = 'none';
+        toast.style.transition = 'opacity 0.3s ease';
+        document.body.appendChild(toast);
+      }
+      toast.style.borderColor = isWarning ? '#ff3366' : '#00f2ff';
+      toast.style.color = isWarning ? '#ff3366' : '#00f2ff';
+      toast.innerHTML = (isWarning ? '<i class="fa-solid fa-triangle-exclamation"></i> ' : '<i class="fa-solid fa-circle-check"></i> ') + msg;
+      toast.style.opacity = '1';
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => {
+        toast.style.opacity = '0';
+      }, 2600);
     }
 
     // Auto-Boot Verification on Page Load
