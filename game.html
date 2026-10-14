@@ -503,15 +503,14 @@
     }
 
     /* ============================================================
-       PERMANENT LAUNCH COUNTDOWN LOCK OVERLAY (Z-INDEX 900)
-       "THIS GAME WILL BE LAUNCHED ON JANUARY 1ST"
+       RECONSTRUCTED CYBER OPERATIVE LOGIN & DEPLOYMENT PORTAL
        ============================================================ */
     #launch-lock-overlay {
       position: fixed;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(6, 14, 24, 0.94) 0%, rgba(2, 4, 8, 0.99) 100%);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+      background: radial-gradient(circle at center, rgba(8, 16, 28, 0.95) 0%, rgba(3, 6, 12, 0.99) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       z-index: 900;
       display: flex;
       flex-direction: column;
@@ -522,47 +521,54 @@
     }
 
     .launch-lock-card {
-      background: linear-gradient(145deg, rgba(12, 20, 32, 0.96), rgba(5, 8, 14, 0.98));
-      border: 1.5px solid rgba(255, 204, 0, 0.7);
+      background: linear-gradient(145deg, rgba(14, 24, 38, 0.97), rgba(6, 10, 18, 0.98));
+      border: 1.5px solid rgba(0, 242, 255, 0.55);
       border-radius: 24px;
-      padding: 32px 36px;
+      padding: 34px 38px;
       max-width: 620px;
       width: 100%;
-      box-shadow: 0 0 60px rgba(255, 204, 0, 0.25), inset 0 0 25px rgba(255, 204, 0, 0.05);
+      box-shadow: 0 0 70px rgba(0, 242, 255, 0.22), inset 0 0 30px rgba(0, 242, 255, 0.05);
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
       gap: 16px;
       position: relative;
+      animation: loginPortalPop 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+
+    @keyframes loginPortalPop {
+      from { transform: scale(0.92); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
     }
 
     .launch-badge-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      background: rgba(255, 51, 102, 0.15);
-      border: 1px solid #ff3366;
-      color: #ff3366;
-      padding: 4px 14px;
+      background: rgba(0, 242, 255, 0.12);
+      border: 1px solid #00f2ff;
+      color: #00f2ff;
+      padding: 5px 16px;
       border-radius: 20px;
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
       font-family: 'Orbitron', sans-serif;
       text-transform: uppercase;
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
     }
 
     .launch-main-title {
       font-family: 'Orbitron', sans-serif;
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 900;
       color: #ffffff;
-      letter-spacing: 2px;
-      line-height: 1.3;
+      letter-spacing: 2.5px;
+      line-height: 1.25;
       margin: 0;
       text-transform: uppercase;
-      text-shadow: 0 0 20px rgba(255, 204, 0, 0.5);
+      text-shadow: 0 0 25px rgba(0, 242, 255, 0.6);
     }
 
     .launch-sub-desc {
@@ -586,7 +592,7 @@
       background: rgba(8, 14, 24, 0.94);
       border: 1.5px solid rgba(0, 242, 255, 0.45);
       border-radius: 14px;
-      padding: 16px 8px;
+      padding: 14px 8px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -608,7 +614,7 @@
 
     .launch-countdown-num {
       font-family: 'Orbitron', monospace;
-      font-size: 36px;
+      font-size: 32px;
       font-weight: 900;
       color: #00f2ff;
       text-shadow: 0 0 16px rgba(0, 242, 255, 0.8);
@@ -667,78 +673,93 @@
     .bs-login-label {
       font-family: 'Orbitron', sans-serif;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 800;
       color: #00f2ff;
-      letter-spacing: 1px;
+      letter-spacing: 1.2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .bs-login-input {
       width: 100%;
-      background: rgba(4, 10, 18, 0.9);
-      border: 1.5px solid rgba(0, 242, 255, 0.4);
+      background: rgba(4, 10, 18, 0.92);
+      border: 1.5px solid rgba(0, 242, 255, 0.45);
       color: #ffffff;
       font-family: 'Orbitron', sans-serif;
       font-size: 15px;
       font-weight: 800;
-      padding: 11px 16px;
-      border-radius: 10px;
+      padding: 12px 18px;
+      border-radius: 12px;
       outline: none;
       letter-spacing: 1.5px;
-      transition: all 0.2s;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
     }
 
     .bs-login-input:focus {
-      border-color: #00f2ff;
-      box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+      border-color: #ffd700;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.45);
+      background: rgba(6, 14, 26, 0.98);
     }
 
-    .launch-preregister-btn {
+    .launch-actions-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
       width: 100%;
-      background: linear-gradient(90deg, #ffaa00, #ffd700);
-      color: #000000;
+    }
+
+    .launch-deploy-btn {
+      width: 100%;
+      background: linear-gradient(90deg, #ffd700, #ffaa00);
+      color: #050a12;
       font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 900;
-      padding: 14px;
-      border-radius: 12px;
+      padding: 15px;
+      border-radius: 14px;
       border: none;
       cursor: pointer;
-      letter-spacing: 1.5px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      box-shadow: 0 0 25px rgba(255, 170, 0, 0.5);
-      transition: all 0.2s;
+      box-shadow: 0 0 30px rgba(255, 215, 0, 0.55);
+      transition: all 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
     }
 
-    .launch-preregister-btn:hover {
-      transform: scale(0.99);
-      box-shadow: 0 0 35px rgba(255, 170, 0, 0.8);
+    .launch-deploy-btn:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 0 45px rgba(255, 215, 0, 0.85);
+      background: linear-gradient(90deg, #ffe033, #ffbb11);
     }
 
     .launch-dev-bypass-btn {
-      background: rgba(0, 242, 255, 0.1);
-      border: 1px solid rgba(0, 242, 255, 0.4);
+      width: 100%;
+      background: rgba(0, 242, 255, 0.12);
+      border: 1.5px solid rgba(0, 242, 255, 0.5);
       color: #00f2ff;
       font-family: 'Orbitron', sans-serif;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 800;
-      padding: 10px 18px;
-      border-radius: 8px;
+      padding: 12px 18px;
+      border-radius: 12px;
       cursor: pointer;
       transition: all 0.2s;
-      letter-spacing: 1px;
-      display: inline-flex;
+      letter-spacing: 1.5px;
+      display: flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
     }
 
     .launch-dev-bypass-btn:hover {
       background: rgba(0, 242, 255, 0.25);
       border-color: #00f2ff;
-      box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
     }
 
     /* ============================================================
@@ -3124,70 +3145,81 @@
   </style>
 </head>
 <body>
-  <!-- PERMANENT LAUNCH COUNTDOWN LOCK SCREEN -->
+  <!-- RECONSTRUCTED CYBER OPERATIVE LOGIN & DEPLOYMENT PORTAL -->
   <div id="launch-lock-overlay">
     <div class="launch-lock-card">
-      <div class="launch-badge-pill">
-        <i class="fa-solid fa-shuttle-space" style="color: #00f2ff;"></i> ASTROSHIFT: BEYOND EARTH // RESTRICTED ACCESS
-      </div>
-
-      <h1 class="launch-main-title" id="launch-heading">THIS GAME WILL BE LAUNCHED ON JANUARY 1ST</h1>
-
-      <p class="launch-sub-desc" id="launch-status-sub">
-        Central District Stadium, Metropolis Expressway, and Deep Space Stargate are in final deployment. Global public access will open once countdown reaches zero.
-      </p>
-
-      <!-- Date Target Switcher (January 1st vs December 1st) -->
-      <div class="launch-date-switcher">
-        <button type="button" class="launch-date-pill active" id="btn-target-jan" onclick="setLaunchTarget('jan')">
-          <i class="fa-solid fa-flag-checkered"></i> JANUARY 1ST, 2027 (GLOBAL RELEASE)
-        </button>
-        <button type="button" class="launch-date-pill" id="btn-target-dec" onclick="setLaunchTarget('dec')">
-          <i class="fa-solid fa-bolt"></i> DECEMBER 1ST, 2026 (EARLY ACCESS)
-        </button>
-      </div>
-
-      <!-- 4-Block Live Countdown -->
-      <div class="launch-countdown-grid">
-        <div class="launch-countdown-tile">
-          <div class="launch-countdown-num" id="countdown-days">00</div>
-          <div class="launch-countdown-lbl">DAYS</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <div class="launch-badge-pill">
+          <i class="fa-solid fa-satellite-dish" style="color: #00f2ff;"></i> ASTROSHIFT // SECURE OPERATIVE PORTAL
         </div>
-        <div class="launch-countdown-tile">
-          <div class="launch-countdown-num" id="countdown-hours">00</div>
-          <div class="launch-countdown-lbl">HOURS</div>
-        </div>
-        <div class="launch-countdown-tile">
-          <div class="launch-countdown-num" id="countdown-mins">00</div>
-          <div class="launch-countdown-lbl">MINUTES</div>
-        </div>
-        <div class="launch-countdown-tile">
-          <div class="launch-countdown-num" id="countdown-secs">00</div>
-          <div class="launch-countdown-lbl">SECONDS</div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: #00ff88; display: flex; align-items: center; gap: 6px;">
+          <span style="width: 7px; height: 7px; background: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88;"></span>
+          <span id="login-telemetry-ping">22ms</span> ONLINE
         </div>
       </div>
 
-      <!-- Pre-Registration / Operative Callsign Box -->
+      <div style="margin: 4px 0;">
+        <h1 class="launch-main-title">AstroShift: Beyond Earth</h1>
+        <p class="launch-sub-desc">
+          Enter operative credentials to deploy into Central Metropolis, Orbital Stargates, and the SpaceX Starship.
+        </p>
+      </div>
+
+      <!-- Operative Callsign Box -->
       <div class="launch-input-box">
-        <span class="bs-login-label"><i class="fa-solid fa-id-card"></i> PRE-REGISTER OPERATIVE CALLSIGN</span>
-        <input type="text" id="launch-callsign-input" class="bs-login-input" value="DEMONALEX" placeholder="ENTER CALLSIGN...">
+        <label for="launch-callsign-input" class="bs-login-label">
+          <i class="fa-solid fa-id-card-clip"></i> OPERATIVE CALLSIGN
+        </label>
+        <input type="text" id="launch-callsign-input" class="bs-login-input" value="DEMONALEX" placeholder="ENTER OPERATIVE CALLSIGN...">
       </div>
 
+      <!-- Operative Security Key Box -->
+      <div class="launch-input-box">
+        <label for="launch-access-key" class="bs-login-label">
+          <i class="fa-solid fa-key"></i> SECURITY CLEARANCE KEY
+        </label>
+        <input type="password" id="launch-access-key" class="bs-login-input" value="ASTRO-2026-NEX" placeholder="SECURITY CLEARANCE KEY...">
+      </div>
+
+      <!-- Clearance Status Bar -->
       <div style="display: flex; justify-content: space-between; width: 100%; font-size: 11px; color: #8fa3b8; font-family: 'Orbitron', sans-serif;">
-        <span>TIER: <strong style="color: #ffd700;">[FOUNDER PASS]</strong></span>
-        <span>STATUS: <strong id="pre-reg-status" style="color: #00ff88;">READY FOR ENLISTMENT</strong></span>
+        <span>TIER: <strong style="color: #ffd700;">[FOUNDER LEVEL 5]</strong></span>
+        <span>CLEARANCE: <strong id="pre-reg-status" style="color: #00ff88;">AUTHORIZED OPERATIVE</strong></span>
       </div>
 
-      <button type="button" class="launch-preregister-btn" onclick="submitPreRegistration()">
-        <i class="fa-solid fa-user-plus"></i> PRE-REGISTER FOR LAUNCH REWARDS
-      </button>
-
-      <!-- Developer Preview Bypass for Developer/Owner testing -->
-      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 12px; margin-top: 4px;">
-        <span style="font-size: 10px; color: #667788; font-family: monospace;">DEV CLEARANCE LEVEL 5</span>
-        <button type="button" class="launch-dev-bypass-btn" onclick="bypassLaunchLock()" title="Developer / Admin match preview">
-          <i class="fa-solid fa-shield-halved"></i> DEVELOPER PREVIEW ACCESS ▶
+      <!-- Action Buttons -->
+      <div class="launch-actions-row">
+        <button type="button" class="launch-deploy-btn" onclick="submitLoginAndDeploy()">
+          <i class="fa-solid fa-rocket"></i> LOGIN &amp; DEPLOY [PLAY NOW]
         </button>
+        <button type="button" class="launch-dev-bypass-btn" onclick="bypassLaunchLock()">
+          <i class="fa-solid fa-table-columns"></i> ENTER COMMAND LOBBY (CUSTOMIZE &amp; RANKS)
+        </button>
+      </div>
+
+      <!-- 4-Block Live Countdown Telemetry (Metropolis Season 1) -->
+      <div style="width: 100%; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 12px; margin-top: 4px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 10px; color: #ffd700; letter-spacing: 1.5px; margin-bottom: 8px;">
+          <i class="fa-solid fa-trophy"></i> METROPOLIS SEASON 1 TOURNAMENT COUNTDOWN
+        </div>
+        <div class="launch-countdown-grid">
+          <div class="launch-countdown-tile">
+            <div class="launch-countdown-num" id="countdown-days">00</div>
+            <div class="launch-countdown-lbl">DAYS</div>
+          </div>
+          <div class="launch-countdown-tile">
+            <div class="launch-countdown-num" id="countdown-hours">00</div>
+            <div class="launch-countdown-lbl">HOURS</div>
+          </div>
+          <div class="launch-countdown-tile">
+            <div class="launch-countdown-num" id="countdown-mins">00</div>
+            <div class="launch-countdown-lbl">MINUTES</div>
+          </div>
+          <div class="launch-countdown-tile">
+            <div class="launch-countdown-num" id="countdown-secs">00</div>
+            <div class="launch-countdown-lbl">SECONDS</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -5076,8 +5108,42 @@
       }
     });
 
+    function submitLoginAndDeploy() {
+      const input = document.getElementById('launch-callsign-input');
+      const callsign = (input && input.value.trim()) ? input.value.trim().toUpperCase() : 'DEMONALEX';
+
+      try {
+        localStorage.setItem('BS_OPERATIVE_CALLSIGN', callsign);
+        localStorage.setItem('BS_HAS_LOGGED_IN', 'true');
+        localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+        sessionStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+      } catch (e) {}
+
+      const nameEl = document.getElementById('lobby-profile-name');
+      const hudNameEl = document.getElementById('hud-op-name');
+      if (nameEl) nameEl.textContent = callsign;
+      if (hudNameEl) hudNameEl.textContent = callsign;
+
+      try {
+        if (typeof cyberAudio !== 'undefined') {
+          cyberAudio.init();
+          cyberAudio.playLootChime();
+        }
+      } catch (e) {}
+
+      const lockOverlay = document.getElementById('launch-lock-overlay');
+      if (lockOverlay) {
+        lockOverlay.style.opacity = '0';
+        lockOverlay.style.transition = 'opacity 0.35s ease';
+        setTimeout(() => {
+          lockOverlay.style.display = 'none';
+          startMatchFromLobby();
+        }, 350);
+      }
+    }
+
     function submitLogin() {
-      bypassLaunchLock();
+      submitLoginAndDeploy();
     }
 
     function startMatchFromLobby() {
@@ -10444,27 +10510,25 @@
 
     let isPointerLocked = false;
     const canvas = document.getElementById('game-canvas');
+    gameState.isFiring = false;
 
-    canvas.addEventListener('click', () => {
+    // Full-Auto Rapid Fire Primary Attack Listener (Hold Left Click to Rapid Fire)
+    canvas.addEventListener('mousedown', e => {
       if (sessionStorage.getItem('ATOMIC_METROPOLIS_UNLOCKED') !== 'true') return;
       cyberAudio.init();
-      if (!isPointerLocked) {
-        try {
-          canvas.requestPointerLock();
-        } catch (e) {
-          console.warn('Pointer lock request error:', e);
-        }
-      } else {
-        if (gameState.flightMode !== 'starship') {
+
+      if (e.button === 0) { // Left Mouse Button (Primary Fire)
+        if (!isPointerLocked) {
+          try {
+            canvas.requestPointerLock();
+          } catch (err) {
+            console.warn('Pointer lock request error:', err);
+          }
+        } else if (gameState.flightMode !== 'starship') {
+          gameState.isFiring = true;
           shootWeapon();
         }
-      }
-    });
-
-    canvas.addEventListener('contextmenu', e => e.preventDefault());
-
-    canvas.addEventListener('mousedown', e => {
-      if (e.button === 2 && gameState.flightMode !== 'starship') {
+      } else if (e.button === 2 && gameState.flightMode !== 'starship') { // Right Click (Aim Down Sights)
         gameState.isAiming = true;
         if (camera) {
           camera.fov = 44;
@@ -10473,7 +10537,12 @@
       }
     });
 
-    canvas.addEventListener('mouseup', e => {
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+    window.addEventListener('mouseup', e => {
+      if (e.button === 0) {
+        gameState.isFiring = false;
+      }
       if (e.button === 2 && gameState.flightMode !== 'starship') {
         gameState.isAiming = false;
         if (camera) {
@@ -10481,6 +10550,11 @@
           camera.updateProjectionMatrix();
         }
       }
+    });
+
+    window.addEventListener('blur', () => {
+      gameState.isFiring = false;
+      gameState.isAiming = false;
     });
 
     document.addEventListener('pointerlockchange', () => {
@@ -10539,7 +10613,11 @@
     function shootWeapon() {
       if (!player.pos) return;
       if (gameState.currentWeapon === 'unarmed' || !gameState.weapons[gameState.currentWeapon]) {
-        if (typeof performMeleePunch === 'function') performMeleePunch();
+        const nowPunch = performance.now();
+        if (nowPunch - (player.lastShoot || 0) >= 190) {
+          player.lastShoot = nowPunch;
+          if (typeof performMeleePunch === 'function') performMeleePunch();
+        }
         return;
       }
       const now = performance.now();
@@ -11471,22 +11549,46 @@
 
       } else if (!gameState.inVehicle) {
         // Standard On-Foot FPS Dynamics
-        const moveX = (keys['KeyD'] ? 1 : 0) - (keys['KeyA'] ? 1 : 0);
-        const moveZ = (keys['KeyS'] ? 1 : 0) - (keys['KeyW'] ? 1 : 0);
-        const isSprinting = keys['ShiftLeft'] || keys['ShiftRight'];
-        const speed = isSprinting ? 12.0 : 6.5;
+        // High-Fidelity Free Fluid Athletic Movement Engine
+        let inputX = (keys['KeyD'] ? 1 : 0) - (keys['KeyA'] ? 1 : 0);
+        let inputZ = (keys['KeyS'] ? 1 : 0) - (keys['KeyW'] ? 1 : 0);
 
-        const fwd = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
-        const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
-        const moveDir = fwd.clone().multiplyScalar(-moveZ).add(right.clone().multiplyScalar(moveX)).normalize();
-
-        if (moveDir.lengthSq() > 0) {
-          player.vel.x = THREE.MathUtils.lerp(player.vel.x, moveDir.x * speed, 0.2);
-          player.vel.z = THREE.MathUtils.lerp(player.vel.z, moveDir.z * speed, 0.2);
-        } else {
-          player.vel.x *= 0.8;
-          player.vel.z *= 0.8;
+        // True 360-degree analog mobile joystick support (smooth floating precision)
+        let joyMag = 0;
+        if (gameState.joyActive && typeof gameState.joyNormX === 'number' && typeof gameState.joyNormY === 'number') {
+          inputX = gameState.joyNormX;
+          inputZ = gameState.joyNormY;
+          joyMag = Math.min(1.0, Math.sqrt(inputX * inputX + inputZ * inputZ));
         }
+
+        const isSprinting = keys['ShiftLeft'] || keys['ShiftRight'] || (typeof dpadCenter !== 'undefined' && dpadCenter && dpadCenter.classList.contains('sprint-active'));
+        const maxSpeed = isSprinting ? 12.8 : 7.2;
+
+        const inputMag = Math.sqrt(inputX * inputX + inputZ * inputZ);
+        let targetSpeed = 0;
+        let moveDir = new THREE.Vector3(0, 0, 0);
+
+        if (inputMag > 0.04) {
+          const normX = inputX / inputMag;
+          const normZ = inputZ / inputMag;
+          const fwd = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+          const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+          moveDir = fwd.clone().multiplyScalar(-normZ).add(right.clone().multiplyScalar(normX)).normalize();
+
+          const throttle = gameState.joyActive ? Math.min(1.0, inputMag) : 1.0;
+          targetSpeed = maxSpeed * throttle;
+        }
+
+        // Frame-rate independent athletic momentum (Ground Acceleration & Air Control)
+        const targetVelX = moveDir.x * targetSpeed;
+        const targetVelZ = moveDir.z * targetSpeed;
+        const accelRate = player.isGrounded 
+          ? (inputMag > 0.04 ? 15.0 : 12.0)
+          : 5.5; // generous air mobility
+
+        const blend = Math.min(1.0, accelRate * delta);
+        player.vel.x += (targetVelX - player.vel.x) * blend;
+        player.vel.z += (targetVelZ - player.vel.z) * blend;
 
         if (keys['Space']) {
           if (player.isGrounded) {
@@ -11753,8 +11855,17 @@
               }
             }
 
-            // Always align yaw
-            playerModelGroup.rotation.y = player.yaw + Math.PI;
+            // Smooth natural character yaw orientation (eliminates stiff snapping)
+            const targetCharYaw = player.yaw + Math.PI;
+            let diffYaw = targetCharYaw - playerModelGroup.rotation.y;
+            while (diffYaw < -Math.PI) diffYaw += Math.PI * 2;
+            while (diffYaw > Math.PI) diffYaw -= Math.PI * 2;
+            playerModelGroup.rotation.y += diffYaw * Math.min(1.0, 16.0 * delta);
+
+            // Natural dynamic banking into turns
+            const localLateralVel = player.vel.x * Math.cos(player.yaw) - player.vel.z * Math.sin(player.yaw);
+            const targetBank = THREE.MathUtils.clamp(-localLateralVel * 0.014, -0.12, 0.12);
+            playerModelGroup.rotation.z = THREE.MathUtils.lerp(playerModelGroup.rotation.z, targetBank, Math.min(1.0, 10.0 * delta));
 
             // Tactical Visor Glow Pulse
             if (playerHelmetVisor && playerHelmetVisor.material) {
@@ -11907,6 +12018,11 @@
             document.getElementById('label-health').textContent = Math.round(gameState.health) + '%';
           }
         });
+      }
+
+      // Rapid Fire Continuous Firing Engine (Runs while fire button held down)
+      if (gameState.isFiring && gameState.flightMode !== 'starship') {
+        shootWeapon();
       }
 
       // Update Projectiles
@@ -12730,16 +12846,12 @@
       if (btnActionFire) {
         const startFire = (e) => {
           if (e) e.preventDefault();
+          gameState.isFiring = true;
           shootWeapon();
-          if (autoFireTimer) clearInterval(autoFireTimer);
-          autoFireTimer = setInterval(shootWeapon, 130);
         };
         const endFire = (e) => {
           if (e) e.preventDefault();
-          if (autoFireTimer) {
-            clearInterval(autoFireTimer);
-            autoFireTimer = null;
-          }
+          gameState.isFiring = false;
         };
         btnActionFire.addEventListener('touchstart', startFire, { passive: false });
         btnActionFire.addEventListener('touchend', endFire, { passive: false });
