@@ -3454,6 +3454,15 @@
             <div id="hud-rocket-throttle-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ff7700, #00f2ff); transition: width 0.1s linear;"></div>
           </div>
         </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; color: #8fa3b8; font-size: 10px; margin-bottom: 3px;">
+            <span>SUPER HEAVY BOOSTER FUEL</span>
+            <span id="hud-rocket-fuel-text" style="color: #00ff88; font-weight: 800;">100%</span>
+          </div>
+          <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.12); border-radius: 4px; overflow: hidden;">
+            <div id="hud-rocket-fuel-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #00ff88, #00f2ff); transition: width 0.2s linear;"></div>
+          </div>
+        </div>
         <div style="display: flex; justify-content: space-between;">
           <span style="color: #8fa3b8;">VELOCITY:</span>
           <span id="hud-rocket-speed" style="color: #00f2ff; font-weight: 800;">MACH 1.0</span>
@@ -3479,6 +3488,38 @@
     <!-- ORBITAL BREAKTHROUGH TOAST -->
     <div id="orbital-break-toast" style="display: none; position: absolute; top: 120px; left: 50%; transform: translateX(-50%); background: rgba(6, 18, 32, 0.92); border: 2px solid #00f2ff; border-radius: 12px; padding: 12px 24px; color: #00f2ff; font-family: 'Orbitron', sans-serif; font-weight: 800; font-size: 12px; z-index: 200; box-shadow: 0 0 35px rgba(0, 242, 255, 0.5); text-align: center; pointer-events: none;">
       <i class="fa-solid fa-satellite" style="color: #00ff88; margin-right: 8px;"></i> ORBITAL ESCAPE VELOCITY ACHIEVED — PRESS [P] TO ENGAGE INTERPLANETARY HYPERDRIVE
+    </div>
+
+    <!-- CINEMATIC STARSHIP LAUNCH SEQUENCE OVERLAY (LAUNCH PAD) -->
+    <div id="rocket-launch-sequence-overlay" style="display: none; position: fixed; top: 110px; left: 50%; transform: translateX(-50%); width: 440px; background: rgba(8, 16, 28, 0.96); border: 2px solid #00f2ff; border-radius: 18px; padding: 20px 24px; z-index: 550; box-shadow: 0 0 50px rgba(0, 242, 255, 0.45); font-family: 'Orbitron', sans-serif; text-align: center;">
+      <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #00f2ff; letter-spacing: 2px; margin-bottom: 8px;">
+        <span><i class="fa-solid fa-satellite-dish"></i> STARBASE MECHAZILLA PAD 01</span>
+        <span style="color: #ffd700; font-weight: 900;">ORBITAL LAUNCH SEQUENCE</span>
+      </div>
+      
+      <div id="launch-seq-countdown" style="font-size: 46px; font-weight: 900; color: #ffd700; text-shadow: 0 0 25px rgba(255, 215, 0, 0.8); line-height: 1.1; margin: 8px 0;">
+        T - 10.0s
+      </div>
+
+      <div id="launch-seq-step-title" style="font-size: 13px; font-weight: 800; color: #ffffff; letter-spacing: 1.5px; margin-bottom: 4px;">
+        LAUNCH PROTOCOL INITIATED // CLEARING PAD
+      </div>
+      <div id="launch-seq-step-sub" style="font-size: 11px; color: #8fa3b8; font-family: monospace; margin-bottom: 14px;">
+        Cryogenic propellant loaded · LOX/CH4 pressure nominal
+      </div>
+
+      <div style="width: 100%; height: 6px; background: rgba(255, 255, 255, 0.15); border-radius: 3px; overflow: hidden; margin-bottom: 14px;">
+        <div id="launch-seq-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ffd700, #00f2ff); transition: width 0.25s linear;"></div>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button type="button" onclick="fastForwardLaunchSequence()" style="background: linear-gradient(90deg, #ffd700, #ffaa00); border: none; color: #050a12; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; padding: 10px 18px; border-radius: 8px; cursor: pointer; letter-spacing: 1px;">
+          <i class="fa-solid fa-forward-fast"></i> SKIP TO LIFTOFF
+        </button>
+        <button type="button" onclick="abortLaunchSequence()" style="background: rgba(255, 51, 102, 0.15); border: 1.5px solid #ff3366; color: #ff3366; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; padding: 10px 18px; border-radius: 8px; cursor: pointer; letter-spacing: 1px;">
+          <i class="fa-solid fa-xmark"></i> ABORT
+        </button>
+      </div>
     </div>
 
     <!-- Center Crosshair & Hitmarker -->
@@ -5546,6 +5587,79 @@
           osc.stop(now + idx * 0.08 + 0.35);
         });
       }
+
+      playLaunchSiren() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.linearRampToValueAtTime(840, now + 0.45);
+        osc.frequency.linearRampToValueAtTime(420, now + 0.9);
+        gain.gain.setValueAtTime(0.24 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.95);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 1.0);
+      }
+
+      playCryoVent() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        try {
+          const bufferSize = Math.floor(this.ctx.sampleRate * 1.4);
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.7;
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(1200, now);
+          filter.Q.setValueAtTime(2.2, now);
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.28 * this.masterVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.35);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start(now);
+          noise.stop(now + 1.4);
+        } catch (_) {}
+      }
+
+      playCountdownBeep(isFinal = false) {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(isFinal ? 1760 : 880, now);
+        gain.gain.setValueAtTime((isFinal ? 0.35 : 0.18) * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + (isFinal ? 0.35 : 0.08));
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + (isFinal ? 0.4 : 0.1));
+      }
+
+      playIgnitionThud() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(90, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.6);
+        gain.gain.setValueAtTime(0.55 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.7);
+      }
     }
 
     const cyberAudio = new CyberAudioEngine();
@@ -5589,12 +5703,15 @@
       starship: {
         isPiloted: false,
         throttle: 100,
+        boosterFuel: 100,
         speed: 0,
         altitude: 0,
         pitch: 0,
         yaw: 0,
         roll: 0,
         isStaged: false,
+        isLaunching: false,
+        launchCountdown: 0,
         boosterPos: null,
         cameraView: 'chase', // 'chase' | 'cockpit'
         isWarping: false,
@@ -8200,6 +8317,7 @@
         const chopstickArm = new THREE.Mesh(new THREE.BoxGeometry(22, 2.4, 2.4), mechazillaMat);
         chopstickArm.position.set(-4, 98, 6);
         spaceportGroup.add(chopstickArm);
+        mechazillaChopsticks = chopstickArm;
 
         // 120m Multi-Stage Starship Stack
         rocketStack = new THREE.Group();
@@ -9583,6 +9701,7 @@
 
         // Initialize Autonomous Metropolis Cyber Traffic System
         initCityTraffic();
+        initCityCitizens();
 
         isEngineInitialized = true;
         setTimeOfDay(gameState.settings.timeOfDay || 'day');
@@ -10298,13 +10417,19 @@
       }
     }
 
+    let mechazillaChopsticks = null;
+    let cityCitizens = [];
+
+    // ============================================================
+    // EXPANDED METROPOLITAN TRAFFIC ENGINE (55+ VEHICLES & AEROCARS)
+    // ============================================================
     function initCityTraffic() {
       trafficGroup = new THREE.Group();
       scene.add(trafficGroup);
       cityTrafficVehicles = [];
 
-      const carPaintColors = [0x0a2540, 0x121417, 0xd9480f, 0x00b4d8];
-      const repulsorGlowColors = [0x00f2ff, 0xff007f, 0x00ff88, 0xffaa00];
+      const carPaintColors = [0x00f2ff, 0xffd700, 0xff0055, 0x00ff88, 0x121417, 0xd9480f, 0x7950f2, 0xe03131];
+      const repulsorGlowColors = [0x00f2ff, 0xff007f, 0x00ff88, 0xffaa00, 0x7950f2];
 
       const rMatDarkTrim = new THREE.MeshStandardMaterial({ color: 0x0d1217, roughness: 0.4, metalness: 0.85 });
       const rMatTire = new THREE.MeshStandardMaterial({ color: 0x06080b, roughness: 0.92 });
@@ -10313,153 +10438,339 @@
       const rMatTaillight = new THREE.MeshBasicMaterial({ color: 0xff0033 });
       const rMatGlass = new THREE.MeshStandardMaterial({ color: 0x071524, roughness: 0.1, metalness: 0.92, transparent: true, opacity: 0.8 });
 
-      // 1. Four Wheeled Autonomous Cybercars & Arterial Expressway Cruisers
-      const wheeledConfigs = [
-        { axis: 'z', fixedCoord: -51, dir: 1, minB: -150, maxB: 150, speed: 14.5, color: carPaintColors[0] },
-        { axis: 'z', fixedCoord: 51, dir: -1, minB: -150, maxB: 150, speed: 16.0, color: carPaintColors[1] },
-        { axis: 'x', fixedCoord: -51, dir: 1, minB: -150, maxB: 150, speed: 13.0, color: carPaintColors[2] },
-        { axis: 'x', fixedCoord: 51, dir: -1, minB: -150, maxB: 150, speed: 15.5, color: carPaintColors[3] },
-        // Arterial Expressway High-Speed Cruisers Connecting Districts
-        { axis: 'z', fixedCoord: 4.5, dir: 1, minB: -880, maxB: 880, speed: 28.0, color: carPaintColors[0] },
-        { axis: 'z', fixedCoord: -4.5, dir: -1, minB: -880, maxB: 880, speed: 26.5, color: carPaintColors[1] },
-        { axis: 'x', fixedCoord: -4.5, dir: 1, minB: -880, maxB: 880, speed: 27.0, color: carPaintColors[2] },
-        { axis: 'x', fixedCoord: 4.5, dir: -1, minB: -880, maxB: 880, speed: 29.0, color: carPaintColors[3] }
+      // Generate 28 Arterial Highway Cruisers (-880m to +880m) across 4 cardinal axes
+      const majorHighwayLanes = [
+        { axis: 'z', fixedCoord: 4.5, dir: 1, minB: -880, maxB: 880, count: 7, baseSpeed: 28.0 },
+        { axis: 'z', fixedCoord: -4.5, dir: -1, minB: -880, maxB: 880, count: 7, baseSpeed: 29.5 },
+        { axis: 'x', fixedCoord: 4.5, dir: 1, minB: -880, maxB: 880, count: 7, baseSpeed: 27.5 },
+        { axis: 'x', fixedCoord: -4.5, dir: -1, minB: -880, maxB: 880, count: 7, baseSpeed: 30.0 }
       ];
 
-      wheeledConfigs.forEach((cfg, idx) => {
-        const vGroup = new THREE.Group();
-        const paintMat = new THREE.MeshStandardMaterial({ color: cfg.color, metalness: 0.88, roughness: 0.25 });
+      majorHighwayLanes.forEach(lane => {
+        const step = (lane.maxB - lane.minB) / lane.count;
+        for (let i = 0; i < lane.count; i++) {
+          const vGroup = new THREE.Group();
+          const color = carPaintColors[(i + (lane.axis === 'z' ? 0 : 3)) % carPaintColors.length];
+          const paintMat = new THREE.MeshStandardMaterial({ color, metalness: 0.88, roughness: 0.25 });
 
-        // Streamlined aero cybercar body
-        const body = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.55, 4.2), paintMat);
-        body.position.y = 0.55;
-        body.castShadow = true;
-        vGroup.add(body);
+          // Aero cybercar body
+          const body = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.55, 4.3), paintMat);
+          body.position.y = 0.55;
+          body.castShadow = true;
+          vGroup.add(body);
 
-        // Aerodynamic fastback cabin greenhouse
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.48, 2.2), rMatGlass);
-        cabin.position.set(0, 1.0, -0.2);
-        vGroup.add(cabin);
+          const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.48, 2.2), rMatGlass);
+          cabin.position.set(0, 1.0, -0.2);
+          vGroup.add(cabin);
 
-        // LED Headlight Lightbar
-        const headLight = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.1), rMatHeadlight);
-        headLight.position.set(0, 0.65, 2.11);
-        vGroup.add(headLight);
+          const headLight = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.1), rMatHeadlight);
+          headLight.position.set(0, 0.65, 2.16);
+          vGroup.add(headLight);
 
-        // LED Taillight Lightbar
-        const tailLight = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.1), rMatTaillight);
-        tailLight.position.set(0, 0.68, -2.11);
-        vGroup.add(tailLight);
+          const tailLight = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.1, 0.1), rMatTaillight);
+          tailLight.position.set(0, 0.68, -2.16);
+          vGroup.add(tailLight);
 
-        // 4 Spinning Wheels
-        const carWheels = [];
-        [[-0.95, 1.2], [0.95, 1.2], [-0.95, -1.2], [0.95, -1.2]].forEach(([wx, wz]) => {
-          const wHub = new THREE.Group();
-          wHub.position.set(wx, 0.42, wz);
+          // 4 Spinning Wheels
+          const carWheels = [];
+          [[-0.95, 1.2], [0.95, 1.2], [-0.95, -1.2], [0.95, -1.2]].forEach(([wx, wz]) => {
+            const wHub = new THREE.Group();
+            wHub.position.set(wx, 0.42, wz);
+            const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.34, 14), rMatTire);
+            tire.rotation.z = Math.PI / 2;
+            wHub.add(tire);
+            vGroup.add(wHub);
+            carWheels.push(wHub);
+          });
 
-          const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.34, 16), rMatTire);
-          tire.rotation.z = Math.PI / 2;
-          wHub.add(tire);
+          const posAlong = lane.minB + i * step + (Math.random() - 0.5) * 20;
+          if (lane.axis === 'z') {
+            vGroup.position.set(lane.fixedCoord, 0, posAlong);
+            vGroup.rotation.y = lane.dir > 0 ? 0 : Math.PI;
+          } else {
+            vGroup.position.set(posAlong, 0, lane.fixedCoord);
+            vGroup.rotation.y = lane.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+          }
 
-          const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.26, 0.36, 12), rMatRim);
-          rim.rotation.z = Math.PI / 2;
-          wHub.add(rim);
-
-          vGroup.add(wHub);
-          carWheels.push(wHub);
-        });
-
-        // Set initial orientation according to road axis and direction
-        if (cfg.axis === 'z') {
-          vGroup.position.set(cfg.fixedCoord + (cfg.dir > 0 ? 2.4 : -2.4), 0, cfg.minB + idx * 70);
-          vGroup.rotation.y = cfg.dir > 0 ? 0 : Math.PI;
-        } else {
-          vGroup.position.set(cfg.minB + idx * 70, 0, cfg.fixedCoord + (cfg.dir > 0 ? -2.4 : 2.4));
-          vGroup.rotation.y = cfg.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+          trafficGroup.add(vGroup);
+          cityTrafficVehicles.push({
+            group: vGroup,
+            axis: lane.axis,
+            fixedCoord: lane.fixedCoord,
+            dir: lane.dir,
+            minB: lane.minB,
+            maxB: lane.maxB,
+            speed: lane.baseSpeed + (Math.random() - 0.5) * 4.0,
+            isHover: false,
+            wheels: carWheels,
+            seed: i * 2.2
+          });
         }
-
-        trafficGroup.add(vGroup);
-        cityTrafficVehicles.push({
-          group: vGroup,
-          axis: cfg.axis,
-          fixedCoord: cfg.fixedCoord + (cfg.axis === 'z' ? (cfg.dir > 0 ? 2.4 : -2.4) : (cfg.dir > 0 ? -2.4 : 2.4)),
-          dir: cfg.dir,
-          minB: cfg.minB,
-          maxB: cfg.maxB,
-          speed: cfg.speed,
-          isHover: false,
-          wheels: carWheels,
-          seed: idx * 2.5
-        });
       });
 
-      // 2. Four Anti-Gravity Hover-Speeders (Futuristic Repulsorcraft)
-      const hoverConfigs = [
-        { axis: 'z', fixedCoord: -17, dir: -1, minB: -150, maxB: 150, speed: 20.0, glow: repulsorGlowColors[0] },
-        { axis: 'z', fixedCoord: 17, dir: 1, minB: -150, maxB: 150, speed: 22.0, glow: repulsorGlowColors[1] },
-        { axis: 'x', fixedCoord: -17, dir: -1, minB: -150, maxB: 150, speed: 19.0, glow: repulsorGlowColors[2] },
-        { axis: 'x', fixedCoord: 17, dir: 1, minB: -150, maxB: 150, speed: 24.0, glow: repulsorGlowColors[3] }
+      // Generate 16 Inner City Boulevard & Avenue Vehicles (-220m to +220m)
+      const innerAvenueLanes = [
+        { axis: 'z', fixedCoord: -52, dir: 1, minB: -240, maxB: 240, count: 4, speed: 16.0 },
+        { axis: 'z', fixedCoord: 52, dir: -1, minB: -240, maxB: 240, count: 4, speed: 17.5 },
+        { axis: 'x', fixedCoord: -52, dir: 1, minB: -240, maxB: 240, count: 4, speed: 15.5 },
+        { axis: 'x', fixedCoord: 52, dir: -1, minB: -240, maxB: 240, count: 4, speed: 18.0 }
       ];
 
-      hoverConfigs.forEach((cfg, idx) => {
-        const hGroup = new THREE.Group();
-        const glowMat = new THREE.MeshBasicMaterial({ color: cfg.glow });
+      innerAvenueLanes.forEach(lane => {
+        const step = (lane.maxB - lane.minB) / lane.count;
+        for (let i = 0; i < lane.count; i++) {
+          const vGroup = new THREE.Group();
+          const color = carPaintColors[(i + 2) % carPaintColors.length];
+          const paintMat = new THREE.MeshStandardMaterial({ color, metalness: 0.9, roughness: 0.2 });
 
-        // Sleek aerodynamic repulsor hull
-        const hHull = new THREE.Mesh(new THREE.ConeGeometry(1.2, 4.4, 4), rMatDarkTrim);
-        hHull.rotation.x = Math.PI / 2;
-        hHull.rotation.y = Math.PI / 4;
-        hHull.position.y = 0.55;
-        hGroup.add(hHull);
+          const isTruck = (i % 2 === 0);
+          const body = new THREE.Mesh(new THREE.BoxGeometry(2.0, isTruck ? 1.4 : 0.6, isTruck ? 6.2 : 4.0), paintMat);
+          body.position.y = isTruck ? 0.95 : 0.55;
+          vGroup.add(body);
 
-        // Stabilizer canard fins
-        [-1, 1].forEach(side => {
-          const fin = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.08, 1.4), rMatDarkTrim);
-          fin.position.set(side * 1.2, 0.55, -0.6);
-          fin.rotation.z = side * 0.2;
-          hGroup.add(fin);
-        });
+          const headLight = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.12, 0.1), rMatHeadlight);
+          headLight.position.set(0, 0.7, isTruck ? 3.12 : 2.02);
+          vGroup.add(headLight);
 
-        // Twin Ventral Repulsor Lift Emitter Discs
-        [-0.55, 0.55].forEach(rx => {
-          const repulsor = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.1, 16), glowMat);
-          repulsor.position.set(rx, 0.12, 0.3);
-          hGroup.add(repulsor);
-        });
+          const tailLight = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.12, 0.1), rMatTaillight);
+          tailLight.position.set(0, 0.7, isTruck ? -3.12 : -2.02);
+          vGroup.add(tailLight);
 
-        // Rear Ion Thruster Plume
-        const ionPlume = new THREE.Mesh(new THREE.ConeGeometry(0.25, 1.2, 8), glowMat);
-        ionPlume.rotation.x = -Math.PI / 2;
-        ionPlume.position.set(0, 0.55, -2.4);
-        hGroup.add(ionPlume);
+          const posAlong = lane.minB + i * step;
+          if (lane.axis === 'z') {
+            vGroup.position.set(lane.fixedCoord, 0, posAlong);
+            vGroup.rotation.y = lane.dir > 0 ? 0 : Math.PI;
+          } else {
+            vGroup.position.set(posAlong, 0, lane.fixedCoord);
+            vGroup.rotation.y = lane.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+          }
 
-        // Headlight & Taillight accents
-        const fGlow = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), rMatHeadlight);
-        fGlow.position.set(0, 0.55, 2.2);
-        hGroup.add(fGlow);
+          trafficGroup.add(vGroup);
+          cityTrafficVehicles.push({
+            group: vGroup,
+            axis: lane.axis,
+            fixedCoord: lane.fixedCoord,
+            dir: lane.dir,
+            minB: lane.minB,
+            maxB: lane.maxB,
+            speed: lane.speed,
+            isHover: false,
+            seed: i * 3.4
+          });
+        }
+      });
 
-        const baseY = 1.35;
-        if (cfg.axis === 'z') {
-          hGroup.position.set(cfg.fixedCoord + (cfg.dir > 0 ? 2.2 : -2.2), baseY, cfg.minB + (idx + 1) * 65);
-          hGroup.rotation.y = cfg.dir > 0 ? 0 : Math.PI;
+      // Generate 12 Skyway Repulsor Hovercraft & Aerocars (y: 18m to 48m aloft)
+      const skywayLanes = [
+        { axis: 'z', fixedCoord: -26, altitude: 22, dir: 1, minB: -380, maxB: 380, count: 3, speed: 28.0, glow: repulsorGlowColors[0] },
+        { axis: 'z', fixedCoord: 26, altitude: 32, dir: -1, minB: -380, maxB: 380, count: 3, speed: 32.0, glow: repulsorGlowColors[1] },
+        { axis: 'x', fixedCoord: -26, altitude: 26, dir: 1, minB: -380, maxB: 380, count: 3, speed: 29.0, glow: repulsorGlowColors[2] },
+        { axis: 'x', fixedCoord: 26, altitude: 38, dir: -1, minB: -380, maxB: 380, count: 3, speed: 34.0, glow: repulsorGlowColors[3] }
+      ];
+
+      skywayLanes.forEach(lane => {
+        const step = (lane.maxB - lane.minB) / lane.count;
+        for (let i = 0; i < lane.count; i++) {
+          const hGroup = new THREE.Group();
+          const glowMat = new THREE.MeshBasicMaterial({ color: lane.glow });
+
+          const hHull = new THREE.Mesh(new THREE.ConeGeometry(1.4, 5.0, 4), rMatDarkTrim);
+          hHull.rotation.x = Math.PI / 2;
+          hHull.rotation.y = Math.PI / 4;
+          hGroup.add(hHull);
+
+          // Glow Repulsors
+          [-0.6, 0.6].forEach(rx => {
+            const repulsor = new THREE.Mesh(new THREE.CylinderGeometry(0.42, 0.42, 0.12, 12), glowMat);
+            repulsor.position.set(rx, -0.4, 0.4);
+            hGroup.add(repulsor);
+          });
+
+          const ionPlume = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.8, 8), glowMat);
+          ionPlume.rotation.x = -Math.PI / 2;
+          ionPlume.position.set(0, 0, -2.8);
+          hGroup.add(ionPlume);
+
+          const posAlong = lane.minB + i * step;
+          if (lane.axis === 'z') {
+            hGroup.position.set(lane.fixedCoord, lane.altitude, posAlong);
+            hGroup.rotation.y = lane.dir > 0 ? 0 : Math.PI;
+          } else {
+            hGroup.position.set(posAlong, lane.altitude, lane.fixedCoord);
+            hGroup.rotation.y = lane.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+          }
+
+          trafficGroup.add(hGroup);
+          cityTrafficVehicles.push({
+            group: hGroup,
+            axis: lane.axis,
+            fixedCoord: lane.fixedCoord,
+            dir: lane.dir,
+            minB: lane.minB,
+            maxB: lane.maxB,
+            speed: lane.speed,
+            isHover: true,
+            baseY: lane.altitude,
+            seed: i * 4.1
+          });
+        }
+      });
+    }
+
+    // ============================================================
+    // METROPOLIS CIVILIAN & OPERATIVE POPULATION ENGINE (45+ NPCS)
+    // ============================================================
+    function initCityCitizens() {
+      const citizenGroup = new THREE.Group();
+      scene.add(citizenGroup);
+      cityCitizens = [];
+
+      const suitColors = [0x141e2e, 0x223046, 0x0f1724, 0x3d4852, 0x1f2937, 0x0e3a47];
+      const visorColors = [0x00f2ff, 0xffd700, 0x00ff88, 0xff0055, 0x9955ff];
+      const names = [
+        'CITIZEN // ARIA-7', 'METRO COMMUTER', 'CYBER VENDOR', 'TECH BROKER',
+        'PEACEKEEPER ENFORCER', 'STATION SCIENTIST', 'NEXUS RESIDENT', 'DATA ARCHIVIST',
+        'HYPERION MOTORS AGENT', 'STARBASE CONTRACTOR', 'CYBER RUNNER', 'COLISEUM SCOUT'
+      ];
+
+      const citizenQuotes = [
+        'Starship launch sequence is primed at the Western Starbase Pad!',
+        'The Quantum 6x6 Combat Rover is parked by District 1!',
+        'Metropolis Sector 1 is operating under automated cyber security.',
+        'Super Heavy Booster has full 100-second propellant burn capacity.',
+        'Did you check out the Tactical Armory inside the Grand Mall?',
+        'Subterranean metro connects all the way down to Sector -22m.'
+      ];
+
+      // Spawn 45 Citizens across Grand Mall, Sidewalks, Stadium & Starbase
+      for (let i = 0; i < 45; i++) {
+        const cGroup = new THREE.Group();
+
+        let posX = 0, posZ = 0, posY = 1.2;
+        let isWalking = (i % 2 === 0);
+
+        if (i < 15) {
+          // Grand Mall Plaza & Terraces (-30 to 30, -45 to 0)
+          posX = (Math.random() - 0.5) * 50;
+          posZ = -22 + (Math.random() - 0.5) * 35;
+        } else if (i < 27) {
+          // District 1 Sidewalks (-70 to 70)
+          const onX = (i % 2 === 0);
+          posX = onX ? (Math.random() - 0.5) * 120 : (Math.random() > 0.5 ? 28 : -28);
+          posZ = onX ? (Math.random() > 0.5 ? 28 : -28) : (Math.random() - 0.5) * 120;
+        } else if (i < 37) {
+          // Central Stadium Concourse (-40 to 40, 40 to 90)
+          posX = (Math.random() - 0.5) * 60;
+          posZ = 65 + (Math.random() - 0.5) * 40;
         } else {
-          hGroup.position.set(cfg.minB + (idx + 1) * 65, baseY, cfg.fixedCoord + (cfg.dir > 0 ? -2.2 : 2.2));
-          hGroup.rotation.y = cfg.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+          // SpaceX Starbase Pad & Observation Deck (90 to 140, -120 to -70)
+          posX = 105 + (Math.random() - 0.5) * 35;
+          posZ = -90 + (Math.random() - 0.5) * 35;
         }
 
-        trafficGroup.add(hGroup);
-        cityTrafficVehicles.push({
-          group: hGroup,
-          axis: cfg.axis,
-          fixedCoord: cfg.fixedCoord + (cfg.axis === 'z' ? (cfg.dir > 0 ? 2.2 : -2.2) : (cfg.dir > 0 ? -2.2 : 2.2)),
-          dir: cfg.dir,
-          minB: cfg.minB,
-          maxB: cfg.maxB,
-          speed: cfg.speed,
-          isHover: true,
-          baseY: baseY,
-          seed: (idx + 5) * 3.1
+        cGroup.position.set(posX, posY, posZ);
+
+        const suitMat = new THREE.MeshStandardMaterial({
+          color: suitColors[i % suitColors.length],
+          metalness: 0.4,
+          roughness: 0.6
         });
+        const visorMat = new THREE.MeshBasicMaterial({
+          color: visorColors[i % visorColors.length]
+        });
+
+        // Torso
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.6, 0.24), suitMat);
+        torso.position.y = 0.9;
+        torso.castShadow = true;
+        cGroup.add(torso);
+
+        // Head
+        const head = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.26, 0.24), suitMat);
+        head.position.y = 1.35;
+        cGroup.add(head);
+
+        // Cyber Visor
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.07, 0.04), visorMat);
+        visor.position.set(0, 1.36, 0.13);
+        cGroup.add(visor);
+
+        // Limbs
+        const armL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.5, 0.12), suitMat);
+        armL.position.set(-0.28, 0.9, 0);
+        cGroup.add(armL);
+
+        const armR = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.5, 0.12), suitMat);
+        armR.position.set(0.28, 0.9, 0);
+        cGroup.add(armR);
+
+        const legL = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), suitMat);
+        legL.position.set(-0.12, 0.3, 0);
+        cGroup.add(legL);
+
+        const legR = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.6, 0.15), suitMat);
+        legR.position.set(0.12, 0.3, 0);
+        cGroup.add(legR);
+
+        citizenGroup.add(cGroup);
+
+        cityCitizens.push({
+          group: cGroup,
+          legL,
+          legR,
+          armL,
+          armR,
+          head,
+          name: names[i % names.length],
+          quote: citizenQuotes[i % citizenQuotes.length],
+          isWalking,
+          speed: 1.8 + Math.random() * 1.2,
+          walkDir: new THREE.Vector3(Math.random() - 0.5, 0, Math.random() - 0.5).normalize(),
+          origin: new THREE.Vector3(posX, posY, posZ),
+          patrolRadius: 18 + Math.random() * 20,
+          seed: i * 1.7
+        });
+      }
+    }
+
+    function updateCityCitizens(delta, now) {
+      if (!cityCitizens || cityCitizens.length === 0) return;
+      const playerPos = player && player.pos ? player.pos : null;
+
+      cityCitizens.forEach(c => {
+        if (c.isWalking) {
+          c.group.position.addScaledVector(c.walkDir, c.speed * delta);
+          c.group.rotation.y = Math.atan2(c.walkDir.x, c.walkDir.z);
+
+          // Stride swing
+          const swing = Math.sin(now * 0.007 + c.seed) * 0.6;
+          c.legL.rotation.x = swing;
+          c.legR.rotation.x = -swing;
+          c.armL.rotation.x = -swing * 0.8;
+          c.armR.rotation.x = swing * 0.8;
+
+          // Wrap / turn around if exceeding patrol radius
+          if (c.group.position.distanceTo(c.origin) > c.patrolRadius) {
+            c.walkDir.multiplyScalar(-1);
+          }
+        } else {
+          // Idle breathing
+          const breathe = Math.sin(now * 0.003 + c.seed) * 0.02;
+          c.armL.rotation.x = -0.1 + breathe;
+          c.armR.rotation.x = -0.1 - breathe;
+        }
+
+        // Proximity interaction with player
+        if (playerPos) {
+          const dist = c.group.position.distanceTo(playerPos);
+          if (dist < 3.2 && !c._saidHello) {
+            c._saidHello = true;
+            c.head.lookAt(playerPos.x, c.head.position.y + c.group.position.y, playerPos.z);
+            showStoreNotification(`${c.name}: "${c.quote}"`);
+            cyberAudio.playAIChirp();
+            setTimeout(() => { c._saidHello = false; }, 12000);
+          }
+        }
       });
     }
 
@@ -10754,57 +11065,171 @@
 
     let detachedBooster = null;
 
+    // ============================================================
+    // CINEMATIC STARSHIP LAUNCH SEQUENCE CONTROLLER (T-MINUS 10s)
+    // ============================================================
+    let launchSeqTimer = null;
+    let launchSeqSeconds = 10.0;
+
+    function initiateStarshipLaunchSequence() {
+      if (!rocketStack) return;
+      if (gameState.flightMode === 'starship') {
+        toggleStarshipFlight();
+        return;
+      }
+
+      const overlay = document.getElementById('rocket-launch-sequence-overlay');
+      if (overlay) overlay.style.display = 'block';
+
+      gameState.starship.isLaunching = true;
+      launchSeqSeconds = 10.0;
+      cyberAudio.playLaunchSiren();
+
+      // Pan camera to epic cinematic low-angle pad view
+      if (camera) {
+        camera.position.set(120 - 32, 18, -100 + 45);
+        camera.lookAt(120, 65, -100);
+      }
+
+      if (launchSeqTimer) clearInterval(launchSeqTimer);
+      launchSeqTimer = setInterval(() => {
+        launchSeqSeconds -= 0.25;
+        const cdEl = document.getElementById('launch-seq-countdown');
+        const titleEl = document.getElementById('launch-seq-step-title');
+        const subEl = document.getElementById('launch-seq-step-sub');
+        const barEl = document.getElementById('launch-seq-progress-bar');
+
+        if (cdEl) cdEl.textContent = `T - ${Math.max(0, launchSeqSeconds).toFixed(1)}s`;
+        if (barEl) barEl.style.width = `${Math.min(100, ((10.0 - launchSeqSeconds) / 10.0) * 100)}%`;
+
+        if (Math.abs(launchSeqSeconds - Math.round(launchSeqSeconds)) < 0.15) {
+          cyberAudio.playCountdownBeep(launchSeqSeconds <= 1.0);
+        }
+
+        // T-6s: Mechazilla Chopsticks swing open
+        if (launchSeqSeconds <= 6.0 && launchSeqSeconds > 4.5) {
+          if (titleEl) titleEl.textContent = 'MECHAZILLA CHOPSTICK ARMS OPENING';
+          if (subEl) subEl.textContent = 'Tower arms swinging wide to clear vehicle trajectory';
+          if (mechazillaChopsticks) {
+            mechazillaChopsticks.rotation.y = THREE.MathUtils.lerp(mechazillaChopsticks.rotation.y, 0.85, 0.15);
+          }
+        }
+        // T-4.5s: Cryogenic Venting
+        else if (launchSeqSeconds <= 4.5 && launchSeqSeconds > 2.5) {
+          if (titleEl) titleEl.textContent = 'CRYOGENIC CHILLDOWN VENTING ACTIVE';
+          if (subEl) subEl.textContent = 'Supercooled LOX/CH4 manifolds verified nominal';
+          cyberAudio.playCryoVent();
+        }
+        // T-2.5s: Sound Suppression Deluge & Raptor Ignition
+        else if (launchSeqSeconds <= 2.5 && launchSeqSeconds > 0) {
+          if (titleEl) titleEl.textContent = '33 RAPTOR ENGINES IGNITION SEQUENCE';
+          if (subEl) subEl.textContent = 'Deluge water active · Thrust ramping to 16,000,000 lbf';
+          if (boosterFlame) boosterFlame.material.opacity = 0.8;
+          cyberAudio.playIgnitionThud();
+        }
+        // T-0s: LIFTOFF!
+        else if (launchSeqSeconds <= 0) {
+          clearInterval(launchSeqTimer);
+          launchSeqTimer = null;
+          fastForwardLaunchSequence();
+        }
+      }, 250);
+    }
+
+    function fastForwardLaunchSequence() {
+      if (launchSeqTimer) {
+        clearInterval(launchSeqTimer);
+        launchSeqTimer = null;
+      }
+      const overlay = document.getElementById('rocket-launch-sequence-overlay');
+      if (overlay) overlay.style.display = 'none';
+
+      gameState.starship.isLaunching = false;
+      gameState.starship.boosterFuel = 100;
+      cyberAudio.playCountdownBeep(true);
+      cyberAudio.playRocketRoar();
+
+      if (mechazillaChopsticks) mechazillaChopsticks.rotation.y = 0.85;
+      if (boosterFlame) boosterFlame.material.opacity = 0.95;
+
+      executeStarshipFlightEntry();
+      showStoreNotification('🚀 STARSHIP LIFTOFF CONFIRMED! SUPER HEAVY ASCENDING!');
+    }
+
+    function abortLaunchSequence() {
+      if (launchSeqTimer) {
+        clearInterval(launchSeqTimer);
+        launchSeqTimer = null;
+      }
+      const overlay = document.getElementById('rocket-launch-sequence-overlay');
+      if (overlay) overlay.style.display = 'none';
+
+      gameState.starship.isLaunching = false;
+      if (mechazillaChopsticks) mechazillaChopsticks.rotation.y = 0;
+      if (boosterFlame) boosterFlame.material.opacity = 0;
+      cyberAudio.playClick();
+      showStoreNotification('LAUNCH SEQUENCE ABORTED. PAD SAFED.');
+    }
+
     function toggleStarshipFlight() {
       if (!rocketStack) return;
       if (gameState.flightMode !== 'starship') {
-        gameState.flightMode = 'starship';
-        gameState.starship.isPiloted = true;
-        gameState.inVehicle = false;
-
-        const flightHud = document.getElementById('rocket-flight-hud');
-        if (flightHud) flightHud.style.display = 'block';
-
-        const shipControls = document.getElementById('starship-mobile-controls');
-        if (shipControls) shipControls.style.display = 'block';
-
-        const btnStarship = document.getElementById('btn-toggle-starship');
-        if (btnStarship) {
-          btnStarship.style.borderColor = '#00ff88';
-          btnStarship.style.color = '#00ff88';
-          btnStarship.innerHTML = '<i class="fa-solid fa-rocket"></i> [B] EXIT SHIP';
-        }
-
-        cyberAudio.playRocketRoar();
-        showAIMessage('( 🚀‿🚀 )', '2.8% [NOMINAL]', 'Starship flight deck active. Push joystick UP to accelerate. Space warp drives primed upon orbital escape velocity!');
+        initiateStarshipLaunchSequence();
       } else {
-        gameState.flightMode = 'none';
-        gameState.starship.isPiloted = false;
+        executeStarshipFlightExit();
+      }
+    }
 
-        const flightHud = document.getElementById('rocket-flight-hud');
-        if (flightHud) flightHud.style.display = 'none';
+    function executeStarshipFlightEntry() {
+      gameState.flightMode = 'starship';
+      gameState.starship.isPiloted = true;
+      gameState.inVehicle = false;
 
-        const shipControls = document.getElementById('starship-mobile-controls');
-        if (shipControls) shipControls.style.display = 'none';
+      const flightHud = document.getElementById('rocket-flight-hud');
+      if (flightHud) flightHud.style.display = 'block';
 
-        const apexTerm = document.getElementById('apex-ai-terminal');
-        if (apexTerm) apexTerm.style.display = 'none';
+      const shipControls = document.getElementById('starship-mobile-controls');
+      if (shipControls) shipControls.style.display = 'block';
 
-        const maxToast = document.getElementById('max-velocity-toast');
-        if (maxToast) maxToast.style.display = 'none';
+      const btnStarship = document.getElementById('btn-toggle-starship');
+      if (btnStarship) {
+        btnStarship.style.borderColor = '#00ff88';
+        btnStarship.style.color = '#00ff88';
+        btnStarship.innerHTML = '<i class="fa-solid fa-rocket"></i> [B] EXIT SHIP';
+      }
 
-        const btnStarship = document.getElementById('btn-toggle-starship');
-        if (btnStarship) {
-          btnStarship.style.borderColor = '#ff9900';
-          btnStarship.style.color = '#ffaa00';
-          btnStarship.innerHTML = '<i class="fa-solid fa-rocket"></i> [B] STARSHIP';
-        }
+      cyberAudio.playRocketRoar();
+      showAIMessage('( 🚀‿🚀 )', '2.8% [NOMINAL]', 'Starship flight deck active. Push joystick UP to accelerate. Space warp drives primed upon orbital escape velocity!');
+    }
 
-        if (starshipUpper) {
-          const worldPos = new THREE.Vector3();
-          starshipUpper.getWorldPosition(worldPos);
-          player.pos.set(worldPos.x + 8, Math.max(1.2, worldPos.y), worldPos.z + 8);
-          player.vel.set(0, 0, 0);
-        }
+    function executeStarshipFlightExit() {
+      gameState.flightMode = 'none';
+      gameState.starship.isPiloted = false;
+
+      const flightHud = document.getElementById('rocket-flight-hud');
+      if (flightHud) flightHud.style.display = 'none';
+
+      const shipControls = document.getElementById('starship-mobile-controls');
+      if (shipControls) shipControls.style.display = 'none';
+
+      const apexTerm = document.getElementById('apex-ai-terminal');
+      if (apexTerm) apexTerm.style.display = 'none';
+
+      const maxToast = document.getElementById('max-velocity-toast');
+      if (maxToast) maxToast.style.display = 'none';
+
+      const btnStarship = document.getElementById('btn-toggle-starship');
+      if (btnStarship) {
+        btnStarship.style.borderColor = '#ff9900';
+        btnStarship.style.color = '#ffaa00';
+        btnStarship.innerHTML = '<i class="fa-solid fa-rocket"></i> [B] STARSHIP';
+      }
+
+      if (starshipUpper) {
+        const worldPos = new THREE.Vector3();
+        starshipUpper.getWorldPosition(worldPos);
+        player.pos.set(worldPos.x + 8, Math.max(1.2, worldPos.y), worldPos.z + 8);
+        player.vel.set(0, 0, 0);
       }
     }
 
@@ -11243,6 +11668,11 @@
         m.group.rotation.y += delta * 0.25;
       });
 
+      // Update Lively Metropolis Civilian Population (45+ Animated NPCs)
+      if (gameState.currentWorld === 'earth') {
+        updateCityCitizens(delta, now);
+      }
+
       // Autonomous Metropolitan Cyber Traffic Circulation
       if (gameState.currentWorld === 'earth' && cityTrafficVehicles.length > 0) {
         cityTrafficVehicles.forEach(veh => {
@@ -11337,13 +11767,19 @@
         wmFpsEl.textContent = Math.round(1 / delta);
       }
 
-      // Detached Booster Automated Boost-Back Descent & Landing
+      // Super Heavy Booster Autonomous Return-To-Launch-Site (RTLS) Boostback Burn
       if (detachedBooster && detachedBooster.mesh) {
-        detachedBooster.altitude = Math.max(0, detachedBooster.altitude - delta * 24.0);
-        detachedBooster.mesh.position.y = detachedBooster.altitude;
-        detachedBooster.mesh.rotation.y += delta * 0.15;
-        if (boosterFlame) {
-          boosterFlame.material.opacity = detachedBooster.altitude > 4 ? 0.35 + Math.random() * 0.15 : 0;
+        if (detachedBooster.altitude > 0) {
+          detachedBooster.altitude = Math.max(0, detachedBooster.altitude - delta * 14.0);
+          detachedBooster.mesh.position.y = detachedBooster.altitude;
+          // Guide booster back towards Mechazilla Launch Mount at (120, 0, -100)
+          detachedBooster.mesh.position.x = THREE.MathUtils.lerp(detachedBooster.mesh.position.x, 120, delta * 0.15);
+          detachedBooster.mesh.position.z = THREE.MathUtils.lerp(detachedBooster.mesh.position.z, -100, delta * 0.15);
+          detachedBooster.mesh.rotation.y += delta * 0.2;
+
+          if (boosterFlame) {
+            boosterFlame.material.opacity = detachedBooster.altitude > 6 ? 0.45 + Math.random() * 0.15 : 0;
+          }
         }
       }
 
@@ -11420,7 +11856,24 @@
         gameState.starship.pitch = Math.max(-Math.PI * 0.48, Math.min(Math.PI * 0.48, gameState.starship.pitch));
 
         const throttleFrac = gameState.starship.throttle / 100;
-        const maxThrust = gameState.starship.isStaged ? 72.0 : 92.0;
+
+        // Long-Lasting Super Heavy Booster Burn (~100s continuous burn capacity)
+        if (!gameState.starship.isStaged) {
+          if (throttleFrac > 0.05) {
+            gameState.starship.boosterFuel = Math.max(0, (gameState.starship.boosterFuel || 100) - delta * 1.05 * throttleFrac);
+            const fuelBar = document.getElementById('hud-rocket-fuel-bar');
+            const fuelTxt = document.getElementById('hud-rocket-fuel-text');
+            if (fuelBar) fuelBar.style.width = `${gameState.starship.boosterFuel}%`;
+            if (fuelTxt) fuelTxt.textContent = `${Math.round(gameState.starship.boosterFuel)}%`;
+
+            // Auto-stage upon full propellant exhaustion
+            if (gameState.starship.boosterFuel <= 0) {
+              triggerStageSeparation();
+            }
+          }
+        }
+
+        const maxThrust = gameState.starship.isStaged ? 88.0 : 145.0;
         const thrust = throttleFrac * maxThrust;
 
         // Apply Rocket Rotation
