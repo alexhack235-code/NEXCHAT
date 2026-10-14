@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://demonalexander526-alt.github.io"],
+    "method": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type", "Authorization", "Content-Length", "Accept-Encoding", "X-CSRF-Token"]
+  }
+]

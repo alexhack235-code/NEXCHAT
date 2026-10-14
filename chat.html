@@ -1,0 +1,3314 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#00ff66">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="NEXCHAT - Secure and fast messaging web app with group chat, AI assistant, and real-time status updates.">
+  <meta name="keywords" content="NEXCHAT, chat app, real-time messaging, group chat, AI assistant, Firebase chat">
+  <meta property="og:title" content="NEXCHAT - Messages" />
+  <meta property="og:description" content="NEXCHAT messaging web app with AI assistant and advanced group management." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/chat.html" />
+  <meta property="og:image" content="https://yourdomain.com/logo.jpg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="NEXCHAT - Messages" />
+  <meta name="twitter:description" content="Secure messaging with AI support and enhanced group creation." />
+  <meta name="apple-mobile-web-app-title" content="NEXCHAT">
+  <meta name="format-detection" content="telephone=no">
+  <meta name="x-apple-disable-message-reformatting" content="yes">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="chat.css">
+  <link rel="stylesheet" href="src/features/group/group-chat.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
+  <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+</head>
+
+<body>
+  <div class="app">
+    <!-- TOP HEADER BAR -->
+    <header class="top-header">
+      <div class="header-left">
+        <button id="dashboardBackBtn" class="back-button" title="Back to Dashboard"><i class="fa-solid fa-arrow-left"></i></button>
+        <!-- Header shows NEXCHAT logo by default, contact name when in chat -->
+        <div id="headerLogoContainer">
+          <div class="nex-logo" id="headerLogoImg">
+            <img src="logo.jpg" alt="NEXCHAT & CAMSHOT" class="nex-header-logo-badge" style="width: 28px; height: 28px; border-radius: 7px; object-fit: cover; border: 1.5px solid rgba(0, 255, 102, 0.4); box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);">
+            <div style="display: flex; flex-direction: column; line-height: 1.1;">
+              <span class="nex-text" style="font-size: 17px; font-weight: 800; letter-spacing: 1.5px;">NEXCHAT</span>
+              <span style="font-family: 'Outfit', sans-serif; font-size: 8px; font-weight: 800; letter-spacing: 2px; color: #00D2FF; text-transform: uppercase;">CAMSHOT ENGINE</span>
+            </div>
+            <span class="nex-online-pulse"></span>
+          </div>
+        </div>
+        <!-- Active chat contact info (shows when in chat) -->
+        <div id="activeChatHeader" class="active-chat-header" style="display: none;">
+          <img id="activeChatAvatar" src="" alt="Contact" class="active-chat-avatar" style="cursor: pointer;">
+          <div class="active-chat-info">
+            <div id="activeChatName" class="active-chat-name">Contact Name</div>
+            <div id="activeChatStatus" class="active-chat-status">Online</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Center Token Pill (Desktop only) -->
+      <div class="header-center desktop-only-header">
+        <div id="tokenDisplay" class="token-display" title="Your tokens">
+          <span class="token-label">Tokens</span>
+          <span id="tokenCount">0</span>
+          <span id="giftBadge" class="gift-badge" aria-live="polite"></span>
+        </div>
+        <button type="button" id="cyberStreakBtn" class="cyber-streak-btn" title="Daily Cyber Streak: Tap to Claim Rewards">
+          <i class="fa-solid fa-bolt" style="color: #ffd700;"></i>
+          <span class="streak-btn-label">STREAK</span>
+          <span id="streakCountHeader" class="streak-btn-count">1</span>
+        </button>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="header-right-scroll">
+        <!-- Desktop Toolbar (hidden on mobile, visible >= 900px) -->
+        <div class="header-right desktop-header-actions">
+          <button id="giftHistoryBtn" class="header-icon-btn" title="Gift History"><i class="fa-solid fa-gift"></i></button>
+          <button id="profile-sticker" class="header-icon-btn profile-sticker" title="Profile"><i class="fa-solid fa-user"></i></button>
+
+          <!-- Dark Mode Sliding Toggle Switch -->
+          <div class="toggle-switch-container" title="Dark/Light Mode">
+            <div class="toggle-switch" id="darkModeToggle">
+              <div class="toggle-slider"></div>
+              <span class="toggle-label dark-label">D</span>
+              <span class="toggle-label light-label">L</span>
+            </div>
+          </div>
+
+          <button id="fullscreen-btn-header" class="header-icon-btn" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
+          <button id="status-btn-header" class="header-icon-btn" title="Status Vault" onclick="window.handleNavigation('status')"><i class="fa-solid fa-circle-notch"></i></button>
+          <button id="reels-btn-header" class="header-icon-btn" title="CamShot" onclick="window.location.href='reels.html'"><i class="fa-solid fa-clapperboard"></i></button>
+          <button id="installHeaderBtn" class="header-icon-btn" title="Install NEXCHAT"><i class="fa-solid fa-download"></i></button>
+          <button id="gaming-btn-header" class="header-icon-btn" title="Gaming Hub &mdash; AstroShift: beyond Earth" onclick="window.location.href='gaminghub.html'"><i class="fa-solid fa-gamepad"></i></button>
+          <button id="shop-btn-header" class="header-icon-btn" title="Buy Tokens"
+            onclick="window.location.href='cart.html'"><i class="fa-solid fa-cart-shopping"></i></button>
+          <button id="search-btn-header" class="header-icon-btn search-btn-header" title="Search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button id="radarBtnHeader" class="header-icon-btn" title="Neural Radar Scanner"><i class="fa-solid fa-satellite-dish"></i></button>
+          <button id="nexbotStudioBtnHeader" class="header-icon-btn" title="NEXBOT Studio &amp; WhatsApp Architect"><i class="fa-solid fa-robot"></i></button>
+          <button id="vipVaultBtnHeader" class="header-icon-btn" title="VIP Token Vault &amp; Licenses"><i class="fa-solid fa-crown"></i></button>
+          <button id="cyberStreakBtnHeader" class="header-icon-btn" title="Daily Cyber Streak Matrix"><i class="fa-solid fa-bolt" style="color: #ffd700;"></i></button>
+          <button id="audioSpacesBtnHeader" class="header-icon-btn" title="Live Neural Audio Spaces"><i class="fa-solid fa-podcast"></i></button>
+          <button id="cyberDropBtnHeader" class="header-icon-btn" title="P2P CyberDrop Direct File Beam"><i class="fa-solid fa-share-nodes"></i></button>
+          <button id="cipherVaultBtnHeader" class="header-icon-btn" title="Cipher Vault &amp; Secret Rooms"><i class="fa-solid fa-key"></i></button>
+          <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
+          <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
+        </div>
+
+        <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
+        <div class="header-right mobile-header-actions">
+          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="CamShot & Camera" onclick="window.location.href='reels.html'">
+            <i class="fa-solid fa-camera"></i>
+          </button>
+          <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button id="mobileMenuBtn" class="header-icon-btn mobile-action-btn" title="Menu" aria-label="Menu">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Quick Dropdown Menu -->
+      <div id="mobileDropdownMenu" class="mobile-dropdown-menu" style="display: none;">
+        <button type="button" class="mobile-menu-item" onclick="window.location.href='reels.html'">
+          <i class="fa-solid fa-clapperboard"></i> <span>CamShot</span>
+        </button>
+        <button type="button" class="mobile-menu-item" onclick="window.location.href='cart.html'">
+          <i class="fa-solid fa-coins"></i> <span>Tokens & Gifts</span>
+          <span class="mobile-menu-badge" id="mobileTokenBadge">0</span>
+        </button>
+        <button type="button" class="mobile-menu-item" onclick="window.location.href='gaminghub.html'">
+          <i class="fa-solid fa-gamepad"></i> <span>AstroShift: beyond Earth</span>
+        </button>
+        <button type="button" class="mobile-menu-item" onclick="window.open('terminal.html','_blank')">
+          <i class="fa-solid fa-terminal"></i> <span>Hacker Terminal</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileLinkDeviceBtn">
+          <i class="fa-solid fa-qrcode"></i> <span>Linked Devices</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileThemeToggleBtn">
+          <i class="fa-solid fa-circle-half-stroke"></i> <span>Toggle Dark / Light</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileRadarBtn">
+          <i class="fa-solid fa-satellite-dish"></i> <span>Neural Radar</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileNexbotStudioBtn">
+          <i class="fa-solid fa-robot"></i> <span>NEXBOT Studio</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileVipVaultBtn">
+          <i class="fa-solid fa-crown"></i> <span>VIP Vault &amp; Licenses</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileStreakBtn">
+          <i class="fa-solid fa-bolt" style="color: #ffd700;"></i> <span>Cyber Streak Hub</span>
+          <span class="mobile-menu-badge" id="mobileStreakBadge">1 DAY</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileAudioSpacesBtn">
+          <i class="fa-solid fa-podcast"></i> <span>Live Audio Spaces</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileCyberDropBtn">
+          <i class="fa-solid fa-share-nodes"></i> <span>CyberDrop P2P Beam</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileCipherVaultBtn">
+          <i class="fa-solid fa-key"></i> <span>Cipher Secret Rooms</span>
+        </button>
+        <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
+          <i class="fa-solid fa-gear"></i> <span>Settings</span>
+        </button>
+        <div class="mobile-menu-divider"></div>
+        <button type="button" class="mobile-menu-item danger" id="mobileLogoutBtn">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- NEXCHAT CYBER HACKER TERMINAL STATUS VAULT SECTION -->
+    <div class="nex-status-container hacker-terminal-status" id="statusContainer" style="display: none;">
+      <!-- Terminal Status HUD Header -->
+      <div class="status-top-appbar terminal-status-appbar">
+        <div class="terminal-status-header-brand">
+          <div class="terminal-status-brand-line">
+            <span class="terminal-prompt-prefix">&gt;</span>
+            <h2 class="status-appbar-title terminal-hud-title">STATUS_VAULT<span class="term-cursor-blink">_</span></h2>
+          </div>
+          <div class="terminal-telemetry-meta">
+            <span class="telemetry-badge active-mesh"><i class="fa-solid fa-signal"></i> MESH: ONLINE</span>
+            <span class="telemetry-badge cipher-badge"><i class="fa-solid fa-shield-halved"></i> 24H_EPHEMERAL</span>
+          </div>
+        </div>
+
+        <div class="status-appbar-actions terminal-actions">
+          <!-- Big Obvious Upload Button in Header -->
+          <button type="button" id="statusHeaderCameraBtn" class="terminal-upload-pill-btn" title="Deploy Photo / Video Status">
+            <i class="fa-solid fa-camera"></i>
+            <span>+ UPLOAD</span>
+          </button>
+          <!-- Text Story Creator Button in Header -->
+          <button type="button" id="statusHeaderTextBtn" class="terminal-text-pill-btn" title="Transmit Encrypted Text Story">
+            <i class="fa-solid fa-terminal"></i>
+            <span>Aa TRANSMIT</span>
+          </button>
+          <!-- Terminal Launcher Icon -->
+          <button type="button" onclick="window.open('terminal.html','_blank')" class="status-icon-btn terminal-quick-btn" title="Launch Full Hacker Terminal">
+            <i class="fa-solid fa-code"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Hidden file input for status media upload -->
+      <input type="file" id="statusImageInput" style="display: none;" accept="image/*,video/*" />
+
+      <!-- Status Sub-header Telemetry Bar -->
+      <div class="terminal-telemetry-banner">
+        <span class="telemetry-stream-label"><i class="fa-solid fa-satellite-dish fa-fade"></i> ACTIVE_NODES_FEED</span>
+        <span class="telemetry-vault-mode"><i class="fa-solid fa-server"></i> VAULTS: MULTI-BLOB (1-5)</span>
+      </div>
+
+      <!-- Status Horizontal List (Hacker Cyber Nodes Stream) -->
+      <div class="status-horizontal-list scrollbar-hide" id="statusHorizontalList">
+        <!-- 1. My Status Node -->
+        <div class="status-circle-item my-status-item terminal-node-card" id="myStatusCircleItem">
+          <div class="status-avatar-wrapper terminal-avatar-wrapper" id="myStatusAvatarWrapper">
+            <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
+            <span class="terminal-node-beacon"></span>
+          </div>
+          <button type="button" id="myStatusAddBadge" class="status-plus-badge terminal-plus-badge" title="Deploy Status Node">+</button>
+          <span class="status-item-copy">
+            <span class="status-item-label terminal-node-name">[MY_NODE]</span>
+            <span class="status-item-hint">Tap to deploy</span>
+          </span>
+        </div>
+
+        <!-- 2. Other Statuses rendered horizontally here -->
+        <div id="statusHorizontalFeed" class="status-horizontal-items"></div>
+      </div>
+
+      <!-- Recent & Viewed Updates List (Hacker Telemetry Stream) -->
+      <div class="status-updates-body terminal-feed-body">
+        <div id="statusRecentSection" class="status-section-block">
+          <div class="terminal-section-heading">
+            <span class="heading-bracket">[//</span>
+            <h3 class="status-section-header">LIVE_TELEMETRY_STREAM</h3>
+            <span class="heading-bracket">]</span>
+            <div class="heading-divider-line"></div>
+          </div>
+          <div id="statusRecentList" class="status-vertical-list terminal-card-list"></div>
+        </div>
+
+        <div id="statusViewedSection" class="status-section-block" style="display: none;">
+          <div class="terminal-section-heading">
+            <span class="heading-bracket">[//</span>
+            <h3 class="status-section-header">ARCHIVED_STREAM_NODES</h3>
+            <span class="heading-bracket">]</span>
+            <div class="heading-divider-line"></div>
+          </div>
+          <div id="statusViewedList" class="status-vertical-list terminal-card-list"></div>
+        </div>
+      </div>
+
+      <!-- Floating Action Buttons: Always-visible Terminal Cyber FABs with Glowing Ring -->
+      <div class="status-fab-container terminal-fab-container">
+        <button type="button" id="statusFabText" class="status-fab-mini terminal-fab-btn" title="Create Terminal Text Story">
+          <i class="fa-solid fa-terminal"></i>
+          <span class="fab-hover-tip">TEXT</span>
+        </button>
+        <button type="button" id="statusFabCamera" class="status-fab-main terminal-fab-main-btn" title="Deploy Status Photo / Video">
+          <i class="fa-solid fa-camera"></i>
+          <span class="fab-pulse-ring"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- GROUPS SECTION -->
+    <div class="groups-container" id="groupsContainer" style="display: none;">
+      <div class="groups-header">
+        <h3>Groups</h3>
+        <button id="createNewGroupBtn" class="new-chat-btn" title="Create Group">New</button>
+      </div>
+      <ul id="groupsList" class="groups-list">
+        <li class="empty-state">
+          <p>No groups yet</p>
+          <p class="hint">Create or join a group to get started</p>
+        </li>
+      </ul>
+    </div>
+
+    <!-- ANNOUNCEMENTS SECTION -->
+    <div class="announcements-container" id="announcementsContainer" style="display: none;">
+      <div class="announcements-header">
+        <h3>Announcements</h3>
+      </div>
+      <div id="announcementsFeed" class="announcements-feed">
+        <!-- WELCOME ANNOUNCEMENT BLOCK -->
+        <div class="announcement-item pinned-announcement"
+          style="border: 2px solid #00ff66; background: rgba(0, 255, 102, 0.05);">
+          <div class="announcement-header">
+            <h4 class="announcement-title">WELCOME TO NEXCHAT</h4>
+            <span class="announcement-badge" style="background: #00ff66; color: #000;"><i class="fa-solid fa-code"></i> NEX-DEV</span>
+          </div>
+          <p class="announcement-content" style="font-weight: 600; color: #fff;">
+            WELCOME TO NEXCHAT THE FUTURE IS INIT I AM DEMON ALEX NEX DEVELOPER....
+          </p>
+          <p class="announcement-content">
+            EXPERIENCE CAMSHOT — OUR EXCLUSIVE HIGH-DEFINITION SHORT-FORM VIDEO PLATFORM LIVE ON NEXCHAT.
+            EXPLORE THE FEED, RECORD LIVE IN THE STUDIO, AND EARN BOUNTY TOKENS!
+          </p>
+          <div style="margin: 12px 0;">
+            <a href="reels.html" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #E8B84B, #C9972E); color: #000; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 12.5px; padding: 9px 18px; border-radius: 9999px; text-decoration: none; box-shadow: 0 4px 16px rgba(232,184,75,0.35); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+              <i class="fa-solid fa-play"></i> LAUNCH CAMSHOT
+            </a>
+          </div>
+          <div class="announcement-footer">
+            <span class="announcement-time">IMPORTANT Update</span>
+            <span class="announcement-admin">BEST REGARDS: DEMON ALEX {LINUX-DEVELOPER}</span>
+          </div>
+        </div>
+
+        <div class="announcements-empty-state">
+          <p>No other announcements yet</p>
+          <p class="hint">Stay tuned for updates from NEXCHAT</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CALL HISTORY SECTION -->
+    <div class="call-history-container" id="callHistoryContainer" style="display: none;">
+      <div class="call-history-header" style="
+        padding: 20px;
+        background: rgba(0, 255, 102, 0.1);
+        border-bottom: 2px solid #00ff66;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      ">
+        <h3 style="margin: 0; color: #00ff66; font-size: 22px;">
+          Call History
+        </h3>
+        <button id="clearCallHistoryBtn" style="
+          padding: 8px 16px;
+          background: rgba(255,68,68,0.2);
+          border: 1px solid #ff4444;
+          border-radius: 6px;
+          color: #ff4444;
+          cursor: pointer;
+          font-size: 12px;
+          font-weight: bold;
+          transition: all 0.2s;
+        ">Clear All</button>
+      </div>
+
+      <div id="callHistoryFeed" class="call-history-feed" style="
+        padding: 15px;
+        overflow-y: auto;
+        max-height: calc(100vh - 200px);
+      ">
+        <!-- Call history items will be populated here -->
+        <div class="call-history-empty-state" style="
+          text-align: center;
+          padding: 60px 20px;
+          color: #888;
+        ">
+          <div style="font-size: 64px; margin-bottom: 20px;">Call</div>
+          <p style="font-size: 18px; color: #aaa; margin-bottom: 10px;">No Calls Yet</p>
+          <p style="font-size: 14px; color: #666;">Your call history will appear here</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN CHAT LIST -->
+    <main class="chat-main" data-layout="list">
+      <!-- CHAT LIST VIEW -->
+      <div id="chatListView" class="chat-list-view">
+        <!-- Search Bar -->
+        <div class="search-container">
+          <input type="text" id="searchInput" class="search-bar" placeholder="Search chats..." autocomplete="off" />
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all" title="All chats">All</button>
+          <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
+          <button class="filter-tab" data-filter="favorites" title="Favorite chats">Favorites</button>
+          <button class="filter-tab" data-filter="groups" title="Group chats">Groups</button>
+          <button class="filter-tab add-chat-tab" id="newChatFromTab" title="New chat"><i class="fa-solid fa-plus"></i></button>
+        </div>
+
+        <!-- Active Chats Section -->
+        <div class="chats-section">
+          <ul id="contactList" class="chat-list">
+            <li class="empty-state">
+              <p>No chats yet</p>
+              <p class="hint">Search for friends to start chatting</p>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Mobile Floating Action Button (FAB) -->
+        <button id="mobileFabNewChat" class="mobile-fab" title="New Chat" aria-label="New Chat">
+          <i class="fa-solid fa-message"></i>
+        </button>
+
+        <!-- Archived Section -->
+        <div class="archived-section">
+          <button class="archived-header" id="archivedToggle">
+            <i class="fa-solid fa-box-archive"></i> Archived Chats <span id="archivedCount" style="font-size: 12px; margin-left: 8px;">0</span>
+          </button>
+          <ul id="archivedList" class="chat-list archived-list" style="display: none;">
+            <li class="empty-state" style="padding: 16px;">
+              <p>No archived chats</p>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <section id="chatWelcomePanel" class="chat-welcome-panel" aria-label="Chat workspace">
+        <span class="chat-welcome-icon" aria-hidden="true"><i class="fa-regular fa-comments"></i></span>
+        <h2>Select a conversation</h2>
+        <p>Your messages will appear here.</p>
+      </section>
+
+      <!-- CHAT DETAIL VIEW -->
+      <div id="chatDetailView" class="chat-detail-view" style="display: none;">
+        <!-- Chat Header -->
+        <div class="chat-detail-header">
+          <button id="backBtn" class="back-btn" title="Back to chats"><i class="fa-solid fa-chevron-left"></i></button>
+          <div class="chat-header-profile" id="chatHeaderProfile" style="cursor: pointer; position: relative;"
+            title="Click to open group settings">
+            <img id="chatProfilePic" src="" alt="profile" class="header-avatar">
+            <div class="header-text">
+              <h3 id="chatName">User</h3>
+              <p id="statusText" class="status-dot">Online</p>
+            </div>
+          </div>
+          <div class="chat-detail-header-actions">
+            <!-- ChronEX Neural Quick Model Switcher in Header -->
+            <div id="chronexHeaderControls" class="chronex-header-controls" style="display: none; position: relative;">
+              <button type="button" id="chronexHeaderModelBtn" class="chronex-header-model-pill" title="Switch AI Model Profile">
+                <i class="fa-solid fa-microchip" style="color: #67e8f9;"></i>
+                <span id="chronexHeaderModelLabel">Neural Pro</span>
+                <i class="fa-solid fa-chevron-down" style="font-size: 9px; opacity: 0.7;"></i>
+              </button>
+              <div id="chronexHeaderModelMenu" class="chronex-model-dropdown-menu" style="display: none;">
+                <button type="button" class="chronex-model-drop-item active" data-model="nexchat-custom">
+                  <i class="fa-solid fa-brain" style="color: #67e8f9;"></i>
+                  <div class="model-drop-text">
+                    <strong>NEXCHAT Custom Pro</strong>
+                    <small>Multi-modal & Coding</small>
+                  </div>
+                </button>
+                <button type="button" class="chronex-model-drop-item" data-model="performance">
+                  <i class="fa-solid fa-bolt" style="color: #00ff66;"></i>
+                  <div class="model-drop-text">
+                    <strong>Speed-Optimized</strong>
+                    <small>Rapid Token Stream</small>
+                  </div>
+                </button>
+                <button type="button" class="chronex-model-drop-item" data-model="creative">
+                  <i class="fa-solid fa-wand-magic-sparkles" style="color: #ffd700;"></i>
+                  <div class="model-drop-text">
+                    <strong>Creative Genius</strong>
+                    <small>Conversational Synthesis</small>
+                  </div>
+                </button>
+                <button type="button" class="chronex-model-drop-item" data-model="safe">
+                  <i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i>
+                  <div class="model-drop-text">
+                    <strong>Strict Shield</strong>
+                    <small>Security & Guarded</small>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <button id="chatSearchToggleBtn" class="header-icon-btn" title="Search in Chat"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button id="headerVideoBtn" class="header-icon-btn chat-action-call" title="Video Call"><i class="fa-solid fa-video"></i></button>
+            <button id="headerCallBtn" class="header-icon-btn chat-action-call" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
+            <button id="quickWallpaperBtn" class="header-icon-btn" title="Chat Wallpaper" style="background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s;"><i class="fa-solid fa-palette"></i></button>
+            <!-- Ghost Protocol Ephemeral Button & Dropdown -->
+            <div id="ghostProtocolControl" class="ghost-protocol-control" style="position: relative; display: inline-flex;">
+              <button type="button" id="ghostProtocolBtn" class="header-icon-btn ghost-toggle-btn" title="Ghost Protocol (Ephemeral Self-Destruct Messages)">
+                <i class="fa-solid fa-ghost"></i>
+              </button>
+              <div id="ghostProtocolMenu" class="ghost-dropdown-menu" style="display: none;">
+                <div class="ghost-menu-header"><i class="fa-solid fa-ghost"></i> GHOST PROTOCOL</div>
+                <div class="ghost-menu-desc">Self-destruct timer for messages:</div>
+                <button type="button" class="ghost-opt active" data-ttl="0"><i class="fa-solid fa-ban"></i> Off (Persistent)</button>
+                <button type="button" class="ghost-opt" data-ttl="10"><i class="fa-solid fa-stopwatch"></i> 10 Seconds</button>
+                <button type="button" class="ghost-opt" data-ttl="30"><i class="fa-solid fa-stopwatch"></i> 30 Seconds</button>
+                <button type="button" class="ghost-opt" data-ttl="60"><i class="fa-solid fa-stopwatch"></i> 1 Minute</button>
+                <button type="button" class="ghost-opt" data-ttl="300"><i class="fa-solid fa-stopwatch"></i> 5 Minutes</button>
+              </div>
+            </div>
+            <button id="menuBtn" class="three-dots-menu" title="More options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+        </div>
+
+        <!-- In-Chat Live Search Bar -->
+        <div id="inChatSearchBar" class="in-chat-search-bar" style="display: none;">
+          <div class="in-chat-search-inner">
+            <i class="fa-solid fa-magnifying-glass" style="color: #00ff66; font-size: 13px;"></i>
+            <input type="text" id="inChatSearchInput" placeholder="Search in this conversation..." autocomplete="off">
+            <span id="chatSearchMatchCount" class="search-match-count">0 found</span>
+            <button type="button" id="closeChatSearchBtn" class="close-search-btn" title="Close Search"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- Ghost Protocol Active Banner -->
+        <div id="ghostActiveBanner" class="ghost-active-banner" style="display: none;">
+          <div class="ghost-banner-content">
+            <i class="fa-solid fa-ghost" style="color: #c084fc;"></i>
+            <span>GHOST PROTOCOL ENGAGED &bull; Disintegrating in <strong id="ghostTtlLabel">30s</strong></span>
+          </div>
+          <button type="button" id="closeGhostBannerBtn" class="close-ghost-banner-btn" title="Disable Ghost Mode">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+
+        <!-- Messages Area -->
+        <div id="chatReloadOverlay" class="chat-reload-overlay" aria-hidden="true">
+          <div class="chat-reload-pill">
+            <span class="chat-reload-progress"></span>
+            <span class="chat-reload-dot"></span>
+            <span class="chat-reload-status">Downloading chat...</span>
+          </div>
+        </div>
+        <div id="pinnedMessagesBar" class="nex-pin-bar-container" style="display: none;"></div>
+        <div class="messages-area" id="messages-area">
+          <div class="messages-list">
+            <div class="empty-state">
+              <p>No messages yet</p>
+              <p class="hint">Start the conversation!</p>
+            </div>
+          </div>
+          <div id="typingIndicator" class="typing-indicator" style="display: none;">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span id="typingIndicatorText" class="typing-text" style="font-size: 12px; color: var(--accent-primary); margin-left: 6px;">User is typing...</span>
+          </div>
+          <!-- Floating Scroll-To-Bottom Button -->
+          <button type="button" id="chatScrollDownBtn" class="chat-scroll-down-btn" style="display: none;" title="Scroll to latest">
+            <i class="fa-solid fa-arrow-down"></i>
+          </button>
+        </div>
+
+        <!-- Chat Options Menu -->
+        <div id="chatOptionsMenu" class="chat-options-dropdown" style="display: none;">
+          <div class="dropdown-header">Options</div>
+          <button id="callBtn" class="option-item call-option">Call User</button>
+          <button id="videoCallBtn" class="option-item video-option">Video Call</button>
+          <button id="groupAdminBtn" class="option-item" style="display: none; background: #00d4ff; color: #000;">Manage Members</button>
+          <button id="groupInviteQrBtn" class="option-item" style="display: none;"><i class="fa-solid fa-qrcode" style="margin-right: 8px;"></i>Invite via QR</button>
+          <button id="groupLeaveBtn" class="option-item danger" style="display: none;"><i class="fa-solid fa-arrow-right-from-bracket" style="margin-right: 8px;"></i>Leave Group</button>
+          <div class="dropdown-divider"></div>
+          <button id="blockBtn" class="option-item danger">Block User</button>
+          <button id="unblockBtn" class="option-item success" style="display: none;">Unblock User</button>
+          <button id="reportBtn" class="option-item danger">Report User</button>
+          <button id="deleteBtn" class="option-item danger">Delete Chat</button>
+        </div>
+
+        <!-- Reply Preview -->
+        <div id="replyPreview" class="reply-preview" style="display: none;">
+          <div class="reply-preview-content">
+            <div class="reply-preview-text">
+              <p class="reply-from">Replying to <span id="replyFromName"></span></p>
+              <p class="reply-message" id="replyMessage"></p>
+            </div>
+            <button type="button" id="cancelReplyBtn" class="cancel-reply-btn" title="Cancel reply">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="message-input-area">
+          <!-- User Profile Display (shows in active chat) -->
+          <div id="chatUserProfile" class="chat-user-profile" style="display: none;">
+            <div class="chat-user-info">
+              <img id="chatUserAvatar" src="" alt="User" class="chat-user-avatar">
+              <div class="chat-user-details">
+                <div id="chatUserName" class="chat-user-name">User Name</div>
+                <div id="chatUserStatus" class="chat-user-status">Online</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slash Commands Autocomplete Hub -->
+          <div id="slashCommandsMenu" class="slash-commands-menu" style="display: none;">
+            <div class="slash-commands-header">
+              <span class="slash-title"><i class="fa-solid fa-terminal"></i> Command Hub</span>
+              <span class="slash-hint">Tab/Click to select &bull; Esc to dismiss</span>
+            </div>
+            <div class="slash-commands-list" id="slashCommandsList"></div>
+          </div>
+
+          <!-- Smart Reply & ChronEX Quick Spark Bar -->
+          <div id="smartReplyBar" class="smart-reply-bar">
+            <div class="smart-chips-wrapper" id="smartChipsWrapper">
+              <button type="button" class="smart-chip" data-text="Understood. Let's proceed.">
+                <i class="fa-solid fa-bolt"></i> <span>Understood. Let's proceed.</span>
+              </button>
+              <button type="button" class="smart-chip" data-text="Could you provide more details?">
+                <i class="fa-solid fa-magnifying-glass"></i> <span>More details?</span>
+              </button>
+              <button type="button" class="smart-chip" data-text="Acknowledged. Executing now.">
+                <i class="fa-solid fa-check"></i> <span>Executing now.</span>
+              </button>
+              <button type="button" class="smart-chip" data-text="Sounds great, appreciate the update.">
+                <i class="fa-solid fa-thumbs-up"></i> <span>Appreciate update.</span>
+              </button>
+            </div>
+            <button type="button" id="aiPolishBtn" class="smart-polish-action-btn" title="AI Polish: Elevate rough draft with ChronEX AI">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Polish</span>
+            </button>
+          </div>
+
+          <!-- Neural Soundboard Dock (Micro-Dock) -->
+          <div id="soundboardDock" class="soundboard-dock" style="display: none;">
+            <div class="soundboard-header">
+              <span class="soundboard-title"><i class="fa-solid fa-volume-high"></i> TACTILE SOUNDBOARD FX</span>
+              <button type="button" id="closeSoundboardBtn" class="close-soundboard-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="soundboard-grid">
+              <button type="button" class="soundboard-fx-btn" data-sound="sonar">
+                <i class="fa-solid fa-satellite-dish"></i> <span>Sonar Ping</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="chime">
+                <i class="fa-solid fa-gem"></i> <span>Crystal Chime</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="zap">
+                <i class="fa-solid fa-bolt"></i> <span>Quantum Zap</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="glitch">
+                <i class="fa-solid fa-terminal"></i> <span>Matrix Glitch</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="subbass">
+                <i class="fa-solid fa-wave-square"></i> <span>Sub Bass</span>
+              </button>
+              <button type="button" class="soundboard-fx-btn" data-sound="affirm">
+                <i class="fa-solid fa-shield-halved"></i> <span>Affirm</span>
+              </button>
+            </div>
+          </div>
+
+          <form id="message-form" class="message-form">
+            <button type="button" id="emoji-btn" class="input-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+            <div class="message-input-wrapper">
+              <textarea id="message-input" class="message-input" placeholder="Message" autocomplete="off" maxlength="1000" rows="1"></textarea>
+              <button type="button" id="attach-btn" class="input-inline-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+            </div>
+            <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
+            <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
+            <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX"><i class="fa-solid fa-volume-high"></i></button>
+            <button type="button" id="audio-record-btn" class="mic-action-btn" title="Record voice message"><i class="fa-solid fa-microphone"></i></button>
+            <button type="button" id="audio-send-btn" class="audio-send-btn" title="Send audio" style="display: none;"><i class="fa-solid fa-play"></i></button>
+            <button type="button" class="send-btn" id="sendBtn" title="Send message" style="display: none;"><i class="fa-solid fa-paper-plane"></i></button>
+          </form>
+
+          <!-- Audio Recording UI -->
+          <div id="audioRecordingUI" class="audio-recording-ui" style="display: none;">
+            <div class="audio-record-controls">
+              <div class="audio-record-meta">
+                <span class="audio-recording-beacon"></span>
+                <span id="audioTimer" class="audio-timer">0:00</span>
+              </div>
+              <div class="audio-waveform-bars">
+                <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="audio-record-actions">
+                <button type="button" id="audioCancelBtn" class="audio-control-btn cancel-btn" title="Cancel recording"><i class="fa-solid fa-xmark"></i></button>
+                <button type="button" id="audioStopBtn" class="audio-control-btn stop-btn" title="Stop"><i class="fa-solid fa-stop"></i></button>
+                <button type="button" id="audioSendNowBtn" class="audio-control-btn send-btn" title="Send voice note"><i class="fa-solid fa-paper-plane"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- File attachment preview -->
+          <div id="attachment-preview" class="attachment-preview" style="display: none;">
+            <div class="attachment-item">
+              <div id="attachment-thumb" class="attachment-thumb-box" style="display: none;"></div>
+              <div class="attachment-meta-info">
+                <span id="attachment-name" class="attachment-filename"><i class="fa-solid fa-paperclip"></i> File selected</span>
+                <span id="attachment-type-badge" class="attachment-badge"></span>
+              </div>
+              <button type="button" id="remove-attachment" class="remove-attachment-btn" title="Remove attachment"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          </div>
+
+          <!-- Poll Modal -->
+          <div id="pollModal" class="modal" style="display: none;">
+            <div class="modal-content">
+              <span class="close-modal"
+                onclick="document.getElementById('pollModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+              <h2 style="font-family: 'Orbitron', monospace; font-size: 19px; color: var(--accent-primary); margin-bottom: 16px;"><i class="fa-solid fa-square-poll-vertical"></i> Create a Poll</h2>
+              <form id="pollForm">
+                <div class="form-group">
+                  <label class="form-label">Poll Question</label>
+                  <input type="text" id="pollQuestion" class="settings-input" placeholder="Ask a question..." maxlength="100" required>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Options (one per line)</label>
+                  <textarea id="pollOptions" class="settings-input" placeholder="Option 1&#10;Option 2&#10;Option 3" rows="4"
+                    required></textarea>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;"><i class="fa-solid fa-plus"></i> Create Poll</button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Emoji Picker -->
+          <div id="emoji-picker" class="emoji-picker-popup" style="display: none;">
+            <div class="emoji-header">
+              <span><i class="fa-regular fa-face-smile"></i> Emojis</span>
+              <button type="button" id="close-emoji-btn" class="close-modal" style="position: static; width: 26px; height: 26px; font-size: 12px;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="emoji-grid" class="emoji-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEARCH OVERLAY (Reconstructed Ultra-Sleek Hub) -->
+      <div id="search-overlay" class="search-overlay" style="display: none;">
+        <div id="search-modal" class="search-modal reconstructed-search-modal">
+          <!-- Modal Top Header -->
+          <div class="search-modal-header">
+            <div class="search-modal-title">
+              <i class="fa-solid fa-compass text-[#00ff66]"></i>
+              <span>Explore NEXCHAT</span>
+            </div>
+            <button id="close-search-btn" class="search-modal-close-btn" title="Close">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Live Search Bar -->
+          <div class="search-bar-container">
+            <i class="fa-solid fa-magnifying-glass search-bar-icon"></i>
+            <input type="text" id="search-input" class="search-input-modern" placeholder="Search people, handles, or groups..." autocomplete="off" />
+            <button id="clear-search-btn" class="search-clear-btn" style="display: none;" title="Clear search">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </button>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="search-category-tabs">
+            <button type="button" class="search-tab-pill active" data-filter="all">
+              <i class="fa-solid fa-globe"></i> All
+            </button>
+            <button type="button" class="search-tab-pill" data-filter="users">
+              <i class="fa-solid fa-user"></i> People
+            </button>
+            <button type="button" class="search-tab-pill" data-filter="groups">
+              <i class="fa-solid fa-users"></i> Groups
+            </button>
+            <button type="button" id="browse-users-btn" class="search-tab-pill search-tab-refresh" title="Reload network">
+              <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+          </div>
+
+          <!-- Search Results Stream -->
+          <div id="search-results" class="search-results-container"></div>
+        </div>
+      </div>
+
+      <!-- INFO SIDEBAR (on chat detail) - Enhanced Group Info Panel -->
+      <div id="infoSidebar" class="info-panel" style="display: none;">
+        <div class="info-header">
+          <button id="closeInfoBtn" class="close-btn" style="position: absolute; left: 16px;"><i class="fa-solid fa-chevron-left"></i></button>
+          <button id="closeInfoBtn2" class="close-btn" style="position: absolute; right: 16px;"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+        </div>
+
+        <div class="info-body">
+          <!-- Profile Section -->
+          <div class="info-profile-section">
+            <div class="profile-pic-container">
+              <img id="infoPic" src="" alt="profile" class="info-profile-pic">
+            </div>
+            <h2 id="infoName">Group Name</h2>
+            <p id="infoMemberCount" class="member-count">Group · 0 members</p>
+            <p id="infoDesc" class="section-value" style="text-align: center; margin: 10px auto; max-width: 90%;">
+            </p>
+            <div id="infoBrandLogo" style="display:none; text-align: center; margin-top: 15px;">
+              <div class="nex-logo" style="display: inline-block; transform: scale(0.6);">
+                <span class="nex-text">NEXCHAT</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="info-action-buttons">
+            <button id="infoAudioBtn" class="info-action-btn">
+              <i class="fa-solid fa-phone"></i>
+              <span class="action-label">Audio</span>
+            </button>
+            <button id="infoVideoBtn" class="info-action-btn">
+              <i class="fa-solid fa-video"></i>
+              <span class="action-label">Video</span>
+            </button>
+            <button id="infoAddBtn" class="info-action-btn">
+              <i class="fa-solid fa-user-plus"></i>
+              <span class="action-label">Add</span>
+            </button>
+            <button id="infoSearchBtn" class="info-action-btn">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span class="action-label">Search</span>
+            </button>
+          </div>
+
+          <div class="info-section" id="groupAdminActionsSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-shield-halved"></i> Group Admin Actions</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+              <button id="infoAddMemberBtn" class="info-action-btn" style="flex: 1; min-width: 140px;"><i class="fa-solid fa-user-plus"></i> Add Member</button>
+              <button id="infoRemoveAllMembersBtn" class="btn-secondary" style="flex: 1; min-width: 140px; color: var(--accent-gold);"><i class="fa-solid fa-users-slash"></i> Remove All</button>
+              <button id="infoDeleteGroupBtn" class="btn-danger" style="flex: 1; min-width: 140px;"><i class="fa-solid fa-trash"></i> Delete Group</button>
+            </div>
+          </div>
+
+          <div class="info-section" id="groupDisappearingSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> Disappearing Messages</div>
+            <div class="section-item" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+              <div>
+                <div class="section-label">Enable disappearing messages</div>
+                <div class="section-value">Messages will vanish after the selected time.</div>
+              </div>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                <input type="checkbox" id="disappearingToggle" style="width: 18px; height: 18px; cursor: pointer;">
+              </label>
+            </div>
+            <div id="disappearingDurationRow" style="display: none; margin-top: 12px; gap: 10px; display: flex; flex-direction: column;">
+              <select id="disappearingDurationSelect" class="settings-select">
+                <option value="60">1 hour</option>
+                <option value="360">6 hours</option>
+                <option value="1440">24 hours</option>
+                <option value="10080">7 days</option>
+              </select>
+              <button id="saveDisappearingSettingsBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-floppy-disk"></i> Save Disappearing Settings</button>
+            </div>
+          </div>
+
+          <div class="info-section" id="groupMuteMembersSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-volume-xmark"></i> Mute Group Members</div>
+            <button id="openMuteMembersModalBtn" class="btn-secondary" style="width: 100%; color: var(--accent-gold); font-weight: 700;"><i class="fa-solid fa-user-slash"></i> Select members to mute</button>
+          </div>
+
+          <!-- Media Section -->
+          <div class="info-section">
+            <div class="section-header">
+              <span class="section-title">Media, links, and docs</span>
+              <span class="section-count" id="mediaCount">0</span>
+              <span class="section-arrow">›</span>
+            </div>
+            <div id="mediaPreview" class="media-preview">
+              <!-- Media items will be populated here -->
+            </div>
+          </div>
+
+          <!-- Notifications Section -->
+          <div class="info-section">
+            <div class="section-item">
+              <span class="section-icon"><i class="fa-solid fa-bell"></i></span>
+              <div class="section-content">
+                <div class="section-label">Notifications</div>
+                <div class="section-value" id="notificationValue">All</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Media Visibility Section -->
+          <div class="info-section">
+            <div class="section-item">
+              <span class="section-icon"><i class="fa-solid fa-eye"></i></span>
+              <div class="section-content">
+                <div class="section-label">Media visibility</div>
+                <div class="section-value" id="mediaVisibilityValue">Off</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Kept Messages Section -->
+          <div class="info-section">
+            <div class="section-item">
+              <span class="section-icon"><i class="fa-solid fa-thumbtack"></i></span>
+              <div class="section-content">
+                <div class="section-label">Kept messages</div>
+                <div class="section-value" id="keptMessagesValue">Only admins can keep or unkeep messages in this group.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Encryption Section -->
+          <div class="info-section">
+            <div class="section-item">
+              <span class="section-icon"><i class="fa-solid fa-lock"></i></span>
+              <div class="section-content">
+                <div class="section-label">Encryption</div>
+                <div class="section-value" id="encryptionValue">Messages and calls are end-to-end encrypted</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Mute/Block/Delete Actions -->
+          <div class="info-section">
+            <div class="section-item" id="muteUserItem" style="cursor: pointer;">
+              <span class="section-icon"><i class="fa-solid fa-volume-xmark"></i></span>
+              <div class="section-content" style="flex: 1;">
+                <div class="section-label">Mute User</div>
+              </div>
+              <div class="toggle-switch-small">
+                <input type="checkbox" id="muteUserToggle">
+                <span class="slider round"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-item" id="infoBlockBtn" style="cursor: pointer; color: var(--status-danger);">
+              <span class="section-icon" style="color: var(--status-danger);"><i class="fa-solid fa-ban"></i></span>
+              <div class="section-content">
+                <div class="section-label" style="color: var(--status-danger);">Block User</div>
+              </div>
+            </div>
+            <div class="section-item" id="infoUnblockBtn" style="cursor: pointer; color: var(--accent-primary); display: none;">
+              <span class="section-icon" style="color: var(--accent-primary);"><i class="fa-solid fa-user-check"></i></span>
+              <div class="section-content">
+                <div class="section-label" style="color: var(--accent-primary);">Unblock User</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="section-item" id="infoDeleteBtn" style="cursor: pointer; color: var(--status-danger);">
+              <span class="section-icon" style="color: var(--status-danger);"><i class="fa-solid fa-trash"></i></span>
+              <div class="section-content">
+                <div class="section-label" style="color: var(--status-danger);">Delete User</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pending Requests Section (for group admins) -->
+          <div class="info-section" id="groupPendingRequestsSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-hourglass-half"></i> Pending Join Requests</div>
+            <div id="groupPendingRequestsList" class="contact-scroll-box" style="max-height: 200px; margin-top: 10px;">
+              <!-- Pending requests will be populated here -->
+            </div>
+          </div>
+
+          <!-- Members Section (for groups) -->
+          <div class="info-section" id="membersList" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-users"></i> Members</div>
+            <div id="membersListContent" class="contact-scroll-box" style="max-height: 260px; margin-top: 8px;">
+              <!-- Members will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="muteMemberModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+          <span class="close-modal" id="closeMuteMemberModalBtn"><i class="fa-solid fa-xmark"></i></span>
+          <h2 style="margin-bottom: 12px; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;"><i class="fa-solid fa-volume-xmark"></i> Mute Group Members</h2>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">Select the members you want to mute and choose how long they remain muted.</p>
+          <div id="muteMemberList" class="contact-scroll-box" style="max-height: 320px; display: grid; gap: 12px; margin-bottom: 16px;"></div>
+          <button id="saveMuteMemberSettingsBtn" class="btn-primary" style="width: 100%;"><i class="fa-solid fa-floppy-disk"></i> Save Mute Settings</button>
+        </div>
+      </div>
+
+      <!-- STATUS VIEWER MODAL (Legacy profile pic viewer) -->
+      <div id="legacyProfileStatusViewerModal" class="modal" style="display: none;">
+        <div class="status-viewer-content">
+          <button id="closeStatusViewerBtn" class="close-modal"
+            style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-xmark"></i></button>
+          <div class="status-viewer-image-container" id="statusViewerMediaContainer">
+            <img id="statusViewerImage" src="" alt="Status" class="status-viewer-image" style="display:none;">
+            <video id="statusViewerVideo" class="status-viewer-video" controls style="display:none; max-width:100%; max-height:100%; border-radius:8px;"></video>
+            <div id="statusViewerFallbackText" class="status-viewer-fallback" style="display:none; color:var(--accent-primary); text-align:center; padding:24px; font-size:16px;"></div>
+          </div>
+          <div class="status-viewer-info">
+            <div class="status-viewer-header">
+              <img id="statusViewerAvatar" src="" alt="user" class="status-viewer-avatar">
+              <div class="status-viewer-text">
+                <h3 id="statusViewerName">User Name</h3>
+                <p id="statusViewerTime">Just now</p>
+              </div>
+            </div>
+            <p id="statusViewerCaption" class="status-viewer-caption">Caption text goes here</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW PROFILE PIC MODAL -->
+      <div id="profilePicModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 520px; text-align: center;">
+          <button id="closeProfileModal" class="close-modal"><i class="fa-solid fa-xmark"></i></button>
+          <img id="profileModalImg" src=""
+            style="max-width: 100%; max-height: 65vh; border: 2px solid var(--accent-primary); box-shadow: 0 0 35px var(--accent-primary-dim); border-radius: var(--radius-lg); object-fit: contain; margin-top: 8px;">
+          <h3 id="profileModalName"
+            style="color: var(--accent-primary); text-align: center; margin-top: 15px; font-family: 'Orbitron', monospace; letter-spacing: 1.5px; text-transform: uppercase;">
+            USER</h3>
+          <p id="profileModalDesc"
+            style="color: var(--text-secondary); text-align: center; font-size: 13.5px; margin-top: 8px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.4;">
+          </p>
+          <div id="profileModalBrandWordmark" style="display:none; text-align: center; margin-top: 15px;">
+            <div class="nex-logo" style="display: inline-block; transform: scale(0.8);">
+              <span class="nex-text">NEXCHAT</span>
+            </div>
+          </div>
+          <button id="editProfileBtnModal" class="btn-primary"
+            style="display:none; margin: 14px auto 0; width: 100%;"><i class="fa-solid fa-user-pen"></i> EDIT AVATAR</button>
+        </div>
+      </div>
+
+      <!-- OFFLINE INDICATOR -->
+      <div id="offlineIndicator" class="offline-indicator" style="display: none;">
+        <span class="offline-icon"><i class="fa-solid fa-wifi-slash"></i></span>
+        <span class="offline-text">You are offline — Messages will send when online</span>
+      </div>
+
+      <!-- REELS FUNCTIONALITY REMOVED -->
+
+      <!-- CREATE GROUP MODAL -->
+      <div id="createGroupModal" class="modal" style="display: none;">
+        <div class="modal-content">
+          <span class="close-modal"
+            onclick="document.getElementById('createGroupModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+          <h2 style="font-family: 'Orbitron', monospace; font-size: 20px; color: var(--accent-primary); margin-bottom: 20px;"><i class="fa-solid fa-user-group"></i> Create Group</h2>
+          <form id="createGroupForm">
+            <div class="form-group" style="text-align: center; margin-bottom: 20px;">
+              <label class="form-label">Group Icon</label>
+              <div style="position: relative; width: 80px; height: 80px; margin: 0 auto 10px;">
+                <img id="groupIconPreview" src="logo.jpg" alt="Group Icon" class="modal-avatar" style="width: 80px; height: 80px; margin: 0;"
+                  onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMDBmZjY2IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGNpcmNsZSBjeD0iOS41IiBjeT0iNyIgcj0iNCIvPjxwYXRoIGQ9Ik0zIDIxdi0yYTQgNCAwIDAgMSA0LTRoNWE0IDQgMCAwIDEgNCA0djIiLz48cGF0aCBkPSJNMTYgMy4xM2E0IDQgMCAwIDEgMCA3Ljc1Ii8+PHBhdGggZD0iTTIxIDIxdi0yYTQgNCAwIDAgMC0zLTMuODUiLz48L3N2Zz4='">
+                <div onclick="document.getElementById('groupIconInput').click()"
+                  style="position: absolute; bottom: 0; right: 0; background: var(--accent-primary); border-radius: 50%; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #000; font-weight: bold; border: 2px solid var(--bg-surface);">
+                  <i class="fa-solid fa-plus" style="font-size: 12px;"></i>
+                </div>
+              </div>
+              <input type="file" id="groupIconInput" accept="image/*" style="display: none;"
+                onchange="const file=this.files[0];if(file){const reader=new FileReader();reader.onload=e=>document.getElementById('groupIconPreview').src=e.target.result;reader.readAsDataURL(file);}">
+              <button type="button" id="generateGroupAvatarBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-dice"></i> Generate NEX Avatar</button>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Group Name</label>
+              <input type="text" id="groupName" class="settings-input" placeholder="Group name..." maxlength="50" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Group Description</label>
+              <textarea id="groupDescription" class="settings-input" placeholder="Group description..." maxlength="200" rows="3"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Group Privacy</label>
+              <select id="groupPrivacy" class="settings-select">
+                <option value="public">Public</option>
+                <option value="private">Private (Admin approval required)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Group Approval</label>
+              <select id="groupApproval" class="settings-select">
+                <option value="auto">Auto-join</option>
+                <option value="admin">Admin approval</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Add Members (select from contacts)</label>
+              <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <button type="button" id="addAllContactsBtn" class="btn-secondary" style="flex: 1;">Add All Contacts</button>
+                <button type="button" id="clearAllContactsBtn" class="btn-secondary" style="flex: 1;">Clear All</button>
+              </div>
+              <div id="groupMembersList" class="contact-scroll-box">
+                <p style="color: var(--text-muted); text-align: center;">Loading contacts...</p>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">Create Group</button>
+            <div id="groupCreateResult" class="result-box" style="margin-top: 15px;"></div>
+          </form>
+        </div>
+      </div>
+
+      <!-- GROUP INFO MODAL -->
+      <div id="groupInfoModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 500px;">
+          <span class="close-modal"
+            onclick="document.getElementById('groupInfoModal').style.display='none'"><i class="fa-solid fa-xmark"></i></span>
+          <div class="modal-avatar-wrapper">
+            <img id="infoGroupIcon" src="" alt="Group Icon" class="modal-avatar">
+            <h2 id="infoGroupName" class="modal-title">Group Name</h2>
+            <p id="infoGroupDesc" class="modal-desc">Description</p>
+          </div>
+
+          <div class="settings-section">
+            <h3>Members (<span id="infoMemberCount">0</span>)</h3>
+            <div id="infoMembersList" class="contact-scroll-box">
+              <!-- Members will be populated here -->
+            </div>
+          </div>
+
+          <div class="settings-section" id="adminActionsSection" style="display: none;">
+            <h3>Admin Actions</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              <button id="addMemberBtn" class="btn-secondary">Add Member</button>
+              <button id="deleteGroupBtn" class="btn-danger">Delete Group</button>
+            </div>
+
+            <div class="settings-section" id="groupApprovalSection" style="margin-top: 16px; display: none;">
+              <h3><i class="fa-solid fa-lock"></i> Group Join Approval</h3>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                <div>
+                  <div class="section-label">Require admin approval for new members</div>
+                  <div class="section-value" id="approvalStatusText" style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Anyone can join freely</div>
+                </div>
+                <label style="display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 700; cursor: pointer;">
+                  <input type="checkbox" id="groupApprovalToggle" style="width: 18px; height: 18px; cursor: pointer;">
+                  Approval
+                </label>
+              </div>
+            </div>
+
+            <div class="settings-section" id="groupPendingRequestsSection" style="margin-top: 16px; display: none;">
+              <h3><i class="fa-solid fa-clock"></i> Pending Join Requests</h3>
+              <div id="groupPendingRequestsList" class="contact-scroll-box">
+                <p style="color: var(--text-muted); text-align: center; padding: 20px;">No pending requests</p>
+              </div>
+            </div>
+          </div>
+
+          <button id="leaveGroupBtn" class="btn-danger" style="width: 100%; margin-top: 18px;">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> Leave Group
+          </button>
+        </div>
+      </div>
+
+      <div id="groupJoinModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 520px;">
+          <span class="close-modal" onclick="closeGroupJoinModal()"><i class="fa-solid fa-xmark"></i></span>
+          <div class="modal-avatar-wrapper">
+            <img id="joinGroupIcon" src="logo.jpg" alt="Group Icon" class="modal-avatar">
+            <h2 id="joinGroupName" class="modal-title">Group Name</h2>
+            <p id="joinGroupDesc" class="modal-desc">Group description appears here.</p>
+          </div>
+          <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+            <div class="stat-chip">
+              <div class="stat-chip-label">Members</div>
+              <div id="joinGroupMemberCount" class="stat-chip-val">0</div>
+            </div>
+            <div class="stat-chip">
+              <div class="stat-chip-label">Approval</div>
+              <div id="joinGroupApprovalStatus" class="stat-chip-val">Auto-join</div>
+            </div>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <div style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 8px;">Active members</div>
+            <div id="joinGroupMemberList" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); min-height: 50px;">
+            </div>
+          </div>
+          <p id="joinGroupStatus" style="color: var(--accent-primary); font-size: 13px; margin-bottom: 16px; text-align: center;">Request approval required for this group.</p>
+          <div style="display: flex; gap: 10px;">
+            <button id="joinGroupRequestBtn" class="btn-primary" style="flex: 1;" onclick="submitGroupJoinRequest()">Request to Join Group</button>
+            <button id="cancelGroupRequestBtn" class="btn-secondary" style="flex: 1; display: none;" onclick="cancelGroupJoinRequest()">Cancel Request</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="addGroupMembersModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 520px;">
+          <span class="close-modal" onclick="closeAddGroupMembersModal()"><i class="fa-solid fa-xmark"></i></span>
+          <h2 style="margin-top: 0; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;"><i class="fa-solid fa-user-plus"></i> Add Members to Group</h2>
+          <div id="addGroupMembersInfo" style="color: var(--text-secondary); font-size: 13.5px; margin-bottom: 14px;">Select contacts to add to this group.</div>
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <button id="selectAllGroupAddMembersBtn" class="btn-secondary" type="button" style="flex: 1;">Select All</button>
+            <button id="clearAllGroupAddMembersBtn" class="btn-secondary" type="button" style="flex: 1;">Clear All</button>
+          </div>
+          <div id="addGroupMembersList" class="contact-scroll-box" style="max-height: 280px;">
+            <p style="color: var(--text-muted); text-align: center;">Loading contacts...</p>
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;">
+            <button id="cancelAddGroupMembersBtn" type="button" class="btn-secondary">Cancel</button>
+            <button id="confirmAddGroupMembersBtn" type="button" class="btn-primary" style="min-width: 140px;">Add Selected</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REELS FUNCTIONALITY REMOVED -->
+
+      <!-- UPLOAD PROGRESS MODAL -->
+      <div id="uploadProgressModal" class="upload-progress-modal" style="display: none;">
+        <div class="upload-progress-content">
+          <div class="upload-progress-circle">
+            <svg class="progress-ring" width="120" height="120">
+              <circle class="progress-ring-circle-bg" stroke="#444" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"/>
+              <circle class="progress-ring-circle" stroke="#00ff66" stroke-width="8" fill="transparent" r="50" cx="60" cy="60"
+                      stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"/>
+            </svg>
+            <div class="progress-text">
+              <div class="progress-percentage">0%</div>
+              <div class="progress-filename">Uploading...</div>
+              <div class="progress-size">0.00 / 0.00 MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- LUXURY CONTROL CENTER & SETTINGS SUITE -->
+      <div id="settingsModal" class="settings-modal" style="display: none;">
+        <div class="settings-modal-content luxury-settings-suite">
+          <div class="settings-header">
+            <button id="settingsBackNavBtn" class="settings-back-btn mobile-only" title="Back to Chats"><i class="fa-solid fa-arrow-left"></i></button>
+            <div class="settings-header-left">
+              <h2><i class="fa-solid fa-sliders" style="color: #00ff66;"></i> Control Center & Settings</h2>
+              <span class="settings-subtitle">Supercharged with Supabase Realtime & Phoenix WebSockets</span>
+            </div>
+            <!-- Live Fast-Filter Search Bar -->
+            <div class="settings-search-bar-wrap">
+              <i class="fa-solid fa-magnifying-glass search-bar-icon"></i>
+              <input type="text" id="settingsSearchInput" class="settings-search-input" placeholder="Quick search settings..." autocomplete="off">
+              <button type="button" id="clearSettingsSearchBtn" class="settings-search-clear-btn" style="display: none;" title="Clear"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <button id="closeSettingsBtn" class="close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <div class="settings-layout">
+            <!-- Sidebar Navigation Tabs -->
+            <nav class="settings-sidebar" id="settingsSidebar">
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">IDENTITY & ASSETS</span>
+                <button type="button" class="settings-nav-tab active" data-tab="tab-profile">
+                  <i class="fa-solid fa-user-astronaut"></i>
+                  <span>Profile & Identity</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-tokens">
+                  <i class="fa-solid fa-coins" style="color: #ffd700;"></i>
+                  <span>Token Vault</span>
+                  <span class="settings-tab-microbadge token-badge">Tokens</span>
+                </button>
+              </div>
+
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">NEURAL INTELLIGENCE</span>
+                <button type="button" class="settings-nav-tab ai-featured-tab" data-tab="tab-ai">
+                  <i class="fa-solid fa-robot" style="color: #67e8f9;"></i>
+                  <span>ChronEX AI Studio</span>
+                  <span class="settings-tab-microbadge ai-badge">60 FPS</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-cloud">
+                  <i class="fa-solid fa-bolt" style="color: #00ff66;"></i>
+                  <span>Realtime Engine</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-mesh">
+                  <i class="fa-solid fa-network-wired" style="color: #c084fc;"></i>
+                  <span>Neural Protocols &amp; Mesh</span>
+                  <span class="settings-tab-microbadge token-badge" style="background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3);">MESH</span>
+                </button>
+              </div>
+
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">EXPERIENCE & MEDIA</span>
+                <button type="button" class="settings-nav-tab" data-tab="tab-chats">
+                  <i class="fa-solid fa-comments"></i>
+                  <span>Chat & Bubbles</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-appearance">
+                  <i class="fa-solid fa-palette"></i>
+                  <span>Themes & Wallpapers</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-sounds">
+                  <i class="fa-solid fa-volume-high"></i>
+                  <span>Sounds & Alerts</span>
+                </button>
+              </div>
+
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">SECURITY & HARDWARE</span>
+                <button type="button" class="settings-nav-tab" data-tab="tab-privacy">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span>Privacy & Security</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-devices">
+                  <i class="fa-solid fa-laptop-code"></i>
+                  <span>Linked Devices</span>
+                </button>
+              </div>
+
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">ECOSYSTEM</span>
+                <button type="button" class="settings-nav-tab" data-tab="tab-apps">
+                  <i class="fa-solid fa-mobile-screen-button"></i>
+                  <span>Install App</span>
+                </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-support">
+                  <i class="fa-solid fa-headset"></i>
+                  <span>Support & Terminal</span>
+                </button>
+              </div>
+
+              <div class="settings-sidebar-spacer"></div>
+              <button type="button" id="logoutSettingsBtn" class="settings-nav-tab logout-tab"><i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span></button>
+            </nav>
+
+            <!-- Main Scrollable Pane for Selected Tab -->
+            <div class="settings-pane-container" id="settingsPaneContainer">
+              
+              <!-- TAB 1: PROFILE & IDENTITY -->
+              <div class="settings-tab-pane active" id="tab-profile">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-user-astronaut"></i> Profile & Identity</h3>
+                  <p>Manage your account credentials, public card, and security status.</p>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Account UID</strong></label>
+                  <p id="userUIDDisplay" class="uid-display-card">Loading...</p>
+                  <button id="copyUIDBtn" class="btn-primary" style="width: 100%; margin-top: 6px;"><i class="fa-solid fa-copy"></i> Copy UID</button>
+                </div>
+
+                <div class="settings-card" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                  <button id="changePasswordBtn" class="btn-secondary"><i class="fa-solid fa-key"></i> Change Password</button>
+                  <button id="clearCacheBtn" class="btn-secondary"><i class="fa-solid fa-broom"></i> Clear Cache</button>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Open Direct Chats</strong>
+                      <p>Allow anyone to start a direct message with you without a prior approval request.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="directChatAutoAccept">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Anti-Reload Protection</strong>
+                      <p>Confirm before reloading to prevent accidental disconnection during voice notes or calls.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="antiReloadToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <button id="refreshPageBtn" class="btn-secondary" style="width: 100%; margin-top: 10px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh Page Safely</button>
+                </div>
+              </div>
+
+              <!-- TAB 2: CHAT & BUBBLES -->
+              <div class="settings-tab-pane" id="tab-chats">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-comments"></i> Chat Experience & Bubbles</h3>
+                  <p>Fine-tune typography, bubble aesthetics, and input behaviors.</p>
+                </div>
+
+                <div class="settings-card">
+                  <label for="bubbleStyleSelect"><strong>Message Bubble Theme</strong></label>
+                  <select id="bubbleStyleSelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="neon-onyx">Neon Onyx (Default Cyber)</option>
+                    <option value="glass-frost">Glassmorphic Frost (Blur & Translucent)</option>
+                    <option value="cyberpunk-gold">Cyberpunk Gold (High Luxury)</option>
+                    <option value="minimal-slate">Minimalist Slate (Clean & Muted)</option>
+                  </select>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Chat Text Size</strong></label>
+                  <div class="radio-pill-group" style="display: flex; gap: 8px; margin-top: 8px;">
+                    <label class="radio-pill"><input type="radio" name="chatSize" value="small" id="chatSizeSmall"> Small</label>
+                    <label class="radio-pill"><input type="radio" name="chatSize" value="medium" id="chatSizeMedium" checked> Medium</label>
+                    <label class="radio-pill"><input type="radio" name="chatSize" value="large" id="chatSizeLarge"> Large</label>
+                    <label class="radio-pill"><input type="radio" name="chatSize" value="extra-large" id="chatSizeExtraLarge"> Extra Large</label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label for="fontFamilySelect"><strong>Font Family</strong></label>
+                  <select id="fontFamilySelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="'Inter', sans-serif">Inter (Modern & Clean)</option>
+                    <option value="'Fira Code', monospace">Fira Code (Hacker Monospace)</option>
+                    <option value="'Segoe UI', Tahoma, sans-serif">Segoe UI</option>
+                    <option value="Arial, sans-serif">Arial</option>
+                    <option value="Georgia, serif">Georgia</option>
+                  </select>
+
+                  <div style="margin-top: 12px;">
+                    <label for="letterSpacingRange"><strong>Letter Spacing: <span id="letterSpacingValue">0</span>px</strong></label>
+                    <input type="range" id="letterSpacingRange" min="-2" max="5" value="0" step="0.5" class="settings-input" style="width: 100%;">
+                  </div>
+
+                  <div style="margin-top: 12px;">
+                    <label for="lineHeightRange"><strong>Line Height: <span id="lineHeightValue">1.5</span></strong></label>
+                    <input type="range" id="lineHeightRange" min="1" max="2.5" value="1.5" step="0.1" class="settings-input" style="width: 100%;">
+                  </div>
+
+                  <div style="margin-top: 12px;">
+                    <label><strong>Text Alignment</strong></label>
+                    <div style="display: flex; gap: 8px; margin-top: 6px;">
+                      <button id="alignLeft" class="btn-secondary" type="button" style="flex: 1;"><i class="fa-solid fa-align-left"></i> Left</button>
+                      <button id="alignCenter" class="btn-secondary" type="button" style="flex: 1;"><i class="fa-solid fa-align-center"></i> Center</button>
+                      <button id="alignRight" class="btn-secondary" type="button" style="flex: 1;"><i class="fa-solid fa-align-right"></i> Right</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Enter Key Sends Message</strong>
+                      <p>Press Enter to send, Shift+Enter for new line. Uncheck to make Enter insert a new line.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="enterKeySendToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 3: APPEARANCE & THEMES -->
+              <div class="settings-tab-pane" id="tab-appearance">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-palette"></i> Appearance & Wallpapers</h3>
+                  <p>Transform the visual aura of your chat application.</p>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Base Theme Mode</strong></label>
+                  <div class="radio-pill-group" style="display: flex; gap: 8px; margin-top: 8px;">
+                    <label class="radio-pill"><input type="radio" name="theme" value="dark" id="themeDark" checked> <i class="fa-solid fa-moon"></i> Dark (Onyx)</label>
+                    <label class="radio-pill"><input type="radio" name="theme" value="light" id="themeLight"> <i class="fa-solid fa-sun"></i> Light Theme</label>
+                  </div>
+                </div>
+
+                <!-- CYBER ACCENT AURA & PALETTE -->
+                <div class="settings-card">
+                  <label><strong>Cyber Accent Aura &amp; Energy Palette</strong></label>
+                  <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 10px;">Select your primary visual frequency for buttons, radar glows, active tabs, and story rings.</p>
+                  <div class="cyber-palette-grid">
+                    <button type="button" class="cyber-swatch-btn active" data-theme="emerald" style="--swatch-color: #00ff66;">
+                      <span class="swatch-dot" style="background: #00ff66;"></span>
+                      <span>Matrix Emerald</span>
+                    </button>
+                    <button type="button" class="cyber-swatch-btn" data-theme="violet" style="--swatch-color: #c084fc;">
+                      <span class="swatch-dot" style="background: #c084fc;"></span>
+                      <span>Neon Violet</span>
+                    </button>
+                    <button type="button" class="cyber-swatch-btn" data-theme="gold" style="--swatch-color: #ffd700;">
+                      <span class="swatch-dot" style="background: #ffd700;"></span>
+                      <span>Solar Gold</span>
+                    </button>
+                    <button type="button" class="cyber-swatch-btn" data-theme="cyan" style="--swatch-color: #00f0ff;">
+                      <span class="swatch-dot" style="background: #00f0ff;"></span>
+                      <span>Cyan Frost</span>
+                    </button>
+                    <button type="button" class="cyber-swatch-btn" data-theme="crimson" style="--swatch-color: #ff4d4d;">
+                      <span class="swatch-dot" style="background: #ff4d4d;"></span>
+                      <span>Crimson Stealth</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Global Chat Wallpaper</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Select from encrypted ambient presets or upload your own wallpaper.</p>
+                  <button type="button" class="btn-primary" onclick="if(window.openChatWallpaperPicker) window.openChatWallpaperPicker(); else if(window.openWallpaperModal) window.openWallpaperModal();" style="width: 100%; background: linear-gradient(135deg, #00ff66, #00d4ff); color: #000; font-weight: 700; margin-bottom: 12px;">
+                    <i class="fa-solid fa-palette"></i> Browse 12+ Wallpaper Presets
+                  </button>
+                  <label for="backgroundImageInput" style="font-size: 12px; color: #ccc;">Custom Image Upload:</label>
+                  <input type="file" id="backgroundImageInput" accept="image/*" class="settings-file-input" style="margin-top: 6px;">
+                  <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="uploadBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Apply Image</button>
+                    <button id="removeBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Remove</button>
+                  </div>
+                  <div id="backgroundPreview" class="background-preview" style="margin-top: 10px;"></div>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Chat-Specific Wallpaper</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Set an exclusive background for the currently open conversation.</p>
+                  <input type="file" id="chatBackgroundImageInput" accept="image/*" class="settings-file-input">
+                  <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button id="uploadChatBackgroundBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-upload"></i> Set Active Chat</button>
+                    <button id="removeChatBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Clear</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 4: SOUNDS & ALERTS -->
+              <div class="settings-tab-pane" id="tab-sounds">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-volume-high"></i> Sounds & Haptics</h3>
+                  <p>Fine-tune message pops, incoming rings, and tactile feedback.</p>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Sound Effects</strong>
+                      <p>Play audio feedback when sending, receiving, or reacting to messages.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="soundToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Desktop Notifications</strong>
+                      <p>Show push banner notifications when messages arrive.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="notifToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Audio FX Synthesizer Test</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Zero-latency Web Audio pops and chimes.</p>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button type="button" id="testSentSoundBtn" class="btn-secondary"><i class="fa-solid fa-paper-plane"></i> Test Sent Pop</button>
+                    <button type="button" id="testReceivedSoundBtn" class="btn-secondary"><i class="fa-solid fa-bell"></i> Test Received Chime</button>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label for="ringtoneSelect"><strong>Call Ringtone</strong></label>
+                  <select id="ringtoneSelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="classic">Classic Ring</option>
+                    <option value="digital">Digital Beep</option>
+                    <option value="soft">Soft Tone</option>
+                    <option value="urgent">Urgent Alert</option>
+                    <option value="skype">Skype Tone</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- TAB 5: PRIVACY & SECURITY -->
+              <div class="settings-tab-pane" id="tab-privacy">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-shield-halved"></i> Privacy & Security</h3>
+                  <p>Control presence visibility, read receipts, and incoming requests.</p>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Show Online Status</strong>
+                      <p>Let contacts know when you are currently active in NEXCHAT.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="onlineStatusToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Read Receipts</strong>
+                      <p>Send double ticks and luxury gold marks when you open messages.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="readReceiptsToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Incognito / Ghost Mode</strong>
+                      <p>Hides your typing indicators and online presence across all channels.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="ghostModeToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- LAST-SEEN & PRESENCE PRIVACY -->
+                <div class="settings-card">
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: var(--text-primary);"><i class="fa-solid fa-eye-slash" style="color: #67e8f9; margin-right: 6px;"></i> Last Seen &amp; Presence Privacy</strong>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Control who can view your active session timestamp, status beam, and online heartbeat.</p>
+                  </div>
+                  <select id="lastSeenPrivacySelect" class="settings-select" style="width: 100%; margin-top: 6px;">
+                    <option value="everyone">Everyone (Public Radar)</option>
+                    <option value="contacts">My Direct Contacts Only</option>
+                    <option value="nobody">Nobody (Maximum Stealth)</option>
+                  </select>
+                </div>
+
+                <!-- GHOST PROTOCOL DISAPPEARING MESSAGE DEFAULTS -->
+                <div class="settings-card">
+                  <div style="margin-bottom: 6px;">
+                    <strong style="color: var(--text-primary);"><i class="fa-solid fa-ghost" style="color: #c084fc; margin-right: 6px;"></i> Ghost Protocol Default Lifetime</strong>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Automatically vaporize transmitted messages across all direct rooms after the configured timer.</p>
+                  </div>
+                  <select id="ghostDefaultTimerSelect" class="settings-select" style="width: 100%; margin-top: 6px;">
+                    <option value="off">Off (Persistent Messages)</option>
+                    <option value="15s">15 Seconds (Self-Destruct)</option>
+                    <option value="1m">1 Minute (Ephemeral Node)</option>
+                    <option value="5m">5 Minutes (Ghost Vault)</option>
+                    <option value="1h">1 Hour (Session Expire)</option>
+                    <option value="24h">24 Hours (Daily Scrub)</option>
+                  </select>
+                </div>
+
+                <!-- BLOCKED CONTACTS & SHIELDED RADAR -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                      <strong style="color: var(--text-primary);"><i class="fa-solid fa-user-slash" style="color: #ff6b6b; margin-right: 6px;"></i> Blocked Users Manager</strong>
+                      <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Manage contacts blocked from messaging, calls, or viewing your stories.</p>
+                    </div>
+                    <button type="button" id="refreshBlockedUsersBtn" class="btn-secondary" style="padding: 5px 12px; font-size: 11.5px;">
+                      <i class="fa-solid fa-rotate"></i> Refresh
+                    </button>
+                  </div>
+                  <div id="blockedUsersContainer" class="contact-scroll-box" style="max-height: 180px; margin-top: 8px; overflow-y: auto;">
+                    <p style="color: var(--text-muted); text-align: center; font-size: 12px; padding: 12px 0;">Loading blocked contacts...</p>
+                  </div>
+                </div>
+
+                <div class="settings-card" style="border: 1px solid rgba(0, 240, 255, 0.3); background: rgba(0, 240, 255, 0.04);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fa-solid fa-shield-halved" style="color: #00f0ff; font-size: 16px;"></i>
+                      <strong style="color: #00f0ff; font-size: 13.5px;">FORTRESS AI Security Shield</strong>
+                    </div>
+                    <span id="fortressShieldBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 255, 102, 0.15); color: #00ff66; font-weight: 700; border: 1px solid rgba(0, 255, 102, 0.3);">
+                      <i class="fa-solid fa-shield-halved"></i> WAF Active (&lt; 0.5ms)
+                    </span>
+                  </div>
+                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
+                    Connected to <a href="https://github.com/alexhack235-code/AI-Security-Scanner-API" target="_blank" style="color: #00f0ff; text-decoration: underline;">AI-Security-Scanner-API</a>. Blocks XSS, SQLi, Prompt Injections, and Bot Flood.
+                  </p>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">Threats Blocked</span>
+                      <div id="fortressThreatsCounter" style="font-size: 16px; font-weight: 800; color: #00ff66; font-family: monospace;">0 Attacks</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">LLM Guard</span>
+                      <div style="font-size: 13px; font-weight: 700; color: #00f0ff; margin-top: 2px;">DAN / Anti-Inject</div>
+                    </div>
+                  </div>
+
+                  <label for="fortressApiUrlInput" style="font-size: 11.5px; color: #ccc;">API Gateway Endpoint:</label>
+                  <input type="text" id="fortressApiUrlInput" placeholder="https://ai-security-scanner-api.vercel.app" class="settings-input" style="width: 100%; box-sizing: border-box; padding: 7px 10px; margin-top: 4px; font-size: 12px;">
+
+                  <label for="fortressVaultKeyInput" style="font-size: 11.5px; color: #ccc; margin-top: 8px; display: block;">Zero-Trust Vault Key (x-vault-key):</label>
+                  <input type="password" id="fortressVaultKeyInput" placeholder="vlt_live_9f8e7d6c..." class="settings-input" style="width: 100%; box-sizing: border-box; padding: 7px 10px; margin-top: 4px; font-size: 12px;">
+
+                  <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button type="button" id="saveFortressConfigBtn" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
+                      <i class="fa-solid fa-floppy-disk"></i> Save Shield
+                    </button>
+                    <button type="button" id="testFortressPingBtn" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
+                      <i class="fa-solid fa-bolt"></i> Test Gateway
+                    </button>
+                  </div>
+                  <div id="fortressTestResult" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Pending Chat Requests</strong></label>
+                  <div id="pendingRequestsList" class="contact-scroll-box" style="max-height: 160px; margin-top: 8px;">
+                    <p style="color: var(--text-muted); text-align: center; padding: 14px;">Loading pending requests...</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 6: REALTIME CLOUD ENGINE (SUPABASE) -->
+              <div class="settings-tab-pane" id="tab-cloud">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-bolt" style="color: #00ff66;"></i> Realtime Cloud Engine</h3>
+                  <p>Sub-15ms Phoenix WebSockets with PostgreSQL CDC and dual-engine durability.</p>
+                </div>
+
+                <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.3); background: rgba(0, 255, 102, 0.04);">
+                  <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span id="supabaseEngineStatus" style="font-size: 13px; color: #00ff66; display: flex; align-items: center; gap: 8px; font-weight: 700;">
+                      <i class="fa-solid fa-circle-check"></i> <span id="supabaseEngineStatusText">Connected to Supabase WebSockets</span>
+                    </span>
+                    <button type="button" id="testSupabasePingBtn" class="btn-primary" style="padding: 5px 12px; font-size: 11px;">
+                      <i class="fa-solid fa-wave-square"></i> Test Latency
+                    </button>
+                  </div>
+                  <div id="supabasePingResult" style="font-size: 11.5px; color: #67e8f9; margin-top: 6px; font-family: monospace;">
+                    <i class="fa-solid fa-bolt" style="color: #67e8f9;"></i> Phoenix WebSocket channel: active & synchronized
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <label for="supabaseUrlInput" style="font-size: 12px; color: #ccc;"><strong>Project URL</strong></label>
+                  <input type="text" id="supabaseUrlInput" placeholder="https://your-project.supabase.co" class="settings-input" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-top: 4px;">
+
+                  <label for="supabaseKeyInput" style="font-size: 12px; color: #ccc; margin-top: 10px; display: block;"><strong>Anon Public Key</strong></label>
+                  <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1Ni..." class="settings-input" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-top: 4px;">
+
+                  <button type="button" id="saveSupabaseSettingsBtn" class="btn-primary" style="width: 100%; margin-top: 12px; font-weight: 700;">
+                    Save Engine Configuration
+                  </button>
+                </div>
+              </div>
+
+              <!-- TAB 7: CHRONEX AI STUDIO -->
+              <div class="settings-tab-pane" id="tab-ai">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-robot" style="color: #67e8f9;"></i> ChronEX AI Studio</h3>
+                  <p>Autonomous neural cognition engine. Configure multi-model routing, 60 FPS streaming, and interactive playground.</p>
+                </div>
+
+                <!-- Neural Telemetry & Quota Status Card -->
+                <div class="settings-card chronex-telemetry-card">
+                  <div class="chronex-telemetry-grid">
+                    <div class="telemetry-stat">
+                      <span class="telemetry-label">NEURAL STATUS</span>
+                      <span class="telemetry-value text-emerald"><i class="fa-solid fa-circle-dot"></i> ONLINE & SYNCED</span>
+                    </div>
+                    <div class="telemetry-stat">
+                      <span class="telemetry-label">FREE DAILY QUOTA</span>
+                      <span class="telemetry-value text-cyan" id="aiStudioQuotaDisplay">10 / 10 REQUESTS</span>
+                    </div>
+                    <div class="telemetry-stat">
+                      <span class="telemetry-label">PIPELINE LATENCY</span>
+                      <span class="telemetry-value text-gold"><i class="fa-solid fa-bolt"></i> ~14ms STREAM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Interactive Visual Model Architecture Cards -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label><strong>AI Neural Model Architecture</strong></label>
+                    <span style="font-size: 11px; color: var(--text-muted);">1-Tap Quick Switch</span>
+                  </div>
+
+                  <!-- Visual Grid of Model Cards -->
+                  <div class="ai-model-cards-grid" id="aiModelCardsGrid">
+                    <div class="ai-model-card active" data-model="nexchat-custom">
+                      <div class="ai-model-card-top">
+                        <i class="fa-solid fa-brain" style="color: #67e8f9;"></i>
+                        <span class="ai-model-card-badge">RECOMMENDED</span>
+                      </div>
+                      <h4 class="ai-model-card-title">NEXCHAT Custom Pro</h4>
+                      <p class="ai-model-card-desc">Deep Multi-Modal Reasoning, Complex Problem Solving & Code Architecture.</p>
+                    </div>
+
+                    <div class="ai-model-card" data-model="performance">
+                      <div class="ai-model-card-top">
+                        <i class="fa-solid fa-bolt" style="color: #00ff66;"></i>
+                        <span class="ai-model-card-badge">ULTRA FAST</span>
+                      </div>
+                      <h4 class="ai-model-card-title">Speed-Optimized</h4>
+                      <p class="ai-model-card-desc">Sub-15ms Token Velocity. Instant responses with minimal token footprint.</p>
+                    </div>
+
+                    <div class="ai-model-card" data-model="creative">
+                      <div class="ai-model-card-top">
+                        <i class="fa-solid fa-wand-magic-sparkles" style="color: #ffd700;"></i>
+                        <span class="ai-model-card-badge">CREATIVE</span>
+                      </div>
+                      <h4 class="ai-model-card-title">Creative Genius</h4>
+                      <p class="ai-model-card-desc">Conversational Brilliance, Brainstorming, Copywriting & Narrative Flow.</p>
+                    </div>
+
+                    <div class="ai-model-card" data-model="safe">
+                      <div class="ai-model-card-top">
+                        <i class="fa-solid fa-shield-halved" style="color: #a78bfa;"></i>
+                        <span class="ai-model-card-badge">SECURE</span>
+                      </div>
+                      <h4 class="ai-model-card-title">Strict Shield</h4>
+                      <p class="ai-model-card-desc">Sandboxed Execution, Threat Verification & Compliance Hardened.</p>
+                    </div>
+                  </div>
+
+                  <!-- Hidden Select for 100% backward compatibility -->
+                  <select id="aiModelSelect" class="settings-select" style="display: none;">
+                    <option value="nexchat-custom">NEXCHAT Custom Pro (Multi-modal & Coding)</option>
+                    <option value="performance">Speed-Optimized (Rapid Token Streaming)</option>
+                    <option value="creative">Creative & Conversational Genius</option>
+                    <option value="safe">Security & Strict Mode</option>
+                  </select>
+                  <button id="saveAiModelBtn" class="btn-primary" style="display: none;"><i class="fa-solid fa-floppy-disk"></i> Apply Model Profile</button>
+                </div>
+
+                <!-- Neural Flux & Creativity Index Slider -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong>Neural Temperature / Flux Index</strong>
+                      <p style="font-size: 11px; color: var(--text-muted); margin: 2px 0 0 0;">Balance strict algorithmic precision vs creative divergence</p>
+                    </div>
+                    <span id="aiTemperatureValue" style="font-size: 12px; font-family: monospace; font-weight: 700; color: #67e8f9;">0.7 Balanced</span>
+                  </div>
+                  <input type="range" id="aiTemperatureSlider" min="0.1" max="1.0" step="0.1" value="0.7" class="cyber-range-slider" style="width: 100%; margin-top: 10px; accent-color: #67e8f9; cursor: pointer;">
+                  <div class="slider-scale-labels" style="display: flex; justify-content: space-between; font-size: 10px; color: #8b949e; margin-top: 4px;">
+                    <span>0.1 Deterministic</span>
+                    <span>0.5 Balanced</span>
+                    <span>1.0 Maximum Flux</span>
+                  </div>
+                </div>
+
+                <!-- 60 FPS Token Streaming Toggle -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>60 FPS Typewriter Streaming</strong>
+                      <p>Simulates ultra-smooth real-time token stream with neon pulsing cursor</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="aiStreamingToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Interactive In-Studio Neural Sandbox Playground -->
+                <div class="settings-card chronex-sandbox-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label><strong style="color: #67e8f9;"><i class="fa-solid fa-terminal"></i> In-Studio Neural Sandbox</strong></label>
+                    <span style="font-size: 11px; color: var(--text-muted);">Test response speed live</span>
+                  </div>
+                  <div class="sandbox-input-row" style="display: flex; gap: 8px;">
+                    <input type="text" id="aiSandboxInput" class="settings-input" placeholder="Enter test query..." value="Explain why asynchronous concurrency matters in 2 sentences." style="flex: 1;">
+                    <button type="button" id="aiSandboxRunBtn" class="btn-primary sandbox-run-btn" style="white-space: nowrap; padding: 8px 16px;">
+                      <i class="fa-solid fa-play"></i> Run
+                    </button>
+                  </div>
+                  <div id="aiSandboxOutput" class="sandbox-output-terminal" style="display: none; margin-top: 10px;">
+                    <div class="sandbox-terminal-header" style="display: flex; justify-content: space-between; align-items: center; font-size: 11px; margin-bottom: 6px;">
+                      <span style="color: #00ff66; font-weight: 700;"><i class="fa-solid fa-bolt"></i> CHRONEX OUTPUT STREAM</span>
+                      <span id="aiSandboxLatencyTag" style="font-size: 11px; font-family: monospace; color: #67e8f9;">-- ms</span>
+                    </div>
+                    <div id="aiSandboxOutputText" class="sandbox-terminal-body" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(103, 232, 249, 0.2); border-radius: 8px; padding: 12px; font-size: 12.5px; color: #e6edf3; line-height: 1.5; font-family: 'Inter', sans-serif;"></div>
+                  </div>
+                </div>
+
+                <!-- Self AI Auto-Responder -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Self AI Autonomous Responder</strong>
+                      <p>Automatically reply to selected peer messages when away or busy</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="selfAIAutoResponderToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div id="selfAIUserList" class="contact-scroll-box" style="margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                      <strong style="color: #00ff66; font-size: 12px;">Allowed Contacts</strong>
+                      <button id="refreshSelfAIUserListBtn" type="button" class="btn-secondary" style="padding: 3px 8px; font-size: 11px;"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                    </div>
+                    <div id="selfAIUserListItems" style="display: grid; gap: 6px;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB: NEURAL PROTOCOLS & MESH -->
+              <div class="settings-tab-pane" id="tab-mesh">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-network-wired" style="color: #c084fc;"></i> Neural Protocols &amp; Security Mesh</h3>
+                  <p>Configure Ghost ephemeral countdown, Cipher Vault security master PIN, P2P CyberDrop beam discovery, and Live Audio Spaces.</p>
+                </div>
+
+                <!-- Ghost Protocol Configuration -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Ghost Ephemeral Countdown Protocol</strong>
+                      <p>Default self-destruct countdown for ephemeral messages. Messages dissolve into quantum particles and are permanently purged from database memory.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsGhostProtocolToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 12px;">
+                    <label for="settingsGhostDurationSelect"><strong>Default Ghost Self-Destruct Timer</strong></label>
+                    <select id="settingsGhostDurationSelect" class="settings-select" style="margin-top: 6px;">
+                      <option value="10">10 Seconds (Rapid Dissolve)</option>
+                      <option value="30" selected>30 Seconds (Default)</option>
+                      <option value="300">5 Minutes</option>
+                      <option value="3600">1 Hour</option>
+                      <option value="86400">24 Hours</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Cipher Vault Master PIN & Security Preferences -->
+                <div class="settings-card">
+                  <label><strong>Cipher Vault Master Security PIN</strong></label>
+                  <p style="font-size: 11.5px; color: #8b949e; margin: 4px 0 10px;">Customize your 4-digit numeric vault PIN to access hidden rooms and zero-knowledge enclaves (Default: 1337).</p>
+                  <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <input type="password" id="settingsCipherPinInput" maxlength="4" placeholder="1337" class="settings-input" style="width: 130px; font-family: 'Orbitron', monospace; letter-spacing: 4px; text-align: center;">
+                    <button type="button" id="saveCipherPinBtn" class="btn-primary" style="white-space: nowrap;"><i class="fa-solid fa-key"></i> Update PIN</button>
+                    <button type="button" id="openCipherFromSettingsBtn" class="btn-secondary" style="white-space: nowrap;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Vault</button>
+                  </div>
+                </div>
+
+                <!-- P2P CyberDrop Direct Beam Configuration -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>P2P CyberDrop Radar Visibility</strong>
+                      <p>Allow nearby peer nodes on the local encrypted mesh to discover your transceiver and initiate direct zero-knowledge file beams.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsCyberDropVisibilityToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 12px;">
+                    <button type="button" id="openCyberDropFromSettingsBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-share-nodes"></i> Launch P2P CyberDrop Beam Station</button>
+                  </div>
+                </div>
+
+                <!-- Live Neural Audio Spaces Configuration -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>High-Fidelity 48kHz Audio Spaces Processing</strong>
+                      <p>Enables ultra-low latency spatial voice telemetry with live 16-bar real-time spectrum equalizers.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsAudioSpacesHiFiToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 12px;">
+                    <button type="button" id="openAudioSpacesFromSettingsBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-podcast"></i> Join Live Neural Audio Spaces</button>
+                  </div>
+                </div>
+
+                <!-- Tactical Soundboard Dock Preferences -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Neural Soundboard Dock Trigger</strong>
+                      <p>Show audio reaction soundboard button in the chat composer bar for quick tactile audio cues.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingsSoundboardDockToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 8: TOKEN VAULT & GRANTS -->
+              <div class="settings-tab-pane" id="tab-tokens">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-coins" style="color: #ffd700;"></i> Neural Token Vault</h3>
+                  <p>Manage tokens used for ChronEX AI generation and premium perks.</p>
+                </div>
+
+                <div class="settings-card" style="text-align: center; padding: 20px;">
+                  <span style="font-size: 11px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px;">Available Balance</span>
+                  <div style="font-size: 36px; font-weight: 800; color: #00ff66; font-family: 'Orbitron', monospace; margin: 4px 0;">
+                    <span id="currentTokenBalance">0</span> <span style="font-size: 16px; opacity: 0.8;">Tokens</span>
+                  </div>
+                  <button type="button" id="claimTokensGrantBtn" class="btn-primary" style="margin-top: 10px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 700;">
+                    <i class="fa-solid fa-gift"></i> Claim Starter Grant (+100 Tokens)
+                  </button>
+                </div>
+
+                <div class="settings-card">
+                  <label><strong>Peer Token Transfer</strong></label>
+                  <input type="text" id="recipientUID" placeholder="Paste recipient UID..." class="settings-input" style="width: 100%; box-sizing: border-box; margin-top: 6px;">
+                  <input type="number" id="transferAmount" placeholder="Amount (e.g. 20)" min="1" max="99999" class="settings-input" style="width: 100%; box-sizing: border-box; margin-top: 8px;">
+                  <button id="transferTokensBtn" type="button" class="btn-primary" style="width: 100%; margin-top: 8px;"><i class="fa-solid fa-paper-plane"></i> Send Tokens</button>
+                  <div id="transferResult" aria-live="polite" style="min-height: 24px; margin-top: 8px; font-size: 12px;"></div>
+                </div>
+              </div>
+
+              <!-- TAB 9: LINKED DEVICES -->
+              <div class="settings-tab-pane" id="tab-devices">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-laptop-code"></i> Linked Devices</h3>
+                  <p>Inspect active paired sessions across laptops, tablets, and phones.</p>
+                </div>
+
+                <div class="settings-card">
+                  <button id="openLinkDeviceModalBtn" class="btn-primary" type="button" style="width: 100%; font-weight: 700;">
+                    <i class="fa-solid fa-qrcode"></i> Link New Device via QR Code
+                  </button>
+                  <div id="linkedDevicesContainer" style="margin-top: 14px;">
+                    <div class="setting-item" style="border-left: 3px solid #00ff66; padding: 10px; background: rgba(0,255,102,0.06); border-radius: 8px;">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fa-solid fa-mobile-screen" style="font-size: 20px; color: #00ff66;"></i>
+                        <div>
+                          <strong style="color: #fff; font-size: 13px;">This Device (Active)</strong>
+                          <p id="currentDeviceLabel" style="margin: 2px 0 0 0; color: #8b949e; font-size: 11px;">Current Web Session</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="otherLinkedDevicesList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 10: INSTALL APP -->
+              <div class="settings-tab-pane" id="tab-apps">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-mobile-screen-button"></i> Install NEXCHAT Native</h3>
+                  <p>Install on desktop, iOS, Android, and Linux for instant launch.</p>
+                </div>
+
+                <div class="settings-card">
+                  <button id="installAppBtn" class="btn-primary" style="width: 100%; font-weight: 700; margin-bottom: 12px;"><i class="fa-solid fa-download"></i> Install PWA App</button>
+                  <div class="install-platform-grid">
+                    <button id="installIOSBtn" type="button"><i class="fa-brands fa-apple"></i> iOS Guide</button>
+                    <button id="installMacBtn" type="button"><i class="fa-solid fa-laptop"></i> Mac</button>
+                    <button id="installWindowsBtn" type="button"><i class="fa-brands fa-windows"></i> Windows</button>
+                    <button id="installLinuxBtn" type="button"><i class="fa-brands fa-linux"></i> Linux</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- TAB 11: SUPPORT & TERMINAL -->
+              <div class="settings-tab-pane" id="tab-support">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-headset"></i> Support & Terminal</h3>
+                  <p>Developer tools, diagnostics, and issue reporting.</p>
+                </div>
+
+                <div class="settings-card">
+                  <button id="openTerminalBtn" class="btn-primary" style="width: 100%; font-weight: 700; margin-bottom: 10px;"><i class="fa-solid fa-terminal"></i> Open NEXCHAT Terminal</button>
+                  <button id="fileComplaintBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-envelope"></i> Send Feedback to NEX_DEV</button>
+                  <button id="adminPanelBtn" class="btn-secondary" style="background: #ffd700; color: #000; font-weight: 700; display: none; width: 100%; margin-top: 10px;"><i class="fa-solid fa-crown"></i> Admin Panel</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LINK DEVICE MODAL -->
+      <div id="linkDeviceModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 440px;">
+          <span class="close-modal" id="closeLinkDeviceModalBtn"><i class="fa-solid fa-xmark"></i></span>
+          <h2 style="margin-top: 0; color: var(--accent-primary); font-family: 'Orbitron', monospace; font-size: 18px;">
+            <i class="fa-solid fa-qrcode"></i> Link a New Device
+          </h2>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+            Enter the 6-character pairing code displayed on your other device:
+          </p>
+          <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+            <input type="text" id="pairCodeInput" placeholder="NX-XXXX" maxlength="7" class="settings-input" style="text-transform: uppercase; font-family: 'Orbitron', monospace; font-size: 18px; letter-spacing: 2px; text-align: center;">
+            <button id="findPairSessionBtn" class="btn-primary" type="button" style="padding: 0 18px;">Verify</button>
+          </div>
+
+          <div id="pairSessionFoundCard" style="display: none; background: rgba(0, 255, 102, 0.08); border: 1px solid var(--accent-primary); border-radius: 10px; padding: 14px; margin-bottom: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <i class="fa-solid fa-display" style="font-size: 24px; color: var(--accent-primary);"></i>
+              <div>
+                <strong id="pairFoundDeviceName" style="color: #fff; font-size: 14px;">Chrome on Windows</strong>
+                <p id="pairFoundDeviceMeta" style="margin: 2px 0 0 0; color: var(--text-muted); font-size: 11px;">Waiting for authorization</p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+              <button id="rejectPairBtn" type="button" class="btn-secondary" style="flex: 1;">Deny</button>
+              <button id="approvePairBtn" type="button" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-check"></i> Authorize & Link</button>
+            </div>
+          </div>
+
+          <div id="pairStatusFeedback" style="font-size: 12px; text-align: center; min-height: 20px;"></div>
+        </div>
+      </div>
+
+      <!-- CREATE STATUS MODAL (NEXCHAT HACKER TERMINAL STORY TRANSMITTER) -->
+      <div id="createStatusModal" class="modal create-status-modal terminal-create-modal" style="display: none;">
+        <div class="modal-content create-status-content terminal-modal-box" style="max-width: 540px; padding: 22px;">
+          <div class="create-status-header terminal-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding-bottom: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800;">[NEX//TRANSMITTER]</span>
+                <span class="term-cursor-blink" style="color: #00FF88;">_</span>
+              </div>
+              <span style="font-size: 10.5px; color: #8696A0; font-family: 'JetBrains Mono', monospace;">EPHEMERAL_24H_BROADCAST_NODE</span>
+            </div>
+            <div class="create-status-tabs" style="display: flex; gap: 8px;">
+              <button type="button" class="btn-primary terminal-tab-btn active" id="statusTabMediaBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
+                <i class="fa-solid fa-photo-film"></i> [MEDIA_NODE]
+              </button>
+              <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabTextBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
+                <i class="fa-solid fa-font"></i> [TEXT_CIPHER]
+              </button>
+            </div>
+            <button type="button" class="close-btn terminal-modal-close" id="closeCreateStatusModalBtn" title="Close" style="position: static; width: 30px; height: 30px; font-size: 14px;"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- TAB 1: Media Story (Photo/Video + Caption) -->
+          <div class="create-status-tab-pane" id="statusTabMediaPane">
+            <div class="status-drop-zone terminal-drop-zone" id="statusMediaDropZone" style="border: 2px dashed rgba(0, 255, 136, 0.4); border-radius: 10px; padding: 26px 16px; text-align: center; cursor: pointer; background: rgba(0, 255, 136, 0.03); transition: all 0.2s;">
+              <input type="file" id="statusMediaModalFileInput" accept="image/*,video/*" style="display: none;">
+              <div id="statusDropPlaceholder">
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size: 38px; color: #00ff88; margin-bottom: 8px; filter: drop-shadow(0 0 10px rgba(0,255,136,0.4));"></i>
+                <div style="font-size: 14px; font-weight: 700; color: #fff; font-family: 'JetBrains Mono', monospace;">CLICK OR DRAG MEDIA PAYLOAD</div>
+                <div style="font-size: 11.5px; color: #8b949e; margin-top: 4px; font-family: 'JetBrains Mono', monospace;">Supports MP4, MOV, PNG, JPG &bull; Cascades to NEX-STATUS VAULT 1-5</div>
+              </div>
+              <div id="statusMediaPreviewBox" style="display: none; position: relative;">
+                <img id="statusModalImgPreview" src="" alt="Preview" style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; object-fit: contain; margin: 0 auto; border: 1px solid rgba(0,255,136,0.3);">
+                <video id="statusModalVideoPreview" src="" controls playsinline style="display: none; max-width: 100%; max-height: 240px; border-radius: 8px; margin: 0 auto; border: 1px solid rgba(0,255,136,0.3);"></video>
+                <button type="button" id="removeStatusMediaPreviewBtn" style="position: absolute; top: -8px; right: -8px; background: #ef4444; color: #fff; border: none; width: 26px; height: 26px; border-radius: 50%; cursor: pointer;" title="Remove media"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+            </div>
+            <div style="margin-top: 14px;">
+              <div style="display: flex; align-items: center; gap: 6px; background: rgba(16, 26, 36, 0.95); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 8px; padding: 4px 12px;">
+                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 12px;">&gt;</span>
+                <input type="text" id="statusMediaCaptionInput" placeholder="Add status decryption caption... (optional)" class="settings-input" style="width: 100%; border: none; background: transparent; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 8px 0; outline: none;">
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 2: Text Story (Custom Gradients + Big Typography) -->
+          <div class="create-status-tab-pane" id="statusTabTextPane" style="display: none;">
+            <div id="statusTextStoryCanvas" class="status-text-canvas terminal-text-canvas" style="border-radius: 10px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; padding: 20px; background: linear-gradient(135deg, #0a0e13, #111b21); border: 1px solid rgba(0, 255, 136, 0.3); transition: background 0.3s; position: relative;">
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00FF88; margin-bottom: 8px; opacity: 0.7;">root@nexchat/status:~$ transmit --message</div>
+              <textarea id="statusTextStoryInput" placeholder="Type your terminal status dispatch..." maxlength="280" style="width: 100%; background: transparent; border: none; outline: none; color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 600; text-align: center; resize: none; min-height: 100px; text-shadow: 0 0 10px rgba(0,255,136,0.5);"></textarea>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 12px; justify-content: center;">
+              <span style="font-size: 10.5px; color: #8b949e; font-family: 'JetBrains Mono', monospace; font-weight: 700;">PALETTE:</span>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #0a0e13, #111b21)" style="width: 24px; height: 24px; border-radius: 4px; border: 2px solid #00FF88; background: #0A0E13;" title="Matrix Void"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #022c22, #065f46)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #065F46;" title="Cyber Emerald"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #082f49, #0284c7)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #0284C7;" title="Cyan Quantum"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #451a03, #d97706)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #D97706;" title="Amber CRT"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #4c0519, #e11d48)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #E11D48;" title="Purge Crimson"></button>
+              <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #3b0764, #9333ea)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #9333EA;" title="Neon Violet"></button>
+            </div>
+          </div>
+
+          <!-- Status Post Footer -->
+          <div style="margin-top: 18px; border-top: 1px solid rgba(0, 255, 136, 0.2); padding-top: 14px;">
+            <div id="statusUploadProgressContainer" style="display: none; width: 100%; margin-bottom: 10px;">
+              <div style="display: flex; justify-content: space-between; font-size: 11.5px; color: #00ff88; margin-bottom: 4px; font-family: 'JetBrains Mono', monospace;">
+                <span id="statusUploadStatusText">[UPLOADING_TO_VAULT...]</span>
+                <span id="statusUploadPercent">0%</span>
+              </div>
+              <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+                <div id="statusUploadProgressBar" style="height: 100%; width: 0%; background: #00ff88; box-shadow: 0 0 10px #00ff88; transition: width 0.2s;"></div>
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <span style="font-size: 11px; color: #8b949e; font-family: 'JetBrains Mono', monospace;"><i class="fa-solid fa-clock-rotate-left"></i> TTL: 24 HOURS (EPHEMERAL)</span>
+              <button type="button" id="publishStatusBtn" class="btn-primary terminal-publish-btn" style="padding: 10px 22px; font-weight: 800; font-family: 'JetBrains Mono', monospace; background: linear-gradient(135deg, #00FF88, #00D4FF); color: #000; border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 16px rgba(0,255,136,0.4);">
+                <i class="fa-solid fa-paper-plane"></i> [TRANSMIT_TO_MESH]
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- MOBILE DISCOVER BOTTOM SHEET -->
+    <div id="mobileMoreSheet" class="mobile-more-sheet" aria-hidden="true">
+      <div class="more-sheet-backdrop" id="closeMoreSheetBackdrop"></div>
+      <div class="more-sheet-panel">
+        <div class="more-sheet-handle"></div>
+        <div class="more-sheet-header">
+          <h3 class="more-sheet-title">NEX Features</h3>
+          <button id="closeMoreSheetBtn" class="close-sheet-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="more-sheet-grid">
+          <button type="button" class="sheet-grid-item" onclick="window.location.href='reels.html'">
+            <div class="sheet-icon-box reels-gradient"><i class="fa-solid fa-clapperboard"></i></div>
+            <span>CamShot</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.location.href='cart.html'">
+            <div class="sheet-icon-box token-gradient"><i class="fa-solid fa-coins"></i></div>
+            <span>Buy Tokens</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.location.href='gaminghub.html'">
+            <div class="sheet-icon-box gaming-gradient"><i class="fa-solid fa-gamepad"></i></div>
+            <span>AstroShift: beyond Earth</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.open('terminal.html','_blank')">
+            <div class="sheet-icon-box terminal-gradient"><i class="fa-solid fa-terminal"></i></div>
+            <span>Terminal</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.location.href='advertisement.html'">
+            <div class="sheet-icon-box market-gradient"><i class="fa-solid fa-shop"></i></div>
+            <span>Marketplace</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.handleNavigation('announcements')">
+            <div class="sheet-icon-box news-gradient"><i class="fa-solid fa-bullhorn"></i></div>
+            <span>News & Alerts</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="document.getElementById('openLinkDeviceModalBtn')?.click()">
+            <div class="sheet-icon-box link-gradient"><i class="fa-solid fa-qrcode"></i></div>
+            <span>Link Device</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetRadarBtn">
+            <div class="sheet-icon-box radar-gradient"><i class="fa-solid fa-satellite-dish"></i></div>
+            <span>Neural Radar</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetNexbotBtn">
+            <div class="sheet-icon-box bot-gradient"><i class="fa-solid fa-robot"></i></div>
+            <span>NEXBOT Studio</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetVipVaultBtn">
+            <div class="sheet-icon-box vault-gradient"><i class="fa-solid fa-crown"></i></div>
+            <span>VIP Vault</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="document.getElementById('settings-btn-header')?.click()">
+            <div class="sheet-icon-box settings-gradient"><i class="fa-solid fa-gear"></i></div>
+            <span>Settings</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav class="bottom-nav">
+      <!-- 4 Core Tabs for Mobile + 1 Discover Tab -->
+      <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chat">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-comments"></i>
+        </div>
+        <span class="nav-label">Chats</span>
+      </button>
+      <button id="nav-status" class="nav-item" data-nav="updates" title="Status">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-circle-notch"></i>
+        </div>
+        <span class="nav-label">Updates</span>
+      </button>
+      <button id="nav-groups" class="nav-item" data-nav="communities" title="Groups">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-users"></i>
+        </div>
+        <span class="nav-label">Communities</span>
+      </button>
+      <button id="nav-calls" class="nav-item" data-nav="calls" title="Call History">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-phone"></i>
+        </div>
+        <span class="nav-label">Calls</span>
+      </button>
+      <button id="nav-more" class="nav-item mobile-only-nav" data-nav="more" title="More Features">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-ellipsis"></i>
+        </div>
+        <span class="nav-label">More</span>
+      </button>
+
+      <!-- Desktop Extra Tabs (visible only on desktop >= 900px) -->
+      <button id="nav-announcements" class="nav-item desktop-only-nav" data-nav="announcements" title="Announcements">
+        <i class="fa-solid fa-bullhorn"></i>
+        <span class="nav-label">News</span>
+      </button>
+      <button id="nav-marketplace" class="nav-item desktop-only-nav" data-nav="marketplace" title="Advert">
+        <i class="fa-solid fa-shop"></i>
+        <span class="nav-label">Market</span>
+      </button>
+      <button id="nav-games" class="nav-item desktop-only-nav" data-nav="games" title="AstroShift: beyond Earth">
+        <i class="fa-solid fa-gamepad"></i>
+        <span class="nav-label">AstroShift</span>
+      </button>
+      <button id="nav-terminal" class="nav-item desktop-only-nav" data-nav="terminal" title="Terminal">
+        <i class="fa-solid fa-terminal"></i>
+        <span class="nav-label">Terminal</span>
+      </button>
+      <button id="logout-btn" class="nav-item desktop-only-nav logout" title="Logout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span class="nav-label">Logout</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- NEXCHAT HACKER TERMINAL STATUS VIEWER FULL-SCREEN MODAL -->
+  <div id="statusViewerModal" class="status-viewer-modal terminal-viewer-modal" style="display: none;">
+    <!-- CRT Matrix Scanlines & HUD Vignette -->
+    <div class="terminal-viewer-scanlines" aria-hidden="true"></div>
+
+    <!-- Top Laser Progress Bars (Segmented Story Indicators) -->
+    <div id="statusViewerProgressBars" class="status-viewer-progress-container terminal-progress-container"></div>
+
+    <!-- Top Header: Avatar + Name + Telemetry + Terminate button -->
+    <div class="status-viewer-top-bar terminal-viewer-header">
+      <div class="status-viewer-user-info terminal-viewer-user">
+        <button type="button" id="closeStatusViewerBtn" class="status-viewer-back-btn terminal-viewer-nav-btn" title="Back (Esc)">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="terminal-viewer-avatar-wrap">
+          <img id="statusViewerAvatar" src="logo.jpg" alt="Avatar" class="status-viewer-avatar terminal-avatar-ring">
+        </div>
+        <div class="status-viewer-meta terminal-viewer-meta">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span id="statusViewerName" class="status-viewer-name terminal-node-title">NODE://USER</span>
+            <span class="terminal-cipher-chip">[AES_GCM_256]</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00FF88;">
+            <span id="statusViewerTime" class="status-viewer-time">T-00:00:00</span>
+            <span class="status-bullet">&bull;</span>
+            <span id="statusViewerDetailsExpires" class="status-expires-text">TTL: 24h</span>
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <span class="terminal-hud-status-badge"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> LIVE_STREAM</span>
+        <button type="button" id="statusViewerCloseIcon" class="status-viewer-close-btn terminal-terminate-btn" title="Terminate Stream (Esc)">
+          <i class="fa-solid fa-xmark"></i> <span>[TERMINATE]</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Center Media Container with Tap Left/Right Controls and HUD Reticles -->
+    <div class="status-viewer-media-stage terminal-media-stage" id="statusViewerStage">
+      <!-- HUD Reticle Corner Brackets -->
+      <div class="terminal-corner tl"></div>
+      <div class="terminal-corner tr"></div>
+      <div class="terminal-corner bl"></div>
+      <div class="terminal-corner br"></div>
+
+      <div class="status-tap-zone left-zone" id="statusTapPrev" title="Previous Status Slide (Left Arrow)"></div>
+      <div class="status-tap-zone right-zone" id="statusTapNext" title="Next Status Slide (Right Arrow)"></div>
+
+      <img id="statusViewerImage" src="" alt="Status" style="display: none;">
+      <video id="statusViewerVideo" src="" playsinline autoplay muted style="display: none;"></video>
+      <div id="statusViewerFallbackText" class="status-viewer-text-slide terminal-text-slide" style="display: none;"></div>
+    </div>
+
+    <!-- Bottom Caption Console & Terminal Transmitter Row -->
+    <div class="status-viewer-bottom-bar terminal-viewer-bottom">
+      <div id="statusViewerCaptionBox" class="status-viewer-caption-card terminal-caption-console">
+        <div class="terminal-console-header">
+          <span class="terminal-console-prompt">root@nexchat/status:~$ cat payload.txt</span>
+          <span id="statusViewerDetailsTime" class="terminal-console-time"><i class="fa-regular fa-clock"></i> 03:56 AM</span>
+        </div>
+        <p id="statusViewerCaption" class="status-viewer-caption-text terminal-console-body"></p>
+      </div>
+
+      <div class="status-viewer-reply-row terminal-reply-row">
+        <span class="terminal-reply-prompt">&gt;</span>
+        <input type="text" id="statusViewerReplyInput" class="status-reply-input terminal-reply-input" placeholder="Transmit encrypted reply to operative..." autocomplete="off" />
+        <button type="button" id="statusViewerReplySend" class="status-reply-btn terminal-reply-send-btn" title="Transmit Reply">
+          <i class="fa-solid fa-paper-plane"></i>
+          <span>[TRANSMIT]</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GIFT RECEIVE DRAWER -->
+  <div id="giftReceiveDrawer" class="bottom-drawer" aria-hidden="true"></div>
+
+  <!-- CINEMATIC MEDIA LIGHTBOX MODAL -->
+  <div id="mediaLightboxModal" class="media-lightbox-modal" style="display: none;">
+    <div class="lightbox-backdrop" id="lightboxBackdrop"></div>
+    <div class="lightbox-toolbar">
+      <div class="lightbox-meta">
+        <i class="fa-solid fa-photo-film" style="color: #00ff66;"></i>
+        <span id="lightboxMediaTitle" class="lightbox-title">Media Viewer</span>
+      </div>
+      <div class="lightbox-actions">
+        <a id="lightboxDownloadBtn" href="" download target="_blank" class="lightbox-action-btn" title="Download File"><i class="fa-solid fa-download"></i></a>
+        <button id="closeLightboxBtn" type="button" class="lightbox-action-btn close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+    <div class="lightbox-stage" id="lightboxStage">
+      <img id="lightboxImage" src="" alt="Enlarged media" style="display: none;" />
+      <video id="lightboxVideo" src="" controls playsinline autoplay style="display: none;"></video>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 1. NEXBOT STUDIO // WHATSAPP BOT ARCHITECT -->
+  <!-- ========================================== -->
+  <div id="nexbotStudioModal" class="nexbot-studio-modal" style="display: none;">
+    <div class="nexbot-modal-backdrop" id="closeNexbotStudioBackdrop"></div>
+    <div class="nexbot-modal-container">
+      <!-- Studio Header -->
+      <div class="nexbot-studio-header">
+        <div class="nexbot-header-left">
+          <div class="nexbot-header-icon"><i class="fa-solid fa-robot"></i></div>
+          <div>
+            <h2 class="nexbot-header-title">NEXBOT STUDIO</h2>
+            <div class="nexbot-header-subtitle">WHATSAPP BOT ARCHITECT &bull; AUTONOMOUS AI ENGINE</div>
+          </div>
+        </div>
+        <div class="nexbot-header-right">
+          <span class="nexbot-header-badge"><i class="fa-brands fa-whatsapp"></i> WA CLOUD API</span>
+          <span class="nexbot-header-badge active"><i class="fa-solid fa-bolt"></i> TURBO 14ms</span>
+          <button type="button" class="nexbot-close-btn" id="closeNexbotStudioBtn" title="Close Studio">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Studio Main Grid: Left Config, Right Simulator -->
+      <div class="nexbot-studio-grid">
+        <!-- LEFT: Config Workspace -->
+        <div class="nexbot-config-col">
+          <!-- Studio Nav Tabs -->
+          <div class="nexbot-nav-tabs">
+            <button type="button" class="nexbot-nav-tab active" data-bot-tab="bot-tab-persona">
+              <i class="fa-solid fa-brain"></i> Persona &amp; Brain
+            </button>
+            <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-triggers">
+              <i class="fa-solid fa-bolt"></i> Triggers &amp; Rules
+            </button>
+            <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-whatsapp">
+              <i class="fa-brands fa-whatsapp"></i> WhatsApp Cloud
+            </button>
+            <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-fleet">
+              <i class="fa-solid fa-list-check"></i> Bot Fleet (<span id="botFleetCount">1</span>)
+            </button>
+          </div>
+
+          <!-- TAB 1: Persona & Brain -->
+          <div class="nexbot-tab-pane active" id="bot-tab-persona">
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Bot Identity Name</label>
+              <div class="nexbot-input-wrap">
+                <i class="fa-solid fa-signature nexbot-input-icon"></i>
+                <input type="text" id="nexbotNameInput" class="nexbot-input" value="ApexSupport AI" placeholder="e.g. NexusAgent, ApexSales Bot" />
+              </div>
+            </div>
+
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Persona Archetype</label>
+              <div class="nexbot-archetype-grid">
+                <button type="button" class="archetype-btn active" data-archetype="support">
+                  <i class="fa-solid fa-headset"></i>
+                  <span class="archetype-title">Customer Support</span>
+                  <span class="archetype-desc">Fast solutions, polite FAQs</span>
+                </button>
+                <button type="button" class="archetype-btn" data-archetype="sales">
+                  <i class="fa-solid fa-chart-line"></i>
+                  <span class="archetype-title">Sales Closer</span>
+                  <span class="archetype-desc">Handles leads, books calls</span>
+                </button>
+                <button type="button" class="archetype-btn" data-archetype="engineer">
+                  <i class="fa-solid fa-code"></i>
+                  <span class="archetype-title">Code Assistant</span>
+                  <span class="archetype-desc">Architecture, syntax &amp; debug</span>
+                </button>
+                <button type="button" class="archetype-btn" data-archetype="crypto">
+                  <i class="fa-solid fa-coins"></i>
+                  <span class="archetype-title">Crypto Alpha</span>
+                  <span class="archetype-desc">Market analysis &amp; alerts</span>
+                </button>
+                <button type="button" class="archetype-btn" data-archetype="twin">
+                  <i class="fa-solid fa-user-astronaut"></i>
+                  <span class="archetype-title">Personal Twin</span>
+                  <span class="archetype-desc">Witty auto-replies</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="nexbot-form-group">
+              <div class="nexbot-label-row">
+                <label class="nexbot-label">System Brain Instructions</label>
+                <div class="nexbot-prompt-sparks">
+                  <button type="button" class="spark-fill-btn" data-template="support">FAQ Support</button>
+                  <button type="button" class="spark-fill-btn" data-template="sales">Sales Booking</button>
+                  <button type="button" class="spark-fill-btn" data-template="concierge">Luxury Concierge</button>
+                </div>
+              </div>
+              <textarea id="nexbotSystemPrompt" class="nexbot-textarea" rows="4" placeholder="You are ApexSupport AI, an autonomous WhatsApp representative..."></textarea>
+            </div>
+
+            <div class="nexbot-form-group">
+              <div class="nexbot-label-row">
+                <label class="nexbot-label">Creativity Index (Temperature)</label>
+                <span class="nexbot-value-pill" id="nexbotTempVal">0.6</span>
+              </div>
+              <input type="range" id="nexbotTempSlider" class="nexbot-slider" min="0" max="1" step="0.05" value="0.6" />
+            </div>
+          </div>
+
+          <!-- TAB 2: Triggers & Rules -->
+          <div class="nexbot-tab-pane" id="bot-tab-triggers">
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Trigger Keywords (Comma Separated)</label>
+              <input type="text" id="nexbotKeywordsInput" class="nexbot-input" value="hi, hello, price, support, order, quote, help" placeholder="hi, help, quote, book..." />
+              <p class="nexbot-help-text">When an incoming WhatsApp message contains any of these keywords, the bot activates.</p>
+            </div>
+
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Default Greeting Message</label>
+              <input type="text" id="nexbotGreetingInput" class="nexbot-input" value="Hello! I am your autonomous AI assistant. How can I assist you today?" />
+            </div>
+
+            <div class="nexbot-form-group">
+              <div class="nexbot-label-row">
+                <label class="nexbot-label">Simulated Typing Latency</label>
+                <span class="nexbot-value-pill" id="nexbotDelayVal">1.2s</span>
+              </div>
+              <input type="range" id="nexbotDelaySlider" class="nexbot-slider" min="0.2" max="3.0" step="0.1" value="1.2" />
+              <p class="nexbot-help-text">Simulates natural human typing pause before dispatching WhatsApp reply.</p>
+            </div>
+
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Fallback Behaviour</label>
+              <select id="nexbotFallbackSelect" class="nexbot-select">
+                <option value="neural">Delegate to ChronEX Neural Engine (Smart AI reply)</option>
+                <option value="transfer">Prompt human operator escalation</option>
+                <option value="silent">Stay silent on unknown triggers</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- TAB 3: WhatsApp Cloud API Integration -->
+          <div class="nexbot-tab-pane" id="bot-tab-whatsapp">
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Webhook Callback URL</label>
+              <div class="nexbot-copy-row">
+                <input type="text" id="nexbotWebhookUrl" class="nexbot-input" value="https://api.nexchat.io/v1/whatsapp/webhook" readonly />
+                <button type="button" class="btn-copy-code" id="copyNexbotWebhookBtn"><i class="fa-solid fa-copy"></i> Copy</button>
+              </div>
+            </div>
+
+            <div class="nexbot-form-group">
+              <label class="nexbot-label">Verification Token</label>
+              <input type="text" id="nexbotVerifyToken" class="nexbot-input" value="nexchat_sec_token_89a" readonly />
+            </div>
+
+            <div class="nexbot-code-card">
+              <div class="nexbot-code-header">
+                <span><i class="fa-brands fa-node-js"></i> 1-Tap Node.js / Baileys WhatsApp Runner</span>
+                <button type="button" class="btn-copy-code" id="copyBaileysScriptBtn"><i class="fa-solid fa-copy"></i> Copy Script</button>
+              </div>
+              <pre class="nexbot-code-block"><code id="nexbotScriptCode">// Ready-to-run Baileys / WhatsApp Web Bot
+// Run: npm install @whiskeysockets/baileys qrcode-terminal
+const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys');
+// Connects to ChronEX AI engine via secure WebSocket API</code></pre>
+            </div>
+          </div>
+
+          <!-- TAB 4: Bot Fleet -->
+          <div class="nexbot-tab-pane" id="bot-tab-fleet">
+            <div class="nexbot-fleet-list" id="nexbotFleetList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- Config Footer Actions -->
+          <div class="nexbot-config-footer">
+            <button type="button" class="nexbot-btn primary" id="saveNexbotBtn">
+              <i class="fa-solid fa-floppy-disk"></i> Save Bot Profile
+            </button>
+            <button type="button" class="nexbot-btn secondary" id="exportNexbotBtn">
+              <i class="fa-solid fa-file-code"></i> Export Script
+            </button>
+            <button type="button" class="nexbot-btn accent" id="syncToSimulatorBtn">
+              <i class="fa-solid fa-play"></i> Sync to Simulator
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT: WhatsApp Phone Simulator -->
+        <div class="nexbot-sim-col">
+          <div class="whatsapp-phone-mockup">
+            <!-- Phone Notch / Status Bar -->
+            <div class="sim-phone-notch">
+              <span class="sim-time">10:30</span>
+              <div class="sim-speaker"></div>
+              <div class="sim-icons">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-full"></i>
+              </div>
+            </div>
+
+            <!-- WhatsApp App Bar -->
+            <div class="sim-appbar">
+              <div class="sim-appbar-left">
+                <i class="fa-solid fa-arrow-left sim-back-icon"></i>
+                <div class="sim-avatar-wrap">
+                  <div class="sim-avatar" id="simBotAvatar"><i class="fa-solid fa-robot"></i></div>
+                  <span class="sim-online-dot"></span>
+                </div>
+                <div class="sim-user-info">
+                  <div class="sim-bot-name" id="simBotName">ApexSupport AI</div>
+                  <div class="sim-bot-status" id="simBotStatus">online</div>
+                </div>
+              </div>
+              <div class="sim-appbar-right">
+                <i class="fa-solid fa-video"></i>
+                <i class="fa-solid fa-phone"></i>
+                <i class="fa-solid fa-ellipsis-vertical"></i>
+              </div>
+            </div>
+
+            <!-- WhatsApp Chat Stream -->
+            <div class="sim-messages-area" id="simMessagesArea">
+              <div class="sim-encryption-pill">
+                <i class="fa-solid fa-lock"></i> Messages are encrypted with ChronEX AI engine.
+              </div>
+              <div class="sim-msg received" id="simInitialGreeting">
+                <p>Hello! I am your autonomous AI assistant. How can I assist you today?</p>
+                <span class="sim-msg-time">10:30 AM</span>
+              </div>
+            </div>
+
+            <!-- Simulator Typing Bar -->
+            <div class="sim-input-bar">
+              <button type="button" class="sim-icon-btn"><i class="fa-solid fa-plus"></i></button>
+              <input type="text" id="simMessageInput" class="sim-input" placeholder="Type a message..." autocomplete="off" />
+              <button type="button" class="sim-icon-btn"><i class="fa-solid fa-camera"></i></button>
+              <button type="button" class="sim-send-btn" id="simSendBtn" title="Send message">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 2. NEURAL RADAR // SPECTRUM DISCOVERY      -->
+  <!-- ========================================== -->
+  <div id="neuralRadarModal" class="neural-radar-modal" style="display: none;">
+    <div class="radar-modal-backdrop" id="closeNeuralRadarBackdrop"></div>
+    <div class="radar-modal-container">
+      <!-- Radar Header -->
+      <div class="radar-modal-header">
+        <div class="radar-header-brand">
+          <div class="radar-brand-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+          <div>
+            <h2 class="radar-brand-title">NEURAL RADAR</h2>
+            <div class="radar-brand-sub">SPECTRUM FREQUENCY SCANNER // ACTIVE MESH</div>
+          </div>
+        </div>
+        <div class="radar-header-telemetry">
+          <span class="radar-telemetry-badge"><i class="fa-solid fa-wave-square"></i> 2.45 GHz</span>
+          <span class="radar-telemetry-badge"><i class="fa-solid fa-location-crosshairs"></i> 5.0 KM RANGE</span>
+          <span class="radar-telemetry-badge active" id="radarNodesCountBadge"><i class="fa-solid fa-circle-dot"></i> 14 NODES ACTIVE</span>
+          <button type="button" class="radar-close-btn" id="closeNeuralRadarBtn" title="Close Radar">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Radar Display Stage -->
+      <div class="radar-display-stage">
+        <div class="radar-screen" id="radarScreen">
+          <!-- Concentric Distance Rings -->
+          <div class="radar-ring ring-100m"><span class="ring-label">100m</span></div>
+          <div class="radar-ring ring-500m"><span class="ring-label">500m</span></div>
+          <div class="radar-ring ring-2km"><span class="ring-label">2.5km</span></div>
+          <div class="radar-ring ring-5km"><span class="ring-label">5.0km</span></div>
+
+          <!-- Crosshair Grid Axes -->
+          <div class="radar-crosshair-x"></div>
+          <div class="radar-crosshair-y"></div>
+          <div class="radar-deg-label deg-0">000°</div>
+          <div class="radar-deg-label deg-90">090°</div>
+          <div class="radar-deg-label deg-180">180°</div>
+          <div class="radar-deg-label deg-270">270°</div>
+
+          <!-- Sweeping Beam Line -->
+          <div class="radar-sweep-beam" id="radarSweepBeam"></div>
+
+          <!-- Center Node Indicator (User) -->
+          <div class="radar-center-origin">
+            <div class="origin-ping"></div>
+            <i class="fa-solid fa-crosshairs"></i>
+          </div>
+
+          <!-- Interactive Discovered Blips Container -->
+          <div class="radar-blips-layer" id="radarBlipsLayer">
+            <!-- Dynamic blips injected here -->
+          </div>
+        </div>
+
+        <!-- Floating Selected Node Inspector Card -->
+        <div class="radar-node-card" id="radarNodeCard" style="display: none;">
+          <div class="node-card-header">
+            <div class="node-card-avatar" id="nodeCardAvatar"><i class="fa-solid fa-user"></i></div>
+            <div class="node-card-meta">
+              <div class="node-card-name" id="nodeCardName">Operative_Alpha</div>
+              <div class="node-card-type" id="nodeCardType">PEER OPERATIVE</div>
+            </div>
+            <button type="button" class="node-card-close" id="closeNodeCardBtn"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="node-card-stats">
+            <div class="node-stat"><span class="stat-lbl">DISTANCE</span><span class="stat-val" id="nodeCardDist">180m</span></div>
+            <div class="node-stat"><span class="stat-lbl">LATENCY</span><span class="stat-val" id="nodeCardLatency">14ms</span></div>
+            <div class="node-stat"><span class="stat-lbl">SIGNAL</span><span class="stat-val" id="nodeCardSignal">-42 dBm</span></div>
+          </div>
+          <p class="node-card-desc" id="nodeCardDesc">Active neural peer synced to NEXCHAT mesh network.</p>
+          <div class="node-card-actions">
+            <button type="button" class="node-action-btn primary" id="nodeCardConnectBtn">
+              <i class="fa-solid fa-comment-dots"></i> Initiate Uplink
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radar Control Strip -->
+      <div class="radar-control-strip">
+        <div class="radar-filter-group">
+          <button type="button" class="radar-filter-pill active" data-filter="all">ALL FREQUENCIES</button>
+          <button type="button" class="radar-filter-pill" data-filter="peers"><i class="fa-solid fa-user"></i> PEERS</button>
+          <button type="button" class="radar-filter-pill" data-filter="bots"><i class="fa-solid fa-robot"></i> NEXBOTS</button>
+          <button type="button" class="radar-filter-pill" data-filter="channels"><i class="fa-solid fa-users"></i> CHANNELS</button>
+        </div>
+        <div class="radar-action-group">
+          <button type="button" class="radar-action-btn" id="radarSoundToggleBtn" title="Toggle Sonar Audio">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+          <button type="button" class="radar-action-btn primary" id="radarRescanBtn">
+            <i class="fa-solid fa-rotate"></i> RESCAN SPECTRUM
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 3. VIP TOKEN VAULT & COMMERCIAL LICENSES   -->
+  <!-- ========================================== -->
+  <div id="vipVaultModal" class="vip-vault-modal" style="display: none;">
+    <div class="vault-modal-backdrop" id="closeVipVaultBackdrop"></div>
+    <div class="vault-modal-container">
+      <div class="vault-modal-header">
+        <div class="vault-brand">
+          <div class="vault-icon"><i class="fa-solid fa-crown"></i></div>
+          <div>
+            <h2 class="vault-title">VIP TOKEN VAULT</h2>
+            <div class="vault-subtitle">COMMERCIAL LICENSES &bull; NEURAL POWERPACKS</div>
+          </div>
+        </div>
+        <div class="vault-balance-badge">
+          <span class="vault-balance-label">AVAILABLE TOKENS:</span>
+          <span class="vault-balance-val" id="vaultModalTokensVal">100</span>
+          <button type="button" class="vault-close-btn" id="closeVipVaultBtn" title="Close Vault">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="vault-tiers-grid">
+        <!-- TIER 1 -->
+        <div class="vault-tier-card current">
+          <div class="tier-pill-badge current">CURRENT ACTIVE</div>
+          <div class="tier-name">STARTER MESH</div>
+          <div class="tier-price">FREE</div>
+          <ul class="tier-features">
+            <li><i class="fa-solid fa-check"></i> 100 Starter Neural Tokens</li>
+            <li><i class="fa-solid fa-check"></i> 1 Active NEXBOT Deployment</li>
+            <li><i class="fa-solid fa-check"></i> Standard ChronEX Model</li>
+            <li><i class="fa-solid fa-check"></i> 5.0 KM Radar Spectrum</li>
+          </ul>
+          <button type="button" class="tier-action-btn disabled">CURRENT TIER</button>
+        </div>
+
+        <!-- TIER 2 -->
+        <div class="vault-tier-card">
+          <div class="tier-pill-badge hot">POPULAR</div>
+          <div class="tier-name">CYBER PIONEER</div>
+          <div class="tier-price">$4.99 <span class="tier-sub">/ one-time</span></div>
+          <ul class="tier-features">
+            <li><i class="fa-solid fa-check"></i> +500 Neural Tokens</li>
+            <li><i class="fa-solid fa-check"></i> 2 Concurrent NEXBOTs</li>
+            <li><i class="fa-solid fa-check"></i> Turbo 14ms Latency Engine</li>
+            <li><i class="fa-solid fa-check"></i> Custom Persona Tuning</li>
+          </ul>
+          <button type="button" class="tier-action-btn primary" data-tokens="500" data-plan="pioneer">
+            <i class="fa-solid fa-bolt"></i> RECHARGE 500
+          </button>
+        </div>
+
+        <!-- TIER 3 -->
+        <div class="vault-tier-card highlight">
+          <div class="tier-pill-badge pro">BEST VALUE</div>
+          <div class="tier-name">NEURAL TITAN</div>
+          <div class="tier-price">$19.99 <span class="tier-sub">/ one-time</span></div>
+          <ul class="tier-features">
+            <li><i class="fa-solid fa-check"></i> +2,500 Neural Tokens</li>
+            <li><i class="fa-solid fa-check"></i> 5 Concurrent NEXBOTs</li>
+            <li><i class="fa-solid fa-check"></i> WhatsApp Cloud API Webhooks</li>
+            <li><i class="fa-solid fa-check"></i> Radar Long-Range &amp; Stealth Mode</li>
+            <li><i class="fa-solid fa-check"></i> Gold VIP Badge in All Chats</li>
+          </ul>
+          <button type="button" class="tier-action-btn gold" data-tokens="2500" data-plan="titan">
+            <i class="fa-solid fa-crown"></i> RECHARGE 2,500
+          </button>
+        </div>
+
+        <!-- TIER 4 -->
+        <div class="vault-tier-card">
+          <div class="tier-pill-badge enterprise">COMMERCIAL</div>
+          <div class="tier-name">ENTERPRISE MESH</div>
+          <div class="tier-price">$49.99 <span class="tier-sub">/ one-time</span></div>
+          <ul class="tier-features">
+            <li><i class="fa-solid fa-check"></i> +10,000 Neural Tokens</li>
+            <li><i class="fa-solid fa-check"></i> Unlimited WhatsApp Deployments</li>
+            <li><i class="fa-solid fa-check"></i> Full Baileys Commercial License</li>
+            <li><i class="fa-solid fa-check"></i> Dedicated Model Server Cluster</li>
+          </ul>
+          <button type="button" class="tier-action-btn primary" data-tokens="10000" data-plan="enterprise">
+            <i class="fa-solid fa-rocket"></i> RECHARGE 10,000
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 4. CYBER STREAK & DAILY REWARDS MATRIX     -->
+  <!-- ========================================== -->
+  <div id="cyberStreakModal" class="cyber-streak-modal" style="display: none;">
+    <div class="streak-modal-backdrop" id="closeCyberStreakBackdrop"></div>
+    <div class="streak-modal-container">
+      <div class="streak-modal-header">
+        <div class="streak-brand">
+          <div class="streak-icon-box"><i class="fa-solid fa-bolt"></i></div>
+          <div>
+            <h2 class="streak-title">CYBER STREAK MATRIX</h2>
+            <div class="streak-subtitle">DAILY LOGIN FREQUENCY &bull; NEURAL MULTIPLIERS</div>
+          </div>
+        </div>
+        <button type="button" class="streak-close-btn" id="closeCyberStreakBtn" title="Close Streak Matrix">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Hero Streak Status Banner -->
+      <div class="streak-hero-card">
+        <div class="streak-hero-left">
+          <div class="streak-hero-count-row">
+            <span class="streak-hero-num" id="modalStreakCount">1</span>
+            <div class="streak-hero-labels">
+              <span class="streak-hero-unit">DAYS ACTIVE</span>
+              <span class="streak-multiplier-badge" id="modalStreakMultiplier">1.0x MULTIPLIER</span>
+            </div>
+          </div>
+          <p class="streak-hero-desc">Maintain consecutive daily uplinks to scale your multiplier. Reach Day 7 to unlock Golden VIP status!</p>
+        </div>
+        <div class="streak-hero-right">
+          <div class="streak-shield-status">
+            <i class="fa-solid fa-shield-halved"></i>
+            <div class="shield-text">
+              <span class="shield-label">STREAK SHIELD</span>
+              <span class="shield-val" id="streakShieldStatus">ACTIVE</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-Day Matrix Trajectory Cards -->
+      <div class="streak-matrix-strip" id="streakMatrixStrip">
+        <div class="streak-day-card" data-day="1">
+          <div class="day-num">DAY 1</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-coins"></i></div>
+          <div class="day-tokens">+25</div>
+          <div class="day-status-pill">CLAIMABLE</div>
+        </div>
+        <div class="streak-day-card" data-day="2">
+          <div class="day-num">DAY 2</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-coins"></i></div>
+          <div class="day-tokens">+50</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card" data-day="3">
+          <div class="day-num">DAY 3</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-coins"></i></div>
+          <div class="day-tokens">+75</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card" data-day="4">
+          <div class="day-num">DAY 4</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-coins"></i></div>
+          <div class="day-tokens">+100</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card" data-day="5">
+          <div class="day-num">DAY 5</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-bolt"></i></div>
+          <div class="day-tokens">+150</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card" data-day="6">
+          <div class="day-num">DAY 6</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-bolt"></i></div>
+          <div class="day-tokens">+250</div>
+          <div class="day-status-pill">LOCKED</div>
+        </div>
+        <div class="streak-day-card jackpot" data-day="7">
+          <div class="day-badge">JACKPOT</div>
+          <div class="day-num">DAY 7</div>
+          <div class="day-reward-icon"><i class="fa-solid fa-crown"></i></div>
+          <div class="day-tokens">+500</div>
+          <div class="day-status-pill">GOLD VIP</div>
+        </div>
+      </div>
+
+      <!-- Streak Telemetry -->
+      <div class="streak-telemetry-row">
+        <div class="telemetry-box">
+          <span class="telemetry-label">LONGEST STREAK</span>
+          <span class="telemetry-val" id="longestStreakVal">1 Day</span>
+        </div>
+        <div class="telemetry-box">
+          <span class="telemetry-label">TOTAL CLAIMED</span>
+          <span class="telemetry-val" id="totalClaimedVal">0 Tokens</span>
+        </div>
+        <div class="telemetry-box">
+          <span class="telemetry-label">STATUS</span>
+          <span class="telemetry-val" id="streakCountdownVal">Ready to Claim</span>
+        </div>
+      </div>
+
+      <!-- Action Footer -->
+      <div class="streak-modal-footer">
+        <button type="button" id="claimStreakRewardBtn" class="streak-claim-action-btn">
+          <i class="fa-solid fa-bolt"></i> CLAIM DAILY REWARD (+25 TOKENS)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 5. LIVE NEURAL AUDIO SPACES & STAGES       -->
+  <!-- ========================================== -->
+  <div id="audioSpacesModal" class="audio-spaces-modal" style="display: none;">
+    <div class="spaces-modal-backdrop" id="closeAudioSpacesBackdrop"></div>
+    <div class="spaces-modal-container">
+      <div class="spaces-modal-header">
+        <div class="spaces-brand">
+          <div class="spaces-icon-box"><i class="fa-solid fa-podcast"></i></div>
+          <div>
+            <h2 class="spaces-title">NEURAL AUDIO SPACES</h2>
+            <div class="spaces-subtitle">DECENTRALIZED VOICE STAGES &bull; LIVE AUDIO PODIUMS</div>
+          </div>
+        </div>
+        <div class="spaces-header-actions">
+          <button type="button" class="spaces-create-btn" id="openCreateSpaceModalBtn">
+            <i class="fa-solid fa-plus"></i> START STAGE
+          </button>
+          <button type="button" class="spaces-close-btn" id="closeAudioSpacesBtn" title="Close Spaces">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Active Stage Broadcast HUD -->
+      <div class="active-stage-card" id="activeStageCard">
+        <div class="stage-top-meta">
+          <div class="stage-status-indicator">
+            <span class="live-dot-pulse"></span>
+            <span class="stage-tag-badge">LIVE STAGE</span>
+            <span class="stage-title-text" id="currentStageTitle">Cyber Security Briefing: Zero-Day Guard</span>
+          </div>
+          <div class="stage-listener-badge">
+            <i class="fa-solid fa-headphones"></i> <span id="currentStageListenersCount">148</span> Listening
+          </div>
+        </div>
+
+        <!-- Live Equalizer Spectrum Visualizer -->
+        <div class="stage-audio-spectrum" id="stageAudioSpectrum">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+
+        <!-- Speaker Podium Grid -->
+        <div class="podium-speakers-grid" id="podiumSpeakersGrid">
+          <div class="podium-speaker active-speaking">
+            <div class="speaker-avatar-wrap">
+              <img src="logo.jpg" alt="Host" class="speaker-avatar">
+              <span class="speaker-role-badge host"><i class="fa-solid fa-crown"></i></span>
+            </div>
+            <span class="speaker-name">Alex [Host]</span>
+            <span class="speaker-freq">880 Hz</span>
+          </div>
+          <div class="podium-speaker">
+            <div class="speaker-avatar-wrap">
+              <img src="chronex-ai.jpg" alt="AI Co-Host" class="speaker-avatar">
+              <span class="speaker-role-badge ai"><i class="fa-solid fa-robot"></i></span>
+            </div>
+            <span class="speaker-name">ChronEX AI</span>
+            <span class="speaker-freq">Neural</span>
+          </div>
+          <div class="podium-speaker">
+            <div class="speaker-avatar-wrap">
+              <img src="favicon.png" alt="Guest" class="speaker-avatar">
+              <span class="speaker-role-badge speaker"><i class="fa-solid fa-microphone"></i></span>
+            </div>
+            <span class="speaker-name">Guest Node</span>
+            <span class="speaker-freq">Co-Host</span>
+          </div>
+        </div>
+
+        <!-- Listener Gallery -->
+        <div class="stage-listener-gallery">
+          <span class="gallery-label">LISTENERS:</span>
+          <div class="gallery-avatars" id="galleryAvatars">
+            <img src="favicon.png" class="gallery-avatar" title="Listener 1">
+            <img src="logo.jpg" class="gallery-avatar" title="Listener 2">
+            <img src="chronex-ai.jpg" class="gallery-avatar" title="Listener 3">
+            <span class="gallery-more-badge">+145</span>
+          </div>
+        </div>
+
+        <!-- Interactive Stage Toolbar -->
+        <div class="stage-controls-toolbar">
+          <button type="button" class="stage-btn mic-btn" id="stageMicToggleBtn" title="Toggle Microphone">
+            <i class="fa-solid fa-microphone"></i> <span>Mute</span>
+          </button>
+          <button type="button" class="stage-btn hand-btn" id="stageHandRaiseBtn" title="Request to Speak">
+            <i class="fa-solid fa-hand"></i> <span>Raise Hand</span>
+          </button>
+          <button type="button" class="stage-btn sfx-btn" id="stageReactionSfxBtn" title="Send Audio Reaction">
+            <i class="fa-solid fa-volume-high"></i> <span>React</span>
+          </button>
+          <button type="button" class="stage-btn leave-btn" id="stageLeaveBtn" title="Leave Stage">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i> <span>Leave</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Discover Spaces Feed -->
+      <div class="spaces-feed-section">
+        <h3 class="spaces-section-heading">EXPLORE LIVE STAGES</h3>
+        <div class="spaces-cards-grid" id="spacesCardsGrid">
+          <div class="space-room-card active-room" data-room-id="room-sec" data-title="Cyber Security Briefing: Zero-Day Guard">
+            <div class="room-card-header">
+              <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> ACTIVE</span>
+              <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 148</span>
+            </div>
+            <h4 class="room-card-title">Cyber Security Briefing: Zero-Day Guard</h4>
+            <p class="room-card-desc">Architecting zero-trust perimeter defenses and quantum cryptographic mesh.</p>
+            <div class="room-card-footer">
+              <span class="room-host-tag"><i class="fa-solid fa-crown"></i> Alex</span>
+              <button type="button" class="join-space-btn" data-room="room-sec">TUNED IN</button>
+            </div>
+          </div>
+
+          <div class="space-room-card" data-room-id="room-ai" data-title="ChronEX AI Devs & Builders Lounge">
+            <div class="room-card-header">
+              <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> LIVE</span>
+              <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 92</span>
+            </div>
+            <h4 class="room-card-title">ChronEX AI Devs &amp; Builders Lounge</h4>
+            <p class="room-card-desc">Fine-tuning custom persona bots and Baileys WhatsApp bridges.</p>
+            <div class="room-card-footer">
+              <span class="room-host-tag"><i class="fa-solid fa-robot"></i> ChronEX</span>
+              <button type="button" class="join-space-btn" data-room="room-ai">TUNE IN</button>
+            </div>
+          </div>
+
+          <div class="space-room-card" data-room-id="room-gaming" data-title="AstroShift: beyond Earth Space">
+            <div class="room-card-header">
+              <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> LIVE</span>
+              <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 210</span>
+            </div>
+            <h4 class="room-card-title">AstroShift: beyond Earth</h4>
+            <p class="room-card-desc">High-speed orbital flight, deep space physics, and planetary tactical combat.</p>
+            <div class="room-card-footer">
+              <span class="room-host-tag"><i class="fa-solid fa-gamepad"></i> Nova</span>
+              <button type="button" class="join-space-btn" data-room="room-gaming">TUNE IN</button>
+            </div>
+          </div>
+
+          <div class="space-room-card" data-room-id="room-ambient" data-title="Night Drift Ambient Cyber Lounge">
+            <div class="room-card-header">
+              <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> LIVE</span>
+              <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 64</span>
+            </div>
+            <h4 class="room-card-title">Night Drift Ambient Cyber Lounge</h4>
+            <p class="room-card-desc">Low-frequency sub-bass synths and open community chat channel.</p>
+            <div class="room-card-footer">
+              <span class="room-host-tag"><i class="fa-solid fa-music"></i> DEMON_BEATS</span>
+              <button type="button" class="join-space-btn" data-room="room-ambient">TUNE IN</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 6. CYBERDROP P2P DIRECT FILE BEAM          -->
+  <!-- ========================================== -->
+  <div id="cyberDropModal" class="cyber-drop-modal" style="display: none;">
+    <div class="cyberdrop-modal-backdrop" id="closeCyberDropBackdrop"></div>
+    <div class="cyberdrop-modal-container">
+      <div class="cyberdrop-modal-header">
+        <div class="cyberdrop-brand">
+          <div class="cyberdrop-icon-box"><i class="fa-solid fa-share-nodes"></i></div>
+          <div>
+            <h2 class="cyberdrop-title">CYBERDROP P2P BEAM</h2>
+            <div class="cyberdrop-subtitle">ZERO-SERVER BANDWIDTH &bull; GIGABIT WEBRTC MESH BEAM</div>
+          </div>
+        </div>
+        <button type="button" class="cyberdrop-close-btn" id="closeCyberDropBtn" title="Close CyberDrop">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Discovery Radar & Passcode Row -->
+      <div class="cyberdrop-top-row">
+        <div class="cyberdrop-radar-box">
+          <div class="cyberdrop-radar-sweep"></div>
+          <div class="cyberdrop-peer-node self" title="Your Node">
+            <i class="fa-solid fa-laptop"></i>
+          </div>
+          <div class="cyberdrop-peer-node peer-1" title="Peer 192.168.1.14 (Deck)">
+            <i class="fa-solid fa-mobile-screen"></i>
+          </div>
+          <div class="cyberdrop-peer-node peer-2" title="Peer Titan-HQ">
+            <i class="fa-solid fa-server"></i>
+          </div>
+          <span class="cyberdrop-radar-status">Scanning Mesh Network...</span>
+        </div>
+
+        <div class="cyberdrop-code-box">
+          <span class="beam-code-label">YOUR ONE-TIME BEAM CODE:</span>
+          <div class="beam-code-display" id="myBeamCodeDisplay">849-210</div>
+          <p class="beam-code-hint">Share this code with nearby peers to beam files directly.</p>
+          <div class="remote-code-input-row">
+            <input type="text" id="remoteBeamCodeInput" placeholder="Enter peer beam code..." maxlength="7">
+            <button type="button" id="connectBeamCodeBtn" class="beam-connect-btn">
+              <i class="fa-solid fa-link"></i> CONNECT
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- File Drop Target Station -->
+      <div class="cyberdrop-zone" id="cyberDropZone">
+        <i class="fa-solid fa-cloud-arrow-up cyberdrop-zone-icon"></i>
+        <div class="cyberdrop-zone-title">DRAG &amp; DROP FILES TO BEAM</div>
+        <p class="cyberdrop-zone-desc">High-speed P2P transmission &bull; Unlimited file size &bull; Direct encryption</p>
+        <button type="button" class="select-beam-files-btn" id="selectBeamFilesBtn">
+          <i class="fa-solid fa-folder-open"></i> BROWSE FILES
+        </button>
+        <input type="file" id="beamFileInput" style="display: none;" multiple>
+      </div>
+
+      <!-- Active Beam Transfer Progress Strip -->
+      <div class="cyberdrop-progress-box" id="cyberDropProgressBox" style="display: none;">
+        <div class="beam-file-meta">
+          <div class="beam-file-name-row">
+            <i class="fa-solid fa-file-zipper"></i>
+            <span id="beamFileName">firmware_v4.tar.gz</span>
+          </div>
+          <div class="beam-metrics">
+            <span id="beamSpeed">38.4 MB/s</span> &bull; <span id="beamTransferred">0%</span>
+          </div>
+        </div>
+        <div class="beam-progress-bar">
+          <div class="beam-progress-fill" id="beamProgressFill" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- 7. CIPHER VAULT & ENCRYPTED SECRET ROOMS   -->
+  <!-- ========================================== -->
+  <div id="cipherVaultModal" class="cipher-vault-modal" style="display: none;">
+    <div class="cipher-modal-backdrop" id="closeCipherVaultBackdrop"></div>
+    <div class="cipher-modal-container">
+      <div class="cipher-modal-header">
+        <div class="cipher-brand">
+          <div class="cipher-icon-box"><i class="fa-solid fa-key"></i></div>
+          <div>
+            <h2 class="cipher-title">CIPHER VAULT</h2>
+            <div class="cipher-subtitle">ZERO-KNOWLEDGE HIDDEN ROOMS &bull; END-TO-END AES-256</div>
+          </div>
+        </div>
+        <button type="button" class="cipher-close-btn" id="closeCipherVaultBtn" title="Close Vault">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Lock Keypad Screen (Visible until unlocked) -->
+      <div class="cipher-lock-screen" id="cipherLockScreen">
+        <div class="lock-shield-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <h3 class="lock-screen-title">ENTER CIPHER SECURITY PIN</h3>
+        <p class="lock-screen-desc">Access to encrypted invisible rooms requires vault master PIN (Default: 1337)</p>
+
+        <!-- PIN Dots -->
+        <div class="pin-dots-row" id="pinDotsRow">
+          <span class="pin-dot"></span>
+          <span class="pin-dot"></span>
+          <span class="pin-dot"></span>
+          <span class="pin-dot"></span>
+        </div>
+
+        <!-- Numeric Keypad -->
+        <div class="pin-keypad-grid">
+          <button type="button" class="pin-key" data-digit="1">1</button>
+          <button type="button" class="pin-key" data-digit="2">2</button>
+          <button type="button" class="pin-key" data-digit="3">3</button>
+          <button type="button" class="pin-key" data-digit="4">4</button>
+          <button type="button" class="pin-key" data-digit="5">5</button>
+          <button type="button" class="pin-key" data-digit="6">6</button>
+          <button type="button" class="pin-key" data-digit="7">7</button>
+          <button type="button" class="pin-key" data-digit="8">8</button>
+          <button type="button" class="pin-key" data-digit="9">9</button>
+          <button type="button" class="pin-key clear" id="pinClearBtn"><i class="fa-solid fa-xmark"></i></button>
+          <button type="button" class="pin-key" data-digit="0">0</button>
+          <button type="button" class="pin-key backspace" id="pinBackspaceBtn"><i class="fa-solid fa-delete-left"></i></button>
+        </div>
+      </div>
+
+      <!-- Unlocked Vault View (Hidden until PIN is verified) -->
+      <div class="cipher-unlocked-view" id="cipherUnlockedView" style="display: none;">
+        <div class="cipher-telemetry-banner">
+          <div class="cipher-status-indicator">
+            <i class="fa-solid fa-lock"></i>
+            <span>ENCRYPTED MESH: AES-256-GCM ACTIVE &bull; MEMORY RESIDENT ONLY</span>
+          </div>
+          <button type="button" class="cipher-lock-btn" id="relockCipherVaultBtn">
+            <i class="fa-solid fa-lock"></i> LOCK VAULT
+          </button>
+        </div>
+
+        <div class="secret-rooms-section">
+          <div class="secret-rooms-header">
+            <h4>HIDDEN SECRET ROOMS</h4>
+            <button type="button" class="create-secret-room-btn" id="createSecretRoomBtn">
+              <i class="fa-solid fa-plus"></i> NEW SECRET ROOM
+            </button>
+          </div>
+
+          <div class="secret-rooms-list" id="secretRoomsList">
+            <div class="secret-room-card" data-room-id="sr-obsidian">
+              <div class="secret-room-info">
+                <div class="secret-room-name-row">
+                  <i class="fa-solid fa-eye-slash" style="color: #c084fc;"></i>
+                  <span class="secret-room-name">Project Obsidian</span>
+                  <span class="secret-room-badge">CIPHER-LOCKED</span>
+                </div>
+                <p class="secret-room-meta">Zero metadata logs &bull; 24h auto-rotation &bull; 2 participants</p>
+              </div>
+              <button type="button" class="open-secret-room-btn" data-room="Project Obsidian">
+                <i class="fa-solid fa-arrow-right"></i> ENTER
+              </button>
+            </div>
+
+            <div class="secret-room-card" data-room-id="sr-phantom">
+              <div class="secret-room-info">
+                <div class="secret-room-name-row">
+                  <i class="fa-solid fa-ghost" style="color: #67e8f9;"></i>
+                  <span class="secret-room-name">Phantom Mesh Vault</span>
+                  <span class="secret-room-badge">EPHEMERAL</span>
+                </div>
+                <p class="secret-room-meta">End-to-end client salted key &bull; Burn on close</p>
+              </div>
+              <button type="button" class="open-secret-room-btn" data-room="Phantom Mesh Vault">
+                <i class="fa-solid fa-arrow-right"></i> ENTER
+              </button>
+            </div>
+
+            <div class="secret-room-card" data-room-id="sr-ledger">
+              <div class="secret-room-info">
+                <div class="secret-room-name-row">
+                  <i class="fa-solid fa-fingerprint" style="color: #00ff66;"></i>
+                  <span class="secret-room-name">Quantum Ledger HQ</span>
+                  <span class="secret-room-badge">ENCLAVE</span>
+                </div>
+                <p class="secret-room-meta">Biometric requirement &bull; Off-grid cache only</p>
+              </div>
+              <button type="button" class="open-secret-room-btn" data-room="Quantum Ledger HQ">
+                <i class="fa-solid fa-arrow-right"></i> ENTER
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incinerator Emergency Wipe -->
+        <div class="cipher-incinerator-box">
+          <div class="incinerator-text">
+            <strong>EMERGENCY VAULT INCINERATOR</strong>
+            <p>Permanently deletes all secret rooms, ephemeral keys, and cached logs with zero recovery.</p>
+          </div>
+          <button type="button" class="incinerator-action-btn" id="incinerateCipherVaultBtn">
+            <i class="fa-solid fa-fire"></i> INCINERATE VAULT
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION CONTAINER -->
+  <div id="notificationContainer" class="notification-container"></div>
+
+  <script type="module" src="pwa-install.js"></script>
+  <script type="module" src="app-prompt.js"></script>
+  <script type="module" src="messaging-features.js"></script>
+  <script type="module" src="chat-navigation.js"></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script type="module" src="chat.js"></script>
+  <script type="module" src="button-setup.js"></script>
+
+</body>
+
+</html>

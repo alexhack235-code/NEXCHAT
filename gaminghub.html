@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#00f2ff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Gaming Hub — AstroShift: beyond Earth</title>
+  <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
+  <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="gaminghub.css" />
+  <link rel="manifest" href="/manifest.json">
+</head>
+
+<body>
+  <div class="gaming-hub-container">
+    <!-- Header -->
+    <header class="gaming-header">
+      <div class="gaming-header-top">
+        <a href="chat.html" class="back-btn" title="Back to NEXCHAT">
+          <i class="fa-solid fa-arrow-left"></i> <span>Back to Chat</span>
+        </a>
+        <h1 class="gaming-title">
+          <i class="fa-solid fa-shuttle-space"></i> NEX GAMING HUB
+        </h1>
+        <div class="hub-header-actions">
+          <div class="token-balance-chip" id="hubTokenBalanceChip" title="Your NEX Tokens">
+            <i class="fa-solid fa-coins"></i> <span id="hubTokenBalance">1,250</span> TOKENS
+          </div>
+          <button type="button" id="hubAudioToggle" class="hub-icon-btn" title="Toggle Sound FX">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- EXCLUSIVE FEATURED 3D GAME: ASTROSHIFT: BEYOND EARTH -->
+    <main>
+      <section class="astro-hero-banner">
+        <div class="astro-hero-badge-row">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <span class="astro-badge"><i class="fa-solid fa-cube"></i> 3D NEWTONIAN ENGINE</span>
+            <span class="astro-badge green"><i class="fa-solid fa-bolt"></i> HIGH-FIDELITY PHYSICS</span>
+          </div>
+          <div class="astro-players-online">
+            <i class="fa-solid fa-users"></i> 8.9M OPERATIVES ONLINE
+          </div>
+        </div>
+
+        <div class="astro-title-wrap">
+          <h2 class="astro-game-title">
+            <span>AstroShift: beyond Earth</span>
+          </h2>
+          <p class="astro-game-desc">
+            Explore deep space, planetary surfaces, and tactical combat beyond Earth. Pilot the colossal 120m SpaceX Starship with Mechazilla Tower, maneuver heavy Armed Combat Rovers, operate the 2,400 MWe Nuclear Power Complex, descend into subterranean bio-bunkers (-22m), and withstand hostile swarms!
+          </p>
+        </div>
+
+        <div class="astro-action-row">
+          <a href="game.html" class="btn-launch-astro" id="btnLaunchAstro">
+            <i class="fa-solid fa-play"></i> LAUNCH 3D GAME [PLAY NOW]
+          </a>
+          <button type="button" class="btn-specs" id="openSpecsBtn">
+            <i class="fa-solid fa-circle-info"></i> SPECIFICATIONS &amp; CONTROLS
+          </button>
+        </div>
+      </section>
+
+      <!-- ASTROSHIFT CORE SYSTEMS & MODULES -->
+      <section class="astro-pillars-grid">
+        <div class="pillar-card">
+          <div class="pillar-icon-box">
+            <i class="fa-solid fa-rocket"></i>
+          </div>
+          <h3 class="pillar-title">120m SpaceX Starship</h3>
+          <p class="pillar-desc">
+            Multi-stage vehicle with detachable Super Heavy Booster, vacuum Raptors, actuating aerodynamic flaps, Mach telemetry, and boost-back descent.
+          </p>
+          <div class="pillar-tag">// PROPULSION: 33 RAPTOR CLUSTER</div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon-box green">
+            <i class="fa-solid fa-earth-americas"></i>
+          </div>
+          <h3 class="pillar-title">4 Interplanetary Worlds</h3>
+          <p class="pillar-desc">
+            Hyperspace warp between Earth Metropolis (1.0G), Mars Oblivion (0.38G), Nebula Prime (0.56G), and Zero-G Orbital Asteroid Belt.
+          </p>
+          <div class="pillar-tag">// GRAVITY: 0.0G - 1.0G DYNAMICS</div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon-box amber">
+            <i class="fa-solid fa-atom"></i>
+          </div>
+          <h3 class="pillar-title">2,400 MWe Nuclear Grid</h3>
+          <p class="pillar-desc">
+            Full fission reactor console with control rod modulation, coolant pump telemetry, emergency SCRAM protocols, and passive NEX Token dividends.
+          </p>
+          <div class="pillar-tag">// OUTPUT: +8.5 NEX TOKENS/SEC</div>
+        </div>
+
+        <div class="pillar-card">
+          <div class="pillar-icon-box red">
+            <i class="fa-solid fa-biohazard"></i>
+          </div>
+          <h3 class="pillar-title">Subterranean Metro (-22m)</h3>
+          <p class="pillar-desc">
+            Underground subway maglev transit, surface combat rover vehicle, tactical weapon loadouts, and quarantine horde defense.
+          </p>
+          <div class="pillar-tag">// COMBAT: TACTICAL WEAPON ARSENAL</div>
+        </div>
+      </section>
+
+      <!-- FLIGHT & TACTICAL CONTROLS GUIDE -->
+      <section class="controls-section">
+        <h3 class="section-header-title">
+          <i class="fa-solid fa-gamepad"></i> Tactical &amp; Flight Controls
+        </h3>
+        <div class="controls-key-grid">
+          <div class="key-item"><span class="key-badge">WASD</span> Walk / Rover Drive / Rocket Throttle</div>
+          <div class="key-item"><span class="key-badge">MOUSE</span> Look / Aim / Rocket Pitch &amp; Yaw</div>
+          <div class="key-item"><span class="key-badge">GYRO</span> Phone Tilt Aim &amp; Starship Steering</div>
+          <div class="key-item"><span class="key-badge">TOUCH</span> 4-Way D-Pad / Joystick &amp; Aim Zone</div>
+          <div class="key-item"><span class="key-badge">SPACE</span> Jump / Jetpack / Rocket Staging</div>
+          <div class="key-item"><span class="key-badge">B</span> Board / Launch SpaceX Starship</div>
+          <div class="key-item"><span class="key-badge">P</span> Interstellar Warp Navigation</div>
+          <div class="key-item"><span class="key-badge">C</span> Cockpit / Chase Rocket View</div>
+          <div class="key-item"><span class="key-badge">V</span> Toggle 1st / 3rd Person View</div>
+          <div class="key-item"><span class="key-badge">SCROLL</span> Zoom In / Out in 3rd Person</div>
+          <div class="key-item"><span class="key-badge">E</span> Pilot / Exit Combat Rover</div>
+          <div class="key-item"><span class="key-badge">F</span> Enter Subterranean Metro (-22m)</div>
+          <div class="key-item"><span class="key-badge">N</span> Nuclear Reactor Console</div>
+          <div class="key-item"><span class="key-badge">1 - 4</span> Switch Tactical Weapons</div>
+          <div class="key-item"><span class="key-badge">CLICK</span> Primary Fire / Cannon</div>
+          <div class="key-item"><span class="key-badge">R</span> Reload Weapon Magazine</div>
+          <div class="key-item"><span class="key-badge">GEAR</span> In-Game Settings &amp; Gyro Controls</div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- SPECIFICATIONS MODAL -->
+  <div class="modal-overlay" id="specsModal" role="dialog" aria-modal="true">
+    <div class="modal-content">
+      <button type="button" class="modal-close" id="closeSpecsBtn" aria-label="Close modal">&times;</button>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <i class="fa-solid fa-shuttle-space" style="color: #00f2ff; font-size: 24px;"></i>
+        <h2 style="font-family: 'Orbitron', sans-serif; font-size: 20px; color: #fff;">ASTROSHIFT SPECIFICATIONS</h2>
+      </div>
+      <div style="font-family: 'Inter', sans-serif; font-size: 14px; color: #9cb0c6; line-height: 1.7; display: flex; flex-direction: column; gap: 14px;">
+        <p>
+          <strong style="color: #00f2ff;">Physics Engine:</strong> Three.js r128 Newtonian gravity solver with sub-step collision resolution and realistic orbital trajectory projection.
+        </p>
+        <p>
+          <strong style="color: #00ff88;">Audio Pipeline:</strong> Web Audio API procedural synthesizer for jet engines, plasma discharge, Geiger counters, and atmospheric sonic booms.
+        </p>
+        <p>
+          <strong style="color: #ffb700;">Security Clearance:</strong> Atomic Defense Protocol Level 5. The developer override passphrase is <code style="background: rgba(0,242,255,0.15); color: #00f2ff; padding: 2px 6px; border-radius: 4px;">IAMATOMICDEVELOPER18@$#</code>.
+        </p>
+        <div style="margin-top: 14px;">
+          <a href="game.html" class="btn-launch-astro" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-play"></i> LAUNCH ASTROSHIFT: BEYOND EARTH NOW
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="gaminghub.js"></script>
+</body>
+
+</html>

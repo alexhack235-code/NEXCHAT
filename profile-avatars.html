@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXCHAT — Premium Identity Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #040811;
+      --bg-2: #0c1625;
+      --panel: rgba(10, 17, 27, 0.82);
+      --panel-strong: rgba(7, 13, 20, 0.96);
+      --panel-soft: rgba(255, 255, 255, 0.025);
+      --line: rgba(255, 255, 255, 0.08);
+      --text: #f5f9ff;
+      --muted: #8fa3bd;
+      --green: #00f076;
+      --cyan: #00d4ff;
+      --purple: #7c5cff;
+      --shadow: rgba(0, 240, 118, 0.26);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: radial-gradient(circle at top, rgba(0, 240, 118, 0.1), transparent 25%),
+        radial-gradient(circle at right, rgba(0, 212, 255, 0.12), transparent 22%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    .identity-shell {
+      position: relative;
+      width: min(1320px, 100%);
+      height: min(900px, 100%);
+      background: rgba(5, 10, 16, 0.72);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.56), 0 0 40px rgba(0, 240, 118, 0.08);
+      backdrop-filter: blur(22px);
+    }
+
+    .identity-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(0, 240, 118, 0.05), transparent 30%, rgba(0, 212, 255, 0.06) 70%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .identity-header {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px 16px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(9, 15, 21, 0.5);
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(0, 240, 118, 0.14), rgba(0, 212, 255, 0.12));
+      border: 1px solid rgba(0, 240, 118, 0.28);
+      color: var(--green);
+      font-weight: 800;
+      box-shadow: 0 12px 28px rgba(0, 240, 118, 0.12);
+    }
+
+    .brand-text {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .brand-text strong {
+      display: block;
+      margin-top: 3px;
+      font-size: 22px;
+      letter-spacing: -0.05em;
+      color: var(--text);
+      text-transform: none;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill,
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .status-pill {
+      color: var(--green);
+      border-color: rgba(0, 240, 118, 0.2);
+      background: rgba(0, 240, 118, 0.06);
+    }
+
+    .status-pill::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 12px rgba(0, 240, 118, 0.8);
+    }
+
+    .identity-layout {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      height: calc(100% - 76px);
+    }
+
+    .identity-sidebar {
+      background: rgba(9, 15, 22, 0.72);
+      border-right: 1px solid var(--line);
+      padding: 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sidebar-label {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 700;
+      margin: 4px 6px 8px;
+    }
+
+    .filter-btn {
+      width: 100%;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      padding: 14px 14px;
+      border-radius: 14px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      color: var(--text);
+      background: rgba(0, 240, 118, 0.08);
+      border-color: rgba(0, 240, 118, 0.24);
+      box-shadow: inset 0 0 14px rgba(0, 240, 118, 0.06);
+    }
+
+    .filter-btn.active {
+      position: relative;
+    }
+
+    .filter-btn.active::before {
+      content: '';
+      position: absolute;
+      left: -1px;
+      top: 8px;
+      bottom: 8px;
+      width: 3px;
+      border-radius: 9999px;
+      background: linear-gradient(180deg, var(--green), var(--cyan));
+    }
+
+    .rescan-btn {
+      margin-top: auto;
+      background: linear-gradient(135deg, rgba(0, 240, 118, 0.08), rgba(0, 212, 255, 0.08));
+      border-color: rgba(0, 240, 118, 0.26);
+      color: var(--green);
+    }
+
+    .identity-main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+      padding: 20px 24px 24px;
+    }
+
+    .main-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 8px 2px 16px;
+    }
+
+    .main-heading {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .main-heading strong {
+      display: block;
+      margin-top: 8px;
+      color: var(--text);
+      font-size: 26px;
+      letter-spacing: -0.05em;
+      text-transform: none;
+    }
+
+    .summary-strip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .mini-stat {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 10px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .mini-stat strong {
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .scroll-container {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 18px;
+      padding: 8px 6px 12px;
+    }
+
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: rgba(10, 15, 22, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 22px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      min-height: 260px;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(0, 240, 118, 0.28);
+      box-shadow: 0 26px 40px rgba(0, 0, 0, 0.25), 0 0 20px rgba(0, 240, 118, 0.08);
+    }
+
+    .card-img-wrap {
+      position: relative;
+      height: 190px;
+      background: radial-gradient(circle at top, rgba(0, 240, 118, 0.06), transparent 34%), #050a11;
+      overflow: hidden;
+    }
+
+    .loading-spinner {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      z-index: 1;
+      color: var(--green);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .card-img {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.7s ease;
+    }
+
+    .card-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      padding: 12px 14px 14px;
+      background: rgba(8, 13, 20, 0.94);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .card-name {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+
+    .card-type {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #9ae7c7;
+      font-weight: 700;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(1, 4, 9, 0.82);
+      backdrop-filter: blur(12px);
+      z-index: 2000;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal {
+      position: relative;
+      width: min(932px, calc(100vw - 42px));
+      height: min(620px, calc(100vh - 50px));
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      background: rgba(8, 14, 22, 0.96);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 28px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.62), 0 0 30px rgba(0, 240, 118, 0.08);
+      overflow: hidden;
+    }
+
+    .preview-large {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(3, 7, 12, 1), rgba(9, 16, 24, 1));
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .preview-large img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .modal-controls {
+      position: relative;
+      padding: 38px 28px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: rgba(7, 12, 18, 0.96);
+    }
+
+    .close-btn {
+      position: absolute;
+      right: 18px;
+      top: 18px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .close-btn:hover {
+      color: var(--text);
+      border-color: rgba(0, 240, 118, 0.25);
+    }
+
+    .modal-eyebrow {
+      color: var(--green);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-weight: 800;
+      margin-bottom: 14px;
+    }
+
+    .modal-title {
+      font-size: clamp(2rem, 3vw, 2.65rem);
+      letter-spacing: -0.06em;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .modal-type {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .modal-desc {
+      color: var(--muted);
+      line-height: 1.7;
+      margin-bottom: 26px;
+      font-size: 14px;
+    }
+
+    .confirm-btn {
+      border: none;
+      padding: 18px 18px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--green), var(--cyan));
+      color: #05110c;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 18px 34px rgba(0, 240, 118, 0.2);
+    }
+
+    .confirm-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 36px rgba(0, 240, 118, 0.28);
+    }
+
+    .modal-footer {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+        padding: 16px;
+      }
+
+      .identity-shell {
+        height: auto;
+        min-height: 620px;
+      }
+
+      .identity-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .identity-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .modal {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .preview-large {
+        min-height: 260px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .identity-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .summary-strip {
+        justify-content: flex-start;
+      }
+
+      .scroll-container {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      }
+
+      .main-topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="identity-shell">
+    <header class="identity-header">
+      <div class="brand-wrap">
+        <div class="brand-mark">N</div>
+        <div class="brand-text">
+          NEXCHAT
+          <strong>Identity Vault</strong>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <span class="meta-pill">15+ Profiles</span>
+        <span class="status-pill">Live</span>
+      </div>
+    </header>
+
+    <div class="identity-layout">
+      <aside class="identity-sidebar">
+        <div class="sidebar-label">Choose a style</div>
+        <button class="filter-btn active" onclick="setFilter('all', event)">All Profiles</button>
+        <button class="filter-btn" onclick="setFilter('nex', event)">Chrome Elite</button>
+        <button class="filter-btn" onclick="setFilter('human', event)">Neo Synth</button>
+        <button class="filter-btn" onclick="setFilter('skull', event)">Silver Sentinel</button>
+        <button class="filter-btn" onclick="setFilter('hacker', event)">Hyper Android</button>
+        <button class="filter-btn" onclick="setFilter('mech', event)">Core Cyborg</button>
+
+        <button class="filter-btn rescan-btn" onclick="rescanSector()">Rescan system</button>
+      </aside>
+
+      <main class="identity-main">
+        <div class="main-topbar">
+          <div class="main-heading">
+            Premium avatar library
+            <strong>Pick the identity that fits you</strong>
+          </div>
+
+          <div class="summary-strip">
+            <span class="mini-stat"><strong>60</strong> units</span>
+            <span class="mini-stat"><strong>4K</strong> realism</span>
+            <span class="mini-stat"><strong>AI</strong> ready</span>
+          </div>
+        </div>
+
+        <div class="scroll-container" id="cardGrid"></div>
+      </main>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal" onclick="if(event.target===this) closeModal()">
+    <div class="modal">
+      <div class="close-btn" onclick="closeModal()">×</div>
+      <div class="preview-large">
+        <img id="modalImg" src="" alt="Selected avatar preview">
+      </div>
+      <div class="modal-controls">
+        <div class="modal-eyebrow">Identity locked</div>
+        <h2 class="modal-title" id="modalTitle">Unit 734</h2>
+        <div class="modal-type" id="modalType">Synthetic</div>
+        <p class="modal-desc" id="modalDesc">
+          Premium identity capsule designed for high-trust personal branding and polished community presence.
+        </p>
+        <button class="confirm-btn" onclick="confirmIdentity(event)">Initialize upload</button>
+        <div class="modal-footer">Powered by NEX Dev</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const avatars = [];
+    let currentFilter = 'all';
+    let selectedAvatar = null;
+
+    function getAvatarUrl(type, seed) {
+      const style = "non-organic ultra-realistic highly polished liquid chrome robot head, 100% mechanical assembly, exposed gears, hydraulic wires, glowing blue optic sensors, industrial style, 8k, cinematic lighting, octane render, machine parts, zero human skin, no organic tissue";
+
+      let prompt = `chrome mechanical robot entity, glowing blue sensors, ${style}`;
+      if (type === 'nex') {
+        prompt = `extreme close-up of the ultimate elite ${style}, masterfully crafted mechanical features, intense glowing blue internal sensors, masterpiece engineering`;
+      } else if (type === 'human') {
+        prompt = `ultra-realistic portrait of a futuristic humanoid robot (synth), sleek white ceramic and silver chrome face structure, glowing cyan intricate circuitry visible through translucent synthetic panels, mechanical eyes with depth, ${style}, elegant but 100% robotic`;
+      } else if (type === 'skull') {
+        prompt = `futuristic silver-sentinel robotic head, sharp chrome armor, ${style}, aggressive high-tech design`;
+      } else if (type === 'hacker') {
+        prompt = `advanced surveillance robotic entity, chrome skull structure with exposed glowing blue light-wires, ${style}, digital infiltration machine`;
+      } else if (type === 'mech') {
+        prompt = `heavy core-cyborg head, reinforced chrome plating, ${style}, powerful industrial robotics`;
+      }
+
+      return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=640&height=640&seed=${seed}&nologo=true`;
+    }
+
+    window.handleAvatarError = function (img, type, seed) {
+      if (!img || img.dataset.failed === 'true') return;
+      img.dataset.failed = 'true';
+
+      const fallbackPrompt = 'hyper-realistic silver chrome robot head, glowing blue eyes, highly detailed metal, cinematic, 8k, machine parts';
+      img.src = `https://image.pollinations.ai/prompt/${encodeURIComponent(fallbackPrompt)}?width=640&height=640&seed=${seed + 999}&nologo=true`;
+      img.onerror = () => {
+        img.src = 'logo.jpg';
+        img.style.opacity = '1';
+      };
+    };
+
+    function init() {
+      const baseSeed = Math.floor(Math.random() * 99999);
+      avatars.length = 0;
+
+      for (let i = 0; i < 15; i++) {
+        avatars.push({ type: 'nex', name: `Chrome-Elite-${700 + i}`, seed: baseSeed + i + 9000 });
+      }
+
+      const types = ['human', 'skull', 'hacker', 'mech'];
+      const labels = { human: 'Synth', skull: 'Sentinel', hacker: 'Hyper', mech: 'Cyborg' };
+      const startIds = { human: 100, skull: 200, hacker: 300, mech: 400 };
+
+      types.forEach(type => {
+        for (let i = 0; i < 15; i++) {
+          avatars.push({
+            type,
+            name: `${labels[type]}-${startIds[type] + i}`,
+            seed: baseSeed + i + (types.indexOf(type) * 1000)
+          });
+        }
+      });
+
+      render();
+    }
+
+    window.rescanSector = function () {
+      const btn = document.querySelector('.rescan-btn');
+      if (btn) btn.textContent = 'Scanning...';
+      setTimeout(() => {
+        init();
+        if (btn) btn.textContent = 'Rescan system';
+      }, 400);
+    };
+
+    function render() {
+      const g = document.getElementById('cardGrid');
+      if (!g) return;
+      g.innerHTML = '';
+
+      const filtered = avatars.filter(av => currentFilter === 'all' || av.type === currentFilter);
+      if (filtered.length === 0) {
+        g.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding: 60px 20px; color:#ff8697;">No profiles in this category.</div>`;
+        return;
+      }
+
+      filtered.forEach(av => {
+        const src = getAvatarUrl(av.type, av.seed);
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="card-img-wrap">
+            <div class="loading-spinner">Loading</div>
+            <img src="${src}" class="card-img" onload="this.style.opacity='1'; this.previousElementSibling.style.display='none';" onerror="handleAvatarError(this, '${av.type}', ${av.seed})">
+          </div>
+          <div class="card-info">
+            <div class="card-name">${av.name}</div>
+            <div class="card-type">${av.type.toUpperCase()} profile</div>
+          </div>
+        `;
+        card.onclick = () => openModal(av, card.querySelector('img').src);
+        g.appendChild(card);
+      });
+    }
+
+    function setFilter(filter, event) {
+      currentFilter = filter;
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.toggle('active', btn.textContent.toLowerCase().includes(filter === 'all' ? 'all' : filter) || (filter === 'all' && btn.classList.contains('active'))));
+      if (event && event.target) {
+        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+      }
+      render();
+    }
+
+    function openModal(av, src) {
+      selectedAvatar = { ...av, url: src };
+      const modal = document.getElementById('modal');
+      const modalImg = document.getElementById('modalImg');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalType = document.getElementById('modalType');
+      const modalDesc = document.getElementById('modalDesc');
+
+      modalImg.src = src;
+      modalTitle.textContent = av.name;
+      modalType.textContent = av.type.toUpperCase() + ' class profile';
+
+      let desc = 'Premium identity capsule designed for trust, confidence, and a professional digital presence.';
+      if (av.type === 'nex') desc = 'Elite chrome identity with a premium, polished presence for standout branding and social recognition.';
+      if (av.type === 'human') desc = 'High-end synth presence with a cleaner human-inspired profile suitable for polished personal branding.';
+      if (av.type === 'skull') desc = 'Sharp, high-contrast identity profile built for confident, memorable visual impact.';
+      if (av.type === 'hacker') desc = 'Tech-first identity with a futuristic edge for creators and digital specialists.';
+      if (av.type === 'mech') desc = 'Industrial-grade digital identity for powerful, high-trust creator profiles.';
+
+      modalDesc.textContent = desc;
+      modal.classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('open');
+    }
+
+    function confirmIdentity(event) {
+      const btn = event ? event.target : document.querySelector('.confirm-btn');
+      if (btn) btn.textContent = 'Loading...';
+
+      if (window.opener) {
+        window.opener.postMessage({ type: 'avatarSelected', avatar: selectedAvatar }, '*');
+        setTimeout(() => window.close(), 180);
+      } else {
+        alert('Profile image selected');
+      }
+    }
+
+    init();
+  </script>
+</body>
+
+</html>

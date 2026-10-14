@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#060913">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <title>NEXCHAT — Neural Cyber Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="login.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
+  <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+</head>
+<body>
+
+<!-- ============================================================
+     NEXSHOT FUSION CINEMATIC INTRO OVERLAY
+     NEXCHAT (Cyan/Emerald) × CAMSHOT (Gold/Iris) => NEXSHOT
+     "THE FUTURE IS RIGHT HERE"
+     ============================================================ -->
+<div id="nexshotFusionOverlay" class="nexshot-fusion-overlay" aria-label="NEXSHOT Fusion Cinematic Intro">
+  <canvas id="fusionCanvas" class="fusion-canvas"></canvas>
+  <div class="fusion-radial-nebula"></div>
+  <div class="fusion-scanline"></div>
+
+  <!-- Top Controls Bar -->
+  <header class="fusion-topbar">
+    <div class="fusion-sys-badge">
+      <span class="fusion-pulse-dot"></span>
+      <span>CONVERGENCE PROTOCOL // ACTIVE</span>
+    </div>
+    <div class="fusion-top-actions">
+      <button type="button" id="fusionAudioBtn" class="fusion-action-btn" title="Toggle Cinematic Sound">
+        <i class="fa-solid fa-volume-high"></i>
+      </button>
+      <button type="button" id="fusionSkipBtn" class="fusion-action-btn fusion-skip-chip" title="Skip to Login">
+        <span>Skip Intro</span>
+        <i class="fa-solid fa-forward-step"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Convergence Stage -->
+  <main class="fusion-stage">
+    
+    <!-- Streams Container (NEXCHAT left, CAMSHOT right) -->
+    <div class="fusion-streams" id="fusionStreams">
+      
+      <!-- Left Stream: NEXCHAT -->
+      <div class="fusion-stream stream-left" id="streamNexchat">
+        <div class="stream-glow-orb stream-glow-cyan"></div>
+        <div class="stream-card stream-card-cyan">
+          <div class="stream-icon-badge">
+            <i class="fa-solid fa-comments"></i>
+          </div>
+          <div class="stream-title">NEXCHAT</div>
+          <div class="stream-tag">NEURAL CHAT</div>
+          <div class="stream-features">
+            <span><i class="fa-solid fa-bolt"></i> Realtime Fast</span>
+            <span><i class="fa-solid fa-shield-halved"></i> Quantum Encrypted</span>
+          </div>
+        </div>
+        <div class="stream-laser-beam beam-left"></div>
+      </div>
+
+      <!-- Center Orbital Collision Node -->
+      <div class="fusion-core-node" id="fusionCoreNode">
+        <div class="core-orbit ring-1"></div>
+        <div class="core-orbit ring-2"></div>
+        <div class="core-orbit ring-3"></div>
+        <div class="core-symbol">
+          <span class="symbol-mult">✕</span>
+        </div>
+        <div class="core-flare"></div>
+      </div>
+
+      <!-- Right Stream: CAMSHOT -->
+      <div class="fusion-stream stream-right" id="streamCamshot">
+        <div class="stream-glow-orb stream-glow-gold"></div>
+        <div class="stream-card stream-card-gold">
+          <div class="stream-icon-badge">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <div class="stream-title">CAMSHOT</div>
+          <div class="stream-tag">NEXT-GEN REELS</div>
+          <div class="stream-features">
+            <span><i class="fa-solid fa-film"></i> 4K Studio Reels</span>
+            <span><i class="fa-solid fa-sliders"></i> Pro Lens Shutter</span>
+          </div>
+        </div>
+        <div class="stream-laser-beam beam-right"></div>
+      </div>
+
+    </div>
+
+    <!-- Fusion Singularity Burst -->
+    <div class="fusion-singularity" id="fusionSingularity">
+      <div class="singularity-shockwave wave-1"></div>
+      <div class="singularity-shockwave wave-2"></div>
+      <div class="singularity-flash"></div>
+    </div>
+
+    <!-- Final Unified NEXSHOT Master Brand Reveal -->
+    <div class="fusion-reveal" id="fusionReveal">
+      <div class="fusion-crest-wrapper">
+        <div class="crest-halo"></div>
+        <div class="crest-ring"></div>
+        <div class="fusion-emblem">
+          <span class="emblem-glyph"><i class="fa-solid fa-bolt"></i></span>
+        </div>
+      </div>
+
+      <div class="fusion-formula-badge">
+        <span class="f-cyan">NEXCHAT</span>
+        <span class="f-x">✕</span>
+        <span class="f-gold">CAMSHOT</span>
+      </div>
+
+      <h1 class="fusion-master-title">NEXSHOT</h1>
+      
+      <div class="fusion-future-banner">
+        <span class="future-bracket">[</span>
+        <span class="future-text">THE FUTURE IS RIGHT HERE</span>
+        <span class="future-bracket">]</span>
+      </div>
+
+      <p class="fusion-reveal-sub">Neural Instant Messaging Merged with Pro Cinematic Reels</p>
+
+      <div class="fusion-progress-track">
+        <div class="fusion-progress-fill" id="fusionProgressBar"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="ambient-glow ambient-glow-1"></div>
+<div class="ambient-glow ambient-glow-2"></div>
+
+<div class="login-wrapper">
+  <main class="login-container">
+    <div class="brand-pill">
+      <span class="status-dot"></span>
+      <span>NEX_AUTH v2.5 • QUANTUM SECURED</span>
+      <button type="button" id="replayFusionBtn" class="replay-intro-btn" title="Replay NEXSHOT Fusion Intro">
+        <i class="fa-solid fa-play"></i> Replay
+      </button>
+    </div>
+
+    <div class="login-header">
+      <div class="logo-wrapper">
+        <img src="logo.jpg" class="brand-logo" alt="NEXCHAT Logo">
+      </div>
+      <h1 class="brand-title">NEXCHAT</h1>
+      <p class="brand-subtitle">Secure neural messaging, calls & decentralized cloud vaults.</p>
+    </div>
+
+    <form id="loginForm" aria-describedby="result" autocomplete="on">
+      <div class="input-group">
+        <label for="loginEmail" class="sr-only">Email address</label>
+        <div class="input-field-wrapper">
+          <i class="fa-solid fa-envelope input-icon" aria-hidden="true"></i>
+          <input type="email" id="loginEmail" placeholder="Email address" autocomplete="email" required>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="loginPassword" class="sr-only">Password</label>
+        <div class="input-field-wrapper password-field">
+          <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
+          <input type="password" id="loginPassword" placeholder="Password" autocomplete="current-password" required>
+          <button type="button" class="password-toggle" data-target="loginPassword" aria-label="Toggle password visibility" tabindex="0">
+            <i class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="form-row-utility">
+        <label class="remember-label">
+          <input type="checkbox" id="rememberMe" checked>
+          <span class="custom-checkbox"><i class="fa-solid fa-check"></i></span>
+          <span>Remember me</span>
+        </label>
+        <a href="reset.html" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <button type="submit" class="auth-btn" id="loginSubmitBtn">
+        <span class="btn-text">Sign In</span>
+        <i class="fa-solid fa-arrow-right btn-icon"></i>
+      </button>
+    </form>
+
+    <div class="divider">
+      <span>OR CONTINUE WITH</span>
+    </div>
+
+    <div class="google-signin-block">
+      <div id="googleSignInContainer" class="google-signin-container">
+        <button type="button" id="googleLoginBtn" class="google-auth-btn">
+          <svg class="google-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.16 0 9.97 0 12s.45 3.84 1.25 5.42l4.03-3.15z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+          </svg>
+          <span class="google-btn-text">Continue with Google</span>
+        </button>
+      </div>
+      <p id="googleConnectLink" class="google-hint">One-click secure Google authentication</p>
+    </div>
+
+    <div class="register-prompt">
+      <span>Don't have an account?</span>
+      <a href="register.html" class="register-link">Create Account <i class="fa-solid fa-arrow-right"></i></a>
+    </div>
+
+    <nav class="quick-utilities-bar" aria-label="Alternative access methods">
+      <a href="link-device.html" class="quick-chip" title="Log in via QR code scanner">
+        <i class="fa-solid fa-qrcode"></i>
+        <span>Linked Device</span>
+      </a>
+      <a href="terminal.html" class="quick-chip" title="Open Hacker Terminal">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Terminal</span>
+      </a>
+      <a href="landing.html" class="quick-chip" title="Explore video showcase & features">
+        <i class="fa-solid fa-sparkles"></i>
+        <span>Showcase</span>
+      </a>
+    </nav>
+
+    <div id="result" class="result-box" role="status" aria-live="polite"></div>
+
+    <div id="loginLoaderOverlay" class="login-loader-overlay" aria-hidden="true">
+      <div class="login-loader-card">
+        <div class="loader-spinner-wrapper">
+          <div class="loader-icon"></div>
+          <div class="loader-pulse-ring"></div>
+        </div>
+        <p class="loader-title">Authenticating...</p>
+        <p class="loader-text">Securing session and decrypting neural workspace.</p>
+        <div class="loader-progress-bar">
+          <div class="loader-progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<footer class="app-footer">
+  <p>CREATED BY <span class="dev-name">NEXO-TECH</span> | POWERED BY <span class="dev-team">NEXCHAT_DEV TEAMS</span></p>
+</footer>
+
+<script type="module" src="app-prompt.js"></script>
+<script type="module" src="pwa-install.js"></script>
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="auth.js"></script>
+</body>
+</html>

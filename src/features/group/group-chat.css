@@ -1,0 +1,814 @@
+/* ==========================================================================
+   NEXCHAT Group Chat Stylesheet
+   Theme: Dark (#0a0e17), Accent Neon Green (#00ff66), Cards (#1a1d23)
+   ========================================================================== */
+
+:root {
+  /* Colors */
+  --nex-bg-main: #0a0e17;
+  --nex-bg-card: #1a1d23;
+  --nex-bg-card-hover: #22262e;
+  --nex-bg-overlay: rgba(10, 14, 23, 0.85);
+  
+  --nex-accent: #00ff66;
+  --nex-accent-gradient-start: #00cc55;
+  --nex-accent-gradient-end: #00aa44;
+  --nex-accent-transparent: rgba(0, 255, 102, 0.15);
+  
+  --nex-text-primary: #e8e8e8;
+  --nex-text-secondary: #9aa0a6;
+  --nex-text-inverse: #000000;
+  
+  --nex-info: #00aaff;
+  --nex-creator: #ffd700;
+  --nex-admin: #00ccff;
+  --nex-mod: #ff9500;
+  
+  /* Dimensions & Shapes */
+  --nex-radius-sm: 4px;
+  --nex-radius-md: 8px;
+  --nex-radius-lg: 12px;
+  --nex-radius-xl: 20px;
+  --nex-radius-round: 50%;
+  
+  --nex-avatar-size: 32px;
+  --nex-bubble-padding: 8px 12px;
+  
+  /* Transitions */
+  --nex-transition: 0.2s ease;
+}
+
+/* ==========================================================================
+   1. Message Bubbles
+   ========================================================================== */
+.nex-msg-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.nex-msg-wrapper.received {
+  justify-content: flex-start;
+  animation: nex-slide-in-left 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.nex-msg-wrapper.sent {
+  justify-content: flex-end;
+  animation: nex-slide-in-right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+
+.nex-msg-wrapper.system {
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0;
+}
+
+.nex-msg-avatar {
+  width: var(--nex-avatar-size);
+  height: var(--nex-avatar-size);
+  border-radius: var(--nex-radius-round);
+  object-fit: cover;
+  flex-shrink: 0;
+  background-color: var(--nex-bg-card);
+}
+
+.nex-msg-bubble {
+  max-width: 75%;
+  padding: var(--nex-bubble-padding);
+  position: relative;
+  word-wrap: break-word;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+.nex-msg-bubble.received {
+  background-color: var(--nex-bg-card);
+  color: var(--nex-text-primary);
+  border-radius: var(--nex-radius-lg) var(--nex-radius-lg) var(--nex-radius-lg) var(--nex-radius-sm);
+}
+
+.nex-msg-bubble.sent {
+  background: linear-gradient(135deg, var(--nex-accent-gradient-start), var(--nex-accent-gradient-end));
+  color: var(--nex-text-inverse);
+  border-radius: var(--nex-radius-lg) var(--nex-radius-lg) var(--nex-radius-sm) var(--nex-radius-lg);
+}
+
+.nex-msg-sender {
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 2px;
+  color: var(--nex-accent);
+}
+
+.nex-msg-bubble.sent .nex-msg-sender {
+  display: none; /* Usually don't show sender for own messages */
+}
+
+.nex-msg-text {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  white-space: pre-wrap;
+}
+
+.nex-msg-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 0.65rem;
+  margin-top: 4px;
+  opacity: 0.8;
+}
+
+.nex-msg-attachment {
+  margin-top: 6px;
+  border-radius: var(--nex-radius-md);
+  overflow: hidden;
+}
+
+.nex-msg-image {
+  max-width: 280px;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: var(--nex-radius-md);
+  cursor: pointer;
+  transition: transform var(--nex-transition);
+}
+
+.nex-msg-image:hover {
+  transform: scale(1.02);
+}
+
+.nex-msg-video {
+  max-width: 280px;
+  border-radius: var(--nex-radius-md);
+  background: #000;
+}
+
+.nex-msg-audio {
+  width: 240px;
+  height: 40px;
+  border-radius: var(--nex-radius-xl);
+}
+
+.nex-msg-doc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--nex-radius-md);
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   2. Reply/Quote
+   ========================================================================== */
+.nex-msg-quote {
+  border-left: 3px solid var(--nex-accent);
+  background: rgba(0, 0, 0, 0.15);
+  padding: 6px 8px;
+  border-radius: 0 var(--nex-radius-md) var(--nex-radius-md) 0;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.nex-msg-quote-sender {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--nex-accent);
+  margin-bottom: 2px;
+}
+
+.nex-msg-bubble.sent .nex-msg-quote-sender {
+  color: var(--nex-text-inverse);
+}
+
+.nex-msg-quote-text {
+  font-size: 0.8125rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  opacity: 0.9;
+}
+
+.nex-reply-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--nex-bg-card);
+  border-left: 4px solid var(--nex-accent);
+  margin-bottom: 4px;
+  border-radius: var(--nex-radius-md);
+}
+
+.nex-reply-preview-close {
+  background: transparent;
+  border: none;
+  color: var(--nex-text-secondary);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.nex-reply-preview-close:hover {
+  color: var(--nex-text-primary);
+}
+
+/* ==========================================================================
+   3. Reactions
+   ========================================================================== */
+.nex-reactions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.nex-reaction-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 6px;
+  background: var(--nex-bg-card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  color: var(--nex-text-secondary);
+  cursor: pointer;
+  transition: all var(--nex-transition);
+}
+
+.nex-reaction-pill:hover {
+  background: var(--nex-bg-card-hover);
+}
+
+.nex-reaction-pill.mine {
+  background: var(--nex-accent-transparent);
+  border-color: var(--nex-accent);
+  color: var(--nex-accent);
+}
+
+.nex-reaction-picker {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) scale(0.9);
+  background: var(--nex-bg-card);
+  border-radius: var(--nex-radius-xl);
+  padding: 6px;
+  display: flex;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  animation: nex-scale-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.nex-reaction-picker.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nex-reaction-picker-emoji {
+  font-size: 1.25rem;
+  padding: 4px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.nex-reaction-picker-emoji:hover {
+  transform: scale(1.2);
+}
+
+/* ==========================================================================
+   4. Read Receipts
+   ========================================================================== */
+.nex-msg-tick {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
+}
+
+.nex-msg-tick.pending { color: var(--nex-text-secondary); }
+.nex-msg-tick.sent { color: var(--nex-text-secondary); }
+.nex-msg-tick.read { color: var(--nex-info); }
+.nex-msg-tick.read-all { color: var(--nex-accent); }
+
+/* ==========================================================================
+   5. Date Separators
+   ========================================================================== */
+.nex-date-separator {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.nex-date-separator span {
+  background: var(--nex-bg-card);
+  padding: 4px 12px;
+  border-radius: var(--nex-radius-xl);
+  font-size: 0.75rem;
+  color: var(--nex-text-secondary);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.nex-date-separator.sticky {
+  position: sticky;
+  top: 8px;
+  z-index: 10;
+}
+
+/* ==========================================================================
+   6. Unread Divider
+   ========================================================================== */
+.nex-unread-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 16px 0;
+  color: var(--nex-info);
+}
+
+.nex-unread-divider::before,
+.nex-unread-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--nex-info);
+  opacity: 0.5;
+}
+
+.nex-unread-pill {
+  background: var(--nex-info);
+  color: var(--nex-text-inverse);
+  font-size: 0.75rem;
+  font-weight: bold;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin: 0 12px;
+}
+
+/* ==========================================================================
+   7. Pinned Messages Bar
+   ========================================================================== */
+.nex-pin-bar {
+  display: flex;
+  align-items: center;
+  background: var(--nex-bg-card);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 8px 16px;
+  gap: 12px;
+  cursor: pointer;
+  transition: background var(--nex-transition);
+}
+
+.nex-pin-bar:hover {
+  background: var(--nex-bg-card-hover);
+}
+
+.nex-pin-bar-content {
+  flex: 1;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--nex-text-primary);
+}
+
+.nex-pin-bar-count {
+  font-size: 0.75rem;
+  color: var(--nex-text-secondary);
+  background: rgba(255,255,255,0.1);
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.nex-pin-bar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nex-pin-bar-close {
+  background: transparent;
+  border: none;
+  color: var(--nex-text-secondary);
+  cursor: pointer;
+}
+
+/* ==========================================================================
+   8. Typing Indicator
+   ========================================================================== */
+.nex-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--nex-bg-card);
+  border-radius: var(--nex-radius-xl);
+  width: fit-content;
+  margin-bottom: 12px;
+  animation: nex-fade-in 0.3s ease;
+}
+
+.nex-typing-dot {
+  width: 6px;
+  height: 6px;
+  background-color: var(--nex-text-secondary);
+  border-radius: 50%;
+  animation: nex-bounce-dots 1.4s infinite ease-in-out both;
+}
+
+.nex-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.nex-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+.nex-typing-text {
+  font-size: 0.75rem;
+  color: var(--nex-text-secondary);
+  margin-left: 4px;
+}
+
+/* ==========================================================================
+   9. Context Menu
+   ========================================================================== */
+.nex-context-menu {
+  position: fixed;
+  background: var(--nex-bg-card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--nex-radius-md);
+  padding: 4px 0;
+  min-width: 160px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  z-index: 1000;
+  animation: nex-scale-in 0.15s ease-out;
+  transform-origin: top left;
+}
+
+.nex-context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  color: var(--nex-text-primary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background var(--nex-transition);
+}
+
+.nex-context-menu-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.nex-context-menu-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+  margin: 4px 0;
+}
+
+/* ==========================================================================
+   10. Role Badges
+   ========================================================================== */
+.nex-role-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.nex-role-badge.creator { background: rgba(255, 215, 0, 0.15); color: var(--nex-creator); }
+.nex-role-badge.admin { background: rgba(0, 204, 255, 0.15); color: var(--nex-admin); }
+.nex-role-badge.moderator { background: rgba(255, 149, 0, 0.15); color: var(--nex-mod); }
+
+/* ==========================================================================
+   11. Mention Highlights
+   ========================================================================== */
+.nex-mention {
+  background: var(--nex-accent-transparent);
+  color: var(--nex-accent);
+  padding: 0 4px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.nex-msg-bubble.sent .nex-mention {
+  background: rgba(0,0,0,0.15);
+  color: var(--nex-text-inverse);
+}
+
+.nex-mention-autocomplete {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  width: 250px;
+  max-height: 200px;
+  overflow-y: auto;
+  background: var(--nex-bg-card);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--nex-radius-md);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  z-index: 50;
+}
+
+.nex-mention-autocomplete-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.nex-mention-autocomplete-item:hover {
+  background: var(--nex-bg-card-hover);
+}
+
+/* ==========================================================================
+   12. Virtual Scroller
+   ========================================================================== */
+.nex-virtual-scroller {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+  will-change: transform;
+  padding: 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.nex-virtual-scroller::-webkit-scrollbar {
+  width: 6px;
+}
+.nex-virtual-scroller::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.2);
+  border-radius: 3px;
+}
+
+.nex-virtual-scroller-content {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.nex-scroll-to-bottom {
+  position: absolute;
+  right: 20px;
+  bottom: 80px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--nex-bg-card);
+  color: var(--nex-text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  cursor: pointer;
+  z-index: 20;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: all var(--nex-transition);
+}
+
+.nex-scroll-to-bottom.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* ==========================================================================
+   13. Poll Component
+   ========================================================================== */
+.nex-poll {
+  background: rgba(0,0,0,0.2);
+  border-radius: var(--nex-radius-md);
+  padding: 12px;
+  margin-top: 6px;
+  min-width: 200px;
+}
+
+.nex-poll-question {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.nex-poll-option {
+  position: relative;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border-radius: var(--nex-radius-sm);
+  overflow: hidden;
+  background: rgba(255,255,255,0.05);
+}
+
+.nex-poll-option.voted {
+  border: 1px solid var(--nex-accent);
+}
+
+.nex-poll-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: var(--nex-accent-transparent);
+  z-index: 1;
+  transition: width 0.4s ease;
+}
+
+.nex-poll-option-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+}
+
+.nex-poll-votes {
+  font-size: 0.75rem;
+  color: var(--nex-text-secondary);
+}
+
+/* ==========================================================================
+   14 & 15. Modals (Invite QR / Who-Read)
+   ========================================================================== */
+.nex-invite-modal,
+.nex-read-modal {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--nex-bg-overlay);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--nex-transition);
+}
+
+.nex-invite-modal.open,
+.nex-read-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nex-modal-content {
+  background: var(--nex-bg-card);
+  padding: 24px;
+  border-radius: var(--nex-radius-lg);
+  min-width: 300px;
+  max-width: 90vw;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+  transform: scale(0.95);
+  transition: transform var(--nex-transition);
+}
+
+.open .nex-modal-content {
+  transform: scale(1);
+}
+
+.nex-invite-qr {
+  background: #fff;
+  padding: 16px;
+  border-radius: var(--nex-radius-md);
+  margin: 16px 0;
+  text-align: center;
+}
+
+.nex-invite-link {
+  word-break: break-all;
+  background: rgba(0,0,0,0.3);
+  padding: 12px;
+  border-radius: var(--nex-radius-sm);
+  font-family: monospace;
+  font-size: 0.875rem;
+  user-select: all;
+  margin-bottom: 16px;
+}
+
+.nex-invite-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.nex-read-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ==========================================================================
+   16. Thread View Panel
+   ========================================================================== */
+.nex-thread-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 360px;
+  background: var(--nex-bg-card);
+  border-left: 1px solid rgba(255,255,255,0.1);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+}
+
+.nex-thread-panel.open {
+  transform: translateX(0);
+}
+
+.nex-thread-header {
+  padding: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nex-thread-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+/* ==========================================================================
+   17. Slow Mode Indicator
+   ========================================================================== */
+.nex-slow-mode-bar {
+  background: rgba(255, 149, 0, 0.15);
+  color: var(--nex-mod);
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.nex-slow-mode-timer {
+  font-weight: bold;
+}
+
+/* ==========================================================================
+   18. Animations
+   ========================================================================== */
+@keyframes nex-slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes nex-slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes nex-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes nex-bounce-dots {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+@keyframes nex-pulse {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(0, 255, 102, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 255, 102, 0); }
+}
+
+@keyframes nex-scale-in {
+  from { opacity: 0; transform: translateX(-50%) scale(0.8); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .nex-msg-bubble {
+    max-width: 85%;
+  }
+  
+  .nex-thread-panel {
+    width: 100%;
+  }
+}

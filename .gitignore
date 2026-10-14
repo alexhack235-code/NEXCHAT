@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build output
+dist/
+dist-ssr/
+
+# Vite temporary / cache files
+.vite/
+
+# Environment files & secrets
+.env
+.env*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.system_generated/
+*.backup.*
+logo_legacy_backup.jpg
+.backup_clean/
+*.tsbuildinfo
+cloudflared.exe
+*.exe
+tunnel_url.txt
+*.log

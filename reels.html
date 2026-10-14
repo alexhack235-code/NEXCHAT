@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>CamShot — Premium Short-Form Videos</title>
+  <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
+  <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Tailwind removed: pure CSS design system -->
+  <link rel="stylesheet" href="reels.css">
+</head>
+<body class="reels-body">
+  <!-- Ambient Luxury Background Grid -->
+  <div class="hud-grid-overlay" aria-hidden="true"></div>
+
+  <!-- Top Navigation Header: Left Brand/Back | Center Feed Switcher | Right Controls -->
+  <header class="reels-header">
+    <div class="reels-header-left">
+      <a href="chat.html" class="reels-header-back-btn" title="Back to Chats">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Chats</span>
+      </a>
+      <div class="camshot-header-brand" title="CamShot Video Stream">
+        <img src="logo.jpg" alt="CamShot" class="camshot-brand-logo">
+        <span class="camshot-brand-name">CAMSHOT</span>
+        <span class="camshot-brand-badge">PRO</span>
+      </div>
+    </div>
+
+    <div class="reels-header-center">
+      <div class="reels-feed-tabs" id="reelsFeedTabs">
+        <button type="button" class="feed-tab-btn" data-feed="following" id="tabFollowing">Following</button>
+        <span class="feed-tab-divider"></span>
+        <button type="button" class="feed-tab-btn active" data-feed="foryou" id="tabForYou">For You</button>
+      </div>
+    </div>
+
+    <div class="reels-header-right">
+      <button id="zenModeToggleBtn" class="reels-header-icon-btn" title="Clean Screen Mode (Hide UI Overlays)">
+        <i class="fa-regular fa-eye-slash"></i>
+      </button>
+      <button id="pipToggleBtn" class="reels-header-icon-btn" title="Picture-in-Picture Mini-Player">
+        <i class="fa-solid fa-clone"></i>
+      </button>
+      <button id="toggleFilterBtn" class="reels-header-icon-btn" title="Cinematic Filters">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+      </button>
+      <button id="globalSoundToggle" class="reels-header-icon-btn" title="Toggle Sound">
+        <i class="fa-solid fa-volume-xmark"></i>
+      </button>
+      <button id="openReelsSettingsBtn" class="reels-header-icon-btn" title="Settings & Preferences">
+        <i class="fa-solid fa-gear"></i>
+      </button>
+      <button id="openUploadModalBtn" class="reels-create-main-btn" title="Create / Post a CamShot (Shortcut: C)">
+        <i class="fa-solid fa-plus"></i>
+        <span>Create</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Trending Hashtags & Topic Filter Ribbon -->
+  <div class="trending-tags-ribbon-wrapper" id="trendingTagsRibbonWrapper">
+    <div class="trending-tags-ribbon" id="trendingTagsRibbon">
+      <button type="button" class="tag-filter-pill active" data-tag="all"><i class="fa-solid fa-fire text-amber-400"></i> All</button>
+      <button type="button" class="tag-filter-pill" data-tag="tech"><i class="fa-solid fa-bolt text-cyan-400"></i> Tech</button>
+      <button type="button" class="tag-filter-pill" data-tag="gaming"><i class="fa-solid fa-gamepad text-emerald-400"></i> Gaming</button>
+      <button type="button" class="tag-filter-pill" data-tag="music"><i class="fa-solid fa-headphones text-purple-400"></i> Music</button>
+      <button type="button" class="tag-filter-pill" data-tag="cyber"><i class="fa-solid fa-microchip text-yellow-400"></i> Cyber</button>
+      <button type="button" class="tag-filter-pill" data-tag="ai"><i class="fa-solid fa-robot text-pink-400"></i> AI</button>
+      <button type="button" class="tag-filter-pill" data-tag="cinema"><i class="fa-solid fa-film text-blue-400"></i> Cinema</button>
+      <button type="button" class="tag-filter-pill" data-tag="lifestyle"><i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Lifestyle</button>
+    </div>
+  </div>
+
+  <!-- Camera Shutter White Flash Animation Layer -->
+  <div id="snapshotFlashLayer" class="snapshot-flash-layer" style="display: none;"></div>
+
+  <!-- Desktop Side Navigation Floating Controls -->
+  <div class="desktop-nav-controls" id="desktopNavControls">
+    <button id="prevReelBtn" class="desktop-nav-btn" title="Previous CamShot (Up Arrow)">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+    <button id="nextReelBtn" class="desktop-nav-btn" title="Next CamShot (Down Arrow)">
+      <i class="fa-solid fa-chevron-down"></i>
+    </button>
+  </div>
+
+  <!-- Fullscreen Vertical Reels Feed Container (100vh x 100vw, Black) -->
+  <main id="reelsFeed" class="reels-feed-container">
+    <!-- Pull-to-Refresh Indicator (Mobile) -->
+    <div id="pullToRefreshIndicator" class="pull-to-refresh-indicator" style="display: none;">
+      <div class="ptr-spinner-icon"><i class="fa-solid fa-rotate"></i></div>
+      <span id="ptrText" class="ptr-text">Pull to refresh</span>
+    </div>
+
+    <!-- Initial Loading State -->
+    <div class="reels-loading-state" id="reelsLoadingState">
+      <div class="cyber-spinner"></div>
+      <p>Loading CamShots...</p>
+    </div>
+  </main>
+
+  <!-- Mobile Floating Bottom Dock (TikTok / Instagram Reels Native Experience) -->
+  <nav class="mobile-bottom-dock" id="mobileBottomDock" aria-label="Mobile Navigation">
+    <button type="button" class="mobile-dock-btn active" id="mobileDockHomeBtn" title="Feed">
+      <i class="fa-solid fa-house"></i>
+      <span>Feed</span>
+    </button>
+    <a href="chat.html" class="mobile-dock-btn" id="mobileDockChatsBtn" title="Chats">
+      <i class="fa-solid fa-comments"></i>
+      <span>Chats</span>
+    </a>
+    <button type="button" class="mobile-dock-create-btn" id="mobileDockCreateBtn" title="Create CamShot">
+      <div class="dock-create-ring"></div>
+      <i class="fa-solid fa-plus"></i>
+    </button>
+    <button type="button" class="mobile-dock-btn" id="mobileDockActivityBtn" title="Activity">
+      <i class="fa-solid fa-bell"></i>
+      <span>Activity</span>
+    </button>
+    <button type="button" class="mobile-dock-btn" id="mobileDockProfileBtn" title="My Profile">
+      <img src="favicon.png" id="mobileDockAvatarImg" class="dock-avatar-icon" alt="Profile">
+      <span>Profile</span>
+    </button>
+  </nav>
+
+  <!-- Floating Time & Video Thumbnail Preview Bubble for Scrubber Dragging -->
+  <div id="scrubberTimeBubble" class="scrubber-time-bubble" style="display: none;">
+    <div class="scrubber-preview-thumb-box" id="scrubberThumbBox" style="display: none;">
+      <video id="scrubberCloneVideo" muted playsinline preload="auto" class="scrubber-clone-video"></video>
+    </div>
+    <div class="scrubber-time-row flex items-center">
+      <i class="fa-solid fa-clock" style="color: var(--cs-gold); margin-right: 4px;"></i>
+      <span id="scrubberTimeText">0:00 / 0:00</span>
+    </div>
+  </div>
+
+  <!-- Touch Pinch-to-Zoom Reset Floating HUD Pill -->
+  <button type="button" id="videoZoomResetPill" class="video-zoom-reset-pill" style="display: none;" title="Reset Zoom">
+    <i class="fa-solid fa-magnifying-glass-minus"></i>
+    <span id="videoZoomLevelText">1.0x Zoom</span>
+    <span class="zoom-reset-hint">Tap to Reset</span>
+  </button>
+
+  <!-- Clean Screen / Zen Mode Floating Exit Pill -->
+  <button type="button" id="exitZenModePill" class="exit-zen-pill" style="display: none;" title="Restore UI Overlays">
+    <i class="fa-solid fa-eye"></i>
+    <span>Exit Clean Screen</span>
+  </button>
+
+  <!-- Left / Right 10s Skip & Rewind Animated HUD Badges -->
+  <div id="seekLeftBadge" class="seek-ripple-badge seek-left" style="display: none;">
+    <div class="seek-ripple-icon"><i class="fa-solid fa-rotate-left"></i></div>
+    <span>10s</span>
+  </div>
+  <div id="seekRightBadge" class="seek-ripple-badge seek-right" style="display: none;">
+    <div class="seek-ripple-icon"><i class="fa-solid fa-rotate-right"></i></div>
+    <span>10s</span>
+  </div>
+
+  <!-- Floating Volume HUD Level Indicator -->
+  <div id="floatingVolumeHud" class="floating-volume-hud" style="display: none;">
+    <i id="hudVolIcon" class="fa-solid fa-volume-high"></i>
+    <div class="hud-vol-bar">
+      <div id="hudVolFill" class="hud-vol-fill" style="width: 100%;"></div>
+    </div>
+    <span id="hudVolText">100%</span>
+  </div>
+
+  <!-- Prominent Floating "Create CamShot" Button (Shortcut: C) -->
+  <div class="floating-create-reel-wrapper" id="floatingCreateReelWrapper">
+    <button type="button" id="floatingCreateReelBtn" class="floating-create-reel-btn" title="Create / Post a CamShot (Shortcut: C)">
+      <div class="create-btn-accent-cyan"></div>
+      <div class="create-btn-accent-green"></div>
+      <div class="create-btn-core">
+        <i class="fa-solid fa-plus"></i>
+      </div>
+      <span class="create-btn-badge-text">CREATE</span>
+    </button>
+  </div>
+
+  <!-- Floating 2X Speed HUD Indicator -->
+  <div id="speed2xBadge" class="speed-2x-hud-badge" style="display: none;">
+    <i class="fa-solid fa-forward-fast" style="color: var(--cs-gold);"></i>
+    <span>2X SPEED</span>
+  </div>
+
+  <!-- Cinematic Visual Filter Ribbon Drawer -->
+  <div id="cyberFilterRibbon" class="cyber-filter-ribbon" style="display: none;">
+    <div class="filter-ribbon-header">
+      <span><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--cs-gold);"></i> Cinematic Color Grades</span>
+      <button type="button" id="closeFilterRibbonBtn" class="filter-close-btn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="filter-ribbon-pills">
+      <button type="button" class="filter-shader-btn active" data-filter="normal">
+        <span class="shader-dot" style="background: white"></span> Normal HD
+      </button>
+      <button type="button" class="filter-shader-btn" data-filter="matrix">
+        <span class="shader-dot" style="background: var(--cs-emerald)"></span> Matrix CRT
+      </button>
+      <button type="button" class="filter-shader-btn" data-filter="cyber-neon">
+        <span class="shader-dot" style="background: var(--cs-cyan)"></span> Cyber Neon
+      </button>
+      <button type="button" class="filter-shader-btn" data-filter="night-city">
+        <span class="shader-dot" style="background: var(--cs-gold)"></span> Night City Amber
+      </button>
+      <button type="button" class="filter-shader-btn" data-filter="noir">
+        <span class="shader-dot" style="background: #9CA3AF"></span> Glitch Noir
+      </button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       CAMSHOT CREATOR STUDIO PRO
+       ══════════════════════════════════════════════════ -->
+  <div id="uploadReelModal" class="reels-modal creator-studio-modal" style="display: none;">
+    <div class="reels-modal-card creator-studio-card">
+      <!-- Studio Header -->
+      <div class="creator-studio-header">
+        <div class="studio-brand-group">
+          <div class="studio-icon-badge">
+            <i class="fa-solid fa-clapperboard"></i>
+          </div>
+          <div>
+            <h3 class="studio-title">Upload to CamShot</h3>
+            <p class="studio-subtitle"><i class="fa-solid fa-sparkles" style="color: var(--cs-gold)"></i> Share your video with the community</p>
+          </div>
+        </div>
+        <div class="studio-header-right">
+          <span class="studio-quality-tag"><i class="fa-solid fa-shield-halved" style="color: var(--cs-violet)"></i> Ready to Post</span>
+          <button id="closeUploadModalBtn" class="reels-modal-close" title="Close Studio"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+
+      <!-- Studio Workspace: Modern Unboxed Fluid Studio -->
+      <div class="studio-dual-layout">
+        <form id="uploadReelForm" class="studio-form studio-modern-grid">
+          <!-- Left Column: Video Viewport / Dropzone / Live Camera Studio -->
+          <div class="studio-video-viewport-col">
+            <!-- Source Mode Switcher: Upload File vs Record Live -->
+            <div class="studio-source-mode-selector">
+              <button type="button" id="sourceUploadFileBtn" class="source-mode-btn active">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Upload Video File
+              </button>
+              <button type="button" id="sourceLiveCamBtn" class="source-mode-btn">
+                <i class="fa-solid fa-camera"></i> Record Live CamShot
+              </button>
+            </div>
+
+            <!-- Mode A: 9:16 Vertical Video Dropzone -->
+            <div class="reels-file-dropzone" id="reelDropzone">
+              <input type="file" id="reelVideoInput" accept="video/mp4,video/webm,video/quicktime,video/*" style="display: none;">
+              <div id="reelDropzonePrompt" class="dropzone-prompt">
+                <div class="dropzone-cloud-icon">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <p class="dropzone-primary-text">Select video to upload</p>
+                <p class="dropzone-secondary-text">Or drag and drop video file</p>
+                <div class="dropzone-format-pills">
+                  <span>MP4</span>
+                  <span>WebM</span>
+                  <span>MOV</span>
+                  <span>1080p FHD</span>
+                </div>
+                <span class="dropzone-hint">720x1280 or higher • Up to 250MB • Vertical 9:16</span>
+                <button type="button" class="dropzone-browse-pill-btn">Browse Video</button>
+              </div>
+
+              <div id="reelPreviewContainer" class="reel-preview-container" style="display: none;">
+                <video id="reelPreviewVideo" playsinline muted controls></video>
+                <div class="preview-overlay-chips">
+                  <div id="reelDurationBadge" class="reel-duration-badge">0:00</div>
+                  <div id="reelHdBadge" class="reel-hd-quality-tag"><i class="fa-solid fa-bolt"></i> <span id="reelHdSpecText">High Definition</span></div>
+                </div>
+                <button type="button" id="removeVideoBtn" class="remove-preview-btn"><i class="fa-solid fa-rotate-left"></i> Change Video</button>
+              </div>
+            </div>
+
+            <!-- Mode B: Live In-Browser Camera Studio Stage -->
+            <div id="liveCameraStudioStage" class="live-cam-stage" style="display: none;">
+              <!-- Live Shaders Selector Ribbon -->
+              <div class="live-cam-shaders-bar">
+                <button type="button" class="cam-shader-pill active" data-shader="normal"><i class="fa-solid fa-wand-magic-sparkles"></i> Normal</button>
+                <button type="button" class="cam-shader-pill" data-shader="matrix"><i class="fa-solid fa-terminal"></i> Matrix CRT</button>
+                <button type="button" class="cam-shader-pill" data-shader="cyber"><i class="fa-solid fa-globe"></i> Cyber Neon</button>
+                <button type="button" class="cam-shader-pill" data-shader="gold"><i class="fa-solid fa-trophy"></i> Gold Luxury</button>
+                <button type="button" class="cam-shader-pill" data-shader="noir"><i class="fa-solid fa-film"></i> Noir Film</button>
+              </div>
+
+              <!-- Camera Stream Viewport -->
+              <div class="live-cam-viewport-box">
+                <video id="liveCamStreamVideo" playsinline autoplay muted></video>
+                <!-- HUD Recording Timer Overlay -->
+                <div id="liveCamTimerBadge">
+                  <span class="timer-record-dot"></span>
+                  <span id="liveCamTimerText">00:00</span>
+                </div>
+                <!-- Camera Flip Button -->
+                <button type="button" id="flipLiveCameraBtn" title="Switch Camera">
+                  <i class="fa-solid fa-camera-rotate"></i>
+                </button>
+              </div>
+
+              <!-- Camera Action Controls Row -->
+              <div class="live-cam-actions-row">
+                <button type="button" id="startLiveRecordBtn">
+                  <i class="fa-solid fa-circle"></i> Start Recording
+                </button>
+                <button type="button" id="stopLiveRecordBtn" style="display: none;">
+                  <i class="fa-solid fa-square"></i> Stop & Use
+                </button>
+              </div>
+            </div>
+
+            <!-- Canvas Poster Thumbnail Extractor Box -->
+            <div class="canvas-poster-box" id="studioThumbBox" style="display: none;">
+              <img id="studioThumbPreviewImg" src="" alt="Frame Poster" class="studio-thumb-img">
+              <div class="thumb-meta-text">
+                <span class="thumb-label"><i class="fa-solid fa-image" style="color: var(--cs-gold)"></i> Cover Frame Selected</span>
+                <p class="text-xs text-gray-400">Thumbnail preview for your reel</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Clean Publishing Controls & Settings -->
+          <div class="studio-details-col">
+            <!-- Caption & Hashtags -->
+            <div class="studio-field-group">
+              <div class="field-label-row">
+                <label for="reelCaptionInput" class="field-title">Description & Caption</label>
+                <button type="button" id="chronexAiGenCaptionBtn" class="chronex-gen-caption-btn" title="AI Generate Viral Caption">
+                  <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--cs-violet)"></i> AI Suggest
+                </button>
+              </div>
+
+              <div class="caption-input-container">
+                <textarea id="reelCaptionInput" class="studio-textarea" rows="3" placeholder="Write a compelling caption... #nexchat #cyberpunk #gaming" maxlength="300"></textarea>
+                <div class="caption-meta-row">
+                  <span id="reelCaptionCounter" class="caption-counter">0/300</span>
+                </div>
+              </div>
+
+              <div class="quick-hashtag-bar">
+                <span class="hashtag-label">Trending:</span>
+                <button type="button" class="hashtag-pill" data-tag="#nexchat">#nexchat</button>
+                <button type="button" class="hashtag-pill" data-tag="#cyberpunk">#cyberpunk</button>
+                <button type="button" class="hashtag-pill" data-tag="#gaming">#gaming</button>
+                <button type="button" class="hashtag-pill" data-tag="#music">#music</button>
+                <button type="button" class="hashtag-pill" data-tag="#tech">#tech</button>
+                <button type="button" class="hashtag-pill" data-tag="#viral">#viral</button>
+                <button type="button" class="hashtag-pill" data-tag="#4k60fps">#4k60fps</button>
+              </div>
+            </div>
+
+            <!-- Soundtrack Selection -->
+            <div class="studio-field-group">
+              <label class="field-title">Soundtrack & Audio</label>
+              <div class="sound-selection-bar">
+                <button type="button" id="openSoundLibraryBtn" class="select-sound-btn" title="Browse Audio Library">
+                  <i class="fa-solid fa-music" style="color: var(--cs-gold)"></i>
+                  <span id="selectedSoundLabel">Original Audio — (Video Sound)</span>
+                  <span class="sound-browse-badge">Change</span>
+                </button>
+                <button type="button" id="resetSoundBtn" class="reset-sound-btn" title="Reset to Original Audio">
+                  <i class="fa-solid fa-rotate-left"></i>
+                </button>
+              </div>
+              <input type="hidden" id="reelSoundTitle" value="Original Audio">
+              <input type="hidden" id="reelSoundUrl" value="">
+            </div>
+
+            <!-- Publishing Persona -->
+            <div class="studio-field-group">
+              <label class="field-title">Publish As</label>
+              <div class="persona-choice-row">
+                <label class="persona-choice-card active" id="personaCardGeneral">
+                  <input type="radio" name="studioPersonaRadio" value="general" checked style="display: none;">
+                  <div class="persona-card-radio-dot"></div>
+                  <div class="flex items-center gap-2">
+                    <img id="personaImgGeneral" src="favicon.png" class="persona-mini-avatar" alt="General">
+                    <div class="flex flex-col">
+                      <span class="persona-name">Primary Profile</span>
+                      <span class="persona-sub text-gray-400" id="personaHandleGeneral">@user</span>
+                    </div>
+                  </div>
+                </label>
+
+                <label class="persona-choice-card" id="personaCardCustom">
+                  <input type="radio" name="studioPersonaRadio" value="custom" style="display: none;">
+                  <div class="persona-card-radio-dot"></div>
+                  <div class="flex items-center gap-2">
+                    <img id="personaImgCustom" src="favicon.png" class="persona-mini-avatar" alt="Creator">
+                    <div class="flex flex-col">
+                      <span class="persona-name">Creator Persona</span>
+                      <span class="persona-sub" style="color: var(--cs-gold)" id="personaHandleCustom">@creator</span>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Video Quality Selection -->
+            <div class="studio-field-group">
+              <label class="field-title">Quality & Resolution</label>
+              <div class="quality-selector-pills">
+                <button type="button" class="quality-pill" data-quality="hd">
+                  <span class="quality-title">HD 720p</span>
+                  <span class="quality-rate">5,000 kbps</span>
+                </button>
+                <button type="button" class="quality-pill active" data-quality="fhd">
+                  <span class="quality-title">Full HD 1080p</span>
+                  <span class="quality-rate">8,000 kbps (Best)</span>
+                </button>
+                <button type="button" class="quality-pill" data-quality="4k">
+                  <span class="quality-title">Ultra HD 4K</span>
+                  <span class="quality-rate">14,000 kbps</span>
+                </button>
+              </div>
+
+              <label class="original-quality-checkbox">
+                <input type="checkbox" id="keepOriginalQuality" checked>
+                <span>Upload in highest available quality</span>
+              </label>
+            </div>
+
+            <!-- Interactive Overlays & Bounties -->
+            <div class="studio-field-group">
+              <label class="field-title">Interactive Overlays</label>
+              <div class="overlay-toggle-box">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: #fff;">
+                    <input type="checkbox" id="enablePollStickerCheckbox" style="accent-color: var(--cs-gold); width: 16px; height: 16px;">
+                    <i class="fa-solid fa-square-poll-vertical" style="color: var(--cs-gold);"></i> Interactive Poll Sticker
+                  </label>
+                  <span style="font-size: 11px; color: #8696A0;">Live viewer votes</span>
+                </div>
+                <div id="pollInputsContainer" style="display: none; flex-direction: column; gap: 8px; margin-top: 10px;">
+                  <input type="text" id="pollQuestionInput" placeholder="Poll question (e.g. Rate this setup?)" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12.5px;">
+                  <div style="display: flex; gap: 8px;">
+                    <input type="text" id="pollOption1Input" placeholder="Option A (e.g. Yes)" value="Yes" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px;">
+                    <input type="text" id="pollOption2Input" placeholder="Option B (e.g. No)" value="No" style="flex: 1; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 8px 12px; color: #fff; font-size: 12px;">
+                  </div>
+                </div>
+              </div>
+
+              <div class="overlay-toggle-box" style="margin-top: 8px;">
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; font-weight: 700; color: #fff;">
+                    <input type="checkbox" id="enableBountyCheckbox" style="accent-color: #00ff66; width: 16px; height: 16px;">
+                    <i class="fa-solid fa-gift" style="color: #00ff66;"></i> NEX Token Bounty (10 Tokens)
+                  </label>
+                  <span style="font-size: 11px; color: #00ff66; font-weight: 600;">Reward viewer on tap</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Upload Progress Wrapper -->
+            <div id="reelUploadProgressWrapper" class="reels-progress-wrapper" style="display: none;">
+              <div class="upload-phase-label">
+                <span class="phase-dot" id="uploadPhaseDot"></span>
+                <span id="uploadPhaseText">Phase 1: Uploading video...</span>
+              </div>
+              <div class="progress-header-row">
+                <span class="progress-title"><i class="fa-solid fa-spinner fa-spin" style="color: var(--cs-gold)"></i> <span id="reelProgressLabel">Uploading your reel...</span></span>
+                <span id="reelProgressPercent" class="progress-pct">0%</span>
+              </div>
+              <div class="reels-progress-bar">
+                <div id="reelProgressBarFill" class="reels-progress-fill" style="width: 0%;"></div>
+              </div>
+              <div class="reels-progress-status">
+                <span id="reelProgressVault">Uploading video...</span>
+                <span id="reelProgressEta" class="upload-eta-label"></span>
+              </div>
+              <div id="uploadSuccessState" class="upload-success-state" style="display: none;">
+                <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+                <h4>CamShot Posted Successfully!</h4>
+                <p>Your video is now live on CamShot</p>
+              </div>
+            </div>
+
+            <!-- Studio Action Footer -->
+            <div class="studio-footer-row">
+              <button type="button" id="cancelUploadBtn" class="studio-cancel-btn">Discard</button>
+              <button type="submit" id="submitReelBtn" class="studio-publish-btn">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Post CamShot</span>
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Music / Sounds Library Drawer (Issue 4: Royalty-Free Trending Funks/Beats) -->
+  <div id="soundsLibraryModal" class="reels-modal" style="display: none;">
+    <div class="reels-modal-card sounds-library-card">
+      <div class="reels-modal-header">
+        <h3><i class="fa-solid fa-headphones"></i> Trending Audio Library</h3>
+        <button id="closeSoundsLibraryBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="sounds-library-tabs">
+        <button type="button" class="sound-tab active" data-tab="trending">Trending Funks & Beats</button>
+        <button type="button" class="sound-tab" data-tab="original">Original Audio</button>
+      </div>
+      <div class="sounds-list-container" id="soundsListContainer">
+        <!-- Rendered dynamically from reels-sounds.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Share Reel Modal -->
+  <div id="shareReelModal" class="reels-modal" style="display: none;">
+    <div class="reels-modal-card share-modal-card">
+      <div class="reels-modal-header">
+        <h3><i class="fa-solid fa-share-nodes"></i> Share CamShot</h3>
+        <button id="closeShareModalBtn" class="reels-modal-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="share-modal-body">
+        <div class="share-options-grid">
+          <button type="button" class="share-option-btn" id="shareCopyLinkBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-link"></i></div>
+            <span>Copy Link</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareWhatsAppBtn" title="Share on WhatsApp">
+            <div class="share-icon-circle" style="color: #25D366;"><i class="fa-brands fa-whatsapp"></i></div>
+            <span>WhatsApp</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareTelegramBtn" title="Share on Telegram">
+            <div class="share-icon-circle" style="color: #229ED9;"><i class="fa-brands fa-telegram"></i></div>
+            <span>Telegram</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareTwitterBtn" title="Share on X / Twitter">
+            <div class="share-icon-circle" style="color: #fff;"><i class="fa-brands fa-x-twitter"></i></div>
+            <span>X / Twitter</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareSendInChatBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-paper-plane"></i></div>
+            <span>Send in Chat</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareNativeBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+            <span>More Apps</span>
+          </button>
+          <button type="button" class="share-option-btn" id="shareDownloadBtn">
+            <div class="share-icon-circle"><i class="fa-solid fa-download"></i></div>
+            <span>Save Video</span>
+          </button>
+        </div>
+        <div class="share-link-preview">
+          <input type="text" id="shareLinkInput" readonly value="">
+          <button type="button" id="shareQuickCopyBtn" class="reels-btn-primary" style="padding: 6px 14px; font-size: 12px; font-weight: 700;">Copy</button>
+        </div>
+        <!-- Dynamic QR Code Card -->
+        <div class="share-qr-wrapper mt-3 flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+          <img id="shareQrImage" src="" alt="Scan QR Code" class="w-16 h-16 rounded-lg bg-white p-1 shrink-0" style="display: none;">
+          <div class="share-qr-meta flex flex-col gap-0.5 text-left">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5"><i class="fa-solid fa-qrcode text-[var(--cs-gold)]"></i> Scan with Phone</span>
+            <span class="text-[11px] text-gray-400">Point your camera to watch this CamShot instantly</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reel Comments Drawer (Professional Bottom Sheet) -->
+  <div id="commentsModal" class="reels-comments-drawer" style="display: none;">
+    <div class="comments-backdrop" id="commentsBackdrop"></div>
+    <div class="comments-card">
+      <div class="drawer-drag-pill"></div>
+      <div class="comments-header">
+        <div class="comments-title-group">
+          <h4>Comments</h4>
+          <span id="commentsCountHeader" class="comments-count-badge">0</span>
+        </div>
+        <button id="closeCommentsBtn" class="comments-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div id="commentsList" class="comments-list">
+        <div class="comments-empty">
+          <i class="fa-regular fa-comment-dots"></i>
+          <p>No comments yet</p>
+          <span>Be the first to share your thoughts on this CamShot!</span>
+        </div>
+      </div>
+
+      <!-- Quick 1-Tap Reaction Icons -->
+      <div class="comments-quick-emojis" id="commentsQuickEmojis">
+        <button type="button" class="quick-emoji-btn" data-text="Fire" title="Fire"><i class="fa-solid fa-fire" style="color:#f97316;"></i></button>
+        <button type="button" class="quick-emoji-btn" data-text="Love" title="Heart"><i class="fa-solid fa-heart" style="color:#fe2c55;"></i></button>
+        <button type="button" class="quick-emoji-btn" data-text="Clap" title="Applause"><i class="fa-solid fa-hands-clapping" style="color:#38bdf8;"></i></button>
+        <button type="button" class="quick-emoji-btn" data-text="Star" title="Star"><i class="fa-solid fa-star" style="color:#facc15;"></i></button>
+        <button type="button" class="quick-emoji-btn" data-text="Diamond" title="Diamond"><i class="fa-solid fa-gem" style="color:#67e8f9;"></i></button>
+        <button type="button" class="quick-emoji-btn" data-text="Bolt" title="Bolt"><i class="fa-solid fa-bolt" style="color:#00ff66;"></i></button>
+        <button type="button" class="quick-emoji-btn" data-text="Rocket" title="Rocket"><i class="fa-solid fa-rocket" style="color:#a78bfa;"></i></button>
+        <button type="button" class="quick-emoji-btn" data-text="Crown" title="Crown"><i class="fa-solid fa-crown" style="color:#ffd700;"></i></button>
+      </div>
+
+      <!-- Comment Reply Indicator Bar -->
+      <div id="commentReplyBar" class="comment-reply-bar" style="display: none;">
+        <span>Replying to <b id="commentReplyUser">@user</b></span>
+        <button type="button" id="cancelCommentReplyBtn" class="comment-reply-cancel-btn" title="Cancel Reply"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Comment Composer Bar -->
+      <form id="commentForm" class="comment-input-bar">
+        <img id="commentInputUserAvatar" src="favicon.png" class="comment-input-avatar" alt="Avatar">
+        <div class="comment-input-field-wrapper">
+          <input type="text" id="commentTextInput" placeholder="Add a comment..." maxlength="300" autocomplete="off" required>
+        </div>
+        <button type="submit" class="comment-send-btn" title="Post Comment">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Fullscreen Video Floating Heart Animation Template -->
+  <div id="heartBurst" class="heart-burst" style="display: none;">
+    <i class="fa-solid fa-heart"></i>
+  </div>
+
+  <!-- CamShot Creator Profile Drawer -->
+  <div id="creatorProfileDrawer" class="creator-profile-drawer" style="display: none;">
+    <div class="profile-drawer-backdrop" id="closeProfileBackdrop"></div>
+    <div class="profile-drawer-content">
+      <!-- Drag Handle -->
+      <div class="drawer-drag-pill"></div>
+
+      <!-- Top Header Navigation -->
+      <div class="profile-drawer-topbar">
+        <button type="button" id="closeProfileBtn" class="profile-top-btn" title="Back">
+          <i class="fa-solid fa-arrow-left"></i>
+        </button>
+        <div class="profile-top-handle">
+          <span id="profileTopUsername">@creator</span>
+          <i class="fa-solid fa-circle-check" style="color: var(--cs-gold); font-size: 12px;" title="Verified Creator"></i>
+        </div>
+        <button type="button" id="shareProfileTopBtn" class="profile-top-btn" title="Share Profile">
+          <i class="fa-solid fa-arrow-up-from-bracket"></i>
+        </button>
+      </div>
+
+      <!-- Profile Hero Header -->
+      <div class="profile-hero-section">
+        <div class="profile-avatar-outer">
+          <img id="profileAvatarImg" src="favicon.png" alt="Avatar" class="profile-avatar-img">
+          <div class="profile-avatar-badge"><i class="fa-solid fa-bolt"></i></div>
+        </div>
+        <h3 id="profileDisplayName" class="profile-name">Alexander Game Dev</h3>
+        <p id="profileHandleText" class="profile-tag">@alexandergamedeveloper74</p>
+
+        <!-- Follow Stats Counters -->
+        <div class="profile-stats-row">
+          <div class="profile-stat-item">
+            <span class="stat-number" id="profileFollowingCount">142</span>
+            <span class="stat-label">Following</span>
+          </div>
+          <div class="stat-separator"></div>
+          <div class="profile-stat-item">
+            <span class="stat-number" id="profileFollowersCount">28.4K</span>
+            <span class="stat-label">Followers</span>
+          </div>
+          <div class="stat-separator"></div>
+          <div class="profile-stat-item">
+            <span class="stat-number" id="profileLikesCount">195.2K</span>
+            <span class="stat-label">Likes</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons: Follow, Message, Edit Profile, Link -->
+        <div class="profile-actions-row">
+          <button type="button" id="profileFollowBtn" class="profile-follow-main-btn">
+            <i class="fa-solid fa-user-plus"></i> <span>Follow</span>
+          </button>
+          <button type="button" id="editMyReelsProfileBtn" class="profile-edit-main-btn" style="display: none;" title="Edit Creator Profile & Avatar">
+            <i class="fa-solid fa-pen-to-square"></i> <span>Edit Profile</span>
+          </button>
+          <button type="button" id="profileMessageBtn" class="profile-message-main-btn" title="Message Creator">
+            <i class="fa-solid fa-comment-dots"></i> <span>Message</span>
+          </button>
+          <button type="button" id="profileCopyLinkBtn" class="profile-icon-square-btn" title="Copy Profile Link">
+            <i class="fa-solid fa-link"></i>
+          </button>
+        </div>
+
+        <!-- Bio / Description -->
+        <div class="profile-bio-box">
+          <p id="profileBioText">Game Developer & Cyberpunk Reel Artist • Posting high-FPS gaming & animations • Built on NEXCHAT Protocol</p>
+        </div>
+      </div>
+
+      <!-- Unique 4-Tab Navigator: Reels, Pics, Liked, Saved -->
+      <div class="profile-tabs-nav">
+        <button type="button" class="profile-tab-btn active" data-tab="reels">
+          <i class="fa-solid fa-table-cells"></i>
+          <span>Reels (<span id="profileReelsTabCount">0</span>)</span>
+        </button>
+        <button type="button" class="profile-tab-btn" data-tab="pics">
+          <i class="fa-regular fa-image"></i>
+          <span>Pics (<span id="profilePicsTabCount">0</span>)</span>
+        </button>
+        <button type="button" class="profile-tab-btn" data-tab="liked">
+          <i class="fa-regular fa-heart"></i>
+          <span>Liked</span>
+        </button>
+        <button type="button" class="profile-tab-btn" data-tab="saved">
+          <i class="fa-regular fa-bookmark"></i>
+          <span>Saved (<span id="profileSavedTabCount">0</span>)</span>
+        </button>
+      </div>
+
+      <!-- Profile Grids Area -->
+      <div class="profile-grids-scroll-area">
+        <!-- Tab 1: 3-Column Reels Grid -->
+        <div id="profileReelsGrid" class="profile-media-grid">
+          <div class="profile-grid-loading">
+            <div class="cyber-spinner" style="width: 26px; height: 26px;"></div>
+            <p>Loading creator's reels...</p>
+          </div>
+        </div>
+
+        <!-- Tab 2: Pics & Status Photos Grid -->
+        <div id="profilePicsGrid" class="profile-pics-grid" style="display: none;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Tab 3: Liked Reels Grid -->
+        <div id="profileLikedGrid" class="profile-media-grid" style="display: none;">
+          <!-- Dynamically populated -->
+        </div>
+
+        <!-- Tab 4: Saved Vault Grid -->
+        <div id="profileSavedGrid" class="profile-media-grid" style="display: none;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- High-Res Pic Lightbox Modal -->
+  <div id="picLightboxModal" class="pic-lightbox-modal" style="display: none;">
+    <div class="lightbox-backdrop" id="closeLightboxBackdrop"></div>
+    <div class="lightbox-content">
+      <button type="button" id="closeLightboxBtn" class="lightbox-close-btn"><i class="fa-solid fa-xmark"></i></button>
+      <img id="lightboxImg" src="" alt="Fullscreen Image">
+      <div id="lightboxCaption" class="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SOUND HUB DRAWER ("Use This Sound" & Track Details)
+       ══════════════════════════════════════════════════ -->
+  <div id="soundHubDrawer" class="reels-modal sound-hub-modal" style="display: none;">
+    <div class="reels-modal-card sound-hub-card">
+      <div class="sound-hub-header">
+        <button type="button" id="closeSoundHubBtn" class="sound-hub-back-btn" title="Back"><i class="fa-solid fa-arrow-left"></i></button>
+        <span class="sound-hub-title"><i class="fa-solid fa-music" style="color: var(--cs-gold)"></i> Sound Hub</span>
+        <button type="button" id="shareSoundTopBtn" class="sound-hub-back-btn" title="Share Sound"><i class="fa-solid fa-arrow-up-from-bracket"></i></button>
+      </div>
+
+      <div class="sound-hub-hero">
+        <div class="sound-vinyl-wrapper">
+          <div class="sound-vinyl-disc" id="soundHubDisc">
+            <div class="sound-vinyl-center"></div>
+          </div>
+        </div>
+        <div class="sound-hub-details">
+          <h3 id="soundHubTrackTitle" class="sound-track-title">Original Audio</h3>
+          <p id="soundHubArtistName" class="sound-artist-name">@creator</p>
+          <div class="sound-reels-count-badge">
+            <i class="fa-solid fa-video"></i> <span id="soundHubUsageCount">12.4K</span> videos
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Button: Use This Sound -->
+      <div class="sound-hub-action-box">
+        <button type="button" id="useThisSoundDrawerBtn" class="use-sound-main-btn">
+          <i class="fa-solid fa-bolt"></i> <span>Use This Sound</span>
+        </button>
+      </div>
+
+      <!-- Sound Equalizer FX Presets -->
+      <div class="sound-hub-fx-row flex flex-col gap-2 p-3 my-2 rounded-xl bg-white/5 border border-white/10">
+        <span class="text-xs font-bold text-gray-200 flex items-center gap-1.5"><i class="fa-solid fa-sliders text-[var(--cs-gold)]"></i> Live Audio DSP Presets:</span>
+        <div class="sound-fx-pills flex flex-wrap gap-2">
+          <button type="button" class="sound-fx-pill active" data-fx="normal">Studio Clean</button>
+          <button type="button" class="sound-fx-pill" data-fx="bass">Bass Boost</button>
+          <button type="button" class="sound-fx-pill" data-fx="echo">Cyber Echo</button>
+          <button type="button" class="sound-fx-pill" data-fx="lofi">Lo-Fi Warmth</button>
+          <button type="button" class="sound-fx-pill" data-fx="nightcore">Nightcore</button>
+        </div>
+      </div>
+
+      <!-- Dual Audio Balance Mixer -->
+      <div id="audioBalanceMixerBox" class="sound-hub-balance-row flex flex-col gap-1.5 p-3 my-2 rounded-xl bg-white/5 border border-white/10">
+        <div class="flex items-center justify-between text-xs font-bold text-gray-200">
+          <span class="flex items-center gap-1.5"><i class="fa-solid fa-volume-high text-[var(--cs-gold)]"></i> Audio Balance</span>
+          <span id="audioBalanceLabel" class="text-[11px] text-[var(--cs-gold)] font-mono">50% Voice / 50% Music</span>
+        </div>
+        <div class="flex items-center gap-2 mt-1">
+          <span class="text-[11px] text-gray-400">Voice</span>
+          <input type="range" id="audioBalanceSlider" min="0" max="100" value="50" class="flex-1 accent-[var(--cs-gold)] cursor-pointer h-1.5 bg-white/20 rounded-lg">
+          <span class="text-[11px] text-gray-400">Music</span>
+        </div>
+      </div>
+
+      <!-- Audio Preview Player Bar -->
+      <div class="sound-hub-audio-player">
+        <button type="button" id="soundHubPlayPauseBtn" class="sound-hub-play-btn"><i class="fa-solid fa-play"></i></button>
+        <div class="sound-hub-wave-bar">
+          <div class="sound-hub-wave-fill" id="soundHubWaveFill"></div>
+        </div>
+      </div>
+
+      <!-- Videos using this sound grid -->
+      <div class="sound-hub-grid-header">
+        <span>Videos using this sound</span>
+      </div>
+      <div id="soundHubReelsGrid" class="profile-media-grid sound-reels-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       CHRONEX AI REEL INTELLIGENCE DRAWER
+       ══════════════════════════════════════════════════ -->
+  <div id="chronexAiDrawer" class="reels-modal chronex-ai-modal" style="display: none;">
+    <div class="reels-modal-card chronex-ai-card">
+      <div class="chronex-ai-header">
+        <div class="chronex-ai-avatar">
+          <i class="fa-solid fa-robot"></i>
+        </div>
+        <div class="flex-1">
+          <h3 class="chronex-title">ChronEX AI Intelligence</h3>
+          <p class="chronex-subtitle">Neural Reel Analysis & Smart Cyber-Comments</p>
+        </div>
+        <button id="closeChronexAiBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="chronex-ai-body">
+        <!-- Analysis Card -->
+        <div class="chronex-analysis-box">
+          <div class="chronex-badge"><i class="fa-solid fa-bolt"></i> Real-Time Analysis</div>
+          <p id="chronexAiSummaryText" class="chronex-summary-text">Analyzing stream telemetry, audio waveform, and creator metadata...</p>
+          <div class="chronex-tags-row" id="chronexAiTagsRow">
+            <span class="chronex-tag">#cyberpunk</span>
+            <span class="chronex-tag">#gaming</span>
+            <span class="chronex-tag">#4K60FPS</span>
+          </div>
+        </div>
+
+        <!-- 1-Click Smart Replies -->
+        <div class="chronex-smart-replies-section">
+          <h4 class="text-xs font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5" style="color: var(--cs-text-secondary);">
+            <i class="fa-solid fa-wand-magic-sparkles" style="color: var(--cs-gold)"></i> 1-Tap Smart Replies
+          </h4>
+          <div class="smart-reply-chips" id="smartReplyChips">
+            <button type="button" class="smart-reply-chip">This 4K lighting in Night City is insane!</button>
+            <button type="button" class="smart-reply-chip">What game engine was used for this procedural scene?</button>
+            <button type="button" class="smart-reply-chip">NEXCHAT 60FPS video engine is butter smooth!</button>
+          </div>
+        </div>
+
+        <!-- Ask ChronEX about this reel -->
+        <div class="chronex-ask-section">
+          <div class="chronex-input-wrapper">
+            <input type="text" id="chronexAiQuestionInput" placeholder="Ask ChronEX about this video..." maxlength="150">
+            <button type="button" id="chronexAiAskBtn" class="chronex-ask-btn"><i class="fa-solid fa-paper-plane"></i></button>
+          </div>
+          <div id="chronexAiAnswerBox" class="chronex-answer-box" style="display: none;">
+            <p id="chronexAiAnswerText"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       CREATOR TOKEN TIP MODAL (2,000 Starting Token Economy)
+       ══════════════════════════════════════════════════ -->
+  <div id="tipCreatorModal" class="reels-modal tip-creator-modal" style="display: none;">
+    <div class="reels-modal-card tip-creator-card">
+      <div class="reels-modal-header">
+        <h3 class="flex items-center gap-2"><i class="fa-solid fa-coins" style="color: var(--cs-gold)"></i> Tip Creator Tokens</h3>
+        <button id="closeTipModalBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="tip-creator-body">
+        <!-- Recipient Card -->
+        <div class="tip-recipient-row">
+          <img id="tipRecipientAvatar" src="favicon.png" alt="Creator" class="tip-recipient-avatar">
+          <div class="flex flex-col">
+            <span class="text-sm font-bold text-white" id="tipRecipientName">Alexander Game Dev</span>
+            <span class="text-xs text-gray-400" id="tipRecipientHandle">@alexandergamedeveloper74</span>
+          </div>
+        </div>
+
+        <!-- Balance Info -->
+        <div class="tip-balance-box">
+          <span class="tip-balance-label">Your Vault Balance:</span>
+          <span class="tip-balance-val"><i class="fa-solid fa-coins" style="color: var(--cs-gold)"></i> <span id="tipUserBalance">2,000</span> Tokens</span>
+        </div>
+
+        <!-- Tip Selector Pills -->
+        <div class="tip-amount-pills">
+          <button type="button" class="tip-pill active" data-amount="50">50 NEX</button>
+          <button type="button" class="tip-pill" data-amount="100">100 NEX</button>
+          <button type="button" class="tip-pill" data-amount="250">250 NEX</button>
+          <button type="button" class="tip-pill" data-amount="500">500 NEX</button>
+        </div>
+
+        <button type="button" id="confirmTipBtn" class="confirm-tip-main-btn">
+          <i class="fa-solid fa-bolt"></i> Send <span id="tipBtnAmount">50</span> Tokens
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Holographic Coin Burst Floating Animation Layer -->
+  <div id="coinBurstLayer" class="coin-burst-layer" style="display: none;"></div>
+
+  <!-- Reels Settings & Creator Studio Modal -->
+  <div id="reelsSettingsModal" class="reels-modal" style="display: none;">
+    <div class="reels-modal-card reels-settings-card">
+      <div class="reels-modal-header">
+        <h3><i class="fa-solid fa-sliders" style="color: var(--cs-gold)"></i> CamShot Studio & Settings</h3>
+        <button id="closeReelsSettingsBtn" class="reels-modal-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Settings Navigation Tabs -->
+      <div class="settings-nav-tabs">
+        <button type="button" class="settings-tab-btn active" data-tab="playback">
+          <i class="fa-solid fa-play"></i> <span>Playback</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="creator">
+          <i class="fa-solid fa-id-badge"></i> <span>Profile & Avatar</span>
+        </button>
+        <button type="button" class="settings-tab-btn" data-tab="privacy">
+          <i class="fa-solid fa-shield-halved"></i> <span>Privacy</span>
+        </button>
+      </div>
+
+      <div class="settings-modal-body">
+        <!-- TAB 1: Playback & Streaming -->
+        <div id="settingsTabPlayback" class="settings-tab-content active">
+          <div class="settings-group">
+            <h4 class="settings-group-title">Video Stream Preferences</h4>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Autoplay Next CamShot</span>
+                <span class="settings-hint">Automatically advance to the next video when current CamShot ends</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingAutoScroll">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Default Sound Mode</span>
+                <span class="settings-hint">Start reels unmuted with volume enabled by default</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingDefaultSound">
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Double-Tap Heart FX</span>
+                <span class="settings-hint">Trigger floating cyber-heart bursts when double-tapping video</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingDoubleTapLike" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-field-block">
+              <label class="settings-label">Default Playback Quality</label>
+              <div class="quality-selector-pills mt-2">
+                <button type="button" class="settings-quality-pill active" data-quality="auto">Auto FHD (1080p)</button>
+                <button type="button" class="settings-quality-pill" data-quality="4k">Ultra HD (4K)</button>
+                <button type="button" class="settings-quality-pill" data-quality="data-saver">Data Saver (720p)</button>
+              </div>
+            </div>
+
+            <!-- Reel Loop Count Limiter -->
+            <div class="settings-field-block mt-3">
+              <label class="settings-label"><i class="fa-solid fa-arrows-rotate text-[var(--cs-gold)]"></i> Reel Loop Limit</label>
+              <span class="settings-hint">How many times a video loops before auto-advancing</span>
+              <div id="loopCountLimiter" class="sleep-timer-pills mt-2 flex flex-wrap gap-2">
+                <button type="button" class="settings-loop-pill active" data-loops="infinite">Infinite</button>
+                <button type="button" class="settings-loop-pill" data-loops="1">1 Loop</button>
+                <button type="button" class="settings-loop-pill" data-loops="2">2 Loops</button>
+                <button type="button" class="settings-loop-pill" data-loops="3">3 Loops</button>
+              </div>
+            </div>
+
+            <!-- Digital Wellbeing Sleep Timer -->
+            <div class="settings-field-block mt-3">
+              <label class="settings-label"><i class="fa-solid fa-moon text-[var(--cs-gold)]"></i> Screen Time / Sleep Timer</label>
+              <span class="settings-hint">Pause playback and remind you to rest after browsing</span>
+              <div class="sleep-timer-pills mt-2 flex flex-wrap gap-2">
+                <button type="button" class="settings-sleep-pill active" data-minutes="0">Off</button>
+                <button type="button" class="settings-sleep-pill" data-minutes="15">15 Min</button>
+                <button type="button" class="settings-sleep-pill" data-minutes="30">30 Min</button>
+                <button type="button" class="settings-sleep-pill" data-minutes="45">45 Min</button>
+                <button type="button" class="settings-sleep-pill" data-minutes="60">60 Min</button>
+              </div>
+            </div>
+
+            <!-- Keyboard Hotkeys Guide Trigger -->
+            <div class="settings-field-block mt-4">
+              <button type="button" id="openKeyboardShortcutsBtn" class="reels-btn-secondary w-full text-xs py-2 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-keyboard"></i> View Keyboard Shortcuts (?)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: Creator Profile & Avatar System -->
+        <div id="settingsTabCreator" class="settings-tab-content" style="display: none;">
+          <div class="settings-group">
+            <h4 class="settings-group-title">Reels Avatar & Creator Identity</h4>
+            <p class="settings-group-subtitle">Choose whether to use your general NEXCHAT profile picture or a dedicated avatar for Reels.</p>
+
+            <!-- Avatar Source Selector -->
+            <div class="avatar-mode-cards">
+              <label class="avatar-mode-card" id="modeCardGeneral">
+                <input type="radio" name="reelsAvatarMode" id="avatarModeGeneral" value="general" checked>
+                <div class="mode-card-content">
+                  <div class="mode-icon"><i class="fa-solid fa-user"></i></div>
+                  <div class="mode-text">
+                    <strong>General Profile Picture</strong>
+                    <span>Automatically synced with your primary account</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="avatar-mode-card" id="modeCardCustom">
+                <input type="radio" name="reelsAvatarMode" id="avatarModeCustom" value="custom">
+                <div class="mode-card-content">
+                  <div class="mode-icon"><i class="fa-solid fa-bolt"></i></div>
+                  <div class="mode-text">
+                    <strong>Custom Reels Avatar</strong>
+                    <span>Upload a dedicated avatar for your reels creator persona</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <!-- Avatar Preview & Uploader Widget -->
+            <div class="reels-avatar-preview-box">
+              <div class="avatar-display-wrapper">
+                <img id="settingsAvatarPreviewImg" src="favicon.png" alt="Active Reels Avatar" class="settings-avatar-img">
+                <div id="settingsAvatarSourceBadge" class="avatar-source-pill">General Profile</div>
+              </div>
+
+              <div class="avatar-actions-column">
+                <input type="file" id="customReelsAvatarInput" accept="image/*" style="display: none;">
+                <button type="button" id="changeReelsAvatarBtn" class="reels-btn-primary" style="font-size: 13px; padding: 8px 14px;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Upload Custom Avatar
+                </button>
+                <button type="button" id="syncGeneralAvatarBtn" class="reels-btn-secondary" style="font-size: 12px; padding: 6px 12px;">
+                  <i class="fa-solid fa-rotate"></i> Sync General Photo
+                </button>
+                <span class="avatar-upload-status" id="avatarUploadStatus">PNG, JPG, WebP supported (Max 5MB)</span>
+              </div>
+            </div>
+
+            <!-- Creator Name and Bio -->
+            <div class="settings-field-block mt-4">
+              <label for="settingCreatorName" class="settings-label">Creator Display Name</label>
+              <input type="text" id="settingCreatorName" class="reels-input" placeholder="Your creator or stage name" maxlength="30">
+            </div>
+
+            <div class="settings-field-block mt-3">
+              <label for="settingCreatorBio" class="settings-label">Reels Bio / Tagline</label>
+              <textarea id="settingCreatorBio" class="reels-textarea" rows="2" placeholder="Tell your audience about your reels..." maxlength="180"></textarea>
+            </div>
+
+            <div class="settings-action-row mt-4">
+              <button type="button" id="saveCreatorProfileSettingsBtn" class="reels-btn-primary w-full">
+                <i class="fa-solid fa-floppy-disk"></i> Save Creator Profile
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Privacy & Data -->
+        <div id="settingsTabPrivacy" class="settings-tab-content" style="display: none;">
+          <div class="settings-group">
+            <h4 class="settings-group-title">Engagement & Privacy</h4>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Allow Comments on My Reels</span>
+                <span class="settings-hint">Let other viewers post comments on your content</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingAllowComments" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Allow Video Downloads</span>
+                <span class="settings-hint">Permit users to save or share your reels</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingAllowDownloads" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Show View Counts</span>
+                <span class="settings-hint">Display live view statistics on your reels</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingShowViews" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <div class="settings-toggle-row">
+              <div class="settings-label-block">
+                <span class="settings-label">Resume Playback Position</span>
+                <span class="settings-hint">Remember timestamp when returning to a previously watched reel</span>
+              </div>
+              <label class="cyber-switch">
+                <input type="checkbox" id="settingResumePlayback" checked>
+                <span class="slider"></span>
+              </label>
+            </div>
+
+            <!-- Watch History Tracker Stats -->
+            <div class="settings-toggle-row mt-2">
+              <div class="settings-label-block">
+                <span class="settings-label">Watch History Activity</span>
+                <span class="settings-hint">Total reels viewed this session</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span id="watchHistoryCountBadge" class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-white/10 text-[var(--cs-gold)] border border-[var(--cs-gold)]/30">0 Reels</span>
+                <button type="button" id="clearWatchHistoryBtn" class="text-xs px-2 py-1 rounded bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10" title="Reset Session History">Reset</button>
+              </div>
+            </div>
+
+            <div class="settings-danger-zone mt-6">
+              <h5 class="text-sm font-semibold text-red-400 mb-2">Storage & Cache</h5>
+              <button type="button" id="clearReelsCacheBtn" class="reels-btn-secondary text-red-400 border-red-500/30 hover:bg-red-500/10">
+                <i class="fa-solid fa-trash-can"></i> Clear Stream Cache & History
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Keyboard Shortcuts Guide Modal -->
+  <div id="keyboardShortcutsModal" class="reels-modal-overlay" style="display: none;">
+    <div class="reels-shortcuts-card">
+      <div class="reels-shortcuts-header flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-keyboard text-[var(--cs-gold)] text-lg"></i>
+          <h3 class="text-base font-bold text-white">Keyboard Hotkeys</h3>
+        </div>
+        <button type="button" id="closeShortcutsModalBtn" class="text-gray-400 hover:text-white transition-colors" title="Close"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="reels-shortcuts-grid mt-4 grid grid-cols-2 gap-2.5 text-xs">
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Next CamShot</span>
+          <kbd class="shortcut-key">↓ or J</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Previous CamShot</span>
+          <kbd class="shortcut-key">↑ or K</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Play / Pause</span>
+          <kbd class="shortcut-key">Space</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Mute / Unmute</span>
+          <kbd class="shortcut-key">M</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Like CamShot</span>
+          <kbd class="shortcut-key">L</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Open Studio</span>
+          <kbd class="shortcut-key">C</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Clean Screen (Zen)</span>
+          <kbd class="shortcut-key">Z</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Picture-in-Picture</span>
+          <kbd class="shortcut-key">P</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">Close / Dismiss</span>
+          <kbd class="shortcut-key">Esc</kbd>
+        </div>
+        <div class="shortcut-item flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/5">
+          <span class="text-gray-300">View Shortcuts</span>
+          <kbd class="shortcut-key">?</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Digital Wellbeing Sleep Reminder Modal -->
+  <div id="sleepReminderModal" class="reels-modal-overlay" style="display: none;">
+    <div class="sleep-reminder-card p-6 text-center max-w-sm rounded-2xl bg-zinc-950/95 border border-[var(--cs-border-gold)] shadow-2xl backdrop-blur-2xl">
+      <div class="w-14 h-14 mx-auto rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 text-2xl mb-3">
+        <i class="fa-solid fa-moon"></i>
+      </div>
+      <h3 class="text-lg font-bold text-white mb-1">Time for a Screen Break</h3>
+      <p class="text-xs text-gray-300 mb-5 leading-relaxed" id="sleepReminderMessage">
+        You've reached your digital wellbeing browsing limit. Take a moment to rest your eyes and stretch!
+      </p>
+      <div class="flex items-center gap-3">
+        <button type="button" id="sleepBreakDismissBtn" class="reels-btn-secondary flex-1 py-2 text-xs">
+          Take a Break
+        </button>
+        <button type="button" id="sleepBreakSnoozeBtn" class="reels-btn-primary flex-1 py-2 text-xs">
+          Snooze 10m
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="reelsNotif" class="reels-toast" style="display: none;"></div>
+
+  <script type="module" src="reels.js"></script>
+</body>
+</html>
