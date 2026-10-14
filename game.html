@@ -2974,6 +2974,153 @@
       from { transform: translate(-50%, -15px); opacity: 0; }
       to { transform: translate(-50%, 0); opacity: 1; }
     }
+
+    /* ============================================================
+       TACTICAL COMBAT FEEDBACK: HITMARKERS, DAMAGE NUMBERS, KILLFEED
+       ============================================================ */
+    .hitmarker-x {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 26px;
+      height: 26px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.05s ease-out;
+      z-index: 100;
+    }
+    .hitmarker-x::before, .hitmarker-x::after {
+      content: '';
+      position: absolute;
+      background: #ff0055;
+      box-shadow: 0 0 10px #ff0055;
+      border-radius: 1px;
+    }
+    .hitmarker-x::before {
+      top: 0; left: 12px; width: 2.5px; height: 26px;
+      transform: rotate(45deg);
+    }
+    .hitmarker-x::after {
+      top: 0; left: 12px; width: 2.5px; height: 26px;
+      transform: rotate(-45deg);
+    }
+    .hitmarker-x.active {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1.18);
+    }
+    .hitmarker-x.crit::before, .hitmarker-x.crit::after {
+      background: #ffd700;
+      box-shadow: 0 0 14px #ffd700;
+    }
+
+    /* Floating Combat Damage Numbers */
+    .combat-damage-num {
+      position: fixed;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 900;
+      font-size: 14px;
+      color: #00f2ff;
+      text-shadow: 0 0 12px rgba(0, 242, 255, 0.8), 0 0 4px #000;
+      pointer-events: none;
+      z-index: 400;
+      transition: transform 0.6s cubic-bezier(0.18, 0.89, 0.32, 1.28), opacity 0.6s ease;
+      user-select: none;
+    }
+    .combat-damage-num.crit {
+      font-size: 19px;
+      color: #ffd700;
+      text-shadow: 0 0 16px rgba(255, 215, 0, 0.9), 0 0 4px #000;
+    }
+
+    /* Tactical Killfeed */
+    #tactical-killfeed {
+      position: fixed;
+      top: 85px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      z-index: 350;
+      pointer-events: none;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+    }
+    .killfeed-item {
+      background: rgba(8, 14, 24, 0.90);
+      border-left: 3px solid #00f2ff;
+      border-radius: 4px;
+      padding: 6px 14px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+      animation: killfeedSlideIn 0.25s ease-out;
+      transition: opacity 0.3s;
+    }
+    @keyframes killfeedSlideIn {
+      from { transform: translateX(40px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    .killfeed-killer { color: #00f2ff; font-weight: 800; }
+    .killfeed-weapon { color: #ffd700; font-size: 10px; font-family: monospace; background: rgba(255, 215, 0, 0.12); padding: 2px 6px; border-radius: 4px; }
+    .killfeed-victim { color: #ff3366; font-weight: 800; }
+
+    /* Elimination Glory Banner */
+    #combat-elimination-banner {
+      position: fixed;
+      top: 135px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.92);
+      background: linear-gradient(135deg, rgba(14, 24, 38, 0.96), rgba(8, 12, 20, 0.98));
+      border: 1.5px solid #ffd700;
+      border-radius: 12px;
+      padding: 10px 28px;
+      text-align: center;
+      z-index: 450;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 0 40px rgba(255, 215, 0, 0.45);
+      pointer-events: none;
+      font-family: 'Orbitron', sans-serif;
+      animation: gloryPop 0.35s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+    }
+    @keyframes gloryPop {
+      0% { transform: translateX(-50%) scale(0.7); opacity: 0; }
+      100% { transform: translateX(-50%) scale(0.92); opacity: 1; }
+    }
+    #elim-title {
+      font-size: 16px;
+      font-weight: 900;
+      color: #ffd700;
+      letter-spacing: 2px;
+    }
+    #elim-sub {
+      font-size: 11px;
+      color: #00f2ff;
+      font-family: monospace;
+      margin-top: 3px;
+    }
+
+    /* Weapon Master Progression Tracker */
+    #weapon-master-tracker {
+      position: fixed;
+      top: 85px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(8, 14, 24, 0.90);
+      border: 1.5px solid rgba(255, 215, 0, 0.4);
+      border-radius: 16px;
+      padding: 6px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      z-index: 350;
+      pointer-events: none;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    }
   </style>
 </head>
 <body>
@@ -3301,13 +3448,33 @@
       <i class="fa-solid fa-satellite" style="color: #00ff88; margin-right: 8px;"></i> ORBITAL ESCAPE VELOCITY ACHIEVED — PRESS [P] TO ENGAGE INTERPLANETARY HYPERDRIVE
     </div>
 
-    <!-- Center Crosshair -->
+    <!-- Center Crosshair & Hitmarker -->
     <div class="crosshair-container">
       <div class="crosshair-dot"></div>
       <div class="crosshair-line top"></div>
       <div class="crosshair-line bottom"></div>
       <div class="crosshair-line left"></div>
       <div class="crosshair-line right"></div>
+      <div class="hitmarker-x" id="crosshair-hitmarker"></div>
+    </div>
+
+    <!-- Tactical Killfeed (Top-Right) -->
+    <div id="tactical-killfeed"></div>
+
+    <!-- Center Elimination Glory Banner -->
+    <div id="combat-elimination-banner">
+      <div id="elim-title">TARGET ELIMINATED</div>
+      <div id="elim-sub">+15 RANK POINTS · +45 NEX</div>
+    </div>
+
+    <!-- Weapon Master Escalation Progress Tracker (Top-Center) -->
+    <div id="weapon-master-tracker" style="display: none;">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; color: #ffd700; letter-spacing: 1.5px;">
+        WEAPON MASTER // TIER <span id="wm-tier-num">1</span>/5 (<span id="wm-kills-num">0</span>/2 KILLS TO ESCALATE)
+      </div>
+      <div style="width: 200px; height: 5px; background: rgba(255, 255, 255, 0.15); border-radius: 3px; overflow: hidden; margin-top: 4px;">
+        <div id="wm-tier-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #ffd700, #00f2ff); transition: width 0.3s;"></div>
+      </div>
     </div>
 
     <!-- Interaction Toast Prompt -->
@@ -4936,7 +5103,14 @@
 
       // SPAWN AT CENTRAL DISTRICT 1 GRAND STADIUM AT (0, 1.2, 0) WITH FIRST-PERSON FISTS (IMAGE 3)
       gameState.cameraMode = '1P';
-      gameState.currentWeapon = 'unarmed';
+      if (gameState.gameMode === 'Weapon Master') {
+        weaponMasterState.tier = 1;
+        weaponMasterState.killsInTier = 0;
+        switchWeapon('rifle');
+      } else {
+        gameState.currentWeapon = 'unarmed';
+      }
+      if (typeof updateWeaponMasterHUD === 'function') updateWeaponMasterHUD();
       if (typeof buildFpFistsModel === 'function') buildFpFistsModel();
       if (player && player.pos) {
         player.pos.set(0, 1.2, 0);
@@ -5242,6 +5416,68 @@
         gain.connect(this.ctx.destination);
         osc.start(now);
         osc.stop(now + 1.05);
+      }
+
+      playHitSound(isCrit = false) {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = isCrit ? 'triangle' : 'sine';
+        osc.frequency.setValueAtTime(isCrit ? 2200 : 1760, now);
+        osc.frequency.exponentialRampToValueAtTime(isCrit ? 1200 : 880, now + 0.035);
+        gain.gain.setValueAtTime((isCrit ? 0.35 : 0.22) * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.045);
+      }
+
+      playKillSound() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(520, now);
+        osc1.frequency.exponentialRampToValueAtTime(130, now + 0.28);
+        gain1.gain.setValueAtTime(0.4 * this.masterVolume, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        osc1.connect(gain1);
+        gain1.connect(this.ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.32);
+
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(1040, now);
+        osc2.frequency.exponentialRampToValueAtTime(260, now + 0.2);
+        gain2.gain.setValueAtTime(0.25 * this.masterVolume, now);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+        osc2.connect(gain2);
+        gain2.connect(this.ctx.destination);
+        osc2.start(now);
+        osc2.stop(now + 0.25);
+      }
+
+      playFanfare() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [440, 554.37, 659.25, 880];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+          gain.gain.setValueAtTime(0.28 * this.masterVolume, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.35);
+        });
       }
     }
 
@@ -6626,6 +6862,188 @@
       fpsFistsGroup.visible = true;
     }
 
+    // ============================================================
+    // TACTICAL COMBAT FEEDBACK: HITMARKERS, DAMAGE NUMBERS, KILLFEED, GLORY BANNER
+    // ============================================================
+    function showHitmarker(isCrit = false) {
+      const hm = document.getElementById('crosshair-hitmarker');
+      if (!hm) return;
+      cyberAudio.playHitSound(isCrit);
+      hm.className = 'hitmarker-x active' + (isCrit ? ' crit' : '');
+      clearTimeout(hm._timer);
+      hm._timer = setTimeout(() => {
+        hm.classList.remove('active', 'crit');
+      }, 90);
+    }
+
+    function showFloatingDamage(amount, isCrit = false, worldPos = null) {
+      if (!camera) return;
+      const screenPos = new THREE.Vector3();
+      if (worldPos) {
+        const wp = worldPos.clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.3, 1.2 + Math.random() * 0.3, (Math.random() - 0.5) * 0.3));
+        wp.project(camera);
+        if (wp.z > 1) return; // behind camera
+        const x = (wp.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-(wp.y * 0.5) + 0.5) * window.innerHeight;
+        screenPos.set(x, y, 0);
+      } else {
+        screenPos.set(window.innerWidth / 2 + (Math.random() - 0.5) * 60, window.innerHeight / 2 - 30 + (Math.random() - 0.5) * 40, 0);
+      }
+
+      const numEl = document.createElement('div');
+      numEl.className = 'combat-damage-num' + (isCrit ? ' crit' : '');
+      numEl.textContent = (isCrit ? 'CRIT -' : '-') + Math.round(amount);
+      numEl.style.left = `${screenPos.x}px`;
+      numEl.style.top = `${screenPos.y}px`;
+      numEl.style.transform = 'translate(-50%, -50%) scale(0.6)';
+      numEl.style.opacity = '1';
+      document.body.appendChild(numEl);
+
+      requestAnimationFrame(() => {
+        numEl.style.transform = `translate(-50%, -${80 + Math.random() * 30}px) scale(${isCrit ? 1.35 : 1.05})`;
+        numEl.style.opacity = '0';
+      });
+
+      setTimeout(() => {
+        if (numEl.parentNode) numEl.parentNode.removeChild(numEl);
+      }, 620);
+    }
+
+    function addKillfeedEvent(killer, weapon, victim, isPlayer = false) {
+      const feed = document.getElementById('tactical-killfeed');
+      if (!feed) return;
+      const item = document.createElement('div');
+      item.className = 'killfeed-item';
+      if (isPlayer) item.style.borderLeftColor = '#ffd700';
+      item.innerHTML = `
+        <span class="killfeed-killer" style="color: ${isPlayer ? '#ffd700' : '#00f2ff'};">${killer}</span>
+        <span class="killfeed-weapon">[${weapon ? weapon.toUpperCase() : 'ENERGY'}]</span>
+        <span class="killfeed-victim">${victim}</span>
+      `;
+      feed.prepend(item);
+      while (feed.children.length > 5) {
+        feed.removeChild(feed.lastChild);
+      }
+      setTimeout(() => {
+        item.style.opacity = '0';
+        setTimeout(() => { if (item.parentNode) item.parentNode.removeChild(item); }, 300);
+      }, 4000);
+    }
+
+    function triggerEliminationBanner(victimName, streak = 1) {
+      const banner = document.getElementById('combat-elimination-banner');
+      if (!banner) return;
+      cyberAudio.playKillSound();
+
+      const titles = [
+        'TARGET ELIMINATED',
+        'DOUBLE KILL',
+        'TRIPLE KILL',
+        'QUADRA ELIMINATION',
+        'LEGENDARY RAMPAGE'
+      ];
+      const titleIdx = Math.min(titles.length - 1, Math.max(0, streak - 1));
+      const title = titles[titleIdx];
+
+      const rpGain = 15 + Math.min(35, (streak - 1) * 10);
+      const tokenGain = 45 + (streak - 1) * 20;
+
+      if (typeof operativeRP === 'number') {
+        operativeRP += rpGain;
+        localStorage.setItem('astroshift_operative_rp', operativeRP.toString());
+        if (typeof syncRankUI === 'function') syncRankUI();
+      }
+      gameState.tokens += tokenGain;
+      const hudTokens = document.getElementById('hud-tokens');
+      if (hudTokens) hudTokens.textContent = gameState.tokens.toLocaleString();
+
+      const titleEl = document.getElementById('elim-title');
+      const subEl = document.getElementById('elim-sub');
+      if (titleEl) titleEl.textContent = title;
+      if (subEl) subEl.textContent = `+${rpGain} RANK POINTS · +${tokenGain} NEX · ${victimName.toUpperCase()}`;
+
+      banner.style.display = 'flex';
+      clearTimeout(banner._timer);
+      banner._timer = setTimeout(() => {
+        banner.style.display = 'none';
+      }, 2200);
+    }
+
+    // ============================================================
+    // WEAPON MASTER ESCALATION ENGINE (5 TIERS)
+    // ============================================================
+    const WEAPON_MASTER_TIERS = [
+      { tier: 1, weapon: 'rifle', name: 'TACTICAL RIFLE', reqKills: 2 },
+      { tier: 2, weapon: 'plasma', name: 'DUAL PLASMA', reqKills: 2 },
+      { tier: 3, weapon: 'rpg', name: 'HEAVY RPG', reqKills: 2 },
+      { tier: 4, weapon: 'railgun', name: 'QUANTUM RAILGUN', reqKills: 2 },
+      { tier: 5, weapon: 'unarmed', name: 'CYBER FISTS (FINAL)', reqKills: 1 }
+    ];
+    let weaponMasterState = {
+      tier: 1,
+      killsInTier: 0,
+      totalKills: 0
+    };
+
+    function updateWeaponMasterHUD() {
+      const tracker = document.getElementById('weapon-master-tracker');
+      if (!tracker) return;
+      const isWM = (gameState.gameMode === 'Weapon Master');
+      tracker.style.display = isWM ? 'flex' : 'none';
+      if (!isWM) return;
+
+      const curTier = WEAPON_MASTER_TIERS[weaponMasterState.tier - 1] || WEAPON_MASTER_TIERS[0];
+      const tierNum = document.getElementById('wm-tier-num');
+      const killsNum = document.getElementById('wm-kills-num');
+      const fill = document.getElementById('wm-tier-fill');
+      if (tierNum) tierNum.textContent = weaponMasterState.tier;
+      if (killsNum) killsNum.textContent = weaponMasterState.killsInTier;
+      if (fill) {
+        const pct = (weaponMasterState.killsInTier / curTier.reqKills) * 100;
+        fill.style.width = `${Math.min(100, pct)}%`;
+      }
+    }
+
+    function recordWeaponMasterKill() {
+      weaponMasterState.totalKills++;
+      weaponMasterState.killsInTier++;
+      const curTier = WEAPON_MASTER_TIERS[weaponMasterState.tier - 1] || WEAPON_MASTER_TIERS[0];
+
+      if (weaponMasterState.killsInTier >= curTier.reqKills) {
+        if (weaponMasterState.tier < WEAPON_MASTER_TIERS.length) {
+          weaponMasterState.tier++;
+          weaponMasterState.killsInTier = 0;
+          const nextTier = WEAPON_MASTER_TIERS[weaponMasterState.tier - 1];
+          switchWeapon(nextTier.weapon);
+          cyberAudio.playFanfare();
+          showStoreNotification(`⚡ WEAPON MASTER ESCALATION! UNLOCKED TIER ${weaponMasterState.tier}: ${nextTier.name}`);
+        } else {
+          cyberAudio.playFanfare();
+          showCyberAnnouncement('WEAPON MASTER VICTORY', 'OUTSTANDING OPERATIVE! You completed all 5 tiers of the Weapon Master gauntlet! +250 BONUS RP AWARDED!');
+          if (typeof operativeRP === 'number') {
+            operativeRP += 250;
+            localStorage.setItem('astroshift_operative_rp', operativeRP.toString());
+            if (typeof syncRankUI === 'function') syncRankUI();
+          }
+        }
+      }
+      updateWeaponMasterHUD();
+    }
+
+    // Ambient Syndicate Crossfire in Tactical Killfeed (Every 18 seconds)
+    setInterval(() => {
+      const lobby = document.getElementById('astroshift-lobby');
+      if (lobby && lobby.style.display !== 'none') return;
+      const operatives = ['VEX-09', 'CIPHER_X', 'KOR-SYNTH', 'DRAVEN_77', 'NYX_SHADOW', 'RAVEN_VOID', 'APEX_PRIME'];
+      const weapons = ['RIFLE', 'RAILGUN', 'PLASMA', 'RPG'];
+      const victims = ['MUTANT_BIO_3', 'DRAVEN_77', 'MUTANT_BIO_9', 'CIPHER_X', 'MUTANT_BIO_14'];
+      const killer = operatives[Math.floor(Math.random() * operatives.length)];
+      let victim = victims[Math.floor(Math.random() * victims.length)];
+      if (victim === killer) victim = 'MUTANT_BIO_12';
+      const weapon = weapons[Math.floor(Math.random() * weapons.length)];
+      addKillfeedEvent(killer, weapon, victim, false);
+    }, 18000);
+
     function performMeleePunch() {
       if (isFistPunching) return;
       isFistPunching = true;
@@ -6655,17 +7073,36 @@
           const z = zombies[j];
           if (!z.alive) continue;
           if (player.pos.distanceTo(z.mesh.position) < 2.8) {
-            z.health -= 50;
+            const isCrit = Math.random() < 0.35;
+            const punchDamage = isCrit ? 80 : 50;
+            z.health -= punchDamage;
+            showHitmarker(isCrit);
+            showFloatingDamage(punchDamage, isCrit, z.mesh.position);
             spawnImpactSparks(z.mesh.position.clone().add(new THREE.Vector3(0, 1.2, 0)));
-            cyberAudio.playLootChime();
+
             if (z.health <= 0) {
               z.alive = false;
               z.mesh.rotation.x = -Math.PI / 2;
               z.mesh.position.y = 0.2;
-              gameState.tokens += 60;
               gameState.kills = (gameState.kills || 0) + 1;
               const killBadge = document.getElementById('mobile-kill-badge');
               if (killBadge) killBadge.textContent = gameState.kills;
+
+              const now = performance.now();
+              if (!window._lastKillTime || (now - window._lastKillTime > 4000)) {
+                window._killStreak = 1;
+              } else {
+                window._killStreak = (window._killStreak || 1) + 1;
+              }
+              window._lastKillTime = now;
+
+              const victimName = z.botName || `MUTANT_${j + 1}`;
+              addKillfeedEvent('DEMONALEX', 'CYBER FISTS', victimName, true);
+              triggerEliminationBanner(victimName, window._killStreak);
+
+              if (gameState.gameMode === 'Weapon Master') {
+                recordWeaponMasterKill();
+              }
             }
             break;
           }
@@ -8945,7 +9382,97 @@
             legR,
             alive: true,
             health: 60,
+            botName: `MUTANT_BIO_${i + 1}`,
             speed: 2.2 + Math.random() * 1.4,
+            seed: Math.random() * 10
+          });
+        }
+
+        // 7. Elite Rival Syndicate Operative Bots
+        const syndicateNames = [
+          'VEX-09', 'CIPHER_X', 'KOR-SYNTH', 'DRAVEN_77',
+          'NYX_SHADOW', 'RAVEN_VOID', 'APEX_PRIME', 'ZERO_OPERATIVE'
+        ];
+        const operativeSuitMat = new THREE.MeshStandardMaterial({
+          color: 0x111620,
+          roughness: 0.35,
+          metalness: 0.85
+        });
+        const operativeArmorMat = new THREE.MeshStandardMaterial({
+          color: 0x1c2738,
+          roughness: 0.25,
+          metalness: 0.95
+        });
+        const visorColors = [0x00f2ff, 0xffd700, 0xff0055, 0x00ff88];
+
+        for (let b = 0; b < syndicateNames.length; b++) {
+          const ang = (b / syndicateNames.length) * Math.PI * 2 + 0.3;
+          const dist = 22 + Math.random() * 25;
+          const bx = Math.cos(ang) * dist;
+          const bz = Math.sin(ang) * dist;
+
+          const botGroup = new THREE.Group();
+          botGroup.position.set(bx, 0, bz);
+
+          // Torso with tactical armor vest
+          const botTorso = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.7, 0.3), operativeSuitMat);
+          botTorso.position.y = 1.1;
+          botTorso.castShadow = true;
+          botGroup.add(botTorso);
+
+          const chestPlate = new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.42, 0.12), operativeArmorMat);
+          chestPlate.position.set(0, 1.18, 0.12);
+          botGroup.add(chestPlate);
+
+          // Tactical Helmet with glowing visor
+          const botHead = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.32, 0.32), operativeArmorMat);
+          botHead.position.set(0, 1.62, 0);
+          botHead.castShadow = true;
+          botGroup.add(botHead);
+
+          const visorColor = visorColors[b % visorColors.length];
+          const visorMat = new THREE.MeshBasicMaterial({ color: visorColor });
+          const botVisor = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.08, 0.04), visorMat);
+          botVisor.position.set(0, 1.63, 0.16);
+          botGroup.add(botVisor);
+
+          // Tactical Weapon in right hand
+          const botGunMat = new THREE.MeshStandardMaterial({ color: 0x0d1117, metalness: 0.9, roughness: 0.2 });
+          const botGun = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.14, 0.65), botGunMat);
+          botGun.position.set(0.35, 1.15, 0.3);
+          botGroup.add(botGun);
+
+          // Limbs
+          const armL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.58, 0.14), operativeSuitMat);
+          armL.position.set(-0.35, 1.1, 0);
+          botGroup.add(armL);
+
+          const armR = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.58, 0.14), operativeSuitMat);
+          armR.position.set(0.35, 1.1, 0.15);
+          armR.rotation.x = -Math.PI / 4;
+          botGroup.add(armR);
+
+          const bLegL = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.75, 0.18), operativeSuitMat);
+          bLegL.position.set(-0.15, 0.4, 0);
+          bLegL.castShadow = true;
+          botGroup.add(bLegL);
+
+          const bLegR = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.75, 0.18), operativeSuitMat);
+          bLegR.position.set(0.15, 0.4, 0);
+          bLegR.castShadow = true;
+          botGroup.add(bLegR);
+
+          scene.add(botGroup);
+
+          zombies.push({
+            mesh: botGroup,
+            legL: bLegL,
+            legR: bLegR,
+            alive: true,
+            health: 90,
+            botName: syndicateNames[b],
+            isSyndicateBot: true,
+            speed: 3.2 + Math.random() * 1.2,
             seed: Math.random() * 10
           });
         }
@@ -9992,6 +10519,7 @@
         dir: dir.clone().normalize(),
         speed: type === 'railgun' ? 120 : (type === 'plasma' ? 75 : 65),
         damage: gameState.weapons[gameState.currentWeapon].damage,
+        weapon: type,
         life: 1.8
       });
     }
@@ -11398,7 +11926,12 @@
           const z = zombies[j];
           if (!z.alive) continue;
           if (p.mesh.position.distanceTo(z.mesh.position.clone().add(new THREE.Vector3(0, 1.0, 0))) < 1.3) {
-            z.health -= p.damage;
+            const isCrit = (p.damage >= 80) || (Math.random() < 0.25);
+            const actualDamage = isCrit ? Math.round(p.damage * 1.5) : p.damage;
+            z.health -= actualDamage;
+
+            showHitmarker(isCrit);
+            showFloatingDamage(actualDamage, isCrit, z.mesh.position);
             spawnImpactSparks(p.mesh.position);
             scene.remove(p.mesh);
             projectiles.splice(i, 1);
@@ -11407,9 +11940,25 @@
               z.alive = false;
               z.mesh.rotation.x = -Math.PI / 2;
               z.mesh.position.y = 0.2;
-              gameState.tokens += 45;
-              cyberAudio.playLootChime();
-              document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
+              gameState.kills = (gameState.kills || 0) + 1;
+              const mobKill = document.getElementById('mobile-kill-badge');
+              if (mobKill) mobKill.textContent = gameState.kills;
+
+              if (!window._lastKillTime || (now - window._lastKillTime > 4000)) {
+                window._killStreak = 1;
+              } else {
+                window._killStreak = (window._killStreak || 1) + 1;
+              }
+              window._lastKillTime = now;
+
+              const victimName = z.botName || `MUTANT_${j + 1}`;
+              const wepName = (p.weapon || gameState.currentWeapon || 'RIFLE').toUpperCase();
+              addKillfeedEvent('DEMONALEX', wepName, victimName, true);
+              triggerEliminationBanner(victimName, window._killStreak);
+
+              if (gameState.gameMode === 'Weapon Master') {
+                recordWeaponMasterKill();
+              }
             }
             break;
           }
@@ -13432,6 +13981,10 @@
       const mSub = document.getElementById('lobby-mode-sub');
       if (mName) mName.textContent = name;
       if (mSub) mSub.textContent = sub;
+
+      if (typeof updateWeaponMasterHUD === 'function') {
+        updateWeaponMasterHUD();
+      }
 
       cyberAudio.playLootChime();
       showStoreNotification(`COMBAT DEPLOYMENT CONFIGURED: ${name.toUpperCase()}`);
