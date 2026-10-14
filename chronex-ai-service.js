@@ -278,7 +278,7 @@ class ChronexAI {
       "gaming": {
         keywords: ["game", "gaming", "play", "astroshift", "3d", "flight", "rover", "space"],
         responses: [
-          "**AstroShift: beyond Earth**: NEXCHAT's flagship 3D game powered by Three.js Newtonian physics. Pilot the SpaceX Starship, drive combat rovers, and explore deep space beyond Earth.",
+          "**AstroShift: Beyond Earth**: NEXCHAT's flagship 3D game powered by Three.js Newtonian physics. Pilot the SpaceX Starship, drive combat rovers, and explore deep space beyond Earth.",
           "**Orbital Flight Dynamics**: AstroShift features realistic Newtonian orbital mechanics, atmospheric flight, supersonic interceptors, and high-intensity tactical engagements.",
           "**Tactical Readiness**: Enter the 3D world anytime from the navigation bar or header icon. Security clearance is maintained by Atomic Defense Protocols."
         ]
@@ -327,7 +327,7 @@ class ChronexAI {
       "nex-commands": {
         keywords: ["commands", "bot", "what can you do", "help me", "how to use", "guide"],
         responses: [
-          "**AI Commands**: You can ask me to `solve [math]`, `explain [topic]`, or `write [code]`. I am also integrated into the NEXCHAT marketplace and AstroShift: beyond Earth 3D game.",
+          "**AI Commands**: You can ask me to `solve [math]`, `explain [topic]`, or `write [code]`. I am also integrated into the NEXCHAT marketplace and AstroShift: Beyond Earth 3D game.",
           "**Optimization**: I can analyze your code for bugs or optimize your SQL queries. Just paste the snippet and ask!",
           "**Sync**: I am always evolving. New directives are uploaded to my core daily by **DEMON ALEX**."
         ]

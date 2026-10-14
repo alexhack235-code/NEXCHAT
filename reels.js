@@ -587,7 +587,7 @@ export const SEED_REELS = [
     thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/finish_line.jpg',
     authorName: 'pixel_warlord',
     authorPic: 'chronex-ai.jpg',
-    caption: 'Orbit burn in AstroShift: beyond Earth! Atmospheric entry down to 0.2 seconds on the clock. Who is ready to fly? #AstroShift #BeyondEarth #3DGame #NEXCHAT',
+    caption: 'Orbit burn in AstroShift: Beyond Earth! Atmospheric entry down to 0.2 seconds on the clock. Who is ready to fly? #AstroShift #BeyondEarth #3DGame #NEXCHAT',
     likesCount: 72400,
     likes: [],
     commentsCount: 3,
@@ -606,7 +606,7 @@ export const SEED_REELS = [
     bountyAmount: 10,
     seedComments: [
       { authorName: 'arcade_king', authorPic: 'favicon.png', text: 'That orbital landing timing was clutch! GG!' },
-      { authorName: 'steve_fps', authorPic: 'logo.jpg', text: 'Challenge accepted! Meet me in AstroShift: beyond Earth.' },
+      { authorName: 'steve_fps', authorPic: 'logo.jpg', text: 'Challenge accepted! Meet me in AstroShift: Beyond Earth.' },
       { authorName: 'nova_gamer', authorPic: 'chronex-ai.jpg', text: 'The intensity was crazy, unreal reflex speed.' }
     ]
   },

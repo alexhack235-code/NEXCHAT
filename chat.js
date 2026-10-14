@@ -2524,11 +2524,11 @@ function handleNavigation(section) {
       break;
     case "games":
     case "gaming":
-      console.log("[NEXCHAT] Opening Gaming Hub — AstroShift: beyond Earth");
+      console.log("[NEXCHAT] Opening Gaming Hub — AstroShift: Beyond Earth");
       window.location.href = "gaminghub.html";
       break;
     case "astroshift":
-      console.log("[NEXCHAT] Launching AstroShift: beyond Earth");
+      console.log("[NEXCHAT] Launching AstroShift: Beyond Earth");
       window.location.href = "game.html";
       break;
     case "marketplace":
@@ -12404,7 +12404,7 @@ async function loadStatusFeed() {
           avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80',
           mediaUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1080&q=85',
           mediaType: 'image',
-          caption: 'AstroShift: beyond Earth flight trial is now open in 3D!',
+          caption: 'AstroShift: Beyond Earth flight trial is now open in 3D!',
           timestamp: now - 240 * 60 * 1000,
           expiresAtMs: now + 15 * 3600 * 1000,
           isViewed: true

@@ -74,5 +74,5 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`[NEX SERVER] Running at http://localhost:${PORT}/index.html`);
   console.log(`[NEX SERVER] Gaming Hub at http://localhost:${PORT}/gaminghub.html`);
-  console.log(`[NEX SERVER] AstroShift: beyond Earth at http://localhost:${PORT}/game.html`);
+  console.log(`[NEX SERVER] AstroShift: Beyond Earth at http://localhost:${PORT}/game.html`);
 });

@@ -1,6 +1,6 @@
 // ============================================================
 // NEXCHAT GAMING HUB — ASTROSHIFT: BEYOND EARTH CONTROLLER
-// Exclusively dedicated to AstroShift: beyond Earth
+// Exclusively dedicated to AstroShift: Beyond Earth
 // ============================================================
 
 (function () {
@@ -134,5 +134,5 @@
 
   // Init
   syncTokens();
-  console.log('[Gaming Hub] Exclusively configured for AstroShift: beyond Earth.');
+  console.log('[Gaming Hub] Exclusively configured for AstroShift: Beyond Earth.');
 })();
