@@ -4009,7 +4009,267 @@
   <!-- ============================================================ -->
 
   <!-- 1. INTER-CITY HYPERLOOP TRANSIT MODAL -->
-  <div id="modal-hyperloop-transit" class="hud-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 92%; max-width: 680px; background: rgba(5, 12, 22, 0.96); border: 2px solid #00f2ff; border-radius: 16px; box-shadow: 0 0 35px rgba(0, 242, 255, 0.45); z-index: 320; padding: 22px; font-family: 'Rajdhani', sans-serif;">
+  
+  <!-- ============================================================ -->
+  <!-- CAR DASHBOARD INSTRUMENT CLUSTER HUD (ACTIVE IN VEHICLE)     -->
+  <!-- ============================================================ -->
+  <div id="car-dashboard-hud" style="display: none; position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 620px; z-index: 250; pointer-events: none; font-family: 'Rajdhani', sans-serif;">
+    <div style="background: rgba(8, 14, 24, 0.92); border: 2px solid #00f2ff; border-radius: 18px; padding: 14px 22px; box-shadow: 0 0 35px rgba(0, 242, 255, 0.35); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: space-between; gap: 16px; pointer-events: auto;">
+      
+      <!-- Speedometer & Gear -->
+      <div style="display: flex; align-items: baseline; gap: 8px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 34px; font-weight: 900; color: #fff; letter-spacing: 1px; min-width: 65px; text-shadow: 0 0 15px rgba(0,242,255,0.8);" id="car-speed-kmh">0</div>
+        <div>
+          <div style="font-size: 11px; font-weight: 800; color: #00f2ff; letter-spacing: 1px;">KM/H</div>
+          <div style="font-size: 9px; color: #8fa3b8;" id="car-speed-mph">0 MPH</div>
+        </div>
+        <div style="background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; border-radius: 6px; padding: 2px 8px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; color: #00f2ff; margin-left: 6px;" id="car-gear-badge">D1</div>
+      </div>
+
+      <!-- Nitro Fuel Gauge & Status -->
+      <div style="flex: 1; max-width: 250px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+          <span style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; color: #00f2ff; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-bolt" style="color: #ffd700;"></i> NITRO INJECTOR
+          </span>
+          <span style="font-family: monospace; font-size: 11px; font-weight: 700; color: #00ff88;" id="car-nitro-val">100%</span>
+        </div>
+        <div style="width: 100%; height: 10px; background: rgba(12, 22, 36, 0.9); border: 1px solid rgba(0, 242, 255, 0.4); border-radius: 5px; overflow: hidden; position: relative;">
+          <div id="car-nitro-bar" style="width: 100%; height: 100%; background: linear-gradient(90deg, #00f2ff, #00ff88, #ffd700); transition: width 0.08s ease-out; box-shadow: 0 0 10px #00f2ff;"></div>
+        </div>
+        <div style="font-size: 9px; color: #8fa3b8; margin-top: 3px; display: flex; justify-content: space-between;">
+          <span id="car-nitro-tier-label">STAGE 1 NOS</span>
+          <span style="color: #ffd700;">HOLD [SHIFT] / [⚡ NITRO]</span>
+        </div>
+      </div>
+
+      <!-- Mobile Touch Nitro & Exit Buttons -->
+      <div style="display: flex; gap: 8px;">
+        <button type="button" id="car-mobile-nitro-btn" style="background: linear-gradient(135deg, #00f2ff, #0077ff); border: 1.5px solid #00f2ff; color: #fff; border-radius: 10px; padding: 10px 14px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 0 18px rgba(0, 242, 255, 0.5); user-select: none; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-bolt"></i> NITRO
+        </button>
+        <button type="button" onclick="toggleVehicleMode()" style="background: rgba(255, 0, 51, 0.2); border: 1.5px solid #ff0033; color: #ff6677; border-radius: 10px; padding: 10px 12px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer;">
+          <i class="fa-solid fa-door-open"></i> [E] EXIT
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- ROCKET LAUNCH PAD & CREW INGRESS PROXIMITY HUD BANNER        -->
+  <!-- ============================================================ -->
+  <div id="hud-rocket-proximity" style="display: none; position: fixed; top: 85px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 620px; z-index: 260; font-family: 'Rajdhani', sans-serif; animation: slideDown 0.3s ease-out;">
+    <div style="background: rgba(10, 18, 30, 0.95); border: 2px solid #ff9900; border-radius: 16px; padding: 14px 20px; box-shadow: 0 0 40px rgba(255, 153, 0, 0.5); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,153,0,0.18); border: 2px solid #ffaa00; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #ffaa00; box-shadow: 0 0 18px rgba(255,153,0,0.4);">
+          <i class="fa-solid fa-rocket"></i>
+        </div>
+        <div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; color: #ffaa00; letter-spacing: 1px;">
+            STARBASE MECHAZILLA // LAUNCH PAD 01
+          </div>
+          <div style="font-size: 11px; color: #8fa3b8;">
+            Airlock Door &amp; Mission Control Console detected · 33 Raptor Engines Ready
+          </div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button type="button" onclick="initiateStarshipLaunchSequence()" style="background: linear-gradient(135deg, #ff3300, #ff8800); border: 1.5px solid #ffaa00; color: #fff; border-radius: 10px; padding: 9px 16px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 0 20px rgba(255, 51, 0, 0.6); display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-fire"></i> [E] INITIATE LAUNCH
+        </button>
+        <button type="button" onclick="executeStarshipFlightEntry()" style="background: rgba(0, 242, 255, 0.2); border: 1.5px solid #00f2ff; color: #00f2ff; border-radius: 10px; padding: 9px 14px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-door-open"></i> BOARD HATCH
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- CAR CUSTOMIZATION & TUNING SHOP MODAL                        -->
+  <!-- ============================================================ -->
+  <div id="modal-car-customs" class="hud-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 94%; max-width: 820px; max-height: 88vh; background: rgba(6, 12, 22, 0.98); border: 2px solid #00f2ff; border-radius: 18px; box-shadow: 0 0 50px rgba(0, 242, 255, 0.45); z-index: 340; padding: 22px; font-family: 'Rajdhani', sans-serif; overflow-y: auto;">
+    
+    <!-- Modal Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid rgba(0,242,255,0.3); padding-bottom: 12px; margin-bottom: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(0,242,255,0.15); border: 1.5px solid #00f2ff; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #00f2ff;">
+          <i class="fa-solid fa-car-tunnel"></i>
+        </div>
+        <div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #00f2ff; letter-spacing: 1.5px;">
+            NEXUS APEX CUSTOMS // SPEED &amp; MOD SHOP
+          </div>
+          <div style="font-size: 11px; color: #8fa3b8;">High-Performance Auto Tuning, Nitrous Oxide &amp; Aerodynamic Styling</div>
+        </div>
+      </div>
+      <button type="button" onclick="closeCarCustomsModal()" style="background: none; border: none; color: #8fa3b8; font-size: 26px; cursor: pointer; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#8fa3b8'">&times;</button>
+    </div>
+
+    <!-- Quick Spawner & Drive Out Actions -->
+    <div style="background: rgba(14, 26, 44, 0.7); border: 1px solid rgba(0,242,255,0.25); border-radius: 12px; padding: 12px 16px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #ffd700;">
+          <i class="fa-solid fa-gauge-high"></i> ACTIVE VEHICLE: COMBAT ROVER (TURNTABLE BAY)
+        </div>
+        <div style="font-size: 11px; color: #8fa3b8;" id="customs-car-specs-summary">
+          TOP SPEED: 86 KM/H · NITRO CAPACITY: 100 · DUAL AUTOCANNON
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <button type="button" onclick="teleportCarToGarage()" style="background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 8px; padding: 7px 12px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; cursor: pointer;">
+          <i class="fa-solid fa-location-crosshairs"></i> SUMMON ON TURNTABLE
+        </button>
+        <button type="button" onclick="driveOutOfGarage()" style="background: linear-gradient(135deg, #00f2ff, #0066ff); border: 1px solid #00f2ff; color: #fff; border-radius: 8px; padding: 7px 14px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 900; cursor: pointer; box-shadow: 0 0 14px rgba(0,242,255,0.4);">
+          <i class="fa-solid fa-car"></i> TEST DRIVE / DRIVE OUT
+        </button>
+      </div>
+    </div>
+
+    <!-- Grid of Customization Categories -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px;">
+
+      <!-- 1. BODY PAINT & FINISH -->
+      <div style="background: rgba(10, 20, 34, 0.85); border: 1.5px solid rgba(0, 242, 255, 0.3); border-radius: 12px; padding: 14px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #00f2ff; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-spray-can"></i> 1. BODY PAINT &amp; LIVERY
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <button type="button" onclick="setCarPaint('#141c26', 'Obsidian Matte Black')" style="background: #141c26; border: 2px solid #475569; border-radius: 8px; height: 42px; cursor: pointer; color: #fff; font-size: 10px; font-weight: 700;">OBSIDIAN</button>
+          <button type="button" onclick="setCarPaint('#00f2ff', 'Cyber Neon Cyan')" style="background: #00f2ff; border: 2px solid #00f2ff; border-radius: 8px; height: 42px; cursor: pointer; color: #000; font-size: 10px; font-weight: 900;">CYAN</button>
+          <button type="button" onclick="setCarPaint('#ff0033', 'Apex Crimson Red')" style="background: #ff0033; border: 2px solid #ff0033; border-radius: 8px; height: 42px; cursor: pointer; color: #fff; font-size: 10px; font-weight: 900;">CRIMSON</button>
+          <button type="button" onclick="setCarPaint('#ffd700', 'Hyper Chrome Gold')" style="background: #ffd700; border: 2px solid #ffd700; border-radius: 8px; height: 42px; cursor: pointer; color: #000; font-size: 10px; font-weight: 900;">GOLD</button>
+          <button type="button" onclick="setCarPaint('#00ff66', 'Toxic Acid Green')" style="background: #00ff66; border: 2px solid #00ff66; border-radius: 8px; height: 42px; cursor: pointer; color: #000; font-size: 10px; font-weight: 900;">LIME</button>
+          <button type="button" onclick="setCarPaint('#9900ff', 'Deep Nebula Violet')" style="background: #9900ff; border: 2px solid #9900ff; border-radius: 8px; height: 42px; cursor: pointer; color: #fff; font-size: 10px; font-weight: 900;">NEBULA</button>
+          <button type="button" onclick="setCarPaint('#f0f6fc', 'Lunar Pearl White')" style="background: #f0f6fc; border: 2px solid #cbd5e1; border-radius: 8px; height: 42px; cursor: pointer; color: #000; font-size: 10px; font-weight: 900;">PEARL</button>
+          <button type="button" onclick="setCarPaint('#ff6600', 'Solar Flare Orange')" style="background: #ff6600; border: 2px solid #ff6600; border-radius: 8px; height: 42px; cursor: pointer; color: #fff; font-size: 10px; font-weight: 900;">SOLAR</button>
+        </div>
+      </div>
+
+      <!-- 2. UNDERGLOW NEON -->
+      <div style="background: rgba(10, 20, 34, 0.85); border: 1.5px solid rgba(0, 242, 255, 0.3); border-radius: 12px; padding: 14px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #00ff88; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-lightbulb"></i> 2. GROUND FX UNDERGLOW
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+          <button type="button" onclick="setCarUnderglow('off')" style="background: #0f172a; border: 1px solid #334155; border-radius: 8px; height: 42px; cursor: pointer; color: #94a3b8; font-size: 10px; font-weight: 700;">OFF</button>
+          <button type="button" onclick="setCarUnderglow('#00f2ff')" style="background: rgba(0,242,255,0.2); border: 1.5px solid #00f2ff; border-radius: 8px; height: 42px; cursor: pointer; color: #00f2ff; font-size: 10px; font-weight: 800;">CYAN</button>
+          <button type="button" onclick="setCarUnderglow('#ff007f')" style="background: rgba(255,0,127,0.2); border: 1.5px solid #ff007f; border-radius: 8px; height: 42px; cursor: pointer; color: #ff007f; font-size: 10px; font-weight: 800;">MAGENTA</button>
+          <button type="button" onclick="setCarUnderglow('#00ff66')" style="background: rgba(0,255,102,0.2); border: 1.5px solid #00ff66; border-radius: 8px; height: 42px; cursor: pointer; color: #00ff66; font-size: 10px; font-weight: 800;">GREEN</button>
+          <button type="button" onclick="setCarUnderglow('#ff0033')" style="background: rgba(255,0,51,0.2); border: 1.5px solid #ff0033; border-radius: 8px; height: 42px; cursor: pointer; color: #ff0033; font-size: 10px; font-weight: 800;">RED</button>
+          <button type="button" onclick="setCarUnderglow('#ffaa00')" style="background: rgba(255,170,0,0.2); border: 1.5px solid #ffaa00; border-radius: 8px; height: 42px; cursor: pointer; color: #ffaa00; font-size: 10px; font-weight: 800;">AMBER</button>
+          <button type="button" onclick="setCarUnderglow('#0066ff')" style="background: rgba(0,102,255,0.2); border: 1.5px solid #0066ff; border-radius: 8px; height: 42px; cursor: pointer; color: #0066ff; font-size: 10px; font-weight: 800;">BLUE</button>
+          <button type="button" onclick="setCarUnderglow('rainbow')" style="background: linear-gradient(135deg, #00f2ff, #ff007f, #ffd700); border: 1.5px solid #fff; border-radius: 8px; height: 42px; cursor: pointer; color: #000; font-size: 10px; font-weight: 900;">RGB</button>
+        </div>
+      </div>
+
+      <!-- 3. NITROUS OXIDE PERFORMANCE -->
+      <div style="background: rgba(10, 20, 34, 0.85); border: 1.5px solid rgba(255, 215, 0, 0.35); border-radius: 12px; padding: 14px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #ffd700; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+          <span><i class="fa-solid fa-bolt"></i> 3. NITRO INJECTION SYSTEMS</span>
+          <span style="font-size: 10px; color: #8fa3b8;">BOOST CAPACITY</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(18,32,50,0.6); padding: 8px 12px; border-radius: 8px;">
+            <div>
+              <div style="font-weight: 800; font-size: 12px; color: #00f2ff;">STAGE 1 SINGLE BOTTLE NOS</div>
+              <div style="font-size: 10px; color: #8fa3b8;">100 Cap · 16/s Recharge · 1.85x Speed</div>
+            </div>
+            <button type="button" onclick="upgradeCarNitro('Stage 1 NOS', 100, 16.0, 0)" style="background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer;">EQUIP</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(18,32,50,0.6); padding: 8px 12px; border-radius: 8px;">
+            <div>
+              <div style="font-weight: 800; font-size: 12px; color: #00ff88;">STAGE 2 TWIN-BOTTLE NITROUS</div>
+              <div style="font-size: 10px; color: #8fa3b8;">175 Cap (+75%) · 24/s Recharge · 2.1x Speed</div>
+            </div>
+            <button type="button" onclick="upgradeCarNitro('Stage 2 Twin-Bottle', 175, 24.0, 250)" style="background: rgba(0,255,136,0.15); border: 1px solid #00ff88; color: #00ff88; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer;">250 NEX</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(18,32,50,0.6); padding: 8px 12px; border-radius: 8px;">
+            <div>
+              <div style="font-weight: 800; font-size: 12px; color: #ffd700;">STAGE 3 QUANTUM PLASMA INJECTOR</div>
+              <div style="font-size: 10px; color: #8fa3b8;">250 Cap (2.5x) · 36/s Recharge · 2.35x Speed</div>
+            </div>
+            <button type="button" onclick="upgradeCarNitro('Stage 3 Quantum Plasma', 250, 36.0, 500)" style="background: rgba(255,215,0,0.15); border: 1px solid #ffd700; color: #ffd700; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer;">500 NEX</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(18,32,50,0.6); padding: 8px 12px; border-radius: 8px;">
+            <div>
+              <div style="font-weight: 800; font-size: 12px; color: #ff007f;">HYPERDRIVE WARP NITROUS (MAX)</div>
+              <div style="font-size: 10px; color: #8fa3b8;">400 Cap (4x) · 55/s Instant Recharge · 2.6x Speed</div>
+            </div>
+            <button type="button" onclick="upgradeCarNitro('Hyperdrive Warp', 400, 55.0, 950)" style="background: rgba(255,0,127,0.15); border: 1px solid #ff007f; color: #ff007f; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer;">950 NEX</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. ENGINE & TRANSMISSION -->
+      <div style="background: rgba(10, 20, 34, 0.85); border: 1.5px solid rgba(255, 51, 0, 0.35); border-radius: 12px; padding: 14px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #ff5533; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+          <span><i class="fa-solid fa-gears"></i> 4. ENGINE &amp; POWERTRAIN</span>
+          <span style="font-size: 10px; color: #8fa3b8;">TOP VELOCITY</span>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(18,32,50,0.6); padding: 8px 12px; border-radius: 8px;">
+            <div>
+              <div style="font-weight: 800; font-size: 12px; color: #00f2ff;">STOCK V8 COMBAT TWIN-TURBO</div>
+              <div style="font-size: 10px; color: #8fa3b8;">Max Speed: 24.0 m/s (86 km/h) · Baseline Accel</div>
+            </div>
+            <button type="button" onclick="upgradeCarEngine('Stock V8', 24.0, 0)" style="background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer;">EQUIP</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(18,32,50,0.6); padding: 8px 12px; border-radius: 8px;">
+            <div>
+              <div style="font-weight: 800; font-size: 12px; color: #00ff88;">STAGE 1 SUPERCHARGER INTERCOOLER</div>
+              <div style="font-size: 10px; color: #8fa3b8;">Max Speed: 32.0 m/s (115 km/h) · +30% Accel</div>
+            </div>
+            <button type="button" onclick="upgradeCarEngine('Stage 1 Supercharger', 32.0, 200)" style="background: rgba(0,255,136,0.15); border: 1px solid #00ff88; color: #00ff88; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer;">200 NEX</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(18,32,50,0.6); padding: 8px 12px; border-radius: 8px;">
+            <div>
+              <div style="font-weight: 800; font-size: 12px; color: #ffd700;">STAGE 2 HYPER-ELECTRIC DUAL MOTOR</div>
+              <div style="font-size: 10px; color: #8fa3b8;">Max Speed: 42.0 m/s (151 km/h) · +60% Accel</div>
+            </div>
+            <button type="button" onclick="upgradeCarEngine('Stage 2 Dual Motor', 42.0, 450)" style="background: rgba(255,215,0,0.15); border: 1px solid #ffd700; color: #ffd700; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer;">450 NEX</button>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(18,32,50,0.6); padding: 8px 12px; border-radius: 8px;">
+            <div>
+              <div style="font-weight: 800; font-size: 12px; color: #ff3300;">STAGE 3 APEX ANTI-MATTER DRIVE</div>
+              <div style="font-size: 10px; color: #8fa3b8;">Max Speed: 55.0 m/s (198 km/h) · +120% Accel</div>
+            </div>
+            <button type="button" onclick="upgradeCarEngine('Stage 3 Anti-Matter', 55.0, 900)" style="background: rgba(255,51,0,0.15); border: 1px solid #ff3300; color: #ff3300; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; cursor: pointer;">900 NEX</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. SPOILERS & AERO KITS -->
+      <div style="background: rgba(10, 20, 34, 0.85); border: 1.5px solid rgba(0, 242, 255, 0.3); border-radius: 12px; padding: 14px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #00f2ff; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-wind"></i> 5. AERODYNAMIC SPOILERS &amp; WINGS
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+          <button type="button" onclick="setCarSpoiler('none')" style="background: rgba(15,23,42,0.8); border: 1px solid #334155; border-radius: 8px; padding: 10px; cursor: pointer; color: #94a3b8; font-size: 11px; font-weight: 700;">CLEAN (NO SPOILER)</button>
+          <button type="button" onclick="setCarSpoiler('ducktail')" style="background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; border-radius: 8px; padding: 10px; cursor: pointer; color: #00f2ff; font-size: 11px; font-weight: 800;">LOW DUCKTAIL</button>
+          <button type="button" onclick="setCarSpoiler('gt_wing')" style="background: rgba(255,215,0,0.15); border: 1.5px solid #ffd700; border-radius: 8px; padding: 10px; cursor: pointer; color: #ffd700; font-size: 11px; font-weight: 900;">HIGH GT CARBON WING</button>
+          <button type="button" onclick="setCarSpoiler('twin_fin')" style="background: rgba(255,0,127,0.15); border: 1.5px solid #ff007f; border-radius: 8px; padding: 10px; cursor: pointer; color: #ff007f; font-size: 11px; font-weight: 900;">CYBER TWIN FINS</button>
+        </div>
+      </div>
+
+      <!-- 6. WHEEL RIMS & CALIPERS -->
+      <div style="background: rgba(10, 20, 34, 0.85); border: 1.5px solid rgba(0, 242, 255, 0.3); border-radius: 12px; padding: 14px;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #00ff88; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-compact-disc"></i> 6. WHEEL ALLOYS &amp; BRAKE CALIPERS
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+          <button type="button" onclick="setCarRims('#1e2836')" style="background: rgba(30,40,54,0.8); border: 1px solid #475569; border-radius: 8px; padding: 10px; cursor: pointer; color: #cbd5e1; font-size: 11px; font-weight: 700;">GUNMETAL ALLOY</button>
+          <button type="button" onclick="setCarRims('#00f2ff')" style="background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; border-radius: 8px; padding: 10px; cursor: pointer; color: #00f2ff; font-size: 11px; font-weight: 800;">NEON CYAN RIMS</button>
+          <button type="button" onclick="setCarCalipers('#ff1744')" style="background: rgba(255,23,68,0.2); border: 1px solid #ff1744; border-radius: 8px; padding: 10px; cursor: pointer; color: #ff1744; font-size: 11px; font-weight: 800;">BREMBO CRIMSON CALIPERS</button>
+          <button type="button" onclick="setCarCalipers('#ffd700')" style="background: rgba(255,215,0,0.2); border: 1px solid #ffd700; border-radius: 8px; padding: 10px; cursor: pointer; color: #ffd700; font-size: 11px; font-weight: 800;">GOLD CERAMIC CALIPERS</button>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+<div id="modal-hyperloop-transit" class="hud-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 92%; max-width: 680px; background: rgba(5, 12, 22, 0.96); border: 2px solid #00f2ff; border-radius: 16px; box-shadow: 0 0 35px rgba(0, 242, 255, 0.45); z-index: 320; padding: 22px; font-family: 'Rajdhani', sans-serif;">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,242,255,0.3); padding-bottom: 12px; margin-bottom: 16px;">
       <div style="font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #00f2ff; display: flex; align-items: center; gap: 10px;">
         <i class="fa-solid fa-train-subway" style="color: #00ff88;"></i> HYPERLOOP MAGLEV RAPID TRANSIT NETWORK
@@ -6076,6 +6336,85 @@
         osc.start(now);
         osc.stop(now + 1.0);
       }
+
+      playNitroLoop() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        if (!this.nitroOsc) {
+          this.nitroOsc = this.ctx.createOscillator();
+          this.nitroGain = this.ctx.createGain();
+          this.nitroFilter = this.ctx.createBiquadFilter();
+          
+          this.nitroOsc.type = 'sawtooth';
+          this.nitroOsc.frequency.setValueAtTime(140, now);
+          this.nitroOsc.frequency.linearRampToValueAtTime(320, now + 0.6);
+          
+          this.nitroFilter.type = 'bandpass';
+          this.nitroFilter.frequency.setValueAtTime(800, now);
+          this.nitroFilter.Q.setValueAtTime(3.0, now);
+          
+          this.nitroGain.gain.setValueAtTime(0.01, now);
+          this.nitroGain.gain.linearRampToValueAtTime(0.28 * this.masterVolume, now + 0.15);
+          
+          this.nitroOsc.connect(this.nitroFilter);
+          this.nitroFilter.connect(this.nitroGain);
+          this.nitroGain.connect(this.ctx.destination);
+          this.nitroOsc.start(now);
+        } else {
+          this.nitroOsc.frequency.setValueAtTime(260 + Math.random() * 40, now);
+        }
+      }
+
+      playNitroVent() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        if (this.nitroOsc) {
+          try {
+            this.nitroGain.gain.linearRampToValueAtTime(0.001, now + 0.2);
+            this.nitroOsc.stop(now + 0.22);
+          } catch(e) {}
+          this.nitroOsc = null;
+          this.nitroGain = null;
+          this.nitroFilter = null;
+        }
+        // Blow-off valve release "pshhht"
+        const bufferSize = this.ctx.sampleRate * 0.28;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(2200, now);
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.35 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+      }
+
+      playAirlockDoor() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(80, now);
+        osc.frequency.linearRampToValueAtTime(140, now + 0.35);
+        osc.frequency.linearRampToValueAtTime(40, now + 0.7);
+        gain.gain.setValueAtTime(0.3 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.75);
+      }
+
     }
 
     const cyberAudio = new CyberAudioEngine();
@@ -6091,7 +6430,22 @@
       jetpackFuel: 100,
       jetpackMaxFuel: 100,
       jetpackRechargeRate: 25.0,
-      jetpackBatteryTier: 'Standard',
+            jetpackBatteryTier: 'Standard',
+      carNitro: 100,
+      carMaxNitro: 100,
+      carNitroRechargeRate: 16.0,
+      carNitroDrainRate: 28.0,
+      isCarBoosting: false,
+      carCustoms: {
+        paintColor: '#00f2ff',
+        paintName: 'Cyber Neon Cyan',
+        underglow: '#00f2ff',
+        nitroTier: 'Stage 1 NOS',
+        engineTier: 'Stock V8',
+        spoiler: 'gt_wing',
+        rimColor: '#1e2836',
+        caliperColor: '#ff1744'
+      },
       isUnderground: false,
       inVehicle: false,
       isAiming: false,
@@ -6303,6 +6657,12 @@
     let reentryPlasmaMesh, worldParticleSystem, worldParticlePositions, worldParticleVelocities = [];
     let trafficGroup;
     let cityTrafficVehicles = [];
+    let roverTitaniumMat = null, roverBrakeCaliperMat = null, roverWheelAlloyMat = null;
+    let roverNitroFlameL = null, roverNitroFlameR = null, roverNitroLight = null;
+    let roverUnderglowLight = null, roverUnderglowMesh = null, roverSpoilerMesh = null;
+    let mobileNitroPressed = false;
+    let carCustomsTurntable = null, carCustomsGroup = null;
+    let starbaseLaunchGroup = null, physicalLaunchButtonMesh = null, physicalAirlockDoorMesh = null, starbaseAirlockBeacon = null;
     let neoKyotoGroup = null;
     let solariaGroup = null;
     let atlantisGroup = null;
@@ -9261,6 +9621,81 @@
         exhaustR.position.x = 0.75;
         roverChassisMesh.add(exhaustR);
 
+        // Store reference to vehicle materials for real-time customs
+        roverTitaniumMat = rMatTitaniumArmor;
+        roverBrakeCaliperMat = rMatBrakeCaliper;
+        roverWheelAlloyMat = rMatWheelAlloy;
+
+        // Dual High-Velocity Nitro Burner Exhaust Flame Meshes
+        const nitroFlameGeo = new THREE.ConeGeometry(0.18, 1.4, 16);
+        const nitroFlameMat = new THREE.MeshBasicMaterial({
+          color: 0x00f2ff,
+          transparent: true,
+          opacity: 0.92,
+          blending: THREE.AdditiveBlending
+        });
+        roverNitroFlameL = new THREE.Mesh(nitroFlameGeo, nitroFlameMat);
+        roverNitroFlameL.rotation.x = -Math.PI / 2;
+        roverNitroFlameL.position.set(-0.75, 0.65, -3.25);
+        roverNitroFlameL.visible = false;
+        roverChassisMesh.add(roverNitroFlameL);
+
+        roverNitroFlameR = new THREE.Mesh(nitroFlameGeo, nitroFlameMat.clone());
+        roverNitroFlameR.rotation.x = -Math.PI / 2;
+        roverNitroFlameR.position.set(0.75, 0.65, -3.25);
+        roverNitroFlameR.visible = false;
+        roverChassisMesh.add(roverNitroFlameR);
+
+        // Dynamic Nitro Exhaust Thrust Light
+        roverNitroLight = new THREE.PointLight(0x00f2ff, 0, 16);
+        roverNitroLight.position.set(0, 0.65, -3.2);
+        roverChassisMesh.add(roverNitroLight);
+
+        // Dynamic Underbody Neon Ground FX
+        roverUnderglowLight = new THREE.PointLight(0x00f2ff, 2.8, 8);
+        roverUnderglowLight.position.set(0, 0.25, 0);
+        roverGroup.add(roverUnderglowLight);
+
+        const underglowQuadGeo = new THREE.PlaneGeometry(2.4, 4.8);
+        const underglowQuadMat = new THREE.MeshBasicMaterial({
+          color: 0x00f2ff,
+          transparent: true,
+          opacity: 0.45,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide
+        });
+        roverUnderglowMesh = new THREE.Mesh(underglowQuadGeo, underglowQuadMat);
+        roverUnderglowMesh.rotation.x = Math.PI / 2;
+        roverUnderglowMesh.position.set(0, 0.12, 0);
+        roverGroup.add(roverUnderglowMesh);
+
+        // Aerodynamic High-Downforce Spoiler Assembly
+        roverSpoilerMesh = new THREE.Group();
+        roverSpoilerMesh.position.set(0, 1.35, -2.35);
+
+        const wingDeck = new THREE.Mesh(
+          new THREE.BoxGeometry(2.4, 0.08, 0.55),
+          new THREE.MeshStandardMaterial({ color: 0x0a0d12, metalness: 0.85, roughness: 0.35 })
+        );
+        roverSpoilerMesh.add(wingDeck);
+
+        [-1.0, 1.0].forEach(sx => {
+          const strut = new THREE.Mesh(
+            new THREE.BoxGeometry(0.08, 0.45, 0.25),
+            new THREE.MeshStandardMaterial({ color: 0x1e2836, metalness: 0.95 })
+          );
+          strut.position.set(sx, -0.22, 0);
+          roverSpoilerMesh.add(strut);
+
+          const endPlate = new THREE.Mesh(
+            new THREE.BoxGeometry(0.04, 0.35, 0.65),
+            new THREE.MeshBasicMaterial({ color: 0x00f2ff })
+          );
+          endPlate.position.set(sx * 1.22, 0.08, 0);
+          roverSpoilerMesh.add(endPlate);
+        });
+        roverChassisMesh.add(roverSpoilerMesh);
+
         // 4. Ultra-Realistic Wheels, Alloys, Brake Calipers & Coilovers
         const wheelCoords = [
           { x: -1.52, z: 1.5, isFront: true },
@@ -10147,6 +10582,8 @@
         // Build Nexus Grand Mall & Shopping Galleria and Alive City Dynamics
         buildShoppingMall();
         buildCityLivelinessElements();
+        buildApexCarCustoms();
+        buildStarbaseLaunchInfrastructure();
         initFootstepDustPool();
 
         // Build 3 Distinct New Regional Cities & Fun Recreational Activities
@@ -10693,7 +11130,486 @@
     // ------------------------------------------------------------
     // 1. NEO-KYOTO CYBER MEGACITY (EAST HORIZON at X: 480, Z: 350)
     // ------------------------------------------------------------
-    function buildNeoKyotoCity() {
+    
+    // ============================================================
+    // NEXUS APEX CAR CUSTOMS & MOD SHOP ARCHITECTURE (-85, 0, 45)
+    // ============================================================
+    function buildApexCarCustoms() {
+      carCustomsGroup = new THREE.Group();
+      carCustomsGroup.position.set(-85, 0, 45);
+      scene.add(carCustomsGroup);
+
+      const gMatDarkSteel = new THREE.MeshStandardMaterial({ color: 0x141a24, metalness: 0.88, roughness: 0.3 });
+      const gMatChrome = new THREE.MeshStandardMaterial({ color: 0x8fa3b8, metalness: 0.95, roughness: 0.15 });
+      const gMatGlass = new THREE.MeshStandardMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.35, roughness: 0.1 });
+      const gMatCyanNeon = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const gMatAmberNeon = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+      const gMatYellowCaution = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+      const gMatFloor = new THREE.MeshStandardMaterial({ color: 0x0d131a, roughness: 0.2, metalness: 0.65 });
+
+      // 1. Polished Epoxy Concrete Garage Foundation & Driveway Apron
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(34, 0.6, 26), gMatFloor);
+      floor.position.y = 0.3;
+      floor.receiveShadow = true;
+      carCustomsGroup.add(floor);
+
+      // 2. High-Tech Garage Walls & Roof (Open Front Drive-In Portal facing East: +X)
+      // Back wall (West: -X)
+      const backWall = new THREE.Mesh(new THREE.BoxGeometry(1.2, 12, 26), gMatDarkSteel);
+      backWall.position.set(-16.4, 6.0, 0);
+      carCustomsGroup.add(backWall);
+
+      // North side wall (+Z)
+      const northWall = new THREE.Mesh(new THREE.BoxGeometry(34, 12, 1.2), gMatDarkSteel);
+      northWall.position.set(0, 6.0, 12.4);
+      carCustomsGroup.add(northWall);
+
+      // South side wall (-Z)
+      const southWall = new THREE.Mesh(new THREE.BoxGeometry(34, 12, 1.2), gMatDarkSteel);
+      southWall.position.set(0, 6.0, -12.4);
+      carCustomsGroup.add(southWall);
+
+      // Roof Canopy
+      const roof = new THREE.Mesh(new THREE.BoxGeometry(34.8, 1.2, 26.8), gMatDarkSteel);
+      roof.position.y = 12.6;
+      carCustomsGroup.add(roof);
+
+      // Front Portal Fascia Posts (leaving wide 18m center opening for vehicles to drive in)
+      [-10.5, 10.5].forEach(pz => {
+        const pPost = new THREE.Mesh(new THREE.BoxGeometry(1.6, 12, 3.8), gMatDarkSteel);
+        pPost.position.set(16.2, 6.0, pz);
+        carCustomsGroup.add(pPost);
+      });
+
+      // Front Portal Header Beam with Chevron Striping
+      const pHeader = new THREE.Mesh(new THREE.BoxGeometry(1.8, 2.8, 26), gMatDarkSteel);
+      pHeader.position.set(16.2, 10.6, 0);
+      carCustomsGroup.add(pHeader);
+
+      const cautionStrip = new THREE.Mesh(new THREE.BoxGeometry(1.85, 0.4, 18), gMatYellowCaution);
+      cautionStrip.position.set(16.2, 9.0, 0);
+      carCustomsGroup.add(cautionStrip);
+
+      // 3. Roof Holographic Neon Marquee Sign
+      const signBoard = new THREE.Mesh(new THREE.BoxGeometry(0.8, 2.4, 22), new THREE.MeshStandardMaterial({ color: 0x06090e, metalness: 0.9 }));
+      signBoard.position.set(16.4, 14.2, 0);
+      carCustomsGroup.add(signBoard);
+
+      const signNeon = new THREE.Mesh(new THREE.BoxGeometry(0.85, 1.4, 20), gMatCyanNeon);
+      signNeon.position.set(16.4, 14.2, 0);
+      carCustomsGroup.add(signNeon);
+
+      // Animated Rotating 3D Supercar Wireframe Hologram on Roof
+      const holoCarGeo = new THREE.BoxGeometry(4.8, 1.2, 2.4);
+      const holoCarMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true });
+      const holoCar = new THREE.Mesh(holoCarGeo, holoCarMat);
+      holoCar.position.set(0, 15.5, 0);
+      carCustomsGroup.add(holoCar);
+      citySpinners.push(holoCar);
+
+      // 4. Rotating Hydraulic Vehicle Turntable in Garage Center
+      carCustomsTurntable = new THREE.Group();
+      carCustomsTurntable.position.set(0, 0.45, 0);
+      carCustomsGroup.add(carCustomsTurntable);
+
+      const tableDisc = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.2, 0.3, 32), gMatDarkSteel);
+      carCustomsTurntable.add(tableDisc);
+
+      const tableNeonRing = new THREE.Mesh(new THREE.RingGeometry(4.8, 5.1, 32), gMatCyanNeon);
+      tableNeonRing.rotation.x = -Math.PI / 2;
+      tableNeonRing.position.y = 0.16;
+      carCustomsTurntable.add(tableNeonRing);
+
+      // Dual Red Hydraulic Vehicle Lift Pillars
+      const rLiftMat = new THREE.MeshStandardMaterial({ color: 0xff0033, metalness: 0.8, roughness: 0.3 });
+      [-2.8, 2.8].forEach(lx => {
+        const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.6, 5.5, 0.6), rLiftMat);
+        pillar.position.set(lx, 2.75, 0);
+        carCustomsTurntable.add(pillar);
+
+        const liftArm = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.25, 3.4), gMatChrome);
+        liftArm.position.set(lx, 1.2, 0);
+        carCustomsTurntable.add(liftArm);
+      });
+
+      // 5. Interior Garage Props: Nitrous Oxide Tanks, Racing Tires, Diagnostics
+      // Nitrous Oxide Tanks (N2O Blue Cylinders)
+      const nosMat = new THREE.MeshStandardMaterial({ color: 0x0066ff, metalness: 0.85, roughness: 0.25 });
+      [-13, -11, -9].forEach(nz => {
+        const nosBottle = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 2.2, 16), nosMat);
+        nosBottle.position.set(-14.2, 1.7, nz);
+        carCustomsGroup.add(nosBottle);
+
+        const nosValve = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.4, 8), gMatChrome);
+        nosValve.position.set(-14.2, 2.9, nz);
+        carCustomsGroup.add(nosValve);
+      });
+
+      // Racing Tire Stacks
+      const tireMat = new THREE.MeshStandardMaterial({ color: 0x06080b, roughness: 0.95 });
+      [6, 8.5, 11].forEach(tz => {
+        for (let th = 0; th < 4; th++) {
+          const tMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.45, 16), tireMat);
+          tMesh.position.set(-14.2, 0.6 + th * 0.46, tz);
+          carCustomsGroup.add(tMesh);
+        }
+      });
+
+      // Wall Diagnostics Telemetry Screens
+      [-4, 4].forEach(dz => {
+        const diagScreen = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 2.0), gMatCyanNeon);
+        diagScreen.position.set(-15.6, 4.5, dz);
+        diagScreen.rotation.y = Math.PI / 2;
+        carCustomsGroup.add(diagScreen);
+      });
+
+      // Register spatial colliders for garage outer walls
+      registerCityCollider({ x: -85 - 16.4, z: 45, hw: 0.6, hd: 13 });
+      registerCityCollider({ x: -85, z: 45 + 12.4, hw: 17, hd: 0.6 });
+      registerCityCollider({ x: -85, z: 45 - 12.4, hw: 17, hd: 0.6 });
+    }
+
+    // ============================================================
+    // STARBASE LAUNCH PAD INFRASTRUCTURE, AIRLOCK & LAUNCH CONSOLE
+    // ============================================================
+    function buildStarbaseLaunchInfrastructure() {
+      starbaseLaunchGroup = new THREE.Group();
+      scene.add(starbaseLaunchGroup);
+
+      const padMat = new THREE.MeshStandardMaterial({ color: 0x181e26, roughness: 0.85, metalness: 0.3 });
+      const steelMat = new THREE.MeshStandardMaterial({ color: 0x2b3442, metalness: 0.9, roughness: 0.25 });
+      const cautionMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+      const redLaunchMat = new THREE.MeshStandardMaterial({ color: 0xff0022, emissive: 0xff0000, emissiveIntensity: 0.85, roughness: 0.2 });
+      const greenAirlockMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+      const cyanGlowMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+      // 1. Concrete Hexagonal Launch Mount Table & Blast Catwalks at (120, 0, -100)
+      const mountTable = new THREE.Mesh(new THREE.CylinderGeometry(22, 24, 3.6, 6), padMat);
+      mountTable.position.set(120, 1.8, -100);
+      mountTable.receiveShadow = true;
+      starbaseLaunchGroup.add(mountTable);
+
+      // Warning Chevron Perimeter Ring
+      const chevronRing = new THREE.Mesh(new THREE.RingGeometry(21.5, 23.5, 6), cautionMat);
+      chevronRing.rotation.x = -Math.PI / 2;
+      chevronRing.position.set(120, 3.65, -100);
+      starbaseLaunchGroup.add(chevronRing);
+
+      // 2. Ground Crew Ingress Airlock Building & Elevator Foyer at (104, 0, -100)
+      const airlockBuilding = new THREE.Mesh(new THREE.BoxGeometry(11, 8.5, 9.5), steelMat);
+      airlockBuilding.position.set(104, 4.25, -100);
+      airlockBuilding.castShadow = true;
+      starbaseLaunchGroup.add(airlockBuilding);
+
+      // Massive Heavy Blast Doors (Double Doors facing West: -X)
+      physicalAirlockDoorMesh = new THREE.Mesh(new THREE.BoxGeometry(0.6, 6.2, 5.2), new THREE.MeshStandardMaterial({ color: 0x0f151e, metalness: 0.95, roughness: 0.2 }));
+      physicalAirlockDoorMesh.position.set(98.3, 3.4, -100);
+      starbaseLaunchGroup.add(physicalAirlockDoorMesh);
+
+      // Blast Door Caution Frame & Status Indicator
+      const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.7, 6.8, 5.8), cautionMat);
+      doorFrame.position.set(98.25, 3.4, -100);
+      starbaseLaunchGroup.add(doorFrame);
+
+      const airlockLight = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), greenAirlockMat);
+      airlockLight.position.set(98.1, 7.0, -100);
+      starbaseLaunchGroup.add(airlockLight);
+
+      // Giant Illuminated Neon Signboard above Airlock Doors
+      const signMesh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.4, 7.8), new THREE.MeshBasicMaterial({ color: 0x00f2ff }));
+      signMesh.position.set(98.1, 8.2, -100);
+      starbaseLaunchGroup.add(signMesh);
+
+      // Pulsing Cyan Ground Entryway Portal Hologram
+      const portalRing = new THREE.Mesh(new THREE.RingGeometry(1.6, 3.2, 32), cyanGlowMat);
+      portalRing.rotation.x = -Math.PI / 2;
+      portalRing.position.set(94.5, 0.15, -100);
+      starbaseLaunchGroup.add(portalRing);
+      citySpinners.push(portalRing);
+
+      // High-Altitude Sky Laser Beacon shooting 260m straight into the sky
+      const beaconGeo = new THREE.CylinderGeometry(0.5, 0.5, 260, 16);
+      const beaconMat = new THREE.MeshBasicMaterial({
+        color: 0x00f2ff,
+        transparent: true,
+        opacity: 0.35,
+        blending: THREE.AdditiveBlending
+      });
+      starbaseAirlockBeacon = new THREE.Mesh(beaconGeo, beaconMat);
+      starbaseAirlockBeacon.position.set(104, 130, -100);
+      starbaseLaunchGroup.add(starbaseAirlockBeacon);
+
+      // 3. Crew Access Arm (CAA) Walkway at Y: 71m connecting Mechazilla tower to Starship
+      const caaArm = new THREE.Mesh(new THREE.BoxGeometry(16, 3.2, 3.4), steelMat);
+      caaArm.position.set(112, 71.0, -100);
+      starbaseLaunchGroup.add(caaArm);
+
+      const caaLight = new THREE.Mesh(new THREE.BoxGeometry(16, 0.3, 0.3), greenAirlockMat);
+      caaLight.position.set(112, 72.8, -98.2);
+      starbaseLaunchGroup.add(caaLight);
+
+      // 4. Mission Control Launch Pedestal with GIANT PHYSICAL 3D RED BUTTON at (104, 0, -84)
+      const consoleDesk = new THREE.Mesh(new THREE.BoxGeometry(5.2, 2.2, 2.8), steelMat);
+      consoleDesk.position.set(104, 1.1, -84);
+      starbaseLaunchGroup.add(consoleDesk);
+
+      // Telemetry Holographic Screens on Desk
+      [-1.6, 0, 1.6].forEach((sx, i) => {
+        const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.8), (i === 1 ? cautionMat : cyanGlowMat));
+        screen.position.set(104 + sx, 2.4, -84);
+        screen.rotation.x = -Math.PI / 8;
+        starbaseLaunchGroup.add(screen);
+      });
+
+      // Yellow Hazard Protective Collar
+      const collarMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.9, 0.25, 24), cautionMat);
+      collarMesh.position.set(104, 2.3, -83.4);
+      starbaseLaunchGroup.add(collarMesh);
+
+      // GIANT GLOWING RED MUSHROOM LAUNCH BUTTON
+      physicalLaunchButtonMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, 0.3, 24), redLaunchMat);
+      physicalLaunchButtonMesh.position.set(104, 2.48, -83.4);
+      physicalLaunchButtonMesh.userData = { isLaunchButton: true };
+      starbaseLaunchGroup.add(physicalLaunchButtonMesh);
+
+      // Floating 3D Holographic Launch Sign above Button
+      const holoSign = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.2), cautionMat);
+      holoSign.position.set(104, 3.6, -83.4);
+      holoSign.rotation.x = -Math.PI / 12;
+      starbaseLaunchGroup.add(holoSign);
+
+      // Register Colliders for Launch Pad structures
+      registerCityCollider({ x: 104, z: -100, hw: 6, hd: 5 });
+      registerCityCollider({ x: 104, z: -84, hw: 3, hd: 2 });
+    }
+
+    // ============================================================
+    // CAR CUSTOMIZATION CONTROLLER & REAL-TIME STATE SYNC
+    // ============================================================
+    function openCarCustomsModal() {
+      const modal = document.getElementById('modal-car-customs');
+      if (modal) modal.style.display = 'block';
+      cyberAudio.playLootChime();
+
+      // If rover is nearby, place on turntable
+      if (roverGroup && player.pos && player.pos.distanceTo(new THREE.Vector3(-85, 0, 45)) < 30) {
+        teleportCarToGarage(false);
+      }
+      updateCarCustomsUI();
+    }
+
+    function closeCarCustomsModal() {
+      const modal = document.getElementById('modal-car-customs');
+      if (modal) modal.style.display = 'none';
+      cyberAudio.playClick();
+    }
+
+    function updateCarCustomsUI() {
+      const summaryEl = document.getElementById('customs-car-specs-summary');
+      if (summaryEl && gameState.carCustoms) {
+        summaryEl.textContent = `PAINT: ${gameState.carCustoms.paintName} · NITRO: ${gameState.carCustoms.nitroTier} (${gameState.carMaxNitro}) · ENGINE: ${gameState.carCustoms.engineTier}`;
+      }
+    }
+
+    function setCarPaint(hexColor, name) {
+      if (!gameState.carCustoms) gameState.carCustoms = {};
+      gameState.carCustoms.paintColor = hexColor;
+      gameState.carCustoms.paintName = name;
+      applyCarCustoms();
+      saveCarCustoms();
+      showStoreNotification(`🏎️ CUSTOM CAR PAINT APPLIED: ${name.toUpperCase()}!`);
+      cyberAudio.playClick();
+    }
+
+    function setCarUnderglow(val) {
+      if (!gameState.carCustoms) gameState.carCustoms = {};
+      gameState.carCustoms.underglow = val;
+      applyCarCustoms();
+      saveCarCustoms();
+      showStoreNotification(`💡 UNDERGLOW NEON UPDATED: ${val.toUpperCase()}!`);
+      cyberAudio.playClick();
+    }
+
+    function upgradeCarNitro(tierName, maxCap, rechargeRate, cost) {
+      if (cost > 0) {
+        if (gameState.tokens < cost) {
+          showStoreNotification('⚠️ INSUFFICIENT NEX TOKENS FOR THIS NITRO UPGRADE!');
+          cyberAudio.playClick();
+          return;
+        }
+        gameState.tokens -= cost;
+        document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
+      }
+
+      gameState.carCustoms.nitroTier = tierName;
+      gameState.carMaxNitro = maxCap;
+      gameState.carNitro = maxCap;
+      gameState.carNitroRechargeRate = rechargeRate;
+
+      const tierLabel = document.getElementById('car-nitro-tier-label');
+      if (tierLabel) tierLabel.textContent = tierName.toUpperCase();
+
+      applyCarCustoms();
+      saveCarCustoms();
+      showStoreNotification(`⚡ NITRO UPGRADED: ${tierName.toUpperCase()} (CAPACITY: ${maxCap})!`);
+      cyberAudio.playLootChime();
+    }
+
+    function upgradeCarEngine(tierName, topSpeed, cost) {
+      if (cost > 0) {
+        if (gameState.tokens < cost) {
+          showStoreNotification('⚠️ INSUFFICIENT NEX TOKENS FOR THIS ENGINE TUNE!');
+          cyberAudio.playClick();
+          return;
+        }
+        gameState.tokens -= cost;
+        document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
+      }
+
+      gameState.carCustoms.engineTier = tierName;
+      applyCarCustoms();
+      saveCarCustoms();
+      showStoreNotification(`⚙️ POWERTRAIN TUNED: ${tierName.toUpperCase()} (MAX: ${Math.round(topSpeed * 3.6)} KM/H)!`);
+      cyberAudio.playLootChime();
+    }
+
+    function setCarSpoiler(style) {
+      if (!gameState.carCustoms) gameState.carCustoms = {};
+      gameState.carCustoms.spoiler = style;
+      applyCarCustoms();
+      saveCarCustoms();
+      showStoreNotification(`🏁 AERO SPOILER UPDATED: ${style.toUpperCase()}!`);
+      cyberAudio.playClick();
+    }
+
+    function setCarRims(colorHex) {
+      if (!gameState.carCustoms) gameState.carCustoms = {};
+      gameState.carCustoms.rimColor = colorHex;
+      applyCarCustoms();
+      saveCarCustoms();
+      showStoreNotification('🛞 WHEEL ALLOY RIMS CUSTOMIZED!');
+      cyberAudio.playClick();
+    }
+
+    function setCarCalipers(colorHex) {
+      if (!gameState.carCustoms) gameState.carCustoms = {};
+      gameState.carCustoms.caliperColor = colorHex;
+      applyCarCustoms();
+      saveCarCustoms();
+      showStoreNotification('🛑 RACING BRAKE CALIPERS CUSTOMIZED!');
+      cyberAudio.playClick();
+    }
+
+    function teleportCarToGarage(notify = true) {
+      if (roverGroup) {
+        roverGroup.position.set(-85, 0.45, 45);
+        roverGroup.rotation.y = Math.PI / 2; // Face towards garage entrance
+        roverCurrentSpeed = 0;
+        roverSteerAngle = 0;
+      }
+      if (notify) {
+        showStoreNotification('🏎️ CUSTOM ROVER SUMMONED ONTO GARAGE HYDRAULIC TURNTABLE!');
+        cyberAudio.playLootChime();
+      }
+    }
+
+    function driveOutOfGarage() {
+      closeCarCustomsModal();
+      if (roverGroup) {
+        roverGroup.position.set(-72, 0, 45); // Drive right out onto West Boulevard
+        roverGroup.rotation.y = Math.PI / 2;
+        roverCurrentSpeed = 12.0;
+        gameState.inVehicle = true;
+      }
+      showStoreNotification('🏎️ ENGINES ROARING! NITRO CHARGED AND READY TO ROLL!');
+      cyberAudio.playNitroLoop();
+      setTimeout(() => { cyberAudio.playNitroVent(); }, 400);
+    }
+
+    function applyCarCustoms() {
+      const c = gameState.carCustoms;
+      if (!c) return;
+
+      // 1. Body Titanium Armor Paint
+      if (roverTitaniumMat && c.paintColor) {
+        roverTitaniumMat.color.set(c.paintColor);
+      }
+
+      // 2. Underglow Neon
+      if (roverUnderglowLight && roverUnderglowMesh) {
+        if (!c.underglow || c.underglow === 'off') {
+          roverUnderglowLight.intensity = 0;
+          roverUnderglowMesh.visible = false;
+        } else if (c.underglow === 'rainbow') {
+          roverUnderglowLight.intensity = 3.2;
+          roverUnderglowMesh.visible = true;
+          roverUnderglowLight.color.set('#00f2ff');
+          roverUnderglowMesh.material.color.set('#00f2ff');
+        } else {
+          roverUnderglowLight.intensity = 3.2;
+          roverUnderglowMesh.visible = true;
+          roverUnderglowLight.color.set(c.underglow);
+          roverUnderglowMesh.material.color.set(c.underglow);
+        }
+      }
+
+      // 3. Spoiler Visibility & Style
+      if (roverSpoilerMesh) {
+        if (c.spoiler === 'none') {
+          roverSpoilerMesh.visible = false;
+        } else {
+          roverSpoilerMesh.visible = true;
+          if (c.spoiler === 'ducktail') {
+            roverSpoilerMesh.scale.set(1.0, 0.45, 0.7);
+          } else if (c.spoiler === 'twin_fin') {
+            roverSpoilerMesh.scale.set(1.2, 1.2, 1.0);
+          } else {
+            roverSpoilerMesh.scale.set(1.0, 1.0, 1.0);
+          }
+        }
+      }
+
+      // 4. Caliper & Rims Colors
+      if (roverBrakeCaliperMat && c.caliperColor) {
+        roverBrakeCaliperMat.color.set(c.caliperColor);
+      }
+      if (roverWheelAlloyMat && c.rimColor) {
+        roverWheelAlloyMat.color.set(c.rimColor);
+      }
+
+      updateCarCustomsUI();
+    }
+
+    function saveCarCustoms() {
+      if (gameState.carCustoms) {
+        try {
+          localStorage.setItem('ASTRO_CAR_CUSTOMS', JSON.stringify(gameState.carCustoms));
+          localStorage.setItem('ASTRO_CAR_MAX_NITRO', String(gameState.carMaxNitro));
+          localStorage.setItem('ASTRO_CAR_NITRO_RECHARGE', String(gameState.carNitroRechargeRate));
+        } catch(e) {}
+      }
+    }
+
+    function loadSavedCarCustoms() {
+      try {
+        const saved = localStorage.getItem('ASTRO_CAR_CUSTOMS');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          Object.assign(gameState.carCustoms, parsed);
+        }
+        const savedMaxN = localStorage.getItem('ASTRO_CAR_MAX_NITRO');
+        if (savedMaxN) {
+          gameState.carMaxNitro = parseFloat(savedMaxN);
+          gameState.carNitro = gameState.carMaxNitro;
+        }
+        const savedRecharge = localStorage.getItem('ASTRO_CAR_NITRO_RECHARGE');
+        if (savedRecharge) {
+          gameState.carNitroRechargeRate = parseFloat(savedRecharge);
+        }
+      } catch(e) {}
+    }
+
+function buildNeoKyotoCity() {
       neoKyotoGroup = new THREE.Group();
       scene.add(neoKyotoGroup);
 
@@ -12607,6 +13523,18 @@
     function handleInteractions() {
       if (!player.pos) return;
 
+      // 0A. Apex Car Customization & Performance Garage (-85, 0, 45)
+      if (player.pos.distanceTo(new THREE.Vector3(-85, 0, 45)) < 16.0) {
+        openCarCustomsModal();
+        return;
+      }
+
+      // 0B. Starbase Mechazilla Launch Pad, Airlock Door & Launch Console (104, 0, -100) or (120, 0, -100)
+      if (player.pos.distanceTo(new THREE.Vector3(104, 0, -100)) < 26.0 || player.pos.distanceTo(new THREE.Vector3(120, 0, -100)) < 26.0) {
+        initiateStarshipLaunchSequence();
+        return;
+      }
+
       // 1. Hyperloop Transit Stations
       const hyperloopStations = [
         new THREE.Vector3(18, 0, 55),
@@ -12673,11 +13601,27 @@
     function toggleVehicleMode() {
       if (!player.pos || !roverGroup) return;
       const distToRover = player.pos.distanceTo(roverGroup.position);
-      if (distToRover < 5.0 && !gameState.inVehicle) {
+      const isNearGarage = player.pos.distanceTo(new THREE.Vector3(-85, 0, 45)) < 16.0;
+
+      if ((distToRover < 8.0 || isNearGarage) && !gameState.inVehicle) {
         gameState.inVehicle = true;
+        const hud = document.getElementById('car-dashboard-hud');
+        if (hud) hud.style.display = 'block';
+        showStoreNotification('🏎️ ENTERED COMBAT ROVER // HOLD [SHIFT] OR TAP [⚡ NITRO] TO BOOST');
+        cyberAudio.playLootChime();
       } else if (gameState.inVehicle) {
         gameState.inVehicle = false;
+        gameState.isCarBoosting = false;
+        if (roverNitroFlameL && roverNitroFlameR) {
+          roverNitroFlameL.visible = false;
+          roverNitroFlameR.visible = false;
+        }
+        if (roverNitroLight) roverNitroLight.intensity = 0;
+        const hud = document.getElementById('car-dashboard-hud');
+        if (hud) hud.style.display = 'none';
         player.pos.copy(roverGroup.position).add(new THREE.Vector3(2.5, 1.2, 0));
+        showStoreNotification('DISEMBARKED FROM VEHICLE');
+        cyberAudio.playClick();
       }
     }
 
@@ -13540,6 +14484,31 @@
           promptShown = true;
         }
 
+        // Apex Car Customs & Mod Shop (-85, 0, 45)
+        if (!promptShown && player.pos.distanceTo(new THREE.Vector3(-85, 0, 45)) < 16.0) {
+          promptEl.style.display = 'flex';
+          document.getElementById('prompt-text').textContent = 'CUSTOMIZE VEHICLE & PERFORMANCE [E / F]';
+          promptShown = true;
+        }
+
+        // Starbase Mechazilla Rocket Pad, Airlock Door & Launch Console (104, 0, -100)
+        const isNearRocketPad = (player.pos.distanceTo(new THREE.Vector3(104, 0, -100)) < 28.0 || player.pos.distanceTo(new THREE.Vector3(120, 0, -100)) < 28.0);
+        const rocketProximityBanner = document.getElementById('hud-rocket-proximity');
+        if (isNearRocketPad && gameState.flightMode !== 'starship') {
+          if (!promptShown) {
+            promptEl.style.display = 'flex';
+            document.getElementById('prompt-text').textContent = 'BOARD STARSHIP OR INITIATE LAUNCH [E / F]';
+            promptShown = true;
+          }
+          if (rocketProximityBanner && rocketProximityBanner.style.display !== 'block') {
+            rocketProximityBanner.style.display = 'block';
+          }
+        } else {
+          if (rocketProximityBanner && rocketProximityBanner.style.display !== 'none') {
+            rocketProximityBanner.style.display = 'none';
+          }
+        }
+
         if (!promptShown && promptEl) {
           promptEl.style.display = 'none';
         }
@@ -14106,13 +15075,96 @@
         }
 
       } else if (roverGroup) {
-        // Ultra-Realistic Combat Rover Driving Dynamics & Physics
-        const steer = (keys['KeyA'] ? 1 : 0) - (keys['KeyD'] ? 1 : 0);
-        const throttle = (keys['KeyW'] ? 1 : 0) - (keys['KeyS'] ? 1 : 0);
+        // Ultra-Realistic Combat Rover Driving Dynamics, Nitro Injection & Physics
+        let steer = (keys['KeyA'] ? 1 : 0) - (keys['KeyD'] ? 1 : 0);
+        let throttle = (keys['KeyW'] ? 1 : 0) - (keys['KeyS'] ? 1 : 0);
+
+        // Mobile Analog Joystick steering & throttle support
+        if (gameState.joyActive && typeof gameState.joyNormX === 'number' && typeof gameState.joyNormY === 'number') {
+          if (Math.abs(gameState.joyNormX) > 0.08) steer = -gameState.joyNormX;
+          if (Math.abs(gameState.joyNormY) > 0.08) throttle = -gameState.joyNormY;
+        }
+
+        // Nitro Boost Execution (Shift, KeyN, or Mobile Touch Button)
+        const wantsNitro = (keys['ShiftLeft'] || keys['ShiftRight'] || keys['KeyN'] || mobileNitroPressed) && throttle > 0.1;
+        let maxDrivingSpeed = 24.0;
+        if (gameState.carCustoms && gameState.carCustoms.engineTier === 'Stage 1 Supercharger') maxDrivingSpeed = 32.0;
+        else if (gameState.carCustoms && gameState.carCustoms.engineTier === 'Stage 2 Dual Motor') maxDrivingSpeed = 42.0;
+        else if (gameState.carCustoms && gameState.carCustoms.engineTier === 'Stage 3 Anti-Matter') maxDrivingSpeed = 55.0;
+
+        let accelLerp = 3.8;
+        if (wantsNitro && gameState.carNitro > 0) {
+          gameState.isCarBoosting = true;
+          gameState.carNitro = Math.max(0, gameState.carNitro - gameState.carNitroDrainRate * delta);
+          maxDrivingSpeed *= 1.85; // Massive nitrous speed multiplier
+          accelLerp = 8.5;         // Explosive launch thrust
+
+          // Dynamic Nitro Exhaust Flames & Light
+          if (roverNitroFlameL && roverNitroFlameR) {
+            const fScale = 1.0 + Math.sin(now * 0.04) * 0.35 + Math.random() * 0.25;
+            roverNitroFlameL.scale.set(1.1, 1.1, fScale);
+            roverNitroFlameR.scale.set(1.1, 1.1, fScale);
+            roverNitroFlameL.visible = true;
+            roverNitroFlameR.visible = true;
+          }
+          if (roverNitroLight) {
+            roverNitroLight.intensity = 5.0 + Math.random() * 2.5;
+          }
+          if (camera) {
+            camera.fov = THREE.MathUtils.lerp(camera.fov, 82, delta * 5.0);
+            camera.updateProjectionMatrix();
+          }
+          cyberAudio.playNitroLoop();
+        } else {
+          if (gameState.isCarBoosting) {
+            cyberAudio.playNitroVent();
+          }
+          gameState.isCarBoosting = false;
+          if (roverNitroFlameL && roverNitroFlameR) {
+            roverNitroFlameL.visible = false;
+            roverNitroFlameR.visible = false;
+          }
+          if (roverNitroLight) {
+            roverNitroLight.intensity = 0;
+          }
+          if (camera && Math.abs(camera.fov - 70) > 0.1) {
+            camera.fov = THREE.MathUtils.lerp(camera.fov, 70, delta * 4.0);
+            camera.updateProjectionMatrix();
+          }
+          // Passive Nitrous Recharge when not boosting
+          gameState.carNitro = Math.min(gameState.carMaxNitro, gameState.carNitro + gameState.carNitroRechargeRate * delta);
+        }
 
         // Responsive throttle acceleration and braking inertia
-        const targetSpeed = throttle * (throttle > 0 ? 22.0 : 10.0);
-        roverCurrentSpeed = THREE.MathUtils.lerp(roverCurrentSpeed, targetSpeed, delta * 3.8);
+        const targetSpeed = throttle * (throttle > 0 ? maxDrivingSpeed : 12.0);
+        roverCurrentSpeed = THREE.MathUtils.lerp(roverCurrentSpeed, targetSpeed, delta * accelLerp);
+
+        // Update Car Dashboard HUD (Speedometer & Nitro Gauge)
+        const dashHud = document.getElementById('car-dashboard-hud');
+        if (dashHud) {
+          if (dashHud.style.display !== 'block') dashHud.style.display = 'block';
+          const speedKmh = Math.round(Math.abs(roverCurrentSpeed) * 3.6);
+          const speedMph = Math.round(speedKmh * 0.621371);
+          const elKmh = document.getElementById('car-speed-kmh');
+          const elMph = document.getElementById('car-speed-mph');
+          const elGear = document.getElementById('car-gear-badge');
+          if (elKmh) elKmh.textContent = speedKmh;
+          if (elMph) elMph.textContent = `${speedMph} MPH`;
+          if (elGear) {
+            if (gameState.isCarBoosting) elGear.textContent = 'NITRO!';
+            else if (speedKmh < 5) elGear.textContent = (throttle < -0.1 ? 'R' : 'N');
+            else if (speedKmh < 45) elGear.textContent = 'D1';
+            else if (speedKmh < 85) elGear.textContent = 'D2';
+            else if (speedKmh < 130) elGear.textContent = 'D3';
+            else elGear.textContent = 'D4';
+          }
+
+          const nitroPct = Math.round((gameState.carNitro / gameState.carMaxNitro) * 100);
+          const nBar = document.getElementById('car-nitro-bar');
+          const nVal = document.getElementById('car-nitro-val');
+          if (nBar) nBar.style.width = `${nitroPct}%`;
+          if (nVal) nVal.textContent = `${nitroPct}% (${Math.round(gameState.carNitro)}/${gameState.carMaxNitro})`;
+        }
 
         // Speed-sensitive steering yaw
         const steerRate = 1.6 + Math.abs(roverCurrentSpeed) * 0.035;
@@ -15109,6 +16161,22 @@
         }, { passive: false });
       }
 
+      // Mobile Nitro Boost Touch Button Listeners
+      const btnNitro = document.getElementById('car-mobile-nitro-btn');
+      if (btnNitro) {
+        btnNitro.addEventListener('touchstart', (e) => {
+          e.preventDefault();
+          mobileNitroPressed = true;
+          if (gameState.settings.haptics && typeof navigator.vibrate === 'function') navigator.vibrate(30);
+        }, { passive: false });
+        btnNitro.addEventListener('touchend', (e) => {
+          e.preventDefault();
+          mobileNitroPressed = false;
+        }, { passive: false });
+        btnNitro.addEventListener('mousedown', () => { mobileNitroPressed = true; });
+        btnNitro.addEventListener('mouseup', () => { mobileNitroPressed = false; });
+      }
+
       const btnInteract = document.getElementById('touch-btn-interact');
       if (btnInteract) {
         btnInteract.addEventListener('touchstart', (e) => {
@@ -15210,6 +16278,9 @@
           if (tierBadge) tierBadge.textContent = `ACTIVE: ${savedTier.toUpperCase()} (${gameState.jetpackMaxFuel} CAP)`;
         }
       } catch (e) {}
+
+      loadSavedCarCustoms();
+      applyCarCustoms();
 
       try {
         const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
