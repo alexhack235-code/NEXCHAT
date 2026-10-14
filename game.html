@@ -2724,6 +2724,256 @@
       color: #ffd700;
       letter-spacing: 1.5px;
     }
+
+    /* ============================================================
+       DYNAMIC ASTRO-CYBER MODAL FRAMEWORK (RANKING, SQUAD, MAIL, MODES, PASS)
+       ============================================================ */
+    .astro-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 94%;
+      max-width: 860px;
+      height: 88vh;
+      max-height: 640px;
+      background: #090e16;
+      border: 1.5px solid rgba(0, 242, 255, 0.45);
+      border-radius: 12px;
+      z-index: 570;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), 0 0 30px rgba(0, 242, 255, 0.2);
+      font-family: 'Rajdhani', sans-serif;
+    }
+    .astro-modal.visible { display: flex; }
+
+    .astro-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: #0d1522;
+      border-bottom: 1.5px solid rgba(0, 242, 255, 0.3);
+    }
+    .astro-modal-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .astro-modal-title i { color: #00f2ff; }
+    .astro-modal-close {
+      background: transparent;
+      border: none;
+      color: #7d8ea3;
+      font-size: 26px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 8px;
+      transition: color 0.15s;
+    }
+    .astro-modal-close:hover { color: #ff3366; }
+
+    .astro-modal-body {
+      padding: 18px 24px;
+      overflow-y: auto;
+      flex: 1;
+      color: #c7d2e0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      background: #090e16;
+    }
+
+    /* RANKING SYSTEM SPECIFIC STYLES */
+    .rank-hero-card {
+      background: linear-gradient(135deg, rgba(14, 24, 38, 0.9), rgba(8, 14, 24, 0.95));
+      border: 1.5px solid #ffd700;
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
+      position: relative;
+      overflow: hidden;
+    }
+    .rank-tier-badge-large {
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      background: rgba(255, 215, 0, 0.15);
+      border: 2px solid #ffd700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      color: #ffd700;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.35);
+      flex-shrink: 0;
+    }
+    .rank-hero-info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .rank-tier-name {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+      color: #ffd700;
+      letter-spacing: 1.5px;
+    }
+    .rank-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .rank-stat-box {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 6px;
+      padding: 6px 10px;
+      text-align: center;
+    }
+    .rank-stat-label {
+      font-size: 9px;
+      color: #8fa3b8;
+      letter-spacing: 1px;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .rank-stat-val {
+      font-size: 13px;
+      font-weight: 800;
+      color: #00f2ff;
+      font-family: monospace;
+    }
+
+    /* Rank Tier Progression Ladder */
+    .rank-tier-track {
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+    }
+    .rank-tier-chip {
+      flex: 1;
+      min-width: 95px;
+      background: rgba(14, 20, 30, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .rank-tier-chip.active {
+      border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.12);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.25);
+    }
+    .rank-tier-chip-icon {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+    .rank-tier-chip-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .rank-tier-chip-rp {
+      font-size: 9px;
+      color: #8fa3b8;
+      font-family: monospace;
+    }
+
+    /* Global Leaderboard Table */
+    .rank-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .rank-table th {
+      background: rgba(0, 0, 0, 0.4);
+      color: #8fa3b8;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1.5px solid rgba(255, 255, 255, 0.1);
+    }
+    .rank-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+    }
+    .rank-table tr:hover {
+      background: rgba(0, 242, 255, 0.06);
+    }
+    .rank-table tr.user-row {
+      background: rgba(255, 215, 0, 0.12);
+      border-left: 3px solid #ffd700;
+    }
+
+    /* DYNAMIC PING PILL */
+    .bs-ping-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-family: monospace;
+      font-weight: 800;
+      background: rgba(0, 255, 136, 0.1);
+      padding: 3px 9px;
+      border-radius: 12px;
+      border: 1px solid rgba(0, 255, 136, 0.35);
+      color: #00ff88;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    /* TACTICAL PING HUD BANNER */
+    #tactical-ping-alert {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(8, 14, 24, 0.92);
+      border: 1.5px solid #00f2ff;
+      border-radius: 20px;
+      padding: 6px 18px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      color: #00f2ff;
+      letter-spacing: 1px;
+      z-index: 500;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.4);
+      pointer-events: none;
+      animation: alertSlideDown 0.25s ease-out;
+    }
+    @keyframes alertSlideDown {
+      from { transform: translate(-50%, -15px); opacity: 0; }
+      to { transform: translate(-50%, 0); opacity: 1; }
+    }
   </style>
 </head>
 <body>
@@ -2819,43 +3069,44 @@
 
       <!-- Currencies & Status (Right) -->
       <div class="bs-top-right-group">
-        <div class="bs-currency-pill">
+        <div class="bs-currency-pill" onclick="toggleStoreModal(true, 'armory')" style="cursor: pointer;" title="NEX Tokens & Store">
           <i class="fa-solid fa-coins" style="color: #ffd700;"></i>
-          <span>6</span>
+          <span id="lobby-currency-nex">1,250</span>
           <div class="bs-curr-add">+</div>
         </div>
-        <div class="bs-currency-pill">
+        <div class="bs-currency-pill" onclick="toggleAstroPassModal()" style="cursor: pointer;" title="Astro Pass Crowns">
           <i class="fa-solid fa-crown" style="color: #ffaa00;"></i>
-          <span>2577</span>
+          <span id="lobby-currency-crowns">2577</span>
           <div class="bs-curr-add">+</div>
         </div>
-        <div class="bs-currency-pill">
+        <div class="bs-currency-pill" onclick="toggleVaultModal()" style="cursor: pointer;" title="Metropolis Credits">
           <span style="color: #00f2ff; font-weight: 900;">Ⓡ</span>
-          <span>185344</span>
+          <span id="lobby-currency-credits">185344</span>
         </div>
-        <button type="button" class="bs-top-icon-btn" title="Leaderboards">
-          <i class="fa-solid fa-ranking-star"></i>
+        <button type="button" class="bs-top-icon-btn" onclick="toggleRankingModal()" title="Leaderboards & Ranking System">
+          <i class="fa-solid fa-ranking-star" style="color: #ffd700;"></i>
         </button>
-        <button type="button" class="bs-top-icon-btn" title="Friends">
+        <button type="button" class="bs-top-icon-btn" onclick="toggleFriendsModal()" title="Friends & Squad">
           <i class="fa-solid fa-user-group"></i>
-          <span class="bs-badge-dot">93</span>
+          <span class="bs-badge-dot">3</span>
         </button>
-        <button type="button" class="bs-top-icon-btn" title="Mailbox">
+        <button type="button" class="bs-top-icon-btn" onclick="toggleMailboxModal()" title="Operative Mailbox">
           <i class="fa-solid fa-envelope"></i>
-          <span class="bs-badge-dot" style="padding: 2px 4px;">•</span>
+          <span class="bs-badge-dot" style="padding: 2px 4px;">1</span>
         </button>
         <button type="button" class="bs-top-icon-btn" onclick="toggleSettingsModal()" title="Game Settings">
           <i class="fa-solid fa-gear"></i>
         </button>
-        <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; color: #00ff88; font-family: monospace;">
-          <i class="fa-solid fa-wifi"></i> 56ms
+        <div class="bs-ping-pill" id="lobby-ping-pill" onclick="showPingDiagnostics()" title="Live Latency / MS">
+          <i class="fa-solid fa-wifi" id="lobby-wifi-icon"></i>
+          <span id="lobby-ping-val">24</span>ms
         </div>
       </div>
     </div>
 
     <!-- Left Side Promo Stack -->
     <div class="bs-left-stack">
-      <div class="bs-promo-card">
+      <div class="bs-promo-card" onclick="toggleStoreModal(true, 'armory')" style="cursor: pointer;" title="Shardcrown Tactical Supply">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <span class="bs-promo-title"><i class="fa-solid fa-gem" style="color: #bb44ff;"></i> SHARDCROWN</span>
         </div>
@@ -2865,17 +3116,17 @@
         </div>
       </div>
 
-      <div class="bs-pass-card">
-        <div class="bs-pass-lvl">23</div>
+      <div class="bs-pass-card" onclick="toggleAstroPassModal()" style="cursor: pointer;" title="Season 1 Astro Pass">
+        <div class="bs-pass-lvl" id="lobby-pass-tier">23</div>
         <div style="display: flex; flex-direction: column;">
           <span style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffffff;">ASTRO PASS</span>
-          <span style="font-size: 9px; color: #00f2ff;">TIER UNLOCKED</span>
+          <span style="font-size: 9px; color: #00f2ff;">TIER 23 UNLOCKED</span>
         </div>
       </div>
 
-      <div class="bs-promo-card" style="border-color: #00ff88;">
+      <div class="bs-promo-card" onclick="toggleEventsModal()" style="cursor: pointer; border-color: #00ff88;" title="Special Events">
         <span class="bs-promo-title" style="color: #00ff88;"><i class="fa-solid fa-gift"></i> EVENT</span>
-        <span style="font-size: 9px; color: #8fa3b8;">LIMITED TIME REWARDS</span>
+        <span style="font-size: 9px; color: #8fa3b8;">STADIUM CHAMPIONSHIP</span>
       </div>
     </div>
 
@@ -2886,19 +3137,19 @@
         <span style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 800; color: #ffd700; letter-spacing: 3px; display: block;">BEYOND EARTH</span>
       </div>
 
-      <div class="bs-rank-pill">
-        <i class="fa-solid fa-shield-halved" style="color: #00f2ff;"></i>
-        <span>Legendary Odyssey II</span>
+      <div class="bs-rank-pill" onclick="toggleRankingModal()" style="cursor: pointer;" title="Operative Ranking System">
+        <i class="fa-solid fa-trophy" id="lobby-rank-icon" style="color: #ffd700;"></i>
+        <span id="lobby-rank-name">Legendary Odyssey II</span>
       </div>
 
-      <div class="bs-mode-selector-card">
-        <span class="bs-mode-name">Weapon Master</span>
-        <span class="bs-mode-sub">1 | Central Stadium (2)</span>
+      <div class="bs-mode-selector-card" onclick="toggleModeModal()" style="cursor: pointer;" title="Select Combat Mode">
+        <span class="bs-mode-name" id="lobby-mode-name">Weapon Master</span>
+        <span class="bs-mode-sub" id="lobby-mode-sub">1 | Central Stadium (2)</span>
         <span style="font-size: 9px; color: #00ff88; margin-top: 2px;"><i class="fa-solid fa-check"></i> Map resource ready</span>
       </div>
 
       <div class="bs-play-group">
-        <div class="bs-loadout-icon" title="Tactical Loadout">
+        <div class="bs-loadout-icon" onclick="toggleStoreModal(true, 'armory')" style="cursor: pointer;" title="Tactical Armory Loadout">
           <i class="fa-solid fa-box-archive"></i>
         </div>
         <button type="button" class="bs-play-btn" onclick="startMatchFromLobby()">
@@ -2920,11 +3171,11 @@
       </div>
 
       <div class="bs-bottom-tabs">
-        <div class="bs-tab-item"><i class="fa-solid fa-table-cells-large"></i></div>
-        <div class="bs-tab-item">OPERATIVE</div>
-        <div class="bs-tab-item">VAULT <span class="bs-tab-red-dot"></span></div>
-        <div class="bs-tab-item">WEAPON <span class="bs-tab-red-dot"></span></div>
-        <div class="bs-tab-item active">MATCH</div>
+        <div class="bs-tab-item" onclick="toggleStoreModal(true, 'armory')" style="cursor: pointer;"><i class="fa-solid fa-table-cells-large"></i></div>
+        <div class="bs-tab-item" onclick="toggleStoreModal(true, 'suits')" style="cursor: pointer;">OPERATIVE</div>
+        <div class="bs-tab-item" onclick="toggleVaultModal()" style="cursor: pointer;">VAULT <span class="bs-tab-red-dot"></span></div>
+        <div class="bs-tab-item" onclick="toggleStoreModal(true, 'armory')" style="cursor: pointer;">WEAPON <span class="bs-tab-red-dot"></span></div>
+        <div class="bs-tab-item active" onclick="switchLobbyBottomTab('match')" style="cursor: pointer;">MATCH</div>
       </div>
     </div>
   </div>
@@ -2957,6 +3208,10 @@
         <div class="hud-chip" id="hud-cam-container" style="background: rgba(0, 255, 136, 0.12); border-color: rgba(0, 255, 136, 0.4);">
           <i class="fa-solid fa-video" style="color: #00ff88;"></i>
           <span class="depth-badge" id="hud-cam-badge" style="color: #00ff88;">// CAM: 1P</span>
+        </div>
+        <div class="hud-chip" id="hud-ping-chip" style="background: rgba(0, 255, 136, 0.12); border-color: rgba(0, 255, 136, 0.4);">
+          <i class="fa-solid fa-wifi" id="hud-wifi-icon" style="color: #00ff88;"></i>
+          <span id="hud-ping-val" style="color: #00ff88; font-family: monospace; font-weight: 800;">24ms</span>
         </div>
       </div>
 
@@ -3265,13 +3520,13 @@
         <button type="button" class="mobile-icon-pill-btn" onclick="toggleSettingsModal()" title="Game Settings">
           <i class="fa-solid fa-gear"></i>
         </button>
-        <button type="button" class="mobile-icon-pill-btn" title="Microphone">
+        <button type="button" class="mobile-icon-pill-btn" id="btn-mobile-mic" onclick="toggleMobileMic()" title="Voice Comms">
           <i class="fa-solid fa-microphone"></i>
         </button>
-        <button type="button" class="mobile-icon-pill-btn" title="Speaker">
+        <button type="button" class="mobile-icon-pill-btn" id="btn-mobile-speaker" onclick="toggleMobileSpeaker()" title="Audio Output">
           <i class="fa-solid fa-volume-high"></i>
         </button>
-        <button type="button" class="mobile-icon-pill-btn" title="Chat">
+        <button type="button" class="mobile-icon-pill-btn" id="btn-mobile-chat" onclick="sendQuickChat()" title="Tactical Comms">
           <i class="fa-solid fa-comment-dots"></i>
         </button>
       </div>
@@ -3305,19 +3560,19 @@
 
     <!-- Center-Bottom Quick Action Buttons (About & Balance Announcement Image 3) -->
     <div class="mobile-center-announcements">
-      <button type="button" class="mobile-center-sub-btn" onclick="cyberAudio.playLootChime(); alert('AstroShift: Beyond Earth\nCentral Stadium Coliseum // High-Performance 60 FPS Mobile Combat Engine');" title="About">
+      <button type="button" class="mobile-center-sub-btn" onclick="showCyberAnnouncement('ABOUT ASTROSHIFT: BEYOND EARTH', 'HIGH-PERFORMANCE 60 FPS COMBAT ENGINE\n- Open-World Metropolis with Central Stadium & 5 Cardinal Transit Districts\n- Nexus Grand Mall with 5 interactive shopping gallerias\n- Real-time 3D physics, vehicle dynamics & ranked matchmaking');" title="About">
         <div class="sub-icon-circle">
           <i class="fa-solid fa-file-lines"></i>
         </div>
         <span>About</span>
       </button>
-      <button type="button" class="mobile-center-sub-btn gold" onclick="cyberAudio.playLootChime(); alert('BALANCE ANNOUNCEMENT\n- Weapon Master mode active\n- Stadium center spawn point secured\n- 60 FPS performance verified');" title="Balance Announcement">
+      <button type="button" class="mobile-center-sub-btn gold" onclick="showCyberAnnouncement('BALANCE & RANKING UPDATE', 'SEASON 1 ODYSSEY CALIBRATIONS:\n- Weapon Master mode active (32 kills to victory)\n- Ranked Tier progression ladder enabled (Bronze to Legendary Odyssey)\n- Tactical Ping waypoint system operational\n- Live MS latency telemetry active');" title="Balance Announcement">
         <div class="sub-icon-circle">
           <i class="fa-solid fa-bullhorn"></i>
         </div>
         <span>Balance Announcement</span>
       </button>
-      <button type="button" class="mobile-center-sub-btn" style="border-color: #ffd700;" onclick="openStoreModal('armory')" title="Nexus Grand Mall">
+      <button type="button" class="mobile-center-sub-btn" style="border-color: #ffd700;" onclick="toggleStoreModal(true, 'armory')" title="Nexus Grand Mall">
         <div class="sub-icon-circle" style="color: #ffd700; border-color: #ffd700;">
           <i class="fa-solid fa-shop"></i>
         </div>
@@ -3371,7 +3626,7 @@
       </button>
 
       <!-- Location Pin (Ping) -->
-      <button type="button" class="bs-action-btn" id="btn-action-ping" title="Tactical Ping">
+      <button type="button" class="bs-action-btn" id="btn-action-ping" onclick="triggerTacticalPing()" title="Tactical Ping (Key Q)">
         <i class="fa-solid fa-location-dot"></i>
       </button>
 
@@ -3387,7 +3642,7 @@
     </div>
 
     <!-- AstroShift In-Game Watermark -->
-    <div class="bs-watermark">ASTROSHIFT: BEYOND EARTH · PING: 56ms · FPS: 60</div>
+    <div class="bs-watermark">ASTROSHIFT: BEYOND EARTH · PING: <span id="wm-ping-val">24ms</span> · FPS: <span id="wm-fps-val">60</span></div>
 
     <!-- Dedicated Starship Cockpit Flight Controls (Active when piloting Starship) -->
     <div id="starship-mobile-controls" style="display: none;">
@@ -4002,6 +4257,449 @@
     <div>
       <div class="store-prompt-title" id="store-prompt-title">NEXUS GRAND MALL</div>
       <div class="store-prompt-sub">[E] / [TAP] VISIT STORE</div>
+    </div>
+  </div>
+
+  <!-- FLOATING TACTICAL WAYPOINT PING BANNER -->
+  <div id="tactical-ping-alert">
+    <i class="fa-solid fa-location-crosshairs"></i>
+    <span id="tactical-ping-text">WAYPOINT ALPHA DESIGNATED</span>
+  </div>
+
+  <!-- ============================================================
+       1. OPERATIVE RANKING SYSTEM & GLOBAL LEADERBOARD MODAL
+       ============================================================ -->
+  <div id="modal-ranking" class="astro-modal">
+    <div class="astro-modal-header">
+      <div class="astro-modal-title">
+        <i class="fa-solid fa-trophy" style="color: #ffd700;"></i>
+        <span>OPERATIVE RANKING SYSTEM // GLOBAL LEADERBOARDS</span>
+      </div>
+      <button type="button" class="astro-modal-close" onclick="toggleRankingModal()">&times;</button>
+    </div>
+    <div class="astro-modal-body">
+      <!-- Player Current Rank Hero Card -->
+      <div class="rank-hero-card">
+        <div class="rank-tier-badge-large" id="rank-badge-icon">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+        <div class="rank-hero-info">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="rank-tier-name" id="rank-tier-display">Legendary Odyssey II</div>
+            <span style="font-size: 11px; color: #ffd700; font-family: 'Orbitron', monospace; font-weight: 800;">SEASON 1 ACTIVE</span>
+          </div>
+          <div style="font-size: 13px; color: #00f2ff; font-family: monospace; margin: 4px 0;">
+            RANK POINTS: <strong id="rank-rp-display" style="font-size: 16px; color: #ffffff;">6,240 RP</strong> · TOP 0.5% WORLDWIDE
+          </div>
+          <div style="width: 100%; background: rgba(255, 255, 255, 0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+            <div id="rank-progress-fill" style="width: 78%; height: 100%; background: linear-gradient(90deg, #ffd700, #00f2ff); transition: width 0.4s;"></div>
+          </div>
+          <div class="rank-stats-grid">
+            <div class="rank-stat-box">
+              <div class="rank-stat-label">WIN RATE</div>
+              <div class="rank-stat-val" id="rank-stat-winrate">68.4%</div>
+            </div>
+            <div class="rank-stat-box">
+              <div class="rank-stat-label">K/D RATIO</div>
+              <div class="rank-stat-val" id="rank-stat-kd">3.42</div>
+            </div>
+            <div class="rank-stat-box">
+              <div class="rank-stat-label">MATCHES</div>
+              <div class="rank-stat-val" id="rank-stat-matches">142</div>
+            </div>
+            <div class="rank-stat-box">
+              <div class="rank-stat-label">TIER PEAK</div>
+              <div class="rank-stat-val" style="color: #ffd700;">LEGEND</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="store-card-btn primary" style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; flex: 1; padding: 12px;" onclick="simulateRankedMatch(true)">
+          <i class="fa-solid fa-crosshairs"></i> SIMULATE RANKED VICTORY (+25 RP)
+        </button>
+        <button type="button" class="store-card-btn primary" style="background: rgba(255, 0, 85, 0.2); border: 1px solid #ff0055; color: #ff0055; width: 140px; padding: 12px;" onclick="simulateRankedMatch(false)">
+          <i class="fa-solid fa-skull"></i> DEFEAT (-15 RP)
+        </button>
+        <button type="button" class="store-card-btn primary" style="background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; width: 190px; padding: 12px;" onclick="claimRankRewards()">
+          <i class="fa-solid fa-gift"></i> CLAIM REWARDS
+        </button>
+      </div>
+
+      <!-- Tier Progression Track -->
+      <div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; color: #8fa3b8; letter-spacing: 1.5px; margin-bottom: 8px;">
+          COMPETITIVE TIER HIERARCHY
+        </div>
+        <div class="rank-tier-track" id="rank-tier-track">
+          <div class="rank-tier-chip"><div class="rank-tier-chip-icon" style="color: #cd7f32;"><i class="fa-solid fa-shield"></i></div><div class="rank-tier-chip-title" style="color: #cd7f32;">BRONZE</div><div class="rank-tier-chip-rp">0 - 999 RP</div></div>
+          <div class="rank-tier-chip"><div class="rank-tier-chip-icon" style="color: #c0c0c0;"><i class="fa-solid fa-shield-halved"></i></div><div class="rank-tier-chip-title" style="color: #c0c0c0;">SILVER</div><div class="rank-tier-chip-rp">1000 - 1999 RP</div></div>
+          <div class="rank-tier-chip"><div class="rank-tier-chip-icon" style="color: #ffd700;"><i class="fa-solid fa-award"></i></div><div class="rank-tier-chip-title" style="color: #ffd700;">GOLD</div><div class="rank-tier-chip-rp">2000 - 2999 RP</div></div>
+          <div class="rank-tier-chip"><div class="rank-tier-chip-icon" style="color: #00f2ff;"><i class="fa-solid fa-medal"></i></div><div class="rank-tier-chip-title" style="color: #00f2ff;">PLATINUM</div><div class="rank-tier-chip-rp">3000 - 3999 RP</div></div>
+          <div class="rank-tier-chip"><div class="rank-tier-chip-icon" style="color: #b9f2ff;"><i class="fa-solid fa-gem"></i></div><div class="rank-tier-chip-title" style="color: #b9f2ff;">DIAMOND</div><div class="rank-tier-chip-rp">4000 - 4999 RP</div></div>
+          <div class="rank-tier-chip"><div class="rank-tier-chip-icon" style="color: #ff007f;"><i class="fa-solid fa-crown"></i></div><div class="rank-tier-chip-title" style="color: #ff007f;">MASTER</div><div class="rank-tier-chip-rp">5000 - 5999 RP</div></div>
+          <div class="rank-tier-chip active"><div class="rank-tier-chip-icon" style="color: #ffd700;"><i class="fa-solid fa-trophy"></i></div><div class="rank-tier-chip-title" style="color: #ffd700;">LEGEND</div><div class="rank-tier-chip-rp">6000+ RP</div></div>
+        </div>
+      </div>
+
+      <!-- Global Top 10 Leaderboard Table -->
+      <div>
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; color: #8fa3b8; letter-spacing: 1.5px; margin-bottom: 8px;">
+          GLOBAL TOP 10 OPERATIVE STANDINGS
+        </div>
+        <div style="background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; overflow: hidden;">
+          <table class="rank-table">
+            <thead>
+              <tr>
+                <th style="width: 50px;">RANK</th>
+                <th>OPERATIVE CALLSIGN</th>
+                <th>TIER</th>
+                <th>RANK POINTS</th>
+                <th>WIN RATE</th>
+                <th>REGION</th>
+              </tr>
+            </thead>
+            <tbody id="rank-leaderboard-body">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       2. SQUAD & FRIENDS MODAL
+       ============================================================ -->
+  <div id="modal-friends" class="astro-modal" style="max-width: 620px;">
+    <div class="astro-modal-header">
+      <div class="astro-modal-title">
+        <i class="fa-solid fa-user-group" style="color: #00f2ff;"></i>
+        <span>SQUAD &amp; OPERATIVE NETWORK</span>
+      </div>
+      <button type="button" class="astro-modal-close" onclick="toggleFriendsModal()">&times;</button>
+    </div>
+    <div class="astro-modal-body">
+      <div style="display: flex; gap: 8px;">
+        <input type="text" id="friend-add-input" placeholder="Enter operative callsign..." style="flex: 1; background: #060a12; border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 6px; padding: 10px 14px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 12px;">
+        <button type="button" class="store-card-btn primary" style="width: 140px; padding: 10px;" onclick="addFriendFromInput()">
+          <i class="fa-solid fa-user-plus"></i> ADD SQUAD
+        </button>
+      </div>
+
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; color: #8fa3b8; letter-spacing: 1.2px;">
+        ONLINE SQUADMATES (3 ONLINE)
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;" id="friends-list-container">
+        <!-- Friend 1 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(14, 22, 34, 0.85); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 8px; padding: 10px 14px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 8px #00ff88;"></div>
+            <div>
+              <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff;">CYBER_VIPER</div>
+              <div style="font-size: 10px; color: #8fa3b8;">IN MATCH · CENTRAL STADIUM</div>
+            </div>
+          </div>
+          <button type="button" class="store-card-btn primary" style="width: 90px; padding: 6px 10px; font-size: 10px;" onclick="inviteFriend('CYBER_VIPER')">INVITE</button>
+        </div>
+        <!-- Friend 2 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(14, 22, 34, 0.85); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 8px; padding: 10px 14px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 8px #00ff88;"></div>
+            <div>
+              <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff;">GHOST_STRIKER</div>
+              <div style="font-size: 10px; color: #8fa3b8;">IN LOBBY · READY</div>
+            </div>
+          </div>
+          <button type="button" class="store-card-btn primary" style="width: 90px; padding: 6px 10px; font-size: 10px;" onclick="inviteFriend('GHOST_STRIKER')">INVITE</button>
+        </div>
+        <!-- Friend 3 -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(14, 22, 34, 0.85); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 8px; padding: 10px 14px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 8px #00ff88;"></div>
+            <div>
+              <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff;">VALKYRIE_99</div>
+              <div style="font-size: 10px; color: #8fa3b8;">IN LOBBY · READY</div>
+            </div>
+          </div>
+          <button type="button" class="store-card-btn primary" style="width: 90px; padding: 6px 10px; font-size: 10px;" onclick="inviteFriend('VALKYRIE_99')">INVITE</button>
+        </div>
+        <!-- Friend 4 (Offline) -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(10, 14, 22, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 10px 14px; opacity: 0.6;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: #556677;"></div>
+            <div>
+              <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff;">TITAN_RONIN</div>
+              <div style="font-size: 10px; color: #8fa3b8;">OFFLINE · 2 HOURS AGO</div>
+            </div>
+          </div>
+          <span style="font-size: 10px; color: #556677; font-family: monospace;">OFFLINE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       3. OPERATIVE MAILBOX & SYSTEM GIFTS MODAL
+       ============================================================ -->
+  <div id="modal-mailbox" class="astro-modal" style="max-width: 680px;">
+    <div class="astro-modal-header">
+      <div class="astro-modal-title">
+        <i class="fa-solid fa-envelope" style="color: #ffd700;"></i>
+        <span>OPERATIVE DISPATCHES &amp; MAILBOX</span>
+      </div>
+      <button type="button" class="astro-modal-close" onclick="toggleMailboxModal()">&times;</button>
+    </div>
+    <div class="astro-modal-body">
+      <!-- Mail Item 1 (Claimable) -->
+      <div style="background: rgba(14, 24, 38, 0.9); border: 1.5px solid #ffd700; border-radius: 8px; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px;" id="mail-item-season">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffd700;">
+            <i class="fa-solid fa-gift"></i> RANKED SEASON 1 ODYSSEY COMMENCEMENT
+          </span>
+          <span style="font-size: 10px; color: #8fa3b8; font-family: monospace;">TODAY</span>
+        </div>
+        <div style="font-size: 12px; color: #c0d0e0; line-height: 1.4;">
+          Welcome Operative. Competitive Ranked Matchmaking Season 1 is now active across the Metropolis. Enjoy this deployment ordnance stipend.
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 4px;">
+          <div style="font-family: 'Orbitron', monospace; font-size: 12px; color: #00ff88; font-weight: 800;">
+            ATTACHMENT: +250 NEX TOKENS
+          </div>
+          <button type="button" class="store-card-btn primary" style="background: #ffd700; color: #000; width: 140px; padding: 8px 12px;" onclick="claimMailReward('mail-item-season', 250)">
+            <i class="fa-solid fa-check"></i> CLAIM 250 NEX
+          </button>
+        </div>
+      </div>
+
+      <!-- Mail Item 2 -->
+      <div style="background: rgba(10, 16, 26, 0.7); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 8px; padding: 14px 18px; display: flex; flex-direction: column; gap: 6px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00f2ff;">
+            <i class="fa-solid fa-bullhorn"></i> METROPOLIS INFRASTRUCTURE DISPATCH
+          </span>
+          <span style="font-size: 10px; color: #8fa3b8; font-family: monospace;">YESTERDAY</span>
+        </div>
+        <div style="font-size: 12px; color: #c0d0e0; line-height: 1.4;">
+          The Nexus Grand Mall &amp; Shopping Galleria along North Avenue is open. Bio-Stim Med-Bays and Armory procurement stations are fully provisioned.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       4. COMBAT DEPLOYMENT MODE SELECTOR MODAL
+       ============================================================ -->
+  <div id="modal-modes" class="astro-modal" style="max-width: 760px;">
+    <div class="astro-modal-header">
+      <div class="astro-modal-title">
+        <i class="fa-solid fa-gamepad" style="color: #ffd700;"></i>
+        <span>COMBAT DEPLOYMENT SELECTOR</span>
+      </div>
+      <button type="button" class="astro-modal-close" onclick="toggleModeModal()">&times;</button>
+    </div>
+    <div class="astro-modal-body">
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+        <!-- Mode 1: Weapon Master -->
+        <div class="store-card" style="border-color: #ffd700;" onclick="selectGameMode('Weapon Master', '1 | Central Stadium (2)')">
+          <span class="store-card-badge" style="color: #ffd700; border-color: #ffd700;">FEATURED</span>
+          <div class="store-card-icon" style="color: #ffd700;"><i class="fa-solid fa-gun"></i></div>
+          <div class="store-card-title">WEAPON MASTER</div>
+          <div class="store-card-desc">Rapid-cadence escalation deathmatch. Advance through the armory roster to claim victory.</div>
+          <button type="button" class="store-card-btn primary" style="background: #ffd700; color: #000; margin-top: auto;">
+            <i class="fa-solid fa-check"></i> DEPLOY HERE
+          </button>
+        </div>
+
+        <!-- Mode 2: Battle Royale -->
+        <div class="store-card" onclick="selectGameMode('Battle Royale: Solo', 'Central Stadium Drop (100)')">
+          <span class="store-card-badge" style="color: #ff3366; border-color: #ff3366;">COMPETITIVE</span>
+          <div class="store-card-icon" style="color: #ff3366;"><i class="fa-solid fa-skull-crossbones"></i></div>
+          <div class="store-card-title">BATTLE ROYALE: SOLO</div>
+          <div class="store-card-desc">100 Operatives drop across the 2,400m Metropolis. Scavenge weapons and be the last survivor.</div>
+          <button type="button" class="store-card-btn primary" style="margin-top: auto;">
+            <i class="fa-solid fa-play"></i> SELECT MODE
+          </button>
+        </div>
+
+        <!-- Mode 3: Zone Domination -->
+        <div class="store-card" onclick="selectGameMode('Zone Domination', 'North Avenue & Spaceport (4v4)')">
+          <span class="store-card-badge" style="color: #00f2ff; border-color: #00f2ff;">TACTICAL</span>
+          <div class="store-card-icon" style="color: #00f2ff;"><i class="fa-solid fa-flag"></i></div>
+          <div class="store-card-title">ZONE DOMINATION</div>
+          <div class="store-card-desc">Capture and fortify critical strategic sectors: Nexus Grand Mall, Starbase Spaceport, and Power Plant.</div>
+          <button type="button" class="store-card-btn primary" style="margin-top: auto;">
+            <i class="fa-solid fa-play"></i> SELECT MODE
+          </button>
+        </div>
+
+        <!-- Mode 4: Free Roam & Exploration -->
+        <div class="store-card" onclick="selectGameMode('Free Roam Exploration', 'Open Metropolis Sandbox')">
+          <span class="store-card-badge" style="color: #00ff88; border-color: #00ff88;">SANDBOX</span>
+          <div class="store-card-icon" style="color: #00ff88;"><i class="fa-solid fa-earth-americas"></i></div>
+          <div class="store-card-title">FREE ROAM EXPLORATION</div>
+          <div class="store-card-desc">Drive the 6x6 Quantum Rover, cruise on repulsor hoverbikes, and explore all 5 futuristic districts freely.</div>
+          <button type="button" class="store-card-btn primary" style="margin-top: auto;">
+            <i class="fa-solid fa-play"></i> SELECT MODE
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       5. ASTRO PASS // SEASON 1 MODAL
+       ============================================================ -->
+  <div id="modal-pass" class="astro-modal" style="max-width: 740px;">
+    <div class="astro-modal-header">
+      <div class="astro-modal-title">
+        <i class="fa-solid fa-crown" style="color: #ffd700;"></i>
+        <span>ASTRO PASS // SEASON 1: BEYOND EARTH</span>
+      </div>
+      <button type="button" class="astro-modal-close" onclick="toggleAstroPassModal()">&times;</button>
+    </div>
+    <div class="astro-modal-body">
+      <div style="background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(0, 242, 255, 0.1)); border: 1.5px solid #ffd700; border-radius: 10px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #ffd700;">TIER 23 COMPLETED / TIER 50 MAX</div>
+          <div style="font-size: 12px; color: #8fa3b8; margin-top: 4px;">SEASON ENDS IN 47 DAYS · 2,400 / 3,000 XP TO TIER 24</div>
+        </div>
+        <button type="button" class="store-card-btn primary" style="background: #ffd700; color: #000; width: 170px; padding: 10px;" onclick="claimPassTier()">
+          <i class="fa-solid fa-box-open"></i> CLAIM ALL (3 TIERS)
+        </button>
+      </div>
+
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; color: #8fa3b8; letter-spacing: 1.2px; margin-top: 4px;">
+        SEASON 1 REWARD PATHWAY
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+        <div class="store-card" style="border-color: #00ff88;">
+          <span class="store-card-badge" style="color: #00ff88; border-color: #00ff88;">TIER 22</span>
+          <div class="store-card-icon" style="color: #00ff88;"><i class="fa-solid fa-coins"></i></div>
+          <div class="store-card-title">+500 NEX</div>
+          <span style="font-size: 10px; color: #00ff88; font-weight: 800;">CLAIMED ✓</span>
+        </div>
+        <div class="store-card" style="border-color: #ffd700;">
+          <span class="store-card-badge" style="color: #ffd700; border-color: #ffd700;">TIER 23</span>
+          <div class="store-card-icon" style="color: #ffd700;"><i class="fa-solid fa-user-ninja"></i></div>
+          <div class="store-card-title">TITAN SUIT</div>
+          <span style="font-size: 10px; color: #ffd700; font-weight: 800;">READY TO CLAIM</span>
+        </div>
+        <div class="store-card" style="opacity: 0.65;">
+          <span class="store-card-badge">TIER 24</span>
+          <div class="store-card-icon"><i class="fa-solid fa-gun"></i></div>
+          <div class="store-card-title">RAILGUN CAMO</div>
+          <span style="font-size: 10px; color: #8fa3b8;">LOCK (600 XP)</span>
+        </div>
+        <div class="store-card" style="opacity: 0.65;">
+          <span class="store-card-badge">TIER 25</span>
+          <div class="store-card-icon"><i class="fa-solid fa-gem"></i></div>
+          <div class="store-card-title">SHARDCROWN</div>
+          <span style="font-size: 10px; color: #8fa3b8;">LOCK (1600 XP)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       6. OPERATIVE VAULT & INVENTORY MODAL
+       ============================================================ -->
+  <div id="modal-vault" class="astro-modal" style="max-width: 680px;">
+    <div class="astro-modal-header">
+      <div class="astro-modal-title">
+        <i class="fa-solid fa-vault" style="color: #00f2ff;"></i>
+        <span>OPERATIVE VAULT &amp; ARSENAL INVENTORY</span>
+      </div>
+      <button type="button" class="astro-modal-close" onclick="toggleVaultModal()">&times;</button>
+    </div>
+    <div class="astro-modal-body">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+        <div class="store-card">
+          <div class="store-card-icon" style="color: #00f2ff;"><i class="fa-solid fa-gun"></i></div>
+          <div class="store-card-title">TAC-9 RIFLE</div>
+          <div class="store-card-desc">Kinetic Assault Rifle · Level 10 Mastered</div>
+        </div>
+        <div class="store-card">
+          <div class="store-card-icon" style="color: #ffd700;"><i class="fa-solid fa-bolt"></i></div>
+          <div class="store-card-title">QUANTUM RAILGUN</div>
+          <div class="store-card-desc">Hyper-velocity heavy ordnance · Level 8</div>
+        </div>
+        <div class="store-card">
+          <div class="store-card-icon" style="color: #ff0055;"><i class="fa-solid fa-fire"></i></div>
+          <div class="store-card-title">PLASMA REPEATERS</div>
+          <div class="store-card-desc">Dual superheated ionized blasters</div>
+        </div>
+        <div class="store-card">
+          <div class="store-card-icon" style="color: #00ff88;"><i class="fa-solid fa-user-ninja"></i></div>
+          <div class="store-card-title">GHOST SUIT</div>
+          <div class="store-card-desc">Matte obsidian carbon weave</div>
+        </div>
+        <div class="store-card">
+          <div class="store-card-icon" style="color: #ffd700;"><i class="fa-solid fa-shield-halved"></i></div>
+          <div class="store-card-title">TITAN SUIT</div>
+          <div class="store-card-desc">High-density gold alloy plating</div>
+        </div>
+        <div class="store-card">
+          <div class="store-card-icon" style="color: #bb44ff;"><i class="fa-solid fa-boxes-stacked"></i></div>
+          <div class="store-card-title">AMMO RESERVES</div>
+          <div class="store-card-desc">Kinetic: 300 · Energy: 180 · Heavy: 24</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       7. SPECIAL EVENTS MODAL
+       ============================================================ -->
+  <div id="modal-events" class="astro-modal" style="max-width: 640px;">
+    <div class="astro-modal-header">
+      <div class="astro-modal-title">
+        <i class="fa-solid fa-gift" style="color: #00ff88;"></i>
+        <span>METROPOLIS SPECIAL OPERATIONS &amp; EVENTS</span>
+      </div>
+      <button type="button" class="astro-modal-close" onclick="toggleEventsModal()">&times;</button>
+    </div>
+    <div class="astro-modal-body">
+      <div style="background: rgba(0, 255, 136, 0.1); border: 1.5px solid #00ff88; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; color: #00ff88;">
+          🏆 CENTRAL STADIUM GRAND CHAMPIONSHIP
+        </span>
+        <div style="font-size: 12px; color: #c0d0e0;">
+          Compete in Weapon Master matches inside the Coliseum to earn 2X RANK POINTS (RP) all weekend!
+        </div>
+      </div>
+
+      <div style="background: rgba(255, 215, 0, 0.1); border: 1.5px solid #ffd700; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 6px;">
+        <span style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; color: #ffd700;">
+          ⚡ DOUBLE NEX TOKEN EXPEDITIONS
+        </span>
+        <div style="font-size: 12px; color: #c0d0e0;">
+          All arcade and exploration rewards grant double NEX tokens throughout the week.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       8. HIGH-TECH IN-GAME ANNOUNCEMENT DIALOG
+       ============================================================ -->
+  <div id="modal-announcement" class="astro-modal" style="max-width: 560px;">
+    <div class="astro-modal-header">
+      <div class="astro-modal-title" id="announcement-title">
+        <i class="fa-solid fa-bullhorn" style="color: #ffd700;"></i>
+        <span>ANNOUNCEMENT</span>
+      </div>
+      <button type="button" class="astro-modal-close" onclick="closeCyberAnnouncement()">&times;</button>
+    </div>
+    <div class="astro-modal-body">
+      <div id="announcement-body" style="font-size: 13px; line-height: 1.6; color: #c7d8ea; white-space: pre-line;"></div>
+      <button type="button" class="store-card-btn primary" style="background: #ffd700; color: #000; padding: 12px; margin-top: 8px;" onclick="closeCyberAnnouncement()">
+        <i class="fa-solid fa-check"></i> ACKNOWLEDGE DISPATCH
+      </button>
     </div>
   </div>
 
@@ -9198,6 +9896,7 @@
       if (e.code === 'KeyB') toggleStarshipFlight();
       if (e.code === 'KeyC') toggleRocketCamera();
       if (e.code === 'KeyV') toggleCameraPerspective();
+      if (e.code === 'KeyQ') triggerTacticalPing();
       if (e.code === 'KeyE') toggleVehicleMode();
       if (e.code === 'KeyF') handleInteractions();
       if (e.code === 'Space' && gameState.flightMode === 'starship') {
@@ -9361,6 +10060,8 @@
     function toggleCameraPerspective() {
       gameState.cameraMode = (gameState.cameraMode === '1P') ? '3P' : '1P';
       updateCameraHUD();
+      syncRankUI();
+      updateNetworkPing();
       cyberAudio.playLootChime();
     }
 
@@ -10019,6 +10720,15 @@
 
       // Check Proximity to Mall Stores & Interactive Terminals
       checkMallStoreProximity();
+
+      // Tactical Ping Beacon Mesh Animations & Fade
+      updateTacticalBeacons(delta);
+
+      // Live Watermark FPS Telemetry
+      const wmFpsEl = document.getElementById('wm-fps-val');
+      if (wmFpsEl && delta > 0.0001) {
+        wmFpsEl.textContent = Math.round(1 / delta);
+      }
 
       // Detached Booster Automated Boost-Back Descent & Landing
       if (detachedBooster && detachedBooster.mesh) {
@@ -12327,6 +13037,529 @@
         toast.style.opacity = '0';
       }, 2600);
     }
+
+    // ============================================================
+    // COMPETITIVE RANKING SYSTEM & OPERATIVE TIERS
+    // ============================================================
+    const RANK_TIERS = [
+      { id: 'bronze', name: 'Bronze Vanguard', minRP: 0, maxRP: 999, color: '#cd7f32', icon: 'fa-shield' },
+      { id: 'silver', name: 'Silver Striker', minRP: 1000, maxRP: 1999, color: '#c0c0c0', icon: 'fa-shield-halved' },
+      { id: 'gold', name: 'Gold Sentinel', minRP: 2000, maxRP: 2999, color: '#ffd700', icon: 'fa-award' },
+      { id: 'platinum', name: 'Platinum Spectre', minRP: 3000, maxRP: 3999, color: '#00f2ff', icon: 'fa-medal' },
+      { id: 'diamond', name: 'Diamond Apex', minRP: 4000, maxRP: 4999, color: '#b9f2ff', icon: 'fa-gem' },
+      { id: 'master', name: 'Master Cyber-Knight', minRP: 5000, maxRP: 5999, color: '#ff007f', icon: 'fa-crown' },
+      { id: 'legend', name: 'Legendary Odyssey', minRP: 6000, maxRP: 99999, color: '#ffd700', icon: 'fa-trophy' }
+    ];
+
+    let operativeRP = parseInt(localStorage.getItem('ASTROSHIFT_RANK_POINTS') || '6240', 10);
+    let operativeWins = parseInt(localStorage.getItem('ASTROSHIFT_RANK_WINS') || '97', 10);
+    let operativeMatches = parseInt(localStorage.getItem('ASTROSHIFT_RANK_MATCHES') || '142', 10);
+
+    function getPlayerRankInfo(rp) {
+      let tier = RANK_TIERS[0];
+      for (let i = 0; i < RANK_TIERS.length; i++) {
+        if (rp >= RANK_TIERS[i].minRP) {
+          tier = RANK_TIERS[i];
+        }
+      }
+
+      // Compute division (III, II, I)
+      let division = 'I';
+      let progress = 100;
+
+      if (tier.id === 'legend') {
+        const excess = rp - 6000;
+        division = (excess >= 500) ? 'III' : ((excess >= 200) ? 'II' : 'I');
+        progress = Math.min(100, Math.round(((excess % 500) / 500) * 100));
+      } else {
+        const range = tier.maxRP - tier.minRP;
+        const current = rp - tier.minRP;
+        const step = range / 3;
+        division = (current >= step * 2) ? 'I' : ((current >= step) ? 'II' : 'III');
+        progress = Math.min(100, Math.round((current / range) * 100));
+      }
+
+      return {
+        tier: tier,
+        fullName: tier.name + ' ' + division,
+        division: division,
+        progress: progress
+      };
+    }
+
+    function syncRankUI() {
+      const info = getPlayerRankInfo(operativeRP);
+
+      // Lobby Rank Pill
+      const lName = document.getElementById('lobby-rank-name');
+      const lIcon = document.getElementById('lobby-rank-icon');
+      if (lName) lName.textContent = info.fullName;
+      if (lIcon) {
+        lIcon.className = 'fa-solid ' + info.tier.icon;
+        lIcon.style.color = info.tier.color;
+      }
+
+      // Modal Elements
+      const mTier = document.getElementById('rank-tier-display');
+      const mRp = document.getElementById('rank-rp-display');
+      const mFill = document.getElementById('rank-progress-fill');
+      const mBadge = document.getElementById('rank-badge-icon');
+      if (mTier) mTier.textContent = info.fullName;
+      if (mRp) mRp.textContent = Number(operativeRP).toLocaleString() + ' RP';
+      if (mFill) mFill.style.width = info.progress + '%';
+      if (mBadge) {
+        mBadge.innerHTML = '<i class="fa-solid ' + info.tier.icon + '"></i>';
+        mBadge.style.color = info.tier.color;
+        mBadge.style.borderColor = info.tier.color;
+        mBadge.style.boxShadow = '0 0 20px ' + info.tier.color + '66';
+      }
+
+      // Stats
+      const sWin = document.getElementById('rank-stat-winrate');
+      const sMatches = document.getElementById('rank-stat-matches');
+      if (sMatches) sMatches.textContent = operativeMatches;
+      if (sWin && operativeMatches > 0) {
+        const wr = ((operativeWins / operativeMatches) * 100).toFixed(1);
+        sWin.textContent = wr + '%';
+      }
+
+      renderLeaderboard();
+    }
+
+    function toggleRankingModal(forceOpen) {
+      const modal = document.getElementById('modal-ranking');
+      if (!modal) return;
+      const willShow = (forceOpen !== undefined) ? forceOpen : !modal.classList.contains('visible');
+
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        syncRankUI();
+        modal.classList.add('visible');
+        cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function simulateRankedMatch(isWin) {
+      const deltaRP = isWin ? (25 + Math.floor(Math.random() * 10)) : -15;
+      operativeRP = Math.max(0, operativeRP + deltaRP);
+      operativeMatches += 1;
+      if (isWin) operativeWins += 1;
+
+      localStorage.setItem('ASTROSHIFT_RANK_POINTS', operativeRP.toString());
+      localStorage.setItem('ASTROSHIFT_RANK_WINS', operativeWins.toString());
+      localStorage.setItem('ASTROSHIFT_RANK_MATCHES', operativeMatches.toString());
+
+      syncRankUI();
+      cyberAudio.playLootChime();
+
+      if (isWin) {
+        showStoreNotification('RANKED VICTORY: +' + deltaRP + ' RP GAINED! (' + operativeRP.toLocaleString() + ' RP)');
+      } else {
+        showStoreNotification('RANKED DEFEAT: ' + deltaRP + ' RP (' + operativeRP.toLocaleString() + ' RP)', true);
+      }
+    }
+
+    function claimRankRewards() {
+      gameState.tokens = (gameState.tokens || 1250) + 500;
+      const tEl = document.getElementById('store-token-display');
+      if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
+      const lNex = document.getElementById('lobby-currency-nex');
+      if (lNex) lNex.textContent = Number(gameState.tokens).toLocaleString();
+
+      cyberAudio.playLootChime();
+      showStoreNotification('SEASON 1 RANK REWARD CLAIMED: +500 NEX TOKENS!');
+    }
+
+    function renderLeaderboard() {
+      const tbody = document.getElementById('rank-leaderboard-body');
+      if (!tbody) return;
+
+      const callsign = localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
+      const myInfo = getPlayerRankInfo(operativeRP);
+
+      const topOperatives = [
+        { rank: 1, name: callsign + ' (You)', clan: '[SHADOW-REALM]', tier: myInfo.fullName, rp: operativeRP, wr: '68.4%', flag: '🇷🇺', isUser: true },
+        { rank: 2, name: 'VORTEX_SPECTRE', clan: '[TITAN]', tier: 'Legendary Odyssey I', rp: 6190, wr: '66.1%', flag: '🇺🇸', isUser: false },
+        { rank: 3, name: 'CYBER_VALKYRIE', clan: '[NEO-TOKYO]', tier: 'Legendary Odyssey I', rp: 6050, wr: '64.8%', flag: '🇯🇵', isUser: false },
+        { rank: 4, name: 'TITAN_CHRONOS', clan: '[APEX]', tier: 'Master Cyber-Knight III', rp: 5980, wr: '63.2%', flag: '🇩🇪', isUser: false },
+        { rank: 5, name: 'NEON_GHOST', clan: '[SHADOW-REALM]', tier: 'Master Cyber-Knight II', rp: 5910, wr: '61.7%', flag: '🇰🇷', isUser: false },
+        { rank: 6, name: 'QUANTUM_RAID', clan: '[VANGUARD]', tier: 'Master Cyber-Knight I', rp: 5820, wr: '60.5%', flag: '🇬🇧', isUser: false },
+        { rank: 7, name: 'ECLIPSE_99', clan: '[AERO]', tier: 'Diamond Apex III', rp: 5740, wr: '59.3%', flag: '🇫🇷', isUser: false },
+        { rank: 8, name: 'APEX_PREDATOR', clan: '[TITAN]', tier: 'Diamond Apex II', rp: 5690, wr: '58.0%', flag: '🇨🇦', isUser: false },
+        { rank: 9, name: 'SOLARIS_X', clan: '[ASTRO]', tier: 'Diamond Apex I', rp: 5610, wr: '57.4%', flag: '🇧🇷', isUser: false },
+        { rank: 10, name: 'HYPERION_ACE', clan: '[ORBITAL]', tier: 'Platinum Spectre III', rp: 5530, wr: '56.2%', flag: '🇦🇺', isUser: false }
+      ];
+
+      tbody.innerHTML = topOperatives.map(op => `
+        <tr class="${op.isUser ? 'user-row' : ''}">
+          <td style="font-family: 'Orbitron', monospace; font-weight: 800; color: ${op.rank === 1 ? '#ffd700' : (op.rank === 2 ? '#c0c0c0' : (op.rank === 3 ? '#cd7f32' : '#8fa3b8'))};">
+            #${op.rank}
+          </td>
+          <td style="font-family: 'Orbitron', sans-serif; font-weight: 800; color: ${op.isUser ? '#ffd700' : '#ffffff'};">
+            ${op.flag} ${op.name} <span style="font-size: 10px; color: #8fa3b8; font-weight: normal;">${op.clan}</span>
+          </td>
+          <td style="font-size: 11px; color: #00f2ff;">${op.tier}</td>
+          <td style="font-family: monospace; font-weight: 800; color: #ffffff;">${op.rp.toLocaleString()} RP</td>
+          <td style="font-family: monospace; color: #00ff88;">${op.wr}</td>
+          <td style="font-size: 14px;">${op.flag}</td>
+        </tr>
+      `).join('');
+    }
+
+    // ============================================================
+    // DYNAMIC LIVE NETWORK PING & MS TELEMETRY CONTROLLER
+    // ============================================================
+    let currentNetworkPing = 24;
+
+    function updateNetworkPing() {
+      // Realistic organic micro-jitter (18ms - 36ms, realistic good game server ping)
+      const jitter = (Math.random() - 0.48) * 5;
+      currentNetworkPing = Math.round(Math.max(18, Math.min(64, currentNetworkPing + jitter)));
+
+      const color = currentNetworkPing < 50 ? '#00ff88' : (currentNetworkPing < 90 ? '#ffd700' : '#ff3366');
+      const wifiClass = currentNetworkPing < 50 ? 'fa-wifi' : (currentNetworkPing < 90 ? 'fa-wifi' : 'fa-triangle-exclamation');
+
+      // 1. Lobby Top Bar Ping Pill
+      const lVal = document.getElementById('lobby-ping-val');
+      const lIcon = document.getElementById('lobby-wifi-icon');
+      const lPill = document.getElementById('lobby-ping-pill');
+      if (lVal) lVal.textContent = currentNetworkPing;
+      if (lIcon) {
+        lIcon.className = 'fa-solid ' + wifiClass;
+        lIcon.style.color = color;
+      }
+      if (lPill) {
+        lPill.style.color = color;
+        lPill.style.borderColor = color + '44';
+      }
+
+      // 2. In-Game Top Bar Ping Chip
+      const hVal = document.getElementById('hud-ping-val');
+      const hIcon = document.getElementById('hud-wifi-icon');
+      if (hVal) {
+        hVal.textContent = currentNetworkPing + 'ms';
+        hVal.style.color = color;
+      }
+      if (hIcon) hIcon.style.color = color;
+
+      // 3. Watermark Ping
+      const wmVal = document.getElementById('wm-ping-val');
+      if (wmVal) wmVal.textContent = currentNetworkPing + 'ms';
+    }
+
+    setInterval(updateNetworkPing, 1000);
+
+    function showPingDiagnostics() {
+      cyberAudio.playLootChime();
+      showStoreNotification(`NETWORK TELEMETRY // LATENCY: ${currentNetworkPing}MS // REGION: US-EAST METROPOLIS // TICK: 64HZ`);
+    }
+
+    // ============================================================
+    // TACTICAL IN-GAME WAYPOINT PING SYSTEM ([Q] / #btn-action-ping)
+    // ============================================================
+    let activeTacticalBeacons = [];
+
+    function triggerTacticalPing() {
+      if (!player.pos || !scene) {
+        showStoreNotification('TACTICAL WAYPOINT MARKED: ALPHA');
+        return;
+      }
+
+      // Determine waypoint target in front of player
+      const pingDist = 18.0;
+      const pingX = player.pos.x - Math.sin(player.yaw) * pingDist;
+      const pingZ = player.pos.z - Math.cos(player.yaw) * pingDist;
+
+      // Create 3D Waypoint Visual Beacon
+      const beaconGroup = new THREE.Group();
+      beaconGroup.position.set(pingX, 0.2, pingZ);
+
+      // Light Pillar
+      const beamGeo = new THREE.CylinderGeometry(0.06, 0.06, 16, 8);
+      const beamMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.85 });
+      const beam = new THREE.Mesh(beamGeo, beamMat);
+      beam.position.y = 8;
+      beaconGroup.add(beam);
+
+      // Expanding ground ring
+      const ringGeo = new THREE.TorusGeometry(1.4, 0.08, 6, 24);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.8 });
+      const ring = new THREE.Mesh(ringGeo, ringMat);
+      ring.rotation.x = Math.PI / 2;
+      beaconGroup.add(ring);
+
+      // Diamond Top Marker
+      const markerGeo = new THREE.DodecahedronGeometry(0.38, 0);
+      const markerMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+      const marker = new THREE.Mesh(markerGeo, markerMat);
+      marker.position.y = 16.2;
+      beaconGroup.add(marker);
+
+      scene.add(beaconGroup);
+
+      activeTacticalBeacons.push({
+        group: beaconGroup,
+        ring: ring,
+        marker: marker,
+        beamMat: beamMat,
+        ringMat: ringMat,
+        life: 5.5,
+        maxLife: 5.5
+      });
+
+      // Sound and HUD banner
+      cyberAudio.playLootChime();
+      const banner = document.getElementById('tactical-ping-alert');
+      const bannerText = document.getElementById('tactical-ping-text');
+      if (banner) {
+        banner.style.display = 'flex';
+        if (bannerText) bannerText.textContent = `WAYPOINT ALPHA DESIGNATED (${Math.round(pingDist)}M)`;
+        clearTimeout(banner._timer);
+        banner._timer = setTimeout(() => {
+          banner.style.display = 'none';
+        }, 3200);
+      }
+    }
+
+    function updateTacticalBeacons(dt) {
+      for (let i = activeTacticalBeacons.length - 1; i >= 0; i--) {
+        const b = activeTacticalBeacons[i];
+        b.life -= dt;
+        const progress = 1 - (b.life / b.maxLife);
+
+        if (b.marker) b.marker.rotation.y += dt * 3.0;
+
+        // Ground ring pulse
+        const ringScale = 1.0 + (progress * 5) % 1.5;
+        if (b.ring) b.ring.scale.set(ringScale, ringScale, 1.0);
+
+        // Fade out during last 1.5s
+        if (b.life < 1.5) {
+          const alpha = b.life / 1.5;
+          if (b.beamMat) b.beamMat.opacity = alpha * 0.85;
+          if (b.ringMat) b.ringMat.opacity = alpha * 0.8;
+        }
+
+        if (b.life <= 0) {
+          scene.remove(b.group);
+          activeTacticalBeacons.splice(i, 1);
+        }
+      }
+    }
+
+    // ============================================================
+    // SQUAD, MAILBOX, MODES, ASTRO PASS, VAULT, EVENTS CONTROLLERS
+    // ============================================================
+    function toggleFriendsModal() {
+      const modal = document.getElementById('modal-friends');
+      if (!modal) return;
+      const willShow = !modal.classList.contains('visible');
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        modal.classList.add('visible');
+        cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function inviteFriend(name) {
+      cyberAudio.playLootChime();
+      showStoreNotification(`SQUAD INVITATION DISPATCHED TO ${name}!`);
+    }
+
+    function addFriendFromInput() {
+      const inp = document.getElementById('friend-add-input');
+      const val = (inp && inp.value.trim()) ? inp.value.trim().toUpperCase() : 'OPERATIVE_X';
+      cyberAudio.playLootChime();
+      showStoreNotification(`SQUAD REQUEST TRANSMITTED TO ${val}!`);
+      if (inp) inp.value = '';
+    }
+
+    function toggleMailboxModal() {
+      const modal = document.getElementById('modal-mailbox');
+      if (!modal) return;
+      const willShow = !modal.classList.contains('visible');
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        modal.classList.add('visible');
+        cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function claimMailReward(elemId, tokens) {
+      gameState.tokens = (gameState.tokens || 1250) + tokens;
+      const tEl = document.getElementById('store-token-display');
+      if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
+      const lNex = document.getElementById('lobby-currency-nex');
+      if (lNex) lNex.textContent = Number(gameState.tokens).toLocaleString();
+
+      const item = document.getElementById(elemId);
+      if (item) {
+        item.style.borderColor = '#00ff88';
+        item.innerHTML = `
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00ff88;">
+            <i class="fa-solid fa-circle-check"></i> DISPATCH REWARD CLAIMED (+${tokens} NEX TOKENS)
+          </div>
+          <div style="font-size: 11px; color: #8fa3b8;">Tokens deposited into operative account.</div>
+        `;
+      }
+
+      cyberAudio.playLootChime();
+      showStoreNotification(`MAILBOX ATTACHMENT CLAIMED: +${tokens} NEX TOKENS!`);
+    }
+
+    function toggleModeModal() {
+      const modal = document.getElementById('modal-modes');
+      if (!modal) return;
+      const willShow = !modal.classList.contains('visible');
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        modal.classList.add('visible');
+        cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function selectGameMode(name, sub) {
+      gameState.gameMode = name;
+      const mName = document.getElementById('lobby-mode-name');
+      const mSub = document.getElementById('lobby-mode-sub');
+      if (mName) mName.textContent = name;
+      if (mSub) mSub.textContent = sub;
+
+      cyberAudio.playLootChime();
+      showStoreNotification(`COMBAT DEPLOYMENT CONFIGURED: ${name.toUpperCase()}`);
+      toggleModeModal();
+    }
+
+    function toggleAstroPassModal() {
+      const modal = document.getElementById('modal-pass');
+      if (!modal) return;
+      const willShow = !modal.classList.contains('visible');
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        modal.classList.add('visible');
+        cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function claimPassTier() {
+      gameState.tokens = (gameState.tokens || 1250) + 750;
+      const tEl = document.getElementById('store-token-display');
+      if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
+      const lNex = document.getElementById('lobby-currency-nex');
+      if (lNex) lNex.textContent = Number(gameState.tokens).toLocaleString();
+
+      cyberAudio.playLootChime();
+      showStoreNotification('ASTRO PASS: TIER 23 REWARDS CLAIMED (+750 NEX & TITAN CAMO)!');
+    }
+
+    function toggleVaultModal() {
+      const modal = document.getElementById('modal-vault');
+      if (!modal) return;
+      const willShow = !modal.classList.contains('visible');
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        modal.classList.add('visible');
+        cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function toggleEventsModal() {
+      const modal = document.getElementById('modal-events');
+      if (!modal) return;
+      const willShow = !modal.classList.contains('visible');
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        modal.classList.add('visible');
+        cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function showCyberAnnouncement(title, body) {
+      const modal = document.getElementById('modal-announcement');
+      const tEl = document.getElementById('announcement-title');
+      const bEl = document.getElementById('announcement-body');
+      if (!modal) return;
+
+      if (tEl) tEl.innerHTML = `<i class="fa-solid fa-bullhorn" style="color: #ffd700;"></i> <span>${title}</span>`;
+      if (bEl) bEl.textContent = body;
+
+      if (document.exitPointerLock) document.exitPointerLock();
+      modal.classList.add('visible');
+      cyberAudio.playLootChime();
+    }
+
+    function closeCyberAnnouncement() {
+      const modal = document.getElementById('modal-announcement');
+      if (modal) modal.classList.remove('visible');
+    }
+
+    function switchLobbyBottomTab(tabName) {
+      if (tabName === 'match') {
+        cyberAudio.playLootChime();
+        showStoreNotification('MATCHMAKING LOBBY ACTIVE');
+      }
+    }
+
+    // Mobile Comms Toggles
+    let isMobileMicActive = false;
+    function toggleMobileMic() {
+      isMobileMicActive = !isMobileMicActive;
+      const btn = document.getElementById('btn-mobile-mic');
+      if (btn) {
+        btn.style.color = isMobileMicActive ? '#00ff88' : '#fff';
+        btn.style.borderColor = isMobileMicActive ? '#00ff88' : 'rgba(255, 255, 255, 0.2)';
+      }
+      cyberAudio.playLootChime();
+      showStoreNotification(isMobileMicActive ? 'VOICE COMMS: TRANSMITTING' : 'VOICE COMMS: MUTED');
+    }
+
+    let isMobileSpeakerActive = true;
+    function toggleMobileSpeaker() {
+      isMobileSpeakerActive = !isMobileSpeakerActive;
+      const btn = document.getElementById('btn-mobile-speaker');
+      if (btn) {
+        btn.style.color = isMobileSpeakerActive ? '#00f2ff' : '#ff3366';
+      }
+      cyberAudio.playLootChime();
+      showStoreNotification(isMobileSpeakerActive ? 'AUDIO OUTPUT: ACTIVE' : 'AUDIO OUTPUT: MUTED');
+    }
+
+    const quickChatMessages = [
+      'TACTICAL COMMS: ENEMY DETECTED IN SECTOR 4!',
+      'TACTICAL COMMS: REGROUP AT NEXUS GRAND MALL!',
+      'TACTICAL COMMS: NEED AMMUNITION & SHIELD!',
+      'TACTICAL COMMS: EXTRACT POINT SECURED!'
+    ];
+    let quickChatIdx = 0;
+    function sendQuickChat() {
+      const msg = quickChatMessages[quickChatIdx % quickChatMessages.length];
+      quickChatIdx++;
+      cyberAudio.playLootChime();
+      showStoreNotification(msg);
+    }
+
+    // Global Compatibility Aliases
+    window.openStoreModal = function(t) { toggleStoreModal(true, t || 'armory'); };
+    window.playLootChime = function() { if (cyberAudio) cyberAudio.playLootChime(); };
+    window.lockTerminal = function() {
+      const lockOverlay = document.getElementById('launch-lock-overlay');
+      if (lockOverlay) lockOverlay.style.display = 'flex';
+      showStoreNotification('TERMINAL SECURITY LOCKED');
+    };
 
     // Auto-Boot Verification on Page Load
     window.addEventListener('DOMContentLoaded', () => {
