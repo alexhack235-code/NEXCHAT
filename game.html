@@ -4080,7 +4080,7 @@
   <!-- ============================================================ -->
   <!-- ROCKET LAUNCH PAD & CREW INGRESS PROXIMITY HUD BANNER        -->
   <!-- ============================================================ -->
-  <div id="hud-rocket-proximity" style="display: none; position: fixed; top: 85px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 620px; z-index: 260; font-family: 'Rajdhani', sans-serif; animation: slideDown 0.3s ease-out;">
+  <div id="hud-rocket-proximity" style="display: none; position: fixed; top: 85px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 640px; z-index: 260; font-family: 'Rajdhani', sans-serif; animation: slideDown 0.3s ease-out;">
     <div style="background: rgba(10, 18, 30, 0.95); border: 2px solid #ff9900; border-radius: 16px; padding: 14px 20px; box-shadow: 0 0 40px rgba(255, 153, 0, 0.5); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
       <div style="display: flex; align-items: center; gap: 12px;">
         <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255,153,0,0.18); border: 2px solid #ffaa00; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #ffaa00; box-shadow: 0 0 18px rgba(255,153,0,0.4);">
@@ -4088,10 +4088,10 @@
         </div>
         <div>
           <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; color: #ffaa00; letter-spacing: 1px;">
-            STARBASE MECHAZILLA // LAUNCH PAD 01
+            CAPE STARBASE // OFFSHORE AEROSPACE RESERVE
           </div>
           <div style="font-size: 11px; color: #8fa3b8;">
-            Airlock Door &amp; Mission Control Console detected · 33 Raptor Engines Ready
+            Isolated Launch Pad (850m from City) · Flame Trench to Ocean · 33 Raptor Engines
           </div>
         </div>
       </div>
@@ -4104,6 +4104,141 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- AIRPORT AIRCRAFT PROXIMITY HUD BANNER                        -->
+  <!-- ============================================================ -->
+  <div id="hud-plane-proximity" style="display: none; position: fixed; top: 85px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 640px; z-index: 260; font-family: 'Rajdhani', sans-serif; animation: slideDown 0.3s ease-out;">
+    <div style="background: rgba(8, 16, 28, 0.95); border: 2px solid #00f2ff; border-radius: 16px; padding: 14px 20px; box-shadow: 0 0 40px rgba(0, 242, 255, 0.45); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,242,255,0.18); border: 2px solid #00f2ff; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #00f2ff; box-shadow: 0 0 18px rgba(0,242,255,0.4);">
+          <i class="fa-solid fa-plane-up"></i>
+        </div>
+        <div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; color: #00f2ff; letter-spacing: 1px;" id="hud-plane-title">
+            NEXUS INTL AERODROME // READY FOR TAKEOFF
+          </div>
+          <div style="font-size: 11px; color: #8fa3b8;" id="hud-plane-desc">
+            Runway 09/27 Active · Press [E] to Pilot Aircraft
+          </div>
+        </div>
+      </div>
+      <div>
+        <button type="button" onclick="boardTargetPlane()" style="background: linear-gradient(135deg, #00f2ff, #0077ff); border: 1.5px solid #00f2ff; color: #fff; border-radius: 10px; padding: 10px 18px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 0 20px rgba(0, 242, 255, 0.6); display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-plane"></i> [E] PILOT AIRCRAFT
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- METRO MAGLEV TRAIN PROXIMITY HUD BANNER                      -->
+  <!-- ============================================================ -->
+  <div id="hud-train-proximity" style="display: none; position: fixed; top: 85px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 640px; z-index: 260; font-family: 'Rajdhani', sans-serif; animation: slideDown 0.3s ease-out;">
+    <div style="background: rgba(8, 16, 28, 0.95); border: 2px solid #00ff88; border-radius: 16px; padding: 14px 20px; box-shadow: 0 0 40px rgba(0, 255, 136, 0.45); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 44px; height: 44px; border-radius: 50%; background: rgba(0,255,136,0.18); border: 2px solid #00ff88; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #00ff88; box-shadow: 0 0 18px rgba(0,255,136,0.4);">
+          <i class="fa-solid fa-train"></i>
+        </div>
+        <div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; color: #00ff88; letter-spacing: 1px;">
+            METRO MAGLEV EXPRESS // GRAND CENTRAL LINE
+          </div>
+          <div style="font-size: 11px; color: #8fa3b8;">
+            High-Speed Perimeter Railway · 100 KM/H Elevated City Loop
+          </div>
+        </div>
+      </div>
+      <div>
+        <button type="button" onclick="boardMaglevTrain()" style="background: linear-gradient(135deg, #00ff88, #00bb66); border: 1.5px solid #00ff88; color: #05140e; border-radius: 10px; padding: 10px 18px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 0 20px rgba(0, 255, 136, 0.6); display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-train-subway"></i> [E] BOARD EXPRESS
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- AERO FLIGHT AVIONICS HUD (ACTIVE WHEN PILOTING AIRPLANE)     -->
+  <!-- ============================================================ -->
+  <div id="plane-flight-hud" style="display: none; position: fixed; inset: 0; pointer-events: none; z-index: 250; font-family: 'Orbitron', sans-serif;">
+    <!-- Compass Heading Ribbon (Top Center) -->
+    <div style="position: absolute; top: 22px; left: 50%; transform: translateX(-50%); background: rgba(6, 16, 28, 0.88); border: 1.5px solid #00f2ff; border-radius: 10px; padding: 6px 20px; color: #00f2ff; font-size: 13px; font-weight: 800; letter-spacing: 2px; box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); backdrop-filter: blur(8px);">
+      <span id="plane-hud-callsign">APEX F-99 // STEALTH INTERCEPTOR</span> · <span id="plane-hud-heading">HDG 090°</span>
+    </div>
+
+    <!-- Airspeed Ladder (Left Side) -->
+    <div style="position: absolute; left: 35px; top: 40%; transform: translateY(-50%); background: rgba(6, 16, 28, 0.85); border: 1.5px solid rgba(0,242,255,0.6); border-radius: 12px; padding: 14px 18px; text-align: right; box-shadow: 0 0 20px rgba(0,242,255,0.3); backdrop-filter: blur(8px);">
+      <div style="font-size: 10px; color: #8fa3b8; letter-spacing: 1px;">AIRSPEED</div>
+      <div style="font-size: 32px; font-weight: 900; color: #00f2ff;" id="plane-hud-spd">0</div>
+      <div style="font-size: 10px; color: #ffd700;" id="plane-hud-knots">KNOTS</div>
+      <div style="width: 70px; height: 4px; background: rgba(255,255,255,0.2); margin-top: 6px; border-radius: 2px; overflow: hidden;">
+        <div id="plane-hud-spd-bar" style="width: 0%; height: 100%; background: #00f2ff;"></div>
+      </div>
+    </div>
+
+    <!-- Altimeter Ladder (Right Side) -->
+    <div style="position: absolute; right: 35px; top: 40%; transform: translateY(-50%); background: rgba(6, 16, 28, 0.85); border: 1.5px solid rgba(0,242,255,0.6); border-radius: 12px; padding: 14px 18px; text-align: left; box-shadow: 0 0 20px rgba(0,242,255,0.3); backdrop-filter: blur(8px);">
+      <div style="font-size: 10px; color: #8fa3b8; letter-spacing: 1px;">ALTITUDE MSL</div>
+      <div style="font-size: 32px; font-weight: 900; color: #00ff88;" id="plane-hud-alt">0</div>
+      <div style="font-size: 10px; color: #8fa3b8;">METERS</div>
+      <div style="font-size: 9px; color: #00f2ff; margin-top: 4px;" id="plane-hud-vs">VS: 0 M/S</div>
+    </div>
+
+    <!-- Center Artificial Horizon Pitch Ladder -->
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 220px; height: 180px; pointer-events: none;">
+      <div id="plane-hud-horizon" style="width: 100%; height: 100%; position: relative; transition: transform 0.05s linear;">
+        <div style="position: absolute; top: 50%; left: 20px; width: 50px; height: 2px; background: #00f2ff; box-shadow: 0 0 8px #00f2ff;"></div>
+        <div style="position: absolute; top: 50%; right: 20px; width: 50px; height: 2px; background: #00f2ff; box-shadow: 0 0 8px #00f2ff;"></div>
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 12px; height: 12px; border: 2px solid #ffd700; border-radius: 50%;"></div>
+        <div style="position: absolute; top: 25%; left: 60px; width: 100px; height: 1px; background: rgba(0,242,255,0.5);"></div>
+        <div style="position: absolute; top: 75%; left: 60px; width: 100px; height: 1px; background: rgba(0,242,255,0.5);"></div>
+      </div>
+    </div>
+
+    <!-- Bottom Flight Control Bar -->
+    <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(6, 16, 28, 0.94); border: 2px solid #00f2ff; border-radius: 16px; padding: 12px 24px; display: flex; align-items: center; gap: 20px; box-shadow: 0 0 30px rgba(0, 242, 255, 0.4); pointer-events: auto;">
+      <div style="display: flex; flex-direction: column; width: 140px;">
+        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #8fa3b8; margin-bottom: 3px;">
+          <span>THROTTLE</span>
+          <span style="color: #00f2ff; font-weight: 800;" id="plane-hud-thr">0%</span>
+        </div>
+        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden;">
+          <div id="plane-hud-thr-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #ffd700, #ff0055);"></div>
+        </div>
+      </div>
+
+      <div id="plane-hud-gear" style="background: rgba(0,255,136,0.15); border: 1.5px solid #00ff88; color: #00ff88; border-radius: 8px; padding: 6px 12px; font-size: 11px; font-weight: 800; letter-spacing: 1px; cursor: pointer;" onclick="togglePlaneGear()">
+        GEAR: DOWN [G]
+      </div>
+
+      <div style="font-size: 10px; color: #8fa3b8; font-family: 'Rajdhani', sans-serif;">
+        <b style="color: #00f2ff;">[W/S]</b> THROTTLE · <b style="color: #00f2ff;">[A/D]</b> ROLL · <b style="color: #00f2ff;">[ARROWS]</b> PITCH/BANK · <b style="color: #ffd700;">[SPACE]</b> BOOST/VTOL
+      </div>
+
+      <button type="button" onclick="executePlaneFlightExit()" style="background: rgba(255, 0, 51, 0.2); border: 1.5px solid #ff0033; color: #ff6677; border-radius: 8px; padding: 7px 14px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer;">
+        <i class="fa-solid fa-parachute-box"></i> [E] DISEMBARK
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- METRO MAGLEV PASSENGER RIDE HUD                              -->
+  <!-- ============================================================ -->
+  <div id="train-passenger-hud" style="display: none; position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: rgba(6, 16, 28, 0.94); border: 2px solid #00ff88; border-radius: 16px; padding: 12px 24px; z-index: 250; font-family: 'Orbitron', sans-serif; box-shadow: 0 0 35px rgba(0, 255, 136, 0.45); pointer-events: auto; display: flex; align-items: center; gap: 20px;">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="fa-solid fa-train-subway" style="color: #00ff88; font-size: 22px;"></i>
+      <div>
+        <div style="font-size: 12px; font-weight: 900; color: #00ff88; letter-spacing: 1px;">METRO MAGLEV EXPRESS LINE 1</div>
+        <div style="font-size: 10px; color: #8fa3b8;" id="train-hud-status">SPEED: 100 KM/H · PERIMETER LOOP ELEVATED GUIDEWAY</div>
+      </div>
+    </div>
+    <div style="font-size: 10px; color: #ffd700;">
+      ENJOY PANORAMIC CITY TOUR
+    </div>
+    <button type="button" onclick="exitMaglevTrain()" style="background: rgba(255, 0, 51, 0.2); border: 1.5px solid #ff0033; color: #ff6677; border-radius: 8px; padding: 7px 14px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer;">
+      <i class="fa-solid fa-door-open"></i> [E] DISEMBARK
+    </button>
   </div>
 
   <!-- ============================================================ -->
@@ -6118,6 +6253,177 @@
         osc.stop(now + 1.05);
       }
 
+      // 100,000 GPM Water Deluge Sound Suppression System Torrent
+      playDelugeSound() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        try {
+          const bufferSize = Math.floor(this.ctx.sampleRate * 2.2);
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.85;
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(280, now);
+          filter.frequency.linearRampToValueAtTime(620, now + 1.2);
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.42 * this.masterVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 2.15);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start(now);
+          noise.stop(now + 2.2);
+        } catch (_) {}
+      }
+
+      // 33 Raptor Engine Ignition Transient Shockwave
+      playRaptorIgnition() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Deep sub-bass impact pulse
+        const subOsc = this.ctx.createOscillator();
+        const subGain = this.ctx.createGain();
+        subOsc.type = 'sawtooth';
+        subOsc.frequency.setValueAtTime(115, now);
+        subOsc.frequency.exponentialRampToValueAtTime(24, now + 0.85);
+        subGain.gain.setValueAtTime(0.75 * this.masterVolume, now);
+        subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+        subOsc.connect(subGain);
+        subGain.connect(this.ctx.destination);
+        subOsc.start(now);
+        subOsc.stop(now + 0.95);
+
+        // Pad resonance detonation thump
+        const thumpOsc = this.ctx.createOscillator();
+        const thumpGain = this.ctx.createGain();
+        thumpOsc.type = 'triangle';
+        thumpOsc.frequency.setValueAtTime(55, now);
+        thumpOsc.frequency.linearRampToValueAtTime(32, now + 0.7);
+        thumpGain.gain.setValueAtTime(0.6 * this.masterVolume, now);
+        thumpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+        thumpOsc.connect(thumpGain);
+        thumpGain.connect(this.ctx.destination);
+        thumpOsc.start(now);
+        thumpOsc.stop(now + 0.8);
+      }
+
+      // Multi-Stage Acoustic Liftoff Roar (16,000,000 lbf Thrust Acoustic Pressure)
+      playAcousticLiftoffRoar(duration = 4.0) {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Multi-frequency low-frequency drone rumble
+        [42, 68, 86].forEach((f, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = idx % 2 === 0 ? 'sawtooth' : 'triangle';
+          osc.frequency.setValueAtTime(f, now);
+          osc.frequency.linearRampToValueAtTime(f * 1.3, now + duration);
+          gain.gain.setValueAtTime(0.28 * this.masterVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + duration + 0.05);
+        });
+
+        // Atmospheric crackle roar noise
+        try {
+          const bufferSize = Math.floor(this.ctx.sampleRate * duration);
+          const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.75;
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(350, now);
+          filter.frequency.linearRampToValueAtTime(800, now + duration);
+          filter.Q.setValueAtTime(1.5, now);
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start(now);
+          noise.stop(now + duration);
+        } catch (_) {}
+      }
+
+      // Supersonic Barrier Sonic Boom (Mach 1 Double Shockwave: "Crack-BOOM")
+      playSonicBoom() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Shock 1: Sharp high-pressure leading edge crack
+        const osc1 = this.ctx.createOscillator();
+        const gain1 = this.ctx.createGain();
+        osc1.type = 'sawtooth';
+        osc1.frequency.setValueAtTime(260, now);
+        osc1.frequency.exponentialRampToValueAtTime(35, now + 0.22);
+        gain1.gain.setValueAtTime(0.6 * this.masterVolume, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc1.connect(gain1);
+        gain1.connect(this.ctx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.26);
+
+        // Shock 2: Deep trailing expansion boom (80ms later)
+        const osc2 = this.ctx.createOscillator();
+        const gain2 = this.ctx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(95, now + 0.08);
+        osc2.frequency.exponentialRampToValueAtTime(20, now + 0.08 + 0.65);
+        gain2.gain.setValueAtTime(0.7 * this.masterVolume, now + 0.08);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.08 + 0.7);
+        osc2.connect(gain2);
+        gain2.connect(this.ctx.destination);
+        osc2.start(now + 0.08);
+        osc2.stop(now + 0.08 + 0.75);
+      }
+
+      // Jet Turbine & Afterburner Acoustics (Plane Flight)
+      playJetEngineSound(throttle = 50, speed = 40) {
+        if (!this.ctx) return;
+        if (this._lastJetSoundTime && (Date.now() - this._lastJetSoundTime) < 180) return;
+        this._lastJetSoundTime = Date.now();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        const baseFreq = 180 + (throttle / 100) * 420;
+        osc.frequency.setValueAtTime(baseFreq, now);
+        osc.frequency.linearRampToValueAtTime(baseFreq * 1.05, now + 0.2);
+        const vol = (0.12 + (throttle / 100) * 0.22) * this.masterVolume;
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.28);
+      }
+
+      // Maglev Train Electromagnetic Induction Hum
+      playMaglevTrainSound() {
+        if (!this.ctx) return;
+        if (this._lastMaglevTime && (Date.now() - this._lastMaglevTime) < 250) return;
+        this._lastMaglevTime = Date.now();
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.linearRampToValueAtTime(180, now + 0.28);
+        gain.gain.setValueAtTime(0.18 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      }
+
       playHitSound(isCrit = false) {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
@@ -6607,7 +6913,31 @@
         coolant: 94,
         lastDividendTime: Date.now()
       },
-      flightMode: 'none', // 'none' | 'starship' | 'rover'
+      flightMode: 'none', // 'none' | 'starship' | 'rover' | 'plane'
+      inPlane: false,
+      currentPlane: null,
+      plane: {
+        isPiloted: false,
+        id: 'f99',
+        name: 'APEX F-99 JET',
+        throttle: 0,
+        speed: 0,
+        pitch: 0,
+        yaw: 0,
+        roll: 0,
+        altitude: 1.2,
+        vs: 0,
+        gearDown: true,
+        afterburner: false,
+        vtolMode: false,
+        mesh: null
+      },
+      inTrain: false,
+      train: {
+        progress: 0,
+        speed: 28.0,
+        carIdx: 0
+      },
       cameraMode: '3P', // '1P' (First Person) | '3P' (Third Person)
       thirdPersonDistance: 3.2,
       shoulderOffset: 0.65,
@@ -6732,6 +7062,9 @@
     let renderer, scene, camera;
     let buildingsGroup, nukeGroup, undergroundGroup, spaceportGroup, roverGroup;
     let marsGroup, nebulaGroup, spaceGroup;
+    let railwayGroup, maglevTrainMesh, maglevPillars = [], railwayStationMesh;
+    let airportGroup, airportPlanes = [], activePilotPlane = null, atcRadarDish = null;
+    let capeStarbaseGroup, delugeWaterPipeMesh, capeBlastGateMesh;
     let cosmicStarfield;
     let starshipBooster, starshipUpper;
     let boosterFlame, upperFlame, raptorFlame, rocketStack;
@@ -8551,12 +8884,13 @@
             canopyGlow.position.set(0, 4.6, depth / 2 + 4.0);
             bGroup.add(canopyGlow);
 
-            // 7. INTERIOR GRAND ARCHITECTURAL STAIRCASE & MEZZANINE
+            // 7. CONTINUOUS MULTI-STORY STAIRWELL & 4-FLOOR WALKABLE ATRIUM
             const mezW = 6.4;
             const mezD = depth * 0.45;
             const mezX = width / 2 - mezW / 2 - 0.6;
             const mezZ = -(depth / 4);
 
+            // FLOOR 2: Mezzanine Balcony Platform (Y: 3.65m)
             const mezFloor = new THREE.Mesh(new THREE.BoxGeometry(mezW, 0.35, mezD), bMatGranite);
             mezFloor.position.set(mezX, 3.6, mezZ);
             bGroup.add(mezFloor);
@@ -8565,9 +8899,9 @@
             mezRail.position.set(mezX, 4.25, mezZ + mezD / 2);
             bGroup.add(mezRail);
 
-            // 10-Step Architectural Illuminated Grand Staircase leading up to Mezzanine
+            // FLIGHT 1: Ground -> Floor 2 (10 Steps ascending in -Z towards Mezzanine)
             const numSteps = 10;
-            const stairW = 2.6;
+            const stairW = 2.4;
             const stairTotalRise = 3.35;
             const stepRise = stairTotalRise / numSteps;
             const stepDepth = 0.48;
@@ -8587,10 +8921,92 @@
               bGroup.add(ledStrip);
             }
 
-            const stairRail = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.85, stairLen * 1.05), bMatLobbyGlass);
-            stairRail.rotation.x = Math.atan2(stairTotalRise, stairLen);
-            stairRail.position.set(stairStartX - stairW / 2 - 0.05, 0.25 + stairTotalRise / 2 + 0.45, stairStartZ - stairLen / 2);
-            bGroup.add(stairRail);
+            const stairRail1 = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.85, stairLen * 1.05), bMatLobbyGlass);
+            stairRail1.rotation.x = Math.atan2(stairTotalRise, stairLen);
+            stairRail1.position.set(stairStartX - stairW / 2 - 0.05, 0.25 + stairTotalRise / 2 + 0.45, stairStartZ - stairLen / 2);
+            bGroup.add(stairRail1);
+
+            // FLOOR 3: Executive Gallery Bridge Platform (Y: 7.30m)
+            const f3W = width * 0.72;
+            const f3D = 4.8;
+            const f3Z = -(depth / 3);
+            const f3Floor = new THREE.Mesh(new THREE.BoxGeometry(f3W, 0.35, f3D), bMatGranite);
+            f3Floor.position.set(0, 7.3, f3Z);
+            bGroup.add(f3Floor);
+
+            const f3Rail = new THREE.Mesh(new THREE.BoxGeometry(f3W, 0.95, 0.1), bMatLobbyGlass);
+            f3Rail.position.set(0, 7.95, f3Z + f3D / 2);
+            bGroup.add(f3Rail);
+
+            // FLIGHT 2: Floor 2 -> Floor 3 (10 Steps ascending in -X direction)
+            for (let s = 0; s < numSteps; s++) {
+              const sy = 3.65 + (s + 0.5) * stepRise;
+              const sx = mezX - (s + 0.5) * stepDepth;
+              const sz = mezZ - mezD / 2 + 1.2;
+              const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(stepDepth, stepRise, stairW), bMatDarkTrim);
+              stepMesh.position.set(sx, sy, sz);
+              bGroup.add(stepMesh);
+
+              const led = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.03, stairW * 0.94), bMatWarmDownlight);
+              led.position.set(sx + stepDepth / 2, sy + stepRise / 2 + 0.01, sz);
+              bGroup.add(led);
+            }
+
+            // FLOOR 4: Sky Lounge Balcony Platform (Y: 10.95m)
+            const f4Floor = new THREE.Mesh(new THREE.BoxGeometry(mezW, 0.35, mezD), bMatGranite);
+            f4Floor.position.set(-mezX, 10.95, mezZ);
+            bGroup.add(f4Floor);
+
+            const f4Rail = new THREE.Mesh(new THREE.BoxGeometry(mezW, 0.95, 0.1), bMatLobbyGlass);
+            f4Rail.position.set(-mezX, 11.6, mezZ + mezD / 2);
+            bGroup.add(f4Rail);
+
+            // FLIGHT 3: Floor 3 -> Floor 4 (10 Steps ascending in +Z direction)
+            for (let s = 0; s < numSteps; s++) {
+              const sy = 7.30 + (s + 0.5) * stepRise;
+              const sz = f3Z + (s + 0.5) * stepDepth;
+              const sx = -mezX;
+              const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(stairW, stepRise, stepDepth), bMatDarkTrim);
+              stepMesh.position.set(sx, sy, sz);
+              bGroup.add(stepMesh);
+
+              const led = new THREE.Mesh(new THREE.BoxGeometry(stairW * 0.94, 0.03, 0.04), bMatWarmDownlight);
+              led.position.set(sx, sy + stepRise / 2 + 0.01, sz - stepDepth / 2);
+              bGroup.add(led);
+            }
+
+            // ROOFTOP OBSERVATION TERRACE: Open-Air Observation Deck (Y: 15.0m)
+            const roofDeck = new THREE.Mesh(new THREE.BoxGeometry(width + 0.8, 0.4, depth + 0.8), bMatGranite);
+            roofDeck.position.set(0, 15.0, 0);
+            bGroup.add(roofDeck);
+
+            // Perimeter Panoramic Glass Balustrades on Rooftop Observation Terrace
+            const rRailF = new THREE.Mesh(new THREE.BoxGeometry(width + 0.6, 1.15, 0.1), bMatLobbyGlass);
+            rRailF.position.set(0, 15.75, depth / 2 + 0.3);
+            bGroup.add(rRailF);
+            const rRailB = new THREE.Mesh(new THREE.BoxGeometry(width + 0.6, 1.15, 0.1), bMatLobbyGlass);
+            rRailB.position.set(0, 15.75, -(depth / 2 + 0.3));
+            bGroup.add(rRailB);
+            const rRailL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.15, depth + 0.6), bMatLobbyGlass);
+            rRailL.position.set(-(width / 2 + 0.3), 15.75, 0);
+            bGroup.add(rRailL);
+            const rRailR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.15, depth + 0.6), bMatLobbyGlass);
+            rRailR.position.set(width / 2 + 0.3, 15.75, 0);
+            bGroup.add(rRailR);
+
+            // FLIGHT 4: Floor 4 -> Rooftop Observation Deck (10 Steps ascending in +X direction to Rooftop)
+            for (let s = 0; s < numSteps; s++) {
+              const sy = 10.95 + (s + 0.5) * (4.05 / numSteps);
+              const sx = -mezX + (s + 0.5) * stepDepth;
+              const sz = mezZ + mezD / 2 - 1.2;
+              const stepMesh = new THREE.Mesh(new THREE.BoxGeometry(stepDepth, 4.05 / numSteps, stairW), bMatDarkTrim);
+              stepMesh.position.set(sx, sy, sz);
+              bGroup.add(stepMesh);
+
+              const led = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.03, stairW * 0.94), bMatWarmDownlight);
+              led.position.set(sx - stepDepth / 2, sy + 0.1, sz);
+              bGroup.add(led);
+            }
 
             // 8. Central Lobby Reception Kiosk & Directory Terminal
             const desk = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 1.0, 16, 1, false, 0, Math.PI), bMatGranite);
@@ -8814,14 +9230,19 @@
               hw: (width + 1.2) / 2,
               hd: (depth + 1.2) / 2,
               doorW: 5.6,
+              type: 'building_interior',
               hasStairs: true,
+              multiFloor: true,
               stairX: mezX,
               stairStartZ: stairStartZ,
               stairLen: stairLen,
               mezX: mezX,
               mezZ: mezZ,
               mezW: mezW,
-              mezD: mezD
+              mezD: mezD,
+              width: width,
+              depth: depth,
+              roofY: 15.0
             });
           }
         }
@@ -9260,9 +9681,9 @@
         signBoard.position.set(0, 3.6, 4.05);
         subwayEntrance.add(signBoard);
 
-        // 4. SpaceX Starship & 145m Mechazilla Tower (120, 0, -100)
+        // 4. SpaceX Starship & 145m Mechazilla Tower at Cape Starbase Offshore Reserve (650, 0, -550)
         spaceportGroup = new THREE.Group();
-        spaceportGroup.position.set(120, 0, -100);
+        spaceportGroup.position.set(650, 0, -550);
         scene.add(spaceportGroup);
 
         const steelMat = new THREE.MeshStandardMaterial({ color: 0xc8d4e0, metalness: 0.95, roughness: 0.15 });
@@ -9280,7 +9701,7 @@
 
         // 120m Multi-Stage Starship Stack (Directly in Scene for Multi-World Navigation)
         rocketStack = new THREE.Group();
-        rocketStack.position.set(120, 0, -100);
+        rocketStack.position.set(650, 0, -550);
         scene.add(rocketStack);
 
         const heatshieldMat = new THREE.MeshStandardMaterial({ color: 0x111620, roughness: 0.9, metalness: 0.1 });
@@ -10866,6 +11287,10 @@
         buildAtlantisCity();
         buildRecreationalActivities();
 
+        // Build Perimeter Railway System & Nexus International Aerodrome
+        buildPerimeterRailway();
+        buildNexusAerodrome();
+
         // Initialize Autonomous Metropolis Cyber Traffic System
         initCityTraffic();
         initCityCitizens();
@@ -11815,6 +12240,7 @@ function buildApexCarCustoms() {
     // ============================================================
     function buildStarbaseLaunchInfrastructure() {
       starbaseLaunchGroup = new THREE.Group();
+      capeStarbaseGroup = starbaseLaunchGroup;
       scene.add(starbaseLaunchGroup);
 
       const padMat = new THREE.MeshStandardMaterial({ color: 0x181e26, roughness: 0.85, metalness: 0.3 });
@@ -11823,52 +12249,68 @@ function buildApexCarCustoms() {
       const redLaunchMat = new THREE.MeshStandardMaterial({ color: 0xff0022, emissive: 0xff0000, emissiveIntensity: 0.85, roughness: 0.2 });
       const greenAirlockMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
       const cyanGlowMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const waterMat = new THREE.MeshStandardMaterial({ color: 0x004466, roughness: 0.1, metalness: 0.8, transparent: true, opacity: 0.85 });
 
-      // 1. Concrete Hexagonal Launch Mount Table & Blast Catwalks at (120, 0, -100)
-      const mountTable = new THREE.Mesh(new THREE.CylinderGeometry(22, 24, 3.6, 6), padMat);
-      mountTable.position.set(120, 1.8, -100);
+      // ============================================================
+      // CAPE STARBASE ISOLATED PENINSULA & CAUSEWAY BRIDGE
+      // ============================================================
+      // 1. Cape Starbase Peninsula Bedrock Berm (X: 550 to 740, Z: -640 to -460)
+      const capeGround = new THREE.Mesh(new THREE.BoxGeometry(220, 1.2, 200), padMat);
+      capeGround.position.set(650, 0.6, -550);
+      capeGround.receiveShadow = true;
+      starbaseLaunchGroup.add(capeGround);
+
+      // 2. Concrete Hexagonal Launch Mount Table at (650, 0, -550)
+      const mountTable = new THREE.Mesh(new THREE.CylinderGeometry(24, 26, 3.6, 6), padMat);
+      mountTable.position.set(650, 1.8, -550);
       mountTable.receiveShadow = true;
       starbaseLaunchGroup.add(mountTable);
 
-      // Warning Chevron Perimeter Ring
-      const chevronRing = new THREE.Mesh(new THREE.RingGeometry(21.5, 23.5, 6), cautionMat);
+      const chevronRing = new THREE.Mesh(new THREE.RingGeometry(23.5, 25.5, 6), cautionMat);
       chevronRing.rotation.x = -Math.PI / 2;
-      chevronRing.position.set(120, 3.65, -100);
+      chevronRing.position.set(650, 3.65, -550);
       starbaseLaunchGroup.add(chevronRing);
 
-      // 2. Ground Crew Ingress Airlock Building & Elevator Foyer at (104, 0, -100)
+      // 3. Deep Flame Trench / Exhaust Deflector directed South into Open Ocean
+      const trench = new THREE.Mesh(new THREE.BoxGeometry(18, 3.0, 75), new THREE.MeshStandardMaterial({ color: 0x0a0e14, roughness: 0.95 }));
+      trench.position.set(650, -0.4, -595);
+      starbaseLaunchGroup.add(trench);
+
+      // Water Deluge Spray Channel along Flame Trench
+      const delugeChannel = new THREE.Mesh(new THREE.BoxGeometry(12, 0.3, 70), waterMat);
+      delugeChannel.position.set(650, 0.1, -595);
+      starbaseLaunchGroup.add(delugeChannel);
+
+      // 4. Ground Crew Ingress Airlock Building & Elevator Foyer at (634, 0, -550)
       const airlockBuilding = new THREE.Mesh(new THREE.BoxGeometry(11, 8.5, 9.5), steelMat);
-      airlockBuilding.position.set(104, 4.25, -100);
+      airlockBuilding.position.set(634, 4.25, -550);
       airlockBuilding.castShadow = true;
       starbaseLaunchGroup.add(airlockBuilding);
 
-      // Massive Heavy Blast Doors (Double Doors facing West: -X)
+      // Massive Heavy Blast Doors (Facing West)
       physicalAirlockDoorMesh = new THREE.Mesh(new THREE.BoxGeometry(0.6, 6.2, 5.2), new THREE.MeshStandardMaterial({ color: 0x0f151e, metalness: 0.95, roughness: 0.2 }));
-      physicalAirlockDoorMesh.position.set(98.3, 3.4, -100);
+      physicalAirlockDoorMesh.position.set(628.3, 3.4, -550);
       starbaseLaunchGroup.add(physicalAirlockDoorMesh);
 
-      // Blast Door Caution Frame & Status Indicator
       const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(0.7, 6.8, 5.8), cautionMat);
-      doorFrame.position.set(98.25, 3.4, -100);
+      doorFrame.position.set(628.25, 3.4, -550);
       starbaseLaunchGroup.add(doorFrame);
 
       const airlockLight = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), greenAirlockMat);
-      airlockLight.position.set(98.1, 7.0, -100);
+      airlockLight.position.set(628.1, 7.0, -550);
       starbaseLaunchGroup.add(airlockLight);
 
-      // Giant Illuminated Neon Signboard above Airlock Doors
       const signMesh = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.4, 7.8), new THREE.MeshBasicMaterial({ color: 0x00f2ff }));
-      signMesh.position.set(98.1, 8.2, -100);
+      signMesh.position.set(628.1, 8.2, -550);
       starbaseLaunchGroup.add(signMesh);
 
-      // Pulsing Cyan Ground Entryway Portal Hologram
       const portalRing = new THREE.Mesh(new THREE.RingGeometry(1.6, 3.2, 32), cyanGlowMat);
       portalRing.rotation.x = -Math.PI / 2;
-      portalRing.position.set(94.5, 0.15, -100);
+      portalRing.position.set(624.5, 0.15, -550);
       starbaseLaunchGroup.add(portalRing);
       citySpinners.push(portalRing);
 
-      // High-Altitude Sky Laser Beacon shooting 260m straight into the sky
+      // High-Altitude Sky Laser Beacon (260m)
       const beaconGeo = new THREE.CylinderGeometry(0.5, 0.5, 260, 16);
       const beaconMat = new THREE.MeshBasicMaterial({
         color: 0x00f2ff,
@@ -11877,51 +12319,132 @@ function buildApexCarCustoms() {
         blending: THREE.AdditiveBlending
       });
       starbaseAirlockBeacon = new THREE.Mesh(beaconGeo, beaconMat);
-      starbaseAirlockBeacon.position.set(104, 130, -100);
+      starbaseAirlockBeacon.position.set(634, 130, -550);
       starbaseLaunchGroup.add(starbaseAirlockBeacon);
 
-      // 3. Crew Access Arm (CAA) Walkway at Y: 71m connecting Mechazilla tower to Starship
+      // Crew Access Arm (CAA) Walkway at Y: 71m
       const caaArm = new THREE.Mesh(new THREE.BoxGeometry(16, 3.2, 3.4), steelMat);
-      caaArm.position.set(112, 71.0, -100);
+      caaArm.position.set(642, 71.0, -550);
       starbaseLaunchGroup.add(caaArm);
 
       const caaLight = new THREE.Mesh(new THREE.BoxGeometry(16, 0.3, 0.3), greenAirlockMat);
-      caaLight.position.set(112, 72.8, -98.2);
+      caaLight.position.set(642, 72.8, -548.2);
       starbaseLaunchGroup.add(caaLight);
 
-      // 4. Mission Control Launch Pedestal with GIANT PHYSICAL 3D RED BUTTON at (104, 0, -84)
-      const consoleDesk = new THREE.Mesh(new THREE.BoxGeometry(5.2, 2.2, 2.8), steelMat);
-      consoleDesk.position.set(104, 1.1, -84);
+      // 5. Cryogenic Propellant Tank Farm at (600, 0, -510)
+      [[-8, -8], [8, -8]].forEach(([tx, tz]) => {
+        const sphereTank = new THREE.Mesh(new THREE.SphereGeometry(6.5, 24, 24), steelMat);
+        sphereTank.position.set(600 + tx, 7.5, -510 + tz);
+        starbaseLaunchGroup.add(sphereTank);
+
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(6.6, 0.25, 8, 24), cautionMat);
+        ring.position.set(600 + tx, 7.5, -510 + tz);
+        starbaseLaunchGroup.add(ring);
+      });
+
+      // 2 Vertical Bullet Tanks
+      [[-8, 8], [8, 8]].forEach(([tx, tz]) => {
+        const bulletTank = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 18, 20), steelMat);
+        bulletTank.position.set(600 + tx, 9.0, -510 + tz);
+        starbaseLaunchGroup.add(bulletTank);
+      });
+
+      // Cryo Piping Manifold
+      const cryoPipe = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 55, 12), steelMat);
+      cryoPipe.rotation.z = Math.PI / 2;
+      cryoPipe.position.set(625, 2.5, -530);
+      starbaseLaunchGroup.add(cryoPipe);
+
+      // 6. Sound Suppression Water Deluge Tower at (610, 0, -570)
+      const delugeTowerLegs = new THREE.Mesh(new THREE.CylinderGeometry(5.0, 7.5, 34, 8), steelMat);
+      delugeTowerLegs.position.set(610, 17, -570);
+      starbaseLaunchGroup.add(delugeTowerLegs);
+
+      const delugeWaterTank = new THREE.Mesh(new THREE.CylinderGeometry(8.0, 8.0, 12, 20), steelMat);
+      delugeWaterTank.position.set(610, 39, -570);
+      starbaseLaunchGroup.add(delugeWaterTank);
+
+      const delugeMainPipe = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 45, 12), cautionMat);
+      delugeMainPipe.rotation.z = Math.PI / 2;
+      delugeMainPipe.position.set(630, 4.0, -560);
+      starbaseLaunchGroup.add(delugeMainPipe);
+
+      // 7. Reinforced Mission Control Bunker at Safe Standoff Distance (580, 0, -480)
+      const bunkerMesh = new THREE.Mesh(new THREE.BoxGeometry(20, 7.0, 15), padMat);
+      bunkerMesh.position.set(580, 3.5, -480);
+      bunkerMesh.castShadow = true;
+      starbaseLaunchGroup.add(bunkerMesh);
+
+      // Slanted Armored Viewing Windows overlooking the Launch Pad
+      const windowMesh = new THREE.Mesh(new THREE.PlaneGeometry(16, 2.8), new THREE.MeshPhysicalMaterial({
+        color: 0x00f2ff,
+        transparent: true,
+        opacity: 0.65,
+        roughness: 0.05,
+        metalness: 0.9
+      }));
+      windowMesh.position.set(580, 4.2, -487.6);
+      windowMesh.rotation.x = -Math.PI / 12;
+      starbaseLaunchGroup.add(windowMesh);
+
+      // Mission Control Console Desk inside Bunker
+      const consoleDesk = new THREE.Mesh(new THREE.BoxGeometry(6.4, 2.2, 2.8), steelMat);
+      consoleDesk.position.set(580, 1.1, -480);
       starbaseLaunchGroup.add(consoleDesk);
 
-      // Telemetry Holographic Screens on Desk
-      [-1.6, 0, 1.6].forEach((sx, i) => {
-        const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 0.8), (i === 1 ? cautionMat : cyanGlowMat));
-        screen.position.set(104 + sx, 2.4, -84);
+      [-1.8, 0, 1.8].forEach((sx, i) => {
+        const screen = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.9), (i === 1 ? cautionMat : cyanGlowMat));
+        screen.position.set(580 + sx, 2.4, -480);
         screen.rotation.x = -Math.PI / 8;
         starbaseLaunchGroup.add(screen);
       });
 
-      // Yellow Hazard Protective Collar
       const collarMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.9, 0.25, 24), cautionMat);
-      collarMesh.position.set(104, 2.3, -83.4);
+      collarMesh.position.set(580, 2.3, -479.4);
       starbaseLaunchGroup.add(collarMesh);
 
-      // GIANT GLOWING RED MUSHROOM LAUNCH BUTTON
+      // GIANT GLOWING RED MUSHROOM LAUNCH BUTTON (At Cape Bunker)
       physicalLaunchButtonMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.58, 0.58, 0.3, 24), redLaunchMat);
-      physicalLaunchButtonMesh.position.set(104, 2.48, -83.4);
+      physicalLaunchButtonMesh.position.set(580, 2.48, -479.4);
       physicalLaunchButtonMesh.userData = { isLaunchButton: true };
       starbaseLaunchGroup.add(physicalLaunchButtonMesh);
 
-      // Floating 3D Holographic Launch Sign above Button
-      const holoSign = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 1.2), cautionMat);
-      holoSign.position.set(104, 3.6, -83.4);
+      const holoSign = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 1.2), cautionMat);
+      holoSign.position.set(580, 3.6, -479.4);
       holoSign.rotation.x = -Math.PI / 12;
       starbaseLaunchGroup.add(holoSign);
 
-      // Register Colliders for Launch Pad structures
-      registerCityCollider({ x: 104, z: -100, hw: 6, hd: 5 });
-      registerCityCollider({ x: 104, z: -84, hw: 3, hd: 2 });
+      // 8. Cape Starbase Coastal Causeway Suspension Bridge (Airport Road -> Cape)
+      // Connects from (340, 0, -220) to (580, 0, -480)
+      const causewayDeck = new THREE.Mesh(new THREE.BoxGeometry(16, 1.2, 340), padMat);
+      causewayDeck.position.set(460, 4.5, -350);
+      causewayDeck.rotation.y = Math.atan2(580 - 340, -480 - (-220));
+      starbaseLaunchGroup.add(causewayDeck);
+
+      // Bridge Pylons & Cable Towers
+      [-50, 50].forEach(pOffset => {
+        const pylon = new THREE.Mesh(new THREE.BoxGeometry(3.0, 42, 3.0), steelMat);
+        pylon.position.set(460 + pOffset * 0.7, 21, -350 + pOffset * 0.7);
+        starbaseLaunchGroup.add(pylon);
+
+        const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 70, 8), cyanGlowMat);
+        cable.rotation.z = Math.PI / 4;
+        cable.position.set(460 + pOffset * 0.7, 26, -350 + pOffset * 0.7);
+        starbaseLaunchGroup.add(cable);
+      });
+
+      // Security Checkpoint Blast Gate at Bridge Entrance
+      const gateSign = new THREE.Mesh(new THREE.BoxGeometry(14, 1.6, 0.4), cautionMat);
+      gateSign.position.set(560, 7.2, -460);
+      starbaseLaunchGroup.add(gateSign);
+
+      // Register Colliders for Cape Starbase Structures
+      registerCityCollider({ type: 'solid', x: 634, z: -550, hw: 6, hd: 5 });
+      registerCityCollider({ type: 'solid', x: 580, z: -480, hw: 11, hd: 8 });
+      registerCityCollider({ type: 'solid', x: 600, z: -510, hw: 14, hd: 14 });
+      registerCityCollider({ type: 'solid', x: 610, z: -570, hw: 8, hd: 8 });
+      registerCityCollider({ type: 'platform', x: 650, z: -550, hw: 26, hd: 26, topY: 3.65 });
+      registerCityCollider({ type: 'platform', x: 460, z: -350, hw: 16, hd: 160, topY: 4.5 });
     }
 
     // ============================================================
@@ -13215,6 +13738,571 @@ function buildNeoKyotoCity() {
     }
 
     // ============================================================
+    // PERIMETER RAILWAY SYSTEM & GRAND CENTRAL RAILWAY STATION
+    // ============================================================
+    function buildPerimeterRailway() {
+      railwayGroup = new THREE.Group();
+      scene.add(railwayGroup);
+
+      const trackMat = new THREE.MeshStandardMaterial({ color: 0x1a222e, roughness: 0.65, metalness: 0.85 });
+      const railMat = new THREE.MeshStandardMaterial({ color: 0xc8d4e0, roughness: 0.2, metalness: 0.95 });
+      const cyanGlowMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const pillarMat = new THREE.MeshStandardMaterial({ color: 0x141a24, roughness: 0.8, metalness: 0.3 });
+      const glassMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.45, roughness: 0.1 });
+      const cautionMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+
+      // 1. Perimeter Track Rectangular Guideway Ring (Elevated at Y: 7.5m)
+      const segments = [
+        { x1: -180, z1: -200, x2: 180, z2: -200, isX: true, len: 360 }, // North Track
+        { x1: 180, z1: -200, x2: 180, z2: 180, isX: false, len: 380 },  // East Track (passes Grand Central)
+        { x1: 180, z1: 180, x2: -180, z2: 180, isX: true, len: 360 },   // South Track
+        { x1: -180, z1: 180, x2: -180, z2: -200, isX: false, len: 380 } // West Track
+      ];
+
+      segments.forEach(seg => {
+        const cx = (seg.x1 + seg.x2) / 2;
+        const cz = (seg.z1 + seg.z2) / 2;
+        const deckGeo = seg.isX ? new THREE.BoxGeometry(seg.len, 0.9, 4.2) : new THREE.BoxGeometry(4.2, 0.9, seg.len);
+        const deck = new THREE.Mesh(deckGeo, trackMat);
+        deck.position.set(cx, 7.5, cz);
+        deck.receiveShadow = true;
+        railwayGroup.add(deck);
+
+        [-1.2, 1.2].forEach(offset => {
+          const railGeo = seg.isX ? new THREE.BoxGeometry(seg.len, 0.25, 0.3) : new THREE.BoxGeometry(0.3, 0.25, seg.len);
+          const rail = new THREE.Mesh(railGeo, railMat);
+          rail.position.set(seg.isX ? cx : cx + offset, 8.0, seg.isX ? cz + offset : cz);
+          railwayGroup.add(rail);
+        });
+
+        const stripGeo = seg.isX ? new THREE.BoxGeometry(seg.len, 0.05, 0.35) : new THREE.BoxGeometry(0.35, 0.05, seg.len);
+        const strip = new THREE.Mesh(stripGeo, cyanGlowMat);
+        strip.position.set(cx, 8.02, cz);
+        railwayGroup.add(strip);
+
+        registerCityCollider({
+          type: 'platform',
+          x: cx,
+          z: cz,
+          hw: seg.isX ? seg.len / 2 : 2.5,
+          hd: seg.isX ? 2.5 : seg.len / 2,
+          topY: 7.5
+        });
+      });
+
+      // Concrete Support Pillars along Perimeter (Every 30m)
+      const pillarSpacing = 30;
+      for (let px = -180; px <= 180; px += pillarSpacing) {
+        [-200, 180].forEach(pz => {
+          const p = new THREE.Mesh(new THREE.BoxGeometry(2.4, 7.5, 2.4), pillarMat);
+          p.position.set(px, 3.75, pz);
+          p.castShadow = true;
+          railwayGroup.add(p);
+          registerCityCollider({ type: 'solid', x: px, z: pz, hw: 1.6, hd: 1.6 });
+        });
+      }
+      for (let pz = -170; pz < 180; pz += pillarSpacing) {
+        [-180, 180].forEach(px => {
+          if (px === 180 && Math.abs(pz - 40) < 30) return; // Station concourse clearing
+          const p = new THREE.Mesh(new THREE.BoxGeometry(2.4, 7.5, 2.4), pillarMat);
+          p.position.set(px, 3.75, pz);
+          p.castShadow = true;
+          railwayGroup.add(p);
+          registerCityCollider({ type: 'solid', x: px, z: pz, hw: 1.6, hd: 1.6 });
+        });
+      }
+
+      // ============================================================
+      // 2. NEXUS GRAND CENTRAL RAILWAY STATION AT (180, 0, 40)
+      // ============================================================
+      const stX = 180, stZ = 40;
+      const stHall = new THREE.Mesh(new THREE.BoxGeometry(18, 6.5, 48), pillarMat);
+      stHall.position.set(stX - 10, 3.25, stZ);
+      stHall.castShadow = true;
+      railwayGroup.add(stHall);
+
+      const stGlass = new THREE.Mesh(new THREE.PlaneGeometry(44, 5.0), glassMat);
+      stGlass.position.set(stX - 19.1, 3.2, stZ);
+      stGlass.rotation.y = -Math.PI / 2;
+      railwayGroup.add(stGlass);
+
+      const stSign = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.4, 28), cyanGlowMat);
+      stSign.position.set(stX - 19.2, 5.8, stZ);
+      railwayGroup.add(stSign);
+
+      const platW = 7.5, platL = 52;
+      const platform = new THREE.Mesh(new THREE.BoxGeometry(platW, 0.45, platL), trackMat);
+      platform.position.set(stX - 5.5, 7.5, stZ);
+      platform.receiveShadow = true;
+      railwayGroup.add(platform);
+
+      const safeStrip = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.05, platL), cautionMat);
+      safeStrip.position.set(stX - 2.0, 7.75, stZ);
+      railwayGroup.add(safeStrip);
+
+      const canopy = new THREE.Mesh(new THREE.CylinderGeometry(platW * 0.7, platW * 0.7, platL, 16, 1, true, 0, Math.PI), glassMat);
+      canopy.rotation.x = Math.PI / 2;
+      canopy.position.set(stX - 5.5, 11.2, stZ);
+      railwayGroup.add(canopy);
+
+      [-16, 16].forEach(sOffsetZ => {
+        const numStairSteps = 16;
+        const sRise = 7.25 / numStairSteps;
+        const sDepth = 0.55;
+        const sW = 3.2;
+        for (let st = 0; st < numStairSteps; st++) {
+          const sy = 0.25 + (st + 0.5) * sRise;
+          const sx = (stX - 16) + (st + 0.5) * (10.5 / numStairSteps);
+          const sz = stZ + sOffsetZ;
+          const sStep = new THREE.Mesh(new THREE.BoxGeometry(sDepth, sRise, sW), trackMat);
+          sStep.position.set(sx, sy, sz);
+          railwayGroup.add(sStep);
+
+          const led = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.03, sW * 0.94), cyanGlowMat);
+          led.position.set(sx - sDepth / 2, sy + sRise / 2 + 0.01, sz);
+          railwayGroup.add(led);
+        }
+      });
+
+      registerCityCollider({ type: 'solid', x: stX - 10, z: stZ, hw: 10, hd: 25 });
+      registerCityCollider({ type: 'platform', x: stX - 5.5, z: stZ, hw: 4.0, hd: 26, topY: 7.5 });
+
+      // ============================================================
+      // 3. AUTONOMOUS HIGH-SPEED METRO MAGLEV EXPRESS TRAIN
+      // ============================================================
+      maglevTrainMesh = new THREE.Group();
+      maglevTrainMesh.position.set(stX, 8.2, stZ);
+      railwayGroup.add(maglevTrainMesh);
+
+      const loco = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.6, 11), railMat);
+      loco.position.set(0, 1.4, 0);
+      maglevTrainMesh.add(loco);
+
+      const noseCone = new THREE.Mesh(new THREE.ConeGeometry(1.6, 3.5, 16), railMat);
+      noseCone.rotation.x = Math.PI / 2;
+      noseCone.position.set(0, 1.4, 6.8);
+      maglevTrainMesh.add(noseCone);
+
+      const hLight = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), cyanGlowMat);
+      hLight.position.set(0, 1.4, 8.5);
+      maglevTrainMesh.add(hLight);
+
+      const coach = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.6, 12), railMat);
+      coach.position.set(0, 1.4, -12);
+      maglevTrainMesh.add(coach);
+
+      const winL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.85, 10.5), glassMat);
+      winL.position.set(-1.62, 1.6, -12);
+      maglevTrainMesh.add(winL);
+      const winR = winL.clone();
+      winR.position.x = 1.62;
+      maglevTrainMesh.add(winR);
+
+      const lounge = new THREE.Mesh(new THREE.BoxGeometry(3.2, 2.6, 11), railMat);
+      lounge.position.set(0, 1.4, -24);
+      maglevTrainMesh.add(lounge);
+
+      const loungeGlass = new THREE.Mesh(new THREE.SphereGeometry(1.58, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), glassMat);
+      loungeGlass.rotation.x = -Math.PI / 2;
+      loungeGlass.position.set(0, 1.4, -29.2);
+      maglevTrainMesh.add(loungeGlass);
+    }
+
+    // ============================================================
+    // NEXUS INTERNATIONAL AERODROME & AIRPORT SYSTEM
+    // ============================================================
+    function buildNexusAerodrome() {
+      airportGroup = new THREE.Group();
+      scene.add(airportGroup);
+
+      const tarmacMat = new THREE.MeshStandardMaterial({ color: 0x111620, roughness: 0.9, metalness: 0.2 });
+      const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const edgeLightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      const thresholdGreenMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+      const redEndLightMat = new THREE.MeshBasicMaterial({ color: 0xff0044 });
+      const blueTaxiMat = new THREE.MeshBasicMaterial({ color: 0x0088ff });
+      const steelMat = new THREE.MeshStandardMaterial({ color: 0x2b3442, metalness: 0.9, roughness: 0.25 });
+      const glassMat = new THREE.MeshStandardMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.45, roughness: 0.1 });
+      const darkStealthMat = new THREE.MeshStandardMaterial({ color: 0x181e28, roughness: 0.4, metalness: 0.85 });
+
+      // 1. Runway 09/27 (X: 320 to 740, Z: -220, Width: 26m, Length: 420m)
+      const rCenter = 530, rZ = -220, rLen = 420, rW = 26;
+      const runwayMesh = new THREE.Mesh(new THREE.BoxGeometry(rLen, 0.4, rW), tarmacMat);
+      runwayMesh.position.set(rCenter, 0.2, rZ);
+      runwayMesh.receiveShadow = true;
+      airportGroup.add(runwayMesh);
+
+      for (let rx = 345; rx <= 715; rx += 25) {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(15, 1.0), lineMat);
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(rx, 0.42, rZ);
+        airportGroup.add(stripe);
+      }
+
+      for (let rx = 330; rx <= 730; rx += 28) {
+        [-rW / 2 + 0.4, rW / 2 - 0.4].forEach(dz => {
+          const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.4, 8), edgeLightMat);
+          lamp.position.set(rx, 0.5, rZ + dz);
+          airportGroup.add(lamp);
+        });
+      }
+
+      for (let ty = -rW / 2 + 2; ty <= rW / 2 - 2; ty += 3.5) {
+        const gLight = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 8), thresholdGreenMat);
+        gLight.position.set(325, 0.55, rZ + ty);
+        airportGroup.add(gLight);
+      }
+
+      for (let ty = -rW / 2 + 2; ty <= rW / 2 - 2; ty += 3.5) {
+        const rLight = new THREE.Mesh(new THREE.SphereGeometry(0.28, 8, 8), redEndLightMat);
+        rLight.position.set(735, 0.55, rZ + ty);
+        airportGroup.add(rLight);
+      }
+
+      registerCityCollider({ type: 'platform', x: rCenter, z: rZ, hw: rLen / 2, hd: rW / 2, topY: 0.4 });
+
+      // 2. Parallel Taxiway & Parking Apron
+      const taxiway = new THREE.Mesh(new THREE.BoxGeometry(220, 0.35, 14), tarmacMat);
+      taxiway.position.set(430, 0.18, -180);
+      airportGroup.add(taxiway);
+
+      for (let tx = 330; tx <= 530; tx += 20) {
+        [-7.5, 7.5].forEach(dz => {
+          const bLamp = new THREE.Mesh(new THREE.SphereGeometry(0.22, 8, 8), blueTaxiMat);
+          bLamp.position.set(tx, 0.5, -180 + dz);
+          airportGroup.add(bLamp);
+        });
+      }
+
+      // 3. Modern Airport Passenger Terminal at (380, 0, -145)
+      const termMesh = new THREE.Mesh(new THREE.BoxGeometry(52, 12, 26), steelMat);
+      termMesh.position.set(380, 6, -145);
+      termMesh.castShadow = true;
+      airportGroup.add(termMesh);
+
+      const termGlass = new THREE.Mesh(new THREE.PlaneGeometry(48, 8), glassMat);
+      termGlass.position.set(380, 6, -131.8);
+      airportGroup.add(termGlass);
+
+      const termSign = new THREE.Mesh(new THREE.BoxGeometry(32, 1.8, 0.4), new THREE.MeshBasicMaterial({ color: 0x00f2ff }));
+      termSign.position.set(380, 11.5, -131.8);
+      airportGroup.add(termSign);
+
+      const jetway = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.6, 26), steelMat);
+      jetway.position.set(390, 4.5, -165);
+      airportGroup.add(jetway);
+
+      // 4. Aircraft Maintenance Hangar at (480, 0, -145)
+      const hangarMesh = new THREE.Mesh(new THREE.BoxGeometry(42, 16, 32), steelMat);
+      hangarMesh.position.set(480, 8, -145);
+      airportGroup.add(hangarMesh);
+
+      const hangarOpening = new THREE.Mesh(new THREE.PlaneGeometry(36, 12), new THREE.MeshBasicMaterial({ color: 0x070b10 }));
+      hangarOpening.position.set(480, 6.2, -128.8);
+      airportGroup.add(hangarOpening);
+
+      // 5. 45m Air Traffic Control (ATC) Tower at (320, 0, -145)
+      const atcShaft = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 4.8, 38, 12), steelMat);
+      atcShaft.position.set(320, 19, -145);
+      atcShaft.castShadow = true;
+      airportGroup.add(atcShaft);
+
+      const atcCab = new THREE.Mesh(new THREE.CylinderGeometry(7.5, 5.5, 6.5, 12), glassMat);
+      atcCab.position.set(320, 41, -145);
+      airportGroup.add(atcCab);
+
+      atcRadarDish = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 0.4, 0.6, 16, 1, false, 0, Math.PI), steelMat);
+      atcRadarDish.rotation.x = Math.PI / 4;
+      atcRadarDish.position.set(320, 45.5, -145);
+      airportGroup.add(atcRadarDish);
+
+      registerCityCollider({ type: 'solid', x: 380, z: -145, hw: 27, hd: 14 });
+      registerCityCollider({ type: 'solid', x: 480, z: -145, hw: 22, hd: 17 });
+      registerCityCollider({ type: 'solid', x: 320, z: -145, hw: 5.5, hd: 5.5 });
+
+      // ============================================================
+      // 6. THREE DISTINCT CONTROLLABLE AIRCRAFT
+      // ============================================================
+      airportPlanes = [];
+
+      // PLANE 1: Apex F-99 Supersonic Stealth Interceptor (Runway Start: 350, 1.2, -220)
+      const f99Group = new THREE.Group();
+      f99Group.position.set(350, 1.2, -220);
+      f99Group.rotation.y = -Math.PI / 2;
+      airportGroup.add(f99Group);
+
+      const f99Body = new THREE.Mesh(new THREE.ConeGeometry(1.6, 16, 8), darkStealthMat);
+      f99Body.rotation.x = -Math.PI / 2;
+      f99Body.position.set(0, 0.9, 0);
+      f99Group.add(f99Body);
+
+      const f99WingGeo = new THREE.BufferGeometry();
+      const wingVerts = new Float32Array([
+        0, 0.9, 2.0,   -6.5, 0.9, -5.5,   0, 0.9, -4.5,
+        0, 0.9, 2.0,    0, 0.9, -4.5,     6.5, 0.9, -5.5
+      ]);
+      f99WingGeo.setAttribute('position', new THREE.BufferAttribute(wingVerts, 3));
+      f99WingGeo.computeVertexNormals();
+      const f99Wings = new THREE.Mesh(f99WingGeo, darkStealthMat);
+      f99Group.add(f99Wings);
+
+      [-1.8, 1.8].forEach((vx, idx) => {
+        const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 2.4, 2.8), darkStealthMat);
+        fin.rotation.z = idx === 0 ? 0.28 : -0.28;
+        fin.position.set(vx, 2.0, -4.5);
+        f99Group.add(fin);
+      });
+
+      const f99Canopy = new THREE.Mesh(new THREE.ConeGeometry(0.85, 4.5, 8), glassMat);
+      f99Canopy.rotation.x = -Math.PI / 2;
+      f99Canopy.position.set(0, 1.5, 2.2);
+      f99Group.add(f99Canopy);
+
+      [-0.85, 0.85].forEach(ex => {
+        const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.65, 1.2, 12), steelMat);
+        nozzle.rotation.x = Math.PI / 2;
+        nozzle.position.set(ex, 0.9, -7.5);
+        f99Group.add(nozzle);
+
+        const flame = new THREE.Mesh(new THREE.ConeGeometry(0.48, 4.0, 8), new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.85 }));
+        flame.rotation.x = -Math.PI / 2;
+        flame.position.set(ex, 0.9, -9.8);
+        f99Group.add(flame);
+      });
+
+      airportPlanes.push({
+        id: 'f99',
+        name: 'APEX F-99 STEALTH FIGHTER',
+        mesh: f99Group,
+        pos: f99Group.position,
+        maxSpeed: 95,
+        takeoffSpeed: 24,
+        pitchRate: 1.6,
+        rollRate: 2.2,
+        yawRate: 1.0,
+        hasAfterburner: true,
+        isVTOL: false
+      });
+
+      // PLANE 2: Cyber Aeroliner (Twin-Turbofan Passenger Jet at Gate 1: 390, 1.2, -180)
+      const airlinerGroup = new THREE.Group();
+      airlinerGroup.position.set(390, 1.4, -180);
+      airlinerGroup.rotation.y = -Math.PI / 2;
+      airportGroup.add(airlinerGroup);
+
+      const aFuse = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 22, 16), steelMat);
+      aFuse.rotation.x = Math.PI / 2;
+      aFuse.position.set(0, 1.6, 0);
+      airlinerGroup.add(aFuse);
+
+      const aNose = new THREE.Mesh(new THREE.ConeGeometry(1.6, 4.2, 16), steelMat);
+      aNose.rotation.x = -Math.PI / 2;
+      aNose.position.set(0, 1.6, 13.1);
+      airlinerGroup.add(aNose);
+
+      const aWing = new THREE.Mesh(new THREE.BoxGeometry(24, 0.28, 3.8), steelMat);
+      aWing.position.set(0, 1.3, 0);
+      airlinerGroup.add(aWing);
+
+      [-12, 12].forEach(wx => {
+        const winglet = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.6, 1.4), darkStealthMat);
+        winglet.position.set(wx, 2.0, 0);
+        airlinerGroup.add(winglet);
+      });
+
+      [-4.2, 4.2].forEach(ex => {
+        const engine = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 3.8, 16), steelMat);
+        engine.rotation.x = Math.PI / 2;
+        engine.position.set(ex, 0.5, 1.0);
+        airlinerGroup.add(engine);
+      });
+
+      const aTailVert = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.2, 3.2), steelMat);
+      aTailVert.position.set(0, 3.6, -9.5);
+      airlinerGroup.add(aTailVert);
+
+      const aTailHoriz = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.22, 2.2), steelMat);
+      aTailHoriz.position.set(0, 5.5, -10.0);
+      airlinerGroup.add(aTailHoriz);
+
+      [-1.62, 1.62].forEach(px => {
+        const pWins = new THREE.Mesh(new THREE.PlaneGeometry(14, 0.45), new THREE.MeshBasicMaterial({ color: 0xffd700 }));
+        pWins.position.set(px, 1.8, 0);
+        pWins.rotation.y = px > 0 ? Math.PI / 2 : -Math.PI / 2;
+        airlinerGroup.add(pWins);
+      });
+
+      airportPlanes.push({
+        id: 'aeroliner',
+        name: 'CYBER AEROLINER JET',
+        mesh: airlinerGroup,
+        pos: airlinerGroup.position,
+        maxSpeed: 65,
+        takeoffSpeed: 20,
+        pitchRate: 1.0,
+        rollRate: 1.2,
+        yawRate: 0.8,
+        hasAfterburner: false,
+        isVTOL: false
+      });
+
+      // PLANE 3: VTOL Sky-Lander (Heavy Cargo Tilt-Rotor at Apron Helipad: 460, 1.2, -180)
+      const vtolGroup = new THREE.Group();
+      vtolGroup.position.set(460, 1.2, -180);
+      vtolGroup.rotation.y = -Math.PI / 2;
+      airportGroup.add(vtolGroup);
+
+      const vtolBody = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.8, 14), darkStealthMat);
+      vtolBody.position.set(0, 1.6, 0);
+      vtolGroup.add(vtolBody);
+
+      const vtolGlass = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.8, 3.2), glassMat);
+      vtolGlass.position.set(0, 1.8, 7.5);
+      vtolGroup.add(vtolGlass);
+
+      const vtolWing = new THREE.Mesh(new THREE.BoxGeometry(16, 0.5, 2.8), steelMat);
+      vtolWing.position.set(0, 2.6, 1.0);
+      vtolGroup.add(vtolWing);
+
+      [-8.0, 8.0].forEach(rx => {
+        const pod = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 2.8, 12), steelMat);
+        pod.position.set(rx, 2.6, 1.0);
+        vtolGroup.add(pod);
+
+        const hub = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.6, 8), darkStealthMat);
+        hub.position.set(rx, 4.1, 1.0);
+        vtolGroup.add(hub);
+
+        const bladeGeo = new THREE.BoxGeometry(5.8, 0.05, 0.35);
+        const blade1 = new THREE.Mesh(bladeGeo, new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.7 }));
+        blade1.position.set(rx, 4.2, 1.0);
+        blade1.name = 'vtolRotorBlade';
+        vtolGroup.add(blade1);
+      });
+
+      airportPlanes.push({
+        id: 'vtol',
+        name: 'VTOL SKY-LANDER',
+        mesh: vtolGroup,
+        pos: vtolGroup.position,
+        maxSpeed: 55,
+        takeoffSpeed: 10,
+        pitchRate: 1.2,
+        rollRate: 1.4,
+        yawRate: 1.2,
+        hasAfterburner: false,
+        isVTOL: true
+      });
+    }
+
+    // ============================================================
+    // AIRCRAFT PILOTING & FLIGHT CONTROLLER
+    // ============================================================
+    let activeNearPlane = null;
+
+    function boardTargetPlane() {
+      if (!activeNearPlane) return;
+      executePlaneFlightEntry(activeNearPlane);
+    }
+
+    function executePlaneFlightEntry(planeData) {
+      activePilotPlane = planeData;
+      gameState.inPlane = true;
+      gameState.flightMode = 'plane';
+      gameState.plane.isPiloted = true;
+      gameState.plane.id = planeData.id;
+      gameState.plane.name = planeData.name;
+      gameState.plane.throttle = 0;
+      gameState.plane.speed = 0;
+      gameState.plane.pitch = 0;
+      gameState.plane.roll = 0;
+      gameState.plane.yaw = planeData.mesh.rotation.y;
+      gameState.plane.altitude = planeData.mesh.position.y;
+      gameState.plane.gearDown = true;
+      gameState.plane.mesh = planeData.mesh;
+
+      const hud = document.getElementById('plane-flight-hud');
+      if (hud) hud.style.display = 'block';
+
+      const callsignEl = document.getElementById('plane-hud-callsign');
+      if (callsignEl) callsignEl.textContent = planeData.name;
+
+      cyberAudio.playLootChime();
+      showStoreNotification(`✈️ PILOTING ${planeData.name}! PRESS [W] TO ADVANCE THROTTLE!`);
+    }
+
+    function executePlaneFlightExit() {
+      if (!gameState.inPlane || !activePilotPlane) return;
+      const planePos = activePilotPlane.mesh.position.clone();
+      const isHighAltitude = planePos.y > 15;
+
+      gameState.inPlane = false;
+      gameState.flightMode = 'none';
+      gameState.plane.isPiloted = false;
+
+      const hud = document.getElementById('plane-flight-hud');
+      if (hud) hud.style.display = 'none';
+
+      if (isHighAltitude) {
+        player.pos.set(planePos.x + 8, planePos.y - 2, planePos.z + 8);
+        player.vel.set(0, -2.5, 0);
+        showStoreNotification('🪂 EMERGENCY EJECTION! PARACHUTE DEPLOYED — GLIDING TO SURFACE!');
+        cyberAudio.playAirVent();
+      } else {
+        player.pos.set(planePos.x + 4, Math.max(1.2, planePos.y), planePos.z + 4);
+        player.vel.set(0, 0, 0);
+        showStoreNotification(`DISEMBARKED FROM ${activePilotPlane.name}.`);
+        cyberAudio.playClick();
+      }
+      activePilotPlane = null;
+    }
+
+    function togglePlaneGear() {
+      if (!gameState.inPlane) return;
+      gameState.plane.gearDown = !gameState.plane.gearDown;
+      const gearEl = document.getElementById('plane-hud-gear');
+      if (gearEl) {
+        if (gameState.plane.gearDown) {
+          gearEl.textContent = 'GEAR: DOWN [G]';
+          gearEl.style.color = '#00ff88';
+          gearEl.style.borderColor = '#00ff88';
+        } else {
+          gearEl.textContent = 'GEAR: UP [G]';
+          gearEl.style.color = '#ffaa00';
+          gearEl.style.borderColor = '#ffaa00';
+        }
+      }
+      cyberAudio.playClick();
+    }
+
+    // ============================================================
+    // METRO MAGLEV TRAIN BOARDING & PASSENGER TOUR
+    // ============================================================
+    function boardMaglevTrain() {
+      if (gameState.inTrain) return;
+      gameState.inTrain = true;
+      const hud = document.getElementById('train-passenger-hud');
+      if (hud) hud.style.display = 'flex';
+      showStoreNotification('🚆 BOARDED METRO MAGLEV EXPRESS! ENJOYING ELEVATED CITY SKYLINE TOUR!');
+      cyberAudio.playMaglevTrainSound();
+    }
+
+    function exitMaglevTrain() {
+      if (!gameState.inTrain) return;
+      gameState.inTrain = false;
+      const hud = document.getElementById('train-passenger-hud');
+      if (hud) hud.style.display = 'none';
+
+      if (maglevTrainMesh) {
+        const tPos = maglevTrainMesh.position.clone();
+        player.pos.set(tPos.x - 3.5, 7.5, tPos.z);
+        player.vel.set(0, 0, 0);
+      }
+      showStoreNotification('DISEMBARKED FROM METRO MAGLEV EXPRESS.');
+      cyberAudio.playClick();
+    }
+
+    // ============================================================
     // CITY LIVELINESS: ELEVATORS, SPINNERS & CYBER-TREES
     // ============================================================
     function buildCityLivelinessElements() {
@@ -13856,7 +14944,13 @@ function buildNeoKyotoCity() {
       if (e.code === 'KeyQ') triggerTacticalPing();
       if (e.code === 'KeyE') toggleVehicleMode();
       if (e.code === 'KeyF') handleInteractions();
-      if (e.code === 'KeyG') toggleAeroGlider();
+      if (e.code === 'KeyG') {
+        if (gameState.inPlane) {
+          togglePlaneGear();
+        } else {
+          toggleAeroGlider();
+        }
+      }
       if (e.code === 'Space' && gameState.flightMode === 'starship') {
         triggerStageSeparation();
       }
@@ -14064,6 +15158,20 @@ function buildNeoKyotoCity() {
     function handleInteractions() {
       if (!player.pos) return;
 
+      // In-Plane or In-Train Exit handlers
+      if (gameState.inPlane) {
+        executePlaneFlightExit();
+        return;
+      }
+      if (gameState.inTrain) {
+        exitMaglevTrain();
+        return;
+      }
+      if (gameState.inVehicle) {
+        toggleVehicleMode();
+        return;
+      }
+
       // 00. Supply Loot Crate Opening Check
       if (supplyLootCrates && supplyLootCrates.length > 0) {
         for (let crate of supplyLootCrates) {
@@ -14102,17 +15210,41 @@ function buildNeoKyotoCity() {
         return;
       }
 
-      // 0B. Universal Starship Ingress & Launch (Earth, Mars, Nebula, and Anywhere)
+      // 0B. Airport Aircraft Piloting Entry (Apex F-99, Cyber Aeroliner, VTOL Sky-Lander)
+      if (airportPlanes && airportPlanes.length > 0 && !gameState.inPlane) {
+        for (let ap of airportPlanes) {
+          if (player.pos.distanceTo(ap.mesh.position) < 15.0) {
+            executePlaneFlightEntry(ap);
+            return;
+          }
+        }
+      }
+
+      // 0C. Metro Maglev Express Train Boarding (Near Train or at Grand Central Platform)
+      if (!gameState.inTrain) {
+        const isNearTrain = maglevTrainMesh && player.pos.distanceTo(maglevTrainMesh.position) < 18.0;
+        const isAtPlatform = Math.hypot(player.pos.x - 174, player.pos.z - 40) < 22.0 && Math.abs(player.pos.y - 7.5) < 3.5;
+        if (isNearTrain || isAtPlatform) {
+          boardMaglevTrain();
+          return;
+        }
+      }
+
+      // 0D. Universal Starship Ingress & Launch (Cape Starbase, Mars, Nebula, and Anywhere)
       let rCheckPos = new THREE.Vector3();
       if (starshipUpper) starshipUpper.getWorldPosition(rCheckPos);
       else if (rocketStack) rocketStack.getWorldPosition(rCheckPos);
       const distToRocketStack = Math.hypot(player.pos.x - rCheckPos.x, player.pos.z - rCheckPos.z);
 
-      const isAtEarthPad = gameState.currentWorld === 'earth' && (player.pos.distanceTo(new THREE.Vector3(104, 0, -100)) < 30.0 || player.pos.distanceTo(new THREE.Vector3(120, 0, -100)) < 30.0);
+      const isAtEarthPad = gameState.currentWorld === 'earth' && (
+        player.pos.distanceTo(new THREE.Vector3(634, 0, -550)) < 35.0 ||
+        player.pos.distanceTo(new THREE.Vector3(650, 0, -550)) < 35.0 ||
+        player.pos.distanceTo(new THREE.Vector3(580, 0, -480)) < 25.0
+      );
       const isAtMarsPad = gameState.currentWorld === 'mars' && (player.pos.distanceTo(new THREE.Vector3(0, 0, -35)) < 32.0 || player.pos.distanceTo(new THREE.Vector3(-16, 0, -35)) < 32.0);
       const isAtNebulaPad = gameState.currentWorld === 'nebula' && (player.pos.distanceTo(new THREE.Vector3(0, 0, -35)) < 32.0 || player.pos.distanceTo(new THREE.Vector3(-16, 0, -35)) < 32.0);
 
-      if (distToRocketStack < 32.0 || isAtEarthPad || isAtMarsPad || isAtNebulaPad) {
+      if (distToRocketStack < 35.0 || isAtEarthPad || isAtMarsPad || isAtNebulaPad) {
         initiateStarshipLaunchSequence();
         return;
       }
@@ -14181,7 +15313,49 @@ function buildNeoKyotoCity() {
     }
 
     function toggleVehicleMode() {
-      if (!player.pos || !roverGroup) return;
+      if (!player.pos) return;
+
+      if (gameState.inPlane) {
+        executePlaneFlightExit();
+        return;
+      }
+      if (gameState.inTrain) {
+        exitMaglevTrain();
+        return;
+      }
+
+      // Check Airport Aircraft Boarding
+      if (airportPlanes && airportPlanes.length > 0 && !gameState.inPlane) {
+        for (let ap of airportPlanes) {
+          if (player.pos.distanceTo(ap.mesh.position) < 15.0) {
+            executePlaneFlightEntry(ap);
+            return;
+          }
+        }
+      }
+
+      // Check Metro Maglev Express Train Boarding
+      if (!gameState.inTrain) {
+        const isNearTrain = maglevTrainMesh && player.pos.distanceTo(maglevTrainMesh.position) < 18.0;
+        const isAtPlatform = Math.hypot(player.pos.x - 174, player.pos.z - 40) < 22.0 && Math.abs(player.pos.y - 7.5) < 3.5;
+        if (isNearTrain || isAtPlatform) {
+          boardMaglevTrain();
+          return;
+        }
+      }
+
+      // Check Cape Starbase Rocket Console / Bunker Launch
+      const isAtLaunchPad = gameState.currentWorld === 'earth' && (
+        player.pos.distanceTo(new THREE.Vector3(634, 0, -550)) < 35.0 ||
+        player.pos.distanceTo(new THREE.Vector3(650, 0, -550)) < 35.0 ||
+        player.pos.distanceTo(new THREE.Vector3(580, 0, -480)) < 25.0
+      );
+      if (isAtLaunchPad && gameState.flightMode !== 'starship') {
+        initiateStarshipLaunchSequence();
+        return;
+      }
+
+      if (!roverGroup) return;
       const distToRover = player.pos.distanceTo(roverGroup.position);
       const isNearGarage = player.pos.distanceTo(new THREE.Vector3(-85, 0, 45)) < 16.0;
 
@@ -14257,8 +15431,8 @@ function buildNeoKyotoCity() {
           camera.position.set(-26, 16, -10);
           camera.lookAt(0, 55, -35);
         } else {
-          camera.position.set(120 - 32, 18, -100 + 45);
-          camera.lookAt(120, 65, -100);
+          camera.position.set(650 - 36, 18, -550 + 45);
+          camera.lookAt(650, 65, -550);
         }
       }
 
@@ -14286,17 +15460,23 @@ function buildNeoKyotoCity() {
           }
         }
         // T-4.5s: Cryogenic Venting
-        else if (launchSeqSeconds <= 4.5 && launchSeqSeconds > 2.5) {
+        else if (launchSeqSeconds <= 4.5 && launchSeqSeconds > 3.2) {
           if (titleEl) titleEl.textContent = 'CRYOGENIC CHILLDOWN VENTING ACTIVE';
           if (subEl) subEl.textContent = 'Supercooled LOX/CH4 manifolds verified nominal';
           cyberAudio.playCryoVent();
         }
-        // T-2.5s: Sound Suppression Deluge & Raptor Ignition
-        else if (launchSeqSeconds <= 2.5 && launchSeqSeconds > 0) {
+        // T-3.2s: Water Deluge System Flooding Flame Trench
+        else if (launchSeqSeconds <= 3.2 && launchSeqSeconds > 1.8) {
+          if (titleEl) titleEl.textContent = 'WATER DELUGE SOUND SUPPRESSION ACTIVE';
+          if (subEl) subEl.textContent = '100,000 GPM cascade flooding trench toward open ocean';
+          cyberAudio.playDelugeSound();
+        }
+        // T-1.8s: 33 Raptor Engine Ignition Shockwave
+        else if (launchSeqSeconds <= 1.8 && launchSeqSeconds > 0) {
           if (titleEl) titleEl.textContent = '33 RAPTOR ENGINES IGNITION SEQUENCE';
-          if (subEl) subEl.textContent = 'Deluge water active · Thrust ramping to 16,000,000 lbf';
-          if (boosterFlame) boosterFlame.material.opacity = 0.8;
-          cyberAudio.playIgnitionThud();
+          if (subEl) subEl.textContent = 'Deluge active · Thrust ramping to 16,000,000 lbf';
+          if (boosterFlame) boosterFlame.material.opacity = 0.85;
+          cyberAudio.playRaptorIgnition();
         }
         // T-0s: LIFTOFF!
         else if (launchSeqSeconds <= 0) {
@@ -14318,7 +15498,7 @@ function buildNeoKyotoCity() {
       gameState.starship.isLaunching = false;
       gameState.starship.boosterFuel = 100;
       cyberAudio.playCountdownBeep(true);
-      cyberAudio.playRocketRoar();
+      cyberAudio.playAcousticLiftoffRoar(6.0);
 
       if (mechazillaChopsticks) mechazillaChopsticks.rotation.y = 0.85;
       if (boosterFlame) boosterFlame.material.opacity = 0.95;
@@ -14754,6 +15934,10 @@ function buildNeoKyotoCity() {
       if (solariaGroup) solariaGroup.visible = isEarth;
       if (atlantisGroup) atlantisGroup.visible = isEarth;
       if (recreationGroup) recreationGroup.visible = isEarth;
+      if (railwayGroup) railwayGroup.visible = isEarth;
+      if (airportGroup) airportGroup.visible = isEarth;
+      if (capeStarbaseGroup) capeStarbaseGroup.visible = isEarth;
+      if (starbaseLaunchGroup) starbaseLaunchGroup.visible = isEarth;
       if (nukeGroup) nukeGroup.visible = isEarth;
       if (spaceportGroup) spaceportGroup.visible = isEarth;
       if (roverGroup) roverGroup.visible = !isSpace;
@@ -14768,8 +15952,8 @@ function buildNeoKyotoCity() {
       if (gameState.flightMode === 'starship') {
         gameState.starship.altitude = isSpace ? 60 : 120;
         if (rocketStack) {
-          const padZ = (isEarth) ? -100 : (isSpace ? 30 : -35);
-          const padX = (isEarth) ? 120 : 0;
+          const padZ = (isEarth) ? -550 : (isSpace ? 30 : -35);
+          const padX = (isEarth) ? 650 : 0;
           rocketStack.position.set(padX, gameState.starship.altitude, padZ);
         }
       } else {
@@ -14788,7 +15972,7 @@ function buildNeoKyotoCity() {
           } else if (isNebula) {
             rocketStack.position.set(0, 0, -35);
           } else if (isEarth) {
-            rocketStack.position.set(120, 0, -100);
+            rocketStack.position.set(650, 0, -550);
             if (roverGroup) {
               roverGroup.position.set(0, 0, 15);
             }
@@ -15069,9 +16253,9 @@ function buildNeoKyotoCity() {
         if (detachedBooster.altitude > 0) {
           detachedBooster.altitude = Math.max(0, detachedBooster.altitude - delta * 14.0);
           detachedBooster.mesh.position.y = detachedBooster.altitude;
-          // Guide booster back towards Mechazilla Launch Mount at (120, 0, -100)
-          detachedBooster.mesh.position.x = THREE.MathUtils.lerp(detachedBooster.mesh.position.x, 120, delta * 0.15);
-          detachedBooster.mesh.position.z = THREE.MathUtils.lerp(detachedBooster.mesh.position.z, -100, delta * 0.15);
+          // Guide booster back towards Cape Starbase Mechazilla Launch Mount at (650, 0, -550)
+          detachedBooster.mesh.position.x = THREE.MathUtils.lerp(detachedBooster.mesh.position.x, 650, delta * 0.15);
+          detachedBooster.mesh.position.z = THREE.MathUtils.lerp(detachedBooster.mesh.position.z, -550, delta * 0.15);
           detachedBooster.mesh.rotation.y += delta * 0.2;
 
           if (boosterFlame) {
@@ -15192,6 +16376,54 @@ function buildNeoKyotoCity() {
           promptShown = true;
         }
 
+        // Airport Aircraft Proximity Check
+        let nearPlane = null;
+        if (!promptShown && airportPlanes && airportPlanes.length > 0 && !gameState.inPlane) {
+          for (let ap of airportPlanes) {
+            if (player.pos.distanceTo(ap.mesh.position) < 14.0) {
+              nearPlane = ap;
+              break;
+            }
+          }
+        }
+        activeNearPlane = nearPlane;
+        const planeBanner = document.getElementById('hud-plane-proximity');
+        if (nearPlane && !gameState.inPlane) {
+          if (!promptShown) {
+            promptEl.style.display = 'flex';
+            document.getElementById('prompt-text').textContent = `PILOT ${nearPlane.name} [E]`;
+            promptShown = true;
+          }
+          if (planeBanner) {
+            planeBanner.style.display = 'block';
+            const titleEl = document.getElementById('hud-plane-title');
+            if (titleEl) titleEl.textContent = nearPlane.name;
+          }
+        } else if (planeBanner) {
+          planeBanner.style.display = 'none';
+        }
+
+        // Metro Maglev Train Proximity Check
+        let nearTrain = false;
+        if (!promptShown && !gameState.inTrain) {
+          const dTrain = maglevTrainMesh ? player.pos.distanceTo(maglevTrainMesh.position) : 999;
+          const isAtPlatform = Math.hypot(player.pos.x - 174, player.pos.z - 40) < 22.0 && Math.abs(player.pos.y - 7.5) < 3.5;
+          if (dTrain < 18.0 || isAtPlatform) {
+            nearTrain = true;
+          }
+        }
+        const trainBanner = document.getElementById('hud-train-proximity');
+        if (nearTrain && !gameState.inTrain) {
+          if (!promptShown) {
+            promptEl.style.display = 'flex';
+            document.getElementById('prompt-text').textContent = 'BOARD METRO MAGLEV EXPRESS [E]';
+            promptShown = true;
+          }
+          if (trainBanner) trainBanner.style.display = 'block';
+        } else if (trainBanner) {
+          trainBanner.style.display = 'none';
+        }
+
         // Universal Rocket Boarding & Launch Proximity (All Worlds: Earth, Mars, Nebula, Space)
         let isNearRocket = false;
         let rocketPos = new THREE.Vector3();
@@ -15200,11 +16432,15 @@ function buildNeoKyotoCity() {
 
         if (player.pos) {
           const dRocketHoriz = Math.hypot(player.pos.x - rocketPos.x, player.pos.z - rocketPos.z);
-          if (dRocketHoriz < 32.0 && Math.abs(player.pos.y - rocketPos.y) < 70.0) {
+          if (dRocketHoriz < 35.0 && Math.abs(player.pos.y - rocketPos.y) < 70.0) {
             isNearRocket = true;
           }
-          // Earth Launch Pad (104, 0, -100)
-          if (gameState.currentWorld === 'earth' && (player.pos.distanceTo(new THREE.Vector3(104, 0, -100)) < 30.0 || player.pos.distanceTo(new THREE.Vector3(120, 0, -100)) < 30.0)) {
+          // Cape Starbase Launch Complex (634, 0, -550) or Pad (650, 0, -550) or Bunker (580, 0, -480)
+          if (gameState.currentWorld === 'earth' && (
+            player.pos.distanceTo(new THREE.Vector3(634, 0, -550)) < 35.0 ||
+            player.pos.distanceTo(new THREE.Vector3(650, 0, -550)) < 35.0 ||
+            player.pos.distanceTo(new THREE.Vector3(580, 0, -480)) < 25.0
+          )) {
             isNearRocket = true;
           }
           // Mars Base Alpha Landing Pad (0, 0, -35)
@@ -15221,7 +16457,7 @@ function buildNeoKyotoCity() {
         if (isNearRocket && gameState.flightMode !== 'starship') {
           if (!promptShown) {
             promptEl.style.display = 'flex';
-            const planetLabel = (gameState.currentWorld === 'mars') ? 'MARS' : ((gameState.currentWorld === 'nebula') ? 'NEBULA' : 'STARBASE');
+            const planetLabel = (gameState.currentWorld === 'mars') ? 'MARS' : ((gameState.currentWorld === 'nebula') ? 'NEBULA' : 'CAPE STARBASE');
             document.getElementById('prompt-text').textContent = `BOARD ${planetLabel} STARSHIP & INITIATE LIFTOFF [E / F]`;
             promptShown = true;
           }
@@ -15497,6 +16733,169 @@ function buildNeoKyotoCity() {
           }
         }
 
+      // ============================================================
+      // AIRCRAFT FLIGHT DYNAMICS & AVIONICS CONTROLLER
+      // ============================================================
+      if (gameState.inPlane && activePilotPlane) {
+        const pState = gameState.plane;
+        const pData = activePilotPlane;
+        const pMesh = pData.mesh;
+
+        const joyY = gameState.joyNormY || 0;
+        const joyX = gameState.joyNormX || 0;
+
+        // Throttle (W / S or Virtual Joystick)
+        if (keys['KeyW'] || joyY < -0.2) {
+          pState.throttle = Math.min(100, pState.throttle + delta * 45);
+        } else if (keys['KeyS'] || joyY > 0.2) {
+          pState.throttle = Math.max(0, pState.throttle - delta * 50);
+        }
+
+        // Space = Afterburner (F-99) or VTOL Vertical Lift (Sky-Lander)
+        pState.afterburner = (keys['Space'] && pData.hasAfterburner && pState.throttle > 80);
+        const effectiveMaxSpd = pState.afterburner ? pData.maxSpeed * 1.45 : pData.maxSpeed;
+        const targetSpd = (pState.throttle / 100) * effectiveMaxSpd;
+        pState.speed = THREE.MathUtils.lerp(pState.speed, targetSpd, delta * (pState.afterburner ? 2.5 : 1.2));
+
+        // Pitch & Roll & Yaw Controls
+        if (keys['ArrowDown'] || keys['KeyS']) {
+          pState.pitch = Math.min(Math.PI * 0.45, pState.pitch + pData.pitchRate * delta);
+        } else if (keys['ArrowUp']) {
+          pState.pitch = Math.max(-Math.PI * 0.45, pState.pitch - pData.pitchRate * delta);
+        } else {
+          pState.pitch *= 0.98;
+        }
+
+        if (keys['KeyA'] || keys['ArrowLeft']) {
+          pState.roll = Math.min(Math.PI * 0.5, pState.roll + pData.rollRate * delta);
+          pState.yaw += pData.yawRate * delta * 0.8;
+        } else if (keys['KeyD'] || keys['ArrowRight']) {
+          pState.roll = Math.max(-Math.PI * 0.5, pState.roll - pData.rollRate * delta);
+          pState.yaw -= pData.yawRate * delta * 0.8;
+        } else {
+          pState.roll *= 0.94;
+        }
+
+        if (keys['KeyQ']) pState.yaw += pData.yawRate * delta;
+        if (keys['KeyE']) pState.yaw -= pData.yawRate * delta;
+
+        // Banked Turn Coupling (rolling automatically turns the plane)
+        pState.yaw -= Math.sin(pState.roll) * (pState.speed / 28) * delta;
+
+        // VTOL Special Lift
+        let vtolLift = 0;
+        if (pData.isVTOL && keys['Space']) {
+          vtolLift = 18.0;
+        }
+
+        // Aerodynamic Lift Equation
+        const liftFrac = Math.min(1.0, Math.pow(pState.speed / pData.takeoffSpeed, 2));
+        const gravityEffect = (1.0 - liftFrac) * gameState.currentGravity;
+        const climbRate = Math.sin(pState.pitch) * pState.speed + vtolLift - (pMesh.position.y > 1.4 ? gravityEffect * 0.4 : 0);
+
+        pState.vs = climbRate;
+        pMesh.position.y += climbRate * delta;
+        if (pMesh.position.y < 1.2) {
+          pMesh.position.y = 1.2;
+          pState.vs = 0;
+          if (pState.pitch < 0) pState.pitch = 0;
+        }
+
+        // Forward Flight Velocity
+        pMesh.rotation.set(pState.pitch, pState.yaw, pState.roll, 'YXZ');
+        const fwdVector = new THREE.Vector3(0, 0, -1).applyEuler(pMesh.rotation);
+        pMesh.position.add(fwdVector.multiplyScalar(pState.speed * delta));
+
+        // Audio
+        if (pState.throttle > 5) {
+          cyberAudio.playJetEngineSound(pState.throttle, pState.speed);
+        }
+
+        // Player Position locked to plane cockpit
+        player.pos.copy(pMesh.position).add(new THREE.Vector3(0, 1.2, 0));
+        player.vel.set(0, 0, 0);
+
+        // Update Avionics HUD
+        const spdKnots = Math.round(pState.speed * 1.94384);
+        const altMeters = Math.round(Math.max(0, pMesh.position.y));
+        const hdgDeg = Math.round((( -pState.yaw * 180 / Math.PI ) % 360 + 360) % 360);
+
+        const spdEl = document.getElementById('plane-hud-spd');
+        const altEl = document.getElementById('plane-hud-alt');
+        const thrEl = document.getElementById('plane-hud-thr');
+        const thrBar = document.getElementById('plane-hud-thr-bar');
+        const spdBar = document.getElementById('plane-hud-spd-bar');
+        const hdgEl = document.getElementById('plane-hud-heading');
+        const vsEl = document.getElementById('plane-hud-vs');
+        const horizEl = document.getElementById('plane-hud-horizon');
+
+        if (spdEl) spdEl.textContent = spdKnots;
+        if (altEl) altEl.textContent = altMeters;
+        if (thrEl) thrEl.textContent = `${Math.round(pState.throttle)}%` + (pState.afterburner ? ' [BURNER]' : '');
+        if (thrBar) thrBar.style.width = `${pState.throttle}%`;
+        if (spdBar) spdBar.style.width = `${Math.min(100, (pState.speed / pData.maxSpeed) * 100)}%`;
+        if (hdgEl) hdgEl.textContent = `HDG ${hdgDeg.toString().padStart(3, '0')}°`;
+        if (vsEl) vsEl.textContent = `VS: ${climbRate >= 0 ? '+' : ''}${climbRate.toFixed(1)} M/S`;
+        if (horizEl) {
+          horizEl.style.transform = `rotate(${-pState.roll * (180 / Math.PI)}deg) translateY(${pState.pitch * 60}px)`;
+        }
+
+        // Camera Follows Plane (Third-Person Chase Cam)
+        if (camera) {
+          const camBack = new THREE.Vector3(0, 4.5, 16).applyEuler(pMesh.rotation);
+          camera.position.copy(pMesh.position).add(camBack);
+          camera.lookAt(pMesh.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
+        }
+      }
+
+      // ============================================================
+      // METRO MAGLEV TRAIN DYNAMICS & PERIMETER GUIDEWAY ANIMATION
+      // ============================================================
+      if (maglevTrainMesh && gameState.currentWorld === 'earth') {
+        const loopSegments = [
+          { p1: new THREE.Vector2(-180, -200), p2: new THREE.Vector2(180, -200), len: 360, angle: 0 },         // North
+          { p1: new THREE.Vector2(180, -200), p2: new THREE.Vector2(180, 180), len: 380, angle: -Math.PI / 2 }, // East
+          { p1: new THREE.Vector2(180, 180), p2: new THREE.Vector2(-180, 180), len: 360, angle: Math.PI },       // South
+          { p1: new THREE.Vector2(-180, 180), p2: new THREE.Vector2(-180, -200), len: 380, angle: Math.PI / 2 }  // West
+        ];
+        const totalPerimeter = 1480;
+        gameState.train.progress = (gameState.train.progress + gameState.train.speed * delta) % totalPerimeter;
+
+        let rem = gameState.train.progress;
+        let trainX = 180, trainZ = 40, trainRotY = -Math.PI / 2;
+        for (let seg of loopSegments) {
+          if (rem <= seg.len) {
+            const frac = rem / seg.len;
+            trainX = seg.p1.x + (seg.p2.x - seg.p1.x) * frac;
+            trainZ = seg.p1.y + (seg.p2.y - seg.p1.y) * frac;
+            trainRotY = seg.angle;
+            break;
+          }
+          rem -= seg.len;
+        }
+
+        maglevTrainMesh.position.set(trainX, 8.2, trainZ);
+        maglevTrainMesh.rotation.y = trainRotY;
+
+        // When player is riding the train
+        if (gameState.inTrain) {
+          player.pos.set(trainX, 9.6, trainZ);
+          player.vel.set(0, 0, 0);
+          if (camera) {
+            const trainCamBack = new THREE.Vector3(0, 2.5, 8).applyEuler(new THREE.Euler(0, trainRotY, 0));
+            camera.position.set(trainX + trainCamBack.x, 10.5, trainZ + trainCamBack.z);
+            camera.lookAt(trainX, 9.6, trainZ);
+          }
+          cyberAudio.playMaglevTrainSound();
+        }
+      }
+
+      // Spinning ATC Radar Dish Animation
+      if (atcRadarDish) {
+        atcRadarDish.rotation.y += delta * 2.2;
+      }
+
+      if (!gameState.inPlane && !gameState.inTrain) {
         player.vel.y -= gameState.currentGravity * delta;
 
         player.pos.x += player.vel.x * delta;
@@ -15511,7 +16910,7 @@ function buildNeoKyotoCity() {
           player.pos.z = Math.max(-1150, Math.min(1150, player.pos.z));
         }
 
-        // Building Box Collisions & Interior Walkable Lobby / Stair Physics (Spatial Hash Partitioned)
+        // Comprehensive Box Collider Grid & Multi-Story Stair Physics
         if (!gameState.isUnderground && gameState.currentWorld === 'earth') {
           const nearbyColliders = getNearbyCityColliders(player.pos.x, player.pos.z);
           for (let ci = 0; ci < nearbyColliders.length; ci++) {
@@ -15519,46 +16918,101 @@ function buildNeoKyotoCity() {
             const dx = player.pos.x - c.x;
             const dz = player.pos.z - c.z;
 
-            // Is the player within the building perimeter?
-            if (Math.abs(dx) < c.hw + 0.8 && Math.abs(dz) < c.hd + 0.8) {
-              const insideFootprint = Math.abs(dx) < c.hw && Math.abs(dz) < c.hd;
-              const inDoorway = Math.abs(dx) < 2.4 && dz > c.hd - 3.2;
-
-              if (!insideFootprint && !inDoorway) {
-                // Outside building: push back against outer walls
-                if (Math.abs(dx) > Math.abs(dz)) {
-                  player.pos.x = c.x + Math.sign(dx) * (c.hw + 0.85);
+            // 1. ELEVATED PLATFORM COLLIDERS (Railway track, station platform, causeway bridge)
+            if (c.type === 'platform') {
+              if (Math.abs(dx) <= c.hw + 0.25 && Math.abs(dz) <= c.hd + 0.25) {
+                const platTop = c.topY !== undefined ? c.topY : 1.2;
+                if (player.pos.y >= platTop - 0.55) {
+                  floorY = Math.max(floorY, platTop);
                 } else {
-                  player.pos.z = c.z + Math.sign(dz) * (c.hd + 0.85);
+                  // Block side horizontal collision
+                  const penX = (c.hw + 0.6) - Math.abs(dx);
+                  const penZ = (c.hd + 0.6) - Math.abs(dz);
+                  if (penX > 0 && penZ > 0) {
+                    if (penX < penZ) { player.pos.x = c.x + Math.sign(dx) * (c.hw + 0.65); player.vel.x = 0; }
+                    else { player.pos.z = c.z + Math.sign(dz) * (c.hd + 0.65); player.vel.z = 0; }
+                  }
                 }
-              } else if (insideFootprint) {
-                // Inside Lobby: constrain to internal walls
-                if (Math.abs(dx) > c.hw - 0.7) {
-                  player.pos.x = c.x + Math.sign(dx) * (c.hw - 0.7);
-                }
-                if (dz < -(c.hd - 0.7)) {
-                  player.pos.z = c.z - (c.hd - 0.7);
-                }
-                // Front wall: block walking through front glass unless through doorway
-                if (dz > c.hd - 0.7 && Math.abs(dx) >= 2.4) {
-                  player.pos.z = c.z + (c.hd - 0.7);
-                }
+              }
+            }
+            // 2. BUILDING INTERIOR ATRIUM & CONTINUOUS MULTI-STORY STAIRWELL
+            else if (c.type === 'building_interior') {
+              if (Math.abs(dx) < c.hw + 0.8 && Math.abs(dz) < c.hd + 0.8) {
+                const insideFootprint = Math.abs(dx) < c.hw && Math.abs(dz) < c.hd;
+                const inDoorway = Math.abs(dx) < 2.4 && dz > c.hd - 3.2;
 
-                // Smooth Staircase & Mezzanine elevation!
-                if (c.hasStairs) {
-                  const sRelX = dx - c.stairX;
-                  const sRelZ = dz - c.stairStartZ;
-                  // On the staircase steps (ascending in -Z towards mezzanine)
-                  if (Math.abs(sRelX) < 1.6 && sRelZ <= 0.2 && sRelZ >= -(c.stairLen + 0.2)) {
-                    const progress = Math.max(0, Math.min(1, -sRelZ / c.stairLen));
-                    const stairHeight = 1.2 + progress * 2.45;
-                    floorY = Math.max(floorY, stairHeight);
-                  } else if (
-                    // On the upper Mezzanine Balcony Terrace
-                    Math.abs(dx - c.mezX) < c.mezW / 2 + 0.2 &&
-                    Math.abs(dz - c.mezZ) < c.mezD / 2 + 0.2
-                  ) {
-                    floorY = Math.max(floorY, 3.65);
+                if (!insideFootprint && !inDoorway) {
+                  if (Math.abs(dx) > Math.abs(dz)) {
+                    player.pos.x = c.x + Math.sign(dx) * (c.hw + 0.85);
+                  } else {
+                    player.pos.z = c.z + Math.sign(dz) * (c.hd + 0.85);
+                  }
+                } else if (insideFootprint) {
+                  if (Math.abs(dx) > c.hw - 0.7) player.pos.x = c.x + Math.sign(dx) * (c.hw - 0.7);
+                  if (dz < -(c.hd - 0.7)) player.pos.z = c.z - (c.hd - 0.7);
+                  if (dz > c.hd - 0.7 && Math.abs(dx) >= 2.4) player.pos.z = c.z + (c.hd - 0.7);
+
+                  // Continuous Multi-Story Staircase & Multi-Floor Elevation Physics
+                  if (c.hasStairs) {
+                    const sRelX = dx - c.stairX;
+                    const sRelZ = dz - c.stairStartZ;
+
+                    // Flight 1: Ground -> Floor 2 (Mezzanine, Y: 3.65m)
+                    if (Math.abs(sRelX) < 1.6 && sRelZ <= 0.2 && sRelZ >= -(c.stairLen + 0.2)) {
+                      const progress = Math.max(0, Math.min(1, -sRelZ / c.stairLen));
+                      floorY = Math.max(floorY, 1.2 + progress * 2.45);
+                    } 
+                    // Floor 2 Mezzanine Balcony Platform
+                    else if (Math.abs(dx - c.mezX) < c.mezW / 2 + 0.2 && Math.abs(dz - c.mezZ) < c.mezD / 2 + 0.2) {
+                      floorY = Math.max(floorY, 3.65);
+                    }
+                    // Flight 2: Floor 2 -> Floor 3 (Executive Gallery, Y: 7.30m)
+                    else if (Math.abs(dz - (c.mezZ - c.mezD / 2 + 1.2)) < 1.6 && dx <= c.mezX && dx >= c.mezX - c.stairLen) {
+                      const progress = Math.max(0, Math.min(1, (c.mezX - dx) / c.stairLen));
+                      floorY = Math.max(floorY, 3.65 + progress * 3.65);
+                    }
+                    // Floor 3 Executive Gallery Platform
+                    else if (Math.abs(dx) < c.width * 0.36 && Math.abs(dz - (-(c.depth / 3))) < 2.5) {
+                      floorY = Math.max(floorY, 7.30);
+                    }
+                    // Flight 3: Floor 3 -> Floor 4 (Sky Lounge, Y: 10.95m)
+                    else if (Math.abs(dx - (-c.mezX)) < 1.6 && dz <= (-(c.depth / 3) + c.stairLen) && dz >= -(c.depth / 3)) {
+                      const progress = Math.max(0, Math.min(1, (dz - (-(c.depth / 3))) / c.stairLen));
+                      floorY = Math.max(floorY, 7.30 + progress * 3.65);
+                    }
+                    // Floor 4 Sky Lounge Platform
+                    else if (Math.abs(dx - (-c.mezX)) < c.mezW / 2 + 0.2 && Math.abs(dz - c.mezZ) < c.mezD / 2 + 0.2) {
+                      floorY = Math.max(floorY, 10.95);
+                    }
+                    // Flight 4: Floor 4 -> Rooftop Observation Deck (Y: 15.0m)
+                    else if (Math.abs(dz - (c.mezZ + c.mezD / 2 - 1.2)) < 1.6 && dx >= -c.mezX && dx <= -c.mezX + c.stairLen) {
+                      const progress = Math.max(0, Math.min(1, (dx - (-c.mezX)) / c.stairLen));
+                      floorY = Math.max(floorY, 10.95 + progress * 4.05);
+                    }
+                    // Rooftop Observation Deck (Entire top terrace at Y: 15.0m)
+                    else if (player.pos.y >= 14.2 && Math.abs(dx) < c.hw - 0.4 && Math.abs(dz) < c.hd - 0.4) {
+                      floorY = Math.max(floorY, 15.0);
+                    }
+                  }
+                }
+              }
+            }
+            // 3. SOLID AABB BOX OBSTACLE (Pillars, hangars, tanks, bunker walls, kiosks)
+            else {
+              const overlapX = (c.hw + 0.65) - Math.abs(dx);
+              const overlapZ = (c.hd + 0.65) - Math.abs(dz);
+              if (overlapX > 0 && overlapZ > 0) {
+                // Smooth Step-Up Physics (if obstacle is low curb or step <= 0.45m)
+                if (c.topY && player.pos.y >= c.topY - 0.45) {
+                  floorY = Math.max(floorY, c.topY);
+                } else {
+                  // Penetration push-out along shallowest overlap axis (allows sliding)
+                  if (overlapX < overlapZ) {
+                    player.pos.x = c.x + Math.sign(dx) * (c.hw + 0.65);
+                    player.vel.x = 0;
+                  } else {
+                    player.pos.z = c.z + Math.sign(dz) * (c.hd + 0.65);
+                    player.vel.z = 0;
                   }
                 }
               }
@@ -15798,6 +17252,7 @@ function buildNeoKyotoCity() {
             .add(forward.clone().multiplyScalar(60));
           camera.lookAt(lookAtTarget);
         }
+      }
 
       } else if (roverGroup) {
         // Ultra-Realistic Combat Rover Driving Dynamics, Nitro Injection & Physics
@@ -16261,12 +17716,28 @@ function buildNeoKyotoCity() {
         drawBlip(0, 0, '#00ff88', 3.5);
         drawBlip(18, 25, '#00ffaa', 2.5); // Metro Entrance
 
+        // Grand Central Railway Station & Perimeter Rail
+        drawBlip(180, 40, '#ff00ff', 4.0); // Grand Central Station
+        if (maglevTrainMesh) {
+          drawBlip(maglevTrainMesh.position.x, maglevTrainMesh.position.z, '#ff00aa', 3.2); // Maglev Bullet Train
+        }
+
+        // Nexus International Aerodrome & Runway 09/27
+        drawBlip(530, -220, '#00f2ff', 4.5); // Runway 09/27
+        drawBlip(380, -145, '#00f2ff', 3.5); // Airport Terminal & Hangar
+        if (airportPlanes && airportPlanes.length > 0) {
+          airportPlanes.forEach(p => {
+            if (p.mesh) drawBlip(p.mesh.position.x, p.mesh.position.z, '#00ffee', 2.8);
+          });
+        }
+
         // District 2: North Tech Valley & Quantum Hub
         drawBlip(0, 580, '#00f2ff', 4.0);
 
-        // District 3: East Starbase Spaceport Complex
-        drawBlip(120, -100, '#ffaa00', 3.5); // Mechazilla Tower
-        drawBlip(540, -60, '#ffaa00', 4.0);  // High-Bay & Pad 39B
+        // Cape Starbase Offshore Aerospace Reserve (>800m away from residential)
+        drawBlip(650, -550, '#ffaa00', 4.5); // Starship Launch Mount & Mechazilla
+        drawBlip(580, -480, '#ff3366', 3.5); // Mission Control Bunker
+        drawBlip(460, -350, '#ffaa00', 2.5); // Causeway Bridge Gate
 
         // District 4: West Industrial & Nuclear Mega-Complex
         drawBlip(-150, -140, '#ff6600', 3.5); // Nuclear Containment

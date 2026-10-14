@@ -5,8 +5,8 @@
 ```text
 ========================================================================================
  PROJECT           : NEXCHAT - Encrypted Social & Messaging Platform
- TOTAL SOURCE LINES: 147,353 Lines
- TOTAL FILES       : 193 Active Project Files
+ TOTAL SOURCE LINES: 239,731 Lines
+ TOTAL FILES       : 486 Tracked Text Files (51 Binary Files Excluded)
  ARCHITECTURE      : Zero-Jitter Multi-Subsystem (Chat, Reels, Terminal, Status Vault)
  CRYPTOGRAPHY      : Zero-Knowledge End-to-End Encryption & Ephemeral Ghost Protocol
  VERIFICATION      : WCAG AAA Compliant / 60 FPS Frame Budget / Zero Layout Shift
@@ -30,8 +30,8 @@ flowchart TD
     end
 
     subgraph RUNTIME["2. Runtime Engine Tier (Business Logic & Event Bus)"]
-        CORE_CHAT["Chat Messaging Engine<br/>(chat.js - 16.9k Lines)"]
-        CORE_REELS["Reels Feed Engine<br/>(reels.js - 5.0k Lines)"]
+        CORE_CHAT["Chat Messaging Engine<br/>(chat.js - 14.8k Lines)"]
+        CORE_REELS["Reels Feed Engine<br/>(reels.js - 4.5k Lines)"]
         CORE_TERM["Terminal CLI Synchronizer<br/>(Two-Way State Bridge)"]
         CORE_THEME["Cyber Accent Engine<br/>(5 Palette Swatches)"]
         CORE_GHOST["Ghost Protocol Manager<br/>(TTL Ephemeral Shredder)"]
@@ -71,19 +71,14 @@ flowchart TD
 
 ---
 
-## 2. Subsystem Volume Distribution
+## 2. Repository Line Count
 
-The distribution of active source code across the primary domains of the application:
+The total counts lines in the 486 Git-tracked text files. The 51 Git-tracked binary files are excluded.
 
 ```mermaid
 flowchart LR
-    ROOT["NEXCHAT Codebase<br/>147,353 Lines"] --> CHAT["Chat Engine & Messaging<br/>37,721 Lines (25.6%)"]
-    ROOT --> REELS["Reels & Video Experience<br/>19,418 Lines (13.2%)"]
-    ROOT --> STYLES["UI Styles & Cyber Themes<br/>23,619 Lines (16.0%)"]
-    ROOT --> REACT["React & Modular Components<br/>15,457 Lines (10.5%)"]
-    ROOT --> CLOUD["Cloud & Realtime Services<br/>3,769 Lines (2.6%)"]
-    ROOT --> TERM["Hacker Terminal Subsystem<br/>1,353 Lines (0.9%)"]
-    ROOT --> CONFIGS["Configs, Scripts & Docs<br/>46,016 Lines (31.2%)"]
+    ROOT["NEXCHAT Codebase<br/>239,731 Lines"] --> TEXT["Tracked Text Files<br/>486"]
+    ROOT --> BINARY["Tracked Binary Files<br/>51 (excluded from line count)"]
 ```
 
 ---
@@ -115,20 +110,15 @@ sequenceDiagram
 
 ---
 
-## 4. Quantitative Metrics Breakdown Table
+## 4. Quantitative Metrics
 
-The table below breaks down the codebase line count and file footprint by operational category:
+The current repository-wide count is:
 
 | Subsystem Domain | Primary Files | File Count | Total Lines | Percentage | Architectural Role |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Chat Engine & Core Messaging** | `chat.js`, `chat.html`, `initialChats.js` | 6 | 37,721 | 25.6% | Core state management, conversation rendering, Ghost Protocol, group mesh |
-| **UI Stylesheets & Themes** | `chat.css`, `reels.css`, `landing.css` | 12 | 23,619 | 16.0% | Cyber matrix styling, responsive breakpoints, HUD layouts, glassmorphism |
-| **Reels & Video Experience** | `reels.js`, `reels.css`, `CreatorStudio` | 10 | 19,418 | 13.2% | Vertical 9:16 video stage, audio scrubbing, comments tray, reactions |
-| **React / Next.js Components** | `src/components/*`, `src/lib/*` | 60 | 15,457 | 10.5% | Modern component tree, Radix UI primitives, design tokens |
-| **Cloud & Realtime Services** | `firebase.js`, `supabase.js`, API hooks | 17 | 3,769 | 2.6% | WebSocket relay, cloud authentication, remote storage sync |
-| **Hacker Terminal Subsystem** | `terminal.html`, Telemetry Vault HUD | 2 | 1,353 | 0.9% | Standalone 3-panel command OS, 1:1 call screens, status filter editor |
-| **Configs, Scripts & Documentation** | `package.json`, `tailwind.config`, docs | 86 | 46,016 | 31.2% | Toolchain, build manifests, schemas, test suites, architecture notes |
-| **TOTALS** | -- | **193** | **147,353** | **100.0%** | Full repository volume verified |
+| **Tracked text files** | All Git-tracked text files | **486** | **239,731** | **100.0%** | Included in the line count |
+| **Tracked binary files** | All Git-tracked binary files | **51** | -- | -- | Excluded from the line count |
+| **TOTALS** | -- | **537** | **239,731** | **100.0%** | Full Git-tracked repository footprint |
 
 ---
 
@@ -138,13 +128,13 @@ An audit of the highest-volume anchor files governing the core behavior of NEXCH
 
 | File Path | Total Lines | Language / Format | Primary Responsibilities |
 | :--- | :---: | :--- | :--- |
-| `chat.js` | 16,989 | JavaScript (ESM) | Master chat controller, event bus, settings modal suite, ghost protocol, status viewer |
-| `chat.css` | 10,234 | CSS3 | Master application styling, status vault HUD, floating FABs, responsive media queries |
-| `reels.js` | 5,076 | JavaScript (ESM) | Reels feed swiper, video playback controller, creator studio, interactions |
-| `landing.css` | 4,724 | CSS3 | High-performance landing page styling, luxury animations, cyber aesthetics |
-| `reels.css` | 4,543 | CSS3 | Zero-collision 9:16 layout, overlay cards, comments drawer, reactions stack |
-| `chat.html` | 3,314 | HTML5 | Application DOM shell, settings tabs, cyber status vault, modal dialogs |
-| `terminal.html` | 1,273 | HTML5 / JS / Tailwind | Responsive 3-panel hacker terminal, CLI command interpreter, 1:1 call screens |
+| `chat.js` | 14,750 | JavaScript (ESM) | Master chat controller, event bus, settings modal suite, ghost protocol, status viewer |
+| `chat.css` | 9,170 | CSS3 | Master application styling, status vault HUD, floating FABs, responsive media queries |
+| `reels.js` | 4,540 | JavaScript (ESM) | Reels feed swiper, video playback controller, creator studio, interactions |
+| `landing.css` | 4,152 | CSS3 | High-performance landing page styling, luxury animations, cyber aesthetics |
+| `reels.css` | 4,028 | CSS3 | Zero-collision 9:16 layout, overlay cards, comments drawer, reactions stack |
+| `chat.html` | 3,071 | HTML5 | Application DOM shell, settings tabs, cyber status vault, modal dialogs |
+| `terminal.html` | 1,229 | HTML5 / JS / Tailwind | Responsive 3-panel hacker terminal, CLI command interpreter, 1:1 call screens |
 
 ---
 
