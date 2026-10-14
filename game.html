@@ -3675,6 +3675,81 @@
     </div>
     
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-top: 6px;">
+      <!-- EARTH REGIONAL CITIES HEADING -->
+      <div style="grid-column: 1 / -1; margin-top: 4px; padding-bottom: 4px; border-bottom: 1px solid rgba(0,242,255,0.25); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00f2ff; letter-spacing: 1px;">
+          <i class="fa-solid fa-map-location-dot"></i> EARTH REGIONAL METROPOLIS CITIES & DISTRICTS
+        </span>
+        <span style="font-size: 10px; color: #8fa3b8; font-family: monospace;">INSTANT SUPERSONIC HYPERLOOP AVAILABLE</span>
+      </div>
+
+      <!-- City 1: Central Downtown Metropolis -->
+      <div class="planet-card active" onclick="warpToCity('central')" id="pcard-city-central" style="background: rgba(10, 22, 38, 0.9); border: 2px solid #00f2ff; border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00f2ff;"><i class="fa-solid fa-city"></i> CENTRAL METROPOLIS</span>
+          <span style="font-size: 9px; background: rgba(0,242,255,0.2); color: #00f2ff; padding: 2px 5px; border-radius: 4px; font-weight: 700;">NEXUS CORE</span>
+        </div>
+        <p style="font-size: 11px; color: #8fa3b8; line-height: 1.4; margin-bottom: 8px;">
+          Central Stadium, Grand Galleria Mall, Mechazilla Starbase, and 2,400 MWe Nuclear Complex.
+        </p>
+        <div style="font-size: 10px; color: #00ff88; font-weight: 700; display: flex; justify-content: space-between;">
+          <span>SECTOR: [0, 0]</span>
+          <span style="color: #00f2ff;">DEPLOY / TRAVEL &rarr;</span>
+        </div>
+      </div>
+
+      <!-- City 2: Neo-Kyoto Cyber Megacity -->
+      <div class="planet-card" onclick="warpToCity('kyoto')" id="pcard-city-kyoto" style="background: rgba(30, 10, 25, 0.9); border: 1px solid rgba(255, 0, 128, 0.5); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ff007f;"><i class="fa-solid fa-torii-gate"></i> NEO-KYOTO CYBER CITY</span>
+          <span style="font-size: 9px; background: rgba(255,0,128,0.2); color: #ff007f; padding: 2px 5px; border-radius: 4px; font-weight: 700;">EAST HORIZON</span>
+        </div>
+        <p style="font-size: 11px; color: #8fa3b8; line-height: 1.4; margin-bottom: 8px;">
+          5-Tier Imperial Cyber Pagoda, Torii Gate avenue, Sakura blossom park, ramen stalls & Club Nebula rooftop!
+        </p>
+        <div style="font-size: 10px; color: #ff007f; font-weight: 700; display: flex; justify-content: space-between;">
+          <span>SECTOR: [+480, +350]</span>
+          <span>HYPERLOOP &rarr;</span>
+        </div>
+      </div>
+
+      <!-- City 3: Solaria Desert Oasis -->
+      <div class="planet-card" onclick="warpToCity('solaria')" id="pcard-city-solaria" style="background: rgba(36, 24, 8, 0.9); border: 1px solid rgba(255, 170, 0, 0.5); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffaa00;"><i class="fa-solid fa-sun"></i> SOLARIA DESERT OASIS</span>
+          <span style="font-size: 9px; background: rgba(255,170,0,0.2); color: #ffaa00; padding: 2px 5px; border-radius: 4px; font-weight: 700;">SOUTH DUNES</span>
+        </div>
+        <p style="font-size: 11px; color: #8fa3b8; line-height: 1.4; margin-bottom: 8px;">
+          95m Solar Thermal Tower, 20-heliostat mirror array, Rusty Rotor Cantina, biodomes & target shooting carnival!
+        </p>
+        <div style="font-size: 10px; color: #ffaa00; font-weight: 700; display: flex; justify-content: space-between;">
+          <span>SECTOR: [-420, +480]</span>
+          <span>HYPERLOOP &rarr;</span>
+        </div>
+      </div>
+
+      <!-- City 4: Atlantis Marina Port -->
+      <div class="planet-card" onclick="warpToCity('atlantis')" id="pcard-city-atlantis" style="background: rgba(8, 28, 36, 0.9); border: 1px solid rgba(0, 242, 255, 0.5); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <span style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00d9ff;"><i class="fa-solid fa-anchor"></i> ATLANTIS MARINA PORT</span>
+          <span style="font-size: 9px; background: rgba(0,217,255,0.2); color: #00d9ff; padding: 2px 5px; border-radius: 4px; font-weight: 700;">WEST COAST</span>
+        </div>
+        <p style="font-size: 11px; color: #8fa3b8; line-height: 1.4; margin-bottom: 8px;">
+          Ocean canals, 80m Bioluminescent Lighthouse, underwater manta biosphere dome & luxury pier boardwalk!
+        </p>
+        <div style="font-size: 10px; color: #00d9ff; font-weight: 700; display: flex; justify-content: space-between;">
+          <span>SECTOR: [-520, -420]</span>
+          <span>HYPERLOOP &rarr;</span>
+        </div>
+      </div>
+
+      <!-- INTERSTELLAR WORLDS HEADING -->
+      <div style="grid-column: 1 / -1; margin-top: 8px; padding-bottom: 4px; border-bottom: 1px solid rgba(0,242,255,0.25); display: flex; justify-content: space-between; align-items: center;">
+        <span style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00f2ff; letter-spacing: 1px;">
+          <i class="fa-solid fa-shuttle-space"></i> INTERSTELLAR PLANETARY BODIES (ORBITAL WARP)
+        </span>
+      </div>
+
       <!-- Planet 1: Earth Metropolis -->
       <div class="planet-card active" onclick="warpToWorld('earth')" id="pcard-earth" style="background: rgba(10, 22, 38, 0.85); border: 2px solid #00f2ff; border-radius: 12px; padding: 16px; cursor: pointer; transition: all 0.2s;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -3929,6 +4004,143 @@
     </div>
 
     <!-- A.P.E.X.-9 AUTONOMOUS AI FLIGHT TERMINAL -->
+  <!-- ============================================================ -->
+  <!-- RECREATIONAL ACTIVITY MODALS & INTERACTIVE OVERLAYS             -->
+  <!-- ============================================================ -->
+
+  <!-- 1. INTER-CITY HYPERLOOP TRANSIT MODAL -->
+  <div id="modal-hyperloop-transit" class="hud-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 92%; max-width: 680px; background: rgba(5, 12, 22, 0.96); border: 2px solid #00f2ff; border-radius: 16px; box-shadow: 0 0 35px rgba(0, 242, 255, 0.45); z-index: 320; padding: 22px; font-family: 'Rajdhani', sans-serif;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,242,255,0.3); padding-bottom: 12px; margin-bottom: 16px;">
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #00f2ff; display: flex; align-items: center; gap: 10px;">
+        <i class="fa-solid fa-train-subway" style="color: #00ff88;"></i> HYPERLOOP MAGLEV RAPID TRANSIT NETWORK
+      </div>
+      <button type="button" onclick="closeHyperloopModal()" style="background: none; border: none; color: #8fa3b8; font-size: 24px; cursor: pointer;">&times;</button>
+    </div>
+    <p style="font-size: 13px; color: #8fa3b8; margin-bottom: 16px;">
+      Select destination station. Supersonic vacuum magnetic levitation accelerates operatives at Mach 3.2 across continental sectors.
+    </p>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+      <div onclick="warpToCity('central'); closeHyperloopModal();" style="background: rgba(10,24,40,0.85); border: 1.5px solid #00f2ff; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.2s;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00f2ff; margin-bottom: 4px;">
+          <i class="fa-solid fa-city"></i> CENTRAL METROPOLIS TERMINAL
+        </div>
+        <div style="font-size: 11px; color: #8fa3b8;">Nexus Core, Stadium Arena, Mall Galleria, Mechazilla Launchpad</div>
+        <div style="font-size: 10px; color: #00ff88; font-weight: 700; margin-top: 8px;">TRAVEL TIME: 1.2s // BOARD &rarr;</div>
+      </div>
+      <div onclick="warpToCity('kyoto'); closeHyperloopModal();" style="background: rgba(30,12,28,0.85); border: 1.5px solid #ff007f; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.2s;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ff007f; margin-bottom: 4px;">
+          <i class="fa-solid fa-torii-gate"></i> NEO-KYOTO EAST TERMINAL
+        </div>
+        <div style="font-size: 11px; color: #8fa3b8;">Imperial Cyber Pagoda, Torii Avenue, Sakura Gardens, Club Nebula</div>
+        <div style="font-size: 10px; color: #ff007f; font-weight: 700; margin-top: 8px;">TRAVEL TIME: 1.8s // BOARD &rarr;</div>
+      </div>
+      <div onclick="warpToCity('solaria'); closeHyperloopModal();" style="background: rgba(36,22,6,0.85); border: 1.5px solid #ffaa00; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.2s;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffaa00; margin-bottom: 4px;">
+          <i class="fa-solid fa-sun"></i> SOLARIA OASIS SOUTH TERMINAL
+        </div>
+        <div style="font-size: 11px; color: #8fa3b8;">Solar Thermal Tower, Heliostats, Rusty Rotor Cantina, Carnival Range</div>
+        <div style="font-size: 10px; color: #ffaa00; font-weight: 700; margin-top: 8px;">TRAVEL TIME: 1.9s // BOARD &rarr;</div>
+      </div>
+      <div onclick="warpToCity('atlantis'); closeHyperloopModal();" style="background: rgba(6,26,36,0.85); border: 1.5px solid #00d9ff; border-radius: 10px; padding: 14px; cursor: pointer; transition: all 0.2s;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00d9ff; margin-bottom: 4px;">
+          <i class="fa-solid fa-anchor"></i> ATLANTIS MARINA WEST TERMINAL
+        </div>
+        <div style="font-size: 11px; color: #8fa3b8;">Marine Canals, Lighthouse Beacon, Underwater Biosphere, Luxury Pier</div>
+        <div style="font-size: 10px; color: #00d9ff; font-weight: 700; margin-top: 8px;">TRAVEL TIME: 2.1s // BOARD &rarr;</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. PLAYABLE RETRO 2D ARCADE: ASTRO-BLASTER 2099 -->
+  <div id="modal-retro-arcade" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 94%; max-width: 520px; background: #080a10; border: 3px solid #ff007f; border-radius: 18px; box-shadow: 0 0 40px rgba(255, 0, 127, 0.6); z-index: 350; padding: 18px; font-family: 'Orbitron', sans-serif; text-align: center;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(255,0,127,0.3); padding-bottom: 8px;">
+      <span style="font-size: 14px; font-weight: 900; color: #ff007f; letter-spacing: 1px;">
+        <i class="fa-solid fa-gamepad"></i> ASTRO-BLASTER 2099 // ARCADE
+      </span>
+      <button type="button" onclick="closeRetroArcadeModal()" style="background: none; border: none; color: #8fa3b8; font-size: 22px; cursor: pointer;">&times;</button>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-size: 11px; color: #00f2ff; margin-bottom: 8px; font-weight: 700;">
+      <span>SCORE: <span id="arcade-score" style="color: #ffd700;">0</span></span>
+      <span>HIGH: <span id="arcade-high-score" style="color: #00ff88;">0</span></span>
+      <span>SHIELD: <span id="arcade-lives" style="color: #ff0055;">100%</span></span>
+    </div>
+    <canvas id="retro-arcade-canvas" width="480" height="360" style="background: #020408; border: 1.5px solid #00f2ff; border-radius: 8px; display: block; margin: 0 auto; box-shadow: inset 0 0 20px rgba(0,242,255,0.25);"></canvas>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: 11px; color: #8fa3b8;">
+      <span>[A] / [D] / &larr; &rarr; MOVE &bull; [SPACE] FIRE</span>
+      <button type="button" onclick="startNewArcadeGame()" style="background: rgba(255,0,127,0.2); border: 1px solid #ff007f; color: #ff007f; padding: 4px 12px; border-radius: 6px; font-weight: 700; cursor: pointer;">RESTART</button>
+    </div>
+  </div>
+
+  <!-- 3. ROOFTOP CLUB NEBULA DJ MIXER MODAL -->
+  <div id="modal-dj-mixer" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 92%; max-width: 580px; background: rgba(14, 6, 24, 0.97); border: 2px solid #a855f7; border-radius: 16px; box-shadow: 0 0 35px rgba(168, 85, 247, 0.5); z-index: 340; padding: 20px; font-family: 'Orbitron', sans-serif;">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(168,85,247,0.3); padding-bottom: 10px; margin-bottom: 14px;">
+      <span style="font-size: 15px; font-weight: 900; color: #a855f7;">
+        <i class="fa-solid fa-compact-disc fa-spin"></i> CLUB NEBULA // ROOFTOP DJ CONSOLE
+      </span>
+      <button type="button" onclick="closeDJMixerModal()" style="background: none; border: none; color: #8fa3b8; font-size: 22px; cursor: pointer;">&times;</button>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+      <span style="font-size: 12px; color: #8fa3b8;">TEMPO: <span id="dj-bpm-label" style="color: #00f2ff; font-weight: 800;">128 BPM</span></span>
+      <input type="range" id="dj-bpm-slider" min="90" max="160" value="128" oninput="updateDJBpm(this.value)" style="width: 180px; accent-color: #a855f7;">
+      <button type="button" id="dj-master-toggle" onclick="toggleDJMaster()" style="background: #a855f7; border: none; color: #fff; padding: 5px 14px; border-radius: 6px; font-weight: 800; cursor: pointer;">START BEAT</button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;">
+      <button type="button" class="dj-track-btn active" id="dj-trk-kick" onclick="toggleDJTrack('kick')" style="background: rgba(168,85,247,0.25); border: 1.5px solid #a855f7; color: #fff; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">
+        <i class="fa-solid fa-drum"></i> TECHNO KICK
+      </button>
+      <button type="button" class="dj-track-btn active" id="dj-trk-bass" onclick="toggleDJTrack('bass')" style="background: rgba(0,242,255,0.25); border: 1.5px solid #00f2ff; color: #fff; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">
+        <i class="fa-solid fa-wave-square"></i> CYBER BASS
+      </button>
+      <button type="button" class="dj-track-btn active" id="dj-trk-hihat" onclick="toggleDJTrack('hihat')" style="background: rgba(255,215,0,0.25); border: 1.5px solid #ffd700; color: #fff; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">
+        <i class="fa-solid fa-bolt"></i> HI-HATS
+      </button>
+      <button type="button" class="dj-track-btn" id="dj-trk-lead" onclick="toggleDJTrack('lead')" style="background: rgba(255,0,127,0.1); border: 1.5px solid #ff007f; color: #ff007f; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">
+        <i class="fa-solid fa-music"></i> NEON ARP LEAD
+      </button>
+      <button type="button" class="dj-track-btn" id="dj-trk-sweep" onclick="toggleDJTrack('sweep')" style="background: rgba(0,255,136,0.1); border: 1.5px solid #00ff88; color: #00ff88; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">
+        <i class="fa-solid fa-satellite-dish"></i> LASER SWEEP
+      </button>
+      <button type="button" class="dj-track-btn" id="dj-trk-drop" onclick="triggerDJDrop()" style="background: rgba(255,68,0,0.2); border: 1.5px solid #ff4400; color: #ff4400; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 800; cursor: pointer;">
+        <i class="fa-solid fa-bomb"></i> BASS DROP!
+      </button>
+    </div>
+    <div style="font-size: 11px; color: #8fa3b8; text-align: center;">
+      Audio synthesized live with Web Audio Oscillators &bull; NPCs dance in rhythm to current BPM!
+    </div>
+  </div>
+
+  <!-- 4. STADIUM CELEBRATION GOAL BANNER -->
+  <div id="stadium-goal-banner" style="display: none; position: fixed; top: 18%; left: 50%; transform: translateX(-50%); background: rgba(5, 15, 30, 0.94); border: 2.5px solid #00ff88; border-radius: 14px; box-shadow: 0 0 35px rgba(0, 255, 136, 0.6); padding: 16px 36px; z-index: 280; font-family: 'Orbitron', sans-serif; text-align: center; pointer-events: none;">
+    <div style="font-size: 26px; font-weight: 900; color: #00ff88; letter-spacing: 2px;" id="stadium-goal-text">⚽ GOAL! TEAM CYAN SCORES!</div>
+    <div style="font-size: 14px; font-weight: 700; color: #ffd700; margin-top: 6px;" id="stadium-score-text">CYAN: 1 &bull; ORANGE: 0</div>
+  </div>
+
+  <!-- 5. SPEEDWAY TIME-TRIAL RACING HUD -->
+  <div id="speedway-race-hud" style="display: none; position: fixed; top: 82px; left: 50%; transform: translateX(-50%); background: rgba(6, 14, 26, 0.9); border: 1.5px solid #ffd700; border-radius: 12px; padding: 10px 24px; z-index: 240; font-family: 'Orbitron', sans-serif; align-items: center; gap: 24px; box-shadow: 0 0 20px rgba(255, 215, 0, 0.35);">
+    <div>
+      <div style="font-size: 9px; color: #ffd700; font-weight: 800;">METRO SPEEDWAY GP</div>
+      <div style="font-size: 18px; font-weight: 900; color: #fff;" id="race-timer-display">00:00.00</div>
+    </div>
+    <div style="border-left: 1px solid rgba(255,215,0,0.3); padding-left: 18px;">
+      <div style="font-size: 9px; color: #8fa3b8;">GATE PROGRESS</div>
+      <div style="font-size: 16px; font-weight: 800; color: #00f2ff;" id="race-gate-display">0 / 10</div>
+    </div>
+    <button type="button" onclick="abortSpeedwayRace()" style="background: rgba(255,50,50,0.2); border: 1px solid #ff3366; color: #ff3366; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; cursor: pointer;">ABORT</button>
+  </div>
+
+  <!-- 6. AEROGLIDER / WINGSUIT FLIGHT HUD -->
+  <div id="aeroglider-flight-hud" style="display: none; position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%); background: rgba(2, 10, 20, 0.92); border: 1.5px solid #00f2ff; border-radius: 30px; padding: 8px 24px; z-index: 240; font-family: 'Orbitron', sans-serif; align-items: center; gap: 18px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);">
+    <div style="font-size: 13px; font-weight: 800; color: #00f2ff;">
+      <i class="fa-solid fa-feather-pointed"></i> AEROGLIDER ACTIVE [G]
+    </div>
+    <div style="font-size: 11px; color: #8fa3b8;">
+      AIRSPEED: <span id="glider-speed-val" style="color: #00ff88; font-weight: 800;">28 M/S</span>
+    </div>
+    <div style="font-size: 11px; color: #ffd700;">
+      AERIAL RINGS: <span id="glider-rings-val" style="font-weight: 800;">0</span>
+    </div>
+  </div>
+
     <div id="apex-ai-terminal" style="display: none;">
       <div class="apex-ai-header">
         <div class="apex-avatar-box">
@@ -5660,6 +5872,122 @@
         osc.start(now);
         osc.stop(now + 0.7);
       }
+
+      playGoalCheer() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [180, 225, 270].forEach(freq => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 1.8);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 1.8);
+        });
+        const bufferSize = this.ctx.sampleRate * 2.0;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * 0.4;
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, now);
+        const nGain = this.ctx.createGain();
+        nGain.gain.setValueAtTime(0.4 * this.masterVolume, now);
+        nGain.gain.exponentialRampToValueAtTime(0.001, now + 2.0);
+        noise.connect(filter);
+        filter.connect(nGain);
+        nGain.connect(this.ctx.destination);
+        noise.start(now);
+      }
+
+      playArcadeLaser() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(110, now + 0.12);
+        gain.gain.setValueAtTime(0.3 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
+
+      playArcadeExplosion() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.35);
+        gain.gain.setValueAtTime(0.45 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.4);
+      }
+
+      playCheckpointChime() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [587.33, 880.0, 1174.66].forEach((f, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + idx * 0.08);
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.setValueAtTime(0.35 * this.masterVolume, now + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.36);
+        });
+      }
+
+      playTargetHit() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1450, now);
+        osc.frequency.exponentialRampToValueAtTime(450, now + 0.1);
+        gain.gain.setValueAtTime(0.4 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      }
+
+      playHyperloopBoom() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(60, now);
+        osc.frequency.exponentialRampToValueAtTime(240, now + 0.4);
+        osc.frequency.exponentialRampToValueAtTime(40, now + 0.9);
+        gain.gain.setValueAtTime(0.6 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.95);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 1.0);
+      }
     }
 
     const cyberAudio = new CyberAudioEngine();
@@ -5884,6 +6212,37 @@
     let reentryPlasmaMesh, worldParticleSystem, worldParticlePositions, worldParticleVelocities = [];
     let trafficGroup;
     let cityTrafficVehicles = [];
+    let neoKyotoGroup = null;
+    let solariaGroup = null;
+    let atlantisGroup = null;
+    let recreationGroup = null;
+
+    // Recreational Activity Engines State
+    let neoSoccerBall = null;
+    let neoSoccerGoals = [];
+    let stadiumScores = { cyan: 0, orange: 0 };
+    let stadiumGoalCooldown = false;
+
+    let speedwayRaceActive = false;
+    let speedwayStartTime = 0;
+    let speedwayCurrentGate = 0;
+    let speedwayGates = [];
+    let speedwayTimerInterval = null;
+
+    let isGliding = false;
+    let gliderMesh = null;
+    let aerialScoreRings = [];
+    let gliderScore = 0;
+
+    let targetRangeActive = false;
+    let shootingTargets = [];
+    let shootingTargetScore = 0;
+
+    let djMixerActive = false;
+    let djTracks = { kick: true, bass: true, hihat: true, lead: false, sweep: false };
+    let djBpm = 128;
+    let djInterval = null;
+    let djStep = 0;
     let aviationBeacons = [];
     let cityElevators = [];
     let citySpinners = [];
@@ -9699,6 +10058,12 @@
         buildCityLivelinessElements();
         initFootstepDustPool();
 
+        // Build 3 Distinct New Regional Cities & Fun Recreational Activities
+        buildNeoKyotoCity();
+        buildSolariaCity();
+        buildAtlantisCity();
+        buildRecreationalActivities();
+
         // Initialize Autonomous Metropolis Cyber Traffic System
         initCityTraffic();
         initCityCitizens();
@@ -10161,6 +10526,1077 @@
 
         storeGroup.add(cab);
       });
+    }
+
+    // ============================================================
+    // REGIONAL CITIES & EXPANDED RECREATIONAL ACTIVITIES ENGINE
+    // ============================================================
+
+    // ------------------------------------------------------------
+    // 1. NEO-KYOTO CYBER MEGACITY (EAST HORIZON at X: 480, Z: 350)
+    // ------------------------------------------------------------
+    function buildNeoKyotoCity() {
+      neoKyotoGroup = new THREE.Group();
+      scene.add(neoKyotoGroup);
+
+      const kMatTrim = new THREE.MeshStandardMaterial({ color: 0x140e1c, roughness: 0.35, metalness: 0.85 });
+      const kMatVermilion = new THREE.MeshStandardMaterial({ color: 0xd92b2b, roughness: 0.3, metalness: 0.5 });
+      const kMatGold = new THREE.MeshStandardMaterial({ color: 0xffd700, roughness: 0.2, metalness: 0.95 });
+      const kMatCyan = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const kMatPink = new THREE.MeshBasicMaterial({ color: 0xff007f });
+      const kMatLantern = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+      const kMatGlass = new THREE.MeshStandardMaterial({ color: 0x1a0f26, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.85 });
+
+      const cx = 480;
+      const cz = 350;
+
+      // City Foundation Plaza (160m x 160m dark granite podium)
+      const plaza = new THREE.Mesh(new THREE.BoxGeometry(160, 0.4, 160), kMatTrim);
+      plaza.position.set(cx, 0.2, cz);
+      plaza.receiveShadow = true;
+      neoKyotoGroup.add(plaza);
+
+      // (A) 5-Tier Imperial Cyber Pagoda Tower (Height: 110m)
+      const pagodaGroup = new THREE.Group();
+      pagodaGroup.position.set(cx, 0, cz);
+
+      const tierSizes = [
+        { w: 26, h: 18, roofW: 32 },
+        { w: 22, h: 16, roofW: 27 },
+        { w: 18, h: 14, roofW: 22 },
+        { w: 14, h: 12, roofW: 17 },
+        { w: 10, h: 10, roofW: 13 }
+      ];
+
+      let curY = 0;
+      tierSizes.forEach((tier, idx) => {
+        // Chamber Body
+        const chamber = new THREE.Mesh(new THREE.BoxGeometry(tier.w, tier.h, tier.w), kMatVermilion);
+        chamber.position.y = curY + tier.h / 2;
+        pagodaGroup.add(chamber);
+
+        // Holographic Windows
+        [-tier.w / 2 - 0.1, tier.w / 2 + 0.1].forEach(wx => {
+          const win = new THREE.Mesh(new THREE.PlaneGeometry(tier.w * 0.7, tier.h * 0.6), idx % 2 === 0 ? kMatCyan : kMatPink);
+          win.position.set(wx, curY + tier.h / 2, 0);
+          win.rotation.y = Math.PI / 2;
+          pagodaGroup.add(win);
+        });
+
+        // Curved Eave Roof
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(tier.roofW * 0.72, 3.2, 4), kMatTrim);
+        roof.rotation.y = Math.PI / 4;
+        roof.position.y = curY + tier.h + 1.2;
+        pagodaGroup.add(roof);
+
+        // Neon Eave Outline
+        const eaveRing = new THREE.Mesh(new THREE.RingGeometry(tier.roofW * 0.45, tier.roofW * 0.52, 4), kMatCyan);
+        eaveRing.rotation.x = -Math.PI / 2;
+        eaveRing.rotation.z = Math.PI / 4;
+        eaveRing.position.y = curY + tier.h + 0.2;
+        pagodaGroup.add(eaveRing);
+
+        curY += tier.h + 1.8;
+      });
+
+      // Spire Pinnacle Finial (Y: 95m to 110m)
+      const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 1.2, 18, 8), kMatGold);
+      spire.position.y = curY + 9;
+      pagodaGroup.add(spire);
+
+      const beacon = new THREE.Mesh(new THREE.SphereGeometry(1.2, 12, 12), kMatPink);
+      beacon.position.y = curY + 18;
+      pagodaGroup.add(beacon);
+
+      neoKyotoGroup.add(pagodaGroup);
+
+      // (B) Grand Cyber Torii Gate (Avenue Entry at X: 480, Z: 280)
+      const toriiGroup = new THREE.Group();
+      toriiGroup.position.set(cx, 0, cz - 70);
+
+      // Twin Main Pillars (22m tall)
+      [-10, 10].forEach(px => {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.5, 24, 16), kMatVermilion);
+        pillar.position.set(px, 12, 0);
+        toriiGroup.add(pillar);
+
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(2.0, 2.2, 1.8, 16), kMatTrim);
+        base.position.set(px, 0.9, 0);
+        toriiGroup.add(base);
+      });
+
+      // Upper Crossbeam (Kasagi & Shimaki)
+      const kasagi = new THREE.Mesh(new THREE.BoxGeometry(28, 1.8, 2.6), kMatTrim);
+      kasagi.position.set(0, 24.2, 0);
+      toriiGroup.add(kasagi);
+
+      const kasagiGlow = new THREE.Mesh(new THREE.BoxGeometry(27.4, 0.2, 2.8), kMatPink);
+      kasagiGlow.position.set(0, 24.2, 0);
+      toriiGroup.add(kasagiGlow);
+
+      const nuki = new THREE.Mesh(new THREE.BoxGeometry(23, 1.2, 1.6), kMatVermilion);
+      nuki.position.set(0, 20.5, 0);
+      toriiGroup.add(nuki);
+
+      // Holographic Central Plaque (Gaku)
+      const plaque = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 5.0), kMatCyan);
+      plaque.position.set(0, 22.3, 1.4);
+      toriiGroup.add(plaque);
+
+      neoKyotoGroup.add(toriiGroup);
+
+      // (C) Sakura Blossom Cyber Gardens (Cherry Blossom Park)
+      const sakuraPositions = [
+        [-38, -35], [-24, -45], [-45, -20], [-35, -55],
+        [38, -35], [24, -45], [45, -20], [35, -55],
+        [-40, 30], [-25, 45], [40, 30], [25, 45]
+      ];
+
+      sakuraPositions.forEach(([sx, sz], i) => {
+        const tree = new THREE.Group();
+        tree.position.set(cx + sx, 0, cz + sz);
+
+        // Trunk
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.8, 5.5, 8), kMatTrim);
+        trunk.position.y = 2.75;
+        tree.add(trunk);
+
+        // Luminous Pink Foliage Cloud
+        const foliageMat = new THREE.MeshBasicMaterial({ color: 0xff3399, transparent: true, opacity: 0.85 });
+        const crown1 = new THREE.Mesh(new THREE.SphereGeometry(3.2, 8, 8), foliageMat);
+        crown1.position.set(0, 6.2, 0);
+        tree.add(crown1);
+
+        const crown2 = new THREE.Mesh(new THREE.SphereGeometry(2.4, 8, 8), foliageMat);
+        crown2.position.set(1.4, 7.2, 0.8);
+        tree.add(crown2);
+
+        // Stone Garden Lantern
+        const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 1.4, 6), kMatTrim);
+        lantern.position.set(2.2, 0.7, 1.5);
+        tree.add(lantern);
+
+        const lGlow = new THREE.Mesh(new THREE.SphereGeometry(0.25, 6, 6), kMatLantern);
+        lGlow.position.set(2.2, 1.5, 1.5);
+        tree.add(lGlow);
+
+        neoKyotoGroup.add(tree);
+      });
+
+      // (D) Neo-Kyoto Street Food Market Stalls (Ramen, Sushi, Boba)
+      const marketStalls = [
+        { name: 'RAMEN ラーメン', x: cx - 18, z: cz + 25, color: 0xff0055 },
+        { name: 'SUSHI BAR 寿司', x: cx - 18, z: cz + 40, color: 0x00f2ff },
+        { name: 'CYBER TEA お茶', x: cx + 18, z: cz + 25, color: 0x00ff88 },
+        { name: 'BOBA LOUNGE', x: cx + 18, z: cz + 40, color: 0xffaa00 }
+      ];
+
+      marketStalls.forEach(stall => {
+        const sGroup = new THREE.Group();
+        sGroup.position.set(stall.x, 0, stall.z);
+
+        // Counter
+        const counter = new THREE.Mesh(new THREE.BoxGeometry(6.5, 1.1, 3.5), kMatTrim);
+        counter.position.y = 0.55;
+        sGroup.add(counter);
+
+        // Awning Roof
+        const canopy = new THREE.Mesh(new THREE.BoxGeometry(7.0, 0.3, 4.2), kMatVermilion);
+        canopy.position.set(0, 3.2, 0);
+        sGroup.add(canopy);
+
+        // Glowing Signboard
+        const signMat = new THREE.MeshBasicMaterial({ color: stall.color });
+        const sign = new THREE.Mesh(new THREE.BoxGeometry(5.8, 0.8, 0.2), signMat);
+        sign.position.set(0, 2.8, 2.0);
+        sGroup.add(sign);
+
+        // Stools
+        [-2.0, 0, 2.0].forEach(bx => {
+          const stool = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.75, 8), kMatTrim);
+          stool.position.set(bx, 0.38, 2.2);
+          sGroup.add(stool);
+        });
+
+        neoKyotoGroup.add(sGroup);
+      });
+
+      // (E) Rooftop Club Nebula & DJ Lounge Terrace (Penthouse at X: 470, Y: 42, Z: 340)
+      const clubTower = new THREE.Mesh(new THREE.BoxGeometry(28, 42, 28), kMatGlass);
+      clubTower.position.set(cx - 50, 21, cz + 20);
+      neoKyotoGroup.add(clubTower);
+
+      // Dance Floor Roof
+      const danceFloor = new THREE.Mesh(new THREE.BoxGeometry(26, 0.4, 26), new THREE.MeshBasicMaterial({ color: 0xa855f7 }));
+      danceFloor.position.set(cx - 50, 42.2, cz + 20);
+      danceFloor.name = 'clubNebulaDanceFloor';
+      neoKyotoGroup.add(danceFloor);
+
+      // DJ Console Table
+      const djTable = new THREE.Mesh(new THREE.BoxGeometry(5, 1.2, 2.2), kMatTrim);
+      djTable.position.set(cx - 50, 43.0, cz + 30);
+      neoKyotoGroup.add(djTable);
+
+      const djHolo = new THREE.Mesh(new THREE.PlaneGeometry(3.5, 1.2), kMatCyan);
+      djHolo.position.set(cx - 50, 44.0, cz + 29.8);
+      neoKyotoGroup.add(djHolo);
+
+      // (F) Neo-Kyoto Hyperloop Station Terminal (X: 430, Z: 300)
+      buildHyperloopStationMesh(neoKyotoGroup, cx - 50, cz - 50, 'NEO-KYOTO EAST TRANSIT', 0xff007f);
+    }
+
+    // ------------------------------------------------------------
+    // 2. SOLARIA DESERT OASIS & SOLAR MEGA-CITY (SOUTH at X: -420, Z: 480)
+    // ------------------------------------------------------------
+    function buildSolariaCity() {
+      solariaGroup = new THREE.Group();
+      scene.add(solariaGroup);
+
+      const sMatSand = new THREE.MeshStandardMaterial({ color: 0x8a6332, roughness: 0.9, metalness: 0.1 });
+      const sMatMetal = new THREE.MeshStandardMaterial({ color: 0x4a453e, roughness: 0.4, metalness: 0.8 });
+      const sMatSolar = new THREE.MeshStandardMaterial({ color: 0x112233, roughness: 0.15, metalness: 0.92 });
+      const sMatGlow = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+      const sMatAmber = new THREE.MeshBasicMaterial({ color: 0xff7700 });
+      const sMatGlass = new THREE.MeshStandardMaterial({ color: 0x55aa99, transparent: true, opacity: 0.6, roughness: 0.1 });
+
+      const cx = -420;
+      const cz = 480;
+
+      // Desert Dune Base Plaza
+      const desertPlaza = new THREE.Mesh(new THREE.BoxGeometry(180, 0.4, 180), sMatSand);
+      desertPlaza.position.set(cx, 0.2, cz);
+      desertPlaza.receiveShadow = true;
+      solariaGroup.add(desertPlaza);
+
+      // (A) 95m Concentrating Solar Molten-Salt Thermal Tower
+      const towerGroup = new THREE.Group();
+      towerGroup.position.set(cx, 0, cz);
+
+      // Tower Column
+      const tower = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 6.5, 95, 16), sMatMetal);
+      tower.position.y = 47.5;
+      towerGroup.add(tower);
+
+      // Molten Salt Solar Receiver Core (Glows intense sun-gold)
+      const receiver = new THREE.Mesh(new THREE.CylinderGeometry(5.2, 5.2, 10, 16), sMatGlow);
+      receiver.position.y = 90;
+      towerGroup.add(receiver);
+
+      const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.8, 14, 8), sMatMetal);
+      spire.position.y = 100;
+      towerGroup.add(spire);
+
+      solariaGroup.add(towerGroup);
+
+      // (B) Heliostat Solar Mirror Field (20 Parabolic Dual-Axis Mirrors)
+      for (let ring = 1; ring <= 2; ring++) {
+        const radius = 35 + ring * 22;
+        const count = 10;
+        for (let i = 0; i < count; i++) {
+          const angle = (i / count) * Math.PI * 2;
+          const mx = cx + Math.cos(angle) * radius;
+          const mz = cz + Math.sin(angle) * radius;
+
+          const hGroup = new THREE.Group();
+          hGroup.position.set(mx, 0, mz);
+
+          // Pylon
+          const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 3.5, 8), sMatMetal);
+          pylon.position.y = 1.75;
+          hGroup.add(pylon);
+
+          // Tilted Mirror Panel (Facing central tower)
+          const mirror = new THREE.Mesh(new THREE.BoxGeometry(4.5, 3.2, 0.2), sMatSolar);
+          mirror.position.y = 3.6;
+          mirror.lookAt(cx, 85, cz);
+          hGroup.add(mirror);
+
+          solariaGroup.add(hGroup);
+        }
+      }
+
+      // (C) The Rusty Rotor Cantina (Desert Saloon with 10m Ceiling Fan)
+      const cantinaGroup = new THREE.Group();
+      cantinaGroup.position.set(cx + 60, 0, cz - 30);
+
+      const saloon = new THREE.Mesh(new THREE.BoxGeometry(22, 6.5, 18), sMatMetal);
+      saloon.position.y = 3.25;
+      cantinaGroup.add(saloon);
+
+      // Shaded Front Veranda
+      const porch = new THREE.Mesh(new THREE.BoxGeometry(22, 0.4, 6), sMatSand);
+      porch.position.set(0, 0.2, 12);
+      cantinaGroup.add(porch);
+
+      // Glowing Cantina Neon Sign
+      const cSign = new THREE.Mesh(new THREE.BoxGeometry(14, 1.6, 0.2), sMatAmber);
+      cSign.position.set(0, 6.0, 9.1);
+      cantinaGroup.add(cSign);
+
+      // 10m Overhead Rotating Ceiling Fan
+      const fanGroup = new THREE.Group();
+      fanGroup.position.set(0, 6.8, 12);
+      fanGroup.name = 'cantinaFanGroup';
+
+      const fanHub = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.4, 12), sMatMetal);
+      fanGroup.add(fanHub);
+
+      for (let b = 0; b < 4; b++) {
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.08, 4.2), sMatMetal);
+        blade.rotation.y = (b * Math.PI) / 2;
+        blade.position.set(Math.sin(b * Math.PI / 2) * 2.2, 0, Math.cos(b * Math.PI / 2) * 2.2);
+        fanGroup.add(blade);
+      }
+      cantinaGroup.add(fanGroup);
+
+      solariaGroup.add(cantinaGroup);
+
+      // (D) Pressurized Geodesic Bio-Dome
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(18, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), sMatGlass);
+      dome.position.set(cx - 55, 0, cz + 40);
+      solariaGroup.add(dome);
+
+      // (E) Target Shooting Carnival Range (X: -360, Z: 490)
+      buildTargetShootingRange(solariaGroup, cx + 60, cz + 40);
+
+      // (F) Solaria Hyperloop Station Terminal (X: -380, Z: 440)
+      buildHyperloopStationMesh(solariaGroup, cx + 40, cz - 50, 'SOLARIA OASIS TRANSIT', 0xffaa00);
+    }
+
+    // ------------------------------------------------------------
+    // 3. ATLANTIS MARINA & OCEAN TRENCH PORT (WEST at X: -520, Z: -420)
+    // ------------------------------------------------------------
+    function buildAtlantisCity() {
+      atlantisGroup = new THREE.Group();
+      scene.add(atlantisGroup);
+
+      const aMatWater = new THREE.MeshStandardMaterial({
+        color: 0x004466,
+        roughness: 0.1,
+        metalness: 0.85,
+        transparent: true,
+        opacity: 0.88
+      });
+      const aMatWood = new THREE.MeshStandardMaterial({ color: 0x221a14, roughness: 0.7, metalness: 0.2 });
+      const aMatPier = new THREE.MeshStandardMaterial({ color: 0x141f28, roughness: 0.4, metalness: 0.8 });
+      const aMatCyan = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const aMatMarine = new THREE.MeshBasicMaterial({ color: 0x00d9ff });
+      const aMatGlass = new THREE.MeshStandardMaterial({ color: 0x00bbdd, transparent: true, opacity: 0.5, roughness: 0.1 });
+
+      const cx = -520;
+      const cz = -420;
+
+      // (A) Expansive Shimmering Ocean Water Basin (220m x 220m)
+      const ocean = new THREE.Mesh(new THREE.BoxGeometry(220, 0.3, 220), aMatWater);
+      ocean.position.set(cx, -0.15, cz);
+      ocean.name = 'atlantisOceanMesh';
+      atlantisGroup.add(ocean);
+
+      // (B) 80m Bioluminescent Navigation Lighthouse Spire
+      const lhGroup = new THREE.Group();
+      lhGroup.position.set(cx + 60, 0, cz - 60);
+
+      const lhTower = new THREE.Mesh(new THREE.CylinderGeometry(3.0, 5.5, 78, 16), aMatPier);
+      lhTower.position.y = 39;
+      lhGroup.add(lhTower);
+
+      // Lantern Room
+      const lhRoom = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.2, 6, 12), aMatGlass);
+      lhRoom.position.y = 80;
+      lhGroup.add(lhRoom);
+
+      // 360-Degree Rotating Marine Searchlight Beam
+      const beamGroup = new THREE.Group();
+      beamGroup.position.y = 80;
+      beamGroup.name = 'lighthouseBeamGroup';
+
+      const searchlight = new THREE.Mesh(new THREE.ConeGeometry(8, 120, 8), new THREE.MeshBasicMaterial({
+        color: 0x00f2ff,
+        transparent: true,
+        opacity: 0.32
+      }));
+      searchlight.rotation.x = Math.PI / 2;
+      searchlight.position.set(0, 0, 60);
+      beamGroup.add(searchlight);
+
+      lhGroup.add(beamGroup);
+      atlantisGroup.add(lhGroup);
+
+      // (C) Boardwalk Promenade Pier (140m Long Pier extending into basin)
+      const pier = new THREE.Mesh(new THREE.BoxGeometry(14, 0.8, 130), aMatWood);
+      pier.position.set(cx, 0.4, cz);
+      pier.receiveShadow = true;
+      atlantisGroup.add(pier);
+
+      // Moored Luxury Cyber Hover-Yachts
+      [-14, 14].forEach((yx, idx) => {
+        const yacht = new THREE.Group();
+        yacht.position.set(cx + yx, 0.4, cz + (idx === 0 ? -25 : 25));
+
+        const hull = new THREE.Mesh(new THREE.BoxGeometry(6.5, 2.2, 18), aMatPier);
+        hull.position.y = 1.1;
+        yacht.add(hull);
+
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(5.0, 1.8, 10), aMatGlass);
+        cabin.position.set(0, 2.8, -1.0);
+        yacht.add(cabin);
+
+        const neonTrim = new THREE.Mesh(new THREE.BoxGeometry(6.6, 0.1, 18.2), aMatMarine);
+        neonTrim.position.y = 1.8;
+        yacht.add(neonTrim);
+
+        atlantisGroup.add(yacht);
+      });
+
+      // (D) Semi-Submerged Underwater Biosphere Marine Dome
+      const subDome = new THREE.Mesh(new THREE.SphereGeometry(22, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2), aMatGlass);
+      subDome.position.set(cx - 50, 0, cz + 40);
+      atlantisGroup.add(subDome);
+
+      // Floating Holographic Manta Ray inside dome
+      const manta = new THREE.Group();
+      manta.position.set(cx - 50, 4.5, cz + 40);
+      manta.name = 'atlantisHoloManta';
+
+      const mBody = new THREE.Mesh(new THREE.ConeGeometry(2.5, 6, 4), aMatCyan);
+      mBody.rotation.x = Math.PI / 2;
+      manta.add(mBody);
+
+      atlantisGroup.add(manta);
+
+      // (E) Atlantis Hyperloop Station Terminal (X: -470, Z: -370)
+      buildHyperloopStationMesh(atlantisGroup, cx + 50, cz + 50, 'ATLANTIS MARINA TRANSIT', 0x00d9ff);
+    }
+
+    // Helper: Build Hyperloop Station Mesh
+    function buildHyperloopStationMesh(parent, hx, hz, stationTitle, themeColor) {
+      const hGroup = new THREE.Group();
+      hGroup.position.set(hx, 0, hz);
+
+      const sMatMetal = new THREE.MeshStandardMaterial({ color: 0x0f1622, roughness: 0.35, metalness: 0.9 });
+      const sMatGlow = new THREE.MeshBasicMaterial({ color: themeColor });
+
+      // Station Platform
+      const platform = new THREE.Mesh(new THREE.BoxGeometry(16, 0.6, 12), sMatMetal);
+      platform.position.y = 0.3;
+      hGroup.add(platform);
+
+      // Hyperloop Vacuum Tube Section
+      const tube = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 28, 16), sMatMetal);
+      tube.rotation.z = Math.PI / 2;
+      tube.position.set(0, 2.8, -4.5);
+      hGroup.add(tube);
+
+      const tubeRing = new THREE.Mesh(new THREE.TorusGeometry(2.45, 0.15, 8, 24), sMatGlow);
+      tubeRing.position.set(0, 2.8, -4.5);
+      hGroup.add(tubeRing);
+
+      // Station Gate Canopy
+      const canopy = new THREE.Mesh(new THREE.BoxGeometry(14, 0.3, 8), sMatMetal);
+      canopy.position.set(0, 4.8, 1.0);
+      hGroup.add(canopy);
+
+      // Interactive Station Signboard
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(12, 1.2, 0.3), sMatGlow);
+      sign.position.set(0, 4.2, 4.8);
+      hGroup.add(sign);
+
+      parent.add(hGroup);
+    }
+
+    // ------------------------------------------------------------
+    // 4. FUN RECREATIONAL ACTIVITIES ENGINE
+    // ------------------------------------------------------------
+    function buildRecreationalActivities() {
+      recreationGroup = new THREE.Group();
+      scene.add(recreationGroup);
+
+      // (A) CENTRAL STADIUM KINETIC NEO-SOCCER BALL & HOLOGRAPHIC GOALS
+      const ballMat = new THREE.MeshStandardMaterial({
+        color: 0x00f2ff,
+        emissive: 0x00ffff,
+        emissiveIntensity: 0.6,
+        roughness: 0.15,
+        metalness: 0.8
+      });
+      neoSoccerBall = new THREE.Mesh(new THREE.SphereGeometry(1.35, 16, 16), ballMat);
+      neoSoccerBall.position.set(0, 1.35, 0);
+      neoSoccerBall.castShadow = true;
+      neoSoccerBall.userData = {
+        vel: new THREE.Vector3(0, 0, 0),
+        radius: 1.35,
+        respawnTimer: 0
+      };
+      recreationGroup.add(neoSoccerBall);
+
+      // 2 Holographic Goal Nets (Cyan North at Z: -52, Orange South at Z: 52)
+      const goalCyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true });
+      const goalOrangeMat = new THREE.MeshBasicMaterial({ color: 0xff6600, wireframe: true });
+
+      const goalNorth = new THREE.Mesh(new THREE.BoxGeometry(16, 6, 4), goalCyanMat);
+      goalNorth.position.set(0, 3, -52);
+      goalNorth.userData = { team: 'cyan', z: -52 };
+      recreationGroup.add(goalNorth);
+      neoSoccerGoals.push(goalNorth);
+
+      const goalSouth = new THREE.Mesh(new THREE.BoxGeometry(16, 6, 4), goalOrangeMat);
+      goalSouth.position.set(0, 3, 52);
+      goalSouth.userData = { team: 'orange', z: 52 };
+      recreationGroup.add(goalSouth);
+      neoSoccerGoals.push(goalSouth);
+
+      // (B) SPEEDWAY TIME-TRIAL RACING GATES (10 Checkpoints along expressways)
+      speedwayGates = [
+        new THREE.Vector3(0, 3.5, -120),
+        new THREE.Vector3(0, 3.5, -350),
+        new THREE.Vector3(150, 3.5, -450),
+        new THREE.Vector3(350, 3.5, -200),
+        new THREE.Vector3(450, 3.5, 100),
+        new THREE.Vector3(250, 3.5, 350),
+        new THREE.Vector3(0, 3.5, 450),
+        new THREE.Vector3(-250, 3.5, 300),
+        new THREE.Vector3(-350, 3.5, -100),
+        new THREE.Vector3(-50, 3.5, -50)
+      ];
+
+      const gateGeo = new THREE.TorusGeometry(4.5, 0.25, 8, 24);
+      const gateMat = new THREE.MeshBasicMaterial({ color: 0xffd700, transparent: true, opacity: 0.65 });
+
+      speedwayGates.forEach((gPos, idx) => {
+        const ring = new THREE.Mesh(gateGeo, gateMat.clone());
+        ring.position.copy(gPos);
+        ring.name = `speedwayGate_${idx}`;
+        ring.visible = false;
+        recreationGroup.add(ring);
+      });
+
+      // (C) AEROGLIDER AERIAL SCORE RINGS (Skyline High-Altitude Gliding)
+      aerialScoreRings = [
+        new THREE.Vector3(0, 65, 80),
+        new THREE.Vector3(60, 85, -60),
+        new THREE.Vector3(-60, 95, -60),
+        new THREE.Vector3(120, 110, -100),
+        new THREE.Vector3(250, 90, 150),
+        new THREE.Vector3(380, 120, 280),
+        new THREE.Vector3(-250, 80, 250),
+        new THREE.Vector3(-380, 100, -200)
+      ];
+
+      const aRingGeo = new THREE.TorusGeometry(6.0, 0.35, 8, 24);
+      const aRingMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.8 });
+
+      aerialScoreRings.forEach((pos, i) => {
+        const aRing = new THREE.Mesh(aRingGeo, aRingMat.clone());
+        aRing.position.copy(pos);
+        aRing.rotation.x = Math.PI / 2;
+        recreationGroup.add(aRing);
+      });
+    }
+
+    // Helper: Target Shooting Carnival Range
+    function buildTargetShootingRange(parent, rx, rz) {
+      const rangeGroup = new THREE.Group();
+      rangeGroup.position.set(rx, 0, rz);
+
+      const rMatWood = new THREE.MeshStandardMaterial({ color: 0x221810, roughness: 0.8 });
+      const rMatTarget = new THREE.MeshBasicMaterial({ color: 0xff0055 });
+
+      // Booth Stall
+      const booth = new THREE.Mesh(new THREE.BoxGeometry(16, 4.2, 5), rMatWood);
+      booth.position.y = 2.1;
+      rangeGroup.add(booth);
+
+      // Signboard
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(14, 1.2, 0.2), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+      sign.position.set(0, 4.8, 2.5);
+      rangeGroup.add(sign);
+
+      // 6 Popup Target Dummies
+      shootingTargets = [];
+      [-6, -3.6, -1.2, 1.2, 3.6, 6].forEach((tx, idx) => {
+        const tMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.15, 16), rMatTarget);
+        tMesh.rotation.x = Math.PI / 2;
+        tMesh.position.set(tx, 2.8, -12 - (idx % 2) * 5);
+        tMesh.userData = { isUp: true, hitTime: 0, originY: 2.8 };
+        rangeGroup.add(tMesh);
+        shootingTargets.push(tMesh);
+      });
+
+      parent.add(rangeGroup);
+    }
+
+    // ------------------------------------------------------------
+    // 5. UPDATE RECREATIONAL ACTIVITIES IN GAMELOOP
+    // ------------------------------------------------------------
+    function updateRecreationalActivities(delta, now) {
+      if (gameState.currentWorld !== 'earth') return;
+
+      // (A) KINETIC NEO-SOCCER BALL SIMULATION
+      if (neoSoccerBall && player && player.pos) {
+        const ball = neoSoccerBall;
+        const bVel = ball.userData.vel;
+
+        // Player Kick Physics (Impart momentum)
+        const distToPlayer = ball.position.distanceTo(player.pos);
+        if (distToPlayer < 2.5) {
+          const kickDir = new THREE.Vector3().subVectors(ball.position, player.pos).normalize();
+          kickDir.y = 0.2; // slight loft
+          const playerSpeed = player.vel ? player.vel.length() : 4.0;
+          const kickForce = 8.0 + playerSpeed * 2.2;
+          bVel.addScaledVector(kickDir, kickForce);
+          cyberAudio.playTargetHit();
+        }
+
+        // Apply velocity & friction
+        ball.position.addScaledVector(bVel, delta);
+        bVel.multiplyScalar(0.982); // turf rolling resistance
+
+        // Keep on stadium ground
+        ball.position.y = 1.35;
+
+        // Stadium Boundary Wall Bounces (-56m to +56m)
+        if (Math.abs(ball.position.x) > 52) {
+          bVel.x *= -0.75;
+          ball.position.x = Math.sign(ball.position.x) * 52;
+        }
+
+        // Check Goals
+        if (!stadiumGoalCooldown) {
+          neoSoccerGoals.forEach(g => {
+            if (ball.position.distanceTo(g.position) < 5.0) {
+              stadiumGoalCooldown = true;
+              const scoringTeam = g.userData.team === 'cyan' ? 'orange' : 'cyan';
+              stadiumScores[scoringTeam]++;
+
+              cyberAudio.playGoalCheer();
+              const banner = document.getElementById('stadium-goal-banner');
+              const gText = document.getElementById('stadium-goal-text');
+              const sText = document.getElementById('stadium-score-text');
+
+              if (banner && gText && sText) {
+                banner.style.display = 'block';
+                gText.textContent = `⚽ GOAL! TEAM ${scoringTeam.toUpperCase()} SCORES!`;
+                sText.textContent = `CYAN: ${stadiumScores.cyan} • ORANGE: ${stadiumScores.orange}`;
+                setTimeout(() => { banner.style.display = 'none'; }, 4000);
+              }
+
+              // Reset ball to center circle after 2.5s
+              setTimeout(() => {
+                ball.position.set(0, 1.35, 0);
+                bVel.set(0, 0, 0);
+                stadiumGoalCooldown = false;
+              }, 2500);
+            }
+          });
+        }
+      }
+
+      // (B) LIGHTHOUSE BEAM & CANTINA FAN ROTATION
+      const beam = scene.getObjectByName('lighthouseBeamGroup');
+      if (beam) beam.rotation.y = now * 0.0018;
+
+      const fan = scene.getObjectByName('cantinaFanGroup');
+      if (fan) fan.rotation.y = now * 0.005;
+
+      const danceFloor = scene.getObjectByName('clubNebulaDanceFloor');
+      if (danceFloor) {
+        const hue = (now * 0.0004) % 1;
+        danceFloor.material.color.setHSL(hue, 0.9, 0.5);
+      }
+
+      // (C) SPEEDWAY TIME-TRIAL RACING TIMER & GATE DETECTION
+      if (speedwayRaceActive && player && player.pos) {
+        const elapsed = (now - speedwayStartTime) / 1000;
+        const mins = Math.floor(elapsed / 60);
+        const secs = (elapsed % 60).toFixed(2);
+        const timerEl = document.getElementById('race-timer-display');
+        if (timerEl) timerEl.textContent = `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+
+        // Check proximity to current target gate
+        const targetGatePos = speedwayGates[speedwayCurrentGate];
+        if (targetGatePos && player.pos.distanceTo(targetGatePos) < 12.0) {
+          cyberAudio.playCheckpointChime();
+          // Hide old ring, show next ring
+          const oldRing = scene.getObjectByName(`speedwayGate_${speedwayCurrentGate}`);
+          if (oldRing) oldRing.visible = false;
+
+          speedwayCurrentGate++;
+          const gateEl = document.getElementById('race-gate-display');
+          if (gateEl) gateEl.textContent = `${speedwayCurrentGate} / ${speedwayGates.length}`;
+
+          if (speedwayCurrentGate >= speedwayGates.length) {
+            // FINISH RACE!
+            finishSpeedwayRace(elapsed);
+          } else {
+            const nextRing = scene.getObjectByName(`speedwayGate_${speedwayCurrentGate}`);
+            if (nextRing) nextRing.visible = true;
+          }
+        }
+      }
+
+      // (D) AEROGLIDER WINGSUIT FLIGHT
+      if (isGliding && player && player.pos) {
+        // Reduced descent gravity
+        player.vel.y = Math.max(-1.8, player.vel.y);
+        // Forward glide momentum based on camera facing
+        const forward = new THREE.Vector3();
+        camera.getWorldDirection(forward);
+        player.pos.addScaledVector(forward, 28.0 * delta);
+
+        // Check Aerial Ring Collisions
+        aerialScoreRings.forEach(ringPos => {
+          if (player.pos.distanceTo(ringPos) < 7.0) {
+            cyberAudio.playCheckpointChime();
+            gliderScore += 100;
+            player.vel.y = 8.0; // Altitude surge boost!
+            const ringsVal = document.getElementById('glider-rings-val');
+            if (ringsVal) ringsVal.textContent = gliderScore;
+            showStoreNotification('⚡ AERIAL GLIDE RING ACCELERATION BOOST +100!');
+          }
+        });
+
+        // Auto-land upon touching surface
+        if (player.pos.y <= 1.35) {
+          toggleAeroGlider();
+          showStoreNotification('AEROGLIDER WINGS SAFELY STOWED ON TOUCHDOWN.');
+        }
+      }
+    }
+
+    // ------------------------------------------------------------
+    // 6. INTERACTIVE RECREATION HANDLERS & MODAL CONTROLLERS
+    // ------------------------------------------------------------
+    function toggleAeroGlider() {
+      isGliding = !isGliding;
+      const hud = document.getElementById('aeroglider-flight-hud');
+      if (isGliding) {
+        if (hud) hud.style.display = 'flex';
+        cyberAudio.playClick();
+        showStoreNotification('🪂 AEROGLIDER DEPLOYED! PITCH & GLIDE ACROSS METROPOLIS!');
+      } else {
+        if (hud) hud.style.display = 'none';
+        cyberAudio.playClick();
+      }
+    }
+
+    // Speedway Race Controls
+    function startSpeedwayRace() {
+      speedwayRaceActive = true;
+      speedwayStartTime = performance.now();
+      speedwayCurrentGate = 0;
+
+      const hud = document.getElementById('speedway-race-hud');
+      if (hud) hud.style.display = 'flex';
+
+      const gateEl = document.getElementById('race-gate-display');
+      if (gateEl) gateEl.textContent = `0 / ${speedwayGates.length}`;
+
+      // Show first gate
+      speedwayGates.forEach((_, i) => {
+        const ring = scene.getObjectByName(`speedwayGate_${i}`);
+        if (ring) ring.visible = (i === 0);
+      });
+
+      cyberAudio.playCheckpointChime();
+      showStoreNotification('🏁 METRO SPEEDWAY GP BEGUN! FLY THROUGH ALL 10 CHECKPOINTS!');
+    }
+
+    function abortSpeedwayRace() {
+      speedwayRaceActive = false;
+      const hud = document.getElementById('speedway-race-hud');
+      if (hud) hud.style.display = 'none';
+
+      speedwayGates.forEach((_, i) => {
+        const ring = scene.getObjectByName(`speedwayGate_${i}`);
+        if (ring) ring.visible = false;
+      });
+      showStoreNotification('SPEEDWAY TIME-TRIAL ABORTED.');
+    }
+
+    function finishSpeedwayRace(totalSeconds) {
+      speedwayRaceActive = false;
+      const hud = document.getElementById('speedway-race-hud');
+      if (hud) hud.style.display = 'none';
+
+      speedwayGates.forEach((_, i) => {
+        const ring = scene.getObjectByName(`speedwayGate_${i}`);
+        if (ring) ring.visible = false;
+      });
+
+      gameState.tokens += 250;
+      document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
+      cyberAudio.playFanfare();
+      showStoreNotification(`🏆 METRO SPEEDWAY VICTORY! TIME: ${totalSeconds.toFixed(2)}s • REWARD: +250 TOKENS!`);
+    }
+
+    // Hyperloop Modal Controls
+    function openHyperloopModal() {
+      const modal = document.getElementById('modal-hyperloop-transit');
+      if (modal) modal.style.display = 'block';
+      cyberAudio.playClick();
+    }
+    function closeHyperloopModal() {
+      const modal = document.getElementById('modal-hyperloop-transit');
+      if (modal) modal.style.display = 'none';
+    }
+
+    // DJ Mixer Controls
+    function openDJMixerModal() {
+      const modal = document.getElementById('modal-dj-mixer');
+      if (modal) modal.style.display = 'block';
+      cyberAudio.playClick();
+    }
+    function closeDJMixerModal() {
+      const modal = document.getElementById('modal-dj-mixer');
+      if (modal) modal.style.display = 'none';
+      if (djInterval) { clearInterval(djInterval); djInterval = null; }
+    }
+    function updateDJBpm(val) {
+      djBpm = parseInt(val);
+      const lbl = document.getElementById('dj-bpm-label');
+      if (lbl) lbl.textContent = `${djBpm} BPM`;
+      if (djMixerActive) {
+        clearInterval(djInterval);
+        startDJLoop();
+      }
+    }
+    function toggleDJTrack(trk) {
+      djTracks[trk] = !djTracks[trk];
+      const btn = document.getElementById(`dj-trk-${trk}`);
+      if (btn) {
+        if (djTracks[trk]) {
+          btn.style.opacity = '1.0';
+          btn.style.borderColor = '#00ff88';
+        } else {
+          btn.style.opacity = '0.4';
+          btn.style.borderColor = '#444';
+        }
+      }
+    }
+    function toggleDJMaster() {
+      djMixerActive = !djMixerActive;
+      const btn = document.getElementById('dj-master-toggle');
+      if (djMixerActive) {
+        if (btn) { btn.textContent = 'STOP BEAT'; btn.style.background = '#ff0055'; }
+        startDJLoop();
+      } else {
+        if (btn) { btn.textContent = 'START BEAT'; btn.style.background = '#a855f7'; }
+        if (djInterval) { clearInterval(djInterval); djInterval = null; }
+      }
+    }
+    function startDJLoop() {
+      const intervalMs = (60 / djBpm / 2) * 1000;
+      djInterval = setInterval(() => {
+        djStep = (djStep + 1) % 8;
+        if (!cyberAudio.ctx) return;
+        const now = cyberAudio.ctx.currentTime;
+        // Kick on 0, 4
+        if (djTracks.kick && (djStep === 0 || djStep === 4)) {
+          const osc = cyberAudio.ctx.createOscillator();
+          const gain = cyberAudio.ctx.createGain();
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(35, now + 0.12);
+          gain.gain.setValueAtTime(0.5, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.connect(gain); gain.connect(cyberAudio.ctx.destination);
+          osc.start(now); osc.stop(now + 0.15);
+        }
+        // Hihat on 2, 6
+        if (djTracks.hihat && (djStep === 2 || djStep === 6)) {
+          const osc = cyberAudio.ctx.createOscillator();
+          const gain = cyberAudio.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(8000, now);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+          osc.connect(gain); gain.connect(cyberAudio.ctx.destination);
+          osc.start(now); osc.stop(now + 0.06);
+        }
+        // Bass Synth
+        if (djTracks.bass && djStep % 2 === 0) {
+          const osc = cyberAudio.ctx.createOscillator();
+          const gain = cyberAudio.ctx.createGain();
+          osc.type = 'sawtooth';
+          const freqs = [55, 65, 49, 73];
+          osc.frequency.setValueAtTime(freqs[Math.floor(djStep / 2)], now);
+          gain.gain.setValueAtTime(0.3, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(gain); gain.connect(cyberAudio.ctx.destination);
+          osc.start(now); osc.stop(now + 0.16);
+        }
+      }, intervalMs);
+    }
+    function triggerDJDrop() {
+      cyberAudio.playHyperloopBoom();
+      showStoreNotification('🔥 SUB-BASS DROP INITIATED! ROOFTOP GOING WILD!');
+    }
+
+    // ------------------------------------------------------------
+    // 7. PLAYABLE RETRO 2D ARCADE MINI-GAME (ASTRO-BLASTER 2099)
+    // ------------------------------------------------------------
+    let retroArcadeRunning = false;
+    let retroArcadeLoopId = null;
+    let retroArcadeScore = 0;
+    let retroArcadeShield = 100;
+    let retroArcadeShipX = 240;
+    let retroArcadeLasers = [];
+    let retroArcadeEnemies = [];
+    let retroArcadeKeys = { left: false, right: false, fire: false };
+
+    function openRetroArcadeModal() {
+      const modal = document.getElementById('modal-retro-arcade');
+      if (modal) modal.style.display = 'block';
+      startNewArcadeGame();
+    }
+    function closeRetroArcadeModal() {
+      const modal = document.getElementById('modal-retro-arcade');
+      if (modal) modal.style.display = 'none';
+      retroArcadeRunning = false;
+      if (retroArcadeLoopId) cancelAnimationFrame(retroArcadeLoopId);
+    }
+    function startNewArcadeGame() {
+      retroArcadeRunning = true;
+      retroArcadeScore = 0;
+      retroArcadeShield = 100;
+      retroArcadeShipX = 240;
+      retroArcadeLasers = [];
+      retroArcadeEnemies = [];
+
+      const high = localStorage.getItem('ASTRO_ARCADE_HIGH') || '0';
+      const highEl = document.getElementById('arcade-high-score');
+      if (highEl) highEl.textContent = high;
+
+      if (retroArcadeLoopId) cancelAnimationFrame(retroArcadeLoopId);
+      runRetroArcadeLoop();
+    }
+
+    window.addEventListener('keydown', e => {
+      if (!retroArcadeRunning) return;
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') retroArcadeKeys.left = true;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') retroArcadeKeys.right = true;
+      if (e.code === 'Space') {
+        retroArcadeKeys.fire = true;
+        fireRetroArcadeLaser();
+      }
+      if (e.code === 'Escape') closeRetroArcadeModal();
+    });
+
+    window.addEventListener('keyup', e => {
+      if (!retroArcadeRunning) return;
+      if (e.code === 'KeyA' || e.code === 'ArrowLeft') retroArcadeKeys.left = false;
+      if (e.code === 'KeyD' || e.code === 'ArrowRight') retroArcadeKeys.right = false;
+      if (e.code === 'Space') retroArcadeKeys.fire = false;
+    });
+
+    function fireRetroArcadeLaser() {
+      retroArcadeLasers.push({ x: retroArcadeShipX - 10, y: 320 });
+      retroArcadeLasers.push({ x: retroArcadeShipX + 10, y: 320 });
+      cyberAudio.playArcadeLaser();
+    }
+
+    function runRetroArcadeLoop() {
+      if (!retroArcadeRunning) return;
+      const cvs = document.getElementById('retro-arcade-canvas');
+      if (!cvs) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width;
+      const h = cvs.height;
+
+      // Update Ship
+      if (retroArcadeKeys.left) retroArcadeShipX = Math.max(20, retroArcadeShipX - 6);
+      if (retroArcadeKeys.right) retroArcadeShipX = Math.min(w - 20, retroArcadeShipX + 6);
+
+      // Spawn Enemies
+      if (Math.random() < 0.04) {
+        retroArcadeEnemies.push({
+          x: 20 + Math.random() * (w - 40),
+          y: -10,
+          speed: 1.8 + Math.random() * 2.2,
+          radius: 12 + Math.random() * 8
+        });
+      }
+
+      // Update Lasers
+      for (let i = retroArcadeLasers.length - 1; i >= 0; i--) {
+        retroArcadeLasers[i].y -= 9;
+        if (retroArcadeLasers[i].y < -10) retroArcadeLasers.splice(i, 1);
+      }
+
+      // Update Enemies & Laser Collisions
+      for (let eIdx = retroArcadeEnemies.length - 1; eIdx >= 0; eIdx--) {
+        const en = retroArcadeEnemies[eIdx];
+        en.y += en.speed;
+
+        // Check Laser Collision
+        for (let lIdx = retroArcadeLasers.length - 1; lIdx >= 0; lIdx--) {
+          const lz = retroArcadeLasers[lIdx];
+          const dist = Math.hypot(lz.x - en.x, lz.y - en.y);
+          if (dist < en.radius + 4) {
+            cyberAudio.playArcadeExplosion();
+            retroArcadeScore += 50;
+            gameState.tokens += 5; // Real tokens awarded!
+            document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
+            retroArcadeEnemies.splice(eIdx, 1);
+            retroArcadeLasers.splice(lIdx, 1);
+            break;
+          }
+        }
+
+        // Check Ship Collision
+        if (en && Math.hypot(en.x - retroArcadeShipX, en.y - 330) < en.radius + 14) {
+          cyberAudio.playHitSound();
+          retroArcadeShield = Math.max(0, retroArcadeShield - 25);
+          retroArcadeEnemies.splice(eIdx, 1);
+          if (retroArcadeShield <= 0) {
+            cyberAudio.playKillSound();
+            showStoreNotification(`GAME OVER! FINAL ARCADE SCORE: ${retroArcadeScore}`);
+            const curHigh = parseInt(localStorage.getItem('ASTRO_ARCADE_HIGH') || '0');
+            if (retroArcadeScore > curHigh) localStorage.setItem('ASTRO_ARCADE_HIGH', '' + retroArcadeScore);
+            retroArcadeRunning = false;
+          }
+        }
+      }
+
+      // Update HUD
+      const sEl = document.getElementById('arcade-score');
+      const lEl = document.getElementById('arcade-lives');
+      if (sEl) sEl.textContent = retroArcadeScore;
+      if (lEl) lEl.textContent = `${retroArcadeShield}%`;
+
+      // Render 2D Arcade Frame
+      ctx.fillStyle = '#020408';
+      ctx.fillRect(0, 0, w, h);
+
+      // Starfield dots
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      for (let i = 0; i < 20; i++) {
+        ctx.fillRect((i * 47) % w, (i * 31 + performance.now() * 0.05) % h, 2, 2);
+      }
+
+      // Draw Ship
+      ctx.fillStyle = '#00f2ff';
+      ctx.beginPath();
+      ctx.moveTo(retroArcadeShipX, 315);
+      ctx.lineTo(retroArcadeShipX - 16, 340);
+      ctx.lineTo(retroArcadeShipX + 16, 340);
+      ctx.closePath();
+      ctx.fill();
+
+      // Draw Lasers
+      ctx.fillStyle = '#ff007f';
+      retroArcadeLasers.forEach(lz => {
+        ctx.fillRect(lz.x - 2, lz.y, 4, 12);
+      });
+
+      // Draw Enemies
+      ctx.fillStyle = '#ff4400';
+      retroArcadeEnemies.forEach(en => {
+        ctx.beginPath();
+        ctx.arc(en.x, en.y, en.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      retroArcadeLoopId = requestAnimationFrame(runArcadeLoop);
     }
 
     // ============================================================
@@ -10804,6 +12240,7 @@
       if (e.code === 'KeyQ') triggerTacticalPing();
       if (e.code === 'KeyE') toggleVehicleMode();
       if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'KeyG') toggleAeroGlider();
       if (e.code === 'Space' && gameState.flightMode === 'starship') {
         triggerStageSeparation();
       }
@@ -11010,6 +12447,50 @@
 
     function handleInteractions() {
       if (!player.pos) return;
+
+      // 1. Hyperloop Transit Stations
+      const hyperloopStations = [
+        new THREE.Vector3(18, 0, 55),
+        new THREE.Vector3(430, 0, 300),
+        new THREE.Vector3(-380, 0, 440),
+        new THREE.Vector3(-470, 0, -370)
+      ];
+      for (let hs of hyperloopStations) {
+        if (player.pos.distanceTo(hs) < 14.0) {
+          openHyperloopModal();
+          return;
+        }
+      }
+
+      // 2. Retro Arcade Cabinets (Mall & Neo-Kyoto)
+      const arcadeSpots = [new THREE.Vector3(5.2, 0, 122), new THREE.Vector3(480, 0, 365)];
+      for (let aspot of arcadeSpots) {
+        if (player.pos.distanceTo(aspot) < 8.0) {
+          openRetroArcadeModal();
+          return;
+        }
+      }
+
+      // 3. Speedway Time-Trial Race Gate
+      if (player.pos.distanceTo(new THREE.Vector3(0, 3.5, -120)) < 16.0) {
+        startSpeedwayRace();
+        return;
+      }
+
+      // 4. Club Nebula Rooftop DJ Console
+      if (player.pos.distanceTo(new THREE.Vector3(430, 42, 370)) < 12.0) {
+        openDJMixerModal();
+        return;
+      }
+
+      // 5. Solaria Target Shooting Carnival Range
+      if (player.pos.distanceTo(new THREE.Vector3(-360, 0, 520)) < 12.0) {
+        cyberAudio.playTargetHit();
+        showStoreNotification('🎯 TARGET SHOOTING CARNIVAL ACTIVE! POPUP DUMMIES RESET!');
+        return;
+      }
+
+      // 6. Subway Headhouse
       const distToSubwayHeadhouse = player.pos.distanceTo(new THREE.Vector3(18, 0, 25));
       if (distToSubwayHeadhouse < 7.0 || gameState.isUnderground) {
         if (!gameState.isUnderground) {
@@ -11504,6 +12985,33 @@
       }
     }
 
+    function warpToCity(cityId) {
+      if (gameState.currentWorld !== 'earth') {
+        warpToWorld('earth');
+      }
+      cyberAudio.playHyperloopBoom();
+      const flash = document.getElementById('warp-flash-overlay');
+      if (flash) {
+        flash.style.opacity = '0.9';
+        setTimeout(() => { flash.style.opacity = '0'; }, 350);
+      }
+
+      if (cityId === 'central') {
+        if (player.pos) player.pos.set(0, 1.2, 35);
+        showStoreNotification('🚆 HYPERLOOP TRANSIT ARRIVAL: CENTRAL METROPOLIS (NEXUS CORE)');
+      } else if (cityId === 'kyoto') {
+        if (player.pos) player.pos.set(480, 1.2, 330);
+        showStoreNotification('🚆 HYPERLOOP TRANSIT ARRIVAL: NEO-KYOTO CYBER MEGACITY');
+      } else if (cityId === 'solaria') {
+        if (player.pos) player.pos.set(-420, 1.2, 460);
+        showStoreNotification('🚆 HYPERLOOP TRANSIT ARRIVAL: SOLARIA DESERT OASIS');
+      } else if (cityId === 'atlantis') {
+        if (player.pos) player.pos.set(-520, 1.2, -400);
+        showStoreNotification('🚆 HYPERLOOP TRANSIT ARRIVAL: ATLANTIS MARINA OCEAN PORT');
+      }
+      if (player.vel) player.vel.set(0, 0, 0);
+    }
+
     function warpToWorld(worldId) {
       if (!WORLDS[worldId]) return;
       const targetWorld = WORLDS[worldId];
@@ -11549,6 +13057,10 @@
 
       if (buildingsGroup) buildingsGroup.visible = isEarth;
       if (trafficGroup) trafficGroup.visible = isEarth;
+      if (neoKyotoGroup) neoKyotoGroup.visible = isEarth;
+      if (solariaGroup) solariaGroup.visible = isEarth;
+      if (atlantisGroup) atlantisGroup.visible = isEarth;
+      if (recreationGroup) recreationGroup.visible = isEarth;
       if (nukeGroup) nukeGroup.visible = isEarth;
       if (spaceportGroup) spaceportGroup.visible = !isSpace;
       if (roverGroup) roverGroup.visible = !isSpace;
@@ -11804,15 +13316,72 @@
           }
         }
 
-        // Metro Entrance Prompt
-        const distToMetroEntrance = player.pos.distanceTo(new THREE.Vector3(18, 0, 25));
+        // Proximity Prompts (Metro, Hyperloop, Arcade, Speedway, DJ, Shooting)
         const promptEl = document.getElementById('interact-prompt');
+        let promptShown = false;
+
+        const distToMetroEntrance = player.pos.distanceTo(new THREE.Vector3(18, 0, 25));
         if ((distToMetroEntrance < 7.0 && !gameState.isUnderground) || gameState.isUnderground) {
           promptEl.style.display = 'flex';
           document.getElementById('prompt-text').textContent = gameState.isUnderground
             ? 'ASCEND TO SURFACE METROPOLIS [F]'
             : 'DESCEND INTO SUBTERRANEAN METRO (-22M) [F]';
-        } else {
+          promptShown = true;
+        }
+
+        // Hyperloop Transit Stations
+        if (!promptShown) {
+          const hyperloopStations = [
+            new THREE.Vector3(18, 0, 55),
+            new THREE.Vector3(430, 0, 300),
+            new THREE.Vector3(-380, 0, 440),
+            new THREE.Vector3(-470, 0, -370)
+          ];
+          for (let hs of hyperloopStations) {
+            if (player.pos.distanceTo(hs) < 14.0) {
+              promptEl.style.display = 'flex';
+              document.getElementById('prompt-text').textContent = 'BOARD INTER-CITY HYPERLOOP TRANSIT [F]';
+              promptShown = true;
+              break;
+            }
+          }
+        }
+
+        // Retro Arcade Cabinets
+        if (!promptShown) {
+          const arcadeSpots = [new THREE.Vector3(5.2, 0, 122), new THREE.Vector3(480, 0, 365)];
+          for (let aspot of arcadeSpots) {
+            if (player.pos.distanceTo(aspot) < 8.0) {
+              promptEl.style.display = 'flex';
+              document.getElementById('prompt-text').textContent = 'PLAY RETRO ARCADE: ASTRO-BLASTER 2099 [F]';
+              promptShown = true;
+              break;
+            }
+          }
+        }
+
+        // Speedway Time-Trial Race Gate
+        if (!promptShown && !speedwayRaceActive && player.pos.distanceTo(new THREE.Vector3(0, 3.5, -120)) < 16.0) {
+          promptEl.style.display = 'flex';
+          document.getElementById('prompt-text').textContent = 'START METRO SPEEDWAY GP TIME-TRIAL [F]';
+          promptShown = true;
+        }
+
+        // Club Nebula DJ Console
+        if (!promptShown && player.pos.distanceTo(new THREE.Vector3(430, 42, 370)) < 12.0) {
+          promptEl.style.display = 'flex';
+          document.getElementById('prompt-text').textContent = 'ENGAGE ROOFTOP DJ MIX CONSOLE [F]';
+          promptShown = true;
+        }
+
+        // Solaria Shooting Carnival Range
+        if (!promptShown && player.pos.distanceTo(new THREE.Vector3(-360, 0, 520)) < 12.0) {
+          promptEl.style.display = 'flex';
+          document.getElementById('prompt-text').textContent = 'START TARGET SHOOTING CARNIVAL [F]';
+          promptShown = true;
+        }
+
+        if (!promptShown && promptEl) {
           promptEl.style.display = 'none';
         }
       } else {
@@ -12535,9 +14104,10 @@
         }
       }
 
-      // Update Atmospheric World Particles, Starship Reentry Shockwave & Holographic Minimap
+      // Update Atmospheric World Particles, Starship Reentry Shockwave, Recreational Systems & Holographic Minimap
       updateWorldAtmosphericParticles(delta, now);
       updateStarshipReentryEffects(now);
+      updateRecreationalActivities(delta, now);
       drawTacticalMinimapRadar(now);
 
       // Synchronize AstroShift Mobile In-Game HUD
@@ -12742,6 +14312,18 @@
 
         // District 5: South Maglev & Aerotropolis Transit Corridor
         drawBlip(0, -580, '#cc44ff', 4.0);   // Aerotropolis Terminal
+
+        // Regional City 1: Neo-Kyoto Cyber Megacity (Torii & Pagoda)
+        drawBlip(480, 350, '#ff007f', 4.5);
+
+        // Regional City 2: Solaria Desert Oasis & Solar Thermal Tower
+        drawBlip(-420, 480, '#ffaa00', 4.5);
+
+        // Regional City 3: Atlantis Marina Port & Bioluminescent Lighthouse
+        drawBlip(-520, -420, '#00d9ff', 4.5);
+
+        // Recreational POI: Central Stadium Neo-Soccer Arena
+        drawBlip(0, 0, '#00ff88', 3.8);
       } else if (gameState.currentWorld !== 'space') {
         drawBlip(0, 0, '#ffaa00', 3.5);
       }
