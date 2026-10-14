@@ -3389,7 +3389,19 @@
           <i class="fa-solid fa-video" style="color: #00ff88;"></i>
           <span class="depth-badge" id="hud-cam-badge" style="color: #00ff88;">// CAM: 1P</span>
         </div>
-        <div class="hud-chip" id="hud-ping-chip" style="background: rgba(0, 255, 136, 0.12); border-color: rgba(0, 255, 136, 0.4);">
+        <div class="hud-chip" id="hud-fps-chip" onclick="toggleLowEndTurboMode()" title="Toggle 60 FPS Low-End Turbo Mode" style="background: rgba(0, 255, 136, 0.12); border-color: rgba(0, 255, 136, 0.4); cursor: pointer; user-select: none;">
+          <i class="fa-solid fa-bolt" id="hud-fps-icon" style="color: #00ff88;"></i>
+          <span id="hud-fps-val" style="color: #00ff88; font-family: monospace; font-weight: 800;">60 FPS</span>
+        </div>
+        <div class="hud-chip" id="hud-heat-chip" style="display: none; background: rgba(255, 0, 51, 0.22); border-color: #ff0033; animation: pulseGlow 0.9s infinite alternate; user-select: none;" title="Cyber Police Wanted Level">
+          <i class="fa-solid fa-shield-halved" style="color: #ff3366;"></i>
+          <span id="hud-heat-stars" style="color: #ffcc00; font-size: 13px; letter-spacing: 2px;">★☆☆☆☆</span>
+        </div>
+        <div class="hud-chip" id="hud-radio-chip" onclick="cycleCyberRadio()" title="Switch Cyberpunk Radio Station" style="background: rgba(0, 242, 255, 0.12); border-color: rgba(0, 242, 255, 0.4); cursor: pointer; user-select: none;">
+          <i class="fa-solid fa-radio" style="color: #00f2ff;"></i>
+          <span id="hud-radio-val" style="color: #00f2ff; font-family: monospace; font-weight: 800;">[📻 CYBERWAVE]</span>
+        </div>
+        <div class="hud-chip" id="hud-ping-chip"  style="background: rgba(0, 255, 136, 0.12); border-color: rgba(0, 255, 136, 0.4);">
           <i class="fa-solid fa-wifi" id="hud-wifi-icon" style="color: #00ff88;"></i>
           <span id="hud-ping-val" style="color: #00ff88; font-family: monospace; font-weight: 800;">24ms</span>
         </div>
@@ -4043,6 +4055,15 @@
         </div>
       </div>
 
+      <!-- In-Car Cyberpunk Radio Tuner -->
+      <div style="display: flex; align-items: center; gap: 8px; background: rgba(14,24,38,0.75); border: 1px solid rgba(0,242,255,0.3); border-radius: 8px; padding: 6px 12px; cursor: pointer; user-select: none;" onclick="cycleCyberRadio()">
+        <i class="fa-solid fa-radio" style="color: #00f2ff; font-size: 14px;"></i>
+        <div>
+          <div style="font-size: 8px; color: #8fa3b8; letter-spacing: 1px;">IN-CAR RADIO</div>
+          <div style="font-size: 10px; font-weight: 800; color: #00f2ff;" id="car-radio-station-name">CYBERWAVE 104.2</div>
+        </div>
+      </div>
+
       <!-- Mobile Touch Nitro & Exit Buttons -->
       <div style="display: flex; gap: 8px;">
         <button type="button" id="car-mobile-nitro-btn" style="background: linear-gradient(135deg, #00f2ff, #0077ff); border: 1.5px solid #00f2ff; color: #fff; border-radius: 10px; padding: 10px 14px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 0 18px rgba(0, 242, 255, 0.5); user-select: none; display: flex; align-items: center; gap: 6px;">
@@ -4617,6 +4638,17 @@
               <button type="button" class="bs-seg-btn" onclick="setResolutionScale(0.75); setSegOption('gfx-quality', 0, this);">Smooth (Low-End)</button>
               <button type="button" class="bs-seg-btn active" onclick="setResolutionScale(1.0); setSegOption('gfx-quality', 1, this);">Standard</button>
               <button type="button" class="bs-seg-btn" onclick="setResolutionScale(1.25); setSegOption('gfx-quality', 2, this);">HD</button>
+            </div>
+          </div>
+
+          <div class="bs-option-row" style="background: rgba(0, 255, 136, 0.08); border-left: 3px solid #00ff88; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px;">
+            <div>
+              <span class="bs-option-label" style="color: #00ff88; font-weight: 800;">⚡ Ultra Low-End 60 FPS Turbo Mode</span>
+              <div style="font-size: 10px; color: #8fa3b8;">Caps resolution scale &amp; traffic draw distance for budget phones &amp; low-end laptops</div>
+            </div>
+            <div class="bs-segmented-group">
+              <button type="button" class="bs-seg-btn" id="btn-lowend-enable" onclick="setLowEndTurboMode(true); setSegOption('lowend-turbo', 0, this);">ON (60 FPS)</button>
+              <button type="button" class="bs-seg-btn active" id="btn-lowend-disable" onclick="setLowEndTurboMode(false); setSegOption('lowend-turbo', 1, this);">OFF</button>
             </div>
           </div>
 
@@ -6398,6 +6430,114 @@
         noise.start(now);
       }
 
+      playPoliceSiren() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(650, now);
+        osc.frequency.linearRampToValueAtTime(1150, now + 0.28);
+        osc.frequency.linearRampToValueAtTime(650, now + 0.55);
+        gain.gain.setValueAtTime(0.22 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.58);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.58);
+      }
+
+      playCrateOpen() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.50, 1318.51].forEach((f, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, now + idx * 0.06);
+          gain.gain.setValueAtTime(0, now);
+          gain.gain.setValueAtTime(0.32 * this.masterVolume, now + idx * 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.06 + 0.38);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.06);
+          osc.stop(now + idx * 0.06 + 0.4);
+        });
+      }
+
+      playWaterSplash() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const bufferSize = this.ctx.sampleRate * 0.35;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(800, now);
+        filter.frequency.linearRampToValueAtTime(250, now + 0.35);
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.4 * this.masterVolume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(this.ctx.destination);
+        noise.start(now);
+      }
+
+      // Procedural Synthwave Web Audio Radio Player (0 MB Audio, 100% Lightweight)
+      startCyberRadio(stationIdx) {
+        this.stopCyberRadio();
+        if (!this.ctx || stationIdx === 0) return;
+
+        const bpm = (stationIdx === 1) ? 122 : (stationIdx === 2 ? 134 : 85);
+        const stepTime = (60 / bpm) / 4; // 16th notes
+        const notes1 = [174.61, 207.65, 261.63, 311.13, 392.00, 311.13, 261.63, 207.65]; // F minor synthwave
+        const notes2 = [130.81, 164.81, 196.00, 246.94, 261.63, 196.00, 164.81, 130.81]; // Cyberpunk drive
+        const notes3 = [110.00, 130.81, 164.81, 220.00, 261.63, 329.63];                  // Ambient pads
+        const notes = (stationIdx === 1) ? notes1 : (stationIdx === 2 ? notes2 : notes3);
+
+        let noteIdx = 0;
+        this.radioInterval = setInterval(() => {
+          if (!this.ctx) return;
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          const filter = this.ctx.createBiquadFilter();
+
+          osc.type = (stationIdx === 1) ? 'sawtooth' : (stationIdx === 2 ? 'square' : 'triangle');
+          osc.frequency.setValueAtTime(notes[noteIdx % notes.length], now);
+
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(stationIdx === 3 ? 550 : 1200 + Math.sin(noteIdx * 0.4) * 600, now);
+          filter.Q.setValueAtTime(stationIdx === 3 ? 1.0 : 4.0, now);
+
+          const dur = (stationIdx === 3) ? stepTime * 3 : stepTime * 0.85;
+          gain.gain.setValueAtTime(0.01, now);
+          gain.gain.linearRampToValueAtTime(0.14 * this.masterVolume, now + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+
+          osc.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start(now);
+          osc.stop(now + dur + 0.02);
+          noteIdx++;
+        }, stepTime * 1000);
+      }
+
+      stopCyberRadio() {
+        if (this.radioInterval) {
+          clearInterval(this.radioInterval);
+          this.radioInterval = null;
+        }
+      }
+
       playAirlockDoor() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
@@ -6431,6 +6571,10 @@
       jetpackMaxFuel: 100,
       jetpackRechargeRate: 25.0,
             jetpackBatteryTier: 'Standard',
+      wantedLevel: 0,
+      wantedTimer: 0,
+      currentRadioStation: 1,
+      radioStationNames: ['RADIO OFF', 'CYBERWAVE 104.2', 'NEON OVERDRIVE 98.7', 'ORBITAL AMBIENT 88.0'],
       carNitro: 100,
       carMaxNitro: 100,
       carNitroRechargeRate: 16.0,
@@ -6512,7 +6656,8 @@
         resolutionScale: 1.0,
         visorOverlay: true,
         masterVolume: 65,
-        haptics: true
+        haptics: true,
+        lowEndTurbo: false
       }
     };
 
@@ -6663,6 +6808,10 @@
     let mobileNitroPressed = false;
     let carCustomsTurntable = null, carCustomsGroup = null;
     let starbaseLaunchGroup = null, physicalLaunchButtonMesh = null, physicalAirlockDoorMesh = null, starbaseAirlockBeacon = null;
+    let supplyLootCrates = [];
+    let policeDrones = [];
+    let hydroSkimmerGroup = null, isHydroSkimmerPiloted = false, hydroSkimmerSpeed = 0, hydroSkimmerSpray = null;
+    let fpsLastCalcTime = performance.now(), fpsFramesCount = 0, currentMeasuredFPS = 60;
     let neoKyotoGroup = null;
     let solariaGroup = null;
     let atlantisGroup = null;
@@ -10584,6 +10733,8 @@
         buildCityLivelinessElements();
         buildApexCarCustoms();
         buildStarbaseLaunchInfrastructure();
+        buildSupplyLootCrates();
+        buildHydroSkimmer();
         initFootstepDustPool();
 
         // Build 3 Distinct New Regional Cities & Fun Recreational Activities
@@ -11134,7 +11285,274 @@
     // ============================================================
     // NEXUS APEX CAR CUSTOMS & MOD SHOP ARCHITECTURE (-85, 0, 45)
     // ============================================================
-    function buildApexCarCustoms() {
+    
+    // ============================================================
+    // 8 SUPPLY LOOT CRATES SCATTERED ACROSS ICONIC LANDMARKS
+    // ============================================================
+    function buildSupplyLootCrates() {
+      const crateLocs = [
+        { name: 'Grand Mall Rooftop Atrium', x: 0, y: 36.2, z: 122, tokens: 250 },
+        { name: 'Mechazilla 145m Tower High Platform', x: 104, y: 71.5, z: -100, tokens: 300 },
+        { name: 'Apex Car Customs Tuning Pit', x: -85, y: 0.6, z: 45, tokens: 180 },
+        { name: 'Subterranean -22m Subway Depot', x: 20, y: -20.5, z: 20, tokens: 200 },
+        { name: 'Neo-Kyoto Imperial Pagoda Spire', x: 480, y: 52.0, z: 300, tokens: 350 },
+        { name: 'Solaria Oasis Cantina Rooftop', x: -380, y: 18.5, z: 440, tokens: 220 },
+        { name: 'Atlantis Oceanic Seafloor Dome', x: -480, y: 0.6, z: -380, tokens: 280 },
+        { name: 'Central Coliseum Championship Podium', x: 0, y: 1.5, z: 0, tokens: 150 }
+      ];
+
+      const cMatGold = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.95, roughness: 0.18 });
+      const cMatDarkSteel = new THREE.MeshStandardMaterial({ color: 0x111923, metalness: 0.9, roughness: 0.3 });
+      const cMatCyanGlow = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+      crateLocs.forEach((loc, idx) => {
+        const crateGroup = new THREE.Group();
+        crateGroup.position.set(loc.x, loc.y, loc.z);
+
+        // Armored Vault Crate Box
+        const box = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.1, 1.4), cMatDarkSteel);
+        box.position.y = 0.55;
+        box.castShadow = true;
+        crateGroup.add(box);
+
+        // Gold Reinforced Corner Brackets
+        const goldBand = new THREE.Mesh(new THREE.BoxGeometry(1.45, 0.22, 1.45), cMatGold);
+        goldBand.position.y = 0.55;
+        crateGroup.add(goldBand);
+
+        // Cyan Glowing Latch
+        const latch = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.25, 1.48), cMatCyanGlow);
+        latch.position.y = 0.55;
+        crateGroup.add(latch);
+
+        // Holographic Rotating Token Icon above Crate
+        const holoCoin = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 0.08, 16), cMatGold);
+        holoCoin.rotation.z = Math.PI / 2;
+        holoCoin.position.y = 1.65;
+        crateGroup.add(holoCoin);
+        citySpinners.push(holoCoin);
+
+        // Ground Glowing Beacon Ring
+        const ring = new THREE.Mesh(new THREE.RingGeometry(1.2, 1.8, 24), cMatCyanGlow);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = 0.05;
+        crateGroup.add(ring);
+
+        scene.add(crateGroup);
+
+        supplyLootCrates.push({
+          group: crateGroup,
+          pos: new THREE.Vector3(loc.x, loc.y, loc.z),
+          name: loc.name,
+          tokens: loc.tokens,
+          isAvailable: true,
+          respawnTimer: 0
+        });
+      });
+    }
+
+    // ============================================================
+    // ATLANTIS OCEANIC HYDRO-SKIMMER / CYBER JET-SKI (-480, 0, -380)
+    // ============================================================
+    function buildHydroSkimmer() {
+      hydroSkimmerGroup = new THREE.Group();
+      hydroSkimmerGroup.position.set(-480, 0.5, -380);
+      scene.add(hydroSkimmerGroup);
+
+      const hMatAqua = new THREE.MeshStandardMaterial({ color: 0x00d9ff, metalness: 0.9, roughness: 0.2 });
+      const hMatCarbon = new THREE.MeshStandardMaterial({ color: 0x0b1017, metalness: 0.85, roughness: 0.35 });
+      const hMatGlow = new THREE.MeshBasicMaterial({ color: 0x00ffcc });
+
+      // Catamaran Twin-Pontoon Hydrofoil Hulls
+      [-0.8, 0.8].forEach(px => {
+        const pontoon = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.32, 4.2, 12), hMatAqua);
+        pontoon.rotation.x = Math.PI / 2;
+        pontoon.position.set(px, 0.3, 0);
+        hydroSkimmerGroup.add(pontoon);
+
+        const repulsorRing = new THREE.Mesh(new THREE.TorusGeometry(0.35, 0.06, 8, 16), hMatGlow);
+        repulsorRing.rotation.x = Math.PI / 2;
+        repulsorRing.position.set(px, 0.15, 0);
+        hydroSkimmerGroup.add(repulsorRing);
+      });
+
+      // Aerodynamic Pilot Deck & Racing Seat
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.35, 3.2), hMatCarbon);
+      deck.position.set(0, 0.55, -0.2);
+      hydroSkimmerGroup.add(deck);
+
+      // Handlebars & Digital Windshield
+      const screen = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.45, 0.1), hMatGlow);
+      screen.position.set(0, 1.15, 0.8);
+      screen.rotation.x = Math.PI / 6;
+      hydroSkimmerGroup.add(screen);
+
+      // Water Rooster-Tail Spray Emitter Mesh
+      const sprayGeo = new THREE.ConeGeometry(0.6, 2.8, 8);
+      const sprayMat = new THREE.MeshBasicMaterial({ color: 0x88eeff, transparent: true, opacity: 0 });
+      hydroSkimmerSpray = new THREE.Mesh(sprayGeo, sprayMat);
+      hydroSkimmerSpray.rotation.x = -Math.PI / 2;
+      hydroSkimmerSpray.position.set(0, 0.4, -2.6);
+      hydroSkimmerGroup.add(hydroSkimmerSpray);
+    }
+
+    // ============================================================
+    // CYBER RADIO & PROCEDURAL SYNTHWAVE PLAYER
+    // ============================================================
+    function cycleCyberRadio() {
+      gameState.currentRadioStation = (gameState.currentRadioStation + 1) % gameState.radioStationNames.length;
+      const stName = gameState.radioStationNames[gameState.currentRadioStation];
+
+      cyberAudio.startCyberRadio(gameState.currentRadioStation);
+
+      const hudBadge = document.getElementById('hud-radio-val');
+      if (hudBadge) {
+        hudBadge.textContent = (gameState.currentRadioStation === 0) ? '[📻 RADIO OFF]' : `[📻 ${stName}]`;
+        hudBadge.style.color = (gameState.currentRadioStation === 0) ? '#8fa3b8' : '#00f2ff';
+      }
+
+      const carRadioLabel = document.getElementById('car-radio-station-name');
+      if (carRadioLabel) {
+        carRadioLabel.textContent = stName;
+        carRadioLabel.style.color = (gameState.currentRadioStation === 0) ? '#8fa3b8' : '#00f2ff';
+      }
+
+      showStoreNotification(`🎵 RADIO TUNED: ${stName.toUpperCase()}`);
+      cyberAudio.playClick();
+    }
+
+    // ============================================================
+    // LOW-END TURBO & PERFORMANCE GUARDIAN ENGINE (60 FPS POTATO MODE)
+    // ============================================================
+    function toggleLowEndTurboMode() {
+      const targetState = !gameState.settings.lowEndTurbo;
+      setLowEndTurboMode(targetState);
+    }
+
+    function setLowEndTurboMode(enable) {
+      gameState.settings.lowEndTurbo = enable;
+
+      // 1. Dynamic Pixel Ratio Tuning
+      if (renderer) {
+        renderer.setPixelRatio(enable ? 0.75 : Math.min(window.devicePixelRatio || 1, 1.5));
+      }
+
+      // 2. Update HUD Badge
+      const fpsBadge = document.getElementById('hud-fps-val');
+      const fpsChip = document.getElementById('hud-fps-chip');
+      const fpsIcon = document.getElementById('hud-fps-icon');
+
+      if (enable) {
+        if (fpsChip) {
+          fpsChip.style.background = 'rgba(0, 255, 136, 0.28)';
+          fpsChip.style.borderColor = '#00ff88';
+        }
+        if (fpsIcon) fpsIcon.style.color = '#ffd700';
+        showStoreNotification('⚡ ULTRA LOW-END 60 FPS TURBO MODE ENGAGED! RESOLUTION & TRAFFIC SCALED!');
+      } else {
+        if (fpsChip) {
+          fpsChip.style.background = 'rgba(0, 255, 136, 0.12)';
+          fpsChip.style.borderColor = 'rgba(0, 255, 136, 0.4)';
+        }
+        if (fpsIcon) fpsIcon.style.color = '#00ff88';
+        showStoreNotification('STANDARD GRAPHICS MODE RESTORED');
+      }
+
+      // 3. Update Settings UI Buttons
+      const btnOn = document.getElementById('btn-lowend-enable');
+      const btnOff = document.getElementById('btn-lowend-disable');
+      if (btnOn && btnOff) {
+        btnOn.classList.toggle('active', enable);
+        btnOff.classList.toggle('active', !enable);
+      }
+
+      try {
+        localStorage.setItem('ASTRO_LOW_END_TURBO', enable ? '1' : '0');
+      } catch(e) {}
+    }
+
+    // ============================================================
+    // CYBER POLICE BOUNTY PURSUIT & WANTED LEVEL ENGINE
+    // ============================================================
+    function triggerCrimeHeat(amount = 1) {
+      gameState.wantedLevel = Math.min(5, gameState.wantedLevel + amount);
+      gameState.wantedTimer = 35.0; // 35 seconds of police pursuit
+
+      updateWantedHUD();
+      cyberAudio.playPoliceSiren();
+
+      // Dispatch Police Drones if heat is 2+
+      if (gameState.wantedLevel >= 2 && policeDrones.length < gameState.wantedLevel) {
+        spawnPolicePursuitDrone();
+      }
+
+      showStoreNotification(`⚠️ CRIME DETECTED! WANTED HEAT LEVEL: ${gameState.wantedLevel} STAR(S)!`);
+    }
+
+    function clearWantedLevel() {
+      if (gameState.wantedLevel === 0) return;
+      gameState.wantedLevel = 0;
+      gameState.wantedTimer = 0;
+      updateWantedHUD();
+
+      // Dismiss drones
+      policeDrones.forEach(d => { scene.remove(d.mesh); });
+      policeDrones = [];
+
+      showStoreNotification('🛡️ BOUNTY PURSUIT CLEARED! SAFEHOUSE ACCESSED!');
+      cyberAudio.playLootChime();
+    }
+
+    function updateWantedHUD() {
+      const heatChip = document.getElementById('hud-heat-chip');
+      const starsEl = document.getElementById('hud-heat-stars');
+      if (!heatChip || !starsEl) return;
+
+      if (gameState.wantedLevel > 0) {
+        heatChip.style.display = 'flex';
+        let starStr = '';
+        for (let i = 1; i <= 5; i++) {
+          starStr += (i <= gameState.wantedLevel) ? '★' : '☆';
+        }
+        starsEl.textContent = starStr;
+      } else {
+        heatChip.style.display = 'none';
+      }
+    }
+
+    function spawnPolicePursuitDrone() {
+      if (!player.pos) return;
+      const droneGroup = new THREE.Group();
+      droneGroup.position.set(player.pos.x + (Math.random() * 40 - 20), player.pos.y + 12, player.pos.z + (Math.random() * 40 - 20));
+
+      const dMatBlack = new THREE.MeshStandardMaterial({ color: 0x050a12, metalness: 0.9, roughness: 0.2 });
+      const dMatRed = new THREE.MeshBasicMaterial({ color: 0xff0033 });
+      const dMatBlue = new THREE.MeshBasicMaterial({ color: 0x0066ff });
+
+      const dBody = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.45, 1.8), dMatBlack);
+      droneGroup.add(dBody);
+
+      // Flashing Police Emergency Lights
+      const lightR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.3), dMatRed);
+      lightR.position.set(-0.7, 0.3, 0);
+      droneGroup.add(lightR);
+
+      const lightB = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, 0.3), dMatBlue);
+      lightB.position.set(0.7, 0.3, 0);
+      droneGroup.add(lightB);
+
+      scene.add(droneGroup);
+
+      policeDrones.push({
+        mesh: droneGroup,
+        lightR,
+        lightB,
+        speed: 18.0 + Math.random() * 6.0,
+        hp: 80
+      });
+    }
+
+function buildApexCarCustoms() {
       carCustomsGroup = new THREE.Group();
       carCustomsGroup.position.set(-85, 0, 45);
       scene.add(carCustomsGroup);
@@ -13523,6 +13941,38 @@ function buildNeoKyotoCity() {
     function handleInteractions() {
       if (!player.pos) return;
 
+      // 00. Supply Loot Crate Opening Check
+      if (supplyLootCrates && supplyLootCrates.length > 0) {
+        for (let crate of supplyLootCrates) {
+          if (crate.isAvailable && player.pos.distanceTo(crate.pos) < 4.2) {
+            crate.isAvailable = false;
+            crate.respawnTimer = 75.0; // Respawns after 75s
+            crate.group.visible = false;
+
+            gameState.tokens += crate.tokens;
+            gameState.health = 100;
+            gameState.shield = 100;
+            cyberAudio.playCrateOpen();
+
+            const tEl = document.getElementById('hud-tokens');
+            if (tEl) tEl.textContent = gameState.tokens.toLocaleString();
+
+            showStoreNotification(`🎁 LOOT CRATE CLAIMED AT ${crate.name.toUpperCase()}! +${crate.tokens} NEX TOKENS! HEALTH & SHIELD RESTORED!`);
+            return;
+          }
+        }
+      }
+
+      // 00B. Atlantis Hydro-Skimmer / Cyber Jet-Ski (-480, 0, -380)
+      if (hydroSkimmerGroup && player.pos.distanceTo(hydroSkimmerGroup.position) < 6.0 && !gameState.inVehicle) {
+        // Teleport rover to player and customize with aqua livery
+        roverGroup.position.copy(hydroSkimmerGroup.position);
+        gameState.inVehicle = true;
+        showStoreNotification('🌊 PILOTING ATLANTIS HYDRO-SKIMMER! ACCELERATING OVER OCEAN CANALS!');
+        cyberAudio.playWaterSplash();
+        return;
+      }
+
       // 0A. Apex Car Customization & Performance Garage (-85, 0, 45)
       if (player.pos.distanceTo(new THREE.Vector3(-85, 0, 45)) < 16.0) {
         openCarCustomsModal();
@@ -14246,6 +14696,58 @@ function buildNeoKyotoCity() {
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
+      // -------------------------------------------------------------
+      // REAL-TIME FPS & FRAME-PACING GUARDIAN (LOW-END PERFORMANCE)
+      // -------------------------------------------------------------
+      fpsFramesCount++;
+      const fpsNow = performance.now();
+      if (fpsNow - fpsLastCalcTime >= 350) {
+        currentMeasuredFPS = Math.round((fpsFramesCount * 1000) / (fpsNow - fpsLastCalcTime));
+        fpsFramesCount = 0;
+        fpsLastCalcTime = fpsNow;
+
+        const fpsEl = document.getElementById('hud-fps-val');
+        if (fpsEl) {
+          fpsEl.textContent = `${currentMeasuredFPS} FPS`;
+          if (currentMeasuredFPS >= 52) fpsEl.style.color = '#00ff88';
+          else if (currentMeasuredFPS >= 30) fpsEl.style.color = '#ffaa00';
+          else fpsEl.style.color = '#ff3366';
+        }
+
+        // Intelligent Auto-Protection: If low FPS on budget device, enable low-end turbo
+        if (currentMeasuredFPS < 26 && !gameState.settings.lowEndTurbo && !gameState._autoPerfTriggered) {
+          gameState._autoPerfTriggered = true;
+          setLowEndTurboMode(true);
+        }
+      }
+
+      // Update Wanted Heat Timer
+      if (gameState.wantedLevel > 0) {
+        gameState.wantedTimer -= delta;
+        if (gameState.wantedTimer <= 0) {
+          gameState.wantedLevel = Math.max(0, gameState.wantedLevel - 1);
+          gameState.wantedTimer = gameState.wantedLevel > 0 ? 18.0 : 0;
+          updateWantedHUD();
+        }
+      }
+
+      // Update Autonomous Police Pursuit Drones
+      if (policeDrones.length > 0 && player.pos) {
+        policeDrones.forEach((d, idx) => {
+          const dir = player.pos.clone().add(new THREE.Vector3(0, 8, 0)).sub(d.mesh.position);
+          const dist = dir.length();
+          if (dist > 3.0) {
+            dir.normalize();
+            d.mesh.position.addScaledVector(dir, d.speed * delta);
+            d.mesh.rotation.y = Math.atan2(dir.x, dir.z);
+          }
+          // Flash police red/blue lights
+          const flash = Math.sin(now * 0.015 + idx) > 0;
+          d.lightR.material.color.setHex(flash ? 0xff0033 : 0x220005);
+          d.lightB.material.color.setHex(flash ? 0x001122 : 0x0066ff);
+        });
+      }
+
       // Billow Cooling Tower Steam
       coolingTowers.forEach((ring, idx) => {
         ring.rotation.z += delta * (0.8 + idx * 0.4);
@@ -14288,9 +14790,16 @@ function buildNeoKyotoCity() {
         updateCityCitizens(delta, now);
       }
 
-      // Autonomous Metropolitan Cyber Traffic Circulation
+      // Autonomous Metropolitan Cyber Traffic Circulation (with Low-End Device Distance-Culling)
       if (gameState.currentWorld === 'earth' && cityTrafficVehicles.length > 0) {
-        cityTrafficVehicles.forEach(veh => {
+        const pPos = (player && player.pos) ? player.pos : null;
+        const maxTrafficDist = gameState.settings.lowEndTurbo ? 140 : 340;
+        const maxTrafficDistSq = maxTrafficDist * maxTrafficDist;
+
+        for (let i = 0; i < cityTrafficVehicles.length; i++) {
+          const veh = cityTrafficVehicles[i];
+
+          // Advance vehicle coordinates along arterial roads
           if (veh.axis === 'z') {
             veh.group.position.z += veh.dir * veh.speed * delta;
             if (veh.dir > 0 && veh.group.position.z > veh.maxB) {
@@ -14307,14 +14816,28 @@ function buildNeoKyotoCity() {
             }
           }
 
+          // Distance-based Level-of-Detail & Frustum Culling for Low-End Devices
+          if (pPos) {
+            const dx = veh.group.position.x - pPos.x;
+            const dz = veh.group.position.z - pPos.z;
+            const distSq = dx * dx + dz * dz;
+
+            if (distSq > maxTrafficDistSq) {
+              veh.group.visible = false;
+              continue; // Skip wheel spin and hover sine calculations for far away vehicles
+            } else {
+              veh.group.visible = true;
+            }
+          }
+
           if (veh.isHover) {
             veh.group.position.y = veh.baseY + Math.sin(now * 0.0035 + veh.seed) * 0.24;
-          } else if (veh.wheels) {
-            veh.wheels.forEach(w => {
-              w.rotation.x += (veh.speed / 0.42) * delta;
-            });
+          } else if (veh.wheels && (!gameState.settings.lowEndTurbo || (i % 2 === 0))) {
+            for (let wi = 0; wi < veh.wheels.length; wi++) {
+              veh.wheels[wi].rotation.x += (veh.speed / 0.42) * delta;
+            }
           }
-        });
+        }
       }
 
       // Synchronized Pulsating Aviation Hazard Beacons across Skyscraper Spires
@@ -14481,6 +15004,25 @@ function buildNeoKyotoCity() {
         if (!promptShown && player.pos.distanceTo(new THREE.Vector3(-360, 0, 520)) < 12.0) {
           promptEl.style.display = 'flex';
           document.getElementById('prompt-text').textContent = 'START TARGET SHOOTING CARNIVAL [F]';
+          promptShown = true;
+        }
+
+        // Supply Loot Crate Proximity
+        if (!promptShown && supplyLootCrates && supplyLootCrates.length > 0) {
+          for (let crate of supplyLootCrates) {
+            if (crate.isAvailable && player.pos.distanceTo(crate.pos) < 4.5) {
+              promptEl.style.display = 'flex';
+              document.getElementById('prompt-text').textContent = `OPEN SUPPLY LOOT CRATE (+${crate.tokens} NEX) [E / F]`;
+              promptShown = true;
+              break;
+            }
+          }
+        }
+
+        // Atlantis Hydro-Skimmer Proximity
+        if (!promptShown && hydroSkimmerGroup && player.pos.distanceTo(hydroSkimmerGroup.position) < 6.0 && !gameState.inVehicle) {
+          promptEl.style.display = 'flex';
+          document.getElementById('prompt-text').textContent = 'PILOT ATLANTIS HYDRO-SKIMMER [E / F]';
           promptShown = true;
         }
 
@@ -15332,6 +15874,19 @@ function buildNeoKyotoCity() {
       updateWorldAtmosphericParticles(delta, now);
       updateStarshipReentryEffects(now);
       updateRecreationalActivities(delta, now);
+
+      // Respawn Supply Loot Crates
+      if (supplyLootCrates && supplyLootCrates.length > 0) {
+        for (let crate of supplyLootCrates) {
+          if (!crate.isAvailable) {
+            crate.respawnTimer -= delta;
+            if (crate.respawnTimer <= 0) {
+              crate.isAvailable = true;
+              crate.group.visible = true;
+            }
+          }
+        }
+      }
       drawTacticalMinimapRadar(now);
 
       // Synchronize AstroShift Mobile In-Game HUD
@@ -16280,6 +16835,12 @@ function buildNeoKyotoCity() {
       } catch (e) {}
 
       loadSavedCarCustoms();
+      try {
+        const savedTurbo = localStorage.getItem('ASTRO_LOW_END_TURBO');
+        if (savedTurbo === '1') {
+          setLowEndTurboMode(true);
+        }
+      } catch(e) {}
       applyCarCustoms();
 
       try {
