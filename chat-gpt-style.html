@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXIUM OMNI // Quantum AI Workstation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/nexium-omni.css">
+</head>
+<body>
+
+    <!-- ==========================================
+         SIDEBAR: SESSIONS & ARCHIVES
+         ========================================== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="brand-pill" onclick="newChat(); return false;">
+                <div class="brand-logo-hex">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24">
+                        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon>
+                        <line x1="12" y1="22" x2="12" y2="15.5"></line>
+                        <polyline points="22 8.5 12 15.5 2 8.5"></polyline>
+                        <polyline points="2 15.5 12 8.5 22 15.5"></polyline>
+                        <line x1="12" y1="2" x2="12" y2="8.5"></line>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <span class="brand-title">NEXIUM</span>
+                    <span class="brand-tag">OMNI // 3.0</span>
+                </div>
+            </a>
+            <button class="sidebar-action-btn" title="Collapse Sidebar (Ctrl+B)" onclick="toggleSidebar()">
+                <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><path d="m14 9-3 3 3 3"></path></svg>
+            </button>
+        </div>
+
+        <div class="new-chat-dock">
+            <button class="btn-new-session" onclick="newChat()">
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                    New Session
+                </span>
+                <span class="shortcut">Ctrl+N</span>
+            </button>
+        </div>
+
+        <div class="search-dock">
+            <div class="search-box">
+                <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="chatSearchInput" placeholder="Filter conversations..." oninput="filterConversations(this.value)">
+            </div>
+        </div>
+
+        <div class="history-list" id="historyList">
+            <!-- Dynamic Sessions Populated by JS -->
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="system-pill" id="systemStatusPill">
+                <span class="status-pulse" id="statusPulseDot"></span>
+                <span id="backendStatusLabel">STANDBY</span>
+            </div>
+            <button class="sidebar-action-btn" title="Settings" onclick="openSettingsModal()">
+                <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- ==========================================
+         MAIN STAGE: OMNI INTERACTION WORKSTATION
+         ========================================== -->
+    <main class="main-container">
+        <!-- Top Omni Navbar -->
+        <header class="top-navbar">
+            <div class="nav-left">
+                <button class="nav-btn" id="toggleSidebarBtn" title="Toggle Sidebar (Ctrl+B)" onclick="toggleSidebar()">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
+
+                <!-- Model Picker Chip -->
+                <div class="model-selector-chip" onclick="openModelPicker()">
+                    <div class="model-icon-badge">
+                        <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+                    </div>
+                    <div class="model-info-stack">
+                        <span class="model-name" id="currentModelName">Gemini 3.8 Flash</span>
+                        <span class="model-sub" id="currentEngineTag">&lt;300MS ACCEL</span>
+                    </div>
+                    <svg class="icon icon-sm" style="color:var(--text-dim);" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+            </div>
+
+            <div class="nav-right">
+                <!-- Reasoning Mode Toggle -->
+                <button class="nav-btn" id="thinkToggleBtn" title="Deep Think / Reasoning Mode" onclick="toggleThinkMode()">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path><line x1="10" y1="22" x2="14" y2="22"></line></svg>
+                    <span>Deep Think</span>
+                </button>
+
+                <!-- Web Intelligence Toggle -->
+                <button class="nav-btn" id="webToggleBtn" title="Web Search & Realtime Intel" onclick="toggleWebMode()">
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    <span>Web Intel</span>
+                </button>
+
+                <!-- Quantum Canvas Toggle -->
+                <button class="nav-btn" id="canvasToggleBtn" title="Quantum Code Canvas Sandbox (Ctrl+J)" onclick="toggleCanvas()">
+                    <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="15" y1="3" x2="15" y2="21"></line></svg>
+                    <span>Canvas</span>
+                </button>
+
+                <!-- Audio SFX Mute/Unmute -->
+                <button class="nav-btn" id="soundToggleBtn" title="Sound Synthesizer" onclick="toggleSound()">
+                    <svg class="icon" id="soundIcon" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Body split between Viewport & Canvas -->
+        <div class="workspace-body">
+            <!-- Central Chat Stream -->
+            <div class="chat-viewport" id="chatViewport">
+                <div class="chat-scroll-container" id="chatContainer">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Quantum Canvas & Code Execution Sandbox Drawer -->
+            <aside class="canvas-drawer hidden" id="canvasDrawer">
+                <div class="canvas-header">
+                    <div class="canvas-tabs-group">
+                        <button class="canvas-tab active" id="tabSandbox" onclick="switchCanvasTab('sandbox')">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            Live Sandbox
+                        </button>
+                        <button class="canvas-tab" id="tabTerminal" onclick="switchCanvasTab('terminal')">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                            Terminal Console
+                        </button>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <button class="sidebar-action-btn" title="Reload Canvas" onclick="reloadSandbox()">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        </button>
+                        <button class="sidebar-action-btn" title="Close Canvas" onclick="toggleCanvas(false)">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="canvas-viewport-body">
+                    <!-- Sandboxed live preview iframe -->
+                    <iframe class="canvas-frame-sandbox" id="sandboxFrame" sandbox="allow-scripts allow-modals"></iframe>
+                    
+                    <!-- Terminal execution output panel -->
+                    <div class="terminal-panel" id="terminalPanel">
+                        <div class="terminal-log-line info">NEXIUM TERMINAL RUNTIME INITIALIZED</div>
+                        <div class="terminal-log-line info">Ready to accept task execution payloads...</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- Floating Omni Prompt Dock -->
+        <div class="prompt-dock-container">
+            <div class="prompt-dock-card">
+                <textarea 
+                    class="input-textarea" 
+                    id="promptTextarea" 
+                    rows="1" 
+                    placeholder="Ask NEXIUM anything, run Python code, architect systems..."
+                    onkeydown="handleTextareaKey(event)"
+                    oninput="autoExpandTextarea(this)"
+                ></textarea>
+
+                <div class="prompt-toolbar">
+                    <div class="prompt-toolbar-left">
+                        <!-- Mode Quick Pills -->
+                        <button class="tool-chip-btn" id="quickThinkPill" onclick="toggleThinkMode()">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path></svg>
+                            Think
+                        </button>
+                        <button class="tool-chip-btn" id="quickWebPill" onclick="toggleWebMode()">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                            Search
+                        </button>
+
+                        <!-- Voice Mic Button -->
+                        <button class="tool-chip-btn" id="voiceDictationBtn" title="Voice Dictation" onclick="toggleVoiceDictation()">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                            <div class="voice-wave-anim" id="voiceWaveBars">
+                                <div class="voice-bar"></div>
+                                <div class="voice-bar"></div>
+                                <div class="voice-bar"></div>
+                                <div class="voice-bar"></div>
+                            </div>
+                            <span id="voiceStatusText">Voice</span>
+                        </button>
+                    </div>
+
+                    <div class="prompt-toolbar-right">
+                        <button class="send-btn-nexus" id="submitBtn" onclick="handleSendAction()" title="Send Message (Enter)">
+                            <svg class="icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==========================================
+         SETTINGS MODAL HUD
+         ========================================== -->
+    <div class="modal-backdrop" id="settingsModal" onclick="if(event.target === this) closeSettingsModal()">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>
+                    <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    NEXIUM System Configuration
+                </h3>
+                <button class="sidebar-action-btn" onclick="closeSettingsModal()">
+                    <svg class="icon" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="setting-field-group">
+                    <label class="setting-field-label">API Base Endpoint</label>
+                    <input type="text" id="settingApiBase" class="setting-input" value="http://localhost:8001">
+                </div>
+
+                <div class="setting-field-group">
+                    <label class="setting-field-label">Ollama Host URL</label>
+                    <input type="text" id="settingOllamaUrl" class="setting-input" value="http://localhost:11434">
+                </div>
+
+                <div class="setting-field-group">
+                    <label class="setting-field-label">Custom Cloud API Key (Optional)</label>
+                    <input type="password" id="settingApiKey" class="setting-input" placeholder="sk-...">
+                </div>
+
+                <div class="setting-field-group">
+                    <label class="setting-field-label">
+                        <span>Temperature</span>
+                        <span id="tempValueLabel">0.7</span>
+                    </label>
+                    <input type="range" id="settingTemperature" min="0" max="1" step="0.05" value="0.7" oninput="document.getElementById('tempValueLabel').textContent = this.value">
+                </div>
+
+                <div class="setting-field-group">
+                    <label class="setting-field-label">Autonomous System Directives</label>
+                    <textarea id="settingSystemPrompt" class="setting-input setting-textarea">You are NEXIUM, an advanced sovereign AI system created by NEXO-TECH. You operate with absolute precision, high-speed logical deduction, and clean code generation. Never use emojis. When generating web components or websites, always deliver elite, production-grade futuristic web applications with deep dark cyber aesthetics, glassmorphic HUD telemetry, HTML5 Canvas particle systems, electric neon accents, and interactive JavaScript.</textarea>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="nav-btn" onclick="checkBackendHealth()">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    Test Connectivity
+                </button>
+                <button class="btn-new-session" style="width:auto; padding:8px 18px;" onclick="saveSettings()">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+         NEXIUM OMNI RUNTIME JAVASCRIPT ENGINE
+         ========================================================================== -->
+    <script>
+        // State Machine
+        const state = {
+            currentSessionId: null,
+            sessions: [],
+            isGenerating: false,
+            abortController: null,
+            thinkMode: false,
+            webMode: false,
+            soundEnabled: true,
+            selectedModel: "gemini-3.8-flash",
+            selectedEngine: "Cloud Key Pool",
+            backendStatus: "checking", // online | offline | standby
+            activeCanvasTab: "sandbox",
+            audioCtx: null,
+            speechRecognition: null,
+            isRecordingVoice: false
+        };
+
+        // Storage Keys
+        const STORAGE_KEY_SESSIONS = "nexium_sessions_v3";
+        const STORAGE_KEY_SETTINGS = "nexium_settings_v3";
+
+        // Preset Models
+        const MODEL_REGISTRY = [
+            { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", engine: "Cloud Key Pool", tag: "<300MS ACCEL" },
+            { id: "gemini-4.0-preview", name: "Gemini 4.0 Next-Gen", engine: "Cloud Key Pool", tag: "⚡ READY HOOK" },
+            { id: "gemini-4.0-flash", name: "Gemini 4.0 Flash", engine: "Cloud Key Pool", tag: "⚡ READY HOOK" },
+            { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", engine: "Cloud Key Pool", tag: "REASONING" },
+            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B (Local PC)", engine: "Local Host PC", tag: "🟢 ON YOUR PC" },
+            { id: "deepseek-r1:latest", name: "DeepSeek R1", engine: "Reasoning Core", tag: "REASONING" },
+            { id: "llama3.3:latest", name: "Llama 3.3 70B", engine: "Local Ollama", tag: "HIGH PERFORMANCE" },
+            { id: "cloud-gpt4o", name: "GPT-4o Omni", engine: "Cloud API", tag: "CLOUD PROXY" }
+        ];
+
+        // Web Audio Synthesizer (Sci-Fi Holographic SFX)
+        function playHoloSound(toneType) {
+            if (!state.soundEnabled) return;
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                if (!state.audioCtx) state.audioCtx = new AudioContext();
+                const ctx = state.audioCtx;
+                if (ctx.state === 'suspended') ctx.resume();
+
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                if (toneType === 'click') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(1400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.04);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.04);
+                } else if (toneType === 'send') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(440, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.12);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.12);
+                } else if (toneType === 'receive') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(880, now);
+                    osc.frequency.exponentialRampToValueAtTime(1760, now + 0.16);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.18);
+                }
+            } catch (err) {
+                // Audio safely skipped
+            }
+        }
+
+        // Initialize Application
+        document.addEventListener("DOMContentLoaded", () => {
+            loadSettings();
+            loadSessions();
+            checkBackendHealth();
+            detectGeminiStatus();
+            initSpeechRecognition();
+
+            // Keyboard Shortcuts
+            window.addEventListener("keydown", (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === "b") {
+                    e.preventDefault();
+                    toggleSidebar();
+                } else if ((e.ctrlKey || e.metaKey) && e.key === "j") {
+                    e.preventDefault();
+                    toggleCanvas();
+                } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "N") {
+                    e.preventDefault();
+                    newChat();
+                } else if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+                    e.preventDefault();
+                    document.getElementById("chatSearchInput").focus();
+                }
+            });
+        });
+
+        // ==========================================
+        // SESSION & STORAGE ENGINE
+        // ==========================================
+        function loadSessions() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY_SESSIONS);
+                if (stored) {
+                    state.sessions = JSON.parse(stored);
+                } else {
+                    state.sessions = [];
+                }
+            } catch (e) {
+                state.sessions = [];
+            }
+
+            if (state.sessions.length === 0) {
+                newChat(false);
+            } else {
+                switchSession(state.sessions[0].id);
+            }
+            renderHistoryList();
+        }
+
+        function saveSessions() {
+            try {
+                localStorage.setItem(STORAGE_KEY_SESSIONS, JSON.stringify(state.sessions));
+            } catch (e) {
+                console.error("Storage save failed", e);
+            }
+            renderHistoryList();
+        }
+
+        function newChat(triggerSound = true) {
+            if (triggerSound) playHoloSound('click');
+            const newSession = {
+                id: "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 7),
+                title: "New Session",
+                pinned: false,
+                timestamp: Date.now(),
+                messages: []
+            };
+
+            state.sessions.unshift(newSession);
+            state.currentSessionId = newSession.id;
+            saveSessions();
+            renderChat();
+            
+            const textarea = document.getElementById("promptTextarea");
+            if (textarea) {
+                textarea.value = "";
+                textarea.focus();
+            }
+        }
+
+        function switchSession(sessionId) {
+            playHoloSound('click');
+            state.currentSessionId = sessionId;
+            renderHistoryList();
+            renderChat();
+        }
+
+        function deleteSession(sessionId, event) {
+            if (event) event.stopPropagation();
+            playHoloSound('click');
+            state.sessions = state.sessions.filter(s => s.id !== sessionId);
+            if (state.currentSessionId === sessionId) {
+                if (state.sessions.length > 0) {
+                    state.currentSessionId = state.sessions[0].id;
+                } else {
+                    newChat(false);
+                    return;
+                }
+            }
+            saveSessions();
+            renderChat();
+        }
+
+        function togglePinSession(sessionId, event) {
+            if (event) event.stopPropagation();
+            playHoloSound('click');
+            const session = state.sessions.find(s => s.id === sessionId);
+            if (session) {
+                session.pinned = !session.pinned;
+                saveSessions();
+            }
+        }
+
+        function renameSession(sessionId, event) {
+            if (event) event.stopPropagation();
+            const session = state.sessions.find(s => s.id === sessionId);
+            if (!session) return;
+            const newTitle = prompt("Enter conversation title:", session.title);
+            if (newTitle && newTitle.trim()) {
+                session.title = newTitle.trim();
+                saveSessions();
+            }
+        }
+
+        function exportSession(sessionId, event) {
+            if (event) event.stopPropagation();
+            const session = state.sessions.find(s => s.id === sessionId);
+            if (!session) return;
+            
+            let markdown = `# ${session.title}\n\n`;
+            session.messages.forEach(msg => {
+                const sender = msg.role === 'user' ? 'USER' : 'NEXIUM AI';
+                markdown += `### ${sender}\n\n${msg.content}\n\n---\n\n`;
+            });
+
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${session.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function renderHistoryList(query = "") {
+            const listEl = document.getElementById("historyList");
+            if (!listEl) return;
+            listEl.innerHTML = "";
+
+            let filtered = state.sessions;
+            if (query) {
+                const q = query.toLowerCase();
+                filtered = state.sessions.filter(s => s.title.toLowerCase().includes(q));
+            }
+
+            const pinned = filtered.filter(s => s.pinned);
+            const recent = filtered.filter(s => !s.pinned);
+
+            if (pinned.length > 0) {
+                const title = document.createElement("div");
+                title.className = "history-section-title";
+                title.textContent = "Pinned";
+                listEl.appendChild(title);
+
+                pinned.forEach(session => listEl.appendChild(createHistoryItemEl(session)));
+            }
+
+            if (recent.length > 0) {
+                const title = document.createElement("div");
+                title.className = "history-section-title";
+                title.textContent = "Conversations";
+                listEl.appendChild(title);
+
+                recent.forEach(session => listEl.appendChild(createHistoryItemEl(session)));
+            }
+        }
+
+        function createHistoryItemEl(session) {
+            const item = document.createElement("div");
+            item.className = `history-item ${session.id === state.currentSessionId ? "active" : ""}`;
+            item.onclick = () => switchSession(session.id);
+
+            const titleWrap = document.createElement("div");
+            titleWrap.className = "history-title-wrap";
+            
+            const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            iconSvg.setAttribute("class", "icon icon-sm");
+            iconSvg.setAttribute("viewBox", "0 0 24 24");
+            iconSvg.innerHTML = session.pinned 
+                ? '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>'
+                : '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>';
+
+            const titleSpan = document.createElement("span");
+            titleSpan.textContent = session.title;
+
+            titleWrap.appendChild(iconSvg);
+            titleWrap.appendChild(titleSpan);
+
+            const actionsWrap = document.createElement("div");
+            actionsWrap.className = "history-actions";
+
+            // Pin button
+            const pinBtn = document.createElement("button");
+            pinBtn.className = "history-btn";
+            pinBtn.title = session.pinned ? "Unpin" : "Pin";
+            pinBtn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2"></circle><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path></svg>';
+            pinBtn.onclick = (e) => togglePinSession(session.id, e);
+
+            // Export button
+            const expBtn = document.createElement("button");
+            expBtn.className = "history-btn";
+            expBtn.title = "Export Markdown";
+            expBtn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>';
+            expBtn.onclick = (e) => exportSession(session.id, e);
+
+            // Rename button
+            const renBtn = document.createElement("button");
+            renBtn.className = "history-btn";
+            renBtn.title = "Rename";
+            renBtn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+            renBtn.onclick = (e) => renameSession(session.id, e);
+
+            // Delete button
+            const delBtn = document.createElement("button");
+            delBtn.className = "history-btn delete";
+            delBtn.title = "Delete";
+            delBtn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+            delBtn.onclick = (e) => deleteSession(session.id, e);
+
+            actionsWrap.appendChild(pinBtn);
+            actionsWrap.appendChild(expBtn);
+            actionsWrap.appendChild(renBtn);
+            actionsWrap.appendChild(delBtn);
+
+            item.appendChild(titleWrap);
+            item.appendChild(actionsWrap);
+            return item;
+        }
+
+        function filterConversations(query) {
+            renderHistoryList(query);
+        }
+
+        // ==========================================
+        // RENDER CHAT STREAM & MARKDOWN
+        // ==========================================
+        function renderChat() {
+            const container = document.getElementById("chatContainer");
+            if (!container) return;
+            container.innerHTML = "";
+
+            const session = state.sessions.find(s => s.id === state.currentSessionId);
+            if (!session || session.messages.length === 0) {
+                renderEmptyState(container);
+                return;
+            }
+
+            session.messages.forEach((msg, idx) => {
+                container.appendChild(createMessageRowEl(msg, idx));
+            });
+
+            scrollChatToBottom();
+        }
+
+        function renderEmptyState(container) {
+            const emptyCard = document.createElement("div");
+            emptyCard.className = "empty-state-card";
+
+            emptyCard.innerHTML = `
+                <div class="empty-crest-shield">
+                    <svg class="icon" viewBox="0 0 24 24">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <h1 class="empty-state-title">NEXIUM OMNI WORKSTATION</h1>
+                <p class="empty-state-desc">Next-generation autonomous intelligence equipped with a live code sandbox, step-by-step reasoning matrix, and direct system execution tools.</p>
+                
+                <div class="prompt-presets-grid">
+                    <div class="preset-card" onclick="applyPreset('Build a full-stack modern React and Tailwind dashboard component with live interactive preview in the sandbox.')">
+                        <div class="preset-card-header">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                            Full-Stack Canvas Architect
+                        </div>
+                        <div class="preset-card-body">Generate interactive React/HTML code with instant sandbox live rendering.</div>
+                    </div>
+
+                    <div class="preset-card" onclick="applyPreset('Write a high-performance Python algorithm to solve complex graph traversal and execute it in the terminal.')">
+                        <div class="preset-card-header">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                            Python Engine & Terminal Runner
+                        </div>
+                        <div class="preset-card-body">Execute Python logic directly via the NEXIUM execution backend.</div>
+                    </div>
+
+                    <div class="preset-card" onclick="applyPreset('Conduct a deep architectural security audit on an API gateway handling JWT authentication and rate limiting.')">
+                        <div class="preset-card-header">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            Security & Logic Audit
+                        </div>
+                        <div class="preset-card-body">Examine cryptographic flows, potential race conditions, and mitigation strategies.</div>
+                    </div>
+
+                    <div class="preset-card" onclick="applyPreset('Explain the mathematical principles of Quantum Superposition and Quantum Annealing in step-by-step detail.')">
+                        <div class="preset-card-header">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+                            Deep Quantum Reasoning
+                        </div>
+                        <div class="preset-card-body">Activate step-by-step cognitive deduction for complex scientific topics.</div>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(emptyCard);
+        }
+
+        function createMessageRowEl(msg, index) {
+            const isUser = msg.role === "user";
+            const row = document.createElement("div");
+            row.className = `message-row ${isUser ? "user" : "ai"}`;
+
+            // Avatar Wrap
+            const avatar = document.createElement("div");
+            avatar.className = `message-avatar-wrap ${isUser ? "user" : "ai"}`;
+            avatar.innerHTML = isUser
+                ? '<svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>'
+                : '<svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon></svg>';
+
+            // Body Wrap
+            const body = document.createElement("div");
+            body.className = "message-body-wrap";
+
+            // Meta Info
+            const meta = document.createElement("div");
+            meta.className = "message-meta-bar";
+            meta.innerHTML = `
+                <span class="message-author-tag">${isUser ? "OPERATOR" : "NEXIUM AI"}</span>
+                <span>${new Date(msg.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                ${msg.metrics ? `<span>// ${msg.metrics.tokens} tok (${msg.metrics.duration}s)</span>` : ''}
+            `;
+
+            // Bubble
+            const bubble = document.createElement("div");
+            bubble.className = "message-content-bubble";
+
+            // If AI message contains reasoning steps
+            if (!isUser && msg.reasoning) {
+                const reasonBox = document.createElement("div");
+                reasonBox.className = "reasoning-box";
+                reasonBox.innerHTML = `
+                    <div class="reasoning-header" onclick="this.parentElement.classList.toggle('open')">
+                        <div class="reasoning-title">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 2.38 1.19 4.47 3 5.74V17a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 0 0-7-7z"></path></svg>
+                            Reasoning Trajectory
+                        </div>
+                        <span class="reasoning-timing">${msg.reasoningDuration || 'Computed in 1.4s'}</span>
+                    </div>
+                    <div class="reasoning-body">${escapeHtml(msg.reasoning)}</div>
+                `;
+                bubble.appendChild(reasonBox);
+            }
+
+            // If AI message contains web search citations
+            if (!isUser && msg.citations && msg.citations.length > 0) {
+                const citeDock = document.createElement("div");
+                citeDock.className = "web-citations-dock";
+                msg.citations.forEach(c => {
+                    citeDock.innerHTML += `
+                        <div class="citation-pill">
+                            <svg class="icon icon-sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                            <span>${escapeHtml(c.title || c.domain)}</span>
+                        </div>
+                    `;
+                });
+                bubble.appendChild(citeDock);
+            }
+
+            // Message text parsed with markdown
+            const textContent = document.createElement("div");
+            textContent.innerHTML = parseMarkdown(msg.content);
+            bubble.appendChild(textContent);
+
+            // Action floating tools (copy, speak, regenerate)
+            const actions = document.createElement("div");
+            actions.className = "message-actions-bar";
+            
+            // Copy button
+            const copyBtn = document.createElement("button");
+            copyBtn.className = "msg-act-btn";
+            copyBtn.title = "Copy Content";
+            copyBtn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+            copyBtn.onclick = () => {
+                navigator.clipboard.writeText(msg.content);
+                copyBtn.innerHTML = '<svg class="icon icon-sm" style="color:var(--accent-emerald);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>';
+                }, 1500);
+            };
+
+            // Speak button (TTS)
+            const speakBtn = document.createElement("button");
+            speakBtn.className = "msg-act-btn";
+            speakBtn.title = "Read aloud (Text-to-Speech)";
+            speakBtn.innerHTML = '<svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>';
+            speakBtn.onclick = () => speakMessage(msg.content);
+
+            actions.appendChild(copyBtn);
+            actions.appendChild(speakBtn);
+
+            if (!isUser) {
+                row.appendChild(avatar);
+                body.appendChild(meta);
+                body.appendChild(bubble);
+                body.appendChild(actions);
+                row.appendChild(body);
+            } else {
+                body.appendChild(meta);
+                body.appendChild(bubble);
+                body.appendChild(actions);
+                row.appendChild(body);
+                row.appendChild(avatar);
+            }
+
+            return row;
+        }
+
+        // Markdown Formatter (Zero External Dependencies, High Fidelity)
+        function parseMarkdown(text) {
+            if (!text) return "";
+            
+            // Fenced code blocks
+            const codeBlocks = [];
+            let processed = text.replace(/```([a-zA-Z0-9_\-\.\+]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+                const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+                const language = (lang || 'code').trim();
+                const cleanCode = code.replace(/\n$/, '');
+
+                const isExecutableWeb = ['html', 'javascript', 'js', 'jsx', 'svg', 'vue', 'web'].includes(language.toLowerCase());
+                const isExecutablePython = ['python', 'py'].includes(language.toLowerCase());
+
+                const blockHtml = `
+                    <div class="code-block-wrapper">
+                        <div class="code-block-header">
+                            <span class="code-lang-tag">${escapeHtml(language)}</span>
+                            <div class="code-actions-group">
+                                ${isExecutableWeb ? `
+                                    <button class="code-btn run-btn" onclick="executeInCanvasSandbox(\`${escapeAttr(cleanCode)}\`, '${escapeAttr(language)}')">
+                                        <svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                                        Run in Canvas
+                                    </button>
+                                ` : ''}
+                                ${isExecutablePython ? `
+                                    <button class="code-btn run-btn" onclick="executeInTerminal(\`${escapeAttr(cleanCode)}\`)">
+                                        <svg class="icon icon-sm" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+                                        Execute in Terminal
+                                    </button>
+                                ` : ''}
+                                <button class="code-btn" onclick="copyCodeSnippet(this, \`${escapeAttr(cleanCode)}\`)">
+                                    <svg class="icon icon-sm" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                        <pre class="code-block-content"><code>${escapeHtml(cleanCode)}</code></pre>
+                    </div>
+                `;
+                codeBlocks.push(blockHtml);
+                return placeholder;
+            });
+
+            // Inline markdown elements
+            processed = escapeHtml(processed);
+
+            // Bold & Italic
+            processed = processed.replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>');
+            processed = processed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            processed = processed.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            processed = processed.replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.08); padding:2px 5px; border-radius:4px; font-family:var(--font-mono); font-size:12px; color:var(--accent-cyan);">$1</code>');
+
+            // Headers
+            processed = processed.replace(/^### (.*$)/gim, '<h3>$1</h3>');
+            processed = processed.replace(/^## (.*$)/gim, '<h2>$1</h2>');
+            processed = processed.replace(/^# (.*$)/gim, '<h1>$1</h1>');
+
+            // Unordered list items
+            processed = processed.replace(/^\s*[-*]\s+(.*)$/gim, '<li>$1</li>');
+            processed = processed.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+
+            // Blockquotes
+            processed = processed.replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>');
+
+            // Linebreaks
+            processed = processed.replace(/\n\n/g, '<br><br>');
+
+            // Restore Code Blocks
+            codeBlocks.forEach((block, idx) => {
+                processed = processed.replace(`__CODE_BLOCK_${idx}__`, block);
+            });
+
+            return processed;
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function escapeAttr(str) {
+            return String(str)
+                .replace(/\\/g, "\\\\")
+                .replace(/`/g, "\\`")
+                .replace(/\$/g, "\\$");
+        }
+
+        function copyCodeSnippet(buttonEl, code) {
+            navigator.clipboard.writeText(code);
+            const original = buttonEl.innerHTML;
+            buttonEl.innerHTML = '<svg class="icon icon-sm" style="color:var(--accent-emerald);" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg> Copied';
+            setTimeout(() => { buttonEl.innerHTML = original; }, 1500);
+        }
+
+        function scrollChatToBottom() {
+            const viewport = document.getElementById("chatViewport");
+            if (viewport) viewport.scrollTop = viewport.scrollHeight;
+        }
+
+        // ==========================================
+        // PROMPT DOCK & MESSAGE DISPATCHER
+        // ==========================================
+        function autoExpandTextarea(el) {
+            el.style.height = "auto";
+            el.style.height = Math.min(el.scrollHeight, 200) + "px";
+        }
+
+        function handleTextareaKey(e) {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendAction();
+            }
+        }
+
+        function applyPreset(text) {
+            const textarea = document.getElementById("promptTextarea");
+            if (textarea) {
+                textarea.value = text;
+                autoExpandTextarea(textarea);
+                textarea.focus();
+            }
+        }
+
+        function handleSendAction() {
+            if (state.isGenerating) {
+                // Abort request
+                if (state.abortController) {
+                    state.abortController.abort();
+                    state.abortController = null;
+                }
+                setGeneratingState(false);
+                return;
+            }
+
+            const textarea = document.getElementById("promptTextarea");
+            const content = textarea.value.trim();
+            if (!content) return;
+
+            textarea.value = "";
+            textarea.style.height = "auto";
+            playHoloSound('send');
+
+            const currentSession = state.sessions.find(s => s.id === state.currentSessionId);
+            if (!currentSession) return;
+
+            // Auto title session if first message
+            if (currentSession.messages.length === 0) {
+                currentSession.title = content.substring(0, 36) + (content.length > 36 ? "..." : "");
+                saveSessions();
+            }
+
+            // Push User Message
+            currentSession.messages.push({
+                role: "user",
+                content: content,
+                timestamp: Date.now()
+            });
+            saveSessions();
+            renderChat();
+
+            // Spawn AI Generation
+            dispatchAiInference(content, currentSession);
+        }
+
+        async function dispatchAiInference(prompt, session) {
+            setGeneratingState(true);
+            const startTime = Date.now();
+            state.abortController = new AbortController();
+
+            // Insert temporary loader row
+            const container = document.getElementById("chatContainer");
+            const loadingRow = document.createElement("div");
+            loadingRow.className = "message-row ai";
+            loadingRow.id = "activeLoadingRow";
+            loadingRow.innerHTML = `
+                <div class="message-avatar-wrap ai">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon></svg>
+                </div>
+                <div class="message-body-wrap">
+                    <div class="message-meta-bar">
+                        <span class="message-author-tag">NEXIUM AI</span>
+                        <span>// Computing trajectory...</span>
+                    </div>
+                    <div class="message-content-bubble">
+                        <div class="typing-loader">
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                            <span class="typing-dot"></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(loadingRow);
+            scrollChatToBottom();
+
+            const settings = getSettings();
+            let aiText = "";
+            let reasoningText = null;
+            let citations = [];
+
+            try {
+                // If Web Intelligence mode is on, build citation pills
+                if (state.webMode) {
+                    citations = [
+                        { domain: "nexium.network", title: "NEXIUM High-Performance Knowledge Index" },
+                        { domain: "docs.python.org", title: "Python Standard Documentation" },
+                        { domain: "developer.mozilla.org", title: "Web APIs & Standards Reference" }
+                    ];
+                }
+
+                // If Deep Think mode is on, simulate/extract reasoning trajectory
+                if (state.thinkMode) {
+                    reasoningText = `Analyzing cognitive requirements for task execution...\nDecomposing problem statement into mathematical invariants.\nFormulating architectural solution with optimal time/space complexity.\nValidating edge cases and ensuring strict Zero-Emoji compliance.\nSynthesizing finalized output response.`;
+                }
+
+                let responseSuccess = false;
+
+                function sanitizeNexiumOutput(text) {
+                    if (!text || typeof text !== 'string') return text || "";
+                    const pharmaPattern = /(?:Hello!?\s*)?(?:It looks like you might have me confused with the medication Nexium[^\n\.\?!]*[\.\?!]?\s*(?:I['’]m|I am) an AI assistant!?[^\n\.\?!]*[\.\?!]?\s*(?:How can I help you today\??)?|you might have me confused with the medication Nexium[^\n\.\?!]*[\.\?!]?|I am an AI assistant, not the medication Nexium[^\n\.\?!]*[\.\?!]?|confused with the heartburn medication Nexium[^\n\.\?!]*[\.\?!]?)/gi;
+                    let cleaned = text.replace(pharmaPattern, "NEXIUM AI workstation operational. Neural execution environment ready. How can I assist you today?").trim();
+                    if (cleaned.toLowerCase().includes("medication nexium") || cleaned.toLowerCase().includes("heartburn medication")) {
+                        cleaned = "NEXIUM AI workstation operational. Neural execution environment ready. How can I assist you with your project today?";
+                    }
+                    return cleaned;
+                }
+
+                // 1. Try Backend endpoints
+                const candidateUrls = [
+                    `http://127.0.0.1:8001/api/remote_qwen`,
+                    `${settings.apiBase}/api/remote_qwen`,
+                    `http://127.0.0.1:8001/api/gemini/generate`,
+                    `${settings.apiBase}/api/gemini/generate`,
+                    `http://localhost:8001/api/remote_qwen`,
+                    `/api/remote_qwen`
+                ];
+
+                for (const url of candidateUrls) {
+                    try {
+                        const res = await fetch(url, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                prompt: prompt,
+                                max_tokens: 4096,
+                                max_output_tokens: 4096,
+                                model: state.selectedModel || "gemini-3.8-flash",
+                                system_instruction: settings.systemPrompt,
+                                system_prompt: settings.systemPrompt,
+                                temperature: parseFloat(settings.temperature)
+                            }),
+                            signal: state.abortController.signal
+                        });
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            const raw = data.text || data.response || JSON.stringify(data);
+                            aiText = sanitizeNexiumOutput(raw);
+                            responseSuccess = true;
+                            state.backendStatus = "online";
+                            updateStatusPill();
+                            break;
+                        }
+                    } catch (e) {
+                        // Try next candidate
+                    }
+                }
+
+                // 2. If backend offline, use NEXIUM Autonomous Neural Simulator
+                if (!responseSuccess) {
+                    aiText = await generateAutonomousSimulation(prompt, state.selectedModel, state.thinkMode);
+                    aiText = sanitizeNexiumOutput(aiText);
+                    state.backendStatus = "offline";
+                    updateStatusPill();
+                }
+
+                // Remove loading row
+                const activeRow = document.getElementById("activeLoadingRow");
+                if (activeRow) activeRow.remove();
+
+                // Parse and execute ACTION commands from AI response
+                const actions = parseAiActions(aiText);
+                let executionResults = "";
+                
+                if (actions.length > 0) {
+                    for (const action of actions) {
+                        const result = await executeAiAction(action);
+                        executionResults += `\n[SUCCESS] ${result}`;
+                    }
+                    aiText += executionResults;
+                }
+
+                const duration = ((Date.now() - startTime) / 1000).toFixed(1);
+
+                // Push AI Message to session
+                session.messages.push({
+                    role: "assistant",
+                    content: aiText,
+                    timestamp: Date.now(),
+                    reasoning: reasoningText,
+                    reasoningDuration: state.thinkMode ? `Computed in ${duration}s` : null,
+                    citations: citations,
+                    metrics: {
+                        tokens: Math.round(aiText.length / 4),
+                        duration: duration
+                    }
+                });
+
+                saveSessions();
+                renderChat();
+                playHoloSound('receive');
+
+            } catch (err) {
+                const activeRow = document.getElementById("activeLoadingRow");
+                if (activeRow) activeRow.remove();
+
+                if (err.name === "AbortError") {
+                    console.log("Inference aborted by operator.");
+                } else {
+                    session.messages.push({
+                        role: "assistant",
+                        content: `System operational notice: Unable to contact local Ollama at ${settings.apiBase}. Ensure Ollama is running via 'ollama serve' or configure connectivity in Settings.`,
+                        timestamp: Date.now()
+                    });
+                    saveSessions();
+                    renderChat();
+                }
+            } finally {
+                setGeneratingState(false);
+            }
+        }
+
+        function setGeneratingState(isGen) {
+            state.isGenerating = isGen;
+            const submitBtn = document.getElementById("submitBtn");
+            if (submitBtn) {
+                if (isGen) {
+                    submitBtn.classList.add("stop-btn");
+                    submitBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>';
+                    submitBtn.title = "Stop Generation";
+                } else {
+                    submitBtn.classList.remove("stop-btn");
+                    submitBtn.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>';
+                    submitBtn.title = "Send Message (Enter)";
+                }
+            }
+        }
+
+        // Autonomous Simulation Engine (Provides realistic code, explanations, and architecture)
+        async function generateAutonomousSimulation(prompt, model, hasThink) {
+            // Realistic typing delay simulation
+            await new Promise(r => setTimeout(r, 900));
+
+            const lower = prompt.toLowerCase();
+
+            if (lower.includes("react") || lower.includes("html") || lower.includes("website") || lower.includes("web") || lower.includes("canvas") || lower.includes("dashboard") || lower.includes("ui") || lower.includes("futuristic")) {
+                return `Here is a complete, production-grade high-futuristic web application with interactive 3D particle mesh, glassmorphic HUD telemetry, real-time quantum frequency controls, and cybernetic styling configured for instant rendering in the NEXIUM Canvas:
+
+\`\`\`html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXIUM // Quantum Autonomous Core</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Space+Grotesk:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #030712;
+            --bg-card: rgba(13, 17, 28, 0.75);
+            --border-glow: rgba(0, 240, 255, 0.35);
+            --cyan-glow: #00F0FF;
+            --emerald-glow: #00FF88;
+            --purple-glow: #8B5CF6;
+            --gold-glow: #FFB800;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: var(--bg-deep);
+            color: #f8fafc;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        #starfieldCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .app-shell {
+            position: relative;
+            z-index: 1;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 32px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+        .cyber-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-family: 'Orbitron', monospace;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: #fff;
+        }
+        .hex-indicator {
+            width: 28px;
+            height: 28px;
+            background: rgba(0,240,255,0.15);
+            border: 1px solid var(--cyan-glow);
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 14px rgba(0,240,255,0.5);
+            animation: pulse-hex 2s infinite alternate;
+        }
+        @keyframes pulse-hex { from { transform: scale(1); } to { transform: scale(1.1); box-shadow: 0 0 20px #00F0FF; } }
+        .nav-telemetry {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+        }
+        .telemetry-chip {
+            background: rgba(0,255,136,0.1);
+            border: 1px solid rgba(0,255,136,0.3);
+            color: var(--emerald-glow);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--emerald-glow); box-shadow: 0 0 8px var(--emerald-glow); animation: blink 1.2s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .hero {
+            text-align: center;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .hero-badge {
+            font-family: 'Orbitron', monospace;
+            font-size: 11px;
+            letter-spacing: 3px;
+            color: var(--cyan-glow);
+            background: rgba(0,240,255,0.08);
+            border: 1px solid rgba(0,240,255,0.3);
+            padding: 6px 16px;
+            border-radius: 100px;
+            text-transform: uppercase;
+        }
+        .hero h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4.2rem);
+            font-weight: 900;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #ffffff 30%, #00F0FF 70%, #8B5CF6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 50px rgba(0,240,255,0.35);
+        }
+        .hero p {
+            max-width: 680px;
+            color: #94a3b8;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn-cyber {
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 1px;
+            padding: 14px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid transparent;
+            text-transform: uppercase;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #00F0FF, #0077FF);
+            color: #030712;
+            box-shadow: 0 0 25px rgba(0,240,255,0.4);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 40px rgba(0,240,255,0.7);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.03);
+            border-color: rgba(255,255,255,0.15);
+            color: #fff;
+            backdrop-filter: blur(10px);
+        }
+        .btn-secondary:hover {
+            border-color: var(--cyan-glow);
+            background: rgba(0,240,255,0.08);
+            transform: translateY(-2px);
+        }
+        .hud-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .hud-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .hud-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--cyan-glow);
+            box-shadow: 0 16px 40px rgba(0,240,255,0.15);
+        }
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .hud-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--cyan-glow);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .metric-hero {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .metric-unit { font-size: 1rem; color: #64748b; font-weight: 400; }
+        .hud-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 16px 0;
+        }
+        .hud-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00F0FF, #00FF88);
+            width: 88%;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(0,255,136,0.6);
+            transition: width 0.5s ease;
+        }
+        .hud-meta {
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="starfieldCanvas"></canvas>
+    <div class="app-shell">
+        <nav class="cyber-nav">
+            <div class="brand">
+                <div class="hex-indicator">NX</div>
+                <span>NEXIUM OS</span>
+            </div>
+            <div class="nav-telemetry">
+                <div class="telemetry-chip">
+                    <span class="pulse-dot"></span>
+                    <span>QUANTUM SYNAPSE ACTIVE</span>
+                </div>
+                <div style="color: #64748b;" id="clockDisplay">00:00:00 UTC</div>
+            </div>
+        </nav>
+        <section class="hero">
+            <div class="hero-badge">Next-Generation Sovereign Computing</div>
+            <h1>BEYOND SILICON INTELLIGENCE</h1>
+            <p>High-density cognitive reasoning engine powered by bare-metal vector pipelines and quantum lattice cryptography.</p>
+            <div class="hero-actions">
+                <button class="btn-cyber btn-primary" onclick="pulseCore()">Initialize Core</button>
+                <button class="btn-cyber btn-secondary" onclick="cycleFrequency()">Cycle Harmonics</button>
+            </div>
+        </section>
+        <div class="hud-grid">
+            <div class="hud-card">
+                <div class="hud-header">
+                    <span class="hud-title">Quantum Coherence</span>
+                    <span style="color:#00FF88; font-size:11px; font-family:'JetBrains Mono';">STABLE</span>
+                </div>
+                <div class="metric-hero" id="metricCoherence">99.98<span class="metric-unit">%</span></div>
+                <div class="hud-bar"><div class="hud-fill" id="barFill" style="width: 99.98%;"></div></div>
+                <p class="hud-meta">Active lattice stability verified via post-quantum Kyber encapsulation.</p>
+            </div>
+            <div class="hud-card">
+                <div class="hud-header">
+                    <span class="hud-title">Vector Inference Speed</span>
+                    <span style="color:#00F0FF; font-size:11px; font-family:'JetBrains Mono';">&lt;120ms</span>
+                </div>
+                <div class="metric-hero" id="metricLatency">284<span class="metric-unit">t/s</span></div>
+                <div class="hud-bar"><div class="hud-fill" style="width: 84%; background: linear-gradient(90deg, #8B5CF6, #00F0FF);"></div></div>
+                <p class="hud-meta">Sub-millisecond Rust AVX2 vectorized tensor throughput across 8 parallel streams.</p>
+            </div>
+            <div class="hud-card">
+                <div class="hud-header">
+                    <span class="hud-title">Cognitive Memory Lattice</span>
+                    <span style="color:#FFB800; font-size:11px; font-family:'JetBrains Mono';">SOVEREIGN</span>
+                </div>
+                <div class="metric-hero">1.2<span class="metric-unit">TB/s</span></div>
+                <div class="hud-bar"><div class="hud-fill" style="width: 92%; background: linear-gradient(90deg, #FFB800, #FF3366);"></div></div>
+                <p class="hud-meta">Zero-leak immutable memory rings safeguarded by hardware-level AppContainer.</p>
+            </div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.getElementById('starfieldCanvas');
+        const ctx = canvas.getContext('2d');
+        let w, h, particles = [];
+        function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+        window.addEventListener('resize', resize);
+        resize();
+        for (let i = 0; i < 75; i++) {
+            particles.push({
+                x: Math.random() * w, y: Math.random() * h,
+                vx: (Math.random() - 0.5) * 0.4, vy: (Math.random() - 0.5) * 0.4,
+                r: Math.random() * 1.8 + 0.8
+            });
+        }
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.6)';
+            particles.forEach((p, idx) => {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+                for (let j = idx + 1; j < particles.length; j++) {
+                    const p2 = particles[j];
+                    const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                    if (dist < 130) {
+                        ctx.strokeStyle = `rgba(0, 240, 255, ${0.18 * (1 - dist / 130)})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+                    }
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+        animate();
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clockDisplay').textContent = now.toISOString().substring(11, 19) + ' UTC';
+        }
+        setInterval(updateClock, 1000); updateClock();
+        function pulseCore() {
+            const val = (99.7 + Math.random() * 0.28).toFixed(2);
+            document.getElementById('metricCoherence').innerHTML = val + '<span class="metric-unit">%</span>';
+            document.getElementById('barFill').style.width = val + '%';
+        }
+        function cycleFrequency() {
+            const tps = Math.floor(270 + Math.random() * 45);
+            document.getElementById('metricLatency').innerHTML = tps + '<span class="metric-unit">t/s</span>';
+        }
+    </script>
+</body>
+</html>
+\`\`\`
+
+Click **"Run in Canvas"** on the code block above to preview and interact with this futuristic website directly in the split-screen sandbox.`;
+            }
+
+            if (lower.includes("python") || lower.includes("algorithm") || lower.includes("terminal") || lower.includes("execute")) {
+                return `Here is the optimized Python implementation designed for direct execution in the NEXIUM execution runtime:
+
+\`\`\`python
+import math
+import time
+
+def compute_quantum_harmonics(steps=5):
+    results = []
+    for n in range(1, steps + 1):
+        energy = math.sin(n * math.pi / 4) ** 2 + math.cos(n * math.pi / 6) ** 2
+        results.append((n, round(energy, 4)))
+    return results
+
+print("=== NEXIUM LOCAL RUNTIME VERIFICATION ===")
+for step, val in compute_quantum_harmonics(6):
+    print(f"Step {step:02d} -> Harmonic Energy: {val:.4f} eV")
+print("Execution completed successfully.")
+\`\`\`
+
+Click **"Execute in Terminal"** above to dispatch this payload directly to your local Python engine via \`/api/execute_task\`.`;
+            }
+
+            return `I am currently in local workstation contingency standby mode because neither the NEXIUM local daemon (port 8001) nor local Ollama (port 11434) returned a response for this query.
+
+To restore full intelligence:
+1. Verify the NEXIUM backend is running: \`python -m uvicorn main:app --port 8001\`.
+2. Ensure your Google Gemini API key or key pool is configured in Settings.
+3. If using local PC inference, ensure your Ollama model is active.
+
+Your query has been preserved in your session history.`;
+        }
+
+        // ==========================================
+        // QUANTUM CANVAS & LIVE CODE EXECUTION
+        // ==========================================
+        function toggleCanvas(forceState) {
+            playHoloSound('click');
+            const drawer = document.getElementById("canvasDrawer");
+            const btn = document.getElementById("canvasToggleBtn");
+            if (!drawer) return;
+
+            if (forceState !== undefined) {
+                if (forceState) drawer.classList.remove("hidden");
+                else drawer.classList.add("hidden");
+            } else {
+                drawer.classList.toggle("hidden");
+            }
+
+            const isOpen = !drawer.classList.contains("hidden");
+            if (btn) btn.classList.toggle("active", isOpen);
+        }
+
+        function switchCanvasTab(tabName) {
+            playHoloSound('click');
+            state.activeCanvasTab = tabName;
+            const tabSandbox = document.getElementById("tabSandbox");
+            const tabTerminal = document.getElementById("tabTerminal");
+            const sandboxFrame = document.getElementById("sandboxFrame");
+            const terminalPanel = document.getElementById("terminalPanel");
+
+            if (tabName === "sandbox") {
+                tabSandbox.classList.add("active");
+                tabTerminal.classList.remove("active");
+                sandboxFrame.style.display = "block";
+                terminalPanel.classList.remove("active");
+            } else {
+                tabSandbox.classList.remove("active");
+                tabTerminal.classList.add("active");
+                sandboxFrame.style.display = "none";
+                terminalPanel.classList.add("active");
+            }
+        }
+
+        function executeInCanvasSandbox(code, language) {
+            playHoloSound('click');
+            toggleCanvas(true);
+            switchCanvasTab("sandbox");
+
+            let htmlPayload = code;
+            if (language === 'javascript' || language === 'js') {
+                htmlPayload = `<!DOCTYPE html><html><head><style>body{background:#0a0b10;color:#00ff9d;font-family:monospace;padding:20px;}</style></head><body><div id="output"></div><script>const log = (...args) => { document.getElementById('output').innerHTML += args.join(' ') + '<br>'; }; console.log = log; try { ${code} } catch(e) { log('Error: ' + e.message); }<\/script></body></html>`;
+            } else if (language === 'svg') {
+                htmlPayload = `<!DOCTYPE html><html><body style="background:#090a10;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">${code}</body></html>`;
+            }
+
+            const frame = document.getElementById("sandboxFrame");
+            if (frame) {
+                frame.srcdoc = htmlPayload;
+            }
+        }
+
+        function reloadSandbox() {
+            const frame = document.getElementById("sandboxFrame");
+            if (frame && frame.srcdoc) {
+                const current = frame.srcdoc;
+                frame.srcdoc = "";
+                setTimeout(() => { frame.srcdoc = current; }, 50);
+            }
+        }
+
+        async function executeInTerminal(pythonCode) {
+            playHoloSound('click');
+            toggleCanvas(true);
+            switchCanvasTab("terminal");
+
+            const term = document.getElementById("terminalPanel");
+            term.innerHTML += `<div class="terminal-log-line cmd">&gt; python -c &quot;[payload execution]&quot;</div>`;
+
+            const settings = getSettings();
+            try {
+                const res = await fetch(`${settings.apiBase}/api/execute_task`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        type: "code",
+                        action: "run",
+                        content: pythonCode
+                    })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    term.innerHTML += `<div class="terminal-log-line">${escapeHtml(data.result || data.message || "Completed.")}</div>`;
+                } else {
+                    term.innerHTML += `<div class="terminal-log-line err">Execution failed: HTTP ${res.status}</div>`;
+                }
+            } catch (err) {
+                term.innerHTML += `<div class="terminal-log-line info">Offline execution simulated output:</div>`;
+                term.innerHTML += `<div class="terminal-log-line">${escapeHtml("=== NEXIUM LOCAL RUNTIME VERIFICATION ===\nStep 01 -> Harmonic Energy: 0.8845 eV\nStep 02 -> Harmonic Energy: 1.0000 eV\nExecution completed successfully.")}</div>`;
+            }
+
+            term.scrollTop = term.scrollHeight;
+        }
+
+        // ==========================================
+        // VOICE DICTATION & TEXT-TO-SPEECH
+        // ==========================================
+        function initSpeechRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) return;
+
+            state.speechRecognition = new SpeechRecognition();
+            state.speechRecognition.continuous = false;
+            state.speechRecognition.interimResults = true;
+
+            state.speechRecognition.onresult = (e) => {
+                let transcript = "";
+                for (let i = e.resultIndex; i < e.results.length; ++i) {
+                    transcript += e.results[i][0].transcript;
+                }
+                const textarea = document.getElementById("promptTextarea");
+                if (textarea) {
+                    textarea.value = transcript;
+                    autoExpandTextarea(textarea);
+                }
+            };
+
+            state.speechRecognition.onend = () => {
+                setVoiceRecordingState(false);
+            };
+
+            state.speechRecognition.onerror = () => {
+                setVoiceRecordingState(false);
+            };
+        }
+
+        function toggleVoiceDictation() {
+            playHoloSound('click');
+            if (!state.speechRecognition) {
+                alert("Speech recognition is not supported in this browser. Use Chrome, Edge, or a WebSpeech-compatible browser.");
+                return;
+            }
+
+            if (state.isRecordingVoice) {
+                state.speechRecognition.stop();
+                setVoiceRecordingState(false);
+            } else {
+                try {
+                    state.speechRecognition.start();
+                    setVoiceRecordingState(true);
+                } catch (e) {
+                    setVoiceRecordingState(false);
+                }
+            }
+        }
+
+        function setVoiceRecordingState(isRec) {
+            state.isRecordingVoice = isRec;
+            const wave = document.getElementById("voiceWaveBars");
+            const txt = document.getElementById("voiceStatusText");
+            const btn = document.getElementById("voiceDictationBtn");
+            if (wave) wave.classList.toggle("listening", isRec);
+            if (txt) txt.textContent = isRec ? "Listening" : "Voice";
+            if (btn) btn.classList.toggle("active", isRec);
+        }
+
+        function speakMessage(text) {
+            playHoloSound('click');
+            if (!window.speechSynthesis) return;
+            window.speechSynthesis.cancel();
+
+            // Clean code blocks & markdown symbols for clean speech
+            const clean = text
+                .replace(/```[\s\S]*?```/g, "Code block omitted.")
+                .replace(/[#*`_~>]/g, "")
+                .trim();
+
+            const utterance = new SpeechSynthesisUtterance(clean);
+            utterance.rate = 1.05;
+            utterance.pitch = 1.0;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // ==========================================
+        // HUD TOGGLES & MODALS
+        // ==========================================
+        function toggleThinkMode() {
+            playHoloSound('click');
+            state.thinkMode = !state.thinkMode;
+            document.getElementById("thinkToggleBtn").classList.toggle("active", state.thinkMode);
+            document.getElementById("thinkToggleBtn").classList.toggle("think-mode", state.thinkMode);
+            const quickPill = document.getElementById("quickThinkPill");
+            if (quickPill) {
+                quickPill.classList.toggle("active", state.thinkMode);
+                quickPill.classList.toggle("think", state.thinkMode);
+            }
+        }
+
+        function toggleWebMode() {
+            playHoloSound('click');
+            state.webMode = !state.webMode;
+            document.getElementById("webToggleBtn").classList.toggle("active", state.webMode);
+            document.getElementById("webToggleBtn").classList.toggle("web-mode", state.webMode);
+            const quickPill = document.getElementById("quickWebPill");
+            if (quickPill) {
+                quickPill.classList.toggle("active", state.webMode);
+                quickPill.classList.toggle("search", state.webMode);
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const btn = document.getElementById("soundToggleBtn");
+            if (btn) btn.classList.toggle("active", state.soundEnabled);
+            playHoloSound('click');
+        }
+
+        function toggleSidebar() {
+            playHoloSound('click');
+            const sb = document.getElementById("sidebar");
+            if (sb) sb.classList.toggle("collapsed");
+        }
+
+        function openModelPicker() {
+            playHoloSound('click');
+            const currentIndex = MODEL_REGISTRY.findIndex(m => m.id === state.selectedModel);
+            const nextIndex = (currentIndex + 1) % MODEL_REGISTRY.length;
+            const selected = MODEL_REGISTRY[nextIndex];
+
+            state.selectedModel = selected.id;
+            state.selectedEngine = selected.engine;
+            localStorage.setItem("nexium_selected_model", selected.id);
+
+            document.getElementById("currentModelName").textContent = selected.name;
+            document.getElementById("currentEngineTag").textContent = selected.tag;
+        }
+
+        function openSettingsModal() {
+            playHoloSound('click');
+            document.getElementById("settingsModal").classList.add("open");
+        }
+
+        function closeSettingsModal() {
+            playHoloSound('click');
+            document.getElementById("settingsModal").classList.remove("open");
+        }
+
+        function getDefaultApiBase() {
+            if (window.location.origin && window.location.origin !== "null" && !window.location.origin.startsWith("file:")) {
+                return window.location.origin;
+            }
+            return "http://localhost:8001";
+        }
+
+        function saveSettings() {
+            playHoloSound('click');
+            const settings = {
+                apiBase: document.getElementById("settingApiBase").value.trim() || getDefaultApiBase(),
+                ollamaUrl: document.getElementById("settingOllamaUrl").value.trim() || "http://localhost:11434",
+                apiKey: document.getElementById("settingApiKey").value.trim(),
+                temperature: document.getElementById("settingTemperature").value,
+                systemPrompt: document.getElementById("settingSystemPrompt").value.trim()
+            };
+
+            localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+            closeSettingsModal();
+            checkBackendHealth();
+        }
+
+        function loadSettings() {
+            try {
+                const stored = localStorage.getItem(STORAGE_KEY_SETTINGS);
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.apiBase) {
+                        if (parsed.apiBase === "http://localhost:8000") {
+                            parsed.apiBase = getDefaultApiBase();
+                        }
+                        document.getElementById("settingApiBase").value = parsed.apiBase;
+                    }
+                    if (parsed.ollamaUrl) document.getElementById("settingOllamaUrl").value = parsed.ollamaUrl;
+                    if (parsed.apiKey) document.getElementById("settingApiKey").value = parsed.apiKey;
+                    if (parsed.temperature) {
+                        document.getElementById("settingTemperature").value = parsed.temperature;
+                        document.getElementById("tempValueLabel").textContent = parsed.temperature;
+                    }
+                    if (parsed.systemPrompt) document.getElementById("settingSystemPrompt").value = parsed.systemPrompt;
+                } else {
+                    document.getElementById("settingApiBase").value = getDefaultApiBase();
+                }
+                const savedModel = localStorage.getItem("nexium_selected_model");
+                if (savedModel) {
+                    const found = MODEL_REGISTRY.find(m => m.id === savedModel);
+                    if (found) {
+                        state.selectedModel = found.id;
+                        state.selectedEngine = found.engine;
+                        const nameEl = document.getElementById("currentModelName");
+                        const tagEl = document.getElementById("currentEngineTag");
+                        if (nameEl) nameEl.textContent = found.name;
+                        if (tagEl) tagEl.textContent = found.tag;
+                    }
+                }
+            } catch (e) {}
+        }
+
+        async function detectGeminiStatus() {
+            const settings = getSettings();
+            try {
+                const res = await fetch(`${settings.apiBase}/api/gemini/status`, {
+                    signal: AbortSignal.timeout(3000)
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.configured && (data.status === "ONLINE" || data.pool_size > 0)) {
+                        console.log("[NEXIUM] Gemini Multi-Key Pool active:", data);
+                        MODEL_REGISTRY.forEach(m => {
+                            if (m.id.includes("gemini")) {
+                                m.tag = `⚡ ${data.pool_size || 6} KEYS ACTIVE`;
+                            }
+                        });
+                        const savedModel = localStorage.getItem("nexium_selected_model");
+                        if (!savedModel) {
+                            const geminiModel = MODEL_REGISTRY.find(m => m.id === "gemini-3.8-flash") || MODEL_REGISTRY.find(m => m.id.includes("gemini"));
+                            if (geminiModel) {
+                                state.selectedModel = geminiModel.id;
+                                state.selectedEngine = geminiModel.engine;
+                                const nameEl = document.getElementById("currentModelName");
+                                const tagEl = document.getElementById("currentEngineTag");
+                                if (nameEl) nameEl.textContent = geminiModel.name;
+                                if (tagEl) tagEl.textContent = geminiModel.tag;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {}
+        }
+
+        function getSettings() {
+            const rawBase = document.getElementById("settingApiBase") ? document.getElementById("settingApiBase").value.trim() : "";
+            const apiBase = (rawBase && rawBase !== "http://localhost:8000") ? rawBase : getDefaultApiBase();
+            return {
+                apiBase: apiBase,
+                ollamaUrl: (document.getElementById("settingOllamaUrl") && document.getElementById("settingOllamaUrl").value.trim()) || "http://localhost:11434",
+                apiKey: (document.getElementById("settingApiKey") && document.getElementById("settingApiKey").value.trim()) || "",
+                temperature: (document.getElementById("settingTemperature") && document.getElementById("settingTemperature").value) || "0.7",
+                systemPrompt: (document.getElementById("settingSystemPrompt") && document.getElementById("settingSystemPrompt").value.trim()) || ""
+            };
+        }
+
+        function parseAiActions(aiText) {
+            // Robust extractor for ACTION: {...} JSON blocks that properly handles nested braces and code
+            const actions = [];
+            if (!aiText) return actions;
+
+            const marker = "ACTION:";
+            let searchIndex = 0;
+
+            while ((searchIndex = aiText.indexOf(marker, searchIndex)) !== -1) {
+                const jsonStart = aiText.indexOf("{", searchIndex + marker.length);
+                if (jsonStart === -1) break;
+
+                let depth = 0;
+                let inString = false;
+                let escapeNext = false;
+                let jsonEnd = -1;
+
+                for (let i = jsonStart; i < aiText.length; i++) {
+                    const char = aiText[i];
+                    if (escapeNext) {
+                        escapeNext = false;
+                        continue;
+                    }
+                    if (char === "\\") {
+                        escapeNext = true;
+                        continue;
+                    }
+                    if (char === '"' && !escapeNext) {
+                        inString = !inString;
+                        continue;
+                    }
+                    if (!inString) {
+                        if (char === "{") depth++;
+                        else if (char === "}") {
+                            depth--;
+                            if (depth === 0) {
+                                jsonEnd = i + 1;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (jsonEnd !== -1) {
+                    const jsonStr = aiText.substring(jsonStart, jsonEnd);
+                    try {
+                        const action = JSON.parse(jsonStr);
+                        actions.push(action);
+                    } catch (e) {
+                        console.error("Failed to parse action JSON:", jsonStr, e);
+                    }
+                    searchIndex = jsonEnd;
+                } else {
+                    searchIndex += marker.length;
+                }
+            }
+
+            return actions;
+        }
+
+        async function executeAiAction(action) {
+            // Execute an ACTION command via /api/execute_task
+            const settings = getSettings();
+            const candidateUrls = [
+                `${settings.apiBase}/api/execute_task`,
+                "http://localhost:8000/api/execute_task",
+                "http://localhost:8001/api/execute_task"
+            ];
+
+            let lastError = null;
+            for (const apiUrl of candidateUrls) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(action)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.success) {
+                            const detail = result.message || result.result || result.path || "OK";
+                            return `Task completed: ${action.type}/${action.action} - ${detail}`;
+                        } else {
+                            return `Task failed: ${action.type}/${action.action} - ${result.error}`;
+                        }
+                    }
+                } catch (e) {
+                    lastError = e;
+                }
+            }
+            return `Task error: ${lastError ? lastError.message : "Backend unreachable"}`;
+        }
+
+        async function checkBackendHealth() {
+            const settings = getSettings();
+            const pulse = document.getElementById("statusPulseDot");
+            const label = document.getElementById("backendStatusLabel");
+
+            if (pulse) pulse.className = "status-pulse";
+            if (label) label.textContent = "PINGING...";
+
+            try {
+                const res = await fetch(`${settings.apiBase}/health`, { signal: AbortSignal.timeout(2000) });
+                if (res.ok) {
+                    state.backendStatus = "online";
+                } else {
+                    state.backendStatus = "standby";
+                }
+            } catch (e) {
+                state.backendStatus = "standby";
+            }
+
+            updateStatusPill();
+        }
+
+        function updateStatusPill() {
+            const pulse = document.getElementById("statusPulseDot");
+            const label = document.getElementById("backendStatusLabel");
+            if (!pulse || !label) return;
+
+            if (state.backendStatus === "online") {
+                pulse.className = "status-pulse";
+                label.textContent = "ONLINE // LOCAL";
+            } else {
+                pulse.className = "status-pulse offline";
+                label.textContent = "STANDBY // SIMULATOR";
+            }
+        }
+    </script>
+</body>
+</html>

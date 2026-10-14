@@ -1,0 +1,100 @@
+{
+  "f1bb8cf527": {
+    "job_id": "f1bb8cf527",
+    "status": "COMPLETED",
+    "mp4_url": "http://127.0.0.1:8001/api/video/stream/short_f1bb8cf527.mp4",
+    "filename": "short_f1bb8cf527.mp4",
+    "script": "He thought the morning was normal. Chapter 1: The Descent of the Absolute Kang Jin-woo rubbed his bloodshot eyes, staring at the fluorescent monitor in the empty convenience store It was 3:42 AM when the sky shattered like cheap glass A crimson system window violently materializes before his retinas. Reality fractures into glass. The global leaderboard updates. His name appears in sovereign gold at rank one. Behind him, the air turns to ice as a dimensional gate rips wide open.",
+    "keywords": [
+      "apocalypse",
+      "system window",
+      "dimensional gate",
+      "sovereign rank"
+    ],
+    "image_prompt": "manhwa style, apocalypse, system window, dimensional gate, sovereign rank, cinematic, 9:16, highly detailed, dramatic lighting, dark fantasy, solo leveling aesthetic",
+    "voice_engine": "Native Sovereign SAPI Synth (Male)",
+    "visual_engine": "Pollinations AI (9:16 Manhwa Neural)",
+    "render_engine": "Native Sovereign FFmpeg Compositor",
+    "duration_sec": 32.64,
+    "elapsed_sec": 57.67,
+    "timestamp": 1790815354.7454824
+  },
+  "bdb8253ce8": {
+    "job_id": "bdb8253ce8",
+    "status": "COMPLETED",
+    "success": true,
+    "mp4_url": "http://127.0.0.1:8001/api/video/stream/short_bdb8253ce8.mp4",
+    "vault_provider": "Local Host Vault (Development)",
+    "filename": "short_bdb8253ce8.mp4",
+    "script": "He thought she was his sanctuary. His only light in a dying world. But her eyes turn cold. A blade glints in the moonlight. She leans in close. Her voice is a freezing whisper. 'I should kill you to death.' The betrayal cuts deeper than the steel. He stands paralyzed. The shadows around them begin to pulse. A system window flickers into existence. It offers a single choice. Surrender his soul or strike first. The countdown begins. He raises his hand. The world screams.",
+    "keywords": [
+      "betrayal",
+      "system window",
+      "death wish",
+      "manhwa style"
+    ],
+    "image_prompt": "manhwa style, betrayal, system window, death wish, manhwa style, cinematic, 9:16, highly detailed, dramatic lighting, dark fantasy, solo leveling aesthetic",
+    "voice_engine": "Native Sovereign SAPI Synth (Male)",
+    "visual_engine": "Pollinations AI (9:16 Manhwa Neural)",
+    "render_engine": "Native Sovereign FFmpeg Compositor",
+    "duration_sec": 39.0,
+    "elapsed_sec": 139.49,
+    "timestamp": 1790883900.407539,
+    "quota_reply": "Video completed. Remaining balance: 665 tokens, approximately 19 videos left.",
+    "user_tier": "elite",
+    "user_tokens": 665,
+    "videos_today": 0
+  },
+  "02eb74b725": {
+    "job_id": "02eb74b725",
+    "status": "COMPLETED",
+    "success": true,
+    "mp4_url": "http://127.0.0.1:8001/api/video/stream/short_02eb74b725.mp4",
+    "vault_provider": "Local Host Vault (Development)",
+    "filename": "short_02eb74b725.mp4",
+    "script": "He thought the morning was normal. He thought he was just an ordinary junior hunter working in the low-rank mines Then the earth split open with a sound like shattering glass A blinding azure status window materialized in the air before his eyes A crimson system window violently materializes before his retinas. Reality fractures into glass. The global leaderboard updates. His name appears in sovereign gold at rank one. Behind him, the air turns to ice as a dimensional gate rips wide open.",
+    "keywords": [
+      "apocalypse",
+      "system window",
+      "dimensional gate",
+      "sovereign rank"
+    ],
+    "image_prompt": "manhwa style, apocalypse, system window, dimensional gate, sovereign rank, cinematic, 9:16, 3-act sequence",
+    "voice_engine": "Native Sovereign SAPI Synth (Male)",
+    "visual_engine": "Dynamic Multi-Scene Engine (1/3 Neural, 2/3 Sovereign HUD)",
+    "render_engine": "Native Sovereign Animated FFmpeg Engine (3-Act Dynamic Motion)",
+    "duration_sec": 31.66,
+    "elapsed_sec": 60.14,
+    "timestamp": 1790884543.5316823,
+    "quota_reply": "Video completed. Free videos used today: 1/2 (Resets at 00:00 Africa/Lagos).",
+    "user_tier": "free",
+    "user_tokens": 0,
+    "videos_today": 1
+  },
+  "d6092c2bae": {
+    "job_id": "d6092c2bae",
+    "status": "COMPLETED",
+    "success": true,
+    "mp4_url": "http://127.0.0.1:8001/api/video/stream/short_d6092c2bae.mp4",
+    "vault_provider": "Local Host Vault (Development)",
+    "filename": "short_d6092c2bae.mp4",
+    "script": "He thought the morning was normal. He thought he was just an ordinary junior hunter working in the low-rank mines Then the earth split open with a sound like shattering glass A blinding azure status window materialized in the air before his eyes A crimson system window violently materializes before his retinas. Reality fractures into glass. The global leaderboard updates. His name appears in sovereign gold at rank one. Behind him, the air turns to ice as a dimensional gate rips wide open.",
+    "keywords": [
+      "apocalypse",
+      "system window",
+      "dimensional gate",
+      "sovereign rank"
+    ],
+    "image_prompt": "manhwa style, apocalypse, system window, dimensional gate, sovereign rank, cinematic, 9:16, 3-act sequence",
+    "voice_engine": "Ultra-Realistic Neural Narrator (Christopher Deep Dramatic + Studio DSP)",
+    "visual_engine": "Dynamic Multi-Scene Engine (1/3 Neural, 2/3 Sovereign HUD)",
+    "render_engine": "Native Sovereign Animated FFmpeg Engine (3-Act Dynamic Motion)",
+    "duration_sec": 30.65,
+    "elapsed_sec": 73.8,
+    "timestamp": 1790888067.1154053,
+    "quota_reply": "Video completed. Free videos used today: 1/2 (Resets at 00:00 Africa/Lagos).",
+    "user_tier": "free",
+    "user_tokens": 0,
+    "videos_today": 1
+  }
+}

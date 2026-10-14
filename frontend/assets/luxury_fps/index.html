@@ -1,0 +1,1589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXIUM // High-Luxury FPS Shooter Game Asset Simulator</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+    <style>
+        :root {
+            --gold: #FFD700;
+            --gold-bright: #FFE55C;
+            --gold-dark: #B8860B;
+            --cyan: #00F0FF;
+            --emerald: #00FF88;
+            --rose: #FF007F;
+            --bg: #07070a;
+            --panel: rgba(14, 14, 20, 0.88);
+            --border: rgba(255, 215, 0, 0.25);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: #f3f4f6;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            overflow: hidden;
+            user-select: none;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #canvas-container {
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Luxury Cyberpunk HUD Overlay */
+        .hud-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+        }
+
+        .hud-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .brand-badge {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 10px 18px;
+            border-radius: 10px;
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+
+        .brand-logo {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            color: #000;
+            font-size: 14px;
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.4);
+        }
+
+        .brand-title {
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .brand-subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--gold);
+        }
+
+        .hud-metrics {
+            display: flex;
+            gap: 12px;
+        }
+
+        .metric-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            text-align: right;
+            backdrop-filter: blur(12px);
+        }
+
+        .metric-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--gold-bright);
+        }
+
+        .metric-lbl {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9ca3af;
+        }
+
+        /* Wave Banner */
+        .wave-banner {
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--gold);
+            padding: 8px 24px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--gold-bright);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        /* Center Crosshair */
+        .crosshair-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+            transition: transform 0.15s ease, opacity 0.15s ease;
+        }
+
+        .crosshair-dot {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 4px;
+            height: 4px;
+            background: var(--gold-bright);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 8px var(--gold);
+        }
+
+        .crosshair-line {
+            position: absolute;
+            background: rgba(255, 215, 0, 0.75);
+            box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+            transition: all 0.1s ease;
+        }
+        .ch-top { top: 2px; left: 19px; width: 2px; height: 10px; }
+        .ch-bottom { bottom: 2px; left: 19px; width: 2px; height: 10px; }
+        .ch-left { left: 2px; top: 19px; width: 10px; height: 2px; }
+        .ch-right { right: 2px; top: 19px; width: 10px; height: 2px; }
+
+        .crosshair-container.ads {
+            opacity: 0.2;
+            transform: translate(-50%, -50%) scale(0.4);
+        }
+
+        /* Hitmarker */
+        .hitmarker {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 24px;
+            height: 24px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.05s ease;
+        }
+        .hitmarker.active {
+            opacity: 1;
+        }
+        .hm-line {
+            position: absolute;
+            width: 10px;
+            height: 2px;
+            background: #FF0055;
+            box-shadow: 0 0 8px #FF0055;
+        }
+        .hm-1 { top: 0; left: 0; transform: rotate(45deg); }
+        .hm-2 { top: 0; right: 0; transform: rotate(-45deg); }
+        .hm-3 { bottom: 0; left: 0; transform: rotate(-45deg); }
+        .hm-4 { bottom: 0; right: 0; transform: rotate(45deg); }
+
+        /* Floating Score Alert */
+        .score-float {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--gold-bright);
+            text-shadow: 0 0 16px rgba(255, 215, 0, 0.8);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s ease-out;
+        }
+
+        /* Footer Controls */
+        .hud-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .weapon-dossier {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            padding: 14px 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            max-width: 440px;
+            pointer-events: auto;
+        }
+
+        /* Skin Selector Bar */
+        .skin-bar {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+        .skin-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #9ca3af;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .skin-btn:hover {
+            border-color: var(--gold);
+            color: #fff;
+        }
+        .skin-btn.active {
+            background: rgba(255, 215, 0, 0.18);
+            border-color: var(--gold);
+            color: var(--gold-bright);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .weapon-name {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .weapon-tier-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            padding: 2px 8px;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .weapon-specs {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #9ca3af;
+            line-height: 1.6;
+        }
+
+        .ammo-gauge {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .ammo-current {
+            font-size: 28px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--cyan);
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+        }
+
+        .ammo-max {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        .action-tray {
+            pointer-events: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-luxury {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.05));
+            border: 1px solid var(--gold);
+            color: var(--gold-bright);
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-luxury:hover {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Start Prompt Modal */
+        #blocker {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(5, 5, 8, 0.88);
+            backdrop-filter: blur(16px);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #instructions {
+            background: #0d0d14;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 36px 40px;
+            text-align: center;
+            max-width: 580px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.15);
+        }
+
+        #instructions h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--gold);
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        #instructions p {
+            color: #9ca3af;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .key-guide {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 26px;
+            text-align: left;
+        }
+
+        .key-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 8px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .key-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(255, 215, 0, 0.15);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .key-desc {
+            font-size: 12px;
+            color: #e5e7eb;
+        }
+
+        .play-btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            color: #000;
+            font-weight: 800;
+            font-size: 15px;
+            padding: 14px 36px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 24px rgba(255, 215, 0, 0.5);
+            transition: all 0.2s ease;
+        }
+        .play-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 32px rgba(255, 215, 0, 0.8);
+        }
+
+        /* Export SDK Modal */
+        #exportModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(14px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        #exportModal.open {
+            display: flex;
+        }
+        .export-card {
+            background: #0e0f18;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        }
+        .export-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .export-tabs {
+            display: flex;
+            gap: 8px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.02);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .export-tab {
+            background: none;
+            border: 1px solid transparent;
+            color: #9ca3af;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .export-tab.active {
+            background: rgba(255,215,0,0.15);
+            border-color: var(--gold);
+            color: var(--gold-bright);
+        }
+        .export-code-box {
+            padding: 20px 24px;
+            overflow-y: auto;
+            flex: 1;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: #d1d5db;
+            background: #08080d;
+            white-space: pre;
+            line-height: 1.5;
+        }
+        .export-footer {
+            padding: 14px 24px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+
+    <div class="hud-overlay">
+        <div class="hud-header">
+            <div class="brand-badge">
+                <div class="brand-logo">N</div>
+                <div>
+                    <div class="brand-title">NEXIUM // LUXURY FPS SIMULATOR</div>
+                    <div class="brand-subtitle">RAILGUN TACTICAL ASSET SUITE • 60+ FPS WEBGL</div>
+                </div>
+            </div>
+
+            <div class="wave-banner" id="waveBanner">WAVE 01 // PURGE HOSTILES</div>
+
+            <div class="hud-metrics">
+                <div class="metric-card">
+                    <div class="metric-val" id="hudWave">01</div>
+                    <div class="metric-lbl">Wave</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-val" id="hudTargets">05</div>
+                    <div class="metric-lbl">Targets</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-val" id="hudScore">00</div>
+                    <div class="metric-lbl">Combat Score</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-val" id="hudFps">60</div>
+                    <div class="metric-lbl">Engine FPS</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="crosshair-container" id="crosshair">
+            <div class="crosshair-dot"></div>
+            <div class="crosshair-line ch-top"></div>
+            <div class="crosshair-line ch-bottom"></div>
+            <div class="crosshair-line ch-left"></div>
+            <div class="crosshair-line ch-right"></div>
+        </div>
+
+        <div class="hitmarker" id="hitmarker">
+            <div class="hm-line hm-1"></div>
+            <div class="hm-line hm-2"></div>
+            <div class="hm-line hm-3"></div>
+            <div class="hm-line hm-4"></div>
+        </div>
+
+        <div class="score-float" id="scoreFloat">+100</div>
+
+        <div class="hud-footer">
+            <div class="weapon-dossier">
+                <div class="skin-bar">
+                    <span style="font-size:10px; color:#888; font-family:'JetBrains Mono'; margin-right:4px;">SKIN [1-4]:</span>
+                    <button class="skin-btn active" id="skinBtn1" onclick="switchSkin(1)">1: 24K Gold</button>
+                    <button class="skin-btn" id="skinBtn2" onclick="switchSkin(2)">2: Chrome</button>
+                    <button class="skin-btn" id="skinBtn3" onclick="switchSkin(3)">3: Damascus</button>
+                    <button class="skin-btn" id="skinBtn4" onclick="switchSkin(4)">4: Rose Gold</button>
+                </div>
+                <div class="weapon-name">
+                    <span>NEX-01 // LUXURY RAILGUN</span>
+                    <span class="weapon-tier-badge" id="skinBadge">OBSIDIAN GOLD</span>
+                </div>
+                <div class="weapon-specs">
+                    High-Frequency Plasma Discharge • Triple-Coil Rail Acceleration<br>
+                    Damage: 35/shot • Fire Rate: 720 RPM • ADS Zoom: 1.8x
+                </div>
+                <div class="ammo-gauge">
+                    <span class="ammo-current" id="hudAmmo">24</span>
+                    <span class="ammo-max">/ 24 HIGH-CAP</span>
+                </div>
+            </div>
+
+            <div class="action-tray">
+                <button class="btn-luxury" onclick="openExportModal()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Export Game SDKs
+                </button>
+                <a href="/chat" class="btn-luxury">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                    NEXIUM AI Cockpit
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructions Overlay -->
+    <div id="blocker">
+        <div id="instructions">
+            <h1>NEXIUM COMBAT ARENA</h1>
+            <p>High-Luxury Procedural FPS Weapon Asset System with Dynamic Skins, Plasma Physics & Hostile Drone AI.</p>
+            <div class="key-guide">
+                <div class="key-item">
+                    <span class="key-desc">Move Tactical</span>
+                    <span class="key-badge">W, A, S, D</span>
+                </div>
+                <div class="key-item">
+                    <span class="key-desc">Fire Plasma</span>
+                    <span class="key-badge">Left Click</span>
+                </div>
+                <div class="key-item">
+                    <span class="key-desc">Aim Down Sights</span>
+                    <span class="key-badge">Right Click (Hold)</span>
+                </div>
+                <div class="key-item">
+                    <span class="key-desc">Tactical Reload</span>
+                    <span class="key-badge">R</span>
+                </div>
+                <div class="key-item">
+                    <span class="key-desc">Inspect Luxury Model</span>
+                    <span class="key-badge">F</span>
+                </div>
+                <div class="key-item">
+                    <span class="key-desc">Switch Weapon Skin</span>
+                    <span class="key-badge">1, 2, 3, 4</span>
+                </div>
+            </div>
+            <button class="play-btn" id="startBtn">ENGAGE WEAPON SIMULATOR</button>
+        </div>
+    </div>
+
+    <!-- Export SDK Modal -->
+    <div id="exportModal">
+        <div class="export-card">
+            <div class="export-header">
+                <h3 style="color:var(--gold); font-size:16px;">📦 NEXIUM Luxury FPS Asset SDK Export</h3>
+                <button class="skin-btn" onclick="closeExportModal()">✕ Close</button>
+            </div>
+            <div class="export-tabs">
+                <button class="export-tab active" onclick="switchExportTab('unreal')">Unreal Engine 5 (C++)</button>
+                <button class="export-tab" onclick="switchExportTab('unity')">Unity 6 (C#)</button>
+                <button class="export-tab" onclick="switchExportTab('godot')">Godot 4 (GDScript)</button>
+                <button class="export-tab" onclick="switchExportTab('r3f')">React Three Fiber (TSX)</button>
+            </div>
+            <div class="export-code-box" id="exportCode">Loading SDK code...</div>
+            <div class="export-footer">
+                <button class="btn-luxury" onclick="copySdkCode()">Copy Code to Clipboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // PROCEDURAL AUDIO SYNTHESIZER
+        // ====================================================================
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+
+        function playFireSound(freq = 1200) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+
+            // Plasma Crack
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(freq, now);
+            osc.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.16);
+
+            // Sub Thump
+            const sub = audioCtx.createOscillator();
+            const subGain = audioCtx.createGain();
+            sub.type = "sine";
+            sub.frequency.setValueAtTime(160, now);
+            sub.frequency.exponentialRampToValueAtTime(30, now + 0.2);
+            subGain.gain.setValueAtTime(0.5, now);
+            subGain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+            sub.connect(subGain);
+            subGain.connect(audioCtx.destination);
+            sub.start(now);
+            sub.stop(now + 0.25);
+        }
+
+        function playHitSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            [2200, 3100].forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(freq, now + idx * 0.02);
+                gain.gain.setValueAtTime(0.25, now + idx * 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + idx * 0.02);
+                osc.stop(now + 0.14);
+            });
+        }
+
+        function playExplosionSound() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const sub = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            sub.type = "triangle";
+            sub.frequency.setValueAtTime(120, now);
+            sub.frequency.exponentialRampToValueAtTime(25, now + 0.5);
+            gain.gain.setValueAtTime(0.6, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6);
+            sub.connect(gain);
+            gain.connect(audioCtx.destination);
+            sub.start(now);
+            sub.stop(now + 0.65);
+        }
+
+        function playMechSound(tone = 350) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = "triangle";
+            osc.frequency.setValueAtTime(tone, now);
+            osc.frequency.exponentialRampToValueAtTime(tone * 1.5, now + 0.06);
+            gain.gain.setValueAtTime(0.25, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        }
+
+        // ====================================================================
+        // THREE.JS SCENE SETUP
+        // ====================================================================
+        const container = document.getElementById("canvas-container");
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x07070a, 0.025);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 1.7, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.35;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        // Lights
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const keyGoldLight = new THREE.DirectionalLight(0xffd700, 1.8);
+        keyGoldLight.position.set(10, 20, 15);
+        keyGoldLight.castShadow = true;
+        scene.add(keyGoldLight);
+
+        const rimCyanLight = new THREE.PointLight(0x00f0ff, 2.5, 45);
+        rimCyanLight.position.set(-8, 5, -10);
+        scene.add(rimCyanLight);
+
+        // Ground Arena: Dark Obsidian Grid with Gold Edges
+        const gridGeo = new THREE.PlaneGeometry(100, 100, 40, 40);
+        const gridMat = new THREE.MeshStandardMaterial({
+            color: 0x0c0c14,
+            roughness: 0.15,
+            metalness: 0.85
+        });
+        const ground = new THREE.Mesh(gridGeo, gridMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        const gridHelper = new THREE.GridHelper(100, 50, 0xffd700, 0x1a1a28);
+        gridHelper.position.y = 0.01;
+        scene.add(gridHelper);
+
+        // Floating Luxury Pillars
+        for (let i = 0; i < 16; i++) {
+            const angle = (i / 16) * Math.PI * 2;
+            const dist = 22 + (i % 2) * 6;
+            const pillarGeo = new THREE.BoxGeometry(0.9, 10, 0.9);
+            const pillarMat = new THREE.MeshStandardMaterial({
+                color: 0x12121c,
+                metalness: 0.9,
+                roughness: 0.2
+            });
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+            pillar.position.set(Math.cos(angle) * dist, 5, Math.sin(angle) * dist);
+            scene.add(pillar);
+
+            const capGeo = new THREE.BoxGeometry(1.2, 0.35, 1.2);
+            const capMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 1.0, roughness: 0.1 });
+            const cap = new THREE.Mesh(capGeo, capMat);
+            cap.position.set(Math.cos(angle) * dist, 10.1, Math.sin(angle) * dist);
+            scene.add(cap);
+        }
+
+        // ====================================================================
+        // WEAPON SKINS DEFINITION
+        // ====================================================================
+        const WEAPON_SKINS = {
+            1: {
+                name: "Obsidian 24K Gold",
+                badge: "OBSIDIAN GOLD",
+                goldColor: 0xffd700,
+                goldMetal: 1.0,
+                goldRough: 0.08,
+                bodyColor: 0x050508,
+                bodyMetal: 0.92,
+                bodyRough: 0.12,
+                plasmaColor: 0x00f0ff,
+                plasmaIntensity: 3.0,
+                flashColor: 0x00f0ff,
+                soundFreq: 1200
+            },
+            2: {
+                name: "Cyber-Neon Chrome",
+                badge: "CYBER CHROME",
+                goldColor: 0x00f0ff,
+                goldMetal: 0.95,
+                goldRough: 0.05,
+                bodyColor: 0xd8e0e8,
+                bodyMetal: 1.0,
+                bodyRough: 0.02,
+                plasmaColor: 0x00ff88,
+                plasmaIntensity: 3.8,
+                flashColor: 0x00ff88,
+                soundFreq: 1450
+            },
+            3: {
+                name: "Damascus Titanium",
+                badge: "DAMASCUS VIOLET",
+                goldColor: 0x9d4edd,
+                goldMetal: 0.95,
+                goldRough: 0.15,
+                bodyColor: 0x181828,
+                bodyMetal: 0.9,
+                bodyRough: 0.2,
+                plasmaColor: 0xff007f,
+                plasmaIntensity: 3.5,
+                flashColor: 0xff007f,
+                soundFreq: 1050
+            },
+            4: {
+                name: "Rose Gold Void",
+                badge: "ROSE GOLD VOID",
+                goldColor: 0xb76e79,
+                goldMetal: 0.88,
+                goldRough: 0.12,
+                bodyColor: 0x120c10,
+                bodyMetal: 0.85,
+                bodyRough: 0.25,
+                plasmaColor: 0xffd700,
+                plasmaIntensity: 3.2,
+                flashColor: 0xffd700,
+                soundFreq: 1300
+            }
+        };
+
+        let currentSkinId = 1;
+
+        // Weapon Hierarchy
+        const weaponPivot = new THREE.Group();
+        camera.add(weaponPivot);
+        scene.add(camera);
+
+        const weaponMesh = new THREE.Group();
+        weaponPivot.add(weaponMesh);
+
+        // Base Materials
+        const goldMat = new THREE.MeshStandardMaterial({
+            color: WEAPON_SKINS[1].goldColor,
+            metalness: WEAPON_SKINS[1].goldMetal,
+            roughness: WEAPON_SKINS[1].goldRough
+        });
+
+        const bodyMat = new THREE.MeshStandardMaterial({
+            color: WEAPON_SKINS[1].bodyColor,
+            metalness: WEAPON_SKINS[1].bodyMetal,
+            roughness: WEAPON_SKINS[1].bodyRough
+        });
+
+        const plasmaCoreMat = new THREE.MeshStandardMaterial({
+            color: WEAPON_SKINS[1].plasmaColor,
+            emissive: WEAPON_SKINS[1].plasmaColor,
+            emissiveIntensity: WEAPON_SKINS[1].plasmaIntensity,
+            roughness: 0.1
+        });
+
+        const lensMat = new THREE.MeshPhysicalMaterial({
+            color: 0x00ffff,
+            transparent: true,
+            opacity: 0.7,
+            roughness: 0.05,
+            transmission: 0.8
+        });
+
+        // Construct Weapon Components
+        const bodyGeo = new THREE.BoxGeometry(0.08, 0.12, 0.42);
+        const body = new THREE.Mesh(bodyGeo, bodyMat);
+        body.userData = { type: "body" };
+        weaponMesh.add(body);
+
+        const shroudGeo = new THREE.BoxGeometry(0.065, 0.085, 0.55);
+        const shroud = new THREE.Mesh(shroudGeo, goldMat);
+        shroud.position.set(0, 0.02, 0.38);
+        shroud.userData = { type: "gold" };
+        weaponMesh.add(shroud);
+
+        const barrelGeo = new THREE.CylinderGeometry(0.022, 0.022, 0.65, 18);
+        barrelGeo.rotateX(Math.PI / 2);
+        const barrel = new THREE.Mesh(barrelGeo, bodyMat);
+        barrel.position.set(0, 0.02, 0.44);
+        barrel.userData = { type: "body" };
+        weaponMesh.add(barrel);
+
+        const muzzleGeo = new THREE.BoxGeometry(0.07, 0.09, 0.12);
+        const muzzle = new THREE.Mesh(muzzleGeo, goldMat);
+        muzzle.position.set(0, 0.02, 0.74);
+        muzzle.userData = { type: "gold" };
+        weaponMesh.add(muzzle);
+
+        const coreGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.22, 16);
+        coreGeo.rotateX(Math.PI / 2);
+        const core = new THREE.Mesh(coreGeo, plasmaCoreMat);
+        core.position.set(0, 0.01, 0.02);
+        core.userData = { type: "plasma" };
+        weaponMesh.add(core);
+
+        const railGeo = new THREE.BoxGeometry(0.04, 0.02, 0.32);
+        const rail = new THREE.Mesh(railGeo, goldMat);
+        rail.position.set(0, 0.08, 0.05);
+        rail.userData = { type: "gold" };
+        weaponMesh.add(rail);
+
+        const sightGeo = new THREE.BoxGeometry(0.055, 0.06, 0.15);
+        const sight = new THREE.Mesh(sightGeo, bodyMat);
+        sight.position.set(0, 0.12, 0.06);
+        sight.userData = { type: "body" };
+        weaponMesh.add(sight);
+
+        const reticleLens = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.045, 0.005), lensMat);
+        reticleLens.position.set(0, 0.12, 0.08);
+        weaponMesh.add(reticleLens);
+
+        const gripGeo = new THREE.BoxGeometry(0.048, 0.16, 0.08);
+        const grip = new THREE.Mesh(gripGeo, bodyMat);
+        grip.position.set(0, -0.12, -0.06);
+        grip.rotation.x = -0.25;
+        grip.userData = { type: "body" };
+        weaponMesh.add(grip);
+
+        const guardGeo = new THREE.BoxGeometry(0.052, 0.015, 0.12);
+        const guard = new THREE.Mesh(guardGeo, goldMat);
+        guard.position.set(0, -0.07, 0.02);
+        guard.userData = { type: "gold" };
+        weaponMesh.add(guard);
+
+        // Hip & ADS Positions
+        const HIP_POS = new THREE.Vector3(0.24, -0.22, -0.5);
+        const ADS_POS = new THREE.Vector3(0.0, -0.12, -0.38);
+        weaponPivot.position.copy(HIP_POS);
+
+        function switchSkin(skinId) {
+            if (!WEAPON_SKINS[skinId]) return;
+            currentSkinId = skinId;
+            const skin = WEAPON_SKINS[skinId];
+            playMechSound(700);
+
+            // Update Materials
+            goldMat.color.setHex(skin.goldColor);
+            goldMat.metalness = skin.goldMetal;
+            goldMat.roughness = skin.goldRough;
+
+            bodyMat.color.setHex(skin.bodyColor);
+            bodyMat.metalness = skin.bodyMetal;
+            bodyMat.roughness = skin.bodyRough;
+
+            plasmaCoreMat.color.setHex(skin.plasmaColor);
+            plasmaCoreMat.emissive.setHex(skin.plasmaColor);
+            plasmaCoreMat.emissiveIntensity = skin.plasmaIntensity;
+
+            // Update UI buttons & badge
+            document.querySelectorAll(".skin-btn").forEach((btn, idx) => {
+                btn.classList.toggle("active", (idx + 1) === skinId);
+            });
+            document.getElementById("skinBadge").textContent = skin.badge;
+            document.getElementById("hudAmmo").style.color = `#${skin.plasmaColor.toString(16).padStart(6, '0')}`;
+        }
+
+        // ====================================================================
+        // HOSTILE DRONES & WAVE SYSTEM
+        // ====================================================================
+        let currentWave = 1;
+        let drones = [];
+        let debrisParticles = [];
+        let plasmaTracers = [];
+
+        function spawnDrone(x, y, z) {
+            const droneGroup = new THREE.Group();
+            droneGroup.position.set(x, y, z);
+
+            const titaniumMat = new THREE.MeshStandardMaterial({ color: 0x1e2028, metalness: 0.9, roughness: 0.2 });
+            const dCore = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, 0.2, 16), titaniumMat);
+            droneGroup.add(dCore);
+
+            const eyeMat = new THREE.MeshStandardMaterial({ color: 0xff0044, emissive: 0xff0044, emissiveIntensity: 2.5 });
+            const dEye = new THREE.Mesh(new THREE.SphereGeometry(0.07, 16, 16), eyeMat);
+            dEye.position.set(0, 0, 0.22);
+            droneGroup.add(dEye);
+
+            const ringGeo = new THREE.TorusGeometry(0.38, 0.03, 12, 32);
+            const ring = new THREE.Mesh(ringGeo, goldMat);
+            ring.rotation.x = Math.PI / 2;
+            droneGroup.add(ring);
+
+            // Holographic Shield Mesh (hidden until hit)
+            const shieldGeo = new THREE.SphereGeometry(0.55, 16, 16);
+            const shieldMat = new THREE.MeshBasicMaterial({
+                color: 0x00f0ff,
+                wireframe: true,
+                transparent: true,
+                opacity: 0.0
+            });
+            const shieldMesh = new THREE.Mesh(shieldGeo, shieldMat);
+            droneGroup.add(shieldMesh);
+
+            droneGroup.userData = {
+                ring: ring,
+                shield: shieldMesh,
+                baseY: y,
+                baseX: x,
+                seed: Math.random() * 100,
+                health: 100,
+                maxHealth: 100,
+                strafing: currentWave > 1
+            };
+
+            scene.add(droneGroup);
+            drones.push(droneGroup);
+        }
+
+        function initWave(waveNum) {
+            currentWave = waveNum;
+            document.getElementById("hudWave").textContent = String(waveNum).padStart(2, '0');
+            document.getElementById("waveBanner").textContent = `WAVE ${String(waveNum).padStart(2, '0')} // PURGE HOSTILES`;
+            document.getElementById("waveBanner").style.borderColor = "var(--gold)";
+
+            // Clear old drones if any
+            drones.forEach(d => scene.remove(d));
+            drones = [];
+
+            const count = 3 + waveNum * 2;
+            document.getElementById("hudTargets").textContent = String(count).padStart(2, '0');
+
+            for (let i = 0; i < count; i++) {
+                const angle = ((i - count / 2) / count) * 1.6;
+                const dist = 14 + (i % 3) * 4;
+                const x = Math.sin(angle) * dist;
+                const z = -Math.cos(angle) * dist;
+                const y = 2.0 + Math.random() * 2.5;
+                spawnDrone(x, y, z);
+            }
+        }
+
+        initWave(1);
+
+        // ====================================================================
+        // COMBAT SYSTEM: SHOOTING, TRACERS, FX
+        // ====================================================================
+        let score = 0;
+        let ammo = 24;
+        let isAiming = false;
+        let isInspecting = false;
+        let isReloading = false;
+
+        const recoil = { rotX: 0, rotY: 0, posZ: 0, recoverSpeed: 11.0 };
+        const mouseSway = { x: 0, y: 0 };
+
+        function shoot() {
+            if (ammo <= 0 || isReloading) {
+                playMechSound(200);
+                return;
+            }
+
+            ammo--;
+            document.getElementById("hudAmmo").textContent = ammo;
+            const currentSkin = WEAPON_SKINS[currentSkinId];
+            playFireSound(currentSkin.soundFreq);
+
+            // Recoil
+            recoil.posZ = isAiming ? 0.05 : 0.12;
+            recoil.rotX = isAiming ? 0.08 : 0.22;
+            recoil.rotY = (Math.random() - 0.5) * 0.04;
+
+            // Dynamic Muzzle Light
+            const flash = new THREE.PointLight(currentSkin.flashColor, 6.0, 12);
+            flash.position.set(0, 0.02, 0.9);
+            weaponMesh.add(flash);
+            setTimeout(() => weaponMesh.remove(flash), 45);
+
+            // Raycast Hit
+            const raycaster = new THREE.Raycaster();
+            raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
+
+            let hitPoint = raycaster.ray.origin.clone().add(raycaster.ray.direction.clone().multiplyScalar(50));
+            let hitDrone = null;
+
+            for (let i = 0; i < drones.length; i++) {
+                const d = drones[i];
+                const hits = raycaster.intersectObjects(d.children, true);
+                if (hits.length > 0) {
+                    hitPoint = hits[0].point;
+                    hitDrone = d;
+                    break;
+                }
+            }
+
+            // Spawn Plasma Tracer Beam
+            spawnPlasmaTracer(barrel.getWorldPosition(new THREE.Vector3()), hitPoint, currentSkin.plasmaColor);
+
+            if (hitDrone) {
+                playHitSound();
+                showHitmarker();
+
+                // Shield Hit Visual
+                hitDrone.userData.shield.material.opacity = 0.8;
+                hitDrone.position.z -= 0.6;
+                hitDrone.userData.health -= 35;
+
+                createSparkExplosion(hitPoint, currentSkin.plasmaColor);
+
+                if (hitDrone.userData.health <= 0) {
+                    // Destroy Drone
+                    playExplosionSound();
+                    score += 250;
+                    showScoreFloat("+250 ELIMINATED");
+                    createDroneDebris(hitDrone.position);
+                    scene.remove(hitDrone);
+                    drones = drones.filter(d => d !== hitDrone);
+                    document.getElementById("hudTargets").textContent = String(drones.length).padStart(2, '0');
+
+                    if (drones.length === 0) {
+                        setTimeout(() => {
+                            initWave(currentWave + 1);
+                        }, 1200);
+                    }
+                } else {
+                    score += 100;
+                    showScoreFloat("+100 HIT");
+                }
+
+                document.getElementById("hudScore").textContent = String(score).padStart(2, '0');
+            }
+        }
+
+        function spawnPlasmaTracer(startPos, endPos, colorHex) {
+            const dir = new THREE.Vector3().subVectors(endPos, startPos);
+            const dist = dir.length();
+            const beamGeo = new THREE.CylinderGeometry(0.025, 0.025, dist, 8);
+            beamGeo.rotateX(Math.PI / 2);
+
+            const beamMat = new THREE.MeshBasicMaterial({
+                color: colorHex,
+                transparent: true,
+                opacity: 0.95
+            });
+
+            const beam = new THREE.Mesh(beamGeo, beamMat);
+            beam.position.copy(startPos).add(dir.clone().multiplyScalar(0.5));
+            beam.lookAt(endPos);
+            scene.add(beam);
+
+            let opacity = 0.95;
+            const fade = setInterval(() => {
+                opacity -= 0.15;
+                beam.material.opacity = Math.max(0, opacity);
+                if (opacity <= 0) {
+                    clearInterval(fade);
+                    scene.remove(beam);
+                }
+            }, 16);
+        }
+
+        function createSparkExplosion(pos, colorHex = 0xffd700) {
+            const count = 18;
+            const geom = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const velocities = [];
+
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = pos.x;
+                positions[i * 3 + 1] = pos.y;
+                positions[i * 3 + 2] = pos.z;
+                velocities.push(new THREE.Vector3(
+                    (Math.random() - 0.5) * 8,
+                    Math.random() * 8,
+                    (Math.random() - 0.5) * 8
+                ));
+            }
+
+            geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const pMat = new THREE.PointsMaterial({ color: colorHex, size: 0.14 });
+            const particles = new THREE.Points(geom, pMat);
+            scene.add(particles);
+
+            let age = 0;
+            const pInterval = setInterval(() => {
+                age += 0.016;
+                const arr = particles.geometry.attributes.position.array;
+                for (let i = 0; i < count; i++) {
+                    arr[i * 3] += velocities[i].x * 0.016;
+                    arr[i * 3 + 1] += velocities[i].y * 0.016;
+                    arr[i * 3 + 2] += velocities[i].z * 0.016;
+                    velocities[i].y -= 9.8 * 0.016;
+                }
+                particles.geometry.attributes.position.needsUpdate = true;
+
+                if (age > 0.35) {
+                    clearInterval(pInterval);
+                    scene.remove(particles);
+                }
+            }, 16);
+        }
+
+        function createDroneDebris(pos) {
+            const count = 8;
+            for (let i = 0; i < count; i++) {
+                const shardGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+                const shardMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 });
+                const shard = new THREE.Mesh(shardGeo, shardMat);
+                shard.position.copy(pos);
+                scene.add(shard);
+                debrisParticles.push({
+                    mesh: shard,
+                    vel: new THREE.Vector3((Math.random() - 0.5) * 7, Math.random() * 6 + 2, (Math.random() - 0.5) * 7),
+                    rot: new THREE.Vector3(Math.random() * 10, Math.random() * 10, 0),
+                    life: 1.2
+                });
+            }
+        }
+
+        function showHitmarker() {
+            const hm = document.getElementById("hitmarker");
+            hm.classList.add("active");
+            setTimeout(() => hm.classList.remove("active"), 120);
+        }
+
+        function showScoreFloat(text) {
+            const sf = document.getElementById("scoreFloat");
+            sf.textContent = text;
+            sf.style.opacity = "1";
+            sf.style.transform = "translate(-50%, -80%)";
+            setTimeout(() => {
+                sf.style.opacity = "0";
+                sf.style.transform = "translate(-50%, -50%)";
+            }, 500);
+        }
+
+        function reloadWeapon() {
+            if (isReloading || ammo === 24) return;
+            isReloading = true;
+            playMechSound(400);
+
+            let reloadTimer = 0;
+            const reloadInterval = setInterval(() => {
+                reloadTimer += 0.05;
+                weaponPivot.rotation.z = Math.sin(reloadTimer * Math.PI) * 0.4;
+                weaponPivot.position.y = HIP_POS.y - Math.sin(reloadTimer * Math.PI) * 0.15;
+
+                if (reloadTimer >= 1.0) {
+                    clearInterval(reloadInterval);
+                    ammo = 24;
+                    document.getElementById("hudAmmo").textContent = ammo;
+                    isReloading = false;
+                    playMechSound(600);
+                }
+            }, 30);
+        }
+
+        function inspectWeapon() {
+            if (isInspecting || isReloading) return;
+            isInspecting = true;
+            playMechSound(500);
+
+            let t = 0;
+            const inspectInt = setInterval(() => {
+                t += 0.03;
+                weaponMesh.rotation.y = Math.sin(t * Math.PI) * 0.85;
+                weaponMesh.rotation.x = Math.sin(t * Math.PI) * -0.25;
+
+                if (t >= 1.0) {
+                    clearInterval(inspectInt);
+                    weaponMesh.rotation.set(0, 0, 0);
+                    isInspecting = false;
+                }
+            }, 30);
+        }
+
+        // ====================================================================
+        // CONTROLS & POINTERLOCK
+        // ====================================================================
+        const controls = new THREE.PointerLockControls(camera, document.body);
+        const blocker = document.getElementById("blocker");
+        const startBtn = document.getElementById("startBtn");
+
+        startBtn.addEventListener("click", () => {
+            controls.lock();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        });
+
+        controls.addEventListener("lock", () => blocker.style.display = "none");
+        controls.addEventListener("unlock", () => blocker.style.display = "flex");
+
+        const keys = { w: false, a: false, s: false, d: false };
+
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "KeyW") keys.w = true;
+            if (e.code === "KeyA") keys.a = true;
+            if (e.code === "KeyS") keys.s = true;
+            if (e.code === "KeyD") keys.d = true;
+            if (e.code === "KeyR") reloadWeapon();
+            if (e.code === "KeyF") inspectWeapon();
+            if (e.code === "Digit1") switchSkin(1);
+            if (e.code === "Digit2") switchSkin(2);
+            if (e.code === "Digit3") switchSkin(3);
+            if (e.code === "Digit4") switchSkin(4);
+        });
+
+        document.addEventListener("keyup", (e) => {
+            if (e.code === "KeyW") keys.w = false;
+            if (e.code === "KeyA") keys.a = false;
+            if (e.code === "KeyS") keys.s = false;
+            if (e.code === "KeyD") keys.d = false;
+        });
+
+        document.addEventListener("mousedown", (e) => {
+            if (!controls.isLocked) return;
+            if (e.button === 0) {
+                shoot();
+            } else if (e.button === 2) {
+                isAiming = true;
+                document.getElementById("crosshair").classList.add("ads");
+                playMechSound(650);
+            }
+        });
+
+        document.addEventListener("mouseup", (e) => {
+            if (e.button === 2) {
+                isAiming = false;
+                document.getElementById("crosshair").classList.remove("ads");
+                playMechSound(300);
+            }
+        });
+
+        document.addEventListener("mousemove", (e) => {
+            if (!controls.isLocked) return;
+            mouseSway.x = THREE.MathUtils.clamp(-e.movementX * 0.0006, -0.04, 0.04);
+            mouseSway.y = THREE.MathUtils.clamp(-e.movementY * 0.0006, -0.04, 0.04);
+        });
+
+        window.addEventListener("contextmenu", (e) => e.preventDefault());
+
+        // ====================================================================
+        // SDK EXPORT MODAL LOGIC
+        // ====================================================================
+        const SDK_SNIPPETS = {
+            unreal: `// Unreal Engine 5: LuxuryWeaponActor.h & .cpp
+#pragma once
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+#include "LuxuryWeaponActor.generated.h"
+
+UCLASS()
+class ALuxuryWeaponActor : public AActor
+{
+    GENERATED_BODY()
+public:
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
+    USkeletalMeshComponent* WeaponMesh;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    float BaseDamage = 35.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+    float FireRateRPM = 720.0f;
+
+    UFUNCTION(BlueprintCallable, Category = "Combat")
+    void FirePlasmaDischarge();
+};`,
+            unity: `// Unity 6: LuxuryFPSController.cs
+using UnityEngine;
+
+public class LuxuryFPSController : MonoBehaviour
+{
+    [Header("Weapon Config")]
+    public float damage = 35f;
+    public float fireRate = 0.083f;
+    public Transform muzzlePoint;
+    public ParticleSystem plasmaMuzzleFlash;
+
+    public void Fire()
+    {
+        Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+        {
+            Instantiate(plasmaMuzzleFlash, muzzlePoint.position, muzzlePoint.rotation);
+        }
+    }
+}`,
+            godot: `# Godot 4: luxury_fps_weapon.gd
+extends Node3D
+
+@export var damage: float = 35.0
+@export var fire_rate: float = 0.083
+@onready var muzzle = $MuzzlePoint
+
+func fire_plasma():
+    var space_state = get_world_3d().direct_space_state
+    var camera = get_viewport().get_camera_3d()
+    var ray_query = PhysicsRayQueryParameters3D.create(
+        camera.global_position, 
+        camera.global_position - camera.global_transform.basis.z * 100.0
+    )
+    var result = space_state.intersect_ray(ray_query)`,
+            r3f: `// React Three Fiber: LuxuryFPSWeapon.tsx
+import React, { useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
+
+export function LuxuryFPSWeapon(props) {
+    const group = useRef();
+    const { nodes, materials } = useGLTF('/models/luxury_plasma_railgun.glb');
+    return (
+        <group ref={group} {...props} dispose={null}>
+            <mesh geometry={nodes.Shroud.geometry} material={materials.Gold24K} />
+            <mesh geometry={nodes.Receiver.geometry} material={materials.Obsidian} />
+        </group>
+    );
+}`
+        };
+
+        let currentSdkTab = 'unreal';
+
+        function openExportModal() {
+            document.getElementById("exportModal").classList.add("open");
+            switchExportTab('unreal');
+        }
+
+        function closeExportModal() {
+            document.getElementById("exportModal").classList.remove("open");
+        }
+
+        function switchExportTab(tab) {
+            currentSdkTab = tab;
+            document.querySelectorAll(".export-tab").forEach(t => t.classList.remove("active"));
+            event.target.classList.add("active");
+            document.getElementById("exportCode").textContent = SDK_SNIPPETS[tab];
+        }
+
+        function copySdkCode() {
+            navigator.clipboard.writeText(SDK_SNIPPETS[currentSdkTab]);
+            alert("SDK Code copied to clipboard!");
+        }
+
+        // ====================================================================
+        // 60/120 FPS GAME LOOP
+        // ====================================================================
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let lastFpsUpdate = performance.now();
+
+        function animate(now) {
+            requestAnimationFrame(animate);
+
+            const delta = Math.min((now - lastTime) / 1000, 0.1);
+            lastTime = now;
+
+            frameCount++;
+            if (now - lastFpsUpdate > 1000) {
+                document.getElementById("hudFps").textContent = frameCount;
+                frameCount = 0;
+                lastFpsUpdate = now;
+            }
+
+            // WASD Movement
+            const moveSpeed = 6.5;
+            if (keys.w) controls.moveForward(moveSpeed * delta);
+            if (keys.s) controls.moveForward(-moveSpeed * delta);
+            if (keys.a) controls.moveRight(-moveSpeed * delta);
+            if (keys.d) controls.moveRight(moveSpeed * delta);
+
+            camera.position.y = 1.7;
+
+            // Recoil Recovery
+            recoil.posZ = THREE.MathUtils.lerp(recoil.posZ, 0, recoil.recoverSpeed * delta);
+            recoil.rotX = THREE.MathUtils.lerp(recoil.rotX, 0, recoil.recoverSpeed * delta);
+            recoil.rotY = THREE.MathUtils.lerp(recoil.rotY, 0, recoil.recoverSpeed * delta);
+
+            // Sway Recovery
+            mouseSway.x = THREE.MathUtils.lerp(mouseSway.x, 0, 5.0 * delta);
+            mouseSway.y = THREE.MathUtils.lerp(mouseSway.y, 0, 5.0 * delta);
+
+            // ADS FOV & Positioning
+            const targetPos = isAiming ? ADS_POS : HIP_POS;
+            const targetFov = isAiming ? 45 : 75;
+
+            weaponPivot.position.x = THREE.MathUtils.lerp(weaponPivot.position.x, targetPos.x + mouseSway.x, 14 * delta);
+            weaponPivot.position.y = THREE.MathUtils.lerp(weaponPivot.position.y, targetPos.y + mouseSway.y, 14 * delta);
+            weaponPivot.position.z = THREE.MathUtils.lerp(weaponPivot.position.z, targetPos.z + recoil.posZ, 20 * delta);
+
+            weaponPivot.rotation.x = THREE.MathUtils.lerp(weaponPivot.rotation.x, recoil.rotX + mouseSway.y * 0.5, 18 * delta);
+            weaponPivot.rotation.y = THREE.MathUtils.lerp(weaponPivot.rotation.y, recoil.rotY + mouseSway.x * 0.5, 18 * delta);
+
+            if (Math.abs(camera.fov - targetFov) > 0.1) {
+                camera.fov = THREE.MathUtils.lerp(camera.fov, targetFov, 12 * delta);
+                camera.updateProjectionMatrix();
+            }
+
+            // Animate Drones
+            for (let d of drones) {
+                d.userData.ring.rotation.z += 1.8 * delta;
+                d.position.y = d.userData.baseY + Math.sin(now * 0.002 + d.userData.seed) * 0.45;
+                if (d.userData.strafing) {
+                    d.position.x = d.userData.baseX + Math.sin(now * 0.0015 + d.userData.seed) * 3.0;
+                }
+                d.lookAt(camera.position.x, d.position.y, camera.position.z);
+
+                // Shield fade out
+                if (d.userData.shield.material.opacity > 0) {
+                    d.userData.shield.material.opacity -= 2.0 * delta;
+                }
+            }
+
+            // Animate Destruction Debris Particles
+            for (let i = debrisParticles.length - 1; i >= 0; i--) {
+                const p = debrisParticles[i];
+                p.mesh.position.addScaledVector(p.vel, delta);
+                p.vel.y -= 9.8 * delta;
+                p.mesh.rotation.x += p.rot.x * delta;
+                p.mesh.rotation.y += p.rot.y * delta;
+                p.life -= delta;
+                if (p.life <= 0) {
+                    scene.remove(p.mesh);
+                    debrisParticles.splice(i, 1);
+                }
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        requestAnimationFrame(animate);
+
+        window.addEventListener("resize", () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>

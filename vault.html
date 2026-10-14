@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXIUM // Video Storage Vault & Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #060810;
+            --bg-card: rgba(13, 17, 28, 0.85);
+            --border-glow: rgba(0, 240, 255, 0.25);
+            --cyan: #00F0FF;
+            --emerald: #00FF88;
+            --purple: #a855f7;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-glow);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .brand h1 {
+            font-family: 'Orbitron', monospace;
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--cyan);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .brand p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .telemetry-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid var(--border-glow);
+            color: var(--cyan);
+        }
+        .badge.emerald {
+            background: rgba(0, 255, 136, 0.1);
+            border-color: rgba(0, 255, 136, 0.3);
+            color: var(--emerald);
+        }
+        .path-banner {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px dashed rgba(0, 240, 255, 0.3);
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin-bottom: 25px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .path-banner span {
+            color: var(--cyan);
+        }
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+        @media (max-width: 900px) {
+            .grid-layout { grid-template-columns: 1fr; }
+        }
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-glow);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        .card h2 {
+            font-family: 'Orbitron', monospace;
+            font-size: 15px;
+            color: var(--cyan);
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .video-box {
+            max-width: 320px;
+            margin: 0 auto 20px auto;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 2px solid var(--border-glow);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+            background: #000;
+        }
+        video {
+            width: 100%;
+            aspect-ratio: 9/16;
+            display: block;
+            background: #000;
+        }
+        .script-box {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            margin-bottom: 15px;
+        }
+        .meta-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .tag {
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 3px 8px;
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--cyan);
+            border-radius: 6px;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            display: inline-block;
+            text-decoration: none;
+            padding: 10px 18px;
+            font-size: 12px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--cyan);
+            color: #000;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 0 15px var(--cyan);
+        }
+        .btn-outline {
+            background: transparent;
+            border-color: var(--cyan);
+            color: var(--cyan);
+        }
+        .btn-outline:hover {
+            background: rgba(0, 240, 255, 0.1);
+        }
+        textarea {
+            width: 100%;
+            height: 140px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 10px;
+            color: #fff;
+            padding: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            margin-bottom: 14px;
+            resize: vertical;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+        }
+        .progress-box {
+            display: none;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-glow);
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .bar-wrap {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--cyan), var(--emerald));
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="brand">
+                <h1>NEXIUM VIDEO VAULT</h1>
+                <p>Localhost 8001 Video Storage & Manufacturing Cockpit</p>
+            </div>
+            <div class="telemetry-row">
+                <span class="badge" id="vaultProviderBadge">STORAGE: LOCALHOST</span>
+                <span class="badge" style="color:var(--cyan); border-color:rgba(0,240,255,0.4);">MOTION: 3-ACT DYNAMIC ANIMATION (30 FPS)</span>
+                <span class="badge emerald" id="userTierBadge">TIER: FREE (0/2 used)</span>
+                <a href="/chat" class="btn btn-outline" style="padding:5px 12px; font-size:11px;">Open Workstation →</a>
+            </div>
+        </header>
+
+        <div class="path-banner">
+            <div>
+                Physical Local Vault Directory: 
+                <span>C:\Users\Baha\Desktop\NEXIUM\backend\generated_code\videos\</span>
+            </div>
+            <div>
+                Server Port: <span>8001</span> (Active)
+            </div>
+        </div>
+
+        <div class="grid-layout">
+            <!-- Left Column: Video Player & Manifest -->
+            <div class="card">
+                <h2>
+                    <span>Active Video Short</span>
+                    <span id="activeVideoDuration" style="font-size:11px; color:var(--emerald);">31.66s</span>
+                </h2>
+
+                <div class="video-box">
+                    <video id="player" controls autoplay loop playsinline src="/api/video/stream/short_02eb74b725.mp4"></video>
+                </div>
+
+                <div class="script-box" id="scriptContent">
+                    <strong>VIRAL RECAP SCRIPT (Anton Bold Subtitles + Dynamic Motion):</strong><br>
+                    He thought he was just an ordinary junior hunter working in the low-rank mines. A crimson system window violently materializes before his retinas. Reality fractures into glass. The global leaderboard updates. His name appears in sovereign gold at rank one. Behind him, the air turns to ice as a dimensional gate rips wide open.
+                </div>
+
+                <div class="meta-tags" id="tagsWrap">
+                    <span class="tag">#3-act-dynamic-motion</span>
+                    <span class="tag">#ken-burns-zoom</span>
+                    <span class="tag">#lateral-pan-drift</span>
+                    <span class="tag">#climax-push-pulse</span>
+                    <span class="tag">#anton-bold-glow</span>
+                    <span class="tag">#30fps-ffmpeg</span>
+                </div>
+
+                <div class="btn-group">
+                    <a id="downloadLink" href="/api/video/stream/short_02eb74b725.mp4" download class="btn btn-primary" style="flex:1;">
+                        Download 9:16 MP4 (3.62 MB)
+                    </a>
+                    <button onclick="copyStreamUrl()" class="btn btn-outline">
+                        Copy Link
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column: Synthesize New Video directly -->
+            <div class="card">
+                <h2>
+                    <span>Manufacture New Short</span>
+                    <span style="font-size:11px; color:var(--cyan);">VideoFactory AI</span>
+                </h2>
+
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">
+                    Upload any storybook or chapter file. The engine rewrites it into a 130-word viral recap script, synthesizes speech, renders 9:16 visuals, and compiles the video with Anton Bold subtitles automatically.
+                </p>
+
+                <!-- Drag and Drop Storybook Upload Box -->
+                <div id="dropZone" onclick="document.getElementById('fileUploadInput').click()" style="border: 2px dashed rgba(0, 240, 255, 0.35); border-radius: 12px; padding: 18px; text-align: center; background: rgba(0, 240, 255, 0.04); cursor: pointer; margin-bottom: 14px; transition: all 0.2s;">
+                    <div style="font-size: 26px; margin-bottom: 6px;">📂</div>
+                    <div id="uploadTitle" style="font-size: 13px; font-weight: 700; color: var(--cyan);">Click to Upload Storybook File or Drag & Drop Here</div>
+                    <div id="uploadSub" style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Supports .txt, .md, novel text files (or paste below)</div>
+                    <input type="file" id="fileUploadInput" accept=".txt,.md,.text" style="display:none;" onchange="handleFileSelect(event)">
+                </div>
+
+                <textarea id="chapterInput" placeholder="Or paste novel chapter / storybook text here directly..."></textarea>
+
+                <button id="synthBtn" onclick="synthesizeFromVault()" class="btn btn-primary" style="width:100%; padding:13px; font-size:13px; margin-bottom:15px; cursor:pointer;">
+                    ⚡ Convert Storybook to 9:16 Viral Video
+                </button>
+
+                <div class="progress-box" id="progressBox">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span id="progressLabel" style="color:var(--cyan);">Executing Pipeline...</span>
+                        <span id="progressStep" style="color:var(--emerald);">STEP 1/4</span>
+                    </div>
+                    <div class="bar-wrap">
+                        <div class="bar-fill" id="barFill"></div>
+                    </div>
+                </div>
+
+                <div style="border-top:1px solid rgba(255,255,255,0.08); padding-top:15px; margin-top:10px;">
+                    <h3 style="font-size:12px; font-family:'Orbitron'; color:var(--text-muted); margin-bottom:10px;">PAST MANUFACTURED SHORTS</h3>
+                    <div id="pastJobsList" style="display:flex; flex-direction:column; gap:8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function loadJobs() {
+            try {
+                const res = await fetch("/api/video/jobs");
+                if (res.ok) {
+                    const data = await res.json();
+                    const list = document.getElementById("pastJobsList");
+                    const jobs = data.jobs || [];
+                    if (jobs.length > 0) {
+                        loadVideoToPlayer(jobs[0]);
+                    }
+                    jobs.forEach(job => {
+                        const div = document.createElement("div");
+                        div.style.cssText = "background:rgba(0,0,0,0.3); padding:8px 12px; border-radius:6px; font-size:11px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;";
+                        div.innerHTML = `
+                            <div>
+                                <span style="color:var(--cyan); font-family:monospace;">${job.filename}</span>
+                                <span style="color:var(--text-muted); margin-left:8px;">${job.duration_sec}s</span>
+                            </div>
+                            <span style="color:var(--emerald); font-size:10px;">LOAD →</span>
+                        `;
+                        div.onclick = () => loadVideoToPlayer(job);
+                        list.appendChild(div);
+                    });
+                }
+            } catch (e) {
+                console.warn(e);
+            }
+        }
+
+        function loadVideoToPlayer(job) {
+            document.getElementById("player").src = job.mp4_url;
+            document.getElementById("downloadLink").href = job.mp4_url;
+            document.getElementById("activeVideoDuration").textContent = job.duration_sec + "s";
+            document.getElementById("scriptContent").innerHTML = `<strong>VIRAL RECAP SCRIPT (Anton Bold Subtitles + Dynamic Motion):</strong><br>${job.script}`;
+            const tagsWrap = document.getElementById("tagsWrap");
+            tagsWrap.innerHTML = "";
+            (job.keywords || []).forEach(k => {
+                tagsWrap.innerHTML += `<span class="tag">#${k}</span>`;
+            });
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            readFile(file);
+        }
+
+        function readFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                document.getElementById("chapterInput").value = text;
+                const words = text.trim().split(/\s+/).length;
+                document.getElementById("uploadTitle").innerHTML = `<span style="color:var(--emerald);">Loaded: ${escapeHtml(file.name)}</span>`;
+                document.getElementById("uploadSub").textContent = `${words.toLocaleString()} words loaded from storybook. Click button below to convert!`;
+            };
+            reader.readAsText(file);
+        }
+
+        function escapeHtml(str) {
+            const d = document.createElement("div");
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        async function synthesizeFromVault() {
+            const chapter = document.getElementById("chapterInput").value.trim();
+            if (!chapter) {
+                alert("Please enter chapter text first.");
+                return;
+            }
+            const btn = document.getElementById("synthBtn");
+            const prog = document.getElementById("progressBox");
+            const label = document.getElementById("progressLabel");
+            const step = document.getElementById("progressStep");
+            const bar = document.getElementById("barFill");
+
+            btn.disabled = true;
+            prog.style.display = "block";
+            bar.style.width = "25%";
+            label.textContent = "Writing 130-word viral recap script...";
+            step.textContent = "STEP 1/4";
+
+            let p = 25;
+            const timer = setInterval(() => {
+                p += 15;
+                if (p > 90) p = 90;
+                bar.style.width = p + "%";
+                if (p >= 40 && p < 60) {
+                    step.textContent = "STEP 2/4";
+                    label.textContent = "Synthesizing Adam deep audio narration...";
+                } else if (p >= 60 && p < 80) {
+                    step.textContent = "STEP 3/4";
+                    label.textContent = "Generating 3-act cinematic manhwa visuals (Hook, Rift, Monarch)...";
+                } else if (p >= 80) {
+                    step.textContent = "STEP 4/4";
+                    label.textContent = "Compiling 3-act dynamic camera motion (zoom/pan/drift) + subtitles...";
+                }
+            }, 3000);
+
+            try {
+                const res = await fetch("/api/video/chapter-to-short", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ chapter: chapter, user_id: "default_user" })
+                });
+
+                clearInterval(timer);
+                bar.style.width = "100%";
+
+                if (res.ok) {
+                    const data = await res.json();
+                    loadVideoToPlayer(data);
+                    alert("Video rendered and stored in vault successfully!");
+                    prog.style.display = "none";
+                    loadJobs();
+                } else {
+                    const err = await res.json().catch(() => ({}));
+                    alert(err.quota_reply || err.error || "Video synthesis failed");
+                    prog.style.display = "none";
+                }
+            } catch (err) {
+                clearInterval(timer);
+                prog.style.display = "none";
+                alert("Error: " + err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function copyStreamUrl() {
+            const url = document.getElementById("downloadLink").href;
+            navigator.clipboard.writeText(url).then(() => {
+                alert("Copied Video URL to clipboard:\n" + url);
+            });
+        }
+
+        async function updateStatus() {
+            try {
+                const res = await fetch("/api/video/vault-status");
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById("vaultProviderBadge").textContent = "VAULT: " + data.active_provider;
+                }
+                const uRes = await fetch("/api/video/user/default_user");
+                if (uRes.ok) {
+                    const uData = await uRes.json();
+                    document.getElementById("userTierBadge").textContent = `TIER: ${uData.tier.toUpperCase()} (${uData.videos_today}/2 used)`;
+                }
+            } catch(e) {}
+        }
+
+        // Setup Drag and Drop Listeners
+        const dropZone = document.getElementById("dropZone");
+        if (dropZone) {
+            ['dragenter', 'dragover'].forEach(name => {
+                dropZone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = "var(--emerald)";
+                    dropZone.style.background = "rgba(0, 255, 136, 0.08)";
+                }, false);
+            });
+            ['dragleave', 'drop'].forEach(name => {
+                dropZone.addEventListener(name, (e) => {
+                    e.preventDefault();
+                    dropZone.style.borderColor = "rgba(0, 240, 255, 0.35)";
+                    dropZone.style.background = "rgba(0, 240, 255, 0.04)";
+                }, false);
+            });
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files && files.length) {
+                    readFile(files[0]);
+                }
+            }, false);
+        }
+
+        loadJobs();
+        updateStatus();
+    </script>
+</body>
+</html>

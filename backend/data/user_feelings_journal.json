@@ -1,0 +1,101 @@
+[
+  {
+    "id": 1,
+    "timestamp": 1789748444.988777,
+    "formatted_time": "2026-09-18 17:20:44",
+    "user_excerpt": "I am absolutely thrilled with how this works! Incredible work!",
+    "primary": "High Anticipation & Eager Hope",
+    "valence": 0.6,
+    "arousal": 0.85,
+    "intensity": 0.9,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 2,
+    "timestamp": 1789748444.9938326,
+    "formatted_time": "2026-09-18 17:20:44",
+    "user_excerpt": "I am feeling overwhelmed and frustrated, nothing is working and I am stuck.",
+    "primary": "Frustration & Urgency",
+    "valence": -0.7,
+    "arousal": 0.85,
+    "intensity": 0.7,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 3,
+    "timestamp": 1789748449.0794022,
+    "formatted_time": "2026-09-18 17:20:49",
+    "user_excerpt": "I am curious to see how the supercomputer performs.",
+    "primary": "Curiosity & Wonder",
+    "valence": 0.65,
+    "arousal": 0.6,
+    "intensity": 0.7,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 4,
+    "timestamp": 1790012538.4883828,
+    "formatted_time": "2026-09-21 18:42:18",
+    "user_excerpt": "I am absolutely thrilled with how this works! Incredible work!",
+    "primary": "High Anticipation & Eager Hope",
+    "valence": 0.6,
+    "arousal": 0.85,
+    "intensity": 0.9,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 5,
+    "timestamp": 1790012538.5069683,
+    "formatted_time": "2026-09-21 18:42:18",
+    "user_excerpt": "I am feeling overwhelmed and frustrated, nothing is working and I am stuck.",
+    "primary": "Frustration & Urgency",
+    "valence": -0.7,
+    "arousal": 0.85,
+    "intensity": 0.7,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 6,
+    "timestamp": 1790012542.6950004,
+    "formatted_time": "2026-09-21 18:42:22",
+    "user_excerpt": "I am curious to see how the supercomputer performs.",
+    "primary": "Curiosity & Wonder",
+    "valence": 0.65,
+    "arousal": 0.6,
+    "intensity": 0.7,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 7,
+    "timestamp": 1790811960.733049,
+    "formatted_time": "2026-10-01 00:46:00",
+    "user_excerpt": "I am absolutely thrilled with how this works! Incredible work!",
+    "primary": "High Anticipation & Eager Hope",
+    "valence": 0.6,
+    "arousal": 0.85,
+    "intensity": 0.9,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 8,
+    "timestamp": 1790811960.7375126,
+    "formatted_time": "2026-10-01 00:46:00",
+    "user_excerpt": "I am feeling overwhelmed and frustrated, nothing is working and I am stuck.",
+    "primary": "Frustration & Urgency",
+    "valence": -0.7,
+    "arousal": 0.85,
+    "intensity": 0.7,
+    "empathy_score": 0.98
+  },
+  {
+    "id": 9,
+    "timestamp": 1790811964.852875,
+    "formatted_time": "2026-10-01 00:46:04",
+    "user_excerpt": "I am curious to see how the supercomputer performs.",
+    "primary": "Curiosity & Wonder",
+    "valence": 0.65,
+    "arousal": 0.6,
+    "intensity": 0.7,
+    "empathy_score": 0.98
+  }
+]

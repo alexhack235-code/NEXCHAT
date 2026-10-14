@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test App — Senior Software Architect</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --glow: rgba(139, 92, 246, 0.4);
+            --accent: #ec4899;
+            --bg: #0b0f19;
+            --card: rgba(18, 24, 38, 0.8);
+            --border: #27314a;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); line-height: 1.6; padding: 4rem 10%; max-width: 1200px; margin: 0 auto; }
+
+        /* Header */
+        header { margin-bottom: 5rem; }
+        .status-tag { display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #10b981; margin-bottom: 1rem; }
+        .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 10px #10b981; }
+        h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.25rem; }
+        h1 span { color: var(--primary); }
+        .bio { font-size: 1.25rem; color: var(--muted); max-width: 650px; margin-bottom: 2rem; }
+        
+        .skills-wrap { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2rem; }
+        .skill-chip { background: var(--card); border: 1px solid var(--border); padding: 0.4rem 0.9rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600; color: var(--muted); }
+        .skill-chip.highlight { border-color: var(--primary); color: #fff; }
+
+        /* Projects */
+        .section-title { font-size: 2rem; font-weight: 700; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end; }
+        .project-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; }
+        .project-card { background: var(--card); border: 1px solid var(--border); border-radius: 1.25rem; padding: 2rem; transition: all 0.3s; display: flex; flex-direction: column; justify-content: space-between; }
+        .project-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 10px 30px var(--glow); }
+        .project-title { font-size: 1.35rem; font-weight: 700; margin-bottom: 0.75rem; }
+        .project-desc { color: var(--muted); font-size: 0.95rem; margin-bottom: 1.5rem; flex: 1; }
+        .project-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        .tag { font-size: 0.75rem; color: var(--primary); font-weight: 600; }
+
+        @media (max-width: 768px) {
+            body { padding: 2rem 5%; }
+            h1 { font-size: 2.5rem; }
+            .project-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="status-tag"><div class="status-dot"></div> Available for Select Architect Projects</div>
+        <h1>Hi, I'm <span>Test App</span>.<br>I architect high-performance distributed AI systems.</h1>
+        <p class="bio">Specialized in Rust-accelerated backends, low-latency microservices, and cognitive multi-agent systems.</p>
+        <div class="skills-wrap">
+            <span class="skill-chip highlight">Rust Core</span>
+            <span class="skill-chip highlight">Python Async</span>
+            <span class="skill-chip">TypeScript</span>
+            <span class="skill-chip">Go Microservices</span>
+            <span class="skill-chip">Modern C++20</span>
+            <span class="skill-chip">SIMD Vectorization</span>
+            <span class="skill-chip">Distributed RAG</span>
+        </div>
+    </header>
+
+    <main>
+        <div class="section-title">
+            <span>Featured Systems</span>
+        </div>
+        <div class="project-grid">
+            <div class="project-card">
+                <div>
+                    <div class="project-title">NEXIUM Rust Core Engine</div>
+                    <p class="project-desc">In-process compiled C-ABI dynamic library delivering microsecond safety scanning and SIMD cosine reranking with zero Windows heap corruption.</p>
+                </div>
+                <div class="project-tags">
+                    <span class="tag">#Rust</span>
+                    <span class="tag">#C-ABI</span>
+                    <span class="tag">#SIMD</span>
+                    <span class="tag">#Zero-Copy</span>
+                </div>
+            </div>
+            <div class="project-card">
+                <div>
+                    <div class="project-title">Autonomous 10M Code Factory</div>
+                    <p class="project-desc">Continuous code synthesis framework capable of compiling and verifying millions of modules across 10 programming languages at 1,600+ loops/second.</p>
+                </div>
+                <div class="project-tags">
+                    <span class="tag">#Python</span>
+                    <span class="tag">#AST</span>
+                    <span class="tag">#Multi-Language</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

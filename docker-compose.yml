@@ -1,0 +1,45 @@
+version: "3.8"
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: nexium-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: nexium-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - HF_API_KEY=${HF_API_KEY:-}
+      - REDIS_URL=redis://redis:6379/0
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_KEY=${SUPABASE_KEY:-}
+      - RATE_LIMIT_PER_MIN=60
+      - MODERATION_ENABLED=1
+    volumes:
+      - ./backend/data:/app/data
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  redis-data:

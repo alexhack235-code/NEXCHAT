@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexium Studio — Next-Gen AI Platform</title>
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --glow: rgba(139, 92, 246, 0.4);
+            --accent: #ec4899;
+            --bg: #0b0f19;
+            --card: rgba(18, 24, 38, 0.8);
+            --border: #27314a;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+        
+        /* Navbar */
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 1.25rem 5%; background: rgba(11, 15, 25, 0.8); backdrop-filter: blur(16px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
+        .logo { font-size: 1.5rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; color: #fff; text-decoration: none; }
+        .logo span { color: var(--primary); }
+        .nav-links { display: flex; gap: 2rem; align-items: center; list-style: none; }
+        .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; transition: color 0.2s; }
+        .nav-links a:hover { color: #fff; }
+        .btn { padding: 0.6rem 1.4rem; border-radius: 9999px; font-weight: 600; font-size: 0.9rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; transition: all 0.25s; border: none; }
+        .btn-primary { background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; box-shadow: 0 4px 20px var(--glow); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--glow); }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-outline:hover { background: rgba(255,255,255,0.05); }
+
+        /* Hero */
+        .hero { padding: 7rem 5% 5rem; text-align: center; max-width: 1000px; margin: 0 auto; position: relative; }
+        .badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 1rem; border-radius: 9999px; background: rgba(139, 92, 246, 0.1); border: 1px solid var(--primary); color: var(--primary); font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; }
+        h1 { font-size: 3.5rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 1.5rem; line-height: 1.15; }
+        h1 span { background: linear-gradient(135deg, #fff, var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { font-size: 1.25rem; color: var(--muted); margin-bottom: 2.5rem; max-width: 700px; margin-left: auto; margin-right: auto; }
+        .hero-actions { display: flex; justify-content: center; gap: 1rem; margin-bottom: 4rem; }
+
+        /* Bento Grid */
+        .section-header { text-align: center; margin-bottom: 3.5rem; }
+        .section-header h2 { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.75rem; }
+        .bento-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; max-width: 1200px; margin: 0 auto; padding: 0 5% 6rem; }
+        .bento-card { background: var(--card); border: 1px solid var(--border); border-radius: 1.25rem; padding: 2rem; transition: all 0.3s; position: relative; overflow: hidden; backdrop-filter: blur(12px); }
+        .bento-card:hover { border-color: var(--primary); transform: translateY(-4px); }
+        .bento-card.span-2 { grid-column: span 2; }
+        .card-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(139, 92, 246, 0.15); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1.5rem; margin-bottom: 1.25rem; }
+        .bento-card h3 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .bento-card p { color: var(--muted); font-size: 0.95rem; }
+
+        /* Pricing */
+        .pricing-section { padding: 5rem 5%; background: rgba(0,0,0,0.2); }
+        .toggle-wrap { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 3rem; }
+        .switch { width: 50px; height: 26px; background: var(--border); border-radius: 999px; position: relative; cursor: pointer; transition: background 0.3s; }
+        .switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.3s; }
+        .switch.annual::after { transform: translateX(24px); }
+        .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; max-width: 1100px; margin: 0 auto; }
+        .price-card { background: var(--card); border: 1px solid var(--border); border-radius: 1.25rem; padding: 2.5rem; text-align: center; position: relative; }
+        .price-card.featured { border-color: var(--primary); box-shadow: 0 0 30px var(--glow); }
+        .price { font-size: 3rem; font-weight: 800; margin: 1.5rem 0 0.5rem; }
+        .price span { font-size: 1rem; color: var(--muted); font-weight: 400; }
+
+        /* FAQ */
+        .faq-section { max-width: 800px; margin: 0 auto; padding: 6rem 5%; }
+        .faq-item { border-bottom: 1px solid var(--border); padding: 1.25rem 0; cursor: pointer; }
+        .faq-q { display: flex; justify-content: space-between; font-weight: 600; font-size: 1.1rem; }
+        .faq-a { color: var(--muted); font-size: 0.95rem; margin-top: 0.75rem; display: none; }
+        .faq-item.active .faq-a { display: block; }
+
+        /* Footer */
+        footer { border-top: 1px solid var(--border); padding: 4rem 5%; text-align: center; color: var(--muted); font-size: 0.9rem; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            .bento-grid, .pricing-grid { grid-template-columns: 1fr; }
+            .bento-card.span-2 { grid-column: span 1; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#" class="logo">⚡ <span>Nexium Studio</span></a>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#faq">FAQ</a></li>
+        </ul>
+        <a href="#pricing" class="btn btn-primary">Get Started Free</a>
+    </nav>
+
+    <header class="hero">
+        <div class="badge">🚀 NEXIUM Engine 2.0 Released</div>
+        <h1>Next-Gen Cognitive AI<br><span>Built for 10x Engineers</span></h1>
+        <p>Supercharge your software engineering workflow with in-process Rust-native acceleration and autonomous multi-agent reasoning.</p>
+        <div class="hero-actions">
+            <a href="#pricing" class="btn btn-primary">Start Building Now →</a>
+            <a href="#features" class="btn btn-outline">Explore Features</a>
+        </div>
+    </header>
+
+    <section id="features">
+        <div class="section-header">
+            <h2>Engineered for High-Performance</h2>
+            <p style="color: var(--muted);">Everything you need to ship resilient systems in record time</p>
+        </div>
+        <div class="bento-grid">
+            <div class="bento-card span-2">
+                <div class="card-icon">⚡</div>
+                <h3>In-Process Native Rust Acceleration</h3>
+                <p>SIMD vectorized cosine calculation and sub-microsecond security guardrails executing directly in-process with zero network overhead.</p>
+            </div>
+            <div class="bento-card">
+                <div class="card-icon">🧠</div>
+                <h3>Autonomous Chain-of-Thought</h3>
+                <p>Deep reasoning decomposes complex tasks into verified sub-steps before generating solutions.</p>
+            </div>
+            <div class="bento-card">
+                <div class="card-icon">🛡️</div>
+                <h3>Microsecond Security Guardrails</h3>
+                <p>Zero-latency multi-pattern scanner protecting against prompt injections and malicious inputs.</p>
+            </div>
+            <div class="bento-card span-2">
+                <div class="card-icon">🌐</div>
+                <h3>10-Language Synthesis Mastery</h3>
+                <p>Natively creates production code in Python, Rust, TypeScript, Go, C++, C, Java, SQL, Bash, and Zig.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="pricing" class="pricing-section">
+        <div class="section-header">
+            <h2>Transparent Pricing for Modern Teams</h2>
+            <p style="color: var(--muted);">Scale seamlessly from prototype to enterprise</p>
+        </div>
+        <div class="toggle-wrap">
+            <span>Monthly</span>
+            <div class="switch" id="billingSwitch" onclick="toggleBilling()"></div>
+            <span>Annual <strong style="color: var(--primary);">(Save 20%)</strong></span>
+        </div>
+        <div class="pricing-grid">
+            <div class="price-card">
+                <h3>Developer</h3>
+                <p style="color: var(--muted);">For solo builders and hackers</p>
+                <div class="price" id="devPrice">$19<span>/mo</span></div>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 1.5rem;">Choose Developer</button>
+            </div>
+            <div class="price-card featured">
+                <div class="badge" style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%);">Most Popular</div>
+                <h3>Pro Team</h3>
+                <p style="color: var(--muted);">For high-growth software teams</p>
+                <div class="price" id="proPrice" style="color: var(--primary);">$49<span>/mo</span></div>
+                <button class="btn btn-primary" style="width: 100%; margin-top: 1.5rem;">Start 14-Day Trial</button>
+            </div>
+            <div class="price-card">
+                <h3>Enterprise</h3>
+                <p style="color: var(--muted);">Custom clusters and on-prem</p>
+                <div class="price">$199<span>/mo</span></div>
+                <button class="btn btn-outline" style="width: 100%; margin-top: 1.5rem;">Contact Sales</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="faq-section">
+        <div class="section-header">
+            <h2>Frequently Asked Questions</h2>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-q"><span>How does the native Rust engine accelerate performance?</span><span>+</span></div>
+            <div class="faq-a">By executing vector distance, tokenization, and safety scans as compiled native C-ABI dynamic libraries directly in the server process memory, completely bypassing interpreter overhead.</div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-q"><span>Can I deploy this offline in an air-gapped environment?</span><span>+</span></div>
+            <div class="faq-a">Yes! NEXIUM is engineered with 100% resilient offline fallbacks and local knowledge base persistence.</div>
+        </div>
+        <div class="faq-item" onclick="toggleFaq(this)">
+            <div class="faq-q"><span>What languages does the code generator support?</span><span>+</span></div>
+            <div class="faq-a">Python, Rust, TypeScript, Go, C++, C, Java, SQL, Bash, and Zig with 100% automated AST compilation checks.</div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 Nexium Studio. Crafted with NEXIUM AI Autonomous Web Studio.</p>
+    </footer>
+
+    <script>
+        let isAnnual = false;
+        function toggleBilling() {
+            isAnnual = !isAnnual;
+            document.getElementById('billingSwitch').classList.toggle('annual');
+            document.getElementById('devPrice').innerHTML = isAnnual ? '$15<span>/mo</span>' : '$19<span>/mo</span>';
+            document.getElementById('proPrice').innerHTML = isAnnual ? '$39<span>/mo</span>' : '$49<span>/mo</span>';
+        }
+        function toggleFaq(el) {
+            el.classList.toggle('active');
+            const span = el.querySelector('.faq-q span:last-child');
+            span.textContent = el.classList.contains('active') ? '−' : '+';
+        }
+    </script>
+</body>
+</html>

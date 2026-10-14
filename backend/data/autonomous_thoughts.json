@@ -1,0 +1,92 @@
+[
+  {
+    "id": 1,
+    "text": "My average confidence score is 0.0%. I need significant improvement. I'll prioritize learning cycles.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5010,
+    "active_goals_count": 1,
+    "latency_ms": 0.02,
+    "timestamp": "2026-09-21T20:40:45.964250"
+  },
+  {
+    "id": 2,
+    "text": "To become smarter, I should: 1) expand my web development knowledge, 2) practice more complex multi-step reasoning chains, 3) verify my solutions with additional tool calls.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5010,
+    "active_goals_count": 2,
+    "latency_ms": 0.02,
+    "timestamp": "2026-09-21T20:48:05.411805"
+  },
+  {
+    "id": 3,
+    "text": "My knowledge base currently has 5013 items. To reach the next milestone, I should focus on ingesting more content about database optimization.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5013,
+    "active_goals_count": 3,
+    "latency_ms": 0.04,
+    "timestamp": "2026-09-21T20:49:57.281664"
+  },
+  {
+    "id": 4,
+    "text": "An interesting connection I've noticed: mathematical reasoning techniques could be applied to improve my capabilities in emerging topics.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5013,
+    "active_goals_count": 4,
+    "latency_ms": 0.03,
+    "timestamp": "2026-09-21T20:50:51.795779"
+  },
+  {
+    "id": 5,
+    "text": "To become smarter, I should: 1) expand my systems programming knowledge, 2) practice more complex multi-step reasoning chains, 3) verify my solutions with additional tool calls.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5013,
+    "active_goals_count": 4,
+    "latency_ms": 0.04,
+    "timestamp": "2026-09-21T20:50:52.807661"
+  },
+  {
+    "id": 6,
+    "text": "Looking at my recent interactions, I notice I was less confident when asked about emerging topics. I should study this domain more deeply.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5013,
+    "active_goals_count": 4,
+    "latency_ms": 0.02,
+    "timestamp": "2026-09-21T20:50:53.823167"
+  },
+  {
+    "id": 7,
+    "text": "My knowledge base currently has 5013 items. To reach the next milestone, I should focus on ingesting more content about quantum computing.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5013,
+    "active_goals_count": 3,
+    "latency_ms": 0.02,
+    "timestamp": "2026-09-21T20:59:29.955105"
+  },
+  {
+    "id": 8,
+    "text": "I've processed 7 conversations. My strongest area is multi-language code synthesis. I should work on expanding my understanding of emerging topics.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5044,
+    "active_goals_count": 4,
+    "latency_ms": 0.03,
+    "timestamp": "2026-09-25T20:23:41.912565"
+  },
+  {
+    "id": 9,
+    "text": "My knowledge base currently has 5049 items. To reach the next milestone, I should focus on ingesting more content about compiler design.",
+    "type": "autonomous_reflection",
+    "confidence_at_time": 0.0,
+    "kb_size_at_time": 5049,
+    "active_goals_count": 5,
+    "latency_ms": 0.02,
+    "timestamp": "2026-10-01T00:42:43.629969"
+  }
+]

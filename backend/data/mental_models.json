@@ -1,0 +1,59 @@
+[
+  {
+    "id": 1,
+    "title": "Mental Model #1: Optimistic Verification vs Pre-emptive Locking",
+    "domains": [
+      "Concurrency & Lock-Free Systems",
+      "Biological Cellular Transport"
+    ],
+    "concept": "Optimistic Verification vs Pre-emptive Locking",
+    "axiom": "Atomic CAS (Compare-and-Swap) mirrors biological enzymatic receptor binding: verify state at the microsecond boundary rather than incurring the global energetic penalty of a mutex fence.",
+    "keywords": [
+      "atomic",
+      "cas",
+      "concurrency",
+      "biology",
+      "efficiency"
+    ],
+    "chunks_stored": 2,
+    "timestamp": "2026-09-21T21:00:27.501097"
+  },
+  {
+    "id": 2,
+    "title": "Mental Model #1: Heuristic Pruning & A* Search in Cognitive Latent Space",
+    "domains": [
+      "Graph Theory (Shortest Paths)",
+      "Neural Reasoning Trajectories"
+    ],
+    "concept": "Heuristic Pruning & A* Search in Cognitive Latent Space",
+    "axiom": "Tree-of-Thought (ToT) reasoning is isomorphic to A* search over a state space: admissible heuristics prune unviable branches before combinatorial explosion occurs.",
+    "keywords": [
+      "graph theory",
+      "tree of thought",
+      "a-star",
+      "heuristic",
+      "reasoning"
+    ],
+    "chunks_stored": 2,
+    "timestamp": "2026-09-25T20:24:37.410258"
+  },
+  {
+    "id": 3,
+    "title": "Mental Model #1: Quorum Invariants & Partition Tolerance",
+    "domains": [
+      "Distributed Consensus (Raft/Paxos)",
+      "Sociological Agreement Dynamics"
+    ],
+    "concept": "Quorum Invariants & Partition Tolerance",
+    "axiom": "In distributed consensus as in collective human governance, progress requires strictly majoritarian quorum (N/2 + 1) to eliminate split-brain divergence under network or communicative severance.",
+    "keywords": [
+      "distributed",
+      "consensus",
+      "raft",
+      "quorum",
+      "fault tolerance"
+    ],
+    "chunks_stored": 3,
+    "timestamp": "2026-10-01T00:43:35.443668"
+  }
+]

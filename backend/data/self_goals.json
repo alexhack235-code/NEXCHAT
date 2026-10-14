@@ -1,0 +1,285 @@
+[
+  {
+    "id": 1,
+    "title": "Master Distributed Consensus (Raft/Paxos)",
+    "category": "distributed_systems",
+    "priority": "high",
+    "status": "completed",
+    "progress_pct": 100,
+    "created_at": "2026-09-21T20:32:58.641922",
+    "completed_at": "2026-09-21T20:32:58.645202",
+    "reflections": [
+      {
+        "text": "Implemented leader election state machine.",
+        "timestamp": "2026-09-21T20:32:58.643477"
+      },
+      {
+        "text": "Log replication tests passing.",
+        "timestamp": "2026-09-21T20:32:58.645202"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Deepen knowledge: Quantum Annealing Optimization",
+    "category": "self_improvement",
+    "priority": "high",
+    "status": "active",
+    "progress_pct": 45,
+    "created_at": "2026-09-21T20:32:58.646370",
+    "completed_at": null,
+    "reflections": [
+      {
+        "text": "Knowledge base grew to 5010 items.",
+        "timestamp": "2026-09-21T20:40:45.965250"
+      },
+      {
+        "text": "Knowledge base grew to 5010 items.",
+        "timestamp": "2026-09-21T20:48:05.413800"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:49:57.282660"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:51.797779"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:52.809655"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:53.824127"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:59:29.956107"
+      },
+      {
+        "text": "Knowledge base grew to 5044 items.",
+        "timestamp": "2026-09-25T20:23:41.913562"
+      },
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.630965"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Optimize SIMD vector dot product",
+    "category": "performance",
+    "priority": "critical",
+    "status": "completed",
+    "progress_pct": 100,
+    "created_at": "2026-09-21T20:40:54.176754",
+    "completed_at": "2026-09-21T20:50:53.826122",
+    "reflections": [
+      {
+        "text": "AVX-512 intrinsic benchmarks verified.",
+        "timestamp": "2026-09-21T20:41:02.353625"
+      },
+      {
+        "text": "Knowledge base grew to 5010 items.",
+        "timestamp": "2026-09-21T20:48:05.414797"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:49:57.284657"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:51.799767"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:52.812648"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:53.826122"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Optimize SIMD vector dot product",
+    "category": "performance",
+    "priority": "critical",
+    "status": "completed",
+    "progress_pct": 100,
+    "created_at": "2026-09-21T20:48:13.614638",
+    "completed_at": "2026-09-21T20:59:29.958097",
+    "reflections": [
+      {
+        "text": "AVX-512 intrinsic benchmarks verified.",
+        "timestamp": "2026-09-21T20:48:21.790805"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:49:57.285653"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:51.801763"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:52.816387"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:53.828198"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:59:29.958097"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Optimize SIMD vector dot product",
+    "category": "performance",
+    "priority": "critical",
+    "status": "completed",
+    "progress_pct": 100,
+    "created_at": "2026-09-21T20:50:05.458651",
+    "completed_at": "2026-09-25T20:23:41.916555",
+    "reflections": [
+      {
+        "text": "AVX-512 intrinsic benchmarks verified.",
+        "timestamp": "2026-09-21T20:50:13.649542"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:51.804754"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:52.818382"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:50:53.832187"
+      },
+      {
+        "text": "Knowledge base grew to 5013 items.",
+        "timestamp": "2026-09-21T20:59:29.961089"
+      },
+      {
+        "text": "Knowledge base grew to 5044 items.",
+        "timestamp": "2026-09-25T20:23:41.916555"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "title": "Optimize SIMD vector dot product",
+    "category": "performance",
+    "priority": "critical",
+    "status": "active",
+    "progress_pct": 85,
+    "created_at": "2026-09-21T20:59:38.133635",
+    "completed_at": null,
+    "reflections": [
+      {
+        "text": "AVX-512 intrinsic benchmarks verified.",
+        "timestamp": "2026-09-21T20:59:46.347124"
+      },
+      {
+        "text": "Knowledge base grew to 5044 items.",
+        "timestamp": "2026-09-25T20:23:41.918548"
+      },
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.632923"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "title": "Deepen knowledge: Optimistic Verification vs Pre-emptive Locking",
+    "category": "self_improvement",
+    "priority": "high",
+    "status": "active",
+    "progress_pct": 10,
+    "created_at": "2026-09-21T21:00:27.506083",
+    "completed_at": null,
+    "reflections": [
+      {
+        "text": "Knowledge base grew to 5044 items.",
+        "timestamp": "2026-09-25T20:23:41.920544"
+      },
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.633921"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "title": "Optimize SIMD vector dot product",
+    "category": "performance",
+    "priority": "critical",
+    "status": "active",
+    "progress_pct": 80,
+    "created_at": "2026-09-25T20:23:50.101616",
+    "completed_at": null,
+    "reflections": [
+      {
+        "text": "AVX-512 intrinsic benchmarks verified.",
+        "timestamp": "2026-09-25T20:23:59.074567"
+      },
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.634917"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "title": "Deepen knowledge: Heuristic Pruning & A* Search in Cognitive Latent Space",
+    "category": "self_improvement",
+    "priority": "high",
+    "status": "active",
+    "progress_pct": 5,
+    "created_at": "2026-09-25T20:24:37.413254",
+    "completed_at": null,
+    "reflections": [
+      {
+        "text": "Knowledge base grew to 5049 items.",
+        "timestamp": "2026-10-01T00:42:43.636913"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "title": "Optimize SIMD vector dot product",
+    "category": "performance",
+    "priority": "critical",
+    "status": "active",
+    "progress_pct": 75,
+    "created_at": "2026-10-01T00:42:51.798058",
+    "completed_at": null,
+    "reflections": [
+      {
+        "text": "AVX-512 intrinsic benchmarks verified.",
+        "timestamp": "2026-10-01T00:42:59.970532"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "title": "Deepen knowledge: Quorum Invariants & Partition Tolerance",
+    "category": "self_improvement",
+    "priority": "high",
+    "status": "active",
+    "progress_pct": 0,
+    "created_at": "2026-10-01T00:43:35.446662",
+    "completed_at": null,
+    "reflections": []
+  }
+]
