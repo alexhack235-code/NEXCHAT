@@ -6691,7 +6691,7 @@
         sunColor: 0xffaa66,
         ambientColor: 0x441b10,
         groundColor: 0x4a180c,
-        spawnPos: new THREE.Vector3(0, 1.2, 20)
+        spawnPos: new THREE.Vector3(0, 1.2, 15)
       },
       nebula: {
         id: 'nebula',
@@ -9278,9 +9278,10 @@
         spaceportGroup.add(chopstickArm);
         mechazillaChopsticks = chopstickArm;
 
-        // 120m Multi-Stage Starship Stack
+        // 120m Multi-Stage Starship Stack (Directly in Scene for Multi-World Navigation)
         rocketStack = new THREE.Group();
-        spaceportGroup.add(rocketStack);
+        rocketStack.position.set(120, 0, -100);
+        scene.add(rocketStack);
 
         const heatshieldMat = new THREE.MeshStandardMaterial({ color: 0x111620, roughness: 0.9, metalness: 0.1 });
         const raptorManifoldMat = new THREE.MeshStandardMaterial({ color: 0x222a36, metalness: 0.95, roughness: 0.3 });
@@ -10335,108 +10336,230 @@
         // INTERPLANETARY WORLDS 3D ENVIRONMENTS
         // ============================================================
 
-        // 1. MARS OBLIVION ENVIRONMENT (Red Planet Outpost)
+        // 1. MARS OBLIVION ENVIRONMENT: FULL-SCALE MARS BASE ALPHA COLONY COMPLEX
         marsGroup = new THREE.Group();
         marsGroup.visible = false;
         scene.add(marsGroup);
 
-        const marsRockMat = new THREE.MeshStandardMaterial({ color: 0x5a2012, roughness: 0.9, metalness: 0.2 });
-        const marsDomeMat = new THREE.MeshStandardMaterial({ color: 0x66bbff, transparent: true, opacity: 0.35, roughness: 0.1, metalness: 0.9 });
-        const marsHabMat = new THREE.MeshStandardMaterial({ color: 0xd8e2ed, roughness: 0.4, metalness: 0.8 });
-        const marsSolarMat = new THREE.MeshStandardMaterial({ color: 0x051a30, metalness: 0.95, roughness: 0.1 });
+        const marsRockMat = new THREE.MeshStandardMaterial({ color: 0x6e2616, roughness: 0.9, metalness: 0.2 });
+        const marsDomeMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.38, roughness: 0.1, metalness: 0.9 });
+        const marsHabMat = new THREE.MeshStandardMaterial({ color: 0xd8e2ed, roughness: 0.35, metalness: 0.8 });
+        const marsSteelMat = new THREE.MeshStandardMaterial({ color: 0x18202a, roughness: 0.4, metalness: 0.9 });
+        const marsSolarMat = new THREE.MeshStandardMaterial({ color: 0x061c36, metalness: 0.95, roughness: 0.1 });
+        const marsCautionMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+        const marsGreenAirlockMat = new THREE.MeshBasicMaterial({ color: 0x00ff88 });
+        const marsRedLaunchMat = new THREE.MeshStandardMaterial({ color: 0xff0022, emissive: 0xff0000, emissiveIntensity: 0.9 });
 
-        // Mars Rugged Basalt Rocks & Crater Formations
-        for (let mr = 0; mr < 28; mr++) {
-          const ang = (mr / 28) * Math.PI * 2;
-          const rad = 40 + Math.random() * 130;
+        // (A) MARS SPACEPORT LANDING PAD 01 (0, 0, -35)
+        const marsPad = new THREE.Mesh(new THREE.CylinderGeometry(24, 26, 3.2, 6), marsSteelMat);
+        marsPad.position.set(0, 1.6, -35);
+        marsPad.receiveShadow = true;
+        marsGroup.add(marsPad);
+
+        const marsChevron = new THREE.Mesh(new THREE.RingGeometry(22, 24.5, 6), marsCautionMat);
+        marsChevron.rotation.x = -Math.PI / 2;
+        marsChevron.position.set(0, 3.25, -35);
+        marsGroup.add(marsChevron);
+
+        // Mars Starship Ingress Tower & Launch Console (-16, 0, -35)
+        const mTower = new THREE.Mesh(new THREE.BoxGeometry(7, 36, 7), marsSteelMat);
+        mTower.position.set(-16, 18, -35);
+        marsGroup.add(mTower);
+
+        // Mars Crew Ingress Airlock Door
+        const mDoor = new THREE.Mesh(new THREE.BoxGeometry(0.5, 5.5, 4.2), new THREE.MeshStandardMaterial({ color: 0x0a1017, metalness: 0.95 }));
+        mDoor.position.set(-12.4, 3.2, -35);
+        marsGroup.add(mDoor);
+
+        const mDoorLight = new THREE.Mesh(new THREE.SphereGeometry(0.3, 12, 12), marsGreenAirlockMat);
+        mDoorLight.position.set(-12.3, 6.2, -35);
+        marsGroup.add(mDoorLight);
+
+        // Mars Ingress Signboard
+        const mSign = new THREE.Mesh(new THREE.BoxGeometry(0.4, 1.2, 6.5), new THREE.MeshBasicMaterial({ color: 0x00f2ff }));
+        mSign.position.set(-12.3, 7.3, -35);
+        marsGroup.add(mSign);
+
+        // Mars Launch Pedestal & Physical Red Launch Button (-16, 0, -22)
+        const mDesk = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.0, 2.4), marsHabMat);
+        mDesk.position.set(-16, 1.0, -22);
+        marsGroup.add(mDesk);
+
+        const mRedBtn = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.25, 20), marsRedLaunchMat);
+        mRedBtn.position.set(-16, 2.15, -22);
+        mRedBtn.userData = { isLaunchButton: true };
+        marsGroup.add(mRedBtn);
+
+        const mHoloPrompt = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 1.0), marsCautionMat);
+        mHoloPrompt.position.set(-16, 3.2, -22);
+        mHoloPrompt.rotation.x = -Math.PI / 8;
+        marsGroup.add(mHoloPrompt);
+
+        // Sky-High Mars Laser Beacon (Shooting 240m into the sky)
+        const mBeacon = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.45, 240, 16), new THREE.MeshBasicMaterial({ color: 0xff6600, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending }));
+        mBeacon.position.set(-16, 120, -35);
+        marsGroup.add(mBeacon);
+
+        // (B) CENTRAL COLONY COMMAND HUB (0, 0, 20)
+        const mHub = new THREE.Mesh(new THREE.CylinderGeometry(14, 16, 8.5, 6), marsHabMat);
+        mHub.position.set(0, 4.25, 20);
+        mHub.castShadow = true;
+        marsGroup.add(mHub);
+
+        // Communications Satellite Dish & Radar
+        const mDish = new THREE.Mesh(new THREE.SphereGeometry(3.2, 16, 8, 0, Math.PI * 2, 0, Math.PI / 3), marsSteelMat);
+        mDish.position.set(0, 11, 20);
+        mDish.rotation.x = Math.PI / 4;
+        marsGroup.add(mDish);
+
+        // Sealed Pressurized Tubular Corridors connecting Hub to Bio-Domes
+        const corridorMat = new THREE.MeshStandardMaterial({ color: 0xccd8e6, metalness: 0.8, roughness: 0.35 });
+        [
+          { x1: 0, z1: 20, x2: -45, z2: 25 },
+          { x1: 0, z1: 20, x2: 45, z2: 25 },
+          { x1: 0, z1: 20, x2: 0, z2: 75 }
+        ].forEach(c => {
+          const dx = c.x2 - c.x1;
+          const dz = c.z2 - c.z1;
+          const len = Math.hypot(dx, dz);
+          const ang = Math.atan2(dx, dz);
+          const tube = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, len, 16), corridorMat);
+          tube.position.set((c.x1 + c.x2) / 2, 2.2, (c.z1 + c.z2) / 2);
+          tube.rotation.z = Math.PI / 2;
+          tube.rotation.y = ang;
+          marsGroup.add(tube);
+        });
+
+        // (C) 3 THEMATIC GEODESIC BIO-DOMES
+        // 1. Hydroponic Agricultural Greenhouse (-45, 0, 25)
+        const dome1 = new THREE.Mesh(new THREE.SphereGeometry(22, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), marsDomeMat);
+        dome1.position.set(-45, 0, 25);
+        marsGroup.add(dome1);
+
+        const greenFloraMat = new THREE.MeshStandardMaterial({ color: 0x00ff88, emissive: 0x00aa44, emissiveIntensity: 0.5 });
+        for (let fl = 0; fl < 12; fl++) {
+          const fx = -45 + (Math.random() - 0.5) * 26;
+          const fz = 25 + (Math.random() - 0.5) * 26;
+          const fTree = new THREE.Mesh(new THREE.ConeGeometry(1.6, 5.5, 8), greenFloraMat);
+          fTree.position.set(fx, 2.75, fz);
+          marsGroup.add(fTree);
+        }
+
+        // 2. Quantum Geology & Core Drill Lab (45, 0, 25)
+        const dome2 = new THREE.Mesh(new THREE.SphereGeometry(22, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), marsDomeMat);
+        dome2.position.set(45, 0, 25);
+        marsGroup.add(dome2);
+
+        const drillTower = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.8, 16, 8), marsSteelMat);
+        drillTower.position.set(45, 8, 25);
+        marsGroup.add(drillTower);
+
+        // 3. Crew Quarters & Exploration Rover Garage (0, 0, 75)
+        const dome3 = new THREE.Mesh(new THREE.SphereGeometry(24, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), marsDomeMat);
+        dome3.position.set(0, 0, 75);
+        marsGroup.add(dome3);
+
+        // Mars Photovoltaic Solar Power Array Farm
+        for (let sx = -3; sx <= 3; sx++) {
+          const panel = new THREE.Mesh(new THREE.BoxGeometry(12, 0.4, 7), marsSolarMat);
+          panel.position.set(sx * 16, 3.5, -80);
+          panel.rotation.x = -0.45;
+          marsGroup.add(panel);
+        }
+
+        // Rugged Basalt Canyon Spires & Martian Crater Ridges
+        for (let mr = 0; mr < 36; mr++) {
+          const ang = (mr / 36) * Math.PI * 2;
+          const rad = 65 + (mr % 4) * 35;
           const rx = Math.cos(ang) * rad;
           const rz = Math.sin(ang) * rad;
-          const h = 8 + Math.random() * 30;
-          const w = 6 + Math.random() * 16;
-          const rock = new THREE.Mesh(new THREE.ConeGeometry(w, h, 6), marsRockMat);
+          const h = 14 + (mr % 5) * 9;
+          const rock = new THREE.Mesh(new THREE.ConeGeometry(8, h, 6), marsRockMat);
           rock.position.set(rx, h / 2, rz);
-          rock.rotation.y = Math.random() * Math.PI;
-          rock.castShadow = true;
-          rock.receiveShadow = true;
+          rock.rotation.y = mr * 0.4;
           marsGroup.add(rock);
         }
 
-        // 3 Geodesic Bio-Domes
-        [[-60, -40, 26], [60, -50, 22], [0, -85, 34]].forEach(([dx, dz, sz], i) => {
-          const dome = new THREE.Mesh(new THREE.SphereGeometry(sz, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), marsDomeMat);
-          dome.position.set(dx, 0, dz);
-          marsGroup.add(dome);
-
-          const habCenter = new THREE.Mesh(new THREE.CylinderGeometry(sz * 0.4, sz * 0.45, sz * 0.6, 16), marsHabMat);
-          habCenter.position.set(dx, sz * 0.3, dz);
-          habCenter.castShadow = true;
-          marsGroup.add(habCenter);
-
-          const glowBeacon = new THREE.PointLight(i === 0 ? 0x00ff88 : 0x00f2ff, 1.5, 80);
-          glowBeacon.position.set(dx, sz * 0.5, dz);
-          marsGroup.add(glowBeacon);
-        });
-
-        // Mars Photovoltaic Solar Array Farm
-        for (let sx = -4; sx <= 4; sx++) {
-          const panel = new THREE.Mesh(new THREE.BoxGeometry(10, 0.4, 6), marsSolarMat);
-          panel.position.set(sx * 14, 3, 70);
-          panel.rotation.x = -0.4;
-          panel.castShadow = true;
-          marsGroup.add(panel);
-
-          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 3, 8), marsHabMat);
-          pole.position.set(sx * 14, 1.5, 70);
-          marsGroup.add(pole);
-        }
-
-        // 2. NEBULA PRIME ENVIRONMENT (Exoplanet Kepler-186f)
+        // ------------------------------------------------------------
+        // 2. NEBULA PRIME ENVIRONMENT: PRECURSOR ALIEN SANCTUARY
+        // ------------------------------------------------------------
         nebulaGroup = new THREE.Group();
         nebulaGroup.visible = false;
         scene.add(nebulaGroup);
 
-        const crystalMat = new THREE.MeshStandardMaterial({
-          color: 0xaa22ff,
-          emissive: 0x6600cc,
-          emissiveIntensity: 0.6,
-          roughness: 0.15,
-          metalness: 0.85
-        });
-        const monolithMat = new THREE.MeshStandardMaterial({ color: 0x120824, roughness: 0.3, metalness: 0.9 });
-        const energyRingMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.8 });
+        const alienRunicMat = new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x7700cc, emissiveIntensity: 0.7, roughness: 0.15, metalness: 0.9 });
+        const alienCyanGlow = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+        const alienMonolithMat = new THREE.MeshStandardMaterial({ color: 0x0d0618, roughness: 0.2, metalness: 0.95 });
 
-        // 20 Amethyst Crystal Spires
-        for (let cr = 0; cr < 20; cr++) {
-          const ang = (cr / 20) * Math.PI * 2;
-          const dist = 30 + Math.random() * 120;
-          const cx = Math.cos(ang) * dist;
-          const cz = Math.sin(ang) * dist;
-          const ch = 16 + Math.random() * 46;
-          const crystal = new THREE.Mesh(new THREE.ConeGeometry(3.6, ch, 6), crystalMat);
-          crystal.position.set(cx, ch / 2, cz);
-          crystal.rotation.z = (Math.random() - 0.5) * 0.2;
-          crystal.castShadow = true;
-          nebulaGroup.add(crystal);
-        }
+        // (A) NEBULA STARSHIP LANDING PAD 01 (0, 0, -35)
+        const nebPad = new THREE.Mesh(new THREE.CylinderGeometry(24, 26, 3.2, 8), alienMonolithMat);
+        nebPad.position.set(0, 1.6, -35);
+        nebulaGroup.add(nebPad);
 
-        // Floating Anti-Gravity Monoliths
+        const nebRunicRing = new THREE.Mesh(new THREE.RingGeometry(21, 24, 32), alienCyanGlow);
+        nebRunicRing.rotation.x = -Math.PI / 2;
+        nebRunicRing.position.set(0, 3.25, -35);
+        nebulaGroup.add(nebRunicRing);
+
+        // Precursor Warp Pylon & Launch Pillar (-16, 0, -35)
+        const nebPylon = new THREE.Mesh(new THREE.BoxGeometry(6, 42, 6), alienMonolithMat);
+        nebPylon.position.set(-16, 21, -35);
+        nebulaGroup.add(nebPylon);
+
+        const nebCoreSphere = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 16), alienRunicMat);
+        nebCoreSphere.position.set(-16, 21, -35);
+        nebulaGroup.add(nebCoreSphere);
+        citySpinners.push(nebCoreSphere);
+
+        // (B) PRECURSOR ALIEN TEMPLE & ENERGY CONFLUX (0, 0, 45)
+        const altarBase = new THREE.Mesh(new THREE.CylinderGeometry(14, 16, 2.5, 8), alienMonolithMat);
+        altarBase.position.set(0, 1.25, 45);
+        nebulaGroup.add(altarBase);
+
+        const altarEnergyDisc = new THREE.Mesh(new THREE.RingGeometry(4, 12, 32), alienCyanGlow);
+        altarEnergyDisc.rotation.x = -Math.PI / 2;
+        altarEnergyDisc.position.set(0, 2.55, 45);
+        nebulaGroup.add(altarEnergyDisc);
+        citySpinners.push(altarEnergyDisc);
+
+        // 6 Giant Floating Precursor Monoliths with Torus Rings
         for (let m = 0; m < 6; m++) {
           const mGroup = new THREE.Group();
-          const mx = (m - 2.5) * 45;
-          const mz = (Math.random() - 0.5) * 130;
-          const baseMy = 35 + Math.random() * 25;
+          const ang = (m / 6) * Math.PI * 2;
+          const mx = Math.cos(ang) * 48;
+          const mz = 45 + Math.sin(ang) * 48;
+          const baseMy = 28 + (m % 3) * 10;
           mGroup.position.set(mx, baseMy, mz);
 
-          const mMesh = new THREE.Mesh(new THREE.BoxGeometry(8, 26, 8), monolithMat);
-          mMesh.castShadow = true;
+          const mMesh = new THREE.Mesh(new THREE.BoxGeometry(6, 32, 6), alienMonolithMat);
           mGroup.add(mMesh);
 
-          const ring = new THREE.Mesh(new THREE.TorusGeometry(8, 0.4, 8, 24), energyRingMat);
+          const ring = new THREE.Mesh(new THREE.TorusGeometry(7.5, 0.45, 8, 24), alienRunicMat);
           ring.rotation.x = Math.PI / 2;
           mGroup.add(ring);
 
           floatingMonoliths.push({ group: mGroup, baseY: baseMy, seed: m * 1.5 });
           nebulaGroup.add(mGroup);
+        }
+
+        // 16 Bioluminescent Giant Spore Mushrooms
+        const shroomCapMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, emissive: 0x0088cc, emissiveIntensity: 0.6, roughness: 0.2 });
+        const shroomStemMat = new THREE.MeshStandardMaterial({ color: 0x331048, roughness: 0.6 });
+
+        for (let sh = 0; sh < 16; sh++) {
+          const shAng = (sh / 16) * Math.PI * 2;
+          const shDist = 28 + (sh % 3) * 25;
+          const sx = Math.cos(shAng) * shDist;
+          const sz = (sh % 2 === 0 ? -40 : 40) + Math.sin(shAng) * shDist;
+          const shHeight = 6 + (sh % 4) * 3.5;
+
+          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.9, shHeight, 10), shroomStemMat);
+          stem.position.set(sx, shHeight / 2, sz);
+          nebulaGroup.add(stem);
+
+          const cap = new THREE.Mesh(new THREE.SphereGeometry(2.4, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), shroomCapMat);
+          cap.position.set(sx, shHeight, sz);
+          nebulaGroup.add(cap);
         }
 
         // 3. ORBITAL ASTEROID BELT ENVIRONMENT (Deep Space Void)
@@ -13979,8 +14102,17 @@ function buildNeoKyotoCity() {
         return;
       }
 
-      // 0B. Starbase Mechazilla Launch Pad, Airlock Door & Launch Console (104, 0, -100) or (120, 0, -100)
-      if (player.pos.distanceTo(new THREE.Vector3(104, 0, -100)) < 26.0 || player.pos.distanceTo(new THREE.Vector3(120, 0, -100)) < 26.0) {
+      // 0B. Universal Starship Ingress & Launch (Earth, Mars, Nebula, and Anywhere)
+      let rCheckPos = new THREE.Vector3();
+      if (starshipUpper) starshipUpper.getWorldPosition(rCheckPos);
+      else if (rocketStack) rocketStack.getWorldPosition(rCheckPos);
+      const distToRocketStack = Math.hypot(player.pos.x - rCheckPos.x, player.pos.z - rCheckPos.z);
+
+      const isAtEarthPad = gameState.currentWorld === 'earth' && (player.pos.distanceTo(new THREE.Vector3(104, 0, -100)) < 30.0 || player.pos.distanceTo(new THREE.Vector3(120, 0, -100)) < 30.0);
+      const isAtMarsPad = gameState.currentWorld === 'mars' && (player.pos.distanceTo(new THREE.Vector3(0, 0, -35)) < 32.0 || player.pos.distanceTo(new THREE.Vector3(-16, 0, -35)) < 32.0);
+      const isAtNebulaPad = gameState.currentWorld === 'nebula' && (player.pos.distanceTo(new THREE.Vector3(0, 0, -35)) < 32.0 || player.pos.distanceTo(new THREE.Vector3(-16, 0, -35)) < 32.0);
+
+      if (distToRocketStack < 32.0 || isAtEarthPad || isAtMarsPad || isAtNebulaPad) {
         initiateStarshipLaunchSequence();
         return;
       }
@@ -14119,10 +14251,15 @@ function buildNeoKyotoCity() {
       launchSeqSeconds = 10.0;
       cyberAudio.playLaunchSiren();
 
-      // Pan camera to epic cinematic low-angle pad view
+      // Pan camera to epic cinematic low-angle pad view for current world
       if (camera) {
-        camera.position.set(120 - 32, 18, -100 + 45);
-        camera.lookAt(120, 65, -100);
+        if (gameState.currentWorld === 'mars' || gameState.currentWorld === 'nebula') {
+          camera.position.set(-26, 16, -10);
+          camera.lookAt(0, 55, -35);
+        } else {
+          camera.position.set(120 - 32, 18, -100 + 45);
+          camera.lookAt(120, 65, -100);
+        }
       }
 
       if (launchSeqTimer) clearInterval(launchSeqTimer);
@@ -14259,7 +14396,10 @@ function buildNeoKyotoCity() {
         btnStarship.innerHTML = '<i class="fa-solid fa-rocket"></i> [B] STARSHIP';
       }
 
-      if (starshipUpper) {
+      if (rocketStack) {
+        player.pos.set(rocketStack.position.x + 8, Math.max(1.2, rocketStack.position.y), rocketStack.position.z + 8);
+        player.vel.set(0, 0, 0);
+      } else if (starshipUpper) {
         const worldPos = new THREE.Vector3();
         starshipUpper.getWorldPosition(worldPos);
         player.pos.set(worldPos.x + 8, Math.max(1.2, worldPos.y), worldPos.z + 8);
@@ -14615,7 +14755,7 @@ function buildNeoKyotoCity() {
       if (atlantisGroup) atlantisGroup.visible = isEarth;
       if (recreationGroup) recreationGroup.visible = isEarth;
       if (nukeGroup) nukeGroup.visible = isEarth;
-      if (spaceportGroup) spaceportGroup.visible = !isSpace;
+      if (spaceportGroup) spaceportGroup.visible = isEarth;
       if (roverGroup) roverGroup.visible = !isSpace;
       if (groundMesh) groundMesh.visible = !isSpace;
 
@@ -14628,12 +14768,31 @@ function buildNeoKyotoCity() {
       if (gameState.flightMode === 'starship') {
         gameState.starship.altitude = isSpace ? 60 : 120;
         if (rocketStack) {
-          rocketStack.position.set(0, gameState.starship.altitude, isSpace ? 30 : 0);
+          const padZ = (isEarth) ? -100 : (isSpace ? 30 : -35);
+          const padX = (isEarth) ? 120 : 0;
+          rocketStack.position.set(padX, gameState.starship.altitude, padZ);
         }
       } else {
         if (player.pos) {
           player.pos.copy(targetWorld.spawnPos);
           player.vel.set(0, 0, 0);
+        }
+        // Station Starship on the designated planetary landing pad
+        if (rocketStack) {
+          if (isMars) {
+            rocketStack.position.set(0, 0, -35);
+            if (roverGroup) {
+              roverGroup.position.set(0, 0.45, 55);
+              roverGroup.rotation.y = Math.PI;
+            }
+          } else if (isNebula) {
+            rocketStack.position.set(0, 0, -35);
+          } else if (isEarth) {
+            rocketStack.position.set(120, 0, -100);
+            if (roverGroup) {
+              roverGroup.position.set(0, 0, 15);
+            }
+          }
         }
       }
 
@@ -15033,13 +15192,37 @@ function buildNeoKyotoCity() {
           promptShown = true;
         }
 
-        // Starbase Mechazilla Rocket Pad, Airlock Door & Launch Console (104, 0, -100)
-        const isNearRocketPad = (player.pos.distanceTo(new THREE.Vector3(104, 0, -100)) < 28.0 || player.pos.distanceTo(new THREE.Vector3(120, 0, -100)) < 28.0);
+        // Universal Rocket Boarding & Launch Proximity (All Worlds: Earth, Mars, Nebula, Space)
+        let isNearRocket = false;
+        let rocketPos = new THREE.Vector3();
+        if (starshipUpper) starshipUpper.getWorldPosition(rocketPos);
+        else if (rocketStack) rocketStack.getWorldPosition(rocketPos);
+
+        if (player.pos) {
+          const dRocketHoriz = Math.hypot(player.pos.x - rocketPos.x, player.pos.z - rocketPos.z);
+          if (dRocketHoriz < 32.0 && Math.abs(player.pos.y - rocketPos.y) < 70.0) {
+            isNearRocket = true;
+          }
+          // Earth Launch Pad (104, 0, -100)
+          if (gameState.currentWorld === 'earth' && (player.pos.distanceTo(new THREE.Vector3(104, 0, -100)) < 30.0 || player.pos.distanceTo(new THREE.Vector3(120, 0, -100)) < 30.0)) {
+            isNearRocket = true;
+          }
+          // Mars Base Alpha Landing Pad (0, 0, -35)
+          if (gameState.currentWorld === 'mars' && (player.pos.distanceTo(new THREE.Vector3(0, 0, -35)) < 32.0 || player.pos.distanceTo(new THREE.Vector3(-16, 0, -35)) < 32.0)) {
+            isNearRocket = true;
+          }
+          // Nebula Precursor Warp Pad (0, 0, -35)
+          if (gameState.currentWorld === 'nebula' && (player.pos.distanceTo(new THREE.Vector3(0, 0, -35)) < 32.0 || player.pos.distanceTo(new THREE.Vector3(-16, 0, -35)) < 32.0)) {
+            isNearRocket = true;
+          }
+        }
+
         const rocketProximityBanner = document.getElementById('hud-rocket-proximity');
-        if (isNearRocketPad && gameState.flightMode !== 'starship') {
+        if (isNearRocket && gameState.flightMode !== 'starship') {
           if (!promptShown) {
             promptEl.style.display = 'flex';
-            document.getElementById('prompt-text').textContent = 'BOARD STARSHIP OR INITIATE LAUNCH [E / F]';
+            const planetLabel = (gameState.currentWorld === 'mars') ? 'MARS' : ((gameState.currentWorld === 'nebula') ? 'NEBULA' : 'STARBASE');
+            document.getElementById('prompt-text').textContent = `BOARD ${planetLabel} STARSHIP & INITIATE LIFTOFF [E / F]`;
             promptShown = true;
           }
           if (rocketProximityBanner && rocketProximityBanner.style.display !== 'block') {
