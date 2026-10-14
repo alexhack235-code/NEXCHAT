@@ -4439,6 +4439,9 @@
         <button type="button" class="store-tab-btn" id="store-tab-arcade" onclick="switchStoreTab('arcade')">
           <i class="fa-solid fa-gamepad"></i> STARDUST CAFE
         </button>
+        <button type="button" class="store-tab-btn" id="store-tab-jetpack" onclick="switchStoreTab('jetpack')">
+          <i class="fa-solid fa-jet-fighter"></i> JETPACK TECH
+        </button>
       </div>
 
       <!-- Right Content Pane -->
@@ -4666,6 +4669,91 @@
               <div class="store-card-desc">Full 100% HP + 100% Shield + 100% Jetpack Fuel replenishment.</div>
               <button type="button" class="store-card-btn primary" onclick="administerMedKit('all')">
                 <i class="fa-solid fa-bolt"></i> FULL RECOVERY (MAX ALL)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6. AERO-PROPULSION & JETPACK BATTERY LABORATORY TAB -->
+        <div class="store-section" id="store-sec-jetpack">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0,242,255,0.25); padding-bottom: 8px;">
+            <div>
+              <h3 style="font-family: 'Orbitron', sans-serif; font-size: 13px; color: #00f2ff; letter-spacing: 1.5px; margin: 0;">
+                <i class="fa-solid fa-battery-bolt"></i> AERO-PROPULSION // JETPACK BATTERY LABORATORY
+              </h3>
+              <div style="font-size: 11px; color: #8fa3b8; margin-top: 3px;">High-density energy storage cells & supersonic ion propellant upgrades</div>
+            </div>
+            <span style="font-size: 11px; color: #00ff88; font-family: monospace; font-weight: 700;" id="jetpack-equipped-tier">ACTIVE: STANDARD (100 mAh)</span>
+          </div>
+
+          <div class="store-grid">
+            <!-- Battery 1: Extended Ion Power Cell (+50% Fuel) -->
+            <div class="store-card" id="card-batt-tier1">
+              <span class="store-card-badge" style="background: rgba(0,242,255,0.25); color: #00f2ff;">TIER I</span>
+              <div class="store-card-icon" style="font-size: 32px; color: #00f2ff; margin-bottom: 8px;">
+                <i class="fa-solid fa-battery-half"></i>
+              </div>
+              <div class="store-card-name">EXTENDED ION BATTERY PACK</div>
+              <div class="store-card-desc">High-density lithium-ion matrix. Increases maximum fuel capacity to 150 units (+50% continuous flight duration).</div>
+              <div style="font-size: 10px; color: #00ff88; font-weight: 700; margin-bottom: 8px;">BURN TIME: ~17.5s &bull; CAPACITY: 150</div>
+              <button type="button" class="store-buy-btn" id="btn-buy-batt-1" onclick="purchaseJetpackBattery(150, 150, 'Tier I Ion Pack', this)">
+                <i class="fa-solid fa-coins"></i> 150 NEX // UPGRADE
+              </button>
+            </div>
+
+            <!-- Battery 2: Dual-Chamber Cobalt Battery (2.5x Fuel) -->
+            <div class="store-card" id="card-batt-tier2">
+              <span class="store-card-badge" style="background: rgba(0,255,136,0.25); color: #00ff88;">TIER II</span>
+              <div class="store-card-icon" style="font-size: 32px; color: #00ff88; margin-bottom: 8px;">
+                <i class="fa-solid fa-battery-three-quarters"></i>
+              </div>
+              <div class="store-card-name">DUAL COBALT POWER CELL</div>
+              <div class="store-card-desc">Pressurized dual-chamber galvanic cell. Doubles total jetpack propellant reservoir to 250 units.</div>
+              <div style="font-size: 10px; color: #00ff88; font-weight: 700; margin-bottom: 8px;">BURN TIME: ~29.5s &bull; CAPACITY: 250</div>
+              <button type="button" class="store-buy-btn" id="btn-buy-batt-2" onclick="purchaseJetpackBattery(350, 250, 'Tier II Cobalt Cell', this)">
+                <i class="fa-solid fa-coins"></i> 350 NEX // UPGRADE
+              </button>
+            </div>
+
+            <!-- Battery 3: Quantum Zero-Point Overcharge Core (4x Fuel) -->
+            <div class="store-card" id="card-batt-tier3">
+              <span class="store-card-badge" style="background: rgba(168,85,247,0.25); color: #a855f7;">TIER III</span>
+              <div class="store-card-icon" style="font-size: 32px; color: #a855f7; margin-bottom: 8px;">
+                <i class="fa-solid fa-atom"></i>
+              </div>
+              <div class="store-card-name">QUANTUM ZERO-POINT CORE</div>
+              <div class="store-card-desc">Subatomic vacuum flux capacitor. Quadruples flight capacity to 400 units with ultra-low thermal dissipation.</div>
+              <div style="font-size: 10px; color: #00ff88; font-weight: 700; margin-bottom: 8px;">BURN TIME: ~47.0s &bull; CAPACITY: 400</div>
+              <button type="button" class="store-buy-btn" id="btn-buy-batt-3" onclick="purchaseJetpackBattery(650, 400, 'Tier III Quantum Core', this)">
+                <i class="fa-solid fa-coins"></i> 650 NEX // UPGRADE
+              </button>
+            </div>
+
+            <!-- Battery 4: Dark Matter Singularity Battery (6x Fuel) -->
+            <div class="store-card" id="card-batt-tier4">
+              <span class="store-card-badge" style="background: rgba(255,215,0,0.25); color: #ffd700;">LEGENDARY</span>
+              <div class="store-card-icon" style="font-size: 32px; color: #ffd700; margin-bottom: 8px;">
+                <i class="fa-solid fa-meteor"></i>
+              </div>
+              <div class="store-card-name">SINGULARITY OVERLOAD CELL</div>
+              <div class="store-card-desc">Contained micro-singularity power conduit. Massive 600 unit reservoir for prolonged inter-district trans-metropolis flight.</div>
+              <div style="font-size: 10px; color: #00ff88; font-weight: 700; margin-bottom: 8px;">BURN TIME: ~70.5s &bull; CAPACITY: 600</div>
+              <button type="button" class="store-buy-btn" id="btn-buy-batt-4" onclick="purchaseJetpackBattery(1200, 600, 'Legendary Singularity', this)">
+                <i class="fa-solid fa-coins"></i> 1,200 NEX // UPGRADE
+              </button>
+            </div>
+
+            <!-- Upgrade: Rapid Solar-Recharge Supercapacitor -->
+            <div class="store-card" id="card-batt-supercap">
+              <span class="store-card-badge" style="background: rgba(255,100,50,0.25); color: #ff7744;">SUPERCHARGER</span>
+              <div class="store-card-icon" style="font-size: 32px; color: #ff7744; margin-bottom: 8px;">
+                <i class="fa-solid fa-bolt-lightning"></i>
+              </div>
+              <div class="store-card-name">RAPID RECHARGE SUPERCAPACITOR</div>
+              <div class="store-card-desc">Accelerates replenishment cycle by 300%. Recharges exhausted fuel tanks from 0% to 100% in under 3.5 seconds!</div>
+              <div style="font-size: 10px; color: #00ff88; font-weight: 700; margin-bottom: 8px;">RECHARGE RATE: 300% (75 units/sec)</div>
+              <button type="button" class="store-buy-btn" id="btn-buy-supercap" onclick="purchaseJetpackRecharger(300, 75.0, this)">
+                <i class="fa-solid fa-coins"></i> 300 NEX // UPGRADE
               </button>
             </div>
           </div>
@@ -6001,6 +6089,9 @@
       shield: 100,
       stamina: 100,
       jetpackFuel: 100,
+      jetpackMaxFuel: 100,
+      jetpackRechargeRate: 25.0,
+      jetpackBatteryTier: 'Standard',
       isUnderground: false,
       inVehicle: false,
       isAiming: false,
@@ -10216,6 +10307,9 @@
       // 9. Store 5: STARDUST CAFE & RETRO ARCADE (North Concourse: x = 0, z = 146)
       buildStoreArcade(mallGroup, 0, 146);
 
+      // 10. Store 6: AERO-PROPULSION & JETPACK TECH STORE (South Galleria Entry: x = 0, z = 100)
+      buildStoreJetpack(mallGroup, 0, 100);
+
       // Register Mall perimeter colliders
       registerCityCollider({ x: -34, z: 122, hw: 2, hd: 31, doorW: 0 }); // West outer wall
       registerCityCollider({ x: 34, z: 122, hw: 2, hd: 31, doorW: 0 });  // East outer wall
@@ -10470,6 +10564,70 @@
       padMesh.rotation.x = -Math.PI / 2;
       padMesh.position.set(0, 0.51, 2.0);
       storeGroup.add(padMesh);
+    }
+
+    // STORE 6: AERO-PROPULSION & JETPACK TECH LAB
+    function buildStoreJetpack(parent, sx, sz) {
+      const storeGroup = new THREE.Group();
+      storeGroup.position.set(sx, 0, sz);
+      parent.add(storeGroup);
+
+      const frameMat = new THREE.MeshStandardMaterial({ color: 0x0a1420, roughness: 0.35, metalness: 0.9 });
+      const cyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const yellowMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+      const glassMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.45, roughness: 0.1 });
+
+      // Store Signboard Arch
+      const signMesh = new THREE.Mesh(new THREE.BoxGeometry(18, 2.0, 0.6), frameMat);
+      signMesh.position.set(0, 6.5, 0);
+      storeGroup.add(signMesh);
+
+      const signGlow = new THREE.Mesh(new THREE.BoxGeometry(17.6, 1.6, 0.7), cyanMat);
+      signGlow.position.set(0, 6.5, 0);
+      storeGroup.add(signGlow);
+
+      // Central Rotating Display Pedestal for Advanced Jetpack
+      const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.6, 1.1, 16), frameMat);
+      pedestal.position.set(0, 0.55, 0);
+      storeGroup.add(pedestal);
+
+      const pedRing = new THREE.Mesh(new THREE.TorusGeometry(2.3, 0.08, 8, 24), cyanMat);
+      pedRing.rotation.x = Math.PI / 2;
+      pedRing.position.set(0, 1.1, 0);
+      storeGroup.add(pedRing);
+
+      // 3D Display Jetpack Model
+      const jpDisplay = new THREE.Group();
+      jpDisplay.position.set(0, 2.2, 0);
+
+      const jpMain = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.6, 0.8), frameMat);
+      jpDisplay.add(jpMain);
+
+      // Dual Ion Thruster Tubes
+      [-0.8, 0.8].forEach(tx => {
+        const thruster = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.45, 1.8, 12), frameMat);
+        thruster.position.set(tx, -0.1, 0);
+        jpDisplay.add(thruster);
+
+        const plume = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.0, 8), cyanMat);
+        plume.rotation.x = Math.PI;
+        plume.position.set(tx, -1.2, 0);
+        jpDisplay.add(plume);
+      });
+
+      storeGroup.add(jpDisplay);
+
+      // Side Battery Display Pods
+      [-5.5, 5.5].forEach((bx, idx) => {
+        const pod = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 0.9, 12), frameMat);
+        pod.position.set(bx, 0.45, 0);
+        storeGroup.add(pod);
+
+        // Glowing battery cells
+        const battMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2, 12), idx === 0 ? yellowMat : cyanMat);
+        battMesh.position.set(bx, 1.4, 0);
+        storeGroup.add(battMesh);
+      });
     }
 
     // STORE 5: STARDUST CAFE & RETRO ARCADE
@@ -11795,6 +11953,7 @@
         { id: 'vehicles', title: 'HYPERION MOTORS', prompt: '[E] / [TAP] VIEW VEHICLE SHOWROOM', x: -20, z: 135, r: 6.0 },
         { id: 'medbay', title: 'BIO-STIM MED-BAY', prompt: '[E] / [TAP] RECHARGE VITALS & SHIELD', x: 20, z: 135, r: 6.0 },
         { id: 'arcade', title: 'STARDUST CAFE & ARCADE', prompt: '[E] / [TAP] PLAY ARCADE & CHILL', x: 0, z: 146, r: 6.0 },
+        { id: 'jetpack', title: 'AERO-TECH JETPACK LAB', prompt: '[E] / [TAP] UPGRADE JETPACK BATTERIES', x: 0, z: 100, r: 7.0 },
         { id: 'armory', title: 'NEXUS GRAND MALL', prompt: '[E] / [TAP] ENTER SHOPPING MALL', x: 0, z: 92, r: 7.0 }
       ];
 
@@ -13618,16 +13777,29 @@
             player.vel.y = gameState.jumpForce;
             player.isGrounded = false;
           } else if (gameState.jetpackFuel > 0) {
-            player.vel.y += 24.0 * delta;
-            gameState.jetpackFuel = Math.max(0, gameState.jetpackFuel - delta * 30);
-            document.getElementById('fill-jetpack').style.width = gameState.jetpackFuel + '%';
-            document.getElementById('label-jetpack').textContent = Math.round(gameState.jetpackFuel) + '%';
+            // Smooth aerodynamic lift with responsive ceiling
+            player.vel.y = Math.min(22.0, player.vel.y + 30.0 * delta);
+
+            // Greatly extended burn duration: reduced fuel drain from 30 to 8.5 (over 3.5x longer flight!)
+            gameState.jetpackFuel = Math.max(0, gameState.jetpackFuel - delta * 8.5);
+
+            const maxFuel = gameState.jetpackMaxFuel || 100;
+            const fuelPct = Math.max(0, Math.min(100, (gameState.jetpackFuel / maxFuel) * 100));
+            const fillEl = document.getElementById('fill-jetpack');
+            const lblEl = document.getElementById('label-jetpack');
+            if (fillEl) fillEl.style.width = fuelPct + '%';
+            if (lblEl) lblEl.textContent = `${Math.round(fuelPct)}% [${Math.round(gameState.jetpackFuel)}/${maxFuel}]`;
           }
         } else {
-          if (gameState.jetpackFuel < 100) {
-            gameState.jetpackFuel = Math.min(100, gameState.jetpackFuel + delta * 15);
-            document.getElementById('fill-jetpack').style.width = gameState.jetpackFuel + '%';
-            document.getElementById('label-jetpack').textContent = Math.round(gameState.jetpackFuel) + '%';
+          const maxFuel = gameState.jetpackMaxFuel || 100;
+          if (gameState.jetpackFuel < maxFuel) {
+            const rechRate = gameState.jetpackRechargeRate || 25.0;
+            gameState.jetpackFuel = Math.min(maxFuel, gameState.jetpackFuel + delta * rechRate);
+            const fuelPct = Math.max(0, Math.min(100, (gameState.jetpackFuel / maxFuel) * 100));
+            const fillEl = document.getElementById('fill-jetpack');
+            const lblEl = document.getElementById('label-jetpack');
+            if (fillEl) fillEl.style.width = fuelPct + '%';
+            if (lblEl) lblEl.textContent = `${Math.round(fuelPct)}% [${Math.round(gameState.jetpackFuel)}/${maxFuel}]`;
           }
         }
 
@@ -15022,6 +15194,24 @@
 
     function loadSavedSettings() {
       try {
+        const savedMaxFuel = localStorage.getItem('ASTRO_JETPACK_MAX_FUEL');
+        if (savedMaxFuel) {
+          gameState.jetpackMaxFuel = parseInt(savedMaxFuel);
+          gameState.jetpackFuel = gameState.jetpackMaxFuel;
+        }
+        const savedRate = localStorage.getItem('ASTRO_JETPACK_RECHARGE_RATE');
+        if (savedRate) {
+          gameState.jetpackRechargeRate = parseFloat(savedRate);
+        }
+        const savedTier = localStorage.getItem('ASTRO_JETPACK_TIER');
+        if (savedTier) {
+          gameState.jetpackBatteryTier = savedTier;
+          const tierBadge = document.getElementById('jetpack-equipped-tier');
+          if (tierBadge) tierBadge.textContent = `ACTIVE: ${savedTier.toUpperCase()} (${gameState.jetpackMaxFuel} CAP)`;
+        }
+      } catch (e) {}
+
+      try {
         const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
@@ -15422,7 +15612,7 @@
 
     function switchStoreTab(tabName) {
       currentStoreTab = tabName;
-      const tabs = ['armory', 'suits', 'vehicles', 'medbay', 'arcade'];
+      const tabs = ['armory', 'suits', 'vehicles', 'medbay', 'arcade', 'jetpack'];
       tabs.forEach(t => {
         const btn = document.getElementById('store-tab-' + t);
         const sec = document.getElementById('store-sec-' + t);
@@ -15458,6 +15648,80 @@
 
       cyberAudio.playLootChime();
       showStoreNotification('WEAPON EQUIPPED: ' + (wepNames[weaponType] || weaponType.toUpperCase()));
+    }
+
+    // Purchase Jetpack Extra Battery Upgrades
+    function purchaseJetpackBattery(price, maxFuel, tierName, btnEl) {
+      const currentTokens = gameState.tokens || 1250;
+      if (currentTokens < price) {
+        showStoreNotification('INSUFFICIENT NEX TOKENS! COMPLETE SHIFTS OR ARCADE TO EARN TOKENS.', true);
+        return;
+      }
+
+      gameState.tokens = currentTokens - price;
+      gameState.jetpackMaxFuel = maxFuel;
+      gameState.jetpackFuel = maxFuel; // Instantly replenish to full capacity
+      gameState.jetpackBatteryTier = tierName;
+
+      try {
+        localStorage.setItem('ASTRO_JETPACK_MAX_FUEL', '' + maxFuel);
+        localStorage.setItem('ASTRO_JETPACK_TIER', tierName);
+      } catch (e) {}
+
+      // Update UI displays
+      const tokenEl = document.getElementById('store-token-display');
+      if (tokenEl) tokenEl.textContent = Number(gameState.tokens).toLocaleString();
+
+      const hudTokens = document.getElementById('hud-tokens');
+      if (hudTokens) hudTokens.textContent = Number(gameState.tokens).toLocaleString();
+
+      const tierBadge = document.getElementById('jetpack-equipped-tier');
+      if (tierBadge) tierBadge.textContent = `ACTIVE: ${tierName.toUpperCase()} (${maxFuel} CAP)`;
+
+      const fillEl = document.getElementById('fill-jetpack');
+      const lblEl = document.getElementById('label-jetpack');
+      if (fillEl) fillEl.style.width = '100%';
+      if (lblEl) lblEl.textContent = `100% [${maxFuel}/${maxFuel}]`;
+
+      if (btnEl) {
+        btnEl.style.background = '#00ff88';
+        btnEl.style.color = '#05121e';
+        btnEl.textContent = 'EQUIPPED';
+      }
+
+      cyberAudio.playLootChime();
+      showStoreNotification(`🚀 JETPACK BATTERY INSTALLED: ${tierName.toUpperCase()} (MAX CAP: ${maxFuel})`);
+    }
+
+    // Purchase Jetpack Supercapacitor Recharge Speed Upgrade
+    function purchaseJetpackRecharger(price, rate, btnEl) {
+      const currentTokens = gameState.tokens || 1250;
+      if (currentTokens < price) {
+        showStoreNotification('INSUFFICIENT NEX TOKENS!', true);
+        return;
+      }
+
+      gameState.tokens = currentTokens - price;
+      gameState.jetpackRechargeRate = rate;
+
+      try {
+        localStorage.setItem('ASTRO_JETPACK_RECHARGE_RATE', '' + rate);
+      } catch (e) {}
+
+      const tokenEl = document.getElementById('store-token-display');
+      if (tokenEl) tokenEl.textContent = Number(gameState.tokens).toLocaleString();
+
+      const hudTokens = document.getElementById('hud-tokens');
+      if (hudTokens) hudTokens.textContent = Number(gameState.tokens).toLocaleString();
+
+      if (btnEl) {
+        btnEl.style.background = '#00ff88';
+        btnEl.style.color = '#05121e';
+        btnEl.textContent = 'EQUIPPED';
+      }
+
+      cyberAudio.playLootChime();
+      showStoreNotification(`⚡ RAPID SUPERCAPACITOR ONLINE! RECHARGE RATE BOOSTED TO ${rate}/SEC!`);
     }
 
     // Buy Ammo Pack
