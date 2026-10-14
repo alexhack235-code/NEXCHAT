@@ -3470,7 +3470,18 @@
     // "THIS GAME WILL BE LAUNCHED ON JANUARY 1ST"
     // ============================================================
     let currentTargetKey = 'jan'; // 'jan' | 'dec'
-    let launchTargetDate = new Date('2027-01-01T00:00:00');
+
+    function getNextTargetDate(monthIndex, day) {
+      const now = new Date();
+      let year = now.getFullYear();
+      let target = new Date(year, monthIndex, day, 0, 0, 0);
+      if (target.getTime() <= now.getTime()) {
+        target = new Date(year + 1, monthIndex, day, 0, 0, 0);
+      }
+      return target;
+    }
+
+    let launchTargetDate = getNextTargetDate(0, 1); // January 1st upcoming
 
     function setLaunchTarget(target) {
       currentTargetKey = target;
@@ -3479,18 +3490,20 @@
       const heading = document.getElementById('launch-heading');
 
       if (target === 'jan') {
-        launchTargetDate = new Date('2027-01-01T00:00:00');
+        launchTargetDate = getNextTargetDate(0, 1);
         if (heading) heading.textContent = 'THIS GAME WILL BE LAUNCHED ON JANUARY 1ST';
         if (btnJan) btnJan.classList.add('active');
         if (btnDec) btnDec.classList.remove('active');
       } else {
-        launchTargetDate = new Date('2026-12-01T00:00:00');
+        launchTargetDate = getNextTargetDate(11, 1);
         if (heading) heading.textContent = 'THIS GAME WILL BE LAUNCHED ON DECEMBER 1ST';
         if (btnDec) btnDec.classList.add('active');
         if (btnJan) btnJan.classList.remove('active');
       }
       updateCountdown();
-      if (typeof cyberAudio !== 'undefined') cyberAudio.playClick();
+      try {
+        if (typeof cyberAudio !== 'undefined') cyberAudio.playClick();
+      } catch (e) {}
     }
 
     function updateCountdown() {
@@ -3503,7 +3516,7 @@
       const elSecs = document.getElementById('countdown-secs');
       const elSub = document.getElementById('launch-status-sub');
 
-      if (diff <= 0) {
+      if (isNaN(diff) || diff <= 0) {
         if (elDays) elDays.textContent = '00';
         if (elHours) elHours.textContent = '00';
         if (elMins) elMins.textContent = '00';
@@ -3522,16 +3535,20 @@
       }
     }
 
+    // Run countdown immediately and update every second
+    updateCountdown();
     setInterval(updateCountdown, 1000);
 
     function submitPreRegistration() {
       const input = document.getElementById('launch-callsign-input');
       const callsign = (input && input.value.trim()) ? input.value.trim().toUpperCase() : 'DEMONALEX';
 
-      localStorage.setItem('BS_OPERATIVE_CALLSIGN', callsign);
-      localStorage.setItem('BS_PREREGISTERED', 'true');
-      localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
-      sessionStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+      try {
+        localStorage.setItem('BS_OPERATIVE_CALLSIGN', callsign);
+        localStorage.setItem('BS_PREREGISTERED', 'true');
+        localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+        sessionStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+      } catch (e) {}
 
       const nameEl = document.getElementById('lobby-profile-name');
       const hudNameEl = document.getElementById('hud-op-name');
@@ -3544,8 +3561,12 @@
         statusEl.style.color = '#ffd700';
       }
 
-      cyberAudio.init();
-      cyberAudio.playLootChime();
+      try {
+        if (typeof cyberAudio !== 'undefined') {
+          cyberAudio.init();
+          cyberAudio.playLootChime();
+        }
+      } catch (e) {}
       alert(`[PRE-REGISTRATION CONFIRMED]\nCallsign: ${callsign}\nFounder Rewards Allocated:\n- 100,000 NEX Tokens\n- Exclusive [FOUNDER] Clan Tag\n- Central Stadium VIP Clearance\n\nGame unlocks on countdown completion!`);
     }
 
@@ -3553,18 +3574,24 @@
       const input = document.getElementById('launch-callsign-input');
       const callsign = (input && input.value.trim()) ? input.value.trim().toUpperCase() : 'DEMONALEX';
 
-      localStorage.setItem('BS_OPERATIVE_CALLSIGN', callsign);
-      localStorage.setItem('BS_HAS_LOGGED_IN', 'true');
-      localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
-      sessionStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+      try {
+        localStorage.setItem('BS_OPERATIVE_CALLSIGN', callsign);
+        localStorage.setItem('BS_HAS_LOGGED_IN', 'true');
+        localStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+        sessionStorage.setItem('ATOMIC_METROPOLIS_UNLOCKED', 'true');
+      } catch (e) {}
 
       const nameEl = document.getElementById('lobby-profile-name');
       const hudNameEl = document.getElementById('hud-op-name');
       if (nameEl) nameEl.textContent = callsign;
       if (hudNameEl) hudNameEl.textContent = callsign;
 
-      cyberAudio.init();
-      cyberAudio.playLootChime();
+      try {
+        if (typeof cyberAudio !== 'undefined') {
+          cyberAudio.init();
+          cyberAudio.playLootChime();
+        }
+      } catch (e) {}
 
       const lockOverlay = document.getElementById('launch-lock-overlay');
       if (lockOverlay) {
@@ -3578,6 +3605,13 @@
         }, 400);
       }
     }
+
+    // Developer shortcut listener: Ctrl+Shift+L or ~ key
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey && e.shiftKey && (e.key === 'L' || e.key === 'l')) || e.key === '~' || e.key === '`') {
+        bypassLaunchLock();
+      }
+    });
 
     function submitLogin() {
       bypassLaunchLock();
@@ -6784,10 +6818,10 @@
         roverChassisMesh.add(cabin);
 
         // Sloped Electrochromic Ballistic Windshield
-        const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.72, 0.2), rMatBallisticGlass);
-        windshield.rotation.x = Math.PI / 4;
-        windshield.position.set(0, 1.52, 1.15);
-        roverChassisMesh.add(windshield);
+        const roverWindshield = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.72, 0.2), rMatBallisticGlass);
+        roverWindshield.rotation.x = Math.PI / 4;
+        roverWindshield.position.set(0, 1.52, 1.15);
+        roverChassisMesh.add(roverWindshield);
 
         // Cockpit Side Windows
         const sideWindowL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.48, 1.6), rMatBallisticGlass);
