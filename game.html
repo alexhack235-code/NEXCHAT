@@ -15875,7 +15875,35 @@ function buildNeoKyotoCity() {
       calgaryTowerTorchLight.position.set(-35, 193, -45);
       calgaryMetropolisGroup.add(calgaryTowerTorchLight);
 
+      // CALGARY TOWER PLAZA CODEX & ALBERTA PASSPORT TERMINAL (X: -35, Z: -32)
+      const calgaryCodexGroup = new THREE.Group();
+      calgaryCodexGroup.position.set(-35, 0, -32);
+      calgaryMetropolisGroup.add(calgaryCodexGroup);
+
+      const codexPed = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.0, 1.2, 8), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.85 }));
+      codexPed.position.y = 0.6;
+      calgaryCodexGroup.add(codexPed);
+
+      const codexShaft = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.4, 8), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.9 }));
+      codexShaft.position.y = 1.9;
+      calgaryCodexGroup.add(codexShaft);
+
+      const codexRing = new THREE.Mesh(new THREE.TorusGeometry(0.9, 0.08, 8, 24), new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true }));
+      codexRing.rotation.x = Math.PI / 2;
+      codexRing.position.y = 2.4;
+      calgaryCodexGroup.add(codexRing);
+      calgaryCodexRing = codexRing;
+
+      const codexCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.35, 0), new THREE.MeshBasicMaterial({ color: 0xff3366 }));
+      codexCore.position.y = 2.4;
+      calgaryCodexGroup.add(codexCore);
+
+      const codexLight = new THREE.PointLight(0x00f2ff, 1.8, 22);
+      codexLight.position.set(0, 2.5, 0);
+      calgaryCodexGroup.add(codexLight);
+
       registerCityCollider({ type: 'solid', x: -35, z: -45, hw: 14, hd: 14, world: 'earth' });
+      registerCityCollider({ type: 'solid', x: -35, z: -32, hw: 3.5, hd: 3.5, world: 'earth' });
 
       // ------------------------------------------------------------
       // 2. THE BOW SKYSCRAPER (236m) — 500 Centre St S at (X: 25, Z: -85)
@@ -16015,21 +16043,42 @@ function buildNeoKyotoCity() {
       libSignText.position.set(0, 21.5, 14.3);
       libGroup.add(libSignText);
 
-      // C-Train LRT Track Passing Through Library Portal (X: 85, Z: -120 to +20)
-      const trackBed = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.25, 140), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 }));
-      trackBed.position.set(85, 0.12, -50);
+      // C-Train LRT Track Extended Through Library to Scotia Place (X: 85, Z: -120 to +90, Length: 210m)
+      const trackBed = new THREE.Mesh(new THREE.BoxGeometry(5.5, 0.25, 210), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 }));
+      trackBed.position.set(85, 0.12, -15);
       calgaryMetropolisGroup.add(trackBed);
 
       [-1.2, 1.2].forEach(rx => {
-        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.2, 140), lrtTrackMat);
-        rail.position.set(85 + rx, 0.3, -50);
+        const rail = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.2, 210), lrtTrackMat);
+        rail.position.set(85 + rx, 0.3, -15);
         calgaryMetropolisGroup.add(rail);
       });
 
-      // Calgary Transit C-Train Siemens S200 Car (Stationary on Track at X: 85, Z: -75)
+      // Calgary Transit Station Platforms with Yellow Safety Tactile Edge Paving
+      const platformMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.85 });
+      const safetyYellowMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4 });
+
+      // Station 1: Central Library / East Village Station (X: 80.5, Z: -50)
+      const plat1 = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.5, 34), platformMat);
+      plat1.position.set(80.5, 0.25, -50);
+      calgaryMetropolisGroup.add(plat1);
+      const plat1Edge = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.52, 34), safetyYellowMat);
+      plat1Edge.position.set(82.1, 0.26, -50);
+      calgaryMetropolisGroup.add(plat1Edge);
+
+      // Station 2: Scotia Place / Arena District Station (X: 80.5, Z: 75)
+      const plat2 = new THREE.Mesh(new THREE.BoxGeometry(3.5, 0.5, 34), platformMat);
+      plat2.position.set(80.5, 0.25, 75);
+      calgaryMetropolisGroup.add(plat2);
+      const plat2Edge = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.52, 34), safetyYellowMat);
+      plat2Edge.position.set(82.1, 0.26, 75);
+      calgaryMetropolisGroup.add(plat2Edge);
+
+      // Calgary Transit C-Train Siemens S200 Car (Dynamic Transit System)
       const ctrainCar = new THREE.Group();
       ctrainCar.position.set(85, 0.4, -75);
       calgaryMetropolisGroup.add(ctrainCar);
+      calgaryCTrainMesh = ctrainCar;
 
       const lrtBody = new THREE.Mesh(new THREE.BoxGeometry(3.0, 3.4, 24), lrtWhiteMat);
       lrtBody.position.y = 1.9;
@@ -16325,13 +16374,57 @@ function buildNeoKyotoCity() {
       if (!grid) return;
       grid.innerHTML = '';
 
+      let stamps = [];
+      try { stamps = JSON.parse(localStorage.getItem('BS_PASSPORT_STAMPS') || '[]'); } catch (e) { stamps = []; }
+
+      // Passport Progress Banner
+      const passportHeader = document.createElement('div');
+      passportHeader.style.gridColumn = '1 / -1';
+      passportHeader.style.background = 'rgba(15, 23, 42, 0.95)';
+      passportHeader.style.border = '1.5px solid #00f2ff';
+      passportHeader.style.borderRadius = '14px';
+      passportHeader.style.padding = '14px 20px';
+      passportHeader.style.marginBottom = '6px';
+      passportHeader.style.display = 'flex';
+      passportHeader.style.justifyContent = 'space-between';
+      passportHeader.style.alignItems = 'center';
+      passportHeader.style.flexWrap = 'wrap';
+      passportHeader.style.gap = '10px';
+
+      const allStamped = (stamps.length >= 14);
+      const exosuitClaimed = (localStorage.getItem('BS_AURORA_EXOSUIT_UNLOCKED') === 'true');
+
+      passportHeader.innerHTML = `
+        <div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 900; color: #00f2ff; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-brands fa-canadian-maple-leaf" style="color: #ff3366;"></i> CANADIAN EXPLORATION PASSPORT: ${stamps.length} / 14 REALMS DISCOVERED
+          </div>
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 3px;">
+            Visit each province and territory codex terminal to collect passport stamps and earn NEX tokens.
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          ${allStamped ? `
+            <button type="button" onclick="claimExosuitReward()" style="background: linear-gradient(135deg, #ffd700, #ff8800); border: none; border-radius: 8px; color: #05140e; padding: 8px 16px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; cursor: pointer; box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);">
+              ${exosuitClaimed ? '<i class="fa-solid fa-shield-halved"></i> EXOSUIT ACTIVE' : '<i class="fa-solid fa-trophy"></i> CLAIM AURORA EXOSUIT (+5,000 NEX)'}
+            </button>
+          ` : `
+            <div style="background: rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 6px 14px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; color: #ffd700;">
+              ${14 - stamps.length} STAMPS REMAINING
+            </div>
+          `}
+        </div>
+      `;
+      grid.appendChild(passportHeader);
+
       CANADIAN_PROVINCES.forEach(p => {
+        const isStamped = stamps.includes(p.id);
         const card = document.createElement('div');
         card.className = 'prov-card';
         card.innerHTML = `
           <div class="prov-card-header">
             <span class="prov-card-title"><i class="fa-solid ${p.icon}" style="color: #ff3366;"></i> ${p.name}</span>
-            <span class="prov-card-abbr">${p.abbr}</span>
+            <span class="prov-card-abbr">${p.abbr} ${isStamped ? '<i class="fa-solid fa-stamp" style="color: #ffd700; margin-left: 4px;" title="Passport Stamped"></i>' : ''}</span>
           </div>
           <div class="prov-card-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
           <div class="prov-card-desc">${p.desc}</div>
@@ -16346,6 +16439,22 @@ function buildNeoKyotoCity() {
         `;
         grid.appendChild(card);
       });
+    }
+
+    
+    function claimExosuitReward() {
+      if (localStorage.getItem('BS_AURORA_EXOSUIT_UNLOCKED') === 'true') {
+        showStoreNotification('✨ AURORA BOREALIS QUANTUM EXOSUIT IS ALREADY EQUIPPED AND ACTIVE!');
+        return;
+      }
+      localStorage.setItem('BS_AURORA_EXOSUIT_UNLOCKED', 'true');
+      gameState.tokens = (gameState.tokens || 1250) + 5000;
+      localStorage.setItem('BS_TOKENS', gameState.tokens.toString());
+      const tEl = document.getElementById('hud-tokens');
+      if (tEl) tEl.textContent = gameState.tokens.toLocaleString();
+      showStoreNotification('🏆 CONGRATULATIONS! AURORA BOREALIS QUANTUM EXOSUIT UNLOCKED (+5,000 NEX)!');
+      if (cyberAudio && cyberAudio.playLootChime) cyberAudio.playLootChime();
+      initProvincesHighwayGrid();
     }
 
     function loadProvinceTag(file, name) {
@@ -17156,7 +17265,15 @@ function buildNeoKyotoCity() {
       if (e.code === 'KeyV') toggleCameraPerspective();
       if (e.code === 'KeyX' && gameState.inVehicle) toggleCarModel();
       if (e.code === 'KeyQ') triggerTacticalPing();
-      if (e.code === 'KeyE') toggleVehicleMode();
+      if (e.code === 'KeyE') {
+        if (gameState.inCalgaryCTrain) {
+          exitCalgaryCTrain();
+        } else if (calgaryCTrainMesh && Math.hypot(player.pos.x - 85, player.pos.z - calgaryCTrainMesh.position.z) < 7.0) {
+          boardCalgaryCTrain();
+        } else {
+          toggleVehicleMode();
+        }
+      }
       if (e.code === 'KeyF') handleInteractions();
       if (e.code === 'KeyH') toggleProvincesModal();
       if (e.code === 'KeyG') {
@@ -17381,8 +17498,231 @@ function buildNeoKyotoCity() {
       updateWeaponHUD();
     }
 
+
+    // ============================================================
+    // CALGARY_METROPOLIS_ADVANCED_FEATURES: C-TRAIN, CODEX, RADAR
+    // ============================================================
+    let calgaryCTrainMesh = null;
+    let calgaryCodexRing = null;
+    let calgaryCTrainZ = -75;
+    let calgaryCTrainDir = 1;
+    let calgaryCTrainStopTimer = 0;
+    gameState.inCalgaryCTrain = false;
+
+    function boardCalgaryCTrain() {
+      if (gameState.inCalgaryCTrain) return;
+      gameState.inCalgaryCTrain = true;
+      const hud = document.getElementById('ctrain-passenger-hud');
+      if (hud) hud.style.display = 'flex';
+      showStoreNotification('🚊 BOARDED CALGARY TRANSIT C-TRAIN! ENJOYING SCENIC SKYLINE TOUR!');
+      if (cyberAudio && cyberAudio.playMaglevTrainSound) cyberAudio.playMaglevTrainSound();
+    }
+
+    function exitCalgaryCTrain() {
+      if (!gameState.inCalgaryCTrain) return;
+      gameState.inCalgaryCTrain = false;
+      const hud = document.getElementById('ctrain-passenger-hud');
+      if (hud) hud.style.display = 'none';
+      if (calgaryCTrainMesh) {
+        player.pos.set(80.5, 1.2, calgaryCTrainMesh.position.z);
+        player.vel.set(0, 0, 0);
+      }
+      showStoreNotification('DISEMBARKED C-TRAIN AT STATION PLATFORM');
+    }
+
+    function updateCalgaryCTrain(delta, now) {
+      if (!calgaryCTrainMesh) return;
+
+      // Handle station dwelling
+      if (calgaryCTrainStopTimer > 0) {
+        calgaryCTrainStopTimer -= delta;
+        const banner = document.getElementById('ctrain-station-banner');
+        if (banner) {
+          const isAtLib = Math.abs(calgaryCTrainZ - (-50)) < 6;
+          banner.textContent = isAtLib ? 'STATION STOP: CALGARY CENTRAL LIBRARY / EAST VILLAGE' : 'STATION STOP: SCOTIA PLACE ARENA / CULTURE DISTRICT';
+        }
+      } else {
+        const trainSpeed = 14.0 * delta * calgaryCTrainDir;
+        calgaryCTrainZ += trainSpeed;
+
+        // Check station stop triggers
+        if (Math.abs(calgaryCTrainZ - (-50)) < 0.6) {
+          calgaryCTrainStopTimer = 4.5;
+        } else if (Math.abs(calgaryCTrainZ - 75) < 0.6) {
+          calgaryCTrainStopTimer = 4.5;
+        }
+
+        if (calgaryCTrainZ > 82) {
+          calgaryCTrainZ = 82;
+          calgaryCTrainDir = -1;
+          calgaryCTrainStopTimer = 3.5;
+        } else if (calgaryCTrainZ < -115) {
+          calgaryCTrainZ = -115;
+          calgaryCTrainDir = 1;
+          calgaryCTrainStopTimer = 3.5;
+        }
+
+        const banner = document.getElementById('ctrain-station-banner');
+        if (banner) {
+          banner.textContent = (calgaryCTrainDir > 0) ? 'NEXT STOP: SCOTIA PLACE ARENA' : 'NEXT STOP: CALGARY CENTRAL LIBRARY';
+        }
+      }
+
+      calgaryCTrainMesh.position.z = calgaryCTrainZ;
+
+      // Passenger camera attachment
+      if (gameState.inCalgaryCTrain) {
+        player.pos.set(85, 1.8, calgaryCTrainZ);
+        player.vel.set(0, 0, 0);
+        if (camera) {
+          camera.position.set(83.8, 3.2, calgaryCTrainZ + 1.2);
+          // Look toward downtown icons (Calgary Tower, The Bow, Telus Sky)
+          camera.lookAt(-10, 35, calgaryCTrainZ - 15);
+        }
+      }
+    }
+
+    function updateCalgaryCityRadar() {
+      const canvas = document.getElementById('city-hud-radar-canvas');
+      if (!canvas || !player.pos) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+      const cx = w / 2, cy = h / 2, r = w / 2 - 2;
+      const maxRange = 450;
+
+      ctx.clearRect(0, 0, w, h);
+
+      // Radar Scope Background
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(6, 12, 22, 0.92)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0, 242, 255, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Range Rings
+      ctx.strokeStyle = 'rgba(0, 242, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.35, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.7, 0, Math.PI * 2); ctx.stroke();
+
+      // Rotating Cardinals
+      const pYaw = player.yaw || 0;
+      const cardinals = [
+        { label: 'N', a: -Math.PI / 2 + pYaw, c: '#ff3366' },
+        { label: 'E', a: 0 + pYaw, c: '#8fa3b8' },
+        { label: 'S', a: Math.PI / 2 + pYaw, c: '#8fa3b8' },
+        { label: 'W', a: Math.PI + pYaw, c: '#8fa3b8' }
+      ];
+      ctx.font = 'bold 9px Orbitron, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      cardinals.forEach(cd => {
+        const lx = cx + Math.cos(cd.a) * (r - 9);
+        const ly = cy + Math.sin(cd.a) * (r - 9);
+        ctx.fillStyle = cd.c;
+        ctx.fillText(cd.label, lx, ly);
+      });
+
+      function project(wx, wz) {
+        const dx = wx - player.pos.x;
+        const dz = wz - player.pos.z;
+        const rotX = dx * Math.cos(pYaw) - dz * Math.sin(pYaw);
+        const rotZ = dx * Math.sin(pYaw) + dz * Math.cos(pYaw);
+        const dist = Math.hypot(rotX, rotZ);
+        const scale = Math.min(dist / maxRange, 0.92);
+        const ang = Math.atan2(rotZ, rotX);
+        return { x: cx + Math.cos(ang) * (r * scale), y: cy + Math.sin(ang) * (r * scale), dist: Math.round(dist) };
+      }
+
+      // Landmarks: Calgary Tower, The Bow, Central Library, Scotia Place, YYC Airport
+      const landmarks = [
+        { name: 'CALGARY TOWER', x: -35, z: -45, col: '#ef4444' },
+        { name: 'THE BOW', x: 25, z: -85, col: '#38bdf8' },
+        { name: 'CENTRAL LIBRARY', x: 85, z: -50, col: '#f59e0b' },
+        { name: 'SCOTIA PLACE', x: 85, z: 75, col: '#10b981' },
+        { name: 'YYC AIRPORT', x: 450, z: -220, col: '#a855f7' }
+      ];
+
+      let closestDist = Infinity;
+      let closestName = 'CALGARY DOWNTOWN';
+
+      landmarks.forEach(lm => {
+        const p = project(lm.x, lm.z);
+        ctx.fillStyle = lm.col;
+        ctx.shadowColor = lm.col; ctx.shadowBlur = 6;
+        ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        if (p.dist < closestDist) {
+          closestDist = p.dist;
+          closestName = lm.name;
+        }
+      });
+
+      // C-Train Blip
+      if (calgaryCTrainMesh) {
+        const cp = project(85, calgaryCTrainMesh.position.z);
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(cp.x - 3, cp.y - 3, 6, 6);
+      }
+
+      const distLbl = document.getElementById('city-radar-dist-lbl');
+      if (distLbl) distLbl.textContent = `${closestDist}m`;
+      const targetLbl = document.getElementById('city-radar-target-lbl');
+      if (targetLbl) targetLbl.textContent = closestName;
+
+      // Center Player Indicator (Arrow facing UP)
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.fillStyle = '#00f2ff';
+      ctx.shadowColor = '#00f2ff'; ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(0, -6);
+      ctx.lineTo(4, 5);
+      ctx.lineTo(0, 3);
+      ctx.lineTo(-4, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
     function handleInteractions() {
       if (!player.pos) return;
+
+      // In-Calgary-CTrain Exit handler
+      if (gameState.inCalgaryCTrain) {
+        exitCalgaryCTrain();
+        return;
+      }
+
+      // Check Calgary Tower Base Codex Terminal Interaction (X: -35, Z: -32)
+      if (Math.hypot(player.pos.x - (-35), player.pos.z - (-32)) < 5.5) {
+        let stamps = [];
+        try { stamps = JSON.parse(localStorage.getItem('BS_PASSPORT_STAMPS') || '[]'); } catch (e) { stamps = []; }
+        if (!stamps.includes('alberta')) {
+          stamps.push('alberta');
+          localStorage.setItem('BS_PASSPORT_STAMPS', JSON.stringify(stamps));
+          gameState.tokens = (gameState.tokens || 1250) + 500;
+          localStorage.setItem('BS_TOKENS', gameState.tokens.toString());
+          const tEl = document.getElementById('hud-tokens');
+          if (tEl) tEl.textContent = gameState.tokens.toLocaleString();
+          showStoreNotification('🍁 CANADIAN PASSPORT STAMPED: ALBERTA / CALGARY (+500 NEX)! [' + stamps.length + '/14]');
+          if (cyberAudio && cyberAudio.playLootChime) cyberAudio.playLootChime();
+        } else {
+          showStoreNotification('🍁 ALBERTA ARCHIVES: EST. 1885 BANFF ROCKIES, CALGARY TOWER & SCOTIA PLACE SYNCHRONIZED!');
+        }
+        return;
+      }
+
+      // Check C-Train Boarding near train or at stations
+      if (calgaryCTrainMesh && Math.hypot(player.pos.x - 85, player.pos.z - calgaryCTrainMesh.position.z) < 7.0) {
+        boardCalgaryCTrain();
+        return;
+      }
+      if ((Math.hypot(player.pos.x - 80.5, player.pos.z - (-50)) < 6.0 || Math.hypot(player.pos.x - 80.5, player.pos.z - 75) < 6.0) && calgaryCTrainMesh && Math.hypot(player.pos.x - 85, player.pos.z - calgaryCTrainMesh.position.z) < 14.0) {
+        boardCalgaryCTrain();
+        return;
+      }
 
       // In-Plane or In-Train Exit handlers
       if (gameState.inPlane) {
@@ -18660,6 +19000,11 @@ function buildNeoKyotoCity() {
         m.group.position.y = m.baseY + Math.sin(now * 0.0018 + m.seed) * 3.5;
         m.group.rotation.y += delta * 0.25;
       });
+
+      // Update Calgary C-Train Transit Motion & Tactical City Radar
+      if (typeof updateCalgaryCTrain === 'function') updateCalgaryCTrain(delta, now);
+      if (typeof updateCalgaryCityRadar === 'function') updateCalgaryCityRadar();
+      if (calgaryCodexRing) calgaryCodexRing.rotation.y += delta * 1.8;
 
       // Update Lively Metropolis Civilian Population (45+ Animated NPCs)
       if (gameState.currentWorld === 'earth') {
@@ -22774,5 +23119,34 @@ function buildNeoKyotoCity() {
       requestAnimationFrame(gameLoop);
     });
   </script>
+
+  <!-- CALGARY METROPOLIS TACTICAL HUD RADAR -->
+  <div id="city-radar-container" style="position: fixed; top: 78px; right: 18px; width: 130px; height: 154px; background: rgba(8, 14, 24, 0.90); border: 1.5px solid rgba(0, 242, 255, 0.45); border-radius: 16px; padding: 6px; z-index: 180; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.65); display: flex; flex-direction: column; align-items: center; pointer-events: none;">
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 900; letter-spacing: 1px; color: #00f2ff; margin-bottom: 2px; display: flex; justify-content: space-between; width: 100%; padding: 0 4px;">
+      <span><i class="fa-solid fa-satellite-dish"></i> RADAR</span>
+      <span id="city-radar-dist-lbl" style="color: #ffd700;">CALGARY</span>
+    </div>
+    <canvas id="city-hud-radar-canvas" width="116" height="116" style="width: 116px; height: 116px; border-radius: 50%;"></canvas>
+    <div id="city-radar-target-lbl" style="font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; color: #8fa3b8; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; text-align: center; margin-top: 2px;">
+      CENTRAL METROPOLIS
+    </div>
+  </div>
+
+  <!-- CALGARY TRANSIT C-TRAIN PASSENGER HUD -->
+  <div id="ctrain-passenger-hud" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(8, 14, 24, 0.95); border: 2px solid #ef4444; border-radius: 16px; padding: 14px 24px; z-index: 250; font-family: 'Rajdhani', sans-serif; align-items: center; gap: 20px; box-shadow: 0 0 40px rgba(239, 68, 68, 0.45); pointer-events: auto;">
+    <div style="font-size: 32px; color: #ef4444;"><i class="fa-solid fa-train-subway"></i></div>
+    <div>
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; color: #fff; letter-spacing: 0.5px;">
+        CALGARY TRANSIT // C-TRAIN ROUTE 202
+      </div>
+      <div id="ctrain-station-banner" style="font-size: 12px; color: #38bdf8; font-weight: 700;">
+        EN ROUTE: CENTRAL LIBRARY &amp; SCOTIA PLACE ARENA
+      </div>
+    </div>
+    <button type="button" onclick="exitCalgaryCTrain()" style="background: rgba(239, 68, 68, 0.2); border: 1.5px solid #ef4444; color: #fca5a5; border-radius: 10px; padding: 8px 16px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer; transition: all 0.2s;">
+      <i class="fa-solid fa-door-open"></i> [E] DISEMBARK
+    </button>
+  </div>
+
 </body>
 </html>

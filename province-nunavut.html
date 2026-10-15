@@ -74,6 +74,12 @@
     .p-abbr { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #d8b4fe; }
     .p-desc { font-size: 11px; color: #8fa3b8; line-height: 1.3; }
     .p-landmark { font-size: 10px; color: #ffd700; font-weight: 700; }
+
+    /* TACTICAL HUD RADAR & CANADIAN CODEX MODAL */
+    #radar-container { position: fixed; top: 82px; right: 16px; width: 130px; height: 154px; background: rgba(14, 18, 26, 0.88); border: 1.5px solid rgba(0, 242, 255, 0.4); border-radius: 16px; padding: 6px; z-index: 95; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+    #hud-radar-canvas { width: 116px; height: 116px; border-radius: 50%; }
+    #modal-codex { position: fixed; inset: 0; background: rgba(6, 12, 22, 0.92); backdrop-filter: blur(14px); z-index: 350; display: none; align-items: center; justify-content: center; padding: 20px; }
+    #modal-codex.visible { display: flex; }
   </style>
 </head>
 <body>
@@ -123,6 +129,111 @@
 
   <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACT</span></div>
   <div id="notify-box"></div>
+
+
+  <!-- TACTICAL CYBER HUD RADAR -->
+  <div id="radar-container">
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 900; letter-spacing: 1px; color: #00f2ff; margin-bottom: 2px; display: flex; justify-content: space-between; width: 100%; padding: 0 4px;">
+      <span><i class="fa-solid fa-satellite-dish"></i> RADAR</span>
+      <span id="radar-dist-lbl" style="color: #ffd700;">--m</span>
+    </div>
+    <canvas id="hud-radar-canvas" width="116" height="116"></canvas>
+    <div id="radar-target-lbl" style="font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; color: #8fa3b8; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; text-align: center; margin-top: 2px;">
+      LANDMARK
+    </div>
+  </div>
+
+
+  <!-- REGIONAL FLIGHT AVIONICS HUD -->
+  <div id="regional-plane-hud" style="display: none; position: fixed; inset: 0; pointer-events: none; z-index: 280; font-family: 'Orbitron', sans-serif;">
+    <div style="position: absolute; top: 22px; left: 50%; transform: translateX(-50%); background: rgba(6, 16, 28, 0.90); border: 1.5px solid #00f2ff; border-radius: 12px; padding: 7px 22px; color: #00f2ff; font-size: 13px; font-weight: 800; letter-spacing: 2px; box-shadow: 0 0 25px rgba(0, 242, 255, 0.45); backdrop-filter: blur(8px);">
+      <span>HIGH-ARCTIC POLAR TUNDRA SKI-PLANE</span> · <span id="reg-plane-hdg">HDG 000°</span>
+    </div>
+
+    <!-- Airspeed (Left) -->
+    <div style="position: absolute; left: 28px; top: 42%; transform: translateY(-50%); background: rgba(6, 16, 28, 0.88); border: 1.5px solid rgba(0,242,255,0.6); border-radius: 14px; padding: 14px 18px; text-align: right; box-shadow: 0 0 25px rgba(0,242,255,0.35); backdrop-filter: blur(8px);">
+      <div style="font-size: 10px; color: #8fa3b8; letter-spacing: 1px;">AIRSPEED</div>
+      <div style="font-size: 34px; font-weight: 900; color: #00f2ff;" id="reg-plane-spd">0</div>
+      <div style="font-size: 10px; color: #ffd700;">KNOTS</div>
+      <div style="width: 75px; height: 5px; background: rgba(255,255,255,0.2); margin-top: 6px; border-radius: 3px; overflow: hidden;">
+        <div id="reg-plane-spd-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #ffd700);"></div>
+      </div>
+    </div>
+
+    <!-- Altimeter (Right) -->
+    <div style="position: absolute; right: 28px; top: 42%; transform: translateY(-50%); background: rgba(6, 16, 28, 0.88); border: 1.5px solid rgba(0,242,255,0.6); border-radius: 14px; padding: 14px 18px; text-align: left; box-shadow: 0 0 25px rgba(0,242,255,0.35); backdrop-filter: blur(8px);">
+      <div style="font-size: 10px; color: #8fa3b8; letter-spacing: 1px;">ALTITUDE MSL</div>
+      <div style="font-size: 34px; font-weight: 900; color: #00ff88;" id="reg-plane-alt">0</div>
+      <div style="font-size: 10px; color: #8fa3b8;">METERS</div>
+      <div style="font-size: 10px; color: #00f2ff; margin-top: 4px;" id="reg-plane-vs">VS: 0 M/S</div>
+    </div>
+
+    <!-- Bottom Flight Control Bar -->
+    <div style="position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%); background: rgba(6, 16, 28, 0.95); border: 2px solid #00f2ff; border-radius: 16px; padding: 12px 24px; display: flex; align-items: center; gap: 20px; box-shadow: 0 0 35px rgba(0, 242, 255, 0.45); pointer-events: auto;">
+      <div style="display: flex; flex-direction: column; width: 140px;">
+        <div style="display: flex; justify-content: space-between; font-size: 10px; color: #8fa3b8; margin-bottom: 3px;">
+          <span>THROTTLE</span>
+          <span style="color: #00f2ff; font-weight: 800;" id="reg-plane-thr">0%</span>
+        </div>
+        <div style="width: 100%; height: 8px; background: rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden;">
+          <div id="reg-plane-thr-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00f2ff, #ffd700, #ff0055);"></div>
+        </div>
+      </div>
+
+      <div style="font-size: 11px; color: #8fa3b8; font-family: 'Rajdhani', sans-serif;">
+        <b style="color: #00f2ff;">[W/S]</b> THROTTLE · <b style="color: #00f2ff;">[A/D]</b> BANK &amp; ROLL · <b style="color: #00f2ff;">[ARROWS]</b> PITCH / RUDDER
+      </div>
+
+      <button type="button" onclick="toggleRegionalPlaneFlight()" style="background: rgba(255, 0, 51, 0.2); border: 1.5px solid #ff0033; color: #ff6677; border-radius: 8px; padding: 8px 16px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer;">
+        <i class="fa-solid fa-plane-slash"></i> [E] DISEMBARK
+      </button>
+    </div>
+  </div>
+
+  <!-- CANADIAN CODEX & PASSPORT MODAL -->
+  <div id="modal-codex">
+    <div class="modal-box" style="max-width: 660px; border: 2px solid #00f2ff; box-shadow: 0 0 50px rgba(0, 242, 255, 0.45); background: rgba(8, 14, 24, 0.97);">
+      <div class="modal-header" style="background: rgba(0, 242, 255, 0.08); border-bottom: 1.5px solid rgba(0, 242, 255, 0.3);">
+        <h2 style="color: #00f2ff;"><i class="fa-brands fa-canadian-maple-leaf" style="color: #ff3366;"></i> CANADIAN CODEX &amp; PASSPORT</h2>
+        <button type="button" class="modal-close" onclick="closeCodexModal()">&times;</button>
+      </div>
+      <div style="padding: 22px; display: flex; flex-direction: column; gap: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px;">
+          <div>
+            <div id="codex-realm-name" style="font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 900; color: #fff;">TERRITORY OF NUNAVUT</div>
+            <div id="codex-realm-motto" style="font-size: 12px; color: #38bdf8; font-style: italic;">Nunavut Sannginivut (Nunavut our strength)</div>
+          </div>
+          <div id="codex-stamp-badge" style="background: rgba(255, 215, 0, 0.15); border: 1.5px solid #ffd700; border-radius: 10px; padding: 7px 12px; color: #ffd700; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; text-align: center;">
+            <i class="fa-solid fa-stamp"></i> PASSPORT STAMPED
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(255,255,255,0.03); border-radius: 10px; padding: 10px;">
+          <div><span style="color: #94a3b8; font-size: 11px;">CAPITAL CITY:</span><div id="codex-realm-capital" style="font-weight: 700; color: #fff;">Iqaluit</div></div>
+          <div><span style="color: #94a3b8; font-size: 11px;">SIGNATURE LANDMARK:</span><div id="codex-realm-landmark" style="font-weight: 700; color: #ffd700;">Monumental Inukshuk & Polar Geodesic Outpost</div></div>
+        </div>
+        <div>
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; color: #00f2ff; margin-bottom: 5px;">
+            <i class="fa-solid fa-landmark"></i> PARKS CANADA &amp; GEOGRAPHICAL ARCHIVES
+          </div>
+          <div id="codex-realm-lore" style="font-size: 13px; line-height: 1.55; color: #cbd5e1; background: rgba(0,0,0,0.3); border-left: 3px solid #00f2ff; padding: 10px 14px; border-radius: 0 8px 8px 0;">
+            Auyuittuq National Park ("The land that never melts") showcases dramatic granite peaks like Mount Thor, featuring the world's greatest vertical cliff drop (1,250m).
+          </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px;">
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-bottom: 6px;">
+            <span>CANADIAN PASSPORT COMPLETION</span>
+            <span id="codex-progress-text" style="color: #ffd700; font-weight: 800;">1 / 14 REALMS</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; overflow: hidden;">
+            <div id="codex-progress-bar" style="background: linear-gradient(90deg, #00f2ff, #ffd700); height: 100%; width: 7%;"></div>
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end;">
+          <button type="button" class="btn-hud" onclick="closeCodexModal()" style="background: rgba(0, 242, 255, 0.2); border-color: #00f2ff; color: #fff; padding: 9px 18px;">DISMISS CODEX [ESC]</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="province-modal" id="modal-map">
     <div class="modal-box">
@@ -570,10 +681,413 @@
 
 
     
+
+    // ------------------------------------------------------------
+    // CANADIAN CODEX & PASSPORT SYSTEM + HUD RADAR + WEATHER
+    // ------------------------------------------------------------
+    const REALM_CODEX_DATA = {"id": "nunavut", "name": "Territory of Nunavut", "motto": "Nunavut Sannginivut (Nunavut our strength)", "capital": "Iqaluit", "landmarkName": "Monumental Inukshuk & Polar Geodesic Outpost", "fact": "Auyuittuq National Park (\"The land that never melts\") showcases dramatic granite peaks like Mount Thor, featuring the world's greatest vertical cliff drop (1,250m).", "pos_x": -28, "pos_z": 12, "weather": "snow_aurora"};
+    const codexBeaconPos = new THREE.Vector3(-28, 0, 12);
+    const codexTerminalGroup = new THREE.Group();
+    codexTerminalGroup.position.copy(codexBeaconPos);
+    scene.add(codexTerminalGroup);
+
+    const codexBaseMesh = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.9, 1.2, 8), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.85 }));
+    codexBaseMesh.position.y = 0.6;
+    codexBaseMesh.castShadow = true;
+    codexTerminalGroup.add(codexBaseMesh);
+
+    const codexPillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.4, 8), new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.2, metalness: 0.9 }));
+    codexPillar.position.y = 1.9;
+    codexTerminalGroup.add(codexPillar);
+
+    const codexHoloDisc = new THREE.Mesh(new THREE.TorusGeometry(0.85, 0.08, 8, 24), new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true }));
+    codexHoloDisc.rotation.x = Math.PI / 2;
+    codexHoloDisc.position.y = 2.4;
+    codexTerminalGroup.add(codexHoloDisc);
+
+    const codexCenterCore = new THREE.Mesh(new THREE.OctahedronGeometry(0.32, 0), new THREE.MeshBasicMaterial({ color: 0xff3366 }));
+    codexCenterCore.position.y = 2.4;
+    codexTerminalGroup.add(codexCenterCore);
+
+    const codexLight = new THREE.PointLight(0x00f2ff, 1.6, 22);
+    codexLight.position.set(0, 2.5, 0);
+    codexTerminalGroup.add(codexLight);
+
+    let weatherParticleSystem = null;
+    let auroraCurtainMesh = null;
+
+    // ------------------------------------------------------------
+    // REGIONAL ATMOSPHERIC WEATHER: SNOW + AURORA BOREALIS CURTAIN
+    // ------------------------------------------------------------
+    const snowCount = 220;
+    const snowGeo = new THREE.BufferGeometry();
+    const snowPos = new Float32Array(snowCount * 3);
+    for (let i = 0; i < snowCount * 3; i += 3) {
+      snowPos[i] = (Math.random() - 0.5) * 180;
+      snowPos[i + 1] = Math.random() * 45;
+      snowPos[i + 2] = (Math.random() - 0.5) * 180;
+    }
+    snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
+    const snowMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.75, transparent: true, opacity: 0.85 });
+    weatherParticleSystem = new THREE.Points(snowGeo, snowMat);
+    distantDecorGroup.add(weatherParticleSystem);
+
+    const auroraGeo = new THREE.PlaneGeometry(360, 52, 24, 4);
+    const auroraMat = new THREE.MeshBasicMaterial({
+      color: 0x00ffaa,
+      transparent: true,
+      opacity: 0.38,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    auroraCurtainMesh = new THREE.Mesh(auroraGeo, auroraMat);
+    auroraCurtainMesh.position.set(0, 95, -280);
+    auroraCurtainMesh.rotation.x = Math.PI * 0.08;
+    distantDecorGroup.add(auroraCurtainMesh);
+
+    function updateWeather(delta, now) {
+      if (qualityMode === 'low') return;
+      if (weatherParticleSystem) {
+        const arr = weatherParticleSystem.geometry.attributes.position.array;
+        for (let i = 1; i < snowCount * 3; i += 3) {
+          arr[i] -= delta * 11.0;
+          if (arr[i] < 0) arr[i] = 45;
+        }
+        weatherParticleSystem.geometry.attributes.position.needsUpdate = true;
+      }
+      if (auroraCurtainMesh) {
+        auroraCurtainMesh.material.opacity = 0.28 + Math.sin(now * 0.0016) * 0.14;
+        auroraCurtainMesh.rotation.z = Math.sin(now * 0.0008) * 0.04;
+      }
+    }
+
+
+    function openCodexModal() {
+      const modal = document.getElementById('modal-codex');
+      if (!modal) return;
+      if (document.exitPointerLock) document.exitPointerLock();
+
+      let stamps = [];
+      try {
+        stamps = JSON.parse(localStorage.getItem('BS_PASSPORT_STAMPS') || '[]');
+      } catch (e) { stamps = []; }
+
+      const realmId = REALM_CODEX_DATA.id;
+      const isNewStamp = !stamps.includes(realmId);
+      if (isNewStamp) {
+        stamps.push(realmId);
+        localStorage.setItem('BS_PASSPORT_STAMPS', JSON.stringify(stamps));
+        tokens += 500;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        const tEl = document.getElementById('token-val');
+        if (tEl) tEl.textContent = tokens.toLocaleString();
+        showNotify(`🍁 CANADIAN PASSPORT STAMPED: ${REALM_CODEX_DATA.name.toUpperCase()} (+500 NEX)! [${stamps.length}/14]`);
+        if (typeof audio !== 'undefined' && audio.playLootChime) audio.playLootChime();
+      }
+
+      document.getElementById('codex-realm-name').textContent = REALM_CODEX_DATA.name.toUpperCase();
+      document.getElementById('codex-realm-motto').textContent = REALM_CODEX_DATA.motto;
+      document.getElementById('codex-realm-capital').textContent = REALM_CODEX_DATA.capital;
+      document.getElementById('codex-realm-landmark').textContent = REALM_CODEX_DATA.landmarkName;
+      document.getElementById('codex-realm-lore').textContent = REALM_CODEX_DATA.fact;
+
+      const progressCount = stamps.length;
+      document.getElementById('codex-progress-text').textContent = `${progressCount} / 14 REALMS`;
+      document.getElementById('codex-progress-bar').style.width = `${Math.round((progressCount / 14) * 100)}%`;
+
+      modal.classList.add('visible');
+    }
+
+    function closeCodexModal() {
+      const modal = document.getElementById('modal-codex');
+      if (modal) modal.classList.remove('visible');
+    }
+
+    function updateRadar(pPos, pYaw, lPos, vPos, cPos) {
+      const canvas = document.getElementById('hud-radar-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = canvas.width, h = canvas.height;
+      const cx = w / 2, cy = h / 2, r = w / 2 - 2;
+      const maxRange = 320;
+
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(6, 12, 22, 0.92)';
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0, 242, 255, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(0, 242, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.35, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, r * 0.7, 0, Math.PI * 2); ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(0, 242, 255, 0.15)';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r); ctx.lineTo(cx, cy + r);
+      ctx.moveTo(cx - r, cy); ctx.lineTo(cx + r, cy);
+      ctx.stroke();
+
+      const offset = pYaw;
+      const cardinals = [
+        { label: 'N', a: -Math.PI / 2 + offset, c: '#ff3366' },
+        { label: 'E', a: 0 + offset, c: '#8fa3b8' },
+        { label: 'S', a: Math.PI / 2 + offset, c: '#8fa3b8' },
+        { label: 'W', a: Math.PI + offset, c: '#8fa3b8' }
+      ];
+      ctx.font = 'bold 9px Orbitron, sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      cardinals.forEach(cd => {
+        const lx = cx + Math.cos(cd.a) * (r - 9);
+        const ly = cy + Math.sin(cd.a) * (r - 9);
+        ctx.fillStyle = cd.c;
+        ctx.fillText(cd.label, lx, ly);
+      });
+
+      function project(wx, wz) {
+        const dx = wx - pPos.x;
+        const dz = wz - pPos.z;
+        const rotX = dx * Math.cos(pYaw) - dz * Math.sin(pYaw);
+        const rotZ = dx * Math.sin(pYaw) + dz * Math.cos(pYaw);
+        const dist = Math.hypot(rotX, rotZ);
+        const scale = Math.min(dist / maxRange, 0.92);
+        const ang = Math.atan2(rotZ, rotX);
+        return { x: cx + Math.cos(ang) * (r * scale), y: cy + Math.sin(ang) * (r * scale), dist: Math.round(dist) };
+      }
+
+      if (lPos) {
+        const lp = project(lPos.x, lPos.z);
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowColor = '#ffd700'; ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.arc(lp.x, lp.y, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+        const distEl = document.getElementById('radar-dist-lbl');
+        if (distEl) distEl.textContent = `${lp.dist}m`;
+      }
+
+      if (cPos) {
+        const cp = project(cPos.x, cPos.z);
+        ctx.fillStyle = '#00f2ff';
+        ctx.shadowColor = '#00f2ff'; ctx.shadowBlur = 6;
+        ctx.beginPath(); ctx.arc(cp.x, cp.y, 3.5, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      if (vPos) {
+        const vp = project(vPos.x, vPos.z);
+        ctx.fillStyle = '#ff8800';
+        ctx.fillRect(vp.x - 3, vp.y - 3, 6, 6);
+      }
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.fillStyle = '#00f2ff';
+      ctx.shadowColor = '#00f2ff'; ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.moveTo(0, -6);
+      ctx.lineTo(4, 5);
+      ctx.lineTo(0, 3);
+      ctx.lineTo(-4, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+
+    // ============================================================
+    // CANADIAN REGIONAL AVIATION: HIGH-ARCTIC POLAR TUNDRA SKI-PLANE
+    // ============================================================
+    const planeGroup = new THREE.Group();
+    planeGroup.position.set(34, 1.4, 8);
+    scene.add(planeGroup);
+    regionalPlaneGroup = planeGroup;
+
+    // Materials
+    const pBodyMat = new THREE.MeshStandardMaterial({ color: 0xf97316, roughness: 0.35, metalness: 0.45 });
+    const pTrimMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.35, metalness: 0.55 });
+    const pGlassMat = new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.85, transparent: true, opacity: 0.75, clearcoat: 1.0 });
+    const pMetalMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.25, metalness: 0.9 });
+    const pPropMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.8 });
+
+    // 1. Aerodynamic Fuselage (Cabin & Tail Boom)
+    const cabin = new THREE.Mesh(new THREE.BoxGeometry(2.1, 1.9, 5.8), pBodyMat);
+    cabin.position.set(0, 0.2, -0.2);
+    cabin.castShadow = true; cabin.receiveShadow = true;
+    planeGroup.add(cabin);
+
+    const cabinStripe = new THREE.Mesh(new THREE.BoxGeometry(2.14, 0.45, 5.8), pTrimMat);
+    cabinStripe.position.set(0, 0.1, -0.2);
+    planeGroup.add(cabinStripe);
+
+    const windshield = new THREE.Mesh(new THREE.BoxGeometry(1.95, 0.85, 1.2), pGlassMat);
+    windshield.position.set(0, 0.65, -1.8);
+    windshield.rotation.x = Math.PI * 0.15;
+    planeGroup.add(windshield);
+
+    // Tapered Rear Tail Boom
+    const tailBoom = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.95, 4.4, 8), pBodyMat);
+    tailBoom.rotation.x = Math.PI / 2;
+    tailBoom.position.set(0, 0.35, 4.2);
+    tailBoom.castShadow = true;
+    planeGroup.add(tailBoom);
+
+    // 2. High-Wing Monoplane Main Wings (Span: 16m)
+    const mainWing = new THREE.Mesh(new THREE.BoxGeometry(16.0, 0.25, 2.5), pBodyMat);
+    mainWing.position.set(0, 1.18, -0.3);
+    mainWing.castShadow = true;
+    planeGroup.add(mainWing);
+
+    const wingTips = new THREE.Mesh(new THREE.BoxGeometry(16.1, 0.28, 0.5), pTrimMat);
+    wingTips.position.set(0, 1.18, 0.8);
+    planeGroup.add(wingTips);
+
+    // Diagonal Wing Lift Struts
+    [-3.8, 3.8].forEach(wx => {
+      const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 3.8, 6), pMetalMat);
+      strut.position.set(wx * 0.5, 0.45, -0.3);
+      strut.rotation.z = (wx > 0 ? 0.65 : -0.65);
+      planeGroup.add(strut);
+    });
+
+    // 3. Tail Assembly (Vertical Fin & Horizontal Elevators)
+    const vertFin = new THREE.Mesh(new THREE.BoxGeometry(0.18, 2.2, 1.8), pTrimMat);
+    vertFin.position.set(0, 1.6, 5.8);
+    vertFin.rotation.x = -Math.PI * 0.12;
+    vertFin.castShadow = true;
+    planeGroup.add(vertFin);
+
+    const horizTail = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.18, 1.4), pBodyMat);
+    horizTail.position.set(0, 0.8, 6.0);
+    horizTail.castShadow = true;
+    planeGroup.add(horizTail);
+
+    // 4. Nose Engine Cowling, Spinner & Animated Propeller
+    const cowl = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.95, 1.6, 12), pMetalMat);
+    cowl.rotation.x = Math.PI / 2;
+    cowl.position.set(0, 0.2, -3.8);
+    cowl.castShadow = true;
+    planeGroup.add(cowl);
+
+    const spinner = new THREE.Mesh(new THREE.ConeGeometry(0.45, 0.8, 12), pTrimMat);
+    spinner.rotation.x = -Math.PI / 2;
+    spinner.position.set(0, 0.2, -4.9);
+    planeGroup.add(spinner);
+
+    const propGroup = new THREE.Group();
+    propGroup.position.set(0, 0.2, -4.7);
+    planeGroup.add(propGroup);
+    regionalPlanePropeller = propGroup;
+
+    // 3-Blade Propeller
+    for (let b = 0; b < 3; b++) {
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(0.18, 2.4, 0.05), pPropMat);
+      blade.rotation.z = (b / 3) * Math.PI * 2;
+      propGroup.add(blade);
+      const bladeTip = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.35, 0.06), new THREE.MeshBasicMaterial({ color: 0xfacc15 }));
+      bladeTip.position.y = 1.1;
+      bladeTip.rotation.z = (b / 3) * Math.PI * 2;
+      propGroup.add(bladeTip);
+    }
+
+    // Nav Lights
+    const redNav = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), new THREE.MeshBasicMaterial({ color: 0xef4444 }));
+    redNav.position.set(-8.0, 1.2, -0.3);
+    planeGroup.add(redNav);
+
+    const greenNav = new THREE.Mesh(new THREE.SphereGeometry(0.09, 8, 8), new THREE.MeshBasicMaterial({ color: 0x22c55e }));
+    greenNav.position.set(8.0, 1.2, -0.3);
+    planeGroup.add(greenNav);
+
+    const forwardHeadlight = new THREE.SpotLight(0xffffff, 2.4, 90, Math.PI * 0.25, 0.4);
+    forwardHeadlight.position.set(0, 0.8, -4.2);
+    forwardHeadlight.target.position.set(0, 0, -50);
+    planeGroup.add(forwardHeadlight);
+    planeGroup.add(forwardHeadlight.target);
+
+
+      // Arctic High-Toughness Snow & Glacier Skis
+      const skiMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.3, metalness: 0.8 });
+      const strutMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.8 });
+      [-1.3, 1.3].forEach(sx => {
+        const ski = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.15, 6.5), skiMat);
+        ski.position.set(sx, -0.9, 0);
+        ski.castShadow = true; ski.receiveShadow = true;
+        planeGroup.add(ski);
+
+        const skiTip = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.32, 0.15, 8, 1, false, 0, Math.PI), skiMat);
+        skiTip.rotation.z = Math.PI / 2;
+        skiTip.position.set(sx, -0.75, -3.2);
+        planeGroup.add(skiTip);
+
+        // Shock Struts
+        [-1.2, 1.2].forEach(sz => {
+          const strut = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.2, 6), strutMat);
+          strut.position.set(sx * 0.65, -0.4, sz);
+          strut.rotation.z = (sx > 0 ? -0.32 : 0.32);
+          planeGroup.add(strut);
+        });
+      });
+
+
+    if (typeof WORLD_COLLIDERS !== 'undefined') {
+      WORLD_COLLIDERS.push({ x: 34, z: 8, r: 4.5 });
+    }
+
+    // ============================================================
+    // REGIONAL AIRCRAFT FLIGHT CONTROLLER
+    // ============================================================
+    let regionalPlaneGroup = null;
+    let regionalPlanePropeller = null;
+    let inRegionalPlane = false;
+    const regionalPlaneState = {
+      throttle: 0,
+      speed: 0,
+      pitch: 0,
+      roll: 0,
+      yaw: 0,
+      vs: 0,
+      maxSpeed: 55,
+      takeoffSpeed: 15
+    };
+
+    function toggleRegionalPlaneFlight() {
+      if (inRegionalPlane) {
+        inRegionalPlane = false;
+        const hud = document.getElementById('regional-plane-hud');
+        if (hud) hud.style.display = 'none';
+
+        if (regionalPlaneGroup.position.y > 15) {
+          showNotify('🪂 EMERGENCY PARAGLIDER DEPLOYED FROM COCKPIT!');
+          player.pos.set(regionalPlaneGroup.position.x + 2.5, regionalPlaneGroup.position.y - 1.0, regionalPlaneGroup.position.z);
+          player.vel.set(0, -2.5, 0);
+        } else {
+          player.pos.set(regionalPlaneGroup.position.x + 3.2, 1.2, regionalPlaneGroup.position.z);
+          player.vel.set(0, 0, 0);
+          showNotify('DISEMBARKED AIRCRAFT ON GROUND');
+        }
+        if (typeof playerRiggedMesh !== 'undefined' && playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P');
+        if (audio && audio.playChirp) audio.playChirp();
+      } else {
+        if (!regionalPlaneGroup || player.pos.distanceTo(regionalPlaneGroup.position) > 10.0) return;
+        inRegionalPlane = true;
+        const hud = document.getElementById('regional-plane-hud');
+        if (hud) hud.style.display = 'block';
+        if (typeof playerRiggedMesh !== 'undefined' && playerRiggedMesh) playerRiggedMesh.visible = false;
+        showNotify('✈️ PILOTING HIGH-ARCTIC POLAR TUNDRA SKI-PLANE // [W/S] THROTTLE [A/D] ROLL [ARROWS] PITCH');
+        if (audio && audio.playChirp) audio.playChirp();
+      }
+    }
+
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
+      { x: -28, z: 12, r: 3.0 },
       { x: 0, z: -150, r: 24 },
       { x: 0, z: -180, r: 5 },
       { x: 120, z: 40, r: 16 },
@@ -614,9 +1128,20 @@
       if (e.code === 'KeyV') toggleCameraView();
       if (e.code === 'KeyQ') cycleQuality();
       if (e.code === 'KeyH') toggleMapModal();
-      if (e.code === 'KeyE') toggleVehicle();
+      if (e.code === 'KeyP') toggleRegionalPlaneFlight();
+      if (e.code === 'KeyE') {
+        if (inRegionalPlane) {
+          toggleRegionalPlaneFlight();
+        } else if (regionalPlaneGroup && player.pos.distanceTo(regionalPlaneGroup.position) < 8.5) {
+          toggleRegionalPlaneFlight();
+        } else {
+          toggleVehicle();
+        }
+      }
       if (e.code === 'KeyF') handleInteractions();
       if (e.code === 'Escape') {
+        const codexM = document.getElementById('modal-codex');
+        if (codexM && codexM.classList.contains('visible')) { closeCodexModal(); return; }
         const m = document.getElementById('modal-map');
         if (m.classList.contains('visible')) m.classList.remove('visible'); else returnToMetropolis();
       }
@@ -650,6 +1175,12 @@
     }
 
     function handleInteractions() {
+      if (regionalPlaneGroup && player.pos.distanceTo(regionalPlaneGroup.position) < 8.5 && !inRegionalPlane) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT HIGH-ARCTIC POLAR TUNDRA SKI-PLANE [E] / [P]';
+      } else if (typeof codexBeaconPos !== 'undefined' && player.pos.distanceTo(codexBeaconPos) < 6.0) {
+        openCodexModal();
+        return;
+      }
       if (!missionDomeDone && player.pos.distanceTo(termGroup.position) < 7.0) {
         missionDomeDone = true;
         document.getElementById('mis-dome').classList.add('done');
@@ -677,13 +1208,99 @@
       lastTime = now;
 
       if (characterMixer) characterMixer.update(delta);
+      // Regional Airplane Propeller & Flight Dynamics
+      if (regionalPlanePropeller) {
+        const propSpeed = inRegionalPlane ? (16 + regionalPlaneState.throttle * 0.5) : 0.8;
+        regionalPlanePropeller.rotation.z += propSpeed * delta;
+      }
+
+      if (inRegionalPlane && regionalPlaneGroup) {
+        // Throttle Control (W / S)
+        if (keys['KeyW']) regionalPlaneState.throttle = Math.min(100, regionalPlaneState.throttle + delta * 42);
+        else if (keys['KeyS']) regionalPlaneState.throttle = Math.max(0, regionalPlaneState.throttle - delta * 45);
+
+        const targetSpeed = (regionalPlaneState.throttle / 100) * regionalPlaneState.maxSpeed;
+        regionalPlaneState.speed = THREE.MathUtils.lerp(regionalPlaneState.speed, targetSpeed, delta * 1.5);
+
+        // Pitch (ArrowDown = Up, ArrowUp = Down)
+        if (keys['ArrowDown']) regionalPlaneState.pitch = Math.min(Math.PI * 0.4, regionalPlaneState.pitch + 1.2 * delta);
+        else if (keys['ArrowUp']) regionalPlaneState.pitch = Math.max(-Math.PI * 0.4, regionalPlaneState.pitch - 1.2 * delta);
+        else regionalPlaneState.pitch *= 0.98;
+
+        // Roll (A / D)
+        if (keys['KeyA'] || keys['ArrowLeft']) regionalPlaneState.roll = Math.min(Math.PI * 0.5, regionalPlaneState.roll + 1.5 * delta);
+        else if (keys['KeyD'] || keys['ArrowRight']) regionalPlaneState.roll = Math.max(-Math.PI * 0.5, regionalPlaneState.roll - 1.5 * delta);
+        else regionalPlaneState.roll *= 0.95;
+
+        // Bank-turn coupling
+        regionalPlaneState.yaw -= Math.sin(regionalPlaneState.roll) * (regionalPlaneState.speed / 26) * delta;
+
+        // Aerodynamic Lift Equation
+        const liftFrac = Math.min(1.0, Math.pow(regionalPlaneState.speed / regionalPlaneState.takeoffSpeed, 2));
+        const climbRate = Math.sin(regionalPlaneState.pitch) * regionalPlaneState.speed - (regionalPlaneGroup.position.y > 1.4 ? (1.0 - liftFrac) * 9.8 * 0.4 : 0);
+        regionalPlaneState.vs = climbRate;
+        regionalPlaneGroup.position.y += climbRate * delta;
+
+        if (regionalPlaneGroup.position.y < 1.3) {
+          regionalPlaneGroup.position.y = 1.3;
+          regionalPlaneState.vs = 0;
+          if (regionalPlaneState.pitch < 0) regionalPlaneState.pitch = 0;
+        }
+
+        // Translate in 3D along forward heading
+        regionalPlaneGroup.rotation.set(regionalPlaneState.pitch, regionalPlaneState.yaw, regionalPlaneState.roll, 'YXZ');
+        const fwd = new THREE.Vector3(0, 0, -1).applyEuler(regionalPlaneGroup.rotation);
+        regionalPlaneGroup.position.add(fwd.multiplyScalar(regionalPlaneState.speed * delta));
+
+        // Player follows aircraft
+        player.pos.copy(regionalPlaneGroup.position);
+        player.vel.set(0, 0, 0);
+
+        // Camera tracks behind and slightly above plane for panoramic views
+        const camOffset = new THREE.Vector3(0, 3.8, 11.5).applyEuler(new THREE.Euler(0, regionalPlaneState.yaw, 0));
+        camera.position.lerp(regionalPlaneGroup.position.clone().add(camOffset), 0.35);
+        camera.lookAt(regionalPlaneGroup.position.x, regionalPlaneGroup.position.y + 1.2, regionalPlaneGroup.position.z);
+
+        // Update Flight Avionics HUD
+        const spdKnots = Math.round(regionalPlaneState.speed * 1.94384);
+        const altM = Math.round(regionalPlaneGroup.position.y);
+        const hdg = Math.round(((-regionalPlaneState.yaw * 180 / Math.PI) % 360 + 360) % 360);
+
+        const spdEl = document.getElementById('reg-plane-spd');
+        const altEl = document.getElementById('reg-plane-alt');
+        const thrEl = document.getElementById('reg-plane-thr');
+        const thrBar = document.getElementById('reg-plane-thr-bar');
+        const spdBar = document.getElementById('reg-plane-spd-bar');
+        const hdgEl = document.getElementById('reg-plane-hdg');
+        const vsEl = document.getElementById('reg-plane-vs');
+
+        if (spdEl) spdEl.textContent = spdKnots;
+        if (altEl) altEl.textContent = altM;
+        if (thrEl) thrEl.textContent = `${Math.round(regionalPlaneState.throttle)}%`;
+        if (thrBar) thrBar.style.width = `${regionalPlaneState.throttle}%`;
+        if (spdBar) spdBar.style.width = `${Math.min(100, (spdKnots / 120) * 100)}%`;
+        if (hdgEl) hdgEl.textContent = `HDG ${hdg.toString().padStart(3, '0')}°`;
+        if (vsEl) vsEl.textContent = `VS: ${regionalPlaneState.vs.toFixed(1)} M/S`;
+      }
+
+      if (typeof codexHoloDisc !== 'undefined' && codexHoloDisc) {
+        codexHoloDisc.rotation.y += delta * 1.8;
+        codexHoloDisc.position.y = 2.4 + Math.sin(now * 0.003) * 0.12;
+      }
+      if (typeof updateWeather === 'function') updateWeather(delta, now);
+      if (typeof updateRadar === 'function') {
+        const cruiserPos = (typeof cruiserGroup !== 'undefined' && cruiserGroup) ? cruiserGroup.position : null;
+        updateRadar(player.pos, player.yaw, new THREE.Vector3(0, 0, -200), cruiserPos, (typeof codexBeaconPos !== 'undefined' ? codexBeaconPos : null));
+      }
       tOrb.rotation.y += delta * 1.5; tOrb.rotation.x += delta * 0.8;
       inukshukLight.intensity = 3.2 + Math.sin(now * 0.005) * 0.8;
       aurora.rotation.z += delta * 0.12;
 
       const prompt = document.getElementById('interact-prompt');
       const promptMsg = document.getElementById('prompt-msg');
-      if (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
+      if (typeof codexBeaconPos !== 'undefined' && player.pos.distanceTo(codexBeaconPos) < 6.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'ACCESS CANADIAN CODEX [F]';
+      } else (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT TUNDRA ROVER [E]';
       } else if (!missionDomeDone && player.pos.distanceTo(termGroup.position) < 7.0) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'LINK OBSERVATORY DOME [F]';

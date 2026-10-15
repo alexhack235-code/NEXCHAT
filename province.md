@@ -4,20 +4,20 @@ This plan applies to the **central metropolis in `game.html` and all 14 province
 
 ## Realms in Scope
 
-- [British Columbia](./province-british-columbia.html)
-- [Alberta](./province-alberta.html)
-- [Saskatchewan](./province-saskatchewan.html)
-- [Manitoba](./province-manitoba.html)
-- [Ontario](./province-ontario.html)
-- [Quebec](./province-quebec.html)
-- [New Brunswick](./province-new-brunswick.html)
-- [Nova Scotia](./province-nova-scotia.html)
-- [Prince Edward Island](./province-prince-edward-island.html)
-- [Newfoundland and Labrador](./province-newfoundland.html)
-- [Yukon](./province-yukon.html)
-- [Northwest Territories](./province-northwest-territories.html)
-- [Nunavut](./province-nunavut.html)
-- [National Capital Region](./province-national-capital.html)
+- [British Columbia](./Canada/province-british-columbia.html)
+- [Alberta](./Canada/province-alberta.html)
+- [Saskatchewan](./Canada/province-saskatchewan.html)
+- [Manitoba](./Canada/province-manitoba.html)
+- [Ontario](./Canada/province-ontario.html)
+- [Quebec](./Canada/province-quebec.html)
+- [New Brunswick](./Canada/province-new-brunswick.html)
+- [Nova Scotia](./Canada/province-nova-scotia.html)
+- [Prince Edward Island](./Canada/province-prince-edward-island.html)
+- [Newfoundland and Labrador](./Canada/province-newfoundland.html)
+- [Yukon](./Canada/province-yukon.html)
+- [Northwest Territories](./Canada/province-northwest-territories.html)
+- [Nunavut](./Canada/province-nunavut.html)
+- [National Capital Region](./Canada/province-national-capital.html)
 
 ## Advanced Upgrade Specification (All 14 Realms)
 
@@ -88,7 +88,7 @@ Apply and verify each shared pass across all 14 pages before calling it complete
 - **Pass D — performance:** apply the same quality settings, asset optimization, distance detail, and fallbacks across every page.
 - **Pass E — verification:** open every realm, confirm all assets load, exercise controls/interactions, and profile representative low-end hardware. Fix failures before marking that realm complete.
 
-The [Newfoundland realm](./province-newfoundland.html) is a useful implementation reference for its GLTF loading, rigged-character setup, camera switch, and quality selector. Treat it as a pattern to review and reuse—not proof that the other realms are upgraded or that its models, animation clips, performance, or visual result have been verified in-game.
+The [Newfoundland realm](./Canada/province-newfoundland.html) is a useful implementation reference for its GLTF loading, rigged-character setup, camera switch, and quality selector. Treat it as a pattern to review and reuse—not proof that the other realms are upgraded or that its models, animation clips, performance, or visual result have been verified in-game.
 
 ## Central Metropolis (`game.html`): Comprehensive Realism Pass
 
@@ -194,46 +194,46 @@ Code inspection finds that `game.html` contains the sun disc, gradient sky, PBR 
 
 
 ### Detailed Geographic Populated Scenery by Realm:
-- **British Columbia (`province-british-columbia.html`)**:
+- **British Columbia (`Canada/province-british-columbia.html`)**:
   - *Settlement & Scenery*: Coastal timber fishing dock pier on heavy preservative-treated wood pilings (`x: -38, z: -15`), harbourmaster fish house shack with cedar-shake gabled roof and brass nautical lantern (`x: -46, z: -15`), stacked wooden lobster/crab traps and rope coils, Pacific cedar driftwood logs on shoreline (`x: 34, z: 12` & `x: -32, z: 25`), mossy granite boulders (`x: 34, z: -30` & `x: -32, z: -70`), and multi-tiered Pacific red cedar / Douglas fir stands.
   - *Colliders*: 10 registered world colliders (pier, shack, coast boulders, and bridges).
-- **Alberta (`province-alberta.html`)**:
+- **Alberta (`Canada/province-alberta.html`)**:
   - *Settlement & Scenery*: Banff alpine ranger log outpost with observation deck and fieldstone chimney (`x: -48, z: -15`), rustic split-rail cedar zigzag fencing along road verge (`x: -32, z: 20` to `z: -50`), trailhead marker signpost and timber bench (`x: -34, z: 5`), angular Rocky Mountain moraine limestone boulders (`x: 38, z: -10` & `x: 42, z: -45`), and subalpine lodgepole pine stands framing the snow peaks.
   - *Colliders*: 8 registered world colliders (outpost, moraine rock clusters, energy grid, town modules).
-- **Saskatchewan (`province-saskatchewan.html`)**:
+- **Saskatchewan (`Canada/province-saskatchewan.html`)**:
   - *Settlement & Scenery*: Prairie twin corrugated galvanized steel grain silos with conical roofs, vertical bucket elevator leg, and overhead catwalk (`x: -52, z: -25`), red timber farm machinery shed (`x: -56, z: 15`), vintage Aermotor steel lattice windmill water pump with 8-blade rotor, tail rudder, and round stock tank (`x: 38, z: -10`), post-and-rail cattle corral fencing, and round golden straw hay bales in pasture.
   - *Colliders*: 8 registered world colliders (silos, machine shed, windmill tower, legislative dome).
-- **Manitoba (`province-manitoba.html`)**:
+- **Manitoba (`Canada/province-manitoba.html`)**:
   - *Settlement & Scenery*: Hudson's Bay pioneer log trading post with notched timber walls, stone hearth chimney, cedar shake roof, and covered veranda porch (`x: -46, z: -15`), fur pelts cache shed (`x: -48, z: 18`), timber voyageur canoe rack with birchbark/cedar canoes (`x: -36, z: -5`), elevated marsh boardwalk on timber stilts across river wetland (`x: 36, z: 15` to `z: -40`), and thick river cattail reed clusters.
   - *Colliders*: 9 registered world colliders (trading post, pelts cache, boardwalk anchor, boreal outposts).
-- **Ontario (`province-ontario.html`)**:
+- **Ontario (`Canada/province-ontario.html`)**:
   - *Settlement & Scenery*: Bruce Peninsula stratified dolomite limestone escarpment bluffs flanking highway (`x: -42, z: 10`, `x: -48, z: -40`, `x: 52, z: -20`), Bruce Trail marker pavilion with fieldstone pillars and map kiosk (`x: 48, z: 15`), rustic limestone arched footbridge over shoreline creek inlet (`x: -40, z: -20`), and windswept Georgian Bay white pines with horizontal weather-shaped crowns.
   - *Colliders*: 13 registered world colliders (trail pavilion, escarpment bluffs, footbridge, CN Tower, town modules).
-- **Quebec (`province-quebec.html`)**:
+- **Quebec (`Canada/province-quebec.html`)**:
   - *Settlement & Scenery*: Gaspésie & St. Lawrence timber fishing cottages with steep red-tin gabled roofs, dormer windows, and stone foundations (`x: -50, z: -10` & `x: -54, z: 25`), historic roadside wayside cross (*croix de chemin*) with carved heart emblem (`x: -34, z: 8`), timber cod drying flakes (*râteliers à morue*) on spruce poles (`x: 38, z: -15`), and Appalachian dark slate rock ledges (`x: 42, z: 15` & `x: 44, z: -45`).
   - *Colliders*: 10 registered world colliders (cottages, cod drying racks, slate ledges, ramparts).
-- **New Brunswick (`province-new-brunswick.html`)**:
+- **New Brunswick (`Canada/province-new-brunswick.html`)**:
   - *Settlement & Scenery*: Bay of Fundy tidal research cabin on heavy preservative-treated timber pilings with weather observation cupola (`x: -46, z: -15`), stacked wooden lobster traps and rope pallets (`x: -36, z: 5`), salt fish storage shed (`x: 48, z: 15`), and Hopewell-style conglomerate red-brown mudstone sea rocks with kelp bands (`x: 40, z: -35` & `x: -34, z: -45`).
   - *Colliders*: 10 registered world colliders (research cabin, salt shed, mudstone rocks, Hopewell arches).
-- **Nova Scotia (`province-nova-scotia.html`)**:
+- **Nova Scotia (`Canada/province-nova-scotia.html`)**:
   - *Settlement & Scenery*: Atlantic lighthouse keeper's cottage with white cedar shingles, red trim, red tin roof, and brick chimney (`x: -48, z: -15`), timber net-drying shed with open loft and hanging nets (`x: -52, z: 20`), wooden herring salt barrels and rope coils (`x: -36, z: 2`), copper foghorn on timber pedestal (`x: 34, z: 0`), and Peggy's Cove smooth rounded pinkish-grey granite whaleback rocks (`x: 36, z: -20`, `x: 44, z: 10`, `x: -34, z: -50`).
   - *Colliders*: 11 registered world colliders (keeper cottage, net shed, granite headlands, Citadel).
-- **Prince Edward Island (`province-prince-edward-island.html`)**:
+- **Prince Edward Island (`Canada/province-prince-edward-island.html`)**:
   - *Settlement & Scenery*: Classic PEI double-pitched red gambrel-roof dairy barn with arched hayloft door and silver silage silo (`x: 52, z: -15`), two-storey white island farmhouse with green shutters and wrap-around porch (`x: 56, z: 22`), cedar post-and-wire paddock fencing bordering roadway, cylindrical golden straw hay bales in green pasture, and vibrant red sandstone soil bluffs with coastal marram dune grass (`x: -36, z: -10` & `x: -46, z: 30`).
   - *Colliders*: 10 registered world colliders (gambrel barn, farmhouse, red bluffs, Confederation bridge).
-- **Newfoundland and Labrador (`province-newfoundland.html`)**:
+- **Newfoundland and Labrador (`Canada/province-newfoundland.html`)**:
   - *Settlement & Scenery*: Traditional coastal outport fishing stage built on wooden stilts over tidal rocks with exterior wharf head and splitting table (`x: -44, z: -15`), red-ochre twine store / gear loft (`x: -50, z: 18`), hauled Newfoundland wooden dory workboats on timber slipway skids (`x: -35, z: 2` & `x: 38, z: -5`), and Gros Morne tableland rusted orange-brown peridotite/serpentine rock boulders (`x: 42, z: -30` & `x: 46, z: 15`).
   - *Colliders*: 10 registered world colliders (fishing stage, twine store, tableland rocks, Marconi tower).
-- **Yukon (`province-yukon.html`)**:
+- **Yukon (`Canada/province-yukon.html`)**:
   - *Settlement & Scenery*: Klondike Gold Rush boomtown mercantile / saloon with false-front ornamental parapet facade, boardwalk porch, and hitching rail (`x: -46, z: -15`), prospector round-log cabin with sod roof and stovepipe (`x: -52, z: 20`), elevated timber sluice box flume trestle carrying gold washwater (`x: 36, z: 10` to `z: -40`), and vintage riveted cast-iron steam mining boiler with tall exhaust smokestack (`x: 46, z: -15`).
   - *Colliders*: 10 registered world colliders (mercantile, prospector cabin, mining boiler, sluice trestle, gold dredge).
-- **Northwest Territories (`province-northwest-territories.html`)**:
+- **Northwest Territories (`Canada/province-northwest-territories.html`)**:
   - *Settlement & Scenery*: Subarctic Mackenzie River freight depot warehouse with loading dock platform and hoist (`x: -48, z: -15`), prospector heavy canvas wall-tent on elevated wooden deck frame (`x: -40, z: 22`), traditional elevated northern food cache on 4 tall peeled log posts with tree-tin bands (`x: -36, z: -40`), arctic steel fuel drum cache on pallets (`x: 38, z: 5`), and Nahanni canyon limestone river rocks (`x: 42, z: -25` & `x: 46, z: 20`).
   - *Colliders*: 9 registered world colliders (freight warehouse, canvas tent, food cache, fuel drums, canyon rocks, diamond mine).
-- **Nunavut (`province-nunavut.html`)**:
+- **Nunavut (`Canada/province-nunavut.html`)**:
   - *Settlement & Scenery*: High-Arctic geodesic research polar habitat in insulated orange and white thermal panels with cylindrical airlock tunnel (`x: -48, z: -15`), meteorological wind telemetry mast with turbine generator and solar array (`x: -38, z: 18`), handcrafted wooden qamutik traditional Inuit sleds resting on snowbanks (`x: -34, z: 2`), insulated polar supplies container (`x: 44, z: 12`), and Auyuittuq granite talus boulders with tundra lichens framing the ceremonial stone Inukshuk (`x: 38, z: -20` & `x: 42, z: -55`).
   - *Colliders*: 10 registered world colliders (geodesic dome, telemetry mast, supplies module, talus boulders, Inukshuk).
-- **National Capital Region (`province-national-capital.html`)**:
+- **National Capital Region (`Canada/province-national-capital.html`)**:
   - *Settlement & Scenery*: Heritage stone Rideau Canal lockkeeper cottage with slate roof and chimney (`x: -48, z: -15`), Confederation Boulevard formal parkland allée of vibrant autumn sugar maples in radiant red, fiery orange, and golden amber foliage crowns (`x: -26` & `x: 26`), classical bronze statuary monument on tiered granite pedestal with memorial plaque (`x: 40, z: -15`), cast-iron Victorian 5-globe gas street lamps with warm amber glow (`x: -24` & `x: 24`), and stone balustrade garden wall (`x: 36, z: 15`).
   - *Colliders*: 11 registered world colliders (lockkeeper cottage, bronze monument, balustrade wall, Parliament Peace Tower).
 
@@ -262,3 +262,45 @@ Code inspection finds that `game.html` contains the sun disc, gradient sky, PBR 
 - **Surrounding Urban Fabric & Transit**:
   - Calgary street signs at key intersections: `CENTRE ST S / 9 AVE SW`, `STEPHEN AVE WALKWAY`, `EAST VILLAGE / C-TRAIN WAY`, `CULTURE & ENTERTAINMENT DISTRICT`.
   - C-Train corridor, concrete sidewalks, curb cuts, bus shelters, planters, benches, and spatial collision boundaries.
+
+### Advanced Gameplay Systems & Interactive Features:
+- **Calgary Transit C-Train Passenger Tour (`game.html`)**:
+  - *Dynamic Motion*: Calgary Transit Siemens S200 light rail vehicle operates continuously between East Village / Central Library (`z: -50`) and the Scotia Place Arena District (`z: 75`).
+  - *Passenger Stations*: Dual stations with concrete platforms and yellow safety tactile edge pavers at Central Library and Scotia Place with automated 4.5-second dwell pauses.
+  - *Boarding & Disembarking*: Press `[E]` within 7m of the train or at station platforms to board. Passenger perspective provides a panoramic view of Calgary's iconic skyline (Calgary Tower, The Bow, Telus Sky) and active Scotia Place construction cranes. Press `[E]` to disembark onto the station sidewalk.
+- **Canadian Exploration Codex & Passport System**:
+  - *Holographic Lore Terminals*: Sleek hexagonal cybernetic pedestals with rotating holographic discs and pulsating beacon lights stationed across all 14 provinces/territories and at the Calgary Tower plaza.
+  - *Interactive Lore*: Press `[F]` within 6m to access authentic geographical and Parks Canada archival records (motto, capital city, signature landmark, and conservation history).
+  - *Passport Stamps & NEX Rewards*: Each realm discovery automatically stamps the player's Canadian Passport in `localStorage` (`BS_PASSPORT_STAMPS`), plays a harmonic loot chime, and awards +500 NEX tokens.
+  - *Trans-Canada Highway Tracker & Exosuit Unlock*: The Trans-Canada Highway modal in `game.html` (`[H]`) tracks passport collection progress (`X/14 REALMS DISCOVERED`). Stamping all 14 realms unlocks the legendary **Aurora Borealis Quantum Exosuit** (+5,000 NEX tokens).
+- **Tactical Cyber HUD Radar & Minimap**:
+  - *All 14 Province Realms*: 120px circular radar mounted in the top-right HUD with rotating cardinal compass (N, S, E, W), track-up heading projection, real-time distance readouts to the regional signature landmark, vehicle locator blip, and Canadian Codex beacon marker.
+  - *Calgary Metropolis*: City-scale radar tracking downtown architectural icons (Calgary Tower, The Bow, Central Library, Scotia Place) and YYC Calgary International Airport.
+- **Procedural Atmospheric Weather FX**:
+  - *Arctic Snow Flurries*: Lightweight falling snow particle systems in Yukon, Northwest Territories, and Nunavut.
+  - *Aurora Borealis Curtains*: Waving ethereal additive-blended emerald and violet aurora curtains across northern skies in Nunavut and Northwest Territories.
+  - *Coastal Sea Mist*: Atmospheric drifting sea mist in British Columbia, Nova Scotia, Newfoundland & Labrador, and New Brunswick.
+  - *Low-End Performance Protection*: Automatically culled when graphics quality is set to `LOW` (`[Q]`), guaranteeing 60 FPS on lower-end devices.
+
+### Regional Canadian Aviation Fleet (All 14 Provinces & Territories):
+- **Authentic Flyable Regional Aircraft Fleet**:
+  - **British Columbia**: `DHC-2 Beaver Pacific Floatplane` (`C-FBCP`) on Burrard Inlet / Pacific Cascadia Fjord with twin pontoon floats and water rudders.
+  - **Alberta**: `Banff Rockies Alpine Bush Plane` (`C-FABR`) with high-clearance heavy tundra balloon wheels.
+  - **Saskatchewan**: `Prairie Aerial Crop Scout` (`C-FSKS`) harvest gold agricultural monoplane.
+  - **Manitoba**: `Red River Amphibian Bush Plane` (`C-FMBR`) docked along The Forks river boardwalk.
+  - **Ontario**: `Canadair CL-415 Water Bomber` (`C-FONT`) fire-service amphibian on Georgian Bay.
+  - **Quebec**: `Gaspésie Maritime Patrol Floatplane` (`C-FQCJ`) royal-blue floatplane on the St. Lawrence.
+  - **New Brunswick**: `Fundy Tidal Surveyor Seaplane` (`C-FNBT`) moored at the Fundy tidal station.
+  - **Nova Scotia**: `Atlantic Coast Guard Rescue Seaplane` (`C-FNSA`) SAR floatplane at Peggy's Cove.
+  - **Prince Edward Island**: `Red Shore Island Commuter` (`C-FPEI`) coastal meadow monoplane.
+  - **Newfoundland & Labrador**: `Gros Morne Iceberg Patrol Amphibian` (`C-FNLA`) moored at outport stage.
+  - **Yukon**: `Klondike Glacier Ski-Plane` (`C-FYKT`) on heavy snow/ice skis for glacier landings.
+  - **Northwest Territories**: `Nahanni Canyon River Bush Floatplane` (`C-FNTN`) moored on the Mackenzie.
+  - **Nunavut**: `High-Arctic Polar Tundra Ski-Plane` (`C-FNUN`) arctic ski-plane beside the polar dome.
+  - **National Capital Region**: `Rideau Canal Diplomatic Amphibian` (`C-FNCR`) pearl-and-gold canal amphibian.
+- **Flight Dynamics & Avionics**:
+  - Interactive Boarding: Walk up to any regional aircraft and press `[E]` or `[P]` to pilot.
+  - Full 3D Flight Model: Variable throttle (`[W/S]`), aerodynamic lift equation, dynamic banking turns (`[A/D]`), and pitch control (`[ArrowUp/Down]`).
+  - Regional Avionics HUD: Real-time airspeed indicator (knots), MSL altimeter ladder (meters), heading compass tape, and vertical speed (VS m/s).
+  - Emergency Parachute: Disembarking while airborne above 15m automatically deploys a parachute to glide safely to the ground.
+
