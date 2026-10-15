@@ -334,4 +334,8 @@ To address monolithic file scaling in `game.html` (which exceeded 20,000 lines),
 - **`js/game_modules/calgary_metropolis.js`**: 3D procedural Calgary architecture (191m Calgary Tower, 236m The Bow with diagrid steel, 222m Telus Sky with RGB LED facade, 247m Brookfield Place East, Snøhetta Central Library with cedar archway, Scotia Place 2026 arena site with rotating tower cranes, and animated Siemens S200 C-Train loop).
 - **`js/game_modules/yyc_aviation.js`**: Calgary International Airport (YYC) Runway 17L/35R, 91m ATC tower, rotating primary radar dish, and 3 flyable aircraft (Apex F-99 Stealth Interceptor, Cyber Aeroliner, and VTOL Sky-Lander) with avionics HUD and landing gear toggle (`[G]`).
 
+### `game.html` Refactoring & Optimization (< 20,000 Lines)
+In addition to the standalone `game_module.html`, `game.html` was refactored to bring it back beneath the 20,000-line threshold:
+- **`js/game_metropolis_world.js`**: Extracted 3,996 lines of metropolis world architecture, shopping galleria, regional aviation, highway infrastructure, and recreation subsystems, reducing `game.html` from 23,297 lines down to 19,305 lines while maintaining 100% feature parity.
+
 
