@@ -453,6 +453,122 @@
     const eOrb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2), new THREE.MeshBasicMaterial({ color: 0xffaa00, wireframe: true }));
     eOrb.position.y = 2.6; energyGroup.add(eOrb);
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: BANFF ROCKIES & FOOTHILLS
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const logMat = new THREE.MeshStandardMaterial({ color: 0x3d2719, roughness: 0.88 });
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x241710, roughness: 0.9 });
+      const stoneMat = new THREE.MeshStandardMaterial({ color: 0x62666a, roughness: 0.92 });
+      const woodDeckMat = new THREE.MeshStandardMaterial({ color: 0x483222, roughness: 0.85 });
+      const moraineRockMat = new THREE.MeshStandardMaterial({ color: 0x767c82, roughness: 0.94 });
+      const pineMat = new THREE.MeshStandardMaterial({ color: 0x162c1b, roughness: 0.78 });
+
+      // 1. Alpine Ranger Log Outpost & Observation Platform (x: -48, z: -15)
+      const outpostGroup = new THREE.Group();
+      outpostGroup.position.set(-48, 0, -15);
+      regionalGroup.add(outpostGroup);
+
+      const cabinBase = new THREE.Mesh(new THREE.BoxGeometry(11, 5.5, 9), logMat);
+      cabinBase.position.y = 2.75;
+      cabinBase.castShadow = true; cabinBase.receiveShadow = true;
+      outpostGroup.add(cabinBase);
+
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(8.5, 3.4, 4), roofMat);
+      roof.position.y = 7.2;
+      roof.rotation.y = Math.PI / 4;
+      roof.scale.set(1.3, 1.0, 1.1);
+      roof.castShadow = true;
+      outpostGroup.add(roof);
+
+      const chimney = new THREE.Mesh(new THREE.BoxGeometry(2.0, 8.5, 2.2), stoneMat);
+      chimney.position.set(4.5, 4.25, 0);
+      chimney.castShadow = true;
+      outpostGroup.add(chimney);
+
+      // Elevated observation platform with handrail
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.35, 5.2), woodDeckMat);
+      deck.position.set(-5.5, 4.2, 0);
+      deck.castShadow = true;
+      outpostGroup.add(deck);
+
+      for (let sx of [-7.8, -3.2]) {
+        for (let sz of [-2.4, 2.4]) {
+          const stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 4.2, 8), logMat);
+          stilt.position.set(sx, 2.1, sz);
+          stilt.castShadow = true;
+          outpostGroup.add(stilt);
+        }
+      }
+
+      const deckLamp = new THREE.PointLight(0xffb044, 1.3, 26);
+      deckLamp.position.set(-5.5, 5.8, 0);
+      outpostGroup.add(deckLamp);
+
+      // 2. Trailhead Sign & Bench
+      const signPost = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.4, 0.3), logMat);
+      signPost.position.set(-34, 1.2, 5);
+      const signBoard = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 0.15), woodDeckMat);
+      signBoard.position.set(-34, 2.0, 5);
+      regionalGroup.add(signPost); regionalGroup.add(signBoard);
+
+      // 3. Rustic Split-Rail Fencing
+      for (let fz = 20; fz >= -50; fz -= 14) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1.6, 6), logMat);
+        post.position.set(-32, 0.8, fz);
+        post.castShadow = true;
+        regionalGroup.add(post);
+        const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 14, 6), logMat);
+        rail.rotation.x = Math.PI / 2;
+        rail.position.set(-32, 1.1, fz - 7);
+        rail.castShadow = true;
+        regionalGroup.add(rail);
+      }
+
+      // 4. Glacial Moraine Limestone Boulders
+      const moraineRocks = [
+        { x: 38, z: -10, s: 5.2 },
+        { x: 42, z: -45, s: 5.6 },
+        { x: -36, z: 15, s: 3.8 }
+      ];
+      moraineRocks.forEach(mr => {
+        const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(mr.s, 1), moraineRockMat);
+        rock.position.set(mr.x, mr.s * 0.52, mr.z);
+        rock.rotation.set(0.4, 0.9, 0.1);
+        rock.scale.set(1.25, 0.8, 1.1);
+        rock.castShadow = true; rock.receiveShadow = true;
+        regionalGroup.add(rock);
+      });
+
+      // 5. Alpine Lodgepole Pines & Foothills Conifers
+      const pineCoords = [
+        { x: -36, z: -10, h: 16, w: 4.5 },
+        { x: -55, z: 12, h: 18, w: 5.0 },
+        { x: 36, z: 12, h: 14, w: 4.2 },
+        { x: 48, z: -25, h: 19, w: 5.2 },
+        { x: -38, z: -55, h: 15, w: 4.6 }
+      ];
+      pineCoords.forEach(pc => {
+        const tree = new THREE.Group();
+        tree.position.set(pc.x, 0, pc.z);
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.45, pc.h * 0.45, 7), logMat);
+        trunk.position.y = pc.h * 0.225;
+        trunk.castShadow = true;
+        tree.add(trunk);
+        for (let t = 0; t < 3; t++) {
+          const tier = new THREE.Mesh(new THREE.ConeGeometry(pc.w * (1 - t * 0.2), pc.h * 0.35, 7), pineMat);
+          tier.position.y = pc.h * (0.38 + t * 0.22);
+          tier.castShadow = true;
+          tree.add(tier);
+        }
+        distantDecorGroup.add(tree);
+      });
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
@@ -462,7 +578,10 @@
       { x: -80, z: -120, r: 14 },
       { x: 0, z: -180, r: 5 },
       { x: -65, z: 20, r: 8 },
-      { x: -65, z: -40, r: 8 }
+      { x: -65, z: -40, r: 8 },
+      { x: -48, z: -15, r: 8 },
+      { x: 38, z: -10, r: 5 },
+      { x: 42, z: -45, r: 5 }
     ];
 
     function resolveCollisions(pos, radius) {

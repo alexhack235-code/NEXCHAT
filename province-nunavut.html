@@ -479,16 +479,111 @@
       }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
     }
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: HIGH-ARCTIC POLAR OUTPOST
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const domeOrangeMat = new THREE.MeshStandardMaterial({ color: 0xdd5511, metalness: 0.3, roughness: 0.5 });
+      const domeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xe0e6ea, metalness: 0.25, roughness: 0.45 });
+      const qamutikWoodMat = new THREE.MeshStandardMaterial({ color: 0x6a4e32, roughness: 0.9 });
+      const talusRockMat = new THREE.MeshStandardMaterial({ color: 0x5a5c60, roughness: 0.95 });
+      const steelMat = new THREE.MeshStandardMaterial({ color: 0x889098, metalness: 0.8, roughness: 0.3 });
+
+      // 1. High-Arctic Geodesic Research Polar Habitat (x: -48, z: -15)
+      const domeGroup = new THREE.Group();
+      domeGroup.position.set(-48, 0, -15);
+      regionalGroup.add(domeGroup);
+
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(6.5, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2), domeOrangeMat);
+      dome.castShadow = true; dome.receiveShadow = true;
+      domeGroup.add(dome);
+
+      // Airlock entry tunnel
+      const airlock = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.6, 4.5), domeWhiteMat);
+      airlock.position.set(0, 1.3, 5.0);
+      airlock.castShadow = true;
+      domeGroup.add(airlock);
+
+      const domeLight = new THREE.PointLight(0x00ffcc, 1.5, 26);
+      domeLight.position.set(0, 3.2, 5.2);
+      domeGroup.add(domeLight);
+
+      // 2. Arctic Wind Telemetry & Solar Mast (x: -38, z: 18)
+      const mastGroup = new THREE.Group();
+      mastGroup.position.set(-38, 0, 18);
+      regionalGroup.add(mastGroup);
+
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.26, 12, 8), steelMat);
+      mast.position.y = 6;
+      mast.castShadow = true;
+      mastGroup.add(mast);
+
+      const turbineRotor = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 0.08, 6), steelMat);
+      turbineRotor.rotation.x = Math.PI / 2;
+      turbineRotor.position.set(0, 12, 0.4);
+      mastGroup.add(turbineRotor);
+
+      const solarPanel = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.4, 0.1), steelMat);
+      solarPanel.position.set(0, 7.5, 0.6);
+      solarPanel.rotation.x = -0.4;
+      mastGroup.add(solarPanel);
+
+      // 3. Handcrafted Wooden Qamutik Traditional Sleds (x: -34, z: 2)
+      const qamutikGroup = new THREE.Group();
+      qamutikGroup.position.set(-34, 0, 2);
+      regionalGroup.add(qamutikGroup);
+
+      [-0.7, 0.7].forEach(rx => {
+        const runner = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.35, 6.2), qamutikWoodMat);
+        runner.position.set(rx, 0.18, 0);
+        qamutikGroup.add(runner);
+      });
+      for (let b = -2.5; b <= 2.5; b += 0.8) {
+        const slat = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.08, 0.3), qamutikWoodMat);
+        slat.position.set(0, 0.38, b);
+        qamutikGroup.add(slat);
+      }
+
+      // 4. Insulated Polar Supplies Container (x: 44, z: 12)
+      const container = new THREE.Mesh(new THREE.BoxGeometry(7, 3.2, 3.2), domeWhiteMat);
+      container.position.set(44, 1.6, 12);
+      container.castShadow = true; container.receiveShadow = true;
+      regionalGroup.add(container);
+
+      // 5. Auyuittuq Granite Talus Boulder Moraine
+      const talusRocks = [
+        { x: 38, z: -20, s: 5.6 },
+        { x: 42, z: -55, s: 5.8 },
+        { x: -36, z: -50, s: 4.8 }
+      ];
+      talusRocks.forEach(tr => {
+        const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(tr.s, 1), talusRockMat);
+        rock.position.set(tr.x, tr.s * 0.5, tr.z);
+        rock.scale.set(1.25, 0.8, 1.15);
+        rock.castShadow = true; rock.receiveShadow = true;
+        regionalGroup.add(rock);
+      });
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
-      { x: 0, z: -140, r: 18 },
-      { x: 120, z: -100, r: 30 },
+      { x: 0, z: -150, r: 24 },
       { x: 0, z: -180, r: 5 },
+      { x: 120, z: 40, r: 16 },
       { x: -65, z: 20, r: 8 },
-      { x: -65, z: -40, r: 8 }
+      { x: -65, z: -40, r: 8 },
+      { x: -48, z: -15, r: 8 },
+      { x: -38, z: 18, r: 4.5 },
+      { x: 44, z: 12, r: 5.5 },
+      { x: 38, z: -20, r: 6 },
+      { x: 42, z: -55, r: 6 }
     ];
 
     function resolveCollisions(pos, radius) {

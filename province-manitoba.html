@@ -473,17 +473,132 @@
       }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
     }
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: RED RIVER TRADING POST & BOREAL MARSH
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const logTimberMat = new THREE.MeshStandardMaterial({ color: 0x38281b, roughness: 0.9 });
+      const cedarShakeMat = new THREE.MeshStandardMaterial({ color: 0x241810, roughness: 0.88 });
+      const fieldstoneMat = new THREE.MeshStandardMaterial({ color: 0x545856, roughness: 0.92 });
+      const birchMat = new THREE.MeshStandardMaterial({ color: 0x7a5232, roughness: 0.85 });
+      const boardwalkMat = new THREE.MeshStandardMaterial({ color: 0x443426, roughness: 0.88 });
+      const reedMat = new THREE.MeshStandardMaterial({ color: 0x2d4022, roughness: 0.75 });
+      const spruceMat = new THREE.MeshStandardMaterial({ color: 0x142b1b, roughness: 0.78 });
+
+      // 1. Hudson's Bay Pioneer Log Trading Post (x: -46, z: -15)
+      const postGroup = new THREE.Group();
+      postGroup.position.set(-46, 0, -15);
+      regionalGroup.add(postGroup);
+
+      const mainCabin = new THREE.Mesh(new THREE.BoxGeometry(11, 5.2, 9), logTimberMat);
+      mainCabin.position.y = 2.6;
+      mainCabin.castShadow = true; mainCabin.receiveShadow = true;
+      postGroup.add(mainCabin);
+
+      const cabinRoof = new THREE.Mesh(new THREE.ConeGeometry(8.5, 3.2, 4), cedarShakeMat);
+      cabinRoof.position.y = 6.8;
+      cabinRoof.rotation.y = Math.PI / 4;
+      cabinRoof.scale.set(1.3, 1.0, 1.1);
+      cabinRoof.castShadow = true;
+      postGroup.add(cabinRoof);
+
+      const stoneChimney = new THREE.Mesh(new THREE.BoxGeometry(2.2, 7.8, 2.2), fieldstoneMat);
+      stoneChimney.position.set(4.4, 3.9, 0);
+      stoneChimney.castShadow = true;
+      postGroup.add(stoneChimney);
+
+      // Veranda porch
+      const porchRoof = new THREE.Mesh(new THREE.BoxGeometry(11, 0.3, 3.5), cedarShakeMat);
+      porchRoof.position.set(0, 3.8, 5.5);
+      postGroup.add(porchRoof);
+      for (let px of [-4.5, 0, 4.5]) {
+        const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 3.8, 6), logTimberMat);
+        pillar.position.set(px, 1.9, 7.0);
+        postGroup.add(pillar);
+      }
+
+      // Trading post lantern
+      const pLamp = new THREE.PointLight(0xffb244, 1.4, 26);
+      pLamp.position.set(0, 3.2, 6.0);
+      postGroup.add(pLamp);
+
+      // 2. Fur Pelts & Equipment Cache Shed (x: -48, z: 18)
+      const cacheShed = new THREE.Mesh(new THREE.BoxGeometry(6.5, 4.2, 6.5), logTimberMat);
+      cacheShed.position.set(-48, 2.1, 18);
+      cacheShed.castShadow = true; cacheShed.receiveShadow = true;
+      regionalGroup.add(cacheShed);
+      const cacheRoof = new THREE.Mesh(new THREE.ConeGeometry(5.2, 2.4, 4), cedarShakeMat);
+      cacheRoof.position.set(-48, 5.4, 18);
+      cacheRoof.rotation.y = Math.PI / 4;
+      cacheRoof.scale.set(1.2, 1.0, 1.2);
+      regionalGroup.add(cacheRoof);
+
+      // 3. Voyageur Canoe Rack (x: -36, z: -5)
+      const canoeRack = new THREE.Group();
+      canoeRack.position.set(-36, 0, -5);
+      regionalGroup.add(canoeRack);
+
+      for (let cx of [-2.4, 2.4]) {
+        const post = new THREE.Mesh(new THREE.BoxGeometry(0.2, 2.6, 0.2), logTimberMat);
+        post.position.set(cx, 1.3, 0);
+        canoeRack.add(post);
+        const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.15, 1.6), logTimberMat);
+        arm.position.set(cx, 1.8, 0);
+        canoeRack.add(arm);
+      }
+
+      const canoe = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.55, 6.2), birchMat);
+      canoe.position.set(0, 2.05, 0);
+      canoe.rotation.z = Math.PI; // upside down to dry
+      canoe.castShadow = true;
+      canoeRack.add(canoe);
+
+      // 4. Elevated Marsh Boardwalk & River Reeds (x: 36, z: 15 to -40)
+      const boardwalk = new THREE.Mesh(new THREE.BoxGeometry(4.0, 0.4, 55), boardwalkMat);
+      boardwalk.position.set(36, 0.6, -12);
+      boardwalk.castShadow = true; boardwalk.receiveShadow = true;
+      regionalGroup.add(boardwalk);
+
+      for (let bz = 12; bz >= -36; bz -= 12) {
+        for (let bx of [34.5, 37.5]) {
+          const stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1.4, 6), logTimberMat);
+          stilt.position.set(bx, 0.3, bz);
+          regionalGroup.add(stilt);
+        }
+      }
+
+      // 5. River Reed Marsh Patches
+      const reedClusters = [
+        { x: 32, z: 5 }, { x: 42, z: -15 }, { x: 33, z: -35 }
+      ];
+      reedClusters.forEach(rc => {
+        for (let r = 0; r < 7; r++) {
+          const reed = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 2.2, 5), reedMat);
+          reed.position.set(rc.x + (Math.random() - 0.5) * 3, 1.1, rc.z + (Math.random() - 0.5) * 3);
+          reed.rotation.z = (Math.random() - 0.5) * 0.25;
+          distantDecorGroup.add(reed);
+        }
+      });
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
-      { x: 0, z: -120, r: 15 },
-      { x: -110, z: -140, r: 24 },
-      { x: 100, z: -60, r: 16 },
+      { x: 0, z: -140, r: 24 },
       { x: 0, z: -180, r: 5 },
+      { x: 90, z: 80, r: 16 },
+      { x: -90, z: 80, r: 16 },
       { x: -65, z: 20, r: 8 },
-      { x: -65, z: -40, r: 8 }
+      { x: -65, z: -40, r: 8 },
+      { x: -46, z: -15, r: 8 },
+      { x: -48, z: 18, r: 6 },
+      { x: 36, z: -12, r: 5 }
     ];
 
     function resolveCollisions(pos, radius) {

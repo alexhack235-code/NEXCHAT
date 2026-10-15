@@ -470,6 +470,127 @@
     const loTower = new THREE.Mesh(new THREE.CylinderGeometry(3, 4, 16, 8), new THREE.MeshStandardMaterial({ color: 0x075438 }));
     loTower.position.y = 8; lookoutGroup.add(loTower);
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: PACIFIC CASCADIA
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const woodDarkMat = new THREE.MeshStandardMaterial({ color: 0x2b1d14, roughness: 0.9 });
+      const woodPlankMat = new THREE.MeshStandardMaterial({ color: 0x3d2d22, roughness: 0.85 });
+      const shingleMat = new THREE.MeshStandardMaterial({ color: 0x221812, roughness: 0.88 });
+      const redCedarWallMat = new THREE.MeshStandardMaterial({ color: 0x482a1c, roughness: 0.82 });
+      const mossRockMat = new THREE.MeshStandardMaterial({ color: 0x2c382b, roughness: 0.95 });
+      const needleMat = new THREE.MeshStandardMaterial({ color: 0x0e2b1b, roughness: 0.75 });
+      const ironMat = new THREE.MeshStandardMaterial({ color: 0x1a1e20, metalness: 0.85, roughness: 0.35 });
+
+      // 1. Coastal Timber Fishing Dock Pier (x: -38, z: -15)
+      const pierGroup = new THREE.Group();
+      pierGroup.position.set(-38, 0, -15);
+      regionalGroup.add(pierGroup);
+
+      const pierDeck = new THREE.Mesh(new THREE.BoxGeometry(10, 0.5, 24), woodPlankMat);
+      pierDeck.position.y = 1.0;
+      pierDeck.castShadow = true; pierDeck.receiveShadow = true;
+      pierGroup.add(pierDeck);
+
+      for (let px of [-4.2, 0, 4.2]) {
+        for (let pz of [-10, -5, 0, 5, 10]) {
+          const pile = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.42, 3.2, 8), woodDarkMat);
+          pile.position.set(px, 0.4, pz);
+          pile.castShadow = true;
+          pierGroup.add(pile);
+        }
+      }
+
+      [-8, 0, 8].forEach(bz => {
+        const bollard = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.24, 0.8, 8), ironMat);
+        bollard.position.set(4.5, 1.6, bz);
+        pierGroup.add(bollard);
+      });
+      const dockLamp = new THREE.PointLight(0xffaa44, 1.4, 28);
+      dockLamp.position.set(0, 3.5, 0);
+      pierGroup.add(dockLamp);
+
+      // 2. Harbourmaster Shack / Fish House (x: -46, z: -15)
+      const shackGroup = new THREE.Group();
+      shackGroup.position.set(-46, 0, -15);
+      regionalGroup.add(shackGroup);
+
+      const shackBase = new THREE.Mesh(new THREE.BoxGeometry(8, 5.2, 11), redCedarWallMat);
+      shackBase.position.y = 2.6;
+      shackBase.castShadow = true; shackBase.receiveShadow = true;
+      shackGroup.add(shackBase);
+
+      const roofMesh = new THREE.Mesh(new THREE.ConeGeometry(7.5, 3.2, 4), shingleMat);
+      roofMesh.position.y = 6.8;
+      roofMesh.rotation.y = Math.PI / 4;
+      roofMesh.scale.set(1.1, 1.0, 1.4);
+      roofMesh.castShadow = true;
+      shackGroup.add(roofMesh);
+
+      for (let i = 0; i < 4; i++) {
+        const crate = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.9, 1.4), woodDarkMat);
+        crate.position.set(3.5, 0.45 + (i > 1 ? 0.9 : 0), -3 + (i % 2) * 1.6);
+        crate.castShadow = true;
+        shackGroup.add(crate);
+      }
+
+      // 3. Shoreline Driftwood Logs & Coastal Mossy Boulders
+      const driftLogs = [
+        { x: 34, z: 12, ry: 0.3, len: 14, r: 0.65 },
+        { x: -32, z: 25, ry: -0.4, len: 12, r: 0.55 }
+      ];
+      driftLogs.forEach(dl => {
+        const log = new THREE.Mesh(new THREE.CylinderGeometry(dl.r * 0.85, dl.r, dl.len, 8), woodDarkMat);
+        log.rotation.z = Math.PI / 2;
+        log.rotation.y = dl.ry;
+        log.position.set(dl.x, 0.4, dl.z);
+        log.castShadow = true; log.receiveShadow = true;
+        regionalGroup.add(log);
+      });
+
+      const mossBoulders = [
+        { x: 34, z: -30, s: 4.8 },
+        { x: -32, z: -70, s: 5.2 },
+        { x: 42, z: 2, s: 3.6 }
+      ];
+      mossBoulders.forEach(mb => {
+        const boulder = new THREE.Mesh(new THREE.DodecahedronGeometry(mb.s, 1), mossRockMat);
+        boulder.position.set(mb.x, mb.s * 0.55, mb.z);
+        boulder.rotation.set(0.3, 0.7, 0.2);
+        boulder.scale.set(1.2, 0.85, 1.1);
+        boulder.castShadow = true; boulder.receiveShadow = true;
+        regionalGroup.add(boulder);
+      });
+
+      // 4. Pacific Red Cedar & Coastal Hemlock Trees
+      const treeCoords = [
+        { x: -35, z: 5, h: 14, w: 5 },
+        { x: -52, z: 8, h: 18, w: 6 },
+        { x: 36, z: -15, h: 15, w: 5.5 },
+        { x: 48, z: -40, h: 17, w: 6.2 },
+        { x: -36, z: -45, h: 13, w: 4.8 }
+      ];
+      treeCoords.forEach(tc => {
+        const tree = new THREE.Group();
+        tree.position.set(tc.x, 0, tc.z);
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.55, tc.h * 0.4, 7), woodDarkMat);
+        trunk.position.y = tc.h * 0.2;
+        trunk.castShadow = true;
+        tree.add(trunk);
+        for (let t = 0; t < 3; t++) {
+          const tier = new THREE.Mesh(new THREE.ConeGeometry(tc.w * (1 - t * 0.22), tc.h * 0.35, 7), needleMat);
+          tier.position.y = tc.h * (0.35 + t * 0.22);
+          tier.castShadow = true;
+          tree.add(tier);
+        }
+        distantDecorGroup.add(tree);
+      });
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
@@ -480,7 +601,11 @@
       { x: 0, z: -180, r: 5 },
       { x: 180, z: 80, r: 8 },
       { x: -55, z: -20, r: 8 },
-      { x: 55, z: -20, r: 8 }
+      { x: 55, z: -20, r: 8 },
+      { x: -46, z: -15, r: 7 },
+      { x: -38, z: -15, r: 6 },
+      { x: 34, z: -30, r: 4.5 },
+      { x: -32, z: -70, r: 4.5 }
     ];
 
     function resolveCollisions(pos, radius) {

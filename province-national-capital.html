@@ -556,19 +556,129 @@
       }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
     }
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: CONFEDERATION BOULEVARD & RIDEAU CANAL
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const sandstoneMat = new THREE.MeshStandardMaterial({ color: 0x8c8272, roughness: 0.9 });
+      const slateRoofMat = new THREE.MeshStandardMaterial({ color: 0x2b3036, roughness: 0.88 });
+      const bronzeMat = new THREE.MeshStandardMaterial({ color: 0x283e34, metalness: 0.85, roughness: 0.3 });
+      const granitePlinthMat = new THREE.MeshStandardMaterial({ color: 0x76787b, roughness: 0.92 });
+      const lampIronMat = new THREE.MeshStandardMaterial({ color: 0x15181a, metalness: 0.9, roughness: 0.3 });
+      const lampGlowMat = new THREE.MeshBasicMaterial({ color: 0xffcc77 });
+
+      // Maple crown foliage colors (autumn palette)
+      const mapleColors = [0xc43018, 0xd46816, 0xcca01c, 0xb82814];
+
+      // 1. Heritage Stone Rideau Canal Lockkeeper Cottage (x: -48, z: -15)
+      const cottageGroup = new THREE.Group();
+      cottageGroup.position.set(-48, 0, -15);
+      regionalGroup.add(cottageGroup);
+
+      const cottageBody = new THREE.Mesh(new THREE.BoxGeometry(10, 5.2, 8), sandstoneMat);
+      cottageBody.position.y = 2.6;
+      cottageBody.castShadow = true; cottageBody.receiveShadow = true;
+      cottageGroup.add(cottageBody);
+
+      const cottageRoof = new THREE.Mesh(new THREE.ConeGeometry(7.8, 3.2, 4), slateRoofMat);
+      cottageRoof.position.y = 6.8;
+      cottageRoof.rotation.y = Math.PI / 4;
+      cottageRoof.scale.set(1.25, 1.0, 1.1);
+      cottageRoof.castShadow = true;
+      cottageGroup.add(cottageRoof);
+
+      const stoneChimney = new THREE.Mesh(new THREE.BoxGeometry(1.8, 7.8, 1.8), sandstoneMat);
+      stoneChimney.position.set(0, 4.4, 0);
+      cottageGroup.add(stoneChimney);
+
+      const cottageLamp = new THREE.PointLight(0xffb244, 1.4, 24);
+      cottageLamp.position.set(0, 3.2, 4.6);
+      cottageGroup.add(cottageLamp);
+
+      // 2. Confederation Boulevard Parkland Sugar Maple Allée
+      const mapleCoords = [
+        { x: -26, z: 30, c: 0 }, { x: -26, z: 5, c: 1 }, { x: -26, z: -20, c: 2 }, { x: -26, z: -45, c: 3 },
+        { x: 26, z: 30, c: 1 }, { x: 26, z: 5, c: 0 }, { x: 26, z: -20, c: 3 }, { x: 26, z: -45, c: 2 }
+      ];
+      mapleCoords.forEach(mc => {
+        const tree = new THREE.Group();
+        tree.position.set(mc.x, 0, mc.z);
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.45, 4.2, 8), sandstoneMat);
+        trunk.position.y = 2.1;
+        trunk.castShadow = true;
+        tree.add(trunk);
+
+        const leafMat = new THREE.MeshStandardMaterial({ color: mapleColors[mc.c], roughness: 0.8 });
+        const crown = new THREE.Mesh(new THREE.SphereGeometry(3.6, 10, 8), leafMat);
+        crown.position.y = 6.2;
+        crown.scale.set(1.15, 1.3, 1.15);
+        crown.castShadow = true;
+        tree.add(crown);
+        distantDecorGroup.add(tree);
+      });
+
+      // 3. Classical Bronze Statuary Monument (x: 40, z: -15)
+      const monumentGroup = new THREE.Group();
+      monumentGroup.position.set(40, 0, -15);
+      regionalGroup.add(monumentGroup);
+
+      const plinth = new THREE.Mesh(new THREE.BoxGeometry(4.5, 1.8, 4.5), granitePlinthMat);
+      plinth.position.y = 0.9;
+      plinth.castShadow = true;
+      monumentGroup.add(plinth);
+
+      const statue = new THREE.Mesh(new THREE.BoxGeometry(1.6, 3.2, 2.2), bronzeMat);
+      statue.position.y = 3.4;
+      statue.castShadow = true;
+      monumentGroup.add(statue);
+
+      // 4. Cast-Iron Heritage 5-Globe Street Gas Lamps
+      const lampCoords = [
+        { x: -24, z: 20 }, { x: -24, z: -10 }, { x: -24, z: -40 },
+        { x: 24, z: 20 }, { x: 24, z: -10 }, { x: 24, z: -40 }
+      ];
+      lampCoords.forEach(lc => {
+        const lampPost = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.22, 5.0, 8), lampIronMat);
+        lampPost.position.set(lc.x, 2.5, lc.z);
+        lampPost.castShadow = true;
+        regionalGroup.add(lampPost);
+
+        const globe = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 8), lampGlowMat);
+        globe.position.set(lc.x, 5.2, lc.z);
+        regionalGroup.add(globe);
+
+        const light = new THREE.PointLight(0xffb74d, 1.4, 18);
+        light.position.set(lc.x, 5.2, lc.z);
+        regionalGroup.add(light);
+      });
+
+      // 5. Stone Balustrade Garden Wall (x: 36, z: 15)
+      const balustrade = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.2, 14), sandstoneMat);
+      balustrade.position.set(36, 0.6, 15);
+      balustrade.castShadow = true;
+      regionalGroup.add(balustrade);
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
-      { x: 0, z: -160, r: 30 },
-      { x: -50, z: -160, r: 22 },
-      { x: 50, z: -160, r: 22 },
-      { x: 0, z: -60, r: 11 },
-      { x: 0, z: -20, r: 5 },
+      { x: 0, z: -150, r: 24 },
+      { x: 0, z: -180, r: 5 },
+      { x: 120, z: -40, r: 16 },
+      { x: -120, z: -40, r: 16 },
       { x: -65, z: -20, r: 8 },
-      { x: -65, z: 60, r: 8 },
-      { x: -65, z: 140, r: 8 }
+      { x: 65, z: -20, r: 8 },
+      { x: -65, z: 20, r: 8 },
+      { x: 65, z: 20, r: 8 },
+      { x: -48, z: -15, r: 7.5 },
+      { x: 40, z: -15, r: 5 },
+      { x: 36, z: 15, r: 4.5 }
     ];
 
     function resolveCollisions(pos, radius) {

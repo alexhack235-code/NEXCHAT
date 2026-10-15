@@ -495,16 +495,129 @@
       }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
     }
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: PRAIRIE GRAIN ELEVATOR & FARMSTEAD
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const siloSteelMat = new THREE.MeshStandardMaterial({ color: 0x8e98a0, metalness: 0.65, roughness: 0.35 });
+      const siloRoofMat = new THREE.MeshStandardMaterial({ color: 0x768088, metalness: 0.7, roughness: 0.4 });
+      const barnRedMat = new THREE.MeshStandardMaterial({ color: 0x6e1b18, roughness: 0.85 });
+      const metalRoofMat = new THREE.MeshStandardMaterial({ color: 0x3d444c, metalness: 0.5, roughness: 0.5 });
+      const latticeMat = new THREE.MeshStandardMaterial({ color: 0x7c848c, metalness: 0.75, roughness: 0.3 });
+      const strawMat = new THREE.MeshStandardMaterial({ color: 0xb4964c, roughness: 0.95 });
+      const woodFenceMat = new THREE.MeshStandardMaterial({ color: 0x483626, roughness: 0.9 });
+
+      // 1. Twin Corrugated Galvanized Steel Grain Silos (x: -52, z: -25)
+      const siloGroup = new THREE.Group();
+      siloGroup.position.set(-52, 0, -25);
+      regionalGroup.add(siloGroup);
+
+      [-4.5, 4.5].forEach(sx => {
+        const silo = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 4.2, 17, 16), siloSteelMat);
+        silo.position.set(sx, 8.5, 0);
+        silo.castShadow = true; silo.receiveShadow = true;
+        siloGroup.add(silo);
+
+        const cap = new THREE.Mesh(new THREE.ConeGeometry(4.4, 3.2, 16), siloRoofMat);
+        cap.position.set(sx, 18.6, 0);
+        cap.castShadow = true;
+        siloGroup.add(cap);
+      });
+
+      // Bucket elevator leg tower & connecting catwalk
+      const elevatorLeg = new THREE.Mesh(new THREE.BoxGeometry(2.2, 22, 2.2), siloSteelMat);
+      elevatorLeg.position.set(0, 11, 4.8);
+      elevatorLeg.castShadow = true;
+      siloGroup.add(elevatorLeg);
+
+      const catwalk = new THREE.Mesh(new THREE.BoxGeometry(10, 0.4, 1.8), latticeMat);
+      catwalk.position.set(0, 17.2, 0);
+      siloGroup.add(catwalk);
+
+      // 2. Machine Shed / Tractor Barn (x: -56, z: 15)
+      const shedGroup = new THREE.Group();
+      shedGroup.position.set(-56, 0, 15);
+      regionalGroup.add(shedGroup);
+
+      const shedBody = new THREE.Mesh(new THREE.BoxGeometry(12, 5.8, 14), barnRedMat);
+      shedBody.position.y = 2.9;
+      shedBody.castShadow = true; shedBody.receiveShadow = true;
+      shedGroup.add(shedBody);
+
+      const shedRoof = new THREE.Mesh(new THREE.ConeGeometry(9.5, 3.2, 4), metalRoofMat);
+      shedRoof.position.y = 7.4;
+      shedRoof.rotation.y = Math.PI / 4;
+      shedRoof.scale.set(1.15, 1.0, 1.35);
+      shedRoof.castShadow = true;
+      shedGroup.add(shedRoof);
+
+      // 3. Vintage Aermotor Steel Windmill Pump (x: 38, z: -10)
+      const windGroup = new THREE.Group();
+      windGroup.position.set(38, 0, -10);
+      regionalGroup.add(windGroup);
+
+      const towerLattice = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 2.4, 16, 4), latticeMat);
+      towerLattice.position.y = 8;
+      towerLattice.castShadow = true;
+      windGroup.add(towerLattice);
+
+      const rotorWheel = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 0.12, 10), latticeMat);
+      rotorWheel.rotation.x = Math.PI / 2;
+      rotorWheel.position.set(0, 16, 0.6);
+      windGroup.add(rotorWheel);
+
+      const tailVane = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.9, 1.6), latticeMat);
+      tailVane.position.set(0, 16, -1.2);
+      windGroup.add(tailVane);
+
+      const stockTank = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 1.0, 12), siloSteelMat);
+      stockTank.position.y = 0.5;
+      stockTank.castShadow = true;
+      windGroup.add(stockTank);
+
+      // 4. Cattle Corral Fencing & Round Hay Bales
+      for (let cz = 12; cz >= -45; cz -= 14) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1.6, 6), woodFenceMat);
+        post.position.set(36, 0.8, cz);
+        regionalGroup.add(post);
+        const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 14, 6), woodFenceMat);
+        rail.rotation.x = Math.PI / 2;
+        rail.position.set(36, 1.1, cz - 7);
+        regionalGroup.add(rail);
+      }
+
+      const hayBales = [
+        { x: 46, z: 6, ry: 0.2 },
+        { x: 48, z: -30, ry: -0.4 },
+        { x: 50, z: -14, ry: 0.6 }
+      ];
+      hayBales.forEach(hb => {
+        const bale = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 2.2, 12), strawMat);
+        bale.rotation.z = Math.PI / 2;
+        bale.rotation.y = hb.ry;
+        bale.position.set(hb.x, 1.6, hb.z);
+        bale.castShadow = true; bale.receiveShadow = true;
+        regionalGroup.add(bale);
+      });
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
-      { x: 0, z: -140, r: 26 },
-      { x: 110, z: -60, r: 22 },
+      { x: 0, z: -140, r: 24 },
       { x: 0, z: -180, r: 5 },
+      { x: 120, z: -60, r: 12 },
       { x: -65, z: 20, r: 8 },
-      { x: -65, z: -40, r: 8 }
+      { x: -65, z: -40, r: 8 },
+      { x: -52, z: -25, r: 8.5 },
+      { x: -56, z: 15, r: 7.5 },
+      { x: 38, z: -10, r: 4.5 }
     ];
 
     function resolveCollisions(pos, radius) {

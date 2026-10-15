@@ -476,17 +476,112 @@
       }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
     }
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: RED SOIL FARMLAND & DUNES
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const barnRedMat = new THREE.MeshStandardMaterial({ color: 0x7a1816, roughness: 0.82 });
+      const farmhouseWhiteMat = new THREE.MeshStandardMaterial({ color: 0xe8ece8, roughness: 0.85 });
+      const redSandstoneMat = new THREE.MeshStandardMaterial({ color: 0x8a301a, roughness: 0.95 });
+      const siloSilverMat = new THREE.MeshStandardMaterial({ color: 0x98a2aa, metalness: 0.7, roughness: 0.35 });
+      const strawMat = new THREE.MeshStandardMaterial({ color: 0xb4964c, roughness: 0.95 });
+      const cedarFenceMat = new THREE.MeshStandardMaterial({ color: 0x483626, roughness: 0.9 });
+
+      // 1. Classic PEI Red Gambrel-Roof Dairy Barn & Silo (x: 52, z: -15)
+      const barnGroup = new THREE.Group();
+      barnGroup.position.set(52, 0, -15);
+      regionalGroup.add(barnGroup);
+
+      const barnBody = new THREE.Mesh(new THREE.BoxGeometry(13, 6.0, 16), barnRedMat);
+      barnBody.position.y = 3.0;
+      barnBody.castShadow = true; barnBody.receiveShadow = true;
+      barnGroup.add(barnBody);
+
+      const gambrelRoof = new THREE.Mesh(new THREE.ConeGeometry(10.5, 4.5, 4), barnRedMat);
+      gambrelRoof.position.y = 8.2;
+      gambrelRoof.rotation.y = Math.PI / 4;
+      gambrelRoof.scale.set(1.15, 1.0, 1.35);
+      gambrelRoof.castShadow = true;
+      barnGroup.add(gambrelRoof);
+
+      // Cylindrical silage silo
+      const silo = new THREE.Mesh(new THREE.CylinderGeometry(2.5, 2.5, 12, 14), siloSilverMat);
+      silo.position.set(-8.5, 6.0, 0);
+      silo.castShadow = true;
+      barnGroup.add(silo);
+
+      // 2. White Island Farmhouse (x: 56, z: 22)
+      const houseGroup = new THREE.Group();
+      houseGroup.position.set(56, 0, 22);
+      regionalGroup.add(houseGroup);
+
+      const houseBody = new THREE.Mesh(new THREE.BoxGeometry(10, 6.2, 8.5), farmhouseWhiteMat);
+      houseBody.position.y = 3.1;
+      houseBody.castShadow = true; houseBody.receiveShadow = true;
+      houseGroup.add(houseBody);
+
+      const houseRoof = new THREE.Mesh(new THREE.ConeGeometry(7.8, 3.2, 4), barnRedMat);
+      houseRoof.position.y = 7.8;
+      houseRoof.rotation.y = Math.PI / 4;
+      houseRoof.scale.set(1.25, 1.0, 1.1);
+      houseGroup.add(houseRoof);
+
+      // 3. Post-and-Wire Cedar Paddock Fence
+      for (let pz = 35; pz >= -60; pz -= 14) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1.6, 6), cedarFenceMat);
+        post.position.set(34, 0.8, pz);
+        regionalGroup.add(post);
+        const wire = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 14, 4), cedarFenceMat);
+        wire.rotation.x = Math.PI / 2;
+        wire.position.set(34, 1.1, pz - 7);
+        regionalGroup.add(wire);
+      }
+
+      // 4. Cylindrical Agricultural Hay Bales
+      const bales = [
+        { x: -38, z: 10 }, { x: -44, z: -20 }, { x: -40, z: -50 }
+      ];
+      bales.forEach(b => {
+        const bale = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 2.2, 12), strawMat);
+        bale.rotation.z = Math.PI / 2;
+        bale.position.set(b.x, 1.6, b.z);
+        bale.castShadow = true;
+        regionalGroup.add(bale);
+      });
+
+      // 5. Red Sandstone Soil Bluffs & Dunes
+      const redBluffs = [
+        { x: -36, z: -10, s: 5.0 },
+        { x: -46, z: 30, s: 5.2 }
+      ];
+      redBluffs.forEach(rb => {
+        const bluff = new THREE.Mesh(new THREE.DodecahedronGeometry(rb.s, 1), redSandstoneMat);
+        bluff.position.set(rb.x, rb.s * 0.48, rb.z);
+        bluff.scale.set(1.4, 0.7, 1.2);
+        bluff.castShadow = true; bluff.receiveShadow = true;
+        regionalGroup.add(bluff);
+      });
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
-      { x: 0, z: -120, r: 12 },
-      { x: 0, z: -240, r: 12 },
-      { x: 120, z: 60, r: 20 },
+      { x: 0, z: -150, r: 24 },
       { x: 0, z: -180, r: 5 },
-      { x: -65, z: 20, r: 8 },
-      { x: -65, z: -40, r: 8 }
+      { x: 120, z: 40, r: 16 },
+      { x: -120, z: 40, r: 16 },
+      { x: 65, z: 20, r: 8 },
+      { x: 65, z: -40, r: 8 },
+      { x: 52, z: -15, r: 8.5 },
+      { x: 56, z: 22, r: 7.5 },
+      { x: -36, z: -10, r: 5 },
+      { x: -46, z: 30, r: 5 }
     ];
 
     function resolveCollisions(pos, radius) {

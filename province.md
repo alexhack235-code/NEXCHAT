@@ -191,3 +191,48 @@ Code inspection finds that `game.html` contains the sun disc, gradient sky, PBR 
   - *Vehicles & Collisions*: Cyber cruiser with dynamic steering, wheel rotation, speedometer HUD, `WORLD_COLLIDERS`, and `resolveCollisions`.
   - *Quality Profiles*: `[Q]` key switching between LOW (DPR 1.0, shadows off, distant props culled), MED (DPR 1.25, 512 shadows), and HIGH (DPR 1.75, PCFSoft shadows).
   - *Observability*: All asset loaders log detailed error warnings on network or path failure while retaining procedural fallbacks. Verified 0 syntax errors across all 14 files.
+
+
+### Detailed Geographic Populated Scenery by Realm:
+- **British Columbia (`province-british-columbia.html`)**:
+  - *Settlement & Scenery*: Coastal timber fishing dock pier on heavy preservative-treated wood pilings (`x: -38, z: -15`), harbourmaster fish house shack with cedar-shake gabled roof and brass nautical lantern (`x: -46, z: -15`), stacked wooden lobster/crab traps and rope coils, Pacific cedar driftwood logs on shoreline (`x: 34, z: 12` & `x: -32, z: 25`), mossy granite boulders (`x: 34, z: -30` & `x: -32, z: -70`), and multi-tiered Pacific red cedar / Douglas fir stands.
+  - *Colliders*: 10 registered world colliders (pier, shack, coast boulders, and bridges).
+- **Alberta (`province-alberta.html`)**:
+  - *Settlement & Scenery*: Banff alpine ranger log outpost with observation deck and fieldstone chimney (`x: -48, z: -15`), rustic split-rail cedar zigzag fencing along road verge (`x: -32, z: 20` to `z: -50`), trailhead marker signpost and timber bench (`x: -34, z: 5`), angular Rocky Mountain moraine limestone boulders (`x: 38, z: -10` & `x: 42, z: -45`), and subalpine lodgepole pine stands framing the snow peaks.
+  - *Colliders*: 8 registered world colliders (outpost, moraine rock clusters, energy grid, town modules).
+- **Saskatchewan (`province-saskatchewan.html`)**:
+  - *Settlement & Scenery*: Prairie twin corrugated galvanized steel grain silos with conical roofs, vertical bucket elevator leg, and overhead catwalk (`x: -52, z: -25`), red timber farm machinery shed (`x: -56, z: 15`), vintage Aermotor steel lattice windmill water pump with 8-blade rotor, tail rudder, and round stock tank (`x: 38, z: -10`), post-and-rail cattle corral fencing, and round golden straw hay bales in pasture.
+  - *Colliders*: 8 registered world colliders (silos, machine shed, windmill tower, legislative dome).
+- **Manitoba (`province-manitoba.html`)**:
+  - *Settlement & Scenery*: Hudson's Bay pioneer log trading post with notched timber walls, stone hearth chimney, cedar shake roof, and covered veranda porch (`x: -46, z: -15`), fur pelts cache shed (`x: -48, z: 18`), timber voyageur canoe rack with birchbark/cedar canoes (`x: -36, z: -5`), elevated marsh boardwalk on timber stilts across river wetland (`x: 36, z: 15` to `z: -40`), and thick river cattail reed clusters.
+  - *Colliders*: 9 registered world colliders (trading post, pelts cache, boardwalk anchor, boreal outposts).
+- **Ontario (`province-ontario.html`)**:
+  - *Settlement & Scenery*: Bruce Peninsula stratified dolomite limestone escarpment bluffs flanking highway (`x: -42, z: 10`, `x: -48, z: -40`, `x: 52, z: -20`), Bruce Trail marker pavilion with fieldstone pillars and map kiosk (`x: 48, z: 15`), rustic limestone arched footbridge over shoreline creek inlet (`x: -40, z: -20`), and windswept Georgian Bay white pines with horizontal weather-shaped crowns.
+  - *Colliders*: 13 registered world colliders (trail pavilion, escarpment bluffs, footbridge, CN Tower, town modules).
+- **Quebec (`province-quebec.html`)**:
+  - *Settlement & Scenery*: Gaspésie & St. Lawrence timber fishing cottages with steep red-tin gabled roofs, dormer windows, and stone foundations (`x: -50, z: -10` & `x: -54, z: 25`), historic roadside wayside cross (*croix de chemin*) with carved heart emblem (`x: -34, z: 8`), timber cod drying flakes (*râteliers à morue*) on spruce poles (`x: 38, z: -15`), and Appalachian dark slate rock ledges (`x: 42, z: 15` & `x: 44, z: -45`).
+  - *Colliders*: 10 registered world colliders (cottages, cod drying racks, slate ledges, ramparts).
+- **New Brunswick (`province-new-brunswick.html`)**:
+  - *Settlement & Scenery*: Bay of Fundy tidal research cabin on heavy preservative-treated timber pilings with weather observation cupola (`x: -46, z: -15`), stacked wooden lobster traps and rope pallets (`x: -36, z: 5`), salt fish storage shed (`x: 48, z: 15`), and Hopewell-style conglomerate red-brown mudstone sea rocks with kelp bands (`x: 40, z: -35` & `x: -34, z: -45`).
+  - *Colliders*: 10 registered world colliders (research cabin, salt shed, mudstone rocks, Hopewell arches).
+- **Nova Scotia (`province-nova-scotia.html`)**:
+  - *Settlement & Scenery*: Atlantic lighthouse keeper's cottage with white cedar shingles, red trim, red tin roof, and brick chimney (`x: -48, z: -15`), timber net-drying shed with open loft and hanging nets (`x: -52, z: 20`), wooden herring salt barrels and rope coils (`x: -36, z: 2`), copper foghorn on timber pedestal (`x: 34, z: 0`), and Peggy's Cove smooth rounded pinkish-grey granite whaleback rocks (`x: 36, z: -20`, `x: 44, z: 10`, `x: -34, z: -50`).
+  - *Colliders*: 11 registered world colliders (keeper cottage, net shed, granite headlands, Citadel).
+- **Prince Edward Island (`province-prince-edward-island.html`)**:
+  - *Settlement & Scenery*: Classic PEI double-pitched red gambrel-roof dairy barn with arched hayloft door and silver silage silo (`x: 52, z: -15`), two-storey white island farmhouse with green shutters and wrap-around porch (`x: 56, z: 22`), cedar post-and-wire paddock fencing bordering roadway, cylindrical golden straw hay bales in green pasture, and vibrant red sandstone soil bluffs with coastal marram dune grass (`x: -36, z: -10` & `x: -46, z: 30`).
+  - *Colliders*: 10 registered world colliders (gambrel barn, farmhouse, red bluffs, Confederation bridge).
+- **Newfoundland and Labrador (`province-newfoundland.html`)**:
+  - *Settlement & Scenery*: Traditional coastal outport fishing stage built on wooden stilts over tidal rocks with exterior wharf head and splitting table (`x: -44, z: -15`), red-ochre twine store / gear loft (`x: -50, z: 18`), hauled Newfoundland wooden dory workboats on timber slipway skids (`x: -35, z: 2` & `x: 38, z: -5`), and Gros Morne tableland rusted orange-brown peridotite/serpentine rock boulders (`x: 42, z: -30` & `x: 46, z: 15`).
+  - *Colliders*: 10 registered world colliders (fishing stage, twine store, tableland rocks, Marconi tower).
+- **Yukon (`province-yukon.html`)**:
+  - *Settlement & Scenery*: Klondike Gold Rush boomtown mercantile / saloon with false-front ornamental parapet facade, boardwalk porch, and hitching rail (`x: -46, z: -15`), prospector round-log cabin with sod roof and stovepipe (`x: -52, z: 20`), elevated timber sluice box flume trestle carrying gold washwater (`x: 36, z: 10` to `z: -40`), and vintage riveted cast-iron steam mining boiler with tall exhaust smokestack (`x: 46, z: -15`).
+  - *Colliders*: 10 registered world colliders (mercantile, prospector cabin, mining boiler, sluice trestle, gold dredge).
+- **Northwest Territories (`province-northwest-territories.html`)**:
+  - *Settlement & Scenery*: Subarctic Mackenzie River freight depot warehouse with loading dock platform and hoist (`x: -48, z: -15`), prospector heavy canvas wall-tent on elevated wooden deck frame (`x: -40, z: 22`), traditional elevated northern food cache on 4 tall peeled log posts with tree-tin bands (`x: -36, z: -40`), arctic steel fuel drum cache on pallets (`x: 38, z: 5`), and Nahanni canyon limestone river rocks (`x: 42, z: -25` & `x: 46, z: 20`).
+  - *Colliders*: 9 registered world colliders (freight warehouse, canvas tent, food cache, fuel drums, canyon rocks, diamond mine).
+- **Nunavut (`province-nunavut.html`)**:
+  - *Settlement & Scenery*: High-Arctic geodesic research polar habitat in insulated orange and white thermal panels with cylindrical airlock tunnel (`x: -48, z: -15`), meteorological wind telemetry mast with turbine generator and solar array (`x: -38, z: 18`), handcrafted wooden qamutik traditional Inuit sleds resting on snowbanks (`x: -34, z: 2`), insulated polar supplies container (`x: 44, z: 12`), and Auyuittuq granite talus boulders with tundra lichens framing the ceremonial stone Inukshuk (`x: 38, z: -20` & `x: 42, z: -55`).
+  - *Colliders*: 10 registered world colliders (geodesic dome, telemetry mast, supplies module, talus boulders, Inukshuk).
+- **National Capital Region (`province-national-capital.html`)**:
+  - *Settlement & Scenery*: Heritage stone Rideau Canal lockkeeper cottage with slate roof and chimney (`x: -48, z: -15`), Confederation Boulevard formal parkland allée of vibrant autumn sugar maples in radiant red, fiery orange, and golden amber foliage crowns (`x: -26` & `x: 26`), classical bronze statuary monument on tiered granite pedestal with memorial plaque (`x: 40, z: -15`), cast-iron Victorian 5-globe gas street lamps with warm amber glow (`x: -24` & `x: 24`), and stone balustrade garden wall (`x: 36, z: 15`).
+  - *Colliders*: 11 registered world colliders (lockkeeper cottage, bronze monument, balustrade wall, Parliament Peace Tower).

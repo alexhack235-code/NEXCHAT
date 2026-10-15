@@ -470,17 +470,120 @@
       }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
     }
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: GASPÉSIE & ST. LAWRENCE
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const cottageWallMat = new THREE.MeshStandardMaterial({ color: 0xd8ded8, roughness: 0.85 });
+      const redTinRoofMat = new THREE.MeshStandardMaterial({ color: 0x8a1c18, metalness: 0.38, roughness: 0.5 });
+      const stoneFoundMat = new THREE.MeshStandardMaterial({ color: 0x5a5854, roughness: 0.94 });
+      const timberDarkMat = new THREE.MeshStandardMaterial({ color: 0x36261a, roughness: 0.9 });
+      const slateRockMat = new THREE.MeshStandardMaterial({ color: 0x343940, roughness: 0.92 });
+      const whiteCrossMat = new THREE.MeshStandardMaterial({ color: 0xe2e2de, roughness: 0.8 });
+
+      // 1. Traditional French-Canadian Timber Cottages with Steep Red-Tin Roofs
+      const cottages = [
+        { x: -50, z: -10, ry: 0.1 },
+        { x: -54, z: 25, ry: -0.2 }
+      ];
+      cottages.forEach(c => {
+        const cGroup = new THREE.Group();
+        cGroup.position.set(c.x, 0, c.z);
+        cGroup.rotation.y = c.ry;
+        regionalGroup.add(cGroup);
+
+        const found = new THREE.Mesh(new THREE.BoxGeometry(10.5, 0.8, 8.5), stoneFoundMat);
+        found.position.y = 0.4;
+        cGroup.add(found);
+
+        const walls = new THREE.Mesh(new THREE.BoxGeometry(10, 4.6, 8), cottageWallMat);
+        walls.position.y = 3.1;
+        walls.castShadow = true; walls.receiveShadow = true;
+        cGroup.add(walls);
+
+        const roof = new THREE.Mesh(new THREE.ConeGeometry(7.8, 4.2, 4), redTinRoofMat);
+        roof.position.y = 7.4;
+        roof.rotation.y = Math.PI / 4;
+        roof.scale.set(1.25, 1.0, 1.1);
+        roof.castShadow = true;
+        cGroup.add(roof);
+
+        // Dormer window
+        const dormer = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.6, 1.6), redTinRoofMat);
+        dormer.position.set(0, 6.2, 3.2);
+        cGroup.add(dormer);
+      });
+
+      // 2. Historic Roadside Wayside Cross (Croix de Chemin at x: -34, z: 8)
+      const crossGroup = new THREE.Group();
+      crossGroup.position.set(-34, 0, 8);
+      regionalGroup.add(crossGroup);
+
+      const crossBase = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 1.2), stoneFoundMat);
+      crossBase.position.y = 0.3;
+      crossGroup.add(crossBase);
+
+      const crossShaft = new THREE.Mesh(new THREE.BoxGeometry(0.35, 6.0, 0.35), whiteCrossMat);
+      crossShaft.position.y = 3.3;
+      crossShaft.castShadow = true;
+      crossGroup.add(crossShaft);
+
+      const crossArm = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.35, 0.35), whiteCrossMat);
+      crossArm.position.y = 4.8;
+      crossArm.castShadow = true;
+      crossGroup.add(crossArm);
+
+      // 3. Cod Drying Flakes (Râteliers à morue at x: 38, z: -15)
+      const flakeGroup = new THREE.Group();
+      flakeGroup.position.set(38, 0, -15);
+      regionalGroup.add(flakeGroup);
+
+      const flakeDeck = new THREE.Mesh(new THREE.BoxGeometry(12, 0.2, 5.0), timberDarkMat);
+      flakeDeck.position.y = 1.4;
+      flakeDeck.castShadow = true;
+      flakeGroup.add(flakeDeck);
+
+      for (let fx of [-5, 0, 5]) {
+        for (let fz of [-2, 2]) {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.18, 1.5, 6), timberDarkMat);
+          post.position.set(fx, 0.75, fz);
+          flakeGroup.add(post);
+        }
+      }
+
+      // 4. St. Lawrence Appalachian Slate Rock Ledges
+      const slateRocks = [
+        { x: 42, z: 15, s: 4.8 },
+        { x: 44, z: -45, s: 5.4 }
+      ];
+      slateRocks.forEach(sr => {
+        const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(sr.s, 1), slateRockMat);
+        rock.position.set(sr.x, sr.s * 0.48, sr.z);
+        rock.scale.set(1.4, 0.7, 1.1);
+        rock.castShadow = true; rock.receiveShadow = true;
+        regionalGroup.add(rock);
+      });
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
-      { x: 0, z: -140, r: 32 },
-      { x: -45, z: -140, r: 12 },
-      { x: 45, z: -140, r: 12 },
-      { x: 0, z: -190, r: 5 },
+      { x: 0, z: -160, r: 28 },
+      { x: 0, z: -180, r: 5 },
+      { x: 120, z: -40, r: 14 },
+      { x: -120, z: -40, r: 14 },
       { x: -65, z: 20, r: 8 },
-      { x: -65, z: -40, r: 8 }
+      { x: -65, z: -40, r: 8 },
+      { x: -50, z: -10, r: 7.5 },
+      { x: -54, z: 25, r: 7.5 },
+      { x: 38, z: -15, r: 6 },
+      { x: 44, z: -45, r: 6 }
     ];
 
     function resolveCollisions(pos, radius) {

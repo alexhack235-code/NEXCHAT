@@ -473,18 +473,103 @@
       }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
     }
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: COASTAL OUTPORT STAGE & TABLELANDS
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const ochreRedMat = new THREE.MeshStandardMaterial({ color: 0x6e221c, roughness: 0.85 });
+      const weatheredStiltMat = new THREE.MeshStandardMaterial({ color: 0x2e2016, roughness: 0.92 });
+      const tablelandRockMat = new THREE.MeshStandardMaterial({ color: 0x784422, roughness: 0.95 });
+      const doryTimberMat = new THREE.MeshStandardMaterial({ color: 0x3d2c1e, roughness: 0.88 });
+
+      // 1. Traditional Outport Fishing Stage on Shore Stilts (x: -44, z: -15)
+      const stageGroup = new THREE.Group();
+      stageGroup.position.set(-44, 0, -15);
+      regionalGroup.add(stageGroup);
+
+      const stageBody = new THREE.Mesh(new THREE.BoxGeometry(10, 4.8, 8.5), ochreRedMat);
+      stageBody.position.y = 3.6;
+      stageBody.castShadow = true; stageBody.receiveShadow = true;
+      stageGroup.add(stageBody);
+
+      const stageRoof = new THREE.Mesh(new THREE.ConeGeometry(7.6, 2.8, 4), weatheredStiltMat);
+      stageRoof.position.y = 7.4;
+      stageRoof.rotation.y = Math.PI / 4;
+      stageRoof.scale.set(1.3, 1.0, 1.1);
+      stageRoof.castShadow = true;
+      stageGroup.add(stageRoof);
+
+      // Shore timber stilts in tidal rocks
+      for (let sx of [-4.2, 0, 4.2]) {
+        for (let sz of [-3.2, 3.2]) {
+          const stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.36, 2.6, 6), weatheredStiltMat);
+          stilt.position.set(sx, 1.3, sz);
+          stilt.castShadow = true;
+          stageGroup.add(stilt);
+        }
+      }
+
+      // Exterior wharf stage head with fish-splitting table
+      const wharfHead = new THREE.Mesh(new THREE.BoxGeometry(6.0, 0.4, 5.0), weatheredStiltMat);
+      wharfHead.position.set(0, 1.4, 6.5);
+      stageGroup.add(wharfHead);
+
+      const lamp = new THREE.PointLight(0xffaa44, 1.4, 24);
+      lamp.position.set(0, 3.2, 5.0);
+      stageGroup.add(lamp);
+
+      // 2. Red-Ochre Gear Store / Twine Loft (x: -50, z: 18)
+      const storeShed = new THREE.Mesh(new THREE.BoxGeometry(8, 5.2, 7.5), ochreRedMat);
+      storeShed.position.set(-50, 2.6, 18);
+      storeShed.castShadow = true;
+      regionalGroup.add(storeShed);
+
+      // 3. Hauled Newfoundland Dory Workboats on Slipways
+      const dories = [
+        { x: -35, z: 2, ry: 0.2 },
+        { x: 38, z: -5, ry: -0.3 }
+      ];
+      dories.forEach(d => {
+        const boat = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.7, 6.2), doryTimberMat);
+        boat.position.set(d.x, 0.45, d.z);
+        boat.rotation.y = d.ry;
+        boat.castShadow = true;
+        regionalGroup.add(boat);
+      });
+
+      // 4. Gros Morne Tableland Rust-Orange Peridotite Rocks
+      const tableRocks = [
+        { x: 42, z: -30, s: 5.8 },
+        { x: 46, z: 15, s: 5.4 }
+      ];
+      tableRocks.forEach(tr => {
+        const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(tr.s, 1), tablelandRockMat);
+        rock.position.set(tr.x, tr.s * 0.52, tr.z);
+        rock.scale.set(1.25, 0.8, 1.15);
+        rock.castShadow = true; rock.receiveShadow = true;
+        regionalGroup.add(rock);
+      });
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
-      { x: 0, z: -140, r: 20 },
-      { x: -30, z: -140, r: 8 },
-      { x: 30, z: -140, r: 8 },
-      { x: 120, z: -80, r: 28 },
+      { x: 0, z: -150, r: 24 },
       { x: 0, z: -180, r: 5 },
+      { x: 120, z: -40, r: 16 },
+      { x: -120, z: -40, r: 16 },
       { x: -65, z: 20, r: 8 },
-      { x: -65, z: -40, r: 8 }
+      { x: -65, z: -40, r: 8 },
+      { x: -44, z: -15, r: 7.5 },
+      { x: -50, z: 18, r: 6.5 },
+      { x: 42, z: -30, r: 6 },
+      { x: 46, z: 15, r: 6 }
     ];
 
     function resolveCollisions(pos, radius) {

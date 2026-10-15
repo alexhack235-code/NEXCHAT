@@ -454,16 +454,121 @@
       }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
     }
 
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: KLONDIKE GOLD RUSH BOOMTOWN
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const frontierWoodMat = new THREE.MeshStandardMaterial({ color: 0x483222, roughness: 0.88 });
+      const logSodMat = new THREE.MeshStandardMaterial({ color: 0x322216, roughness: 0.92 });
+      const rustIronMat = new THREE.MeshStandardMaterial({ color: 0x382820, metalness: 0.8, roughness: 0.4 });
+      const timberFlumeMat = new THREE.MeshStandardMaterial({ color: 0x3e2c1c, roughness: 0.86 });
+
+      // 1. Klondike Gold-Rush Saloon / Mercantile with False-Front Parapet (x: -46, z: -15)
+      const saloonGroup = new THREE.Group();
+      saloonGroup.position.set(-46, 0, -15);
+      regionalGroup.add(saloonGroup);
+
+      const mainBuilding = new THREE.Mesh(new THREE.BoxGeometry(11, 6.2, 9), frontierWoodMat);
+      mainBuilding.position.y = 3.1;
+      mainBuilding.castShadow = true; mainBuilding.receiveShadow = true;
+      saloonGroup.add(mainBuilding);
+
+      // Iconic boomtown false-front parapet wall extending above roof
+      const falseFront = new THREE.Mesh(new THREE.BoxGeometry(11.2, 2.8, 0.4), frontierWoodMat);
+      falseFront.position.set(0, 7.6, 4.5);
+      falseFront.castShadow = true;
+      saloonGroup.add(falseFront);
+
+      // Wooden boardwalk porch with square timber columns
+      const porchFloor = new THREE.Mesh(new THREE.BoxGeometry(11.5, 0.4, 3.2), frontierWoodMat);
+      porchFloor.position.set(0, 0.2, 5.8);
+      saloonGroup.add(porchFloor);
+
+      for (let px of [-5.0, 0, 5.0]) {
+        const col = new THREE.Mesh(new THREE.BoxGeometry(0.24, 3.8, 0.24), frontierWoodMat);
+        col.position.set(px, 2.1, 7.2);
+        saloonGroup.add(col);
+      }
+
+      const saloonLamp = new THREE.PointLight(0xffb244, 1.4, 26);
+      saloonLamp.position.set(0, 3.4, 6.2);
+      saloonGroup.add(saloonLamp);
+
+      // 2. Prospector Round-Log Cabin with Sod Roof (x: -52, z: 20)
+      const cabinGroup = new THREE.Group();
+      cabinGroup.position.set(-52, 0, 20);
+      regionalGroup.add(cabinGroup);
+
+      const logBody = new THREE.Mesh(new THREE.BoxGeometry(8, 4.5, 7), logSodMat);
+      logBody.position.y = 2.25;
+      logBody.castShadow = true; logBody.receiveShadow = true;
+      cabinGroup.add(logBody);
+
+      const sodRoof = new THREE.Mesh(new THREE.BoxGeometry(8.6, 0.6, 7.6), logSodMat);
+      sodRoof.position.y = 4.8;
+      cabinGroup.add(sodRoof);
+
+      // Galvanized stovepipe
+      const stovepipe = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.2, 8), rustIronMat);
+      stovepipe.position.set(2.4, 5.8, 1.5);
+      cabinGroup.add(stovepipe);
+
+      // 3. Elevated Timber Sluice Box Flume Trestle (x: 36, z: 10 to -40)
+      const flumeGroup = new THREE.Group();
+      flumeGroup.position.set(36, 0, -15);
+      regionalGroup.add(flumeGroup);
+
+      const flumeTrough = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 50), timberFlumeMat);
+      flumeTrough.position.y = 3.6;
+      flumeTrough.rotation.x = -0.04; // slight washwater incline
+      flumeTrough.castShadow = true;
+      flumeGroup.add(flumeTrough);
+
+      for (let fz = -20; fz <= 20; fz += 10) {
+        for (let fx of [-0.6, 0.6]) {
+          const trestleLeg = new THREE.Mesh(new THREE.BoxGeometry(0.18, 3.6, 0.18), timberFlumeMat);
+          trestleLeg.position.set(fx, 1.8, fz);
+          trestleLeg.castShadow = true;
+          flumeGroup.add(trestleLeg);
+        }
+      }
+
+      // 4. Vintage Riveted Cast-Iron Steam Mining Boiler (x: 46, z: -15)
+      const boilerGroup = new THREE.Group();
+      boilerGroup.position.set(46, 0, -15);
+      regionalGroup.add(boilerGroup);
+
+      const boilerTank = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 4.8, 12), rustIronMat);
+      boilerTank.rotation.x = Math.PI / 2;
+      boilerTank.position.y = 1.8;
+      boilerTank.castShadow = true;
+      boilerGroup.add(boilerTank);
+
+      const smokestack = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.38, 5.5, 8), rustIronMat);
+      smokestack.position.set(0, 5.2, -1.6);
+      smokestack.castShadow = true;
+      boilerGroup.add(smokestack);
+    })();
+
+
     
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
     const WORLD_COLLIDERS = [
-      { x: 0, z: -140, r: 26 },
-      { x: 0, z: -115, r: 14 },
+      { x: 0, z: -150, r: 24 },
       { x: 0, z: -180, r: 5 },
+      { x: 120, z: -40, r: 16 },
+      { x: -120, z: -40, r: 16 },
       { x: -65, z: 20, r: 8 },
-      { x: -65, z: -40, r: 8 }
+      { x: -65, z: -40, r: 8 },
+      { x: -46, z: -15, r: 8 },
+      { x: -52, z: 20, r: 6.5 },
+      { x: 46, z: -15, r: 5.5 },
+      { x: 36, z: -15, r: 5 }
     ];
 
     function resolveCollisions(pos, radius) {
