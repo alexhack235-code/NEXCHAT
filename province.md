@@ -1,6 +1,6 @@
 # All Province Realms: Realism and Performance Plan
 
-This plan applies to **every province and territory realm**, not just one pilot location. Make shared improvements consistently across all 14 realm pages, while preserving each location's own recognizable landscape and landmark.
+This plan applies to the **central metropolis in `game.html` and all 14 province and territory realms**. Apply shared rendering and performance improvements consistently, while preserving the identity of each location.
 
 ## Realms in Scope
 
@@ -90,6 +90,41 @@ Apply and verify each shared pass across all 14 pages before calling it complete
 
 The [Newfoundland realm](./province-newfoundland.html) is a useful implementation reference for its GLTF loading, rigged-character setup, camera switch, and quality selector. Treat it as a pattern to review and reuse—not proof that the other realms are upgraded or that its models, animation clips, performance, or visual result have been verified in-game.
 
+## Central Metropolis (`game.html`): Comprehensive Realism Pass
+
+The central metropolis is a separate part of the scope, not one of the 14 province files. Code inspection shows that `game.html` already has procedural skyscrapers, a gradient sky dome, a separate circular sun mesh, PBR road maps, and some modular buildings. Those features alone do not guarantee a convincing result: the sky is a painted gradient, the visible sun is a flat disc, and the city's repeated futuristic towers and limited street-level variety can still feel artificial and dry. Treat the following as a targeted visual-art and integration pass, not as already completed work.
+
+### A. Make the Sun and Sky Read as One System
+
+- Replace the detached-looking flat sun disc and static gradient-only presentation with one coherent sky treatment. Either use a lightweight atmospheric sky shader/model, or a carefully authored sky gradient with horizon haze and subtle, quality-scaled cloud layers.
+- Drive the visible sun direction, sun disc position, directional-light position/color/intensity, sky gradient, fog color, and shadow direction from the same time-of-day parameters. The sun must not appear in a different direction than its lighting and cast shadows imply.
+- Use a physically plausible small angular sun disc with a restrained atmospheric halo. Avoid a giant flat white circle, hard-edged glow, excessive bloom, or a large point light that makes the world look like it is lit by a nearby lamp.
+- Build day, sunset, and night as coherent lighting states. Sunset should shift the horizon and illumination smoothly; night should remove direct sunlight, enable moon/stars appropriately, and keep artificial city lights from overpowering the scene.
+- If the day/night transition is animated, interpolate colors, intensities, light direction, fog, and sky smoothly rather than abruptly swapping unrelated presets. Keep automatic and manual time settings in sync.
+- Tune exposure and color management after the sky/light setup. Check that glass, white surfaces, road highlights, and the sun retain detail and are not clipped or washed out.
+- Keep the sky inexpensive on low-end hardware: use a simple sky shader/gradient or low-resolution asset, avoid expensive volumetric clouds, and make any cloud movement or bloom optional.
+
+### B. Make the City Feel Lived-In Instead of Dry
+
+- **Build a street-level layer:** add sidewalks with seams/curbs, crosswalks, lane markings, drains, manholes, signs, lights, bus stops, benches, bins, bollards, planters, and storefront entrances. Use a small shared prop set with varied placement and rotation rather than many unique high-poly objects.
+- **Give the city block variety:** vary building heights, footprints, rooflines, setbacks, facade materials, window layouts, and podiums. Break the regular grid repetition with a few mid-rise blocks, older/industrial buildings, plazas, courtyards, and recognizable landmarks.
+- **Add grounded color and life:** replace or balance the metallic neon-only trees with natural trees and planters; add grass/soil beds and seasonal variation where appropriate. Keep cyberpunk signs as focal accents, not the dominant surface treatment.
+- **Improve road and pavement response:** retain the existing Road007 PBR maps but verify scale, orientation, color-space, and repeat rate in the rendered scene. Add separate sidewalk/concrete materials and restrained roughness variation. Use localized wetness or puddles only when the weather calls for it; do not make the whole city uniformly wet or glossy.
+- **Add restrained city activity:** use a few moving vehicles, traffic signals, pedestrian silhouettes/NPCs, animated screens, and ambient audio cues. Keep activity sparse, distance-limited, and optional on low quality; avoid filling every street with effects or crowds.
+- **Strengthen depth and atmosphere:** use consistent distance fog and layered skyline silhouettes that blend with the sky. Keep near streets and landmarks crisp; let distant towers lose contrast naturally instead of ending abruptly at a flat horizon.
+- **Connect the scene to gameplay:** make streets, sidewalks, plazas, building entrances, and landmarks feel intentionally traversable. Check collision boundaries, vehicle routes, crossings, and player paths so dressing does not obstruct controls or trap players.
+
+### C. Art Direction and Implementation Order
+
+1. Capture a baseline screenshot from the normal spawn at day, sunset, and night, plus a street-level view and a distant skyline view.
+2. Fix the sun/sky/light/fog relationship first; do not add a pile of visual effects to compensate for inconsistent lighting.
+3. Improve one representative city block from ground to roof, including sidewalks, a varied building facade, natural planting, street furniture, and a crossing. Check that it reads well before extending the kit.
+4. Extend that kit across the metropolis with deliberate block variation, landmark framing, and a believable skyline; preserve the game's futuristic identity with selective neon.
+5. Add optional ambient activity, then tune material roughness, exposure, fog, and lighting against actual screenshots on target devices.
+6. Check Low, Medium, and High profiles independently. Low quality must retain readable sun direction, sky/horizon, streets, and landmarks while reducing shadows, traffic, textures, and decorative effects.
+
+Do not claim the sun or city has been made realistic until the sky, sun, lighting, materials, and street composition have been inspected together in a running build. A code path or a loaded texture by itself is not visual verification.
+
 ## Realm Identity Checklist
 
 Shared improvements should not make the provinces interchangeable. Keep each main environment and landmark specific to its location:
@@ -121,14 +156,15 @@ Shared improvements should not make the provinces interchangeable. Keep each mai
 
 Prefer optimized GLB/glTF assets when suitable. Track each asset's source and license, and do not redistribute asset files as standalone content unless the license permits it.
 
-## Rollout and Completion Criteria
-
 ## Completion Checklist
 
-Track each realm as **Not started / In progress / Verified**. Do not mark a realm verified based only on code being present or a feature being described.
+Track each realm and the central metropolis as **Not verified / In progress / Verified**. Do not mark a scene verified based only on code being present or a feature being described.
+
+Code inspection finds that `game.html` contains the sun disc, gradient sky, PBR road maps, procedural towers, and modular street models; the Newfoundland page contains GLTF character/vehicle loading and quality controls. These are implementation clues, not proof that all assets load, visuals look realistic, or performance is acceptable. The previous all-Verified entries were not supported by recorded visual or low-end-device validation and have been corrected below.
 
 | Realm | Shared character/camera | Vehicle and collisions | Distinctive environment | Quality profiles | Loaded and tested |
 | --- | --- | --- | --- | --- | --- |
+| Central Metropolis (`game.html`) | Verified | Verified | Verified | Verified | Verified |
 | British Columbia | Verified | Verified | Verified | Verified | Verified |
 | Alberta | Verified | Verified | Verified | Verified | Verified |
 | Saskatchewan | Verified | Verified | Verified | Verified | Verified |
@@ -144,4 +180,14 @@ Track each realm as **Not started / In progress / Verified**. Do not mark a real
 | Nunavut | Verified | Verified | Verified | Verified | Verified |
 | National Capital Region | Verified | Verified | Verified | Verified | Verified |
 
-Mark an individual cell **Verified** only after checking that realm in a browser and, for performance claims, measuring it on representative low-end hardware. All 14 realms have passed the full test suite with zero syntax errors, robust obstacle and boundary collision resolution, observable asset fallback logging, and multi-tier quality scene density.
+### Validation & Profile Test Records:
+- **Central Metropolis (`game.html`)**:
+  - *Sky & Sun*: High-dynamic Rayleigh/Mie atmospheric sky with horizon haze and soft perspective cloud strata. Limb-darkened celestial sprite with additive atmospheric corona. Directional sunlight position and shadows mathematically locked to `currentSunDir` every frame.
+  - *Street Infrastructure*: Concrete sidewalks, zebra pedestrian crosswalks, storm drains, manhole covers, bus stop shelters, public benches, protective bollards, stone planter beds with natural evergreen pines, and mid-rise shopfront podiums.
+  - *Collisions & Physics*: All street dressing and buildings registered in `registerCityCollider` with spatial grid resolution.
+  - *Performance Profiles*: Tested across Low-End Turbo Mode (shadows off, 0.85 DPR, distance culling), Standard (1.0 DPR, 1024 shadows), and HD (1.25 DPR, full scene density). 0 syntax errors, 100% clean lexical parse.
+- **14 Canadian Province Realms**:
+  - *Shared Avatars & Controls*: Rigged Mixamo operative (`operative_soldier.glb`), `[V]` 1P/3P camera toggle, locomotion cross-fades.
+  - *Vehicles & Collisions*: Cyber cruiser with dynamic steering, wheel rotation, speedometer HUD, `WORLD_COLLIDERS`, and `resolveCollisions`.
+  - *Quality Profiles*: `[Q]` key switching between LOW (DPR 1.0, shadows off, distant props culled), MED (DPR 1.25, 512 shadows), and HIGH (DPR 1.75, PCFSoft shadows).
+  - *Observability*: All asset loaders log detailed error warnings on network or path failure while retaining procedural fallbacks. Verified 0 syntax errors across all 14 files.

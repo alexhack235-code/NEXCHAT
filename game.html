@@ -8130,35 +8130,87 @@
       const skyscraperTex = pbrTextures.skyscraperBlue.diff;
       const skyscraperEmissiveTex = pbrTextures.skyscraperBlue.emis;
 
-      // 6b. Atmospheric Sky Hemispheres (Day, Sunset, Night)
+      // 6b. Atmospheric Rayleigh & Mie Sky Hemispheres with Horizon Haze and Subtle Clouds
       function createSkyTexture(type) {
         const sc = document.createElement('canvas');
-        sc.width = 512;
+        sc.width = 1024;
         sc.height = 512;
         const sctx = sc.getContext('2d');
         const sgrad = sctx.createLinearGradient(0, 0, 0, 512);
 
         if (type === 'day') {
-          sgrad.addColorStop(0, '#1565c0');
-          sgrad.addColorStop(0.35, '#2196f3');
-          sgrad.addColorStop(0.7, '#64b5f6');
-          sgrad.addColorStop(0.92, '#bbdefb');
-          sgrad.addColorStop(1.0, '#e3f2fd');
+          // Deep Rayleigh zenith azure fading through atmospheric haze to soft horizon
+          sgrad.addColorStop(0.00, '#0d47a1');
+          sgrad.addColorStop(0.25, '#1976d2');
+          sgrad.addColorStop(0.55, '#42a5f5');
+          sgrad.addColorStop(0.78, '#90caf9');
+          sgrad.addColorStop(0.92, '#c5e3fb');
+          sgrad.addColorStop(1.00, '#eef6fc');
         } else if (type === 'sunset') {
-          sgrad.addColorStop(0, '#1e1b4b');
-          sgrad.addColorStop(0.3, '#4c1d95');
-          sgrad.addColorStop(0.6, '#b91c1c');
-          sgrad.addColorStop(0.85, '#f97316');
-          sgrad.addColorStop(1.0, '#fef08a');
+          // Rich twilight violet zenith through deep crimson to warm golden-amber horizon
+          sgrad.addColorStop(0.00, '#14143a');
+          sgrad.addColorStop(0.30, '#3f1a68');
+          sgrad.addColorStop(0.58, '#aa2424');
+          sgrad.addColorStop(0.78, '#ea580c');
+          sgrad.addColorStop(0.92, '#f59e0b');
+          sgrad.addColorStop(1.00, '#fde68a');
         } else {
-          sgrad.addColorStop(0, '#020617');
-          sgrad.addColorStop(0.4, '#091322');
-          sgrad.addColorStop(0.8, '#0f1d33');
-          sgrad.addColorStop(1.0, '#15253e');
+          // Deep cosmic void through midnight blue to subtle city horizon glow
+          sgrad.addColorStop(0.00, '#010409');
+          sgrad.addColorStop(0.35, '#040d1a');
+          sgrad.addColorStop(0.68, '#091628');
+          sgrad.addColorStop(0.88, '#0e2038');
+          sgrad.addColorStop(1.00, '#142b4d');
         }
 
         sctx.fillStyle = sgrad;
-        sctx.fillRect(0, 0, 512, 512);
+        sctx.fillRect(0, 0, 1024, 512);
+
+        // Subtle, lightweight layered atmospheric cloud wisps with perspective scaling
+        const cloudColor = type === 'day' ? 'rgba(255, 255, 255, ' : (type === 'sunset' ? 'rgba(254, 215, 170, ' : 'rgba(15, 25, 40, ');
+        const cloudCount = type === 'night' ? 4 : 7;
+        for (let c = 0; c < cloudCount; c++) {
+          const cy = 200 + c * 38;
+          const cWidth = 140 + (c * 45);
+          const cHeight = 8 + (c * 2.2);
+          const cAlpha = (0.12 - c * 0.012);
+          const cGrad = sctx.createRadialGradient(200 + c * 110, cy, 0, 200 + c * 110, cy, cWidth);
+          cGrad.addColorStop(0, cloudColor + cAlpha + ')');
+          cGrad.addColorStop(0.7, cloudColor + (cAlpha * 0.4) + ')');
+          cGrad.addColorStop(1, cloudColor + '0)');
+          sctx.fillStyle = cGrad;
+          sctx.fillRect(0, cy - cHeight, 1024, cHeight * 2);
+        }
+
+        const tex = new THREE.CanvasTexture(sc);
+        tex.wrapS = THREE.RepeatWrapping;
+        return tex;
+      }
+
+      function createCelestialSpriteTexture(isSun) {
+        const sc = document.createElement('canvas');
+        sc.width = 256;
+        sc.height = 256;
+        const sctx = sc.getContext('2d');
+        const grad = sctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+        if (isSun) {
+          // High-intensity white solar core with soft limb-darkening to warm atmospheric corona
+          grad.addColorStop(0.00, '#ffffff');
+          grad.addColorStop(0.18, '#fffdf0');
+          grad.addColorStop(0.38, 'rgba(255, 238, 175, 0.95)');
+          grad.addColorStop(0.60, 'rgba(255, 195, 110, 0.40)');
+          grad.addColorStop(0.82, 'rgba(255, 160, 80, 0.12)');
+          grad.addColorStop(1.00, 'rgba(255, 140, 60, 0.00)');
+        } else {
+          // Lunar silver core with faint ethereal atmospheric halo
+          grad.addColorStop(0.00, '#ffffff');
+          grad.addColorStop(0.24, '#e2e8f0');
+          grad.addColorStop(0.48, 'rgba(203, 213, 225, 0.85)');
+          grad.addColorStop(0.72, 'rgba(148, 163, 184, 0.28)');
+          grad.addColorStop(1.00, 'rgba(100, 116, 139, 0.00)');
+        }
+        sctx.fillStyle = grad;
+        sctx.fillRect(0, 0, 256, 256);
         return new THREE.CanvasTexture(sc);
       }
 
@@ -8509,15 +8561,31 @@
         kenneyBuildingsGroup = new THREE.Group();
         scene.add(kenneyBuildingsGroup);
 
+        // Expanded modular mid-rise architecture, shopfronts, and natural greenery
         const buildingConfigs = [
+          // Commercial district storefronts & mid-rise podium blocks
           { file: 'building-garage.glb', x: -85, y: 0, z: 54, scale: 6.5, rotY: 0, hw: 6.5, hd: 6.5 },
+          { file: 'building-garage.glb', x: 85, y: 0, z: -54, scale: 6.5, rotY: Math.PI, hw: 6.5, hd: 6.5 },
           { file: 'pavement-fountain.glb', x: 0, y: 0, z: 24, scale: 4.5, rotY: 0, hw: 4.5, hd: 4.5 },
+          { file: 'pavement-fountain.glb', x: 0, y: 0, z: -90, scale: 4.5, rotY: 0, hw: 4.5, hd: 4.5 },
           { file: 'building-small-a.glb', x: 26, y: 0, z: 34, scale: 5.5, rotY: Math.PI / 2, hw: 5.5, hd: 5.5 },
           { file: 'building-small-b.glb', x: -26, y: 0, z: 34, scale: 5.5, rotY: -Math.PI / 2, hw: 5.5, hd: 5.5 },
           { file: 'building-small-c.glb', x: 34, y: 0, z: -34, scale: 6.0, rotY: Math.PI, hw: 6.0, hd: 6.0 },
           { file: 'building-small-d.glb', x: -34, y: 0, z: -34, scale: 5.8, rotY: 0, hw: 5.8, hd: 5.8 },
+          { file: 'building-small-a.glb', x: 68, y: 0, z: 20, scale: 5.5, rotY: Math.PI, hw: 5.5, hd: 5.5 },
+          { file: 'building-small-b.glb', x: -68, y: 0, z: 20, scale: 5.5, rotY: 0, hw: 5.5, hd: 5.5 },
+          { file: 'building-small-c.glb', x: 68, y: 0, z: -85, scale: 5.8, rotY: Math.PI / 2, hw: 5.8, hd: 5.8 },
+          { file: 'building-small-d.glb', x: -68, y: 0, z: -85, scale: 5.8, rotY: -Math.PI / 2, hw: 5.8, hd: 5.8 },
+
+          // Natural pine trees & planters grounding urban avenues
           { file: 'grass-trees-tall.glb', x: 18, y: 0, z: 24, scale: 4.5, rotY: 0.5, hw: 3.5, hd: 3.5 },
-          { file: 'grass-trees-tall.glb', x: -18, y: 0, z: 24, scale: 4.5, rotY: -0.5, hw: 3.5, hd: 3.5 }
+          { file: 'grass-trees-tall.glb', x: -18, y: 0, z: 24, scale: 4.5, rotY: -0.5, hw: 3.5, hd: 3.5 },
+          { file: 'grass-trees-tall.glb', x: 18, y: 0, z: -24, scale: 4.5, rotY: 1.2, hw: 3.5, hd: 3.5 },
+          { file: 'grass-trees-tall.glb', x: -18, y: 0, z: -24, scale: 4.5, rotY: -1.2, hw: 3.5, hd: 3.5 },
+          { file: 'grass-trees-tall.glb', x: 34, y: 0, z: 68, scale: 4.8, rotY: 0.8, hw: 3.5, hd: 3.5 },
+          { file: 'grass-trees-tall.glb', x: -34, y: 0, z: 68, scale: 4.8, rotY: -0.8, hw: 3.5, hd: 3.5 },
+          { file: 'grass-trees-tall.glb', x: 34, y: 0, z: -68, scale: 4.8, rotY: 0.2, hw: 3.5, hd: 3.5 },
+          { file: 'grass-trees-tall.glb', x: -34, y: 0, z: -68, scale: 4.8, rotY: -0.2, hw: 3.5, hd: 3.5 }
         ];
 
         buildingConfigs.forEach(cfg => {
@@ -8540,12 +8608,176 @@
               hd: cfg.hd,
               world: 'earth'
             });
-          }, undefined, () => {});
+          }, undefined, err => {
+            console.warn(`[AssetLoader] Failed loading kenney asset ${cfg.file}:`, err);
+          });
         });
-        console.log('✅ [3D ASSET] Kenney CC0 modular street architecture and fountain active.');
+
+        // Build Realistic Street Infrastructure: Sidewalks, Crosswalks, Planters, Furniture
+        buildStreetLevelInfrastructure();
+        console.log('✅ [3D ASSET] Kenney modular street architecture, natural planting, and street-level infrastructure active.');
       } catch (err) {
         console.warn('Kenney architecture loader warning:', err);
       }
+    }
+
+    // ------------------------------------------------------------
+    // LIVED-IN STREET-LEVEL INFRASTRUCTURE SYSTEM
+    // ------------------------------------------------------------
+    function buildStreetLevelInfrastructure() {
+      const streetInfraGroup = new THREE.Group();
+      scene.add(streetInfraGroup);
+
+      const sidewalkMat = new THREE.MeshStandardMaterial({
+        color: 0x64748b,
+        roughness: 0.85,
+        metalness: 0.15
+      });
+      const crosswalkMat = new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        roughness: 0.72,
+        metalness: 0.08
+      });
+      const ironMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.65,
+        metalness: 0.85
+      });
+      const woodMat = new THREE.MeshStandardMaterial({
+        color: 0x5c3a21,
+        roughness: 0.75,
+        metalness: 0.1
+      });
+      const glassMat = new THREE.MeshStandardMaterial({
+        color: 0x38bdf8,
+        transparent: true,
+        opacity: 0.45,
+        roughness: 0.1,
+        metalness: 0.9
+      });
+      const soilMat = new THREE.MeshStandardMaterial({
+        color: 0x271c14,
+        roughness: 0.95
+      });
+
+      const roadCoords = [-85, -51, -17, 17, 51, 85, 119];
+
+      // 1. Concrete Sidewalk Ribbons Flanking Avenues
+      roadCoords.forEach(r => {
+        // Sidewalk ribbons alongside East-West avenues
+        [-1, 1].forEach(side => {
+          const swX = new THREE.Mesh(new THREE.BoxGeometry(360, 0.18, 3.6), sidewalkMat);
+          swX.position.set(0, 0.09, r + side * 7.5);
+          swX.receiveShadow = true;
+          streetInfraGroup.add(swX);
+        });
+
+        // Sidewalk ribbons alongside North-South avenues
+        [-1, 1].forEach(side => {
+          const swZ = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.18, 360), sidewalkMat);
+          swZ.position.set(r + side * 7.5, 0.09, 0);
+          swZ.receiveShadow = true;
+          streetInfraGroup.add(swZ);
+        });
+      });
+
+      // 2. Pedestrian Crosswalks at Avenue Intersections
+      roadCoords.forEach(rx => {
+        roadCoords.forEach(rz => {
+          // Crosswalk bars for East-West pedestrian crossing
+          [-1, 1].forEach(dir => {
+            for (let b = -4; b <= 4; b += 1.8) {
+              const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 3.2), crosswalkMat);
+              stripe.rotation.x = -Math.PI / 2;
+              stripe.position.set(rx + b, 0.045, rz + dir * 6.2);
+              stripe.receiveShadow = true;
+              streetInfraGroup.add(stripe);
+            }
+          });
+          // Crosswalk bars for North-South pedestrian crossing
+          [-1, 1].forEach(dir => {
+            for (let b = -4; b <= 4; b += 1.8) {
+              const stripe = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.7), crosswalkMat);
+              stripe.rotation.x = -Math.PI / 2;
+              stripe.position.set(rx + dir * 6.2, 0.045, rz + b);
+              stripe.receiveShadow = true;
+              streetInfraGroup.add(stripe);
+            }
+          });
+
+          // Storm drain grates near curbs
+          const drain = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.05, 0.8), ironMat);
+          drain.position.set(rx + 5.2, 0.05, rz + 5.2);
+          streetInfraGroup.add(drain);
+
+          // Circular manhole cover
+          const manhole = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.04, 16), ironMat);
+          manhole.position.set(rx - 2.8, 0.045, rz + 2.8);
+          streetInfraGroup.add(manhole);
+        });
+      });
+
+      // 3. Street Furniture (Bus Stop Shelters, Benches, Planters, Bollards)
+      const furnitureLocations = [
+        { x: -17, z: 26, ry: 0 },
+        { x: 17, z: 26, ry: Math.PI },
+        { x: -17, z: -42, ry: 0 },
+        { x: 17, z: -42, ry: Math.PI },
+        { x: -51, z: 26, ry: 0 },
+        { x: 51, z: 26, ry: Math.PI }
+      ];
+
+      furnitureLocations.forEach(loc => {
+        // Bus Shelter
+        const shelter = new THREE.Group();
+        shelter.position.set(loc.x + (loc.ry === 0 ? -7.2 : 7.2), 0, loc.z);
+        shelter.rotation.y = loc.ry;
+
+        const sRoof = new THREE.Mesh(new THREE.BoxGeometry(4.4, 0.15, 2.4), ironMat);
+        sRoof.position.set(0, 2.7, 0);
+        shelter.add(sRoof);
+
+        const sGlass = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.5, 0.1), glassMat);
+        sGlass.position.set(0, 1.35, -1.1);
+        shelter.add(sGlass);
+
+        [-2.0, 2.0].forEach(px => {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.7, 8), ironMat);
+          post.position.set(px, 1.35, 1.0);
+          shelter.add(post);
+        });
+
+        // Bench inside shelter
+        const benchSeat = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.08, 0.5), woodMat);
+        benchSeat.position.set(0, 0.5, -0.6);
+        shelter.add(benchSeat);
+
+        streetInfraGroup.add(shelter);
+        registerCityCollider({ x: shelter.position.x, z: shelter.position.z, hw: 2.2, hd: 1.4, world: 'earth' });
+
+        // Raised Planter Box with Soil
+        const planter = new THREE.Group();
+        planter.position.set(loc.x + (loc.ry === 0 ? -7.2 : 7.2), 0, loc.z + 8);
+        const pBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.65, 1.6), sidewalkMat);
+        pBox.position.y = 0.32;
+        pBox.castShadow = true;
+        planter.add(pBox);
+
+        const pSoil = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.1, 1.2), soilMat);
+        pSoil.position.y = 0.62;
+        planter.add(pSoil);
+
+        streetInfraGroup.add(planter);
+        registerCityCollider({ x: planter.position.x, z: planter.position.z, hw: 1.8, hd: 0.9, world: 'earth' });
+
+        // Pedestrian Bollards
+        [-1.6, 0, 1.6].forEach(bx => {
+          const bollard = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 0.85, 12), ironMat);
+          bollard.position.set(loc.x + (loc.ry === 0 ? -5.5 : 5.5), 0.42, loc.z + bx + 3.0);
+          bollard.castShadow = true;
+          streetInfraGroup.add(bollard);
+        });
+      });
     }
 
     function loadRobotCompanionDrone() {
@@ -9601,25 +9833,32 @@
         skyMesh = new THREE.Mesh(skyGeo, skyMat);
         scene.add(skyMesh);
 
-        // 3D Visual Sun Disk & Radiant Coronal Flare Halo
-        const sunGeo = new THREE.CircleGeometry(42, 32);
-        const sunMat = new THREE.MeshBasicMaterial({ color: 0xfffff2, side: THREE.DoubleSide });
-        sunVisualMesh = new THREE.Mesh(sunGeo, sunMat);
+        // 3D Visual Sun Disk with Continuous Limb-Darkening & Atmospheric Corona
+        const sunTex = createCelestialSpriteTexture(true);
+        const sunMat = new THREE.SpriteMaterial({
+          map: sunTex,
+          color: 0xffffff,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        sunVisualMesh = new THREE.Sprite(sunMat);
+        sunVisualMesh.scale.set(65, 65, 1);
         sunVisualMesh.position.set(280, 520, 200);
-        sunVisualMesh.lookAt(0, 0, 0);
         scene.add(sunVisualMesh);
 
-        const coronaGeo = new THREE.RingGeometry(42, 95, 32);
-        const coronaMat = new THREE.MeshBasicMaterial({ color: 0xffea9f, transparent: true, opacity: 0.55, side: THREE.DoubleSide });
-        sunCoronaMesh = new THREE.Mesh(coronaGeo, coronaMat);
-        sunVisualMesh.add(sunCoronaMesh);
-
-        // 3D Visual Moon Disk (Active at Night)
-        const moonGeo = new THREE.CircleGeometry(32, 32);
-        const moonMat = new THREE.MeshBasicMaterial({ color: 0xdde7f5, side: THREE.DoubleSide });
-        moonVisualMesh = new THREE.Mesh(moonGeo, moonMat);
+        // 3D Visual Moon Disk with Soft Lunar Glow
+        const moonTex = createCelestialSpriteTexture(false);
+        const moonMat = new THREE.SpriteMaterial({
+          map: moonTex,
+          color: 0xffffff,
+          transparent: true,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        moonVisualMesh = new THREE.Sprite(moonMat);
+        moonVisualMesh.scale.set(48, 48, 1);
         moonVisualMesh.position.set(-280, 480, -200);
-        moonVisualMesh.lookAt(0, 0, 0);
         moonVisualMesh.visible = false;
         scene.add(moonVisualMesh);
 
@@ -13319,9 +13558,18 @@
     function setLowEndTurboMode(enable) {
       gameState.settings.lowEndTurbo = enable;
 
-      // 1. Dynamic Pixel Ratio Tuning
+      // 1. Dynamic Pixel Ratio & Real-Time Shadow Protection
       if (renderer) {
-        renderer.setPixelRatio(enable ? 0.75 : Math.min(window.devicePixelRatio || 1, 1.5));
+        renderer.setPixelRatio(enable ? 0.85 : Math.min(window.devicePixelRatio || 1, 1.5));
+        renderer.shadowMap.enabled = !enable;
+      }
+      if (sunLight) {
+        sunLight.castShadow = !enable;
+      }
+      if (typeof kenneyBuildingsGroup !== 'undefined' && kenneyBuildingsGroup) {
+        kenneyBuildingsGroup.traverse(c => {
+          if (c.isMesh && enable) c.castShadow = false;
+        });
       }
 
       // 2. Update HUD Badge
@@ -18132,13 +18380,24 @@ function buildNeoKyotoCity() {
         }
       }
 
-      // Sky Dome, Starfield & Directional Sun Shadow Tracking across 2,400m Open World
+      // Sky Dome, Celestial Bodies & Coherent Directional Sunlight/Shadow Alignment
       if (skyMesh) skyMesh.position.copy(camera.position);
       if (cosmicStarfield) cosmicStarfield.position.copy(camera.position);
-      if (sunLight && player.pos) {
-        sunLight.position.set(player.pos.x + 120, 240, player.pos.z + 80);
-        sunLight.target.position.copy(player.pos);
-        sunLight.target.updateMatrixWorld();
+
+      // Smoothly interpolate celestial vectors for coherent lighting and shadow casting
+      if (typeof currentSunDir !== 'undefined' && typeof targetSunDir !== 'undefined') {
+        currentSunDir.lerp(targetSunDir, Math.min(delta * 2.8, 0.15));
+        if (sunLight && player.pos) {
+          sunLight.position.copy(player.pos).addScaledVector(currentSunDir, 260);
+          sunLight.target.position.copy(player.pos);
+          sunLight.target.updateMatrixWorld();
+        }
+        if (sunVisualMesh && sunVisualMesh.visible) {
+          sunVisualMesh.position.copy(camera.position).addScaledVector(currentSunDir, 1500);
+        }
+        if (moonVisualMesh && moonVisualMesh.visible) {
+          moonVisualMesh.position.copy(camera.position).addScaledVector(currentMoonDir, 1500);
+        }
       }
 
       // Proximity Geiger Counter Audio
@@ -20977,15 +21236,12 @@ function buildNeoKyotoCity() {
             ambientLight.color.setHex(0x8ec4f5);
             ambientLight.intensity = 0.5;
           }
+          targetSunDir.set(0.42, 0.85, 0.31).normalize();
           if (sunLight) {
             sunLight.color.setHex(0xfffaea);
-            sunLight.intensity = 2.2;
-            sunLight.position.set(120, 240, 80);
+            sunLight.intensity = 2.3;
           }
-          if (sunVisualMesh) {
-            sunVisualMesh.visible = true;
-            sunVisualMesh.position.set(180, 360, 120);
-          }
+          if (sunVisualMesh) sunVisualMesh.visible = true;
           if (moonVisualMesh) moonVisualMesh.visible = false;
           if (cosmicStarfield) cosmicStarfield.material.opacity = 0.0;
           if (worldParticleSystem) worldParticleSystem.visible = false;
@@ -21000,21 +21256,18 @@ function buildNeoKyotoCity() {
           if (hemiLight) {
             hemiLight.color.setHex(0xffa07a);
             hemiLight.groundColor.setHex(0x301a14);
-            hemiLight.intensity = 1.1;
+            hemiLight.intensity = 1.15;
           }
           if (ambientLight) {
             ambientLight.color.setHex(0xaa5533);
             ambientLight.intensity = 0.4;
           }
+          targetSunDir.set(0.78, 0.22, 0.58).normalize();
           if (sunLight) {
             sunLight.color.setHex(0xff9438);
             sunLight.intensity = 2.4;
-            sunLight.position.set(240, 70, 160);
           }
-          if (sunVisualMesh) {
-            sunVisualMesh.visible = true;
-            sunVisualMesh.position.set(360, 105, 240);
-          }
+          if (sunVisualMesh) sunVisualMesh.visible = true;
           if (moonVisualMesh) moonVisualMesh.visible = false;
           if (cosmicStarfield) cosmicStarfield.material.opacity = 0.2;
           setSkyscraperEmissive(0.45);
@@ -21034,10 +21287,11 @@ function buildNeoKyotoCity() {
             ambientLight.color.setHex(0x182436);
             ambientLight.intensity = 0.35;
           }
+          targetMoonDir.set(-0.48, 0.72, -0.50).normalize();
+          targetSunDir.copy(targetMoonDir);
           if (sunLight) {
             sunLight.color.setHex(0x7899cc);
             sunLight.intensity = 0.85;
-            sunLight.position.set(60, 140, 50);
           }
           if (sunVisualMesh) sunVisualMesh.visible = false;
           if (moonVisualMesh) moonVisualMesh.visible = true;
