@@ -142,12 +142,128 @@
     #hud-radar-canvas { width: 116px; height: 116px; border-radius: 50%; }
     #modal-codex { position: fixed; inset: 0; background: rgba(6, 12, 22, 0.92); backdrop-filter: blur(14px); z-index: 350; display: none; align-items: center; justify-content: center; padding: 20px; }
     #modal-codex.visible { display: flex; }
+
+    /* CANADIAN COLDNESS & SURVIVAL VITALITY HUD */
+    .survival-hud-bar {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: rgba(10, 16, 26, 0.94);
+      border: 1.5px solid rgba(0, 242, 255, 0.45);
+      border-radius: 14px;
+      padding: 8px 18px;
+      z-index: 120;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.65);
+      pointer-events: auto;
+    }
+    .vital-item {
+      display: flex;
+      flex-direction: column;
+      width: 125px;
+    }
+    .vital-header {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      margin-bottom: 3px;
+    }
+    .vital-track {
+      width: 100%;
+      height: 7px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .vital-fill {
+      height: 100%;
+      transition: width 0.15s ease;
+    }
+    .vital-fill.hp {
+      background: linear-gradient(90deg, #ef4444, #22c55e);
+    }
+    .vital-fill.warmth {
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #00f2ff);
+    }
+    .vital-gear {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-gear {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(0, 242, 255, 0.35);
+      border-radius: 8px;
+      color: #38bdf8;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-gear:hover {
+      background: rgba(0, 242, 255, 0.2);
+      border-color: #00f2ff;
+      color: #fff;
+    }
+    #frostbite-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 260;
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      box-shadow: inset 0 0 90px rgba(0, 242, 255, 0.8), inset 0 0 180px rgba(224, 242, 254, 0.6);
+      background: radial-gradient(circle at center, transparent 35%, rgba(186, 230, 253, 0.25) 75%, rgba(224, 242, 254, 0.65) 100%);
+    }
   </style>
 </head>
 <body>
   <div id="canvas-container"></div>
 
   <!-- HUD -->
+
+  <!-- CANADIAN COLDNESS & SURVIVAL VITALITY HUD -->
+  <div class="survival-hud-bar">
+    <!-- HEALTH BAR -->
+    <div class="vital-item">
+      <div class="vital-header">
+        <span style="color: #fca5a5;"><i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i> HEALTH</span>
+        <span id="vital-hp-val" style="color: #22c55e;">100%</span>
+      </div>
+      <div class="vital-track"><div id="vital-hp-fill" class="vital-fill hp" style="width: 100%;"></div></div>
+    </div>
+
+    <!-- WARMTH / BODY HEAT BAR -->
+    <div class="vital-item">
+      <div class="vital-header">
+        <span style="color: #93c5fd;"><i class="fa-solid fa-temperature-half" id="vital-temp-icon" style="color: #38bdf8;"></i> WARMTH (<span id="vital-temp-c">-18°C</span>)</span>
+        <span id="vital-warmth-val" style="color: #00f2ff;">100%</span>
+      </div>
+      <div class="vital-track"><div id="vital-warmth-fill" class="vital-fill warmth" style="width: 100%;"></div></div>
+    </div>
+
+    <!-- THERMAL GEAR & HOT THERMOS -->
+    <div class="vital-gear">
+      <button type="button" class="btn-gear" id="btn-gear-toggle" onclick="cycleWinterGear()" title="Cycle Canadian Winter Thermal Gear [T]">
+        <span id="gear-label">🇨🇦 ARCTIC GOOSE PARKA (85%)</span> [T]
+      </button>
+      <button type="button" class="btn-gear" onclick="drinkHotMapleThermos()" title="Drink Hot Canadian Maple Coffee [C]">
+        <span id="thermos-label">☕ HOT THERMOS (3)</span> [C]
+      </button>
+    </div>
+  </div>
+
+  <!-- FROSTBITE ICE VIGNETTE OVERLAY -->
+  <div id="frostbite-overlay"></div>
+
   <div class="province-hud">
     <div class="province-badge">
       <div class="maple-crest"><i class="fa-brands fa-canadian-maple-leaf"></i></div>
@@ -1379,6 +1495,223 @@
       }
     }
 
+
+    // ------------------------------------------------------------
+    // CANADIAN CRACKLING BIRCH CAMPFIRE (x: -24, z: 25)
+    // ------------------------------------------------------------
+    const campfireGroup = new THREE.Group();
+    campfireGroup.position.set(-24, 0, 25);
+    scene.add(campfireGroup);
+
+    // Stone Ring (Circular River Fieldstones)
+    const stoneRingMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.9 });
+    for (let s = 0; s < 10; s++) {
+      const sAng = (s / 10) * Math.PI * 2;
+      const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.38, 0), stoneRingMat);
+      stone.position.set(Math.cos(sAng) * 1.5, 0.25, Math.sin(sAng) * 1.5);
+      stone.rotation.set(s * 0.4, s * 0.8, 0);
+      campfireGroup.add(stone);
+    }
+
+    // Glowing Charcoal Embers & Stacked Birch Logs
+    const emberMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+    const embers = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.3, 0.25, 12), emberMat);
+    embers.position.y = 0.15;
+    campfireGroup.add(embers);
+
+    const birchMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.8 });
+    for (let l = 0; l < 4; l++) {
+      const logMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.14, 1.8, 6), birchMat);
+      logMesh.rotation.z = Math.PI * 0.35;
+      logMesh.rotation.y = (l / 4) * Math.PI * 2;
+      logMesh.position.set(0, 0.45, 0);
+      campfireGroup.add(logMesh);
+    }
+
+    // Dancing Campfire Flame Cone
+    const flameMat = new THREE.MeshBasicMaterial({ color: 0xff7700 });
+    const flameCone = new THREE.Mesh(new THREE.ConeGeometry(0.65, 1.4, 8), flameMat);
+    flameCone.position.y = 0.95;
+    campfireGroup.add(flameCone);
+
+    const campfireLight = new THREE.PointLight(0xff7700, 2.2, 18);
+    campfireLight.position.set(0, 1.4, 0);
+    campfireGroup.add(campfireLight);
+
+    // ------------------------------------------------------------
+    // CANADIAN FEATURE: TRADITIONAL MAPLE SUGAR SHACK (CABANE À SUCRE) (x: -36, z: -35)
+    // ------------------------------------------------------------
+    const sugarShackGroup = new THREE.Group();
+    sugarShackGroup.position.set(-36, 0, -35);
+    scene.add(sugarShackGroup);
+
+    const timberMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.85 });
+    const redTinMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.4, metalness: 0.3 });
+    const snowMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.95 });
+
+    // Sugar Shack Log Cabin
+    const shackCabin = new THREE.Mesh(new THREE.BoxGeometry(8.5, 4.5, 7.0), timberMat);
+    shackCabin.position.y = 2.25;
+    shackCabin.castShadow = true; shackCabin.receiveShadow = true;
+    sugarShackGroup.add(shackCabin);
+
+    // Gabled Red Tin Roof with Steam Cupola
+    const shackRoof = new THREE.Mesh(new THREE.ConeGeometry(6.5, 2.8, 4), redTinMat);
+    shackRoof.position.y = 5.8;
+    shackRoof.rotation.y = Math.PI / 4;
+    shackRoof.scale.set(1.1, 1.0, 0.9);
+    sugarShackGroup.add(shackRoof);
+
+    // Steaming Maple Evaporator Smokestack
+    const stack = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 2.8, 8), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 }));
+    stack.position.set(1.8, 6.2, 0);
+    sugarShackGroup.add(stack);
+
+    // Fresh Snow Trough for Maple Taffy (Tire sur la neige)
+    const troughWood = new THREE.Mesh(new THREE.BoxGeometry(6.2, 0.85, 1.4), timberMat);
+    troughWood.position.set(0, 0.45, 5.2);
+    troughWood.castShadow = true;
+    sugarShackGroup.add(troughWood);
+
+    const snowFill = new THREE.Mesh(new THREE.BoxGeometry(5.9, 0.3, 1.1), snowMat);
+    snowFill.position.set(0, 0.85, 5.2);
+    sugarShackGroup.add(snowFill);
+
+    // Golden Boiled Maple Ribbon on Snow
+    const mapleRibbon = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.15, 0.5), new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.2, metalness: 0.1 }));
+    mapleRibbon.position.set(0, 1.0, 5.2);
+    sugarShackGroup.add(mapleRibbon);
+
+    if (typeof WORLD_COLLIDERS !== 'undefined') {
+      WORLD_COLLIDERS.push({ x: -36, z: -35, r: 6.5 });
+    }
+
+    // ============================================================
+    // CANADIAN COLDNESS & SURVIVAL HYPOTHERMIA MECHANICS
+    // ============================================================
+    const PROVINCE_COLD_RATE = 2.3;
+    let playerHealth = 100;
+    let playerWarmth = 100;
+    let thermosCharges = 3;
+    let mapleSpeedBoostTimer = 0;
+    let selectedGearIndex = 0;
+
+    const WINTER_GEAR_TYPES = [
+      { id: 'parka', name: '🇨🇦 ARCTIC GOOSE PARKA (85% INSULATION)', mult: 0.15 },
+      { id: 'tuque', name: '🇨🇦 BUFFALO PLAID & TUQUE (50% INSULATION)', mult: 0.50 },
+      { id: 'flannel', name: '🇨🇦 LIGHT VOYAGEUR SHIRT (15% INSULATION)', mult: 0.85 },
+      { id: 'exosuit', name: '🇨🇦 AURORA QUANTUM EXOSUIT (100% SHIELD)', mult: 0.00 }
+    ];
+
+    function cycleWinterGear() {
+      selectedGearIndex = (selectedGearIndex + 1) % WINTER_GEAR_TYPES.length;
+      const gear = WINTER_GEAR_TYPES[selectedGearIndex];
+      const lbl = document.getElementById('gear-label');
+      if (lbl) lbl.textContent = gear.name;
+      showNotify(`EQUIPPED ${gear.name}`);
+      if (audio && audio.playChirp) audio.playChirp();
+    }
+
+    function drinkHotMapleThermos() {
+      if (thermosCharges <= 0) {
+        showNotify('☕ THERMOS EMPTY! REFILL NEAR CAMPFIRE, CABIN STOVE OR HOT SPRINGS');
+        return;
+      }
+      thermosCharges--;
+      playerWarmth = Math.min(100, playerWarmth + 35);
+      const thLbl = document.getElementById('thermos-label');
+      if (thLbl) thLbl.textContent = `☕ HOT THERMOS (${thermosCharges})`;
+      showNotify(`☕ SIPPED HOT CANADIAN MAPLE COFFEE (+35% WARMTH)! [${thermosCharges} LEFT]`);
+      if (audio && audio.playChirp) audio.playChirp();
+    }
+
+    function updateCanadianColdness(delta, now) {
+      // Check Heat Proximity
+      const distToCampfire = Math.hypot(player.pos.x - (-24), player.pos.z - 25);
+      const isNearCampfire = distToCampfire < 5.8;
+
+      // Special Provincial Heat Sources
+      let isNearHotSprings = false;
+      let isNearSugarShack = false;
+      
+      isNearSugarShack = Math.hypot(player.pos.x - (-36), player.pos.z - (-35)) < 5.2;
+
+      const isInsideHeatedVehicle = (typeof inPatrolCruiser !== 'undefined' && inPatrolCruiser) || (typeof inRegionalPlane !== 'undefined' && inRegionalPlane);
+
+      // Refill thermos near heat
+      if ((isNearCampfire || isNearHotSprings || isNearSugarShack) && thermosCharges < 3) {
+        thermosCharges = 3;
+        const thLbl = document.getElementById('thermos-label');
+        if (thLbl) thLbl.textContent = '☕ HOT THERMOS (3)';
+      }
+
+      // Hot Springs Soak Recovery
+      if (isNearHotSprings) {
+        playerWarmth = 100;
+        playerHealth = Math.min(100, playerHealth + delta * 15.0);
+      } else if (isNearCampfire) {
+        playerWarmth = Math.min(100, playerWarmth + delta * 38.0);
+      } else if (isInsideHeatedVehicle) {
+        playerWarmth = Math.min(100, playerWarmth + delta * 14.0);
+      } else {
+        // Outdoor Coldness Drain based on Gear Insulation
+        const gear = WINTER_GEAR_TYPES[selectedGearIndex];
+        const effectiveDrain = PROVINCE_COLD_RATE * gear.mult;
+        playerWarmth = Math.max(0, playerWarmth - effectiveDrain * delta);
+      }
+
+      // Hypothermia & Health Depletion
+      const frostOverlay = document.getElementById('frostbite-overlay');
+      if (playerWarmth <= 0) {
+        // BELOW ZERO WARMTH: HYPOTHERMIA DAMAGE
+        playerHealth = Math.max(0, playerHealth - delta * 5.2);
+        if (frostOverlay) frostOverlay.style.opacity = '0.85';
+
+        // Camera shiver effect
+        if (camera) {
+          camera.position.x += (Math.random() - 0.5) * 0.04;
+          camera.position.y += (Math.random() - 0.5) * 0.04;
+        }
+
+        if (playerHealth <= 0) {
+          // Hypothermia Collapse & Emergency Rescue to heated outpost
+          playerHealth = 100;
+          playerWarmth = 100;
+          player.pos.set(0, 1.2, 45);
+          showNotify('❄️ HYPOTHERMIA COLLAPSE! EMERGENCY MEDICAL RESCUE TO WARM OUTPOST (+100% WARMTH)');
+          if (audio && audio.playChirp) audio.playChirp();
+        }
+      } else {
+        if (frostOverlay) {
+          const frostFrac = Math.max(0, (20 - playerWarmth) / 20);
+          frostOverlay.style.opacity = (frostFrac * 0.65).toFixed(2);
+        }
+        // Natural Health Regeneration when Warm
+        if (playerWarmth > 45 && playerHealth < 100) {
+          playerHealth = Math.min(100, playerHealth + delta * 2.8);
+        }
+      }
+
+      // Maple Speed Boost Timer
+      if (mapleSpeedBoostTimer > 0) {
+        mapleSpeedBoostTimer -= delta;
+      }
+
+      // Update Survival HUD Elements
+      const hpFill = document.getElementById('vital-hp-fill');
+      const hpVal = document.getElementById('vital-hp-val');
+      const warmthFill = document.getElementById('vital-warmth-fill');
+      const warmthVal = document.getElementById('vital-warmth-val');
+
+      if (hpFill) hpFill.style.width = `${Math.round(playerHealth)}%`;
+      if (hpVal) hpVal.textContent = `${Math.round(playerHealth)}%`;
+      if (warmthFill) warmthFill.style.width = `${Math.round(playerWarmth)}%`;
+      if (warmthVal) {
+        warmthVal.textContent = (playerWarmth <= 0) ? 'FROSTBITE!' : `${Math.round(playerWarmth)}%`;
+        warmthVal.style.color = (playerWarmth <= 0) ? '#ef4444' : '#00f2ff';
+      }
+    }
+
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
@@ -1432,6 +1765,8 @@
       if (e.code === 'KeyV') toggleCameraView();
       if (e.code === 'KeyQ') cycleQuality();
       if (e.code === 'KeyH') toggleMapModal();
+      if (e.code === 'KeyT') cycleWinterGear();
+      if (e.code === 'KeyC') drinkHotMapleThermos();
       if (e.code === 'KeyP') toggleRegionalPlaneFlight();
       if (e.code === 'KeyE') {
         if (inRegionalPlane) {
@@ -1489,7 +1824,16 @@
     }
 
     function handleInteractions() {
-      if (regionalPlaneGroup && player.pos.distanceTo(regionalPlaneGroup.position) < 8.5 && !inRegionalPlane) {
+      if (Math.hypot(player.pos.x - (-36), player.pos.z - (-35)) < 5.5) {
+        playerWarmth = Math.min(100, playerWarmth + 50);
+        mapleSpeedBoostTimer = 18.0;
+        showNotify('🍁 ENJOYED FRESH MAPLE TAFFY ON SNOW (TIRE SUR LA NEIGE)! (+50% WARMTH & MAPLE SPRINT BOOST)');
+        if (audio && audio.playLootChime) audio.playLootChime();
+        return;
+      }
+      if (Math.hypot(player.pos.x - (-24), player.pos.z - 25) < 5.5) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'WARM UP BY CRACKLING CAMPFIRE (+WARMTH)';
+      } else if (Math.hypot(player.pos.x - (-36), player.pos.z - (-35)) < 5.2) { prompt.style.display = 'flex'; promptMsg.textContent = 'POUR HOT MAPLE TAFFY ON SNOW [F]'; } else if (regionalPlaneGroup && player.pos.distanceTo(regionalPlaneGroup.position) < 8.5 && !inRegionalPlane) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT CANADAIR CL-415 WATER BOMBER [E] / [P]';
       } else if (typeof codexBeaconPos !== 'undefined' && player.pos.distanceTo(codexBeaconPos) < 6.0) {
         openCodexModal();
@@ -1548,6 +1892,11 @@
 
       // Skeletal Animation Mixer
       if (characterMixer) characterMixer.update(delta);
+      if (typeof updateCanadianColdness === 'function') updateCanadianColdness(delta, now);
+      if (typeof flameCone !== 'undefined' && flameCone) {
+        flameCone.scale.y = 1.0 + Math.sin(now * 0.012) * 0.15;
+        campfireLight.intensity = 2.0 + Math.sin(now * 0.015) * 0.4;
+      }
       // Regional Airplane Propeller & Flight Dynamics
       if (regionalPlanePropeller) {
         const propSpeed = inRegionalPlane ? (16 + regionalPlaneState.throttle * 0.5) : 0.8;

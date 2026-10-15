@@ -303,4 +303,28 @@ Code inspection finds that `game.html` contains the sun disc, gradient sky, PBR 
   - Full 3D Flight Model: Variable throttle (`[W/S]`), aerodynamic lift equation, dynamic banking turns (`[A/D]`), and pitch control (`[ArrowUp/Down]`).
   - Regional Avionics HUD: Real-time airspeed indicator (knots), MSL altimeter ladder (meters), heading compass tape, and vertical speed (VS m/s).
   - Emergency Parachute: Disembarking while airborne above 15m automatically deploys a parachute to glide safely to the ground.
+
+### Canadian Coldness, Survival Hypothermia & Regional Heat Sources:
+- **Body Warmth & Temperature Meter**:
+  - Real-time temperature simulation: from `-8°C` in British Columbia to `-42°C` polar windchill in Nunavut and `-18°C` in Calgary.
+  - Outdoor exposure gradually drains the player's Body Warmth bar.
+- **Thermal Winter Wear Protection (`[T]`)**:
+  - Press `[T]` to cycle authentic Canadian winter garments:
+    1. `🇨🇦 ARCTIC GOOSE PARKA (85% INSULATION)`: High-efficiency cold protection.
+    2. `🇨🇦 BUFFALO PLAID & TUQUE (50% INSULATION)`: Classic Canadian wool & flannel.
+    3. `🇨🇦 LIGHT VOYAGEUR SHIRT (15% INSULATION)`: High-risk cold challenge.
+    4. `🇨🇦 AURORA BOREALIS QUANTUM EXOSUIT (100% THERMAL SHIELD)`: Complete immunity to sub-zero temperatures.
+- **Frostbite Ice Vignette & Hypothermia Damage**:
+  - If the Warmth bar drops to `0%` (or below zero / freezing hypothermia state), an icy radial frost vignette creeps across the screen edges, camera shivering occurs, and **Player Health drains continuously**.
+  - If Health reaches zero, the player suffers hypothermia blackout and is rescued to the heated settlement outpost with 100% warmth and health restored.
+- **Authentic Canadian Heat Sources & Warmth Recovery**:
+  - **Crackling Birch Campfires (All 14 Realms)**: Stone-ringed birch fires restore warmth rapidly at `+38%/sec`.
+  - **Banff Geothermal Upper Hot Springs (Alberta)**: Steaming turquoise mineral pool at `x: -36, z: -35` restores 100% warmth and rapidly heals health.
+  - **Traditional Maple Sugar Shack & Snow Trough (ON, QC, NCR)**: Press `[F]` to pour hot maple taffy on snow (*tire sur la neige*) for +50% warmth and a 15-second sprint boost.
+  - **Insulated Hot Maple Coffee Thermos (`[C]`)**: Sip hot Canadian maple coffee from an insulated thermos for +35% instant warmth on the trail (3 charges, refilled near heat).
+  - **Heated Cabins & Cockpits**: Sheltering inside vehicles, aircraft cockpits, the Calgary Central Library atrium, or C-Train cars completely halts cold drain and recovers warmth.
+- **Canadian Wildlife**:
+  - Majestic Bull Moose with broad palmate antlers in BC, Alberta, Manitoba, Ontario, and New Brunswick.
+  - Arctic Polar Bear surveying the tundra in Nunavut.
+
 
