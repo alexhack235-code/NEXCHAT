@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Yukon Territory // Trans-Canada Cyberway [YT]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="js/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #141008; font-family: 'Rajdhani', sans-serif; color: #fff; }
+    #canvas-container { position: absolute; inset: 0; }
+    canvas { width: 100%; height: 100%; display: block; }
+    
+    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; }
+    .province-badge { background: rgba(28, 22, 12, 0.9); border: 1.5px solid #eab308; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(234, 179, 8, 0.35); pointer-events: auto; }
+    .crest { width: 42px; height: 42px; border-radius: 50%; background: rgba(234, 179, 8, 0.2); border: 2px solid #eab308; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #eab308; }
+    .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+    .province-sub { font-size: 11px; color: #fde047; letter-spacing: 0.5px; font-weight: 600; }
+    
+    .hud-right { display: flex; gap: 10px; align-items: center; pointer-events: auto; }
+    .hud-pill { background: rgba(28, 22, 12, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-return { background: linear-gradient(135deg, #d97706, #b45309); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 18px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px rgba(217,119,6,0.4); display: flex; align-items: center; gap: 8px; }
+    .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(217,119,6,0.7); }
+    .btn-map { background: rgba(234, 179, 8, 0.2); border: 1.5px solid #eab308; border-radius: 10px; color: #eab308; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .btn-map:hover { background: rgba(234, 179, 8, 0.4); }
+
+    .controls-banner { position: fixed; bottom: 20px; left: 20px; background: rgba(20, 16, 8, 0.85); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .controls-banner span { color: #fde047; font-weight: 700; }
+
+    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(28, 22, 12, 0.95); border: 2px solid #eab308; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fde047; display: none; align-items: center; gap: 10px; box-shadow: 0 0 30px rgba(234,179,8,0.4); z-index: 150; }
+    #notify-box { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: rgba(28, 22, 12, 0.96); border: 1.5px solid #ffd700; border-radius: 10px; padding: 10px 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #ffd700; z-index: 200; display: none; box-shadow: 0 0 25px rgba(255,215,0,0.35); text-align: center; }
+
+    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.85); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .province-modal.visible { display: flex; }
+    .modal-box { background: rgba(28, 22, 12, 0.96); border: 2px solid #eab308; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(234,179,8,0.4); }
+    .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(234,179,8,0.08); }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .modal-close { background: none; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; }
+    .modal-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; }
+    .province-card { background: rgba(36, 28, 16, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
+    .province-card:hover { border-color: #eab308; transform: translateY(-2px); box-shadow: 0 0 20px rgba(234,179,8,0.25); }
+    .province-card.active { border-color: #eab308; background: rgba(234,179,8,0.2); box-shadow: 0 0 20px rgba(234,179,8,0.3); }
+    .p-head { display: flex; align-items: center; justify-content: space-between; }
+    .p-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fff; }
+    .p-abbr { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #fde047; }
+    .p-desc { font-size: 11px; color: #8fa3b8; line-height: 1.3; }
+    .p-landmark { font-size: 10px; color: #ffd700; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div class="province-hud">
+    <div class="province-badge">
+      <div class="crest"><i class="fa-solid fa-mountain-sun"></i></div>
+      <div>
+        <div class="province-title">YUKON TERRITORY</div>
+        <div class="province-sub">// KLONDIKE GOLD DREDGE &amp; MOUNT LOGAN [YT]</div>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
+      <button type="button" class="btn-map" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> TRANS-CANADA [H]</button>
+      <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
+    </div>
+  </div>
+
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>E / F</span>] 8x8 EXOCRAWLER &nbsp;|&nbsp; [<span>H</span>] PROVINCES
+  </div>
+
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACTION</span></div>
+  <div id="notify-box"></div>
+
+  <div class="province-modal" id="modal-map">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2><i class="fa-brands fa-canadian-maple-leaf" style="color: #eab308;"></i> TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES &amp; TERRITORIES</h2>
+        <button type="button" class="modal-close" onclick="toggleMapModal()">&times;</button>
+      </div>
+      <div class="modal-grid" id="provinces-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const CANADIAN_PROVINCES = [
+      { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
+      { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
+      { id: 'british-columbia', name: 'British Columbia', abbr: 'BC', file: 'province-british-columbia.html', landmark: 'Lions Gate Bridge & Whistler Peak', desc: 'Pacific cascadia rainforests, mountain ranges and coastal seaplane ports.' },
+      { id: 'alberta', name: 'Alberta', abbr: 'AB', file: 'province-alberta.html', landmark: 'Calgary Stampede & Banff Rockies', desc: 'Energy capital, heavy exocraft haulers and high mountain glaciers.' },
+      { id: 'manitoba', name: 'Manitoba', abbr: 'MB', file: 'province-manitoba.html', landmark: 'The Forks & Esplanade Riel Bridge', desc: 'Gateway to the West, trans-continental rail hub and polar aurora station.' },
+      { id: 'saskatchewan', name: 'Saskatchewan', abbr: 'SK', file: 'province-saskatchewan.html', landmark: 'Wascana Legislative Dome & Potash Wells', desc: 'Land of the living skies, massive solar farms and autonomous agriculture.' },
+      { id: 'nova-scotia', name: 'Nova Scotia', abbr: 'NS', file: 'province-nova-scotia.html', landmark: 'Halifax Star Citadel & Peggy\'s Cove', desc: 'Atlantic maritime naval fortress, historic Bluenose dock and tidal power.' },
+      { id: 'new-brunswick', name: 'New Brunswick', abbr: 'NB', file: 'province-new-brunswick.html', landmark: 'Hopewell Rocks & Bay of Fundy Tides', desc: 'Appalachian cyber-corridor with the highest tidal surges in the world.' },
+      { id: 'newfoundland', name: 'Newfoundland & Labrador', abbr: 'NL', file: 'province-newfoundland.html', landmark: 'Signal Hill Marconi Tower & Iceberg Alley', desc: 'First light of North America, transatlantic cables and iceberg interceptors.' },
+      { id: 'prince-edward-island', name: 'Prince Edward Island', abbr: 'PE', file: 'province-prince-edward-island.html', landmark: 'Confederation Bridge & Red Sand Cliffs', desc: 'Cradle of Confederation, 13km causeway and coastal red sand dunes.' },
+      { id: 'northwest-territories', name: 'Northwest Territories', abbr: 'NT', file: 'province-northwest-territories.html', landmark: 'Diavik Diamond Mine & Slave Lake Ice Road', desc: 'Aurora capital of the Arctic, sub-zero trucking and kimberlite diamonds.' },
+      { id: 'yukon', name: 'Yukon Territory', abbr: 'YT', file: 'province-yukon.html', landmark: 'Klondike Gold Dredge & Mount Logan', desc: 'Historic Klondike gold territory and Canada\'s highest glacial summit.' },
+      { id: 'nunavut', name: 'Territory of Nunavut', abbr: 'NU', file: 'province-nunavut.html', landmark: 'Giant Neon Inukshuk & Igloo Dome', desc: 'High Arctic sovereignty, endless tundra and aurora-cloaked settlements.' },
+      { id: 'national-capital', name: 'National Capital Region', abbr: 'NCR', file: 'province-national-capital.html', landmark: 'Parliament Peace Tower & Rideau Canal', desc: 'Federal core of Canada, Centennial Flame and national quantum archive.' }
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
+    const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
+    let inCrawler = false;
+    let crawlerSpeed = 0;
+
+    document.getElementById('token-val').textContent = tokens.toLocaleString();
+
+    function showNotify(msg) {
+      const box = document.getElementById('notify-box');
+      box.textContent = msg;
+      box.style.display = 'block';
+      setTimeout(() => { box.style.display = 'none'; }, 3800);
+    }
+
+    function returnToMetropolis() {
+      localStorage.setItem('BS_TOKENS', tokens.toString());
+      window.location.href = `game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+    }
+
+    function toggleMapModal() {
+      document.getElementById('modal-map').classList.toggle('visible');
+    }
+
+    const listEl = document.getElementById('provinces-list');
+    CANADIAN_PROVINCES.forEach(p => {
+      const card = document.createElement('a');
+      card.className = 'province-card' + (p.id === 'yukon' ? ' active' : '');
+      card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      card.innerHTML = `
+        <div class="p-head">
+          <span class="p-name">${p.name}</span>
+          <span class="p-abbr">${p.abbr}</span>
+        </div>
+        <div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
+        <div class="p-desc">${p.desc}</div>
+      `;
+      listEl.appendChild(card);
+    });
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'KeyH') toggleMapModal();
+      if (e.code === 'KeyE') toggleVehicle();
+      if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'Escape') {
+        const m = document.getElementById('modal-map');
+        if (m.classList.contains('visible')) m.classList.remove('visible');
+        else returnToMetropolis();
+      }
+    });
+
+    // ------------------------------------------------------------
+    // THREE.JS 3D ENGINE - YUKON MOUNT LOGAN & KLONDIKE GOLD DREDGE
+    // ------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x141008);
+    scene.fog = new THREE.FogExp2(0x141008, 0.0035);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1500);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0x594626, 0.95);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xfde047, 1.8);
+    dirLight.position.set(130, 220, 90);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // High Klondike River Valley Ground
+    const valleyGeo = new THREE.PlaneGeometry(1200, 1200);
+    const valleyMat = new THREE.MeshStandardMaterial({ color: 0x271f11, roughness: 0.9 });
+    const valley = new THREE.Mesh(valleyGeo, valleyMat);
+    valley.rotation.x = -Math.PI / 2;
+    valley.receiveShadow = true;
+    scene.add(valley);
+
+    // MOUNT LOGAN SUMMIT (Towering Mountain Massifs at X = -450)
+    const mtnMat = new THREE.MeshStandardMaterial({ color: 0x3d3025, roughness: 0.95 });
+    const snowCapMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
+    for (let m = 0; m < 7; m++) {
+      const mz = (m - 3) * 140;
+      const mh = 200 + Math.random() * 90;
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(110, mh, 5), mtnMat);
+      cone.position.set(-440, mh / 2, mz);
+      scene.add(cone);
+
+      const cap = new THREE.Mesh(new THREE.ConeGeometry(38, mh * 0.35, 5), snowCapMat);
+      cap.position.set(-440, mh * 0.82, mz);
+      scene.add(cap);
+    }
+
+    // HISTORIC KLONDIKE GOLD DREDGE NO. 4 (at 110, 0, -110)
+    const dredgeGroup = new THREE.Group();
+    dredgeGroup.position.set(110, 0, -110);
+    scene.add(dredgeGroup);
+
+    // Dredge Hull & Housing (3-story timber/steel superstructure)
+    const dHull = new THREE.Mesh(new THREE.BoxGeometry(45, 16, 26), new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.85 }));
+    dHull.position.y = 8;
+    dredgeGroup.add(dHull);
+
+    const dUpper = new THREE.Mesh(new THREE.BoxGeometry(32, 14, 20), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 }));
+    dUpper.position.y = 23;
+    dredgeGroup.add(dUpper);
+
+    // Slanted Bucketline Ladder Boom
+    const boom = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 45), new THREE.MeshStandardMaterial({ color: 0xeab308, metalness: 0.85 }));
+    boom.rotation.x = 0.55;
+    boom.position.set(0, 16, -26);
+    dredgeGroup.add(boom);
+
+    // KLONDIKE ALL-TERRAIN 8x8 EXOCRAWLER (-10, 0.6, 25)
+    const crawlerGroup = new THREE.Group();
+    crawlerGroup.position.set(-10, 0.6, 25);
+    scene.add(crawlerGroup);
+
+    const cBody = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.4, 6.8), new THREE.MeshStandardMaterial({ color: 0xeab308, metalness: 0.9, roughness: 0.25 }));
+    cBody.position.y = 1.1;
+    crawlerGroup.add(cBody);
+
+    const cCab = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.1, 2.8), new THREE.MeshStandardMaterial({ color: 0x181008, metalness: 0.8 }));
+    cCab.position.set(0, 2.1, -1.0);
+    crawlerGroup.add(cCab);
+
+    // 8 All-Terrain Bogie Wheels
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x090d14, roughness: 0.95 });
+    [-1.9, 1.9].forEach(wx => {
+      [-2.4, -0.8, 0.8, 2.4].forEach(wz => {
+        const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.5, 16), tireMat);
+        tire.rotation.z = Math.PI / 2;
+        tire.position.set(wx, 0.65, wz);
+        crawlerGroup.add(tire);
+      });
+    });
+
+    // Klondike Gold Strike Vault at (0, 0, -20)
+    const termGroup = new THREE.Group();
+    termGroup.position.set(0, 0, -20);
+    scene.add(termGroup);
+
+    const tBase = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x33250b, metalness: 0.9 }));
+    tBase.position.y = 1.1;
+    termGroup.add(tBase);
+
+    const tOrb = new THREE.Mesh(new THREE.DodecahedronGeometry(1.3), new THREE.MeshBasicMaterial({ color: 0xfacc15, wireframe: true }));
+    tOrb.position.y = 2.6;
+    termGroup.add(tOrb);
+
+    // Player
+    const player = {
+      pos: new THREE.Vector3(0, 1.2, 50),
+      vel: new THREE.Vector3(),
+      yaw: 0,
+      pitch: 0,
+      isGrounded: true
+    };
+
+    const keys = {};
+    window.addEventListener('keydown', e => { keys[e.code] = true; });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    let isPointerLocked = false;
+    window.addEventListener('click', () => {
+      if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock();
+    });
+    document.addEventListener('pointerlockchange', () => {
+      isPointerLocked = (document.pointerLockElement === document.body);
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isPointerLocked) return;
+      player.yaw -= e.movementX * 0.0024;
+      player.pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.pitch - e.movementY * 0.0024));
+    });
+
+    function toggleVehicle() {
+      if (inCrawler) {
+        inCrawler = false;
+        player.pos.copy(crawlerGroup.position).add(new THREE.Vector3(2.8, 0.8, 0));
+        showNotify('DISEMBARKED KLONDIKE 8x8 EXOCRAWLER');
+      } else {
+        if (player.pos.distanceTo(crawlerGroup.position) < 8.0) {
+          inCrawler = true;
+          showNotify('🏔️ PILOTING KLONDIKE 8x8 EXOCRAWLER // GOLD PASS TRACK ACTIVE');
+        }
+      }
+    }
+
+    let loreClaimed = false;
+    function handleInteractions() {
+      if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
+        loreClaimed = true;
+        tokens += 700;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚡ YUKON ARCHIVE UNLOCKED: "KLONDIKE GOLD RUSH" (+700 NEX TOKENS)');
+      }
+    }
+
+    let lastTime = performance.now();
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      tOrb.rotation.y += delta * 1.5;
+      tOrb.rotation.x += delta * 0.9;
+
+      const prompt = document.getElementById('interact-prompt');
+      const promptMsg = document.getElementById('prompt-msg');
+      if (player.pos.distanceTo(crawlerGroup.position) < 7.0 && !inCrawler) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'PILOT 8x8 EXOCRAWLER [E]';
+      } else if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'ACCESS KLONDIKE GOLD VAULT [F]';
+      } else {
+        prompt.style.display = 'none';
+      }
+
+      if (inCrawler) {
+        let throttle = 0, steer = 0;
+        if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
+        if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
+        if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
+        if (keys['KeyD'] || keys['ArrowRight']) steer += 1;
+        const nitro = keys['ShiftLeft'] || keys['ShiftRight'] ? 1.6 : 1.0;
+
+        crawlerSpeed = THREE.MathUtils.lerp(crawlerSpeed, throttle * 48 * nitro, delta * 2.8);
+        crawlerGroup.rotation.y += steer * delta * (crawlerSpeed / 20);
+        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), crawlerGroup.rotation.y);
+        crawlerGroup.position.add(fwd.multiplyScalar(crawlerSpeed * delta));
+
+        player.pos.copy(crawlerGroup.position).add(new THREE.Vector3(0, 1.8, 0));
+        const camBack = new THREE.Vector3(0, 4.8, 11).applyAxisAngle(new THREE.Vector3(0, 1, 0), crawlerGroup.rotation.y);
+        camera.position.lerp(crawlerGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(crawlerGroup.position.x, crawlerGroup.position.y + 1.2, crawlerGroup.position.z);
+      } else {
+        let moveX = 0, moveZ = 0;
+        if (keys['KeyW']) moveZ -= 1;
+        if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1;
+        if (keys['KeyD']) moveX += 1;
+
+        const moveSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 22 : 12;
+        const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
+        const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+
+        player.pos.x += rotatedMove.x * moveSpeed * delta;
+        player.pos.z += rotatedMove.z * moveSpeed * delta;
+
+        if (keys['Space'] && player.isGrounded) {
+          player.vel.y = 9.5;
+          player.isGrounded = false;
+        }
+        player.vel.y -= 22 * delta;
+        player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2) {
+          player.pos.y = 1.2;
+          player.vel.y = 0;
+          player.isGrounded = true;
+        }
+
+        camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+        const lookDir = new THREE.Vector3(
+          Math.sin(player.yaw) * Math.cos(player.pitch),
+          Math.sin(player.pitch),
+          Math.cos(player.yaw) * Math.cos(player.pitch)
+        );
+        camera.lookAt(camera.position.clone().add(lookDir));
+      }
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

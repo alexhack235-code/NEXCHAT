@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Province of Saskatchewan // Trans-Canada Cyberway [SK]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="js/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #0c1810; font-family: 'Rajdhani', sans-serif; color: #fff; }
+    #canvas-container { position: absolute; inset: 0; }
+    canvas { width: 100%; height: 100%; display: block; }
+    
+    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; }
+    .province-badge { background: rgba(12, 28, 16, 0.9); border: 1.5px solid #10b981; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(16, 185, 129, 0.35); pointer-events: auto; }
+    .crest { width: 42px; height: 42px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); border: 2px solid #10b981; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #10b981; }
+    .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+    .province-sub { font-size: 11px; color: #6ee7b7; letter-spacing: 0.5px; font-weight: 600; }
+    
+    .hud-right { display: flex; gap: 10px; align-items: center; pointer-events: auto; }
+    .hud-pill { background: rgba(12, 28, 16, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-return { background: linear-gradient(135deg, #059669, #047857); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 18px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px rgba(5,150,105,0.4); display: flex; align-items: center; gap: 8px; }
+    .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(5,150,105,0.7); }
+    .btn-map { background: rgba(16, 185, 129, 0.2); border: 1.5px solid #10b981; border-radius: 10px; color: #10b981; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .btn-map:hover { background: rgba(16, 185, 129, 0.4); }
+
+    .controls-banner { position: fixed; bottom: 20px; left: 20px; background: rgba(10, 22, 14, 0.85); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .controls-banner span { color: #6ee7b7; font-weight: 700; }
+
+    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(12, 28, 16, 0.95); border: 2px solid #10b981; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #6ee7b7; display: none; align-items: center; gap: 10px; box-shadow: 0 0 30px rgba(16,185,129,0.4); z-index: 150; }
+    #notify-box { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: rgba(12, 28, 16, 0.96); border: 1.5px solid #ffd700; border-radius: 10px; padding: 10px 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #ffd700; z-index: 200; display: none; box-shadow: 0 0 25px rgba(255,215,0,0.35); text-align: center; }
+
+    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.85); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .province-modal.visible { display: flex; }
+    .modal-box { background: rgba(12, 28, 16, 0.96); border: 2px solid #10b981; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(16,185,129,0.4); }
+    .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(16,185,129,0.08); }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .modal-close { background: none; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; }
+    .modal-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; }
+    .province-card { background: rgba(20, 36, 24, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
+    .province-card:hover { border-color: #10b981; transform: translateY(-2px); box-shadow: 0 0 20px rgba(16,185,129,0.25); }
+    .province-card.active { border-color: #10b981; background: rgba(16,185,129,0.2); box-shadow: 0 0 20px rgba(16,185,129,0.3); }
+    .p-head { display: flex; align-items: center; justify-content: space-between; }
+    .p-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fff; }
+    .p-abbr { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #6ee7b7; }
+    .p-desc { font-size: 11px; color: #8fa3b8; line-height: 1.3; }
+    .p-landmark { font-size: 10px; color: #ffd700; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div class="province-hud">
+    <div class="province-badge">
+      <div class="crest"><i class="fa-solid fa-wheat-awn"></i></div>
+      <div>
+        <div class="province-title">PROVINCE OF SASKATCHEWAN</div>
+        <div class="province-sub">// LAND OF THE LIVING SKIES [SK]</div>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
+      <button type="button" class="btn-map" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> TRANS-CANADA [H]</button>
+      <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
+    </div>
+  </div>
+
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>E / F</span>] PRAIRIE COMBINE &nbsp;|&nbsp; [<span>H</span>] PROVINCES
+  </div>
+
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACTION</span></div>
+  <div id="notify-box"></div>
+
+  <div class="province-modal" id="modal-map">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2><i class="fa-brands fa-canadian-maple-leaf" style="color: #10b981;"></i> TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES &amp; TERRITORIES</h2>
+        <button type="button" class="modal-close" onclick="toggleMapModal()">&times;</button>
+      </div>
+      <div class="modal-grid" id="provinces-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const CANADIAN_PROVINCES = [
+      { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
+      { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
+      { id: 'british-columbia', name: 'British Columbia', abbr: 'BC', file: 'province-british-columbia.html', landmark: 'Lions Gate Bridge & Whistler Peak', desc: 'Pacific cascadia rainforests, mountain ranges and coastal seaplane ports.' },
+      { id: 'alberta', name: 'Alberta', abbr: 'AB', file: 'province-alberta.html', landmark: 'Calgary Stampede & Banff Rockies', desc: 'Energy capital, heavy exocraft haulers and high mountain glaciers.' },
+      { id: 'manitoba', name: 'Manitoba', abbr: 'MB', file: 'province-manitoba.html', landmark: 'The Forks & Esplanade Riel Bridge', desc: 'Gateway to the West, trans-continental rail hub and polar aurora station.' },
+      { id: 'saskatchewan', name: 'Saskatchewan', abbr: 'SK', file: 'province-saskatchewan.html', landmark: 'Wascana Legislative Dome & Potash Wells', desc: 'Land of the living skies, massive solar farms and autonomous agriculture.' },
+      { id: 'nova-scotia', name: 'Nova Scotia', abbr: 'NS', file: 'province-nova-scotia.html', landmark: 'Halifax Star Citadel & Peggy\'s Cove', desc: 'Atlantic maritime naval fortress, historic Bluenose dock and tidal power.' },
+      { id: 'new-brunswick', name: 'New Brunswick', abbr: 'NB', file: 'province-new-brunswick.html', landmark: 'Hopewell Rocks & Bay of Fundy Tides', desc: 'Appalachian cyber-corridor with the highest tidal surges in the world.' },
+      { id: 'newfoundland', name: 'Newfoundland & Labrador', abbr: 'NL', file: 'province-newfoundland.html', landmark: 'Signal Hill Marconi Tower & Iceberg Alley', desc: 'First light of North America, transatlantic cables and iceberg interceptors.' },
+      { id: 'prince-edward-island', name: 'Prince Edward Island', abbr: 'PE', file: 'province-prince-edward-island.html', landmark: 'Confederation Bridge & Red Sand Cliffs', desc: 'Cradle of Confederation, 13km causeway and coastal red sand dunes.' },
+      { id: 'northwest-territories', name: 'Northwest Territories', abbr: 'NT', file: 'province-northwest-territories.html', landmark: 'Diavik Diamond Mine & Slave Lake Ice Road', desc: 'Aurora capital of the Arctic, sub-zero trucking and kimberlite diamonds.' },
+      { id: 'yukon', name: 'Yukon Territory', abbr: 'YT', file: 'province-yukon.html', landmark: 'Klondike Gold Dredge & Mount Logan', desc: 'Historic Klondike gold territory and Canada\'s highest glacial summit.' },
+      { id: 'nunavut', name: 'Territory of Nunavut', abbr: 'NU', file: 'province-nunavut.html', landmark: 'Giant Neon Inukshuk & Igloo Dome', desc: 'High Arctic sovereignty, endless tundra and aurora-cloaked settlements.' },
+      { id: 'national-capital', name: 'National Capital Region', abbr: 'NCR', file: 'province-national-capital.html', landmark: 'Parliament Peace Tower & Rideau Canal', desc: 'Federal core of Canada, Centennial Flame and national quantum archive.' }
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
+    const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
+    let inCombine = false;
+    let combineSpeed = 0;
+
+    document.getElementById('token-val').textContent = tokens.toLocaleString();
+
+    function showNotify(msg) {
+      const box = document.getElementById('notify-box');
+      box.textContent = msg;
+      box.style.display = 'block';
+      setTimeout(() => { box.style.display = 'none'; }, 3800);
+    }
+
+    function returnToMetropolis() {
+      localStorage.setItem('BS_TOKENS', tokens.toString());
+      window.location.href = `game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+    }
+
+    function toggleMapModal() {
+      document.getElementById('modal-map').classList.toggle('visible');
+    }
+
+    const listEl = document.getElementById('provinces-list');
+    CANADIAN_PROVINCES.forEach(p => {
+      const card = document.createElement('a');
+      card.className = 'province-card' + (p.id === 'saskatchewan' ? ' active' : '');
+      card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      card.innerHTML = `
+        <div class="p-head">
+          <span class="p-name">${p.name}</span>
+          <span class="p-abbr">${p.abbr}</span>
+        </div>
+        <div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
+        <div class="p-desc">${p.desc}</div>
+      `;
+      listEl.appendChild(card);
+    });
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'KeyH') toggleMapModal();
+      if (e.code === 'KeyE') toggleVehicle();
+      if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'Escape') {
+        const m = document.getElementById('modal-map');
+        if (m.classList.contains('visible')) m.classList.remove('visible');
+        else returnToMetropolis();
+      }
+    });
+
+    // ------------------------------------------------------------
+    // THREE.JS 3D ENGINE - SASKATCHEWAN LIVING SKIES & WASCANA DOME
+    // ------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0c1810);
+    scene.fog = new THREE.FogExp2(0x0c1810, 0.0032);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1500);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0x2d5a3c, 0.95);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xfcd34d, 1.8);
+    dirLight.position.set(140, 220, 100);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Flat Prairie Golden Wheat Ground
+    const groundGeo = new THREE.PlaneGeometry(1200, 1200);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x223318, roughness: 0.9 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // WASCANA LEGISLATIVE DOME COMPLEX (at 0, 0, -150)
+    const wascanaGroup = new THREE.Group();
+    wascanaGroup.position.set(0, 0, -150);
+    scene.add(wascanaGroup);
+
+    const wBase = new THREE.Mesh(new THREE.BoxGeometry(110, 24, 48), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7 }));
+    wBase.position.y = 12;
+    wascanaGroup.add(wBase);
+
+    // Central Emerald Dome
+    const wDome = new THREE.Mesh(new THREE.SphereGeometry(22, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.85, roughness: 0.2 }));
+    wDome.position.y = 24;
+    wascanaGroup.add(wDome);
+
+    // Lantern Cupola
+    const cupola = new THREE.Mesh(new THREE.CylinderGeometry(4, 5, 14, 12), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 }));
+    cupola.position.y = 48;
+    wascanaGroup.add(cupola);
+
+    // Golden Living Sky Beacon
+    const skyBeacon = new THREE.PointLight(0x10b981, 3.5, 200);
+    skyBeacon.position.y = 56;
+    wascanaGroup.add(skyBeacon);
+
+    // MASSIVE SOLAR ARRAY COLLECTORS (Flanking West & East)
+    [-180, 180].forEach(sx => {
+      for (let r = -2; r <= 2; r++) {
+        const panel = new THREE.Mesh(new THREE.BoxGeometry(26, 0.5, 14), new THREE.MeshStandardMaterial({ color: 0x064e3b, metalness: 0.9, roughness: 0.1 }));
+        panel.rotation.x = 0.35;
+        panel.position.set(sx, 7, r * 28 - 60);
+        scene.add(panel);
+
+        const pStand = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.6, 7, 8), new THREE.MeshStandardMaterial({ color: 0x64748b }));
+        pStand.position.set(sx, 3.5, r * 28 - 60);
+        scene.add(pStand);
+      }
+    });
+
+    // PRAIRIE COMBINE HARVESTER EXOCRAFT (-12, 0.6, 25)
+    const combineGroup = new THREE.Group();
+    combineGroup.position.set(-12, 0.6, 25);
+    scene.add(combineGroup);
+
+    const cBody = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.0, 7.5), new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.85, roughness: 0.3 }));
+    cBody.position.y = 1.6;
+    combineGroup.add(cBody);
+
+    const cCab = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.4, 2.6), new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.9 }));
+    cCab.position.set(0, 3.0, -1.8);
+    combineGroup.add(cCab);
+
+    // Front Rotating Reel Cylinder
+    const reel = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.2, 7.2, 16), new THREE.MeshStandardMaterial({ color: 0xf59e0b, wireframe: true }));
+    reel.rotation.z = Math.PI / 2;
+    reel.position.set(0, 1.0, -4.6);
+    combineGroup.add(reel);
+
+    // Giant Drive Wheels
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x090d14, roughness: 0.95 });
+    [-2.2, 2.2].forEach(wx => {
+      const bigTire = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.4, 0.9, 16), tireMat);
+      bigTire.rotation.z = Math.PI / 2;
+      bigTire.position.set(wx, 1.4, -1.2);
+      combineGroup.add(bigTire);
+
+      const smallTire = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.6, 16), tireMat);
+      smallTire.rotation.z = Math.PI / 2;
+      smallTire.position.set(wx * 0.9, 0.8, 2.4);
+      combineGroup.add(smallTire);
+    });
+
+    // Potash Grid Cyber Terminal at (0, 0, -20)
+    const termGroup = new THREE.Group();
+    termGroup.position.set(0, 0, -20);
+    scene.add(termGroup);
+
+    const tBase = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x142b1a, metalness: 0.9 }));
+    tBase.position.y = 1.1;
+    termGroup.add(tBase);
+
+    const tOrb = new THREE.Mesh(new THREE.DodecahedronGeometry(1.3), new THREE.MeshBasicMaterial({ color: 0x10b981, wireframe: true }));
+    tOrb.position.y = 2.6;
+    termGroup.add(tOrb);
+
+    // Player
+    const player = {
+      pos: new THREE.Vector3(0, 1.2, 50),
+      vel: new THREE.Vector3(),
+      yaw: 0,
+      pitch: 0,
+      isGrounded: true
+    };
+
+    const keys = {};
+    window.addEventListener('keydown', e => { keys[e.code] = true; });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    let isPointerLocked = false;
+    window.addEventListener('click', () => {
+      if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock();
+    });
+    document.addEventListener('pointerlockchange', () => {
+      isPointerLocked = (document.pointerLockElement === document.body);
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isPointerLocked) return;
+      player.yaw -= e.movementX * 0.0024;
+      player.pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.pitch - e.movementY * 0.0024));
+    });
+
+    function toggleVehicle() {
+      if (inCombine) {
+        inCombine = false;
+        player.pos.copy(combineGroup.position).add(new THREE.Vector3(3.2, 0.8, 0));
+        showNotify('DISEMBARKED SASKATCHEWAN PRAIRIE COMBINE');
+      } else {
+        if (player.pos.distanceTo(combineGroup.position) < 8.0) {
+          inCombine = true;
+          showNotify('🚜 PILOTING PRAIRIE COMBINE EXOCRAFT // LIVING SKIES REEL ACTIVE');
+        }
+      }
+    }
+
+    let loreClaimed = false;
+    function handleInteractions() {
+      if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
+        loreClaimed = true;
+        tokens += 600;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚡ SASKATCHEWAN ARCHIVE UNLOCKED: "MULTIS E GENTIBUS VIRES" (+600 NEX TOKENS)');
+      }
+    }
+
+    let lastTime = performance.now();
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      tOrb.rotation.y += delta * 1.5;
+      tOrb.rotation.x += delta * 0.9;
+      reel.rotation.x += delta * 2.5;
+
+      const prompt = document.getElementById('interact-prompt');
+      const promptMsg = document.getElementById('prompt-msg');
+      if (player.pos.distanceTo(combineGroup.position) < 7.0 && !inCombine) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'PILOT PRAIRIE COMBINE [E]';
+      } else if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'ACCESS POTASH GRID ARCHIVE [F]';
+      } else {
+        prompt.style.display = 'none';
+      }
+
+      if (inCombine) {
+        let throttle = 0, steer = 0;
+        if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
+        if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
+        if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
+        if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+        const nitro = keys['ShiftLeft'] || keys['ShiftRight'] ? 1.5 : 1.0;
+
+        combineSpeed = THREE.MathUtils.lerp(combineSpeed, throttle * 44 * nitro, delta * 2.8);
+        combineGroup.rotation.y += steer * delta * (combineSpeed / 20);
+        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), combineGroup.rotation.y);
+        combineGroup.position.add(fwd.multiplyScalar(combineSpeed * delta));
+
+        player.pos.copy(combineGroup.position).add(new THREE.Vector3(0, 2.2, 0));
+        const camBack = new THREE.Vector3(0, 5.2, 12).applyAxisAngle(new THREE.Vector3(0, 1, 0), combineGroup.rotation.y);
+        camera.position.lerp(combineGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(combineGroup.position.x, combineGroup.position.y + 1.6, combineGroup.position.z);
+      } else {
+        let moveX = 0, moveZ = 0;
+        if (keys['KeyW']) moveZ -= 1;
+        if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1;
+        if (keys['KeyD']) moveX += 1;
+
+        const moveSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 22 : 12;
+        const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
+        const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+
+        player.pos.x += rotatedMove.x * moveSpeed * delta;
+        player.pos.z += rotatedMove.z * moveSpeed * delta;
+
+        if (keys['Space'] && player.isGrounded) {
+          player.vel.y = 9.5;
+          player.isGrounded = false;
+        }
+        player.vel.y -= 22 * delta;
+        player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2) {
+          player.pos.y = 1.2;
+          player.vel.y = 0;
+          player.isGrounded = true;
+        }
+
+        camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+        const lookDir = new THREE.Vector3(
+          Math.sin(player.yaw) * Math.cos(player.pitch),
+          Math.sin(player.pitch),
+          Math.cos(player.yaw) * Math.cos(player.pitch)
+        );
+        camera.lookAt(camera.position.clone().add(lookDir));
+      }
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

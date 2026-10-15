@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Province of Ontario // Trans-Canada Cyberway [ON]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="js/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #060b14; font-family: 'Rajdhani', sans-serif; color: #fff; }
+    #canvas-container { position: absolute; inset: 0; }
+    canvas { width: 100%; height: 100%; display: block; }
+    
+    /* Top Bar HUD */
+    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; }
+    .province-badge { background: rgba(10, 18, 32, 0.88); border: 1.5px solid #00f2ff; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0, 242, 255, 0.25); pointer-events: auto; }
+    .maple-crest { width: 42px; height: 42px; border-radius: 50%; background: rgba(255, 34, 68, 0.2); border: 2px solid #ff2244; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ff2244; }
+    .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+    .province-sub { font-size: 11px; color: #00f2ff; letter-spacing: 0.5px; font-weight: 600; }
+    
+    .hud-right { display: flex; gap: 10px; align-items: center; pointer-events: auto; }
+    .hud-pill { background: rgba(10, 18, 32, 0.88); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-return { background: linear-gradient(135deg, #ff2244, #cc0022); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 18px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px rgba(255,34,68,0.4); display: flex; align-items: center; gap: 8px; }
+    .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(255,34,68,0.7); }
+    .btn-map { background: rgba(0, 242, 255, 0.2); border: 1.5px solid #00f2ff; border-radius: 10px; color: #00f2ff; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
+    .btn-map:hover { background: rgba(0, 242, 255, 0.4); }
+
+    /* Controls Guide */
+    .controls-banner { position: fixed; bottom: 20px; left: 20px; background: rgba(8, 14, 24, 0.85); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .controls-banner span { color: #00f2ff; font-weight: 700; }
+
+    /* Interaction Prompt */
+    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(10, 18, 30, 0.95); border: 2px solid #00f2ff; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #00f2ff; display: none; align-items: center; gap: 10px; box-shadow: 0 0 30px rgba(0,242,255,0.4); z-index: 150; animation: pulseGlow 1.5s infinite; }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(0,242,255,0.3); } 50% { box-shadow: 0 0 35px rgba(0,242,255,0.6); } }
+
+    /* Notification */
+    #notify-box { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: rgba(8, 14, 24, 0.96); border: 1.5px solid #ffd700; border-radius: 10px; padding: 10px 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #ffd700; z-index: 200; display: none; box-shadow: 0 0 25px rgba(255,215,0,0.35); text-align: center; }
+
+    /* Trans-Canada Highway Modal */
+    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.85); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .province-modal.visible { display: flex; }
+    .modal-box { background: rgba(10, 18, 32, 0.96); border: 2px solid #ff2244; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(255,34,68,0.4); }
+    .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(255,34,68,0.08); }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .modal-close { background: none; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; transition: color 0.2s; }
+    .modal-close:hover { color: #ff2244; }
+    .modal-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; }
+    .province-card { background: rgba(16, 26, 44, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
+    .province-card:hover { border-color: #00f2ff; transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,242,255,0.25); }
+    .province-card.active { border-color: #ff2244; background: rgba(255,34,68,0.15); box-shadow: 0 0 20px rgba(255,34,68,0.3); }
+    .p-head { display: flex; align-items: center; justify-content: space-between; }
+    .p-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fff; }
+    .p-abbr { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #00f2ff; }
+    .p-desc { font-size: 11px; color: #8fa3b8; line-height: 1.3; }
+    .p-landmark { font-size: 10px; color: #ffd700; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- HUD -->
+  <div class="province-hud">
+    <div class="province-badge">
+      <div class="maple-crest"><i class="fa-brands fa-canadian-maple-leaf"></i></div>
+      <div>
+        <div class="province-title">PROVINCE OF ONTARIO</div>
+        <div class="province-sub">// NEO-TORONTO &amp; HIGHWAY 401 CORRIDOR [ON]</div>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
+      <button type="button" class="btn-map" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> TRANS-CANADA [H]</button>
+      <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
+    </div>
+  </div>
+
+  <!-- Controls Banner -->
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>E / F</span>] PATROL CRUISER &nbsp;|&nbsp; [<span>H</span>] HIGHWAYS
+  </div>
+
+  <!-- Interaction Prompt -->
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACT</span></div>
+
+  <!-- Notification Box -->
+  <div id="notify-box"></div>
+
+  <!-- Trans-Canada Highway Modal -->
+  <div class="province-modal" id="modal-map">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2><i class="fa-brands fa-canadian-maple-leaf" style="color: #ff2244;"></i> TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES &amp; TERRITORIES</h2>
+        <button type="button" class="modal-close" onclick="toggleMapModal()">&times;</button>
+      </div>
+      <div class="modal-grid" id="provinces-list">
+        <!-- Rendered via script -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Canadian Jurisdictions Registry
+    const CANADIAN_PROVINCES = [
+      { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
+      { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
+      { id: 'british-columbia', name: 'British Columbia', abbr: 'BC', file: 'province-british-columbia.html', landmark: 'Lions Gate Bridge & Whistler Peak', desc: 'Pacific cascadia rainforests, mountain ranges and coastal seaplane ports.' },
+      { id: 'alberta', name: 'Alberta', abbr: 'AB', file: 'province-alberta.html', landmark: 'Calgary Stampede & Banff Rockies', desc: 'Energy capital, heavy exocraft haulers and high mountain glaciers.' },
+      { id: 'manitoba', name: 'Manitoba', abbr: 'MB', file: 'province-manitoba.html', landmark: 'The Forks & Esplanade Riel Bridge', desc: 'Gateway to the West, trans-continental rail hub and polar aurora station.' },
+      { id: 'saskatchewan', name: 'Saskatchewan', abbr: 'SK', file: 'province-saskatchewan.html', landmark: 'Wascana Legislative Dome & Potash Wells', desc: 'Land of the living skies, massive solar farms and autonomous agriculture.' },
+      { id: 'nova-scotia', name: 'Nova Scotia', abbr: 'NS', file: 'province-nova-scotia.html', landmark: 'Halifax Star Citadel & Peggy\'s Cove', desc: 'Atlantic maritime naval fortress, historic Bluenose dock and tidal power.' },
+      { id: 'new-brunswick', name: 'New Brunswick', abbr: 'NB', file: 'province-new-brunswick.html', landmark: 'Hopewell Rocks & Bay of Fundy Tides', desc: 'Appalachian cyber-corridor with the highest tidal surges in the world.' },
+      { id: 'newfoundland', name: 'Newfoundland & Labrador', abbr: 'NL', file: 'province-newfoundland.html', landmark: 'Signal Hill Marconi Tower & Iceberg Alley', desc: 'First light of North America, transatlantic cables and iceberg interceptors.' },
+      { id: 'prince-edward-island', name: 'Prince Edward Island', abbr: 'PE', file: 'province-prince-edward-island.html', landmark: 'Confederation Bridge & Red Sand Cliffs', desc: 'Cradle of Confederation, 13km causeway and coastal red sand dunes.' },
+      { id: 'northwest-territories', name: 'Northwest Territories', abbr: 'NT', file: 'province-northwest-territories.html', landmark: 'Diavik Diamond Mine & Slave Lake Ice Road', desc: 'Aurora capital of the Arctic, sub-zero trucking and kimberlite diamonds.' },
+      { id: 'yukon', name: 'Yukon Territory', abbr: 'YT', file: 'province-yukon.html', landmark: 'Klondike Gold Dredge & Mount Logan', desc: 'Historic Klondike gold territory and Canada\'s highest glacial summit.' },
+      { id: 'nunavut', name: 'Territory of Nunavut', abbr: 'NU', file: 'province-nunavut.html', landmark: 'Giant Neon Inukshuk & Igloo Dome', desc: 'High Arctic sovereignty, endless tundra and aurora-cloaked settlements.' },
+      { id: 'national-capital', name: 'National Capital Region', abbr: 'NCR', file: 'province-national-capital.html', landmark: 'Parliament Peace Tower & Rideau Canal', desc: 'Federal core of Canada, Centennial Flame and national quantum archive.' }
+    ];
+
+    // State
+    const urlParams = new URLSearchParams(window.location.search);
+    let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
+    const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
+    let inPatrolCruiser = false;
+    let cruiserSpeed = 0;
+
+    document.getElementById('token-val').textContent = tokens.toLocaleString();
+
+    function showNotify(msg) {
+      const box = document.getElementById('notify-box');
+      box.textContent = msg;
+      box.style.display = 'block';
+      setTimeout(() => { box.style.display = 'none'; }, 3800);
+    }
+
+    function returnToMetropolis() {
+      localStorage.setItem('BS_TOKENS', tokens.toString());
+      window.location.href = `game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+    }
+
+    function toggleMapModal() {
+      const modal = document.getElementById('modal-map');
+      modal.classList.toggle('visible');
+    }
+
+    // Render Provincial Registry
+    const listEl = document.getElementById('provinces-list');
+    CANADIAN_PROVINCES.forEach(p => {
+      const card = document.createElement('a');
+      card.className = 'province-card' + (p.id === 'ontario' ? ' active' : '');
+      card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      card.innerHTML = `
+        <div class="p-head">
+          <span class="p-name">${p.name}</span>
+          <span class="p-abbr">${p.abbr}</span>
+        </div>
+        <div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
+        <div class="p-desc">${p.desc}</div>
+      `;
+      listEl.appendChild(card);
+    });
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'KeyH') toggleMapModal();
+      if (e.code === 'KeyE') toggleVehicle();
+      if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'Escape') {
+        const m = document.getElementById('modal-map');
+        if (m.classList.contains('visible')) m.classList.remove('visible');
+        else returnToMetropolis();
+      }
+    });
+
+    // ------------------------------------------------------------
+    // THREE.JS 3D ENGINE - ONTARIO HIGHWAY 401 & CN TOWER CITADEL
+    // ------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a101e);
+    scene.fog = new THREE.FogExp2(0x0a101e, 0.0035);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1500);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    container.appendChild(renderer.domElement);
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x406085, 0.9);
+    scene.add(ambientLight);
+    const dirLight = new THREE.DirectionalLight(0xaad5ff, 1.6);
+    dirLight.position.set(120, 250, 100);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    // Ground: Lake Ontario Coastline & Highway Asphalt
+    const groundGeo = new THREE.PlaneGeometry(1200, 1200, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x111622, roughness: 0.85, metalness: 0.2 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // Lake Ontario Blue Water Zone (South Z > 250)
+    const waterGeo = new THREE.PlaneGeometry(1200, 500);
+    const waterMat = new THREE.MeshStandardMaterial({ color: 0x004477, metalness: 0.8, roughness: 0.15, transparent: true, opacity: 0.85 });
+    const water = new THREE.Mesh(waterGeo, waterMat);
+    water.rotation.x = -Math.PI / 2;
+    water.position.set(0, 0.2, 500);
+    scene.add(water);
+
+    // Trans-Canada Highway 401 Multi-Lane Concrete Viaduct
+    const hwyGeo = new THREE.BoxGeometry(45, 1.2, 1000);
+    const hwyMat = new THREE.MeshStandardMaterial({ color: 0x181c24, roughness: 0.7 });
+    const hwy = new THREE.Mesh(hwyGeo, hwyMat);
+    hwy.position.set(0, 0.6, 0);
+    scene.add(hwy);
+
+    // Neon Highway Lane Lines
+    const lineMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
+    [-12, 0, 12].forEach(lx => {
+      const lGeo = new THREE.BoxGeometry(0.4, 0.05, 990);
+      const line = new THREE.Mesh(lGeo, lineMat);
+      line.position.set(lx, 1.25, 0);
+      scene.add(line);
+    });
+
+    // ARCHITECTURE: CYBER CN TOWER (553m Beacon) at (140, 0, -180)
+    const cnTowerGroup = new THREE.Group();
+    cnTowerGroup.position.set(140, 0, -180);
+    scene.add(cnTowerGroup);
+
+    const baseCore = new THREE.Mesh(new THREE.CylinderGeometry(5, 16, 220, 16), new THREE.MeshStandardMaterial({ color: 0xdde6ed, metalness: 0.8, roughness: 0.3 }));
+    baseCore.position.y = 110;
+    cnTowerGroup.add(baseCore);
+
+    // SkyPod & Revolving 360 Restaurant
+    const skyPod = new THREE.Mesh(new THREE.CylinderGeometry(24, 20, 16, 32), new THREE.MeshStandardMaterial({ color: 0x00f2ff, metalness: 0.9, roughness: 0.2 }));
+    skyPod.position.y = 220;
+    cnTowerGroup.add(skyPod);
+
+    // Upper Spire & Broadcast Antenna
+    const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 4, 180, 16), new THREE.MeshStandardMaterial({ color: 0xff2244, metalness: 0.95 }));
+    spire.position.y = 310;
+    cnTowerGroup.add(spire);
+
+    // Neon Red Maple Beacon on Spire Tip
+    const tipLight = new THREE.PointLight(0xff0044, 4, 400);
+    tipLight.position.y = 400;
+    cnTowerGroup.add(tipLight);
+
+    // Neo-Toronto Skyscraper Skyline
+    const buildingMat = new THREE.MeshStandardMaterial({ color: 0x162234, metalness: 0.8, roughness: 0.3 });
+    const windowMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+    for (let i = 0; i < 40; i++) {
+      const bx = (Math.random() - 0.5) * 800;
+      const bz = (Math.random() - 0.5) * 600 - 150;
+      if (Math.abs(bx) < 40) continue; // Keep highway clear
+      const bh = 50 + Math.random() * 160;
+      const bw = 20 + Math.random() * 30;
+      const b = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bw), buildingMat);
+      b.position.set(bx, bh / 2, bz);
+      scene.add(b);
+
+      // Neon accent ring
+      const r = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.6, 2, bw + 0.6), windowMat);
+      r.position.set(bx, bh * 0.8, bz);
+      scene.add(r);
+    }
+
+    // Interactive Ontario Lore Quantum Terminal at (0, 0, 80)
+    const loreTerminal = new THREE.Group();
+    loreTerminal.position.set(0, 0, 80);
+    scene.add(loreTerminal);
+
+    const termPedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x0a1424, metalness: 0.9 }));
+    termPedestal.position.y = 1.1;
+    loreTerminal.add(termPedestal);
+
+    const termHolo = new THREE.Mesh(new THREE.OctahedronGeometry(0.9), new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true }));
+    termHolo.position.y = 2.8;
+    loreTerminal.add(termHolo);
+
+    // Ontario OPP Cyber Patrol Cruiser (0, 0.6, 25)
+    const cruiserGroup = new THREE.Group();
+    cruiserGroup.position.set(0, 0.6, 25);
+    scene.add(cruiserGroup);
+
+    const cBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 4.8), new THREE.MeshStandardMaterial({ color: 0x050a14, metalness: 0.9, roughness: 0.2 }));
+    cBody.position.y = 0.65;
+    cruiserGroup.add(cBody);
+
+    const cRoof = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.65, 2.2), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.5, roughness: 0.3 }));
+    cRoof.position.set(0, 1.35, -0.2);
+    cruiserGroup.add(cRoof);
+
+    // Emergency Red & Blue Lightbar
+    const lightBar = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.18, 0.4), new THREE.MeshBasicMaterial({ color: 0xff0044 }));
+    lightBar.position.set(0, 1.75, -0.2);
+    cruiserGroup.add(lightBar);
+
+    // Wheels
+    const tireMat = new THREE.MeshStandardMaterial({ color: 0x111, roughness: 0.9 });
+    [[-1.2, 0.4, 1.5], [1.2, 0.4, 1.5], [-1.2, 0.4, -1.5], [1.2, 0.4, -1.5]].forEach(wp => {
+      const w = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 0.38, 16), tireMat);
+      w.rotation.z = Math.PI / 2;
+      w.position.set(wp[0], wp[1], wp[2]);
+      cruiserGroup.add(w);
+    });
+
+    // Player Avatar
+    const player = {
+      pos: new THREE.Vector3(0, 1.2, 60),
+      vel: new THREE.Vector3(),
+      yaw: 0,
+      pitch: 0,
+      isGrounded: true
+    };
+
+    const keys = {};
+    window.addEventListener('keydown', e => { keys[e.code] = true; });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    let isPointerLocked = false;
+    window.addEventListener('click', () => {
+      if (!isPointerLocked && document.body.requestPointerLock) {
+        document.body.requestPointerLock();
+      }
+    });
+    document.addEventListener('pointerlockchange', () => {
+      isPointerLocked = (document.pointerLockElement === document.body);
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isPointerLocked) return;
+      player.yaw -= e.movementX * 0.0024;
+      player.pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.pitch - e.movementY * 0.0024));
+    });
+
+    function toggleVehicle() {
+      if (inPatrolCruiser) {
+        inPatrolCruiser = false;
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(2.2, 0.8, 0));
+        showNotify('DISEMBARKED OPP HIGHWAY PATROL CRUISER');
+      } else {
+        if (player.pos.distanceTo(cruiserGroup.position) < 8.0) {
+          inPatrolCruiser = true;
+          showNotify('🏎️ PILOTING ONTARIO HIGHWAY PATROL CRUISER // [W/S] ACCELERATE, [A/D] STEER');
+        }
+      }
+    }
+
+    let loreCollected = false;
+    function handleInteractions() {
+      if (!loreCollected && player.pos.distanceTo(loreTerminal.position) < 6.0) {
+        loreCollected = true;
+        tokens += 600;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('🍁 ONTARIO ARCHIVE UNLOCKED: "UT INCEPIT FIDELIS SIC PERMANET" (+600 NEX TOKENS)');
+      }
+    }
+
+    // Animation Loop
+    let lastTime = performance.now();
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      // Rotate CN Tower Beacon & Holo Terminal
+      termHolo.rotation.y += delta * 1.5;
+      termHolo.rotation.x += delta * 0.8;
+      skyPod.rotation.y += delta * 0.2;
+
+      // Lightbar oscillation
+      lightBar.material.color.setHex(Math.sin(now * 0.01) > 0 ? 0xff0044 : 0x0066ff);
+
+      // Interaction Proximity
+      const prompt = document.getElementById('interact-prompt');
+      const promptMsg = document.getElementById('prompt-msg');
+      if (player.pos.distanceTo(cruiserGroup.position) < 7.0 && !inPatrolCruiser) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'PILOT ONTARIO PATROL CRUISER [E]';
+      } else if (!loreCollected && player.pos.distanceTo(loreTerminal.position) < 6.0) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'ACCESS ONTARIO QUANTUM ARCHIVE [F]';
+      } else {
+        prompt.style.display = 'none';
+      }
+
+      if (inPatrolCruiser) {
+        // Vehicle Driving Physics
+        let throttle = 0, steer = 0;
+        if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
+        if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
+        if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
+        if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+        const nitro = keys['ShiftLeft'] || keys['ShiftRight'] ? 1.6 : 1.0;
+
+        cruiserSpeed = THREE.MathUtils.lerp(cruiserSpeed, throttle * 48 * nitro, delta * 3.0);
+        cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 20);
+        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
+
+        // Sync player & camera
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(0, 1.4, 0));
+        const camBack = new THREE.Vector3(0, 4.2, 9.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        camera.position.lerp(cruiserGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(cruiserGroup.position.x, cruiserGroup.position.y + 1.2, cruiserGroup.position.z);
+      } else {
+        // On Foot Physics
+        let moveX = 0, moveZ = 0;
+        if (keys['KeyW']) moveZ -= 1;
+        if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1;
+        if (keys['KeyD']) moveX += 1;
+
+        const moveSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 22 : 12;
+        const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
+        const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+
+        player.pos.x += rotatedMove.x * moveSpeed * delta;
+        player.pos.z += rotatedMove.z * moveSpeed * delta;
+
+        // Gravity & Jump
+        if (keys['Space'] && player.isGrounded) {
+          player.vel.y = 9.5;
+          player.isGrounded = false;
+        }
+        player.vel.y -= 22 * delta;
+        player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2) {
+          player.pos.y = 1.2;
+          player.vel.y = 0;
+          player.isGrounded = true;
+        }
+
+        // Camera
+        camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+        const lookDir = new THREE.Vector3(
+          Math.sin(player.yaw) * Math.cos(player.pitch),
+          Math.sin(player.pitch),
+          Math.cos(player.yaw) * Math.cos(player.pitch)
+        );
+        camera.lookAt(camera.position.clone().add(lookDir));
+      }
+
+      renderer.render(scene, camera);
+    }
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

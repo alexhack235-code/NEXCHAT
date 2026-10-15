@@ -3142,6 +3142,228 @@
       z-index: 350;
       pointer-events: none;
       box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
+    /* ============================================================
+       TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES & TERRITORIES
+       ============================================================ */
+    #modal-provinces-highway {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 95%;
+      max-width: 1080px;
+      height: 90vh;
+      max-height: 720px;
+      background: rgba(10, 16, 26, 0.98);
+      border: 2px solid #ff3366;
+      border-radius: 16px;
+      z-index: 580;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 0 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(255, 51, 102, 0.35);
+      backdrop-filter: blur(14px);
+      font-family: 'Rajdhani', sans-serif;
+    }
+    #modal-provinces-highway.visible { display: flex; }
+
+    .province-highway-header {
+      padding: 16px 24px;
+      background: linear-gradient(90deg, rgba(255, 51, 102, 0.2), rgba(0, 242, 255, 0.1));
+      border-bottom: 1.5px solid rgba(255, 51, 102, 0.4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .province-highway-header h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: 1px;
+    }
+    .highway-badge {
+      font-size: 11px;
+      background: rgba(255, 51, 102, 0.25);
+      border: 1px solid #ff3366;
+      color: #ff99aa;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-weight: 700;
+    }
+
+    .province-highway-grid {
+      padding: 20px 24px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+      overflow-y: auto;
+      flex: 1;
+      background: #080d16;
+    }
+    .prov-card {
+      background: rgba(16, 24, 38, 0.9);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+    }
+    .prov-card:hover {
+      border-color: #ff3366;
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(255, 51, 102, 0.25);
+    }
+    .prov-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .prov-card-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .prov-card-abbr {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(255, 51, 102, 0.2);
+      border: 1px solid rgba(255, 51, 102, 0.4);
+      color: #ff88a3;
+    }
+    .prov-card-landmark {
+      font-size: 11px;
+      color: #ffd700;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .prov-card-desc {
+      font-size: 11px;
+      color: #8fa3b8;
+      line-height: 1.35;
+      flex: 1;
+    }
+    .prov-card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .prov-btn-load {
+      flex: 1;
+      background: rgba(0, 242, 255, 0.15);
+      border: 1.5px solid #00f2ff;
+      color: #00f2ff;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .prov-btn-load:hover {
+      background: rgba(0, 242, 255, 0.35);
+      transform: scale(1.02);
+    }
+    .prov-btn-direct {
+      flex: 1;
+      background: linear-gradient(135deg, #ff3366, #cc1144);
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+    .prov-btn-direct:hover {
+      box-shadow: 0 0 15px rgba(255, 51, 102, 0.6);
+      transform: scale(1.02);
+    }
+
+    /* IN-GAME DYNAMIC PROVINCE IFRAME TAG OVERLAY */
+    #province-loader-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 600;
+      background: #000;
+      display: none;
+      flex-direction: column;
+    }
+    #province-loader-overlay.active { display: flex; }
+    .prov-loader-bar {
+      height: 48px;
+      background: rgba(12, 18, 28, 0.98);
+      border-bottom: 2px solid #ff3366;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 18px;
+      z-index: 610;
+    }
+    .prov-loader-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 13px;
+      font-weight: 900;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .prov-loader-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .prov-bar-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 6px 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .prov-bar-btn:hover { background: rgba(255, 51, 102, 0.3); border-color: #ff3366; }
+    .prov-bar-btn.primary { background: linear-gradient(135deg, #ff3366, #c01140); border: none; }
+    #province-viewport-frame {
+      flex: 1;
+      width: 100%;
+      height: calc(100% - 48px);
+      border: none;
+      background: #000;
     }
   </style>
 </head>
@@ -3276,6 +3498,9 @@
         </button>
         <button type="button" class="bs-top-icon-btn" onclick="toggleSettingsModal()" title="Game Settings">
           <i class="fa-solid fa-gear"></i>
+        </button>
+        <button type="button" class="bs-top-icon-btn" onclick="toggleProvincesModal()" title="Trans-Canada Highway // 14 Provinces & Territories [H]">
+          <i class="fa-brands fa-canadian-maple-leaf" style="color: #ff3366;"></i>
         </button>
         <div class="bs-ping-pill" id="lobby-ping-pill" onclick="showPingDiagnostics()" title="Live Latency / MS">
           <i class="fa-solid fa-wifi" id="lobby-wifi-icon"></i>
@@ -3419,6 +3644,9 @@
         </button>
         <button type="button" class="hud-btn" id="btn-toggle-worlds" style="border-color: #00f2ff; color: #00f2ff;" title="Interstellar Planetary Navigation">
           <i class="fa-solid fa-earth-americas"></i> <span class="btn-label-text">[P] WORLDS</span>
+        </button>
+        <button type="button" class="hud-btn" id="btn-toggle-provinces" onclick="toggleProvincesModal()" style="border-color: #ff3366; color: #ff3366;" title="Trans-Canada Highway // 14 Provinces & Territories [H]">
+          <i class="fa-brands fa-canadian-maple-leaf"></i> <span class="btn-label-text">[H] PROVINCES</span>
         </button>
         <button type="button" class="hud-btn" id="btn-toggle-missions" onclick="toggleMissionsModal()" style="border-color: #ffd700; color: #ffd700;" title="Bounty & Exploration Mission Board (Press M)">
           <i class="fa-solid fa-crosshairs"></i> <span class="btn-label-text">[M] MISSIONS</span>
@@ -5707,11 +5935,59 @@
       <button type="button" class="astro-modal-close" onclick="closeCyberAnnouncement()">&times;</button>
     </div>
     <div class="astro-modal-body">
-      <div id="announcement-body" style="font-size: 13px; line-height: 1.6; color: #c7d8ea; white-space: pre-line;"></div>
       <button type="button" class="store-card-btn primary" style="background: #ffd700; color: #000; padding: 12px; margin-top: 8px;" onclick="closeCyberAnnouncement()">
         <i class="fa-solid fa-check"></i> ACKNOWLEDGE DISPATCH
       </button>
     </div>
+  </div>
+  <!-- ============================================================
+       TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES & TERRITORIES MODAL
+       ============================================================ -->
+  <div id="modal-provinces-highway">
+    <div class="province-highway-header">
+      <h2>
+        <i class="fa-brands fa-canadian-maple-leaf" style="color: #ff3366;"></i>
+        <span>TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES &amp; TERRITORIES [H]</span>
+        <span class="highway-badge">COAST-TO-COAST 3D NETWORK</span>
+      </h2>
+      <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; padding: 6px 12px; font-family: 'Orbitron', sans-serif; font-size: 12px; color: #ffd700; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-coins"></i> <span id="highway-tokens-display">1,250</span> NEX
+        </div>
+        <button type="button" class="astro-modal-close" onclick="toggleProvincesModal()" title="Close Highway Map">&times;</button>
+      </div>
+    </div>
+    <div class="province-highway-grid" id="highway-provinces-grid">
+      <!-- 14 Canadian Province Cards rendered dynamically via JS -->
+    </div>
+  </div>
+
+  <!-- ============================================================
+       IN-GAME DYNAMIC PROVINCE IFRAME TAG OVERLAY
+       ============================================================ -->
+  <div id="province-loader-overlay">
+    <div class="prov-loader-bar">
+      <div class="prov-loader-title">
+        <i class="fa-brands fa-canadian-maple-leaf" style="color: #ff3366;"></i>
+        <span id="province-loader-title">PROVINCE OF ONTARIO</span>
+        <span style="font-size: 11px; color: #00f2ff; font-weight: 700; background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; padding: 2px 8px; border-radius: 4px;">ACTIVE PROVINCE VIEWPORT</span>
+      </div>
+      <div class="prov-loader-actions">
+        <button type="button" class="prov-bar-btn" onclick="reloadProvinceFrame()" title="Reload Province Viewport">
+          <i class="fa-solid fa-rotate-right"></i> RELOAD
+        </button>
+        <button type="button" class="prov-bar-btn" onclick="openProvinceNewTab()" title="Open Province in New Tab">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> FULL TAB
+        </button>
+        <button type="button" class="prov-bar-btn" onclick="toggleProvincesModal(true)" title="Switch to Another Province">
+          <i class="fa-solid fa-map-location-dot"></i> SWITCH PROVINCE [H]
+        </button>
+        <button type="button" class="prov-bar-btn primary" onclick="closeProvinceLoader()" title="Return to Metropolis Hub">
+          <i class="fa-solid fa-house-chimney"></i> RETURN TO METROPOLIS
+        </button>
+      </div>
+    </div>
+    <iframe id="province-viewport-frame" src="" allow="pointer-lock; autoplay"></iframe>
   </div>
 
   <!-- START / CONTROLS OVERLAY -->
@@ -5742,6 +6018,7 @@
         <div class="ctrl-item"><span class="ctrl-key">E</span> Pilot / Exit Combat Rover</div>
         <div class="ctrl-item"><span class="ctrl-key">F</span> Enter Subterranean Metro (-22m)</div>
         <div class="ctrl-item"><span class="ctrl-key">N</span> Nuclear Power Console</div>
+        <div class="ctrl-item"><span class="ctrl-key">H</span> Trans-Canada Highway // 14 Provinces</div>
         <div class="ctrl-item"><span class="ctrl-key">1 - 4</span> Switch Tactical Weapons</div>
       </div>
 
@@ -11980,6 +12257,7 @@
         // Build Perimeter Railway System & Nexus International Aerodrome
         buildPerimeterRailway();
         buildNexusAerodrome();
+        buildTransCanadaGateway();
 
         // Initialize Autonomous Metropolis Cyber Traffic System
         initCityTraffic();
@@ -14866,7 +15144,6 @@ function buildNeoKyotoCity() {
         const bladeGeo = new THREE.BoxGeometry(5.8, 0.05, 0.35);
         const blade1 = new THREE.Mesh(bladeGeo, new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.7 }));
         blade1.position.set(rx, 4.2, 1.0);
-        blade1.name = 'vtolRotorBlade';
         vtolGroup.add(blade1);
       });
 
@@ -14883,6 +15160,205 @@ function buildNeoKyotoCity() {
         hasAfterburner: false,
         isVTOL: true
       });
+    }
+
+    // ============================================================
+    // TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES & TERRITORIES
+    // ============================================================
+    const CANADIAN_PROVINCES = [
+      { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', icon: 'fa-tower-observation', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
+      { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', icon: 'fa-monument', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
+      { id: 'british-columbia', name: 'British Columbia', abbr: 'BC', file: 'province-british-columbia.html', icon: 'fa-tree', landmark: 'Lions Gate Bridge & Whistler Peak', desc: 'Pacific cascadia rainforests, mountain ranges and coastal seaplane ports.' },
+      { id: 'alberta', name: 'Alberta', abbr: 'AB', file: 'province-alberta.html', icon: 'fa-fire-flame-curved', landmark: 'Calgary Stampede & Banff Rockies', desc: 'Energy capital, heavy exocraft haulers and high mountain glaciers.' },
+      { id: 'manitoba', name: 'Manitoba', abbr: 'MB', file: 'province-manitoba.html', icon: 'fa-snowflake', landmark: 'The Forks & Esplanade Riel Bridge', desc: 'Gateway to the West, trans-continental rail hub and polar aurora station.' },
+      { id: 'saskatchewan', name: 'Saskatchewan', abbr: 'SK', file: 'province-saskatchewan.html', icon: 'fa-wheat-awn', landmark: 'Wascana Legislative Dome & Potash Wells', desc: 'Land of the living skies, massive solar farms and autonomous agriculture.' },
+      { id: 'nova-scotia', name: 'Nova Scotia', abbr: 'NS', file: 'province-nova-scotia.html', icon: 'fa-anchor', landmark: 'Halifax Star Citadel & Peggy\'s Cove', desc: 'Atlantic maritime naval fortress, historic Bluenose dock and tidal power.' },
+      { id: 'new-brunswick', name: 'New Brunswick', abbr: 'NB', file: 'province-new-brunswick.html', icon: 'fa-water', landmark: 'Hopewell Rocks & Bay of Fundy Tides', desc: 'Appalachian cyber-corridor with the highest tidal surges in the world.' },
+      { id: 'newfoundland', name: 'Newfoundland & Labrador', abbr: 'NL', file: 'province-newfoundland.html', icon: 'fa-tower-broadcast', landmark: 'Signal Hill Marconi Tower & Iceberg Alley', desc: 'First light of North America, transatlantic cables and iceberg interceptors.' },
+      { id: 'prince-edward-island', name: 'Prince Edward Island', abbr: 'PE', file: 'province-prince-edward-island.html', icon: 'fa-bridge-water', landmark: 'Confederation Bridge & Red Sand Cliffs', desc: 'Cradle of Confederation, 13km causeway and coastal red sand dunes.' },
+      { id: 'northwest-territories', name: 'Northwest Territories', abbr: 'NT', file: 'province-northwest-territories.html', icon: 'fa-gem', landmark: 'Diavik Diamond Mine & Slave Lake Ice Road', desc: 'Aurora capital of the Arctic, sub-zero trucking and kimberlite diamonds.' },
+      { id: 'yukon', name: 'Yukon Territory', abbr: 'YT', file: 'province-yukon.html', icon: 'fa-mountain-sun', landmark: 'Klondike Gold Dredge & Mount Logan', desc: 'Historic Klondike gold territory and Canada\'s highest glacial summit.' },
+      { id: 'nunavut', name: 'Territory of Nunavut', abbr: 'NU', file: 'province-nunavut.html', icon: 'fa-cubes-stacked', landmark: 'Giant Neon Inukshuk & Igloo Dome', desc: 'High Arctic sovereignty, endless tundra and aurora-cloaked settlements.' },
+      { id: 'national-capital', name: 'National Capital Region', abbr: 'NCR', file: 'province-national-capital.html', icon: 'fa-landmark-dome', landmark: 'Parliament Peace Tower & Rideau Canal', desc: 'Federal core of Canada, Centennial Flame and national quantum archive.' }
+    ];
+
+    let transCanadaGateGroup = null;
+    let transCanadaPortalRing = null;
+    let transCanadaLight = null;
+    let activeProvinceFile = null;
+
+    function buildTransCanadaGateway() {
+      transCanadaGateGroup = new THREE.Group();
+      transCanadaGateGroup.position.set(0, 0, 560);
+      scene.add(transCanadaGateGroup);
+
+      const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.85, roughness: 0.25 });
+      const redNeonMat = new THREE.MeshBasicMaterial({ color: 0xff3366 });
+      const cyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+      // Twin Heavy Support Columns (X = -18, +18)
+      [-18, 18].forEach(px => {
+        const pillar = new THREE.Mesh(new THREE.BoxGeometry(5, 28, 5), pillarMat);
+        pillar.position.set(px, 14, 0);
+        transCanadaGateGroup.add(pillar);
+
+        const neonStripe = new THREE.Mesh(new THREE.BoxGeometry(0.4, 28, 5.2), redNeonMat);
+        neonStripe.position.set(px + (px > 0 ? -2.4 : 2.4), 14, 0);
+        transCanadaGateGroup.add(neonStripe);
+      });
+
+      // Overhead Cantilever Arch Bridge
+      const arch = new THREE.Mesh(new THREE.BoxGeometry(42, 4.5, 6), pillarMat);
+      arch.position.set(0, 28, 0);
+      transCanadaGateGroup.add(arch);
+
+      // Digital Highway LED Sign
+      const signBoard = new THREE.Mesh(new THREE.BoxGeometry(32, 4, 1.2), new THREE.MeshStandardMaterial({ color: 0x0a1018, metalness: 0.9 }));
+      signBoard.position.set(0, 25.5, 3.2);
+      transCanadaGateGroup.add(signBoard);
+
+      const signTrim = new THREE.Mesh(new THREE.BoxGeometry(32.4, 0.35, 1.4), cyanMat);
+      signTrim.position.set(0, 23.4, 3.2);
+      transCanadaGateGroup.add(signTrim);
+
+      // Maple Leaf Crest Emblem at Apex
+      const crestMesh = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 0.8, 16), new THREE.MeshStandardMaterial({ color: 0xff3366, metalness: 0.9 }));
+      crestMesh.rotation.x = Math.PI / 2;
+      crestMesh.position.set(0, 31.5, 0);
+      transCanadaGateGroup.add(crestMesh);
+
+      // Rotating Trans-Canada Quantum Portal Ring
+      const ringGeo = new THREE.TorusGeometry(12, 1.2, 16, 32);
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true, transparent: true, opacity: 0.85 });
+      transCanadaPortalRing = new THREE.Mesh(ringGeo, ringMat);
+      transCanadaPortalRing.position.set(0, 14, 0);
+      transCanadaGateGroup.add(transCanadaPortalRing);
+
+      // Highway Portal Illumination
+      transCanadaLight = new THREE.PointLight(0xff3366, 3.5, 90);
+      transCanadaLight.position.set(0, 16, 6);
+      transCanadaGateGroup.add(transCanadaLight);
+
+      // Roadway Speed Decals & Chevrons on Ground
+      const roadSlab = new THREE.Mesh(new THREE.PlaneGeometry(28, 120), new THREE.MeshStandardMaterial({ color: 0x111827, roughness: 0.8 }));
+      roadSlab.rotation.x = -Math.PI / 2;
+      roadSlab.position.set(0, 0.08, 0);
+      transCanadaGateGroup.add(roadSlab);
+
+      for (let s = -3; s <= 3; s++) {
+        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 8), new THREE.MeshBasicMaterial({ color: 0xffd700 }));
+        stripe.rotation.x = -Math.PI / 2;
+        stripe.position.set(0, 0.12, s * 16);
+        transCanadaGateGroup.add(stripe);
+      }
+
+      registerCityCollider({ type: 'solid', x: -18, z: 560, hw: 3.5, hd: 3.5 });
+      registerCityCollider({ type: 'solid', x: 18, z: 560, hw: 3.5, hd: 3.5 });
+    }
+
+    function toggleProvincesModal(forceOpen) {
+      const modal = document.getElementById('modal-provinces-highway');
+      if (!modal) return;
+      const willShow = (forceOpen !== undefined) ? forceOpen : !modal.classList.contains('visible');
+      if (willShow) {
+        if (document.exitPointerLock) document.exitPointerLock();
+        initProvincesHighwayGrid();
+        modal.classList.add('visible');
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+      } else {
+        modal.classList.remove('visible');
+      }
+    }
+
+    function initProvincesHighwayGrid() {
+      const grid = document.getElementById('highway-provinces-grid');
+      const tokensEl = document.getElementById('highway-tokens-display');
+      const currentTokens = (typeof gameState !== 'undefined' && gameState.tokens) ? gameState.tokens : (parseInt(localStorage.getItem('BS_TOKENS')) || 1250);
+      const callsign = (typeof gameState !== 'undefined' && gameState.operativeCallsign) ? gameState.operativeCallsign : (localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX');
+
+      if (tokensEl) tokensEl.textContent = Number(currentTokens).toLocaleString();
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      CANADIAN_PROVINCES.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'prov-card';
+        card.innerHTML = `
+          <div class="prov-card-header">
+            <span class="prov-card-title"><i class="fa-solid ${p.icon}" style="color: #ff3366;"></i> ${p.name}</span>
+            <span class="prov-card-abbr">${p.abbr}</span>
+          </div>
+          <div class="prov-card-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
+          <div class="prov-card-desc">${p.desc}</div>
+          <div class="prov-card-actions">
+            <button type="button" class="prov-btn-load" onclick="loadProvinceTag('${p.file}', '${p.name}')" title="Load directly in game viewport">
+              <i class="fa-solid fa-laptop-code"></i> IN-GAME TAG
+            </button>
+            <a class="prov-btn-direct" href="${p.file}?tokens=${currentTokens}&callsign=${encodeURIComponent(callsign)}" title="Launch Fullscreen 3D World">
+              <i class="fa-solid fa-rocket"></i> LAUNCH 3D
+            </a>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function loadProvinceTag(file, name) {
+      activeProvinceFile = file;
+      const overlay = document.getElementById('province-loader-overlay');
+      const frame = document.getElementById('province-viewport-frame');
+      const titleEl = document.getElementById('province-loader-title');
+      const currentTokens = (typeof gameState !== 'undefined' && gameState.tokens) ? gameState.tokens : (parseInt(localStorage.getItem('BS_TOKENS')) || 1250);
+      const callsign = (typeof gameState !== 'undefined' && gameState.operativeCallsign) ? gameState.operativeCallsign : (localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX');
+
+      if (document.exitPointerLock) document.exitPointerLock();
+      toggleProvincesModal(false);
+
+      if (titleEl) titleEl.textContent = `PROVINCE // ${name.toUpperCase()}`;
+      if (frame) {
+        frame.src = `${file}?tokens=${currentTokens}&callsign=${encodeURIComponent(callsign)}`;
+      }
+      if (overlay) overlay.classList.add('active');
+
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`🍁 TRANS-CANADA HIGHWAY: CONNECTED TO ${name.toUpperCase()}!`);
+      }
+    }
+
+    function closeProvinceLoader() {
+      const overlay = document.getElementById('province-loader-overlay');
+      const frame = document.getElementById('province-viewport-frame');
+      if (overlay) overlay.classList.remove('active');
+      if (frame) frame.src = 'about:blank';
+
+      // Sync tokens that might have been earned inside the province
+      const savedTokens = parseInt(localStorage.getItem('BS_TOKENS'));
+      if (savedTokens && typeof gameState !== 'undefined') {
+        gameState.tokens = Math.max(gameState.tokens || 0, savedTokens);
+        const tEl = document.getElementById('hud-tokens');
+        if (tEl) tEl.textContent = gameState.tokens.toLocaleString();
+        const lNex = document.getElementById('lobby-currency-nex');
+        if (lNex) lNex.textContent = gameState.tokens.toLocaleString();
+        const sEl = document.getElementById('store-token-display');
+        if (sEl) sEl.textContent = gameState.tokens.toLocaleString();
+      }
+    }
+
+    function reloadProvinceFrame() {
+      const frame = document.getElementById('province-viewport-frame');
+      if (frame && activeProvinceFile) {
+        const currentTokens = (typeof gameState !== 'undefined' && gameState.tokens) ? gameState.tokens : (parseInt(localStorage.getItem('BS_TOKENS')) || 1250);
+        const callsign = (typeof gameState !== 'undefined' && gameState.operativeCallsign) ? gameState.operativeCallsign : (localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX');
+        frame.src = `${activeProvinceFile}?tokens=${currentTokens}&callsign=${encodeURIComponent(callsign)}`;
+      }
+    }
+
+    function openProvinceNewTab() {
+      if (activeProvinceFile) {
+        const currentTokens = (typeof gameState !== 'undefined' && gameState.tokens) ? gameState.tokens : (parseInt(localStorage.getItem('BS_TOKENS')) || 1250);
+        const callsign = (typeof gameState !== 'undefined' && gameState.operativeCallsign) ? gameState.operativeCallsign : (localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX');
+        window.open(`${activeProvinceFile}?tokens=${currentTokens}&callsign=${encodeURIComponent(callsign)}`, '_blank');
+      }
     }
 
     // ============================================================
@@ -15636,6 +16112,7 @@ function buildNeoKyotoCity() {
       if (e.code === 'KeyQ') triggerTacticalPing();
       if (e.code === 'KeyE') toggleVehicleMode();
       if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'KeyH') toggleProvincesModal();
       if (e.code === 'KeyG') {
         if (gameState.inPlane) {
           togglePlaneGear();
@@ -15904,6 +16381,12 @@ function buildNeoKyotoCity() {
         gameState.inVehicle = true;
         showStoreNotification('🌊 PILOTING ATLANTIS HYDRO-SKIMMER! ACCELERATING OVER OCEAN CANALS!');
         cyberAudio.playWaterSplash();
+        return;
+      }
+
+      // 0A-TransCanada. Trans-Canada Highway Gateway System (0, 0, 560)
+      if (gameState.currentWorld === 'earth' && player.pos.distanceTo(new THREE.Vector3(0, 0, 560)) < 26.0) {
+        toggleProvincesModal();
         return;
       }
 
@@ -17233,6 +17716,15 @@ function buildNeoKyotoCity() {
         });
       }
 
+      // Trans-Canada Highway Gateway Portal Animation
+      if (transCanadaPortalRing) {
+        transCanadaPortalRing.rotation.z += delta * 1.5;
+        transCanadaPortalRing.rotation.y = Math.sin(now * 0.002) * 0.25;
+      }
+      if (transCanadaLight) {
+        transCanadaLight.intensity = 2.8 + Math.sin(now * 0.008) * 1.2;
+      }
+
       // Footstep Dust Particles Update
       updateFootstepDust(delta);
 
@@ -17449,6 +17941,16 @@ function buildNeoKyotoCity() {
             if (trainBanner) trainBanner.style.display = 'block';
           } else if (trainBanner) {
             trainBanner.style.display = 'none';
+          }
+
+          // Trans-Canada Highway Gateway Proximity (0, 0, 560)
+          if (!promptShown) {
+            const dHighway = player.pos.distanceTo(new THREE.Vector3(0, 0, 560));
+            if (dHighway < 26.0) {
+              promptEl.style.display = 'flex';
+              document.getElementById('prompt-text').textContent = 'ENTER TRANS-CANADA HIGHWAY // 14 PROVINCES [E / F / H]';
+              promptShown = true;
+            }
           }
         }
 
