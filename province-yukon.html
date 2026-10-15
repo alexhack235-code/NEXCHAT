@@ -8,45 +8,65 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <script src="js/three.min.js"></script>
   <script>
     if (typeof THREE === 'undefined') {
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
     }
   </script>
+  <script src="js/GLTFLoader.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
+    }
+  </script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body, html { width: 100%; height: 100%; overflow: hidden; background: #141008; font-family: 'Rajdhani', sans-serif; color: #fff; }
     #canvas-container { position: absolute; inset: 0; }
     canvas { width: 100%; height: 100%; display: block; }
     
-    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; }
-    .province-badge { background: rgba(28, 22, 12, 0.9); border: 1.5px solid #eab308; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(234, 179, 8, 0.35); pointer-events: auto; }
-    .crest { width: 42px; height: 42px; border-radius: 50%; background: rgba(234, 179, 8, 0.2); border: 2px solid #eab308; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #eab308; }
+    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; flex-wrap: wrap; gap: 10px; }
+    .province-badge { background: rgba(28, 22, 12, 0.92); border: 1.5px solid #eab308; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(234, 179, 8, 0.35); pointer-events: auto; }
+    .crest { width: 44px; height: 44px; border-radius: 50%; background: rgba(234, 179, 8, 0.2); border: 2px solid #eab308; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #eab308; }
     .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
-    .province-sub { font-size: 11px; color: #fde047; letter-spacing: 0.5px; font-weight: 600; }
+    .province-sub { font-size: 11px; color: #fde047; letter-spacing: 0.5px; font-weight: 700; }
     
-    .hud-right { display: flex; gap: 10px; align-items: center; pointer-events: auto; }
-    .hud-pill { background: rgba(28, 22, 12, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
-    .btn-return { background: linear-gradient(135deg, #d97706, #b45309); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 18px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px rgba(217,119,6,0.4); display: flex; align-items: center; gap: 8px; }
+    .hud-right { display: flex; gap: 8px; align-items: center; pointer-events: auto; flex-wrap: wrap; }
+    .hud-pill { background: rgba(28, 22, 12, 0.92); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-hud { background: rgba(38, 28, 14, 0.92); border: 1px solid rgba(234, 179, 8, 0.4); border-radius: 10px; color: #fde047; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; padding: 9px 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .btn-hud:hover { background: rgba(234, 179, 8, 0.25); transform: translateY(-1px); }
+    .btn-return { background: linear-gradient(135deg, #d97706, #b45309); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; padding: 9px 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 16px rgba(217,119,6,0.45); display: flex; align-items: center; gap: 8px; }
     .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(217,119,6,0.7); }
-    .btn-map { background: rgba(234, 179, 8, 0.2); border: 1.5px solid #eab308; border-radius: 10px; color: #eab308; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-    .btn-map:hover { background: rgba(234, 179, 8, 0.4); }
 
-    .controls-banner { position: fixed; bottom: 20px; left: 20px; background: rgba(20, 16, 8, 0.85); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .mission-tracker { position: fixed; top: 82px; left: 16px; width: 310px; background: rgba(22, 16, 8, 0.88); border: 1.5px solid rgba(234, 179, 8, 0.35); border-radius: 14px; padding: 12px 16px; z-index: 95; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.5); pointer-events: auto; }
+    .mission-header { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffd700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .mission-item { font-size: 12px; color: #cbd5e1; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .mission-item.done { color: #fde047; text-decoration: line-through; opacity: 0.8; }
+    .mission-item i { width: 14px; text-align: center; }
+
+    .controls-banner { position: fixed; bottom: 18px; left: 18px; background: rgba(20, 14, 8, 0.88); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
     .controls-banner span { color: #fde047; font-weight: 700; }
 
-    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(28, 22, 12, 0.95); border: 2px solid #eab308; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fde047; display: none; align-items: center; gap: 10px; box-shadow: 0 0 30px rgba(234,179,8,0.4); z-index: 150; }
-    #notify-box { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: rgba(28, 22, 12, 0.96); border: 1.5px solid #ffd700; border-radius: 10px; padding: 10px 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #ffd700; z-index: 200; display: none; box-shadow: 0 0 25px rgba(255,215,0,0.35); text-align: center; }
+    #cruiser-hud { position: fixed; bottom: 20px; right: 20px; background: rgba(28, 22, 12, 0.94); border: 2px solid #eab308; border-radius: 16px; padding: 14px 20px; z-index: 100; display: none; box-shadow: 0 0 35px rgba(234, 179, 8, 0.35); min-width: 260px; }
+    .speed-val { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #eab308; }
+    .speed-unit { font-size: 12px; color: #8fa3b8; font-weight: 700; margin-left: 6px; }
 
-    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.85); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(28, 22, 12, 0.96); border: 2px solid #eab308; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fde047; display: none; align-items: center; gap: 10px; box-shadow: 0 0 35px rgba(234,179,8,0.45); z-index: 150; animation: pulseGlow 1.6s infinite; }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(234,179,8,0.3); } 50% { box-shadow: 0 0 40px rgba(234,179,8,0.65); } }
+
+    #notify-box { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(28, 22, 12, 0.96); border: 1.5px solid #eab308; border-radius: 12px; padding: 12px 26px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff; z-index: 200; display: none; box-shadow: 0 0 35px rgba(234,179,8,0.4); text-align: center; }
+
+    .province-modal { position: fixed; inset: 0; background: rgba(12, 8, 4, 0.88); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
     .province-modal.visible { display: flex; }
     .modal-box { background: rgba(28, 22, 12, 0.96); border: 2px solid #eab308; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(234,179,8,0.4); }
     .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(234,179,8,0.08); }
     .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
     .modal-close { background: none; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; }
     .modal-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; }
-    .province-card { background: rgba(36, 28, 16, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
+    .province-card { background: rgba(38, 28, 16, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
     .province-card:hover { border-color: #eab308; transform: translateY(-2px); box-shadow: 0 0 20px rgba(234,179,8,0.25); }
     .province-card.active { border-color: #eab308; background: rgba(234,179,8,0.2); box-shadow: 0 0 20px rgba(234,179,8,0.3); }
     .p-head { display: flex; align-items: center; justify-content: space-between; }
@@ -70,16 +90,38 @@
 
     <div class="hud-right">
       <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
-      <button type="button" class="btn-map" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> TRANS-CANADA [H]</button>
+      <button type="button" class="btn-hud" id="btn-camera" onclick="toggleCameraView()"><i class="fa-solid fa-eye"></i> <span id="cam-mode-label">3P VIEW</span> [V]</button>
+      <button type="button" class="btn-hud" id="btn-quality" onclick="cycleQuality()"><i class="fa-solid fa-sliders"></i> <span id="quality-label">GRAPHICS: HIGH</span> [Q]</button>
+      <button type="button" class="btn-hud" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> HIGHWAYS [H]</button>
       <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
     </div>
   </div>
 
-  <div class="controls-banner">
-    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>E / F</span>] 8x8 EXOCRAWLER &nbsp;|&nbsp; [<span>H</span>] PROVINCES
+  <div class="mission-tracker">
+    <div class="mission-header">
+      <span><i class="fa-solid fa-crosshairs"></i> YUKON OBJECTIVES</span>
+      <span id="missions-count">0/3</span>
+    </div>
+    <div class="mission-item" id="mis-highway"><i class="fa-solid fa-road"></i> 1. Alaska Highway Klondike Dash</div>
+    <div class="mission-item" id="mis-dredge"><i class="fa-solid fa-gear"></i> 2. Klondike Dredge No. 4 Sluice Sync</div>
+    <div class="mission-item" id="mis-logan"><i class="fa-solid fa-snowflake"></i> 3. Mount Logan Summit Weather Link</div>
   </div>
 
-  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACTION</span></div>
+  <div id="cruiser-hud">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <div><span class="speed-val" id="cruiser-kmh">0</span><span class="speed-unit">KM/H</span></div>
+      <div style="font-size: 11px; color: #eab308; font-family: 'Orbitron', sans-serif;">PROSPECTOR CRUISER ACTIVE</div>
+    </div>
+    <div style="font-size: 10px; color: #8fa3b8; margin-top: 4px;">
+      [W/S] ACCEL/BRAKE &nbsp;|&nbsp; [A/D] STEER &nbsp;|&nbsp; [SHIFT] NITRO &nbsp;|&nbsp; [E] EXIT
+    </div>
+  </div>
+
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>V</span>] 1P/3P &nbsp;|&nbsp; [<span>E</span>] CRUISER &nbsp;|&nbsp; [<span>F</span>] INTERACT
+  </div>
+
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACT</span></div>
   <div id="notify-box"></div>
 
   <div class="province-modal" id="modal-map">
@@ -93,6 +135,40 @@
   </div>
 
   <script>
+    class ProvinceAudio {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      }
+      playChirp() {
+        this.init(); if (!this.ctx) return;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(460, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.14);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.14);
+      }
+      playLootChime() {
+        this.init(); if (!this.ctx) return;
+        [440.0, 554.37, 659.25, 880.0].forEach((f, idx) => {
+          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.35);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.35);
+        });
+      }
+    }
+    const audio = new ProvinceAudio();
+
     const CANADIAN_PROVINCES = [
       { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
       { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
@@ -113,16 +189,32 @@
     const urlParams = new URLSearchParams(window.location.search);
     let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
     const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
-    let inCrawler = false;
-    let crawlerSpeed = 0;
+    let inPatrolCruiser = false;
+    let cruiserSpeed = 0;
+    let cameraMode = '3P';
+    let qualityMode = localStorage.getItem('PROVINCE_QUALITY') || 'high';
 
+    let missionHighwayDone = false, missionDredgeDone = false, missionLoganDone = false;
     document.getElementById('token-val').textContent = tokens.toLocaleString();
 
     function showNotify(msg) {
       const box = document.getElementById('notify-box');
-      box.textContent = msg;
-      box.style.display = 'block';
-      setTimeout(() => { box.style.display = 'none'; }, 3800);
+      box.innerHTML = msg; box.style.display = 'block';
+      clearTimeout(window._notifTimer);
+      window._notifTimer = setTimeout(() => { box.style.display = 'none'; }, 4200);
+    }
+
+    function updateMissionBadge() {
+      const completed = (missionHighwayDone ? 1 : 0) + (missionDredgeDone ? 1 : 0) + (missionLoganDone ? 1 : 0);
+      document.getElementById('missions-count').textContent = `${completed}/3`;
+      if (completed === 3 && !window._sectorRewardGranted) {
+        window._sectorRewardGranted = true;
+        tokens += 1000;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚡ YUKON KLONDIKE SECTOR MASTERED! BONUS +1,000 NEX TOKENS');
+        audio.playLootChime();
+      }
     }
 
     function returnToMetropolis() {
@@ -130,8 +222,39 @@
       window.location.href = `game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
     }
 
-    function toggleMapModal() {
-      document.getElementById('modal-map').classList.toggle('visible');
+    function toggleMapModal() { document.getElementById('modal-map').classList.toggle('visible'); }
+    function toggleCameraView() {
+      cameraMode = (cameraMode === '1P') ? '3P' : '1P';
+      document.getElementById('cam-mode-label').textContent = `${cameraMode} VIEW`;
+      if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P' && !inPatrolCruiser);
+      audio.playChirp();
+    }
+    function cycleQuality() {
+      qualityMode = (qualityMode === 'high') ? 'med' : (qualityMode === 'med' ? 'low' : 'high');
+      localStorage.setItem('PROVINCE_QUALITY', qualityMode);
+      applyQualitySettings();
+      audio.playChirp();
+    }
+    function applyQualitySettings() {
+      const lbl = document.getElementById('quality-label');
+      if (lbl) lbl.textContent = `GRAPHICS: ${qualityMode.toUpperCase()}`;
+      if (!renderer) return;
+      if (qualityMode === 'low') {
+        renderer.setPixelRatio(1.0);
+        renderer.shadowMap.enabled = false;
+        if (dirLight) dirLight.castShadow = false;
+      } else if (qualityMode === 'med') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(512, 512); }
+      } else {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(1024, 1024); }
+      }
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     const listEl = document.getElementById('provinces-list');
@@ -139,150 +262,216 @@
       const card = document.createElement('a');
       card.className = 'province-card' + (p.id === 'yukon' ? ' active' : '');
       card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
-      card.innerHTML = `
-        <div class="p-head">
-          <span class="p-name">${p.name}</span>
-          <span class="p-abbr">${p.abbr}</span>
-        </div>
-        <div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
-        <div class="p-desc">${p.desc}</div>
-      `;
+      card.innerHTML = `<div class="p-head"><span class="p-name">${p.name}</span><span class="p-abbr">${p.abbr}</span></div><div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div><div class="p-desc">${p.desc}</div>`;
       listEl.appendChild(card);
     });
 
-    window.addEventListener('keydown', e => {
-      if (e.code === 'KeyH') toggleMapModal();
-      if (e.code === 'KeyE') toggleVehicle();
-      if (e.code === 'KeyF') handleInteractions();
-      if (e.code === 'Escape') {
-        const m = document.getElementById('modal-map');
-        if (m.classList.contains('visible')) m.classList.remove('visible');
-        else returnToMetropolis();
-      }
-    });
-
     // ------------------------------------------------------------
-    // THREE.JS 3D ENGINE - YUKON MOUNT LOGAN & KLONDIKE GOLD DREDGE
+    // 3D SCENE SETUP & YUKON MOUNT LOGAN & KLONDIKE ENVIRONMENT
     // ------------------------------------------------------------
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x141008);
-    scene.fog = new THREE.FogExp2(0x141008, 0.0035);
+    scene.background = new THREE.Color(0x16120a);
+    scene.fog = new THREE.FogExp2(0x16120a, 0.0016);
 
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1500);
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2400);
     const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
+    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.ACESFilmicToneMapping) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+    }
     container.appendChild(renderer.domElement);
 
-    const ambientLight = new THREE.AmbientLight(0x594626, 0.95);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xfde047, 1.8);
-    dirLight.position.set(130, 220, 90);
+    const hemiLight = new THREE.HemisphereLight(0xffe088, 0x221a10, 1.35);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff6dc, 2.2);
+    dirLight.position.set(150, 260, 100);
     dirLight.castShadow = true;
+    dirLight.shadow.camera.near = 10; dirLight.shadow.camera.far = 650;
+    dirLight.shadow.camera.left = -200; dirLight.shadow.camera.right = 200;
+    dirLight.shadow.camera.top = 200; dirLight.shadow.camera.bottom = -200;
+    dirLight.shadow.bias = -0.0006;
     scene.add(dirLight);
 
-    // High Klondike River Valley Ground
-    const valleyGeo = new THREE.PlaneGeometry(1200, 1200);
-    const valleyMat = new THREE.MeshStandardMaterial({ color: 0x271f11, roughness: 0.9 });
-    const valley = new THREE.Mesh(valleyGeo, valleyMat);
-    valley.rotation.x = -Math.PI / 2;
-    valley.receiveShadow = true;
-    scene.add(valley);
+    applyQualitySettings();
 
-    // MOUNT LOGAN SUMMIT (Towering Mountain Massifs at X = -450)
-    const mtnMat = new THREE.MeshStandardMaterial({ color: 0x3d3025, roughness: 0.95 });
-    const snowCapMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3 });
-    for (let m = 0; m < 7; m++) {
-      const mz = (m - 3) * 140;
-      const mh = 200 + Math.random() * 90;
-      const cone = new THREE.Mesh(new THREE.ConeGeometry(110, mh, 5), mtnMat);
-      cone.position.set(-440, mh / 2, mz);
-      scene.add(cone);
+    const texLoader = new THREE.TextureLoader();
 
-      const cap = new THREE.Mesh(new THREE.ConeGeometry(38, mh * 0.35, 5), snowCapMat);
-      cap.position.set(-440, mh * 0.82, mz);
+    // Yukon Klondike River Valley Ground
+    const groundGeo = new THREE.PlaneGeometry(1600, 1600, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x221b12, roughness: 0.92, metalness: 0.08 });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
+
+    // MOUNT LOGAN GLACIAL MOUNTAIN WALL (West Horizon at X: -480)
+    const mtnMat = new THREE.MeshStandardMaterial({ color: 0x28201a, roughness: 0.95 });
+    const snowCapMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
+    for (let m = 0; m < 9; m++) {
+      const mz = (m - 4) * 130;
+      const mh = 190 + ((m % 4) * 35);
+      const mtn = new THREE.Mesh(new THREE.ConeGeometry(100, mh, 6), mtnMat);
+      mtn.position.set(-460, mh / 2, mz);
+      scene.add(mtn);
+      const cap = new THREE.Mesh(new THREE.ConeGeometry(36, mh * 0.35, 6), snowCapMat);
+      cap.position.set(-460, mh * 0.82, mz);
       scene.add(cap);
     }
 
-    // HISTORIC KLONDIKE GOLD DREDGE NO. 4 (at 110, 0, -110)
+    // Alaska Highway Corridor
+    const hwyMat = new THREE.MeshStandardMaterial({ color: 0x25201a, roughness: 0.8 });
+    texLoader.load('assets/textures/pbr/Road007_1K-JPG_Color.jpg', tex => {
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 32);
+      hwyMat.map = tex; hwyMat.needsUpdate = true;
+    }, undefined, () => {});
+
+    const hwyGeo = new THREE.BoxGeometry(45, 1.2, 1200);
+    const hwyMesh = new THREE.Mesh(hwyGeo, hwyMat);
+    hwyMesh.position.set(0, 0.6, 0);
+    hwyMesh.receiveShadow = true;
+    scene.add(hwyMesh);
+
+    // HISTORIC KLONDIKE GOLD DREDGE NO. 4 (East flank at 110, 0, -110)
     const dredgeGroup = new THREE.Group();
     dredgeGroup.position.set(110, 0, -110);
     scene.add(dredgeGroup);
 
     // Dredge Hull & Housing (3-story timber/steel superstructure)
-    const dHull = new THREE.Mesh(new THREE.BoxGeometry(45, 16, 26), new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 0.85 }));
-    dHull.position.y = 8;
+    const dHull = new THREE.Mesh(new THREE.BoxGeometry(48, 18, 28), new THREE.MeshStandardMaterial({ color: 0x3d2110, roughness: 0.85 }));
+    dHull.position.y = 9;
+    dHull.castShadow = true;
+    dHull.receiveShadow = true;
     dredgeGroup.add(dHull);
 
-    const dUpper = new THREE.Mesh(new THREE.BoxGeometry(32, 14, 20), new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.8 }));
-    dUpper.position.y = 23;
+    const dUpper = new THREE.Mesh(new THREE.BoxGeometry(34, 15, 22), new THREE.MeshStandardMaterial({ color: 0x61381c, roughness: 0.8 }));
+    dUpper.position.y = 25.5;
+    dUpper.castShadow = true;
     dredgeGroup.add(dUpper);
 
-    // Slanted Bucketline Ladder Boom
-    const boom = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 45), new THREE.MeshStandardMaterial({ color: 0xeab308, metalness: 0.85 }));
+    // Slanted Gold Sluice & Bucketline Ladder Boom
+    const boom = new THREE.Mesh(new THREE.BoxGeometry(6, 6, 48), new THREE.MeshStandardMaterial({ color: 0xeab308, metalness: 0.85, roughness: 0.2 }));
     boom.rotation.x = 0.55;
-    boom.position.set(0, 16, -26);
+    boom.position.set(0, 18, -28);
+    boom.castShadow = true;
     dredgeGroup.add(boom);
 
-    // KLONDIKE ALL-TERRAIN 8x8 EXOCRAWLER (-10, 0.6, 25)
-    const crawlerGroup = new THREE.Group();
-    crawlerGroup.position.set(-10, 0.6, 25);
-    scene.add(crawlerGroup);
+    const dredgeLight = new THREE.PointLight(0xeab308, 3.5, 300);
+    dredgeLight.position.set(0, 36, 0);
+    dredgeGroup.add(dredgeLight);
 
-    const cBody = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.4, 6.8), new THREE.MeshStandardMaterial({ color: 0xeab308, metalness: 0.9, roughness: 0.25 }));
-    cBody.position.y = 1.1;
-    crawlerGroup.add(cBody);
-
-    const cCab = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.1, 2.8), new THREE.MeshStandardMaterial({ color: 0x181008, metalness: 0.8 }));
-    cCab.position.set(0, 2.1, -1.0);
-    crawlerGroup.add(cCab);
-
-    // 8 All-Terrain Bogie Wheels
-    const tireMat = new THREE.MeshStandardMaterial({ color: 0x090d14, roughness: 0.95 });
-    [-1.9, 1.9].forEach(wx => {
-      [-2.4, -0.8, 0.8, 2.4].forEach(wz => {
-        const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.65, 0.5, 16), tireMat);
-        tire.rotation.z = Math.PI / 2;
-        tire.position.set(wx, 0.65, wz);
-        crawlerGroup.add(tire);
-      });
-    });
-
-    // Klondike Gold Strike Vault at (0, 0, -20)
+    // Klondike Gold Strike Vault & Weather Terminal at (0, 0, -180)
     const termGroup = new THREE.Group();
-    termGroup.position.set(0, 0, -20);
+    termGroup.position.set(0, 0, -180);
     scene.add(termGroup);
 
-    const tBase = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x33250b, metalness: 0.9 }));
-    tBase.position.y = 1.1;
-    termGroup.add(tBase);
+    const tPed = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.0, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x221a0c, metalness: 0.9 }));
+    tPed.position.y = 1.1; termGroup.add(tPed);
+    const tOrb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2), new THREE.MeshBasicMaterial({ color: 0xeab308, wireframe: true }));
+    tOrb.position.y = 2.6; termGroup.add(tOrb);
 
-    const tOrb = new THREE.Mesh(new THREE.DodecahedronGeometry(1.3), new THREE.MeshBasicMaterial({ color: 0xfacc15, wireframe: true }));
-    tOrb.position.y = 2.6;
-    termGroup.add(tOrb);
+    // Kenney Modular Frontier Architecture
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const gLoader = new THREE.GLTFLoader();
+      const mods = [
+        { file: 'building-small-a.glb', x: -65, y: 0.2, z: 20, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'building-small-b.glb', x: -65, y: 0.2, z: -40, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'grass-trees-tall.glb', x: -45, y: 0.2, z: 80, scale: 5.0, ry: 0.4 },
+        { file: 'grass-trees-tall.glb', x: 45, y: 0.2, z: 80, scale: 5.0, ry: -0.6 }
+      ];
+      mods.forEach(cfg => {
+        gLoader.load(`assets/models/kenney/${cfg.file}`, gltf => {
+          const m = gltf.scene;
+          m.position.set(cfg.x, cfg.y, cfg.z);
+          m.scale.set(cfg.scale, cfg.scale, cfg.scale);
+          m.rotation.y = cfg.ry;
+          m.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+          scene.add(m);
+        }, undefined, () => {});
+      });
+    }
 
-    // Player
-    const player = {
-      pos: new THREE.Vector3(0, 1.2, 50),
-      vel: new THREE.Vector3(),
-      yaw: 0,
-      pitch: 0,
-      isGrounded: true
-    };
+    // ------------------------------------------------------------
+    // RIGGED CHARACTER & PROSPECTOR CRUISER
+    // ------------------------------------------------------------
+    const playerGroup = new THREE.Group();
+    scene.add(playerGroup);
 
+    let playerRiggedMesh = null, characterMixer = null, characterActions = {}, activeCharacterAction = null;
+    const procChar = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 1.4, 12), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+    procChar.position.y = 0.9;
+    playerGroup.add(procChar);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const charLoader = new THREE.GLTFLoader();
+      charLoader.load('assets/models/operative_soldier.glb', gltf => {
+        playerRiggedMesh = gltf.scene;
+        playerRiggedMesh.position.set(0, 0, 0);
+        playerRiggedMesh.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+        characterMixer = new THREE.AnimationMixer(playerRiggedMesh);
+        gltf.animations.forEach(clip => { characterActions[clip.name] = characterMixer.clipAction(clip); });
+        if (characterActions['Idle']) { characterActions['Idle'].play(); activeCharacterAction = characterActions['Idle']; }
+        playerGroup.add(playerRiggedMesh);
+        procChar.visible = false;
+        playerRiggedMesh.visible = (cameraMode === '3P');
+      }, undefined, () => {});
+    }
+
+    const cruiserGroup = new THREE.Group();
+    cruiserGroup.position.set(0, 0.4, 30);
+    scene.add(cruiserGroup);
+
+    let cyberCarMesh = null, cyberCarWheels = [], cyberCarSteers = [];
+    const procCruiser = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.2, 5.2), new THREE.MeshStandardMaterial({ color: 0xd97706 }));
+    procCruiser.position.y = 0.8;
+    cruiserGroup.add(procCruiser);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const vLoader = new THREE.GLTFLoader();
+      vLoader.load('assets/models/cyber_car.glb', gltf => {
+        cyberCarMesh = gltf.scene;
+        cyberCarMesh.rotation.y = Math.PI;
+        cyberCarMesh.position.set(0, 0.22, 0);
+        cyberCarMesh.traverse(c => {
+          if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; }
+          const n = (c.name || '').toLowerCase();
+          if (n.includes('wheel_fl') || n.includes('wheel_fr')) {
+            cyberCarSteers.push({ node: c, rotY: c.rotation.y });
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          } else if (n.includes('wheel_rl') || n.includes('wheel_rr')) {
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          }
+        });
+        cruiserGroup.add(cyberCarMesh);
+        procCruiser.visible = false;
+      }, undefined, () => {});
+    }
+
+    // ------------------------------------------------------------
+    // CONTROLS & GAMEPLAY
+    // ------------------------------------------------------------
+    const player = { pos: new THREE.Vector3(0, 1.2, 45), vel: new THREE.Vector3(), yaw: 0, pitch: 0, isGrounded: true };
     const keys = {};
-    window.addEventListener('keydown', e => { keys[e.code] = true; });
+    window.addEventListener('keydown', e => {
+      audio.init(); keys[e.code] = true;
+      if (e.code === 'KeyV') toggleCameraView();
+      if (e.code === 'KeyQ') cycleQuality();
+      if (e.code === 'KeyH') toggleMapModal();
+      if (e.code === 'KeyE') toggleVehicle();
+      if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'Escape') {
+        const m = document.getElementById('modal-map');
+        if (m.classList.contains('visible')) m.classList.remove('visible'); else returnToMetropolis();
+      }
+    });
     window.addEventListener('keyup', e => { keys[e.code] = false; });
 
     let isPointerLocked = false;
-    window.addEventListener('click', () => {
-      if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock();
-    });
-    document.addEventListener('pointerlockchange', () => {
-      isPointerLocked = (document.pointerLockElement === document.body);
-    });
+    window.addEventListener('click', () => { if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock(); });
+    document.addEventListener('pointerlockchange', () => { isPointerLocked = (document.pointerLockElement === document.body); });
     window.addEventListener('mousemove', e => {
       if (!isPointerLocked) return;
       player.yaw -= e.movementX * 0.0024;
@@ -290,103 +479,143 @@
     });
 
     function toggleVehicle() {
-      if (inCrawler) {
-        inCrawler = false;
-        player.pos.copy(crawlerGroup.position).add(new THREE.Vector3(2.8, 0.8, 0));
-        showNotify('DISEMBARKED KLONDIKE 8x8 EXOCRAWLER');
-      } else {
-        if (player.pos.distanceTo(crawlerGroup.position) < 8.0) {
-          inCrawler = true;
-          showNotify('🏔️ PILOTING KLONDIKE 8x8 EXOCRAWLER // GOLD PASS TRACK ACTIVE');
-        }
+      if (inPatrolCruiser) {
+        inPatrolCruiser = false;
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(2.4, 0.8, 0));
+        document.getElementById('cruiser-hud').style.display = 'none';
+        if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P');
+        showNotify('DISEMBARKED PROSPECTOR CRUISER');
+        audio.playChirp();
+      } else if (player.pos.distanceTo(cruiserGroup.position) < 8.0) {
+        inPatrolCruiser = true;
+        document.getElementById('cruiser-hud').style.display = 'block';
+        if (playerRiggedMesh) playerRiggedMesh.visible = false;
+        showNotify('⛏️ PILOTING YUKON PROSPECTOR CRUISER // [SHIFT] NITRO BOOST');
+        audio.playChirp();
       }
     }
 
-    let loreClaimed = false;
     function handleInteractions() {
-      if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
-        loreClaimed = true;
-        tokens += 700;
-        localStorage.setItem('BS_TOKENS', tokens.toString());
+      if (!missionLoganDone && player.pos.distanceTo(termGroup.position) < 7.0) {
+        missionLoganDone = true;
+        document.getElementById('mis-logan').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
         document.getElementById('token-val').textContent = tokens.toLocaleString();
-        showNotify('⚡ YUKON ARCHIVE UNLOCKED: "KLONDIKE GOLD RUSH" (+700 NEX TOKENS)');
+        showNotify('🏔️ MOUNT LOGAN SUMMIT WEATHER LINK SYNCHRONIZED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
+      }
+      const dredgePos = new THREE.Vector3(110, 0, -110);
+      if (!missionDredgeDone && player.pos.distanceTo(dredgePos) < 28.0) {
+        missionDredgeDone = true;
+        document.getElementById('mis-dredge').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚙️ KLONDIKE DREDGE NO. 4 SLUICE CORE SYNCHRONIZED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
       }
     }
 
-    let lastTime = performance.now();
+    // Main Loop
+    let lastTime = performance.now(), wheelSpin = 0, steerAngle = 0;
     function animate(now) {
       requestAnimationFrame(animate);
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
-      tOrb.rotation.y += delta * 1.5;
-      tOrb.rotation.x += delta * 0.9;
+      if (characterMixer) characterMixer.update(delta);
+      tOrb.rotation.y += delta * 1.5; tOrb.rotation.x += delta * 0.8;
+      dredgeLight.intensity = 3.2 + Math.sin(now * 0.005) * 0.8;
 
       const prompt = document.getElementById('interact-prompt');
       const promptMsg = document.getElementById('prompt-msg');
-      if (player.pos.distanceTo(crawlerGroup.position) < 7.0 && !inCrawler) {
-        prompt.style.display = 'flex';
-        promptMsg.textContent = 'PILOT 8x8 EXOCRAWLER [E]';
-      } else if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
-        prompt.style.display = 'flex';
-        promptMsg.textContent = 'ACCESS KLONDIKE GOLD VAULT [F]';
+      if (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT PROSPECTOR CRUISER [E]';
+      } else if (!missionLoganDone && player.pos.distanceTo(termGroup.position) < 7.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'LINK MOUNT LOGAN WEATHER [F]';
+      } else if (!missionDredgeDone && player.pos.distanceTo(new THREE.Vector3(110, 0, -110)) < 28.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'SYNC DREDGE SLUICE CORE [F]';
       } else {
         prompt.style.display = 'none';
       }
 
-      if (inCrawler) {
+      if (inPatrolCruiser) {
         let throttle = 0, steer = 0;
         if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
         if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
         if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
-        if (keys['KeyD'] || keys['ArrowRight']) steer += 1;
-        const nitro = keys['ShiftLeft'] || keys['ShiftRight'] ? 1.6 : 1.0;
+        if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+        const nitro = (keys['ShiftLeft'] || keys['ShiftRight']) ? 1.85 : 1.0;
 
-        crawlerSpeed = THREE.MathUtils.lerp(crawlerSpeed, throttle * 48 * nitro, delta * 2.8);
-        crawlerGroup.rotation.y += steer * delta * (crawlerSpeed / 20);
-        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), crawlerGroup.rotation.y);
-        crawlerGroup.position.add(fwd.multiplyScalar(crawlerSpeed * delta));
+        cruiserSpeed = THREE.MathUtils.lerp(cruiserSpeed, throttle * 44 * nitro, delta * 3.5);
+        steerAngle = THREE.MathUtils.lerp(steerAngle, steer * 0.38, delta * 8.0);
+        cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
+        const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
 
-        player.pos.copy(crawlerGroup.position).add(new THREE.Vector3(0, 1.8, 0));
-        const camBack = new THREE.Vector3(0, 4.8, 11).applyAxisAngle(new THREE.Vector3(0, 1, 0), crawlerGroup.rotation.y);
-        camera.position.lerp(crawlerGroup.position.clone().add(camBack), 0.35);
-        camera.lookAt(crawlerGroup.position.x, crawlerGroup.position.y + 1.2, crawlerGroup.position.z);
+        wheelSpin += (cruiserSpeed / 0.5) * delta;
+        cyberCarSteers.forEach(i => { i.node.rotation.y = i.rotY + steerAngle; });
+        cyberCarWheels.forEach(i => { i.node.rotation.x = i.rotX + wheelSpin; });
+
+        const absKmh = Math.abs(Math.round(cruiserSpeed * 3.6));
+        document.getElementById('cruiser-kmh').textContent = absKmh;
+
+        // Mission 1: Alaska Highway Dash at Z > 220
+        if (!missionHighwayDone && cruiserGroup.position.z > 220 && Math.abs(cruiserGroup.position.x) < 22) {
+          missionHighwayDone = true;
+          document.getElementById('mis-highway').classList.add('done');
+          tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+          document.getElementById('token-val').textContent = tokens.toLocaleString();
+          showNotify('🏔️ ALASKA HIGHWAY KLONDIKE CORRIDOR TRAVERSED (+500 NEX)');
+          audio.playLootChime(); updateMissionBadge();
+        }
+
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(0, 1.4, 0));
+        const camBack = new THREE.Vector3(0, 4.4, -9.8).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        camera.position.lerp(cruiserGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(cruiserGroup.position.x, cruiserGroup.position.y + 1.2, cruiserGroup.position.z);
+
       } else {
         let moveX = 0, moveZ = 0;
-        if (keys['KeyW']) moveZ -= 1;
-        if (keys['KeyS']) moveZ += 1;
-        if (keys['KeyA']) moveX -= 1;
-        if (keys['KeyD']) moveX += 1;
-
-        const moveSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 22 : 12;
+        if (keys['KeyW']) moveZ -= 1; if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1; if (keys['KeyD']) moveX += 1;
+        const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight']);
+        const moveSpeed = isSprinting ? 18.0 : 9.5;
         const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
         const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
 
         player.pos.x += rotatedMove.x * moveSpeed * delta;
         player.pos.z += rotatedMove.z * moveSpeed * delta;
 
-        if (keys['Space'] && player.isGrounded) {
-          player.vel.y = 9.5;
-          player.isGrounded = false;
-        }
-        player.vel.y -= 22 * delta;
-        player.pos.y += player.vel.y * delta;
-        if (player.pos.y <= 1.2) {
-          player.pos.y = 1.2;
-          player.vel.y = 0;
-          player.isGrounded = true;
+        const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;
+        const isMoving = horizSpeed > 0.5;
+
+        if (characterActions['Idle'] && characterMixer) {
+          let target = characterActions['Idle'];
+          if (isMoving) target = isSprinting ? (characterActions['Run'] || characterActions['Walk']) : characterActions['Walk'];
+          if (target && activeCharacterAction !== target) {
+            const prev = activeCharacterAction; activeCharacterAction = target;
+            if (prev) prev.fadeOut(0.2); target.reset().fadeIn(0.2).play();
+          }
         }
 
-        camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
-        const lookDir = new THREE.Vector3(
-          Math.sin(player.yaw) * Math.cos(player.pitch),
-          Math.sin(player.pitch),
-          Math.cos(player.yaw) * Math.cos(player.pitch)
-        );
-        camera.lookAt(camera.position.clone().add(lookDir));
+        if (keys['Space'] && player.isGrounded) { player.vel.y = 9.8; player.isGrounded = false; }
+        player.vel.y -= 22 * delta; player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2) { player.pos.y = 1.2; player.vel.y = 0; player.isGrounded = true; }
+
+        playerGroup.position.copy(player.pos);
+        playerGroup.rotation.y = player.yaw + Math.PI;
+
+        if (cameraMode === '1P') {
+          camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+          camera.rotation.set(player.pitch, player.yaw, 0, 'YXZ');
+        } else {
+          const camOffset = new THREE.Vector3(0.5, 2.0, 3.6)
+            .applyAxisAngle(new THREE.Vector3(1, 0, 0), player.pitch * 0.45)
+            .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+          camera.position.copy(player.pos).add(camOffset);
+          camera.lookAt(player.pos.x, player.pos.y + 1.4, player.pos.z);
+        }
       }
-
-      renderer.render(scene, camera);
     }
     requestAnimationFrame(animate);
 

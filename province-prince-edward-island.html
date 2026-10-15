@@ -8,45 +8,65 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <script src="js/three.min.js"></script>
   <script>
     if (typeof THREE === 'undefined') {
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
     }
   </script>
+  <script src="js/GLTFLoader.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
+    }
+  </script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
-    body, html { width: 100%; height: 100%; overflow: hidden; background: #180e0c; font-family: 'Rajdhani', sans-serif; color: #fff; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #1a0c0a; font-family: 'Rajdhani', sans-serif; color: #fff; }
     #canvas-container { position: absolute; inset: 0; }
     canvas { width: 100%; height: 100%; display: block; }
     
-    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; }
-    .province-badge { background: rgba(30, 14, 12, 0.9); border: 1.5px solid #ef4444; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(239, 68, 68, 0.35); pointer-events: auto; }
-    .crest { width: 42px; height: 42px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #ef4444; }
+    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; flex-wrap: wrap; gap: 10px; }
+    .province-badge { background: rgba(32, 14, 12, 0.92); border: 1.5px solid #ef4444; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(239, 68, 68, 0.35); pointer-events: auto; }
+    .crest { width: 44px; height: 44px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ef4444; }
     .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
-    .province-sub { font-size: 11px; color: #fca5a5; letter-spacing: 0.5px; font-weight: 600; }
+    .province-sub { font-size: 11px; color: #fca5a5; letter-spacing: 0.5px; font-weight: 700; }
     
-    .hud-right { display: flex; gap: 10px; align-items: center; pointer-events: auto; }
-    .hud-pill { background: rgba(30, 14, 12, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
-    .btn-return { background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 18px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px rgba(220,38,38,0.4); display: flex; align-items: center; gap: 8px; }
+    .hud-right { display: flex; gap: 8px; align-items: center; pointer-events: auto; flex-wrap: wrap; }
+    .hud-pill { background: rgba(32, 14, 12, 0.92); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-hud { background: rgba(44, 18, 16, 0.92); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 10px; color: #fca5a5; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; padding: 9px 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .btn-hud:hover { background: rgba(239, 68, 68, 0.25); transform: translateY(-1px); }
+    .btn-return { background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; padding: 9px 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 16px rgba(220,38,38,0.45); display: flex; align-items: center; gap: 8px; }
     .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(220,38,38,0.7); }
-    .btn-map { background: rgba(239, 68, 68, 0.2); border: 1.5px solid #ef4444; border-radius: 10px; color: #ef4444; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-    .btn-map:hover { background: rgba(239, 68, 68, 0.4); }
 
-    .controls-banner { position: fixed; bottom: 20px; left: 20px; background: rgba(24, 12, 10, 0.85); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .mission-tracker { position: fixed; top: 82px; left: 16px; width: 310px; background: rgba(26, 12, 10, 0.88); border: 1.5px solid rgba(239, 68, 68, 0.35); border-radius: 14px; padding: 12px 16px; z-index: 95; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.5); pointer-events: auto; }
+    .mission-header { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffd700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .mission-item { font-size: 12px; color: #cbd5e1; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .mission-item.done { color: #fca5a5; text-decoration: line-through; opacity: 0.8; }
+    .mission-item i { width: 14px; text-align: center; }
+
+    .controls-banner { position: fixed; bottom: 18px; left: 18px; background: rgba(26, 12, 10, 0.88); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
     .controls-banner span { color: #fca5a5; font-weight: 700; }
 
-    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(30, 14, 12, 0.95); border: 2px solid #ef4444; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fca5a5; display: none; align-items: center; gap: 10px; box-shadow: 0 0 30px rgba(239,68,68,0.4); z-index: 150; }
-    #notify-box { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: rgba(30, 14, 12, 0.96); border: 1.5px solid #ffd700; border-radius: 10px; padding: 10px 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #ffd700; z-index: 200; display: none; box-shadow: 0 0 25px rgba(255,215,0,0.35); text-align: center; }
+    #cruiser-hud { position: fixed; bottom: 20px; right: 20px; background: rgba(32, 14, 12, 0.94); border: 2px solid #ef4444; border-radius: 16px; padding: 14px 20px; z-index: 100; display: none; box-shadow: 0 0 35px rgba(239, 68, 68, 0.35); min-width: 260px; }
+    .speed-val { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #ef4444; }
+    .speed-unit { font-size: 12px; color: #8fa3b8; font-weight: 700; margin-left: 6px; }
 
-    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.85); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(32, 14, 12, 0.96); border: 2px solid #ef4444; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fca5a5; display: none; align-items: center; gap: 10px; box-shadow: 0 0 35px rgba(239,68,68,0.45); z-index: 150; animation: pulseGlow 1.6s infinite; }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(239,68,68,0.3); } 50% { box-shadow: 0 0 40px rgba(239,68,68,0.65); } }
+
+    #notify-box { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(32, 14, 12, 0.96); border: 1.5px solid #ef4444; border-radius: 12px; padding: 12px 26px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff; z-index: 200; display: none; box-shadow: 0 0 35px rgba(239,68,68,0.4); text-align: center; }
+
+    .province-modal { position: fixed; inset: 0; background: rgba(14, 6, 6, 0.88); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
     .province-modal.visible { display: flex; }
-    .modal-box { background: rgba(30, 14, 12, 0.96); border: 2px solid #ef4444; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(239,68,68,0.4); }
+    .modal-box { background: rgba(32, 14, 12, 0.96); border: 2px solid #ef4444; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(239,68,68,0.4); }
     .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(239,68,68,0.08); }
     .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
     .modal-close { background: none; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; }
     .modal-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; }
-    .province-card { background: rgba(42, 20, 18, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
+    .province-card { background: rgba(44, 20, 18, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
     .province-card:hover { border-color: #ef4444; transform: translateY(-2px); box-shadow: 0 0 20px rgba(239,68,68,0.25); }
     .province-card.active { border-color: #ef4444; background: rgba(239,68,68,0.2); box-shadow: 0 0 20px rgba(239,68,68,0.3); }
     .p-head { display: flex; align-items: center; justify-content: space-between; }
@@ -70,16 +90,38 @@
 
     <div class="hud-right">
       <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
-      <button type="button" class="btn-map" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> TRANS-CANADA [H]</button>
+      <button type="button" class="btn-hud" id="btn-camera" onclick="toggleCameraView()"><i class="fa-solid fa-eye"></i> <span id="cam-mode-label">3P VIEW</span> [V]</button>
+      <button type="button" class="btn-hud" id="btn-quality" onclick="cycleQuality()"><i class="fa-solid fa-sliders"></i> <span id="quality-label">GRAPHICS: HIGH</span> [Q]</button>
+      <button type="button" class="btn-hud" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> HIGHWAYS [H]</button>
       <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
     </div>
   </div>
 
-  <div class="controls-banner">
-    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>E / F</span>] CAUSEWAY ROADSTER &nbsp;|&nbsp; [<span>H</span>] PROVINCES
+  <div class="mission-tracker">
+    <div class="mission-header">
+      <span><i class="fa-solid fa-crosshairs"></i> PEI OBJECTIVES</span>
+      <span id="missions-count">0/3</span>
+    </div>
+    <div class="mission-item" id="mis-bridge"><i class="fa-solid fa-road-bridge"></i> 1. Confederation Bridge 13km Transit</div>
+    <div class="mission-item" id="mis-dunes"><i class="fa-solid fa-mountain-sun"></i> 2. Red Sandstone Dune Survey</div>
+    <div class="mission-item" id="mis-cradle"><i class="fa-solid fa-landmark"></i> 3. Cradle of Confederation Sync</div>
   </div>
 
-  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACTION</span></div>
+  <div id="cruiser-hud">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <div><span class="speed-val" id="cruiser-kmh">0</span><span class="speed-unit">KM/H</span></div>
+      <div style="font-size: 11px; color: #ef4444; font-family: 'Orbitron', sans-serif;">ISLAND ROADSTER ACTIVE</div>
+    </div>
+    <div style="font-size: 10px; color: #8fa3b8; margin-top: 4px;">
+      [W/S] ACCEL/BRAKE &nbsp;|&nbsp; [A/D] STEER &nbsp;|&nbsp; [SHIFT] NITRO &nbsp;|&nbsp; [E] EXIT
+    </div>
+  </div>
+
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>V</span>] 1P/3P &nbsp;|&nbsp; [<span>E</span>] CRUISER &nbsp;|&nbsp; [<span>F</span>] INTERACT
+  </div>
+
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACT</span></div>
   <div id="notify-box"></div>
 
   <div class="province-modal" id="modal-map">
@@ -93,6 +135,40 @@
   </div>
 
   <script>
+    class ProvinceAudio {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      }
+      playChirp() {
+        this.init(); if (!this.ctx) return;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(760, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.14);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.14);
+      }
+      playLootChime() {
+        this.init(); if (!this.ctx) return;
+        [440.0, 554.37, 659.25, 880.0].forEach((f, idx) => {
+          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.35);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.35);
+        });
+      }
+    }
+    const audio = new ProvinceAudio();
+
     const CANADIAN_PROVINCES = [
       { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
       { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
@@ -113,16 +189,32 @@
     const urlParams = new URLSearchParams(window.location.search);
     let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
     const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
-    let inRoadster = false;
-    let roadsterSpeed = 0;
+    let inPatrolCruiser = false;
+    let cruiserSpeed = 0;
+    let cameraMode = '3P';
+    let qualityMode = localStorage.getItem('PROVINCE_QUALITY') || 'high';
 
+    let missionBridgeDone = false, missionDunesDone = false, missionCradleDone = false;
     document.getElementById('token-val').textContent = tokens.toLocaleString();
 
     function showNotify(msg) {
       const box = document.getElementById('notify-box');
-      box.textContent = msg;
-      box.style.display = 'block';
-      setTimeout(() => { box.style.display = 'none'; }, 3800);
+      box.innerHTML = msg; box.style.display = 'block';
+      clearTimeout(window._notifTimer);
+      window._notifTimer = setTimeout(() => { box.style.display = 'none'; }, 4200);
+    }
+
+    function updateMissionBadge() {
+      const completed = (missionBridgeDone ? 1 : 0) + (missionDunesDone ? 1 : 0) + (missionCradleDone ? 1 : 0);
+      document.getElementById('missions-count').textContent = `${completed}/3`;
+      if (completed === 3 && !window._sectorRewardGranted) {
+        window._sectorRewardGranted = true;
+        tokens += 1000;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚡ PEI CRADLE OF CONFEDERATION SECTOR MASTERED! BONUS +1,000 NEX TOKENS');
+        audio.playLootChime();
+      }
     }
 
     function returnToMetropolis() {
@@ -130,8 +222,39 @@
       window.location.href = `game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
     }
 
-    function toggleMapModal() {
-      document.getElementById('modal-map').classList.toggle('visible');
+    function toggleMapModal() { document.getElementById('modal-map').classList.toggle('visible'); }
+    function toggleCameraView() {
+      cameraMode = (cameraMode === '1P') ? '3P' : '1P';
+      document.getElementById('cam-mode-label').textContent = `${cameraMode} VIEW`;
+      if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P' && !inPatrolCruiser);
+      audio.playChirp();
+    }
+    function cycleQuality() {
+      qualityMode = (qualityMode === 'high') ? 'med' : (qualityMode === 'med' ? 'low' : 'high');
+      localStorage.setItem('PROVINCE_QUALITY', qualityMode);
+      applyQualitySettings();
+      audio.playChirp();
+    }
+    function applyQualitySettings() {
+      const lbl = document.getElementById('quality-label');
+      if (lbl) lbl.textContent = `GRAPHICS: ${qualityMode.toUpperCase()}`;
+      if (!renderer) return;
+      if (qualityMode === 'low') {
+        renderer.setPixelRatio(1.0);
+        renderer.shadowMap.enabled = false;
+        if (dirLight) dirLight.castShadow = false;
+      } else if (qualityMode === 'med') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(512, 512); }
+      } else {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(1024, 1024); }
+      }
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     const listEl = document.getElementById('provinces-list');
@@ -139,148 +262,238 @@
       const card = document.createElement('a');
       card.className = 'province-card' + (p.id === 'prince-edward-island' ? ' active' : '');
       card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
-      card.innerHTML = `
-        <div class="p-head">
-          <span class="p-name">${p.name}</span>
-          <span class="p-abbr">${p.abbr}</span>
-        </div>
-        <div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
-        <div class="p-desc">${p.desc}</div>
-      `;
+      card.innerHTML = `<div class="p-head"><span class="p-name">${p.name}</span><span class="p-abbr">${p.abbr}</span></div><div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div><div class="p-desc">${p.desc}</div>`;
       listEl.appendChild(card);
     });
 
+    // ------------------------------------------------------------
+    // 3D SCENE SETUP & PEI CONFEDERATION BRIDGE ENVIRONMENT
+    // ------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x180c0a);
+    scene.fog = new THREE.FogExp2(0x180c0a, 0.0016);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2400);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.ACESFilmicToneMapping) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+    }
+    container.appendChild(renderer.domElement);
+
+    const hemiLight = new THREE.HemisphereLight(0xffa899, 0x24100c, 1.35);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff0ea, 2.2);
+    dirLight.position.set(150, 260, 100);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.near = 10; dirLight.shadow.camera.far = 650;
+    dirLight.shadow.camera.left = -200; dirLight.shadow.camera.right = 200;
+    dirLight.shadow.camera.top = 200; dirLight.shadow.camera.bottom = -200;
+    dirLight.shadow.bias = -0.0006;
+    scene.add(dirLight);
+
+    applyQualitySettings();
+
+    const texLoader = new THREE.TextureLoader();
+
+    // Red Sandstone Coastline Ground
+    const groundGeo = new THREE.PlaneGeometry(1600, 1600, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x4a180e, roughness: 0.92, metalness: 0.08 });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
+
+    // Northumberland Strait Ocean Water (West Flank X < -50)
+    const seaGeo = new THREE.PlaneGeometry(400, 1600, 16, 64);
+    const seaMat = new THREE.MeshStandardMaterial({ color: 0x0c253d, roughness: 0.16, metalness: 0.8, transparent: true, opacity: 0.9 });
+    const seaMesh = new THREE.Mesh(seaGeo, seaMat);
+    seaMesh.rotation.x = -Math.PI / 2;
+    seaMesh.position.set(-160, 0.25, 0);
+    seaMesh.receiveShadow = true;
+    scene.add(seaMesh);
+
+    // Trans-Canada Highway / Confederation Bridge Span
+    const hwyMat = new THREE.MeshStandardMaterial({ color: 0x281a18, roughness: 0.8 });
+    texLoader.load('assets/textures/pbr/Road007_1K-JPG_Color.jpg', tex => {
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 32);
+      hwyMat.map = tex; hwyMat.needsUpdate = true;
+    }, undefined, () => {});
+
+    const hwyGeo = new THREE.BoxGeometry(45, 1.2, 1200);
+    const hwyMesh = new THREE.Mesh(hwyGeo, hwyMat);
+    hwyMesh.position.set(0, 0.6, 0);
+    hwyMesh.receiveShadow = true;
+    scene.add(hwyMesh);
+
+    // CONFEDERATION BRIDGE 12.9KM CONCRETE SPANS (Massive Piers in the Strait at X: -160)
+    const bridgeGroup = new THREE.Group();
+    bridgeGroup.position.set(-160, 0, 0);
+    scene.add(bridgeGroup);
+
+    // Elevated causeway deck across the strait
+    const bDeck = new THREE.Mesh(new THREE.BoxGeometry(22, 3.0, 1200), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7 }));
+    bDeck.position.set(0, 16, 0);
+    bDeck.castShadow = true;
+    bridgeGroup.add(bDeck);
+
+    // Giant piers plunging into the strait
+    for (let p = -5; p <= 5; p++) {
+      const pz = p * 110;
+      const pier = new THREE.Mesh(new THREE.CylinderGeometry(5.0, 7.5, 16, 16), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 }));
+      pier.position.set(0, 8, pz);
+      pier.castShadow = true;
+      bridgeGroup.add(pier);
+    }
+
+    // RED SANDSTONE CLIFFS & DUNES (East flank at 120, 0, -80)
+    const dunesGroup = new THREE.Group();
+    dunesGroup.position.set(120, 0, -80);
+    scene.add(dunesGroup);
+
+    const duneMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.95 });
+    for (let d = 0; d < 5; d++) {
+      const dz = (d - 2) * 60;
+      const dh = 24 + (d % 3) * 8;
+      const dune = new THREE.Mesh(new THREE.ConeGeometry(38, dh, 7), duneMat);
+      dune.position.set(0, dh / 2, dz);
+      dune.castShadow = true;
+      dune.receiveShadow = true;
+      dunesGroup.add(dune);
+    }
+
+    // CAVENDISH FARMLAND WIND TURBINES at (150, 0, 80)
+    const turbineMast = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 2.2, 85, 16), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 }));
+    turbineMast.position.set(150, 42.5, 80);
+    turbineMast.castShadow = true;
+    scene.add(turbineMast);
+
+    const turbineRotor = new THREE.Group();
+    turbineRotor.position.set(150, 85, 80);
+    scene.add(turbineRotor);
+
+    for (let b = 0; b < 3; b++) {
+      const blade = new THREE.Mesh(new THREE.BoxGeometry(1.0, 34, 0.4), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+      blade.position.y = 17;
+      const bladePivot = new THREE.Group();
+      bladePivot.rotation.z = (b * Math.PI * 2) / 3;
+      bladePivot.add(blade);
+      turbineRotor.add(bladePivot);
+    }
+
+    // Cradle of Confederation Memorial Terminal at (0, 0, -180)
+    const termGroup = new THREE.Group();
+    termGroup.position.set(0, 0, -180);
+    scene.add(termGroup);
+
+    const tPed = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.0, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x2a100d, metalness: 0.9 }));
+    tPed.position.y = 1.1; termGroup.add(tPed);
+    const tOrb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2), new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true }));
+    tOrb.position.y = 2.6; termGroup.add(tOrb);
+
+    // Kenney Modular Island Architecture
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const gLoader = new THREE.GLTFLoader();
+      const mods = [
+        { file: 'building-small-a.glb', x: 65, y: 0.2, z: 20, scale: 5.5, ry: -Math.PI / 2 },
+        { file: 'building-small-b.glb', x: 65, y: 0.2, z: -40, scale: 5.5, ry: -Math.PI / 2 },
+        { file: 'grass-trees-tall.glb', x: 50, y: 0.2, z: -110, scale: 5.0, ry: 0.4 },
+        { file: 'grass-trees-tall.glb', x: 50, y: 0.2, z: 60, scale: 5.0, ry: -0.6 }
+      ];
+      mods.forEach(cfg => {
+        gLoader.load(`assets/models/kenney/${cfg.file}`, gltf => {
+          const m = gltf.scene;
+          m.position.set(cfg.x, cfg.y, cfg.z);
+          m.scale.set(cfg.scale, cfg.scale, cfg.scale);
+          m.rotation.y = cfg.ry;
+          m.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+          scene.add(m);
+        }, undefined, () => {});
+      });
+    }
+
+    // ------------------------------------------------------------
+    // RIGGED CHARACTER & ISLAND ROADSTER
+    // ------------------------------------------------------------
+    const playerGroup = new THREE.Group();
+    scene.add(playerGroup);
+
+    let playerRiggedMesh = null, characterMixer = null, characterActions = {}, activeCharacterAction = null;
+    const procChar = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 1.4, 12), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
+    procChar.position.y = 0.9;
+    playerGroup.add(procChar);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const charLoader = new THREE.GLTFLoader();
+      charLoader.load('assets/models/operative_soldier.glb', gltf => {
+        playerRiggedMesh = gltf.scene;
+        playerRiggedMesh.position.set(0, 0, 0);
+        playerRiggedMesh.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+        characterMixer = new THREE.AnimationMixer(playerRiggedMesh);
+        gltf.animations.forEach(clip => { characterActions[clip.name] = characterMixer.clipAction(clip); });
+        if (characterActions['Idle']) { characterActions['Idle'].play(); activeCharacterAction = characterActions['Idle']; }
+        playerGroup.add(playerRiggedMesh);
+        procChar.visible = false;
+        playerRiggedMesh.visible = (cameraMode === '3P');
+      }, undefined, () => {});
+    }
+
+    const cruiserGroup = new THREE.Group();
+    cruiserGroup.position.set(0, 0.4, 30);
+    scene.add(cruiserGroup);
+
+    let cyberCarMesh = null, cyberCarWheels = [], cyberCarSteers = [];
+    const procCruiser = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.2, 5.2), new THREE.MeshStandardMaterial({ color: 0xdc2626 }));
+    procCruiser.position.y = 0.8;
+    cruiserGroup.add(procCruiser);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const vLoader = new THREE.GLTFLoader();
+      vLoader.load('assets/models/cyber_car.glb', gltf => {
+        cyberCarMesh = gltf.scene;
+        cyberCarMesh.rotation.y = Math.PI;
+        cyberCarMesh.position.set(0, 0.22, 0);
+        cyberCarMesh.traverse(c => {
+          if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; }
+          const n = (c.name || '').toLowerCase();
+          if (n.includes('wheel_fl') || n.includes('wheel_fr')) {
+            cyberCarSteers.push({ node: c, rotY: c.rotation.y });
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          } else if (n.includes('wheel_rl') || n.includes('wheel_rr')) {
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          }
+        });
+        cruiserGroup.add(cyberCarMesh);
+        procCruiser.visible = false;
+      }, undefined, () => {});
+    }
+
+    // ------------------------------------------------------------
+    // CONTROLS & GAMEPLAY
+    // ------------------------------------------------------------
+    const player = { pos: new THREE.Vector3(0, 1.2, 45), vel: new THREE.Vector3(), yaw: 0, pitch: 0, isGrounded: true };
+    const keys = {};
     window.addEventListener('keydown', e => {
+      audio.init(); keys[e.code] = true;
+      if (e.code === 'KeyV') toggleCameraView();
+      if (e.code === 'KeyQ') cycleQuality();
       if (e.code === 'KeyH') toggleMapModal();
       if (e.code === 'KeyE') toggleVehicle();
       if (e.code === 'KeyF') handleInteractions();
       if (e.code === 'Escape') {
         const m = document.getElementById('modal-map');
-        if (m.classList.contains('visible')) m.classList.remove('visible');
-        else returnToMetropolis();
+        if (m.classList.contains('visible')) m.classList.remove('visible'); else returnToMetropolis();
       }
     });
-
-    // ------------------------------------------------------------
-    // THREE.JS 3D ENGINE - PEI CONFEDERATION BRIDGE & RED SAND
-    // ------------------------------------------------------------
-    const container = document.getElementById('canvas-container');
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x180e0c);
-    scene.fog = new THREE.FogExp2(0x180e0c, 0.0035);
-
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1500);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    container.appendChild(renderer.domElement);
-
-    const ambientLight = new THREE.AmbientLight(0x6b3026, 0.95);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xfca5a5, 1.8);
-    dirLight.position.set(130, 220, 90);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
-
-    // Red Sandstone Coastline Ground
-    const groundGeo = new THREE.PlaneGeometry(1200, 1200);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x5a1e12, roughness: 0.9 });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    // Northumberland Strait Water (Z < -50)
-    const seaGeo = new THREE.PlaneGeometry(1200, 600);
-    const seaMat = new THREE.MeshStandardMaterial({ color: 0x0f2942, roughness: 0.2, metalness: 0.7 });
-    const sea = new THREE.Mesh(seaGeo, seaMat);
-    sea.rotation.x = -Math.PI / 2;
-    sea.position.set(0, 0.2, -350);
-    scene.add(sea);
-
-    // CONFEDERATION BRIDGE 12.9KM CAUSEWAY (Extends across sea from Z = -50 to -650)
-    const bridgeGroup = new THREE.Group();
-    bridgeGroup.position.set(0, 0, 0);
-    scene.add(bridgeGroup);
-
-    // Bridge Deck (Continuous elevated freeway)
-    const bDeck = new THREE.Mesh(new THREE.BoxGeometry(18, 2.5, 600), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 }));
-    bDeck.position.set(0, 14, -350);
-    bridgeGroup.add(bDeck);
-
-    // Bridge Guardrails with Red Neon Edge
-    [-9, 9].forEach(gx => {
-      const rail = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.5, 600), new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.9 }));
-      rail.position.set(gx, 15.5, -350);
-      bridgeGroup.add(rail);
-    });
-
-    // Massive Concrete Bridge Piers in the Strait
-    for (let p = 0; p < 7; p++) {
-      const pz = -100 - p * 80;
-      const pier = new THREE.Mesh(new THREE.CylinderGeometry(5.5, 7.5, 14, 16), new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.7 }));
-      pier.position.set(0, 7, pz);
-      bridgeGroup.add(pier);
-    }
-
-    // PEI ISLAND CAUSEWAY ROADSTER (-10, 0.4, 25)
-    const roadsterGroup = new THREE.Group();
-    roadsterGroup.position.set(-10, 0.4, 25);
-    scene.add(roadsterGroup);
-
-    const rBody = new THREE.Mesh(new THREE.BoxGeometry(2.8, 0.9, 5.8), new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.95, roughness: 0.15 }));
-    rBody.position.y = 0.7;
-    roadsterGroup.add(rBody);
-
-    const rCab = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.7, 2.4), new THREE.MeshStandardMaterial({ color: 0x090d16, metalness: 0.9 }));
-    rCab.position.set(0, 1.3, -0.2);
-    roadsterGroup.add(rCab);
-
-    // 4 Sport Wheels
-    const tireMat = new THREE.MeshStandardMaterial({ color: 0x090d14, roughness: 0.95 });
-    [-1.5, 1.5].forEach(wx => {
-      [-1.7, 1.7].forEach(wz => {
-        const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.4, 16), tireMat);
-        tire.rotation.z = Math.PI / 2;
-        tire.position.set(wx, 0.55, wz);
-        roadsterGroup.add(tire);
-      });
-    });
-
-    // Cradle of Confederation Terminal at (0, 0, -20)
-    const termGroup = new THREE.Group();
-    termGroup.position.set(0, 0, -20);
-    scene.add(termGroup);
-
-    const tBase = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x361612, metalness: 0.9 }));
-    tBase.position.y = 1.1;
-    termGroup.add(tBase);
-
-    const tOrb = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.35, 16, 32), new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true }));
-    tOrb.position.y = 2.6;
-    termGroup.add(tOrb);
-
-    // Player
-    const player = {
-      pos: new THREE.Vector3(0, 1.2, 50),
-      vel: new THREE.Vector3(),
-      yaw: 0,
-      pitch: 0,
-      isGrounded: true
-    };
-
-    const keys = {};
-    window.addEventListener('keydown', e => { keys[e.code] = true; });
     window.addEventListener('keyup', e => { keys[e.code] = false; });
 
     let isPointerLocked = false;
-    window.addEventListener('click', () => {
-      if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock();
-    });
-    document.addEventListener('pointerlockchange', () => {
-      isPointerLocked = (document.pointerLockElement === document.body);
-    });
+    window.addEventListener('click', () => { if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock(); });
+    document.addEventListener('pointerlockchange', () => { isPointerLocked = (document.pointerLockElement === document.body); });
     window.addEventListener('mousemove', e => {
       if (!isPointerLocked) return;
       player.yaw -= e.movementX * 0.0024;
@@ -288,103 +501,143 @@
     });
 
     function toggleVehicle() {
-      if (inRoadster) {
-        inRoadster = false;
-        player.pos.copy(roadsterGroup.position).add(new THREE.Vector3(2.6, 0.8, 0));
-        showNotify('DISEMBARKED CAUSEWAY ROADSTER');
-      } else {
-        if (player.pos.distanceTo(roadsterGroup.position) < 8.0) {
-          inRoadster = true;
-          showNotify('🏎️ PILOTING ISLAND CAUSEWAY ROADSTER // HIGH-SPEED OVERPASS MODE ACTIVE');
-        }
+      if (inPatrolCruiser) {
+        inPatrolCruiser = false;
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(2.4, 0.8, 0));
+        document.getElementById('cruiser-hud').style.display = 'none';
+        if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P');
+        showNotify('DISEMBARKED ISLAND ROADSTER');
+        audio.playChirp();
+      } else if (player.pos.distanceTo(cruiserGroup.position) < 8.0) {
+        inPatrolCruiser = true;
+        document.getElementById('cruiser-hud').style.display = 'block';
+        if (playerRiggedMesh) playerRiggedMesh.visible = false;
+        showNotify('🌉 PILOTING PEI CAUSEWAY ROADSTER // [SHIFT] NITRO BOOST');
+        audio.playChirp();
       }
     }
 
-    let loreClaimed = false;
     function handleInteractions() {
-      if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
-        loreClaimed = true;
-        tokens += 600;
-        localStorage.setItem('BS_TOKENS', tokens.toString());
+      if (!missionCradleDone && player.pos.distanceTo(termGroup.position) < 7.0) {
+        missionCradleDone = true;
+        document.getElementById('mis-cradle').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
         document.getElementById('token-val').textContent = tokens.toLocaleString();
-        showNotify('⚡ PEI ARCHIVE UNLOCKED: "PARVA SUB INGENTI" (+600 NEX TOKENS)');
+        showNotify('🏛️ CRADLE OF CONFEDERATION SYNCHRONIZED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
+      }
+      const dunesPos = new THREE.Vector3(120, 0, -80);
+      if (!missionDunesDone && player.pos.distanceTo(dunesPos) < 28.0) {
+        missionDunesDone = true;
+        document.getElementById('mis-dunes').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('🏖️ RED SANDSTONE DUNES SURVEYED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
       }
     }
 
-    let lastTime = performance.now();
+    // Main Loop
+    let lastTime = performance.now(), wheelSpin = 0, steerAngle = 0;
     function animate(now) {
       requestAnimationFrame(animate);
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
-      tOrb.rotation.y += delta * 1.5;
-      tOrb.rotation.x += delta * 0.9;
+      if (characterMixer) characterMixer.update(delta);
+      tOrb.rotation.y += delta * 1.5; tOrb.rotation.x += delta * 0.8;
+      turbineRotor.rotation.z += delta * 1.2;
 
       const prompt = document.getElementById('interact-prompt');
       const promptMsg = document.getElementById('prompt-msg');
-      if (player.pos.distanceTo(roadsterGroup.position) < 7.0 && !inRoadster) {
-        prompt.style.display = 'flex';
-        promptMsg.textContent = 'PILOT CAUSEWAY ROADSTER [E]';
-      } else if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
-        prompt.style.display = 'flex';
-        promptMsg.textContent = 'ACCESS CONFEDERATION ARCHIVE [F]';
+      if (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT ISLAND ROADSTER [E]';
+      } else if (!missionCradleDone && player.pos.distanceTo(termGroup.position) < 7.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'SYNC CONFEDERATION MEMORIAL [F]';
+      } else if (!missionDunesDone && player.pos.distanceTo(new THREE.Vector3(120, 0, -80)) < 28.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'SURVEY RED DUNES [F]';
       } else {
         prompt.style.display = 'none';
       }
 
-      if (inRoadster) {
+      if (inPatrolCruiser) {
         let throttle = 0, steer = 0;
         if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
         if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
         if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
-        if (keys['KeyD'] || keys['ArrowRight']) steer += 1;
-        const nitro = keys['ShiftLeft'] || keys['ShiftRight'] ? 1.7 : 1.0;
+        if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+        const nitro = (keys['ShiftLeft'] || keys['ShiftRight']) ? 1.85 : 1.0;
 
-        roadsterSpeed = THREE.MathUtils.lerp(roadsterSpeed, throttle * 55 * nitro, delta * 3.2);
-        roadsterGroup.rotation.y += steer * delta * (roadsterSpeed / 20);
-        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), roadsterGroup.rotation.y);
-        roadsterGroup.position.add(fwd.multiplyScalar(roadsterSpeed * delta));
+        cruiserSpeed = THREE.MathUtils.lerp(cruiserSpeed, throttle * 44 * nitro, delta * 3.5);
+        steerAngle = THREE.MathUtils.lerp(steerAngle, steer * 0.38, delta * 8.0);
+        cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
+        const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
 
-        player.pos.copy(roadsterGroup.position).add(new THREE.Vector3(0, 1.4, 0));
-        const camBack = new THREE.Vector3(0, 3.8, 9.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), roadsterGroup.rotation.y);
-        camera.position.lerp(roadsterGroup.position.clone().add(camBack), 0.35);
-        camera.lookAt(roadsterGroup.position.x, roadsterGroup.position.y + 1.0, roadsterGroup.position.z);
+        wheelSpin += (cruiserSpeed / 0.5) * delta;
+        cyberCarSteers.forEach(i => { i.node.rotation.y = i.rotY + steerAngle; });
+        cyberCarWheels.forEach(i => { i.node.rotation.x = i.rotX + wheelSpin; });
+
+        const absKmh = Math.abs(Math.round(cruiserSpeed * 3.6));
+        document.getElementById('cruiser-kmh').textContent = absKmh;
+
+        // Mission 1: Confederation Bridge Crossing at Z > 220
+        if (!missionBridgeDone && cruiserGroup.position.z > 220 && Math.abs(cruiserGroup.position.x) < 22) {
+          missionBridgeDone = true;
+          document.getElementById('mis-bridge').classList.add('done');
+          tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+          document.getElementById('token-val').textContent = tokens.toLocaleString();
+          showNotify('🌉 CONFEDERATION BRIDGE STRAIT CROSSING COMPLETE (+500 NEX)');
+          audio.playLootChime(); updateMissionBadge();
+        }
+
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(0, 1.4, 0));
+        const camBack = new THREE.Vector3(0, 4.4, -9.8).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        camera.position.lerp(cruiserGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(cruiserGroup.position.x, cruiserGroup.position.y + 1.2, cruiserGroup.position.z);
+
       } else {
         let moveX = 0, moveZ = 0;
-        if (keys['KeyW']) moveZ -= 1;
-        if (keys['KeyS']) moveZ += 1;
-        if (keys['KeyA']) moveX -= 1;
-        if (keys['KeyD']) moveX += 1;
-
-        const moveSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 22 : 12;
+        if (keys['KeyW']) moveZ -= 1; if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1; if (keys['KeyD']) moveX += 1;
+        const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight']);
+        const moveSpeed = isSprinting ? 18.0 : 9.5;
         const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
         const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
 
         player.pos.x += rotatedMove.x * moveSpeed * delta;
         player.pos.z += rotatedMove.z * moveSpeed * delta;
 
-        if (keys['Space'] && player.isGrounded) {
-          player.vel.y = 9.5;
-          player.isGrounded = false;
-        }
-        player.vel.y -= 22 * delta;
-        player.pos.y += player.vel.y * delta;
-        if (player.pos.y <= 1.2) {
-          player.pos.y = 1.2;
-          player.vel.y = 0;
-          player.isGrounded = true;
+        const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;
+        const isMoving = horizSpeed > 0.5;
+
+        if (characterActions['Idle'] && characterMixer) {
+          let target = characterActions['Idle'];
+          if (isMoving) target = isSprinting ? (characterActions['Run'] || characterActions['Walk']) : characterActions['Walk'];
+          if (target && activeCharacterAction !== target) {
+            const prev = activeCharacterAction; activeCharacterAction = target;
+            if (prev) prev.fadeOut(0.2); target.reset().fadeIn(0.2).play();
+          }
         }
 
-        camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
-        const lookDir = new THREE.Vector3(
-          Math.sin(player.yaw) * Math.cos(player.pitch),
-          Math.sin(player.pitch),
-          Math.cos(player.yaw) * Math.cos(player.pitch)
-        );
-        camera.lookAt(camera.position.clone().add(lookDir));
+        if (keys['Space'] && player.isGrounded) { player.vel.y = 9.8; player.isGrounded = false; }
+        player.vel.y -= 22 * delta; player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2) { player.pos.y = 1.2; player.vel.y = 0; player.isGrounded = true; }
+
+        playerGroup.position.copy(player.pos);
+        playerGroup.rotation.y = player.yaw + Math.PI;
+
+        if (cameraMode === '1P') {
+          camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+          camera.rotation.set(player.pitch, player.yaw, 0, 'YXZ');
+        } else {
+          const camOffset = new THREE.Vector3(0.5, 2.0, 3.6)
+            .applyAxisAngle(new THREE.Vector3(1, 0, 0), player.pitch * 0.45)
+            .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+          camera.position.copy(player.pos).add(camOffset);
+          camera.lookAt(player.pos.x, player.pos.y + 1.4, player.pos.z);
+        }
       }
-
-      renderer.render(scene, camera);
     }
     requestAnimationFrame(animate);
 

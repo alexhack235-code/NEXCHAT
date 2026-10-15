@@ -8,38 +8,58 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
   <script src="js/three.min.js"></script>
   <script>
     if (typeof THREE === 'undefined') {
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
     }
   </script>
+  <script src="js/GLTFLoader.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
+    }
+  </script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body, html { width: 100%; height: 100%; overflow: hidden; background: #08101e; font-family: 'Rajdhani', sans-serif; color: #fff; }
     #canvas-container { position: absolute; inset: 0; }
     canvas { width: 100%; height: 100%; display: block; }
     
-    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; }
-    .province-badge { background: rgba(8, 16, 30, 0.9); border: 1.5px solid #ef4444; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(239, 68, 68, 0.35); pointer-events: auto; }
-    .crest { width: 42px; height: 42px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ef4444; }
+    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; flex-wrap: wrap; gap: 10px; }
+    .province-badge { background: rgba(8, 16, 30, 0.94); border: 1.5px solid #ef4444; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(239, 68, 68, 0.35); pointer-events: auto; }
+    .crest { width: 44px; height: 44px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ef4444; }
     .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
-    .province-sub { font-size: 11px; color: #fca5a5; letter-spacing: 0.5px; font-weight: 600; }
+    .province-sub { font-size: 11px; color: #fca5a5; letter-spacing: 0.5px; font-weight: 700; }
     
-    .hud-right { display: flex; gap: 10px; align-items: center; pointer-events: auto; }
-    .hud-pill { background: rgba(8, 16, 30, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
-    .btn-return { background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 18px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 15px rgba(220,38,38,0.4); display: flex; align-items: center; gap: 8px; }
+    .hud-right { display: flex; gap: 8px; align-items: center; pointer-events: auto; flex-wrap: wrap; }
+    .hud-pill { background: rgba(8, 16, 30, 0.94); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-hud { background: rgba(24, 18, 32, 0.92); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 10px; color: #fca5a5; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; padding: 9px 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .btn-hud:hover { background: rgba(239, 68, 68, 0.25); transform: translateY(-1px); }
+    .btn-return { background: linear-gradient(135deg, #dc2626, #b91c1c); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; padding: 9px 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 16px rgba(220,38,38,0.45); display: flex; align-items: center; gap: 8px; }
     .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(220,38,38,0.7); }
-    .btn-map { background: rgba(239, 68, 68, 0.2); border: 1.5px solid #ef4444; border-radius: 10px; color: #ef4444; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; padding: 10px 16px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; }
-    .btn-map:hover { background: rgba(239, 68, 68, 0.4); }
 
-    .controls-banner { position: fixed; bottom: 20px; left: 20px; background: rgba(6, 12, 24, 0.85); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .mission-tracker { position: fixed; top: 82px; left: 16px; width: 320px; background: rgba(8, 14, 28, 0.88); border: 1.5px solid rgba(239, 68, 68, 0.35); border-radius: 14px; padding: 12px 16px; z-index: 95; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.5); pointer-events: auto; }
+    .mission-header { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffd700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .mission-item { font-size: 12px; color: #cbd5e1; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .mission-item.done { color: #fca5a5; text-decoration: line-through; opacity: 0.8; }
+    .mission-item i { width: 14px; text-align: center; }
+
+    .controls-banner { position: fixed; bottom: 18px; left: 18px; background: rgba(6, 12, 24, 0.88); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
     .controls-banner span { color: #fca5a5; font-weight: 700; }
 
-    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(8, 16, 30, 0.95); border: 2px solid #ef4444; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fca5a5; display: none; align-items: center; gap: 10px; box-shadow: 0 0 30px rgba(239,68,68,0.4); z-index: 150; }
-    #notify-box { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: rgba(8, 16, 30, 0.96); border: 1.5px solid #ffd700; border-radius: 10px; padding: 10px 20px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; color: #ffd700; z-index: 200; display: none; box-shadow: 0 0 25px rgba(255,215,0,0.35); text-align: center; }
+    #cruiser-hud { position: fixed; bottom: 20px; right: 20px; background: rgba(8, 16, 30, 0.94); border: 2px solid #ef4444; border-radius: 16px; padding: 14px 20px; z-index: 100; display: none; box-shadow: 0 0 35px rgba(239, 68, 68, 0.35); min-width: 270px; }
+    .speed-val { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #ef4444; }
+    .speed-unit { font-size: 12px; color: #8fa3b8; font-weight: 700; margin-left: 6px; }
 
-    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.85); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(8, 16, 30, 0.96); border: 2px solid #ef4444; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fca5a5; display: none; align-items: center; gap: 10px; box-shadow: 0 0 35px rgba(239,68,68,0.45); z-index: 150; animation: pulseGlow 1.6s infinite; }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(239,68,68,0.3); } 50% { box-shadow: 0 0 40px rgba(239,68,68,0.65); } }
+
+    #notify-box { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(8, 16, 30, 0.96); border: 1.5px solid #ffd700; border-radius: 12px; padding: 12px 26px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff; z-index: 200; display: none; box-shadow: 0 0 35px rgba(255,215,0,0.35); text-align: center; }
+
+    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.88); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
     .province-modal.visible { display: flex; }
     .modal-box { background: rgba(8, 16, 30, 0.96); border: 2px solid #ef4444; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(239,68,68,0.4); }
     .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(239,68,68,0.08); }
@@ -64,22 +84,44 @@
       <div class="crest"><i class="fa-brands fa-canadian-maple-leaf"></i></div>
       <div>
         <div class="province-title">NATIONAL CAPITAL REGION</div>
-        <div class="province-sub">// PARLIAMENT HILL PEACE TOWER [NCR]</div>
+        <div class="province-sub">// PARLIAMENT HILL PEACE TOWER &amp; RIDEAU CANAL [NCR]</div>
       </div>
     </div>
 
     <div class="hud-right">
       <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
-      <button type="button" class="btn-map" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> TRANS-CANADA [H]</button>
+      <button type="button" class="btn-hud" id="btn-camera" onclick="toggleCameraView()"><i class="fa-solid fa-eye"></i> <span id="cam-mode-label">3P VIEW</span> [V]</button>
+      <button type="button" class="btn-hud" id="btn-quality" onclick="cycleQuality()"><i class="fa-solid fa-sliders"></i> <span id="quality-label">GRAPHICS: HIGH</span> [Q]</button>
+      <button type="button" class="btn-hud" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> HIGHWAYS [H]</button>
       <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
     </div>
   </div>
 
-  <div class="controls-banner">
-    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>E / F</span>] DIPLOMATIC CRUISER &nbsp;|&nbsp; [<span>H</span>] PROVINCES
+  <div class="mission-tracker">
+    <div class="mission-header">
+      <span><i class="fa-solid fa-crosshairs"></i> CAPITAL REGION OBJECTIVES</span>
+      <span id="missions-count">0/3</span>
+    </div>
+    <div class="mission-item" id="mis-transit"><i class="fa-solid fa-car-side"></i> 1. Confederation Boulevard Diplomatic Transit</div>
+    <div class="mission-item" id="mis-tower"><i class="fa-solid fa-monument"></i> 2. Parliament Peace Tower Spire Sync</div>
+    <div class="mission-item" id="mis-flame"><i class="fa-solid fa-fire-flame-curved"></i> 3. Centennial Flame Resonator Harmonize</div>
   </div>
 
-  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACTION</span></div>
+  <div id="cruiser-hud">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <div><span class="speed-val" id="cruiser-kmh">0</span><span class="speed-unit">KM/H</span></div>
+      <div style="font-size: 11px; color: #ef4444; font-family: 'Orbitron', sans-serif;">DIPLOMATIC VIP ESCORT ACTIVE</div>
+    </div>
+    <div style="font-size: 10px; color: #8fa3b8; margin-top: 4px;">
+      [W/S] ACCEL/BRAKE &nbsp;|&nbsp; [A/D] STEER &nbsp;|&nbsp; [SHIFT] NITRO &nbsp;|&nbsp; [E] EXIT
+    </div>
+  </div>
+
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>V</span>] 1P/3P &nbsp;|&nbsp; [<span>E</span>] VIP CRUISER &nbsp;|&nbsp; [<span>F</span>] INTERACT
+  </div>
+
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACT</span></div>
   <div id="notify-box"></div>
 
   <div class="province-modal" id="modal-map">
@@ -93,6 +135,40 @@
   </div>
 
   <script>
+    class ProvinceAudio {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      }
+      playChirp() {
+        this.init(); if (!this.ctx) return;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(480, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(860, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.14);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.14);
+      }
+      playLootChime() {
+        this.init(); if (!this.ctx) return;
+        [440.0, 554.37, 659.25, 880.0].forEach((f, idx) => {
+          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.35);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.35);
+        });
+      }
+    }
+    const audio = new ProvinceAudio();
+
     const CANADIAN_PROVINCES = [
       { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
       { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
@@ -113,16 +189,32 @@
     const urlParams = new URLSearchParams(window.location.search);
     let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
     const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
-    let inLimousine = false;
-    let limoSpeed = 0;
+    let inPatrolCruiser = false;
+    let cruiserSpeed = 0;
+    let cameraMode = '3P';
+    let qualityMode = localStorage.getItem('PROVINCE_QUALITY') || 'high';
 
+    let missionTransitDone = false, missionTowerDone = false, missionFlameDone = false;
     document.getElementById('token-val').textContent = tokens.toLocaleString();
 
     function showNotify(msg) {
       const box = document.getElementById('notify-box');
-      box.textContent = msg;
-      box.style.display = 'block';
-      setTimeout(() => { box.style.display = 'none'; }, 3800);
+      box.innerHTML = msg; box.style.display = 'block';
+      clearTimeout(window._notifTimer);
+      window._notifTimer = setTimeout(() => { box.style.display = 'none'; }, 4200);
+    }
+
+    function updateMissionBadge() {
+      const completed = (missionTransitDone ? 1 : 0) + (missionTowerDone ? 1 : 0) + (missionFlameDone ? 1 : 0);
+      document.getElementById('missions-count').textContent = `${completed}/3`;
+      if (completed === 3 && !window._sectorRewardGranted) {
+        window._sectorRewardGranted = true;
+        tokens += 1000;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚡ NATIONAL CAPITAL REGION MASTERED! BONUS +1,000 NEX TOKENS');
+        audio.playLootChime();
+      }
     }
 
     function returnToMetropolis() {
@@ -130,8 +222,39 @@
       window.location.href = `game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
     }
 
-    function toggleMapModal() {
-      document.getElementById('modal-map').classList.toggle('visible');
+    function toggleMapModal() { document.getElementById('modal-map').classList.toggle('visible'); }
+    function toggleCameraView() {
+      cameraMode = (cameraMode === '1P') ? '3P' : '1P';
+      document.getElementById('cam-mode-label').textContent = `${cameraMode} VIEW`;
+      if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P' && !inPatrolCruiser);
+      audio.playChirp();
+    }
+    function cycleQuality() {
+      qualityMode = (qualityMode === 'high') ? 'med' : (qualityMode === 'med' ? 'low' : 'high');
+      localStorage.setItem('PROVINCE_QUALITY', qualityMode);
+      applyQualitySettings();
+      audio.playChirp();
+    }
+    function applyQualitySettings() {
+      const lbl = document.getElementById('quality-label');
+      if (lbl) lbl.textContent = `GRAPHICS: ${qualityMode.toUpperCase()}`;
+      if (!renderer) return;
+      if (qualityMode === 'low') {
+        renderer.setPixelRatio(1.0);
+        renderer.shadowMap.enabled = false;
+        if (dirLight) dirLight.castShadow = false;
+      } else if (qualityMode === 'med') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(512, 512); }
+      } else {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(1024, 1024); }
+      }
+      renderer.setSize(window.innerWidth, window.innerHeight);
     }
 
     const listEl = document.getElementById('provinces-list');
@@ -139,196 +262,318 @@
       const card = document.createElement('a');
       card.className = 'province-card' + (p.id === 'national-capital' ? ' active' : '');
       card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
-      card.innerHTML = `
-        <div class="p-head">
-          <span class="p-name">${p.name}</span>
-          <span class="p-abbr">${p.abbr}</span>
-        </div>
-        <div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
-        <div class="p-desc">${p.desc}</div>
-      `;
+      card.innerHTML = `<div class="p-head"><span class="p-name">${p.name}</span><span class="p-abbr">${p.abbr}</span></div><div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div><div class="p-desc">${p.desc}</div>`;
       listEl.appendChild(card);
     });
 
+    // ------------------------------------------------------------
+    // 3D SCENE SETUP & PARLIAMENT HILL PEACE TOWER & RIDEAU CANAL
+    // ------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a101f);
+    scene.fog = new THREE.FogExp2(0x0a101f, 0.0018);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2400);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.ACESFilmicToneMapping) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+    }
+    container.appendChild(renderer.domElement);
+
+    const hemiLight = new THREE.HemisphereLight(0xffe4e6, 0x1e293b, 1.35);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 2.2);
+    dirLight.position.set(140, 260, 110);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.near = 10; dirLight.shadow.camera.far = 650;
+    dirLight.shadow.camera.left = -220; dirLight.shadow.camera.right = 220;
+    dirLight.shadow.camera.top = 220; dirLight.shadow.camera.bottom = -220;
+    dirLight.shadow.bias = -0.0006;
+    scene.add(dirLight);
+
+    applyQualitySettings();
+
+    const texLoader = new THREE.TextureLoader();
+
+    // Parliament Hill Lawn & Paved Plaza Ground
+    const groundGeo = new THREE.PlaneGeometry(1600, 1600, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x14201a, roughness: 0.88, metalness: 0.12 });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
+
+    // Confederation Boulevard (Central Highway Corridor)
+    const hwyMat = new THREE.MeshStandardMaterial({ color: 0x22262d, roughness: 0.75, metalness: 0.25 });
+    texLoader.load('assets/textures/pbr/Road007_1K-JPG_Color.jpg', tex => {
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 32);
+      hwyMat.map = tex; hwyMat.needsUpdate = true;
+    }, undefined, () => {});
+
+    const hwyGeo = new THREE.BoxGeometry(46, 1.2, 1200);
+    const hwyMesh = new THREE.Mesh(hwyGeo, hwyMat);
+    hwyMesh.position.set(0, 0.6, 0);
+    hwyMesh.receiveShadow = true;
+    scene.add(hwyMesh);
+
+    // RIDEAU CANAL WATERWAY & LOCKS (Running parallel to the east at x = 95)
+    const canalGroup = new THREE.Group();
+    canalGroup.position.set(95, 0, 0);
+    scene.add(canalGroup);
+
+    // Canal Channel Bed
+    const canalBed = new THREE.Mesh(new THREE.BoxGeometry(32, 6, 1200), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 }));
+    canalBed.position.set(0, -3.0, 0);
+    canalBed.receiveShadow = true;
+    canalGroup.add(canalBed);
+
+    // Canal Embankment Stone Walls
+    [-17, 17].forEach(wx => {
+      const wall = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 1200), new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.8 }));
+      wall.position.set(wx, 1.0, 0);
+      wall.castShadow = true; wall.receiveShadow = true;
+      canalGroup.add(wall);
+    });
+
+    // Rideau Canal Shimmering Water
+    const canalWaterGeo = new THREE.PlaneGeometry(30, 1200, 32, 64);
+    const canalWaterMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.15, metalness: 0.85, transparent: true, opacity: 0.82 });
+    const canalWater = new THREE.Mesh(canalWaterGeo, canalWaterMat);
+    canalWater.rotation.x = -Math.PI / 2;
+    canalWater.position.set(0, 0.4, 0);
+    canalGroup.add(canalWater);
+
+    // Canal Lock Gates at z = -60 and z = 60
+    [-60, 60].forEach(lz => {
+      const lockGate = new THREE.Mesh(new THREE.BoxGeometry(30, 6, 2), new THREE.MeshStandardMaterial({ color: 0x78350f, metalness: 0.6, roughness: 0.6 }));
+      lockGate.position.set(0, 1.2, lz);
+      lockGate.castShadow = true;
+      canalGroup.add(lockGate);
+    });
+
+    // ------------------------------------------------------------
+    // PARLIAMENT HILL CENTRE BLOCK & 95M GOTHIC PEACE TOWER
+    // ------------------------------------------------------------
+    const parlGroup = new THREE.Group();
+    parlGroup.position.set(0, 0, -160);
+    scene.add(parlGroup);
+
+    const stoneMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.82, metalness: 0.35 });
+    const copperRoofMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.45, metalness: 0.65 });
+
+    // Centre Block Main Façade Wings (East & West)
+    const wings = new THREE.Mesh(new THREE.BoxGeometry(160, 28, 42), stoneMat);
+    wings.position.y = 14;
+    wings.castShadow = true; wings.receiveShadow = true;
+    parlGroup.add(wings);
+
+    // Centre Block Copper Verdigris Mansard Roof
+    const roof = new THREE.Mesh(new THREE.ConeGeometry(92, 20, 4), copperRoofMat);
+    roof.rotation.y = Math.PI / 4;
+    roof.position.y = 36;
+    roof.castShadow = true;
+    parlGroup.add(roof);
+
+    // Neo-Gothic Flying Buttress Corner Turrets
+    [-80, 80].forEach(tx => {
+      [-21, 21].forEach(tz => {
+        const turret = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 5.0, 38, 8), stoneMat);
+        turret.position.set(tx, 19, tz);
+        turret.castShadow = true;
+        parlGroup.add(turret);
+
+        const spireTurret = new THREE.Mesh(new THREE.ConeGeometry(4.5, 14, 8), copperRoofMat);
+        spireTurret.position.set(tx, 45, tz);
+        spireTurret.castShadow = true;
+        parlGroup.add(spireTurret);
+      });
+    });
+
+    // 95-Meter Monumental Neo-Gothic Peace Tower
+    const pTower = new THREE.Mesh(new THREE.BoxGeometry(18, 96, 18), stoneMat);
+    pTower.position.set(0, 48, 14);
+    pTower.castShadow = true; pTower.receiveShadow = true;
+    parlGroup.add(pTower);
+
+    // Observation Gallery Arched Tier
+    const obsDeck = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 22), stoneMat);
+    obsDeck.position.set(0, 92, 14);
+    obsDeck.castShadow = true;
+    parlGroup.add(obsDeck);
+
+    // Four Grand Luminous Clock Faces
+    [-9.1, 9.1].forEach(cx => {
+      const clock = new THREE.Mesh(new THREE.CircleGeometry(4.2, 24), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+      clock.position.set(cx, 78, 14);
+      clock.rotation.y = Math.PI / 2;
+      parlGroup.add(clock);
+    });
+    [4.9, 23.1].forEach(cz => {
+      const clock = new THREE.Mesh(new THREE.CircleGeometry(4.2, 24), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
+      clock.position.set(0, 78, cz);
+      parlGroup.add(clock);
+    });
+
+    // Peace Tower Needle Spire
+    const spire = new THREE.Mesh(new THREE.ConeGeometry(8, 44, 8), copperRoofMat);
+    spire.position.set(0, 120, 14);
+    spire.castShadow = true;
+    parlGroup.add(spire);
+
+    // Federal Sovereign Red Beacon
+    const peaceBeacon = new THREE.PointLight(0xef4444, 4.5, 300);
+    peaceBeacon.position.set(0, 142, 14);
+    parlGroup.add(peaceBeacon);
+
+    // ------------------------------------------------------------
+    // CENTENNIAL FLAME EVERLASTING RESONATOR (at 0, 0, -60)
+    // ------------------------------------------------------------
+    const flameGroup = new THREE.Group();
+    flameGroup.position.set(0, 0, -60);
+    scene.add(flameGroup);
+
+    // Octagonal Granite Basin & Water Ring
+    const fBasin = new THREE.Mesh(new THREE.CylinderGeometry(9.5, 10.5, 2.4, 16), new THREE.MeshStandardMaterial({ color: 0x92400e, metalness: 0.85, roughness: 0.3 }));
+    fBasin.position.y = 1.2;
+    fBasin.castShadow = true; fBasin.receiveShadow = true;
+    flameGroup.add(fBasin);
+
+    const fWater = new THREE.Mesh(new THREE.CylinderGeometry(8.8, 8.8, 0.4, 16), new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.9, roughness: 0.1 }));
+    fWater.position.y = 2.1;
+    flameGroup.add(fWater);
+
+    // Eternal Flame Braziers & Dancing Glow
+    const flameLight = new THREE.PointLight(0xf97316, 4.2, 75);
+    flameLight.position.y = 4.2;
+    flameGroup.add(flameLight);
+
+    const flameCore = new THREE.Mesh(new THREE.SphereGeometry(1.2, 16, 16), new THREE.MeshBasicMaterial({ color: 0xfef08a }));
+    flameCore.position.y = 3.6;
+    flameGroup.add(flameCore);
+
+    // ------------------------------------------------------------
+    // CONFEDERATION QUANTUM ARCHIVE TERMINAL (at 0, 0, -20)
+    // ------------------------------------------------------------
+    const termGroup = new THREE.Group();
+    termGroup.position.set(0, 0, -20);
+    scene.add(termGroup);
+
+    const tPed = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x1f1624, metalness: 0.9, roughness: 0.2 }));
+    tPed.position.y = 1.1;
+    tPed.castShadow = true;
+    termGroup.add(tPed);
+
+    const tOrb = new THREE.Mesh(new THREE.TorusKnotGeometry(0.9, 0.28, 64, 8), new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true }));
+    tOrb.position.y = 2.8;
+    termGroup.add(tOrb);
+
+    // Kenney Modular Civic Buildings & Evergreen Conifers
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const gLoader = new THREE.GLTFLoader();
+      const civicMods = [
+        { file: 'building-small-a.glb', x: -65, y: 0.2, z: -20, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'building-small-b.glb', x: -65, y: 0.2, z: 60, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'building-small-c.glb', x: -65, y: 0.2, z: 140, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'grass-trees-tall.glb', x: -35, y: 0.2, z: -70, scale: 5.0, ry: 0.5 },
+        { file: 'grass-trees-tall.glb', x: 35, y: 0.2, z: -70, scale: 5.0, ry: -0.4 },
+        { file: 'grass-trees-tall.glb', x: -35, y: 0.2, z: 20, scale: 4.8, ry: 1.2 },
+        { file: 'grass-trees-tall.glb', x: 35, y: 0.2, z: 20, scale: 4.8, ry: -1.0 }
+      ];
+      civicMods.forEach(cfg => {
+        gLoader.load(`assets/models/kenney/${cfg.file}`, gltf => {
+          const m = gltf.scene;
+          m.position.set(cfg.x, cfg.y, cfg.z);
+          m.scale.set(cfg.scale, cfg.scale, cfg.scale);
+          m.rotation.y = cfg.ry;
+          m.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+          scene.add(m);
+        }, undefined, () => {});
+      });
+    }
+
+    // ------------------------------------------------------------
+    // RIGGED CHARACTER & DIPLOMATIC PRIME CRUISER
+    // ------------------------------------------------------------
+    const playerGroup = new THREE.Group();
+    scene.add(playerGroup);
+
+    let playerRiggedMesh = null, characterMixer = null, characterActions = {}, activeCharacterAction = null;
+    const procChar = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 1.4, 12), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+    procChar.position.y = 0.9;
+    playerGroup.add(procChar);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const charLoader = new THREE.GLTFLoader();
+      charLoader.load('assets/models/operative_soldier.glb', gltf => {
+        playerRiggedMesh = gltf.scene;
+        playerRiggedMesh.position.set(0, 0, 0);
+        playerRiggedMesh.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+        characterMixer = new THREE.AnimationMixer(playerRiggedMesh);
+        gltf.animations.forEach(clip => { characterActions[clip.name] = characterMixer.clipAction(clip); });
+        if (characterActions['Idle']) { characterActions['Idle'].play(); activeCharacterAction = characterActions['Idle']; }
+        playerGroup.add(playerRiggedMesh);
+        procChar.visible = false;
+        playerRiggedMesh.visible = (cameraMode === '3P');
+      }, undefined, () => {});
+    }
+
+    const cruiserGroup = new THREE.Group();
+    cruiserGroup.position.set(0, 0.4, 30);
+    scene.add(cruiserGroup);
+
+    let cyberCarMesh = null, cyberCarWheels = [], cyberCarSteers = [];
+    const procCruiser = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.2, 5.2), new THREE.MeshStandardMaterial({ color: 0xef4444 }));
+    procCruiser.position.y = 0.8;
+    cruiserGroup.add(procCruiser);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const vLoader = new THREE.GLTFLoader();
+      vLoader.load('assets/models/cyber_car.glb', gltf => {
+        cyberCarMesh = gltf.scene;
+        cyberCarMesh.rotation.y = Math.PI;
+        cyberCarMesh.position.set(0, 0.22, 0);
+        cyberCarMesh.traverse(c => {
+          if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; }
+          const n = (c.name || '').toLowerCase();
+          if (n.includes('wheel_fl') || n.includes('wheel_fr')) {
+            cyberCarSteers.push({ node: c, rotY: c.rotation.y });
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          } else if (n.includes('wheel_rl') || n.includes('wheel_rr')) {
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          }
+        });
+        cruiserGroup.add(cyberCarMesh);
+        procCruiser.visible = false;
+      }, undefined, () => {});
+    }
+
+    // ------------------------------------------------------------
+    // CONTROLS & GAMEPLAY
+    // ------------------------------------------------------------
+    const player = { pos: new THREE.Vector3(0, 1.2, 45), vel: new THREE.Vector3(), yaw: 0, pitch: 0, isGrounded: true };
+    const keys = {};
     window.addEventListener('keydown', e => {
+      audio.init(); keys[e.code] = true;
+      if (e.code === 'KeyV') toggleCameraView();
+      if (e.code === 'KeyQ') cycleQuality();
       if (e.code === 'KeyH') toggleMapModal();
       if (e.code === 'KeyE') toggleVehicle();
       if (e.code === 'KeyF') handleInteractions();
       if (e.code === 'Escape') {
         const m = document.getElementById('modal-map');
-        if (m.classList.contains('visible')) m.classList.remove('visible');
-        else returnToMetropolis();
+        if (m.classList.contains('visible')) m.classList.remove('visible'); else returnToMetropolis();
       }
     });
-
-    // ------------------------------------------------------------
-    // THREE.JS 3D ENGINE - PARLIAMENT HILL PEACE TOWER & CENTENNIAL FLAME
-    // ------------------------------------------------------------
-    const container = document.getElementById('canvas-container');
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x08101e);
-    scene.fog = new THREE.FogExp2(0x08101e, 0.0032);
-
-    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1500);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    container.appendChild(renderer.domElement);
-
-    const ambientLight = new THREE.AmbientLight(0x384a68, 0.95);
-    scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xf87171, 1.8);
-    dirLight.position.set(120, 220, 90);
-    dirLight.castShadow = true;
-    scene.add(dirLight);
-
-    // Parliament Hill Lawn & Paved Plaza
-    const groundGeo = new THREE.PlaneGeometry(1200, 1200);
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x111e18, roughness: 0.9 });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    // Stone Plaza Walkway (Center axis)
-    const plazaGeo = new THREE.PlaneGeometry(45, 1200);
-    const plazaMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
-    const plaza = new THREE.Mesh(plazaGeo, plazaMat);
-    plaza.rotation.x = -Math.PI / 2;
-    plaza.position.set(0, 0.1, 0);
-    scene.add(plaza);
-
-    // PARLIAMENT HILL CENTRE BLOCK & PEACE TOWER (at 0, 0, -150)
-    const parlGroup = new THREE.Group();
-    parlGroup.position.set(0, 0, -150);
-    scene.add(parlGroup);
-
-    // Centre Block Neo-Gothic Wings (East & West)
-    const wings = new THREE.Mesh(new THREE.BoxGeometry(140, 24, 38), new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.6 }));
-    wings.position.y = 12;
-    parlGroup.add(wings);
-
-    // Copper Mansard Verdigris Roof
-    const roof = new THREE.Mesh(new THREE.ConeGeometry(75, 16, 4), new THREE.MeshStandardMaterial({ color: 0x059669, roughness: 0.5 }));
-    roof.rotation.y = Math.PI / 4;
-    roof.position.y = 30;
-    parlGroup.add(roof);
-
-    // 92-Meter Neo-Gothic Peace Tower
-    const pTower = new THREE.Mesh(new THREE.BoxGeometry(16, 92, 16), new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7 }));
-    pTower.position.set(0, 46, 12);
-    parlGroup.add(pTower);
-
-    // Four Clock Faces
-    [-8.1, 8.1].forEach(cx => {
-      const clock = new THREE.Mesh(new THREE.CircleGeometry(3.5, 16), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
-      clock.position.set(cx, 74, 12);
-      clock.rotation.y = Math.PI / 2;
-      parlGroup.add(clock);
-    });
-    [3.9, 20.1].forEach(cz => {
-      const clock = new THREE.Mesh(new THREE.CircleGeometry(3.5, 16), new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide }));
-      clock.position.set(0, 74, cz);
-      parlGroup.add(clock);
-    });
-
-    // Copper Spire on Top of Peace Tower
-    const spire = new THREE.Mesh(new THREE.ConeGeometry(7, 36, 8), new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.85 }));
-    spire.position.set(0, 110, 12);
-    parlGroup.add(spire);
-
-    // Peace Tower Beacon
-    const peaceBeacon = new THREE.PointLight(0xef4444, 4, 240);
-    peaceBeacon.position.set(0, 128, 12);
-    parlGroup.add(peaceBeacon);
-
-    // CENTENNIAL FLAME (Fountain with everlasting fire at 0, 0, -60)
-    const flameGroup = new THREE.Group();
-    flameGroup.position.set(0, 0, -60);
-    scene.add(flameGroup);
-
-    const fBasin = new THREE.Mesh(new THREE.CylinderGeometry(8, 9, 2.2, 16), new THREE.MeshStandardMaterial({ color: 0xb45309, metalness: 0.8 }));
-    fBasin.position.y = 1.1;
-    flameGroup.add(fBasin);
-
-    const flameLight = new THREE.PointLight(0xf97316, 3.5, 60);
-    flameLight.position.y = 3.5;
-    flameGroup.add(flameLight);
-
-    // ROYAL CANADIAN VIP DIPLOMATIC CRUISER (-10, 0.4, 25)
-    const limoGroup = new THREE.Group();
-    limoGroup.position.set(-10, 0.4, 25);
-    scene.add(limoGroup);
-
-    const lBody = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.1, 7.8), new THREE.MeshStandardMaterial({ color: 0x050811, metalness: 0.95, roughness: 0.15 }));
-    lBody.position.y = 0.8;
-    limoGroup.add(lBody);
-
-    const lCab = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.9, 4.4), new THREE.MeshStandardMaterial({ color: 0x020307, metalness: 0.9 }));
-    lCab.position.set(0, 1.6, -0.2);
-    limoGroup.add(lCab);
-
-    // Canadian Maple Leaf Fender Pennants
-    [-1.5, 1.5].forEach(px => {
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.4, 6), new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.9 }));
-      pole.position.set(px, 1.8, -3.4);
-      limoGroup.add(pole);
-    });
-
-    // Red & Blue Diplomatic Escort Strobes
-    const redStrobe = new THREE.PointLight(0xef4444, 2, 25);
-    redStrobe.position.set(-0.8, 2.1, -0.2);
-    limoGroup.add(redStrobe);
-
-    const blueStrobe = new THREE.PointLight(0x3b82f6, 2, 25);
-    blueStrobe.position.set(0.8, 2.1, -0.2);
-    limoGroup.add(blueStrobe);
-
-    // 4 Armored Wheels
-    const tireMat = new THREE.MeshStandardMaterial({ color: 0x090d14, roughness: 0.95 });
-    [-1.55, 1.55].forEach(wx => {
-      [-2.4, 2.4].forEach(wz => {
-        const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 0.45, 16), tireMat);
-        tire.rotation.z = Math.PI / 2;
-        tire.position.set(wx, 0.6, wz);
-        limoGroup.add(tire);
-      });
-    });
-
-    // Confederation National Quantum Archive at (0, 0, -20)
-    const termGroup = new THREE.Group();
-    termGroup.position.set(0, 0, -20);
-    scene.add(termGroup);
-
-    const tBase = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.2, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x1f1624, metalness: 0.9 }));
-    tBase.position.y = 1.1;
-    termGroup.add(tBase);
-
-    const tOrb = new THREE.Mesh(new THREE.TorusKnotGeometry(0.9, 0.28, 64, 8), new THREE.MeshBasicMaterial({ color: 0xef4444, wireframe: true }));
-    tOrb.position.y = 2.6;
-    termGroup.add(tOrb);
-
-    // Player
-    const player = {
-      pos: new THREE.Vector3(0, 1.2, 50),
-      vel: new THREE.Vector3(),
-      yaw: 0,
-      pitch: 0,
-      isGrounded: true
-    };
-
-    const keys = {};
-    window.addEventListener('keydown', e => { keys[e.code] = true; });
     window.addEventListener('keyup', e => { keys[e.code] = false; });
 
     let isPointerLocked = false;
-    window.addEventListener('click', () => {
-      if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock();
-    });
-    document.addEventListener('pointerlockchange', () => {
-      isPointerLocked = (document.pointerLockElement === document.body);
-    });
+    window.addEventListener('click', () => { if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock(); });
+    document.addEventListener('pointerlockchange', () => { isPointerLocked = (document.pointerLockElement === document.body); });
     window.addEventListener('mousemove', e => {
       if (!isPointerLocked) return;
       player.yaw -= e.movementX * 0.0024;
@@ -336,107 +581,145 @@
     });
 
     function toggleVehicle() {
-      if (inLimousine) {
-        inLimousine = false;
-        player.pos.copy(limoGroup.position).add(new THREE.Vector3(2.6, 0.8, 0));
+      if (inPatrolCruiser) {
+        inPatrolCruiser = false;
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(2.4, 0.8, 0));
+        document.getElementById('cruiser-hud').style.display = 'none';
+        if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P');
         showNotify('DISEMBARKED VIP DIPLOMATIC CRUISER');
-      } else {
-        if (player.pos.distanceTo(limoGroup.position) < 8.0) {
-          inLimousine = true;
-          showNotify('🍁 PILOTING ROYAL CANADIAN DIPLOMATIC CRUISER // VIP ESCORT ACTIVE');
-        }
+        audio.playChirp();
+      } else if (player.pos.distanceTo(cruiserGroup.position) < 8.0) {
+        inPatrolCruiser = true;
+        document.getElementById('cruiser-hud').style.display = 'block';
+        if (playerRiggedMesh) playerRiggedMesh.visible = false;
+        showNotify('🍁 PILOTING ROYAL VIP DIPLOMATIC CRUISER // [SHIFT] NITRO BOOST');
+        audio.playChirp();
       }
     }
 
-    let loreClaimed = false;
     function handleInteractions() {
-      if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
-        loreClaimed = true;
-        tokens += 1000;
-        localStorage.setItem('BS_TOKENS', tokens.toString());
+      const towerPos = new THREE.Vector3(0, 0, -160);
+      if (!missionTowerDone && player.pos.distanceTo(towerPos) < 32.0) {
+        missionTowerDone = true;
+        document.getElementById('mis-tower').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
         document.getElementById('token-val').textContent = tokens.toLocaleString();
-        showNotify('⚡ NATIONAL ARCHIVE UNLOCKED: "A MARI USQUE AD MARE" (+1,000 NEX TOKENS)');
+        showNotify('🏛️ PARLIAMENT PEACE TOWER SPIRE SYNCHRONIZED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
+      }
+      const flamePos = new THREE.Vector3(0, 0, -60);
+      if (!missionFlameDone && player.pos.distanceTo(flamePos) < 18.0) {
+        missionFlameDone = true;
+        document.getElementById('mis-flame').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('🔥 CENTENNIAL FLAME RESONATOR HARMONIZED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
       }
     }
 
-    let lastTime = performance.now();
+    // Main Animation Loop
+    let lastTime = performance.now(), wheelSpin = 0, steerAngle = 0;
     function animate(now) {
       requestAnimationFrame(animate);
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
-      tOrb.rotation.y += delta * 1.5;
-      tOrb.rotation.x += delta * 0.9;
-
-      const strobeFlash = Math.sin(now * 0.012) > 0;
-      redStrobe.intensity = strobeFlash ? 3.5 : 0.2;
-      blueStrobe.intensity = strobeFlash ? 0.2 : 3.5;
+      if (characterMixer) characterMixer.update(delta);
+      tOrb.rotation.y += delta * 1.5; tOrb.rotation.x += delta * 0.8;
+      flameLight.intensity = 3.6 + Math.sin(now * 0.015) * 0.9;
+      peaceBeacon.intensity = 3.8 + Math.sin(now * 0.005) * 0.8;
 
       const prompt = document.getElementById('interact-prompt');
       const promptMsg = document.getElementById('prompt-msg');
-      if (player.pos.distanceTo(limoGroup.position) < 7.0 && !inLimousine) {
-        prompt.style.display = 'flex';
-        promptMsg.textContent = 'PILOT VIP DIPLOMATIC CRUISER [E]';
-      } else if (!loreClaimed && player.pos.distanceTo(termGroup.position) < 6.5) {
-        prompt.style.display = 'flex';
-        promptMsg.textContent = 'ACCESS CONFEDERATION ARCHIVE [F]';
+      if (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT VIP CRUISER [E]';
+      } else if (!missionTowerDone && player.pos.distanceTo(new THREE.Vector3(0, 0, -160)) < 32.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'SYNC PEACE TOWER SPIRE [F]';
+      } else if (!missionFlameDone && player.pos.distanceTo(new THREE.Vector3(0, 0, -60)) < 18.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'HARMONIZE CENTENNIAL FLAME [F]';
       } else {
         prompt.style.display = 'none';
       }
 
-      if (inLimousine) {
+      if (inPatrolCruiser) {
         let throttle = 0, steer = 0;
         if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
         if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
         if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
         if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
-        const nitro = keys['ShiftLeft'] || keys['ShiftRight'] ? 1.6 : 1.0;
+        const nitro = (keys['ShiftLeft'] || keys['ShiftRight']) ? 1.85 : 1.0;
 
-        limoSpeed = THREE.MathUtils.lerp(limoSpeed, throttle * 52 * nitro, delta * 3.0);
-        limoGroup.rotation.y += steer * delta * (limoSpeed / 20);
-        const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), limoGroup.rotation.y);
-        limoGroup.position.add(fwd.multiplyScalar(limoSpeed * delta));
+        cruiserSpeed = THREE.MathUtils.lerp(cruiserSpeed, throttle * 44 * nitro, delta * 3.5);
+        steerAngle = THREE.MathUtils.lerp(steerAngle, steer * 0.38, delta * 8.0);
+        cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
+        const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
 
-        player.pos.copy(limoGroup.position).add(new THREE.Vector3(0, 1.4, 0));
-        const camBack = new THREE.Vector3(0, 4.2, 11).applyAxisAngle(new THREE.Vector3(0, 1, 0), limoGroup.rotation.y);
-        camera.position.lerp(limoGroup.position.clone().add(camBack), 0.35);
-        camera.lookAt(limoGroup.position.x, limoGroup.position.y + 1.2, limoGroup.position.z);
+        wheelSpin += (cruiserSpeed / 0.5) * delta;
+        cyberCarSteers.forEach(i => { i.node.rotation.y = i.rotY + steerAngle; });
+        cyberCarWheels.forEach(i => { i.node.rotation.x = i.rotX + wheelSpin; });
+
+        const absKmh = Math.abs(Math.round(cruiserSpeed * 3.6));
+        document.getElementById('cruiser-kmh').textContent = absKmh;
+
+        // Mission 1: Confederation Boulevard transit at Z > 220
+        if (!missionTransitDone && cruiserGroup.position.z > 220 && Math.abs(cruiserGroup.position.x) < 24) {
+          missionTransitDone = true;
+          document.getElementById('mis-transit').classList.add('done');
+          tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+          document.getElementById('token-val').textContent = tokens.toLocaleString();
+          showNotify('🏛️ CONFEDERATION BOULEVARD DIPLOMATIC TRANSIT COMPLETE (+500 NEX)');
+          audio.playLootChime(); updateMissionBadge();
+        }
+
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(0, 1.4, 0));
+        const camBack = new THREE.Vector3(0, 4.4, -9.8).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        camera.position.lerp(cruiserGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(cruiserGroup.position.x, cruiserGroup.position.y + 1.2, cruiserGroup.position.z);
+
       } else {
         let moveX = 0, moveZ = 0;
-        if (keys['KeyW']) moveZ -= 1;
-        if (keys['KeyS']) moveZ += 1;
-        if (keys['KeyA']) moveX -= 1;
-        if (keys['KeyD']) moveX += 1;
-
-        const moveSpeed = keys['ShiftLeft'] || keys['ShiftRight'] ? 22 : 12;
+        if (keys['KeyW']) moveZ -= 1; if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1; if (keys['KeyD']) moveX += 1;
+        const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight']);
+        const moveSpeed = isSprinting ? 18.0 : 9.5;
         const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
         const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
 
         player.pos.x += rotatedMove.x * moveSpeed * delta;
         player.pos.z += rotatedMove.z * moveSpeed * delta;
 
-        if (keys['Space'] && player.isGrounded) {
-          player.vel.y = 9.5;
-          player.isGrounded = false;
-        }
-        player.vel.y -= 22 * delta;
-        player.pos.y += player.vel.y * delta;
-        if (player.pos.y <= 1.2) {
-          player.pos.y = 1.2;
-          player.vel.y = 0;
-          player.isGrounded = true;
+        const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;
+        const isMoving = horizSpeed > 0.5;
+
+        if (characterActions['Idle'] && characterMixer) {
+          let target = characterActions['Idle'];
+          if (isMoving) target = isSprinting ? (characterActions['Run'] || characterActions['Walk']) : characterActions['Walk'];
+          if (target && activeCharacterAction !== target) {
+            const prev = activeCharacterAction; activeCharacterAction = target;
+            if (prev) prev.fadeOut(0.2); target.reset().fadeIn(0.2).play();
+          }
         }
 
-        camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
-        const lookDir = new THREE.Vector3(
-          Math.sin(player.yaw) * Math.cos(player.pitch),
-          Math.sin(player.pitch),
-          Math.cos(player.yaw) * Math.cos(player.pitch)
-        );
-        camera.lookAt(camera.position.clone().add(lookDir));
+        if (keys['Space'] && player.isGrounded) { player.vel.y = 9.8; player.isGrounded = false; }
+        player.vel.y -= 22 * delta; player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2) { player.pos.y = 1.2; player.vel.y = 0; player.isGrounded = true; }
+
+        playerGroup.position.copy(player.pos);
+        playerGroup.rotation.y = player.yaw + Math.PI;
+
+        if (cameraMode === '1P') {
+          camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+          camera.rotation.set(player.pitch, player.yaw, 0, 'YXZ');
+        } else {
+          const camOffset = new THREE.Vector3(0.5, 2.0, 3.6)
+            .applyAxisAngle(new THREE.Vector3(1, 0, 0), player.pitch * 0.45)
+            .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+          camera.position.copy(player.pos).add(camOffset);
+          camera.lookAt(player.pos.x, player.pos.y + 1.4, player.pos.z);
+        }
       }
-
-      renderer.render(scene, camera);
     }
     requestAnimationFrame(animate);
 
