@@ -141,7 +141,7 @@ def validate_file(filepath):
 
 
 def main():
-    files = sorted(glob.glob('province-*.html')) + ['game.html']
+    files = sorted(glob.glob('Canada/province-*.html')) + ['game.html']
     all_ok = True
     print(f"Validating {len(files)} files...")
     for f in files:

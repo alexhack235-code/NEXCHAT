@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Northwest Territories // Trans-Canada Cyberway [NT]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="../js/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <script src="../js/GLTFLoader.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
+    }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #040e1c; font-family: 'Rajdhani', sans-serif; color: #fff; }
+    #canvas-container { position: absolute; inset: 0; }
+    canvas { width: 100%; height: 100%; display: block; }
+    
+    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; flex-wrap: wrap; gap: 10px; }
+    .province-badge { background: rgba(4, 18, 36, 0.92); border: 1.5px solid #22d3ee; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(34, 211, 238, 0.35); pointer-events: auto; }
+    .crest { width: 44px; height: 44px; border-radius: 50%; background: rgba(34, 211, 238, 0.2); border: 2px solid #22d3ee; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #22d3ee; }
+    .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+    .province-sub { font-size: 11px; color: #67e8f9; letter-spacing: 0.5px; font-weight: 700; }
+    
+    .hud-right { display: flex; gap: 8px; align-items: center; pointer-events: auto; flex-wrap: wrap; }
+    .hud-pill { background: rgba(4, 18, 36, 0.92); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-hud { background: rgba(6, 26, 48, 0.92); border: 1px solid rgba(34, 211, 238, 0.4); border-radius: 10px; color: #67e8f9; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; padding: 9px 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .btn-hud:hover { background: rgba(34, 211, 238, 0.25); transform: translateY(-1px); }
+    .btn-return { background: linear-gradient(135deg, #0284c7, #0369a1); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; padding: 9px 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 16px rgba(2,132,199,0.45); display: flex; align-items: center; gap: 8px; }
+    .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(2,132,199,0.7); }
+
+    .mission-tracker { position: fixed; top: 82px; left: 16px; width: 310px; background: rgba(4, 14, 28, 0.88); border: 1.5px solid rgba(34, 211, 238, 0.35); border-radius: 14px; padding: 12px 16px; z-index: 95; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.5); pointer-events: auto; }
+    .mission-header { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffd700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .mission-item { font-size: 12px; color: #cbd5e1; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .mission-item.done { color: #67e8f9; text-decoration: line-through; opacity: 0.8; }
+    .mission-item i { width: 14px; text-align: center; }
+
+    .controls-banner { position: fixed; bottom: 18px; left: 18px; background: rgba(4, 14, 28, 0.88); border: 1px solid rgba(34, 211, 238, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .controls-banner span { color: #67e8f9; font-weight: 700; }
+
+    #cruiser-hud { position: fixed; bottom: 20px; right: 20px; background: rgba(4, 18, 36, 0.94); border: 2px solid #22d3ee; border-radius: 16px; padding: 14px 20px; z-index: 100; display: none; box-shadow: 0 0 35px rgba(34, 211, 238, 0.35); min-width: 260px; }
+    .speed-val { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #22d3ee; }
+    .speed-unit { font-size: 12px; color: #8fa3b8; font-weight: 700; margin-left: 6px; }
+
+    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(4, 18, 36, 0.96); border: 2px solid #22d3ee; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #67e8f9; display: none; align-items: center; gap: 10px; box-shadow: 0 0 35px rgba(34,211,238,0.45); z-index: 150; animation: pulseGlow 1.6s infinite; }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(34,211,238,0.3); } 50% { box-shadow: 0 0 40px rgba(34,211,238,0.65); } }
+
+    #notify-box { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(4, 18, 36, 0.96); border: 1.5px solid #22d3ee; border-radius: 12px; padding: 12px 26px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff; z-index: 200; display: none; box-shadow: 0 0 35px rgba(34,211,238,0.4); text-align: center; }
+
+    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.88); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .province-modal.visible { display: flex; }
+    .modal-box { background: rgba(4, 18, 36, 0.96); border: 2px solid #22d3ee; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(34,211,238,0.4); }
+    .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(34,211,238,0.08); }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .modal-close { background: none; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; }
+    .modal-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; }
+    .province-card { background: rgba(10, 26, 46, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
+    .province-card:hover { border-color: #22d3ee; transform: translateY(-2px); box-shadow: 0 0 20px rgba(34,211,238,0.25); }
+    .province-card.active { border-color: #22d3ee; background: rgba(34,211,238,0.2); box-shadow: 0 0 20px rgba(34,211,238,0.3); }
+    .p-head { display: flex; align-items: center; justify-content: space-between; }
+    .p-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fff; }
+    .p-abbr { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #67e8f9; }
+    .p-desc { font-size: 11px; color: #8fa3b8; line-height: 1.3; }
+    .p-landmark { font-size: 10px; color: #ffd700; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div class="province-hud">
+    <div class="province-badge">
+      <div class="crest"><i class="fa-solid fa-gem"></i></div>
+      <div>
+        <div class="province-title">NORTHWEST TERRITORIES</div>
+        <div class="province-sub">// DIAVIK DIAMOND MINE &amp; GREAT SLAVE ICE ROAD [NT]</div>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
+      <button type="button" class="btn-hud" id="btn-camera" onclick="toggleCameraView()"><i class="fa-solid fa-eye"></i> <span id="cam-mode-label">3P VIEW</span> [V]</button>
+      <button type="button" class="btn-hud" id="btn-quality" onclick="cycleQuality()"><i class="fa-solid fa-sliders"></i> <span id="quality-label">GRAPHICS: HIGH</span> [Q]</button>
+      <button type="button" class="btn-hud" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> HIGHWAYS [H]</button>
+      <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
+    </div>
+  </div>
+
+  <div class="mission-tracker">
+    <div class="mission-header">
+      <span><i class="fa-solid fa-crosshairs"></i> NWT OBJECTIVES</span>
+      <span id="missions-count">0/3</span>
+    </div>
+    <div class="mission-item" id="mis-ice"><i class="fa-solid fa-truck-moving"></i> 1. Great Slave Lake Ice Road Crossing</div>
+    <div class="mission-item" id="mis-diavik"><i class="fa-solid fa-gem"></i> 2. Diavik Kimberlite Diamond Core Sync</div>
+    <div class="mission-item" id="mis-aurora"><i class="fa-solid fa-wand-magic-sparkles"></i> 3. Aurora Magnetosphere Resonance Link</div>
+  </div>
+
+  <div id="cruiser-hud">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <div><span class="speed-val" id="cruiser-kmh">0</span><span class="speed-unit">KM/H</span></div>
+      <div style="font-size: 11px; color: #22d3ee; font-family: 'Orbitron', sans-serif;">ARCTIC CRUISER ACTIVE</div>
+    </div>
+    <div style="font-size: 10px; color: #8fa3b8; margin-top: 4px;">
+      [W/S] ACCEL/BRAKE &nbsp;|&nbsp; [A/D] STEER &nbsp;|&nbsp; [SHIFT] NITRO &nbsp;|&nbsp; [E] EXIT
+    </div>
+  </div>
+
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>V</span>] 1P/3P &nbsp;|&nbsp; [<span>E</span>] CRUISER &nbsp;|&nbsp; [<span>F</span>] INTERACT
+  </div>
+
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACT</span></div>
+  <div id="notify-box"></div>
+
+  <div class="province-modal" id="modal-map">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2><i class="fa-brands fa-canadian-maple-leaf" style="color: #22d3ee;"></i> TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES &amp; TERRITORIES</h2>
+        <button type="button" class="modal-close" onclick="toggleMapModal()">&times;</button>
+      </div>
+      <div class="modal-grid" id="provinces-list"></div>
+    </div>
+  </div>
+
+  <script>
+    class ProvinceAudio {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      }
+      playChirp() {
+        this.init(); if (!this.ctx) return;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(500, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(920, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.14);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.14);
+      }
+      playLootChime() {
+        this.init(); if (!this.ctx) return;
+        [440.0, 554.37, 659.25, 880.0].forEach((f, idx) => {
+          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.35);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.35);
+        });
+      }
+    }
+    const audio = new ProvinceAudio();
+
+    const CANADIAN_PROVINCES = [
+      { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
+      { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
+      { id: 'british-columbia', name: 'British Columbia', abbr: 'BC', file: 'province-british-columbia.html', landmark: 'Lions Gate Bridge & Whistler Peak', desc: 'Pacific cascadia rainforests, mountain ranges and coastal seaplane ports.' },
+      { id: 'alberta', name: 'Alberta', abbr: 'AB', file: 'province-alberta.html', landmark: 'Calgary Stampede & Banff Rockies', desc: 'Energy capital, heavy exocraft haulers and high mountain glaciers.' },
+      { id: 'manitoba', name: 'Manitoba', abbr: 'MB', file: 'province-manitoba.html', landmark: 'The Forks & Esplanade Riel Bridge', desc: 'Gateway to the West, trans-continental rail hub and polar aurora station.' },
+      { id: 'saskatchewan', name: 'Saskatchewan', abbr: 'SK', file: 'province-saskatchewan.html', landmark: 'Wascana Legislative Dome & Potash Wells', desc: 'Land of the living skies, massive solar farms and autonomous agriculture.' },
+      { id: 'nova-scotia', name: 'Nova Scotia', abbr: 'NS', file: 'province-nova-scotia.html', landmark: 'Halifax Star Citadel & Peggy\'s Cove', desc: 'Atlantic maritime naval fortress, historic Bluenose dock and tidal power.' },
+      { id: 'new-brunswick', name: 'New Brunswick', abbr: 'NB', file: 'province-new-brunswick.html', landmark: 'Hopewell Rocks & Bay of Fundy Tides', desc: 'Appalachian cyber-corridor with the highest tidal surges in the world.' },
+      { id: 'newfoundland', name: 'Newfoundland & Labrador', abbr: 'NL', file: 'province-newfoundland.html', landmark: 'Signal Hill Marconi Tower & Iceberg Alley', desc: 'First light of North America, transatlantic cables and iceberg interceptors.' },
+      { id: 'prince-edward-island', name: 'Prince Edward Island', abbr: 'PE', file: 'province-prince-edward-island.html', landmark: 'Confederation Bridge & Red Sand Cliffs', desc: 'Cradle of Confederation, 13km causeway and coastal red sand dunes.' },
+      { id: 'northwest-territories', name: 'Northwest Territories', abbr: 'NT', file: 'province-northwest-territories.html', landmark: 'Diavik Diamond Mine & Slave Lake Ice Road', desc: 'Aurora capital of the Arctic, sub-zero trucking and kimberlite diamonds.' },
+      { id: 'yukon', name: 'Yukon Territory', abbr: 'YT', file: 'province-yukon.html', landmark: 'Klondike Gold Dredge & Mount Logan', desc: 'Historic Klondike gold territory and Canada\'s highest glacial summit.' },
+      { id: 'nunavut', name: 'Territory of Nunavut', abbr: 'NU', file: 'province-nunavut.html', landmark: 'Giant Neon Inukshuk & Igloo Dome', desc: 'High Arctic sovereignty, endless tundra and aurora-cloaked settlements.' },
+      { id: 'national-capital', name: 'National Capital Region', abbr: 'NCR', file: 'province-national-capital.html', landmark: 'Parliament Peace Tower & Rideau Canal', desc: 'Federal core of Canada, Centennial Flame and national quantum archive.' }
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
+    const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
+    let inPatrolCruiser = false;
+    let cruiserSpeed = 0;
+    let cameraMode = '3P';
+    let qualityMode = localStorage.getItem('PROVINCE_QUALITY') || 'high';
+
+    let missionIceDone = false, missionDiavikDone = false, missionAuroraDone = false;
+    document.getElementById('token-val').textContent = tokens.toLocaleString();
+
+    function showNotify(msg) {
+      const box = document.getElementById('notify-box');
+      box.innerHTML = msg; box.style.display = 'block';
+      clearTimeout(window._notifTimer);
+      window._notifTimer = setTimeout(() => { box.style.display = 'none'; }, 4200);
+    }
+
+    function updateMissionBadge() {
+      const completed = (missionIceDone ? 1 : 0) + (missionDiavikDone ? 1 : 0) + (missionAuroraDone ? 1 : 0);
+      document.getElementById('missions-count').textContent = `${completed}/3`;
+      if (completed === 3 && !window._sectorRewardGranted) {
+        window._sectorRewardGranted = true;
+        tokens += 1000;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚡ NWT SUB-ZERO SECTOR MASTERED! BONUS +1,000 NEX TOKENS');
+        audio.playLootChime();
+      }
+    }
+
+    function returnToMetropolis() {
+      localStorage.setItem('BS_TOKENS', tokens.toString());
+      window.location.href = `../game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+    }
+
+    function toggleMapModal() { document.getElementById('modal-map').classList.toggle('visible'); }
+    function toggleCameraView() {
+      cameraMode = (cameraMode === '1P') ? '3P' : '1P';
+      document.getElementById('cam-mode-label').textContent = `${cameraMode} VIEW`;
+      if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P' && !inPatrolCruiser);
+      audio.playChirp();
+    }
+    function cycleQuality() {
+      qualityMode = (qualityMode === 'high') ? 'med' : (qualityMode === 'med' ? 'low' : 'high');
+      localStorage.setItem('PROVINCE_QUALITY', qualityMode);
+      applyQualitySettings();
+      audio.playChirp();
+    }
+    function applyQualitySettings() {
+      const lbl = document.getElementById('quality-label');
+      if (lbl) lbl.textContent = `GRAPHICS: ${qualityMode.toUpperCase()}`;
+      if (!renderer) return;
+      if (qualityMode === 'low') {
+        renderer.setPixelRatio(1.0);
+        renderer.shadowMap.enabled = false;
+        if (dirLight) dirLight.castShadow = false;
+        if (typeof distantDecorGroup !== 'undefined') distantDecorGroup.visible = false;
+      } else if (qualityMode === 'med') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(512, 512); }
+        if (typeof distantDecorGroup !== 'undefined') distantDecorGroup.visible = true;
+      } else {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(1024, 1024); }
+      }
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    const listEl = document.getElementById('provinces-list');
+    CANADIAN_PROVINCES.forEach(p => {
+      const card = document.createElement('a');
+      card.className = 'province-card' + (p.id === 'northwest-territories' ? ' active' : '');
+      card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      card.innerHTML = `<div class="p-head"><span class="p-name">${p.name}</span><span class="p-abbr">${p.abbr}</span></div><div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div><div class="p-desc">${p.desc}</div>`;
+      listEl.appendChild(card);
+    });
+
+    // ------------------------------------------------------------
+    // 3D SCENE SETUP & NWT DIAVIK MINE & AURORA BOREALIS
+    // ------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const distantDecorGroup = new THREE.Group();
+    scene.add(distantDecorGroup);
+    scene.background = new THREE.Color(0x061424);
+    scene.fog = new THREE.FogExp2(0x061424, 0.0016);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2400);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.ACESFilmicToneMapping) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+    }
+    container.appendChild(renderer.domElement);
+
+    const hemiLight = new THREE.HemisphereLight(0x67e8f9, 0x0a1e30, 1.35);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xdcf8fc, 2.2);
+    dirLight.position.set(150, 260, 100);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.near = 10; dirLight.shadow.camera.far = 650;
+    dirLight.shadow.camera.left = -200; dirLight.shadow.camera.right = 200;
+    dirLight.shadow.camera.top = 200; dirLight.shadow.camera.bottom = -200;
+    dirLight.shadow.bias = -0.0006;
+    scene.add(dirLight);
+
+    applyQualitySettings();
+
+    const texLoader = new THREE.TextureLoader();
+
+    // Aurora Borealis Overhead Ribbons in Sky
+    const auroraGeo = new THREE.RingGeometry(160, 340, 32);
+    const auroraMat = new THREE.MeshBasicMaterial({ color: 0x00ffcc, side: THREE.DoubleSide, transparent: true, opacity: 0.22, wireframe: true });
+    const aurora = new THREE.Mesh(auroraGeo, auroraMat);
+    aurora.rotation.x = Math.PI / 2.2;
+    aurora.position.set(0, 190, -100);
+    scene.add(aurora);
+
+    // Arctic Tundra Snow Ground
+    const groundGeo = new THREE.PlaneGeometry(1600, 1600, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x142032, roughness: 0.9, metalness: 0.1 });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
+
+    // Great Slave Lake Frozen Ice Road Corridor
+    const hwyMat = new THREE.MeshStandardMaterial({ color: 0x16344d, roughness: 0.2, metalness: 0.7 });
+    texLoader.load('../assets/textures/pbr/Road007_1K-JPG_Color.jpg', tex => {
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 32);
+      hwyMat.map = tex; hwyMat.needsUpdate = true;
+    }, undefined, err => { console.warn('[AssetLoader] Failed loading Road007 texture:', err); });
+
+    const hwyGeo = new THREE.BoxGeometry(45, 1.2, 1200);
+    const hwyMesh = new THREE.Mesh(hwyGeo, hwyMat);
+    hwyMesh.position.set(0, 0.6, 0);
+    hwyMesh.receiveShadow = true;
+    scene.add(hwyMesh);
+
+    // DIAVIK KIMBERLITE DIAMOND MINE PIT (at 130, 0, -120)
+    const mineGroup = new THREE.Group();
+    mineGroup.position.set(130, 0, -120);
+    scene.add(mineGroup);
+
+    // Terraced Pit Steppes
+    for (let t = 0; t < 4; t++) {
+      const ring = new THREE.Mesh(new THREE.CylinderGeometry(55 - t * 9, 65 - t * 9, 8, 24), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 }));
+      ring.position.y = 4 + t * 7;
+      ring.castShadow = true;
+      ring.receiveShadow = true;
+      mineGroup.add(ring);
+    }
+
+    // Glowing Diamond Core Crystal
+    const crystalGeo = new THREE.OctahedronGeometry(13);
+    const crystalMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, metalness: 0.95, transparent: true, opacity: 0.85 });
+    const crystal = new THREE.Mesh(crystalGeo, crystalMat);
+    crystal.position.y = 52;
+    mineGroup.add(crystal);
+
+    const diamondGlow = new THREE.PointLight(0x22d3ee, 3.8, 300);
+    diamondGlow.position.y = 55;
+    mineGroup.add(diamondGlow);
+
+    // Magnetosphere Resonance Terminal at (0, 0, -180)
+    const termGroup = new THREE.Group();
+    termGroup.position.set(0, 0, -180);
+    scene.add(termGroup);
+
+    const tPed = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.0, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x0d2238, metalness: 0.9 }));
+    tPed.position.y = 1.1; termGroup.add(tPed);
+    const tOrb = new THREE.Mesh(new THREE.OctahedronGeometry(1.2), new THREE.MeshBasicMaterial({ color: 0x22d3ee, wireframe: true }));
+    tOrb.position.y = 2.6; termGroup.add(tOrb);
+
+    // Kenney Modular Arctic Architecture & Conifers
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const gLoader = new THREE.GLTFLoader();
+      const mods = [
+        { file: 'building-small-a.glb', x: -65, y: 0.2, z: 20, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'building-small-b.glb', x: -65, y: 0.2, z: -40, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'grass-trees-tall.glb', x: -45, y: 0.2, z: 80, scale: 5.0, ry: 0.4 },
+        { file: 'grass-trees-tall.glb', x: 45, y: 0.2, z: 80, scale: 5.0, ry: -0.6 }
+      ];
+      mods.forEach(cfg => {
+        gLoader.load(`../assets/models/kenney/${cfg.file}`, gltf => {
+          const m = gltf.scene;
+          m.position.set(cfg.x, cfg.y, cfg.z);
+          m.scale.set(cfg.scale, cfg.scale, cfg.scale);
+          m.rotation.y = cfg.ry;
+          m.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+          distantDecorGroup.add(m);
+        }, undefined, err => { console.warn(`[AssetLoader] Failed loading kenney asset ${cfg.file}:`, err); });
+      });
+    }
+
+    // ------------------------------------------------------------
+    // RIGGED CHARACTER & ARCTIC CRUISER
+    // ------------------------------------------------------------
+    const playerGroup = new THREE.Group();
+    scene.add(playerGroup);
+
+    let playerRiggedMesh = null, characterMixer = null, characterActions = {}, activeCharacterAction = null;
+    const procChar = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 1.4, 12), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+    procChar.position.y = 0.9;
+    playerGroup.add(procChar);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const charLoader = new THREE.GLTFLoader();
+      charLoader.load('../assets/models/operative_soldier.glb', gltf => {
+        playerRiggedMesh = gltf.scene;
+        playerRiggedMesh.position.set(0, 0, 0);
+        playerRiggedMesh.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+        characterMixer = new THREE.AnimationMixer(playerRiggedMesh);
+        gltf.animations.forEach(clip => { characterActions[clip.name] = characterMixer.clipAction(clip); });
+        if (characterActions['Idle']) { characterActions['Idle'].play(); activeCharacterAction = characterActions['Idle']; }
+        playerGroup.add(playerRiggedMesh);
+        procChar.visible = false;
+        playerRiggedMesh.visible = (cameraMode === '3P');
+      }, undefined, err => { console.warn('[AssetLoader] Failed loading operative_soldier.glb, retaining procedural avatar fallback:', err); });
+    }
+
+    const cruiserGroup = new THREE.Group();
+    cruiserGroup.position.set(0, 0.4, 30);
+    scene.add(cruiserGroup);
+
+    let cyberCarMesh = null, cyberCarWheels = [], cyberCarSteers = [];
+    const procCruiser = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.2, 5.2), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+    procCruiser.position.y = 0.8;
+    cruiserGroup.add(procCruiser);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const vLoader = new THREE.GLTFLoader();
+      vLoader.load('../assets/models/cyber_car.glb', gltf => {
+        cyberCarMesh = gltf.scene;
+        cyberCarMesh.rotation.y = Math.PI;
+        cyberCarMesh.position.set(0, 0.22, 0);
+        cyberCarMesh.traverse(c => {
+          if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; }
+          const n = (c.name || '').toLowerCase();
+          if (n.includes('wheel_fl') || n.includes('wheel_fr')) {
+            cyberCarSteers.push({ node: c, rotY: c.rotation.y });
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          } else if (n.includes('wheel_rl') || n.includes('wheel_rr')) {
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          }
+        });
+        cruiserGroup.add(cyberCarMesh);
+        procCruiser.visible = false;
+      }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
+    }
+
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: MACKENZIE RIVER FREIGHT OUTPOST
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const depotWoodMat = new THREE.MeshStandardMaterial({ color: 0x3a3028, roughness: 0.88 });
+      const tinRoofMat = new THREE.MeshStandardMaterial({ color: 0x555e66, metalness: 0.6, roughness: 0.4 });
+      const canvasMat = new THREE.MeshStandardMaterial({ color: 0xb5a88c, roughness: 0.95 });
+      const drumRedMat = new THREE.MeshStandardMaterial({ color: 0x8a201c, metalness: 0.75, roughness: 0.35 });
+      const drumBlueMat = new THREE.MeshStandardMaterial({ color: 0x1c4472, metalness: 0.75, roughness: 0.35 });
+      const canyonRockMat = new THREE.MeshStandardMaterial({ color: 0x6a655d, roughness: 0.95 });
+
+      // 1. Subarctic River Freight Warehouse Depot (x: -48, z: -15)
+      const depotGroup = new THREE.Group();
+      depotGroup.position.set(-48, 0, -15);
+      regionalGroup.add(depotGroup);
+
+      const warehouse = new THREE.Mesh(new THREE.BoxGeometry(13, 5.8, 11), depotWoodMat);
+      warehouse.position.y = 2.9;
+      warehouse.castShadow = true; warehouse.receiveShadow = true;
+      depotGroup.add(warehouse);
+
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(9.6, 3.2, 4), tinRoofMat);
+      roof.position.y = 7.4;
+      roof.rotation.y = Math.PI / 4;
+      roof.scale.set(1.2, 1.0, 1.3);
+      roof.castShadow = true;
+      depotGroup.add(roof);
+
+      // Loading dock platform
+      const dockPlatform = new THREE.Mesh(new THREE.BoxGeometry(13.5, 0.8, 4.0), depotWoodMat);
+      dockPlatform.position.set(0, 0.4, 7.5);
+      depotGroup.add(dockPlatform);
+
+      const depotLamp = new THREE.PointLight(0xffb244, 1.4, 26);
+      depotLamp.position.set(0, 4.2, 6.0);
+      depotGroup.add(depotLamp);
+
+      // 2. Prospector Heavy Canvas Wall-Tent (x: -40, z: 22)
+      const tentGroup = new THREE.Group();
+      tentGroup.position.set(-40, 0, 22);
+      regionalGroup.add(tentGroup);
+
+      const tentPlatform = new THREE.Mesh(new THREE.BoxGeometry(5.8, 0.4, 6.8), depotWoodMat);
+      tentPlatform.position.y = 0.2;
+      tentGroup.add(tentPlatform);
+
+      const tentBody = new THREE.Mesh(new THREE.BoxGeometry(5.4, 3.0, 6.4), canvasMat);
+      tentBody.position.y = 1.9;
+      tentBody.castShadow = true;
+      tentGroup.add(tentBody);
+
+      // 3. Traditional Elevated Northern Food Cache on 4 Stilts (x: -36, z: -40)
+      const cacheGroup = new THREE.Group();
+      cacheGroup.position.set(-36, 0, -40);
+      regionalGroup.add(cacheGroup);
+
+      const cacheBox = new THREE.Mesh(new THREE.BoxGeometry(3.6, 2.6, 3.6), depotWoodMat);
+      cacheBox.position.y = 5.2;
+      cacheBox.castShadow = true;
+      cacheGroup.add(cacheBox);
+
+      for (let px of [-1.4, 1.4]) {
+        for (let pz of [-1.4, 1.4]) {
+          const stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 4.2, 6), depotWoodMat);
+          stilt.position.set(px, 2.1, pz);
+          stilt.castShadow = true;
+          cacheGroup.add(stilt);
+        }
+      }
+
+      // 4. Arctic Steel Fuel Drum Cache (x: 38, z: 5)
+      const drumGroup = new THREE.Group();
+      drumGroup.position.set(38, 0, 5);
+      regionalGroup.add(drumGroup);
+
+      for (let d = 0; d < 8; d++) {
+        const mat = (d % 2 === 0) ? drumRedMat : drumBlueMat;
+        const drum = new THREE.Mesh(new THREE.CylinderGeometry(0.48, 0.48, 1.15, 10), mat);
+        drum.position.set((d % 4) * 1.1, 0.6, Math.floor(d / 4) * 1.1);
+        drum.castShadow = true;
+        drumGroup.add(drum);
+      }
+
+      // 5. Nahanni Canyon River Boulders
+      const canyonRocks = [
+        { x: 42, z: -25, s: 5.2 },
+        { x: 46, z: 20, s: 4.8 }
+      ];
+      canyonRocks.forEach(cr => {
+        const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(cr.s, 1), canyonRockMat);
+        rock.position.set(cr.x, cr.s * 0.5, cr.z);
+        rock.scale.set(1.3, 0.85, 1.1);
+        rock.castShadow = true;
+        regionalGroup.add(rock);
+      });
+    })();
+
+
+    
+    // ------------------------------------------------------------
+    // SCENERY COLLIDERS & OBSTACLE PHYSICS
+    // ------------------------------------------------------------
+    const WORLD_COLLIDERS = [
+      { x: 0, z: -150, r: 24 },
+      { x: 0, z: -180, r: 5 },
+      { x: -65, z: 20, r: 8 },
+      { x: -65, z: -40, r: 8 },
+      { x: -48, z: -15, r: 8 },
+      { x: -40, z: 22, r: 5 },
+      { x: -36, z: -40, r: 4.5 },
+      { x: 38, z: 5, r: 4 },
+      { x: 42, z: -25, r: 5.5 }
+    ];
+
+    function resolveCollisions(pos, radius) {
+      for (let i = 0; i < WORLD_COLLIDERS.length; i++) {
+        const c = WORLD_COLLIDERS[i];
+        const dx = pos.x - c.x;
+        const dz = pos.z - c.z;
+        const distSq = dx * dx + dz * dz;
+        const minDist = radius + c.r;
+        if (distSq < minDist * minDist && distSq > 0.0001) {
+          const dist = Math.sqrt(distSq);
+          const overlap = minDist - dist;
+          pos.x += (dx / dist) * overlap;
+          pos.z += (dz / dist) * overlap;
+        }
+      }
+      pos.x = Math.max(-550, Math.min(550, pos.x));
+      pos.z = Math.max(-550, Math.min(550, pos.z));
+    }
+
+    // ------------------------------------------------------------
+    // CONTROLS & GAMEPLAY
+    // ------------------------------------------------------------
+    const player = { pos: new THREE.Vector3(0, 1.2, 45), vel: new THREE.Vector3(), yaw: 0, pitch: 0, isGrounded: true };
+    const keys = {};
+    window.addEventListener('keydown', e => {
+      audio.init(); keys[e.code] = true;
+      if (e.code === 'KeyV') toggleCameraView();
+      if (e.code === 'KeyQ') cycleQuality();
+      if (e.code === 'KeyH') toggleMapModal();
+      if (e.code === 'KeyE') toggleVehicle();
+      if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'Escape') {
+        const m = document.getElementById('modal-map');
+        if (m.classList.contains('visible')) m.classList.remove('visible'); else returnToMetropolis();
+      }
+    });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    let isPointerLocked = false;
+    window.addEventListener('click', () => { if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock(); });
+    document.addEventListener('pointerlockchange', () => { isPointerLocked = (document.pointerLockElement === document.body); });
+    window.addEventListener('mousemove', e => {
+      if (!isPointerLocked) return;
+      player.yaw -= e.movementX * 0.0024;
+      player.pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.pitch - e.movementY * 0.0024));
+    });
+
+    function toggleVehicle() {
+      if (inPatrolCruiser) {
+        inPatrolCruiser = false;
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(2.4, 0.8, 0));
+        document.getElementById('cruiser-hud').style.display = 'none';
+        if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P');
+        showNotify('DISEMBARKED ARCTIC CRUISER');
+        audio.playChirp();
+      } else if (player.pos.distanceTo(cruiserGroup.position) < 8.0) {
+        inPatrolCruiser = true;
+        document.getElementById('cruiser-hud').style.display = 'block';
+        if (playerRiggedMesh) playerRiggedMesh.visible = false;
+        showNotify('❄️ PILOTING NWT ARCTIC ICE CRUISER // [SHIFT] NITRO BOOST');
+        audio.playChirp();
+      }
+    }
+
+    function handleInteractions() {
+      if (!missionAuroraDone && player.pos.distanceTo(termGroup.position) < 7.0) {
+        missionAuroraDone = true;
+        document.getElementById('mis-aurora').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('🌌 AURORA MAGNETOSPHERE RESONANCE LINKED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
+      }
+      const diavikPos = new THREE.Vector3(130, 0, -120);
+      if (!missionDiavikDone && player.pos.distanceTo(diavikPos) < 32.0) {
+        missionDiavikDone = true;
+        document.getElementById('mis-diavik').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('💎 DIAVIK KIMBERLITE DIAMOND CORE SYNCHRONIZED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
+      }
+    }
+
+    // Main Loop
+    let lastTime = performance.now(), wheelSpin = 0, steerAngle = 0;
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      if (characterMixer) characterMixer.update(delta);
+      tOrb.rotation.y += delta * 1.5; tOrb.rotation.x += delta * 0.8;
+      crystal.rotation.y += delta * 0.9; crystal.rotation.z += delta * 0.5;
+      diamondGlow.intensity = 3.2 + Math.sin(now * 0.005) * 0.8;
+      aurora.rotation.z += delta * 0.15;
+
+      const prompt = document.getElementById('interact-prompt');
+      const promptMsg = document.getElementById('prompt-msg');
+      if (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT ARCTIC CRUISER [E]';
+      } else if (!missionAuroraDone && player.pos.distanceTo(termGroup.position) < 7.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'LINK AURORA RESONANCE [F]';
+      } else if (!missionDiavikDone && player.pos.distanceTo(new THREE.Vector3(130, 0, -120)) < 32.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'SYNC DIAVIK DIAMOND CORE [F]';
+      } else {
+        prompt.style.display = 'none';
+      }
+
+      if (inPatrolCruiser) {
+        let throttle = 0, steer = 0;
+        if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
+        if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
+        if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
+        if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+        const nitro = (keys['ShiftLeft'] || keys['ShiftRight']) ? 1.85 : 1.0;
+
+        cruiserSpeed = THREE.MathUtils.lerp(cruiserSpeed, throttle * 44 * nitro, delta * 3.5);
+        steerAngle = THREE.MathUtils.lerp(steerAngle, steer * 0.38, delta * 8.0);
+        cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
+        const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
+        resolveCollisions(cruiserGroup.position, 2.4);
+
+        wheelSpin += (cruiserSpeed / 0.5) * delta;
+        cyberCarSteers.forEach(i => { i.node.rotation.y = i.rotY + steerAngle; });
+        cyberCarWheels.forEach(i => { i.node.rotation.x = i.rotX + wheelSpin; });
+
+        const absKmh = Math.abs(Math.round(cruiserSpeed * 3.6));
+        document.getElementById('cruiser-kmh').textContent = absKmh;
+
+        // Mission 1: Ice Road Crossing at Z > 220
+        if (!missionIceDone && cruiserGroup.position.z > 220 && Math.abs(cruiserGroup.position.x) < 22) {
+          missionIceDone = true;
+          document.getElementById('mis-ice').classList.add('done');
+          tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+          document.getElementById('token-val').textContent = tokens.toLocaleString();
+          showNotify('❄️ GREAT SLAVE LAKE ICE HIGHWAY TRAVERSED (+500 NEX)');
+          audio.playLootChime(); updateMissionBadge();
+        }
+
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(0, 1.4, 0));
+        const camBack = new THREE.Vector3(0, 4.4, -9.8).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        camera.position.lerp(cruiserGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(cruiserGroup.position.x, cruiserGroup.position.y + 1.2, cruiserGroup.position.z);
+
+      } else {
+        let moveX = 0, moveZ = 0;
+        if (keys['KeyW']) moveZ -= 1; if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1; if (keys['KeyD']) moveX += 1;
+        const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight']);
+        const moveSpeed = isSprinting ? 18.0 : 9.5;
+        const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
+        const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+
+        player.pos.x += rotatedMove.x * moveSpeed * delta;
+        player.pos.z += rotatedMove.z * moveSpeed * delta;
+        resolveCollisions(player.pos, 0.6);
+
+        const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;
+        const isMoving = horizSpeed > 0.5;
+
+        if (characterActions['Idle'] && characterMixer) {
+          let target = characterActions['Idle'];
+          if (isMoving) target = isSprinting ? (characterActions['Run'] || characterActions['Walk']) : characterActions['Walk'];
+          if (target && activeCharacterAction !== target) {
+            const prev = activeCharacterAction; activeCharacterAction = target;
+            if (prev) prev.fadeOut(0.2); target.reset().fadeIn(0.2).play();
+          }
+        }
+
+        if (keys['Space'] && player.isGrounded) { player.vel.y = 9.8; player.isGrounded = false; }
+        player.vel.y -= 22 * delta; player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2) { player.pos.y = 1.2; player.vel.y = 0; player.isGrounded = true; }
+
+        playerGroup.position.copy(player.pos);
+        playerGroup.rotation.y = player.yaw + Math.PI;
+
+        if (cameraMode === '1P') {
+          camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+          camera.rotation.set(player.pitch, player.yaw, 0, 'YXZ');
+        } else {
+          const camOffset = new THREE.Vector3(0.5, 2.0, 3.6)
+            .applyAxisAngle(new THREE.Vector3(1, 0, 0), player.pitch * 0.45)
+            .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+          camera.position.copy(player.pos).add(camOffset);
+          camera.lookAt(player.pos.x, player.pos.y + 1.4, player.pos.z);
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

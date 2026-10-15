@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Province of Ontario // Trans-Canada Cyberway [ON]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Three.js & GLTFLoader (Local primary, CDN fallback) -->
+  <script src="../js/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <script src="../js/GLTFLoader.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
+    }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #060b14; font-family: 'Rajdhani', sans-serif; color: #fff; }
+    #canvas-container { position: absolute; inset: 0; }
+    canvas { width: 100%; height: 100%; display: block; }
+    
+    /* Top Bar HUD */
+    .province-hud {
+      position: fixed; top: 16px; left: 16px; right: 16px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 100; pointer-events: none; flex-wrap: wrap; gap: 10px;
+    }
+    .province-badge {
+      background: rgba(10, 18, 32, 0.92); border: 1.5px solid #00f2ff;
+      border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px;
+      backdrop-filter: blur(12px); box-shadow: 0 0 25px rgba(0, 242, 255, 0.25); pointer-events: auto;
+    }
+    .maple-crest {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255, 34, 68, 0.2); border: 2px solid #ff2244;
+      display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ff2244;
+    }
+    .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+    .province-sub { font-size: 11px; color: #00f2ff; letter-spacing: 0.5px; font-weight: 700; }
+    
+    .hud-right { display: flex; gap: 8px; align-items: center; pointer-events: auto; flex-wrap: wrap; }
+    .hud-pill {
+      background: rgba(10, 18, 32, 0.92); border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif;
+      font-size: 13px; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px);
+    }
+    .btn-hud {
+      background: rgba(16, 26, 44, 0.92); border: 1px solid rgba(0, 242, 255, 0.4);
+      border-radius: 10px; color: #00f2ff; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800;
+      padding: 9px 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-hud:hover { background: rgba(0, 242, 255, 0.25); transform: translateY(-1px); }
+    .btn-return {
+      background: linear-gradient(135deg, #ff2244, #cc0022); border: none; border-radius: 10px;
+      color: #fff; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900;
+      padding: 9px 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 16px rgba(255,34,68,0.45);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(255,34,68,0.7); }
+
+    /* Mission Objectives Tracker */
+    .mission-tracker {
+      position: fixed; top: 82px; left: 16px; width: 310px;
+      background: rgba(8, 14, 26, 0.88); border: 1.5px solid rgba(0, 242, 255, 0.3);
+      border-radius: 14px; padding: 12px 16px; z-index: 95; backdrop-filter: blur(10px);
+      box-shadow: 0 0 25px rgba(0,0,0,0.5); pointer-events: auto;
+    }
+    .mission-header { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffd700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .mission-item { font-size: 12px; color: #cbd5e1; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .mission-item.done { color: #00ff88; text-decoration: line-through; opacity: 0.8; }
+    .mission-item i { width: 14px; text-align: center; }
+
+    /* Controls Banner */
+    .controls-banner {
+      position: fixed; bottom: 18px; left: 18px;
+      background: rgba(8, 14, 24, 0.88); border: 1px solid rgba(0, 242, 255, 0.3);
+      border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px);
+    }
+    .controls-banner span { color: #00f2ff; font-weight: 700; }
+
+    /* Vehicle Speedometer Overlay */
+    #cruiser-hud {
+      position: fixed; bottom: 20px; right: 20px;
+      background: rgba(8, 16, 28, 0.94); border: 2px solid #00f2ff;
+      border-radius: 16px; padding: 14px 20px; z-index: 100; display: none;
+      box-shadow: 0 0 35px rgba(0, 242, 255, 0.35); min-width: 260px;
+    }
+    .speed-val { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #00f2ff; }
+    .speed-unit { font-size: 12px; color: #8fa3b8; font-weight: 700; margin-left: 6px; }
+
+    /* Interaction Prompt */
+    #interact-prompt {
+      position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(10, 18, 30, 0.96); border: 2px solid #00f2ff; border-radius: 14px;
+      padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800;
+      color: #00f2ff; display: none; align-items: center; gap: 10px; box-shadow: 0 0 35px rgba(0,242,255,0.45);
+      z-index: 150; animation: pulseGlow 1.6s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0,242,255,0.3); }
+      50% { box-shadow: 0 0 40px rgba(0,242,255,0.65); }
+    }
+
+    /* Notification Box */
+    #notify-box {
+      position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+      background: rgba(8, 16, 28, 0.96); border: 1.5px solid #00f2ff; border-radius: 12px;
+      padding: 12px 26px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800;
+      color: #fff; z-index: 200; display: none; box-shadow: 0 0 35px rgba(0,242,255,0.4); text-align: center;
+    }
+
+    /* Trans-Canada Highway Modal */
+    .province-modal { position: fixed; inset: 0; background: rgba(4, 8, 16, 0.88); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .province-modal.visible { display: flex; }
+    .modal-box { background: rgba(10, 18, 32, 0.96); border: 2px solid #ff2244; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(255,34,68,0.4); }
+    .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(255,34,68,0.08); }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .modal-close { background: none; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; transition: color 0.2s; }
+    .modal-close:hover { color: #ff2244; }
+    .modal-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; }
+    .province-card { background: rgba(16, 26, 44, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
+    .province-card:hover { border-color: #00f2ff; transform: translateY(-2px); box-shadow: 0 0 20px rgba(0,242,255,0.25); }
+    .province-card.active { border-color: #ff2244; background: rgba(255,34,68,0.15); box-shadow: 0 0 20px rgba(255,34,68,0.3); }
+    .p-head { display: flex; align-items: center; justify-content: space-between; }
+    .p-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fff; }
+    .p-abbr { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #00f2ff; }
+    .p-desc { font-size: 11px; color: #8fa3b8; line-height: 1.3; }
+    .p-landmark { font-size: 10px; color: #ffd700; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <!-- HUD -->
+  <div class="province-hud">
+    <div class="province-badge">
+      <div class="maple-crest"><i class="fa-brands fa-canadian-maple-leaf"></i></div>
+      <div>
+        <div class="province-title">PROVINCE OF ONTARIO</div>
+        <div class="province-sub">// NEO-TORONTO &amp; LAKE ONTARIO CORRIDOR [ON]</div>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
+      <button type="button" class="btn-hud" id="btn-camera" onclick="toggleCameraView()"><i class="fa-solid fa-eye"></i> <span id="cam-mode-label">3P VIEW</span> [V]</button>
+      <button type="button" class="btn-hud" id="btn-quality" onclick="cycleQuality()"><i class="fa-solid fa-sliders"></i> <span id="quality-label">GRAPHICS: HIGH</span> [Q]</button>
+      <button type="button" class="btn-hud" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> HIGHWAYS [H]</button>
+      <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
+    </div>
+  </div>
+
+  <!-- Mission Tracker -->
+  <div class="mission-tracker">
+    <div class="mission-header">
+      <span><i class="fa-solid fa-crosshairs"></i> ONTARIO SECTOR OBJECTIVES</span>
+      <span id="missions-count">0/3</span>
+    </div>
+    <div class="mission-item" id="mis-radar"><i class="fa-solid fa-gauge-high"></i> 1. Highway 401 Radar Test (120+ km/h)</div>
+    <div class="mission-item" id="mis-tower"><i class="fa-solid fa-tower-broadcast"></i> 2. CN Tower SkyPod Beacon Sync</div>
+    <div class="mission-item" id="mis-lore"><i class="fa-solid fa-database"></i> 3. Waterfront Quantum Lore Archive</div>
+  </div>
+
+  <!-- In-Cruiser Speedometer HUD -->
+  <div id="cruiser-hud">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <div>
+        <span class="speed-val" id="cruiser-kmh">0</span><span class="speed-unit">KM/H</span>
+      </div>
+      <div style="font-size: 11px; color: #ffd700; font-family: 'Orbitron', sans-serif;" id="radar-status">OPP RADAR: ARMED</div>
+    </div>
+    <div style="font-size: 10px; color: #8fa3b8; margin-top: 4px;">
+      [W/S] ACCEL/BRAKE &nbsp;|&nbsp; [A/D] STEER &nbsp;|&nbsp; [SHIFT] NITRO &nbsp;|&nbsp; [E] EXIT
+    </div>
+  </div>
+
+  <!-- Controls Banner -->
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>V</span>] 1P/3P &nbsp;|&nbsp; [<span>E</span>] CRUISER &nbsp;|&nbsp; [<span>F</span>] INTERACT
+  </div>
+
+  <!-- Interaction Prompt -->
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACT</span></div>
+
+  <!-- Notification Box -->
+  <div id="notify-box"></div>
+
+  <!-- Trans-Canada Highway Modal -->
+  <div class="province-modal" id="modal-map">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2><i class="fa-brands fa-canadian-maple-leaf" style="color: #ff2244;"></i> TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES &amp; TERRITORIES</h2>
+        <button type="button" class="modal-close" onclick="toggleMapModal()">&times;</button>
+      </div>
+      <div class="modal-grid" id="provinces-list"></div>
+    </div>
+  </div>
+
+  <script>
+    // ------------------------------------------------------------
+    // 1. SOUND SYNTHESIZER (Native Web Audio API - Zero External Dependencies)
+    // ------------------------------------------------------------
+    class ProvinceAudio {
+      constructor() {
+        this.ctx = null;
+      }
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      }
+      playChirp() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(580, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.14);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.14);
+      }
+      playLootChime() {
+        this.init();
+        if (!this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.35);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.35);
+        });
+      }
+      playBeaconTone() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.18, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.35);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.35);
+      }
+    }
+    const audio = new ProvinceAudio();
+
+    // Canadian Jurisdictions Registry
+    const CANADIAN_PROVINCES = [
+      { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
+      { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
+      { id: 'british-columbia', name: 'British Columbia', abbr: 'BC', file: 'province-british-columbia.html', landmark: 'Lions Gate Bridge & Whistler Peak', desc: 'Pacific cascadia rainforests, mountain ranges and coastal seaplane ports.' },
+      { id: 'alberta', name: 'Alberta', abbr: 'AB', file: 'province-alberta.html', landmark: 'Calgary Stampede & Banff Rockies', desc: 'Energy capital, heavy exocraft haulers and high mountain glaciers.' },
+      { id: 'manitoba', name: 'Manitoba', abbr: 'MB', file: 'province-manitoba.html', landmark: 'The Forks & Esplanade Riel Bridge', desc: 'Gateway to the West, trans-continental rail hub and polar aurora station.' },
+      { id: 'saskatchewan', name: 'Saskatchewan', abbr: 'SK', file: 'province-saskatchewan.html', landmark: 'Wascana Legislative Dome & Potash Wells', desc: 'Land of the living skies, massive solar farms and autonomous agriculture.' },
+      { id: 'nova-scotia', name: 'Nova Scotia', abbr: 'NS', file: 'province-nova-scotia.html', landmark: 'Halifax Star Citadel & Peggy\'s Cove', desc: 'Atlantic maritime naval fortress, historic Bluenose dock and tidal power.' },
+      { id: 'new-brunswick', name: 'New Brunswick', abbr: 'NB', file: 'province-new-brunswick.html', landmark: 'Hopewell Rocks & Bay of Fundy Tides', desc: 'Appalachian cyber-corridor with the highest tidal surges in the world.' },
+      { id: 'newfoundland', name: 'Newfoundland & Labrador', abbr: 'NL', file: 'province-newfoundland.html', landmark: 'Signal Hill Marconi Tower & Iceberg Alley', desc: 'First light of North America, transatlantic cables and iceberg interceptors.' },
+      { id: 'prince-edward-island', name: 'Prince Edward Island', abbr: 'PE', file: 'province-prince-edward-island.html', landmark: 'Confederation Bridge & Red Sand Cliffs', desc: 'Cradle of Confederation, 13km causeway and coastal red sand dunes.' },
+      { id: 'northwest-territories', name: 'Northwest Territories', abbr: 'NT', file: 'province-northwest-territories.html', landmark: 'Diavik Diamond Mine & Slave Lake Ice Road', desc: 'Aurora capital of the Arctic, sub-zero trucking and kimberlite diamonds.' },
+      { id: 'yukon', name: 'Yukon Territory', abbr: 'YT', file: 'province-yukon.html', landmark: 'Klondike Gold Dredge & Mount Logan', desc: 'Historic Klondike gold territory and Canada\'s highest glacial summit.' },
+      { id: 'nunavut', name: 'Territory of Nunavut', abbr: 'NU', file: 'province-nunavut.html', landmark: 'Giant Neon Inukshuk & Igloo Dome', desc: 'High Arctic sovereignty, endless tundra and aurora-cloaked settlements.' },
+      { id: 'national-capital', name: 'National Capital Region', abbr: 'NCR', file: 'province-national-capital.html', landmark: 'Parliament Peace Tower & Rideau Canal', desc: 'Federal core of Canada, Centennial Flame and national quantum archive.' }
+    ];
+
+    // State
+    const urlParams = new URLSearchParams(window.location.search);
+    let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
+    const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
+    let inPatrolCruiser = false;
+    let cruiserSpeed = 0;
+    let cameraMode = '3P'; // '1P' or '3P'
+    let qualityMode = localStorage.getItem('PROVINCE_QUALITY') || 'high';
+
+    // Missions State
+    let missionsCompleted = 0;
+    let missionRadarDone = false;
+    let missionTowerDone = false;
+    let missionLoreDone = false;
+
+    document.getElementById('token-val').textContent = tokens.toLocaleString();
+
+    function showNotify(msg) {
+      const box = document.getElementById('notify-box');
+      box.innerHTML = msg;
+      box.style.display = 'block';
+      clearTimeout(window._notifTimer);
+      window._notifTimer = setTimeout(() => { box.style.display = 'none'; }, 4200);
+    }
+
+    function updateMissionBadge() {
+      missionsCompleted = (missionRadarDone ? 1 : 0) + (missionTowerDone ? 1 : 0) + (missionLoreDone ? 1 : 0);
+      const countEl = document.getElementById('missions-count');
+      if (countEl) countEl.textContent = `${missionsCompleted}/3`;
+      if (missionsCompleted === 3 && !window._sectorRewardGranted) {
+        window._sectorRewardGranted = true;
+        tokens += 1000;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('🌟 ONTARIO PROVINCIAL SECTOR MASTERED! BONUS +1,000 NEX TOKENS');
+        audio.playLootChime();
+      }
+    }
+
+    function returnToMetropolis() {
+      localStorage.setItem('BS_TOKENS', tokens.toString());
+      window.location.href = `../game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+    }
+
+    function toggleMapModal() {
+      const modal = document.getElementById('modal-map');
+      modal.classList.toggle('visible');
+    }
+
+    function toggleCameraView() {
+      cameraMode = (cameraMode === '1P') ? '3P' : '1P';
+      document.getElementById('cam-mode-label').textContent = `${cameraMode} VIEW`;
+      if (playerRiggedMesh) {
+        playerRiggedMesh.visible = (cameraMode === '3P' && !inPatrolCruiser);
+      }
+      audio.playChirp();
+    }
+
+    function cycleQuality() {
+      if (qualityMode === 'high') qualityMode = 'med';
+      else if (qualityMode === 'med') qualityMode = 'low';
+      else qualityMode = 'high';
+      localStorage.setItem('PROVINCE_QUALITY', qualityMode);
+      applyQualitySettings();
+      audio.playChirp();
+    }
+
+    function applyQualitySettings() {
+      const lbl = document.getElementById('quality-label');
+      if (lbl) lbl.textContent = `GRAPHICS: ${qualityMode.toUpperCase()}`;
+      if (!renderer) return;
+
+      if (qualityMode === 'low') {
+        renderer.setPixelRatio(1.0);
+        renderer.shadowMap.enabled = false;
+        if (dirLight) dirLight.castShadow = false;
+        if (typeof distantDecorGroup !== 'undefined') distantDecorGroup.visible = false;
+        if (typeof cityGroup !== 'undefined') cityGroup.visible = false;
+      } else if (qualityMode === 'med') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
+        if (dirLight) {
+          dirLight.castShadow = true;
+          dirLight.shadow.mapSize.set(512, 512);
+        }
+      } else {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        if (dirLight) {
+          dirLight.castShadow = true;
+          dirLight.shadow.mapSize.set(1024, 1024);
+        }
+      }
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Render Provincial Registry Modal
+    const listEl = document.getElementById('provinces-list');
+    CANADIAN_PROVINCES.forEach(p => {
+      const card = document.createElement('a');
+      card.className = 'province-card' + (p.id === 'ontario' ? ' active' : '');
+      card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      card.innerHTML = `
+        <div class="p-head">
+          <span class="p-name">${p.name}</span>
+          <span class="p-abbr">${p.abbr}</span>
+        </div>
+        <div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div>
+        <div class="p-desc">${p.desc}</div>
+      `;
+      listEl.appendChild(card);
+    });
+
+    // ------------------------------------------------------------
+    // 2. THREE.JS 3D SCENE & REALISTIC LIGHTING
+    // ------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const distantDecorGroup = new THREE.Group();
+    scene.add(distantDecorGroup);
+    scene.background = new THREE.Color(0x0c1424);
+    scene.fog = new THREE.FogExp2(0x0c1424, 0.0018);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2400);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.ACESFilmicToneMapping) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+    }
+    container.appendChild(renderer.domElement);
+
+    // Realistic Hemisphere Daylight & Directional Sun
+    const hemiLight = new THREE.HemisphereLight(0x92c7ff, 0x303a2c, 1.35);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfff6e8, 2.2);
+    dirLight.position.set(150, 280, 120);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.near = 10;
+    dirLight.shadow.camera.far = 600;
+    dirLight.shadow.camera.left = -180;
+    dirLight.shadow.camera.right = 180;
+    dirLight.shadow.camera.top = 180;
+    dirLight.shadow.camera.bottom = -180;
+    dirLight.shadow.bias = -0.0006;
+    scene.add(dirLight);
+
+    applyQualitySettings();
+
+    // ------------------------------------------------------------
+    // 3. TERRAIN, ROAD NETWORK & LAKE ONTARIO WATERFRONT
+    // ------------------------------------------------------------
+    const texLoader = new THREE.TextureLoader();
+
+    // Ground Plane (Main Shoreline & Foundation)
+    const groundGeo = new THREE.PlaneGeometry(1600, 1600, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x18202c, roughness: 0.88, metalness: 0.15 });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
+
+    // Lake Ontario Animated Shoreline Water Mesh (South Z > 220)
+    const waterGeo = new THREE.PlaneGeometry(1600, 600, 64, 48);
+    const waterMat = new THREE.MeshStandardMaterial({
+      color: 0x003d66,
+      metalness: 0.85,
+      roughness: 0.12,
+      transparent: true,
+      opacity: 0.88
+    });
+    const waterMesh = new THREE.Mesh(waterGeo, waterMat);
+    waterMesh.rotation.x = -Math.PI / 2;
+    waterMesh.position.set(0, 0.4, 520);
+    scene.add(waterMesh);
+
+    // Coastal Sandy Beach Strip
+    const beachGeo = new THREE.PlaneGeometry(1600, 24);
+    const beachMat = new THREE.MeshStandardMaterial({ color: 0x5a5042, roughness: 0.95 });
+    const beachMesh = new THREE.Mesh(beachGeo, beachMat);
+    beachMesh.rotation.x = -Math.PI / 2;
+    beachMesh.position.set(0, 0.45, 218);
+    scene.add(beachMesh);
+
+    // Highway 401 Concrete Multi-Lane Viaduct
+    const hwyMat = new THREE.MeshStandardMaterial({
+      color: 0x222832,
+      roughness: 0.82,
+      metalness: 0.18
+    });
+    // Load ambientCG CC0 Road007 PBR Textures
+    texLoader.load('../assets/textures/pbr/Road007_1K-JPG_Color.jpg', col => {
+      col.wrapS = col.wrapT = THREE.RepeatWrapping;
+      col.repeat.set(4, 32);
+      hwyMat.map = col;
+      hwyMat.needsUpdate = true;
+    }, undefined, () => {});
+    texLoader.load('../assets/textures/pbr/Road007_1K-JPG_NormalGL.jpg', norm => {
+      norm.wrapS = norm.wrapT = THREE.RepeatWrapping;
+      norm.repeat.set(4, 32);
+      hwyMat.normalMap = norm;
+      hwyMat.normalScale.set(1.2, 1.2);
+      hwyMat.needsUpdate = true;
+    }, undefined, () => {});
+
+    const hwyGeo = new THREE.BoxGeometry(48, 1.2, 1200);
+    const hwyMesh = new THREE.Mesh(hwyGeo, hwyMat);
+    hwyMesh.position.set(0, 0.6, 0);
+    hwyMesh.receiveShadow = true;
+    scene.add(hwyMesh);
+
+    // Road Markings (Solid Amber and Crisp White Lane Strips)
+    const lineMatAmber = new THREE.MeshBasicMaterial({ color: 0xffb700 });
+    const lineMatWhite = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    [-18, 18].forEach(lx => {
+      const edge = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.05, 1190), lineMatWhite);
+      edge.position.set(lx, 1.25, 0);
+      scene.add(edge);
+    });
+    [-6, 6].forEach(lx => {
+      const div = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.05, 1190), lineMatAmber);
+      div.position.set(lx, 1.25, 0);
+      scene.add(div);
+    });
+
+    // ------------------------------------------------------------
+    // 4. SIGNATURE LANDMARK: ARCHITECTURAL CN TOWER & SKYPOD
+    // ------------------------------------------------------------
+    const cnTowerGroup = new THREE.Group();
+    cnTowerGroup.position.set(150, 0, -180);
+    scene.add(cnTowerGroup);
+
+    const towerConcreteMat = new THREE.MeshStandardMaterial({ color: 0xd6e0ea, roughness: 0.45, metalness: 0.35 });
+    const towerGlassMat = new THREE.MeshPhysicalMaterial({ color: 0x00f2ff, metalness: 0.9, roughness: 0.08, transparent: true, opacity: 0.75, clearcoat: 1.0 });
+    const towerAntennaMat = new THREE.MeshStandardMaterial({ color: 0xee2244, roughness: 0.3, metalness: 0.85 });
+
+    // Hexagonal Tapered Main Concrete Core (Ground to 330m)
+    const coreMesh = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 18, 330, 12), towerConcreteMat);
+    coreMesh.position.y = 165;
+    coreMesh.castShadow = true;
+    coreMesh.receiveShadow = true;
+    cnTowerGroup.add(coreMesh);
+
+    // Triangular Buttress Wings at Base (Engineered stability)
+    for (let b = 0; b < 3; b++) {
+      const ang = (b / 3) * Math.PI * 2;
+      const buttress = new THREE.Mesh(new THREE.BoxGeometry(3.5, 120, 24), towerConcreteMat);
+      buttress.position.set(Math.cos(ang) * 16, 60, Math.sin(ang) * 16);
+      buttress.rotation.y = -ang;
+      cnTowerGroup.add(buttress);
+    }
+
+    // Main Observation Pod (SkyPod & Revolving 360 Restaurant at 340m)
+    const podMesh = new THREE.Mesh(new THREE.CylinderGeometry(28, 22, 18, 32), towerGlassMat);
+    podMesh.position.y = 340;
+    cnTowerGroup.add(podMesh);
+
+    const podRoof = new THREE.Mesh(new THREE.ConeGeometry(28, 9, 32), towerConcreteMat);
+    podRoof.position.y = 353;
+    cnTowerGroup.add(podRoof);
+
+    // EdgeWalk Outdoor Metal Gantry Ring
+    const edgeWalkGeo = new THREE.TorusGeometry(26, 0.9, 8, 32);
+    const edgeWalkMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8, roughness: 0.2 });
+    const edgeWalkMesh = new THREE.Mesh(edgeWalkGeo, edgeWalkMat);
+    edgeWalkMesh.rotation.x = Math.PI / 2;
+    edgeWalkMesh.position.y = 336;
+    cnTowerGroup.add(edgeWalkMesh);
+
+    // Upper Space Deck (at 447m)
+    const upperDeck = new THREE.Mesh(new THREE.CylinderGeometry(11, 8, 12, 24), towerConcreteMat);
+    upperDeck.position.y = 447;
+    cnTowerGroup.add(upperDeck);
+
+    // Broadcast Transmission Spire & Antenna (Total 553m)
+    const antennaSpire = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 3.2, 110, 12), towerAntennaMat);
+    antennaSpire.position.y = 502;
+    cnTowerGroup.add(antennaSpire);
+
+    // High-Intensity Pulsed Red Aviation Beacon
+    const beaconLight = new THREE.PointLight(0xff0033, 4.5, 600);
+    beaconLight.position.y = 555;
+    cnTowerGroup.add(beaconLight);
+
+    // Rideable Exterior Glass High-Speed Elevator
+    const elevatorGroup = new THREE.Group();
+    elevatorGroup.position.set(0, 2.5, 9.5); // Attached to exterior tower shaft
+    cnTowerGroup.add(elevatorGroup);
+
+    const elevCab = new THREE.Mesh(new THREE.BoxGeometry(4.2, 5.2, 3.8), towerGlassMat);
+    elevCab.position.y = 2.6;
+    elevatorGroup.add(elevCab);
+    const elevFrame = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.4, 4.1), towerConcreteMat);
+    elevFrame.position.y = 0.2;
+    elevatorGroup.add(elevFrame);
+
+    let elevatorY = 2.5;
+    let elevatorDir = 1; // 1 = ascending, -1 = descending
+    let isRidingElevator = false;
+
+    // ------------------------------------------------------------
+    // 5. TORONTO SKYLINE & KENNEY STREET ARCHITECTURE
+    // ------------------------------------------------------------
+    const cityGroup = new THREE.Group();
+    scene.add(cityGroup);
+
+    const bMat = new THREE.MeshStandardMaterial({ color: 0x162234, roughness: 0.35, metalness: 0.82 });
+    const winMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+    // Skyscraper Blocks
+    for (let i = 0; i < 35; i++) {
+      const bx = (Math.random() - 0.5) * 850;
+      const bz = (Math.random() - 0.5) * 600 - 180;
+      if (Math.abs(bx) < 45) continue; // Keep highway clear
+      if (Math.hypot(bx - 150, bz - (-180)) < 70) continue; // Keep CN Tower plaza clear
+
+      const bh = 55 + Math.random() * 150;
+      const bw = 24 + Math.random() * 26;
+      const b = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bw), bMat);
+      b.position.set(bx, bh / 2, bz);
+      b.castShadow = true;
+      b.receiveShadow = true;
+      cityGroup.add(b);
+
+      // Architectural Window Band Accent
+      const winBand = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.5, 2.2, bw + 0.5), winMat);
+      winBand.position.set(bx, bh * 0.75, bz);
+      cityGroup.add(winBand);
+    }
+
+    // Kenney Modular Architecture Integration
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const gLoader = new THREE.GLTFLoader();
+      const streetModules = [
+        { file: 'building-garage.glb', x: -65, y: 0.6, z: 45, scale: 6.0, ry: Math.PI / 2 },
+        { file: 'pavement-fountain.glb', x: -65, y: 0.6, z: 0, scale: 5.0, ry: 0 },
+        { file: 'building-small-a.glb', x: -65, y: 0.6, z: -45, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'building-small-b.glb', x: 65, y: 0.6, z: 45, scale: 5.5, ry: -Math.PI / 2 },
+        { file: 'building-small-c.glb', x: 65, y: 0.6, z: -45, scale: 5.5, ry: -Math.PI / 2 },
+        { file: 'grass-trees-tall.glb', x: 42, y: 0.6, z: 90, scale: 4.5, ry: 0 },
+        { file: 'grass-trees-tall.glb', x: -42, y: 0.6, z: 90, scale: 4.5, ry: 1.2 },
+        { file: 'grass-trees-tall.glb', x: 42, y: 0.6, z: 150, scale: 4.5, ry: 0.5 },
+        { file: 'grass-trees-tall.glb', x: -42, y: 0.6, z: 150, scale: 4.5, ry: -0.8 }
+      ];
+
+      streetModules.forEach(cfg => {
+        gLoader.load(`../assets/models/kenney/${cfg.file}`, gltf => {
+          const m = gltf.scene;
+          m.position.set(cfg.x, cfg.y, cfg.z);
+          m.scale.set(cfg.scale, cfg.scale, cfg.scale);
+          m.rotation.y = cfg.ry;
+          m.traverse(c => {
+            if (c.isMesh) {
+              c.castShadow = true;
+              c.receiveShadow = true;
+            }
+          });
+          distantDecorGroup.add(m);
+        }, undefined, err => { console.warn(`[AssetLoader] Failed loading kenney asset ${cfg.file}:`, err); });
+      });
+    }
+
+    // ------------------------------------------------------------
+    // 6. OPERATIVE SKELETAL RIGGED PLAYER CHARACTER
+    // ------------------------------------------------------------
+    const playerGroup = new THREE.Group();
+    scene.add(playerGroup);
+
+    let playerRiggedMesh = null;
+    let characterMixer = null;
+    let characterActions = {};
+    let activeCharacterAction = null;
+
+    // Procedural Fallback Mesh (active immediately while GLTF parses)
+    const procCharGroup = new THREE.Group();
+    const procTorso = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 0.8, 12), new THREE.MeshStandardMaterial({ color: 0x141c26 }));
+    procTorso.position.y = 1.0;
+    procCharGroup.add(procTorso);
+    const procHead = new THREE.Mesh(new THREE.SphereGeometry(0.16, 16, 16), new THREE.MeshStandardMaterial({ color: 0xe0a696 }));
+    procHead.position.y = 1.55;
+    procCharGroup.add(procHead);
+    playerGroup.add(procCharGroup);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const charLoader = new THREE.GLTFLoader();
+      charLoader.load('../assets/models/operative_soldier.glb', gltf => {
+        playerRiggedMesh = gltf.scene;
+        playerRiggedMesh.position.set(0, 0, 0);
+        playerRiggedMesh.traverse(c => {
+          if (c.isMesh) {
+            c.castShadow = true;
+            c.receiveShadow = true;
+          }
+        });
+        characterMixer = new THREE.AnimationMixer(playerRiggedMesh);
+        gltf.animations.forEach(clip => {
+          characterActions[clip.name] = characterMixer.clipAction(clip);
+        });
+        if (characterActions['Idle']) {
+          characterActions['Idle'].play();
+          activeCharacterAction = characterActions['Idle'];
+        }
+        playerGroup.add(playerRiggedMesh);
+        procCharGroup.visible = false;
+        playerRiggedMesh.visible = (cameraMode === '3P');
+        console.log('✅ [Ontario] Rigged Humanoid Operative loaded.');
+      }, undefined, err => {
+        console.warn('Operative model load fallback retained:', err);
+      });
+    }
+
+    // ------------------------------------------------------------
+    // 7. OPP HIGHWAY PATROL INTERCEPTOR (CYBER GT CRUISER)
+    // ------------------------------------------------------------
+    const cruiserGroup = new THREE.Group();
+    cruiserGroup.position.set(0, 0.6, 60);
+    scene.add(cruiserGroup);
+
+    let cyberCarMesh = null;
+    let cyberCarWheels = [];
+    let cyberCarSteers = [];
+
+    // Procedural Cruiser Fallback
+    const procCruiser = new THREE.Group();
+    const cHull = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.85, 4.8), new THREE.MeshStandardMaterial({ color: 0x070c14, metalness: 0.9, roughness: 0.2 }));
+    cHull.position.y = 0.65;
+    procCruiser.add(cHull);
+    const cRoof = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.65, 2.2), new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.6 }));
+    cRoof.position.set(0, 1.35, -0.2);
+    procCruiser.add(cRoof);
+    cruiserGroup.add(procCruiser);
+
+    // Emergency Flasher Strobe Lightbar on Cruiser Roof
+    const flasherMesh = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.16, 0.35), new THREE.MeshBasicMaterial({ color: 0xff0044 }));
+    flasherMesh.position.set(0, 1.72, -0.2);
+    cruiserGroup.add(flasherMesh);
+
+    // Forward Projector Headlights
+    const cruiserHeadlight = new THREE.SpotLight(0xdcf8ff, 3.5, 60, Math.PI / 4, 0.3);
+    cruiserHeadlight.position.set(0, 1.0, 2.4);
+    const hlTarget = new THREE.Object3D();
+    hlTarget.position.set(0, 0.3, 35);
+    cruiserGroup.add(hlTarget);
+    cruiserHeadlight.target = hlTarget;
+    cruiserGroup.add(cruiserHeadlight);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const carLoader = new THREE.GLTFLoader();
+      carLoader.load('../assets/models/cyber_car.glb', gltf => {
+        cyberCarMesh = gltf.scene;
+        cyberCarMesh.rotation.y = Math.PI; // Face vehicle forward (+Z)
+        cyberCarMesh.position.set(0, 0.24, 0);
+        cyberCarMesh.traverse(c => {
+          if (c.isMesh) {
+            c.castShadow = true;
+            c.receiveShadow = true;
+            if (c.material) c.material.envMapIntensity = 1.3;
+          }
+          const name = (c.name || '').toLowerCase();
+          if (name.includes('wheel_fl') || name.includes('wheel_fr')) {
+            cyberCarSteers.push({ node: c, rotY: c.rotation.y });
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          } else if (name.includes('wheel_rl') || name.includes('wheel_rr')) {
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          }
+        });
+        cruiserGroup.add(cyberCarMesh);
+        procCruiser.visible = false;
+        console.log('✅ [Ontario] Detailed Cyber GT OPP Cruiser loaded.');
+      }, undefined, err => {
+        console.warn('Vehicle model fallback retained:', err);
+      });
+    }
+
+    // ------------------------------------------------------------
+    // 8. INTERACTIVE MISSIONS & DISCOVERABLE LANDMARKS
+    // ------------------------------------------------------------
+    // Mission 3: Waterfront Quantum Lore Archive Terminal at (0, 0.6, 215)
+    const loreTerminal = new THREE.Group();
+    loreTerminal.position.set(0, 0.6, 215);
+    scene.add(loreTerminal);
+
+    const termPed = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x0a1424, metalness: 0.9 }));
+    termPed.position.y = 1.1;
+    loreTerminal.add(termPed);
+
+    const termHolo = new THREE.Mesh(new THREE.OctahedronGeometry(0.9), new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true }));
+    termHolo.position.y = 2.8;
+    loreTerminal.add(termHolo);
+
+    // Highway Radar Speed Trap Gate at (0, 0.6, -80)
+    const radarArch = new THREE.Group();
+    radarArch.position.set(0, 0.6, -80);
+    scene.add(radarArch);
+    const archBar = new THREE.Mesh(new THREE.BoxGeometry(50, 2.0, 1.8), new THREE.MeshStandardMaterial({ color: 0x141e2a, metalness: 0.9 }));
+    archBar.position.y = 11.5;
+    radarArch.add(archBar);
+    const radarSign = new THREE.Mesh(new THREE.PlaneGeometry(18, 4.5), new THREE.MeshBasicMaterial({ color: 0x00f2ff }));
+    radarSign.position.set(0, 11.5, 1.0);
+    radarArch.add(radarSign);
+
+    // ------------------------------------------------------------
+    // 9. PLAYER CONTROLS & PHYSICS
+    // ------------------------------------------------------------
+
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: BRUCE ESCARPMENT & GREAT LAKES
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const dolostoneMat = new THREE.MeshStandardMaterial({ color: 0x888c8e, roughness: 0.94 });
+      const timberMat = new THREE.MeshStandardMaterial({ color: 0x3a2818, roughness: 0.88 });
+      const cedarShakeMat = new THREE.MeshStandardMaterial({ color: 0x261a12, roughness: 0.9 });
+      const pineNeedleMat = new THREE.MeshStandardMaterial({ color: 0x183320, roughness: 0.76 });
+      const waterMat = new THREE.MeshStandardMaterial({ color: 0x004466, metalness: 0.85, roughness: 0.15, transparent: true, opacity: 0.85 });
+
+      // 1. Bruce Peninsula Stratified Limestone Escarpment Bluffs
+      const escarpmentBluffs = [
+        { x: -42, z: 10, w: 14, h: 7, d: 10 },
+        { x: -48, z: -40, w: 16, h: 8.5, d: 12 },
+        { x: 52, z: -20, w: 15, h: 7.5, d: 11 }
+      ];
+      escarpmentBluffs.forEach(b => {
+        const bluffGroup = new THREE.Group();
+        bluffGroup.position.set(b.x, 0, b.z);
+        regionalGroup.add(bluffGroup);
+
+        for (let l = 0; l < 4; l++) {
+          const layerH = b.h * 0.28;
+          const layerW = b.w * (1 - l * 0.12);
+          const layerD = b.d * (1 - l * 0.12);
+          const ledge = new THREE.Mesh(new THREE.BoxGeometry(layerW, layerH, layerD), dolostoneMat);
+          ledge.position.set((Math.random() - 0.5) * 1.5, layerH * (0.5 + l), (Math.random() - 0.5) * 1.5);
+          ledge.castShadow = true; ledge.receiveShadow = true;
+          bluffGroup.add(ledge);
+        }
+      });
+
+      // 2. Bruce Trail Marker Pavilion & Kiosk (x: 48, z: 15)
+      const pavGroup = new THREE.Group();
+      pavGroup.position.set(48, 0, 15);
+      regionalGroup.add(pavGroup);
+
+      const pavFloor = new THREE.Mesh(new THREE.BoxGeometry(9.5, 0.4, 7.5), dolostoneMat);
+      pavFloor.position.y = 0.2;
+      pavFloor.castShadow = true;
+      pavGroup.add(pavFloor);
+
+      // Four corner fieldstone masonry pillars
+      for (let px of [-4.0, 4.0]) {
+        for (let pz of [-3.0, 3.0]) {
+          const col = new THREE.Mesh(new THREE.BoxGeometry(0.7, 4.2, 0.7), dolostoneMat);
+          col.position.set(px, 2.3, pz);
+          col.castShadow = true;
+          pavGroup.add(col);
+        }
+      }
+
+      const pavRoof = new THREE.Mesh(new THREE.ConeGeometry(7.5, 2.6, 4), cedarShakeMat);
+      pavRoof.position.y = 5.6;
+      pavRoof.rotation.y = Math.PI / 4;
+      pavRoof.scale.set(1.3, 1.0, 1.1);
+      pavRoof.castShadow = true;
+      pavGroup.add(pavRoof);
+
+      // Interpretive map kiosk board
+      const kiosk = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.6, 0.2), timberMat);
+      kiosk.position.set(0, 2.2, 0);
+      pavGroup.add(kiosk);
+
+      const pavLamp = new THREE.PointLight(0xffaa44, 1.3, 22);
+      pavLamp.position.set(0, 4.2, 0);
+      pavGroup.add(pavLamp);
+
+      // 3. Rustic Stone Footbridge over Creek Inlet (x: -40, z: -20)
+      const bridgeGroup = new THREE.Group();
+      bridgeGroup.position.set(-40, 0, -20);
+      regionalGroup.add(bridgeGroup);
+
+      const archDeck = new THREE.Mesh(new THREE.BoxGeometry(5.0, 1.2, 13), dolostoneMat);
+      archDeck.position.y = 1.0;
+      archDeck.castShadow = true; archDeck.receiveShadow = true;
+      bridgeGroup.add(archDeck);
+
+      // Creek water ribbon beneath
+      const creek = new THREE.Mesh(new THREE.BoxGeometry(14, 0.2, 6.0), waterMat);
+      creek.position.set(0, 0.2, 0);
+      bridgeGroup.add(creek);
+
+      // 4. Windswept Georgian Bay White Pines
+      const pineCoords = [
+        { x: -35, z: 28, h: 14 },
+        { x: -52, z: -10, h: 17 },
+        { x: 38, z: 32, h: 13 },
+        { x: 44, z: -40, h: 16 }
+      ];
+      pineCoords.forEach(pc => {
+        const pine = new THREE.Group();
+        pine.position.set(pc.x, 0, pc.z);
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.45, pc.h * 0.45, 6), timberMat);
+        trunk.position.y = pc.h * 0.225;
+        trunk.rotation.z = 0.12; // characteristic wind lean
+        trunk.castShadow = true;
+        pine.add(trunk);
+
+        for (let t = 0; t < 3; t++) {
+          const tier = new THREE.Mesh(new THREE.ConeGeometry(5.0 * (1 - t * 0.2), pc.h * 0.32, 6), pineNeedleMat);
+          tier.position.set((t * 0.4), pc.h * (0.36 + t * 0.22), 0);
+          tier.castShadow = true;
+          pine.add(tier);
+        }
+        distantDecorGroup.add(pine);
+      });
+    })();
+
+    
+    // ------------------------------------------------------------
+    // SCENERY COLLIDERS & OBSTACLE PHYSICS
+    // ------------------------------------------------------------
+    const WORLD_COLLIDERS = [
+      { x: 150, z: -180, r: 24 },
+      { x: -65, z: 45, r: 9 },
+      { x: -65, z: 0, r: 7 },
+      { x: -65, z: -45, r: 8 },
+      { x: 65, z: 45, r: 8 },
+      { x: 65, z: -45, r: 8 },
+      { x: 0, z: 220, r: 18 },
+      { x: 0, z: -300, r: 18 },
+      { x: 48, z: 15, r: 7 },
+      { x: -42, z: 10, r: 6 },
+      { x: -48, z: -40, r: 6 },
+      { x: 52, z: -20, r: 6 },
+      { x: -40, z: -20, r: 5 }
+    ];
+
+    function resolveCollisions(pos, radius) {
+      for (let i = 0; i < WORLD_COLLIDERS.length; i++) {
+        const c = WORLD_COLLIDERS[i];
+        const dx = pos.x - c.x;
+        const dz = pos.z - c.z;
+        const distSq = dx * dx + dz * dz;
+        const minDist = radius + c.r;
+        if (distSq < minDist * minDist && distSq > 0.0001) {
+          const dist = Math.sqrt(distSq);
+          const overlap = minDist - dist;
+          pos.x += (dx / dist) * overlap;
+          pos.z += (dz / dist) * overlap;
+        }
+      }
+      pos.x = Math.max(-550, Math.min(550, pos.x));
+      pos.z = Math.max(-550, Math.min(550, pos.z));
+    }
+
+    const player = {
+      pos: new THREE.Vector3(0, 1.2, 70),
+      vel: new THREE.Vector3(),
+      yaw: 0,
+      pitch: 0,
+      isGrounded: true
+    };
+
+    const keys = {};
+    window.addEventListener('keydown', e => {
+      audio.init();
+      keys[e.code] = true;
+      if (e.code === 'KeyV') toggleCameraView();
+      if (e.code === 'KeyQ') cycleQuality();
+      if (e.code === 'KeyH') toggleMapModal();
+      if (e.code === 'KeyE') toggleVehicle();
+      if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'Escape') {
+        const m = document.getElementById('modal-map');
+        if (m.classList.contains('visible')) m.classList.remove('visible');
+        else returnToMetropolis();
+      }
+    });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    let isPointerLocked = false;
+    window.addEventListener('click', () => {
+      audio.init();
+      if (!isPointerLocked && document.body.requestPointerLock) {
+        document.body.requestPointerLock();
+      }
+    });
+    document.addEventListener('pointerlockchange', () => {
+      isPointerLocked = (document.pointerLockElement === document.body);
+    });
+    window.addEventListener('mousemove', e => {
+      if (!isPointerLocked) return;
+      player.yaw -= e.movementX * 0.0024;
+      player.pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.pitch - e.movementY * 0.0024));
+    });
+
+    function toggleVehicle() {
+      if (inPatrolCruiser) {
+        inPatrolCruiser = false;
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(2.4, 0.8, 0));
+        document.getElementById('cruiser-hud').style.display = 'none';
+        if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P');
+        showNotify('DISEMBARKED OPP PATROL CRUISER');
+        audio.playChirp();
+      } else {
+        if (player.pos.distanceTo(cruiserGroup.position) < 8.0) {
+          inPatrolCruiser = true;
+          document.getElementById('cruiser-hud').style.display = 'block';
+          if (playerRiggedMesh) playerRiggedMesh.visible = false;
+          showNotify('🏎️ PILOTING OPP HIGHWAY CRUISER // [SHIFT] NITRO ACCELERATE');
+          audio.playChirp();
+        }
+      }
+    }
+
+    function handleInteractions() {
+      // 1. Lore Terminal
+      if (!missionLoreDone && player.pos.distanceTo(loreTerminal.position) < 6.5) {
+        missionLoreDone = true;
+        document.getElementById('mis-lore').classList.add('done');
+        tokens += 500;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('🍁 WATERFRONT ARCHIVE ACTIVATED: "UT INCEPIT FIDELIS SIC PERMANET" (+500 NEX)');
+        audio.playLootChime();
+        updateMissionBadge();
+      }
+
+      // 2. CN Tower Elevator Ingress
+      const towerBasePos = new THREE.Vector3(150, 0, -180);
+      if (player.pos.distanceTo(towerBasePos) < 22.0) {
+        isRidingElevator = !isRidingElevator;
+        if (isRidingElevator) {
+          showNotify('🚀 ASCENDING TO CN TOWER SKYPOD OBSERVATION DECK (350 METERS)');
+          audio.playBeaconTone();
+        } else {
+          showNotify('DESCENDED TO CN TOWER BASE');
+          audio.playChirp();
+        }
+      }
+
+      // 3. SkyPod Beacon Calibration
+      const skyPodPos = new THREE.Vector3(150, 340, -180);
+      if (!missionTowerDone && player.pos.distanceTo(skyPodPos) < 35.0) {
+        missionTowerDone = true;
+        document.getElementById('mis-tower').classList.add('done');
+        tokens += 750;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('🗼 CN TOWER SKYPOD BEACON CALIBRATED! (+750 NEX TOKENS)');
+        audio.playLootChime();
+        updateMissionBadge();
+      }
+    }
+
+    // ------------------------------------------------------------
+    // 10. MAIN ANIMATION & GAME PHYSICS LOOP
+    // ------------------------------------------------------------
+    let lastTime = performance.now();
+    let wheelSpin = 0;
+    let steerAngle = 0;
+
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      // Skeletal Animation Mixer
+      if (characterMixer) characterMixer.update(delta);
+
+      // Lightbar Emergency Strobe Alternator
+      flasherMesh.material.color.setHex(Math.sin(now * 0.015) > 0 ? 0xff0033 : 0x0066ff);
+
+      // Rotate Spire Beacon, SkyPod, and Lore Holo
+      termHolo.rotation.y += delta * 1.6;
+      termHolo.rotation.x += delta * 0.8;
+      podMesh.rotation.y += delta * 0.05;
+
+      // Lake Ontario Animated Gentle Water Waves
+      if (qualityMode !== 'low') {
+        const vPos = waterGeo.attributes.position;
+        for (let i = 0; i < vPos.count; i++) {
+          const u = vPos.getX(i);
+          const v = vPos.getY(i);
+          vPos.setZ(i, Math.sin(u * 0.04 + now * 0.002) * Math.cos(v * 0.04 + now * 0.0018) * 0.35);
+        }
+        vPos.needsUpdate = true;
+      }
+
+      // CN Tower Glass Elevator Motion
+      if (isRidingElevator) {
+        if (elevatorDir > 0) {
+          elevatorY += delta * 45; // High-speed ascent
+          if (elevatorY >= 338) {
+            elevatorY = 338;
+            elevatorDir = -1;
+            player.pos.set(150, 340, -165); // Step out onto SkyPod EdgeWalk
+            showNotify('STEPPING OUT ONTO CN TOWER EDGEWALK DECK // PRESS [F] TO CALIBRATE');
+            audio.playChirp();
+          }
+        } else {
+          elevatorY -= delta * 45;
+          if (elevatorY <= 2.5) {
+            elevatorY = 2.5;
+            elevatorDir = 1;
+            isRidingElevator = false;
+            player.pos.set(150, 1.2, -160);
+          }
+        }
+        elevatorGroup.position.y = elevatorY;
+        if (isRidingElevator && elevatorY < 335) {
+          player.pos.set(150, elevatorY + 1.2, -170);
+        }
+      }
+
+      // Interaction Proximity Display
+      const prompt = document.getElementById('interact-prompt');
+      const promptMsg = document.getElementById('prompt-msg');
+      const distToCruiser = player.pos.distanceTo(cruiserGroup.position);
+      const distToLore = player.pos.distanceTo(loreTerminal.position);
+      const distToTowerBase = player.pos.distanceTo(new THREE.Vector3(150, 0, -180));
+      const distToSkyPod = player.pos.distanceTo(new THREE.Vector3(150, 340, -180));
+
+      if (distToCruiser < 7.5 && !inPatrolCruiser) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'PILOT OPP PATROL CRUISER [E]';
+      } else if (!missionLoreDone && distToLore < 6.5) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'ACCESS ONTARIO QUANTUM ARCHIVE [F]';
+      } else if (distToTowerBase < 20.0 && !isRidingElevator && player.pos.y < 10) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'RIDE CN TOWER SKYPOD ELEVATOR [F]';
+      } else if (!missionTowerDone && distToSkyPod < 30.0) {
+        prompt.style.display = 'flex';
+        promptMsg.textContent = 'CALIBRATE PROVINCIAL BEACON [F]';
+      } else {
+        prompt.style.display = 'none';
+      }
+
+      // ----------------------------------------------------------
+      // DRIVING OR ON-FOOT PHYSICS
+      // ----------------------------------------------------------
+      if (inPatrolCruiser) {
+        let throttle = 0, steer = 0;
+        if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
+        if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
+        if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
+        if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+        const nitro = (keys['ShiftLeft'] || keys['ShiftRight']) ? 1.85 : 1.0;
+
+        cruiserSpeed = THREE.MathUtils.lerp(cruiserSpeed, throttle * 42 * nitro, delta * 3.5);
+        steerAngle = THREE.MathUtils.lerp(steerAngle, steer * 0.38, delta * 8.0);
+
+        // Turn vehicle
+        cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
+        const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
+        resolveCollisions(cruiserGroup.position, 2.4);
+
+        // Wheel animation
+        wheelSpin += (cruiserSpeed / 0.5) * delta;
+        cyberCarSteers.forEach(item => { item.node.rotation.y = item.rotY + steerAngle; });
+        cyberCarWheels.forEach(item => { item.node.rotation.x = item.rotX + wheelSpin; });
+
+        // Speedometer Display
+        const absKmh = Math.abs(Math.round(cruiserSpeed * 3.6));
+        document.getElementById('cruiser-kmh').textContent = absKmh;
+
+        // Mission 1: Highway 401 Radar Checkpoint (passed at 120+ km/h)
+        if (!missionRadarDone && Math.abs(cruiserGroup.position.z - (-80)) < 16.0 && Math.abs(cruiserGroup.position.x) < 22.0) {
+          if (absKmh >= 120) {
+            missionRadarDone = true;
+            document.getElementById('mis-radar').classList.add('done');
+            tokens += 400;
+            localStorage.setItem('BS_TOKENS', tokens.toString());
+            document.getElementById('token-val').textContent = tokens.toLocaleString();
+            showNotify(`⚡ RADAR CLOCKED AT ${absKmh} KM/H! HIGHWAY 401 SPEED CHALLENGE MET (+400 NEX)`);
+            audio.playLootChime();
+            updateMissionBadge();
+          }
+        }
+
+        // Clamp vehicle to road corridor
+        cruiserGroup.position.x = Math.max(-230, Math.min(230, cruiserGroup.position.x));
+        cruiserGroup.position.z = Math.max(-560, Math.min(560, cruiserGroup.position.z));
+
+        // Follow Camera
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(0, 1.4, 0));
+        const camBack = new THREE.Vector3(0, 4.4, -9.8).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        camera.position.lerp(cruiserGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(cruiserGroup.position.x, cruiserGroup.position.y + 1.2, cruiserGroup.position.z);
+
+      } else {
+        // ON-FOOT OPERATIVE LOCOMOTION
+        let moveX = 0, moveZ = 0;
+        if (keys['KeyW']) moveZ -= 1;
+        if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1;
+        if (keys['KeyD']) moveX += 1;
+
+        const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight']);
+        const moveSpeed = isSprinting ? 18.0 : 9.5;
+        const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
+        const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+
+        player.pos.x += rotatedMove.x * moveSpeed * delta;
+        player.pos.z += rotatedMove.z * moveSpeed * delta;
+        resolveCollisions(player.pos, 0.6);
+
+        // Character Skeletal Animation Blending
+        const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;
+        const isMoving = horizSpeed > 0.5;
+
+        if (characterActions['Idle'] && characterMixer) {
+          let targetAction = characterActions['Idle'];
+          if (isMoving) {
+            targetAction = isSprinting ? (characterActions['Run'] || characterActions['Walk']) : characterActions['Walk'];
+          }
+          if (targetAction && activeCharacterAction !== targetAction) {
+            const prev = activeCharacterAction;
+            activeCharacterAction = targetAction;
+            if (prev) prev.fadeOut(0.2);
+            targetAction.reset().fadeIn(0.2).play();
+          }
+        }
+
+        // Gravity & Jumping
+        if (keys['Space'] && player.isGrounded) {
+          player.vel.y = 9.8;
+          player.isGrounded = false;
+        }
+        player.vel.y -= 22 * delta;
+        player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2 && !isRidingElevator && player.pos.y < 50) {
+          player.pos.y = 1.2;
+          player.vel.y = 0;
+          player.isGrounded = true;
+        }
+
+        // Player Model Transform & Orientation
+        playerGroup.position.copy(player.pos);
+        playerGroup.rotation.y = player.yaw + Math.PI;
+
+        // Camera View Mode (1P vs 3P)
+        if (cameraMode === '1P') {
+          camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+          camera.rotation.set(player.pitch, player.yaw, 0, 'YXZ');
+        } else {
+          // 3P Over-the-Shoulder Camera
+          const camOffset = new THREE.Vector3(0.5, 2.0, 3.6)
+            .applyAxisAngle(new THREE.Vector3(1, 0, 0), player.pitch * 0.45)
+            .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+          camera.position.copy(player.pos).add(camOffset);
+          camera.lookAt(player.pos.x, player.pos.y + 1.4, player.pos.z);
+        }
+      }
+    }
+
+    requestAnimationFrame(animate);
+
+    // Responsive Window Resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

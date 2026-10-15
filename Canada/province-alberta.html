@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Province of Alberta // Trans-Canada Cyberway [AB]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script src="../js/three.min.js"></script>
+  <script>
+    if (typeof THREE === 'undefined') {
+      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+    }
+  </script>
+  <script src="../js/GLTFLoader.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
+    }
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html { width: 100%; height: 100%; overflow: hidden; background: #120e0a; font-family: 'Rajdhani', sans-serif; color: #fff; }
+    #canvas-container { position: absolute; inset: 0; }
+    canvas { width: 100%; height: 100%; display: block; }
+    
+    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; flex-wrap: wrap; gap: 10px; }
+    .province-badge { background: rgba(28, 18, 10, 0.92); border: 1.5px solid #ff8800; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(255, 136, 0, 0.3); pointer-events: auto; }
+    .crest { width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 136, 0, 0.2); border: 2px solid #ff8800; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #ff8800; }
+    .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+    .province-sub { font-size: 11px; color: #ffaa33; letter-spacing: 0.5px; font-weight: 700; }
+    
+    .hud-right { display: flex; gap: 8px; align-items: center; pointer-events: auto; flex-wrap: wrap; }
+    .hud-pill { background: rgba(28, 18, 10, 0.92); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-hud { background: rgba(38, 24, 12, 0.92); border: 1px solid rgba(255, 136, 0, 0.4); border-radius: 10px; color: #ffaa33; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; padding: 9px 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .btn-hud:hover { background: rgba(255, 136, 0, 0.25); transform: translateY(-1px); }
+    .btn-return { background: linear-gradient(135deg, #ff8800, #cc5500); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; padding: 9px 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 16px rgba(255,136,0,0.45); display: flex; align-items: center; gap: 8px; }
+    .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(255,136,0,0.7); }
+
+    .mission-tracker { position: fixed; top: 82px; left: 16px; width: 310px; background: rgba(24, 16, 8, 0.88); border: 1.5px solid rgba(255, 136, 0, 0.35); border-radius: 14px; padding: 12px 16px; z-index: 95; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.5); pointer-events: auto; }
+    .mission-header { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #ffd700; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .mission-item { font-size: 12px; color: #cbd5e1; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+    .mission-item.done { color: #ffaa33; text-decoration: line-through; opacity: 0.8; }
+    .mission-item i { width: 14px; text-align: center; }
+
+    .controls-banner { position: fixed; bottom: 18px; left: 18px; background: rgba(22, 14, 8, 0.88); border: 1px solid rgba(255, 136, 0, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .controls-banner span { color: #ffaa33; font-weight: 700; }
+
+    #cruiser-hud { position: fixed; bottom: 20px; right: 20px; background: rgba(26, 16, 8, 0.94); border: 2px solid #ff8800; border-radius: 16px; padding: 14px 20px; z-index: 100; display: none; box-shadow: 0 0 35px rgba(255, 136, 0, 0.35); min-width: 260px; }
+    .speed-val { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 900; color: #ff8800; }
+    .speed-unit { font-size: 12px; color: #8fa3b8; font-weight: 700; margin-left: 6px; }
+
+    #interact-prompt { position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%); background: rgba(28, 18, 10, 0.96); border: 2px solid #ff8800; border-radius: 14px; padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffaa33; display: none; align-items: center; gap: 10px; box-shadow: 0 0 35px rgba(255,136,0,0.45); z-index: 150; animation: pulseGlow 1.6s infinite; }
+    @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(255,136,0,0.3); } 50% { box-shadow: 0 0 40px rgba(255,136,0,0.65); } }
+
+    #notify-box { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(28, 18, 10, 0.96); border: 1.5px solid #ff8800; border-radius: 12px; padding: 12px 26px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #fff; z-index: 200; display: none; box-shadow: 0 0 35px rgba(255,136,0,0.4); text-align: center; }
+
+    .province-modal { position: fixed; inset: 0; background: rgba(14, 8, 4, 0.88); backdrop-filter: blur(12px); z-index: 300; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .province-modal.visible { display: flex; }
+    .modal-box { background: rgba(28, 18, 10, 0.96); border: 2px solid #ff8800; border-radius: 18px; width: 100%; max-width: 920px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 50px rgba(255,136,0,0.4); }
+    .modal-header { padding: 18px 24px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(255,136,0,0.08); }
+    .modal-header h2 { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 900; color: #fff; display: flex; align-items: center; gap: 10px; }
+    .modal-close { background: none; border: none; font-size: 24px; color: #a0aec0; cursor: pointer; }
+    .modal-grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; overflow-y: auto; }
+    .province-card { background: rgba(36, 22, 12, 0.85); border: 1.5px solid rgba(255,255,255,0.12); border-radius: 12px; padding: 14px; cursor: pointer; transition: all 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 6px; }
+    .province-card:hover { border-color: #ffaa33; transform: translateY(-2px); box-shadow: 0 0 20px rgba(255,170,51,0.25); }
+    .province-card.active { border-color: #ff8800; background: rgba(255,136,0,0.2); box-shadow: 0 0 20px rgba(255,136,0,0.3); }
+    .p-head { display: flex; align-items: center; justify-content: space-between; }
+    .p-name { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fff; }
+    .p-abbr { font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1); color: #ffaa33; }
+    .p-desc { font-size: 11px; color: #8fa3b8; line-height: 1.3; }
+    .p-landmark { font-size: 10px; color: #ffd700; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="canvas-container"></div>
+
+  <div class="province-hud">
+    <div class="province-badge">
+      <div class="crest"><i class="fa-solid fa-fire"></i></div>
+      <div>
+        <div class="province-title">PROVINCE OF ALBERTA</div>
+        <div class="province-sub">// CALGARY STAMPEDE &amp; ROCKIES CORRIDOR [AB]</div>
+      </div>
+    </div>
+
+    <div class="hud-right">
+      <div class="hud-pill"><i class="fa-solid fa-coins"></i> <span id="token-val">1,250</span> NEX</div>
+      <button type="button" class="btn-hud" id="btn-camera" onclick="toggleCameraView()"><i class="fa-solid fa-eye"></i> <span id="cam-mode-label">3P VIEW</span> [V]</button>
+      <button type="button" class="btn-hud" id="btn-quality" onclick="cycleQuality()"><i class="fa-solid fa-sliders"></i> <span id="quality-label">GRAPHICS: HIGH</span> [Q]</button>
+      <button type="button" class="btn-hud" onclick="toggleMapModal()"><i class="fa-solid fa-map-location-dot"></i> HIGHWAYS [H]</button>
+      <button type="button" class="btn-return" onclick="returnToMetropolis()"><i class="fa-solid fa-arrow-left"></i> METROPOLIS HUB</button>
+    </div>
+  </div>
+
+  <div class="mission-tracker">
+    <div class="mission-header">
+      <span><i class="fa-solid fa-crosshairs"></i> ALBERTA SECTOR OBJECTIVES</span>
+      <span id="missions-count">0/3</span>
+    </div>
+    <div class="mission-item" id="mis-hauler"><i class="fa-solid fa-truck-monster"></i> 1. Rocky Foothills Hauler Crossing</div>
+    <div class="mission-item" id="mis-tower"><i class="fa-solid fa-fire-flame-curved"></i> 2. Calgary Tower Torch Sync</div>
+    <div class="mission-item" id="mis-energy"><i class="fa-solid fa-bolt"></i> 3. Athabasca Quantum Energy Grid</div>
+  </div>
+
+  <div id="cruiser-hud">
+    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+      <div><span class="speed-val" id="cruiser-kmh">0</span><span class="speed-unit">KM/H</span></div>
+      <div style="font-size: 11px; color: #ffaa33; font-family: 'Orbitron', sans-serif;">HEAVY HAULER ACTIVE</div>
+    </div>
+    <div style="font-size: 10px; color: #8fa3b8; margin-top: 4px;">
+      [W/S] ACCEL/BRAKE &nbsp;|&nbsp; [A/D] STEER &nbsp;|&nbsp; [SHIFT] NITRO &nbsp;|&nbsp; [E] EXIT
+    </div>
+  </div>
+
+  <div class="controls-banner">
+    [<span>W, A, S, D</span>] MOVE &nbsp;|&nbsp; [<span>MOUSE</span>] LOOK &nbsp;|&nbsp; [<span>SPACE</span>] JUMP &nbsp;|&nbsp; [<span>SHIFT</span>] SPRINT &nbsp;|&nbsp; [<span>V</span>] 1P/3P &nbsp;|&nbsp; [<span>E</span>] HAULER &nbsp;|&nbsp; [<span>F</span>] INTERACT
+  </div>
+
+  <div id="interact-prompt"><i class="fa-solid fa-circle-exclamation"></i> <span id="prompt-msg">INTERACT</span></div>
+  <div id="notify-box"></div>
+
+  <div class="province-modal" id="modal-map">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2><i class="fa-brands fa-canadian-maple-leaf" style="color: #ff8800;"></i> TRANS-CANADA HIGHWAY SYSTEM // 14 PROVINCES &amp; TERRITORIES</h2>
+        <button type="button" class="modal-close" onclick="toggleMapModal()">&times;</button>
+      </div>
+      <div class="modal-grid" id="provinces-list"></div>
+    </div>
+  </div>
+
+  <script>
+    class ProvinceAudio {
+      constructor() { this.ctx = null; }
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+      }
+      playChirp() {
+        this.init(); if (!this.ctx) return;
+        const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+        osc.connect(gain); gain.connect(this.ctx.destination);
+        osc.type = 'sawtooth'; osc.frequency.setValueAtTime(480, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(720, this.ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+        gain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.14);
+        osc.start(); osc.stop(this.ctx.currentTime + 0.14);
+      }
+      playLootChime() {
+        this.init(); if (!this.ctx) return;
+        [440.00, 554.37, 659.25, 880.00].forEach((f, idx) => {
+          const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.connect(gain); gain.connect(this.ctx.destination);
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.08 + 0.35);
+          osc.start(this.ctx.currentTime + idx * 0.08);
+          osc.stop(this.ctx.currentTime + idx * 0.08 + 0.35);
+        });
+      }
+    }
+    const audio = new ProvinceAudio();
+
+    const CANADIAN_PROVINCES = [
+      { id: 'ontario', name: 'Ontario', abbr: 'ON', file: 'province-ontario.html', landmark: 'Cyber CN Tower & Highway 401', desc: 'Heartland of the Great Lakes and Canada\'s economic industrial power.' },
+      { id: 'quebec', name: 'Québec', abbr: 'QC', file: 'province-quebec.html', landmark: 'Château Frontenac & St. Lawrence Locks', desc: 'Historic French citadel, hydro-electric super-grid and winter bastion.' },
+      { id: 'british-columbia', name: 'British Columbia', abbr: 'BC', file: 'province-british-columbia.html', landmark: 'Lions Gate Bridge & Whistler Peak', desc: 'Pacific cascadia rainforests, mountain ranges and coastal seaplane ports.' },
+      { id: 'alberta', name: 'Alberta', abbr: 'AB', file: 'province-alberta.html', landmark: 'Calgary Stampede & Banff Rockies', desc: 'Energy capital, heavy exocraft haulers and high mountain glaciers.' },
+      { id: 'manitoba', name: 'Manitoba', abbr: 'MB', file: 'province-manitoba.html', landmark: 'The Forks & Esplanade Riel Bridge', desc: 'Gateway to the West, trans-continental rail hub and polar aurora station.' },
+      { id: 'saskatchewan', name: 'Saskatchewan', abbr: 'SK', file: 'province-saskatchewan.html', landmark: 'Wascana Legislative Dome & Potash Wells', desc: 'Land of the living skies, massive solar farms and autonomous agriculture.' },
+      { id: 'nova-scotia', name: 'Nova Scotia', abbr: 'NS', file: 'province-nova-scotia.html', landmark: 'Halifax Star Citadel & Peggy\'s Cove', desc: 'Atlantic maritime naval fortress, historic Bluenose dock and tidal power.' },
+      { id: 'new-brunswick', name: 'New Brunswick', abbr: 'NB', file: 'province-new-brunswick.html', landmark: 'Hopewell Rocks & Bay of Fundy Tides', desc: 'Appalachian cyber-corridor with the highest tidal surges in the world.' },
+      { id: 'newfoundland', name: 'Newfoundland & Labrador', abbr: 'NL', file: 'province-newfoundland.html', landmark: 'Signal Hill Marconi Tower & Iceberg Alley', desc: 'First light of North America, transatlantic cables and iceberg interceptors.' },
+      { id: 'prince-edward-island', name: 'Prince Edward Island', abbr: 'PE', file: 'province-prince-edward-island.html', landmark: 'Confederation Bridge & Red Sand Cliffs', desc: 'Cradle of Confederation, 13km causeway and coastal red sand dunes.' },
+      { id: 'northwest-territories', name: 'Northwest Territories', abbr: 'NT', file: 'province-northwest-territories.html', landmark: 'Diavik Diamond Mine & Slave Lake Ice Road', desc: 'Aurora capital of the Arctic, sub-zero trucking and kimberlite diamonds.' },
+      { id: 'yukon', name: 'Yukon Territory', abbr: 'YT', file: 'province-yukon.html', landmark: 'Klondike Gold Dredge & Mount Logan', desc: 'Historic Klondike gold territory and Canada\'s highest glacial summit.' },
+      { id: 'nunavut', name: 'Territory of Nunavut', abbr: 'NU', file: 'province-nunavut.html', landmark: 'Giant Neon Inukshuk & Igloo Dome', desc: 'High Arctic sovereignty, endless tundra and aurora-cloaked settlements.' },
+      { id: 'national-capital', name: 'National Capital Region', abbr: 'NCR', file: 'province-national-capital.html', landmark: 'Parliament Peace Tower & Rideau Canal', desc: 'Federal core of Canada, Centennial Flame and national quantum archive.' }
+    ];
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let tokens = parseInt(urlParams.get('tokens')) || parseInt(localStorage.getItem('BS_TOKENS')) || 1250;
+    const callsign = urlParams.get('callsign') || localStorage.getItem('BS_OPERATIVE_CALLSIGN') || 'DEMONALEX';
+    let inPatrolCruiser = false;
+    let cruiserSpeed = 0;
+    let cameraMode = '3P';
+    let qualityMode = localStorage.getItem('PROVINCE_QUALITY') || 'high';
+
+    let missionHaulerDone = false, missionTowerDone = false, missionEnergyDone = false;
+    document.getElementById('token-val').textContent = tokens.toLocaleString();
+
+    function showNotify(msg) {
+      const box = document.getElementById('notify-box');
+      box.innerHTML = msg; box.style.display = 'block';
+      clearTimeout(window._notifTimer);
+      window._notifTimer = setTimeout(() => { box.style.display = 'none'; }, 4200);
+    }
+
+    function updateMissionBadge() {
+      const completed = (missionHaulerDone ? 1 : 0) + (missionTowerDone ? 1 : 0) + (missionEnergyDone ? 1 : 0);
+      document.getElementById('missions-count').textContent = `${completed}/3`;
+      if (completed === 3 && !window._sectorRewardGranted) {
+        window._sectorRewardGranted = true;
+        tokens += 1000;
+        localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚡ ALBERTA ENERGY SECTOR MASTERED! BONUS +1,000 NEX TOKENS');
+        audio.playLootChime();
+      }
+    }
+
+    function returnToMetropolis() {
+      localStorage.setItem('BS_TOKENS', tokens.toString());
+      window.location.href = `../game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+    }
+
+    function toggleMapModal() { document.getElementById('modal-map').classList.toggle('visible'); }
+    function toggleCameraView() {
+      cameraMode = (cameraMode === '1P') ? '3P' : '1P';
+      document.getElementById('cam-mode-label').textContent = `${cameraMode} VIEW`;
+      if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P' && !inPatrolCruiser);
+      audio.playChirp();
+    }
+    function cycleQuality() {
+      qualityMode = (qualityMode === 'high') ? 'med' : (qualityMode === 'med' ? 'low' : 'high');
+      localStorage.setItem('PROVINCE_QUALITY', qualityMode);
+      applyQualitySettings();
+      audio.playChirp();
+    }
+    function applyQualitySettings() {
+      const lbl = document.getElementById('quality-label');
+      if (lbl) lbl.textContent = `GRAPHICS: ${qualityMode.toUpperCase()}`;
+      if (!renderer) return;
+      if (qualityMode === 'low') {
+        renderer.setPixelRatio(1.0);
+        renderer.shadowMap.enabled = false;
+        if (dirLight) dirLight.castShadow = false;
+        if (typeof distantDecorGroup !== 'undefined') distantDecorGroup.visible = false;
+      } else if (qualityMode === 'med') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.BasicShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(512, 512); }
+        if (typeof distantDecorGroup !== 'undefined') distantDecorGroup.visible = true;
+      } else {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(1024, 1024); }
+      }
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    const listEl = document.getElementById('provinces-list');
+    CANADIAN_PROVINCES.forEach(p => {
+      const card = document.createElement('a');
+      card.className = 'province-card' + (p.id === 'alberta' ? ' active' : '');
+      card.href = `${p.file}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      card.innerHTML = `<div class="p-head"><span class="p-name">${p.name}</span><span class="p-abbr">${p.abbr}</span></div><div class="p-landmark"><i class="fa-solid fa-monument"></i> ${p.landmark}</div><div class="p-desc">${p.desc}</div>`;
+      listEl.appendChild(card);
+    });
+
+    // ------------------------------------------------------------
+    // 3D SCENE SETUP & ROCKY MOUNTAIN ENVIRONMENT
+    // ------------------------------------------------------------
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    const distantDecorGroup = new THREE.Group();
+    scene.add(distantDecorGroup);
+    scene.background = new THREE.Color(0x18120c);
+    scene.fog = new THREE.FogExp2(0x18120c, 0.0016);
+
+    const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2400);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
+    if (THREE.ACESFilmicToneMapping) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.18;
+    }
+    container.appendChild(renderer.domElement);
+
+    const hemiLight = new THREE.HemisphereLight(0xffcc88, 0x332014, 1.35);
+    scene.add(hemiLight);
+
+    const dirLight = new THREE.DirectionalLight(0xfffaea, 2.3);
+    dirLight.position.set(160, 300, 120);
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.near = 10; dirLight.shadow.camera.far = 650;
+    dirLight.shadow.camera.left = -200; dirLight.shadow.camera.right = 200;
+    dirLight.shadow.camera.top = 200; dirLight.shadow.camera.bottom = -200;
+    dirLight.shadow.bias = -0.0006;
+    scene.add(dirLight);
+
+    applyQualitySettings();
+
+    const texLoader = new THREE.TextureLoader();
+
+    // Prairie-to-Mountain Ground Terrain
+    const groundGeo = new THREE.PlaneGeometry(1600, 1600, 32, 32);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x221a14, roughness: 0.92, metalness: 0.1 });
+    const groundMesh = new THREE.Mesh(groundGeo, groundMat);
+    groundMesh.rotation.x = -Math.PI / 2;
+    groundMesh.receiveShadow = true;
+    scene.add(groundMesh);
+
+    // Rocky Mountains Wall with Glacial Snow Peaks (West Horizon at X: -480)
+    const mtnMat = new THREE.MeshStandardMaterial({ color: 0x1f1a18, roughness: 0.95 });
+    const snowMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.35 });
+    for (let m = 0; m < 9; m++) {
+      const mz = (m - 4) * 130;
+      const mh = 170 + ((m % 4) * 35);
+      const mtn = new THREE.Mesh(new THREE.ConeGeometry(95, mh, 6), mtnMat);
+      mtn.position.set(-460, mh / 2, mz);
+      scene.add(mtn);
+      const cap = new THREE.Mesh(new THREE.ConeGeometry(32, mh * 0.32, 6), snowMat);
+      cap.position.set(-460, mh * 0.84, mz);
+      scene.add(cap);
+    }
+
+    // Alberta Highway 2 Concrete Energy Corridor
+    const hwyMat = new THREE.MeshStandardMaterial({ color: 0x24201c, roughness: 0.8 });
+    texLoader.load('../assets/textures/pbr/Road007_1K-JPG_Color.jpg', tex => {
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 32);
+      hwyMat.map = tex; hwyMat.needsUpdate = true;
+    }, undefined, err => { console.warn('[AssetLoader] Failed loading Road007 texture:', err); });
+
+    const hwyGeo = new THREE.BoxGeometry(45, 1.2, 1200);
+    const hwyMesh = new THREE.Mesh(hwyGeo, hwyMat);
+    hwyMesh.position.set(0, 0.6, 0);
+    hwyMesh.receiveShadow = true;
+    scene.add(hwyMesh);
+
+    // CALGARY STAMPEDE SADDLEDOME & CALGARY TOWER ARCHITECTURE
+    const stampedeGroup = new THREE.Group();
+    stampedeGroup.position.set(130, 0, -140);
+    scene.add(stampedeGroup);
+
+    const domeBase = new THREE.Mesh(new THREE.CylinderGeometry(55, 60, 24, 32), new THREE.MeshStandardMaterial({ color: 0x1c222c, metalness: 0.8, roughness: 0.3 }));
+    domeBase.position.y = 12;
+    domeBase.castShadow = true;
+    stampedeGroup.add(domeBase);
+
+    // Hyperbolic Paraboloid Saddle Roof
+    const saddleRoof = new THREE.Mesh(new THREE.TorusGeometry(38, 14, 16, 32), new THREE.MeshStandardMaterial({ color: 0xff8800, metalness: 0.9, roughness: 0.2 }));
+    saddleRoof.rotation.x = Math.PI / 2;
+    saddleRoof.position.y = 26;
+    stampedeGroup.add(saddleRoof);
+
+    // Calgary Tower Spire with Flame Torch
+    const cTower = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 5.0, 130, 16), new THREE.MeshStandardMaterial({ color: 0xdde6ed, metalness: 0.85 }));
+    cTower.position.set(-85, 65, -60);
+    cTower.castShadow = true;
+    stampedeGroup.add(cTower);
+
+    const torchLight = new THREE.PointLight(0xff6600, 3.5, 300);
+    torchLight.position.set(-85, 132, -60);
+    stampedeGroup.add(torchLight);
+
+    // Kenney Modular Town Scenery & Conifers
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const gLoader = new THREE.GLTFLoader();
+      const mods = [
+        { file: 'grass-trees-tall.glb', x: -35, y: 0.2, z: -50, scale: 5.0, ry: 0 },
+        { file: 'grass-trees-tall.glb', x: 35, y: 0.2, z: -50, scale: 5.0, ry: 1.2 },
+        { file: 'grass-trees-tall.glb', x: -45, y: 0.2, z: 80, scale: 5.5, ry: 0.5 },
+        { file: 'grass-trees-tall.glb', x: 45, y: 0.2, z: 80, scale: 5.5, ry: -0.7 },
+        { file: 'building-small-a.glb', x: -60, y: 0.2, z: 20, scale: 5.5, ry: Math.PI / 2 },
+        { file: 'building-small-b.glb', x: 60, y: 0.2, z: 20, scale: 5.5, ry: -Math.PI / 2 }
+      ];
+      mods.forEach(cfg => {
+        gLoader.load(`../assets/models/kenney/${cfg.file}`, gltf => {
+          const m = gltf.scene;
+          m.position.set(cfg.x, cfg.y, cfg.z);
+          m.scale.set(cfg.scale, cfg.scale, cfg.scale);
+          m.rotation.y = cfg.ry;
+          m.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+          distantDecorGroup.add(m);
+        }, undefined, err => { console.warn(`[AssetLoader] Failed loading kenney asset ${cfg.file}:`, err); });
+      });
+    }
+
+    // ------------------------------------------------------------
+    // RIGGED CHARACTER & HEAVY EXOCRAFT CRUISER
+    // ------------------------------------------------------------
+    const playerGroup = new THREE.Group();
+    scene.add(playerGroup);
+
+    let playerRiggedMesh = null, characterMixer = null, characterActions = {}, activeCharacterAction = null;
+    const procChar = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.18, 1.4, 12), new THREE.MeshStandardMaterial({ color: 0xcc5500 }));
+    procChar.position.y = 0.9;
+    playerGroup.add(procChar);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const charLoader = new THREE.GLTFLoader();
+      charLoader.load('../assets/models/operative_soldier.glb', gltf => {
+        playerRiggedMesh = gltf.scene;
+        playerRiggedMesh.position.set(0, 0, 0);
+        playerRiggedMesh.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
+        characterMixer = new THREE.AnimationMixer(playerRiggedMesh);
+        gltf.animations.forEach(clip => { characterActions[clip.name] = characterMixer.clipAction(clip); });
+        if (characterActions['Idle']) { characterActions['Idle'].play(); activeCharacterAction = characterActions['Idle']; }
+        playerGroup.add(playerRiggedMesh);
+        procChar.visible = false;
+        playerRiggedMesh.visible = (cameraMode === '3P');
+      }, undefined, err => { console.warn('[AssetLoader] Failed loading operative_soldier.glb, retaining procedural avatar fallback:', err); });
+    }
+
+    const cruiserGroup = new THREE.Group();
+    cruiserGroup.position.set(0, 0.4, 30);
+    scene.add(cruiserGroup);
+
+    let cyberCarMesh = null, cyberCarWheels = [], cyberCarSteers = [];
+    const procCruiser = new THREE.Mesh(new THREE.BoxGeometry(2.6, 1.2, 5.2), new THREE.MeshStandardMaterial({ color: 0xff8800 }));
+    procCruiser.position.y = 0.8;
+    cruiserGroup.add(procCruiser);
+
+    if (typeof THREE.GLTFLoader !== 'undefined') {
+      const vLoader = new THREE.GLTFLoader();
+      vLoader.load('../assets/models/cyber_car.glb', gltf => {
+        cyberCarMesh = gltf.scene;
+        cyberCarMesh.rotation.y = Math.PI;
+        cyberCarMesh.position.set(0, 0.22, 0);
+        cyberCarMesh.traverse(c => {
+          if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; }
+          const n = (c.name || '').toLowerCase();
+          if (n.includes('wheel_fl') || n.includes('wheel_fr')) {
+            cyberCarSteers.push({ node: c, rotY: c.rotation.y });
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          } else if (n.includes('wheel_rl') || n.includes('wheel_rr')) {
+            cyberCarWheels.push({ node: c, rotX: c.rotation.x });
+          }
+        });
+        cruiserGroup.add(cyberCarMesh);
+        procCruiser.visible = false;
+      }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
+    }
+
+    // Landmark 3: Athabasca Quantum Energy Grid at (0, 0.2, -180)
+    const energyGroup = new THREE.Group();
+    energyGroup.position.set(0, 0.2, -180);
+    scene.add(energyGroup);
+    const ePed = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 3.0, 2.2, 8), new THREE.MeshStandardMaterial({ color: 0x181008, metalness: 0.9 }));
+    ePed.position.y = 1.1; energyGroup.add(ePed);
+    const eOrb = new THREE.Mesh(new THREE.IcosahedronGeometry(1.2), new THREE.MeshBasicMaterial({ color: 0xffaa00, wireframe: true }));
+    eOrb.position.y = 2.6; energyGroup.add(eOrb);
+
+    // ------------------------------------------------------------
+    // GEOGRAPHIC ENVIRONMENT & AUTHENTIC REGIONAL SCENERY: BANFF ROCKIES & FOOTHILLS
+    // ------------------------------------------------------------
+    (function buildRegionalEnvironment() {
+      const regionalGroup = new THREE.Group();
+      scene.add(regionalGroup);
+
+      const logMat = new THREE.MeshStandardMaterial({ color: 0x3d2719, roughness: 0.88 });
+      const roofMat = new THREE.MeshStandardMaterial({ color: 0x241710, roughness: 0.9 });
+      const stoneMat = new THREE.MeshStandardMaterial({ color: 0x62666a, roughness: 0.92 });
+      const woodDeckMat = new THREE.MeshStandardMaterial({ color: 0x483222, roughness: 0.85 });
+      const moraineRockMat = new THREE.MeshStandardMaterial({ color: 0x767c82, roughness: 0.94 });
+      const pineMat = new THREE.MeshStandardMaterial({ color: 0x162c1b, roughness: 0.78 });
+
+      // 1. Alpine Ranger Log Outpost & Observation Platform (x: -48, z: -15)
+      const outpostGroup = new THREE.Group();
+      outpostGroup.position.set(-48, 0, -15);
+      regionalGroup.add(outpostGroup);
+
+      const cabinBase = new THREE.Mesh(new THREE.BoxGeometry(11, 5.5, 9), logMat);
+      cabinBase.position.y = 2.75;
+      cabinBase.castShadow = true; cabinBase.receiveShadow = true;
+      outpostGroup.add(cabinBase);
+
+      const roof = new THREE.Mesh(new THREE.ConeGeometry(8.5, 3.4, 4), roofMat);
+      roof.position.y = 7.2;
+      roof.rotation.y = Math.PI / 4;
+      roof.scale.set(1.3, 1.0, 1.1);
+      roof.castShadow = true;
+      outpostGroup.add(roof);
+
+      const chimney = new THREE.Mesh(new THREE.BoxGeometry(2.0, 8.5, 2.2), stoneMat);
+      chimney.position.set(4.5, 4.25, 0);
+      chimney.castShadow = true;
+      outpostGroup.add(chimney);
+
+      // Elevated observation platform with handrail
+      const deck = new THREE.Mesh(new THREE.BoxGeometry(5.2, 0.35, 5.2), woodDeckMat);
+      deck.position.set(-5.5, 4.2, 0);
+      deck.castShadow = true;
+      outpostGroup.add(deck);
+
+      for (let sx of [-7.8, -3.2]) {
+        for (let sz of [-2.4, 2.4]) {
+          const stilt = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.25, 4.2, 8), logMat);
+          stilt.position.set(sx, 2.1, sz);
+          stilt.castShadow = true;
+          outpostGroup.add(stilt);
+        }
+      }
+
+      const deckLamp = new THREE.PointLight(0xffb044, 1.3, 26);
+      deckLamp.position.set(-5.5, 5.8, 0);
+      outpostGroup.add(deckLamp);
+
+      // 2. Trailhead Sign & Bench
+      const signPost = new THREE.Mesh(new THREE.BoxGeometry(0.3, 2.4, 0.3), logMat);
+      signPost.position.set(-34, 1.2, 5);
+      const signBoard = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.8, 0.15), woodDeckMat);
+      signBoard.position.set(-34, 2.0, 5);
+      regionalGroup.add(signPost); regionalGroup.add(signBoard);
+
+      // 3. Rustic Split-Rail Fencing
+      for (let fz = 20; fz >= -50; fz -= 14) {
+        const post = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 1.6, 6), logMat);
+        post.position.set(-32, 0.8, fz);
+        post.castShadow = true;
+        regionalGroup.add(post);
+        const rail = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.11, 14, 6), logMat);
+        rail.rotation.x = Math.PI / 2;
+        rail.position.set(-32, 1.1, fz - 7);
+        rail.castShadow = true;
+        regionalGroup.add(rail);
+      }
+
+      // 4. Glacial Moraine Limestone Boulders
+      const moraineRocks = [
+        { x: 38, z: -10, s: 5.2 },
+        { x: 42, z: -45, s: 5.6 },
+        { x: -36, z: 15, s: 3.8 }
+      ];
+      moraineRocks.forEach(mr => {
+        const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(mr.s, 1), moraineRockMat);
+        rock.position.set(mr.x, mr.s * 0.52, mr.z);
+        rock.rotation.set(0.4, 0.9, 0.1);
+        rock.scale.set(1.25, 0.8, 1.1);
+        rock.castShadow = true; rock.receiveShadow = true;
+        regionalGroup.add(rock);
+      });
+
+      // 5. Alpine Lodgepole Pines & Foothills Conifers
+      const pineCoords = [
+        { x: -36, z: -10, h: 16, w: 4.5 },
+        { x: -55, z: 12, h: 18, w: 5.0 },
+        { x: 36, z: 12, h: 14, w: 4.2 },
+        { x: 48, z: -25, h: 19, w: 5.2 },
+        { x: -38, z: -55, h: 15, w: 4.6 }
+      ];
+      pineCoords.forEach(pc => {
+        const tree = new THREE.Group();
+        tree.position.set(pc.x, 0, pc.z);
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.45, pc.h * 0.45, 7), logMat);
+        trunk.position.y = pc.h * 0.225;
+        trunk.castShadow = true;
+        tree.add(trunk);
+        for (let t = 0; t < 3; t++) {
+          const tier = new THREE.Mesh(new THREE.ConeGeometry(pc.w * (1 - t * 0.2), pc.h * 0.35, 7), pineMat);
+          tier.position.y = pc.h * (0.38 + t * 0.22);
+          tier.castShadow = true;
+          tree.add(tier);
+        }
+        distantDecorGroup.add(tree);
+      });
+    })();
+
+
+    
+    // ------------------------------------------------------------
+    // SCENERY COLLIDERS & OBSTACLE PHYSICS
+    // ------------------------------------------------------------
+    const WORLD_COLLIDERS = [
+      { x: 120, z: -100, r: 34 },
+      { x: -80, z: -120, r: 14 },
+      { x: 0, z: -180, r: 5 },
+      { x: -65, z: 20, r: 8 },
+      { x: -65, z: -40, r: 8 },
+      { x: -48, z: -15, r: 8 },
+      { x: 38, z: -10, r: 5 },
+      { x: 42, z: -45, r: 5 }
+    ];
+
+    function resolveCollisions(pos, radius) {
+      for (let i = 0; i < WORLD_COLLIDERS.length; i++) {
+        const c = WORLD_COLLIDERS[i];
+        const dx = pos.x - c.x;
+        const dz = pos.z - c.z;
+        const distSq = dx * dx + dz * dz;
+        const minDist = radius + c.r;
+        if (distSq < minDist * minDist && distSq > 0.0001) {
+          const dist = Math.sqrt(distSq);
+          const overlap = minDist - dist;
+          pos.x += (dx / dist) * overlap;
+          pos.z += (dz / dist) * overlap;
+        }
+      }
+      pos.x = Math.max(-550, Math.min(550, pos.x));
+      pos.z = Math.max(-550, Math.min(550, pos.z));
+    }
+
+    // ------------------------------------------------------------
+    // CONTROLS & GAMEPLAY
+    // ------------------------------------------------------------
+    const player = { pos: new THREE.Vector3(0, 1.2, 45), vel: new THREE.Vector3(), yaw: 0, pitch: 0, isGrounded: true };
+    const keys = {};
+    window.addEventListener('keydown', e => {
+      audio.init(); keys[e.code] = true;
+      if (e.code === 'KeyV') toggleCameraView();
+      if (e.code === 'KeyQ') cycleQuality();
+      if (e.code === 'KeyH') toggleMapModal();
+      if (e.code === 'KeyE') toggleVehicle();
+      if (e.code === 'KeyF') handleInteractions();
+      if (e.code === 'Escape') {
+        const m = document.getElementById('modal-map');
+        if (m.classList.contains('visible')) m.classList.remove('visible'); else returnToMetropolis();
+      }
+    });
+    window.addEventListener('keyup', e => { keys[e.code] = false; });
+
+    let isPointerLocked = false;
+    window.addEventListener('click', () => { if (!isPointerLocked && document.body.requestPointerLock) document.body.requestPointerLock(); });
+    document.addEventListener('pointerlockchange', () => { isPointerLocked = (document.pointerLockElement === document.body); });
+    window.addEventListener('mousemove', e => {
+      if (!isPointerLocked) return;
+      player.yaw -= e.movementX * 0.0024;
+      player.pitch = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, player.pitch - e.movementY * 0.0024));
+    });
+
+    function toggleVehicle() {
+      if (inPatrolCruiser) {
+        inPatrolCruiser = false;
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(2.4, 0.8, 0));
+        document.getElementById('cruiser-hud').style.display = 'none';
+        if (playerRiggedMesh) playerRiggedMesh.visible = (cameraMode === '3P');
+        showNotify('DISEMBARKED HEAVY HAULER');
+        audio.playChirp();
+      } else if (player.pos.distanceTo(cruiserGroup.position) < 8.0) {
+        inPatrolCruiser = true;
+        document.getElementById('cruiser-hud').style.display = 'block';
+        if (playerRiggedMesh) playerRiggedMesh.visible = false;
+        showNotify('🚜 PILOTING ALBERTA HEAVY HAULER // [SHIFT] NITRO BOOST');
+        audio.playChirp();
+      }
+    }
+
+    function handleInteractions() {
+      if (!missionEnergyDone && player.pos.distanceTo(energyGroup.position) < 7.0) {
+        missionEnergyDone = true;
+        document.getElementById('mis-energy').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('⚡ ATHABASCA QUANTUM ENERGY GRID SYNCHRONIZED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
+      }
+      const towerTorchPos = new THREE.Vector3(45, 0, -200);
+      if (!missionTowerDone && player.pos.distanceTo(towerTorchPos) < 22.0) {
+        missionTowerDone = true;
+        document.getElementById('mis-tower').classList.add('done');
+        tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+        document.getElementById('token-val').textContent = tokens.toLocaleString();
+        showNotify('🔥 CALGARY TOWER TORCH BEACON SYNCHRONIZED (+500 NEX)');
+        audio.playLootChime(); updateMissionBadge();
+      }
+    }
+
+    // Main Loop
+    let lastTime = performance.now(), wheelSpin = 0, steerAngle = 0;
+    function animate(now) {
+      requestAnimationFrame(animate);
+      const delta = Math.min((now - lastTime) / 1000, 0.1);
+      lastTime = now;
+
+      if (characterMixer) characterMixer.update(delta);
+      eOrb.rotation.y += delta * 1.5; eOrb.rotation.x += delta * 0.8;
+      torchLight.intensity = 3.2 + Math.sin(now * 0.01) * 0.8;
+
+      const prompt = document.getElementById('interact-prompt');
+      const promptMsg = document.getElementById('prompt-msg');
+      if (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT HEAVY HAULER [E]';
+      } else if (!missionEnergyDone && player.pos.distanceTo(energyGroup.position) < 7.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'SYNC ENERGY GRID [F]';
+      } else if (!missionTowerDone && player.pos.distanceTo(new THREE.Vector3(45, 0, -200)) < 22.0) {
+        prompt.style.display = 'flex'; promptMsg.textContent = 'SYNC CALGARY TOWER TORCH [F]';
+      } else {
+        prompt.style.display = 'none';
+      }
+
+      if (inPatrolCruiser) {
+        let throttle = 0, steer = 0;
+        if (keys['KeyW'] || keys['ArrowUp']) throttle += 1;
+        if (keys['KeyS'] || keys['ArrowDown']) throttle -= 1;
+        if (keys['KeyA'] || keys['ArrowLeft']) steer += 1;
+        if (keys['KeyD'] || keys['ArrowRight']) steer -= 1;
+        const nitro = (keys['ShiftLeft'] || keys['ShiftRight']) ? 1.85 : 1.0;
+
+        cruiserSpeed = THREE.MathUtils.lerp(cruiserSpeed, throttle * 44 * nitro, delta * 3.5);
+        steerAngle = THREE.MathUtils.lerp(steerAngle, steer * 0.38, delta * 8.0);
+        cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
+        const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
+        resolveCollisions(cruiserGroup.position, 2.4);
+
+        wheelSpin += (cruiserSpeed / 0.5) * delta;
+        cyberCarSteers.forEach(i => { i.node.rotation.y = i.rotY + steerAngle; });
+        cyberCarWheels.forEach(i => { i.node.rotation.x = i.rotX + wheelSpin; });
+
+        const absKmh = Math.abs(Math.round(cruiserSpeed * 3.6));
+        document.getElementById('cruiser-kmh').textContent = absKmh;
+
+        // Mission 1: Foothills Hauler Crossing at Z > 220
+        if (!missionHaulerDone && cruiserGroup.position.z > 220 && Math.abs(cruiserGroup.position.x) < 22) {
+          missionHaulerDone = true;
+          document.getElementById('mis-hauler').classList.add('done');
+          tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
+          document.getElementById('token-val').textContent = tokens.toLocaleString();
+          showNotify('🏔️ ROCKY FOOTHILLS CORRIDOR TRAVERSED (+500 NEX)');
+          audio.playLootChime(); updateMissionBadge();
+        }
+
+        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(0, 1.4, 0));
+        const camBack = new THREE.Vector3(0, 4.4, -9.8).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
+        camera.position.lerp(cruiserGroup.position.clone().add(camBack), 0.35);
+        camera.lookAt(cruiserGroup.position.x, cruiserGroup.position.y + 1.2, cruiserGroup.position.z);
+
+      } else {
+        let moveX = 0, moveZ = 0;
+        if (keys['KeyW']) moveZ -= 1; if (keys['KeyS']) moveZ += 1;
+        if (keys['KeyA']) moveX -= 1; if (keys['KeyD']) moveX += 1;
+        const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight']);
+        const moveSpeed = isSprinting ? 18.0 : 9.5;
+        const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
+        const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+
+        player.pos.x += rotatedMove.x * moveSpeed * delta;
+        player.pos.z += rotatedMove.z * moveSpeed * delta;
+        resolveCollisions(player.pos, 0.6);
+
+        const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;
+        const isMoving = horizSpeed > 0.5;
+
+        if (characterActions['Idle'] && characterMixer) {
+          let target = characterActions['Idle'];
+          if (isMoving) target = isSprinting ? (characterActions['Run'] || characterActions['Walk']) : characterActions['Walk'];
+          if (target && activeCharacterAction !== target) {
+            const prev = activeCharacterAction; activeCharacterAction = target;
+            if (prev) prev.fadeOut(0.2); target.reset().fadeIn(0.2).play();
+          }
+        }
+
+        if (keys['Space'] && player.isGrounded) { player.vel.y = 9.8; player.isGrounded = false; }
+        player.vel.y -= 22 * delta; player.pos.y += player.vel.y * delta;
+        if (player.pos.y <= 1.2) { player.pos.y = 1.2; player.vel.y = 0; player.isGrounded = true; }
+
+        playerGroup.position.copy(player.pos);
+        playerGroup.rotation.y = player.yaw + Math.PI;
+
+        if (cameraMode === '1P') {
+          camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
+          camera.rotation.set(player.pitch, player.yaw, 0, 'YXZ');
+        } else {
+          const camOffset = new THREE.Vector3(0.5, 2.0, 3.6)
+            .applyAxisAngle(new THREE.Vector3(1, 0, 0), player.pitch * 0.45)
+            .applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+          camera.position.copy(player.pos).add(camOffset);
+          camera.lookAt(player.pos.x, player.pos.y + 1.4, player.pos.z);
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

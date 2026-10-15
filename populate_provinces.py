@@ -1690,7 +1690,7 @@ def main():
     print("Beginning injection across all 14 realm files...")
     success_count = 0
     for filename in sorted(SCENERY_DEFINITIONS.keys()):
-        if process_file(filename):
+        if process_file(os.path.join('Canada', filename)):
             success_count += 1
     print(f"\nDone: {success_count}/{len(SCENERY_DEFINITIONS)} files successfully updated.")
 

@@ -236,3 +236,29 @@ Code inspection finds that `game.html` contains the sun disc, gradient sky, PBR 
 - **National Capital Region (`province-national-capital.html`)**:
   - *Settlement & Scenery*: Heritage stone Rideau Canal lockkeeper cottage with slate roof and chimney (`x: -48, z: -15`), Confederation Boulevard formal parkland allée of vibrant autumn sugar maples in radiant red, fiery orange, and golden amber foliage crowns (`x: -26` & `x: 26`), classical bronze statuary monument on tiered granite pedestal with memorial plaque (`x: 40, z: -15`), cast-iron Victorian 5-globe gas street lamps with warm amber glow (`x: -24` & `x: 24`), and stone balustrade garden wall (`x: 36, z: 15`).
   - *Colliders*: 11 registered world colliders (lockkeeper cottage, bronze monument, balustrade wall, Parliament Peace Tower).
+
+
+### Calgary Metropolis & Live-Status Construction Record:
+- **Calgary International Airport (YYC)**:
+  - *Location & Orientation*: Northeast of downtown (`X: 320 to 740, Z: -220`), reflecting real-world spatial orientation.
+  - *Features*: Canada's tallest Air Traffic Control Tower (91m) with slender white faceted shaft, octagonal cantilevered glass cab at 82.5m, observation gallery, and primary surveillance radar at 91m. Runways 17L/35R (longest runway in Canada) and 17R/35L with high-intensity approach lighting, threshold bars, centerlines, and blue taxiway edge lights. Passenger terminal with passenger boarding jetways, aircraft parking apron, maintenance hangars, and ground support equipment.
+- **Calgary Downtown Skyline & Landmark Spacing**:
+  - *Calgary Tower (190.8m)* at `x: -35, z: -45` (101 9th Ave SW): Carmine red column shaft, revolving Sky 360 restaurant drum, upper observation deck, and animated Olympic natural gas flame torch spire (`0xffaa22`).
+  - *The Bow Skyscraper (236m)* at `x: 25, z: -85` (500 Centre St S): Crescent-curved south-facing aerodynamic glass facade with external triangular structural steel diagrid exoskeleton bracing.
+  - *Telus Sky (222m)* at `x: -20, z: -80` (685 Centre St S): Slender base twisting into stepped residential terraces with dynamic Northern Lights LED architectural art ribbons.
+  - *Brookfield Place East (247m)* at `x: -65, z: -95` (225 6th Ave SW): Tallest tower in Calgary with curved glass corners and architectural mechanical crown.
+- **Calgary Central Library (Snøhetta / DIALOG)**:
+  - *Location*: 800 3 St SE in East Village at `x: 85, z: -50`.
+  - *Architecture*: Organic curved geometric envelope with hexagonal/polygonal glass and iridescent aluminum panel cladding, soaring Western Red Cedar-lined pedestrian archway portal.
+  - *Transit Integration*: Active Calgary Transit C-Train light rail transit track passing directly through the building's portal arch, complete with steel rails, catenary masts, and a red-and-white Siemens S200 C-Train LRT car.
+- **Verified Active Construction Project (Confirmed Live Research for 2025–2026)**:
+  - *Project Name*: **Scotia Place** (Calgary Event Centre / Future Home of the Calgary Flames)
+  - *Location*: 14th Ave SE & 5th St SE in the Culture + Entertainment District / Victoria Park at `x: 85, z: 75`.
+  - *Primary Source URLs*: `https://www.scotiaplace.com/` and City of Calgary Major Projects `https://www.calgary.ca/major-projects/event-centre.html`.
+  - *Date Checked*: October 2026.
+  - *Live Construction Status*: Active construction in full progress. Deep excavation and foundations complete; structural steel framework topping out in 2026; ongoing installation of roof trusses, tiered concrete raked seating bowl decks, and exterior envelope. Opening fall 2027.
+  - *In-Game Realization*: Visible structural steel columns and roof trusses under erection, concrete raked seating bowl tiers, two high-visibility yellow construction tower cranes (56m and 48m) with flashing red aviation hazard beacons, perimeter safety hoarding fence with hazard striping and project billboards ("SCOTIA PLACE — FUTURE HOME OF CALGARY FLAMES / CULTURE + ENTERTAINMENT DISTRICT — OPENING 2027"), construction site office trailers, and orange barricade bollards.
+  - *Collision Safety*: Registered in `registerCityCollider` (`hw: 36, hd: 40, world: 'earth'`) ensuring players and vehicles navigate safely around the active perimeter.
+- **Surrounding Urban Fabric & Transit**:
+  - Calgary street signs at key intersections: `CENTRE ST S / 9 AVE SW`, `STEPHEN AVE WALKWAY`, `EAST VILLAGE / C-TRAIN WAY`, `CULTURE & ENTERTAINMENT DISTRICT`.
+  - C-Train corridor, concrete sidewalks, curb cuts, bus shelters, planters, benches, and spatial collision boundaries.

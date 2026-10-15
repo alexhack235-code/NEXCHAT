@@ -9,13 +9,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <script src="js/three.min.js"></script>
+  <script src="../js/three.min.js"></script>
   <script>
     if (typeof THREE === 'undefined') {
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
     }
   </script>
-  <script src="js/GLTFLoader.js"></script>
+  <script src="../js/GLTFLoader.js"></script>
   <script>
     if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
       document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
@@ -219,7 +219,7 @@
 
     function returnToMetropolis() {
       localStorage.setItem('BS_TOKENS', tokens.toString());
-      window.location.href = `game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      window.location.href = `../game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
     }
 
     function toggleMapModal() { document.getElementById('modal-map').classList.toggle('visible'); }
@@ -323,7 +323,7 @@
 
     // Trans-Canada Highway 2 Corridor
     const hwyMat = new THREE.MeshStandardMaterial({ color: 0x261e24, roughness: 0.8 });
-    texLoader.load('assets/textures/pbr/Road007_1K-JPG_Color.jpg', tex => {
+    texLoader.load('../assets/textures/pbr/Road007_1K-JPG_Color.jpg', tex => {
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 32);
       hwyMat.map = tex; hwyMat.needsUpdate = true;
     }, undefined, err => { console.warn('[AssetLoader] Failed loading Road007 texture:', err); });
@@ -397,7 +397,7 @@
         { file: 'grass-trees-tall.glb', x: 45, y: 0.2, z: 80, scale: 5.0, ry: -0.6 }
       ];
       mods.forEach(cfg => {
-        gLoader.load(`assets/models/kenney/${cfg.file}`, gltf => {
+        gLoader.load(`../assets/models/kenney/${cfg.file}`, gltf => {
           const m = gltf.scene;
           m.position.set(cfg.x, cfg.y, cfg.z);
           m.scale.set(cfg.scale, cfg.scale, cfg.scale);
@@ -421,7 +421,7 @@
 
     if (typeof THREE.GLTFLoader !== 'undefined') {
       const charLoader = new THREE.GLTFLoader();
-      charLoader.load('assets/models/operative_soldier.glb', gltf => {
+      charLoader.load('../assets/models/operative_soldier.glb', gltf => {
         playerRiggedMesh = gltf.scene;
         playerRiggedMesh.position.set(0, 0, 0);
         playerRiggedMesh.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
@@ -445,7 +445,7 @@
 
     if (typeof THREE.GLTFLoader !== 'undefined') {
       const vLoader = new THREE.GLTFLoader();
-      vLoader.load('assets/models/cyber_car.glb', gltf => {
+      vLoader.load('../assets/models/cyber_car.glb', gltf => {
         cyberCarMesh = gltf.scene;
         cyberCarMesh.rotation.y = Math.PI;
         cyberCarMesh.position.set(0, 0.22, 0);
