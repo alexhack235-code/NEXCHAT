@@ -19,8 +19,13 @@
       document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
     }
   </script>
-  <!-- Free 3D Assets GLTFLoader (CDN with error catch) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+  <!-- Free 3D Assets GLTFLoader (Local primary, CDN fallback) -->
+  <script src="js/GLTFLoader.js"></script>
+  <script>
+    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
+    }
+  </script>
 
   <style>
     * {
@@ -4335,8 +4340,11 @@
         </div>
       </div>
 
-      <!-- Mobile Touch Nitro & Exit Buttons -->
+      <!-- Mobile Touch Nitro, Model Switcher & Exit Buttons -->
       <div style="display: flex; gap: 8px;">
+        <button type="button" onclick="toggleCarModel()" style="background: rgba(0, 242, 255, 0.15); border: 1.5px solid #00f2ff; color: #00f2ff; border-radius: 10px; padding: 10px 12px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer;" title="Toggle 3D Vehicle Model (Cyber GT Supercar vs Combat Rover)">
+          <i class="fa-solid fa-shapes"></i> [X] MODEL
+        </button>
         <button type="button" id="car-mobile-nitro-btn" style="background: linear-gradient(135deg, #00f2ff, #0077ff); border: 1.5px solid #00f2ff; color: #fff; border-radius: 10px; padding: 10px 14px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; cursor: pointer; box-shadow: 0 0 18px rgba(0, 242, 255, 0.5); user-select: none; display: flex; align-items: center; gap: 6px;">
           <i class="fa-solid fa-bolt"></i> NITRO
         </button>
@@ -4555,6 +4563,24 @@
 
     <!-- Grid of Customization Categories -->
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 16px;">
+
+      <!-- 0. 3D VEHICLE CHASSIS SELECTION (DETAILED GLTF SUPERCAR VS ARMORED ROVER) -->
+      <div style="background: rgba(10, 20, 34, 0.85); border: 1.5px solid rgba(0, 242, 255, 0.3); border-radius: 12px; padding: 14px; grid-column: 1 / -1;">
+        <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; color: #ffd700; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+          <span style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-shapes"></i> 3D VEHICLE CHASSIS ARCHITECTURE</span>
+          <span id="customs-model-badge" style="font-size: 10px; padding: 3px 10px; border-radius: 6px; background: rgba(0,242,255,0.2); border: 1px solid #00f2ff; color: #00f2ff; font-weight: 800;">ACTIVE: CYBER GT SUPERCAR</span>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px;">
+          <button type="button" onclick="switchVehicleModel('cyber_car')" id="btn-select-cyber-car" style="background: rgba(0, 242, 255, 0.18); border: 2px solid #00f2ff; border-radius: 10px; padding: 12px; text-align: left; cursor: pointer; color: #fff; transition: all 0.2s;">
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; color: #00f2ff; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-bolt"></i> CYBER GT SUPERCAR (GLTF)</div>
+            <div style="font-size: 11px; color: #8fa3b8; margin-top: 4px; line-height: 1.4;">High-poly aerodynamic sports coupe with animated alloy wheels, brake rotors, and low-drag styling.</div>
+          </button>
+          <button type="button" onclick="switchVehicleModel('rover')" id="btn-select-rover" style="background: rgba(15, 23, 42, 0.6); border: 1px solid #475569; border-radius: 10px; padding: 12px; text-align: left; cursor: pointer; color: #fff; transition: all 0.2s;">
+            <div style="font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 900; color: #ffd700; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-shield-halved"></i> APCV-9 GHOST-FANG (ROVER)</div>
+            <div style="font-size: 11px; color: #8fa3b8; margin-top: 4px; line-height: 1.4;">Reinforced titanium combat rover with angular glacis wedge, dual autocannons, and heavy suspension.</div>
+          </button>
+        </div>
+      </div>
 
       <!-- 1. BODY PAINT & FINISH -->
       <div style="background: rgba(10, 20, 34, 0.85); border: 1.5px solid rgba(0, 242, 255, 0.3); border-radius: 12px; padding: 14px;">
@@ -7740,6 +7766,22 @@
     let roverSteerAngle = 0;
     let roverWheelSpin = 0;
 
+    // High-Fidelity 3D Free Assets, Rigged Skeletal Animations & PBR Systems
+    let playerRiggedMesh = null;
+    let playerProceduralBody = null;
+    let characterMixer = null;
+    let characterActions = {};
+    let activeCharacterAction = null;
+    let isRiggedCharacterLoaded = false;
+    let cyberCarMesh = null;
+    let cyberCarWheels = [];
+    let cyberCarSteerNodes = [];
+    let activeVehicleModel = 'cyber_car'; // 'cyber_car' | 'rover'
+    let robotCompanionMesh = null;
+    let robotCompanionMixer = null;
+    let kenneyBuildingsGroup = null;
+    let cityRoadMat = null;
+
     const keys = {};
     const player = {
       pos: null,
@@ -8276,6 +8318,327 @@
       }
     }
 
+    // ============================================================
+    // FREE 3D ASSETS, RIGGED ANIMATIONS & PBR ENHANCEMENTS LOADER
+    // Sources: Poly Haven, Kenney, Quaternius, Mixamo, ambientCG
+    // ============================================================
+    function load3DAssetsAndEnhancements() {
+      // 1. Rigged Humanoid Operative Character with Walking & Idle Animations
+      loadRiggedPlayerCharacter();
+
+      // 2. High-Poly Detailed Cyber GT Supercar
+      loadCyberCarVehicle();
+
+      // 3. Kenney Modular City Architecture & Central Fountain
+      loadKenneyCityArchitecture();
+
+      // 4. Autonomous Animated Robot Companion
+      loadRobotCompanionDrone();
+
+      // 5. Road & Ground PBR Material Enhancements & Sky Lighting
+      upgradePBRRoadsAndLighting();
+    }
+
+    function loadRiggedPlayerCharacter() {
+      if (typeof THREE.GLTFLoader === 'undefined') {
+        console.warn('THREE.GLTFLoader not available; using procedural operative fallback.');
+        return;
+      }
+      try {
+        const loader = new THREE.GLTFLoader();
+        loader.load('assets/models/operative_soldier.glb', gltf => {
+          try {
+            playerRiggedMesh = gltf.scene;
+            playerRiggedMesh.traverse(child => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if (child.material) {
+                  child.material.roughness = Math.max(0.28, child.material.roughness || 0.45);
+                  child.material.metalness = Math.min(0.85, child.material.metalness || 0.2);
+                }
+              }
+            });
+
+            // Mixamo skeletal armature in standard Y-up meters
+            playerRiggedMesh.position.set(0, 0, 0);
+            playerRiggedMesh.rotation.y = 0;
+
+            // Rigged skeletal AnimationMixer for crossfading Idle, Walk, Run
+            characterMixer = new THREE.AnimationMixer(playerRiggedMesh);
+            characterActions = {};
+            if (gltf.animations && gltf.animations.length > 0) {
+              gltf.animations.forEach(clip => {
+                characterActions[clip.name] = characterMixer.clipAction(clip);
+              });
+              if (characterActions['Idle']) {
+                characterActions['Idle'].play();
+                activeCharacterAction = characterActions['Idle'];
+              }
+            }
+
+            if (playerModelGroup) {
+              playerModelGroup.add(playerRiggedMesh);
+              if (playerProceduralBody) {
+                playerProceduralBody.visible = false;
+              }
+            }
+            isRiggedCharacterLoaded = true;
+            console.log('✅ [3D ASSET] Rigged Humanoid Operative with skeletal animations active.');
+          } catch (e) {
+            console.warn('Rigged character parsing warning, procedural fallback retained:', e);
+          }
+        }, undefined, err => {
+          console.warn('Operative model load fallback to procedural operative:', err);
+        });
+      } catch (err) {
+        console.warn('GLTFLoader initialization error:', err);
+      }
+    }
+
+    function loadCyberCarVehicle() {
+      if (typeof THREE.GLTFLoader === 'undefined') return;
+      try {
+        const loader = new THREE.GLTFLoader();
+        loader.load('assets/models/cyber_car.glb', gltf => {
+          try {
+            cyberCarMesh = gltf.scene;
+            // Car front faces -Z in source model; rotate 180° around Y to align with +Z forward vector
+            cyberCarMesh.rotation.y = Math.PI;
+            cyberCarMesh.position.set(0, 0.22, 0);
+
+            cyberCarMesh.traverse(child => {
+              if (child.isMesh) {
+                child.castShadow = true;
+                child.receiveShadow = true;
+                if (child.material) {
+                  child.material.envMapIntensity = 1.35;
+                }
+              }
+            });
+
+            cyberCarWheels = [];
+            cyberCarSteerNodes = [];
+            cyberCarMesh.traverse(n => {
+              const name = (n.name || '').toLowerCase();
+              if (name === 'wheel_fl' || name === 'wheel_fr') {
+                cyberCarSteerNodes.push({ node: n, initialRotY: n.rotation.y });
+                cyberCarWheels.push({ node: n, initialRotX: n.rotation.x });
+              } else if (name === 'wheel_rl' || name === 'wheel_rr') {
+                cyberCarWheels.push({ node: n, initialRotX: n.rotation.x });
+              }
+            });
+
+            if (roverGroup) {
+              roverGroup.add(cyberCarMesh);
+              applyVehicleModelDisplay();
+            }
+            console.log('✅ [3D ASSET] Cyber GT Supercar detailed GLTF model loaded.');
+          } catch (e) {
+            console.warn('Cyber car parsing warning, rover fallback retained:', e);
+          }
+        }, undefined, err => {
+          console.warn('Cyber car load fallback to procedural rover:', err);
+        });
+      } catch (err) {
+        console.warn('GLTFLoader error on vehicle:', err);
+      }
+    }
+
+    function switchVehicleModel(modelType) {
+      activeVehicleModel = modelType;
+      applyVehicleModelDisplay();
+      if (cyberAudio && cyberAudio.playClick) cyberAudio.playClick();
+      const name = (modelType === 'cyber_car') ? 'CYBER GT SUPERCAR (GLTF)' : 'APCV-9 GHOST-FANG (ROVER)';
+      showVehicleModelToast(`VEHICLE ACTIVE: ${name}`);
+    }
+
+    function toggleCarModel() {
+      const next = (activeVehicleModel === 'cyber_car') ? 'rover' : 'cyber_car';
+      switchVehicleModel(next);
+    }
+
+    function showVehicleModelToast(msg) {
+      const el = document.getElementById('orbital-break-toast');
+      if (el) {
+        el.innerHTML = `<i class="fa-solid fa-car" style="color: #00f2ff; margin-right: 8px;"></i> ${msg}`;
+        el.style.display = 'block';
+        clearTimeout(window._vehToastTimer);
+        window._vehToastTimer = setTimeout(() => {
+          el.style.display = 'none';
+        }, 2600);
+      }
+    }
+
+    function applyVehicleModelDisplay() {
+      const isCyberCar = (activeVehicleModel === 'cyber_car' && cyberCarMesh);
+      if (cyberCarMesh) {
+        cyberCarMesh.visible = isCyberCar;
+      }
+      if (roverChassisMesh) {
+        roverChassisMesh.visible = !isCyberCar;
+      }
+      if (roverWheels) {
+        roverWheels.forEach(w => {
+          if (w.parent) w.parent.visible = !isCyberCar;
+          else w.visible = !isCyberCar;
+        });
+      }
+
+      // Update Car Customs badge & buttons
+      const badge = document.getElementById('customs-model-badge');
+      if (badge) {
+        badge.textContent = isCyberCar ? 'ACTIVE: CYBER GT SUPERCAR' : 'ACTIVE: APCV-9 GHOST-FANG';
+        badge.style.color = isCyberCar ? '#00f2ff' : '#ffd700';
+        badge.style.borderColor = isCyberCar ? '#00f2ff' : '#ffd700';
+      }
+      const btnCyber = document.getElementById('btn-select-cyber-car');
+      const btnRover = document.getElementById('btn-select-rover');
+      if (btnCyber && btnRover) {
+        btnCyber.style.border = isCyberCar ? '2px solid #00f2ff' : '1px solid #475569';
+        btnCyber.style.background = isCyberCar ? 'rgba(0, 242, 255, 0.18)' : 'rgba(15, 23, 42, 0.6)';
+        btnRover.style.border = !isCyberCar ? '2px solid #ffd700' : '1px solid #475569';
+        btnRover.style.background = !isCyberCar ? 'rgba(255, 215, 0, 0.18)' : 'rgba(15, 23, 42, 0.6)';
+      }
+    }
+
+    function loadKenneyCityArchitecture() {
+      if (typeof THREE.GLTFLoader === 'undefined') return;
+      try {
+        const loader = new THREE.GLTFLoader();
+        kenneyBuildingsGroup = new THREE.Group();
+        scene.add(kenneyBuildingsGroup);
+
+        const buildingConfigs = [
+          { file: 'building-garage.glb', x: -85, y: 0, z: 54, scale: 6.5, rotY: 0, hw: 6.5, hd: 6.5 },
+          { file: 'pavement-fountain.glb', x: 0, y: 0, z: 24, scale: 4.5, rotY: 0, hw: 4.5, hd: 4.5 },
+          { file: 'building-small-a.glb', x: 26, y: 0, z: 34, scale: 5.5, rotY: Math.PI / 2, hw: 5.5, hd: 5.5 },
+          { file: 'building-small-b.glb', x: -26, y: 0, z: 34, scale: 5.5, rotY: -Math.PI / 2, hw: 5.5, hd: 5.5 },
+          { file: 'building-small-c.glb', x: 34, y: 0, z: -34, scale: 6.0, rotY: Math.PI, hw: 6.0, hd: 6.0 },
+          { file: 'building-small-d.glb', x: -34, y: 0, z: -34, scale: 5.8, rotY: 0, hw: 5.8, hd: 5.8 },
+          { file: 'grass-trees-tall.glb', x: 18, y: 0, z: 24, scale: 4.5, rotY: 0.5, hw: 3.5, hd: 3.5 },
+          { file: 'grass-trees-tall.glb', x: -18, y: 0, z: 24, scale: 4.5, rotY: -0.5, hw: 3.5, hd: 3.5 }
+        ];
+
+        buildingConfigs.forEach(cfg => {
+          loader.load(`assets/models/kenney/${cfg.file}`, gltf => {
+            const m = gltf.scene;
+            m.position.set(cfg.x, cfg.y, cfg.z);
+            m.scale.set(cfg.scale, cfg.scale, cfg.scale);
+            m.rotation.y = cfg.rotY;
+            m.traverse(c => {
+              if (c.isMesh) {
+                c.castShadow = true;
+                c.receiveShadow = true;
+              }
+            });
+            kenneyBuildingsGroup.add(m);
+            registerCityCollider({
+              x: cfg.x,
+              z: cfg.z,
+              hw: cfg.hw,
+              hd: cfg.hd,
+              world: 'earth'
+            });
+          }, undefined, () => {});
+        });
+        console.log('✅ [3D ASSET] Kenney CC0 modular street architecture and fountain active.');
+      } catch (err) {
+        console.warn('Kenney architecture loader warning:', err);
+      }
+    }
+
+    function loadRobotCompanionDrone() {
+      if (typeof THREE.GLTFLoader === 'undefined') return;
+      try {
+        const loader = new THREE.GLTFLoader();
+        loader.load('assets/models/robot_companion.glb', gltf => {
+          try {
+            robotCompanionMesh = gltf.scene;
+            robotCompanionMesh.position.set(3.5, 0.45, 14);
+            robotCompanionMesh.scale.set(1.15, 1.15, 1.15);
+            robotCompanionMesh.traverse(c => {
+              if (c.isMesh) {
+                c.castShadow = true;
+                c.receiveShadow = true;
+              }
+            });
+            scene.add(robotCompanionMesh);
+
+            if (gltf.animations && gltf.animations.length > 0) {
+              robotCompanionMixer = new THREE.AnimationMixer(robotCompanionMesh);
+              const waveClip = THREE.AnimationClip.findByName(gltf.animations, 'Wave') ||
+                               THREE.AnimationClip.findByName(gltf.animations, 'Idle') ||
+                               gltf.animations[0];
+              if (waveClip) {
+                const act = robotCompanionMixer.clipAction(waveClip);
+                act.play();
+              }
+            }
+            console.log('✅ [3D ASSET] Autonomous Robot Companion loaded.');
+          } catch (e) {
+            console.warn('Robot companion setup warning:', e);
+          }
+        }, undefined, () => {});
+      } catch (err) {
+        console.warn('Robot companion loader warning:', err);
+      }
+    }
+
+    function upgradePBRRoadsAndLighting() {
+      try {
+        const texLoader = new THREE.TextureLoader();
+        // Load ambientCG CC0 Road007 1K PBR Maps
+        texLoader.load('assets/textures/pbr/Road007_1K-JPG_Color.jpg', colMap => {
+          colMap.wrapS = colMap.wrapT = THREE.RepeatWrapping;
+          colMap.repeat.set(4, 32);
+          if (cityRoadMat) {
+            cityRoadMat.map = colMap;
+            cityRoadMat.needsUpdate = true;
+          }
+        }, undefined, () => {});
+
+        texLoader.load('assets/textures/pbr/Road007_1K-JPG_NormalGL.jpg', normMap => {
+          normMap.wrapS = normMap.wrapT = THREE.RepeatWrapping;
+          normMap.repeat.set(4, 32);
+          if (cityRoadMat) {
+            cityRoadMat.normalMap = normMap;
+            cityRoadMat.normalScale.set(1.4, 1.4);
+            cityRoadMat.needsUpdate = true;
+          }
+        }, undefined, () => {});
+
+        texLoader.load('assets/textures/pbr/Road007_1K-JPG_Roughness.jpg', roughMap => {
+          roughMap.wrapS = roughMap.wrapT = THREE.RepeatWrapping;
+          roughMap.repeat.set(4, 32);
+          if (cityRoadMat) {
+            cityRoadMat.roughnessMap = roughMap;
+            cityRoadMat.roughness = 0.82;
+            cityRoadMat.needsUpdate = true;
+          }
+        }, undefined, () => {});
+
+        // Atmospheric Sky & Directional Lighting Enhancement
+        if (hemiLight) {
+          hemiLight.color.setHex(0xb5e5ff);
+          hemiLight.groundColor.setHex(0x384435);
+          hemiLight.intensity = 1.45;
+        }
+        if (sunLight) {
+          sunLight.color.setHex(0xfffaea);
+          sunLight.intensity = 2.4;
+          sunLight.shadow.bias = -0.0005;
+        }
+        if (renderer) {
+          renderer.toneMapping = THREE.ACESFilmicToneMapping;
+          renderer.toneMappingExposure = 1.20;
+        }
+        console.log('✅ [PBR & LIGHTING] Road PBR maps and atmospheric lighting active.');
+      } catch (e) {
+        console.warn('PBR upgrade fallback engaged:', e);
+      }
+    }
+
     function spawnImpactSparks(pos) {
       if (!scene) return;
       for (let i = 0; i < 7; i++) {
@@ -8299,6 +8662,9 @@
     function buildPlayerCharacterModel() {
       playerModelGroup = new THREE.Group();
       scene.add(playerModelGroup);
+
+      playerProceduralBody = new THREE.Group();
+      playerModelGroup.add(playerProceduralBody);
 
       // Realistic Human Skin, Hair & Fabric PBR Materials
       const skinMat = new THREE.MeshStandardMaterial({
@@ -8437,12 +8803,12 @@
       micBoom.position.set(0.13, -0.04, 0.06);
       playerHeadMesh.add(micBoom);
 
-      playerModelGroup.add(playerHeadMesh);
+      playerProceduralBody.add(playerHeadMesh);
 
       // 2. Anatomical Neck
       const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.062, 0.074, 0.14, 16), skinMat);
       neck.position.set(0, 1.48, 0);
-      playerModelGroup.add(neck);
+      playerProceduralBody.add(neck);
 
       // 3. Torso & Modern Tailored Tactical Jacket
       playerTorso = new THREE.Group();
@@ -8490,18 +8856,18 @@
         playerTorso.add(strap);
       });
 
-      playerModelGroup.add(playerTorso);
+      playerProceduralBody.add(playerTorso);
 
       // 4. Compact Ionic Jetpack Module on Back (Sleek Sci-Fi Backpack)
       const jetpack = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.44, 0.14), titaniumMat);
       jetpack.position.set(0, 1.18, -0.21);
-      playerModelGroup.add(jetpack);
+      playerProceduralBody.add(jetpack);
 
       const jetNozzleGeo = new THREE.CylinderGeometry(0.05, 0.07, 0.16, 14);
       [-0.12, 0.12].forEach(jx => {
         const noz = new THREE.Mesh(jetNozzleGeo, jacketMat);
         noz.position.set(jx, 0.94, -0.21);
-        playerModelGroup.add(noz);
+        playerProceduralBody.add(noz);
       });
 
       const jetFlameGeo = new THREE.ConeGeometry(0.07, 0.45, 14);
@@ -8571,7 +8937,7 @@
       thumbR.position.set(-0.03, -0.52, 0.02);
       playerArmR.add(thumbR);
 
-      playerModelGroup.add(playerArmR);
+      playerProceduralBody.add(playerArmR);
 
       // Left Arm (Forearm Support for Weapon)
       playerArmL = new THREE.Group();
@@ -8596,7 +8962,7 @@
       handL.position.set(0, -0.53, 0);
       playerArmL.add(handL);
 
-      playerModelGroup.add(playerArmL);
+      playerProceduralBody.add(playerArmL);
 
       // 6. Tactical Assault Weapon (Rifle in Hands)
       const rifleGroup = new THREE.Group();
@@ -8618,7 +8984,7 @@
       rOpticGlow.position.set(0, 0.09, 0.121);
       rifleGroup.add(rOpticGlow);
 
-      playerModelGroup.add(rifleGroup);
+      playerProceduralBody.add(rifleGroup);
 
       // 7. Anatomical Human Legs & Technical High-Top Footwear
       // Left Leg Assembly
@@ -8648,7 +9014,7 @@
       shoeSoleL.position.set(0, -0.80, 0.04);
       playerLegL.add(shoeSoleL);
 
-      playerModelGroup.add(playerLegL);
+      playerProceduralBody.add(playerLegL);
 
       // Right Leg Assembly
       playerLegR = new THREE.Group();
@@ -8677,8 +9043,9 @@
       shoeSoleR.position.set(0, -0.80, 0.04);
       playerLegR.add(shoeSoleR);
 
-      playerModelGroup.add(playerLegR);
+      playerProceduralBody.add(playerLegR);
 
+      playerProceduralBody.visible = !isRiggedCharacterLoaded;
       playerModelGroup.visible = (gameState.cameraMode === '3P');
     }
 
@@ -9971,6 +10338,7 @@
           roughness: 0.88,
           metalness: 0.15
         });
+        cityRoadMat = roadMat;
         const curbMat = new THREE.MeshStandardMaterial({
           color: 0x1f2733,
           roughness: 0.75,
@@ -12258,6 +12626,9 @@
         buildPerimeterRailway();
         buildNexusAerodrome();
         buildTransCanadaGateway();
+
+        // Load Free 3D Assets (Models, Rigged Skeletal Animations & PBR Maps)
+        load3DAssetsAndEnhancements();
 
         // Initialize Autonomous Metropolis Cyber Traffic System
         initCityTraffic();
@@ -16109,6 +16480,7 @@ function buildNeoKyotoCity() {
       if (e.code === 'KeyB') toggleStarshipFlight();
       if (e.code === 'KeyC') toggleRocketCamera();
       if (e.code === 'KeyV') toggleCameraPerspective();
+      if (e.code === 'KeyX' && gameState.inVehicle) toggleCarModel();
       if (e.code === 'KeyQ') triggerTacticalPing();
       if (e.code === 'KeyE') toggleVehicleMode();
       if (e.code === 'KeyF') handleInteractions();
@@ -17522,6 +17894,10 @@ function buildNeoKyotoCity() {
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
 
+      // High-Fidelity Rigged 3D Animation Mixers Update
+      if (characterMixer) characterMixer.update(delta);
+      if (robotCompanionMixer) robotCompanionMixer.update(delta);
+
       // -------------------------------------------------------------
       // REAL-TIME FPS & FRAME-PACING GUARDIAN (LOW-END PERFORMANCE)
       // -------------------------------------------------------------
@@ -18699,78 +19075,89 @@ function buildNeoKyotoCity() {
             const isSprinting = isMoving && (keys['ShiftLeft'] || keys['ShiftRight']);
             const strideRate = isSprinting ? 0.016 : 0.011;
 
+            // Rigged Humanoid Operative Animation Blending (Idle / Walk / Run)
+            if (isRiggedCharacterLoaded && characterMixer && characterActions['Idle']) {
+              let targetAction = characterActions['Idle'];
+              if (isMoving) {
+                targetAction = isSprinting ? (characterActions['Run'] || characterActions['Walk']) : characterActions['Walk'];
+              }
+              if (targetAction && activeCharacterAction !== targetAction) {
+                const prev = activeCharacterAction;
+                activeCharacterAction = targetAction;
+                if (prev) prev.fadeOut(0.2);
+                targetAction.reset().fadeIn(0.2).play();
+              }
+            }
+
             if (player.isGrounded) {
               if (isMoving) {
-                // WALKING / SPRINTING ACTIVE STRIDE CYCLE
                 const stride = now * strideRate * Math.min(speed, 6.0);
-                const legAmp = isSprinting ? 0.75 : 0.52;
-                const armAmp = isSprinting ? 0.85 : 0.58;
-
                 const sinStride = Math.sin(stride);
                 const cosStride = Math.cos(stride);
-
-                // Alternating realistic leg swing
-                if (playerLegL) playerLegL.rotation.x = sinStride * legAmp;
-                if (playerLegR) playerLegR.rotation.x = -sinStride * legAmp;
-
-                // Natural arm swing with weapon compensation
-                if (playerArmL) playerArmL.rotation.x = -sinStride * armAmp;
-                if (playerArmR) playerArmR.rotation.x = -Math.PI / 3.2 + sinStride * (armAmp * 0.45);
-
-                // Organic vertical hip bobbing (hips drop on stride, rise on pass)
-                const hipBounce = Math.abs(Math.sin(stride)) * (isSprinting ? 0.065 : 0.042);
-                playerModelGroup.position.set(player.pos.x, player.pos.y + hipBounce, player.pos.z);
-
-                // Torso counter-rotation (biomechanical core twist)
-                if (playerTorso) {
-                  playerTorso.rotation.y = -sinStride * 0.12;
-                  playerTorso.rotation.z = -cosStride * 0.03;
-                  playerTorso.position.y = 1.14;
-                  playerTorso.scale.set(1, 1, 1);
-                }
-
-                // Head stays focused forward with micro-dampening
-                if (playerHeadMesh) {
-                  playerHeadMesh.rotation.y = sinStride * 0.04;
-                  playerHeadMesh.rotation.z = 0;
-                }
 
                 // Spawn Footstep Dust Puffs on foot strike
                 if (Math.abs(cosStride) > 0.94) {
                   triggerFootstepDust(player.pos, sinStride > 0 ? -0.16 : 0.16);
                 }
 
-              } else {
-                // ALIVE IDLE CYCLE: Breathing, weight shifting & curiosity glances
-                const idleBreathe = Math.sin(now * 0.0035);
-                const idleSway = Math.sin(now * 0.0018);
-                const idleGlance = Math.sin(now * 0.0009);
+                if (isRiggedCharacterLoaded) {
+                  playerModelGroup.position.copy(player.pos);
+                } else {
+                  // Procedural Stride Cycle Fallback
+                  const legAmp = isSprinting ? 0.75 : 0.52;
+                  const armAmp = isSprinting ? 0.85 : 0.58;
 
-                playerModelGroup.position.copy(player.pos);
+                  if (playerLegL) playerLegL.rotation.x = sinStride * legAmp;
+                  if (playerLegR) playerLegR.rotation.x = -sinStride * legAmp;
 
-                // Legs gently return to relaxed standing stance
-                if (playerLegL) playerLegL.rotation.x = THREE.MathUtils.lerp(playerLegL.rotation.x, 0.02, 0.15);
-                if (playerLegR) playerLegR.rotation.x = THREE.MathUtils.lerp(playerLegR.rotation.x, -0.02, 0.15);
+                  if (playerArmL) playerArmL.rotation.x = -sinStride * armAmp;
+                  if (playerArmR) playerArmR.rotation.x = -Math.PI / 3.2 + sinStride * (armAmp * 0.45);
 
-                // Chest expands and rises with breathing
-                if (playerTorso) {
-                  playerTorso.rotation.y = THREE.MathUtils.lerp(playerTorso.rotation.y, idleSway * 0.02, 0.1);
-                  playerTorso.rotation.z = THREE.MathUtils.lerp(playerTorso.rotation.z, 0, 0.1);
-                  playerTorso.position.y = 1.14 + idleBreathe * 0.012;
-                  const breatheScale = 1.0 + idleBreathe * 0.015;
-                  playerTorso.scale.set(breatheScale, 1.0, breatheScale);
+                  const hipBounce = Math.abs(Math.sin(stride)) * (isSprinting ? 0.065 : 0.042);
+                  playerModelGroup.position.set(player.pos.x, player.pos.y + hipBounce, player.pos.z);
+
+                  if (playerTorso) {
+                    playerTorso.rotation.y = -sinStride * 0.12;
+                    playerTorso.rotation.z = -cosStride * 0.03;
+                    playerTorso.position.y = 1.14;
+                    playerTorso.scale.set(1, 1, 1);
+                  }
+
+                  if (playerHeadMesh) {
+                    playerHeadMesh.rotation.y = sinStride * 0.04;
+                    playerHeadMesh.rotation.z = 0;
+                  }
                 }
 
-                // Arms sway with breathing in idle ready stance
-                if (playerArmL) playerArmL.rotation.x = THREE.MathUtils.lerp(playerArmL.rotation.x, -Math.PI / 2.7 + idleBreathe * 0.025, 0.15);
-                if (playerArmR) playerArmR.rotation.x = THREE.MathUtils.lerp(playerArmR.rotation.x, -Math.PI / 3.2 + idleBreathe * 0.02, 0.15);
+              } else {
+                playerModelGroup.position.copy(player.pos);
 
-                // Natural human micro-glances: head occasionally tilts and looks around
-                if (playerHeadMesh) {
-                  const lookTargetY = (Math.abs(idleGlance) > 0.65) ? (idleGlance * 0.22) : 0;
-                  const tiltTargetZ = (Math.abs(idleGlance) > 0.65) ? (idleGlance * 0.05) : 0;
-                  playerHeadMesh.rotation.y = THREE.MathUtils.lerp(playerHeadMesh.rotation.y, lookTargetY, 0.06);
-                  playerHeadMesh.rotation.z = THREE.MathUtils.lerp(playerHeadMesh.rotation.z, tiltTargetZ, 0.06);
+                if (!isRiggedCharacterLoaded) {
+                  // Procedural Idle Breathing Fallback
+                  const idleBreathe = Math.sin(now * 0.0035);
+                  const idleSway = Math.sin(now * 0.0018);
+                  const idleGlance = Math.sin(now * 0.0009);
+
+                  if (playerLegL) playerLegL.rotation.x = THREE.MathUtils.lerp(playerLegL.rotation.x, 0.02, 0.15);
+                  if (playerLegR) playerLegR.rotation.x = THREE.MathUtils.lerp(playerLegR.rotation.x, -0.02, 0.15);
+
+                  if (playerTorso) {
+                    playerTorso.rotation.y = THREE.MathUtils.lerp(playerTorso.rotation.y, idleSway * 0.02, 0.1);
+                    playerTorso.rotation.z = THREE.MathUtils.lerp(playerTorso.rotation.z, 0, 0.1);
+                    playerTorso.position.y = 1.14 + idleBreathe * 0.012;
+                    const breatheScale = 1.0 + idleBreathe * 0.015;
+                    playerTorso.scale.set(breatheScale, 1.0, breatheScale);
+                  }
+
+                  if (playerArmL) playerArmL.rotation.x = THREE.MathUtils.lerp(playerArmL.rotation.x, -Math.PI / 2.7 + idleBreathe * 0.025, 0.15);
+                  if (playerArmR) playerArmR.rotation.x = THREE.MathUtils.lerp(playerArmR.rotation.x, -Math.PI / 3.2 + idleBreathe * 0.02, 0.15);
+
+                  if (playerHeadMesh) {
+                    const lookTargetY = (Math.abs(idleGlance) > 0.65) ? (idleGlance * 0.22) : 0;
+                    const tiltTargetZ = (Math.abs(idleGlance) > 0.65) ? (idleGlance * 0.05) : 0;
+                    playerHeadMesh.rotation.y = THREE.MathUtils.lerp(playerHeadMesh.rotation.y, lookTargetY, 0.06);
+                    playerHeadMesh.rotation.z = THREE.MathUtils.lerp(playerHeadMesh.rotation.z, tiltTargetZ, 0.06);
+                  }
                 }
               }
 
@@ -18985,6 +19372,20 @@ function buildNeoKyotoCity() {
         // Wheel spin rotation proportional to ground velocity
         roverWheelSpin += (roverCurrentSpeed / 0.58) * delta;
         roverWheels.forEach(w => { w.rotation.x = roverWheelSpin; });
+
+        // Detailed Cyber GT Supercar Steering, Wheel Spin & Suspension Pitch/Roll
+        if (cyberCarMesh && cyberCarMesh.visible) {
+          cyberCarSteerNodes.forEach(item => {
+            item.node.rotation.y = item.initialRotY + roverSteerAngle;
+          });
+          cyberCarWheels.forEach(item => {
+            item.node.rotation.x = item.initialRotX + roverWheelSpin;
+          });
+          const targetPitch = -throttle * 0.035;
+          const targetRoll = steer * (roverCurrentSpeed / 22.0) * 0.045;
+          cyberCarMesh.rotation.x = THREE.MathUtils.lerp(cyberCarMesh.rotation.x, targetPitch, delta * 6.0);
+          cyberCarMesh.rotation.z = THREE.MathUtils.lerp(cyberCarMesh.rotation.z, targetRoll, delta * 6.0);
+        }
 
         // Dynamic chassis suspension pitch & roll
         if (roverChassisMesh) {
