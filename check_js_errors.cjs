@@ -40,6 +40,7 @@ function checkHtmlFile(filePath) {
 
 const htmlFiles = [
   'game.html',
+  'game_module.html',
   ...fs.readdirSync('Canada').filter(f => f.endsWith('.html')).map(f => path.join('Canada', f)),
   ...fs.readdirSync('.').filter(f => f.startsWith('province-') && f.endsWith('.html'))
 ];

@@ -324,7 +324,14 @@ Code inspection finds that `game.html` contains the sun disc, gradient sky, PBR 
   - **Insulated Hot Maple Coffee Thermos (`[C]`)**: Sip hot Canadian maple coffee from an insulated thermos for +35% instant warmth on the trail (3 charges, refilled near heat).
   - **Heated Cabins & Cockpits**: Sheltering inside vehicles, aircraft cockpits, the Calgary Central Library atrium, or C-Train cars completely halts cold drain and recovers warmth.
 - **Canadian Wildlife**:
-  - Majestic Bull Moose with broad palmate antlers in BC, Alberta, Manitoba, Ontario, and New Brunswick.
-  - Arctic Polar Bear surveying the tundra in Nunavut.
+
+### Calgary Metropolis Modular Edition (`game_module.html`)
+To address monolithic file scaling in `game.html` (which exceeded 20,000 lines), **`game_module.html`** introduces a high-performance modular architecture (< 600 lines) dividing the metropolis and aviation engine into maintainable modules in `js/game_modules/`:
+- **`js/game_modules/audio.js`**: Procedural Web Audio API sound synthesizer (C-Train hum, jet afterburner roar, footsteps, loot chimes, UI chirps).
+- **`js/game_modules/tactical_radar.js`**: 120px circular canvas tactical HUD radar tracking landmarks, aircraft, campfires, and player heading.
+- **`js/game_modules/canadian_survival.js`**: Canadian survival & hypothermia simulation with Body Warmth & Health telemetry, gear cycling (`[T]`), hot thermos (`[C]`), frostbite vignette, and blackout search-and-rescue.
+- **`js/game_modules/canadian_codex.js`**: Canadian Heritage Codex & Passport (`[F]`) tracking all 14 provinces and territories (+500 NEX token reward each) and Trans-Canada Highway hyperspace portal (`[H]`).
+- **`js/game_modules/calgary_metropolis.js`**: 3D procedural Calgary architecture (191m Calgary Tower, 236m The Bow with diagrid steel, 222m Telus Sky with RGB LED facade, 247m Brookfield Place East, Snøhetta Central Library with cedar archway, Scotia Place 2026 arena site with rotating tower cranes, and animated Siemens S200 C-Train loop).
+- **`js/game_modules/yyc_aviation.js`**: Calgary International Airport (YYC) Runway 17L/35R, 91m ATC tower, rotating primary radar dish, and 3 flyable aircraft (Apex F-99 Stealth Interceptor, Cyber Aeroliner, and VTOL Sky-Lander) with avionics HUD and landing gear toggle (`[G]`).
 
 

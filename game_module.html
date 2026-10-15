@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>NEXCHAT // Calgary Metropolis & Regional Aviation [Module Edition]</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body, html {
+      width: 100%; height: 100%; overflow: hidden;
+      background-color: #050b14; color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    }
+    #canvas-container {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+    }
+    /* Top Header Bar */
+    #topHeader {
+      position: fixed; top: 16px; left: 24px; z-index: 800;
+      display: flex; align-items: center; gap: 14px;
+      background: rgba(10, 20, 32, 0.75); backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 8px;
+      padding: 8px 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    #topHeader h1 {
+      font-size: 14px; font-weight: 800; letter-spacing: 1.5px;
+      color: #00f0ff; text-transform: uppercase;
+    }
+    #topHeader .badge {
+      font-size: 11px; padding: 2px 8px; border-radius: 4px;
+      background: rgba(0, 255, 200, 0.15); border: 1px solid #00ffc8;
+      color: #00ffc8; font-weight: 700;
+    }
+
+    /* Top Right Quality & Audio Bar */
+    #topControls {
+      position: fixed; top: 16px; right: 24px; z-index: 800;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hud-btn {
+      background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 240, 255, 0.4);
+      color: #38bdf8; padding: 6px 12px; border-radius: 6px; font-size: 11px;
+      font-weight: 700; cursor: pointer; backdrop-filter: blur(6px);
+      transition: all 0.2s ease;
+    }
+    .hud-btn:hover {
+      background: rgba(0, 240, 255, 0.2); color: #fff; border-color: #00f0ff;
+    }
+
+    /* Keymap quick guide bar at bottom */
+    #bottomGuide {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      z-index: 800; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+      background: rgba(8, 14, 24, 0.82); backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 30px;
+      padding: 8px 22px; font-size: 11px; color: #cbd5e1; box-shadow: 0 6px 25px rgba(0,0,0,0.6);
+    }
+    #bottomGuide span strong { color: #00f0ff; }
+
+    /* Interaction Prompt overlay */
+    #actionPrompt {
+      display: none; position: fixed; top: 62%; left: 50%; transform: translate(-50%, -50%);
+      z-index: 850; background: rgba(0, 240, 255, 0.15); backdrop-filter: blur(8px);
+      border: 2px solid #00f0ff; border-radius: 8px; padding: 10px 24px;
+      color: #ffffff; font-size: 14px; font-weight: bold; letter-spacing: 0.8px;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.45); pointer-events: none;
+      animation: pulseAction 1.2s infinite alternate;
+    }
+    @keyframes pulseAction {
+      0% { transform: translate(-50%, -50%) scale(0.98); }
+      100% { transform: translate(-50%, -50%) scale(1.03); }
+    }
+
+    /* Loading Splash */
+    #loadingSplash {
+      position: fixed; inset: 0; z-index: 9999; background: #030712;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      transition: opacity 0.8s ease;
+    }
+    .spinner {
+      width: 52px; height: 52px; border: 4px solid rgba(0, 240, 255, 0.2);
+      border-top-color: #00f0ff; border-radius: 50%;
+      animation: spin 0.8s linear infinite; margin-bottom: 18px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <!-- Three.js Engine -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- Modular NEXCHAT Subsystems -->
+  <script src="js/game_modules/audio.js"></script>
+  <script src="js/game_modules/tactical_radar.js"></script>
+  <script src="js/game_modules/canadian_survival.js"></script>
+  <script src="js/game_modules/canadian_codex.js"></script>
+  <script src="js/game_modules/calgary_metropolis.js"></script>
+  <script src="js/game_modules/yyc_aviation.js"></script>
+</head>
+<body>
+  <!-- Canvas WebGL Container -->
+  <div id="canvas-container"></div>
+
+  <!-- Loading Screen -->
+  <div id="loadingSplash">
+    <div class="spinner"></div>
+    <h2 style="color:#00f0ff; letter-spacing:2px; font-size:18px; margin-bottom:6px;">NEXCHAT // METROPOLIS ENGINE</h2>
+    <p style="color:#64748b; font-size:12px;">Synthesizing Calgary Skyline, YYC Aviation & Canadian Climate Systems...</p>
+  </div>
+
+  <!-- Top Header -->
+  <div id="topHeader">
+    <h1>Calgary Metropolis</h1>
+    <span class="badge">MODULE ARCHITECTURE</span>
+    <span style="font-size:12px; color:#94a3b8;">Alberta Regional Hub</span>
+  </div>
+
+  <!-- Top Right Controls -->
+  <div id="topControls">
+    <button class="hud-btn" id="btnQuality" onclick="cycleQuality()">QUALITY: HIGH [Q]</button>
+    <button class="hud-btn" id="btnCam" onclick="toggleCameraView()">CAM: 3RD PERSON [V]</button>
+    <button class="hud-btn" onclick="if(window.codexSys) window.codexSys.toggleCodex()">CODEX [F]</button>
+    <button class="hud-btn" onclick="if(window.codexSys) window.codexSys.toggleHighway()">WARP [H]</button>
+  </div>
+
+  <!-- Action Interaction Prompt -->
+  <div id="actionPrompt">PRESS [E] TO INTERACT</div>
+
+  <!-- Bottom Navigation Guide -->
+  <div id="bottomGuide">
+    <span><strong>[WASD]</strong> Move</span>
+    <span><strong>[SHIFT]</strong> Sprint</span>
+    <span><strong>[SPACE]</strong> Jump</span>
+    <span><strong>[V]</strong> 1st/3rd Camera</span>
+    <span><strong>[E]</strong> Board Aircraft</span>
+    <span><strong>[T]</strong> Thermal Gear</span>
+    <span><strong>[C]</strong> Hot Thermos</span>
+    <span><strong>[F]</strong> Codex & Stamps</span>
+    <span><strong>[H]</strong> Trans-Canada Highway</span>
+  </div>
+
+  <script>
+    // =========================================================================
+    // NEXCHAT // Calgary Metropolis & Canadian Aviation Core Orchestrator
+    // =========================================================================
+
+    let scene, camera, renderer, clock;
+    let metropolis, aviation, survivalSys, radar, codexSys;
+    let colliders = [];
+    let keys = {};
+    let isThirdPerson = true;
+    let qualityTier = 'HIGH'; // ULTRA, HIGH, MEDIUM, LOW
+
+    // Player state
+    const player = {
+      pos: new THREE.Vector3(0, 0, 20),
+      vel: new THREE.Vector3(),
+      heading: 0,
+      isGrounded: true,
+      speed: 12,
+      runSpeed: 24,
+      mesh: null,
+      isPiloting: false
+    };
+
+    // Camera offset for third-person
+    const camOffset = new THREE.Vector3(0, 3.8, 9.5);
+    let snowParticles;
+
+    window.addEventListener('DOMContentLoaded', initGame);
+
+    function initGame() {
+      clock = new THREE.Clock();
+
+      // 1. Scene & Atmosphere Setup
+      scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x06111f);
+      scene.fog = new THREE.FogExp2(0x081728, 0.0018);
+
+      // 2. Camera Setup
+      camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.2, 2000);
+      camera.position.set(0, 5, 30);
+
+      // 3. Renderer Setup
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.15;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+      // 4. Canadian Winter Lighting & Sky
+      initLighting();
+      initSnowfall();
+
+      // 5. Build Player Avatar Rig
+      initPlayerAvatar();
+
+      // 6. Instantiate Modular Subsystems
+      metropolis = new CalgaryMetropolis(scene, colliders);
+      aviation = new YYCAviation(scene, colliders);
+      
+      survivalSys = new CanadianSurvivalSystem({
+        ambientTemp: -24,
+        windChill: -34,
+        onRescue: () => {
+          player.pos.set(-100, 1, 40); // Teleport to Snøhetta Central Library shelter
+          player.vel.set(0, 0, 0);
+        }
+      });
+      window.survivalSys = survivalSys;
+
+      // Register heat sources with survival system
+      survivalSys.addHeatSource(new THREE.Vector3(-120, 0, -40), 16, 'Banff Hot Springs', 35);
+      survivalSys.addHeatSource(new THREE.Vector3(-60, 0, 110), 14, 'Sugar Shack Hearth', 25);
+      survivalSys.addHeatSource(new THREE.Vector3(0, 0, 0), 10, 'Olympic Plaza Campfire', 20);
+
+      // Build Olympic Plaza Campfire prop
+      createCampfireProp(0, 0, 0);
+
+      codexSys = new CanadianCodexSystem();
+      window.codexSys = codexSys;
+
+      radar = new TacticalRadar('radarCanvas');
+
+      // Setup radar tracking targets
+      const radarTargets = [
+        ...metropolis.landmarks,
+        { name: 'YYC Airport Rwy 17L', pos: new THREE.Vector3(350, 0, -350), color: '#38bdf8', size: 5 },
+        { name: 'Campfire', pos: new THREE.Vector3(0, 0, 0), color: '#ffaa00', size: 3.5, pulse: true }
+      ];
+      radar.setTargets(radarTargets);
+
+      // 7. Input listeners
+      initInputListeners();
+
+      // 8. Handle Window Resize
+      window.addEventListener('resize', onWindowResize);
+
+      // 9. Hide Loading Screen
+      setTimeout(() => {
+        const splash = document.getElementById('loadingSplash');
+        if (splash) {
+          splash.style.opacity = '0';
+          setTimeout(() => splash.remove(), 800);
+        }
+      }, 700);
+
+      // 10. Start Animation Game Loop
+      requestAnimationFrame(animate);
+    }
+
+    function initLighting() {
+      // Crisp Canadian winter ambient light
+      const hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x1e293b, 0.7);
+      scene.add(hemiLight);
+
+      // Low-angle crisp winter sun (Calgary winter latitude ~51°N)
+      const sunLight = new THREE.DirectionalLight(0xfff7ed, 1.35);
+      sunLight.position.set(220, 180, 260);
+      sunLight.castShadow = true;
+      sunLight.shadow.mapSize.width = 2048;
+      sunLight.shadow.mapSize.height = 2048;
+      sunLight.shadow.camera.near = 10;
+      sunLight.shadow.camera.far = 800;
+      sunLight.shadow.camera.left = -280;
+      sunLight.shadow.camera.right = 280;
+      sunLight.shadow.camera.top = 280;
+      sunLight.shadow.camera.bottom = -280;
+      scene.add(sunLight);
+
+      // Soft cyan city fill light
+      const fillLight = new THREE.DirectionalLight(0x00f0ff, 0.35);
+      fillLight.position.set(-180, 80, -180);
+      scene.add(fillLight);
+    }
+
+    function initSnowfall() {
+      const snowCount = 2200;
+      const snowGeo = new THREE.BufferGeometry();
+      const snowPos = new Float32Array(snowCount * 3);
+
+      for (let i = 0; i < snowCount; i++) {
+        snowPos[i * 3] = (Math.random() - 0.5) * 600;
+        snowPos[i * 3 + 1] = Math.random() * 120;
+        snowPos[i * 3 + 2] = (Math.random() - 0.5) * 600;
+      }
+
+      snowGeo.setAttribute('position', new THREE.BufferAttribute(snowPos, 3));
+      const snowMat = new THREE.PointsMaterial({
+        color: 0xffffff,
+        size: 0.85,
+        transparent: true,
+        opacity: 0.75
+      });
+
+      snowParticles = new THREE.Points(snowGeo, snowMat);
+      scene.add(snowParticles);
+    }
+
+    function updateSnowfall(dt) {
+      if (!snowParticles) return;
+      const pos = snowParticles.geometry.attributes.position.array;
+      for (let i = 0; i < pos.length; i += 3) {
+        pos[i + 1] -= dt * 14; // Fall downwards
+        pos[i] += Math.sin(pos[i + 1] * 0.05) * dt * 3; // Gentle wind drift
+        if (pos[i + 1] < 0) {
+          pos[i + 1] = 120;
+          pos[i] = player.pos.x + (Math.random() - 0.5) * 400;
+          pos[i + 2] = player.pos.z + (Math.random() - 0.5) * 400;
+        }
+      }
+      snowParticles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    function initPlayerAvatar() {
+      player.mesh = new THREE.Group();
+
+      // Body (Thermal Cyber-Parka)
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.5, metalness: 0.3 });
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.45, 1.6, 12), bodyMat);
+      body.position.y = 1.4;
+      body.castShadow = true;
+      player.mesh.add(body);
+
+      // Head / Helmet with HUD visor
+      const headMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.6 });
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.38, 14, 14), headMat);
+      head.position.y = 2.5;
+      player.mesh.add(head);
+
+      // Cyan visor
+      const visorMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.16, 0.28), visorMat);
+      visor.position.set(0, 2.5, 0.28);
+      player.mesh.add(visor);
+
+      // Backpack / Life Support
+      const pack = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.9, 0.35), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
+      pack.position.set(0, 1.45, -0.42);
+      player.mesh.add(pack);
+
+      player.mesh.position.copy(player.pos);
+      scene.add(player.mesh);
+    }
+
+    function createCampfireProp(x, y, z) {
+      const fireGroup = new THREE.Group();
+      fireGroup.position.set(x, y, z);
+
+      // Stone ring
+      const stoneMat = new THREE.MeshStandardMaterial({ color: 0x4b5563, roughness: 0.9 });
+      for (let i = 0; i < 8; i++) {
+        const a = (i / 8) * Math.PI * 2;
+        const stone = new THREE.Mesh(new THREE.DodecahedronGeometry(0.45), stoneMat);
+        stone.position.set(Math.cos(a) * 1.5, 0.3, Math.sin(a) * 1.5);
+        fireGroup.add(stone);
+      }
+
+      // Crossed logs
+      const logMat = new THREE.MeshStandardMaterial({ color: 0x3e2723, roughness: 0.9 });
+      const log1 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 2.2, 6), logMat);
+      log1.rotation.z = Math.PI / 4;
+      log1.position.y = 0.35;
+      fireGroup.add(log1);
+
+      const log2 = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 2.2, 6), logMat);
+      log2.rotation.z = -Math.PI / 4;
+      log2.position.y = 0.35;
+      fireGroup.add(log2);
+
+      // Fire flame core
+      const flameMat = new THREE.MeshBasicMaterial({ color: 0xff7700 });
+      const flame = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.8, 8), flameMat);
+      flame.position.y = 1.0;
+      fireGroup.add(flame);
+
+      // Flickering point light
+      const fireLight = new THREE.PointLight(0xff9900, 2.5, 18);
+      fireLight.position.y = 1.4;
+      fireGroup.add(fireLight);
+
+      scene.add(fireGroup);
+    }
+
+    function initInputListeners() {
+      window.addEventListener('keydown', (e) => {
+        if (e.target && ['INPUT', 'TEXTAREA'].includes(e.target.tagName)) return;
+        keys[e.code] = true;
+
+        if (e.code === 'KeyV') toggleCameraView();
+        if (e.code === 'KeyQ') cycleQuality();
+        if (e.code === 'KeyE') handleInteraction();
+      });
+
+      window.addEventListener('keyup', (e) => {
+        keys[e.code] = false;
+      });
+
+      // Mouse drag camera rotation
+      let isMouseDown = false;
+      let prevMouseX = 0;
+      window.addEventListener('mousedown', (e) => {
+        if (e.button === 0) {
+          isMouseDown = true;
+          prevMouseX = e.clientX;
+          if (window.cyberAudio && window.cyberAudio.init) window.cyberAudio.init();
+        }
+      });
+      window.addEventListener('mouseup', () => { isMouseDown = false; });
+      window.addEventListener('mousemove', (e) => {
+        if (isMouseDown) {
+          const deltaX = e.clientX - prevMouseX;
+          player.heading -= deltaX * 0.005;
+          prevMouseX = e.clientX;
+        }
+      });
+    }
+
+    function handleInteraction() {
+      // Check if near aircraft to board or exit
+      if (aviation) {
+        const result = aviation.tryBoardOrExit(player.pos, camera);
+        if (result.boarded) {
+          player.isPiloting = true;
+          player.mesh.visible = false;
+          showNotice(`BOARDED: ${result.aircraft.name.toUpperCase()}`);
+          return;
+        } else if (result.exited) {
+          player.isPiloting = false;
+          player.pos.copy(result.exitPos);
+          player.mesh.position.copy(player.pos);
+          player.mesh.visible = true;
+          showNotice(`DISEMBARKED AIRCRAFT`);
+          return;
+        }
+      }
+
+      // Check proximity to Calgary Tower Codex Terminal
+      const distToTower = player.pos.distanceTo(new THREE.Vector3(0, 0, -80));
+      if (distToTower < 18 && codexSys) {
+        codexSys.toggleCodex();
+        return;
+      }
+    }
+
+    function toggleCameraView() {
+      isThirdPerson = !isThirdPerson;
+      const btn = document.getElementById('btnCam');
+      if (btn) btn.innerText = isThirdPerson ? 'CAM: 3RD PERSON [V]' : 'CAM: 1ST PERSON [V]';
+      if (player.mesh) player.mesh.visible = isThirdPerson && !player.isPiloting;
+      if (window.cyberAudio && window.cyberAudio.playChirp) window.cyberAudio.playChirp();
+    }
+
+    function cycleQuality() {
+      const presets = ['ULTRA', 'HIGH', 'MEDIUM', 'LOW'];
+      const idx = (presets.indexOf(qualityTier) + 1) % presets.length;
+      qualityTier = presets[idx];
+
+      const btn = document.getElementById('btnQuality');
+      if (btn) btn.innerText = `QUALITY: ${qualityTier} [Q]`;
+
+      if (qualityTier === 'ULTRA') {
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+      } else if (qualityTier === 'HIGH') {
+        renderer.setPixelRatio(1.25);
+        renderer.shadowMap.enabled = true;
+      } else if (qualityTier === 'MEDIUM') {
+        renderer.setPixelRatio(1.0);
+        renderer.shadowMap.enabled = false;
+      } else if (qualityTier === 'LOW') {
+        renderer.setPixelRatio(0.85);
+        renderer.shadowMap.enabled = false;
+      }
+      if (window.cyberAudio && window.cyberAudio.playChirp) window.cyberAudio.playChirp();
+      showNotice(`Graphics Preset Set to: ${qualityTier}`);
+    }
+
+    function showNotice(text) {
+      let prompt = document.getElementById('actionPrompt');
+      if (prompt) {
+        prompt.innerText = text;
+        prompt.style.display = 'block';
+        clearTimeout(prompt._timer);
+        prompt._timer = setTimeout(() => { prompt.style.display = 'none'; }, 2200);
+      }
+    }
+
+    function updatePlayerMovement(dt) {
+      if (player.isPiloting) return;
+
+      const moveForward = (keys['KeyW'] || keys['ArrowUp'] ? 1 : 0) - (keys['KeyS'] || keys['ArrowDown'] ? 1 : 0);
+      const moveRight = (keys['KeyD'] || keys['ArrowRight'] ? 1 : 0) - (keys['KeyA'] || keys['ArrowLeft'] ? 1 : 0);
+      const isSprinting = keys['ShiftLeft'] || keys['ShiftRight'];
+
+      const targetSpeed = isSprinting ? player.runSpeed : player.speed;
+
+      // Calculate directional vector relative to heading
+      const forwardVec = new THREE.Vector3(-Math.sin(player.heading), 0, -Math.cos(player.heading));
+      const rightVec = new THREE.Vector3(Math.cos(player.heading), 0, -Math.sin(player.heading));
+
+      const inputDir = new THREE.Vector3();
+      inputDir.addScaledVector(forwardVec, moveForward);
+      inputDir.addScaledVector(rightVec, moveRight);
+
+      if (inputDir.lengthSq() > 0.001) {
+        inputDir.normalize();
+        player.pos.addScaledVector(inputDir, targetSpeed * dt);
+        player.mesh.rotation.y = Math.atan2(inputDir.x, inputDir.z) + Math.PI;
+
+        // Procedural footstep sound pacing
+        if (Math.random() < 0.12 && window.cyberAudio && window.cyberAudio.playFootstep) {
+          window.cyberAudio.playFootstep();
+        }
+      }
+
+      // Jump & Gravity physics
+      if (keys['Space'] && player.isGrounded) {
+        player.vel.y = 11;
+        player.isGrounded = false;
+      }
+
+      if (!player.isGrounded) {
+        player.vel.y -= 28 * dt; // Gravity
+        player.pos.y += player.vel.y * dt;
+        if (player.pos.y <= 0) {
+          player.pos.y = 0;
+          player.vel.y = 0;
+          player.isGrounded = true;
+        }
+      }
+
+      // Simple collision box check against metropolis landmarks
+      for (const col of colliders) {
+        if (!col.box) continue;
+        if (col.box.containsPoint(player.pos)) {
+          // Push player out slightly
+          const push = player.pos.clone().sub(col.pos || col.box.getCenter(new THREE.Vector3())).normalize();
+          player.pos.addScaledVector(push, 1.2);
+        }
+      }
+
+      // Update Mesh position
+      player.mesh.position.copy(player.pos);
+
+      // Camera sync
+      if (isThirdPerson) {
+        const targetCamPos = player.pos.clone().add(
+          new THREE.Vector3(
+            Math.sin(player.heading) * camOffset.z,
+            camOffset.y,
+            Math.cos(player.heading) * camOffset.z
+          )
+        );
+        camera.position.lerp(targetCamPos, 0.15);
+        camera.lookAt(player.pos.x, player.pos.y + 1.8, player.pos.z);
+      } else {
+        // 1st person
+        camera.position.set(player.pos.x, player.pos.y + 2.3, player.pos.z);
+        const lookTarget = player.pos.clone().add(new THREE.Vector3(-Math.sin(player.heading) * 10, 2.3, -Math.cos(player.heading) * 10));
+        camera.lookAt(lookTarget);
+      }
+
+      // Proximity Action Prompt check
+      checkNearbyInteractables();
+    }
+
+    function checkNearbyInteractables() {
+      let prompt = document.getElementById('actionPrompt');
+      if (!prompt) return;
+
+      // Aircraft proximity
+      if (aviation && !player.isPiloting) {
+        for (const ac of aviation.aircraftList) {
+          if (player.pos.distanceTo(ac.mesh.position) <= 12) {
+            prompt.innerText = `PRESS [E] TO PILOT ${ac.name.toUpperCase()}`;
+            prompt.style.display = 'block';
+            return;
+          }
+        }
+      }
+
+      // Calgary Tower Codex Terminal
+      if (player.pos.distanceTo(new THREE.Vector3(0, 0, -80)) <= 16) {
+        prompt.innerText = `PRESS [F] TO ACCESS CANADIAN HERITAGE CODEX`;
+        prompt.style.display = 'block';
+        return;
+      }
+
+      // Banff Hot Springs
+      if (player.pos.distanceTo(new THREE.Vector3(-120, 0, -40)) <= 14) {
+        prompt.innerText = `♨️ BANFF HOT SPRINGS: RESTORING WARMTH & HEALTH`;
+        prompt.style.display = 'block';
+        return;
+      }
+
+      // Sugar Shack
+      if (player.pos.distanceTo(new THREE.Vector3(-60, 0, 110)) <= 12) {
+        prompt.innerText = `🍁 SUGAR SHACK: HOT MAPLE TAFFY AVAILABLE`;
+        prompt.style.display = 'block';
+        return;
+      }
+
+      prompt.style.display = 'none';
+    }
+
+    function onWindowResize() {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    // Main Engine Animation Loop
+    function animate() {
+      requestAnimationFrame(animate);
+      const dt = Math.min(clock.getDelta(), 0.05);
+
+      // 1. Update Player locomotion
+      updatePlayerMovement(dt);
+
+      // 2. Update Weather / Snowfall
+      updateSnowfall(dt);
+
+      // 3. Update Metropolis dynamics (C-Train, cranes, beacon lights)
+      if (metropolis) metropolis.update(dt);
+
+      // 4. Update Aviation dynamics (flights, airport radar, HUD)
+      if (aviation) aviation.update(dt, keys, player.isPiloting ? camera : null);
+
+      // 5. Update Canadian Survival / Hypothermia simulation
+      if (survivalSys) survivalSys.update(player.pos, dt);
+
+      // 6. Update Tactical Canvas Radar HUD
+      if (radar) radar.update(player.pos, player.heading, dt);
+
+      // 7. Render Three.js WebGL Scene
+      renderer.render(scene, camera);
+    }
+  </script>
+</body>
+</html>
