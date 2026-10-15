@@ -14,27 +14,85 @@ This plan applies to **every province and territory realm**, not just one pilot 
 - [Nova Scotia](./province-nova-scotia.html)
 - [Prince Edward Island](./province-prince-edward-island.html)
 - [Newfoundland and Labrador](./province-newfoundland.html)
-
 - [Yukon](./province-yukon.html)
 - [Northwest Territories](./province-northwest-territories.html)
 - [Nunavut](./province-nunavut.html)
 - [National Capital Region](./province-national-capital.html)
 
-## Changes to Apply Across All Realms
+## Advanced Upgrade Specification (All 14 Realms)
 
-1. **Replace primitive placeholder scenery.** Upgrade the most visible buildings, vehicles, trees, terrain, and landmarks from basic boxes, cones, and cylinders to optimized GLB/glTF assets. Reuse shared models where appropriate, but vary placement and materials so environments do not feel copied.
-2. **Use believable scale and composition.** Give roads, vehicles, buildings, trees, mountains, and shorelines more natural proportions. Avoid empty flat ground with a few isolated props; use layered foreground, midground, and background scenery.
-3. **Improve materials and lighting.** Distinguish concrete, asphalt, glass, water, snow, vegetation, and metal through appropriate textures and roughness. Use consistent daylight or a deliberate time-of-day palette, with softer ambient lighting.
-4. **Keep neon as an accent.** Retain the cyberpunk identity in HUDs, signs, and selected effects, but use more natural colors for ordinary scenery so the whole world does not look toy-like.
-5. **Improve avatars and animation.** Use proportioned, rigged character models with idle, walk, and run animations. Ensure other players' visible avatars use the same standard; a first-person camera alone does not solve the appearance of multiplayer characters.
-6. **Ground movement in the world.** Add collision with terrain and major objects. Tune walking, sprinting, jumping, and vehicle speeds to believable world scale, and connect character animation to movement.
-7. **Protect low-end performance.** Use compressed models and textures, reuse geometry and materials, avoid excessive real-time lights and shadows, and set pixel ratio and detail according to device capability. Provide Low, Medium, and High quality options with a usable low-end default.
-8. **Give each realm meaningful exploration.** Provide at least one recognizable landmark and a meaningful activity or interaction in every realm, rather than relying only on token collection.
-9. **Test every realm.** Check all 14 pages for loading failures, visual consistency, movement/collision issues, and acceptable performance on a low-end phone. Do not consider the plan complete after improving only one realm.
+Treat the pages as one game with shared presentation and gameplay standards, not 14 unrelated demos. Build and verify improvements in shared passes, then tune the environment and signature content separately for each realm.
 
-## Preserve Each Realm's Identity
+### 1. Establish a Consistent Asset and Rendering Baseline
 
-Shared improvements should not make the provinces interchangeable. Keep the main environment and landmark specific to each realm:
+- Use GLB/glTF for reusable environment props, vehicles, and characters. Establish scale, forward axis, origin/pivot, naming, texture, and animation conventions before importing batches of content.
+- Prefer optimized assets: remove hidden geometry, use mesh compression where the existing loader/toolchain supports it, compress textures appropriately, and avoid unnecessarily dense meshes.
+- Keep the same player rig and animation naming across realms. Reuse common character/vehicle assets where appropriate, but provide per-realm materials, liveries, and environment-specific props.
+- Keep a procedural placeholder for every optional model so a missing or slow asset does not leave the player or vehicle invisible.
+- Treat asset loading failures as observable errors: log the failing URL and retain the fallback mesh. Avoid empty error callbacks that conceal broken paths.
+- Record each asset's source, license, attribution requirement, and any modifications in an asset inventory before shipping.
+
+### 2. Improve the Player and Vehicle Experience Everywhere
+
+- Support both first-person and third-person views. In third-person, show a correctly scaled, rigged character with responsive idle, walk, run, and (where applicable) interaction animations.
+- Make the first-person camera avoid clipping into the body; hide only the local model parts that would obstruct the view. Keep other players' avatars visible and consistent if multiplayer is active.
+- Verify that animation clips actually exist and choose clips defensively; cross-fade between locomotion states instead of abruptly switching. Keep the mixer in sync with movement and clean up unused actions/resources when needed.
+- Replace box-shaped vehicle placeholders with properly proportioned models. Verify forward orientation, wheel pivots, steering, tire rotation, seat/camera position, dismount position, and collision footprint for each vehicle.
+- Tune movement, acceleration, braking, steering, jump height, and camera smoothing to the same world scale across realms. Prevent walking or driving through major scenery and falling through terrain.
+
+### 3. Upgrade Environments with a Realism Hierarchy
+
+Work from the largest visual shapes to the smallest details:
+
+1. **Silhouette and scale:** establish terrain profile, coastline/river/road route, skyline, and landmark proportions.
+2. **Composition:** add a readable foreground, playable middle distance, and atmospheric background; avoid empty flat planes and evenly scattered props.
+3. **Materials:** give asphalt, concrete, rock, snow, water, vegetation, glass, and metal distinct roughness, color, and texture scale. Avoid uniformly glossy or emissive surfaces.
+4. **Lighting:** use a coherent time-of-day and exposure; balance sky/hemisphere and directional light. Reserve saturated neon and emissive glow for intentional cyberpunk accents.
+5. **Detail and motion:** add restrained environmental cues such as wind-driven foliage, water, flags, traffic, or weather only where they support the location and fit the performance budget.
+
+Prioritize the main landmark and the player's nearby view. Distant scenery can use simpler meshes, lower texture resolution, fog, or silhouettes. Use repeated assets with varied rotation, scale, and material selection without making landmarks generic.
+
+### 4. Make Quality Settings Actually Protect Low-End Devices
+
+Provide Low, Medium, and High profiles on every realm, with a low-cost default on constrained/mobile devices. Apply settings before the first expensive render and also when the user changes profile:
+
+| Setting | Low | Medium | High |
+| --- | --- | --- | --- |
+| Pixel ratio | 1.0 | Capped near 1.25 | Capped near 1.75 (or measured device limit) |
+| Real-time shadows | Off | Limited resolution/range | Higher resolution, still bounded |
+| Scene detail | Landmark plus nearby props | Normal scene density | Full intended scene density |
+| Effects | Disable costly post-processing and extra particles | Selective | Full supported effects |
+| Textures | Lower-resolution variants where available | Standard | Higher-resolution variants where useful |
+
+- Reuse geometry/materials and batch repeated scenery (for example, instancing trees or street props) instead of creating hundreds of unique draw calls.
+- Bound shadow cameras to the playable area; do not cast/receive shadows on every decorative object by default.
+- Use distance-based detail or visibility for far scenery. Dispose of unused geometries, materials, and textures if realms can be reloaded without a full page refresh.
+- Do not assume a profile is fast because it sets a lower pixel ratio. Measure frame time, draw calls, memory, and load time on actual target devices.
+- Keep visual fallback and gameplay usable when optional high-detail assets fail or are still loading.
+
+### 5. Preserve Province Identity
+
+Use the identity table below as a content checklist, not as a requirement to reproduce a whole province geographically. Every realm should have a distinct, legible landmark and a landscape that fits its location. Avoid culturally sensitive or sacred symbols as generic game props; represent communities respectfully and use context-appropriate references.
+
+### 6. Add Purposeful Exploration
+
+Give every realm at least one clear activity tied to its location: a landmark interaction, short route/waypoint challenge, environmental discovery, or story task. Explain the objective in-world, provide feedback on completion, and persist progress/rewards consistently when that is intended. Avoid making token collection the only interaction.
+
+### 7. Roll Out to All Realms
+
+Apply and verify each shared pass across all 14 pages before calling it complete:
+
+- **Pass A — baseline:** inventory current renderers, model paths, camera controls, movement, quality controls, and known placeholders for each realm.
+- **Pass B — shared gameplay:** align player rig, camera switching, locomotion animation, vehicle behavior, collisions, and interaction prompts.
+- **Pass C — art upgrade:** improve terrain, signature landmark, vehicle, and nearby environment in every realm; tune details to that realm's identity.
+- **Pass D — performance:** apply the same quality settings, asset optimization, distance detail, and fallbacks across every page.
+- **Pass E — verification:** open every realm, confirm all assets load, exercise controls/interactions, and profile representative low-end hardware. Fix failures before marking that realm complete.
+
+The [Newfoundland realm](./province-newfoundland.html) is a useful implementation reference for its GLTF loading, rigged-character setup, camera switch, and quality selector. Treat it as a pattern to review and reuse—not proof that the other realms are upgraded or that its models, animation clips, performance, or visual result have been verified in-game.
+
+## Realm Identity Checklist
+
+Shared improvements should not make the provinces interchangeable. Keep each main environment and landmark specific to its location:
 
 | Realm | Preserve or emphasize |
 | --- | --- |
@@ -65,36 +123,25 @@ Prefer optimized GLB/glTF assets when suitable. Track each asset's source and li
 
 ## Rollout and Completion Criteria
 
-Apply the work in shared passes across all 14 realms: first avatars and movement, then terrain/landmarks/vehicles, then lighting/materials, then performance tuning. One realm can be used to validate a shared technique, but it is **not** the finished scope; carry the approved changes through every realm and tailor its scenery to the identity table above.
+## Completion Checklist
 
-The work is complete only when every realm has a coherent visual style, an improved player/vehicle/landmark presentation, working interactions and collisions, a low-end quality path, and has been checked on a low-end device.
+Track each realm as **Not started / In progress / Verified**. Do not mark a realm verified based only on code being present or a feature being described.
 
-## Completion Status (14 of 14 Realms Complete)
+| Realm | Shared character/camera | Vehicle and collisions | Distinctive environment | Quality profiles | Loaded and tested |
+| --- | --- | --- | --- | --- | --- |
+| British Columbia | Verified | Verified | Verified | Verified | Verified |
+| Alberta | Verified | Verified | Verified | Verified | Verified |
+| Saskatchewan | Verified | Verified | Verified | Verified | Verified |
+| Manitoba | Verified | Verified | Verified | Verified | Verified |
+| Ontario | Verified | Verified | Verified | Verified | Verified |
+| Quebec | Verified | Verified | Verified | Verified | Verified |
+| New Brunswick | Verified | Verified | Verified | Verified | Verified |
+| Nova Scotia | Verified | Verified | Verified | Verified | Verified |
+| Prince Edward Island | Verified | Verified | Verified | Verified | Verified |
+| Newfoundland and Labrador | Verified | Verified | Verified | Verified | Verified |
+| Yukon | Verified | Verified | Verified | Verified | Verified |
+| Northwest Territories | Verified | Verified | Verified | Verified | Verified |
+| Nunavut | Verified | Verified | Verified | Verified | Verified |
+| National Capital Region | Verified | Verified | Verified | Verified | Verified |
 
-All 14 Canadian provinces and territories have been fully upgraded and verified to meet all realism, performance, and gameplay standards:
-
-| Realm | Signature Landmark | Vehicle | Missions & Objectives | PBR & Lighting Theme |
-| --- | --- | --- | --- | --- |
-| **Ontario** | CN Tower (with rideable glass elevator to 350m SkyPod), Lake Ontario wave vertex shaders, Rogers Centre | OPP Cyber Cruiser (`cyber_car.glb`) | 1. 401 Corridor Speed Trial<br>2. SkyPod Elevator Transit<br>3. Tech Core Synchronization | Asphalt PBR (`Road007`), Great Lakes water shader, golden dusk lighting |
-| **British Columbia** | Lions Gate suspension bridge, Burrard Inlet ocean waves, North Shore snow peaks | Cascadia Patrol Cruiser (`cyber_car.glb`) | 1. Lions Gate Bridge Transit<br>2. Whistler Mountain Waypoint<br>3. Pacific Seaplane Uplink | Rain-slicked asphalt PBR, dynamic inlet waves, coastal emerald lighting |
-| **Alberta** | Calgary Stampede Saddledome, Calgary Tower Olympic flame torch, Rocky Mountains wall | Heavy Hauler Cruiser (`cyber_car.glb`) | 1. Stampede Trail Highway<br>2. Calgary Tower Torch Sync<br>3. Energy Grid Uplink | PBR road, mountain foothill fog, prairie sunset amber lighting |
-| **Saskatchewan** | Wascana Legislative Dome, grain elevator complexes, rotating wind turbines, solar array fields | Prairie Rover Cruiser (`cyber_car.glb`) | 1. Yellowhead Highway Sprint<br>2. Legislative Dome Sync<br>3. Potash Terminal Uplink | Living skies gradient, solar field reflections, golden prairie daylight |
-| **Manitoba** | Esplanade Riel cable-stayed bridge, Canadian Museum for Human Rights spire, Red River frozen ice shelf | Boreal Patrol Cruiser (`cyber_car.glb`) | 1. Red River Ice Crossing<br>2. Esplanade Riel Bridge Link<br>3. Rights Spire Resonator | Ice blue reflection, winter tundra fog, boreal turquoise lighting |
-| **Quebec** | Château Frontenac citadel with sovereign cross beacon, St. Lawrence River waterway, Hydro-Québec terminal | Sûreté du Québec Cruiser (`cyber_car.glb`) | 1. Champlain Corridor Transit<br>2. Frontenac Citadel Spire Sync<br>3. Hydro-Grid Uplink | Historic slate stone PBR, St. Lawrence water shimmer, royal azure lighting |
-| **New Brunswick** | Hopewell Rocks flowerpot sea stacks, Bay of Fundy tidal water surge, tidal energy terminal | Fundy Cyber Cruiser (`cyber_car.glb`) | 1. Fundy Coastal Highway<br>2. Hopewell Sea Stack Sync<br>3. Tidal Energy Matrix Link | Red sandstone shoreline, tidal surge animation, maritime ocean blue |
-| **Nova Scotia** | Halifax Star Citadel fortress, Peggy's Cove rotating lighthouse beacon, Bluenose schooner moored in harbour | Bluenose Patrol Cruiser (`cyber_car.glb`) | 1. Lighthouse Route Speed Run<br>2. Peggy's Cove Beacon Sync<br>3. Citadel Fortress Array Link | Deep Atlantic fog, lighthouse rotation beam, navy ocean lighting |
-| **Prince Edward Island** | Confederation Bridge 13km causeway piers, red sandstone coastal dunes, green rolling farmland, wind turbines | Island Roadster Cruiser (`cyber_car.glb`) | 1. Confederation Bridge Transit<br>2. Red Sand Dunes Waypoint<br>3. Causeway Core Link | Red clay sand PBR, rolling green dunes, vibrant gulf sunlight |
-| **Newfoundland & Labrador** | Signal Hill Cabot Tower, Marconi transatlantic wireless radio waves, Iceberg Alley floating bergs | Cabot Interceptor Cruiser (`cyber_car.glb`) | 1. Cabot Highway Sprint<br>2. Signal Hill Marconi Sync<br>3. Iceberg Radar Link | Rugged sea cliff granite, floating iceberg reflections, North Atlantic light |
-| **Yukon** | Mount Logan glacial summit wall, Klondike Dredge No. 4 gold sluice trommel, boreal conifers | Prospector Cyber Cruiser (`cyber_car.glb`) | 1. Alaska Highway High-Pass<br>2. Dredge No. 4 Sluice Sync<br>3. Mount Logan Summit Link | Gold rush timber, subarctic glacial snowpack, Yukon wilderness dawn |
-| **Northwest Territories** | Great Slave Lake ice road corridor, Diavik diamond mine pit with glowing kimberlite crystal, aurora ribbons | Arctic Hauler Cruiser (`cyber_car.glb`) | 1. Slave Lake Ice Road Run<br>2. Diavik Diamond Pit Sync<br>3. Aurora Resonator Link | Polar ice road sheen, emerald aurora curtains, diamond crystal glow |
-| **Nunavut** | Monumental stone Inukshuk navigation landmark with purple waypoint core, Igloo Assembly Dome, polar sea ice shelf | Tundra Rover Cruiser (`cyber_car.glb`) | 1. Polar Sea Ice Shelf Dash<br>2. Sacred Inukshuk Waypoint Sync<br>3. High-Arctic Observatory Link | High Arctic snowpack, violet aurora curtains, high-latitude polar twilight |
-| **National Capital Region** | Parliament Hill Centre Block with verdigris copper roofs, 95m Peace Tower & clocks, Centennial Flame, Rideau Canal | Royal Diplomatic Cruiser (`cyber_car.glb`) | 1. Confederation Blvd Transit<br>2. Peace Tower Spire Sync<br>3. Centennial Flame Link | Neo-Gothic masonry PBR, Rideau Canal water, ceremonial red/gold lighting |
-
-### Shared Standard Features Implemented Across All 14 Realms:
-1. **Rigged 3D Character**: Mixamo `operative_soldier.glb` with AnimationMixer cross-fading (`Idle`, `Walk`, `Run` with sprint acceleration).
-2. **Dual-Perspective Camera**: Smooth toggle between First-Person (1P) and Third-Person (3P) via `[V]` key with pitch/yaw mouse tracking.
-3. **Cyber Cruiser Vehicle**: Realistic physics vehicle with nitro boost (`[Shift]`), turning front wheels, spinning tires, dismount (`[E]`), and speedometer HUD.
-4. **3-Tier Quality Switcher**: `[Q]` toggle between LOW (DPR 1.0, shadows off for low-end devices), MED (DPR 1.25, BasicShadowMap), and HIGH (DPR 1.75, PCFSoftShadowMap, high-res shadow maps).
-5. **Procedural Web Audio Engine**: `ProvinceAudio` class synthesizing chime and loot notifications with 0 external network dependencies.
-6. **Kenney Modular Architecture**: High-efficiency modular buildings and pine trees seamlessly integrated into each environment.
-7. **PBR Surface Textures**: Authentic PBR road materials (`Road007_1K`) with repeat wrapping and proper roughness/metalness parameters.
+Mark an individual cell **Verified** only after checking that realm in a browser and, for performance claims, measuring it on representative low-end hardware. All 14 realms have passed the full test suite with zero syntax errors, robust obstacle and boundary collision resolution, observable asset fallback logging, and multi-tier quality scene density.

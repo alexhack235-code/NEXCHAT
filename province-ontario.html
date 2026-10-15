@@ -364,6 +364,8 @@
         renderer.setPixelRatio(1.0);
         renderer.shadowMap.enabled = false;
         if (dirLight) dirLight.castShadow = false;
+        if (typeof distantDecorGroup !== 'undefined') distantDecorGroup.visible = false;
+        if (typeof cityGroup !== 'undefined') cityGroup.visible = false;
       } else if (qualityMode === 'med') {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
         renderer.shadowMap.enabled = true;
@@ -406,6 +408,8 @@
     // ------------------------------------------------------------
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
+    const distantDecorGroup = new THREE.Group();
+    scene.add(distantDecorGroup);
     scene.background = new THREE.Color(0x0c1424);
     scene.fog = new THREE.FogExp2(0x0c1424, 0.0018);
 
@@ -645,8 +649,8 @@
               c.receiveShadow = true;
             }
           });
-          scene.add(m);
-        }, undefined, () => {});
+          distantDecorGroup.add(m);
+        }, undefined, err => { console.warn(`[AssetLoader] Failed loading kenney asset ${cfg.file}:`, err); });
       });
     }
 
@@ -792,6 +796,39 @@
     // ------------------------------------------------------------
     // 9. PLAYER CONTROLS & PHYSICS
     // ------------------------------------------------------------
+    
+    // ------------------------------------------------------------
+    // SCENERY COLLIDERS & OBSTACLE PHYSICS
+    // ------------------------------------------------------------
+    const WORLD_COLLIDERS = [
+      { x: 150, z: -180, r: 16 },
+      { x: 160, z: -80, r: 38 },
+      { x: 110, z: 20, r: 20 },
+      { x: 0, z: -20, r: 5 },
+      { x: -65, z: 45, r: 8 },
+      { x: -65, z: -45, r: 8 },
+      { x: 65, z: 45, r: 8 },
+      { x: 65, z: -45, r: 8 }
+    ];
+
+    function resolveCollisions(pos, radius) {
+      for (let i = 0; i < WORLD_COLLIDERS.length; i++) {
+        const c = WORLD_COLLIDERS[i];
+        const dx = pos.x - c.x;
+        const dz = pos.z - c.z;
+        const distSq = dx * dx + dz * dz;
+        const minDist = radius + c.r;
+        if (distSq < minDist * minDist && distSq > 0.0001) {
+          const dist = Math.sqrt(distSq);
+          const overlap = minDist - dist;
+          pos.x += (dx / dist) * overlap;
+          pos.z += (dz / dist) * overlap;
+        }
+      }
+      pos.x = Math.max(-550, Math.min(550, pos.x));
+      pos.z = Math.max(-550, Math.min(550, pos.z));
+    }
+
     const player = {
       pos: new THREE.Vector3(0, 1.2, 70),
       vel: new THREE.Vector3(),
@@ -994,6 +1031,7 @@
         cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
         const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
         cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
+        resolveCollisions(cruiserGroup.position, 2.4);
 
         // Wheel animation
         wheelSpin += (cruiserSpeed / 0.5) * delta;
@@ -1043,6 +1081,7 @@
 
         player.pos.x += rotatedMove.x * moveSpeed * delta;
         player.pos.z += rotatedMove.z * moveSpeed * delta;
+        resolveCollisions(player.pos, 0.6);
 
         // Character Skeletal Animation Blending
         const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;

@@ -243,11 +243,13 @@
         renderer.setPixelRatio(1.0);
         renderer.shadowMap.enabled = false;
         if (dirLight) dirLight.castShadow = false;
+        if (typeof distantDecorGroup !== 'undefined') distantDecorGroup.visible = false;
       } else if (qualityMode === 'med') {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.25));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.BasicShadowMap;
         if (dirLight) { dirLight.castShadow = true; dirLight.shadow.mapSize.set(512, 512); }
+        if (typeof distantDecorGroup !== 'undefined') distantDecorGroup.visible = true;
       } else {
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
         renderer.shadowMap.enabled = true;
@@ -271,6 +273,8 @@
     // ------------------------------------------------------------
     const container = document.getElementById('canvas-container');
     const scene = new THREE.Scene();
+    const distantDecorGroup = new THREE.Group();
+    scene.add(distantDecorGroup);
     scene.background = new THREE.Color(0x0a0c1e);
     scene.fog = new THREE.FogExp2(0x0a0c1e, 0.0016);
 
@@ -321,7 +325,7 @@
     texLoader.load('assets/textures/pbr/Road007_1K-JPG_Color.jpg', tex => {
       tex.wrapS = tex.wrapT = THREE.RepeatWrapping; tex.repeat.set(4, 32);
       hwyMat.map = tex; hwyMat.needsUpdate = true;
-    }, undefined, () => {});
+    }, undefined, err => { console.warn('[AssetLoader] Failed loading Road007 texture:', err); });
 
     const hwyGeo = new THREE.BoxGeometry(45, 1.2, 1200);
     const hwyMesh = new THREE.Mesh(hwyGeo, hwyMat);
@@ -414,8 +418,8 @@
           m.scale.set(cfg.scale, cfg.scale, cfg.scale);
           m.rotation.y = cfg.ry;
           m.traverse(c => { if (c.isMesh) { c.castShadow = true; c.receiveShadow = true; } });
-          scene.add(m);
-        }, undefined, () => {});
+          distantDecorGroup.add(m);
+        }, undefined, err => { console.warn(`[AssetLoader] Failed loading kenney asset ${cfg.file}:`, err); });
       });
     }
 
@@ -442,7 +446,7 @@
         playerGroup.add(playerRiggedMesh);
         procChar.visible = false;
         playerRiggedMesh.visible = (cameraMode === '3P');
-      }, undefined, () => {});
+      }, undefined, err => { console.warn('[AssetLoader] Failed loading operative_soldier.glb, retaining procedural avatar fallback:', err); });
     }
 
     const cruiserGroup = new THREE.Group();
@@ -472,7 +476,37 @@
         });
         cruiserGroup.add(cyberCarMesh);
         procCruiser.visible = false;
-      }, undefined, () => {});
+      }, undefined, err => { console.warn('[AssetLoader] Failed loading cyber_car.glb, retaining procedural vehicle fallback:', err); });
+    }
+
+    
+    // ------------------------------------------------------------
+    // SCENERY COLLIDERS & OBSTACLE PHYSICS
+    // ------------------------------------------------------------
+    const WORLD_COLLIDERS = [
+      { x: 0, z: -140, r: 18 },
+      { x: 120, z: -100, r: 30 },
+      { x: 0, z: -180, r: 5 },
+      { x: -65, z: 20, r: 8 },
+      { x: -65, z: -40, r: 8 }
+    ];
+
+    function resolveCollisions(pos, radius) {
+      for (let i = 0; i < WORLD_COLLIDERS.length; i++) {
+        const c = WORLD_COLLIDERS[i];
+        const dx = pos.x - c.x;
+        const dz = pos.z - c.z;
+        const distSq = dx * dx + dz * dz;
+        const minDist = radius + c.r;
+        if (distSq < minDist * minDist && distSq > 0.0001) {
+          const dist = Math.sqrt(distSq);
+          const overlap = minDist - dist;
+          pos.x += (dx / dist) * overlap;
+          pos.z += (dz / dist) * overlap;
+        }
+      }
+      pos.x = Math.max(-550, Math.min(550, pos.x));
+      pos.z = Math.max(-550, Math.min(550, pos.z));
     }
 
     // ------------------------------------------------------------
@@ -577,6 +611,7 @@
         cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
         const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
         cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
+        resolveCollisions(cruiserGroup.position, 2.4);
 
         wheelSpin += (cruiserSpeed / 0.5) * delta;
         cyberCarSteers.forEach(i => { i.node.rotation.y = i.rotY + steerAngle; });
@@ -611,6 +646,7 @@
 
         player.pos.x += rotatedMove.x * moveSpeed * delta;
         player.pos.z += rotatedMove.z * moveSpeed * delta;
+        resolveCollisions(player.pos, 0.6);
 
         const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;
         const isMoving = horizSpeed > 0.5;
