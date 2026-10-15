@@ -825,8 +825,8 @@
     weatherParticleSystem = new THREE.Points(snowGeo, snowMat);
     distantDecorGroup.add(weatherParticleSystem);
 
-    const auroraGeo = new THREE.PlaneGeometry(360, 52, 24, 4);
-    const auroraMat = new THREE.MeshBasicMaterial({
+    const auroraCurtainGeo = new THREE.PlaneGeometry(360, 52, 24, 4);
+    const auroraCurtainMat = new THREE.MeshBasicMaterial({
       color: 0x00ffaa,
       transparent: true,
       opacity: 0.38,
@@ -834,7 +834,7 @@
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
-    auroraCurtainMesh = new THREE.Mesh(auroraGeo, auroraMat);
+    auroraCurtainMesh = new THREE.Mesh(auroraCurtainGeo, auroraCurtainMat);
     auroraCurtainMesh.position.set(0, 95, -280);
     auroraCurtainMesh.rotation.x = Math.PI * 0.08;
     distantDecorGroup.add(auroraCurtainMesh);
@@ -1571,7 +1571,7 @@
       const promptMsg = document.getElementById('prompt-msg');
       if (typeof codexBeaconPos !== 'undefined' && player.pos.distanceTo(codexBeaconPos) < 6.0) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'ACCESS CANADIAN CODEX [F]';
-      } else (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
+      } else if (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT ARCTIC CRUISER [E]';
       } else if (!missionAuroraDone && player.pos.distanceTo(termGroup.position) < 7.0) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'LINK AURORA RESONANCE [F]';

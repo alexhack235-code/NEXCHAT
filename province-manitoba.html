@@ -1628,7 +1628,7 @@
       const promptMsg = document.getElementById('prompt-msg');
       if (typeof codexBeaconPos !== 'undefined' && player.pos.distanceTo(codexBeaconPos) < 6.0) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'ACCESS CANADIAN CODEX [F]';
-      } else (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
+      } else if (player.pos.distanceTo(cruiserGroup.position) < 7.5 && !inPatrolCruiser) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'PILOT BOREAL CRUISER [E]';
       } else if (!missionForksDone && player.pos.distanceTo(forksTerm.position) < 7.0) {
         prompt.style.display = 'flex'; promptMsg.textContent = 'VERIFY THE FORKS GATEWAY [F]';

@@ -17724,6 +17724,8 @@ function buildNeoKyotoCity() {
     }
 
     function updateCalgaryCityColdness(delta) {
+      const survivalHudEl = document.getElementById('city-survival-hud');
+      if (survivalHudEl) survivalHudEl.style.display = (gameState.currentWorld === 'earth') ? 'flex' : 'none';
       if (gameState.currentWorld !== 'earth' || !player.pos) return;
 
       // Calgary Heat Sources: Inside C-Train, Inside Central Library, Stephen Ave Patio Fire Torches, Inside Vehicles
