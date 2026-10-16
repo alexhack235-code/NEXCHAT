@@ -6,7 +6,7 @@
 (function(window) {
   'use strict';
 
-  // Global registries for military and aviation assets
+  // Global registries for military, aviation, vehicle and cyber assets
   window.militaryAviationState = {
     isEnlisted: false,
     lastSalaryClaim: 0,
@@ -15,7 +15,30 @@
     patrolJets: [],
     policeCruisers: [],
     carrierCatapultReady: true,
-    cockpitViewActive: false
+    cockpitViewActive: false,
+    // Aerial & Naval Dogfight Combat Systems
+    projectiles: [],
+    explosions: [],
+    hostileDrones: [],
+    lockedTarget: null,
+    lastCannonTime: 0,
+    lastMissileTime: 0,
+    missileStock: 6,
+    tailhookDown: false,
+    trapCatchState: null,
+    // Canadian LAV 6.0 8x8 Combat Vehicle
+    isPilotingLAV: false,
+    lavVehicleMesh: null,
+    lavSpeed: 0,
+    lavHeading: 0,
+    lavTurretAngle: 0,
+    lastLAVCannonTime: 0,
+    lavSmokeCharges: 3,
+    // FLIR Thermal Recon Visor
+    thermalVisorActive: false,
+    // CCCS Cyber Threat Console
+    cyberModalOpen: false,
+    cyberThreatsDefused: [false, false, false]
   };
 
   // ============================================================
@@ -90,11 +113,40 @@
     });
 
     // 4 Arresting Wires (Cross-deck cables for carrier trap landings)
+    carrierGroup._arrestingWires = [];
     for (let w = 0; w < 4; w++) {
       const wire = new THREE.Mesh(new THREE.BoxGeometry(32, 0.2, 0.2), steelMat);
       wire.position.set(-6, hullHeight + 1.35, 65 + (w * 10));
       carrierGroup.add(wire);
+      carrierGroup._arrestingWires.push(wire);
     }
+
+    // IFLOLS (Improved Fresnel Lens Optical Landing System / "The Meatball")
+    const iflolsGroup = new THREE.Group();
+    iflolsGroup.position.set(-hullWidth / 2 - 2, hullHeight + 1.4, 75);
+
+    const iflolsPole = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.35, 3.8, 8), steelMat);
+    iflolsPole.position.y = 1.9;
+    iflolsGroup.add(iflolsPole);
+
+    const iflolsBox = new THREE.Mesh(new THREE.BoxGeometry(1.4, 2.8, 2.2), steelMat);
+    iflolsBox.position.y = 3.6;
+    iflolsGroup.add(iflolsBox);
+
+    // Green Datum Reference Light Bars
+    [-0.8, 0.8].forEach(dy => {
+      const datum = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.18, 2.4), greenLightMat);
+      datum.position.set(-0.8, 3.6 + dy, 0);
+      iflolsGroup.add(datum);
+    });
+
+    // Amber "Meatball" Glidepath Lens (Centers on optimal 3.0 deg approach)
+    const meatball = new THREE.Mesh(new THREE.SphereGeometry(0.32, 12, 12), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+    meatball.position.set(-0.85, 3.6, 0);
+    iflolsGroup.add(meatball);
+    carrierGroup._iflolsMeatball = meatball;
+
+    carrierGroup.add(iflolsGroup);
 
     // Island Superstructure (Starboard / Right Side Command Tower)
     const island = new THREE.Group();
@@ -224,6 +276,50 @@
       jet.add(noz);
     });
 
+    // Twin 20mm Vulcan Gatling Cannon Barrels at Wing Roots
+    const gunMat = new THREE.MeshStandardMaterial({ color: 0x11161f, metalness: 0.95, roughness: 0.2 });
+    [-1.35, 1.35].forEach(gx => {
+      const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 2.2, 8), gunMat);
+      barrel.rotation.x = Math.PI / 2;
+      barrel.position.set(gx, -0.15, -2.5);
+      jet.add(barrel);
+    });
+
+    // 4 Underwing Weapons Pylons with AIM-120D AMRAAM Missiles
+    const missileWhiteMat = new THREE.MeshStandardMaterial({ color: 0xecf0f1, roughness: 0.3 });
+    const finDarkMat = new THREE.MeshBasicMaterial({ color: 0x1e293b });
+    jet._underwingMissiles = [];
+    [-3.4, -1.9, 1.9, 3.4].forEach((px, i) => {
+      const pylon = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.25, 1.8), camoMat);
+      pylon.position.set(px, -0.22, 1.2);
+      jet.add(pylon);
+
+      const mGroup = new THREE.Group();
+      mGroup.position.set(px, -0.42, 1.2);
+      const mBody = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 2.6, 8), missileWhiteMat);
+      mBody.rotation.x = Math.PI / 2;
+      mGroup.add(mBody);
+      const mNose = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.6, 8), finDarkMat);
+      mNose.rotation.x = -Math.PI / 2;
+      mNose.position.z = -1.6;
+      mGroup.add(mNose);
+      jet.add(mGroup);
+      jet._underwingMissiles.push(mGroup);
+    });
+
+    // Articulated Carrier Tailhook Assembly
+    const tailhookPivot = new THREE.Group();
+    tailhookPivot.position.set(0, -0.55, 6.2);
+    const hookArm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 2.8, 8), gunMat);
+    hookArm.rotation.x = 0.55;
+    hookArm.position.set(0, -0.6, 1.1);
+    tailhookPivot.add(hookArm);
+    const hookShoe = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.2, 0.45), gunMat);
+    hookShoe.position.set(0, -1.65, 2.0);
+    tailhookPivot.add(hookShoe);
+    jet.add(tailhookPivot);
+    jet._tailhook = tailhookPivot;
+
     return jet;
   }
 
@@ -300,6 +396,61 @@
     const lav = buildCanadianLAVVehicle();
     lav.position.set(0, 1.2, 15);
     baseGroup.add(lav);
+    baseGroup._lav = lav;
+    window.militaryAviationState.lavVehicleMesh = lav;
+
+    // Register trigger collider for Boarding LAV 6.0 Combat Vehicle
+    if (typeof registerCityCollider === 'function') {
+      registerCityCollider({
+        x: baseGroup.position.x,
+        z: baseGroup.position.z + 15,
+        hw: 7, hd: 7, world: 'earth',
+        isTrigger: true,
+        type: 'military_lav_vehicle'
+      });
+    }
+
+    // ============================================================
+    // CANADIAN ARMED FORCES TACTICAL ARMORY & RECON DEPOT
+    // ============================================================
+    const armoryGroup = new THREE.Group();
+    armoryGroup.position.set(-25, 0, 10);
+
+    const armoryBldg = new THREE.Mesh(new THREE.BoxGeometry(16, 6.5, 18), wallMat);
+    armoryBldg.position.y = 3.25;
+    armoryGroup.add(armoryBldg);
+
+    // Armory Signboard
+    const armoryTex = createMilitaryBannerTexture('TACTICAL ARMORY & RECON DEPOT', 'C7A2 RIFLES · FLIR THERMAL VISORS · CADPAT COMBAT RIGS');
+    const armorySign = new THREE.Mesh(new THREE.PlaneGeometry(12, 3.6), new THREE.MeshBasicMaterial({ map: armoryTex, transparent: true }));
+    armorySign.position.set(0, 5.2, 9.1);
+    armoryGroup.add(armorySign);
+
+    // Interactive Armory Kiosk Terminal
+    const armoryKiosk = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 1.2), steelMat);
+    armoryKiosk.position.set(0, 1.1, 9.8);
+    armoryGroup.add(armoryKiosk);
+
+    const armoryHolo = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.2), new THREE.MeshBasicMaterial({
+      color: 0x22c55e,
+      emissive: 0x22c55e,
+      side: THREE.DoubleSide
+    }));
+    armoryHolo.position.set(0, 2.4, 9.9);
+    armoryGroup.add(armoryHolo);
+
+    baseGroup.add(armoryGroup);
+
+    // Register trigger collider for Tactical Armory Interaction
+    if (typeof registerCityCollider === 'function') {
+      registerCityCollider({
+        x: baseGroup.position.x - 25,
+        z: baseGroup.position.z + 20,
+        hw: 6, hd: 6, world: 'earth',
+        isTrigger: true,
+        type: 'military_armory_terminal'
+      });
+    }
 
     // ============================================================
     // GIANT HOLOGRAPHIC RECRUITMENT BILLBOARD ($10,000 CAD WEEKLY)
@@ -356,29 +507,71 @@
   function buildCanadianLAVVehicle() {
     const lav = new THREE.Group();
     const cadpatMat = new THREE.MeshStandardMaterial({ color: 0x223020, roughness: 0.7, metalness: 0.3 });
+    const steelDark = new THREE.MeshStandardMaterial({ color: 0x11161d, metalness: 0.9, roughness: 0.25 });
     const tireMat = new THREE.MeshStandardMaterial({ color: 0x0a0d11, roughness: 0.95 });
+    const headlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
     const body = new THREE.Mesh(new THREE.BoxGeometry(4.2, 2.2, 9.5), cadpatMat);
     body.position.y = 1.6;
     lav.add(body);
 
-    // Turret & 25mm Bushmaster Autocannon
-    const turret = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 1.4, 8), cadpatMat);
-    turret.position.set(0, 3.2, 0.5);
-    lav.add(turret);
+    // Front Headlights
+    [-1.6, 1.6].forEach(hx => {
+      const hl = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.25, 0.2), headlightMat);
+      hl.position.set(hx, 1.8, -4.8);
+      lav.add(hl);
+    });
 
-    const cannon = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 5.5, 8), new THREE.MeshStandardMaterial({ color: 0x111, metalness: 0.9 }));
+    // Turret & 25mm Bushmaster Autocannon Assembly
+    const turretGroup = new THREE.Group();
+    turretGroup.position.set(0, 2.7, 0.5);
+
+    const turret = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.8, 1.2, 8), cadpatMat);
+    turretGroup.add(turret);
+
+    // Commander Hatch Cupola
+    const hatch = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.6, 0.35, 8), steelDark);
+    hatch.position.set(0.45, 0.75, 0.3);
+    turretGroup.add(hatch);
+
+    // Smoke Grenade Discharger Clusters (4 barrels per side)
+    [-1.45, 1.45].forEach((sx, idx) => {
+      for (let sm = 0; sm < 4; sm++) {
+        const tube = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.45, 6), steelDark);
+        tube.rotation.x = -0.4;
+        tube.rotation.z = (sx < 0 ? -0.4 : 0.4);
+        tube.position.set(sx, 0.45, -0.4 + sm * 0.25);
+        turretGroup.add(tube);
+      }
+    });
+
+    const cannon = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 5.5, 8), steelDark);
     cannon.rotation.x = Math.PI / 2;
-    cannon.position.set(0, 3.4, -3.2);
-    lav.add(cannon);
+    cannon.position.set(0, 0.2, -3.2);
+    turretGroup.add(cannon);
+
+    // Cannon Muzzle Brake
+    const muzzle = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.25, 0.5), steelDark);
+    muzzle.position.set(0, 0.2, -5.9);
+    turretGroup.add(muzzle);
+
+    lav.add(turretGroup);
+    lav._turretGroup = turretGroup;
+    lav._cannon = cannon;
 
     // 8 All-Terrain Tires
+    lav._tires = [];
     for (let side = -1; side <= 1; side += 2) {
       for (let ax = 0; ax < 4; ax++) {
+        const tirePivot = new THREE.Group();
+        tirePivot.position.set(side * 2.2, 0.7, -3.2 + (ax * 2.1));
+
         const tire = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 0.65, 12), tireMat);
         tire.rotation.z = Math.PI / 2;
-        tire.position.set(side * 2.2, 0.7, -3.2 + (ax * 2.1));
-        lav.add(tire);
+        tirePivot.add(tire);
+
+        lav.add(tirePivot);
+        lav._tires.push({ pivot: tirePivot, mesh: tire, isFront: (ax <= 1), side });
       }
     }
 
@@ -469,6 +662,43 @@
       cseGroup.add(radome);
     });
 
+    // 3D Holographic Cyber War Room Console & Quantum Terminal
+    const consoleGroup = new THREE.Group();
+    consoleGroup.position.set(0, 0, 24);
+
+    const consolePodium = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.0, 1.4, 8), steelTrim);
+    consolePodium.position.y = 0.7;
+    consoleGroup.add(consolePodium);
+
+    // Floating Rotating Wireframe Earth Globe
+    const globeMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true });
+    const globe = new THREE.Mesh(new THREE.SphereGeometry(1.3, 16, 12), globeMat);
+    globe.position.y = 2.4;
+    consoleGroup.add(globe);
+    cseGroup._cyberGlobe = globe;
+
+    // Glowing Holographic Display Screen
+    const holoScreen = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.6), new THREE.MeshBasicMaterial({
+      color: 0x00f2ff,
+      emissive: 0x00f2ff,
+      side: THREE.DoubleSide
+    }));
+    holoScreen.position.set(0, 3.8, 0.2);
+    consoleGroup.add(holoScreen);
+
+    cseGroup.add(consoleGroup);
+
+    // Register trigger collider for Cyber Command Console
+    if (typeof registerCityCollider === 'function') {
+      registerCityCollider({
+        x: cseGroup.position.x,
+        z: cseGroup.position.z + 24,
+        hw: 6, hd: 6, world: 'earth',
+        isTrigger: true,
+        type: 'cyber_command_terminal'
+      });
+    }
+
     console.log('✅ [CANADIAN CYBERSECURITY] CCCS / CSE Cyber Command Citadel deployed.');
   }
 
@@ -530,18 +760,926 @@
     window.militaryAviationState.policeCruisers = cruisers;
   }
 
-  // Update loops for patrols, cruisers, and fighter jet cockpit HUD
+  // ============================================================
+  // WEB AUDIO MILITARY ACOUSTICS SYNTHESIZER
+  // ============================================================
+  function playMilitarySFX(type) {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      if (!window._milAudioCtx) window._milAudioCtx = new AudioCtx();
+      const ctx = window._milAudioCtx;
+      if (ctx.state === 'suspended') ctx.resume();
+      const now = ctx.currentTime;
+
+      if (type === 'cannon') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(45, now + 0.08);
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'missile_launch') {
+        const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 0.35), ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+        const noise = ctx.createBufferSource();
+        noise.buffer = buf;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(900, now);
+        filter.frequency.exponentialRampToValueAtTime(3400, now + 0.35);
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        noise.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        noise.start(now);
+      } else if (type === 'explosion') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(80, now);
+        osc.frequency.exponentialRampToValueAtTime(20, now + 0.65);
+        gain.gain.setValueAtTime(0.65, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.65);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.65);
+      } else if (type === 'autocannon') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(110, now);
+        osc.frequency.exponentialRampToValueAtTime(30, now + 0.16);
+        gain.gain.setValueAtTime(0.5, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.16);
+      } else if (type === 'cable_trap') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(240, now);
+        osc.frequency.linearRampToValueAtTime(90, now + 0.5);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.5);
+      } else if (type === 'lock_tone') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1750, now);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'visor') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(550, now);
+        osc.frequency.exponentialRampToValueAtTime(2200, now + 0.2);
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } else if (type === 'cyber_beep') {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.setValueAtTime(1320, now + 0.08);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      }
+    } catch (e) {}
+  }
+
+  // ============================================================
+  // CANADIAN AURORA BOREALIS (NORTHERN LIGHTS)
+  // ============================================================
+  function buildCanadianAuroraBorealis() {
+    if (typeof scene === 'undefined' || !scene || window.militaryAviationState.auroraMesh) return;
+
+    const auroraGroup = new THREE.Group();
+    auroraGroup.position.set(0, 215, -620);
+
+    // Layer 1: Radiant Emerald Green Curtain
+    const geo1 = new THREE.PlaneGeometry(850, 110, 48, 12);
+    const mat1 = new THREE.MeshBasicMaterial({
+      color: 0x00ff88,
+      transparent: true,
+      opacity: 0.45,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const curtain1 = new THREE.Mesh(geo1, mat1);
+    auroraGroup.add(curtain1);
+
+    // Layer 2: Radiant Violet & Electric Magenta Curtain
+    const geo2 = new THREE.PlaneGeometry(820, 95, 48, 12);
+    const mat2 = new THREE.MeshBasicMaterial({
+      color: 0x9d4edd,
+      transparent: true,
+      opacity: 0.38,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const curtain2 = new THREE.Mesh(geo2, mat2);
+    curtain2.position.set(20, 15, 30);
+    curtain2.rotation.y = 0.12;
+    auroraGroup.add(curtain2);
+
+    scene.add(auroraGroup);
+    window.militaryAviationState.auroraMesh = { group: auroraGroup, curtain1, curtain2, geo1, geo2 };
+    console.log('🌌 [NORTHERN LIGHTS] Canadian Aurora Borealis celestial curtain active.');
+  }
+
+  function updateCanadianAuroraBorealis(now) {
+    const a = window.militaryAviationState.auroraMesh;
+    if (!a) return;
+    const time = now * 0.0012;
+
+    const pos1 = a.geo1.attributes.position;
+    for (let i = 0; i < pos1.count; i++) {
+      const u = pos1.getX(i);
+      const v = pos1.getY(i);
+      const zOffset = Math.sin(time * 1.5 + u * 0.015) * 22 + Math.cos(time * 0.9 + v * 0.03) * 14;
+      pos1.setZ(i, zOffset);
+    }
+    pos1.needsUpdate = true;
+
+    const pos2 = a.geo2.attributes.position;
+    for (let i = 0; i < pos2.count; i++) {
+      const u = pos2.getX(i);
+      const zOffset = Math.cos(time * 1.3 + u * 0.018) * 26;
+      pos2.setZ(i, zOffset);
+    }
+    pos2.needsUpdate = true;
+  }
+
+  // ============================================================
+  // HOSTILE RENEGADE SKY-RAIDER DRONES (AERIAL DOGFIGHT TARGETS)
+  // ============================================================
+  function initHostileSkyRaiders() {
+    if (typeof scene === 'undefined' || !scene || window.militaryAviationState.hostileDrones.length > 0) return;
+
+    const sectors = [
+      { name: 'BANDIT-01 // SKY PIRATE', x: -320, y: 160, z: 220, r: 180, spd: 0.32 },
+      { name: 'BANDIT-02 // IRON TALON', x: -180, y: 195, z: -290, r: 210, spd: 0.28 },
+      { name: 'BANDIT-03 // CYBER WASP', x: 210, y: 210, z: 140, r: 190, spd: 0.35 },
+      { name: 'BANDIT-04 // SHADOW WRAITH', x: -360, y: 175, z: 490, r: 230, spd: 0.25 }
+    ];
+
+    const drones = [];
+    sectors.forEach((sec, idx) => {
+      const dGroup = new THREE.Group();
+      dGroup.position.set(sec.x, sec.y, sec.z);
+
+      const dMat = new THREE.MeshStandardMaterial({ color: 0x0f141c, metalness: 0.95, roughness: 0.25 });
+      const redEyeMat = new THREE.MeshBasicMaterial({ color: 0xff0044 });
+      const thrusterMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+
+      // Stealth Delta Wing Body
+      const body = new THREE.Mesh(new THREE.ConeGeometry(3.6, 7.8, 4), dMat);
+      body.rotation.x = -Math.PI / 2;
+      body.rotation.y = Math.PI / 4;
+      dGroup.add(body);
+
+      // Glowing Hostile Optic Sensor Eye
+      const eye = new THREE.Mesh(new THREE.SphereGeometry(0.55, 8, 8), redEyeMat);
+      eye.position.set(0, 0.4, -3.8);
+      dGroup.add(eye);
+
+      // Twin Thrusters
+      [-1.4, 1.4].forEach(tx => {
+        const t = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 1.2, 8), thrusterMat);
+        t.rotation.x = Math.PI / 2;
+        t.position.set(tx, 0, 3.8);
+        dGroup.add(t);
+      });
+
+      // 3D Billboard Canvas for Health Bar
+      const canvas = document.createElement('canvas');
+      canvas.width = 256; canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      const tex = new THREE.CanvasTexture(canvas);
+      const spriteMat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.position.set(0, 4.5, 0);
+      sprite.scale.set(14, 3.5, 1);
+      dGroup.add(sprite);
+
+      scene.add(dGroup);
+
+      const droneData = {
+        name: sec.name,
+        mesh: dGroup,
+        center: new THREE.Vector3(sec.x, sec.y, sec.z),
+        radius: sec.r,
+        angle: (idx * Math.PI) / 2,
+        speed: sec.spd,
+        health: 100,
+        maxHealth: 100,
+        canvas, ctx, tex,
+        isDestroyed: false,
+        respawnTimer: 0
+      };
+      drones.push(droneData);
+      renderDroneHealthBar(droneData);
+    });
+
+    window.militaryAviationState.hostileDrones = drones;
+    console.log('🛸 [DOGFIGHT COMBAT] 4 Hostile Renegade Sky-Raider Drones airborne over airspace.');
+  }
+
+  function renderDroneHealthBar(drone) {
+    const ctx = drone.ctx;
+    ctx.clearRect(0, 0, 256, 64);
+
+    ctx.fillStyle = 'rgba(6, 12, 20, 0.9)';
+    ctx.fillRect(0, 0, 256, 64);
+    ctx.strokeStyle = '#ff0044';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(3, 3, 250, 58);
+
+    ctx.fillStyle = '#ff0044';
+    ctx.font = 'bold 20px "Orbitron", monospace, sans-serif';
+    ctx.fillText(drone.name, 12, 26);
+
+    const hpFrac = Math.max(0, drone.health / drone.maxHealth);
+    ctx.fillStyle = '#220005';
+    ctx.fillRect(12, 36, 232, 18);
+    ctx.fillStyle = hpFrac > 0.4 ? '#ff0044' : '#ffaa00';
+    ctx.fillRect(12, 36, 232 * hpFrac, 18);
+
+    drone.tex.needsUpdate = true;
+  }
+
+  function updateHostileSkyRaiders(delta, now) {
+    const st = window.militaryAviationState;
+    if (!st.hostileDrones) return;
+
+    const pPos = (typeof player !== 'undefined' && player && player.pos) ? player.pos : null;
+
+    st.hostileDrones.forEach(drone => {
+      if (drone.isDestroyed) {
+        drone.respawnTimer -= delta;
+        if (drone.respawnTimer <= 0) {
+          drone.isDestroyed = false;
+          drone.health = drone.maxHealth;
+          drone.mesh.visible = true;
+          renderDroneHealthBar(drone);
+        }
+        return;
+      }
+
+      // Orbital flight around sector waypoint
+      drone.angle += drone.speed * delta;
+      let targetX = drone.center.x + Math.cos(drone.angle) * drone.radius;
+      let targetZ = drone.center.z + Math.sin(drone.angle) * drone.radius;
+      let targetY = drone.center.y + Math.sin(drone.angle * 2.0) * 12;
+
+      // Evasive maneuvers if player jet approaches within 260m
+      if (pPos && pPos.distanceTo(drone.mesh.position) < 260) {
+        const away = drone.mesh.position.clone().sub(pPos).normalize();
+        targetX += away.x * 45;
+        targetZ += away.z * 45;
+        targetY += 15;
+      }
+
+      drone.mesh.position.x = THREE.MathUtils.lerp(drone.mesh.position.x, targetX, delta * 1.5);
+      drone.mesh.position.y = THREE.MathUtils.lerp(drone.mesh.position.y, targetY, delta * 1.5);
+      drone.mesh.position.z = THREE.MathUtils.lerp(drone.mesh.position.z, targetZ, delta * 1.5);
+
+      drone.mesh.rotation.y = -drone.angle + Math.PI / 2;
+    });
+  }
+
+  function destroyHostileDrone(drone) {
+    if (drone.isDestroyed) return;
+    drone.isDestroyed = true;
+    drone.mesh.visible = false;
+    drone.respawnTimer = 35.0; // Respawns in 35 seconds
+
+    playMilitarySFX('explosion');
+
+    // Spawn massive multi-sphere fireball explosion
+    const boomPos = drone.mesh.position.clone();
+    for (let b = 0; b < 4; b++) {
+      const expGeo = new THREE.SphereGeometry(3.5 + b * 1.5, 10, 10);
+      const expMat = new THREE.MeshBasicMaterial({
+        color: (b % 2 === 0 ? 0xff3300 : 0xffea00),
+        transparent: true,
+        opacity: 0.95
+      });
+      const expMesh = new THREE.Mesh(expGeo, expMat);
+      expMesh.position.copy(boomPos).add(new THREE.Vector3(
+        (Math.random() - 0.5) * 6,
+        (Math.random() - 0.5) * 6,
+        (Math.random() - 0.5) * 6
+      ));
+      scene.add(expMesh);
+      window.militaryAviationState.explosions.push({
+        mesh: expMesh,
+        scaleSpeed: 14 + b * 4,
+        life: 0.9 + b * 0.2,
+        maxLife: 0.9 + b * 0.2
+      });
+    }
+
+    // Award +$2,500 CAD Dogfight Bounty
+    if (typeof gameState !== 'undefined') {
+      gameState.tokens = (gameState.tokens || 1250) + 2500;
+      const tEl = document.getElementById('store-token-display');
+      if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
+      const lNex = document.getElementById('lobby-currency-nex');
+      if (lNex) lNex.textContent = Number(gameState.tokens).toLocaleString();
+    }
+
+    if (typeof showStoreNotification === 'function') {
+      showStoreNotification(`🎯 DOGFIGHT KILL CONFIRMED: ${drone.name} NEUTRALIZED (+ $2,500 CAD BOUNTY)!`);
+    }
+    if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+  }
+
+  // ============================================================
+  // WEAPON FIRING & BALLISTICS SIMULATION
+  // ============================================================
+  function fireJetCannon() {
+    if (typeof gameState === 'undefined' || !gameState.inPlane || !gameState.plane) return;
+    const now = Date.now();
+    const st = window.militaryAviationState;
+    if (now - (st.lastCannonTime || 0) < 90) return;
+    st.lastCannonTime = now;
+
+    playMilitarySFX('cannon');
+
+    const pMesh = gameState.plane.mesh;
+    if (!pMesh) return;
+
+    st._cannonSide = -(st._cannonSide || 1);
+    const muzzleOffset = new THREE.Vector3(st._cannonSide * 1.35, -0.15, -4.5).applyEuler(pMesh.rotation);
+    const spawnPos = pMesh.position.clone().add(muzzleOffset);
+
+    const tracerGeo = new THREE.CylinderGeometry(0.08, 0.08, 2.2, 6);
+    tracerGeo.rotateX(Math.PI / 2);
+    const tracerMat = new THREE.MeshBasicMaterial({ color: 0xffea00 });
+    const tracer = new THREE.Mesh(tracerGeo, tracerMat);
+    tracer.position.copy(spawnPos);
+    tracer.rotation.copy(pMesh.rotation);
+    scene.add(tracer);
+
+    const fwd = new THREE.Vector3(0, 0, -1).applyEuler(pMesh.rotation);
+    const projVel = fwd.clone().multiplyScalar(260).add(fwd.clone().multiplyScalar(gameState.plane.speed));
+
+    st.projectiles.push({
+      mesh: tracer,
+      vel: projVel,
+      type: 'cannon',
+      life: 2.2,
+      damage: 25
+    });
+  }
+
+  function fireJetMissile() {
+    if (typeof gameState === 'undefined' || !gameState.inPlane || !gameState.plane) return;
+    const now = Date.now();
+    const st = window.militaryAviationState;
+    if (now - (st.lastMissileTime || 0) < 1100) return;
+
+    if (st.missileStock <= 0) {
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('⚠️ AMRAAM MISSILES DEPLETED // RELOADING PAYLOAD (10S)...');
+      }
+      setTimeout(() => {
+        st.missileStock = 6;
+        const countEl = document.getElementById('cockpit-missile-count');
+        if (countEl) countEl.textContent = '6';
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('🚀 AIM-120D AMRAAM PAYLOAD RESTOCKED (6/6 READY)!');
+        }
+      }, 10000);
+      return;
+    }
+
+    st.missileStock--;
+    st.lastMissileTime = now;
+    const countEl = document.getElementById('cockpit-missile-count');
+    if (countEl) countEl.textContent = st.missileStock;
+
+    playMilitarySFX('missile_launch');
+
+    const pMesh = gameState.plane.mesh;
+    const fwd = new THREE.Vector3(0, 0, -1).applyEuler(pMesh.rotation);
+
+    let bestTarget = null;
+    let bestDist = 550;
+    st.hostileDrones.forEach(drone => {
+      if (drone.isDestroyed) return;
+      const toDrone = drone.mesh.position.clone().sub(pMesh.position);
+      const d = toDrone.length();
+      if (d < bestDist) {
+        const dot = fwd.dot(toDrone.normalize());
+        if (dot > 0.55) {
+          bestDist = d;
+          bestTarget = drone;
+        }
+      }
+    });
+
+    const mGroup = new THREE.Group();
+    const pylonX = (st.missileStock % 2 === 0 ? -2.2 : 2.2);
+    mGroup.position.copy(pMesh.position).add(new THREE.Vector3(pylonX, -0.6, 0).applyEuler(pMesh.rotation));
+    mGroup.rotation.copy(pMesh.rotation);
+
+    const mBody = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 2.8, 8), new THREE.MeshStandardMaterial({ color: 0xecf0f1 }));
+    mBody.rotation.x = Math.PI / 2;
+    mGroup.add(mBody);
+
+    const mFlame = new THREE.Mesh(new THREE.ConeGeometry(0.15, 1.4, 8), new THREE.MeshBasicMaterial({ color: 0xff5500 }));
+    mFlame.rotation.x = Math.PI / 2;
+    mFlame.position.z = 2.0;
+    mGroup.add(mFlame);
+
+    scene.add(mGroup);
+
+    const vel = fwd.clone().multiplyScalar(95 + gameState.plane.speed);
+    st.projectiles.push({
+      mesh: mGroup,
+      vel: vel,
+      type: 'missile',
+      target: bestTarget,
+      life: 4.5,
+      damage: 100
+    });
+
+    if (bestTarget) {
+      playMilitarySFX('lock_tone');
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`🚀 AIM-120D AMRAAM LAUNCHED: RADAR LOCK ON [${bestTarget.name}]!`);
+      }
+    } else {
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('🚀 AIM-120D AMRAAM FIRED (UNGUIDED BORESIGHT)');
+      }
+    }
+  }
+
+  function spawnExplosion(pos, radius, colorHex) {
+    const geo = new THREE.SphereGeometry(radius || 2.0, 10, 10);
+    const mat = new THREE.MeshBasicMaterial({ color: colorHex || 0xff6600, transparent: true, opacity: 0.9 });
+    const exp = new THREE.Mesh(geo, mat);
+    exp.position.copy(pos);
+    scene.add(exp);
+    window.militaryAviationState.explosions.push({
+      mesh: exp,
+      scaleSpeed: 10.0,
+      life: 0.65,
+      maxLife: 0.65
+    });
+  }
+
+  function updateMilitaryProjectiles(delta) {
+    const st = window.militaryAviationState;
+
+    // Update active projectiles
+    for (let i = st.projectiles.length - 1; i >= 0; i--) {
+      const p = st.projectiles[i];
+      p.life -= delta;
+
+      if (p.type === 'missile' && p.target && !p.target.isDestroyed) {
+        const toTarget = p.target.mesh.position.clone().sub(p.mesh.position);
+        const dist = toTarget.length();
+        if (dist < 6.0) {
+          destroyHostileDrone(p.target);
+          p.life = 0;
+        } else {
+          const steer = toTarget.normalize().multiplyScalar(220);
+          p.vel.lerp(steer, delta * 5.0);
+          p.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, -1), p.vel.clone().normalize());
+        }
+      }
+
+      p.mesh.position.addScaledVector(p.vel, delta);
+
+      // Check bullet/shell collision with hostile drones
+      st.hostileDrones.forEach(drone => {
+        if (drone.isDestroyed) return;
+        if (p.mesh.position.distanceTo(drone.mesh.position) < 5.5) {
+          drone.health -= (p.damage || 25);
+          renderDroneHealthBar(drone);
+          spawnExplosion(p.mesh.position, 1.2, 0xffcc00);
+          p.life = 0;
+          if (drone.health <= 0) {
+            destroyHostileDrone(drone);
+          }
+        }
+      });
+
+      // Ground impact for shells
+      if (p.type === 'lav_shell' && p.mesh.position.y <= 1.2) {
+        spawnExplosion(p.mesh.position, 2.5, 0xff5500);
+        p.life = 0;
+      }
+
+      if (p.life <= 0) {
+        scene.remove(p.mesh);
+        st.projectiles.splice(i, 1);
+      }
+    }
+
+    // Update explosions
+    for (let e = st.explosions.length - 1; e >= 0; e--) {
+      const exp = st.explosions[e];
+      exp.life -= delta;
+      const s = 1.0 + (exp.scaleSpeed * (exp.maxLife - exp.life));
+      exp.mesh.scale.set(s, s, s);
+      exp.mesh.material.opacity = Math.max(0, exp.life / exp.maxLife);
+
+      if (exp.life <= 0) {
+        scene.remove(exp.mesh);
+        st.explosions.splice(e, 1);
+      }
+    }
+  }
+
+  // ============================================================
+  // CARRIER ARRESTOR WIRE TRAP RECOVERY SYSTEM
+  // ============================================================
+  function toggleCarrierTailhook() {
+    const st = window.militaryAviationState;
+    st.tailhookDown = !st.tailhookDown;
+
+    if (typeof gameState !== 'undefined' && gameState.inPlane && gameState.plane && gameState.plane.mesh) {
+      if (gameState.plane.mesh._tailhook) {
+        gameState.plane.mesh._tailhook.rotation.x = st.tailhookDown ? 0.75 : 0;
+      }
+    }
+
+    const hookStatusEl = document.getElementById('cockpit-hook-status');
+    if (hookStatusEl) {
+      hookStatusEl.textContent = st.tailhookDown ? 'DOWN [ARMED]' : 'UP [H]';
+      hookStatusEl.style.color = st.tailhookDown ? '#00ff88' : '#00f2ff';
+    }
+
+    if (typeof showStoreNotification === 'function') {
+      showStoreNotification(st.tailhookDown ? '⚓ TAILHOOK DEPLOYED // ARMED FOR CARRIER 3-WIRE TRAP LANDING [H]' : '⚓ TAILHOOK RETRACTED [H]');
+    }
+    if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+  }
+
+  function checkCarrierTrapLanding(pMesh, pState, delta) {
+    const st = window.militaryAviationState;
+    if (!st.tailhookDown || !pMesh || !pState || pState.speed < 12.0) return;
+
+    const px = pMesh.position.x;
+    const py = pMesh.position.y;
+    const pz = pMesh.position.z;
+
+    // Carrier Deck Surface Bounds:
+    // Center (-340, 1.2, 340). Angled deck runway spans Z: 390 to 445, X: -362 to -326, Y: 11.0 to 14.8
+    if (px >= -362 && px <= -326 && pz >= 392 && pz <= 442 && py >= 11.0 && py <= 14.8) {
+      if (!st.trapCatchState) {
+        st.trapCatchState = {
+          trappedTime: Date.now(),
+          rewarded: false
+        };
+        playMilitarySFX('cable_trap');
+      }
+
+      // Instant arrestor cable tension deceleration
+      pState.speed = THREE.MathUtils.lerp(pState.speed, 0, delta * 7.5);
+      pState.throttle = 0;
+
+      if (pState.speed < 1.0 && !st.trapCatchState.rewarded) {
+        st.trapCatchState.rewarded = true;
+        gameState.tokens = (gameState.tokens || 1250) + 5000;
+        const tEl = document.getElementById('store-token-display');
+        if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
+
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('⚓ OK 3-WIRE! PERFECT CARRIER TRAP RECOVERY (+ $5,000 CAD CARRIER FLIGHT BONUS)!');
+        }
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) {
+          cyberAudio.playLootChime();
+        }
+        setTimeout(() => { st.trapCatchState = null; }, 5000);
+      }
+    }
+  }
+
+  // ============================================================
+  // CANADIAN ARMED FORCES LAV 6.0 (8X8 COMBAT VEHICLE) DRIVING
+  // ============================================================
+  function boardCanadianLAV() {
+    const st = window.militaryAviationState;
+    if (st.isPilotingLAV || !st.lavVehicleMesh) return;
+
+    st.isPilotingLAV = true;
+    if (typeof gameState !== 'undefined') gameState.inVehicle = true;
+
+    if (typeof player !== 'undefined' && player.pos) {
+      player.pos.copy(st.lavVehicleMesh.position).add(new THREE.Vector3(0, 3.2, 0));
+      player.vel.set(0, 0, 0);
+    }
+
+    const lavHud = document.getElementById('lav-vehicle-hud');
+    if (lavHud) lavHud.style.display = 'flex';
+
+    if (typeof showStoreNotification === 'function') {
+      showStoreNotification('🇨🇦 PILOTING CANADIAN FORCES LAV 6.0 // 8X8 ALL-TERRAIN COMBAT SYSTEM [E: EXIT]!');
+    }
+    playMilitarySFX('autocannon');
+  }
+
+  function exitCanadianLAV() {
+    const st = window.militaryAviationState;
+    if (!st.isPilotingLAV || !st.lavVehicleMesh) return;
+
+    st.isPilotingLAV = false;
+    st.lavSpeed = 0;
+    if (typeof gameState !== 'undefined') gameState.inVehicle = false;
+
+    if (typeof player !== 'undefined' && player.pos) {
+      player.pos.copy(st.lavVehicleMesh.position).add(new THREE.Vector3(4.5, 0.5, 0));
+      player.vel.set(0, 0, 0);
+    }
+
+    const lavHud = document.getElementById('lav-vehicle-hud');
+    if (lavHud) lavHud.style.display = 'none';
+
+    if (typeof showStoreNotification === 'function') {
+      showStoreNotification('🇨🇦 DISMOUNTED CANADIAN FORCES LAV 6.0 [ON FOOT]');
+    }
+  }
+
+  function updateCanadianLAV(delta, now) {
+    const st = window.militaryAviationState;
+    if (!st.isPilotingLAV || !st.lavVehicleMesh) return;
+
+    const lav = st.lavVehicleMesh;
+    const k = (typeof keys !== 'undefined') ? keys : {};
+
+    // 8x8 Acceleration & Braking
+    let targetSpeed = 0;
+    if (k['KeyW'] || k['ArrowUp']) targetSpeed = 32.0; // ~115 km/h
+    else if (k['KeyS'] || k['ArrowDown']) targetSpeed = -14.0;
+
+    st.lavSpeed = THREE.MathUtils.lerp(st.lavSpeed, targetSpeed, delta * 2.8);
+
+    // Multi-axle Steering
+    let steerInput = 0;
+    if (k['KeyA'] || k['ArrowLeft']) steerInput = 1;
+    if (k['KeyD'] || k['ArrowRight']) steerInput = -1;
+
+    st.lavHeading = (st.lavHeading || 0) + steerInput * (1.2 + Math.abs(st.lavSpeed) * 0.02) * delta;
+    lav.rotation.y = st.lavHeading;
+
+    // Move Forward Vector
+    const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), st.lavHeading);
+    lav.position.addScaledVector(fwd, st.lavSpeed * delta);
+
+    // Roll 8 tires
+    if (lav._tires) {
+      lav._tires.forEach(tObj => {
+        tObj.mesh.rotation.x += st.lavSpeed * delta * 2.2;
+        if (tObj.isFront) {
+          tObj.pivot.rotation.y = THREE.MathUtils.lerp(tObj.pivot.rotation.y, steerInput * 0.35, delta * 8.0);
+        }
+      });
+    }
+
+    // Lock player position to vehicle
+    if (typeof player !== 'undefined' && player.pos) {
+      player.pos.copy(lav.position).add(new THREE.Vector3(0, 3.2, 0));
+      player.vel.set(0, 0, 0);
+    }
+
+    // Third-person armored vehicle follow camera
+    if (typeof camera !== 'undefined' && camera) {
+      const camBack = new THREE.Vector3(0, 4.8, 14.0).applyAxisAngle(new THREE.Vector3(0, 1, 0), st.lavHeading);
+      camera.position.copy(lav.position).add(camBack);
+      camera.lookAt(lav.position.clone().add(new THREE.Vector3(0, 2.2, 0)));
+    }
+
+    // Update HUD
+    const spdEl = document.getElementById('lav-hud-spd');
+    if (spdEl) spdEl.textContent = `${Math.round(Math.abs(st.lavSpeed) * 3.6)} KM/H`;
+  }
+
+  function fireLAVBushmaster() {
+    const st = window.militaryAviationState;
+    if (!st.isPilotingLAV || !st.lavVehicleMesh) return;
+    const now = Date.now();
+    if (now - (st.lastLAVCannonTime || 0) < 220) return;
+    st.lastLAVCannonTime = now;
+
+    playMilitarySFX('autocannon');
+
+    const lav = st.lavVehicleMesh;
+    const fwd = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), st.lavHeading);
+    const spawnPos = lav.position.clone().add(new THREE.Vector3(0, 2.9, 0)).addScaledVector(fwd, 6.2);
+
+    const shellGeo = new THREE.SphereGeometry(0.18, 8, 8);
+    const shellMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+    const shell = new THREE.Mesh(shellGeo, shellMat);
+    shell.position.copy(spawnPos);
+    scene.add(shell);
+
+    st.projectiles.push({
+      mesh: shell,
+      vel: fwd.clone().multiplyScalar(180),
+      type: 'lav_shell',
+      life: 2.5,
+      damage: 75
+    });
+  }
+
+  function deployLAVSmokeScreen() {
+    const st = window.militaryAviationState;
+    if (!st.isPilotingLAV || !st.lavVehicleMesh) return;
+    if ((st.lavSmokeCharges || 0) <= 0) {
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('⚠️ SMOKE SCREEN EMPTY // RELOADING CHARGES...');
+      }
+      return;
+    }
+    st.lavSmokeCharges--;
+    playMilitarySFX('missile_launch');
+
+    const lav = st.lavVehicleMesh;
+    for (let s = 0; s < 6; s++) {
+      const ang = (s / 6) * Math.PI * 2;
+      const smokeGeo = new THREE.SphereGeometry(2.5, 8, 8);
+      const smokeMat = new THREE.MeshBasicMaterial({ color: 0xcccccc, transparent: true, opacity: 0.85 });
+      const puff = new THREE.Mesh(smokeGeo, smokeMat);
+      puff.position.copy(lav.position).add(new THREE.Vector3(Math.cos(ang) * 6.5, 1.8, Math.sin(ang) * 6.5));
+      scene.add(puff);
+      st.explosions.push({ mesh: puff, scaleSpeed: 3.5, life: 3.0, maxLife: 3.0 });
+    }
+
+    if (typeof showStoreNotification === 'function') {
+      showStoreNotification(`💨 360° SMOKE SCREEN DEPLOYED (${st.lavSmokeCharges} CHARGES LEFT)!`);
+    }
+  }
+
+  // ============================================================
+  // TACTICAL ARMORY & FLIR THERMAL RECON VISOR
+  // ============================================================
+  function accessTacticalArmory() {
+    if (typeof gameState === 'undefined') return;
+    gameState.tokens = (gameState.tokens || 1250) + 1000;
+    const tEl = document.getElementById('store-token-display');
+    if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
+
+    playMilitarySFX('visor');
+    if (typeof showStoreNotification === 'function') {
+      showStoreNotification('🇨🇦 TACTICAL ARMORY LOADOUT EQUIPPED // CADPAT CAMO & FLIR THERMAL VISOR ACTIVE [T]!');
+    }
+  }
+
+  function toggleThermalReconVisor() {
+    const st = window.militaryAviationState;
+    st.thermalVisorActive = !st.thermalVisorActive;
+
+    const overlay = document.getElementById('thermal-recon-visor-overlay');
+    if (overlay) overlay.style.display = st.thermalVisorActive ? 'block' : 'none';
+
+    playMilitarySFX('visor');
+    if (typeof showStoreNotification === 'function') {
+      showStoreNotification(st.thermalVisorActive ? '👁️ FLIR THERMAL RECON VISOR: ONLINE [T]' : '👁️ FLIR THERMAL RECON VISOR: STANDBY [T]');
+    }
+  }
+
+  function updateThermalReconVisor() {
+    const container = document.getElementById('thermal-targets-container');
+    if (!container || typeof camera === 'undefined' || !camera) return;
+
+    let html = '';
+    const st = window.militaryAviationState;
+
+    // Track Hostile Drones
+    if (st.hostileDrones) {
+      st.hostileDrones.forEach(drone => {
+        if (drone.isDestroyed) return;
+        const proj = drone.mesh.position.clone().project(camera);
+        if (proj.z < 1.0 && Math.abs(proj.x) < 0.95 && Math.abs(proj.y) < 0.95) {
+          const sx = (proj.x * 0.5 + 0.5) * window.innerWidth;
+          const sy = (-proj.y * 0.5 + 0.5) * window.innerHeight;
+          const dist = Math.round(camera.position.distanceTo(drone.mesh.position));
+          html += `
+            <div style="position:absolute; left:${sx}px; top:${sy}px; transform:translate(-50%,-50%); border:1.5px solid #ff0044; width:34px; height:34px; pointer-events:none;">
+              <div style="position:absolute; top:-16px; left:0; font-size:10px; font-weight:900; color:#ff0044; white-space:nowrap;">
+                ${drone.name} [HEAT: 142°C // ${dist}M]
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
+
+    // Track Active LAV Engine
+    if (st.lavVehicleMesh) {
+      const proj = st.lavVehicleMesh.position.clone().add(new THREE.Vector3(0, 1.8, 0)).project(camera);
+      if (proj.z < 1.0 && Math.abs(proj.x) < 0.95 && Math.abs(proj.y) < 0.95) {
+        const sx = (proj.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-proj.y * 0.5 + 0.5) * window.innerHeight;
+        const dist = Math.round(camera.position.distanceTo(st.lavVehicleMesh.position));
+        html += `
+          <div style="position:absolute; left:${sx}px; top:${sy}px; transform:translate(-50%,-50%); border:1.5px solid #ffaa00; width:44px; height:28px; pointer-events:none;">
+            <div style="position:absolute; top:-16px; left:0; font-size:10px; font-weight:900; color:#ffaa00; white-space:nowrap;">
+              LAV 6.0 TURBINE [HEAT: 88°C // ${dist}M]
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    container.innerHTML = html;
+  }
+
+  // ============================================================
+  // CCCS CYBER COMMAND THREAT DEFUSAL MATRIX
+  // ============================================================
+  function openCyberThreatMatrix() {
+    const st = window.militaryAviationState;
+    st.cyberModalOpen = true;
+    const modal = document.getElementById('cccs-cyber-threat-modal');
+    if (modal) modal.style.display = 'flex';
+    playMilitarySFX('cyber_beep');
+  }
+
+  function defuseCyberThreat(threatIndex) {
+    const st = window.militaryAviationState;
+    st.cyberThreatsDefused[threatIndex] = true;
+    playMilitarySFX('cyber_beep');
+
+    const card = document.getElementById(`cyber-threat-card-${threatIndex}`);
+    if (card) {
+      card.style.borderColor = '#22c55e';
+      card.innerHTML = `<span style="color:#22c55e; font-weight:900;">✅ DEFUSED // CRYPTO COUNTER-PAYLOAD ACTIVE</span>`;
+    }
+
+    if (st.cyberThreatsDefused.every(v => v === true)) {
+      setTimeout(() => {
+        if (typeof gameState !== 'undefined') {
+          gameState.tokens = (gameState.tokens || 1250) + 5000;
+          const tEl = document.getElementById('store-token-display');
+          if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
+        }
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('🛡️ CCCS NATIONAL CYBER THREAT DEFUSED // +$5,000 CAD BOUNTY AWARDED!');
+        }
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+
+        const modal = document.getElementById('cccs-cyber-threat-modal');
+        if (modal) modal.style.display = 'none';
+        st.cyberModalOpen = false;
+        setTimeout(() => { st.cyberThreatsDefused = [false, false, false]; }, 30000);
+      }, 900);
+    }
+  }
+
+  // ============================================================
+  // MAIN MILITARY AVIATION SIMULATION UPDATE LOOP
+  // ============================================================
   function updateMilitaryAviation(delta, now) {
     // 1. Rotate Aircraft Carrier Radar and Base Kiosk Crest
     if (typeof scene !== 'undefined' && scene) {
       scene.traverse(obj => {
         if (obj._radarBar) obj._radarBar.rotation.y += delta * 1.8;
         if (obj._kioskLeaf) obj._kioskLeaf.rotation.y += delta * 1.5;
+        if (obj._cyberGlobe) obj._cyberGlobe.rotation.y += delta * 0.9;
       });
     }
 
-    // 2. Air-Defense Sky Fighter Formation Flight Path (High altitude arrowhead orbit)
     const st = window.militaryAviationState;
+
+    // 2. Air-Defense Sky Fighter Formation Flight Path
     if (st && st.patrolFormation) {
       st.patrolAngle = (st.patrolAngle || 0) + delta * 0.22;
       const r = 520;
@@ -567,11 +1705,43 @@
       });
     }
 
-    // 4. Proximity Check for Enlistment & Carrier Jet Catapult
+    // 4. Ensure Northern Lights & Hostile Drones are initialized
+    if (!st.auroraMesh) buildCanadianAuroraBorealis();
+    if (!st.hostileDrones || st.hostileDrones.length === 0) initHostileSkyRaiders();
+
+    // 5. Update Aurora Borealis Waves
+    updateCanadianAuroraBorealis(now);
+
+    // 6. Update Hostile Drones AI & Dogfight Evasion
+    updateHostileSkyRaiders(delta, now);
+
+    // 7. Update Projectiles & Detonations
+    updateMilitaryProjectiles(delta);
+
+    // 8. Update Canadian LAV 6.0 8x8 Vehicle Physics
+    updateCanadianLAV(delta, now);
+
+    // 9. Carrier Arrestor Trap Landing Check
+    if (typeof gameState !== 'undefined' && gameState && gameState.inPlane && gameState.plane) {
+      checkCarrierTrapLanding(gameState.plane.mesh, gameState.plane, delta);
+    }
+
+    // 10. Update FLIR Thermal Recon Visor Overlays
+    if (st.thermalVisorActive) {
+      updateThermalReconVisor();
+    }
+
+    // 11. Proximity Check for Enlistment, LAV, Armory, and Cyber Terminal
     checkMilitaryProximity();
 
-    // 5. Plane Cockpit View HUD and Avionics Instruments Update
+    // 12. Floating Tactical Bar display in plane mode
     ensureCockpitHUDDOM();
+    const tacBar = document.getElementById('plane-tactical-bar');
+    if (tacBar) {
+      tacBar.style.display = (typeof gameState !== 'undefined' && gameState && gameState.inPlane && !st.cockpitViewActive) ? 'flex' : 'none';
+    }
+
+    // 13. Plane Cockpit View HUD and Avionics Instruments Update
     const cockHud = document.getElementById('plane-cockpit-hud');
     if (typeof gameState !== 'undefined' && gameState && gameState.inPlane && gameState.plane) {
       if (st.cockpitViewActive) {
@@ -584,7 +1754,6 @@
         const hdgDeg = Math.round(((-pState.yaw * 180 / Math.PI) % 360 + 360) % 360);
         const gForce = (1.0 + Math.abs(pState.roll) * 1.8 + Math.max(-0.8, (pState.vs || 0) * 0.08)).toFixed(1);
 
-        // Update HUD readouts
         const elHdg = document.getElementById('cockpit-hud-heading');
         const elSpd = document.getElementById('cockpit-hud-spd');
         const elMach = document.getElementById('cockpit-hud-mach');
@@ -631,6 +1800,39 @@
           st._radarAngle = (st._radarAngle || 0) + delta * 140;
           elRadar.style.transform = `rotate(${st._radarAngle}deg)`;
         }
+
+        // HUD Collimated Reticle Target Box
+        const targetBox = document.getElementById('cockpit-hud-target-box');
+        const targetLabel = document.getElementById('cockpit-hud-target-label');
+        if (targetBox && targetLabel && typeof camera !== 'undefined' && camera) {
+          let nearestInView = null;
+          let minDist = 550;
+          st.hostileDrones.forEach(d => {
+            if (d.isDestroyed) return;
+            const dist = camera.position.distanceTo(d.mesh.position);
+            if (dist < minDist) {
+              const proj = d.mesh.position.clone().project(camera);
+              if (proj.z < 1.0 && Math.abs(proj.x) < 0.85 && Math.abs(proj.y) < 0.85) {
+                minDist = dist;
+                nearestInView = { drone: d, proj, dist };
+              }
+            }
+          });
+
+          if (nearestInView) {
+            targetBox.style.display = 'block';
+            const scrX = (nearestInView.proj.x * 0.5 + 0.5) * 460;
+            const scrY = (-nearestInView.proj.y * 0.5 + 0.5) * 420;
+            targetBox.style.left = `${scrX}px`;
+            targetBox.style.top = `${scrY}px`;
+            const isLocked = nearestInView.dist < 420;
+            targetBox.style.borderColor = isLocked ? '#ef4444' : '#00ff88';
+            targetLabel.style.color = isLocked ? '#ef4444' : '#00ff88';
+            targetLabel.textContent = isLocked ? `[LOCKED // ${Math.round(nearestInView.dist)}M // AIM-120D]` : `[TARGET // ${Math.round(nearestInView.dist)}M]`;
+          } else {
+            targetBox.style.display = 'none';
+          }
+        }
       } else {
         if (cockHud) cockHud.style.display = 'none';
       }
@@ -641,7 +1843,7 @@
   }
 
   // ============================================================
-  // 5. CANADIAN ENLISTMENT ACTION ($10,000 CAD EVERY WEEK)
+  // CANADIAN ENLISTMENT ACTION ($10,000 CAD EVERY WEEK)
   // ============================================================
   function enlistInCanadianForces() {
     if (typeof gameState === 'undefined') return;
@@ -654,7 +1856,6 @@
       st.lastSalaryClaim = now;
       gameState.isMilitaryEnlisted = true;
 
-      // Award $10,000 CAD signing bonus
       gameState.tokens = (gameState.tokens || 1250) + 10000;
       const tEl = document.getElementById('store-token-display');
       if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
@@ -669,14 +1870,12 @@
         showStoreNotification('🇨🇦 ENLISTED IN CANADIAN FORCES: +$10,000 CAD SIGNING SALARY & MILITARY COMBAT CLEARANCE!');
       }
 
-      // Automatically equip Titan Exo-Rig or Parka
       if (window.HyperRealismEngine && window.HyperRealismEngine.equipGear) {
         window.HyperRealismEngine.equipGear('exosuit');
       }
     } else {
-      // Claim Weekly Pay Dispatch ($10,000 CAD)
       const elapsedMs = now - (st.lastSalaryClaim || 0);
-      const oneWeekSimMs = 60000; // Simulated 60 seconds = 1 pay cycle for instant fun
+      const oneWeekSimMs = 60000;
       if (elapsedMs >= oneWeekSimMs) {
         st.lastSalaryClaim = now;
         gameState.tokens += 10000;
@@ -698,8 +1897,9 @@
   function checkMilitaryProximity() {
     if (typeof player === 'undefined' || !player || !player.pos) return;
     const px = player.pos.x, pz = player.pos.z;
+    const st = window.militaryAviationState;
 
-    // Military Base Terminal (X: -230, Z: 105)
+    // 1. Military Base Terminal (X: -230, Z: 105)
     const distBase = Math.hypot(px - (-230), pz - (105));
     if (distBase < 5.5 && !window._promptEnlistShown) {
       window._promptEnlistShown = true;
@@ -709,7 +1909,7 @@
       setTimeout(() => { window._promptEnlistShown = false; }, 8000);
     }
 
-    // Aircraft Carrier Jet Catapult (X: -352, Z: 332)
+    // 2. Aircraft Carrier Jet Catapult (X: -352, Z: 332)
     const distCarrierJet = Math.hypot(px - (-352), pz - (332));
     if (distCarrierJet < 9.0 && !window._promptCarrierShown && (!gameState || !gameState.inPlane)) {
       window._promptCarrierShown = true;
@@ -718,27 +1918,88 @@
       }
       setTimeout(() => { window._promptCarrierShown = false; }, 8000);
     }
+
+    // 3. Canadian LAV 6.0 Combat Vehicle (X: -230, Z: 175)
+    const distLAV = Math.hypot(px - (-230), pz - (175));
+    if (distLAV < 6.5 && !window._promptLAVShown && !st.isPilotingLAV) {
+      window._promptLAVShown = true;
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('🇨🇦 [E] BOARD CANADIAN FORCES LAV 6.0 COMBAT VEHICLE (8X8)!');
+      }
+      setTimeout(() => { window._promptLAVShown = false; }, 8000);
+    }
+
+    // 4. Tactical Armory Depot (X: -255, Z: 170)
+    const distArmory = Math.hypot(px - (-255), pz - (170));
+    if (distArmory < 6.0 && !window._promptArmoryShown) {
+      window._promptArmoryShown = true;
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('🇨🇦 [E] ACCESS TACTICAL ARMORY // EQUIP CADPAT GEAR & FLIR THERMAL VISOR!');
+      }
+      setTimeout(() => { window._promptArmoryShown = false; }, 8000);
+    }
+
+    // 5. CCCS Cyber Command Terminal (X: 70, Z: -101)
+    const distCyber = Math.hypot(px - (70), pz - (-101));
+    if (distCyber < 6.0 && !window._promptCyberShown) {
+      window._promptCyberShown = true;
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('🛡️ [E] ACCESS CCCS NATIONAL CYBER DEFENSE TERMINAL ($5,000 CAD BOUNTY)!');
+      }
+      setTimeout(() => { window._promptCyberShown = false; }, 8000);
+    }
   }
 
-  // Keyboard shortcut listener: Press E near base to enlist or near carrier to launch
+  // Keyboard shortcut listener
   window.addEventListener('keydown', e => {
+    const st = window.militaryAviationState;
+
     if (e.key === 'e' || e.key === 'E') {
+      if (st.isPilotingLAV) {
+        exitCanadianLAV();
+        return;
+      }
+
       if (typeof player !== 'undefined' && player && player.pos) {
-        const distBase = Math.hypot(player.pos.x - (-230), player.pos.z - (105));
+        const px = player.pos.x, pz = player.pos.z;
+
+        // LAV 6.0 Boarding
+        const distLAV = Math.hypot(px - (-230), pz - (175));
+        if (distLAV < 7.5 && (!gameState || !gameState.inPlane)) {
+          boardCanadianLAV();
+          return;
+        }
+
+        // Tactical Armory
+        const distArmory = Math.hypot(px - (-255), pz - (170));
+        if (distArmory < 6.5) {
+          accessTacticalArmory();
+          return;
+        }
+
+        // CCCS Cyber Terminal
+        const distCyber = Math.hypot(px - (70), pz - (-101));
+        if (distCyber < 6.5) {
+          openCyberThreatMatrix();
+          return;
+        }
+
+        // Base Recruitment
+        const distBase = Math.hypot(px - (-230), pz - (105));
         if (distBase < 6.5) {
           enlistInCanadianForces();
           return;
         }
 
-        const distCarrier = Math.hypot(player.pos.x - (-352), player.pos.z - (332));
+        // Carrier Jet Catapult
+        const distCarrier = Math.hypot(px - (-352), pz - (332));
         if (distCarrier < 12.0 && (!gameState || !gameState.inPlane)) {
-          // Board Naval Jet and Catapult Launch
           if (typeof executePlaneFlightEntry === 'function' && window.carrierFighterJetData) {
             executePlaneFlightEntry(window.carrierFighterJetData);
             if (gameState && gameState.plane) {
               gameState.plane.throttle = 100;
               gameState.plane.afterburner = true;
-              gameState.plane.speed = 85.0; // Instant catapult boost
+              gameState.plane.speed = 85.0;
               if (typeof showStoreNotification === 'function') {
                 showStoreNotification('🚀 STEAM CATAPULT FIRED! HMCS CALGARY LAUNCH // AIRBORNE!');
               }
@@ -753,6 +2014,57 @@
     if (e.key === 'v' || e.key === 'V') {
       if (typeof gameState !== 'undefined' && gameState && gameState.inPlane) {
         togglePlaneCockpitView();
+      }
+    }
+
+    // [H] Key: Toggle Carrier Tailhook
+    if (e.key === 'h' || e.key === 'H') {
+      if (typeof gameState !== 'undefined' && gameState && gameState.inPlane) {
+        toggleCarrierTailhook();
+      }
+    }
+
+    // [R] Key: Fire AIM-120D AMRAAM Guided Missile
+    if (e.key === 'r' || e.key === 'R') {
+      if (typeof gameState !== 'undefined' && gameState && gameState.inPlane) {
+        fireJetMissile();
+      }
+    }
+
+    // [T] Key: Toggle FLIR Thermal Recon Visor
+    if (e.key === 't' || e.key === 'T') {
+      toggleThermalReconVisor();
+    }
+
+    // [F] Key: Fire LAV 25mm Bushmaster Autocannon
+    if (e.key === 'f' || e.key === 'F') {
+      if (st.isPilotingLAV) {
+        fireLAVBushmaster();
+      }
+    }
+
+    // [G] Key: Deploy LAV Smoke Screen
+    if (e.key === 'g' || e.key === 'G') {
+      if (st.isPilotingLAV) {
+        deployLAVSmokeScreen();
+      }
+    }
+
+    // [Space] Key: Fire 20mm Vulcan Gatling Cannon when in plane
+    if (e.code === 'Space') {
+      if (typeof gameState !== 'undefined' && gameState && gameState.inPlane) {
+        fireJetCannon();
+      }
+    }
+  });
+
+  // Mouse Primary Click Fire Handler
+  window.addEventListener('mousedown', e => {
+    if (e.button === 0) {
+      if (typeof gameState !== 'undefined' && gameState && gameState.inPlane) {
+        fireJetCannon();
+      } else if (window.militaryAviationState && window.militaryAviationState.isPilotingLAV) {
+        fireLAVBushmaster();
       }
     }
   });
@@ -1053,6 +2365,10 @@
             <text x="25" y="174" fill="#00ff88" font-size="11" font-family="monospace">-20</text>
           </svg>
         </div>
+        <!-- Dynamic HUD Target Box -->
+        <div id="cockpit-hud-target-box" style="display:none; position:absolute; width:48px; height:48px; border:2px solid #00ff88; transform:translate(-50%,-50%); pointer-events:none; transition:border-color 0.1s ease;">
+          <div id="cockpit-hud-target-label" style="position:absolute; top:-16px; left:0; font-size:10px; font-weight:900; color:#00ff88; white-space:nowrap;">TARGET [SCAN]</div>
+        </div>
       </div>
 
       <!-- Right Altitude Tape -->
@@ -1094,10 +2410,21 @@
               MASTER ARM: ARMED
             </div>
           </div>
-          <div style="color: #94a3b8; font-size: 11px; text-align: center;">
-            WEAPON: <span style="color: #00ff88; font-weight: 800;">AIM-120D AMRAAM (x4)</span> · <span style="color: #ffd700;">20MM CANNON: 450 RDS</span>
+          <div style="display: flex; gap: 8px; margin-top: 4px;">
+            <button id="cockpit-btn-gun" type="button" onclick="window.fireJetCannon()" style="background: rgba(255, 204, 0, 0.22); border: 1.5px solid #ffcc00; color: #ffcc00; font-family: 'Share Tech Mono', monospace; font-weight: 900; font-size: 11px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+              🔫 20MM VULCAN [SPACE]
+            </button>
+            <button id="cockpit-btn-missile" type="button" onclick="window.fireJetMissile()" style="background: rgba(239, 68, 68, 0.25); border: 1.5px solid #ef4444; color: #ef4444; font-family: 'Share Tech Mono', monospace; font-weight: 900; font-size: 11px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+              🚀 AIM-120D [R] (<span id="cockpit-missile-count">6</span>)
+            </button>
+            <button id="cockpit-btn-hook" type="button" onclick="window.toggleCarrierTailhook()" style="background: rgba(0, 242, 255, 0.22); border: 1.5px solid #00f2ff; color: #00f2ff; font-family: 'Share Tech Mono', monospace; font-weight: 900; font-size: 11px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+              ⚓ HOOK: <span id="cockpit-hook-status">UP [H]</span>
+            </button>
+            <button id="cockpit-btn-thermal" type="button" onclick="window.toggleThermalReconVisor()" style="background: rgba(34, 197, 94, 0.22); border: 1.5px solid #22c55e; color: #22c55e; font-family: 'Share Tech Mono', monospace; font-weight: 900; font-size: 11px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
+              👁️ THERMAL [T]
+            </button>
           </div>
-          <div style="display: flex; gap: 16px; font-size: 11px;">
+          <div style="display: flex; gap: 16px; font-size: 11px; margin-top: 4px;">
             <div>THROTTLE: <span id="cockpit-hud-thr-val" style="color: #00f2ff; font-weight: 900;">0%</span></div>
             <div>AFTERBURNER: <span id="cockpit-hud-ab-status" style="color: #8fa3b8; font-weight: 900;">STANDBY</span></div>
           </div>
@@ -1135,6 +2462,126 @@
       </div>
     `;
     document.body.appendChild(hudDiv);
+
+    // 2. Floating Tactical Bar for 3rd-person plane chase camera
+    if (!document.getElementById('plane-tactical-bar')) {
+      const tacBar = document.createElement('div');
+      tacBar.id = 'plane-tactical-bar';
+      tacBar.style.cssText = 'display:none; position:fixed; bottom:24px; right:24px; z-index:1150; flex-direction:column; gap:8px; pointer-events:auto;';
+      tacBar.innerHTML = `
+        <button type="button" onclick="window.fireJetCannon()" style="background:rgba(255,204,0,0.88); border:2px solid #fff; color:#000; font-family:'Orbitron',sans-serif; font-weight:900; font-size:12px; padding:10px 16px; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(255,204,0,0.5);">
+          🔫 20MM CANNON [SPACE]
+        </button>
+        <button type="button" onclick="window.fireJetMissile()" style="background:rgba(239,68,68,0.88); border:2px solid #fff; color:#fff; font-family:'Orbitron',sans-serif; font-weight:900; font-size:12px; padding:10px 16px; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(239,68,68,0.5);">
+          🚀 AIM-120D MISSILE [R]
+        </button>
+        <button type="button" onclick="window.toggleCarrierTailhook()" style="background:rgba(0,242,255,0.88); border:2px solid #fff; color:#000; font-family:'Orbitron',sans-serif; font-weight:900; font-size:12px; padding:10px 16px; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(0,242,255,0.5);">
+          ⚓ TAILHOOK [H]
+        </button>
+        <button type="button" onclick="window.togglePlaneCockpitView()" style="background:rgba(0,255,136,0.88); border:2px solid #fff; color:#000; font-family:'Orbitron',sans-serif; font-weight:900; font-size:12px; padding:10px 16px; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(0,255,136,0.5);">
+          ✈️ COCKPIT HUD [V]
+        </button>
+      `;
+      document.body.appendChild(tacBar);
+    }
+
+    // 3. Canadian Armed Forces LAV 6.0 8x8 Combat Vehicle HUD
+    if (!document.getElementById('lav-vehicle-hud')) {
+      const lavHud = document.createElement('div');
+      lavHud.id = 'lav-vehicle-hud';
+      lavHud.style.cssText = 'display:none; position:fixed; bottom:25px; left:50%; transform:translateX(-50%); background:rgba(10,16,24,0.94); border:2px solid #22c55e; border-radius:12px; padding:12px 28px; color:#fff; font-family:\'Share Tech Mono\',monospace; z-index:1150; flex-direction:column; align-items:center; gap:8px; box-shadow:0 0 25px rgba(34,197,94,0.35); pointer-events:auto;';
+      lavHud.innerHTML = `
+        <div style="display:flex; justify-content:space-between; width:100%; gap:24px; font-size:14px; font-weight:900; color:#22c55e; border-bottom:1px solid rgba(34,197,94,0.4); padding-bottom:4px;">
+          <span>🇨🇦 CANADIAN ARMED FORCES // LAV 6.0 (8X8)</span>
+          <span id="lav-hud-spd">0 KM/H</span>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:4px;">
+          <button type="button" onclick="window.fireLAVBushmaster()" style="background:rgba(239,68,68,0.25); border:1.5px solid #ef4444; color:#ef4444; font-family:monospace; font-weight:900; font-size:12px; padding:8px 16px; border-radius:6px; cursor:pointer;">
+            💥 25MM BUSHMASTER [CLICK / F]
+          </button>
+          <button type="button" onclick="window.deployLAVSmokeScreen()" style="background:rgba(148,163,184,0.25); border:1.5px solid #94a3b8; color:#e2e8f0; font-family:monospace; font-weight:900; font-size:12px; padding:8px 16px; border-radius:6px; cursor:pointer;">
+            💨 SMOKE SCREEN [G]
+          </button>
+          <button type="button" onclick="window.exitCanadianLAV()" style="background:rgba(34,197,94,0.25); border:1.5px solid #22c55e; color:#22c55e; font-family:monospace; font-weight:900; font-size:12px; padding:8px 16px; border-radius:6px; cursor:pointer;">
+            🚪 DISMOUNT [E]
+          </button>
+        </div>
+      `;
+      document.body.appendChild(lavHud);
+    }
+
+    // 4. FLIR Thermal Recon Visor Fullscreen Overlay
+    if (!document.getElementById('thermal-recon-visor-overlay')) {
+      const visorDiv = document.createElement('div');
+      visorDiv.id = 'thermal-recon-visor-overlay';
+      visorDiv.style.cssText = 'display:none; position:fixed; inset:0; pointer-events:none; z-index:1300; background:radial-gradient(circle, transparent 40%, rgba(0,25,35,0.7) 100%);';
+      visorDiv.innerHTML = `
+        <div style="position:absolute; inset:0; background:repeating-linear-gradient(0deg, rgba(0,242,255,0.03) 0px, rgba(0,242,255,0.03) 2px, transparent 2px, transparent 4px);"></div>
+        <div style="position:absolute; top:20px; left:25px; color:#00f2ff; font-family:'Share Tech Mono',monospace; font-size:13px; font-weight:900; letter-spacing:1px; line-height:1.5;">
+          <div>🇨🇦 CANADIAN FORCES FLIR RECON SYSTEM</div>
+          <div>IR SPECTRUM: 8-14μm LWIR · GAIN: AUTO-CALIBRATED</div>
+          <div>THERMAL SENSITIVITY: 0.04°C · AMBIENT: -4.5°C [CALGARY ALBERTA]</div>
+        </div>
+        <div style="position:absolute; top:20px; right:25px; color:#00ff88; font-family:'Share Tech Mono',monospace; font-size:13px; font-weight:900; text-align:right;">
+          <div>STATUS: RECON ACTIVE [T: TOGGLE]</div>
+          <div>BATTERY: 98% [NOMINAL]</div>
+        </div>
+        <div style="position:absolute; top:50%; left:50%; width:60px; height:60px; transform:translate(-50%,-50%); border:1px solid rgba(0,242,255,0.4); border-radius:50%;"></div>
+        <div id="thermal-targets-container"></div>
+      `;
+      document.body.appendChild(visorDiv);
+    }
+
+    // 5. CCCS Cyber Command Threat Mitigation Modal
+    if (!document.getElementById('cccs-cyber-threat-modal')) {
+      const modalDiv = document.createElement('div');
+      modalDiv.id = 'cccs-cyber-threat-modal';
+      modalDiv.style.cssText = 'display:none; position:fixed; inset:0; background:rgba(3,8,16,0.92); z-index:2100; align-items:center; justify-content:center; backdrop-filter:blur(8px); font-family:\'Share Tech Mono\',monospace;';
+      modalDiv.innerHTML = `
+        <div style="width:720px; max-width:92vw; background:#070d18; border:2px solid #00f2ff; border-radius:12px; padding:24px; box-shadow:0 0 35px rgba(0,242,255,0.3); color:#fff;">
+          <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #00f2ff; padding-bottom:10px; margin-bottom:16px;">
+            <div>
+              <div style="color:#00f2ff; font-size:18px; font-weight:900; font-family:'Orbitron',sans-serif;">🇨🇦 CCCS NATIONAL CYBER DEFENSE TERMINAL</div>
+              <div style="color:#94a3b8; font-size:11px;">COMMUNICATIONS SECURITY ESTABLISHMENT // THREAT MITIGATION MATRIX</div>
+            </div>
+            <button type="button" onclick="document.getElementById('cccs-cyber-threat-modal').style.display='none'" style="background:transparent; border:none; color:#ef4444; font-size:20px; cursor:pointer; font-weight:900;">✕</button>
+          </div>
+          <div style="margin-bottom:16px; color:#e2e8f0; font-size:12px;">
+            DEFENSE DIRECTIVE: Active malicious intrusions detected targeting Canadian critical infrastructure. Deploy cryptographic counter-payloads to defuse threats and secure the national grid for <span style="color:#ffd700; font-weight:900;">$5,000 CAD BOUNTY</span>.
+          </div>
+          <div style="display:flex; flex-direction:column; gap:12px;">
+            <div id="cyber-threat-card-0" style="background:#0b1322; border:1.5px solid #ef4444; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="color:#ef4444; font-weight:900; font-size:13px;">🚨 QUANTUM RANSOMWARE WORM // ARCTIC RADAR NODE</div>
+                <div style="color:#94a3b8; font-size:11px;">Target: Alert Bay Coastal Radar · Vector: Port 443 SCADA</div>
+              </div>
+              <button type="button" onclick="window.defuseCyberThreat(0)" style="background:rgba(239,68,68,0.25); border:1.5px solid #ef4444; color:#ef4444; font-weight:900; padding:6px 14px; border-radius:6px; cursor:pointer;">
+                🛡️ DEPLOY COUNTER-PAYLOAD
+              </button>
+            </div>
+            <div id="cyber-threat-card-1" style="background:#0b1322; border:1.5px solid #ffaa00; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="color:#ffaa00; font-weight:900; font-size:13px;">⚠️ TERABIT DDOS FLOOD // TRANS-CANADA RAILWAYS</div>
+                <div style="color:#94a3b8; font-size:11px;">Target: Calgary Maglev Network · Vector: 1.4 Tbps SYN Flood</div>
+              </div>
+              <button type="button" onclick="window.defuseCyberThreat(1)" style="background:rgba(255,170,0,0.25); border:1.5px solid #ffaa00; color:#ffaa00; font-weight:900; padding:6px 14px; border-radius:6px; cursor:pointer;">
+                🛡️ DEPLOY COUNTER-PAYLOAD
+              </button>
+            </div>
+            <div id="cyber-threat-card-2" style="background:#0b1322; border:1.5px solid #38bdf8; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <div style="color:#38bdf8; font-weight:900; font-size:13px;">⚡ ZERO-DAY CRYPTO-EXPLOIT // FEDERAL ENERGY GRID</div>
+                <div style="color:#94a3b8; font-size:11px;">Target: Alberta Hydro Substation · Vector: Zero-Day Memory Buffer</div>
+              </div>
+              <button type="button" onclick="window.defuseCyberThreat(2)" style="background:rgba(56,189,248,0.25); border:1.5px solid #38bdf8; color:#38bdf8; font-weight:900; padding:6px 14px; border-radius:6px; cursor:pointer;">
+                🛡️ DEPLOY COUNTER-PAYLOAD
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modalDiv);
+    }
   }
 
   // Helper Canvas Banners
@@ -1203,5 +2650,19 @@
   window.enlistInCanadianForces = enlistInCanadianForces;
   window.togglePlaneCockpitView = togglePlaneCockpitView;
   window.ensureCockpitHUDDOM = ensureCockpitHUDDOM;
+  window.playMilitarySFX = playMilitarySFX;
+  window.buildCanadianAuroraBorealis = buildCanadianAuroraBorealis;
+  window.initHostileSkyRaiders = initHostileSkyRaiders;
+  window.fireJetCannon = fireJetCannon;
+  window.fireJetMissile = fireJetMissile;
+  window.toggleCarrierTailhook = toggleCarrierTailhook;
+  window.boardCanadianLAV = boardCanadianLAV;
+  window.exitCanadianLAV = exitCanadianLAV;
+  window.fireLAVBushmaster = fireLAVBushmaster;
+  window.deployLAVSmokeScreen = deployLAVSmokeScreen;
+  window.accessTacticalArmory = accessTacticalArmory;
+  window.toggleThermalReconVisor = toggleThermalReconVisor;
+  window.openCyberThreatMatrix = openCyberThreatMatrix;
+  window.defuseCyberThreat = defuseCyberThreat;
 
 })(window);
