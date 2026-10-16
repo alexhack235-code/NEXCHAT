@@ -11,21 +11,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
-  <!-- High-reliability Three.js r128 (Local primary, CDN multi-fallback) -->
+  <!-- High-reliability Three.js r128 (Local primary with CDN fallback) -->
   <script src="js/three.min.js"></script>
-  <script>
-    if (typeof THREE === 'undefined') {
-      console.warn('[AstroShift: Beyond Earth] Local Three.js not detected, fetching from CDN fallback...');
-      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
-    }
-  </script>
-  <!-- Free 3D Assets GLTFLoader (Local primary, CDN fallback) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="js/GLTFLoader.js"></script>
-  <script>
-    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
-      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
-    }
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
   <style>
     * {
@@ -4077,18 +4067,18 @@
     </div>
   </div>
 
-  <!-- PINNED ACTIVE MISSION HUD WIDGET -->
-  <div id="hud-active-mission" onclick="toggleMissionsModal()" style="position: fixed; top: 125px; right: 20px; z-index: 220; background: rgba(8, 14, 24, 0.9); border: 1.5px solid #00f2ff; border-radius: 12px; padding: 10px 14px; backdrop-filter: blur(8px); cursor: pointer; font-family: 'Rajdhani', sans-serif; box-shadow: 0 0 20px rgba(0, 242, 255, 0.25); max-width: 250px; user-select: none;">
-    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 4px;">
-      <span style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; color: #00f2ff; letter-spacing: 0.5px;"><i class="fa-solid fa-crosshairs"></i> CONTRACT [M]</span>
-      <span id="hud-mission-reward" style="font-size: 11px; font-weight: 800; color: #ffd700;">+1,200 NEX</span>
+  <!-- PINNED ACTIVE MISSION HUD WIDGET (TOP-LEFT COMPACT BADGE) -->
+  <div id="hud-active-mission" onclick="toggleMissionsModal()" style="display: none; position: fixed; top: 14px; left: 16px; z-index: 180; background: rgba(8, 14, 24, 0.88); border: 1.5px solid rgba(0, 242, 255, 0.45); border-radius: 12px; padding: 6px 12px; backdrop-filter: blur(8px); cursor: pointer; font-family: 'Rajdhani', sans-serif; box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); max-width: 190px; user-select: none;">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 2px;">
+      <span style="font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; color: #00f2ff; letter-spacing: 0.5px;"><i class="fa-solid fa-crosshairs"></i> CONTRACT [M]</span>
+      <span id="hud-mission-reward" style="font-size: 10px; font-weight: 800; color: #ffd700;">+1,200 NEX</span>
     </div>
-    <div id="hud-mission-title" style="font-size: 13px; font-weight: 700; color: #fff; line-height: 1.2;">MARTIAN XENON MINING</div>
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 6px; font-size: 11px; color: #8fa3b8;">
+    <div id="hud-mission-title" style="font-size: 11px; font-weight: 700; color: #fff; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">MARTIAN XENON MINING</div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 3px; font-size: 10px; color: #8fa3b8;">
       <span id="hud-mission-progress-text">0 / 3 CRYSTALS</span>
       <span id="hud-mission-pct" style="color: #00ff88; font-weight: 700;">0%</span>
     </div>
-    <div style="background: rgba(255,255,255,0.1); border-radius: 4px; height: 5px; margin-top: 4px; overflow: hidden;">
+    <div style="background: rgba(255,255,255,0.12); border-radius: 3px; height: 3px; margin-top: 3px; overflow: hidden;">
       <div id="hud-mission-bar" style="background: #00f2ff; height: 100%; width: 0%; transition: width 0.3s ease;"></div>
     </div>
   </div>
@@ -4103,54 +4093,12 @@
     <button type="button" style="background:none; border:none; color:#00f2ff; cursor:pointer; font-size:14px; margin-left:6px;" title="Dismiss">&times;</button>
   </div>
 
-  <!-- MOBILE ON-SCREEN TOUCH CONTROLS OVERLAY -->
+  <!-- MOBILE ON-SCREEN TOUCH CONTROLS OVERLAY (AAA UNCLUTTERED) -->
   <div id="mobile-touch-layer">
     <!-- Touch Aim Drag Zone (Right side touch pan) -->
     <div id="touch-aim-zone" title="Touch &amp; Drag to Aim / Look Around"></div>
 
-    <!-- Top-Left Tactical Minimap & Quick Control Icons (Image 3) -->
-    <div id="mobile-hud-top-left">
-      <div id="mobile-minimap-box">
-        <canvas id="mobile-minimap-canvas" width="108" height="84"></canvas>
-      </div>
-      <div class="mobile-quick-icons-row">
-        <button type="button" class="mobile-icon-pill-btn" onclick="toggleSettingsModal()" title="Game Settings">
-          <i class="fa-solid fa-gear"></i>
-        </button>
-        <button type="button" class="mobile-icon-pill-btn" id="btn-mobile-mic" onclick="toggleMobileMic()" title="Voice Comms">
-          <i class="fa-solid fa-microphone"></i>
-        </button>
-        <button type="button" class="mobile-icon-pill-btn" id="btn-mobile-speaker" onclick="toggleMobileSpeaker()" title="Audio Output">
-          <i class="fa-solid fa-volume-high"></i>
-        </button>
-        <button type="button" class="mobile-icon-pill-btn" id="btn-mobile-chat" onclick="sendQuickChat()" title="Tactical Comms">
-          <i class="fa-solid fa-comment-dots"></i>
-        </button>
-        <button type="button" class="mobile-icon-pill-btn" onclick="toggleMissionsModal()" title="Mission Board" style="color: #ffd700; border-color: rgba(255,215,0,0.5);">
-          <i class="fa-solid fa-crosshairs"></i>
-        </button>
-      </div>
-    </div>
-
-    <!-- Teammate Vacancy Status Cards (Top-Center Image 3) -->
-    <div class="mobile-teammates-box">
-      <div class="mobile-teammate-card">Vacant</div>
-      <div class="mobile-teammate-card">Vacant</div>
-    </div>
-
-    <!-- Top-Center Score/Kill Badge (Image 3) -->
-    <div id="mobile-kill-badge">1</div>
-
-    <!-- Top-Right Pause / Scoreboard Button (Image 3) -->
-    <button type="button" id="mobile-top-pause" onclick="toggleSettingsModal()" title="Scoreboard &amp; Menu">
-      <div style="display: flex; gap: 3px; align-items: center; justify-content: center; height: 16px;">
-        <span style="display: block; width: 3px; height: 12px; background: #ffffff; border-radius: 2px;"></span>
-        <span style="display: block; width: 3px; height: 16px; background: #ffffff; border-radius: 2px;"></span>
-        <span style="display: block; width: 3px; height: 12px; background: #ffffff; border-radius: 2px;"></span>
-      </div>
-    </button>
-
-    <!-- Golden Angled Diamond Analog Joystick (Bottom-Left Image 3) -->
+    <!-- Golden Angled Diamond Analog Joystick (Bottom-Left) -->
     <div id="golden-joystick-container">
       <div id="golden-joystick-outer">
         <div id="golden-speed-readout">00</div>
@@ -4158,52 +4106,7 @@
       </div>
     </div>
 
-    <!-- Center-Bottom Quick Action Buttons (About & Balance Announcement Image 3) -->
-    <div class="mobile-center-announcements">
-      <button type="button" class="mobile-center-sub-btn" onclick="showCyberAnnouncement('ABOUT ASTROSHIFT: BEYOND EARTH', 'HIGH-PERFORMANCE 60 FPS COMBAT ENGINE\n- Open-World Metropolis with Central Stadium & 5 Cardinal Transit Districts\n- Nexus Grand Mall with 5 interactive shopping gallerias\n- Real-time 3D physics, vehicle dynamics & ranked matchmaking');" title="About">
-        <div class="sub-icon-circle">
-          <i class="fa-solid fa-file-lines"></i>
-        </div>
-        <span>About</span>
-      </button>
-      <button type="button" class="mobile-center-sub-btn gold" onclick="showCyberAnnouncement('BALANCE & RANKING UPDATE', 'SEASON 1 ODYSSEY CALIBRATIONS:\n- Weapon Master mode active (32 kills to victory)\n- Ranked Tier progression ladder enabled (Bronze to Legendary Odyssey)\n- Tactical Ping waypoint system operational\n- Live MS latency telemetry active');" title="Balance Announcement">
-        <div class="sub-icon-circle">
-          <i class="fa-solid fa-bullhorn"></i>
-        </div>
-        <span>Balance Announcement</span>
-      </button>
-      <button type="button" class="mobile-center-sub-btn" style="border-color: #ffd700;" onclick="toggleStoreModal(true, 'armory')" title="Nexus Grand Mall">
-        <div class="sub-icon-circle" style="color: #ffd700; border-color: #ffd700;">
-          <i class="fa-solid fa-shop"></i>
-        </div>
-        <span style="color: #ffd700;">Mall</span>
-      </button>
-    </div>
-
-    <!-- Compact Operative Vitals Pill (Bottom-Center Image 3) -->
-    <div id="mobile-vitals-pill">
-      <div class="vitals-avatar">
-        <i class="fa-solid fa-user-ninja"></i>
-      </div>
-      <div class="vitals-data">
-        <div class="vitals-header">
-          <span>Lv.1</span>
-          <span style="color: #8fa3b8; font-size: 9px;" id="hud-op-name">DEMONALEX</span>
-        </div>
-        <div class="vitals-bars">
-          <!-- Armor Bar (Top, segmented white/gray) -->
-          <div class="vitals-bar-track">
-            <div class="vitals-bar-fill-armor" id="mobile-fill-armor" style="width: 100%;"></div>
-          </div>
-          <!-- Health Bar (Bottom, green/cyan) -->
-          <div class="vitals-bar-track">
-            <div class="vitals-bar-fill-hp" id="mobile-fill-hp" style="width: 100%;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Translucent Circular Action Buttons Cluster (Right Side Image 3) -->
+    <!-- Translucent Circular Action Buttons Cluster (Bottom-Right) -->
     <div id="mobile-action-buttons">
       <!-- Aim Down Sights (Eye / Magnifier) -->
       <button type="button" class="bs-action-btn" id="btn-action-aim" title="Aim Down Sights (ADS)">
@@ -4502,20 +4405,17 @@
   </div>
 
   <!-- ============================================================ -->
-  <!-- METRO MAGLEV PASSENGER RIDE HUD                              -->
+  <!-- METRO MAGLEV PASSENGER RIDE HUD (ACTIVE ONLY WHEN RIDING)     -->
   <!-- ============================================================ -->
-  <div id="train-passenger-hud" style="display: none; position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); background: rgba(6, 16, 28, 0.94); border: 2px solid #00ff88; border-radius: 16px; padding: 12px 24px; z-index: 250; font-family: 'Orbitron', sans-serif; box-shadow: 0 0 35px rgba(0, 255, 136, 0.45); pointer-events: auto; display: flex; align-items: center; gap: 20px;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-      <i class="fa-solid fa-train-subway" style="color: #00ff88; font-size: 22px;"></i>
+  <div id="train-passenger-hud" style="display: none !important; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(6, 16, 28, 0.94); border: 1.5px solid #00ff88; border-radius: 12px; padding: 8px 18px; z-index: 250; font-family: 'Orbitron', sans-serif; box-shadow: 0 0 25px rgba(0, 255, 136, 0.35); pointer-events: auto; align-items: center; gap: 14px; backdrop-filter: blur(8px);">
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-train-subway" style="color: #00ff88; font-size: 18px;"></i>
       <div>
-        <div style="font-size: 12px; font-weight: 900; color: #00ff88; letter-spacing: 1px;">METRO MAGLEV EXPRESS LINE 1</div>
-        <div style="font-size: 10px; color: #8fa3b8;" id="train-hud-status">SPEED: 100 KM/H · PERIMETER LOOP ELEVATED GUIDEWAY</div>
+        <div style="font-size: 11px; font-weight: 900; color: #00ff88; letter-spacing: 0.5px;">METRO MAGLEV EXPRESS</div>
+        <div style="font-size: 9px; color: #8fa3b8;" id="train-hud-status">SPEED: 100 KM/H · PERIMETER LOOP</div>
       </div>
     </div>
-    <div style="font-size: 10px; color: #ffd700;">
-      ENJOY PANORAMIC CITY TOUR
-    </div>
-    <button type="button" onclick="exitMaglevTrain()" style="background: rgba(255, 0, 51, 0.2); border: 1.5px solid #ff0033; color: #ff6677; border-radius: 8px; padding: 7px 14px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer;">
+    <button type="button" onclick="exitMaglevTrain()" style="background: rgba(255, 0, 51, 0.2); border: 1.5px solid #ff0033; color: #ff6677; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; cursor: pointer;">
       <i class="fa-solid fa-door-open"></i> [E] DISEMBARK
     </button>
   </div>
@@ -6214,8 +6114,11 @@
         lockOverlay.style.transition = 'opacity 0.4s ease';
         setTimeout(() => {
           lockOverlay.style.display = 'none';
-          const lobby = document.getElementById('astroshift-lobby');
-          if (lobby) lobby.style.display = 'flex';
+          if (typeof setUIMode === 'function') setUIMode('lobby');
+          else {
+            const lobby = document.getElementById('astroshift-lobby');
+            if (lobby) lobby.style.display = 'flex';
+          }
           if (!isEngineInitialized) boot3DEngine();
         }, 400);
       }
@@ -6315,17 +6218,10 @@
         camera.position.set(0, 2.8, 0);
       }
 
-      // Hide legacy desktop HUD bars completely (Image 3 Clean HUD)
-      const topBar = document.querySelector('.hud-top-bar');
-      const botBar = document.querySelector('.hud-bottom-bar');
-      const minimapCont = document.getElementById('hud-minimap-container');
-      if (topBar) topBar.style.display = 'none';
-      if (botBar) botBar.style.display = 'none';
-      if (minimapCont) minimapCont.style.display = 'none';
-
-      // Activate Mobile In-Game HUD (Image 3)
-      const touchLayer = document.getElementById('mobile-touch-layer');
-      if (touchLayer) touchLayer.classList.add('active');
+      // Switch UI to Clean In-Game Mode (Hides lobby, shows streamlined game HUD)
+      if (typeof setUIMode === 'function') {
+        setUIMode('game');
+      }
 
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 1024);
       if (!isMobile) {
@@ -6336,6 +6232,15 @@
         }
       }
     }
+
+    function returnToLobby() {
+      if (document.exitPointerLock) document.exitPointerLock();
+      if (typeof setUIMode === 'function') {
+        setUIMode('lobby');
+      }
+      cyberAudio.playLootChime();
+    }
+    window.returnToLobby = returnToLobby;
 
     // ============================================================
     // ASTROSHIFT: BEYOND EARTH SETTINGS CONTROLLER
@@ -12862,35 +12767,27 @@
         worldParticleSystem = new THREE.Points(partGeo, partMat);
         scene.add(worldParticleSystem);
 
-        // Build Nexus Grand Mall & Shopping Galleria and Alive City Dynamics
-        buildShoppingMall();
-        buildCityLivelinessElements();
-        buildApexCarCustoms();
-        buildStarbaseLaunchInfrastructure();
-        buildSupplyLootCrates();
-        buildHydroSkimmer();
-        initFootstepDustPool();
+        // Build Nexus Grand Mall & World Systems safely
+        try { if (typeof buildShoppingMall === 'function') buildShoppingMall(); } catch (e) { console.warn(e); }
+        try { if (typeof buildCityLivelinessElements === 'function') buildCityLivelinessElements(); } catch (e) { console.warn(e); }
+        try { if (typeof buildApexCarCustoms === 'function') buildApexCarCustoms(); } catch (e) { console.warn(e); }
+        try { if (typeof buildStarbaseLaunchInfrastructure === 'function') buildStarbaseLaunchInfrastructure(); } catch (e) { console.warn(e); }
+        try { if (typeof buildSupplyLootCrates === 'function') buildSupplyLootCrates(); } catch (e) { console.warn(e); }
+        try { if (typeof buildHydroSkimmer === 'function') buildHydroSkimmer(); } catch (e) { console.warn(e); }
+        try { if (typeof initFootstepDustPool === 'function') initFootstepDustPool(); } catch (e) { console.warn(e); }
+        try { if (typeof buildNeoKyotoCity === 'function') buildNeoKyotoCity(); } catch (e) { console.warn(e); }
+        try { if (typeof buildSolariaCity === 'function') buildSolariaCity(); } catch (e) { console.warn(e); }
+        try { if (typeof buildAtlantisCity === 'function') buildAtlantisCity(); } catch (e) { console.warn(e); }
+        try { if (typeof buildRecreationalActivities === 'function') buildRecreationalActivities(); } catch (e) { console.warn(e); }
+        try { if (typeof buildPerimeterRailway === 'function') buildPerimeterRailway(); } catch (e) { console.warn(e); }
+        try { if (typeof buildNexusAerodrome === 'function') buildNexusAerodrome(); } catch (e) { console.warn(e); }
+        try { if (typeof buildCalgaryMetropolis === 'function') buildCalgaryMetropolis(); } catch (e) { console.warn(e); }
+        try { if (typeof buildTransCanadaGateway === 'function') buildTransCanadaGateway(); } catch (e) { console.warn(e); }
+        try { if (typeof load3DAssetsAndEnhancements === 'function') load3DAssetsAndEnhancements(); } catch (e) { console.warn(e); }
+        try { if (typeof initCityTraffic === 'function') initCityTraffic(); } catch (e) { console.warn(e); }
 
-        // Build 3 Distinct New Regional Cities & Fun Recreational Activities
-        buildNeoKyotoCity();
-        buildSolariaCity();
-        buildAtlantisCity();
-        buildRecreationalActivities();
-
-        // Build Perimeter Railway System & Nexus International Aerodrome
-        buildPerimeterRailway();
-        buildNexusAerodrome();
-        buildCalgaryMetropolis();
-        buildTransCanadaGateway();
-
-        // Load Free 3D Assets (Models, Rigged Skeletal Animations & PBR Maps)
-        load3DAssetsAndEnhancements();
-
-        // Initialize Autonomous Metropolis Cyber Traffic System
-        initCityTraffic();
-        // Initialize Hyper-Realism Engine & Adaptive Low-End Hardware Scaler
         if (window.HyperRealismEngine) {
-          window.HyperRealismEngine.init(scene, camera, renderer, player, gameState);
+          try { window.HyperRealismEngine.init(scene, camera, renderer, player, gameState); } catch (e) { console.warn(e); }
         }
 
         isEngineInitialized = true;
@@ -19269,6 +19166,52 @@
       showStoreNotification('TERMINAL SECURITY LOCKED');
     };
 
+    // Set UI Mode: Clean state separation between Lobby and In-Game HUDs
+    function setUIMode(mode) {
+      const lobby = document.getElementById('astroshift-lobby');
+      const touchLayer = document.getElementById('mobile-touch-layer');
+      const survivalHud = document.getElementById('city-survival-hud');
+      const radar = document.getElementById('city-radar-container');
+      const missionHud = document.getElementById('hud-active-mission');
+      const maglevHud = document.getElementById('train-passenger-hud');
+      const ctrainHud = document.getElementById('ctrain-passenger-hud');
+      const lockOverlay = document.getElementById('launch-lock-overlay');
+      const startOverlay = document.getElementById('start-overlay');
+
+      if (lockOverlay) lockOverlay.style.display = 'none';
+      if (startOverlay) startOverlay.style.display = 'none';
+
+      if (mode === 'lobby') {
+        if (lobby) lobby.style.display = 'flex';
+        if (touchLayer) touchLayer.classList.remove('active');
+        if (survivalHud) survivalHud.style.display = 'none';
+        if (radar) radar.style.display = 'none';
+        if (missionHud) missionHud.style.display = 'none';
+        if (maglevHud) maglevHud.style.setProperty('display', 'none', 'important');
+        if (ctrainHud) ctrainHud.style.setProperty('display', 'none', 'important');
+      } else {
+        if (lobby) lobby.style.display = 'none';
+        const isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 1024);
+        if (touchLayer && (isMobile || (gameState && gameState.settings && gameState.settings.forceMobileControls))) {
+          touchLayer.classList.add('active');
+        } else if (touchLayer) {
+          touchLayer.classList.remove('active');
+        }
+        if (survivalHud) survivalHud.style.display = 'flex';
+        if (radar) radar.style.display = 'flex';
+        if (missionHud) missionHud.style.display = 'block';
+        if (maglevHud) {
+          if (gameState && gameState.inTrain) maglevHud.style.setProperty('display', 'flex', 'important');
+          else maglevHud.style.setProperty('display', 'none', 'important');
+        }
+        if (ctrainHud) {
+          if (gameState && gameState.inCalgaryCTrain) ctrainHud.style.setProperty('display', 'flex', 'important');
+          else ctrainHud.style.setProperty('display', 'none', 'important');
+        }
+      }
+    }
+    window.setUIMode = setUIMode;
+
     // Auto-Boot Verification on Page Load
     window.addEventListener('DOMContentLoaded', () => {
       loadSavedSettings();
@@ -19295,22 +19238,17 @@
       if (callsignInput) callsignInput.value = savedCallsign;
 
       const launchLockOverlay = document.getElementById('launch-lock-overlay');
-      const lobbyEl = document.getElementById('astroshift-lobby');
       const startOverlay = document.getElementById('start-overlay');
       if (startOverlay) startOverlay.style.display = 'none';
 
       // Direct live 3D rendering: start immediately into Central Metropolis
       const wantPortalLock = urlParams.has('portal') || urlParams.has('lock');
       if (wantPortalLock) {
+        setUIMode('lobby');
         if (launchLockOverlay) launchLockOverlay.style.display = 'flex';
-        if (lobbyEl) lobbyEl.style.display = 'none';
       } else if (urlParams.has('lobby')) {
-        if (launchLockOverlay) launchLockOverlay.style.display = 'none';
-        if (lobbyEl) lobbyEl.style.display = 'flex';
+        setUIMode('lobby');
       } else {
-        // Default: Instantly enter 3D Central Metropolis with zero dark overlays!
-        if (launchLockOverlay) launchLockOverlay.style.display = 'none';
-        if (lobbyEl) lobbyEl.style.display = 'none';
         startMatchFromLobby();
       }
 
@@ -19319,71 +19257,60 @@
     });
   </script>
 
-  <!-- TACTICAL IN-GAME GRAPHICS & SETTINGS TRIGGER -->
-  <button type="button" id="btn-tactical-settings" onclick="toggleSettingsModal('graphics')" style="position: fixed; top: 18px; right: 18px; z-index: 250; background: rgba(8, 14, 24, 0.94); border: 1.5px solid #00f2ff; color: #00f2ff; border-radius: 12px; padding: 7px 15px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 18px rgba(0,242,255,0.35); backdrop-filter: blur(10px); transition: all 0.2s;" title="Open Graphics &amp; Game Settings [ESC]">
-    <i class="fa-solid fa-sliders" style="color: #00f2ff;"></i> <span>GRAPHICS &amp; SETTINGS [ESC]</span>
-  </button>
-
-  <!-- CALGARY METROPOLIS TACTICAL HUD RADAR -->
-  <div id="city-radar-container" style="position: fixed; top: 78px; right: 18px; width: 130px; height: 154px; background: rgba(8, 14, 24, 0.90); border: 1.5px solid rgba(0, 242, 255, 0.45); border-radius: 16px; padding: 6px; z-index: 180; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.65); display: flex; flex-direction: column; align-items: center; pointer-events: none;">
-    <div style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 900; letter-spacing: 1px; color: #00f2ff; margin-bottom: 2px; display: flex; justify-content: space-between; width: 100%; padding: 0 4px;">
+  <!-- CALGARY METROPOLIS TACTICAL HUD RADAR (TOP-RIGHT COMPACT) -->
+  <div id="city-radar-container" style="display: none; position: fixed; top: 14px; right: 14px; width: 114px; height: 138px; background: rgba(8, 14, 24, 0.88); border: 1.5px solid rgba(0, 242, 255, 0.45); border-radius: 14px; padding: 5px; z-index: 180; backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(0,0,0,0.65); flex-direction: column; align-items: center; pointer-events: auto;">
+    <div style="font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 900; letter-spacing: 0.5px; color: #00f2ff; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 4px;">
       <span><i class="fa-solid fa-satellite-dish"></i> RADAR</span>
-      <span id="city-radar-dist-lbl" style="color: #ffd700;">CALGARY</span>
+      <button type="button" onclick="toggleSettingsModal('graphics')" style="background: none; border: none; color: #00f2ff; cursor: pointer; font-size: 10px; padding: 0 2px;" title="Graphics &amp; Game Settings [ESC]"><i class="fa-solid fa-gear"></i></button>
     </div>
-    <canvas id="city-hud-radar-canvas" width="116" height="116" style="width: 116px; height: 116px; border-radius: 50%;"></canvas>
-    <div id="city-radar-target-lbl" style="font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 700; color: #8fa3b8; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; text-align: center; margin-top: 2px;">
-      CENTRAL METROPOLIS
+    <canvas id="city-hud-radar-canvas" width="104" height="104" style="width: 104px; height: 104px; border-radius: 50%;"></canvas>
+    <div id="city-radar-target-lbl" style="font-family: 'Rajdhani', sans-serif; font-size: 9px; font-weight: 700; color: #8fa3b8; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 108px; text-align: center; margin-top: 1px;">
+      CALGARY METROPOLIS
     </div>
   </div>
 
-  <!-- CALGARY TRANSIT C-TRAIN PASSENGER HUD -->
-  <div id="ctrain-passenger-hud" style="display: none; position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: rgba(8, 14, 24, 0.95); border: 2px solid #ef4444; border-radius: 16px; padding: 14px 24px; z-index: 250; font-family: 'Rajdhani', sans-serif; align-items: center; gap: 20px; box-shadow: 0 0 40px rgba(239, 68, 68, 0.45); pointer-events: auto;">
-    <div style="font-size: 32px; color: #ef4444;"><i class="fa-solid fa-train-subway"></i></div>
+  <!-- CALGARY TRANSIT C-TRAIN PASSENGER HUD (HIDDEN UNLESS BOARDED) -->
+  <div id="ctrain-passenger-hud" style="display: none !important; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(8, 14, 24, 0.95); border: 1.5px solid #ef4444; border-radius: 12px; padding: 8px 18px; z-index: 250; font-family: 'Rajdhani', sans-serif; align-items: center; gap: 14px; box-shadow: 0 0 30px rgba(239, 68, 68, 0.4); pointer-events: auto;">
+    <div style="font-size: 22px; color: #ef4444;"><i class="fa-solid fa-train-subway"></i></div>
     <div>
-      <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 900; color: #fff; letter-spacing: 0.5px;">
-        CALGARY TRANSIT // C-TRAIN ROUTE 202
+      <div style="font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; color: #fff;">
+        CALGARY TRANSIT // C-TRAIN
       </div>
-      <div id="ctrain-station-banner" style="font-size: 12px; color: #38bdf8; font-weight: 700;">
-        EN ROUTE: CENTRAL LIBRARY &amp; SCOTIA PLACE ARENA
+      <div id="ctrain-station-banner" style="font-size: 10px; color: #38bdf8; font-weight: 700;">
+        EN ROUTE: CENTRAL LIBRARY
       </div>
     </div>
-    <button type="button" onclick="exitCalgaryCTrain()" style="background: rgba(239, 68, 68, 0.2); border: 1.5px solid #ef4444; color: #fca5a5; border-radius: 10px; padding: 8px 16px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer; transition: all 0.2s;">
+    <button type="button" onclick="exitCalgaryCTrain()" style="background: rgba(239, 68, 68, 0.2); border: 1.5px solid #ef4444; color: #fca5a5; border-radius: 6px; padding: 5px 10px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; cursor: pointer;">
       <i class="fa-solid fa-door-open"></i> [E] DISEMBARK
     </button>
   </div>
 
-
-  <!-- CALGARY METROPOLIS CANADIAN COLDNESS & SURVIVAL HUD -->
-  <div id="city-survival-hud" style="position: fixed; top: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 16px; background: rgba(8, 14, 24, 0.94); border: 1.5px solid rgba(0, 242, 255, 0.45); border-radius: 14px; padding: 8px 18px; z-index: 220; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.65); pointer-events: auto;">
+  <!-- CALGARY METROPOLIS CANADIAN COLDNESS & SURVIVAL HUD (TOP-CENTER AAA STATUS PILL) -->
+  <div id="city-survival-hud" style="display: none; position: fixed; top: 14px; left: 50%; transform: translateX(-50%); align-items: center; gap: 8px; background: rgba(8, 14, 24, 0.88); border: 1.5px solid rgba(0, 242, 255, 0.45); border-radius: 20px; padding: 4px 12px; z-index: 220; backdrop-filter: blur(10px); box-shadow: 0 0 20px rgba(0,0,0,0.65); pointer-events: auto;">
     <!-- HEALTH -->
-    <div style="display: flex; flex-direction: column; width: 125px;">
-      <div style="display: flex; justify-content: space-between; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; margin-bottom: 3px;">
-        <span style="color: #fca5a5;"><i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i> HEALTH</span>
-        <span id="city-hp-val" style="color: #22c55e;">100%</span>
-      </div>
-      <div style="width: 100%; height: 7px; background: rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden;">
-        <div id="city-hp-fill" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ef4444, #22c55e); transition: width 0.15s ease;"></div>
-      </div>
+    <div style="display: flex; align-items: center; gap: 4px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800;">
+      <i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i>
+      <span id="city-hp-val" style="color: #22c55e;">100%</span>
     </div>
+
+    <span style="color: rgba(255,255,255,0.25); font-size: 10px;">|</span>
 
     <!-- WARMTH -->
-    <div style="display: flex; flex-direction: column; width: 125px;">
-      <div style="display: flex; justify-content: space-between; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; margin-bottom: 3px;">
-        <span style="color: #93c5fd;"><i class="fa-solid fa-temperature-half" style="color: #38bdf8;"></i> WARMTH (<span id="city-temp-val">-18°C</span>)</span>
-        <span id="city-warmth-val" style="color: #00f2ff;">100%</span>
-      </div>
-      <div style="width: 100%; height: 7px; background: rgba(255,255,255,0.15); border-radius: 4px; overflow: hidden;">
-        <div id="city-warmth-fill" style="width: 100%; height: 100%; background: linear-gradient(90deg, #ef4444, #f59e0b, #00f2ff); transition: width 0.15s ease;"></div>
-      </div>
+    <div style="display: flex; align-items: center; gap: 4px; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800;">
+      <i class="fa-solid fa-temperature-half" style="color: #38bdf8;"></i>
+      <span id="city-temp-val" style="color: #93c5fd;">-18°C</span>
+      <span id="city-warmth-val" style="color: #00f2ff;">100%</span>
     </div>
 
+    <span style="color: rgba(255,255,255,0.25); font-size: 10px;">|</span>
+
     <!-- GEAR & THERMOS -->
-    <div style="display: flex; align-items: center; gap: 8px;">
-      <button type="button" onclick="cycleCityWinterGear()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(0,242,255,0.35); border-radius: 8px; color: #38bdf8; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 800; padding: 5px 10px; cursor: pointer;">
-        <span id="city-gear-label">🇨🇦 ARCTIC GOOSE PARKA (85%)</span> [T]
+    <div style="display: flex; align-items: center; gap: 6px;">
+      <button type="button" onclick="cycleCityWinterGear()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(0,242,255,0.35); border-radius: 6px; color: #38bdf8; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 800; padding: 2px 7px; cursor: pointer;" title="Cycle Winter Gear [T]">
+        <span id="city-gear-label">🇨🇦 PARKA 85%</span>
       </button>
-      <button type="button" onclick="drinkCityHotThermos()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(0,242,255,0.35); border-radius: 8px; color: #ffd700; font-family: 'Rajdhani', sans-serif; font-size: 11px; font-weight: 800; padding: 5px 10px; cursor: pointer;">
-        <span id="city-thermos-label">☕ HOT THERMOS (3)</span> [C]
+      <button type="button" onclick="drinkCityHotThermos()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,215,0,0.35); border-radius: 6px; color: #ffd700; font-family: 'Rajdhani', sans-serif; font-size: 10px; font-weight: 800; padding: 2px 7px; cursor: pointer;" title="Drink Hot Coffee [C]">
+        <span id="city-thermos-label">☕ 3</span>
       </button>
     </div>
   </div>
