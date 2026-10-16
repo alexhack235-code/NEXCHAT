@@ -9772,6 +9772,25 @@
 
       try {
         const canvas = document.getElementById('game-canvas');
+        if (canvas) {
+          canvas.addEventListener('webglcontextlost', function(e) {
+            e.preventDefault();
+            console.warn('[WebGL Watchdog] GPU context lost! Preventing freeze and initiating recovery in Safe Low Mode...');
+            if (typeof showStoreNotification === 'function') {
+              showStoreNotification('⚠️ GPU HANG DETECTED // AUTO-RECOVERING IN SAFE LOW MODE...');
+            }
+            if (typeof setLowEndTurboMode === 'function') {
+              setLowEndTurboMode(true);
+            }
+          }, false);
+
+          canvas.addEventListener('webglcontextrestored', function() {
+            console.log('[WebGL Watchdog] GPU Context restored! Re-rendering scene...');
+            if (typeof window.emergencyUnblackScreen === 'function') {
+              window.emergencyUnblackScreen();
+            }
+          }, false);
+        }
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || (window.innerWidth <= 850);
         renderer = new THREE.WebGLRenderer({
           canvas,
@@ -15069,6 +15088,20 @@
       requestAnimationFrame(gameLoop);
       if (!isEngineInitialized || !scene || !camera || !renderer) return;
 
+      // Fail-Safe: Out-of-bounds or NaN camera / player watchdog to unconditionally eliminate black void
+      if (player && player.pos) {
+        if (isNaN(player.pos.x) || isNaN(player.pos.y) || isNaN(player.pos.z) || player.pos.y < -25) {
+          player.pos.set(0, 1.2, 0);
+          if (player.vel) player.vel.set(0, 0, 0);
+          if (camera) camera.position.set(0, 2.8, 0);
+        }
+      }
+      if (camera && camera.position) {
+        if (isNaN(camera.position.x) || isNaN(camera.position.y) || isNaN(camera.position.z)) {
+          camera.position.set(0, 2.8, 0);
+        }
+      }
+
       // GPU Protection: Target FPS Limiter (prevents thermal throttling and GPU hangs)
       const targetFps = (gameState && gameState.settings && gameState.settings.fpsTarget) ? gameState.settings.fpsTarget : 0;
       if (targetFps > 0) {
@@ -15100,9 +15133,10 @@
           );
           const targetPos = player.pos.clone().add(targetOffset);
           robotCompanionMesh.position.lerp(targetPos, Math.min(1.0, delta * 3.8));
-          // Face forward in player's look direction
+          // Face forward in player's look direction (Kenney GLTF model local +Z forward: rotate 180 deg so face looks forward)
           const fwdLook = new THREE.Vector3(-Math.sin(pYaw), 0, -Math.cos(pYaw));
           robotCompanionMesh.lookAt(robotCompanionMesh.position.clone().add(fwdLook));
+          robotCompanionMesh.rotateY(Math.PI);
         }
       }
 
@@ -17046,7 +17080,11 @@
         window.HyperRealismEngine.update(delta, now);
       }
 
-      renderer.render(scene, camera);
+      try {
+        renderer.render(scene, camera);
+      } catch (renderErr) {
+        console.warn('[Render Watchdog] Render exception caught:', renderErr);
+      }
     }
 
     // ============================================================
@@ -19713,6 +19751,12 @@
       </button>
     </div>
   </div>
+
+  <!-- EMERGENCY SCREEN RESCUE & UNBLACK RESTORATION BUTTON (Z-INDEX 999999) -->
+  <button id="emergency-rescue-hud-btn" type="button" onclick="window.emergencyUnblackScreen()" style="position: fixed; top: 82px; left: 16px; z-index: 999999; background: rgba(8, 14, 24, 0.92); border: 1.5px solid #00f2ff; border-radius: 12px; padding: 6px 14px; color: #00f2ff; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; cursor: pointer; box-shadow: 0 0 15px rgba(0, 242, 255, 0.4); display: flex; align-items: center; gap: 6px; pointer-events: auto;" title="Click if screen is black/dark or frozen [F8]">
+    <i class="fa-solid fa-wand-magic-sparkles" style="color: #ffd700;"></i>
+    <span>RESCUE VIEW [F8]</span>
+  </button>
 
   <!-- CITY FROSTBITE ICE VIGNETTE -->
   <div id="city-frostbite-overlay" style="position: fixed; inset: 0; pointer-events: none; z-index: 260; opacity: 0; transition: opacity 0.35s ease; box-shadow: inset 0 0 90px rgba(0, 242, 255, 0.8), inset 0 0 180px rgba(224, 242, 254, 0.6); background: radial-gradient(circle at center, transparent 35%, rgba(186, 230, 253, 0.25) 75%, rgba(224, 242, 254, 0.65) 100%);"></div>

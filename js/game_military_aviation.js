@@ -335,6 +335,7 @@
 
     const wallMat = new THREE.MeshStandardMaterial({ color: 0x1b232c, roughness: 0.9, metalness: 0.2 });
     const camoMat = new THREE.MeshStandardMaterial({ color: 0x273526, roughness: 0.8, metalness: 0.3 }); // CADPAT Green
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85, roughness: 0.25 });
     const redMapleMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
     const whiteMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
     const goldMat = new THREE.MeshBasicMaterial({ color: 0xffd700 });
@@ -433,7 +434,6 @@
 
     const armoryHolo = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.2), new THREE.MeshBasicMaterial({
       color: 0x22c55e,
-      emissive: 0x22c55e,
       side: THREE.DoubleSide
     }));
     armoryHolo.position.set(0, 2.4, 9.9);
@@ -474,7 +474,6 @@
 
     const hologramScreen = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.6), new THREE.MeshBasicMaterial({
       color: 0x00f2ff,
-      emissive: 0x00f2ff,
       side: THREE.DoubleSide
     }));
     hologramScreen.position.set(0, 2.6, 0.4);
@@ -2641,6 +2640,141 @@
     return new THREE.CanvasTexture(c);
   }
 
+  // ============================================================
+  // BULLETPROOF ANTI-BLACK-SCREEN & RESCUE RESTORATION WATCHDOG
+  // ============================================================
+  function emergencyUnblackScreen() {
+    console.warn('[RESCUE SYSTEM] Executing Emergency Unblack Screen restoration...');
+
+    // 1. Force hide all potential dark fullscreen overlays and modals
+    const overlaysToHide = [
+      'launch-lock-overlay',
+      'start-overlay',
+      'plane-cockpit-hud',
+      'plane-tactical-bar',
+      'thermal-recon-visor-overlay',
+      'cccs-cyber-threat-modal',
+      'metro-cutscene-overlay',
+      'space-blackout-overlay'
+    ];
+    overlaysToHide.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.setProperty('display', 'none', 'important');
+        el.style.opacity = '0';
+      }
+    });
+
+    // 2. Clear aviation state flags
+    if (window.militaryAviationState) {
+      window.militaryAviationState.cockpitViewActive = false;
+      window.militaryAviationState.thermalVisorActive = false;
+    }
+
+    // 3. Rescue player and camera coordinates if NaN or out-of-bounds
+    if (typeof player !== 'undefined' && player) {
+      if (!player.pos || isNaN(player.pos.x) || isNaN(player.pos.y) || isNaN(player.pos.z) || player.pos.y < -10) {
+        if (typeof THREE !== 'undefined' && player.pos && player.pos.set) {
+          player.pos.set(0, 1.2, 0);
+        } else if (typeof THREE !== 'undefined') {
+          player.pos = new THREE.Vector3(0, 1.2, 0);
+        }
+      }
+      if (player.vel && player.vel.set) player.vel.set(0, 0, 0);
+      player.yaw = 0;
+      player.pitch = 0;
+      player.isGrounded = true;
+    }
+
+    if (typeof camera !== 'undefined' && camera) {
+      if (!camera.position || isNaN(camera.position.x) || isNaN(camera.position.y) || isNaN(camera.position.z) || camera.position.y < -5) {
+        if (camera.position && camera.position.set) {
+          camera.position.set(0, 2.8, 0);
+        }
+      }
+      if (typeof camera.lookAt === 'function') {
+        camera.lookAt(0, 2.8, -50);
+      }
+    }
+
+    // 4. Force vibrant day sky & lighting so scene is bright and visible
+    if (typeof scene !== 'undefined' && scene) {
+      if (typeof THREE !== 'undefined') {
+        scene.background = new THREE.Color(0x5a9ee6);
+        if (scene.fog) {
+          scene.fog.color.setHex(0xbeddfa);
+          scene.fog.density = 0.0009;
+        }
+      }
+    }
+    if (typeof hemiLight !== 'undefined' && hemiLight) {
+      hemiLight.intensity = 1.6;
+    }
+    if (typeof ambientLight !== 'undefined' && ambientLight) {
+      ambientLight.intensity = 0.8;
+    }
+
+    // 5. Uncull all distant groups and switch graphics to Safe Mode
+    if (window.HyperRealismEngine && typeof window.HyperRealismEngine.restoreSafeDisplay === 'function') {
+      window.HyperRealismEngine.restoreSafeDisplay();
+    }
+    if (typeof setLowEndTurboMode === 'function') {
+      setLowEndTurboMode(true);
+    }
+
+    // 6. Force immediate render frame
+    if (typeof renderer !== 'undefined' && renderer && typeof scene !== 'undefined' && typeof camera !== 'undefined') {
+      try {
+        renderer.render(scene, camera);
+      } catch (err) {
+        console.warn('[RESCUE SYSTEM] Render retry warning:', err);
+      }
+    }
+
+    // 7. Audible & Visual Feedback
+    if (typeof showStoreNotification === 'function') {
+      showStoreNotification('✅ SCREEN RESCUED // SAFE VIEW RESTORED');
+    }
+    if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) {
+      cyberAudio.playLootChime();
+    }
+  }
+
+  // Autonomous Watchdog: runs every 2.5 seconds to auto-correct stuck states
+  setInterval(() => {
+    try {
+      if (typeof isEngineInitialized !== 'undefined' && isEngineInitialized) {
+        // Check if player is falling into void
+        if (typeof player !== 'undefined' && player && player.pos) {
+          if (player.pos.y < -35 || isNaN(player.pos.x) || isNaN(player.pos.y)) {
+            console.warn('[Watchdog] Player in void or NaN. Auto-rescuing...');
+            emergencyUnblackScreen();
+          }
+        }
+        // Check stuck cockpit hud when not in plane
+        if (typeof gameState !== 'undefined' && (!gameState || !gameState.inPlane)) {
+          const cEl = document.getElementById('plane-cockpit-hud');
+          if (cEl && cEl.style.display !== 'none') cEl.style.display = 'none';
+        }
+      }
+    } catch (e) {}
+  }, 2500);
+
+  // Global Hotkey: F8 or Double-Escape triggers rescue
+  let lastEscTime = 0;
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'F8') {
+      e.preventDefault();
+      emergencyUnblackScreen();
+    } else if (e.key === 'Escape') {
+      const now = performance.now();
+      if (now - lastEscTime < 450) {
+        emergencyUnblackScreen();
+      }
+      lastEscTime = now;
+    }
+  });
+
   // Export functions to window
   window.buildAircraftCarrierHMCSCalgary = buildAircraftCarrierHMCSCalgary;
   window.buildCanadianMilitaryBase = buildCanadianMilitaryBase;
@@ -2664,5 +2798,6 @@
   window.toggleThermalReconVisor = toggleThermalReconVisor;
   window.openCyberThreatMatrix = openCyberThreatMatrix;
   window.defuseCyberThreat = defuseCyberThreat;
+  window.emergencyUnblackScreen = emergencyUnblackScreen;
 
 })(window);

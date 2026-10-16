@@ -526,6 +526,13 @@
     updateDistanceCulling() {
       if (!this.camera || this.distantCullGroup.length === 0) return;
       const camPos = this.camera.position;
+      if (!camPos || isNaN(camPos.x) || isNaN(camPos.z)) {
+        // Prevent NaN coordinate calculation from hiding the entire world
+        for (let i = 0; i < this.distantCullGroup.length; i++) {
+          if (this.distantCullGroup[i]) this.distantCullGroup[i].visible = true;
+        }
+        return;
+      }
       const maxDistSq = this.profile.cullDistance * this.profile.cullDistance;
 
       for (let i = 0; i < this.distantCullGroup.length; i++) {
@@ -592,6 +599,13 @@
 
       // 6. Canadian Coldness & Survival
       this.updateSurvival(delta);
+    }
+
+    restoreSafeDisplay() {
+      for (let i = 0; i < this.distantCullGroup.length; i++) {
+        if (this.distantCullGroup[i]) this.distantCullGroup[i].visible = true;
+      }
+      this.setQuality('low');
     }
   }
 
