@@ -518,7 +518,7 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       z-index: 900;
-      display: flex;
+      display: none;
       flex-direction: column;
       align-items: center;
       justify-content: center;
@@ -5054,6 +5054,18 @@
 
         <!-- SECTION 4: Graphics & Audio (Optimized for Low-End Devices) -->
         <div class="bs-section-content" id="bs-sec-graphics" style="display: none;">
+          <div class="bs-option-row" style="background: rgba(0, 242, 255, 0.08); border-left: 3px solid #00f2ff; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px;">
+            <div>
+              <span class="bs-option-label" style="color: #00f2ff; font-weight: 900; font-size: 13px;"><i class="fa-solid fa-cube"></i> HYPER-REALISM RENDERING ENGINE</span>
+              <div style="font-size: 10px; color: #8fa3b8;">Adaptive PBR materials, ACES filmic tonemapping, solar corona &amp; Canadian survival physics</div>
+            </div>
+            <div class="bs-segmented-group" id="group-hyper-quality">
+              <button type="button" class="bs-seg-btn" id="btn-hyper-q-low" onclick="setGameQualityPreset('low'); setSegOption('hyper-q', 0, this);"><i class="fa-solid fa-bolt" style="color:#00ff88;"></i> LOW (FAST 60FPS)</button>
+              <button type="button" class="bs-seg-btn active" id="btn-hyper-q-med" onclick="setGameQualityPreset('med'); setSegOption('hyper-q', 1, this);"><i class="fa-solid fa-gauge-high" style="color:#ffd700;"></i> MEDIUM (BALANCED)</button>
+              <button type="button" class="bs-seg-btn" id="btn-hyper-q-high" onclick="setGameQualityPreset('high'); setSegOption('hyper-q', 2, this);"><i class="fa-solid fa-wand-magic-sparkles" style="color:#00f2ff;"></i> HIGH (PBR CINEMATIC)</button>
+            </div>
+          </div>
+
           <div class="bs-option-row">
             <span class="bs-option-label">Frame Rate (FPS Target)</span>
             <div class="bs-segmented-group">
@@ -5065,18 +5077,18 @@
           </div>
 
           <div class="bs-option-row">
-            <span class="bs-option-label">Graphics Quality</span>
+            <span class="bs-option-label">Graphics Resolution Scaling</span>
             <div class="bs-segmented-group">
-              <button type="button" class="bs-seg-btn" onclick="setResolutionScale(0.75); setSegOption('gfx-quality', 0, this);">Smooth (Low-End)</button>
-              <button type="button" class="bs-seg-btn active" onclick="setResolutionScale(1.0); setSegOption('gfx-quality', 1, this);">Standard</button>
-              <button type="button" class="bs-seg-btn" onclick="setResolutionScale(1.25); setSegOption('gfx-quality', 2, this);">HD</button>
+              <button type="button" class="bs-seg-btn" id="choice-res-75" onclick="setResolutionScale(0.75); setSegOption('gfx-quality', 0, this);">Performance (0.75x)</button>
+              <button type="button" class="bs-seg-btn active" id="choice-res-100" onclick="setResolutionScale(1.0); setSegOption('gfx-quality', 1, this);">Native (1.0x)</button>
+              <button type="button" class="bs-seg-btn" id="choice-res-125" onclick="setResolutionScale(1.25); setSegOption('gfx-quality', 2, this);">Ultra HD (1.25x)</button>
             </div>
           </div>
 
           <div class="bs-option-row" style="background: rgba(0, 255, 136, 0.08); border-left: 3px solid #00ff88; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px;">
             <div>
               <span class="bs-option-label" style="color: #00ff88; font-weight: 800;">⚡ Ultra Low-End 60 FPS Turbo Mode</span>
-              <div style="font-size: 10px; color: #8fa3b8;">Caps resolution scale &amp; traffic draw distance for budget phones &amp; low-end laptops</div>
+              <div style="font-size: 10px; color: #8fa3b8;">Aggressively culls geometry &gt; 280m and disables shadows for low-end devices</div>
             </div>
             <div class="bs-segmented-group">
               <button type="button" class="bs-seg-btn" id="btn-lowend-enable" onclick="setLowEndTurboMode(true); setSegOption('lowend-turbo', 0, this);">ON (60 FPS)</button>
@@ -5085,19 +5097,11 @@
           </div>
 
           <div class="bs-option-row">
-            <span class="bs-option-label">Low-End Budget Acceleration</span>
+            <span class="bs-option-label">Atmospheric Celestial Time of Day</span>
             <div class="bs-segmented-group">
-              <button type="button" class="bs-seg-btn active" onclick="setSegOption('low-end-accel', 0, this);">Enabled (Fast)</button>
-              <button type="button" class="bs-seg-btn" onclick="setSegOption('low-end-accel', 1, this);">Disabled</button>
-            </div>
-          </div>
-
-          <div class="bs-option-row">
-            <span class="bs-option-label">Atmospheric Time of Day</span>
-            <div class="bs-segmented-group">
-              <button type="button" class="bs-seg-btn active" onclick="setTimeOfDay('day'); setSegOption('sky-tod', 0, this);">Day ☀️</button>
-              <button type="button" class="bs-seg-btn" onclick="setTimeOfDay('sunset'); setSegOption('sky-tod', 1, this);">Sunset 🌅</button>
-              <button type="button" class="bs-seg-btn" onclick="setTimeOfDay('night'); setSegOption('sky-tod', 2, this);">Night 🌙</button>
+              <button type="button" class="bs-seg-btn active" id="choice-tod-day" onclick="setTimeOfDay('day'); setSegOption('sky-tod', 0, this);">Day ☀️ (0°C to -18°C)</button>
+              <button type="button" class="bs-seg-btn" id="choice-tod-sunset" onclick="setTimeOfDay('sunset'); setSegOption('sky-tod', 1, this);">Sunset 🌅 (-22°C)</button>
+              <button type="button" class="bs-seg-btn" id="choice-tod-night" onclick="setTimeOfDay('night'); setSegOption('sky-tod', 2, this);">Night 🌙 (-28°C)</button>
             </div>
           </div>
         </div>
@@ -6274,6 +6278,13 @@
           lobby.style.display = 'none';
           lobby.style.opacity = '1';
         }, 400);
+      }
+
+      // Hide launch lock overlay and lobby
+      const lockOverlay = document.getElementById('launch-lock-overlay');
+      if (lockOverlay) {
+        lockOverlay.style.display = 'none';
+        lockOverlay.style.opacity = '0';
       }
 
       // Hide start overlay if present
@@ -13259,6 +13270,10 @@
       cyberAudio.init();
       keys[e.code] = true;
 
+      if (e.code === 'Escape') {
+        toggleSettingsModal('graphics');
+      }
+
       if (e.code === 'Digit1') switchWeapon('rifle');
       if (e.code === 'Digit2') switchWeapon('railgun');
       if (e.code === 'Digit3') switchWeapon('plasma');
@@ -18013,6 +18028,17 @@
         if (btn) btn.classList.toggle('active', Math.abs((s.resolutionScale || 1.0) - r) < 0.05);
       });
 
+      // Synchronize Hyper-Realism Engine profile buttons & low-end turbo toggle
+      const curHyperQ = (window.HyperRealismEngine && window.HyperRealismEngine.quality) || (s && s.quality) || 'med';
+      ['low', 'med', 'high'].forEach(q => {
+        const btn = document.getElementById('btn-hyper-q-' + q);
+        if (btn) btn.classList.toggle('active', curHyperQ === q);
+      });
+      const btnLowTurbo = document.getElementById('btn-lowend-enable');
+      const btnLowDisable = document.getElementById('btn-lowend-disable');
+      if (btnLowTurbo) btnLowTurbo.classList.toggle('active', !!s.lowEndTurbo);
+      if (btnLowDisable) btnLowDisable.classList.toggle('active', !s.lowEndTurbo);
+
       setCheck('toggle-helmet-visor', s.visorOverlay);
 
       setVal('range-audio-vol', s.masterVolume);
@@ -18070,6 +18096,28 @@
       if (!gameState.settings) return;
       gameState.settings.touchFireMode = mode;
       syncSettingsUIToState();
+      saveSettings();
+      cyberAudio.playLootChime();
+    }
+
+    function setGameQualityPreset(mode) {
+      if (!gameState.settings) return;
+      gameState.settings.quality = mode;
+      if (mode === 'low') {
+        gameState.settings.resolutionScale = 0.75;
+        gameState.settings.lowEndTurbo = true;
+      } else if (mode === 'med') {
+        gameState.settings.resolutionScale = 1.0;
+        gameState.settings.lowEndTurbo = false;
+      } else {
+        gameState.settings.resolutionScale = 1.25;
+        gameState.settings.lowEndTurbo = false;
+      }
+      if (window.setHyperQuality) {
+        window.setHyperQuality(mode);
+      }
+      syncSettingsUIToState();
+      applySettings();
       saveSettings();
       cyberAudio.playLootChime();
     }
@@ -18246,7 +18294,7 @@
       cyberAudio.playLootChime();
     }
 
-    function toggleSettingsModal() {
+    function toggleSettingsModal(defaultTab) {
       const modal = document.getElementById('modal-settings');
       if (!modal) return;
       const willShow = !modal.classList.contains('visible');
@@ -18254,6 +18302,7 @@
       if (willShow) {
         if (document.exitPointerLock) document.exitPointerLock();
         syncSettingsUIToState();
+        bsSwitchSettingsTab(defaultTab || 'graphics');
         modal.classList.add('visible');
         cyberAudio.playLootChime();
       } else {
@@ -19250,24 +19299,30 @@
       const startOverlay = document.getElementById('start-overlay');
       if (startOverlay) startOverlay.style.display = 'none';
 
-      // Permanent launch countdown lock screen active by default
-      const isDevBypass = urlParams.has('dev') || urlParams.has('autostart') || urlParams.has('preview');
-      if (isDevBypass) {
-        if (launchLockOverlay) launchLockOverlay.style.display = 'none';
-        if (urlParams.has('autostart')) {
-          startMatchFromLobby();
-        } else {
-          if (lobbyEl) lobbyEl.style.display = 'flex';
-        }
-      } else {
+      // Direct live 3D rendering: start immediately into Central Metropolis
+      const wantPortalLock = urlParams.has('portal') || urlParams.has('lock');
+      if (wantPortalLock) {
         if (launchLockOverlay) launchLockOverlay.style.display = 'flex';
         if (lobbyEl) lobbyEl.style.display = 'none';
+      } else if (urlParams.has('lobby')) {
+        if (launchLockOverlay) launchLockOverlay.style.display = 'none';
+        if (lobbyEl) lobbyEl.style.display = 'flex';
+      } else {
+        // Default: Instantly enter 3D Central Metropolis with zero dark overlays!
+        if (launchLockOverlay) launchLockOverlay.style.display = 'none';
+        if (lobbyEl) lobbyEl.style.display = 'none';
+        startMatchFromLobby();
       }
 
       updateCountdown();
       requestAnimationFrame(gameLoop);
     });
   </script>
+
+  <!-- TACTICAL IN-GAME GRAPHICS & SETTINGS TRIGGER -->
+  <button type="button" id="btn-tactical-settings" onclick="toggleSettingsModal('graphics')" style="position: fixed; top: 18px; right: 18px; z-index: 250; background: rgba(8, 14, 24, 0.94); border: 1.5px solid #00f2ff; color: #00f2ff; border-radius: 12px; padding: 7px 15px; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 0 18px rgba(0,242,255,0.35); backdrop-filter: blur(10px); transition: all 0.2s;" title="Open Graphics &amp; Game Settings [ESC]">
+    <i class="fa-solid fa-sliders" style="color: #00f2ff;"></i> <span>GRAPHICS &amp; SETTINGS [ESC]</span>
+  </button>
 
   <!-- CALGARY METROPOLIS TACTICAL HUD RADAR -->
   <div id="city-radar-container" style="position: fixed; top: 78px; right: 18px; width: 130px; height: 154px; background: rgba(8, 14, 24, 0.90); border: 1.5px solid rgba(0, 242, 255, 0.45); border-radius: 16px; padding: 6px; z-index: 180; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.65); display: flex; flex-direction: column; align-items: center; pointer-events: none;">
