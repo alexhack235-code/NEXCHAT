@@ -4892,6 +4892,18 @@
               <button type="button" class="bs-seg-btn active" onclick="setSegOption('skill-keybinds', 1, this)">OFF</button>
             </div>
           </div>
+
+          <!-- Companion Robot Follow Toggle -->
+          <div class="bs-option-row">
+            <div>
+              <span class="bs-option-label"><i class="fa-solid fa-robot" style="color: #00f2ff;"></i> Companion Robot Follow</span>
+              <div style="font-size: 10px; color: #8fa3b8;">Enable or disable your companion drone following your avatar</div>
+            </div>
+            <div class="bs-segmented-group" id="group-robot-follow">
+              <button type="button" class="bs-seg-btn active" id="btn-robot-follow-on" onclick="setRobotFollow(true); setSegOption('robot-follow', 0, this);">ON</button>
+              <button type="button" class="bs-seg-btn" id="btn-robot-follow-off" onclick="setRobotFollow(false); setSegOption('robot-follow', 1, this);">OFF</button>
+            </div>
+          </div>
         </div>
 
         <!-- SECTION 2: Controls -->
@@ -7777,27 +7789,55 @@
     // ============================================================
     function generatePBRTextures() {
       // 1. Asphalt PBR Diffuse & Normal
+      // 1. Ultra-Realistic Multi-Lane Highway & Avenue Asphalt PBR
       const asphaltCanvas = document.createElement('canvas');
       asphaltCanvas.width = 512;
       asphaltCanvas.height = 512;
       const actx = asphaltCanvas.getContext('2d');
-      actx.fillStyle = '#0c1017';
+      actx.fillStyle = '#11151c'; // Deep weathered highway asphalt
       actx.fillRect(0, 0, 512, 512);
 
+      // Fine asphalt aggregate speckling
       const imgData = actx.getImageData(0, 0, 512, 512);
       for (let i = 0; i < imgData.data.length; i += 4) {
-        const noise = (Math.random() - 0.5) * 28;
+        const noise = (Math.random() - 0.5) * 32;
         imgData.data[i] = Math.max(0, Math.min(255, imgData.data[i] + noise));
         imgData.data[i + 1] = Math.max(0, Math.min(255, imgData.data[i + 1] + noise));
-        imgData.data[i + 2] = Math.max(0, Math.min(255, imgData.data[i + 2] + noise + 4));
+        imgData.data[i + 2] = Math.max(0, Math.min(255, imgData.data[i + 2] + noise + 5));
       }
       actx.putImageData(imgData, 0, 0);
 
-      actx.strokeStyle = 'rgba(255, 180, 0, 0.4)';
-      actx.lineWidth = 8;
-      actx.setLineDash([32, 24]);
+      // Tire wear tracks in lanes
+      actx.fillStyle = 'rgba(10, 14, 20, 0.28)';
+      actx.fillRect(70, 0, 48, 512);
+      actx.fillRect(150, 0, 48, 512);
+      actx.fillRect(314, 0, 48, 512);
+      actx.fillRect(394, 0, 48, 512);
+
+      // Outer White Shoulder / Edge Lines (Solid)
+      actx.strokeStyle = '#e2e8f0';
+      actx.lineWidth = 5;
+      actx.setLineDash([]);
       actx.beginPath();
-      actx.moveTo(256, 0); actx.lineTo(256, 512);
+      actx.moveTo(18, 0); actx.lineTo(18, 512);
+      actx.moveTo(494, 0); actx.lineTo(494, 512);
+      actx.stroke();
+
+      // Double Solid Yellow Center Median Lines
+      actx.strokeStyle = '#f59e0b';
+      actx.lineWidth = 4;
+      actx.beginPath();
+      actx.moveTo(250, 0); actx.lineTo(250, 512);
+      actx.moveTo(262, 0); actx.lineTo(262, 512);
+      actx.stroke();
+
+      // White Dashed Lane Separator Markings (Lane 1 & Lane 2 on each side)
+      actx.strokeStyle = 'rgba(255, 255, 255, 0.88)';
+      actx.lineWidth = 4;
+      actx.setLineDash([36, 28]);
+      actx.beginPath();
+      actx.moveTo(134, 0); actx.lineTo(134, 512);
+      actx.moveTo(378, 0); actx.lineTo(378, 512);
       actx.stroke();
 
       const asphaltTex = new THREE.CanvasTexture(asphaltCanvas);
@@ -12823,6 +12863,10 @@
         try { if (typeof load3DAssetsAndEnhancements === 'function') load3DAssetsAndEnhancements(); } catch (e) { console.warn(e); }
         try { if (typeof initCityTraffic === 'function') initCityTraffic(); } catch (e) { console.warn(e); }
         try { if (typeof initCityCitizens === 'function') initCityCitizens(); } catch (e) { console.warn(e); }
+        try { if (typeof buildAircraftCarrierHMCSCalgary === 'function') buildAircraftCarrierHMCSCalgary(); } catch (e) { console.warn(e); }
+        try { if (typeof buildCanadianMilitaryBase === 'function') buildCanadianMilitaryBase(); } catch (e) { console.warn(e); }
+        try { if (typeof buildCyberSecurityHeadquarters === 'function') buildCyberSecurityHeadquarters(); } catch (e) { console.warn(e); }
+        try { if (typeof initMilitaryAviationPatrols === 'function') initMilitaryAviationPatrols(); } catch (e) { console.warn(e); }
 
         if (window.HyperRealismEngine) {
           try { window.HyperRealismEngine.init(scene, camera, renderer, player, gameState); } catch (e) { console.warn(e); }
@@ -12842,6 +12886,8 @@
   <script src="js/game_metropolis_world.js"></script>
   <!-- Hyper-Realism Rendering Engine & Low-End Scaler -->
   <script src="js/game_hyper_realism.js"></script>
+  <!-- Canadian Military Base, HMCS Calgary Carrier & Aviation Defense Engine -->
+  <script src="js/game_military_aviation.js"></script>
   <script>
 
     // ============================================================
@@ -15040,18 +15086,27 @@
       if (characterMixer) characterMixer.update(delta);
       if (robotCompanionMixer) robotCompanionMixer.update(delta);
 
-      // Player Companion Robot Follow System
-      if (robotCompanionMesh && player && player.pos) {
-        const pYaw = player.yaw || 0;
-        const targetOffset = new THREE.Vector3(
-          Math.sin(pYaw + 2.2) * 1.8,
-          0.35 + Math.sin(now * 0.0035) * 0.1,
-          Math.cos(pYaw + 2.2) * 1.8
-        );
-        const targetPos = player.pos.clone().add(targetOffset);
-        robotCompanionMesh.position.lerp(targetPos, Math.min(1.0, delta * 3.8));
-        const lookTarget = player.pos.clone().add(new THREE.Vector3(0, 1.1, 0));
-        robotCompanionMesh.lookAt(lookTarget);
+      // Player Companion Robot Follow System (Optional via Settings)
+      const robotFollowActive = (!gameState.settings || gameState.settings.robotFollow !== false);
+      if (robotCompanionMesh) {
+        robotCompanionMesh.visible = robotFollowActive;
+        if (robotFollowActive && player && player.pos) {
+          const pYaw = player.yaw || 0;
+          const targetOffset = new THREE.Vector3(
+            Math.sin(pYaw + 2.2) * 1.8,
+            0.35 + Math.sin(now * 0.0035) * 0.1,
+            Math.cos(pYaw + 2.2) * 1.8
+          );
+          const targetPos = player.pos.clone().add(targetOffset);
+          robotCompanionMesh.position.lerp(targetPos, Math.min(1.0, delta * 3.8));
+          const lookTarget = player.pos.clone().add(new THREE.Vector3(0, 1.1, 0));
+          robotCompanionMesh.lookAt(lookTarget);
+        }
+      }
+
+      // Canadian Armed Forces, HMCS Calgary Carrier & Aviation Defense Update
+      if (typeof updateMilitaryAviation === 'function') {
+        try { updateMilitaryAviation(delta, now); } catch (e) { console.warn(e); }
       }
 
       // -------------------------------------------------------------
@@ -15977,11 +16032,20 @@
           horizEl.style.transform = `rotate(${-pState.roll * (180 / Math.PI)}deg) translateY(${pState.pitch * 60}px)`;
         }
 
-        // Camera Follows Plane (Third-Person Chase Cam)
+        // Camera Follows Plane (First-Person Cockpit View or Third-Person Chase Cam)
         if (camera) {
-          const camBack = new THREE.Vector3(0, 4.5, 16).applyEuler(pMesh.rotation);
-          camera.position.copy(pMesh.position).add(camBack);
-          camera.lookAt(pMesh.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
+          if (window.militaryAviationState && window.militaryAviationState.cockpitViewActive) {
+            // First-Person Cockpit Eye Position looking forward through windshield HUD
+            const cockOffset = new THREE.Vector3(0, 1.25, 0.5).applyEuler(pMesh.rotation);
+            camera.position.copy(pMesh.position).add(cockOffset);
+            const lookTarget = pMesh.position.clone().add(new THREE.Vector3(0, 1.25, -50).applyEuler(pMesh.rotation));
+            camera.lookAt(lookTarget);
+          } else {
+            // Third-Person Chase Cam
+            const camBack = new THREE.Vector3(0, 4.5, 16).applyEuler(pMesh.rotation);
+            camera.position.copy(pMesh.position).add(camBack);
+            camera.lookAt(pMesh.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
+          }
         }
       }
 
@@ -17902,6 +17966,10 @@
         if (savedTurbo === '1') {
           setLowEndTurboMode(true);
         }
+        const savedRf = localStorage.getItem('ASTRO_ROBOT_FOLLOW');
+        if (savedRf !== null) {
+          gameState.settings.robotFollow = (savedRf === '1');
+        }
       } catch(e) {}
       applyCarCustoms();
 
@@ -18154,6 +18222,13 @@
         if (btn) btn.classList.toggle('active', (s.timeOfDay || 'day') === t);
       });
       setCheck('toggle-tod-cycle', s.dayNightAutoCycle);
+
+      // Companion Robot Follow Button Sync
+      const rfOn = s.robotFollow !== false;
+      const btnRfOn = document.getElementById('btn-robot-follow-on');
+      const btnRfOff = document.getElementById('btn-robot-follow-off');
+      if (btnRfOn) btnRfOn.classList.toggle('active', rfOn);
+      if (btnRfOff) btnRfOff.classList.toggle('active', !rfOn);
     }
 
     function updateSettingsFromUI() {
@@ -18234,6 +18309,20 @@
       if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
     }
     window.setLowEndTurboMode = setLowEndTurboMode;
+
+    function setRobotFollow(enable) {
+      if (!gameState.settings) gameState.settings = {};
+      gameState.settings.robotFollow = !!enable;
+      try { localStorage.setItem('ASTRO_ROBOT_FOLLOW', enable ? '1' : '0'); } catch (e) {}
+      if (robotCompanionMesh) robotCompanionMesh.visible = !!enable;
+      syncSettingsUIToState();
+      saveSettings();
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(enable ? '🤖 COMPANION ROBOT: FOLLOWING ACTIVE' : '🤖 COMPANION ROBOT: STANDBY / HIDDEN');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+    }
+    window.setRobotFollow = setRobotFollow;
 
     function setShadowQuality(quality) {
       if (!gameState.settings) return;
