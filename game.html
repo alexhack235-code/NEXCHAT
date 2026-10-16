@@ -4966,29 +4966,11 @@
             </div>
           </div>
 
-          <div class="bs-option-row">
-            <span class="bs-option-label">Frame Rate (FPS Target)</span>
-            <div class="bs-segmented-group">
-              <button type="button" class="bs-seg-btn" onclick="setSegOption('fps-target', 0, this)">30 FPS</button>
-              <button type="button" class="bs-seg-btn" onclick="setSegOption('fps-target', 1, this)">45 FPS</button>
-              <button type="button" class="bs-seg-btn active" onclick="setSegOption('fps-target', 2, this)">60 FPS</button>
-              <button type="button" class="bs-seg-btn" onclick="setSegOption('fps-target', 3, this)">Max (120)</button>
-            </div>
-          </div>
-
-          <div class="bs-option-row">
-            <span class="bs-option-label">Graphics Resolution Scaling</span>
-            <div class="bs-segmented-group">
-              <button type="button" class="bs-seg-btn" id="choice-res-75" onclick="setResolutionScale(0.75); setSegOption('gfx-quality', 0, this);">Performance (0.75x)</button>
-              <button type="button" class="bs-seg-btn active" id="choice-res-100" onclick="setResolutionScale(1.0); setSegOption('gfx-quality', 1, this);">Native (1.0x)</button>
-              <button type="button" class="bs-seg-btn" id="choice-res-125" onclick="setResolutionScale(1.25); setSegOption('gfx-quality', 2, this);">Ultra HD (1.25x)</button>
-            </div>
-          </div>
-
+          <!-- Turbo Mode -->
           <div class="bs-option-row" style="background: rgba(0, 255, 136, 0.08); border-left: 3px solid #00ff88; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px;">
             <div>
               <span class="bs-option-label" style="color: #00ff88; font-weight: 800;">⚡ Ultra Low-End 60 FPS Turbo Mode</span>
-              <div style="font-size: 10px; color: #8fa3b8;">Aggressively culls geometry &gt; 280m and disables shadows for low-end devices</div>
+              <div style="font-size: 10px; color: #8fa3b8;">Instantly stops GPU hanging: disables shadows, enables 380m culling &amp; 0.65x render scale</div>
             </div>
             <div class="bs-segmented-group">
               <button type="button" class="bs-seg-btn" id="btn-lowend-enable" onclick="setLowEndTurboMode(true); setSegOption('lowend-turbo', 0, this);">ON (60 FPS)</button>
@@ -4996,6 +4978,62 @@
             </div>
           </div>
 
+          <!-- Shadow Fidelity -->
+          <div class="bs-option-row">
+            <div>
+              <span class="bs-option-label">Real-Time Dynamic Shadows</span>
+              <div style="font-size: 10px; color: #8fa3b8;">Turn OFF to instantly relieve heavy GPU load / heating</div>
+            </div>
+            <div class="bs-segmented-group" id="group-shadow-quality">
+              <button type="button" class="bs-seg-btn" id="choice-shadow-off" onclick="setShadowQuality('off'); setSegOption('shadow-q', 0, this);">OFF (Fastest)</button>
+              <button type="button" class="bs-seg-btn active" id="choice-shadow-low" onclick="setShadowQuality('low'); setSegOption('shadow-q', 1, this);">Low (Hard)</button>
+              <button type="button" class="bs-seg-btn" id="choice-shadow-high" onclick="setShadowQuality('high'); setSegOption('shadow-q', 2, this);">High (Soft PBR)</button>
+            </div>
+          </div>
+
+          <!-- Render Distance -->
+          <div class="bs-option-row">
+            <div>
+              <span class="bs-option-label">View Distance &amp; Culling</span>
+              <div style="font-size: 10px; color: #8fa3b8;">Near distances skip rendering distant skyscrapers to boost FPS</div>
+            </div>
+            <div class="bs-segmented-group" id="group-render-distance">
+              <button type="button" class="bs-seg-btn" id="choice-dist-350" onclick="setRenderDistance(350); setSegOption('render-dist', 0, this);">350m (Near)</button>
+              <button type="button" class="bs-seg-btn" id="choice-dist-750" onclick="setRenderDistance(750); setSegOption('render-dist', 1, this);">750m (Mid)</button>
+              <button type="button" class="bs-seg-btn active" id="choice-dist-1500" onclick="setRenderDistance(1500); setSegOption('render-dist', 2, this);">1500m (Far)</button>
+              <button type="button" class="bs-seg-btn" id="choice-dist-3000" onclick="setRenderDistance(3000); setSegOption('render-dist', 3, this);">3000m (Max)</button>
+            </div>
+          </div>
+
+          <!-- Resolution Scaling -->
+          <div class="bs-option-row">
+            <div>
+              <span class="bs-option-label">Graphics Resolution Scaling</span>
+              <div style="font-size: 10px; color: #8fa3b8;">Scale 3D viewport while keeping text and HUD crystal clear</div>
+            </div>
+            <div class="bs-segmented-group" id="group-res-scale">
+              <button type="button" class="bs-seg-btn" id="choice-res-50" onclick="setResolutionScale(0.5); setSegOption('gfx-quality', 0, this);">Ultra Low (0.5x)</button>
+              <button type="button" class="bs-seg-btn" id="choice-res-75" onclick="setResolutionScale(0.75); setSegOption('gfx-quality', 1, this);">Performance (0.75x)</button>
+              <button type="button" class="bs-seg-btn active" id="choice-res-100" onclick="setResolutionScale(1.0); setSegOption('gfx-quality', 2, this);">Native (1.0x)</button>
+              <button type="button" class="bs-seg-btn" id="choice-res-125" onclick="setResolutionScale(1.25); setSegOption('gfx-quality', 3, this);">Ultra HD (1.25x)</button>
+            </div>
+          </div>
+
+          <!-- Target Frame Rate -->
+          <div class="bs-option-row">
+            <div>
+              <span class="bs-option-label">Frame Rate (FPS Target)</span>
+              <div style="font-size: 10px; color: #8fa3b8;">Capping at 30 or 60 FPS prevents GPU thermal throttling</div>
+            </div>
+            <div class="bs-segmented-group" id="group-fps-target">
+              <button type="button" class="bs-seg-btn" id="choice-fps-30" onclick="setFpsTarget(30); setSegOption('fps-target', 0, this);">30 FPS</button>
+              <button type="button" class="bs-seg-btn" id="choice-fps-45" onclick="setFpsTarget(45); setSegOption('fps-target', 1, this);">45 FPS</button>
+              <button type="button" class="bs-seg-btn active" id="choice-fps-60" onclick="setFpsTarget(60); setSegOption('fps-target', 2, this);">60 FPS</button>
+              <button type="button" class="bs-seg-btn" id="choice-fps-max" onclick="setFpsTarget(0); setSegOption('fps-target', 3, this);">Max (Uncapped)</button>
+            </div>
+          </div>
+
+          <!-- Time of Day -->
           <div class="bs-option-row">
             <span class="bs-option-label">Atmospheric Celestial Time of Day</span>
             <div class="bs-segmented-group">
@@ -12784,6 +12822,7 @@
         try { if (typeof buildTransCanadaGateway === 'function') buildTransCanadaGateway(); } catch (e) { console.warn(e); }
         try { if (typeof load3DAssetsAndEnhancements === 'function') load3DAssetsAndEnhancements(); } catch (e) { console.warn(e); }
         try { if (typeof initCityTraffic === 'function') initCityTraffic(); } catch (e) { console.warn(e); }
+        try { if (typeof initCityCitizens === 'function') initCityCitizens(); } catch (e) { console.warn(e); }
 
         if (window.HyperRealismEngine) {
           try { window.HyperRealismEngine.init(scene, camera, renderer, player, gameState); } catch (e) { console.warn(e); }
@@ -13097,6 +13136,31 @@
         legR.position.set(0.12, 0.3, 0);
         cGroup.add(legR);
 
+        // Companion Robot / Drone for each Citizen
+        const droneGroup = new THREE.Group();
+        const dBody = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 8), new THREE.MeshStandardMaterial({
+          color: 0x1e293b,
+          metalness: 0.85,
+          roughness: 0.25
+        }));
+        droneGroup.add(dBody);
+
+        const dRingMat = new THREE.MeshBasicMaterial({
+          color: visorColors[(i + 1) % visorColors.length],
+          transparent: true,
+          opacity: 0.85
+        });
+        const dRing = new THREE.Mesh(new THREE.TorusGeometry(0.16, 0.02, 6, 16), dRingMat);
+        dRing.rotation.x = Math.PI / 2;
+        droneGroup.add(dRing);
+
+        const dEye = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), dRingMat);
+        dEye.position.set(0, 0, 0.09);
+        droneGroup.add(dEye);
+
+        droneGroup.position.set(0.42, 1.6, -0.25);
+        cGroup.add(droneGroup);
+
         citizenGroup.add(cGroup);
 
         cityCitizens.push({
@@ -13106,6 +13170,8 @@
           armL,
           armR,
           head,
+          drone: droneGroup,
+          droneRing: dRing,
           name: names[i % names.length],
           quote: citizenQuotes[i % citizenQuotes.length],
           isWalking,
@@ -13123,6 +13189,23 @@
       const playerPos = player && player.pos ? player.pos : null;
 
       cityCitizens.forEach(c => {
+        // Distance Culling for Low-End GPUs
+        if (playerPos) {
+          const dist = c.group.position.distanceTo(playerPos);
+          if (gameState.settings && gameState.settings.lowEndTurbo && dist > 180) {
+            c.group.visible = false;
+            return;
+          } else {
+            c.group.visible = true;
+          }
+        }
+
+        // Companion drone hover & bobbing
+        if (c.drone) {
+          c.drone.position.y = 1.58 + Math.sin(now * 0.0035 + c.seed) * 0.08;
+          if (c.droneRing) c.droneRing.rotation.z += delta * 2.2;
+        }
+
         if (c.isWalking) {
           c.group.position.addScaledVector(c.walkDir, c.speed * delta);
           c.group.rotation.y = Math.atan2(c.walkDir.x, c.walkDir.z);
@@ -14933,11 +15016,22 @@
     // MAIN ANIMATION & PHYSICS GAME LOOP
     // ============================================================
     let lastTime = performance.now();
+    let lastRenderTimestamp = 0;
     let geigerTimer = 0;
 
     function gameLoop(now) {
       requestAnimationFrame(gameLoop);
       if (!isEngineInitialized || !scene || !camera || !renderer) return;
+
+      // GPU Protection: Target FPS Limiter (prevents thermal throttling and GPU hangs)
+      const targetFps = (gameState && gameState.settings && gameState.settings.fpsTarget) ? gameState.settings.fpsTarget : 0;
+      if (targetFps > 0) {
+        const minFrameInterval = 1000 / targetFps;
+        if (now - lastRenderTimestamp < minFrameInterval - 1.5) {
+          return;
+        }
+      }
+      lastRenderTimestamp = now;
 
       const delta = Math.min((now - lastTime) / 1000, 0.1);
       lastTime = now;
@@ -14945,6 +15039,20 @@
       // High-Fidelity Rigged 3D Animation Mixers Update
       if (characterMixer) characterMixer.update(delta);
       if (robotCompanionMixer) robotCompanionMixer.update(delta);
+
+      // Player Companion Robot Follow System
+      if (robotCompanionMesh && player && player.pos) {
+        const pYaw = player.yaw || 0;
+        const targetOffset = new THREE.Vector3(
+          Math.sin(pYaw + 2.2) * 1.8,
+          0.35 + Math.sin(now * 0.0035) * 0.1,
+          Math.cos(pYaw + 2.2) * 1.8
+        );
+        const targetPos = player.pos.clone().add(targetOffset);
+        robotCompanionMesh.position.lerp(targetPos, Math.min(1.0, delta * 3.8));
+        const lookTarget = player.pos.clone().add(new THREE.Vector3(0, 1.1, 0));
+        robotCompanionMesh.lookAt(lookTarget);
+      }
 
       // -------------------------------------------------------------
       // REAL-TIME FPS & FRAME-PACING GUARDIAN (LOW-END PERFORMANCE)
@@ -17871,13 +17979,89 @@
         setTimeOfDay(gameState.settings.timeOfDay);
       }
 
-      if (window.HyperRealismEngine) {
-        const q = (gameState.settings.resolutionScale <= 0.75) ? 'low' : ((gameState.settings.resolutionScale >= 1.2) ? 'high' : 'med');
-        window.HyperRealismEngine.setQuality(gameState.settings.quality || q);
-      }
-
+      applyGPUGraphicsSettings();
       handleResponsiveResize();
     }
+
+    function applyGPUGraphicsSettings() {
+      if (!gameState || !gameState.settings) return;
+      const s = gameState.settings;
+
+      // 1. Dynamic Shadows Control
+      if (typeof renderer !== 'undefined' && renderer) {
+        const shadowQ = s.shadowQuality || (s.lowEndTurbo ? 'off' : 'low');
+        if (shadowQ === 'off') {
+          renderer.shadowMap.enabled = false;
+          if (typeof sunLight !== 'undefined' && sunLight) sunLight.castShadow = false;
+        } else if (shadowQ === 'low') {
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMap.type = THREE.BasicShadowMap;
+          if (typeof sunLight !== 'undefined' && sunLight) {
+            sunLight.castShadow = true;
+            if (sunLight.shadow && sunLight.shadow.mapSize) sunLight.shadow.mapSize.set(512, 512);
+          }
+        } else {
+          renderer.shadowMap.enabled = true;
+          renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+          if (typeof sunLight !== 'undefined' && sunLight) {
+            sunLight.castShadow = true;
+            if (sunLight.shadow && sunLight.shadow.mapSize) sunLight.shadow.mapSize.set(1024, 1024);
+          }
+        }
+      }
+
+      // 2. Camera Draw Distance (Far Clipping Plane & Horizon Culling)
+      if (typeof camera !== 'undefined' && camera) {
+        const renderDist = s.renderDistance || (s.lowEndTurbo ? 380 : 1200);
+        camera.far = renderDist;
+        camera.updateProjectionMatrix();
+
+        // 3. Fog Adaptation for smooth visual horizon
+        if (typeof scene !== 'undefined' && scene && scene.fog) {
+          if (renderDist <= 450) {
+            scene.fog.density = 0.0035;
+          } else if (renderDist <= 900) {
+            scene.fog.density = 0.0018;
+          } else {
+            scene.fog.density = 0.0009;
+          }
+        }
+      }
+
+      // 4. Tone Mapping optimization
+      if (typeof renderer !== 'undefined' && renderer) {
+        if (s.lowEndTurbo || s.quality === 'low') {
+          renderer.toneMapping = THREE.LinearToneMapping;
+        } else if (THREE.ACESFilmicToneMapping) {
+          renderer.toneMapping = THREE.ACESFilmicToneMapping;
+          renderer.toneMappingExposure = 1.15;
+        }
+      }
+
+      // 5. Update Turbo Mode HUD Chip indicator
+      const fpsIcon = document.getElementById('hud-fps-icon');
+      const fpsChip = document.getElementById('hud-fps-chip');
+      if (fpsChip) {
+        if (s.lowEndTurbo) {
+          fpsChip.style.borderColor = '#00ff88';
+          fpsChip.style.background = 'rgba(0, 255, 136, 0.22)';
+          if (fpsIcon) fpsIcon.className = 'fa-solid fa-bolt-lightning';
+        } else {
+          fpsChip.style.borderColor = 'rgba(0, 255, 136, 0.4)';
+          fpsChip.style.background = 'rgba(0, 255, 136, 0.12)';
+          if (fpsIcon) fpsIcon.className = 'fa-solid fa-bolt';
+        }
+      }
+
+      // 6. HyperRealismEngine linkage
+      if (window.HyperRealismEngine && window.HyperRealismEngine.setQuality) {
+        window.HyperRealismEngine.setQuality(s.quality || 'med');
+      }
+
+      // 7. Resolution & Pixel Ratio
+      handleResponsiveResize();
+    }
+    window.applyGPUGraphicsSettings = applyGPUGraphicsSettings;
 
     function syncSettingsUIToState() {
       const s = gameState.settings;
@@ -17919,7 +18103,8 @@
       setText('val-fov', s.fov + '°');
       setCheck('toggle-portrait-fov', s.autoPortraitFov);
 
-      [0.75, 1.0, 1.25].forEach(r => {
+      // Resolution scale buttons
+      [0.5, 0.75, 1.0, 1.25].forEach(r => {
         const btn = document.getElementById('choice-res-' + Math.round(r * 100));
         if (btn) btn.classList.toggle('active', Math.abs((s.resolutionScale || 1.0) - r) < 0.05);
       });
@@ -17934,6 +18119,29 @@
       const btnLowDisable = document.getElementById('btn-lowend-disable');
       if (btnLowTurbo) btnLowTurbo.classList.toggle('active', !!s.lowEndTurbo);
       if (btnLowDisable) btnLowDisable.classList.toggle('active', !s.lowEndTurbo);
+
+      // Shadow quality buttons
+      const curShadow = s.shadowQuality || (s.lowEndTurbo ? 'off' : 'low');
+      ['off', 'low', 'high'].forEach(sq => {
+        const btn = document.getElementById('choice-shadow-' + sq);
+        if (btn) btn.classList.toggle('active', curShadow === sq);
+      });
+
+      // Render distance buttons
+      const curDist = s.renderDistance || 750;
+      [350, 750, 1500, 3000].forEach(d => {
+        const btn = document.getElementById('choice-dist-' + d);
+        if (btn) btn.classList.toggle('active', curDist === d);
+      });
+
+      // Frame rate target buttons
+      const curFps = s.fpsTarget !== undefined ? s.fpsTarget : 60;
+      [30, 45, 60].forEach(f => {
+        const btn = document.getElementById('choice-fps-' + f);
+        if (btn) btn.classList.toggle('active', curFps === f);
+      });
+      const btnFpsMax = document.getElementById('choice-fps-max');
+      if (btnFpsMax) btnFpsMax.classList.toggle('active', curFps === 0 || curFps > 60);
 
       setCheck('toggle-helmet-visor', s.visorOverlay);
 
@@ -17996,36 +18204,110 @@
       cyberAudio.playLootChime();
     }
 
+    function setLowEndTurboMode(enable) {
+      if (!gameState.settings) return;
+      gameState.settings.lowEndTurbo = !!enable;
+      try {
+        localStorage.setItem('ASTRO_LOW_END_TURBO', enable ? '1' : '0');
+      } catch (e) {}
+
+      if (enable) {
+        gameState.settings.quality = 'low';
+        gameState.settings.resolutionScale = 0.65;
+        gameState.settings.shadowQuality = 'off';
+        gameState.settings.renderDistance = 380;
+        gameState.settings.fpsTarget = 60;
+      } else {
+        gameState.settings.quality = 'med';
+        gameState.settings.resolutionScale = 1.0;
+        gameState.settings.shadowQuality = 'low';
+        gameState.settings.renderDistance = 1200;
+      }
+
+      applyGPUGraphicsSettings();
+      syncSettingsUIToState();
+      saveSettings();
+
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(enable ? '⚡ 60 FPS TURBO ACTIVE: SHADOWS OFF & 380M CULLING' : 'STANDARD GRAPHICS RESTORED');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+    }
+    window.setLowEndTurboMode = setLowEndTurboMode;
+
+    function setShadowQuality(quality) {
+      if (!gameState.settings) return;
+      gameState.settings.shadowQuality = quality;
+      applyGPUGraphicsSettings();
+      syncSettingsUIToState();
+      saveSettings();
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`DYNAMIC SHADOWS: ${quality.toUpperCase()}`);
+      }
+    }
+    window.setShadowQuality = setShadowQuality;
+
+    function setRenderDistance(dist) {
+      if (!gameState.settings) return;
+      gameState.settings.renderDistance = parseInt(dist, 10) || 750;
+      applyGPUGraphicsSettings();
+      syncSettingsUIToState();
+      saveSettings();
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`VIEW DISTANCE: ${dist}M`);
+      }
+    }
+    window.setRenderDistance = setRenderDistance;
+
+    function setFpsTarget(fps) {
+      if (!gameState.settings) return;
+      gameState.settings.fpsTarget = parseInt(fps, 10);
+      syncSettingsUIToState();
+      saveSettings();
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(fps > 0 ? `FPS TARGET: ${fps} FPS` : 'FPS TARGET: UNCAPPED (MAX)');
+      }
+    }
+    window.setFpsTarget = setFpsTarget;
+
     function setGameQualityPreset(mode) {
       if (!gameState.settings) return;
       gameState.settings.quality = mode;
       if (mode === 'low') {
-        gameState.settings.resolutionScale = 0.75;
+        gameState.settings.resolutionScale = 0.70;
+        gameState.settings.shadowQuality = 'off';
+        gameState.settings.renderDistance = 450;
         gameState.settings.lowEndTurbo = true;
       } else if (mode === 'med') {
         gameState.settings.resolutionScale = 1.0;
+        gameState.settings.shadowQuality = 'low';
+        gameState.settings.renderDistance = 900;
         gameState.settings.lowEndTurbo = false;
       } else {
         gameState.settings.resolutionScale = 1.25;
+        gameState.settings.shadowQuality = 'high';
+        gameState.settings.renderDistance = 2400;
         gameState.settings.lowEndTurbo = false;
       }
-      if (window.setHyperQuality) {
-        window.setHyperQuality(mode);
-      }
+      applyGPUGraphicsSettings();
       syncSettingsUIToState();
-      applySettings();
       saveSettings();
-      cyberAudio.playLootChime();
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
     }
+    window.setGameQualityPreset = setGameQualityPreset;
 
     function setResolutionScale(scale) {
       if (!gameState.settings) return;
       gameState.settings.resolutionScale = scale;
+      applyGPUGraphicsSettings();
       syncSettingsUIToState();
-      applySettings();
       saveSettings();
-      cyberAudio.playLootChime();
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
     }
+    window.setResolutionScale = setResolutionScale;
 
     function resetSettingsToDefault() {
       gameState.settings = {
