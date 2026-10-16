@@ -3,12 +3,19 @@
 // Extracted from game.html for modularity and high performance (< 20,000-line compliance)
 
 
+    function registerCullable(grp) {
+      if (window.HyperRealismEngine && window.HyperRealismEngine.registerCullableGroup) {
+        window.HyperRealismEngine.registerCullableGroup(grp);
+      }
+    }
+
     // ============================================================
     // NEXUS GRAND MALL & SHOPPING GALLERIA ARCHITECTURE
     // ============================================================
     function buildShoppingMall() {
       const mallGroup = new THREE.Group();
       scene.add(mallGroup);
+      registerCullable(mallGroup);
 
       // Shared High-Tech Materials
       const mallFloorMat = new THREE.MeshStandardMaterial({
@@ -949,6 +956,7 @@ function buildApexCarCustoms() {
       starbaseLaunchGroup = new THREE.Group();
       capeStarbaseGroup = starbaseLaunchGroup;
       scene.add(starbaseLaunchGroup);
+      registerCullable(starbaseLaunchGroup);
 
       const padMat = new THREE.MeshStandardMaterial({ color: 0x181e26, roughness: 0.85, metalness: 0.3 });
       const steelMat = new THREE.MeshStandardMaterial({ color: 0x2b3442, metalness: 0.9, roughness: 0.25 });
@@ -1383,6 +1391,7 @@ function buildApexCarCustoms() {
 function buildNeoKyotoCity() {
       neoKyotoGroup = new THREE.Group();
       scene.add(neoKyotoGroup);
+      registerCullable(neoKyotoGroup);
 
       const kMatTrim = new THREE.MeshStandardMaterial({ color: 0x140e1c, roughness: 0.35, metalness: 0.85 });
       const kMatVermilion = new THREE.MeshStandardMaterial({ color: 0xd92b2b, roughness: 0.3, metalness: 0.5 });
@@ -2918,6 +2927,7 @@ function buildNeoKyotoCity() {
     function buildCalgaryMetropolis() {
       calgaryMetropolisGroup = new THREE.Group();
       scene.add(calgaryMetropolisGroup);
+      registerCullable(calgaryMetropolisGroup);
 
       // PBR Materials for Calgary Architectural Icons
       const towerRedMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.38, metalness: 0.45 });
@@ -3404,6 +3414,7 @@ function buildNeoKyotoCity() {
       transCanadaGateGroup = new THREE.Group();
       transCanadaGateGroup.position.set(0, 0, 560);
       scene.add(transCanadaGateGroup);
+      registerCullable(transCanadaGateGroup);
 
       const pillarMat = new THREE.MeshStandardMaterial({ color: 0x1f2937, metalness: 0.85, roughness: 0.25 });
       const redNeonMat = new THREE.MeshBasicMaterial({ color: 0xff3366 });

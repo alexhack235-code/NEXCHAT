@@ -5961,6 +5961,7 @@
       <button type="button" class="astro-modal-close" onclick="closeCyberAnnouncement()">&times;</button>
     </div>
     <div class="astro-modal-body">
+      <div id="announcement-body" style="font-size: 13px; color: #cbd5e1; line-height: 1.6; margin-bottom: 14px; white-space: pre-line;"></div>
       <button type="button" class="store-card-btn primary" style="background: #ffd700; color: #000; padding: 12px; margin-top: 8px;" onclick="closeCyberAnnouncement()">
         <i class="fa-solid fa-check"></i> ACKNOWLEDGE DISPATCH
       </button>
@@ -7639,6 +7640,10 @@
     let ambientLight, sunLight, hemiLight, groundMesh, groundMat;
     let skyMesh, skyMat, daySkyTex, sunsetSkyTex, nightSkyTex;
     let sunVisualMesh, sunCoronaMesh, moonVisualMesh;
+    let currentSunDir = new THREE.Vector3(0.42, 0.85, 0.31).normalize();
+    let targetSunDir = new THREE.Vector3(0.42, 0.85, 0.31).normalize();
+    let currentMoonDir = new THREE.Vector3(-0.48, 0.72, -0.50).normalize();
+    let targetMoonDir = new THREE.Vector3(-0.48, 0.72, -0.50).normalize();
     let bMatFacadeBlue, bMatFacadeBronze, bMatFacadeSilver;
     let coolingTowers = [];
     let cityColliders = [];
@@ -12872,7 +12877,10 @@
 
         // Initialize Autonomous Metropolis Cyber Traffic System
         initCityTraffic();
-        initCityCitizens();
+        // Initialize Hyper-Realism Engine & Adaptive Low-End Hardware Scaler
+        if (window.HyperRealismEngine) {
+          window.HyperRealismEngine.init(scene, camera, renderer, player, gameState);
+        }
 
         isEngineInitialized = true;
         setTimeOfDay(gameState.settings.timeOfDay || 'day');
@@ -12886,6 +12894,8 @@
   </script>
   <!-- Metropolis World Architecture & Regional Systems (Extracted for modularity) -->
   <script src="js/game_metropolis_world.js"></script>
+  <!-- Hyper-Realism Rendering Engine & Low-End Scaler -->
+  <script src="js/game_hyper_realism.js"></script>
   <script>
 
     // ============================================================
@@ -15272,6 +15282,9 @@
       // Smoothly interpolate celestial vectors for coherent lighting and shadow casting
       if (typeof currentSunDir !== 'undefined' && typeof targetSunDir !== 'undefined') {
         currentSunDir.lerp(targetSunDir, Math.min(delta * 2.8, 0.15));
+        if (typeof currentMoonDir !== 'undefined' && typeof targetMoonDir !== 'undefined') {
+          currentMoonDir.lerp(targetMoonDir, Math.min(delta * 2.8, 0.15));
+        }
         if (sunLight && player.pos) {
           sunLight.position.copy(player.pos).addScaledVector(currentSunDir, 260);
           sunLight.target.position.copy(player.pos);
@@ -16916,6 +16929,11 @@
         }
       }
 
+      // Update Hyper-Realism Celestial Systems, Canadian Cold Weather & Culling Optimizer
+      if (window.HyperRealismEngine) {
+        window.HyperRealismEngine.update(delta, now);
+      }
+
       renderer.render(scene, camera);
     }
 
@@ -17942,6 +17960,11 @@
         setTimeOfDay(gameState.settings.timeOfDay);
       }
 
+      if (window.HyperRealismEngine) {
+        const q = (gameState.settings.resolutionScale <= 0.75) ? 'low' : ((gameState.settings.resolutionScale >= 1.2) ? 'high' : 'med');
+        window.HyperRealismEngine.setQuality(gameState.settings.quality || q);
+      }
+
       handleResponsiveResize();
     }
 
@@ -18197,6 +18220,10 @@
                                          '<i class="fa-solid fa-moon" style="color:#00f2ff;"></i> NIGHT');
       }
 
+      if (window.HyperRealismEngine) {
+        window.HyperRealismEngine.setTimeOfDay(mode);
+      }
+
       saveSettings();
     }
 
@@ -18390,7 +18417,7 @@
       const tokenEl = document.getElementById('store-token-display');
       if (tokenEl) tokenEl.textContent = Number(gameState.tokens).toLocaleString();
 
-      const ammoEl = document.getElementById('hud-ammo-val');
+      const ammoEl = document.getElementById('hud-ammo-cur') || document.getElementById('hud-ammo-val');
       if (ammoEl) ammoEl.textContent = gameState.ammo;
 
       cyberAudio.playLootChime();
@@ -18481,14 +18508,19 @@
         showStoreNotification('OVERDRIVE PROTOCOL: MAX HEALTH + SHIELD + FUEL');
       }
 
-      const hpBar = document.getElementById('hud-hp-bar');
-      const hpVal = document.getElementById('hud-hp-val');
-      const shBar = document.getElementById('hud-shield-bar');
-      const shVal = document.getElementById('hud-shield-val');
+      const hpBar = document.getElementById('hud-hp-bar') || document.getElementById('fill-health');
+      const hpVal = document.getElementById('hud-hp-val') || document.getElementById('label-health');
+      const shBar = document.getElementById('hud-shield-bar') || document.getElementById('fill-shield');
+      const shVal = document.getElementById('hud-shield-val') || document.getElementById('label-shield');
       if (hpBar) hpBar.style.width = '100%';
       if (hpVal) hpVal.textContent = '100';
       if (shBar) shBar.style.width = '100%';
       if (shVal) shVal.textContent = '100';
+
+      const cityHpFill = document.getElementById('city-hp-fill');
+      const cityHpVal = document.getElementById('city-hp-val');
+      if (cityHpFill) cityHpFill.style.width = '100%';
+      if (cityHpVal) cityHpVal.textContent = '100%';
 
       cyberAudio.playLootChime();
     }
@@ -19179,6 +19211,9 @@
     window.toggleAeroGlider = toggleAeroGlider;
     window.toggleExocraftMode = toggleExocraftMode;
     window.advanceMissionProgress = advanceMissionProgress;
+    window.exitCalgaryCTrain = exitCalgaryCTrain;
+    window.cycleCityWinterGear = cycleCityWinterGear;
+    window.drinkCityHotThermos = drinkCityHotThermos;
     window.lockTerminal = function() {
       const lockOverlay = document.getElementById('launch-lock-overlay');
       if (lockOverlay) lockOverlay.style.display = 'flex';
