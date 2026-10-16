@@ -8108,33 +8108,6 @@
         return tex;
       }
 
-      function createCelestialSpriteTexture(isSun) {
-        const sc = document.createElement('canvas');
-        sc.width = 256;
-        sc.height = 256;
-        const sctx = sc.getContext('2d');
-        const grad = sctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-        if (isSun) {
-          // High-intensity white solar core with soft limb-darkening to warm atmospheric corona
-          grad.addColorStop(0.00, '#ffffff');
-          grad.addColorStop(0.18, '#fffdf0');
-          grad.addColorStop(0.38, 'rgba(255, 238, 175, 0.95)');
-          grad.addColorStop(0.60, 'rgba(255, 195, 110, 0.40)');
-          grad.addColorStop(0.82, 'rgba(255, 160, 80, 0.12)');
-          grad.addColorStop(1.00, 'rgba(255, 140, 60, 0.00)');
-        } else {
-          // Lunar silver core with faint ethereal atmospheric halo
-          grad.addColorStop(0.00, '#ffffff');
-          grad.addColorStop(0.24, '#e2e8f0');
-          grad.addColorStop(0.48, 'rgba(203, 213, 225, 0.85)');
-          grad.addColorStop(0.72, 'rgba(148, 163, 184, 0.28)');
-          grad.addColorStop(1.00, 'rgba(100, 116, 139, 0.00)');
-        }
-        sctx.fillStyle = grad;
-        sctx.fillRect(0, 0, 256, 256);
-        return new THREE.CanvasTexture(sc);
-      }
-
       daySkyTex = createSkyTexture('day');
       sunsetSkyTex = createSkyTexture('sunset');
       nightSkyTex = createSkyTexture('night');
@@ -8267,6 +8240,32 @@
       pbrTextures.carArmor = carArmorTex;
       pbrTextures.tireTread = tireTreadTex;
     }
+
+    function createCelestialSpriteTexture(isSun) {
+      const sc = document.createElement('canvas');
+      sc.width = 256;
+      sc.height = 256;
+      const sctx = sc.getContext('2d');
+      const grad = sctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+      if (isSun) {
+        grad.addColorStop(0.00, '#ffffff');
+        grad.addColorStop(0.18, '#fffdf0');
+        grad.addColorStop(0.38, 'rgba(255, 238, 175, 0.95)');
+        grad.addColorStop(0.60, 'rgba(255, 195, 110, 0.40)');
+        grad.addColorStop(0.82, 'rgba(255, 160, 80, 0.12)');
+        grad.addColorStop(1.00, 'rgba(255, 140, 60, 0.00)');
+      } else {
+        grad.addColorStop(0.00, '#ffffff');
+        grad.addColorStop(0.24, '#e2e8f0');
+        grad.addColorStop(0.48, 'rgba(203, 213, 225, 0.85)');
+        grad.addColorStop(0.72, 'rgba(148, 163, 184, 0.28)');
+        grad.addColorStop(1.00, 'rgba(100, 116, 139, 0.00)');
+      }
+      sctx.fillStyle = grad;
+      sctx.fillRect(0, 0, 256, 256);
+      return new THREE.CanvasTexture(sc);
+    }
+    window.createCelestialSpriteTexture = createCelestialSpriteTexture;
 
     function loadOnlineAssetTextures() {
       try {
