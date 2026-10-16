@@ -15092,15 +15092,17 @@
         robotCompanionMesh.visible = robotFollowActive;
         if (robotFollowActive && player && player.pos) {
           const pYaw = player.yaw || 0;
+          // Behind player's right shoulder (behind: +yaw, right: +yaw normal)
           const targetOffset = new THREE.Vector3(
-            Math.sin(pYaw + 2.2) * 1.8,
-            0.35 + Math.sin(now * 0.0035) * 0.1,
-            Math.cos(pYaw + 2.2) * 1.8
+            Math.sin(pYaw) * 1.8 + Math.cos(pYaw) * 1.2,
+            0.45 + Math.sin(now * 0.0035) * 0.1,
+            Math.cos(pYaw) * 1.8 - Math.sin(pYaw) * 1.2
           );
           const targetPos = player.pos.clone().add(targetOffset);
           robotCompanionMesh.position.lerp(targetPos, Math.min(1.0, delta * 3.8));
-          const lookTarget = player.pos.clone().add(new THREE.Vector3(0, 1.1, 0));
-          robotCompanionMesh.lookAt(lookTarget);
+          // Face forward in player's look direction
+          const fwdLook = new THREE.Vector3(-Math.sin(pYaw), 0, -Math.cos(pYaw));
+          robotCompanionMesh.lookAt(robotCompanionMesh.position.clone().add(fwdLook));
         }
       }
 
@@ -15675,13 +15677,21 @@
         const joyY = gameState.joyNormY || 0;
         const joyX = gameState.joyNormX || 0;
 
+        if (gameState.starship.pitch === undefined) gameState.starship.pitch = 0;
+        if (gameState.starship.yaw === undefined) gameState.starship.yaw = 0;
+        if (gameState.starship.roll === undefined) gameState.starship.roll = 0;
+        if (gameState.starship.throttle === undefined) gameState.starship.throttle = 0;
+
+        // Joystick inputs:
+        // Pushing UP / Forward (joyY < -0.15): Advances throttle and pitches nose FORWARD
+        // Pulling DOWN / Backward (joyY > 0.15): Cuts throttle and rights rocket toward vertical
         if (Math.abs(joyY) > 0.15 || Math.abs(joyX) > 0.15) {
           if (joyY < -0.15) {
             gameState.starship.throttle = Math.min(100, gameState.starship.throttle + Math.abs(joyY) * delta * 75);
-            gameState.starship.pitch -= joyY * delta * 0.85;
+            gameState.starship.pitch = Math.min(Math.PI * 0.44, gameState.starship.pitch + Math.abs(joyY) * delta * 0.75);
           } else if (joyY > 0.15) {
             gameState.starship.throttle = Math.max(0, gameState.starship.throttle - joyY * delta * 75);
-            gameState.starship.pitch -= joyY * delta * 0.85;
+            gameState.starship.pitch = Math.max(-Math.PI * 0.15, gameState.starship.pitch - joyY * delta * 0.75);
           }
 
           if (Math.abs(joyX) > 0.15) {
@@ -15694,13 +15704,27 @@
           gameState.starship.roll *= 0.94;
         }
 
-        // Keyboard Fallback Controls
-        if (keys['KeyW']) gameState.starship.throttle = Math.min(100, gameState.starship.throttle + delta * 50);
-        if (keys['KeyS']) gameState.starship.throttle = Math.max(0, gameState.starship.throttle - delta * 50);
-        if (keys['KeyA']) gameState.starship.roll += delta * 1.8;
-        if (keys['KeyD']) gameState.starship.roll -= delta * 1.8;
+        // Keyboard Controls:
+        // W / ArrowUp = throttle up & pitch forward
+        // S / ArrowDown = throttle down & pitch vertical
+        if (keys['KeyW'] || keys['ArrowUp']) {
+          gameState.starship.throttle = Math.min(100, gameState.starship.throttle + delta * 60);
+          gameState.starship.pitch = Math.min(Math.PI * 0.44, gameState.starship.pitch + delta * 0.55);
+        }
+        if (keys['KeyS'] || keys['ArrowDown']) {
+          gameState.starship.throttle = Math.max(0, gameState.starship.throttle - delta * 55);
+          gameState.starship.pitch = Math.max(-Math.PI * 0.15, gameState.starship.pitch - delta * 0.55);
+        }
+        if (keys['KeyA'] || keys['ArrowLeft']) {
+          gameState.starship.yaw -= delta * 1.6;
+          gameState.starship.roll += delta * 1.8;
+        }
+        if (keys['KeyD'] || keys['ArrowRight']) {
+          gameState.starship.yaw += delta * 1.6;
+          gameState.starship.roll -= delta * 1.8;
+        }
 
-        gameState.starship.pitch = Math.max(-Math.PI * 0.48, Math.min(Math.PI * 0.48, gameState.starship.pitch));
+        gameState.starship.pitch = Math.max(-Math.PI * 0.15, Math.min(Math.PI * 0.44, gameState.starship.pitch));
 
         const throttleFrac = gameState.starship.throttle / 100;
 
@@ -15720,26 +15744,31 @@
           }
         }
 
-        const maxThrust = gameState.starship.isStaged ? 88.0 : 145.0;
+        const maxThrust = gameState.starship.isStaged ? 95.0 : 155.0;
         const thrust = throttleFrac * maxThrust;
 
-        // Apply Rocket Rotation
+        // Apply Rocket Rotation with explicit Euler order YXZ
+        rocketStack.rotation.order = 'YXZ';
         rocketStack.rotation.x = gameState.starship.pitch;
         rocketStack.rotation.y = gameState.starship.yaw;
         rocketStack.rotation.z = gameState.starship.roll;
 
-        // Net Vertical & Horizontal Acceleration
+        // Forward flight vector in the direction of yaw
+        const fwdDir = new THREE.Vector3(Math.sin(gameState.starship.yaw), 0, Math.cos(gameState.starship.yaw));
+
+        // Net Vertical & Forward Horizontal Acceleration
+        // When pitch = 0 (upright): 100% thrust is vertical
+        // When pitch > 0 (tilting forward): thrust accelerates forward (Math.sin(pitch) > 0)!
         if (gameState.starship.velY === undefined) gameState.starship.velY = 0;
         const netAccelY = thrust * Math.cos(gameState.starship.pitch) - gameState.currentGravity;
         gameState.starship.velY += netAccelY * delta;
 
         if (gameState.starship.velHoriz === undefined) gameState.starship.velHoriz = 0;
-        const netAccelHoriz = thrust * Math.sin(-gameState.starship.pitch);
-        gameState.starship.velHoriz += netAccelHoriz * delta;
+        const netAccelHoriz = thrust * Math.sin(gameState.starship.pitch);
+        gameState.starship.velHoriz = Math.max(0, (gameState.starship.velHoriz || 0) + netAccelHoriz * delta);
 
         rocketStack.position.y += gameState.starship.velY * delta;
-        const fwdDir = new THREE.Vector3(Math.sin(gameState.starship.yaw), 0, Math.cos(gameState.starship.yaw));
-        rocketStack.position.add(fwdDir.multiplyScalar(gameState.starship.velHoriz * delta));
+        rocketStack.position.add(fwdDir.clone().multiplyScalar(gameState.starship.velHoriz * delta));
 
         const minAlt = gameState.currentWorld === 'space' ? -150 : 0;
         if (rocketStack.position.y < minAlt) {
