@@ -61,3 +61,4 @@ cloudflared.exe
 tunnel_url.txt
 *.log
 email-config.json
+NEXCHAT_API_KEYS_FOR_DEVELOPER.txt
