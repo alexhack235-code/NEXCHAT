@@ -6924,6 +6924,38 @@ body.chat-size-extra-large .message-bubble {
   border-color: rgba(239, 68, 68, 0.3);
 }
 
+.nexbot-mobile-view-toggle {
+  display: none;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.nexbot-view-toggle-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 7px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.nexbot-view-toggle-btn.active {
+  background: rgba(139, 92, 246, 0.25);
+  color: #fff;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.25);
+}
+
 /* Studio Main Grid */
 .nexbot-studio-grid {
   display: grid;
@@ -8225,11 +8257,59 @@ body.chat-size-extra-large .message-bubble {
 
 /* Responsive adjustments */
 @media (max-width: 900px) {
-  .nexbot-studio-grid {
-    grid-template-columns: 1fr;
+  .nexbot-mobile-view-toggle {
+    display: flex !important;
   }
-  .nexbot-sim-col {
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  .desktop-only-badge {
+    display: none !important;
+  }
+  .nexbot-modal-container {
+    height: 94vh !important;
+    max-height: 94vh !important;
+  }
+  .nexbot-studio-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  .nexbot-studio-grid[data-active-view="config"] .nexbot-config-col {
+    display: flex !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    border-right: none !important;
+    padding: 14px 16px !important;
+  }
+  .nexbot-studio-grid[data-active-view="config"] .nexbot-sim-col {
+    display: none !important;
+  }
+  .nexbot-studio-grid[data-active-view="sim"] .nexbot-config-col {
+    display: none !important;
+  }
+  .nexbot-studio-grid[data-active-view="sim"] .nexbot-sim-col {
+    display: flex !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-top: none !important;
+  }
+  .nexbot-nav-tabs {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+    background: #090d14 !important;
+    padding: 6px 0 10px !important;
+    margin-bottom: 14px !important;
+    flex-shrink: 0 !important;
+  }
+  .whatsapp-phone-mockup {
+    max-height: 100% !important;
+    height: 580px !important;
   }
   .radar-screen {
     width: 300px;

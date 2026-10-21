@@ -166,11 +166,16 @@ body.reels-body {
 }
 
 .camshot-brand-logo {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  object-fit: cover;
-  box-shadow: 0 0 12px rgba(0, 255, 102, 0.3);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.55));
+  transition: transform 0.2s ease;
+}
+
+.camshot-brand-logo:hover {
+  transform: scale(1.08) rotate(15deg);
 }
 
 .camshot-brand-name {
@@ -4312,12 +4317,13 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
     top: 52px;
   }
 
-  /* Rail drops to just above the dock; bottom bar stays left of it */
+  /* Rail stays safely docked ABOVE bottom comment bar to prevent music disc overlap */
   .reel-actions-column {
-    bottom: calc(env(safe-area-inset-bottom, 0px) + 66px) !important;
-    right: 10px;
-    gap: 8px;
-    max-height: calc(100% - 66px - 150px - env(safe-area-inset-bottom, 0px));
+    right: 8px !important;
+    bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 54px) !important;
+    z-index: 26 !important;
+    gap: 6px !important;
+    max-height: calc(100% - 54px - 140px - env(safe-area-inset-bottom, 0px));
   }
 
   .reel-actions-column .like-btn,
@@ -4325,46 +4331,49 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   .reel-actions-column .bookmark-btn,
   .reel-actions-column .share-btn,
   .reel-actions-column .bot-btn,
-  .reel-actions-column .snapshot-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
+  .reel-actions-column .snapshot-btn,
+  .reel-actions-column .ai-insights-btn,
+  .reel-actions-column .reel-more-btn {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 16px !important;
   }
 
   .action-creator-avatar-wrap,
   .action-creator-avatar {
-    width: 40px;
-    height: 40px;
+    width: 38px !important;
+    height: 38px !important;
   }
 
   .music-disc-wrapper,
   .reel-sound-disc {
-    width: 36px;
-    height: 36px;
+    width: 32px !important;
+    height: 32px !important;
   }
 
+  .reel-speed-btn {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+  }
+
+  /* Bottom Comment Bar: full span above the bottom dock with zero collision */
   .reel-bottom-bar {
     left: 10px !important;
-    right: 64px !important;
+    right: 10px !important;
     bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 8px) !important;
-    z-index: 22 !important;
+    z-index: 28 !important;
   }
 
+  /* Bottom Metadata wraps to the left of the action rail */
   .reel-bottom-info {
     left: 12px !important;
     right: 64px !important;
     max-width: calc(100% - 76px) !important;
-    bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 58px) !important;
-    max-height: calc(100% - 54px - env(safe-area-inset-bottom, 0px) - 210px) !important;
+    bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 54px) !important;
+    max-height: calc(100% - 54px - env(safe-area-inset-bottom, 0px) - 180px) !important;
     overflow-y: auto !important;
     scrollbar-width: none !important;
     z-index: 20 !important;
-  }
-
-  .reel-actions-column {
-    right: 8px !important;
-    bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 14px) !important;
-    z-index: 26 !important;
   }
 
   .camshot-bounty-badge {

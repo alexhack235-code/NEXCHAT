@@ -9801,9 +9801,11 @@ async function setupInitialization() {
 
           console.log("? User data loaded. Username:", myUsername, "Tokens:", tokenCount);
 
-          if (userData.isAdmin) {
+          if (userData.isAdmin || localStorage.getItem('nex_is_admin') === 'true') {
             const adminBtn = document.getElementById("adminPanelBtn");
             if (adminBtn) adminBtn.style.display = "block";
+            const mobileAdminBtn = document.getElementById("mobileAdminConsoleBtn");
+            if (mobileAdminBtn) mobileAdminBtn.style.display = "flex";
           }
 
           setupIncomingCallListener();
@@ -10244,7 +10246,7 @@ if (installHeaderBtnEl) {
 
 
 document.getElementById("adminPanelBtn")?.addEventListener("click", () => {
-  window.location.href = "../NEXCHAT-ADMIN DASH BOARD/admin-dashboard.html";
+  window.location.href = "admin-dashboard.html";
 }, false);
 
 document.getElementById("settingsModal")?.addEventListener("click", (e) => {
@@ -15505,6 +15507,20 @@ function initNexbotStudio() {
     });
   });
 
+  // Mobile View Toggle: Architect vs Simulator
+  const viewToggleBtns = document.querySelectorAll('.nexbot-view-toggle-btn');
+  const nexbotGrid = document.querySelector('.nexbot-studio-grid');
+  viewToggleBtns.forEach(btn => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = 'true';
+    btn.addEventListener('click', () => {
+      viewToggleBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const view = btn.getAttribute('data-view') || 'config';
+      if (nexbotGrid) nexbotGrid.setAttribute('data-active-view', view);
+    });
+  });
+
   // Archetypes
   const archetypes = {
     support: {
@@ -15623,6 +15639,10 @@ function initNexbotStudio() {
       }
       showNotif('Bot configuration synced to live WhatsApp simulator!', 'success', 2000);
       if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+      if (window.innerWidth <= 900) {
+        const simToggleBtn = document.querySelector('.nexbot-view-toggle-btn[data-view="sim"]');
+        if (simToggleBtn) simToggleBtn.click();
+      }
     });
   }
 

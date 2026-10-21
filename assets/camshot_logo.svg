@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Lens Gradients -->
+    <radialGradient id="lensBodyGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0a1020" />
+      <stop offset="60%" stop-color="#060913" />
+      <stop offset="100%" stop-color="#020408" />
+    </radialGradient>
+
+    <!-- Cyber Neon Rim Gradient -->
+    <linearGradient id="neonLaserGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f2ff" />
+      <stop offset="35%" stop-color="#7928ca" />
+      <stop offset="70%" stop-color="#ff0080" />
+      <stop offset="100%" stop-color="#ffd700" />
+    </linearGradient>
+
+    <!-- Luxury Gold Accent Gradient -->
+    <linearGradient id="goldLuxuryGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#d97706" />
+      <stop offset="50%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#fef08a" />
+    </linearGradient>
+
+    <!-- Iris Shutter Blades Gradient -->
+    <linearGradient id="shutterBladeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <linearGradient id="bladeEdgeGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f2ff" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#ff0080" stop-opacity="0.2" />
+    </linearGradient>
+
+    <!-- Center Sensor Pupil Glow -->
+    <radialGradient id="pupilCoreGrad" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="25%" stop-color="#38bdf8" />
+      <stop offset="60%" stop-color="#0284c7" />
+      <stop offset="85%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#020617" />
+    </radialGradient>
+
+    <radialGradient id="sensorIrisGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#00f2ff" stop-opacity="0.6" />
+      <stop offset="60%" stop-color="#7928ca" stop-opacity="0.2" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0" />
+    </radialGradient>
+
+    <!-- Filters for Glow Effects -->
+    <filter id="neonGlowFilter" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="coreFlareFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="10" result="blur1" />
+      <feGaussianBlur stdDeviation="4" result="blur2" />
+      <feMerge>
+        <feMergeNode in="blur1" />
+        <feMergeNode in="blur2" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Outer Cybernetic Bezel Ring -->
+  <circle cx="256" cy="256" r="248" fill="url(#lensBodyGrad)" stroke="#1e293b" stroke-width="4" />
+  
+  <!-- Outer Glow Neon Laser Track -->
+  <circle cx="256" cy="256" r="236" fill="none" stroke="url(#neonLaserGrad)" stroke-width="4.5" filter="url(#neonGlowFilter)" stroke-dasharray="1480" stroke-dashoffset="0" />
+
+  <!-- Technical Degree Tick Marks (Cyber Cinema Calibration) -->
+  <g stroke="#38bdf8" stroke-width="2" opacity="0.6">
+    <line x1="256" y1="24" x2="256" y2="34" />
+    <line x1="256" y1="478" x2="256" y2="488" />
+    <line x1="24" y1="256" x2="34" y2="256" />
+    <line x1="478" y1="256" x2="488" y2="256" />
+    <line x1="92" y1="92" x2="100" y2="100" />
+    <line x1="420" y1="92" x2="412" y2="100" />
+    <line x1="92" y1="420" x2="100" y2="412" />
+    <line x1="420" y1="420" x2="412" y2="412" />
+  </g>
+
+  <!-- Golden Luxury Outer Flange -->
+  <circle cx="256" cy="256" r="218" fill="none" stroke="url(#goldLuxuryGrad)" stroke-width="2.5" opacity="0.85" />
+  <circle cx="256" cy="256" r="202" fill="#090d16" stroke="#1e293b" stroke-width="3" />
+
+  <!-- 6 Precision Iris Shutter Blades (Aperture) -->
+  <g id="apertureBlades" transform="rotate(18, 256, 256)">
+    <!-- Blade 1 -->
+    <path d="M 256 56 C 330 56, 395 98, 426 160 L 290 236 C 274 220, 256 210, 236 208 Z" 
+          fill="url(#shutterBladeGrad)" stroke="url(#bladeEdgeGlow)" stroke-width="2" />
+    <!-- Blade 2 -->
+    <path d="M 426 160 C 456 220, 456 292, 426 352 L 296 280 C 298 258, 290 238, 276 224 Z" 
+          fill="url(#shutterBladeGrad)" stroke="url(#bladeEdgeGlow)" stroke-width="2" />
+    <!-- Blade 3 -->
+    <path d="M 426 352 C 395 414, 330 456, 256 456 L 222 300 C 238 298, 258 290, 272 276 Z" 
+          fill="url(#shutterBladeGrad)" stroke="url(#bladeEdgeGlow)" stroke-width="2" />
+    <!-- Blade 4 -->
+    <path d="M 256 456 C 182 456, 117 414, 86 352 L 222 276 C 238 292, 256 302, 276 304 Z" 
+          fill="url(#shutterBladeGrad)" stroke="url(#bladeEdgeGlow)" stroke-width="2" />
+    <!-- Blade 5 -->
+    <path d="M 86 352 C 56 292, 56 220, 86 160 L 216 232 C 214 254, 222 274, 236 288 Z" 
+          fill="url(#shutterBladeGrad)" stroke="url(#bladeEdgeGlow)" stroke-width="2" />
+    <!-- Blade 6 -->
+    <path d="M 86 160 C 117 98, 182 56, 256 56 L 290 212 C 274 214, 254 222, 240 236 Z" 
+          fill="url(#shutterBladeGrad)" stroke="url(#bladeEdgeGlow)" stroke-width="2" />
+  </g>
+
+  <!-- Central Optical Core Aperture Opening -->
+  <circle cx="256" cy="256" r="92" fill="#030712" />
+  <circle cx="256" cy="256" r="92" fill="url(#sensorIrisGlow)" />
+  <circle cx="256" cy="256" r="92" fill="none" stroke="url(#neonLaserGrad)" stroke-width="3" filter="url(#neonGlowFilter)" />
+
+  <!-- High-Precision Center Glass Lens Flare & Pupil -->
+  <circle cx="256" cy="256" r="64" fill="url(#pupilCoreGrad)" filter="url(#coreFlareFilter)" />
+  
+  <!-- Dynamic Play Button Shutter Triangle (The CamShot Video Cinema DNA) -->
+  <polygon points="244,228 282,256 244,284" fill="#ffffff" filter="url(#neonGlowFilter)" />
+  <polygon points="244,228 282,256 244,284" fill="url(#goldLuxuryGrad)" opacity="0.9" />
+
+  <!-- Diagonal Lens Reflection Flare -->
+  <ellipse cx="225" cy="225" rx="36" ry="16" transform="rotate(-40, 225, 225)" fill="#ffffff" opacity="0.35" />
+  <circle cx="285" cy="285" r="7" fill="#00f2ff" opacity="0.6" filter="url(#coreFlareFilter)" />
+
+  <!-- Golden Crown / PRO Accent Arc at top -->
+  <path d="M 216 72 A 190 190 0 0 1 296 72" fill="none" stroke="url(#goldLuxuryGrad)" stroke-width="4" stroke-linecap="round" />
+</svg>

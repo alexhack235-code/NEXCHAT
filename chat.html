@@ -1221,11 +1221,6 @@
 
               <div class="settings-nav-group">
                 <span class="settings-nav-group-title">SECURITY & HARDWARE</span>
-                <button type="button" class="settings-nav-tab" data-tab="tab-ai-defense">
-                  <i class="fa-solid fa-shield-virus" style="color: #00ff66;"></i>
-                  <span>AI Security Defense</span>
-                  <span class="settings-tab-microbadge token-badge" style="background: rgba(0,255,102,0.15); color: #00ff66; border: 1px solid rgba(0,255,102,0.3);">ACTIVE</span>
-                </button>
                 <button type="button" class="settings-nav-tab" data-tab="tab-privacy">
                   <i class="fa-solid fa-shield-halved"></i>
                   <span>Privacy & Security</span>
@@ -1495,105 +1490,7 @@
                 </div>
               </div>
 
-              <!-- TAB: AI SECURITY SCANNER DEFENSE HUB -->
-              <div class="settings-tab-pane" id="tab-ai-defense">
-                <div class="settings-pane-header">
-                  <h3><i class="fa-solid fa-shield-virus" style="color: #00ff66;"></i> AI Security Defense Hub</h3>
-                  <p>Enterprise Real-Time Heuristics, Malware Signatures & Injection Defense (alexhack235-code / REDOX-PY_SCANNER Engine)</p>
-                </div>
 
-                <!-- Live Defense Telemetry Card -->
-                <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.4); background: rgba(0, 255, 102, 0.04);">
-                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #00ff66; box-shadow: 0 0 10px #00ff66;"></span>
-                      <strong style="color: #00ff66; font-size: 13px; font-family: 'Orbitron', monospace; letter-spacing: 1px;">AI DEFENSE ENGINE: ARMED &amp; OPERATIONAL</strong>
-                    </div>
-                    <span id="aiScannerEngineVer" style="font-size: 11px; font-family: monospace; color: #8b949e; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 6px;">v9.2 PRO</span>
-                  </div>
-
-                  <!-- 4-Metric Grid -->
-                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 10px;">
-                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center;">
-                      <div id="metricTotalScanned" style="font-size: 20px; font-weight: 800; color: #00ff66; font-family: monospace;">0</div>
-                      <div style="font-size: 10px; color: #8b949e; text-transform: uppercase;">Total Scanned</div>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center;">
-                      <div id="metricThreatsBlocked" style="font-size: 20px; font-weight: 800; color: #00d4ff; font-family: monospace;">0</div>
-                      <div style="font-size: 10px; color: #8b949e; text-transform: uppercase;">Threats Blocked</div>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center;">
-                      <div id="metricXssKilled" style="font-size: 20px; font-weight: 800; color: #ffd700; font-family: monospace;">0</div>
-                      <div style="font-size: 10px; color: #8b949e; text-transform: uppercase;">XSS / Injections</div>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center;">
-                      <div id="metricQuarantined" style="font-size: 20px; font-weight: 800; color: #ff4d6d; font-family: monospace;">0</div>
-                      <div style="font-size: 10px; color: #8b949e; text-transform: uppercase;">Quarantined</div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- One-Click System Security Audit -->
-                <div class="settings-card">
-                  <div>
-                    <strong>Deep System Vulnerability &amp; Integrity Audit</strong>
-                    <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Scans session tokens, IndexedDB caches, active WebSockets, and payload signatures.</p>
-                  </div>
-                  <button type="button" id="runSecurityAuditBtn" class="btn-primary" style="width: 100%; font-weight: 700; background: linear-gradient(135deg, #00ff66, #00d4ff); color: #000;">
-                    <i class="fa-solid fa-satellite-dish"></i> Execute Full System Security Scan
-                  </button>
-                  <div id="securityScanProgressWrap" style="display: none; margin-top: 12px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-                      <span id="securityScanStatusText" style="color: #00ff66; font-family: monospace;">Initiating Heuristic Matrix...</span>
-                      <span id="securityScanPctText" style="color: #fff; font-family: monospace; font-weight: 700;">0%</span>
-                    </div>
-                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden;">
-                      <div id="securityScanProgressBar" style="width: 0%; height: 100%; background: #00ff66; transition: width 0.3s ease;"></div>
-                    </div>
-                  </div>
-                  <div id="securityScanReportBox" style="display: none; margin-top: 12px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid rgba(0,255,102,0.2); font-size: 12px; font-family: monospace; color: #00ff66;"></div>
-                </div>
-
-                <!-- Real-Time Defense Toggles -->
-                <div class="settings-card">
-                  <div class="luxury-toggle-row">
-                    <div>
-                      <strong>Real-Time Message &amp; Prompt Firewall</strong>
-                      <p>Neutralizes XSS, SQLi, and prompt injection jailbreak patterns in real time.</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="realTimeFirewallToggle" checked>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                </div>
-
-                <div class="settings-card">
-                  <div class="luxury-toggle-row">
-                    <div>
-                      <strong>Shannon Entropy File Inspector</strong>
-                      <p>Scans uploads for high-entropy packed malware and disguised executables (.exe, .scr, .apk).</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="entropyFileScanToggle" checked>
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                </div>
-
-                <!-- Quarantine Vault Action -->
-                <div class="settings-card">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                      <strong>Quarantine Vault Isolation</strong>
-                      <p style="font-size: 11px; color: #8b949e; margin: 2px 0 0;">Inspect and purge malicious payloads isolated by the defense scanner.</p>
-                    </div>
-                    <button type="button" id="purgeQuarantineBtn" class="btn-secondary" style="font-size: 11px; padding: 6px 12px; color: #ff4d6d; border-color: rgba(255,77,109,0.3);">
-                      <i class="fa-solid fa-trash"></i> Purge Vault
-                    </button>
-                  </div>
-                </div>
-              </div>
 
               <!-- TAB 5: PRIVACY & SECURITY -->
               <div class="settings-tab-pane" id="tab-privacy">
@@ -2266,6 +2163,9 @@
       <button type="button" class="mobile-menu-item" id="mobileCipherVaultBtn">
         <i class="fa-solid fa-key"></i> <span>Cipher Secret Rooms</span>
       </button>
+      <button type="button" class="mobile-menu-item" id="mobileAdminConsoleBtn" onclick="window.location.href='admin-dashboard.html'" style="display: none; background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.2);">
+        <i class="fa-solid fa-shield-virus" style="color: #00ff66;"></i> <span style="color: #00ff66; font-weight: 700;">Admin Security Console</span>
+      </button>
       <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
         <i class="fa-solid fa-gear"></i> <span>Settings</span>
       </button>
@@ -2535,16 +2435,25 @@
           </div>
         </div>
         <div class="nexbot-header-right">
-          <span class="nexbot-header-badge"><i class="fa-brands fa-whatsapp"></i> WA CLOUD API</span>
-          <span class="nexbot-header-badge active"><i class="fa-solid fa-bolt"></i> TURBO 14ms</span>
+          <!-- Mobile Architect vs Simulator Toggle -->
+          <div class="nexbot-mobile-view-toggle" id="nexbotMobileViewToggle">
+            <button type="button" class="nexbot-view-toggle-btn active" data-view="config">
+              <i class="fa-solid fa-sliders"></i> Architect
+            </button>
+            <button type="button" class="nexbot-view-toggle-btn" data-view="sim">
+              <i class="fa-brands fa-whatsapp"></i> Simulator
+            </button>
+          </div>
+          <span class="nexbot-header-badge desktop-only-badge"><i class="fa-brands fa-whatsapp"></i> WA CLOUD API</span>
+          <span class="nexbot-header-badge active desktop-only-badge"><i class="fa-solid fa-bolt"></i> TURBO 14ms</span>
           <button type="button" class="nexbot-close-btn" id="closeNexbotStudioBtn" title="Close Studio">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
       </div>
 
-      <!-- Studio Main Grid: Left Config, Right Simulator -->
-      <div class="nexbot-studio-grid">
+      <!-- Studio Main Grid: Left Config, Right Simulator (with responsive view switching) -->
+      <div class="nexbot-studio-grid" data-active-view="config">
         <!-- LEFT: Config Workspace -->
         <div class="nexbot-config-col">
           <!-- Studio Nav Tabs -->
