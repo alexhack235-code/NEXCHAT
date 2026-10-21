@@ -42,6 +42,7 @@ Thumbs.db
 chrome_test_profile*/
 /scratch/
 *.png
+!assets/*.png
 *.log
 .vscode/*
 !.vscode/extensions.json

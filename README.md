@@ -8,6 +8,10 @@
 > **`[ THE FUTURE IS RIGHT HERE ]`**  
 > **NEXSHOT** represents the state-of-the-art technological convergence of **NEXCHAT** (Quantum-Encrypted Neural Messaging & Dual-Engine Real-Time Chat) and **CAMSHOT** (Pro Cinematic Reels, Multi-Vault Decentralized Storage & Studio Camera Tools).
 
+<p align="center">
+  <img src="assets/nexchat_system_architecture_diagram.png" alt="NEXCHAT Full-Stack System Architecture & Cryptographic Flow Diagram" width="100%" style="border-radius: 12px; border: 1px solid rgba(0, 255, 102, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.8);" />
+</p>
+
 ---
 
 ## 🌟 The Convergence Formula
@@ -233,24 +237,65 @@ NEXCHAT/
 * **Interactive Media Cards:** High-definition photo viewers, gold-badged folder archive download containers, and document preview chips.
 * **Multi-Device Link Pairing:** Instant QR-code device linking with cryptographic token handshakes.
 
-### 2. 🎬 CAMSHOT 4K Creator Reels
+### 2. 🔒 End-to-End Cryptographic Envelope & Inspector (E2EE)
+* **Hardware-Accelerated WebCrypto:** Pure client-side cryptography via the browser's native `crypto.subtle` API.
+* **Asymmetric Key Exchange:** **ECDH (Elliptic Curve Diffie-Hellman)** on the **NIST P-256 curve** for zero-knowledge peer key derivation.
+* **Symmetric Cipher:** **AES-256-GCM** with fresh, cryptographically secure 96-bit random Initialization Vectors (IVs) per message.
+* **Tamper-Proof Integrity:** 128-bit Authentication Tags (GCM MAC) to detect any payload tampering.
+* **Interactive Envelope Inspector:** Click the `🔒 E2EE` badge on any message to open the live inspector modal displaying raw ciphertext (Hex/Base64), IVs, curve parameters, and verification tags.
+
+### 3. 🤖 NEXBOT Studio // AI Bot Creator & Code Extension Suite
+* **Natural Prompt-to-Bot Synthesizer:** Type natural directives (e.g. *"Create a bot for no reply when away or busy"*) to automatically synthesize persona archetypes, system brain instructions, wildcard triggers, and simulated latency.
+* **Dedicated Code Extension & Runner Tab (`bot-tab-extension`):** Multi-target code generation offering:
+  * **In-App Client Extension:** Executable JavaScript hook that runs directly inside NEXCHAT to intercept incoming peer messages and auto-respond.
+  * **Node.js / Baileys WhatsApp Runner:** Standalone WhatsApp Web bot script with QR terminal authentication.
+  * **Vercel Serverless Function:** Ready-to-deploy edge webhook (`api/whatsapp-webhook.js`).
+  * **Chrome Web Extension:** Manifest V3 content script for web messenger automation.
+* **Interactive Live Execution Simulator:** Test runner with real-time event trace: message ingestion, trigger analysis, and live auto-reply dispatch.
+* **One-Click Ecosystem Hub Registration:** Persists custom bots directly into the Vercel-Style Extension Consent Hub.
+
+### 4. 🧩 Vercel-Style Ecosystem Extension Consent Hub
+* **Zero-Trust OAuth Permission Management:** Interactive modal displaying granular permission scopes (`read:profile`, `write:media_vault`, `sync:chat_feed`, `security:telemetry`).
+* **Automated Gmail Security Alerts:** Real-time email dispatch alerting the account owner whenever an extension permission is approved or revoked.
+* **Dynamic Extension Discovery:** Browse, authorize, or revoke ecosystem applications like NEX-REELS, NEX-METROPOLIS 3D, and custom NEXBOT agents.
+
+### 5. 🛡️ SuperAdmin Security Command Center
+* **Zero-Trust Master PIN Gate:** Protected by numeric master access PIN (`1337`) preventing unauthenticated access.
+* **Live User Moderation:** Real-time user ledger with instant account banning/unbanning, muting, and privilege revocation.
+* **Interactive Radar & Threat Telemetry:** Canvas radar map displaying active nodes, signal strengths, IP footprints, and WAF security scanner logs.
+
+### 6. 🧼 Settings Suite Sanitization & Security Hardening
+* **Zero Credential Leakage:** All raw backend Supabase Anon Keys, project URLs, and WAF vault keys have been completely purged from client inputs and settings DOM.
+* **Clean User Dashboard:** Replaced with live connection status (`Connected & Synchronized`), real-time latency ping testing, and privacy toggles.
+* **Purged Admin Triggers:** Administrative consoles are strictly unlinked from regular user menus.
+
+### 7. 👻 Ghost Ephemeral Countdown Protocol
+* **Quantum Self-Destruct Timers:** Ephemeral message countdowns (10s, 30s, 5m, 1h, 24h).
+* **Permanent Data Scrubbing:** Automatically scrubs plaintext and cryptographic envelopes from both client storage and Firestore databases upon expiration.
+
+### 8. 🎬 CAMSHOT 4K Creator Reels
 * **Next-Gen Reels Experience:** Smooth vertical feed navigation with hardware-accelerated transitions.
 * **Multi-Vault Cloud Pipeline:** Zero-backend upload architecture sequentially rotating across multiple storage vaults for 99.99% availability.
 * **Creator Bounty & Monetization Hub:** Token reward mechanics for creator engagement and viral trends.
 * **Soundtrack Studio:** Integrated audio mixing with custom sound overlays.
 
-### 3. ✨ NEXSHOT Fusion Cinematic Intro
+### 9. 🎮 GamingHub & 3D WebGL Metropolis Cyberverse
+* **Three.js Cyberverse:** 3D soldier combat, cyber vehicles, real-time physics engine, and proximity audio spaces.
+* **GamingHub Portal:** Multi-game launcher connecting instant browser games and WebGL metaverse experiences.
+
+### 10. ✨ NEXSHOT Fusion Cinematic Intro
 * **Visual Convergence:** Cinematic intro overlay on the login portal where **NEXCHAT** (Cyan/Emerald stream) and **CAMSHOT** (Gold/Iris stream) collide at a central singularity to manifest **NEXSHOT**.
 * **Tagline:** `[ THE FUTURE IS RIGHT HERE ]`
 * **Zero-Asset Web Audio Synthesizer:** Pure mathematical frequency synthesis producing ambient start chimes, sub-bass collision impacts, and harmonic quantum chords.
 * **User Control:** One-click Skip Intro button, audio mute toggle, session memory, and an on-demand Replay trigger.
 
-### 4. 🤖 ChronEX AI Brain
+### 11. 🧠 ChronEX AI Brain & Gemini Super Intelligence
 * **10 Requests/Day Rate Limit:** Rolling 24-hour window quota enforcement. If a user exceeds the daily threshold, the model gracefully informs:
   > `MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS`
-* **Multi-Tier Model Routing:** Sequential automatic failover across Google Gemini, OpenAI ChatGPT, Local Ollama, and offline rule-based neural modules.
+* **Multi-Tier Model Routing:** Sequential automatic failover across Google Gemini (Tier 1 Key Pool), OpenAI ChatGPT, Local Ollama, and offline rule-based neural modules.
+* **Super Intelligence Cognitive Engine:** Upgraded system instructions for quantum software architecture, algorithm deductions, and code synthesis.
 
-### 5. 🛡️ FORTRESS Security Shield
+### 12. 🛡️ FORTRESS Security Shield
 * **Pre-Flight Sanitization:** Scans all outbound chat messages and incoming directives against XSS payloads and malicious code injection.
 * **LLM Guard:** Blocks jailbreaks and prompt injection attempts before queries reach the AI brain.
 * **Anti-Executable Filter:** Automatically rejects dangerous executable binaries (`.exe`, `.bat`, `.cmd`, `.sh`, `.msi`) from attachment queues.

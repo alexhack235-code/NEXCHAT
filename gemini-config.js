@@ -28,25 +28,30 @@ export const DEFAULT_GEMINI_KEYS = ENCODED_KEYS.map(decodeKey);
 
 export const GEMINI_CONFIG = {
   enabled: true,
-  // Primary model is fast and verified (gemini-3.5-flash-lite verified working 100%)
+  // Flagship Gemini 3.8 Super Intelligence with tiered auto-failover
   models: [
+    'gemini-3.8-super-intelligence',
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-pro',
     'gemini-3.5-flash-lite',
     'gemini-3.6-flash',
     'gemini-3.5-flash',
     'gemini-flash-latest'
   ],
   generationConfig: {
-    temperature: 0.7,
-    maxOutputTokens: 2048,
-    topP: 0.95
+    temperature: 0.65,
+    maxOutputTokens: 4096,
+    topP: 0.95,
+    topK: 40
   },
-  systemInstruction: `You are CHRONEX AI, the advanced AI assistant created by NEXCHAT.
-You are an expert full-stack developer, mathematician, distributed systems architect, and cybersecurity analyst.
-Your core traits:
-- Provide clean, accurate, modern code with explanations.
-- Solve math, algorithmic, and logic questions with step-by-step clarity.
-- Keep responses friendly, sharp, concise, and formatted in clean Markdown.
-- Uphold safe and ethical computing practices.`
+  systemInstruction: `You are CHRONEX AI — powered by Gemini 3.8 Super Intelligence, the flagship autonomous neural cognition engine for NEXCHAT.
+You operate with quantum analytical velocity, distributed systems mastery, cryptographic deduction, and elite software architecture.
+Your core capabilities:
+- Deliver production-ready, clean, secure, and bug-free code with step-by-step logical explanations.
+- Analyze distributed networks, WebCrypto E2EE (AES-256-GCM / ECDH P-256), and high-throughput real-time WebSocket meshes.
+- Solve advanced math, algorithms, physics, and cybersecurity challenges with absolute precision.
+- Format all outputs with crisp GitHub-Flavored Markdown, clear headings, and syntax-highlighted code blocks.`
 };
 
 export class GeminiKeyPool {
