@@ -21,10 +21,14 @@ service cloud.firestore {
     //   - createdAt: timestamp (optional, immutable)
     //   - isAdmin / isSuperAdmin / role / banned: privileged flags (superAdmin only)
     //   - blockedUsers / mutedUsers / archivedChats: list of strings (max 500 items)
+    //   - ipAddresses / knownIps / recentIps / clientIps / verifiedIps: list of strings (max 4 IP addresses)
+    //   - ipAddress / lastIp: string (optional, max 45 chars)
     // Subcollection: linkedDevices/{deviceId}
     //   - deviceId: string (required)
     //   - deviceName: string (optional, max 128 chars)
     //   - platform: string (optional, max 64 chars)
+    //   - ipAddress / lastIp: string (optional, max 45 chars)
+    //   - ipAddresses / clientIps: list of strings (max 4 IP addresses)
     //   - linkedAt: timestamp/number (optional)
     //
     // Collection: messages
@@ -96,6 +100,8 @@ service cloud.firestore {
     //   - userId / ownerId: string (required, scanner user UID, immutable)
     //   - scanType: string (optional, max 100 chars)
     //   - status / findings / summary: string (optional, max 5000 chars)
+    //   - ipAddress / lastIp: string (optional, max 45 chars)
+    //   - ipAddresses / detectedIps / clientIps: list of strings (max 4 IP addresses)
     //   - timestamp: timestamp/number (optional)
     //
     // Collection: quarantine_vault
@@ -223,7 +229,15 @@ service cloud.firestore {
              isValidList(request.resource.data[field], maxSize);
     }
 
-    // 13. Immutable Field Check
+    // 13. IP Address List Validation Helper (Enforces array/list cap, e.g. at most 4 IP addresses)
+    function isValidIpList(field, maxCount) {
+      return !(field in request.resource.data) ||
+             request.resource.data[field] == null ||
+             (request.resource.data[field] is list &&
+              request.resource.data[field].size() <= maxCount);
+    }
+
+    // 14. Immutable Field Check
     function areImmutableFieldsUnchanged(fields) {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
     }
@@ -232,7 +246,7 @@ service cloud.firestore {
     // DOMAIN VALIDATORS (Validator Function Pattern)
     // ===============================================================
 
-    // User Profile Validator: Prevents privilege escalation and limits payload sizes
+    // User Profile Validator: Prevents privilege escalation, enforces IP address caps (max 4 IPs), and limits payload sizes
     function isValidUserCreate(data) {
       return (!('isAdmin' in data) || data.isAdmin == false || isSuperAdmin()) &&
              (!('isSuperAdmin' in data) || data.isSuperAdmin == false || isSuperAdmin()) &&
@@ -246,12 +260,19 @@ service cloud.firestore {
              isValidOptionalUrl('avatar') &&
              isValidOptionalList('blockedUsers', 500) &&
              isValidOptionalList('mutedUsers', 500) &&
-             isValidOptionalList('archivedChats', 500);
+             isValidOptionalList('archivedChats', 500) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('lastIp', 0, 45) &&
+             isValidOptionalList('ipAddresses', 4) &&
+             isValidOptionalList('knownIps', 4) &&
+             isValidOptionalList('recentIps', 4) &&
+             isValidOptionalList('clientIps', 4) &&
+             isValidOptionalList('verifiedIps', 4);
     }
 
     function isValidUserUpdate(data, prev) {
       return (!('isAdmin' in data) || !('isAdmin' in prev) || data.isAdmin == prev.isAdmin || isSuperAdmin()) &&
-             (!('isSuperAdmin' in data) || !('isSuperAdmin' in prev) || data.isSuperAdmin == prev.isSuperAdmin() || isSuperAdmin()) &&
+             (!('isSuperAdmin' in data) || !('isSuperAdmin' in prev) || data.isSuperAdmin == prev.isSuperAdmin || isSuperAdmin()) &&
              (!('role' in data) || !('role' in prev) || data.role == prev.role || isSuperAdmin()) &&
              (!('banned' in data) || !('banned' in prev) || data.banned == prev.banned || isSuperAdmin()) &&
              (!('uid' in data) || !('uid' in prev) || data.uid == prev.uid) &&
@@ -263,7 +284,14 @@ service cloud.firestore {
              isValidOptionalUrl('avatar') &&
              isValidOptionalList('blockedUsers', 500) &&
              isValidOptionalList('mutedUsers', 500) &&
-             isValidOptionalList('archivedChats', 500);
+             isValidOptionalList('archivedChats', 500) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('lastIp', 0, 45) &&
+             isValidOptionalList('ipAddresses', 4) &&
+             isValidOptionalList('knownIps', 4) &&
+             isValidOptionalList('recentIps', 4) &&
+             isValidOptionalList('clientIps', 4) &&
+             isValidOptionalList('verifiedIps', 4);
     }
 
     // Direct Message Validator
@@ -291,7 +319,7 @@ service cloud.firestore {
              isValidOptionalUrl('avatar');
     }
 
-    // Security Scanner Log Validator
+    // Security Scanner Log Validator (Enforces max 4 detected/stored IP addresses)
     function isValidSecurityScanLog(data) {
       return (
                ('userId' in data && data.userId == request.auth.uid) ||
@@ -300,7 +328,13 @@ service cloud.firestore {
              ) &&
              isValidOptionalString('scanType', 0, 100) &&
              isValidOptionalString('status', 0, 50) &&
-             isValidOptionalString('summary', 0, 5000);
+             isValidOptionalString('summary', 0, 5000) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('lastIp', 0, 45) &&
+             isValidOptionalList('ipAddresses', 4) &&
+             isValidOptionalList('detectedIps', 4) &&
+             isValidOptionalList('clientIps', 4) &&
+             isValidOptionalList('verifiedIps', 4);
     }
 
     // Quarantine Vault Item Validator
@@ -357,12 +391,16 @@ service cloud.firestore {
       // Account deletion restricted to SuperAdmin
       allow delete: if isSuperAdmin();
 
-      // Linked Devices subcollection (Multi-device pairing)
+      // Linked Devices subcollection (Multi-device pairing with max 4 stored IP addresses)
       match /linkedDevices/{deviceId} {
         allow read: if isOwner(uid) || isSuperAdmin();
         allow create, update: if (isOwner(uid) || isSuperAdmin()) &&
                                  isValidOptionalString('deviceName', 0, 128) &&
-                                 isValidOptionalString('platform', 0, 64);
+                                 isValidOptionalString('platform', 0, 64) &&
+                                 isValidOptionalString('ipAddress', 0, 45) &&
+                                 isValidOptionalString('lastIp', 0, 45) &&
+                                 isValidOptionalList('ipAddresses', 4) &&
+                                 isValidOptionalList('clientIps', 4);
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
     }
@@ -1104,28 +1142,92 @@ service cloud.firestore {
     // ===============================================================
     match /admins/{adminId} {
       allow read: if isAuthenticated() && (isSuperAdmin() || request.auth.uid == adminId);
-      allow write: if isSuperAdmin();
+      allow write: if isSuperAdmin() &&
+                      isValidOptionalString('ipAddress', 0, 45) &&
+                      isValidOptionalString('lastIp', 0, 45) &&
+                      isValidIpList('ipAddresses', 4) &&
+                      isValidIpList('verifiedIps', 4) &&
+                      isValidIpList('knownIps', 4);
     }
 
     match /adminLogs/{logId} {
-      allow read, write: if isSuperAdmin();
+      allow read, write: if isSuperAdmin() &&
+                            isValidOptionalString('ipAddress', 0, 45) &&
+                            isValidOptionalString('lastIp', 0, 45) &&
+                            isValidIpList('ipAddresses', 4) &&
+                            isValidIpList('verifiedIps', 4);
     }
 
     match /adminAuditLog/{logId} {
-      allow read, write: if isSuperAdmin();
+      allow read, write: if isSuperAdmin() &&
+                            isValidOptionalString('ipAddress', 0, 45) &&
+                            isValidOptionalString('lastIp', 0, 45) &&
+                            isValidIpList('ipAddresses', 4) &&
+                            isValidIpList('verifiedIps', 4);
     }
 
     match /adminSecurityLogs/{logId} {
-      allow read, write: if isSuperAdmin();
+      allow read, write: if isSuperAdmin() &&
+                            isValidOptionalString('ipAddress', 0, 45) &&
+                            isValidOptionalString('lastIp', 0, 45) &&
+                            isValidIpList('ipAddresses', 4) &&
+                            isValidIpList('verifiedIps', 4);
     }
 
     match /securityLogs/{logId} {
-      allow create: if isAuthenticated();
-      allow read, write: if isSuperAdmin();
+      allow create: if isAuthenticated() &&
+                       isValidOptionalString('ipAddress', 0, 45) &&
+                       isValidOptionalString('lastIp', 0, 45) &&
+                       isValidIpList('ipAddresses', 4) &&
+                       isValidIpList('verifiedIps', 4);
+      allow read, write: if isSuperAdmin() &&
+                            isValidOptionalString('ipAddress', 0, 45) &&
+                            isValidOptionalString('lastIp', 0, 45) &&
+                            isValidIpList('ipAddresses', 4) &&
+                            isValidIpList('verifiedIps', 4);
     }
 
     match /securityAuditLogs/{auditId} {
-      allow read, write: if isSuperAdmin();
+      allow read, write: if isSuperAdmin() &&
+                            isValidOptionalString('ipAddress', 0, 45) &&
+                            isValidOptionalString('lastIp', 0, 45) &&
+                            isValidIpList('ipAddresses', 4) &&
+                            isValidIpList('verifiedIps', 4);
+    }
+
+    // Admin Dashboard Telemetry & IP Security Verification
+    match /admin_telemetry/{docId} {
+      allow read: if isSuperAdmin();
+      allow create: if isAuthenticated() &&
+                       isValidOptionalString('ipAddress', 0, 45) &&
+                       isValidOptionalString('lastIp', 0, 45) &&
+                       isValidIpList('ipAddresses', 4) &&
+                       isValidIpList('verifiedIps', 4);
+      allow update, delete: if isSuperAdmin() &&
+                               isValidOptionalString('ipAddress', 0, 45) &&
+                               isValidOptionalString('lastIp', 0, 45) &&
+                               isValidIpList('ipAddresses', 4) &&
+                               isValidIpList('verifiedIps', 4);
+    }
+
+    match /admin_security/{docId} {
+      allow read: if isSuperAdmin();
+      allow create, update: if isSuperAdmin() &&
+                               isValidOptionalString('ipAddress', 0, 45) &&
+                               isValidOptionalString('lastIp', 0, 45) &&
+                               isValidIpList('ipAddresses', 4) &&
+                               isValidIpList('verifiedIps', 4);
+      allow delete: if isSuperAdmin();
+    }
+
+    match /admin_ip_verification/{docId} {
+      allow read: if isSuperAdmin();
+      allow create, update: if isSuperAdmin() &&
+                               isValidOptionalString('ipAddress', 0, 45) &&
+                               isValidOptionalString('lastIp', 0, 45) &&
+                               isValidIpList('ipAddresses', 4) &&
+                               isValidIpList('verifiedIps', 4);
+      allow delete: if isSuperAdmin();
     }
 
     match /userActivity/{activityId} {
