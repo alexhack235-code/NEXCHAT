@@ -15,28 +15,35 @@ service cloud.firestore {
     //   - displayName: string (optional, max 100 chars)
     //   - photoURL / avatar: string (optional URL, max 2048 chars)
     //   - bio: string (optional, max 1000 chars)
-    //   - tokens: number (optional, user token balance)
+    //   - tokens: number (optional, user token balance, anti-privilege escalation)
     //   - online: bool (optional)
     //   - lastSeen: timestamp (optional)
     //   - createdAt: timestamp (optional, immutable)
     //   - isAdmin / isSuperAdmin / role / banned: privileged flags (superAdmin only)
     //   - blockedUsers / mutedUsers / archivedChats: list of strings (max 500 items)
-    //   - ipAddresses / knownIps / recentIps / clientIps / verifiedIps: list of strings (max 4 IP addresses)
+    //   - ipAddresses / knownIps / recentIps / clientIps / detectedIps / verifiedIps: list of strings (max 4 IP addresses, each max 45 chars)
     //   - ipAddress / lastIp: string (optional, max 45 chars)
     // Subcollection: linkedDevices/{deviceId}
-    //   - deviceId: string (required)
+    //   - deviceId: string (required/optional, max 128 chars)
     //   - deviceName: string (optional, max 128 chars)
     //   - platform: string (optional, max 64 chars)
     //   - ipAddress / lastIp: string (optional, max 45 chars)
-    //   - ipAddresses / clientIps: list of strings (max 4 IP addresses)
+    //   - ipAddresses / knownIps / recentIps / clientIps / detectedIps / verifiedIps: list of strings (max 4 IP addresses)
     //   - linkedAt: timestamp/number (optional)
+    // Subcollection: authorized_extensions/{extensionId}
+    //   - extensionId: string (1 to 64 chars, immutable)
+    //   - status: string (required, 'approved' | 'denied' | 'pending')
+    //   - scopes: list of strings (optional, max 10 items, each scope max 64 chars)
+    //   - timestamp / updatedAt / createdAt: timestamp/string/number (optional)
+    //   - ipAddress: string (optional, max 45 chars)
+    //   - extensionName: string (optional, max 128 chars)
     //
     // Collection: messages
     // Document ID: {messageId} (Auto-generated)
     // Fields:
     //   - from / senderId: string (required, sender UID, immutable)
     //   - to / receiverId: string (required, recipient UID, immutable)
-    //   - text: string (optional, max 10000 chars)
+    //   - text / content: string (optional, max 10000 chars)
     //   - status: string (optional, e.g. 'sent', 'delivered', 'read')
     //   - read: bool (optional)
     //   - readAt: timestamp/number/string (optional)
@@ -54,8 +61,8 @@ service cloud.firestore {
     //   - admins: list of strings (required, group admin UIDs, max 100 items)
     //   - moderators: list of strings (optional, max 100 items)
     // Subcollection: messages/{msgId}
-    //   - senderId / from: string (required, sender UID)
-    //   - text: string (optional, max 10000 chars)
+    //   - senderId / from: string (required, sender UID, immutable)
+    //   - text / content: string (optional, max 10000 chars)
     //   - reactions: list (optional, max 100 items)
     //   - readBy / readAt: list/map (optional)
     //
@@ -66,9 +73,9 @@ service cloud.firestore {
     //   - content / caption: string (optional, max 2000 chars)
     //   - mediaUrl / imageUrl: string (optional URL, max 2048 chars)
     //   - type: string (optional, 'image' | 'video' | 'text')
-    //   - expiresAtMs: int (required, max 24h + 5m grace period)
-    //   - expiresAt: timestamp/string (optional)
-    //   - views: list or map (optional, viewer tracking)
+    //   - expiresAtMs: int (optional, max 24h + 5m grace period, immutable)
+    //   - expiresAt: timestamp/string (optional, max 24h + 5m grace period, immutable)
+    //   - views / viewCount / viewsCount: interaction tracking
     //
     // Collection: reels
     // Document ID: {reelId} (Auto-generated)
@@ -77,37 +84,41 @@ service cloud.firestore {
     //   - caption: string (optional, max 2000 chars)
     //   - videoUrl: string (required URL, max 2048 chars)
     //   - thumbnailUrl: string (optional URL, max 2048 chars)
+    //   - sound: string (optional, max 200 chars)
     //   - access: string (optional, 'public' | 'private')
-    //   - likes / likesCount / commentsCount / views / sharesCount: interaction fields
+    //   - likes / likesCount / commentsCount / views / sharesCount / tokensTipped: interaction fields
     // Subcollection: comments/{commentId}
-    //   - authorId / userId: string (required, commenter UID)
-    //   - text: string (required, max 1000 chars)
+    //   - authorId / userId: string (required, commenter UID, immutable)
+    //   - text: string (required, 1 to 1000 chars)
     // Subcollection: likes/{likeId}
     //   - userId: string (required, liker UID)
     //
     // Collection: nexbot_configs
     // Document ID: {configId} (Auto-generated)
     // Fields:
-    //   - authorId / userId: string (required, author UID, immutable)
-    //   - name: string (required, max 100 chars)
+    //   - authorId / userId / uid: string (required, author UID, immutable)
+    //   - name: string (required, 1 to 100 chars)
     //   - description: string (optional, max 1000 chars)
     //   - systemPrompt / instructions: string (optional, max 15000 chars)
+    //   - model: string (optional, max 100 chars)
+    //   - avatar: string (optional URL, max 2048 chars)
     //   - isPublished / published / status: bool/string (public visibility flag)
     //
     // Collection: security_scan_logs
     // Document ID: {logId} (Auto-generated)
     // Fields:
-    //   - userId / ownerId: string (required, scanner user UID, immutable)
+    //   - userId / ownerId / uid: string (required, scanner user UID, immutable)
     //   - scanType: string (optional, max 100 chars)
-    //   - status / findings / summary: string (optional, max 5000 chars)
+    //   - status: string (optional, max 50 chars)
+    //   - findings / summary: string (optional, max 5000 chars)
     //   - ipAddress / lastIp: string (optional, max 45 chars)
-    //   - ipAddresses / detectedIps / clientIps: list of strings (max 4 IP addresses)
+    //   - ipAddresses / knownIps / recentIps / clientIps / detectedIps / verifiedIps: list of strings (max 4 IP addresses, each max 45 chars)
     //   - timestamp: timestamp/number (optional)
     //
     // Collection: quarantine_vault
     // Document ID: {vaultId} (Auto-generated)
     // Fields:
-    //   - userId / ownerId: string (required, owner UID, immutable)
+    //   - userId / ownerId / uid: string (required, owner UID, immutable)
     //   - fileName: string (optional, max 255 chars)
     //   - fileUrl: string (optional URL, max 2048 chars)
     //   - threatLevel / reason: string (optional, max 1000 chars)
@@ -117,9 +128,9 @@ service cloud.firestore {
     // Fields:
     //   - callerId: string (required, initiator UID, immutable)
     //   - receiverId: string (optional, target UID)
-    //   - participants: list of strings (optional, participant UIDs)
-    //   - callType: string (optional, 'voice' | 'video')
-    //   - status: string (optional, 'ringing' | 'connected' | 'ended' | 'rejected')
+    //   - participants: list of strings (optional, participant UIDs, max 50 items)
+    //   - callType: string (optional, 'voice' | 'video', max 50 chars)
+    //   - status: string (optional, 'ringing' | 'connected' | 'ended' | 'rejected', max 50 chars)
     //
     // Collection: tokens & vip_licenses
     // Document ID: {tokenId} / {licenseId}
@@ -229,12 +240,16 @@ service cloud.firestore {
              isValidList(request.resource.data[field], maxSize);
     }
 
-    // 13. IP Address List Validation Helper (Enforces array/list cap, e.g. at most 4 IP addresses)
+    // 13. IP Address List Validation Helper (Enforces array/list cap: max 4 IP addresses, each max 45 chars string)
     function isValidIpList(field, maxCount) {
       return !(field in request.resource.data) ||
              request.resource.data[field] == null ||
              (request.resource.data[field] is list &&
-              request.resource.data[field].size() <= maxCount);
+              request.resource.data[field].size() <= maxCount &&
+              (request.resource.data[field].size() < 1 || (request.resource.data[field][0] is string && request.resource.data[field][0].size() <= 45)) &&
+              (request.resource.data[field].size() < 2 || (request.resource.data[field][1] is string && request.resource.data[field][1].size() <= 45)) &&
+              (request.resource.data[field].size() < 3 || (request.resource.data[field][2] is string && request.resource.data[field][2].size() <= 45)) &&
+              (request.resource.data[field].size() < 4 || (request.resource.data[field][3] is string && request.resource.data[field][3].size() <= 45)));
     }
 
     // 14. Immutable Field Check
@@ -242,16 +257,38 @@ service cloud.firestore {
       return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
     }
 
+    // 15. Extension Hub Scopes Validator (Max 10 scopes, each string max 64 chars)
+    function isValidScopeList(scopes) {
+      return scopes is list &&
+             scopes.size() <= 10 &&
+             (scopes.size() < 1 || (scopes[0] is string && scopes[0].size() <= 64)) &&
+             (scopes.size() < 2 || (scopes[1] is string && scopes[1].size() <= 64)) &&
+             (scopes.size() < 3 || (scopes[2] is string && scopes[2].size() <= 64)) &&
+             (scopes.size() < 4 || (scopes[3] is string && scopes[3].size() <= 64)) &&
+             (scopes.size() < 5 || (scopes[4] is string && scopes[4].size() <= 64)) &&
+             (scopes.size() < 6 || (scopes[5] is string && scopes[5].size() <= 64)) &&
+             (scopes.size() < 7 || (scopes[6] is string && scopes[6].size() <= 64)) &&
+             (scopes.size() < 8 || (scopes[7] is string && scopes[7].size() <= 64)) &&
+             (scopes.size() < 9 || (scopes[8] is string && scopes[8].size() <= 64)) &&
+             (scopes.size() < 10 || (scopes[9] is string && scopes[9].size() <= 64));
+    }
+
+    // 16. Flexible Timestamp / String / Number validator helper
+    function isValidTimestampOrNumber(val) {
+      return val == null || val is timestamp || val is string || val is int || val is float || val is number;
+    }
+
     // ===============================================================
     // DOMAIN VALIDATORS (Validator Function Pattern)
     // ===============================================================
 
-    // User Profile Validator: Prevents privilege escalation, enforces IP address caps (max 4 IPs), and limits payload sizes
+    // User Profile Validator: Prevents privilege escalation on isAdmin, isSuperAdmin, role, banned, and tokens; enforces max 4 IPs
     function isValidUserCreate(data) {
       return (!('isAdmin' in data) || data.isAdmin == false || isSuperAdmin()) &&
              (!('isSuperAdmin' in data) || data.isSuperAdmin == false || isSuperAdmin()) &&
              (!('role' in data) || data.role in ['user', 'member', 'client', 'guest'] || isSuperAdmin()) &&
              (!('banned' in data) || data.banned == false || isSuperAdmin()) &&
+             (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && data.tokens <= 2000) || isSuperAdmin()) &&
              isValidOptionalString('username', 0, 100) &&
              isValidOptionalString('displayName', 0, 100) &&
              isValidOptionalString('bio', 0, 1000) &&
@@ -263,18 +300,20 @@ service cloud.firestore {
              isValidOptionalList('archivedChats', 500) &&
              isValidOptionalString('ipAddress', 0, 45) &&
              isValidOptionalString('lastIp', 0, 45) &&
-             isValidOptionalList('ipAddresses', 4) &&
-             isValidOptionalList('knownIps', 4) &&
-             isValidOptionalList('recentIps', 4) &&
-             isValidOptionalList('clientIps', 4) &&
-             isValidOptionalList('verifiedIps', 4);
+             isValidIpList('ipAddresses', 4) &&
+             isValidIpList('knownIps', 4) &&
+             isValidIpList('recentIps', 4) &&
+             isValidIpList('clientIps', 4) &&
+             isValidIpList('detectedIps', 4) &&
+             isValidIpList('verifiedIps', 4);
     }
 
     function isValidUserUpdate(data, prev) {
-      return (!('isAdmin' in data) || !('isAdmin' in prev) || data.isAdmin == prev.isAdmin || isSuperAdmin()) &&
-             (!('isSuperAdmin' in data) || !('isSuperAdmin' in prev) || data.isSuperAdmin == prev.isSuperAdmin || isSuperAdmin()) &&
-             (!('role' in data) || !('role' in prev) || data.role == prev.role || isSuperAdmin()) &&
-             (!('banned' in data) || !('banned' in prev) || data.banned == prev.banned || isSuperAdmin()) &&
+      return (!('isAdmin' in data) || (('isAdmin' in prev && data.isAdmin == prev.isAdmin) || (!('isAdmin' in prev) && data.isAdmin == false)) || isSuperAdmin()) &&
+             (!('isSuperAdmin' in data) || (('isSuperAdmin' in prev && data.isSuperAdmin == prev.isSuperAdmin) || (!('isSuperAdmin' in prev) && data.isSuperAdmin == false)) || isSuperAdmin()) &&
+             (!('role' in data) || (('role' in prev && data.role == prev.role) || (!('role' in prev) && data.role in ['user', 'member', 'client', 'guest'])) || isSuperAdmin()) &&
+             (!('banned' in data) || (('banned' in prev && data.banned == prev.banned) || (!('banned' in prev) && data.banned == false)) || isSuperAdmin()) &&
+             (!('tokens' in data) || (data.tokens is number && data.tokens >= 0 && (('tokens' in prev && data.tokens <= prev.tokens) || (!('tokens' in prev) && data.tokens <= 2000))) || isSuperAdmin()) &&
              (!('uid' in data) || !('uid' in prev) || data.uid == prev.uid) &&
              isValidOptionalString('username', 0, 100) &&
              isValidOptionalString('displayName', 0, 100) &&
@@ -287,11 +326,26 @@ service cloud.firestore {
              isValidOptionalList('archivedChats', 500) &&
              isValidOptionalString('ipAddress', 0, 45) &&
              isValidOptionalString('lastIp', 0, 45) &&
-             isValidOptionalList('ipAddresses', 4) &&
-             isValidOptionalList('knownIps', 4) &&
-             isValidOptionalList('recentIps', 4) &&
-             isValidOptionalList('clientIps', 4) &&
-             isValidOptionalList('verifiedIps', 4);
+             isValidIpList('ipAddresses', 4) &&
+             isValidIpList('knownIps', 4) &&
+             isValidIpList('recentIps', 4) &&
+             isValidIpList('clientIps', 4) &&
+             isValidIpList('detectedIps', 4) &&
+             isValidIpList('verifiedIps', 4);
+    }
+
+    // Extension Hub Authorized Extension Validator: Schema validation for /users/{uid}/authorized_extensions/{extensionId}
+    function isValidAuthorizedExtension(data, extId) {
+      return extId is string &&
+             extId.size() >= 1 && extId.size() <= 64 &&
+             (!('extensionId' in data) || (data.extensionId is string && data.extensionId.size() >= 1 && data.extensionId.size() <= 64 && data.extensionId == extId)) &&
+             ('status' in data && data.status is string && data.status in ['approved', 'denied', 'pending']) &&
+             (!('scopes' in data) || data.scopes == null || isValidScopeList(data.scopes)) &&
+             (!('timestamp' in data) || isValidTimestampOrNumber(data.timestamp)) &&
+             (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             isValidOptionalString('ipAddress', 0, 45) &&
+             isValidOptionalString('extensionName', 0, 128);
     }
 
     // Direct Message Validator
@@ -301,6 +355,7 @@ service cloud.firestore {
                (('senderId' in data && data.senderId == request.auth.uid) && ('receiverId' in data && data.receiverId is string && data.receiverId.size() <= 128))
              ) &&
              isValidOptionalString('text', 0, 10000) &&
+             isValidOptionalString('content', 0, 10000) &&
              isValidOptionalList('reactions', 100);
     }
 
@@ -309,6 +364,7 @@ service cloud.firestore {
       return (
                ('authorId' in data && data.authorId == request.auth.uid) ||
                ('userId' in data && data.userId == request.auth.uid) ||
+               ('uid' in data && data.uid == request.auth.uid) ||
                isSuperAdmin()
              ) &&
              validStringLength('name', 1, 100) &&
@@ -324,17 +380,21 @@ service cloud.firestore {
       return (
                ('userId' in data && data.userId == request.auth.uid) ||
                ('ownerId' in data && data.ownerId == request.auth.uid) ||
+               ('uid' in data && data.uid == request.auth.uid) ||
                isSuperAdmin()
              ) &&
              isValidOptionalString('scanType', 0, 100) &&
              isValidOptionalString('status', 0, 50) &&
+             isValidOptionalString('findings', 0, 5000) &&
              isValidOptionalString('summary', 0, 5000) &&
              isValidOptionalString('ipAddress', 0, 45) &&
              isValidOptionalString('lastIp', 0, 45) &&
-             isValidOptionalList('ipAddresses', 4) &&
-             isValidOptionalList('detectedIps', 4) &&
-             isValidOptionalList('clientIps', 4) &&
-             isValidOptionalList('verifiedIps', 4);
+             isValidIpList('ipAddresses', 4) &&
+             isValidIpList('knownIps', 4) &&
+             isValidIpList('recentIps', 4) &&
+             isValidIpList('clientIps', 4) &&
+             isValidIpList('detectedIps', 4) &&
+             isValidIpList('verifiedIps', 4);
     }
 
     // Quarantine Vault Item Validator
@@ -342,6 +402,7 @@ service cloud.firestore {
       return (
                ('userId' in data && data.userId == request.auth.uid) ||
                ('ownerId' in data && data.ownerId == request.auth.uid) ||
+               ('uid' in data && data.uid == request.auth.uid) ||
                isSuperAdmin()
              ) &&
              isValidOptionalString('fileName', 0, 255) &&
@@ -368,15 +429,17 @@ service cloud.firestore {
     function isValidCallSession(data) {
       return (
                ('callerId' in data && data.callerId == request.auth.uid) ||
+               ('receiverId' in data && data.receiverId == request.auth.uid) ||
                ('participants' in data && data.participants is list && request.auth.uid in data.participants) ||
                isSuperAdmin()
              ) &&
              isValidOptionalString('callType', 0, 50) &&
-             isValidOptionalString('status', 0, 50);
+             isValidOptionalString('status', 0, 50) &&
+             isValidOptionalList('participants', 50);
     }
 
     // ===============================================================
-    // 1. USERS COLLECTION & LINKED DEVICES
+    // 1. USERS COLLECTION & LINKED DEVICES & EXTENSIONS
     // ===============================================================
     match /users/{uid} {
       // Authenticated users can read directory profiles for contacts/chat (unauthenticated denied)
@@ -385,8 +448,10 @@ service cloud.firestore {
       // Creation restricted to owner with anti-privilege escalation & payload bounds
       allow create: if isOwner(uid) && isValidUserCreate(request.resource.data);
 
-      // Updates restricted to owner or SuperAdmin, protecting privileged flags
-      allow update: if (isOwner(uid) && isValidUserUpdate(request.resource.data, resource.data)) || isSuperAdmin();
+      // Updates restricted to owner or SuperAdmin, protecting privileged flags; allows contact approvals
+      allow update: if (isOwner(uid) && isValidUserUpdate(request.resource.data, resource.data)) ||
+                       (isAuthenticated() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approvedChatUsers']) && isValidOptionalList('approvedChatUsers', 1000)) ||
+                       isSuperAdmin();
 
       // Account deletion restricted to SuperAdmin
       allow delete: if isSuperAdmin();
@@ -395,12 +460,28 @@ service cloud.firestore {
       match /linkedDevices/{deviceId} {
         allow read: if isOwner(uid) || isSuperAdmin();
         allow create, update: if (isOwner(uid) || isSuperAdmin()) &&
+                                 isValidOptionalString('deviceId', 0, 128) &&
                                  isValidOptionalString('deviceName', 0, 128) &&
                                  isValidOptionalString('platform', 0, 64) &&
                                  isValidOptionalString('ipAddress', 0, 45) &&
                                  isValidOptionalString('lastIp', 0, 45) &&
-                                 isValidOptionalList('ipAddresses', 4) &&
-                                 isValidOptionalList('clientIps', 4);
+                                 isValidIpList('ipAddresses', 4) &&
+                                 isValidIpList('knownIps', 4) &&
+                                 isValidIpList('recentIps', 4) &&
+                                 isValidIpList('clientIps', 4) &&
+                                 isValidIpList('detectedIps', 4) &&
+                                 isValidIpList('verifiedIps', 4);
+        allow delete: if isOwner(uid) || isSuperAdmin();
+      }
+
+      // Extension Hub Authorized Extensions subcollection (Owner-only with strict schema validation)
+      match /authorized_extensions/{extensionId} {
+        allow read: if isOwner(uid) || isSuperAdmin();
+        allow create: if (isOwner(uid) || isSuperAdmin()) &&
+                         isValidAuthorizedExtension(request.resource.data, extensionId);
+        allow update: if (isOwner(uid) || isSuperAdmin()) &&
+                         areImmutableFieldsUnchanged(['extensionId', 'createdAt']) &&
+                         isValidAuthorizedExtension(request.resource.data, extensionId);
         allow delete: if isOwner(uid) || isSuperAdmin();
       }
     }
@@ -418,7 +499,7 @@ service cloud.firestore {
         isSuperAdmin()
       );
 
-      // Create: supports both from/to and senderId/receiverId schemas with data validation
+      // Create: supports both from/to and senderId/receiverId schemas with data validation (text <= 10000, reactions <= 100)
       allow create: if isAuthenticated() && isValidMessageCreate(request.resource.data);
 
       // Update:
@@ -430,6 +511,7 @@ service cloud.firestore {
           (request.auth.uid == resource.data.from || ('senderId' in resource.data && request.auth.uid == resource.data.senderId)) &&
           areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
           isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
           isValidOptionalList('reactions', 100)
         ) ||
         (
@@ -463,14 +545,18 @@ service cloud.firestore {
                        request.resource.data.groupId is string &&
                        isGroupMember(request.resource.data.groupId) &&
                        (request.resource.data.from == request.auth.uid || request.resource.data.senderId == request.auth.uid) &&
-                       isValidOptionalString('text', 0, 10000);
+                       isValidOptionalString('text', 0, 10000) &&
+                       isValidOptionalString('content', 0, 10000) &&
+                       isValidOptionalList('reactions', 100);
 
       // Sender can edit text/reactions; group members can ONLY update reactions/readBy; moderators can moderate
       allow update: if isAuthenticated() && (
         (
           (request.auth.uid == resource.data.from || request.auth.uid == resource.data.senderId) &&
           areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
-          isValidOptionalString('text', 0, 10000)
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalList('reactions', 100)
         ) ||
         isGroupModerator(resource.data.groupId) ||
         (
@@ -527,12 +613,16 @@ service cloud.firestore {
         allow read: if isAuthenticated() && (isGroupMember(groupId) || isSuperAdmin());
         allow create: if isAuthenticated() && isGroupMember(groupId) &&
                          (request.resource.data.senderId == request.auth.uid || request.resource.data.from == request.auth.uid) &&
-                         isValidOptionalString('text', 0, 10000);
+                         isValidOptionalString('text', 0, 10000) &&
+                         isValidOptionalString('content', 0, 10000) &&
+                         isValidOptionalList('reactions', 100);
         allow update: if isAuthenticated() && (
           (
             (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.from) &&
             areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
-            isValidOptionalString('text', 0, 10000)
+            isValidOptionalString('text', 0, 10000) &&
+            isValidOptionalString('content', 0, 10000) &&
+            isValidOptionalList('reactions', 100)
           ) ||
           isGroupAdmin(groupId) ||
           (
@@ -571,8 +661,17 @@ service cloud.firestore {
 
       allow create: if isAuthenticated() &&
                        request.resource.data.userId == request.auth.uid &&
-                       request.resource.data.expiresAtMs is int &&
-                       request.resource.data.expiresAtMs <= request.time.toMillis() + 86400000 + 300000 &&
+                       (
+                         !('expiresAtMs' in request.resource.data) ||
+                         (request.resource.data.expiresAtMs is int &&
+                          request.resource.data.expiresAtMs <= request.time.toMillis() + 86400000 + 300000 &&
+                          request.resource.data.expiresAtMs >= request.time.toMillis() - 300000)
+                       ) &&
+                       (
+                         !('expiresAt' in request.resource.data) ||
+                         request.resource.data.expiresAt is timestamp ||
+                         request.resource.data.expiresAt is string
+                       ) &&
                        isValidOptionalString('content', 0, 2000) &&
                        isValidOptionalString('caption', 0, 2000) &&
                        isValidOptionalUrl('imageUrl') &&
@@ -580,12 +679,17 @@ service cloud.firestore {
 
       // Author/Admin can update their status; viewers can record views without modifying author content
       allow update: if isAuthenticated() && (
-        (isOwner(resource.data.userId) && areImmutableFieldsUnchanged(['userId', 'createdAt'])) ||
+        (
+          isOwner(resource.data.userId) &&
+          areImmutableFieldsUnchanged(['userId', 'createdAt', 'expiresAtMs', 'expiresAt']) &&
+          isValidOptionalString('content', 0, 2000) &&
+          isValidOptionalString('caption', 0, 2000)
+        ) ||
         (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'viewCount', 'viewsCount'])) ||
         isSuperAdmin()
       );
 
-      // Auto-purge or author/admin deletion
+      // Auto-purge or author/admin deletion once expired or owner-initiated
       allow delete: if isAuthenticated() && (
         isOwner(resource.data.userId) ||
         isSuperAdmin() ||
@@ -607,7 +711,7 @@ service cloud.firestore {
 
       allow create: if isAuthenticated() && isValidReel(request.resource.data);
 
-      // Author or SuperAdmin can update reel details; authenticated users can update engagement counters/likes
+      // Author or SuperAdmin can update reel details; authenticated users can update engagement counters/likes/tips
       allow update: if isAuthenticated() && (
         (
           (request.auth.uid == resource.data.authorId || request.auth.uid == resource.data.userId) &&
@@ -615,7 +719,7 @@ service cloud.firestore {
           isValidReel(request.resource.data)
         ) ||
         (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'commentsCount', 'views', 'sharesCount', 'poll']) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes', 'likesCount', 'commentsCount', 'views', 'sharesCount', 'poll', 'tokensTipped']) &&
           isValidOptionalList('likes', 10000)
         ) ||
         isSuperAdmin()
@@ -674,6 +778,7 @@ service cloud.firestore {
         isAuthenticated() && (
           resource.data.authorId == request.auth.uid ||
           resource.data.userId == request.auth.uid ||
+          ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
           isSuperAdmin()
         )
       );
@@ -682,8 +787,8 @@ service cloud.firestore {
 
       allow update: if isAuthenticated() && (
         (
-          (resource.data.authorId == request.auth.uid || resource.data.userId == request.auth.uid) &&
-          areImmutableFieldsUnchanged(['authorId', 'userId', 'createdAt']) &&
+          (resource.data.authorId == request.auth.uid || resource.data.userId == request.auth.uid || ('uid' in resource.data && resource.data.uid == request.auth.uid)) &&
+          areImmutableFieldsUnchanged(['authorId', 'userId', 'uid', 'createdAt']) &&
           isValidNexbotConfig(request.resource.data)
         ) ||
         isSuperAdmin()
@@ -692,6 +797,7 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && (
         resource.data.authorId == request.auth.uid ||
         resource.data.userId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
         isSuperAdmin()
       );
     }
@@ -703,6 +809,7 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
         resource.data.ownerId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
         isSuperAdmin()
       );
 
@@ -718,6 +825,7 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
         resource.data.ownerId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
         isSuperAdmin()
       );
 
@@ -725,8 +833,8 @@ service cloud.firestore {
 
       allow update: if isAuthenticated() && (
         (
-          (resource.data.userId == request.auth.uid || resource.data.ownerId == request.auth.uid) &&
-          areImmutableFieldsUnchanged(['userId', 'ownerId', 'createdAt']) &&
+          (resource.data.userId == request.auth.uid || resource.data.ownerId == request.auth.uid || ('uid' in resource.data && resource.data.uid == request.auth.uid)) &&
+          areImmutableFieldsUnchanged(['userId', 'ownerId', 'uid', 'createdAt']) &&
           isValidQuarantineVault(request.resource.data)
         ) ||
         isSuperAdmin()
@@ -735,6 +843,7 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
         resource.data.ownerId == request.auth.uid ||
+        ('uid' in resource.data && resource.data.uid == request.auth.uid) ||
         isSuperAdmin()
       );
     }

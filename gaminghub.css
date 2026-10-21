@@ -52,7 +52,85 @@ body {
 
 /* Header */
 .gaming-header {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
+}
+
+/* Prominent Cyber Head Tag Banner */
+.astro-head-tag-banner {
+  margin: 0 0 24px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.astro-head-tag-inner {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(0, 242, 255, 0.15) 0%, rgba(0, 255, 136, 0.1) 100%);
+  border: 1.5px solid rgba(0, 242, 255, 0.55);
+  box-shadow: 0 0 30px rgba(0, 242, 255, 0.28), inset 0 0 16px rgba(0, 242, 255, 0.12);
+  padding: 12px 28px;
+  border-radius: 9999px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: headTagGlow 3s infinite ease-in-out;
+  transition: all 0.25s ease;
+}
+
+.astro-head-tag-inner:hover {
+  transform: translateY(-1px) scale(1.02);
+  border-color: #00f2ff;
+  box-shadow: 0 0 40px rgba(0, 242, 255, 0.45), inset 0 0 20px rgba(0, 242, 255, 0.2);
+}
+
+@keyframes headTagGlow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2), inset 0 0 12px rgba(0, 242, 255, 0.05);
+    border-color: rgba(0, 242, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 36px rgba(0, 242, 255, 0.5), inset 0 0 22px rgba(0, 242, 255, 0.18);
+    border-color: rgba(0, 242, 255, 0.85);
+  }
+}
+
+.astro-head-tag-pulse {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #00f2ff;
+  box-shadow: 0 0 10px #00f2ff;
+  animation: pulseHeadDot 1.5s infinite ease-in-out;
+}
+
+@keyframes pulseHeadDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(0.7); opacity: 0.4; }
+}
+
+.astro-head-tag-text {
+  font-family: var(--font-orbitron);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 0 14px rgba(0, 242, 255, 0.7);
+}
+
+.astro-head-tag-chip {
+  font-family: var(--font-rajdhani);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.15);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  padding: 3px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
 }
 
 .gaming-header-top {

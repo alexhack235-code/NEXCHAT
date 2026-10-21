@@ -29,6 +29,17 @@ if (fs.existsSync(localConfigPath)) {
   }
 }
 
+// Preload official NEXCHAT logo for inline MIME attachment (prevents blank/missing logo in Gmail)
+let LOGO_BASE64 = '';
+const localLogoPath = path.join(__dirname, '..', '..', 'logo.jpg');
+if (fs.existsSync(localLogoPath)) {
+  try {
+    LOGO_BASE64 = fs.readFileSync(localLogoPath).toString('base64').replace(/(.{76})/g, '$1\r\n');
+  } catch (e) {
+    console.warn('[EMAIL] Could not read logo.jpg for attachment:', e.message);
+  }
+}
+
 /**
  * Sends an email via pure native TLS SMTP (smtp.gmail.com:465)
  */
@@ -87,19 +98,48 @@ function sendViaGmailSMTP(to, subject, htmlContent) {
         socket.write('DATA\r\n');
         step = 7;
       }
-      // Step 7: Ready for message (354) -> Send Headers & Body
+      // Step 7: Ready for message (354) -> Send Headers, HTML Body & Inline Attached Logo
       else if (step === 7 && code === 354) {
         const boundary = '----=_Part_NexChat_' + Date.now();
-        const emailData = [
-          `From: "${CONFIG.FROM_NAME}" <${CONFIG.GMAIL_USER}>`,
-          `To: <${to}>`,
-          `Subject: ${subject}`,
-          'MIME-Version: 1.0',
-          `Content-Type: text/html; charset=UTF-8`,
-          '',
-          htmlContent,
-          '\r\n.\r\n',
-        ].join('\r\n');
+        let emailData = '';
+
+        if (LOGO_BASE64) {
+          emailData = [
+            `From: "${CONFIG.FROM_NAME}" <${CONFIG.GMAIL_USER}>`,
+            `To: <${to}>`,
+            `Subject: ${subject}`,
+            'MIME-Version: 1.0',
+            `Content-Type: multipart/related; boundary="${boundary}"`,
+            '',
+            `--${boundary}`,
+            'Content-Type: text/html; charset=UTF-8',
+            'Content-Transfer-Encoding: 7bit',
+            '',
+            htmlContent,
+            '',
+            `--${boundary}`,
+            'Content-Type: image/jpeg; name="logo.jpg"',
+            'Content-Transfer-Encoding: base64',
+            'Content-ID: <nexchat-logo>',
+            'Content-Disposition: inline; filename="logo.jpg"',
+            '',
+            LOGO_BASE64,
+            '',
+            `--${boundary}--`,
+            '\r\n.\r\n',
+          ].join('\r\n');
+        } else {
+          emailData = [
+            `From: "${CONFIG.FROM_NAME}" <${CONFIG.GMAIL_USER}>`,
+            `To: <${to}>`,
+            `Subject: ${subject}`,
+            'MIME-Version: 1.0',
+            `Content-Type: text/html; charset=UTF-8`,
+            '',
+            htmlContent,
+            '\r\n.\r\n',
+          ].join('\r\n');
+        }
 
         socket.write(emailData);
         step = 8;
@@ -220,9 +260,7 @@ function createPasswordResetEmail({ username, resetUrl, token, ipAddress, expire
                   </p>
                 </td>
                 <td align="right" valign="top">
-                  <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 240, 118, 0.12); border: 1px solid #00f076; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 44px; font-size: 20px;">
-                    🔐
-                  </div>
+                  <img src="cid:nexchat-logo" alt="NEXCHAT Logo" width="48" height="48" style="border-radius: 12px; border: 1.5px solid #00f076; box-shadow: 0 0 14px rgba(0, 240, 118, 0.4); display: block;" onerror="this.src='https://raw.githubusercontent.com/alexhack235-code/NEXCHAT/main/logo.jpg'" />
                 </td>
               </tr>
             </table>
@@ -360,9 +398,18 @@ function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, r
                   </p>
                 </td>
                 <td align="right" valign="top">
-                  <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(254, 44, 85, 0.15); border: 1px solid #fe2c55; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 44px; font-size: 20px;">
-                    🚨
-                  </div>
+                  <table border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding-right: 10px;" valign="middle">
+                        <img src="cid:nexchat-logo" alt="NEXCHAT Logo" width="44" height="44" style="border-radius: 12px; border: 1.5px solid #fe2c55; box-shadow: 0 0 14px rgba(254, 44, 85, 0.4); display: block;" onerror="this.src='https://raw.githubusercontent.com/alexhack235-code/NEXCHAT/main/logo.jpg'" />
+                      </td>
+                      <td valign="middle">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(254, 44, 85, 0.15); border: 1px solid #fe2c55; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 44px; font-size: 20px;">
+                          🚨
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>
@@ -454,12 +501,21 @@ function createOfflineMessageEmail({ recipientName, senderName, messageSnippet, 
         <!-- Header -->
         <tr>
           <td style="background: linear-gradient(135deg, rgba(6, 14, 28, 0.98), rgba(10, 22, 45, 0.95)); padding: 28px 32px; border-bottom: 1px solid rgba(0, 240, 118, 0.25);">
-            <span style="display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #00f076; text-transform: uppercase; background: rgba(0, 240, 118, 0.1); border: 1px solid rgba(0, 240, 118, 0.35); padding: 4px 12px; border-radius: 9999px; margin-bottom: 10px;">
-              ENCRYPTED DISPATCH &bull; UNREAD ACTIVITY
-            </span>
-            <h1 style="margin: 6px 0 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
-              NEXCHAT <span style="color: #00d4ff;">//</span> CHAT RELAY
-            </h1>
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <span style="display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #00f076; text-transform: uppercase; background: rgba(0, 240, 118, 0.1); border: 1px solid rgba(0, 240, 118, 0.35); padding: 4px 12px; border-radius: 9999px; margin-bottom: 10px;">
+                    ENCRYPTED DISPATCH &bull; UNREAD ACTIVITY
+                  </span>
+                  <h1 style="margin: 6px 0 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
+                    NEXCHAT <span style="color: #00d4ff;">//</span> CHAT RELAY
+                  </h1>
+                </td>
+                <td align="right" valign="top">
+                  <img src="cid:nexchat-logo" alt="NEXCHAT Logo" width="48" height="48" style="border-radius: 12px; border: 1.5px solid #00f076; box-shadow: 0 0 14px rgba(0, 240, 118, 0.4); display: block;" onerror="this.src='https://raw.githubusercontent.com/alexhack235-code/NEXCHAT/main/logo.jpg'" />
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
 
@@ -582,9 +638,18 @@ function createExtensionConsentEmail({ username, extensionName, extensionId, sta
                   </p>
                 </td>
                 <td align="right" valign="top">
-                  <div style="width: 46px; height: 46px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1.5px solid ${primaryColor}; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 46px; font-size: 22px;">
-                    ${statusIcon}
-                  </div>
+                  <table border="0" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td style="padding-right: 12px;" valign="middle">
+                        <img src="cid:nexchat-logo" alt="NEXCHAT Logo" width="46" height="46" style="border-radius: 12px; border: 1.5px solid ${primaryColor}; box-shadow: 0 0 14px ${glowColor}; display: block;" onerror="this.src='https://raw.githubusercontent.com/alexhack235-code/NEXCHAT/main/logo.jpg'" />
+                      </td>
+                      <td valign="middle">
+                        <div style="width: 46px; height: 46px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1.5px solid ${primaryColor}; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 46px; font-size: 22px;">
+                          ${statusIcon}
+                        </div>
+                      </td>
+                    </tr>
+                  </table>
                 </td>
               </tr>
             </table>

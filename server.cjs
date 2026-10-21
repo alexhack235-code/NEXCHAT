@@ -125,10 +125,22 @@ const server = http.createServer((req, res) => {
             to: toEmail,
             subject: '⚡ NEXCHAT Gmail Notification Test: SUCCESS',
             htmlContent: `
-              <div style="background:#060913; color:#f8fafc; padding:24px; border-radius:12px; font-family:sans-serif; border:1px solid #00f076;">
-                <h2 style="color:#00f076; margin:0 0 10px;">NEXCHAT GMAIL SMTP TEST</h2>
-                <p>Congratulations! Your Gmail notification engine is operational and ready to dispatch real-time alerts.</p>
-                <p style="color:#64748b; font-size:12px;">Dispatched from local server preview &bull; ${new Date().toISOString()}</p>
+              <div style="background:#060913; color:#f8fafc; padding:28px 24px; border-radius:14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; border:1px solid #00f076; max-width:600px; margin:0 auto;">
+                <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+                  <tr>
+                    <td>
+                      <span style="font-size:10px; font-weight:800; letter-spacing:2px; color:#00f076; text-transform:uppercase; background:rgba(0,240,118,0.1); border:1px solid rgba(0,240,118,0.35); padding:3px 10px; border-radius:9999px;">
+                        SYSTEM VERIFIED
+                      </span>
+                      <h2 style="color:#ffffff; margin:8px 0 0; font-size:20px; font-weight:800;">NEXCHAT GMAIL SMTP TEST</h2>
+                    </td>
+                    <td align="right" valign="top">
+                      <img src="cid:nexchat-logo" alt="NEXCHAT Logo" width="48" height="48" style="border-radius:12px; border:2px solid #00f076; display:block;" onerror="this.src='https://raw.githubusercontent.com/alexhack235-code/NEXCHAT/main/logo.jpg'" />
+                    </td>
+                  </tr>
+                </table>
+                <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">Congratulations! Your Gmail notification engine is operational and ready to dispatch real-time alerts with official attached branding.</p>
+                <p style="color:#64748b; font-size:12px; margin-top:16px;">Dispatched from local server preview &bull; ${new Date().toISOString()}</p>
               </div>
             `,
           });
