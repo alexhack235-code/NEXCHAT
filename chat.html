@@ -119,62 +119,10 @@
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
-          <button id="mobileMenuBtn" class="header-icon-btn mobile-action-btn" title="Menu" aria-label="Menu">
+          <button id="mobileMenuBtn" class="header-icon-btn mobile-action-btn" title="Menu" aria-label="Menu" onclick="if(window.toggleMobileDropdownMenu) window.toggleMobileDropdownMenu(event);">
             <i class="fa-solid fa-ellipsis-vertical"></i>
           </button>
         </div>
-      </div>
-
-      <!-- Mobile Quick Dropdown Menu -->
-      <div id="mobileDropdownMenu" class="mobile-dropdown-menu" style="display: none;">
-        <button type="button" class="mobile-menu-item" onclick="window.location.href='reels.html'">
-          <i class="fa-solid fa-clapperboard"></i> <span>CamShot</span>
-        </button>
-        <button type="button" class="mobile-menu-item" onclick="window.location.href='cart.html'">
-          <i class="fa-solid fa-coins"></i> <span>Tokens & Gifts</span>
-          <span class="mobile-menu-badge" id="mobileTokenBadge">0</span>
-        </button>
-        <button type="button" class="mobile-menu-item" onclick="window.location.href='gaminghub.html'">
-          <i class="fa-solid fa-gamepad"></i> <span>AstroShift: Beyond Earth</span>
-        </button>
-        <button type="button" class="mobile-menu-item" onclick="window.open('terminal.html','_blank')">
-          <i class="fa-solid fa-terminal"></i> <span>Hacker Terminal</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileLinkDeviceBtn">
-          <i class="fa-solid fa-qrcode"></i> <span>Linked Devices</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileThemeToggleBtn">
-          <i class="fa-solid fa-circle-half-stroke"></i> <span>Toggle Dark / Light</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileRadarBtn">
-          <i class="fa-solid fa-satellite-dish"></i> <span>Neural Radar</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileNexbotStudioBtn">
-          <i class="fa-solid fa-robot"></i> <span>NEXBOT Studio</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileVipVaultBtn">
-          <i class="fa-solid fa-crown"></i> <span>VIP Vault &amp; Licenses</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileStreakBtn">
-          <i class="fa-solid fa-bolt" style="color: #ffd700;"></i> <span>Cyber Streak Hub</span>
-          <span class="mobile-menu-badge" id="mobileStreakBadge">1 DAY</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileAudioSpacesBtn">
-          <i class="fa-solid fa-podcast"></i> <span>Live Audio Spaces</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileCyberDropBtn">
-          <i class="fa-solid fa-share-nodes"></i> <span>CyberDrop P2P Beam</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileCipherVaultBtn">
-          <i class="fa-solid fa-key"></i> <span>Cipher Secret Rooms</span>
-        </button>
-        <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
-          <i class="fa-solid fa-gear"></i> <span>Settings</span>
-        </button>
-        <div class="mobile-menu-divider"></div>
-        <button type="button" class="mobile-menu-item danger" id="mobileLogoutBtn">
-          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
-        </button>
       </div>
     </header>
 
@@ -227,8 +175,8 @@
           <div class="status-avatar-wrapper terminal-avatar-wrapper" id="myStatusAvatarWrapper">
             <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
             <span class="terminal-node-beacon"></span>
+            <button type="button" id="myStatusAddBadge" class="status-plus-badge terminal-plus-badge" title="Deploy Status Node">+</button>
           </div>
-          <button type="button" id="myStatusAddBadge" class="status-plus-badge terminal-plus-badge" title="Deploy Status Node">+</button>
           <span class="status-item-copy">
             <span class="status-item-label terminal-node-name">[MY_NODE]</span>
             <span class="status-item-hint">Tap to deploy</span>
@@ -1273,6 +1221,11 @@
 
               <div class="settings-nav-group">
                 <span class="settings-nav-group-title">SECURITY & HARDWARE</span>
+                <button type="button" class="settings-nav-tab" data-tab="tab-ai-defense">
+                  <i class="fa-solid fa-shield-virus" style="color: #00ff66;"></i>
+                  <span>AI Security Defense</span>
+                  <span class="settings-tab-microbadge token-badge" style="background: rgba(0,255,102,0.15); color: #00ff66; border: 1px solid rgba(0,255,102,0.3);">ACTIVE</span>
+                </button>
                 <button type="button" class="settings-nav-tab" data-tab="tab-privacy">
                   <i class="fa-solid fa-shield-halved"></i>
                   <span>Privacy & Security</span>
@@ -1539,6 +1492,106 @@
                     <option value="urgent">Urgent Alert</option>
                     <option value="skype">Skype Tone</option>
                   </select>
+                </div>
+              </div>
+
+              <!-- TAB: AI SECURITY SCANNER DEFENSE HUB -->
+              <div class="settings-tab-pane" id="tab-ai-defense">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-shield-virus" style="color: #00ff66;"></i> AI Security Defense Hub</h3>
+                  <p>Enterprise Real-Time Heuristics, Malware Signatures & Injection Defense (alexhack235-code / REDOX-PY_SCANNER Engine)</p>
+                </div>
+
+                <!-- Live Defense Telemetry Card -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.4); background: rgba(0, 255, 102, 0.04);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #00ff66; box-shadow: 0 0 10px #00ff66;"></span>
+                      <strong style="color: #00ff66; font-size: 13px; font-family: 'Orbitron', monospace; letter-spacing: 1px;">AI DEFENSE ENGINE: ARMED &amp; OPERATIONAL</strong>
+                    </div>
+                    <span id="aiScannerEngineVer" style="font-size: 11px; font-family: monospace; color: #8b949e; background: rgba(255,255,255,0.06); padding: 2px 8px; border-radius: 6px;">v9.2 PRO</span>
+                  </div>
+
+                  <!-- 4-Metric Grid -->
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center;">
+                      <div id="metricTotalScanned" style="font-size: 20px; font-weight: 800; color: #00ff66; font-family: monospace;">0</div>
+                      <div style="font-size: 10px; color: #8b949e; text-transform: uppercase;">Total Scanned</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center;">
+                      <div id="metricThreatsBlocked" style="font-size: 20px; font-weight: 800; color: #00d4ff; font-family: monospace;">0</div>
+                      <div style="font-size: 10px; color: #8b949e; text-transform: uppercase;">Threats Blocked</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center;">
+                      <div id="metricXssKilled" style="font-size: 20px; font-weight: 800; color: #ffd700; font-family: monospace;">0</div>
+                      <div style="font-size: 10px; color: #8b949e; text-transform: uppercase;">XSS / Injections</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center;">
+                      <div id="metricQuarantined" style="font-size: 20px; font-weight: 800; color: #ff4d6d; font-family: monospace;">0</div>
+                      <div style="font-size: 10px; color: #8b949e; text-transform: uppercase;">Quarantined</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- One-Click System Security Audit -->
+                <div class="settings-card">
+                  <div>
+                    <strong>Deep System Vulnerability &amp; Integrity Audit</strong>
+                    <p style="font-size: 12px; color: #8b949e; margin: 4px 0 10px;">Scans session tokens, IndexedDB caches, active WebSockets, and payload signatures.</p>
+                  </div>
+                  <button type="button" id="runSecurityAuditBtn" class="btn-primary" style="width: 100%; font-weight: 700; background: linear-gradient(135deg, #00ff66, #00d4ff); color: #000;">
+                    <i class="fa-solid fa-satellite-dish"></i> Execute Full System Security Scan
+                  </button>
+                  <div id="securityScanProgressWrap" style="display: none; margin-top: 12px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
+                      <span id="securityScanStatusText" style="color: #00ff66; font-family: monospace;">Initiating Heuristic Matrix...</span>
+                      <span id="securityScanPctText" style="color: #fff; font-family: monospace; font-weight: 700;">0%</span>
+                    </div>
+                    <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden;">
+                      <div id="securityScanProgressBar" style="width: 0%; height: 100%; background: #00ff66; transition: width 0.3s ease;"></div>
+                    </div>
+                  </div>
+                  <div id="securityScanReportBox" style="display: none; margin-top: 12px; padding: 10px; background: rgba(0,0,0,0.5); border-radius: 8px; border: 1px solid rgba(0,255,102,0.2); font-size: 12px; font-family: monospace; color: #00ff66;"></div>
+                </div>
+
+                <!-- Real-Time Defense Toggles -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Real-Time Message &amp; Prompt Firewall</strong>
+                      <p>Neutralizes XSS, SQLi, and prompt injection jailbreak patterns in real time.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="realTimeFirewallToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Shannon Entropy File Inspector</strong>
+                      <p>Scans uploads for high-entropy packed malware and disguised executables (.exe, .scr, .apk).</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="entropyFileScanToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Quarantine Vault Action -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong>Quarantine Vault Isolation</strong>
+                      <p style="font-size: 11px; color: #8b949e; margin: 2px 0 0;">Inspect and purge malicious payloads isolated by the defense scanner.</p>
+                    </div>
+                    <button type="button" id="purgeQuarantineBtn" class="btn-secondary" style="font-size: 11px; padding: 6px 12px; color: #ff4d6d; border-color: rgba(255,77,109,0.3);">
+                      <i class="fa-solid fa-trash"></i> Purge Vault
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -2170,6 +2223,90 @@
       </div>
     </main>
 
+    <!-- Mobile Quick Dropdown Menu (Fixed Viewport Floating Menu) -->
+    <div id="mobileDropdownMenu" class="mobile-dropdown-menu" style="display: none;">
+      <button type="button" class="mobile-menu-item" onclick="window.location.href='reels.html'">
+        <i class="fa-solid fa-clapperboard"></i> <span>CamShot</span>
+      </button>
+      <button type="button" class="mobile-menu-item" onclick="window.location.href='cart.html'">
+        <i class="fa-solid fa-coins"></i> <span>Tokens & Gifts</span>
+        <span class="mobile-menu-badge" id="mobileTokenBadge">0</span>
+      </button>
+      <button type="button" class="mobile-menu-item" onclick="window.location.href='gaminghub.html'">
+        <i class="fa-solid fa-gamepad"></i> <span>AstroShift: Beyond Earth</span>
+      </button>
+      <button type="button" class="mobile-menu-item" onclick="window.open('terminal.html','_blank')">
+        <i class="fa-solid fa-terminal"></i> <span>Hacker Terminal</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileLinkDeviceBtn">
+        <i class="fa-solid fa-qrcode"></i> <span>Linked Devices</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileThemeToggleBtn">
+        <i class="fa-solid fa-circle-half-stroke"></i> <span>Toggle Dark / Light</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileRadarBtn">
+        <i class="fa-solid fa-satellite-dish"></i> <span>Neural Radar</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileNexbotStudioBtn">
+        <i class="fa-solid fa-robot"></i> <span>NEXBOT Studio</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileVipVaultBtn">
+        <i class="fa-solid fa-crown"></i> <span>VIP Vault &amp; Licenses</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileStreakBtn">
+        <i class="fa-solid fa-bolt" style="color: #ffd700;"></i> <span>Cyber Streak Hub</span>
+        <span class="mobile-menu-badge" id="mobileStreakBadge">1 DAY</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileAudioSpacesBtn">
+        <i class="fa-solid fa-podcast"></i> <span>Live Audio Spaces</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileCyberDropBtn">
+        <i class="fa-solid fa-share-nodes"></i> <span>CyberDrop P2P Beam</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileCipherVaultBtn">
+        <i class="fa-solid fa-key"></i> <span>Cipher Secret Rooms</span>
+      </button>
+      <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
+        <i class="fa-solid fa-gear"></i> <span>Settings</span>
+      </button>
+      <div class="mobile-menu-divider"></div>
+      <button type="button" class="mobile-menu-item danger" id="mobileLogoutBtn">
+        <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+      </button>
+    </div>
+
+    <script>
+      (function() {
+        window.toggleMobileDropdownMenu = function(e) {
+          if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+          const menu = document.getElementById('mobileDropdownMenu');
+          if (!menu) return;
+          const isVisible = menu.style.display === 'flex' || menu.classList.contains('show');
+          if (isVisible) {
+            menu.style.display = 'none';
+            menu.classList.remove('show');
+            menu.setAttribute('aria-hidden', 'true');
+          } else {
+            menu.style.display = 'flex';
+            menu.classList.add('show');
+            menu.setAttribute('aria-hidden', 'false');
+          }
+        };
+
+        document.addEventListener('click', function(e) {
+          const menu = document.getElementById('mobileDropdownMenu');
+          const btn = document.getElementById('mobileMenuBtn');
+          if (!menu || !btn) return;
+          if ((menu.style.display === 'flex' || menu.classList.contains('show')) &&
+              !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+            menu.style.display = 'none';
+            menu.classList.remove('show');
+            menu.setAttribute('aria-hidden', 'true');
+          }
+        });
+      })();
+    </script>
+
     <!-- MOBILE DISCOVER BOTTOM SHEET -->
     <div id="mobileMoreSheet" class="mobile-more-sheet" aria-hidden="true">
       <div class="more-sheet-backdrop" id="closeMoreSheetBackdrop"></div>
@@ -2424,6 +2561,9 @@
             <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-fleet">
               <i class="fa-solid fa-list-check"></i> Bot Fleet (<span id="botFleetCount">1</span>)
             </button>
+            <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-connections" id="nexbotTabConnections">
+              <i class="fa-solid fa-network-wired"></i> Test All Connections
+            </button>
           </div>
 
           <!-- TAB 1: Persona & Brain -->
@@ -2551,6 +2691,87 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           <div class="nexbot-tab-pane" id="bot-tab-fleet">
             <div class="nexbot-fleet-list" id="nexbotFleetList">
               <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <!-- TAB 5: Mesh Diagnostics & Test Connections to All -->
+          <div class="nexbot-tab-pane" id="bot-tab-connections">
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <div>
+                  <h4 style="margin: 0; font-size: 14.5px; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-satellite-dish" style="color: #00ff66;"></i> Full Mesh Live Connectivity Diagnostics
+                  </h4>
+                  <p style="margin: 3px 0 0; font-size: 11.5px; color: #94a3b8;">
+                    Verify round-trip real-time latencies across all backend infrastructure pipelines.
+                  </p>
+                </div>
+                <button type="button" id="runAllMeshDiagnosticsBtn" class="nexbot-btn primary" style="padding: 7px 14px; font-size: 11.5px;">
+                  <i class="fa-solid fa-play"></i> Test All Connections
+                </button>
+              </div>
+
+              <!-- Diagnostic Grid -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;" id="meshNodesGrid">
+                <!-- Node 1: Firebase Firestore -->
+                <div class="mesh-node-card" id="meshNodeFirestore" style="background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-fire text-amber-500"></i> Cloud Firestore</span>
+                    <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
+                  </div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Security Rules v2 &bull; Realtime Listeners</div>
+                  <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
+                </div>
+
+                <!-- Node 2: Supabase WebSockets -->
+                <div class="mesh-node-card" id="meshNodeSupabase" style="background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-bolt text-emerald-400"></i> Supabase Realtime</span>
+                    <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
+                  </div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Postgres CDC &bull; Broadcast Mesh</div>
+                  <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
+                </div>
+
+                <!-- Node 3: Cloudinary CDN -->
+                <div class="mesh-node-card" id="meshNodeCloudinary" style="background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-cloud text-blue-400"></i> Cloudinary Media</span>
+                    <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
+                  </div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Edge Video Delivery &bull; Vault CDN</div>
+                  <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
+                </div>
+
+                <!-- Node 4: Chronex Autonomous AI Engine -->
+                <div class="mesh-node-card" id="meshNodeChronex" style="background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-robot text-purple-400"></i> Chronex AI Engine</span>
+                    <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
+                  </div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Autonomous Neural LLM &bull; WA Bot Brain</div>
+                  <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
+                </div>
+
+                <!-- Node 5: REDOX AI Security Scanner -->
+                <div class="mesh-node-card" id="meshNodeSecurity" style="background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 10px; padding: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-shield-halved text-cyan-400"></i> REDOX AI Scanner</span>
+                    <span class="mesh-node-status" style="font-size: 10px; font-weight: 800; color: #94a3b8; background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px;">IDLE</span>
+                  </div>
+                  <div style="margin-top: 6px; font-size: 11px; color: #64748b;" class="mesh-node-detail">Zero-Trust WAF &bull; RealTime Defender</div>
+                  <div style="margin-top: 4px; font-size: 12px; font-weight: 800; color: #00ff66;" class="mesh-node-latency">-- ms</div>
+                </div>
+              </div>
+
+              <!-- Overall Health Banner -->
+              <div id="meshOverallStatusBanner" style="margin-top: 14px; background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <i class="fa-solid fa-circle-check" style="color: #00ff66; font-size: 16px;"></i>
+                  <span style="font-size: 12px; font-weight: 700; color: #e2e8f0;" id="meshOverallStatusText">All Mesh nodes operational and ready for live synchronization.</span>
+                </div>
+                <span style="font-size: 10.5px; font-weight: 800; color: #00ff66; background: rgba(0,255,102,0.15); padding: 3px 8px; border-radius: 6px;">READY</span>
+              </div>
             </div>
           </div>
 
@@ -3306,6 +3527,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script type="module" src="messaging-features.js"></script>
   <script type="module" src="chat-navigation.js"></script>
   <script src="https://apis.google.com/js/api.js"></script>
+  <script type="module" src="./src/js/ai-security-scanner-api.js"></script>
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
 

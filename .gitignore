@@ -23,6 +23,26 @@ pnpm-debug.log*
 # Editor & OS files
 .DS_Store
 Thumbs.db
+
+# Unity Temporary & Cache Folders
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+*.csproj
+*.unityproj
+*.sln
+*.slnx
+
+# Scratch & Browser test profiles
+chrome_test_profile*/
+/scratch/
+*.png
+*.log
 .vscode/*
 !.vscode/extensions.json
 .idea
