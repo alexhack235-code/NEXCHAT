@@ -385,6 +385,21 @@ function hideLoginLoader() {
   }
 }
 
+// Allow user to dismiss login loader via backdrop click or Escape key
+const loginOverlayEl = document.getElementById('loginLoaderOverlay');
+if (loginOverlayEl) {
+  loginOverlayEl.addEventListener('click', (e) => {
+    if (e.target === loginOverlayEl) {
+      hideLoginLoader();
+    }
+  });
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    hideLoginLoader();
+  }
+});
+
 if (loginForm) {
   loginForm.addEventListener('submit', async e => {
     e.preventDefault();

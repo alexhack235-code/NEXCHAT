@@ -754,6 +754,24 @@ export const SEED_REELS = [
   }
 ];
 
+// Robust Loader Dismissal with Safety Watchdog & Tap-to-Exit
+function hideReelsLoader() {
+  if (!reelsLoadingState) return;
+  reelsLoadingState.classList.add('fade-out');
+  reelsLoadingState.classList.remove('active');
+  setTimeout(() => {
+    reelsLoadingState.style.display = 'none';
+  }, 350);
+}
+
+// Tap or click on loader to dismiss immediately
+if (reelsLoadingState) {
+  reelsLoadingState.addEventListener('click', hideReelsLoader);
+}
+
+// Safety watchdog: ensure loading screen NEVER blocks the user for more than 2.2s
+setTimeout(hideReelsLoader, 2200);
+
 // Subscribe to Firestore Reels Collection
 function initReelsFeed() {
   const reelsQuery = query(
@@ -763,7 +781,7 @@ function initReelsFeed() {
   );
 
   onSnapshot(reelsQuery, (snapshot) => {
-    if (reelsLoadingState) reelsLoadingState.style.display = 'none';
+    hideReelsLoader();
 
     const reelDocs = (!snapshot.empty) ? snapshot.docs.map((docSnap) => ({
       id: docSnap.id,
@@ -783,7 +801,7 @@ function initReelsFeed() {
     applyFeedFilter();
   }, (err) => {
     console.warn('Reels stream fallback to seeded content:', err.message);
-    if (reelsLoadingState) reelsLoadingState.style.display = 'none';
+    hideReelsLoader();
     allLoadedReels = [...SEED_REELS];
     applyFeedFilter();
   });

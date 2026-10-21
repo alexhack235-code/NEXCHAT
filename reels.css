@@ -369,6 +369,13 @@ body.reels-body {
   z-index: 99999 !important;
 }
 
+.reels-loading-state.fade-out {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 0.35s ease, visibility 0.35s ease;
+}
+
 .nexshot-3d-scene {
   display: flex;
   flex-direction: column;
