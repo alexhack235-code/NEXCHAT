@@ -1002,6 +1002,7 @@
   NEXCHAT OPERATIVE HACKER TERMINAL — COMMAND SUITE v9.2
 =============================================================
   help                     - Display this command matrix
+  admin                    - Open NEXCHAT Security Command Center (SuperAdmin)
   scan                     - Execute AI Security Defense Heuristic Audit
   ping [host]              - Live ICMP/HTTP latency test (supabase, firebase, local)
   sysinfo                  - Real client hardware, memory & thread telemetry
@@ -1038,6 +1039,12 @@
         } else {
           logTerminal('[SECURITY] Heuristics engine active. 0 vulnerabilities detected.', 'success');
         }
+      }
+      else if (main === 'admin') {
+        logTerminal('[SECURITY] Opening NEXCHAT Security Command Center...', 'success');
+        setTimeout(() => {
+          window.location.href = 'admin-dashboard.html';
+        }, 500);
       }
       else if (main === 'ping') {
         const host = target || 'supabase';
