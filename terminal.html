@@ -1041,7 +1041,14 @@
         }
       }
       else if (main === 'admin') {
-        logTerminal('[SECURITY] Opening NEXCHAT Security Command Center...', 'success');
+        const pass = target.trim();
+        if (pass === 'IAMATOMICDEVELOPER16@$#') {
+          sessionStorage.setItem('nex_admin_authorized', 'true');
+          localStorage.setItem('nex_is_admin', 'true');
+          logTerminal('[SECURITY] SuperAdmin authenticated via terminal. Launching console...', 'success');
+        } else {
+          logTerminal('[SECURITY] Opening NEXCHAT Security Command Center...', 'success');
+        }
         setTimeout(() => {
           window.location.href = 'admin-dashboard.html';
         }, 500);

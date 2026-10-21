@@ -569,10 +569,10 @@
         NEXCHAT MASTER GATE
       </h2>
       <p style="font-size: 12px; color: var(--text-dim); margin-top: 8px;">
-        Restricted Security Command. Enter Admin Passkey or SuperAdmin Token to initialize.
+        Restricted Security Command. Enter SuperAdmin Master Password to initialize.
       </p>
       
-      <input type="password" id="adminPasskeyInput" class="auth-input" placeholder="PASSKEY" autocomplete="off" />
+      <input type="password" id="adminPasskeyInput" class="auth-input" placeholder="MASTER PASSWORD" autocomplete="off" />
       
       <button type="button" id="unlockAdminBtn" class="admin-btn primary" style="width: 100%; justify-content: center; padding: 12px;">
         <i class="fa-solid fa-unlock-keyhole"></i> Authenticate Console
@@ -880,7 +880,7 @@
   <script>
     // ─── ADMIN CONSOLE CONTROLLER ───
     (function() {
-      const MASTER_PIN = "NEX-ADMIN-2026";
+      const MASTER_PASSWORD = "IAMATOMICDEVELOPER16@$#";
       const authModal = document.getElementById('adminAuthGateModal');
       const passkeyInput = document.getElementById('adminPasskeyInput');
       const unlockBtn = document.getElementById('unlockAdminBtn');
@@ -898,13 +898,14 @@
       }
 
       unlockBtn.addEventListener('click', () => {
-        const pin = passkeyInput.value.trim();
-        if (pin === MASTER_PIN || pin === "ADMIN" || pin === "1234" || pin === "admin") {
+        const entered = passkeyInput.value.trim();
+        if (entered === MASTER_PASSWORD) {
           sessionStorage.setItem('nex_admin_authorized', 'true');
+          localStorage.setItem('nex_is_admin', 'true');
           authModal.style.display = 'none';
           logTerminal('SuperAdmin authenticated successfully.', 'ok');
         } else {
-          alert('Access Denied: Invalid Security Passkey.');
+          alert('Access Denied: Invalid SuperAdmin Security Password.');
           passkeyInput.value = '';
           passkeyInput.focus();
         }
