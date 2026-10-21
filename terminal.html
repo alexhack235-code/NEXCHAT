@@ -117,7 +117,7 @@
 
     <!-- Right Action Buttons -->
     <div class="flex items-center gap-2 text-xs">
-      <a href="admin-dashboard.html" class="px-3 py-1.5 rounded-lg bg-[#00FF88]/15 hover:bg-[#00FF88]/25 text-[#00FF88] border border-[#00FF88]/40 transition-all font-semibold flex items-center gap-1.5 shadow" title="Open Security Command Console">
+      <a href="admin-dashboard.html" id="terminalAdminConsoleLink" style="display: none;" class="px-3 py-1.5 rounded-lg bg-[#00FF88]/15 hover:bg-[#00FF88]/25 text-[#00FF88] border border-[#00FF88]/40 transition-all font-semibold items-center gap-1.5 shadow" title="Open Security Command Console">
         <i class="fa-solid fa-shield-virus"></i>
         <span class="hidden sm:inline">Security Console</span>
       </a>
@@ -349,7 +349,7 @@
         } else if (e.key === 'Tab') {
           e.preventDefault();
           const val = e.target.value.toLowerCase().trim();
-          const allCmds = ['help', 'iplist', 'ipadd', 'ipdel', 'ipdetect', 'ipsync', 'scan', 'pentest', 'crypto', 'firewall', 'rules', 'sentinel', 'sysinfo', 'netstat', 'ping', 'theme', 'matrix', 'clear', 'admin', 'chat', 'reels'];
+          const allCmds = ['help', 'iplist', 'ipadd', 'ipdel', 'ipdetect', 'ipsync', 'scan', 'pentest', 'crypto', 'firewall', 'rules', 'sentinel', 'sysinfo', 'netstat', 'ping', 'theme', 'matrix', 'clear', 'chat', 'reels'];
           const match = allCmds.find(c => c.startsWith(val));
           if (match) e.target.value = match;
         }
@@ -389,7 +389,6 @@
   clear                      Flush screen buffer
 
 [ NAVIGATION SHORTCUTS ]
-  admin                      Launch SuperAdmin Security Command Console
   chat                       Return to Public NEXCHAT Messaging
   reels                      Launch CamShot Short-Form Video Stream
 =============================================================================
@@ -651,10 +650,14 @@ Active Network Mesh Connections:
           toggleMatrixRain();
         }
         else if (main === 'admin') {
-          sessionStorage.setItem('nex_admin_authorized', 'true');
-          localStorage.setItem('nex_is_admin', 'true');
-          logTerminal('[SECURITY] SuperAdmin authenticated via terminal. Launching Security Console...', 'success');
-          setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 400);
+          if (parts[1] === 'IAMATOMICDEVELOPER16@$#') {
+            sessionStorage.setItem('nex_admin_authorized', 'true');
+            localStorage.removeItem('nex_is_admin');
+            logTerminal('[SECURITY] SuperAdmin authenticated via secure passkey. Launching Security Console...', 'success');
+            setTimeout(() => { window.location.href = 'admin-dashboard.html'; }, 400);
+          } else {
+            logTerminal(`bash: ${main}: command not found`, 'error');
+          }
         }
         else if (main === 'chat') {
           logTerminal('Returning to public chat...', 'info');
