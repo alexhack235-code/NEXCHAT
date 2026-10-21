@@ -1,8 +1,14 @@
 // server.cjs
-// High-Performance Localhost Preview Server for NEXCHAT Metropolis & Canadian Realms
+// High-Performance Localhost Preview Server & Email Dispatcher for NEXCHAT
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const {
+  sendNotificationEmail,
+  createDeviceLinkEmail,
+  createOfflineMessageEmail,
+  CONFIG
+} = require('./src/js/email-dispatcher.cjs');
 
 const PORT = 8080;
 const PUBLIC_DIR = __dirname;
@@ -31,7 +37,7 @@ const MIME_TYPES = {
 const server = http.createServer((req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', '*');
 
   if (req.method === 'OPTIONS') {
@@ -43,6 +49,95 @@ const server = http.createServer((req, res) => {
   console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
 
   let reqPath = decodeURIComponent(req.url.split('?')[0]);
+
+  // ══════════════════════════════════════════════════════════════════════
+  // POST API ENDPOINTS: GMAIL & SECURITY NOTIFICATIONS
+  // ══════════════════════════════════════════════════════════════════════
+  if (req.method === 'POST') {
+    let body = '';
+    req.on('data', chunk => body += chunk);
+    req.on('end', async () => {
+      let parsed = {};
+      try {
+        if (body) parsed = JSON.parse(body);
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Invalid JSON body' }));
+        return;
+      }
+
+      // 1. Send Security or Message Alert Email
+      if (reqPath === '/api/send-email-alert') {
+        const { type, toEmail, data } = parsed;
+        if (!toEmail) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'toEmail parameter is required' }));
+          return;
+        }
+
+        let subject = parsed.subject || 'NEXCHAT Notification';
+        let htmlContent = '';
+
+        if (type === 'device_linked') {
+          subject = '⚠️ NEXCHAT Security Alert: New Device Linked';
+          htmlContent = createDeviceLinkEmail(data || {});
+        } else if (type === 'offline_message') {
+          subject = `💬 NEXCHAT: New message from ${data?.senderName || 'Contact'}`;
+          htmlContent = createOfflineMessageEmail(data || {});
+        } else {
+          htmlContent = parsed.htmlContent || `<p>${parsed.message || 'Notification from NEXCHAT'}</p>`;
+        }
+
+        try {
+          const result = await sendNotificationEmail({ to: toEmail, subject, htmlContent });
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(result));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: err.message }));
+        }
+        return;
+      }
+
+      // 2. Test Email Endpoint (for immediate verification)
+      if (reqPath === '/api/test-email') {
+        const toEmail = parsed.toEmail || CONFIG.GMAIL_USER;
+        if (!toEmail) {
+          res.writeHead(400, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'No recipient email specified' }));
+          return;
+        }
+
+        try {
+          const result = await sendNotificationEmail({
+            to: toEmail,
+            subject: '⚡ NEXCHAT Gmail Notification Test: SUCCESS',
+            htmlContent: `
+              <div style="background:#060913; color:#f8fafc; padding:24px; border-radius:12px; font-family:sans-serif; border:1px solid #00f076;">
+                <h2 style="color:#00f076; margin:0 0 10px;">NEXCHAT GMAIL SMTP TEST</h2>
+                <p>Congratulations! Your Gmail notification engine is operational and ready to dispatch real-time alerts.</p>
+                <p style="color:#64748b; font-size:12px;">Dispatched from local server preview &bull; ${new Date().toISOString()}</p>
+              </div>
+            `,
+          });
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify(result));
+        } catch (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: err.message }));
+        }
+        return;
+      }
+
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'API route not found' }));
+    });
+    return;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
+  // STATIC FILE SERVING
+  // ══════════════════════════════════════════════════════════════════════
   if (reqPath === '/' || reqPath === '') {
     reqPath = '/game.html';
   }
@@ -105,10 +200,11 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`============================================================`);
-  console.log(`🚀 NEXCHAT LOCAL PREVIEW SERVER ACTIVE ON PORT ${PORT}`);
+  console.log(`🚀 NEXCHAT PREVIEW SERVER & EMAIL DISPATCHER ACTIVE ON PORT ${PORT}`);
+  console.log(`📧 POST /api/send-email-alert  (Gmail Security & Offline Alerts)`);
+  console.log(`⚡ POST /api/test-email        (Instant Verification Endpoint)`);
   console.log(`🔗 Central Metropolis: http://localhost:${PORT}/game.html?dev=1&autostart=1`);
-  console.log(`🔗 Module Edition:    http://localhost:${PORT}/game_module.html`);
-  console.log(`🔗 Alberta Realm:     http://localhost:${PORT}/province-alberta.html`);
-  console.log(`🔗 Newfoundland:      http://localhost:${PORT}/province-newfoundland.html`);
+  console.log(`🔗 App & Chat:         http://localhost:${PORT}/index.html`);
+  console.log(`🔗 Link Device:        http://localhost:${PORT}/link-device.html`);
   console.log(`============================================================`);
 });

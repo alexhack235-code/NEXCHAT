@@ -216,6 +216,30 @@ export async function approvePairingSession(sessionId, primaryUser) {
     status: 'active',
   });
 
+  // 3. Dispatch Security Alert to user's Gmail
+  if (primaryUser.email) {
+    try {
+      fetch('/api/send-email-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'device_linked',
+          toEmail: primaryUser.email,
+          data: {
+            username: userPayload.name,
+            deviceType: deviceInfo.deviceType || 'Desktop',
+            browser: deviceInfo.browser || 'Browser',
+            os: deviceInfo.os || 'OS',
+            ipAddress: sessionData.ipAddress || 'Verified Primary',
+            revokeUrl: `${window.location.origin}/chat.html?action=manage_devices`,
+          },
+        }),
+      }).catch((e) => console.warn('[LINK-DEVICE] Email alert dispatch failed:', e));
+    } catch (dispatchErr) {
+      console.warn('[LINK-DEVICE] Email alert dispatch error:', dispatchErr);
+    }
+  }
+
   return true;
 }
 

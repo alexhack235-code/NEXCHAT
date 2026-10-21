@@ -60,3 +60,4 @@ cloudflared.exe
 *.exe
 tunnel_url.txt
 *.log
+email-config.json
