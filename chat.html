@@ -3428,9 +3428,72 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
     </div>
   </div>
 
+  <!-- E2EE ENVELOPE INSPECTOR MODAL -->
+  <div id="e2eeInspectorModal" style="display: none; position: fixed; inset: 0; background: rgba(5, 8, 16, 0.92); backdrop-filter: blur(20px); z-index: 100000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: rgba(12, 18, 30, 0.96); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 18px; width: 100%; max-width: 520px; padding: 26px; box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0, 255, 102, 0.15);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(0, 255, 102, 0.15); border: 1px solid #00ff66; display: flex; align-items: center; justify-content: center; color: #00ff66;">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-family: 'Orbitron', monospace; font-size: 15px; color: #fff; letter-spacing: 1px;">
+              E2EE CRYPTO ENVELOPE
+            </h3>
+            <span style="font-size: 11px; color: #00ff66; font-family: monospace;">NIST AES-256-GCM • ECDH P-256</span>
+          </div>
+        </div>
+        <button type="button" id="closeE2eeInspectorBtn" style="background: none; border: none; color: #8b949e; font-size: 18px; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div style="background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; font-family: monospace; font-size: 11.5px; line-height: 1.6; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: #8b949e;">Protocol:</span>
+          <span style="color: #67e8f9;" id="e2eeModalProtocol">NEX-E2EE-v4.8</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: #8b949e;">Cipher Engine:</span>
+          <span style="color: #00ff66;" id="e2eeModalAlgorithm">AES-256-GCM (256-bit Key)</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: #8b949e;">Key Agreement:</span>
+          <span style="color: #c084fc;">ECDH Named Curve P-256</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: #8b949e;">96-bit IV (Hex):</span>
+          <span style="color: #f1f5f9; font-size: 10.5px;" id="e2eeModalIv">7f 4a c9 12 8b e4 31 99 04 df 23 18</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: #8b949e;">Auth Tag:</span>
+          <span style="color: #ffd700;" id="e2eeModalAuthTag">128-bit GCM MAC Verified</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #8b949e;">Enclave Status:</span>
+          <span style="color: #00ff66;">Zero-Knowledge Local Decrypt</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 11px; font-weight: 700; color: #8b949e; text-transform: uppercase; margin-bottom: 6px;">
+          Raw Ciphertext Hex Dump
+        </div>
+        <div id="e2eeModalCiphertextDump" style="background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 8px; padding: 10px; font-family: 'Consolas', monospace; font-size: 11px; color: #67e8f9; word-break: break-all; max-height: 100px; overflow-y: auto;">
+          4a 8f 1c 3e 99 b2 04 71 d8 e3 a1 55 c7 f2 90 3a ...
+        </div>
+      </div>
+
+      <button type="button" id="copyE2eeDumpBtn" style="width: 100%; padding: 10px; background: rgba(0, 255, 102, 0.15); border: 1px solid #00ff66; border-radius: 10px; color: #00ff66; font-weight: 700; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <i class="fa-regular fa-copy"></i> Copy Ciphertext Hex Dump
+      </button>
+    </div>
+  </div>
+
   <!-- NOTIFICATION CONTAINER -->
   <div id="notificationContainer" class="notification-container"></div>
 
+  <script src="./src/js/e2ee-crypto-vault.js"></script>
   <script type="module" src="pwa-install.js"></script>
   <script type="module" src="app-prompt.js"></script>
   <script type="module" src="messaging-features.js"></script>

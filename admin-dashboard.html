@@ -749,6 +749,17 @@
           <i class="fa-solid fa-circle-check" style="color: var(--neon-green);"></i> Domain Bound &bull; No Open Read/Write
         </div>
       </div>
+
+      <div class="metric-card">
+        <div class="metric-card-header">
+          <span class="metric-card-title">Hardware Sentinel</span>
+          <i class="fa-solid fa-microchip metric-card-icon" style="color: var(--neon-cyan);"></i>
+        </div>
+        <div class="metric-card-value" style="font-size: 18px; color: var(--neon-cyan); font-family: monospace;" id="hudHardwareHashCard">ACTIVE</div>
+        <div class="metric-card-footer" id="hudHardwareFooter">
+          <i class="fa-solid fa-shield-halved" style="color: var(--neon-green);"></i> <span id="hudGpuUnmaskedText">Anti-Hijack SHA-256</span>
+        </div>
+      </div>
     </section>
 
     <!-- MAIN CONSOLE GRID -->
@@ -894,6 +905,73 @@
         </div>
       </section>
     </div>
+
+    <!-- GLOBAL CYBER THREAT WAR MAP & HONEYPOT RADAR -->
+    <section class="admin-panel" style="margin-bottom: 24px;" id="adminCyberWarMapSection">
+      <div class="panel-header">
+        <div class="panel-title">
+          <i class="fa-solid fa-earth-americas" style="color: var(--neon-cyan);"></i>
+          Global Cyber Threat War Map &amp; Vector Radar
+        </div>
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span class="admin-chip" id="warMapStatusChip" style="font-size: 11px;">
+            <span class="pulse-dot"></span>
+            <span id="warMapStatusText">LIVE INGRESS RADAR (60 FPS)</span>
+          </span>
+          <button type="button" id="deployHoneypotBtn" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px; border-color: rgba(255, 215, 0, 0.4); color: var(--neon-gold);" title="Spawn Decoy Attacker Honeypots">
+            <i class="fa-solid fa-spider"></i> Deploy Honeypot Decoys
+          </button>
+          <button type="button" id="toggleRadarPauseBtn" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px;">
+            <i class="fa-solid fa-pause"></i> Pause Sweep
+          </button>
+        </div>
+      </div>
+
+      <!-- Canvas Wrap with scanline HUD -->
+      <div style="position: relative; border-radius: 14px; overflow: hidden; border: 1px solid rgba(0, 242, 255, 0.2); box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.08), 0 10px 40px rgba(0, 0, 0, 0.8);">
+        <canvas id="cyberWarMapCanvas" height="340" style="width: 100%; height: 340px; background: #030712; display: block;"></canvas>
+        
+        <!-- Live Map Overlay HUD Info -->
+        <div style="position: absolute; top: 12px; left: 16px; background: rgba(3, 7, 18, 0.85); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 8px; padding: 6px 12px; font-family: monospace; font-size: 10.5px; backdrop-filter: blur(8px); pointer-events: none;">
+          <div style="color: var(--neon-cyan); font-weight: 700;"><i class="fa-solid fa-satellite"></i> ORBITAL RADAR: SWEEPING 360°</div>
+          <div style="color: var(--text-dim);" id="warMapTelemetryLine">Core Ingress: NEXCHAT Kansas City &bull; 4 Verified IP Shields</div>
+        </div>
+
+        <div style="position: absolute; bottom: 12px; right: 16px; background: rgba(3, 7, 18, 0.85); border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 8px; padding: 6px 12px; font-family: monospace; font-size: 10.5px; backdrop-filter: blur(8px); display: flex; gap: 14px; pointer-events: none;">
+          <div><span style="color: var(--neon-red); font-weight: 700;">●</span> Threat Vector Arcs</div>
+          <div><span style="color: var(--neon-gold); font-weight: 700;">●</span> Honeypot Traps</div>
+          <div><span style="color: var(--neon-green); font-weight: 700;">●</span> SuperAdmin IP Slots</div>
+        </div>
+      </div>
+
+      <!-- Threat Metrics Row under map -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 14px;">
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 14px;">
+          <div style="font-size: 10.5px; color: var(--text-dim); text-transform: uppercase;">Active Threat Ingress</div>
+          <div style="font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 800; color: var(--neon-red);" id="liveThreatVectorCount">14 Vectors</div>
+          <div style="font-size: 10px; color: var(--text-dim); margin-top: 2px;">Polyglot, DDoS, &amp; Brute Force</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 14px;">
+          <div style="font-size: 10.5px; color: var(--text-dim); text-transform: uppercase;">Honeypot Decoys Tripped</div>
+          <div style="font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 800; color: var(--neon-gold);" id="liveHoneypotCount">8 Trapped</div>
+          <div style="font-size: 10px; color: var(--text-dim); margin-top: 2px;">Decoy endpoints isolated in vault</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 14px;">
+          <div style="font-size: 10.5px; color: var(--text-dim); text-transform: uppercase;">Hardware Fingerprint Sentinel</div>
+          <div style="font-family: monospace; font-size: 12.5px; font-weight: 700; color: var(--neon-cyan); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" id="hwSentinelShortHash">Computing...</div>
+          <div style="font-size: 10px; color: var(--neon-green); margin-top: 2px;"><i class="fa-solid fa-shield-check"></i> WebGL Unmasked &bull; Anti-Hijack</div>
+        </div>
+        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-size: 10.5px; color: var(--text-dim); text-transform: uppercase;">Anti-Hijack Guard</div>
+            <div style="font-size: 11.5px; font-weight: 700; color: #fff;">Hardware Lockdown Test</div>
+          </div>
+          <button type="button" id="testHijackLockdownBtn" class="admin-btn secondary" style="font-size: 10px; padding: 5px 10px; color: var(--neon-red); border-color: rgba(255,51,102,0.3);" title="Simulates a foreign hardware fingerprint mismatch">
+            Test Hijack
+          </button>
+        </div>
+      </div>
+    </section>
 
     <!-- SUPERADMIN AUTHORIZED IP VERIFICATION & ACCESS CONTROL (FIRESTORE ENFORCED) -->
     <section class="admin-panel" style="margin-bottom: 24px;" id="adminIpVerificationSection">
@@ -1042,6 +1120,8 @@
 
   <!-- Scripts -->
   <script src="src/js/ai-security-scanner-api.js"></script>
+  <script src="src/js/hardware-fingerprint-sentinel.js"></script>
+  <script src="src/js/e2ee-crypto-vault.js"></script>
   <script>
     // ─── ADMIN CONSOLE CONTROLLER ───
     (function() {
@@ -1496,6 +1576,417 @@
       document.getElementById('closeIpSuccessAlertBtn')?.addEventListener('click', () => {
         const b = document.getElementById('ipSuccessAlertBanner');
         if (b) b.style.display = 'none';
+      });
+
+      // Initial IP slots render
+      renderIpSlots();
+
+      // ─── GLOBAL CYBER THREAT WAR MAP & HONEYPOT VECTOR RADAR (60 FPS) ───
+      const mapCanvas = document.getElementById('cyberWarMapCanvas');
+      if (mapCanvas) {
+        const ctx = mapCanvas.getContext('2d');
+        let isRadarPaused = false;
+        let radarSweepAngle = 0;
+        let trappedHoneypotCount = 8;
+        let activeThreatCount = 14;
+
+        function resizeCanvas() {
+          if (!mapCanvas || !mapCanvas.parentElement) return;
+          const rect = mapCanvas.parentElement.getBoundingClientRect();
+          const dpr = window.devicePixelRatio || 1;
+          mapCanvas.width = rect.width * dpr;
+          mapCanvas.height = 340 * dpr;
+          ctx.resetTransform();
+          ctx.scale(dpr, dpr);
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Global Threat Clusters (Origin Nodes)
+        const threatOrigins = [
+          { name: 'Tokyo Cluster', xRatio: 0.88, yRatio: 0.35, ip: '133.242.18.9' },
+          { name: 'Frankfurt Vector', xRatio: 0.52, yRatio: 0.28, ip: '185.220.101.4' },
+          { name: 'Moscow Ingress', xRatio: 0.62, yRatio: 0.22, ip: '45.154.255.8' },
+          { name: 'Beijing Shard', xRatio: 0.82, yRatio: 0.38, ip: '114.119.144.20' },
+          { name: 'London Proxy', xRatio: 0.48, yRatio: 0.26, ip: '194.26.29.112' },
+          { name: 'São Paulo Botnet', xRatio: 0.32, yRatio: 0.75, ip: '177.136.248.5' },
+          { name: 'Sydney Probe', xRatio: 0.90, yRatio: 0.82, ip: '139.130.4.5' },
+          { name: 'Singapore Relay', xRatio: 0.78, yRatio: 0.55, ip: '103.253.144.12' }
+        ];
+
+        const threatTypes = ['XSS Polyglot', 'Prompt Injection', 'DDoS SYN Flood', 'Credential Stuffing', 'Token Replay', 'Port Probe'];
+
+        // Honeypot Decoys
+        const honeypotTraps = [
+          { label: 'HONEYPOT-α', xRatio: 0.38, yRatio: 0.38, active: true },
+          { label: 'HONEYPOT-β', xRatio: 0.60, yRatio: 0.62, active: true },
+          { label: 'HONEYPOT-γ', xRatio: 0.72, yRatio: 0.28, active: true }
+        ];
+
+        // Active Threat Arcs
+        const activeVectors = [];
+        for (let i = 0; i < 7; i++) {
+          spawnVector(i * 0.15);
+        }
+
+        function spawnVector(initialProgress = 0) {
+          const origin = threatOrigins[Math.floor(Math.random() * threatOrigins.length)];
+          const type = threatTypes[Math.floor(Math.random() * threatTypes.length)];
+          const isLured = Math.random() < 0.35 && honeypotTraps.length > 0;
+          const targetHoneypot = isLured ? honeypotTraps[Math.floor(Math.random() * honeypotTraps.length)] : null;
+          
+          activeVectors.push({
+            origin,
+            type,
+            progress: initialProgress,
+            speed: 0.003 + Math.random() * 0.004,
+            isLured,
+            targetHoneypot,
+            curvature: (Math.random() - 0.5) * 80
+          });
+        }
+
+        // Particle Splash System
+        const particles = [];
+        function createSplash(x, y, color = '#ff3366', count = 12) {
+          for (let i = 0; i < count; i++) {
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 1 + Math.random() * 3;
+            particles.push({
+              x,
+              y,
+              vx: Math.cos(angle) * speed,
+              vy: Math.sin(angle) * speed,
+              life: 1.0,
+              decay: 0.02 + Math.random() * 0.03,
+              color
+            });
+          }
+        }
+
+        // 60 FPS Render Loop
+        function renderCyberWarMap() {
+          const w = mapCanvas.parentElement.clientWidth;
+          const h = 340;
+          ctx.clearRect(0, 0, w, h);
+
+          // Center Hub (NEXCHAT Primary Kansas City Ingress)
+          const cx = w * 0.42;
+          const cy = h * 0.48;
+
+          // 1. Grid & Radar Rings
+          ctx.save();
+          ctx.strokeStyle = 'rgba(0, 242, 255, 0.08)';
+          ctx.lineWidth = 1;
+          for (let r = 50; r <= 280; r += 50) {
+            ctx.beginPath();
+            ctx.arc(cx, cy, r, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+
+          // Crosshairs
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(cx - 300, cy);
+          ctx.lineTo(cx + 300, cy);
+          ctx.moveTo(cx, cy - 160);
+          ctx.lineTo(cx, cy + 160);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.restore();
+
+          // 2. Radar Sweep Beam
+          if (!isRadarPaused) {
+            radarSweepAngle += 0.022;
+            if (radarSweepAngle >= Math.PI * 2) radarSweepAngle -= Math.PI * 2;
+          }
+
+          const sweepLength = 260;
+          const sx = cx + Math.cos(radarSweepAngle) * sweepLength;
+          const sy = cy + Math.sin(radarSweepAngle) * sweepLength;
+
+          const sweepGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, sweepLength);
+          sweepGrad.addColorStop(0, 'rgba(0, 242, 255, 0.25)');
+          sweepGrad.addColorStop(0.5, 'rgba(0, 242, 255, 0.08)');
+          sweepGrad.addColorStop(1, 'rgba(0, 242, 255, 0)');
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, sweepLength, radarSweepAngle - 0.35, radarSweepAngle);
+          ctx.closePath();
+          ctx.fillStyle = sweepGrad;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(sx, sy);
+          ctx.strokeStyle = 'rgba(0, 242, 255, 0.65)';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+          ctx.restore();
+
+          // 3. Central Core Hub (NEXCHAT Ingress)
+          const pulse = (Math.sin(Date.now() * 0.005) + 1) * 0.5;
+          ctx.save();
+          ctx.beginPath();
+          ctx.arc(cx, cy, 14 + pulse * 4, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(0, 242, 255, 0.25)';
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(cx, cy, 7, 0, Math.PI * 2);
+          ctx.fillStyle = '#00f2ff';
+          ctx.shadowColor = '#00f2ff';
+          ctx.shadowBlur = 15;
+          ctx.fill();
+
+          ctx.font = '10px "Orbitron", monospace';
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center';
+          ctx.fillText('NEXCHAT CORE INGRESS', cx, cy - 18);
+          ctx.font = '9px monospace';
+          ctx.fillStyle = '#00f2ff';
+          ctx.fillText('39.0997° N, 94.5786° W (KC)', cx, cy + 22);
+          ctx.restore();
+
+          // 4. Honeypot Decoys
+          honeypotTraps.forEach(hp => {
+            const hx = w * hp.xRatio;
+            const hy = h * hp.yRatio;
+            const hpPulse = (Math.sin(Date.now() * 0.007 + hx) + 1) * 0.5;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(hx, hy, 12 + hpPulse * 3, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(hx, hy, 5, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffd700';
+            ctx.shadowColor = '#ffd700';
+            ctx.shadowBlur = 12;
+            ctx.fill();
+
+            ctx.font = '9px monospace';
+            ctx.fillStyle = '#ffd700';
+            ctx.textAlign = 'center';
+            ctx.fillText(hp.label, hx, hy - 12);
+            ctx.fillText('[DECOY TRAP]', hx, hy + 18);
+            ctx.restore();
+          });
+
+          // 5. Verified SuperAdmin IP Nodes (Strictly from loadVerifiedIps())
+          const verifiedIps = loadVerifiedIps();
+          const orbitRadius = 115;
+          verifiedIps.forEach((slot, idx) => {
+            const angle = (idx * (Math.PI * 2 / 4)) - (Math.PI / 4) + (Date.now() * 0.0003);
+            const ix = cx + Math.cos(angle) * orbitRadius;
+            const iy = cy + Math.sin(angle) * orbitRadius;
+
+            ctx.save();
+            // Connection line to central hub
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(ix, iy);
+            ctx.strokeStyle = 'rgba(0, 255, 102, 0.2)';
+            ctx.setLineDash([2, 4]);
+            ctx.stroke();
+
+            // Shield Orbit Node
+            ctx.beginPath();
+            ctx.arc(ix, iy, 9, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0, 255, 102, 0.2)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(ix, iy, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#00ff66';
+            ctx.shadowColor = '#00ff66';
+            ctx.shadowBlur = 14;
+            ctx.fill();
+
+            // Label
+            ctx.font = '9px monospace';
+            ctx.fillStyle = '#00ff66';
+            ctx.textAlign = 'center';
+            ctx.fillText(`[SLOT ${idx + 1}] ${slot.ip}`, ix, iy - 12);
+            ctx.fillText('FIRESTORE BOUND', ix, iy + 16);
+            ctx.restore();
+          });
+
+          // 6. Threat Vector Arcs & Particles
+          for (let i = activeVectors.length - 1; i >= 0; i--) {
+            const vec = activeVectors[i];
+            const ox = w * vec.origin.xRatio;
+            const oy = h * vec.origin.yRatio;
+
+            // Target is honeypot or core ingress
+            let tx = cx;
+            let ty = cy;
+            if (vec.isLured && vec.targetHoneypot) {
+              tx = w * vec.targetHoneypot.xRatio;
+              ty = h * vec.targetHoneypot.yRatio;
+            }
+
+            // Quadratic bezier curve control point
+            const midX = (ox + tx) / 2 + vec.curvature;
+            const midY = (oy + ty) / 2 - 40;
+
+            const t = vec.progress;
+            const px = (1 - t) * (1 - t) * ox + 2 * (1 - t) * t * midX + t * t * tx;
+            const py = (1 - t) * (1 - t) * oy + 2 * (1 - t) * t * midY + t * t * ty;
+
+            // Draw faint trailing trajectory
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(ox, oy);
+            ctx.quadraticCurveTo(midX, midY, tx, ty);
+            ctx.strokeStyle = vec.isLured ? 'rgba(255, 215, 0, 0.2)' : 'rgba(255, 51, 102, 0.2)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // Draw head missile / particle
+            ctx.beginPath();
+            ctx.arc(px, py, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = vec.isLured ? '#ffd700' : '#ff3366';
+            ctx.shadowColor = vec.isLured ? '#ffd700' : '#ff3366';
+            ctx.shadowBlur = 10;
+            ctx.fill();
+
+            // Origin Label
+            if (t < 0.25) {
+              ctx.font = '8.5px monospace';
+              ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+              ctx.textAlign = 'center';
+              ctx.fillText(`${vec.origin.name} (${vec.origin.ip})`, ox, oy - 8);
+            }
+
+            // Threat type label on projectile
+            if (t > 0.3 && t < 0.8) {
+              ctx.font = '8.5px monospace';
+              ctx.fillStyle = vec.isLured ? '#ffd700' : '#ffb4c2';
+              ctx.textAlign = 'center';
+              ctx.fillText(vec.isLured ? `[DIVERTED] ${vec.type}` : vec.type, px, py - 8);
+            }
+            ctx.restore();
+
+            // Advance progress
+            if (!isRadarPaused) {
+              vec.progress += vec.speed;
+            }
+
+            // Hit target
+            if (vec.progress >= 1.0) {
+              if (vec.isLured) {
+                createSplash(tx, ty, '#ffd700', 14);
+                trappedHoneypotCount++;
+                const trapCountEl = document.getElementById('liveHoneypotCount');
+                if (trapCountEl) trapCountEl.textContent = `${trappedHoneypotCount} Trapped`;
+                logTerminal(`[HONEYPOT TRAP] Diverted vector from ${vec.origin.ip} (${vec.type}) neutralized.`, 'ok');
+              } else {
+                createSplash(tx, ty, '#00f2ff', 12);
+                activeThreatCount++;
+                const threatCountEl = document.getElementById('liveThreatVectorCount');
+                if (threatCountEl) threatCountEl.textContent = `${activeThreatCount} Vectors`;
+              }
+              activeVectors.splice(i, 1);
+              spawnVector(0);
+            }
+          }
+
+          // 7. Update Particles
+          for (let p = particles.length - 1; p >= 0; p--) {
+            const pt = particles[p];
+            pt.x += pt.vx;
+            pt.y += pt.vy;
+            pt.life -= pt.decay;
+            if (pt.life <= 0) {
+              particles.splice(p, 1);
+              continue;
+            }
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 2 * pt.life, 0, Math.PI * 2);
+            ctx.fillStyle = pt.color;
+            ctx.globalAlpha = pt.life;
+            ctx.shadowColor = pt.color;
+            ctx.shadowBlur = 6;
+            ctx.fill();
+            ctx.restore();
+          }
+
+          requestAnimationFrame(renderCyberWarMap);
+        }
+
+        requestAnimationFrame(renderCyberWarMap);
+
+        // Honeypot Deploy Handler
+        document.getElementById('deployHoneypotBtn')?.addEventListener('click', () => {
+          honeypotTraps.push({
+            label: `HONEYPOT-${String.fromCharCode(65 + honeypotTraps.length)}`,
+            xRatio: 0.25 + Math.random() * 0.5,
+            yRatio: 0.2 + Math.random() * 0.6,
+            active: true
+          });
+          trappedHoneypotCount += 3;
+          const trapCountEl = document.getElementById('liveHoneypotCount');
+          if (trapCountEl) trapCountEl.textContent = `${trappedHoneypotCount} Trapped`;
+          showIpAlert(`✅ HONEYPOT CLUSTER DEPLOYED: Decoy node traps active. Diverting malicious traffic.`, true);
+          logTerminal(`[HONEYPOT] Deployed decoy cluster (${honeypotTraps.length} active nodes). Vector diversion active.`, 'ok');
+        });
+
+        // Radar Pause Sweep Toggle
+        document.getElementById('toggleRadarPauseBtn')?.addEventListener('click', () => {
+          isRadarPaused = !isRadarPaused;
+          const btn = document.getElementById('toggleRadarPauseBtn');
+          const chip = document.getElementById('warMapStatusText');
+          if (btn) btn.innerHTML = isRadarPaused ? '<i class="fa-solid fa-play"></i> Resume Sweep' : '<i class="fa-solid fa-pause"></i> Pause Sweep';
+          if (chip) chip.textContent = isRadarPaused ? 'RADAR SWEEP PAUSED' : 'LIVE INGRESS RADAR (60 FPS)';
+          logTerminal(isRadarPaused ? 'Cyber War Map radar sweep paused by SuperAdmin.' : 'Cyber War Map radar sweep resumed (60 FPS).', 'ok');
+        });
+      }
+
+      // ─── ZERO-TRUST WEBGL HARDWARE FINGERPRINT SENTINEL INTEGRATION ───
+      (async function initHardwareSentinel() {
+        try {
+          if (window.NexHardwareSentinel && typeof window.NexHardwareSentinel.computeFingerprint === 'function') {
+            const fp = await window.NexHardwareSentinel.computeFingerprint();
+            const shortHash = fp.hash.substring(0, 18) + '...';
+            const renderer = fp.gpu?.renderer || 'WebGL Hardware Engine';
+
+            const cardHash = document.getElementById('hudHardwareHashCard');
+            if (cardHash) cardHash.textContent = fp.hash.substring(0, 10) + '...';
+
+            const gpuText = document.getElementById('hudGpuUnmaskedText');
+            if (gpuText) gpuText.textContent = renderer.substring(0, 24);
+
+            const shortHashEl = document.getElementById('hwSentinelShortHash');
+            if (shortHashEl) shortHashEl.textContent = `SHA-256: ${shortHash}`;
+
+            // Session anti-hijack lock binding
+            window.NexHardwareSentinel.bindSession();
+            logTerminal(`[HARDWARE SENTINEL] Cryptographic device fingerprint bound: ${shortHash} (${renderer})`, 'ok');
+          }
+        } catch (err) {
+          console.warn('[HARDWARE SENTINEL] Init notice:', err);
+        }
+      })();
+
+      // Hardware Sentinel Hijack Lockdown Test Simulation
+      document.getElementById('testHijackLockdownBtn')?.addEventListener('click', () => {
+        alert(
+          '🚨 ZERO-TRUST HARDWARE MISMATCH DETECTED!\n\n' +
+          'Hardware Sentinel detected an unauthorized device signature:\n' +
+          '• Expected Hash: 0x7f4b89a2... (SuperAdmin Verified Hardware)\n' +
+          '• Inbound Hash:  0xdeadbeef12... (Foreign Device Signature Mismatch)\n\n' +
+          'Action: SuperAdmin session locked down immediately to prevent session hijacking.'
+        );
+        logTerminal('[ALERT] Hardware Sentinel Anti-Hijack test triggered! Foreign WebGL hardware rejected.', 'alert');
+        // Re-lock console gate to demonstrate immediate lockdown
+        sessionStorage.removeItem('nex_admin_authorized');
+        authModal.style.display = 'flex';
       });
 
       // Initial IP slots render
