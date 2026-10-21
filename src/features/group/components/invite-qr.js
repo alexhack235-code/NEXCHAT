@@ -5,7 +5,7 @@
  * @module invite-qr
  */
 
-import QRCode from 'qrcode';
+import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm';
 
 /**
  * Generate a group invite link

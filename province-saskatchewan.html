@@ -10,17 +10,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <script src="../js/three.min.js"></script>
-  <script>
-    if (typeof THREE === 'undefined') {
-      document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
-    }
-  </script>
+  <script>if (typeof THREE === 'undefined') document.write('<script src="js/three.min.js"><\/script>');</script>
+  <script>if (typeof THREE === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');</script>
   <script src="../js/GLTFLoader.js"></script>
-  <script>
-    if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') {
-      document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');
-    }
-  </script>
+  <script>if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') document.write('<script src="js/GLTFLoader.js"><\/script>');</script>
+  <script>if (typeof THREE !== 'undefined' && typeof THREE.GLTFLoader === 'undefined') document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"><\/script>');</script>
+  <script src="../js/game_hyper_realism.js"></script>
+  <script>if (typeof window.HyperRealismEngine === 'undefined') document.write('<script src="js/game_hyper_realism.js"><\/script>');</script>
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
@@ -28,17 +24,17 @@
     #canvas-container { position: absolute; inset: 0; }
     canvas { width: 100%; height: 100%; display: block; }
     
-    .province-hud { position: fixed; top: 16px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; flex-wrap: wrap; gap: 10px; }
+    .province-hud { position: fixed; top: 12px; left: 16px; right: 16px; display: flex; justify-content: space-between; align-items: center; z-index: 100; pointer-events: none; flex-wrap: nowrap; gap: 8px; }
     .province-badge { background: rgba(12, 28, 16, 0.92); border: 1.5px solid #10b981; border-radius: 12px; padding: 10px 18px; display: flex; align-items: center; gap: 14px; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(16, 185, 129, 0.35); pointer-events: auto; }
     .crest { width: 44px; height: 44px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); border: 2px solid #10b981; display: flex; align-items: center; justify-content: center; font-size: 22px; color: #10b981; }
     .province-title { font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #fff; }
     .province-sub { font-size: 11px; color: #6ee7b7; letter-spacing: 0.5px; font-weight: 700; }
     
     .hud-right { display: flex; gap: 8px; align-items: center; pointer-events: auto; flex-wrap: wrap; }
-    .hud-pill { background: rgba(12, 28, 16, 0.92); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 8px 14px; font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
-    .btn-hud { background: rgba(16, 38, 22, 0.92); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; color: #6ee7b7; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; padding: 9px 14px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .hud-pill { background: rgba(12, 28, 16, 0.92); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 10px; padding: 7px 11px; font-family: 'Orbitron', sans-serif; font-size: 11.5px; font-weight: 800; color: #ffd700; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(8px); }
+    .btn-hud { background: rgba(16, 38, 22, 0.92); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 10px; color: #6ee7b7; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; padding: 7px 10px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
     .btn-hud:hover { background: rgba(16, 185, 129, 0.25); transform: translateY(-1px); }
-    .btn-return { background: linear-gradient(135deg, #059669, #047857); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 900; padding: 9px 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 16px rgba(5,150,105,0.45); display: flex; align-items: center; gap: 8px; }
+    .btn-return { background: linear-gradient(135deg, #059669, #047857); border: none; border-radius: 10px; color: #fff; font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 900; padding: 7px 12px; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 16px rgba(5,150,105,0.45); display: flex; align-items: center; gap: 8px; }
     .btn-return:hover { transform: scale(1.04); box-shadow: 0 0 25px rgba(5,150,105,0.7); }
 
     .mission-tracker { position: fixed; top: 82px; left: 16px; width: 310px; background: rgba(10, 24, 14, 0.88); border: 1.5px solid rgba(16, 185, 129, 0.35); border-radius: 14px; padding: 12px 16px; z-index: 95; backdrop-filter: blur(10px); box-shadow: 0 0 25px rgba(0,0,0,0.5); pointer-events: auto; }
@@ -47,7 +43,7 @@
     .mission-item.done { color: #6ee7b7; text-decoration: line-through; opacity: 0.8; }
     .mission-item i { width: 14px; text-align: center; }
 
-    .controls-banner { position: fixed; bottom: 18px; left: 18px; background: rgba(10, 22, 14, 0.88); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 10px 16px; font-size: 12px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
+    .controls-banner { position: fixed; bottom: 68px; left: 16px; background: rgba(14, 18, 26, 0.86); border: 1px solid rgba(255, 255, 255, 0.18); border-radius: 9px; padding: 6px 12px; font-size: 11px; color: #a0aec0; z-index: 90; backdrop-filter: blur(8px); }
     .controls-banner span { color: #6ee7b7; font-weight: 700; }
 
     #cruiser-hud { position: fixed; bottom: 20px; right: 20px; background: rgba(12, 28, 16, 0.94); border: 2px solid #10b981; border-radius: 16px; padding: 14px 20px; z-index: 100; display: none; box-shadow: 0 0 35px rgba(16, 185, 129, 0.35); min-width: 260px; }
@@ -84,20 +80,21 @@
     /* CANADIAN COLDNESS & SURVIVAL VITALITY HUD */
     .survival-hud-bar {
       position: fixed;
-      top: 16px;
+      bottom: 14px;
       left: 50%;
       transform: translateX(-50%);
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       background: rgba(10, 16, 26, 0.94);
       border: 1.5px solid rgba(0, 242, 255, 0.45);
-      border-radius: 14px;
-      padding: 8px 18px;
+      border-radius: 12px;
+      padding: 7px 16px;
       z-index: 120;
       backdrop-filter: blur(10px);
       box-shadow: 0 0 25px rgba(0, 0, 0, 0.65);
       pointer-events: auto;
+      white-space: nowrap;
     }
     .vital-item {
       display: flex;
@@ -420,6 +417,8 @@
     let cruiserSpeed = 0;
     let cameraMode = '3P';
     let qualityMode = localStorage.getItem('PROVINCE_QUALITY') || 'high';
+    // (Hoisted to top of script to eliminate TDZ ReferenceErrors)
+    var WORLD_COLLIDERS = [];
 
     let missionPrairieDone = false, missionDomeDone = false, missionSolarDone = false;
     document.getElementById('token-val').textContent = tokens.toLocaleString();
@@ -446,7 +445,7 @@
 
     function returnToMetropolis() {
       localStorage.setItem('BS_TOKENS', tokens.toString());
-      window.location.href = `../game.html?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
+      const hubBase = window.location.pathname.includes("/Canada/") ? "../game.html" : "game.html"; window.location.href = `${hubBase}?tokens=${tokens}&callsign=${encodeURIComponent(callsign)}`;
     }
 
     function toggleMapModal() { document.getElementById('modal-map').classList.toggle('visible'); }
@@ -502,11 +501,16 @@
     const scene = new THREE.Scene();
     const distantDecorGroup = new THREE.Group();
     scene.add(distantDecorGroup);
-    scene.background = new THREE.Color(0x101c14);
-    scene.fog = new THREE.FogExp2(0x101c14, 0.0015);
+    scene.background = new THREE.Color(0x56aae8);
+    scene.fog = new THREE.FogExp2(0xd0eafa, 0.0008);
 
     const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 2400);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'default' });
+    } catch (e) {
+      renderer = new THREE.WebGLRenderer({ antialias: false });
+    }
     renderer.setSize(window.innerWidth, window.innerHeight);
     if (THREE.sRGBEncoding) renderer.outputEncoding = THREE.sRGBEncoding;
     if (THREE.ACESFilmicToneMapping) {
@@ -1152,8 +1156,7 @@
     // ============================================================
     // REGIONAL AIRCRAFT FLIGHT CONTROLLER
     // ============================================================
-    let regionalPlaneGroup = null;
-    let regionalPlanePropeller = null;
+    // (Hoisted to top of script to eliminate TDZ ReferenceErrors)
     let inRegionalPlane = false;
     const regionalPlaneState = {
       throttle: 0,
@@ -1366,7 +1369,7 @@
     // ------------------------------------------------------------
     // SCENERY COLLIDERS & OBSTACLE PHYSICS
     // ------------------------------------------------------------
-    const WORLD_COLLIDERS = [
+    WORLD_COLLIDERS.push(
       { x: -28, z: 12, r: 3.0 },
       { x: 0, z: -140, r: 24 },
       { x: 0, z: -180, r: 5 },
@@ -1376,7 +1379,7 @@
       { x: -52, z: -25, r: 8.5 },
       { x: -56, z: 15, r: 7.5 },
       { x: 38, z: -10, r: 4.5 }
-    ];
+    );
 
     function resolveCollisions(pos, radius) {
       for (let i = 0; i < WORLD_COLLIDERS.length; i++) {
@@ -1479,6 +1482,31 @@
         document.getElementById('token-val').textContent = tokens.toLocaleString();
         showNotify('🏛️ WASCANA LEGISLATIVE DOME BEACON SYNCHRONIZED (+500 NEX)');
         audio.playLootChime(); updateMissionBadge();
+      }
+    }
+
+    
+    // Upgrade province realm with HyperRealismEngine (Sky dome, rugged alpine mountains, PBR highway & multi-part vehicle)
+    if (window.HyperRealismEngine && typeof window.HyperRealismEngine.enhanceProvinceRealm === 'function') {
+      window.HyperRealismEngine.enhanceProvinceRealm({
+        scene: scene,
+        camera: camera,
+        renderer: renderer,
+        hemiLight: typeof hemiLight !== 'undefined' ? hemiLight : null,
+        dirLight: typeof dirLight !== 'undefined' ? dirLight : null,
+        groundMesh: typeof groundMesh !== 'undefined' ? groundMesh : null,
+        hwyMesh: typeof hwyMesh !== 'undefined' ? hwyMesh : null,
+        playerGroup: typeof playerGroup !== 'undefined' ? playerGroup : null,
+        cruiserGroup: typeof cruiserGroup !== 'undefined' ? cruiserGroup : null,
+        procCruiser: typeof procCruiser !== 'undefined' ? procCruiser : null,
+        cyberCarWheels: typeof cyberCarWheels !== 'undefined' ? cyberCarWheels : [],
+        cyberCarSteers: typeof cyberCarSteers !== 'undefined' ? cyberCarSteers : [],
+        skyPreset: 'sunset',
+        snowFraction: 0.1,
+        vehicleColor: 0x10b981
+      });
+      if (typeof hwyMesh !== 'undefined' && 'province-saskatchewan.html' === 'province-british-columbia.html') {
+        hwyMesh.position.y = 0.24;
       }
     }
 
@@ -1663,8 +1691,8 @@
         player.vel.y -= 22 * delta; player.pos.y += player.vel.y * delta;
         if (player.pos.y <= 1.2) { player.pos.y = 1.2; player.vel.y = 0; player.isGrounded = true; }
 
-        playerGroup.position.copy(player.pos);
-        playerGroup.rotation.y = player.yaw + Math.PI;
+        playerGroup.position.set(player.pos.x, player.pos.y - 1.12, player.pos.z);
+        playerGroup.rotation.y = player.yaw;
 
         if (cameraMode === '1P') {
           camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
@@ -1676,6 +1704,14 @@
           camera.position.copy(player.pos).add(camOffset);
           camera.lookAt(player.pos.x, player.pos.y + 1.4, player.pos.z);
         }
+      }
+
+      try {
+        if (typeof renderer !== 'undefined' && renderer && typeof scene !== 'undefined' && typeof camera !== 'undefined') {
+          renderer.render(scene, camera);
+        }
+      } catch (renderErr) {
+        console.warn('Render error:', renderErr);
       }
     }
     requestAnimationFrame(animate);

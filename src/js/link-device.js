@@ -7,7 +7,7 @@ import {
   collection, doc, setDoc, getDoc, getDocs, updateDoc, deleteDoc,
   query, where, onSnapshot, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
-import QRCode from 'qrcode';
+import QRCode from 'https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm';
 
 /**
  * Detects current client device, browser, and platform.

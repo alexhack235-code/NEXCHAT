@@ -193,6 +193,89 @@
     carrierGroup.add(navalJet);
     carrierGroup._navalJet = navalJet;
 
+    // 3 Additional Parked Wingman F-35C / CF-188 Stealth Jets along Starboard Flight Deck Apron
+    [
+      { x: 18, z: -65, yaw: 0.45 },
+      { x: 18, z: -42, yaw: 0.45 },
+      { x: 18, z: 32,  yaw: 0.52 }
+    ].forEach(slot => {
+      const wingmanJet = buildNavalFighterJetMesh();
+      wingmanJet.position.set(slot.x, hullHeight + 2.2, slot.z);
+      wingmanJet.rotation.y = slot.yaw;
+      carrierGroup.add(wingmanJet);
+    });
+
+    // E-2D Advanced Hawkeye Carrier AWACS Early-Warning Radar Aircraft (Aft Starboard Deck)
+    const awacsGroup = new THREE.Group();
+    awacsGroup.position.set(16, hullHeight + 2.3, 62);
+    awacsGroup.rotation.y = 0.38;
+    const awacsMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.35, metalness: 0.65 });
+    const awacsBody = new THREE.Mesh(new THREE.BoxGeometry(2.4, 1.8, 15.5), awacsMat);
+    awacsGroup.add(awacsBody);
+    const awacsWing = new THREE.Mesh(new THREE.BoxGeometry(21.0, 0.25, 2.8), awacsMat);
+    awacsWing.position.set(0, 0.9, -1.0);
+    awacsGroup.add(awacsWing);
+    const rotodomeStrut = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.4, 2.2, 8), steelMat);
+    rotodomeStrut.position.set(0, 2.0, 0.5);
+    awacsGroup.add(rotodomeStrut);
+    const rotodomeDish = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 3.8, 0.55, 24), new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.2, metalness: 0.5 }));
+    rotodomeDish.position.set(0, 3.1, 0.5);
+    awacsGroup.add(rotodomeDish);
+    carrierGroup.add(awacsGroup);
+
+    // 4 Phalanx CIWS 20mm Radar-Guided Air-Defense & SeaRAM Missile Turrets on Sponsons
+    const ciwsWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.25, metalness: 0.5 });
+    [
+      [-hullWidth / 2 - 4, -95],
+      [hullWidth / 2 + 4,  -85],
+      [-hullWidth / 2 - 4,  95],
+      [hullWidth / 2 + 4,   95]
+    ].forEach(([cx, cz]) => {
+      const sponson = new THREE.Mesh(new THREE.BoxGeometry(6, 1.5, 6), hullMat);
+      sponson.position.set(cx, hullHeight - 0.5, cz);
+      carrierGroup.add(sponson);
+
+      const ciwsBase = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.3, 1.4, 12), steelMat);
+      ciwsBase.position.set(cx, hullHeight + 0.9, cz);
+      carrierGroup.add(ciwsBase);
+
+      const radome = new THREE.Mesh(new THREE.CylinderGeometry(0.95, 0.95, 2.1, 16), ciwsWhiteMat);
+      radome.position.set(cx, hullHeight + 2.6, cz);
+      carrierGroup.add(radome);
+
+      const radomeCap = new THREE.Mesh(new THREE.SphereGeometry(0.95, 16, 12), ciwsWhiteMat);
+      radomeCap.position.set(cx, hullHeight + 3.65, cz);
+      carrierGroup.add(radomeCap);
+
+      const gatling = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.22, 2.2, 8), steelMat);
+      gatling.rotation.x = Math.PI / 2 - 0.35;
+      gatling.position.set(cx, hullHeight + 2.1, cz - 1.2);
+      carrierGroup.add(gatling);
+    });
+
+    // Escort Halifax-Class Guided-Missile Frigate (HMCS Vancouver FFH-331) in Harbor Basin
+    const frigateGroup = new THREE.Group();
+    frigateGroup.position.set(-82, 0, -15);
+    const frigHull = new THREE.Mesh(new THREE.BoxGeometry(16.5, 6.5, 134), hullMat);
+    frigHull.position.y = 2.8;
+    frigateGroup.add(frigHull);
+    const frigBow = new THREE.Mesh(new THREE.ConeGeometry(9.2, 26, 4), hullMat);
+    frigBow.rotation.x = -Math.PI / 2;
+    frigBow.rotation.y = Math.PI / 4;
+    frigBow.position.set(0, 2.8, -79);
+    frigateGroup.add(frigBow);
+    const frigSuper = new THREE.Mesh(new THREE.BoxGeometry(13.5, 8.5, 58), steelMat);
+    frigSuper.position.set(0, 9.8, -8);
+    frigateGroup.add(frigSuper);
+    const boforsGun = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.0, 2.2, 8), ciwsWhiteMat);
+    boforsGun.position.set(0, 7.2, -52);
+    frigateGroup.add(boforsGun);
+    const gunBarrel = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.2, 4.2, 8), steelMat);
+    gunBarrel.rotation.x = Math.PI / 2 - 0.25;
+    gunBarrel.position.set(0, 7.6, -54.5);
+    frigateGroup.add(gunBarrel);
+    carrierGroup.add(frigateGroup);
+
     // Register into global airportPlanes array for flight physics, avionics, and HUD
     const carrierJetData = {
       id: 'f99_naval',
@@ -222,7 +305,7 @@
       });
     }
 
-    console.log('✅ [CANADIAN FORCES] HMCS Calgary (CVN-88) Aircraft Carrier deployed at Deepwater Harbor.');
+    console.log('✅ [CANADIAN FORCES] HMCS Calgary (CVN-88) Aircraft Carrier & Escort Frigate deployed at Deepwater Harbor.');
   }
 
   // Helper: Build a sleek Canadian CF-188 / F-99 Ghost Naval Fighter Jet
@@ -488,6 +571,35 @@
 
     baseGroup.add(kioskGroup);
 
+    // Tactical Helipad & CH-146 Griffon / AH-64 Attack Gunship Helicopter (28, 0, -18)
+    const helipad = new THREE.Mesh(new THREE.CylinderGeometry(9.5, 9.8, 0.25, 24), wallMat);
+    helipad.position.set(28, 0.13, -18);
+    baseGroup.add(helipad);
+    const heliRing = new THREE.Mesh(new THREE.RingGeometry(7.2, 7.8, 24), goldMat);
+    heliRing.rotation.x = -Math.PI / 2;
+    heliRing.position.set(28, 0.27, -18);
+    baseGroup.add(heliRing);
+
+    const gunship = new THREE.Group();
+    gunship.position.set(28, 1.4, -18);
+    const gsBody = new THREE.Mesh(new THREE.BoxGeometry(2.2, 2.0, 9.5), camoMat);
+    gunship.add(gsBody);
+    const gsTail = new THREE.Mesh(new THREE.BoxGeometry(0.65, 0.75, 7.0), camoMat);
+    gsTail.position.set(0, 0.4, 7.2);
+    gunship.add(gsTail);
+    const gsWing = new THREE.Mesh(new THREE.BoxGeometry(6.8, 0.22, 1.4), camoMat);
+    gsWing.position.set(0, -0.1, -0.5);
+    gunship.add(gsWing);
+    const gsRotor = new THREE.Mesh(new THREE.BoxGeometry(12.5, 0.08, 0.45), steelMat);
+    gsRotor.position.set(0, 1.45, 0);
+    gunship.add(gsRotor);
+    baseGroup.add(gunship);
+
+    // Parked RCAF F-35A Lightning II Stealth Fighter on Base Apron (-28, 1.4, -22)
+    const rcafJet = buildNavalFighterJetMesh();
+    rcafJet.position.set(-28, 1.4, -22);
+    baseGroup.add(rcafJet);
+
     // Register trigger collider for Enlistment Interaction
     if (typeof registerCityCollider === 'function') {
       registerCityCollider({
@@ -499,7 +611,7 @@
       });
     }
 
-    console.log('✅ [CANADIAN FORCES] CFB Calgary Military Recruitment Base established ($10,000 CAD Weekly Pay).');
+    console.log('✅ [CANADIAN FORCES] CFB Calgary Military Recruitment Base & Air Defense established ($10,000 CAD Weekly Pay).');
   }
 
   // Build Canadian Armed Forces LAV 6.0 Combat Vehicle
@@ -679,7 +791,6 @@
     // Glowing Holographic Display Screen
     const holoScreen = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 1.6), new THREE.MeshBasicMaterial({
       color: 0x00f2ff,
-      emissive: 0x00f2ff,
       side: THREE.DoubleSide
     }));
     holoScreen.position.set(0, 3.8, 0.2);
@@ -917,7 +1028,10 @@
     console.log('🌌 [NORTHERN LIGHTS] Canadian Aurora Borealis celestial curtain active.');
   }
 
+  let _lastAuroraUpdate = 0;
   function updateCanadianAuroraBorealis(now) {
+    if (now - _lastAuroraUpdate < 33) return; // 30 FPS vertex morph throttle
+    _lastAuroraUpdate = now;
     const a = window.militaryAviationState.auroraMesh;
     if (!a) return;
     const time = now * 0.0012;
@@ -1667,29 +1781,42 @@
   // MAIN MILITARY AVIATION SIMULATION UPDATE LOOP
   // ============================================================
   function updateMilitaryAviation(delta, now) {
-    // 1. Rotate Aircraft Carrier Radar and Base Kiosk Crest
+    const st = window.militaryAviationState;
+    if (!st) return;
+
+    // 1. Rotate Aircraft Carrier Radar and Base Kiosk Crest (Zero scene.traverse - cached array)
     if (typeof scene !== 'undefined' && scene) {
-      scene.traverse(obj => {
+      if (!st.cachedRadars) {
+        st.cachedRadars = [];
+        scene.traverse(obj => {
+          if (obj._radarBar || obj._kioskLeaf || obj._cyberGlobe) st.cachedRadars.push(obj);
+        });
+      }
+      for (let i = 0; i < st.cachedRadars.length; i++) {
+        const obj = st.cachedRadars[i];
         if (obj._radarBar) obj._radarBar.rotation.y += delta * 1.8;
         if (obj._kioskLeaf) obj._kioskLeaf.rotation.y += delta * 1.5;
         if (obj._cyberGlobe) obj._cyberGlobe.rotation.y += delta * 0.9;
-      });
+      }
     }
 
-    const st = window.militaryAviationState;
+    const combatActive = !(st.combatPaused || (typeof gameState !== 'undefined' && gameState && gameState.settings && gameState.settings.skyFighterCombat === false));
 
     // 2. Air-Defense Sky Fighter Formation Flight Path
-    if (st && st.patrolFormation) {
-      st.patrolAngle = (st.patrolAngle || 0) + delta * 0.22;
-      const r = 520;
-      const px = Math.cos(st.patrolAngle) * r;
-      const pz = Math.sin(st.patrolAngle) * r;
-      st.patrolFormation.position.set(px, 160 + Math.sin(st.patrolAngle * 2) * 15, pz);
-      st.patrolFormation.rotation.y = -st.patrolAngle + Math.PI / 2;
+    if (st.patrolFormation) {
+      st.patrolFormation.visible = combatActive;
+      if (combatActive) {
+        st.patrolAngle = (st.patrolAngle || 0) + delta * 0.22;
+        const r = 520;
+        const px = Math.cos(st.patrolAngle) * r;
+        const pz = Math.sin(st.patrolAngle) * r;
+        st.patrolFormation.position.set(px, 160 + Math.sin(st.patrolAngle * 2) * 15, pz);
+        st.patrolFormation.rotation.y = -st.patrolAngle + Math.PI / 2;
+      }
     }
 
     // 3. Police Cruisers Patrol Drive & Strobe Lightbars
-    if (st && st.policeCruisers) {
+    if (st.policeCruisers) {
       const flash = Math.sin(now * 0.02) > 0;
       st.policeCruisers.forEach(c => {
         c.mesh.position.z += c.dir * c.speed * delta;
@@ -1708,14 +1835,25 @@
     if (!st.auroraMesh) buildCanadianAuroraBorealis();
     if (!st.hostileDrones || st.hostileDrones.length === 0) initHostileSkyRaiders();
 
-    // 5. Update Aurora Borealis Waves
-    updateCanadianAuroraBorealis(now);
+    // 5. Update Aurora Borealis Waves (throttled when active, hidden when disabled)
+    if (combatActive && (!window.gameState || !window.gameState.settings || window.gameState.settings.weatherParticles !== false)) {
+      if (st.auroraMesh && st.auroraMesh.group) st.auroraMesh.group.visible = true;
+      updateCanadianAuroraBorealis(now);
+    } else if (st.auroraMesh && st.auroraMesh.group) {
+      st.auroraMesh.group.visible = false;
+    }
 
     // 6. Update Hostile Drones AI & Dogfight Evasion
-    updateHostileSkyRaiders(delta, now);
-
-    // 7. Update Projectiles & Detonations
-    updateMilitaryProjectiles(delta);
+    if (combatActive) {
+      if (st.hostileDrones) {
+        st.hostileDrones.forEach(d => { if (d.mesh) d.mesh.visible = true; });
+      }
+      updateHostileSkyRaiders(delta, now);
+      // 7. Update Projectiles & Detonations
+      updateMilitaryProjectiles(delta);
+    } else if (st.hostileDrones) {
+      st.hostileDrones.forEach(d => { if (d.mesh) d.mesh.visible = false; });
+    }
 
     // 8. Update Canadian LAV 6.0 8x8 Vehicle Physics
     updateCanadianLAV(delta, now);

@@ -1,4 +1,4 @@
-import { openDB } from 'idb';
+import { openDB } from 'https://cdn.jsdelivr.net/npm/idb@8/+esm';
 
 /**
  * GroupCache - IndexedDB persistent cache for group messages and metadata

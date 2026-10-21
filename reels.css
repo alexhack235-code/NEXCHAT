@@ -162,20 +162,21 @@ body.reels-body {
 .camshot-header-brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .camshot-brand-logo {
-  width: 28px;
-  height: 28px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   object-fit: contain;
-  filter: drop-shadow(0 0 8px rgba(0, 242, 255, 0.55));
-  transition: transform 0.2s ease;
+  filter: drop-shadow(0 0 10px rgba(0, 242, 255, 0.75));
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), filter 0.25s ease;
 }
 
 .camshot-brand-logo:hover {
-  transform: scale(1.08) rotate(15deg);
+  transform: scale(1.14) rotate(10deg);
+  filter: drop-shadow(0 0 20px rgba(0, 242, 255, 0.95));
 }
 
 .camshot-brand-name {

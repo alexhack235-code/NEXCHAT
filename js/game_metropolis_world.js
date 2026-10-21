@@ -551,7 +551,7 @@
         { name: 'Neo-Kyoto Imperial Pagoda Spire', x: 480, y: 52.0, z: 300, tokens: 350 },
         { name: 'Solaria Oasis Cantina Rooftop', x: -380, y: 18.5, z: 440, tokens: 220 },
         { name: 'Atlantis Oceanic Seafloor Dome', x: -480, y: 0.6, z: -380, tokens: 280 },
-        { name: 'Central Coliseum Championship Podium', x: 0, y: 1.5, z: 0, tokens: 150 }
+        { name: 'Central Coliseum Championship Podium', x: 6.5, y: 0.15, z: -8.5, tokens: 150 }
       ];
 
       const cMatGold = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.95, roughness: 0.18 });
@@ -683,6 +683,10 @@
     }
 
     function setLowEndTurboMode(enable) {
+      if (typeof window.setLowEndTurboMode === 'function' && window.setLowEndTurboMode !== setLowEndTurboMode) {
+        window.setLowEndTurboMode(enable);
+        return;
+      }
       gameState.settings.lowEndTurbo = enable;
 
       // 1. Dynamic Pixel Ratio & Real-Time Shadow Protection
@@ -1865,20 +1869,20 @@ function buildNeoKyotoCity() {
       recreationGroup = new THREE.Group();
       scene.add(recreationGroup);
 
-      // (A) CENTRAL STADIUM KINETIC NEO-SOCCER BALL & HOLOGRAPHIC GOALS
+      // (A) CENTRAL PLAZA KINETIC NEO-SOCCER BALL & HOLOGRAPHIC GOALS
       const ballMat = new THREE.MeshStandardMaterial({
-        color: 0x00f2ff,
-        emissive: 0x00ffff,
-        emissiveIntensity: 0.6,
-        roughness: 0.15,
-        metalness: 0.8
+        color: 0x1e293b,
+        emissive: 0x00f2ff,
+        emissiveIntensity: 0.25,
+        roughness: 0.25,
+        metalness: 0.85
       });
-      neoSoccerBall = new THREE.Mesh(new THREE.SphereGeometry(1.35, 16, 16), ballMat);
-      neoSoccerBall.position.set(0, 1.35, 0);
+      neoSoccerBall = new THREE.Mesh(new THREE.SphereGeometry(0.45, 16, 16), ballMat);
+      neoSoccerBall.position.set(0, 0.45, -24);
       neoSoccerBall.castShadow = true;
       neoSoccerBall.userData = {
         vel: new THREE.Vector3(0, 0, 0),
-        radius: 1.35,
+        radius: 0.45,
         respawnTimer: 0
       };
       recreationGroup.add(neoSoccerBall);
@@ -1982,6 +1986,11 @@ function buildNeoKyotoCity() {
     // ------------------------------------------------------------
     // 5. UPDATE RECREATIONAL ACTIVITIES IN GAMELOOP
     // ------------------------------------------------------------
+    const _scratchSoccerKickDir = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    let _cachedLighthouseBeam = null;
+    let _cachedCantinaFan = null;
+    let _cachedDanceFloor = null;
+
     function updateRecreationalActivities(delta, now) {
       if (gameState.currentWorld !== 'earth') return;
 
@@ -1993,7 +2002,8 @@ function buildNeoKyotoCity() {
         // Player Kick Physics (Impart momentum)
         const distToPlayer = ball.position.distanceTo(player.pos);
         if (distToPlayer < 2.5) {
-          const kickDir = new THREE.Vector3().subVectors(ball.position, player.pos).normalize();
+          const kickDir = _scratchSoccerKickDir || new THREE.Vector3();
+          kickDir.subVectors(ball.position, player.pos).normalize();
           kickDir.y = 0.2; // slight loft
           const playerSpeed = player.vel ? player.vel.length() : 4.0;
           const kickForce = 8.0 + playerSpeed * 2.2;
@@ -2005,8 +2015,8 @@ function buildNeoKyotoCity() {
         ball.position.addScaledVector(bVel, delta);
         bVel.multiplyScalar(0.982); // turf rolling resistance
 
-        // Keep on stadium ground
-        ball.position.y = 1.35;
+        // Keep on plaza ground
+        ball.position.y = 0.45;
 
         // Stadium Boundary Wall Bounces (-56m to +56m)
         if (Math.abs(ball.position.x) > 52) {
@@ -2034,9 +2044,9 @@ function buildNeoKyotoCity() {
                 setTimeout(() => { banner.style.display = 'none'; }, 4000);
               }
 
-              // Reset ball to center circle after 2.5s
+              // Reset ball to forward field after 2.5s
               setTimeout(() => {
-                ball.position.set(0, 1.35, 0);
+                ball.position.set(0, 0.45, -24);
                 bVel.set(0, 0, 0);
                 stadiumGoalCooldown = false;
               }, 2500);
@@ -2045,17 +2055,17 @@ function buildNeoKyotoCity() {
         }
       }
 
-      // (B) LIGHTHOUSE BEAM & CANTINA FAN ROTATION
-      const beam = scene.getObjectByName('lighthouseBeamGroup');
-      if (beam) beam.rotation.y = now * 0.0018;
+      // (B) LIGHTHOUSE BEAM & CANTINA FAN ROTATION (Cached references, 0 scene graph traversal)
+      if (!_cachedLighthouseBeam && scene) _cachedLighthouseBeam = scene.getObjectByName('lighthouseBeamGroup');
+      if (_cachedLighthouseBeam) _cachedLighthouseBeam.rotation.y = now * 0.0018;
 
-      const fan = scene.getObjectByName('cantinaFanGroup');
-      if (fan) fan.rotation.y = now * 0.005;
+      if (!_cachedCantinaFan && scene) _cachedCantinaFan = scene.getObjectByName('cantinaFanGroup');
+      if (_cachedCantinaFan) _cachedCantinaFan.rotation.y = now * 0.005;
 
-      const danceFloor = scene.getObjectByName('clubNebulaDanceFloor');
-      if (danceFloor) {
+      if (!_cachedDanceFloor && scene) _cachedDanceFloor = scene.getObjectByName('clubNebulaDanceFloor');
+      if (_cachedDanceFloor) {
         const hue = (now * 0.0004) % 1;
-        danceFloor.material.color.setHSL(hue, 0.9, 0.5);
+        _cachedDanceFloor.material.color.setHSL(hue, 0.9, 0.5);
       }
 
       // (C) SPEEDWAY TIME-TRIAL RACING TIMER & GATE DETECTION
@@ -2089,13 +2099,14 @@ function buildNeoKyotoCity() {
       }
 
       // (D) AEROGLIDER WINGSUIT FLIGHT
-      if (isGliding && player && player.pos) {
+      const isCurrentlyGliding = isGliding || (typeof gameState !== 'undefined' && gameState.isGliding);
+      if (isCurrentlyGliding && player && player.pos) {
         // Reduced descent gravity
         player.vel.y = Math.max(-1.8, player.vel.y);
-        // Forward glide momentum based on camera facing
-        const forward = new THREE.Vector3();
-        camera.getWorldDirection(forward);
-        player.pos.addScaledVector(forward, 28.0 * delta);
+        // Forward glide momentum based on camera facing (zero-allocation scratch vector)
+        if (!window._scratchGliderForward) window._scratchGliderForward = new THREE.Vector3();
+        camera.getWorldDirection(window._scratchGliderForward);
+        player.pos.addScaledVector(window._scratchGliderForward, 28.0 * delta);
 
         // Check Aerial Ring Collisions
         aerialScoreRings.forEach(ringPos => {
@@ -2121,7 +2132,13 @@ function buildNeoKyotoCity() {
     // 6. INTERACTIVE RECREATION HANDLERS & MODAL CONTROLLERS
     // ------------------------------------------------------------
     function toggleAeroGlider() {
+      if (typeof window.toggleAeroGlider === 'function' && window.toggleAeroGlider !== toggleAeroGlider) {
+        window.toggleAeroGlider();
+        isGliding = (typeof gameState !== 'undefined') ? !!gameState.isGliding : !isGliding;
+        return;
+      }
       isGliding = !isGliding;
+      if (typeof gameState !== 'undefined') gameState.isGliding = isGliding;
       const hud = document.getElementById('aeroglider-flight-hud');
       if (isGliding) {
         if (hud) hud.style.display = 'flex';
@@ -2381,7 +2398,14 @@ function buildNeoKyotoCity() {
         const en = retroArcadeEnemies[eIdx];
         en.y += en.speed;
 
+        // Cull enemies that slipped past the bottom edge (prevents unbounded array growth)
+        if (en.y - en.radius > h) {
+          retroArcadeEnemies.splice(eIdx, 1);
+          continue;
+        }
+
         // Check Laser Collision
+        let destroyed = false;
         for (let lIdx = retroArcadeLasers.length - 1; lIdx >= 0; lIdx--) {
           const lz = retroArcadeLasers[lIdx];
           const dist = Math.hypot(lz.x - en.x, lz.y - en.y);
@@ -2392,12 +2416,14 @@ function buildNeoKyotoCity() {
             document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
             retroArcadeEnemies.splice(eIdx, 1);
             retroArcadeLasers.splice(lIdx, 1);
+            destroyed = true;
             break;
           }
         }
+        if (destroyed) continue; // enemy is gone: don't run ship collision against a stale index
 
         // Check Ship Collision
-        if (en && Math.hypot(en.x - retroArcadeShipX, en.y - 330) < en.radius + 14) {
+        if (Math.hypot(en.x - retroArcadeShipX, en.y - 330) < en.radius + 14) {
           cyberAudio.playHitSound();
           retroArcadeShield = Math.max(0, retroArcadeShield - 25);
           retroArcadeEnemies.splice(eIdx, 1);
@@ -2450,7 +2476,7 @@ function buildNeoKyotoCity() {
         ctx.fill();
       });
 
-      retroArcadeLoopId = requestAnimationFrame(runArcadeLoop);
+      retroArcadeLoopId = requestAnimationFrame(runRetroArcadeLoop);
     }
 
     // ============================================================
@@ -2910,6 +2936,57 @@ function buildNeoKyotoCity() {
         hasAfterburner: false,
         isVTOL: true
       });
+
+      // PLANE 4: RCAF CC-177 Globemaster III Quad-Turbofan Heavy Military Transport (Apron East: 525, 1.4, -180)
+      const c17Group = new THREE.Group();
+      c17Group.position.set(525, 1.4, -180);
+      c17Group.rotation.y = -Math.PI / 2;
+      airportGroup.add(c17Group);
+
+      const c17Mat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.45, metalness: 0.72 });
+      const c17Fuse = new THREE.Mesh(new THREE.CylinderGeometry(2.8, 2.8, 32, 20), c17Mat);
+      c17Fuse.rotation.x = Math.PI / 2;
+      c17Fuse.position.set(0, 2.8, 0);
+      c17Group.add(c17Fuse);
+
+      const c17Nose = new THREE.Mesh(new THREE.SphereGeometry(2.8, 16, 12), c17Mat);
+      c17Nose.scale.set(1, 0.9, 1.6);
+      c17Nose.position.set(0, 2.7, 16.0);
+      c17Group.add(c17Nose);
+
+      const c17Wing = new THREE.Mesh(new THREE.BoxGeometry(36, 0.45, 5.2), c17Mat);
+      c17Wing.position.set(0, 4.9, 2.0);
+      c17Group.add(c17Wing);
+
+      // 4 High-Bypass F117 Turbofan Engine Nacelles under high wing
+      [-12.5, -6.5, 6.5, 12.5].forEach(ex => {
+        const nac = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.05, 4.6, 16), steelMat);
+        nac.rotation.x = Math.PI / 2;
+        nac.position.set(ex, 3.6, 3.4);
+        c17Group.add(nac);
+      });
+
+      // Towering T-Tail Vertical & Horizontal Stabilizer
+      const c17TailV = new THREE.Mesh(new THREE.BoxGeometry(0.45, 7.5, 5.2), c17Mat);
+      c17TailV.position.set(0, 6.4, -13.5);
+      c17Group.add(c17TailV);
+      const c17TailH = new THREE.Mesh(new THREE.BoxGeometry(13.5, 0.35, 3.2), c17Mat);
+      c17TailH.position.set(0, 10.1, -14.2);
+      c17Group.add(c17TailH);
+
+      airportPlanes.push({
+        id: 'cc177_globemaster',
+        name: 'RCAF CC-177 GLOBEMASTER III',
+        mesh: c17Group,
+        pos: c17Group.position,
+        maxSpeed: 74,
+        takeoffSpeed: 18,
+        pitchRate: 1.1,
+        rollRate: 1.3,
+        yawRate: 0.9,
+        hasAfterburner: true,
+        isVTOL: false
+      });
     }
 
     // ============================================================
@@ -2929,84 +3006,173 @@ function buildNeoKyotoCity() {
       scene.add(calgaryMetropolisGroup);
       registerCullable(calgaryMetropolisGroup);
 
-      // PBR Materials for Calgary Architectural Icons
-      const towerRedMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.38, metalness: 0.45 });
-      const towerConcreteMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.85, metalness: 0.15 });
-      const towerGlassMat = new THREE.MeshPhysicalMaterial({ color: 0x00f2ff, roughness: 0.08, metalness: 0.88, transparent: true, opacity: 0.78, clearcoat: 1.0 });
+      // PBR Materials for Calgary Architectural Icons (wired to procedural PBR maps when available)
+      const hasPBR = (typeof pbrTextures !== 'undefined' && pbrTextures && pbrTextures.skyscraperBlue);
+      const towerRedMat = new THREE.MeshStandardMaterial({
+        color: 0x991b1b,
+        roughness: 0.32,
+        metalness: 0.55,
+        map: hasPBR ? pbrTextures.metal : null
+      });
+      const towerConcreteMat = new THREE.MeshStandardMaterial({
+        color: 0x334155,
+        roughness: 0.65,
+        metalness: 0.35,
+        map: hasPBR ? pbrTextures.metal : null
+      });
+      const towerPodiumMat = new THREE.MeshStandardMaterial({
+        color: 0x1e293b,
+        roughness: 0.42,
+        metalness: 0.65,
+        map: hasPBR ? pbrTextures.metal : null
+      });
+      const towerGlassMat = new THREE.MeshPhysicalMaterial({
+        color: 0x0f172a,
+        roughness: 0.08,
+        metalness: 0.92,
+        transparent: true,
+        opacity: 0.88,
+        clearcoat: 1.0
+      });
       const torchFlameMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
 
-      const bowGlassMat = new THREE.MeshStandardMaterial({ color: 0x1e3a5f, roughness: 0.12, metalness: 0.88 });
-      const bowDiagridMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.32, metalness: 0.85 });
+      const bowGlassMat = new THREE.MeshStandardMaterial({
+        color: 0x8ab4d8,
+        map: hasPBR ? pbrTextures.skyscraperBlue.diff : null,
+        emissiveMap: hasPBR ? pbrTextures.skyscraperBlue.emis : null,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.08,
+        normalMap: hasPBR ? pbrTextures.normal : null,
+        roughness: 0.14,
+        metalness: 0.90
+      });
+      const bowDiagridMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.28, metalness: 0.88 });
 
-      const telusSkyGlassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.15, metalness: 0.9 });
+      const telusSkyGlassMat = new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        map: hasPBR ? pbrTextures.skyscraperSilver.diff : null,
+        emissiveMap: hasPBR ? pbrTextures.skyscraperSilver.emis : null,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.08,
+        normalMap: hasPBR ? pbrTextures.normal : null,
+        roughness: 0.15,
+        metalness: 0.92
+      });
       const telusLedMat1 = new THREE.MeshBasicMaterial({ color: 0x00ffaa });
-      const telusLedMat2 = new THREE.MeshBasicMaterial({ color: 0x0088ff });
+      const telusLedMat2 = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
 
-      const brookfieldGlassMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.10, metalness: 0.92 });
-      const steelFrameMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.45, metalness: 0.8 });
+      const brookfieldGlassMat = new THREE.MeshStandardMaterial({
+        color: 0x94a3b8,
+        map: hasPBR ? pbrTextures.skyscraperBronze.diff : null,
+        emissiveMap: hasPBR ? pbrTextures.skyscraperBronze.emis : null,
+        emissive: 0xffffff,
+        emissiveIntensity: 0.07,
+        normalMap: hasPBR ? pbrTextures.normal : null,
+        roughness: 0.12,
+        metalness: 0.92
+      });
+      const steelFrameMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.42, metalness: 0.82 });
 
-      const libraryFacadeMat = new THREE.MeshStandardMaterial({ color: 0xf1f5f9, roughness: 0.42, metalness: 0.35 });
-      const libraryWoodMat = new THREE.MeshStandardMaterial({ color: 0x9a5b32, roughness: 0.72, metalness: 0.08 });
-      const libraryGlassMat = new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, roughness: 0.12, metalness: 0.7, transparent: true, opacity: 0.72 });
+      const libraryFacadeMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.48, metalness: 0.35 });
+      const libraryWoodMat = new THREE.MeshStandardMaterial({ color: 0x854d0e, roughness: 0.68, metalness: 0.08 });
+      const libraryGlassMat = new THREE.MeshPhysicalMaterial({ color: 0x38bdf8, roughness: 0.12, metalness: 0.75, transparent: true, opacity: 0.76 });
 
-      const craneYellowMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.35, metalness: 0.65 });
-      const concreteBowlMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.9, metalness: 0.1 });
+      const craneYellowMat = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.35, metalness: 0.65 });
+      const concreteBowlMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.88, metalness: 0.12 });
       const safetyOrangeMat = new THREE.MeshBasicMaterial({ color: 0xf97316 });
       const warningBeaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
 
       const lrtTrackMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.85, roughness: 0.3 });
-      const lrtRedMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4, metalness: 0.3 });
-      const lrtWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+      const lrtRedMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.38, metalness: 0.35 });
+      const lrtWhiteMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.38 });
 
       // ------------------------------------------------------------
-      // 1. THE CALGARY TOWER (190m) — 101 9th Ave SW at (X: -35, Z: -45)
+      // 1. THE CALGARY TOWER (191m) — 101 9th Ave SW at (X: -35, Z: -45)
+      // Multi-tiered architectural podium, fluted concrete shaft & Carmine Red observation pod
       // ------------------------------------------------------------
       const calgaryTowerGroup = new THREE.Group();
       calgaryTowerGroup.position.set(-35, 0, -45);
       calgaryMetropolisGroup.add(calgaryTowerGroup);
 
-      // Flared Tripod Base & Pavilion (Ground to 18m)
-      const cBase = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 15, 18, 16), towerConcreteMat);
-      cBase.position.y = 9;
+      // Architectural Granite & Glazed Podium Base (0 to 12m)
+      const cPodium = new THREE.Mesh(new THREE.BoxGeometry(22, 12, 22), towerPodiumMat);
+      cPodium.position.y = 6;
+      cPodium.castShadow = true; cPodium.receiveShadow = true;
+      calgaryTowerGroup.add(cPodium);
+
+      // Podium Glazed Curtain Wall Band
+      const cPodiumGlass = new THREE.Mesh(new THREE.BoxGeometry(22.3, 7.5, 22.3), bowGlassMat);
+      cPodiumGlass.position.y = 6.2;
+      calgaryTowerGroup.add(cPodiumGlass);
+
+      // Sleek Architectural Structural Collar (12m to 16m)
+      const cBase = new THREE.Mesh(new THREE.CylinderGeometry(5.6, 6.4, 4, 24), towerPodiumMat);
+      cBase.position.y = 14;
       cBase.castShadow = true; cBase.receiveShadow = true;
       calgaryTowerGroup.add(cBase);
 
-      // Carmine Red Slender Column Shaft (18m to 155m)
-      const cShaft = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 5.8, 137, 16), towerRedMat);
-      cShaft.position.y = 86.5;
-      cShaft.castShadow = true;
+      // Fluted Architectural Concrete Shaft (16m to 154m)
+      const cShaft = new THREE.Mesh(new THREE.CylinderGeometry(4.4, 5.4, 138, 24), towerConcreteMat);
+      cShaft.position.y = 85;
+      cShaft.castShadow = true; cShaft.receiveShadow = true;
       calgaryTowerGroup.add(cShaft);
 
-      // Revolving Sky 360 Restaurant Drum (155m to 167m)
-      const cDrum = new THREE.Mesh(new THREE.CylinderGeometry(15, 13, 12, 32), towerGlassMat);
-      cDrum.position.y = 161;
+      // 12 Vertical Structural Flutes & Carmine Accent Ribs along Shaft
+      for (let f = 0; f < 12; f++) {
+        const fAng = (f / 12) * Math.PI * 2;
+        const ribMat = (f % 3 === 0) ? towerRedMat : steelFrameMat;
+        const rib = new THREE.Mesh(new THREE.BoxGeometry(0.42, 136, 0.55), ribMat);
+        rib.position.set(Math.cos(fAng) * 5.0, 86, Math.sin(fAng) * 5.0);
+        rib.rotation.y = -fAng;
+        calgaryTowerGroup.add(rib);
+      }
+
+      // Lower Carmine Red Structural Cup Under Pod (150m to 156m)
+      const cPodCup = new THREE.Mesh(new THREE.CylinderGeometry(13.2, 5.2, 6.5, 32), towerRedMat);
+      cPodCup.position.y = 153;
+      cPodCup.castShadow = true;
+      calgaryTowerGroup.add(cPodCup);
+
+      // Revolving Sky 360 Restaurant & Observation Drum (156m to 168m)
+      const cDrum = new THREE.Mesh(new THREE.CylinderGeometry(14.8, 13.4, 11.5, 32), towerGlassMat);
+      cDrum.position.y = 162;
       calgaryTowerGroup.add(cDrum);
 
-      const cDrumRoof = new THREE.Mesh(new THREE.ConeGeometry(15.2, 4.5, 32), towerConcreteMat);
-      cDrumRoof.position.y = 169.25;
+      // 24 Vertical Window Mullions around Observation Deck
+      for (let m = 0; m < 24; m++) {
+        const mAng = (m / 24) * Math.PI * 2;
+        const mullion = new THREE.Mesh(new THREE.BoxGeometry(0.22, 11.6, 0.35), steelFrameMat);
+        mullion.position.set(Math.cos(mAng) * 14.2, 162, Math.sin(mAng) * 14.2);
+        mullion.rotation.y = -mAng;
+        calgaryTowerGroup.add(mullion);
+      }
+
+      //Carmine Red Observation Crown Band (168m to 172m)
+      const cDrumRoof = new THREE.Mesh(new THREE.CylinderGeometry(12.0, 15.0, 4.0, 32), towerRedMat);
+      cDrumRoof.position.y = 169.8;
       calgaryTowerGroup.add(cDrumRoof);
 
-      // Upper Space Deck Observation Level (170m to 178m)
-      const cUpperDeck = new THREE.Mesh(new THREE.CylinderGeometry(8.5, 6.5, 8, 20), towerConcreteMat);
-      cUpperDeck.position.y = 174;
+      // Upper Space Deck Observation Level (172m to 179m)
+      const cUpperDeck = new THREE.Mesh(new THREE.CylinderGeometry(7.8, 9.5, 7, 24), towerPodiumMat);
+      cUpperDeck.position.y = 175;
       calgaryTowerGroup.add(cUpperDeck);
 
-      // Natural Gas Centennial Olympic Torch Spire & Flame (178m to 191m)
-      const cSpire = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 1.4, 14, 8), steelFrameMat);
+      // Natural Gas Centennial Olympic Torch Spire & Flame Cauldron (179m to 191m)
+      const cSpire = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 1.4, 14, 12), steelFrameMat);
       cSpire.position.y = 185;
       calgaryTowerGroup.add(cSpire);
 
-      const cFlame = new THREE.Mesh(new THREE.ConeGeometry(0.9, 2.8, 8), torchFlameMat);
-      cFlame.position.y = 193;
+      const cFlame = new THREE.Mesh(new THREE.ConeGeometry(1.1, 3.4, 12), torchFlameMat);
+      cFlame.position.y = 193.5;
       calgaryTowerGroup.add(cFlame);
 
-      calgaryTowerTorchLight = new THREE.PointLight(0xffaa22, 2.5, 180);
-      calgaryTowerTorchLight.position.set(-35, 193, -45);
+      calgaryTowerTorchLight = new THREE.PointLight(0xffaa22, 2.2, 180);
+      calgaryTowerTorchLight.position.set(-35, 194, -45);
       calgaryMetropolisGroup.add(calgaryTowerTorchLight);
 
-      // CALGARY TOWER PLAZA CODEX & ALBERTA PASSPORT TERMINAL (X: -35, Z: -32)
+      // CALGARY TOWER PLAZA CODEX & ALBERTA PASSPORT TERMINAL (X: -35, Z: -30)
       const calgaryCodexGroup = new THREE.Group();
-      calgaryCodexGroup.position.set(-35, 0, -32);
+      calgaryCodexGroup.position.set(-35, 0, -30);
       calgaryMetropolisGroup.add(calgaryCodexGroup);
 
       const codexPed = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.0, 1.2, 8), new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.3, metalness: 0.85 }));
@@ -3027,12 +3193,12 @@ function buildNeoKyotoCity() {
       codexCore.position.y = 2.4;
       calgaryCodexGroup.add(codexCore);
 
-      const codexLight = new THREE.PointLight(0x00f2ff, 1.8, 22);
+      const codexLight = new THREE.PointLight(0x00f2ff, 1.6, 22);
       codexLight.position.set(0, 2.5, 0);
       calgaryCodexGroup.add(codexLight);
 
-      registerCityCollider({ type: 'solid', x: -35, z: -45, hw: 14, hd: 14, world: 'earth' });
-      registerCityCollider({ type: 'solid', x: -35, z: -32, hw: 3.5, hd: 3.5, world: 'earth' });
+      registerCityCollider({ type: 'solid', x: -35, z: -45, hw: 11.5, hd: 11.5, world: 'earth' });
+      registerCityCollider({ type: 'solid', x: -35, z: -30, hw: 2.5, hd: 2.5, world: 'earth' });
 
       // ------------------------------------------------------------
       // 2. THE BOW SKYSCRAPER (236m) — 500 Centre St S at (X: 25, Z: -85)
@@ -3602,7 +3768,10 @@ function buildNeoKyotoCity() {
       if (frame) {
         frame.src = `${file}?tokens=${currentTokens}&callsign=${encodeURIComponent(callsign)}`;
       }
-      if (overlay) overlay.classList.add('active');
+      if (overlay) {
+        overlay.classList.add('active');
+        overlay.style.display = 'flex';
+      }
 
       if (typeof showStoreNotification === 'function') {
         showStoreNotification(`🍁 TRANS-CANADA HIGHWAY: CONNECTED TO ${name.toUpperCase()}!`);
@@ -3612,7 +3781,10 @@ function buildNeoKyotoCity() {
     function closeProvinceLoader() {
       const overlay = document.getElementById('province-loader-overlay');
       const frame = document.getElementById('province-viewport-frame');
-      if (overlay) overlay.classList.remove('active');
+      if (overlay) {
+        overlay.classList.remove('active');
+        overlay.style.display = 'none';
+      }
       if (frame) frame.src = 'about:blank';
 
       // Sync tokens that might have been earned inside the province
@@ -3644,6 +3816,12 @@ function buildNeoKyotoCity() {
         window.open(`${activeProvinceFile}?tokens=${currentTokens}&callsign=${encodeURIComponent(callsign)}`, '_blank');
       }
     }
+
+    window.loadProvinceTag = loadProvinceTag;
+    window.closeProvinceLoader = closeProvinceLoader;
+    window.reloadProvinceFrame = reloadProvinceFrame;
+    window.openProvinceNewTab = openProvinceNewTab;
+    window.toggleProvincesModal = toggleProvincesModal;
 
     // ============================================================
     // AIRCRAFT PILOTING & FLIGHT CONTROLLER

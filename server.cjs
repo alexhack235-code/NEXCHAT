@@ -40,10 +40,13 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
+
   let reqPath = decodeURIComponent(req.url.split('?')[0]);
   if (reqPath === '/' || reqPath === '') {
     reqPath = '/game.html';
   }
+  reqPath = reqPath.replace(/^(\/\.\.)+/g, '');
 
   const safePath = path.normalize(path.join(PUBLIC_DIR, reqPath));
   if (!safePath.startsWith(PUBLIC_DIR)) {
@@ -82,7 +85,8 @@ const server = http.createServer((req, res) => {
         'Content-Range': `bytes ${start}-${end}/${totalSize}`,
         'Accept-Ranges': 'bytes',
         'Content-Length': chunksize,
-        'Content-Type': contentType
+        'Content-Type': contentType,
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0'
       });
       file.pipe(res);
     } else {
@@ -90,7 +94,9 @@ const server = http.createServer((req, res) => {
         'Content-Length': totalSize,
         'Content-Type': contentType,
         'Accept-Ranges': 'bytes',
-        'Cache-Control': 'no-cache'
+        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0'
       });
       fs.createReadStream(safePath).pipe(res);
     }

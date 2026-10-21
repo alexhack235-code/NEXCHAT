@@ -5,8 +5,8 @@
 ```text
 ========================================================================================
  PROJECT           : NEXCHAT - Encrypted Social & Messaging Platform
- TOTAL SOURCE LINES: 300,908 Lines
- TOTAL FILES       : 523 Tracked Text Files (81 Binary Files Excluded)
+ TOTAL SOURCE LINES: 312,229 Lines
+ TOTAL FILES       : 536 Tracked Text Files (81 Binary Files Excluded)
  ARCHITECTURE      : Zero-Jitter Multi-Subsystem (Chat, Reels, Terminal, Status Vault)
  CRYPTOGRAPHY      : Zero-Knowledge End-to-End Encryption & Ephemeral Ghost Protocol
  VERIFICATION      : WCAG AAA Compliant / 60 FPS Frame Budget / Zero Layout Shift
@@ -73,11 +73,11 @@ flowchart TD
 
 ## 2. Repository Line Count
 
-The total counts lines in the 523 Git-tracked text files. The 81 Git-tracked binary files are excluded.
+The total counts lines in the 536 Git-tracked text files. The 81 Git-tracked binary files are excluded.
 
 ```mermaid
 flowchart LR
-    ROOT["NEXCHAT Codebase<br/>300,908 Lines"] --> TEXT["Tracked Text Files<br/>523"]
+    ROOT["NEXCHAT Codebase<br/>312,229 Lines"] --> TEXT["Tracked Text Files<br/>536"]
     ROOT --> BINARY["Tracked Binary Files<br/>81 (excluded from line count)"]
 ```
 
@@ -116,9 +116,9 @@ The current repository-wide count is:
 
 | Subsystem Domain | Primary Files | File Count | Total Lines | Percentage | Architectural Role |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Tracked text files** | All Git-tracked text files | **523** | **300,908** | **100.0%** | Included in the line count |
+| **Tracked text files** | All Git-tracked text files | **536** | **312,229** | **100.0%** | Included in the line count |
 | **Tracked binary files** | All Git-tracked binary files | **81** | -- | -- | Excluded from the line count |
-| **TOTALS** | -- | **604** | **300,908** | **100.0%** | Full Git-tracked repository footprint |
+| **TOTALS** | -- | **617** | **312,229** | **100.0%** | Full Git-tracked repository footprint |
 
 ---
 
@@ -128,12 +128,14 @@ An audit of the highest-volume anchor files governing the core behavior of NEXCH
 
 | File Path | Total Lines | Language / Format | Primary Responsibilities |
 | :--- | :---: | :--- | :--- |
+| `game.html` | 20,766 | HTML5 / JS / Three.js | Central metropolis, flight gameplay, and province navigation |
 | `chat.js` | 14,750 | JavaScript (ESM) | Master chat controller, event bus, settings modal suite, ghost protocol, status viewer |
 | `chat.css` | 9,170 | CSS3 | Master application styling, status vault HUD, floating FABs, responsive media queries |
 | `reels.js` | 4,540 | JavaScript (ESM) | Reels feed swiper, video playback controller, creator studio, interactions |
 | `landing.css` | 4,152 | CSS3 | High-performance landing page styling, luxury animations, cyber aesthetics |
 | `reels.css` | 4,028 | CSS3 | Zero-collision 9:16 layout, overlay cards, comments drawer, reactions stack |
 | `chat.html` | 3,071 | HTML5 | Application DOM shell, settings tabs, cyber status vault, modal dialogs |
+| `nex-3d-studio.html` | 1,693 | HTML5 / JS / Three.js | 3D studio interface and interactive scene tools |
 | `terminal.html` | 1,229 | HTML5 / JS / Tailwind | Responsive 3-panel hacker terminal, CLI command interpreter, 1:1 call screens |
 
 ---
