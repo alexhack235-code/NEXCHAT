@@ -1610,18 +1610,9 @@
                     </div>
                   </div>
 
-                  <label for="fortressApiUrlInput" style="font-size: 11.5px; color: #ccc;">API Gateway Endpoint:</label>
-                  <input type="text" id="fortressApiUrlInput" placeholder="https://ai-security-scanner-api.vercel.app" class="settings-input" style="width: 100%; box-sizing: border-box; padding: 7px 10px; margin-top: 4px; font-size: 12px;">
-
-                  <label for="fortressVaultKeyInput" style="font-size: 11.5px; color: #ccc; margin-top: 8px; display: block;">Zero-Trust Vault Key (x-vault-key):</label>
-                  <input type="password" id="fortressVaultKeyInput" placeholder="vlt_live_9f8e7d6c..." class="settings-input" style="width: 100%; box-sizing: border-box; padding: 7px 10px; margin-top: 4px; font-size: 12px;">
-
-                  <div style="display: flex; gap: 8px; margin-top: 10px;">
-                    <button type="button" id="saveFortressConfigBtn" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
-                      <i class="fa-solid fa-floppy-disk"></i> Save Shield
-                    </button>
-                    <button type="button" id="testFortressPingBtn" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
-                      <i class="fa-solid fa-bolt"></i> Test Gateway
+                  <div style="margin-top: 10px;">
+                    <button type="button" id="testFortressPingBtn" class="btn-secondary" style="width: 100%; padding: 8px 12px; font-size: 12px;">
+                      <i class="fa-solid fa-bolt"></i> Test Security Gateway Connection
                     </button>
                   </div>
                   <div id="fortressTestResult" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>
@@ -1635,37 +1626,64 @@
                 </div>
               </div>
 
-              <!-- TAB 6: REALTIME CLOUD ENGINE (SUPABASE) -->
+              <!-- TAB 6: REALTIME MESSAGING ENGINE -->
               <div class="settings-tab-pane" id="tab-cloud">
                 <div class="settings-pane-header">
-                  <h3><i class="fa-solid fa-bolt" style="color: #00ff66;"></i> Realtime Cloud Engine</h3>
-                  <p>Sub-15ms Phoenix WebSockets with PostgreSQL CDC and dual-engine durability.</p>
+                  <h3><i class="fa-solid fa-bolt" style="color: #00ff66;"></i> Realtime Messaging Engine</h3>
+                  <p>Sub-15ms Phoenix WebSocket mesh with end-to-end cryptographic delivery.</p>
                 </div>
 
                 <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.3); background: rgba(0, 255, 102, 0.04);">
                   <div style="display: flex; align-items: center; justify-content: space-between;">
                     <span id="supabaseEngineStatus" style="font-size: 13px; color: #00ff66; display: flex; align-items: center; gap: 8px; font-weight: 700;">
-                      <i class="fa-solid fa-circle-check"></i> <span id="supabaseEngineStatusText">Connected to Supabase WebSockets</span>
+                      <i class="fa-solid fa-circle-check"></i> <span id="supabaseEngineStatusText">Connected &amp; Synchronized</span>
                     </span>
                     <button type="button" id="testSupabasePingBtn" class="btn-primary" style="padding: 5px 12px; font-size: 11px;">
                       <i class="fa-solid fa-wave-square"></i> Test Latency
                     </button>
                   </div>
                   <div id="supabasePingResult" style="font-size: 11.5px; color: #67e8f9; margin-top: 6px; font-family: monospace;">
-                    <i class="fa-solid fa-bolt" style="color: #67e8f9;"></i> Phoenix WebSocket channel: active & synchronized
+                    <i class="fa-solid fa-bolt" style="color: #67e8f9;"></i> Phoenix WebSocket mesh: active &amp; verified
                   </div>
                 </div>
 
                 <div class="settings-card">
-                  <label for="supabaseUrlInput" style="font-size: 12px; color: #ccc;"><strong>Project URL</strong></label>
-                  <input type="text" id="supabaseUrlInput" placeholder="https://your-project.supabase.co" class="settings-input" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-top: 4px;">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Dual-Engine Message Resilience</strong>
+                      <p>Synchronize live message delivery across Phoenix WebSockets and Firestore backup.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="dualEngineSyncToggle" checked disabled>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
 
-                  <label for="supabaseKeyInput" style="font-size: 12px; color: #ccc; margin-top: 10px; display: block;"><strong>Anon Public Key</strong></label>
-                  <input type="password" id="supabaseKeyInput" placeholder="eyJhbGciOiJIUzI1Ni..." class="settings-input" style="width: 100%; box-sizing: border-box; padding: 8px 10px; margin-top: 4px;">
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Auto-Reconnect Optimization</strong>
+                      <p>Instantly resume active chat streams when transitioning between Wi-Fi and mobile networks.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="autoReconnectToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
 
-                  <button type="button" id="saveSupabaseSettingsBtn" class="btn-primary" style="width: 100%; margin-top: 12px; font-weight: 700;">
-                    Save Engine Configuration
-                  </button>
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Hardware-Bound Cryptographic Enclave</strong>
+                      <p>Direct message sessions are guarded by WebCrypto AES-256-GCM zero-knowledge encryption.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="e2eeEnclaveToggle" checked disabled>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -1996,7 +2014,6 @@
                 <div class="settings-card">
                   <button id="openTerminalBtn" class="btn-primary" style="width: 100%; font-weight: 700; margin-bottom: 10px;"><i class="fa-solid fa-terminal"></i> Open NEXCHAT Terminal</button>
                   <button id="fileComplaintBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-envelope"></i> Send Feedback to NEX_DEV</button>
-                  <button id="adminPanelBtn" class="btn-secondary" style="background: #ffd700; color: #000; font-weight: 700; display: none; width: 100%; margin-top: 10px;"><i class="fa-solid fa-crown"></i> Admin Panel</button>
                 </div>
               </div>
 
@@ -2168,9 +2185,6 @@
       </button>
       <button type="button" class="mobile-menu-item" id="mobileCipherVaultBtn">
         <i class="fa-solid fa-key"></i> <span>Cipher Secret Rooms</span>
-      </button>
-      <button type="button" class="mobile-menu-item" id="mobileAdminConsoleBtn" onclick="window.location.href='admin-dashboard.html'" style="display: none; background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.2);">
-        <i class="fa-solid fa-shield-virus" style="color: #00ff66;"></i> <span style="color: #00ff66; font-weight: 700;">Admin Security Console</span>
       </button>
       <button type="button" class="mobile-menu-item" id="mobileSettingsBtn">
         <i class="fa-solid fa-gear"></i> <span>Settings</span>

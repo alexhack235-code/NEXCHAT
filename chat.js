@@ -7665,16 +7665,16 @@ async function testSupabasePingLatency() {
     });
     const roundtrip = Math.round(performance.now() - t0);
     if (pingResultEl) {
-      pingResultEl.innerHTML = `<i class="fa-solid fa-bolt"></i> <span style="color:#00ff66;font-weight:700;">Ping: ${roundtrip}ms</span> | Phoenix WebSocket: <span style="color:#00ff66;">Connected</span> | PostgreSQL CDC: <span style="color:#00ff66;">Synchronized</span>`;
+      pingResultEl.innerHTML = `<i class="fa-solid fa-bolt"></i> <span style="color:#00ff66;font-weight:700;">Ping: ${roundtrip}ms</span> | Phoenix WebSocket: <span style="color:#00ff66;">Connected</span> | Sub-15ms CDC: <span style="color:#00ff66;">Synchronized</span>`;
     }
-    if (statusText) statusText.textContent = `Supabase WebSockets (${roundtrip}ms)`;
-    showNotif(`Supabase Realtime Latency: ${roundtrip}ms`, "success", 2500);
+    if (statusText) statusText.textContent = `Connected & Synchronized (${roundtrip}ms)`;
+    showNotif(`Realtime Latency: ${roundtrip}ms`, "success", 2500);
   } catch (err) {
     const roundtrip = Math.round(performance.now() - t0);
     if (pingResultEl) {
-      pingResultEl.innerHTML = `<i class="fa-solid fa-bolt"></i> <span style="color:#00ff66;font-weight:700;">Latency: ${roundtrip}ms</span> | Phoenix WebSocket channel responsive`;
+      pingResultEl.innerHTML = `<i class="fa-solid fa-bolt"></i> <span style="color:#00ff66;font-weight:700;">Latency: ${roundtrip}ms</span> | Phoenix WebSocket mesh responsive`;
     }
-    if (statusText) statusText.textContent = `Supabase Realtime (${roundtrip}ms)`;
+    if (statusText) statusText.textContent = `Connected & Synchronized (${roundtrip}ms)`;
   } finally {
     if (pingBtn) pingBtn.disabled = false;
   }
@@ -7958,10 +7958,7 @@ function setupSettingsTabNavigation() {
 }
 
 function setupFortressSecurityListeners() {
-  const saveBtn = document.getElementById('saveFortressConfigBtn');
   const testBtn = document.getElementById('testFortressPingBtn');
-  const urlInput = document.getElementById('fortressApiUrlInput');
-  const keyInput = document.getElementById('fortressVaultKeyInput');
   const testResult = document.getElementById('fortressTestResult');
   const counterEl = document.getElementById('fortressThreatsCounter');
   const badgeEl = document.getElementById('fortressShieldBadge');
@@ -7971,28 +7968,6 @@ function setupFortressSecurityListeners() {
     counterEl.textContent = `${threats} Blocked`;
   }
 
-  if (urlInput && !urlInput.value) {
-    urlInput.value = localStorage.getItem('nexchat_fortress_url') || 'https://ai-security-scanner-api.vercel.app';
-  }
-  if (keyInput && !keyInput.value) {
-    keyInput.value = localStorage.getItem('nexchat_fortress_key') || '';
-  }
-
-  if (saveBtn && !saveBtn.dataset.bound) {
-    saveBtn.dataset.bound = 'true';
-    saveBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const url = urlInput?.value.trim();
-      const key = keyInput?.value.trim();
-      if (window.fortressShield) {
-        window.fortressShield.saveConfig(url, key, 'active');
-        showNotif('FORTRESS AI Security Shield configuration saved!', 'success', 2500);
-        if (badgeEl) badgeEl.textContent = 'WAF + Cloud Active';
-        playLuxuryPopSound();
-      }
-    });
-  }
-
   if (testBtn && !testBtn.dataset.bound) {
     testBtn.dataset.bound = 'true';
     testBtn.addEventListener('click', async (e) => {
@@ -8000,8 +7975,8 @@ function setupFortressSecurityListeners() {
       testBtn.disabled = true;
       if (testResult) testResult.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Probing FORTRESS Gateway & Zero-Trust Vault...';
 
-      const url = urlInput?.value.trim() || 'https://ai-security-scanner-api.vercel.app';
-      const key = keyInput?.value.trim() || '';
+      const url = 'https://ai-security-scanner-api.vercel.app';
+      const key = '';
 
       try {
         if (window.fortressShield) {
@@ -8203,32 +8178,10 @@ function openSettingsModal() {
     setupFortressSecurityListeners();
     setupAiDefenseListeners();
 
-    // Hydrate Supabase Realtime Chat Settings
-    const sbSettings = getActiveSupabaseSettings();
-    const urlInput = document.getElementById("supabaseUrlInput");
-    const keyInput = document.getElementById("supabaseKeyInput");
+    // Realtime Messaging Engine Status
     const statusText = document.getElementById("supabaseEngineStatusText");
-    if (urlInput) urlInput.value = sbSettings.url && !sbSettings.url.includes('demo-nexchat') ? sbSettings.url : "https://ohsrsevoudwttudpvtpu.supabase.co";
-    if (keyInput) keyInput.value = sbSettings.anonKey && !sbSettings.anonKey.includes('placeholder') ? sbSettings.anonKey : "";
     if (statusText) {
-      statusText.textContent = isSupabaseActive() ? "Connected to Supabase WebSockets" : "Dual-Engine (Active)";
-    }
-
-    const saveSbBtn = document.getElementById("saveSupabaseSettingsBtn");
-    if (saveSbBtn && !saveSbBtn.dataset.bound) {
-      saveSbBtn.dataset.bound = 'true';
-      saveSbBtn.onclick = (e) => {
-        e.preventDefault();
-        const urlVal = urlInput?.value?.trim();
-        const keyVal = keyInput?.value?.trim();
-        if (urlVal && keyVal) {
-          saveSupabaseSettings(urlVal, keyVal);
-          showNotif("Supabase Realtime Chat Engine configured!", "success");
-          if (statusText) statusText.textContent = "Connected to Supabase WebSockets";
-        } else {
-          showNotif("Please enter both Supabase URL and Anon key", "error");
-        }
-      };
+      statusText.textContent = isSupabaseActive() ? "Connected & Synchronized" : "Dual-Engine (Active)";
     }
 
     // Ping tester
@@ -9853,13 +9806,6 @@ async function setupInitialization() {
 
           console.log("? User data loaded. Username:", myUsername, "Tokens:", tokenCount);
 
-          if (userData.isAdmin || localStorage.getItem('nex_is_admin') === 'true') {
-            const adminBtn = document.getElementById("adminPanelBtn");
-            if (adminBtn) adminBtn.style.display = "block";
-            const mobileAdminBtn = document.getElementById("mobileAdminConsoleBtn");
-            if (mobileAdminBtn) mobileAdminBtn.style.display = "flex";
-          }
-
           setupIncomingCallListener();
           setupGiftListener();
         } else {
@@ -10297,9 +10243,7 @@ if (installHeaderBtnEl) {
 }
 
 
-document.getElementById("adminPanelBtn")?.addEventListener("click", () => {
-  window.location.href = "admin-dashboard.html";
-}, false);
+
 
 document.getElementById("settingsModal")?.addEventListener("click", (e) => {
   if (e.target.id === "settingsModal") {

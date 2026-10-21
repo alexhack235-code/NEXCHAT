@@ -1307,14 +1307,16 @@
         console.warn('[FIREBASE INIT]', err);
       }
 
-      // Initialize Supabase
+      // Initialize Supabase client dynamically if configured
       let supabaseClient = null;
       try {
         if (window.supabase) {
-          supabaseClient = window.supabase.createClient(
-            'https://ohsrsevoudwttudpvtpu.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oc3JzZXZvdWR3dHR1ZHB2dHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyODgyMTUsImV4cCI6MjEwNjg2NDIxNX0.j5xCe7U2NCqVAEEPc6d40WIGKpbfRFj81RVueDkO4IU'
-          );
+          const cfg = window.SUPABASE_CONFIG || (function() {
+            try { return JSON.parse(localStorage.getItem('nexchat_supabase_config')); } catch(e) { return null; }
+          })() || {};
+          if (cfg.url && cfg.anonKey) {
+            supabaseClient = window.supabase.createClient(cfg.url, cfg.anonKey);
+          }
         }
       } catch(e) {}
 
