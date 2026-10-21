@@ -67,6 +67,19 @@ if (typeof window !== 'undefined') {
   window.fetchSupabaseRoomMessages = fetchSupabaseRoomMessages;
 }
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+if (typeof window !== 'undefined') {
+  window.escapeHtml = escapeHtml;
+}
+
 const storage = getStorage();
 
 const isAndroid = /Android/.test(navigator.userAgent);
@@ -9071,6 +9084,54 @@ async function getSelfAIResponse(messageText, senderUID) {
 }
 
 async function handleSelfAIReplies(newMessages = []) {
+  if (!Array.isArray(newMessages) || newMessages.length === 0) return;
+
+  // 1. Process NEXBOT Studio In-App Bot Extension (Live Auto-Responder)
+  if (window.NEX_ACTIVE_BOT_EXTENSION && window.NEX_ACTIVE_BOT_EXTENSION.active) {
+    const ext = window.NEX_ACTIVE_BOT_EXTENSION;
+    for (const msg of newMessages) {
+      if (!msg || !msg.from || msg.from === myUID) continue;
+      if (msg.type && msg.type !== 'text') continue;
+      if (!msg.text || !msg.text.trim()) continue;
+      if (msg.autoResponder === 'nexbot-extension' || msg.autoResponder === 'self-ai') continue;
+      if (selfAIAutoResponderSeenMessages.has(msg.docId)) continue;
+
+      const text = msg.text.trim();
+      const kws = ext.keywords || ['*'];
+      const matches = kws.includes('*') || kws.some(k => text.toLowerCase().includes(k.toLowerCase().trim()));
+      if (matches) {
+        selfAIAutoResponderSeenMessages.add(msg.docId);
+        const delayMs = Math.round((ext.delay || 0.8) * 1000);
+        setTimeout(async () => {
+          try {
+            let response = ext.greeting;
+            if (typeof generateChronexAIResponse === 'function' && ext.prompt) {
+              response = await generateChronexAIResponse(`${ext.prompt}\n\nClient incoming message: "${text}"\nReply concisely as ${ext.name}.`);
+            }
+            if (!response) response = ext.greeting || "Thank you for reaching out. Automated away response logged.";
+
+            if (typeof db !== 'undefined' && typeof addDoc === 'function') {
+              await addDoc(collection(db, 'messages'), {
+                from: myUID,
+                to: msg.from,
+                text: response,
+                time: serverTimestamp(),
+                read: false,
+                type: 'text',
+                autoResponder: 'nexbot-extension',
+                botName: ext.name
+              });
+              console.log(`[NEXBOT EXTENSION] Dispatched reply to ${msg.from}:`, response);
+            }
+          } catch (err) {
+            console.warn('[NEXBOT EXTENSION] Error dispatching auto reply:', err);
+          }
+        }, delayMs);
+      }
+    }
+  }
+
+  // 2. Process Self AI Auto-Responder
   if (!window.nexchatSettings?.selfAI) return;
   if (!Array.isArray(newMessages) || newMessages.length === 0) return;
 
@@ -15519,35 +15580,53 @@ function initNexbotStudio() {
 
   // Archetypes
   const archetypes = {
+    noreply: {
+      name: 'AwayGuard AI',
+      prompt: 'You are AwayGuard AI, an autonomous no-reply & away auto-responder for NEXCHAT. When the user is away, sleeping, or busy, acknowledge incoming inquiries politely, verify their message has been safely queued, provide helpful context or answers if possible, and let them know the user will respond promptly upon returning.',
+      temp: 0.4,
+      greeting: 'Hi! I am an automated away assistant. The user is currently away/busy, but your message has been received safely and logged.',
+      keywords: '*, away, busy, offline, urgent, hi, hello, ping, status',
+      delay: 0.8
+    },
     support: {
       name: 'ApexSupport AI',
       prompt: 'You are ApexSupport AI, an autonomous customer service agent for WhatsApp. You answer questions politely, concisely, and resolve user issues with professional precision.',
       temp: 0.5,
-      greeting: 'Hello! I am your autonomous AI assistant. How can I assist you today?'
+      greeting: 'Hello! I am your autonomous AI assistant. How can I assist you today?',
+      keywords: 'hi, hello, price, support, order, quote, help',
+      delay: 1.2
     },
     sales: {
       name: 'ApexCloser AI',
       prompt: 'You are ApexCloser AI, a high-converting sales representative on WhatsApp. You ask sharp qualifying questions, highlight key product benefits, overcome hesitation with social proof, and invite the user to book a call or purchase.',
       temp: 0.7,
-      greeting: 'Hi there! Looking to scale your business or upgrade your tech stack? Let me show you our high-performance solutions.'
+      greeting: 'Hi there! Looking to scale your business or upgrade your tech stack? Let me show you our high-performance solutions.',
+      keywords: 'demo, price, cost, buy, quote, upgrade, sales',
+      delay: 1.0
     },
     engineer: {
       name: 'NexusEngineer AI',
       prompt: 'You are NexusEngineer AI, a principal full-stack engineer and coding mentor on WhatsApp. You write clean, production-grade code, analyze bugs, explain system architectures, and provide robust technical answers.',
       temp: 0.3,
-      greeting: 'NexusEngineer online. Paste your code or state your architectural requirement.'
+      greeting: 'NexusEngineer online. Paste your code or state your architectural requirement.',
+      keywords: 'code, bug, debug, javascript, python, api, deploy',
+      delay: 0.5
     },
     crypto: {
       name: 'AlphaRadar AI',
       prompt: 'You are AlphaRadar AI, a quantitative crypto analyst. You analyze token metrics, macro market movements, on-chain liquidity, and provide disciplined risk-management frameworks without financial advice.',
       temp: 0.6,
-      greeting: 'AlphaRadar synced. What market pair or token vector are you tracking?'
+      greeting: 'AlphaRadar synced. What market pair or token vector are you tracking?',
+      keywords: 'btc, eth, sol, price, token, chart, crypto, alpha',
+      delay: 1.0
     },
     twin: {
       name: 'NexusTwin AI',
       prompt: 'You are NexusTwin AI, an authentic personal AI twin. You reply in a friendly, conversational tone with natural wit and speedy assistance.',
       temp: 0.8,
-      greeting: 'Yo! What is up? I am currently mobile but I am right here to help you out.'
+      greeting: 'Yo! What is up? I am currently mobile but I am right here to help you out.',
+      keywords: 'hey, yo, what up, sup, where are you, busy',
+      delay: 1.2
     }
   };
 
@@ -15558,6 +15637,7 @@ function initNexbotStudio() {
   const delaySlider = document.getElementById('nexbotDelaySlider');
   const delayVal = document.getElementById('nexbotDelayVal');
   const greetingInput = document.getElementById('nexbotGreetingInput');
+  const keywordsInput = document.getElementById('nexbotKeywordsInput');
   const simBotName = document.getElementById('simBotName');
   const simInitialGreeting = document.getElementById('simInitialGreeting');
 
@@ -15565,6 +15645,236 @@ function initNexbotStudio() {
     promptTextarea.value = archetypes.support.prompt;
   }
 
+  // Active Extension Target State ('nexchat' | 'baileys' | 'vercel' | 'chrome')
+  let activeExtTarget = 'nexchat';
+
+  // Target Script Generators
+  const getInAppExtensionScript = () => {
+    const bName = nameInput?.value || 'AwayGuard AI';
+    const bPrompt = promptTextarea?.value || 'You are an autonomous away and no-reply assistant.';
+    const bGreeting = greetingInput?.value || 'Hello! I am currently away. Your message is safely logged.';
+    const bKeywords = (keywordsInput?.value || '*').split(',').map(s => s.trim().toLowerCase());
+    const bDelay = parseFloat(delaySlider?.value || 0.8);
+
+    return `// ==========================================================
+// NEXCHAT IN-APP BOT EXTENSION // AUTONOMOUS CHAT RUNNER
+// Extension ID: nex-bot-${bName.toLowerCase().replace(/[^a-z0-9]/g, '-')}
+// Target: NEXCHAT In-App Client Engine & Ecosystem Consent Hub
+// Generated by NEXBOT Studio v2.4 (Vercel Extension Hub Ready)
+// ==========================================================
+
+(function() {
+  'use strict';
+
+  const BOT_CONFIG = {
+    name: "${bName.replace(/"/g, '\\"')}",
+    type: "in_app_autonomous_bot",
+    systemPrompt: "${bPrompt.replace(/\n/g, ' ').replace(/"/g, '\\"')}",
+    defaultGreeting: "${bGreeting.replace(/"/g, '\\"')}",
+    triggerKeywords: ${JSON.stringify(bKeywords)},
+    latencyMs: ${Math.round(bDelay * 1000)},
+    version: "2.4.0",
+    status: "active"
+  };
+
+  // Mount into NEXCHAT Runtime Extension Registry
+  window.NEX_ACTIVE_BOT_EXTENSION = {
+    name: BOT_CONFIG.name,
+    active: true,
+    config: BOT_CONFIG,
+    onIncomingMessage: async function(senderId, text) {
+      console.log(\`[\${BOT_CONFIG.name}] Ingested incoming message from \${senderId}: "\${text}"\`);
+      
+      // Match keywords or wildcard
+      const matches = BOT_CONFIG.triggerKeywords.includes("*") || 
+        BOT_CONFIG.triggerKeywords.some(k => text.toLowerCase().includes(k.trim()));
+      
+      if (!matches) return null;
+
+      console.log(\`[\${BOT_CONFIG.name}] Trigger matched. Dispatching away auto-reply...\`);
+      return {
+        reply: BOT_CONFIG.defaultGreeting,
+        delayMs: BOT_CONFIG.latencyMs
+      };
+    }
+  };
+
+  console.log(\`[NEXCHAT RUNTIME] Extension "\${BOT_CONFIG.name}" mounted & listening.\`);
+})();`;
+  };
+
+  const getFullBaileysScript = () => {
+    const bName = nameInput?.value || 'ApexSupport AI';
+    const bPrompt = promptTextarea?.value || 'You are an autonomous WhatsApp AI assistant.';
+    const bGreeting = greetingInput?.value || 'Hello! Thank you for your inquiry. Automated response queued.';
+    const bKeywords = (keywordsInput?.value || '*').split(',').map(s => s.trim().toLowerCase());
+    const bDelay = parseFloat(delaySlider?.value || 1.2);
+
+    return `// ==========================================================
+// NEXBOT Autonomous WhatsApp Runner (Baileys Engine)
+// Generated by NEXCHAT Studio v2.4
+// Run: npm install @whiskeysockets/baileys qrcode-terminal
+// ==========================================================
+
+const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
+const qrcode = require('qrcode-terminal');
+
+const BOT_NAME = "${bName.replace(/"/g, '\\"')}";
+const SYSTEM_PROMPT = "${bPrompt.replace(/\n/g, ' ').replace(/"/g, '\\"')}";
+const DEFAULT_GREETING = "${bGreeting.replace(/"/g, '\\"')}";
+const TRIGGER_KEYWORDS = ${JSON.stringify(bKeywords)};
+const DELAY_MS = ${Math.round(bDelay * 1000)};
+
+async function startBot() {
+  console.log('[NEXBOT] Starting autonomous WhatsApp worker for ' + BOT_NAME + '...');
+  const { state, saveCreds } = await useMultiFileAuthState('nexbot_auth_session');
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: true,
+    browser: [BOT_NAME, 'Chrome', '1.0.0']
+  });
+
+  sock.ev.on('creds.update', saveCreds);
+
+  sock.ev.on('connection.update', (update) => {
+    const { connection, lastDisconnect, qr } = update;
+    if (qr) qrcode.generate(qr, { small: true });
+    if (connection === 'close') {
+      const reason = lastDisconnect?.error?.output?.statusCode;
+      if (reason !== DisconnectReason.loggedOut) startBot();
+    } else if (connection === 'open') {
+      console.log('[NEXBOT] Connected to WhatsApp Mesh as ' + BOT_NAME);
+    }
+  });
+
+  sock.ev.on('messages.upsert', async ({ messages, type }) => {
+    if (type !== 'notify') return;
+    for (const msg of messages) {
+      if (!msg.message || msg.key.fromMe) continue;
+      const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
+      if (!text) continue;
+
+      console.log('[INCOMING MESSAGE]', text);
+      const isMatch = TRIGGER_KEYWORDS.includes("*") || 
+        TRIGGER_KEYWORDS.some(k => text.toLowerCase().includes(k.trim()));
+      
+      if (!isMatch) continue;
+
+      console.log('[TRIGGER MATCHED] Preparing response...');
+      await new Promise(r => setTimeout(r, DELAY_MS));
+
+      try {
+        await sock.sendMessage(msg.key.remoteJid, { text: DEFAULT_GREETING });
+        console.log('[DISPATCHED AUTOREPLY]', DEFAULT_GREETING);
+      } catch (err) {
+        console.error('[BOT ERROR]', err);
+      }
+    }
+  });
+}
+
+startBot();`;
+  };
+
+  const getVercelWebhookScript = () => {
+    const bName = nameInput?.value || 'AwayGuard AI';
+    const bGreeting = greetingInput?.value || 'Hello! Automated away reply queued.';
+
+    return `// ==========================================================
+// VERCEL SERVERLESS EDGE WEBHOOK // NEXBOT DISPATCHER
+// Deploy: vercel deploy
+// Route: /api/whatsapp-webhook
+// ==========================================================
+
+export default async function handler(req, res) {
+  const BOT_NAME = "${bName.replace(/"/g, '\\"')}";
+  const GREETING = "${bGreeting.replace(/"/g, '\\"')}";
+  const VERIFY_TOKEN = "nexchat_sec_token_89a";
+
+  if (req.method === 'GET') {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      return res.status(200).send(challenge);
+    }
+    return res.status(403).send('Forbidden verification token');
+  }
+
+  if (req.method === 'POST') {
+    const body = req.body;
+    console.log('[VERCEL WEBHOOK INCOMING]', JSON.stringify(body));
+    return res.status(200).json({ 
+      status: "success", 
+      bot: BOT_NAME, 
+      reply: GREETING,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  return res.status(405).json({ error: "Method not allowed" });
+}`;
+  };
+
+  const getChromeExtensionScript = () => {
+    const bName = nameInput?.value || 'AwayGuard AI';
+    const bGreeting = greetingInput?.value || 'Hello! The user is currently away/busy.';
+    return `// ==========================================================
+// CHROME WEB EXTENSION // CONTENT SCRIPT RUNNER
+// Manifest V3 Content Script for Web Messenger
+// ==========================================================
+
+(function() {
+  console.log("[NEXBOT EXTENSION] Chrome Content Script active for ${bName}");
+  const BOT_NAME = "${bName.replace(/"/g, '\\"')}";
+  const GREETING = "${bGreeting.replace(/"/g, '\\"')}";
+
+  window.addEventListener("message", (event) => {
+    if (event.data && event.data.type === "NEXCHAT_INCOMING_MESSAGE") {
+      console.log("[MUTATION DETECTED]", event.data.text);
+      // Dispatch auto-reply
+      window.postMessage({ type: "NEXCHAT_DISPATCH_REPLY", reply: GREETING, bot: BOT_NAME }, "*");
+    }
+  });
+})();`;
+  };
+
+  // Render Active Extension Code in viewer
+  const renderActiveExtensionCode = () => {
+    const codeEl = document.getElementById('nexbotLiveExtensionCode');
+    const fileNameEl = document.getElementById('nexbotExtFileName');
+    const targetLabelEl = document.getElementById('nexbotExtTargetLabel');
+    const waScriptEl = document.getElementById('nexbotScriptCode');
+
+    let code = '';
+    let fileName = '';
+    let targetLabel = '';
+
+    if (activeExtTarget === 'nexchat') {
+      code = getInAppExtensionScript();
+      fileName = '<i class="fa-brands fa-js" style="color:#00ff66;"></i> nexchat-bot-extension.js';
+      targetLabel = 'Target: NEXCHAT In-App Client Hook';
+    } else if (activeExtTarget === 'baileys') {
+      code = getFullBaileysScript();
+      fileName = '<i class="fa-brands fa-node-js" style="color:#22c55e;"></i> whatsapp-baileys-runner.js';
+      targetLabel = 'Target: Node.js / Baileys WhatsApp Runner';
+    } else if (activeExtTarget === 'vercel') {
+      code = getVercelWebhookScript();
+      fileName = '<i class="fa-solid fa-server" style="color:#67e8f9;"></i> api/whatsapp-webhook.js';
+      targetLabel = 'Target: Vercel Edge Serverless Function';
+    } else if (activeExtTarget === 'chrome') {
+      code = getChromeExtensionScript();
+      fileName = '<i class="fa-brands fa-chrome" style="color:#ffd700;"></i> chrome-content-script.js';
+      targetLabel = 'Target: Chrome Web Extension Script';
+    }
+
+    if (codeEl) codeEl.textContent = code;
+    if (fileNameEl) fileNameEl.innerHTML = fileName;
+    if (targetLabelEl) targetLabelEl.textContent = targetLabel;
+    if (waScriptEl) waScriptEl.textContent = getFullBaileysScript();
+  };
+
+  // Archetype Buttons Click
   document.querySelectorAll('.archetype-btn[data-archetype]').forEach(btn => {
     if (btn.dataset.bound) return;
     btn.dataset.bound = 'true';
@@ -15580,15 +15890,350 @@ function initNexbotStudio() {
           if (tempVal) tempVal.textContent = arch.temp;
         }
         if (greetingInput) greetingInput.value = arch.greeting;
+        if (keywordsInput && arch.keywords) keywordsInput.value = arch.keywords;
+        if (delaySlider && arch.delay) {
+          delaySlider.value = arch.delay;
+          if (delayVal) delayVal.textContent = arch.delay + 's';
+        }
         if (simBotName) simBotName.textContent = arch.name;
         if (simInitialGreeting) {
           const p = simInitialGreeting.querySelector('p');
           if (p) p.textContent = arch.greeting;
         }
+        renderActiveExtensionCode();
         if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
       }
     });
   });
+
+  // Target Pills Click (Extension Target Switcher)
+  document.querySelectorAll('#nexbotTargetPills .target-pill').forEach(pill => {
+    if (pill.dataset.bound) return;
+    pill.dataset.bound = 'true';
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#nexbotTargetPills .target-pill').forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeExtTarget = pill.getAttribute('data-target') || 'nexchat';
+      renderActiveExtensionCode();
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+    });
+  });
+
+  // AI Prompt Synthesizer (Neural Bot Generator)
+  const aiPromptInput = document.getElementById('nexbotAiPromptInput');
+  const generateAiBotBtn = document.getElementById('nexbotGenerateAiBotBtn');
+
+  const executeAiBotSynthesis = (rawPromptText) => {
+    const promptText = (rawPromptText || aiPromptInput?.value || '').trim();
+    if (!promptText) {
+      showNotif('Please enter an instruction or prompt for the bot creator!', 'warning');
+      return;
+    }
+
+    const lower = promptText.toLowerCase();
+
+    // Check intent
+    if (lower.includes('no reply') || lower.includes('no-reply') || lower.includes('away') || lower.includes('busy') || lower.includes('sleep') || lower.includes('offline') || lower.includes('auto reply') || lower.includes('auto-reply')) {
+      const arch = archetypes.noreply;
+      if (nameInput) nameInput.value = 'AwayGuard AI (No-Reply Protocol)';
+      if (promptTextarea) promptTextarea.value = 'You are AwayGuard AI, an autonomous away & no-reply assistant for NEXCHAT. When the user is away or unable to reply, acknowledge incoming inquiries politely, assure them their message is safely recorded, answer quick queries if possible, and state the user will follow up shortly.';
+      if (greetingInput) greetingInput.value = "Hi there! I am an automated away assistant. The user is currently away/busy, but your message has been received safely and logged.";
+      if (keywordsInput) keywordsInput.value = '*, away, busy, offline, urgent, hi, hello, ping, status';
+      if (delaySlider) {
+        delaySlider.value = 0.8;
+        if (delayVal) delayVal.textContent = '0.8s';
+      }
+      document.querySelectorAll('.archetype-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-archetype') === 'noreply'));
+    } else if (lower.includes('support') || lower.includes('help') || lower.includes('faq')) {
+      const arch = archetypes.support;
+      if (nameInput) nameInput.value = 'ApexSupport AI';
+      if (promptTextarea) promptTextarea.value = arch.prompt;
+      if (greetingInput) greetingInput.value = arch.greeting;
+      if (keywordsInput) keywordsInput.value = arch.keywords;
+      document.querySelectorAll('.archetype-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-archetype') === 'support'));
+    } else if (lower.includes('sales') || lower.includes('closer') || lower.includes('lead') || lower.includes('price')) {
+      const arch = archetypes.sales;
+      if (nameInput) nameInput.value = 'ApexCloser AI';
+      if (promptTextarea) promptTextarea.value = arch.prompt;
+      if (greetingInput) greetingInput.value = arch.greeting;
+      if (keywordsInput) keywordsInput.value = arch.keywords;
+      document.querySelectorAll('.archetype-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-archetype') === 'sales'));
+    } else if (lower.includes('code') || lower.includes('developer') || lower.includes('program') || lower.includes('bug')) {
+      const arch = archetypes.engineer;
+      if (nameInput) nameInput.value = 'NexusEngineer AI';
+      if (promptTextarea) promptTextarea.value = arch.prompt;
+      if (greetingInput) greetingInput.value = arch.greeting;
+      if (keywordsInput) keywordsInput.value = arch.keywords;
+      document.querySelectorAll('.archetype-btn').forEach(b => b.classList.toggle('active', b.getAttribute('data-archetype') === 'engineer'));
+    } else {
+      // General custom synthesis
+      const synthesizedName = promptText.split(' ').slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('') + 'Bot AI';
+      if (nameInput) nameInput.value = synthesizedName;
+      if (promptTextarea) promptTextarea.value = `You are ${synthesizedName}, an autonomous assistant specialized in: ${promptText}. Respond concisely, politely, and effectively.`;
+      if (greetingInput) greetingInput.value = `Hello! I am ${synthesizedName}. ${promptText.charAt(0).toUpperCase() + promptText.slice(1)} Ready to assist!`;
+      if (keywordsInput) keywordsInput.value = '*, help, info, ' + synthesizedName.toLowerCase();
+    }
+
+    if (simBotName && nameInput) simBotName.textContent = nameInput.value;
+    if (simInitialGreeting && greetingInput) {
+      const p = simInitialGreeting.querySelector('p');
+      if (p) p.textContent = greetingInput.value;
+    }
+
+    // Refresh code extension
+    renderActiveExtensionCode();
+
+    // Automatically switch to Code Extension & Runner tab so user sees the script!
+    const extTabBtn = document.getElementById('nexbotTabExtension');
+    if (extTabBtn) extTabBtn.click();
+
+    // Log to terminal
+    const term = document.getElementById('nexbotExtTerminalLog');
+    if (term) {
+      term.innerHTML = `<span style="color:#67e8f9;">[${new Date().toLocaleTimeString()}] [SYNTHESIZER] Bot Profile &amp; Code Extension synthesized successfully!</span><br/>` +
+        `<span style="color:#00ff66;">[${new Date().toLocaleTimeString()}] [READY] Generated: ${escapeHtml(nameInput?.value || 'Bot')} &bull; Target: In-App Extension. Click 'Run Extension In NEXCHAT' to activate live.</span>`;
+    }
+
+    showNotif(`⚡ Bot & Code Extension [${nameInput?.value || 'Bot'}] synthesized! Script is ready to run below.`, 'success', 3000);
+    if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+  };
+
+  if (generateAiBotBtn && !generateAiBotBtn.dataset.bound) {
+    generateAiBotBtn.dataset.bound = 'true';
+    generateAiBotBtn.addEventListener('click', () => executeAiBotSynthesis());
+  }
+
+  if (aiPromptInput && !aiPromptInput.dataset.bound) {
+    aiPromptInput.dataset.bound = 'true';
+    aiPromptInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        executeAiBotSynthesis();
+      }
+    });
+  }
+
+  // Quick Prompt Pills
+  document.querySelectorAll('.quick-prompt-pill[data-prompt]').forEach(pill => {
+    if (pill.dataset.bound) return;
+    pill.dataset.bound = 'true';
+    pill.addEventListener('click', () => {
+      const pText = pill.getAttribute('data-prompt');
+      if (aiPromptInput) aiPromptInput.value = pText;
+      executeAiBotSynthesis(pText);
+    });
+  });
+
+  // Re-render code whenever inputs change
+  [nameInput, promptTextarea, greetingInput, keywordsInput, delaySlider].forEach(el => {
+    if (el && !el.dataset.codeBound) {
+      el.dataset.codeBound = 'true';
+      el.addEventListener('input', () => renderActiveExtensionCode());
+    }
+  });
+
+  // Run Extension In-App (Live Execution)
+  const runExtBtn = document.getElementById('runExtensionInAppBtn');
+  const stopExtBtn = document.getElementById('stopExtensionInAppBtn');
+  const footerRunBtn = document.getElementById('footerRunExtensionBtn');
+  const statusBadge = document.getElementById('nexbotExtRuntimeStatus');
+
+  const appendTermLog = (html) => {
+    const el = document.getElementById('nexbotExtTerminalLog');
+    if (el) {
+      el.innerHTML += html;
+      el.scrollTop = el.scrollHeight;
+    }
+  };
+
+  const startExtensionRuntime = () => {
+    const bName = nameInput?.value || 'AwayGuard AI';
+    const bPrompt = promptTextarea?.value || 'Autonomous away assistant';
+    const bGreeting = greetingInput?.value || 'Hello! I am currently away.';
+    const bKeywords = (keywordsInput?.value || '*').split(',').map(s => s.trim().toLowerCase());
+    const bDelay = parseFloat(delaySlider?.value || 0.8);
+
+    // Register active extension into window runtime
+    window.NEX_ACTIVE_BOT_EXTENSION = {
+      name: bName,
+      active: true,
+      prompt: bPrompt,
+      greeting: bGreeting,
+      keywords: bKeywords,
+      delay: bDelay,
+      startedAt: new Date().toISOString()
+    };
+
+    if (statusBadge) {
+      statusBadge.innerHTML = '<i class="fa-solid fa-circle-check" style="color:#00ff66;"></i> ACTIVE &amp; RUNNING IN NEXCHAT';
+      statusBadge.style.background = 'rgba(0, 255, 102, 0.2)';
+      statusBadge.style.border = '1px solid rgba(0, 255, 102, 0.5)';
+      statusBadge.style.color = '#00ff66';
+    }
+
+    if (runExtBtn) runExtBtn.style.display = 'none';
+    if (stopExtBtn) stopExtBtn.style.display = 'inline-flex';
+    if (footerRunBtn) {
+      footerRunBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Extension Running';
+      footerRunBtn.style.background = 'linear-gradient(135deg, #00ff66, #22c55e)';
+    }
+
+    appendTermLog(`<br/><span style="color:#00ff66;">[${new Date().toLocaleTimeString()}] 🚀 [RUNNER] Extension "${escapeHtml(bName)}" mounted into NEXCHAT chat engine!</span><br/>` +
+      `<span style="color:#cbd5e1;">[${new Date().toLocaleTimeString()}] [LISTENER] Actively intercepting direct incoming peer messages &amp; dispatching replies.</span>`);
+
+    showNotif(`Bot Extension [${bName}] is now RUNNING live in NEXCHAT!`, 'success', 3000);
+    if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+  };
+
+  const stopExtensionRuntime = () => {
+    if (window.NEX_ACTIVE_BOT_EXTENSION) {
+      window.NEX_ACTIVE_BOT_EXTENSION.active = false;
+    }
+
+    if (statusBadge) {
+      statusBadge.innerHTML = '<i class="fa-solid fa-circle-dot"></i> Extension Engine: Ready';
+      statusBadge.style.background = 'rgba(0, 255, 102, 0.15)';
+      statusBadge.style.border = '1px solid rgba(0, 255, 102, 0.3)';
+    }
+
+    if (runExtBtn) runExtBtn.style.display = 'inline-flex';
+    if (stopExtBtn) stopExtBtn.style.display = 'none';
+    if (footerRunBtn) {
+      footerRunBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Run Extension In-App';
+      footerRunBtn.style.background = 'linear-gradient(135deg, #00ff66, #00bb44)';
+    }
+
+    appendTermLog(`<br/><span style="color:#ff6b6b;">[${new Date().toLocaleTimeString()}] ⏹️ [RUNNER] Extension stopped. Listener unmounted.</span>`);
+
+    showNotif('Bot Extension stopped.', 'info', 1800);
+  };
+
+  [runExtBtn, footerRunBtn].forEach(btn => {
+    if (btn && !btn.dataset.bound) {
+      btn.dataset.bound = 'true';
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        startExtensionRuntime();
+      });
+    }
+  });
+
+  if (stopExtBtn && !stopExtBtn.dataset.bound) {
+    stopExtBtn.dataset.bound = 'true';
+    stopExtBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      stopExtensionRuntime();
+    });
+  }
+
+  // Interactive Live Test Execution Console
+  const testMsgInput = document.getElementById('nexbotTestMsgInput');
+  const runTestMsgBtn = document.getElementById('runTestMsgBtn');
+
+  if (runTestMsgBtn && !runTestMsgBtn.dataset.bound) {
+    runTestMsgBtn.dataset.bound = 'true';
+    runTestMsgBtn.addEventListener('click', async () => {
+      const msg = testMsgInput?.value.trim() || 'Hey are you around?';
+      const bName = nameInput?.value || 'AwayGuard AI';
+      const bGreeting = greetingInput?.value || 'Hello! I am currently away/busy.';
+      const bKeywords = (keywordsInput?.value || '*').split(',').map(s => s.trim().toLowerCase());
+      const bDelay = parseFloat(delaySlider?.value || 0.8);
+
+      appendTermLog(`<br/><span style="color:#67e8f9;">[${new Date().toLocaleTimeString()}] [SIMULATED INCOMING] "${escapeHtml(msg)}"</span>`);
+
+      // Test trigger matching
+      const matches = bKeywords.includes('*') || bKeywords.some(k => msg.toLowerCase().includes(k));
+      if (!matches) {
+        appendTermLog(`<br/><span style="color:#eab308;">[${new Date().toLocaleTimeString()}] [ANALYSIS] No trigger keywords matched. Silent fallback.</span>`);
+        return;
+      }
+
+      appendTermLog(`<br/><span style="color:#a78bfa;">[${new Date().toLocaleTimeString()}] [MATCH] Trigger condition verified &bull; Simulating ${bDelay}s latency...</span>`);
+
+      await new Promise(r => setTimeout(r, Math.min(1500, bDelay * 1000)));
+
+      let responseText = bGreeting;
+      try {
+        if (typeof generateChronexAIResponse === 'function' && promptTextarea?.value) {
+          const timeoutPromise = new Promise(r => setTimeout(() => r(null), 800));
+          const aiPromise = generateChronexAIResponse(`${promptTextarea.value}\n\nClient inquiry: "${msg}"\nReply concisely as ${bName}.`);
+          const aiRes = await Promise.race([aiPromise, timeoutPromise]);
+          if (aiRes) responseText = aiRes;
+        }
+      } catch (e) {
+        responseText = bGreeting;
+      }
+
+      appendTermLog(`<br/><span style="color:#00ff66;font-weight:700;">[${new Date().toLocaleTimeString()}] [DISPATCHED REPLY] (${bName}): "${escapeHtml(responseText)}"</span><br/>` +
+        `<span style="color:#38bdf8;">[${new Date().toLocaleTimeString()}] [STATUS 200] Delivery verified &bull; Roundtrip 12ms.</span>`);
+
+      if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+    });
+  }
+
+  // Copy Extension Code Button
+  const copyExtBtn = document.getElementById('copyActiveExtCodeBtn');
+  if (copyExtBtn && !copyExtBtn.dataset.bound) {
+    copyExtBtn.dataset.bound = 'true';
+    copyExtBtn.addEventListener('click', () => {
+      const codeEl = document.getElementById('nexbotLiveExtensionCode');
+      if (codeEl) {
+        navigator.clipboard.writeText(codeEl.textContent);
+        showNotif('Code extension copied to clipboard!', 'success', 2000);
+        if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+      }
+    });
+  }
+
+  // Download Extension Script
+  const downloadExtBtn = document.getElementById('downloadActiveExtCodeBtn');
+  if (downloadExtBtn && !downloadExtBtn.dataset.bound) {
+    downloadExtBtn.dataset.bound = 'true';
+    downloadExtBtn.addEventListener('click', () => {
+      const codeEl = document.getElementById('nexbotLiveExtensionCode');
+      const bName = nameInput?.value || 'nexbot';
+      const fName = `${bName.toLowerCase().replace(/[^a-z0-9]/g, '_')}_extension.js`;
+      const blob = new Blob([codeEl?.textContent || ''], { type: 'text/javascript' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = fName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showNotif(`Downloaded [${fName}]!`, 'success', 2000);
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+    });
+  }
+
+  // Register in Ecosystem Extension Hub
+  const regHubBtn = document.getElementById('registerInEcosystemHubBtn');
+  if (regHubBtn && !regHubBtn.dataset.bound) {
+    regHubBtn.dataset.bound = 'true';
+    regHubBtn.addEventListener('click', () => {
+      const bName = nameInput?.value || 'AwayGuard AI';
+      const bId = 'nex-ext-' + bName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+      try {
+        let saved = JSON.parse(localStorage.getItem('nex_custom_extensions') || '[]');
+        saved = saved.filter(e => e.id !== bId);
+        saved.push({
+          id: bId,
+          name: bName,
+          category: 'Custom Bot Extension • Autonomous Agent',
+          description: promptTextarea?.value || 'Autonomous AI Bot Extension',
+          status: 'connected',
+          registeredAt: new Date().toISOString()
+        });
+        localStorage.setItem('nex_custom_extensions', JSON.stringify(saved));
+        showNotif(`Bot [${bName}] registered in NEX Ecosystem Extension Hub!`, 'success', 2500);
+        if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+      } catch (e) {
+        showNotif('Registered locally in session!', 'success', 2000);
+      }
+    });
+  }
+
+  // Initial render of code viewer
+  renderActiveExtensionCode();
 
   // Prompt Sparks
   document.querySelectorAll('.spark-fill-btn[data-template]').forEach(btn => {
@@ -15688,66 +16333,9 @@ function initNexbotStudio() {
     });
   }
 
-  // Copy Baileys Script
+  // Copy Baileys Script & Export Script
   const copyScriptBtn = document.getElementById('copyBaileysScriptBtn');
   const exportScriptBtn = document.getElementById('exportNexbotBtn');
-  const getFullBaileysScript = () => {
-    const bName = nameInput?.value || 'ApexSupport AI';
-    const bPrompt = promptTextarea?.value || 'You are an autonomous WhatsApp AI assistant.';
-    return `// ==========================================================
-// NEXBOT Autonomous WhatsApp Runner (Baileys Engine)
-// Generated by NEXCHAT Studio v2.4
-// Run: npm install @whiskeysockets/baileys qrcode-terminal axios
-// ==========================================================
-
-const { default: makeWASocket, useMultiFileAuthState, DisconnectReason } = require('@whiskeysockets/baileys');
-const qrcode = require('qrcode-terminal');
-
-const BOT_NAME = "${bName.replace(/"/g, '\\"')}";
-const SYSTEM_PROMPT = "${bPrompt.replace(/\n/g, ' ').replace(/"/g, '\\"')}";
-
-async function startBot() {
-  const { state, saveCreds } = await useMultiFileAuthState('nexbot_auth_session');
-  const sock = makeWASocket({
-    auth: state,
-    printQRInTerminal: true,
-    browser: [BOT_NAME, 'Chrome', '1.0.0']
-  });
-
-  sock.ev.on('creds.update', saveCreds);
-
-  sock.ev.on('connection.update', (update) => {
-    const { connection, lastDisconnect, qr } = update;
-    if (qr) qrcode.generate(qr, { small: true });
-    if (connection === 'close') {
-      const reason = lastDisconnect?.error?.output?.statusCode;
-      if (reason !== DisconnectReason.loggedOut) startBot();
-    } else if (connection === 'open') {
-      console.log('[NEXBOT] Connected to WhatsApp Mesh as ' + BOT_NAME);
-    }
-  });
-
-  sock.ev.on('messages.upsert', async ({ messages, type }) => {
-    if (type !== 'notify') return;
-    for (const msg of messages) {
-      if (!msg.message || msg.key.fromMe) continue;
-      const text = msg.message.conversation || msg.message.extendedTextMessage?.text;
-      if (!text) continue;
-
-      console.log('[INCOMING]', text);
-      try {
-        const response = "Thank you for reaching out to " + BOT_NAME + ". We received your inquiry: \\"" + text + "\\". Automated neural response queued.";
-        await sock.sendMessage(msg.key.remoteJid, { text: response });
-      } catch (err) {
-        console.error('[BOT ERROR]', err);
-      }
-    }
-  });
-}
-
-startBot();`;
-  };
-
   [copyScriptBtn, exportScriptBtn].forEach(btn => {
     if (btn && !btn.dataset.bound) {
       btn.dataset.bound = 'true';

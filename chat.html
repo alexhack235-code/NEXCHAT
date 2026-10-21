@@ -2476,6 +2476,29 @@
       <div class="nexbot-studio-grid" data-active-view="config">
         <!-- LEFT: Config Workspace -->
         <div class="nexbot-config-col">
+          <!-- AI Bot Creator // Neural Synthesizer -->
+          <div class="nexbot-ai-prompt-bar">
+            <div class="nexbot-prompt-header">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-wand-magic-sparkles" style="color: #00ff66;"></i>
+                <strong style="color: #f1f5f9; font-size: 13px;">Prompt the Bot Creator</strong>
+              </div>
+              <span class="nexbot-prompt-badge"><i class="fa-solid fa-bolt"></i> AI Code Extension Synthesizer</span>
+            </div>
+            <div class="nexbot-prompt-input-row">
+              <input type="text" id="nexbotAiPromptInput" class="nexbot-prompt-input" placeholder="e.g. 'Create a bot for no reply when away or busy', '24/7 support FAQ'..." />
+              <button type="button" id="nexbotGenerateAiBotBtn" class="nexbot-btn primary" style="white-space: nowrap;">
+                <i class="fa-solid fa-microchip"></i> Synthesize Bot &amp; Script
+              </button>
+            </div>
+            <div class="nexbot-quick-prompts">
+              <button type="button" class="quick-prompt-pill" data-prompt="Create a bot for no reply: automatically reply when I am away or busy with a friendly polite message"><i class="fa-solid fa-moon" style="color: #67e8f9;"></i> No-Reply Away Bot</button>
+              <button type="button" class="quick-prompt-pill" data-prompt="Create a 24/7 customer support bot that solves product issues and shares help guides"><i class="fa-solid fa-headset" style="color: #00ff66;"></i> Support Bot</button>
+              <button type="button" class="quick-prompt-pill" data-prompt="Create an elite sales closer bot that qualifies leads, answers pricing, and closes deals"><i class="fa-solid fa-chart-line" style="color: #ffd700;"></i> Sales Closer</button>
+              <button type="button" class="quick-prompt-pill" data-prompt="Create a coding assistant bot that debugs code and writes JavaScript"><i class="fa-solid fa-code" style="color: #c084fc;"></i> Code Assistant</button>
+            </div>
+          </div>
+
           <!-- Studio Nav Tabs -->
           <div class="nexbot-nav-tabs">
             <button type="button" class="nexbot-nav-tab active" data-bot-tab="bot-tab-persona">
@@ -2483,6 +2506,9 @@
             </button>
             <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-triggers">
               <i class="fa-solid fa-bolt"></i> Triggers &amp; Rules
+            </button>
+            <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-extension" id="nexbotTabExtension">
+              <i class="fa-solid fa-code" style="color: #00ff66;"></i> Code Extension &amp; Runner
             </button>
             <button type="button" class="nexbot-nav-tab" data-bot-tab="bot-tab-whatsapp">
               <i class="fa-brands fa-whatsapp"></i> WhatsApp Cloud
@@ -2508,6 +2534,11 @@
             <div class="nexbot-form-group">
               <label class="nexbot-label">Persona Archetype</label>
               <div class="nexbot-archetype-grid">
+                <button type="button" class="archetype-btn" data-archetype="noreply">
+                  <i class="fa-solid fa-moon" style="color: #67e8f9;"></i>
+                  <span class="archetype-title">Away / No-Reply</span>
+                  <span class="archetype-desc">Polite auto-reply when away</span>
+                </button>
                 <button type="button" class="archetype-btn active" data-archetype="support">
                   <i class="fa-solid fa-headset"></i>
                   <span class="archetype-title">Customer Support</span>
@@ -2586,6 +2617,75 @@
                 <option value="transfer">Prompt human operator escalation</option>
                 <option value="silent">Stay silent on unknown triggers</option>
               </select>
+            </div>
+          </div>
+
+          <!-- TAB: Code Extension & Runner (Executable Bot Extension) -->
+          <div class="nexbot-tab-pane" id="bot-tab-extension">
+            <!-- Extension Status & Target Selector Bar -->
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span id="nexbotExtRuntimeStatus" style="font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 6px; background: rgba(0, 255, 102, 0.15); color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.3); display: flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-circle-dot" style="font-size: 8px;"></i> Extension Engine: Ready
+                </span>
+                <span style="font-size: 11px; color: #94a3b8;" id="nexbotExtTargetLabel">Target: NEXCHAT In-App Client Hook</span>
+              </div>
+              <div class="nexbot-target-pills" id="nexbotTargetPills" style="display: flex; gap: 4px;">
+                <button type="button" class="target-pill active" data-target="nexchat">In-App Extension</button>
+                <button type="button" class="target-pill" data-target="baileys">WhatsApp Runner</button>
+                <button type="button" class="target-pill" data-target="vercel">Vercel Webhook</button>
+                <button type="button" class="target-pill" data-target="chrome">Chrome Script</button>
+              </div>
+            </div>
+
+            <!-- Code Viewer Card -->
+            <div class="nexbot-code-card" style="margin-top: 0; border: 1px solid rgba(0, 255, 102, 0.25);">
+              <div class="nexbot-code-header" style="background: rgba(2, 6, 23, 0.95); padding: 8px 14px; display: flex; align-items: center; justify-content: space-between;">
+                <span style="color: #67e8f9; font-family: monospace; font-size: 12px;" id="nexbotExtFileName">
+                  <i class="fa-brands fa-js"></i> nexchat-away-extension.js
+                </span>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" class="btn-copy-code" id="copyActiveExtCodeBtn">
+                    <i class="fa-solid fa-copy"></i> Copy Extension Code
+                  </button>
+                  <button type="button" class="btn-copy-code" id="downloadActiveExtCodeBtn">
+                    <i class="fa-solid fa-download"></i> Download .js
+                  </button>
+                </div>
+              </div>
+              <pre class="nexbot-code-block" style="max-height: 220px; background: #030712; color: #a5f3fc; line-height: 1.5; font-size: 11px;"><code id="nexbotLiveExtensionCode">// Generating dynamic bot extension...</code></pre>
+            </div>
+
+            <!-- Run & Authorize Actions -->
+            <div style="display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;">
+              <button type="button" class="nexbot-btn accent" id="runExtensionInAppBtn" style="flex: 1.2;">
+                <i class="fa-solid fa-play"></i> Run Extension In NEXCHAT (Live)
+              </button>
+              <button type="button" class="nexbot-btn secondary" id="stopExtensionInAppBtn" style="display: none;">
+                <i class="fa-solid fa-stop"></i> Stop Extension
+              </button>
+              <button type="button" class="nexbot-btn secondary" id="registerInEcosystemHubBtn" style="flex: 1;">
+                <i class="fa-solid fa-cubes-stacked"></i> Register in Ecosystem Hub
+              </button>
+            </div>
+
+            <!-- Interactive Live Test Execution Console -->
+            <div style="margin-top: 14px; background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 12px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; font-weight: 700; color: #f1f5f9;">
+                  <i class="fa-solid fa-terminal" style="color: #00ff66;"></i> Live Execution Tester &amp; Event Stream
+                </span>
+                <span style="font-size: 10px; color: #64748b;">Sub-12ms Local Dispatch</span>
+              </div>
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <input type="text" id="nexbotTestMsgInput" class="nexbot-input" style="flex: 1; font-size: 12px; padding: 7px 10px;" value="Hey, are you around? Need a quick answer." placeholder="Simulate incoming message..." />
+                <button type="button" id="runTestMsgBtn" class="nexbot-btn primary" style="padding: 7px 14px; font-size: 11.5px; white-space: nowrap;">
+                  <i class="fa-solid fa-bolt"></i> Test Execute
+                </button>
+              </div>
+              <div id="nexbotExtTerminalLog" style="background: rgba(0, 0, 0, 0.9); border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 8px; padding: 10px; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 11px; color: #00ff66; min-height: 80px; max-height: 140px; overflow-y: auto; line-height: 1.45;">
+                [NEX-RUNTIME] Extension Engine Ready. Type a test message above and click 'Test Execute' or click 'Run Extension In NEXCHAT'.
+              </div>
             </div>
           </div>
 
@@ -2714,6 +2814,9 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
             </button>
             <button type="button" class="nexbot-btn accent" id="syncToSimulatorBtn">
               <i class="fa-solid fa-play"></i> Sync to Simulator
+            </button>
+            <button type="button" class="nexbot-btn primary" id="footerRunExtensionBtn" style="background: linear-gradient(135deg, #00ff66, #00bb44); color: #000; border: none; font-weight: 800;">
+              <i class="fa-solid fa-bolt"></i> Run Extension In-App
             </button>
           </div>
         </div>
