@@ -505,11 +505,184 @@ function createOfflineMessageEmail({ recipientName, senderName, messageSnippet, 
   `;
 }
 
+/**
+ * Enterprise-Grade Extension Preview & Permission Consent Security Email
+ */
+function createExtensionConsentEmail({ username, extensionName, extensionId, status, scopes, ipAddress, clientTime, revokeUrl }) {
+  const isApproved = (status === 'approved' || status === 'granted' || status === 'yes');
+  const directUrl = revokeUrl || 'http://localhost:8080/chat.html?action=manage_extensions';
+  const name = extensionName || 'NEX-REELS (CamShot)';
+  const defaultScopes = scopes && scopes.length ? scopes : [
+    'read:profile',
+    'write:media_vault',
+    'sync:chat_feed',
+    'security:telemetry'
+  ];
+
+  const primaryColor = isApproved ? '#00f076' : '#fe2c55';
+  const secondaryColor = isApproved ? '#00d4ff' : '#ff758c';
+  const statusBadge = isApproved ? 'ACCESS AUTHORIZED &bull; ACTIVE' : 'ACCESS DENIED &bull; BLOCKED';
+  const statusText = isApproved ? 'AUTHORIZED // ACTIVE' : 'BLOCKED // FORBIDDEN';
+  const statusIcon = isApproved ? '🛡️' : '🛑';
+  const headerGradient = isApproved 
+    ? 'linear-gradient(135deg, rgba(6, 24, 18, 0.98), rgba(8, 22, 45, 0.95))'
+    : 'linear-gradient(135deg, rgba(34, 8, 16, 0.98), rgba(20, 10, 28, 0.95))';
+  const borderColor = isApproved ? 'rgba(0, 240, 118, 0.35)' : 'rgba(254, 44, 85, 0.4)';
+  const glowColor = isApproved ? 'rgba(0, 240, 118, 0.15)' : 'rgba(254, 44, 85, 0.15)';
+
+  const scopesHtml = defaultScopes.map(scope => {
+    let scopeDesc = '';
+    if (scope === 'read:profile') scopeDesc = 'Read user identity, avatar, and verification badges';
+    else if (scope === 'write:media_vault') scopeDesc = 'Upload & save recorded clips to shared media storage';
+    else if (scope === 'sync:chat_feed') scopeDesc = 'Cross-post reels into active chat groups and contacts';
+    else if (scope === 'security:telemetry') scopeDesc = 'End-to-end cryptographic session telemetry';
+    else scopeDesc = 'Module ecosystem integration';
+
+    const checkIcon = isApproved ? '✔' : '✖';
+    const checkColor = isApproved ? '#00f076' : '#fe2c55';
+
+    return `
+      <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+        <td style="padding: 8px 0; vertical-align: top; width: 24px; color: ${checkColor}; font-weight: bold; font-size: 14px;">
+          ${checkIcon}
+        </td>
+        <td style="padding: 8px 0; vertical-align: top;">
+          <code style="background: rgba(255, 255, 255, 0.06); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 11.5px; color: ${secondaryColor}; font-weight: 600;">${scope}</code>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 3px;">${scopeDesc}</div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>NEXCHAT Security: Extension Permission ${isApproved ? 'Granted' : 'Blocked'}</title>
+    </head>
+    <body style="margin: 0; padding: 24px 12px; background-color: #03060d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 620px; margin: 0 auto; background-color: #070c18; border-radius: 18px; border: 1px solid ${borderColor}; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 24px ${glowColor}; overflow: hidden;">
+        
+        <!-- Header Banner with Neon Glow -->
+        <tr>
+          <td style="background: ${headerGradient}; padding: 28px 32px; border-bottom: 1px solid ${borderColor};">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <span style="display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: ${primaryColor}; text-transform: uppercase; background: rgba(255, 255, 255, 0.08); border: 1px solid ${primaryColor}; padding: 4px 12px; border-radius: 9999px; margin-bottom: 10px;">
+                    ${statusBadge}
+                  </span>
+                  <h1 style="margin: 6px 0 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
+                    NEX-ECOSYSTEM <span style="color: ${secondaryColor};">//</span> PERMISSION HUB
+                  </h1>
+                  <p style="margin: 6px 0 0; color: #94a3b8; font-size: 13px;">
+                    Vercel-Style OAuth Extension Authorization Record
+                  </p>
+                </td>
+                <td align="right" valign="top">
+                  <div style="width: 46px; height: 46px; border-radius: 14px; background: rgba(255, 255, 255, 0.06); border: 1.5px solid ${primaryColor}; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 46px; font-size: 22px;">
+                    ${statusIcon}
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Main Content Area -->
+        <tr>
+          <td style="padding: 32px 32px 24px;">
+            <p style="margin: 0 0 16px; font-size: 16px; color: #f8fafc; font-weight: 600;">
+              Hello <span style="color: ${secondaryColor};">${username || 'Alex'}</span>,
+            </p>
+            <p style="margin: 0 0 20px; font-size: 14px; color: #cbd5e1; line-height: 1.65;">
+              ${isApproved 
+                ? `You have explicitly <strong>AUTHORIZED</strong> the module <strong style="color: #ffffff;">${name}</strong> to access your NEXCHAT ecosystem account. The requested scopes have been bound to your secure session.`
+                : `You have explicitly <strong>DENIED &amp; BLOCKED</strong> the module <strong style="color: #ffffff;">${name}</strong> from accessing your NEXCHAT account. Zero user data, tokens, or media were exchanged.`}
+            </p>
+
+            <!-- Extension Details Card -->
+            <div style="background: rgba(12, 19, 38, 0.85); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 20px; margin: 22px 0;">
+              <span style="font-size: 10px; font-weight: 800; color: ${secondaryColor}; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 12px;">
+                EXTENSION TELEMETRY &amp; PERMISSION AUDIT
+              </span>
+              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #cbd5e1;">
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;">Target Module:</td>
+                  <td style="padding: 5px 0; color: #f8fafc; font-weight: 700; text-align: right;">${name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;">Provider / Vendor:</td>
+                  <td style="padding: 5px 0; color: #94a3b8; text-align: right;">NEXO-TECH Verified Enclave</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;">Consent Status:</td>
+                  <td style="padding: 5px 0; color: ${primaryColor}; font-weight: 800; text-align: right;">${statusText}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;">Client IP Address:</td>
+                  <td style="padding: 5px 0; color: #00f076; font-family: monospace; font-weight: 600; text-align: right;">${ipAddress || 'Verified Primary IP'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 5px 0; color: #64748b;">Authorization Timestamp:</td>
+                  <td style="padding: 5px 0; color: #f8fafc; text-align: right;">${clientTime || new Date().toUTCString()}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Scopes Requested / Evaluated -->
+            <div style="background: rgba(8, 14, 28, 0.9); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 18px 20px; margin: 20px 0;">
+              <span style="font-size: 10.5px; font-weight: 800; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">
+                ${isApproved ? 'GRANTED ACCESS SCOPES' : 'BLOCKED / DENIED SCOPES'}
+              </span>
+              <table width="100%" border="0" cellpadding="0" cellspacing="0">
+                ${scopesHtml}
+              </table>
+            </div>
+
+            <!-- Direct 1-Click Management Action -->
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 28px 0 20px;">
+              <tr>
+                <td align="center">
+                  <a href="${directUrl}" target="_blank" style="display: inline-block; background: ${isApproved ? 'linear-gradient(135deg, #00f076 0%, #00d4ff 100%)' : '#fe2c55'}; color: ${isApproved ? '#050811' : '#ffffff'}; text-decoration: none; font-size: 13.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; padding: 15px 36px; border-radius: 9999px; box-shadow: 0 6px 20px ${isApproved ? 'rgba(0, 240, 118, 0.4)' : 'rgba(254, 44, 85, 0.4)'};">
+                    ${isApproved ? 'MANAGE OR REVOKE ACCESS &rarr;' : 'REVIEW SECURITY SETTINGS &rarr;'}
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Security Assurance Note -->
+            <p style="margin: 18px 0 0; font-size: 12px; color: #64748b; line-height: 1.5; text-align: center;">
+              You can modify or revoke extension access at any time from your NEXCHAT Settings &rarr; Ecosystem Hub.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #040710; padding: 22px 32px; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
+            <p style="margin: 0 0 6px; font-size: 11px; color: #64748b;">
+              This is an automated cryptographic security transmission from <strong>NEX-ECOSYSTEM Sentinel</strong>.
+            </p>
+            <p style="margin: 0; font-size: 10px; color: #475569;">
+              NEXO-TECH OAuth Enclave &bull; Zero-Trust Authorization &bull; All Rights Reserved 2026
+            </p>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
 module.exports = {
   sendNotificationEmail,
   sendViaGmailSMTP,
   createPasswordResetEmail,
   createDeviceLinkEmail,
   createOfflineMessageEmail,
+  createExtensionConsentEmail,
   CONFIG,
 };

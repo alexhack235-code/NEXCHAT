@@ -1,0 +1,786 @@
+/* ══════════════════════════════════════════════════════════════════════
+   NEX-ECOSYSTEM // VERCEL-STYLE EXTENSION PREVIEW & CONSENT HUB
+   Ultra-Modern Cyberpunk & Vercel Aesthetic
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Modal Backdrop */
+.nex-ext-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  background: rgba(3, 6, 14, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nex-ext-modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Modal Window Container */
+.nex-ext-modal-window {
+  width: 100%;
+  max-width: 660px;
+  max-height: 92vh;
+  background: linear-gradient(180deg, #0a0f1d 0%, #050812 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.85), 0 0 40px rgba(0, 212, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.96) translateY(12px);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nex-ext-modal-backdrop.active .nex-ext-modal-window {
+  transform: scale(1) translateY(0);
+}
+
+/* Modal Header */
+.nex-ext-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(12, 18, 34, 0.6);
+}
+
+.nex-ext-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nex-ext-header-badge {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #00d4ff;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nex-ext-title {
+  margin: 4px 0 0;
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+.nex-ext-close-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.nex-ext-close-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+/* Account Banner (Vercel Organization Selector Bar) */
+.nex-ext-account-bar {
+  padding: 12px 24px;
+  background: rgba(6, 11, 22, 0.7);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.nex-ext-account-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nex-ext-avatar-badge {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #00f076, #00d4ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 14px;
+  color: #050811;
+  box-shadow: 0 0 12px rgba(0, 240, 118, 0.3);
+}
+
+.nex-ext-account-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f1f5f9;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nex-ext-account-email {
+  font-size: 11px;
+  color: #64748b;
+  font-family: monospace;
+}
+
+.nex-ext-status-pill {
+  font-size: 11px;
+  font-weight: 600;
+  color: #00f076;
+  background: rgba(0, 240, 118, 0.08);
+  border: 1px solid rgba(0, 240, 118, 0.25);
+  padding: 3px 8px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* Search & Tabs Filter */
+.nex-ext-search-row {
+  padding: 14px 24px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.nex-ext-search-input-wrapper {
+  position: relative;
+  flex: 1;
+}
+
+.nex-ext-search-input-wrapper i {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #64748b;
+  font-size: 13px;
+}
+
+.nex-ext-search-input {
+  width: 100%;
+  background: rgba(14, 21, 38, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 9px 12px 9px 36px;
+  color: #f8fafc;
+  font-size: 13px;
+  outline: none;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.nex-ext-search-input:focus {
+  border-color: #00d4ff;
+  background: rgba(18, 28, 52, 0.9);
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.18);
+}
+
+/* Modal Body / Scroll Area */
+.nex-ext-modal-body {
+  padding: 18px 24px 24px;
+  overflow-y: auto;
+  max-height: calc(92vh - 200px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nex-ext-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.nex-ext-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+/* Vercel-Style Extension Card */
+.nex-ext-card {
+  background: rgba(11, 17, 32, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 18px;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nex-ext-card:hover {
+  background: rgba(15, 24, 46, 0.85);
+  border-color: rgba(0, 212, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 212, 255, 0.08);
+}
+
+.nex-ext-card.highlight {
+  border-color: rgba(0, 240, 118, 0.45);
+  box-shadow: 0 0 20px rgba(0, 240, 118, 0.12);
+}
+
+.nex-ext-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.nex-ext-card-identity {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.nex-ext-card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.nex-ext-card-icon.reels {
+  background: linear-gradient(135deg, rgba(0, 210, 255, 0.2), rgba(0, 255, 102, 0.2));
+  border: 1px solid #00d4ff;
+  color: #00d4ff;
+}
+
+.nex-ext-card-icon.metro {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2));
+  border: 1px solid #c084fc;
+  color: #c084fc;
+}
+
+.nex-ext-card-icon.nexbot {
+  background: linear-gradient(135deg, rgba(234, 179, 8, 0.2), rgba(249, 115, 22, 0.2));
+  border: 1px solid #fbbf24;
+  color: #fbbf24;
+}
+
+.nex-ext-card-icon.chronex {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(14, 165, 233, 0.2));
+  border: 1px solid #38bdf8;
+  color: #38bdf8;
+}
+
+.nex-ext-card-title-group h3 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nex-ext-tag {
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.nex-ext-tag.official {
+  background: rgba(0, 240, 118, 0.12);
+  border: 1px solid rgba(0, 240, 118, 0.3);
+  color: #00f076;
+}
+
+.nex-ext-tag.partner {
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: #00d4ff;
+}
+
+.nex-ext-card-repo-slug {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  font-family: monospace;
+  color: #64748b;
+}
+
+.nex-ext-card-desc {
+  margin: 0;
+  font-size: 12.5px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* Scope Pills */
+.nex-ext-scopes-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.nex-ext-scope-pill {
+  font-size: 10.5px;
+  font-family: monospace;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+  color: #cbd5e1;
+}
+
+/* Card Actions */
+.nex-ext-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.nex-ext-badge-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.nex-ext-badge-status.approved {
+  color: #00f076;
+}
+
+.nex-ext-badge-status.denied {
+  color: #fe2c55;
+}
+
+.nex-ext-badge-status.pending {
+  color: #00d4ff;
+}
+
+.nex-ext-badge-status.connected {
+  color: #00f076;
+}
+
+.nex-ext-btn {
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  border: none;
+  text-decoration: none;
+}
+
+.nex-ext-btn.primary {
+  background: linear-gradient(135deg, #00f076 0%, #00d4ff 100%);
+  color: #050811;
+  font-weight: 700;
+  box-shadow: 0 4px 14px rgba(0, 240, 118, 0.25);
+}
+
+.nex-ext-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 240, 118, 0.4);
+}
+
+.nex-ext-btn.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+}
+
+.nex-ext-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.nex-ext-btn.danger {
+  background: rgba(254, 44, 85, 0.12);
+  border: 1px solid rgba(254, 44, 85, 0.4);
+  color: #fe2c55;
+}
+
+.nex-ext-btn.danger:hover {
+  background: rgba(254, 44, 85, 0.25);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   OAUTH-STYLE PERMISSION CONSENT MODAL ("Allow NEX-REELS to access NEXCHAT?")
+   ══════════════════════════════════════════════════════════════════════ */
+.nex-consent-modal-window {
+  max-width: 540px;
+}
+
+/* OAuth Identity Sync Visualizer */
+.nex-oauth-sync-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 24px 20px 16px;
+}
+
+.nex-oauth-entity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.nex-oauth-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  position: relative;
+}
+
+.nex-oauth-icon.nexchat {
+  background: linear-gradient(135deg, rgba(6, 26, 18, 0.95), rgba(10, 36, 26, 0.9));
+  border: 1.5px solid #00f076;
+  box-shadow: 0 0 24px rgba(0, 240, 118, 0.35);
+}
+
+.nex-oauth-icon.extension {
+  background: linear-gradient(135deg, rgba(8, 22, 45, 0.95), rgba(6, 32, 60, 0.9));
+  border: 1.5px solid #00d4ff;
+  box-shadow: 0 0 24px rgba(0, 212, 255, 0.35);
+}
+
+.nex-oauth-entity-name {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #f1f5f9;
+}
+
+.nex-oauth-link-pipeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.nex-oauth-lock-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #00d4ff;
+  animation: nexPulseLock 2s infinite ease-in-out;
+}
+
+@keyframes nexPulseLock {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(0, 212, 255, 0); }
+}
+
+.nex-oauth-pipeline-arrows {
+  font-size: 18px;
+  color: #94a3b8;
+  letter-spacing: 2px;
+}
+
+/* Consent Main Text */
+.nex-consent-header-text {
+  text-align: center;
+  padding: 0 24px 16px;
+}
+
+.nex-consent-title {
+  margin: 0 0 8px;
+  font-size: 19px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.3px;
+}
+
+.nex-consent-subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.nex-consent-subtitle strong {
+  color: #f1f5f9;
+}
+
+/* Requested Scopes List */
+.nex-consent-scopes-box {
+  background: rgba(8, 14, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin: 0 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nex-consent-scopes-heading {
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #00d4ff;
+  text-transform: uppercase;
+}
+
+.nex-consent-scope-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.nex-consent-scope-icon {
+  font-size: 15px;
+  color: #00f076;
+  margin-top: 1px;
+}
+
+.nex-consent-scope-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nex-consent-scope-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.nex-consent-scope-desc {
+  font-size: 11.5px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* Security Notice Callout */
+.nex-consent-security-callout {
+  background: rgba(0, 212, 255, 0.06);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin: 0 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.nex-consent-security-callout i {
+  color: #00d4ff;
+  font-size: 14px;
+}
+
+.nex-consent-security-callout strong {
+  color: #00f076;
+  font-family: monospace;
+}
+
+/* Consent Footer Buttons */
+.nex-consent-footer {
+  padding: 16px 24px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(6, 11, 22, 0.6);
+}
+
+.nex-consent-btn {
+  flex: 1;
+  padding: 13px 20px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: none;
+}
+
+.nex-consent-btn.deny {
+  background: rgba(254, 44, 85, 0.1);
+  border: 1.5px solid rgba(254, 44, 85, 0.4);
+  color: #fe2c55;
+}
+
+.nex-consent-btn.deny:hover {
+  background: rgba(254, 44, 85, 0.2);
+  transform: translateY(-1px);
+}
+
+.nex-consent-btn.allow {
+  background: linear-gradient(135deg, #00f076 0%, #00d4ff 100%);
+  color: #050811;
+  box-shadow: 0 6px 22px rgba(0, 240, 118, 0.35);
+}
+
+.nex-consent-btn.allow:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 28px rgba(0, 240, 118, 0.5);
+}
+
+.nex-consent-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Toast Alert Notification */
+.nex-ext-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100010;
+  background: #080d1a;
+  border: 1px solid rgba(0, 240, 118, 0.4);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 240, 118, 0.2);
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #f8fafc;
+  font-size: 13px;
+  transform: translateY(30px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  max-width: 420px;
+}
+
+.nex-ext-toast.active {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nex-ext-toast.danger {
+  border-color: rgba(254, 44, 85, 0.5);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), 0 0 20px rgba(254, 44, 85, 0.2);
+}
+
+.nex-ext-toast-icon {
+  font-size: 20px;
+}
+
+/* Top Header Extensions Quick Trigger Button */
+.header-icon-btn.extensions-trigger {
+  position: relative;
+}
+
+.extension-pulse-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  background: #00d4ff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00d4ff;
+  animation: nexDotPulse 2s infinite ease-in-out;
+}
+
+@keyframes nexDotPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.nex-reels-denied-pill {
+  position: fixed;
+  top: 70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: rgba(254, 44, 85, 0.9);
+  color: #ffffff;
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  box-shadow: 0 4px 16px rgba(254, 44, 85, 0.4);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.nex-reels-denied-pill:hover {
+  transform: translateX(-50%) scale(1.04);
+}
+
+@media (max-width: 600px) {
+  .nex-ext-modal-window {
+    border-radius: 16px;
+  }
+  .nex-ext-account-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nex-consent-footer {
+    flex-direction: column-reverse;
+  }
+  .nex-consent-btn {
+    width: 100%;
+  }
+}

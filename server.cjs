@@ -8,6 +8,7 @@ const {
   createPasswordResetEmail,
   createDeviceLinkEmail,
   createOfflineMessageEmail,
+  createExtensionConsentEmail,
   CONFIG
 } = require('./src/js/email-dispatcher.cjs');
 
@@ -88,6 +89,13 @@ const server = http.createServer((req, res) => {
         } else if (type === 'offline_message') {
           subject = `💬 NEXCHAT: New message from ${data?.senderName || 'Contact'}`;
           htmlContent = createOfflineMessageEmail(data || {});
+        } else if (type === 'extension_consent') {
+          const isApproved = (data?.status === 'approved' || data?.status === 'granted' || data?.status === 'yes');
+          const extName = data?.extensionName || 'NEX-REELS';
+          subject = isApproved
+            ? `🛡️ NEX-ECOSYSTEM: Access GRANTED to ${extName}`
+            : `🛑 NEX-ECOSYSTEM: Access BLOCKED for ${extName}`;
+          htmlContent = createExtensionConsentEmail(data || {});
         } else {
           htmlContent = parsed.htmlContent || `<p>${parsed.message || 'Notification from NEXCHAT'}</p>`;
         }

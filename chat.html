@@ -27,6 +27,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="chat.css">
   <link rel="stylesheet" href="src/features/group/group-chat.css">
+  <link rel="stylesheet" href="extension-hub.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
@@ -93,6 +94,7 @@
           <button id="fullscreen-btn-header" class="header-icon-btn" title="Fullscreen"><i class="fa-solid fa-expand"></i></button>
           <button id="status-btn-header" class="header-icon-btn" title="Status Vault" onclick="window.handleNavigation('status')"><i class="fa-solid fa-circle-notch"></i></button>
           <button id="reels-btn-header" class="header-icon-btn" title="CamShot" onclick="window.location.href='reels.html'"><i class="fa-solid fa-clapperboard"></i></button>
+          <button id="extensions-btn-header" class="header-icon-btn extensions-trigger" title="NEX Ecosystem Extensions (Vercel Hub)"><i class="fa-solid fa-cubes-stacked"></i><span class="extension-pulse-dot"></span></button>
           <button id="installHeaderBtn" class="header-icon-btn" title="Install NEXCHAT"><i class="fa-solid fa-download"></i></button>
           <button id="gaming-btn-header" class="header-icon-btn" title="Gaming Hub &mdash; AstroShift: Beyond Earth" onclick="window.location.href='gaminghub.html'"><i class="fa-solid fa-gamepad"></i></button>
           <button id="shop-btn-header" class="header-icon-btn" title="Buy Tokens"
@@ -2135,6 +2137,10 @@
       <button type="button" class="mobile-menu-item" onclick="window.open('terminal.html','_blank')">
         <i class="fa-solid fa-terminal"></i> <span>Hacker Terminal</span>
       </button>
+      <button type="button" class="mobile-menu-item extensions-trigger" id="mobileExtensionsBtn">
+        <i class="fa-solid fa-cubes-stacked" style="color: #00d4ff;"></i> <span>Ecosystem Extensions</span>
+        <span class="mobile-menu-badge" style="background: rgba(0, 212, 255, 0.2); color: #00d4ff; border: 1px solid #00d4ff;">VERCEL HUB</span>
+      </button>
       <button type="button" class="mobile-menu-item" id="mobileLinkDeviceBtn">
         <i class="fa-solid fa-qrcode"></i> <span>Linked Devices</span>
       </button>
@@ -3502,6 +3508,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script type="module" src="./src/js/ai-security-scanner-api.js"></script>
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
+  <script src="./src/js/extension-consent-hub.js"></script>
 
 </body>
 

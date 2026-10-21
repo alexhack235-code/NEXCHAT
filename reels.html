@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <!-- Tailwind removed: pure CSS design system -->
   <link rel="stylesheet" href="reels.css">
+  <link rel="stylesheet" href="extension-hub.css">
 </head>
 <body class="reels-body">
   <!-- Ambient Luxury Background Grid -->
@@ -52,6 +53,9 @@
       </button>
       <button id="globalSoundToggle" class="reels-header-icon-btn" title="Toggle Sound">
         <i class="fa-solid fa-volume-xmark"></i>
+      </button>
+      <button id="reelsExtHubBtn" class="reels-header-icon-btn extensions-trigger" title="NEX Ecosystem Extensions (Vercel Hub)">
+        <i class="fa-solid fa-cubes-stacked"></i>
       </button>
       <button id="openReelsSettingsBtn" class="reels-header-icon-btn" title="Settings & Preferences">
         <i class="fa-solid fa-gear"></i>
@@ -1317,5 +1321,6 @@
 
   <script type="module" src="./src/js/ai-security-scanner-api.js"></script>
   <script type="module" src="reels.js"></script>
+  <script src="./src/js/extension-consent-hub.js"></script>
 </body>
 </html>
