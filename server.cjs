@@ -5,6 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const {
   sendNotificationEmail,
+  createPasswordResetEmail,
   createDeviceLinkEmail,
   createOfflineMessageEmail,
   CONFIG
@@ -81,6 +82,9 @@ const server = http.createServer((req, res) => {
         if (type === 'device_linked') {
           subject = '⚠️ NEXCHAT Security Alert: New Device Linked';
           htmlContent = createDeviceLinkEmail(data || {});
+        } else if (type === 'password_reset') {
+          subject = '🔐 NEXCHAT: Password Recovery & Security Key Reset';
+          htmlContent = createPasswordResetEmail(data || {});
         } else if (type === 'offline_message') {
           subject = `💬 NEXCHAT: New message from ${data?.senderName || 'Contact'}`;
           htmlContent = createOfflineMessageEmail(data || {});

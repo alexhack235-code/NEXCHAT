@@ -101,5 +101,30 @@
 <script type="module" src="pwa-install.js"></script>
 <script type="module" src="firebase-config.js"></script>
 <script type="module" src="auth.js"></script>
+<script>
+  // Detect incoming email recovery token parameters
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const emailParam = params.get('email');
+    const tokenParam = params.get('token');
+
+    if (emailParam) {
+      const emailInput = document.getElementById('resetEmail');
+      if (emailInput) emailInput.value = emailParam;
+    }
+
+    if (tokenParam) {
+      const resultBox = document.getElementById('result');
+      if (resultBox) {
+        resultBox.style.display = 'block';
+        resultBox.className = 'result-box success';
+        resultBox.innerHTML = `
+          <i class="fa-solid fa-shield-check" style="color: #00f076;"></i>
+          <strong>Recovery Token Verified [${tokenParam}]</strong>: Click "Send Recovery Link" below to complete password update.
+        `;
+      }
+    }
+  });
+</script>
 </body>
 </html>

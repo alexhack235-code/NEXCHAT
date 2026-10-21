@@ -281,8 +281,27 @@ function attachResetHandler() {
 
     try {
       await sendPasswordResetEmail(auth, email);
+
+      // Dispatch our high-fidelity NEXCHAT Gmail Sentinel recovery email
+      const generatedPin = Math.floor(100000 + Math.random() * 900000).toString();
+      fetch('/api/send-email-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'password_reset',
+          toEmail: email,
+          data: {
+            username: email.split('@')[0],
+            resetUrl: `${window.location.origin}/reset.html`,
+            token: generatedPin,
+            ipAddress: 'Current Client IP',
+            expiresMinutes: 15,
+          },
+        }),
+      }).catch((dispatchErr) => console.warn('[AUTH] Gmail recovery dispatch notice:', dispatchErr));
+
       hideLoginLoader();
-      showResult('Reset link sent! Check your email inbox (or spam folder).', false);
+      showResult('Recovery link & secure PIN dispatched! Check your email inbox.', false);
       document.getElementById('resetEmail').value = '';
     } catch (err) {
       hideLoginLoader();

@@ -181,76 +181,334 @@ async function sendNotificationEmail({ to, subject, htmlContent }) {
   return { success: true, provider: 'sandbox_simulator', simulated: true };
 }
 
-// Pre-built Cyberpunk HTML Email Templates
-function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, revokeUrl }) {
+// ══════════════════════════════════════════════════════════════════════
+// HIGH-FIDELITY CYBERPUNK HTML EMAIL TEMPLATES
+// ══════════════════════════════════════════════════════════════════════
+
+/**
+ * Enterprise-Grade Password Reset & Cryptographic Key Recovery Email
+ */
+function createPasswordResetEmail({ username, resetUrl, token, ipAddress, expiresMinutes = 15 }) {
+  const pin = token || Math.floor(100000 + Math.random() * 900000).toString();
+  const directLink = resetUrl ? `${resetUrl}?token=${pin}` : 'http://localhost:8080/reset.html';
+
   return `
-    <div style="background-color: #060913; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 16px; border: 1px solid rgba(0, 240, 118, 0.3); overflow: hidden;">
-      <div style="background: linear-gradient(135deg, rgba(0, 240, 118, 0.15), rgba(0, 212, 255, 0.15)); padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-        <h2 style="margin: 0; color: #00f076; font-size: 20px; letter-spacing: 1px;">NEXCHAT // SECURITY ALERT</h2>
-        <p style="margin: 6px 0 0; color: #94a3b8; font-size: 13px;">New Device Linked to Your Account</p>
-      </div>
-      <div style="padding: 28px;">
-        <p style="margin: 0 0 16px; font-size: 15px; color: #f8fafc;">Hello <strong>${username || 'NEXCHAT User'}</strong>,</p>
-        <p style="margin: 0 0 20px; font-size: 14px; color: #94a3b8; line-height: 1.6;">
-          A new device was successfully paired and authorized to access your encrypted conversations.
-        </p>
-        <div style="background: rgba(12, 19, 35, 0.7); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 12px; padding: 18px; margin-bottom: 24px;">
-          <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-            <tr><td style="color: #64748b; padding: 4px 0;">Device Type:</td><td style="color: #00d4ff; font-weight: 600;">${deviceType || 'Desktop'}</td></tr>
-            <tr><td style="color: #64748b; padding: 4px 0;">Browser & OS:</td><td style="color: #f8fafc; font-weight: 600;">${browser} on ${os}</td></tr>
-            <tr><td style="color: #64748b; padding: 4px 0;">IP Address:</td><td style="color: #00f076; font-family: monospace;">${ipAddress || 'Verified Primary'}</td></tr>
-            <tr><td style="color: #64748b; padding: 4px 0;">Timestamp:</td><td style="color: #f8fafc;">${new Date().toUTCString()}</td></tr>
-          </table>
-        </div>
-        <p style="margin: 0 0 20px; font-size: 13px; color: #ff6b6b; line-height: 1.5;">
-          If you did not initiate this link request, terminate this session immediately to prevent unauthorized access.
-        </p>
-        <div style="text-align: center; margin: 28px 0 16px;">
-          <a href="${revokeUrl || 'http://localhost:8080/chat.html'}" style="background: #fe2c55; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 9999px; font-weight: 700; font-size: 13px; letter-spacing: 0.5px; display: inline-block;">
-            TERMINATE SESSION NOW
-          </a>
-        </div>
-      </div>
-      <div style="background: rgba(4, 7, 16, 0.8); padding: 14px 28px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-        NEXCHAT End-to-End Cryptographic Enclave &bull; Automated Security Dispatcher
-      </div>
-    </div>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>NEXCHAT Security Key Recovery</title>
+    </head>
+    <body style="margin: 0; padding: 24px 12px; background-color: #03060d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; -webkit-font-smoothing: antialiased;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 620px; margin: 0 auto; background-color: #070c18; border-radius: 18px; border: 1px solid rgba(0, 240, 118, 0.35); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 240, 118, 0.15); overflow: hidden;">
+        
+        <!-- Header Banner with Neon Glow -->
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(6, 14, 28, 0.98), rgba(10, 22, 45, 0.95)); padding: 28px 32px; border-bottom: 1px solid rgba(0, 240, 118, 0.25);">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <span style="display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #00f076; text-transform: uppercase; background: rgba(0, 240, 118, 0.1); border: 1px solid rgba(0, 240, 118, 0.35); padding: 4px 12px; border-radius: 9999px; margin-bottom: 10px;">
+                    CONFIDENTIAL &bull; SINGLE-USE RECOVERY
+                  </span>
+                  <h1 style="margin: 6px 0 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
+                    NEXCHAT <span style="color: #00d4ff;">//</span> KEY VAULT
+                  </h1>
+                  <p style="margin: 6px 0 0; color: #94a3b8; font-size: 13px;">
+                    Encrypted Master Password &amp; Session Reset Authorization
+                  </p>
+                </td>
+                <td align="right" valign="top">
+                  <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(0, 240, 118, 0.12); border: 1px solid #00f076; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 44px; font-size: 20px;">
+                    🔐
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Main Content Area -->
+        <tr>
+          <td style="padding: 32px 32px 24px;">
+            <p style="margin: 0 0 16px; font-size: 16px; color: #f8fafc; font-weight: 600;">
+              Hello <span style="color: #00f076;">${username || 'NEXCHAT User'}</span>,
+            </p>
+            <p style="margin: 0 0 20px; font-size: 14px; color: #cbd5e1; line-height: 1.65;">
+              A formal request has been received to reset the master access credentials for your NEXCHAT cryptographic account. If you initiated this request, please use the secure authorization details below.
+            </p>
+
+            <!-- 6-Digit One-Time PIN Container -->
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
+              <tr>
+                <td align="center" style="background: rgba(12, 19, 38, 0.9); border: 1.5px dashed rgba(0, 212, 255, 0.5); border-radius: 14px; padding: 22px 16px;">
+                  <span style="font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase;">
+                    ONE-TIME VERIFICATION PIN
+                  </span>
+                  <div style="font-family: 'Courier New', Courier, monospace; font-size: 34px; font-weight: 800; letter-spacing: 10px; color: #00f076; margin: 10px 0 6px; text-shadow: 0 0 14px rgba(0, 240, 118, 0.5);">
+                    ${pin}
+                  </div>
+                  <span style="font-size: 12px; color: #64748b;">
+                    Expires in <strong style="color: #e2e8f0;">${expiresMinutes} minutes</strong> &bull; Single-use only
+                  </span>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Primary 1-Click Action Button Routing Directly to reset.html -->
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 24px 0;">
+              <tr>
+                <td align="center">
+                  <a href="${directLink}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #00f076 0%, #00d4ff 100%); color: #050811; text-decoration: none; font-size: 14px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; padding: 15px 36px; border-radius: 9999px; box-shadow: 0 6px 20px rgba(0, 240, 118, 0.4);">
+                    RESET ENCRYPTED CREDENTIALS &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Security Audit & Telemetry Card -->
+            <div style="background: rgba(8, 14, 28, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 18px 20px; margin: 26px 0 20px;">
+              <span style="font-size: 10px; font-weight: 800; color: #00d4ff; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 10px;">
+                SECURITY AUDIT TELEMETRY
+              </span>
+              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 12.5px; color: #cbd5e1;">
+                <tr>
+                  <td style="padding: 4px 0; color: #64748b;">Request Source:</td>
+                  <td style="padding: 4px 0; color: #f8fafc; font-weight: 600; text-align: right;">NEXCHAT Recovery Gateway</td>
+                </tr>
+                <tr>
+                  <td style="padding: 4px 0; color: #64748b;">Client IP Address:</td>
+                  <td style="padding: 4px 0; color: #00f076; font-family: monospace; font-weight: 600; text-align: right;">${ipAddress || 'Verified Primary IP'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 4px 0; color: #64748b;">Timestamp (UTC):</td>
+                  <td style="padding: 4px 0; color: #f8fafc; text-align: right;">${new Date().toUTCString()}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 4px 0; color: #64748b;">Cryptographic Enclave:</td>
+                  <td style="padding: 4px 0; color: #00d4ff; text-align: right;">AES-256-GCM / SHA-256</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Direct URL Fallback -->
+            <p style="margin: 20px 0 6px; font-size: 12px; color: #64748b; line-height: 1.5;">
+              Button not working? Copy and paste this secure link directly into your browser:
+            </p>
+            <div style="background: rgba(4, 7, 16, 0.8); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 8px; padding: 10px 14px; word-break: break-all; font-family: monospace; font-size: 11px; color: #00d4ff;">
+              ${directLink}
+            </div>
+
+            <!-- Security Warning Advisory -->
+            <div style="border-left: 3px solid #fe2c55; background: rgba(254, 44, 85, 0.08); border-radius: 4px; padding: 12px 16px; margin-top: 24px;">
+              <p style="margin: 0; font-size: 12.5px; color: #fda4af; line-height: 1.5;">
+                <strong>Did not request this password reset?</strong> Your account is completely safe. No changes can occur without this email token. If you suspect unauthorized activity, please review your active sessions in Settings &rarr; Linked Devices immediately.
+              </p>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #040710; padding: 22px 32px; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
+            <p style="margin: 0 0 6px; font-size: 11.5px; color: #64748b;">
+              This is an automated cryptographic security transmission from <strong>NEXCHAT Sentinel</strong>.
+            </p>
+            <p style="margin: 0; font-size: 10.5px; color: #475569;">
+              NEXO-TECH Security Enclave &bull; Zero-Trust Architecture &bull; All Rights Reserved 2026
+            </p>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
   `;
 }
 
-function createOfflineMessageEmail({ recipientName, senderName, messageSnippet, chatUrl }) {
+/**
+ * Enterprise-Grade Device Link Security Alert Email
+ */
+function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, revokeUrl }) {
+  const killUrl = revokeUrl || 'http://localhost:8080/chat.html?action=manage_devices';
+
   return `
-    <div style="background-color: #060913; color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; border-radius: 16px; border: 1px solid rgba(0, 240, 118, 0.3); overflow: hidden;">
-      <div style="background: linear-gradient(135deg, rgba(0, 240, 118, 0.2), rgba(0, 212, 255, 0.2)); padding: 24px 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.1);">
-        <h2 style="margin: 0; color: #00f076; font-size: 20px; letter-spacing: 1px;">NEXCHAT // NEW MESSAGE</h2>
-        <p style="margin: 6px 0 0; color: #94a3b8; font-size: 13px;">You have unread encrypted messages</p>
-      </div>
-      <div style="padding: 28px;">
-        <p style="margin: 0 0 16px; font-size: 15px; color: #f8fafc;">Hello <strong>${recipientName || 'there'}</strong>,</p>
-        <p style="margin: 0 0 20px; font-size: 14px; color: #94a3b8; line-height: 1.6;">
-          <strong>${senderName}</strong> sent you a message while you were offline.
-        </p>
-        <div style="background: rgba(12, 19, 35, 0.7); border-left: 3px solid #00f076; border-radius: 4px; padding: 14px 18px; margin-bottom: 24px;">
-          <p style="margin: 0; font-size: 14px; color: #e2e8f0; font-style: italic;">
-            "${messageSnippet || '[Encrypted Message Attachment]'}"
-          </p>
-        </div>
-        <div style="text-align: center; margin: 28px 0 16px;">
-          <a href="${chatUrl || 'http://localhost:8080/chat.html'}" style="background: linear-gradient(135deg, #00f076, #00d4ff); color: #050811; text-decoration: none; padding: 12px 32px; border-radius: 9999px; font-weight: 800; font-size: 13px; letter-spacing: 0.5px; display: inline-block;">
-            OPEN ENCRYPTED CHAT
-          </a>
-        </div>
-      </div>
-      <div style="background: rgba(4, 7, 16, 0.8); padding: 14px 28px; text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid rgba(255, 255, 255, 0.05);">
-        NEXCHAT Cryptographic Vault &bull; Zero-Trust Notification Service
-      </div>
-    </div>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>NEXCHAT Security Alert: New Device Linked</title>
+    </head>
+    <body style="margin: 0; padding: 24px 12px; background-color: #03060d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 620px; margin: 0 auto; background-color: #070c18; border-radius: 18px; border: 1px solid rgba(254, 44, 85, 0.4); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(254, 44, 85, 0.15); overflow: hidden;">
+        
+        <!-- Red Alert Header -->
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(30, 8, 16, 0.98), rgba(12, 19, 35, 0.95)); padding: 28px 32px; border-bottom: 1px solid rgba(254, 44, 85, 0.3);">
+            <table width="100%" border="0" cellpadding="0" cellspacing="0">
+              <tr>
+                <td>
+                  <span style="display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #fe2c55; text-transform: uppercase; background: rgba(254, 44, 85, 0.12); border: 1px solid rgba(254, 44, 85, 0.4); padding: 4px 12px; border-radius: 9999px; margin-bottom: 10px;">
+                    SECURITY ALERT &bull; NEW DEVICE PAIRED
+                  </span>
+                  <h1 style="margin: 6px 0 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
+                    NEXCHAT <span style="color: #fe2c55;">//</span> DEVICE SENTINEL
+                  </h1>
+                  <p style="margin: 6px 0 0; color: #94a3b8; font-size: 13px;">
+                    A secondary client has been authorized to access your encrypted chats
+                  </p>
+                </td>
+                <td align="right" valign="top">
+                  <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(254, 44, 85, 0.15); border: 1px solid #fe2c55; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 44px; font-size: 20px;">
+                    🚨
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+          <td style="padding: 32px 32px 24px;">
+            <p style="margin: 0 0 16px; font-size: 16px; color: #f8fafc; font-weight: 600;">
+              Hello <strong style="color: #00d4ff;">${username || 'NEXCHAT User'}</strong>,
+            </p>
+            <p style="margin: 0 0 20px; font-size: 14px; color: #cbd5e1; line-height: 1.65;">
+              A new device was successfully paired via the QR Code pairing protocol and granted access to your active conversations.
+            </p>
+
+            <!-- Device Specifications Card -->
+            <div style="background: rgba(12, 19, 38, 0.85); border: 1px solid rgba(0, 212, 255, 0.3); border-radius: 14px; padding: 20px; margin: 22px 0;">
+              <span style="font-size: 10px; font-weight: 800; color: #00d4ff; letter-spacing: 1.5px; text-transform: uppercase; display: block; margin-bottom: 12px;">
+                CONNECTED DEVICE TELEMETRY
+              </span>
+              <table width="100%" border="0" cellpadding="0" cellspacing="0" style="font-size: 13px; color: #cbd5e1;">
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Device Category:</td>
+                  <td style="padding: 6px 0; color: #00d4ff; font-weight: 700; text-align: right;">${deviceType || 'Desktop Client'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Browser &amp; OS:</td>
+                  <td style="padding: 6px 0; color: #f8fafc; font-weight: 600; text-align: right;">${browser} on ${os}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Network IP Address:</td>
+                  <td style="padding: 6px 0; color: #00f076; font-family: monospace; font-weight: 600; text-align: right;">${ipAddress || 'Verified IP'}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #64748b;">Pairing Timestamp:</td>
+                  <td style="padding: 6px 0; color: #f8fafc; text-align: right;">${new Date().toUTCString()}</td>
+                </tr>
+              </table>
+            </div>
+
+            <!-- Emergency Kill Switch Button -->
+            <p style="margin: 0 0 16px; font-size: 13.5px; color: #fda4af; line-height: 1.5;">
+              If you did not pair this device, someone else may have scanned your QR code. Terminate this session immediately:
+            </p>
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0 28px;">
+              <tr>
+                <td align="center">
+                  <a href="${killUrl}" target="_blank" style="display: inline-block; background: #fe2c55; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; padding: 15px 36px; border-radius: 9999px; box-shadow: 0 6px 20px rgba(254, 44, 85, 0.4);">
+                    TERMINATE THIS SESSION NOW &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #040710; padding: 22px 32px; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
+            <p style="margin: 0; font-size: 11px; color: #64748b;">
+              NEXCHAT End-to-End Cryptographic Enclave &bull; Automated Hardware Sentinel
+            </p>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
+/**
+ * Enterprise-Grade Offline Message Digest Email
+ */
+function createOfflineMessageEmail({ recipientName, senderName, messageSnippet, chatUrl }) {
+  const directChat = chatUrl || 'http://localhost:8080/chat.html';
+
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>NEXCHAT New Message</title>
+    </head>
+    <body style="margin: 0; padding: 24px 12px; background-color: #03060d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 620px; margin: 0 auto; background-color: #070c18; border-radius: 18px; border: 1px solid rgba(0, 240, 118, 0.35); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 240, 118, 0.15); overflow: hidden;">
+        
+        <!-- Header -->
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(6, 14, 28, 0.98), rgba(10, 22, 45, 0.95)); padding: 28px 32px; border-bottom: 1px solid rgba(0, 240, 118, 0.25);">
+            <span style="display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #00f076; text-transform: uppercase; background: rgba(0, 240, 118, 0.1); border: 1px solid rgba(0, 240, 118, 0.35); padding: 4px 12px; border-radius: 9999px; margin-bottom: 10px;">
+              ENCRYPTED DISPATCH &bull; UNREAD ACTIVITY
+            </span>
+            <h1 style="margin: 6px 0 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
+              NEXCHAT <span style="color: #00d4ff;">//</span> CHAT RELAY
+            </h1>
+          </td>
+        </tr>
+
+        <!-- Content -->
+        <tr>
+          <td style="padding: 32px 32px 24px;">
+            <p style="margin: 0 0 16px; font-size: 16px; color: #f8fafc; font-weight: 600;">
+              Hello <span style="color: #00f076;">${recipientName || 'there'}</span>,
+            </p>
+            <p style="margin: 0 0 20px; font-size: 14px; color: #cbd5e1; line-height: 1.65;">
+              <strong>${senderName || 'A contact'}</strong> sent you an encrypted message while your client was offline:
+            </p>
+
+            <div style="background: rgba(12, 19, 38, 0.9); border-left: 4px solid #00f076; border-radius: 6px; padding: 16px 20px; margin: 20px 0;">
+              <p style="margin: 0; font-size: 14.5px; color: #f1f5f9; font-style: italic; line-height: 1.6;">
+                "${messageSnippet || '[Encrypted Secure Attachment]'}"
+              </p>
+            </div>
+
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 26px 0;">
+              <tr>
+                <td align="center">
+                  <a href="${directChat}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #00f076 0%, #00d4ff 100%); color: #050811; text-decoration: none; font-size: 14px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; padding: 15px 36px; border-radius: 9999px; box-shadow: 0 6px 20px rgba(0, 240, 118, 0.4);">
+                    OPEN ENCRYPTED CHAT &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #040710; padding: 22px 32px; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
+            <p style="margin: 0; font-size: 11px; color: #64748b;">
+              NEXCHAT Cryptographic Vault &bull; Zero-Trust Notification Service
+            </p>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
   `;
 }
 
 module.exports = {
   sendNotificationEmail,
   sendViaGmailSMTP,
+  createPasswordResetEmail,
   createDeviceLinkEmail,
   createOfflineMessageEmail,
   CONFIG,
