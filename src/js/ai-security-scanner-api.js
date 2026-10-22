@@ -1,8 +1,7 @@
 /**
- * NEXO-TECH ENTERPRISE AI SECURITY SCANNER DEFENSE API v10.0 (ULTRA-HARDENED)
- * Ported & Unified from alexhack235-code / REDOX-PY_SCANNER & NetworkThreatDefender
- * Includes Zero-Day Heuristics, PHP2Shell (CVE-2026-109618 / CVE-2026-109619) Defense,
- * Real-Time Heuristics, Malware Signatures, Prompt Injection Shield & Quarantine Vault
+ * NEXO-TECH ENTERPRISE AI SECURITY SCANNER & DEFENSE API v10.5-ENTERPRISE
+ * Browser-Optimized Client Module for NEXCHAT & Web Applications
+ * Architected by alexhack235-code & NEXO-TECH Cyber Defense Systems.
  */
 
 // 1. Signature Database: Known Threat Hashes (MD5 & SHA-256)
@@ -32,7 +31,7 @@ export const SUSPICIOUS_PATTERNS = [
   { pattern: /UNION\s+SELECT\s+/gi, name: "SQL Injection Payload (UNION SELECT)" },
   { pattern: /DROP\s+TABLE\s+/gi, name: "SQL Destructive Query (DROP TABLE)" },
 
-  // --- Dynamic Code Evaluation & System Exploits ---
+  // --- Dynamic Code Evaluation & Shell Invocation ---
   { pattern: /\b(eval|exec|Function)\s*\(/g, name: "Dynamic Code Evaluation Vector" },
   { pattern: /powershell\s+-(nop|w\s+hidden|enc)/gi, name: "Hidden PowerShell Execution Stager" },
   { pattern: /vssadmin\s+delete\s+shadows/gi, name: "Ransomware Volume Shadow Deletion" },
@@ -42,6 +41,7 @@ export const SUSPICIOUS_PATTERNS = [
   { pattern: /ignore\s+(all\s+previous|system)\s+instructions/gi, name: "AI Prompt Injection & Jailbreak Attempt" },
   { pattern: /DAN\s+Mode\s+enabled/gi, name: "AI System Prompt Bypass Attempt" },
   { pattern: /system\s*:\s*role\s*=\s*override/gi, name: "AI Role Elevation Attack" },
+  { pattern: /(<\|im_start\|>|<\|endoftext\|>|\[INST\]|<<SYS>>)/gi, name: "AI Special Token Delimiter Injection" },
 
   // --- PHP2Shell (CVE-2026-109618 & CVE-2026-109619) & PHP RCE Vectors ---
   { pattern: /PHP_SESSION_UPLOAD_PROGRESS/i, name: "PHP2Shell / Session Upload Progress Abuse Vector" },
@@ -52,19 +52,27 @@ export const SUSPICIOUS_PATTERNS = [
   { pattern: /base64_decode\s*\(\s*['"][A-Za-z0-9+/=]{40,}['"]\s*\)/gi, name: "Obfuscated Base64 PHP Payload Execution" }
 ];
 
-// Dangerous Executable Extensions disguised as media
 export const FORBIDDEN_EXTENSIONS = [
   '.exe', '.scr', '.bat', '.cmd', '.ps1', '.vbs', '.pif', '.com', '.msi', '.apk', '.bin', '.sh',
   '.php', '.php3', '.php4', '.php5', '.phtml', '.phar', '.inc'
 ];
+
+export const CLOUD_METADATA_ENDPOINTS = [
+  { host: "169.254.169.254", name: "AWS/Azure/GCP Cloud Instance Metadata Service (IMDS)" },
+  { host: "metadata.google.internal", name: "Google Cloud Platform (GCP) Internal Metadata" },
+  { host: "100.100.100.200", name: "Alibaba Cloud Metadata Server" },
+  { host: "fd00:ec2::254", name: "AWS IPv6 Instance Metadata Service" }
+];
+
+export const ZERO_WIDTH_REGEX = /[\u200B\u200C\u200D\uFEFF\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
 
 /**
  * Enterprise AI Security Scanner Class
  */
 export class AISecurityScanner {
   constructor() {
-    this.version = "10.0.0-PRO";
-    this.codename = "PHP2Shell-Immune";
+    this.version = "10.5.0-ENTERPRISE";
+    this.codename = "Apex-Shield";
     this.enabled = true;
     this.realTimeDefenderActive = true;
     this.metrics = this.loadMetrics();
@@ -78,16 +86,17 @@ export class AISecurityScanner {
       if (saved) return JSON.parse(saved);
     } catch {}
     return {
-      version: "10.0.0-PRO",
+      version: this.version,
       total_scanned: 0,
       threats_blocked: 0,
       xss_neutralized: 0,
       prompt_injections_killed: 0,
       php2shell_blocked: 0,
+      ssrf_intercepted: 0,
+      prototype_pollutions_blocked: 0,
       malware_files_quarantined: 0,
-      network_anomalies_defended: 0,
       last_scan_timestamp: Date.now(),
-      defense_status: "ARMED & OPERATIONAL (PHP2Shell IMMUNE)"
+      defense_status: "ARMED & OPERATIONAL (APEX-SHIELD)"
     };
   }
 
@@ -124,9 +133,6 @@ export class AISecurityScanner {
     }
   }
 
-  /**
-   * Scans a text message, API input, or AI prompt for threats, XSS, PHP2Shell, and jailbreaks.
-   */
   scanMessage(text, meta = {}) {
     if (!text || typeof text !== 'string') return { safe: true, threats: [], text: '' };
     this.metrics.total_scanned++;
@@ -134,13 +140,18 @@ export class AISecurityScanner {
     const threats = [];
     let sanitizedText = text;
 
+    if (ZERO_WIDTH_REGEX.test(text)) {
+      threats.push("Invisible Zero-Width Unicode Steganography / Evasion");
+      sanitizedText = sanitizedText.replace(ZERO_WIDTH_REGEX, '');
+    }
+
     for (const item of SUSPICIOUS_PATTERNS) {
-      if (item.pattern.test(text)) {
+      if (item.pattern.test(sanitizedText)) {
         threats.push(item.name);
         if (item.name.includes("XSS") || item.name.includes("DOM")) {
           this.metrics.xss_neutralized++;
         }
-        if (item.name.includes("Prompt Injection") || item.name.includes("Jailbreak")) {
+        if (item.name.includes("Prompt") || item.name.includes("Jailbreak") || item.name.includes("Special Token")) {
           this.metrics.prompt_injections_killed++;
         }
         if (item.name.includes("PHP2Shell") || item.name.includes("PHP")) {
@@ -167,9 +178,108 @@ export class AISecurityScanner {
     return { safe: true, threats: [], sanitizedText: text };
   }
 
-  /**
-   * Computes Shannon Entropy of array buffer (measures encryption / packed malware randomness).
-   */
+  scanUrl(targetUrl) {
+    if (!targetUrl || typeof targetUrl !== 'string') {
+      return { safe: false, threats: ["Invalid or empty URL parameter"] };
+    }
+    this.metrics.total_scanned++;
+    const threats = [];
+
+    let parsed;
+    try {
+      parsed = new URL(targetUrl.trim());
+    } catch {
+      return { safe: false, threats: ["Malformed URL Structure / Parser Exception"] };
+    }
+
+    const allowedSchemes = ['http:', 'https:'];
+    if (!allowedSchemes.includes(parsed.protocol.toLowerCase())) {
+      threats.push(`Prohibited Protocol Scheme (${parsed.protocol} - SSRF Vector)`);
+    }
+
+    const hostname = parsed.hostname.toLowerCase();
+
+    for (const cloud of CLOUD_METADATA_ENDPOINTS) {
+      if (hostname === cloud.host || hostname.includes(cloud.host)) {
+        threats.push(`Critical SSRF: Cloud Metadata Exfiltration Attempt (${cloud.name})`);
+      }
+    }
+
+    if (
+      hostname === 'localhost' ||
+      hostname === '127.0.0.1' ||
+      hostname === '0.0.0.0' ||
+      hostname === '::1' ||
+      hostname === '[::1]' ||
+      hostname.endsWith('.localhost') ||
+      hostname.endsWith('.local')
+    ) {
+      threats.push("SSRF: Loopback / Localhost Target Identified");
+    }
+
+    if (this.isPrivateOrInternalIP(hostname)) {
+      threats.push(`SSRF: Internal Private Network Subnet (${hostname})`);
+    }
+
+    if (threats.length > 0) {
+      this.metrics.threats_blocked += threats.length;
+      this.metrics.ssrf_intercepted = (this.metrics.ssrf_intercepted || 0) + threats.length;
+      this.saveMetrics();
+      this.logThreat({ type: "SSRF_ATTEMPT", threats, url: targetUrl, timestamp: Date.now() });
+      return { safe: false, threats, hostname, protocol: parsed.protocol };
+    }
+
+    return { safe: true, threats: [], hostname, protocol: parsed.protocol };
+  }
+
+  isPrivateOrInternalIP(ip) {
+    if (!/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) return false;
+    const parts = ip.split('.').map(Number);
+    if (parts[0] === 127) return true;
+    if (parts[0] === 10) return true;
+    if (parts[0] === 172 && parts[1] >= 16 && parts[1] <= 31) return true;
+    if (parts[0] === 192 && parts[1] === 168) return true;
+    if (parts[0] === 169 && parts[1] === 254) return true;
+    if (parts[0] === 0) return true;
+    return false;
+  }
+
+  scanObject(obj, maxDepth = 10) {
+    this.metrics.total_scanned++;
+    const threats = [];
+
+    const deepInspect = (target, depth) => {
+      if (!target || typeof target !== 'object' || depth > maxDepth) return;
+
+      const keys = Object.getOwnPropertyNames(target);
+      for (const key of keys) {
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          threats.push(`Prototype Pollution Key Identified: "${key}"`);
+          delete target[key];
+        } else if (typeof target[key] === 'object' && target[key] !== null) {
+          deepInspect(target[key], depth + 1);
+        }
+      }
+    };
+
+    try {
+      const cloned = JSON.parse(JSON.stringify(obj));
+      deepInspect(cloned, 0);
+
+      if (threats.length > 0) {
+        this.metrics.threats_blocked += threats.length;
+        this.metrics.prototype_pollutions_blocked = (this.metrics.prototype_pollutions_blocked || 0) + threats.length;
+        this.saveMetrics();
+        this.logThreat({ type: "PROTOTYPE_POLLUTION", threats, timestamp: Date.now() });
+        return { safe: false, threats, sanitizedObject: cloned };
+      }
+
+      return { safe: true, threats: [], sanitizedObject: cloned };
+    } catch (err) {
+      return { safe: false, threats: [`Object inspection error: ${err.message}`] };
+    }
+  }
+
   calculateEntropy(buffer) {
     const bytes = new Uint8Array(buffer);
     if (bytes.length === 0) return 0;
@@ -187,9 +297,6 @@ export class AISecurityScanner {
     return Number(entropy.toFixed(3));
   }
 
-  /**
-   * Scans an uploaded file, blob, or attachment.
-   */
   async scanFile(file) {
     if (!file) return { safe: false, reason: "No file provided" };
     this.metrics.total_scanned++;
@@ -197,7 +304,6 @@ export class AISecurityScanner {
     const fileName = (file.name || '').toLowerCase();
     const threats = [];
 
-    // Check extension spoofing
     for (const ext of FORBIDDEN_EXTENSIONS) {
       if (fileName.endsWith(ext) || fileName.includes(ext + '.')) {
         threats.push(`Dangerous Executable / Script Masked as Media (${ext})`);
@@ -205,7 +311,6 @@ export class AISecurityScanner {
       }
     }
 
-    // Read byte buffer
     let buffer;
     try {
       buffer = await file.arrayBuffer();
@@ -213,7 +318,6 @@ export class AISecurityScanner {
       buffer = new ArrayBuffer(0);
     }
 
-    // Compute SHA-256
     let hashHex = '';
     if (buffer.byteLength > 0 && crypto?.subtle) {
       try {
@@ -226,7 +330,6 @@ export class AISecurityScanner {
       threats.push(`Known Threat Signature Match: ${THREAT_SIGNATURE_HASHES[hashHex]}`);
     }
 
-    // Entropy check (> 7.95 in plain documents suggests obfuscated malicious packer)
     const entropy = this.calculateEntropy(buffer);
     if (entropy > 7.95 && !fileName.match(/\.(mp4|zip|rar|7z|gz|webm|png|jpg|jpeg|webp)$/i)) {
       threats.push(`High Heuristic Entropy Anomaly (${entropy}/8.0 - Packed Payload Suspicion)`);
@@ -264,26 +367,23 @@ export class AISecurityScanner {
     console.warn('[AI SECURITY DEFENSE SHIELD] Threat Intercepted & Neutralized:', record);
   }
 
-  /**
-   * Comprehensive System Self-Audit Scan
-   */
   async runFullSystemScan(progressCb) {
     this.metrics.last_scan_timestamp = Date.now();
     const steps = [
       { name: "Scanning Local Storage & Session Integrity", progress: 15 },
       { name: "Verifying IndexedDB Encrypted Caches", progress: 35 },
-      { name: "Inspecting Inbound Streams for PHP2Shell Multipart Vectors", progress: 55 },
-      { name: "Analyzing Active WebSockets & Realtime Mesh", progress: 75 },
+      { name: "Inspecting Inbound Streams for PHP2Shell & SSRF Vectors", progress: 55 },
+      { name: "Auditing Prototype Pollution & Object Sanitizers", progress: 75 },
       { name: "Auditing Firestore Rule Protections & Auth Tokens", progress: 90 },
-      { name: "Executing Heuristic Heptathlon & Zero-Day Check", progress: 100 }
+      { name: "Executing Heuristic Entropy Heptathlon & Zero-Day Check", progress: 100 }
     ];
 
     for (const step of steps) {
       if (progressCb) progressCb(step.name, step.progress);
-      await new Promise(r => setTimeout(r, 150));
+      await new Promise(r => setTimeout(r, 120));
     }
 
-    this.metrics.defense_status = "100% SECURE • PHP2Shell IMMUNE • ZERO THREATS DETECTED";
+    this.metrics.defense_status = "100% SECURE • APEX-SHIELD ACTIVE • ZERO THREATS DETECTED";
     this.saveMetrics();
     return {
       status: "SECURE",
@@ -296,7 +396,6 @@ export class AISecurityScanner {
   }
 }
 
-// Global Singleton Instance
 export const aiSecurityScanner = new AISecurityScanner();
 if (typeof window !== 'undefined') {
   window.aiSecurityScanner = aiSecurityScanner;

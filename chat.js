@@ -3946,10 +3946,19 @@ window.dispatchTokenRain = async function(dropAttachment) {
 };
 
 function renderMessageAttachment(attachment) {
-  if (!attachment || (!attachment.downloadURL && !attachment.isTimeCapsule && !attachment.isTokenRain && !attachment.dropData)) return null;
+  if (!attachment || (!attachment.downloadURL && !attachment.isTimeCapsule && !attachment.isTokenRain && !attachment.dropData && !attachment.isPredictionPoll && !attachment.pollData)) return null;
   const container = document.createElement("div");
   container.className = "message-attachment-container";
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  // Interactive Token Prediction Market Poll
+  if (attachment.isPredictionPoll || attachment.fileType === 'prediction_poll' || attachment.pollData) {
+    if (window.predictionPollEngine && typeof window.predictionPollEngine.renderPollBubble === 'function') {
+      const pollEl = window.predictionPollEngine.renderPollBubble(attachment);
+      container.appendChild(pollEl);
+      return container;
+    }
+  }
 
   // Quantum Time Capsule Card
   if (attachment.isTimeCapsule && attachment.capsuleData) {
@@ -4345,12 +4354,12 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
 
   const isStk = attachment && (attachment.isSticker || attachment.fileType === 'sticker');
   const isCirc = attachment && (attachment.isCircularVideo || attachment.fileType === 'video_note');
-  const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData);
+  const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData || attachment.isPredictionPoll || attachment.fileType === 'prediction_poll' || attachment.pollData);
   const bubble = document.createElement("div");
   bubble.className = isCirc ? "message-bubble sent is-clip-message" : (isDrop ? "message-bubble sent is-drop-message" : (isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent"));
   bubble.style.cssText = (isCirc || isStk || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: var(--active-bubble-bg, linear-gradient(135deg, #059669 0%, #10b981 100%)); border: var(--active-bubble-border, none); box-shadow: var(--active-bubble-shadow, 0 4px 14px rgba(5, 150, 105, 0.25)); color: var(--active-bubble-color, #ffffff); padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word;";
 
-  if (attachment && (attachment.downloadURL || attachment.isTimeCapsule || attachment.isTokenRain || attachment.dropData)) {
+  if (attachment && (attachment.downloadURL || attachment.isTimeCapsule || attachment.isTokenRain || attachment.dropData || attachment.isPredictionPoll || attachment.pollData)) {
     const attachNode = renderMessageAttachment(attachment);
     if (attachNode) bubble.appendChild(attachNode);
   }
@@ -4852,7 +4861,7 @@ function loadMessages() {
         bubble.appendChild(replyQuote);
       }
 
-      if (m.attachment && (m.attachment.downloadURL || m.attachment.isTimeCapsule || m.attachment.isTokenRain || m.attachment.dropData)) {
+      if (m.attachment && (m.attachment.downloadURL || m.attachment.isTimeCapsule || m.attachment.isTokenRain || m.attachment.dropData || m.attachment.isPredictionPoll || m.attachment.pollData)) {
         const attachNode = renderMessageAttachment(m.attachment);
         if (attachNode) bubble.appendChild(attachNode);
       }
@@ -5074,6 +5083,21 @@ function loadMessages() {
           if (incoming.attachment.isTokenRainSync) {
             window.dispatchEvent(new CustomEvent('nexchat:token_rain_received', { detail: incoming.attachment }));
             return;
+          }
+          if (incoming.attachment.isPredictionPollSync) {
+            window.dispatchEvent(new CustomEvent('nexchat:poll_sync_received', { detail: incoming.attachment }));
+            return;
+          }
+          if (incoming.attachment.isAudioSpaceEvent) {
+            window.dispatchEvent(new CustomEvent('nexchat:audio_space_event_received', { detail: incoming.attachment }));
+            return;
+          }
+          if (incoming.attachment.isScheduledBurn) {
+            // Self-destruct countdown trigger
+            const wrapper = document.getElementById(`wrapper-${incoming.id}`);
+            if (wrapper && window.scheduledBurnEngine) {
+              window.scheduledBurnEngine.attachLaserBurnCountdown(wrapper, incoming.attachment.burnSeconds || 30);
+            }
           }
           if (incoming.attachment.isP2PChunk) {
             window.dispatchEvent(new CustomEvent('nexchat:p2p_chunk_received', { detail: incoming.attachment }));
