@@ -2260,6 +2260,7 @@ body.reels-body {
 
 .select-sound-btn {
   flex: 1;
+  min-width: 0;
   padding: 10px 14px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
@@ -2271,6 +2272,15 @@ body.reels-body {
   font-size: 12.5px;
   font-weight: 600;
   cursor: pointer;
+  overflow: hidden;
+}
+
+#selectedSoundLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  text-align: left;
 }
 
 .sound-browse-badge {
@@ -2999,20 +3009,31 @@ body.reels-body {
 /* Responsive Overrides */
 @media (max-width: 860px) {
   .studio-modern-grid {
-    grid-template-columns: 1fr;
-    height: calc(100% - 64px);
-    overflow-y: auto;
-    padding: 16px;
-    gap: 18px;
+    grid-template-columns: 1fr !important;
+    height: calc(100% - 64px) !important;
+    overflow-y: auto !important;
+    padding: 16px !important;
+    gap: 18px !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .studio-video-viewport-col,
+  .studio-details-col {
+    height: auto !important;
+    overflow: visible !important;
   }
 
   .creator-studio-card {
-    width: 100%;
-    max-width: 100%;
-    height: 100vh;
-    height: 100dvh;
-    max-height: 100vh;
-    border-radius: 0;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
+
+  .reels-file-dropzone {
+    min-height: 260px !important;
   }
 }
 
@@ -4334,7 +4355,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
 /* ─── 13. Trending Hashtags & Topics Ribbon ─── */
 .trending-tags-ribbon-wrapper {
   position: fixed;
-  top: 56px;
+  top: 72px;
   left: 0;
   right: 0;
   z-index: 45;
@@ -4761,7 +4782,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 /* ─── Mobile (<= 768px) ─── */
 @media (max-width: 768px) {
   .trending-tags-ribbon-wrapper {
-    top: 56px;
+    top: 60px;
   }
 
   /* Rail stays safely docked ABOVE bottom comment bar to prevent music disc overlap */

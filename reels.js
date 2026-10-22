@@ -596,6 +596,15 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault();
     const pipBtn = document.getElementById('pipToggleBtn');
     if (pipBtn) pipBtn.click();
+  } else if (e.key === 'f' || e.key === 'F') {
+    e.preventDefault();
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(() => {});
+      showToast('Fullscreen Mode Activated (Press F or Esc to exit)');
+    } else {
+      document.exitFullscreen().catch(() => {});
+      showToast('Exited Fullscreen');
+    }
   } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
     e.preventDefault();
     toggleKeyboardShortcutsModal();
