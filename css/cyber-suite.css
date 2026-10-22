@@ -970,6 +970,53 @@
   animation: cyberFadeIn 0.25s ease;
 }
 
+/* Auto-Translate On Load & Foreign Group Intelligence */
+.auto-translated-card {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(6, 182, 212, 0.1);
+  border-left: 3px solid #00f3ff;
+  border-radius: 0 8px 8px 0;
+  animation: cyberFadeIn 0.3s ease;
+}
+
+.auto-trans-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #00f3ff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.auto-trans-original {
+  margin-top: 5px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-style: italic;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 3px;
+}
+
+.auto-translate-header-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #00f3ff;
+  background: rgba(0, 243, 255, 0.15);
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  border-radius: 10px;
+  padding: 2px 7px;
+  margin-left: 6px;
+  vertical-align: middle;
+  letter-spacing: 0.5px;
+}
+
 .translate-meta-row {
   display: flex;
   align-items: center;

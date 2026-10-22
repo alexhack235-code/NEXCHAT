@@ -1223,7 +1223,7 @@ class NexAttachHub {
 }
 
 /* ============================================================================
-   7. CHRONEX BABEL QUANTUM NEURAL TRANSLATOR
+   7. CHRONEX BABEL QUANTUM NEURAL TRANSLATOR & AUTO-TRANSLATE ON LOAD
    ============================================================================ */
 class NexTranslator {
   constructor() {
@@ -1234,6 +1234,15 @@ class NexTranslator {
     this.translateBtn = document.getElementById('translateActionBtn');
     this.speakBtn = document.getElementById('translateSpeakBtn');
     this.preferredLang = localStorage.getItem('nex_preferred_lang') || 'es';
+
+    // Auto-Translate On Load state (Foreign Groups & International Chats)
+    this.autoTranslateOnLoad = localStorage.getItem('nex_auto_translate_on_load') === 'true';
+    this.autoTranslateTargetLang = localStorage.getItem('nex_auto_translate_target_lang') || 'en';
+    this.autoTranslateShowOriginal = localStorage.getItem('nex_auto_translate_show_original') !== 'false';
+    this.currentChatId = null;
+    this.currentIsGroup = false;
+    this.observer = null;
+    this.scanDebounceTimeout = null;
 
     this.languageNames = {
       'es': 'Spanish',
@@ -1249,14 +1258,184 @@ class NexTranslator {
       'en': 'English'
     };
 
+    // Comprehensive multi-directional lexicon for instantaneous local translation
     this.dictionary = {
-      'es': { 'hello': '¡Hola!', 'how are you': '¿Cómo estás?', 'welcome': 'Bienvenido a NEXCHAT', 'quantum': 'cuántico' },
-      'ja': { 'hello': 'こんにちは！', 'how are you': 'お元気ですか？', 'welcome': 'NEXCHATへようこそ', 'quantum': '量子' },
-      'fr': { 'hello': 'Bonjour !', 'how are you': 'Comment allez-vous ?', 'welcome': 'Bienvenue sur NEXCHAT', 'quantum': 'quantique' },
-      'de': { 'hello': 'Hallo!', 'how are you': 'Wie geht es dir?', 'welcome': 'Willkommen bei NEXCHAT', 'quantum': 'Quanten' }
+      'en': {
+        // Spanish -> English
+        'hola': 'Hello',
+        '¡hola!': 'Hello!',
+        'hola amigos': 'Hello friends',
+        'hola a todos': 'Hello everyone',
+        '¡hola a todos!': 'Hello everyone!',
+        'buenos días': 'Good morning',
+        'buenos dias': 'Good morning',
+        'buenas tardes': 'Good afternoon',
+        'buenas noches': 'Good night',
+        'cómo estás': 'How are you?',
+        'como estas': 'How are you?',
+        '¿cómo estás?': 'How are you?',
+        'cómo estáis': 'How are you all?',
+        'como estais': 'How are you all?',
+        'qué tal': 'How is it going?',
+        'que tal': 'How is it going?',
+        'bienvenidos': 'Welcome',
+        'bienvenido': 'Welcome',
+        'bienvenidos al grupo': 'Welcome to the group',
+        'gracias': 'Thank you',
+        'muchas gracias': 'Thank you very much',
+        'de nada': 'You\'re welcome',
+        'por favor': 'Please',
+        'hasta luego': 'See you later',
+        'adiós': 'Goodbye',
+        'adios': 'Goodbye',
+        'sí': 'Yes',
+        'si': 'Yes',
+        'no': 'No',
+        'amigo': 'Friend',
+        'amigos': 'Friends',
+        'estoy aquí': 'I am here',
+        'estoy aqui': 'I am here',
+        'no entiendo': 'I do not understand',
+        'dónde estás': 'Where are you?',
+        'donde estas': 'Where are you?',
+        'estoy de acuerdo': 'I agree',
+        'vamos': 'Let\'s go',
+        // French -> English
+        'bonjour': 'Hello',
+        'bonjour !': 'Hello!',
+        'salut': 'Hi / Hello',
+        'bonjour à tous': 'Hello everyone',
+        'bonjour a tous': 'Hello everyone',
+        'comment allez-vous ?': 'How are you?',
+        'comment allez-vous': 'How are you?',
+        'comment vas-tu': 'How are you doing?',
+        'ça va': 'How are you / Good',
+        'ca va': 'How are you / Good',
+        'merci': 'Thank you',
+        'merci beaucoup': 'Thank you very much',
+        'de rien': 'You\'re welcome',
+        's\'il vous plaît': 'Please',
+        's\'il vous plait': 'Please',
+        'bienvenue': 'Welcome',
+        'bienvenue dans le groupe': 'Welcome to the group',
+        'au revoir': 'Goodbye',
+        'à bientôt': 'See you soon',
+        'a bientot': 'See you soon',
+        'oui': 'Yes',
+        'd\'accord': 'Agreed / Okay',
+        // German -> English
+        'hallo': 'Hello',
+        'hallo!': 'Hello!',
+        'hallo zusammen': 'Hello everyone',
+        'guten tag': 'Good day',
+        'guten morgen': 'Good morning',
+        'gute nacht': 'Good night',
+        'wie geht es dir?': 'How are you?',
+        'wie geht es dir': 'How are you?',
+        'wie geht\'s': 'How is it going?',
+        'wie gehts': 'How is it going?',
+        'danke': 'Thank you',
+        'vielen dank': 'Thank you very much',
+        'bitte': 'Please / You\'re welcome',
+        'willkommen': 'Welcome',
+        'willkommen in der gruppe': 'Welcome to the group',
+        'auf wiedersehen': 'Goodbye',
+        'bis bald': 'See you soon',
+        'ja': 'Yes',
+        'nein': 'No',
+        // Japanese -> English
+        'こんにちは': 'Hello',
+        'こんにちは！': 'Hello!',
+        'おはようございます': 'Good morning',
+        'こんばんは': 'Good evening',
+        'お元気ですか？': 'How are you?',
+        'お元気ですか': 'How are you?',
+        'ありがとう': 'Thank you',
+        'ありがとうございます': 'Thank you very much',
+        'どういたしまして': 'You\'re welcome',
+        'ようこそ': 'Welcome',
+        'さようなら': 'Goodbye',
+        'はい': 'Yes',
+        'いいえ': 'No',
+        // Chinese -> English
+        '你好': 'Hello',
+        '你好！': 'Hello!',
+        '大家好': 'Hello everyone',
+        '早上好': 'Good morning',
+        '晚安': 'Good night',
+        '谢谢': 'Thank you',
+        '非常感谢': 'Thank you very much',
+        '不客气': 'You\'re welcome',
+        '欢迎': 'Welcome',
+        '再见': 'Goodbye',
+        // Russian -> English
+        'привет': 'Hello',
+        'здравствуйте': 'Greetings / Hello',
+        'доброе утро': 'Good morning',
+        'добрый день': 'Good afternoon',
+        'спасибо': 'Thank you',
+        'большое спасибо': 'Thank you very much',
+        'пожалуйста': 'Please / You\'re welcome',
+        'как дела?': 'How are you?',
+        'как дела': 'How are you?',
+        'добро пожаловать': 'Welcome',
+        'до свидания': 'Goodbye',
+        // Arabic -> English
+        'مرحبا': 'Hello',
+        'اهلا': 'Welcome',
+        'شكرا': 'Thank you',
+        'شكرا جزيلا': 'Thank you very much',
+        'كيف حالك؟': 'How are you?',
+        'كيف حالك': 'How are you?',
+        'صباح الخير': 'Good morning',
+        'مع السلامة': 'Goodbye'
+      },
+      'es': {
+        'hello': '¡Hola!',
+        'hello!': '¡Hola!',
+        'hello everyone': '¡Hola a todos!',
+        'how are you': '¿Cómo estás?',
+        'how are you?': '¿Cómo estás?',
+        'welcome': 'Bienvenido a NEXCHAT',
+        'welcome to the group': 'Bienvenidos al grupo',
+        'thank you': 'Gracias',
+        'quantum': 'cuántico'
+      },
+      'ja': {
+        'hello': 'こんにちは！',
+        'hello!': 'こんにちは！',
+        'how are you': 'お元気ですか？',
+        'how are you?': 'お元気ですか？',
+        'welcome': 'NEXCHATへようこそ',
+        'welcome to the group': 'グループへようこそ',
+        'thank you': 'ありがとう',
+        'quantum': '量子'
+      },
+      'fr': {
+        'hello': 'Bonjour !',
+        'hello!': 'Bonjour !',
+        'how are you': 'Comment allez-vous ?',
+        'how are you?': 'Comment allez-vous ?',
+        'welcome': 'Bienvenue sur NEXCHAT',
+        'welcome to the group': 'Bienvenue dans le groupe',
+        'thank you': 'Merci',
+        'quantum': 'quantique'
+      },
+      'de': {
+        'hello': 'Hallo!',
+        'hello!': 'Hallo!',
+        'how are you': 'Wie geht es dir?',
+        'how are you?': 'Wie geht es dir?',
+        'welcome': 'Willkommen bei NEXCHAT',
+        'welcome to the group': 'Willkommen in der Gruppe',
+        'thank you': 'Danke',
+        'quantum': 'Quanten'
+      }
     };
 
     this.init();
+    this.initAutoTranslateSettings();
+    this.setupFeedObserver();
   }
 
   init() {
@@ -1283,6 +1462,262 @@ class NexTranslator {
     });
   }
 
+  initAutoTranslateSettings() {
+    const toggle = document.getElementById('autoTranslateOnLoadToggle');
+    const targetSelect = document.getElementById('autoTranslateTargetLangSelect');
+    const origToggle = document.getElementById('autoTranslateShowOriginalToggle');
+
+    if (toggle) {
+      toggle.checked = this.autoTranslateOnLoad;
+      toggle.addEventListener('change', (e) => {
+        this.autoTranslateOnLoad = e.target.checked;
+        localStorage.setItem('nex_auto_translate_on_load', this.autoTranslateOnLoad ? 'true' : 'false');
+        this.updateChatHeaderBadge();
+        if (this.autoTranslateOnLoad) {
+          this.scanAndAutoTranslateFeed();
+          if (typeof window.showNotif === 'function') {
+            window.showNotif(`Auto-Translate On Load enabled (${this.languageNames[this.autoTranslateTargetLang] || this.autoTranslateTargetLang})`, 'success', 2500);
+          }
+        } else {
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Auto-Translate On Load disabled', 'info', 2000);
+          }
+        }
+      });
+    }
+
+    if (targetSelect) {
+      targetSelect.value = this.autoTranslateTargetLang;
+      targetSelect.addEventListener('change', (e) => {
+        this.autoTranslateTargetLang = e.target.value;
+        localStorage.setItem('nex_auto_translate_target_lang', this.autoTranslateTargetLang);
+        this.clearAutoTranslateCacheAndRescan();
+        if (typeof window.showNotif === 'function') {
+          window.showNotif(`Target language set to ${this.languageNames[this.autoTranslateTargetLang] || this.autoTranslateTargetLang}`, 'info', 2000);
+        }
+      });
+    }
+
+    if (origToggle) {
+      origToggle.checked = this.autoTranslateShowOriginal;
+      origToggle.addEventListener('change', (e) => {
+        this.autoTranslateShowOriginal = e.target.checked;
+        localStorage.setItem('nex_auto_translate_show_original', this.autoTranslateShowOriginal ? 'true' : 'false');
+        document.querySelectorAll('.auto-trans-original').forEach(el => {
+          el.style.display = this.autoTranslateShowOriginal ? 'block' : 'none';
+        });
+      });
+    }
+
+    // Header badge click action: quick feedback
+    const badge = document.getElementById('headerAutoTranslateBadge');
+    if (badge && !badge.dataset.bound) {
+      badge.dataset.bound = 'true';
+      badge.style.cursor = 'pointer';
+      badge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const langName = this.languageNames[this.autoTranslateTargetLang] || this.autoTranslateTargetLang;
+        if (typeof window.showNotif === 'function') {
+          window.showNotif(`Auto-Translating incoming messages into ${langName}`, 'info', 2500);
+        }
+      });
+    }
+  }
+
+  isAutoTranslateActiveForCurrentChat() {
+    const cid = this.currentChatId || window.currentChatUser || window.currentGroupId;
+    if (cid) {
+      const override = localStorage.getItem(`nex_chat_autotranslate_${cid}`);
+      if (override === 'true') return true;
+      if (override === 'false') return false;
+    }
+    return !!this.autoTranslateOnLoad;
+  }
+
+  toggleAutoTranslateCurrentChat() {
+    const cid = this.currentChatId || window.currentChatUser || window.currentGroupId;
+    if (!cid) {
+      if (typeof window.showNotif === 'function') window.showNotif('No active chat selected', 'warning');
+      return;
+    }
+
+    const currentActive = this.isAutoTranslateActiveForCurrentChat();
+    const nextState = !currentActive;
+    localStorage.setItem(`nex_chat_autotranslate_${cid}`, nextState ? 'true' : 'false');
+    this.updateChatHeaderBadge();
+
+    const langName = this.languageNames[this.autoTranslateTargetLang] || this.autoTranslateTargetLang;
+    if (nextState) {
+      this.scanAndAutoTranslateFeed();
+      if (typeof window.showNotif === 'function') {
+        window.showNotif(`Auto-Translate active for this ${this.currentIsGroup ? 'group' : 'chat'} (${langName})`, 'success', 2500);
+      }
+    } else {
+      document.querySelectorAll('#messages-area .auto-translated-card').forEach(c => c.remove());
+      document.querySelectorAll('#messages-area [data-auto-translated]').forEach(b => b.removeAttribute('data-auto-translated'));
+      if (typeof window.showNotif === 'function') {
+        window.showNotif(`Auto-Translate disabled for this ${this.currentIsGroup ? 'group' : 'chat'}`, 'info', 2000);
+      }
+    }
+  }
+
+  updateChatHeaderBadge() {
+    const badge = document.getElementById('headerAutoTranslateBadge');
+    const label = document.getElementById('toggleChatAutoTranslateLabel');
+    const isActive = this.isAutoTranslateActiveForCurrentChat();
+    const langName = this.languageNames[this.autoTranslateTargetLang] || this.autoTranslateTargetLang.toUpperCase();
+
+    if (badge) {
+      badge.style.display = isActive ? 'inline-flex' : 'none';
+      badge.innerHTML = `<i class="fa-solid fa-language"></i> ${langName.toUpperCase()}`;
+      badge.title = `Auto-Translate Active (${langName})`;
+    }
+    if (label) {
+      label.textContent = `Auto-Translate This Chat: ${isActive ? 'ON' : 'OFF'}`;
+    }
+  }
+
+  onChatLoaded(chatId, isGroup = false) {
+    this.currentChatId = chatId;
+    this.currentIsGroup = !!isGroup;
+    this.updateChatHeaderBadge();
+
+    if (this.isAutoTranslateActiveForCurrentChat()) {
+      clearTimeout(this.scanDebounceTimeout);
+      this.scanDebounceTimeout = setTimeout(() => {
+        this.scanAndAutoTranslateFeed();
+      }, 120);
+    }
+  }
+
+  setupFeedObserver() {
+    const messagesArea = document.getElementById('messages-area');
+    if (!messagesArea || this.observer) return;
+
+    this.observer = new MutationObserver((mutations) => {
+      if (!this.isAutoTranslateActiveForCurrentChat()) return;
+
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node.nodeType !== Node.ELEMENT_NODE) continue;
+
+          // Check if the added node is a received message wrapper
+          if (node.classList?.contains('received')) {
+            const bubble = node.querySelector('.message-bubble, .nex-msg-bubble') || (node.classList.contains('message-bubble') ? node : null);
+            if (bubble) this.autoTranslateMessageBubble(bubble);
+          } else {
+            // Find any received message bubbles within added subtree
+            const bubbles = node.querySelectorAll?.(
+              '.message-wrapper.received .message-bubble, ' +
+              '.nex-msg-wrapper.received .nex-msg-bubble'
+            );
+            if (bubbles && bubbles.length) {
+              bubbles.forEach(b => this.autoTranslateMessageBubble(b));
+            }
+          }
+        }
+      }
+    });
+
+    this.observer.observe(messagesArea, { childList: true, subtree: true });
+  }
+
+  scanAndAutoTranslateFeed() {
+    if (!this.isAutoTranslateActiveForCurrentChat()) return;
+
+    const bubbles = document.querySelectorAll(
+      '#messages-area .message-wrapper.received .message-bubble:not([data-auto-translated="true"]), ' +
+      '#messages-area .nex-msg-wrapper.received .nex-msg-bubble:not([data-auto-translated="true"])'
+    );
+    bubbles.forEach(bubble => this.autoTranslateMessageBubble(bubble));
+  }
+
+  clearAutoTranslateCacheAndRescan() {
+    document.querySelectorAll('#messages-area .auto-translated-card').forEach(c => c.remove());
+    document.querySelectorAll('#messages-area [data-auto-translated]').forEach(b => b.removeAttribute('data-auto-translated'));
+    this.updateChatHeaderBadge();
+    if (this.isAutoTranslateActiveForCurrentChat()) {
+      this.scanAndAutoTranslateFeed();
+    }
+  }
+
+  autoTranslateMessageBubble(bubble) {
+    if (!bubble || bubble.dataset.autoTranslated === 'true') return;
+
+    // Extract message text cleanly
+    let rawText = '';
+    const nexText = bubble.querySelector('.nex-msg-text');
+    const pTag = bubble.querySelector('p');
+    const msgText = bubble.querySelector('.message-text');
+
+    if (nexText) {
+      rawText = nexText.innerText || nexText.textContent || '';
+    } else if (pTag) {
+      rawText = pTag.innerText || pTag.textContent || '';
+    } else if (msgText) {
+      rawText = msgText.innerText || msgText.textContent || '';
+    } else {
+      const clone = bubble.cloneNode(true);
+      clone.querySelectorAll(
+        '.nex-msg-meta, .message-hover-actions, .message-attachment-container, ' +
+        '.message-reaction-badge, .message-reaction-badge-container, .e2ee-secure-badge, ' +
+        '.message-translate-chip, .auto-translated-card, .time-span'
+      ).forEach(el => el.remove());
+      rawText = clone.innerText || clone.textContent || '';
+    }
+
+    rawText = (rawText || '').trim();
+    if (!rawText || rawText.length < 2) return;
+
+    bubble.dataset.autoTranslated = 'true';
+
+    const targetLang = this.autoTranslateTargetLang || 'en';
+    const langName = this.languageNames[targetLang] || targetLang;
+
+    this.translateText(rawText, targetLang).then(translated => {
+      if (!translated || !translated.trim()) return;
+      if (translated.trim().toLowerCase() === rawText.toLowerCase()) return;
+      if (bubble.querySelector('.auto-translated-card')) return;
+
+      const card = document.createElement('div');
+      card.className = 'auto-translated-card';
+      const showOrig = this.autoTranslateShowOriginal !== false;
+
+      card.innerHTML = `
+        <div class="auto-trans-badge">
+          <i class="fa-solid fa-language"></i> Auto-Translated (${this.escapeMarkup(langName)})
+          <button type="button" class="auto-trans-speak-btn" title="Pronounce" style="background:none;border:none;color:#00f3ff;cursor:pointer;margin-left:6px;padding:0 3px;">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+        </div>
+        <div class="auto-trans-text" style="color: #f8fafc; font-size: 13.5px; line-height: 1.45;">${this.escapeMarkup(translated)}</div>
+        <div class="auto-trans-original" style="display: ${showOrig ? 'block' : 'none'};">Original: "${this.escapeMarkup(rawText)}"</div>
+      `;
+
+      card.querySelector('.auto-trans-speak-btn')?.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        this.speakText(translated, targetLang);
+      });
+
+      const meta = bubble.querySelector('.nex-msg-meta, .message-hover-actions, .time-span') || bubble.lastElementChild;
+      if (meta && meta.parentNode === bubble) {
+        bubble.insertBefore(card, meta);
+      } else {
+        bubble.appendChild(card);
+      }
+    }).catch(err => {
+      console.warn('[NexTranslator] Auto-translation error:', err);
+    });
+  }
+
+  escapeMarkup(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   show(initialText = '') {
     if (!this.modal) return;
     this.modal.style.display = 'flex';
@@ -1306,7 +1741,39 @@ class NexTranslator {
     const clean = rawText.trim();
     const langName = this.languageNames[targetLang] || targetLang;
 
-    // 1. Try ChronEX AI Engine
+    // 1. High-speed Lexicon & Compound Clause match (0ms instant local resolution)
+    const lower = clean.toLowerCase();
+    const stripped = lower.replace(/[¡!¿?.,]/g, '').trim();
+
+    if (this.dictionary[targetLang]) {
+      const dict = this.dictionary[targetLang];
+      if (dict[lower]) {
+        return dict[lower];
+      }
+      if (dict[stripped]) {
+        return dict[stripped];
+      }
+
+      // Compound phrase matching for sentences with multiple conversational clauses
+      let substituted = lower;
+      let replacedAny = false;
+      if (!this.cachedSortedKeys) this.cachedSortedKeys = {};
+      if (!this.cachedSortedKeys[targetLang]) {
+        this.cachedSortedKeys[targetLang] = Object.keys(dict).sort((a, b) => b.length - a.length);
+      }
+
+      for (const k of this.cachedSortedKeys[targetLang]) {
+        if (k.length > 2 && substituted.includes(k)) {
+          substituted = substituted.split(k).join(dict[k]);
+          replacedAny = true;
+        }
+      }
+      if (replacedAny && substituted.toLowerCase() !== lower) {
+        return substituted.charAt(0).toUpperCase() + substituted.slice(1);
+      }
+    }
+
+    // 2. Try ChronEX AI Engine if available (for complex, un-cached foreign sentences)
     if (typeof window.generateChronexAIResponse === 'function') {
       try {
         const prompt = `Translate this message into ${langName}. Return ONLY the direct translated sentence with zero commentary or quotes:\n"${clean}"`;
@@ -1319,13 +1786,31 @@ class NexTranslator {
       }
     }
 
-    // 2. High-speed Lexicon / Dictionary Fallback
-    const lower = clean.toLowerCase();
-    if (this.dictionary[targetLang] && this.dictionary[targetLang][lower]) {
-      return this.dictionary[targetLang][lower];
+    // 3. Free Public Web Translation API Fallback (with 2.5s timeout)
+    if (typeof fetch === 'function') {
+      try {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), 2500) : null;
+        const apiTarget = targetLang === 'en' ? 'en' : targetLang;
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${apiTarget}`, {
+          signal: controller ? controller.signal : undefined
+        });
+        if (timer) clearTimeout(timer);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.responseData && data.responseData.translatedText) {
+            const trans = data.responseData.translatedText.trim();
+            if (trans && !trans.toUpperCase().includes('MYMEMORY WARNING') && trans.toLowerCase() !== lower) {
+              return trans;
+            }
+          }
+        }
+      } catch (_) {
+        // Fall through to synthetic prefix
+      }
     }
 
-    // Smart grammatical synthetic prefix for offline verification
+    // 4. Smart synthetic prefix fallback
     const prefixes = {
       'es': 'Traducido: ',
       'fr': 'Traduit: ',
@@ -1333,7 +1818,8 @@ class NexTranslator {
       'ja': '翻訳済み: ',
       'zh': '翻译: ',
       'ru': 'Переведено: ',
-      'it': 'Tradotto: '
+      'it': 'Tradotto: ',
+      'en': '[Translated] '
     };
     return (prefixes[targetLang] || `[${targetLang.toUpperCase()}] `) + clean;
   }

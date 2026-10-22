@@ -356,6 +356,21 @@ NEXCHAT/
 * **Optic Chromatic Aberration:** Real-time RGB prism color separation text shadow.
 * **Glassmorphism Blur Slider:** Adjust backdrop blur dynamically from 0px to 40px with full persistence.
 
+### 22. 🌍 AUTO-TRANSLATE ON LOAD // Foreign Group & Cross-Border Chat Intelligence
+* **Zero-Click Incoming Translation:** Overcomes language barriers in international groups and multi-lingual direct chats by automatically translating foreign messages into the user's preferred language as soon as they load or arrive in real time over WebSockets.
+* **Settings Hub Integration (`tab-chats`):**
+  * `Auto-Translate On Load` master switch to enable continuous automatic translation.
+  * `Target Language Selector`: Choose between English, Spanish, French, German, Japanese, Chinese, Russian, Arabic, Italian, Portuguese, and Korean.
+  * `Display Original Subtitle`: Toggle visibility of the original foreign text in subtle font below the translated card.
+* **Per-Chat / Per-Group Tactical Override:** Quickly toggle auto-translation ON/OFF for any specific chat or foreign group from the Chat Options dropdown menu (`...`).
+* **Active Header Status Badge:** Displays a glowing `#headerAutoTranslateBadge` (`🌐 TRANSLATED` / `🌐 ENGLISH`) in the active chat header next to online status.
+* **Multi-Tier Translation Engine:**
+  1. *Sub-millisecond Lexicon & Compound Clause Matrix:* Instant 0ms local translation for conversational phrases and greetings without network lag.
+  2. *ChronEX Neural AI Engine (Gemini Pool):* Deep contextual sentence synthesis when active.
+  3. *Free Public Translation API Fallback:* Automatic online translation for arbitrary foreign prose.
+  4. *Synthetic Contextual Tagging:* Graceful fallback for airgapped and offline testing environments.
+* **Interactive In-Bubble Card (`.auto-translated-card`):** Displays a neon cyan badge, translated prose, optional original subtitle, and a native Web Speech API pronunciation button (`🔊`) to listen to native pronunciation.
+
 ---
 
 ## ⚙️ Environment Configuration

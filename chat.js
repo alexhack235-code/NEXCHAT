@@ -4814,6 +4814,11 @@ function loadMessages() {
     });
 
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    try {
+      if (window.CyberFeatures && window.CyberFeatures.translator) {
+        window.CyberFeatures.translator.onChatLoaded(currentChatUser, false);
+      }
+    } catch (_) {}
   };
 
   const debouncedUpdateMessages = () => {
@@ -4900,6 +4905,11 @@ function updateChatProfileDisplay(username, profilePic, status = 'Online') {
 
     if (activeChatName) activeChatName.textContent = username;
     if (activeChatStatus) activeChatStatus.textContent = status;
+    try {
+      if (window.CyberFeatures && window.CyberFeatures.translator) {
+        window.CyberFeatures.translator.updateChatHeaderBadge();
+      }
+    } catch (_) {}
     if (activeChatAvatar) {
       if (profilePic) {
         activeChatAvatar.src = profilePic;
@@ -9221,6 +9231,19 @@ function loadSettingsPreferences() {
     if (bubbleSelect && prefs.bubbleTheme) bubbleSelect.value = prefs.bubbleTheme;
     if (aiModelSelect && prefs.aiModel) aiModelSelect.value = prefs.aiModel;
 
+    const autoTranslateToggleEl = document.getElementById("autoTranslateOnLoadToggle");
+    const autoTranslateTargetLangEl = document.getElementById("autoTranslateTargetLangSelect");
+    const autoTranslateShowOrigEl = document.getElementById("autoTranslateShowOriginalToggle");
+    if (autoTranslateToggleEl) {
+      autoTranslateToggleEl.checked = localStorage.getItem("nex_auto_translate_on_load") === "true";
+    }
+    if (autoTranslateTargetLangEl) {
+      autoTranslateTargetLangEl.value = localStorage.getItem("nex_auto_translate_target_lang") || "en";
+    }
+    if (autoTranslateShowOrigEl) {
+      autoTranslateShowOrigEl.checked = localStorage.getItem("nex_auto_translate_show_original") !== "false";
+    }
+
     applyBubbleTheme(prefs.bubbleTheme || "neon-onyx");
 
     const lastSeenSelect = document.getElementById("lastSeenPrivacySelect");
@@ -9228,7 +9251,13 @@ function loadSettingsPreferences() {
       lastSeenSelect.value = prefs.lastSeenPrivacy;
     }
 
-    const ghostTimerSelect = document.getElementById("ghostDefaultTimerSelect");
+    const autoTranslateTargetSelect = document.getElementById("autoTranslateTargetLangSelect");
+  if (autoTranslateTargetSelect && !autoTranslateTargetSelect.dataset.bound) {
+    autoTranslateTargetSelect.dataset.bound = "true";
+    autoTranslateTargetSelect.addEventListener("change", saveSettingsPreferences, false);
+  }
+
+  const ghostTimerSelect = document.getElementById("ghostDefaultTimerSelect");
     if (ghostTimerSelect && prefs.ghostDefaultTimer) {
       ghostTimerSelect.value = prefs.ghostDefaultTimer;
     }
@@ -9350,6 +9379,25 @@ function saveSettingsPreferences() {
     };
 
     localStorage.setItem("nexchat_settings", JSON.stringify(prefs));
+
+    const autoTranslateToggleEl = document.getElementById("autoTranslateOnLoadToggle");
+    const autoTranslateTargetLangEl = document.getElementById("autoTranslateTargetLangSelect");
+    const autoTranslateShowOrigEl = document.getElementById("autoTranslateShowOriginalToggle");
+    if (autoTranslateToggleEl) {
+      localStorage.setItem("nex_auto_translate_on_load", autoTranslateToggleEl.checked ? "true" : "false");
+    }
+    if (autoTranslateTargetLangEl) {
+      localStorage.setItem("nex_auto_translate_target_lang", autoTranslateTargetLangEl.value);
+    }
+    if (autoTranslateShowOrigEl) {
+      localStorage.setItem("nex_auto_translate_show_original", autoTranslateShowOrigEl.checked ? "true" : "false");
+    }
+    if (window.CyberFeatures && window.CyberFeatures.translator) {
+      if (autoTranslateToggleEl) window.CyberFeatures.translator.autoTranslateOnLoad = autoTranslateToggleEl.checked;
+      if (autoTranslateTargetLangEl) window.CyberFeatures.translator.autoTranslateTargetLang = autoTranslateTargetLangEl.value;
+      if (autoTranslateShowOrigEl) window.CyberFeatures.translator.autoTranslateShowOriginal = autoTranslateShowOrigEl.checked;
+      window.CyberFeatures.translator.updateChatHeaderBadge();
+    }
     console.log("Settings saved:", prefs);
     showNotif("Settings saved", "success", 2000);
 
@@ -10713,7 +10761,7 @@ document.getElementById("settingsModal")?.addEventListener("click", (e) => {
 }, false);
 
 const setupSettingsListeners = () => {
-  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle"];
+  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle"];
 
   toggles.forEach(id => {
     const el = document.getElementById(id);
@@ -12396,6 +12444,11 @@ async function loadGroupMessages(groupId) {
     }
 
     cancelChatLoadFeedback();
+    try {
+      if (window.CyberFeatures && window.CyberFeatures.translator) {
+        window.CyberFeatures.translator.onChatLoaded(groupId, true);
+      }
+    } catch (_) {}
   } catch (error) {
     cancelChatLoadFeedback();
     console.error('Error loading group messages:', error);

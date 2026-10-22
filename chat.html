@@ -57,7 +57,10 @@
           <img id="activeChatAvatar" src="logo.jpg" alt="Contact" class="active-chat-avatar" style="cursor: pointer;" onerror="this.onerror=null;this.src='logo.jpg';">
           <div class="active-chat-info">
             <div id="activeChatName" class="active-chat-name">Contact Name</div>
-            <div id="activeChatStatus" class="active-chat-status">Online</div>
+            <div style="display: flex; align-items: center; gap: 4px;">
+              <div id="activeChatStatus" class="active-chat-status">Online</div>
+              <span id="headerAutoTranslateBadge" class="auto-translate-header-pill" style="display: none;" title="Auto-Translate On Load Active"><i class="fa-solid fa-language"></i> TRANSLATED</span>
+            </div>
           </div>
         </div>
       </div>
@@ -516,6 +519,7 @@
           <button id="groupInviteQrBtn" class="option-item" style="display: none;"><i class="fa-solid fa-qrcode" style="margin-right: 8px;"></i>Invite via QR</button>
           <button id="groupLeaveBtn" class="option-item danger" style="display: none;"><i class="fa-solid fa-arrow-right-from-bracket" style="margin-right: 8px;"></i>Leave Group</button>
           <div class="dropdown-divider"></div>
+          <button id="toggleChatAutoTranslateBtn" class="option-item" onclick="window.CyberFeatures.translator?.toggleAutoTranslateCurrentChat();"><i class="fa-solid fa-language" style="margin-right: 8px; color: #00f3ff;"></i><span id="toggleChatAutoTranslateLabel">Auto-Translate This Chat: OFF</span></button>
           <button id="hideChatInGhostVaultBtn" class="option-item" onclick="if(window.currentChatUser) window.CyberFeatures.ghostVault?.hideChat(window.currentChatUser);"><i class="fa-solid fa-ghost" style="margin-right: 8px; color: #c084fc;"></i>Hide in Ghost Vault</button>
           <button id="blockBtn" class="option-item danger">Block User</button>
           <button id="unblockBtn" class="option-item success" style="display: none;">Unblock User</button>
@@ -1419,6 +1423,50 @@
                       <input type="checkbox" id="enterKeySendToggle" checked>
                       <span class="slider"></span>
                     </label>
+                  </div>
+                </div>
+
+                <!-- Auto-Translate On Load (Foreign Group & Chat Intelligence) -->
+                <div class="settings-card" id="autoTranslateSettingsCard">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="color: #00f3ff; font-size: 14px;"><i class="fa-solid fa-language"></i> Auto-Translate On Load</strong>
+                      <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Automatically translate incoming messages in foreign groups and international chats as soon as they load or arrive in real time.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="autoTranslateOnLoadToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  
+                  <div id="autoTranslateOptionsWrap" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <label for="autoTranslateTargetLangSelect" style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">
+                      Translate foreign messages into:
+                    </label>
+                    <select id="autoTranslateTargetLangSelect" class="settings-select">
+                      <option value="en">English (Default)</option>
+                      <option value="es">Spanish (Español)</option>
+                      <option value="fr">French (Français)</option>
+                      <option value="de">German (Deutsch)</option>
+                      <option value="ja">Japanese (日本語)</option>
+                      <option value="zh">Chinese (中文)</option>
+                      <option value="ru">Russian (Русский)</option>
+                      <option value="ar">Arabic (العربية)</option>
+                      <option value="it">Italian (Italiano)</option>
+                      <option value="pt">Portuguese (Português)</option>
+                      <option value="ko">Korean (한국어)</option>
+                    </select>
+                    
+                    <div class="luxury-toggle-row" style="margin-top: 12px;">
+                      <div>
+                        <span style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Display Original Subtitle</span>
+                        <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Keep original foreign text visible in subtle font under translation.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="autoTranslateShowOriginalToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>
