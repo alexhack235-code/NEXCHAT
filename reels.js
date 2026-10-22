@@ -605,6 +605,11 @@ window.addEventListener('keydown', (e) => {
       document.exitFullscreen().catch(() => {});
       showToast('Exited Fullscreen');
     }
+  } else if (e.key === 't' || e.key === 'T') {
+    e.preventDefault();
+    const tBtn = document.getElementById('theaterModeToggleBtn');
+    if (tBtn) tBtn.click();
+    else setTheaterMode(!isTheaterMode);
   } else if (e.key === '?' || (e.shiftKey && e.key === '/')) {
     e.preventDefault();
     toggleKeyboardShortcutsModal();
@@ -1223,17 +1228,29 @@ function renderReels(reelsList) {
 
     // Elements inside card
     const videoEl = card.querySelector('.reel-video');
-    // Dynamic Aspect-Ratio Detection: If vertical 9:16, fill edge-to-edge; otherwise show full-sized without cropping
-    videoEl.addEventListener('loadedmetadata', () => {
-      if (videoEl.videoWidth && videoEl.videoHeight) {
+    // Dynamic Aspect-Ratio Detection: Automatically expands landscape / gaming clips (16:9 cinema) or fills vertical reels (9:16)
+    const updateVideoOrientation = () => {
+      if (videoEl && videoEl.videoWidth && videoEl.videoHeight) {
         const ratio = videoEl.videoHeight / videoEl.videoWidth;
         if (ratio >= 1.35) {
           videoEl.classList.add('is-vertical');
+          card.classList.add('is-portrait-video');
+          card.classList.remove('is-landscape-video');
         } else {
           videoEl.classList.remove('is-vertical');
+          card.classList.add('is-landscape-video');
+          card.classList.remove('is-portrait-video');
         }
       }
-    });
+    };
+    if (videoEl) {
+      videoEl.addEventListener('loadedmetadata', updateVideoOrientation);
+      videoEl.addEventListener('canplay', updateVideoOrientation);
+      videoEl.addEventListener('playing', updateVideoOrientation);
+      if (videoEl.videoWidth > 0 || videoEl.readyState >= 1) {
+        updateVideoOrientation();
+      }
+    }
 
     const playIndicator = card.querySelector('.reel-play-indicator');
     const progressFill = card.querySelector('.reel-progress-fill');
@@ -4923,6 +4940,38 @@ if (pipBtn) {
       showToast('Picture-in-Picture could not be started');
     }
   });
+}
+
+// Widescreen Theater Mode Controller (for PC / Desktop)
+const theaterModeBtn = document.getElementById('theaterModeToggleBtn');
+let isTheaterMode = localStorage.getItem('nex_theater_mode') === 'true';
+
+function setTheaterMode(active) {
+  isTheaterMode = active;
+  document.body.classList.toggle('theater-mode-active', isTheaterMode);
+  localStorage.setItem('nex_theater_mode', isTheaterMode ? 'true' : 'false');
+  if (theaterModeBtn) {
+    theaterModeBtn.classList.toggle('active', isTheaterMode);
+    theaterModeBtn.innerHTML = isTheaterMode ? '<i class="fa-solid fa-compress"></i>' : '<i class="fa-solid fa-arrows-left-right-to-line"></i>';
+    theaterModeBtn.title = isTheaterMode ? 'Exit Widescreen Theater Mode (Shortcut: T)' : 'Widescreen Theater Mode (Shortcut: T)';
+  }
+  showToast(isTheaterMode ? 'Widescreen Cinema Mode (16:9 Cinema)' : 'Standard Portrait View');
+  if (navigator.vibrate) navigator.vibrate(20);
+}
+
+if (theaterModeBtn) {
+  theaterModeBtn.addEventListener('click', () => {
+    setTheaterMode(!isTheaterMode);
+  });
+}
+
+// Restore saved theater mode preference on desktop startup
+if (isTheaterMode && window.innerWidth >= 900) {
+  document.body.classList.add('theater-mode-active');
+  if (theaterModeBtn) {
+    theaterModeBtn.classList.add('active');
+    theaterModeBtn.innerHTML = '<i class="fa-solid fa-compress"></i>';
+  }
 }
 
 // 2. Mobile Floating Bottom Dock (TikTok / Instagram Native Navigation)
