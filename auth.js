@@ -284,6 +284,11 @@ function attachResetHandler() {
 
       // Dispatch our high-fidelity NEXCHAT Gmail Sentinel recovery email
       const generatedPin = Math.floor(100000 + Math.random() * 900000).toString();
+      const origin = (window.location.origin && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1'))
+        ? window.location.origin
+        : 'https://nexchat-drab.vercel.app';
+      const publicResetUrl = `${origin}/reset.html?email=${encodeURIComponent(email)}&token=${generatedPin}`;
+
       fetch('/api/send-email-alert', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -292,7 +297,7 @@ function attachResetHandler() {
           toEmail: email,
           data: {
             username: email.split('@')[0],
-            resetUrl: `${window.location.origin}/reset.html`,
+            resetUrl: publicResetUrl,
             token: generatedPin,
             ipAddress: 'Current Client IP',
             expiresMinutes: 15,

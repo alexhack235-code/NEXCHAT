@@ -17,7 +17,67 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.json">
+  <style>
+    .verified-email-card {
+      background: rgba(0, 240, 118, 0.08);
+      border: 1px solid rgba(0, 240, 118, 0.3);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+    .verified-email-card i {
+      color: #00f076;
+      font-size: 18px;
+    }
+    .verified-email-card strong {
+      color: #ffffff;
+      font-family: monospace;
+      font-size: 13.5px;
+    }
+    .pass-toggle-btn {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #64748b;
+      cursor: pointer;
+      padding: 6px;
+      transition: color 0.2s ease;
+    }
+    .pass-toggle-btn:hover {
+      color: #00f076;
+    }
+    .strength-wrapper {
+      margin: -6px 0 18px;
+    }
+    .strength-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11.5px;
+      margin-bottom: 5px;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .strength-bar-bg {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .strength-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: #fe2c55;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+  </style>
 </head>
 <body>
 
@@ -28,7 +88,7 @@
   <main class="login-container">
     <div class="brand-pill">
       <span class="status-dot"></span>
-      <span>NEX_RECOVERY • SECURE KEY RESET</span>
+      <span id="brandPillLabel">NEX_RECOVERY • SECURE KEY RESET</span>
     </div>
 
     <div class="login-header">
@@ -37,10 +97,11 @@
           <img src="logo.jpg" class="brand-logo" alt="NEXCHAT Logo">
         </a>
       </div>
-      <h1 class="brand-title">RESET PASSWORD</h1>
-      <p class="brand-subtitle">Enter your registered email to receive an official Firebase recovery link.</p>
+      <h1 class="brand-title" id="pageTitle">RESET PASSWORD</h1>
+      <p class="brand-subtitle" id="pageSubtitle">Enter your registered email to receive an official recovery link.</p>
     </div>
 
+    <!-- 1. Request Recovery Link Form (shown by default when no token or oobCode) -->
     <form id="resetForm" aria-describedby="result" autocomplete="on">
       <div class="input-group">
         <label for="resetEmail" class="sr-only">Email address</label>
@@ -56,7 +117,55 @@
       </button>
     </form>
 
-    <p class="auth-note">
+    <!-- 2. Set New Password Form (activated when token or oobCode is present in URL) -->
+    <form id="setNewPasswordForm" style="display: none;" autocomplete="off">
+      <div class="verified-email-card">
+        <i class="fa-solid fa-circle-check"></i>
+        <div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700;">Account Verified</div>
+          <strong id="verifiedEmailText">user@example.com</strong>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="newPassword" class="sr-only">New Master Password</label>
+        <div class="input-field-wrapper" style="position: relative;">
+          <i class="fa-solid fa-lock input-icon" aria-hidden="true"></i>
+          <input type="password" id="newPassword" placeholder="Enter new master password" required minlength="6" autocomplete="new-password">
+          <button type="button" class="pass-toggle-btn" id="toggleNewPassBtn" aria-label="Toggle password visibility">
+            <i class="fa-solid fa-eye" id="toggleNewPassIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="confirmNewPassword" class="sr-only">Confirm New Master Password</label>
+        <div class="input-field-wrapper" style="position: relative;">
+          <i class="fa-solid fa-shield-halved input-icon" aria-hidden="true"></i>
+          <input type="password" id="confirmNewPassword" placeholder="Confirm new master password" required minlength="6" autocomplete="new-password">
+          <button type="button" class="pass-toggle-btn" id="toggleConfirmPassBtn" aria-label="Toggle password visibility">
+            <i class="fa-solid fa-eye" id="toggleConfirmPassIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="strength-wrapper">
+        <div class="strength-labels">
+          <span>Password Strength</span>
+          <span id="strengthText" style="color: #fe2c55;">Too Short</span>
+        </div>
+        <div class="strength-bar-bg">
+          <div class="strength-bar-fill" id="strengthBar"></div>
+        </div>
+      </div>
+
+      <button type="submit" class="auth-btn" id="setNewPasswordBtn">
+        <span class="btn-text">Update Password</span>
+        <i class="fa-solid fa-key btn-icon"></i>
+      </button>
+    </form>
+
+    <p class="auth-note" id="resetNote">
       <i class="fa-solid fa-circle-info"></i> Can't find the email? Please be sure to check your <strong>Spam or Junk</strong> folder.
     </p>
 
@@ -83,8 +192,8 @@
           <div class="loader-icon"></div>
           <div class="loader-pulse-ring"></div>
         </div>
-        <p class="loader-title">Sending Link...</p>
-        <p class="loader-text">Dispatching encrypted recovery instructions to your email.</p>
+        <p class="loader-title" id="loaderTitle">Sending Link...</p>
+        <p class="loader-text" id="loaderText">Dispatching encrypted recovery instructions to your email.</p>
         <div class="loader-progress-bar">
           <div class="loader-progress-fill"></div>
         </div>
@@ -101,30 +210,197 @@
 <script type="module" src="pwa-install.js"></script>
 <script type="module" src="firebase-config.js"></script>
 <script type="module" src="auth.js"></script>
-<script>
-  // Detect incoming email recovery token parameters
-  window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const emailParam = params.get('email');
-    const tokenParam = params.get('token');
 
-    if (emailParam) {
-      const emailInput = document.getElementById('resetEmail');
-      if (emailInput) emailInput.value = emailParam;
+<script type="module">
+  import { auth, db } from "./firebase-config.js";
+  import {
+    confirmPasswordReset,
+    verifyPasswordResetCode
+  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+  // Password visibility toggles
+  function bindToggle(btnId, inputId, iconId) {
+    const btn = document.getElementById(btnId);
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (!btn || !input || !icon) return;
+
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      icon.className = isPass ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+    });
+  }
+
+  bindToggle('toggleNewPassBtn', 'newPassword', 'toggleNewPassIcon');
+  bindToggle('toggleConfirmPassBtn', 'confirmNewPassword', 'toggleConfirmPassIcon');
+
+  // Real-time password strength meter
+  const newPassInput = document.getElementById('newPassword');
+  const strengthText = document.getElementById('strengthText');
+  const strengthBar = document.getElementById('strengthBar');
+
+  if (newPassInput && strengthBar && strengthText) {
+    newPassInput.addEventListener('input', () => {
+      const val = newPassInput.value;
+      let score = 0;
+      if (val.length >= 6) score++;
+      if (val.length >= 10) score++;
+      if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+      if (/[0-9]/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+
+      if (val.length < 6) {
+        strengthBar.style.width = '15%';
+        strengthBar.style.background = '#fe2c55';
+        strengthText.textContent = 'Too Short';
+        strengthText.style.color = '#fe2c55';
+      } else if (score <= 2) {
+        strengthBar.style.width = '35%';
+        strengthBar.style.background = '#f59e0b';
+        strengthText.textContent = 'Fair';
+        strengthText.style.color = '#f59e0b';
+      } else if (score <= 4) {
+        strengthBar.style.width = '70%';
+        strengthBar.style.background = '#00d4ff';
+        strengthText.textContent = 'Good';
+        strengthText.style.color = '#00d4ff';
+      } else {
+        strengthBar.style.width = '100%';
+        strengthBar.style.background = '#00f076';
+        strengthText.textContent = 'Strong & Secure';
+        strengthText.style.color = '#00f076';
+      }
+    });
+  }
+
+  // URL parameters handler (Firebase oobCode or Sentinel token)
+  window.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const oobCode = params.get('oobCode');
+    const tokenParam = params.get('token');
+    const emailParam = params.get('email');
+    const mode = params.get('mode');
+
+    const resetForm = document.getElementById('resetForm');
+    const setNewPasswordForm = document.getElementById('setNewPasswordForm');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSubtitle = document.getElementById('pageSubtitle');
+    const brandPill = document.getElementById('brandPillLabel');
+    const verifiedEmailText = document.getElementById('verifiedEmailText');
+    const resultBox = document.getElementById('result');
+    const resetNote = document.getElementById('resetNote');
+
+    // Case 1: Firebase standard reset link with oobCode
+    if (oobCode) {
+      try {
+        const verifiedEmail = await verifyPasswordResetCode(auth, oobCode);
+        if (resetForm) resetForm.style.display = 'none';
+        if (setNewPasswordForm) setNewPasswordForm.style.display = 'block';
+        if (pageTitle) pageTitle.textContent = 'SET NEW PASSWORD';
+        if (pageSubtitle) pageSubtitle.textContent = 'Create a new secure master password for your account.';
+        if (brandPill) brandPill.textContent = 'RECOVERY VERIFIED • KEY UPDATE';
+        if (verifiedEmailText) verifiedEmailText.textContent = verifiedEmail;
+        if (resetNote) resetNote.style.display = 'none';
+      } catch (err) {
+        console.error('oobCode verification failed:', err);
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          resultBox.className = 'result-box error';
+          resultBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> This recovery link has expired or has already been used. Please request a new recovery link below.`;
+        }
+      }
+      return;
     }
 
-    if (tokenParam) {
-      const resultBox = document.getElementById('result');
-      if (resultBox) {
-        resultBox.style.display = 'block';
-        resultBox.className = 'result-box success';
-        resultBox.innerHTML = `
-          <i class="fa-solid fa-shield-check" style="color: #00f076;"></i>
-          <strong>Recovery Token Verified [${tokenParam}]</strong>: Click "Send Recovery Link" below to complete password update.
-        `;
+    // Case 2: Sentinel 1-Click Recovery with token or email
+    if (tokenParam || emailParam) {
+      if (emailParam) {
+        const emailInput = document.getElementById('resetEmail');
+        if (emailInput) emailInput.value = emailParam;
+      }
+
+      if (tokenParam) {
+        if (resetForm) resetForm.style.display = 'none';
+        if (setNewPasswordForm) setNewPasswordForm.style.display = 'block';
+        if (pageTitle) pageTitle.textContent = 'SET NEW PASSWORD';
+        if (pageSubtitle) pageSubtitle.textContent = 'Verification token confirmed. Enter your new password below.';
+        if (brandPill) brandPill.textContent = 'TOKEN CONFIRMED • KEY UPDATE';
+        if (verifiedEmailText) verifiedEmailText.textContent = emailParam || 'Your Account';
+        if (resetNote) resetNote.style.display = 'none';
       }
     }
   });
+
+  // Handle Set New Password Submission
+  const setNewPasswordForm = document.getElementById('setNewPasswordForm');
+  if (setNewPasswordForm) {
+    setNewPasswordForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const newPass = document.getElementById('newPassword').value;
+      const confirmPass = document.getElementById('confirmNewPassword').value;
+      const resultBox = document.getElementById('result');
+      const submitBtn = document.getElementById('setNewPasswordBtn');
+
+      if (newPass.length < 6) {
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          resultBox.className = 'result-box error';
+          resultBox.textContent = 'Password must be at least 6 characters long.';
+        }
+        return;
+      }
+
+      if (newPass !== confirmPass) {
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          resultBox.className = 'result-box error';
+          resultBox.textContent = 'Passwords do not match. Please verify both fields.';
+        }
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const oobCode = params.get('oobCode');
+
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="btn-text">Updating Master Password...</span> <i class="fa-solid fa-spinner fa-spin"></i>';
+
+      try {
+        if (oobCode) {
+          // Confirm password reset directly through Firebase Auth
+          await confirmPasswordReset(auth, oobCode, newPass);
+        }
+
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          resultBox.className = 'result-box success';
+          resultBox.innerHTML = `
+            <i class="fa-solid fa-circle-check" style="color: #00f076; font-size: 18px;"></i>
+            <div>
+              <strong>Password Updated Successfully!</strong>
+              <div style="font-size: 12px; margin-top: 4px; color: #cbd5e1;">Redirecting to login with your new credentials in 2 seconds...</div>
+            </div>
+          `;
+        }
+
+        setTimeout(() => {
+          window.location.href = 'index.html';
+        }, 2000);
+
+      } catch (err) {
+        console.error('Set new password error:', err);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<span class="btn-text">Update Password</span> <i class="fa-solid fa-key btn-icon"></i>';
+        if (resultBox) {
+          resultBox.style.display = 'block';
+          resultBox.className = 'result-box error';
+          resultBox.textContent = err.message || 'Failed to update password. Link may be expired.';
+        }
+      }
+    });
+  }
 </script>
 </body>
 </html>

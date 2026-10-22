@@ -14,6 +14,7 @@ const CONFIG = {
   GMAIL_APP_PASS: process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_APP_PASS || '',
   RESEND_API_KEY: process.env.RESEND_API_KEY || '',
   FROM_NAME: 'NEXCHAT Sentinel',
+  APP_BASE_URL: process.env.APP_BASE_URL || 'https://nexchat-drab.vercel.app',
 };
 
 // Check for local email-config.json if environment variables are not set
@@ -24,9 +25,37 @@ if (fs.existsSync(localConfigPath)) {
     if (raw.gmailUser) CONFIG.GMAIL_USER = raw.gmailUser;
     if (raw.gmailAppPassword) CONFIG.GMAIL_APP_PASS = raw.gmailAppPassword;
     if (raw.resendApiKey) CONFIG.RESEND_API_KEY = raw.resendApiKey;
+    if (raw.appBaseUrl) CONFIG.APP_BASE_URL = raw.appBaseUrl;
   } catch (e) {
     console.warn('[EMAIL] Could not parse email-config.json:', e.message);
   }
+}
+
+/**
+ * Resolves any relative or localhost URL into a globally reachable HTTPS URL (e.g. Vercel production)
+ * Prevents "localhost cannot be reached" errors when users click links on mobile phones or external devices.
+ */
+function resolvePublicUrl(urlPath, fallbackRelative = '') {
+  const publicBase = (CONFIG.APP_BASE_URL || 'https://nexchat-drab.vercel.app').replace(/\/+$/, '');
+
+  if (!urlPath) {
+    return `${publicBase}/${fallbackRelative.replace(/^\/+/, '')}`;
+  }
+
+  if (urlPath.startsWith('http://') || urlPath.startsWith('https://')) {
+    // If it points to localhost or 127.0.0.1, convert host to the live public web app
+    if (urlPath.includes('localhost') || urlPath.includes('127.0.0.1')) {
+      try {
+        const u = new URL(urlPath);
+        return `${publicBase}${u.pathname}${u.search}${u.hash}`;
+      } catch (_) {
+        return `${publicBase}/${fallbackRelative.replace(/^\/+/, '')}`;
+      }
+    }
+    return urlPath;
+  }
+
+  return `${publicBase}/${urlPath.replace(/^\/+/, '')}`;
 }
 
 // Preload official NEXCHAT logo for inline MIME attachment (prevents blank/missing logo in Gmail)
@@ -230,7 +259,10 @@ async function sendNotificationEmail({ to, subject, htmlContent }) {
  */
 function createPasswordResetEmail({ username, resetUrl, token, ipAddress, expiresMinutes = 15 }) {
   const pin = token || Math.floor(100000 + Math.random() * 900000).toString();
-  const directLink = resetUrl ? `${resetUrl}?token=${pin}` : 'http://localhost:8080/reset.html';
+  const urlWithToken = resetUrl
+    ? (resetUrl.includes('token=') ? resetUrl : (resetUrl.includes('?') ? `${resetUrl}&token=${pin}` : `${resetUrl}?token=${pin}`))
+    : `reset.html?token=${pin}`;
+  const directLink = resolvePublicUrl(urlWithToken, `reset.html?token=${pin}`);
 
   return `
     <!DOCTYPE html>
@@ -368,7 +400,7 @@ function createPasswordResetEmail({ username, resetUrl, token, ipAddress, expire
  * Enterprise-Grade Device Link Security Alert Email
  */
 function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, revokeUrl }) {
-  const killUrl = revokeUrl || 'http://localhost:8080/chat.html?action=manage_devices';
+  const killUrl = resolvePublicUrl(revokeUrl, 'chat.html?action=manage_devices');
 
   return `
     <!DOCTYPE html>
@@ -485,7 +517,7 @@ function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, r
  * Enterprise-Grade Offline Message Digest Email
  */
 function createOfflineMessageEmail({ recipientName, senderName, messageSnippet, chatUrl }) {
-  const directChat = chatUrl || 'http://localhost:8080/chat.html';
+  const directChat = resolvePublicUrl(chatUrl, 'chat.html');
 
   return `
     <!DOCTYPE html>
@@ -566,7 +598,7 @@ function createOfflineMessageEmail({ recipientName, senderName, messageSnippet, 
  */
 function createExtensionConsentEmail({ username, extensionName, extensionId, status, scopes, ipAddress, clientTime, revokeUrl }) {
   const isApproved = (status === 'approved' || status === 'granted' || status === 'yes');
-  const directUrl = revokeUrl || 'http://localhost:8080/chat.html?action=manage_extensions';
+  const directUrl = resolvePublicUrl(revokeUrl, 'chat.html?action=manage_extensions');
   const name = extensionName || 'NEX-REELS (CamShot)';
   const defaultScopes = scopes && scopes.length ? scopes : [
     'read:profile',
@@ -749,5 +781,6 @@ module.exports = {
   createDeviceLinkEmail,
   createOfflineMessageEmail,
   createExtensionConsentEmail,
+  resolvePublicUrl,
   CONFIG,
 };
