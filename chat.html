@@ -1618,6 +1618,30 @@
                   <div id="fortressTestResult" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>
                 </div>
 
+                <!-- NEXCHAT SENTINEL EMAIL NOTIFICATION VERIFIER -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 240, 118, 0.35); background: rgba(0, 240, 118, 0.04);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fa-solid fa-envelope-circle-check" style="color: #00f076; font-size: 16px;"></i>
+                      <strong style="color: #00f076; font-size: 13.5px;">Sentinel Email Security &amp; Alerts</strong>
+                    </div>
+                    <span id="sentinelMailerBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 240, 118, 0.15); color: #00f076; font-weight: 700; border: 1px solid rgba(0, 240, 118, 0.3);">
+                      TLS SMTP Active
+                    </span>
+                  </div>
+                  <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 10px 0;">
+                    Dispatches instant cryptographic alerts to your inbox for password resets, paired secondary devices, and unread offline digests.
+                  </p>
+
+                  <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <input type="email" id="settingsTestEmailInput" placeholder="Enter recipient email..." style="flex: 1; font-size: 12px; padding: 8px 12px; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
+                    <button type="button" id="sendSentinelTestEmailBtn" style="padding: 8px 14px; font-size: 12px; white-space: nowrap; background: linear-gradient(135deg, #00f076, #00d4ff); color: #050608; font-weight: 800; border: none; border-radius: 8px; cursor: pointer;">
+                      <i class="fa-solid fa-paper-plane"></i> Send Test Ping
+                    </button>
+                  </div>
+                  <div id="sentinelTestEmailFeedback" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>
+                </div>
+
                 <div class="settings-card">
                   <label><strong>Pending Chat Requests</strong></label>
                   <div id="pendingRequestsList" class="contact-scroll-box" style="max-height: 160px; margin-top: 8px;">

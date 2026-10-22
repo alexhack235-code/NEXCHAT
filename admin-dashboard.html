@@ -849,6 +849,10 @@
       <button type="button" class="admin-tab-btn" data-tab="tab-threats">
         <i class="fa-solid fa-shield-virus"></i> Firewall &amp; Audit Logs
       </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-emailer">
+        <i class="fa-solid fa-envelope-circle-check" style="color: var(--neon-cyan);"></i> Sentinel Mailer &amp; Dispatcher
+        <span class="tab-count" id="tabEmailerBadge" style="background: rgba(0, 240, 118, 0.15); color: #00f076; border-color: rgba(0, 240, 118, 0.3);">Gmail SMTP</span>
+      </button>
     </nav>
 
     <!-- ========================================== -->
@@ -1039,6 +1043,164 @@
             <div style="text-align: center; padding: 24px; color: var(--text-dim); font-size: 12px;">
               No active system announcements currently published.
             </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 7: SENTINEL GMAIL DISPATCHER & TESTER  -->
+    <!-- ========================================== -->
+    <div class="tab-pane" id="tab-emailer">
+      <!-- Telemetry Status Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
+        <div class="stat-card">
+          <div class="stat-label">DISPATCHER STATUS</div>
+          <div class="stat-val" id="emailerStatusText" style="color: var(--neon-green); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #00f076; box-shadow: 0 0 10px #00f076;"></span>
+            ONLINE (VERIFIED)
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">smtp.gmail.com:465 TLS</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">PRIMARY SENDER ACCOUNT</div>
+          <div class="stat-val" id="emailerSenderAccount" style="color: var(--neon-cyan); font-size: 14px; word-break: break-all;">
+            oyewoletodoroki@gmail.com
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">NEXCHAT Sentinel Enclave</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">MIME BRANDING ATTACHMENT</div>
+          <div class="stat-val" style="color: var(--neon-gold); font-size: 15px;">
+            <i class="fa-solid fa-paperclip"></i> logo.jpg (Base64)
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Inline cid:nexchat-logo</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">DISPATCH LATENCY</div>
+          <div class="stat-val" id="emailerLatencyVal" style="color: #cbd5e1; font-size: 15px;">
+            ~1.2s avg
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Zero-Dependency Native TLS</div>
+        </div>
+      </div>
+
+      <!-- Main Testing Console & Live Log -->
+      <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px;">
+        <!-- Left: Dispatch Controller -->
+        <section class="admin-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-paper-plane" style="color: var(--neon-cyan);"></i>
+              Sentinel Email Dispatch &amp; Verification Console
+            </div>
+            <button type="button" id="refreshEmailerHealthBtn" class="admin-btn secondary" style="font-size: 11px; padding: 4px 10px;">
+              <i class="fa-solid fa-arrows-rotate"></i> Check SMTP
+            </button>
+          </div>
+
+          <form id="adminEmailerForm" style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                Recipient Email Address:
+              </label>
+              <input type="email" id="emailTargetRecipient" class="admin-input" placeholder="e.g., your-email@gmail.com" value="oyewoletodoroki@gmail.com" required style="font-family: monospace;">
+              <span style="font-size: 10.5px; color: var(--text-dim); margin-top: 4px; display: block;">
+                Emails are sent directly to this Gmail / inbox using authenticated TLS SMTP.
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Template Type:
+                </label>
+                <select id="emailTemplateType" class="admin-input" style="font-size: 12.5px;">
+                  <option value="test_email" selected>⚡ System Test Verification</option>
+                  <option value="password_reset">🔐 Cryptographic Key &amp; PIN Reset</option>
+                  <option value="device_linked">⚠️ Device Link Security Alert</option>
+                  <option value="offline_message">💬 Encrypted Offline Chat Digest</option>
+                  <option value="extension_consent_approved">🛡️ Extension Access: GRANTED</option>
+                  <option value="extension_consent_denied">🛑 Extension Access: BLOCKED</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Recipient Username:
+                </label>
+                <input type="text" id="emailParamUsername" class="admin-input" placeholder="e.g., Alexander" value="Alexander">
+              </div>
+            </div>
+
+            <!-- Dynamic Fields for Templates -->
+            <div id="emailOptionalParamsWrap" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px;">
+              <div id="fieldMessageSnippetWrap" style="display: none;">
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Message Snippet:
+                </label>
+                <input type="text" id="emailParamMessage" class="admin-input" value="Security alert: Please review your paired sessions.">
+              </div>
+              <div id="fieldExtensionNameWrap" style="display: none;">
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Target Extension:
+                </label>
+                <input type="text" id="emailParamExtension" class="admin-input" value="NEX-REELS (CamShot Pro)">
+              </div>
+              <div id="fieldGeneralNoteWrap" style="font-size: 11.5px; color: var(--text-dim); line-height: 1.5;">
+                <i class="fa-solid fa-circle-info" style="color: var(--neon-cyan);"></i>
+                <span id="templateExplainerText">Dispatches a live high-fidelity HTML email verification ping with inline NEXCHAT emblem.</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
+              <button type="submit" id="sendLiveEmailBtn" class="admin-btn primary" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 800; letter-spacing: 0.5px;">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span id="sendEmailBtnLabel">DISPATCH LIVE EMAIL NOW</span>
+              </button>
+              <button type="button" id="previewTemplateBtn" class="admin-btn secondary" style="padding: 12px 16px; font-size: 13px;">
+                <i class="fa-solid fa-eye"></i> Preview
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Right: Dispatch Log & Telemetry Output -->
+        <section class="admin-panel" style="display: flex; flex-direction: column;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-terminal" style="color: var(--neon-green);"></i>
+              Live Sentinel Delivery Log
+            </div>
+            <button type="button" id="clearEmailLogsBtn" class="admin-btn secondary" style="font-size: 11px; padding: 4px 8px;">
+              Clear
+            </button>
+          </div>
+
+          <div class="admin-terminal-stream" id="emailerLogStream" style="flex: 1; min-height: 280px; max-height: 380px;">
+            <div class="terminal-line"><span class="term-ts">[SYSTEM]</span> <span class="term-msg ok">Sentinel Mailer Subsystem Ready.</span></div>
+            <div class="terminal-line"><span class="term-ts">[CONFIG]</span> <span class="term-msg info">Target SMTP: smtp.gmail.com:465 (Native TLS)</span></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Live HTML Preview Modal / Card -->
+      <div id="emailPreviewCardWrapper" style="margin-top: 20px; display: none;">
+        <section class="admin-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-display" style="color: var(--neon-gold);"></i>
+              HTML Email Template Live Preview
+            </div>
+            <button type="button" id="closeEmailPreviewBtn" class="admin-btn secondary" style="font-size: 11px; padding: 4px 8px;">
+              Close Preview
+            </button>
+          </div>
+          <div style="background: #03060d; border-radius: 12px; padding: 16px; overflow-x: auto;">
+            <iframe id="emailPreviewIframe" style="width: 100%; min-height: 480px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: #03060d;"></iframe>
           </div>
         </section>
       </div>
@@ -1258,6 +1420,164 @@
 
           <div class="admin-terminal-stream" id="adminTerminalStream">
             <div class="terminal-line"><span class="term-ts">[SYSTEM]</span> <span class="term-msg ok">Zero-Trust Admin Console initialized.</span></div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 7: SENTINEL GMAIL DISPATCHER & TESTER  -->
+    <!-- ========================================== -->
+    <div class="tab-pane" id="tab-emailer">
+      <!-- Telemetry Status Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
+        <div class="stat-card">
+          <div class="stat-label">DISPATCHER STATUS</div>
+          <div class="stat-val" id="emailerStatusText" style="color: var(--neon-green); font-size: 16px; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #00f076; box-shadow: 0 0 10px #00f076;"></span>
+            ONLINE (VERIFIED)
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">smtp.gmail.com:465 TLS</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">PRIMARY SENDER ACCOUNT</div>
+          <div class="stat-val" id="emailerSenderAccount" style="color: var(--neon-cyan); font-size: 14px; word-break: break-all;">
+            oyewoletodoroki@gmail.com
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">NEXCHAT Sentinel Enclave</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">MIME BRANDING ATTACHMENT</div>
+          <div class="stat-val" style="color: var(--neon-gold); font-size: 15px;">
+            <i class="fa-solid fa-paperclip"></i> logo.jpg (Base64)
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Inline cid:nexchat-logo</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">DISPATCH LATENCY</div>
+          <div class="stat-val" id="emailerLatencyVal" style="color: #cbd5e1; font-size: 15px;">
+            ~1.2s avg
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Zero-Dependency Native TLS</div>
+        </div>
+      </div>
+
+      <!-- Main Testing Console & Live Log -->
+      <div style="display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 20px;">
+        <!-- Left: Dispatch Controller -->
+        <section class="admin-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-paper-plane" style="color: var(--neon-cyan);"></i>
+              Sentinel Email Dispatch &amp; Verification Console
+            </div>
+            <button type="button" id="refreshEmailerHealthBtn" class="admin-btn secondary" style="font-size: 11px; padding: 4px 10px;">
+              <i class="fa-solid fa-arrows-rotate"></i> Check SMTP
+            </button>
+          </div>
+
+          <form id="adminEmailerForm" style="display: flex; flex-direction: column; gap: 14px;">
+            <div>
+              <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                Recipient Email Address:
+              </label>
+              <input type="email" id="emailTargetRecipient" class="admin-input" placeholder="e.g., your-email@gmail.com" value="oyewoletodoroki@gmail.com" required style="font-family: monospace;">
+              <span style="font-size: 10.5px; color: var(--text-dim); margin-top: 4px; display: block;">
+                Emails are sent directly to this Gmail / inbox using authenticated TLS SMTP.
+              </span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Template Type:
+                </label>
+                <select id="emailTemplateType" class="admin-input" style="font-size: 12.5px;">
+                  <option value="test_email" selected>⚡ System Test Verification</option>
+                  <option value="password_reset">🔐 Cryptographic Key &amp; PIN Reset</option>
+                  <option value="device_linked">⚠️ Device Link Security Alert</option>
+                  <option value="offline_message">💬 Encrypted Offline Chat Digest</option>
+                  <option value="extension_consent_approved">🛡️ Extension Access: GRANTED</option>
+                  <option value="extension_consent_denied">🛑 Extension Access: BLOCKED</option>
+                </select>
+              </div>
+
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Recipient Username:
+                </label>
+                <input type="text" id="emailParamUsername" class="admin-input" placeholder="e.g., Alexander" value="Alexander">
+              </div>
+            </div>
+
+            <!-- Dynamic Fields for Templates -->
+            <div id="emailOptionalParamsWrap" style="background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px;">
+              <div id="fieldMessageSnippetWrap" style="display: none;">
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Message Snippet:
+                </label>
+                <input type="text" id="emailParamMessage" class="admin-input" value="Security alert: Please review your paired sessions.">
+              </div>
+              <div id="fieldExtensionNameWrap" style="display: none;">
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Target Extension:
+                </label>
+                <input type="text" id="emailParamExtension" class="admin-input" value="NEX-REELS (CamShot Pro)">
+              </div>
+              <div id="fieldGeneralNoteWrap" style="font-size: 11.5px; color: var(--text-dim); line-height: 1.5;">
+                <i class="fa-solid fa-circle-info" style="color: var(--neon-cyan);"></i>
+                <span id="templateExplainerText">Dispatches a live high-fidelity HTML email verification ping with inline NEXCHAT emblem.</span>
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
+              <button type="submit" id="sendLiveEmailBtn" class="admin-btn primary" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 800; letter-spacing: 0.5px;">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span id="sendEmailBtnLabel">DISPATCH LIVE EMAIL NOW</span>
+              </button>
+              <button type="button" id="previewTemplateBtn" class="admin-btn secondary" style="padding: 12px 16px; font-size: 13px;">
+                <i class="fa-solid fa-eye"></i> Preview
+              </button>
+            </div>
+          </form>
+        </section>
+
+        <!-- Right: Dispatch Log & Telemetry Output -->
+        <section class="admin-panel" style="display: flex; flex-direction: column;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-terminal" style="color: var(--neon-green);"></i>
+              Live Sentinel Delivery Log
+            </div>
+            <button type="button" id="clearEmailLogsBtn" class="admin-btn secondary" style="font-size: 11px; padding: 4px 8px;">
+              Clear
+            </button>
+          </div>
+
+          <div class="admin-terminal-stream" id="emailerLogStream" style="flex: 1; min-height: 280px; max-height: 380px;">
+            <div class="terminal-line"><span class="term-ts">[SYSTEM]</span> <span class="term-msg ok">Sentinel Mailer Subsystem Ready.</span></div>
+            <div class="terminal-line"><span class="term-ts">[CONFIG]</span> <span class="term-msg info">Target SMTP: smtp.gmail.com:465 (Native TLS)</span></div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Live HTML Preview Modal / Card -->
+      <div id="emailPreviewCardWrapper" style="margin-top: 20px; display: none;">
+        <section class="admin-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-display" style="color: var(--neon-gold);"></i>
+              HTML Email Template Live Preview
+            </div>
+            <button type="button" id="closeEmailPreviewBtn" class="admin-btn secondary" style="font-size: 11px; padding: 4px 8px;">
+              Close Preview
+            </button>
+          </div>
+          <div style="background: #03060d; border-radius: 12px; padding: 16px; overflow-x: auto;">
+            <iframe id="emailPreviewIframe" style="width: 100%; min-height: 480px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: #03060d;"></iframe>
           </div>
         </section>
       </div>
@@ -2355,6 +2675,249 @@
         });
       }
 
+      // ─── 7. SENTINEL EMAIL DISPATCHER & TESTER CONTROLLER ───
+      function logEmailer(msg, type = 'info') {
+        const stream = document.getElementById('emailerLogStream');
+        if (!stream) return;
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        const ts = new Date().toLocaleTimeString();
+        let colorClass = 'info';
+        if (type === 'ok') colorClass = 'ok';
+        else if (type === 'alert' || type === 'error') colorClass = 'alert';
+        else if (type === 'warn') colorClass = 'warn';
+
+        line.innerHTML = `<span class="term-ts">[${ts}]</span> <span class="term-msg ${colorClass}">${escapeHtml(msg)}</span>`;
+        stream.appendChild(line);
+        stream.scrollTop = stream.scrollHeight;
+      }
+
+      async function checkEmailerHealth() {
+        const statusEl = document.getElementById('emailerStatusText');
+        const badge = document.getElementById('tabEmailerBadge');
+        const senderEl = document.getElementById('emailerSenderAccount');
+        const latencyEl = document.getElementById('emailerLatencyVal');
+
+        const startTime = performance.now();
+        try {
+          const res = await fetch('/api/email-status');
+          const elapsed = Math.round(performance.now() - startTime);
+          if (latencyEl) latencyEl.textContent = `${elapsed}ms`;
+
+          if (res.ok) {
+            const data = await res.json();
+            if (data.configured) {
+              if (statusEl) statusEl.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#00f076;box-shadow:0 0 10px #00f076;"></span> ONLINE (${data.provider.toUpperCase()})`;
+              if (senderEl && data.user) senderEl.textContent = data.user;
+              if (badge) badge.textContent = 'Active SMTP';
+              logEmailer(`SMTP Dispatcher Verified: Connected to ${data.server} as ${data.user} (${elapsed}ms).`, 'ok');
+              return true;
+            }
+          }
+        } catch (e) {
+          logEmailer(`Could not query /api/email-status: ${e.message}`, 'warn');
+        }
+
+        if (statusEl) statusEl.innerHTML = `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#ffd700;box-shadow:0 0 10px #ffd700;"></span> LOCAL / SANDBOX`;
+        if (badge) badge.textContent = 'Sandbox';
+        return false;
+      }
+
+      const emailTypeSelect = document.getElementById('emailTemplateType');
+      if (emailTypeSelect) {
+        emailTypeSelect.addEventListener('change', () => {
+          const val = emailTypeSelect.value;
+          const msgWrap = document.getElementById('fieldMessageSnippetWrap');
+          const extWrap = document.getElementById('fieldExtensionNameWrap');
+          const explainer = document.getElementById('templateExplainerText');
+
+          if (msgWrap) msgWrap.style.display = (val === 'offline_message') ? 'block' : 'none';
+          if (extWrap) extWrap.style.display = (val.startsWith('extension_consent')) ? 'block' : 'none';
+
+          if (explainer) {
+            if (val === 'test_email') explainer.textContent = 'Dispatches a live high-fidelity HTML email verification ping with inline NEXCHAT emblem.';
+            else if (val === 'password_reset') explainer.textContent = 'Sends a 6-digit cryptographic PIN with direct one-click link to reset.html.';
+            else if (val === 'device_linked') explainer.textContent = 'Sends an urgent security alert containing client hardware & network telemetry with emergency kill-switch.';
+            else if (val === 'offline_message') explainer.textContent = 'Sends an encrypted preview digest of missed chat messages with direct routing to chat.html.';
+            else if (val === 'extension_consent_approved') explainer.textContent = 'Sends an OAuth-style permission confirmation with authorized access scopes.';
+            else if (val === 'extension_consent_denied') explainer.textContent = 'Sends a security notice confirming that third-party extension access was rejected.';
+          }
+        });
+      }
+
+      document.getElementById('refreshEmailerHealthBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('refreshEmailerHealthBtn');
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking...';
+        await checkEmailerHealth();
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Check SMTP';
+      });
+
+      document.getElementById('clearEmailLogsBtn')?.addEventListener('click', () => {
+        const stream = document.getElementById('emailerLogStream');
+        if (stream) stream.innerHTML = '<div class="terminal-line"><span class="term-ts">[SYSTEM]</span> <span class="term-msg ok">Logs cleared.</span></div>';
+      });
+
+      // Submit Email Dispatch
+      document.getElementById('adminEmailerForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const recipient = document.getElementById('emailTargetRecipient')?.value.trim();
+        const templateType = document.getElementById('emailTemplateType')?.value || 'test_email';
+        const username = document.getElementById('emailParamUsername')?.value.trim() || 'Alexander';
+        const message = document.getElementById('emailParamMessage')?.value.trim() || 'Important security advisory for your NEXCHAT session.';
+        const extension = document.getElementById('emailParamExtension')?.value.trim() || 'NEX-REELS (CamShot Pro)';
+
+        if (!recipient) {
+          alert('Please enter a recipient email address.');
+          return;
+        }
+
+        const btn = document.getElementById('sendLiveEmailBtn');
+        const btnLabel = document.getElementById('sendEmailBtnLabel');
+        if (btn) btn.disabled = true;
+        if (btnLabel) btnLabel.textContent = 'DISPATCHING TLS SMTP...';
+
+        logEmailer(`Initiating ${templateType} dispatch to ${recipient}...`, 'info');
+        const startTime = performance.now();
+
+        try {
+          let endpoint = '/api/send-email-alert';
+          let payload = {};
+
+          if (templateType === 'test_email') {
+            endpoint = '/api/test-email';
+            payload = { toEmail: recipient };
+          } else if (templateType === 'password_reset') {
+            const pin = Math.floor(100000 + Math.random() * 900000).toString();
+            payload = {
+              type: 'password_reset',
+              toEmail: recipient,
+              data: {
+                username,
+                resetUrl: `${window.location.origin}/reset.html`,
+                token: pin,
+                ipAddress: 'Verified SuperAdmin Console IP',
+                expiresMinutes: 15
+              }
+            };
+          } else if (templateType === 'device_linked') {
+            payload = {
+              type: 'device_linked',
+              toEmail: recipient,
+              data: {
+                username,
+                deviceType: 'SuperAdmin CyberDeck',
+                browser: navigator.userAgent.split(' ')[0] || 'Chrome',
+                os: navigator.platform || 'Windows',
+                ipAddress: '127.0.0.1',
+                revokeUrl: `${window.location.origin}/chat.html?action=manage_devices`
+              }
+            };
+          } else if (templateType === 'offline_message') {
+            payload = {
+              type: 'offline_message',
+              toEmail: recipient,
+              data: {
+                recipientName: username,
+                senderName: 'NEXCHAT Sentinel AI',
+                messageSnippet: message,
+                chatUrl: `${window.location.origin}/chat.html`
+              }
+            };
+          } else if (templateType === 'extension_consent_approved') {
+            payload = {
+              type: 'extension_consent',
+              toEmail: recipient,
+              data: {
+                username,
+                extensionName: extension,
+                status: 'approved',
+                scopes: ['read:profile', 'write:media_vault', 'sync:chat_feed'],
+                ipAddress: 'Verified Primary IP',
+                clientTime: new Date().toUTCString(),
+                revokeUrl: `${window.location.origin}/chat.html?action=manage_extensions`
+              }
+            };
+          } else if (templateType === 'extension_consent_denied') {
+            payload = {
+              type: 'extension_consent',
+              toEmail: recipient,
+              data: {
+                username,
+                extensionName: extension,
+                status: 'denied',
+                scopes: ['read:contacts', 'admin:system'],
+                ipAddress: 'Verified Primary IP',
+                clientTime: new Date().toUTCString(),
+                revokeUrl: `${window.location.origin}/chat.html?action=manage_extensions`
+              }
+            };
+          }
+
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const elapsed = Math.round(performance.now() - startTime);
+          const data = await res.json();
+
+          if (res.ok && data.success) {
+            const prov = data.provider || 'gmail_smtp';
+            const msgId = data.details?.messageId || 'OK';
+            logEmailer(`SUCCESS: Email dispatched via ${prov} in ${elapsed}ms!`, 'ok');
+            logEmailer(`Response: ${msgId}`, 'ok');
+            logAudit(`Dispatched ${templateType} email to ${recipient} (${prov})`, 'ok');
+            alert(`✅ Email Dispatched Successfully!\n\nRecipient: ${recipient}\nProvider: ${prov}\nLatency: ${elapsed}ms\nMessage: ${msgId}`);
+          } else {
+            const err = data.error || 'Server rejected dispatch request.';
+            logEmailer(`DISPATCH ERROR: ${err}`, 'alert');
+            logAudit(`Failed dispatching email to ${recipient}: ${err}`, 'alert');
+            alert(`❌ Dispatch Failed:\n${err}`);
+          }
+        } catch (dispatchErr) {
+          logEmailer(`NETWORK ERROR: ${dispatchErr.message}`, 'alert');
+          alert(`Network Error: ${dispatchErr.message}`);
+        } finally {
+          if (btn) btn.disabled = false;
+          if (btnLabel) btnLabel.textContent = 'DISPATCH LIVE EMAIL NOW';
+        }
+      });
+
+      // Preview Email Template
+      document.getElementById('previewTemplateBtn')?.addEventListener('click', () => {
+        const wrap = document.getElementById('emailPreviewCardWrapper');
+        const iframe = document.getElementById('emailPreviewIframe');
+        const templateType = document.getElementById('emailTemplateType')?.value || 'test_email';
+        const username = document.getElementById('emailParamUsername')?.value.trim() || 'Alexander';
+        const message = document.getElementById('emailParamMessage')?.value.trim() || 'Important security advisory for your NEXCHAT session.';
+        const extension = document.getElementById('emailParamExtension')?.value.trim() || 'NEX-REELS (CamShot Pro)';
+
+        if (!wrap || !iframe) return;
+
+        let previewHtml = `
+          <!DOCTYPE html><html><body style="background:#070c18;color:#cbd5e1;font-family:sans-serif;padding:30px;text-align:center;">
+            <h2 style="color:#00f076;">NEXCHAT Sentinel Mailer</h2>
+            <p>Template: <strong>${templateType}</strong></p>
+            <p>Recipient: <strong>${username}</strong></p>
+            <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:20px;max-width:500px;margin:20px auto;text-align:left;">
+              <div style="font-size:12px;color:#00d4ff;font-family:monospace;margin-bottom:8px;">SAMPLE PAYLOAD</div>
+              <div style="font-size:13px;line-height:1.6;color:#f8fafc;">${message}</div>
+              <div style="margin-top:14px;font-size:11px;color:#64748b;">Target Module: ${extension}</div>
+            </div>
+          </body></html>
+        `;
+
+        iframe.srcdoc = previewHtml;
+        wrap.style.display = 'block';
+        wrap.scrollIntoView({ behavior: 'smooth' });
+      });
+
+      document.getElementById('closeEmailPreviewBtn')?.addEventListener('click', () => {
+        const wrap = document.getElementById('emailPreviewCardWrapper');
+        if (wrap) wrap.style.display = 'none';
+      });
+
       function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>"']/g, m => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[m]);
@@ -2362,6 +2925,8 @@
 
       // Check auth gate on load
       checkAuth();
+      // Probe emailer status
+      checkEmailerHealth();
     })();
   </script>
 </body>

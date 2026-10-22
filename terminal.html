@@ -349,7 +349,7 @@
         } else if (e.key === 'Tab') {
           e.preventDefault();
           const val = e.target.value.toLowerCase().trim();
-          const allCmds = ['help', 'iplist', 'ipadd', 'ipdel', 'ipdetect', 'ipsync', 'scan', 'pentest', 'crypto', 'firewall', 'rules', 'sentinel', 'sysinfo', 'netstat', 'ping', 'theme', 'matrix', 'clear', 'chat', 'reels'];
+          const allCmds = ['help', 'iplist', 'ipadd', 'ipdel', 'ipdetect', 'ipsync', 'scan', 'pentest', 'crypto', 'sentinel', 'firewall', 'rules', 'email', 'sysinfo', 'netstat', 'ping', 'theme', 'matrix', 'clear', 'chat', 'reels'];
           const match = allCmds.find(c => c.startsWith(val));
           if (match) e.target.value = match;
         }
@@ -379,6 +379,7 @@
   sentinel                   Query Zero-Trust WebGL Hardware Fingerprint status
   firewall                   Inspect WAF sanitization & Shannon entropy filters
   rules                      Audit Cloud Firestore Security Rules v2 constraints
+  email [status|test|send]   Query or test Sentinel TLS SMTP email engine
 
 [ SYSTEM & NETWORK TELEMETRY ]
   ping <host>                Measure round-trip latency to edge node
@@ -599,6 +600,75 @@
           logTerminal('  • SuperAdmin 4-IP Quota: ENFORCED (isValidIpList size <= 4)', 'success');
           logTerminal('  • Users, Messages, Groups, Reels, Statuses: Hardened Schema Bounds', 'success');
           logTerminal('  • Privilege Escalation: Rejected on all user documents', 'success');
+        }
+        else if (main === 'email') {
+          const sub = (parts[1] || 'status').toLowerCase();
+          const targetEmail = parts[2] || 'oyewoletodoroki@gmail.com';
+
+          if (sub === 'status' || sub === 'check') {
+            logTerminal('[EMAIL SENTINEL] Querying mailer engine status...', 'info');
+            fetch('/api/email-status').then(r => r.json()).then(data => {
+              if (data.configured) {
+                logTerminal(`[EMAIL SENTINEL] Status: ONLINE_VERIFIED`, 'success');
+                logTerminal(`  Provider: ${data.provider} (${data.server})`, 'info');
+                logTerminal(`  Sender:   ${data.user}`, 'info');
+                logTerminal(`  Name:     ${data.senderName}`, 'info');
+              } else {
+                logTerminal(`[EMAIL SENTINEL] Status: STANDBY (Local sandbox mode)`, 'warn');
+              }
+            }).catch(e => {
+              logTerminal(`[EMAIL SENTINEL] Error querying status: ${e.message}`, 'error');
+            });
+          } else if (sub === 'test') {
+            logTerminal(`[EMAIL DISPATCH] Triggering diagnostic ping to: ${targetEmail}...`, 'info');
+            fetch('/api/test-email', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ toEmail: targetEmail })
+            }).then(r => r.json()).then(res => {
+              if (res.success) {
+                logTerminal(`[EMAIL DISPATCH] SUCCESS! Dispatched via ${res.provider}.`, 'success');
+                logTerminal(`  Message ID: ${res.details?.messageId || 'OK'}`, 'info');
+              } else {
+                logTerminal(`[EMAIL DISPATCH] Failed: ${res.error || 'Unknown error'}`, 'error');
+              }
+            }).catch(e => {
+              logTerminal(`[EMAIL DISPATCH] Network error: ${e.message}`, 'error');
+            });
+          } else if (sub === 'send') {
+            const type = parts[2] || 'password_reset';
+            const recipient = parts[3] || 'oyewoletodoroki@gmail.com';
+            logTerminal(`[EMAIL DISPATCH] Sending template [${type}] to ${recipient}...`, 'info');
+            fetch('/api/send-email-alert', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type,
+                toEmail: recipient,
+                data: {
+                  username: recipient.split('@')[0],
+                  resetUrl: window.location.origin + '/reset.html',
+                  token: '928401',
+                  deviceType: 'Terminal CyberDeck',
+                  browser: 'NEXCHAT Shell',
+                  os: 'Terminal CLI',
+                  messageSnippet: 'Terminal-dispatched encrypted advisory.',
+                  extensionName: 'NEX-REELS Pro',
+                  status: 'approved'
+                }
+              })
+            }).then(r => r.json()).then(res => {
+              if (res.success) {
+                logTerminal(`[EMAIL DISPATCH] SUCCESS! Template [${type}] delivered.`, 'success');
+                logTerminal(`  Message ID: ${res.details?.messageId || 'OK'}`, 'info');
+              } else {
+                logTerminal(`[EMAIL DISPATCH] Failed: ${res.error || 'Server error'}`, 'error');
+              }
+            }).catch(e => logTerminal(`[EMAIL DISPATCH] Error: ${e.message}`, 'error'));
+          } else {
+            logTerminal(`Usage: email status | email test [recipient] | email send <type> [recipient]`, 'warn');
+            logTerminal(`Types: password_reset, device_linked, offline_message, extension_consent`, 'info');
+          }
         }
         else if (main === 'ping') {
           const host = target || 'supabase';

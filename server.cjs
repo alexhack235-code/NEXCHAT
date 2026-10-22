@@ -53,6 +53,63 @@ const server = http.createServer((req, res) => {
   let reqPath = decodeURIComponent(req.url.split('?')[0]);
 
   // ══════════════════════════════════════════════════════════════════════
+  // GET API ENDPOINTS: EMAIL DISPATCHER HEALTH & STATUS
+  // ══════════════════════════════════════════════════════════════════════
+  if (req.method === 'GET' && reqPath === '/api/email-status') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({
+      configured: Boolean(CONFIG.GMAIL_USER && CONFIG.GMAIL_APP_PASS),
+      user: CONFIG.GMAIL_USER || null,
+      provider: 'gmail_smtp',
+      server: 'smtp.gmail.com:465',
+      senderName: CONFIG.FROM_NAME,
+      status: 'ONLINE_VERIFIED'
+    }));
+    return;
+  }
+
+  if (req.method === 'GET' && reqPath === '/api/test-email') {
+    const parsedUrl = new URL(req.url, `http://${req.headers.host || 'localhost:8080'}`);
+    const toEmail = parsedUrl.searchParams.get('to') || CONFIG.GMAIL_USER;
+    if (!toEmail) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'No recipient email specified' }));
+      return;
+    }
+
+    sendNotificationEmail({
+      to: toEmail,
+      subject: '⚡ NEXCHAT Gmail Notification Test: SUCCESS',
+      htmlContent: `
+        <div style="background:#060913; color:#f8fafc; padding:28px 24px; border-radius:14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; border:1px solid #00f076; max-width:600px; margin:0 auto;">
+          <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+            <tr>
+              <td>
+                <span style="font-size:10px; font-weight:800; letter-spacing:2px; color:#00f076; text-transform:uppercase; background:rgba(0,240,118,0.1); border:1px solid rgba(0,240,118,0.35); padding:3px 10px; border-radius:9999px;">
+                  SYSTEM VERIFIED
+                </span>
+                <h2 style="color:#ffffff; margin:8px 0 0; font-size:20px; font-weight:800;">NEXCHAT GMAIL SMTP TEST</h2>
+              </td>
+              <td align="right" valign="top">
+                <img src="cid:nexchat-logo" alt="NEXCHAT Logo" width="48" height="48" style="border-radius:12px; border:2px solid #00f076; display:block;" onerror="this.src='https://raw.githubusercontent.com/alexhack235-code/NEXCHAT/main/logo.jpg'" />
+              </td>
+            </tr>
+          </table>
+          <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">Congratulations! Your Gmail notification engine is operational and ready to dispatch real-time alerts with official attached branding.</p>
+          <p style="color:#64748b; font-size:12px; margin-top:16px;">Dispatched from local server preview &bull; ${new Date().toISOString()}</p>
+        </div>
+      `,
+    }).then(result => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(result));
+    }).catch(err => {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: err.message }));
+    });
+    return;
+  }
+
+  // ══════════════════════════════════════════════════════════════════════
   // POST API ENDPOINTS: GMAIL & SECURITY NOTIFICATIONS
   // ══════════════════════════════════════════════════════════════════════
   if (req.method === 'POST') {

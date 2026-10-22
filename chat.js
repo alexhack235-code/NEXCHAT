@@ -8023,6 +8023,74 @@ function setupFortressSecurityListeners() {
   }
 }
 
+function setupSentinelMailerSettings() {
+  const emailInput = document.getElementById('settingsTestEmailInput');
+  const sendBtn = document.getElementById('sendSentinelTestEmailBtn');
+  const feedbackEl = document.getElementById('sentinelTestEmailFeedback');
+  const badgeEl = document.getElementById('sentinelMailerBadge');
+
+  if (emailInput && !emailInput.value) {
+    const userEmail = (primaryUser && primaryUser.email) || localStorage.getItem('auth_email') || localStorage.getItem('userEmail') || 'oyewoletodoroki@gmail.com';
+    emailInput.value = userEmail;
+  }
+
+  // Probe status once
+  fetch('/api/email-status').then(r => r.json()).then(data => {
+    if (badgeEl && data.configured) {
+      badgeEl.textContent = 'Gmail SMTP Online';
+      badgeEl.style.borderColor = '#00f076';
+    }
+  }).catch(() => {});
+
+  if (sendBtn && !sendBtn.dataset.bound) {
+    sendBtn.dataset.bound = 'true';
+    sendBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const target = emailInput?.value?.trim();
+      if (!target) {
+        if (feedbackEl) feedbackEl.innerHTML = '<span style="color:#fe2c55;">Please enter an email address.</span>';
+        return;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Dispatching...';
+      if (feedbackEl) feedbackEl.innerHTML = '<span style="color:#00d4ff;">Connecting to native TLS SMTP smtp.gmail.com:465...</span>';
+
+      const t0 = performance.now();
+      try {
+        const res = await fetch('/api/test-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ toEmail: target })
+        });
+        const elapsed = Math.round(performance.now() - t0);
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          const prov = data.provider || 'gmail_smtp';
+          const msgId = data.details?.messageId ? data.details.messageId.substring(0, 36) : 'OK';
+          if (feedbackEl) {
+            feedbackEl.innerHTML = `<span style="color:#00ff66;font-weight:700;"><i class="fa-solid fa-check-circle"></i> Dispatched via ${prov} (${elapsed}ms)</span><br><span style="color:#64748b;font-size:10.5px;">${msgId}</span>`;
+          }
+          if (badgeEl) {
+            badgeEl.textContent = `Verified (${elapsed}ms)`;
+          }
+          if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+          if (typeof showNotif === 'function') showNotif(`Sentinel security alert dispatched to ${target}!`, 'success', 3000);
+        } else {
+          const err = data.error || 'Server rejected email dispatch.';
+          if (feedbackEl) feedbackEl.innerHTML = `<span style="color:#fe2c55;"><i class="fa-solid fa-triangle-exclamation"></i> ${err}</span>`;
+        }
+      } catch (err) {
+        if (feedbackEl) feedbackEl.innerHTML = `<span style="color:#fe2c55;"><i class="fa-solid fa-triangle-exclamation"></i> Network error: ${err.message}</span>`;
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Test Ping';
+      }
+    });
+  }
+}
+
 function setupAiDefenseListeners() {
   const auditBtn = document.getElementById('runSecurityAuditBtn');
   const purgeBtn = document.getElementById('purgeQuarantineBtn');
@@ -8189,6 +8257,7 @@ function openSettingsModal() {
     loadLinkedDevices();
     setupSettingsTabNavigation();
     setupFortressSecurityListeners();
+    setupSentinelMailerSettings();
     setupAiDefenseListeners();
 
     // Realtime Messaging Engine Status
