@@ -3867,8 +3867,74 @@ window.dispatchCircularVideoNote = async function(videoDataUrl, durationSec) {
   if (typeof showNotif === 'function') showNotif("Cyber Clip sent!", "success", 1500);
 };
 
+// Global Dispatcher for Cyber Token Rain
+window.dispatchTokenRain = async function(dropAttachment) {
+  const targetUser = currentChatUser || window.currentChatUser || window.currentChatUserId;
+  const senderId = myUID || window.myUID;
+  if (!targetUser) {
+    if (typeof showNotif === 'function') showNotif("Please select a conversation first", "error");
+    return;
+  }
+  if (!senderId) {
+    if (typeof showNotif === 'function') showNotif("Please log in first", "error");
+    return;
+  }
+  if (!currentChatUser) currentChatUser = targetUser;
+  if (!myUID) myUID = senderId;
+
+  const clientMsgId = `tr_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  // 1. Instant optimistic append
+  if (typeof appendLocalSentMessage === 'function') {
+    appendLocalSentMessage("", dropAttachment, false, 'sending', clientMsgId, null);
+  }
+
+  // 2. Realtime Supabase Broadcast
+  if (typeof sendSupabaseMessage === 'function') {
+    sendSupabaseMessage({
+      from: myUID,
+      to: currentChatUser,
+      text: "",
+      attachment: dropAttachment,
+      chatType: currentChatType || 'direct'
+    }).then(() => {
+      if (typeof updateLocalSentMessageStatus === 'function') {
+        updateLocalSentMessageStatus(clientMsgId, 'sent');
+      }
+    }).catch(console.warn);
+  }
+
+  // 3. Dual-layer Firestore persistence
+  try {
+    const messageData = {
+      from: myUID,
+      to: currentChatUser,
+      text: "",
+      attachment: dropAttachment,
+      time: serverTimestamp(),
+      read: false,
+      status: "sent",
+      type: "token_rain",
+      clientMsgId: clientMsgId
+    };
+    await addDoc(collection(db, "messages"), messageData);
+    if (typeof updateLocalSentMessageStatus === 'function') {
+      updateLocalSentMessageStatus(clientMsgId, 'sent');
+    }
+  } catch (err) {
+    console.warn("Token rain sync note:", err?.message);
+  }
+
+  // 4. Streak update
+  if (window.cyberStreaksEngine) {
+    window.cyberStreaksEngine.recordInteraction(currentChatUserId || currentChatUser);
+  }
+
+  if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+};
+
 function renderMessageAttachment(attachment) {
-  if (!attachment || (!attachment.downloadURL && !attachment.isTimeCapsule)) return null;
+  if (!attachment || (!attachment.downloadURL && !attachment.isTimeCapsule && !attachment.isTokenRain && !attachment.dropData)) return null;
   const container = document.createElement("div");
   container.className = "message-attachment-container";
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
@@ -3916,6 +3982,13 @@ function renderMessageAttachment(attachment) {
     return container;
   }
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  // Cyber Token Rain In-Chat Bounty Drop
+  if (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData) {
+    if (window.tokenRainEngine && typeof window.tokenRainEngine.renderDropBubble === 'function') {
+      return window.tokenRainEngine.renderDropBubble(attachment);
+    }
+  }
 
   // Telegram-Style Circular Video Note (Cyber Clip)
   const isCircularVideo = attachment.isCircularVideo || fileType === 'video_note' || (fileName && fileName.startsWith('cyber_clip_'));
@@ -4260,11 +4333,12 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
 
   const isStk = attachment && (attachment.isSticker || attachment.fileType === 'sticker');
   const isCirc = attachment && (attachment.isCircularVideo || attachment.fileType === 'video_note');
+  const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData);
   const bubble = document.createElement("div");
-  bubble.className = isCirc ? "message-bubble sent is-clip-message" : (isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent");
-  bubble.style.cssText = (isCirc || isStk) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);";
+  bubble.className = isCirc ? "message-bubble sent is-clip-message" : (isDrop ? "message-bubble sent is-drop-message" : (isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent"));
+  bubble.style.cssText = (isCirc || isStk || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: var(--active-bubble-bg, linear-gradient(135deg, #059669 0%, #10b981 100%)); border: var(--active-bubble-border, none); box-shadow: var(--active-bubble-shadow, 0 4px 14px rgba(5, 150, 105, 0.25)); color: var(--active-bubble-color, #ffffff); padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word;";
 
-  if (attachment && (attachment.downloadURL || attachment.isTimeCapsule)) {
+  if (attachment && (attachment.downloadURL || attachment.isTimeCapsule || attachment.isTokenRain || attachment.dropData)) {
     const attachNode = renderMessageAttachment(attachment);
     if (attachNode) bubble.appendChild(attachNode);
   }
@@ -4358,6 +4432,8 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
   return id;
 }
+window.appendLocalSentMessage = appendLocalSentMessage;
+window.updateLocalSentMessageStatus = updateLocalSentMessageStatus;
 
 function updateLocalSentMessageStatus(clientMsgId, status) {
   if (!clientMsgId) return;
@@ -4764,7 +4840,7 @@ function loadMessages() {
         bubble.appendChild(replyQuote);
       }
 
-      if (m.attachment && m.attachment.downloadURL) {
+      if (m.attachment && (m.attachment.downloadURL || m.attachment.isTimeCapsule || m.attachment.isTokenRain || m.attachment.dropData)) {
         const attachNode = renderMessageAttachment(m.attachment);
         if (attachNode) bubble.appendChild(attachNode);
       }
@@ -4969,6 +5045,25 @@ function loadMessages() {
     subscribeToSupabaseRoom(roomId, {
       onNewMessage: (incoming) => {
         if (!incoming || incoming.from === myUID) return;
+        // Live real-time event interceptors
+        if (incoming.attachment) {
+          if (incoming.attachment.isSoundboardPing) {
+            window.dispatchEvent(new CustomEvent('nexchat:soundboard_sfx_received', { detail: incoming.attachment }));
+            return;
+          }
+          if (incoming.attachment.isCanvasStroke) {
+            window.dispatchEvent(new CustomEvent('nexchat:canvas_stroke_received', { detail: incoming.attachment }));
+            return;
+          }
+          if (incoming.attachment.isCanvasClear) {
+            window.dispatchEvent(new CustomEvent('nexchat:canvas_clear_received', { detail: incoming.attachment }));
+            return;
+          }
+          if (incoming.attachment.isTokenRainSync) {
+            window.dispatchEvent(new CustomEvent('nexchat:token_rain_received', { detail: incoming.attachment }));
+            return;
+          }
+        }
         const exists = messages2.some(m => m.docId === incoming.docId || (m.text === incoming.text && Math.abs((m.time?.toMillis?.() || 0) - (incoming.time?.toMillis?.() || 0)) < 4000));
         if (!exists) {
           messages2.push(incoming);
