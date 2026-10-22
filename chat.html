@@ -106,6 +106,7 @@
           <button id="search-btn-header" class="header-icon-btn search-btn-header" title="Search">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
+          <button id="locationDiscoveryBtnHeader" class="header-icon-btn" title="Location Discovery &amp; People In Your Location" onclick="window.CyberFeatures.geoDiscovery?.show()"><i class="fa-solid fa-location-crosshairs" style="color: #00f3ff;"></i></button>
           <button id="radarBtnHeader" class="header-icon-btn" title="Neural Radar Scanner"><i class="fa-solid fa-satellite-dish"></i></button>
           <button id="nexbotStudioBtnHeader" class="header-icon-btn" title="NEXBOT Studio &amp; WhatsApp Architect"><i class="fa-solid fa-robot"></i></button>
           <button id="vipVaultBtnHeader" class="header-icon-btn" title="VIP Token Vault &amp; Licenses"><i class="fa-solid fa-crown"></i></button>
@@ -1455,6 +1456,29 @@
                       <option value="it">Italian (Italiano)</option>
                       <option value="pt">Portuguese (Português)</option>
                       <option value="ko">Korean (한국어)</option>
+                      <option value="hi">Hindi (हिन्दी)</option>
+                      <option value="bn">Bengali (বাংলা)</option>
+                      <option value="tr">Turkish (Türkçe)</option>
+                      <option value="vi">Vietnamese (Tiếng Việt)</option>
+                      <option value="id">Indonesian (Bahasa Indonesia)</option>
+                      <option value="nl">Dutch (Nederlands)</option>
+                      <option value="pl">Polish (Polski)</option>
+                      <option value="uk">Ukrainian (Українська)</option>
+                      <option value="sw">Swahili (Kiswahili)</option>
+                      <option value="tl">Tagalog (Filipino)</option>
+                      <option value="el">Greek (Ελληνικά)</option>
+                      <option value="sv">Swedish (Svenska)</option>
+                      <option value="cs">Czech (Čeština)</option>
+                      <option value="he">Hebrew (עברית)</option>
+                      <option value="th">Thai (ไทย)</option>
+                      <option value="ro">Romanian (Română)</option>
+                      <option value="hu">Hungarian (Magyar)</option>
+                      <option value="ur">Urdu (اردو)</option>
+                      <option value="fa">Persian (فارسی)</option>
+                      <option value="ms">Malay (Bahasa Melayu)</option>
+                      <option value="yo">Yoruba (Yorùbá)</option>
+                      <option value="ig">Igbo (Ásụ̀sụ́ Ìgbò)</option>
+                      <option value="ha">Hausa (Harshen Hausa)</option>
                     </select>
                     
                     <div class="luxury-toggle-row" style="margin-top: 12px;">
@@ -1467,6 +1491,69 @@
                         <span class="slider"></span>
                       </label>
                     </div>
+                  </div>
+                </div>
+
+                <!-- Country CDN & Regional Routing Engine -->
+                <div class="settings-card" id="countryCdnSettingsCard">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="color: #00f3ff; font-size: 14px;"><i class="fa-solid fa-network-wired"></i> Country CDN &amp; Edge Router</strong>
+                      <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Automatically routes media uploads, voice notes, and real-time feeds through the lowest-latency regional edge CDN POP for your country.</p>
+                    </div>
+                    <span id="countryCdnLatencyBadge" class="auto-trans-badge" style="background: rgba(0, 243, 255, 0.15); border: 1px solid rgba(0, 243, 255, 0.35); padding: 3px 8px; border-radius: 6px;">12ms [OPTIMAL]</span>
+                  </div>
+                  <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <label style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">Active Country Edge Node:</label>
+                    <select id="countryCdnNodeSelect" class="settings-select">
+                      <option value="auto">🌐 Automatic Routing (Closest to Detected Country)</option>
+                      <option value="af-west-lagos-7">🇳🇬 AF-West (Lagos Edge 7) - West Africa</option>
+                      <option value="af-south-joburg-8">🇿🇦 AF-South (Johannesburg Edge 8) - Southern Africa</option>
+                      <option value="us-east-virginia-1">🇺🇸 US-East (Virginia Edge 1) - North America</option>
+                      <option value="us-west-oregon-2">🇺🇸 US-West (Oregon Edge 2) - North America</option>
+                      <option value="eu-west-frankfurt-3">🇩🇪 EU-West (Frankfurt Edge 3) - Europe</option>
+                      <option value="eu-north-stockholm-4">🇸🇪 EU-North (Stockholm Edge 4) - Northern Europe</option>
+                      <option value="ap-south-mumbai-5">🇮🇳 AP-South (Mumbai Edge 5) - South Asia</option>
+                      <option value="ap-east-tokyo-6">🇯🇵 AP-East (Tokyo Edge 6) - East Asia</option>
+                      <option value="sa-east-saopaulo-9">🇧🇷 SA-East (São Paulo Edge 9) - South America</option>
+                      <option value="oc-south-sydney-10">🇦🇺 OC-South (Sydney Edge 10) - Oceania</option>
+                    </select>
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                      <button type="button" id="testCountryCdnPingBtn" class="btn-primary" style="flex: 1; font-size: 12px; padding: 7px 12px; background: rgba(0, 243, 255, 0.15); border: 1px solid #00f3ff; color: #00f3ff;">
+                        <i class="fa-solid fa-bolt"></i> Ping Test Edge Node
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Anti-VPN & Location Integrity Shield -->
+                <div class="settings-card" id="antiVpnSettingsCard">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="color: #10b981; font-size: 14px;"><i class="fa-solid fa-shield-halved"></i> Anti-VPN &amp; Location Integrity Shield</strong>
+                      <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Multi-vector hardware verification: cross-references WebRTC adapter leaks, host IANA timezone offset, and cloud datacenter ASNs to prevent VPN/proxy location bypass.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="antiVpnStrictToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="color: #94a3b8;">Integrity Status:</span>
+                      <span id="antiVpnStatusBadge" style="color: #10b981; font-weight: 700;">🛡️ 100% Physical Hardware Match</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="color: #94a3b8;">WebRTC Adapter Leak:</span>
+                      <span id="antiVpnWebrtcStatus" style="color: #cbd5e1; font-family: monospace;">No Leak (Protected)</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="color: #94a3b8;">Host Hardware Timezone:</span>
+                      <span id="antiVpnTimezoneStatus" style="color: #cbd5e1; font-family: monospace;">Africa/Lagos (UTC+1)</span>
+                    </div>
+                    <button type="button" id="verifyHardwareLocationBtn" class="btn-primary" style="width: 100%; margin-top: 8px; font-size: 12px; padding: 7px 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;">
+                      <i class="fa-solid fa-location-crosshairs"></i> Run Full Anti-VPN Multi-Vector Audit
+                    </button>
                   </div>
                 </div>
               </div>
@@ -3922,17 +4009,40 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <label style="font-size: 12px; font-weight: 700; color: #cbd5e1;">Target Language:</label>
           <select id="translateTargetLang" style="background: #0f172a; color: #00f3ff; border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 8px; padding: 6px 12px; font-size: 12.5px; font-family: inherit;">
-            <option value="es">Spanish (Español)</option>
-            <option value="fr">French (Français)</option>
-            <option value="de">German (Deutsch)</option>
-            <option value="ja">Japanese (日本語)</option>
-            <option value="zh">Chinese (中文)</option>
-            <option value="ru">Russian (Русский)</option>
-            <option value="ar">Arabic (العربية)</option>
-            <option value="it">Italian (Italiano)</option>
-            <option value="pt">Portuguese (Português)</option>
-            <option value="ko">Korean (한국어)</option>
-            <option value="en">English</option>
+                      <option value="en">English (Default)</option>
+                      <option value="es">Spanish (Español)</option>
+                      <option value="fr">French (Français)</option>
+                      <option value="de">German (Deutsch)</option>
+                      <option value="ja">Japanese (日本語)</option>
+                      <option value="zh">Chinese (中文)</option>
+                      <option value="ru">Russian (Русский)</option>
+                      <option value="ar">Arabic (العربية)</option>
+                      <option value="it">Italian (Italiano)</option>
+                      <option value="pt">Portuguese (Português)</option>
+                      <option value="ko">Korean (한국어)</option>
+                      <option value="hi">Hindi (हिन्दी)</option>
+                      <option value="bn">Bengali (বাংলা)</option>
+                      <option value="tr">Turkish (Türkçe)</option>
+                      <option value="vi">Vietnamese (Tiếng Việt)</option>
+                      <option value="id">Indonesian (Bahasa Indonesia)</option>
+                      <option value="nl">Dutch (Nederlands)</option>
+                      <option value="pl">Polish (Polski)</option>
+                      <option value="uk">Ukrainian (Українська)</option>
+                      <option value="sw">Swahili (Kiswahili)</option>
+                      <option value="tl">Tagalog (Filipino)</option>
+                      <option value="el">Greek (Ελληνικά)</option>
+                      <option value="sv">Swedish (Svenska)</option>
+                      <option value="cs">Czech (Čeština)</option>
+                      <option value="he">Hebrew (עברית)</option>
+                      <option value="th">Thai (ไทย)</option>
+                      <option value="ro">Romanian (Română)</option>
+                      <option value="hu">Hungarian (Magyar)</option>
+                      <option value="ur">Urdu (اردو)</option>
+                      <option value="fa">Persian (فارسی)</option>
+                      <option value="ms">Malay (Bahasa Melayu)</option>
+                      <option value="yo">Yoruba (Yorùbá)</option>
+                      <option value="ig">Igbo (Ásụ̀sụ́ Ìgbò)</option>
+                      <option value="ha">Hausa (Harshen Hausa)</option>
           </select>
         </div>
         <div>
@@ -4088,6 +4198,60 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
             <input type="range" id="glassBlurSlider" min="0" max="40" value="20" style="width: 100%; cursor: pointer;">
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Location Discovery & Regional People Recommendation Hub -->
+  <div id="locationDiscoveryModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
+    <div class="cyber-hub-backdrop" id="closeLocationDiscoveryBackdrop"></div>
+    <div class="cyber-hub-card location-discovery-card">
+      <div class="cyber-hub-header">
+        <div class="cyber-hub-title-group">
+          <div class="cyber-beacon" style="background: #00f3ff; box-shadow: 0 0 10px #00f3ff;"></div>
+          <h3 style="margin: 0; font-size: 16px; color: #fff; letter-spacing: 0.5px; font-weight: 800;">
+            <i class="fa-solid fa-location-crosshairs" style="color: #00f3ff; margin-right: 8px;"></i>
+            NEX-LOCATION // Regional Discovery &amp; People In Your Location
+          </h3>
+        </div>
+        <button type="button" class="cyber-close-btn" id="closeLocationDiscoveryBtn">&times;</button>
+      </div>
+
+      <!-- Real-time Location & Anti-VPN Telemetry Bar -->
+      <div class="location-telemetry-bar">
+        <div class="telemetry-pill">
+          <i class="fa-solid fa-earth-africa" style="color: #00f3ff;"></i>
+          <span id="geoDetectedCountryLabel">Detecting Location...</span>
+        </div>
+        <div class="telemetry-pill" id="antiVpnHeaderBadge">
+          <i class="fa-solid fa-shield-halved" style="color: #10b981;"></i>
+          <span>Anti-VPN: Shield Active</span>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fa-solid fa-network-wired" style="color: #a855f7;"></i>
+          <span id="geoCdnEdgeBadge">CDN: Resolving...</span>
+        </div>
+        <button type="button" id="refreshLocationTelemetryBtn" class="telemetry-refresh-btn" title="Refresh &amp; Verify Hardware GPS">
+          <i class="fa-solid fa-arrows-rotate"></i>
+        </button>
+      </div>
+
+      <!-- Discovery Filter & Search Controls -->
+      <div class="location-discovery-controls">
+        <div class="location-tab-pills">
+          <button type="button" class="loc-tab-btn active" data-tab="country">🌍 In Your Country</button>
+          <button type="button" class="loc-tab-btn" data-tab="city">📍 In Your City</button>
+          <button type="button" class="loc-tab-btn" data-tab="global">🌐 Global Operatives</button>
+        </div>
+        <div class="loc-search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="locationOperativesSearchInput" placeholder="Filter by name, skills, or city..." />
+        </div>
+      </div>
+
+      <!-- Operatives Grid -->
+      <div id="locationOperativesGrid" class="location-operatives-grid">
+        <!-- Populated dynamically by NexLocationDiscovery -->
       </div>
     </div>
   </div>
