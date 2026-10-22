@@ -3792,6 +3792,81 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec) {
   if (typeof showNotif === 'function') showNotif("Voice note sent!", "success", 1500);
 };
 
+// Global Dispatcher for Telegram-Style Circular Video Notes (Cyber Clips)
+window.dispatchCircularVideoNote = async function(videoDataUrl, durationSec) {
+  const targetUser = currentChatUser || window.currentChatUser || window.currentChatUserId;
+  const senderId = myUID || window.myUID;
+  if (!targetUser) {
+    if (typeof showNotif === 'function') showNotif("Please select a conversation first", "error");
+    return;
+  }
+  if (!senderId) {
+    if (typeof showNotif === 'function') showNotif("Please log in first", "error");
+    return;
+  }
+  if (!currentChatUser) currentChatUser = targetUser;
+  if (!myUID) myUID = senderId;
+
+  const clipAttachment = {
+    downloadURL: videoDataUrl,
+    fileName: `cyber_clip_${Date.now()}.mp4`,
+    fileType: 'video_note',
+    isCircularVideo: true,
+    duration: durationSec || 1
+  };
+
+  const clientMsgId = `cc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  // 1. Instant 0ms Optimistic UI Append
+  if (typeof appendLocalSentMessage === 'function') {
+    appendLocalSentMessage("", clipAttachment, false, 'sending', clientMsgId, null);
+  }
+
+  // 2. Realtime Supabase Broadcast
+  if (typeof sendSupabaseMessage === 'function') {
+    sendSupabaseMessage({
+      from: myUID,
+      to: currentChatUser,
+      text: "",
+      attachment: clipAttachment,
+      chatType: currentChatType || 'direct'
+    }).then(() => {
+      if (typeof updateLocalSentMessageStatus === 'function') {
+        updateLocalSentMessageStatus(clientMsgId, 'sent');
+      }
+    }).catch(console.warn);
+  }
+
+  // 3. Firestore Persistence
+  try {
+    const messageData = {
+      from: myUID,
+      to: currentChatUser,
+      text: "",
+      attachment: clipAttachment,
+      time: serverTimestamp(),
+      read: false,
+      status: "sent",
+      type: "video_note",
+      clientMsgId: clientMsgId
+    };
+    await addDoc(collection(db, "messages"), messageData);
+    if (typeof updateLocalSentMessageStatus === 'function') {
+      updateLocalSentMessageStatus(clientMsgId, 'sent');
+    }
+  } catch (err) {
+    console.warn("Cyber clip sync note:", err?.message);
+  }
+
+  // 4. Streak update
+  if (window.cyberStreaksEngine) {
+    window.cyberStreaksEngine.recordInteraction(currentChatUserId || currentChatUser);
+  }
+
+  if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+  if (typeof showNotif === 'function') showNotif("Cyber Clip sent!", "success", 1500);
+};
+
 function renderMessageAttachment(attachment) {
   if (!attachment || (!attachment.downloadURL && !attachment.isTimeCapsule)) return null;
   const container = document.createElement("div");
@@ -3841,6 +3916,37 @@ function renderMessageAttachment(attachment) {
     return container;
   }
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  // Telegram-Style Circular Video Note (Cyber Clip)
+  const isCircularVideo = attachment.isCircularVideo || fileType === 'video_note' || (fileName && fileName.startsWith('cyber_clip_'));
+  if (isCircularVideo) {
+    const clipWrap = document.createElement("div");
+    clipWrap.className = "message-cyber-clip-wrap";
+
+    const video = document.createElement("video");
+    video.src = url;
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.style.cssText = "width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%;";
+
+    const muteBadge = document.createElement("div");
+    muteBadge.className = "clip-mute-badge";
+    muteBadge.innerHTML = '<i class="fa-solid fa-volume-xmark"></i>';
+
+    clipWrap.addEventListener("click", () => {
+      video.muted = !video.muted;
+      muteBadge.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+      muteBadge.style.transform = "scale(1.2)";
+      setTimeout(() => { muteBadge.style.transform = "scale(1)"; }, 200);
+    });
+
+    clipWrap.appendChild(video);
+    clipWrap.appendChild(muteBadge);
+    container.appendChild(clipWrap);
+    return container;
+  }
 
   const isImage = fileType.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif|svg|avif|bmp|heic)$/i.test(fileName);
   const isVideo = (fileType.startsWith("video/") || /\.(mp4|mov|mkv|avi|3gp)$/i.test(fileName) || (/\.webm$/i.test(fileName) && !fileType.startsWith("audio/"))) && !fileType.startsWith("audio/") && !fileName.startsWith("voice_note_");
@@ -4153,9 +4259,10 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   }
 
   const isStk = attachment && (attachment.isSticker || attachment.fileType === 'sticker');
+  const isCirc = attachment && (attachment.isCircularVideo || attachment.fileType === 'video_note');
   const bubble = document.createElement("div");
-  bubble.className = isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent";
-  bubble.style.cssText = isStk ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);";
+  bubble.className = isCirc ? "message-bubble sent is-clip-message" : (isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent");
+  bubble.style.cssText = (isCirc || isStk) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);";
 
   if (attachment && (attachment.downloadURL || attachment.isTimeCapsule)) {
     const attachNode = renderMessageAttachment(attachment);
@@ -4617,9 +4724,10 @@ function loadMessages() {
       const time = formatTime(msgDate);
 
       const isStk = m.isSticker || (m.attachment && (m.attachment.isSticker || m.attachment.fileType === 'sticker'));
+      const isCirc = m.attachment && (m.attachment.isCircularVideo || m.attachment.fileType === 'video_note');
       const bubble = document.createElement("div");
-      bubble.className = `message-bubble ${isOwn ? "sent" : "received"} ${isStk ? "is-sticker-message" : ""}`;
-      bubble.style.cssText = isStk ? `
+      bubble.className = `message-bubble ${isOwn ? "sent" : "received"} ${isCirc ? "is-clip-message" : (isStk ? "is-sticker-message" : "")}`;
+      bubble.style.cssText = (isStk || isCirc) ? `
         position: relative;
         padding: 2px;
         background: transparent;
@@ -5054,6 +5162,9 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   window.currentChatType = chatType;
   currentChatName = username;
   window.currentChatName = username;
+  if (window.cyberStreaksEngine) {
+    window.cyberStreaksEngine.renderStreakBadge();
+  }
   const chatDetailView = document.getElementById('chatDetailView');
   const chatDetailHeader = document.querySelector('.chat-detail-header');
   if (chatDetailView) {
