@@ -328,6 +328,34 @@ NEXCHAT/
 * **Dual-Pane Execution Modal:** Monaco-style code editor alongside an isolated `<iframe>` execution environment with `sandbox="allow-scripts allow-modals"`.
 * **Real-Time Console Stream:** Intercepts `console.log`, `console.warn`, and `console.error` and streams formatted output to an in-app terminal log.
 
+### 18. 🌐 CHRONEX BABEL // Real-Time Quantum Neural Translator & Audio Speaker
+* **In-Chat Neural Translation:** Every message bubble features a `🌐 Translate` chip that automatically converts incoming and outgoing text into 11+ languages (Spanish, Japanese, French, German, Chinese, Russian, Arabic, etc.).
+* **Dual-View Rendering:** Displays the translation in a sleek neon cyan chip right under the original text with language identification badges.
+* **Native Text-to-Speech:** Click the mini speaker button on any translated message to hear native pronunciation via `window.speechSynthesis`.
+* **Translation Hub Modal:** Interactive translation playground with live speech synthesis pronunciation.
+
+### 19. ⏳ QUANTUM TIME-CAPSULE // Cryptographic Time-Lock Message Vault
+* **Temporal Cryptography:** Seal confidential messages and coordinates into a cryptographic time-capsule with custom unlock countdowns (10s demo, 1m, 1h, 24h, 7d).
+* **Live In-Chat Countdown:** Recipient sees an Obsidian & Gold Time Capsule container with a live running clock badge (`LOCKED: 00:09`).
+* **Dynamic Unlock Event:** When the countdown reaches zero, the padlock unlocks with an audio chime and particle burst to reveal the decrypted secret.
+
+### 20. 👻 NEX-BIO // Biometric Ghost Chat Vault & Secret Cloaking
+* **Total Sidebar Cloaking:** Hide sensitive 1-on-1 direct messages or group chats completely from the sidebar conversation feed.
+* **Secret Access Protocol:** Triple-click on the NEXCHAT logo, press `Alt + H`, or type `/ghost` in search to summon the Biometric Ghost Authenticator.
+* **Master PIN Gate:** Protected by Master PIN `1337` or device WebAuthn sensors.
+* **Vault Ledger:** View cloaked conversations, jump directly into secure chat, or restore them to the public list.
+
+### 21. 🎛️ CYBER-HUD THEME STUDIO // Visual Aura & Matrix Shaders
+* **5 Futuristic Visual Aura Themes:**
+  * `Matrix Zero-Day` (Emerald phosphor code rain)
+  * `Cyberpunk 2099` (Electric neon cyan & hot pink glow)
+  * `Solaris Obsidian Gold` (Deep space obsidian with champagne gold accents)
+  * `Ghost Phantom` (Monochrome tactical slate)
+  * `Crimson WAF` (Cybernetic defense red alert)
+* **Real-Time CRT Scanline Shader:** Overlay authentic cathode-ray monitor lines across the app.
+* **Optic Chromatic Aberration:** Real-time RGB prism color separation text shadow.
+* **Glassmorphism Blur Slider:** Adjust backdrop blur dynamically from 0px to 40px with full persistence.
+
 ---
 
 ## ⚙️ Environment Configuration

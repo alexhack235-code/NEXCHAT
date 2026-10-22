@@ -115,6 +115,9 @@
           <button id="tacticalCanvasBtnHeader" class="header-icon-btn" title="NEX-CANVAS Tactical Whiteboard" onclick="window.CyberFeatures.canvas?.show()"><i class="fa-solid fa-pen-ruler"></i></button>
           <button id="steganoBtnHeader" class="header-icon-btn" title="NEX-STEGANO Pixel Enclave" onclick="window.CyberFeatures.stegano?.show()"><i class="fa-solid fa-user-secret"></i></button>
           <button id="sandboxBtnHeader" class="header-icon-btn" title="NEX-SANDBOX Code Runner" onclick="window.CyberFeatures.sandbox?.show()"><i class="fa-solid fa-microchip"></i></button>
+          <button id="translateBtnHeader" class="header-icon-btn" title="ChronEX Babel Neural Translator" onclick="window.CyberFeatures.translator?.show()"><i class="fa-solid fa-language"></i></button>
+          <button id="ghostVaultBtnHeader" class="header-icon-btn" title="Ghost Vault &amp; Hidden Chats (Alt+H)" onclick="window.CyberFeatures.ghostVault?.show()"><i class="fa-solid fa-ghost"></i></button>
+          <button id="themeStudioBtnHeader" class="header-icon-btn" title="Cyber-HUD Theme Studio" onclick="window.CyberFeatures.themeStudio?.show()"><i class="fa-solid fa-palette"></i></button>
           <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
         </div>
 
@@ -513,6 +516,7 @@
           <button id="groupInviteQrBtn" class="option-item" style="display: none;"><i class="fa-solid fa-qrcode" style="margin-right: 8px;"></i>Invite via QR</button>
           <button id="groupLeaveBtn" class="option-item danger" style="display: none;"><i class="fa-solid fa-arrow-right-from-bracket" style="margin-right: 8px;"></i>Leave Group</button>
           <div class="dropdown-divider"></div>
+          <button id="hideChatInGhostVaultBtn" class="option-item" onclick="if(window.currentChatUser) window.CyberFeatures.ghostVault?.hideChat(window.currentChatUser);"><i class="fa-solid fa-ghost" style="margin-right: 8px; color: #c084fc;"></i>Hide in Ghost Vault</button>
           <button id="blockBtn" class="option-item danger">Block User</button>
           <button id="unblockBtn" class="option-item success" style="display: none;">Unblock User</button>
           <button id="reportBtn" class="option-item danger">Report User</button>
@@ -634,6 +638,14 @@
             <div class="attach-hub-item" id="hubActionBot">
               <div class="attach-hub-icon icon-bot"><i class="fa-solid fa-robot"></i></div>
               <span>NEXBOT Studio</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionCapsule">
+              <div class="attach-hub-icon icon-capsule"><i class="fa-solid fa-hourglass-start"></i></div>
+              <span>Time Capsule</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionTranslate">
+              <div class="attach-hub-icon icon-translate"><i class="fa-solid fa-language"></i></div>
+              <span>Translator</span>
             </div>
           </div>
 
@@ -2355,6 +2367,18 @@
             <div class="sheet-icon-box" style="background: linear-gradient(135deg, #00ff66, #00f3ff); color: #000;"><i class="fa-solid fa-microchip"></i></div>
             <span>NEX-Sandbox</span>
           </button>
+          <button type="button" class="sheet-grid-item" id="sheetCapsuleBtn" onclick="window.CyberFeatures.capsule?.show()">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, #ffd700, #f59e0b); color: #000;"><i class="fa-solid fa-hourglass-start"></i></div>
+            <span>Time Capsule</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetGhostVaultBtn" onclick="window.CyberFeatures.ghostVault?.show()">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, #a855f7, #6366f1);"><i class="fa-solid fa-ghost"></i></div>
+            <span>Ghost Vault</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetThemeBtn" onclick="window.CyberFeatures.themeStudio?.show()">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, #00f3ff, #ff007f);"><i class="fa-solid fa-palette"></i></div>
+            <span>Theme Studio</span>
+          </button>
           <button type="button" class="sheet-grid-item" onclick="document.getElementById('settings-btn-header')?.click()">
             <div class="sheet-icon-box settings-gradient"><i class="fa-solid fa-gear"></i></div>
             <span>Settings</span>
@@ -3833,6 +3857,188 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           </div>
           <iframe id="sandboxPreviewFrame" class="sandbox-preview-frame" sandbox="allow-scripts allow-modals"></iframe>
           <div class="sandbox-console-log" id="sandboxConsoleLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHRONEX BABEL Neural Translation Hub Modal -->
+  <div id="translationHubModal" class="stegano-modal" style="display: none;" aria-hidden="true">
+    <div class="more-sheet-backdrop" id="closeTranslationHubBackdrop"></div>
+    <div class="stegano-container" style="border-color: rgba(6, 182, 212, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.95), 0 0 35px rgba(6, 182, 212, 0.25);">
+      <div class="stegano-header" style="border-color: rgba(6, 182, 212, 0.2);">
+        <div class="stegano-title" style="color: #67e8f9;"><i class="fa-solid fa-language"></i> CHRONEX BABEL // Neural Translator</div>
+        <button type="button" class="close-sheet-btn" id="closeTranslationHubBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="stegano-body">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="font-size: 12px; font-weight: 700; color: #cbd5e1;">Target Language:</label>
+          <select id="translateTargetLang" style="background: #0f172a; color: #00f3ff; border: 1px solid rgba(0, 243, 255, 0.3); border-radius: 8px; padding: 6px 12px; font-size: 12.5px; font-family: inherit;">
+            <option value="es">Spanish (Español)</option>
+            <option value="fr">French (Français)</option>
+            <option value="de">German (Deutsch)</option>
+            <option value="ja">Japanese (日本語)</option>
+            <option value="zh">Chinese (中文)</option>
+            <option value="ru">Russian (Русский)</option>
+            <option value="ar">Arabic (العربية)</option>
+            <option value="it">Italian (Italiano)</option>
+            <option value="pt">Portuguese (Português)</option>
+            <option value="ko">Korean (한국어)</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">Original Message / Text:</label>
+          <textarea id="translateInputText" class="stegano-textarea" placeholder="Type or paste any text to translate..."></textarea>
+        </div>
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <label style="font-size: 12px; font-weight: 700; color: #00f3ff;">Neural Translation Output:</label>
+            <button type="button" id="translateSpeakBtn" class="translate-speak-btn" title="Pronounce via Speech Synthesizer"><i class="fa-solid fa-volume-high"></i> Listen Pronunciation</button>
+          </div>
+          <textarea id="translateOutputText" class="stegano-textarea" readonly style="background: rgba(6, 182, 212, 0.08); border-color: rgba(6, 182, 212, 0.3); color: #67e8f9;"></textarea>
+        </div>
+        <button type="button" id="translateActionBtn" class="stegano-btn-primary" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); box-shadow: 0 4px 18px rgba(6, 182, 212, 0.4);"><i class="fa-solid fa-bolt"></i> Translate with ChronEX AI</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUANTUM TIME CAPSULE Modal -->
+  <div id="timeCapsuleModal" class="stegano-modal" style="display: none;" aria-hidden="true">
+    <div class="more-sheet-backdrop" id="closeTimeCapsuleBackdrop"></div>
+    <div class="stegano-container" style="border-color: rgba(255, 215, 0, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.95), 0 0 35px rgba(255, 215, 0, 0.2);">
+      <div class="stegano-header" style="border-color: rgba(255, 215, 0, 0.2);">
+        <div class="stegano-title" style="color: #ffd700;"><i class="fa-solid fa-hourglass-start"></i> QUANTUM TIME CAPSULE</div>
+        <button type="button" class="close-sheet-btn" id="closeTimeCapsuleBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="stegano-body">
+        <div style="font-size: 12px; color: #94a3b8; line-height: 1.5;">Seal a message or secret data into a temporal cryptographic vault. Automatically decrypts only when countdown reaches zero.</div>
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: #fef08a; display: block; margin-bottom: 6px;">Unlock Countdown Timer:</label>
+          <select id="capsuleDurationSelect" style="width: 100%; background: #0f172a; color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 8px; padding: 10px 14px; font-size: 13px; font-family: inherit;">
+            <option value="10">10 Seconds (Instant Test / Demo)</option>
+            <option value="60">1 Minute</option>
+            <option value="300">5 Minutes</option>
+            <option value="3600">1 Hour</option>
+            <option value="86400">24 Hours</option>
+            <option value="604800">7 Days (1 Week)</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: #fef08a; display: block; margin-bottom: 6px;">Confidential Note to Seal:</label>
+          <textarea id="capsuleSecretInput" class="stegano-textarea" style="border-color: rgba(255, 215, 0, 0.25);" placeholder="Type secret coordinates, prediction, or surprise message..."></textarea>
+        </div>
+        <button type="button" id="capsuleSealBtn" class="stegano-btn-primary" style="background: linear-gradient(135deg, #ffd700, #f59e0b); color: #000; box-shadow: 0 4px 18px rgba(255, 215, 0, 0.4);"><i class="fa-solid fa-lock"></i> Seal &amp; Dispatch Time Capsule</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEX-BIO GHOST CHAT VAULT Modal -->
+  <div id="ghostChatVaultModal" class="ghost-vault-modal" style="display: none;" aria-hidden="true">
+    <div class="more-sheet-backdrop" id="closeGhostVaultBackdrop"></div>
+    <div class="ghost-vault-container">
+      <div class="stegano-header" style="border-color: rgba(192, 132, 252, 0.2);">
+        <div class="stegano-title" style="color: #c084fc;"><i class="fa-solid fa-ghost"></i> GHOST CHAT VAULT</div>
+        <button type="button" class="close-sheet-btn" id="closeGhostVaultBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="padding: 24px;">
+        <!-- Auth section -->
+        <div id="ghostVaultAuthSection" style="text-align: center;">
+          <div style="font-size: 38px; color: #c084fc; margin-bottom: 12px; filter: drop-shadow(0 0 14px rgba(192, 132, 252, 0.6));"><i class="fa-solid fa-fingerprint"></i></div>
+          <div style="font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 6px;">BIOMETRIC GHOST AUTHENTICATOR</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 18px;">Cloaked conversations are hidden from the public chat feed.<br>Enter Master PIN to authenticate enclave.</div>
+          <input type="password" id="ghostVaultPinInput" class="panic-pin-input" style="border-color: rgba(192, 132, 252, 0.4); color: #c084fc; max-width: 280px; margin: 0 auto 16px auto;" placeholder="&bull;&bull;&bull;&bull;" maxlength="8">
+          <button type="button" id="ghostVaultUnlockBtn" class="stegano-btn-primary" style="max-width: 280px; margin: 0 auto; background: linear-gradient(135deg, #a855f7, #6366f1);"><i class="fa-solid fa-unlock-keyhole"></i> Unlock Ghost Vault</button>
+        </div>
+        <!-- Cloaked list section -->
+        <div id="ghostVaultContentSection" style="display: none;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+            <span style="font-size: 13px; font-weight: 700; color: #c084fc;"><i class="fa-solid fa-shield-cat"></i> Cloaked Conversations</span>
+            <span style="font-size: 11px; color: #94a3b8;">Shortcut: Alt+H</span>
+          </div>
+          <div id="ghostVaultChatList" style="max-height: 280px; overflow-y: auto;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CYBER-HUD THEME STUDIO Modal -->
+  <div id="cyberThemeStudioModal" class="theme-studio-modal" style="display: none;" aria-hidden="true">
+    <div class="more-sheet-backdrop" id="closeThemeStudioBackdrop"></div>
+    <div class="theme-studio-container">
+      <div class="stegano-header">
+        <div class="stegano-title" style="color: #00ff66;"><i class="fa-solid fa-palette"></i> CYBER-HUD THEME STUDIO</div>
+        <button type="button" class="close-sheet-btn" id="closeThemeStudioBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="padding: 22px;">
+        <div style="font-size: 12px; color: #94a3b8; margin-bottom: 14px;">Select your neural aura and configure visual WebGL / CRT shaders in real time.</div>
+        
+        <!-- Theme grid -->
+        <div class="theme-card-grid">
+          <div class="theme-card active" data-theme="matrix">
+            <div style="font-weight: 700; font-size: 13px; color: #00ff66;">Matrix Zero-Day</div>
+            <div class="theme-swatches">
+              <span class="theme-swatch-dot" style="background: #00ff66;"></span>
+              <span class="theme-swatch-dot" style="background: #050d08;"></span>
+            </div>
+            <span style="font-size: 10.5px; color: #94a3b8;">Emerald phosphor code rain</span>
+          </div>
+          <div class="theme-card" data-theme="cyberpunk">
+            <div style="font-weight: 700; font-size: 13px; color: #00f3ff;">Cyberpunk 2099</div>
+            <div class="theme-swatches">
+              <span class="theme-swatch-dot" style="background: #00f3ff;"></span>
+              <span class="theme-swatch-dot" style="background: #ff007f;"></span>
+            </div>
+            <span style="font-size: 10.5px; color: #94a3b8;">Neon cyan &amp; hot pink glow</span>
+          </div>
+          <div class="theme-card" data-theme="solaris">
+            <div style="font-weight: 700; font-size: 13px; color: #ffd700;">Solaris Obsidian</div>
+            <div class="theme-swatches">
+              <span class="theme-swatch-dot" style="background: #ffd700;"></span>
+              <span class="theme-swatch-dot" style="background: #141005;"></span>
+            </div>
+            <span style="font-size: 10.5px; color: #94a3b8;">Obsidian gold luxury dark</span>
+          </div>
+          <div class="theme-card" data-theme="phantom">
+            <div style="font-weight: 700; font-size: 13px; color: #e2e8f0;">Ghost Phantom</div>
+            <div class="theme-swatches">
+              <span class="theme-swatch-dot" style="background: #e2e8f0;"></span>
+              <span class="theme-swatch-dot" style="background: #0f172a;"></span>
+            </div>
+            <span style="font-size: 10.5px; color: #94a3b8;">Monochrome tactical slate</span>
+          </div>
+          <div class="theme-card" data-theme="crimson">
+            <div style="font-weight: 700; font-size: 13px; color: #ff0055;">Crimson WAF</div>
+            <div class="theme-swatches">
+              <span class="theme-swatch-dot" style="background: #ff0055;"></span>
+              <span class="theme-swatch-dot" style="background: #1a060a;"></span>
+            </div>
+            <span style="font-size: 10.5px; color: #94a3b8;">Cybernetic defense red alert</span>
+          </div>
+        </div>
+
+        <!-- Modifiers -->
+        <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; flex-direction: column; gap: 14px;">
+          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <div>
+              <div style="font-size: 13px; font-weight: 700; color: #f1f5f9;">Retro CRT Scanline Shader</div>
+              <div style="font-size: 11px; color: #94a3b8;">Overlay authentic cathode-ray monitor lines</div>
+            </div>
+            <input type="checkbox" id="crtScanlineToggle" style="width: 18px; height: 18px; cursor: pointer;">
+          </label>
+          <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <div>
+              <div style="font-size: 13px; font-weight: 700; color: #f1f5f9;">Chromatic Aberration</div>
+              <div style="font-size: 11px; color: #94a3b8;">Optic prism RGB color separation effect</div>
+            </div>
+            <input type="checkbox" id="chromaticToggle" style="width: 18px; height: 18px; cursor: pointer;">
+          </label>
+          <div>
+            <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px;">
+              <span>Glassmorphism Backdrop Blur</span>
+            </div>
+            <input type="range" id="glassBlurSlider" min="0" max="40" value="20" style="width: 100%; cursor: pointer;">
+          </div>
         </div>
       </div>
     </div>

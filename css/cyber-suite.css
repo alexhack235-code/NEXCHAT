@@ -23,9 +23,9 @@
   border-radius: 18px;
   padding: 14px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  width: 320px;
+  width: 390px;
   z-index: 999;
   animation: cyberSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -82,6 +82,8 @@
 .icon-stegano { background: linear-gradient(135deg, #8b5cf6, #6366f1); color: #fff; }
 .icon-poll { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
 .icon-bot { background: linear-gradient(135deg, #00f3ff, #00a8ff); color: #000; }
+.icon-capsule { background: linear-gradient(135deg, #ffd700, #f59e0b); color: #000; }
+.icon-translate { background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; }
 
 /* --------------------------------------------------------------------------
    2. NEX-VOICE QUANTUM WAVEFORM RECORDER
@@ -928,6 +930,290 @@
 @keyframes cyberFadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   7. CHRONEX BABEL QUANTUM NEURAL TRANSLATOR
+   -------------------------------------------------------------------------- */
+.message-translate-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 6px;
+  padding: 3px 8px;
+  margin-top: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.message-translate-chip:hover {
+  background: rgba(56, 189, 248, 0.25);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.translated-message-box {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border-left: 3px solid #00f3ff;
+  border-radius: 0 8px 8px 0;
+  font-size: 13px;
+  color: #e2e8f0;
+  line-height: 1.45;
+  animation: cyberFadeIn 0.25s ease;
+}
+
+.translate-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+}
+
+.translate-lang-tag {
+  font-weight: 700;
+  color: #00f3ff;
+  text-transform: uppercase;
+}
+
+.translate-speak-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.translate-speak-btn:hover {
+  color: #00ff66;
+  background: rgba(0, 255, 102, 0.12);
+}
+
+/* --------------------------------------------------------------------------
+   8. QUANTUM TIME CAPSULE
+   -------------------------------------------------------------------------- */
+.time-capsule-card {
+  position: relative;
+  background: linear-gradient(135deg, #181404 0%, #0d0a02 100%);
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  box-shadow: 0 10px 30px rgba(255, 215, 0, 0.12), inset 0 0 15px rgba(255, 215, 0, 0.05);
+  border-radius: 14px;
+  padding: 16px;
+  margin: 6px 0;
+  max-width: 340px;
+  color: #fef08a;
+}
+
+.capsule-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.capsule-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Orbitron', monospace;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+
+.capsule-timer-badge {
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fef08a;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.capsule-timer-badge.unlocked {
+  border-color: #00ff66;
+  color: #00ff66;
+  background: rgba(0, 255, 102, 0.1);
+}
+
+.capsule-unlocked-content {
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  border-radius: 10px;
+  color: #f8fafc;
+  font-size: 13.5px;
+  line-height: 1.5;
+  animation: cyberGlowBurst 0.6s ease;
+}
+
+@keyframes cyberGlowBurst {
+  0% { transform: scale(0.95); box-shadow: 0 0 30px #ffd700; }
+  50% { transform: scale(1.02); box-shadow: 0 0 40px #00ff66; }
+  100% { transform: scale(1); box-shadow: none; }
+}
+
+/* --------------------------------------------------------------------------
+   9. NEX-BIO GHOST CHAT VAULT
+   -------------------------------------------------------------------------- */
+.ghost-vault-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10004;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 5, 12, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 16px;
+}
+
+.ghost-vault-container {
+  background: linear-gradient(135deg, #110c22 0%, #070410 100%);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(192, 132, 252, 0.25);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 540px;
+  overflow: hidden;
+  color: #f3e8ff;
+}
+
+.ghost-enclave-badge {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.15);
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  border-radius: 12px;
+  padding: 2px 8px;
+  letter-spacing: 0.5px;
+}
+
+.ghost-chat-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+
+.ghost-chat-item:hover {
+  background: rgba(192, 132, 252, 0.1);
+  border-color: rgba(192, 132, 252, 0.3);
+}
+
+/* --------------------------------------------------------------------------
+   10. CYBER-HUD THEME STUDIO & CRT SHADERS
+   -------------------------------------------------------------------------- */
+.theme-studio-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10005;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 7, 15, 0.9);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 16px;
+}
+
+.theme-studio-container {
+  background: #080d1a;
+  border: 1px solid rgba(0, 240, 118, 0.35);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 240, 118, 0.2);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  color: #f1f5f9;
+}
+
+.theme-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.theme-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.theme-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.theme-card.active {
+  border-color: #00ff66;
+  background: rgba(0, 255, 102, 0.08);
+  box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);
+}
+
+.theme-swatches {
+  display: flex;
+  gap: 6px;
+}
+
+.theme-swatch-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* CRT Scanlines Overlay */
+.crt-scanlines {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999998;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+  background-size: 100% 4px;
+  opacity: 0.6;
+}
+
+/* Chromatic Aberration */
+.cyber-chromatic {
+  text-shadow: 1.5px 0 0 rgba(255, 0, 128, 0.7), -1.5px 0 0 rgba(0, 243, 255, 0.7) !important;
 }
 
 @media (max-width: 768px) {

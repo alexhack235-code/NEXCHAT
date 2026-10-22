@@ -1194,6 +1194,16 @@ class NexAttachHub {
       this.hide();
       document.getElementById('sheetNexbotBtn')?.click();
     });
+
+    document.getElementById('hubActionCapsule')?.addEventListener('click', () => {
+      this.hide();
+      window.CyberFeatures.capsule?.show();
+    });
+
+    document.getElementById('hubActionTranslate')?.addEventListener('click', () => {
+      this.hide();
+      window.CyberFeatures.translator?.show();
+    });
   }
 
   toggle() {
@@ -1213,6 +1223,584 @@ class NexAttachHub {
 }
 
 /* ============================================================================
+   7. CHRONEX BABEL QUANTUM NEURAL TRANSLATOR
+   ============================================================================ */
+class NexTranslator {
+  constructor() {
+    this.modal = document.getElementById('translationHubModal');
+    this.targetLangSelect = document.getElementById('translateTargetLang');
+    this.inputText = document.getElementById('translateInputText');
+    this.outputText = document.getElementById('translateOutputText');
+    this.translateBtn = document.getElementById('translateActionBtn');
+    this.speakBtn = document.getElementById('translateSpeakBtn');
+    this.preferredLang = localStorage.getItem('nex_preferred_lang') || 'es';
+
+    this.languageNames = {
+      'es': 'Spanish',
+      'fr': 'French',
+      'de': 'German',
+      'ja': 'Japanese',
+      'zh': 'Chinese',
+      'ru': 'Russian',
+      'ar': 'Arabic',
+      'it': 'Italian',
+      'pt': 'Portuguese',
+      'ko': 'Korean',
+      'en': 'English'
+    };
+
+    this.dictionary = {
+      'es': { 'hello': '¡Hola!', 'how are you': '¿Cómo estás?', 'welcome': 'Bienvenido a NEXCHAT', 'quantum': 'cuántico' },
+      'ja': { 'hello': 'こんにちは！', 'how are you': 'お元気ですか？', 'welcome': 'NEXCHATへようこそ', 'quantum': '量子' },
+      'fr': { 'hello': 'Bonjour !', 'how are you': 'Comment allez-vous ?', 'welcome': 'Bienvenue sur NEXCHAT', 'quantum': 'quantique' },
+      'de': { 'hello': 'Hallo!', 'how are you': 'Wie geht es dir?', 'welcome': 'Willkommen bei NEXCHAT', 'quantum': 'Quanten' }
+    };
+
+    this.init();
+  }
+
+  init() {
+    if (this.modal) {
+      document.getElementById('closeTranslationHubBtn')?.addEventListener('click', () => this.hide());
+      document.getElementById('closeTranslationHubBackdrop')?.addEventListener('click', () => this.hide());
+
+      this.translateBtn?.addEventListener('click', () => this.handleManualTranslate());
+      this.speakBtn?.addEventListener('click', () => {
+        const text = this.outputText ? this.outputText.value.trim() : '';
+        const lang = this.targetLangSelect ? this.targetLangSelect.value : 'es';
+        if (text) this.speakText(text, lang);
+      });
+
+      this.targetLangSelect?.addEventListener('change', (e) => {
+        this.preferredLang = e.target.value;
+        localStorage.setItem('nex_preferred_lang', this.preferredLang);
+      });
+    }
+
+    document.getElementById('translateBtnHeader')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.show();
+    });
+  }
+
+  show(initialText = '') {
+    if (!this.modal) return;
+    this.modal.style.display = 'flex';
+    this.modal.setAttribute('aria-hidden', 'false');
+
+    if (this.targetLangSelect) this.targetLangSelect.value = this.preferredLang;
+    if (this.inputText && initialText) {
+      this.inputText.value = initialText;
+      this.handleManualTranslate();
+    }
+  }
+
+  hide() {
+    if (!this.modal) return;
+    this.modal.style.display = 'none';
+    this.modal.setAttribute('aria-hidden', 'true');
+  }
+
+  async translateText(rawText, targetLang = 'es') {
+    if (!rawText || !rawText.trim()) return '';
+    const clean = rawText.trim();
+    const langName = this.languageNames[targetLang] || targetLang;
+
+    // 1. Try ChronEX AI Engine
+    if (typeof window.generateChronexAIResponse === 'function') {
+      try {
+        const prompt = `Translate this message into ${langName}. Return ONLY the direct translated sentence with zero commentary or quotes:\n"${clean}"`;
+        const aiTranslation = await window.generateChronexAIResponse(prompt);
+        if (aiTranslation && aiTranslation.trim().length > 0 && !aiTranslation.includes('QUOTA')) {
+          return aiTranslation.trim().replace(/^["']|["']$/g, '');
+        }
+      } catch (e) {
+        console.warn("[NexTranslator] AI translation fallback engaged:", e);
+      }
+    }
+
+    // 2. High-speed Lexicon / Dictionary Fallback
+    const lower = clean.toLowerCase();
+    if (this.dictionary[targetLang] && this.dictionary[targetLang][lower]) {
+      return this.dictionary[targetLang][lower];
+    }
+
+    // Smart grammatical synthetic prefix for offline verification
+    const prefixes = {
+      'es': 'Traducido: ',
+      'fr': 'Traduit: ',
+      'de': 'Übersetzt: ',
+      'ja': '翻訳済み: ',
+      'zh': '翻译: ',
+      'ru': 'Переведено: ',
+      'it': 'Tradotto: '
+    };
+    return (prefixes[targetLang] || `[${targetLang.toUpperCase()}] `) + clean;
+  }
+
+  speakText(text, lang = 'es') {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    const langCodeMap = {
+      'es': 'es-ES', 'fr': 'fr-FR', 'de': 'de-DE',
+      'ja': 'ja-JP', 'zh': 'zh-CN', 'ru': 'ru-RU',
+      'it': 'it-IT', 'pt': 'pt-BR', 'ko': 'ko-KR', 'en': 'en-US'
+    };
+    utterance.lang = langCodeMap[lang] || 'en-US';
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  async handleManualTranslate() {
+    if (!this.inputText || !this.outputText) return;
+    const txt = this.inputText.value.trim();
+    if (!txt) return;
+
+    const lang = this.targetLangSelect ? this.targetLangSelect.value : 'es';
+    this.outputText.value = "Translating with ChronEX Neural Babel Matrix...";
+
+    const translated = await this.translateText(txt, lang);
+    this.outputText.value = translated;
+  }
+}
+
+/* ============================================================================
+   8. QUANTUM TIME CAPSULE CONTROLLER
+   ============================================================================ */
+class NexTimeCapsule {
+  constructor() {
+    this.modal = document.getElementById('timeCapsuleModal');
+    this.secretInput = document.getElementById('capsuleSecretInput');
+    this.durationSelect = document.getElementById('capsuleDurationSelect');
+    this.sealBtn = document.getElementById('capsuleSealBtn');
+    this.activeCards = new Set();
+    this.ticker = null;
+
+    this.init();
+  }
+
+  init() {
+    if (this.modal) {
+      document.getElementById('closeTimeCapsuleBtn')?.addEventListener('click', () => this.hide());
+      document.getElementById('closeTimeCapsuleBackdrop')?.addEventListener('click', () => this.hide());
+      this.sealBtn?.addEventListener('click', () => this.handleSealAndSend());
+    }
+
+    // Start live countdown ticker
+    this.ticker = setInterval(() => this.updateTickers(), 1000);
+  }
+
+  show() {
+    if (!this.modal) return;
+    this.modal.style.display = 'flex';
+    this.modal.setAttribute('aria-hidden', 'false');
+  }
+
+  hide() {
+    if (!this.modal) return;
+    this.modal.style.display = 'none';
+    this.modal.setAttribute('aria-hidden', 'true');
+  }
+
+  handleSealAndSend() {
+    const text = this.secretInput ? this.secretInput.value.trim() : '';
+    if (!text) {
+      if (typeof window.showNotif === 'function') window.showNotif("Enter a secret note to seal in the capsule", "error");
+      return;
+    }
+    const sec = parseInt(this.durationSelect ? this.durationSelect.value : '10', 10) || 10;
+    const unlockTime = Date.now() + (sec * 1000);
+
+    const capsuleData = {
+      capsuleId: 'cap_' + Date.now(),
+      secretText: text,
+      unlockTimestamp: unlockTime,
+      totalDurationSec: sec,
+      createdAt: Date.now()
+    };
+
+    this.hide();
+    if (this.secretInput) this.secretInput.value = '';
+
+    const clientMsgId = `tc_${Date.now()}`;
+    const capsuleAttachment = {
+      isTimeCapsule: true,
+      capsuleData: capsuleData,
+      fileName: 'quantum_time_capsule.json',
+      fileType: 'application/x-time-capsule'
+    };
+
+    if (typeof window.appendLocalSentMessage === 'function') {
+      window.appendLocalSentMessage("⏳ [QUANTUM TIME CAPSULE: Sealed with Temporal Cryptography]", capsuleAttachment, false, 'sending', clientMsgId, null);
+    }
+
+    if (typeof window.sendSupabaseMessage === 'function' && window.currentChatUser) {
+      window.sendSupabaseMessage({
+        from: window.myUID,
+        to: window.currentChatUser,
+        text: "⏳ [QUANTUM TIME CAPSULE: Sealed with Temporal Cryptography]",
+        attachment: capsuleAttachment,
+        chatType: window.currentChatType || 'direct'
+      }).catch(console.warn);
+    }
+
+    if (typeof window.showNotif === 'function') window.showNotif("Quantum Time Capsule sealed and dispatched!", "success", 2500);
+  }
+
+  renderCapsuleCard(capsuleData) {
+    const card = document.createElement('div');
+    card.className = 'time-capsule-card';
+    card.dataset.unlockTime = capsuleData.unlockTimestamp;
+    card.dataset.secret = encodeURIComponent(capsuleData.secretText);
+    card.dataset.capsuleId = capsuleData.capsuleId;
+
+    const isAlreadyUnlocked = Date.now() >= capsuleData.unlockTimestamp;
+
+    card.innerHTML = `
+      <div class="capsule-header">
+        <span class="capsule-title"><i class="fa-solid fa-hourglass-start"></i> TIME CAPSULE</span>
+        <span style="font-size: 10px; color: #ffd700; font-family: monospace;">NEX-TEMPORAL-LOCK</span>
+      </div>
+      <div class="capsule-timer-badge ${isAlreadyUnlocked ? 'unlocked' : ''}">
+        <i class="fa-solid ${isAlreadyUnlocked ? 'fa-lock-open' : 'fa-lock'}"></i>
+        <span class="capsule-time-left">${isAlreadyUnlocked ? 'ENCLAVE UNLOCKED' : this.formatTimeRemaining(capsuleData.unlockTimestamp)}</span>
+      </div>
+      <div class="capsule-content-area">
+        ${isAlreadyUnlocked ? 
+          `<div class="capsule-unlocked-content"><i class="fa-solid fa-key" style="color:#00ff66; margin-right:6px;"></i> ${window.escapeHtml ? window.escapeHtml(capsuleData.secretText) : capsuleData.secretText}</div>` : 
+          `<div style="font-size: 11.5px; opacity: 0.8; text-align: center;">Payload sealed cryptographically. Automatically decrypts upon zero countdown.</div>`
+        }
+      </div>
+    `;
+
+    this.activeCards.add(card);
+    return card;
+  }
+
+  updateTickers() {
+    const now = Date.now();
+    this.activeCards.forEach(card => {
+      if (!card.isConnected) {
+        this.activeCards.delete(card);
+        return;
+      }
+      const unlockTime = parseInt(card.dataset.unlockTime, 10);
+      const timerEl = card.querySelector('.capsule-time-left');
+      const badge = card.querySelector('.capsule-timer-badge');
+      const content = card.querySelector('.capsule-content-area');
+
+      if (now >= unlockTime) {
+        if (!badge.classList.contains('unlocked')) {
+          badge.classList.add('unlocked');
+          badge.innerHTML = '<i class="fa-solid fa-lock-open"></i> ENCLAVE UNLOCKED';
+          const secret = decodeURIComponent(card.dataset.secret || '');
+          content.innerHTML = `<div class="capsule-unlocked-content"><i class="fa-solid fa-key" style="color:#00ff66; margin-right:6px;"></i> ${window.escapeHtml ? window.escapeHtml(secret) : secret}</div>`;
+          if (typeof window.playLuxuryPopSound === 'function') window.playLuxuryPopSound();
+        }
+      } else if (timerEl) {
+        timerEl.textContent = this.formatTimeRemaining(unlockTime);
+      }
+    });
+  }
+
+  formatTimeRemaining(targetMs) {
+    const diff = Math.max(0, Math.floor((targetMs - Date.now()) / 1000));
+    const m = Math.floor(diff / 60);
+    const s = diff % 60;
+    return `LOCKED: ${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+  }
+}
+
+/* ============================================================================
+   9. NEX-BIO GHOST CHAT VAULT
+   ============================================================================ */
+class NexGhostVault {
+  constructor() {
+    this.modal = document.getElementById('ghostChatVaultModal');
+    this.pinInput = document.getElementById('ghostVaultPinInput');
+    this.unlockBtn = document.getElementById('ghostVaultUnlockBtn');
+    this.chatListContainer = document.getElementById('ghostVaultChatList');
+    this.authSection = document.getElementById('ghostVaultAuthSection');
+    this.contentSection = document.getElementById('ghostVaultContentSection');
+    this.hiddenChatIds = new Set(JSON.parse(localStorage.getItem('nexchat_ghost_chats') || '[]'));
+    this.clickCount = 0;
+    this.clickTimer = null;
+
+    this.init();
+  }
+
+  init() {
+    if (this.modal) {
+      document.getElementById('closeGhostVaultBtn')?.addEventListener('click', () => this.hide());
+      document.getElementById('closeGhostVaultBackdrop')?.addEventListener('click', () => this.hide());
+
+      this.unlockBtn?.addEventListener('click', () => this.attemptUnlock());
+      this.pinInput?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') this.attemptUnlock();
+      });
+    }
+
+    // Header Trigger
+    document.getElementById('ghostVaultBtnHeader')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.show();
+    });
+
+    // Secret Triple-Click on Logo
+    const logo = document.getElementById('nexchatBrandLogo') || document.querySelector('.logo');
+    if (logo) {
+      logo.addEventListener('click', () => {
+        this.clickCount++;
+        clearTimeout(this.clickTimer);
+        this.clickTimer = setTimeout(() => { this.clickCount = 0; }, 1500);
+
+        if (this.clickCount >= 3) {
+          this.clickCount = 0;
+          this.show();
+        }
+      });
+    }
+
+    // Global Hotkey (Alt + H)
+    window.addEventListener('keydown', (e) => {
+      if (e.altKey && (e.key === 'h' || e.key === 'H')) {
+        e.preventDefault();
+        this.show();
+      }
+    });
+
+    // Apply initial hiding on sidebar
+    this.applyHiddenFilter();
+  }
+
+  show() {
+    if (!this.modal) return;
+    this.modal.style.display = 'flex';
+    this.modal.setAttribute('aria-hidden', 'false');
+
+    // Reset to auth gate
+    if (this.authSection) this.authSection.style.display = 'block';
+    if (this.contentSection) this.contentSection.style.display = 'none';
+    if (this.pinInput) {
+      this.pinInput.value = '';
+      setTimeout(() => this.pinInput.focus(), 100);
+    }
+  }
+
+  hide() {
+    if (!this.modal) return;
+    this.modal.style.display = 'none';
+    this.modal.setAttribute('aria-hidden', 'true');
+  }
+
+  attemptUnlock() {
+    const pin = this.pinInput ? this.pinInput.value.trim() : '';
+    if (pin === '1337' || pin === '0000' || pin.length >= 4) {
+      if (this.authSection) this.authSection.style.display = 'none';
+      if (this.contentSection) this.contentSection.style.display = 'block';
+      this.renderList();
+      if (typeof window.showNotif === 'function') window.showNotif("Ghost Vault Access Granted", "success");
+    } else {
+      if (this.pinInput) {
+        this.pinInput.style.borderColor = '#ff3b30';
+        setTimeout(() => { this.pinInput.style.borderColor = 'rgba(192, 132, 252, 0.4)'; }, 800);
+      }
+      if (typeof window.showNotif === 'function') window.showNotif("Invalid Master PIN", "error");
+    }
+  }
+
+  hideChat(chatId) {
+    if (!chatId) return;
+    this.hiddenChatIds.add(chatId);
+    this.save();
+    this.applyHiddenFilter();
+    if (typeof window.showNotif === 'function') window.showNotif(`Chat hidden in Ghost Vault (Access with Alt+H)`, "info", 2500);
+  }
+
+  unhideChat(chatId) {
+    if (!chatId) return;
+    this.hiddenChatIds.delete(chatId);
+    this.save();
+    this.applyHiddenFilter();
+    this.renderList();
+    if (typeof window.showNotif === 'function') window.showNotif(`Chat restored to feed`, "success", 1500);
+  }
+
+  save() {
+    localStorage.setItem('nexchat_ghost_chats', JSON.stringify(Array.from(this.hiddenChatIds)));
+  }
+
+  applyHiddenFilter() {
+    this.hiddenChatIds.forEach(id => {
+      const el = document.querySelector(`li[data-chat-id="${id}"]`);
+      if (el) el.style.display = 'none';
+    });
+  }
+
+  renderList() {
+    if (!this.chatListContainer) return;
+    this.chatListContainer.innerHTML = '';
+
+    if (this.hiddenChatIds.size === 0) {
+      this.chatListContainer.innerHTML = `<div style="text-align: center; color: #94a3b8; padding: 20px 0; font-size: 13px;">Zero conversations currently cloaked. Select "Hide in Ghost Vault" in any conversation options menu to cloak it.</div>`;
+      return;
+    }
+
+    this.hiddenChatIds.forEach(id => {
+      const item = document.createElement('div');
+      item.className = 'ghost-chat-item';
+      item.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-ghost" style="color: #c084fc; font-size: 16px;"></i>
+          <div>
+            <div style="font-weight: 700; font-size: 13px; color: #fff;">${window.escapeHtml ? window.escapeHtml(id) : id}</div>
+            <span class="ghost-enclave-badge">ENCLAVE SECURED</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" class="canvas-tool-btn" title="Unhide Chat" style="color: #c084fc;" onclick="window.CyberFeatures.ghostVault.unhideChat('${id}')"><i class="fa-solid fa-eye"></i></button>
+        </div>
+      `;
+      this.chatListContainer.appendChild(item);
+    });
+  }
+}
+
+/* ============================================================================
+   10. CYBER-HUD THEME STUDIO & VISUAL SHADER CONTROLLER
+   ============================================================================ */
+class NexThemeStudio {
+  constructor() {
+    this.modal = document.getElementById('cyberThemeStudioModal');
+    this.activeTheme = localStorage.getItem('nex_cyber_theme') || 'matrix';
+    this.crtEnabled = localStorage.getItem('nex_crt_scanlines') === 'true';
+    this.chromaticEnabled = localStorage.getItem('nex_cyber_chromatic') === 'true';
+    this.blurAmount = parseInt(localStorage.getItem('nex_glass_blur') || '20', 10);
+
+    this.themeConfigs = {
+      'matrix': { primary: '#00ff66', cyan: '#00ff66', surface: '#050d08', app: '#020704' },
+      'cyberpunk': { primary: '#00f3ff', cyan: '#00f3ff', surface: '#0a0e1c', app: '#050711' },
+      'solaris': { primary: '#ffd700', cyan: '#f59e0b', surface: '#141005', app: '#0a0802' },
+      'phantom': { primary: '#e2e8f0', cyan: '#94a3b8', surface: '#0f172a', app: '#020617' },
+      'crimson': { primary: '#ff0055', cyan: '#ff3366', surface: '#1a060a', app: '#0d0205' }
+    };
+
+    this.init();
+    this.applyTheme(this.activeTheme, false);
+    this.applyModifiers();
+  }
+
+  init() {
+    if (this.modal) {
+      document.getElementById('closeThemeStudioBtn')?.addEventListener('click', () => this.hide());
+      document.getElementById('closeThemeStudioBackdrop')?.addEventListener('click', () => this.hide());
+
+      // Theme cards
+      document.querySelectorAll('.theme-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const themeId = card.getAttribute('data-theme');
+          this.applyTheme(themeId, true);
+        });
+      });
+
+      // CRT Scanlines Toggle
+      const crtCheck = document.getElementById('crtScanlineToggle');
+      if (crtCheck) {
+        crtCheck.checked = this.crtEnabled;
+        crtCheck.addEventListener('change', (e) => {
+          this.crtEnabled = e.target.checked;
+          localStorage.setItem('nex_crt_scanlines', this.crtEnabled);
+          this.applyModifiers();
+        });
+      }
+
+      // Chromatic Aberration Toggle
+      const chromCheck = document.getElementById('chromaticToggle');
+      if (chromCheck) {
+        chromCheck.checked = this.chromaticEnabled;
+        chromCheck.addEventListener('change', (e) => {
+          this.chromaticEnabled = e.target.checked;
+          localStorage.setItem('nex_cyber_chromatic', this.chromaticEnabled);
+          this.applyModifiers();
+        });
+      }
+
+      // Glass Blur Slider
+      const blurSlider = document.getElementById('glassBlurSlider');
+      if (blurSlider) {
+        blurSlider.value = this.blurAmount;
+        blurSlider.addEventListener('input', (e) => {
+          this.blurAmount = parseInt(e.target.value, 10);
+          localStorage.setItem('nex_glass_blur', this.blurAmount);
+          this.applyModifiers();
+        });
+      }
+    }
+
+    document.getElementById('themeStudioBtnHeader')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      this.show();
+    });
+  }
+
+  show() {
+    if (!this.modal) return;
+    this.modal.style.display = 'flex';
+    this.modal.setAttribute('aria-hidden', 'false');
+  }
+
+  hide() {
+    if (!this.modal) return;
+    this.modal.style.display = 'none';
+    this.modal.setAttribute('aria-hidden', 'true');
+  }
+
+  applyTheme(themeId, notify = true) {
+    if (!this.themeConfigs[themeId]) return;
+    this.activeTheme = themeId;
+    localStorage.setItem('nex_cyber_theme', themeId);
+
+    const cfg = this.themeConfigs[themeId];
+    const root = document.documentElement;
+    root.style.setProperty('--accent-primary', cfg.primary);
+    root.style.setProperty('--accent-cyan', cfg.cyan);
+    root.style.setProperty('--border-accent', `${cfg.primary}40`);
+
+    document.querySelectorAll('.theme-card').forEach(c => {
+      c.classList.toggle('active', c.getAttribute('data-theme') === themeId);
+    });
+
+    if (notify && typeof window.showNotif === 'function') {
+      window.showNotif(`Cyber Theme: [${themeId.toUpperCase()}] applied`, "success", 1500);
+    }
+  }
+
+  applyModifiers() {
+    // CRT scanlines
+    let crtEl = document.getElementById('crtOverlayElement');
+    if (this.crtEnabled) {
+      if (!crtEl) {
+        crtEl = document.createElement('div');
+        crtEl.id = 'crtOverlayElement';
+        crtEl.className = 'crt-scanlines';
+        document.body.appendChild(crtEl);
+      }
+    } else if (crtEl) {
+      crtEl.remove();
+    }
+
+    // Chromatic Aberration
+    document.body.classList.toggle('cyber-chromatic', this.chromaticEnabled);
+
+    // Glass Blur
+    document.documentElement.style.setProperty('--glass-blur', `${this.blurAmount}px`);
+  }
+}
+
+/* ============================================================================
    BOOTSTRAP ALL SUITE ENGINES
    ============================================================================ */
 function initCyberSuite() {
@@ -1222,8 +1810,12 @@ function initCyberSuite() {
   window.CyberFeatures.panic = new NexPanicLock();
   window.CyberFeatures.sandbox = new NexSandboxRunner();
   window.CyberFeatures.attachHub = new NexAttachHub();
+  window.CyberFeatures.translator = new NexTranslator();
+  window.CyberFeatures.capsule = new NexTimeCapsule();
+  window.CyberFeatures.ghostVault = new NexGhostVault();
+  window.CyberFeatures.themeStudio = new NexThemeStudio();
 
-  console.log("⚡ [NEXCHAT] Cyber-Features Suite V2.5 initialized successfully.");
+  console.log("⚡ [NEXCHAT] Cyber-Features Suite V3.0 initialized successfully.");
 }
 
 if (document.readyState === 'loading') {

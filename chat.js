@@ -3793,10 +3793,19 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec) {
 };
 
 function renderMessageAttachment(attachment) {
-  if (!attachment || !attachment.downloadURL) return null;
+  if (!attachment || (!attachment.downloadURL && !attachment.isTimeCapsule)) return null;
   const container = document.createElement("div");
   container.className = "message-attachment-container";
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  // Quantum Time Capsule Card
+  if (attachment.isTimeCapsule && attachment.capsuleData) {
+    if (window.CyberFeatures && window.CyberFeatures.capsule) {
+      const capsuleEl = window.CyberFeatures.capsule.renderCapsuleCard(attachment.capsuleData);
+      container.appendChild(capsuleEl);
+      return container;
+    }
+  }
 
   const fileType = (attachment.fileType || '').toLowerCase();
   const fileName = (attachment.fileName || '').toLowerCase();
@@ -4148,7 +4157,7 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   bubble.className = isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent";
   bubble.style.cssText = isStk ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);";
 
-  if (attachment && attachment.downloadURL) {
+  if (attachment && (attachment.downloadURL || attachment.isTimeCapsule)) {
     const attachNode = renderMessageAttachment(attachment);
     if (attachNode) bubble.appendChild(attachNode);
   }
@@ -4158,6 +4167,46 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
     textP.style.margin = "0";
     textP.textContent = text;
     bubble.appendChild(textP);
+
+    // ChronEX Babel Translate Chip
+    const translateChip = document.createElement("span");
+    translateChip.className = "message-translate-chip";
+    translateChip.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translate</span>';
+    translateChip.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      let transBox = bubble.querySelector('.translated-message-box');
+      if (transBox) {
+        transBox.remove();
+        translateChip.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translate</span>';
+        return;
+      }
+      translateChip.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Translating...</span>';
+      const targetLang = localStorage.getItem('nex_preferred_lang') || 'es';
+      let translated = "";
+      if (window.CyberFeatures && window.CyberFeatures.translator) {
+        translated = await window.CyberFeatures.translator.translateText(text, targetLang);
+      } else {
+        translated = `[Translated] ${text}`;
+      }
+      transBox = document.createElement('div');
+      transBox.className = 'translated-message-box';
+      transBox.innerHTML = `
+        <div>${window.escapeHtml ? window.escapeHtml(translated) : translated}</div>
+        <div class="translate-meta-row">
+          <span class="translate-lang-tag">${targetLang}</span>
+          <button type="button" class="translate-speak-btn" title="Pronounce"><i class="fa-solid fa-volume-high"></i></button>
+        </div>
+      `;
+      transBox.querySelector('.translate-speak-btn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.CyberFeatures && window.CyberFeatures.translator) {
+          window.CyberFeatures.translator.speakText(translated, targetLang);
+        }
+      });
+      bubble.appendChild(transBox);
+      translateChip.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translated</span>';
+    });
+    bubble.appendChild(translateChip);
   }
 
   const timeSpan = document.createElement("div");
