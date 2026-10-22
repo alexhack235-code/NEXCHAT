@@ -156,6 +156,7 @@ function initNexDynamicViewportEngine() {
 initNexDynamicViewportEngine();
 
 let currentChatUser = null;
+let currentChatUserId = null;
 let currentChatType = 'direct'; // 'direct' or 'group'
 let currentChatName = null;
 let typingStatusUnsubscribe = null;
@@ -3726,6 +3727,71 @@ window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
   if (typeof showNotif === 'function') showNotif("Sticker sent!", "success", 1200);
 };
 
+// Global Dispatcher for Voice Notes
+window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec) {
+  if (!currentChatUser) {
+    if (typeof showNotif === 'function') showNotif("Please select a conversation first", "error");
+    return;
+  }
+  if (!myUID) {
+    if (typeof showNotif === 'function') showNotif("Please log in first", "error");
+    return;
+  }
+
+  const audioAttachment = {
+    downloadURL: audioDataUrl,
+    fileName: `voice_note_${Date.now()}.webm`,
+    fileType: 'audio/webm',
+    duration: durationSec || 1
+  };
+
+  const clientMsgId = `vn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  // 1. Instant 0ms Optimistic UI Append
+  if (typeof appendLocalSentMessage === 'function') {
+    appendLocalSentMessage("", audioAttachment, false, 'sending', clientMsgId, null);
+  }
+
+  // 2. Realtime Supabase Broadcast
+  if (typeof sendSupabaseMessage === 'function') {
+    sendSupabaseMessage({
+      from: myUID,
+      to: currentChatUser,
+      text: "",
+      attachment: audioAttachment,
+      chatType: currentChatType || 'direct'
+    }).then(() => {
+      if (typeof updateLocalSentMessageStatus === 'function') {
+        updateLocalSentMessageStatus(clientMsgId, 'sent');
+      }
+    }).catch(console.warn);
+  }
+
+  // 3. Firestore Persistence
+  try {
+    const messageData = {
+      from: myUID,
+      to: currentChatUser,
+      text: "",
+      attachment: audioAttachment,
+      time: serverTimestamp(),
+      read: false,
+      status: "sent",
+      type: "audio",
+      clientMsgId: clientMsgId
+    };
+    await addDoc(collection(db, "messages"), messageData);
+    if (typeof updateLocalSentMessageStatus === 'function') {
+      updateLocalSentMessageStatus(clientMsgId, 'sent');
+    }
+  } catch (err) {
+    console.warn("Voice note sync note:", err?.message);
+  }
+
+  if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+  if (typeof showNotif === 'function') showNotif("Voice note sent!", "success", 1500);
+};
+
 function renderMessageAttachment(attachment) {
   if (!attachment || !attachment.downloadURL) return null;
   const container = document.createElement("div");
@@ -4851,6 +4917,9 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   }
 
   currentChatUser = uid;
+  currentChatUserId = uid;
+  window.currentChatUser = uid;
+  window.currentChatUserId = uid;
   currentChatType = chatType;
   currentChatName = username;
   const chatDetailView = document.getElementById('chatDetailView');
@@ -5408,11 +5477,14 @@ async function startCall(isVideo = false) {
   const callTypeText = isVideo ? 'video' : 'voice';
 
   try {
+    const targetUserId = currentChatUserId || currentChatUser;
+    const targetUserName = currentChatName || currentChatUser || 'User';
+
     const callDocRef = await addDoc(collection(db, 'calls'), {
       callerId: myUID,
       callerName: myUsername || '',
-      receiverId: currentChatUserId,
-      receiverName: currentChatUser,
+      receiverId: targetUserId,
+      receiverName: targetUserName,
       callType: callTypeText,
       status: 'ringing',
       createdAt: serverTimestamp(),
@@ -5461,7 +5533,8 @@ async function startCall(isVideo = false) {
             updatedAt: serverTimestamp()
           });
 
-          const callHistoryId = await saveCallToHistory(myUID, currentChatUserId, callTypeText, 60, 'missed');
+          const targetUserId = currentChatUserId || currentChatUser;
+          const callHistoryId = await saveCallToHistory(myUID, targetUserId, callTypeText, 60, 'missed');
           console.log('?? Missed call logged to history:', callHistoryId);
           showNotif(`Missed call from @${currentChatUser}`, 'info');
           endCall();
@@ -6542,7 +6615,8 @@ function endCall() {
   const callType = document.getElementById('local-video') ? 'video' : 'voice';
 
   if (currentChatUser && myUID) {
-    saveCallToHistory(myUID, currentChatUserId, callType, callDuration, 'completed').catch(err => {
+    const targetUserId = currentChatUserId || currentChatUser;
+    saveCallToHistory(myUID, targetUserId, callType, callDuration, 'completed').catch(err => {
       console.warn('Could not save call to history:', err);
     });
   }
