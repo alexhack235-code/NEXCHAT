@@ -6651,3 +6651,190 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
     transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.6);
   }
 }
+
+
+/* ==========================================================================
+   CAMSHOT ADVANCED CYBER SUITE
+   1. Kinetic Karaoke AI Captions
+   2. Interactive Loot Stashes & Bounties
+   3. Real-Time Lens Shaders (Thermal, NVG, Glitch, Anamorphic)
+   4. Duet & Reaction Booth
+   5. Creator Tip Jar & Particle Canvas
+   STRICTLY ZERO EMOJIS: Clean Cyberpunk Styling
+   ========================================================================== */
+
+/* 1. Kinetic Karaoke AI Captions Overlay */
+.kinetic-caption-overlay {
+  position: absolute;
+  bottom: 85px;
+  left: 16px;
+  right: 64px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 25;
+  text-align: center;
+}
+.caption-karaoke-word {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 18px;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.7);
+  opacity: 0.65;
+  transition: transform 0.12s ease, color 0.12s ease, opacity 0.12s ease, text-shadow 0.12s ease;
+}
+.caption-karaoke-word.highlight-active {
+  color: #00f3ff;
+  opacity: 1;
+  transform: scale(1.18);
+  text-shadow: 0 0 14px rgba(0, 243, 255, 0.9), 0 0 25px rgba(0, 243, 255, 0.6), 0 2px 8px #000000;
+}
+
+/* 2. Interactive Loot Stash Blip */
+.in-reel-loot-stash {
+  position: absolute;
+  top: 140px;
+  right: 20px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+}
+.loot-pulse-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  border: 2px solid #ffd700;
+  animation: lootRadarPulse 1.8s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  pointer-events: none;
+}
+@keyframes lootRadarPulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.6); opacity: 0; }
+}
+.loot-claim-trigger {
+  background: rgba(10, 15, 26, 0.85);
+  border: 1px solid #ffd700;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.loot-claim-trigger:hover {
+  transform: scale(1.06);
+  background: rgba(255, 215, 0, 0.15);
+}
+.loot-label {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffd700;
+}
+.in-reel-loot-stash.claimed .loot-claim-trigger {
+  background: rgba(0, 255, 102, 0.15);
+  border-color: #00ff66;
+}
+.claimed-badge {
+  color: #00ff66;
+  font-size: 10px;
+  font-weight: 800;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 3. Lens Shaders */
+.reel-video.shader-thermal {
+  filter: invert(1) hue-rotate(180deg) saturate(3.5) contrast(1.4) !important;
+}
+.reel-video.shader-nightvision {
+  filter: sepia(1) hue-rotate(75deg) saturate(5.5) brightness(0.92) contrast(1.5) !important;
+}
+.reel-video.shader-glitch {
+  filter: contrast(1.65) saturate(2) hue-rotate(50deg) !important;
+}
+.reel-video.shader-anamorphic {
+  filter: contrast(1.22) brightness(1.05) saturate(1.25) !important;
+}
+
+/* 4. Duet & Reaction Booth */
+.duet-booth-card {
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  box-shadow: 0 0 40px rgba(0, 243, 255, 0.2);
+}
+.duet-viewport-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  height: 380px;
+}
+.duet-video-box {
+  position: relative;
+  background: #060911;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  height: 100%;
+}
+.duet-label {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 800;
+  font-family: monospace;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 10;
+}
+
+/* 5. Creator Tip Jar */
+.creator-tip-card {
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  box-shadow: 0 0 35px rgba(255, 215, 0, 0.2);
+}
+.tip-amount-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+.tip-amount-btn:hover {
+  border-color: #ffd700;
+  color: #ffd700;
+}
+.tip-amount-btn.active {
+  background: rgba(255, 215, 0, 0.18);
+  border-color: #ffd700;
+  color: #ffd700;
+}
+
+/* 6. Fullscreen Particle Fireworks Canvas */
+.reels-particle-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 999999;
+}

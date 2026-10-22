@@ -8757,3 +8757,290 @@ body.crt-phosphor-active::after {
   background-size: 100% 3px, 6px 100%;
   pointer-events: none;
 }
+
+
+/* ==========================================================================
+   NEXCHAT ADVANCED MATRIX & REEL BRIDGE SUITE
+   1. Tactical 4-Screen Multi-Channel Split Matrix
+   2. Stealth Ghost Mode Banner & Radar
+   3. White-Hat Security URL Audit Card
+   4. Mission Expense Tab Settlement Card
+   5. CamShot Reel-to-Chat Mini-Player Card
+   STRICTLY ZERO EMOJIS: Pure Cyberpunk Styling
+   ========================================================================== */
+
+/* 1. Tactical 4-Screen Split Grid */
+.tactical-split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  height: calc(100vh - 65px);
+  padding: 8px;
+  background: #04060c;
+  z-index: 100;
+  box-sizing: border-box;
+}
+.split-sector-panel {
+  background: #080d18;
+  border: 1px solid rgba(0, 243, 255, 0.25);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.split-sector-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #050810;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.sector-tag {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.sector-status {
+  font-size: 9px;
+  font-weight: 800;
+  color: #00ff66;
+  background: rgba(0, 255, 102, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+.split-sector-feed {
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sector-msg-item {
+  background: rgba(255, 255, 255, 0.02);
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+}
+.split-sector-input-bar {
+  padding: 8px;
+  background: #04060a;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.split-sector-input {
+  width: 100%;
+  background: #070b14;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 6px 10px;
+  font-size: 11px;
+  outline: none;
+}
+.split-sector-input:focus {
+  border-color: #00f3ff;
+}
+
+/* 2. Stealth Ghost Mode Banner */
+.stealth-mode-banner {
+  background: rgba(192, 132, 252, 0.15);
+  border-bottom: 1px solid rgba(192, 132, 252, 0.4);
+  color: #c084fc;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 50;
+}
+
+/* 3. Security URL Audit Card */
+.security-audit-bubble-card {
+  background: #080d18;
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 440px;
+}
+.sec-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+.sec-score-badge {
+  background: rgba(0, 255, 102, 0.15);
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+.sec-metrics-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #04070e;
+  padding: 8px;
+  border-radius: 6px;
+}
+.sec-metric-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  font-family: monospace;
+}
+.metric-key { color: #94a3b8; }
+.metric-val { font-weight: 700; }
+
+/* 4. Mission Expense Tab Settlement Card */
+.mission-tab-modal-window {
+  max-width: 500px;
+  width: 95%;
+  background: #090e1a;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  box-shadow: 0 0 35px rgba(255, 215, 0, 0.2);
+  border-radius: 12px;
+}
+.tab-input {
+  background: #04070e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  padding: 7px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+}
+.tab-input:focus { border-color: #ffd700; }
+.tab-add-btn {
+  background: #ffd700;
+  color: #000000;
+  font-weight: 800;
+  font-size: 11px;
+  padding: 0 14px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+.tab-expenses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.tab-item-row {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.02);
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.tab-dispatch-btn {
+  width: 100%;
+  background: #ffd700;
+  color: #000000;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+}
+.mission-tab-bubble-card {
+  background: #090e1a;
+  border: 1px solid rgba(255, 215, 0, 0.35);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 440px;
+}
+.tab-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+.tab-badge {
+  background: rgba(255, 215, 0, 0.15);
+  color: #ffd700;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+.tab-settle-btn {
+  width: 100%;
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid #ffd700;
+  color: #ffd700;
+  padding: 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* 5. CamShot Reel Mini-Player Card in Chat */
+.reel-chat-bubble-card {
+  background: #060912;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 340px;
+}
+.reel-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.reel-bubble-player-wrap {
+  width: 100%;
+  max-height: 380px;
+  background: #000000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.reel-bubble-video {
+  width: 100%;
+  max-height: 380px;
+  object-fit: cover;
+  display: block;
+}
+.reel-open-camshot-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255, 215, 0, 0.15);
+  border: 1px solid #ffd700;
+  color: #ffd700;
+  padding: 6px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+.reel-open-camshot-btn:hover {
+  background: #ffd700;
+  color: #000000;
+}

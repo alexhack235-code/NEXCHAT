@@ -3955,7 +3955,9 @@ function isRenderableAttachment(att) {
     att.isNeuralVoiceNote || att.voiceData || att.isQuantumSignature || att.signatureData ||
     att.isCasinoDuel || att.casinoData || att.isCodeSandbox || att.codeData ||
     att.isAiDebate || att.debateData || att.isGeofenceBeacon || att.beaconData ||
-    att.isKanbanMission || att.kanbanData
+    att.isKanbanMission || att.kanbanData ||
+    att.isSecurityAudit || att.auditData || att.isMissionTab || att.tabData ||
+    att.isCamshotReel || att.reelData
   );
 }
 
@@ -3966,6 +3968,33 @@ function renderMessageAttachment(attachment) {
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
 
   
+  // White-Hat Security URL Audit
+  if (attachment.isSecurityAudit || attachment.auditData) {
+    if (window.chatAdvancedMatrix && typeof window.chatAdvancedMatrix.renderSecurityAuditBubble === 'function') {
+      const secEl = window.chatAdvancedMatrix.renderSecurityAuditBubble(attachment.auditData);
+      container.appendChild(secEl);
+      return container;
+    }
+  }
+
+  // Self-Balancing Mission Tab
+  if (attachment.isMissionTab || attachment.tabData) {
+    if (window.chatAdvancedMatrix && typeof window.chatAdvancedMatrix.renderMissionTabBubble === 'function') {
+      const tabEl = window.chatAdvancedMatrix.renderMissionTabBubble(attachment.tabData);
+      container.appendChild(tabEl);
+      return container;
+    }
+  }
+
+  // CamShot Reel Interactive Mini-Player
+  if (attachment.isCamshotReel || attachment.reelData) {
+    if (window.chatAdvancedMatrix && typeof window.chatAdvancedMatrix.renderReelBubble === 'function') {
+      const reelEl = window.chatAdvancedMatrix.renderReelBubble(attachment.reelData);
+      container.appendChild(reelEl);
+      return container;
+    }
+  }
+
   // 1. Neural Voice Synthesizer
   if (attachment.isNeuralVoiceNote || attachment.voiceData) {
     if (window.neuralVoiceSynthEngine && typeof window.neuralVoiceSynthEngine.renderVoiceBubble === 'function') {
