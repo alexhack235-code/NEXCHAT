@@ -3838,8 +3838,8 @@ function renderMessageAttachment(attachment) {
   const url = attachment.downloadURL;
 
   const isImage = fileType.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif|svg|avif|bmp|heic)$/i.test(fileName);
-  const isVideo = fileType.startsWith("video/") || /\.(mp4|webm|mov|mkv|avi|3gp)$/i.test(fileName);
-  const isAudio = fileType.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(fileName);
+  const isVideo = (fileType.startsWith("video/") || /\.(mp4|mov|mkv|avi|3gp)$/i.test(fileName) || (/\.webm$/i.test(fileName) && !fileType.startsWith("audio/"))) && !fileType.startsWith("audio/") && !fileName.startsWith("voice_note_");
+  const isAudio = fileType.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(fileName) || fileName.startsWith("voice_note_");
   const isArchive = fileType.includes("zip") || fileType.includes("rar") || fileType.includes("tar") || fileType.includes("compressed") || fileType.includes("7z") || /\.(zip|rar|7z|tar|gz|bz2|tgz)$/i.test(fileName);
 
   if (isImage) {
@@ -4921,7 +4921,9 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   window.currentChatUser = uid;
   window.currentChatUserId = uid;
   currentChatType = chatType;
+  window.currentChatType = chatType;
   currentChatName = username;
+  window.currentChatName = username;
   const chatDetailView = document.getElementById('chatDetailView');
   const chatDetailHeader = document.querySelector('.chat-detail-header');
   if (chatDetailView) {
@@ -5471,6 +5473,12 @@ async function startCall(isVideo = false) {
 
   if (currentChatType !== 'direct') {
     showNotif('Calls are available only in direct or group chats', 'error');
+    return;
+  }
+
+  // Route through NexCallingEngine (Direct Google STUN WebRTC & Instant Google Meet)
+  if (window.nexCallingEngine && typeof window.nexCallingEngine.openChoiceModal === 'function') {
+    window.nexCallingEngine.openChoiceModal(currentChatName || currentChatUser || 'User', isVideo);
     return;
   }
 
@@ -10042,6 +10050,7 @@ async function setupInitialization() {
       sessionStorage.removeItem('auth_redirect_block');
 
       myUID = user.uid;
+      window.myUID = user.uid;
       pageInitializedForCurrentUser = true;
       console.log(" User authenticated:", myUID);
 

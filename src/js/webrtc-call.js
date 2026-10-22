@@ -318,11 +318,22 @@
       this.callType = isVideo ? 'video' : 'voice';
 
       try {
-        // Request local media
-        this.localStream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: isVideo ? { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } : false
-        });
+        // Request local media with audio & optional video
+        try {
+          this.localStream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: isVideo ? { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } : false
+          });
+        } catch (mediaErr) {
+          if (isVideo && (mediaErr.name === 'NotFoundError' || mediaErr.name === 'DevicesNotFoundError')) {
+            console.warn('[WebRTC] Camera not detected, falling back to audio only');
+            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            isVideo = false;
+            this.callType = 'voice';
+          } else {
+            throw mediaErr;
+          }
+        }
 
         // Create RTCPeerConnection with Google STUN
         this.peerConnection = new RTCPeerConnection(GOOGLE_ICE_CONFIG);
