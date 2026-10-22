@@ -7260,3 +7260,1199 @@
   background: rgba(239, 68, 68, 0.05);
   margin: 20px;
 }
+
+
+/* ==========================================================================
+   ADVANCED CYBER SUITE BATCH 6: 10 ENTERPRISE MODULES
+   1. Neural Voice Clone Synthesizer
+   2. Quantum Message Signatures (ECDSA P-256)
+   3. In-Chat Cyber Casino Roulette
+   4. Collaborative Code Sandbox Matrix
+   5. Interactive 3D Holographic Avatars
+   6. Tactical Broadcast Channels
+   7. Encrypted Dynamic QR Node Pairing
+   8. AI Operative Debater & Fallacy Auditor
+   9. Geo-Fenced Coordinate Radar Beacons
+   10. In-Chat Tactical Kanban Mission Board
+   STRICTLY ZERO EMOJIS: Pure Cyberpunk Typography & FontAwesome
+   ========================================================================== */
+
+/* 1. NEURAL VOICE SYNTHESIZER */
+.voice-synth-modal-window {
+  max-width: 580px;
+  width: 95%;
+  background: #090d16;
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.synth-badge {
+  background: rgba(0, 243, 255, 0.15);
+  color: #00f3ff;
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.synth-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.synth-textarea {
+  width: 100%;
+  min-height: 80px;
+  background: #060911;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+}
+.synth-textarea:focus {
+  outline: none;
+  border-color: #00f3ff;
+}
+.synth-profiles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.synth-profile-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+.synth-profile-card:hover {
+  background: rgba(0, 243, 255, 0.05);
+  border-color: rgba(0, 243, 255, 0.3);
+}
+.synth-profile-card.active {
+  background: rgba(0, 243, 255, 0.12);
+  border-color: #00f3ff;
+  box-shadow: 0 0 12px rgba(0, 243, 255, 0.25);
+}
+.synth-preview-stage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #060911;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px;
+}
+.synth-waveform-visualizer {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 32px;
+}
+.synth-wave-bar {
+  width: 4px;
+  background: #00f3ff;
+  border-radius: 2px;
+  height: 8px;
+  transition: height 0.1s ease;
+}
+.synth-preview-stage.auditioning .synth-wave-bar {
+  animation: synthBarPulse 0.4s infinite alternate ease-in-out;
+}
+@keyframes synthBarPulse {
+  0% { height: 6px; }
+  100% { height: 28px; background: #00ff66; }
+}
+.synth-btn-audition {
+  background: rgba(0, 243, 255, 0.15);
+  border: 1px solid #00f3ff;
+  color: #00f3ff;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.synth-actions-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.synth-btn-dispatch {
+  background: #00f3ff;
+  color: #000000;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* Voice Bubble Card */
+.synth-voice-bubble-card {
+  background: linear-gradient(135deg, rgba(9, 13, 22, 0.95), rgba(15, 23, 42, 0.95));
+  border: 1px solid rgba(0, 243, 255, 0.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 420px;
+}
+.synth-voice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.synth-bubble-preset-badge {
+  background: rgba(0, 243, 255, 0.15);
+  color: #00f3ff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+.synth-voice-transcript {
+  font-size: 12px;
+  color: #e2e8f0;
+  line-height: 1.4;
+  margin-bottom: 8px;
+  font-style: italic;
+}
+.synth-voice-player-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.synth-bubble-play-btn {
+  background: #00f3ff;
+  color: #000000;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+.synth-bubble-waveform-canvas {
+  flex: 1;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.synth-voice-footer-meta {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 10px;
+  color: #64748b;
+  font-family: monospace;
+}
+
+/* 2. QUANTUM SIGNATURES */
+.sig-modal-window {
+  max-width: 600px;
+  width: 95%;
+  background: #090d16;
+  border: 1px solid rgba(138, 43, 226, 0.4);
+  box-shadow: 0 0 35px rgba(138, 43, 226, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.sig-badge {
+  background: rgba(138, 43, 226, 0.2);
+  color: #bf7fff;
+  border: 1px solid rgba(138, 43, 226, 0.5);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.sig-key-box {
+  background: #050811;
+  border: 1px solid rgba(138, 43, 226, 0.25);
+  border-radius: 6px;
+  padding: 8px;
+  font-family: monospace;
+  font-size: 10px;
+  color: #bf7fff;
+  word-break: break-all;
+}
+.sig-bubble-card {
+  background: #080d1a;
+  border: 1px solid rgba(138, 43, 226, 0.35);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 440px;
+}
+.sig-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+.sig-verified-pill {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.sig-bubble-text {
+  font-size: 13px;
+  color: #ffffff;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+.sig-bubble-meta {
+  font-family: monospace;
+  font-size: 10px;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 6px;
+  border-radius: 4px;
+  word-break: break-all;
+}
+.sig-btn-verify {
+  margin-top: 8px;
+  width: 100%;
+  background: rgba(138, 43, 226, 0.2);
+  border: 1px solid #8a2be2;
+  color: #bf7fff;
+  padding: 6px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 3. CYBER CASINO */
+.casino-modal-window {
+  max-width: 520px;
+  width: 95%;
+  background: #0b0f19;
+  border: 1px solid rgba(255, 176, 0, 0.4);
+  box-shadow: 0 0 35px rgba(255, 176, 0, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.casino-badge {
+  background: rgba(255, 176, 0, 0.15);
+  color: #ffb000;
+  border: 1px solid rgba(255, 176, 0, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.casino-wheel-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #060911;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 176, 0, 0.2);
+}
+.casino-bet-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.casino-bet-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+.casino-bet-btn.active {
+  background: rgba(255, 176, 0, 0.2);
+  border-color: #ffb000;
+  color: #ffb000;
+}
+.casino-bubble-card {
+  background: #090e1a;
+  border: 1px solid rgba(255, 176, 0, 0.35);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 420px;
+}
+.casino-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.casino-pot-badge {
+  background: rgba(255, 176, 0, 0.15);
+  color: #ffb000;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 176, 0, 0.3);
+}
+
+/* 4. CODE SANDBOX MATRIX */
+.code-modal-window {
+  max-width: 720px;
+  width: 95%;
+  background: #080d16;
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  box-shadow: 0 0 35px rgba(0, 255, 102, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.code-env-badge {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.code-editor-textarea {
+  width: 100%;
+  height: 160px;
+  background: #04070d;
+  color: #00ff66;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  border: 1px solid rgba(0, 255, 102, 0.25);
+  border-radius: 8px;
+  padding: 10px;
+  resize: vertical;
+}
+.code-terminal-output {
+  background: #020408;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-family: monospace;
+  font-size: 11px;
+  color: #cbd5e1;
+  max-height: 100px;
+  overflow-y: auto;
+}
+.code-sandbox-card {
+  background: #070c14;
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 480px;
+}
+.code-block-pre {
+  background: #03060a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 10px;
+  color: #00ff66;
+  font-family: monospace;
+  font-size: 11px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+}
+
+/* 5. HOLOGRAPHIC AVATARS */
+.holo-modal-window {
+  max-width: 540px;
+  width: 95%;
+  background: #080d18;
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.holo-badge {
+  background: rgba(0, 243, 255, 0.15);
+  color: #00f3ff;
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.holo-viewport-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #03060c;
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  border-radius: 10px;
+  padding: 16px;
+  position: relative;
+}
+.holo-preset-picker {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.holo-preset-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  text-align: center;
+}
+.holo-preset-btn.active {
+  background: rgba(0, 243, 255, 0.15);
+  border-color: #00f3ff;
+  color: #00f3ff;
+}
+
+/* 6. BROADCAST CHANNELS */
+.channels-modal-window {
+  max-width: 680px;
+  width: 95%;
+  background: #080d16;
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.channel-feed-stream {
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+.channel-post-item {
+  background: #060a12;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+}
+.channel-reaction-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.channel-reaction-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 7. ENCRYPTED DYNAMIC QR NODE PAIRING */
+.qr-modal-window {
+  max-width: 480px;
+  width: 95%;
+  background: #090e18;
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.qr-canvas-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 12px auto;
+  width: fit-content;
+}
+.qr-timer-bar {
+  height: 4px;
+  background: #00f3ff;
+  border-radius: 2px;
+  transition: width 1s linear;
+}
+
+/* 8. AI OPERATIVE DEBATER */
+.debater-modal-window {
+  max-width: 650px;
+  width: 95%;
+  background: #080c16;
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.debater-badge {
+  background: rgba(0, 243, 255, 0.15);
+  color: #00f3ff;
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.debater-info-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 243, 255, 0.05);
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+}
+.debater-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.debater-textarea {
+  width: 100%;
+  min-height: 70px;
+  background: #050810;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+}
+.debater-textarea:focus {
+  outline: none;
+  border-color: #00f3ff;
+}
+.debater-modes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.debater-mode-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.debater-mode-btn.active {
+  background: rgba(0, 243, 255, 0.12);
+  border-color: #00f3ff;
+  color: #00f3ff;
+}
+.debater-analysis-card {
+  background: #050912;
+  border: 1px solid rgba(0, 243, 255, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+}
+.debater-analysis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+.debater-score-pill {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.debater-fallacy-alert {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 176, 0, 0.08);
+  border: 1px solid rgba(255, 176, 0, 0.25);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+.debater-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.debater-metric-cell {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 6px;
+}
+.metric-num {
+  display: block;
+  font-size: 15px;
+  font-weight: 800;
+  font-family: monospace;
+}
+.metric-lbl {
+  display: block;
+  font-size: 9px;
+  color: #64748b;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.debater-bubble-card {
+  background: #080c16;
+  border: 1px solid rgba(0, 243, 255, 0.3);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 460px;
+}
+.debater-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+.debater-mode-tag {
+  background: rgba(0, 243, 255, 0.12);
+  color: #00f3ff;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.debater-score-badge {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.debater-bubble-claim {
+  margin-bottom: 8px;
+}
+.debater-sub-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+.debater-claim-text {
+  font-size: 12px;
+  color: #e2e8f0;
+  font-style: italic;
+  line-height: 1.4;
+}
+.debater-opp-text {
+  font-size: 12px;
+  color: #ffffff;
+  line-height: 1.4;
+}
+.debater-bubble-fallacy {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 176, 0, 0.08);
+  border: 1px solid rgba(255, 176, 0, 0.2);
+  padding: 5px 8px;
+  border-radius: 4px;
+  margin: 8px 0;
+}
+.debater-bubble-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.bubble-stat-chip {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 4px;
+  text-align: center;
+}
+.bubble-stat-chip .stat-val {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  font-family: monospace;
+}
+.bubble-stat-chip .stat-lbl {
+  display: block;
+  font-size: 8px;
+  color: #64748b;
+  font-weight: 700;
+}
+.debater-rebut-btn {
+  width: 100%;
+  background: rgba(0, 243, 255, 0.12);
+  border: 1px solid #00f3ff;
+  color: #00f3ff;
+  padding: 6px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.debater-btn-primary {
+  background: #00f3ff;
+  color: #000000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.debater-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 9. GEOFENCE RADAR BEACON */
+.geofence-modal-window {
+  max-width: 540px;
+  width: 95%;
+  background: #080d16;
+  border: 1px solid rgba(255, 0, 85, 0.4);
+  box-shadow: 0 0 35px rgba(255, 0, 85, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.beacon-badge {
+  background: rgba(255, 0, 85, 0.15);
+  color: #ff0055;
+  border: 1px solid rgba(255, 0, 85, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.geofence-radar-canvas-container {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #04060a;
+  border: 1px solid rgba(255, 0, 85, 0.25);
+  border-radius: 8px;
+  padding: 10px;
+  overflow: hidden;
+}
+.radar-telemetry-overlay {
+  position: absolute;
+  bottom: 6px;
+  left: 10px;
+  right: 10px;
+  display: flex;
+  justify-content: space-between;
+  font-family: monospace;
+  font-size: 10px;
+  color: #ff0055;
+}
+.beacon-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.beacon-input, .beacon-select, .beacon-textarea {
+  width: 100%;
+  background: #050810;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-family: inherit;
+}
+.beacon-textarea {
+  min-height: 55px;
+  resize: vertical;
+}
+.beacon-gps-btn {
+  background: rgba(255, 0, 85, 0.15);
+  border: 1px solid #ff0055;
+  color: #ff0055;
+  padding: 0 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.beacon-btn-deploy {
+  background: #ff0055;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.beacon-btn-cancel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.beacon-bubble-card {
+  background: #090e18;
+  border: 1px solid rgba(255, 0, 85, 0.35);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 440px;
+}
+.beacon-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+.beacon-status-pill {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.beacon-status-pill.locked {
+  background: rgba(255, 0, 85, 0.15);
+  color: #ff0055;
+  border: 1px solid rgba(255, 0, 85, 0.4);
+}
+.beacon-status-pill.unlocked {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  border: 1px solid rgba(0, 255, 102, 0.4);
+}
+.beacon-credits-tag {
+  background: rgba(255, 176, 0, 0.15);
+  color: #ffb000;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.beacon-coord-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+.coord-label {
+  color: #94a3b8;
+  font-weight: 700;
+}
+.coord-val {
+  color: #ffffff;
+  font-family: monospace;
+}
+.beacon-payload-display {
+  margin: 8px 0;
+}
+.beacon-payload-obscured {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px dashed rgba(255, 0, 85, 0.3);
+  padding: 12px;
+  border-radius: 6px;
+}
+.beacon-ping-btn {
+  width: 100%;
+  background: rgba(255, 0, 85, 0.2);
+  border: 1px solid #ff0055;
+  color: #ff0055;
+  padding: 7px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* 10. TACTICAL KANBAN BOARD */
+.kanban-modal-window {
+  max-width: 900px;
+  width: 95%;
+  background: #080c16;
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.kanban-badge {
+  background: rgba(0, 243, 255, 0.15);
+  color: #00f3ff;
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.kanban-creator-bar {
+  background: #050810;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+}
+.kanban-input, .kanban-select {
+  background: #03050a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #ffffff;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+.kanban-add-btn {
+  background: #00f3ff;
+  color: #000000;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.kanban-columns-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  min-height: 280px;
+}
+.kanban-column {
+  background: #050810;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+}
+.kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.kanban-col-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.kanban-col-indicator.backlog { background: #64748b; }
+.kanban-col-indicator.in-progress { background: #00f3ff; }
+.kanban-col-indicator.audit { background: #ffb000; }
+.kanban-col-indicator.deployed { background: #00ff66; }
+.kanban-col-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+}
+.kanban-col-count {
+  font-size: 10px;
+  font-weight: 800;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: #94a3b8;
+}
+.kanban-cards-wrapper {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 240px;
+}
+.kanban-card {
+  background: #0a0f1c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 8px;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.kanban-card:hover {
+  border-color: rgba(0, 243, 255, 0.4);
+  transform: translateY(-1px);
+}
+.kanban-card-pri {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-bottom: 4px;
+}
+.kanban-card-pri.critical {
+  background: rgba(255, 0, 85, 0.15);
+  color: #ff0055;
+  border: 1px solid rgba(255, 0, 85, 0.4);
+}
+.kanban-card-pri.high {
+  background: rgba(255, 176, 0, 0.15);
+  color: #ffb000;
+  border: 1px solid rgba(255, 176, 0, 0.4);
+}
+.kanban-card-pri.nominal {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  border: 1px solid rgba(0, 255, 102, 0.4);
+}
+.kanban-card-title {
+  font-size: 11px;
+  color: #ffffff;
+  line-height: 1.3;
+}
+.kanban-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 10px;
+}
+.kanban-move-btn {
+  background: rgba(0, 243, 255, 0.15);
+  border: 1px solid #00f3ff;
+  color: #00f3ff;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+}
+.kanban-btn-share {
+  width: 100%;
+  background: #00f3ff;
+  color: #000000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.kanban-bubble-card {
+  background: #080d1a;
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 6px 0;
+  max-width: 460px;
+}
+.kanban-bubble-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 6px;
+}
+.kanban-bubble-badge {
+  background: rgba(0, 243, 255, 0.15);
+  color: #00f3ff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.kanban-bubble-task-item {
+  background: #050810;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+.kanban-bubble-pri {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+.kanban-bubble-pri.critical { color: #ff0055; }
+.kanban-bubble-pri.high { color: #ffb000; }
+.kanban-bubble-pri.nominal { color: #00ff66; }
+.kanban-bubble-status {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 3px;
+}
+.kanban-bubble-status.backlog { background: rgba(100, 116, 139, 0.2); color: #94a3b8; }
+.kanban-bubble-status.in-progress { background: rgba(0, 243, 255, 0.15); color: #00f3ff; }
+.kanban-bubble-status.audit { background: rgba(255, 176, 0, 0.15); color: #ffb000; }
+.kanban-bubble-status.deployed { background: rgba(0, 255, 102, 0.15); color: #00ff66; }
+.kanban-bubble-task-title {
+  font-size: 12px;
+  color: #ffffff;
+}
+.kanban-advance-chip {
+  background: rgba(0, 243, 255, 0.1);
+  border: 1px solid #00f3ff;
+  color: #00f3ff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.kanban-open-board-btn {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(0, 243, 255, 0.3);
+  color: #00f3ff;
+  padding: 6px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}

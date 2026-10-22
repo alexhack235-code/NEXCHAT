@@ -117,6 +117,9 @@
           <button id="cipherVaultBtnHeader" class="header-icon-btn" title="Cipher Vault &amp; Secret Rooms"><i class="fa-solid fa-key"></i></button>
           <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
           <button id="ghostPanicLockBtn" class="header-icon-btn ghost-lock-btn" title="Ghost Panic Shield (Ctrl+Shift+L)"><i class="fa-solid fa-shield-virus"></i></button>
+          <button id="holoAvatarBtnHeader" class="header-icon-btn" title="3D Holographic Avatar Studio" onclick="window.holographicAvatarsEngine?.openModal()"><i class="fa-solid fa-cube text-[#00ff66]"></i></button>
+          <button id="broadcastChannelsBtnHeader" class="header-icon-btn" title="Tactical Broadcast Channels" onclick="window.broadcastChannelsEngine?.openModal()"><i class="fa-solid fa-tower-broadcast text-[#00f3ff]"></i></button>
+          <button id="qrPairingBtnHeader" class="header-icon-btn" title="Dynamic QR Node Pairing" onclick="window.qrPairingEngine?.openModal()"><i class="fa-solid fa-qrcode text-[#00f3ff]"></i></button>
           <button id="tacticalCanvasBtnHeader" class="header-icon-btn" title="NEX-CANVAS Tactical Whiteboard" onclick="window.CyberFeatures.canvas?.show()"><i class="fa-solid fa-pen-ruler"></i></button>
           <button id="steganoBtnHeader" class="header-icon-btn" title="NEX-STEGANO Pixel Enclave" onclick="window.CyberFeatures.stegano?.show()"><i class="fa-solid fa-user-secret"></i></button>
           <button id="sandboxBtnHeader" class="header-icon-btn" title="NEX-SANDBOX Code Runner" onclick="window.CyberFeatures.sandbox?.show()"><i class="fa-solid fa-microchip"></i></button>
@@ -672,6 +675,34 @@
             <div class="attach-hub-item" id="hubActionTranslate">
               <div class="attach-hub-icon icon-translate"><i class="fa-solid fa-language"></i></div>
               <span>Translator</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionVoiceSynth">
+              <div class="attach-hub-icon" style="color: #00f3ff;"><i class="fa-solid fa-microphone-lines"></i></div>
+              <span>Voice Synth</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionSignMessage">
+              <div class="attach-hub-icon" style="color: #bf7fff;"><i class="fa-solid fa-file-signature"></i></div>
+              <span>Sign ECDSA</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionCasino">
+              <div class="attach-hub-icon" style="color: #ffb000;"><i class="fa-solid fa-dice"></i></div>
+              <span>Cyber Roulette</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionCodeSandbox">
+              <div class="attach-hub-icon" style="color: #00ff66;"><i class="fa-solid fa-code"></i></div>
+              <span>Code Sandbox</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionAiDebater">
+              <div class="attach-hub-icon" style="color: #00f3ff;"><i class="fa-solid fa-scale-balanced"></i></div>
+              <span>AI Debater</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionGeofence">
+              <div class="attach-hub-icon" style="color: #ff0055;"><i class="fa-solid fa-satellite-dish"></i></div>
+              <span>Geo Beacon</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionKanban">
+              <div class="attach-hub-icon" style="color: #00f3ff;"><i class="fa-solid fa-table-columns"></i></div>
+              <span>Kanban Board</span>
             </div>
           </div>
 
@@ -4322,6 +4353,16 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/stegano-cloak.js"></script>
   <script src="./src/js/audio-spectrum-visualizer.js"></script>
   <script src="./src/js/ghost-panic-lock.js"></script>
+  <script src="./src/js/neural-voice-synth.js"></script>
+  <script src="./src/js/quantum-signatures.js"></script>
+  <script src="./src/js/cyber-casino.js"></script>
+  <script src="./src/js/code-sandbox.js"></script>
+  <script src="./src/js/holographic-avatars.js"></script>
+  <script src="./src/js/broadcast-channels.js"></script>
+  <script src="./src/js/qr-pairing.js"></script>
+  <script src="./src/js/ai-debater.js"></script>
+  <script src="./src/js/geofence-beacon.js"></script>
+  <script src="./src/js/kanban-board.js"></script>
 
 </body>
 

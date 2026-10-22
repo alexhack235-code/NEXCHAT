@@ -3945,11 +3945,89 @@ window.dispatchTokenRain = async function(dropAttachment) {
   if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
 };
 
+
+function isRenderableAttachment(att) {
+  if (!att) return false;
+  return Boolean(
+    att.downloadURL || att.isTimeCapsule || att.isTokenRain || att.dropData ||
+    att.isPredictionPoll || att.pollData || att.isScratchCard || att.scratchData ||
+    att.isBountyContract || att.bountyData || att.isSteganoCloak ||
+    att.isNeuralVoiceNote || att.voiceData || att.isQuantumSignature || att.signatureData ||
+    att.isCasinoDuel || att.casinoData || att.isCodeSandbox || att.codeData ||
+    att.isAiDebate || att.debateData || att.isGeofenceBeacon || att.beaconData ||
+    att.isKanbanMission || att.kanbanData
+  );
+}
+
 function renderMessageAttachment(attachment) {
-  if (!attachment || (!attachment.downloadURL && !attachment.isTimeCapsule && !attachment.isTokenRain && !attachment.dropData && !attachment.isPredictionPoll && !attachment.pollData && !attachment.isScratchCard && !attachment.scratchData && !attachment.isBountyContract && !attachment.bountyData && !attachment.isSteganoCloak)) return null;
+  if (!attachment || !isRenderableAttachment(attachment)) return null;
   const container = document.createElement("div");
   container.className = "message-attachment-container";
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  
+  // 1. Neural Voice Synthesizer
+  if (attachment.isNeuralVoiceNote || attachment.voiceData) {
+    if (window.neuralVoiceSynthEngine && typeof window.neuralVoiceSynthEngine.renderVoiceBubble === 'function') {
+      const voiceEl = window.neuralVoiceSynthEngine.renderVoiceBubble(attachment.voiceData);
+      container.appendChild(voiceEl);
+      return container;
+    }
+  }
+
+  // 2. Quantum Message Signatures
+  if (attachment.isQuantumSignature || attachment.signatureData) {
+    if (window.quantumSignaturesEngine && typeof window.quantumSignaturesEngine.renderSignatureBubble === 'function') {
+      const sigEl = window.quantumSignaturesEngine.renderSignatureBubble(attachment.signatureData);
+      container.appendChild(sigEl);
+      return container;
+    }
+  }
+
+  // 3. Cyber Casino Roulette
+  if (attachment.isCasinoDuel || attachment.casinoData) {
+    if (window.cyberCasinoEngine && typeof window.cyberCasinoEngine.renderCasinoBubble === 'function') {
+      const casinoEl = window.cyberCasinoEngine.renderCasinoBubble(attachment.casinoData);
+      container.appendChild(casinoEl);
+      return container;
+    }
+  }
+
+  // 4. Code Sandbox Matrix
+  if (attachment.isCodeSandbox || attachment.codeData) {
+    if (window.codeSandboxEngine && typeof window.codeSandboxEngine.renderCodeBubble === 'function') {
+      const codeEl = window.codeSandboxEngine.renderCodeBubble(attachment.codeData);
+      container.appendChild(codeEl);
+      return container;
+    }
+  }
+
+  // 8. AI Operative Debater
+  if (attachment.isAiDebate || attachment.debateData) {
+    if (window.aiDebaterEngine && typeof window.aiDebaterEngine.renderDebateBubble === 'function') {
+      const debEl = window.aiDebaterEngine.renderDebateBubble(attachment.debateData);
+      container.appendChild(debEl);
+      return container;
+    }
+  }
+
+  // 9. Geofence Radar Beacon
+  if (attachment.isGeofenceBeacon || attachment.beaconData) {
+    if (window.geofenceBeaconEngine && typeof window.geofenceBeaconEngine.renderBeaconBubble === 'function') {
+      const bcnEl = window.geofenceBeaconEngine.renderBeaconBubble(attachment.beaconData);
+      container.appendChild(bcnEl);
+      return container;
+    }
+  }
+
+  // 10. Tactical Kanban Mission Board
+  if (attachment.isKanbanMission || attachment.kanbanData) {
+    if (window.kanbanBoardEngine && typeof window.kanbanBoardEngine.renderKanbanBubble === 'function') {
+      const knbEl = window.kanbanBoardEngine.renderKanbanBubble(attachment.kanbanData);
+      container.appendChild(knbEl);
+      return container;
+    }
+  }
 
   // Escrow Bounty Contract
   if (attachment.isBountyContract || attachment.fileType === 'escrow_bounty' || attachment.bountyData) {
@@ -4386,7 +4464,7 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   bubble.className = isCirc ? "message-bubble sent is-clip-message" : (isDrop ? "message-bubble sent is-drop-message" : (isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent"));
   bubble.style.cssText = (isCirc || isStk || isDrop) ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: var(--active-bubble-bg, linear-gradient(135deg, #059669 0%, #10b981 100%)); border: var(--active-bubble-border, none); box-shadow: var(--active-bubble-shadow, 0 4px 14px rgba(5, 150, 105, 0.25)); color: var(--active-bubble-color, #ffffff); padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word;";
 
-  if (attachment && (attachment.downloadURL || attachment.isTimeCapsule || attachment.isTokenRain || attachment.dropData || attachment.isPredictionPoll || attachment.pollData || attachment.isScratchCard || attachment.scratchData || attachment.isBountyContract || attachment.bountyData || attachment.isSteganoCloak)) {
+  if (attachment && isRenderableAttachment(attachment)) {
     const attachNode = renderMessageAttachment(attachment);
     if (attachNode) bubble.appendChild(attachNode);
   }
@@ -4888,7 +4966,7 @@ function loadMessages() {
         bubble.appendChild(replyQuote);
       }
 
-      if (m.attachment && (m.attachment.downloadURL || m.attachment.isTimeCapsule || m.attachment.isTokenRain || m.attachment.dropData || m.attachment.isPredictionPoll || m.attachment.pollData || m.attachment.isScratchCard || m.attachment.scratchData || m.attachment.isBountyContract || m.attachment.bountyData || m.attachment.isSteganoCloak)) {
+      if (m.attachment && isRenderableAttachment(m.attachment)) {
         const attachNode = renderMessageAttachment(m.attachment);
         if (attachNode) bubble.appendChild(attachNode);
       }
