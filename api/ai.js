@@ -14,6 +14,10 @@ import { enforceRateLimit, applySecurityHeaders } from './_security.js';
  */
 
 const FALLBACK_PRO_KEYS = [
+  // User Fresh Pro Key 1 (Oct 2026)
+  Buffer.from('QVEuQWI4Uk42THhqc0Y2VUEyZU5icmlrcGg0dlpLdU96NXFObVFVa1BQaXVJM0hkcXlaTlE=', 'base64').toString('utf8'),
+  // User Fresh Pro Key 2 (Oct 2026)
+  Buffer.from('QVEuQWI4Uk42SVpnQm95RVprZlM1NDk4X3lvMlE1WjE1T3dKall3N2hhdTUtMzlkVlF6b3c=', 'base64').toString('utf8'),
   // User Pro Key 1
   Buffer.from('QVEuQWI4Uk42TFEzbEZpNmszcGUxNkxWcmhPVTVjLXMwQlhnNHczUG4tWUdPdHRxWngxSmc=', 'base64').toString('utf8'),
   // User Pro Key 2

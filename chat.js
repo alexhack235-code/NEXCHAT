@@ -3659,10 +3659,112 @@ async function sendMessage() {
   }
 }
 
+// Global Dispatcher for WhatsApp-Style Stickers
+window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
+  if (!currentChatUser) {
+    if (typeof showNotif === 'function') showNotif("Please select a conversation first", "error");
+    return;
+  }
+  if (!myUID) {
+    if (typeof showNotif === 'function') showNotif("Please log in first", "error");
+    return;
+  }
+
+  const stickerAttachment = {
+    downloadURL: stickerUrl,
+    fileName: (stickerName || 'sticker') + '.webp',
+    fileType: 'sticker',
+    isSticker: true
+  };
+
+  const clientMsgId = `stk_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+  // 1. Instant 0ms Local UI Append
+  if (typeof appendLocalSentMessage === 'function') {
+    appendLocalSentMessage("", stickerAttachment, false, 'sending', clientMsgId, null);
+  }
+
+  // 2. Realtime Supabase Broadcast
+  if (typeof sendSupabaseMessage === 'function') {
+    sendSupabaseMessage({
+      from: myUID,
+      to: currentChatUser,
+      text: "",
+      attachment: stickerAttachment,
+      isSticker: true,
+      chatType: currentChatType || 'direct'
+    }).then(() => {
+      if (typeof updateLocalSentMessageStatus === 'function') {
+        updateLocalSentMessageStatus(clientMsgId, 'sent');
+      }
+    }).catch(console.warn);
+  }
+
+  // 3. Firestore Persistence
+  try {
+    const messageData = {
+      from: myUID,
+      to: currentChatUser,
+      text: "",
+      attachment: stickerAttachment,
+      isSticker: true,
+      time: serverTimestamp(),
+      read: false,
+      status: "sent",
+      type: "sticker",
+      clientMsgId: clientMsgId
+    };
+    await addDoc(collection(db, "messages"), messageData);
+    if (typeof updateLocalSentMessageStatus === 'function') {
+      updateLocalSentMessageStatus(clientMsgId, 'sent');
+    }
+  } catch (err) {
+    console.warn("Sticker sync note:", err?.message);
+  }
+
+  if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+  if (typeof showNotif === 'function') showNotif("Sticker sent!", "success", 1200);
+};
+
 function renderMessageAttachment(attachment) {
   if (!attachment || !attachment.downloadURL) return null;
   const container = document.createElement("div");
   container.className = "message-attachment-container";
+  container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  const fileType = (attachment.fileType || '').toLowerCase();
+  const fileName = (attachment.fileName || '').toLowerCase();
+  const url = attachment.downloadURL;
+
+  // WhatsApp-Style Clean Transparent Sticker
+  const isSticker = attachment.isSticker || fileType === 'sticker' || (fileName && fileName.includes('sticker'));
+  if (isSticker) {
+    const stickerWrap = document.createElement("div");
+    stickerWrap.className = "message-sticker-wrap";
+    stickerWrap.style.cssText = "position: relative; display: inline-block; cursor: pointer;";
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = attachment.fileName || "Sticker";
+    img.className = "message-sticker-img";
+    img.loading = "lazy";
+    img.title = "Click to save sticker to your device";
+    img.addEventListener("click", () => {
+      if (window.nexStickerStore) {
+        window.nexStickerStore.saveCustomSticker({
+          id: 'stk_' + Date.now(),
+          name: attachment.fileName ? attachment.fileName.replace('.webp', '') : 'Saved Sticker',
+          pack: 'my_stickers',
+          dataUrl: url,
+          createdAt: Date.now()
+        }).then(() => {
+          if (typeof showNotif === 'function') showNotif('Sticker saved to your device collection!', 'success');
+        });
+      }
+    });
+    stickerWrap.appendChild(img);
+    container.appendChild(stickerWrap);
+    return container;
+  }
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
 
   const fileType = (attachment.fileType || '').toLowerCase();
@@ -3907,9 +4009,10 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
     wrapper.appendChild(headerLabel);
   }
 
+  const isStk = attachment && (attachment.isSticker || attachment.fileType === 'sticker');
   const bubble = document.createElement("div");
-  bubble.className = "message-bubble sent";
-  bubble.style.cssText = "background: linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);";
+  bubble.className = isStk ? "message-bubble sent is-sticker-message" : "message-bubble sent";
+  bubble.style.cssText = isStk ? "background: transparent; border: none; box-shadow: none; padding: 2px;" : "background: linear-gradient(135deg, #059669 0%, #10b981 100%); color:#ffffff; padding:10px 14px; border-radius:14px 14px 4px 14px; max-width:72%; word-wrap:break-word; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);";
 
   if (attachment && attachment.downloadURL) {
     const attachNode = renderMessageAttachment(attachment);
@@ -4327,9 +4430,17 @@ function loadMessages() {
       const msgDate = m.time?.toDate?.() || new Date();
       const time = formatTime(msgDate);
 
+      const isStk = m.isSticker || (m.attachment && (m.attachment.isSticker || m.attachment.fileType === 'sticker'));
       const bubble = document.createElement("div");
-      bubble.className = `message-bubble ${isOwn ? "sent" : "received"}`;
-      bubble.style.cssText = `
+      bubble.className = `message-bubble ${isOwn ? "sent" : "received"} ${isStk ? "is-sticker-message" : ""}`;
+      bubble.style.cssText = isStk ? `
+        position: relative;
+        padding: 2px;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        max-width: 72%;
+      ` : `
         position: relative;
         padding: 10px 14px;
         border-radius: ${isOwn ? "16px 16px 4px 16px" : "16px 16px 16px 4px"};

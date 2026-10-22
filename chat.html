@@ -596,10 +596,19 @@
             </div>
           </div>
 
+          <!-- Predictive Word & Auto-Correct Strip -->
+          <div id="predictiveWordBar" class="predictive-word-bar" style="display: none;">
+            <div class="predictive-chips-scroll" id="predictiveChipsScroll"></div>
+            <button type="button" id="quickAutocorrectBtn" class="quick-autocorrect-btn" style="display: none;" title="Apply Instant Grammar & Spelling Fix">
+              <i class="fa-solid fa-sparkles"></i> <span>Auto-Correct</span>
+            </button>
+          </div>
+
           <form id="message-form" class="message-form">
             <button type="button" id="emoji-btn" class="input-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+            <button type="button" id="sticker-btn" class="input-btn sticker-toggle-btn" title="WhatsApp-style Stickers & Sticker Store"><i class="fa-solid fa-note-sticky"></i></button>
             <div class="message-input-wrapper">
-              <textarea id="message-input" class="message-input" placeholder="Message" autocomplete="off" maxlength="1000" rows="1"></textarea>
+              <textarea id="message-input" class="message-input" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
               <button type="button" id="attach-btn" class="input-inline-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
             </div>
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
@@ -3650,6 +3659,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
+  <script src="./src/js/predictive-input.js"></script>
+  <script src="./src/js/sticker-store.js"></script>
 
 </body>
 

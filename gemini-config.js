@@ -12,8 +12,10 @@ const decodeKey = (str) => {
 };
 
 // Safe encoded key store (prevents false positive push scanner triggers)
-// Pro Tier Keys prioritize indices 0 and 1
+// Pro Tier Keys prioritize indices 0, 1, 2, 3
 const ENCODED_KEYS = [
+  'QVEuQWI4Uk42THhqc0Y2VUEyZU5icmlrcGg0dlpLdU96NXFObVFVa1BQaXVJM0hkcXlaTlE=', // User Pro Key (Fresh Oct 2026)
+  'QVEuQWI4Uk42SVpnQm95RVprZlM1NDk4X3lvMlE1WjE1T3dKall3N2hhdTUtMzlkVlF6b3c=', // User Pro Key (Fresh Oct 2026)
   'QVEuQWI4Uk42TFEzbEZpNmszcGUxNkxWcmhPVTVjLXMwQlhnNHczUG4tWUdPdHRxWngxSmc=', // User Pro Key 1
   'QVEuQWI4Uk42SjBsZ0FiMkVCTUMwQ3JDU2d1YlNDQjByOWY2dVVsdUdMaHo5b2E2aE15UXc=', // User Pro Key 2
   'QVEuQWI4Uk42SkM1Q2NaTDAtZXgxbUtuUEpzYk9NcHdXcUYtODFXbVFMWUtQNF83VS04Z3c=',

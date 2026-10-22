@@ -10718,3 +10718,571 @@ body.chat-size-extra-large .message-bubble {
   animation: badgeBlink 1s infinite alternate;
   flex-shrink: 0;
 }
+
+/* ══════════════════════════════════════════════════
+   PREDICTIVE WORD BAR & SMART AUTOCORRECT STRIP
+   ══════════════════════════════════════════════════ */
+.predictive-word-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(10, 16, 26, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(0, 255, 102, 0.15);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.4);
+  z-index: 45;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.predictive-chips-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex: 1;
+  min-width: 0;
+  padding: 2px 0;
+}
+
+.predictive-chips-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.predictive-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f1f5f9;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.predictive-chip:hover {
+  background: rgba(0, 255, 102, 0.15);
+  border-color: rgba(0, 255, 102, 0.4);
+  color: #00ff66;
+  transform: translateY(-1px);
+}
+
+.predictive-chip.is-correction {
+  background: rgba(0, 255, 102, 0.12);
+  border-color: rgba(0, 255, 102, 0.5);
+  color: #00ff66;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+}
+
+.quick-autocorrect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(0, 255, 102, 0.2), rgba(0, 210, 255, 0.2));
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  color: #00ff66;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.25);
+}
+
+.quick-autocorrect-btn:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 102, 0.35), rgba(0, 210, 255, 0.35));
+  transform: scale(1.03);
+}
+
+/* ══════════════════════════════════════════════════
+   WHATSAPP-STYLE STICKER STORE & HUB MODAL
+   ══════════════════════════════════════════════════ */
+.sticker-store-modal,
+.sticker-studio-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 16, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.sticker-store-card {
+  width: min(94vw, 540px);
+  max-height: 85vh;
+  background: linear-gradient(180deg, #101624 0%, #090e18 100%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(0, 242, 255, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.sticker-store-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sticker-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sticker-modal-title {
+  font-family: var(--font-display, 'Outfit', sans-serif);
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.3px;
+}
+
+.sticker-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sticker-create-quick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+  color: #040814;
+  border: none;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 14px rgba(0, 242, 254, 0.3);
+}
+
+.sticker-create-quick-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 6px 18px rgba(0, 242, 254, 0.45);
+}
+
+.sticker-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sticker-close-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.sticker-pack-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 18px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.sticker-pack-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.sticker-tab-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.sticker-tab-pill.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.sticker-grid-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding: 18px;
+  overflow-y: auto;
+  max-height: 52vh;
+  min-height: 220px;
+}
+
+@media (max-width: 480px) {
+  .sticker-grid-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    padding: 12px;
+  }
+}
+
+.sticker-tile-item {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
+  user-select: none;
+}
+
+.sticker-tile-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(0, 242, 254, 0.3);
+  transform: scale(1.08);
+}
+
+.sticker-tile-item:active {
+  transform: scale(0.95);
+}
+
+.sticker-tile-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.45));
+}
+
+.sticker-tile-add-card {
+  aspect-ratio: 1 / 1;
+  border: 2px dashed rgba(0, 255, 102, 0.4);
+  background: rgba(0, 255, 102, 0.05);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #00ff66;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+  padding: 8px;
+}
+
+.sticker-tile-add-card:hover {
+  background: rgba(0, 255, 102, 0.12);
+  border-color: #00ff66;
+  transform: scale(1.05);
+}
+
+.sticker-tile-del-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  font-size: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.sticker-tile-item:hover .sticker-tile-del-btn {
+  opacity: 1;
+}
+
+.sticker-empty-pack-message {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 16px;
+  text-align: center;
+}
+
+.sticker-store-footer {
+  padding: 10px 18px;
+  background: rgba(0, 0, 0, 0.35);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sticker-storage-info {
+  font-size: 11px;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ══════════════════════════════════════════════════
+   STICKER STUDIO CREATOR (MINI POP-UP PAGE)
+   ══════════════════════════════════════════════════ */
+.sticker-studio-card {
+  width: min(94vw, 680px);
+  max-height: 90vh;
+  background: linear-gradient(180deg, #121826 0%, #090e18 100%);
+  border: 1px solid rgba(0, 255, 102, 0.25);
+  border-radius: 24px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.98), 0 0 25px rgba(0, 255, 102, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.sticker-studio-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sticker-studio-body {
+  display: grid;
+  grid-template-columns: 1fr 1.1fr;
+  gap: 20px;
+  padding: 20px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+@media (max-width: 680px) {
+  .sticker-studio-body {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+.sticker-canvas-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.sticker-checkered-stage {
+  width: 260px;
+  height: 260px;
+  border-radius: 20px;
+  background-color: #0b0f19;
+  background-image: 
+    linear-gradient(45deg, #131b2e 25%, transparent 25%),
+    linear-gradient(-45deg, #131b2e 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #131b2e 75%),
+    linear-gradient(-45deg, transparent 75%, #131b2e 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+
+#stickerStudioCanvas {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.sticker-controls-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sticker-upload-dropzone {
+  border: 2px dashed rgba(0, 242, 254, 0.4);
+  background: rgba(0, 242, 254, 0.04);
+  border-radius: 16px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sticker-upload-dropzone:hover,
+.sticker-upload-dropzone.dragover {
+  background: rgba(0, 242, 254, 0.1);
+  border-color: #00f2fe;
+}
+
+.sticker-control-label {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+  margin-bottom: 5px;
+}
+
+.sticker-style-pill {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.sticker-style-pill.active {
+  background: rgba(0, 255, 102, 0.15);
+  border-color: #00ff66;
+  color: #00ff66;
+}
+
+.sticker-text-input {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(10, 16, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.sticker-text-input:focus {
+  border-color: #00ff66;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);
+}
+
+.sticker-action-primary {
+  background: linear-gradient(135deg, #00ff66 0%, #00b0ff 100%);
+  color: #040814;
+  border: none;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 11px 16px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 4px 16px rgba(0, 255, 102, 0.3);
+}
+
+.sticker-action-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0, 255, 102, 0.45);
+}
+
+.sticker-action-send {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 11px 18px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.sticker-action-send:hover {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: #00f2fe;
+  color: #00f2fe;
+}
+
+/* ══════════════════════════════════════════════════
+   IN-CHAT WHATSAPP STICKER MESSAGE BUBBLE
+   ══════════════════════════════════════════════════ */
+.message-bubble.is-sticker-message {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 2px !important;
+  margin: 4px 0 !important;
+}
+
+.message-sticker-img {
+  max-width: 160px;
+  max-height: 160px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+}
+
+.message-sticker-img:hover {
+  transform: scale(1.08);
+}
+
+.message-bubble.is-sticker-message .e2ee-secure-badge {
+  display: none !important;
+}
+
