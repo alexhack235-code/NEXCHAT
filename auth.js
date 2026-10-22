@@ -663,9 +663,14 @@ async function handleGoogleSignIn() {
             Domain <code>${currentHost}</code> is not in your Firebase Authorized Domains list.<br>
             Add it in <b>Firebase Console &gt; Authentication &gt; Settings &gt; Authorized Domains</b>.
           </p>
-          <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
-            <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
-          </button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
+            <a href="https://console.firebase.google.com/project/nexchat-47326/authentication/settings" target="_blank" rel="noopener" class="quick-guest-btn" style="text-decoration: none; display: inline-flex; align-items: center; justify-content: center; background: rgba(0,243,255,0.15); border: 1px solid #00f3ff; color: #00f3ff; padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 700;">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Firebase Console Settings
+            </a>
+            <button type="button" class="quick-guest-btn" onclick="window.quickGuestLogin()">
+              <i class="fa-solid fa-bolt"></i> Continue as Guest / Demo Mode
+            </button>
+          </div>
         </div>
       `;
     } else if (errCode === 'auth/operation-not-allowed') {
