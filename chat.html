@@ -28,6 +28,7 @@
   <link rel="stylesheet" href="chat.css">
   <link rel="stylesheet" href="src/features/group/group-chat.css">
   <link rel="stylesheet" href="extension-hub.css">
+  <link rel="stylesheet" href="css/cyber-suite.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
@@ -110,6 +111,10 @@
           <button id="cyberDropBtnHeader" class="header-icon-btn" title="P2P CyberDrop Direct File Beam"><i class="fa-solid fa-share-nodes"></i></button>
           <button id="cipherVaultBtnHeader" class="header-icon-btn" title="Cipher Vault &amp; Secret Rooms"><i class="fa-solid fa-key"></i></button>
           <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
+          <button id="ghostPanicLockBtn" class="header-icon-btn ghost-lock-btn" title="Ghost Panic Shield (Ctrl+Shift+L)"><i class="fa-solid fa-shield-virus"></i></button>
+          <button id="tacticalCanvasBtnHeader" class="header-icon-btn" title="NEX-CANVAS Tactical Whiteboard" onclick="window.CyberFeatures.canvas?.show()"><i class="fa-solid fa-pen-ruler"></i></button>
+          <button id="steganoBtnHeader" class="header-icon-btn" title="NEX-STEGANO Pixel Enclave" onclick="window.CyberFeatures.stegano?.show()"><i class="fa-solid fa-user-secret"></i></button>
+          <button id="sandboxBtnHeader" class="header-icon-btn" title="NEX-SANDBOX Code Runner" onclick="window.CyberFeatures.sandbox?.show()"><i class="fa-solid fa-microchip"></i></button>
           <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
         </div>
 
@@ -602,6 +607,34 @@
             <button type="button" id="quickAutocorrectBtn" class="quick-autocorrect-btn" style="display: none;" title="Apply Instant Grammar & Spelling Fix">
               <i class="fa-solid fa-sparkles"></i> <span>Auto-Correct</span>
             </button>
+          </div>
+
+          <!-- Attachment Hub Popup Menu -->
+          <div id="attachmentPopupHub" class="attachment-popup-hub" style="display: none;">
+            <div class="attach-hub-item" id="hubActionFile">
+              <div class="attach-hub-icon icon-file"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+              <span>File / Media</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionVoice">
+              <div class="attach-hub-icon icon-voice"><i class="fa-solid fa-microphone"></i></div>
+              <span>Voice Studio</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionCanvas">
+              <div class="attach-hub-icon icon-canvas"><i class="fa-solid fa-pen-ruler"></i></div>
+              <span>Tactical Canvas</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionStegano">
+              <div class="attach-hub-icon icon-stegano"><i class="fa-solid fa-user-secret"></i></div>
+              <span>Stegano Enclave</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionPoll">
+              <div class="attach-hub-icon icon-poll"><i class="fa-solid fa-square-poll-vertical"></i></div>
+              <span>Create Poll</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionBot">
+              <div class="attach-hub-icon icon-bot"><i class="fa-solid fa-robot"></i></div>
+              <span>NEXBOT Studio</span>
+            </div>
           </div>
 
           <form id="message-form" class="message-form">
@@ -2310,6 +2343,18 @@
             <div class="sheet-icon-box vault-gradient"><i class="fa-solid fa-crown"></i></div>
             <span>VIP Vault</span>
           </button>
+          <button type="button" class="sheet-grid-item" id="sheetCanvasBtn" onclick="window.CyberFeatures.canvas?.show()">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, #ec4899, #f43f5e);"><i class="fa-solid fa-pen-ruler"></i></div>
+            <span>Tactical Canvas</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetSteganoBtn" onclick="window.CyberFeatures.stegano?.show()">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, #8b5cf6, #6366f1);"><i class="fa-solid fa-user-secret"></i></div>
+            <span>Stegano Enclave</span>
+          </button>
+          <button type="button" class="sheet-grid-item" id="sheetSandboxBtn" onclick="window.CyberFeatures.sandbox?.show()">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, #00ff66, #00f3ff); color: #000;"><i class="fa-solid fa-microchip"></i></div>
+            <span>NEX-Sandbox</span>
+          </button>
           <button type="button" class="sheet-grid-item" onclick="document.getElementById('settings-btn-header')?.click()">
             <div class="sheet-icon-box settings-gradient"><i class="fa-solid fa-gear"></i></div>
             <span>Settings</span>
@@ -3646,6 +3691,153 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
     </div>
   </div>
 
+  <!-- NEX-STEGANO Quantum Pixel Enclave Modal -->
+  <div id="steganoModal" class="stegano-modal" style="display: none;" aria-hidden="true">
+    <div class="more-sheet-backdrop" id="closeSteganoBackdrop"></div>
+    <div class="stegano-container">
+      <div class="stegano-header">
+        <div class="stegano-title"><i class="fa-solid fa-user-secret" style="color: #a78bfa;"></i> NEX-STEGANO // Pixel Enclave</div>
+        <button type="button" class="close-sheet-btn" id="closeSteganoModalBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="stegano-tabs">
+        <button type="button" class="stegano-tab-btn active" id="steganoTabEncode"><i class="fa-solid fa-lock"></i> Hide Secret In Image</button>
+        <button type="button" class="stegano-tab-btn" id="steganoTabDecode"><i class="fa-solid fa-unlock-keyhole"></i> Scan &amp; Reveal</button>
+      </div>
+      
+      <!-- Encode View -->
+      <div class="stegano-body" id="steganoEncodeBody">
+        <input type="file" id="steganoFileInput" accept="image/png,image/jpeg,image/webp" style="display: none;">
+        <div class="stegano-dropzone" id="steganoDropzone">
+          <i class="fa-solid fa-image" style="font-size: 28px; color: #a78bfa; margin-bottom: 8px;"></i>
+          <div style="font-weight: 700; font-size: 13.5px;">Click or Drag Host Image Here</div>
+          <div style="font-size: 11.5px; color: #94a3b8; margin-top: 4px;">Lossless PNG embedding with zero visual distortion</div>
+        </div>
+        <canvas id="steganoPreviewCanvas" class="stegano-preview-canvas" style="display: none;"></canvas>
+        <div id="steganoCapacityLabel" style="font-size: 11px; color: #a78bfa; text-align: center;"></div>
+        
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">Confidential Message to Hide:</label>
+          <textarea id="steganoMessageInput" class="stegano-textarea" placeholder="Type confidential coordinates, passkeys, or instructions..."></textarea>
+        </div>
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">Optional Security Passcode:</label>
+          <input type="password" id="steganoPasscodeInput" class="stegano-passcode-input" placeholder="Passcode (optional XOR encryption)">
+        </div>
+        <div class="stegano-actions">
+          <button type="button" id="steganoEmbedSendBtn" class="stegano-btn-primary"><i class="fa-solid fa-paper-plane"></i> Embed &amp; Send to Chat</button>
+          <button type="button" id="steganoDownloadBtn" class="stegano-btn-primary" style="background: rgba(255,255,255,0.08); box-shadow: none;"><i class="fa-solid fa-download"></i> Save PNG</button>
+        </div>
+      </div>
+
+      <!-- Decode View -->
+      <div class="stegano-body" id="steganoDecodeBody" style="display: none;">
+        <div style="font-size: 12.5px; color: #94a3b8;">Extract and decrypt hidden messages embedded in pixel color bits.</div>
+        <div>
+          <label style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">Security Passcode (if encrypted):</label>
+          <input type="password" id="steganoDecodePassInput" class="stegano-passcode-input" placeholder="Enter passphrase">
+        </div>
+        <button type="button" id="steganoDecryptBtn" class="stegano-btn-primary"><i class="fa-solid fa-microchip"></i> Decrypt Hidden Enclave</button>
+        <div id="steganoDecodeResult" style="display: none; margin-top: 10px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEX-CANVAS Tactical Whiteboard Modal -->
+  <div id="nexCanvasModal" class="nex-canvas-modal" style="display: none;" aria-hidden="true">
+    <div class="more-sheet-backdrop" id="closeNexCanvasBackdrop"></div>
+    <div class="nex-canvas-container">
+      <div class="nex-canvas-header">
+        <div class="nex-canvas-title"><i class="fa-solid fa-pen-ruler"></i> NEX-CANVAS // Tactical Whiteboard</div>
+        <button type="button" class="close-sheet-btn" id="closeNexCanvasBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="nex-canvas-toolbar">
+        <div class="canvas-color-group">
+          <span class="canvas-color-dot active" data-color="#00f3ff" style="background: #00f3ff;"></span>
+          <span class="canvas-color-dot" data-color="#00ff66" style="background: #00ff66;"></span>
+          <span class="canvas-color-dot" data-color="#ffd700" style="background: #ffd700;"></span>
+          <span class="canvas-color-dot" data-color="#c026d3" style="background: #c026d3;"></span>
+          <span class="canvas-color-dot" data-color="#ff0055" style="background: #ff0055;"></span>
+          <span class="canvas-color-dot" data-color="#ffffff" style="background: #ffffff;"></span>
+        </div>
+        <div class="canvas-tool-group">
+          <button type="button" class="canvas-tool-btn canvas-size-btn" data-size="2" title="Fine (2px)">1x</button>
+          <button type="button" class="canvas-tool-btn canvas-size-btn active" data-size="5" title="Tactical (5px)">2x</button>
+          <button type="button" class="canvas-tool-btn canvas-size-btn" data-size="12" title="Marker (12px)">3x</button>
+          <button type="button" class="canvas-tool-btn canvas-size-btn" data-size="24" title="Heavy (24px)">4x</button>
+          <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 4px;"></div>
+          <button type="button" id="toolEraser" class="canvas-tool-btn" title="Eraser"><i class="fa-solid fa-eraser"></i></button>
+          <button type="button" id="toolGlow" class="canvas-tool-btn active" title="Laser Glow Effect"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+          <button type="button" id="toolGridToggle" class="canvas-tool-btn" title="Toggle Grid"><i class="fa-solid fa-border-all"></i></button>
+          <button type="button" id="toolUndo" class="canvas-tool-btn" title="Undo"><i class="fa-solid fa-rotate-left"></i></button>
+          <button type="button" id="toolClear" class="canvas-tool-btn" title="Clear Canvas"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+      </div>
+      <div class="canvas-board-wrap grid-bg">
+        <canvas id="nexTacticalCanvas"></canvas>
+      </div>
+      <div class="nex-canvas-footer">
+        <span style="font-size: 12px; color: #64748b;"><i class="fa-solid fa-shield-halved" style="color: #00f3ff;"></i> Zero-loss cryptographic vector snapshot</span>
+        <button type="button" id="canvasSendToChatBtn" class="canvas-send-btn"><i class="fa-solid fa-paper-plane"></i> Send to Chat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ghost Panic Lock & Matrix Decoy Terminal -->
+  <div id="ghostPanicOverlay" class="ghost-panic-overlay" style="display: none;">
+    <canvas id="matrixRainCanvas"></canvas>
+    <div class="panic-terminal-box" id="panicTerminalBox">
+      <div class="panic-logo"><i class="fa-solid fa-shield-halved"></i></div>
+      <div class="panic-title">GHOST LOCK ACTIVE</div>
+      <div class="panic-subtitle">Privacy Shield Engaged &bull; Visual &amp; Audio Telemetry Cloaked<br>Enter Master Security PIN to Disarm</div>
+      <input type="password" id="panicPinInput" class="panic-pin-input" placeholder="&bull;&bull;&bull;&bull;" maxlength="8" autocomplete="off">
+      <button type="button" id="panicUnlockBtn" class="panic-unlock-btn"><i class="fa-solid fa-key"></i> DISARM SHIELD</button>
+      <button type="button" id="panicDecoyToggle" class="panic-decoy-toggle">Switch to Decoy System Terminal</button>
+    </div>
+    <div class="panic-terminal-box" id="panicDecoyBox" style="display: none; max-width: 580px;">
+      <div class="panic-title" style="color: #38bdf8; text-align: left; font-size: 15px;"><i class="fa-solid fa-server"></i> KERNEL_DAEMON_TRACE [PID 4092]</div>
+      <div class="decoy-code-view">
+[06:21:04] tcp_socket_bind(0.0.0.0, port=443, backlog=1024) = SUCCESS
+[06:21:05] crypto_engine_init: AES-NI instruction set hardware verified
+[06:21:06] mem_alloc: page size 4096 bytes, resident pool: 128 MB
+[06:21:08] worker_thread_pool[0..7]: healthy, 0 drops, load_factor=0.04
+[06:21:11] SSL_CTX_set_cipher_list("TLS_AES_256_GCM_SHA384") = OK
+[06:21:14] system status: RUNNING NORMAL (NO PRIVACY BREACH DETECTED)
+      </div>
+      <button type="button" onclick="document.getElementById('panicDecoyToggle')?.click()" class="panic-unlock-btn" style="background: rgba(255,255,255,0.1); color: #fff;">RETURN TO PIN DISARM</button>
+    </div>
+  </div>
+
+  <!-- NEX-SANDBOX In-Chat Interactive Code & Extension Runner Modal -->
+  <div id="nexSandboxModal" class="nex-sandbox-modal" style="display: none;" aria-hidden="true">
+    <div class="more-sheet-backdrop" id="closeNexSandboxBackdrop"></div>
+    <div class="nex-sandbox-container">
+      <div class="nex-sandbox-header">
+        <div class="nex-sandbox-title"><i class="fa-solid fa-microchip"></i> NEX-SANDBOX // Interactive Code Runner</div>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <button type="button" id="sandboxResetBtn" class="canvas-tool-btn" title="Reset Code"><i class="fa-solid fa-arrow-rotate-left"></i></button>
+          <button type="button" id="sandboxRunBtn" class="sandbox-run-btn"><i class="fa-solid fa-play"></i> Execute</button>
+          <button type="button" class="close-sheet-btn" id="closeNexSandboxBtn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+      </div>
+      <div class="sandbox-split-body">
+        <div class="sandbox-editor-pane">
+          <div class="sandbox-editor-header">
+            <span><i class="fa-solid fa-code"></i> Source Code (HTML / CSS / JS)</span>
+            <span style="font-size: 10px; color: #00ff66;">SANDBOX ISOLATED</span>
+          </div>
+          <textarea id="sandboxCodeInput" class="sandbox-code-input" spellcheck="false"></textarea>
+        </div>
+        <div class="sandbox-preview-pane">
+          <div class="sandbox-editor-header">
+            <span><i class="fa-solid fa-desktop"></i> Live Rendered Viewport</span>
+          </div>
+          <iframe id="sandboxPreviewFrame" class="sandbox-preview-frame" sandbox="allow-scripts allow-modals"></iframe>
+          <div class="sandbox-console-log" id="sandboxConsoleLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- NOTIFICATION CONTAINER -->
   <div id="notificationContainer" class="notification-container"></div>
 
@@ -3663,6 +3855,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/sticker-store.js"></script>
   <script src="./src/js/voice-recorder.js"></script>
   <script src="./src/js/webrtc-call.js"></script>
+  <script type="module" src="js/cyber-features-suite.js"></script>
 
 </body>
 

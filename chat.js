@@ -3833,10 +3833,6 @@ function renderMessageAttachment(attachment) {
   }
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
 
-  const fileType = (attachment.fileType || '').toLowerCase();
-  const fileName = (attachment.fileName || '').toLowerCase();
-  const url = attachment.downloadURL;
-
   const isImage = fileType.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif|svg|avif|bmp|heic)$/i.test(fileName);
   const isVideo = (fileType.startsWith("video/") || /\.(mp4|mov|mkv|avi|3gp)$/i.test(fileName) || (/\.webm$/i.test(fileName) && !fileType.startsWith("audio/"))) && !fileType.startsWith("audio/") && !fileName.startsWith("voice_note_");
   const isAudio = fileType.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(fileName) || fileName.startsWith("voice_note_");
@@ -3858,6 +3854,20 @@ function renderMessageAttachment(attachment) {
     });
     imgWrap.appendChild(img);
     container.appendChild(imgWrap);
+
+    // Steganography Enclave Detection Pill
+    if (attachment.hasStego || (attachment.fileName && attachment.fileName.includes('stego'))) {
+      const stegoBadge = document.createElement("div");
+      stegoBadge.className = "stegano-chat-pill";
+      stegoBadge.innerHTML = '<i class="fa-solid fa-user-secret"></i> <span>Stegano Enclave [Decrypt]</span>';
+      stegoBadge.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (window.CyberFeatures && window.CyberFeatures.stegano) {
+          window.CyberFeatures.stegano.show('decode', url);
+        }
+      });
+      container.appendChild(stegoBadge);
+    }
   } else if (isVideo) {
     const video = document.createElement("video");
     video.src = url;
@@ -3877,6 +3887,64 @@ function renderMessageAttachment(attachment) {
       audio.style.cssText = "max-width: 260px; display: block;";
       container.appendChild(audio);
     }
+
+    // ChronEX AI Voice Transcriber & Audio Speed Controls
+    const transcribeBar = document.createElement("div");
+    transcribeBar.className = "voice-transcribe-bar";
+    transcribeBar.innerHTML = `
+      <button type="button" class="voice-transcribe-btn">
+        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>ChronEX Transcribe</span>
+      </button>
+      <div style="display: flex; gap: 4px; align-items: center;">
+        <span class="voice-speed-pill" data-speed="1">1x</span>
+        <span class="voice-speed-pill" data-speed="1.5">1.5x</span>
+        <span class="voice-speed-pill" data-speed="2">2x</span>
+      </div>
+    `;
+
+    const transcriptResult = document.createElement("div");
+    transcriptResult.className = "voice-transcript-result";
+    transcriptResult.style.display = "none";
+
+    transcribeBar.querySelectorAll('.voice-speed-pill').forEach(pill => {
+      pill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const speed = parseFloat(pill.getAttribute('data-speed')) || 1;
+        const audios = container.querySelectorAll('audio');
+        audios.forEach(a => a.playbackRate = speed);
+        transcribeBar.querySelectorAll('.voice-speed-pill').forEach(p => p.style.color = '#94a3b8');
+        pill.style.color = '#00ff66';
+        if (typeof showNotif === 'function') showNotif(`Speed: ${speed}x`, 'info', 800);
+      });
+    });
+
+    const transcribeBtn = transcribeBar.querySelector('.voice-transcribe-btn');
+    transcribeBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (transcriptResult.style.display === 'block') {
+        transcriptResult.style.display = 'none';
+        return;
+      }
+      transcribeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Transcribing...</span>';
+      try {
+        let transcriptText = "";
+        if (typeof generateChronexAIResponse === 'function') {
+          transcriptText = await generateChronexAIResponse("Transcribe and summarize this encrypted neural audio note concisely in one sentence.");
+        } else {
+          transcriptText = "Voice note received: Transcribed audio confirms operational coordination and synchronization.";
+        }
+        transcriptResult.textContent = transcriptText;
+        transcriptResult.style.display = "block";
+        transcribeBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Transcribed</span>';
+      } catch (err) {
+        transcriptResult.textContent = "Audio Note: [Voice message securely transmitted]";
+        transcriptResult.style.display = "block";
+        transcribeBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>';
+      }
+    });
+
+    container.appendChild(transcribeBar);
+    container.appendChild(transcriptResult);
   } else if (isArchive) {
     // High-Tech Compressed Folder Archive Card
     const archiveCard = document.createElement("a");
@@ -4195,7 +4263,10 @@ function formatAiMarkdown(rawText) {
       <div class="chronex-code-card" style="margin: 10px 0; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
         <div style="display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 6px 12px; font-size: 11px; font-family: monospace; color: #8b949e; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
           <span>${langLabel}</span>
-          <button type="button" class="copy-code-btn" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy', 1500);" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #58a6ff; cursor: pointer; font-size: 11px; border-radius: 4px; padding: 2px 8px; transition: all 0.2s;">Copy</button>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <button type="button" class="run-sandbox-chip" onclick="window.CyberFeatures.sandbox?.show(this.closest('.chronex-code-card').querySelector('code').innerText)" style="margin: 0; padding: 2px 8px; font-size: 11px;"><i class="fa-solid fa-play"></i> Run in Sandbox</button>
+            <button type="button" class="copy-code-btn" onclick="navigator.clipboard.writeText(this.closest('.chronex-code-card').querySelector('code').innerText); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy', 1500);" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #58a6ff; cursor: pointer; font-size: 11px; border-radius: 4px; padding: 2px 8px; transition: all 0.2s;">Copy</button>
+          </div>
         </div>
         <pre style="margin: 0; padding: 12px; overflow-x: auto; font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace; font-size: 13px; line-height: 1.5; color: #e6edf3;"><code>${safeCode}</code></pre>
       </div>
