@@ -6,8 +6,13 @@
 (function () {
   'use strict';
 
-  const DEFAULT_USER_EMAIL = 'alexhack235@gmail.com';
-  const DEFAULT_USER_NAME = 'Alex';
+  let cachedUserEmail = '';
+  let cachedUserName = '';
+
+  function updateUser(email, name) {
+    if (email) cachedUserEmail = email;
+    if (name) cachedUserName = name;
+  }
 
   // Available Ecosystem Extensions
   const EXTENSIONS = [
@@ -75,26 +80,84 @@
     }
   ];
 
-  // Helper to get active user details
+  // Helper to dynamically resolve the authenticated user's sign-in email & display name
   function getUserDetails() {
-    let email = DEFAULT_USER_EMAIL;
-    let name = DEFAULT_USER_NAME;
+    let email = cachedUserEmail || window.myEmail || '';
+    let name = cachedUserName || window.myUsername || '';
 
     try {
-      if (window.firebase && window.firebase.auth) {
-        const u = window.firebase.auth().currentUser;
-        if (u && u.email) email = u.email;
-        if (u && u.displayName) name = u.displayName;
+      // 1. Check primary auth.js keys
+      if (!email) {
+        email = localStorage.getItem('auth_email') || sessionStorage.getItem('auth_email') || '';
       }
-      const savedEmail = localStorage.getItem('userEmail') || localStorage.getItem('nex_user_email');
-      if (savedEmail) email = savedEmail;
-      const savedName = localStorage.getItem('username') || localStorage.getItem('nex_username');
-      if (savedName) name = savedName;
+      if (!name) {
+        name = localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username') || localStorage.getItem('username') || '';
+      }
+
+      // 2. Check JSON serialized user objects
+      if (!email) {
+        const rawUser = localStorage.getItem('currentUser') || localStorage.getItem('nexchat_user') || localStorage.getItem('user');
+        if (rawUser) {
+          try {
+            const parsed = JSON.parse(rawUser);
+            if (parsed.email) email = parsed.email;
+            if (parsed.username || parsed.name || parsed.displayName) {
+              if (!name) name = parsed.username || parsed.name || parsed.displayName;
+            }
+          } catch (_) {}
+        }
+      }
+
+      // 3. Check Firebase Auth instances
+      if (!email) {
+        if (window.auth && window.auth.currentUser && window.auth.currentUser.email) {
+          email = window.auth.currentUser.email;
+          if (!name) name = window.auth.currentUser.displayName || '';
+        } else if (window.firebase && window.firebase.auth) {
+          try {
+            const u = window.firebase.auth().currentUser;
+            if (u && u.email) email = u.email;
+            if (u && u.displayName && !name) name = u.displayName;
+          } catch (_) {}
+        }
+      }
+
+      // 4. Check Supabase session tokens
+      if (!email) {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.includes('auth-token')) {
+            try {
+              const session = JSON.parse(localStorage.getItem(k));
+              if (session?.user?.email) {
+                email = session.user.email;
+                if (!name) name = session.user.user_metadata?.username || session.user.user_metadata?.full_name || '';
+                break;
+              }
+            } catch (_) {}
+          }
+        }
+      }
+
+      // 5. Check legacy keys
+      if (!email) {
+        email = localStorage.getItem('userEmail') || localStorage.getItem('nex_user_email') || '';
+      }
+      if (!name) {
+        name = localStorage.getItem('nex_username') || '';
+      }
     } catch (e) {
-      // fallback
+      console.warn('[EXTENSION HUB] getUserDetails resolution notice:', e);
     }
 
-    return { email, name };
+    if (email && !name) {
+      name = email.split('@')[0];
+    }
+
+    return {
+      email: email ? email.trim() : '',
+      name: name ? name.trim() : (email ? email.split('@')[0] : 'User')
+    };
   }
 
   // Get authorization status for an extension
@@ -148,6 +211,10 @@
   // Send email dispatch request to server
   async function dispatchEmailAlert({ extensionId, status, extensionName, scopes }) {
     const { email, name } = getUserDetails();
+    if (!email || !email.includes('@')) {
+      console.warn('[EXTENSION HUB] No authenticated user email found; skipping security email dispatch.');
+      return { success: false, skipped: true, reason: 'no_user_email' };
+    }
     const ip = await getClientIp();
 
     try {
@@ -170,7 +237,7 @@
         })
       });
       const data = await res.json();
-      console.log('[EXTENSION HUB] Email dispatch result:', data);
+      console.log(`[EXTENSION HUB] Security alert sent to ${email}:`, data);
       return data;
     } catch (err) {
       console.warn('[EXTENSION HUB] Email dispatch error:', err.message);
@@ -271,7 +338,7 @@
         <div class="nex-consent-header-text">
           <h2 class="nex-consent-title" id="nexConsentTitle">Allow NEX-REELS to access NEXCHAT?</h2>
           <p class="nex-consent-subtitle">
-            <strong>NEX-REELS (CamShot Pro)</strong> by <span style="color: #00d4ff;">NEXO-TECH</span> wants to link with your account <strong>${email}</strong>.
+            <strong>NEX-REELS (CamShot Pro)</strong> by <span style="color: #00d4ff;">NEXO-TECH</span> wants to link with your account <strong id="nexConsentUserEmail">${email || 'your account'}</strong>.
           </p>
         </div>
 
@@ -316,7 +383,7 @@
         <div class="nex-consent-security-callout">
           <i class="fa-solid fa-envelope-shield"></i>
           <div>
-            An automated security notification will be sent to <strong>${email}</strong> upon your decision.
+            An automated security notification will be sent to <strong id="nexConsentSecurityEmail">${email || 'your registered sign-in email'}</strong> upon your decision.
           </div>
         </div>
 
@@ -505,9 +572,11 @@
 
     // 6. Show Toast
     if (isApproved) {
-      showToast(`<strong>Access Granted!</strong> NEX-REELS is now authorized. Confirmation email dispatched to <span style="font-family:monospace; color:#00f076;">${email}</span>.`, false);
+      const emailNotice = email ? `Confirmation email dispatched to <span style="font-family:monospace; color:#00f076;">${email}</span>.` : `Permission granted.`;
+      showToast(`<strong>Access Granted!</strong> NEX-REELS is now authorized. ${emailNotice}`, false);
     } else {
-      showToast(`<strong>Access Denied!</strong> NEX-REELS has been blocked. Security notice dispatched to <span style="font-family:monospace; color:#fe2c55;">${email}</span>.`, true);
+      const emailNotice = email ? `Security notice dispatched to <span style="font-family:monospace; color:#fe2c55;">${email}</span>.` : `Access blocked.`;
+      showToast(`<strong>Access Denied!</strong> NEX-REELS has been blocked. ${emailNotice}`, true);
     }
 
     // 7. Check / update reels banner if applicable
@@ -555,11 +624,17 @@
   // Open Consent Modal
   function openConsentModal(targetExtensionId = 'nex-reels') {
     injectDom();
+    const { email } = getUserDetails();
     const ext = EXTENSIONS.find(e => e.id === targetExtensionId) || EXTENSIONS[0];
     const targetName = document.getElementById('nexConsentTargetName');
     const title = document.getElementById('nexConsentTitle');
+    const userEmailEl = document.getElementById('nexConsentUserEmail');
+    const securityEmailEl = document.getElementById('nexConsentSecurityEmail');
+
     if (targetName) targetName.textContent = ext.name.split(' ')[0];
     if (title) title.textContent = `Allow ${ext.name.split(' ')[0]} to access NEXCHAT?`;
+    if (userEmailEl) userEmailEl.textContent = email || 'your signed-in account';
+    if (securityEmailEl) securityEmailEl.textContent = email || 'your signed-in email address';
 
     document.getElementById('nexConsentModal').classList.add('active');
   }
@@ -648,6 +723,8 @@
     handleDecision,
     getExtensionStatus,
     setExtensionStatus,
+    updateUser,
+    getUserDetails,
     EXTENSIONS
   };
 

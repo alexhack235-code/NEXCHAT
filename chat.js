@@ -8223,8 +8223,8 @@ function setupSentinelMailerSettings() {
   const badgeEl = document.getElementById('sentinelMailerBadge');
 
   if (emailInput && !emailInput.value) {
-    const userEmail = (primaryUser && primaryUser.email) || localStorage.getItem('auth_email') || localStorage.getItem('userEmail') || 'oyewoletodoroki@gmail.com';
-    emailInput.value = userEmail;
+    const userEmail = window.myEmail || localStorage.getItem('auth_email') || (typeof auth !== 'undefined' && auth?.currentUser?.email) || '';
+    if (userEmail) emailInput.value = userEmail;
   }
 
   // Probe status once
@@ -10054,6 +10054,12 @@ async function setupInitialization() {
       pageInitializedForCurrentUser = true;
       console.log(" User authenticated:", myUID);
 
+      const authEmail = user.email || localStorage.getItem('auth_email') || '';
+      if (authEmail) {
+        window.myEmail = authEmail;
+        localStorage.setItem('auth_email', authEmail);
+      }
+
       if (typeof chronexAI !== 'undefined' && chronexAI.setUserId) {
         chronexAI.setUserId(myUID);
       }
@@ -10063,7 +10069,17 @@ async function setupInitialization() {
         if (userDoc.exists()) {
           const userData = userDoc.data();
           myUsername = userData.username || "";
+          window.myUsername = myUsername;
           myProfilePic = userData.profilePic || userData.profilePicUrl || "";
+
+          const userEmail = userData.email || user.email || localStorage.getItem('auth_email') || '';
+          if (userEmail) {
+            window.myEmail = userEmail;
+            localStorage.setItem('auth_email', userEmail);
+            if (window.NEX_ECOSYSTEM && typeof window.NEX_ECOSYSTEM.updateUser === 'function') {
+              window.NEX_ECOSYSTEM.updateUser(userEmail, myUsername);
+            }
+          }
 
           updateProfileSticker(myProfilePic, myUsername);
           const statusImg = document.getElementById('myStatusPic');
