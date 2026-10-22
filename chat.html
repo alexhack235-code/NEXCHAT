@@ -119,6 +119,7 @@
           <button id="ghostPanicLockBtn" class="header-icon-btn ghost-lock-btn" title="Ghost Panic Shield (Ctrl+Shift+L)"><i class="fa-solid fa-shield-virus"></i></button>
           <button id="holoAvatarBtnHeader" class="header-icon-btn" title="3D Holographic Avatar Studio" onclick="window.holographicAvatarsEngine?.openModal()"><i class="fa-solid fa-cube text-[#00ff66]"></i></button>
           <button id="broadcastChannelsBtnHeader" class="header-icon-btn" title="Tactical Broadcast Channels" onclick="window.broadcastChannelsEngine?.openModal()"><i class="fa-solid fa-tower-broadcast text-[#00f3ff]"></i></button>
+          <button id="cyberMatrixBtnHeader" class="header-icon-btn" title="100 Cyber Feature Matrix Toggles" onclick="window.cyberFeatureMatrix?.openModal()"><i class="fa-solid fa-sliders text-[#00f3ff]"></i></button>
           <button id="qrPairingBtnHeader" class="header-icon-btn" title="Dynamic QR Node Pairing" onclick="window.qrPairingEngine?.openModal()"><i class="fa-solid fa-qrcode text-[#00f3ff]"></i></button>
           <button id="tacticalCanvasBtnHeader" class="header-icon-btn" title="NEX-CANVAS Tactical Whiteboard" onclick="window.CyberFeatures.canvas?.show()"><i class="fa-solid fa-pen-ruler"></i></button>
           <button id="steganoBtnHeader" class="header-icon-btn" title="NEX-STEGANO Pixel Enclave" onclick="window.CyberFeatures.stegano?.show()"><i class="fa-solid fa-user-secret"></i></button>
@@ -1355,6 +1356,14 @@
                   <span>Support & Terminal</span>
                 </button>
               </div>
+              <div class="settings-nav-group">
+                <span class="settings-nav-group-title">ADVANCED ARCHITECTURE</span>
+                <button type="button" class="settings-nav-tab" data-tab="tab-cyber-features-matrix">
+                  <i class="fa-solid fa-sliders" style="color: #00f3ff;"></i>
+                  <span>100 Cyber Matrix</span>
+                  <span class="settings-tab-microbadge" style="background: rgba(0,243,255,0.15); color: #00f3ff; border: 1px solid rgba(0,243,255,0.4);">100 FLAGS</span>
+                </button>
+              </div>
 
               <div class="settings-sidebar-spacer"></div>
               <button type="button" id="logoutSettingsBtn" class="settings-nav-tab logout-tab"><i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span></button>
@@ -2270,7 +2279,42 @@
               </div>
 
               <!-- TAB 11: SUPPORT & TERMINAL -->
-              <div class="settings-tab-pane" id="tab-support">
+              
+              <!-- TAB 12: 100 CYBER MATRIX & FEATURE TOGGLES -->
+              <div class="settings-tab-pane" id="tab-cyber-features-matrix">
+                <div class="settings-pane-header">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h3 class="font-bold text-white text-base">
+                        <i class="fa-solid fa-sliders text-[#00f3ff]"></i> 100 CYBER MATRIX & FEATURE TOGGLES
+                      </h3>
+                      <p class="text-xs text-gray-400 mt-0.5">Toggle and calibrate any of the 100 enterprise cybersecurity modules in real time.</p>
+                    </div>
+                    <span class="matrix-status-pill" id="matrixMasterStatusBadge">100 / 100 ACTIVE</span>
+                  </div>
+                </div>
+
+                <div class="matrix-controls-bar mt-3">
+                  <div class="flex gap-2 flex-wrap sm:flex-nowrap items-center">
+                    <div class="matrix-search-box flex-1">
+                      <i class="fa-solid fa-magnifying-glass text-[#00f3ff]"></i>
+                      <input type="text" id="matrixSearchInput" class="matrix-search-input" placeholder="Search 100 features by ID, name, or domain..." />
+                    </div>
+                    <button type="button" class="matrix-quick-btn" id="matrixEnableAllBtn">
+                      <i class="fa-solid fa-check-double"></i> ENABLE ALL
+                    </button>
+                    <button type="button" class="matrix-quick-btn danger" id="matrixDisableAllBtn">
+                      <i class="fa-solid fa-power-off"></i> DISABLE ALL
+                    </button>
+                  </div>
+                </div>
+
+                <div class="matrix-content-scroll mt-3" id="cyberMatrixContentArea">
+                  <!-- Dynamically populated 10 domains -->
+                </div>
+              </div>
+
+<div class="settings-tab-pane" id="tab-support">
                 <div class="settings-pane-header">
                   <h3><i class="fa-solid fa-headset"></i> Support & Terminal</h3>
                   <p>Developer tools, diagnostics, and issue reporting.</p>
@@ -4363,6 +4407,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/ai-debater.js"></script>
   <script src="./src/js/geofence-beacon.js"></script>
   <script src="./src/js/kanban-board.js"></script>
+  <script src="./src/js/cyber-feature-matrix.js"></script>
+  <script src="./src/js/cyber-hundred-suite.js"></script>
 
 </body>
 

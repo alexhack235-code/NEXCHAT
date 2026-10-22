@@ -8456,3 +8456,304 @@
   font-weight: 700;
   cursor: pointer;
 }
+
+
+/* ==========================================================================
+   100 CYBER MATRIX & SETTINGS CONTROL SUITE
+   Zero-Emoji Cyberpunk Styling for Feature Toggles, Sliders, and Modals
+   ========================================================================== */
+
+.matrix-controls-bar {
+  background: #060912;
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+}
+.matrix-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #03050a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 6px 12px;
+}
+.matrix-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-size: 12px;
+  width: 100%;
+}
+.matrix-quick-btn {
+  background: rgba(0, 243, 255, 0.12);
+  border: 1px solid #00f3ff;
+  color: #00f3ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+.matrix-quick-btn:hover {
+  background: #00f3ff;
+  color: #000000;
+}
+.matrix-quick-btn.danger {
+  background: rgba(255, 0, 85, 0.12);
+  border-color: #ff0055;
+  color: #ff0055;
+}
+.matrix-quick-btn.danger:hover {
+  background: #ff0055;
+  color: #ffffff;
+}
+.matrix-status-pill {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  border: 1px solid rgba(0, 255, 102, 0.4);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-family: monospace;
+}
+.matrix-modal-badge {
+  background: rgba(0, 243, 255, 0.15);
+  color: #00f3ff;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.matrix-content-scroll {
+  max-height: 520px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 4px;
+}
+.matrix-domain-card {
+  background: #080d18;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+.matrix-domain-card:hover {
+  border-color: rgba(0, 243, 255, 0.3);
+}
+.matrix-domain-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #050810;
+  padding: 10px 14px;
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.matrix-domain-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+.matrix-domain-count {
+  font-size: 10px;
+  color: #00f3ff;
+  font-family: monospace;
+  background: rgba(0, 243, 255, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+.matrix-dom-toggle-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 9.5px;
+  font-weight: 800;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.matrix-dom-toggle-btn.active {
+  background: rgba(0, 255, 102, 0.12);
+  border-color: #00ff66;
+  color: #00ff66;
+}
+.matrix-collapse-icon {
+  color: #64748b;
+  font-size: 11px;
+  transition: transform 0.2s ease;
+}
+.matrix-domain-card.collapsed .matrix-collapse-icon {
+  transform: rotate(-90deg);
+}
+.matrix-domain-card.collapsed .matrix-features-grid {
+  display: none;
+}
+.matrix-features-grid {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.matrix-feature-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+.matrix-feature-item:hover {
+  background: rgba(0, 243, 255, 0.03);
+  border-color: rgba(0, 243, 255, 0.2);
+}
+.matrix-feature-item.disabled {
+  opacity: 0.55;
+}
+.matrix-item-left {
+  flex: 1;
+  padding-right: 14px;
+}
+.matrix-item-id {
+  font-size: 10px;
+  font-weight: 800;
+  font-family: monospace;
+  color: #00f3ff;
+}
+.matrix-item-title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+.matrix-status-tag {
+  font-size: 8.5px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+.matrix-status-tag.tag-enabled {
+  background: rgba(0, 255, 102, 0.15);
+  color: #00ff66;
+  border: 1px solid rgba(0, 255, 102, 0.3);
+}
+.matrix-status-tag.tag-disabled {
+  background: rgba(255, 0, 85, 0.15);
+  color: #ff0055;
+  border: 1px solid rgba(255, 0, 85, 0.3);
+}
+.matrix-item-desc {
+  font-size: 10.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+  line-height: 1.3;
+}
+.matrix-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.matrix-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.matrix-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: .25s;
+  border-radius: 20px;
+}
+.matrix-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #64748b;
+  transition: .25s;
+  border-radius: 50%;
+}
+.matrix-switch input:checked + .matrix-slider {
+  background-color: rgba(0, 243, 255, 0.25);
+  border-color: #00f3ff;
+  box-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+}
+.matrix-switch input:checked + .matrix-slider:before {
+  transform: translateX(16px);
+  background-color: #00f3ff;
+}
+
+/* Modal Window for Matrix */
+.matrix-modal-window {
+  max-width: 840px;
+  width: 95%;
+  background: #080d18;
+  border: 1px solid rgba(0, 243, 255, 0.35);
+  box-shadow: 0 0 40px rgba(0, 243, 255, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.hundred-modal-window {
+  max-width: 600px;
+  width: 95%;
+  background: #090e1a;
+  border: 1px solid rgba(0, 243, 255, 0.3);
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.15);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.hundred-badge {
+  background: rgba(0, 243, 255, 0.15);
+  color: #00f3ff;
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.hundred-btn-primary {
+  width: 100%;
+  background: #00f3ff;
+  color: #000000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* CRT Phosphor Scanline Overlay */
+body.crt-phosphor-active::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 999999;
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+}
