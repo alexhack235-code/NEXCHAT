@@ -167,6 +167,15 @@
               <button type="button" id="toggleCallCamBtn" class="call-dock-btn active" title="Enable/Disable Camera" style="display: none;">
                 <i class="fa-solid fa-video"></i>
               </button>
+              <button type="button" id="toggleCallScreenBtn" class="call-dock-btn" title="Share Screen (Desktop/Window)">
+                <i class="fa-solid fa-desktop"></i>
+              </button>
+              <button type="button" id="toggleCallPipBtn" class="call-dock-btn" title="Picture-in-Picture Popout">
+                <i class="fa-solid fa-clone"></i>
+              </button>
+              <button type="button" id="toggleCallBlurBtn" class="call-dock-btn" title="Privacy Camera Enhancement">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </button>
               <button type="button" id="switchGoogleMeetBtn" class="call-dock-btn" title="Switch to Google Meet Room">
                 <i class="fa-solid fa-up-right-from-square"></i>
               </button>
@@ -514,4 +523,5 @@
 
   // Export to global scope
   window.nexCallingEngine = new NexCallingEngine();
+  window.webrtcCallEngine = window.nexCallingEngine;
 })();

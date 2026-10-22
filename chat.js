@@ -3422,6 +3422,18 @@ async function sendMessage() {
     return;
   }
 
+  // Autonomous Offline IndexedDB Queue Routing
+  if (!navigator.onLine && window.offlineQueueEngine) {
+    window.offlineQueueEngine.enqueue({
+      text: text || '',
+      attachment: null,
+      targetUser: currentChatUser,
+      chatType: currentChatType || 'direct'
+    });
+    if (messageText) messageText.value = '';
+    return;
+  }
+
   // [FORTRESS AI Security Shield: Inspect text before dispatch]
   if (text && window.fortressShield) {
     const inspection = window.fortressShield.inspectText(text);
@@ -5061,6 +5073,10 @@ function loadMessages() {
           }
           if (incoming.attachment.isTokenRainSync) {
             window.dispatchEvent(new CustomEvent('nexchat:token_rain_received', { detail: incoming.attachment }));
+            return;
+          }
+          if (incoming.attachment.isP2PChunk) {
+            window.dispatchEvent(new CustomEvent('nexchat:p2p_chunk_received', { detail: incoming.attachment }));
             return;
           }
         }

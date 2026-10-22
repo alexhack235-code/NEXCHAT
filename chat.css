@@ -13382,3 +13382,392 @@ body.chat-size-extra-large .message-bubble {
   transform: translateY(-1px);
   box-shadow: 0 6px 24px rgba(16, 185, 129, 0.5);
 }
+
+/* ======================================================= */
+/* 13. BIOMETRIC ENCLAVE AUTO-LOCK OVERLAY                 */
+/* ======================================================= */
+.biometric-lock-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 9, 14, 0.94);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: fadeIn 0.3s ease-out;
+}
+.biometric-lock-card {
+  width: 100%;
+  max-width: 420px;
+  background: #0d121c;
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  border-radius: 20px;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 212, 255, 0.2);
+}
+.biometric-shield-badge {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto;
+  border-radius: 16px;
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid #00d4ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #00d4ff;
+  box-shadow: 0 0 18px rgba(0, 212, 255, 0.35);
+}
+.biometric-scanner-orb {
+  width: 90px;
+  height: 90px;
+  margin: 22px auto 14px;
+  border-radius: 50%;
+  background: rgba(0, 212, 255, 0.08);
+  border: 2px solid rgba(0, 212, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.biometric-scanner-orb:hover {
+  transform: scale(1.06);
+  border-color: #00ff66;
+  box-shadow: 0 0 25px rgba(0, 255, 102, 0.35);
+}
+.biometric-scanner-orb .scanner-icon {
+  font-size: 42px;
+  color: #00d4ff;
+  transition: color 0.2s;
+}
+.biometric-scanner-orb.scanning .scanner-icon {
+  color: #00ff66;
+}
+.scanner-laser-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #00ff66, transparent);
+  box-shadow: 0 0 12px #00ff66;
+  opacity: 0;
+}
+.biometric-scanner-orb.scanning .scanner-laser-line {
+  opacity: 1;
+  animation: scanLaser 1.2s infinite ease-in-out;
+}
+@keyframes scanLaser {
+  0% { top: 0%; }
+  50% { top: 95%; }
+  100% { top: 0%; }
+}
+.biometric-status-msg {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #00d4ff;
+  min-height: 18px;
+}
+.biometric-actions-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bio-primary-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #0284c7 0%, #00d4ff 100%);
+  border: none;
+  border-radius: 10px;
+  color: #000000;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 212, 255, 0.35);
+  transition: all 0.2s;
+}
+.bio-primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(0, 212, 255, 0.5);
+}
+.bio-secondary-btn {
+  width: 100%;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #cbd5e1;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.bio-secondary-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+.bio-pin-box {
+  margin-top: 14px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+.pin-inputs-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.bio-pin-field {
+  width: 140px;
+  padding: 8px 12px;
+  background: #080c12;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 18px;
+  text-align: center;
+  letter-spacing: 6px;
+  outline: none;
+}
+.bio-pin-field:focus {
+  border-color: #00d4ff;
+}
+.bio-pin-submit-btn {
+  padding: 8px 14px;
+  background: #00d4ff;
+  border: none;
+  border-radius: 8px;
+  color: #000000;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* ======================================================= */
+/* 14. SCREEN SHARE, PiP, & CAMERA BLUR CONTROLS           */
+/* ======================================================= */
+.call-dock-btn.sharing {
+  background: #ef4444 !important;
+  color: #ffffff !important;
+  animation: pulseCrate 1.5s infinite;
+}
+.local-pip-video.cam-blur-active {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ======================================================= */
+/* 15. OFFLINE QUEUE STATUS PILL & TICK ICONS              */
+/* ======================================================= */
+.network-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 7px;
+  border-radius: 12px;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin-top: 2px;
+}
+.network-status-pill.online {
+  background: rgba(0, 255, 102, 0.08);
+  border: 1px solid rgba(0, 255, 102, 0.25);
+  color: #00ff66;
+}
+.network-status-pill.offline {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+.network-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.tick-pending {
+  color: #fbbf24 !important;
+  font-size: 10px;
+}
+
+/* ======================================================= */
+/* 16. CHRONEX VOICE TRANSCRIBER & DICTATION               */
+/* ======================================================= */
+.voice-dictate-btn {
+  color: #94a3b8;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+.voice-dictate-btn:hover {
+  color: #00d4ff;
+}
+.voice-dictate-btn.dictating {
+  color: #ef4444 !important;
+  animation: pulseCrate 1s infinite;
+}
+.voice-transcribed-box {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border-left: 2px solid #00ff66;
+  border-radius: 6px;
+  display: none;
+}
+.transcript-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.transcript-tag {
+  font-size: 9px;
+  font-weight: 800;
+  color: #00ff66;
+  letter-spacing: 0.5px;
+}
+.copy-transcript-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px;
+}
+.copy-transcript-btn:hover {
+  color: #ffffff;
+}
+.transcript-text {
+  font-size: 12px;
+  line-height: 1.4;
+  color: #f1f5f9;
+  font-style: italic;
+  margin: 0;
+}
+.voice-speed-pill {
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.voice-speed-pill.active {
+  background: #00d4ff;
+  color: #000000;
+}
+
+/* ======================================================= */
+/* 17. P2P DATA BEAM DIRECT TRANSFER MODAL                 */
+/* ======================================================= */
+.p2p-beam-modal-window {
+  max-width: 490px;
+  background: #0b0f17;
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  box-shadow: 0 10px 45px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 255, 102, 0.15);
+}
+.p2p-badge {
+  font-size: 9px;
+  font-weight: 800;
+  color: #00ff66;
+  background: rgba(0, 255, 102, 0.12);
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  margin-left: 8px;
+}
+.p2p-drop-zone {
+  border: 2px dashed rgba(0, 255, 102, 0.3);
+  background: rgba(0, 255, 102, 0.03);
+  border-radius: 14px;
+  padding: 32px 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.p2p-drop-zone:hover, .p2p-drop-zone.dragover {
+  border-color: #00ff66;
+  background: rgba(0, 255, 102, 0.08);
+}
+.drop-zone-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: rgba(0, 255, 102, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #00ff66;
+}
+.p2p-transfer-stage {
+  margin-top: 14px;
+  padding: 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.p2p-file-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.p2p-speed-pill {
+  padding: 3px 8px;
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #00d4ff;
+  font-family: monospace;
+}
+.p2p-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.p2p-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #00d4ff, #00ff66);
+  transition: width 0.15s ease-out;
+}
+.p2p-security-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  color: #94a3b8;
+}
+.p2p-beam-btn {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #059669 0%, #00ff66 100%);
+  border: none;
+  border-radius: 10px;
+  color: #000000;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(0, 255, 102, 0.35);
+  transition: all 0.2s;
+}
+.p2p-beam-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(0, 255, 102, 0.5);
+}
