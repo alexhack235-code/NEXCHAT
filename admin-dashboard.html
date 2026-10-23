@@ -1537,6 +1537,10 @@
         <i class="fa-brands fa-whatsapp"></i> WhatsApp Orders &amp; Badges
         <span class="tab-count" style="background: rgba(37, 211, 102, 0.15); color: #25d366;">Fulfillment</span>
       </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-reports" style="border-color: rgba(255, 59, 48, 0.45); color: #ff3b30;">
+        <i class="fa-solid fa-flag"></i> Reports &amp; Activity Sentinels
+        <span class="tab-count" id="tabReportsBadge" style="background: rgba(255, 59, 48, 0.15); color: #ff3b30;">Inbox</span>
+      </button>
     </nav>
 
     <!-- ========================================== -->
@@ -3751,6 +3755,104 @@
         </div>
       </section>
     </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 15: REPORTS INBOX & USER/GROUP ACTIVITY SENTINELS     -->
+    <!-- ======================================================== -->
+    <div class="tab-pane" id="tab-reports">
+      <section class="admin-panel" style="border-color: rgba(255, 59, 48, 0.35);">
+        <div class="panel-header" style="border-bottom-color: rgba(255, 59, 48, 0.2);">
+          <div class="panel-title" style="color: #ff3b30;">
+            <i class="fa-solid fa-flag" style="font-size: 20px; color: #ff3b30;"></i>
+            Trust &amp; Safety Incident Reports &amp; Activity Sentinels
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <button type="button" id="btnRefreshAdminReports" class="admin-btn secondary" style="font-size: 11.5px;">
+              <i class="fa-solid fa-rotate"></i> Refresh Reports
+            </button>
+            <button type="button" id="btnExportReportsCsv" class="admin-btn secondary" style="font-size: 11.5px;">
+              <i class="fa-solid fa-file-arrow-down"></i> Export Reports
+            </button>
+          </div>
+        </div>
+
+        <!-- Metric HUD -->
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;">
+          <div class="stat-card" style="border-left: 3px solid #ff3b30;">
+            <div class="stat-label">Pending Review</div>
+            <div class="stat-value" id="hudPendingReports" style="color: #ff3b30;">0</div>
+            <div class="stat-sub">Awaiting moderator triage</div>
+          </div>
+          <div class="stat-card" style="border-left: 3px solid #f59e0b;">
+            <div class="stat-label">Under Investigation</div>
+            <div class="stat-value" id="hudReviewingReports" style="color: #f59e0b;">0</div>
+            <div class="stat-sub">Active evidence audit</div>
+          </div>
+          <div class="stat-card" style="border-left: 3px solid #10b981;">
+            <div class="stat-label">Resolved Incidents</div>
+            <div class="stat-value" id="hudResolvedReports" style="color: #10b981;">0</div>
+            <div class="stat-sub">Sanctions applied or cleared</div>
+          </div>
+          <div class="stat-card" style="border-left: 3px solid #00f2ff;">
+            <div class="stat-label">Total Indexed</div>
+            <div class="stat-value" id="hudTotalReports" style="color: #00f2ff;">0</div>
+            <div class="stat-sub">Firestore reports collection</div>
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.02); padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.06);">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <label style="font-size: 11px; font-weight: 700; color: #94a3b8;">Filter Status:</label>
+            <select id="filterReportStatus" class="admin-input" style="font-size: 11.5px; padding: 4px 8px; width: auto;">
+              <option value="ALL">All Statuses</option>
+              <option value="pending" selected>Pending Review</option>
+              <option value="reviewing">Under Review</option>
+              <option value="resolved">Resolved</option>
+              <option value="dismissed">Dismissed</option>
+            </select>
+
+            <label style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-left: 8px;">Severity:</label>
+            <select id="filterReportSeverity" class="admin-input" style="font-size: 11.5px; padding: 4px 8px; width: auto;">
+              <option value="ALL">All Severities</option>
+              <option value="CRITICAL">Critical Sev-1</option>
+              <option value="HIGH">High</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+            </select>
+          </div>
+
+          <div style="font-size: 11px; color: #94a3b8;">
+            Hotline Escalations: <strong style="color: #25d366;">+234 905 434 5858</strong>
+          </div>
+        </div>
+
+        <!-- Reports Queue & Detail Split View -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px;">
+          <!-- Reports Feed -->
+          <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
+            <h4 style="font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 12px 0; display: flex; align-items: center; justify-content: space-between;">
+              <span><i class="fa-solid fa-list-check" style="color: #ff3b30;"></i> Incident Reports Stream</span>
+              <span id="reportsListCountBadge" class="badge" style="background: rgba(255, 59, 48, 0.15); color: #ff3b30; font-size: 10px;">0 reports</span>
+            </h4>
+            <div id="adminReportsContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 540px; overflow-y: auto; padding-right: 4px;">
+              <!-- Dynamic Report Cards -->
+            </div>
+          </div>
+
+          <!-- Report Detail & Quick Sanction Inspector -->
+          <div id="adminReportDetailPane" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div id="adminReportDetailContent">
+              <div style="text-align: center; color: #64748b; padding: 60px 20px;">
+                <i class="fa-solid fa-hand-pointer" style="font-size: 32px; margin-bottom: 12px; display: block; color: rgba(0, 242, 255, 0.3);"></i>
+                <strong style="color: #fff; display: block; font-size: 13.5px;">Select an Incident Report</strong>
+                <p style="font-size: 11.5px; margin-top: 4px;">Click any report on the left to inspect cryptographic evidence, attached chat logs, and dispatch enforcement sanctions.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- ======================================================== -->
@@ -4132,6 +4234,7 @@
   <script src="src/js/ai-security-scanner-api.js"></script>
   <script src="src/js/hardware-fingerprint-sentinel.js"></script>
   <script src="src/js/verification-badges-catalog.js"></script>
+  <script src="src/js/report-activity-monitor.js"></script>
 
   <!-- CONTROLLER SCRIPT -->
   <script>
@@ -4377,6 +4480,9 @@
           if (targetTabId === 'tab-fulfillment') {
             try { initFulfillmentDesk(); } catch(e) {}
           }
+          if (targetTabId === 'tab-reports') {
+            try { initAdminReportsHub(); } catch(e) {}
+          }
         });
       });
 
@@ -4400,6 +4506,7 @@
         try { initMasterControlDeck(); } catch(e) { console.warn('[CONTROL DECK INIT]', e); }
         try { initAdvancedCyberSystems(); } catch(e) { console.warn('[CYBER SYSTEMS INIT]', e); }
         try { initFulfillmentDesk(); } catch(e) { console.warn('[FULFILLMENT DESK INIT]', e); }
+        try { initAdminReportsHub(); } catch(e) { console.warn('[REPORTS HUB INIT]', e); }
       }
 
       // ─── MASTER CYBER CONTROL DECK CONTROLLER ───
@@ -7755,6 +7862,396 @@ For support or further inquiries, reply directly to this chat.`;
       window.selectFulfillUser = selectFulfillUser;
       window.refreshFulfillmentUserOptions = refreshFulfillmentUserOptions;
       window.updateWhatsappReceiptPreview = updateWhatsappReceiptPreview;
+
+      // ═════════════════════════════════════════════════════════════════════
+      // TAB 15: REPORTS INBOX & ACTIVITY SENTINEL CONTROLLER
+      // ═════════════════════════════════════════════════════════════════════
+      const SEEDED_ADMIN_REPORTS = [
+        {
+          id: 'REP_SEED_01',
+          ticketId: 'REP-CRIT-9011',
+          reportedBy: 'usr_cyber_ghost_02',
+          reporterUsername: 'shadow_operative',
+          reportedUser: 'usr_toxic_raider_04',
+          reportedUsername: 'blackhat_intruder',
+          chatType: 'direct',
+          category: 'HARASSMENT',
+          subReason: 'Direct Threats of Violence & Doxxing',
+          severity: 'CRITICAL',
+          description: 'User initiated threatening direct communication demanding private server credentials and threatened doxxing and credential exposure.',
+          evidenceMessages: [
+            { sender: 'blackhat_intruder', text: 'Hand over root admin or I release full contact lists.', timestamp: '10:42 PM' },
+            { sender: 'shadow_operative', text: 'This session is monitored by NEX Sentinel.', timestamp: '10:43 PM' },
+            { sender: 'blackhat_intruder', text: 'You have 10 minutes.', timestamp: '10:44 PM' }
+          ],
+          hasEvidenceAttachment: false,
+          status: 'pending',
+          reviewed: false,
+          timestamp: new Date(Date.now() - 3600000).toISOString()
+        },
+        {
+          id: 'REP_SEED_02',
+          ticketId: 'REP-SPAM-8812',
+          reportedBy: 'usr_alex_root_01',
+          reporterUsername: 'demonalexander526',
+          reportedUser: 'usr_spam_bot_03',
+          reportedUsername: 'crypto_spammer_99',
+          chatType: 'group',
+          groupId: 'grp_global_crypto',
+          groupName: 'Cyber Public Alpha',
+          category: 'SPAM_SCAM',
+          subReason: 'Crypto / Token Investment Scam',
+          severity: 'HIGH',
+          description: 'Automated bot blasting fraudulent token airdrop links across public channel with high velocity.',
+          evidenceMessages: [
+            { sender: 'crypto_spammer_99', text: 'CLAIM 10,000 FREE TOKENS at phish-reward.xyz/claim NOW!', timestamp: '09:15 PM' }
+          ],
+          hasEvidenceAttachment: false,
+          status: 'reviewing',
+          reviewed: false,
+          timestamp: new Date(Date.now() - 7200000).toISOString()
+        },
+        {
+          id: 'REP_SEED_03',
+          ticketId: 'REP-IMPER-7723',
+          reportedBy: 'usr_cyber_ghost_02',
+          reporterUsername: 'shadow_operative',
+          reportedUser: 'usr_fake_alex_99',
+          reportedUsername: 'demonalexander_official_mod',
+          chatType: 'direct',
+          category: 'IMPERSONATION',
+          subReason: 'Posing as Platform Staff / Admin',
+          severity: 'MEDIUM',
+          description: 'Account created with identical avatar claiming to be Lead Dev Alexander asking for private passkeys.',
+          evidenceMessages: [],
+          hasEvidenceAttachment: false,
+          status: 'resolved',
+          reviewed: true,
+          reviewedBy: 'SuperAdmin (+2349054345858)',
+          timestamp: new Date(Date.now() - 86400000).toISOString()
+        }
+      ];
+
+      let cachedReports = [...SEEDED_ADMIN_REPORTS];
+      let activeSelectedReport = null;
+
+      async function initAdminReportsHub() {
+        const container = document.getElementById('adminReportsContainer');
+        if (!container) return;
+
+        // Fetch from Firestore reports collection
+        if (db) {
+          try {
+            const snap = await Promise.race([
+              db.collection('reports').limit(50).get(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Reports fetch timeout')), 1500))
+            ]);
+            const liveReports = [];
+            snap.forEach(doc => {
+              liveReports.push({ id: doc.id, ...doc.data() });
+            });
+            if (liveReports.length > 0) {
+              cachedReports = liveReports;
+            }
+          } catch (e) {
+            console.warn('[REPORTS FETCH NOTIFICATION]', e.message);
+          }
+        }
+
+        renderAdminReports();
+        setupReportsFilterListeners();
+      }
+
+      function renderAdminReports() {
+        const container = document.getElementById('adminReportsContainer');
+        const statusFilter = document.getElementById('filterReportStatus')?.value || 'ALL';
+        const sevFilter = document.getElementById('filterReportSeverity')?.value || 'ALL';
+        if (!container) return;
+
+        const filtered = cachedReports.filter(r => {
+          if (statusFilter !== 'ALL' && (r.status || 'pending').toLowerCase() !== statusFilter.toLowerCase()) return false;
+          if (sevFilter !== 'ALL' && (r.severity || 'LOW').toUpperCase() !== sevFilter.toUpperCase()) return false;
+          return true;
+        });
+
+        // Update HUD
+        const pendingCount = cachedReports.filter(r => (r.status || 'pending') === 'pending').length;
+        const reviewingCount = cachedReports.filter(r => r.status === 'reviewing').length;
+        const resolvedCount = cachedReports.filter(r => r.status === 'resolved').length;
+
+        const hudPending = document.getElementById('hudPendingReports');
+        const hudReviewing = document.getElementById('hudReviewingReports');
+        const hudResolved = document.getElementById('hudResolvedReports');
+        const hudTotal = document.getElementById('hudTotalReports');
+        const badgeEl = document.getElementById('tabReportsBadge');
+        const listCountEl = document.getElementById('reportsListCountBadge');
+
+        if (hudPending) hudPending.textContent = pendingCount;
+        if (hudReviewing) hudReviewing.textContent = reviewingCount;
+        if (hudResolved) hudResolved.textContent = resolvedCount;
+        if (hudTotal) hudTotal.textContent = cachedReports.length;
+        if (badgeEl) badgeEl.textContent = `${pendingCount} Pending`;
+        if (listCountEl) listCountEl.textContent = `${filtered.length} shown`;
+
+        container.innerHTML = '';
+        if (filtered.length === 0) {
+          container.innerHTML = '<div style="color: var(--text-dim); text-align: center; padding: 30px; font-size: 12px; font-style: italic;">No incident reports matching active filters.</div>';
+          return;
+        }
+
+        filtered.forEach(rep => {
+          const card = document.createElement('div');
+          const isSelected = activeSelectedReport && activeSelectedReport.id === rep.id;
+          const sev = (rep.severity || 'LOW').toUpperCase();
+          let sevColor = '#94a3b8';
+          if (sev === 'CRITICAL') sevColor = '#ff3b30';
+          else if (sev === 'HIGH') sevColor = '#f59e0b';
+          else if (sev === 'MEDIUM') sevColor = '#00f2ff';
+
+          const time = new Date(rep.timestamp || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const targetName = rep.reportedUsername || rep.reportedUser || 'Unknown';
+          const reporterName = rep.reporterUsername || rep.reportedBy || 'Reporter';
+          const ticketId = rep.ticketId || rep.id;
+
+          card.style.cssText = `
+            background: ${isSelected ? 'rgba(255, 59, 48, 0.08)' : 'rgba(255, 255, 255, 0.02)'};
+            border: 1px solid ${isSelected ? '#ff3b30' : 'rgba(255, 255, 255, 0.08)'};
+            border-left: 3px solid ${sevColor};
+            border-radius: 10px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          `;
+
+          card.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+              <div>
+                <span style="font-size: 10px; font-family: monospace; color: #94a3b8;">${escapeHtml(ticketId)}</span>
+                <strong style="color: #fff; font-size: 12.5px; display: block; margin-top: 2px;">
+                  Target: @${escapeHtml(targetName)}
+                </strong>
+              </div>
+              <div style="text-align: right;">
+                <span class="badge" style="background: ${sevColor}22; border: 1px solid ${sevColor}; color: ${sevColor}; font-size: 9.5px; font-weight: 800;">
+                  ${sev}
+                </span>
+                <div style="font-size: 9.5px; color: var(--text-dim); margin-top: 3px;">${time}</div>
+              </div>
+            </div>
+            <div style="font-size: 11px; color: #cbd5e1; margin-bottom: 6px; line-height: 1.35;">
+              <strong>Category:</strong> ${escapeHtml(rep.category || 'General')} &bull; ${escapeHtml(rep.subReason || '')}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #94a3b8;">
+              <span>Reported by: <strong>@${escapeHtml(reporterName)}</strong></span>
+              <span class="badge" style="text-transform: uppercase; font-size: 9px; background: rgba(255,255,255,0.06);">
+                ${rep.status || 'pending'}
+              </span>
+            </div>
+          `;
+
+          card.addEventListener('click', () => {
+            activeSelectedReport = rep;
+            renderAdminReports();
+            renderReportDetailPane(rep);
+          });
+
+          container.appendChild(card);
+        });
+
+        if (activeSelectedReport) {
+          renderReportDetailPane(activeSelectedReport);
+        }
+      }
+
+      function renderReportDetailPane(rep) {
+        const pane = document.getElementById('adminReportDetailContent');
+        if (!pane) return;
+
+        const sev = (rep.severity || 'LOW').toUpperCase();
+        let sevColor = '#94a3b8';
+        if (sev === 'CRITICAL') sevColor = '#ff3b30';
+        else if (sev === 'HIGH') sevColor = '#f59e0b';
+        else if (sev === 'MEDIUM') sevColor = '#00f2ff';
+
+        const targetName = rep.reportedUsername || rep.reportedUser || 'Unknown';
+        const targetUid = rep.reportedUser || '--';
+        const reporterName = rep.reporterUsername || rep.reportedBy || 'Reporter';
+        const reporterUid = rep.reportedBy || '--';
+        const ticketId = rep.ticketId || rep.id;
+        const msgs = rep.evidenceMessages || [];
+
+        let evidenceHtml = '';
+        if (msgs.length > 0) {
+          evidenceHtml = `
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; margin-top: 8px; max-height: 120px; overflow-y: auto; font-family: monospace; font-size: 11px;">
+              ${msgs.map(m => `
+                <div style="margin-bottom: 4px; padding-bottom: 3px; border-bottom: 1px solid rgba(255,255,255,0.04);">
+                  <strong style="color: #00f2ff;">${escapeHtml(m.sender)}:</strong>
+                  <span style="color: #cbd5e1;"> ${escapeHtml(m.text)}</span>
+                  <span style="color: #64748b; font-size: 9.5px; float: right;">${escapeHtml(m.timestamp)}</span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        } else {
+          evidenceHtml = '<div style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 4px;">No attached chat messages in snapshot.</div>';
+        }
+
+        pane.innerHTML = `
+          <div>
+            <!-- Detail Header -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+              <div>
+                <span class="badge" style="background: ${sevColor}22; border: 1px solid ${sevColor}; color: ${sevColor}; font-size: 10px; font-weight: 800;">
+                  SEVERITY: ${sev}
+                </span>
+                <h3 style="font-size: 16px; font-weight: 800; color: #fff; margin: 6px 0 2px 0;">
+                  Incident ${escapeHtml(ticketId)}
+                </h3>
+                <div style="font-size: 11px; color: #94a3b8;">
+                  Status: <strong style="color: #fff; text-transform: uppercase;">${rep.status || 'pending'}</strong> &bull; Filed: ${new Date(rep.timestamp || Date.now()).toLocaleString()}
+                </div>
+              </div>
+              <button type="button" id="btnReportWhatsappEscalate" class="admin-btn" style="background: #25d366; color: #000; font-weight: 700; font-size: 11px; padding: 6px 12px; border: none; border-radius: 6px;">
+                <i class="fa-brands fa-whatsapp"></i> Dispatch Hotline
+              </button>
+            </div>
+
+            <!-- Involved Parties Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+              <div style="background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 8px; padding: 10px;">
+                <div style="font-size: 10px; text-transform: uppercase; color: #ff3b30; font-weight: 700;">Reported Target</div>
+                <div style="font-size: 13px; font-weight: 700; color: #fff; margin-top: 2px;">@${escapeHtml(targetName)}</div>
+                <div style="font-size: 10px; font-family: monospace; color: #94a3b8; margin-top: 2px;">UID: ${escapeHtml(targetUid)}</div>
+              </div>
+              <div style="background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 8px; padding: 10px;">
+                <div style="font-size: 10px; text-transform: uppercase; color: #00f2ff; font-weight: 700;">Reporter Account</div>
+                <div style="font-size: 13px; font-weight: 700; color: #fff; margin-top: 2px;">@${escapeHtml(reporterName)}</div>
+                <div style="font-size: 10px; font-family: monospace; color: #94a3b8; margin-top: 2px;">UID: ${escapeHtml(reporterUid)}</div>
+              </div>
+            </div>
+
+            <!-- Violation Details -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-bottom: 12px;">
+              <div style="font-size: 11px; color: #94a3b8; margin-bottom: 3px;"><strong>Infraction:</strong> ${escapeHtml(rep.category || 'GENERAL')} &bull; ${escapeHtml(rep.subReason || 'N/A')}</div>
+              <div style="font-size: 12px; color: #fff; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(rep.description || 'No written description provided.')}</div>
+            </div>
+
+            <!-- Attached Evidence Snapshot -->
+            <div style="margin-bottom: 14px;">
+              <label style="font-size: 11px; font-weight: 700; color: #00f2ff; display: block;">
+                <i class="fa-solid fa-camera"></i> Attached Chat History Evidence
+              </label>
+              ${evidenceHtml}
+            </div>
+          </div>
+
+          <!-- Moderation Actions Footer -->
+          <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              <button type="button" id="btnActionResolveReport" class="admin-btn" style="flex: 1; background: #10b981; color: #000; font-weight: 700; font-size: 11.5px; padding: 9px;">
+                <i class="fa-solid fa-check"></i> Mark Resolved
+              </button>
+              <button type="button" id="btnActionReviewReport" class="admin-btn secondary" style="flex: 1; border-color: #f59e0b; color: #f59e0b; font-size: 11.5px; padding: 9px;">
+                <i class="fa-solid fa-magnifying-glass"></i> Under Review
+              </button>
+              <button type="button" id="btnActionDismissReport" class="admin-btn secondary" style="flex: 1; border-color: #64748b; color: #94a3b8; font-size: 11.5px; padding: 9px;">
+                <i class="fa-solid fa-ban"></i> Dismiss
+              </button>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="btnActionSanctionTarget" class="admin-btn danger" style="flex: 1; font-size: 11.5px; padding: 8px; background: rgba(255, 59, 48, 0.2); border: 1px solid #ff3b30; color: #ff3b30; font-weight: 700;">
+                <i class="fa-solid fa-gavel"></i> Apply Account Sanctions
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Wire Action buttons
+        pane.querySelector('#btnActionResolveReport')?.addEventListener('click', () => updateReportStatus(rep.id, 'resolved'));
+        pane.querySelector('#btnActionReviewReport')?.addEventListener('click', () => updateReportStatus(rep.id, 'reviewing'));
+        pane.querySelector('#btnActionDismissReport')?.addEventListener('click', () => updateReportStatus(rep.id, 'dismissed'));
+        pane.querySelector('#btnActionSanctionTarget')?.addEventListener('click', () => {
+          const user = cachedUsers.find(u => u.id === targetUid || u.username === targetName);
+          if (user) {
+            openUserSanctionsModal(user);
+          } else {
+            alert(`User record @${targetName} (${targetUid}) not currently in local memory cache.`);
+          }
+        });
+        pane.querySelector('#btnReportWhatsappEscalate')?.addEventListener('click', () => {
+          const text = `NEXCHAT SUPERADMIN AUDIT DISPATCH
+Hotline: +234 905 434 5858
+
+Incident Ticket: ${ticketId}
+Reported User: @${targetName} (${targetUid})
+Category: ${rep.category}
+Severity: ${sev}
+Status: ${rep.status}`;
+          window.open(`https://wa.me/2349054345858?text=${encodeURIComponent(text)}`, '_blank');
+        });
+      }
+
+      async function updateReportStatus(reportId, newStatus) {
+        const rep = cachedReports.find(r => r.id === reportId);
+        if (!rep) return;
+
+        rep.status = newStatus;
+        if (newStatus === 'resolved') {
+          rep.reviewed = true;
+          rep.reviewedBy = 'SuperAdmin (+2349054345858)';
+        }
+
+        if (db) {
+          try {
+            await db.collection('reports').doc(reportId).set({
+              status: newStatus,
+              reviewed: rep.reviewed || false,
+              reviewedBy: rep.reviewedBy || null
+            }, { merge: true });
+          } catch (e) {
+            console.warn('[REPORT FIRESTORE UPDATE]', e.message);
+          }
+        }
+
+        addMerkleAuditBlock('REPORT_STATUS_UPDATE', `Incident ${rep.ticketId || reportId} updated to: ${newStatus}`);
+        logAudit(`Incident report [${rep.ticketId || reportId}] updated to status: ${newStatus.toUpperCase()}`, 'ok');
+
+        renderAdminReports();
+        alert(`Incident report marked as ${newStatus.toUpperCase()}.`);
+      }
+
+      function setupReportsFilterListeners() {
+        document.getElementById('filterReportStatus')?.addEventListener('change', renderAdminReports);
+        document.getElementById('filterReportSeverity')?.addEventListener('change', renderAdminReports);
+        document.getElementById('btnRefreshAdminReports')?.addEventListener('click', () => {
+          initAdminReportsHub();
+          logAudit('Refreshed Trust & Safety incident reports queue.', 'ok');
+        });
+        document.getElementById('btnExportReportsCsv')?.addEventListener('click', () => {
+          const csvRows = ['TicketId,ReportedUser,Reporter,Category,Severity,Status,Timestamp'];
+          cachedReports.forEach(r => {
+            csvRows.push([
+              r.ticketId || r.id,
+              r.reportedUsername || r.reportedUser,
+              r.reporterUsername || r.reportedBy,
+              r.category,
+              r.severity,
+              r.status,
+              r.timestamp
+            ].map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(','));
+          });
+          const blob = new Blob([csvRows.join('\n')], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `nexchat_incident_reports_${Date.now()}.csv`;
+          a.click();
+          URL.revokeObjectURL(url);
+          logAudit('Exported incident reports as CSV.', 'ok');
+        });
+      }
+
     })();
   </script>
 </body>

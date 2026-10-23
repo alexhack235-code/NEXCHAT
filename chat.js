@@ -1848,6 +1848,27 @@ async function showGroupInfoPanel(groupId) {
       disappearingDurationRow.style.display = disappearingConfig.enabled ? 'flex' : 'none';
     }
 
+    // Group Activity & Telemetry Sentinel
+    try {
+      let groupActivityBox = document.getElementById('groupActivityTelemetrySection');
+      if (!groupActivityBox) {
+        groupActivityBox = document.createElement('div');
+        groupActivityBox.id = 'groupActivityTelemetrySection';
+        const actionsSec = document.getElementById('groupAdminActionsSection');
+        if (actionsSec && actionsSec.parentNode) {
+          actionsSec.parentNode.insertBefore(groupActivityBox, actionsSec);
+        } else {
+          const infoSidebarEl = document.getElementById('infoSidebar');
+          if (infoSidebarEl) infoSidebarEl.appendChild(groupActivityBox);
+        }
+      }
+      if (groupActivityBox && window.NexActivityMonitor) {
+        window.NexActivityMonitor.renderGroupActivitySection(groupData, groupActivityBox);
+      }
+    } catch (actErr) {
+      console.warn('[GROUP ACTIVITY RENDER]', actErr);
+    }
+
     if (isAdmin) {
       await loadGroupPendingRequests(groupId);
     }
@@ -3427,6 +3448,15 @@ async function sendMessage() {
   if (!myUID) {
     showNotif("[Error] Please log in first", "error");
     return;
+  }
+
+  // Activity Monitor Logging
+  if (window.NexActivityMonitor) {
+    window.NexActivityMonitor.logActivity('MESSAGE_SENT', `Sent ${selectedFile ? 'file attachment' : 'message'} in @${currentChatName || currentChatUser}`, {
+      target: currentChatUser,
+      chatType: currentChatType || 'direct',
+      hasAttachment: !!selectedFile
+    });
   }
 
   // Autonomous Offline IndexedDB Queue Routing
@@ -5868,24 +5898,17 @@ document.getElementById("deleteBtn")?.addEventListener("click", async () => {
   closeChatOptionsMenu();
 });
 
-document.getElementById("reportBtn")?.addEventListener("click", async () => {
+document.getElementById("reportBtn")?.addEventListener("click", () => {
   if (!currentChatUser || !myUID) return;
-
-  try {
-    const reportRef = collection(db, "reports");
-    await addDoc(reportRef, {
-      reportedBy: myUID,
-      reportedUser: currentChatUser,
-      reason: "User reported from chat",
-      timestamp: serverTimestamp(),
-      status: "pending"
+  closeChatOptionsMenu();
+  if (typeof window.openReportModal === 'function') {
+    window.openReportModal({
+      targetUid: currentChatUser,
+      targetUsername: currentChatName || 'User',
+      targetType: currentChatType === 'group' ? 'group' : 'user',
+      groupId: currentChatType === 'group' ? currentChatUser : null,
+      groupName: currentChatType === 'group' ? currentChatName : null
     });
-
-    showNotif("User reported successfully - Our team will review this", "success");
-    closeChatOptionsMenu();
-  } catch (err) {
-    console.error("Report error:", err);
-    showNotif("Error submitting report: " + err.message, "error");
   }
 });
 
@@ -7369,25 +7392,18 @@ document.getElementById("infoDeleteBtn")?.addEventListener("click", async () => 
   }
 });
 
-document.getElementById("infoReportBtn")?.addEventListener("click", async () => {
+document.getElementById("infoReportBtn")?.addEventListener("click", () => {
   if (!currentChatUser || !myUID) return;
-
-  try {
-    const reportRef = collection(db, "reports");
-    await addDoc(reportRef, {
-      reportedBy: myUID,
-      reportedUser: currentChatUser,
-      reason: "User reported from info panel",
-      timestamp: serverTimestamp(),
-      status: "pending"
+  const infoSidebarEl = document.getElementById("infoSidebar");
+  if (infoSidebarEl) infoSidebarEl.style.display = "none";
+  if (typeof window.openReportModal === 'function') {
+    window.openReportModal({
+      targetUid: currentChatUser,
+      targetUsername: currentChatName || 'User',
+      targetType: currentChatType === 'group' ? 'group' : 'user',
+      groupId: currentChatType === 'group' ? currentChatUser : null,
+      groupName: currentChatType === 'group' ? currentChatName : null
     });
-
-    showNotif("User reported successfully - Our team will review this", "success");
-    const infoSidebarEl = document.getElementById("infoSidebar");
-    if (infoSidebarEl) infoSidebarEl.style.display = "none";
-  } catch (err) {
-    console.error("Report error:", err);
-    showNotif("Error submitting report: " + err.message, "error");
   }
 });
 
@@ -9745,6 +9761,45 @@ function loadSettingsPreferences() {
       alignmentBtn.style.background = "#00ff66";
       alignmentBtn.style.color = "#000";
     }
+
+    // Activity Telemetry Toggles & Sentinel Bindings
+    if (window.NexActivityMonitor) {
+      const actLoggingEl = document.getElementById("activityLoggingToggle");
+      const groupTrackingEl = document.getElementById("groupActivityTrackingToggle");
+      const screenshotAlertEl = document.getElementById("screenshotAlertToggle");
+      const broadcastEl = document.getElementById("activityBroadcastingToggle");
+
+      if (actLoggingEl) {
+        actLoggingEl.checked = window.NexActivityMonitor.getToggle("telemetryLogging") !== false;
+        actLoggingEl.onchange = () => window.NexActivityMonitor.setToggle("telemetryLogging", actLoggingEl.checked);
+      }
+      if (groupTrackingEl) {
+        groupTrackingEl.checked = window.NexActivityMonitor.getToggle("groupTelemetry") !== false;
+        groupTrackingEl.onchange = () => window.NexActivityMonitor.setToggle("groupTelemetry", groupTrackingEl.checked);
+      }
+      if (screenshotAlertEl) {
+        screenshotAlertEl.checked = window.NexActivityMonitor.getToggle("screenshotAlert") !== false;
+        screenshotAlertEl.onchange = () => window.NexActivityMonitor.setToggle("screenshotAlert", screenshotAlertEl.checked);
+      }
+      if (broadcastEl) {
+        broadcastEl.checked = window.NexActivityMonitor.getToggle("activityBroadcasting") !== false;
+        broadcastEl.onchange = () => window.NexActivityMonitor.setToggle("activityBroadcasting", broadcastEl.checked);
+      }
+    }
+
+    document.getElementById("btnOpenUserActivityLog")?.addEventListener("click", () => {
+      if (window.NexActivityMonitor) window.NexActivityMonitor.openActivityAuditModal();
+    });
+
+    document.getElementById("btnOpenIncidentReportLauncher")?.addEventListener("click", () => {
+      if (typeof window.openReportModal === 'function') {
+        window.openReportModal({
+          targetUid: currentChatUser || 'general_user',
+          targetUsername: currentChatName || 'Target User',
+          targetType: currentChatType === 'group' ? 'group' : 'user'
+        });
+      }
+    });
 
     console.log("Settings loaded successfully", prefs);
   } catch (err) {
