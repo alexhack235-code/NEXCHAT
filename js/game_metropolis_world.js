@@ -6,6 +6,10 @@
     function registerCullable(grp) {
       if (window.HyperRealismEngine && window.HyperRealismEngine.registerCullableGroup) {
         window.HyperRealismEngine.registerCullableGroup(grp);
+      } else {
+        // Queue for deferred registration when HyperRealismEngine initializes later
+        window._pendingCullableGroups = window._pendingCullableGroups || [];
+        window._pendingCullableGroups.push(grp);
       }
     }
 
@@ -151,11 +155,21 @@
       // 10. Store 6: AERO-PROPULSION & JETPACK TECH STORE (South Galleria Entry: x = 0, z = 100)
       buildStoreJetpack(mallGroup, 0, 100);
 
-      // Register Mall perimeter colliders
+      // Register Mall perimeter & interior store colliders
       registerCityCollider({ x: -34, z: 122, hw: 2, hd: 31, doorW: 0 }); // West outer wall
       registerCityCollider({ x: 34, z: 122, hw: 2, hd: 31, doorW: 0 });  // East outer wall
       registerCityCollider({ x: 0, z: 153, hw: 34, hd: 2, doorW: 0 });   // North back wall
-      registerCityCollider({ x: 0, z: 91, hw: 34, hd: 2, doorW: 14 });   // South front wall with 14m entrance doorway
+      // South front entrance: Two solid wall segments flanking the 14m entrance portal (x: -7 to +7)
+      registerCityCollider({ type: 'solid', x: -20.5, z: 91, hw: 13.5, hd: 2, world: 'earth' });
+      registerCityCollider({ type: 'solid', x: 20.5, z: 91, hw: 13.5, hd: 2, world: 'earth' });
+      // Central Atrium Fountain & Hologram Pedestal
+      registerCityCollider({ type: 'solid', x: 0, z: 122, hw: 4.8, hd: 4.8, world: 'earth' });
+      // Interior Store Partition & Counter Colliders
+      registerCityCollider({ type: 'solid', x: -20, z: 110, hw: 8, hd: 6, world: 'earth' }); // Store 1: Cyber-Armory
+      registerCityCollider({ type: 'solid', x: 20, z: 110, hw: 8, hd: 6, world: 'earth' });  // Store 2: Exo-Core Atelier
+      registerCityCollider({ type: 'solid', x: -20, z: 135, hw: 8, hd: 6, world: 'earth' }); // Store 3: Hyperion Motors
+      registerCityCollider({ type: 'solid', x: 20, z: 135, hw: 8, hd: 6, world: 'earth' });  // Store 4: Bio-Stim Med-Bay
+      registerCityCollider({ type: 'solid', x: 0, z: 146, hw: 8, hd: 5, world: 'earth' });   // Store 5: Stardust Cafe
     }
 
     // STORE 1: CYBER-ARMORY
@@ -1468,6 +1482,13 @@ function buildNeoKyotoCity() {
 
       neoKyotoGroup.add(pagodaGroup);
 
+      // Neo Kyoto District Solid Building Colliders (prevents player walk-through)
+      registerCityCollider({ type: 'solid', x: 480, z: 350, hw: 14, hd: 14, world: 'earth' }); // Imperial Pagoda
+      registerCityCollider({ type: 'solid', x: 430, z: 310, hw: 16, hd: 16, world: 'earth' }); // Mega-Skyscraper NW
+      registerCityCollider({ type: 'solid', x: 530, z: 310, hw: 16, hd: 16, world: 'earth' }); // Mega-Skyscraper NE
+      registerCityCollider({ type: 'solid', x: 430, z: 390, hw: 16, hd: 16, world: 'earth' }); // Mega-Skyscraper SW
+      registerCityCollider({ type: 'solid', x: 530, z: 390, hw: 16, hd: 16, world: 'earth' }); // Mega-Skyscraper SE
+
       // (B) Grand Cyber Torii Gate (Avenue Entry at X: 480, Z: 280)
       const toriiGroup = new THREE.Group();
       toriiGroup.position.set(cx, 0, cz - 70);
@@ -1719,6 +1740,13 @@ function buildNeoKyotoCity() {
 
       // (F) Solaria Hyperloop Station Terminal (X: -380, Z: 440)
       buildHyperloopStationMesh(solariaGroup, cx + 40, cz - 50, 'SOLARIA OASIS TRANSIT', 0xffaa00);
+
+      // Solaria Oasis Solid Architecture Colliders (prevents player walk-through)
+      registerCityCollider({ type: 'solid', x: cx, z: cz, hw: 7, hd: 7, world: 'earth' }); // Concentrating Solar Thermal Tower
+      registerCityCollider({ type: 'solid', x: cx + 60, z: cz - 30, hw: 12, hd: 10, world: 'earth' }); // The Rusty Rotor Cantina
+      registerCityCollider({ type: 'solid', x: cx - 55, z: cz + 40, hw: 18, hd: 18, world: 'earth' }); // Pressurized Geodesic Bio-Dome
+      registerCityCollider({ type: 'solid', x: cx + 60, z: cz + 40, hw: 9, hd: 3, world: 'earth' }); // Target Shooting Range Stall
+      registerCityCollider({ type: 'platform', x: cx + 40, z: cz - 50, hw: 9, hd: 7, topY: 0.6, world: 'earth' }); // Solaria Hyperloop Station Platform
     }
 
     // ------------------------------------------------------------
@@ -1824,6 +1852,14 @@ function buildNeoKyotoCity() {
 
       // (E) Atlantis Hyperloop Station Terminal (X: -470, Z: -370)
       buildHyperloopStationMesh(atlantisGroup, cx + 50, cz + 50, 'ATLANTIS MARINA TRANSIT', 0x00d9ff);
+
+      // Atlantis Marina Solid Architecture Colliders (prevents player walk-through)
+      registerCityCollider({ type: 'solid', x: cx + 60, z: cz - 60, hw: 6, hd: 6, world: 'earth' }); // Navigation Lighthouse Spire
+      registerCityCollider({ type: 'platform', x: cx, z: cz, hw: 8, hd: 66, topY: 0.8, world: 'earth' }); // Boardwalk Promenade Pier Platform
+      registerCityCollider({ type: 'solid', x: cx - 14, z: cz - 25, hw: 4, hd: 10, world: 'earth' }); // Moored Luxury Hover-Yacht West
+      registerCityCollider({ type: 'solid', x: cx + 14, z: cz + 25, hw: 4, hd: 10, world: 'earth' }); // Moored Luxury Hover-Yacht East
+      registerCityCollider({ type: 'solid', x: cx - 50, z: cz + 40, hw: 22, hd: 22, world: 'earth' }); // Semi-Submerged Underwater Biosphere Marine Dome
+      registerCityCollider({ type: 'platform', x: cx + 50, z: cz + 50, hw: 9, hd: 7, topY: 0.6, world: 'earth' }); // Atlantis Hyperloop Station Platform
     }
 
     // Helper: Build Hyperloop Station Mesh

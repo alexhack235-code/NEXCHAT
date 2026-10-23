@@ -2992,8 +2992,9 @@
       for (let i = 0; i < this.distantCullGroup.length; i++) {
         const item = this.distantCullGroup[i];
         if (!item || !item.position) continue;
-        const dx = item.position.x - camPos.x;
-        const dz = item.position.z - camPos.z;
+        const center = (item.userData && item.userData.worldCenter) ? item.userData.worldCenter : item.position;
+        const dx = center.x - camPos.x;
+        const dz = center.z - camPos.z;
         const distSq = dx * dx + dz * dz;
 
         item.visible = (distSq <= maxDistSq);
@@ -3005,7 +3006,14 @@
 
       if (now - this.lastCullCheck > 120) {
         this.lastCullCheck = now;
-        this.updateDistanceCulling();
+        // Flush any groups queued before HyperRealismEngine was ready
+      if (window._pendingCullableGroups && window._pendingCullableGroups.length > 0) {
+        for (let pg = 0; pg < window._pendingCullableGroups.length; pg++) {
+          this.registerCullableGroup(window._pendingCullableGroups[pg]);
+        }
+        window._pendingCullableGroups = [];
+      }
+      this.updateDistanceCulling();
       }
 
       if (now - this.lastVaporTime > 2400) {

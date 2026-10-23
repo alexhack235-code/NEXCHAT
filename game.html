@@ -7929,6 +7929,52 @@
         });
       }
 
+      // Vehicle Crash & Impact Crunch Synthesizer (Procedural Web Audio API)
+      playVehicleCrash() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        if (this._lastCrash && now - this._lastCrash < 0.28) return;
+        this._lastCrash = now;
+        try {
+          // White noise impact punch
+          const sampleRate = this.ctx.sampleRate || 44100;
+          const bufferSize = Math.floor(sampleRate * 0.22);
+          const buffer = this.ctx.createBuffer(1, bufferSize, sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (sampleRate * 0.04));
+          }
+          const noise = this.ctx.createBufferSource();
+          noise.buffer = buffer;
+          const filter = this.ctx.createBiquadFilter();
+          filter.type = 'lowpass';
+          filter.frequency.setValueAtTime(850, now);
+          filter.frequency.exponentialRampToValueAtTime(140, now + 0.18);
+          const gain = this.ctx.createGain();
+          gain.gain.setValueAtTime(0.38 * this.masterVolume, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.21);
+          noise.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.ctx.destination);
+          noise.start(now);
+
+          // Low-frequency chassis compression thud
+          const osc = this.ctx.createOscillator();
+          const oscGain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(130, now);
+          osc.frequency.exponentialRampToValueAtTime(32, now + 0.17);
+          oscGain.gain.setValueAtTime(0.42 * this.masterVolume, now);
+          oscGain.gain.exponentialRampToValueAtTime(0.001, now + 0.19);
+          osc.connect(oscGain);
+          oscGain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } catch (e) {
+          // Audio fallback gracefully
+        }
+      }
+
       // Tactical Bullet Ricochet & Concrete/Metal Impact Ping
       playRicochet() {
         if (!this.ctx) return;
@@ -8360,6 +8406,32 @@
     let cityColliders = [];
     let spatialColliderGrid = new Map();
     const SPATIAL_CELL_SIZE = 60;
+
+    // Pre-allocated scratch vectors to eliminate per-frame GC spikes in gameLoop
+    const _scratchGlideFwd = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchRoverCamOffset = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchRoverMoveDir = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchUpAxis = (typeof THREE !== 'undefined') ? new THREE.Vector3(0, 1, 0) : null;
+    const _scratchTrainCamBack = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchTrainEuler = (typeof THREE !== 'undefined') ? new THREE.Euler() : null;
+    const _scratchPlaneFwd = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchPlaneCockOffset = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchPlaneLookTarget = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchPlaneCamBack = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchPlaneLookPos = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchFpForward = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchFpLookTarget = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchFpTargetPos = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchRoverTargetPos = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchExoMoveDir = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchExoCamOffset = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchExoTargetPos = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _staticTrainLoopSegments = (typeof THREE !== 'undefined') ? [
+      { p1: { x: -180, y: -200 }, p2: { x: 180, y: -200 }, len: 360, angle: 0 },
+      { p1: { x: 180, y: -200 }, p2: { x: 180, y: 180 }, len: 380, angle: -Math.PI / 2 },
+      { p1: { x: 180, y: 180 }, p2: { x: -180, y: 180 }, len: 360, angle: Math.PI },
+      { p1: { x: -180, y: 180 }, p2: { x: -180, y: -200 }, len: 380, angle: Math.PI / 2 }
+    ] : null;
 
     function clearCityColliders() {
       cityColliders = [];
@@ -18301,8 +18373,8 @@
       }
 
       // GPU Protection: Target FPS Limiter (prevents thermal throttling, battery drain & noisy fans)
-      const isMobileScreen = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth <= 900);
-      const defaultFps = isMobileScreen ? 30 : 60;
+      const isActualPhone = (window.innerWidth <= 600 && ('ontouchstart' in window));
+      const defaultFps = isActualPhone ? 30 : 60;
       const targetFps = (document.hidden) ? 15 : ((gameState && gameState.settings && typeof gameState.settings.fpsTarget === 'number' && gameState.settings.fpsTarget > 0) ? gameState.settings.fpsTarget : defaultFps);
       const minFrameInterval = 1000 / targetFps;
       if (now - lastRenderTimestamp < minFrameInterval - 1.5) {
@@ -18597,6 +18669,73 @@
               continue; // Skip wheel spin and hover sine calculations for far away vehicles
             } else {
               veh.group.visible = true;
+            }
+
+            // Vehicle Collision Detection & Impact Physics (Player on foot AND Player driving car)
+            if (gameState.inVehicle && roverGroup && Math.abs(roverGroup.position.y - veh.group.position.y) < 2.5) {
+              const rDx = veh.group.position.x - roverGroup.position.x;
+              const rDz = veh.group.position.z - roverGroup.position.z;
+              const vehHW = veh.isTruck ? 3.2 : 2.2;
+              const vehHD = veh.isTruck ? 1.8 : 1.2;
+              const rOverlapX = (vehHW + 1.4) - Math.abs(rDx);
+              const rOverlapZ = (vehHD + 2.2) - Math.abs(rDz);
+              if (rOverlapX > 0 && rOverlapZ > 0) {
+                // Realistic Car-to-Car Rebound & Displacement
+                if (rOverlapX < rOverlapZ) {
+                  roverGroup.position.x -= Math.sign(rDx) * (rOverlapX + 0.1);
+                } else {
+                  roverGroup.position.z -= Math.sign(rDz) * (rOverlapZ + 0.1);
+                }
+                roverCurrentSpeed *= -0.45;
+                if (gameState) gameState.cameraShake = Math.min(0.65, (gameState.cameraShake || 0) + 0.45);
+                if (typeof spawnImpactSparks === 'function') spawnImpactSparks(roverGroup.position);
+                if (typeof spawnTireSmoke === 'function') spawnTireSmoke(veh.group.position);
+                if (typeof cyberAudio !== 'undefined' && cyberAudio) {
+                  if (cyberAudio.playVehicleCrash) cyberAudio.playVehicleCrash();
+                  else if (cyberAudio.playRicochet) cyberAudio.playRicochet();
+                }
+                veh._origSpeed = veh._origSpeed || veh.speed;
+                veh.speed *= 0.2;
+                setTimeout(() => { veh.speed = veh._origSpeed || 12; }, 1500);
+                if (typeof showStoreNotification === 'function') {
+                  showStoreNotification('VEHICLE COLLISION // IMPACT DAMPERS FIRED');
+                }
+              }
+            } else if (!gameState.inVehicle && !gameState.inPlane && !gameState.inTrain && !gameState.inExocraft && gameState.flightMode !== 'starship') {
+              const vehHW = veh.isTruck ? 3.1 : 2.2;
+              const vehHD = veh.isTruck ? 1.5 : 1.1;
+              const absDx = Math.abs(dx);
+              const absDz = Math.abs(dz);
+              if (absDx < vehHW + 0.55 && absDz < vehHD + 0.55 && Math.abs(pPos.y - veh.group.position.y) < 2.0) {
+                // Impact! Launch player away from vehicle
+                const impactForce = Math.max(8.0, veh.speed * 1.8);
+                if (veh.axis === 'z') {
+                  player.vel.z += veh.dir * impactForce * 0.7;
+                  player.vel.x += (dx > 0 ? 1 : -1) * impactForce * 0.5;
+                } else {
+                  player.vel.x += veh.dir * impactForce * 0.7;
+                  player.vel.z += (dz > 0 ? 1 : -1) * impactForce * 0.5;
+                }
+                player.vel.y = Math.max(player.vel.y, 5.5);
+                // Screen shake
+                if (gameState) gameState.cameraShake = Math.min(0.55, (gameState.cameraShake || 0) + 0.4);
+                // Sparks and tire smoke
+                if (typeof spawnImpactSparks === 'function') spawnImpactSparks(pPos);
+                if (typeof spawnTireSmoke === 'function') spawnTireSmoke(veh.group.position);
+                // Audio feedback
+                if (typeof cyberAudio !== 'undefined' && cyberAudio) {
+                  if (cyberAudio.playVehicleCrash) cyberAudio.playVehicleCrash();
+                  else if (cyberAudio.playRicochet) cyberAudio.playRicochet();
+                }
+                // Vehicle brakes hard after impact
+                veh._origSpeed = veh._origSpeed || veh.speed;
+                veh.speed *= 0.25;
+                setTimeout(() => { veh.speed = veh._origSpeed || 12; }, 1200);
+                // Brief HUD flash
+                if (typeof showStoreNotification === 'function') {
+                  showStoreNotification('VEHICLE IMPACT // DAMPENERS ENGAGED');
+                }
+              }
             }
           }
 
@@ -19512,18 +19651,19 @@
           if (pState.pitch < 0) pState.pitch = 0;
         }
 
-        // Forward Flight Velocity
+        // Forward Flight Velocity (Zero Allocations)
         pMesh.rotation.set(pState.pitch, pState.yaw, pState.roll, 'YXZ');
-        const fwdVector = new THREE.Vector3(0, 0, -1).applyEuler(pMesh.rotation);
-        pMesh.position.add(fwdVector.multiplyScalar(pState.speed * delta));
+        _scratchPlaneFwd.set(0, 0, -1).applyEuler(pMesh.rotation);
+        pMesh.position.addScaledVector(_scratchPlaneFwd, pState.speed * delta);
 
         // Audio
         if (pState.throttle > 5) {
           cyberAudio.playJetEngineSound(pState.throttle, pState.speed);
         }
 
-        // Player Position locked to plane cockpit
-        player.pos.copy(pMesh.position).add(new THREE.Vector3(0, 1.2, 0));
+        // Player Position locked to plane cockpit (Zero Allocations)
+        player.pos.copy(pMesh.position);
+        player.pos.y += 1.2;
         player.vel.set(0, 0, 0);
 
         // Update Avionics HUD
@@ -19551,19 +19691,21 @@
           horizEl.style.transform = `rotate(${-pState.roll * (180 / Math.PI)}deg) translateY(${pState.pitch * 60}px)`;
         }
 
-        // Camera Follows Plane (First-Person Cockpit View or Third-Person Chase Cam)
+        // Camera Follows Plane (First-Person Cockpit View or Third-Person Chase Cam - Zero Allocations)
         if (camera) {
           if (window.militaryAviationState && window.militaryAviationState.cockpitViewActive) {
             // First-Person Cockpit Eye Position looking forward through windshield HUD
-            const cockOffset = new THREE.Vector3(0, 1.25, 0.5).applyEuler(pMesh.rotation);
-            camera.position.copy(pMesh.position).add(cockOffset);
-            const lookTarget = pMesh.position.clone().add(new THREE.Vector3(0, 1.25, -50).applyEuler(pMesh.rotation));
-            camera.lookAt(lookTarget);
+            _scratchPlaneCockOffset.set(0, 1.25, 0.5).applyEuler(pMesh.rotation);
+            camera.position.copy(pMesh.position).add(_scratchPlaneCockOffset);
+            _scratchPlaneLookTarget.set(0, 1.25, -50).applyEuler(pMesh.rotation).add(pMesh.position);
+            camera.lookAt(_scratchPlaneLookTarget);
           } else {
             // Third-Person Chase Cam
-            const camBack = new THREE.Vector3(0, 4.5, 16).applyEuler(pMesh.rotation);
-            camera.position.copy(pMesh.position).add(camBack);
-            camera.lookAt(pMesh.position.clone().add(new THREE.Vector3(0, 1.5, 0)));
+            _scratchPlaneCamBack.set(0, 4.5, 16).applyEuler(pMesh.rotation);
+            camera.position.copy(pMesh.position).add(_scratchPlaneCamBack);
+            _scratchPlaneLookPos.copy(pMesh.position);
+            _scratchPlaneLookPos.y += 1.5;
+            camera.lookAt(_scratchPlaneLookPos);
           }
         }
       }
@@ -19572,11 +19714,11 @@
       // METRO MAGLEV TRAIN DYNAMICS & PERIMETER GUIDEWAY ANIMATION
       // ============================================================
       if (maglevTrainMesh && gameState.currentWorld === 'earth') {
-        const loopSegments = [
-          { p1: new THREE.Vector2(-180, -200), p2: new THREE.Vector2(180, -200), len: 360, angle: 0 },         // North
-          { p1: new THREE.Vector2(180, -200), p2: new THREE.Vector2(180, 180), len: 380, angle: -Math.PI / 2 }, // East
-          { p1: new THREE.Vector2(180, 180), p2: new THREE.Vector2(-180, 180), len: 360, angle: Math.PI },       // South
-          { p1: new THREE.Vector2(-180, 180), p2: new THREE.Vector2(-180, -200), len: 380, angle: Math.PI / 2 }  // West
+        const loopSegments = _staticTrainLoopSegments || [
+          { p1: { x: -180, y: -200 }, p2: { x: 180, y: -200 }, len: 360, angle: 0 },
+          { p1: { x: 180, y: -200 }, p2: { x: 180, y: 180 }, len: 380, angle: -Math.PI / 2 },
+          { p1: { x: 180, y: 180 }, p2: { x: -180, y: 180 }, len: 360, angle: Math.PI },
+          { p1: { x: -180, y: 180 }, p2: { x: -180, y: -200 }, len: 380, angle: Math.PI / 2 }
         ];
         const totalPerimeter = 1480;
         gameState.train.progress = (gameState.train.progress + gameState.train.speed * delta) % totalPerimeter;
@@ -19597,13 +19739,14 @@
         maglevTrainMesh.position.set(trainX, 8.2, trainZ);
         maglevTrainMesh.rotation.y = trainRotY;
 
-        // When player is riding the train
+        // When player is riding the train (Zero Allocations)
         if (gameState.inTrain) {
           player.pos.set(trainX, 9.6, trainZ);
           player.vel.set(0, 0, 0);
           if (camera) {
-            const trainCamBack = new THREE.Vector3(0, 2.5, 8).applyEuler(new THREE.Euler(0, trainRotY, 0));
-            camera.position.set(trainX + trainCamBack.x, 10.5, trainZ + trainCamBack.z);
+            _scratchTrainEuler.set(0, trainRotY, 0);
+            _scratchTrainCamBack.set(0, 2.5, 8).applyEuler(_scratchTrainEuler);
+            camera.position.set(trainX + _scratchTrainCamBack.x, 10.5, trainZ + _scratchTrainCamBack.z);
             camera.lookAt(trainX, 9.6, trainZ);
           }
           cyberAudio.playMaglevTrainSound();
@@ -19618,9 +19761,9 @@
       if (!gameState.inPlane && !gameState.inTrain) {
         if (gameState.isGliding) {
           player.vel.y = Math.max(-2.4, player.vel.y - 4.5 * delta);
-          const fwd = new THREE.Vector3(Math.sin(player.yaw), 0, Math.cos(player.yaw));
+          _scratchGlideFwd.set(Math.sin(player.yaw), 0, Math.cos(player.yaw));
           const gSpeed = (keys['ShiftLeft'] || keys['ShiftRight']) ? 26.0 : 16.0;
-          player.pos.add(fwd.multiplyScalar(gSpeed * delta));
+          player.pos.addScaledVector(_scratchGlideFwd, gSpeed * delta);
           if (playerHoloWings) {
             playerHoloWings.visible = true;
             playerHoloWings.rotation.z = Math.sin(now * 0.006) * 0.1;
@@ -19629,9 +19772,18 @@
           player.vel.y -= gameState.currentGravity * delta;
         }
 
-        player.pos.x += player.vel.x * delta;
-        player.pos.y += player.vel.y * delta;
-        player.pos.z += player.vel.z * delta;
+        // Multi-Substep Continuous Collision Detection (prevents wall tunneling at high speed or low FPS)
+        const speedSq = player.vel.x * player.vel.x + player.vel.z * player.vel.z;
+        const physSubSteps = (delta > 0.02 || speedSq > 100.0) ? 3 : (speedSq > 36.0 ? 2 : 1);
+        const subDelta = delta / physSubSteps;
+
+        for (let _subStep = 0; _subStep < physSubSteps; _subStep++) {
+          if (_subStep === 0) {
+            player.pos.y += player.vel.y * delta; // Y only once (gravity is frame-coherent)
+          }
+          player.pos.x += player.vel.x * subDelta;
+          player.pos.z += player.vel.z * subDelta;
+        }
 
         let floorY = gameState.isUnderground ? -21.0 : (gameState.currentWorld === 'space' ? 40.0 : 1.2);
 
@@ -19805,13 +19957,13 @@
           }
 
           camera.position.set(player.pos.x, player.pos.y + 1.6, player.pos.z);
-          const forward = new THREE.Vector3(
+          _scratchFpForward.set(
             -Math.sin(player.yaw) * Math.cos(player.pitch),
             Math.sin(player.pitch),
             -Math.cos(player.yaw) * Math.cos(player.pitch)
           );
-          const lookTarget = camera.position.clone().add(forward);
-          camera.lookAt(lookTarget);
+          _scratchFpLookTarget.copy(camera.position).add(_scratchFpForward);
+          camera.lookAt(_scratchFpLookTarget);
 
           // Weapon / Fist Sway & Natural Stride Bobbing
           const isMoving = player.vel.lengthSq() > 0.4;
@@ -19835,12 +19987,14 @@
 
           const fpBreatheY = Math.sin(now * 0.003) * 0.006;
           const fpBreatheX = Math.sin(now * 0.0015) * 0.003;
-          const targetPos = gameState.isAiming
-            ? new THREE.Vector3(0.0 + fpBreatheX * 0.4, -0.16 + fpBreatheY * 0.5, -0.38 + (gameState.recoilKick || 0))
-            : new THREE.Vector3(0.26 + bobX + fpBreatheX + (gameState.weaponSwayX || 0), -0.24 - bobY + fpBreatheY - (gameState.weaponSwayY || 0), -0.52 + (gameState.recoilKick || 0));
+          if (gameState.isAiming) {
+            _scratchFpTargetPos.set(0.0 + fpBreatheX * 0.4, -0.16 + fpBreatheY * 0.5, -0.38 + (gameState.recoilKick || 0));
+          } else {
+            _scratchFpTargetPos.set(0.26 + bobX + fpBreatheX + (gameState.weaponSwayX || 0), -0.24 - bobY + fpBreatheY - (gameState.weaponSwayY || 0), -0.52 + (gameState.recoilKick || 0));
+          }
 
           if (fpsViewModel && fpsViewModel.visible) {
-            fpsViewModel.position.lerp(targetPos, 0.25);
+            fpsViewModel.position.lerp(_scratchFpTargetPos, 0.25);
             fpsViewModel.rotation.x = (gameState.recoilKick || 0) * 0.8;
           }
 
@@ -20255,13 +20409,15 @@
           roverChassisMesh.rotation.z = THREE.MathUtils.lerp(roverChassisMesh.rotation.z, targetRoll, delta * 6.0);
         }
 
-        player.pos.copy(roverGroup.position).add(new THREE.Vector3(0, 1.8, 0));
+        player.pos.copy(roverGroup.position);
+        player.pos.y += 1.8;
 
-        // Smooth dynamic chase camera with speed lag
+        // Smooth dynamic chase camera with speed lag (Zero Allocations)
         const camDist = 7.8 + Math.abs(roverCurrentSpeed) * 0.08;
         const camHeight = 3.6 + Math.abs(roverCurrentSpeed) * 0.02;
-        const camOffset = new THREE.Vector3(0, camHeight, -camDist).applyAxisAngle(new THREE.Vector3(0, 1, 0), roverGroup.rotation.y);
-        camera.position.lerp(roverGroup.position.clone().add(camOffset), 0.35);
+        _scratchRoverCamOffset.set(0, camHeight, -camDist).applyAxisAngle(_scratchUpAxis, roverGroup.rotation.y);
+        _scratchRoverTargetPos.copy(roverGroup.position).add(_scratchRoverCamOffset);
+        camera.position.lerp(_scratchRoverTargetPos, 0.35);
         camera.lookAt(roverGroup.position.x, roverGroup.position.y + 1.2, roverGroup.position.z);
       }
 
@@ -20288,19 +20444,21 @@
           marsExocraftGroup.rotation.y += steerRate * delta;
         }
 
-        const moveDir = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), marsExocraftGroup.rotation.y);
-        marsExocraftGroup.position.add(moveDir.multiplyScalar(marsExocraftSpeed * delta));
+        _scratchExoMoveDir.set(0, 0, 1).applyAxisAngle(_scratchUpAxis, marsExocraftGroup.rotation.y);
+        marsExocraftGroup.position.addScaledVector(_scratchExoMoveDir, marsExocraftSpeed * delta);
 
         // Low-gravity terrain surface elevation
         const marsGroundY = 0.65 + Math.sin(marsExocraftGroup.position.x * 0.02) * 1.5 + Math.cos(marsExocraftGroup.position.z * 0.02) * 1.5;
         marsExocraftGroup.position.y = marsGroundY;
 
-        // Player locked in driver cockpit
-        player.pos.copy(marsExocraftGroup.position).add(new THREE.Vector3(0, 1.4, 0));
+        // Player locked in driver cockpit (Zero Allocations)
+        player.pos.copy(marsExocraftGroup.position);
+        player.pos.y += 1.4;
 
-        // Smooth chase camera behind exocraft
-        const camOffset = new THREE.Vector3(0, 3.8, -8.5).applyAxisAngle(new THREE.Vector3(0, 1, 0), marsExocraftGroup.rotation.y);
-        camera.position.lerp(marsExocraftGroup.position.clone().add(camOffset), 0.35);
+        // Smooth chase camera behind exocraft (Zero Allocations)
+        _scratchExoCamOffset.set(0, 3.8, -8.5).applyAxisAngle(_scratchUpAxis, marsExocraftGroup.rotation.y);
+        _scratchExoTargetPos.copy(marsExocraftGroup.position).add(_scratchExoCamOffset);
+        camera.position.lerp(_scratchExoTargetPos, 0.35);
         camera.lookAt(marsExocraftGroup.position.x, marsExocraftGroup.position.y + 1.2, marsExocraftGroup.position.z);
 
         // Mission Check: Martian Exocraft Canyon Jump (speed >= 75 km/h)
@@ -20491,7 +20649,10 @@
         for (let j = 0; j < zombies.length; j++) {
           const z = zombies[j];
           if (!z.alive) continue;
-          if (p.mesh.position.distanceTo(z.mesh.position.clone().add(new THREE.Vector3(0, 1.0, 0))) < 1.3) {
+          const zdx = p.mesh.position.x - z.mesh.position.x;
+          const zdy = p.mesh.position.y - (z.mesh.position.y + 1.0);
+          const zdz = p.mesh.position.z - z.mesh.position.z;
+          if ((zdx * zdx + zdy * zdy + zdz * zdz) < 1.69) {
             const isCrit = (p.damage >= 80) || (Math.random() < 0.25);
             const actualDamage = isCrit ? Math.round(p.damage * 1.5) : p.damage;
             z.health -= actualDamage;
@@ -20695,6 +20856,15 @@
       }
       if (window.HyperRealismEngine) {
         window.HyperRealismEngine.update(delta, now);
+      }
+
+      // Camera Shake Decay (consumed per frame for smooth rumble)
+      if (gameState.cameraShake && gameState.cameraShake > 0.001) {
+        const shakeAmp = gameState.cameraShake * 0.12;
+        camera.position.x += (Math.random() - 0.5) * shakeAmp;
+        camera.position.y += (Math.random() - 0.5) * shakeAmp * 0.6;
+        gameState.cameraShake *= 0.88; // Exponential decay
+        if (gameState.cameraShake < 0.005) gameState.cameraShake = 0;
       }
 
       try {
