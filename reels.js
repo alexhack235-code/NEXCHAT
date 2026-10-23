@@ -159,6 +159,8 @@ let currentProfilePics = [];
 let activeFeedMode = 'foryou'; // 'foryou' | 'following'
 let allLoadedReels = [];
 let bookmarkedReels = new Set(JSON.parse(localStorage.getItem('nex_bookmarked_reels') || '[]'));
+let likedReelsSet = new Set(JSON.parse(localStorage.getItem('camshot_liked_reels') || '[]'));
+let userReactionsMap = JSON.parse(localStorage.getItem('camshot_user_reactions') || '{}');
 let userTokenBalance = parseInt(localStorage.getItem('nex_user_tokens') || '2000', 10);
 let activeFilterShader = 'normal';
 let activeAiReel = null;
@@ -982,8 +984,9 @@ function renderReels(reelsList) {
   reelsFeed.innerHTML = '';
 
   reelsList.forEach((reel) => {
-    const isLiked = myUID && reel.likes && Array.isArray(reel.likes) && reel.likes.includes(myUID);
+    const isLiked = (myUID && reel.likes && Array.isArray(reel.likes) && reel.likes.includes(myUID)) || likedReelsSet.has(reel.id);
     const isBookmarked = bookmarkedReels.has(reel.id);
+    const activeReaction = userReactionsMap[reel.id] || null;
     const likeCount = reel.likesCount || (reel.likes ? reel.likes.length : 0);
     const commentCount = reel.commentsCount || 0;
     const shareCount = reel.sharesCount || 21000;
@@ -1194,13 +1197,13 @@ function renderReels(reelsList) {
 
         <!-- Sleek Bottom Inline Comment Bar -->
         <div class="reel-bottom-bar flex items-center gap-2">
-          <!-- Floating Quick Emoji Reactions Bar -->
+          <!-- Floating Quick Emoji Reactions Bar (Strict 1-Reaction Per User) -->
           <div class="reel-quick-reactions">
-            <button type="button" class="quick-react-btn" data-react="fire" data-icon="fa-fire" data-color="#f97316" title="Fire"><i class="fa-solid fa-fire" style="color:#f97316;"></i></button>
-            <button type="button" class="quick-react-btn" data-react="love" data-icon="fa-heart" data-color="#fe2c55" title="Love"><i class="fa-solid fa-heart" style="color:#fe2c55;"></i></button>
-            <button type="button" class="quick-react-btn" data-react="star" data-icon="fa-star" data-color="#facc15" title="Star"><i class="fa-solid fa-star" style="color:#facc15;"></i></button>
-            <button type="button" class="quick-react-btn" data-react="gem" data-icon="fa-gem" data-color="#67e8f9" title="Diamond"><i class="fa-solid fa-gem" style="color:#67e8f9;"></i></button>
-            <button type="button" class="quick-react-btn" data-react="rocket" data-icon="fa-rocket" data-color="#a78bfa" title="Rocket"><i class="fa-solid fa-rocket" style="color:#a78bfa;"></i></button>
+            <button type="button" class="quick-react-btn ${activeReaction === 'fire' ? 'active' : ''}" data-react="fire" data-icon="fa-fire" data-color="#f97316" title="Fire"><i class="fa-solid fa-fire" style="color:#f97316;"></i></button>
+            <button type="button" class="quick-react-btn ${activeReaction === 'love' ? 'active' : ''}" data-react="love" data-icon="fa-heart" data-color="#fe2c55" title="Love"><i class="fa-solid fa-heart" style="color:#fe2c55;"></i></button>
+            <button type="button" class="quick-react-btn ${activeReaction === 'star' ? 'active' : ''}" data-react="star" data-icon="fa-star" data-color="#facc15" title="Star"><i class="fa-solid fa-star" style="color:#facc15;"></i></button>
+            <button type="button" class="quick-react-btn ${activeReaction === 'gem' ? 'active' : ''}" data-react="gem" data-icon="fa-gem" data-color="#67e8f9" title="Diamond"><i class="fa-solid fa-gem" style="color:#67e8f9;"></i></button>
+            <button type="button" class="quick-react-btn ${activeReaction === 'rocket' ? 'active' : ''}" data-react="rocket" data-icon="fa-rocket" data-color="#a78bfa" title="Rocket"><i class="fa-solid fa-rocket" style="color:#a78bfa;"></i></button>
           </div>
 
           <div class="reel-inline-bar-pill flex-1 bg-white/10 hover:bg-white/15 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-white/10 transition-all">
@@ -1839,17 +1842,12 @@ function renderReels(reelsList) {
       });
     }
 
-    // Quick Floating Vector Reactions Cannon
+    // Quick Floating Vector Reactions Cannon (Strict 1-Reaction Per User with Toggle & Switch)
     card.querySelectorAll('.quick-react-btn').forEach((rBtn) => {
       rBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const reaction = {
-          icon: rBtn.getAttribute('data-icon') || 'fa-fire',
-          color: rBtn.getAttribute('data-color') || '#f97316',
-          label: rBtn.getAttribute('title') || 'Reaction'
-        };
-        const rect = rBtn.getBoundingClientRect();
-        spawnReactionCannon(reaction, rect);
+        const reactKey = rBtn.getAttribute('data-react');
+        handleReelReactionToggle(reel.id, reactKey, rBtn, card);
       });
     });
 
@@ -2208,39 +2206,117 @@ function spawnReactionCannon(reaction, rect) {
 }
 
 
-// Like Toggle Logic
+// Quick Vector Reactions Toggle Logic (Strictly 1 Reaction Per User Per Reel)
+function handleReelReactionToggle(reelId, reactKey, rBtn, card) {
+  if (!reelId || !reactKey) return;
+  const currentActive = userReactionsMap[reelId];
+  const allBtns = card ? card.querySelectorAll('.quick-react-btn') : document.querySelectorAll(`.reel-card[data-reel-id="${reelId}"] .quick-react-btn`);
+
+  if (currentActive === reactKey) {
+    // 1. TOGGLE OFF: User tapped their current active reaction -> remove it
+    delete userReactionsMap[reelId];
+    localStorage.setItem('camshot_user_reactions', JSON.stringify(userReactionsMap));
+    allBtns.forEach(b => b.classList.remove('active'));
+    showToast(`${rBtn.getAttribute('title') || reactKey} reaction removed`);
+    playLuxuryPopSound();
+  } else {
+    // 2. SWITCH OR ADD: User selected a new reaction -> set strictly to this one
+    userReactionsMap[reelId] = reactKey;
+    localStorage.setItem('camshot_user_reactions', JSON.stringify(userReactionsMap));
+    allBtns.forEach(b => {
+      if (b.getAttribute('data-react') === reactKey) {
+        b.classList.add('active');
+      } else {
+        b.classList.remove('active');
+      }
+    });
+
+    const reaction = {
+      icon: rBtn.getAttribute('data-icon') || 'fa-fire',
+      color: rBtn.getAttribute('data-color') || '#f97316',
+      label: rBtn.getAttribute('title') || 'Reaction'
+    };
+    const rect = rBtn.getBoundingClientRect();
+    spawnReactionCannon(reaction, rect);
+    showToast(currentActive ? `Switched reaction to ${reaction.label}` : `${reaction.label} reaction recorded`);
+  }
+}
+window.handleReelReactionToggle = handleReelReactionToggle;
+
+// Like Toggle Logic (Strict 1-Vote Per User with Mutex Lock & In-Memory Sync)
 async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
-  if (!myUID) {
+  const currentUid = (typeof window !== 'undefined' && window.myUID) ? window.myUID : (myUID || (auth && auth.currentUser ? auth.currentUser.uid : null));
+  if (!currentUid) {
     showToast('Log in to like CamShots');
     return;
   }
 
-  const reelRef = doc(db, 'reels', reelId);
-  const heartIcon = likeBtn.querySelector('i') || likeBtn;
-  const currentlyLiked = heartIcon.classList.contains('text-[#fe2c55]');
+  // Mutex lock to prevent async race condition / rapid clicking spam
+  if (likeBtn._isLiking) return;
+  likeBtn._isLiking = true;
 
-  if (currentlyLiked && !forceLike) {
-    heartIcon.classList.remove('text-[#fe2c55]');
-    heartIcon.classList.add('text-white');
-    const current = Math.max(0, parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '1', 10) - 1);
-    countSpan.textContent = formatNumber(current);
-    await updateDoc(reelRef, {
-      likes: arrayRemove(myUID),
-      likesCount: increment(-1),
-    }).catch(err => console.warn('Like remove err:', err));
-  } else if (!currentlyLiked) {
-    heartIcon.classList.remove('text-white');
-    heartIcon.classList.add('text-[#fe2c55]');
-    heartIcon.classList.add('scale-125');
-    setTimeout(() => heartIcon.classList.remove('scale-125'), 200);
-    const current = parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '0', 10) + 1;
-    countSpan.textContent = formatNumber(current);
-    await updateDoc(reelRef, {
-      likes: arrayUnion(myUID),
-      likesCount: increment(1),
-    }).catch(err => console.warn('Like add err:', err));
+  try {
+    const reelRef = doc(db, 'reels', reelId);
+    const heartIcon = likeBtn.querySelector('i') || likeBtn;
+    const currentlyLiked = heartIcon.classList.contains('text-[#fe2c55]') || likedReelsSet.has(reelId);
+
+    // Synchronize in-memory reel object in allLoadedReels
+    const reelObj = Array.isArray(allLoadedReels) ? allLoadedReels.find(r => r.id === reelId) : null;
+
+    if (currentlyLiked && !forceLike) {
+      // UNLIKE
+      heartIcon.classList.remove('text-[#fe2c55]');
+      heartIcon.classList.add('text-white');
+      likedReelsSet.delete(reelId);
+      localStorage.setItem('camshot_liked_reels', JSON.stringify([...likedReelsSet]));
+
+      const current = Math.max(0, parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '1', 10) - 1);
+      countSpan.textContent = formatNumber(current);
+
+      if (reelObj) {
+        if (Array.isArray(reelObj.likes)) {
+          reelObj.likes = reelObj.likes.filter(u => u !== currentUid);
+        }
+        reelObj.likesCount = Math.max(0, (reelObj.likesCount || 1) - 1);
+      }
+
+      if (currentUid && !currentUid.startsWith('guest_')) {
+        await updateDoc(reelRef, {
+          likes: arrayRemove(currentUid),
+          likesCount: increment(-1),
+        }).catch(err => console.warn('Like remove err:', err));
+      }
+    } else if (!currentlyLiked) {
+      // LIKE
+      heartIcon.classList.remove('text-white');
+      heartIcon.classList.add('text-[#fe2c55]');
+      heartIcon.classList.add('scale-125');
+      setTimeout(() => heartIcon.classList.remove('scale-125'), 200);
+
+      likedReelsSet.add(reelId);
+      localStorage.setItem('camshot_liked_reels', JSON.stringify([...likedReelsSet]));
+
+      const current = parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '0', 10) + 1;
+      countSpan.textContent = formatNumber(current);
+
+      if (reelObj) {
+        if (!Array.isArray(reelObj.likes)) reelObj.likes = [];
+        if (!reelObj.likes.includes(currentUid)) reelObj.likes.push(currentUid);
+        reelObj.likesCount = (reelObj.likesCount || 0) + 1;
+      }
+
+      if (currentUid && !currentUid.startsWith('guest_')) {
+        await updateDoc(reelRef, {
+          likes: arrayUnion(currentUid),
+          likesCount: increment(1),
+        }).catch(err => console.warn('Like add err:', err));
+      }
+    }
+  } finally {
+    setTimeout(() => { likeBtn._isLiking = false; }, 250);
   }
 }
+window.handleLikeToggle = handleLikeToggle;
 
 // ══════════════════════════════════════════════════
 // FEATURE B: BOOKMARKS / SAVED VAULT LOGIC
