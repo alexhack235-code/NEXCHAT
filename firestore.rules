@@ -238,6 +238,22 @@ service cloud.firestore {
     //   - callerUid / senderId: string (optional)
     //   - recipientUid / receiverId: string (optional)
     //   - timestamp: timestamp/number (optional)
+    //
+    // Collection: system_settings
+    // Document ID: {settingId} ('global_lockdown', 'reels_state', 'chat_state')
+    // Fields:
+    //   - active / readOnly: bool (optional)
+    //   - activatedAt / updatedAt: string/timestamp (optional)
+    //   - activatedBy / updatedBy: string (optional)
+    //
+    // Collection: admin_audit_logs
+    // Document ID: {logId} (Auto-generated)
+    // Fields:
+    //   - action: string ('FULFILLMENT_TOKEN_CREDIT', 'FULFILLMENT_BADGE_GRANT', etc.)
+    //   - targetUid: string (target user UID)
+    //   - targetUsername: string (target username)
+    //   - amount / tier / certHash / reason / paymentRef / operator: string or number
+    //   - timestamp: timestamp/string
     // ===============================================================
 
     // ===============================================================
@@ -257,9 +273,9 @@ service cloud.firestore {
     // 3. Super Admin Verification (Bootstrap email, token claim, or admins collection)
     function isSuperAdmin() {
       return isAuthenticated() && (
-        (request.auth.token.email == 'demonalexander526@gmail.com' && request.auth.token.email_verified == true) ||
+        (request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com']) ||
         request.auth.token.admin == true ||
-        request.auth.uid == 'demonalexander526' ||
+        request.auth.uid in ['demonalexander526', 'alexhack235'] ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
@@ -1537,6 +1553,12 @@ service cloud.firestore {
                       isValidIpList('knownIps', 4);
     }
 
+    // System Settings (Global Lockdown, Reels State, Chat State toggled from Admin Dashboard)
+    match /system_settings/{settingId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
     match /adminLogs/{logId} {
       allow read, write: if isSuperAdmin() &&
                             isValidOptionalString('ipAddress', 0, 45) &&
@@ -1551,6 +1573,11 @@ service cloud.firestore {
                             isValidOptionalString('lastIp', 0, 45) &&
                             isValidIpList('ipAddresses', 4) &&
                             isValidIpList('verifiedIps', 4);
+    }
+
+    // Admin Audit Logs (Fulfillment actions, badge grants, token credits recorded by Admin Dashboard)
+    match /admin_audit_logs/{logId} {
+      allow read, write: if isSuperAdmin();
     }
 
     match /adminSecurityLogs/{logId} {

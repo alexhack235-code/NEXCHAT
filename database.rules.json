@@ -3,7 +3,7 @@
     "users": {
       "$uid": {
         ".read": "auth != null",
-        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'demonalexander526@gmail.com')"
+        ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'demonalexander526@gmail.com' || auth.token.email === 'alexhack235@gmail.com')"
       }
     },
     "presence": {
