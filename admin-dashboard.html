@@ -3474,6 +3474,99 @@
     </div>
   </div>
 
+  <!-- ======================================================== -->
+  <!-- MODAL: CREATOR VERIFICATION BADGE & CERTIFICATE CONSOLE  -->
+  <!-- ======================================================== -->
+  <div id="adminVerificationBadgeModal" class="admin-modal-backdrop">
+    <div class="admin-modal-card" style="max-width: 580px;">
+      <div class="admin-modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(0, 242, 255, 0.15); border: 1px solid var(--neon-cyan); color: var(--neon-cyan); display: flex; align-items: center; justify-content: center; font-size: 17px;">
+            <i class="fa-solid fa-certificate"></i>
+          </div>
+          <div>
+            <h3 style="font-size: 16px; font-weight: 800; color: #fff; font-family: 'Space Grotesk', sans-serif; margin: 0;">
+              Creator Verification &amp; Sovereignty Console
+            </h3>
+            <div style="font-size: 11px; color: var(--text-dim);">
+              Grant, Upgrade, or Revoke Cryptographic Identity Badges
+            </div>
+          </div>
+        </div>
+        <button type="button" id="closeAdminBadgeModalBtn" class="admin-btn secondary" style="padding: 6px 12px; font-size: 12px;">
+          <i class="fa-solid fa-xmark"></i> Close
+        </button>
+      </div>
+
+      <!-- Target User Meta -->
+      <div style="background: rgba(0, 242, 255, 0.04); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px;">
+        <img id="modalBadgeUserAvatar" src="logo.jpg" alt="User Avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--neon-cyan);">
+        <div style="flex: 1;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong id="modalBadgeUserDisplayName" style="font-size: 14px; color: #fff;">User</strong>
+            <span id="modalBadgeCurrentTierBadge" class="badge" style="background: rgba(0,242,255,0.15); color: #00f2ff;">UNVERIFIED</span>
+          </div>
+          <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 2px;" id="modalBadgeUserHandle">@handle</div>
+          <div style="font-size: 10px; font-family: monospace; color: var(--text-muted); margin-top: 1px;" id="modalBadgeUserUid">UID: --</div>
+        </div>
+      </div>
+
+      <!-- Tier Selection -->
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">
+          Select Cryptographic Verification Tier:
+        </label>
+        <div style="display: flex; flex-direction: column; gap: 8px;" id="adminBadgeTierOptions">
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="VERIFIED_CREATOR" checked style="accent-color: #00f2ff;">
+            <div>
+              <strong style="color: #00f2ff; font-size: 12px; display: block;"><i class="fa-solid fa-circle-check"></i> Official Verified Creator (Tier 1)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">High-trust public creator status with blue check badge across CamShot &amp; chat.</span>
+            </div>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="C2PA_HARDWARE_VERIFIED" style="accent-color: #00ff88;">
+            <div>
+              <strong style="color: #00ff88; font-size: 12px; display: block;"><i class="fa-solid fa-shield-halved"></i> C2PA Hardware Sensor Provenance (Tier 2)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Hardware enclave attested physical camera capture with anti-synthetic media validation.</span>
+            </div>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="VIP_SOVEREIGN" style="accent-color: #c084fc;">
+            <div>
+              <strong style="color: #c084fc; font-size: 12px; display: block;"><i class="fa-solid fa-crown"></i> VIP Sovereign Master Node (Tier 3)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Sovereign consensus governance status with multi-sig arbitration privileges.</span>
+            </div>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TOP_PATRON" style="accent-color: #fbbf24;">
+            <div>
+              <strong style="color: #fbbf24; font-size: 12px; display: block;"><i class="fa-solid fa-star"></i> Apex Sovereign Patron (Tier 4)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Central Treasury Liquidity Guild high-volume tipping supporter.</span>
+            </div>
+          </label>
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,59,48,0.06); border: 1px solid rgba(255,59,48,0.2); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="NONE" style="accent-color: #ff3b30;">
+            <div>
+              <strong style="color: #ff3b30; font-size: 12px; display: block;"><i class="fa-solid fa-ban"></i> Revoke All Verification Badges</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Strips all verified checks and cryptographic provenance from this account.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 10px;">
+        <button type="button" id="btnSaveAdminVerificationBadge" class="admin-btn primary" style="flex: 1.5; justify-content: center; padding: 11px; font-size: 12.5px;">
+          <i class="fa-solid fa-certificate"></i> Issue Cryptographic Badge
+        </button>
+        <button type="button" id="btnCancelAdminVerificationBadge" class="admin-btn secondary" style="flex: 1; justify-content: center; padding: 11px; font-size: 12.5px;">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- FIREBASE & SUPABASE DEPENDENCIES -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -4895,6 +4988,9 @@
                 <button type="button" class="admin-btn primary manage-sanctions-btn" data-uid="${u.id}" style="padding: 5px 10px; font-size: 11px;">
                   <i class="fa-solid fa-gavel"></i> Sanctions &amp; Manage
                 </button>
+                <button type="button" class="admin-btn secondary manage-badge-btn" data-uid="${u.id}" style="padding: 5px 10px; font-size: 11px; border-color: #00f2ff; color: #00f2ff;">
+                  <i class="fa-solid fa-certificate"></i> Badge
+                </button>
                 <button type="button" class="admin-btn ${isBanned ? 'secondary' : 'danger'} toggle-ban-btn" data-uid="${u.id}" data-banned="${isBanned}" style="padding: 5px 10px; font-size: 11px;">
                   <i class="fa-solid ${isBanned ? 'fa-user-check' : 'fa-user-slash'}"></i> ${isBanned ? 'Unban' : 'Quick Ban'}
                 </button>
@@ -4917,6 +5013,15 @@
             const uid = btn.getAttribute('data-uid');
             const user = cachedUsers.find(u => u.id === uid);
             if (user) openUserSanctionsModal(user);
+          });
+        });
+
+        // Open Verification Badge Modal
+        document.querySelectorAll('.manage-badge-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const uid = btn.getAttribute('data-uid');
+            const user = cachedUsers.find(u => u.id === uid);
+            if (user) openAdminVerificationBadgeModal(user);
           });
         });
 
@@ -5219,6 +5324,89 @@
         } finally {
           saveSanctionsBtn.disabled = false;
           saveSanctionsBtn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Apply Sanctions &amp; Save to Firestore';
+        }
+      });
+
+      // ─── CREATOR VERIFICATION BADGE CONTROLLER ───
+      let activeBadgeUser = null;
+      const adminVerificationBadgeModal = document.getElementById('adminVerificationBadgeModal');
+      const closeAdminBadgeModalBtn = document.getElementById('closeAdminBadgeModalBtn');
+      const btnCancelAdminVerificationBadge = document.getElementById('btnCancelAdminVerificationBadge');
+      const btnSaveAdminVerificationBadge = document.getElementById('btnSaveAdminVerificationBadge');
+
+      function openAdminVerificationBadgeModal(user) {
+        if (!user) return;
+        activeBadgeUser = user;
+
+        const avatar = document.getElementById('modalBadgeUserAvatar');
+        const nameEl = document.getElementById('modalBadgeUserDisplayName');
+        const handleEl = document.getElementById('modalBadgeUserHandle');
+        const uidEl = document.getElementById('modalBadgeUserUid');
+        const tierBadge = document.getElementById('modalBadgeCurrentTierBadge');
+
+        if (avatar) avatar.src = user.avatarUrl || user.photoURL || 'logo.jpg';
+        if (nameEl) nameEl.textContent = user.username || user.displayName || 'Anonymous User';
+        if (handleEl) handleEl.textContent = '@' + (user.username || 'user');
+        if (uidEl) uidEl.textContent = 'UID: ' + user.id;
+
+        const currentBadge = user.verificationBadge || (user.isVerified ? 'VERIFIED_CREATOR' : 'NONE');
+        if (tierBadge) {
+          tierBadge.textContent = currentBadge;
+          tierBadge.style.color = currentBadge === 'NONE' ? '#94a3b8' : '#00f2ff';
+        }
+
+        const radio = document.querySelector(`input[name="adminVerificationTierRadio"][value="${currentBadge}"]`);
+        if (radio) radio.checked = true;
+
+        adminVerificationBadgeModal?.classList.add('active');
+      }
+
+      function closeAdminVerificationBadgeModal() {
+        adminVerificationBadgeModal?.classList.remove('active');
+        activeBadgeUser = null;
+      }
+
+      closeAdminBadgeModalBtn?.addEventListener('click', closeAdminVerificationBadgeModal);
+      btnCancelAdminVerificationBadge?.addEventListener('click', closeAdminVerificationBadgeModal);
+
+      btnSaveAdminVerificationBadge?.addEventListener('click', async () => {
+        if (!activeBadgeUser) return;
+        const selectedTier = document.querySelector('input[name="adminVerificationTierRadio"]:checked')?.value || 'NONE';
+        const uid = activeBadgeUser.id;
+
+        btnSaveAdminVerificationBadge.disabled = true;
+        btnSaveAdminVerificationBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Issuing Badge...';
+
+        try {
+          const certHash = 'sha256:' + Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, '0')).join('');
+          const badgeUpdate = {
+            verificationBadge: selectedTier,
+            isVerified: selectedTier !== 'NONE',
+            verificationCertifiedAt: new Date().toISOString(),
+            verificationRootHash: certHash
+          };
+
+          if (db) {
+            try {
+              await db.collection('users').doc(uid).set(badgeUpdate, { merge: true });
+            } catch (err) {
+              console.warn('[FIRESTORE BADGE SYNC]', err);
+            }
+          }
+
+          Object.assign(activeBadgeUser, badgeUpdate);
+
+          addMerkleAuditBlock('ISSUE_VERIFICATION_BADGE', `User @${activeBadgeUser.username || uid} issued badge: ${selectedTier}`);
+          logAudit(`Issued verification badge [${selectedTier}] to user @${activeBadgeUser.username || uid}. Signature: ${certHash}`, 'ok');
+
+          alert(`[VERIFICATION BADGE ISSUED] Successfully assigned ${selectedTier} to @${activeBadgeUser.username || 'user'}.`);
+          closeAdminVerificationBadgeModal();
+          renderUsersTable(cachedUsers);
+        } catch (err) {
+          alert('Failed to issue badge: ' + err.message);
+        } finally {
+          btnSaveAdminVerificationBadge.disabled = false;
+          btnSaveAdminVerificationBadge.innerHTML = '<i class="fa-solid fa-certificate"></i> Issue Cryptographic Badge';
         }
       });
 

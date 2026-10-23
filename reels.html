@@ -58,6 +58,12 @@
       <button id="globalSoundToggle" class="reels-header-icon-btn" title="Toggle Sound">
         <i class="fa-solid fa-volume-xmark"></i>
       </button>
+      <button id="openBeatSyncBtn" class="reels-header-icon-btn" title="AI Auto-Beat Sync &amp; Soundwave Trimmer" onclick="if(window.NexReelsQuantum) window.NexReelsQuantum.beatSync.openBeatSyncModal();">
+        <i class="fa-solid fa-wave-square" style="color: #00ff88;"></i>
+      </button>
+      <button id="openVoiceoverStudioBtn" class="reels-header-icon-btn" title="Multi-Track Audio &amp; Voiceover DSP Mixer" onclick="if(window.NexReelsQuantum) window.NexReelsQuantum.voiceover.openStudio();">
+        <i class="fa-solid fa-sliders" style="color: #c084fc;"></i>
+      </button>
       <button id="reelsExtHubBtn" class="reels-header-icon-btn extensions-trigger" title="NEX Ecosystem Extensions (Vercel Hub)">
         <i class="fa-solid fa-cubes-stacked"></i>
       </button>
@@ -1346,5 +1352,6 @@
   <script src="./src/js/extension-consent-hub.js"></script>
   <script src="./src/js/reels-advanced-suite.js"></script>
   <script src="./src/js/nextgen-eight-suite.js"></script>
+  <script src="./src/js/reels-quantum-suite.js"></script>
 </body>
 </html>

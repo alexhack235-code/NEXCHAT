@@ -1072,6 +1072,22 @@ function renderReels(reelsList) {
             <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
           </div>
 
+          <!-- Duet Reaction -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="reel-quantum-duet-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Duet with Creator">
+              <i class="fa-solid fa-people-arrows text-[22px] text-[#00f2ff] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="text-[10px] font-bold text-[#00f2ff] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Duet</span>
+          </div>
+
+          <!-- Stitch 5s -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="reel-quantum-stitch-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Stitch 5-Second Clip">
+              <i class="fa-solid fa-scissors text-[22px] text-[#ff3366] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="text-[10px] font-bold text-[#ff3366] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Stitch</span>
+          </div>
+
           <!-- Snapshot Clean Frame Grabber -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
             <button type="button" class="snapshot-btn text-white transition-transform active:scale-125 focus:outline-none" title="Capture Clean Snapshot (Save Frame)">
@@ -1143,9 +1159,9 @@ function renderReels(reelsList) {
             <span class="reel-creator-handle font-bold text-[14.5px] tracking-wide text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)] hover:underline cursor-pointer" data-author="${escapeHtml(authorHandle)}" title="View @${escapeHtml(authorHandle)} Profile">
               @${escapeHtml(authorHandle)}
             </span>
-            <span class="reel-verified-badge" title="Verified Creator"><i class="fa-solid fa-circle-check"></i></span>
+            <span class="reel-verified-badge" data-handle="${escapeHtml(authorHandle)}" data-tier="VERIFIED_CREATOR" title="Official Verified Creator Certificate" style="cursor: pointer;"><i class="fa-solid fa-circle-check" style="color: #00f2ff;"></i></span>
             ${(reel.c2paManifest || reel.provenanceStatus === 'C2PA_VERIFIED_AUTHENTIC') ? `
-            <span class="reel-c2pa-badge" title="C2PA Authenticity Provenance Verified: Hardware Cryptographically Signed" style="background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; color: #00ff88; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-left: 4px; display: inline-flex; align-items: center; gap: 3px;">
+            <span class="reel-c2pa-badge" data-handle="${escapeHtml(authorHandle)}" data-tier="C2PA_HARDWARE_VERIFIED" title="C2PA Authenticity Provenance Verified: Hardware Cryptographically Signed" style="background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; color: #00ff88; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-left: 4px; display: inline-flex; align-items: center; gap: 3px; cursor: pointer;">
               <i class="fa-solid fa-shield-halved"></i> C2PA
             </span>` : ''}
             <button type="button" class="reel-follow-pill ${isFollowing ? 'following' : ''}" data-author="${escapeHtml(authorHandle)}" title="Follow creator">
@@ -1849,6 +1865,28 @@ function renderReels(reelsList) {
         }
       }
     });
+
+    // Duet Reaction Studio Trigger
+    const duetBtn = card.querySelector('.reel-quantum-duet-btn');
+    if (duetBtn) {
+      duetBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.NexReelsQuantum && window.NexReelsQuantum.duetStitch) {
+          window.NexReelsQuantum.duetStitch.openDuetStudio(reel);
+        }
+      });
+    }
+
+    // Stitch 5s Tool Trigger
+    const stitchBtn = card.querySelector('.reel-quantum-stitch-btn');
+    if (stitchBtn) {
+      stitchBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.NexReelsQuantum && window.NexReelsQuantum.duetStitch) {
+          window.NexReelsQuantum.duetStitch.openStitchStudio(reel);
+        }
+      });
+    }
 
     // Snapshot Clean Frame Grabber
     const snapBtn = card.querySelector('.snapshot-btn');
