@@ -101,7 +101,7 @@
           <button id="reels-btn-header" class="header-icon-btn" title="CamShot" onclick="window.location.href='reels.html'"><i class="fa-solid fa-clapperboard"></i></button>
           <button id="extensions-btn-header" class="header-icon-btn extensions-trigger" title="NEX Ecosystem Extensions (Vercel Hub)"><i class="fa-solid fa-cubes-stacked"></i><span class="extension-pulse-dot"></span></button>
           <button id="installHeaderBtn" class="header-icon-btn" title="Install NEXCHAT"><i class="fa-solid fa-download"></i></button>
-          <button id="gaming-btn-header" class="header-icon-btn" title="Gaming Hub &mdash; GET EARLY ACCESS TO Astro: Shift Beyond Earth" onclick="window.location.href='gaminghub.html'"><i class="fa-solid fa-gamepad"></i></button>
+          <button id="gaming-btn-header" class="header-icon-btn" title="Gaming Hub // Arcade Matrix" onclick="window.location.href='gaminghub.html'"><i class="fa-solid fa-gamepad"></i></button>
           <button id="shop-btn-header" class="header-icon-btn" title="Buy Tokens"
             onclick="window.location.href='cart.html'"><i class="fa-solid fa-cart-shopping"></i></button>
           <button id="search-btn-header" class="header-icon-btn search-btn-header" title="Search">
@@ -150,6 +150,9 @@
       <!-- Terminal Status HUD Header -->
       <div class="status-top-appbar terminal-status-appbar">
         <div class="terminal-status-header-brand">
+          <button type="button" id="statusBackBtn" class="terminal-back-btn" onclick="if(window.showChatListView) window.showChatListView(); else window.handleNavigation('chats');" title="Back to Chats">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
           <div class="terminal-status-brand-line">
             <span class="terminal-prompt-prefix">&gt;</span>
             <h2 class="status-appbar-title terminal-hud-title">STATUS_VAULT<span class="term-cursor-blink">_</span></h2>
@@ -2458,7 +2461,7 @@
         <span class="mobile-menu-badge" id="mobileTokenBadge">0</span>
       </button>
       <button type="button" class="mobile-menu-item" onclick="window.location.href='gaminghub.html'">
-        <i class="fa-solid fa-gamepad"></i> <span>Astro: Shift Beyond Earth</span>
+        <i class="fa-solid fa-gamepad"></i> <span>Cyber Gaming Arena</span>
       </button>
       <button type="button" class="mobile-menu-item" onclick="window.open('terminal.html','_blank')">
         <i class="fa-solid fa-terminal"></i> <span>Hacker Terminal</span>
@@ -2556,7 +2559,7 @@
           </button>
           <button type="button" class="sheet-grid-item" onclick="window.location.href='gaminghub.html'">
             <div class="sheet-icon-box gaming-gradient"><i class="fa-solid fa-gamepad"></i></div>
-            <span>AstroShift: Beyond Earth</span>
+            <span>Cyber Gaming Hub</span>
           </button>
           <button type="button" class="sheet-grid-item" onclick="window.open('terminal.html','_blank')">
             <div class="sheet-icon-box terminal-gradient"><i class="fa-solid fa-terminal"></i></div>
@@ -2661,9 +2664,9 @@
         <i class="fa-solid fa-shop"></i>
         <span class="nav-label">Market</span>
       </button>
-      <button id="nav-games" class="nav-item desktop-only-nav" data-nav="games" title="AstroShift: Beyond Earth">
+      <button id="nav-games" class="nav-item desktop-only-nav" data-nav="games" title="Cyber Arcade">
         <i class="fa-solid fa-gamepad"></i>
-        <span class="nav-label">AstroShift</span>
+        <span class="nav-label">Arcade</span>
       </button>
       <button id="nav-terminal" class="nav-item desktop-only-nav" data-nav="terminal" title="Terminal">
         <i class="fa-solid fa-terminal"></i>
@@ -3648,13 +3651,13 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
             </div>
           </div>
 
-          <div class="space-room-card" data-room-id="room-gaming" data-title="AstroShift: Beyond Earth Space">
+          <div class="space-room-card" data-room-id="room-gaming" data-title="Cyber Odyssey Arena Space">
             <div class="room-card-header">
               <span class="room-pill-status live"><i class="fa-solid fa-circle"></i> LIVE</span>
               <span class="room-pill-listeners"><i class="fa-solid fa-headphones"></i> 210</span>
             </div>
-            <h4 class="room-card-title">AstroShift: Beyond Earth</h4>
-            <p class="room-card-desc">High-speed orbital flight, deep space physics, and planetary tactical combat.</p>
+            <h4 class="room-card-title">Cyber Odyssey Arena</h4>
+            <p class="room-card-desc">High-speed tactical flight, neural arena physics, and team multiplayer matrix.</p>
             <div class="room-card-footer">
               <span class="room-host-tag"><i class="fa-solid fa-gamepad"></i> Nova</span>
               <button type="button" class="join-space-btn" data-room="room-gaming">TUNE IN</button>
@@ -4030,9 +4033,44 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <div class="canvas-board-wrap grid-bg">
         <canvas id="nexTacticalCanvas"></canvas>
       </div>
-      <div class="nex-canvas-footer">
+      <div class="nex-canvas-footer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
         <span style="font-size: 12px; color: #64748b;"><i class="fa-solid fa-shield-halved" style="color: #00f3ff;"></i> Zero-loss cryptographic vector snapshot</span>
-        <button type="button" id="canvasSendToChatBtn" class="canvas-send-btn"><i class="fa-solid fa-paper-plane"></i> Send to Chat</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" id="canvasDownloadBtn" class="canvas-tool-btn" title="Download PNG"><i class="fa-solid fa-download"></i> Save</button>
+          <button type="button" id="canvasForwardBtn" class="canvas-tool-btn" style="background: rgba(0, 243, 255, 0.15); border-color: #00f3ff; color: #00f3ff;" title="Forward Whiteboard to Contacts or Groups"><i class="fa-solid fa-share-nodes"></i> Forward</button>
+          <button type="button" id="canvasSendToChatBtn" class="canvas-send-btn"><i class="fa-solid fa-paper-plane"></i> Send to Chat</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEX-CANVAS Tactical Forward Modal -->
+  <div id="nexCanvasForwardModal" class="nex-canvas-modal" style="display: none; z-index: 10005;" aria-hidden="true">
+    <div class="more-sheet-backdrop" id="closeCanvasForwardBackdrop"></div>
+    <div class="nex-canvas-container" style="max-width: 500px; padding: 0;">
+      <div class="nex-canvas-header">
+        <div class="nex-canvas-title"><i class="fa-solid fa-share-nodes"></i> Forward Whiteboard Snapshot</div>
+        <button type="button" class="close-sheet-btn" id="closeCanvasForwardBtn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div style="padding: 16px 20px;">
+        <div style="position: relative; margin-bottom: 12px;">
+          <input type="text" id="canvasForwardSearchInput" placeholder="Search contacts or groups..." style="width: 100%; padding: 10px 14px 10px 36px; background: rgba(255,255,255,0.06); border: 1px solid rgba(0,243,255,0.25); border-radius: 8px; color: #fff; font-size: 13px; font-family: monospace;" />
+          <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; top: 12px; color: #64748b; font-size: 13px;"></i>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <span style="font-size: 11px; font-family: monospace; color: #94a3b8; text-transform: uppercase;">SELECT DESTINATION CHATS</span>
+          <button type="button" id="canvasSelectAllTargetsBtn" style="background: transparent; border: none; color: #00f3ff; font-size: 11px; font-family: monospace; cursor: pointer;">SELECT ALL</button>
+        </div>
+        <div id="canvasForwardTargetList" class="contact-scroll-box" style="max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 4px 0;">
+          <!-- Dynamically populated from active contacts and groups -->
+        </div>
+      </div>
+      <div class="nex-canvas-footer" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px;">
+        <button type="button" id="canvasCopyDataUrlBtn" class="canvas-tool-btn" title="Copy Cryptographic Image Base64"><i class="fa-solid fa-copy"></i> Copy</button>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" id="cancelCanvasForwardBtn" class="canvas-tool-btn">Cancel</button>
+          <button type="button" id="confirmCanvasForwardBtn" class="canvas-send-btn"><i class="fa-solid fa-paper-plane"></i> Forward Selected</button>
+        </div>
       </div>
     </div>
   </div>

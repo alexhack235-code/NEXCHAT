@@ -342,25 +342,41 @@ html, body {
   margin-left: 2px;
 }
 
-/* Header Right - Actions cluster */
+/* Header Right - Actions cluster with smooth horizontal scroll and zero-drift alignment */
 .header-right-scroll {
   display: flex;
   align-items: center;
   flex: 1 1 auto;
   min-width: 0;
-  justify-content: flex-end;
   overflow-x: auto;
-  scrollbar-width: none;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 243, 255, 0.35) transparent;
+  scroll-behavior: smooth;
+  padding: 4px 6px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .header-right-scroll::-webkit-scrollbar {
-  display: none;
+  height: 3px;
+  display: block;
+}
+
+.header-right-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+
+.header-right-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(0, 243, 255, 0.6), rgba(0, 255, 102, 0.6));
+  border-radius: 4px;
 }
 
 .header-right {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .header-icon-btn {
@@ -4134,8 +4150,45 @@ html, body {
               linear-gradient(180deg, #0A0E13 0%, #06090D 100%);
 }
 
-.app[data-active-section="updates"] > .top-header {
+.app[data-active-section="updates"] > .top-header,
+.app[data-active-section="status"] > .top-header {
   display: none;
+}
+
+.app[data-active-section="updates"] .chat-main,
+.app[data-active-section="status"] .chat-main,
+.app[data-active-section="groups"] .chat-main,
+.app[data-active-section="communities"] .chat-main,
+.app[data-active-section="announcements"] .chat-main,
+.app[data-active-section="calls"] .chat-main {
+  display: none !important;
+}
+
+.terminal-status-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.terminal-back-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  color: #00FF88;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.terminal-back-btn:hover {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: #00FF88;
+  transform: translateX(-2px);
 }
 
 /* ─── Top Terminal Status AppBar ─── */
@@ -8445,3 +8498,17 @@ body.chat-size-extra-large .message-bubble {
 }
 
 /* Secondary features, interactive modules, and modal suites are modularized into chat2.css */
+
+/* Hide unstyled chatUserProfile in message-input-area to prevent avatar from blowing up */
+.chat-user-profile {
+  display: none !important;
+}
+
+.chat-user-avatar {
+  width: 32px !important;
+  height: 32px !important;
+  max-width: 32px !important;
+  max-height: 32px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}

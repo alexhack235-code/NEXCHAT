@@ -27,8 +27,12 @@
 
     bindDOM() {
       this.injectModal();
-      this.injectHeaderTrigger();
+      this.bindHeaderTrigger();
       this.bindPanicHotkeys();
+    }
+
+    injectHeaderTrigger() {
+      this.bindHeaderTrigger();
     }
 
     injectModal() {

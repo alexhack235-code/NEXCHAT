@@ -484,6 +484,8 @@
 }
 
 .nex-canvas-container {
+  position: relative;
+  z-index: 10;
   background: #080d1a;
   border: 1px solid rgba(0, 243, 255, 0.35);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 243, 255, 0.2);

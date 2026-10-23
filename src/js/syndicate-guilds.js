@@ -70,8 +70,12 @@
 
     bindDOM() {
       this.injectModal();
-      this.injectHeaderTrigger();
+      this.bindHeaderTrigger();
       this.listenSupabaseRealtime();
+    }
+
+    injectHeaderTrigger() {
+      this.bindHeaderTrigger();
     }
 
     loadUserGuild() {

@@ -647,16 +647,31 @@ class NexCanvasStudio {
   }
 
   bindEvents() {
-    // Open/Close
-    document.getElementById('closeNexCanvasBtn')?.addEventListener('click', () => this.hide());
-    document.getElementById('closeNexCanvasBackdrop')?.addEventListener('click', () => this.hide());
+    // Prevent any clicks inside the canvas modal from bubbling to the backdrop
+    const modalContainer = this.modal?.querySelector('.nex-canvas-container');
+    if (modalContainer) {
+      modalContainer.addEventListener('click', (e) => e.stopPropagation());
+      modalContainer.addEventListener('mousedown', (e) => e.stopPropagation());
+    }
 
-    // Color Pickers
+    // Open/Close
+    document.getElementById('closeNexCanvasBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hide();
+    });
+    document.getElementById('closeNexCanvasBackdrop')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.hide();
+    });
+
+    // Color Pickers - Crucial: stop propagation so click never bubbles to backdrop
     document.querySelectorAll('.canvas-color-dot').forEach(dot => {
-      dot.addEventListener('click', () => {
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
         document.querySelectorAll('.canvas-color-dot').forEach(d => d.classList.remove('active'));
         dot.classList.add('active');
-        this.currentColor = dot.getAttribute('data-color');
+        this.currentColor = dot.getAttribute('data-color') || '#00f3ff';
         this.isEraser = false;
         document.getElementById('toolEraser')?.classList.remove('active');
       });
@@ -664,7 +679,9 @@ class NexCanvasStudio {
 
     // Brush Sizes
     document.querySelectorAll('.canvas-size-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
         document.querySelectorAll('.canvas-size-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         this.currentSize = parseInt(btn.getAttribute('data-size'), 10) || 5;
@@ -673,12 +690,16 @@ class NexCanvasStudio {
 
     // Tool: Eraser
     document.getElementById('toolEraser')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
       this.isEraser = !this.isEraser;
       e.currentTarget.classList.toggle('active', this.isEraser);
     });
 
     // Tool: Glow
     document.getElementById('toolGlow')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
       this.glowEnabled = !this.glowEnabled;
       e.currentTarget.classList.toggle('active', this.glowEnabled);
       if (typeof window.showNotif === 'function') {
@@ -687,19 +708,73 @@ class NexCanvasStudio {
     });
 
     // Tool: Undo
-    document.getElementById('toolUndo')?.addEventListener('click', () => this.undo());
+    document.getElementById('toolUndo')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.undo();
+    });
 
     // Tool: Clear
-    document.getElementById('toolClear')?.addEventListener('click', () => this.clear());
+    document.getElementById('toolClear')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      this.clear();
+    });
 
     // Tool: Grid Toggle
     document.getElementById('toolGridToggle')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
       const wrap = this.canvas.parentElement;
       wrap.classList.toggle('grid-bg');
     });
 
     // Send to Chat
-    document.getElementById('canvasSendToChatBtn')?.addEventListener('click', () => this.exportAndSend());
+    document.getElementById('canvasSendToChatBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.exportAndSend();
+    });
+
+    // Forward Whiteboard to Contacts or Groups
+    document.getElementById('canvasForwardBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.openForwardModal();
+    });
+
+    // Save PNG locally
+    document.getElementById('canvasDownloadBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.downloadImage();
+    });
+
+    // Forward modal event listeners
+    document.getElementById('closeCanvasForwardBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.closeForwardModal();
+    });
+    document.getElementById('closeCanvasForwardBackdrop')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.closeForwardModal();
+    });
+    document.getElementById('cancelCanvasForwardBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.closeForwardModal();
+    });
+    document.getElementById('canvasCopyDataUrlBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.copyDataUrl();
+    });
+    document.getElementById('confirmCanvasForwardBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.dispatchForward();
+    });
+    document.getElementById('canvasSelectAllTargetsBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.toggleSelectAllForwardTargets();
+    });
+    document.getElementById('canvasForwardSearchInput')?.addEventListener('input', (e) => {
+      this.filterForwardTargets(e.target.value);
+    });
 
     // Drawing Mouse & Touch listeners
     this.canvas.addEventListener('mousedown', (e) => this.startDraw(e));
@@ -820,30 +895,193 @@ class NexCanvasStudio {
   exportAndSend() {
     if (!this.canvas) return;
     const dataUrl = this.canvas.toDataURL('image/png');
-    this.hide();
 
     const attachment = {
       downloadURL: dataUrl,
-      fileName: `tactical_doodle_${Date.now()}.png`,
+      fileName: `tactical_whiteboard_${Date.now()}.png`,
       fileType: 'image/png'
     };
 
     const clientMsgId = `canvas_${Date.now()}`;
     if (typeof window.appendLocalSentMessage === 'function') {
-      window.appendLocalSentMessage("🎨 [NEX-CANVAS Tactical Doodle]", attachment, false, 'sending', clientMsgId, null);
+      window.appendLocalSentMessage("[NEX-CANVAS Tactical Whiteboard]", attachment, false, 'sending', clientMsgId, null);
     }
 
     if (typeof window.sendSupabaseMessage === 'function' && window.currentChatUser) {
       window.sendSupabaseMessage({
         from: window.myUID,
         to: window.currentChatUser,
-        text: "🎨 [NEX-CANVAS Tactical Doodle]",
+        text: "[NEX-CANVAS Tactical Whiteboard]",
         attachment: attachment,
         chatType: window.currentChatType || 'direct'
       }).catch(console.warn);
     }
 
-    if (typeof window.showNotif === 'function') window.showNotif("Tactical doodle sent to chat!", "success");
+    this.hide();
+    if (typeof window.showNotif === 'function') {
+      window.showNotif("[TRANSMITTED] Tactical whiteboard sent to active chat", "success");
+    }
+  }
+
+  downloadImage() {
+    if (!this.canvas) return;
+    try {
+      const dataUrl = this.canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `nex_tactical_whiteboard_${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      if (typeof window.showNotif === 'function') window.showNotif("[SAVED] Whiteboard snapshot downloaded", "success");
+    } catch (e) {
+      console.warn("Download error:", e);
+    }
+  }
+
+  copyDataUrl() {
+    if (!this.canvas) return;
+    try {
+      const dataUrl = this.canvas.toDataURL('image/png');
+      navigator.clipboard.writeText(dataUrl).then(() => {
+        if (typeof window.showNotif === 'function') window.showNotif("[COPIED] Cryptographic snapshot data copied to clipboard", "success");
+      }).catch(() => {
+        if (typeof window.showNotif === 'function') window.showNotif("[ERROR] Clipboard write failed", "error");
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+  openForwardModal() {
+    if (!this.canvas) return;
+    const fModal = document.getElementById('nexCanvasForwardModal');
+    if (!fModal) return;
+    fModal.style.display = 'flex';
+    fModal.setAttribute('aria-hidden', 'false');
+    this.renderForwardTargets();
+  }
+
+  closeForwardModal() {
+    const fModal = document.getElementById('nexCanvasForwardModal');
+    if (fModal) {
+      fModal.style.display = 'none';
+      fModal.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  renderForwardTargets(filterText = '') {
+    const targetList = document.getElementById('canvasForwardTargetList');
+    if (!targetList) return;
+    targetList.innerHTML = '';
+
+    // Gather contacts and groups from chat view
+    const targets = [];
+    const chatItems = document.querySelectorAll('#contactList .chat-list-item, #contactList .contact-item, #groupsList .group-item');
+    chatItems.forEach(item => {
+      const id = item.getAttribute('data-chat-id') || item.getAttribute('data-uid') || item.id;
+      const nameEl = item.querySelector('.chat-name, .contact-name, .group-name, h4, span');
+      const name = nameEl ? nameEl.textContent.trim() : (id || 'Contact');
+      const isGrp = item.classList.contains('group-item') || item.getAttribute('data-type') === 'group';
+      const imgEl = item.querySelector('img');
+      const avatar = imgEl ? imgEl.src : 'logo.jpg';
+      if (id && !targets.some(t => t.id === id)) {
+        targets.push({ id, name, isGroup: isGrp, avatar });
+      }
+    });
+
+    // Fallback if empty list in mock/offline mode
+    if (targets.length === 0) {
+      targets.push(
+        { id: 'alexander-id', name: 'ALEXANDER', isGroup: false, avatar: 'logo.jpg' },
+        { id: 'sunnmisola-id', name: 'Sunnmisola', isGroup: false, avatar: 'logo.jpg' },
+        { id: 'group-nexo-tech', name: 'NEXO-TECH', isGroup: true, avatar: 'logo.jpg' }
+      );
+    }
+
+    const filtered = filterText
+      ? targets.filter(t => t.name.toLowerCase().includes(filterText.toLowerCase()))
+      : targets;
+
+    if (filtered.length === 0) {
+      targetList.innerHTML = '<div style="color: #64748b; font-size: 12px; text-align: center; padding: 18px; font-family: monospace;">[NO MATCHING CHATS FOUND]</div>';
+      return;
+    }
+
+    filtered.forEach(t => {
+      const row = document.createElement('label');
+      row.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; cursor: pointer; transition: background 0.15s;';
+      row.onmouseover = () => { row.style.background = 'rgba(0, 243, 255, 0.08)'; };
+      row.onmouseout = () => { row.style.background = 'rgba(255,255,255,0.03)'; };
+      row.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <img src="${t.avatar}" onerror="this.src='logo.jpg'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid ${t.isGroup ? '#ffd700' : '#00f3ff'};" />
+          <div>
+            <div style="color: #fff; font-size: 13px; font-weight: 600;">${t.name}</div>
+            <div style="color: ${t.isGroup ? '#ffd700' : '#00f3ff'}; font-size: 10px; font-family: monospace;">[${t.isGroup ? 'GROUP' : 'OPERATIVE'}]</div>
+          </div>
+        </div>
+        <input type="checkbox" class="forward-target-cb" data-id="${t.id}" data-name="${t.name}" data-type="${t.isGroup ? 'group' : 'direct'}" style="accent-color: #00f3ff; width: 18px; height: 18px; cursor: pointer;" />
+      `;
+      targetList.appendChild(row);
+    });
+  }
+
+  toggleSelectAllForwardTargets() {
+    const cbs = document.querySelectorAll('.forward-target-cb');
+    if (cbs.length === 0) return;
+    const allChecked = Array.from(cbs).every(cb => cb.checked);
+    cbs.forEach(cb => { cb.checked = !allChecked; });
+    const btn = document.getElementById('canvasSelectAllTargetsBtn');
+    if (btn) btn.textContent = allChecked ? 'SELECT ALL' : 'DESELECT ALL';
+  }
+
+  filterForwardTargets(text) {
+    this.renderForwardTargets(text);
+  }
+
+  dispatchForward() {
+    if (!this.canvas) return;
+    const selected = Array.from(document.querySelectorAll('.forward-target-cb:checked')).map(cb => ({
+      id: cb.getAttribute('data-id'),
+      name: cb.getAttribute('data-name'),
+      type: cb.getAttribute('data-type')
+    }));
+
+    if (selected.length === 0) {
+      if (typeof window.showNotif === 'function') window.showNotif("Please select at least one chat or group to forward to", "error");
+      return;
+    }
+
+    const dataUrl = this.canvas.toDataURL('image/png');
+    const attachment = {
+      downloadURL: dataUrl,
+      fileName: `tactical_whiteboard_${Date.now()}.png`,
+      fileType: 'image/png'
+    };
+
+    selected.forEach(target => {
+      const clientMsgId = `canvas_fwd_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      if (typeof window.sendSupabaseMessage === 'function') {
+        window.sendSupabaseMessage({
+          from: window.myUID,
+          to: target.id,
+          text: `[FORWARDED] [NEX-CANVAS Tactical Whiteboard]`,
+          attachment: attachment,
+          chatType: target.type
+        }).catch(console.warn);
+      }
+      if (window.currentChatUser === target.id && typeof window.appendLocalSentMessage === 'function') {
+        window.appendLocalSentMessage("[FORWARDED] [NEX-CANVAS Tactical Whiteboard]", attachment, false, 'sending', clientMsgId, null);
+      }
+    });
+
+    const targetNames = selected.map(s => s.name).join(', ');
+    if (typeof window.showNotif === 'function') {
+      window.showNotif(`[DISPATCHED] Tactical whiteboard forwarded to: ${targetNames}`, "success", 4000);
+    }
+    this.closeForwardModal();
+    this.hide();
   }
 }
 

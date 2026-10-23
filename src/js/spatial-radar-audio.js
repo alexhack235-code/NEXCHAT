@@ -33,7 +33,11 @@
 
     bindDOM() {
       this.injectModal();
-      this.injectHeaderTrigger();
+      this.bindHeaderTrigger();
+    }
+
+    injectHeaderTrigger() {
+      this.bindHeaderTrigger();
     }
 
     injectModal() {

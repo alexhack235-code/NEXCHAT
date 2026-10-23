@@ -37,8 +37,12 @@
 
     bindDOM() {
       this.injectModal();
-      this.injectHeaderTrigger();
+      this.bindHeaderTrigger();
       this.listenIncomingMessages();
+    }
+
+    injectHeaderTrigger() {
+      this.bindHeaderTrigger();
     }
 
     loadConfig() {

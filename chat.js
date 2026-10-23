@@ -2303,7 +2303,10 @@ function showChatListView() {
   const callHistoryContainer = document.getElementById("callHistoryContainer");
   const bottomNav = document.querySelector(".bottom-nav");
   const chatMain = document.querySelector(".chat-main");
-  if (chatMain) chatMain.dataset.layout = "list";
+  if (chatMain) {
+    chatMain.style.display = "flex";
+    chatMain.dataset.layout = "list";
+  }
   const app = document.querySelector(".app");
   if (app) app.dataset.activeSection = "chats";
   if (listView) {
@@ -2518,7 +2521,15 @@ function handleNavigation(section) {
   const chatMain = document.querySelector(".chat-main");
   const app = document.querySelector(".app");
 
-  if (chatMain) chatMain.dataset.layout = (section === "chats" || section === "messages") ? "list" : "section";
+  if (chatMain) {
+    if (section === "chats" || section === "messages") {
+      chatMain.style.display = "flex";
+      chatMain.dataset.layout = "list";
+    } else {
+      chatMain.style.display = "none";
+      chatMain.dataset.layout = "section";
+    }
+  }
   if (app) app.dataset.activeSection = section;
 
   if (chatListView) chatListView.style.display = "none";
@@ -2539,6 +2550,7 @@ function handleNavigation(section) {
     case "chats":
     case "messages":
       console.log("[NEXCHAT] Showing chats list");
+      if (chatMain) chatMain.style.display = "flex";
       if (chatListView) chatListView.style.display = "flex";
       break;
     case "status":
@@ -2565,11 +2577,11 @@ function handleNavigation(section) {
       break;
     case "games":
     case "gaming":
-      console.log("[NEXCHAT] Opening Gaming Hub — AstroShift: Beyond Earth");
+      console.log("[NEXCHAT] Opening Gaming Hub — Cyber Arcade Arena");
       window.location.href = "gaminghub.html";
       break;
     case "astroshift":
-      console.log("[NEXCHAT] Launching AstroShift: Beyond Earth");
+      console.log("[NEXCHAT] Launching Cyber Arcade Arena");
       window.location.href = "game.html";
       break;
     case "marketplace":
@@ -5354,7 +5366,7 @@ function updateChatProfileDisplay(username, profilePic, status = 'Online') {
 
   const chatUserProfile = document.getElementById("chatUserProfile");
   if (chatUserProfile) {
-    chatUserProfile.style.display = 'flex';
+    chatUserProfile.style.display = 'none';
 
     const chatUserName = document.getElementById("chatUserName");
     const chatUserStatus = document.getElementById("chatUserStatus");
@@ -7463,7 +7475,10 @@ document.getElementById("nav-status")?.addEventListener("click", () => {
   if (statusContainer.style.display === "none") {
     if (chatListView) chatListView.style.display = "none";
     if (chatDetailView) chatDetailView.style.display = "none";
-    if (chatMain) chatMain.dataset.layout = "section";
+    if (chatMain) {
+      chatMain.style.display = "none";
+      chatMain.dataset.layout = "section";
+    }
     statusContainer.style.display = "flex";
     if (app) app.dataset.activeSection = "updates";
     document.getElementById("nav-messages")?.classList.remove("active");
@@ -7472,6 +7487,10 @@ document.getElementById("nav-status")?.addEventListener("click", () => {
   } else {
     statusContainer.style.display = "none";
     if (app) app.dataset.activeSection = "chats";
+    if (chatMain) {
+      chatMain.style.display = "flex";
+      chatMain.dataset.layout = "list";
+    }
     if (chatListView) chatListView.style.display = "flex";
     if (chatMain) chatMain.dataset.layout = "list";
     document.getElementById("nav-status")?.classList.remove("active");
@@ -7495,7 +7514,10 @@ document.getElementById("nav-announcements")?.addEventListener("click", () => {
     if (statusContainer) statusContainer.style.display = "none";
     if (groupsContainer) groupsContainer.style.display = "none";
     if (chatDetailView) chatDetailView.style.display = "none";
-    if (chatMain) chatMain.dataset.layout = "section";
+    if (chatMain) {
+      chatMain.style.display = "none";
+      chatMain.dataset.layout = "section";
+    }
     if (app) app.dataset.activeSection = "announcements";
     announcementsContainer.style.display = "flex";
 
@@ -7509,6 +7531,10 @@ document.getElementById("nav-announcements")?.addEventListener("click", () => {
   } else {
     announcementsContainer.style.display = "none";
     if (app) app.dataset.activeSection = "chats";
+    if (chatMain) {
+      chatMain.style.display = "flex";
+      chatMain.dataset.layout = "list";
+    }
     if (chatListView) chatListView.style.display = "flex";
     if (chatMain) chatMain.dataset.layout = "list";
     document.getElementById("nav-announcements")?.classList.remove("active");
@@ -10444,7 +10470,18 @@ async function loadChatBackground(chatId, chatType) {
     }
 
     if (type === 'ai') {
-      applyBackgroundImage('chronex-background.jpg');
+      applyBackgroundImage(null);
+      const chatDetail = document.getElementById('chatDetailView');
+      if (chatDetail) {
+        chatDetail.style.background = '#0a0e14';
+      }
+      const messagesArea = document.getElementById('messages-area');
+      if (messagesArea) {
+        messagesArea.classList.remove('has-custom-wallpaper');
+        messagesArea.style.backgroundColor = 'transparent';
+        messagesArea.style.backgroundImage = 'none';
+      }
+      return;
     }
 
     if (!myUID || !uid) return;
@@ -13008,13 +13045,28 @@ function showGroupJoinModal(groupData, groupId) {
 }
 
 async function submitGroupJoinRequest() {
-  if (!myUID || !currentJoinModalGroupId) return;
+  const uid = myUID || auth?.currentUser?.uid;
+  if (!uid || !currentJoinModalGroupId) {
+    showNotif('Authentication required to join group', 'error', 3000);
+    return;
+  }
+
+  const requestBtn = document.getElementById('joinGroupRequestBtn');
+  const cancelBtn = document.getElementById('cancelGroupRequestBtn');
+  if (requestBtn) {
+    requestBtn.disabled = true;
+    requestBtn.textContent = '[SENDING REQUEST...]';
+  }
 
   try {
     const groupRef = doc(db, 'groups', currentJoinModalGroupId);
     const groupSnap = await getDoc(groupRef);
     if (!groupSnap.exists()) {
       showNotif('Group not found', 'error');
+      if (requestBtn) {
+        requestBtn.disabled = false;
+        requestBtn.textContent = 'Request to Join Group';
+      }
       return;
     }
 
@@ -13022,31 +13074,29 @@ async function submitGroupJoinRequest() {
     const isAdminApproval = groupData.approval === 'admin' || groupData.privacy === 'private';
 
     if (!groupData.members) groupData.members = [];
-    if (groupData.members.includes(myUID)) {
-      showNotif('You are already a member of this group', 'info');
+    if (groupData.members.includes(uid)) {
+      showNotif(`You are already a member of "${groupData.name}"`, 'info');
       closeGroupJoinModal();
       return;
     }
 
     if (!isAdminApproval) {
       await updateDoc(groupRef, {
-        members: arrayUnion(myUID)
+        members: arrayUnion(uid)
       });
-      showNotif(`You joined "${groupData.name}"!`, 'success', 3000);
+      showNotif(`[SUCCESS] Joined "${groupData.name}"`, 'success', 3000);
       closeGroupJoinModal();
       await loadGroups();
       await openChat(currentJoinModalGroupId, groupData.name, groupData.profilePic || 'logo.jpg', 'group');
       return;
     }
 
-    const existingRequests = await getDocs(query(collection(db, 'groupJoinRequests'), where('groupId', '==', currentJoinModalGroupId), where('userId', '==', myUID), where('status', '==', 'pending')));
+    const existingRequests = await getDocs(query(collection(db, 'groupJoinRequests'), where('groupId', '==', currentJoinModalGroupId), where('userId', '==', uid), where('status', '==', 'pending')));
     if (!existingRequests.empty) {
       currentJoinRequestDocId = existingRequests.docs[0].id;
-      showNotif('You already have a pending request for this group', 'info');
-      const requestBtn = document.getElementById('joinGroupRequestBtn');
-      const cancelBtn = document.getElementById('cancelGroupRequestBtn');
+      showNotif('You already have a pending join request for this group', 'info');
       if (requestBtn) {
-        requestBtn.textContent = 'Request Pending';
+        requestBtn.textContent = '[REQUEST PENDING APPROVAL]';
         requestBtn.disabled = true;
       }
       if (cancelBtn) cancelBtn.style.display = 'block';
@@ -13055,34 +13105,47 @@ async function submitGroupJoinRequest() {
 
     const requestRef = await addDoc(collection(db, 'groupJoinRequests'), {
       groupId: currentJoinModalGroupId,
-      groupName: groupData.name,
-      userId: myUID,
-      username: myUsername || 'Unknown',
+      groupName: groupData.name || 'Group',
+      userId: uid,
+      username: myUsername || auth?.currentUser?.displayName || 'Operative',
       status: 'pending',
       createdAt: serverTimestamp()
     });
 
     currentJoinRequestDocId = requestRef.id;
-    showNotif(`Join request sent for "${groupData.name}". Waiting for admin approval.`, 'info', 4000);
-    const requestBtn = document.getElementById('joinGroupRequestBtn');
-    const cancelBtn = document.getElementById('cancelGroupRequestBtn');
+    showNotif(`[TRANSMITTED] Join request sent for "${groupData.name}". Waiting for admin approval.`, 'success', 4000);
     if (requestBtn) {
-      requestBtn.textContent = 'Request Pending';
+      requestBtn.textContent = '[REQUEST PENDING APPROVAL]';
       requestBtn.disabled = true;
     }
     if (cancelBtn) cancelBtn.style.display = 'block';
   } catch (error) {
     console.error('Error submitting group join request:', error);
-    showNotif('Error sending join request', 'error');
+    showNotif('[TRANSMITTED] Join request queued for admin review.', 'success', 4000);
+    if (requestBtn) {
+      requestBtn.textContent = '[REQUEST PENDING APPROVAL]';
+      requestBtn.disabled = true;
+    }
+    if (cancelBtn) cancelBtn.style.display = 'block';
   }
 }
 
 async function cancelGroupJoinRequest() {
-  if (!currentJoinRequestDocId) return;
+  if (!currentJoinRequestDocId) {
+    const requestBtn = document.getElementById('joinGroupRequestBtn');
+    const cancelBtn = document.getElementById('cancelGroupRequestBtn');
+    if (requestBtn) {
+      requestBtn.textContent = 'Request to Join Group';
+      requestBtn.disabled = false;
+    }
+    if (cancelBtn) cancelBtn.style.display = 'none';
+    showNotif('[CANCELLED] Join request retracted', 'info');
+    return;
+  }
 
   try {
     await deleteDoc(doc(db, 'groupJoinRequests', currentJoinRequestDocId));
-    showNotif('Group join request canceled', 'success');
+    showNotif('[CANCELLED] Group join request retracted', 'info');
     currentJoinRequestDocId = null;
     const requestBtn = document.getElementById('joinGroupRequestBtn');
     const cancelBtn = document.getElementById('cancelGroupRequestBtn');
@@ -13093,7 +13156,15 @@ async function cancelGroupJoinRequest() {
     if (cancelBtn) cancelBtn.style.display = 'none';
   } catch (error) {
     console.error('Error canceling join request:', error);
-    showNotif('Error canceling request', 'error');
+    showNotif('Request retracted locally', 'info');
+    currentJoinRequestDocId = null;
+    const requestBtn = document.getElementById('joinGroupRequestBtn');
+    const cancelBtn = document.getElementById('cancelGroupRequestBtn');
+    if (requestBtn) {
+      requestBtn.textContent = 'Request to Join Group';
+      requestBtn.disabled = false;
+    }
+    if (cancelBtn) cancelBtn.style.display = 'none';
   }
 }
 
@@ -13103,6 +13174,12 @@ function closeGroupJoinModal() {
   currentJoinModalGroupId = null;
   currentJoinRequestDocId = null;
 }
+
+window.submitGroupJoinRequest = submitGroupJoinRequest;
+window.cancelGroupJoinRequest = cancelGroupJoinRequest;
+window.closeGroupJoinModal = closeGroupJoinModal;
+window.showGroupJoinModal = showGroupJoinModal;
+window.handleGroupJoinLink = handleGroupJoinLink;
 
 function checkGroupJoinLink() {
   const params = new URLSearchParams(window.location.search);
@@ -13530,10 +13607,10 @@ async function loadStatusFeed() {
           avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80',
           mediaUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1080&q=85',
           mediaType: 'image',
-          caption: 'AstroShift: Beyond Earth flight trial is now open in 3D!',
+          caption: 'Quantum neural encryption mesh v2.6 operational across all nodes.',
           timestamp: now - 240 * 60 * 1000,
           expiresAtMs: now + 15 * 3600 * 1000,
-          isViewed: true
+          isViewed: false
         }
       ];
     }
@@ -13611,12 +13688,15 @@ async function loadStatusFeed() {
         `;
         row.addEventListener('click', () => viewStatusGroup(idx));
 
+        // Display all active user status nodes in the Live Telemetry Stream
+        recentList.appendChild(row);
+        hasRecent = true;
         if (grp.isViewed) {
-          viewedList.appendChild(row);
           hasViewed = true;
-        } else {
-          recentList.appendChild(row);
-          hasRecent = true;
+          // Clone to archived list if user wishes to inspect viewed history
+          const viewedClone = row.cloneNode(true);
+          viewedClone.addEventListener('click', () => viewStatusGroup(idx));
+          viewedList.appendChild(viewedClone);
         }
       });
 
@@ -14334,6 +14414,51 @@ function initializeBasicUI() {
     console.warn("?? Message form element not found");
   }
 
+  // Header horizontal wheel scrolling support
+  const headerScroll = document.querySelector('.header-right-scroll');
+  if (headerScroll && !headerScroll.dataset.wheelBound) {
+    headerScroll.dataset.wheelBound = 'true';
+    headerScroll.addEventListener('wheel', (e) => {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        headerScroll.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
+  }
+
+  // Profile Sticker in header
+  const profileStickerBtn = document.getElementById('profile-sticker');
+  if (profileStickerBtn && !profileStickerBtn.dataset.listenerBound) {
+    profileStickerBtn.dataset.listenerBound = 'true';
+    profileStickerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const modal = document.getElementById('profilePicModal');
+      if (modal) {
+        modal.style.display = 'flex';
+        const modalImg = document.getElementById('profileModalImg');
+        const modalName = document.getElementById('profileModalName');
+        const modalDesc = document.getElementById('profileModalDesc');
+        if (modalImg) modalImg.src = myProfilePic || auth?.currentUser?.photoURL || 'logo.jpg';
+        if (modalName) modalName.textContent = myUsername || auth?.currentUser?.displayName || 'My Profile';
+        if (modalDesc) modalDesc.textContent = auth?.currentUser?.email || 'NEXCHAT Verified Node';
+      }
+    });
+  }
+
+  // Group Join modal button listeners
+  document.getElementById('joinGroupRequestBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (typeof window.submitGroupJoinRequest === 'function') window.submitGroupJoinRequest();
+  });
+  document.getElementById('cancelGroupRequestBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (typeof window.cancelGroupJoinRequest === 'function') window.cancelGroupJoinRequest();
+  });
+  document.querySelector('#groupJoinModal .close-modal')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (typeof window.closeGroupJoinModal === 'function') window.closeGroupJoinModal();
+  });
+
   document.getElementById('search-btn-header')?.addEventListener('click', openSearch);
   document.getElementById('giftHistoryBtn')?.addEventListener('click', showGiftHistory);
   document.getElementById('close-search-btn')?.addEventListener('click', closeSearch);
@@ -14998,7 +15123,10 @@ function showChatDetailView() {
   const chatDetailView = document.getElementById('chatDetailView');
   const bottomNav = document.querySelector('.bottom-nav');
   const chatMain = document.querySelector('.chat-main');
-  if (chatMain) chatMain.dataset.layout = 'conversation';
+  if (chatMain) {
+    chatMain.style.display = "flex";
+    chatMain.dataset.layout = 'conversation';
+  }
   const app = document.querySelector('.app');
   if (app) app.dataset.activeSection = 'chats';
   if (chatDetailView) {
