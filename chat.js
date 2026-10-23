@@ -188,25 +188,13 @@ let sentMessageSuccessCount = Number(localStorage.getItem('sentMessageSuccessCou
 // ============================================================
 
 function formatBalanceDisplay(amount) {
-  if (amount >= 1e32) {
-    return '∞';
-  }
-  if (amount >= 1e15) {
-    return 'QUADTRILLION';
-  }
-  if (amount >= 1e12) {
-    return 'TRILLION';
-  }
-  if (amount >= 1e9) {
-    return 'BILLION';
-  }
-  if (amount >= 1e6) {
-    return 'MILLION';
-  }
-  if (amount >= 1e3) {
-    return 'THOUSAND';
-  }
-  return `${amount}`;
+  const num = Number(amount);
+  if (isNaN(num) || !isFinite(num)) return '0';
+  if (num < 0) return '0';
+  return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
+}
+if (typeof window !== 'undefined') {
+  window.formatBalanceDisplay = formatBalanceDisplay;
 }
 const MESSAGE_SEND_NOTIFICATION_INTERVAL = 100;
 
@@ -4492,14 +4480,6 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   wrapper.id = `wrapper-${id}`;
   wrapper.style.cssText = "display:flex; justify-content:flex-end; margin:8px 0; padding:0 12px; flex-direction: column; align-items: flex-end;";
 
-  if (showHeader) {
-    const headerLabel = document.createElement("div");
-    headerLabel.style.cssText = "font-size:11px; color:#00ff66; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;";
-    const now = new Date();
-    headerLabel.textContent = `You · ${formatChatTimestamp(now)}`;
-    wrapper.appendChild(headerLabel);
-  }
-
   const isStk = attachment && (attachment.isSticker || attachment.fileType === 'sticker');
   const isCirc = attachment && (attachment.isCircularVideo || attachment.fileType === 'video_note');
   const isDrop = attachment && (attachment.isTokenRain || attachment.fileType === 'token_rain' || attachment.dropData || attachment.isPredictionPoll || attachment.fileType === 'prediction_poll' || attachment.pollData || attachment.isScratchCard || attachment.fileType === 'scratch_card' || attachment.scratchData || attachment.isBountyContract || attachment.fileType === 'escrow_bounty' || attachment.bountyData || attachment.isSteganoCloak);
@@ -4517,57 +4497,17 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
     textP.style.margin = "0";
     textP.textContent = text;
     bubble.appendChild(textP);
-
-    // ChronEX Babel Translate Chip
-    const translateChip = document.createElement("span");
-    translateChip.className = "message-translate-chip";
-    translateChip.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translate</span>';
-    translateChip.addEventListener('click', async (ev) => {
-      ev.stopPropagation();
-      let transBox = bubble.querySelector('.translated-message-box');
-      if (transBox) {
-        transBox.remove();
-        translateChip.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translate</span>';
-        return;
-      }
-      translateChip.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Translating...</span>';
-      const targetLang = localStorage.getItem('nex_preferred_lang') || 'es';
-      let translated = "";
-      if (window.CyberFeatures && window.CyberFeatures.translator) {
-        translated = await window.CyberFeatures.translator.translateText(text, targetLang);
-      } else {
-        translated = `[Translated] ${text}`;
-      }
-      transBox = document.createElement('div');
-      transBox.className = 'translated-message-box';
-      transBox.innerHTML = `
-        <div>${window.escapeHtml ? window.escapeHtml(translated) : translated}</div>
-        <div class="translate-meta-row">
-          <span class="translate-lang-tag">${targetLang}</span>
-          <button type="button" class="translate-speak-btn" title="Pronounce"><i class="fa-solid fa-volume-high"></i></button>
-        </div>
-      `;
-      transBox.querySelector('.translate-speak-btn')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (window.CyberFeatures && window.CyberFeatures.translator) {
-          window.CyberFeatures.translator.speakText(translated, targetLang);
-        }
-      });
-      bubble.appendChild(transBox);
-      translateChip.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translated</span>';
-    });
-    bubble.appendChild(translateChip);
   }
 
   const timeSpan = document.createElement("div");
   timeSpan.style.cssText = "font-size: 10.5px; margin-top:4px; opacity:0.85; display:flex; align-items:center; justify-content:flex-end; gap:6px;";
 
-  // E2EE Lock Badge
+  // E2EE Lock Icon (Clean & Professional)
   const e2eeBadge = document.createElement("span");
   e2eeBadge.className = "e2ee-secure-badge";
-  e2eeBadge.style.cssText = "display:inline-flex; align-items:center; gap:3px; font-size:9.5px; font-family:monospace; background:rgba(0,0,0,0.22); color:#a7f3d0; padding:1px 5px; border-radius:4px; margin-right:auto; cursor:pointer;";
-  e2eeBadge.innerHTML = '<i class="fa-solid fa-lock" style="font-size:8.5px;"></i> E2EE';
-  e2eeBadge.title = "AES-256-GCM Zero-Knowledge Enclave Encrypted. Click to inspect ciphertext.";
+  e2eeBadge.style.cssText = "display:inline-flex; align-items:center; opacity:0.55; margin-right:auto; cursor:pointer;";
+  e2eeBadge.innerHTML = '<i class="fa-solid fa-lock" style="font-size:8.5px;"></i>';
+  e2eeBadge.title = "End-to-End Encrypted (AES-256-GCM Zero-Knowledge)";
   e2eeBadge.addEventListener('click', (ev) => {
     ev.stopPropagation();
     if (typeof window.openE2eeInspector === 'function') {
@@ -5035,11 +4975,11 @@ function loadMessages() {
       const timeSpan = document.createElement("div");
       timeSpan.style.cssText = `font-size: 10.5px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 6px;`;
 
-      // E2EE Lock Badge
+      // E2EE Lock Icon (Clean & Professional)
       const e2eeBadge = document.createElement("span");
       e2eeBadge.className = "e2ee-secure-badge";
-      e2eeBadge.style.cssText = `display:inline-flex; align-items:center; gap:3px; font-size:9.5px; font-family:monospace; background:${isOwn ? 'rgba(0,0,0,0.22)' : 'rgba(0,255,102,0.12)'}; color:${isOwn ? '#a7f3d0' : '#00ff66'}; padding:1px 5px; border-radius:4px; margin-right:auto; cursor:pointer;`;
-      e2eeBadge.innerHTML = '<i class="fa-solid fa-lock" style="font-size:8.5px;"></i> E2EE';
+      e2eeBadge.style.cssText = `display:inline-flex; align-items:center; opacity:0.55; margin-right:auto; cursor:pointer;`;
+      e2eeBadge.innerHTML = '<i class="fa-solid fa-lock" style="font-size:8.5px;"></i>';
       e2eeBadge.title = "AES-256-GCM Zero-Knowledge Enclave Encrypted. Click to inspect ciphertext.";
       e2eeBadge.addEventListener('click', (ev) => {
         ev.stopPropagation();
@@ -5441,7 +5381,7 @@ function hideChatProfileDisplay() {
 async function openChat(uid, username, profilePic, chatType = 'direct') {
   if (chatType === 'direct' && uid !== myUID && !isDirectChatAllowed(uid)) {
     if (pendingChatRequests[uid]) {
-      showNotif('â³ Chat request already pending for this user', 'info');
+      showNotif('Chat request already pending for this user', 'info');
     } else {
       showDirectChatRequestPrompt(uid, username, profilePic);
     }
@@ -6918,7 +6858,7 @@ async function setupVideoStreams(stream = null) {
       const placeholder = document.getElementById('remote-placeholder');
       if (placeholder) {
         placeholder.innerHTML = `
-          <p style="color: #00ff66; font-size: 14px;">?? Waiting for ${currentChatUser} to join...</p>
+          <p style="color: #00ff66; font-size: 14px;">Waiting for ${currentChatUser} to join...</p>
           <p style="color: #888; font-size: 12px; margin-top: 10px;">For full P2P video calling, WebRTC signaling server required</p>
         `;
       }
@@ -9457,7 +9397,7 @@ async function acceptGroupJoinRequest(requestId, groupId) {
 
     const welcomeUsername = request.username || 'New member';
     const mentionText = request.username ? `@${request.username.replace(/\s+/g, '_')}` : 'a new member';
-    await sendGroupBotMessage(groupId, `??? Group Defense Bot: ${mentionText} has joined the group. Welcome aboard!`, [request.userId]);
+    await sendGroupBotMessage(groupId, `Group Defense Bot: ${mentionText} has joined the group. Welcome aboard!`, [request.userId]);
 
     showNotif(`${request.username || 'User'} accepted to group`, 'success');
     loadGroupPendingRequests(groupId); // Refresh list
@@ -10327,7 +10267,7 @@ async function createPoll(groupId, question, options) {
     showNotif('Poll created successfully', 'success', 1500);
 
     await updateDoc(doc(db, 'groups', groupId), {
-      lastMessage: `?? Poll: ${question}`,
+      lastMessage: `Poll: ${question}`,
       lastMessageTime: serverTimestamp()
     });
 
@@ -12367,7 +12307,7 @@ async function createGroup(e) {
             <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; margin: 10px 0; word-break: break-all; font-size: 0.85rem; max-height: 80px; overflow-y: auto;">
             ${groupJoinLink}
             </div>
-            <button type="button" onclick="copyGroupLink('${groupJoinLink}')" style="background: #fff; color: #333; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px;">?? Copy Link</button>
+            <button type="button" onclick="copyGroupLink('${groupJoinLink}')" style="background: #fff; color: #333; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px;">Copy Link</button>
         </div>
         `;
     }
@@ -12717,7 +12657,7 @@ async function addSelectedGroupMembersToGroup(groupId) {
 
     const memberNames = selectedCheckboxes.map(cb => cb.getAttribute('data-username') || 'Member');
     const mentionText = memberNames.map(name => `@${String(name).replace(/\s+/g, '_')}`).join(', ');
-    await sendGroupBotMessage(groupId, `??? Group Defense Bot: ${mentionText} joined the group. Stay safe and welcome them!`, userIds);
+    await sendGroupBotMessage(groupId, `Group Defense Bot: ${mentionText} joined the group. Stay safe and welcome them!`, userIds);
 
     showNotif(`Added ${userIds.length} member(s)`, 'success');
     closeAddGroupMembersModal();
@@ -17926,7 +17866,7 @@ function initVipVault() {
         const currentTokenBalanceEl = document.getElementById('currentTokenBalance');
         if (currentTokenBalanceEl) currentTokenBalanceEl.textContent = formatBalanceDisplay(tokens);
         const tokenCountEl = document.getElementById('tokenCount');
-        if (tokenCountEl) tokenCountEl.textContent = tokens.toString();
+        if (tokenCountEl) tokenCountEl.textContent = formatBalanceDisplay(tokens);
 
         updateBalance();
         if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
@@ -18291,7 +18231,7 @@ function initCyberStreak() {
         }
 
         const tokenCountEl = document.getElementById('tokenCount');
-        if (tokenCountEl) tokenCountEl.textContent = tokens.toString();
+        if (tokenCountEl) tokenCountEl.textContent = formatBalanceDisplay(tokens);
         const currentTokenBalanceEl = document.getElementById('currentTokenBalance');
         if (currentTokenBalanceEl) currentTokenBalanceEl.textContent = formatBalanceDisplay(tokens);
 
@@ -18318,6 +18258,7 @@ function initSmartReplyAndPolish() {
   const polishBtn = document.getElementById('aiPolishBtn');
 
   // Handle chip clicks
+  const smartReplyBar = document.getElementById('smartReplyBar');
   if (chipsWrapper && messageInput) {
     chipsWrapper.addEventListener('click', (e) => {
       const chip = e.target.closest('.smart-chip');
@@ -18325,15 +18266,23 @@ function initSmartReplyAndPolish() {
       const text = chip.getAttribute('data-text') || chip.textContent.trim();
       messageInput.value = text;
       messageInput.focus();
+      if (smartReplyBar) smartReplyBar.style.display = 'none';
       if (sendBtn) sendBtn.style.display = 'flex';
       playCyberSfx('chime');
       if (navigator.vibrate) navigator.vibrate(15);
+    });
+
+    messageInput.addEventListener('input', () => {
+      if (smartReplyBar && messageInput.value.trim().length > 0) {
+        smartReplyBar.style.display = 'none';
+      }
     });
   }
 
   // Dynamic context-aware chips generator
   window.updateSmartReplySuggestions = function(lastMsgText) {
     if (!chipsWrapper || !lastMsgText) return;
+    if (messageInput && messageInput.value.trim().length > 0) return;
     const lower = lastMsgText.toLowerCase();
     let suggestions = [];
 
@@ -18369,6 +18318,10 @@ function initSmartReplyAndPolish() {
         <i class="fa-solid ${s.icon}"></i> <span>${escapeHtml(s.text)}</span>
       </button>
     `).join('');
+
+    if (smartReplyBar) {
+      smartReplyBar.style.display = suggestions.length > 0 ? 'flex' : 'none';
+    }
   };
 
   // AI Polish Console Handler

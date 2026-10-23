@@ -1022,17 +1022,31 @@
           <span class="nextgen-draft-tone-tag">CASUAL</span>
           <span>Sounds awesome, let's do this</span>
         </button>
+        <button type="button" class="nextgen-draft-dismiss-btn" title="Dismiss" style="background:transparent;border:none;color:#64748b;cursor:pointer;padding:4px 6px;margin-left:auto;font-size:11px;"><i class="fa-solid fa-xmark"></i></button>
       `;
 
       inputArea.insertBefore(bar, inputArea.firstChild);
 
+      bar.querySelector('.nextgen-draft-dismiss-btn')?.addEventListener('click', () => {
+        bar.style.display = 'none';
+      });
+
+      const input = document.getElementById('messageInput') || document.querySelector('.message-input');
+      if (input) {
+        input.addEventListener('input', () => {
+          if (input.value.trim().length > 0) {
+            bar.style.display = 'none';
+          }
+        });
+      }
+
       bar.querySelectorAll('.nextgen-draft-chip').forEach(btn => {
         btn.addEventListener('click', () => {
-          const input = document.getElementById('messageInput') || document.querySelector('.message-input');
           if (input) {
             input.value = btn.dataset.text;
             input.focus();
             showToast('Draft inserted. Ready to transmit.', 'info');
+            bar.style.display = 'none';
           }
         });
       });

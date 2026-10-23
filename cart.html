@@ -904,25 +904,10 @@
     // ============================================================
 
     function formatBalanceDisplay(amount) {
-      if (amount >= 1e32) {
-        return '∞';
-      }
-      if (amount >= 1e15) {
-        return 'QUADTRILLION';
-      }
-      if (amount >= 1e12) {
-        return 'TRILLION';
-      }
-      if (amount >= 1e9) {
-        return 'BILLION';
-      }
-      if (amount >= 1e6) {
-        return 'MILLION';
-      }
-      if (amount >= 1e3) {
-        return 'THOUSAND';
-      }
-      return `${amount}`;
+      const num = Number(amount);
+      if (isNaN(num) || !isFinite(num)) return '0';
+      if (num < 0) return '0';
+      return num.toLocaleString('en-US', { maximumFractionDigits: 2 });
     }
 
     let currentUser = null;

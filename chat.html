@@ -572,7 +572,7 @@
           </div>
 
           <!-- Smart Reply & ChronEX Quick Spark Bar -->
-          <div id="smartReplyBar" class="smart-reply-bar">
+          <div id="smartReplyBar" class="smart-reply-bar" style="display: none;">
             <div class="smart-chips-wrapper" id="smartChipsWrapper">
               <button type="button" class="smart-chip" data-text="Understood. Let's proceed.">
                 <i class="fa-solid fa-bolt"></i> <span>Understood. Let's proceed.</span>
@@ -726,14 +726,14 @@
 
           <form id="message-form" class="message-form">
             <button type="button" id="emoji-btn" class="input-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
-            <button type="button" id="sticker-btn" class="input-btn sticker-toggle-btn" title="WhatsApp-style Stickers & Sticker Store"><i class="fa-solid fa-note-sticky"></i></button>
+            <button type="button" id="sticker-btn" class="input-btn sticker-toggle-btn" title="WhatsApp-style Stickers &amp; Sticker Store" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
             <div class="message-input-wrapper">
-              <textarea id="message-input" class="message-input" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
+              <textarea id="message-input" class="message-input" placeholder="Write a message..." autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
               <button type="button" id="attach-btn" class="input-inline-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
             </div>
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
             <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
-            <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX"><i class="fa-solid fa-volume-high"></i></button>
+            <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX" style="display: none;"><i class="fa-solid fa-volume-high"></i></button>
             <button type="button" id="audio-record-btn" class="mic-action-btn" title="Record voice message"><i class="fa-solid fa-microphone"></i></button>
             <button type="button" id="audio-send-btn" class="audio-send-btn" title="Send audio" style="display: none;"><i class="fa-solid fa-play"></i></button>
             <button type="button" class="send-btn" id="sendBtn" title="Send message" style="display: none;"><i class="fa-solid fa-paper-plane"></i></button>
