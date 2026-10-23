@@ -15,6 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="src/js/verification-badges-catalog.js"></script>
   <style>
     * {
       margin: 0;
@@ -718,68 +719,162 @@
     <!-- CREATOR VERIFICATION BADGES & CERTIFICATES STORE                -->
     <!-- =============================================================== -->
     <div id="creatorBadgeStoreSection" class="verification-badges-section" style="margin-top: 50px;">
-      <div class="section-title-wrap" style="text-align: center; margin-bottom: 24px;">
+      <div class="section-title-wrap" style="text-align: center; margin-bottom: 28px;">
         <h2 class="section-title"><i class="fa-solid fa-certificate" style="color: #00f2ff;"></i> Creator Verification Badges</h2>
-        <p class="section-desc" style="color: #94a3b8; font-size: 13px; max-width: 600px; margin: 6px auto 0;">
-          Unlock official verified status, C2PA camera provenance seals, and VIP sovereign privileges across CamShot Reels and chat. Instant order dispatch via WhatsApp.
+        <p class="section-desc" style="color: #94a3b8; font-size: 13px; max-width: 650px; margin: 6px auto 0;">
+          Multi-tier verified identity ecosystem modeled after X (Twitter). Stand out with distinctive Beginner, Pro Blue, Gold Organization, Grey Official, and VIP Sovereign badges across CamShot Reels and chat. Instant order dispatch via WhatsApp.
         </p>
       </div>
 
-      <div class="packages-grid">
-        <!-- Tier 1: Official Verified Creator -->
-        <div class="package-card" onclick="selectBadgePackage('VERIFIED_CREATOR', 10, 15000, 'Official Verified Creator', 'fa-circle-check')" style="border-color: rgba(0, 242, 255, 0.4);">
-          <div class="package-icon" style="color: #00f2ff;"><i class="fa-solid fa-circle-check"></i></div>
-          <div class="package-tokens" style="color: #00f2ff; font-size: 22px;">TIER 1</div>
-          <div class="package-label" style="font-weight: 700; color: #fff;">Verified Creator</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px;">Blue check verification badge with high platform trust across CamShot &amp; chat.</div>
-          <div class="package-price">$10</div>
-          <div class="package-currency">₦15,000 NGN</div>
-          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #00f2ff 0%, #0088ff 100%); color: #000; font-weight: 800;">
-            <i class="fa-brands fa-whatsapp"></i> Order Badge
+      <!-- Category Filter Pills -->
+      <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;">
+        <span class="badge" style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; color: #10b981; font-size: 11px; padding: 5px 12px;">
+          <i class="fa-solid fa-seedling"></i> Beginner Creators
+        </span>
+        <span class="badge" style="background: rgba(29, 155, 240, 0.12); border: 1px solid #1d9bf0; color: #1d9bf0; font-size: 11px; padding: 5px 12px;">
+          <i class="fa-solid fa-circle-check"></i> Pro &amp; Premium+ (X Blue)
+        </span>
+        <span class="badge" style="background: rgba(255, 215, 0, 0.12); border: 1px solid #ffd700; color: #ffd700; font-size: 11px; padding: 5px 12px;">
+          <i class="fa-solid fa-building-circle-check"></i> Business &amp; Studios (X Gold)
+        </span>
+        <span class="badge" style="background: rgba(148, 163, 184, 0.12); border: 1px solid #94a3b8; color: #94a3b8; font-size: 11px; padding: 5px 12px;">
+          <i class="fa-solid fa-landmark"></i> Government &amp; Officials (X Grey)
+        </span>
+        <span class="badge" style="background: rgba(192, 132, 252, 0.12); border: 1px solid #c084fc; color: #c084fc; font-size: 11px; padding: 5px 12px;">
+          <i class="fa-solid fa-crown"></i> VIP Sovereign &amp; Patrons
+        </span>
+      </div>
+
+      <div class="packages-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 18px;">
+        
+        <!-- Tier 1: Beginner Verified (Green Check) -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_BEGINNER', 5, 7500, 'Beginner Verified', 'fa-circle-check')" style="border-color: rgba(16, 185, 129, 0.45); position: relative;">
+          <div class="special-badge" style="background: #10b981; color: #000; font-weight: 800;">STARTER CREATOR</div>
+          <div class="package-icon" style="color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="package-tokens" style="color: #10b981; font-size: 20px;">BEGINNER</div>
+          <div class="package-label" style="font-weight: 700; color: #fff;">Beginner Verified</div>
+          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+            Rising talent verified check. Confirms human identity, baseline CamShot algorithm reach, and green verified badge.
+          </div>
+          <div class="package-price" style="color: #10b981;">$5</div>
+          <div class="package-currency">₦7,500 NGN</div>
+          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #000; font-weight: 800;">
+            <i class="fa-brands fa-whatsapp"></i> Order Beginner Check
           </button>
         </div>
 
-        <!-- Tier 2: C2PA Hardware Sensor Provenance -->
-        <div class="package-card" onclick="selectBadgePackage('C2PA_HARDWARE_VERIFIED', 20, 30000, 'C2PA Hardware Provenance', 'fa-shield-halved')" style="border-color: rgba(0, 255, 136, 0.4);">
-          <div class="special-badge" style="background: #00ff88; color: #000;">AUTHENTIC SENSOR</div>
+        <!-- Tier 2: Pro Creator (X Blue Standard) -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_PRO', 12, 18000, 'Pro Creator (X Blue)', 'fa-circle-check')" style="border-color: rgba(29, 155, 240, 0.5); position: relative;">
+          <div class="special-badge" style="background: #1d9bf0; color: #fff; font-weight: 800;">X BLUE STANDARD</div>
+          <div class="package-icon" style="color: #1d9bf0;"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="package-tokens" style="color: #1d9bf0; font-size: 20px;">PRO (X BLUE)</div>
+          <div class="package-label" style="font-weight: 700; color: #fff;">Pro Creator (X Blue)</div>
+          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+            The iconic electric blue checkmark. Unlocks full monetization, 5x CamShot velocity priority, and trusted creator status.
+          </div>
+          <div class="package-price" style="color: #1d9bf0;">$12</div>
+          <div class="package-currency">₦18,000 NGN</div>
+          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #1d9bf0 0%, #0077cc 100%); color: #fff; font-weight: 800;">
+            <i class="fa-brands fa-whatsapp"></i> Order Blue Check
+          </button>
+        </div>
+
+        <!-- Tier 3: Pro Master (Premium+ Ultra Cyan) -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_PRO_MAX', 25, 38000, 'Pro Master (Premium+ Ultra)', 'fa-certificate')" style="border-color: rgba(0, 242, 255, 0.5); position: relative;">
+          <div class="special-badge" style="background: #00f2ff; color: #000; font-weight: 800;">PREMIUM+ ULTRA</div>
+          <div class="package-icon" style="color: #00f2ff;"><i class="fa-solid fa-certificate"></i></div>
+          <div class="package-tokens" style="color: #00f2ff; font-size: 20px;">PRO MASTER</div>
+          <div class="package-label" style="font-weight: 700; color: #fff;">Pro Master (Premium+)</div>
+          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+            Illuminated cyan rosette badge. 10x viral feed boost, synthetic detector bypass whitelist, and 0% tipping commission.
+          </div>
+          <div class="package-price" style="color: #00f2ff;">$25</div>
+          <div class="package-currency">₦38,000 NGN</div>
+          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #00f2ff 0%, #0088ff 100%); color: #000; font-weight: 800;">
+            <i class="fa-brands fa-whatsapp"></i> Order Premium+ Check
+          </button>
+        </div>
+
+        <!-- Tier 4: Verified Business & Studio (X Gold Organization) -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_BUSINESS_GOLD', 50, 75000, 'Verified Business & Studio (X Gold)', 'fa-certificate')" style="border-color: rgba(255, 215, 0, 0.5); position: relative;">
+          <div class="special-badge" style="background: #ffd700; color: #000; font-weight: 800;">X GOLD BUSINESS</div>
+          <div class="package-icon" style="color: #ffd700;"><i class="fa-solid fa-certificate"></i></div>
+          <div class="package-tokens" style="color: #ffd700; font-size: 20px;">X GOLD</div>
+          <div class="package-label" style="font-weight: 700; color: #fff;">Verified Business &amp; Studio</div>
+          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+            Official gold organization rosette like X Gold. Enables studio profile branding, multi-creator staff badges, and verified business banner.
+          </div>
+          <div class="package-price" style="color: #ffd700;">$50</div>
+          <div class="package-currency">₦75,000 NGN</div>
+          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #ffd700 0%, #ff8800 100%); color: #000; font-weight: 800;">
+            <i class="fa-brands fa-whatsapp"></i> Order Gold Check
+          </button>
+        </div>
+
+        <!-- Tier 5: Government & Sovereign Authority (X Grey Official) -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_GOVERNMENT_GREY', 40, 60000, 'Government & Sovereign Authority (X Grey)', 'fa-circle-check')" style="border-color: rgba(148, 163, 184, 0.5); position: relative;">
+          <div class="special-badge" style="background: #94a3b8; color: #000; font-weight: 800;">X GREY OFFICIAL</div>
+          <div class="package-icon" style="color: #cbd5e1;"><i class="fa-solid fa-circle-check"></i></div>
+          <div class="package-tokens" style="color: #cbd5e1; font-size: 20px;">X GREY</div>
+          <div class="package-label" style="font-weight: 700; color: #fff;">Government &amp; Authority</div>
+          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+            Official slate grey checkmark for public institutions, community governance, sovereign validator nodes, and consensus councils.
+          </div>
+          <div class="package-price" style="color: #cbd5e1;">$40</div>
+          <div class="package-currency">₦60,000 NGN</div>
+          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #cbd5e1 0%, #64748b 100%); color: #000; font-weight: 800;">
+            <i class="fa-brands fa-whatsapp"></i> Order Grey Check
+          </button>
+        </div>
+
+        <!-- Tier 6: VIP Sovereign Master Node -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_VIP_SOVEREIGN', 35, 50000, 'VIP Sovereign Master Node', 'fa-crown')" style="border-color: rgba(192, 132, 252, 0.5); position: relative;">
+          <div class="special-badge" style="background: #c084fc; color: #000; font-weight: 800;">GOVERNANCE VIP</div>
+          <div class="package-icon" style="color: #c084fc;"><i class="fa-solid fa-crown"></i></div>
+          <div class="package-tokens" style="color: #c084fc; font-size: 20px;">VIP SOVEREIGN</div>
+          <div class="package-label" style="font-weight: 700; color: #fff;">VIP Sovereign Master Node</div>
+          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+            Radiant purple crown badge. Sovereign consensus governance status, multi-sig arbitration privileges, and VIP lounge flair.
+          </div>
+          <div class="package-price" style="color: #c084fc;">$35</div>
+          <div class="package-currency">₦50,000 NGN</div>
+          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #c084fc 0%, #7e22ce 100%); color: #fff; font-weight: 800;">
+            <i class="fa-brands fa-whatsapp"></i> Order VIP Crown
+          </button>
+        </div>
+
+        <!-- Tier 7: Apex Patron & Investor -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_TOP_PATRON', 75, 110000, 'Apex Patron & Investor', 'fa-gem')" style="border-color: rgba(244, 63, 94, 0.5); position: relative;">
+          <div class="special-badge" style="background: #f43f5e; color: #fff; font-weight: 800;">APEX PATRON</div>
+          <div class="package-icon" style="color: #f43f5e;"><i class="fa-solid fa-gem"></i></div>
+          <div class="package-tokens" style="color: #f43f5e; font-size: 20px;">APEX PATRON</div>
+          <div class="package-label" style="font-weight: 700; color: #fff;">Apex Patron &amp; Investor</div>
+          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+            Rose diamond gem emblem. Highest platform liquidity angel status, certified investor halo, and 0% escrow protocol fee.
+          </div>
+          <div class="package-price" style="color: #f43f5e;">$75</div>
+          <div class="package-currency">₦110,000 NGN</div>
+          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%); color: #fff; font-weight: 800;">
+            <i class="fa-brands fa-whatsapp"></i> Order Patron Diamond
+          </button>
+        </div>
+
+        <!-- Tier 8: C2PA Hardware Sensor Provenance -->
+        <div class="package-card" onclick="selectBadgePackage('TIER_C2PA_HARDWARE', 20, 30000, 'C2PA Hardware Sensor Provenance', 'fa-shield-halved')" style="border-color: rgba(0, 255, 136, 0.45); position: relative;">
+          <div class="special-badge" style="background: #00ff88; color: #000; font-weight: 800;">AUTHENTIC SENSOR</div>
           <div class="package-icon" style="color: #00ff88;"><i class="fa-solid fa-shield-halved"></i></div>
-          <div class="package-tokens" style="color: #00ff88; font-size: 22px;">TIER 2</div>
+          <div class="package-tokens" style="color: #00ff88; font-size: 20px;">C2PA SENSOR</div>
           <div class="package-label" style="font-weight: 700; color: #fff;">C2PA Hardware Provenance</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px;">Enclave attested physical capture with cryptographic anti-synthetic media validation.</div>
-          <div class="package-price">$20</div>
+          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px; min-height: 44px;">
+            Hardware secure-enclave camera provenance. Cryptographically certifies that media was physically captured via real camera sensors.
+          </div>
+          <div class="package-price" style="color: #00ff88;">$20</div>
           <div class="package-currency">₦30,000 NGN</div>
           <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #00ff88 0%, #00bb55 100%); color: #000; font-weight: 800;">
-            <i class="fa-brands fa-whatsapp"></i> Order Badge
+            <i class="fa-brands fa-whatsapp"></i> Order Hardware Seal
           </button>
         </div>
 
-        <!-- Tier 3: VIP Sovereign Node -->
-        <div class="package-card" onclick="selectBadgePackage('VIP_SOVEREIGN', 35, 50000, 'VIP Sovereign Node', 'fa-crown')" style="border-color: rgba(255, 215, 0, 0.4);">
-          <div class="special-badge" style="background: #ffd700; color: #000;">GOVERNANCE VIP</div>
-          <div class="package-icon" style="color: #ffd700;"><i class="fa-solid fa-crown"></i></div>
-          <div class="package-tokens" style="color: #ffd700; font-size: 22px;">TIER 3</div>
-          <div class="package-label" style="font-weight: 700; color: #fff;">VIP Sovereign Node</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px;">Radiant gold crown badge, priority algorithm boosting &amp; protocol sponsor status.</div>
-          <div class="package-price">$35</div>
-          <div class="package-currency">₦50,000 NGN</div>
-          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #ffd700 0%, #ff8800 100%); color: #000; font-weight: 800;">
-            <i class="fa-brands fa-whatsapp"></i> Order Badge
-          </button>
-        </div>
-
-        <!-- Tier 4: Top Patron & Investor -->
-        <div class="package-card" onclick="selectBadgePackage('TOP_PATRON', 50, 75000, 'Top Patron & Investor', 'fa-gem')" style="border-color: rgba(255, 0, 255, 0.4);">
-          <div class="special-badge" style="background: #ff00ff; color: #000;">TOP PATRON</div>
-          <div class="package-icon" style="color: #ff00ff;"><i class="fa-solid fa-gem"></i></div>
-          <div class="package-tokens" style="color: #ff00ff; font-size: 22px;">TIER 4</div>
-          <div class="package-label" style="font-weight: 700; color: #fff;">Top Patron &amp; Investor</div>
-          <div style="font-size: 11px; color: #94a3b8; margin: 6px 0 10px;">Magenta gem emblem, highest escrow trust score &amp; certified investor halo.</div>
-          <div class="package-price">$50</div>
-          <div class="package-currency">₦75,000 NGN</div>
-          <button type="button" class="buy-btn" style="background: linear-gradient(135deg, #ff00ff 0%, #9900ff 100%); color: #fff; font-weight: 800;">
-            <i class="fa-brands fa-whatsapp"></i> Order Badge
-          </button>
-        </div>
       </div>
     </div>
 
@@ -1015,12 +1110,21 @@
     };
 
     window.selectBadgePackage = function(tier, priceUSD, priceNGN, name, icon) {
-      selectedPackage = { isBadge: true, tier, priceUSD, priceNGN, name, icon };
+      const tierMeta = window.NexVerificationCatalog ? window.NexVerificationCatalog.getVerificationTier(tier) : null;
+      const actualName = tierMeta ? tierMeta.name : (name || tier);
+      const actualPriceUSD = tierMeta ? tierMeta.priceUSD : priceUSD;
+      const actualPriceNGN = tierMeta ? tierMeta.priceNGN : priceNGN;
+      const actualIcon = tierMeta ? tierMeta.icon : (icon || 'fa-circle-check');
+      const actualColor = tierMeta ? tierMeta.color : '#00f2ff';
+      const actualSubtitle = tierMeta ? tierMeta.subtitle : 'Cryptographic Verified Identity Badge';
+
+      selectedPackage = { isBadge: true, tier, priceUSD: actualPriceUSD, priceNGN: actualPriceNGN, name: actualName, icon: actualIcon, color: actualColor };
       document.getElementById("packageSummary").innerHTML = `
         <div style="margin: 20px 0; text-align: center;">
-          <div style="font-size: 32px; color: #00f2ff; margin-bottom: 8px;"><i class="fa-solid ${icon}"></i></div>
-          <div style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 6px;">${name}</div>
-          <div style="font-size: 16px; font-weight: 700; color: #00ff66; margin-bottom: 6px;">$${priceUSD} / ₦${priceNGN.toLocaleString()} NGN</div>
+          <div style="font-size: 36px; color: ${actualColor}; margin-bottom: 8px;"><i class="fa-solid ${actualIcon}"></i></div>
+          <div style="font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 4px;">${actualName}</div>
+          <div style="font-size: 12px; color: ${actualColor}; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">${actualSubtitle}</div>
+          <div style="font-size: 18px; font-weight: 700; color: #00ff66; margin-bottom: 6px;">$${actualPriceUSD} / ₦${actualPriceNGN.toLocaleString()} NGN</div>
           <div style="font-size: 11.5px; color: #94a3b8;">Cryptographic Verified Identity Badge &amp; Provenance Seal</div>
         </div>
       `;

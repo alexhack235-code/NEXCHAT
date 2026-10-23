@@ -3457,50 +3457,103 @@
               </div>
 
               <!-- Badge Tiers Grid -->
-              <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 8px;">Select Verification Tier to Assign</label>
+              <!-- Badge Tiers Grid (X-Style Multi-Tier Suite) -->
+              <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 8px;">Select Verification Tier to Assign (X-Style Multi-Tier Suite)</label>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
                 
-                <label style="background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                  <input type="radio" name="fulfillBadgeTierRadio" value="VERIFIED_CREATOR" checked style="margin-top: 3px; accent-color: #00f2ff;">
+                <!-- Tier 1: Beginner Verified -->
+                <label style="background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TIER_BEGINNER" style="margin-top: 3px; accent-color: #10b981;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-circle-check"></i> Beginner Verified
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Green check, starter creator human verification</div>
+                    <div style="font-size: 9.5px; color: #10b981; font-family: monospace; margin-top: 3px;">$5.00 / ₦7,500</div>
+                  </div>
+                </label>
+
+                <!-- Tier 2: Pro Creator (X Blue) -->
+                <label style="background: rgba(29, 155, 240, 0.05); border: 1px solid rgba(29, 155, 240, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TIER_PRO" checked style="margin-top: 3px; accent-color: #1d9bf0;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #1d9bf0; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-circle-check"></i> Pro Creator (X Blue)
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Standard blue check, identity trust, boost algorithm</div>
+                    <div style="font-size: 9.5px; color: #1d9bf0; font-family: monospace; margin-top: 3px;">$12.00 / ₦18,000</div>
+                  </div>
+                </label>
+
+                <!-- Tier 3: Pro Master (Premium+) -->
+                <label style="background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TIER_PRO_MAX" style="margin-top: 3px; accent-color: #00f2ff;">
                   <div style="flex: 1;">
                     <div style="font-size: 12px; font-weight: 700; color: #00f2ff; display: flex; align-items: center; gap: 5px;">
-                      <i class="fa-solid fa-circle-check"></i> Verified Creator
+                      <i class="fa-solid fa-certificate"></i> Pro Master (Premium+)
                     </div>
-                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Official verified identity &amp; blue check badge</div>
-                    <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace; margin-top: 3px;">$10.00 / ₦15,000</div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Cyan rosette, premium+ radar, 1080p60 duplex stream</div>
+                    <div style="font-size: 9.5px; color: #00f2ff; font-family: monospace; margin-top: 3px;">$25.00 / ₦38,000</div>
                   </div>
                 </label>
 
-                <label style="background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                  <input type="radio" name="fulfillBadgeTierRadio" value="C2PA_HARDWARE_VERIFIED" style="margin-top: 3px; accent-color: #00ff88;">
-                  <div style="flex: 1;">
-                    <div style="font-size: 12px; font-weight: 700; color: #00ff88; display: flex; align-items: center; gap: 5px;">
-                      <i class="fa-solid fa-camera-rotate"></i> C2PA Hardware
-                    </div>
-                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Hardware cryptoseal &amp; camera provenance</div>
-                    <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace; margin-top: 3px;">$20.00 / ₦30,000</div>
-                  </div>
-                </label>
-
-                <label style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                  <input type="radio" name="fulfillBadgeTierRadio" value="VIP_SOVEREIGN" style="margin-top: 3px; accent-color: #ffd700;">
+                <!-- Tier 4: Verified Business & Studio (X Gold) -->
+                <label style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TIER_BUSINESS_GOLD" style="margin-top: 3px; accent-color: #ffd700;">
                   <div style="flex: 1;">
                     <div style="font-size: 12px; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 5px;">
-                      <i class="fa-solid fa-crown"></i> Sovereign VIP
+                      <i class="fa-solid fa-certificate"></i> Business &amp; Studio (Gold)
                     </div>
-                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Elite sovereign badge, priority feed routing</div>
-                    <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace; margin-top: 3px;">$35.00 / ₦50,000</div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Gold organization rosette, official studio branding</div>
+                    <div style="font-size: 9.5px; color: #ffd700; font-family: monospace; margin-top: 3px;">$50.00 / ₦75,000</div>
                   </div>
                 </label>
 
-                <label style="background: rgba(192, 132, 252, 0.05); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-                  <input type="radio" name="fulfillBadgeTierRadio" value="TOP_PATRON" style="margin-top: 3px; accent-color: #c084fc;">
+                <!-- Tier 5: Government & Sovereign Authority (X Grey) -->
+                <label style="background: rgba(148, 163, 184, 0.05); border: 1px solid rgba(148, 163, 184, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TIER_GOVERNMENT_GREY" style="margin-top: 3px; accent-color: #94a3b8;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-circle-check"></i> Government &amp; Authority (Grey)
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Slate grey check, institutional validator governance</div>
+                    <div style="font-size: 9.5px; color: #cbd5e1; font-family: monospace; margin-top: 3px;">$40.00 / ₦60,000</div>
+                  </div>
+                </label>
+
+                <!-- Tier 6: VIP Sovereign Master Node -->
+                <label style="background: rgba(192, 132, 252, 0.05); border: 1px solid rgba(192, 132, 252, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TIER_VIP_SOVEREIGN" style="margin-top: 3px; accent-color: #c084fc;">
                   <div style="flex: 1;">
                     <div style="font-size: 12px; font-weight: 700; color: #c084fc; display: flex; align-items: center; gap: 5px;">
-                      <i class="fa-solid fa-gem"></i> Top Patron
+                      <i class="fa-solid fa-crown"></i> VIP Sovereign Master
                     </div>
-                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Diamond patron badge &amp; zero commission perk</div>
-                    <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace; margin-top: 3px;">$50.00 / ₦75,000</div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Purple crown, multi-sig arbitration, VIP routing</div>
+                    <div style="font-size: 9.5px; color: #c084fc; font-family: monospace; margin-top: 3px;">$35.00 / ₦50,000</div>
+                  </div>
+                </label>
+
+                <!-- Tier 7: Apex Patron & Investor -->
+                <label style="background: rgba(244, 63, 94, 0.05); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TIER_TOP_PATRON" style="margin-top: 3px; accent-color: #f43f5e;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #f43f5e; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-gem"></i> Apex Patron &amp; Investor
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Rose diamond, zero escrow protocol fees, investor halo</div>
+                    <div style="font-size: 9.5px; color: #f43f5e; font-family: monospace; margin-top: 3px;">$75.00 / ₦110,000</div>
+                  </div>
+                </label>
+
+                <!-- Tier 8: C2PA Hardware Sensor Provenance -->
+                <label style="background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TIER_C2PA_HARDWARE" style="margin-top: 3px; accent-color: #00ff88;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #00ff88; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-shield-halved"></i> C2PA Hardware Sensor
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Enclave camera cryptoseal, physical sensor attestation</div>
+                    <div style="font-size: 9.5px; color: #00ff88; font-family: monospace; margin-top: 3px;">$20.00 / ₦30,000</div>
                   </div>
                 </label>
               </div>
@@ -3624,28 +3677,52 @@
                       <td>₦650,000</td>
                     </tr>
                     <tr style="border-top: 1px solid rgba(0, 242, 255, 0.2);">
-                      <td style="color: #00f2ff; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Verified Creator</td>
-                      <td>Identity Check</td>
-                      <td>$10.00</td>
-                      <td>₦15,000</td>
+                      <td style="color: #10b981; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Beginner Verified</td>
+                      <td>Green Check</td>
+                      <td>$5.00</td>
+                      <td>₦7,500</td>
                     </tr>
                     <tr>
-                      <td style="color: #00ff88; font-weight: 600;"><i class="fa-solid fa-camera-rotate"></i> C2PA Hardware</td>
-                      <td>Hardware Seal</td>
-                      <td>$20.00</td>
-                      <td>₦30,000</td>
+                      <td style="color: #1d9bf0; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Pro Creator (X Blue)</td>
+                      <td>Standard Blue Check</td>
+                      <td>$12.00</td>
+                      <td>₦18,000</td>
                     </tr>
                     <tr>
-                      <td style="color: #ffd700; font-weight: 600;"><i class="fa-solid fa-crown"></i> Sovereign VIP</td>
-                      <td>Priority VIP</td>
+                      <td style="color: #00f2ff; font-weight: 600;"><i class="fa-solid fa-certificate"></i> Pro Master (Premium+)</td>
+                      <td>Cyan Rosette</td>
+                      <td>$25.00</td>
+                      <td>₦38,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #ffd700; font-weight: 600;"><i class="fa-solid fa-certificate"></i> Business &amp; Studio</td>
+                      <td>X Gold Rosette</td>
+                      <td>$50.00</td>
+                      <td>₦75,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #cbd5e1; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Government &amp; Authority</td>
+                      <td>X Grey Check</td>
+                      <td>$40.00</td>
+                      <td>₦60,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #c084fc; font-weight: 600;"><i class="fa-solid fa-crown"></i> VIP Sovereign</td>
+                      <td>Purple Crown</td>
                       <td>$35.00</td>
                       <td>₦50,000</td>
                     </tr>
                     <tr>
-                      <td style="color: #c084fc; font-weight: 600;"><i class="fa-solid fa-gem"></i> Top Patron</td>
-                      <td>Diamond Patron</td>
-                      <td>$50.00</td>
-                      <td>₦75,000</td>
+                      <td style="color: #f43f5e; font-weight: 600;"><i class="fa-solid fa-gem"></i> Apex Patron &amp; Investor</td>
+                      <td>Rose Diamond</td>
+                      <td>$75.00</td>
+                      <td>₦110,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #00ff88; font-weight: 600;"><i class="fa-solid fa-shield-halved"></i> C2PA Hardware Sensor</td>
+                      <td>Emerald Camera Shield</td>
+                      <td>$20.00</td>
+                      <td>₦30,000</td>
                     </tr>
                   </tbody>
                 </table>
@@ -3948,34 +4025,80 @@
           Select Cryptographic Verification Tier:
         </label>
         <div style="display: flex; flex-direction: column; gap: 8px;" id="adminBadgeTierOptions">
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
-            <input type="radio" name="adminVerificationTierRadio" value="VERIFIED_CREATOR" checked style="accent-color: #00f2ff;">
+          
+          <!-- Tier 1: Beginner Verified -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(16,185,129,0.04); border: 1px solid rgba(16,185,129,0.25); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TIER_BEGINNER" style="accent-color: #10b981;">
             <div>
-              <strong style="color: #00f2ff; font-size: 12px; display: block;"><i class="fa-solid fa-circle-check"></i> Official Verified Creator (Tier 1)</strong>
-              <span style="font-size: 10.5px; color: #94a3b8;">High-trust public creator status with blue check badge across CamShot &amp; chat.</span>
+              <strong style="color: #10b981; font-size: 12px; display: block;"><i class="fa-solid fa-circle-check"></i> Beginner Verified (Starter Creator)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Green check badge. Starter human verification and baseline CamShot algorithm indexing ($5.00 / ₦7,500).</span>
             </div>
           </label>
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
-            <input type="radio" name="adminVerificationTierRadio" value="C2PA_HARDWARE_VERIFIED" style="accent-color: #00ff88;">
+
+          <!-- Tier 2: Pro Creator (X Blue) -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(29,155,240,0.04); border: 1px solid rgba(29,155,240,0.25); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TIER_PRO" checked style="accent-color: #1d9bf0;">
             <div>
-              <strong style="color: #00ff88; font-size: 12px; display: block;"><i class="fa-solid fa-shield-halved"></i> C2PA Hardware Sensor Provenance (Tier 2)</strong>
-              <span style="font-size: 10.5px; color: #94a3b8;">Hardware enclave attested physical camera capture with anti-synthetic media validation.</span>
+              <strong style="color: #1d9bf0; font-size: 12px; display: block;"><i class="fa-solid fa-circle-check"></i> Pro Creator (X Blue Checkmark)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Official blue checkmark like X Blue. High-trust public identity &amp; boost reach ($12.00 / ₦18,000).</span>
             </div>
           </label>
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
-            <input type="radio" name="adminVerificationTierRadio" value="VIP_SOVEREIGN" style="accent-color: #c084fc;">
+
+          <!-- Tier 3: Pro Master (Premium+) -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(0,242,255,0.04); border: 1px solid rgba(0,242,255,0.25); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TIER_PRO_MAX" style="accent-color: #00f2ff;">
             <div>
-              <strong style="color: #c084fc; font-size: 12px; display: block;"><i class="fa-solid fa-crown"></i> VIP Sovereign Master Node (Tier 3)</strong>
-              <span style="font-size: 10.5px; color: #94a3b8;">Sovereign consensus governance status with multi-sig arbitration privileges.</span>
+              <strong style="color: #00f2ff; font-size: 12px; display: block;"><i class="fa-solid fa-certificate"></i> Pro Master (Premium+ Ultra Cyan)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Cyan rosette emblem. 1080p60 ultra bitrate duplex streams &amp; verified creator certificate ($25.00 / ₦38,000).</span>
             </div>
           </label>
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
-            <input type="radio" name="adminVerificationTierRadio" value="TOP_PATRON" style="accent-color: #fbbf24;">
+
+          <!-- Tier 4: Verified Business & Studio (X Gold) -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,215,0,0.04); border: 1px solid rgba(255,215,0,0.25); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TIER_BUSINESS_GOLD" style="accent-color: #ffd700;">
             <div>
-              <strong style="color: #fbbf24; font-size: 12px; display: block;"><i class="fa-solid fa-star"></i> Apex Sovereign Patron (Tier 4)</strong>
-              <span style="font-size: 10.5px; color: #94a3b8;">Central Treasury Liquidity Guild high-volume tipping supporter.</span>
+              <strong style="color: #ffd700; font-size: 12px; display: block;"><i class="fa-solid fa-certificate"></i> Verified Business &amp; Studio (X Gold Rosette)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Official gold organization rosette like X Gold. Studio branding &amp; multi-creator staff badges ($50.00 / ₦75,000).</span>
             </div>
           </label>
+
+          <!-- Tier 5: Government & Sovereign Authority (X Grey) -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(148,163,184,0.04); border: 1px solid rgba(148,163,184,0.25); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TIER_GOVERNMENT_GREY" style="accent-color: #94a3b8;">
+            <div>
+              <strong style="color: #cbd5e1; font-size: 12px; display: block;"><i class="fa-solid fa-circle-check"></i> Government &amp; Sovereign Authority (X Grey Check)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Official slate grey checkmark for public institutions, community councils, and validator nodes ($40.00 / ₦60,000).</span>
+            </div>
+          </label>
+
+          <!-- Tier 6: VIP Sovereign Master Node -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(192,132,252,0.04); border: 1px solid rgba(192,132,252,0.25); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TIER_VIP_SOVEREIGN" style="accent-color: #c084fc;">
+            <div>
+              <strong style="color: #c084fc; font-size: 12px; display: block;"><i class="fa-solid fa-crown"></i> VIP Sovereign Master Node (Amethyst Crown)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Purple crown badge. Sovereign consensus governance status &amp; multi-sig arbitration privileges ($35.00 / ₦50,000).</span>
+            </div>
+          </label>
+
+          <!-- Tier 7: Apex Patron & Investor -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(244,63,94,0.04); border: 1px solid rgba(244,63,94,0.25); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TIER_TOP_PATRON" style="accent-color: #f43f5e;">
+            <div>
+              <strong style="color: #f43f5e; font-size: 12px; display: block;"><i class="fa-solid fa-gem"></i> Apex Patron &amp; Investor (Rose Diamond)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Rose diamond emblem. Top platform investor halo and 0% escrow protocol fee ($75.00 / ₦110,000).</span>
+            </div>
+          </label>
+
+          <!-- Tier 8: C2PA Hardware Sensor Provenance -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(0,255,136,0.04); border: 1px solid rgba(0,255,136,0.25); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
+            <input type="radio" name="adminVerificationTierRadio" value="TIER_C2PA_HARDWARE" style="accent-color: #00ff88;">
+            <div>
+              <strong style="color: #00ff88; font-size: 12px; display: block;"><i class="fa-solid fa-shield-halved"></i> C2PA Hardware Sensor Provenance (Emerald Shield)</strong>
+              <span style="font-size: 10.5px; color: #94a3b8;">Hardware secure-enclave camera provenance certifying authentic physical sensor capture ($20.00 / ₦30,000).</span>
+            </div>
+          </label>
+
+          <!-- Revoke Option -->
           <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,59,48,0.06); border: 1px solid rgba(255,59,48,0.2); padding: 10px 14px; border-radius: 8px; cursor: pointer;">
             <input type="radio" name="adminVerificationTierRadio" value="NONE" style="accent-color: #ff3b30;">
             <div>
@@ -4008,6 +4131,7 @@
   <script src="src/js/reels-watermark-engine.js"></script>
   <script src="src/js/ai-security-scanner-api.js"></script>
   <script src="src/js/hardware-fingerprint-sentinel.js"></script>
+  <script src="src/js/verification-badges-catalog.js"></script>
 
   <!-- CONTROLLER SCRIPT -->
   <script>
@@ -4258,10 +4382,10 @@
 
       // ─── LOAD LIVE DATA & METRICS ───
       const SEEDED_ADMIN_USERS = [
-        { id: 'usr_alex_root_01', username: 'demonalexander526', displayName: 'Alexander (Lead Dev)', email: 'demonalexander526@gmail.com', role: 'superadmin', tokens: 99999, status: 'active', banned: false },
-        { id: 'usr_cyber_ghost_02', username: 'shadow_operative', displayName: 'Shadow Operative', email: 'operative@nexchat.io', role: 'moderator', tokens: 1250, status: 'active', banned: false },
-        { id: 'usr_spam_bot_03', username: 'crypto_spammer_99', displayName: 'Spam Affiliate Bot', email: 'bot99@phish.xyz', role: 'user', tokens: 0, status: 'suspended', suspended: true, suspensionReason: 'Automated promotional spam in public rooms' },
-        { id: 'usr_toxic_raider_04', username: 'blackhat_intruder', displayName: 'Exploit Tester', email: 'intruder@darknet.org', role: 'user', tokens: 10, status: 'banned', banned: true, suspensionReason: 'Cross-origin injection attempt' }
+        { id: 'usr_alex_root_01', username: 'demonalexander526', displayName: 'Alexander (Lead Dev)', email: 'demonalexander526@gmail.com', role: 'superadmin', tokens: 99999, status: 'active', banned: false, verificationBadge: 'TIER_PRO_MAX', isVerified: true },
+        { id: 'usr_cyber_ghost_02', username: 'shadow_operative', displayName: 'Shadow Operative', email: 'operative@nexchat.io', role: 'moderator', tokens: 1250, status: 'active', banned: false, verificationBadge: 'TIER_C2PA_HARDWARE', isVerified: true },
+        { id: 'usr_spam_bot_03', username: 'crypto_spammer_99', displayName: 'Spam Affiliate Bot', email: 'bot99@phish.xyz', role: 'user', tokens: 0, status: 'suspended', suspended: true, suspensionReason: 'Automated promotional spam in public rooms', verificationBadge: 'NONE', isVerified: false },
+        { id: 'usr_toxic_raider_04', username: 'blackhat_intruder', displayName: 'Exploit Tester', email: 'intruder@darknet.org', role: 'user', tokens: 10, status: 'banned', banned: true, suspensionReason: 'Cross-origin injection attempt', verificationBadge: 'NONE', isVerified: false }
       ];
       let cachedUsers = [...SEEDED_ADMIN_USERS];
 
@@ -5684,11 +5808,22 @@
         if (uidText) uidText.textContent = user.id;
         if (balanceEl) balanceEl.textContent = Number(user.tokens || 0).toLocaleString();
         
-        const currentBadge = user.verificationBadge || (user.isVerified ? 'VERIFIED_CREATOR' : 'NONE');
-        if (badgeTierEl) badgeTierEl.textContent = currentBadge;
+        const currentBadge = user.verificationBadge || (user.isVerified ? 'TIER_PRO' : 'NONE');
+        if (badgeTierEl) {
+          if (window.NexVerificationCatalog && typeof window.NexVerificationCatalog.renderVerificationBadgePill === 'function' && currentBadge !== 'NONE') {
+            badgeTierEl.innerHTML = window.NexVerificationCatalog.renderVerificationBadgePill(currentBadge);
+          } else {
+            badgeTierEl.textContent = currentBadge;
+          }
+        }
 
         const radio = document.querySelector(`input[name="fulfillBadgeTierRadio"][value="${currentBadge}"]`);
-        if (radio) radio.checked = true;
+        if (radio) {
+          radio.checked = true;
+        } else {
+          const fallbackRadio = document.querySelector(`input[name="fulfillBadgeTierRadio"][value="NONE"]`);
+          if (fallbackRadio) fallbackRadio.checked = true;
+        }
 
         if (roleBadge) {
           const role = (user.role || 'user').toUpperCase();
@@ -5864,6 +5999,10 @@ For support or further inquiries, reply directly to this chat.`;
           const tokens = u.tokens || 0;
           const avatarUrl = u.avatarUrl || u.photoURL || 'logo.jpg';
           const displayName = u.username || u.displayName || 'Anonymous User';
+          const badgeTierKey = u.verificationBadge || (u.isVerified ? 'TIER_PRO' : 'NONE');
+          const badgeHtml = (window.NexVerificationCatalog && typeof window.NexVerificationCatalog.renderVerificationBadgeHtml === 'function')
+            ? window.NexVerificationCatalog.renderVerificationBadgeHtml(badgeTierKey, { fontSize: '13px' })
+            : '';
 
           let statusBadgeHtml = '<span class="badge active"><i class="fa-solid fa-circle-check"></i> ACTIVE</span>';
           if (isBanned) {
@@ -5879,7 +6018,10 @@ For support or further inquiries, reply directly to this chat.`;
               <div style="display: flex; align-items: center; gap: 10px;">
                 <img src="${avatarUrl}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(0,242,255,0.3);" onerror="this.src='logo.jpg'">
                 <div>
-                  <strong style="color: #fff; font-size: 13px;">${escapeHtml(displayName)}</strong>
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <strong style="color: #fff; font-size: 13px;">${escapeHtml(displayName)}</strong>
+                    ${badgeHtml}
+                  </div>
                   <div style="font-size: 10px; color: var(--text-dim); font-family: monospace;">@${escapeHtml(u.username || 'user')}</div>
                 </div>
               </div>
@@ -6288,14 +6430,23 @@ For support or further inquiries, reply directly to this chat.`;
         if (handleEl) handleEl.textContent = '@' + (user.username || 'user');
         if (uidEl) uidEl.textContent = 'UID: ' + user.id;
 
-        const currentBadge = user.verificationBadge || (user.isVerified ? 'VERIFIED_CREATOR' : 'NONE');
+        const currentBadge = user.verificationBadge || (user.isVerified ? 'TIER_PRO' : 'NONE');
         if (tierBadge) {
-          tierBadge.textContent = currentBadge;
-          tierBadge.style.color = currentBadge === 'NONE' ? '#94a3b8' : '#00f2ff';
+          if (window.NexVerificationCatalog && typeof window.NexVerificationCatalog.renderVerificationBadgePill === 'function' && currentBadge !== 'NONE') {
+            tierBadge.innerHTML = window.NexVerificationCatalog.renderVerificationBadgePill(currentBadge);
+          } else {
+            tierBadge.textContent = currentBadge;
+            tierBadge.style.color = currentBadge === 'NONE' ? '#94a3b8' : '#00f2ff';
+          }
         }
 
         const radio = document.querySelector(`input[name="adminVerificationTierRadio"][value="${currentBadge}"]`);
-        if (radio) radio.checked = true;
+        if (radio) {
+          radio.checked = true;
+        } else {
+          const fallbackRadio = document.querySelector(`input[name="adminVerificationTierRadio"][value="NONE"]`);
+          if (fallbackRadio) fallbackRadio.checked = true;
+        }
 
         adminVerificationBadgeModal?.classList.add('active');
       }

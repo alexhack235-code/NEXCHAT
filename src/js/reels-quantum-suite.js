@@ -792,12 +792,68 @@
   class CreatorVerificationBadgeSystem {
     constructor() {
       this.tiers = {
-        VERIFIED_CREATOR: {
-          title: 'Official Verified Creator',
+        TIER_BEGINNER: {
+          title: 'Beginner Verified Creator',
           icon: 'fa-circle-check',
-          color: '#00f2ff',
+          color: '#10b981',
+          badgeClass: 'badge-creator-green',
+          authority: 'NEXCHAT Human Verification Sentinel'
+        },
+        TIER_PRO: {
+          title: 'Official Pro Creator (X Blue)',
+          icon: 'fa-circle-check',
+          color: '#1d9bf0',
           badgeClass: 'badge-creator-blue',
-          authority: 'NEXCHAT Creator Guild Root'
+          authority: 'NEXCHAT Creator Trust Guild'
+        },
+        TIER_PRO_MAX: {
+          title: 'Pro Master (Premium+ Ultra Cyan)',
+          icon: 'fa-certificate',
+          color: '#00f2ff',
+          badgeClass: 'badge-creator-cyan',
+          authority: 'NEXCHAT Creator Guild Root Authority'
+        },
+        TIER_BUSINESS_GOLD: {
+          title: 'Verified Business & Studio (X Gold)',
+          icon: 'fa-certificate',
+          color: '#ffd700',
+          badgeClass: 'badge-org-gold',
+          authority: 'NEXCHAT Commercial Enterprise Registry'
+        },
+        TIER_GOVERNMENT_GREY: {
+          title: 'Government & Sovereign Authority (X Grey)',
+          icon: 'fa-circle-check',
+          color: '#cbd5e1',
+          badgeClass: 'badge-gov-grey',
+          authority: 'Sovereign Institutional Governance Council'
+        },
+        TIER_VIP_SOVEREIGN: {
+          title: 'VIP Sovereign Master Node',
+          icon: 'fa-crown',
+          color: '#c084fc',
+          badgeClass: 'badge-vip-purple',
+          authority: 'Sovereign Consensus Governance Network'
+        },
+        TIER_TOP_PATRON: {
+          title: 'Apex Patron & Investor',
+          icon: 'fa-gem',
+          color: '#f43f5e',
+          badgeClass: 'badge-patron-rose',
+          authority: 'Central Treasury Liquidity Guild'
+        },
+        TIER_C2PA_HARDWARE: {
+          title: 'C2PA Hardware Sensor Provenance',
+          icon: 'fa-shield-halved',
+          color: '#00ff88',
+          badgeClass: 'badge-c2pa-green',
+          authority: 'Hardware Enclave Cryptographic Attestation'
+        },
+        VERIFIED_CREATOR: {
+          title: 'Official Pro Creator (X Blue)',
+          icon: 'fa-circle-check',
+          color: '#1d9bf0',
+          badgeClass: 'badge-creator-blue',
+          authority: 'NEXCHAT Creator Trust Guild'
         },
         C2PA_HARDWARE_VERIFIED: {
           title: 'C2PA Hardware Sensor Provenance',
@@ -811,13 +867,13 @@
           icon: 'fa-crown',
           color: '#c084fc',
           badgeClass: 'badge-vip-purple',
-          authority: 'Sovereign Consensus Governance'
+          authority: 'Sovereign Consensus Governance Network'
         },
         TOP_PATRON: {
-          title: 'Apex Sovereign Patron',
-          icon: 'fa-star',
-          color: '#fbbf24',
-          badgeClass: 'badge-patron-gold',
+          title: 'Apex Patron & Investor',
+          icon: 'fa-gem',
+          color: '#f43f5e',
+          badgeClass: 'badge-patron-rose',
           authority: 'Central Treasury Liquidity Guild'
         }
       };
@@ -827,22 +883,31 @@
     initModalTriggers() {
       // Delegate clicks on verification badges anywhere in document
       document.addEventListener('click', (e) => {
-        const badge = e.target.closest('.reel-verified-badge, .reel-c2pa-badge, .creator-verification-pill');
+        const badge = e.target.closest('.reel-verified-badge, .reel-c2pa-badge, .creator-verification-pill, .nex-verification-badge');
         if (badge) {
           e.preventDefault();
           e.stopPropagation();
           const handle = badge.getAttribute('data-handle') || badge.closest('.reel-card')?.querySelector('.reel-creator-handle')?.textContent.trim() || '@creator';
-          const tier = badge.getAttribute('data-tier') || (badge.classList.contains('reel-c2pa-badge') ? 'C2PA_HARDWARE_VERIFIED' : 'VERIFIED_CREATOR');
+          const tier = badge.getAttribute('data-tier') || (badge.classList.contains('reel-c2pa-badge') ? 'TIER_C2PA_HARDWARE' : 'TIER_PRO');
           this.openCertificateModal(handle.replace('@', ''), tier);
         }
       });
     }
 
-    openCertificateModal(handle, tierKey = 'VERIFIED_CREATOR') {
+    openCertificateModal(handle, tierKey = 'TIER_PRO') {
       let modal = document.getElementById('nexVerificationCertificateModal');
       if (modal) modal.remove();
 
-      const tier = this.tiers[tierKey] || this.tiers.VERIFIED_CREATOR;
+      const catalogTier = (window.NexVerificationCatalog && typeof window.NexVerificationCatalog.getVerificationTier === 'function')
+        ? window.NexVerificationCatalog.getVerificationTier(tierKey)
+        : null;
+      const tier = catalogTier ? {
+        title: catalogTier.name,
+        icon: catalogTier.icon,
+        color: catalogTier.color,
+        badgeClass: 'badge-' + (catalogTier.key ? catalogTier.key.toLowerCase().replace(/_/g, '-') : 'verified'),
+        authority: catalogTier.authority || 'NEXCHAT Cryptographic Verification Authority'
+      } : (this.tiers[tierKey] || this.tiers.TIER_PRO || this.tiers.VERIFIED_CREATOR);
       const certId = 'CERT_' + Math.abs(this.hashCode(handle)).toString(16).toUpperCase() + '_2026';
       const rootHash = 'sha256:' + Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, '0')).join('') + '...7f02';
 

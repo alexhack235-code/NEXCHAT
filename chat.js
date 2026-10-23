@@ -3301,6 +3301,10 @@ function renderSearchResults(itemsToRender) {
     const isGroup = !!item.isGroup;
     const rawName = item.name || item.username || (isGroup ? 'Unnamed Group' : 'Cyber User');
     const displayName = escapeHtml(rawName);
+    const badgeTierKey = item.verificationBadge || (item.isVerified ? 'TIER_PRO' : null);
+    const badgeHtml = (!isGroup && window.NexVerificationCatalog && badgeTierKey && badgeTierKey !== 'NONE')
+      ? window.NexVerificationCatalog.renderVerificationBadgeHtml(badgeTierKey, { fontSize: '12px' })
+      : '';
     const handle = isGroup ? `Group · ${item.members?.length || 0} members` : (item.username ? `@${escapeHtml(item.username)}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User'));
     const profilePic = item.profilePic || item.profilePicUrl || item.avatar || (isGroup ? 'logo.jpg' : '/favicons/favicon.ico');
     const isOnline = item.online === true;
@@ -3319,6 +3323,7 @@ function renderSearchResults(itemsToRender) {
       <div class="search-card-info">
         <div class="search-card-header-row">
           <span class="search-card-name">${displayName}</span>
+          ${badgeHtml}
           ${isGroup ? '<span class="search-badge group-badge"><i class="fa-solid fa-users"></i></span>' : (isOnline ? '<span class="search-badge verified-badge"><i class="fa-solid fa-circle-check"></i></span>' : '')}
         </div>
         <div class="search-card-handle">${handle}</div>
@@ -5464,10 +5469,10 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
         if (infoEmailEl) infoEmailEl.textContent = `Members: ${groupData.members.length} `;
 
         const statusTextEl = document.getElementById("statusText");
-        if (statusTextEl) statusTextEl.textContent = `?? Group Chat`;
+        if (statusTextEl) statusTextEl.textContent = "Group Chat";
 
         const infoStatusEl = document.getElementById("infoStatus");
-        if (infoStatusEl) infoStatusEl.textContent = `?? Group Chat`;
+        if (infoStatusEl) infoStatusEl.textContent = "Group Chat";
 
         updateChatProfileDisplay(username, profilePic, "Group Chat");
 
@@ -5531,6 +5536,19 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
         if (infoStatusEl) infoStatusEl.textContent = statusText;
 
         updateChatProfileDisplay(username, profilePic, statusText);
+
+        const badgeTier = userData.verificationBadge || (userData.isVerified ? 'TIER_PRO' : 'NONE');
+        if (window.NexVerificationCatalog && badgeTier && badgeTier !== 'NONE') {
+          const badgeHtml = window.NexVerificationCatalog.renderVerificationBadgeHtml(badgeTier, { fontSize: '13px' });
+          const activeChatName = document.getElementById("activeChatName");
+          if (activeChatName) {
+            activeChatName.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
+          }
+          const chatNameEl = document.getElementById("chatName");
+          if (chatNameEl) {
+            chatNameEl.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
+          }
+        }
       } else {
         console.warn("User document not found in database, but proceeding with UID:", uid);
         const infoEmail = document.getElementById("infoEmail");
