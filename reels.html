@@ -14,6 +14,7 @@
   <!-- Tailwind removed: pure CSS design system -->
   <link rel="stylesheet" href="reels.css">
   <link rel="stylesheet" href="extension-hub.css">
+  <link rel="stylesheet" href="css/nextgen-suite.css">
 </head>
 <body class="reels-body">
   <!-- Ambient Luxury Background Grid -->
@@ -62,6 +63,10 @@
       </button>
       <button id="openReelsSettingsBtn" class="reels-header-icon-btn" title="Settings & Preferences">
         <i class="fa-solid fa-gear"></i>
+      </button>
+      <button type="button" id="camshotGoLiveBtn" class="reels-create-main-btn" style="background: linear-gradient(135deg, #ff3366, #ff0055); box-shadow: 0 4px 18px rgba(255, 51, 102, 0.4);" title="Start Live Broadcast Stream" onclick="if(window.NextGenSuite) window.NextGenSuite.liveBroadcast.openModal();">
+        <i class="fa-solid fa-tower-broadcast"></i>
+        <span>Go Live</span>
       </button>
       <button id="openUploadModalBtn" class="reels-create-main-btn" title="Create / Post a CamShot (Shortcut: C)">
         <i class="fa-solid fa-plus"></i>
@@ -1334,5 +1339,6 @@
   <script type="module" src="reels.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
   <script src="./src/js/reels-advanced-suite.js"></script>
+  <script src="./src/js/nextgen-eight-suite.js"></script>
 </body>
 </html>

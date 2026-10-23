@@ -30,6 +30,7 @@
   <link rel="stylesheet" href="src/features/group/group-chat.css">
   <link rel="stylesheet" href="extension-hub.css">
   <link rel="stylesheet" href="css/cyber-suite.css">
+  <link rel="stylesheet" href="css/nextgen-suite.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
@@ -707,6 +708,18 @@
             <div class="attach-hub-item" id="hubActionKanban">
               <div class="attach-hub-icon" style="color: #00f3ff;"><i class="fa-solid fa-table-columns"></i></div>
               <span>Kanban Board</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionVoiceSpectrogram" onclick="if(window.NextGenSuite) window.NextGenSuite.voice.openModal();">
+              <div class="attach-hub-icon" style="color: #00ff88;"><i class="fa-solid fa-wave-square"></i></div>
+              <span>Voice Spectrogram</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionP2pMesh" onclick="if(window.NextGenSuite) window.NextGenSuite.p2pMesh.openModal();">
+              <div class="attach-hub-icon" style="color: #00d4ff;"><i class="fa-solid fa-network-wired"></i></div>
+              <span>P2P Chunk Mesh</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionSpatialLounge" onclick="if(window.NextGenSuite) window.NextGenSuite.spatialLounge.openModal();">
+              <div class="attach-hub-icon" style="color: #c084fc;"><i class="fa-solid fa-radar"></i></div>
+              <span>Spatial Lounge</span>
             </div>
           </div>
 
@@ -1570,17 +1583,17 @@
                   <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
                     <label style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">Active Country Edge Node:</label>
                     <select id="countryCdnNodeSelect" class="settings-select">
-                      <option value="auto">🌐 Automatic Routing (Closest to Detected Country)</option>
-                      <option value="af-west-lagos-7">🇳🇬 AF-West (Lagos Edge 7) - West Africa</option>
-                      <option value="af-south-joburg-8">🇿🇦 AF-South (Johannesburg Edge 8) - Southern Africa</option>
-                      <option value="us-east-virginia-1">🇺🇸 US-East (Virginia Edge 1) - North America</option>
-                      <option value="us-west-oregon-2">🇺🇸 US-West (Oregon Edge 2) - North America</option>
-                      <option value="eu-west-frankfurt-3">🇩🇪 EU-West (Frankfurt Edge 3) - Europe</option>
-                      <option value="eu-north-stockholm-4">🇸🇪 EU-North (Stockholm Edge 4) - Northern Europe</option>
-                      <option value="ap-south-mumbai-5">🇮🇳 AP-South (Mumbai Edge 5) - South Asia</option>
-                      <option value="ap-east-tokyo-6">🇯🇵 AP-East (Tokyo Edge 6) - East Asia</option>
-                      <option value="sa-east-saopaulo-9">🇧🇷 SA-East (São Paulo Edge 9) - South America</option>
-                      <option value="oc-south-sydney-10">🇦🇺 OC-South (Sydney Edge 10) - Oceania</option>
+                      <option value="auto">[AUTO] Automatic Routing (Closest to Detected Country)</option>
+                      <option value="af-west-lagos-7">[NG] AF-West (Lagos Edge 7) - West Africa</option>
+                      <option value="af-south-joburg-8">[ZA] AF-South (Johannesburg Edge 8) - Southern Africa</option>
+                      <option value="us-east-virginia-1">[US] US-East (Virginia Edge 1) - North America</option>
+                      <option value="us-west-oregon-2">[US] US-West (Oregon Edge 2) - North America</option>
+                      <option value="eu-west-frankfurt-3">[DE] EU-West (Frankfurt Edge 3) - Europe</option>
+                      <option value="eu-north-stockholm-4">[SE] EU-North (Stockholm Edge 4) - Northern Europe</option>
+                      <option value="ap-south-mumbai-5">[IN] AP-South (Mumbai Edge 5) - South Asia</option>
+                      <option value="ap-east-tokyo-6">[JP] AP-East (Tokyo Edge 6) - East Asia</option>
+                      <option value="sa-east-saopaulo-9">[BR] SA-East (São Paulo Edge 9) - South America</option>
+                      <option value="oc-south-sydney-10">[AU] OC-South (Sydney Edge 10) - Oceania</option>
                     </select>
                     <div style="display: flex; gap: 8px; margin-top: 10px;">
                       <button type="button" id="testCountryCdnPingBtn" class="btn-primary" style="flex: 1; font-size: 12px; padding: 7px 12px; background: rgba(0, 243, 255, 0.15); border: 1px solid #00f3ff; color: #00f3ff;">
@@ -1605,7 +1618,7 @@
                   <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08); font-size: 12px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                       <span style="color: #94a3b8;">Integrity Status:</span>
-                      <span id="antiVpnStatusBadge" style="color: #10b981; font-weight: 700;">🛡️ 100% Physical Hardware Match</span>
+                      <span id="antiVpnStatusBadge" style="color: #10b981; font-weight: 700;">[SECURE] 100% Physical Hardware Match</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                       <span style="color: #94a3b8;">WebRTC Adapter Leak:</span>
@@ -4373,9 +4386,9 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <!-- Discovery Filter & Search Controls -->
       <div class="location-discovery-controls">
         <div class="location-tab-pills">
-          <button type="button" class="loc-tab-btn active" data-tab="country">🌍 In Your Country</button>
-          <button type="button" class="loc-tab-btn" data-tab="city">📍 In Your City</button>
-          <button type="button" class="loc-tab-btn" data-tab="global">🌐 Global Operatives</button>
+          <button type="button" class="loc-tab-btn active" data-tab="country">In Your Country</button>
+          <button type="button" class="loc-tab-btn" data-tab="city">In Your City</button>
+          <button type="button" class="loc-tab-btn" data-tab="global">Global Operatives</button>
         </div>
         <div class="loc-search-wrap">
           <i class="fa-solid fa-magnifying-glass"></i>
@@ -4448,6 +4461,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/cyber-feature-matrix.js"></script>
   <script src="./src/js/cyber-hundred-suite.js"></script>
   <script src="./src/js/chat-advanced-matrix.js"></script>
+  <script src="./src/js/nextgen-eight-suite.js"></script>
 
 </body>
 

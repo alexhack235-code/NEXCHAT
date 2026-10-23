@@ -1,0 +1,815 @@
+/* ==========================================================================
+   NEXCHAT & CAMSHOT NEXT-GEN CYBER SUITE (8 PRO FEATURES)
+   Strictly Zero Emojis: Premium Cyberpunk HUD Typography & Glowing Accents
+   ========================================================================== */
+
+:root {
+  --ng-neon-green: #00ff88;
+  --ng-neon-cyan: #00d4ff;
+  --ng-neon-purple: #c084fc;
+  --ng-neon-amber: #ffd700;
+  --ng-neon-red: #ff3366;
+  --ng-bg-dark: #070b12;
+  --ng-surface-dark: rgba(11, 17, 30, 0.95);
+  --ng-border-glow: rgba(0, 255, 136, 0.25);
+  --ng-font-mono: 'JetBrains Mono', 'Rajdhani', monospace;
+}
+
+/* --------------------------------------------------------------------------
+   0. SETTINGS TAB: NEXT-GEN CYBER SUITE
+   -------------------------------------------------------------------------- */
+.nextgen-settings-container {
+  padding: 10px 0;
+  color: #f8fafc;
+  font-family: 'Inter', sans-serif;
+}
+
+.nextgen-hero-banner {
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.08) 0%, rgba(0, 212, 255, 0.08) 100%);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.nextgen-hero-content h3 {
+  margin: 0 0 6px 0;
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-size: 16px;
+  letter-spacing: 1.2px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nextgen-hero-content p {
+  margin: 0;
+  font-size: 12.5px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+.nextgen-master-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 8px 14px;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nextgen-master-label {
+  font-size: 11px;
+  font-family: var(--ng-font-mono);
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--ng-neon-green);
+}
+
+.nextgen-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.nextgen-card {
+  background: rgba(14, 22, 38, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.22s ease;
+  backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.nextgen-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 3px; height: 100%;
+  background: var(--ng-neon-green);
+  opacity: 0.3;
+  transition: opacity 0.2s;
+}
+
+.nextgen-card:hover {
+  border-color: rgba(0, 255, 136, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(0, 255, 136, 0.12);
+}
+
+.nextgen-card:hover::before {
+  opacity: 1;
+}
+
+.nextgen-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.nextgen-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nextgen-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: rgba(0, 255, 136, 0.1);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  color: var(--ng-neon-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.nextgen-card-title {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.4px;
+}
+
+.nextgen-card-badge {
+  font-size: 9.5px;
+  font-family: var(--ng-font-mono);
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(0, 212, 255, 0.12);
+  color: var(--ng-neon-cyan);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  display: inline-block;
+  margin-top: 3px;
+}
+
+.nextgen-card-desc {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0 0 16px 0;
+  flex: 1;
+}
+
+.nextgen-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 14px;
+}
+
+.nextgen-launch-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--ng-font-mono);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.nextgen-launch-btn:hover {
+  background: rgba(0, 255, 136, 0.12);
+  border-color: var(--ng-neon-green);
+  color: var(--ng-neon-green);
+}
+
+/* Cyber Toggle Switch */
+.nextgen-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.nextgen-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.nextgen-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: #1e293b;
+  transition: .3s;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nextgen-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #64748b;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+.nextgen-switch input:checked + .nextgen-slider {
+  background-color: rgba(0, 255, 136, 0.2);
+  border-color: var(--ng-neon-green);
+}
+
+.nextgen-switch input:checked + .nextgen-slider:before {
+  transform: translateX(20px);
+  background-color: var(--ng-neon-green);
+  box-shadow: 0 0 10px var(--ng-neon-green);
+}
+
+/* --------------------------------------------------------------------------
+   1. NEURAL HOLOGRAPHIC VOICE & SPECTROGRAM HUD
+   -------------------------------------------------------------------------- */
+.nextgen-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 8, 16, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 10020;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: ngFadeIn 0.25s ease forwards;
+}
+
+@keyframes ngFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.nextgen-modal-card {
+  background: #090e17;
+  border: 1px solid var(--ng-border-glow);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.8), 0 0 35px rgba(0,255,136,0.15);
+  font-family: 'Inter', sans-serif;
+  color: #f8fafc;
+  display: flex;
+  flex-direction: column;
+}
+
+.nextgen-modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nextgen-modal-title {
+  margin: 0;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nextgen-modal-close {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.nextgen-modal-close:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+.nextgen-voice-stage {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.nextgen-spectrogram-canvas {
+  width: 100%;
+  height: 110px;
+  background: #05080e;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+}
+
+.nextgen-voice-shifter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.voice-shift-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-family: var(--ng-font-mono);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.voice-shift-pill.active {
+  background: rgba(0, 255, 136, 0.15);
+  border-color: var(--ng-neon-green);
+  color: var(--ng-neon-green);
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.25);
+}
+
+.voice-speed-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.voice-speed-btn {
+  padding: 5px 11px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  font-size: 11px;
+  font-family: var(--ng-font-mono);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.voice-speed-btn.active {
+  background: rgba(0, 212, 255, 0.15);
+  border-color: var(--ng-neon-cyan);
+  color: var(--ng-neon-cyan);
+}
+
+.voice-transcript-drawer {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 12.5px;
+  color: #cbd5e1;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.voice-record-btn-large {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ng-neon-green), var(--ng-neon-cyan));
+  color: #000;
+  border: none;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(0, 255, 136, 0.5);
+  transition: all 0.2s;
+}
+
+.voice-record-btn-large.recording {
+  background: var(--ng-neon-red);
+  color: #fff;
+  animation: ngRecordPulse 1.2s infinite;
+}
+
+@keyframes ngRecordPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.6); }
+  50% { box-shadow: 0 0 0 16px rgba(255, 51, 102, 0); }
+}
+
+/* --------------------------------------------------------------------------
+   2. @CHRONEX INLINE AI CO-PILOT
+   -------------------------------------------------------------------------- */
+.chronex-inline-popup {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 20px;
+  background: #0b121e;
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  border-radius: 12px;
+  padding: 10px 14px;
+  z-index: 100;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.7), 0 0 20px rgba(0,255,136,0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 280px;
+}
+
+.chronex-inline-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #cbd5e1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.chronex-inline-item:hover {
+  background: rgba(0, 255, 136, 0.12);
+  border-color: rgba(0, 255, 136, 0.3);
+  color: #fff;
+}
+
+.chronex-inline-item i {
+  color: var(--ng-neon-green);
+  font-size: 13px;
+}
+
+.chronex-inline-bubble {
+  background: #0c1422 !important;
+  border: 1.5px solid rgba(0, 255, 136, 0.45) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 255, 136, 0.15) !important;
+  color: #f1f5f9;
+}
+
+.chronex-bubble-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--ng-font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ng-neon-green);
+  margin-bottom: 6px;
+  letter-spacing: 0.8px;
+}
+
+/* --------------------------------------------------------------------------
+   3. QUANTUM PARTICLE SELF-DESTRUCT BURN PROTOCOL
+   -------------------------------------------------------------------------- */
+.quantum-burn-shield {
+  filter: blur(12px);
+  user-select: none;
+  cursor: pointer;
+  transition: filter 0.3s ease;
+  position: relative;
+}
+
+.quantum-burn-shield.revealed {
+  filter: blur(0px);
+}
+
+.quantum-burn-lock-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 14px;
+  font-family: var(--ng-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ng-neon-red);
+  letter-spacing: 1px;
+}
+
+.quantum-burn-canvas {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10050;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+}
+
+/* --------------------------------------------------------------------------
+   4. WEBRTC P2P ENCRYPTED CHUNK MESH (GIGABYTE DIRECT TRANSFER)
+   -------------------------------------------------------------------------- */
+.p2p-mesh-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.p2p-speed-radial {
+  font-family: 'Orbitron', monospace;
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--ng-neon-cyan);
+  text-shadow: 0 0 16px rgba(0, 212, 255, 0.5);
+}
+
+.p2p-progress-track {
+  width: 100%;
+  height: 10px;
+  background: #111a28;
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.p2p-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--ng-neon-green), var(--ng-neon-cyan));
+  width: 0%;
+  transition: width 0.3s ease;
+  box-shadow: 0 0 10px var(--ng-neon-green);
+}
+
+.p2p-chunk-grid {
+  display: grid;
+  grid-template-columns: repeat(20, 1fr);
+  gap: 3px;
+  width: 100%;
+  max-height: 80px;
+  overflow-y: hidden;
+  background: #060a12;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.p2p-chunk-block {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 2px;
+}
+
+.p2p-chunk-block.done {
+  background: var(--ng-neon-green);
+  box-shadow: 0 0 4px var(--ng-neon-green);
+}
+
+/* --------------------------------------------------------------------------
+   5. SPATIAL AUDIO PROXIMITY LOUNGE
+   -------------------------------------------------------------------------- */
+.spatial-lounge-canvas-wrap {
+  position: relative;
+  width: 100%;
+  height: 380px;
+  background: radial-gradient(circle at center, #091522 0%, #03060c 100%);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.8);
+}
+
+.spatial-radar-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(circle, rgba(0, 212, 255, 0.15) 1px, transparent 1px),
+    linear-gradient(rgba(0, 212, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px, 40px 40px, 40px 40px;
+}
+
+.spatial-radar-ring {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 255, 136, 0.25);
+  pointer-events: none;
+}
+
+.spatial-node {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  user-select: none;
+  transform: translate(-50%, -50%);
+  transition: box-shadow 0.2s;
+  z-index: 10;
+}
+
+.spatial-node:active {
+  cursor: grabbing;
+}
+
+.spatial-node img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--ng-neon-green);
+  object-fit: cover;
+}
+
+.spatial-node.self img {
+  border-color: var(--ng-neon-cyan);
+  box-shadow: 0 0 16px var(--ng-neon-cyan);
+}
+
+.spatial-node-tag {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-family: var(--ng-font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  color: #cbd5e1;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   6. CAMSHOT AR FACE FILTERS & SHADER OVERLAYS
+   -------------------------------------------------------------------------- */
+.reels-ar-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 4px;
+}
+
+.reels-ar-chip {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #cbd5e1;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-family: var(--ng-font-mono);
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.reels-ar-chip.active {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: var(--ng-neon-green);
+  color: var(--ng-neon-green);
+  box-shadow: 0 0 14px rgba(0, 255, 136, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   7. PREDICTIVE MULTI-TONE AUTO-DRAFT BAR
+   -------------------------------------------------------------------------- */
+.nextgen-predictive-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 18px 4px 18px;
+  background: transparent;
+}
+
+.nextgen-draft-chip {
+  background: rgba(14, 22, 38, 0.85);
+  border: 1px solid rgba(0, 255, 136, 0.25);
+  color: #cbd5e1;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+  backdrop-filter: blur(8px);
+}
+
+.nextgen-draft-chip:hover {
+  background: rgba(0, 255, 136, 0.15);
+  border-color: var(--ng-neon-green);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.nextgen-draft-tone-tag {
+  font-family: var(--ng-font-mono);
+  font-weight: 800;
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(0, 212, 255, 0.15);
+  color: var(--ng-neon-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   8. CAMSHOT LIVE BROADCAST & CO-HOST MATRIX
+   -------------------------------------------------------------------------- */
+.nextgen-live-badge {
+  background: var(--ng-neon-red);
+  color: #fff;
+  font-family: var(--ng-font-mono);
+  font-weight: 800;
+  font-size: 10.5px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  animation: ngRecordPulse 1.4s infinite;
+}
+
+.nextgen-live-viewer-count {
+  font-family: var(--ng-font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nextgen-live-split-matrix {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+  height: 380px;
+  background: #000;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.nextgen-cohost-slot {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #090e17;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.nextgen-cohost-slot video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
