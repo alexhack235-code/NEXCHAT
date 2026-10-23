@@ -4806,6 +4806,50 @@ function displayChronexAIResponse(response, stream = true) {
 window.displayChronexAIMessage = displayChronexAIResponse;
 window.displayChronexAIResponse = displayChronexAIResponse;
 window.formatAiMarkdown = formatAiMarkdown;
+// ═══════════════════════════════════════════════════════════════════
+// FIRESTORE MESSAGE DELETION ENGINE
+// ═══════════════════════════════════════════════════════════════════
+window.deleteMessageFromFirestore = async function(collectionName, docId, forEveryone) {
+  if (!docId) return;
+  const targetCol = collectionName || (currentChatType === 'group' ? 'groupMessages' : 'messages');
+  const msgRef = doc(db, targetCol, docId);
+
+  try {
+    if (forEveryone) {
+      try {
+        await deleteDoc(msgRef);
+        console.log(`[DELETION] Successfully purged message ${docId} from ${targetCol}`);
+      } catch (err) {
+        console.warn(`[DELETION] deleteDoc failed, fallback to updateDoc tombstone:`, err);
+        await updateDoc(msgRef, {
+          isDeleted: true,
+          deletedForEveryone: true,
+          text: "This message was deleted",
+          attachment: null,
+          deletedAt: serverTimestamp()
+        });
+      }
+    } else {
+      if (myUID) {
+        await updateDoc(msgRef, {
+          deletedFor: arrayUnion(myUID)
+        });
+        console.log(`[DELETION] Successfully marked message ${docId} deleted for user ${myUID}`);
+      }
+    }
+  } catch (err) {
+    console.error(`[DELETION] Failed to process message deletion:`, err);
+    throw err;
+  }
+};
+
+document.addEventListener('nexDeleteMessageRequest', async (e) => {
+  const { docId, collectionName, forEveryone } = e.detail || {};
+  if (docId && typeof window.deleteMessageFromFirestore === 'function') {
+    await window.deleteMessageFromFirestore(collectionName, docId, forEveryone).catch(() => {});
+  }
+});
+
 
 function displayChronexAIError(errorMessage) {
   const messagesContainer = document.getElementById("messages-area");
@@ -4983,8 +5027,13 @@ function loadMessages() {
     }
 
     allMessages.forEach((m) => {
+      // 1. Filter out messages deleted for current user
+      if (m.deletedFor && Array.isArray(m.deletedFor) && m.deletedFor.includes(myUID)) return;
+      if (window.NexChatFileManager && window.NexChatFileManager.isMessageHiddenLocally(m.docId)) return;
+
       let isOwn = m.from === myUID;
       const isAI = m.from === 'chronex-ai' || m.isAiResponse;
+      const isDeletedTombstone = !!(m.isDeleted || m.deletedForEveryone);
 
       if (isAI) isOwn = false;
 
@@ -5057,7 +5106,13 @@ function loadMessages() {
         bubble.style.border = "1px solid rgba(0, 255, 102, 0.2)";
       }
 
-      if (m.text && m.text.trim()) {
+      if (isDeletedTombstone) {
+        const deletedNotice = document.createElement("div");
+        deletedNotice.className = "message-deleted-tombstone";
+        deletedNotice.style.cssText = `font-style: italic; opacity: 0.65; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: ${isOwn ? 'rgba(255,255,255,0.7)' : '#94a3b8'};`;
+        deletedNotice.innerHTML = '<i class="fa-solid fa-ban" style="font-size: 11px;"></i> This message was deleted';
+        bubble.appendChild(deletedNotice);
+      } else if (m.text && m.text.trim()) {
         const content = document.createElement("div");
         content.className = "message-text-content";
         if (isAI || (currentChatType === 'ai' && !isOwn)) {
@@ -5158,7 +5213,71 @@ function loadMessages() {
         }
       });
       actionsBar.appendChild(replyBtn);
-      bubble.appendChild(actionsBar);
+
+      // Delete Message Action Button
+      if (!isDeletedTombstone) {
+        const deleteMsgBtn = document.createElement("button");
+        deleteMsgBtn.type = "button";
+        deleteMsgBtn.className = "msg-delete-trigger-btn";
+        deleteMsgBtn.title = isOwn ? "Delete Message (Everyone or For Me)" : "Delete For Me";
+        deleteMsgBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
+        deleteMsgBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (window.NexChatFileManager && typeof window.NexChatFileManager.openDeleteMessageModal === 'function') {
+            window.NexChatFileManager.openDeleteMessageModal(m, isOwn, () => {
+              if (typeof debouncedUpdateMessages === 'function') debouncedUpdateMessages();
+            });
+          }
+        });
+        actionsBar.appendChild(deleteMsgBtn);
+
+        // Report Message Action Button (for messages sent by other party)
+        if (!isOwn && !isAI) {
+          const reportMsgBtn = document.createElement("button");
+          reportMsgBtn.type = "button";
+          reportMsgBtn.className = "msg-report-trigger-btn";
+          reportMsgBtn.title = "Report Message";
+          reportMsgBtn.innerHTML = '<i class="fa-solid fa-flag"></i>';
+          reportMsgBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (typeof window.openReportModal === 'function') {
+              window.openReportModal({
+                targetUid: m.from || currentChatUser,
+                targetUsername: currentChatName || 'User',
+                targetType: currentChatType === 'group' ? 'group' : 'user',
+                groupId: currentChatType === 'group' ? currentChatUser : null,
+                groupName: currentChatType === 'group' ? currentChatName : null,
+                messageId: m.docId,
+                messageText: m.text || (m.attachment ? m.attachment.fileName : ''),
+                evidenceContext: [
+                  { sender: currentChatName || 'Sender', text: m.text || 'Media attachment', timestamp: formatTime(msgDate) }
+                ]
+              });
+            }
+          });
+          actionsBar.appendChild(reportMsgBtn);
+        }
+      }
+
+      if (!isDeletedTombstone) {
+        bubble.appendChild(actionsBar);
+      }
+
+      // Mobile Touch Long-Press Support for Delete & Actions
+      if (!isDeletedTombstone) {
+        let touchTimer = null;
+        bubble.addEventListener('touchstart', () => {
+          touchTimer = setTimeout(() => {
+            if (window.NexChatFileManager && typeof window.NexChatFileManager.openDeleteMessageModal === 'function') {
+              window.NexChatFileManager.openDeleteMessageModal(m, isOwn, () => {
+                if (typeof debouncedUpdateMessages === 'function') debouncedUpdateMessages();
+              });
+            }
+          }, 450);
+        }, { passive: true });
+        bubble.addEventListener('touchend', () => { if (touchTimer) clearTimeout(touchTimer); });
+        bubble.addEventListener('touchmove', () => { if (touchTimer) clearTimeout(touchTimer); });
+      }
 
       // Render Active Reactions Tray
       if (m.reactions && (Array.isArray(m.reactions) ? m.reactions.length > 0 : Object.keys(m.reactions).length > 0)) {
@@ -7653,10 +7772,33 @@ document.getElementById("file-input")?.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (!file) return;
 
-  const maxSize = 50 * 1024 * 1024; // 50MB
-  if (file.size > maxSize) {
-    showNotif("File too large (max 50MB)", "error", 2500);
-    return;
+  // 1. Tiered Size & Format Validation (50MB Standard -> 100MB Pro -> 150MB Ultra)
+  if (window.NexChatFileManager) {
+    const valResult = window.NexChatFileManager.validateFileAttachment(file);
+    if (!valResult.ok) {
+      if (valResult.isSizeLimit) {
+        window.NexChatFileManager.showUploadLimitModal(valResult.fileSizeMB, valResult.tierConfig);
+      } else {
+        showNotif(valResult.reason, "error", 3000);
+      }
+      e.target.value = '';
+      return;
+    }
+
+    // 2. Sliding Window Rate Limit & Burst Prevention
+    const rateCheck = window.NexChatFileManager.checkUploadRateLimit();
+    if (!rateCheck.allowed) {
+      showNotif(rateCheck.reason, "error", 3500);
+      e.target.value = '';
+      return;
+    }
+  } else {
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      showNotif("File too large (max 50MB). Upgrade to Pro for 100MB.", "error", 2500);
+      e.target.value = '';
+      return;
+    }
   }
 
   const ext = (file.name.split('.').pop() || '').toLowerCase();
@@ -7769,6 +7911,9 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
       const totalSizeMB = (totalSize / 1024 / 1024).toFixed(2);
 
       console.log(`[STORAGE] Uploading attachment: ${file.name} (${totalSizeMB}MB)`);
+      if (window.NexChatFileManager && typeof window.NexChatFileManager.recordUploadAttempt === 'function') {
+        window.NexChatFileManager.recordUploadAttempt();
+      }
 
       const modal = document.getElementById('uploadProgressModal');
       const filenameEl = modal?.querySelector('.progress-filename');
@@ -11939,292 +12084,63 @@ function startStatusTimerUpdates() {
   }, 60000); // Update every minute
 }
 
-function openReportModal() {
-  if (!currentChatUser || !myUID) {
-    showNotif("Please select a user first", "error");
-    return;
-  }
-
-  const reportModal = document.getElementById("reportModal");
-  if (!reportModal) {
-    createReportModal();
-    return;
-  }
-
-  reportModal.style.display = "flex";
-  document.body.style.overflow = "hidden";
-}
-
-function closeReportModal() {
-  const reportModal = document.getElementById("reportModal");
-  if (reportModal) {
-    reportModal.style.display = "none";
-    document.body.style.overflow = "";
-  }
-}
-
-function createReportModal() {
-  const modal = document.createElement("div");
-  modal.id = "reportModal";
-  modal.className = "report-modal";
-  modal.style.cssText = `
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-  `;
-
-  modal.innerHTML = `
-    <div class="report-modal-content" style="
-      background: #1a1a1a;
-      border: 2px solid #00ff66;
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 90%;
-      width: 100%;
-      max-height: 80vh;
-      overflow-y: auto;
-      -webkit-user-select: text;
-      user-select: text;
-    ">
-      <div class="report-header" style="
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-      ">
-        <h2 style="
-          margin: 0;
-          color: #00ff66;
-          font-size: 20px;
-          font-weight: 700;
-        "><i class="fa-solid fa-flag"></i> Report User</h2>
-        <button id="closeReportModalBtn" class="close-btn" style="
-          background: none;
-          border: none;
-          color: #00ff66;
-          font-size: 24px;
-          cursor: pointer;
-          padding: 0;
-          width: 30px;
-          height: 30px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">?</button>
-      </div>
-      
-      <div class="report-body" style="
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      ">
-        <div style="
-          background: rgba(0, 255, 102, 0.1);
-          border: 1px solid #00ff66;
-          border-radius: 12px;
-          padding: 12px;
-          color: #00d4ff;
-          font-size: 13px;
-        ">
-          <strong><i class="fa-solid fa-circle-info"></i> Report Information:</strong><br>
-          This report will be reviewed by our moderation team. Please provide accurate details.
-        </div>
-        
-        <div style="
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        ">
-          <label style="
-            color: #00ff66;
-            font-weight: 600;
-            font-size: 14px;
-          ">Report Reason:</label>
-          <select id="reportReason" style="
-            width: 100%;
-            padding: 12px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #00ff66;
-            border-radius: 8px;
-            color: #00ff66;
-            font-size: 14px;
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-          ">
-            <option value="" style="background: #1a1a1a; color: #fff;">Select a reason...</option>
-            <option value="harassment" style="background: #1a1a1a; color: #fff;">Harassment/Bullying</option>
-            <option value="spam" style="background: #1a1a1a; color: #fff;">Spam</option>
-            <option value="inappropriate" style="background: #1a1a1a; color: #fff;">Inappropriate Content</option>
-            <option value="scam" style="background: #1a1a1a; color: #fff;">Scam/Fraud</option>
-            <option value="hate" style="background: #1a1a1a; color: #fff;">Hate Speech</option>
-            <option value="other" style="background: #1a1a1a; color: #fff;">? Other</option>
-          </select>
-        </div>
-        
-        <div style="
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        ">
-          <label style="
-            color: #00ff66;
-            font-weight: 600;
-            font-size: 14px;
-          ">Detailed Description:</label>
-          <textarea id="reportDescription" placeholder="Please explain what happened..." style="
-            width: 100%;
-            padding: 12px;
-            min-height: 120px;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #00ff66;
-            border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
-            font-family: inherit;
-            outline: none;
-            resize: vertical;
-            -webkit-appearance: none;
-            -webkit-user-select: text;
-            user-select: text;
-          "></textarea>
-          <small style="
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 12px;
-          " id="reportCharCount">0 / 500</small>
-        </div>
-        
-        <div style="
-          display: flex;
-          gap: 12px;
-        ">
-          <button id="submitReportBtn" style="
-            flex: 1;
-            padding: 12px;
-            background: #00ff66;
-            color: #000;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-          ">Submit Report</button>
-          <button id="cancelReportBtn" style="
-            flex: 1;
-            padding: 12px;
-            background: rgba(255, 0, 0, 0.2);
-            color: #ff6b6b;
-            border: 1px solid #ff6b6b;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-          ">? Cancel</button>
-        </div>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(modal);
-
-  document.getElementById("closeReportModalBtn")?.addEventListener("click", closeReportModal);
-  document.getElementById("cancelReportBtn")?.addEventListener("click", closeReportModal);
-  document.getElementById("submitReportBtn")?.addEventListener("click", submitReport);
-
-  const textarea = document.getElementById("reportDescription");
-  textarea?.addEventListener("input", () => {
-    const count = textarea.value.length;
-    const charCount = document.getElementById("reportCharCount");
-    if (charCount) {
-      charCount.textContent = `${count} / 500`;
-      if (count > 500) {
-        textarea.value = textarea.value.substring(0, 500);
-      }
-    }
-  });
-
-  modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-      closeReportModal();
-    }
-  });
-}
-
-async function submitReport() {
-  const reason = document.getElementById("reportReason")?.value;
-  const description = document.getElementById("reportDescription")?.value.trim();
-
-  if (!reason) {
-    showNotif("Please select a reason", "error");
-    return;
-  }
-
-  if (!description || description.length < 10) {
-    showNotif("Please provide a detailed description (at least 10 characters)", "error");
-    return;
-  }
-
-  if (!currentChatUser || !myUID) {
-    showNotif("Error: User information not found", "error");
-    return;
-  }
-
-  try {
-    const submitBtn = document.getElementById("submitReportBtn");
-    if (submitBtn) {
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Submitting...";
-    }
-
-    const reportsRef = collection(db, "reports");
-    await addDoc(reportsRef, {
-      reportedBy: myUID,
-      reportedUser: currentChatUser,
-      reason: reason,
-      description: description,
-      timestamp: serverTimestamp(),
-      status: "pending",
-      reviewed: false
+function openReportModal(opts) {
+  if (typeof window.openReportModal === 'function') {
+    return window.openReportModal(opts || {
+      targetUid: currentChatUser,
+      targetUsername: currentChatName || 'User',
+      targetType: currentChatType === 'group' ? 'group' : 'user',
+      groupId: currentChatType === 'group' ? currentChatUser : null,
+      groupName: currentChatType === 'group' ? currentChatName : null
     });
-
-    showNotif("Report submitted successfully! Our team will review it shortly.", "success", 3000);
-    closeReportModal();
-
-    const reportReasonEl = document.getElementById("reportReason");
-    if (reportReasonEl) reportReasonEl.value = "";
-    const reportDescEl = document.getElementById("reportDescription");
-    if (reportDescEl) reportDescEl.value = "";
-  } catch (err) {
-    console.error("Report submission error:", err);
-    showNotif("Error submitting report: " + err.message, "error");
-  } finally {
-    const submitBtn = document.getElementById("submitReportBtn");
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "Submit Report";
-    }
   }
 }
 
 document.getElementById("reportBtn")?.addEventListener("click", (e) => {
   e.stopPropagation();
   closeChatOptionsMenu();
-  openReportModal();
+  if (typeof window.openReportModal === 'function') {
+    window.openReportModal({
+      targetUid: currentChatUser,
+      targetUsername: currentChatName || 'User',
+      targetType: currentChatType === 'group' ? 'group' : 'user',
+      groupId: currentChatType === 'group' ? currentChatUser : null,
+      groupName: currentChatType === 'group' ? currentChatName : null
+    });
+  }
 });
 
 document.getElementById("infoReportBtn")?.addEventListener("click", (e) => {
   e.stopPropagation();
-  openReportModal();
+  if (typeof window.openReportModal === 'function') {
+    window.openReportModal({
+      targetUid: currentChatUser,
+      targetUsername: currentChatName || 'User',
+      targetType: currentChatType === 'group' ? 'group' : 'user',
+      groupId: currentChatType === 'group' ? currentChatUser : null,
+      groupName: currentChatType === 'group' ? currentChatName : null
+    });
+  }
+});
+
+// Dedicated Header Report Button
+document.getElementById("headerReportBtn")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  if (!currentChatUser) {
+    showNotif("Please select a conversation first", "error");
+    return;
+  }
+  if (typeof window.openReportModal === 'function') {
+    window.openReportModal({
+      targetUid: currentChatUser,
+      targetUsername: currentChatName || 'User',
+      targetType: currentChatType === 'group' ? 'group' : 'user',
+      groupId: currentChatType === 'group' ? currentChatUser : null,
+      groupName: currentChatType === 'group' ? currentChatName : null
+    });
+  } else {
+    showNotif("Incident reporting system is initializing...", "info");
+  }
 });
 
 async function openCreateGroupModal() {
