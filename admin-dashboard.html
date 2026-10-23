@@ -1257,6 +1257,9 @@
           <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-geowar" style="font-size: 11px; padding: 6px 11px; border-color: rgba(0, 255, 102, 0.35);">
             <i class="fa-solid fa-earth-americas" style="color: var(--neon-green);"></i> 3D War Room
           </button>
+          <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-replay" style="font-size: 11px; padding: 6px 11px; border-color: rgba(192, 132, 252, 0.35);">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #c084fc;"></i> Chrono-Replay
+          </button>
           <button type="button" id="btnDeckFlushCache" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px;">
             <i class="fa-solid fa-broom"></i> Flush Edge Cache
           </button>
@@ -1522,6 +1525,10 @@
       <button type="button" class="admin-tab-btn" data-tab="tab-geowar">
         <i class="fa-solid fa-earth-americas" style="color: var(--neon-green);"></i> 3D War Room &amp; P2P Swarm
         <span class="tab-count" style="background: rgba(0, 255, 102, 0.15); color: var(--neon-green);">Live Map</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-replay">
+        <i class="fa-solid fa-clock-rotate-left" style="color: #c084fc;"></i> Chrono-Forensics &amp; Incident Replay
+        <span class="tab-count" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;">Tab 13</span>
       </button>
     </nav>
 
@@ -3059,6 +3066,183 @@
         </section>
       </div>
     </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 13: CHRONO-FORENSICS & USER INCIDENT REPLAY STUDIO   -->
+    <!-- ======================================================== -->
+    <div class="tab-pane" id="tab-replay">
+      <section class="admin-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-clock-rotate-left" style="color: #c084fc;"></i>
+            Chrono-Forensics &amp; User Incident Time-Travel Replay Studio
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <span class="badge" style="background: rgba(255, 59, 48, 0.15); border: 1px solid #ff3b30; color: #ff3b30;">
+              <i class="fa-solid fa-triangle-exclamation"></i> SEV-1 AUDIT REPLAY
+            </span>
+            <button type="button" id="btnExportIncidentReport" class="admin-btn secondary" style="font-size: 11px; padding: 5px 12px;">
+              <i class="fa-solid fa-file-shield"></i> Export Forensic Dossier
+            </button>
+          </div>
+        </div>
+
+        <!-- Incident Investigation Meta Controls -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 16px; background: rgba(0,0,0,0.4); padding: 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06);">
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">Target Subject Under Review</label>
+            <select id="replaySubjectSelect" class="admin-select" style="font-size: 11.5px; padding: 6px 10px;">
+              <option value="sarah_creator">sarah_creator (Flagged Escrow Dispute TX_9012)</option>
+              <option value="david_crypto">david_crypto (Dispute Challenger - 1,400 CR)</option>
+              <option value="spambot_992">spambot_992 (Sybil Burst - 42 Req/Sec)</option>
+              <option value="alex_cyber">alex_cyber (SuperAdmin Root Audit)</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">Incident Investigation Window</label>
+            <div style="font-family: monospace; font-size: 11.5px; color: #c084fc; padding: 7px 10px; background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.3); border-radius: 8px;">
+              <i class="fa-solid fa-timeline"></i> T -15:00.000 to T +00:00.000
+            </div>
+          </div>
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">Chrono Replay Speed</label>
+            <div style="display: flex; gap: 4px;" id="replaySpeedGroup">
+              <button type="button" class="admin-btn secondary active replay-speed-btn" data-speed="1" style="flex: 1; padding: 5px; font-size: 10.5px;">1x</button>
+              <button type="button" class="admin-btn secondary replay-speed-btn" data-speed="2" style="flex: 1; padding: 5px; font-size: 10.5px;">2x</button>
+              <button type="button" class="admin-btn secondary replay-speed-btn" data-speed="5" style="flex: 1; padding: 5px; font-size: 10.5px;">5x</button>
+              <button type="button" class="admin-btn secondary replay-speed-btn" data-speed="10" style="flex: 1; padding: 5px; font-size: 10.5px;">10x</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Master Time-Travel Scrubber Bar -->
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(192, 132, 252, 0.3); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button type="button" id="btnReplayPlayPause" class="admin-btn primary" style="padding: 6px 14px; font-size: 11px;">
+                <i class="fa-solid fa-play"></i> Play Replay
+              </button>
+              <button type="button" id="btnReplayStepBack" class="admin-btn secondary" style="padding: 6px 10px; font-size: 11px;" title="Step Back 30s">
+                <i class="fa-solid fa-backward-step"></i>
+              </button>
+              <button type="button" id="btnReplayStepForward" class="admin-btn secondary" style="padding: 6px 10px; font-size: 11px;" title="Step Forward 30s">
+                <i class="fa-solid fa-forward-step"></i>
+              </button>
+            </div>
+            <div style="font-family: monospace; font-size: 13px; font-weight: 800; color: #c084fc;" id="replayScrubberTimestamp">
+              T -04:22.150 [INCIDENT TRIGGER MOMENT]
+            </div>
+            <div style="font-size: 11px; color: #94a3b8; font-family: monospace;">
+              Frame 418 / 900
+            </div>
+          </div>
+
+          <input type="range" id="replayTimelineSlider" min="0" max="900" value="638" class="cyber-range-slider" style="accent-color: #c084fc; width: 100%; cursor: pointer;">
+          <div style="display: flex; justify-content: space-between; font-size: 10px; color: #64748b; font-family: monospace; margin-top: 6px;">
+            <span>T -15:00 (Session Start)</span>
+            <span style="color: #ff3b30; font-weight: 700;">T -04:22 (Dispute Filed)</span>
+            <span>T -00:00 (Present)</span>
+          </div>
+        </div>
+
+        <!-- Split Grid: Simulated Viewport Recreation vs Chronological Event Log -->
+        <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px;">
+          <!-- Left: Simulated Viewport & DOM Recreation -->
+          <div style="background: #020617; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+            <div style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); padding: 8px 12px; display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 11px; font-family: monospace; color: #94a3b8;">
+                <i class="fa-solid fa-window-maximize"></i> Simulated User Viewport (1080x1920 Mobile Stream)
+              </span>
+              <span class="badge" style="background: rgba(0, 242, 255, 0.15); color: #00f2ff; font-size: 9.5px;">
+                DOM RECONSTRUCTED
+              </span>
+            </div>
+
+            <!-- Viewport Stage -->
+            <div style="padding: 16px; height: 380px; position: relative; display: flex; flex-direction: column; justify-content: space-between; background: radial-gradient(circle at center, #0f172a 0%, #020617 100%);" id="replayViewportStage">
+              <!-- Reconstructed App Header -->
+              <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 800; font-size: 12px; color: #fff;">CAMSHOT REELS STUDIO</span>
+                <span style="font-size: 10px; font-family: monospace; color: #00ff88;">FPS: 60.0 &bull; WebGL Active</span>
+              </div>
+
+              <!-- Center Highlight Box -->
+              <div style="text-align: center; padding: 20px; border: 2px dashed rgba(192, 132, 252, 0.4); border-radius: 10px; background: rgba(192,132,252,0.05);" id="replayViewportCenter">
+                <i class="fa-solid fa-handshake-simple" style="font-size: 36px; color: #c084fc; margin-bottom: 10px;"></i>
+                <h4 style="margin: 0 0 6px 0; font-size: 14px; color: #fff;" id="replayActionTitle">P2P Escrow Contract Created</h4>
+                <p style="font-size: 11px; color: #94a3b8; margin: 0;" id="replayActionDesc">Subject locked 1,400 CR for Cyberpunk 3D Avatar Rig with @sarah_creator.</p>
+              </div>
+
+              <!-- Reconstructed Bottom Action Bar -->
+              <div style="background: rgba(255,255,255,0.04); padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                <span style="color: #64748b; font-family: monospace;" id="replayMouseCoord">Mouse: X: 412, Y: 890 [CLICK]</span>
+                <span style="color: #ff3b30; font-family: monospace; font-weight: 700;" id="replayStateTag">STATE: DISPUTE_OPENED</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Chronological Event Stream & Multi-Sig Escrow Arbitration -->
+          <div style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Forensic Audit Event Trail -->
+            <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px;">
+              <h4 style="margin: 0 0 10px 0; font-size: 12.5px; font-weight: 800; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                <span><i class="fa-solid fa-list-check" style="color: #c084fc;"></i> Forensic Micro-Event Log</span>
+                <span style="font-size: 10.5px; font-family: monospace; color: #94a3b8;">5 Recorded Steps</span>
+              </h4>
+              <div style="display: flex; flex-direction: column; gap: 8px; max-height: 180px; overflow-y: auto;" id="replayEventList">
+                <div class="replay-event-item" style="background: rgba(255,255,255,0.03); border-left: 3px solid #00f2ff; padding: 6px 10px; border-radius: 4px; font-size: 11px;">
+                  <span style="font-family: monospace; color: #64748b;">T -14:10</span>
+                  <strong style="color: #fff; margin-left: 6px;">SESSION_INIT</strong>
+                  <div style="color: #94a3b8; font-size: 10px;">User authenticated via Firebase Auth token. IP: 192.168.1.104</div>
+                </div>
+                <div class="replay-event-item" style="background: rgba(255,255,255,0.03); border-left: 3px solid #00ff88; padding: 6px 10px; border-radius: 4px; font-size: 11px;">
+                  <span style="font-family: monospace; color: #64748b;">T -10:20</span>
+                  <strong style="color: #fff; margin-left: 6px;">ESCROW_CREATED</strong>
+                  <div style="color: #94a3b8; font-size: 10px;">Created contract TX_9012 for 1,400 CR with @elena_vfx</div>
+                </div>
+                <div class="replay-event-item active" style="background: rgba(255,59,48,0.1); border-left: 3px solid #ff3b30; padding: 6px 10px; border-radius: 4px; font-size: 11px;">
+                  <span style="font-family: monospace; color: #ff3b30;">T -04:22</span>
+                  <strong style="color: #fff; margin-left: 6px;">DISPUTE_RAISED</strong>
+                  <div style="color: #ff88a8; font-size: 10px;">Dispute: Asset geometry failed WebGL shader compile threshold</div>
+                </div>
+                <div class="replay-event-item" style="background: rgba(255,255,255,0.03); border-left: 3px solid #fbbf24; padding: 6px 10px; border-radius: 4px; font-size: 11px;">
+                  <span style="font-family: monospace; color: #64748b;">T -01:15</span>
+                  <strong style="color: #fff; margin-left: 6px;">EVIDENCE_SUBMITTED</strong>
+                  <div style="color: #94a3b8; font-size: 10px;">Attached GLTF shader compile logs (Error: fragment shader syntax 102)</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Multi-Sig P2P Escrow Dispute Arbitration Box -->
+            <div style="background: rgba(192, 132, 252, 0.05); border: 1px solid rgba(192, 132, 252, 0.3); border-radius: 12px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <h4 style="margin: 0; font-size: 12.5px; font-weight: 800; color: #fff;">
+                  <i class="fa-solid fa-gavel" style="color: #fbbf24;"></i> Multi-Sig Escrow Arbitration
+                </h4>
+                <span class="badge" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24; font-size: 10px;">
+                  TX_9012 PENDING VERDICT
+                </span>
+              </div>
+              <div style="font-size: 11px; color: #94a3b8; margin-bottom: 10px; line-height: 1.4;">
+                Escrow Amount: <strong style="color: #fbbf24;">1,400 CR</strong> &bull; Buyer: <strong style="color: #fff;">@david_crypto</strong> &bull; Seller: <strong style="color: #fff;">@elena_vfx</strong>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="admin-btn secondary btn-arbitrate-escrow" data-verdict="refund_buyer" style="flex: 1; min-width: 130px; font-size: 11px; padding: 6px; border-color: #00f2ff; color: #00f2ff;">
+                  <i class="fa-solid fa-rotate-left"></i> Refund Buyer 100%
+                </button>
+                <button type="button" class="admin-btn secondary btn-arbitrate-escrow" data-verdict="award_seller" style="flex: 1; min-width: 130px; font-size: 11px; padding: 6px; border-color: #00ff88; color: #00ff88;">
+                  <i class="fa-solid fa-check-double"></i> Award Seller 100%
+                </button>
+                <button type="button" class="admin-btn secondary btn-arbitrate-escrow" data-verdict="split_50_50" style="flex: 1; min-width: 130px; font-size: 11px; padding: 6px; border-color: #fbbf24; color: #fbbf24;">
+                  <i class="fa-solid fa-scale-balanced"></i> Split 50/50
+                </button>
+              </div>
+              <div id="escrowArbitrationResult" style="display: none; margin-top: 10px; padding: 8px; background: rgba(0,255,136,0.1); border: 1px solid #00ff88; border-radius: 6px; font-size: 11px; color: #00ff88; font-family: monospace;"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- ======================================================== -->
@@ -4434,6 +4618,169 @@
           logAudit(`Verified Merkle audit hash chain across all ${merkleChain.length} blocks. Zero tampering.`, 'ok');
           alert(`[MERKLE CHAIN VERIFIED] Cryptographic hash chain from Genesis to Block #${merkleChain[merkleChain.length - 1].index} is 100% authentic.`);
         });
+
+        // ─── 5. Pillar 5: Chrono-Forensics & User Incident Replay Studio (Tab 13) ───
+        initChronoForensicsStudio();
+
+        function initChronoForensicsStudio() {
+          const incidentEvents = [
+            { frame: 120, time: "T -14:10", action: "SESSION_INIT", desc: "User authenticated via Firebase Auth token. IP: 192.168.1.104", state: "CONNECTED", mouse: "Mouse: X: 120, Y: 440 [IDLE]", title: "Session Initialized", icon: "fa-user-check" },
+            { frame: 310, time: "T -10:20", action: "ESCROW_CREATED", desc: "Created multi-sig contract TX_9012 for 1,400 CR with @elena_vfx", state: "ESCROW_LOCKED", mouse: "Mouse: X: 350, Y: 720 [CLICK]", title: "Multi-Sig Escrow Locked", icon: "fa-lock" },
+            { frame: 540, time: "T -06:45", action: "ASSET_DELIVERY", desc: "Elena VFX uploaded 3D asset bundle rig.gltf (14.2 MB)", state: "DELIVERED", mouse: "Mouse: X: 512, Y: 600 [DOWNLOAD]", title: "Asset File Delivered", icon: "fa-file-code" },
+            { frame: 638, time: "T -04:22", action: "DISPUTE_RAISED", desc: "Dispute filed: Asset geometry failed WebGL shader compile threshold on mobile device", state: "DISPUTE_OPENED", mouse: "Mouse: X: 412, Y: 890 [CLICK]", title: "SEV-1 Dispute Filed", icon: "fa-triangle-exclamation" },
+            { frame: 820, time: "T -01:15", action: "EVIDENCE_SUBMITTED", desc: "Attached GLTF shader compile logs (Error: fragment shader syntax 102)", state: "EVIDENCE_LOGGED", mouse: "Mouse: X: 610, Y: 780 [UPLOAD]", title: "Forensic Evidence Submitted", icon: "fa-file-waveform" }
+          ];
+
+          const slider = document.getElementById('replayTimelineSlider');
+          const timeLabel = document.getElementById('replayScrubberTimestamp');
+          const titleEl = document.getElementById('replayActionTitle');
+          const descEl = document.getElementById('replayActionDesc');
+          const mouseEl = document.getElementById('replayMouseCoord');
+          const stateTag = document.getElementById('replayStateTag');
+          const centerBox = document.getElementById('replayViewportCenter');
+          const eventItems = document.querySelectorAll('.replay-event-item');
+
+          let isPlaying = false;
+          let playInterval = null;
+          let replaySpeed = 1;
+
+          function renderFrame(frameVal) {
+            let currentEvt = incidentEvents[0];
+            incidentEvents.forEach(evt => {
+              if (frameVal >= evt.frame) currentEvt = evt;
+            });
+
+            const mins = Math.floor((900 - frameVal) / 60);
+            const secs = (900 - frameVal) % 60;
+            const msStr = (frameVal % 60 * 16).toString().padStart(3, '0');
+            const sign = frameVal === 900 ? '+00:00.000' : `-0${mins}:${secs < 10 ? '0' : ''}${secs}.${msStr}`;
+
+            if (timeLabel) timeLabel.textContent = `T ${sign} [${currentEvt.action}]`;
+            if (titleEl) titleEl.textContent = currentEvt.title;
+            if (descEl) descEl.textContent = currentEvt.desc;
+            if (mouseEl) mouseEl.textContent = currentEvt.mouse;
+            if (stateTag) stateTag.textContent = `STATE: ${currentEvt.state}`;
+
+            if (centerBox) {
+              const iconEl = centerBox.querySelector('i');
+              if (iconEl) iconEl.className = `fa-solid ${currentEvt.icon}`;
+            }
+
+            eventItems.forEach((item, idx) => {
+              if (idx === incidentEvents.indexOf(currentEvt)) {
+                item.classList.add('active');
+                item.style.background = 'rgba(192, 132, 252, 0.15)';
+                item.style.borderLeftColor = '#c084fc';
+              } else {
+                item.classList.remove('active');
+                item.style.background = 'rgba(255, 255, 255, 0.03)';
+                item.style.borderLeftColor = 'rgba(255,255,255,0.1)';
+              }
+            });
+          }
+
+          if (slider) {
+            slider.addEventListener('input', () => {
+              renderFrame(parseInt(slider.value, 10));
+            });
+          }
+
+          // Play/Pause Loop
+          const playBtn = document.getElementById('btnReplayPlayPause');
+          if (playBtn) {
+            playBtn.addEventListener('click', () => {
+              isPlaying = !isPlaying;
+              if (isPlaying) {
+                playBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause Replay';
+                playBtn.classList.remove('primary');
+                playBtn.classList.add('danger');
+                playInterval = setInterval(() => {
+                  let nextVal = parseInt(slider.value, 10) + (1 * replaySpeed);
+                  if (nextVal > 900) nextVal = 0;
+                  slider.value = nextVal;
+                  renderFrame(nextVal);
+                }, 100);
+              } else {
+                clearInterval(playInterval);
+                playBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play Replay';
+                playBtn.classList.add('primary');
+                playBtn.classList.remove('danger');
+              }
+            });
+          }
+
+          // Step Controls
+          document.getElementById('btnReplayStepBack')?.addEventListener('click', () => {
+            slider.value = Math.max(0, parseInt(slider.value, 10) - 30);
+            renderFrame(parseInt(slider.value, 10));
+          });
+          document.getElementById('btnReplayStepForward')?.addEventListener('click', () => {
+            slider.value = Math.min(900, parseInt(slider.value, 10) + 30);
+            renderFrame(parseInt(slider.value, 10));
+          });
+
+          // Speed Controls
+          const speedBtns = document.querySelectorAll('.replay-speed-btn');
+          speedBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+              speedBtns.forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              replaySpeed = parseInt(btn.getAttribute('data-speed'), 10) || 1;
+            });
+          });
+
+          // Multi-Sig Escrow Arbitration Verdict Handlers
+          const arbitrateBtns = document.querySelectorAll('.btn-arbitrate-escrow');
+          const resultBanner = document.getElementById('escrowArbitrationResult');
+          arbitrateBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+              const verdict = btn.getAttribute('data-verdict');
+              let message = '';
+              if (verdict === 'refund_buyer') {
+                message = 'ARBITRATION VERDICT: Refunded 1,400 CR to buyer @david_crypto. Escrow TX_9012 closed.';
+              } else if (verdict === 'award_seller') {
+                message = 'ARBITRATION VERDICT: Released 1,400 CR to seller @elena_vfx. Escrow TX_9012 closed.';
+              } else {
+                message = 'ARBITRATION VERDICT: Split 50/50 (700 CR to @david_crypto, 700 CR to @elena_vfx). Compromise settled.';
+              }
+
+              if (resultBanner) {
+                resultBanner.textContent = message;
+                resultBanner.style.display = 'block';
+              }
+
+              addMerkleAuditBlock('ESCROW_ARBITRATION', message);
+              logAudit(message, 'ok');
+
+              if (window.NexEscrowMarket) {
+                window.NexEscrowMarket.releaseEscrow('escrow_tx_9012');
+              }
+            });
+          });
+
+          // Export Forensic Dossier JSON
+          document.getElementById('btnExportIncidentReport')?.addEventListener('click', () => {
+            const dossier = {
+              investigationId: 'INCIDENT_TX9012_CHRONO',
+              generatedAt: new Date().toISOString(),
+              investigator: 'demonalexander526@gmail.com',
+              status: 'FORENSIC_ANALYSIS_COMPLETE',
+              subject: 'david_crypto vs elena_vfx',
+              merkleBlocksCount: merkleChain.length,
+              events: incidentEvents
+            };
+            const blob = new Blob([JSON.stringify(dossier, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'NEXCHAT_FORENSIC_INCIDENT_REPORT_TX9012.json';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 4000);
+            logAudit('Forensic Dossier exported for Incident TX_9012.', 'ok');
+          });
+        }
       }
 
       const SEEDED_ADMIN_USERS = [

@@ -13363,21 +13363,42 @@ async function markOfflineMessageSent(offlineMsgId) {
 
 function monitorConnectivity() {
   const offlineIndicator = document.getElementById('offlineIndicator');
+  const meshBanner = document.getElementById('nexOffGridMeshBanner');
 
   function updateOnlineStatus() {
     const isOnline = navigator.onLine;
-    console.log(`?? Connection status: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
+    console.log(`[NET] Connection status: ${isOnline ? 'ONLINE' : 'OFFLINE'}`);
 
     if (offlineIndicator) {
       if (!isOnline) {
         offlineIndicator.style.display = 'flex';
+        if (meshBanner) {
+          meshBanner.style.display = 'flex';
+          const peerCountEl = document.getElementById('nexMeshPeerCount');
+          if (peerCountEl && window.NexOfflineMesh) {
+            peerCountEl.textContent = window.NexOfflineMesh.getConnectedLocalPeersCount();
+          }
+        }
         document.querySelector('.app')?.classList.add('show-offline-indicator');
       } else {
         offlineIndicator.style.display = 'none';
+        if (meshBanner) meshBanner.style.display = 'none';
         document.querySelector('.app')?.classList.remove('show-offline-indicator');
         syncOfflineMessages();
       }
     }
+  }
+
+  const pingBtn = document.getElementById('nexMeshPingBtn');
+  if (pingBtn) {
+    pingBtn.onclick = () => {
+      if (window.NexOfflineMesh) {
+        window.NexOfflineMesh.broadcastHeartbeat();
+        const peerCountEl = document.getElementById('nexMeshPeerCount');
+        if (peerCountEl) peerCountEl.textContent = window.NexOfflineMesh.getConnectedLocalPeersCount();
+        if (window.showNotif) window.showNotif('Mesh heartbeat broadcast to local peers', 'info');
+      }
+    };
   }
 
   window.addEventListener('online', updateOnlineStatus);
@@ -14738,7 +14759,7 @@ function initializeBasicUI() {
           messageInput.value = '';
           autoResize();
           updateSendButtons();
-          showNotif(`🪙 Neural Balance: ${tokens} tokens remaining`, 'info', 3000);
+          showNotif(`[TOKENS] Neural Balance: ${tokens} tokens remaining`, 'info', 3000);
           hapticFeedback('light');
         }
       },

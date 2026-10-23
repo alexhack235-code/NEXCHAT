@@ -414,12 +414,30 @@
             </div>
 
             <!-- Outro Card Switch -->
-            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 10px; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 10px 14px; border-radius: 10px; margin-bottom: 12px;">
               <div>
                 <strong style="font-size: 12px; color: #fff; display: block;">Cinematic Outro Bumper</strong>
                 <span style="font-size: 10.5px; color: #94a3b8;">Appends official NEXCHAT glowing outro end-card</span>
               </div>
               <input type="checkbox" id="nexWmOutroToggle" checked style="width: 18px; height: 18px; accent-color: #00f2ff; cursor: pointer;">
+            </div>
+
+            <!-- Multi-Platform Destination Presets -->
+            <div style="margin-bottom: 14px;">
+              <div style="font-size: 11px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                Direct Multi-Platform Presets:
+              </div>
+              <div style="display: flex; gap: 6px;" id="nexWmPlatformPresets">
+                <button type="button" class="nex-wm-platform-btn active" data-platform="tiktok" style="flex: 1; padding: 6px 4px; font-size: 10.5px; font-weight: 700; border-radius: 7px; background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #fff; cursor: pointer;">
+                  <i class="fa-brands fa-tiktok"></i> TikTok
+                </button>
+                <button type="button" class="nex-wm-platform-btn" data-platform="shorts" style="flex: 1; padding: 6px 4px; font-size: 10.5px; font-weight: 700; border-radius: 7px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #94a3b8; cursor: pointer;">
+                  <i class="fa-brands fa-youtube"></i> Shorts
+                </button>
+                <button type="button" class="nex-wm-platform-btn" data-platform="instagram" style="flex: 1; padding: 6px 4px; font-size: 10.5px; font-weight: 700; border-radius: 7px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #94a3b8; cursor: pointer;">
+                  <i class="fa-brands fa-instagram"></i> IG Reels
+                </button>
+              </div>
             </div>
 
             <!-- Progress Indicator -->
@@ -434,12 +452,15 @@
             </div>
 
             <!-- Action Buttons -->
-            <div style="display: flex; gap: 10px;">
-              <button type="button" id="nexWmDirectExportBtn" class="nex-wm-action-btn primary" style="flex: 1;">
-                <i class="fa-solid fa-download"></i> Generate &amp; Download Watermarked Video
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="nexWmDirectExportBtn" class="nex-wm-action-btn primary" style="flex: 1.4;">
+                <i class="fa-solid fa-download"></i> Generate &amp; Download
+              </button>
+              <button type="button" id="nexWmShareNativeBtn" class="nex-wm-action-btn secondary" style="flex: 1;" title="Direct Native Share to Apps">
+                <i class="fa-solid fa-share-nodes"></i> Share App
               </button>
               <button type="button" id="nexWmRawDownloadBtn" class="nex-wm-action-btn secondary" title="Download raw video without watermarks (Creator Master)">
-                <i class="fa-solid fa-file-video"></i> Raw Master
+                <i class="fa-solid fa-file-video"></i> Raw
               </button>
             </div>
           </div>
@@ -459,7 +480,9 @@
     const outroToggle = modal.querySelector('#nexWmOutroToggle');
     const outroBadge = modal.querySelector('#nexWatermarkOutroBadge');
     const directExportBtn = modal.querySelector('#nexWmDirectExportBtn');
+    const shareNativeBtn = modal.querySelector('#nexWmShareNativeBtn');
     const rawDownloadBtn = modal.querySelector('#nexWmRawDownloadBtn');
+    const platformBtns = modal.querySelectorAll('.nex-wm-platform-btn');
     const progressWrap = modal.querySelector('#nexWmProgressWrap');
     const progressBar = modal.querySelector('#nexWmProgressBar');
     const progressStatus = modal.querySelector('#nexWmProgressStatus');
@@ -472,6 +495,76 @@
     previewVideo.src = reel.videoUrl;
 
     let isBouncingMode = true;
+    let selectedPlatform = 'tiktok';
+
+    const platformPresets = {
+      tiktok: {
+        name: 'TikTok',
+        tags: '#NEXCHAT #CyberReels #ViralTok #TechTok',
+        aspect: '9:16'
+      },
+      shorts: {
+        name: 'YouTube Shorts',
+        tags: '#Shorts #NEXCHAT #Cyberpunk #ShortsFeed',
+        aspect: '9:16'
+      },
+      instagram: {
+        name: 'Instagram Reels',
+        tags: '#ReelsInstagram #NEXCHAT #CyberVibes #ExplorePage',
+        aspect: '9:16'
+      }
+    };
+
+    platformBtns.forEach(btn => {
+      btn.onclick = () => {
+        platformBtns.forEach(b => {
+          b.classList.remove('active');
+          b.style.background = 'rgba(255, 255, 255, 0.05)';
+          b.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+          b.style.color = '#94a3b8';
+        });
+        btn.classList.add('active');
+        btn.style.background = 'rgba(0, 242, 255, 0.15)';
+        btn.style.borderColor = '#00f2ff';
+        btn.style.color = '#fff';
+        selectedPlatform = btn.getAttribute('data-platform') || 'tiktok';
+      };
+    });
+
+    if (shareNativeBtn) {
+      shareNativeBtn.onclick = async () => {
+        const preset = platformPresets[selectedPlatform] || platformPresets.tiktok;
+        const caption = `${reel.caption || 'Created on NEXCHAT'} ${preset.tags} (Via NEXCHAT @${authorName})`;
+        
+        let shared = false;
+        if (navigator.share) {
+          try {
+            await navigator.share({
+              title: `${preset.name} Reel by @${authorName}`,
+              text: caption,
+              url: window.location.href
+            });
+            shared = true;
+          } catch (e) {
+            // User cancelled or share failed, fallback to clipboard
+          }
+        }
+        
+        if (!shared && navigator.clipboard) {
+          try {
+            await navigator.clipboard.writeText(caption);
+          } catch (e) {
+            console.warn('[CLIPBOARD FAILED]', e);
+          }
+        }
+
+        const originalText = shareNativeBtn.innerHTML;
+        shareNativeBtn.innerHTML = '<i class="fa-solid fa-check"></i> ' + preset.name + ' Ready!';
+        setTimeout(() => {
+          shareNativeBtn.innerHTML = originalText;
+        }, 2500);
+      };
+    }
 
     // Toggle bouncing vs static
     bouncingBtn.onclick = () => {

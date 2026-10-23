@@ -122,6 +122,7 @@
           <button id="broadcastChannelsBtnHeader" class="header-icon-btn" title="Tactical Broadcast Channels" onclick="window.broadcastChannelsEngine?.openModal()"><i class="fa-solid fa-tower-broadcast text-[#00f3ff]"></i></button>
           <button id="cyberMatrixBtnHeader" class="header-icon-btn" title="100 Cyber Feature Matrix Toggles" onclick="window.cyberFeatureMatrix?.openModal()"><i class="fa-solid fa-sliders text-[#00f3ff]"></i></button>
           <button id="qrPairingBtnHeader" class="header-icon-btn" title="Dynamic QR Node Pairing" onclick="window.qrPairingEngine?.openModal()"><i class="fa-solid fa-qrcode text-[#00f3ff]"></i></button>
+          <button id="escrowMarketBtnHeader" class="header-icon-btn" title="Creator Collectibles &amp; Multi-Sig P2P Escrow Market" onclick="window.NexEscrowMarket?.openMarketModal()"><i class="fa-solid fa-gem text-[#00f2ff]"></i></button>
           <button id="tacticalCanvasBtnHeader" class="header-icon-btn" title="NEX-CANVAS Tactical Whiteboard" onclick="window.CyberFeatures.canvas?.show()"><i class="fa-solid fa-pen-ruler"></i></button>
           <button id="steganoBtnHeader" class="header-icon-btn" title="NEX-STEGANO Pixel Enclave" onclick="window.CyberFeatures.stegano?.show()"><i class="fa-solid fa-user-secret"></i></button>
           <button id="sandboxBtnHeader" class="header-icon-btn" title="NEX-SANDBOX Code Runner" onclick="window.CyberFeatures.sandbox?.show()"><i class="fa-solid fa-microchip"></i></button>
@@ -1096,6 +1097,20 @@
       <div id="offlineIndicator" class="offline-indicator" style="display: none;">
         <span class="offline-icon"><i class="fa-solid fa-wifi-slash"></i></span>
         <span class="offline-text">You are offline — Messages will send when online</span>
+      </div>
+
+      <!-- PEER-TO-PEER OFFLINE LOCAL MESH BANNER -->
+      <div id="nexOffGridMeshBanner" style="display: none; background: linear-gradient(135deg, rgba(0, 242, 255, 0.12), rgba(0, 255, 136, 0.12)); border: 1px solid #00f2ff; border-radius: 8px; margin: 8px 16px; padding: 10px 14px; align-items: center; justify-content: space-between; z-index: 100;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 10px #00ff88;"></div>
+          <div>
+            <strong style="font-size: 11.5px; color: #fff; display: block;">OFF-GRID LOCAL P2P MESH ACTIVE</strong>
+            <span style="font-size: 10px; color: #94a3b8;">Local BroadcastChannel sync with <span id="nexMeshPeerCount">1</span> nearby peer node(s). Messages sync to cloud upon reconnect.</span>
+          </div>
+        </div>
+        <button type="button" id="nexMeshPingBtn" style="padding: 4px 10px; background: rgba(0,242,255,0.2); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 5px; font-size: 10.5px; font-weight: 700; cursor: pointer;">
+          <i class="fa-solid fa-satellite-dish"></i> Mesh Ping
+        </button>
       </div>
 
       <!-- REELS FUNCTIONALITY REMOVED -->
@@ -4462,6 +4477,9 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/cyber-hundred-suite.js"></script>
   <script src="./src/js/chat-advanced-matrix.js"></script>
   <script src="./src/js/nextgen-eight-suite.js"></script>
+  <script src="./src/js/cyber-audio-dsp.js"></script>
+  <script src="./src/js/offline-mesh-sync.js"></script>
+  <script src="./src/js/creator-escrow-market.js"></script>
 
 </body>
 

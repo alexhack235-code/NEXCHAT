@@ -176,6 +176,20 @@
               <button type="button" id="toggleCallBlurBtn" class="call-dock-btn" title="Privacy Camera Enhancement">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
               </button>
+              <!-- Cyber Audio Voice Masker DSP Selector -->
+              <div style="position: relative; display: inline-block;">
+                <button type="button" id="toggleVoiceDspBtn" class="call-dock-btn" title="Cyber Voice DSP Masker &amp; Vocoder">
+                  <i class="fa-solid fa-robot"></i>
+                </button>
+                <div id="callVoiceDspPopover" style="display: none; position: absolute; bottom: 58px; left: 50%; transform: translateX(-50%); background: #0f172a; border: 1px solid #00f2ff; border-radius: 8px; padding: 8px; width: 170px; z-index: 50; box-shadow: 0 8px 24px rgba(0,0,0,0.85);">
+                  <div style="font-size: 10px; font-weight: 800; color: #00f2ff; margin-bottom: 6px; font-family: monospace;">VOICE DSP MASKER</div>
+                  <button type="button" class="dsp-preset-opt active" data-preset="clean" style="width: 100%; text-align: left; padding: 5px 8px; font-size: 11px; background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; border-radius: 4px; color: #fff; margin-bottom: 4px; cursor: pointer;">Studio Clean</button>
+                  <button type="button" class="dsp-preset-opt" data-preset="android" style="width: 100%; text-align: left; padding: 5px 8px; font-size: 11px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #94a3b8; margin-bottom: 4px; cursor: pointer;">Cyber Android</button>
+                  <button type="button" class="dsp-preset-opt" data-preset="radio" style="width: 100%; text-align: left; padding: 5px 8px; font-size: 11px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #94a3b8; margin-bottom: 4px; cursor: pointer;">Radio Dispatch</button>
+                  <button type="button" class="dsp-preset-opt" data-preset="ghost" style="width: 100%; text-align: left; padding: 5px 8px; font-size: 11px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #94a3b8; margin-bottom: 4px; cursor: pointer;">Ghost Operative</button>
+                  <button type="button" class="dsp-preset-opt" data-preset="vocoder" style="width: 100%; text-align: left; padding: 5px 8px; font-size: 11px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; color: #94a3b8; cursor: pointer;">Harmonic Vocoder</button>
+                </div>
+              </div>
               <button type="button" id="switchGoogleMeetBtn" class="call-dock-btn" title="Switch to Google Meet Room">
                 <i class="fa-solid fa-up-right-from-square"></i>
               </button>
@@ -262,6 +276,50 @@
       if (switchMeetBtn) {
         switchMeetBtn.addEventListener('click', () => this.launchGoogleMeetCall());
       }
+
+      // Voice DSP Masker Controls
+      const dspBtn = document.getElementById('toggleVoiceDspBtn');
+      const dspPopover = document.getElementById('callVoiceDspPopover');
+      if (dspBtn && dspPopover) {
+        dspBtn.addEventListener('click', () => {
+          const isOpen = dspPopover.style.display === 'block';
+          dspPopover.style.display = isOpen ? 'none' : 'block';
+        });
+
+        dspPopover.querySelectorAll('.dsp-preset-opt').forEach(opt => {
+          opt.addEventListener('click', () => {
+            const preset = opt.getAttribute('data-preset');
+            dspPopover.querySelectorAll('.dsp-preset-opt').forEach(b => {
+              b.classList.remove('active');
+              b.style.background = 'rgba(255,255,255,0.04)';
+              b.style.borderColor = 'rgba(255,255,255,0.08)';
+              b.style.color = '#94a3b8';
+            });
+            opt.classList.add('active');
+            opt.style.background = 'rgba(0,242,255,0.15)';
+            opt.style.borderColor = '#00f2ff';
+            opt.style.color = '#fff';
+
+            if (window.CyberAudioDSP && this.localStream) {
+              try {
+                const processedStream = window.CyberAudioDSP.applyVoicePreset(this.localStream, preset);
+                const audioTrack = processedStream.getAudioTracks()[0];
+                if (audioTrack && this.peerConnection) {
+                  const senders = this.peerConnection.getSenders();
+                  const audioSender = senders.find(s => s.track && s.track.kind === 'audio');
+                  if (audioSender) {
+                    audioSender.replaceTrack(audioTrack);
+                  }
+                }
+                if (window.showNotif) window.showNotif(`Voice DSP preset: ${preset.toUpperCase()} active`, 'info');
+              } catch (dspErr) {
+                console.warn('[VOICE DSP]', dspErr);
+              }
+            }
+            dspPopover.style.display = 'none';
+          });
+        });
+      }
     }
 
     openChoiceModal(targetName, isVideo) {
@@ -298,8 +356,8 @@
       // Open Google Meet in new tab immediately for the host
       window.open('https://meet.google.com/new', '_blank');
 
-      // Post Google Meet Invitation Card into the active chat
-      const inviteText = `📹 **Google Meet Video Call**\nI've started a Google Meet video conference. Click below to join with crystal-clear audio, video, and screen sharing:\n\n👉 [Join Google Meeting](https://meet.google.com/new)`;
+      // Post Google Meet Invitation Card into the active chat (Strictly zero emojis)
+      const inviteText = `[GOOGLE MEET VIDEO CALL]\nI have started a Google Meet video conference. Click below to join with crystal-clear audio, video, and screen sharing:\n\n[Join Google Meeting](https://meet.google.com/new)`;
 
       const input = document.getElementById('message-input');
       if (input) {
@@ -373,7 +431,7 @@
           window.sendSupabaseMessage({
             from: myId,
             to: targetUid,
-            text: `📞 Call invitation (${isVideo ? 'Video' : 'Voice'})`,
+            text: `[Call Invitation] (${isVideo ? 'Video' : 'Voice'})`,
             isCallSignal: true,
             signalType: 'offer',
             callType: this.callType,

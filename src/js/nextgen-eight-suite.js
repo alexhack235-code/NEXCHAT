@@ -1043,6 +1043,15 @@
   // MODULE 8: CAMSHOT LIVE BROADCAST STREAMER & CO-HOST MATRIX
   // ---------------------------------------------------------------------------
   const LiveBroadcastModule = {
+    fxCanvas: null,
+    fxCtx: null,
+    fxAnimId: null,
+    particles: [],
+    pkActive: false,
+    pkTimerId: null,
+    pkHostScore: 1250,
+    pkOpponentScore: 1250,
+
     openModal() {
       if (!state.config.camshot_live_broadcast) {
         showToast('Live Broadcast is disabled in Settings.', 'info');
@@ -1054,36 +1063,105 @@
       modal.id = 'camshotLiveBroadcastModal';
       modal.className = 'nextgen-modal-overlay';
       modal.innerHTML = `
-        <div class="nextgen-modal-card" style="max-width: 740px;">
-          <div class="nextgen-modal-header">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <span class="nextgen-live-badge">LIVE STREAM</span>
-              <span class="nextgen-live-viewer-count" id="liveViewersCount"><i class="fa-solid fa-eye"></i> 1,428 VIEWERS</span>
+        <div class="nextgen-modal-card" style="max-width: 820px; width: 95vw;">
+          <div class="nextgen-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <span class="nextgen-live-badge" style="background: #ff0055; color: #fff; font-weight: 800; padding: 3px 8px; border-radius: 4px; font-size: 11px;">LIVE</span>
+              <span class="nextgen-live-viewer-count" id="liveViewersCount" style="font-family: monospace; font-size: 11px; color: #67e8f9;"><i class="fa-solid fa-eye"></i> 2,840 VIEWERS</span>
+              <span class="c2pa-live-badge" style="background: rgba(0,255,136,0.15); border: 1px solid #00ff88; color: #00ff88; font-size: 10.5px; padding: 2px 8px; border-radius: 4px; font-family: monospace;">
+                <i class="fa-solid fa-shield-halved"></i> C2PA HARDWARE AUTHENTIC
+              </span>
             </div>
-            <button type="button" class="nextgen-modal-close" id="closeLiveModalBtn" title="End Broadcast">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button type="button" class="nextgen-launch-btn" id="livePkBattleToggleBtn" style="background: linear-gradient(135deg, rgba(255,0,85,0.2), rgba(0,242,255,0.2)); border: 1px solid #00f2ff; color: #00f2ff; font-size: 11px; padding: 5px 12px;">
+                <i class="fa-solid fa-swords"></i> PK BATTLE MODE
+              </button>
+              <button type="button" class="nextgen-modal-close" id="closeLiveModalBtn" title="End Broadcast">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
           </div>
-          <div style="padding: 20px;">
-            <div class="nextgen-live-split-matrix">
-              <div class="nextgen-cohost-slot" id="mainBroadcastSlot">
-                <video id="liveSelfVideo" autoplay playsinline muted></video>
-                <div style="position: absolute; bottom: 12px; left: 12px; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 6px; font-family: var(--ng-font-mono); font-size: 11px; color: #00ff88;">
+
+          <!-- PK Battle Real-Time Tug-of-War Bar (Hidden by default until PK activated) -->
+          <div id="nexPkBattleBar" style="display: none; padding: 10px 16px; background: rgba(0,0,0,0.5); border-bottom: 1px solid rgba(255,255,255,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-family: monospace; font-size: 11px;">
+              <span style="color: #00f2ff; font-weight: 700;"><i class="fa-solid fa-user-astronaut"></i> HOST: <span id="pkHostScoreEl">1,250</span> PTS</span>
+              <span style="color: #fbbf24; font-weight: 800; background: rgba(251,191,36,0.15); padding: 2px 8px; border-radius: 4px;" id="pkCountdownTimer"><i class="fa-regular fa-clock"></i> 02:45</span>
+              <span style="color: #ff0055; font-weight: 700;">CHALLENGER: <span id="pkOpponentScoreEl">1,250</span> PTS <i class="fa-solid fa-skull"></i></span>
+            </div>
+            <div style="width: 100%; height: 10px; background: #ff0055; border-radius: 6px; overflow: hidden; display: flex; position: relative;">
+              <div id="pkHostProgress" style="width: 50%; height: 100%; background: #00f2ff; transition: width 0.3s ease;"></div>
+            </div>
+          </div>
+
+          <div style="padding: 16px; position: relative;">
+            <!-- Split Screen Matrix -->
+            <div class="nextgen-live-split-matrix" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; height: 340px; position: relative; border-radius: 12px; overflow: hidden; background: #000;">
+              <!-- Host Slot -->
+              <div class="nextgen-cohost-slot" id="mainBroadcastSlot" style="position: relative; height: 100%; background: #0a0e17; border: 1px solid rgba(0,242,255,0.3); border-radius: 10px; overflow: hidden;">
+                <video id="liveSelfVideo" autoplay playsinline muted style="width: 100%; height: 100%; object-fit: cover;"></video>
+                <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 3px 8px; border-radius: 5px; font-family: monospace; font-size: 10px; color: #00ff88; border: 1px solid rgba(0,255,136,0.3);">
                   PRIMARY HOST &bull; 1080p 60FPS
                 </div>
+                <!-- Interactive Particle FX Canvas -->
+                <canvas id="nexLiveFxCanvas" style="position: absolute; inset: 0; pointer-events: none; width: 100%; height: 100%; z-index: 5;"></canvas>
+                <!-- Floating Tip Banner Notification -->
+                <div id="nexLiveTipBanner" style="display: none; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, rgba(0,242,255,0.95), rgba(0,255,136,0.95)); color: #000; font-weight: 800; font-size: 11px; padding: 6px 14px; border-radius: 20px; z-index: 6; box-shadow: 0 4px 20px rgba(0,242,255,0.5); pointer-events: none; animation: pulse 0.8s infinite alternate;"></div>
               </div>
-              <div class="nextgen-cohost-slot" id="cohostBroadcastSlot">
-                <div style="text-align: center; color: #64748b; padding: 20px;">
-                  <i class="fa-solid fa-user-plus" style="font-size: 32px; color: #00d4ff; margin-bottom: 10px;"></i>
-                  <p style="font-size: 12px; margin: 0 0 12px 0;">Co-Host Slot Open</p>
-                  <button type="button" class="nextgen-launch-btn" id="inviteCohostBtn">
+
+              <!-- Co-Host / PK Challenger Slot -->
+              <div class="nextgen-cohost-slot" id="cohostBroadcastSlot" style="position: relative; height: 100%; background: #0e0a14; border: 1px solid rgba(255,0,85,0.3); border-radius: 10px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                <div id="cohostEmptyState" style="text-align: center; color: #64748b; padding: 20px;">
+                  <i class="fa-solid fa-user-plus" style="font-size: 32px; color: #ff0055; margin-bottom: 10px;"></i>
+                  <p style="font-size: 12px; margin: 0 0 10px 0; color: #94a3b8;">Challenger Slot Ready</p>
+                  <button type="button" class="nextgen-launch-btn" id="inviteCohostBtn" style="font-size: 11px; padding: 6px 14px;">
                     <i class="fa-solid fa-link"></i> INVITE CO-HOST
                   </button>
+                </div>
+                <!-- Simulated PK Opponent Video Simulation -->
+                <div id="pkOpponentStage" style="display: none; width: 100%; height: 100%; position: relative; background: radial-gradient(circle at center, #1e112a 0%, #08030c 100%);">
+                  <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ff0055; overflow: hidden; box-shadow: 0 0 20px rgba(255,0,85,0.5);">
+                      <img src="favicon.png" style="width: 100%; height: 100%; object-fit: cover;" alt="Opponent">
+                    </div>
+                    <span style="font-family: monospace; font-size: 12px; color: #fff; font-weight: 700;">@cyber_challenger</span>
+                    <span style="font-size: 10px; color: #ff0055; font-family: monospace;"><i class="fa-solid fa-circle-dot fa-fade"></i> BATTLE ACTIVE</span>
+                  </div>
+                  <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 3px 8px; border-radius: 5px; font-family: monospace; font-size: 10px; color: #ff0055; border: 1px solid rgba(255,0,85,0.3);">
+                    CHALLENGER STAGE
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px;">
+            <!-- Cyber Tipping FX Action Bar -->
+            <div style="margin-top: 14px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 11.5px; font-weight: 700; color: #e2e8f0;">
+                  <i class="fa-solid fa-coins" style="color: #fbbf24;"></i> Send Cyber Tipping FX to Stream:
+                </span>
+                <span style="font-size: 11px; font-family: monospace; color: #00ff88;">
+                  EARNED: <span id="nexHostEarningsEl">4,120</span> CR
+                </span>
+              </div>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" class="nex-live-tip-btn" data-preset="glitch" data-coins="50" style="flex: 1; min-width: 120px; padding: 7px 10px; background: rgba(255, 0, 85, 0.12); border: 1px solid rgba(255,0,85,0.4); border-radius: 7px; color: #ff3366; font-size: 11px; font-weight: 700; cursor: pointer;">
+                  <i class="fa-solid fa-bolt"></i> Cyber Glitch (50 CR)
+                </button>
+                <button type="button" class="nex-live-tip-btn" data-preset="matrix" data-coins="100" style="flex: 1; min-width: 120px; padding: 7px 10px; background: rgba(0, 255, 136, 0.12); border: 1px solid rgba(0,255,136,0.4); border-radius: 7px; color: #00ff88; font-size: 11px; font-weight: 700; cursor: pointer;">
+                  <i class="fa-solid fa-code"></i> Matrix Rain (100 CR)
+                </button>
+                <button type="button" class="nex-live-tip-btn" data-preset="quantum" data-coins="250" style="flex: 1; min-width: 120px; padding: 7px 10px; background: rgba(0, 242, 255, 0.12); border: 1px solid rgba(0,242,255,0.4); border-radius: 7px; color: #00f2ff; font-size: 11px; font-weight: 700; cursor: pointer;">
+                  <i class="fa-solid fa-atom"></i> Quantum Core (250 CR)
+                </button>
+                <button type="button" class="nex-live-tip-btn" data-preset="supernova" data-coins="500" style="flex: 1; min-width: 120px; padding: 7px 10px; background: rgba(251, 191, 36, 0.12); border: 1px solid rgba(251,191,36,0.4); border-radius: 7px; color: #fbbf24; font-size: 11px; font-weight: 700; cursor: pointer;">
+                  <i class="fa-solid fa-flare"></i> Holo Supernova (500 CR)
+                </button>
+              </div>
+            </div>
+
+            <!-- Host Live Audio & Video Controls -->
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px;">
               <div style="display: flex; align-items: center; gap: 8px;">
                 <button type="button" class="nextgen-launch-btn" id="liveMicToggleBtn">
                   <i class="fa-solid fa-microphone"></i> MUTE MIC
@@ -1118,9 +1196,250 @@
       modal.querySelector('#inviteCohostBtn').addEventListener('click', () => {
         showToast('Co-Host invite link copied to clipboard.', 'success');
       });
+
+      // Initialize Particle FX Canvas
+      this.initFxCanvas(modal);
+
+      // Wire Cyber Tip Buttons
+      const tipBtns = modal.querySelectorAll('.nex-live-tip-btn');
+      tipBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const preset = btn.getAttribute('data-preset');
+          const coins = parseInt(btn.getAttribute('data-coins'), 10) || 50;
+          this.triggerTipFx(preset, coins);
+        });
+      });
+
+      // Wire PK Battle Toggle
+      const pkToggleBtn = modal.querySelector('#livePkBattleToggleBtn');
+      pkToggleBtn.addEventListener('click', () => {
+        this.togglePkBattle(modal);
+      });
+    },
+
+    initFxCanvas(modal) {
+      this.fxCanvas = modal.querySelector('#nexLiveFxCanvas');
+      if (!this.fxCanvas) return;
+      this.fxCtx = this.fxCanvas.getContext('2d');
+      const resize = () => {
+        if (!this.fxCanvas) return;
+        this.fxCanvas.width = this.fxCanvas.parentElement.clientWidth;
+        this.fxCanvas.height = this.fxCanvas.parentElement.clientHeight;
+      };
+      resize();
+      this.particles = [];
+      this.startParticleLoop();
+    },
+
+    startParticleLoop() {
+      const loop = () => {
+        if (!this.fxCanvas || !this.fxCtx) return;
+        this.fxCtx.clearRect(0, 0, this.fxCanvas.width, this.fxCanvas.height);
+
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.x += p.vx;
+          p.y += p.vy;
+          p.life -= p.decay;
+
+          if (p.life <= 0) {
+            this.particles.splice(i, 1);
+            continue;
+          }
+
+          this.fxCtx.save();
+          this.fxCtx.globalAlpha = p.life;
+          this.fxCtx.fillStyle = p.color;
+          this.fxCtx.shadowColor = p.color;
+          this.fxCtx.shadowBlur = 10;
+
+          if (p.type === 'text') {
+            this.fxCtx.font = `${p.size}px monospace`;
+            this.fxCtx.fillText(p.char, p.x, p.y);
+          } else if (p.type === 'box') {
+            this.fxCtx.fillRect(p.x, p.y, p.w, p.h);
+          } else {
+            this.fxCtx.beginPath();
+            this.fxCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            this.fxCtx.fill();
+          }
+          this.fxCtx.restore();
+        }
+
+        this.fxAnimId = requestAnimationFrame(loop);
+      };
+      this.fxAnimId = requestAnimationFrame(loop);
+    },
+
+    triggerTipFx(preset, coins) {
+      if (!this.fxCanvas) return;
+      const w = this.fxCanvas.width;
+      const h = this.fxCanvas.height;
+
+      // Play cyber synthesized notification tone
+      try {
+        const audioCtx = getAudioContext();
+        if (audioCtx) {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.3);
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.3);
+        }
+      } catch (e) {
+        // audio context silent fail
+      }
+
+      // Spawn particles based on preset
+      if (preset === 'matrix') {
+        const chars = '0123456789ABCDEF!@#$%';
+        for (let i = 0; i < 40; i++) {
+          this.particles.push({
+            type: 'text',
+            char: chars[Math.floor(Math.random() * chars.length)],
+            x: Math.random() * w,
+            y: Math.random() * (h * 0.4),
+            vx: 0,
+            vy: 3 + Math.random() * 5,
+            size: 14 + Math.random() * 8,
+            color: '#00ff88',
+            life: 1.0,
+            decay: 0.015
+          });
+        }
+      } else if (preset === 'glitch') {
+        for (let i = 0; i < 25; i++) {
+          this.particles.push({
+            type: 'box',
+            x: Math.random() * w,
+            y: Math.random() * h,
+            w: 20 + Math.random() * 60,
+            h: 3 + Math.random() * 8,
+            vx: (Math.random() - 0.5) * 4,
+            vy: (Math.random() - 0.5) * 2,
+            color: Math.random() > 0.5 ? '#ff0055' : '#00f2ff',
+            life: 1.0,
+            decay: 0.03
+          });
+        }
+      } else if (preset === 'quantum') {
+        const cx = w / 2;
+        const cy = h / 2;
+        for (let i = 0; i < 50; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 2 + Math.random() * 5;
+          this.particles.push({
+            type: 'circle',
+            x: cx,
+            y: cy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: 3 + Math.random() * 4,
+            color: '#00f2ff',
+            life: 1.0,
+            decay: 0.02
+          });
+        }
+      } else { // supernova
+        const cx = w / 2;
+        const cy = h / 2;
+        for (let i = 0; i < 80; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 3 + Math.random() * 8;
+          this.particles.push({
+            type: 'circle',
+            x: cx,
+            y: cy,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: 2 + Math.random() * 5,
+            color: Math.random() > 0.5 ? '#fbbf24' : '#00ff88',
+            life: 1.0,
+            decay: 0.018
+          });
+        }
+      }
+
+      // Display floating tip banner
+      const banner = document.getElementById('nexLiveTipBanner');
+      if (banner) {
+        banner.textContent = `GIFT SENT: +${coins} CR [${preset.toUpperCase()}]`;
+        banner.style.display = 'block';
+        setTimeout(() => {
+          if (banner) banner.style.display = 'none';
+        }, 2200);
+      }
+
+      // Update Host Earnings
+      const earningsEl = document.getElementById('nexHostEarningsEl');
+      if (earningsEl) {
+        const current = parseInt(earningsEl.textContent.replace(/,/g, ''), 10) || 4120;
+        earningsEl.textContent = (current + coins).toLocaleString();
+      }
+
+      // If PK Battle is active, boost host score
+      if (this.pkActive) {
+        this.pkHostScore += coins;
+        this.updatePkScoreboard();
+      }
+    },
+
+    togglePkBattle(modal) {
+      this.pkActive = !this.pkActive;
+      const bar = modal.querySelector('#nexPkBattleBar');
+      const emptyState = modal.querySelector('#cohostEmptyState');
+      const stage = modal.querySelector('#pkOpponentStage');
+      const toggleBtn = modal.querySelector('#livePkBattleToggleBtn');
+
+      if (this.pkActive) {
+        bar.style.display = 'block';
+        emptyState.style.display = 'none';
+        stage.style.display = 'block';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-flag-checkered"></i> EXIT PK BATTLE';
+        toggleBtn.style.color = '#ff0055';
+        toggleBtn.style.borderColor = '#ff0055';
+        this.pkHostScore = 1250;
+        this.pkOpponentScore = 1250;
+        this.updatePkScoreboard();
+        showToast('Split-Screen PK Battle Activated! 3-minute challenge live.', 'success');
+      } else {
+        bar.style.display = 'none';
+        emptyState.style.display = 'block';
+        stage.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fa-solid fa-swords"></i> PK BATTLE MODE';
+        toggleBtn.style.color = '#00f2ff';
+        toggleBtn.style.borderColor = '#00f2ff';
+        showToast('PK Battle concluded.', 'info');
+      }
+    },
+
+    updatePkScoreboard() {
+      const hostEl = document.getElementById('pkHostScoreEl');
+      const oppEl = document.getElementById('pkOpponentScoreEl');
+      const progressEl = document.getElementById('pkHostProgress');
+      if (hostEl) hostEl.textContent = this.pkHostScore.toLocaleString();
+      if (oppEl) oppEl.textContent = this.pkOpponentScore.toLocaleString();
+      if (progressEl) {
+        const total = this.pkHostScore + this.pkOpponentScore;
+        const pct = Math.min(95, Math.max(5, (this.pkHostScore / (total || 1)) * 100));
+        progressEl.style.width = pct + '%';
+      }
     },
 
     closeModal() {
+      if (this.fxAnimId) {
+        cancelAnimationFrame(this.fxAnimId);
+        this.fxAnimId = null;
+      }
+      this.particles = [];
+      this.pkActive = false;
+
       const existing = document.getElementById('camshotLiveBroadcastModal');
       if (existing) {
         const video = existing.querySelector('#liveSelfVideo');

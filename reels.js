@@ -1144,6 +1144,10 @@ function renderReels(reelsList) {
               @${escapeHtml(authorHandle)}
             </span>
             <span class="reel-verified-badge" title="Verified Creator"><i class="fa-solid fa-circle-check"></i></span>
+            ${(reel.c2paManifest || reel.provenanceStatus === 'C2PA_VERIFIED_AUTHENTIC') ? `
+            <span class="reel-c2pa-badge" title="C2PA Authenticity Provenance Verified: Hardware Cryptographically Signed" style="background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; color: #00ff88; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-left: 4px; display: inline-flex; align-items: center; gap: 3px;">
+              <i class="fa-solid fa-shield-halved"></i> C2PA
+            </span>` : ''}
             <button type="button" class="reel-follow-pill ${isFollowing ? 'following' : ''}" data-author="${escapeHtml(authorHandle)}" title="Follow creator">
               ${isFollowing ? '<i class="fa-solid fa-check"></i> Following' : '<i class="fa-solid fa-plus"></i> Follow'}
             </button>
@@ -4073,6 +4077,20 @@ uploadReelForm.addEventListener('submit', async (e) => {
       }
     }
 
+    // Phase 2.8: Neural Deepfake & Synthetic Media C2PA Validation
+    let c2paManifest = null;
+    let syntheticMetrics = null;
+    if (window.NexSyntheticValidator) {
+      try {
+        reelProgressVault.textContent = 'Verifying C2PA hardware provenance & neural landmarks...';
+        const valRes = await window.NexSyntheticValidator.validateVideo(selectedReelFile);
+        c2paManifest = valRes.c2paManifest;
+        syntheticMetrics = valRes.metrics;
+      } catch (c2paErr) {
+        console.warn('[C2PA VALIDATION NOTICE]', c2paErr);
+      }
+    }
+
     // Phase 3: Commit to CamShot stream
     reelProgressVault.textContent = 'Publishing to CamShot stream...';
     const realAuthorId = auth.currentUser?.uid || myUID || 'user_anon';
@@ -4093,6 +4111,9 @@ uploadReelForm.addEventListener('submit', async (e) => {
       authorName: publishAuthorName,
       authorPic: publishAuthorPic,
       publishingIdentity: chosenPersona,
+      c2paManifest: c2paManifest,
+      syntheticMetrics: syntheticMetrics,
+      provenanceStatus: c2paManifest ? 'C2PA_VERIFIED_AUTHENTIC' : 'STANDARD_UPLOAD',
       likes: [],
       likesCount: 0,
       commentsCount: 0,
