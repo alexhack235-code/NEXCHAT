@@ -627,6 +627,10 @@
             <div class="share-icon-circle"><i class="fa-solid fa-download"></i></div>
             <span>Save Video</span>
           </button>
+          <button type="button" class="share-option-btn" id="shareWatermarkExportBtn" style="border: 1px solid rgba(0,242,255,0.4); background: rgba(0,242,255,0.08);">
+            <div class="share-icon-circle" style="color: #00f2ff;"><i class="fa-solid fa-watermark"></i></div>
+            <span style="color: #00f2ff; font-weight: 700;">TikTok Watermark</span>
+          </button>
         </div>
         <div class="share-link-preview">
           <input type="text" id="shareLinkInput" readonly value="">
@@ -1335,6 +1339,7 @@
   <!-- Notification Toast -->
   <div id="reelsNotif" class="reels-toast" style="display: none;"></div>
 
+  <script src="./src/js/reels-watermark-engine.js"></script>
   <script type="module" src="./src/js/ai-security-scanner-api.js"></script>
   <script type="module" src="reels.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>

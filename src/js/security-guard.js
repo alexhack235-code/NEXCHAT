@@ -14,6 +14,7 @@ const PUBLIC_PAGES = new Set([
   'reset.html',
   'link-device.html',
   'landing.html',
+  'reels.html',
   '',
 ]);
 

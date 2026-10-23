@@ -811,7 +811,9 @@ function initReelsFeed() {
       }
     });
 
-    allLoadedReels = merged;
+    // Filter out suspended, banned or takedown reels
+    const activeReels = merged.filter(r => r.status !== 'suspended' && r.status !== 'takedown' && r.status !== 'banned');
+    allLoadedReels = activeReels;
     applyFeedFilter();
   }, (err) => {
     console.warn('Reels stream fallback to seeded content:', err.message);
@@ -2788,18 +2790,38 @@ if (cancelCommentReplyBtn) {
   });
 }
 
+const shareWatermarkExportBtn = document.getElementById('shareWatermarkExportBtn');
+
+if (shareWatermarkExportBtn) {
+  shareWatermarkExportBtn.addEventListener('click', () => {
+    if (activeShareReel && activeShareReel.videoUrl) {
+      if (window.NexWatermarkEngine && typeof window.NexWatermarkEngine.openWatermarkExportModal === 'function') {
+        closeShareModal();
+        window.NexWatermarkEngine.openWatermarkExportModal(activeShareReel);
+      } else {
+        showToast('Watermark Engine initializing...');
+      }
+    }
+  });
+}
+
 if (shareDownloadBtn) {
   shareDownloadBtn.addEventListener('click', () => {
     if (activeShareReel && activeShareReel.videoUrl) {
-      const a = document.createElement('a');
-      a.href = activeShareReel.videoUrl;
-      a.download = `CAMSHOT_${activeShareReel.id}.mp4`;
-      a.target = '_blank';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      showToast('Downloading reel video...');
-      closeShareModal();
+      if (window.NexWatermarkEngine && typeof window.NexWatermarkEngine.openWatermarkExportModal === 'function') {
+        closeShareModal();
+        window.NexWatermarkEngine.openWatermarkExportModal(activeShareReel);
+      } else {
+        const a = document.createElement('a');
+        a.href = activeShareReel.videoUrl;
+        a.download = `CAMSHOT_${activeShareReel.id}.mp4`;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        showToast('Downloading reel video...');
+        closeShareModal();
+      }
     }
   });
 }

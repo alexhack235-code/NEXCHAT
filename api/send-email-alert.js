@@ -22,7 +22,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { type, toEmail, data = {} } = req.body || {};
+    const body = req.body || {};
+    const type = body.type;
+    const toEmail = body.toEmail || body.to || body.recipient;
+    const data = body.data || body.details || {};
 
     if (!toEmail || !toEmail.includes('@')) {
       return res.status(400).json({ success: false, error: 'Valid recipient email is required.' });
@@ -192,6 +195,72 @@ export default async function handler(req, res) {
               </div>
               <p style="margin: 0; font-size: 12px; color: #64748b;">
                 This PIN will expire in 15 minutes. If you did not request this, ignore this transmission.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+      `;
+    } else if (type === 'account_sanction') {
+      const status = data.status || 'SANCTIONED';
+      const reason = data.reason || 'Violation of platform community standards';
+      const duration = data.duration || '24h';
+      const suspendedUntil = data.suspendedUntil || 'Pending Review';
+
+      subject = `[NEXCHAT SECURITY] Account Sanction Notice: ${status}`;
+
+      emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>${subject}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #060912; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #f1f5f9;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #060912; padding: 30px 15px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width: 600px; background-color: #0d1526; border: 1px solid rgba(255, 51, 102, 0.4); border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.8);">
+          <tr>
+            <td style="padding: 24px 30px; background: rgba(255, 51, 102, 0.15); border-bottom: 1px solid rgba(255, 51, 102, 0.3);">
+              <div style="font-family: monospace; font-size: 11px; font-weight: 800; color: #ff3366; letter-spacing: 1.5px; margin-bottom: 6px;">
+                NEX-SECURITY ENFORCEMENT PROTOCOL
+              </div>
+              <h1 style="margin: 0; font-size: 20px; font-weight: 800; color: #ffffff;">ACCOUNT SANCTION DISPATCH</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px;">
+              <p style="margin: 0 0 16px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
+                Hello <strong>${data.username || toEmail.split('@')[0]}</strong>,
+              </p>
+              <p style="margin: 0 0 20px; font-size: 14px; line-height: 1.6; color: #cbd5e1;">
+                This automated security transmission notifies you that an administrative sanction has been registered against your NEXCHAT account.
+              </p>
+              <table role="presentation" width="100%" style="background-color: #080d1a; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; font-family: monospace; font-size: 11px; margin-bottom: 24px;">
+                <tr>
+                  <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05); width: 35%;">SANCTION STATUS</td>
+                  <td style="padding: 10px 14px; color: #ff3366; font-weight: 800; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${status}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">REASON</td>
+                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${reason}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 14px; color: #64748b; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">DURATION</td>
+                  <td style="padding: 10px 14px; color: #cbd5e1; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">${duration}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 10px 14px; color: #64748b;">HOLD EXPIRATION</td>
+                  <td style="padding: 10px 14px; color: #00d4ff;">${suspendedUntil}</td>
+                </tr>
+              </table>
+              <p style="margin: 0; font-size: 12px; color: #64748b; line-height: 1.5;">
+                To file an appeal or request review, contact SuperAdmin operations through the official support gateway.
               </p>
             </td>
           </tr>
