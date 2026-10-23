@@ -124,7 +124,7 @@
         }
 
         if (typeof window.showNotif === 'function') {
-          window.showNotif('🖥️ Screen sharing active in 1080p!', 'success', 2200);
+          window.showNotif('Screen sharing active in 1080p', 'success', 2200);
         }
         if (typeof window.playCyberSfx === 'function') window.playCyberSfx('affirm');
 
@@ -194,7 +194,7 @@
       } else if (document.pictureInPictureEnabled && targetVid.requestPictureInPicture) {
         try {
           await targetVid.requestPictureInPicture();
-          if (typeof window.showNotif === 'function') window.showNotif('📺 Picture-in-Picture window active!', 'success', 2000);
+          if (typeof window.showNotif === 'function') window.showNotif('Picture-in-Picture window active', 'success', 2000);
           if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
         } catch (err) {
           console.warn('PiP request error:', err);
@@ -224,7 +224,7 @@
       }
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(this.isBlurEnabled ? '✨ Privacy Camera Enhancement ON' : 'Camera Enhancement OFF', 'info', 1800);
+        window.showNotif(this.isBlurEnabled ? 'Privacy Camera Enhancement ON' : 'Camera Enhancement OFF', 'info', 1800);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('zap');
     }

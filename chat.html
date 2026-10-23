@@ -212,17 +212,19 @@
     <div class="nex-status-container hacker-terminal-status" id="statusContainer" style="display: none;">
       <!-- Terminal Status HUD Header -->
       <div class="status-top-appbar terminal-status-appbar">
-        <div class="terminal-status-header-brand">
+        <div class="terminal-status-brand-wrap">
           <button type="button" id="statusBackBtn" class="terminal-back-btn" onclick="if(window.showChatListView) window.showChatListView(); else window.handleNavigation('chats');" title="Back to Chats">
             <i class="fa-solid fa-arrow-left"></i>
           </button>
-          <div class="terminal-status-brand-line">
-            <span class="terminal-prompt-prefix">&gt;</span>
-            <h2 class="status-appbar-title terminal-hud-title">STATUS_VAULT<span class="term-cursor-blink">_</span></h2>
-          </div>
-          <div class="terminal-telemetry-meta">
-            <span class="telemetry-badge active-mesh"><i class="fa-solid fa-signal"></i> MESH: ONLINE</span>
-            <span class="telemetry-badge cipher-badge"><i class="fa-solid fa-shield-halved"></i> 24H_EPHEMERAL</span>
+          <div class="terminal-status-header-brand">
+            <div class="terminal-status-brand-line">
+              <span class="terminal-prompt-prefix">&gt;</span>
+              <h2 class="status-appbar-title terminal-hud-title">STATUS_VAULT<span class="term-cursor-blink">_</span></h2>
+            </div>
+            <div class="terminal-telemetry-meta">
+              <span class="telemetry-badge active-mesh"><i class="fa-solid fa-signal"></i> MESH: ONLINE</span>
+              <span class="telemetry-badge cipher-badge"><i class="fa-solid fa-shield-halved"></i> 24H_EPHEMERAL</span>
+            </div>
           </div>
         </div>
 
@@ -599,6 +601,8 @@
           <div class="dropdown-header">Options</div>
           <button id="callBtn" class="option-item call-option">Call User</button>
           <button id="videoCallBtn" class="option-item video-option">Video Call</button>
+          <button id="menuSearchInChatBtn" class="option-item" onclick="document.getElementById('chatSearchToggleBtn')?.click(); closeChatOptionsMenu();"><i class="fa-solid fa-magnifying-glass" style="margin-right: 8px; color: #00ff66;"></i>Search in Chat</button>
+          <button id="menuWallpaperBtn" class="option-item" onclick="document.getElementById('quickWallpaperBtn')?.click(); closeChatOptionsMenu();"><i class="fa-solid fa-palette" style="margin-right: 8px; color: #a78bfa;"></i>Change Wallpaper</button>
           <button id="groupAdminBtn" class="option-item" style="display: none; background: #00d4ff; color: #000;">Manage Members</button>
           <button id="groupInviteQrBtn" class="option-item" style="display: none;"><i class="fa-solid fa-qrcode" style="margin-right: 8px;"></i>Invite via QR</button>
           <button id="groupLeaveBtn" class="option-item danger" style="display: none;"><i class="fa-solid fa-arrow-right-from-bracket" style="margin-right: 8px;"></i>Leave Group</button>
@@ -4285,11 +4289,11 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <div class="canvas-board-wrap grid-bg">
         <canvas id="nexTacticalCanvas"></canvas>
       </div>
-      <div class="nex-canvas-footer" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
-        <span style="font-size: 12px; color: #64748b;"><i class="fa-solid fa-shield-halved" style="color: #00f3ff;"></i> Zero-loss cryptographic vector snapshot</span>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <button type="button" id="canvasDownloadBtn" class="canvas-tool-btn" title="Download PNG"><i class="fa-solid fa-download"></i> Save</button>
-          <button type="button" id="canvasForwardBtn" class="canvas-tool-btn" style="background: rgba(0, 243, 255, 0.15); border-color: #00f3ff; color: #00f3ff;" title="Forward Whiteboard to Contacts or Groups"><i class="fa-solid fa-share-nodes"></i> Forward</button>
+      <div class="nex-canvas-footer">
+        <span class="nex-canvas-footer-tip"><i class="fa-solid fa-shield-halved" style="color: #00f3ff;"></i> Zero-loss cryptographic vector snapshot</span>
+        <div class="nex-canvas-footer-btns">
+          <button type="button" id="canvasDownloadBtn" class="canvas-footer-btn" title="Download PNG"><i class="fa-solid fa-download"></i> Save</button>
+          <button type="button" id="canvasForwardBtn" class="canvas-footer-btn canvas-forward-btn" title="Forward Whiteboard to Contacts or Groups"><i class="fa-solid fa-share-nodes"></i> Forward</button>
           <button type="button" id="canvasSendToChatBtn" class="canvas-send-btn"><i class="fa-solid fa-paper-plane"></i> Send to Chat</button>
         </div>
       </div>

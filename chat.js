@@ -67,6 +67,21 @@ if (typeof window !== 'undefined') {
   window.firebaseSendEmailVerification = sendEmailVerification;
   window.saveSupabaseSettings = saveSupabaseSettings;
   window.fetchSupabaseRoomMessages = fetchSupabaseRoomMessages;
+  window.nexFirestore = {
+    db,
+    collection,
+    doc,
+    getDoc,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    setDoc,
+    query,
+    where,
+    onSnapshot,
+    serverTimestamp
+  };
 }
 
 function escapeHtml(str) {
@@ -4396,8 +4411,9 @@ function renderMessageAttachment(attachment) {
     video.style.cssText = "max-width: 290px; max-height: 320px; width: 100%; border-radius: 10px; display: block; box-shadow: 0 4px 16px rgba(0,0,0,0.35);";
     container.appendChild(video);
   } else if (isAudio) {
+    const durationVal = parseFloat(attachment.duration) || 0;
     if (window.messagingFeatures && typeof window.messagingFeatures.createAudioPlayerElement === "function") {
-      const audioEl = window.messagingFeatures.createAudioPlayerElement(url, attachment.duration || 0);
+      const audioEl = window.messagingFeatures.createAudioPlayerElement(url, durationVal);
       container.appendChild(audioEl);
     } else {
       const audio = document.createElement("audio");
@@ -4406,64 +4422,6 @@ function renderMessageAttachment(attachment) {
       audio.style.cssText = "max-width: 260px; display: block;";
       container.appendChild(audio);
     }
-
-    // ChronEX AI Voice Transcriber & Audio Speed Controls
-    const transcribeBar = document.createElement("div");
-    transcribeBar.className = "voice-transcribe-bar";
-    transcribeBar.innerHTML = `
-      <button type="button" class="voice-transcribe-btn">
-        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>ChronEX Transcribe</span>
-      </button>
-      <div style="display: flex; gap: 4px; align-items: center;">
-        <span class="voice-speed-pill" data-speed="1">1x</span>
-        <span class="voice-speed-pill" data-speed="1.5">1.5x</span>
-        <span class="voice-speed-pill" data-speed="2">2x</span>
-      </div>
-    `;
-
-    const transcriptResult = document.createElement("div");
-    transcriptResult.className = "voice-transcript-result";
-    transcriptResult.style.display = "none";
-
-    transcribeBar.querySelectorAll('.voice-speed-pill').forEach(pill => {
-      pill.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const speed = parseFloat(pill.getAttribute('data-speed')) || 1;
-        const audios = container.querySelectorAll('audio');
-        audios.forEach(a => a.playbackRate = speed);
-        transcribeBar.querySelectorAll('.voice-speed-pill').forEach(p => p.style.color = '#94a3b8');
-        pill.style.color = '#00ff66';
-        if (typeof showNotif === 'function') showNotif(`Speed: ${speed}x`, 'info', 800);
-      });
-    });
-
-    const transcribeBtn = transcribeBar.querySelector('.voice-transcribe-btn');
-    transcribeBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      if (transcriptResult.style.display === 'block') {
-        transcriptResult.style.display = 'none';
-        return;
-      }
-      transcribeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Transcribing...</span>';
-      try {
-        let transcriptText = "";
-        if (typeof generateChronexAIResponse === 'function') {
-          transcriptText = await generateChronexAIResponse("Transcribe and summarize this encrypted neural audio note concisely in one sentence.");
-        } else {
-          transcriptText = "Voice note received: Transcribed audio confirms operational coordination and synchronization.";
-        }
-        transcriptResult.textContent = transcriptText;
-        transcriptResult.style.display = "block";
-        transcribeBtn.innerHTML = '<i class="fa-solid fa-check"></i> <span>Transcribed</span>';
-      } catch (err) {
-        transcriptResult.textContent = "Audio Note: [Voice message securely transmitted]";
-        transcriptResult.style.display = "block";
-        transcribeBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>';
-      }
-    });
-
-    container.appendChild(transcribeBar);
-    container.appendChild(transcriptResult);
   } else if (isArchive) {
     // High-Tech Compressed Folder Archive Card
     const archiveCard = document.createElement("a");
@@ -5836,6 +5794,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   window.currentChatType = chatType;
   currentChatName = username;
   window.currentChatName = username;
+  window.currentChatAvatar = profilePic || 'logo.jpg';
   if (window.cyberStreaksEngine) {
     window.cyberStreaksEngine.renderStreakBadge();
   }
@@ -6457,7 +6416,7 @@ async function startCall(isVideo = false) {
     if (callTimeoutTimer) clearTimeout(callTimeoutTimer);
     callTimeoutTimer = setTimeout(async () => {
       if (callActive && activeCallDocId) {
-        console.log('?? Call timeout after 60s - marking as no-answer (missed call)');
+        console.log('[CALL] Call timeout after 60s - marking as no-answer (missed call)');
         try {
           await updateDoc(doc(db, 'calls', activeCallDocId), {
             status: 'no-answer',
@@ -6467,7 +6426,7 @@ async function startCall(isVideo = false) {
 
           const targetUserId = currentChatUserId || currentChatUser;
           const callHistoryId = await saveCallToHistory(myUID, targetUserId, callTypeText, 60, 'missed');
-          console.log('?? Missed call logged to history:', callHistoryId);
+          console.log('[CALL] Missed call logged to history:', callHistoryId);
           showNotif(`Missed call from @${currentChatUser}`, 'info');
           endCall();
         } catch (err) {
@@ -7429,6 +7388,11 @@ function setupIncomingCallListener() {
 }
 
 async function showIncomingCallPrompt(callId, callData) {
+  if (window.nexCallingEngine && typeof window.nexCallingEngine.handleIncomingCall === 'function') {
+    window.nexCallingEngine.handleIncomingCall(callId, callData);
+    return;
+  }
+
   if (incomingCallOverlay) return;
 
   const callerName = callData.callerName || callData.callerId || 'Unknown';
@@ -7528,7 +7492,7 @@ async function showIncomingCallPrompt(callId, callData) {
 
 document.addEventListener('audioMessageReady', (e) => {
   if (e.detail && e.detail.file) {
-    console.log("?? Audio message ready received in chat.js");
+    console.log('[AUDIO] Audio message ready received in chat.js');
     selectedFile = e.detail.file;
 
     const form = document.getElementById('message-form');
@@ -7621,6 +7585,21 @@ function bindCallButtonListeners() {
       const menu = document.getElementById("chatOptionsMenu");
       if (menu) menu.style.display = "none";
     });
+  }
+
+  const headerCallBtn = document.getElementById("headerCallBtn");
+  if (headerCallBtn) {
+    headerCallBtn.addEventListener("click", () => startCall(false));
+  }
+
+  const headerVideoBtn = document.getElementById("headerVideoBtn");
+  if (headerVideoBtn) {
+    headerVideoBtn.addEventListener("click", () => startCall(true));
+  }
+
+  const infoAudioBtn = document.getElementById("infoAudioBtn");
+  if (infoAudioBtn) {
+    infoAudioBtn.addEventListener("click", () => startCall(false));
   }
 
   const infoCallBtn = document.getElementById("infoCallBtn");
@@ -16270,6 +16249,7 @@ async function saveCallToHistory(callerId, receiverId, callType, duration, callS
     throw error;
   }
 }
+window.saveCallToHistory = saveCallToHistory;
 
 
 async function loadCallHistory() {

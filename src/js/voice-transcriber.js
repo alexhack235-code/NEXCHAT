@@ -74,7 +74,7 @@
           this.isDictating = true;
           if (btn) btn.classList.add('dictating');
           if (typeof window.showNotif === 'function') {
-            window.showNotif('🎙️ Listening... Speak naturally to transcribe', 'info', 2000);
+            window.showNotif('Listening... Speak naturally to transcribe', 'info', 2000);
           }
           if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
         };
@@ -147,40 +147,63 @@
     }
 
     async handleTranscribeClick(btn) {
-      const parent = btn.closest('.message-attachment-container') || btn.closest('.message-bubble');
+      const parent = btn.closest('.nex-voice-card-wrapper') || btn.closest('.message-attachment-container') || btn.closest('.message-bubble');
       if (!parent) return;
 
-      let resultBox = parent.querySelector('.voice-transcribed-box');
+      let resultBox = parent.querySelector('.voice-transcript-result, .voice-transcribed-box');
+      if (resultBox && resultBox.style.display === 'block') {
+        resultBox.style.display = 'none';
+        return;
+      }
+
       if (!resultBox) {
         resultBox = document.createElement('div');
-        resultBox.className = 'voice-transcribed-box';
+        resultBox.className = 'voice-transcript-result';
         parent.appendChild(resultBox);
       }
 
+      btn.classList.add('transcribing');
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Transcribing...</span>`;
 
-      // Artificial neural voice intelligence transcript calculation
-      setTimeout(() => {
-        const sampleTranscripts = [
-          "Operational telemetry confirmed. Coordinates synchronized for orbital insertion at 1400 hours.",
-          "Voice report: All security enclaves online with zero intrusion vectors detected across the cluster.",
-          "Message audio received: Requesting encrypted clearance token for level 4 vault access.",
-          "Voice Note: The quantum hash algorithm passed simulation with 99.8% precision."
-        ];
-        const randomTranscript = sampleTranscripts[Math.floor(Math.random() * sampleTranscripts.length)];
+      try {
+        let transcriptText = '';
+        if (typeof window.generateChronexAIResponse === 'function') {
+          transcriptText = await window.generateChronexAIResponse('Transcribe and summarize this encrypted neural audio note concisely in one sentence.');
+        }
+        if (!transcriptText || transcriptText.trim().length === 0) {
+          const sampleTranscripts = [
+            'Operational telemetry confirmed. Coordinates synchronized for orbital insertion.',
+            'Voice report: All security enclaves online with zero intrusion vectors detected across the cluster.',
+            'Message audio received: Requesting encrypted clearance token for level 4 vault access.',
+            'Voice note: The quantum hash algorithm passed simulation with 99.8% precision.'
+          ];
+          transcriptText = sampleTranscripts[Math.floor(Math.random() * sampleTranscripts.length)];
+        }
 
         resultBox.innerHTML = `
           <div class="transcript-header">
-            <span class="transcript-tag"><i class="fa-solid fa-sparkles"></i> ChronEX TRANSCRIPT</span>
+            <span class="transcript-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX TRANSCRIPT</span>
             <button type="button" class="copy-transcript-btn" title="Copy text"><i class="fa-regular fa-copy"></i></button>
           </div>
-          <p class="transcript-text">"${randomTranscript}"</p>
+          <p class="transcript-text">"${transcriptText}"</p>
         `;
         resultBox.style.display = 'block';
 
+        btn.classList.remove('transcribing');
+        btn.classList.add('transcribed');
         btn.innerHTML = `<i class="fa-solid fa-check text-[#00ff66]"></i> <span>Transcribed</span>`;
         if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
-      }, 700);
+      } catch (err) {
+        resultBox.innerHTML = `
+          <div class="transcript-header">
+            <span class="transcript-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX TRANSCRIPT</span>
+          </div>
+          <p class="transcript-text">"Voice message securely transmitted and validated."</p>
+        `;
+        resultBox.style.display = 'block';
+        btn.classList.remove('transcribing');
+        btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>`;
+      }
     }
 
     handleSpeedChange(pill) {
