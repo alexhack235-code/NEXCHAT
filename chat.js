@@ -1848,6 +1848,93 @@ async function showGroupInfoPanel(groupId) {
       disappearingDurationRow.style.display = disappearingConfig.enabled ? 'flex' : 'none';
     }
 
+    // VIP Gated Channel & Creator Monetization
+    try {
+      let vipBox = document.getElementById('groupVipGateSection');
+      if (!vipBox) {
+        vipBox = document.createElement('div');
+        vipBox.id = 'groupVipGateSection';
+        vipBox.className = 'info-section';
+        vipBox.innerHTML = `
+          <div class="info-section-title" style="display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fa-solid fa-crown" style="color: #ffd700;"></i> VIP Gated Channel</span>
+            <span class="badge" style="background: rgba(255,215,0,0.15); border: 1px solid #ffd700; color: #ffd700; font-size: 10px;">MONETIZATION</span>
+          </div>
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,215,0,0.2); border-radius: 12px; padding: 14px; margin-top: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div>
+                <strong style="color: #fff; font-size: 12.5px; display: block;">Require Monthly VIP Pass</strong>
+                <span style="font-size: 10.5px; color: #94a3b8;">Only subscribed members can view and chat</span>
+              </div>
+              <input type="checkbox" id="groupVipGateToggle" style="width: 18px; height: 18px; accent-color: #ffd700; cursor: pointer;">
+            </div>
+            <div id="groupVipPriceRow" style="display: none; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+              <div>
+                <label style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 3px;">Pass Fee (NEX)</label>
+                <input type="number" id="groupVipTokensInput" value="500" min="50" step="50" style="width: 100%; padding: 6px 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #ffd700; font-weight: 700; font-size: 11px;">
+              </div>
+              <div>
+                <label style="font-size: 10px; color: #94a3b8; display: block; margin-bottom: 3px;">USD Equivalent ($)</label>
+                <input type="number" id="groupVipUsdInput" value="3.50" min="1" step="0.5" style="width: 100%; padding: 6px 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #00ff66; font-weight: 700; font-size: 11px;">
+              </div>
+            </div>
+            <button type="button" id="btnSaveGroupVipSettings" style="display: none; width: 100%; margin-top: 10px; padding: 8px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 800; font-size: 11px; border: none; border-radius: 8px; cursor: pointer;">
+              <i class="fa-solid fa-check"></i> Save VIP Gated Settings
+            </button>
+          </div>
+        `;
+        const actSec = document.getElementById('groupActivityTelemetrySection');
+        if (actSec && actSec.parentNode) {
+          actSec.parentNode.insertBefore(vipBox, actSec.nextSibling);
+        } else {
+          const infoSidebarEl = document.getElementById('infoSidebar');
+          if (infoSidebarEl) infoSidebarEl.appendChild(vipBox);
+        }
+      }
+
+      vipBox.style.display = isAdmin ? 'block' : 'none';
+      const vipToggle = document.getElementById('groupVipGateToggle');
+      const vipPriceRow = document.getElementById('groupVipPriceRow');
+      const vipTokensIn = document.getElementById('groupVipTokensInput');
+      const vipUsdIn = document.getElementById('groupVipUsdInput');
+      const btnSaveVip = document.getElementById('btnSaveGroupVipSettings');
+
+      if (vipToggle) {
+        vipToggle.checked = !!groupData.isVipGated;
+        if (vipPriceRow) vipPriceRow.style.display = vipToggle.checked ? 'grid' : 'none';
+        if (btnSaveVip) btnSaveVip.style.display = vipToggle.checked ? 'block' : 'none';
+        if (vipTokensIn) vipTokensIn.value = groupData.subscriptionFeeTokens || 500;
+        if (vipUsdIn) vipUsdIn.value = groupData.subscriptionFeeUsd || 3.50;
+
+        vipToggle.onchange = () => {
+          if (vipPriceRow) vipPriceRow.style.display = vipToggle.checked ? 'grid' : 'none';
+          if (btnSaveVip) btnSaveVip.style.display = 'block';
+        };
+
+        if (btnSaveVip) {
+          btnSaveVip.onclick = async () => {
+            try {
+              const isVip = vipToggle.checked;
+              const feeTok = parseInt(vipTokensIn?.value || '500', 10);
+              const feeUsd = parseFloat(vipUsdIn?.value || '3.50');
+              await updateDoc(doc(db, 'groups', groupId), {
+                isVipGated: isVip,
+                subscriptionFeeTokens: feeTok,
+                subscriptionFeeUsd: feeUsd
+              });
+              showNotif(isVip ? 'Group set as VIP Gated Channel!' : 'VIP Gate removed from group', 'success');
+              btnSaveVip.style.display = 'none';
+            } catch (vErr) {
+              console.error('Error saving VIP settings:', vErr);
+              showNotif('Failed to save VIP settings', 'error');
+            }
+          };
+        }
+      }
+    } catch (vipErr) {
+      console.warn('[VIP SETTINGS RENDER]', vipErr);
+    }
+
     // Group Activity & Telemetry Sentinel
     try {
       let groupActivityBox = document.getElementById('groupActivityTelemetrySection');
@@ -12889,6 +12976,43 @@ async function removeAllGroupMembers(groupId) {
 
 async function loadGroupMessages(groupId) {
   const messagesDiv = document.getElementById('messages-area');
+  
+  // VIP Gated Channel Access Sentinel
+  try {
+    if (groupId && window.NexVipSubscriptionEngine) {
+      const gDoc = await getDoc(doc(db, 'groups', groupId));
+      if (gDoc.exists()) {
+        const gData = gDoc.data();
+        if (window.NexVipSubscriptionEngine.isChannelGated(gData)) {
+          const hasAccess = window.NexVipSubscriptionEngine.hasActiveSubscription(gData, myUID);
+          if (!hasAccess) {
+            window.NexVipSubscriptionEngine.openSubscribeModal(gData);
+            if (messagesDiv) {
+              messagesDiv.innerHTML = `
+                <div style="padding: 50px 20px; text-align: center; color: #94a3b8; max-width: 500px; margin: 40px auto; background: rgba(15,23,42,0.8); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px;">
+                  <div style="width: 60px; height: 60px; border-radius: 50%; background: rgba(255,215,0,0.15); border: 1px solid #ffd700; color: #ffd700; display: inline-flex; align-items: center; justify-content: center; font-size: 26px; margin-bottom: 16px;">
+                    <i class="fa-solid fa-lock"></i>
+                  </div>
+                  <h3 style="color: #fff; font-size: 18px; margin-bottom: 8px;">VIP Gated Channel</h3>
+                  <p style="font-size: 13px; margin-bottom: 16px; color: #cbd5e1;">This channel requires an active VIP creator pass (${gData.subscriptionFeeTokens || 500} NEX / $${gData.subscriptionFeeUsd || 3.50} USD per month). Please subscribe to access discussions.</p>
+                  <button type="button" id="btnUnlockVipChannelNow" style="padding: 10px 20px; background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; font-weight: 800; border: none; border-radius: 10px; cursor: pointer;">
+                    <i class="fa-brands fa-whatsapp"></i> Unlock VIP Access
+                  </button>
+                </div>
+              `;
+              messagesDiv.querySelector('#btnUnlockVipChannelNow')?.addEventListener('click', () => {
+                window.NexVipSubscriptionEngine.openSubscribeModal(gData);
+              });
+            }
+            return;
+          }
+        }
+      }
+    }
+  } catch (gGateErr) {
+    console.warn('[VIP GATE CHECK]', gGateErr);
+  }
+
   if (!messagesDiv) {
     console.error("Messages area not found!");
     return;

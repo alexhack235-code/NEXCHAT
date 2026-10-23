@@ -3581,6 +3581,57 @@
               </div>
             </div>
 
+            <!-- =============================================================== -->
+            <!-- Step 2C: Strategic Marketing Campaign & Scarcity Fulfillments   -->
+            <!-- =============================================================== -->
+            <div id="strategicMarketingDeskSection" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 12px; padding: 16px; margin-top: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="font-size: 13.5px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-rocket" style="color: #00f2ff;"></i> Step 2C: Reel Boost &amp; Scarcity Flash Vault Fulfillment
+                </h4>
+                <span class="badge" style="background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; font-size: 10px;">
+                  STRATEGIC REVENUE
+                </span>
+              </div>
+
+              <!-- Quick Campaign Presets -->
+              <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 6px;">
+                Quick Fulfill WhatsApp Campaign Order for Selected User
+              </label>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 14px;">
+                <!-- 5k Starter Boost -->
+                <button type="button" class="admin-btn secondary fulfill-campaign-preset" data-tokens="500" data-usd="3.50" data-ngn="5000" data-note="CamShot 5K Starter Boost Campaign" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: #00f2ff; font-family: monospace;">5K Reel Boost</strong>
+                  <span style="font-size: 9.5px; color: #94a3b8;">+500 NEX ($3.50)</span>
+                </button>
+                <!-- 20k Viral Surge -->
+                <button type="button" class="admin-btn secondary fulfill-campaign-preset" data-tokens="1500" data-usd="10.00" data-ngn="15000" data-note="CamShot 20K Viral Surge Campaign" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: #ffd700; font-family: monospace;">20K Viral Surge</strong>
+                  <span style="font-size: 9.5px; color: #94a3b8;">+1,500 NEX ($10.00)</span>
+                </button>
+                <!-- 50k Apex Domination -->
+                <button type="button" class="admin-btn secondary fulfill-campaign-preset" data-tokens="3500" data-usd="24.00" data-ngn="36000" data-note="CamShot 50K Apex Domination Campaign" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: #c084fc; font-family: monospace;">50K Apex Reel</strong>
+                  <span style="font-size: 9.5px; color: #94a3b8;">+3,500 NEX ($24.00)</span>
+                </button>
+                <!-- Founding Rosette -->
+                <button type="button" class="admin-btn secondary fulfill-campaign-preset" data-tokens="10000" data-usd="65.00" data-ngn="95000" data-note="Flash Vault Founding Member Rosette Mint" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: #ffd700; font-family: monospace;">Founding Rosette</strong>
+                  <span style="font-size: 9.5px; color: #94a3b8;">$65.00 / ₦95,000</span>
+                </button>
+                <!-- Predator Sensor Shield -->
+                <button type="button" class="admin-btn secondary fulfill-campaign-preset" data-tokens="15000" data-usd="80.00" data-ngn="120000" data-note="Flash Vault Apex Predator Shield Mint" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: #00ff88; font-family: monospace;">Predator Shield</strong>
+                  <span style="font-size: 9.5px; color: #94a3b8;">$80.00 / ₦120,000</span>
+                </button>
+                <!-- VIP Channel Pass -->
+                <button type="button" class="admin-btn secondary fulfill-campaign-preset" data-tokens="500" data-usd="3.50" data-ngn="5000" data-note="Monthly VIP Channel Pass Subscription" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: #f43f5e; font-family: monospace;">VIP Room Pass</strong>
+                  <span style="font-size: 9.5px; color: #94a3b8;">$3.50 / ₦5,000</span>
+                </button>
+              </div>
+            </div>
+
           </div>
 
           <!-- RIGHT COLUMN: WhatsApp Receipt Engine, Price Cheatsheet & Recent Logs -->
@@ -4234,6 +4285,7 @@
   <script src="src/js/ai-security-scanner-api.js"></script>
   <script src="src/js/hardware-fingerprint-sentinel.js"></script>
   <script src="src/js/verification-badges-catalog.js"></script>
+  <script src="src/js/strategic-marketing-suite.js"></script>
   <script src="src/js/report-activity-monitor.js"></script>
 
   <!-- CONTROLLER SCRIPT -->
@@ -5618,6 +5670,19 @@
               tokenPaymentRef.value = `WhatsApp package: +${Number(tokens).toLocaleString()} Tokens ($${usd} / NGN ${Number(ngn).toLocaleString()})`;
             }
             updateWhatsappReceiptPreview('TOKEN_CREDIT', { tokens: Number(tokens), usd, ngn });
+          });
+        });
+
+        document.querySelectorAll('.fulfill-campaign-preset').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tokens = btn.getAttribute('data-tokens');
+            const note = btn.getAttribute('data-note');
+            const usd = btn.getAttribute('data-usd') || '0';
+            const ngn = btn.getAttribute('data-ngn') || '0';
+            if (tokenAmtInput) tokenAmtInput.value = tokens;
+            if (tokenPaymentRef) tokenPaymentRef.value = `WhatsApp Order: ${note}`;
+            updateWhatsappReceiptPreview('TOKEN_CREDIT', { tokens: Number(tokens), usd, ngn });
+            logAudit(`Preloaded campaign preset: ${note} (+${tokens} tokens).`, 'ok');
           });
         });
 

@@ -1088,6 +1088,14 @@ function renderReels(reelsList) {
             <span class="text-[10px] font-bold text-[#ff3366] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Stitch</span>
           </div>
 
+          <!-- Boost Reel Promotion -->
+          <div class="flex flex-col items-center gap-1 cursor-pointer">
+            <button type="button" class="reel-boost-promo-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" data-creator="${escape(reel.creatorUsername || 'creator')}" title="Boost Reel / Promote to Millions">
+              <i class="fa-solid fa-rocket text-[22px] text-[#ffd700] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
+            </button>
+            <span class="text-[10px] font-bold text-[#ffd700] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Boost</span>
+          </div>
+
           <!-- Snapshot Clean Frame Grabber -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
             <button type="button" class="snapshot-btn text-white transition-transform active:scale-125 focus:outline-none" title="Capture Clean Snapshot (Save Frame)">
@@ -5433,3 +5441,29 @@ document.querySelectorAll('.sound-fx-pill').forEach((pill) => {
 
 // Launch feed on startup
 initReelsFeed();
+
+// NEXCHAT_STRATEGIC_MARKETING_LISTENERS
+document.addEventListener('click', (e) => {
+  const boostBtn = e.target.closest('.reel-boost-promo-btn');
+  if (boostBtn) {
+    e.stopPropagation();
+    const rId = boostBtn.getAttribute('data-reel-id');
+    const creator = boostBtn.getAttribute('data-creator');
+    if (window.NexReelBoostEngine) {
+      window.NexReelBoostEngine.openBoostModal(rId, creator);
+    }
+  }
+
+  const statusBtn = e.target.closest('#shareWhatsAppStatusBtn');
+  if (statusBtn) {
+    e.stopPropagation();
+    const curReel = (typeof currentReels !== 'undefined' && typeof currentReelIndex !== 'undefined' && currentReels[currentReelIndex]) ? currentReels[currentReelIndex] : {};
+    if (window.NexViralShareEngine) {
+      window.NexViralShareEngine.shareReelToWhatsAppStatus(
+        curReel.caption || curReel.title || 'CamShot Reel',
+        curReel.creatorUsername || 'creator',
+        window.location.href
+      );
+    }
+  }
+});
