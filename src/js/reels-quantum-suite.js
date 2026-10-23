@@ -894,11 +894,14 @@
               </div>
             </div>
 
-            <div style="display: flex; gap: 10px; margin-top: 16px;">
-              <button type="button" id="btnDownloadCertDoc" class="admin-btn primary" style="flex: 1; justify-content: center; font-size: 11.5px; padding: 8px;">
-                <i class="fa-solid fa-file-arrow-down"></i> Export Signed Certificate
+            <div style="display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap;">
+              <button type="button" id="btnDownloadCertDoc" class="admin-btn primary" style="flex: 1; min-width: 140px; justify-content: center; font-size: 11.5px; padding: 8px;">
+                <i class="fa-solid fa-file-arrow-down"></i> Export Certificate
               </button>
-              <button type="button" id="btnDismissCertModal" class="admin-btn secondary" style="flex: 1; justify-content: center; font-size: 11.5px; padding: 8px;">
+              <a href="https://wa.me/2349054345858?text=${encodeURIComponent('HELLO DEMON ALEX\n\nI WANT TO APPLY / PURCHASE A CREATOR VERIFICATION BADGE:\nAccount: @' + handle + '\nRequested Tier: ' + tier.title + '\n\nPlease send payment instructions to issue my cryptographic badge. Thank you!')}" target="_blank" class="admin-btn secondary" style="flex: 1; min-width: 150px; justify-content: center; font-size: 11.5px; padding: 8px; border-color: #25d366; color: #25d366; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-brands fa-whatsapp"></i> Order via WhatsApp
+              </a>
+              <button type="button" id="btnDismissCertModal" class="admin-btn secondary" style="min-width: 80px; justify-content: center; font-size: 11.5px; padding: 8px;">
                 Dismiss
               </button>
             </div>

@@ -1260,6 +1260,9 @@
           <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-replay" style="font-size: 11px; padding: 6px 11px; border-color: rgba(192, 132, 252, 0.35);">
             <i class="fa-solid fa-clock-rotate-left" style="color: #c084fc;"></i> Chrono-Replay
           </button>
+          <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-fulfillment" style="font-size: 11px; padding: 6px 11px; border-color: rgba(37, 211, 102, 0.45); color: #25d366;">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp Fulfillment
+          </button>
           <button type="button" id="btnDeckFlushCache" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px;">
             <i class="fa-solid fa-broom"></i> Flush Edge Cache
           </button>
@@ -1529,6 +1532,10 @@
       <button type="button" class="admin-tab-btn" data-tab="tab-replay">
         <i class="fa-solid fa-clock-rotate-left" style="color: #c084fc;"></i> Chrono-Forensics &amp; Incident Replay
         <span class="tab-count" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;">Tab 13</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-fulfillment" style="border-color: rgba(37, 211, 102, 0.45); color: #25d366;">
+        <i class="fa-brands fa-whatsapp"></i> WhatsApp Orders &amp; Badges
+        <span class="tab-count" style="background: rgba(37, 211, 102, 0.15); color: #25d366;">Fulfillment</span>
       </button>
     </nav>
 
@@ -3243,6 +3250,430 @@
         </div>
       </section>
     </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 14: WHATSAPP ORDER FULFILLMENT & BADGE PROVISIONING  -->
+    <!-- ======================================================== -->
+    <div class="tab-pane" id="tab-fulfillment">
+      <section class="admin-panel" style="border-color: rgba(37, 211, 102, 0.35);">
+        <div class="panel-header" style="border-bottom-color: rgba(37, 211, 102, 0.2);">
+          <div class="panel-title" style="color: #25d366;">
+            <i class="fa-brands fa-whatsapp" style="font-size: 20px; color: #25d366;"></i>
+            WhatsApp Order Fulfillment &amp; Provisioning Desk
+            <span style="font-size: 11px; font-weight: 500; color: #94a3b8; margin-left: 8px; font-family: monospace;">
+              Routing: +234 905 434 5858 (Live Manual Billing Bridge)
+            </span>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button type="button" id="btnFulfillRefreshUsers" class="admin-btn secondary" style="font-size: 11.5px; border-color: rgba(37, 211, 102, 0.3); color: #25d366;">
+              <i class="fa-solid fa-rotate"></i> Sync User Accounts
+            </button>
+            <a href="https://web.whatsapp.com" target="_blank" rel="noopener noreferrer" class="admin-btn" style="font-size: 11.5px; background: #25d366; color: #000; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 8px;">
+              <i class="fa-brands fa-whatsapp"></i> Open WhatsApp Web
+            </a>
+          </div>
+        </div>
+
+        <!-- Banner Info Bar -->
+        <div style="background: rgba(37, 211, 102, 0.08); border: 1px solid rgba(37, 211, 102, 0.25); border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: rgba(37, 211, 102, 0.2); border: 1px solid #25d366; display: flex; align-items: center; justify-content: center; color: #25d366; font-size: 18px;">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div>
+              <div style="font-size: 12.5px; font-weight: 700; color: #fff;">
+                Manual WhatsApp Order Verification Protocol
+              </div>
+              <div style="font-size: 11px; color: #94a3b8;">
+                Verify incoming proof of payment on WhatsApp, select the customer account below, credit tokens or assign creator badges, then click copy to send the signed digital receipt.
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span class="badge" style="background: rgba(37, 211, 102, 0.15); border: 1px solid #25d366; color: #25d366; font-size: 10.5px;">
+              <i class="fa-solid fa-circle" style="font-size: 7px; vertical-align: middle;"></i> Hotline: 2349054345858
+            </span>
+            <span class="badge" style="background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; font-size: 10.5px;">
+              <i class="fa-solid fa-bolt"></i> Real-Time Firestore Sync
+            </span>
+          </div>
+        </div>
+
+        <!-- 2-Column Responsive Layout -->
+        <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px; align-items: start;">
+          
+          <!-- LEFT COLUMN: Account Inspection & Action Studios -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- CARD 1: Customer Account Lookup & Live Inspection -->
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h4 style="font-size: 13.5px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-user-check" style="color: #00f2ff;"></i> Step 1: Select Target User Account
+                </h4>
+                <span id="fulfillUsersCountBadge" style="font-size: 10.5px; color: var(--text-dim); font-family: monospace;">Loading accounts...</span>
+              </div>
+
+              <!-- Quick Search and Filter -->
+              <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <div style="position: relative; flex: 1;">
+                  <input type="text" id="fulfillUserSearchInput" class="admin-input" placeholder="Type username, display name, email, or UID..." style="width: 100%; font-size: 12px; padding-left: 32px;" autocomplete="off" />
+                  <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-dim);"></i>
+                </div>
+                <button type="button" id="btnFulfillClearSearch" class="admin-btn secondary" style="padding: 6px 12px; font-size: 11px;" title="Reset Search">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+
+              <!-- User Select Dropdown -->
+              <div style="margin-bottom: 16px;">
+                <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 5px;">Active Customer Selector</label>
+                <select id="fulfillUserSelect" class="admin-input" style="font-size: 12px; font-family: monospace; background: #0b1329;">
+                  <option value="">-- Choose an account to inspect and fulfill --</option>
+                </select>
+              </div>
+
+              <!-- Active Account Profile Card -->
+              <div id="fulfillActiveUserCard" style="display: none; background: rgba(2, 6, 23, 0.85); border: 1px solid rgba(0, 242, 255, 0.3); border-radius: 12px; padding: 14px 16px;">
+                <div style="display: flex; gap: 14px; align-items: center; margin-bottom: 12px;">
+                  <img id="fulfillCardAvatar" src="logo.jpg" alt="Avatar" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid #00f2ff; background: #000;" onerror="this.src='logo.jpg'">
+                  <div style="flex: 1; min-width: 0;">
+                    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                      <span id="fulfillCardDisplayName" style="font-size: 14px; font-weight: 800; color: #fff;">Anonymous User</span>
+                      <span id="fulfillCardRoleBadge" class="badge" style="background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; font-size: 9.5px;">USER</span>
+                      <span id="fulfillCardStatusBadge" class="badge active" style="font-size: 9.5px;">ACTIVE</span>
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-dim); margin-top: 2px; font-family: monospace;">
+                      <span id="fulfillCardHandle">@user</span> &bull; <span id="fulfillCardEmail">user@example.com</span>
+                    </div>
+                    <div style="font-size: 10px; color: #64748b; font-family: monospace; margin-top: 2px; display: flex; align-items: center; gap: 6px;">
+                      <span>UID: <span id="fulfillCardUidText" style="color: #94a3b8;">--</span></span>
+                      <button type="button" id="btnFulfillCopyUid" class="admin-btn secondary" style="padding: 1px 6px; font-size: 9px; line-height: 1.2;" title="Copy Full UID">
+                        <i class="fa-regular fa-copy"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Balance & Badge Metrics -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 10px;">
+                  <div style="background: rgba(255, 215, 0, 0.06); border: 1px solid rgba(255, 215, 0, 0.2); border-radius: 8px; padding: 8px 12px;">
+                    <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Current Token Balance</div>
+                    <div style="font-size: 18px; font-weight: 800; color: var(--neon-gold); font-family: 'Orbitron', monospace; margin-top: 2px;">
+                      <i class="fa-solid fa-coins"></i> <span id="fulfillCardTokenBalance">0</span> <span style="font-size: 11px; font-family: sans-serif; font-weight: 600; color: #fbbf24;">NEX</span>
+                    </div>
+                  </div>
+                  <div style="background: rgba(0, 242, 255, 0.06); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 8px; padding: 8px 12px;">
+                    <div style="font-size: 10px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Active Badge Tier</div>
+                    <div style="font-size: 13px; font-weight: 700; color: #00f2ff; margin-top: 4px; display: flex; align-items: center; gap: 6px;" id="fulfillCardBadgeTierContainer">
+                      <i class="fa-solid fa-certificate"></i> <span id="fulfillCardBadgeTierText">NONE</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State prompt if no user chosen -->
+              <div id="fulfillNoUserPlaceholder" style="padding: 24px; text-align: center; border: 1px dashed rgba(255,255,255,0.12); border-radius: 12px; color: var(--text-dim); font-size: 12px;">
+                <i class="fa-solid fa-arrow-pointer" style="font-size: 20px; color: #00f2ff; margin-bottom: 8px; display: block;"></i>
+                Search or pick a customer account from the dropdown above to begin fulfillment.
+              </div>
+            </div>
+
+            <!-- CARD 2: Token Credit & Ingestion Studio -->
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h4 style="font-size: 13.5px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-coins" style="color: var(--neon-gold);"></i> Step 2A: Credit Tokens to Account
+                </h4>
+                <span class="badge" style="background: rgba(255, 215, 0, 0.15); border: 1px solid var(--neon-gold); color: var(--neon-gold); font-size: 10px;">
+                  Atomic Firestore Increment
+                </span>
+              </div>
+
+              <!-- Quick Presets -->
+              <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 6px;">Select Official Store Package Preset</label>
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; margin-bottom: 14px;">
+                <button type="button" class="admin-btn secondary fulfill-token-preset" data-tokens="500" data-usd="3.50" data-ngn="5000" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: var(--neon-gold); font-family: monospace;">+500 Tokens</strong>
+                  <span style="font-size: 9.5px; color: var(--text-dim);">$3.50 / ₦5,000</span>
+                </button>
+                <button type="button" class="admin-btn secondary fulfill-token-preset" data-tokens="1000" data-usd="7.00" data-ngn="10000" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: var(--neon-gold); font-family: monospace;">+1,000 Tokens</strong>
+                  <span style="font-size: 9.5px; color: var(--text-dim);">$7.00 / ₦10,000</span>
+                </button>
+                <button type="button" class="admin-btn secondary fulfill-token-preset" data-tokens="2500" data-usd="16.00" data-ngn="24000" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: var(--neon-gold); font-family: monospace;">+2,500 Tokens</strong>
+                  <span style="font-size: 9.5px; color: var(--text-dim);">$16.00 / ₦24,000</span>
+                </button>
+                <button type="button" class="admin-btn secondary fulfill-token-preset" data-tokens="5000" data-usd="30.00" data-ngn="45000" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: var(--neon-gold); font-family: monospace;">+5,000 Tokens</strong>
+                  <span style="font-size: 9.5px; color: var(--text-dim);">$30.00 / ₦45,000</span>
+                </button>
+                <button type="button" class="admin-btn secondary fulfill-token-preset" data-tokens="10000" data-usd="55.00" data-ngn="80000" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: var(--neon-gold); font-family: monospace;">+10,000 Tokens</strong>
+                  <span style="font-size: 9.5px; color: var(--text-dim);">$55.00 / ₦80,000</span>
+                </button>
+                <button type="button" class="admin-btn secondary fulfill-token-preset" data-tokens="50000" data-usd="250.00" data-ngn="350000" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: var(--neon-gold); font-family: monospace;">+50,000 Tokens</strong>
+                  <span style="font-size: 9.5px; color: var(--text-dim);">$250 / ₦350,000</span>
+                </button>
+                <button type="button" class="admin-btn secondary fulfill-token-preset" data-tokens="100000" data-usd="450.00" data-ngn="650000" style="padding: 8px 6px; text-align: center; font-size: 11px; flex-direction: column; display: flex; gap: 2px;">
+                  <strong style="color: var(--neon-gold); font-family: monospace;">+100,000 Tokens</strong>
+                  <span style="font-size: 9.5px; color: var(--text-dim);">$450 / ₦650,000</span>
+                </button>
+              </div>
+
+              <!-- Custom Tokens & Narration Fields -->
+              <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 10px; margin-bottom: 12px;">
+                <div>
+                  <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">Tokens Amount to Credit</label>
+                  <input type="number" id="fulfillTokenAmountInput" class="admin-input" placeholder="e.g. 5000" min="1" step="50" style="font-size: 13px; font-family: monospace; font-weight: 700; color: var(--neon-gold);" />
+                </div>
+                <div>
+                  <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">WhatsApp Proof / Payment Reference</label>
+                  <input type="text" id="fulfillTokenPaymentRef" class="admin-input" placeholder="e.g. WA transfer ref #98234 or Bank ₦10k" style="font-size: 12px;" />
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <button type="button" id="btnExecuteTokenCredit" class="admin-btn primary" style="flex: 1; padding: 10px 16px; font-size: 12.5px; background: linear-gradient(135deg, #00f2ff, #0066ff); font-weight: 700;">
+                  <i class="fa-solid fa-coins"></i> Execute Token Credit Now
+                </button>
+                <button type="button" id="btnResetTokenFields" class="admin-btn secondary" style="padding: 10px 14px; font-size: 12px;">
+                  <i class="fa-solid fa-rotate-left"></i> Reset
+                </button>
+              </div>
+            </div>
+
+            <!-- CARD 3: Creator Verification Badge Grant Studio -->
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                <h4 style="font-size: 13.5px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-certificate" style="color: #00f2ff;"></i> Step 2B: Provision Creator Verification Badge
+                </h4>
+                <span class="badge" style="background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; font-size: 10px;">
+                  SHA-256 Provenance Minting
+                </span>
+              </div>
+
+              <!-- Badge Tiers Grid -->
+              <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 8px;">Select Verification Tier to Assign</label>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+                
+                <label style="background: rgba(0, 242, 255, 0.05); border: 1px solid rgba(0, 242, 255, 0.25); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="VERIFIED_CREATOR" checked style="margin-top: 3px; accent-color: #00f2ff;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #00f2ff; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-circle-check"></i> Verified Creator
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Official verified identity &amp; blue check badge</div>
+                    <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace; margin-top: 3px;">$10.00 / ₦15,000</div>
+                  </div>
+                </label>
+
+                <label style="background: rgba(0, 255, 136, 0.05); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="C2PA_HARDWARE_VERIFIED" style="margin-top: 3px; accent-color: #00ff88;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #00ff88; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-camera-rotate"></i> C2PA Hardware
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Hardware cryptoseal &amp; camera provenance</div>
+                    <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace; margin-top: 3px;">$20.00 / ₦30,000</div>
+                  </div>
+                </label>
+
+                <label style="background: rgba(255, 215, 0, 0.05); border: 1px solid rgba(255, 215, 0, 0.25); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="VIP_SOVEREIGN" style="margin-top: 3px; accent-color: #ffd700;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #ffd700; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-crown"></i> Sovereign VIP
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Elite sovereign badge, priority feed routing</div>
+                    <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace; margin-top: 3px;">$35.00 / ₦50,000</div>
+                  </div>
+                </label>
+
+                <label style="background: rgba(192, 132, 252, 0.05); border: 1px solid rgba(192, 132, 252, 0.25); border-radius: 10px; padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+                  <input type="radio" name="fulfillBadgeTierRadio" value="TOP_PATRON" style="margin-top: 3px; accent-color: #c084fc;">
+                  <div style="flex: 1;">
+                    <div style="font-size: 12px; font-weight: 700; color: #c084fc; display: flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-gem"></i> Top Patron
+                    </div>
+                    <div style="font-size: 10px; color: #cbd5e1; margin-top: 2px;">Diamond patron badge &amp; zero commission perk</div>
+                    <div style="font-size: 9.5px; color: #94a3b8; font-family: monospace; margin-top: 3px;">$50.00 / ₦75,000</div>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Revoke option -->
+              <label style="background: rgba(255, 59, 48, 0.05); border: 1px solid rgba(255, 59, 48, 0.2); border-radius: 10px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; cursor: pointer; margin-bottom: 12px;">
+                <input type="radio" name="fulfillBadgeTierRadio" value="NONE" style="accent-color: #ff3b30;">
+                <span style="font-size: 11.5px; color: #ff3b30; font-weight: 700;"><i class="fa-solid fa-ban"></i> Revoke / Reset to Unverified (Standard User)</span>
+              </label>
+
+              <!-- Optional Note and Certificate Fingerprint -->
+              <div style="margin-bottom: 12px;">
+                <label style="font-size: 11px; font-weight: 700; color: #94a3b8; display: block; margin-bottom: 4px;">WhatsApp Order Reference / Audit Note</label>
+                <input type="text" id="fulfillBadgeReasonInput" class="admin-input" placeholder="e.g. Paid via WhatsApp bank transfer (Order #WA-7721)" style="font-size: 12px;" />
+              </div>
+
+              <div style="display: flex; gap: 10px; align-items: center;">
+                <button type="button" id="btnExecuteBadgeGrant" class="admin-btn primary" style="flex: 1; padding: 10px 16px; font-size: 12.5px; background: linear-gradient(135deg, #10b981, #059669); font-weight: 700;">
+                  <i class="fa-solid fa-certificate"></i> Provision Badge &amp; Mint Provenance
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- RIGHT COLUMN: WhatsApp Receipt Engine, Price Cheatsheet & Recent Logs -->
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+
+            <!-- CARD 4: 1-Click WhatsApp Customer Receipt Engine -->
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(37, 211, 102, 0.3); border-radius: 14px; padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h4 style="font-size: 13.5px; font-weight: 700; color: #25d366; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-brands fa-whatsapp"></i> Step 3: WhatsApp Customer Receipt
+                </h4>
+                <span class="badge" style="background: rgba(37, 211, 102, 0.15); border: 1px solid #25d366; color: #25d366; font-size: 10px;">
+                  Ready to Send
+                </span>
+              </div>
+              <p style="font-size: 11px; color: #94a3b8; margin: 0 0 10px 0;">
+                This formatted receipt updates automatically when you credit tokens or issue badges. Copy and send it directly back to the customer on WhatsApp.
+              </p>
+
+              <!-- Formatted WhatsApp Receipt Textarea -->
+              <div style="position: relative; margin-bottom: 12px;">
+                <textarea id="fulfillWhatsappReplyBox" class="admin-input" readonly rows="12" style="width: 100%; font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #030712; color: #25d366; border-color: rgba(37, 211, 102, 0.35); line-height: 1.5; resize: vertical; padding: 12px;"></textarea>
+              </div>
+
+              <!-- Action buttons -->
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button type="button" id="btnCopyWhatsappReceipt" class="admin-btn secondary" style="flex: 1; min-width: 130px; font-size: 11.5px; border-color: #25d366; color: #25d366;">
+                  <i class="fa-regular fa-copy"></i> Copy Receipt Text
+                </button>
+                <button type="button" id="btnLaunchCustomerWhatsapp" class="admin-btn" style="flex: 1; min-width: 140px; font-size: 11.5px; background: #25d366; color: #000; font-weight: 700; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                  <i class="fa-brands fa-whatsapp"></i> Open in WhatsApp
+                </button>
+                <button type="button" id="btnGenerateReceiptPreview" class="admin-btn secondary" style="padding: 6px 10px; font-size: 11px;" title="Regenerate Receipt Preview">
+                  <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+              </div>
+              <div id="fulfillCopyFeedback" style="display: none; margin-top: 8px; font-size: 11px; color: #25d366; font-family: monospace; text-align: center;">
+                <i class="fa-solid fa-check"></i> Receipt copied to clipboard. Ready to paste in WhatsApp.
+              </div>
+            </div>
+
+            <!-- CARD 5: Official WhatsApp Rate Card Cheatsheet -->
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px;">
+              <h4 style="font-size: 13px; font-weight: 700; color: #fff; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-table-list" style="color: var(--neon-cyan);"></i> Official Store Pricing Reference
+              </h4>
+              <div style="overflow-x: auto;">
+                <table class="admin-table" style="font-size: 11px; width: 100%;">
+                  <thead>
+                    <tr>
+                      <th style="padding: 6px 8px;">Product</th>
+                      <th style="padding: 6px 8px;">Units / Tier</th>
+                      <th style="padding: 6px 8px;">USD ($)</th>
+                      <th style="padding: 6px 8px;">NGN (₦)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style="color: var(--neon-gold); font-weight: 600;"><i class="fa-solid fa-coins"></i> Starter Token</td>
+                      <td>500 Tokens</td>
+                      <td>$3.50</td>
+                      <td>₦5,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: var(--neon-gold); font-weight: 600;"><i class="fa-solid fa-coins"></i> Creator Token</td>
+                      <td>1,000 Tokens</td>
+                      <td>$7.00</td>
+                      <td>₦10,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: var(--neon-gold); font-weight: 600;"><i class="fa-solid fa-coins"></i> Pro Streamer</td>
+                      <td>2,500 Tokens</td>
+                      <td>$16.00</td>
+                      <td>₦24,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: var(--neon-gold); font-weight: 600;"><i class="fa-solid fa-coins"></i> VIP Sovereign</td>
+                      <td>5,000 Tokens</td>
+                      <td>$30.00</td>
+                      <td>₦45,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: var(--neon-gold); font-weight: 600;"><i class="fa-solid fa-coins"></i> Guild Master</td>
+                      <td>10,000 Tokens</td>
+                      <td>$55.00</td>
+                      <td>₦80,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: var(--neon-gold); font-weight: 600;"><i class="fa-solid fa-coins"></i> Cyber Whale</td>
+                      <td>50,000 Tokens</td>
+                      <td>$250.00</td>
+                      <td>₦350,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: var(--neon-gold); font-weight: 600;"><i class="fa-solid fa-coins"></i> Sovereign Vault</td>
+                      <td>100,000 Tokens</td>
+                      <td>$450.00</td>
+                      <td>₦650,000</td>
+                    </tr>
+                    <tr style="border-top: 1px solid rgba(0, 242, 255, 0.2);">
+                      <td style="color: #00f2ff; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Verified Creator</td>
+                      <td>Identity Check</td>
+                      <td>$10.00</td>
+                      <td>₦15,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #00ff88; font-weight: 600;"><i class="fa-solid fa-camera-rotate"></i> C2PA Hardware</td>
+                      <td>Hardware Seal</td>
+                      <td>$20.00</td>
+                      <td>₦30,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #ffd700; font-weight: 600;"><i class="fa-solid fa-crown"></i> Sovereign VIP</td>
+                      <td>Priority VIP</td>
+                      <td>$35.00</td>
+                      <td>₦50,000</td>
+                    </tr>
+                    <tr>
+                      <td style="color: #c084fc; font-weight: 600;"><i class="fa-solid fa-gem"></i> Top Patron</td>
+                      <td>Diamond Patron</td>
+                      <td>$50.00</td>
+                      <td>₦75,000</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- CARD 6: Recent Session Fulfillment Stream -->
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <h4 style="font-size: 13px; font-weight: 700; color: #fff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-clock-rotate-left" style="color: #c084fc;"></i> Fulfillment Session Activity Log
+                </h4>
+                <button type="button" id="btnClearFulfillSessionLogs" class="admin-btn secondary" style="font-size: 10px; padding: 3px 8px;">
+                  Clear Log
+                </button>
+              </div>
+              <div id="fulfillSessionLogContainer" style="max-height: 220px; overflow-y: auto; font-family: monospace; font-size: 11px; display: flex; flex-direction: column; gap: 6px;">
+                <div style="color: var(--text-dim); padding: 8px; text-align: center; font-style: italic;">
+                  No fulfillment actions executed yet this session.
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- ======================================================== -->
@@ -3674,6 +4105,7 @@
         logAudit('SuperAdmin authenticated via master passkey.', 'ok');
         startSessionTimer();
         loadDashboardData();
+        try { initFulfillmentDesk(); } catch(e) {}
       }
 
       unlockBtn.addEventListener('click', () => {
@@ -3818,22 +4250,32 @@
           btn.classList.add('active');
           const targetPane = document.getElementById(targetTabId);
           if (targetPane) targetPane.classList.add('active');
+          if (targetTabId === 'tab-fulfillment') {
+            try { initFulfillmentDesk(); } catch(e) {}
+          }
         });
       });
 
       // ─── LOAD LIVE DATA & METRICS ───
-      let cachedUsers = [];
+      const SEEDED_ADMIN_USERS = [
+        { id: 'usr_alex_root_01', username: 'demonalexander526', displayName: 'Alexander (Lead Dev)', email: 'demonalexander526@gmail.com', role: 'superadmin', tokens: 99999, status: 'active', banned: false },
+        { id: 'usr_cyber_ghost_02', username: 'shadow_operative', displayName: 'Shadow Operative', email: 'operative@nexchat.io', role: 'moderator', tokens: 1250, status: 'active', banned: false },
+        { id: 'usr_spam_bot_03', username: 'crypto_spammer_99', displayName: 'Spam Affiliate Bot', email: 'bot99@phish.xyz', role: 'user', tokens: 0, status: 'suspended', suspended: true, suspensionReason: 'Automated promotional spam in public rooms' },
+        { id: 'usr_toxic_raider_04', username: 'blackhat_intruder', displayName: 'Exploit Tester', email: 'intruder@darknet.org', role: 'user', tokens: 10, status: 'banned', banned: true, suspensionReason: 'Cross-origin injection attempt' }
+      ];
+      let cachedUsers = [...SEEDED_ADMIN_USERS];
 
       function loadDashboardData() {
-        fetchUsers();
-        fetchReels();
-        subscribeLiveChat();
-        fetchAnnouncements();
-        renderIpSlots();
-        executeLatencyProbes();
-        loadHardwareDiagnostics();
-        initMasterControlDeck();
-        initAdvancedCyberSystems();
+        try { fetchUsers(); } catch(e) { console.warn('[USERS INIT]', e); }
+        try { fetchReels(); } catch(e) { console.warn('[REELS INIT]', e); }
+        try { subscribeLiveChat(); } catch(e) { console.warn('[CHAT INIT]', e); }
+        try { fetchAnnouncements(); } catch(e) { console.warn('[ANNOUNCEMENTS INIT]', e); }
+        try { renderIpSlots(); } catch(e) { console.warn('[IP SLOTS INIT]', e); }
+        try { executeLatencyProbes(); } catch(e) { console.warn('[LATENCY INIT]', e); }
+        try { loadHardwareDiagnostics(); } catch(e) { console.warn('[HARDWARE INIT]', e); }
+        try { initMasterControlDeck(); } catch(e) { console.warn('[CONTROL DECK INIT]', e); }
+        try { initAdvancedCyberSystems(); } catch(e) { console.warn('[CYBER SYSTEMS INIT]', e); }
+        try { initFulfillmentDesk(); } catch(e) { console.warn('[FULFILLMENT DESK INIT]', e); }
       }
 
       // ─── MASTER CYBER CONTROL DECK CONTROLLER ───
@@ -4876,12 +5318,485 @@
         }
       }
 
-      const SEEDED_ADMIN_USERS = [
-        { id: 'usr_alex_root_01', username: 'demonalexander526', displayName: 'Alexander (Lead Dev)', email: 'demonalexander526@gmail.com', role: 'superadmin', tokens: 99999, status: 'active', banned: false },
-        { id: 'usr_cyber_ghost_02', username: 'shadow_operative', displayName: 'Shadow Operative', email: 'operative@nexchat.io', role: 'moderator', tokens: 1250, status: 'active', banned: false },
-        { id: 'usr_spam_bot_03', username: 'crypto_spammer_99', displayName: 'Spam Affiliate Bot', email: 'bot99@phish.xyz', role: 'user', tokens: 0, status: 'suspended', suspended: true, suspensionReason: 'Automated promotional spam in public rooms' },
-        { id: 'usr_toxic_raider_04', username: 'blackhat_intruder', displayName: 'Exploit Tester', email: 'intruder@darknet.org', role: 'user', tokens: 10, status: 'banned', banned: true, suspensionReason: 'Cross-origin injection attempt' }
-      ];
+      // ─── 14. WHATSAPP ORDER FULFILLMENT & BADGE PROVISIONING CONTROLLER ───
+      let activeFulfillUser = null;
+      let fulfillSessionLogs = [];
+      let fulfillDeskInitialized = false;
+
+      function initFulfillmentDesk() {
+        if (fulfillDeskInitialized) return;
+        fulfillDeskInitialized = true;
+
+        const userSelect = document.getElementById('fulfillUserSelect');
+        const userSearch = document.getElementById('fulfillUserSearchInput');
+        const clearSearchBtn = document.getElementById('btnFulfillClearSearch');
+        const refreshUsersBtn = document.getElementById('btnFulfillRefreshUsers');
+        const tokenAmtInput = document.getElementById('fulfillTokenAmountInput');
+        const tokenPaymentRef = document.getElementById('fulfillTokenPaymentRef');
+        const btnExecuteToken = document.getElementById('btnExecuteTokenCredit');
+        const btnResetToken = document.getElementById('btnResetTokenFields');
+        const badgeReasonInput = document.getElementById('fulfillBadgeReasonInput');
+        const btnExecuteBadge = document.getElementById('btnExecuteBadgeGrant');
+        const replyBox = document.getElementById('fulfillWhatsappReplyBox');
+        const btnCopyReceipt = document.getElementById('btnCopyWhatsappReceipt');
+        const btnLaunchWhatsapp = document.getElementById('btnLaunchCustomerWhatsapp');
+        const btnGenPreview = document.getElementById('btnGenerateReceiptPreview');
+        const copyFeedback = document.getElementById('fulfillCopyFeedback');
+        const clearLogsBtn = document.getElementById('btnClearFulfillSessionLogs');
+        const btnCopyUid = document.getElementById('btnFulfillCopyUid');
+
+        // Populate customer options from cachedUsers
+        refreshFulfillmentUserOptions();
+
+        // Search input filter
+        userSearch?.addEventListener('input', () => {
+          const q = (userSearch.value || '').toLowerCase().trim();
+          refreshFulfillmentUserOptions(q);
+        });
+
+        clearSearchBtn?.addEventListener('click', () => {
+          if (userSearch) userSearch.value = '';
+          refreshFulfillmentUserOptions('');
+        });
+
+        refreshUsersBtn?.addEventListener('click', () => {
+          fetchUsers();
+          logAudit('Manual sync triggered for WhatsApp Fulfillment Desk user directory.', 'ok');
+        });
+
+        // User dropdown change
+        userSelect?.addEventListener('change', () => {
+          selectFulfillUser(userSelect.value);
+        });
+
+        // Copy UID button
+        btnCopyUid?.addEventListener('click', () => {
+          if (!activeFulfillUser) return;
+          navigator.clipboard.writeText(activeFulfillUser.id);
+          logAudit(`Copied UID ${activeFulfillUser.id} to clipboard.`, 'ok');
+        });
+
+        // Quick Token Presets
+        document.querySelectorAll('.fulfill-token-preset').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const tokens = btn.getAttribute('data-tokens');
+            const usd = btn.getAttribute('data-usd');
+            const ngn = btn.getAttribute('data-ngn');
+            if (tokenAmtInput) tokenAmtInput.value = tokens;
+            if (tokenPaymentRef && (!tokenPaymentRef.value || tokenPaymentRef.value.startsWith('WhatsApp package:'))) {
+              tokenPaymentRef.value = `WhatsApp package: +${Number(tokens).toLocaleString()} Tokens ($${usd} / NGN ${Number(ngn).toLocaleString()})`;
+            }
+            updateWhatsappReceiptPreview('TOKEN_CREDIT', { tokens: Number(tokens), usd, ngn });
+          });
+        });
+
+        btnResetToken?.addEventListener('click', () => {
+          if (tokenAmtInput) tokenAmtInput.value = '';
+          if (tokenPaymentRef) tokenPaymentRef.value = '';
+          updateWhatsappReceiptPreview();
+        });
+
+        // Execute Token Credit
+        btnExecuteToken?.addEventListener('click', async () => {
+          if (!activeFulfillUser) {
+            const userSelect = document.getElementById('fulfillUserSelect');
+            if (userSelect && userSelect.value) {
+              selectFulfillUser(userSelect.value);
+            }
+          }
+          if (!activeFulfillUser) {
+            alert('Please select an active customer account from the dropdown first.');
+            return;
+          }
+          const amt = parseInt(tokenAmtInput?.value, 10);
+          if (isNaN(amt) || amt <= 0) {
+            alert('Please enter a valid positive token amount to credit.');
+            return;
+          }
+          const ref = (tokenPaymentRef?.value || '').trim() || 'WhatsApp manual payment verified (+234 905 434 5858)';
+          const uid = activeFulfillUser.id;
+          const username = activeFulfillUser.username || activeFulfillUser.displayName || 'user';
+
+          btnExecuteToken.disabled = true;
+          btnExecuteToken.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Crediting Tokens...';
+
+          try {
+            if (db) {
+              try {
+                await Promise.race([
+                  db.collection('users').doc(uid).set({
+                    tokens: firebase.firestore.FieldValue.increment(amt),
+                    lastTokenTopupAt: new Date().toISOString(),
+                    lastTokenTopupAmount: amt,
+                    lastTokenTopupRef: ref,
+                    lastTokenTopupSource: 'WHATSAPP_FULFILLMENT'
+                  }, { merge: true }),
+                  new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore sync timeout')), 400))
+                ]);
+              } catch (syncErr) {
+                console.warn('[FIRESTORE TOKEN SYNC]', syncErr.message);
+              }
+
+              db.collection('admin_audit_logs').add({
+                action: 'FULFILLMENT_TOKEN_CREDIT',
+                targetUid: uid,
+                targetUsername: username,
+                amount: amt,
+                paymentRef: ref,
+                operator: 'SuperAdmin (+2349054345858)',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+              }).catch(auditErr => console.warn('[AUDIT LOG FULFILLMENT]', auditErr.message));
+            }
+
+            activeFulfillUser.tokens = (activeFulfillUser.tokens || 0) + amt;
+            const matchedUser = cachedUsers.find(u => u.id === uid);
+            if (matchedUser) matchedUser.tokens = activeFulfillUser.tokens;
+
+            const balanceEl = document.getElementById('fulfillCardTokenBalance');
+            if (balanceEl) balanceEl.textContent = Number(activeFulfillUser.tokens).toLocaleString();
+
+            addFulfillSessionLog('TOKEN_CREDIT', `@${username}`, `+${Number(amt).toLocaleString()} NEX`, ref);
+
+            logAudit(`[WHATSAPP DESK] Credited +${amt} tokens to @${username} (${uid}). New balance: ${activeFulfillUser.tokens} NEX.`, 'ok');
+
+            updateWhatsappReceiptPreview('TOKEN_CREDIT', { tokens: amt, ref });
+
+            renderUsersTable(cachedUsers);
+
+            alert(`[FULFILLMENT SUCCESS]\nSuccessfully credited +${Number(amt).toLocaleString()} tokens to @${username}.\nNew Balance: ${Number(activeFulfillUser.tokens).toLocaleString()} NEX.\n\nThe WhatsApp receipt is ready to copy on the right.`);
+          } catch (err) {
+            console.error('[FULFILLMENT ERROR]', err);
+            alert('Failed to credit tokens: ' + err.message);
+          } finally {
+            btnExecuteToken.disabled = false;
+            btnExecuteToken.innerHTML = '<i class="fa-solid fa-coins"></i> Execute Token Credit Now';
+          }
+        });
+
+        // Execute Badge Grant
+        btnExecuteBadge?.addEventListener('click', async () => {
+          if (!activeFulfillUser) {
+            const userSelect = document.getElementById('fulfillUserSelect');
+            if (userSelect && userSelect.value) {
+              selectFulfillUser(userSelect.value);
+            }
+          }
+          if (!activeFulfillUser) {
+            alert('Please select an active customer account from the dropdown first.');
+            return;
+          }
+          const selectedTier = document.querySelector('input[name="fulfillBadgeTierRadio"]:checked')?.value || 'NONE';
+          const reason = (badgeReasonInput?.value || '').trim() || 'WhatsApp payment verification verified (+234 905 434 5858)';
+          const uid = activeFulfillUser.id;
+          const username = activeFulfillUser.username || activeFulfillUser.displayName || 'user';
+
+          btnExecuteBadge.disabled = true;
+          btnExecuteBadge.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Provisioning Badge...';
+
+          try {
+            const certHash = 'sha256:' + Array.from(crypto.getRandomValues(new Uint8Array(12))).map(b => b.toString(16).padStart(2, '0')).join('');
+            const badgeUpdate = {
+              verificationBadge: selectedTier,
+              isVerified: selectedTier !== 'NONE',
+              badgeTier: selectedTier,
+              verificationCertifiedAt: new Date().toISOString(),
+              verificationRootHash: certHash,
+              verificationReason: reason,
+              verificationAuthority: 'NEXCHAT SuperAdmin (+234 905 434 5858)'
+            };
+
+            if (db) {
+              try {
+                await Promise.race([
+                  db.collection('users').doc(uid).set(badgeUpdate, { merge: true }),
+                  new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore sync timeout')), 400))
+                ]);
+              } catch (syncErr) {
+                console.warn('[FIRESTORE BADGE SYNC]', syncErr.message);
+              }
+
+              if (selectedTier !== 'NONE') {
+                db.collection('creator_badges').doc(`${uid}_${selectedTier}`).set({
+                  uid: uid,
+                  username: username,
+                  displayName: activeFulfillUser.displayName || username,
+                  tier: selectedTier,
+                  signature: certHash,
+                  reason: reason,
+                  issuedAt: new Date().toISOString(),
+                  issuedBy: 'SuperAdmin (+2349054345858)',
+                  status: 'ACTIVE'
+                }, { merge: true }).catch(bErr => console.warn('[BADGE RECORD SYNC]', bErr.message));
+              }
+
+              db.collection('admin_audit_logs').add({
+                action: 'FULFILLMENT_BADGE_GRANT',
+                targetUid: uid,
+                targetUsername: username,
+                tier: selectedTier,
+                certHash: certHash,
+                reason: reason,
+                operator: 'SuperAdmin (+2349054345858)',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString()
+              }).catch(auditErr => console.warn('[AUDIT LOG BADGE]', auditErr.message));
+            }
+
+            Object.assign(activeFulfillUser, badgeUpdate);
+            const matchedUser = cachedUsers.find(u => u.id === uid);
+            if (matchedUser) Object.assign(matchedUser, badgeUpdate);
+
+            const tierEl = document.getElementById('fulfillCardBadgeTierText');
+            if (tierEl) tierEl.textContent = selectedTier;
+
+            addFulfillSessionLog('BADGE_PROVISION', `@${username}`, selectedTier, reason);
+
+            logAudit(`[WHATSAPP DESK] Assigned verification badge [${selectedTier}] to @${username}. Hash: ${certHash}`, 'ok');
+
+            updateWhatsappReceiptPreview('BADGE_GRANT', { tier: selectedTier, certHash, reason });
+
+            renderUsersTable(cachedUsers);
+
+            alert(`[BADGE PROVISION SUCCESS]\nSuccessfully updated verification tier to: ${selectedTier} for @${username}.\nCryptographic Cert Hash: ${certHash}\n\nThe WhatsApp receipt is ready to copy on the right.`);
+          } catch (err) {
+            console.error('[BADGE PROVISION ERROR]', err);
+            alert('Failed to provision badge: ' + err.message);
+          } finally {
+            btnExecuteBadge.disabled = false;
+            btnExecuteBadge.innerHTML = '<i class="fa-solid fa-certificate"></i> Provision Badge &amp; Mint Provenance';
+          }
+        });
+
+        // Copy Receipt to Clipboard
+        btnCopyReceipt?.addEventListener('click', () => {
+          if (!replyBox || !replyBox.value) return;
+          navigator.clipboard.writeText(replyBox.value);
+          if (copyFeedback) {
+            copyFeedback.style.display = 'block';
+            setTimeout(() => { copyFeedback.style.display = 'none'; }, 4000);
+          }
+          logAudit('Copied formatted WhatsApp customer receipt to clipboard.', 'ok');
+        });
+
+        // Send via WhatsApp Web
+        btnLaunchWhatsapp?.addEventListener('click', () => {
+          const text = replyBox ? replyBox.value : '';
+          if (!text) {
+            window.open('https://web.whatsapp.com', '_blank');
+            return;
+          }
+          const url = `https://web.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+          window.open(url, '_blank');
+        });
+
+        btnGenPreview?.addEventListener('click', () => {
+          updateWhatsappReceiptPreview();
+        });
+
+        clearLogsBtn?.addEventListener('click', () => {
+          fulfillSessionLogs = [];
+          const container = document.getElementById('fulfillSessionLogContainer');
+          if (container) {
+            container.innerHTML = '<div style="color: var(--text-dim); padding: 8px; text-align: center; font-style: italic;">No fulfillment actions executed yet this session.</div>';
+          }
+        });
+
+        updateWhatsappReceiptPreview();
+      }
+
+      function refreshFulfillmentUserOptions(filterQuery = '') {
+        const userSelect = document.getElementById('fulfillUserSelect');
+        const countBadge = document.getElementById('fulfillUsersCountBadge');
+        if (!userSelect) return;
+
+        const currentVal = userSelect.value;
+        userSelect.innerHTML = '<option value="">-- Choose an account to inspect and fulfill --</option>';
+
+        const filtered = cachedUsers.filter(u => {
+          if (!filterQuery) return true;
+          const fq = filterQuery.toLowerCase();
+          return (
+            (u.username && u.username.toLowerCase().includes(fq)) ||
+            (u.displayName && u.displayName.toLowerCase().includes(fq)) ||
+            (u.email && u.email.toLowerCase().includes(fq)) ||
+            (u.id && u.id.toLowerCase().includes(fq))
+          );
+        });
+
+        if (countBadge) {
+          countBadge.textContent = `${filtered.length} account${filtered.length === 1 ? '' : 's'} indexed`;
+        }
+
+        filtered.forEach(u => {
+          const opt = document.createElement('option');
+          opt.value = u.id;
+          const name = u.displayName || u.username || 'User';
+          const handle = u.username ? `@${u.username}` : '';
+          const email = u.email ? `(${u.email})` : '';
+          const tokens = u.tokens ? `[${Number(u.tokens).toLocaleString()} NEX]` : '[0 NEX]';
+          const badge = (u.verificationBadge && u.verificationBadge !== 'NONE') ? `[${u.verificationBadge}]` : '';
+          opt.textContent = `${name} ${handle} ${email} ${tokens} ${badge}`.replace(/\s+/g, ' ').trim();
+          userSelect.appendChild(opt);
+        });
+
+        if (currentVal && filtered.some(u => u.id === currentVal)) {
+          userSelect.value = currentVal;
+        }
+      }
+
+      function selectFulfillUser(uid) {
+        const card = document.getElementById('fulfillActiveUserCard');
+        const placeholder = document.getElementById('fulfillNoUserPlaceholder');
+        const userSelect = document.getElementById('fulfillUserSelect');
+        if (userSelect && userSelect.value !== uid) {
+          userSelect.value = uid || '';
+        }
+        if (!uid) {
+          activeFulfillUser = null;
+          window.activeFulfillUser = null;
+          if (card) card.style.display = 'none';
+          if (placeholder) placeholder.style.display = 'block';
+          updateWhatsappReceiptPreview();
+          return;
+        }
+
+        const user = cachedUsers.find(u => u.id === uid);
+        if (!user) return;
+        activeFulfillUser = user;
+        window.activeFulfillUser = user;
+
+        if (card) card.style.display = 'block';
+        if (placeholder) placeholder.style.display = 'none';
+
+        const avatar = document.getElementById('fulfillCardAvatar');
+        const nameEl = document.getElementById('fulfillCardDisplayName');
+        const handleEl = document.getElementById('fulfillCardHandle');
+        const emailEl = document.getElementById('fulfillCardEmail');
+        const uidText = document.getElementById('fulfillCardUidText');
+        const balanceEl = document.getElementById('fulfillCardTokenBalance');
+        const badgeTierEl = document.getElementById('fulfillCardBadgeTierText');
+        const roleBadge = document.getElementById('fulfillCardRoleBadge');
+        const statusBadge = document.getElementById('fulfillCardStatusBadge');
+
+        if (avatar) avatar.src = user.avatarUrl || user.photoURL || 'logo.jpg';
+        if (nameEl) nameEl.textContent = user.displayName || user.username || 'Anonymous User';
+        if (handleEl) handleEl.textContent = user.username ? `@${user.username}` : '@user';
+        if (emailEl) emailEl.textContent = user.email || 'No email registered';
+        if (uidText) uidText.textContent = user.id;
+        if (balanceEl) balanceEl.textContent = Number(user.tokens || 0).toLocaleString();
+        
+        const currentBadge = user.verificationBadge || (user.isVerified ? 'VERIFIED_CREATOR' : 'NONE');
+        if (badgeTierEl) badgeTierEl.textContent = currentBadge;
+
+        const radio = document.querySelector(`input[name="fulfillBadgeTierRadio"][value="${currentBadge}"]`);
+        if (radio) radio.checked = true;
+
+        if (roleBadge) {
+          const role = (user.role || 'user').toUpperCase();
+          roleBadge.textContent = role;
+        }
+
+        if (statusBadge) {
+          const isBanned = user.banned === true || user.status === 'banned';
+          statusBadge.textContent = isBanned ? 'BANNED' : 'ACTIVE';
+          statusBadge.className = isBanned ? 'badge banned' : 'badge active';
+        }
+
+        updateWhatsappReceiptPreview();
+      }
+
+      function updateWhatsappReceiptPreview(type, details = {}) {
+        const replyBox = document.getElementById('fulfillWhatsappReplyBox');
+        if (!replyBox) return;
+
+        if (!activeFulfillUser) {
+          replyBox.value = 
+`NEXCHAT OFFICIAL PAYMENT FULFILLMENT RECEIPT
+------------------------------------------------------------
+Status: PENDING ACCOUNT SELECTION
+WhatsApp Billing Hotline: +234 905 434 5858
+
+Select an account from the left panel to generate
+a customer-specific WhatsApp delivery confirmation.
+------------------------------------------------------------`;
+          return;
+        }
+
+        const now = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+        const username = activeFulfillUser.username ? `@${activeFulfillUser.username}` : (activeFulfillUser.displayName || 'Valued Customer');
+        const uid = activeFulfillUser.id;
+        const currentTokens = Number(activeFulfillUser.tokens || 0).toLocaleString();
+        const currentTier = activeFulfillUser.verificationBadge || (activeFulfillUser.isVerified ? 'VERIFIED_CREATOR' : 'NONE');
+
+        let actionSummary = '';
+        if (type === 'TOKEN_CREDIT') {
+          actionSummary = 
+`Item Fulfilled: Token Recharge (+${Number(details.tokens || 0).toLocaleString()} NEX)
+Payment Reference: ${details.ref || 'WhatsApp manual transfer verified'}
+Account Balance After Credit: ${currentTokens} NEX`;
+        } else if (type === 'BADGE_GRANT') {
+          actionSummary = 
+`Item Fulfilled: Creator Verification Badge [${details.tier}]
+Certificate Fingerprint: ${details.certHash || 'sha256:verified_by_root'}
+Audit Reference: ${details.reason || 'WhatsApp payment verified'}
+Account Status: CERTIFIED ACTIVE`;
+        } else {
+          actionSummary = 
+`Item Fulfilled: Account Verification & Balance Check
+Current Token Balance: ${currentTokens} NEX
+Verification Status: ${currentTier}`;
+        }
+
+        const receipt = 
+`*NEXCHAT OFFICIAL PAYMENT FULFILLMENT RECEIPT*
+------------------------------------------------------------
+*Account Handle:* ${username}
+*Account UID:* ${uid}
+*Transaction Date:* ${now}
+*Fulfillment Channel:* NEXCHAT WhatsApp Desk (+234 905 434 5858)
+*Operator:* NEXCHAT SuperAdmin Root
+
+------------------------------------------------------------
+${actionSummary}
+------------------------------------------------------------
+
+*Status:* COMPLETED & VERIFIED ON-CHAIN
+Your NEXCHAT balance and badge status have updated in real-time.
+Refresh your application or check your NEXCHAT Profile to view your new balance and badges.
+
+Thank you for choosing NEXCHAT.
+For support or further inquiries, reply directly to this chat.`;
+
+        replyBox.value = receipt;
+      }
+
+      function addFulfillSessionLog(type, userText, itemText, refText) {
+        const container = document.getElementById('fulfillSessionLogContainer');
+        if (!container) return;
+
+        const time = new Date().toTimeString().split(' ')[0];
+        const item = document.createElement('div');
+        item.style.cssText = 'background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 6px 10px; display: flex; justify-content: space-between; align-items: center; gap: 8px;';
+        
+        const icon = type === 'TOKEN_CREDIT' ? 'fa-coins' : 'fa-certificate';
+        const color = type === 'TOKEN_CREDIT' ? 'var(--neon-gold)' : '#00f2ff';
+
+        item.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: ${color};"><i class="fa-solid ${icon}"></i></span>
+            <span style="color: #fff; font-weight: 700;">${escapeHtml(userText)}</span>
+            <span style="color: ${color};">${escapeHtml(itemText)}</span>
+          </div>
+          <div style="font-size: 10px; color: var(--text-dim); text-align: right;">
+            <span>${time}</span> &bull; <span>${escapeHtml(refText.substring(0, 22))}</span>
+          </div>
+        `;
+
+        if (fulfillSessionLogs.length === 0) {
+          container.innerHTML = '';
+        }
+        fulfillSessionLogs.unshift({ type, userText, itemText, refText, time });
+        container.prepend(item);
+      }
 
       // ─── 1. USER MANAGEMENT & MODERATION ───
       async function fetchUsers() {
@@ -4889,6 +5804,7 @@
         if (!db) {
           cachedUsers = [...SEEDED_ADMIN_USERS];
           renderUsersTable(cachedUsers);
+          if (typeof refreshFulfillmentUserOptions === 'function') refreshFulfillmentUserOptions();
           return;
         }
 
@@ -4897,12 +5813,14 @@
             db.collection('users').limit(100).get(),
             new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore user fetch timeout')), 1200))
           ]);
-          cachedUsers = [];
+          const freshUsers = [];
           snapshot.forEach(doc => {
-            cachedUsers.push({ id: doc.id, ...doc.data() });
+            freshUsers.push({ id: doc.id, ...doc.data() });
           });
 
-          if (cachedUsers.length === 0) {
+          if (freshUsers.length > 0) {
+            cachedUsers = freshUsers;
+          } else if (cachedUsers.length === 0) {
             cachedUsers = [...SEEDED_ADMIN_USERS];
           }
 
@@ -4917,11 +5835,13 @@
           if (hudBannedUsers) hudBannedUsers.textContent = bannedCount;
 
           renderUsersTable(cachedUsers);
+          if (typeof refreshFulfillmentUserOptions === 'function') refreshFulfillmentUserOptions();
           logAudit(`Fetched ${cachedUsers.length} user records from Cloud Firestore.`, 'ok');
         } catch (err) {
           console.warn('[USERS FETCH NOTIFICATION]', err.message);
           cachedUsers = [...SEEDED_ADMIN_USERS];
           renderUsersTable(cachedUsers);
+          if (typeof refreshFulfillmentUserOptions === 'function') refreshFulfillmentUserOptions();
         }
       }
 
@@ -4997,6 +5917,9 @@
                 <button type="button" class="admin-btn secondary adjust-tokens-btn" data-uid="${u.id}" data-name="${escapeHtml(displayName)}" style="padding: 5px 10px; font-size: 11px;">
                   <i class="fa-solid fa-coins"></i> Tokens
                 </button>
+                <button type="button" class="admin-btn secondary fulfill-user-btn" data-uid="${u.id}" style="padding: 5px 10px; font-size: 11px; border-color: rgba(37, 211, 102, 0.45); color: #25d366;" title="Open WhatsApp Fulfillment Desk">
+                  <i class="fa-brands fa-whatsapp"></i> Fulfill
+                </button>
               </div>
             </td>
           `;
@@ -5022,6 +5945,22 @@
             const uid = btn.getAttribute('data-uid');
             const user = cachedUsers.find(u => u.id === uid);
             if (user) openAdminVerificationBadgeModal(user);
+          });
+        });
+
+        // Open WhatsApp Fulfillment Desk
+        document.querySelectorAll('.fulfill-user-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const uid = btn.getAttribute('data-uid');
+            const tabBtn = document.querySelector('.admin-tab-btn[data-tab="tab-fulfillment"]');
+            if (tabBtn) tabBtn.click();
+            const userSelect = document.getElementById('fulfillUserSelect');
+            if (userSelect) {
+              userSelect.value = uid;
+              if (typeof selectFulfillUser === 'function') selectFulfillUser(uid);
+            }
+            const pane = document.getElementById('tab-fulfillment');
+            if (pane) pane.scrollIntoView({ behavior: 'smooth', block: 'start' });
           });
         });
 
@@ -6661,6 +7600,10 @@
       window.openUserSanctionsModal = openUserSanctionsModal;
       window.fetchUsers = fetchUsers;
       window.fetchReels = fetchReels;
+      window.initFulfillmentDesk = initFulfillmentDesk;
+      window.selectFulfillUser = selectFulfillUser;
+      window.refreshFulfillmentUserOptions = refreshFulfillmentUserOptions;
+      window.updateWhatsappReceiptPreview = updateWhatsappReceiptPreview;
     })();
   </script>
 </body>

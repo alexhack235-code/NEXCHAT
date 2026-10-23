@@ -17837,48 +17837,21 @@ function initVipVault() {
     backdrop.addEventListener('click', closeModal);
   }
 
-  // Tier Recharge Buttons
+  // Tier Recharge Buttons -> WhatsApp Direct Payment Gateway
   document.querySelectorAll('.tier-action-btn[data-tokens]').forEach(btn => {
     if (btn.dataset.bound) return;
     btn.dataset.bound = 'true';
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', () => {
       const addTokens = parseInt(btn.getAttribute('data-tokens'), 10) || 500;
       const planName = btn.getAttribute('data-plan') || 'pioneer';
+      const uid = myUID || localStorage.getItem('myUID') || 'Guest_' + Date.now().toString(36);
+      const username = myUsername || localStorage.getItem('myUsername') || 'NEX_User';
 
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Provisioning...';
+      const orderMsg = `HELLO DEMON ALEX\n\nI WANT TO RECHARGE TOKENS / VIP LICENSE:\n\nPlan: ${planName.toUpperCase()}\nTokens: +${addTokens.toLocaleString()} Tokens\nNEX-UID: ${uid}\nAccount: @${username}\n\nPlease provide payment details to credit my tokens. Thank you!`;
+      const waUrl = `https://wa.me/2349054345858?text=${encodeURIComponent(orderMsg)}`;
 
-      try {
-        tokens = (typeof tokens === 'number' ? tokens : 100) + addTokens;
-
-        if (myUID && typeof db !== 'undefined') {
-          try {
-            await updateDoc(doc(db, 'users', myUID), {
-              tokens: tokens,
-              vipPlan: planName,
-              lastUpgradeAt: new Date().toISOString()
-            });
-          } catch (e) {
-            console.warn('[VIP VAULT] Firestore update notice:', e);
-          }
-        }
-
-        const currentTokenBalanceEl = document.getElementById('currentTokenBalance');
-        if (currentTokenBalanceEl) currentTokenBalanceEl.textContent = formatBalanceDisplay(tokens);
-        const tokenCountEl = document.getElementById('tokenCount');
-        if (tokenCountEl) tokenCountEl.textContent = formatBalanceDisplay(tokens);
-
-        updateBalance();
-        if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
-        if (navigator.vibrate) navigator.vibrate([60, 80, 60]);
-
-        showNotif(`Success! +${addTokens} Neural Tokens added. Commercial license active.`, 'success', 3500);
-      } catch (err) {
-        showNotif('Provisioning error: ' + err.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-bolt"></i> RECHARGE ${addTokens}`;
-      }
+      showNotif(`Opening WhatsApp payment channel for ${addTokens.toLocaleString()} tokens...`, 'info', 2500);
+      window.open(waUrl, '_blank');
     });
   });
 }
