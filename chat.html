@@ -517,6 +517,10 @@
             <button id="chatSearchToggleBtn" class="header-icon-btn" title="Search in Chat"><i class="fa-solid fa-magnifying-glass"></i></button>
             <button id="headerVideoBtn" class="header-icon-btn chat-action-call" title="Video Call"><i class="fa-solid fa-video"></i></button>
             <button id="headerCallBtn" class="header-icon-btn chat-action-call" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
+            <button id="btnOpenGroupStage" class="header-icon-btn" title="Live Cyber Audio Stage"><i class="fa-solid fa-podcast" style="color: #00f3ff;"></i></button>
+            <button id="btnChronexxCatchUp" class="header-icon-btn" title="Chronexx Group Catch-Up &amp; Executive Summary" onclick="window.NexChronexxSummarizer?.triggerGroupCatchUp();"><i class="fa-solid fa-microchip" style="color: #ffd700;"></i></button>
+            <button id="btnTacticalScreenShare" class="header-icon-btn" title="Tactical Screen Share (60 FPS)" onclick="window.NexTacticalScreenShare?.startScreenShare();"><i class="fa-solid fa-display" style="color: #c084fc;"></i></button>
+            <button id="btnP2PFileSwarm" class="header-icon-btn" title="P2P Heavy File Swarm (Up to 2GB)" onclick="document.getElementById('inputP2PSwarmFile')?.click();"><i class="fa-solid fa-network-wired" style="color: #10b981;"></i></button>
             <button id="headerReportBtn" class="header-icon-btn report-header-btn" title="Report User or Conversation" style="color: #ef4444;" aria-label="Report User"><i class="fa-solid fa-flag"></i></button>
             <button id="quickWallpaperBtn" class="header-icon-btn" title="Chat Wallpaper" style="background: none; border: none; color: #94a3b8; font-size: 16px; cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.2s;"><i class="fa-solid fa-palette"></i></button>
             <!-- Ghost Protocol Ephemeral Button & Dropdown -->
@@ -603,6 +607,11 @@
           <button id="hideChatInGhostVaultBtn" class="option-item" onclick="if(window.currentChatUser) window.CyberFeatures.ghostVault?.hideChat(window.currentChatUser);"><i class="fa-solid fa-ghost" style="margin-right: 8px; color: #c084fc;"></i>Hide in Ghost Vault</button>
           <button id="blockBtn" class="option-item danger">Block User</button>
           <button id="unblockBtn" class="option-item success" style="display: none;">Unblock User</button>
+          <button id="menuP2PTransferBtn" class="option-item" onclick="document.getElementById('inputP2PSwarmFile')?.click();"><i class="fa-solid fa-network-wired" style="margin-right: 8px; color: #10b981;"></i>P2P Heavy File Swarm (Up to 2GB)</button>
+          <button id="menuTacticalScreenBtn" class="option-item" onclick="window.NexTacticalScreenShare?.startScreenShare();"><i class="fa-solid fa-display" style="margin-right: 8px; color: #c084fc;"></i>Tactical Screen Share &amp; Telestrator</button>
+          <button id="menuGroupStageBtn" class="option-item" onclick="window.NexGroupAudioStage?.toggleStage('current');"><i class="fa-solid fa-podcast" style="margin-right: 8px; color: #00f3ff;"></i>Live Cyber Audio Stage</button>
+          <button id="menuChronexxSummaryBtn" class="option-item" onclick="window.NexChronexxSummarizer?.triggerGroupCatchUp();"><i class="fa-solid fa-microchip" style="margin-right: 8px; color: #ffd700;"></i>Chronexx Group Catch-Up Briefing</button>
+          <button id="menuVoicePersonasBtn" class="option-item" onclick="window.NexChronexxVoicePersonas?.openPersonaModal();"><i class="fa-solid fa-microphone-lines" style="margin-right: 8px; color: #38bdf8;"></i>Chronexx Neural Voice Personas</button>
           <button id="reportBtn" class="option-item danger">Report User</button>
           <button id="deleteBtn" class="option-item danger">Delete Chat</button>
         </div>
@@ -1934,6 +1943,45 @@
                     <option value="1h">1 Hour (Session Expire)</option>
                     <option value="24h">24 Hours (Daily Scrub)</option>
                   </select>
+                </div>
+
+                <!-- DECOY VAULT & DUAL-PASSCODE COERCION DEFENSE -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(0, 242, 255, 0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong style="color: #00f2ff;"><i class="fa-solid fa-user-secret" style="margin-right: 6px;"></i> Decoy Vault &amp; Dual-Passcode</strong>
+                      <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Physical coercion defense. Unlock with secondary PIN to open a sanitized decoy workspace.</p>
+                    </div>
+                    <button type="button" id="btnSetupDecoyPin" class="btn-secondary" style="padding: 6px 12px; font-size: 11.5px; border-color: #00f2ff; color: #00f2ff;">
+                      <i class="fa-solid fa-key"></i> Configure Decoy PIN
+                    </button>
+                  </div>
+                </div>
+
+                <!-- DISPOSABLE GHOST ALIASES -->
+                <div class="settings-card" style="border: 1px solid rgba(168, 85, 247, 0.3); background: rgba(168, 85, 247, 0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong style="color: #c084fc;"><i class="fa-solid fa-ghost" style="margin-right: 6px;"></i> Disposable Ghost Aliases</strong>
+                      <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Generate an ephemeral cryptographic pseudonym to mask your true identity in public channels.</p>
+                    </div>
+                    <button type="button" id="btnToggleGhostAlias" class="btn-secondary" style="padding: 6px 12px; font-size: 11.5px; border-color: #a855f7; color: #c084fc;">
+                      <i class="fa-solid fa-mask"></i> Engage Ghost Persona
+                    </button>
+                  </div>
+                </div>
+
+                <!-- ZERO-KNOWLEDGE VAULT BACKUP -->
+                <div class="settings-card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                      <strong style="color: #10b981;"><i class="fa-solid fa-file-shield" style="margin-right: 6px;"></i> Client Encrypted Backup (.nexvault)</strong>
+                      <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0;">Export client-encrypted AES-256-GCM backup or restore locally without cloud servers.</p>
+                    </div>
+                    <button type="button" id="btnVaultBackup" class="btn-secondary" onclick="window.NexVaultBackup?.openBackupModal();" style="padding: 6px 12px; font-size: 11.5px; border-color: #10b981; color: #10b981;">
+                      <i class="fa-solid fa-database"></i> Backup / Restore
+                    </button>
+                  </div>
                 </div>
 
                 <!-- BLOCKED CONTACTS & SHIELDED RADAR -->
@@ -4608,6 +4656,17 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/announcement-translator.js"></script>
   <script src="./src/js/ghost-whisper-engine.js"></script>
   <script src="./src/js/telegram-whatsapp-presence.js"></script>
+  <script src="./src/js/decoy-vault.js"></script>
+  <script src="./src/js/ghost-alias.js"></script>
+  <script src="./src/js/vault-backup.js"></script>
+  <script src="./src/js/group-audio-stage.js"></script>
+  <script src="./src/js/reels-prediction-engine.js"></script>
+  <script src="./src/js/reels-greenscreen.js"></script>
+  <script src="./src/js/p2p-file-swarm.js"></script>
+  <script src="./src/js/tactical-screen-share.js"></script>
+  <script src="./src/js/chronexx-summarizer.js"></script>
+  <script src="./src/js/chronexx-voice-personas.js"></script>
+  <input type="file" id="inputP2PSwarmFile" style="display:none;" onchange="if(this.files[0]) window.NexP2PFileSwarm?.sendFile(this.files[0], 'peer');" />
   <script type="module" src="pwa-install.js"></script>
   <script type="module" src="app-prompt.js"></script>
   <script type="module" src="messaging-features.js"></script>

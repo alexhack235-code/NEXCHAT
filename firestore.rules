@@ -103,6 +103,11 @@ service cloud.firestore {
     //   - text: string (required, 1 to 1000 chars)
     // Subcollection: likes/{likeId}
     //   - userId: string (required, liker UID)
+    // Subcollection: prediction_bets/{betId}
+    //   - userId: string (required, betting user UID)
+    //   - option: string (optional, chosen outcome or prediction target)
+    //   - amount: number (optional, wager amount)
+    //   - status: string (optional, bet status)
     //
     // Collection: nexbot_configs
     // Document ID: {configId} (Auto-generated)
@@ -216,6 +221,23 @@ service cloud.firestore {
     //   - isp: string
     //   - blocked: bool (IP blocked flag)
     //   - exempt: bool (IP exempt flag)
+    //
+    // Collection: groupStages
+    // Document ID: {stageId} (Auto-generated or custom stage ID)
+    // Fields:
+    //   - hostUid: string (required on delete, host user UID)
+    //   - title / name: string (optional, stage title)
+    //   - status: string (optional, 'live' | 'ended' | 'scheduled')
+    //   - participants / speakers: list (optional)
+    //
+    // Collection: p2pSignaling
+    // Document ID: {channelId} (Auto-generated or channel ID)
+    // Fields:
+    //   - type: string (optional, signal message type)
+    //   - signal / sdp: string or map (optional, WebRTC signaling payload)
+    //   - callerUid / senderId: string (optional)
+    //   - recipientUid / receiverId: string (optional)
+    //   - timestamp: timestamp/number (optional)
     // ===============================================================
 
     // ===============================================================
@@ -972,6 +994,14 @@ service cloud.firestore {
           likeId == request.auth.uid ||
           isSuperAdmin()
         );
+      }
+
+      // Reels Prediction Pools & Bets Subcollection
+      match /prediction_bets/{betId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+        allow update: if isSuperAdmin() || (isAuthenticated() && request.auth.uid == resource.data.userId);
+        allow delete: if isSuperAdmin();
       }
     }
 
@@ -2285,7 +2315,24 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // 21. ZERO-TRUST DEFAULT DENY BARRIER
+    // 21. GROUP AUDIO STAGES
+    // ===============================================================
+    match /groupStages/{stageId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isSuperAdmin() || (isAuthenticated() && resource.data.hostUid == request.auth.uid);
+    }
+
+    // ===============================================================
+    // 22. P2P SIGNALING CHANNELS
+    // ===============================================================
+    match /p2pSignaling/{channelId} {
+      allow read, write: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    // ===============================================================
+    // 23. ZERO-TRUST DEFAULT DENY BARRIER
     // ===============================================================
     match /{document=**} {
       allow read, write: if false;
