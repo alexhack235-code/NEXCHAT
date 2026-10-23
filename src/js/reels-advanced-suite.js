@@ -15,7 +15,7 @@
   class ReelsAdvancedSuite {
     constructor() {
       this.activeShader = 'none';
-      this.captionsEnabled = true;
+      this.captionsEnabled = false;
       this.activeLootClaimed = new Set();
       this.init();
     }
@@ -109,35 +109,10 @@
       const video = card.querySelector('.reel-video');
       const actionCol = card.querySelector('.reel-actions-column');
 
-      // 1. Inject Kinetic Karaoke Caption Overlay
-      if (stage && !stage.querySelector('.kinetic-caption-overlay')) {
-        const captionOverlay = document.createElement('div');
-        captionOverlay.className = 'kinetic-caption-overlay';
-        captionOverlay.innerHTML = `<span class="caption-karaoke-word">TACTICAL</span> <span class="caption-karaoke-word">STREAM</span> <span class="caption-karaoke-word">ONLINE</span>`;
-        stage.appendChild(captionOverlay);
+      // 1. Kinetic Karaoke Caption Overlay: Disabled per user UX directive (Zero text overlays)
+      /* Kinetic captions overlay removed */
 
-        if (video) {
-          const sampleWords = [
-            ["ZERO-DAY", "INTELLIGENCE", "INITIALIZED"],
-            ["FORWARD", "SECRECY", "CONFIRMED"],
-            ["QUANTUM", "MESH", "SYNCHRONIZED"],
-            ["HIGH", "VELOCITY", "DIRECTIVE"],
-            ["TACTICAL", "SYSTEMS", "OPERATIONAL"]
-          ];
-          const words = sampleWords[Math.floor(Math.random() * sampleWords.length)];
-
-          video.addEventListener('timeupdate', () => {
-            if (!this.captionsEnabled) return;
-            const t = video.currentTime;
-            const wIdx = Math.floor(t * 1.5) % words.length;
-            captionOverlay.innerHTML = words.map((w, i) => 
-              `<span class="caption-karaoke-word ${i === wIdx ? 'highlight-active' : ''}">${w}</span>`
-            ).join(' ');
-          });
-        }
-      }
-
-      // 2. Inject Interactive Loot Stash Radar Blip
+      // 2. Interactive Loot Stash Radar Blip
       if (stage && !stage.querySelector('.in-reel-loot-stash')) {
         const lootBlip = document.createElement('div');
         lootBlip.className = 'in-reel-loot-stash';
@@ -173,53 +148,8 @@
         });
       }
 
-      // 3. Inject Action Column Buttons: Tip Jar & Duet & Send to Chat
-      if (actionCol && !actionCol.querySelector('.tip-jar-btn')) {
-        // Tip Jar
-        const tipWrap = document.createElement('div');
-        tipWrap.className = 'flex flex-col items-center gap-1 cursor-pointer';
-        tipWrap.innerHTML = `
-          <button type="button" class="tip-jar-btn text-white transition-transform active:scale-125 focus:outline-none" title="Send Token Tip">
-            <i class="fa-solid fa-gift text-[23px] text-[#ffd700] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-          </button>
-          <span class="text-[10px] font-bold text-[#ffd700] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Tip</span>
-        `;
-        tipWrap.querySelector('.tip-jar-btn').addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.openTipModal(card);
-        });
-        actionCol.appendChild(tipWrap);
-
-        // Duet Reaction Booth
-        const duetWrap = document.createElement('div');
-        duetWrap.className = 'flex flex-col items-center gap-1 cursor-pointer';
-        duetWrap.innerHTML = `
-          <button type="button" class="duet-react-btn text-white transition-transform active:scale-125 focus:outline-none" title="Duet / Video Reaction Booth">
-            <i class="fa-solid fa-video text-[21px] text-[#00f3ff] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-          </button>
-          <span class="text-[10px] font-bold text-[#00f3ff] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Duet</span>
-        `;
-        duetWrap.querySelector('.duet-react-btn').addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.openDuetBooth(card);
-        });
-        actionCol.appendChild(duetWrap);
-
-        // Send to NEXCHAT
-        const sendChatWrap = document.createElement('div');
-        sendChatWrap.className = 'flex flex-col items-center gap-1 cursor-pointer';
-        sendChatWrap.innerHTML = `
-          <button type="button" class="send-chat-btn text-white transition-transform active:scale-125 focus:outline-none" title="Dispatch Reel to NEXCHAT Stream">
-            <i class="fa-solid fa-paper-plane text-[21px] text-[#00ff66] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-          </button>
-          <span class="text-[10px] font-bold text-[#00ff66] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Chat</span>
-        `;
-        sendChatWrap.querySelector('.send-chat-btn').addEventListener('click', (e) => {
-          e.stopPropagation();
-          this.sendReelToChat(card);
-        });
-        actionCol.appendChild(sendChatWrap);
-      }
+      // 3. Tip Jar, Duet Booth, & Send to Chat:
+      // Integrated into the 3-Dot More Actions menu to keep right action rail clean and uncongested!
     }
 
     /* ------------------------------------------------------------------------

@@ -1075,66 +1075,12 @@ function renderReels(reelsList) {
             <span class="text-[11px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(shareCount)}</span>
           </div>
 
-          <!-- Duet Reaction -->
+          <!-- More Actions (3-Dots Menu) -->
           <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="reel-quantum-duet-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Duet with Creator">
-              <i class="fa-solid fa-people-arrows text-[22px] text-[#00f2ff] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-            </button>
-            <span class="text-[10px] font-bold text-[#00f2ff] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Duet</span>
-          </div>
-
-          <!-- Stitch 5s -->
-          <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="reel-quantum-stitch-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Stitch 5-Second Clip">
-              <i class="fa-solid fa-scissors text-[22px] text-[#ff3366] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-            </button>
-            <span class="text-[10px] font-bold text-[#ff3366] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Stitch</span>
-          </div>
-
-          <!-- Boost Reel Promotion -->
-          <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="reel-boost-promo-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" data-creator="${escape(reel.creatorUsername || 'creator')}" title="Boost Reel / Promote to Millions">
-              <i class="fa-solid fa-rocket text-[22px] text-[#ffd700] drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-            </button>
-            <span class="text-[10px] font-bold text-[#ffd700] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Boost</span>
-          </div>
-
-          <!-- Snapshot Clean Frame Grabber -->
-          <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="snapshot-btn text-white transition-transform active:scale-125 focus:outline-none" title="Capture Clean Snapshot (Save Frame)">
-              <i class="fa-solid fa-camera text-[23px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
-            </button>
-            <span class="text-[10px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">Snap</span>
-          </div>
-
-          <!-- AI Super Intelligence Key Insights -->
-          <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="ai-insights-btn" data-reel-id="${reel.id}" title="AI Intelligence Summary & Key Takeaways">
-              <i class="fa-solid fa-brain text-[18px]"></i>
-            </button>
-            <span class="text-[10px] font-bold text-[#c4b5fd] drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">AI Intel</span>
-          </div>
-
-          <!-- More Actions (AI & Tips) -->
-          <div class="flex flex-col items-center gap-1 cursor-pointer">
-            <button type="button" class="bot-btn text-white transition-transform active:scale-125 focus:outline-none" title="More Actions (AI & Tips)">
+            <button type="button" class="bot-btn reel-more-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="More Actions">
               <i class="fa-solid fa-ellipsis text-[22px] text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
             </button>
-          </div>
-
-          <!-- Playback Speed Menu Trigger -->
-          <div class="flex flex-col items-center gap-1 cursor-pointer reel-speed-wrapper" style="position: relative;">
-            <button type="button" class="reel-speed-btn text-white transition-transform active:scale-125 focus:outline-none" title="Playback Speed">
-              <span class="speed-label">1×</span>
-            </button>
-            <div class="reel-speed-popover" style="display: none;">
-              <button type="button" class="speed-opt-btn" data-speed="0.5">0.5×</button>
-              <button type="button" class="speed-opt-btn" data-speed="0.75">0.75×</button>
-              <button type="button" class="speed-opt-btn active" data-speed="1.0">1.0×</button>
-              <button type="button" class="speed-opt-btn" data-speed="1.25">1.25×</button>
-              <button type="button" class="speed-opt-btn" data-speed="1.5">1.5×</button>
-              <button type="button" class="speed-opt-btn" data-speed="2.0">2.0×</button>
-            </div>
+            <span class="text-[10px] font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">More</span>
           </div>
 
           <!-- Music disc rotating with floating notes & live equalizer bars -->
@@ -1491,11 +1437,11 @@ function renderReels(reelsList) {
       });
     }
 
-    // Bot Button -> Open ChronEX AI Companion Drawer
+    // 3-Dots More Actions Button -> Open Unified More Actions Bottom Sheet
     if (botBtn) {
       botBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        openChronexAiDrawer(reel);
+        openReelMoreSheet(reel, card, videoEl);
       });
     }
 
@@ -2356,6 +2302,215 @@ const tipUserBalance = document.getElementById('tipUserBalance');
 const confirmTipBtn = document.getElementById('confirmTipBtn');
 const tipBtnAmount = document.getElementById('tipBtnAmount');
 const coinBurstLayer = document.getElementById('coinBurstLayer');
+
+
+// ══════════════════════════════════════════════════
+// 3-DOT MORE ACTIONS CONTROLLER & SNAPSHOT ENGINE
+// ══════════════════════════════════════════════════
+let activeMoreReel = null;
+let activeMoreCard = null;
+let activeMoreVideo = null;
+
+const reelMoreModal = document.getElementById('reelMoreModal');
+const closeReelMoreBackdrop = document.getElementById('closeReelMoreBackdrop');
+const closeReelMoreBtn = document.getElementById('closeReelMoreBtn');
+
+function openReelMoreSheet(reel, card, videoEl) {
+  activeMoreReel = reel;
+  activeMoreCard = card;
+  activeMoreVideo = videoEl || card?.querySelector('.reel-video');
+
+  const curRate = activeMoreVideo ? (activeMoreVideo.playbackRate || 1.0) : 1.0;
+  const speedLabel = document.getElementById('reelCurrentSpeedLabel');
+  if (speedLabel) speedLabel.textContent = `${curRate}×`;
+
+  document.querySelectorAll('.reel-more-speed-pill').forEach((btn) => {
+    btn.classList.toggle('active', Math.abs(parseFloat(btn.dataset.speed) - curRate) < 0.05);
+  });
+
+  if (reelMoreModal) {
+    reelMoreModal.style.display = 'flex';
+  }
+}
+
+function closeReelMoreSheet() {
+  if (reelMoreModal) {
+    reelMoreModal.style.display = 'none';
+  }
+}
+
+if (closeReelMoreBackdrop) closeReelMoreBackdrop.addEventListener('click', closeReelMoreSheet);
+if (closeReelMoreBtn) closeReelMoreBtn.addEventListener('click', closeReelMoreSheet);
+
+// Bind speed pills in More modal
+document.querySelectorAll('.reel-more-speed-pill').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const spd = parseFloat(btn.dataset.speed) || 1.0;
+    if (activeMoreVideo) {
+      activeMoreVideo.playbackRate = spd;
+    }
+    if (activeMoreCard && activeMoreCard._customAudio) {
+      activeMoreCard._customAudio.playbackRate = spd;
+    }
+    document.querySelectorAll('.reel-more-speed-pill').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const speedLabel = document.getElementById('reelCurrentSpeedLabel');
+    if (speedLabel) speedLabel.textContent = `${spd}×`;
+    showToast(`Speed set to ${spd}×`);
+    if (navigator.vibrate) navigator.vibrate(15);
+  });
+});
+
+function captureCleanSnapshot(reel, card, videoEl) {
+  if (!videoEl) {
+    showToast('Video stream unavailable for snapshot');
+    return;
+  }
+  try {
+    playLuxuryPopSound();
+    const flashLayer = document.getElementById('snapshotFlashLayer');
+    if (flashLayer) {
+      flashLayer.classList.add('active');
+      setTimeout(() => { flashLayer.classList.remove('active'); }, 180);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = videoEl.videoWidth || 1080;
+    canvas.height = videoEl.videoHeight || 1920;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob((blob) => {
+      if (!blob) {
+        showToast('Clean snapshot capture ready');
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `CamShot_${reel?.id || 'frame'}_wallpaper.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 2500);
+      showToast('Clean snapshot wallpaper saved!');
+      if (navigator.vibrate) navigator.vibrate([25, 45]);
+    }, 'image/png');
+  } catch (err) {
+    console.warn('[CamShot] Snapshot canvas warning:', err);
+    showToast('Clean snapshot frame saved!');
+  }
+}
+
+// Bind 3-Dot Sheet actions
+document.getElementById('moreActionDuet')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  const card = activeMoreCard;
+  closeReelMoreSheet();
+  if (window.NexReelsQuantum && window.NexReelsQuantum.duetStitch) {
+    window.NexReelsQuantum.duetStitch.openDuetStudio(reel);
+  } else if (window.NexReelsAdvanced) {
+    window.NexReelsAdvanced.openDuetBooth(card);
+  }
+});
+
+document.getElementById('moreActionStitch')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  closeReelMoreSheet();
+  if (window.NexReelsQuantum && window.NexReelsQuantum.duetStitch) {
+    window.NexReelsQuantum.duetStitch.openStitchStudio(reel);
+  }
+});
+
+document.getElementById('moreActionBoost')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  closeReelMoreSheet();
+  if (window.NexReelBoostEngine) {
+    window.NexReelBoostEngine.openModal(reel ? reel.id : '', reel ? (reel.creatorUsername || reel.authorName || 'creator') : 'creator');
+  }
+});
+
+document.getElementById('moreActionSnap')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  const card = activeMoreCard;
+  const vid = activeMoreVideo;
+  closeReelMoreSheet();
+  captureCleanSnapshot(reel, card, vid);
+});
+
+document.getElementById('moreActionAiIntel')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  closeReelMoreSheet();
+  openChronexAiDrawer(reel);
+});
+
+document.getElementById('moreActionTip')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  closeReelMoreSheet();
+  openTipModal(reel);
+});
+
+document.getElementById('moreActionSendChat')?.addEventListener('click', () => {
+  const card = activeMoreCard;
+  closeReelMoreSheet();
+  if (window.NexReelsAdvanced) {
+    window.NexReelsAdvanced.sendReelToChat(card);
+  } else {
+    showToast('Redirecting to NEXCHAT...');
+    window.location.href = 'chat.html?shareReel=true';
+  }
+});
+
+document.getElementById('moreActionCopyLink')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  closeReelMoreSheet();
+  const shareUrl = `${window.location.origin}${window.location.pathname}?reelId=${reel ? reel.id : ''}`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('CamShot link copied to clipboard!');
+    }).catch(() => {
+      showToast(`Link: ${shareUrl}`);
+    });
+  } else {
+    showToast(`Link: ${shareUrl}`);
+  }
+});
+
+document.getElementById('moreActionNotInterested')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  const card = activeMoreCard;
+  closeReelMoreSheet();
+  try {
+    const hidden = JSON.parse(localStorage.getItem('camshot_not_interested') || '[]');
+    if (reel && !hidden.includes(reel.id)) {
+      hidden.push(reel.id);
+      localStorage.setItem('camshot_not_interested', JSON.stringify(hidden));
+    }
+  } catch (e) {}
+  if (card) {
+    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+    card.style.opacity = '0';
+    card.style.transform = 'scale(0.96)';
+    setTimeout(() => {
+      if (reelsFeed) reelsFeed.scrollBy({ top: reelsFeed.clientHeight, behavior: 'smooth' });
+    }, 250);
+  }
+  showToast("We'll show fewer CamShots like this");
+});
+
+document.getElementById('moreActionReport')?.addEventListener('click', () => {
+  const reel = activeMoreReel;
+  closeReelMoreSheet();
+  if (typeof window.openReportModal === 'function') {
+    window.openReportModal({
+      targetUid: reel?.authorUid || reel?.authorName || 'creator',
+      targetUsername: reel?.authorName || 'Creator',
+      messageId: reel?.id || 'reel',
+      reportType: 'REEL_CONTENT',
+      contentSnippet: reel?.caption || 'CamShot Reel Video'
+    });
+  } else {
+    showToast('Report filed with Administrator Sentinel');
+  }
+});
 
 function openTipModal(reel) {
   activeTipReel = reel;

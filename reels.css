@@ -1185,7 +1185,7 @@ body.reels-body {
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.7);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
   padding: 2px 4px 0 0;
@@ -1966,7 +1966,7 @@ body.reels-body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
   z-index: 10;
@@ -2431,7 +2431,7 @@ body.reels-body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--cs-gold);
 }
@@ -2605,7 +2605,7 @@ body.reels-body {
 }
 
 .comments-count-badge {
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   color: var(--cs-text-muted);
 }
@@ -3280,7 +3280,7 @@ body.reels-body {
   border: 1px solid var(--cs-border);
   color: var(--cs-text-secondary);
   font-family: var(--cs-font-display);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -4304,7 +4304,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   border: 1px solid var(--cs-border-gold);
   color: #fff;
   font-family: var(--cs-font-display);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   pointer-events: none;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 16px rgba(232, 184, 75, 0.3);
@@ -4366,7 +4366,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   border: 1px solid var(--cs-border);
   color: var(--cs-text-muted);
   font-family: var(--cs-font-display);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -6244,7 +6244,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   background: transparent;
   border: none;
   color: #cbd5e1;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   padding: 5px 12px;
   border-radius: 8px;
@@ -6849,4 +6849,281 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   height: 100vh;
   pointer-events: none;
   z-index: 999999;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CAMSHOT ZERO-TEXT-OVERLAY ENFORCEMENT & 3-DOT MORE ACTIONS LUXURY SHEET
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Strictly Eliminate All Unwanted Text Overlays on Video & Creator HUD */
+.neon-karaoke-stream,
+.kinetic-caption-overlay {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+}
+
+/* 2. Refined Right Action Rail: Balanced 7-Item Spacing & Geometry */
+.reel-actions-column {
+  gap: 12px !important;
+}
+
+@media (max-width: 768px) {
+  .reel-actions-column {
+    gap: 8px !important;
+    bottom: calc(54px + env(safe-area-inset-bottom, 0px) + 54px) !important;
+  }
+}
+
+/* 3. 3-Dot More Actions Modal & Glassmorphic Bottom Sheet */
+.reel-more-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: auto;
+  overscroll-behavior: contain;
+}
+
+.reels-more-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: fadeInMoreBackdrop 0.2s ease forwards;
+}
+
+.reels-more-sheet {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 480px;
+  max-height: 88vh;
+  background: rgba(14, 18, 28, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: none;
+  border-radius: 24px 24px 0 0;
+  box-shadow: 0 -16px 50px rgba(0, 0, 0, 0.85);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUpMoreSheet 0.26s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (min-width: 768px) {
+  .reel-more-modal {
+    align-items: center;
+  }
+  .reels-more-sheet {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    max-height: 82vh;
+    animation: scaleInMoreSheet 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
+
+@keyframes fadeInMoreBackdrop {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUpMoreSheet {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleInMoreSheet {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.reels-more-header {
+  padding: 14px 20px 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.reels-more-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.reels-more-close-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+/* Playback Speed Section */
+.reels-more-speed-section {
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.reels-more-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--cs-font-display, 'Outfit', sans-serif);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.reels-speed-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.reels-speed-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.reel-more-speed-pill {
+  flex: 1;
+  min-width: 42px;
+  padding: 7px 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-family: monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.reel-more-speed-pill:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.reel-more-speed-pill.active {
+  background: rgba(232, 184, 75, 0.2);
+  border-color: var(--cs-gold, #e8b84b);
+  color: var(--cs-gold, #e8b84b);
+  box-shadow: 0 0 10px rgba(232, 184, 75, 0.3);
+}
+
+/* Actions List / Grid */
+.reels-more-actions-grid {
+  padding: 10px 14px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+  max-height: calc(85vh - 150px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.reels-more-actions-grid::-webkit-scrollbar {
+  width: 4px;
+}
+
+.reels-more-actions-grid::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.reel-more-action-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.reel-more-action-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(3px);
+}
+
+.reel-more-action-item:active {
+  transform: scale(0.98);
+}
+
+.reel-more-icon-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  border: 1px solid;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+
+.reel-more-action-item:hover .reel-more-icon-circle {
+  transform: scale(1.08);
+}
+
+.reel-more-action-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.reel-more-action-label {
+  font-family: var(--cs-font-display, 'Outfit', sans-serif);
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.01em;
+}
+
+.reel-more-action-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reel-more-danger:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.reel-more-danger:hover .reel-more-icon-circle {
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
 }

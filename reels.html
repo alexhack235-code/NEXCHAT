@@ -982,6 +982,160 @@
   <!-- ══════════════════════════════════════════════════
        CREATOR TOKEN TIP MODAL (2,000 Starting Token Economy)
        ══════════════════════════════════════════════════ -->
+  <!-- CamShot Reels 3-Dot More Actions Bottom Sheet / Popover -->
+  <div id="reelMoreModal" class="reels-modal-overlay reel-more-modal" style="display: none;">
+    <div class="reels-more-backdrop" id="closeReelMoreBackdrop"></div>
+    <div class="reels-more-sheet">
+      <div class="drawer-drag-pill"></div>
+      <div class="reels-more-header">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-ellipsis-vertical text-[var(--cs-gold)]"></i>
+          <h3 class="text-sm font-bold text-white tracking-wide">CAMSHOT ACTIONS</h3>
+        </div>
+        <button type="button" id="closeReelMoreBtn" class="reels-more-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Playback Speed Control Pill Strip -->
+      <div class="reels-more-speed-section">
+        <div class="reels-more-section-title">
+          <span><i class="fa-solid fa-gauge-high"></i> PLAYBACK SPEED</span>
+          <span id="reelCurrentSpeedLabel" class="text-xs text-[var(--cs-gold)] font-bold">1.0×</span>
+        </div>
+        <div class="reels-speed-pills">
+          <button type="button" class="reel-more-speed-pill" data-speed="0.5">0.5×</button>
+          <button type="button" class="reel-more-speed-pill" data-speed="0.75">0.75×</button>
+          <button type="button" class="reel-more-speed-pill active" data-speed="1.0">1.0×</button>
+          <button type="button" class="reel-more-speed-pill" data-speed="1.25">1.25×</button>
+          <button type="button" class="reel-more-speed-pill" data-speed="1.5">1.5×</button>
+          <button type="button" class="reel-more-speed-pill" data-speed="2.0">2.0×</button>
+        </div>
+      </div>
+
+      <!-- Grid / Action Items -->
+      <div class="reels-more-actions-grid">
+        <!-- 1. Duet Reaction Studio -->
+        <button type="button" class="reel-more-action-item" id="moreActionDuet">
+          <div class="reel-more-icon-circle" style="color: #00f2ff; background: rgba(0, 242, 255, 0.12); border-color: rgba(0, 242, 255, 0.3);">
+            <i class="fa-solid fa-people-arrows"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">Duet Reaction</div>
+            <div class="reel-more-action-desc">Record side-by-side reaction studio</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 2. Stitch 5s Clip -->
+        <button type="button" class="reel-more-action-item" id="moreActionStitch">
+          <div class="reel-more-icon-circle" style="color: #ff3366; background: rgba(255, 51, 102, 0.12); border-color: rgba(255, 51, 102, 0.3);">
+            <i class="fa-solid fa-scissors"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">Stitch 5s Clip</div>
+            <div class="reel-more-action-desc">Trim and remix clip into your reel</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 3. Boost Reel Promotion -->
+        <button type="button" class="reel-more-action-item" id="moreActionBoost">
+          <div class="reel-more-icon-circle" style="color: #ffd700; background: rgba(255, 215, 0, 0.12); border-color: rgba(255, 215, 0, 0.3);">
+            <i class="fa-solid fa-rocket"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">Boost &amp; Promote</div>
+            <div class="reel-more-action-desc">Amplify reach to thousands of operatives</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 4. Clean Snapshot -->
+        <button type="button" class="reel-more-action-item" id="moreActionSnap">
+          <div class="reel-more-icon-circle" style="color: #ffffff; background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.25);">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">Clean Snapshot</div>
+            <div class="reel-more-action-desc">Download HD wallpaper without overlays</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 5. AI Super Intelligence & Insights -->
+        <button type="button" class="reel-more-action-item" id="moreActionAiIntel">
+          <div class="reel-more-icon-circle" style="color: #c4b5fd; background: rgba(196, 181, 253, 0.12); border-color: rgba(196, 181, 253, 0.3);">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">ChronEX AI Intelligence</div>
+            <div class="reel-more-action-desc">Key takeaways, AI analysis &amp; companion</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 6. Tip Creator Jar -->
+        <button type="button" class="reel-more-action-item" id="moreActionTip">
+          <div class="reel-more-icon-circle" style="color: #ffd700; background: rgba(255, 215, 0, 0.12); border-color: rgba(255, 215, 0, 0.3);">
+            <i class="fa-solid fa-gift"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">Tip Creator</div>
+            <div class="reel-more-action-desc">Send NEX tokens with celebration burst</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 7. Send to NEXCHAT -->
+        <button type="button" class="reel-more-action-item" id="moreActionSendChat">
+          <div class="reel-more-icon-circle" style="color: #00ff88; background: rgba(0, 255, 136, 0.12); border-color: rgba(0, 255, 136, 0.3);">
+            <i class="fa-solid fa-paper-plane"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">Send to NEXCHAT</div>
+            <div class="reel-more-action-desc">Dispatch to your direct or group chats</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 8. Copy Link -->
+        <button type="button" class="reel-more-action-item" id="moreActionCopyLink">
+          <div class="reel-more-icon-circle" style="color: #60a5fa; background: rgba(96, 165, 250, 0.12); border-color: rgba(96, 165, 250, 0.3);">
+            <i class="fa-solid fa-link"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">Copy Share Link</div>
+            <div class="reel-more-action-desc">Copy direct URL to share with friends</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 9. Not Interested -->
+        <button type="button" class="reel-more-action-item" id="moreActionNotInterested">
+          <div class="reel-more-icon-circle" style="color: #94a3b8; background: rgba(148, 163, 184, 0.12); border-color: rgba(148, 163, 184, 0.25);">
+            <i class="fa-solid fa-eye-slash"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label">Not Interested</div>
+            <div class="reel-more-action-desc">Hide this reel and tune your feed algorithm</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-gray-500"></i>
+        </button>
+
+        <!-- 10. Report Content -->
+        <button type="button" class="reel-more-action-item reel-more-danger" id="moreActionReport">
+          <div class="reel-more-icon-circle" style="color: #ef4444; background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3);">
+            <i class="fa-solid fa-flag"></i>
+          </div>
+          <div class="reel-more-action-info">
+            <div class="reel-more-action-label" style="color: #ef4444;">Report Content</div>
+            <div class="reel-more-action-desc">Flag policy violation or harmful content</div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-xs text-red-500/60"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <div id="tipCreatorModal" class="reels-modal tip-creator-modal" style="display: none;">
     <div class="reels-modal-card tip-creator-card">
       <div class="reels-modal-header">
@@ -1359,6 +1513,7 @@
   <script src="./src/js/synthetic-media-validator.js"></script>
   <script src="./src/js/reels-watermark-engine.js"></script>
   <script type="module" src="./src/js/ai-security-scanner-api.js"></script>
+  <script src="./src/js/report-activity-monitor.js"></script>
   <script type="module" src="reels.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
   <script src="./src/js/reels-advanced-suite.js"></script>

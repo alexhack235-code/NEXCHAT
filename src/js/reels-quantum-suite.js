@@ -513,8 +513,8 @@
       const video = card.querySelector('.reel-video');
       if (!stage || !video) return;
 
-      const branches = reel.branchingStory || this.storyDatabase.get('default');
-      if (!branches || !Array.isArray(branches)) return;
+      const branches = reel.branchingStory;
+      if (!branches || !Array.isArray(branches) || branches.length === 0) return;
 
       const overlay = document.createElement('div');
       overlay.className = 'branching-story-overlay';
@@ -573,15 +573,8 @@
       const video = card.querySelector('.reel-video');
       if (!stage || !video) return;
 
-      const product = reel.shoppableItem || {
-        id: 'prod_cyber_rig_01',
-        title: 'Cyberpunk 3D Avatar Rig for CamShot',
-        price: 850,
-        currency: 'NEX_CREDITS',
-        seller: reel.authorName || 'sarah_creator',
-        timeStart: 2.0,
-        timeEnd: 12.0
-      };
+      const product = reel.shoppableItem;
+      if (!product || !product.id) return;
 
       const pin = document.createElement('div');
       pin.className = 'shoppable-pin-tag';
@@ -682,54 +675,13 @@
   // ---------------------------------------------------------------------------
   class KaraokeSubtitleEngine {
     constructor() {
-      this.enabled = true;
+      this.enabled = false;
       this.activeColor = '#00f2ff';
     }
 
     injectKaraokeCaptions(card, reel) {
-      if (!card || card.querySelector('.neon-karaoke-stream')) return;
-      const stage = card.querySelector('.reel-stage');
-      const video = card.querySelector('.reel-video');
-      if (!stage || !video) return;
-
-      const container = document.createElement('div');
-      container.className = 'neon-karaoke-stream';
-      container.style.cssText = 'position: absolute; bottom: 125px; left: 16px; right: 16px; z-index: 18; display: flex; justify-content: center; pointer-events: none;';
-
-      const box = document.createElement('div');
-      box.style.cssText = 'background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 6px 12px; display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: center;';
-
-      const scriptWords = [
-        "NEURAL", "HOLOGRAPHIC", "TRANSMISSION", "SYNCHRONIZED", "WITH", "NEXCHAT", "CORE"
-      ];
-
-      box.innerHTML = scriptWords.map(w => `<span class="karaoke-word" style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 800; color: #64748b; transition: all 0.15s ease;">${w}</span>`).join(' ');
-      container.appendChild(box);
-      stage.appendChild(container);
-
-      const wordsEls = box.querySelectorAll('.karaoke-word');
-
-      video.addEventListener('timeupdate', () => {
-        if (!this.enabled) {
-          container.style.display = 'none';
-          return;
-        }
-        container.style.display = 'flex';
-        const t = video.currentTime;
-        const activeIdx = Math.floor(t * 1.8) % wordsEls.length;
-
-        wordsEls.forEach((el, idx) => {
-          if (idx === activeIdx) {
-            el.style.color = this.activeColor;
-            el.style.textShadow = `0 0 12px ${this.activeColor}`;
-            el.style.transform = 'scale(1.15)';
-          } else {
-            el.style.color = '#64748b';
-            el.style.textShadow = 'none';
-            el.style.transform = 'scale(1.0)';
-          }
-        });
-      });
+      // Disabled to prevent unwanted text overlay on creator info and caption per user UX directive
+      return;
     }
   }
 

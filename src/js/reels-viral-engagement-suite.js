@@ -32,7 +32,7 @@
   class ReelsViralEngagementSuite {
     constructor() {
       this.audioCtx = null;
-      this.danmakuEnabled = true;
+      this.danmakuEnabled = false;
       this.danmakuTimer = null;
       this.speedHoldTimer = null;
       this.isSpeedHolding = false;
@@ -284,9 +284,10 @@
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.id = 'toggleDanmakuBtn';
-      btn.className = 'reels-header-icon-btn danmaku-toggle-btn active';
+      btn.className = 'reels-header-icon-btn danmaku-toggle-btn';
       btn.title = 'Toggle Flying Danmaku Comments (On/Off)';
       btn.innerHTML = '<i class="fa-solid fa-comments"></i>';
+      btn.style.color = '#64748b';
 
       btn.addEventListener('click', () => {
         this.danmakuEnabled = !this.danmakuEnabled;

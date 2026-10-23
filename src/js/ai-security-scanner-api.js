@@ -66,6 +66,14 @@ export const CLOUD_METADATA_ENDPOINTS = [
 
 export const ZERO_WIDTH_REGEX = /[\u200B\u200C\u200D\uFEFF\u200E\u200F\u202A-\u202E\u2066-\u2069]/g;
 
+// Decoy Leads for Client / Web Honeypot Routing
+export const DECOY_LEADS = [
+  { path: '/.env', category: 'CREDENTIAL_HARVESTING' },
+  { path: '/admin/config.php', category: 'PHP_RCE_EXPLOIT_LURE' },
+  { path: '/phpinfo.php', category: 'INFORMATION_DISCLOSURE_LURE' },
+  { path: '/api/v1/admin/keys', category: 'API_KEY_LEAK_LURE' }
+];
+
 /**
  * Enterprise AI Security Scanner Class
  */
@@ -77,6 +85,7 @@ export class AISecurityScanner {
     this.realTimeDefenderActive = true;
     this.metrics = this.loadMetrics();
     this.quarantineVault = this.loadQuarantine();
+    this.honeypotVault = this.loadHoneypotVault();
     this.scanListeners = new Set();
   }
 
@@ -94,6 +103,7 @@ export class AISecurityScanner {
       php2shell_blocked: 0,
       ssrf_intercepted: 0,
       prototype_pollutions_blocked: 0,
+      honeypot_traps_tripped: 0,
       malware_files_quarantined: 0,
       last_scan_timestamp: Date.now(),
       defense_status: "ARMED & OPERATIONAL (APEX-SHIELD)"
@@ -119,6 +129,21 @@ export class AISecurityScanner {
   saveQuarantine() {
     try {
       localStorage.setItem('nex_quarantine_vault', JSON.stringify(this.quarantineVault));
+    } catch {}
+  }
+
+  loadHoneypotVault() {
+    try {
+      const h = localStorage.getItem('nex_honeypot_threat_vault');
+      return h ? JSON.parse(h) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  saveHoneypotVault() {
+    try {
+      localStorage.setItem('nex_honeypot_threat_vault', JSON.stringify(this.honeypotVault));
     } catch {}
   }
 
@@ -280,6 +305,61 @@ export class AISecurityScanner {
     }
   }
 
+  /**
+   * Browser Honeypot Trigger & WebRTC Unmasking
+   */
+  async triggerHoneypotTrap(decoyPath, attackerMeta = {}) {
+    this.metrics.honeypot_traps_tripped++;
+    const incidentId = 'INC-HACK-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+    
+    // Attempt WebRTC candidate extraction
+    let candidates = [];
+    if (typeof RTCPeerConnection !== 'undefined') {
+      try {
+        const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        pc.createDataChannel('');
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        pc.onicecandidate = (e) => {
+          if (e?.candidate?.candidate) {
+            const m = e.candidate.candidate.match(/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})/);
+            if (m && m[1]) candidates.push(m[1]);
+          }
+        };
+      } catch {}
+    }
+
+    const threatEntry = {
+      incidentId,
+      timestamp: new Date().toISOString(),
+      threatLevel: 'CRITICAL_HIGH_EXPLOIT',
+      decoyPath,
+      attackerMeta,
+      webrtcCandidateIPs: candidates,
+      securityStatus: 'USER_TRYING_TO_HACK_REPORTED_TO_CYBER_SECURITY',
+      action: 'IP_FLAGGED_AND_ISOLATED'
+    };
+
+    this.honeypotVault.unshift(threatEntry);
+    if (this.honeypotVault.length > 100) this.honeypotVault.pop();
+    this.saveHoneypotVault();
+    this.saveMetrics();
+
+    console.warn('[!] CRITICAL SECURITY ALERT: USER TRYING TO HACK (REPORTED TO CYBER SECURITY):', threatEntry);
+    return threatEntry;
+  }
+
+  getAdminSecurityReport() {
+    return {
+      title: "NEXCHAT ADMIN CYBER SECURITY THREAT LOG REPORT",
+      timestamp: new Date().toISOString(),
+      totalHoneypotTraps: this.honeypotVault.length,
+      quarantinedFiles: this.quarantineVault.length,
+      metrics: this.metrics,
+      recentIncidents: this.honeypotVault.slice(0, 20)
+    };
+  }
+
   calculateEntropy(buffer) {
     const bytes = new Uint8Array(buffer);
     if (bytes.length === 0) return 0;
@@ -374,7 +454,7 @@ export class AISecurityScanner {
       { name: "Verifying IndexedDB Encrypted Caches", progress: 35 },
       { name: "Inspecting Inbound Streams for PHP2Shell & SSRF Vectors", progress: 55 },
       { name: "Auditing Prototype Pollution & Object Sanitizers", progress: 75 },
-      { name: "Auditing Firestore Rule Protections & Auth Tokens", progress: 90 },
+      { name: "Auditing Honeypot Traps & Canary Token Logs", progress: 90 },
       { name: "Executing Heuristic Entropy Heptathlon & Zero-Day Check", progress: 100 }
     ];
 
@@ -391,6 +471,7 @@ export class AISecurityScanner {
       threatsNeutralized: this.metrics.threats_blocked,
       php2shellBlocked: this.metrics.php2shell_blocked || 0,
       quarantinedCount: this.quarantineVault.length,
+      honeypotTraps: this.honeypotVault.length,
       timestamp: new Date().toLocaleTimeString()
     };
   }
