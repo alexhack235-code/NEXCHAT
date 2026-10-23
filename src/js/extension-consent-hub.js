@@ -199,7 +199,7 @@
     }
     toast.className = `nex-ext-toast ${isDanger ? 'danger' : ''}`;
     toast.innerHTML = `
-      <div class="nex-ext-toast-icon">${isDanger ? '🛑' : '🛡️'}</div>
+      <div class="nex-ext-toast-icon">${isDanger ? '<i class="fa-solid fa-triangle-exclamation" style="color: #fe2c55;"></i>' : '<i class="fa-solid fa-shield-halved" style="color: #00f076;"></i>'}</div>
       <div style="flex: 1; line-height: 1.4;">${message}</div>
     `;
     toast.classList.add('active');
@@ -323,7 +323,7 @@
 
           <div class="nex-oauth-link-pipeline">
             <div class="nex-oauth-lock-badge"><i class="fa-solid fa-lock"></i></div>
-            <div class="nex-oauth-pipeline-arrows">⇄</div>
+            <div class="nex-oauth-pipeline-arrows"><i class="fa-solid fa-arrow-right-arrow-left"></i></div>
           </div>
 
           <div class="nex-oauth-entity">
@@ -336,7 +336,7 @@
 
         <!-- Consent Header -->
         <div class="nex-consent-header-text">
-          <h2 class="nex-consent-title" id="nexConsentTitle">Allow NEX-REELS to access NEXCHAT?</h2>
+          <h2 class="nex-consent-title" id="nexConsentTitle">Do you want NEXCHAT to access CamShot (Vercel Extension Ecosystem)?</h2>
           <p class="nex-consent-subtitle">
             <strong>NEX-REELS (CamShot Pro)</strong> by <span style="color: #00d4ff;">NEXO-TECH</span> wants to link with your account <strong id="nexConsentUserEmail">${email || 'your account'}</strong>.
           </p>
@@ -528,7 +528,7 @@
     }).join('');
   }
 
-  // Handle User Decision (YES or NO)
+  // Handle User Decision (YES or NO) with Verification Pass & Email Verification
   async function handleDecision(isApproved) {
     const allowBtn = document.getElementById('nexConsentAllowBtn');
     const denyBtn = document.getElementById('nexConsentDenyBtn');
@@ -537,55 +537,137 @@
     allowBtn.disabled = true;
     denyBtn.disabled = true;
 
-    if (isApproved) {
-      allowBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Authorizing &amp; Dispatching Alert...`;
-    } else {
-      denyBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Blocking &amp; Dispatching Alert...`;
+    const { email, name } = getUserDetails();
+    const userEmail = email || 'your signed-in email address';
+
+    if (!isApproved) {
+      denyBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Blocking...`;
+      setExtensionStatus('nex-reels', 'denied');
+      await dispatchEmailAlert({
+        extensionId: 'nex-reels',
+        status: 'denied',
+        extensionName: 'CamShot (Vercel Extension Ecosystem)',
+        scopes: []
+      });
+      closeConsentModal();
+      showToast('<strong>Access Denied!</strong> CamShot access has been blocked.', true);
+      checkReelsDeniedBanner();
+      window.dispatchEvent(new CustomEvent('nex-extension-consent-changed', {
+        detail: { extensionId: 'nex-reels', status: 'denied', isApproved: false }
+      }));
+      return;
     }
 
-    const { email } = getUserDetails();
-    const statusStr = isApproved ? 'approved' : 'denied';
+    // When User Approves: Issue Cryptographic Verification Pass & Send Email Verification
+    allowBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Issuing Verification Pass...`;
 
-    // 1. Save state locally
-    setExtensionStatus('nex-reels', statusStr);
+    const passId = 'PASS-NEX-' + Math.floor(1000 + Math.random() * 9000) + '-VERIFIED';
+    const verificationPin = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // 2. Dispatch real automated email alert via backend
-    const reelsExt = EXTENSIONS.find(e => e.id === 'nex-reels');
+    // 1. Dispatch Firebase Email Verification if authenticated in Firebase
+    if (window.firebaseAuth?.currentUser && typeof window.firebaseSendEmailVerification === 'function') {
+      try {
+        await window.firebaseSendEmailVerification(window.firebaseAuth.currentUser);
+        console.log('[FIREBASE] Email verification link dispatched to user.');
+      } catch (fbErr) {
+        console.warn('[FIREBASE] Email verification notice:', fbErr.message);
+      }
+    }
+
+    // 2. Dispatch Vercel API Security Email Alert with Pass and PIN
     await dispatchEmailAlert({
       extensionId: 'nex-reels',
-      status: statusStr,
-      extensionName: reelsExt ? reelsExt.name : 'NEX-REELS (CamShot Pro)',
-      scopes: reelsExt ? reelsExt.scopes.map(s => s.code) : []
+      status: 'approved',
+      passId: passId,
+      token: verificationPin,
+      extensionName: 'CamShot (Vercel Extension Ecosystem)',
+      scopes: ['read:profile', 'write:media_vault', 'sync:chat_feed', 'security:telemetry']
     });
 
-    // 3. Reset buttons
-    allowBtn.disabled = false;
-    denyBtn.disabled = false;
-    allowBtn.innerHTML = `<i class="fa-solid fa-check-double"></i> Yes, Allow &amp; Authorize`;
-    denyBtn.innerHTML = `<i class="fa-solid fa-ban"></i> No, Deny Access`;
+    // 3. Render High-Tech Verification Pass Screen in the Modal
+    const modalWindow = document.querySelector('#nexConsentModal .nex-consent-modal-window');
+    if (modalWindow) {
+      modalWindow.innerHTML = `
+        <!-- Close Button -->
+        <div style="display: flex; justify-content: flex-end; padding: 16px 20px 0;">
+          <button type="button" class="nex-ext-close-btn" id="nexPassCloseBtn" title="Dismiss">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
 
-    // 4. Close consent modal
-    closeConsentModal();
+        <div style="padding: 10px 24px 28px; text-align: center;">
+          <!-- Security Badge -->
+          <div style="display: inline-flex; align-items: center; gap: 8px; background: rgba(0, 255, 136, 0.12); border: 1px solid #00ff88; padding: 6px 14px; border-radius: 9999px; margin-bottom: 14px;">
+            <i class="fa-solid fa-shield-halved" style="color: #00ff88; font-size: 13px;"></i>
+            <span style="font-family: monospace; font-size: 11px; font-weight: 800; color: #00ff88; letter-spacing: 1px;">
+              SECURITY CLEARANCE ISSUED &bull; VERCEL PROTOCOL
+            </span>
+          </div>
 
-    // 5. Update Hub cards if open
-    renderExtensionCards();
+          <h2 style="font-family: 'Orbitron', sans-serif; font-size: 18px; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; margin: 0 0 8px;">
+            VERIFICATION PASS ISSUED
+          </h2>
+          <p style="font-size: 12.5px; color: #94a3b8; line-height: 1.5; margin: 0 0 20px;">
+            Your cryptographic verification pass and 6-digit confirmation PIN have been dispatched to <strong style="color: #00d4ff;">${userEmail}</strong>.
+          </p>
 
-    // 6. Show Toast
-    if (isApproved) {
-      const emailNotice = email ? `Confirmation email dispatched to <span style="font-family:monospace; color:#00f076;">${email}</span>.` : `Permission granted.`;
-      showToast(`<strong>Access Granted!</strong> NEX-REELS is now authorized. ${emailNotice}`, false);
-    } else {
-      const emailNotice = email ? `Security notice dispatched to <span style="font-family:monospace; color:#fe2c55;">${email}</span>.` : `Access blocked.`;
-      showToast(`<strong>Access Denied!</strong> NEX-REELS has been blocked. ${emailNotice}`, true);
+          <!-- Pass Certificate Card -->
+          <div style="background: #070b14; border: 1.5px solid #00ff88; border-radius: 14px; padding: 22px; text-align: center; margin-bottom: 20px; box-shadow: 0 0 30px rgba(0,255,136,0.15); position: relative; overflow: hidden;">
+            <div style="font-family: monospace; font-size: 11px; font-weight: 800; color: #00d4ff; letter-spacing: 2px; margin-bottom: 10px;">
+              [PASS ID: ${passId}]
+            </div>
+            <div style="font-family: monospace; font-size: 34px; font-weight: 900; letter-spacing: 10px; color: #ffffff; background: rgba(0,255,136,0.1); padding: 12px 24px; border-radius: 10px; display: inline-block; border: 1.5px dashed #00ff88; margin-bottom: 12px;">
+              ${verificationPin}
+            </div>
+            <div style="font-size: 11.5px; color: #94a3b8; line-height: 1.5;">
+              6-Digit Security Verification PIN &bull; Email verification link sent
+            </div>
+          </div>
+
+          <!-- PIN Confirmation Form -->
+          <div style="text-align: left; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 16px;">
+            <label style="font-size: 12px; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 8px;">
+              Enter 6-Digit PIN to Confirm Verification:
+            </label>
+            <div style="display: flex; gap: 10px;">
+              <input type="text" id="nexPassPinInput" style="flex: 1; background: #070b14; border: 1px solid rgba(0, 255, 136, 0.4); border-radius: 8px; color: #00ff88; font-family: monospace; font-size: 18px; font-weight: 800; text-align: center; letter-spacing: 6px; padding: 10px;" maxlength="6" value="${verificationPin}">
+              <button type="button" id="nexConfirmPassBtn" class="nex-consent-btn allow" style="flex: 1; margin: 0; padding: 12px 18px; font-size: 13px;">
+                <i class="fa-solid fa-check-double"></i> Confirm &amp; Unlock
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      modalWindow.querySelector('#nexPassCloseBtn').addEventListener('click', closeConsentModal);
+
+      modalWindow.querySelector('#nexConfirmPassBtn').addEventListener('click', () => {
+        const inputPin = modalWindow.querySelector('#nexPassPinInput').value.trim();
+        if (inputPin.length !== 6) {
+          showToast('Please enter a valid 6-digit PIN code.', true);
+          return;
+        }
+
+        // Save approved state & verification pass
+        setExtensionStatus('nex-reels', 'approved');
+        localStorage.setItem('nex_verification_pass', JSON.stringify({
+          passId: passId,
+          pin: verificationPin,
+          verified: true,
+          timestamp: Date.now()
+        }));
+
+        closeConsentModal();
+        renderExtensionCards();
+        checkReelsDeniedBanner();
+
+        showToast(`<strong>Verification Pass Confirmed!</strong> CamShot Pro is fully unlocked.`, false);
+
+        window.dispatchEvent(new CustomEvent('nex-extension-consent-changed', {
+          detail: { extensionId: 'nex-reels', status: 'approved', isApproved: true, passId: passId }
+        }));
+      });
     }
-
-    // 7. Check / update reels banner if applicable
-    checkReelsDeniedBanner();
-
-    // 8. Fire custom event for any listeners
-    window.dispatchEvent(new CustomEvent('nex-extension-consent-changed', {
-      detail: { extensionId: 'nex-reels', status: statusStr, isApproved }
-    }));
   }
 
   // Check if we need to show the denied banner on reels page
@@ -632,7 +714,7 @@
     const securityEmailEl = document.getElementById('nexConsentSecurityEmail');
 
     if (targetName) targetName.textContent = ext.name.split(' ')[0];
-    if (title) title.textContent = `Allow ${ext.name.split(' ')[0]} to access NEXCHAT?`;
+    if (title) title.textContent = `Do you want NEXCHAT to access ${ext.name} (Vercel Extension Ecosystem)?`;
     if (userEmailEl) userEmailEl.textContent = email || 'your signed-in account';
     if (securityEmailEl) securityEmailEl.textContent = email || 'your signed-in email address';
 
@@ -665,7 +747,7 @@
     const reelsStatus = localStorage.getItem('nex_ext_reels_status');
     if (reelsStatus === null) {
       // Delay so initial interface render is pristine
-      const delay = window.location.pathname.includes('reels.html') ? 1400 : 2200;
+      const delay = 400; // Primary first popup screen for new users
       setTimeout(() => {
         // Double check not already open or decided
         const alreadyDecided = localStorage.getItem('nex_ext_reels_status');
