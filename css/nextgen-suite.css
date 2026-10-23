@@ -74,7 +74,7 @@
 
 .nextgen-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: 16px;
 }
 
@@ -812,4 +812,16 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+
+/* Split matrix mobile stacking */
+@media (max-width: 580px) {
+  .nextgen-live-split-matrix {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+  .nextgen-cohost-slot {
+    height: 200px !important;
+  }
 }

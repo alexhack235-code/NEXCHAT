@@ -14,7 +14,7 @@
 .attachment-popup-hub {
   position: absolute;
   bottom: 80px;
-  left: 20px;
+  left: 16px;
   background: rgba(10, 15, 26, 0.95);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -24,10 +24,20 @@
   padding: 14px;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  width: 390px;
+  gap: 10px;
+  width: calc(100vw - 32px);
+  max-width: 390px;
+  box-sizing: border-box;
   z-index: 999;
   animation: cyberSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (max-width: 380px) {
+  .attachment-popup-hub {
+    grid-template-columns: repeat(3, 1fr);
+    left: 10px;
+    width: calc(100vw - 20px);
+    padding: 10px;
+  }
 }
 
 @keyframes cyberSlideUp {
@@ -558,6 +568,22 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
+}
+@media (max-width: 480px) {
+  .nex-canvas-toolbar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .canvas-color-group {
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+  .canvas-tool-group {
+    justify-content: center;
+    width: 100%;
+  }
 }
 
 .canvas-tool-btn {
@@ -1278,8 +1304,20 @@
   .sandbox-preview-frame {
     min-height: 200px;
   }
+  .canvas-board-wrap,
   .nex-canvas-board-wrap {
-    height: 340px;
+    height: 320px;
+  }
+}
+
+@media (max-height: 700px), (max-width: 480px) {
+  .canvas-board-wrap,
+  .nex-canvas-board-wrap {
+    height: 250px;
+  }
+  .nex-canvas-container {
+    max-height: 94vh;
+    overflow-y: auto;
   }
 }
 

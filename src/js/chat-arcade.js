@@ -78,23 +78,23 @@
             <div class="wager-selector-title">SELECT TOKEN WAGER:</div>
             <div class="wager-pills-row">
               <button type="button" class="wager-pill" data-wager="0">Free</button>
-              <button type="button" class="wager-pill active" data-wager="50">50 🪙</button>
-              <button type="button" class="wager-pill" data-wager="100">100 🪙</button>
-              <button type="button" class="wager-pill" data-wager="250">250 🪙</button>
+              <button type="button" class="wager-pill active" data-wager="50">50 <i class="fa-solid fa-coins"></i></button>
+              <button type="button" class="wager-pill" data-wager="100">100 <i class="fa-solid fa-coins"></i></button>
+              <button type="button" class="wager-pill" data-wager="250">250 <i class="fa-solid fa-coins"></i></button>
             </div>
 
             <div class="wager-selector-title mt-4">PICK YOUR SECRET MOVE:</div>
             <div class="rps-choices-row">
               <button type="button" class="rps-choice-btn" data-choice="rock">
-                <span class="rps-emoji">🪨</span>
+                <span class="rps-emoji"><i class="fa-solid fa-hand-fist"></i></span>
                 <span class="rps-name">ROCK</span>
               </button>
               <button type="button" class="rps-choice-btn" data-choice="paper">
-                <span class="rps-emoji">📄</span>
+                <span class="rps-emoji"><i class="fa-solid fa-hand"></i></span>
                 <span class="rps-name">PAPER</span>
               </button>
               <button type="button" class="rps-choice-btn" data-choice="scissors">
-                <span class="rps-emoji">✂️</span>
+                <span class="rps-emoji"><i class="fa-solid fa-hand-scissors"></i></span>
                 <span class="rps-name">SCISSORS</span>
               </button>
             </div>
@@ -258,7 +258,7 @@
       localStorage.setItem(`rps_secret_${challengeId}`, this.myRpsChoice);
 
       // Create challenge card payload
-      const cardText = `🎮 **ROCK-PAPER-SCISSORS BATTLE**\n${myName} challenged ${partnerName}!\n🪙 **Wager Pot: ${wager > 0 ? wager + ' NEX Tokens' : 'Free Match'}**\n\nTap your move below to accept the challenge!`;
+      const cardText = `[TACTICAL DUEL] **ROCK-PAPER-SCISSORS BATTLE**\n${myName} challenged ${partnerName}!\n **Wager Pot: ${wager > 0 ? wager + ' NEX Tokens' : 'Free Match'}**\n\nTap your move below to accept the challenge!`;
 
       const input = document.getElementById('message-input');
       if (input) {
@@ -294,19 +294,22 @@
         running: false
       };
 
-      // Mouse and Touch Controls
-      canvas.onmousemove = (e) => {
+      // Mouse and Touch Controls with scale factor normalization
+      const getCanvasY = (clientY) => {
         const rect = canvas.getBoundingClientRect();
-        const root = document.documentElement;
-        const mouseY = e.clientY - rect.top - root.scrollTop;
-        this.pongState.playerY = Math.max(0, Math.min(canvas.height - this.pongState.paddleH, mouseY - this.pongState.paddleH / 2));
+        const scaleY = rect.height > 0 ? canvas.height / rect.height : 1;
+        return (clientY - rect.top) * scaleY;
+      };
+
+      canvas.onmousemove = (e) => {
+        const y = getCanvasY(e.clientY);
+        this.pongState.playerY = Math.max(0, Math.min(canvas.height - this.pongState.paddleH, y - this.pongState.paddleH / 2));
       };
 
       canvas.ontouchmove = (e) => {
         e.preventDefault();
-        const rect = canvas.getBoundingClientRect();
-        const touchY = e.touches[0].clientY - rect.top;
-        this.pongState.playerY = Math.max(0, Math.min(canvas.height - this.pongState.paddleH, touchY - this.pongState.paddleH / 2));
+        const y = getCanvasY(e.touches[0].clientY);
+        this.pongState.playerY = Math.max(0, Math.min(canvas.height - this.pongState.paddleH, y - this.pongState.paddleH / 2));
       };
 
       this.drawPong();
@@ -383,7 +386,7 @@
         s.running = false;
         const win = s.playerScore >= 5;
         if (win && window.showNotif) {
-          window.showNotif('🎉 VICTORY! You defeated Cyber-AI 5-' + s.aiScore, 'success', 3500);
+          window.showNotif('[VICTORY] You defeated Cyber-AI 5-' + s.aiScore, 'success', 3500);
         }
       }
 
@@ -475,7 +478,7 @@
 
       if (this.triviaIndex >= questions.length) {
         // Complete
-        document.getElementById('triviaQuestionText').textContent = `🏆 TRIVIA COMPLETE! Your Final Score: ${this.triviaScore} / ${questions.length * 20} PTS`;
+        document.getElementById('triviaQuestionText').textContent = `[CHAMPION] TRIVIA COMPLETE! Your Final Score: ${this.triviaScore} / ${questions.length * 20} PTS`;
         document.getElementById('triviaOptionsGrid').innerHTML = `
           <button type="button" class="trivia-opt-btn correct text-center" id="restartTriviaBtn">
             <i class="fa-solid fa-rotate-right"></i> PLAY AGAIN

@@ -230,7 +230,7 @@
           <label style="display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 8px;">
             3. Assessed Severity Level
           </label>
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;" id="nexReportSeverityGrid">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(68px, 1fr)); gap: 6px;" id="nexReportSeverityGrid">
             <!-- Injected via JS -->
           </div>
         </div>

@@ -951,7 +951,7 @@
 
     init() {
       // Injects AR bar into CamShot reels studio camera header if present
-      const studioHeader = document.querySelector('.reels-studio-header') || document.querySelector('.reels-header');
+      const studioHeader = document.querySelector('.reels-studio-header');
       if (studioHeader && !document.getElementById('nextgenReelsArBar')) {
         const bar = document.createElement('div');
         bar.id = 'nextgenReelsArBar';

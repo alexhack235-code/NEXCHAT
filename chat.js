@@ -2107,12 +2107,12 @@ async function showGroupAdminPanel(groupId) {
       const adminBadge = isAdmin ? ' <span style="font-size:10px;color:#ffd700;border:1px solid #ffd700;padding:1px 6px;border-radius:10px;"><i class="fa-solid fa-shield-halved"></i> Admin</span>' : '';
 
       membersHTML += `
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px; border-bottom: 1px solid #00ff66; gap: 10px;">
+        <div class="group-admin-member-row">
           <div style="flex: 1; min-width: 0;">
             <p style="margin: 0; font-weight: 600; color: #00ff66;">${escape(username)}${adminBadge}</p>
             <p style="margin: 4px 0 0 0; font-size: 12px; color: ${isSuspended ? '#ff6b6b' : '#4CAF50'};">${suspendStatus}</p>
           </div>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+          <div class="admin-actions-btns" style="display: flex; gap: 6px; flex-wrap: wrap;">
             ${!isAdmin ? `<button onclick="promoteToAdmin('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #00d4ff; color: #000; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-award"></i> Promote</button>` : '<span style="color: #00ff66; font-size: 12px;">Admin</span>'}\n            <button onclick="toggleSuspendMember('${groupId}', '${memberId}', ${isSuspended})" style="padding: 6px 10px; background: ${isSuspended ? '#4CAF50' : '#ff6b6b'}; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;">${isSuspended ? '<i class="fa-solid fa-play"></i> Unsuspend' : '<i class="fa-solid fa-pause"></i> Suspend'}</button>\n            <button onclick="kickMember('${groupId}', '${memberId}')" style="padding: 6px 10px; background: #ff4444; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600;"><i class="fa-solid fa-user-xmark"></i> Kick</button>\n          </div>\n        </div>\n      `;
     }
     membersHTML += '</div>';

@@ -1058,6 +1058,126 @@
       transform: scale(1.08);
       border-color: var(--neon-cyan);
     }
+
+    /* ======================================================== */
+    /* AUDIT REMEDIATION: UNIFIED RESPONSIVE & COMPONENT STYLES */
+    /* ======================================================== */
+
+    /* 1. Missing Stat Card Suite */
+    .stat-card {
+      background: var(--bg-panel);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 16px 18px;
+      backdrop-filter: blur(14px);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: all 0.25s ease;
+    }
+    .stat-card:hover {
+      background: var(--bg-panel-hover);
+      border-color: var(--border-color);
+      transform: translateY(-2px);
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+    .stat-val, .stat-value {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(16px, 2vw, 22px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      word-break: break-word;
+      overflow-wrap: anywhere;
+    }
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 6px;
+      word-break: break-word;
+    }
+
+    /* 2. Responsive Session Info & Header */
+    .session-info {
+      flex-wrap: wrap !important;
+    }
+
+    /* 3. Flexible Segmented Groups */
+    .cyber-segmented-group {
+      flex-wrap: wrap !important;
+    }
+    .cyber-seg-btn {
+      flex: 1 1 auto !important;
+    }
+
+    /* 4. Table Cell Constraints */
+    .admin-table td {
+      word-break: break-word;
+    }
+
+    /* 5. Responsive Breakpoints */
+    @media (max-width: 1024px) {
+      .admin-panel div[style*="grid-template-columns: 1.2fr 1fr"],
+      .admin-panel div[style*="grid-template-columns: 1.15fr 0.85fr"],
+      .admin-panel div[style*="grid-template-columns: 1.1fr 0.9fr"],
+      .admin-panel div[style*="grid-template-columns: 1fr 1fr"],
+      .admin-panel div[style*="grid-template-columns: 1.2fr 0.8fr"],
+      .tab-pane > div[style*="grid-template-columns: 1.2fr 1fr"],
+      .tab-pane > div[style*="grid-template-columns: 1.15fr 0.85fr"],
+      .tab-pane > div[style*="grid-template-columns: 1.1fr 0.9fr"],
+      .tab-pane > div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+
+      div[style*="grid-template-columns: repeat(4, 1fr)"] {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .admin-container {
+        padding: 12px 12px 60px !important;
+      }
+      .admin-panel {
+        padding: 16px !important;
+      }
+      .admin-header {
+        padding: 14px 16px !important;
+        gap: 12px !important;
+      }
+      .admin-title {
+        font-size: 16px !important;
+        letter-spacing: 1px !important;
+      }
+      .admin-shield-icon {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 18px !important;
+      }
+
+      #adminReelVideoModal div[style*="grid-template-columns: 280px 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+      #adminReelVideoModal [style*="repeat(4, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      #adminReelVideoModal div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+
+      #adminUserSanctionsModal div[style*="grid-template-columns: 1.2fr 1fr"] {
+        grid-template-columns: 1fr !important;
+      }
+    }
   </style>
 </head>
 <body>

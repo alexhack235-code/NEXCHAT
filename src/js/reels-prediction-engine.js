@@ -163,9 +163,14 @@
             <span style="font-size:10px; font-weight:800; color:#00f3ff; text-transform:uppercase; display:flex; align-items:center; gap:5px;">
               <i class="fa-solid fa-chart-line"></i> PREDICTION POOL (${pool.status})
             </span>
-            <span style="font-size:10.5px; color:#ffd700; font-family:monospace;">
-              <i class="fa-solid fa-coins"></i> Total Pool: ${total} Tokens
-            </span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:10.5px; color:#ffd700; font-family:monospace;">
+                <i class="fa-solid fa-coins"></i> Total Pool: ${total} Tokens
+              </span>
+              <button type="button" class="btn-close-prediction" style="background:none; border:none; color:#94a3b8; font-size:13px; cursor:pointer; padding:2px 4px;" title="Close" onclick="document.getElementById('${containerId}').innerHTML=''">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
           </div>
 
           <div style="font-size:12px; font-weight:700; margin-bottom:10px; color:#f8fafc;">
@@ -178,9 +183,9 @@
             <div style="width:${pctB}%; background:#a855f7; transition:width 0.3s ease;"></div>
           </div>
 
-          <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:10px; font-family:monospace;">
-            <span style="color:#00f3ff;">[A] ${pool.optionA} (${pctA}%)</span>
-            <span style="color:#c084fc;">[B] ${pool.optionB} (${pctB}%)</span>
+          <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:10px; font-family:monospace; gap:8px;">
+            <span style="color:#00f3ff; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">[A] ${pool.optionA} (${pctA}%)</span>
+            <span style="color:#c084fc; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right;">[B] ${pool.optionB} (${pctB}%)</span>
           </div>
 
           ${pool.status === 'OPEN' ? `

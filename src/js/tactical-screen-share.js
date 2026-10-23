@@ -36,11 +36,11 @@
         modal = document.createElement('div');
         modal.id = 'tacticalScreenModal';
         modal.className = 'cyber-modal-overlay';
-        modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; display:flex; flex-direction:column; padding:12px;';
+        modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:99999; display:flex; flex-direction:column; padding:12px; overflow-y:auto;';
         modal.innerHTML = `
           <!-- Header Toolbar -->
-          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 16px; background:rgba(9,13,22,0.9); border:1px solid rgba(0,243,255,0.25); border-radius:10px; margin-bottom:10px;">
-            <div style="display:flex; align-items:center; gap:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; padding:10px 14px; background:rgba(9,13,22,0.9); border:1px solid rgba(0,243,255,0.25); border-radius:10px; margin-bottom:10px;">
+            <div style="display:flex; align-items:center; flex-wrap:wrap; gap:8px;">
               <span style="font-size:12px; font-weight:800; color:#00f3ff; text-transform:uppercase; display:flex; align-items:center; gap:6px;">
                 <i class="fa-solid fa-display"></i> TACTICAL SCREEN SHARE (60 FPS)
               </span>

@@ -24,9 +24,9 @@
         modal = document.createElement('div');
         modal.id = 'reelsGreenScreenModal';
         modal.className = 'cyber-modal-overlay';
-        modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.92); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px;';
+        modal.style.cssText = 'position:fixed; inset:0; background:rgba(0,0,0,0.92); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; z-index:99999; padding:16px; overflow-y:auto;';
         modal.innerHTML = `
-          <div style="background:#090d16; border:1px solid rgba(0,243,255,0.3); border-radius:14px; max-width:680px; width:100%; padding:20px; color:#fff; box-shadow:0 0 35px rgba(0,243,255,0.15);">
+          <div style="background:#090d16; border:1px solid rgba(0,243,255,0.3); border-radius:14px; max-width:680px; width:100%; max-height:90vh; overflow-y:auto; padding:20px; color:#fff; box-shadow:0 0 35px rgba(0,243,255,0.15); box-sizing:border-box;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
               <h3 style="font-size:16px; font-weight:800; color:#00f3ff; margin:0; display:flex; align-items:center; gap:8px;">
                 <i class="fa-solid fa-camera-retro"></i> AI Green Screen &amp; Reaction Studio
@@ -37,7 +37,7 @@
             </div>
 
             <!-- Canvas Viewport -->
-            <div style="position:relative; width:100%; height:360px; background:#000; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); margin-bottom:14px; display:flex; align-items:center; justify-content:center;">
+            <div style="position:relative; width:100%; aspect-ratio:16/9; max-height:280px; background:#000; border-radius:10px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); margin-bottom:14px; display:flex; align-items:center; justify-content:center;">
               <canvas id="greenScreenCanvas" width="640" height="360" style="width:100%; height:100%; object-fit:contain;"></canvas>
               <video id="gsWebcamVideo" playsinline autoplay muted style="display:none;"></video>
               <video id="gsBgVideo" loop playsinline autoplay muted style="display:none;"></video>
