@@ -3596,6 +3596,18 @@ async function sendMessage() {
       showNotif("[Info] Uploading file...", "info");
       try {
         attachment = await uploadFileToStorage(selectedFile, currentChatUser, currentChatType === 'group');
+        if (window.isAttachmentViewOnce) {
+          attachment.isViewOnce = true;
+          attachment.viewOnceType = selectedFile.type?.startsWith('image/') ? 'photo' : (selectedFile.type?.startsWith('audio/') ? 'audio' : 'file');
+          attachment.burnTimeout = window.attachmentViewOnceTimeout || 10;
+          attachment.cipherHash = window.NexGhostWhisper ? window.NexGhostWhisper.generateRandomHash() : ('0x' + Math.random().toString(16).substring(2, 10).toUpperCase());
+          attachment.viewed = false;
+          window.isAttachmentViewOnce = false;
+          const toggleBtn = document.getElementById('btnToggleViewOnceAttachment');
+          if (toggleBtn) toggleBtn.classList.remove('active');
+          const pillsRow = document.getElementById('voTimerPillSelect');
+          if (pillsRow) pillsRow.style.display = 'none';
+        }
         showNotif("[Success] File uploaded successfully!", "success", 2000);
       } catch (uploadErr) {
         console.error("File upload failed:", uploadErr);
@@ -3747,7 +3759,15 @@ async function sendMessage() {
           }
         } : {})
       };
-      if (attachment) messageData.attachment = attachment;
+      if (attachment) {
+        messageData.attachment = attachment;
+        if (attachment.isViewOnce) {
+          messageData.isViewOnce = true;
+          messageData.viewOnceType = attachment.viewOnceType;
+          messageData.burnTimeout = attachment.burnTimeout;
+          messageData.cipherHash = attachment.cipherHash;
+        }
+      }
       if (window.activeGhostTtl > 0) {
         messageData.ephemeral = true;
         messageData.ttl = window.activeGhostTtl;
@@ -3880,12 +3900,25 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec) {
     return;
   }
 
+  const isViewOnce = window.isVoiceViewOnce || false;
+  const burnTimeout = window.voiceViewOnceTimeout || 10;
+
   const audioAttachment = {
     downloadURL: audioDataUrl,
     fileName: `voice_note_${Date.now()}.webm`,
-    fileType: 'audio/webm',
-    duration: durationSec || 1
+    fileType: isViewOnce ? 'view_once' : 'audio/webm',
+    duration: durationSec || 1,
+    isViewOnce: isViewOnce,
+    viewOnceType: 'audio',
+    burnTimeout: burnTimeout,
+    cipherHash: window.NexGhostWhisper ? window.NexGhostWhisper.generateRandomHash() : ('0x' + Math.random().toString(16).substring(2, 10).toUpperCase())
   };
+
+  if (isViewOnce) {
+    window.isVoiceViewOnce = false;
+    const toggleBtn = document.getElementById('btnToggleViewOnceAudio');
+    if (toggleBtn) toggleBtn.classList.remove('active');
+  }
 
   const clientMsgId = `vn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
@@ -3914,13 +3947,14 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec) {
     const messageData = {
       from: myUID,
       to: currentChatUser,
-      text: "",
+      text: isViewOnce ? "[1-VIEW VOICE NOTE]" : "",
       attachment: audioAttachment,
       time: serverTimestamp(),
       read: false,
       status: "sent",
-      type: "audio",
-      clientMsgId: clientMsgId
+      type: isViewOnce ? "view_once" : "audio",
+      clientMsgId: clientMsgId,
+      ...(isViewOnce ? { isViewOnce: true, viewOnceType: 'audio', burnTimeout: burnTimeout } : {})
     };
     await addDoc(collection(db, "messages"), messageData);
     if (typeof updateLocalSentMessageStatus === 'function') {
@@ -4079,6 +4113,7 @@ window.dispatchTokenRain = async function(dropAttachment) {
 function isRenderableAttachment(att) {
   if (!att) return false;
   return Boolean(
+    att.isViewOnce || att.viewOnce || att.fileType === 'view_once' || att.viewOnceData ||
     att.downloadURL || att.isTimeCapsule || att.isTokenRain || att.dropData ||
     att.isPredictionPoll || att.pollData || att.isScratchCard || att.scratchData ||
     att.isBountyContract || att.bountyData || att.isSteganoCloak ||
@@ -4096,6 +4131,17 @@ function renderMessageAttachment(attachment) {
   const container = document.createElement("div");
   container.className = "message-attachment-container";
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  // 0. View-Once Ephemeral Media & Audio (Photo, Audio Voice Note, Secret Text)
+  if (attachment.isViewOnce || attachment.viewOnce || attachment.fileType === 'view_once' || attachment.viewOnceData) {
+    if (window.NexGhostWhisper && typeof window.NexGhostWhisper.renderViewOnceBubble === 'function') {
+      const voNode = window.NexGhostWhisper.renderViewOnceBubble(attachment, container);
+      if (voNode) {
+        container.appendChild(voNode);
+        return container;
+      }
+    }
+  }
 
   
   // White-Hat Security URL Audit
@@ -5182,7 +5228,7 @@ function loadMessages() {
         deletedNotice.style.cssText = `font-style: italic; opacity: 0.65; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: ${isOwn ? 'rgba(255,255,255,0.7)' : '#94a3b8'};`;
         deletedNotice.innerHTML = '<i class="fa-solid fa-ban" style="font-size: 11px;"></i> This message was deleted';
         bubble.appendChild(deletedNotice);
-      } else if (m.text && m.text.trim()) {
+      } else if (m.text && m.text.trim() && !(m.attachment && (m.attachment.isViewOnce || m.attachment.fileType === 'view_once'))) {
         const content = document.createElement("div");
         content.className = "message-text-content";
         if (isAI || (currentChatType === 'ai' && !isOwn)) {
@@ -7956,6 +8002,11 @@ document.getElementById("remove-attachment")?.addEventListener("click", (e) => {
 
 function removeAttachment() {
   selectedFile = null;
+  window.isAttachmentViewOnce = false;
+  const voToggleBtn = document.getElementById('btnToggleViewOnceAttachment');
+  if (voToggleBtn) voToggleBtn.classList.remove('active');
+  const voPillsRow = document.getElementById('voTimerPillSelect');
+  if (voPillsRow) voPillsRow.style.display = 'none';
   if (currentAttachmentPreviewUrl) {
     URL.revokeObjectURL(currentAttachmentPreviewUrl);
     currentAttachmentPreviewUrl = null;

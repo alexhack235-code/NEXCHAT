@@ -814,6 +814,7 @@
                 <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
               </div>
               <div class="audio-record-actions">
+                <button type="button" id="btnToggleViewOnceAudio" class="audio-control-btn vo-audio-toggle-btn" title="Toggle View-Once Voice Note (Self-destructs)"><span class="vo-circle-one">1</span></button>
                 <button type="button" id="audioCancelBtn" class="audio-control-btn cancel-btn" title="Cancel recording"><i class="fa-solid fa-xmark"></i></button>
                 <button type="button" id="audioStopBtn" class="audio-control-btn stop-btn" title="Stop"><i class="fa-solid fa-stop"></i></button>
                 <button type="button" id="audioSendNowBtn" class="audio-control-btn send-btn" title="Send voice note"><i class="fa-solid fa-paper-plane"></i></button>
@@ -828,6 +829,20 @@
               <div class="attachment-meta-info">
                 <span id="attachment-name" class="attachment-filename"><i class="fa-solid fa-paperclip"></i> File selected</span>
                 <span id="attachment-type-badge" class="attachment-badge"></span>
+              </div>
+              <div id="attachmentVoControls" class="attachment-vo-controls">
+                <button type="button" id="btnToggleViewOnceAttachment" class="btn-toggle-vo" title="Toggle View-Once mode">
+                  <span class="vo-circle-one">1</span>
+                  <span>View Once</span>
+                </button>
+                <div id="voTimerPillSelect" class="vo-timer-pills-row" style="display: none;">
+                  <span class="vo-timer-label"><i class="fa-solid fa-fire"></i> Timeout:</span>
+                  <button type="button" class="vo-time-chip" data-sec="5">5s</button>
+                  <button type="button" class="vo-time-chip active" data-sec="10">10s</button>
+                  <button type="button" class="vo-time-chip" data-sec="15">15s</button>
+                  <button type="button" class="vo-time-chip" data-sec="30">30s</button>
+                  <button type="button" class="vo-time-chip" data-sec="60">60s</button>
+                </div>
               </div>
               <button type="button" id="remove-attachment" class="remove-attachment-btn" title="Remove attachment"><i class="fa-solid fa-xmark"></i></button>
             </div>
