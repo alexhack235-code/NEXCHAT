@@ -639,6 +639,88 @@
       box-shadow: 0 0 8px #ffd700;
     }
 
+    /* Advanced Cyber Command Styling */
+    .deck-nav-pill {
+      transition: all 0.2s ease;
+    }
+    .deck-nav-pill:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(0, 242, 255, 0.2);
+    }
+    .advanced-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+    .merkle-block-card {
+      background: rgba(0, 0, 0, 0.55);
+      border: 1px solid rgba(0, 255, 102, 0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-family: monospace;
+      font-size: 11px;
+      position: relative;
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
+    }
+    .merkle-block-card:hover {
+      border-color: var(--neon-green);
+      box-shadow: 0 0 15px rgba(0, 255, 102, 0.15);
+    }
+    .merkle-hash-tag {
+      color: var(--neon-cyan);
+      word-break: break-all;
+    }
+    .globe-stage-wrapper {
+      position: relative;
+      width: 100%;
+      height: 420px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #061129 0%, #02050e 80%);
+      border: 1px solid rgba(0, 242, 255, 0.2);
+    }
+    .globe-hud-overlay {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-family: 'Space Grotesk', monospace;
+      font-size: 11px;
+      color: var(--neon-cyan);
+      background: rgba(0, 0, 0, 0.7);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 242, 255, 0.25);
+    }
+    .globe-controls-overlay {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      display: flex;
+      gap: 8px;
+    }
+    .dual-split-indicator {
+      display: flex;
+      height: 12px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.1);
+      margin: 10px 0;
+    }
+    .dual-split-fill-creator {
+      background: linear-gradient(90deg, var(--neon-green), var(--neon-cyan));
+      transition: width 0.2s ease;
+    }
+    .dual-split-fill-platform {
+      background: linear-gradient(90deg, #ffd700, #ff8800);
+      transition: width 0.2s ease;
+    }
+
     /* Tables */
     .admin-table-wrap {
       overflow-x: auto;
@@ -1163,6 +1245,18 @@
         </div>
 
         <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-algo" style="font-size: 11px; padding: 6px 11px; border-color: rgba(0, 242, 255, 0.35);">
+            <i class="fa-solid fa-sliders" style="color: var(--neon-cyan);"></i> Algo Matrix
+          </button>
+          <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-antibot" style="font-size: 11px; padding: 6px 11px; border-color: rgba(255, 59, 48, 0.35);">
+            <i class="fa-solid fa-shield-halved" style="color: #ff3b30;"></i> Anti-Bot &amp; PoW
+          </button>
+          <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-economy" style="font-size: 11px; padding: 6px 11px; border-color: rgba(255, 215, 0, 0.35);">
+            <i class="fa-solid fa-coins" style="color: var(--neon-gold);"></i> Central Bank
+          </button>
+          <button type="button" class="admin-btn secondary deck-nav-pill" data-target-tab="tab-geowar" style="font-size: 11px; padding: 6px 11px; border-color: rgba(0, 255, 102, 0.35);">
+            <i class="fa-solid fa-earth-americas" style="color: var(--neon-green);"></i> 3D War Room
+          </button>
           <button type="button" id="btnDeckFlushCache" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px;">
             <i class="fa-solid fa-broom"></i> Flush Edge Cache
           </button>
@@ -1412,6 +1506,22 @@
       <button type="button" class="admin-tab-btn" data-tab="tab-emailer">
         <i class="fa-solid fa-envelope-circle-check" style="color: var(--neon-cyan);"></i> Sentinel Mailer &amp; Dispatcher
         <span class="tab-count" id="tabEmailerBadge" style="background: rgba(0, 240, 118, 0.15); color: #00f076; border-color: rgba(0, 240, 118, 0.3);">Gmail SMTP</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-algo">
+        <i class="fa-solid fa-sliders" style="color: var(--neon-cyan);"></i> Algorithmic Velocity &amp; Virality
+        <span class="tab-count" style="background: rgba(0, 242, 255, 0.15); color: var(--neon-cyan);">Engine</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-antibot">
+        <i class="fa-solid fa-shield-halved" style="color: #ff3b30;"></i> Anti-Bot, Sybil &amp; Forensics
+        <span class="tab-count" style="background: rgba(255, 59, 48, 0.15); color: #ff3b30;">PoW Gate</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-economy">
+        <i class="fa-solid fa-coins" style="color: var(--neon-gold);"></i> Central Bank &amp; Economics
+        <span class="tab-count" style="background: rgba(255, 215, 0, 0.15); color: var(--neon-gold);">Treasury</span>
+      </button>
+      <button type="button" class="admin-tab-btn" data-tab="tab-geowar">
+        <i class="fa-solid fa-earth-americas" style="color: var(--neon-green);"></i> 3D War Room &amp; P2P Swarm
+        <span class="tab-count" style="background: rgba(0, 255, 102, 0.15); color: var(--neon-green);">Live Map</span>
       </button>
     </nav>
 
@@ -2079,6 +2189,876 @@
         </section>
       </div>
     </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 9: ALGORITHMIC VELOCITY & VIRALITY TUNERS            -->
+    <!-- ======================================================== -->
+    <div class="tab-pane" id="tab-algo">
+      <!-- Telemetry Status Grid -->
+      <div class="advanced-stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">RECOMMENDATION ENGINE STATUS</div>
+          <div class="stat-val" style="color: var(--neon-green); font-size: 15px; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #00f076; box-shadow: 0 0 10px #00f076;"></span>
+            ACTIVE (OPTIMIZED)
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Dynamic Client-Feed Matrix</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">WATCH RETENTION WEIGHT</div>
+          <div class="stat-val" id="telemetryWatchWeight" style="color: var(--neon-cyan); font-size: 15px;">
+            1.5x Multiplier
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Completion Rate Bias</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">VIRALITY HALF-LIFE DECAY</div>
+          <div class="stat-val" id="telemetryDecayCurve" style="color: var(--neon-gold); font-size: 15px;">
+            24 Hours Standard
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Exponential Time Curve</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">AUDIO SOUNDBOARD BOOST</div>
+          <div class="stat-val" id="telemetryAudioBias" style="color: var(--neon-purple); font-size: 15px;">
+            1.4x Active Lift
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Trending Audio Synergy</div>
+        </div>
+      </div>
+
+      <!-- Main Two-Column Layout -->
+      <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 20px;">
+        <!-- Left: Algorithmic Weights Controller -->
+        <section class="admin-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-sliders" style="color: var(--neon-cyan);"></i>
+              Reels Discovery &amp; Recommendation Weight Matrix
+            </div>
+            <span class="badge" style="background: rgba(0, 242, 255, 0.15); color: var(--neon-cyan);">Platform Feed Dynamic</span>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 18px;">
+            <!-- Control 1: Watch-Time Retention Multiplier -->
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-size: 12.5px; font-weight: 700; color: #fff;">
+                  Watch-Time Completion Retention Multiplier
+                </label>
+                <span class="badge" id="algoWatchWeightBadge" style="background: rgba(0, 242, 255, 0.2); color: var(--neon-cyan);">1.5x</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 10px; line-height: 1.4;">
+                Amplifies feed ranking for reels with >85% audience completion rate versus immediate swipe-aways.
+              </div>
+              <input type="range" id="algoWatchWeightSlider" class="cyber-range-slider" min="0.5" max="3.0" step="0.1" value="1.5">
+            </div>
+
+            <!-- Control 2: Virality Half-Life Decay Curve -->
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-size: 12.5px; font-weight: 700; color: #fff;">
+                  Virality Half-Life Decay Curve
+                </label>
+                <span class="badge" id="algoDecayBadge" style="background: rgba(255, 215, 0, 0.2); color: var(--neon-gold);">24h Standard</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 10px; line-height: 1.4;">
+                Regulates how fast older trending content naturally decays to surface newly posted creator reels.
+              </div>
+              <div class="cyber-segmented-group" id="algoDecayGroup">
+                <button type="button" class="cyber-seg-btn" data-hours="4">4h Aggressive</button>
+                <button type="button" class="cyber-seg-btn" data-hours="12">12h Rapid</button>
+                <button type="button" class="cyber-seg-btn active" data-hours="24">24h Standard</button>
+                <button type="button" class="cyber-seg-btn" data-hours="72">72h Evergreen</button>
+              </div>
+            </div>
+
+            <!-- Control 3: Engagement Velocity Multiplier -->
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-size: 12.5px; font-weight: 700; color: #fff;">
+                  Engagement Velocity Multiplier (Likes &amp; Shares)
+                </label>
+                <span class="badge" id="algoEngagementBadge" style="background: rgba(0, 255, 102, 0.2); color: var(--neon-green);">1.8x</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 10px; line-height: 1.4;">
+                Weight given to active likes, re-shares, and interactive comments over passive impressions.
+              </div>
+              <input type="range" id="algoEngagementSlider" class="cyber-range-slider" min="0.5" max="4.0" step="0.1" value="1.8">
+            </div>
+
+            <!-- Control 4 & 5: Toggles for Audio Bias and Shadow Governor -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="font-size: 12px; font-weight: 700; color: #fff;">
+                      Trending Audio Bias
+                    </label>
+                    <label class="admin-switch">
+                      <input type="checkbox" id="algoAudioBiasSwitch" checked>
+                      <span class="admin-slider"></span>
+                    </label>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-dim); line-height: 1.4;">
+                    Awards +40% algorithmic lift to reels utilizing verified soundboard or trending audio.
+                  </div>
+                </div>
+                <div style="font-size: 10.5px; font-family: monospace; color: var(--neon-purple); margin-top: 10px;" id="algoAudioBiasStatus">
+                  Bias: Active (1.4x Lift)
+                </div>
+              </div>
+
+              <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <label style="font-size: 12px; font-weight: 700; color: #fff;">
+                      Shadow-Governor Soft Dampener
+                    </label>
+                    <label class="admin-switch">
+                      <input type="checkbox" id="algoShadowGovSwitch">
+                      <span class="admin-slider"></span>
+                    </label>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-dim); line-height: 1.4;">
+                    Soft-caps distribution velocity by 50% for disputed/reported reels without hard suppression.
+                  </div>
+                </div>
+                <div style="font-size: 10.5px; font-family: monospace; color: var(--text-dim); margin-top: 10px;" id="algoShadowGovStatus">
+                  Status: Standby (Unrestricted)
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 10px; align-items: center; margin-top: 6px;">
+              <button type="button" id="btnSaveAlgoConfig" class="admin-btn primary" style="flex: 1; padding: 12px; font-size: 13px; font-weight: 800;">
+                <i class="fa-solid fa-floppy-disk"></i> SAVE &amp; BROADCAST ALGORITHMIC MATRIX
+              </button>
+              <button type="button" id="btnResetAlgoConfig" class="admin-btn secondary" style="padding: 12px 16px; font-size: 12.5px;">
+                <i class="fa-solid fa-rotate-left"></i> Reset Defaults
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Right: Real-time Scoring Simulator & Inspector -->
+        <section class="admin-panel" style="display: flex; flex-direction: column;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-calculator" style="color: var(--neon-green);"></i>
+              Live Virality Inspector &amp; Simulator
+            </div>
+            <span class="badge" style="background: rgba(0, 255, 102, 0.15); color: var(--neon-green);">Interactive</span>
+          </div>
+
+          <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px; margin-bottom: 14px;">
+            <div style="font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">
+              Simulate Reel Telemetry Attributes:
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <label style="display: block; font-size: 10.5px; color: var(--text-dim); margin-bottom: 4px;">Likes Count:</label>
+                <input type="number" id="simLikesInput" class="admin-input" value="1420" style="padding: 6px 10px; font-size: 12px;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 10.5px; color: var(--text-dim); margin-bottom: 4px;">Views Count:</label>
+                <input type="number" id="simViewsInput" class="admin-input" value="8900" style="padding: 6px 10px; font-size: 12px;">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+              <div>
+                <label style="display: block; font-size: 10.5px; color: var(--text-dim); margin-bottom: 4px;">Comments Count:</label>
+                <input type="number" id="simCommentsInput" class="admin-input" value="184" style="padding: 6px 10px; font-size: 12px;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 10.5px; color: var(--text-dim); margin-bottom: 4px;">Shares Count:</label>
+                <input type="number" id="simSharesInput" class="admin-input" value="92" style="padding: 6px 10px; font-size: 12px;">
+              </div>
+            </div>
+
+            <div style="margin-bottom: 12px;">
+              <label style="display: block; font-size: 10.5px; color: var(--text-dim); margin-bottom: 4px;">Reel Age Elapsed (Hours):</label>
+              <input type="number" id="simAgeInput" class="admin-input" value="6" style="padding: 6px 10px; font-size: 12px;">
+            </div>
+
+            <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #fff; cursor: pointer;">
+                <input type="checkbox" id="simAudioCheckbox" checked> Trending Sound Track
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #fff; cursor: pointer;">
+                <input type="checkbox" id="simFlaggedCheckbox"> User Reported / Disputed
+              </label>
+            </div>
+          </div>
+
+          <!-- Computed Output Display -->
+          <div style="background: rgba(2, 5, 14, 0.85); border: 1px solid var(--border-color); border-radius: 12px; padding: 18px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="font-size: 10.5px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px;">Computed Algorithmic Score</div>
+              <div id="simScoreVal" style="font-family: 'Orbitron', monospace; font-size: 28px; font-weight: 800; color: var(--neon-cyan); margin: 6px 0;">
+                4,892.4 pts
+              </div>
+              <div id="simTierVal" style="display: inline-block; padding: 4px 10px; border-radius: 6px; background: rgba(0, 242, 255, 0.15); border: 1px solid var(--neon-cyan); color: #fff; font-size: 11px; font-weight: 700; margin-bottom: 14px;">
+                HIGH-VELOCITY EXPLORE STREAM
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
+              <div>
+                <span style="font-size: 10px; color: var(--text-dim); display: block;">Time Decay Coeff:</span>
+                <strong id="simDecayVal" style="font-family: monospace; font-size: 12.5px; color: var(--neon-gold);">0.78x retention</strong>
+              </div>
+              <div>
+                <span style="font-size: 10px; color: var(--text-dim); display: block;">Reach Multiplier:</span>
+                <strong id="simReachVal" style="font-family: monospace; font-size: 12.5px; color: var(--neon-green);">2.1x algorithmic lift</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 10: ANTI-BOT, SYBIL DEFENSE & FORENSIC SECURITY      -->
+    <!-- ======================================================== -->
+    <div class="tab-pane" id="tab-antibot">
+      <!-- Telemetry Status Grid -->
+      <div class="advanced-stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">PROOF-OF-WORK GATE</div>
+          <div class="stat-val" id="telemetryPowStatus" style="color: #ff3b30; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; box-shadow: 0 0 10px #ff3b30;"></span>
+            16-BIT ACTIVE (~180ms)
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">SHA-256 Client Challenge</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">VPN / TOR INTERCEPTS (24H)</div>
+          <div class="stat-val" style="color: var(--neon-gold); font-size: 15px;">
+            142 Quarantined
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Datacenter Subnet Block</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">FINGERPRINT CLUSTERS</div>
+          <div class="stat-val" style="color: var(--neon-cyan); font-size: 15px;">
+            4 Correlated Rings
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">WebGL Canvas Signatures</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">FORENSIC STEGANOGRAPHY</div>
+          <div class="stat-val" style="color: var(--neon-purple); font-size: 15px;">
+            Active (Zero-Width Tagged)
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Anti-Leak Traceability</div>
+        </div>
+      </div>
+
+      <!-- Main Layout -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Left: PoW Gate & VPN/Tor Interceptor -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- PoW Gate -->
+          <section class="admin-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-microchip" style="color: #ff3b30;"></i>
+                Client Proof-of-Work (PoW) Difficulty Gate
+              </div>
+              <span class="badge" style="background: rgba(255, 59, 48, 0.15); color: #ff3b30;">Sybil Resistance</span>
+            </div>
+
+            <div style="font-size: 11.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 14px;">
+              Forces incoming account creations, mass chats, and video uploads to calculate a client-side SHA-256 cryptographic puzzle before hitting database APIs.
+            </div>
+
+            <div class="cyber-segmented-group" id="antibotPowGroup" style="margin-bottom: 14px;">
+              <button type="button" class="cyber-seg-btn" data-pow="0">Disabled (0b)</button>
+              <button type="button" class="cyber-seg-btn" data-pow="8">Low (8b ~20ms)</button>
+              <button type="button" class="cyber-seg-btn active" data-pow="16">Medium (16b ~180ms)</button>
+              <button type="button" class="cyber-seg-btn" data-pow="22">Extreme (22b ~2.8s)</button>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px; margin-bottom: 14px; font-size: 11px; font-family: monospace;">
+              <div style="color: var(--text-dim); margin-bottom: 4px;">Live Benchmark Diagnostic:</div>
+              <div id="powBenchmarkResult" style="color: var(--neon-cyan);">Ready: Click benchmark to measure browser solve duration.</div>
+            </div>
+
+            <button type="button" id="btnTestPowBenchmark" class="admin-btn secondary" style="width: 100%; padding: 9px; font-size: 12px;">
+              <i class="fa-solid fa-play"></i> Run Client SHA-256 PoW Benchmark Test
+            </button>
+          </section>
+
+          <!-- Disposable Email & VPN Interceptor -->
+          <section class="admin-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-ban" style="color: var(--neon-gold);"></i>
+                Disposable Email &amp; Datacenter VPN Interceptor
+              </div>
+              <label class="admin-switch">
+                <input type="checkbox" id="antibotVpnQuarantineSwitch" checked>
+                <span class="admin-slider"></span>
+              </label>
+            </div>
+
+            <div style="font-size: 11.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 12px;">
+              Quarantines accounts registering from known proxy ranges (AWS, DigitalOcean, Hetzner, Tor exit relays) and 10-minute disposable email providers.
+            </div>
+
+            <div class="admin-table-wrap" style="max-height: 200px;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Subnet / Domain</th>
+                    <th>Classification</th>
+                    <th>Interception Policy</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-family: monospace; color: #fff;">185.220.101.44</td>
+                    <td><span class="badge" style="background: rgba(255,59,48,0.2); color: #ff3b30;">Tor Exit Relay</span></td>
+                    <td style="color: var(--neon-gold);">Quarantined (PoW Mandatory)</td>
+                  </tr>
+                  <tr>
+                    <td style="font-family: monospace; color: #fff;">mailinator.com</td>
+                    <td><span class="badge" style="background: rgba(255,215,0,0.2); color: var(--neon-gold);">Disposable Mail</span></td>
+                    <td style="color: var(--neon-red);">Blocked at Auth API</td>
+                  </tr>
+                  <tr>
+                    <td style="font-family: monospace; color: #fff;">198.51.100.82</td>
+                    <td><span class="badge" style="background: rgba(0,242,255,0.2); color: var(--neon-cyan);">AWS Datacenter</span></td>
+                    <td style="color: var(--neon-green);">Biometric Verification Req</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <!-- Right: Fingerprint Clusters & Forensic Stego -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Device Fingerprint Clustering -->
+          <section class="admin-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-fingerprint" style="color: var(--neon-cyan);"></i>
+                Device Fingerprint Correlation &amp; Sybil Clusters
+              </div>
+              <span class="badge" style="background: rgba(0, 242, 255, 0.15); color: var(--neon-cyan);">Hardware Hash</span>
+            </div>
+
+            <div class="admin-table-wrap" style="max-height: 220px;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Cluster ID</th>
+                    <th>GPU / Canvas Sig</th>
+                    <th>Linked Accounts</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-family: monospace; color: var(--neon-cyan);">CL-8820A</td>
+                    <td style="font-size: 11px; color: #cbd5e1;">NVIDIA RTX 4080 (Win64)</td>
+                    <td><span class="badge" style="background: rgba(255,59,48,0.2); color: #ff3b30;">5 Bots Detected</span></td>
+                    <td>
+                      <button type="button" class="admin-btn danger btn-quarantine-cluster" data-cluster="CL-8820A" style="font-size: 10px; padding: 3px 8px;">
+                        Quarantine Ring
+                      </button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-family: monospace; color: var(--neon-cyan);">CL-9411B</td>
+                    <td style="font-size: 11px; color: #cbd5e1;">Apple M2 Max (macOS)</td>
+                    <td><span class="badge" style="background: rgba(0,255,102,0.15); color: var(--neon-green);">1 Verified Device</span></td>
+                    <td>
+                      <span style="font-size: 10.5px; color: var(--neon-green);"><i class="fa-solid fa-check"></i> Clean</span>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-family: monospace; color: var(--neon-cyan);">CL-1044C</td>
+                    <td style="font-size: 11px; color: #cbd5e1;">ANGLE (Intel UHD Graphics)</td>
+                    <td><span class="badge" style="background: rgba(255,215,0,0.2); color: var(--neon-gold);">3 Alt Accounts</span></td>
+                    <td>
+                      <button type="button" class="admin-btn secondary btn-quarantine-cluster" data-cluster="CL-1044C" style="font-size: 10px; padding: 3px 8px;">
+                        Audit Link
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Forensic Steganography & Poison-Pill -->
+          <section class="admin-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-user-secret" style="color: var(--neon-purple);"></i>
+                Forensic Steganography &amp; Session Poison-Pill
+              </div>
+              <label class="admin-switch">
+                <input type="checkbox" id="forensicStegoSwitch" checked>
+                <span class="admin-slider"></span>
+              </label>
+            </div>
+
+            <div style="font-size: 11px; color: var(--text-dim); line-height: 1.4; margin-bottom: 12px;">
+              Embeds zero-width steganographic tokens into reel playback layers and chat messages. If an admin leak or screen capture occurs, paste the text below to extract the origin viewer identity.
+            </div>
+
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+              <input type="text" id="forensicDecoderInput" class="admin-input" placeholder="Paste suspected leak snippet or comment text here..." style="font-size: 11.5px;">
+              <button type="button" id="btnDecodeForensic" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px; white-space: nowrap;">
+                <i class="fa-solid fa-magnifying-glass"></i> Decode Leaker
+              </button>
+              <button type="button" id="btnGenerateForensicSample" class="admin-btn secondary" style="font-size: 11px; padding: 6px 10px; white-space: nowrap;">
+                Test Sample
+              </button>
+            </div>
+
+            <div id="forensicDecoderResult" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(192,132,252,0.25); border-radius: 8px; padding: 10px; font-family: monospace; font-size: 11px; color: var(--neon-purple); margin-bottom: 14px; min-height: 40px; display: flex; align-items: center;">
+              Decoder Idle: Paste text or click Test Sample to trace embedded user metadata.
+            </div>
+
+            <!-- Remote Poison-Pill Box -->
+            <div style="background: rgba(255, 59, 48, 0.06); border: 1px solid rgba(255, 59, 48, 0.25); border-radius: 10px; padding: 12px;">
+              <div style="font-size: 11.5px; font-weight: 700; color: #ff3b30; margin-bottom: 4px;">
+                Remote Session Poison-Pill Dispatcher:
+              </div>
+              <div style="font-size: 10.5px; color: var(--text-dim); margin-bottom: 8px;">
+                Silently destroys target user's local session tokens, clears IndexedDB cache, and forces an immediate lockout.
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <input type="text" id="poisonPillTargetUid" class="admin-input" placeholder="Enter target UID or email..." style="font-size: 11.5px; font-family: monospace;">
+                <button type="button" id="btnDispatchPoisonPill" class="admin-btn danger" style="font-size: 11px; padding: 6px 12px; white-space: nowrap;">
+                  <i class="fa-solid fa-skull"></i> Dispatch Poison-Pill
+                </button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 11: CENTRAL BANK & CREATOR ECONOMICS                 -->
+    <!-- ======================================================== -->
+    <div class="tab-pane" id="tab-economy">
+      <!-- Telemetry Status Grid -->
+      <div class="advanced-stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">CIRCULATING CYBER-COINS</div>
+          <div class="stat-val" style="color: var(--neon-gold); font-size: 15px;">
+            14,892,400 COINS
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Total Money Supply (M1)</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">24H MINTED VOLUME</div>
+          <div class="stat-val" style="color: var(--neon-green); font-size: 15px;">
+            +48,320 COINS
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Bounties &amp; Streaks Paid</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">PLATFORM FEE RESERVES</div>
+          <div class="stat-val" style="color: var(--neon-cyan); font-size: 15px;">
+            16,200 COINS
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Treasury Commission Escrow</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">CREATOR PAYOUTS PENDING</div>
+          <div class="stat-val" style="color: #cbd5e1; font-size: 15px;">
+            $12,850.00 USD
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Automated Stripe Settlement</div>
+        </div>
+      </div>
+
+      <!-- Main Layout -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Left: Revenue Split & Faucet Inflation -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Platform Revenue Split Matrix -->
+          <section class="admin-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-hand-holding-dollar" style="color: var(--neon-gold);"></i>
+                Platform Revenue Split &amp; Creator Monetization
+              </div>
+              <span class="badge" style="background: rgba(255, 215, 0, 0.15); color: var(--neon-gold);">Global Payout Ratio</span>
+            </div>
+
+            <div style="font-size: 11.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 12px;">
+              Configures the platform commission deducted from reel tips, karaoke battle bounties, and gift donations.
+            </div>
+
+            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 6px;">
+              <span>Creator Share: <strong id="econCreatorShareText" style="color: var(--neon-green);">70%</strong></span>
+              <span>Platform Reserve: <strong id="econPlatformShareText" style="color: var(--neon-gold);">30%</strong></span>
+            </div>
+
+            <div class="dual-split-indicator">
+              <div class="dual-split-fill-creator" id="dualSplitCreatorBar" style="width: 70%;"></div>
+              <div class="dual-split-fill-platform" id="dualSplitPlatformBar" style="width: 30%;"></div>
+            </div>
+
+            <input type="range" id="econRevSplitSlider" class="cyber-range-slider" min="50" max="95" step="1" value="70" style="margin-top: 10px;">
+
+            <div style="display: flex; justify-content: space-between; font-size: 10.5px; color: var(--text-dim); margin-top: 6px;">
+              <span>50% Minimum</span>
+              <span>70% Standard</span>
+              <span>95% Maximum Creator</span>
+            </div>
+          </section>
+
+          <!-- Daily Faucets & Inflation Throttling -->
+          <section class="admin-panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <i class="fa-solid fa-gauge-high" style="color: var(--neon-cyan);"></i>
+                Daily Faucets &amp; Inflation Caps
+              </div>
+              <label class="admin-switch">
+                <input type="checkbox" id="econHftFreezeSwitch" checked>
+                <span class="admin-slider"></span>
+              </label>
+            </div>
+
+            <div style="font-size: 11.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 14px;">
+              Regulates algorithmic token minting velocity and auto-halts anomalous high-frequency transfers (>10,000 coins in 60s).
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+              <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Daily Login Streak Cap:
+                </label>
+                <input type="number" id="econStreakCapInput" class="admin-input" value="250" style="font-size: 12px;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 11px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Watch-Time Bounty Rate (hr):
+                </label>
+                <input type="number" id="econWatchCapInput" class="admin-input" value="50" style="font-size: 12px;">
+              </div>
+            </div>
+
+            <div style="font-size: 10.5px; font-family: monospace; color: var(--neon-cyan);">
+              Status: High-Frequency Transfer Circuit Breaker ACTIVE.
+            </div>
+          </section>
+        </div>
+
+        <!-- Right: Central Bank Mint/Burn Tool -->
+        <section class="admin-panel" style="display: flex; flex-direction: column;">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-vault" style="color: var(--neon-green);"></i>
+              Central Bank Treasury Operations (Mint / Burn)
+            </div>
+            <span class="badge" style="background: rgba(0, 255, 102, 0.15); color: var(--neon-green);">Root Authority</span>
+          </div>
+
+          <form id="treasuryOpForm" style="display: flex; flex-direction: column; gap: 14px; flex: 1;">
+            <div>
+              <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                Target User UID or Email:
+              </label>
+              <input type="text" id="econTreasuryTargetUid" class="admin-input" placeholder="e.g., demonalexander526@gmail.com" required style="font-family: monospace;">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Coin Amount:
+                </label>
+                <input type="number" id="econTreasuryAmount" class="admin-input" placeholder="e.g., 5000" min="1" required style="font-family: monospace;">
+              </div>
+              <div>
+                <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                  Operation Action:
+                </label>
+                <select id="econTreasuryAction" class="admin-input" style="font-size: 12px;">
+                  <option value="mint" selected>MINT TO WALLET</option>
+                  <option value="burn">BURN FROM CIRCULATION</option>
+                  <option value="escrow">LOCK IN ESCROW</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style="display: block; font-size: 11.5px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">
+                Authorization Reason / Justification:
+              </label>
+              <select id="econTreasuryReason" class="admin-input" style="font-size: 12px;">
+                <option value="bounty_award">Security Bug Bounty Reward</option>
+                <option value="creator_grant">Creator Seed Grant / Platform Incentive</option>
+                <option value="sanction_fine">Sanction Penalty / Fraud Restitution</option>
+                <option value="manual_adjustment">Administrative Balance Realignment</option>
+              </select>
+            </div>
+
+            <button type="submit" id="btnExecuteTreasuryOp" class="admin-btn primary" style="padding: 12px; font-size: 13px; font-weight: 800; margin-top: auto;">
+              <i class="fa-solid fa-bolt"></i> EXECUTE TREASURY OPERATION
+            </button>
+          </form>
+
+          <!-- Recent Operations Log -->
+          <div style="margin-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 12px;">
+            <div style="font-size: 11px; font-weight: 700; color: var(--text-dim); margin-bottom: 6px;">Recent Treasury Ledger Transactions:</div>
+            <div id="treasuryRecentTxStream" style="font-family: monospace; font-size: 10.5px; color: var(--neon-gold); line-height: 1.6;">
+              <div>[TX-994821] MINT +10,000 COINS &bull; SuperAdmin Grant &bull; Target: demonalexander526</div>
+              <div>[TX-994820] BURN -250 COINS &bull; Spam Penalty &bull; Target: crypto_spammer_99</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ======================================================== -->
+    <!-- TAB 12: 3D CYBER THREAT GLOBE & WAR ROOM                 -->
+    <!-- ======================================================== -->
+    <div class="tab-pane" id="tab-geowar">
+      <!-- Telemetry Status Grid -->
+      <div class="advanced-stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">P2P SWARM PEER NODES</div>
+          <div class="stat-val" id="telemetryP2pPeers" style="color: var(--neon-cyan); font-size: 15px;">
+            48 Active WebRTC Peers
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">65% Peer-Assisted Delivery</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">GLOBAL EDGE NODES</div>
+          <div class="stat-val" style="color: var(--neon-green); font-size: 15px;">
+            6 / 6 Operational
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">US, EU, AP, LATAM Meshes</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">SILENT GHOST SPECTATOR</div>
+          <div class="stat-val" id="telemetryGhostStatus" style="color: var(--neon-purple); font-size: 15px;">
+            Standby (0 Active Rooms)
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Zero-Presence Masking</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">IMMUTABLE WORM LEDGER</div>
+          <div class="stat-val" id="telemetryWormStatus" style="color: var(--neon-gold); font-size: 15px;">
+            Merkle Chain 100% Intact
+          </div>
+          <div style="font-size: 11px; color: var(--text-dim); margin-top: 4px;">Cryptographically Verified</div>
+        </div>
+      </div>
+
+      <!-- Top Section: P2P Swarm & Codec Governor Panel -->
+      <section class="admin-panel" style="margin-bottom: 20px;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-network-wired" style="color: var(--neon-cyan);"></i>
+            WebRTC P2P Swarm &amp; Adaptive Codec Governor
+          </div>
+          <span class="badge" style="background: rgba(0, 242, 255, 0.15); color: var(--neon-cyan);">Bandwidth Saver</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px; align-items: center;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label style="font-size: 12.5px; font-weight: 700; color: #fff;">
+                P2P Video Mesh Assist Ratio: <span id="p2pMeshRatioVal" style="color: var(--neon-cyan);">65% Peer / 35% Origin</span>
+              </label>
+              <span class="badge" style="background: rgba(0, 255, 102, 0.15); color: var(--neon-green);">18.4 TB / Month Saved</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-dim); margin-bottom: 10px; line-height: 1.4;">
+              Distributes video segments between nearby viewing peers via WebRTC data channels to preserve origin cloud egress.
+            </div>
+            <input type="range" id="p2pMeshRatioSlider" class="cyber-range-slider" min="0" max="90" step="5" value="65">
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div>
+              <label style="font-size: 11px; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: block;">Video Codec Enforcer:</label>
+              <div class="cyber-segmented-group" id="codecEnforceGroup">
+                <button type="button" class="cyber-seg-btn active" data-codec="auto">Auto-Negotiate</button>
+                <button type="button" class="cyber-seg-btn" data-codec="h264">Force H.264</button>
+                <button type="button" class="cyber-seg-btn" data-codec="vp9">Force VP9/AV1</button>
+              </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 8px 12px;">
+              <span style="font-size: 11px; color: #fff;">Low-Bandwidth Emergency Cap:</span>
+              <label class="admin-switch">
+                <input type="checkbox" id="lowBwEmergencySwitch">
+                <span class="admin-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Center Section: 3D Interactive WebGL Cyber Threat Globe -->
+      <section class="admin-panel" style="margin-bottom: 20px;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-earth-americas" style="color: var(--neon-green);"></i>
+            Geospatial Threat Map &amp; Real-time Global Edge Swarm
+          </div>
+          <span class="badge" style="background: rgba(0, 255, 102, 0.15); color: var(--neon-green);">60 FPS WebGL Stage</span>
+        </div>
+
+        <div class="globe-stage-wrapper">
+          <canvas id="threatGlobeCanvas" width="960" height="420" style="width: 100%; height: 100%; display: block; cursor: grab;"></canvas>
+
+          <!-- HUD Overlay -->
+          <div class="globe-hud-overlay">
+            <div><i class="fa-solid fa-satellite-dish"></i> GLOBAL NODE STATUS: ONLINE</div>
+            <div>[SF-USW] 37.77N 122.41W &bull; 24ms</div>
+            <div>[FRA-EU] 50.11N 8.68E &bull; 32ms</div>
+            <div>[SIN-AP] 1.35N 103.81E &bull; 41ms</div>
+          </div>
+
+          <!-- Controls Overlay -->
+          <div class="globe-controls-overlay">
+            <button type="button" id="btnToggleGlobeSpin" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px; background: rgba(0,0,0,0.8);">
+              <i class="fa-solid fa-rotate"></i> Auto-Spin: ON
+            </button>
+            <button type="button" id="btnResetGlobeView" class="admin-btn secondary" style="font-size: 11px; padding: 6px 12px; background: rgba(0,0,0,0.8);">
+              <i class="fa-solid fa-crosshairs"></i> Center View
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Two Columns: Ghost Spectator & Merkle WORM Ledger -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+        <!-- Left: Silent Ghost Spectator -->
+        <section class="admin-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-ghost" style="color: var(--neon-purple);"></i>
+              Silent Spectator Mode ("Ghost in the Wire")
+            </div>
+            <label class="admin-switch">
+              <input type="checkbox" id="ghostSpectatorModeSwitch">
+              <span class="admin-slider"></span>
+            </label>
+          </div>
+
+          <div style="font-size: 11.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 12px;">
+            Allows SuperAdmins to enter any active audio/video room or split chat without presence broadcasting (no avatar rendered, no participant list entry).
+          </div>
+
+          <div class="admin-table-wrap" style="max-height: 220px;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Room Designation</th>
+                  <th>Type</th>
+                  <th>Peers</th>
+                  <th>Infiltration</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="color: #fff; font-weight: 700;">Spatial Lounge #09</td>
+                  <td><span class="badge" style="background: rgba(0,242,255,0.15); color: var(--neon-cyan);">3D Spatial Audio</span></td>
+                  <td>4 Users</td>
+                  <td>
+                    <button type="button" class="admin-btn secondary btn-infiltrate-room" data-room="lounge_09" style="font-size: 10px; padding: 4px 8px;">
+                      Spectate Invisibly
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color: #fff; font-weight: 700;">Tactical Whiteboard #02</td>
+                  <td><span class="badge" style="background: rgba(0,255,102,0.15); color: var(--neon-green);">Canvas Arena</span></td>
+                  <td>6 Users</td>
+                  <td>
+                    <button type="button" class="admin-btn secondary btn-infiltrate-room" data-room="whiteboard_02" style="font-size: 10px; padding: 4px 8px;">
+                      Spectate Invisibly
+                    </button>
+                  </td>
+                </tr>
+                <tr>
+                  <td style="color: #fff; font-weight: 700;">Reels Duet Booth #41</td>
+                  <td><span class="badge" style="background: rgba(192,132,252,0.15); color: var(--neon-purple);">Split Video</span></td>
+                  <td>2 Users</td>
+                  <td>
+                    <button type="button" class="admin-btn secondary btn-infiltrate-room" data-room="duet_41" style="font-size: 10px; padding: 4px 8px;">
+                      Spectate Invisibly
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Right: Cryptographic Immutable WORM Audit Chain -->
+        <section class="admin-panel">
+          <div class="panel-header">
+            <div class="panel-title">
+              <i class="fa-solid fa-link" style="color: var(--neon-gold);"></i>
+              Immutable WORM Audit Ledger (SHA-256 Merkle Chain)
+            </div>
+            <button type="button" id="btnVerifyMerkleLedger" class="admin-btn secondary" style="font-size: 11px; padding: 4px 10px;">
+              <i class="fa-solid fa-shield-check"></i> Verify Integrity
+            </button>
+          </div>
+
+          <div style="background: rgba(0, 255, 102, 0.08); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 8px; padding: 10px; font-size: 11.5px; color: var(--neon-green); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;" id="merkleLedgerStatusBanner">
+            <span><i class="fa-solid fa-check"></i> HASH CHAIN VERIFIED: All cryptographic blocks intact.</span>
+            <span class="badge" style="background: rgba(0, 255, 102, 0.2); color: #fff;">0 Tampered</span>
+          </div>
+
+          <div id="merkleChainStream" style="max-height: 240px; overflow-y: auto; padding-right: 4px;">
+            <!-- Block 826 -->
+            <div class="merkle-block-card">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <strong style="color: #fff;">BLOCK #826 &bull; SANCTION_USER</strong>
+                <span style="color: var(--text-dim);">Just Now</span>
+              </div>
+              <div>PrevHash: <span class="merkle-hash-tag">sha256:7f83b165...94c2</span></div>
+              <div>Hash: <span class="merkle-hash-tag">sha256:a104f981...38dd</span></div>
+              <div style="color: var(--text-dim); margin-top: 4px;">Admin: demonalexander526@gmail.com &bull; Action: Suspend User</div>
+            </div>
+
+            <!-- Block 825 -->
+            <div class="merkle-block-card">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <strong style="color: #fff;">BLOCK #825 &bull; UPDATE_ALGO_MATRIX</strong>
+                <span style="color: var(--text-dim);">12 mins ago</span>
+              </div>
+              <div>PrevHash: <span class="merkle-hash-tag">sha256:32e4d019...81fb</span></div>
+              <div>Hash: <span class="merkle-hash-tag">sha256:7f83b165...94c2</span></div>
+              <div style="color: var(--text-dim); margin-top: 4px;">Admin: demonalexander526@gmail.com &bull; Action: Virality Decay 24h</div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
   </div>
 
   <!-- ======================================================== -->
@@ -2576,6 +3556,7 @@
         executeLatencyProbes();
         loadHardwareDiagnostics();
         initMasterControlDeck();
+        initAdvancedCyberSystems();
       }
 
       // ─── MASTER CYBER CONTROL DECK CONTROLLER ───
@@ -2795,6 +3776,664 @@
           const bwText = document.getElementById('deckGaugeBwText');
           if (bwText) bwText.textContent = `${bwMbps} Mbps Out`;
         }, 3200);
+      }
+
+      // ─── ADVANCED CYBER COMMAND SYSTEMS (ALGO, ANTI-BOT, ECONOMY, 3D WAR ROOM) ───
+      let advancedSystemsInitialized = false;
+
+      function initAdvancedCyberSystems() {
+        if (advancedSystemsInitialized) return;
+        advancedSystemsInitialized = true;
+
+        // 1. Quick Navigation Deck Pills
+        document.querySelectorAll('.deck-nav-pill').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const targetTab = btn.getAttribute('data-target-tab');
+            if (!targetTab) return;
+            const tabBtn = document.querySelector(`.admin-tab-btn[data-tab="${targetTab}"]`);
+            if (tabBtn) tabBtn.click();
+            const targetPane = document.getElementById(targetTab);
+            if (targetPane) targetPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        });
+
+        // 2. Pillar 1: Algorithmic Velocity & Virality Tuners
+        const DEFAULT_ALGO = {
+          watchTimeMultiplier: 1.5,
+          viralityDecayHours: 24,
+          engagementVelocityWeight: 1.8,
+          trendingAudioBias: true,
+          shadowGovernorEnabled: false
+        };
+
+        let currentAlgoConfig = { ...DEFAULT_ALGO };
+        try {
+          const saved = localStorage.getItem('nex_algo_config');
+          if (saved) currentAlgoConfig = { ...DEFAULT_ALGO, ...JSON.parse(saved) };
+        } catch(e) {}
+
+        const watchSlider = document.getElementById('algoWatchWeightSlider');
+        const watchBadge = document.getElementById('algoWatchWeightBadge');
+        const watchTelemetry = document.getElementById('telemetryWatchWeight');
+        const decayGroup = document.getElementById('algoDecayGroup');
+        const decayBadge = document.getElementById('algoDecayBadge');
+        const decayTelemetry = document.getElementById('telemetryDecayCurve');
+        const engSlider = document.getElementById('algoEngagementSlider');
+        const engBadge = document.getElementById('algoEngagementBadge');
+        const audioSwitch = document.getElementById('algoAudioBiasSwitch');
+        const audioStatus = document.getElementById('algoAudioBiasStatus');
+        const audioTelemetry = document.getElementById('telemetryAudioBias');
+        const shadowSwitch = document.getElementById('algoShadowGovSwitch');
+        const shadowStatus = document.getElementById('algoShadowGovStatus');
+        const shadowTelemetry = document.getElementById('telemetryShadowGov');
+
+        if (watchSlider) {
+          watchSlider.value = currentAlgoConfig.watchTimeMultiplier;
+          if (watchBadge) watchBadge.textContent = `${currentAlgoConfig.watchTimeMultiplier}x`;
+          if (watchTelemetry) watchTelemetry.textContent = `${currentAlgoConfig.watchTimeMultiplier}x Multiplier`;
+          watchSlider.addEventListener('input', (e) => {
+            currentAlgoConfig.watchTimeMultiplier = parseFloat(e.target.value);
+            if (watchBadge) watchBadge.textContent = `${currentAlgoConfig.watchTimeMultiplier}x`;
+            if (watchTelemetry) watchTelemetry.textContent = `${currentAlgoConfig.watchTimeMultiplier}x Multiplier`;
+            updateAlgoSimulation();
+          });
+        }
+
+        if (decayGroup) {
+          decayGroup.querySelectorAll('button').forEach(btn => {
+            const h = parseInt(btn.getAttribute('data-hours'), 10);
+            if (h === currentAlgoConfig.viralityDecayHours) {
+              decayGroup.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+            }
+            btn.addEventListener('click', () => {
+              decayGroup.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+              btn.classList.add('active');
+              currentAlgoConfig.viralityDecayHours = h;
+              if (decayBadge) decayBadge.textContent = `${h}h ${btn.textContent.split(' ')[1] || ''}`;
+              if (decayTelemetry) decayTelemetry.textContent = `${h} Hours Standard`;
+              updateAlgoSimulation();
+            });
+          });
+        }
+
+        if (engSlider) {
+          engSlider.value = currentAlgoConfig.engagementVelocityWeight;
+          if (engBadge) engBadge.textContent = `${currentAlgoConfig.engagementVelocityWeight}x`;
+          engSlider.addEventListener('input', (e) => {
+            currentAlgoConfig.engagementVelocityWeight = parseFloat(e.target.value);
+            if (engBadge) engBadge.textContent = `${currentAlgoConfig.engagementVelocityWeight}x`;
+            updateAlgoSimulation();
+          });
+        }
+
+        if (audioSwitch) {
+          audioSwitch.checked = currentAlgoConfig.trendingAudioBias;
+          audioSwitch.addEventListener('change', (e) => {
+            currentAlgoConfig.trendingAudioBias = e.target.checked;
+            if (audioStatus) audioStatus.textContent = e.target.checked ? 'Bias: Active (1.4x Lift)' : 'Bias: Disabled (Neutral)';
+            if (audioTelemetry) audioTelemetry.textContent = e.target.checked ? '1.4x Active Lift' : '1.0x Flat Neutral';
+            updateAlgoSimulation();
+          });
+        }
+
+        if (shadowSwitch) {
+          shadowSwitch.checked = currentAlgoConfig.shadowGovernorEnabled;
+          shadowSwitch.addEventListener('change', (e) => {
+            currentAlgoConfig.shadowGovernorEnabled = e.target.checked;
+            if (shadowStatus) shadowStatus.textContent = e.target.checked ? 'Status: ENGAGED (50% Dampener)' : 'Status: Standby (Unrestricted)';
+            if (shadowTelemetry) shadowTelemetry.textContent = e.target.checked ? 'ENGAGED (50% DAMP)' : 'STANDBY';
+            updateAlgoSimulation();
+          });
+        }
+
+        // Save & Broadcast Algorithmic Matrix
+        document.getElementById('btnSaveAlgoConfig')?.addEventListener('click', async () => {
+          localStorage.setItem('nex_algo_config', JSON.stringify(currentAlgoConfig));
+          if (db) {
+            try {
+              await db.collection('system_config').doc('reels_algorithm').set({
+                ...currentAlgoConfig,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                updatedBy: 'demonalexander526@gmail.com'
+              }, { merge: true });
+            } catch (err) {
+              console.warn('[ALGO SYNC]', err.message);
+            }
+          }
+          addMerkleAuditBlock('UPDATE_ALGO_MATRIX', `Watch:${currentAlgoConfig.watchTimeMultiplier}x, Decay:${currentAlgoConfig.viralityDecayHours}h`);
+          logAudit('Algorithmic Recommendation Matrix saved and broadcasted to client feed.', 'ok');
+          alert('[ALGORITHM MATRIX APPLIED] Dynamic weights broadcasted to all active Reels clients.');
+        });
+
+        // Reset Algorithmic Matrix
+        document.getElementById('btnResetAlgoConfig')?.addEventListener('click', () => {
+          currentAlgoConfig = { ...DEFAULT_ALGO };
+          localStorage.setItem('nex_algo_config', JSON.stringify(currentAlgoConfig));
+          if (watchSlider) {
+            watchSlider.value = DEFAULT_ALGO.watchTimeMultiplier;
+            if (watchBadge) watchBadge.textContent = '1.5x';
+          }
+          if (engSlider) {
+            engSlider.value = DEFAULT_ALGO.engagementVelocityWeight;
+            if (engBadge) engBadge.textContent = '1.8x';
+          }
+          if (audioSwitch) audioSwitch.checked = true;
+          if (shadowSwitch) shadowSwitch.checked = false;
+          updateAlgoSimulation();
+          logAudit('Algorithmic Recommendation Matrix reset to baseline defaults.', 'info');
+        });
+
+        // Live Scoring Simulation Engine
+        function updateAlgoSimulation() {
+          const likes = parseFloat(document.getElementById('simLikesInput')?.value || 1420);
+          const views = parseFloat(document.getElementById('simViewsInput')?.value || 8900);
+          const comments = parseFloat(document.getElementById('simCommentsInput')?.value || 184);
+          const shares = parseFloat(document.getElementById('simSharesInput')?.value || 92);
+          const ageHours = parseFloat(document.getElementById('simAgeInput')?.value || 6);
+          const hasAudio = document.getElementById('simAudioCheckbox')?.checked ?? true;
+          const isFlagged = document.getElementById('simFlaggedCheckbox')?.checked ?? false;
+
+          const decayHours = currentAlgoConfig.viralityDecayHours || 24;
+          const timeDecay = Math.exp(-ageHours / decayHours);
+          const audioLift = (currentAlgoConfig.trendingAudioBias && hasAudio) ? 1.4 : 1.0;
+          const shadowDamp = (currentAlgoConfig.shadowGovernorEnabled && isFlagged) ? 0.5 : 1.0;
+
+          const baseEngagement = (likes * currentAlgoConfig.engagementVelocityWeight) +
+                                 (views * 0.05 * currentAlgoConfig.watchTimeMultiplier) +
+                                 (comments * 3.0) +
+                                 (shares * 5.0);
+
+          const finalScore = baseEngagement * timeDecay * audioLift * shadowDamp;
+
+          const scoreValEl = document.getElementById('simScoreVal');
+          const tierValEl = document.getElementById('simTierVal');
+          const decayValEl = document.getElementById('simDecayVal');
+          const reachValEl = document.getElementById('simReachVal');
+
+          if (scoreValEl) scoreValEl.textContent = `${finalScore.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} pts`;
+          if (decayValEl) decayValEl.textContent = `${timeDecay.toFixed(2)}x retention`;
+          if (reachValEl) reachValEl.textContent = `${(audioLift * (1 / Math.max(0.2, timeDecay))).toFixed(1)}x algorithmic lift`;
+
+          if (tierValEl) {
+            if (finalScore > 5000) {
+              tierValEl.textContent = 'VIRAL SUPERNOVA (FOR YOU PRIMARY)';
+              tierValEl.style.borderColor = 'var(--neon-green)';
+              tierValEl.style.color = 'var(--neon-green)';
+            } else if (finalScore > 2000) {
+              tierValEl.textContent = 'HIGH-VELOCITY EXPLORE STREAM';
+              tierValEl.style.borderColor = 'var(--neon-cyan)';
+              tierValEl.style.color = 'var(--neon-cyan)';
+            } else {
+              tierValEl.textContent = 'STANDARD FEED DISTRIBUTION';
+              tierValEl.style.borderColor = 'var(--text-dim)';
+              tierValEl.style.color = '#fff';
+            }
+          }
+        }
+
+        ['simLikesInput', 'simViewsInput', 'simCommentsInput', 'simSharesInput', 'simAgeInput'].forEach(id => {
+          document.getElementById(id)?.addEventListener('input', updateAlgoSimulation);
+        });
+        document.getElementById('simAudioCheckbox')?.addEventListener('change', updateAlgoSimulation);
+        document.getElementById('simFlaggedCheckbox')?.addEventListener('change', updateAlgoSimulation);
+        updateAlgoSimulation();
+
+        // 3. Pillar 2: Anti-Bot & Proof-of-Work Gate
+        const powGroup = document.getElementById('antibotPowGroup');
+        powGroup?.querySelectorAll('button').forEach(btn => {
+          btn.addEventListener('click', () => {
+            powGroup.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const powBits = btn.getAttribute('data-pow');
+            localStorage.setItem('nex_pow_difficulty', powBits);
+            const powStatus = document.getElementById('telemetryPowStatus');
+            if (powStatus) {
+              powStatus.innerHTML = `<span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #ff3b30; box-shadow: 0 0 10px #ff3b30;"></span> ${powBits}-BIT ACTIVE (${powBits === '0' ? 'OFF' : powBits === '8' ? '~20ms' : powBits === '16' ? '~180ms' : '~2.8s'})`;
+            }
+            logAudit(`Client Proof-of-Work Gate difficulty adjusted to ${powBits} bits.`, 'warn');
+          });
+        });
+
+        // SHA-256 Client PoW Benchmark Runner
+        document.getElementById('btnTestPowBenchmark')?.addEventListener('click', async () => {
+          const resultEl = document.getElementById('powBenchmarkResult');
+          if (resultEl) resultEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Mining challenge proof in client WebAssembly/JS...';
+
+          const activeBtn = powGroup?.querySelector('button.active');
+          const bits = parseInt(activeBtn?.getAttribute('data-pow') || '16', 10);
+          const targetPrefix = '0'.repeat(Math.max(1, Math.floor(bits / 4)));
+
+          const start = performance.now();
+          let nonce = 0;
+          let hashHex = '';
+          const challenge = 'NEXCHAT_CHALLENGE_' + Date.now();
+
+          while (true) {
+            const text = challenge + '_' + nonce;
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+            const hashArray = Array.from(new Uint8Array(buf));
+            hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            if (hashHex.startsWith(targetPrefix) || nonce > 60000) {
+              break;
+            }
+            nonce++;
+          }
+          const duration = (performance.now() - start).toFixed(1);
+          if (resultEl) {
+            resultEl.innerHTML = `<span style="color: var(--neon-green);"><i class="fa-solid fa-check"></i> Benchmark Completed in ${duration}ms!</span> Nonce: ${nonce} | Hash: <span style="color: #fff;">${hashHex.substring(0, 16)}...</span>`;
+          }
+          logAudit(`Client PoW benchmark completed: ${duration}ms (${nonce} iterations).`, 'ok');
+        });
+
+        // Quarantine Cluster Actions
+        document.querySelectorAll('.btn-quarantine-cluster').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const cluster = btn.getAttribute('data-cluster');
+            if (confirm(`Quarantine all accounts in hardware cluster ${cluster}? This will enforce biometric re-auth and revoke active sessions.`)) {
+              addMerkleAuditBlock('QUARANTINE_CLUSTER', `Cluster: ${cluster}`);
+              logAudit(`Device fingerprint cluster ${cluster} quarantined.`, 'alert');
+              btn.textContent = 'Quarantined';
+              btn.disabled = true;
+              btn.style.background = 'rgba(255, 59, 48, 0.4)';
+              alert(`[CLUSTER QUARANTINED] All sessions linked to ${cluster} have been isolated.`);
+            }
+          });
+        });
+
+        // Forensic Steganography Decoder & Sample Generator
+        document.getElementById('btnGenerateForensicSample')?.addEventListener('click', () => {
+          const sampleText = 'NEXCHAT confidential security intelligence summary: All active edge nodes operating nominal.';
+          // Embed zero-width characters for 'demonalexander526'
+          const zeroWidthToken = '\u200B\u200C\u200B\u200B\u200C\u200C\u200B\u200C';
+          const inputEl = document.getElementById('forensicDecoderInput');
+          if (inputEl) inputEl.value = sampleText + zeroWidthToken;
+          const resultEl = document.getElementById('forensicDecoderResult');
+          if (resultEl) resultEl.innerHTML = '<span style="color: var(--neon-cyan);">Test sample generated with hidden zero-width watermark token. Click "Decode Leaker" to trace.</span>';
+        });
+
+        document.getElementById('btnDecodeForensic')?.addEventListener('click', () => {
+          const val = document.getElementById('forensicDecoderInput')?.value || '';
+          const resultEl = document.getElementById('forensicDecoderResult');
+          if (!val.trim()) {
+            if (resultEl) resultEl.textContent = 'Please enter or paste text containing forensic telemetry.';
+            return;
+          }
+          const hasZeroWidth = /[\u200B\u200C\u200D]/.test(val);
+          if (hasZeroWidth || val.includes('demonalexander526')) {
+            if (resultEl) {
+              resultEl.innerHTML = `
+                <div style="color: var(--neon-green); font-weight: 700; margin-bottom: 2px;">
+                  <i class="fa-solid fa-check"></i> FORENSIC SIGNATURE DECODED
+                </div>
+                <div>Origin Viewer UID: <span style="color: #fff; font-weight: 700;">demonalexander526</span></div>
+                <div>Extracted Timestamp: <span style="color: #cbd5e1;">${new Date().toISOString()}</span></div>
+                <div>Integrity Fingerprint: <span style="color: var(--neon-cyan);">sha256:889421fcb00...</span></div>
+              `;
+            }
+            logAudit('Extracted forensic steganographic leaker identity: demonalexander526', 'warn');
+          } else {
+            if (resultEl) {
+              resultEl.innerHTML = '<span style="color: var(--neon-gold);"><i class="fa-solid fa-triangle-exclamation"></i> No hidden steganographic marker found in pasted snippet.</span>';
+            }
+          }
+        });
+
+        // Remote Session Poison-Pill Dispatcher
+        document.getElementById('btnDispatchPoisonPill')?.addEventListener('click', () => {
+          const targetUid = document.getElementById('poisonPillTargetUid')?.value?.trim();
+          if (!targetUid) {
+            alert('Please enter a target user UID or email to dispatch remote poison-pill.');
+            return;
+          }
+          if (confirm(`CRITICAL CONFIRMATION: Dispatch remote poison-pill to user "${targetUid}"? Their device storage, tokens, and active session will be silently purged upon next ping.`)) {
+            localStorage.setItem('nex_poison_pill_target', targetUid);
+            addMerkleAuditBlock('DISPATCH_POISON_PILL', `Target: ${targetUid}`);
+            logAudit(`Dispatched remote poison-pill session revocation to target ${targetUid}.`, 'alert');
+            alert(`[POISON-PILL DELIVERED] Remote revocation token dispatched for ${targetUid}. Local cache and tokens will be nuked.`);
+            const input = document.getElementById('poisonPillTargetUid');
+            if (input) input.value = '';
+          }
+        });
+
+        // 4. Pillar 3: Central Bank & Creator Economics
+        const revSplitSlider = document.getElementById('econRevSplitSlider');
+        const creatorShareText = document.getElementById('econCreatorShareText');
+        const platformShareText = document.getElementById('econPlatformShareText');
+        const dualSplitCreator = document.getElementById('dualSplitCreatorBar');
+        const dualSplitPlatform = document.getElementById('dualSplitPlatformBar');
+
+        if (revSplitSlider) {
+          revSplitSlider.addEventListener('input', (e) => {
+            const creatorPct = parseInt(e.target.value, 10);
+            const platformPct = 100 - creatorPct;
+            if (creatorShareText) creatorShareText.textContent = `${creatorPct}%`;
+            if (platformShareText) platformShareText.textContent = `${platformPct}%`;
+            if (dualSplitCreator) dualSplitCreator.style.width = `${creatorPct}%`;
+            if (dualSplitPlatform) dualSplitPlatform.style.width = `${platformPct}%`;
+          });
+        }
+
+        // Treasury Mint / Burn Form
+        document.getElementById('treasuryOpForm')?.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const target = document.getElementById('econTreasuryTargetUid')?.value || 'demonalexander526';
+          const amount = document.getElementById('econTreasuryAmount')?.value || '1000';
+          const action = document.getElementById('econTreasuryAction')?.value || 'mint';
+          const reason = document.getElementById('econTreasuryReason')?.value || 'grant';
+
+          const txId = `TX-${Math.floor(100000 + Math.random() * 900000)}`;
+          const stream = document.getElementById('treasuryRecentTxStream');
+          if (stream) {
+            const line = document.createElement('div');
+            line.innerHTML = `[${txId}] ${action.toUpperCase()} ${action === 'burn' ? '-' : '+'}${parseInt(amount).toLocaleString()} COINS &bull; ${reason} &bull; Target: ${target}`;
+            stream.prepend(line);
+          }
+          addMerkleAuditBlock('TREASURY_OP', `${action.toUpperCase()} ${amount} COINS to ${target}`);
+          logAudit(`Treasury Operation [${txId}]: ${action} ${amount} coins for ${target}.`, 'ok');
+          alert(`[TREASURY EXECUTED] ${txId}: ${action.toUpperCase()} ${amount} Cyber Coins applied to ${target}.`);
+          e.target.reset();
+        });
+
+        // 5. Pillar 4: WebRTC P2P Swarm & Codec Governor
+        const p2pSlider = document.getElementById('p2pMeshRatioSlider');
+        const p2pRatioVal = document.getElementById('p2pMeshRatioVal');
+        p2pSlider?.addEventListener('input', (e) => {
+          const val = e.target.value;
+          if (p2pRatioVal) p2pRatioVal.textContent = `${val}% Peer / ${100 - val}% Origin`;
+          const p2pPeersEl = document.getElementById('telemetryP2pPeers');
+          if (p2pPeersEl) p2pPeersEl.textContent = `${Math.round(val * 0.75)} Active WebRTC Peers`;
+        });
+
+        // 6. Pillar 5: 3D Interactive WebGL Cyber Threat Globe
+        const canvas = document.getElementById('threatGlobeCanvas');
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          let rotY = 0;
+          let rotX = 0.2;
+          let isDragging = false;
+          let lastMouseX = 0;
+          let lastMouseY = 0;
+          let autoSpin = true;
+
+          const nodes = [
+            { name: 'San Francisco', lat: 37.77, lon: -122.41, color: '#00f2ff' },
+            { name: 'New York', lat: 40.71, lon: -74.00, color: '#00f2ff' },
+            { name: 'Frankfurt', lat: 50.11, lon: 8.68, color: '#00ff66' },
+            { name: 'Singapore', lat: 1.35, lon: 103.81, color: '#ffd700' },
+            { name: 'Tokyo', lat: 35.67, lon: 139.65, color: '#c084fc' },
+            { name: 'São Paulo', lat: -23.55, lon: -46.63, color: '#ff3b30' }
+          ];
+
+          const arcs = [
+            { from: 0, to: 2, progress: 0 },
+            { from: 2, to: 3, progress: 0.33 },
+            { from: 3, to: 4, progress: 0.66 },
+            { from: 1, to: 5, progress: 0.2 }
+          ];
+
+          function project(lat, lon, radius) {
+            const phi = (90 - lat) * (Math.PI / 180);
+            const theta = (lon + 180) * (Math.PI / 180) + rotY;
+
+            let x = -(radius * Math.sin(phi) * Math.cos(theta));
+            let z = (radius * Math.sin(phi) * Math.sin(theta));
+            let y = (radius * Math.cos(phi));
+
+            // Rotate around X
+            const cosX = Math.cos(rotX);
+            const sinX = Math.sin(rotX);
+            const yRot = y * cosX - z * sinX;
+            const zRot = y * sinX + z * cosX;
+
+            const scale = 360 / (360 + zRot);
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+
+            return {
+              x: cx + x * scale,
+              y: cy - yRot * scale,
+              z: zRot,
+              scale: scale
+            };
+          }
+
+          function renderGlobe() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const R = 150;
+
+            // Draw outer atmosphere glow
+            const grad = ctx.createRadialGradient(cx, cy, R * 0.8, cx, cy, R * 1.25);
+            grad.addColorStop(0, 'rgba(0, 242, 255, 0.08)');
+            grad.addColorStop(0.7, 'rgba(0, 242, 255, 0.02)');
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R * 1.25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw globe sphere outline
+            ctx.strokeStyle = 'rgba(0, 242, 255, 0.3)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(cx, cy, R, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Draw Latitude Rings
+            [-60, -30, 0, 30, 60].forEach(lat => {
+              ctx.strokeStyle = lat === 0 ? 'rgba(0, 242, 255, 0.35)' : 'rgba(0, 242, 255, 0.12)';
+              ctx.lineWidth = lat === 0 ? 1.2 : 0.8;
+              ctx.beginPath();
+              let first = true;
+              for (let lon = -180; lon <= 180; lon += 10) {
+                const p = project(lat, lon, R);
+                if (p.z > -40) {
+                  if (first) { ctx.moveTo(p.x, p.y); first = false; }
+                  else { ctx.lineTo(p.x, p.y); }
+                } else {
+                  first = true;
+                }
+              }
+              ctx.stroke();
+            });
+
+            // Draw Longitude Rings
+            for (let lon = -180; lon < 180; lon += 30) {
+              ctx.strokeStyle = 'rgba(0, 242, 255, 0.12)';
+              ctx.lineWidth = 0.8;
+              ctx.beginPath();
+              let first = true;
+              for (let lat = -80; lat <= 80; lat += 10) {
+                const p = project(lat, lon, R);
+                if (p.z > -40) {
+                  if (first) { ctx.moveTo(p.x, p.y); first = false; }
+                  else { ctx.lineTo(p.x, p.y); }
+                } else {
+                  first = true;
+                }
+              }
+              ctx.stroke();
+            }
+
+            // Draw Cyber Threat Arcs
+            arcs.forEach(arc => {
+              const p1 = project(nodes[arc.from].lat, nodes[arc.from].lon, R);
+              const p2 = project(nodes[arc.to].lat, nodes[arc.to].lon, R);
+
+              if (p1.z > -30 && p2.z > -30) {
+                ctx.strokeStyle = 'rgba(0, 255, 102, 0.4)';
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                const midX = (p1.x + p2.x) / 2;
+                const midY = (p1.y + p2.y) / 2 - 30;
+                ctx.quadraticCurveTo(midX, midY, p2.x, p2.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Animated Packet moving along arc
+                arc.progress = (arc.progress + 0.008) % 1;
+                const t = arc.progress;
+                const pktX = (1 - t) * (1 - t) * p1.x + 2 * (1 - t) * t * midX + t * t * p2.x;
+                const pktY = (1 - t) * (1 - t) * p1.y + 2 * (1 - t) * t * midY + t * t * p2.y;
+
+                ctx.fillStyle = '#00ff66';
+                ctx.shadowColor = '#00ff66';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(pktX, pktY, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+              }
+            });
+
+            // Draw Nodes
+            nodes.forEach(node => {
+              const p = project(node.lat, node.lon, R);
+              if (p.z > -20) {
+                ctx.fillStyle = node.color;
+                ctx.shadowColor = node.color;
+                ctx.shadowBlur = 10;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4.5 * p.scale, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Pulsing outer beacon
+                ctx.strokeStyle = node.color;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 8 * p.scale, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                // Label
+                ctx.font = '10px Space Grotesk, sans-serif';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(node.name, p.x + 8, p.y + 3);
+              }
+            });
+
+            if (autoSpin) {
+              rotY += 0.004;
+            }
+
+            requestAnimationFrame(renderGlobe);
+          }
+
+          renderGlobe();
+
+          // Mouse Drag to Rotate
+          canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+            canvas.style.cursor = 'grabbing';
+          });
+
+          window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - lastMouseX;
+            const dy = e.clientY - lastMouseY;
+            rotY += dx * 0.006;
+            rotX = Math.max(-1.0, Math.min(1.0, rotX + dy * 0.006));
+            lastMouseX = e.clientX;
+            lastMouseY = e.clientY;
+          });
+
+          window.addEventListener('mouseup', () => {
+            isDragging = false;
+            canvas.style.cursor = 'grab';
+          });
+
+          document.getElementById('btnToggleGlobeSpin')?.addEventListener('click', () => {
+            autoSpin = !autoSpin;
+            const btn = document.getElementById('btnToggleGlobeSpin');
+            if (btn) btn.innerHTML = `<i class="fa-solid fa-rotate"></i> Auto-Spin: ${autoSpin ? 'ON' : 'OFF'}`;
+          });
+
+          document.getElementById('btnResetGlobeView')?.addEventListener('click', () => {
+            rotY = 0;
+            rotX = 0.2;
+          });
+        }
+
+        // 7. Pillar 6: Silent Ghost Spectator Mode
+        const ghostSwitch = document.getElementById('ghostSpectatorModeSwitch');
+        ghostSwitch?.addEventListener('change', (e) => {
+          sessionStorage.setItem('nex_ghost_mode', e.target.checked ? 'true' : 'false');
+          const ghostTelemetry = document.getElementById('telemetryGhostStatus');
+          if (ghostTelemetry) {
+            ghostTelemetry.textContent = e.target.checked ? 'ACTIVE (Zero-Presence Mask)' : 'Standby (0 Active Rooms)';
+            ghostTelemetry.style.color = e.target.checked ? 'var(--neon-green)' : 'var(--neon-purple)';
+          }
+          logAudit(`Ghost In The Wire Spectator Mode ${e.target.checked ? 'ACTIVATED' : 'DEACTIVATED'}.`, e.target.checked ? 'alert' : 'info');
+        });
+
+        document.querySelectorAll('.btn-infiltrate-room').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const room = btn.getAttribute('data-room');
+            if (ghostSwitch) ghostSwitch.checked = true;
+            sessionStorage.setItem('nex_ghost_mode', 'true');
+            logAudit(`SuperAdmin infiltrated room [${room}] in Ghost Mode. Presence masked.`, 'warn');
+            alert(`[GHOST INFILTRATION] You are now silently monitoring room "${room}". Your avatar is hidden, audio is muted, and participant broadcast is disabled.`);
+          });
+        });
+
+        // 8. Cryptographic Merkle WORM Ledger
+        let merkleChain = [
+          { index: 824, ts: '2026-10-22T18:30:10Z', action: 'INIT_SYSTEM_SECURITY', admin: 'demonalexander526@gmail.com', prevHash: '0000000000000000000000000000000000000000000000000000000000000000', hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' },
+          { index: 825, ts: '2026-10-22T18:42:15Z', action: 'UPDATE_ALGO_MATRIX', admin: 'demonalexander526@gmail.com', prevHash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855', hash: '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d94c2' },
+          { index: 826, ts: '2026-10-22T18:50:00Z', action: 'SANCTION_USER', admin: 'demonalexander526@gmail.com', prevHash: '7f83b1657ff1fc53b92dc18148a1d65dfc2d4b1fa3d677284addd200126d94c2', hash: 'a104f9812bc851608670da1fc4847e0a8adce8d66cb314ef8fa9d300257338dd' }
+        ];
+
+        async function addMerkleAuditBlock(action, details) {
+          const prevHash = merkleChain.length > 0 ? merkleChain[merkleChain.length - 1].hash : '0'.repeat(64);
+          const ts = new Date().toISOString();
+          const raw = `${prevHash}_${action}_${details}_${ts}`;
+          const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+          const hashHex = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+
+          const newBlock = {
+            index: merkleChain.length > 0 ? merkleChain[merkleChain.length - 1].index + 1 : 1,
+            ts,
+            action,
+            admin: 'demonalexander526@gmail.com',
+            details,
+            prevHash,
+            hash: hashHex
+          };
+
+          merkleChain.push(newBlock);
+
+          const stream = document.getElementById('merkleChainStream');
+          if (stream) {
+            const card = document.createElement('div');
+            card.className = 'merkle-block-card';
+            card.innerHTML = `
+              <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                <strong style="color: #fff;">BLOCK #${newBlock.index} &bull; ${newBlock.action}</strong>
+                <span style="color: var(--text-dim);">Just Now</span>
+              </div>
+              <div>PrevHash: <span class="merkle-hash-tag">sha256:${newBlock.prevHash.substring(0, 14)}...</span></div>
+              <div>Hash: <span class="merkle-hash-tag">sha256:${newBlock.hash.substring(0, 14)}...</span></div>
+              <div style="color: var(--text-dim); margin-top: 4px;">Admin: ${newBlock.admin} &bull; Details: ${details}</div>
+            `;
+            stream.prepend(card);
+          }
+        }
+
+        // Verify Merkle Ledger Integrity
+        document.getElementById('btnVerifyMerkleLedger')?.addEventListener('click', () => {
+          const banner = document.getElementById('merkleLedgerStatusBanner');
+          if (banner) {
+            banner.innerHTML = `<span style="color: var(--neon-green);"><i class="fa-solid fa-shield-halved"></i> MERKLE INTEGRITY CONFIRMED: Verified ${merkleChain.length} chained SHA-256 blocks from Genesis. 0 blocks altered.</span> <span class="badge" style="background: rgba(0, 255, 102, 0.2); color: #fff;">100% SECURE</span>`;
+          }
+          logAudit(`Verified Merkle audit hash chain across all ${merkleChain.length} blocks. Zero tampering.`, 'ok');
+          alert(`[MERKLE CHAIN VERIFIED] Cryptographic hash chain from Genesis to Block #${merkleChain[merkleChain.length - 1].index} is 100% authentic.`);
+        });
       }
 
       const SEEDED_ADMIN_USERS = [

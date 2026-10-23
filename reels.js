@@ -823,6 +823,57 @@ function initReelsFeed() {
   });
 }
 
+// Algorithmic Recommendation Engine Weights
+const DEFAULT_ALGO_CONFIG = {
+  watchTimeMultiplier: 1.5,
+  viralityDecayHours: 24,
+  engagementVelocityWeight: 1.8,
+  trendingAudioBias: true,
+  shadowGovernorEnabled: false
+};
+
+function getActiveAlgoConfig() {
+  try {
+    const raw = localStorage.getItem('nex_algo_config');
+    if (raw) return { ...DEFAULT_ALGO_CONFIG, ...JSON.parse(raw) };
+  } catch {}
+  return DEFAULT_ALGO_CONFIG;
+}
+
+function rankReelsByAlgorithm(reelsList) {
+  const config = getActiveAlgoConfig();
+  const now = Date.now();
+  const decayMs = (config.viralityDecayHours || 24) * 3600 * 1000;
+
+  return [...reelsList].sort((a, b) => {
+    const likesA = (a.likesCount || (a.likes ? a.likes.length : 0)) * (config.engagementVelocityWeight || 1.8);
+    const likesB = (b.likesCount || (b.likes ? b.likes.length : 0)) * (config.engagementVelocityWeight || 1.8);
+    const viewsA = (a.views || 100) * 0.05 * (config.watchTimeMultiplier || 1.5);
+    const viewsB = (b.views || 100) * 0.05 * (config.watchTimeMultiplier || 1.5);
+    const commentsA = (a.commentsCount || 10) * 3;
+    const commentsB = (b.commentsCount || 10) * 3;
+
+    // Time decay factor
+    const ageA = Math.max(1, now - (a.createdAt?.toMillis ? a.createdAt.toMillis() : (a.timestamp || now - 3600000)));
+    const ageB = Math.max(1, now - (b.createdAt?.toMillis ? b.createdAt.toMillis() : (b.timestamp || now - 3600000)));
+    const timeDecayA = Math.exp(-ageA / decayMs);
+    const timeDecayB = Math.exp(-ageB / decayMs);
+
+    // Trending audio boost
+    const audioBoostA = (config.trendingAudioBias && (a.sound || '').toLowerCase().includes('trending')) ? 1.4 : 1.0;
+    const audioBoostB = (config.trendingAudioBias && (b.sound || '').toLowerCase().includes('trending')) ? 1.4 : 1.0;
+
+    // Shadow Governor dampener
+    const shadowA = (config.shadowGovernorEnabled && (a.status === 'flagged' || a.reportsCount > 0)) ? 0.5 : 1.0;
+    const shadowB = (config.shadowGovernorEnabled && (b.status === 'flagged' || b.reportsCount > 0)) ? 0.5 : 1.0;
+
+    const scoreA = (likesA + viewsA + commentsA) * timeDecayA * audioBoostA * shadowA;
+    const scoreB = (likesB + viewsB + commentsB) * timeDecayB * audioBoostB * shadowB;
+
+    return scoreB - scoreA;
+  });
+}
+
 function applyFeedFilter() {
   if (activeFeedMode === 'following') {
     const followingReels = allLoadedReels.filter(r => followedAuthors.has(r.authorName));
@@ -832,7 +883,8 @@ function applyFeedFilter() {
     }
     renderReels(followingReels);
   } else {
-    renderReels(allLoadedReels);
+    const rankedReels = rankReelsByAlgorithm(allLoadedReels);
+    renderReels(rankedReels);
   }
 }
 

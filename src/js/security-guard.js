@@ -47,6 +47,20 @@ function detectInstrumentation() {
  * Installs the zero-trust impenetrable security shield immediately on page load.
  */
 export function initSecurityGuard() {
+  // 0. Remote Session Poison-Pill Revocation Check
+  try {
+    const targetRevocation = localStorage.getItem('nex_poison_pill_target');
+    const localUser = JSON.parse(localStorage.getItem('nexchat_user') || '{}');
+    if (targetRevocation && (localUser.uid === targetRevocation || localUser.email === targetRevocation)) {
+      console.warn('[SECURITY GUARD] Session revoked by SuperAdmin Poison-Pill command.');
+      localStorage.clear();
+      sessionStorage.clear();
+      if (document.body) document.body.innerHTML = '';
+      window.location.replace('index.html?reason=poison_pill_revoked');
+      return;
+    }
+  } catch {}
+
   if (!isProtectedPage()) {
     return; // Public entry point
   }
