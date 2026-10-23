@@ -1935,10 +1935,10 @@
 
                   <!-- Action Buttons -->
                   <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                    <button type="button" id="btnOpenUserActivityLog" style="flex: 1; min-width: 140px; padding: 8px 12px; background: rgba(0, 242, 255, 0.12); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <button type="button" id="btnOpenUserActivityLog" onclick="if (window.NexActivityMonitor) { window.NexActivityMonitor.openActivityAuditModal(); }" style="flex: 1; min-width: 140px; padding: 8px 12px; background: rgba(0, 242, 255, 0.12); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
                       <i class="fa-solid fa-clock-rotate-left"></i> View Activity Audit Trail
                     </button>
-                    <button type="button" id="btnOpenIncidentReportLauncher" style="flex: 1; min-width: 140px; padding: 8px 12px; background: rgba(255, 59, 48, 0.12); border: 1px solid #ff3b30; color: #ff3b30; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <button type="button" id="btnOpenIncidentReportLauncher" onclick="if (typeof window.openReportModal === 'function') { window.openReportModal(); } else if (typeof window.createReportModal === 'function') { window.createReportModal(); }" style="flex: 1; min-width: 140px; padding: 8px 12px; background: rgba(255, 59, 48, 0.12); border: 1px solid #ff3b30; color: #ff3b30; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
                       <i class="fa-solid fa-flag"></i> File Incident Report
                     </button>
                   </div>
@@ -2566,6 +2566,12 @@
         <i class="fa-solid fa-coins"></i> <span>Tokens & Gifts</span>
         <span class="mobile-menu-badge" id="mobileTokenBadge">0</span>
       </button>
+      <button type="button" class="mobile-menu-item" onclick="window.NexDailyStreakEngine?.openStreakModal()">
+        <i class="fa-solid fa-gift" style="color: #ffd700;"></i> <span>Daily Streak Drops</span>
+      </button>
+      <button type="button" class="mobile-menu-item" onclick="window.NexReferralEngine?.openReferralModal()">
+        <i class="fa-solid fa-bullhorn" style="color: #00ff66;"></i> <span>Ambassador & Referrals</span>
+      </button>
       <button type="button" class="mobile-menu-item" onclick="window.location.href='gaminghub.html'">
         <i class="fa-solid fa-gamepad"></i> <span>Cyber Gaming Arena</span>
       </button>
@@ -2662,6 +2668,14 @@
           <button type="button" class="sheet-grid-item" onclick="window.location.href='cart.html'">
             <div class="sheet-icon-box token-gradient"><i class="fa-solid fa-coins"></i></div>
             <span>Buy Tokens</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.NexDailyStreakEngine?.openStreakModal()">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,136,0,0.2)); border: 1px solid #ffd700; color: #ffd700;"><i class="fa-solid fa-gift"></i></div>
+            <span>Daily Streak</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.NexReferralEngine?.openReferralModal()">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, rgba(0,255,102,0.2), rgba(0,212,255,0.2)); border: 1px solid #00ff66; color: #00ff66;"><i class="fa-solid fa-bullhorn"></i></div>
+            <span>Ambassador</span>
           </button>
           <button type="button" class="sheet-grid-item" onclick="window.location.href='gaminghub.html'">
             <div class="sheet-icon-box gaming-gradient"><i class="fa-solid fa-gamepad"></i></div>
