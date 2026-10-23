@@ -390,6 +390,54 @@
           osc.stop(this.ctx.currentTime + idx * 0.08 + 0.35);
         });
       }
+      // Procedural Vehicle Engine Throttle & Rev Synthesizer
+      updateEngine(speedKmh) {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const normSpeed = Math.min(1.0, Math.abs(speedKmh) / 160.0);
+        if (!this._engineOsc) {
+          try {
+            this._engineOsc = this.ctx.createOscillator();
+            this._engineGain = this.ctx.createGain();
+            this._engineOsc.type = 'sawtooth';
+            this._engineOsc.frequency.setValueAtTime(55, now);
+            this._engineGain.gain.setValueAtTime(0.001, now);
+            this._engineOsc.connect(this._engineGain);
+            this._engineGain.connect(this.ctx.destination);
+            this._engineOsc.start();
+          } catch (e) {}
+        }
+        if (this._engineOsc && this._engineGain) {
+          if (Math.abs(speedKmh) > 1.0) {
+            const targetFreq = 55 + normSpeed * 175;
+            this._engineOsc.frequency.setTargetAtTime(targetFreq, now, 0.08);
+            this._engineGain.gain.setTargetAtTime(0.05 + normSpeed * 0.07, now, 0.08);
+          } else {
+            this._engineGain.gain.setTargetAtTime(0.001, now, 0.15);
+          }
+        }
+      }
+
+      // Procedural Vehicle Impact & Barrier Crunch Sound
+      playCrashSound() {
+        this.init();
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(36, now + 0.18);
+          gain.gain.setValueAtTime(0.35, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.22);
+        } catch (e) {}
+      }
     }
     const audio = new ProvinceAudio();
 
@@ -1699,7 +1747,11 @@
           const hasImpact = resolveCollisions(cruiserGroup.position, 2.4, true);
           if (hasImpact) {
             cruiserSpeed *= -0.38; // Realistic kinetic collision rebound
-            if (typeof audio !== 'undefined' && audio && audio.playChirp) audio.playChirp();
+            if (typeof audio !== 'undefined' && audio) {
+              if (audio.playCrashSound) audio.playCrashSound();
+              else if (audio.playChirp) audio.playChirp();
+            }
+            if (camera) camera.position.y += 0.35;
             break;
           }
         }
@@ -1710,6 +1762,7 @@
 
         const absKmh = Math.abs(Math.round(cruiserSpeed * 3.6));
         document.getElementById('cruiser-kmh').textContent = absKmh;
+        if (typeof audio !== 'undefined' && audio && audio.updateEngine) audio.updateEngine(absKmh);
 
         // Mission 1: Tidal Surge highway run at Z > 220
         if (!missionTidesDone && cruiserGroup.position.z > 220 && Math.abs(cruiserGroup.position.x) < 22) {
