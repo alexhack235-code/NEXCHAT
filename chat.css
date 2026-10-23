@@ -1056,11 +1056,18 @@ html, body {
   cursor: pointer;
   padding: 2px 4px;
   border-radius: 50%;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .reaction-quick-btn:hover {
   transform: scale(1.3);
+}
+
+.reaction-quick-btn.active {
+  background: rgba(0, 255, 102, 0.22) !important;
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.55);
+  transform: scale(1.25);
+  border-radius: 6px;
 }
 
 .msg-reply-trigger-btn {
@@ -1109,6 +1116,22 @@ html, body {
 .message-reaction-badge:hover {
   transform: scale(1.08);
   border-color: rgba(255, 255, 255, 0.3);
+}
+
+.message-reaction-badge.user-reacted,
+.message-reaction-badge.active {
+  background: rgba(0, 255, 102, 0.16) !important;
+  border-color: rgba(0, 255, 102, 0.65) !important;
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.28);
+  color: #00ff66 !important;
+}
+
+.message-reaction-badge.user-reacted:hover,
+.message-reaction-badge.active:hover {
+  background: rgba(239, 68, 68, 0.2) !important;
+  border-color: rgba(239, 68, 68, 0.65) !important;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.35);
+  color: #ef4444 !important;
 }
 
 /* Floating Scroll-To-Bottom Button */

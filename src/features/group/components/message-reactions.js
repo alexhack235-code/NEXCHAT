@@ -175,39 +175,63 @@ export function hideReactionPicker() {
  * @returns {Object} New reactions object
  */
 export function toggleReaction(reactions, emoji, uid) {
-  const newReactions = { ...reactions };
-  if (!newReactions[emoji]) {
-    newReactions[emoji] = [];
+  // Strictly enforce 1 reaction per user
+  const userMap = new Map();
+  if (Array.isArray(reactions)) {
+    reactions.forEach(r => {
+      if (r && r.uid && (r.emoji || r.key)) userMap.set(r.uid, r.emoji || r.key);
+    });
+  } else if (reactions && typeof reactions === 'object') {
+    Object.entries(reactions).forEach(([em, uids]) => {
+      if (Array.isArray(uids)) {
+        uids.forEach(u => { if (u) userMap.set(u, em); });
+      }
+    });
   }
 
-  const uids = newReactions[emoji];
-  const index = uids.indexOf(uid);
-
-  if (index === -1) {
-    newReactions[emoji] = [...uids, uid];
+  if (userMap.get(uid) === emoji) {
+    userMap.delete(uid);
   } else {
-    newReactions[emoji] = uids.filter(id => id !== uid);
-    if (newReactions[emoji].length === 0) {
-      delete newReactions[emoji];
-    }
+    userMap.set(uid, emoji);
   }
 
-  return newReactions;
+  return Array.from(userMap.entries()).map(([u, em]) => ({ emoji: em, uid: u }));
 }
 
 /**
- * Gets a sorted summary of reactions.
- * @param {Object} reactions Current reactions object
+ * Gets a sorted summary of reactions (strictly deduplicated: 1 vote per UID).
+ * @param {Array|Object} reactions Current reactions object or list
  * @returns {Array} Sorted array of reaction objects
  */
 export function getReactionSummary(reactions) {
   if (!reactions) return [];
-  
-  return Object.keys(reactions)
+
+  const userMap = new Map();
+  if (Array.isArray(reactions)) {
+    reactions.forEach(r => {
+      if (r && r.uid && (r.emoji || r.key)) userMap.set(r.uid, r.emoji || r.key);
+    });
+  } else if (typeof reactions === 'object') {
+    Object.entries(reactions).forEach(([em, uids]) => {
+      if (Array.isArray(uids)) {
+        uids.forEach(u => { if (u) userMap.set(u, em); });
+      }
+    });
+  }
+
+  const counts = {};
+  const uidsMap = {};
+  userMap.forEach((em, u) => {
+    counts[em] = (counts[em] || 0) + 1;
+    if (!uidsMap[em]) uidsMap[em] = [];
+    uidsMap[em].push(u);
+  });
+
+  return Object.keys(counts)
     .map(emoji => ({
       emoji,
-      count: reactions[emoji].length,
-      uids: reactions[emoji]
+      count: counts[emoji],
+      uids: uidsMap[emoji] || []
     }))
     .sort((a, b) => b.count - a.count);
 }

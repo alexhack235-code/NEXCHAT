@@ -4607,42 +4607,164 @@ function playLuxuryChimeSound() {
   } catch (e) {}
 }
 
-function handleMessageReaction(docId, emoji, bubbleElement) {
+function renderMessageReactionsTray(bubbleElement, rawReactions, docId, targetCol = null) {
+  if (!bubbleElement) return;
+
+  const userUid = (typeof window !== 'undefined' && window.myUID) ? window.myUID : (myUID || (auth && auth.currentUser ? auth.currentUser.uid : 'anon'));
+  const collectionName = targetCol || ((typeof currentChatType !== 'undefined' && currentChatType === 'group') ? 'groupMessages' : 'messages');
+  const userReactionMap = new Map();
+
+  if (Array.isArray(rawReactions)) {
+    rawReactions.forEach(r => {
+      if (!r) return;
+      const key = typeof r === 'string' ? r : (r.emoji || r.key || 'star');
+      const uid = (typeof r === 'object' && r.uid) ? r.uid : null;
+      if (uid) {
+        userReactionMap.set(uid, key);
+      }
+    });
+  } else if (rawReactions && typeof rawReactions === 'object') {
+    Object.entries(rawReactions).forEach(([key, val]) => {
+      if (Array.isArray(val)) {
+        val.forEach(uid => {
+          if (uid) userReactionMap.set(uid, key);
+        });
+      }
+    });
+  }
+
+  // Store normalized strictly 1-per-user reactions on bubble element
+  const normalizedList = Array.from(userReactionMap.entries()).map(([u, k]) => ({ emoji: k, uid: u }));
+  bubbleElement._reactionsData = normalizedList;
+
+  // Aggregate counts per reaction key
+  const reactionCounts = {};
+  userReactionMap.forEach((key) => {
+    reactionCounts[key] = (reactionCounts[key] || 0) + 1;
+  });
+
+  const keys = Object.keys(reactionCounts).filter(k => reactionCounts[k] > 0);
+  let tray = bubbleElement.querySelector('.message-reactions-tray');
+
+  const myActiveReaction = userReactionMap.get(userUid);
+
+  // Sync quick reaction buttons active state on hover bar
+  bubbleElement.querySelectorAll('.reaction-quick-btn').forEach(btn => {
+    const btnKey = btn.dataset.key;
+    if (btnKey && btnKey === myActiveReaction) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+
+  if (keys.length === 0) {
+    if (tray) tray.remove();
+    return;
+  }
+
+  if (!tray) {
+    tray = document.createElement("div");
+    tray.className = "message-reactions-tray";
+    bubbleElement.appendChild(tray);
+  }
+  tray.innerHTML = '';
+
+  const reactionIconMap = {
+    heart: '<i class="fa-solid fa-heart" style="color:#ef4444;font-size:11px;"></i>',
+    fire: '<i class="fa-solid fa-fire" style="color:#f97316;font-size:11px;"></i>',
+    like: '<i class="fa-solid fa-thumbs-up" style="color:#3b82f6;font-size:11px;"></i>',
+    star: '<i class="fa-solid fa-star" style="color:#eab308;font-size:11px;"></i>',
+    bolt: '<i class="fa-solid fa-bolt" style="color:#00ff66;font-size:11px;"></i>'
+  };
+
+  keys.forEach((rKey) => {
+    const count = reactionCounts[rKey];
+    const isMine = myActiveReaction === rKey;
+    const badge = document.createElement("span");
+    badge.className = `message-reaction-badge ${isMine ? 'user-reacted active' : ''}`;
+    badge.dataset.key = rKey;
+    badge.title = isMine ? 'You reacted. Tap to remove' : `${count} reaction${count > 1 ? 's' : ''}`;
+    const iconMarkup = reactionIconMap[rKey] || '<i class="fa-solid fa-star" style="color:#eab308;font-size:11px;"></i>';
+    badge.innerHTML = `${iconMarkup} <span class="reaction-count">${count}</span>`;
+    badge.addEventListener("click", (e) => {
+      e.stopPropagation();
+      handleMessageReaction(docId, rKey, bubbleElement, collectionName);
+    });
+    tray.appendChild(badge);
+  });
+}
+window.renderMessageReactionsTray = renderMessageReactionsTray;
+
+function handleMessageReaction(docId, targetKey, bubbleElement, collectionName = null) {
   playLuxuryPopSound();
   if (!bubbleElement) return;
 
-  // Optimistic UI reaction pill in the tray
-  let tray = bubbleElement.querySelector('.message-reactions-tray');
-  if (!tray) {
-    tray = document.createElement('div');
-    tray.className = 'message-reactions-tray';
-    bubbleElement.appendChild(tray);
+  const targetCol = collectionName || ((typeof currentChatType !== 'undefined' && currentChatType === 'group') ? 'groupMessages' : 'messages');
+  const userUid = (typeof window !== 'undefined' && window.myUID) ? window.myUID : (myUID || (auth && auth.currentUser ? auth.currentUser.uid : 'anon'));
+
+  // Retrieve current reactions from bubble cache or existing badges
+  let currentReactions = bubbleElement._reactionsData;
+  if (!Array.isArray(currentReactions)) {
+    currentReactions = [];
+    const tray = bubbleElement.querySelector('.message-reactions-tray');
+    if (tray) {
+      tray.querySelectorAll('.message-reaction-badge').forEach(badge => {
+        const key = badge.dataset.key || '';
+        const count = parseInt(badge.querySelector('.reaction-count')?.textContent || badge.textContent.replace(/[^0-9]/g, '') || '1', 10);
+        const isMine = badge.classList.contains('user-reacted') || badge.classList.contains('active');
+        if (key) {
+          for (let i = 0; i < count; i++) {
+            currentReactions.push({ emoji: key, uid: (i === 0 && isMine) ? userUid : `other_${key}_${i}` });
+          }
+        }
+      });
+    }
   }
 
-  let existingBadge = [...tray.querySelectorAll('.message-reaction-badge')].find(b => b.textContent.includes(emoji));
-  if (existingBadge) {
-    const num = parseInt(existingBadge.textContent.replace(/[^0-9]/g, '') || '1', 10);
-    existingBadge.textContent = `${emoji} ${num + 1}`;
+  // Deduplicate strictly: ONE REACTION PER USER
+  const userReactionMap = new Map();
+  currentReactions.forEach(r => {
+    if (!r) return;
+    const k = typeof r === 'string' ? r : (r.emoji || r.key || 'star');
+    const u = (typeof r === 'object' && r.uid) ? r.uid : null;
+    if (u) userReactionMap.set(u, k);
+  });
+
+  const previousReaction = userReactionMap.get(userUid);
+
+  if (previousReaction === targetKey) {
+    // 1. TOGGLE OFF: User tapped their current reaction -> remove it
+    userReactionMap.delete(userUid);
   } else {
-    const badge = document.createElement('span');
-    badge.className = 'message-reaction-badge';
-    badge.textContent = `${emoji} 1`;
-    badge.addEventListener('click', (e) => {
-      e.stopPropagation();
-      handleMessageReaction(docId, emoji, bubbleElement);
-    });
-    tray.appendChild(badge);
+    // 2. SWITCH OR ADD: User tapped a new reaction -> set strictly to this one
+    userReactionMap.set(userUid, targetKey);
   }
 
-  // Non-blocking sync to Firestore if document ID is valid
-  if (docId) {
+  // Rebuild strictly 1-reaction-per-user list
+  const updatedReactions = Array.from(userReactionMap.entries()).map(([u, k]) => ({
+    emoji: k,
+    uid: u
+  }));
+
+  // Optimistic UI updates
+  bubbleElement._reactionsData = updatedReactions;
+  renderMessageReactionsTray(bubbleElement, updatedReactions, docId, targetCol);
+
+  // Firestore update
+  if (docId && typeof docId === 'string' && !docId.startsWith('msg_')) {
     try {
-      updateDoc(doc(db, "messages", docId), {
-        reactions: arrayUnion({ emoji: emoji, uid: myUID || 'anon', time: Date.now() })
-      }).catch(err => console.warn("Reaction update non-blocking:", err));
-    } catch (err) {}
+      updateDoc(doc(db, targetCol, docId), {
+        reactions: updatedReactions
+      }).catch(err => {
+        console.warn("[REACTIONS] Firestore sync notice:", err?.message || err);
+      });
+    } catch (err) {
+      console.warn("[REACTIONS] Firestore dispatch catch:", err);
+    }
   }
 }
+window.handleMessageReaction = handleMessageReaction;
 
 function appendLocalSentMessage(text, attachment = null, showHeader = false, status = 'sending', clientMsgId = null, envelope = null) {
   const messagesContainer = document.getElementById("messages-area");
@@ -5324,11 +5446,12 @@ function loadMessages() {
         const emoBtn = document.createElement("button");
         emoBtn.type = "button";
         emoBtn.className = "reaction-quick-btn";
+        emoBtn.dataset.key = r.key;
         emoBtn.innerHTML = r.icon;
         emoBtn.title = `React ${r.title}`;
         emoBtn.addEventListener("click", (e) => {
           e.stopPropagation();
-          handleMessageReaction(m.docId, r.key, bubble);
+          handleMessageReaction(m.docId, r.key, bubble, currentChatType === 'group' ? 'groupMessages' : 'messages');
         });
         actionsBar.appendChild(emoBtn);
       });
@@ -5415,45 +5538,9 @@ function loadMessages() {
         bubble.addEventListener('touchmove', () => { if (touchTimer) clearTimeout(touchTimer); });
       }
 
-      // Render Active Reactions Tray
-      if (m.reactions && (Array.isArray(m.reactions) ? m.reactions.length > 0 : Object.keys(m.reactions).length > 0)) {
-        const tray = document.createElement("div");
-        tray.className = "message-reactions-tray";
-        const reactionCounts = {};
-        if (Array.isArray(m.reactions)) {
-          m.reactions.forEach(r => {
-            const reactionKey = typeof r === 'string' ? r : (r.emoji || r.key || 'star');
-            reactionCounts[reactionKey] = (reactionCounts[reactionKey] || 0) + 1;
-          });
-        } else if (typeof m.reactions === 'object') {
-          Object.entries(m.reactions).forEach(([reactionKey, val]) => {
-            if (Array.isArray(val) && val.length > 0) {
-              reactionCounts[reactionKey] = val.length;
-            } else if (typeof val === 'number' && val > 0) {
-              reactionCounts[reactionKey] = val;
-            }
-          });
-        }
-        const reactionIconMap = {
-          heart: '<i class="fa-solid fa-heart" style="color:#ef4444;font-size:11px;"></i>',
-          fire: '<i class="fa-solid fa-fire" style="color:#f97316;font-size:11px;"></i>',
-          like: '<i class="fa-solid fa-thumbs-up" style="color:#3b82f6;font-size:11px;"></i>',
-          star: '<i class="fa-solid fa-star" style="color:#eab308;font-size:11px;"></i>',
-          bolt: '<i class="fa-solid fa-bolt" style="color:#00ff66;font-size:11px;"></i>'
-        };
-        Object.entries(reactionCounts).forEach(([rKey, count]) => {
-          const badge = document.createElement("span");
-          badge.className = "message-reaction-badge";
-          const iconMarkup = reactionIconMap[rKey] || '<i class="fa-solid fa-star" style="color:#eab308;font-size:11px;"></i>';
-          badge.innerHTML = `${iconMarkup} <span>${count}</span>`;
-          badge.addEventListener("click", (e) => {
-            e.stopPropagation();
-            handleMessageReaction(m.docId, rKey, bubble);
-          });
-          tray.appendChild(badge);
-        });
-        bubble.appendChild(tray);
-      }
+      // Render Active Reactions Tray (Strictly 1 Reaction Per User with Live Toggle & Switch)
+      bubble._reactionsData = m.reactions;
+      renderMessageReactionsTray(bubble, m.reactions, m.docId, currentChatType === 'group' ? 'groupMessages' : 'messages');
 
       div.appendChild(bubble);
       messagesDiv.appendChild(div);

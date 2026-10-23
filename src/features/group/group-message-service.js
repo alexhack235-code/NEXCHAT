@@ -375,27 +375,40 @@ export async function addReaction(messageId, emoji) {
   const msgSnap = await getDoc(msgRef);
   if (!msgSnap.exists()) return;
 
-  const reactions = msgSnap.data().reactions || {};
-  const emojiVoters = reactions[emoji] || [];
+  const data = msgSnap.data();
+  const rawReactions = data.reactions || [];
 
-  if (emojiVoters.includes(uid)) {
-    // Remove reaction
-    await updateDoc(msgRef, {
-      [`reactions.${emoji}`]: arrayUnion(uid) // Firestore doesn't have arrayRemove for nested - use full update
+  // Strictly 1 reaction per user: normalize by UID
+  const userMap = new Map();
+  if (Array.isArray(rawReactions)) {
+    rawReactions.forEach(r => {
+      if (r && r.uid && (r.emoji || r.key)) {
+        userMap.set(r.uid, r.emoji || r.key);
+      }
     });
-    // Actually we need to handle this differently for nested maps
-    const updatedReactions = { ...reactions };
-    updatedReactions[emoji] = emojiVoters.filter(u => u !== uid);
-    if (updatedReactions[emoji].length === 0) {
-      delete updatedReactions[emoji];
-    }
-    await updateDoc(msgRef, { reactions: updatedReactions });
-  } else {
-    // Add reaction
-    const updatedReactions = { ...reactions };
-    updatedReactions[emoji] = [...emojiVoters, uid];
-    await updateDoc(msgRef, { reactions: updatedReactions });
+  } else if (typeof rawReactions === 'object') {
+    Object.entries(rawReactions).forEach(([em, uids]) => {
+      if (Array.isArray(uids)) {
+        uids.forEach(u => { if (u) userMap.set(u, em); });
+      }
+    });
   }
+
+  const previousEmoji = userMap.get(uid);
+  if (previousEmoji === emoji) {
+    // TOGGLE OFF: User tapped their current reaction
+    userMap.delete(uid);
+  } else {
+    // SWITCH / ADD: User selected a new reaction (replaces any previous one)
+    userMap.set(uid, emoji);
+  }
+
+  const updatedReactions = Array.from(userMap.entries()).map(([u, em]) => ({
+    emoji: em,
+    uid: u
+  }));
+
+  await updateDoc(msgRef, { reactions: updatedReactions });
 }
 
 /**
