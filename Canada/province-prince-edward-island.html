@@ -438,7 +438,7 @@
         tokens += 1000;
         localStorage.setItem('BS_TOKENS', tokens.toString());
         document.getElementById('token-val').textContent = tokens.toLocaleString();
-        showNotify('⚡ PEI CRADLE OF CONFEDERATION SECTOR MASTERED! BONUS +1,000 NEX TOKENS');
+        showNotify('PEI CRADLE OF CONFEDERATION SECTOR MASTERED! BONUS +1,000 NEX TOKENS');
         audio.playLootChime();
       }
     }
@@ -856,7 +856,7 @@
         localStorage.setItem('BS_TOKENS', tokens.toString());
         const tEl = document.getElementById('token-val');
         if (tEl) tEl.textContent = tokens.toLocaleString();
-        showNotify(`🍁 CANADIAN PASSPORT STAMPED: ${REALM_CODEX_DATA.name.toUpperCase()} (+500 NEX)! [${stamps.length}/14]`);
+        showNotify(`CANADIAN PASSPORT STAMPED: ${REALM_CODEX_DATA.name.toUpperCase()} (+500 NEX)! [${stamps.length}/14]`);
         if (typeof audio !== 'undefined' && audio.playLootChime) audio.playLootChime();
       }
 
@@ -1138,7 +1138,7 @@
         if (hud) hud.style.display = 'none';
 
         if (regionalPlaneGroup.position.y > 15) {
-          showNotify('🪂 EMERGENCY PARAGLIDER DEPLOYED FROM COCKPIT!');
+          showNotify('EMERGENCY PARAGLIDER DEPLOYED FROM COCKPIT!');
           player.pos.set(regionalPlaneGroup.position.x + 2.5, regionalPlaneGroup.position.y - 1.0, regionalPlaneGroup.position.z);
           player.vel.set(0, -2.5, 0);
         } else {
@@ -1154,7 +1154,7 @@
         const hud = document.getElementById('regional-plane-hud');
         if (hud) hud.style.display = 'block';
         if (typeof playerRiggedMesh !== 'undefined' && playerRiggedMesh) playerRiggedMesh.visible = false;
-        showNotify('✈️ PILOTING RED SHORE ISLAND COMMUTER // [W/S] THROTTLE [A/D] ROLL [ARROWS] PITCH');
+        showNotify('PILOTING RED SHORE ISLAND COMMUTER // [W/S] THROTTLE [A/D] ROLL [ARROWS] PITCH');
         if (audio && audio.playChirp) audio.playChirp();
       }
     }
@@ -1294,7 +1294,7 @@
           playerHealth = 100;
           playerWarmth = 100;
           player.pos.set(0, 1.2, 45);
-          showNotify('❄️ HYPOTHERMIA COLLAPSE! EMERGENCY MEDICAL RESCUE TO WARM OUTPOST (+100% WARMTH)');
+          showNotify('HYPOTHERMIA COLLAPSE! EMERGENCY MEDICAL RESCUE TO WARM OUTPOST (+100% WARMTH)');
           if (audio && audio.playChirp) audio.playChirp();
         }
       } else {
@@ -1345,7 +1345,20 @@
       { x: -46, z: 30, r: 5 }
     );
 
-    function resolveCollisions(pos, radius) {
+    // Pre-allocated scratch vectors for zero-allocation performance in animate loop
+    const _scratchFwd = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchInputDir = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchRotatedMove = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchCamBack = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchUpAxis = (typeof THREE !== 'undefined') ? new THREE.Vector3(0, 1, 0) : null;
+    const _scratchPlaneFwd = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchPlaneCamOffset = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchPlaneEuler = (typeof THREE !== 'undefined') ? new THREE.Euler() : null;
+    const _scratchPlaneTargetPos = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+    const _scratchCruiserTargetPos = (typeof THREE !== 'undefined') ? new THREE.Vector3() : null;
+
+    function resolveCollisions(pos, radius, isVehicle = false) {
+      let collided = false;
       for (let i = 0; i < WORLD_COLLIDERS.length; i++) {
         const c = WORLD_COLLIDERS[i];
         const dx = pos.x - c.x;
@@ -1357,10 +1370,12 @@
           const overlap = minDist - dist;
           pos.x += (dx / dist) * overlap;
           pos.z += (dz / dist) * overlap;
+          collided = true;
         }
       }
       pos.x = Math.max(-550, Math.min(550, pos.x));
       pos.z = Math.max(-550, Math.min(550, pos.z));
+      return collided;
     }
 
     // ------------------------------------------------------------
@@ -1416,7 +1431,7 @@
         inPatrolCruiser = true;
         document.getElementById('cruiser-hud').style.display = 'block';
         if (playerRiggedMesh) playerRiggedMesh.visible = false;
-        showNotify('🌉 PILOTING PEI CAUSEWAY ROADSTER // [SHIFT] NITRO BOOST');
+        showNotify('PILOTING PEI CAUSEWAY ROADSTER // [SHIFT] NITRO BOOST');
         audio.playChirp();
       }
     }
@@ -1435,7 +1450,7 @@
         document.getElementById('mis-cradle').classList.add('done');
         tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
         document.getElementById('token-val').textContent = tokens.toLocaleString();
-        showNotify('🏛️ CRADLE OF CONFEDERATION SYNCHRONIZED (+500 NEX)');
+        showNotify('CRADLE OF CONFEDERATION SYNCHRONIZED (+500 NEX)');
         audio.playLootChime(); updateMissionBadge();
       }
       const dunesPos = new THREE.Vector3(120, 0, -80);
@@ -1528,16 +1543,18 @@
 
         // Translate in 3D along forward heading
         regionalPlaneGroup.rotation.set(regionalPlaneState.pitch, regionalPlaneState.yaw, regionalPlaneState.roll, 'YXZ');
-        const fwd = new THREE.Vector3(0, 0, -1).applyEuler(regionalPlaneGroup.rotation);
-        regionalPlaneGroup.position.add(fwd.multiplyScalar(regionalPlaneState.speed * delta));
+        _scratchPlaneFwd.set(0, 0, -1).applyEuler(regionalPlaneGroup.rotation);
+        regionalPlaneGroup.position.addScaledVector(_scratchPlaneFwd, regionalPlaneState.speed * delta);
 
-        // Player follows aircraft
+        // Player follows aircraft (Zero Allocations)
         player.pos.copy(regionalPlaneGroup.position);
         player.vel.set(0, 0, 0);
 
-        // Camera tracks behind and slightly above plane for panoramic views
-        const camOffset = new THREE.Vector3(0, 3.8, 11.5).applyEuler(new THREE.Euler(0, regionalPlaneState.yaw, 0));
-        camera.position.lerp(regionalPlaneGroup.position.clone().add(camOffset), 0.35);
+        // Camera tracks behind and slightly above plane for panoramic views (Zero Allocations)
+        _scratchPlaneEuler.set(0, regionalPlaneState.yaw, 0);
+        _scratchPlaneCamOffset.set(0, 3.8, 11.5).applyEuler(_scratchPlaneEuler);
+        _scratchPlaneTargetPos.copy(regionalPlaneGroup.position).add(_scratchPlaneCamOffset);
+        camera.position.lerp(_scratchPlaneTargetPos, 0.35);
         camera.lookAt(regionalPlaneGroup.position.x, regionalPlaneGroup.position.y + 1.2, regionalPlaneGroup.position.z);
 
         // Update Flight Avionics HUD
@@ -1599,9 +1616,20 @@
         cruiserSpeed = THREE.MathUtils.lerp(cruiserSpeed, throttle * 44 * nitro, delta * 3.5);
         steerAngle = THREE.MathUtils.lerp(steerAngle, steer * 0.38, delta * 8.0);
         cruiserGroup.rotation.y += steer * delta * (cruiserSpeed / 18.0);
-        const fwd = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
-        cruiserGroup.position.add(fwd.multiplyScalar(cruiserSpeed * delta));
-        resolveCollisions(cruiserGroup.position, 2.4);
+        _scratchFwd.set(0, 0, 1).applyAxisAngle(_scratchUpAxis, cruiserGroup.rotation.y);
+
+        // Multi-substep vehicle physics to prevent high-speed tunneling through landscape colliders
+        const vSubsteps = (Math.abs(cruiserSpeed) > 28.0 || delta > 0.02) ? 3 : 2;
+        const vSubDelta = delta / vSubsteps;
+        for (let vStep = 0; vStep < vSubsteps; vStep++) {
+          cruiserGroup.position.addScaledVector(_scratchFwd, cruiserSpeed * vSubDelta);
+          const hasImpact = resolveCollisions(cruiserGroup.position, 2.4, true);
+          if (hasImpact) {
+            cruiserSpeed *= -0.38; // Realistic kinetic collision rebound
+            if (typeof audio !== 'undefined' && audio && audio.playChirp) audio.playChirp();
+            break;
+          }
+        }
 
         wheelSpin += (cruiserSpeed / 0.5) * delta;
         cyberCarSteers.forEach(i => { i.node.rotation.y = i.rotY + steerAngle; });
@@ -1616,13 +1644,15 @@
           document.getElementById('mis-bridge').classList.add('done');
           tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
           document.getElementById('token-val').textContent = tokens.toLocaleString();
-          showNotify('🌉 CONFEDERATION BRIDGE STRAIT CROSSING COMPLETE (+500 NEX)');
+          showNotify('CONFEDERATION BRIDGE STRAIT CROSSING COMPLETE (+500 NEX)');
           audio.playLootChime(); updateMissionBadge();
         }
 
-        player.pos.copy(cruiserGroup.position).add(new THREE.Vector3(0, 1.4, 0));
-        const camBack = new THREE.Vector3(0, 4.4, -9.8).applyAxisAngle(new THREE.Vector3(0, 1, 0), cruiserGroup.rotation.y);
-        camera.position.lerp(cruiserGroup.position.clone().add(camBack), 0.35);
+        player.pos.copy(cruiserGroup.position);
+        player.pos.y += 1.4;
+        _scratchCamBack.set(0, 4.4, -9.8).applyAxisAngle(_scratchUpAxis, cruiserGroup.rotation.y);
+        _scratchCruiserTargetPos.copy(cruiserGroup.position).add(_scratchCamBack);
+        camera.position.lerp(_scratchCruiserTargetPos, 0.35);
         camera.lookAt(cruiserGroup.position.x, cruiserGroup.position.y + 1.2, cruiserGroup.position.z);
 
       } else {
@@ -1631,14 +1661,19 @@
         if (keys['KeyA']) moveX -= 1; if (keys['KeyD']) moveX += 1;
         const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight']);
         const moveSpeed = isSprinting ? 18.0 : 9.5;
-        const inputDir = new THREE.Vector3(moveX, 0, moveZ).normalize();
-        const rotatedMove = inputDir.applyAxisAngle(new THREE.Vector3(0, 1, 0), player.yaw);
+        _scratchInputDir.set(moveX, 0, moveZ).normalize();
+        _scratchRotatedMove.copy(_scratchInputDir).applyAxisAngle(_scratchUpAxis, player.yaw);
 
-        player.pos.x += rotatedMove.x * moveSpeed * delta;
-        player.pos.z += rotatedMove.z * moveSpeed * delta;
-        resolveCollisions(player.pos, 0.6);
+        // Multi-substep player movement to prevent tunneling through scenery colliders
+        const pSubsteps = (moveSpeed > 12.0 || delta > 0.02) ? 3 : 2;
+        const pSubDelta = delta / pSubsteps;
+        for (let pStep = 0; pStep < pSubsteps; pStep++) {
+          player.pos.x += _scratchRotatedMove.x * moveSpeed * pSubDelta;
+          player.pos.z += _scratchRotatedMove.z * moveSpeed * pSubDelta;
+          resolveCollisions(player.pos, 0.6);
+        }
 
-        const horizSpeed = Math.sqrt(rotatedMove.x * rotatedMove.x + rotatedMove.z * rotatedMove.z) * moveSpeed;
+        const horizSpeed = Math.sqrt(_scratchRotatedMove.x * _scratchRotatedMove.x + _scratchRotatedMove.z * _scratchRotatedMove.z) * moveSpeed;
         const isMoving = horizSpeed > 0.5;
 
         if (characterActions['Idle'] && characterMixer) {
