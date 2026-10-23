@@ -481,21 +481,37 @@
       try {
         if (typeof window.showNotif === 'function') window.showNotif('Deleting message for everyone...', 'info', 1200);
 
-        // Optimistic DOM removal
-        const wrapper = document.querySelector(`[data-doc-id="${docId}"]`) ||
-                        Array.from(document.querySelectorAll('.message-wrapper')).find(w => w.innerHTML.includes(docId));
-        if (wrapper) {
-          wrapper.style.transition = 'opacity 0.25s, transform 0.25s';
+        // 1. Optimistic DOM removal immediately
+        const targets = [
+          document.getElementById(`msg-wrapper-${docId}`),
+          document.getElementById(`wrapper-${docId}`),
+          document.querySelector(`[data-doc-id="${docId}"]`)
+        ].filter(Boolean);
+
+        targets.forEach(wrapper => {
+          wrapper.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
           wrapper.style.opacity = '0';
-          wrapper.style.transform = 'scale(0.95)';
-          setTimeout(() => wrapper.remove(), 260);
+          wrapper.style.transform = 'scale(0.9)';
+          setTimeout(() => wrapper.remove(), 230);
+        });
+
+        // 2. Cache locally in hidden list so it remains erased immediately
+        try {
+          const localHidden = JSON.parse(localStorage.getItem('nex_hidden_msg_ids') || '[]');
+          if (!localHidden.includes(docId)) {
+            localHidden.push(docId);
+            localStorage.setItem('nex_hidden_msg_ids', JSON.stringify(localHidden.slice(-500)));
+          }
+        } catch (_) {}
+
+        if (typeof window.evictMessageFromCache === 'function') {
+          window.evictMessageFromCache(docId);
         }
 
-        // Import firestore dynamically or via global window.firebase / window.db
+        // 3. Purge from Firestore
         if (typeof window.deleteMessageFromFirestore === 'function') {
           await window.deleteMessageFromFirestore(collectionName, docId, true);
         } else {
-          // Direct fallback call via event
           document.dispatchEvent(new CustomEvent('nexDeleteMessageRequest', {
             detail: { docId, collectionName, forEveryone: true }
           }));
@@ -519,14 +535,19 @@
       const collectionName = isGroup ? 'groupMessages' : 'messages';
 
       try {
-        // Optimistic DOM removal
-        const wrapper = document.querySelector(`[data-doc-id="${docId}"]`) ||
-                        Array.from(document.querySelectorAll('.message-wrapper')).find(w => w.innerHTML.includes(docId));
-        if (wrapper) {
-          wrapper.style.transition = 'opacity 0.25s, transform 0.25s';
+        // 1. Optimistic DOM removal immediately
+        const targets = [
+          document.getElementById(`msg-wrapper-${docId}`),
+          document.getElementById(`wrapper-${docId}`),
+          document.querySelector(`[data-doc-id="${docId}"]`)
+        ].filter(Boolean);
+
+        targets.forEach(wrapper => {
+          wrapper.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
           wrapper.style.opacity = '0';
-          setTimeout(() => wrapper.remove(), 260);
-        }
+          wrapper.style.transform = 'scale(0.9)';
+          setTimeout(() => wrapper.remove(), 230);
+        });
 
         // Cache locally in localStorage so it stays hidden even offline
         try {

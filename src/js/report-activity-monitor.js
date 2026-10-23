@@ -279,15 +279,18 @@
           </div>
         </div>
 
-        <!-- Description -->
+        <!-- Description & Detailed Explanation -->
         <div style="margin-bottom: 16px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <label style="font-size: 12px; font-weight: 700; color: #cbd5e1;">
-              5. Incident Statement / Description
+            <label style="font-size: 12px; font-weight: 800; color: #ff3b30; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-align-left"></i> 5. Detailed Explanation &amp; Incident Context (Sent to Admin Dashboard)
             </label>
             <span id="nexReportCharCounter" style="font-size: 10.5px; color: #94a3b8;">0 / 1000</span>
           </div>
-          <textarea id="nexReportDescriptionInput" rows="3" placeholder="Describe the violation, context, or threats observed..." style="
+          <p style="margin: 0 0 6px 0; font-size: 11px; color: #94a3b8;">
+            Please explain in detail what happened so administrators can review this incident immediately:
+          </p>
+          <textarea id="nexReportDescriptionInput" rows="3" placeholder="Explain what happened in detail. Include quotes of what was said, context of the infraction, and any details to assist the Admin Review Desk..." style="
             width: 100%;
             box-sizing: border-box;
             background: rgba(0,0,0,0.4);
@@ -374,7 +377,7 @@
       const file = e.target.files?.[0];
       if (!file) return;
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size exceeds 5MB limit.');
+        if (typeof window.showNotif === 'function') window.showNotif('File size exceeds 5MB limit.', 'error');
         return;
       }
       const reader = new FileReader();
@@ -596,7 +599,7 @@
 
     const desc = modal.querySelector('#nexReportDescriptionInput')?.value?.trim() || '';
     if (!desc || desc.length < 5) {
-      alert('Please provide a brief description (at least 5 characters) of the incident.');
+      if (typeof window.showNotif === 'function') window.showNotif('Please provide an explanation (at least 5 characters).', 'warning');
       return;
     }
 
@@ -621,6 +624,7 @@
       subReason: selectedSubReasonText,
       severity: selectedSeverityKey,
       description: desc,
+      explanation: desc, // Dedicated explanation field for admin dashboard
       evidenceMessages: evidenceMsgs,
       hasEvidenceAttachment: !!attachedEvidenceDataUrl,
       evidenceAttachment: attachedEvidenceDataUrl || null,
@@ -639,8 +643,14 @@
     }
 
     try {
-      // 1. Write to Firestore 'reports' collection if firebase is available
-      if (window.db) {
+      // 1. Write to Firestore 'reports' collection via helper or window.db
+      if (typeof window.saveReportToFirestore === 'function') {
+        try {
+          await window.saveReportToFirestore(reportPayload);
+        } catch (dbErr) {
+          console.warn('[FIRESTORE REPORT WRITE NOTIFICATION]', dbErr.message);
+        }
+      } else if (window.db) {
         try {
           if (typeof window.db.collection === 'function') {
             await window.db.collection('reports').add(reportPayload);
@@ -650,7 +660,14 @@
         }
       }
 
-      // 2. Save in localStorage user reports history
+      // 2. Save in shared admin reports inbox for instant Admin Dashboard synchronization
+      try {
+        const adminInbox = JSON.parse(localStorage.getItem('nex_admin_reports_inbox') || '[]');
+        adminInbox.unshift(reportPayload);
+        localStorage.setItem('nex_admin_reports_inbox', JSON.stringify(adminInbox.slice(0, 100)));
+      } catch (_) {}
+
+      // 3. Save in localStorage user reports history
       try {
         const stored = JSON.parse(localStorage.getItem('nex_user_reports') || '[]');
         stored.unshift({
@@ -658,11 +675,16 @@
           targetUsername: activeReportTarget.targetUsername,
           category: selectedCategoryKey,
           severity: selectedSeverityKey,
+          description: desc,
+          explanation: desc,
           timestamp: reportPayload.timestamp,
           status: 'pending'
         });
         localStorage.setItem('nex_user_reports', JSON.stringify(stored.slice(0, 50)));
       } catch (_) {}
+
+      // Dispatch real-time report event
+      document.dispatchEvent(new CustomEvent('nexReportSubmitted', { detail: { reportPayload } }));
 
       // 3. Log to Activity Monitor
       if (window.NexActivityMonitor) {
@@ -673,8 +695,10 @@
         });
       }
 
-      // 4. Alert user
-      alert(`[INCIDENT REPORT LODGED]\nTicket ID: ${ticketId}\nTarget: @${activeReportTarget.targetUsername}\nStatus: PENDING ADMIN REVIEW\n\nOur Trust & Safety moderators will investigate. Thank you for protecting the NEXCHAT ecosystem.`);
+      // 4. Notify user (clean non-blocking notification)
+      if (typeof window.showNotif === 'function') {
+        window.showNotif(`Incident report ${ticketId} lodged for @${activeReportTarget.targetUsername}. Sent to Admin Dashboard.`, 'success', 3500);
+      }
 
       closeReportModal();
 
@@ -686,7 +710,7 @@
       if (thumbBox) thumbBox.style.display = 'none';
 
     } catch (err) {
-      alert('Failed to submit report: ' + err.message);
+      if (typeof window.showNotif === 'function') window.showNotif('Failed to submit report: ' + err.message, 'error');
     } finally {
       if (submitBtn) {
         submitBtn.disabled = false;

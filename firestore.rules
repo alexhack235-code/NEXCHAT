@@ -49,6 +49,9 @@ service cloud.firestore {
     //   - readAt: timestamp/number/string (optional)
     //   - reactions: list (optional, max 100 items)
     //   - attachment: map or string URL (optional)
+    //   - deletedFor: list of strings (optional, user UIDs who deleted message for themselves, max 500 items)
+    //   - isDeleted / deletedForEveryone: bool (optional, tombstone deletion flags)
+    //   - deletedAt: timestamp/number/string (optional)
     //   - createdAt / timestamp: timestamp (optional, immutable)
     //
     // Collection: groups
@@ -65,6 +68,9 @@ service cloud.firestore {
     //   - text / content: string (optional, max 10000 chars)
     //   - reactions: list (optional, max 100 items)
     //   - readBy / readAt: list/map (optional)
+    //   - deletedFor: list of strings (optional, max 500 items)
+    //   - isDeleted / deletedForEveryone: bool (optional)
+    //   - deletedAt: timestamp/number/string (optional)
     //
     // Collection: statuses
     // Document ID: {statusId} (Auto-generated)
@@ -175,6 +181,19 @@ service cloud.firestore {
     //   - price: number (optional, >= 0)
     //   - minted: number (optional, >= 0)
     //   - holders / claimedBy: list/string (optional)
+    //
+    // Collection: reports
+    // Document ID: {reportId} (Auto-generated)
+    // Fields:
+    //   - reportedBy: string (required on create, reporter UID)
+    //   - reportedUser: string (optional, target UID)
+    //   - reporterUsername: string (optional, max 100 chars)
+    //   - reportedUsername: string (optional, max 100 chars)
+    //   - category: string (optional, incident category)
+    //   - severity: string (optional, incident severity)
+    //   - description: string (optional, max 5000 chars)
+    //   - status: string (optional, default 'pending')
+    //   - timestamp: timestamp/string (optional)
     // ===============================================================
 
     // ===============================================================
@@ -607,7 +626,8 @@ service cloud.firestore {
 
       // Update:
       // - Sender can edit message text or reactions (immutable sender/receiver/timestamps protected)
-      // - Recipient can ONLY update delivery ticks (sent, delivered, read), status, and reactions
+      // - Recipient can update delivery ticks (sent, delivered, read), status, reactions, and deletedFor
+      // - Sender or participant can set tombstone / deletion fields
       // - SuperAdmin can manage or moderate
       allow update: if isAuthenticated() && (
         (
@@ -615,22 +635,41 @@ service cloud.firestore {
           areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
           isValidOptionalString('text', 0, 10000) &&
           isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalList('reactions', 100)
+          isValidOptionalList('reactions', 100) &&
+          isValidOptionalList('deletedFor', 500)
         ) ||
         (
           (request.auth.uid == resource.data.to || ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId)) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions']) &&
-          isValidOptionalList('reactions', 100)
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
+          isValidOptionalList('reactions', 100) &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        (
+          (
+            request.auth.uid == resource.data.from ||
+            request.auth.uid == resource.data.to ||
+            ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
+            ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId)
+          ) &&
+          areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
+              (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
+            )
+          ) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalList('deletedFor', 500)
         ) ||
         isSuperAdmin()
       );
 
-      // Delete: sender, recipient, or SuperAdmin
+      // Delete: sender or SuperAdmin
       allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.from ||
-        request.auth.uid == resource.data.to ||
         ('senderId' in resource.data && request.auth.uid == resource.data.senderId) ||
-        ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId) ||
         isSuperAdmin()
       );
     }
@@ -652,20 +691,40 @@ service cloud.firestore {
                        isValidOptionalString('content', 0, 10000) &&
                        isValidOptionalList('reactions', 100);
 
-      // Sender can edit text/reactions; group members can ONLY update reactions/readBy; moderators can moderate
+      // Sender can edit text/reactions; group members can update reactions/readBy/deletedFor; sender/moderator can update tombstone fields
       allow update: if isAuthenticated() && (
         (
           (request.auth.uid == resource.data.from || request.auth.uid == resource.data.senderId) &&
           areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
           isValidOptionalString('text', 0, 10000) &&
           isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalList('reactions', 100)
+          isValidOptionalList('reactions', 100) &&
+          isValidOptionalList('deletedFor', 500)
+        ) ||
+        (
+          (
+            request.auth.uid == resource.data.from ||
+            request.auth.uid == resource.data.senderId ||
+            isGroupModerator(resource.data.groupId)
+          ) &&
+          areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
+              (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
+            )
+          ) &&
+          isValidOptionalString('text', 0, 10000) &&
+          isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalList('deletedFor', 500)
         ) ||
         isGroupModerator(resource.data.groupId) ||
         (
           isGroupMember(resource.data.groupId) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt']) &&
-          isValidOptionalList('reactions', 100)
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor']) &&
+          isValidOptionalList('reactions', 100) &&
+          isValidOptionalList('deletedFor', 500)
         ) ||
         isSuperAdmin()
       );
@@ -725,13 +784,33 @@ service cloud.firestore {
             areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
             isValidOptionalString('text', 0, 10000) &&
             isValidOptionalString('content', 0, 10000) &&
-            isValidOptionalList('reactions', 100)
+            isValidOptionalList('reactions', 100) &&
+            isValidOptionalList('deletedFor', 500)
+          ) ||
+          (
+            (
+              request.auth.uid == resource.data.senderId ||
+              request.auth.uid == resource.data.from ||
+              isGroupAdmin(groupId)
+            ) &&
+            areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
+            (
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
+              (
+                request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
+                (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
+              )
+            ) &&
+            isValidOptionalString('text', 0, 10000) &&
+            isValidOptionalString('content', 0, 10000) &&
+            isValidOptionalList('deletedFor', 500)
           ) ||
           isGroupAdmin(groupId) ||
           (
             isGroupMember(groupId) &&
-            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt']) &&
-            isValidOptionalList('reactions', 100)
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor']) &&
+            isValidOptionalList('reactions', 100) &&
+            isValidOptionalList('deletedFor', 500)
           ) ||
           isSuperAdmin()
         );
@@ -1578,8 +1657,15 @@ service cloud.firestore {
     }
 
     match /reports/{reportId} {
-      allow create: if isAuthenticated() && request.resource.data.reportedBy == request.auth.uid;
-      allow read, write: if isSuperAdmin();
+      allow create: if isAuthenticated() && (
+        request.resource.data.reportedBy == request.auth.uid ||
+        isSuperAdmin()
+      );
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.reportedBy ||
+        isSuperAdmin()
+      );
+      allow write: if isSuperAdmin();
     }
 
     match /blockedUsers/{blockId} {

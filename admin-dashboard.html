@@ -8004,28 +8004,48 @@ For support or further inquiries, reply directly to this chat.`;
         const container = document.getElementById('adminReportsContainer');
         if (!container) return;
 
-        // Fetch from Firestore reports collection
+        // 1. Fetch from local admin inbox cache for instant sync
+        let localReports = [];
+        try {
+          localReports = JSON.parse(localStorage.getItem('nex_admin_reports_inbox') || '[]');
+        } catch (_) {}
+
+        // Instant render of local reports + seeded reports (0ms latency)
+        const initialMap = new Map();
+        [...localReports, ...SEEDED_ADMIN_REPORTS].forEach(r => {
+          const key = r.ticketId || r.id;
+          if (key && !initialMap.has(key)) initialMap.set(key, r);
+        });
+        cachedReports = Array.from(initialMap.values());
+        renderAdminReports();
+        setupReportsFilterListeners();
+
+        // 2. Fetch from Firestore reports collection in background
         if (db) {
           try {
             const snap = await Promise.race([
               db.collection('reports').limit(50).get(),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Reports fetch timeout')), 1500))
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Reports fetch timeout')), 1000))
             ]);
-            const liveReports = [];
+            const firestoreReports = [];
             snap.forEach(doc => {
-              liveReports.push({ id: doc.id, ...doc.data() });
+              firestoreReports.push({ id: doc.id, ...doc.data() });
             });
-            if (liveReports.length > 0) {
-              cachedReports = liveReports;
+            if (firestoreReports.length > 0) {
+              const fullMap = new Map();
+              [...localReports, ...firestoreReports, ...SEEDED_ADMIN_REPORTS].forEach(r => {
+                const key = r.ticketId || r.id;
+                if (key && !fullMap.has(key)) fullMap.set(key, r);
+              });
+              cachedReports = Array.from(fullMap.values());
+              renderAdminReports();
             }
           } catch (e) {
             console.warn('[REPORTS FETCH NOTIFICATION]', e.message);
           }
         }
-
-        renderAdminReports();
-        setupReportsFilterListeners();
       }
+      window.initAdminReportsHub = initAdminReportsHub;
 
       function renderAdminReports() {
         const container = document.getElementById('adminReportsContainer');
@@ -8196,10 +8216,22 @@ For support or further inquiries, reply directly to this chat.`;
               </div>
             </div>
 
+            <!-- User Incident Explanation Box -->
+            <div style="background: rgba(255, 59, 48, 0.08); border: 1.5px solid rgba(255, 59, 48, 0.35); border-radius: 10px; padding: 12px; margin-bottom: 12px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                <div style="font-size: 11px; font-weight: 800; color: #ff3b30; text-transform: uppercase; display: flex; align-items: center; gap: 6px;">
+                  <i class="fa-solid fa-align-left"></i> User Incident Explanation
+                </div>
+                <span class="badge" style="font-size: 9px; background: rgba(255, 59, 48, 0.2); color: #ff3b30;">Transmitted to Admin</span>
+              </div>
+              <div style="font-size: 13px; color: #f8fafc; line-height: 1.55; white-space: pre-wrap; word-break: break-word;">
+                ${escapeHtml(rep.explanation || rep.description || 'No written explanation provided by reporter.')}
+              </div>
+            </div>
+
             <!-- Violation Details -->
             <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 10px; margin-bottom: 12px;">
               <div style="font-size: 11px; color: #94a3b8; margin-bottom: 3px;"><strong>Infraction:</strong> ${escapeHtml(rep.category || 'GENERAL')} &bull; ${escapeHtml(rep.subReason || 'N/A')}</div>
-              <div style="font-size: 12px; color: #fff; line-height: 1.45; white-space: pre-wrap;">${escapeHtml(rep.description || 'No written description provided.')}</div>
             </div>
 
             <!-- Attached Evidence Snapshot -->

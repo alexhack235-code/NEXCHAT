@@ -356,7 +356,13 @@ function formatChatTimestamp(timestamp) {
 
 function getUserPresenceStatus(userData) {
   if (!userData) return 'Unknown';
-  if (userData.online) return 'Online';
+  if (window.NexPresenceEngine && typeof window.NexPresenceEngine.isUserActuallyOnline === 'function') {
+    if (window.NexPresenceEngine.isUserActuallyOnline(userData)) {
+      return 'Online';
+    }
+  } else if (userData.online === true) {
+    return 'Online';
+  }
   if (userData.lastSeen) return formatLastSeen(userData.lastSeen);
   return 'Offline';
 }
@@ -4807,12 +4813,40 @@ window.displayChronexAIMessage = displayChronexAIResponse;
 window.displayChronexAIResponse = displayChronexAIResponse;
 window.formatAiMarkdown = formatAiMarkdown;
 // ═══════════════════════════════════════════════════════════════════
-// FIRESTORE MESSAGE DELETION ENGINE
+// FIRESTORE MESSAGE DELETION & CACHE EVICTION ENGINE
 // ═══════════════════════════════════════════════════════════════════
+window.evictMessageFromCache = function(docId) {
+  if (!docId) return;
+  try {
+    if (typeof directChatMessageCache !== 'undefined' && directChatMessageCache.entries) {
+      for (const [key, val] of directChatMessageCache.entries()) {
+        if (val && Array.isArray(val.messages)) {
+          val.messages = val.messages.filter(m => m.docId !== docId && m.id !== docId);
+        }
+      }
+    }
+  } catch (_) {}
+};
+
+window.hideMessageLocally = function(docId) {
+  if (!docId) return;
+  try {
+    const localHidden = JSON.parse(localStorage.getItem('nex_hidden_msg_ids') || '[]');
+    if (!localHidden.includes(docId)) {
+      localHidden.push(docId);
+      localStorage.setItem('nex_hidden_msg_ids', JSON.stringify(localHidden.slice(-500)));
+    }
+  } catch (_) {}
+};
+
 window.deleteMessageFromFirestore = async function(collectionName, docId, forEveryone) {
   if (!docId) return;
   const targetCol = collectionName || (currentChatType === 'group' ? 'groupMessages' : 'messages');
   const msgRef = doc(db, targetCol, docId);
+
+  // Evict locally and hide immediately
+  window.evictMessageFromCache(docId);
+  window.hideMessageLocally(docId);
 
   try {
     if (forEveryone) {
@@ -4827,18 +4861,37 @@ window.deleteMessageFromFirestore = async function(collectionName, docId, forEve
           text: "This message was deleted",
           attachment: null,
           deletedAt: serverTimestamp()
+        }).catch(uErr => {
+          console.warn('[DELETION] Tombstone fallback failed:', uErr.message);
         });
       }
     } else {
       if (myUID) {
         await updateDoc(msgRef, {
           deletedFor: arrayUnion(myUID)
+        }).catch(uErr => {
+          console.warn('[DELETION] updateDoc deletedFor failed:', uErr.message);
         });
         console.log(`[DELETION] Successfully marked message ${docId} deleted for user ${myUID}`);
       }
     }
   } catch (err) {
     console.error(`[DELETION] Failed to process message deletion:`, err);
+    throw err;
+  }
+};
+
+window.saveReportToFirestore = async function(reportPayload) {
+  if (!db) return null;
+  try {
+    const reportRef = await addDoc(collection(db, 'reports'), {
+      ...reportPayload,
+      timestamp: serverTimestamp()
+    });
+    console.log('[REPORT] Successfully saved report to Firestore docId:', reportRef.id);
+    return reportRef.id;
+  } catch (err) {
+    console.error('[REPORT] Failed to save report to Firestore:', err);
     throw err;
   }
 };
@@ -5039,6 +5092,10 @@ function loadMessages() {
 
       const div = document.createElement("div");
       div.className = `message-wrapper ${isOwn ? "sent" : "received"}`;
+      if (m.docId) {
+        div.dataset.docId = m.docId;
+        div.id = `msg-wrapper-${m.docId}`;
+      }
       div.style.cssText = `
         display: flex;
         justify-content: ${isOwn ? "flex-end" : "flex-start"};
@@ -5053,6 +5110,19 @@ function loadMessages() {
       const isCirc = m.attachment && (m.attachment.isCircularVideo || m.attachment.fileType === 'video_note');
       const bubble = document.createElement("div");
       bubble.className = `message-bubble ${isOwn ? "sent" : "received"} ${isCirc ? "is-clip-message" : (isStk ? "is-sticker-message" : "")}`;
+      if (m.docId) {
+        bubble.dataset.docId = m.docId;
+      }
+      if (!isDeletedTombstone) {
+        bubble.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          if (window.NexChatFileManager && typeof window.NexChatFileManager.openDeleteMessageModal === 'function') {
+            window.NexChatFileManager.openDeleteMessageModal(m, isOwn, () => {
+              if (typeof debouncedUpdateMessages === 'function') debouncedUpdateMessages();
+            });
+          }
+        });
+      }
       bubble.style.cssText = (isStk || isCirc) ? `
         position: relative;
         padding: 2px;
@@ -5748,6 +5818,9 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
         if (infoStatusEl) infoStatusEl.textContent = statusText;
 
         updateChatProfileDisplay(username, profilePic, statusText);
+        if (window.NexPresenceEngine && typeof window.NexPresenceEngine.syncActiveChatPartner === 'function') {
+          window.NexPresenceEngine.syncActiveChatPartner(uid, username);
+        }
 
         const badgeTier = userData.verificationBadge || (userData.isVerified ? 'TIER_PRO' : 'NONE');
         if (window.NexVerificationCatalog && badgeTier && badgeTier !== 'NONE') {
