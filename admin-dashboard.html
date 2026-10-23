@@ -1501,7 +1501,7 @@
         <i class="fa-solid fa-bullhorn"></i> Global Broadcast Dispatcher
       </button>
       <button type="button" class="admin-tab-btn" data-tab="tab-security">
-        <i class="fa-solid fa-network-wired"></i> 4-IP Quota &amp; Cyber Radar
+        <i class="fa-solid fa-network-wired"></i> IP Quotas &amp; Sybil Guard
       </button>
       <button type="button" class="admin-tab-btn" data-tab="tab-health">
         <i class="fa-solid fa-heart-pulse"></i> Real Service Health &amp; Ping
@@ -1895,6 +1895,64 @@
           <div style="position: absolute; top: 10px; left: 14px; background: rgba(3,7,18,0.85); border: 1px solid rgba(0,242,255,0.2); border-radius: 8px; padding: 6px 12px; font-family: monospace; font-size: 10.5px;">
             <span style="color: var(--neon-cyan); font-weight: 700;">ORBITAL RADAR: SWEEPING 360°</span> &bull; <span style="color: var(--text-dim);">Central Hub: NEXCHAT Kansas City Ingress</span>
           </div>
+        </div>
+      </section>
+
+      <!-- User Registration Sybil Guard & IP Quota Monitor (Max 2 Accounts / IP) -->
+      <section class="admin-panel" id="userIpQuotaMonitorSection" style="margin-top: 24px;">
+        <div class="panel-header">
+          <div class="panel-title">
+            <i class="fa-solid fa-users-slash" style="color: var(--neon-cyan);"></i>
+            User Registration Sybil Guard &amp; IP Quota Monitor (Max 2 Per IP)
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="admin-chip cyan" id="chipTotalTrackedIps">TRACKED IPS: 0</span>
+            <span class="admin-chip" id="chipFlaggedIps" style="border-color: rgba(255,51,102,0.4); color: #ff3366;">FLAGGED: 0</span>
+            <button type="button" class="admin-btn secondary" id="btnRefreshIpRegistrations" style="padding: 4px 10px; font-size: 11px;">
+              <i class="fa-solid fa-arrows-rotate"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div style="background: rgba(0, 242, 255, 0.03); border: 1px solid rgba(0, 242, 255, 0.12); border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <p style="font-size: 12px; color: var(--text-dim); margin: 0; line-height: 1.5; flex: 1; min-width: 280px;">
+              Autonomous Sybil Prevention strictly enforces a <strong>hard limit of 2 accounts per IP address</strong> in <code style="color: var(--neon-cyan); font-family: monospace;">ip_registrations/{ipKey}</code>. SuperAdmins can inspect registration clusters, reset limits, grant exemptions to foreign developer nodes, or block abusive networks.
+            </p>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input type="text" id="filterIpRegistrationsInput" class="admin-input" placeholder="Search IP, email, or username..." style="font-size: 11.5px; width: 220px;" />
+              <select id="filterIpStatusSelect" class="admin-input" style="font-size: 11.5px; width: 140px;">
+                <option value="all">All Statuses</option>
+                <option value="max_reached">Max Reached (2/2)</option>
+                <option value="within_limit">Within Limit (1/2)</option>
+                <option value="blocked">Blocked IPs</option>
+                <option value="exempt">Exempt IPs</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table of IP Registrations -->
+        <div style="overflow-x: auto; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;" id="ipRegistrationsTable">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.08); color: var(--text-dim);">
+                <th style="padding: 12px 14px;">IP Address / Geo</th>
+                <th style="padding: 12px 14px;">Account Quota</th>
+                <th style="padding: 12px 14px;">Registered Accounts (Emails &amp; UIDs)</th>
+                <th style="padding: 12px 14px;">Last Activity</th>
+                <th style="padding: 12px 14px;">Status</th>
+                <th style="padding: 12px 14px; text-align: right;">Administrative Actions</th>
+              </tr>
+            </thead>
+            <tbody id="ipRegistrationsTbody">
+              <tr>
+                <td colspan="6" style="padding: 24px; text-align: center; color: var(--text-dim);">
+                  <i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i> Loading IP registration telemetry...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </div>
@@ -4535,6 +4593,9 @@
           if (targetTabId === 'tab-reports') {
             try { initAdminReportsHub(); } catch(e) {}
           }
+          if (targetTabId === 'tab-security') {
+            try { initUserIpRegistrationsMonitor(); } catch(e) {}
+          }
         });
       });
 
@@ -4559,6 +4620,7 @@
         try { initAdvancedCyberSystems(); } catch(e) { console.warn('[CYBER SYSTEMS INIT]', e); }
         try { initFulfillmentDesk(); } catch(e) { console.warn('[FULFILLMENT DESK INIT]', e); }
         try { initAdminReportsHub(); } catch(e) { console.warn('[REPORTS HUB INIT]', e); }
+        try { initUserIpRegistrationsMonitor(); } catch(e) { console.warn('[IP MONITOR INIT]', e); }
       }
 
       // ─── MASTER CYBER CONTROL DECK CONTROLLER ───
@@ -8348,6 +8410,254 @@ Status: ${rep.status}`;
           logAudit('Exported incident reports as CSV.', 'ok');
         });
       }
+
+
+      // ===============================================================
+      // USER REGISTRATION SYBIL GUARD & IP QUOTA MONITOR (MAX 2 PER IP)
+      // ===============================================================
+      let ipRegistrationsUnsubscribe = null;
+      let cachedIpRegistrations = [];
+
+      async function initUserIpRegistrationsMonitor() {
+        const tbody = document.getElementById('ipRegistrationsTbody');
+        if (!tbody) return;
+
+        setupIpRegistrationsListeners();
+
+        if (ipRegistrationsUnsubscribe) return;
+
+        if (typeof db !== 'undefined' && db && db.collection) {
+          try {
+            ipRegistrationsUnsubscribe = db.collection('ip_registrations')
+              .onSnapshot((snapshot) => {
+                const list = [];
+                snapshot.forEach(docSnap => {
+                  list.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                cachedIpRegistrations = list;
+                renderIpRegistrationsTable();
+              }, (err) => {
+                console.warn('[IP MONITOR SNAPSHOT NOTICE]', err.message);
+                db.collection('ip_registrations').get().then(snap => {
+                  const list = [];
+                  snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+                  cachedIpRegistrations = list;
+                  renderIpRegistrationsTable();
+                }).catch(() => {});
+              });
+          } catch (e) {
+            console.warn('[IP MONITOR INIT ERR]', e.message);
+          }
+        }
+      }
+      window.initUserIpRegistrationsMonitor = initUserIpRegistrationsMonitor;
+
+      function renderIpRegistrationsTable() {
+        const tbody = document.getElementById('ipRegistrationsTbody');
+        const chipTotal = document.getElementById('chipTotalTrackedIps');
+        const chipFlagged = document.getElementById('chipFlaggedIps');
+        const searchVal = (document.getElementById('filterIpRegistrationsInput')?.value || '').trim().toLowerCase();
+        const statusFilter = document.getElementById('filterIpStatusSelect')?.value || 'all';
+
+        if (chipTotal) chipTotal.textContent = `TRACKED IPS: ${cachedIpRegistrations.length}`;
+        const flaggedCount = cachedIpRegistrations.filter(r => (Number(r.count || 0) >= 2) || r.blocked).length;
+        if (chipFlagged) chipFlagged.textContent = `FLAGGED: ${flaggedCount}`;
+
+        if (!tbody) return;
+
+        let filtered = cachedIpRegistrations.filter(item => {
+          const count = Number(item.count || 0);
+          if (statusFilter === 'max_reached' && count < 2) return false;
+          if (statusFilter === 'within_limit' && count >= 2) return false;
+          if (statusFilter === 'blocked' && !item.blocked) return false;
+          if (statusFilter === 'exempt' && !item.exempt) return false;
+
+          if (searchVal) {
+            const ip = (item.ip || item.id || '').toLowerCase();
+            const emails = (Array.isArray(item.accountEmails) ? item.accountEmails.join(' ') : '').toLowerCase();
+            const uids = (Array.isArray(item.accountUids) ? item.accountUids.join(' ') : '').toLowerCase();
+            const lastUser = (item.lastUsername || '').toLowerCase();
+            const country = (item.country || '').toLowerCase();
+            const city = (item.city || '').toLowerCase();
+            const isp = (item.isp || '').toLowerCase();
+            if (!ip.includes(searchVal) && !emails.includes(searchVal) && !uids.includes(searchVal) && !lastUser.includes(searchVal) && !country.includes(searchVal) && !city.includes(searchVal) && !isp.includes(searchVal)) {
+              return false;
+            }
+          }
+          return true;
+        });
+
+        if (filtered.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="padding: 24px; text-align: center; color: var(--text-dim);">
+                <i class="fa-solid fa-circle-info" style="margin-right: 6px;"></i> No IP registration records match the current filter.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        tbody.innerHTML = filtered.map(item => {
+          const count = Number(item.count || (Array.isArray(item.accountUids) ? item.accountUids.length : 0));
+          const isMax = count >= 2;
+          const isBlocked = Boolean(item.blocked);
+          const isExempt = Boolean(item.exempt);
+
+          let quotaBarColor = '#10b981';
+          if (count === 1) quotaBarColor = '#00f3ff';
+          if (isMax) quotaBarColor = '#ff3366';
+
+          let statusBadge = '<span class="badge active"><i class="fa-solid fa-check"></i> WITHIN LIMIT</span>';
+          if (isBlocked) {
+            statusBadge = '<span class="badge" style="background: #ef4444; color: #fff;"><i class="fa-solid fa-ban"></i> BLOCKED</span>';
+          } else if (isExempt) {
+            statusBadge = '<span class="badge" style="background: #10b981; color: #fff;"><i class="fa-solid fa-shield-halved"></i> EXEMPT</span>';
+          } else if (isMax) {
+            statusBadge = '<span class="badge" style="background: #f59e0b; color: #000; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> MAX REACHED (2/2)</span>';
+          }
+
+          const emails = Array.isArray(item.accountEmails) ? item.accountEmails : [];
+          const uids = Array.isArray(item.accountUids) ? item.accountUids : [];
+
+          const accountsHtml = emails.length > 0 
+            ? emails.map((em, idx) => `
+                <div style="margin-bottom: 2px;">
+                  <span class="admin-chip" style="font-size: 11px; padding: 2px 6px;">
+                    <i class="fa-solid fa-envelope" style="color: var(--neon-cyan); margin-right: 4px;"></i>${escapeHtml(em)}
+                  </span>
+                  <span style="font-size: 10px; color: var(--text-dim); font-family: monospace;">(${escapeHtml(uids[idx] || '')})</span>
+                </div>
+              `).join('')
+            : '<span style="color: var(--text-dim); font-style: italic;">No account history</span>';
+
+          const locationText = [item.city, item.country].filter(Boolean).join(', ') || 'Unknown Location';
+          const ispText = item.isp || 'Standard ISP';
+
+          return `
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s ease;">
+              <td style="padding: 12px 14px;">
+                <div style="font-family: monospace; font-size: 13.5px; font-weight: 700; color: #fff; margin-bottom: 3px;">
+                  <i class="fa-solid fa-network-wired" style="color: var(--neon-cyan); margin-right: 6px;"></i>${escapeHtml(item.ip || item.id)}
+                </div>
+                <div style="font-size: 11px; color: var(--text-dim);">
+                  <i class="fa-solid fa-globe" style="margin-right: 4px;"></i>${escapeHtml(locationText)}
+                  &bull; <span style="font-family: monospace;">${escapeHtml(ispText)}</span>
+                </div>
+              </td>
+              <td style="padding: 12px 14px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <strong style="font-size: 13px; color: ${quotaBarColor}; font-family: monospace;">${count} / 2</strong>
+                  <div style="width: 50px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                    <div style="width: ${Math.min(100, (count / 2) * 100)}%; height: 100%; background: ${quotaBarColor};"></div>
+                  </div>
+                </div>
+                <div style="font-size: 10px; color: var(--text-dim); margin-top: 3px;">
+                  ${isMax ? 'Registration blocked' : 'Slots remaining: ' + Math.max(0, 2 - count)}
+                </div>
+              </td>
+              <td style="padding: 12px 14px;">
+                ${accountsHtml}
+              </td>
+              <td style="padding: 12px 14px;">
+                <div style="color: #e2e8f0; font-size: 11.5px; font-weight: 600;">
+                  <i class="fa-solid fa-user" style="color: var(--neon-cyan); margin-right: 4px;"></i>${escapeHtml(item.lastUsername || 'N/A')}
+                </div>
+                <div style="font-size: 10px; color: var(--text-dim); margin-top: 2px;">
+                  <i class="fa-solid fa-clock" style="margin-right: 3px;"></i>${item.lastRegisteredAt ? new Date(item.lastRegisteredAt).toLocaleString() : 'N/A'}
+                </div>
+              </td>
+              <td style="padding: 12px 14px;">
+                ${statusBadge}
+              </td>
+              <td style="padding: 12px 14px; text-align: right;">
+                <div style="display: inline-flex; gap: 6px;">
+                  <button type="button" class="admin-btn secondary" onclick="window.adminResetIpQuota('${item.id}')" title="Reset quota to 0 to permit registration" style="padding: 4px 8px; font-size: 11px;">
+                    <i class="fa-solid fa-rotate-left" style="color: var(--neon-cyan);"></i> Reset
+                  </button>
+                  <button type="button" class="admin-btn secondary" onclick="window.adminToggleIpExempt('${item.id}', ${!isExempt})" title="Toggle Developer Exemption" style="padding: 4px 8px; font-size: 11px; ${isExempt ? 'border-color: #10b981; color: #10b981;' : ''}">
+                    <i class="fa-solid fa-shield-halved"></i> ${isExempt ? 'Unexempt' : 'Exempt'}
+                  </button>
+                  <button type="button" class="admin-btn secondary" onclick="window.adminToggleIpBlock('${item.id}', ${!isBlocked})" title="Toggle IP Block" style="padding: 4px 8px; font-size: 11px; ${isBlocked ? 'border-color: #ef4444; color: #ef4444;' : ''}">
+                    <i class="fa-solid fa-ban"></i> ${isBlocked ? 'Unblock' : 'Block'}
+                  </button>
+                  <button type="button" class="admin-btn secondary" onclick="window.adminDeleteIpRecord('${item.id}')" title="Delete record" style="padding: 4px 8px; font-size: 11px; color: var(--neon-red); border-color: rgba(255,51,102,0.3);">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join('');
+      }
+
+      function setupIpRegistrationsListeners() {
+        if (window._ipRegistrationsListenersSet) return;
+        window._ipRegistrationsListenersSet = true;
+
+        document.getElementById('filterIpRegistrationsInput')?.addEventListener('input', renderIpRegistrationsTable);
+        document.getElementById('filterIpStatusSelect')?.addEventListener('change', renderIpRegistrationsTable);
+        document.getElementById('btnRefreshIpRegistrations')?.addEventListener('click', () => {
+          if (typeof db !== 'undefined' && db && db.collection) {
+            db.collection('ip_registrations').get().then(snap => {
+              const list = [];
+              snap.forEach(d => list.push({ id: d.id, ...d.data() }));
+              cachedIpRegistrations = list;
+              renderIpRegistrationsTable();
+              logAudit('Refreshed IP registration & Sybil monitor table.', 'ok');
+            }).catch(e => {
+              alert('Could not refresh IP table: ' + e.message);
+            });
+          }
+        });
+      }
+
+      window.adminResetIpQuota = async function(ipKey) {
+        if (!confirm(`Reset account registration quota for IP [${ipKey}] to 0?`)) return;
+        try {
+          await db.collection('ip_registrations').doc(ipKey).update({
+            count: 0,
+            accountUids: [],
+            accountEmails: []
+          });
+          logAudit(`Reset registration quota for IP ${ipKey} to 0 accounts.`, 'ok');
+          alert(`Registration quota for ${ipKey} has been reset to 0.`);
+        } catch (e) {
+          alert(`Failed to reset quota: ${e.message}`);
+        }
+      };
+
+      window.adminToggleIpExempt = async function(ipKey, exemptStatus) {
+        try {
+          await db.collection('ip_registrations').doc(ipKey).update({
+            exempt: exemptStatus
+          });
+          logAudit(`${exemptStatus ? 'Granted' : 'Revoked'} IP registration exemption for ${ipKey}.`, 'ok');
+        } catch (e) {
+          alert(`Failed to update exemption status: ${e.message}`);
+        }
+      };
+
+      window.adminToggleIpBlock = async function(ipKey, blockStatus) {
+        try {
+          await db.collection('ip_registrations').doc(ipKey).update({
+            blocked: blockStatus
+          });
+          logAudit(`${blockStatus ? 'Blocked' : 'Unblocked'} IP ${ipKey} in Sybil firewall.`, 'warn');
+        } catch (e) {
+          alert(`Failed to update block status: ${e.message}`);
+        }
+      };
+
+      window.adminDeleteIpRecord = async function(ipKey) {
+        if (!confirm(`Completely delete registration tracking record for ${ipKey}?`)) return;
+        try {
+          await db.collection('ip_registrations').doc(ipKey).delete();
+          logAudit(`Deleted IP registration entry ${ipKey}.`, 'alert');
+        } catch (e) {
+          alert(`Failed to delete record: ${e.message}`);
+        }
+      };
 
     })();
   </script>

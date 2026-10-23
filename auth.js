@@ -12,7 +12,7 @@ import {
   setPersistence,
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { setDoc, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { setDoc, doc, getDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { ref, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const loginAttempts = new Map();
@@ -62,31 +62,191 @@ function getRandomSticker() {
   return 'logo.jpg';
 }
 
+function sanitizeIpKey(ip) {
+  if (!ip || ip === 'unknown') return 'unknown_ip';
+  return String(ip).trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
 async function detectIPAndVPN() {
+  let ipCandidate = null;
+  // 1. Try ipify.org (ultra fast, CORS-safe, high availability worldwide)
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const resp = await fetch('https://api.ipify.org?format=json', { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (resp.ok) {
+      const d = await resp.json();
+      if (d.ip) ipCandidate = d.ip;
+    }
+  } catch (_) { }
+
+  // 2. Try ipapi.co for rich geolocation & ISP metadata
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 2500);
 
     const response = await fetch('https://ipapi.co/json/', { signal: controller.signal });
     clearTimeout(timeoutId);
-    if (!response.ok) return null;
-    const data = await response.json();
-
-    const ipInfo = {
-      ip: data.ip || 'unknown',
-      country: data.country_name || 'unknown',
-      city: data.city || 'unknown',
-      isp: data.org || 'unknown',
-      isVPN: false, // Do not block users based on carrier proxy heuristics
-      latitude: data.latitude || 0,
-      longitude: data.longitude || 0,
-      timezone: data.timezone || 'UTC'
-    };
-
-    return ipInfo;
+    if (response.ok) {
+      const data = await response.json();
+      return {
+        ip: data.ip || ipCandidate || 'unknown',
+        country: data.country_name || 'unknown',
+        city: data.city || 'unknown',
+        isp: data.org || 'unknown',
+        isVPN: false,
+        latitude: data.latitude || 0,
+        longitude: data.longitude || 0,
+        timezone: data.timezone || 'UTC'
+      };
+    }
   } catch (err) {
-    console.warn('[AUTH] Network telemetry note:', err.message);
-    return null;
+    console.warn('[AUTH] Geo IP telemetry note:', err.message);
+  }
+
+  // 3. Fallback to ipwho.is if ipapi was rate-limited
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const resp = await fetch('https://ipwho.is/', { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data && data.ip) {
+        return {
+          ip: data.ip,
+          country: data.country || 'unknown',
+          city: data.city || 'unknown',
+          isp: (data.connection && data.connection.isp) || 'unknown',
+          isVPN: false,
+          latitude: data.latitude || 0,
+          longitude: data.longitude || 0,
+          timezone: (data.timezone && data.timezone.id) || 'UTC'
+        };
+      }
+    }
+  } catch (_) { }
+
+  if (ipCandidate) {
+    return {
+      ip: ipCandidate,
+      country: 'unknown',
+      city: 'unknown',
+      isp: 'unknown',
+      isVPN: false,
+      latitude: 0,
+      longitude: 0,
+      timezone: 'UTC'
+    };
+  }
+
+  return null;
+}
+
+async function checkIpRegistrationLimit(ip) {
+  // Device-level check
+  const localCount = parseInt(localStorage.getItem('nex_reg_accounts_count') || '0', 10);
+  if (localCount >= 2) {
+    return {
+      allowed: false,
+      reason: 'Registration quota reached (maximum 2 accounts per device/network). Contact SuperAdmin on WhatsApp (+234 905 434 5858) for authorization.',
+      count: localCount
+    };
+  }
+
+  if (!ip || ip === 'unknown') {
+    return { allowed: true, count: localCount };
+  }
+
+  const ipKey = sanitizeIpKey(ip);
+  try {
+    const ipDocRef = doc(db, 'ip_registrations', ipKey);
+    const snap = await Promise.race([
+      getDoc(ipDocRef),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('IP check timeout')), 2500))
+    ]);
+
+    if (snap && snap.exists()) {
+      const data = snap.data();
+      if (data.blocked === true) {
+        return {
+          allowed: false,
+          reason: 'Network registration restricted by security policy. Contact SuperAdmin on WhatsApp: +234 905 434 5858.',
+          count: data.count || 2
+        };
+      }
+      if (data.exempt === true) {
+        return { allowed: true, count: data.count || 0, exempt: true };
+      }
+      const count = Number(data.count) || (data.accountUids ? data.accountUids.length : 0);
+      if (count >= 2) {
+        return {
+          allowed: false,
+          reason: `Registration Limit Exceeded: Maximum 2 accounts permitted per IP address (${ip}). Existing accounts registered: ${count}/2. Contact SuperAdmin on WhatsApp: +234 905 434 5858 for an exemption.`,
+          count: count
+        };
+      }
+      return { allowed: true, count: count };
+    }
+    return { allowed: true, count: 0 };
+  } catch (err) {
+    console.warn('[AUTH] IP limit check bypass on network glitch:', err.message);
+    return { allowed: true, count: 0 };
+  }
+}
+
+async function recordIpRegistration(ipInfo, uid, email, username) {
+  try {
+    const localCount = parseInt(localStorage.getItem('nex_reg_accounts_count') || '0', 10);
+    localStorage.setItem('nex_reg_accounts_count', String(localCount + 1));
+
+    if (!ipInfo || !ipInfo.ip || ipInfo.ip === 'unknown') return;
+
+    const ipKey = sanitizeIpKey(ipInfo.ip);
+    const ipDocRef = doc(db, 'ip_registrations', ipKey);
+
+    const snap = await Promise.race([
+      getDoc(ipDocRef),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 2500))
+    ]).catch(() => null);
+
+    if (!snap || !snap.exists()) {
+      await setDoc(ipDocRef, {
+        ip: ipInfo.ip,
+        count: 1,
+        accountUids: [uid],
+        accountEmails: [email],
+        lastRegisteredAt: new Date().toISOString(),
+        lastUsername: username,
+        country: ipInfo.country || 'unknown',
+        city: ipInfo.city || 'unknown',
+        isp: ipInfo.isp || 'unknown',
+        blocked: false,
+        exempt: false
+      });
+    } else {
+      const existing = snap.data();
+      const currentCount = Number(existing.count || 0);
+      const uids = Array.isArray(existing.accountUids) ? [...existing.accountUids] : [];
+      const emails = Array.isArray(existing.accountEmails) ? [...existing.accountEmails] : [];
+      if (!uids.includes(uid)) uids.push(uid);
+      if (!emails.includes(email)) emails.push(email);
+
+      await updateDoc(ipDocRef, {
+        count: currentCount + 1,
+        accountUids: uids,
+        accountEmails: emails,
+        lastRegisteredAt: new Date().toISOString(),
+        lastUsername: username,
+        country: ipInfo.country || existing.country || 'unknown',
+        city: ipInfo.city || existing.city || 'unknown',
+        isp: ipInfo.isp || existing.isp || 'unknown'
+      });
+    }
+    console.log('[AUTH] IP registration record updated for:', ipKey);
+  } catch (err) {
+    console.warn('[AUTH] Could not record IP registration:', err.message);
   }
 }
 
@@ -149,6 +309,32 @@ function attachRegisterHandler() {
     }
 
     try {
+      showLoginLoader('Verifying Security Quota...', 'Inspecting network authorization and IP registration limits.');
+
+      // 1. IP Rate Limiting Guard (Max 2 accounts per IP)
+      let detectedIpData = null;
+      try {
+        detectedIpData = await detectIPAndVPN();
+      } catch (_) { }
+
+      const ipLimitCheck = await checkIpRegistrationLimit(detectedIpData ? detectedIpData.ip : null);
+      if (!ipLimitCheck.allowed) {
+        hideLoginLoader();
+        showResult(`
+          <div style="display:flex; align-items:flex-start; gap:10px; text-align:left;">
+            <i class="fa-solid fa-triangle-exclamation" style="color:#ff3366; font-size:18px; margin-top:2px;"></i>
+            <div>
+              <strong style="color:#ff3366; display:block; margin-bottom:4px;">Registration Quota Exceeded (Max 2 Accounts per IP)</strong>
+              <span>${ipLimitCheck.reason}</span>
+              <div style="margin-top:6px; font-size:11px; opacity:0.85;">
+                Support &amp; Exemption Hotline: <a href="https://wa.me/2349054345858" target="_blank" style="color:#00f3ff; text-decoration:underline;">+234 905 434 5858</a>
+              </div>
+            </div>
+          </div>
+        `, true);
+        return;
+      }
+
       showLoginLoader('Creating Account...', 'Registering credentials and configuring secure workspace.');
       showResult('Creating your secure NEXCHAT account...', false);
 
@@ -157,6 +343,11 @@ function attachRegisterHandler() {
 
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       console.log('[AUTH] User created in Auth:', cred.user.uid);
+
+      // Record IP registration to ip_registrations collection (Non-blocking background promise)
+      recordIpRegistration(detectedIpData, cred.user.uid, email, username).catch(rErr => {
+        console.warn('[AUTH] Background IP registration record notice:', rErr?.message);
+      });
 
       const selectedAvatarInput = document.getElementById('selectedAvatarData');
       const customAvatar = selectedAvatarInput && selectedAvatarInput.value ? selectedAvatarInput.value : null;
@@ -177,6 +368,8 @@ function attachRegisterHandler() {
         profilePicUrl: finalProfilePic,
         uid: cred.user.uid,
         registrationTimestamp: new Date().toISOString(),
+        registrationIP: detectedIpData?.ip || 'unknown',
+        ipKey: sanitizeIpKey(detectedIpData?.ip)
       };
 
       // 1. Immediately store to localStorage for zero-latency session continuity
@@ -201,7 +394,8 @@ function attachRegisterHandler() {
       }
 
       // 3. Telemetry in background (completely non-blocking)
-      detectIPAndVPN().then(async (ipInfo) => {
+      (async () => {
+        const ipInfo = detectedIpData || await detectIPAndVPN();
         if (!ipInfo) return;
         const securityData = {
           email,
@@ -220,7 +414,7 @@ function attachRegisterHandler() {
         } catch (secErr) {
           console.warn('[AUTH] Security telemetry skipped:', secErr.message);
         }
-      }).catch(() => { });
+      })().catch(() => { });
 
       // 4. Realtime Database sync - STRICTLY NON-BLOCKING! NEVER AWAIT!
       try {
@@ -1076,3 +1270,10 @@ function initNexshotFusionIntro() {
     overlay.style.display = 'none';
   }
 }
+
+// Window exports for IP Sybil Shield & Registration Quota Monitoring
+window.checkIpRegistrationLimit = checkIpRegistrationLimit;
+window.recordIpRegistration = recordIpRegistration;
+window.detectIPAndVPN = detectIPAndVPN;
+window.sanitizeIpKey = sanitizeIpKey;
+

@@ -14434,93 +14434,120 @@ function setupCreateStatusModal() {
 }
 
 
+let announcementsUnsubscribe = null;
+
 async function loadAnnouncements() {
   try {
     const announcementsFeed = document.getElementById('announcementsFeed');
     if (!announcementsFeed) return;
 
-    const pinnedAnnouncementHTML = `
-      <div class="announcement-item pinned-announcement" style="border: 2px solid #00ff66; background: rgba(0, 255, 102, 0.05); margin-bottom: 15px;">
-        <div class="announcement-header">
-          <h4 class="announcement-title">WELCOME TO NEXCHAT</h4>
-          <span class="announcement-badge" style="background: #00ff66; color: #000;"><i class="fa-solid fa-code"></i> NEX-DEV</span>
-        </div>
-        <p class="announcement-content" style="font-weight: 600; color: #fff;">
-          WELCOME TO NEXCHAT THE FUTURE IS INIT I AM DEMON ALEX NEX DEVELOPER....
-        </p>
-        <p class="announcement-content">
-          CAMSHOT IS LIVE ON NEXCHAT! ENJOY ULTRA HD SHORT-FORM VIDEOS, CREATOR LIVE RECORDING, SHADER COLOR GRADES, AND NEX TOKEN BOUNTIES.
-        </p>
-        <p class="announcement-content" style="color: #00ff66; font-weight: bold; margin-top: 10px; text-shadow: 0 0 10px rgba(0,255,102,0.5);">
-          <i class="fa-solid fa-terminal"></i> LIVE TERMINAL WILL BE ADDED TO NEXCHAT
-        </p>
-        <div class="announcement-footer">
-          <span class="announcement-time">IMPORTANT Update</span>
-          <span class="announcement-admin">BEST REGARDS: DEMON ALEX {LINUX-DEVELOPER}</span>
-        </div>
-      </div>
-    `;
-
-    const q = query(
-      collection(db, 'announcements'),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    );
-
-    const snapshot = await getDocs(q);
-
-    announcementsFeed.innerHTML = pinnedAnnouncementHTML;
-
-    if (snapshot.empty) {
-      announcementsFeed.innerHTML += `
-        <div class="announcements-empty-state">
-          <p>No other announcements yet</p>
-          <p class="hint">Stay tuned for more updates from NEXCHAT</p>
-        </div>
-      `;
-      return;
+    // Detach previous realtime snapshot listener if active
+    if (typeof announcementsUnsubscribe === 'function') {
+      announcementsUnsubscribe();
+      announcementsUnsubscribe = null;
     }
 
-    snapshot.forEach(doc => {
-      const announcement = doc.data();
-      const announceDiv = document.createElement('div');
-      announceDiv.className = 'announcement-item';
+    // Real-Time live listener on system_announcements dispatched by SuperAdmin Dashboard
+    const qSys = query(
+      collection(db, 'system_announcements'),
+      where('active', '==', true),
+      limit(25)
+    );
 
-      const createdTime = announcement.createdAt?.toDate ? announcement.createdAt.toDate() : (announcement.createdAt ? new Date(announcement.createdAt) : new Date());
-      const timeDiff = Math.floor((Date.now() - createdTime.getTime()) / 1000);
+    announcementsUnsubscribe = onSnapshot(qSys, async (snapshot) => {
+      if (snapshot.empty) {
+        // Fallback check legacy announcements collection
+        try {
+          const qLeg = query(collection(db, 'announcements'), orderBy('createdAt', 'desc'), limit(15));
+          const legSnap = await getDocs(qLeg);
+          if (!legSnap.empty) {
+            renderAnnouncementsFromSnapshot(legSnap, announcementsFeed);
+            return;
+          }
+        } catch (_) {}
 
-      let timeText = 'Just now';
-      if (timeDiff < 60) {
-        timeText = 'Just now';
-      } else if (timeDiff < 3600) {
-        timeText = `${Math.floor(timeDiff / 60)}m ago`;
-      } else if (timeDiff < 86400) {
-        timeText = `${Math.floor(timeDiff / 3600)}h ago`;
-      } else {
-        timeText = `${Math.floor(timeDiff / 86400)}d ago`;
+        announcementsFeed.innerHTML = `
+          <div class="announcements-empty-state" id="announcementsEmptyState">
+            <i class="fa-solid fa-tower-broadcast" style="font-size: 32px; color: #475569; margin-bottom: 12px;"></i>
+            <p>No active system announcements</p>
+            <p class="hint">Updates and broadcasts dispatched from the Admin Dashboard will appear here in real-time.</p>
+          </div>
+        `;
+        return;
       }
 
-      announceDiv.innerHTML = `
-        <div class="announcement-header">
-          <h4 class="announcement-title">${escape(announcement.title || 'Announcement')}</h4>
-          <span class="announcement-badge"><i class="fa-solid fa-shield-halved"></i> Admin</span>
-        </div>
-        <p class="announcement-content">${escape(announcement.content || '')}</p>
-        <div class="announcement-footer">
-          <span class="announcement-time">${timeText}</span>
-          <span class="announcement-admin">By Admin</span>
-        </div>
-      `;
-
-      announcementsFeed.appendChild(announceDiv);
+      renderAnnouncementsFromSnapshot(snapshot, announcementsFeed);
+    }, (err) => {
+      console.warn('[ANNOUNCEMENTS SNAPSHOT NOTICE]', err.message);
+      loadAnnouncementsFallback(announcementsFeed);
     });
 
-    showNotif('Announcements updated', 'success', 2000);
   } catch (error) {
-    console.error('? Error loading announcements:', error);
-    showNotif('Error loading announcements: ' + error.message, 'error');
+    console.error('Error loading announcements:', error);
   }
 }
+
+async function loadAnnouncementsFallback(feed) {
+  try {
+    const snap = await getDocs(query(collection(db, 'system_announcements'), limit(20)));
+    renderAnnouncementsFromSnapshot(snap, feed);
+  } catch (_) {
+    if (feed) {
+      feed.innerHTML = `
+        <div class="announcements-empty-state">
+          <i class="fa-solid fa-tower-broadcast" style="font-size: 32px; color: #475569; margin-bottom: 12px;"></i>
+          <p>No active system announcements</p>
+          <p class="hint">Dispatches from the Admin Dashboard will appear here.</p>
+        </div>
+      `;
+    }
+  }
+}
+
+function renderAnnouncementsFromSnapshot(snapshot, feed) {
+  if (!feed) return;
+  feed.innerHTML = '';
+
+  const announcements = [];
+  snapshot.forEach(docSnap => {
+    announcements.push({ id: docSnap.id, ...docSnap.data() });
+  });
+
+  // Sort descending by timestamp / createdAt
+  announcements.sort((a, b) => {
+    const tA = a.timestamp?.toDate ? a.timestamp.toDate().getTime() : (a.createdAt?.toDate ? a.createdAt.toDate().getTime() : 0);
+    const tB = b.timestamp?.toDate ? b.timestamp.toDate().getTime() : (b.createdAt?.toDate ? b.createdAt.toDate().getTime() : 0);
+    return tB - tA;
+  });
+
+  announcements.forEach(item => {
+    if (window.NexTranslator && typeof window.NexTranslator.renderAnnouncementCardHtml === 'function') {
+      const cardHtml = window.NexTranslator.renderAnnouncementCardHtml(item, item.id);
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = cardHtml.trim();
+      feed.appendChild(tempDiv.firstChild);
+    } else {
+      const announceDiv = document.createElement('div');
+      announceDiv.className = 'announcement-item';
+      announceDiv.innerHTML = `
+        <div class="announcement-header">
+          <h4 class="announcement-title">${escape(item.title || 'System Announcement')}</h4>
+          <span class="announcement-badge"><i class="fa-solid fa-bullhorn"></i> Admin</span>
+        </div>
+        <p class="announcement-content">${escape(item.message || item.content || '')}</p>
+      `;
+      feed.appendChild(announceDiv);
+    }
+  });
+
+  // If client language is not English, auto-translate!
+  if (window.NexTranslator && window.NexTranslator.currentLang && window.NexTranslator.currentLang !== 'en') {
+    setTimeout(() => {
+      window.NexTranslator.translateAllAnnouncementsInFeed(window.NexTranslator.currentLang);
+    }, 200);
+  }
+}
+window.loadAnnouncements = loadAnnouncements;
 
 function loadTokenBalance() {
   console.log('Loading token balance');

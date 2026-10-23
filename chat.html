@@ -322,40 +322,45 @@
       </ul>
     </div>
 
-    <!-- ANNOUNCEMENTS SECTION -->
+    <!-- ANNOUNCEMENTS SECTION (LIVE FROM ADMIN DASHBOARD + AUTO-TRANSLATION) -->
     <div class="announcements-container" id="announcementsContainer" style="display: none;">
       <div class="announcements-header">
-        <h3>Announcements</h3>
-      </div>
-      <div id="announcementsFeed" class="announcements-feed">
-        <!-- WELCOME ANNOUNCEMENT BLOCK -->
-        <div class="announcement-item pinned-announcement"
-          style="border: 2px solid #00ff66; background: rgba(0, 255, 102, 0.05);">
-          <div class="announcement-header">
-            <h4 class="announcement-title">WELCOME TO NEXCHAT</h4>
-            <span class="announcement-badge" style="background: #00ff66; color: #000;"><i class="fa-solid fa-code"></i> NEX-DEV</span>
-          </div>
-          <p class="announcement-content" style="font-weight: 600; color: #fff;">
-            WELCOME TO NEXCHAT THE FUTURE IS INIT I AM DEMON ALEX NEX DEVELOPER....
-          </p>
-          <p class="announcement-content">
-            EXPERIENCE CAMSHOT — OUR EXCLUSIVE HIGH-DEFINITION SHORT-FORM VIDEO PLATFORM LIVE ON NEXCHAT.
-            EXPLORE THE FEED, RECORD LIVE IN THE STUDIO, AND EARN BOUNTY TOKENS!
-          </p>
-          <div style="margin: 12px 0;">
-            <a href="reels.html" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #E8B84B, #C9972E); color: #000; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 12.5px; padding: 9px 18px; border-radius: 9999px; text-decoration: none; box-shadow: 0 4px 16px rgba(232,184,75,0.35); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
-              <i class="fa-solid fa-play"></i> LAUNCH CAMSHOT
-            </a>
-          </div>
-          <div class="announcement-footer">
-            <span class="announcement-time">IMPORTANT Update</span>
-            <span class="announcement-admin">BEST REGARDS: DEMON ALEX {LINUX-DEVELOPER}</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 10px;">
+          <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 18px;">
+            <i class="fa-solid fa-bullhorn" style="color: #00f3ff;"></i> System Announcements
+          </h3>
+          <div class="announcement-controls-bar">
+            <div class="announcement-lang-picker">
+              <i class="fa-solid fa-language" style="color: #c084fc;"></i>
+              <select id="announcementLangSelect" class="announcement-lang-select" title="Auto-Translate Language">
+                <option value="auto">Auto (Device Lang)</option>
+                <option value="en">English (US)</option>
+                <option value="es">Español (Spanish)</option>
+                <option value="fr">Français (French)</option>
+                <option value="de">Deutsch (German)</option>
+                <option value="zh">中文 (Chinese)</option>
+                <option value="ja">日本語 (Japanese)</option>
+                <option value="ru">Русский (Russian)</option>
+                <option value="ar">العربية (Arabic)</option>
+                <option value="pt">Português (Portuguese)</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+              </select>
+            </div>
+            <button type="button" id="btnAutoTranslateAll" class="btn-auto-translate" title="Auto-Translate all announcements">
+              <i class="fa-solid fa-globe"></i>
+              <span>Auto-Translate</span>
+            </button>
+            <button type="button" id="refreshAnnouncementsBtn" class="announcement-refresh-btn" title="Refresh Announcements">
+              <i class="fa-solid fa-rotate"></i>
+            </button>
           </div>
         </div>
-
-        <div class="announcements-empty-state">
-          <p>No other announcements yet</p>
-          <p class="hint">Stay tuned for updates from NEXCHAT</p>
+      </div>
+      <div id="announcementsFeed" class="announcements-feed">
+        <div class="announcements-empty-state" id="announcementsEmptyState">
+          <i class="fa-solid fa-tower-broadcast" style="font-size: 32px; color: #475569; margin-bottom: 12px;"></i>
+          <p>No system announcements published</p>
+          <p class="hint">Live broadcasts dispatched from the SuperAdmin Dashboard will appear here in real-time.</p>
         </div>
       </div>
     </div>
@@ -4600,6 +4605,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/chat-file-transfer-manager.js"></script>
   <script src="./src/js/group-chat-addictive-suite.js"></script>
   <script src="./src/js/cyber-scribe-ai.js"></script>
+  <script src="./src/js/announcement-translator.js"></script>
   <script src="./src/js/ghost-whisper-engine.js"></script>
   <script src="./src/js/telegram-whatsapp-presence.js"></script>
   <script type="module" src="pwa-install.js"></script>

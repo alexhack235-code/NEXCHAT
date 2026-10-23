@@ -194,6 +194,28 @@ service cloud.firestore {
     //   - description: string (optional, max 5000 chars)
     //   - status: string (optional, default 'pending')
     //   - timestamp: timestamp/string (optional)
+    //
+    // Collection: system_announcements
+    // Document ID: {announcementId} (Auto-generated)
+    // Fields:
+    //   - text / message / title: string
+    //   - active / status: bool or string
+    //   - createdAt / timestamp: timestamp or string
+    //
+    // Collection: ip_registrations
+    // Document ID: {ipKey} (Sanitized IP representation or hash)
+    // Fields:
+    //   - ip: string (IPv4 or IPv6 address)
+    //   - count: number (registration count per IP, max 2 allowed)
+    //   - accountUids: list of strings (registered user UIDs)
+    //   - accountEmails: list of strings (registered user emails)
+    //   - lastRegisteredAt: timestamp or number or string
+    //   - lastUsername: string
+    //   - country: string
+    //   - city: string
+    //   - isp: string
+    //   - blocked: bool (IP blocked flag)
+    //   - exempt: bool (IP exempt flag)
     // ===============================================================
 
     // ===============================================================
@@ -1576,6 +1598,16 @@ service cloud.firestore {
       allow read, write: if isSuperAdmin();
     }
 
+    // IP Registration Rate Limiting (Used to limit account creation to max 2 accounts per IP and monitor Sybil accounts in Admin Dashboard)
+    match /ip_registrations/{ipKey} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['ip', 'count', 'accountUids', 'accountEmails', 'lastRegisteredAt', 'lastUsername', 'country', 'city', 'isp', 'blocked', 'exempt']);
+      allow update: if isSuperAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count', 'accountUids', 'accountEmails', 'lastRegisteredAt', 'lastUsername', 'country', 'city', 'isp'])
+      );
+      allow delete: if isSuperAdmin();
+    }
+
     match /videoActivity/{vidActId} {
       allow create: if isAuthenticated();
       allow read, write: if isSuperAdmin();
@@ -1653,6 +1685,12 @@ service cloud.firestore {
     // ===============================================================
     match /announcements/{announcementId} {
       allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // System Announcements (public & authenticated can read system announcements from admin dashboard)
+    match /system_announcements/{announcementId} {
+      allow read: if true;
       allow write: if isSuperAdmin();
     }
 
