@@ -284,12 +284,69 @@ export function renderMessageBubble(message, container, options) {
       contentArea.appendChild(reactionsRow);
     }
 
-    // Expires / Disappearing message
+    // Expires / Disappearing message with Live Countdown & Progress Bar
     if (message.expiresAt) {
+      const expDate = message.expiresAt.toDate ? message.expiresAt.toDate() : new Date(message.expiresAt);
       const expireDiv = document.createElement('div');
-      expireDiv.className = 'nex-msg-expires';
-      expireDiv.textContent = ' Disappearing message';
+      expireDiv.className = 'nex-msg-expires disappearing-countdown-badge';
+      expireDiv.innerHTML = `
+        <div class="ghost-countdown-content">
+          <i class="fa-solid fa-clock-rotate-left fa-spin-pulse"></i>
+          <span class="ghost-countdown-label">Disappears in</span>
+          <span class="ghost-timer-sec disappear-timer-val">Calculating...</span>
+        </div>
+        <div class="disappear-progress-bar">
+          <div class="disappear-progress-fill"></div>
+        </div>
+      `;
       contentArea.appendChild(expireDiv);
+
+      const timerVal = expireDiv.querySelector('.disappear-timer-val');
+      const progressFill = expireDiv.querySelector('.disappear-progress-fill');
+      const createdAtMs = message.createdAt?.toDate ? message.createdAt.toDate().getTime() : (message.time?.toDate ? message.time.toDate().getTime() : Date.now() - 60000);
+      const totalDurationMs = Math.max(1000, expDate.getTime() - createdAtMs);
+
+      const updateCountdown = () => {
+        const remainingMs = expDate.getTime() - Date.now();
+        if (remainingMs <= 0) {
+          clearInterval(intervalId);
+          expireDiv.innerHTML = '<i class="fa-solid fa-fire-burner"></i> <span>Message expired</span>';
+          wrapper.classList.add('ephemeral-dissolve');
+          setTimeout(() => {
+            if (wrapper.parentNode) wrapper.parentNode.removeChild(wrapper);
+          }, 600);
+          return;
+        }
+
+        const remSec = Math.floor(remainingMs / 1000);
+        const remMin = Math.floor(remSec / 60);
+        const remHours = Math.floor(remMin / 60);
+        const remDays = Math.floor(remHours / 24);
+
+        let formatted = '';
+        if (remDays > 0) {
+          formatted = `${remDays}d ${remHours % 24}h`;
+        } else if (remHours > 0) {
+          formatted = `${remHours}h ${remMin % 60}m`;
+        } else if (remMin > 0) {
+          const s = remSec % 60;
+          formatted = `${remMin}m ${s < 10 ? '0' : ''}${s}s`;
+        } else {
+          formatted = `${remSec}s`;
+        }
+
+        if (timerVal) timerVal.textContent = formatted;
+        if (progressFill) {
+          const pct = Math.max(0, Math.min(100, (remainingMs / totalDurationMs) * 100));
+          progressFill.style.width = `${pct}%`;
+          if (pct < 20 || remainingMs < 60000) {
+            expireDiv.classList.add('critical-urgency');
+          }
+        }
+      };
+
+      updateCountdown();
+      const intervalId = setInterval(updateCountdown, 1000);
     }
 
     wrapper.appendChild(contentArea);

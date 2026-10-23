@@ -5279,9 +5279,29 @@ function loadMessages() {
       timeSpan.appendChild(timeTextNode);
       bubble.appendChild(timeSpan);
 
-      // Ghost Protocol Ephemeral Dissolution
-      if (m.ephemeral && m.ttl && typeof attachGhostCountdown === 'function') {
-        attachGhostCountdown(div, m.ttl, m.docId);
+      // Ghost Protocol & Disappearing Messages Ephemeral Dissolution
+      if ((m.ephemeral && m.ttl) || m.expiresAt) {
+        let ttl = m.ttl;
+        let totalTtl = m.ttl;
+        if (m.expiresAt) {
+          const expMs = m.expiresAt.toMillis ? m.expiresAt.toMillis() : (m.expiresAt.toDate ? m.expiresAt.toDate().getTime() : new Date(m.expiresAt).getTime());
+          ttl = Math.max(0, Math.round((expMs - Date.now()) / 1000));
+          const sentMs = m.time?.toMillis ? m.time.toMillis() : (m.time?.toDate ? m.time.toDate().getTime() : (Date.now() - 30000));
+          totalTtl = Math.max(ttl, Math.round((expMs - sentMs) / 1000));
+        } else if (m.ttl && m.time) {
+          const sentMs = m.time?.toMillis ? m.time.toMillis() : (m.time?.toDate ? m.time.toDate().getTime() : Date.now());
+          const elapsed = Math.floor((Date.now() - sentMs) / 1000);
+          ttl = Math.max(0, m.ttl - elapsed);
+        }
+
+        if (ttl > 0 && typeof attachGhostCountdown === 'function') {
+          attachGhostCountdown(div, ttl, m.docId, totalTtl);
+        } else if (ttl <= 0 && m.ttl) {
+          div.style.display = 'none';
+          if (m.docId) {
+            try { deleteDoc(doc(db, 'messages', m.docId)).catch(() => {}); } catch (_) {}
+          }
+        }
       }
       if (!isOwn && m.text && typeof window.updateSmartReplySuggestions === 'function') {
         window.updateSmartReplySuggestions(m.text);
@@ -18163,25 +18183,66 @@ function playCyberSfx(type) {
 /* ======================================================= */
 window.activeGhostTtl = 0;
 
-function attachGhostCountdown(wrapperEl, ttlSeconds, docId = null) {
+function formatCountdownDisplay(seconds) {
+  if (seconds <= 0) return '0s';
+  if (seconds < 60) return `${seconds}s`;
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  if (m < 60) return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+  const h = Math.floor(m / 60);
+  const remM = m % 60;
+  if (h < 24) return `${h}h ${remM < 10 ? '0' : ''}${remM}m`;
+  const d = Math.floor(h / 24);
+  const remH = h % 24;
+  return `${d}d ${remH}h`;
+}
+window.formatCountdownDisplay = formatCountdownDisplay;
+
+function attachGhostCountdown(wrapperEl, ttlSeconds, docId = null, totalTtl = null) {
   if (!wrapperEl || ttlSeconds <= 0) return;
   const bubble = wrapperEl.querySelector('.message-bubble');
   if (!bubble) return;
 
-  const pill = document.createElement('span');
+  const existingPill = bubble.querySelector('.ghost-countdown-pill');
+  if (existingPill) existingPill.remove();
+
+  const total = totalTtl || ttlSeconds;
+  const pill = document.createElement('div');
   pill.className = 'ghost-countdown-pill';
-  pill.innerHTML = `<i class="fa-solid fa-hourglass-half"></i> <span class="ghost-timer-sec">${ttlSeconds}</span>s`;
+  pill.title = 'Disappearing message: self-destructs when countdown hits zero';
+  pill.innerHTML = `
+    <div class="ghost-countdown-content">
+      <i class="fa-solid fa-clock-rotate-left fa-spin-pulse"></i>
+      <span class="ghost-countdown-label">Disappears in</span>
+      <span class="ghost-timer-sec">${formatCountdownDisplay(ttlSeconds)}</span>
+    </div>
+    <div class="ghost-countdown-bar">
+      <div class="ghost-countdown-fill" style="width: ${Math.max(0, Math.min(100, (ttlSeconds / total) * 100))}%;"></div>
+    </div>
+  `;
   bubble.appendChild(pill);
 
   let remaining = ttlSeconds;
   const timerSecEl = pill.querySelector('.ghost-timer-sec');
+  const timerFill = pill.querySelector('.ghost-countdown-fill');
 
   const intervalId = setInterval(() => {
     remaining--;
-    if (timerSecEl) timerSecEl.textContent = remaining;
+    if (timerSecEl) timerSecEl.textContent = formatCountdownDisplay(remaining);
+    if (timerFill) {
+      const pct = Math.max(0, Math.min(100, (remaining / total) * 100));
+      timerFill.style.width = `${pct}%`;
+      if (pct < 25 || remaining <= 10) {
+        pill.classList.add('critical');
+      }
+    }
     if (remaining <= 0) {
       clearInterval(intervalId);
-      playCyberSfx('zap');
+      if (typeof playCyberSfx === 'function') {
+        playCyberSfx('zap');
+      } else if (window.playLuxuryPopSound) {
+        window.playLuxuryPopSound();
+      }
       wrapperEl.classList.add('ephemeral-dissolve');
       setTimeout(() => {
         if (wrapperEl.parentNode) wrapperEl.parentNode.removeChild(wrapperEl);
@@ -18194,6 +18255,7 @@ function attachGhostCountdown(wrapperEl, ttlSeconds, docId = null) {
     }
   }, 1000);
 }
+window.attachGhostCountdown = attachGhostCountdown;
 
 function initGhostProtocol() {
   const ghostBtn = document.getElementById('ghostProtocolBtn');

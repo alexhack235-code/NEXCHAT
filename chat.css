@@ -8512,3 +8512,139 @@ body.chat-size-extra-large .message-bubble {
   border-radius: 50% !important;
   object-fit: cover !important;
 }
+
+
+/* ========================================================================== */
+/* DISAPPEARING & GHOST MESSAGES LIVE COUNTDOWN SUITE                         */
+/* ========================================================================== */
+.ghost-countdown-pill {
+  display: block;
+  margin-top: 6px;
+  background: rgba(13, 18, 29, 0.85);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 11px;
+  color: #c084fc;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  user-select: none;
+  transition: all 0.25s ease;
+}
+
+.ghost-countdown-pill.critical {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  animation: countdownPulse 0.85s infinite alternate;
+}
+
+@keyframes countdownPulse {
+  0% { box-shadow: 0 0 4px rgba(239, 68, 68, 0.35); }
+  100% { box-shadow: 0 0 14px rgba(239, 68, 68, 0.75); }
+}
+
+.ghost-countdown-content {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.ghost-countdown-content i {
+  font-size: 10.5px;
+  color: inherit;
+}
+
+.ghost-countdown-label {
+  opacity: 0.8;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.ghost-timer-sec {
+  font-family: 'SF Mono', Consolas, Monaco, monospace;
+  font-size: 11.5px;
+  font-weight: 800;
+  margin-left: auto;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 7px;
+  border-radius: 4px;
+}
+
+.ghost-countdown-bar {
+  margin-top: 4px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ghost-countdown-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #f97316 65%, #ef4444 100%);
+  transition: width 1s linear;
+}
+
+/* Ephemeral Dissolution Animation */
+.ephemeral-dissolve {
+  animation: dissolveToParticles 0.58s cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+  pointer-events: none;
+}
+
+@keyframes dissolveToParticles {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0px) contrast(100%);
+  }
+  35% {
+    opacity: 0.85;
+    transform: scale(1.04);
+    filter: blur(2px) contrast(200%) drop-shadow(0 0 12px #f97316);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.82) translateY(-14px);
+    filter: blur(14px) contrast(300%) drop-shadow(0 0 24px #ef4444);
+  }
+}
+
+/* Group Chat Disappearing Message Badge */
+.disappearing-countdown-badge, .nex-msg-expires {
+  display: block;
+  margin-top: 6px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  border-radius: 8px;
+  padding: 5px 9px;
+  font-size: 11px;
+  color: #38bdf8;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  user-select: none;
+}
+
+.disappearing-countdown-badge.critical-urgency {
+  border-color: #ef4444;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  animation: countdownPulse 0.85s infinite alternate;
+}
+
+.disappear-progress-bar {
+  margin-top: 4px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.disappear-progress-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #38bdf8, #f97316, #ef4444);
+  transition: width 1s linear;
+}
