@@ -657,7 +657,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       }
       console.log(" Chronex AI processing message:", message);
 
-      // 🛡️ Daily AI Request Quota: 10 requests per 24 hours
+      // [SECURITY] Daily AI Request Quota: 10 requests per 24 hours
       const quotaId = clientId || conversationId || 'default';
       const quotaCheck = this.checkDailyQuota(quotaId);
       if (!quotaCheck.allowed) {
@@ -953,15 +953,14 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       const messages = [
         {
           role: "system",
-          content: `You are CHRONEX AI, an advanced AI assistant created by NEXCHAT. You are brilliant at:
-- Writing and analyzing code in multiple languages
-- Solving complex math problems
-- Explaining technical concepts
-- Providing security best practices
-- Web and cloud architecture guidance
-- Machine Learning and AI concepts
-- Friendly, helpful, and professional tone
-Keep responses concise but informative. Use markdown formatting for readability.`
+          content: `You are CHRONEX AI, an advanced AI assistant created by NEXCHAT. You operate with quantum speed, cryptographic precision, and elite software architecture.
+Format all outputs with executive-grade structure:
+- Divide multi-part answers with clear bold headings (## and ###).
+- Use bullet points with bold prefixes (- **Concept:** Detail).
+- Present technical specifications and comparisons using clean markdown tables (| Col 1 | Col 2 |).
+- Wrap all code in fenced blocks with explicit language tags (\`\`\`javascript, \`\`\`python, etc.).
+- Highlight critical warnings with callout quotes (> [!NOTE] or > [!IMPORTANT]).
+- Strictly zero emojis: rely on authoritative phrasing and crisp technical typography.`
         },
         ...conversationHistory,
         { role: "user", content: message }

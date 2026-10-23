@@ -4716,45 +4716,10 @@ window.generateChronexAIResponse = generateChronexAIResponse;
 
 function formatAiMarkdown(rawText) {
   if (!rawText) return '';
-  let text = String(rawText);
-
-  // 1. Preserve and format code blocks
-  text = text.replace(/```([a-zA-Z0-9_\-\+]*)\n([\s\S]*?)```/g, (match, lang, code) => {
-    const safeCode = escape(code.trim());
-    const langLabel = escape(lang || 'code');
-    return `
-      <div class="chronex-code-card" style="margin: 10px 0; background: #0d1117; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
-        <div style="display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 6px 12px; font-size: 11px; font-family: monospace; color: #8b949e; border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
-          <span>${langLabel}</span>
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <button type="button" class="run-sandbox-chip" onclick="window.CyberFeatures.sandbox?.show(this.closest('.chronex-code-card').querySelector('code').innerText)" style="margin: 0; padding: 2px 8px; font-size: 11px;"><i class="fa-solid fa-play"></i> Run in Sandbox</button>
-            <button type="button" class="copy-code-btn" onclick="navigator.clipboard.writeText(this.closest('.chronex-code-card').querySelector('code').innerText); this.textContent='Copied!'; setTimeout(()=>this.textContent='Copy', 1500);" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #58a6ff; cursor: pointer; font-size: 11px; border-radius: 4px; padding: 2px 8px; transition: all 0.2s;">Copy</button>
-          </div>
-        </div>
-        <pre style="margin: 0; padding: 12px; overflow-x: auto; font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace; font-size: 13px; line-height: 1.5; color: #e6edf3;"><code>${safeCode}</code></pre>
-      </div>
-    `;
-  });
-
-  // 2. Inline code
-  text = text.replace(/`([^`]+)`/g, '<code style="background: rgba(255, 255, 255, 0.1); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12.5px; color: #58a6ff;">$1</code>');
-
-  // 3. Bold
-  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
-
-  // 4. Headers
-  text = text.replace(/^### (.*$)/gim, '<h4 style="margin: 10px 0 4px 0; color: #58a6ff; font-size: 14.5px; font-weight: 600;">$1</h4>');
-  text = text.replace(/^## (.*$)/gim, '<h3 style="margin: 12px 0 6px 0; color: #00ff66; font-size: 15.5px; font-weight: 700;">$1</h3>');
-  text = text.replace(/^# (.*$)/gim, '<h2 style="margin: 14px 0 8px 0; color: #00ff66; font-size: 17px; font-weight: 800;">$1</h2>');
-
-  // 5. Bullet list items
-  text = text.replace(/^\s*[-*]\s+(.*$)/gim, '<li style="margin: 3px 0 3px 18px; list-style-type: disc;">$1</li>');
-
-  // 6. Paragraph line breaks
-  text = text.replace(/\n\n/g, '<br><br>');
-  text = text.replace(/\n/g, '<br>');
-
-  return text;
+  if (window.ChronexxLayoutEngine) {
+    return window.ChronexxLayoutEngine.formatMarkdown(rawText);
+  }
+  return escape(rawText).replace(/\n/g, '<br>');
 }
 
 function displayChronexAIUserMessage(message) {
@@ -4787,15 +4752,18 @@ function displayChronexAIResponse(response, stream = true) {
   div.className = "message-wrapper received ai-message-bubble-wrapper";
   div.style.cssText = "display: flex; justify-content: flex-start; align-items: flex-end; margin: 10px 0; padding: 0 12px; gap: 8px;";
 
+  const voicePlayerMarkup = window.ChronexxVoiceEngine ? window.ChronexxVoiceEngine.renderVoicePlayerBar(response) : '';
+
   div.innerHTML = `
-    <img src="chronex-ai.jpg" class="message-avatar chronex-avatar" onerror="this.src='logo.jpg';" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff66; margin-bottom: 2px; flex-shrink: 0;" alt="ChronEX AI">
-    <div class="message-bubble chronex-ai-bubble" style="background: #181d24; color: #f0f6fc; padding: 12px 18px; border-radius: 18px 18px 18px 4px; max-width: 82%; word-wrap: break-word; border: 1px solid rgba(0, 255, 102, 0.25); font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.55; box-shadow: 0 4px 16px rgba(0,0,0,0.35);">
-      <div style="font-size: 11px; font-weight: 700; color: #00ff66; margin-bottom: 6px; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between;">
-        <span><i class="fa-solid fa-bolt" style="font-size: 10px; margin-right: 4px;"></i> CHRONEX AI • PRO</span>
-        <button type="button" class="copy-ai-msg-btn" onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.innerText); showNotif('Copied to clipboard', 'success', 1500);" style="background: none; border: none; color: #8b949e; cursor: pointer; font-size: 11px;" title="Copy response"><i class="fa-regular fa-copy"></i></button>
+    <img src="chronex-ai.jpg" class="message-avatar chronex-avatar" onerror="this.src='logo.jpg';" style="width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff66; margin-bottom: 2px; flex-shrink: 0;" alt="ChronEX AI">
+    <div class="message-bubble chronex-ai-bubble" style="background: #111722; color: #f0f6fc; padding: 14px 18px; border-radius: 18px 18px 18px 4px; max-width: 85%; word-wrap: break-word; border: 1px solid rgba(0, 255, 102, 0.28); font-family: 'Inter', sans-serif; font-size: 13.5px; line-height: 1.6; box-shadow: 0 8px 24px rgba(0,0,0,0.45);">
+      <div style="font-size: 11px; font-weight: 700; color: #00ff66; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between;">
+        <span><i class="fa-solid fa-bolt" style="font-size: 10px; margin-right: 4px;"></i> CHRONEX AI &bull; PRO</span>
+        <button type="button" class="copy-ai-msg-btn" onclick="navigator.clipboard.writeText(this.closest('.chronex-ai-bubble').querySelector('.ai-body-content').innerText); showNotif('Copied to clipboard', 'success', 1500);" style="background: none; border: none; color: #8b949e; cursor: pointer; font-size: 11px;" title="Copy response"><i class="fa-regular fa-copy"></i></button>
       </div>
-      <div class="ai-body-content" style="color: #e6edf3;"></div>
-      <div style="font-size: 10.5px; margin-top: 8px; opacity: 0.65; color: #8b949e; text-align: right;">${formatTimeAgo(new Date())}</div>
+      ${voicePlayerMarkup}
+      <div class="ai-body-content" style="color: #e6edf3; margin-top: 8px;"></div>
+      <div style="font-size: 10.5px; margin-top: 10px; opacity: 0.65; color: #8b949e; text-align: right;">${formatTimeAgo(new Date())}</div>
     </div>
   `;
 
@@ -4836,6 +4804,8 @@ function displayChronexAIResponse(response, stream = true) {
 }
 
 window.displayChronexAIMessage = displayChronexAIResponse;
+window.displayChronexAIResponse = displayChronexAIResponse;
+window.formatAiMarkdown = formatAiMarkdown;
 
 function displayChronexAIError(errorMessage) {
   const messagesContainer = document.getElementById("messages-area");
@@ -5088,9 +5058,15 @@ function loadMessages() {
       }
 
       if (m.text && m.text.trim()) {
-        const content = document.createElement("p");
-        content.style.margin = "0";
-        content.textContent = m.text;
+        const content = document.createElement("div");
+        content.className = "message-text-content";
+        if (isAI || (currentChatType === 'ai' && !isOwn)) {
+          const vBar = window.ChronexxVoiceEngine ? window.ChronexxVoiceEngine.renderVoicePlayerBar(m.text) : '';
+          content.innerHTML = `${vBar}<div class="ai-body-content" style="margin-top: 8px;">${formatAiMarkdown(m.text)}</div>`;
+        } else {
+          content.style.margin = "0";
+          content.textContent = m.text;
+        }
         bubble.appendChild(content);
       }
 

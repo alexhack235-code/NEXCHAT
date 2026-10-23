@@ -35,6 +35,65 @@
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
+  <!-- CHRONEXX AI PROFESSIONAL LAYOUT & NEURAL VOICE STYLES -->
+  <style>
+    .chronex-ai-bubble {
+      background: #111722 !important;
+      border: 1px solid rgba(0, 255, 102, 0.28) !important;
+      color: #f1f5f9 !important;
+      font-family: 'Inter', -apple-system, sans-serif !important;
+      font-size: 13.5px !important;
+      line-height: 1.6 !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+      max-width: 85% !important;
+    }
+    .chronex-p { margin: 0 0 10px 0; color: #e2e8f0; }
+    .chronex-p:last-child { margin-bottom: 0; }
+    .chronex-h2 { font-size: 17px; font-weight: 800; color: #00ff66; margin: 14px 0 8px 0; border-bottom: 1px solid rgba(0, 255, 102, 0.2); padding-bottom: 4px; }
+    .chronex-h3 { font-size: 15px; font-weight: 700; color: #00f2ff; margin: 12px 0 6px 0; }
+    .chronex-h4 { font-size: 13.5px; font-weight: 600; color: #ffd700; margin: 10px 0 4px 0; }
+    .chronex-hr { border: 0; height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 255, 102, 0.35), transparent); margin: 14px 0; }
+    .chronex-ul, .chronex-ol { margin: 8px 0 12px 0; padding: 0; list-style: none; }
+    .chronex-li { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; color: #cbd5e1; }
+    .chronex-bullet-icon { color: #00ff66; font-size: 11px; margin-top: 4px; flex-shrink: 0; }
+    .chronex-oli { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; color: #cbd5e1; }
+    .chronex-num-badge { background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; font-size: 10px; font-weight: 800; border-radius: 4px; padding: 1px 6px; font-family: monospace; flex-shrink: 0; margin-top: 2px; }
+    .chronex-inline-code { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.12); color: #58a6ff; padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 12.5px; }
+    .chronex-kv-pill { display: inline-block; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 6px; padding: 3px 8px; margin: 2px 0; }
+    .chronex-kv-pill .kv-key { color: #00ff66; font-weight: 700; }
+    .chronex-kv-pill .kv-val { color: #f8fafc; }
+    .chronex-table-wrapper { overflow-x: auto; margin: 12px 0; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px; background: #090e17; }
+    .chronex-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+    .chronex-table th { background: #141b26; color: #00f2ff; font-weight: 700; padding: 8px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.5px; }
+    .chronex-table td { padding: 8px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); color: #cbd5e1; }
+    .chronex-table tr:last-child td { border-bottom: none; }
+    .chronex-table tr:hover td { background: rgba(0, 255, 102, 0.04); }
+    .chronex-code-card { margin: 12px 0; background: #090d16; border: 1px solid rgba(0, 255, 102, 0.25); border-radius: 8px; overflow: hidden; box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4); }
+    .chronex-code-header { display: flex; justify-content: space-between; align-items: center; background: #111827; padding: 6px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+    .chronex-code-lang { font-family: monospace; font-size: 11px; color: #00ff66; font-weight: 700; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+    .chronex-code-actions { display: flex; gap: 6px; align-items: center; }
+    .chronex-code-actions .run-sandbox-chip { background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px; cursor: pointer; }
+    .chronex-code-actions .copy-code-btn { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #94a3b8; font-size: 10.5px; font-weight: 700; padding: 3px 8px; border-radius: 4px; cursor: pointer; }
+    .chronex-code-pre { margin: 0; padding: 12px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 12.5px; line-height: 1.5; color: #e2e8f0; }
+    .chronex-voice-player-bar { display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 12px; padding: 8px 12px; margin: 8px 0; transition: all 0.25s ease; }
+    .chronex-voice-player-bar:hover { border-color: #00ff66; background: rgba(0, 255, 102, 0.05); }
+    .chronex-voice-play-btn { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #00ff66 0%, #00d4ff 100%); border: none; color: #000; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 0 10px rgba(0, 255, 102, 0.4); transition: transform 0.15s ease; }
+    .chronex-voice-play-btn:hover { transform: scale(1.08); }
+    .chronex-voice-track { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .chronex-voice-waveform { display: flex; align-items: center; gap: 2.5px; height: 16px; }
+    .chronex-voice-waveform span { display: block; width: 3px; height: 6px; background: rgba(255, 255, 255, 0.3); border-radius: 2px; transition: height 0.15s ease, background 0.15s ease; }
+    .chronex-voice-waveform.animating span { background: #00ff66; animation: wavePulse 0.8s ease-in-out infinite alternate; }
+    .chronex-voice-waveform.animating span:nth-child(2n) { animation-delay: 0.15s; }
+    .chronex-voice-waveform.animating span:nth-child(3n) { animation-delay: 0.3s; }
+    .chronex-voice-waveform.animating span:nth-child(4n) { animation-delay: 0.45s; }
+    @keyframes wavePulse { 0% { height: 4px; } 100% { height: 16px; } }
+    .chronex-voice-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #94a3b8; font-family: monospace; }
+    .voice-speed-chip { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #00f2ff; border-radius: 4px; padding: 1px 5px; cursor: pointer; font-weight: 700; font-size: 9.5px; }
+    .chronex-voice-core-pill { font-size: 9.5px; font-weight: 800; color: #00ff66; background: rgba(0, 255, 102, 0.12); border: 1px solid #00ff66; border-radius: 10px; padding: 2px 8px; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+    .chronex-neural-dot { width: 5px; height: 5px; border-radius: 50%; background: #00ff66; box-shadow: 0 0 6px #00ff66; animation: pulseDot 1.2s infinite; }
+    @keyframes pulseDot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+    @keyframes burstFloatUp { 0% { transform: translateY(0) scale(0.6); opacity: 1; } 100% { transform: translateY(-120px) scale(1.4); opacity: 0; } }
+  </style>
 </head>
 
 <body>
@@ -4516,6 +4575,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/e2ee-crypto-vault.js"></script>
   <script src="./src/js/verification-badges-catalog.js"></script>
   <script src="./src/js/strategic-marketing-suite.js"></script>
+  <script src="./src/js/chronexx-layout-engine.js"></script>
   <script src="./src/js/report-activity-monitor.js"></script>
   <script type="module" src="pwa-install.js"></script>
   <script type="module" src="app-prompt.js"></script>

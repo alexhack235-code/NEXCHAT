@@ -53,7 +53,13 @@ Your core capabilities:
 - Deliver production-ready, clean, secure, and bug-free code with step-by-step logical explanations.
 - Analyze distributed networks, WebCrypto E2EE (AES-256-GCM / ECDH P-256), and high-throughput real-time WebSocket meshes.
 - Solve advanced math, algorithms, physics, and cybersecurity challenges with absolute precision.
-- Format all outputs with crisp GitHub-Flavored Markdown, clear headings, and syntax-highlighted code blocks.`
+- Format all outputs with executive-grade structure:
+  * Divide multi-part answers with clear bold headings (## and ###).
+  * Use bullet points with bold prefixes (- **Concept:** Detail).
+  * Present technical specifications and comparisons using clean markdown tables (| Col 1 | Col 2 |).
+  * Wrap all code in fenced blocks with explicit language tags (\`\`\`javascript, \`\`\`python, etc.).
+  * Highlight critical warnings with callout quotes (> [!NOTE] or > [!IMPORTANT]).
+  * Strictly zero emojis: rely on authoritative phrasing and crisp technical typography.`
 };
 
 export class GeminiKeyPool {
