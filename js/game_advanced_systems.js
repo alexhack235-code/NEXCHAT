@@ -34,6 +34,11 @@
  * (Ultra Tier 30: Dual Hood Nitrous Purge Jets & Pneumatic Vapor Plumes)
  * (Ultra Tier 31: Real-Time Procedural Synthwave Web Audio Synthesizer)
  * (Ultra Tier 32: Dynamic Resolution Scaling & Auto-FPS Throttle)
+ * (Apex Tier 33: Interactive Cyber Car Wash & Chassis Detailing)
+ * (Apex Tier 34: 3D Holographic Destination Compass HUD Arrow)
+ * (Apex Tier 35: Stunt Launch Jumps & Air-Time Telemetry Scoring)
+ * (Apex Tier 36: Dynamic Underglow Neon RGB Pulsing Modes)
+ * (Apex Tier 37: Autonomous Highway Tow Truck & Mobile Recovery Unit)
  *
  * Architecture: Zero-GC scratch vectors, strictly zero Unicode emojis.
  * ============================================================================
@@ -104,6 +109,12 @@
       this.nitrousPurge = null;
       this.synthwaveRadio = null;
       this.drsAutoThrottle = null;
+      // 5 Apex Realism Systems
+      this.carWash = null;
+      this.skyCompass = null;
+      this.stuntRamps = null;
+      this.underglowModes = null;
+      this.towRecovery = null;
 
       // Global state
       this.isRaining = false;
@@ -176,9 +187,16 @@
       this.synthwaveRadio = new ProceduralSynthwaveRadioSubsystem(this);
       this.drsAutoThrottle = new DynamicResolutionAutoThrottleSubsystem(this);
 
+      // 5 Apex Realism Systems
+      this.carWash = new CarWashDetailingSubsystem(this);
+      this.skyCompass = new HolographicSkyCompassSubsystem(this);
+      this.stuntRamps = new StuntJumpsAndAirScoreSubsystem(this);
+      this.underglowModes = new UnderglowRGBModesSubsystem(this);
+      this.towRecovery = new TowTruckMobileRecoverySubsystem(this);
+
       this.initHUDControls();
       this.initialized = true;
-      console.log('[ADVANCED SYSTEMS] All 32 Ultra Systems initialized successfully (Zero Emojis, Zero-GC, 60 FPS DRS).');
+      console.log('[ADVANCED SYSTEMS] All 37 Systems initialized successfully (Apex Realism Suite, Zero Emojis, Zero-GC).');
     }
 
     initHUDControls() {
@@ -218,6 +236,8 @@
           if (this.nitrousPurge) this.nitrousPurge.triggerPurge();
         } else if (key === 'u') {
           if (this.synthwaveRadio) this.synthwaveRadio.toggleMusic();
+        } else if (key === 'l') {
+          if (this.underglowModes) this.underglowModes.cycleMode();
         }
       });
     }
@@ -288,6 +308,12 @@
       if (this.nitrousPurge) this.nitrousPurge.update(delta, vehicleState);
       if (this.synthwaveRadio) this.synthwaveRadio.update(delta);
       if (this.drsAutoThrottle) this.drsAutoThrottle.update(delta);
+      // 5 Apex Realism Systems Updates
+      if (this.carWash) this.carWash.update(delta, vehicleState);
+      if (this.skyCompass) this.skyCompass.update(delta, vehicleState);
+      if (this.stuntRamps) this.stuntRamps.update(delta, vehicleState);
+      if (this.underglowModes) this.underglowModes.update(delta, vehicleState);
+      if (this.towRecovery) this.towRecovery.update(delta, vehicleState);
     }
   }
 
@@ -3457,6 +3483,344 @@
             renderer.setPixelRatio(this.currentPixelRatio);
           }
         }
+      }
+    }
+  }
+
+
+  // ==========================================================================
+  // APEX TIER 33: INTERACTIVE CYBER CAR WASH & CHASSIS DETAILING
+  // ==========================================================================
+  class CarWashDetailingSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.washGroup = new THREE.Group();
+      this.washGroup.name = 'carWashDetailingGroup';
+      this.parent.scene.add(this.washGroup);
+
+      this.bayX = 0;
+      this.bayZ = 135;
+      this.isWashing = false;
+      this.washTimer = 0;
+
+      this.buildCarWashStation();
+    }
+
+    buildCarWashStation() {
+      const archMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5, metalness: 0.6 });
+      const brushMat = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.9 });
+      const ledMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+      const arch = new THREE.Mesh(new THREE.BoxGeometry(9.0, 5.0, 1.2), archMat);
+      arch.position.set(this.bayX, 2.5, this.bayZ);
+      this.washGroup.add(arch);
+
+      const ledFrame = new THREE.Mesh(new THREE.BoxGeometry(9.2, 0.25, 1.25), ledMat);
+      ledFrame.position.set(this.bayX, 5.1, this.bayZ);
+      this.washGroup.add(ledFrame);
+
+      this.brushL = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 3.8, 12), brushMat);
+      this.brushL.position.set(this.bayX - 2.8, 2.0, this.bayZ);
+      this.washGroup.add(this.brushL);
+
+      this.brushR = new THREE.Mesh(new THREE.CylinderGeometry(0.85, 0.85, 3.8, 12), brushMat);
+      this.brushR.position.set(this.bayX + 2.8, 2.0, this.bayZ);
+      this.washGroup.add(this.brushR);
+    }
+
+    playWashSprayAudio() {
+      try {
+        const audioCtx = (typeof cyberAudio !== 'undefined' && cyberAudio.ctx) ? cyberAudio.ctx : (THREE.AudioContext ? THREE.AudioContext.getContext() : null);
+        if (!audioCtx) return;
+
+        const bufferSize = audioCtx.sampleRate * 1.5;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.7));
+        }
+
+        const whiteNoise = audioCtx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(1800, audioCtx.currentTime);
+
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.35, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.45);
+
+        whiteNoise.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        whiteNoise.start();
+      } catch (e) {}
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const rPos = roverGroup.position;
+      const dx = rPos.x - this.bayX;
+      const dz = rPos.z - this.bayZ;
+      const dist = Math.hypot(dx, dz);
+
+      if (dist < 4.5 && !this.isWashing) {
+        this.isWashing = true;
+        this.washTimer = 2.5;
+        this.playWashSprayAudio();
+
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[CAR WASH] HIGH-PRESSURE NEON WASH IN PROGRESS...');
+        }
+      }
+
+      if (this.isWashing) {
+        this.washTimer -= delta;
+        this.brushL.rotation.y += delta * 14.0;
+        this.brushR.rotation.y -= delta * 14.0;
+
+        if (this.washTimer <= 0) {
+          this.isWashing = false;
+          const roverChassis = typeof window.roverChassisMesh !== 'undefined' ? window.roverChassisMesh : null;
+          if (roverChassis && roverChassis.material) {
+            roverChassis.material.roughness = 0.18;
+            roverChassis.material.metalness = 0.92;
+          }
+
+          if (typeof showStoreNotification === 'function') {
+            showStoreNotification('[CAR WASH] COMPLETE! CHASSIS RESTORED TO SHOWROOM GLOSS (100% SHINE)');
+          }
+          if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+        }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // APEX TIER 34: 3D HOLOGRAPHIC DESTINATION COMPASS HUD ARROW
+  // ==========================================================================
+  class HolographicSkyCompassSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.compassGroup = new THREE.Group();
+      this.compassGroup.name = 'holographicSkyCompassGroup';
+      this.parent.scene.add(this.compassGroup);
+
+      const arrowMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.85 });
+      const arrowGeo = new THREE.ConeGeometry(0.35, 1.2, 4);
+      arrowGeo.rotateX(Math.PI / 2);
+
+      this.arrowMesh = new THREE.Mesh(arrowGeo, arrowMat);
+      this.compassGroup.add(this.arrowMesh);
+
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, side: THREE.DoubleSide, transparent: true, opacity: 0.5 });
+      this.ringMesh = new THREE.Mesh(new THREE.RingGeometry(0.85, 0.95, 16), ringMat);
+      this.ringMesh.rotation.x = -Math.PI / 2;
+      this.compassGroup.add(this.ringMesh);
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const rPos = roverGroup.position;
+      this.compassGroup.position.set(rPos.x, rPos.y + 2.2, rPos.z);
+      this.ringMesh.rotation.z += delta * 2.0;
+
+      if (this.parent.gps && this.parent.gps.activeTarget) {
+        const target = this.parent.gps.activeTarget;
+        const dx = target.x - rPos.x;
+        const dz = target.z - rPos.z;
+        const targetAngle = Math.atan2(dx, dz);
+
+        this.arrowMesh.rotation.y = targetAngle;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // APEX TIER 35: STUNT LAUNCH JUMPS & AIR-TIME TELEMETRY SCORING
+  // ==========================================================================
+  class StuntJumpsAndAirScoreSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.rampsGroup = new THREE.Group();
+      this.rampsGroup.name = 'stuntJumpsAndAirScoreGroup';
+      this.parent.scene.add(this.rampsGroup);
+
+      this.isAirborne = false;
+      this.airTime = 0;
+      this.jumpDistance = 0;
+      this.takeoffPos = new THREE.Vector3();
+
+      this.buildStuntRamps();
+    }
+
+    buildStuntRamps() {
+      const rampMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.8, roughness: 0.3 });
+      const neonEdgeMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+
+      const rampConfigs = [
+        { x: 0, z: 95, ry: 0 },
+        { x: 0, z: -95, ry: Math.PI },
+        { x: 520, z: -460, ry: Math.PI / 2 },
+        { x: -350, z: 410, ry: -Math.PI / 4 }
+      ];
+
+      rampConfigs.forEach(rc => {
+        const rGroup = new THREE.Group();
+        rGroup.position.set(rc.x, 0, rc.z);
+        rGroup.rotation.y = rc.ry;
+
+        const wedge = new THREE.Mesh(new THREE.BoxGeometry(10, 2.5, 8), rampMat);
+        wedge.rotation.x = -0.22;
+        wedge.position.set(0, 1.1, 0);
+        rGroup.add(wedge);
+
+        const edge = new THREE.Mesh(new THREE.BoxGeometry(10.2, 0.2, 0.4), neonEdgeMat);
+        edge.position.set(0, 2.25, 3.8);
+        rGroup.add(edge);
+
+        this.rampsGroup.add(rGroup);
+      });
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const altitude = roverGroup.position.y;
+
+      if (altitude > 1.35 && !this.isAirborne) {
+        this.isAirborne = true;
+        this.airTime = 0;
+        this.takeoffPos.copy(roverGroup.position);
+      } else if (this.isAirborne) {
+        if (altitude > 1.35) {
+          this.airTime += delta;
+        } else {
+          this.isAirborne = false;
+          const dist = this.takeoffPos.distanceTo(roverGroup.position);
+
+          if (this.airTime > 0.8) {
+            const score = Math.round(this.airTime * 250 + dist * 5);
+            if (typeof showStoreNotification === 'function') {
+              showStoreNotification(`[STUNT] AIR-TIME: ${this.airTime.toFixed(1)}S (${Math.round(dist)}M)! +${score} STUNT POINTS`);
+            }
+            if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+          }
+        }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // APEX TIER 36: DYNAMIC UNDERGLOW NEON RGB PULSING MODES
+  // ==========================================================================
+  class UnderglowRGBModesSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.modes = ['STATIC', 'BREATHE', 'RAINBOW_STROBE', 'SPEED_SYNC'];
+      this.currentModeIdx = 0;
+      this.hueTimer = 0;
+    }
+
+    cycleMode() {
+      this.currentModeIdx = (this.currentModeIdx + 1) % this.modes.length;
+      const mode = this.modes[this.currentModeIdx];
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`[LIGHTING] UNDERGLOW MODE: ${mode} [L]`);
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    update(delta, vState) {
+      const mode = this.modes[this.currentModeIdx];
+      const underglow = typeof window.roverUnderglowMesh !== 'undefined' ? window.roverUnderglowMesh : null;
+      if (!underglow || !underglow.material) return;
+
+      if (mode === 'BREATHE') {
+        this.hueTimer += delta * 2.5;
+        underglow.material.opacity = 0.35 + Math.sin(this.hueTimer) * 0.45;
+      } else if (mode === 'RAINBOW_STROBE') {
+        this.hueTimer += delta * 1.8;
+        const hue = (this.hueTimer % 6.28) / 6.28;
+        underglow.material.color.setHSL(hue, 1.0, 0.5);
+        underglow.material.opacity = 0.85;
+      } else if (mode === 'SPEED_SYNC') {
+        const speed = (vState && vState.roverCurrentSpeed) ? Math.abs(vState.roverCurrentSpeed) : 0;
+        if (speed < 12.0) {
+          underglow.material.color.setHex(0x00f2ff);
+        } else if (speed < 24.0) {
+          underglow.material.color.setHex(0xf59e0b);
+        } else {
+          underglow.material.color.setHex(0xef4444);
+        }
+        underglow.material.opacity = 0.88;
+      } else {
+        underglow.material.opacity = 0.85;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // APEX TIER 37: AUTONOMOUS HIGHWAY TOW TRUCK & MOBILE RECOVERY UNIT
+  // ==========================================================================
+  class TowTruckMobileRecoverySubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.upsideDownTimer = 0;
+      this.isRecovering = false;
+    }
+
+    playRecoveryAudio() {
+      try {
+        const audioCtx = (typeof cyberAudio !== 'undefined' && cyberAudio.ctx) ? cyberAudio.ctx : (THREE.AudioContext ? THREE.AudioContext.getContext() : null);
+        if (!audioCtx) return;
+
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc.frequency.linearRampToValueAtTime(440, audioCtx.currentTime + 0.8);
+
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.85);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.88);
+      } catch (e) {}
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const roll = Math.abs(roverGroup.rotation.z);
+      const isFlipped = roll > 1.2 && roll < 5.0;
+
+      if (isFlipped) {
+        this.upsideDownTimer += delta;
+        if (this.upsideDownTimer > 3.0 && !this.isRecovering) {
+          this.isRecovering = true;
+          this.playRecoveryAudio();
+
+          roverGroup.rotation.z = 0;
+          roverGroup.rotation.x = 0;
+          roverGroup.position.y += 0.8;
+
+          if (typeof showStoreNotification === 'function') {
+            showStoreNotification('[TOW] MOBILE RECOVERY UNIT: VEHICLE RIGHTED UPRIGHT!');
+          }
+          setTimeout(() => { this.isRecovering = false; }, 2000);
+        }
+      } else {
+        this.upsideDownTimer = 0;
       }
     }
   }
