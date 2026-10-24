@@ -10,6 +10,10 @@
  * (Tier 6: 1P Cockpit Interior Camera, 3D Gauge Cluster & Steering Wheel)
  * (Tier 7: Vehicle Damage Physics, Collision Spark Shards & 5 Pit-Stop Bays)
  * (Tier 8: Operational Elevated Maglev Monorail Transit Network & Fast-Travel)
+ * (Tier 9: Dynamic Pedestrian Crowd Simulation & Honk Evasion AI)
+ * (Tier 10: Spatial 3D Audio Visualizer Towers & Cyber DJ Stings)
+ * (Tier 11: Subterranean Neon Underground Highway Network at y: -18m)
+ * (Tier 12: Interactive Drive-In Tuning Garage & Real-Time Wrap Editor)
  *
  * Architecture: Zero-GC scratch vectors, strictly zero Unicode emojis.
  * ============================================================================
@@ -53,6 +57,10 @@
       this.cockpit = null;
       this.damageAndPitstop = null;
       this.maglev = null;
+      this.pedestrians = null;
+      this.visualizer = null;
+      this.tunnels = null;
+      this.tuning = null;
 
       // Global state
       this.isRaining = false;
@@ -94,10 +102,14 @@
       this.cockpit = new CockpitInteriorDashboardSubsystem(this);
       this.damageAndPitstop = new VehicleDamageAndRepairBaySubsystem(this);
       this.maglev = new ElevatedMaglevTransitSubsystem(this);
+      this.pedestrians = new PedestrianCrowdSimulationSubsystem(this);
+      this.visualizer = new SpatialAudioVisualizerSubsystem(this);
+      this.tunnels = new SubterraneanTunnelNetworkSubsystem(this);
+      this.tuning = new VehicleTuningStudioSubsystem(this);
 
       this.initHUDControls();
       this.initialized = true;
-      console.log('[ADVANCED SYSTEMS] All 8 Tiers initialized successfully (Zero Emojis, Zero-GC).');
+      console.log('[ADVANCED SYSTEMS] All 12 Tiers initialized successfully (Zero Emojis, Zero-GC).');
     }
 
     initHUDControls() {
@@ -111,6 +123,10 @@
           this.toggleWetWeather();
         } else if (key === 'k') {
           if (this.celestial) this.celestial.advanceTimeOfDay(4.0);
+        } else if (key === 'h') {
+          if (this.pedestrians) this.pedestrians.triggerHonk();
+        } else if (key === 't') {
+          if (this.tuning) this.tuning.toggleStudio();
         }
       });
     }
@@ -154,6 +170,10 @@
       if (this.cockpit) this.cockpit.update(delta, vehicleState);
       if (this.damageAndPitstop) this.damageAndPitstop.update(delta, vehicleState);
       if (this.maglev) this.maglev.update(delta);
+      if (this.pedestrians) this.pedestrians.update(delta, vehicleState);
+      if (this.visualizer) this.visualizer.update(delta);
+      if (this.tunnels) this.tunnels.update(delta, vehicleState);
+      if (this.tuning) this.tuning.update(delta, vehicleState);
     }
   }
 
@@ -1563,6 +1583,471 @@
 
       this.trainCarriage.position.copy(pt);
       this.trainCarriage.lookAt(pt.x + tangent.x, pt.y + tangent.y, pt.z + tangent.z);
+    }
+  }
+
+
+  // ==========================================================================
+  // TIER 9: DYNAMIC PEDESTRIAN CROWD SIMULATION & HONK EVASION AI
+  // ==========================================================================
+  class PedestrianCrowdSimulationSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.crowdGroup = new THREE.Group();
+      this.crowdGroup.name = 'pedestrianCrowdGroup';
+      this.parent.scene.add(this.crowdGroup);
+
+      this.citizens = [];
+      this.citizenCount = 28;
+      this.initCrowd();
+    }
+
+    initCrowd() {
+      const headMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.6 });
+      const visorMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const torsoColors = [0x1e293b, 0x0f766e, 0x4338ca, 0xbe185d, 0x854d0e];
+      const limbMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
+
+      for (let i = 0; i < this.citizenCount; i++) {
+        const cGroup = new THREE.Group();
+
+        const torsoMat = new THREE.MeshStandardMaterial({ color: torsoColors[i % torsoColors.length], roughness: 0.7 });
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.7, 0.3), torsoMat);
+        torso.position.y = 1.05;
+        cGroup.add(torso);
+
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), headMat);
+        head.position.y = 1.55;
+        cGroup.add(head);
+
+        const visor = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.08, 0.12), visorMat);
+        visor.position.set(0, 1.55, 0.12);
+        cGroup.add(visor);
+
+        const legGeo = new THREE.BoxGeometry(0.16, 0.7, 0.16);
+        const legL = new THREE.Mesh(legGeo, limbMat);
+        legL.position.set(-0.16, 0.35, 0);
+        cGroup.add(legL);
+
+        const legR = new THREE.Mesh(legGeo, limbMat);
+        legR.position.set(0.16, 0.35, 0);
+        cGroup.add(legR);
+
+        const isEastWest = (i % 2 === 0);
+        const laneOffset = (i % 4 < 2) ? 14 : -14;
+        const startCoord = -160 + (i / this.citizenCount) * 320;
+
+        if (isEastWest) {
+          cGroup.position.set(startCoord, 0.12, laneOffset);
+        } else {
+          cGroup.position.set(laneOffset, 0.12, startCoord);
+        }
+
+        this.crowdGroup.add(cGroup);
+
+        this.citizens.push({
+          group: cGroup,
+          legL: legL,
+          legR: legR,
+          isEastWest: isEastWest,
+          laneOffset: laneOffset,
+          dir: (i % 2 === 0 ? 1 : -1),
+          speed: 1.3 + Math.random() * 0.4,
+          walkPhase: Math.random() * Math.PI * 2,
+          state: 'WALKING',
+          evadeTimer: 0
+        });
+      }
+    }
+
+    triggerHonk() {
+      this.playHornAudio();
+
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[HORN] CYBERCAR DUAL ELECTRIC HORN SOUNDED!');
+      }
+
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const rPos = roverGroup.position;
+      this.citizens.forEach(c => {
+        const dx = c.group.position.x - rPos.x;
+        const dz = c.group.position.z - rPos.z;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist < 28.0) {
+          c.state = 'EVADING';
+          c.evadeTimer = 2.4;
+          c.group.position.x += (dx > 0 ? 2.5 : -2.5);
+        }
+      });
+    }
+
+    playHornAudio() {
+      try {
+        const audioCtx = (typeof cyberAudio !== 'undefined' && cyberAudio.ctx) ? cyberAudio.ctx : (THREE.AudioContext ? THREE.AudioContext.getContext() : null);
+        if (!audioCtx) return;
+
+        [380, 475].forEach(freq => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+          gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start();
+          osc.stop(audioCtx.currentTime + 0.36);
+        });
+      } catch (e) {}
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      const rPos = roverGroup ? roverGroup.position : null;
+      const rSpeed = (vState && vState.roverCurrentSpeed) ? vState.roverCurrentSpeed : 0;
+
+      for (let i = 0; i < this.citizens.length; i++) {
+        const c = this.citizens[i];
+
+        if (c.state === 'EVADING') {
+          c.evadeTimer -= delta;
+          if (c.evadeTimer <= 0) c.state = 'WALKING';
+          continue;
+        }
+
+        if (rPos && Math.abs(rSpeed) > 10.0) {
+          const dx = c.group.position.x - rPos.x;
+          const dz = c.group.position.z - rPos.z;
+          const dist = Math.sqrt(dx * dx + dz * dz);
+          if (dist < 14.0) {
+            c.state = 'EVADING';
+            c.evadeTimer = 2.2;
+            c.group.position.x += (dx > 0 ? 2.2 : -2.2);
+            continue;
+          }
+        }
+
+        c.walkPhase += delta * 6.5;
+        c.legL.rotation.x = Math.sin(c.walkPhase) * 0.55;
+        c.legR.rotation.x = -Math.sin(c.walkPhase) * 0.55;
+
+        if (c.isEastWest) {
+          c.group.position.x += c.dir * c.speed * delta;
+          c.group.rotation.y = c.dir > 0 ? Math.PI / 2 : -Math.PI / 2;
+          if (c.dir > 0 && c.group.position.x > 180) c.dir = -1;
+          if (c.dir < 0 && c.group.position.x < -180) c.dir = 1;
+        } else {
+          c.group.position.z += c.dir * c.speed * delta;
+          c.group.rotation.y = c.dir > 0 ? 0 : Math.PI;
+          if (c.dir > 0 && c.group.position.z > 180) c.dir = -1;
+          if (c.dir < 0 && c.group.position.z < -180) c.dir = 1;
+        }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 10: SPATIAL 3D AUDIO VISUALIZER TOWERS & CYBER DJ STINGS
+  // ==========================================================================
+  class SpatialAudioVisualizerSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.visGroup = new THREE.Group();
+      this.visGroup.name = 'spatialAudioVisualizerGroup';
+      this.parent.scene.add(this.visGroup);
+
+      this.analyser = null;
+      this.dataArray = new Uint8Array(32);
+      this.initAudioAnalyser();
+      this.buildEqualizerTowers();
+    }
+
+    initAudioAnalyser() {
+      try {
+        const audioCtx = (typeof cyberAudio !== 'undefined' && cyberAudio.ctx) ? cyberAudio.ctx : (THREE.AudioContext ? THREE.AudioContext.getContext() : null);
+        if (audioCtx) {
+          this.analyser = audioCtx.createAnalyser();
+          this.analyser.fftSize = 64;
+          this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+        }
+      } catch (e) {}
+    }
+
+    buildEqualizerTowers() {
+      this.eqColumns = [];
+      const towerPositions = [
+        { x: -55, z: 55, ry: 0 },
+        { x: 55, z: -55, ry: Math.PI }
+      ];
+
+      const colCount = 12;
+      const blockCount = 8;
+      const blockGeo = new THREE.BoxGeometry(1.4, 1.8, 0.4);
+
+      towerPositions.forEach(tp => {
+        const tGroup = new THREE.Group();
+        tGroup.position.set(tp.x, 0, tp.z);
+        tGroup.rotation.y = tp.ry;
+
+        for (let c = 0; c < colCount; c++) {
+          const colBlocks = [];
+          const cx = (c - colCount / 2) * 2.1;
+
+          for (let b = 0; b < blockCount; b++) {
+            const cy = 12 + b * 2.6;
+            const colorHex = b < 3 ? 0x00f2ff : b < 6 ? 0xa855f7 : 0xf43f5e;
+            const mat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.15 });
+            const mesh = new THREE.Mesh(blockGeo, mat);
+            mesh.position.set(cx, cy, 14.2);
+            tGroup.add(mesh);
+            colBlocks.push(mesh);
+          }
+          this.eqColumns.push(colBlocks);
+        }
+        this.visGroup.add(tGroup);
+      });
+    }
+
+    update(delta) {
+      if (this.analyser) {
+        this.analyser.getByteFrequencyData(this.dataArray);
+      } else {
+        const time = performance.now() * 0.003;
+        for (let i = 0; i < 16; i++) {
+          this.dataArray[i] = Math.floor(100 + Math.sin(time * 2.0 + i * 0.4) * 80 + Math.cos(time * 5.0) * 40);
+        }
+      }
+
+      const totalCols = this.eqColumns.length;
+      for (let c = 0; c < totalCols; c++) {
+        const blocks = this.eqColumns[c];
+        const binIdx = (c % 12);
+        const amp = (this.dataArray[binIdx] || 0) / 255.0;
+        const activeCount = Math.floor(amp * 8.5);
+
+        for (let b = 0; b < 8; b++) {
+          blocks[b].material.opacity = (b <= activeCount) ? 0.95 : 0.12;
+        }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 11: SUBTERRANEAN NEON UNDERGROUND HIGHWAY NETWORK (y = -18m)
+  // ==========================================================================
+  class SubterraneanTunnelNetworkSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.tunnelGroup = new THREE.Group();
+      this.tunnelGroup.name = 'subterraneanTunnelNetworkGroup';
+      this.parent.scene.add(this.tunnelGroup);
+
+      this.inTunnel = false;
+      this.buildTunnelHighway();
+    }
+
+    buildTunnelHighway() {
+      const wallMat = new THREE.MeshStandardMaterial({ color: 0x151c28, roughness: 0.85, metalness: 0.3 });
+      const roadMat = new THREE.MeshStandardMaterial({ color: 0x0f141c, roughness: 0.8, metalness: 0.2 });
+      const stripCyanMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const stripAmberMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+
+      const tunnelLen = 420;
+      const tFloor = new THREE.Mesh(new THREE.PlaneGeometry(24, tunnelLen), roadMat);
+      tFloor.rotation.x = -Math.PI / 2;
+      tFloor.position.set(0, -18.0, 0);
+      this.tunnelGroup.add(tFloor);
+
+      const tRoof = new THREE.Mesh(new THREE.CylinderGeometry(13, 13, tunnelLen, 16, 1, true, 0, Math.PI), wallMat);
+      tRoof.rotation.z = Math.PI / 2;
+      tRoof.rotation.y = Math.PI / 2;
+      tRoof.position.set(0, -18.0 + 3.0, 0);
+      this.tunnelGroup.add(tRoof);
+
+      const lightStripL = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, tunnelLen), stripCyanMat);
+      lightStripL.position.set(-6, -11.5, 0);
+      this.tunnelGroup.add(lightStripL);
+
+      const lightStripR = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.2, tunnelLen), stripAmberMat);
+      lightStripR.position.set(6, -11.5, 0);
+      this.tunnelGroup.add(lightStripR);
+
+      [-1, 1].forEach(dir => {
+        const rampLen = 85;
+        const rAngle = Math.atan2(18.0, rampLen);
+        const rampMesh = new THREE.Mesh(new THREE.PlaneGeometry(20, Math.hypot(18.0, rampLen)), roadMat);
+        rampMesh.rotation.x = -Math.PI / 2 + (dir * rAngle);
+        rampMesh.position.set(0, -9.0, dir * (tunnelLen / 2 + rampLen / 2));
+        this.tunnelGroup.add(rampMesh);
+      });
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const rPos = roverGroup.position;
+      const isUnderground = rPos.y < -6.0;
+
+      if (isUnderground && !this.inTunnel) {
+        this.inTunnel = true;
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[TUNNEL] ENTERED CALGARY METRO SUBTERRANEAN HIGHWAY (-18M)');
+        }
+      } else if (!isUnderground && this.inTunnel) {
+        this.inTunnel = false;
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[SURFACE] EMERGED ONTO METROPOLIS ARTERIAL SKYWAY');
+        }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 12: INTERACTIVE DRIVE-IN TUNING GARAGE & REAL-TIME WRAP EDITOR
+  // ==========================================================================
+  class VehicleTuningStudioSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.isOpen = false;
+      this.studioGroup = new THREE.Group();
+      this.studioGroup.name = 'vehicleTuningStudioGroup';
+      this.parent.scene.add(this.studioGroup);
+
+      this.bayX = 0;
+      this.bayZ = 160;
+      this.buildShowroomBay();
+      this.createStudioModal();
+    }
+
+    buildShowroomBay() {
+      const tableMat = new THREE.MeshStandardMaterial({ color: 0x0e1726, metalness: 0.85, roughness: 0.25 });
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, side: THREE.DoubleSide });
+
+      const turntable = new THREE.Mesh(new THREE.CylinderGeometry(6.2, 6.2, 0.24, 24), tableMat);
+      turntable.position.set(this.bayX, 0.12, this.bayZ);
+      this.studioGroup.add(turntable);
+
+      const glowRing = new THREE.Mesh(new THREE.RingGeometry(6.0, 6.35, 24), ringMat);
+      glowRing.rotation.x = -Math.PI / 2;
+      glowRing.position.set(this.bayX, 0.25, this.bayZ);
+      this.studioGroup.add(glowRing);
+    }
+
+    createStudioModal() {
+      const existing = document.getElementById('tuning-studio-modal');
+      if (existing) existing.remove();
+
+      const modal = document.createElement('div');
+      modal.id = 'tuning-studio-modal';
+      modal.style.cssText = `
+        position: fixed;
+        top: 50%;
+        right: 25px;
+        transform: translateY(-50%);
+        width: 320px;
+        background: rgba(10, 16, 28, 0.94);
+        border: 1px solid rgba(0, 242, 255, 0.5);
+        border-radius: 12px;
+        padding: 18px;
+        color: #fff;
+        font-family: 'Rajdhani', sans-serif;
+        z-index: 999;
+        display: none;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 32px rgba(0, 242, 255, 0.25);
+      `;
+
+      modal.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,242,255,0.3); padding-bottom: 8px; margin-bottom: 14px;">
+          <div style="font-weight: 900; font-size: 15px; color: #00f2ff; letter-spacing: 1px;">
+            <i class="fa-solid fa-wrench"></i> CYBER TUNING STUDIO
+          </div>
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.toggleStudio()" style="background: none; border: none; color: #ef4444; font-size: 18px; cursor: pointer;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div style="font-size: 11px; margin-bottom: 10px; color: #94a3b8;">PEARLESCENT PAINT WRAP:</div>
+        <div style="display: flex; gap: 6px; margin-bottom: 14px;">
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.applyWrap(0x00f2ff)" style="flex: 1; height: 26px; background: #00f2ff; border: 1px solid #fff; border-radius: 4px; cursor: pointer;"></button>
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.applyWrap(0xff0055)" style="flex: 1; height: 26px; background: #ff0055; border: 1px solid #fff; border-radius: 4px; cursor: pointer;"></button>
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.applyWrap(0xffaa00)" style="flex: 1; height: 26px; background: #ffaa00; border: 1px solid #fff; border-radius: 4px; cursor: pointer;"></button>
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.applyWrap(0x8b5cf6)" style="flex: 1; height: 26px; background: #8b5cf6; border: 1px solid #fff; border-radius: 4px; cursor: pointer;"></button>
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.applyWrap(0x10b981)" style="flex: 1; height: 26px; background: #10b981; border: 1px solid #fff; border-radius: 4px; cursor: pointer;"></button>
+        </div>
+
+        <div style="font-size: 11px; margin-bottom: 10px; color: #94a3b8;">SUSPENSION STANCE:</div>
+        <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.setStance('track')" style="flex: 1; padding: 6px; background: rgba(0,242,255,0.15); border: 1px solid #00f2ff; color: #00f2ff; border-radius: 6px; font-weight: 800; cursor: pointer;">Slammed Track</button>
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.setStance('dakar')" style="flex: 1; padding: 6px; background: rgba(255,170,0,0.15); border: 1px solid #ffaa00; color: #ffaa00; border-radius: 6px; font-weight: 800; cursor: pointer;">Baja Lift</button>
+        </div>
+
+        <div style="font-size: 11px; margin-bottom: 10px; color: #94a3b8;">ECU ENGINE PROFILE:</div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.setECU('drift')" style="flex: 1; padding: 6px; background: rgba(168,85,247,0.15); border: 1px solid #a855f7; color: #a855f7; border-radius: 6px; font-weight: 800; cursor: pointer;">Drift King</button>
+          <button type="button" onclick="window.advancedSystemsInstance.tuning.setECU('speed')" style="flex: 1; padding: 6px; background: rgba(239,68,68,0.15); border: 1px solid #ef4444; color: #ef4444; border-radius: 6px; font-weight: 800; cursor: pointer;">Supersonic</button>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    toggleStudio() {
+      this.isOpen = !this.isOpen;
+      const modal = document.getElementById('tuning-studio-modal');
+      if (modal) modal.style.display = this.isOpen ? 'block' : 'none';
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    applyWrap(colorHex) {
+      const roverChassis = typeof window.roverChassisMesh !== 'undefined' ? window.roverChassisMesh : null;
+      const cyberCar = typeof window.cyberCarMesh !== 'undefined' ? window.cyberCarMesh : null;
+
+      if (roverChassis && roverChassis.material) roverChassis.material.color.setHex(colorHex);
+      if (cyberCar) {
+        cyberCar.traverse(obj => {
+          if (obj.isMesh && obj.material && obj.material.color) {
+            obj.material.color.setHex(colorHex);
+          }
+        });
+      }
+
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[TUNING] CUSTOM PEARLESCENT WRAP APPLIED!');
+      }
+    }
+
+    setStance(mode) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (roverGroup) {
+        roverGroup.position.y = mode === 'track' ? 0.04 : 0.28;
+      }
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`[TUNING] SUSPENSION STANCE CONFIGURED: ${mode.toUpperCase()}`);
+      }
+    }
+
+    setECU(profile) {
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`[ECU] PERFORMANCE PROFILE FLASHED: ${profile.toUpperCase()}`);
+      }
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const dx = roverGroup.position.x - this.bayX;
+      const dz = roverGroup.position.z - this.bayZ;
+      const dist = Math.sqrt(dx * dx + dz * dz);
+
+      if (dist < 7.0 && !this.isOpen && Math.abs((vState && vState.roverCurrentSpeed) ? vState.roverCurrentSpeed : 0) < 1.0) {
+        // Can open studio
+      }
     }
   }
 
