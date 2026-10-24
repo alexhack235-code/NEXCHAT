@@ -187,10 +187,10 @@
     <!-- THERMAL GEAR & HOT THERMOS -->
     <div class="vital-gear">
       <button type="button" class="btn-gear" id="btn-gear-toggle" onclick="cycleWinterGear()" title="Cycle Canadian Winter Thermal Gear [T]">
-        <span id="gear-label">🇨🇦 ARCTIC GOOSE PARKA (85%)</span> [T]
+        <span id="gear-label">[CA] ARCTIC GOOSE PARKA (85%)</span> [T]
       </button>
       <button type="button" class="btn-gear" onclick="drinkHotMapleThermos()" title="Drink Hot Canadian Maple Coffee [C]">
-        <span id="thermos-label">☕ HOT THERMOS (3)</span> [C]
+        <span id="thermos-label">[THERMOS] HOT THERMOS (3)</span> [C]
       </button>
     </div>
   </div>
@@ -1270,10 +1270,10 @@
     let selectedGearIndex = 0;
 
     const WINTER_GEAR_TYPES = [
-      { id: 'parka', name: '🇨🇦 ARCTIC GOOSE PARKA (85% INSULATION)', mult: 0.15 },
-      { id: 'tuque', name: '🇨🇦 BUFFALO PLAID & TUQUE (50% INSULATION)', mult: 0.50 },
-      { id: 'flannel', name: '🇨🇦 LIGHT VOYAGEUR SHIRT (15% INSULATION)', mult: 0.85 },
-      { id: 'exosuit', name: '🇨🇦 AURORA QUANTUM EXOSUIT (100% SHIELD)', mult: 0.00 }
+      { id: 'parka', name: '[CA] ARCTIC GOOSE PARKA (85% INSULATION)', mult: 0.15 },
+      { id: 'tuque', name: '[CA] BUFFALO PLAID & TUQUE (50% INSULATION)', mult: 0.50 },
+      { id: 'flannel', name: '[CA] LIGHT VOYAGEUR SHIRT (15% INSULATION)', mult: 0.85 },
+      { id: 'exosuit', name: '[CA] AURORA QUANTUM EXOSUIT (100% SHIELD)', mult: 0.00 }
     ];
 
     function cycleWinterGear() {
@@ -1287,14 +1287,14 @@
 
     function drinkHotMapleThermos() {
       if (thermosCharges <= 0) {
-        showNotify('☕ THERMOS EMPTY! REFILL NEAR CAMPFIRE, CABIN STOVE OR HOT SPRINGS');
+        showNotify('[THERMOS] THERMOS EMPTY! REFILL NEAR CAMPFIRE, CABIN STOVE OR HOT SPRINGS');
         return;
       }
       thermosCharges--;
       playerWarmth = Math.min(100, playerWarmth + 35);
       const thLbl = document.getElementById('thermos-label');
-      if (thLbl) thLbl.textContent = `☕ HOT THERMOS (${thermosCharges})`;
-      showNotify(`☕ SIPPED HOT CANADIAN MAPLE COFFEE (+35% WARMTH)! [${thermosCharges} LEFT]`);
+      if (thLbl) thLbl.textContent = `[THERMOS] HOT THERMOS (${thermosCharges})`;
+      showNotify(`[THERMOS] SIPPED HOT CANADIAN MAPLE COFFEE (+35% WARMTH)! [${thermosCharges} LEFT]`);
       if (audio && audio.playChirp) audio.playChirp();
     }
 
@@ -1315,7 +1315,7 @@
       if ((isNearCampfire || isNearHotSprings || isNearSugarShack) && thermosCharges < 3) {
         thermosCharges = 3;
         const thLbl = document.getElementById('thermos-label');
-        if (thLbl) thLbl.textContent = '☕ HOT THERMOS (3)';
+        if (thLbl) thLbl.textContent = '[THERMOS] HOT THERMOS (3)';
       }
 
       // Hot Springs Soak Recovery
@@ -1488,7 +1488,7 @@
         inPatrolCruiser = true;
         document.getElementById('cruiser-hud').style.display = 'block';
         if (playerRiggedMesh) playerRiggedMesh.visible = false;
-        showNotify('📡 PILOTING NEWFOUNDLAND CABOT CRUISER // [SHIFT] NITRO BOOST');
+        showNotify('[RADAR] PILOTING NEWFOUNDLAND CABOT CRUISER // [SHIFT] NITRO BOOST');
         audio.playChirp();
       }
     }
@@ -1507,7 +1507,7 @@
         document.getElementById('mis-iceberg').classList.add('done');
         tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
         document.getElementById('token-val').textContent = tokens.toLocaleString();
-        showNotify('🧊 ICEBERG ALLEY INTERCEPT CALIBRATED (+500 NEX)');
+        showNotify('[ICEBERG] ICEBERG ALLEY INTERCEPT CALIBRATED (+500 NEX)');
         audio.playLootChime(); updateMissionBadge();
       }
       const cabotPos = new THREE.Vector3(-110, 0, -110);
@@ -1516,7 +1516,7 @@
         document.getElementById('mis-cabot').classList.add('done');
         tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
         document.getElementById('token-val').textContent = tokens.toLocaleString();
-        showNotify('🗼 SIGNAL HILL CABOT MARCONI UPLINK SYNCHRONIZED (+500 NEX)');
+        showNotify('[TOWER] SIGNAL HILL CABOT MARCONI UPLINK SYNCHRONIZED (+500 NEX)');
         audio.playLootChime(); updateMissionBadge();
       }
     }
@@ -1712,7 +1712,7 @@
           document.getElementById('mis-patrol').classList.add('done');
           tokens += 500; localStorage.setItem('BS_TOKENS', tokens.toString());
           document.getElementById('token-val').textContent = tokens.toLocaleString();
-          showNotify('📡 SIGNAL HILL TRANSATLANTIC HIGHWAY TRAVERSED (+500 NEX)');
+          showNotify('[RADAR] SIGNAL HILL TRANSATLANTIC HIGHWAY TRAVERSED (+500 NEX)');
           audio.playLootChime(); updateMissionBadge();
         }
 

@@ -305,7 +305,7 @@
       });
     }
 
-    console.log('✅ [CANADIAN FORCES] HMCS Calgary (CVN-88) Aircraft Carrier & Escort Frigate deployed at Deepwater Harbor.');
+    console.log('[OK] [CANADIAN FORCES] HMCS Calgary (CVN-88) Aircraft Carrier & Escort Frigate deployed at Deepwater Harbor.');
   }
 
   // Helper: Build a sleek Canadian CF-188 / F-99 Ghost Naval Fighter Jet
@@ -611,7 +611,7 @@
       });
     }
 
-    console.log('✅ [CANADIAN FORCES] CFB Calgary Military Recruitment Base & Air Defense established ($10,000 CAD Weekly Pay).');
+    console.log('[OK] [CANADIAN FORCES] CFB Calgary Military Recruitment Base & Air Defense established ($10,000 CAD Weekly Pay).');
   }
 
   // Build Canadian Armed Forces LAV 6.0 Combat Vehicle
@@ -809,7 +809,7 @@
       });
     }
 
-    console.log('✅ [CANADIAN CYBERSECURITY] CCCS / CSE Cyber Command Citadel deployed.');
+    console.log('[OK] [CANADIAN CYBERSECURITY] CCCS / CSE Cyber Command Citadel deployed.');
   }
 
   // ============================================================
@@ -1025,7 +1025,7 @@
 
     scene.add(auroraGroup);
     window.militaryAviationState.auroraMesh = { group: auroraGroup, curtain1, curtain2, geo1, geo2 };
-    console.log('🌌 [NORTHERN LIGHTS] Canadian Aurora Borealis celestial curtain active.');
+    console.log('[AURORA] [NORTHERN LIGHTS] Canadian Aurora Borealis celestial curtain active.');
   }
 
   let _lastAuroraUpdate = 0;
@@ -1126,7 +1126,7 @@
     });
 
     window.militaryAviationState.hostileDrones = drones;
-    console.log('🛸 [DOGFIGHT COMBAT] 4 Hostile Renegade Sky-Raider Drones airborne over airspace.');
+    console.log('[VTOL] [DOGFIGHT COMBAT] 4 Hostile Renegade Sky-Raider Drones airborne over airspace.');
   }
 
   function renderDroneHealthBar(drone) {
@@ -1234,7 +1234,7 @@
     }
 
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification(`🎯 DOGFIGHT KILL CONFIRMED: ${drone.name} NEUTRALIZED (+ $2,500 CAD BOUNTY)!`);
+      showStoreNotification(`[TARGET] DOGFIGHT KILL CONFIRMED: ${drone.name} NEUTRALIZED (+ $2,500 CAD BOUNTY)!`);
     }
     if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
   }
@@ -1286,14 +1286,14 @@
 
     if (st.missileStock <= 0) {
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('⚠️ AMRAAM MISSILES DEPLETED // RELOADING PAYLOAD (10S)...');
+        showStoreNotification('[ALERT] AMRAAM MISSILES DEPLETED // RELOADING PAYLOAD (10S)...');
       }
       setTimeout(() => {
         st.missileStock = 6;
         const countEl = document.getElementById('cockpit-missile-count');
         if (countEl) countEl.textContent = '6';
         if (typeof showStoreNotification === 'function') {
-          showStoreNotification('🚀 AIM-120D AMRAAM PAYLOAD RESTOCKED (6/6 READY)!');
+          showStoreNotification('[STARSHIP] AIM-120D AMRAAM PAYLOAD RESTOCKED (6/6 READY)!');
         }
       }, 10000);
       return;
@@ -1353,11 +1353,11 @@
     if (bestTarget) {
       playMilitarySFX('lock_tone');
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification(`🚀 AIM-120D AMRAAM LAUNCHED: RADAR LOCK ON [${bestTarget.name}]!`);
+        showStoreNotification(`[STARSHIP] AIM-120D AMRAAM LAUNCHED: RADAR LOCK ON [${bestTarget.name}]!`);
       }
     } else {
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('🚀 AIM-120D AMRAAM FIRED (UNGUIDED BORESIGHT)');
+        showStoreNotification('[STARSHIP] AIM-120D AMRAAM FIRED (UNGUIDED BORESIGHT)');
       }
     }
   }
@@ -1460,7 +1460,7 @@
     }
 
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification(st.tailhookDown ? '⚓ TAILHOOK DEPLOYED // ARMED FOR CARRIER 3-WIRE TRAP LANDING [H]' : '⚓ TAILHOOK RETRACTED [H]');
+      showStoreNotification(st.tailhookDown ? '[NAVAL] TAILHOOK DEPLOYED // ARMED FOR CARRIER 3-WIRE TRAP LANDING [H]' : '[NAVAL] TAILHOOK RETRACTED [H]');
     }
     if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
   }
@@ -1495,7 +1495,7 @@
         if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
 
         if (typeof showStoreNotification === 'function') {
-          showStoreNotification('⚓ OK 3-WIRE! PERFECT CARRIER TRAP RECOVERY (+ $5,000 CAD CARRIER FLIGHT BONUS)!');
+          showStoreNotification('[NAVAL] OK 3-WIRE! PERFECT CARRIER TRAP RECOVERY (+ $5,000 CAD CARRIER FLIGHT BONUS)!');
         }
         if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) {
           cyberAudio.playLootChime();
@@ -1524,7 +1524,7 @@
     if (lavHud) lavHud.style.display = 'flex';
 
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification('🇨🇦 PILOTING CANADIAN FORCES LAV 6.0 // 8X8 ALL-TERRAIN COMBAT SYSTEM [E: EXIT]!');
+      showStoreNotification('[CA] PILOTING CANADIAN FORCES LAV 6.0 // 8X8 ALL-TERRAIN COMBAT SYSTEM [E: EXIT]!');
     }
     playMilitarySFX('autocannon');
   }
@@ -1546,7 +1546,7 @@
     if (lavHud) lavHud.style.display = 'none';
 
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification('🇨🇦 DISMOUNTED CANADIAN FORCES LAV 6.0 [ON FOOT]');
+      showStoreNotification('[CA] DISMOUNTED CANADIAN FORCES LAV 6.0 [ON FOOT]');
     }
   }
 
@@ -1637,7 +1637,7 @@
     if (!st.isPilotingLAV || !st.lavVehicleMesh) return;
     if ((st.lavSmokeCharges || 0) <= 0) {
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('⚠️ SMOKE SCREEN EMPTY // RELOADING CHARGES...');
+        showStoreNotification('[ALERT] SMOKE SCREEN EMPTY // RELOADING CHARGES...');
       }
       return;
     }
@@ -1656,7 +1656,7 @@
     }
 
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification(`💨 360° SMOKE SCREEN DEPLOYED (${st.lavSmokeCharges} CHARGES LEFT)!`);
+      showStoreNotification(`[SMOKE] 360° SMOKE SCREEN DEPLOYED (${st.lavSmokeCharges} CHARGES LEFT)!`);
     }
   }
 
@@ -1671,7 +1671,7 @@
 
     playMilitarySFX('visor');
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification('🇨🇦 TACTICAL ARMORY LOADOUT EQUIPPED // CADPAT CAMO & FLIR THERMAL VISOR ACTIVE [T]!');
+      showStoreNotification('[CA] TACTICAL ARMORY LOADOUT EQUIPPED // CADPAT CAMO & FLIR THERMAL VISOR ACTIVE [T]!');
     }
   }
 
@@ -1684,7 +1684,7 @@
 
     playMilitarySFX('visor');
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification(st.thermalVisorActive ? '👁️ FLIR THERMAL RECON VISOR: ONLINE [T]' : '👁️ FLIR THERMAL RECON VISOR: STANDBY [T]');
+      showStoreNotification(st.thermalVisorActive ? '[FLIR] FLIR THERMAL RECON VISOR: ONLINE [T]' : '[FLIR] FLIR THERMAL RECON VISOR: STANDBY [T]');
     }
   }
 
@@ -1754,7 +1754,7 @@
     const card = document.getElementById(`cyber-threat-card-${threatIndex}`);
     if (card) {
       card.style.borderColor = '#22c55e';
-      card.innerHTML = `<span style="color:#22c55e; font-weight:900;">✅ DEFUSED // CRYPTO COUNTER-PAYLOAD ACTIVE</span>`;
+      card.innerHTML = `<span style="color:#22c55e; font-weight:900;">[OK] DEFUSED // CRYPTO COUNTER-PAYLOAD ACTIVE</span>`;
     }
 
     if (st.cyberThreatsDefused.every(v => v === true)) {
@@ -1765,7 +1765,7 @@
           if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
         }
         if (typeof showStoreNotification === 'function') {
-          showStoreNotification('🛡️ CCCS NATIONAL CYBER THREAT DEFUSED // +$5,000 CAD BOUNTY AWARDED!');
+          showStoreNotification('[SHIELD] CCCS NATIONAL CYBER THREAT DEFUSED // +$5,000 CAD BOUNTY AWARDED!');
         }
         if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
 
@@ -2004,7 +2004,7 @@
       }
 
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('🇨🇦 ENLISTED IN CANADIAN FORCES: +$10,000 CAD SIGNING SALARY & MILITARY COMBAT CLEARANCE!');
+        showStoreNotification('[CA] ENLISTED IN CANADIAN FORCES: +$10,000 CAD SIGNING SALARY & MILITARY COMBAT CLEARANCE!');
       }
 
       if (window.HyperRealismEngine && window.HyperRealismEngine.equipGear) {
@@ -2019,13 +2019,13 @@
         const tEl = document.getElementById('store-token-display');
         if (tEl) tEl.textContent = Number(gameState.tokens).toLocaleString();
         if (typeof showStoreNotification === 'function') {
-          showStoreNotification('🇨🇦 WEEKLY SALARY DISPATCH RECEIVED: +$10,000 CANADIAN DOLLARS DEPOSITED!');
+          showStoreNotification('[CA] WEEKLY SALARY DISPATCH RECEIVED: +$10,000 CANADIAN DOLLARS DEPOSITED!');
         }
         if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
       } else {
         const secsLeft = Math.ceil((oneWeekSimMs - elapsedMs) / 1000);
         if (typeof showStoreNotification === 'function') {
-          showStoreNotification(`🇨🇦 SOLDIER STATUS ACTIVE // NEXT $10,000 CAD PAYCHECK IN: ${secsLeft}S`);
+          showStoreNotification(`[CA] SOLDIER STATUS ACTIVE // NEXT $10,000 CAD PAYCHECK IN: ${secsLeft}S`);
         }
       }
     }
@@ -2041,7 +2041,7 @@
     if (distBase < 5.5 && !window._promptEnlistShown) {
       window._promptEnlistShown = true;
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('🇨🇦 [E] INTERACT WITH RECRUITMENT TERMINAL // ENLIST FOR $10,000 CAD SALARY!');
+        showStoreNotification('[CA] [E] INTERACT WITH RECRUITMENT TERMINAL // ENLIST FOR $10,000 CAD SALARY!');
       }
       setTimeout(() => { window._promptEnlistShown = false; }, 8000);
     }
@@ -2051,7 +2051,7 @@
     if (distCarrierJet < 9.0 && !window._promptCarrierShown && (!gameState || !gameState.inPlane)) {
       window._promptCarrierShown = true;
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('⚓ [E] BOARD CARRIER FIGHTER JET // CATAPULT LAUNCH READY!');
+        showStoreNotification('[NAVAL] [E] BOARD CARRIER FIGHTER JET // CATAPULT LAUNCH READY!');
       }
       setTimeout(() => { window._promptCarrierShown = false; }, 8000);
     }
@@ -2061,7 +2061,7 @@
     if (distLAV < 6.5 && !window._promptLAVShown && !st.isPilotingLAV) {
       window._promptLAVShown = true;
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('🇨🇦 [E] BOARD CANADIAN FORCES LAV 6.0 COMBAT VEHICLE (8X8)!');
+        showStoreNotification('[CA] [E] BOARD CANADIAN FORCES LAV 6.0 COMBAT VEHICLE (8X8)!');
       }
       setTimeout(() => { window._promptLAVShown = false; }, 8000);
     }
@@ -2071,7 +2071,7 @@
     if (distArmory < 6.0 && !window._promptArmoryShown) {
       window._promptArmoryShown = true;
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('🇨🇦 [E] ACCESS TACTICAL ARMORY // EQUIP CADPAT GEAR & FLIR THERMAL VISOR!');
+        showStoreNotification('[CA] [E] ACCESS TACTICAL ARMORY // EQUIP CADPAT GEAR & FLIR THERMAL VISOR!');
       }
       setTimeout(() => { window._promptArmoryShown = false; }, 8000);
     }
@@ -2081,7 +2081,7 @@
     if (distCyber < 6.0 && !window._promptCyberShown) {
       window._promptCyberShown = true;
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification('🛡️ [E] ACCESS CCCS NATIONAL CYBER DEFENSE TERMINAL ($5,000 CAD BOUNTY)!');
+        showStoreNotification('[SHIELD] [E] ACCESS CCCS NATIONAL CYBER DEFENSE TERMINAL ($5,000 CAD BOUNTY)!');
       }
       setTimeout(() => { window._promptCyberShown = false; }, 8000);
     }
@@ -2138,7 +2138,7 @@
               gameState.plane.afterburner = true;
               gameState.plane.speed = 85.0;
               if (typeof showStoreNotification === 'function') {
-                showStoreNotification('🚀 STEAM CATAPULT FIRED! HMCS CALGARY LAUNCH // AIRBORNE!');
+                showStoreNotification('[STARSHIP] STEAM CATAPULT FIRED! HMCS CALGARY LAUNCH // AIRBORNE!');
               }
             }
             return;
@@ -2211,7 +2211,7 @@
     const st = window.militaryAviationState;
     st.cockpitViewActive = !st.cockpitViewActive;
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification(st.cockpitViewActive ? '✈️ COCKPIT HUD VIEW: ACTIVE [V]' : '✈️ CHASE CAMERA VIEW: ACTIVE [V]');
+      showStoreNotification(st.cockpitViewActive ? '[JET] COCKPIT HUD VIEW: ACTIVE [V]' : '[JET] CHASE CAMERA VIEW: ACTIVE [V]');
     }
     const cockHud = document.getElementById('plane-cockpit-hud');
     if (cockHud) {
@@ -2549,16 +2549,16 @@
           </div>
           <div style="display: flex; gap: 8px; margin-top: 4px;">
             <button id="cockpit-btn-gun" type="button" onclick="window.fireJetCannon()" style="background: rgba(255, 204, 0, 0.22); border: 1.5px solid #ffcc00; color: #ffcc00; font-family: 'Share Tech Mono', monospace; font-weight: 900; font-size: 11px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
-              🔫 20MM VULCAN [SPACE]
+              [CANNON] 20MM VULCAN [SPACE]
             </button>
             <button id="cockpit-btn-missile" type="button" onclick="window.fireJetMissile()" style="background: rgba(239, 68, 68, 0.25); border: 1.5px solid #ef4444; color: #ef4444; font-family: 'Share Tech Mono', monospace; font-weight: 900; font-size: 11px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
-              🚀 AIM-120D [R] (<span id="cockpit-missile-count">6</span>)
+              [STARSHIP] AIM-120D [R] (<span id="cockpit-missile-count">6</span>)
             </button>
             <button id="cockpit-btn-hook" type="button" onclick="window.toggleCarrierTailhook()" style="background: rgba(0, 242, 255, 0.22); border: 1.5px solid #00f2ff; color: #00f2ff; font-family: 'Share Tech Mono', monospace; font-weight: 900; font-size: 11px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
-              ⚓ HOOK: <span id="cockpit-hook-status">UP [H]</span>
+              [NAVAL] HOOK: <span id="cockpit-hook-status">UP [H]</span>
             </button>
             <button id="cockpit-btn-thermal" type="button" onclick="window.toggleThermalReconVisor()" style="background: rgba(34, 197, 94, 0.22); border: 1.5px solid #22c55e; color: #22c55e; font-family: 'Share Tech Mono', monospace; font-weight: 900; font-size: 11px; padding: 5px 12px; border-radius: 6px; cursor: pointer;">
-              👁️ THERMAL [T]
+              [FLIR] THERMAL [T]
             </button>
           </div>
           <div style="display: flex; gap: 16px; font-size: 11px; margin-top: 4px;">
@@ -2607,16 +2607,16 @@
       tacBar.style.cssText = 'display:none; position:fixed; bottom:24px; right:24px; z-index:1150; flex-direction:column; gap:8px; pointer-events:auto;';
       tacBar.innerHTML = `
         <button type="button" onclick="window.fireJetCannon()" style="background:rgba(255,204,0,0.88); border:2px solid #fff; color:#000; font-family:'Orbitron',sans-serif; font-weight:900; font-size:12px; padding:10px 16px; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(255,204,0,0.5);">
-          🔫 20MM CANNON [SPACE]
+          [CANNON] 20MM CANNON [SPACE]
         </button>
         <button type="button" onclick="window.fireJetMissile()" style="background:rgba(239,68,68,0.88); border:2px solid #fff; color:#fff; font-family:'Orbitron',sans-serif; font-weight:900; font-size:12px; padding:10px 16px; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(239,68,68,0.5);">
-          🚀 AIM-120D MISSILE [R]
+          [STARSHIP] AIM-120D MISSILE [R]
         </button>
         <button type="button" onclick="window.toggleCarrierTailhook()" style="background:rgba(0,242,255,0.88); border:2px solid #fff; color:#000; font-family:'Orbitron',sans-serif; font-weight:900; font-size:12px; padding:10px 16px; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(0,242,255,0.5);">
-          ⚓ TAILHOOK [H]
+          [NAVAL] TAILHOOK [H]
         </button>
         <button type="button" onclick="window.togglePlaneCockpitView()" style="background:rgba(0,255,136,0.88); border:2px solid #fff; color:#000; font-family:'Orbitron',sans-serif; font-weight:900; font-size:12px; padding:10px 16px; border-radius:8px; cursor:pointer; box-shadow:0 0 15px rgba(0,255,136,0.5);">
-          ✈️ COCKPIT HUD [V]
+          [JET] COCKPIT HUD [V]
         </button>
       `;
       document.body.appendChild(tacBar);
@@ -2629,18 +2629,18 @@
       lavHud.style.cssText = 'display:none; position:fixed; bottom:25px; left:50%; transform:translateX(-50%); background:rgba(10,16,24,0.94); border:2px solid #22c55e; border-radius:12px; padding:12px 28px; color:#fff; font-family:\'Share Tech Mono\',monospace; z-index:1150; flex-direction:column; align-items:center; gap:8px; box-shadow:0 0 25px rgba(34,197,94,0.35); pointer-events:auto;';
       lavHud.innerHTML = `
         <div style="display:flex; justify-content:space-between; width:100%; gap:24px; font-size:14px; font-weight:900; color:#22c55e; border-bottom:1px solid rgba(34,197,94,0.4); padding-bottom:4px;">
-          <span>🇨🇦 CANADIAN ARMED FORCES // LAV 6.0 (8X8)</span>
+          <span>[CA] CANADIAN ARMED FORCES // LAV 6.0 (8X8)</span>
           <span id="lav-hud-spd">0 KM/H</span>
         </div>
         <div style="display:flex; gap:12px; margin-top:4px;">
           <button type="button" onclick="window.fireLAVBushmaster()" style="background:rgba(239,68,68,0.25); border:1.5px solid #ef4444; color:#ef4444; font-family:monospace; font-weight:900; font-size:12px; padding:8px 16px; border-radius:6px; cursor:pointer;">
-            💥 25MM BUSHMASTER [CLICK / F]
+            [IMPACT] 25MM BUSHMASTER [CLICK / F]
           </button>
           <button type="button" onclick="window.deployLAVSmokeScreen()" style="background:rgba(148,163,184,0.25); border:1.5px solid #94a3b8; color:#e2e8f0; font-family:monospace; font-weight:900; font-size:12px; padding:8px 16px; border-radius:6px; cursor:pointer;">
-            💨 SMOKE SCREEN [G]
+            [SMOKE] SMOKE SCREEN [G]
           </button>
           <button type="button" onclick="window.exitCanadianLAV()" style="background:rgba(34,197,94,0.25); border:1.5px solid #22c55e; color:#22c55e; font-family:monospace; font-weight:900; font-size:12px; padding:8px 16px; border-radius:6px; cursor:pointer;">
-            🚪 DISMOUNT [E]
+            [DISMOUNT] DISMOUNT [E]
           </button>
         </div>
       `;
@@ -2655,7 +2655,7 @@
       visorDiv.innerHTML = `
         <div style="position:absolute; inset:0; background:repeating-linear-gradient(0deg, rgba(0,242,255,0.03) 0px, rgba(0,242,255,0.03) 2px, transparent 2px, transparent 4px);"></div>
         <div style="position:absolute; top:20px; left:25px; color:#00f2ff; font-family:'Share Tech Mono',monospace; font-size:13px; font-weight:900; letter-spacing:1px; line-height:1.5;">
-          <div>🇨🇦 CANADIAN FORCES FLIR RECON SYSTEM</div>
+          <div>[CA] CANADIAN FORCES FLIR RECON SYSTEM</div>
           <div>IR SPECTRUM: 8-14μm LWIR · GAIN: AUTO-CALIBRATED</div>
           <div>THERMAL SENSITIVITY: 0.04°C · AMBIENT: -4.5°C [CALGARY ALBERTA]</div>
         </div>
@@ -2678,7 +2678,7 @@
         <div style="width:720px; max-width:92vw; background:#070d18; border:2px solid #00f2ff; border-radius:12px; padding:24px; box-shadow:0 0 35px rgba(0,242,255,0.3); color:#fff;">
           <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #00f2ff; padding-bottom:10px; margin-bottom:16px;">
             <div>
-              <div style="color:#00f2ff; font-size:18px; font-weight:900; font-family:'Orbitron',sans-serif;">🇨🇦 CCCS NATIONAL CYBER DEFENSE TERMINAL</div>
+              <div style="color:#00f2ff; font-size:18px; font-weight:900; font-family:'Orbitron',sans-serif;">[CA] CCCS NATIONAL CYBER DEFENSE TERMINAL</div>
               <div style="color:#94a3b8; font-size:11px;">COMMUNICATIONS SECURITY ESTABLISHMENT // THREAT MITIGATION MATRIX</div>
             </div>
             <button type="button" onclick="document.getElementById('cccs-cyber-threat-modal').style.display='none'" style="background:transparent; border:none; color:#ef4444; font-size:20px; cursor:pointer; font-weight:900;">✕</button>
@@ -2689,29 +2689,29 @@
           <div style="display:flex; flex-direction:column; gap:12px;">
             <div id="cyber-threat-card-0" style="background:#0b1322; border:1.5px solid #ef4444; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
               <div>
-                <div style="color:#ef4444; font-weight:900; font-size:13px;">🚨 QUANTUM RANSOMWARE WORM // ARCTIC RADAR NODE</div>
+                <div style="color:#ef4444; font-weight:900; font-size:13px;">[ALERT] QUANTUM RANSOMWARE WORM // ARCTIC RADAR NODE</div>
                 <div style="color:#94a3b8; font-size:11px;">Target: Alert Bay Coastal Radar · Vector: Port 443 SCADA</div>
               </div>
               <button type="button" onclick="window.defuseCyberThreat(0)" style="background:rgba(239,68,68,0.25); border:1.5px solid #ef4444; color:#ef4444; font-weight:900; padding:6px 14px; border-radius:6px; cursor:pointer;">
-                🛡️ DEPLOY COUNTER-PAYLOAD
+                [SHIELD] DEPLOY COUNTER-PAYLOAD
               </button>
             </div>
             <div id="cyber-threat-card-1" style="background:#0b1322; border:1.5px solid #ffaa00; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
               <div>
-                <div style="color:#ffaa00; font-weight:900; font-size:13px;">⚠️ TERABIT DDOS FLOOD // TRANS-CANADA RAILWAYS</div>
+                <div style="color:#ffaa00; font-weight:900; font-size:13px;">[ALERT] TERABIT DDOS FLOOD // TRANS-CANADA RAILWAYS</div>
                 <div style="color:#94a3b8; font-size:11px;">Target: Calgary Maglev Network · Vector: 1.4 Tbps SYN Flood</div>
               </div>
               <button type="button" onclick="window.defuseCyberThreat(1)" style="background:rgba(255,170,0,0.25); border:1.5px solid #ffaa00; color:#ffaa00; font-weight:900; padding:6px 14px; border-radius:6px; cursor:pointer;">
-                🛡️ DEPLOY COUNTER-PAYLOAD
+                [SHIELD] DEPLOY COUNTER-PAYLOAD
               </button>
             </div>
             <div id="cyber-threat-card-2" style="background:#0b1322; border:1.5px solid #38bdf8; border-radius:8px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
               <div>
-                <div style="color:#38bdf8; font-weight:900; font-size:13px;">⚡ ZERO-DAY CRYPTO-EXPLOIT // FEDERAL ENERGY GRID</div>
+                <div style="color:#38bdf8; font-weight:900; font-size:13px;">[BOOST] ZERO-DAY CRYPTO-EXPLOIT // FEDERAL ENERGY GRID</div>
                 <div style="color:#94a3b8; font-size:11px;">Target: Alberta Hydro Substation · Vector: Zero-Day Memory Buffer</div>
               </div>
               <button type="button" onclick="window.defuseCyberThreat(2)" style="background:rgba(56,189,248,0.25); border:1.5px solid #38bdf8; color:#38bdf8; font-weight:900; padding:6px 14px; border-radius:6px; cursor:pointer;">
-                🛡️ DEPLOY COUNTER-PAYLOAD
+                [SHIELD] DEPLOY COUNTER-PAYLOAD
               </button>
             </div>
           </div>
@@ -2734,7 +2734,7 @@
 
     ctx.fillStyle = '#00f2ff';
     ctx.font = '900 46px "Orbitron", sans-serif';
-    ctx.fillText(`🇨🇦 ${title}`, 32, 90);
+    ctx.fillText(`[CA] ${title}`, 32, 90);
 
     ctx.fillStyle = '#94a3b8';
     ctx.font = '700 24px "Rajdhani", sans-serif';
@@ -2761,7 +2761,7 @@
 
     ctx.fillStyle = '#ffffff';
     ctx.font = '900 42px "Orbitron", sans-serif';
-    ctx.fillText('🇨🇦 CANADIAN ARMED FORCES ENLISTMENT', 45, 85);
+    ctx.fillText('[CA] CANADIAN ARMED FORCES ENLISTMENT', 45, 85);
 
     ctx.fillStyle = '#ffd700';
     ctx.font = '900 52px "Orbitron", sans-serif';
@@ -2871,7 +2871,7 @@
 
     // 7. Audible & Visual Feedback
     if (typeof showStoreNotification === 'function') {
-      showStoreNotification('✅ SCREEN RESCUED // SAFE VIEW RESTORED');
+      showStoreNotification('[OK] SCREEN RESCUED // SAFE VIEW RESTORED');
     }
     if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) {
       cyberAudio.playLootChime();

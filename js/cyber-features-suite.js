@@ -557,14 +557,14 @@ class NexStegano {
 
       const clientMsgId = `stg_${Date.now()}`;
       if (typeof window.appendLocalSentMessage === 'function') {
-        window.appendLocalSentMessage("🔒 [NEX-STEGANO ENCLAVE: Pixel Encrypted Secret Image]", attachment, false, 'sending', clientMsgId, null);
+        window.appendLocalSentMessage("[SECURE] [NEX-STEGANO ENCLAVE: Pixel Encrypted Secret Image]", attachment, false, 'sending', clientMsgId, null);
       }
 
       if (typeof window.sendSupabaseMessage === 'function' && window.currentChatUser) {
         window.sendSupabaseMessage({
           from: window.myUID,
           to: window.currentChatUser,
-          text: "🔒 [NEX-STEGANO ENCLAVE: Pixel Encrypted Secret Image]",
+          text: "[SECURE] [NEX-STEGANO ENCLAVE: Pixel Encrypted Secret Image]",
           attachment: attachment,
           chatType: window.currentChatType || 'direct'
         }).catch(console.warn);
@@ -1366,9 +1366,9 @@ class NexSandboxRunner {
     div.style.cssText = "margin-bottom: 4px; font-family: monospace; font-size: 11px;";
 
     let color = "#38bdf8";
-    let icon = "⚡";
-    if (level === 'warn') { color = "#f59e0b"; icon = "⚠️"; }
-    if (level === 'error') { color = "#ef4444"; icon = "❌"; }
+    let icon = "[BOOST]";
+    if (level === 'warn') { color = "#f59e0b"; icon = "[ALERT]"; }
+    if (level === 'error') { color = "#ef4444"; icon = "[X]"; }
 
     div.style.color = color;
     div.textContent = `${icon} ${args.join(' ')}`;
@@ -2748,9 +2748,9 @@ class NexAntiVpnShield {
 
     if (userInitiated && typeof window.showNotif === 'function') {
       if (isVpnDetected) {
-        window.showNotif(`⚠️ VPN/Proxy Anomaly Flagged (${riskScore}% Risk): ${reasons.join('; ')}`, 'warning', 4000);
+        window.showNotif(`[ALERT] VPN/Proxy Anomaly Flagged (${riskScore}% Risk): ${reasons.join('; ')}`, 'warning', 4000);
       } else {
-        window.showNotif(`🛡️ Hardware Location Verified: 100% Physical Integrity`, 'success', 3000);
+        window.showNotif(`[SHIELD] Hardware Location Verified: 100% Physical Integrity`, 'success', 3000);
       }
     }
 
@@ -2761,10 +2761,10 @@ class NexAntiVpnShield {
     if (this.statusBadge) {
       if (isVpnDetected) {
         this.statusBadge.style.color = '#ef4444';
-        this.statusBadge.innerHTML = `⚠️ VPN / Proxy Anomaly Detected (${riskScore}% Risk)`;
+        this.statusBadge.innerHTML = `[ALERT] VPN / Proxy Anomaly Detected (${riskScore}% Risk)`;
       } else {
         this.statusBadge.style.color = '#10b981';
-        this.statusBadge.innerHTML = `🛡️ 100% Physical Hardware Match`;
+        this.statusBadge.innerHTML = `[SHIELD] 100% Physical Hardware Match`;
       }
     }
 
@@ -2797,16 +2797,16 @@ class NexCountryCDN {
     this.headerBadge = document.getElementById('geoCdnEdgeBadge');
 
     this.edgeNodes = {
-      'af-west-lagos-7': { name: 'AF-West (Lagos Edge 7)', country: 'Nigeria', flag: '🇳🇬', region: 'West Africa', baseLatency: 8 },
-      'af-south-joburg-8': { name: 'AF-South (Johannesburg Edge 8)', country: 'South Africa', flag: '🇿🇦', region: 'Southern Africa', baseLatency: 18 },
-      'us-east-virginia-1': { name: 'US-East (Virginia Edge 1)', country: 'United States', flag: '🇺🇸', region: 'North America', baseLatency: 12 },
-      'us-west-oregon-2': { name: 'US-West (Oregon Edge 2)', country: 'United States', flag: '🇺🇸', region: 'North America', baseLatency: 16 },
-      'eu-west-frankfurt-3': { name: 'EU-West (Frankfurt Edge 3)', country: 'Germany', flag: '🇩🇪', region: 'Europe', baseLatency: 11 },
-      'eu-north-stockholm-4': { name: 'EU-North (Stockholm Edge 4)', country: 'Sweden', flag: '🇸🇪', region: 'Northern Europe', baseLatency: 14 },
-      'ap-south-mumbai-5': { name: 'AP-South (Mumbai Edge 5)', country: 'India', flag: '🇮🇳', region: 'South Asia', baseLatency: 14 },
-      'ap-east-tokyo-6': { name: 'AP-East (Tokyo Edge 6)', country: 'Japan', flag: '🇯🇵', region: 'East Asia', baseLatency: 10 },
-      'sa-east-saopaulo-9': { name: 'SA-East (São Paulo Edge 9)', country: 'Brazil', flag: '🇧🇷', region: 'South America', baseLatency: 16 },
-      'oc-south-sydney-10': { name: 'OC-South (Sydney Edge 10)', country: 'Australia', flag: '🇦🇺', region: 'Oceania', baseLatency: 15 }
+      'af-west-lagos-7': { name: 'AF-West (Lagos Edge 7)', country: 'Nigeria', flag: '[NG]', region: 'West Africa', baseLatency: 8 },
+      'af-south-joburg-8': { name: 'AF-South (Johannesburg Edge 8)', country: 'South Africa', flag: '[ZA]', region: 'Southern Africa', baseLatency: 18 },
+      'us-east-virginia-1': { name: 'US-East (Virginia Edge 1)', country: 'United States', flag: '[US]', region: 'North America', baseLatency: 12 },
+      'us-west-oregon-2': { name: 'US-West (Oregon Edge 2)', country: 'United States', flag: '[US]', region: 'North America', baseLatency: 16 },
+      'eu-west-frankfurt-3': { name: 'EU-West (Frankfurt Edge 3)', country: 'Germany', flag: '[DE]', region: 'Europe', baseLatency: 11 },
+      'eu-north-stockholm-4': { name: 'EU-North (Stockholm Edge 4)', country: 'Sweden', flag: '[SE]', region: 'Northern Europe', baseLatency: 14 },
+      'ap-south-mumbai-5': { name: 'AP-South (Mumbai Edge 5)', country: 'India', flag: '[IN]', region: 'South Asia', baseLatency: 14 },
+      'ap-east-tokyo-6': { name: 'AP-East (Tokyo Edge 6)', country: 'Japan', flag: '[JP]', region: 'East Asia', baseLatency: 10 },
+      'sa-east-saopaulo-9': { name: 'SA-East (São Paulo Edge 9)', country: 'Brazil', flag: '[BR]', region: 'South America', baseLatency: 16 },
+      'oc-south-sydney-10': { name: 'OC-South (Sydney Edge 10)', country: 'Australia', flag: '[AU]', region: 'Oceania', baseLatency: 15 }
     };
 
     this.selectedNodeKey = localStorage.getItem('nex_country_cdn_node') || 'auto';
@@ -2878,7 +2878,7 @@ class NexCountryCDN {
 
     this.updateUI();
     if (notify && typeof window.showNotif === 'function') {
-      window.showNotif(`⚡ ${this.currentNode.name} Ping: ${this.lastLatency}ms [OPTIMIZED]`, 'success', 2500);
+      window.showNotif(`[BOOST] ${this.currentNode.name} Ping: ${this.lastLatency}ms [OPTIMIZED]`, 'success', 2500);
     }
   }
 
@@ -2901,7 +2901,7 @@ class NexGeoLocation {
       ip: '102.89.33.142',
       country: 'Nigeria',
       countryCode: 'NG',
-      flag: '🇳🇬',
+      flag: '[NG]',
       city: 'Lagos',
       region: 'Lagos State',
       timezone: 'Africa/Lagos',
@@ -2927,7 +2927,7 @@ class NexGeoLocation {
           ip: data.ip || this.currentLocation.ip,
           country: data.country || 'Nigeria',
           countryCode: data.countryCode || 'NG',
-          flag: data.flag || '🇳🇬',
+          flag: data.flag || '[NG]',
           city: data.city || 'Lagos',
           region: data.region || 'Lagos State',
           timezone: data.timezone || 'Africa/Lagos',
@@ -3003,9 +3003,9 @@ class NexLocationDiscovery {
   }
 
   async loadOperatives() {
-    const geo = window.CyberFeatures?.geo?.currentLocation || { country: 'Nigeria', countryCode: 'NG', city: 'Lagos', flag: '🇳🇬' };
+    const geo = window.CyberFeatures?.geo?.currentLocation || { country: 'Nigeria', countryCode: 'NG', city: 'Lagos', flag: '[NG]' };
     if (this.countryLabel) {
-      this.countryLabel.textContent = `📍 ${geo.city}, ${geo.country} [${geo.countryCode}] ${geo.flag}`;
+      this.countryLabel.textContent = `[WAYPOINT] ${geo.city}, ${geo.country} [${geo.countryCode}] ${geo.flag}`;
     }
 
     this.operativesPool = [
@@ -3060,7 +3060,7 @@ class NexLocationDiscovery {
         handle: '@elena_berlin',
         country: 'Germany',
         countryCode: 'DE',
-        flag: '🇩🇪',
+        flag: '[DE]',
         city: 'Berlin',
         role: 'ChronEX Neural Specialist',
         distance: 'International Peer',
@@ -3075,7 +3075,7 @@ class NexLocationDiscovery {
         handle: '@kenji_tokyo',
         country: 'Japan',
         countryCode: 'JP',
-        flag: '🇯🇵',
+        flag: '[JP]',
         city: 'Tokyo',
         role: 'Zero-Knowledge Cryptographer',
         distance: 'International Peer',
@@ -3090,7 +3090,7 @@ class NexLocationDiscovery {
         handle: '@thorne_uk',
         country: 'United Kingdom',
         countryCode: 'GB',
-        flag: '🇬🇧',
+        flag: '[UK]',
         city: 'London',
         role: 'Tactical Recon Specialist',
         distance: 'International Peer',
@@ -3163,7 +3163,7 @@ class NexLocationDiscovery {
   sendWave(uid, name) {
     if (typeof window.playLuxuryPopSound === 'function') window.playLuxuryPopSound();
     if (typeof window.showNotif === 'function') {
-      window.showNotif(`👋 You waved at operative ${name} in your region!`, 'success', 2500);
+      window.showNotif(`[SIGNAL] You waved at operative ${name} in your region!`, 'success', 2500);
     }
   }
 
@@ -3196,7 +3196,7 @@ function initCyberSuite() {
   window.CyberFeatures.geo = new NexGeoLocation();
   window.CyberFeatures.geoDiscovery = new NexLocationDiscovery();
 
-  console.log("⚡ [NEXCHAT] Cyber-Features Suite V3.0 initialized successfully.");
+  console.log("[BOOST] [NEXCHAT] Cyber-Features Suite V3.0 initialized successfully.");
 }
 
 if (document.readyState === 'loading') {

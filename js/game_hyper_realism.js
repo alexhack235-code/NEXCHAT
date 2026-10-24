@@ -74,9 +74,9 @@
   // 2. CANADIAN CLIMATE, SURVIVAL & CLOTHING GEAR CONFIGS
   // ============================================================
   const CANADIAN_GEAR_TYPES = [
-    { id: 'parka', name: '🇨🇦 ARCTIC GOOSE PARKA (85% INSULATION)', insulation: 0.85, warmthDrain: 0.22 },
-    { id: 'toque', name: '🇨🇦 CALGARY WINTER FLANNEL & TOQUE (65% INSULATION)', insulation: 0.65, warmthDrain: 0.45 },
-    { id: 'exosuit', name: '⚡ TITAN THERMAL EXO-RIG (95% INSULATION)', insulation: 0.95, warmthDrain: 0.08 }
+    { id: 'parka', name: '[CA] ARCTIC GOOSE PARKA (85% INSULATION)', insulation: 0.85, warmthDrain: 0.22 },
+    { id: 'toque', name: '[CA] CALGARY WINTER FLANNEL & TOQUE (65% INSULATION)', insulation: 0.65, warmthDrain: 0.45 },
+    { id: 'exosuit', name: '[BOOST] TITAN THERMAL EXO-RIG (95% INSULATION)', insulation: 0.95, warmthDrain: 0.08 }
   ];
 
   // ============================================================
@@ -95,7 +95,7 @@
       accent: 0x0f172a,
       caliper: 0xffd000,
       canFly: false,
-      badge: '🇮🇹 V12 HYBRID HYPERCAR',
+      badge: '[IT] V12 HYBRID HYPERCAR',
       desc: 'Giallo Orion scissor-door V12 flagship with Y-shaped LEDs, active carbon delta wing & dual hexagonal exhaust.'
     },
     {
@@ -110,7 +110,7 @@
       accent: 0x0b0f17,
       caliper: 0xfacc15,
       canFly: false,
-      badge: '🇮🇹 ROSSO CORSA SUPERCAR',
+      badge: '[IT] ROSSO CORSA SUPERCAR',
       desc: 'Sculpted Maranello twin-turbo V8 PHEV with S-duct nose, Nero carbon cabin canopy & quad round tail lamps.'
     },
     {
@@ -125,7 +125,7 @@
       accent: 0x111827,
       caliper: 0xff5e00,
       canFly: false,
-      badge: '🇬🇧 PAPAYA SPARK LONGTAIL',
+      badge: '[UK] PAPAYA SPARK LONGTAIL',
       desc: 'Carbon-monocoque track weapon with F1 roof snorkel, dihedral doors, quad titanium exhaust & active airbrake.'
     },
     {
@@ -140,7 +140,7 @@
       accent: 0x090d16,
       caliper: 0x38bdf8,
       canFly: false,
-      badge: '🇫🇷 1,600 HP W16 HYPERCAR',
+      badge: '[FR] 1,600 HP W16 HYPERCAR',
       desc: 'Two-tone French Racing Blue & Nocturne Carbon with signature C-bar side profile and horseshoe grille.'
     },
     {
@@ -155,7 +155,7 @@
       accent: 0xe11d48,
       caliper: 0xe11d48,
       canFly: false,
-      badge: '🇩🇪 SWAN-NECK DRS TRACK',
+      badge: '[DE] SWAN-NECK DRS TRACK',
       desc: 'Ice White & Pyro Red aero icon with oval matrix LEDs, carbon hood louvers & towering swan-neck DRS wing.'
     },
     {
@@ -171,7 +171,7 @@
       accent: 0x0f172a,
       caliper: 0x00f2ff,
       canFly: true,
-      badge: '🛸 FLYING TESLA [PRESS X]',
+      badge: '[VTOL] FLYING TESLA [PRESS X]',
       desc: 'Ultra-Red EV hyper-roadster with deployable SpaceX Cold-Gas VTOL Thrusters & retractable plasma aero-wings!'
     },
     {
@@ -187,7 +187,7 @@
       accent: 0x1e293b,
       caliper: 0x00f2ff,
       canFly: true,
-      badge: '🛸 FLYING CYBERTRUCK [PRESS X]',
+      badge: '[VTOL] FLYING CYBERTRUCK [PRESS X]',
       desc: '30X Stainless-Steel exoskeleton truck equipped with 4 Heavy VTOL Plasma Thrusters & fold-out Cyber-Delta wings!'
     },
     {
@@ -203,7 +203,7 @@
       caliper: 0xef4444,
       canFly: false,
       isPolice: true,
-      badge: '🚓 RCMP POLICE CRUISER',
+      badge: '[RCMP] RCMP POLICE CRUISER',
       desc: 'Official Canadian Police Interceptor with PIT push-bumper, high-output twin-turbo V6 & strobe lightbar.'
     }
   ];
@@ -1526,8 +1526,8 @@
       this.updateTeslaFlightHUD();
 
       const msg = spec.canFly
-        ? `🛸 SPAWNED ${spec.name.toUpperCase()}! PRESS [X] OR TAP [TESLA FLY] TO ENGAGE AERO-FLIGHT!`
-        : `🏎️ SPAWNED ${spec.name.toUpperCase()} (${spec.topSpeedKmh} KM/H)!`;
+        ? `[VTOL] SPAWNED ${spec.name.toUpperCase()}! PRESS [X] OR TAP [TESLA FLY] TO ENGAGE AERO-FLIGHT!`
+        : `[HYPERCAR] SPAWNED ${spec.name.toUpperCase()} (${spec.topSpeedKmh} KM/H)!`;
       this.notifyUser(msg);
       this.closeDealershipModal();
     }
@@ -1595,13 +1595,13 @@
       if (this.teslaFlightActive && vehGroup) {
         this.teslaAltitude = Math.max(vehGroup.position.y + 5.5, 8.5);
         vehGroup.position.y = this.teslaAltitude;
-        this.notifyUser('🛸 TESLA SPACEX VTOL FLIGHT ENGAGED! [SPACE/▲] CLIMB · [C/▼] DESCEND · [W/S/A/D] FLY');
+        this.notifyUser('[VTOL] TESLA SPACEX VTOL FLIGHT ENGAGED! [SPACE/▲] CLIMB · [C/▼] DESCEND · [W/S/A/D] FLY');
       } else if (vehGroup) {
         vehGroup.position.y = 0.08;
         vehGroup.rotation.x = 0;
         vehGroup.rotation.z = 0;
         this.teslaAltitude = 0.08;
-        this.notifyUser('🛞 TESLA AERO-THRUSTERS RETRACTED // ROAD DRIVING MODE RESTORED');
+        this.notifyUser('[WHEELS] TESLA AERO-THRUSTERS RETRACTED // ROAD DRIVING MODE RESTORED');
       }
       this.updateTeslaFlightHUD();
     }
@@ -2247,11 +2247,11 @@
 
       const labels = [
         '',
-        '🚓 1-STAR WANTED: RCMP PATROL INTERCEPTORS DISPATCHED!',
-        '🚓 2-STAR WANTED: HIGH-SPEED POLICE PURSUIT ACTIVE!',
-        '🚁 3-STAR WANTED: SWAT TACTICAL & POLICE SEARCHLIGHT CHOPPER AIRBORNE!',
-        '🪖 4-STAR MILITARY ALERT: CANADIAN FORCES LAV & SAM RADAR TRACKING!',
-        '🚀 5-STAR DEFCON LOCKDOWN: STEALTH FIGHTERS & SAM AIR-DEFENSE ENGAGED!'
+        '[RCMP] 1-STAR WANTED: RCMP PATROL INTERCEPTORS DISPATCHED!',
+        '[RCMP] 2-STAR WANTED: HIGH-SPEED POLICE PURSUIT ACTIVE!',
+        '[CHOPPER] 3-STAR WANTED: SWAT TACTICAL & POLICE SEARCHLIGHT CHOPPER AIRBORNE!',
+        '[TACTICAL] 4-STAR MILITARY ALERT: CANADIAN FORCES LAV & SAM RADAR TRACKING!',
+        '[STARSHIP] 5-STAR DEFCON LOCKDOWN: STEALTH FIGHTERS & SAM AIR-DEFENSE ENGAGED!'
       ];
       this.notifyUser(labels[this.wantedStars]);
     }
@@ -2268,7 +2268,7 @@
         this.policeChopper.visible = false;
       }
       this.syncWantedBadgeUI();
-      this.notifyUser('🛡️ POLICE & MILITARY DISPATCH CLEARED // LEGAL STATUS RESTORED');
+      this.notifyUser('[SHIELD] POLICE & MILITARY DISPATCH CLEARED // LEGAL STATUS RESTORED');
     }
 
     spawnPoliceHelicopter() {
@@ -2718,11 +2718,11 @@
             </div>
             <div style="display:flex; gap:8px; margin-top:6px;">
               <button type="button" onclick="window.HyperRealismEngine.spawnExoticCar('${c.id}', true)" style="flex:1; background:linear-gradient(135deg, #00f2ff, #0284c7); border:none; border-radius:8px; color:#04101c; font-family:'Orbitron',sans-serif; font-size:11px; font-weight:900; padding:9px 12px; cursor:pointer;">
-                ${c.canFly ? '🛸 DRIVE / FLY NOW' : '🏎️ DRIVE NOW'}
+                ${c.canFly ? '[VTOL] DRIVE / FLY NOW' : '[HYPERCAR] DRIVE NOW'}
               </button>
               ${c.canFly ? `
                 <button type="button" onclick="window.HyperRealismEngine.spawnExoticCar('${c.id}', true); window.HyperRealismEngine.setTeslaFlightMode(true);" style="background:linear-gradient(135deg, #f43f5e, #be123c); border:none; border-radius:8px; color:#fff; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:900; padding:9px 10px; cursor:pointer;" title="Launch Directly into Sky Flight Mode">
-                  ✈️ TAKEOFF
+                  [JET] TAKEOFF
                 </button>
               ` : ''}
             </div>
@@ -2735,7 +2735,7 @@
           <div style="padding:16px 22px; border-bottom:1px solid rgba(255,255,255,0.12); display:flex; justify-content:space-between; align-items:center; background:rgba(0,242,255,0.08); flex-wrap:wrap; gap:10px;">
             <div>
               <div style="font-family:'Orbitron',sans-serif; font-size:16px; font-weight:900; color:#fff;">
-                🏎️ WORLD EXOTIC MOTORS, TESLA AERO-FLIGHT & MILITARY COMMAND
+                [HYPERCAR] WORLD EXOTIC MOTORS, TESLA AERO-FLIGHT & MILITARY COMMAND
               </div>
               <div style="font-size:11.5px; color:#38bdf8; font-weight:700;">
                 LAMBORGHINI · FERRARI · MCLAREN · BUGATTI · PORSCHE · FLYING TESLA ROADSTER & CYBERTRUCK
@@ -2743,19 +2743,19 @@
             </div>
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
               <button type="button" onclick="window.HyperRealismEngine.teleportToDistrict('dealership')" style="background:rgba(250,204,21,0.2); border:1px solid #facc15; color:#facc15; border-radius:7px; padding:6px 10px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; cursor:pointer;">
-                📍 AUTO MILE
+                [WAYPOINT] AUTO MILE
               </button>
               <button type="button" onclick="window.HyperRealismEngine.teleportToDistrict('carrier')" style="background:rgba(56,189,248,0.2); border:1px solid #38bdf8; color:#38bdf8; border-radius:7px; padding:6px 10px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; cursor:pointer;">
-                ⚓ CARRIER & JETS
+                [NAVAL] CARRIER & JETS
               </button>
               <button type="button" onclick="window.HyperRealismEngine.teleportToDistrict('military')" style="background:rgba(34,197,94,0.2); border:1px solid #22c55e; color:#22c55e; border-radius:7px; padding:6px 10px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; cursor:pointer;">
-                🪖 MILITARY & SAM
+                [TACTICAL] MILITARY & SAM
               </button>
               <button type="button" onclick="window.HyperRealismEngine.teleportToDistrict('rocket')" style="background:rgba(249,115,22,0.2); border:1px solid #f97316; color:#f97316; border-radius:7px; padding:6px 10px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; cursor:pointer;">
-                🚀 ROCKET PAD
+                [STARSHIP] ROCKET PAD
               </button>
               <button type="button" onclick="window.HyperRealismEngine.clearWantedStars()" style="background:rgba(239,68,68,0.2); border:1px solid #ef4444; color:#fca5a5; border-radius:7px; padding:6px 10px; font-family:'Orbitron',sans-serif; font-size:10px; font-weight:800; cursor:pointer;">
-                🛡️ CLEAR COPS ★
+                [SHIELD] CLEAR COPS ★
               </button>
               <button type="button" onclick="window.HyperRealismEngine.closeDealershipModal()" style="background:none; border:none; color:#94a3b8; font-size:24px; cursor:pointer; padding:0 6px;">✕</button>
             </div>
@@ -2797,21 +2797,21 @@
 
       if (sector === 'dealership') {
         pObj.pos.set(isMetropolis ? -125 : 42, 1.2, isMetropolis ? -45 : 55);
-        this.notifyUser('📍 TELEPORTED TO EXOTIC SUPERCAR & TESLA AERO SHOWROOM!');
+        this.notifyUser('[WAYPOINT] TELEPORTED TO EXOTIC SUPERCAR & TESLA AERO SHOWROOM!');
       } else if (sector === 'carrier') {
         pObj.pos.set(isMetropolis ? -340 : 148, 12.5, isMetropolis ? 330 : -180);
-        this.notifyUser('⚓ TELEPORTED TO HMCS AIRCRAFT CARRIER FLIGHT DECK!');
+        this.notifyUser('[NAVAL] TELEPORTED TO HMCS AIRCRAFT CARRIER FLIGHT DECK!');
       } else if (sector === 'military') {
         pObj.pos.set(isMetropolis ? -230 : -155, 1.2, isMetropolis ? 115 : -125);
-        this.notifyUser('🪖 TELEPORTED TO CANADIAN FORCES MILITARY BASE & SAM AIR-DEFENSE!');
+        this.notifyUser('[TACTICAL] TELEPORTED TO CANADIAN FORCES MILITARY BASE & SAM AIR-DEFENSE!');
       } else if (sector === 'rocket') {
         if (isMetropolis) {
           pObj.pos.set(622, 1.2, -550);
-          this.notifyUser('🚀 TELEPORTED TO CAPE STARBASE ORBITAL ROCKET COMPLEX!');
+          this.notifyUser('[STARSHIP] TELEPORTED TO CAPE STARBASE ORBITAL ROCKET COMPLEX!');
         } else {
           pObj.pos.set(185, 4.0, -180);
           this.provincialRocketLaunching = true;
-          this.notifyUser('🚀 ORBITAL STARSHIP IGNITION SEQUENCE STARTED!');
+          this.notifyUser('[STARSHIP] ORBITAL STARSHIP IGNITION SEQUENCE STARTED!');
         }
       }
       this.closeDealershipModal();
@@ -2920,7 +2920,7 @@
     drinkThermos() {
       if (this.thermosCount <= 0) {
         if (typeof window.showStoreNotification === 'function') {
-          window.showStoreNotification('☕ THERMOS EMPTY! VISIT STARDUST CAFE IN GRAND MALL TO REFILL.', true);
+          window.showStoreNotification('[THERMOS] THERMOS EMPTY! VISIT STARDUST CAFE IN GRAND MALL TO REFILL.', true);
         }
         return;
       }
@@ -2928,7 +2928,7 @@
       this.warmth = Math.min(100, this.warmth + 35);
       if (typeof window.playLootChime === 'function') window.playLootChime();
       if (typeof window.showStoreNotification === 'function') {
-        window.showStoreNotification(`☕ SAVORED HOT TIM HORTONS COFFEE (+35% WARMTH, ${this.thermosCount} REMAINING)!`);
+        window.showStoreNotification(`[THERMOS] SAVORED HOT TIM HORTONS COFFEE (+35% WARMTH, ${this.thermosCount} REMAINING)!`);
       }
       this.syncSurvivalHUD();
     }
@@ -2954,7 +2954,7 @@
       if (wFill) wFill.style.width = Math.round(this.warmth) + '%';
       if (tVal) tVal.textContent = this.outdoorTemp + '°C';
       if (gLbl) gLbl.textContent = this.equippedGear.name;
-      if (thLbl) thLbl.textContent = `☕ HOT THERMOS (${this.thermosCount})`;
+      if (thLbl) thLbl.textContent = `[THERMOS] HOT THERMOS (${this.thermosCount})`;
     }
 
     setTimeOfDay(mode) {

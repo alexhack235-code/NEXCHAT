@@ -105,7 +105,7 @@
         sctx.font = 'bold 44px Orbitron, sans-serif';
         sctx.textAlign = 'center';
         sctx.textBaseline = 'middle';
-        sctx.fillText('⚡ NEXUS GRAND MALL & GALLERIA ⚡', 512, 50);
+        sctx.fillText('[BOOST] NEXUS GRAND MALL & GALLERIA [BOOST]', 512, 50);
         sctx.fillStyle = '#00f2ff';
         sctx.font = '22px Orbitron, monospace';
         sctx.fillText('CYBER-ARMORY // EXO-SUITS // MOTORS // MED-BAY // ARCADE', 512, 94);
@@ -674,7 +674,7 @@
 
       const hudBadge = document.getElementById('hud-radio-val');
       if (hudBadge) {
-        hudBadge.textContent = (gameState.currentRadioStation === 0) ? '[📻 RADIO OFF]' : `[📻 ${stName}]`;
+        hudBadge.textContent = (gameState.currentRadioStation === 0) ? '[[RADIO] RADIO OFF]' : `[[RADIO] ${stName}]`;
         hudBadge.style.color = (gameState.currentRadioStation === 0) ? '#8fa3b8' : '#00f2ff';
       }
 
@@ -684,7 +684,7 @@
         carRadioLabel.style.color = (gameState.currentRadioStation === 0) ? '#8fa3b8' : '#00f2ff';
       }
 
-      showStoreNotification(`🎵 RADIO TUNED: ${stName.toUpperCase()}`);
+      showStoreNotification(`[AUDIO] RADIO TUNED: ${stName.toUpperCase()}`);
       cyberAudio.playClick();
     }
 
@@ -728,7 +728,7 @@
           fpsChip.style.borderColor = '#00ff88';
         }
         if (fpsIcon) fpsIcon.style.color = '#ffd700';
-        showStoreNotification('⚡ ULTRA LOW-END 60 FPS TURBO MODE ENGAGED! RESOLUTION & TRAFFIC SCALED!');
+        showStoreNotification('[BOOST] ULTRA LOW-END 60 FPS TURBO MODE ENGAGED! RESOLUTION & TRAFFIC SCALED!');
       } else {
         if (fpsChip) {
           fpsChip.style.background = 'rgba(0, 255, 136, 0.12)';
@@ -766,7 +766,7 @@
         spawnPolicePursuitDrone();
       }
 
-      showStoreNotification(`⚠️ CRIME DETECTED! WANTED HEAT LEVEL: ${gameState.wantedLevel} STAR(S)!`);
+      showStoreNotification(`[ALERT] CRIME DETECTED! WANTED HEAT LEVEL: ${gameState.wantedLevel} STAR(S)!`);
     }
 
     function clearWantedLevel() {
@@ -779,7 +779,7 @@
       policeDrones.forEach(d => { scene.remove(d.mesh); });
       policeDrones = [];
 
-      showStoreNotification('🛡️ BOUNTY PURSUIT CLEARED! SAFEHOUSE ACCESSED!');
+      showStoreNotification('[SHIELD] BOUNTY PURSUIT CLEARED! SAFEHOUSE ACCESSED!');
       cyberAudio.playLootChime();
     }
 
@@ -1214,7 +1214,7 @@ function buildApexCarCustoms() {
       gameState.carCustoms.paintName = name;
       applyCarCustoms();
       saveCarCustoms();
-      showStoreNotification(`🏎️ CUSTOM CAR PAINT APPLIED: ${name.toUpperCase()}!`);
+      showStoreNotification(`[HYPERCAR] CUSTOM CAR PAINT APPLIED: ${name.toUpperCase()}!`);
       cyberAudio.playClick();
     }
 
@@ -1223,14 +1223,14 @@ function buildApexCarCustoms() {
       gameState.carCustoms.underglow = val;
       applyCarCustoms();
       saveCarCustoms();
-      showStoreNotification(`💡 UNDERGLOW NEON UPDATED: ${val.toUpperCase()}!`);
+      showStoreNotification(`[LIGHTS] UNDERGLOW NEON UPDATED: ${val.toUpperCase()}!`);
       cyberAudio.playClick();
     }
 
     function upgradeCarNitro(tierName, maxCap, rechargeRate, cost) {
       if (cost > 0) {
         if (gameState.tokens < cost) {
-          showStoreNotification('⚠️ INSUFFICIENT NEX TOKENS FOR THIS NITRO UPGRADE!');
+          showStoreNotification('[ALERT] INSUFFICIENT NEX TOKENS FOR THIS NITRO UPGRADE!');
           cyberAudio.playClick();
           return;
         }
@@ -1248,14 +1248,14 @@ function buildApexCarCustoms() {
 
       applyCarCustoms();
       saveCarCustoms();
-      showStoreNotification(`⚡ NITRO UPGRADED: ${tierName.toUpperCase()} (CAPACITY: ${maxCap})!`);
+      showStoreNotification(`[BOOST] NITRO UPGRADED: ${tierName.toUpperCase()} (CAPACITY: ${maxCap})!`);
       cyberAudio.playLootChime();
     }
 
     function upgradeCarEngine(tierName, topSpeed, cost) {
       if (cost > 0) {
         if (gameState.tokens < cost) {
-          showStoreNotification('⚠️ INSUFFICIENT NEX TOKENS FOR THIS ENGINE TUNE!');
+          showStoreNotification('[ALERT] INSUFFICIENT NEX TOKENS FOR THIS ENGINE TUNE!');
           cyberAudio.playClick();
           return;
         }
@@ -1266,7 +1266,7 @@ function buildApexCarCustoms() {
       gameState.carCustoms.engineTier = tierName;
       applyCarCustoms();
       saveCarCustoms();
-      showStoreNotification(`⚙️ POWERTRAIN TUNED: ${tierName.toUpperCase()} (MAX: ${Math.round(topSpeed * 3.6)} KM/H)!`);
+      showStoreNotification(`[SETTINGS] POWERTRAIN TUNED: ${tierName.toUpperCase()} (MAX: ${Math.round(topSpeed * 3.6)} KM/H)!`);
       cyberAudio.playLootChime();
     }
 
@@ -1275,7 +1275,7 @@ function buildApexCarCustoms() {
       gameState.carCustoms.spoiler = style;
       applyCarCustoms();
       saveCarCustoms();
-      showStoreNotification(`🏁 AERO SPOILER UPDATED: ${style.toUpperCase()}!`);
+      showStoreNotification(`[FINISH] AERO SPOILER UPDATED: ${style.toUpperCase()}!`);
       cyberAudio.playClick();
     }
 
@@ -1284,7 +1284,7 @@ function buildApexCarCustoms() {
       gameState.carCustoms.rimColor = colorHex;
       applyCarCustoms();
       saveCarCustoms();
-      showStoreNotification('🛞 WHEEL ALLOY RIMS CUSTOMIZED!');
+      showStoreNotification('[WHEELS] WHEEL ALLOY RIMS CUSTOMIZED!');
       cyberAudio.playClick();
     }
 
@@ -1293,7 +1293,7 @@ function buildApexCarCustoms() {
       gameState.carCustoms.caliperColor = colorHex;
       applyCarCustoms();
       saveCarCustoms();
-      showStoreNotification('🛑 RACING BRAKE CALIPERS CUSTOMIZED!');
+      showStoreNotification('[STOP] RACING BRAKE CALIPERS CUSTOMIZED!');
       cyberAudio.playClick();
     }
 
@@ -1305,7 +1305,7 @@ function buildApexCarCustoms() {
         roverSteerAngle = 0;
       }
       if (notify) {
-        showStoreNotification('🏎️ CUSTOM ROVER SUMMONED ONTO GARAGE HYDRAULIC TURNTABLE!');
+        showStoreNotification('[HYPERCAR] CUSTOM ROVER SUMMONED ONTO GARAGE HYDRAULIC TURNTABLE!');
         cyberAudio.playLootChime();
       }
     }
@@ -1318,7 +1318,7 @@ function buildApexCarCustoms() {
         roverCurrentSpeed = 12.0;
         gameState.inVehicle = true;
       }
-      showStoreNotification('🏎️ ENGINES ROARING! NITRO CHARGED AND READY TO ROLL!');
+      showStoreNotification('[HYPERCAR] ENGINES ROARING! NITRO CHARGED AND READY TO ROLL!');
       cyberAudio.playNitroLoop();
       setTimeout(() => { cyberAudio.playNitroVent(); }, 400);
     }
@@ -2075,7 +2075,7 @@ function buildNeoKyotoCity() {
 
               if (banner && gText && sText) {
                 banner.style.display = 'block';
-                gText.textContent = `⚽ GOAL! TEAM ${scoringTeam.toUpperCase()} SCORES!`;
+                gText.textContent = `[SPORT] GOAL! TEAM ${scoringTeam.toUpperCase()} SCORES!`;
                 sText.textContent = `CYAN: ${stadiumScores.cyan} • ORANGE: ${stadiumScores.orange}`;
                 setTimeout(() => { banner.style.display = 'none'; }, 4000);
               }
@@ -2152,7 +2152,7 @@ function buildNeoKyotoCity() {
             player.vel.y = 8.0; // Altitude surge boost!
             const ringsVal = document.getElementById('glider-rings-val');
             if (ringsVal) ringsVal.textContent = gliderScore;
-            showStoreNotification('⚡ AERIAL GLIDE RING ACCELERATION BOOST +100!');
+            showStoreNotification('[BOOST] AERIAL GLIDE RING ACCELERATION BOOST +100!');
           }
         });
 
@@ -2179,7 +2179,7 @@ function buildNeoKyotoCity() {
       if (isGliding) {
         if (hud) hud.style.display = 'flex';
         cyberAudio.playClick();
-        showStoreNotification('🪂 AEROGLIDER DEPLOYED! PITCH & GLIDE ACROSS METROPOLIS!');
+        showStoreNotification('[GLIDER] AEROGLIDER DEPLOYED! PITCH & GLIDE ACROSS METROPOLIS!');
       } else {
         if (hud) hud.style.display = 'none';
         cyberAudio.playClick();
@@ -2205,7 +2205,7 @@ function buildNeoKyotoCity() {
       });
 
       cyberAudio.playCheckpointChime();
-      showStoreNotification('🏁 METRO SPEEDWAY GP BEGUN! FLY THROUGH ALL 10 CHECKPOINTS!');
+      showStoreNotification('[FINISH] METRO SPEEDWAY GP BEGUN! FLY THROUGH ALL 10 CHECKPOINTS!');
     }
 
     function abortSpeedwayRace() {
@@ -2233,7 +2233,7 @@ function buildNeoKyotoCity() {
       gameState.tokens += 250;
       document.getElementById('hud-tokens').textContent = gameState.tokens.toLocaleString();
       cyberAudio.playFanfare();
-      showStoreNotification(`🏆 METRO SPEEDWAY VICTORY! TIME: ${totalSeconds.toFixed(2)}s • REWARD: +250 TOKENS!`);
+      showStoreNotification(`[TROPHY] METRO SPEEDWAY VICTORY! TIME: ${totalSeconds.toFixed(2)}s • REWARD: +250 TOKENS!`);
     }
 
     // Hyperloop Modal Controls
@@ -2335,7 +2335,7 @@ function buildNeoKyotoCity() {
     }
     function triggerDJDrop() {
       cyberAudio.playHyperloopBoom();
-      showStoreNotification('🔥 SUB-BASS DROP INITIATED! ROOFTOP GOING WILD!');
+      showStoreNotification('[OVERDRIVE] SUB-BASS DROP INITIATED! ROOFTOP GOING WILD!');
     }
 
     // ------------------------------------------------------------
@@ -3586,7 +3586,7 @@ function buildNeoKyotoCity() {
         calgaryMetropolisGroup.add(board);
       });
 
-      console.log('✅ [CALGARY METROPOLIS] Calgary Tower (190m), The Bow (236m), Telus Sky (222m), Brookfield Place (247m), Calgary Central Library (East Village), and Scotia Place active construction site integrated.');
+      console.log('[OK] [CALGARY METROPOLIS] Calgary Tower (190m), The Bow (236m), Telus Sky (222m), Brookfield Place (247m), Calgary Central Library (East Village), and Scotia Place active construction site integrated.');
     }
 
 
@@ -3776,7 +3776,7 @@ function buildNeoKyotoCity() {
     
     function claimExosuitReward() {
       if (localStorage.getItem('BS_AURORA_EXOSUIT_UNLOCKED') === 'true') {
-        showStoreNotification('✨ AURORA BOREALIS QUANTUM EXOSUIT IS ALREADY EQUIPPED AND ACTIVE!');
+        showStoreNotification('[AURA] AURORA BOREALIS QUANTUM EXOSUIT IS ALREADY EQUIPPED AND ACTIVE!');
         return;
       }
       localStorage.setItem('BS_AURORA_EXOSUIT_UNLOCKED', 'true');
@@ -3784,7 +3784,7 @@ function buildNeoKyotoCity() {
       localStorage.setItem('BS_TOKENS', gameState.tokens.toString());
       const tEl = document.getElementById('hud-tokens');
       if (tEl) tEl.textContent = gameState.tokens.toLocaleString();
-      showStoreNotification('🏆 CONGRATULATIONS! AURORA BOREALIS QUANTUM EXOSUIT UNLOCKED (+5,000 NEX)!');
+      showStoreNotification('[TROPHY] CONGRATULATIONS! AURORA BOREALIS QUANTUM EXOSUIT UNLOCKED (+5,000 NEX)!');
       if (cyberAudio && cyberAudio.playLootChime) cyberAudio.playLootChime();
       initProvincesHighwayGrid();
     }
@@ -3810,7 +3810,7 @@ function buildNeoKyotoCity() {
       }
 
       if (typeof showStoreNotification === 'function') {
-        showStoreNotification(`🍁 TRANS-CANADA HIGHWAY: CONNECTED TO ${name.toUpperCase()}!`);
+        showStoreNotification(`[MAPLE] TRANS-CANADA HIGHWAY: CONNECTED TO ${name.toUpperCase()}!`);
       }
     }
 
@@ -3892,7 +3892,7 @@ function buildNeoKyotoCity() {
       if (callsignEl) callsignEl.textContent = planeData.name;
 
       cyberAudio.playLootChime();
-      showStoreNotification(`✈️ PILOTING ${planeData.name}! PRESS [W] TO ADVANCE THROTTLE!`);
+      showStoreNotification(`[JET] PILOTING ${planeData.name}! PRESS [W] TO ADVANCE THROTTLE!`);
     }
 
     function executePlaneFlightExit() {
@@ -3910,7 +3910,7 @@ function buildNeoKyotoCity() {
       if (isHighAltitude) {
         player.pos.set(planePos.x + 8, planePos.y - 2, planePos.z + 8);
         player.vel.set(0, -2.5, 0);
-        showStoreNotification('🪂 EMERGENCY EJECTION! PARACHUTE DEPLOYED — GLIDING TO SURFACE!');
+        showStoreNotification('[GLIDER] EMERGENCY EJECTION! PARACHUTE DEPLOYED — GLIDING TO SURFACE!');
         cyberAudio.playAirVent();
       } else {
         player.pos.set(planePos.x + 4, Math.max(1.2, planePos.y), planePos.z + 4);
@@ -3947,7 +3947,7 @@ function buildNeoKyotoCity() {
       gameState.inTrain = true;
       const hud = document.getElementById('train-passenger-hud');
       if (hud) hud.style.display = 'flex';
-      showStoreNotification('🚆 BOARDED METRO MAGLEV EXPRESS! ENJOYING ELEVATED CITY SKYLINE TOUR!');
+      showStoreNotification('[MAGLEV] BOARDED METRO MAGLEV EXPRESS! ENJOYING ELEVATED CITY SKYLINE TOUR!');
       cyberAudio.playMaglevTrainSound();
     }
 
@@ -4223,3 +4223,307 @@ function buildNeoKyotoCity() {
 
     let mechazillaChopsticks = null;
     let cityCitizens = [];
+
+    // ============================================================
+    // METROPOLIS CONNECTING ARTERIES & REGIONAL URBAN INFILL
+    // Connects Downtown Calgary to Neo-Kyoto, Solaria, Atlantis & Starbase
+    // Eliminates empty voids, isolated island effect, and z-fighting
+    // ============================================================
+    function buildMetropolisConnectingArteriesAndInfill() {
+      const artGroup = new THREE.Group();
+      artGroup.name = 'metropolisArteriesAndInfill';
+      scene.add(artGroup);
+      registerCullable(artGroup);
+
+      const hasPBR = (typeof pbrTextures !== 'undefined' && pbrTextures && pbrTextures.roadMarkings);
+      const artRoadMat = new THREE.MeshStandardMaterial({
+        color: 0x18202c,
+        roughness: 0.82,
+        metalness: 0.15,
+        map: hasPBR ? pbrTextures.roadMarkings : null,
+        normalMap: hasPBR ? pbrTextures.normal : null,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+        polygonOffsetUnits: -2
+      });
+
+      const artCurbMat = new THREE.MeshStandardMaterial({
+        color: 0x222e3d,
+        roughness: 0.65,
+        metalness: 0.4
+      });
+
+      const bldgConcreteMat = new THREE.MeshStandardMaterial({ color: 0x1e2736, roughness: 0.7, metalness: 0.3 });
+      const bldgGlassBlue = new THREE.MeshStandardMaterial({ color: 0x0ea5e9, roughness: 0.1, metalness: 0.88, transparent: true, opacity: 0.75 });
+      const bldgGlassBronze = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.15, metalness: 0.85, transparent: true, opacity: 0.72 });
+
+      // Helper: Build a straight, angled roadway between (x1, z1) and (x2, z2)
+      function buildSegmentedArtery(x1, z1, x2, z2, width, themeColor, signLabel) {
+        const dx = x2 - x1;
+        const dz = z2 - z1;
+        const len = Math.sqrt(dx * dx + dz * dz);
+        const angle = Math.atan2(dx, dz);
+        const midX = (x1 + x2) / 2;
+        const midZ = (z1 + z2) / 2;
+
+        // Road Surface with anti-z-fighting elevation
+        const rMesh = new THREE.Mesh(new THREE.PlaneGeometry(width, len), artRoadMat);
+        rMesh.rotation.x = -Math.PI / 2;
+        rMesh.rotation.z = -angle;
+        rMesh.position.set(midX, 0.08, midZ);
+        rMesh.receiveShadow = true;
+        artGroup.add(rMesh);
+
+        // Raised Flanking Concrete Curbs
+        const curbGeo = new THREE.BoxGeometry(1.4, 0.24, len);
+        const halfW = width / 2 + 0.7;
+
+        const cL = new THREE.Mesh(curbGeo, artCurbMat);
+        cL.position.set(midX - Math.cos(angle) * halfW, 0.12, midZ + Math.sin(angle) * halfW);
+        cL.rotation.y = angle;
+        cL.receiveShadow = true;
+        artGroup.add(cL);
+
+        const cR = new THREE.Mesh(curbGeo, artCurbMat);
+        cR.position.set(midX + Math.cos(angle) * halfW, 0.12, midZ - Math.sin(angle) * halfW);
+        cR.rotation.y = angle;
+        cR.receiveShadow = true;
+        artGroup.add(cR);
+
+        // Center Amber/Gold Lane Divider
+        const divMesh = new THREE.Mesh(new THREE.PlaneGeometry(0.35, len), new THREE.MeshBasicMaterial({ color: 0xffaa00 }));
+        divMesh.rotation.x = -Math.PI / 2;
+        divMesh.rotation.z = -angle;
+        divMesh.position.set(midX, 0.086, midZ);
+        artGroup.add(divMesh);
+
+        // Streetlamp Pylons spaced along artery
+        const lampInterval = 55;
+        const lampCount = Math.floor(len / lampInterval);
+        for (let i = 1; i <= lampCount; i++) {
+          const t = i / (lampCount + 1);
+          const lx = x1 + dx * t;
+          const lz = z1 + dz * t;
+          const side = (i % 2 === 0) ? 1 : -1;
+          const px = lx + Math.cos(angle) * (width / 2 + 2.0) * side;
+          const pz = lz - Math.sin(angle) * (width / 2 + 2.0) * side;
+
+          const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 7.8, 8), artCurbMat);
+          pole.position.set(px, 3.9, pz);
+          artGroup.add(pole);
+
+          const head = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.22, 1.4), new THREE.MeshBasicMaterial({ color: themeColor }));
+          head.position.set(px, 7.8, pz);
+          artGroup.add(head);
+        }
+
+        // Mid-point Overhead Highway Gantry Portal
+        const gantry = new THREE.Group();
+        gantry.position.set(midX, 0, midZ);
+        gantry.rotation.y = angle;
+
+        const gL = new THREE.Mesh(new THREE.BoxGeometry(0.7, 9.8, 0.7), artCurbMat);
+        gL.position.set(-width / 2 - 1.2, 4.9, 0);
+        gantry.add(gL);
+
+        const gR = new THREE.Mesh(new THREE.BoxGeometry(0.7, 9.8, 0.7), artCurbMat);
+        gR.position.set(width / 2 + 1.2, 4.9, 0);
+        gantry.add(gR);
+
+        const gBeam = new THREE.Mesh(new THREE.BoxGeometry(width + 3.2, 1.5, 0.8), artCurbMat);
+        gBeam.position.set(0, 9.2, 0);
+        gantry.add(gBeam);
+
+        const gSignFwd = new THREE.Mesh(new THREE.BoxGeometry(width * 0.75, 1.2, 0.2), new THREE.MeshBasicMaterial({ color: themeColor }));
+        gSignFwd.position.set(0, 9.2, 0.5);
+        gantry.add(gSignFwd);
+
+        const gSignBwd = gSignFwd.clone();
+        gSignBwd.position.z = -0.5;
+        gantry.add(gSignBwd);
+
+        artGroup.add(gantry);
+      }
+
+      // 1. Four Master Diagonal Arterial Skyways
+      // (A) North-East Skyway to Neo-Kyoto
+      buildSegmentedArtery(85, 85, 480, 280, 16, 0xff0055, 'NEO-KYOTO IMPERIAL SKYWAY');
+
+      // (B) North-West Sunway to Solaria Desert Oasis
+      buildSegmentedArtery(-85, 85, -380, 430, 16, 0xffaa00, 'SOLARIA OASIS THERMAL HIGHWAY');
+
+      // (C) South-West Aquaway to Atlantis Marina
+      buildSegmentedArtery(-85, -85, -470, -370, 16, 0x00d9ff, 'ATLANTIS MARINA OCEANIC CAUSEWAY');
+
+      // (D) South-East Heavy Corridor to Starbase
+      buildSegmentedArtery(85, -85, 580, -480, 16, 0x00ff88, 'STARBASE STARSHIP COMPLEX RESTRICTED');
+
+      // 2. Mid-Density Urban Infill (Fills all 4 empty quadrant voids)
+      function buildInfillBuilding(bx, bz, bw, bh, bd, matGlass, matTrim, labelColor) {
+        const bGroup = new THREE.Group();
+        bGroup.position.set(bx, 0, bz);
+
+        const base = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bd), bldgConcreteMat);
+        base.position.y = bh / 2;
+        base.castShadow = true; base.receiveShadow = true;
+        bGroup.add(base);
+
+        const glass = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.3, bh * 0.75, bd + 0.3), matGlass);
+        glass.position.y = bh / 2;
+        bGroup.add(glass);
+
+        const hvac = new THREE.Mesh(new THREE.BoxGeometry(bw * 0.45, 2.4, bd * 0.45), matTrim);
+        hvac.position.y = bh + 1.2;
+        bGroup.add(hvac);
+
+        const spire = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.35, 12, 8), matTrim);
+        spire.position.y = bh + 7.5;
+        bGroup.add(spire);
+
+        const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 8), new THREE.MeshBasicMaterial({ color: labelColor }));
+        beacon.position.y = bh + 13.5;
+        bGroup.add(beacon);
+
+        artGroup.add(bGroup);
+
+        registerCityCollider({
+          type: 'solid',
+          x: bx,
+          z: bz,
+          hw: bw / 2 + 0.5,
+          hd: bd / 2 + 0.5,
+          world: 'earth'
+        });
+      }
+
+      // Quadrant 1 Infill: North-East Corridor (Between Calgary & Neo-Kyoto)
+      buildInfillBuilding(220, 140, 26, 38, 26, bldgGlassBlue, bldgConcreteMat, 0x00f2ff);
+      buildInfillBuilding(310, 170, 22, 46, 22, bldgGlassBlue, bldgConcreteMat, 0xff0055);
+      buildInfillBuilding(260, 230, 28, 32, 28, bldgGlassBronze, bldgConcreteMat, 0xffaa00);
+      buildInfillBuilding(360, 250, 24, 40, 24, bldgGlassBlue, bldgConcreteMat, 0x00f2ff);
+
+      // Quadrant 2 Infill: North-West Corridor (Between Calgary & Solaria)
+      buildInfillBuilding(-220, 160, 32, 22, 24, bldgGlassBronze, bldgConcreteMat, 0xffaa00);
+      buildInfillBuilding(-290, 210, 26, 36, 26, bldgGlassBlue, bldgConcreteMat, 0x00f2ff);
+      buildInfillBuilding(-240, 280, 28, 30, 28, bldgGlassBronze, bldgConcreteMat, 0xffaa00);
+      buildInfillBuilding(-340, 320, 24, 28, 24, bldgGlassBlue, bldgConcreteMat, 0x00ff88);
+
+      // Quadrant 3 Infill: South-West Corridor (Between Calgary & Atlantis)
+      buildInfillBuilding(-210, -170, 30, 26, 26, bldgGlassBlue, bldgConcreteMat, 0x00d9ff);
+      buildInfillBuilding(-280, -220, 24, 38, 24, bldgGlassBlue, bldgConcreteMat, 0x00d9ff);
+      buildInfillBuilding(-230, -290, 28, 24, 28, bldgGlassBronze, bldgConcreteMat, 0xffaa00);
+      buildInfillBuilding(-350, -270, 26, 34, 26, bldgGlassBlue, bldgConcreteMat, 0x00f2ff);
+
+      // Quadrant 4 Infill: South-East Corridor (Between Calgary & Starbase)
+      buildInfillBuilding(230, -170, 34, 28, 28, bldgGlassBronze, bldgConcreteMat, 0x00ff88);
+      buildInfillBuilding(320, -220, 26, 42, 26, bldgGlassBlue, bldgConcreteMat, 0x00f2ff);
+      buildInfillBuilding(260, -300, 30, 34, 30, bldgGlassBronze, bldgConcreteMat, 0xffaa00);
+      buildInfillBuilding(380, -320, 32, 26, 32, bldgGlassBlue, bldgConcreteMat, 0x00ff88);
+
+      // Propellant Storage Sphere Tanks in South-East Starbase quadrant (X: 340, Z: -260)
+      [-14, 0, 14].forEach((tx, idx) => {
+        const tankSphere = new THREE.Mesh(
+          new THREE.SphereGeometry(6.2, 16, 16),
+          new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.92, roughness: 0.18 })
+        );
+        tankSphere.position.set(340 + tx, 7.5, -260);
+        tankSphere.castShadow = true;
+        artGroup.add(tankSphere);
+
+        const tankLegs = new THREE.Mesh(new THREE.CylinderGeometry(6.4, 6.4, 7.5, 6, 1, true), artCurbMat);
+        tankLegs.position.set(340 + tx, 3.75, -260);
+        artGroup.add(tankLegs);
+      });
+      registerCityCollider({ type: 'solid', x: 340, z: -260, hw: 22, hd: 8, world: 'earth' });
+
+      // Holographic Cyber Advertising Billboards
+      const billboardConfigs = [
+        { x: 190, z: 120, ry: 0.4, color: 0x00f2ff },
+        { x: -190, z: 130, ry: -0.5, color: 0xffaa00 },
+        { x: -180, z: -140, ry: 2.5, color: 0x00d9ff },
+        { x: 190, z: -140, ry: -2.4, color: 0x00ff88 }
+      ];
+
+      billboardConfigs.forEach(bb => {
+        const bbGroup = new THREE.Group();
+        bbGroup.position.set(bb.x, 0, bb.z);
+        bbGroup.rotation.y = bb.ry;
+
+        const p1 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 18, 8), artCurbMat);
+        p1.position.set(-6, 9, 0);
+        bbGroup.add(p1);
+
+        const p2 = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.4, 18, 8), artCurbMat);
+        p2.position.set(6, 9, 0);
+        bbGroup.add(p2);
+
+        const board = new THREE.Mesh(new THREE.BoxGeometry(16, 5.5, 0.6), artCurbMat);
+        board.position.y = 18;
+        bbGroup.add(board);
+
+        const screen = new THREE.Mesh(new THREE.PlaneGeometry(15.2, 4.8), new THREE.MeshBasicMaterial({ color: bb.color }));
+        screen.position.set(0, 18, 0.32);
+        bbGroup.add(screen);
+
+        const screenBack = screen.clone();
+        screenBack.rotation.y = Math.PI;
+        screenBack.position.z = -0.32;
+        bbGroup.add(screenBack);
+
+        artGroup.add(bbGroup);
+      });
+    }
+
+    // ============================================================
+    // CANADIAN ROCKY MOUNTAIN HORIZON ENCLOSURE BACKDROP
+    // Encloses the 2000m x 2000m world so it never terminates in empty space
+    // ============================================================
+    function buildPerimeterMountainHorizon() {
+      const mtnGroup = new THREE.Group();
+      mtnGroup.name = 'perimeterMountainHorizon';
+      scene.add(mtnGroup);
+      registerCullable(mtnGroup);
+
+      const mtnRockMat = new THREE.MeshStandardMaterial({
+        color: 0x18202a,
+        roughness: 0.95,
+        metalness: 0.15
+      });
+
+      const mtnSnowMat = new THREE.MeshStandardMaterial({
+        color: 0xe2e8f0,
+        roughness: 0.75,
+        metalness: 0.1
+      });
+
+      const peakCount = 48;
+      const baseRadius = 980;
+      const step = (Math.PI * 2) / peakCount;
+
+      for (let i = 0; i < peakCount; i++) {
+        const ang = i * step + (Math.sin(i * 3.7) * 0.04);
+        const rad = baseRadius + Math.sin(i * 2.3) * 90;
+        const px = Math.cos(ang) * rad;
+        const pz = Math.sin(ang) * rad;
+
+        const pHeight = 175 + Math.sin(i * 1.7) * 65 + Math.cos(i * 4.1) * 35;
+        const pBaseRad = 70 + Math.sin(i * 2.9) * 22;
+
+        const mtnPeak = new THREE.Group();
+        mtnPeak.position.set(px, 0, pz);
+
+        const rockCone = new THREE.Mesh(new THREE.ConeGeometry(pBaseRad, pHeight, 7), mtnRockMat);
+        rockCone.position.y = pHeight / 2;
+        rockCone.rotation.y = i * 0.8;
+        mtnPeak.add(rockCone);
+
+        const snowH = pHeight * 0.35;
+        const snowRad = pBaseRad * 0.35;
+        const snowCap = new THREE.Mesh(new THREE.ConeGeometry(snowRad, snowH, 7), mtnSnowMat);
+        snowCap.position.y = pHeight - snowH / 2;
+        snowCap.rotation.y = i * 0.8;
+        mtnPeak.add(snowCap);
+
+        mtnGroup.add(mtnPeak);
+      }
+    }
