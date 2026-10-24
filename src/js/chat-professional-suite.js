@@ -51,6 +51,12 @@
       this.initDragDropVault();
       this.initVanishMode();
       this.injectStandardPollModal();
+      this.initCodeRunner();
+      this.initCallMiniPlayer();
+      this.injectQuickSnippetsModal();
+      this.injectThemePresetPicker();
+      this.injectGroupMemberRoster();
+      this.injectNotificationModeSelector();
       this.startMessageObserver();
       this.startTelemetryLoop();
       this.startSchedulerWorker();
@@ -1023,6 +1029,8 @@
         <button type="button" class="nex-format-btn" id="nexQuickPollBtn" title="Create Interactive Poll"><i class="fa-solid fa-square-poll-vertical" style="color: #00ff88;"></i></button>
         <button type="button" class="nex-format-btn" id="nexQuickScheduleBtn" title="Schedule Dispatch"><i class="fa-solid fa-clock" style="color: #fbbf24;"></i></button>
         <button type="button" class="nex-format-btn" id="nexQuickCodeSnippetBtn" title="Code Snippet IDE"><i class="fa-solid fa-laptop-code" style="color: #00f2ff;"></i></button>
+        <button type="button" class="nex-format-btn" id="nexQuickSnippetsBtn" title="Canned Quick Responses"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i></button>
+        <button type="button" class="nex-format-btn" id="nexThemePickerBtn" title="Cycle Chat Theme Presets"><i class="fa-solid fa-palette" style="color: #ec4899;"></i></button>
       `;
 
       messageForm.parentNode.insertBefore(dock, messageForm);
@@ -1121,6 +1129,8 @@
         const lang = parts[0] || 'code';
         const title = parts.slice(1).join(' ').replace(/[\[\]]/g, '') || (lang.toUpperCase() + ' Snippet');
         const codeId = 'code_' + Math.random().toString(36).substring(2, 9);
+        const langLower = (lang || '').toLowerCase();
+        const isRunnable = (langLower === 'javascript' || langLower === 'js');
         return `
           <div class="nex-code-snippet-box">
             <div class="nex-code-header">
@@ -1128,9 +1138,16 @@
                 <span class="nex-code-lang-badge">${escapeHtml(lang)}</span>
                 <span class="nex-code-title">${escapeHtml(title)}</span>
               </div>
-              <button type="button" class="nex-code-copy-btn" data-copy-target="${codeId}">
-                <i class="fa-solid fa-copy"></i> <span>Copy</span>
-              </button>
+              <div class="nex-code-actions">
+                ${isRunnable ? `
+                  <button type="button" class="nex-code-run-btn" data-run-target="${codeId}" title="Run JavaScript in sandbox">
+                    <i class="fa-solid fa-play"></i> <span>Run</span>
+                  </button>
+                ` : ''}
+                <button type="button" class="nex-code-copy-btn" data-copy-target="${codeId}">
+                  <i class="fa-solid fa-copy"></i> <span>Copy</span>
+                </button>
+              </div>
             </div>
             <pre class="nex-code-body" id="${codeId}">${code.trim()}</pre>
           </div>
@@ -2156,6 +2173,459 @@ ${text}`;
           vanishBtn.style.borderColor = '';
           this.showToast('Vanish Mode disengaged (Normal Chat restored)');
         }
+      });
+    }
+
+
+    /* ------------------------------------------------------------------------
+       22. IN-CHAT CODE SANDBOX LIVE CONSOLE RUNNER
+       ------------------------------------------------------------------------ */
+    initCodeRunner() {
+      document.addEventListener('click', (e) => {
+        const runBtn = e.target.closest('[data-run-target]');
+        if (!runBtn) return;
+        e.stopPropagation();
+
+        const targetId = runBtn.getAttribute('data-run-target');
+        const pre = document.getElementById(targetId);
+        if (!pre) return;
+
+        const snippetBox = pre.closest('.nex-code-snippet-box');
+        if (!snippetBox) return;
+
+        let consoleBox = snippetBox.querySelector('.nex-code-output-console');
+        if (!consoleBox) {
+          consoleBox = document.createElement('div');
+          consoleBox.className = 'nex-code-output-console';
+          snippetBox.appendChild(consoleBox);
+        }
+
+        const rawCode = pre.textContent || '';
+        consoleBox.textContent = '[SANDBOX EXECUTION IN PROGRESS...]\n';
+
+        const outputLogs = [];
+        const customConsole = {
+          log: (...args) => outputLogs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a)).join(' ')),
+          warn: (...args) => outputLogs.push('[WARN] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')),
+          error: (...args) => outputLogs.push('[ERROR] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ')),
+          info: (...args) => outputLogs.push('[INFO] ' + args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' '))
+        };
+
+        try {
+          const runner = new Function('console', `"use strict";\n${rawCode}`);
+          const result = runner(customConsole);
+          if (result !== undefined) {
+            outputLogs.push('=> ' + (typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result)));
+          }
+          consoleBox.textContent = outputLogs.length > 0 ? outputLogs.join('\n') : '[Execution completed: Return 0 / No output logged]';
+          this.showToast('Code executed in sandbox');
+        } catch (err) {
+          consoleBox.textContent = (outputLogs.length ? outputLogs.join('\n') + '\n' : '') + '[RUNTIME EXCEPTION]: ' + err.message;
+          this.showToast('Execution error: ' + err.message, 'error');
+        }
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       23. FLOATING VOIP CALL MINI-PLAYER & ACTIVE CALL PIP
+       ------------------------------------------------------------------------ */
+    initCallMiniPlayer() {
+      const callVoiceBtn = document.getElementById('headerCallBtn') || document.querySelector('.header-icon-btn[title*="call" i]');
+      const callVideoBtn = document.getElementById('headerVideoBtn') || document.querySelector('.header-icon-btn[title*="video" i]');
+
+      const startPiPCall = (type = 'voice') => {
+        let pipBar = document.getElementById('nexCallPipBar');
+        if (pipBar) return;
+
+        const chatName = document.getElementById('chatName')?.textContent?.trim() || 'Alex Hack';
+
+        pipBar = document.createElement('div');
+        pipBar.id = 'nexCallPipBar';
+        pipBar.className = 'nex-call-pip-bar';
+        pipBar.innerHTML = `
+          <div class="nex-call-meta">
+            <div class="nex-call-status-dot"></div>
+            <div>
+              <div class="nex-call-name">${escapeHtml(chatName)}</div>
+              <div class="nex-call-timer" id="nexCallElapsedTimer">00:00</div>
+            </div>
+          </div>
+          <div class="nex-call-controls">
+            <button type="button" class="nex-call-btn" id="nexCallMuteBtn" title="Mute Audio">
+              <i class="fa-solid fa-microphone"></i>
+            </button>
+            <button type="button" class="nex-call-btn ${type === 'video' ? 'active' : ''}" id="nexCallCamBtn" title="Toggle Camera">
+              <i class="fa-solid fa-video"></i>
+            </button>
+            <button type="button" class="nex-call-btn end-call" id="nexCallEndBtn" title="Terminate Call">
+              <i class="fa-solid fa-phone-slash"></i>
+            </button>
+          </div>
+        `;
+
+        const messagesContainer = document.querySelector('.chat-detail-view') || document.body;
+        messagesContainer.appendChild(pipBar);
+
+        let elapsedSecs = 0;
+        const timerEl = pipBar.querySelector('#nexCallElapsedTimer');
+        const intervalId = setInterval(() => {
+          elapsedSecs++;
+          const m = String(Math.floor(elapsedSecs / 60)).padStart(2, '0');
+          const s = String(elapsedSecs % 60).padStart(2, '0');
+          if (timerEl) timerEl.textContent = `${m}:${s}`;
+        }, 1000);
+
+        let isMuted = false;
+        pipBar.querySelector('#nexCallMuteBtn')?.addEventListener('click', (e) => {
+          const btn = e.currentTarget;
+          isMuted = !isMuted;
+          btn.classList.toggle('active', isMuted);
+          btn.innerHTML = isMuted ? '<i class="fa-solid fa-microphone-slash" style="color: #ef4444;"></i>' : '<i class="fa-solid fa-microphone"></i>';
+          this.showToast(isMuted ? 'Microphone muted' : 'Microphone unmuted');
+        });
+
+        let isCamOff = (type !== 'video');
+        pipBar.querySelector('#nexCallCamBtn')?.addEventListener('click', (e) => {
+          const btn = e.currentTarget;
+          isCamOff = !isCamOff;
+          btn.classList.toggle('active', !isCamOff);
+          btn.innerHTML = isCamOff ? '<i class="fa-solid fa-video-slash" style="color: #ef4444;"></i>' : '<i class="fa-solid fa-video"></i>';
+          this.showToast(isCamOff ? 'Camera disabled' : 'Camera active');
+        });
+
+        pipBar.querySelector('#nexCallEndBtn')?.addEventListener('click', () => {
+          clearInterval(intervalId);
+          pipBar.style.opacity = '0';
+          pipBar.style.transform = 'translate(-50%, -20px)';
+          setTimeout(() => pipBar.remove(), 250);
+          this.showToast('Call ended (' + (timerEl?.textContent || '00:00') + ')');
+        });
+      };
+
+      callVoiceBtn?.addEventListener('click', () => startPiPCall('voice'));
+      callVideoBtn?.addEventListener('click', () => startPiPCall('video'));
+    }
+
+    /* ------------------------------------------------------------------------
+       24. CANNED RESPONSES & QUICK SNIPPETS MODAL
+       ------------------------------------------------------------------------ */
+    injectQuickSnippetsModal() {
+      if (document.getElementById('nexQuickSnippetsModal')) return;
+
+      const defaultSnippets = [
+        { title: "LGTM", text: "LGTM - Approved! Ready to merge." },
+        { title: "Reviewing PR", text: "Looking through the pull request and running tests now." },
+        { title: "Investigating Logs", text: "Checking production logs and telemetry traces now..." },
+        { title: "Bug Reproduced", text: "Reproduced the issue locally. Deploying a fix shortly." },
+        { title: "Please Provide Traces", text: "Could you please provide the stack trace and browser version?" },
+        { title: "Standup Sync", text: "Yesterday: Implemented features\nToday: Unit tests & polish\nBlockers: None" },
+        { title: "In Client Call", text: "Currently in a client meeting, will get back to you in 15 minutes." },
+        { title: "Confirmed & Proceeding", text: "Reviewed specifications and confirmed. Proceeding with rollout." }
+      ];
+
+      const modal = document.createElement('div');
+      modal.id = 'nexQuickSnippetsModal';
+      modal.className = 'nex-prof-modal-backdrop';
+      modal.innerHTML = `
+        <div class="nex-prof-modal-window" style="max-width: 540px;">
+          <div class="nex-prof-modal-header">
+            <div class="nex-prof-modal-title">
+              <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i>
+              <span>Canned Responses &amp; Quick Snippets</span>
+            </div>
+            <button type="button" class="nex-thread-close-btn" id="nexSnippetModalCloseBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="nex-prof-modal-body" style="max-height: 420px; overflow-y: auto;">
+            <div style="font-size: 11.5px; color: #94a3b8; margin-bottom: 12px;">
+              Click any snippet to instantly populate the composer, or add custom team responses.
+            </div>
+            <div class="nex-quick-snippets-grid" id="nexSnippetsGridContainer"></div>
+            
+            <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+              <div class="nex-prof-field-label">Add Custom Quick Snippet</div>
+              <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <input type="text" id="nexCustomSnippetTitle" class="nex-prof-input" placeholder="Title (e.g. Staging Ready)" style="width: 40%;">
+                <input type="text" id="nexCustomSnippetText" class="nex-prof-input" placeholder="Snippet message..." style="width: 60%;">
+              </div>
+              <button type="button" class="nex-prof-btn primary" id="nexSaveCustomSnippetBtn" style="padding: 6px 14px; font-size: 11.5px;">
+                <i class="fa-solid fa-plus" style="margin-right: 4px;"></i> Save Snippet
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const close = () => modal.classList.remove('active');
+      modal.querySelector('#nexSnippetModalCloseBtn')?.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close();
+      });
+
+      const renderSnippets = () => {
+        const grid = document.getElementById('nexSnippetsGridContainer');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        let saved = [];
+        try {
+          saved = JSON.parse(localStorage.getItem('nex_custom_snippets') || '[]');
+        } catch (_) {
+          saved = [];
+        }
+
+        const all = [...defaultSnippets, ...saved];
+        all.forEach(snip => {
+          const card = document.createElement('div');
+          card.className = 'nex-snippet-card';
+          card.innerHTML = `
+            <div class="nex-snippet-title">${escapeHtml(snip.title)}</div>
+            <div class="nex-snippet-preview">${escapeHtml(snip.text)}</div>
+          `;
+          card.addEventListener('click', () => {
+            const input = document.getElementById('message-input');
+            if (input) {
+              input.value = snip.text;
+              input.focus();
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            close();
+            this.showToast(`Snippet inserted: "${snip.title}"`);
+          });
+          grid.appendChild(card);
+        });
+      };
+
+      modal.querySelector('#nexSaveCustomSnippetBtn')?.addEventListener('click', () => {
+        const titleInput = document.getElementById('nexCustomSnippetTitle');
+        const textInput = document.getElementById('nexCustomSnippetText');
+        const t = titleInput?.value.trim();
+        const m = textInput?.value.trim();
+        if (!t || !m) {
+          alert('Please enter both a title and message for the snippet.');
+          return;
+        }
+
+        let saved = [];
+        try {
+          saved = JSON.parse(localStorage.getItem('nex_custom_snippets') || '[]');
+        } catch (_) {
+          saved = [];
+        }
+        saved.push({ title: t, text: m });
+        localStorage.setItem('nex_custom_snippets', JSON.stringify(saved));
+        titleInput.value = '';
+        textInput.value = '';
+        renderSnippets();
+        this.showToast('Custom snippet saved!');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('#nexQuickSnippetsBtn')) {
+          renderSnippets();
+          modal.classList.add('active');
+        }
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       25. HIGH-CONTRAST CHAT THEME PRESET SWITCHER
+       ------------------------------------------------------------------------ */
+    injectThemePresetPicker() {
+      const themes = {
+        cyan: { name: 'Cyber Cyan', accent: '#00f2ff', bg: '#0b1120' },
+        oled: { name: 'Midnight OLED', accent: '#38bdf8', bg: '#000000' },
+        matrix: { name: 'Matrix Emerald', accent: '#00ff88', bg: '#03140a' },
+        purple: { name: 'Royal Synthwave', accent: '#c084fc', bg: '#130924' },
+        crimson: { name: 'Crimson Eclipse', accent: '#ff4d6d', bg: '#1c0a0e' }
+      };
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('#nexThemePickerBtn')) {
+          const current = localStorage.getItem('nex_chat_theme_preset') || 'cyan';
+          const keys = Object.keys(themes);
+          const nextIdx = (keys.indexOf(current) + 1) % keys.length;
+          const nextKey = keys[nextIdx];
+          const chosen = themes[nextKey];
+
+          localStorage.setItem('nex_chat_theme_preset', nextKey);
+          document.documentElement.style.setProperty('--chat-accent', chosen.accent);
+          document.documentElement.style.setProperty('--chat-bg-dark', chosen.bg);
+          this.showToast(`Theme switched to: ${chosen.name}`);
+        }
+      });
+
+      const savedTheme = localStorage.getItem('nex_chat_theme_preset');
+      if (savedTheme && themes[savedTheme]) {
+        document.documentElement.style.setProperty('--chat-accent', themes[savedTheme].accent);
+        document.documentElement.style.setProperty('--chat-bg-dark', themes[savedTheme].bg);
+      }
+    }
+
+    /* ------------------------------------------------------------------------
+       26. GROUP PARTICIPANT ROSTER & DIRECT MESSAGE JUMP
+       ------------------------------------------------------------------------ */
+    injectGroupMemberRoster() {
+      if (document.getElementById('nexGroupRosterModal')) return;
+
+      const modal = document.createElement('div');
+      modal.id = 'nexGroupRosterModal';
+      modal.className = 'nex-prof-modal-backdrop';
+      modal.innerHTML = `
+        <div class="nex-prof-modal-window" style="max-width: 480px;">
+          <div class="nex-prof-modal-header">
+            <div class="nex-prof-modal-title">
+              <i class="fa-solid fa-users" style="color: #00f2ff;"></i>
+              <span>Group Participant Directory</span>
+            </div>
+            <button type="button" class="nex-thread-close-btn" id="nexRosterModalCloseBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="nex-prof-modal-body">
+            <div style="font-size: 11.5px; color: #94a3b8; margin-bottom: 12px;">
+              Active members in this conversation channel. Click "Direct Message" to start a 1-on-1 private session.
+            </div>
+            <div class="nex-roster-list" id="nexRosterListContainer"></div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const close = () => modal.classList.remove('active');
+      modal.querySelector('#nexRosterModalCloseBtn')?.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close();
+      });
+
+      window.openGroupRosterModal = () => {
+        const list = document.getElementById('nexRosterListContainer');
+        if (!list) return;
+        list.innerHTML = '';
+
+        const sampleMembers = [
+          { name: 'Alex Hack', role: 'owner', status: 'Online - Building NEXCHAT' },
+          { name: 'Sarah Sentinel', role: 'admin', status: 'Online - Monitoring' },
+          { name: 'Dev Swarm', role: 'vip', status: 'In voice conference' },
+          { name: 'System Moderator', role: 'mod', status: 'Active Sentinel' },
+          { name: 'Guest Operative', role: 'member', status: 'Idle' }
+        ];
+
+        sampleMembers.forEach(mem => {
+          const item = document.createElement('div');
+          item.className = 'nex-roster-member';
+          item.innerHTML = `
+            <div class="nex-roster-info">
+              <div class="nex-roster-avatar">${mem.name.substring(0, 2).toUpperCase()}</div>
+              <div>
+                <div class="nex-roster-name">
+                  <span>${escapeHtml(mem.name)}</span>
+                  <span class="nex-group-role-badge ${mem.role}">[${mem.role.toUpperCase()}]</span>
+                </div>
+                <div class="nex-roster-status">${escapeHtml(mem.status)}</div>
+              </div>
+            </div>
+            <div class="nex-roster-actions">
+              <button type="button" class="nex-roster-action-btn" data-roster-mention="${escapeHtml(mem.name)}" title="Mention in composer">
+                <i class="fa-solid fa-at"></i> <span>Mention</span>
+              </button>
+              <button type="button" class="nex-roster-action-btn" data-roster-dm="${escapeHtml(mem.name)}" title="Open Direct Chat">
+                <i class="fa-solid fa-comment"></i> <span>DM</span>
+              </button>
+            </div>
+          `;
+
+          item.querySelector('[data-roster-mention]')?.addEventListener('click', () => {
+            const input = document.getElementById('message-input');
+            if (input) {
+              input.value = (input.value ? input.value + ' ' : '') + '@' + mem.name + ' ';
+              input.focus();
+            }
+            close();
+            this.showToast(`Mention added: @${mem.name}`);
+          });
+
+          item.querySelector('[data-roster-dm]')?.addEventListener('click', () => {
+            close();
+            const chatNameEl = document.getElementById('chatName');
+            if (chatNameEl) chatNameEl.textContent = mem.name;
+            this.showToast(`Switched to Direct Message with ${mem.name}`);
+          });
+
+          list.appendChild(item);
+        });
+
+        modal.classList.add('active');
+      };
+    }
+
+    /* ------------------------------------------------------------------------
+       27. PER-CHAT NOTIFICATION MODE SELECTOR
+       ------------------------------------------------------------------------ */
+    injectNotificationModeSelector() {
+      const headerActions = document.querySelector('.chat-detail-header-actions');
+      if (!headerActions || document.getElementById('nexChatNotifModeBtn')) return;
+
+      const notifBtn = document.createElement('button');
+      notifBtn.type = 'button';
+      notifBtn.id = 'nexChatNotifModeBtn';
+      notifBtn.className = 'header-icon-btn';
+      notifBtn.title = 'Notification Preferences';
+      notifBtn.innerHTML = '<i class="fa-solid fa-bell"></i>';
+
+      headerActions.prepend(notifBtn);
+
+      const menu = document.createElement('div');
+      menu.id = 'nexNotifMenu';
+      menu.className = 'nex-notif-menu';
+      menu.style.display = 'none';
+      menu.innerHTML = `
+        <button type="button" class="nex-notif-opt active" data-mode="all">
+          <i class="fa-solid fa-bell" style="color: #00ff88;"></i> All Messages
+        </button>
+        <button type="button" class="nex-notif-opt" data-mode="mentions">
+          <i class="fa-solid fa-at" style="color: #00f2ff;"></i> Mentions Only
+        </button>
+        <button type="button" class="nex-notif-opt" data-mode="mute">
+          <i class="fa-solid fa-bell-slash" style="color: #ef4444;"></i> Mute Channel
+        </button>
+      `;
+
+      headerActions.appendChild(menu);
+
+      notifBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+      });
+
+      document.addEventListener('click', () => {
+        menu.style.display = 'none';
+      });
+
+      menu.querySelectorAll('.nex-notif-opt').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const mode = opt.dataset.mode;
+          menu.querySelectorAll('.nex-notif-opt').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+
+          if (mode === 'all') {
+            notifBtn.innerHTML = '<i class="fa-solid fa-bell"></i>';
+            this.showToast('Notifications: All Messages');
+          } else if (mode === 'mentions') {
+            notifBtn.innerHTML = '<i class="fa-solid fa-at" style="color: #00f2ff;"></i>';
+            this.showToast('Notifications: Mentions Only');
+          } else {
+            notifBtn.innerHTML = '<i class="fa-solid fa-bell-slash" style="color: #ef4444;"></i>';
+            this.showToast('Channel muted (Silent mode)');
+          }
+
+          menu.style.display = 'none';
+        });
       });
     }
 

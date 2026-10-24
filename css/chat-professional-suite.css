@@ -1791,3 +1791,323 @@
   justify-content: space-between;
   z-index: 25;
 }
+
+/* --------------------------------------------------------------------------
+   24. IN-CHAT CODE SANDBOX LIVE CONSOLE OUTPUT
+   -------------------------------------------------------------------------- */
+.nex-code-run-btn {
+  background: rgba(0, 255, 136, 0.12);
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  border-radius: 5px;
+  color: #00ff88;
+  padding: 3px 8px;
+  font-size: 10.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+  margin-left: 6px;
+}
+
+.nex-code-run-btn:hover {
+  background: rgba(0, 255, 136, 0.22);
+  border-color: #00ff88;
+  transform: scale(1.05);
+}
+
+.nex-code-output-console {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(5, 8, 15, 0.95);
+  border-top: 1px solid rgba(0, 242, 255, 0.2);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 11.5px;
+  color: #00f2ff;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  max-height: 120px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* --------------------------------------------------------------------------
+   25. FLOATING VOIP CALL MINI-PLAYER & ACTIVE CALL PIP
+   -------------------------------------------------------------------------- */
+.nex-call-pip-bar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(11, 17, 32, 0.95);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 255, 136, 0.2);
+  border-radius: 9999px;
+  padding: 6px 18px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 999;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  animation: nexCallSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes nexCallSlideDown {
+  from { opacity: 0; transform: translate(-50%, -20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.nex-call-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nex-call-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #00ff88;
+  box-shadow: 0 0 8px #00ff88;
+  animation: nexCallPulse 1.2s infinite alternate;
+}
+
+@keyframes nexCallPulse {
+  0% { transform: scale(0.9); opacity: 0.6; }
+  100% { transform: scale(1.3); opacity: 1; }
+}
+
+.nex-call-name {
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.nex-call-timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: #00ff88;
+}
+
+.nex-call-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nex-call-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nex-call-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
+  transform: scale(1.08);
+}
+
+.nex-call-btn.active {
+  background: rgba(0, 242, 255, 0.2);
+  border-color: #00f2ff;
+  color: #00f2ff;
+}
+
+.nex-call-btn.end-call {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+  color: #ef4444;
+}
+
+.nex-call-btn.end-call:hover {
+  background: #ef4444;
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   26. SAVED CANNED RESPONSES / QUICK REPLY SNIPPETS
+   -------------------------------------------------------------------------- */
+.nex-quick-snippets-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.nex-snippet-card {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nex-snippet-card:hover {
+  background: rgba(0, 242, 255, 0.1);
+  border-color: rgba(0, 242, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+.nex-snippet-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #00f2ff;
+  margin-bottom: 2px;
+}
+
+.nex-snippet-preview {
+  font-size: 11px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
+   27. CODE ACTIONS & LIVE CODE RUNNER
+   -------------------------------------------------------------------------- */
+.nex-code-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* --------------------------------------------------------------------------
+   28. GROUP MEMBER ROSTER & DIRECT MESSAGE JUMP
+   -------------------------------------------------------------------------- */
+.nex-roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.nex-roster-member {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  transition: all 0.15s ease;
+}
+
+.nex-roster-member:hover {
+  background: rgba(0, 242, 255, 0.06);
+  border-color: rgba(0, 242, 255, 0.3);
+}
+
+.nex-roster-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nex-roster-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00f2ff 0%, #0077ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0b1120;
+}
+
+.nex-roster-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nex-roster-status {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.nex-roster-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nex-roster-action-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.nex-roster-action-btn:hover {
+  background: rgba(0, 242, 255, 0.18);
+  border-color: #00f2ff;
+  color: #00f2ff;
+}
+
+/* --------------------------------------------------------------------------
+   29. NOTIFICATION MODE SELECTOR POPUP
+   -------------------------------------------------------------------------- */
+.nex-notif-menu {
+  position: absolute;
+  top: 48px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid rgba(0, 242, 255, 0.25);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 1000;
+  min-width: 170px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.nex-notif-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #cbd5e1;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.nex-notif-opt:hover, .nex-notif-opt.active {
+  background: rgba(0, 242, 255, 0.12);
+  color: #00f2ff;
+}

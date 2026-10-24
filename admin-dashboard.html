@@ -4531,7 +4531,7 @@
   <!-- CONTROLLER SCRIPT -->
   <script>
     (function() {
-      // ─── CREDENTIALS & INITIALIZATION ───
+      //  CREDENTIALS & INITIALIZATION 
       const MASTER_KEY = "IAMATOMICDEVELOPER16@$#";
       const SUPERADMIN_EMAILS = ["demonalexander526@gmail.com", "alexhack235@gmail.com"];
       const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes
@@ -4577,7 +4577,7 @@
       // Clean persistent bypass
       localStorage.removeItem('nex_is_admin');
 
-      // ─── AUTHENTICATION GATE & TIMEOUT ENGINE ───
+      //  AUTHENTICATION GATE & TIMEOUT ENGINE 
       const authModal = document.getElementById('adminAuthGateModal');
       const mainContainer = document.getElementById('adminMainContainer');
       const passkeyInput = document.getElementById('adminPasskeyInput');
@@ -4757,7 +4757,7 @@
         if (term) term.innerHTML = '';
       });
 
-      // ─── TAB NAVIGATION CONTROLLER ───
+      //  TAB NAVIGATION CONTROLLER 
       const tabBtns = document.querySelectorAll('.admin-tab-btn');
       const tabPanes = document.querySelectorAll('.tab-pane');
 
@@ -4781,7 +4781,7 @@
         });
       });
 
-      // ─── LOAD LIVE DATA & METRICS ───
+      //  LOAD LIVE DATA & METRICS 
       const SEEDED_ADMIN_USERS = [
         { id: 'usr_alex_root_01', username: 'demonalexander526', displayName: 'Alexander (Lead Dev)', email: 'demonalexander526@gmail.com', role: 'superadmin', tokens: 99999, status: 'active', banned: false, verificationBadge: 'TIER_PRO_MAX', isVerified: true },
         { id: 'usr_cyber_ghost_02', username: 'shadow_operative', displayName: 'Shadow Operative', email: 'operative@nexchat.io', role: 'moderator', tokens: 1250, status: 'active', banned: false, verificationBadge: 'TIER_C2PA_HARDWARE', isVerified: true },
@@ -4805,7 +4805,7 @@
         try { initUserIpRegistrationsMonitor(); } catch(e) { console.warn('[IP MONITOR INIT]', e); }
       }
 
-      // ─── MASTER CYBER CONTROL DECK CONTROLLER ───
+      //  MASTER CYBER CONTROL DECK CONTROLLER 
       let controlDeckInitialized = false;
 
       function initMasterControlDeck() {
@@ -5024,7 +5024,7 @@
         }, 3200);
       }
 
-      // ─── ADVANCED CYBER COMMAND SYSTEMS (ALGO, ANTI-BOT, ECONOMY, 3D WAR ROOM) ───
+      //  ADVANCED CYBER COMMAND SYSTEMS (ALGO, ANTI-BOT, ECONOMY, 3D WAR ROOM) 
       let advancedSystemsInitialized = false;
 
       function initAdvancedCyberSystems() {
@@ -5681,7 +5681,7 @@
           alert(`[MERKLE CHAIN VERIFIED] Cryptographic hash chain from Genesis to Block #${merkleChain[merkleChain.length - 1].index} is 100% authentic.`);
         });
 
-        // ─── 5. Pillar 5: Chrono-Forensics & User Incident Replay Studio (Tab 13) ───
+        //  5. Pillar 5: Chrono-Forensics & User Incident Replay Studio (Tab 13) 
         initChronoForensicsStudio();
 
         function initChronoForensicsStudio() {
@@ -5845,7 +5845,7 @@
         }
       }
 
-      // ─── 14. WHATSAPP ORDER FULFILLMENT & BADGE PROVISIONING CONTROLLER ───
+      //  14. WHATSAPP ORDER FULFILLMENT & BADGE PROVISIONING CONTROLLER 
       let activeFulfillUser = null;
       let fulfillSessionLogs = [];
       let fulfillDeskInitialized = false;
@@ -6349,7 +6349,7 @@ For support or further inquiries, reply directly to this chat.`;
         container.prepend(item);
       }
 
-      // ─── 1. USER MANAGEMENT & MODERATION ───
+      //  1. USER MANAGEMENT & MODERATION 
       async function fetchUsers() {
         const tbody = document.getElementById('usersTableBody');
         if (!db) {
@@ -6650,7 +6650,7 @@ For support or further inquiries, reply directly to this chat.`;
         logAudit('Exported user directory CSV file.', 'ok');
       });
 
-      // ─── USER SANCTIONS & ADVANCED MODERATION CONTROLLER ───
+      //  USER SANCTIONS & ADVANCED MODERATION CONTROLLER 
       let activeSanctionUser = null;
       const userSanctionsModal = document.getElementById('adminUserSanctionsModal');
       const closeSanctionsModalBtn = document.getElementById('closeAdminSanctionsModalBtn');
@@ -6824,7 +6824,7 @@ For support or further inquiries, reply directly to this chat.`;
         }
       });
 
-      // ─── CREATOR VERIFICATION BADGE CONTROLLER ───
+      //  CREATOR VERIFICATION BADGE CONTROLLER 
       let activeBadgeUser = null;
       const adminVerificationBadgeModal = document.getElementById('adminVerificationBadgeModal');
       const closeAdminBadgeModalBtn = document.getElementById('closeAdminBadgeModalBtn');
@@ -6916,7 +6916,7 @@ For support or further inquiries, reply directly to this chat.`;
         }
       });
 
-      // ─── REELS STUDIO & CONTENT MODERATION CONTROLLER ───
+      //  REELS STUDIO & CONTENT MODERATION CONTROLLER 
       let cachedReels = [];
       let activeInspectedReel = null;
 
@@ -7208,7 +7208,7 @@ For support or further inquiries, reply directly to this chat.`;
         logAudit('Exported reels catalog CSV file.', 'ok');
       });
 
-      // ─── ADMIN REEL VIDEO INSPECTOR MODAL ───
+      //  ADMIN REEL VIDEO INSPECTOR MODAL 
       function openAdminReelInspectorModal(reel) {
         if (!reel) return;
         activeInspectedReel = reel;
@@ -7333,7 +7333,7 @@ For support or further inquiries, reply directly to this chat.`;
         }
       });
 
-      // ─── 2. LIVE CHAT FEED & MESSAGE PURGE ───
+      //  2. LIVE CHAT FEED & MESSAGE PURGE 
       let chatUnsubscribe = null;
 
       function subscribeLiveChat() {
@@ -7424,7 +7424,7 @@ For support or further inquiries, reply directly to this chat.`;
         }
       });
 
-      // ─── 3. GLOBAL BROADCAST DISPATCHER ───
+      //  3. GLOBAL BROADCAST DISPATCHER 
       const broadcastForm = document.getElementById('broadcastDispatchForm');
       broadcastForm?.addEventListener('submit', async () => {
         const title = document.getElementById('broadcastTitleInput').value.trim();
@@ -7527,7 +7527,7 @@ For support or further inquiries, reply directly to this chat.`;
         }
       }
 
-      // ─── 4. FIRESTORE 4-IP ACCESS CONTROL (MAX 4 SLOTS) ───
+      //  4. FIRESTORE 4-IP ACCESS CONTROL (MAX 4 SLOTS) 
       const MAX_VERIFIED_IPS = 4;
       const IP_STORAGE_KEY = 'nex_verified_ips_whitelist';
 
@@ -7712,7 +7712,7 @@ For support or further inquiries, reply directly to this chat.`;
         logAudit(`Detected client IP address: ${detected}`, 'ok');
       });
 
-      // ─── 5. REAL LATENCY PROBES (NO Math.random()) ───
+      //  5. REAL LATENCY PROBES (NO Math.random()) 
       async function probeEndpoint(url, label) {
         const start = performance.now();
         try {
@@ -7785,7 +7785,7 @@ For support or further inquiries, reply directly to this chat.`;
         }
       }
 
-      // ─── 6. 60 FPS CYBER WAR MAP CANVAS ───
+      //  6. 60 FPS CYBER WAR MAP CANVAS 
       const mapCanvas = document.getElementById('cyberWarMapCanvas');
       if (mapCanvas) {
         const ctx = mapCanvas.getContext('2d');
@@ -7910,7 +7910,7 @@ For support or further inquiries, reply directly to this chat.`;
         });
       }
 
-      // ─── 7. SENTINEL EMAIL DISPATCHER & TESTER CONTROLLER ───
+      //  7. SENTINEL EMAIL DISPATCHER & TESTER CONTROLLER 
       function logEmailer(msg, type = 'info') {
         const stream = document.getElementById('emailerLogStream');
         if (!stream) return;
@@ -8140,89 +8140,7 @@ For support or further inquiries, reply directly to this chat.`;
               <div style="font-size:13px;line-height:1.6;color:#f8fafc;">${message}</div>
               <div style="margin-top:14px;font-size:11px;color:#64748b;">Target Module: ${extension}</div>
             </div>
-            <!-- Android Viewport & Orientation Anti-Sway Lock -->
-  <script>
-    (function initAndroidLock() {
-      function lockRigidView() {
-        document.documentElement.style.overflowX = 'hidden';
-        document.documentElement.style.width = '100%';
-        document.body.style.overflowX = 'hidden';
-        document.body.style.width = '100%';
-        document.body.style.maxWidth = '100vw';
-        document.body.style.touchAction = 'pan-y';
-        document.body.style.overscrollBehaviorX = 'none';
-        const container = document.querySelector('.admin-container');
-        if (container) {
-          container.style.overflowX = 'hidden';
-          container.style.maxWidth = '100vw';
-          container.style.width = '100%';
-        }
-      }
-      lockRigidView();
-      window.addEventListener('resize', lockRigidView, { passive: true });
-      window.addEventListener('orientationchange', () => setTimeout(lockRigidView, 80), { passive: true });
-    })();
-
-    // ChronEX AI Quota Admin Handlers
-    document.addEventListener('DOMContentLoaded', () => {
-      const targetInput = document.getElementById('aiQuotaTargetUid');
-      const resultBox = document.getElementById('aiQuotaResultDisplay');
-
-      function showResult(msg) {
-        if (!resultBox) return;
-        resultBox.style.display = 'block';
-        resultBox.innerHTML = msg;
-      }
-
-      document.getElementById('btnCheckUserAiQuota')?.addEventListener('click', () => {
-        const uid = targetInput?.value.trim() || 'default';
-        const key = `nexchat_ai_daily_quota_${uid}`;
-        const raw = localStorage.getItem(key);
-        if (!raw) {
-          showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Used: 0 / 100 requests &bull; Status: ACTIVE (Full Quota Available)`);
-        } else {
-          try {
-            const data = JSON.parse(raw);
-            showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Used: <strong>${data.count || 0} / 100</strong> requests &bull; First Request: ${new Date(data.firstTimestamp).toLocaleTimeString()}`);
-          } catch (_) {
-            showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Active`);
-          }
-        }
-      });
-
-      document.getElementById('btnGrant100AiQuota')?.addEventListener('click', () => {
-        const uid = targetInput?.value.trim() || 'default';
-        const key = `nexchat_ai_daily_quota_${uid}`;
-        localStorage.setItem(key, JSON.stringify({ count: 0, firstTimestamp: Date.now() }));
-        showResult(`[SUCCESS] User <strong>${uid}</strong> quota updated to 100 requests per 24 hours.`);
-        if (typeof logAudit === 'function') logAudit(`Set ChronEX AI quota to 100 for ${uid}`, 'ok');
-      });
-
-      document.getElementById('btnGrant500AiQuota')?.addEventListener('click', () => {
-        const uid = targetInput?.value.trim() || 'default';
-        localStorage.setItem(`user_ai_bonus_${uid}`, '500');
-        showResult(`[SUCCESS] Granted +500 Bonus AI Prompts to user <strong>${uid}</strong>.`);
-        if (typeof logAudit === 'function') logAudit(`Granted +500 bonus AI prompts to ${uid}`, 'ok');
-      });
-
-      document.getElementById('btnUpgradeVipAiQuota')?.addEventListener('click', () => {
-        const uid = targetInput?.value.trim() || 'default';
-        localStorage.setItem('user_plan', 'vip');
-        localStorage.setItem('is_vip', 'true');
-        showResult(`[SUCCESS] User <strong>${uid}</strong> elevated to UNLIMITED VIP AI Tier! Zero quota limits enforced.`);
-        if (typeof logAudit === 'function') logAudit(`Elevated ${uid} to UNLIMITED VIP AI Tier`, 'ok');
-      });
-
-      document.getElementById('btnResetAiQuotaCooldown')?.addEventListener('click', () => {
-        const uid = targetInput?.value.trim() || 'default';
-        const key = `nexchat_ai_daily_quota_${uid}`;
-        localStorage.removeItem(key);
-        showResult(`[SUCCESS] 24-Hour Cooldown for user <strong>${uid}</strong> has been completely reset.`);
-        if (typeof logAudit === 'function') logAudit(`Reset AI 24h cooldown for ${uid}`, 'ok');
-      });
-    });
-  </script>
-</body></html>
+            </body></html>
         `;
 
         iframe.srcdoc = previewHtml;
@@ -8254,9 +8172,9 @@ For support or further inquiries, reply directly to this chat.`;
       window.refreshFulfillmentUserOptions = refreshFulfillmentUserOptions;
       window.updateWhatsappReceiptPreview = updateWhatsappReceiptPreview;
 
-      // ═════════════════════════════════════════════════════════════════════
+      // 
       // TAB 15: REPORTS INBOX & ACTIVITY SENTINEL CONTROLLER
-      // ═════════════════════════════════════════════════════════════════════
+      // 
       const SEEDED_ADMIN_REPORTS = [
         {
           id: 'REP_SEED_01',
@@ -8925,5 +8843,124 @@ Status: ${rep.status}`;
 
     })();
   </script>
+
+  <!-- RIGID ANDROID RESIZE & VIEWPORT ANTI-SWAY SENTINEL (PRODUCTION GRADE) -->
+  <script>
+    (function initRigidAndroidLock() {
+      function enforceRigidBounds() {
+        try {
+          const vw = Math.min(window.innerWidth, document.documentElement.clientWidth || window.innerWidth);
+          document.documentElement.style.setProperty('overflow-x', 'hidden', 'important');
+          document.documentElement.style.setProperty('width', '100%', 'important');
+          document.documentElement.style.setProperty('max-width', '100vw', 'important');
+          document.documentElement.style.setProperty('overscroll-behavior-x', 'none', 'important');
+
+          document.body.style.setProperty('overflow-x', 'hidden', 'important');
+          document.body.style.setProperty('width', '100%', 'important');
+          document.body.style.setProperty('max-width', '100vw', 'important');
+          document.body.style.setProperty('touch-action', 'pan-y', 'important');
+          document.body.style.setProperty('overscroll-behavior-x', 'none', 'important');
+
+          const container = document.querySelector('.admin-container');
+          if (container) {
+            container.style.setProperty('overflow-x', 'hidden', 'important');
+            container.style.setProperty('max-width', '100vw', 'important');
+            container.style.setProperty('width', '100%', 'important');
+            container.style.setProperty('box-sizing', 'border-box', 'important');
+          }
+
+          const adminMain = document.querySelector('.admin-main');
+          if (adminMain) {
+            adminMain.style.setProperty('overflow-x', 'hidden', 'important');
+            adminMain.style.setProperty('max-width', '100vw', 'important');
+            adminMain.style.setProperty('width', '100%', 'important');
+            adminMain.style.setProperty('box-sizing', 'border-box', 'important');
+          }
+
+          // Enforce internal scrolling on any wide data tables
+          document.querySelectorAll('table').forEach(tbl => {
+            const parent = tbl.parentElement;
+            if (parent && !parent.classList.contains('admin-table-wrapper')) {
+              parent.style.setProperty('overflow-x', 'auto', 'important');
+              parent.style.setProperty('max-width', '100%', 'important');
+              parent.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+            }
+          });
+        } catch (e) {
+          console.warn('[Android Lock] Error enforcing bounds:', e);
+        }
+      }
+
+      enforceRigidBounds();
+      window.addEventListener('resize', enforceRigidBounds, { passive: true });
+      window.addEventListener('orientationchange', () => {
+        setTimeout(enforceRigidBounds, 50);
+        setTimeout(enforceRigidBounds, 250);
+      }, { passive: true });
+
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', enforceRigidBounds, { passive: true });
+      }
+    })();
+
+    // ChronEX AI Quota Admin Handlers (Standard Free: 100/day, VIP: Unlimited)
+    document.addEventListener('DOMContentLoaded', () => {
+      const targetInput = document.getElementById('aiQuotaTargetUid');
+      const resultBox = document.getElementById('aiQuotaResultDisplay');
+
+      function showResult(msg) {
+        if (!resultBox) return;
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = msg;
+      }
+
+      document.getElementById('btnCheckUserAiQuota')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        const key = `nexchat_ai_daily_quota_${uid}`;
+        const raw = localStorage.getItem(key);
+        if (!raw) {
+          showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Used: 0 / 100 requests &bull; Status: ACTIVE (100 Available / 24h)`);
+        } else {
+          try {
+            const data = JSON.parse(raw);
+            showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Used: <strong>${data.count || 0} / 100</strong> requests &bull; First Request: ${new Date(data.firstTimestamp).toLocaleTimeString()}`);
+          } catch (_) {
+            showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Active`);
+          }
+        }
+      });
+
+      document.getElementById('btnGrant100AiQuota')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        const key = `nexchat_ai_daily_quota_${uid}`;
+        localStorage.setItem(key, JSON.stringify({ count: 0, firstTimestamp: Date.now() }));
+        showResult(`[SUCCESS] User <strong>${uid}</strong> quota updated to 100 requests per 24 hours.`);
+        if (typeof logAudit === 'function') logAudit(`Set ChronEX AI quota to 100 for ${uid}`, 'ok');
+      });
+
+      document.getElementById('btnGrant500AiQuota')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        localStorage.setItem(`user_ai_bonus_${uid}`, '500');
+        showResult(`[SUCCESS] Granted +500 Bonus AI Prompts to user <strong>${uid}</strong>.`);
+        if (typeof logAudit === 'function') logAudit(`Granted +500 bonus AI prompts to ${uid}`, 'ok');
+      });
+
+      document.getElementById('btnUpgradeVipAiQuota')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        localStorage.setItem('user_plan', 'vip');
+        localStorage.setItem('is_vip', 'true');
+        showResult(`[SUCCESS] User <strong>${uid}</strong> elevated to UNLIMITED VIP AI Tier! Zero quota limits enforced.`);
+        if (typeof logAudit === 'function') logAudit(`Elevated ${uid} to UNLIMITED VIP AI Tier`, 'ok');
+      });
+
+      document.getElementById('btnResetAiDailyCooldown')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        localStorage.removeItem(`nexchat_ai_daily_quota_${uid}`);
+        showResult(`[SUCCESS] Daily quota cooldown cleared for <strong>${uid}</strong>. Fresh 100/100 requests available immediately.`);
+        if (typeof logAudit === 'function') logAudit(`Reset 24h AI quota cooldown for ${uid}`, 'ok');
+      });
+    });
+  </script>
+
 </body>
 </html>
