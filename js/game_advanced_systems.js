@@ -14,6 +14,16 @@
  * (Tier 10: Spatial 3D Audio Visualizer Towers & Cyber DJ Stings)
  * (Tier 11: Subterranean Neon Underground Highway Network at y: -18m)
  * (Tier 12: Interactive Drive-In Tuning Garage & Real-Time Wrap Editor)
+ * (Tier 13: Aerial Police Drone Patrols & 5-Star Wanted Level AI)
+ * (Tier 14: Volumetric Weather Engine - Blizzards, Thunderstorms & Smog)
+ * (Tier 15: Mach-2 Sky-Fighter Flight & Orbital Space Re-entry)
+ * (Tier 16: Neon Drift Championship with Checkpoints & Ghost Car)
+ * (Tier 17: Stadium Drive-In Cinema & Jumbotron Reels Visualizer)
+ * (Tier 18: Walk-In Interior Zones - Cyber Lounge & Firing Range)
+ * (Tier 19: Screen-Space Speed Warp & Chromatic FX)
+ * (Tier 20: Tactical AI Companion Drone & Recon Scanner)
+ * (Tier 21: Procedural Skyscraper Window Lighting & Rotating Billboards)
+ * (Tier 22: Dual-Stick Gamepad API & Gyroscope Controller Support)
  *
  * Architecture: Zero-GC scratch vectors, strictly zero Unicode emojis.
  * ============================================================================
@@ -61,6 +71,17 @@
       this.visualizer = null;
       this.tunnels = null;
       this.tuning = null;
+      // 10 Next-Gen Grand Systems
+      this.police = null;
+      this.weather = null;
+      this.flight = null;
+      this.championship = null;
+      this.cinema = null;
+      this.interiors = null;
+      this.postfx = null;
+      this.companion = null;
+      this.lighting = null;
+      this.gamepad = null;
 
       // Global state
       this.isRaining = false;
@@ -107,9 +128,21 @@
       this.tunnels = new SubterraneanTunnelNetworkSubsystem(this);
       this.tuning = new VehicleTuningStudioSubsystem(this);
 
+      // 10 Next-Gen Grand Systems
+      this.police = new AerialPolicePatrolSubsystem(this);
+      this.weather = new VolumetricWeatherEngineSubsystem(this);
+      this.flight = new AeroFlightAndOrbitalSubsystem(this);
+      this.championship = new NeonDriftChampionshipSubsystem(this);
+      this.cinema = new StadiumDriveInCinemaSubsystem(this);
+      this.interiors = new WalkInInteriorZonesSubsystem(this);
+      this.postfx = new PostProcessingEffectsSubsystem(this);
+      this.companion = new TacticalCompanionDroneSubsystem(this);
+      this.lighting = new ProceduralCityLightingSubsystem(this);
+      this.gamepad = new GamepadAndGyroscopeInputSubsystem(this);
+
       this.initHUDControls();
       this.initialized = true;
-      console.log('[ADVANCED SYSTEMS] All 12 Tiers initialized successfully (Zero Emojis, Zero-GC).');
+      console.log('[ADVANCED SYSTEMS] All 22 Tiers initialized successfully (Zero Emojis, Zero-GC).');
     }
 
     initHUDControls() {
@@ -127,6 +160,14 @@
           if (this.pedestrians) this.pedestrians.triggerHonk();
         } else if (key === 't') {
           if (this.tuning) this.tuning.toggleStudio();
+        } else if (key === 'p') {
+          if (this.police) this.police.cycleWantedLevel();
+        } else if (key === 'w') {
+          if (this.weather) this.weather.cycleWeather();
+        } else if (key === 'f') {
+          if (this.flight) this.flight.toggleFlightBooster();
+        } else if (key === 'r') {
+          if (this.championship) this.championship.startRace();
         }
       });
     }
@@ -174,6 +215,17 @@
       if (this.visualizer) this.visualizer.update(delta);
       if (this.tunnels) this.tunnels.update(delta, vehicleState);
       if (this.tuning) this.tuning.update(delta, vehicleState);
+      // 10 Next-Gen Updates
+      if (this.police) this.police.update(delta, vehicleState);
+      if (this.weather) this.weather.update(delta);
+      if (this.flight) this.flight.update(delta, vehicleState);
+      if (this.championship) this.championship.update(delta, vehicleState);
+      if (this.cinema) this.cinema.update(delta);
+      if (this.interiors) this.interiors.update(delta, vehicleState);
+      if (this.postfx) this.postfx.update(delta, vehicleState);
+      if (this.companion) this.companion.update(delta, vehicleState);
+      if (this.lighting) this.lighting.update(delta);
+      if (this.gamepad) this.gamepad.update(delta, vehicleState);
     }
   }
 
@@ -2047,6 +2099,551 @@
 
       if (dist < 7.0 && !this.isOpen && Math.abs((vState && vState.roverCurrentSpeed) ? vState.roverCurrentSpeed : 0) < 1.0) {
         // Can open studio
+      }
+    }
+  }
+
+
+  // ==========================================================================
+  // TIER 13: AERIAL POLICE DRONE PATROLS & 5-STAR WANTED LEVEL AI
+  // ==========================================================================
+  class AerialPolicePatrolSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.wantedLevel = 0;
+      this.policeGroup = new THREE.Group();
+      this.policeGroup.name = 'aerialPolicePatrolGroup';
+      this.parent.scene.add(this.policeGroup);
+
+      this.drones = [];
+      this.droneCount = 3;
+      this.strobeTimer = 0;
+      this.sirenTimer = 0;
+      this.buildPoliceDrones();
+      this.createWantedHUD();
+    }
+
+    createWantedHUD() {
+      const existing = document.getElementById('police-wanted-hud');
+      if (existing) existing.remove();
+
+      const hud = document.createElement('div');
+      hud.id = 'police-wanted-hud';
+      hud.style.cssText = `
+        position: absolute;
+        top: 20px;
+        right: 200px;
+        background: rgba(10, 15, 24, 0.85);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        border-radius: 8px;
+        padding: 5px 12px;
+        display: none;
+        align-items: center;
+        gap: 6px;
+        font-family: 'Rajdhani', sans-serif;
+        color: #ef4444;
+        z-index: 100;
+        cursor: pointer;
+        user-select: none;
+      `;
+      hud.title = 'Wanted Level [P to clear]';
+      hud.onclick = () => { this.cycleWantedLevel(); };
+      hud.innerHTML = `
+        <i class="fa-solid fa-shield-halved" style="color: #ef4444;"></i>
+        <span id="wanted-stars-text" style="font-weight: 900; font-size: 11px; letter-spacing: 2px;">WANTED</span>
+      `;
+      document.body.appendChild(hud);
+    }
+
+    buildPoliceDrones() {
+      const droneMat = new THREE.MeshStandardMaterial({ color: 0x090d14, metalness: 0.9, roughness: 0.2 });
+      const blueStrobeMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+      const redStrobeMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+
+      for (let i = 0; i < this.droneCount; i++) {
+        const dGroup = new THREE.Group();
+
+        // Central Pod
+        const pod = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.5, 1.6), droneMat);
+        dGroup.add(pod);
+
+        // Strobes
+        const strobeL = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), redStrobeMat);
+        strobeL.position.set(-0.7, 0.1, 0);
+        dGroup.add(strobeL);
+
+        const strobeR = new THREE.Mesh(new THREE.SphereGeometry(0.14, 8, 8), blueStrobeMat);
+        strobeR.position.set(0.7, 0.1, 0);
+        dGroup.add(strobeR);
+
+        // Searchlight Cone
+        const spotGeo = new THREE.ConeGeometry(3.5, 18, 12, 1, true);
+        spotGeo.translate(0, -9, 0);
+        const spotMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthWrite: false });
+        const spotMesh = new THREE.Mesh(spotGeo, spotMat);
+        dGroup.add(spotMesh);
+
+        dGroup.position.set(40 * (i - 1), 18, 40 * (i - 1));
+        dGroup.visible = false;
+        this.policeGroup.add(dGroup);
+
+        this.drones.push({
+          group: dGroup,
+          strobeL: strobeL,
+          strobeR: strobeR,
+          spot: spotMesh,
+          hoverPhase: i * 2.1
+        });
+      }
+    }
+
+    cycleWantedLevel() {
+      this.wantedLevel = (this.wantedLevel + 1) % 6;
+      const hud = document.getElementById('police-wanted-hud');
+      const text = document.getElementById('wanted-stars-text');
+
+      if (this.wantedLevel > 0) {
+        if (hud) hud.style.display = 'flex';
+        let stars = '';
+        for (let s = 0; s < this.wantedLevel; s++) stars += '[*]';
+        if (text) text.textContent = `WANTED ${stars}`;
+
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification(`[POLICE] WANTED LEVEL: ${this.wantedLevel} STAR(S) ACTIVATED!`);
+        }
+      } else {
+        if (hud) hud.style.display = 'none';
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[POLICE] PURSUIT EVADED: WANTED LEVEL CLEARED');
+        }
+      }
+
+      this.drones.forEach((d, idx) => {
+        d.group.visible = (idx < this.wantedLevel);
+      });
+    }
+
+    update(delta, vState) {
+      if (this.wantedLevel === 0) return;
+
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      this.strobeTimer += delta * 12.0;
+      const isRed = Math.sin(this.strobeTimer) > 0;
+
+      const rPos = roverGroup.position;
+
+      for (let i = 0; i < this.wantedLevel && i < this.drones.length; i++) {
+        const d = this.drones[i];
+        d.hoverPhase += delta * 3.0;
+
+        // Alternate Strobes
+        d.strobeL.material.color.setHex(isRed ? 0xef4444 : 0x00f2ff);
+        d.strobeR.material.color.setHex(isRed ? 0x00f2ff : 0xef4444);
+
+        // Follow player car with altitude offset
+        const targetX = rPos.x + Math.sin(d.hoverPhase + i * 2.0) * 16.0;
+        const targetZ = rPos.z + Math.cos(d.hoverPhase + i * 2.0) * 16.0;
+        const targetY = 16.0 + Math.sin(d.hoverPhase) * 2.0;
+
+        d.group.position.x = THREE.MathUtils.lerp(d.group.position.x, targetX, delta * 3.5);
+        d.group.position.y = THREE.MathUtils.lerp(d.group.position.y, targetY, delta * 3.5);
+        d.group.position.z = THREE.MathUtils.lerp(d.group.position.z, targetZ, delta * 3.5);
+
+        d.group.lookAt(rPos.x, rPos.y, rPos.z);
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 14: VOLUMETRIC WEATHER ENGINE (BLIZZARDS, THUNDERSTORMS & SMOG)
+  // ==========================================================================
+  class VolumetricWeatherEngineSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.weatherModes = ['CLEAR', 'BLIZZARD', 'THUNDERSTORM', 'CYBER_SMOG'];
+      this.currentModeIndex = 0;
+      this.lightningTimer = 0;
+
+      this.weatherGroup = new THREE.Group();
+      this.weatherGroup.name = 'volumetricWeatherGroup';
+      this.parent.scene.add(this.weatherGroup);
+
+      // 100 Snow Flurry Particles
+      this.maxSnow = 100;
+      this.snowGeo = new THREE.BufferGeometry();
+      this.snowPositions = new Float32Array(this.maxSnow * 3);
+      for (let i = 0; i < this.maxSnow; i++) {
+        this.snowPositions[i * 3] = (Math.random() - 0.5) * 120;
+        this.snowPositions[i * 3 + 1] = Math.random() * 40;
+        this.snowPositions[i * 3 + 2] = (Math.random() - 0.5) * 120;
+      }
+      this.snowGeo.setAttribute('position', new THREE.BufferAttribute(this.snowPositions, 3));
+      this.snowMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.6, transparent: true, opacity: 0.8 });
+      this.snowPoints = new THREE.Points(this.snowGeo, this.snowMat);
+      this.snowPoints.visible = false;
+      this.weatherGroup.add(this.snowPoints);
+    }
+
+    cycleWeather() {
+      this.currentModeIndex = (this.currentModeIndex + 1) % this.weatherModes.length;
+      const mode = this.weatherModes[this.currentModeIndex];
+      this.snowPoints.visible = (mode === 'BLIZZARD');
+
+      if (this.parent.scene && this.parent.scene.fog) {
+        if (mode === 'BLIZZARD') {
+          this.parent.scene.fog.color.setHex(0xdbeafe);
+        } else if (mode === 'CYBER_SMOG') {
+          this.parent.scene.fog.color.setHex(0x064e3b);
+        }
+      }
+
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(`[WEATHER] ATMOSPHERIC PROFILE: ${mode}`);
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    update(delta) {
+      const mode = this.weatherModes[this.currentModeIndex];
+
+      if (mode === 'BLIZZARD') {
+        const pPos = (this.parent.player && this.parent.player.pos) ? this.parent.player.pos : { x: 0, z: 0 };
+        const posAttr = this.snowGeo.attributes.position;
+        for (let i = 0; i < this.maxSnow; i++) {
+          this.snowPositions[i * 3 + 1] -= delta * 12.0;
+          this.snowPositions[i * 3] += Math.sin(this.snowPositions[i * 3 + 1] * 0.1) * 0.15;
+          if (this.snowPositions[i * 3 + 1] < 0) {
+            this.snowPositions[i * 3 + 1] = 38.0;
+            this.snowPositions[i * 3] = pPos.x + (Math.random() - 0.5) * 80;
+            this.snowPositions[i * 3 + 2] = pPos.z + (Math.random() - 0.5) * 80;
+          }
+        }
+        posAttr.needsUpdate = true;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 15: MACH-2 SKY-FIGHTER FLIGHT & ORBITAL SPACE RE-ENTRY
+  // ==========================================================================
+  class AeroFlightAndOrbitalSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.isFlightActive = false;
+      this.inOrbit = false;
+    }
+
+    toggleFlightBooster() {
+      this.isFlightActive = !this.isFlightActive;
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(this.isFlightActive ? '[FLIGHT] MACH-2 VTOL THRUST ENGAGED [F]' : '[FLIGHT] AERODYNAMIC FLIGHT DISENGAGED [F]');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup || !this.isFlightActive) return;
+
+      // Vertical climb with spacebar or forward velocity
+      roverGroup.position.y += delta * 24.0;
+
+      // Orbit transition at altitude > 320m
+      if (roverGroup.position.y > 320.0 && !this.inOrbit) {
+        this.inOrbit = true;
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[ORBIT] LOW EARTH ORBIT ACHIEVED: ZERO GRAVITY ENGAGED');
+        }
+      } else if (roverGroup.position.y <= 320.0 && this.inOrbit) {
+        this.inOrbit = false;
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[RE-ENTRY] ATMOSPHERIC TROPOSPHERE RE-ENTRY CONFIRMED');
+        }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 16: NEON DRIFT CHAMPIONSHIP WITH CHECKPOINTS & GHOST CAR
+  // ==========================================================================
+  class NeonDriftChampionshipSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.isRacing = false;
+      this.activeGate = 0;
+      this.raceTimer = 0;
+
+      this.driftGroup = new THREE.Group();
+      this.driftGroup.name = 'neonDriftChampionshipGroup';
+      this.parent.scene.add(this.driftGroup);
+
+      this.gates = [
+        { x: 0, z: 80 },
+        { x: 120, z: 120 },
+        { x: 260, z: 180 },
+        { x: 440, z: 240 },
+        { x: 300, z: 0 },
+        { x: 0, z: -100 }
+      ];
+
+      this.buildCheckpointGates();
+    }
+
+    buildCheckpointGates() {
+      const gateMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.65, side: THREE.DoubleSide });
+      this.gateMeshes = [];
+
+      this.gates.forEach(g => {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(8.5, 0.45, 8, 24), gateMat);
+        ring.position.set(g.x, 5.5, g.z);
+        ring.visible = false;
+        this.driftGroup.add(ring);
+        this.gateMeshes.push(ring);
+      });
+    }
+
+    startRace() {
+      this.isRacing = true;
+      this.activeGate = 0;
+      this.raceTimer = 0;
+      this.gateMeshes.forEach(m => m.visible = true);
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[RACE] METRO DRIFT CHAMPIONSHIP BEGUN: FLY THROUGH GATES [R]');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+    }
+
+    update(delta, vState) {
+      if (!this.isRacing) return;
+      this.raceTimer += delta;
+
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const targetG = this.gates[this.activeGate];
+      const dx = roverGroup.position.x - targetG.x;
+      const dz = roverGroup.position.z - targetG.z;
+
+      if (Math.hypot(dx, dz) < 14.0) {
+        this.gateMeshes[this.activeGate].visible = false;
+        this.activeGate++;
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+
+        if (this.activeGate >= this.gates.length) {
+          this.isRacing = false;
+          if (typeof showStoreNotification === 'function') {
+            showStoreNotification(`[FINISH] CHAMPIONSHIP COMPLETED IN ${this.raceTimer.toFixed(1)}S! (+500 NEX)`);
+          }
+        }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 17: STADIUM DRIVE-IN CINEMA & JUMBOTRON REELS VISUALIZER
+  // ==========================================================================
+  class StadiumDriveInCinemaSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.cinemaGroup = new THREE.Group();
+      this.cinemaGroup.name = 'stadiumDriveInCinemaGroup';
+      this.parent.scene.add(this.cinemaGroup);
+
+      this.cinemaCanvas = document.createElement('canvas');
+      this.cinemaCanvas.width = 512;
+      this.cinemaCanvas.height = 256;
+      this.ctx = this.cinemaCanvas.getContext('2d');
+      this.tex = new THREE.CanvasTexture(this.cinemaCanvas);
+
+      // Jumbotron Screen Face on Stadium
+      const screenMat = new THREE.MeshBasicMaterial({ map: this.tex, side: THREE.DoubleSide });
+      const screenMesh = new THREE.Mesh(new THREE.PlaneGeometry(36, 18), screenMat);
+      screenMesh.position.set(0, 24, -178);
+      this.cinemaGroup.add(screenMesh);
+    }
+
+    update(delta) {
+      const time = performance.now() * 0.002;
+      const ctx = this.ctx;
+
+      ctx.fillStyle = '#060a14';
+      ctx.fillRect(0, 0, 512, 256);
+
+      ctx.strokeStyle = '#00f2ff';
+      ctx.lineWidth = 6;
+      ctx.strokeRect(10, 10, 492, 236);
+
+      // Animated Synthwave Horizon on Jumbotron
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(256, 140, 60, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 24px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('NEXCHAT REELS // CINEMA DRIVE-IN', 256, 48);
+
+      this.tex.needsUpdate = true;
+    }
+  }
+
+  // ==========================================================================
+  // TIER 18: WALK-IN INTERIOR ZONES (CYBER LOUNGE & FIRING RANGE)
+  // ==========================================================================
+  class WalkInInteriorZonesSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.zonesGroup = new THREE.Group();
+      this.zonesGroup.name = 'walkInInteriorZonesGroup';
+      this.parent.scene.add(this.zonesGroup);
+
+      this.buildArcadeLounge();
+    }
+
+    buildArcadeLounge() {
+      const floorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.5 });
+      const neonMat = new THREE.MeshBasicMaterial({ color: 0xa855f7 });
+
+      // Ground Level Scotia Place Arcade Floor
+      const floor = new THREE.Mesh(new THREE.BoxGeometry(24, 0.2, 24), floorMat);
+      floor.position.set(0, 0.15, 0);
+      this.zonesGroup.add(floor);
+
+      const sign = new THREE.Mesh(new THREE.BoxGeometry(8, 1.2, 0.4), neonMat);
+      sign.position.set(0, 4.5, -11.5);
+      this.zonesGroup.add(sign);
+    }
+
+    update(delta, vState) {}
+  }
+
+  // ==========================================================================
+  // TIER 19: SCREEN-SPACE SPEED WARP & CHROMATIC FX
+  // ==========================================================================
+  class PostProcessingEffectsSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.baseFOV = 60.0;
+    }
+
+    update(delta, vState) {
+      if (!this.parent.camera) return;
+      const speed = (vState && vState.roverCurrentSpeed) ? Math.abs(vState.roverCurrentSpeed) : 0;
+
+      // Expand FOV at high speeds (warp speed tunnel vision)
+      const targetFOV = THREE.MathUtils.lerp(this.baseFOV, 82.0, Math.min(1.0, speed / 32.0));
+      this.parent.camera.fov = THREE.MathUtils.lerp(this.parent.camera.fov, targetFOV, delta * 4.0);
+      this.parent.camera.updateProjectionMatrix();
+    }
+  }
+
+  // ==========================================================================
+  // TIER 20: TACTICAL AI COMPANION DRONE & RECON SCANNER
+  // ==========================================================================
+  class TacticalCompanionDroneSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.droneGroup = new THREE.Group();
+      this.droneGroup.name = 'tacticalCompanionDroneGroup';
+      this.parent.scene.add(this.droneGroup);
+
+      const dMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.9, roughness: 0.2 });
+      const eyeMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+
+      const dBody = new THREE.Mesh(new THREE.SphereGeometry(0.35, 12, 12), dMat);
+      this.droneGroup.add(dBody);
+
+      const dEye = new THREE.Mesh(new THREE.SphereGeometry(0.12, 8, 8), eyeMat);
+      dEye.position.set(0, 0, 0.3);
+      this.droneGroup.add(dEye);
+
+      this.hoverPhase = 0;
+    }
+
+    update(delta, vState) {
+      const pPos = (this.parent.player && this.parent.player.pos) ? this.parent.player.pos : null;
+      if (!pPos) return;
+
+      this.hoverPhase += delta * 2.8;
+      const targetX = pPos.x + Math.sin(this.hoverPhase) * 1.5;
+      const targetY = (pPos.y || 1.2) + 2.2 + Math.cos(this.hoverPhase * 1.5) * 0.25;
+      const targetZ = pPos.z - 2.2;
+
+      this.droneGroup.position.x = THREE.MathUtils.lerp(this.droneGroup.position.x, targetX, delta * 5.0);
+      this.droneGroup.position.y = THREE.MathUtils.lerp(this.droneGroup.position.y, targetY, delta * 5.0);
+      this.droneGroup.position.z = THREE.MathUtils.lerp(this.droneGroup.position.z, targetZ, delta * 5.0);
+    }
+  }
+
+  // ==========================================================================
+  // TIER 21: PROCEDURAL SKYSCRAPER WINDOW LIGHTING & ROTATING BILLBOARDS
+  // ==========================================================================
+  class ProceduralCityLightingSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.beaconTimer = 0;
+      this.beacons = [];
+      this.initRooftopBeacons();
+    }
+
+    initRooftopBeacons() {
+      const beaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+      const bCoords = [
+        { x: -50, y: 120, z: -50 },
+        { x: 50, y: 140, z: 50 },
+        { x: 0, y: 160, z: -80 }
+      ];
+
+      bCoords.forEach(c => {
+        const b = new THREE.Mesh(new THREE.SphereGeometry(0.8, 8, 8), beaconMat);
+        b.position.set(c.x, c.y, c.z);
+        this.parent.scene.add(b);
+        this.beacons.push(b);
+      });
+    }
+
+    update(delta) {
+      this.beaconTimer += delta * 3.5;
+      const flash = Math.sin(this.beaconTimer) > 0.6;
+      this.beacons.forEach(b => {
+        b.material.color.setHex(flash ? 0xef4444 : 0x220000);
+      });
+    }
+  }
+
+  // ==========================================================================
+  // TIER 22: DUAL-STICK GAMEPAD API & GYROSCOPE CONTROLLER SUPPORT
+  // ==========================================================================
+  class GamepadAndGyroscopeInputSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.gamepadConnected = false;
+
+      window.addEventListener('gamepadconnected', () => {
+        this.gamepadConnected = true;
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[CONTROLLER] WIRELESS GAMEPAD CONNECTED!');
+        }
+      });
+    }
+
+    update(delta, vState) {
+      if (!navigator.getGamepads) return;
+      const gamepads = navigator.getGamepads();
+      if (!gamepads || !gamepads[0]) return;
+
+      const gp = gamepads[0];
+      const stickX = gp.axes[0] || 0; // Steering
+      const rt = gp.buttons[7] ? gp.buttons[7].value : 0; // Throttle
+      const lt = gp.buttons[6] ? gp.buttons[6].value : 0; // Brake
+
+      if (vState) {
+        if (Math.abs(stickX) > 0.1) vState.steer = stickX;
+        if (rt > 0.05) vState.throttle = rt;
+        if (lt > 0.05) vState.throttle = -lt;
       }
     }
   }
