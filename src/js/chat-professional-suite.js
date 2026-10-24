@@ -45,6 +45,9 @@
       this.bindAttachHubActions();
       this.injectGroupAdminDrawer();
       this.injectDeliveryAuditModal();
+      this.injectSharedMediaDrawer();
+      this.injectForwardMessageModal();
+      this.initMentionAutocomplete();
       this.startMessageObserver();
       this.startTelemetryLoop();
       this.startSchedulerWorker();
@@ -413,6 +416,7 @@
         <button type="button" class="nex-dock-btn" data-action="reply-thread" title="Reply in Thread"><i class="fa-solid fa-reply"></i></button>
         <button type="button" class="nex-dock-btn" data-action="pin-msg" title="Pin Message"><i class="fa-solid fa-thumbtack"></i></button>
         <button type="button" class="nex-dock-btn" data-action="star-msg" title="Star / Bookmark"><i class="fa-solid fa-star"></i></button>
+        <button type="button" class="nex-dock-btn" data-action="forward-msg" title="Forward Message"><i class="fa-solid fa-share"></i></button>
         <button type="button" class="nex-dock-btn" data-action="copy-msg" title="Copy Text"><i class="fa-solid fa-copy"></i></button>
       `;
 
@@ -442,6 +446,11 @@
       dock.querySelector('[data-action="star-msg"]')?.addEventListener('click', (e) => {
         e.stopPropagation();
         this.toggleStarMessage(wrapper);
+      });
+
+      dock.querySelector('[data-action="forward-msg"]')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.openForwardModal(wrapper);
       });
 
       dock.querySelector('[data-action="copy-msg"]')?.addEventListener('click', (e) => {
@@ -1394,6 +1403,345 @@
             document.getElementById('auditTimeDispatched').textContent = timeVal;
             modal.classList.add('active');
           }
+        });
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       15. CONVERSATION MEDIA & SHARED FILES VAULT DRAWER
+       ------------------------------------------------------------------------ */
+    injectSharedMediaDrawer() {
+      const chatDetailView = document.getElementById('chatDetailView');
+      if (!chatDetailView || document.getElementById('nexSharedMediaDrawer')) return;
+
+      // Add button to header
+      const headerActions = document.querySelector('.chat-detail-header-actions');
+      if (headerActions && !document.getElementById('chatSharedMediaBtn')) {
+        const mediaBtn = document.createElement('button');
+        mediaBtn.type = 'button';
+        mediaBtn.id = 'chatSharedMediaBtn';
+        mediaBtn.className = 'header-icon-btn';
+        mediaBtn.title = 'Conversation Media & Vault Files';
+        mediaBtn.innerHTML = '<i class="fa-solid fa-photo-film" style="color: #00ff88;"></i>';
+        mediaBtn.addEventListener('click', () => this.openSharedMediaDrawer());
+        headerActions.prepend(mediaBtn);
+      }
+
+      const drawer = document.createElement('div');
+      drawer.id = 'nexSharedMediaDrawer';
+      drawer.className = 'nex-shared-media-drawer';
+      drawer.innerHTML = `
+        <div class="nex-shared-media-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-folder-open" style="color: #00ff88;"></i>
+            <span style="font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 700; color: #fff;">Shared Vault</span>
+          </div>
+          <button type="button" class="nex-thread-close-btn" id="nexSharedMediaCloseBtn" title="Close">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="nex-shared-media-tabs">
+          <button type="button" class="nex-media-tab-btn active" data-tab="media">Media</button>
+          <button type="button" class="nex-media-tab-btn" data-tab="docs">Docs &amp; Code</button>
+          <button type="button" class="nex-media-tab-btn" data-tab="voice">Voice Notes</button>
+          <button type="button" class="nex-media-tab-btn" data-tab="links">Links</button>
+        </div>
+        <div class="nex-shared-media-content" id="nexSharedMediaContent">
+          <!-- Populated dynamically -->
+        </div>
+      `;
+
+      chatDetailView.appendChild(drawer);
+
+      drawer.querySelector('#nexSharedMediaCloseBtn')?.addEventListener('click', () => {
+        drawer.classList.remove('open');
+      });
+
+      drawer.querySelectorAll('.nex-media-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          drawer.querySelectorAll('.nex-media-tab-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          this.renderSharedMediaTab(btn.dataset.tab);
+        });
+      });
+    }
+
+    openSharedMediaDrawer() {
+      const drawer = document.getElementById('nexSharedMediaDrawer');
+      if (!drawer) return;
+      this.renderSharedMediaTab('media');
+      drawer.classList.add('open');
+    }
+
+    renderSharedMediaTab(tabKey) {
+      const container = document.getElementById('nexSharedMediaContent');
+      if (!container) return;
+
+      const messagesArea = document.getElementById('messages-area');
+      if (!messagesArea) return;
+
+      if (tabKey === 'media') {
+        const imgs = Array.from(messagesArea.querySelectorAll('.message-bubble img:not(.header-avatar):not(.speaker-avatar)'));
+        const vids = Array.from(messagesArea.querySelectorAll('.message-bubble video'));
+        const mediaItems = [...imgs, ...vids];
+
+        if (mediaItems.length === 0) {
+          container.innerHTML = `<div style="text-align: center; color: #64748b; font-size: 12px; margin-top: 40px;">
+            <i class="fa-solid fa-image" style="font-size: 26px; opacity: 0.35; margin-bottom: 8px;"></i>
+            <div>No photos or videos shared in this conversation yet.</div>
+          </div>`;
+          return;
+        }
+
+        container.innerHTML = `<div class="nex-media-gallery-grid">${mediaItems.map(item => `
+          <div class="nex-media-grid-item" onclick="window.open('${item.src || item.querySelector('source')?.src || ''}', '_blank')">
+            <img src="${item.src || item.poster || 'logo.jpg'}" alt="Media" onerror="this.src='logo.jpg'">
+          </div>
+        `).join('')}</div>`;
+      } else if (tabKey === 'docs') {
+        const fileLinks = Array.from(messagesArea.querySelectorAll('a[download], .file-download-btn, [data-file-url]'));
+        const codeBoxes = Array.from(messagesArea.querySelectorAll('.nex-code-snippet-box'));
+
+        if (fileLinks.length === 0 && codeBoxes.length === 0) {
+          container.innerHTML = `<div style="text-align: center; color: #64748b; font-size: 12px; margin-top: 40px;">
+            <i class="fa-solid fa-file-code" style="font-size: 26px; opacity: 0.35; margin-bottom: 8px;"></i>
+            <div>No documents or code snippets shared yet.</div>
+          </div>`;
+          return;
+        }
+
+        container.innerHTML = `<div class="nex-docs-list">
+          ${codeBoxes.map(box => `
+            <div class="nex-doc-row">
+              <div class="nex-doc-left">
+                <div class="nex-doc-ext-badge"><i class="fa-solid fa-code"></i></div>
+                <div>
+                  <div class="nex-doc-name">${escapeHtml(box.querySelector('.nex-code-title')?.textContent || 'Code Snippet')}</div>
+                  <div class="nex-doc-date">Code Block &bull; ${escapeHtml(box.querySelector('.nex-code-lang-badge')?.textContent || 'CODE')}</div>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>`;
+      } else if (tabKey === 'voice') {
+        const audios = Array.from(messagesArea.querySelectorAll('audio'));
+        if (audios.length === 0) {
+          container.innerHTML = `<div style="text-align: center; color: #64748b; font-size: 12px; margin-top: 40px;">
+            <i class="fa-solid fa-microphone-lines" style="font-size: 26px; opacity: 0.35; margin-bottom: 8px;"></i>
+            <div>No voice messages shared in this conversation yet.</div>
+          </div>`;
+          return;
+        }
+        container.innerHTML = `<div class="nex-docs-list">${audios.map((a, idx) => `
+          <div class="nex-doc-row">
+            <div class="nex-doc-left">
+              <div class="nex-doc-ext-badge"><i class="fa-solid fa-waveform-lines"></i></div>
+              <div>
+                <div class="nex-doc-name">Voice Note #${idx + 1}</div>
+                <div class="nex-doc-date">Encrypted Voice Recording</div>
+              </div>
+            </div>
+            <button type="button" class="admin-btn secondary" style="padding: 4px 8px; font-size: 11px;" onclick="const a = document.querySelectorAll('#messages-area audio')[${idx}]; if(a) a.paused ? a.play() : a.pause();">
+              <i class="fa-solid fa-play"></i> Play
+            </button>
+          </div>
+        `).join('')}</div>`;
+      } else if (tabKey === 'links') {
+        const linkBoxes = Array.from(messagesArea.querySelectorAll('.nex-link-preview-box'));
+        if (linkBoxes.length === 0) {
+          container.innerHTML = `<div style="text-align: center; color: #64748b; font-size: 12px; margin-top: 40px;">
+            <i class="fa-solid fa-link" style="font-size: 26px; opacity: 0.35; margin-bottom: 8px;"></i>
+            <div>No external links shared yet.</div>
+          </div>`;
+          return;
+        }
+        container.innerHTML = `<div class="nex-docs-list">${linkBoxes.map(l => `
+          <a href="${l.href}" target="_blank" rel="noopener noreferrer" class="nex-doc-row">
+            <div class="nex-doc-left">
+              <div class="nex-doc-ext-badge"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+              <div>
+                <div class="nex-doc-name">${escapeHtml(l.querySelector('.nex-link-domain-row span')?.textContent || 'LINK')}</div>
+                <div class="nex-doc-date">${escapeHtml(l.querySelector('.nex-link-title')?.textContent || l.href)}</div>
+              </div>
+            </div>
+          </a>
+        `).join('')}</div>`;
+      }
+    }
+
+    /* ------------------------------------------------------------------------
+       16. INTERACTIVE MESSAGE FORWARDING MODAL
+       ------------------------------------------------------------------------ */
+    injectForwardMessageModal() {
+      if (document.getElementById('nexForwardMessageModal')) return;
+
+      const modal = document.createElement('div');
+      modal.id = 'nexForwardMessageModal';
+      modal.className = 'nex-prof-modal-backdrop';
+      modal.innerHTML = `
+        <div class="nex-forward-modal-window">
+          <div class="nex-prof-modal-header">
+            <div class="nex-prof-modal-title">
+              <i class="fa-solid fa-share" style="color: #00f2ff;"></i>
+              <span>Forward Message</span>
+            </div>
+            <button type="button" class="nex-thread-close-btn" id="nexForwardCloseBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div style="padding: 14px 18px 6px;">
+            <div id="nexForwardPreviewCard" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(0,242,255,0.25); border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #f1f5f9; margin-bottom: 12px; max-height: 80px; overflow-y: auto;">
+              Preview...
+            </div>
+            <input type="text" id="nexForwardSearchInput" class="nex-prof-input" placeholder="Search conversations or contacts...">
+          </div>
+          <div class="nex-forward-contacts-list" id="nexForwardContactsList">
+            <!-- Dynamic contact list -->
+          </div>
+          <div class="nex-prof-modal-footer">
+            <button type="button" class="nex-prof-btn secondary" id="nexForwardCancelBtn">Cancel</button>
+            <button type="button" class="nex-prof-btn primary" id="nexForwardConfirmBtn">
+              <i class="fa-solid fa-paper-plane" style="margin-right: 5px;"></i> Forward Now
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const close = () => modal.classList.remove('active');
+      modal.querySelector('#nexForwardCloseBtn')?.addEventListener('click', close);
+      modal.querySelector('#nexForwardCancelBtn')?.addEventListener('click', close);
+
+      modal.querySelector('#nexForwardConfirmBtn')?.addEventListener('click', () => {
+        const text = modal.dataset.forwardText;
+        const sender = modal.dataset.forwardSender || 'Contact';
+        if (!text) return;
+        const forwardHeader = `[FORWARDED FROM ${sender.toUpperCase()}]
+${text}`;
+        if (typeof window.appendLocalSentMessage === 'function') {
+          window.appendLocalSentMessage(forwardHeader);
+          this.showToast('Message forwarded');
+        }
+        close();
+      });
+    }
+
+    openForwardModal(wrapper) {
+      const modal = document.getElementById('nexForwardMessageModal');
+      if (!modal) return;
+
+      const text = wrapper.querySelector('p')?.textContent || '[Media]';
+      const sender = wrapper.classList.contains('sent') ? 'You' : (document.getElementById('chatName')?.textContent || 'Contact');
+
+      modal.dataset.forwardText = text;
+      modal.dataset.forwardSender = sender;
+      document.getElementById('nexForwardPreviewCard').textContent = text;
+
+      // Populate contacts from active chat list
+      const listContainer = document.getElementById('nexForwardContactsList');
+      if (listContainer) {
+        const contacts = Array.from(document.querySelectorAll('.chat-item, .contact-item'));
+        if (contacts.length === 0) {
+          listContainer.innerHTML = `
+            <div class="nex-forward-contact-item selected">
+              <span style="font-weight: 600; color: #fff;">Current Conversation</span>
+              <i class="fa-solid fa-check" style="color: #00f2ff;"></i>
+            </div>
+            <div class="nex-forward-contact-item">
+              <span style="font-weight: 600; color: #fff;">Saved Messages</span>
+            </div>
+          `;
+        } else {
+          listContainer.innerHTML = contacts.slice(0, 8).map((c, i) => `
+            <div class="nex-forward-contact-item ${i === 0 ? 'selected' : ''}">
+              <span style="font-weight: 600; color: #fff;">${escapeHtml(c.querySelector('.chat-item-name, .contact-name')?.textContent || 'Chat')}</span>
+              ${i === 0 ? '<i class="fa-solid fa-check" style="color: #00f2ff;"></i>' : ''}
+            </div>
+          `).join('');
+        }
+
+        listContainer.querySelectorAll('.nex-forward-contact-item').forEach(item => {
+          item.addEventListener('click', () => {
+            listContainer.querySelectorAll('.nex-forward-contact-item').forEach(it => it.classList.remove('selected'));
+            item.classList.add('selected');
+          });
+        });
+      }
+
+      modal.classList.add('active');
+    }
+
+    /* ------------------------------------------------------------------------
+       17. GROUP MEMBER MENTION AUTOCOMPLETE (@username)
+       ------------------------------------------------------------------------ */
+    initMentionAutocomplete() {
+      const input = document.getElementById('message-input');
+      if (!input || document.getElementById('nexMentionPopup')) return;
+
+      const popup = document.createElement('div');
+      popup.id = 'nexMentionPopup';
+      popup.className = 'nex-mention-popup';
+      popup.style.display = 'none';
+
+      input.parentNode.appendChild(popup);
+
+      input.addEventListener('input', () => {
+        const val = input.value;
+        const cursor = input.selectionStart;
+        const beforeCursor = val.substring(0, cursor);
+        const atMatch = beforeCursor.match(/@([a-zA-Z0-9_]*)$/);
+
+        if (atMatch) {
+          const query = atMatch[1].toLowerCase();
+          this.renderMentionCandidates(popup, query, input, atMatch.index);
+        } else {
+          popup.style.display = 'none';
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!popup.contains(e.target) && e.target !== input) {
+          popup.style.display = 'none';
+        }
+      });
+    }
+
+    renderMentionCandidates(popup, query, input, atIndex) {
+      const members = [
+        { name: 'demonalexander526', role: 'owner', badge: '<span class="nex-role-badge owner"><i class="fa-solid fa-crown"></i> OWNER</span>' },
+        { name: 'ChronEX_AI', role: 'admin', badge: '<span class="nex-role-badge admin"><i class="fa-solid fa-robot"></i> AI MOD</span>' },
+        { name: 'operator', role: 'vip', badge: '<span class="nex-role-badge vip"><i class="fa-solid fa-gem"></i> VIP</span>' },
+        { name: 'security_sentinel', role: 'moderator', badge: '<span class="nex-role-badge moderator"><i class="fa-solid fa-shield-halved"></i> SEC</span>' }
+      ];
+
+      const filtered = members.filter(m => m.name.toLowerCase().includes(query));
+      if (filtered.length === 0) {
+        popup.style.display = 'none';
+        return;
+      }
+
+      popup.innerHTML = filtered.map(m => `
+        <button type="button" class="nex-mention-item" data-username="${m.name}">
+          <div class="nex-mention-info">
+            <img src="logo.jpg" alt="${m.name}" class="nex-mention-avatar">
+            <span class="nex-mention-username">@${m.name}</span>
+          </div>
+          ${m.badge}
+        </button>
+      `).join('');
+
+      popup.style.display = 'flex';
+
+      popup.querySelectorAll('.nex-mention-item').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const uname = btn.dataset.username;
+          const before = input.value.substring(0, atIndex);
+          const after = input.value.substring(input.selectionStart);
+          input.value = `${before}@${uname} ${after}`;
+          popup.style.display = 'none';
+          input.focus();
         });
       });
     }
