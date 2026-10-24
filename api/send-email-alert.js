@@ -1,4 +1,14 @@
 import { enforceRateLimit, applySecurityHeaders } from './_security.js';
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const {
+  sendNotificationEmail,
+  createEarlyAccessEmail,
+  createPasswordResetEmail,
+  createDeviceLinkEmail,
+  createExtensionConsentEmail
+} = require('../src/js/email-dispatcher.cjs');
 
 /**
  * /api/send-email-alert - Serverless Email Dispatch Engine for Vercel
@@ -273,30 +283,30 @@ export default async function handler(req, res) {
       `;
     }
 
-    // Attempt live dispatch via Resend API if key is present
+    if (type === 'early_access_registration') {
+      subject = '[NEXCHAT] AstroShift: Beyond Earth - Early Access Reservation Confirmed';
+      emailHtml = createEarlyAccessEmail({
+        email: toEmail,
+        queueNumber: data.queueNumber || '14,893',
+        gameTitle: data.gameTitle || 'AstroShift: Beyond Earth',
+        registeredAt: timestamp
+      });
+    }
+
+    // Live dispatch via Native Gmail TLS SMTP (or Resend fallback)
     let liveDispatched = false;
     let providerReceipt = null;
 
-    if (process.env.RESEND_API_KEY) {
-      try {
-        const resendRes = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            from: process.env.RESEND_FROM || 'NEXCHAT Security <security@nexchat.io>',
-            to: [toEmail],
-            subject: subject,
-            html: emailHtml
-          })
-        });
-        providerReceipt = await resendRes.json();
-        liveDispatched = resendRes.ok;
-      } catch (liveErr) {
-        console.warn('[EMAIL ALERT] Resend provider notice:', liveErr.message);
-      }
+    try {
+      const dispatchResult = await sendNotificationEmail({
+        to: toEmail,
+        subject: subject,
+        htmlContent: emailHtml
+      });
+      liveDispatched = dispatchResult.success && dispatchResult.provider !== 'sandbox_simulator';
+      providerReceipt = dispatchResult;
+    } catch (sendErr) {
+      console.error('[EMAIL ALERT] Dispatch error:', sendErr.message);
     }
 
     console.log(`[EMAIL ALERT] Dispatched (${type}) to ${toEmail}. Live: ${liveDispatched}`);

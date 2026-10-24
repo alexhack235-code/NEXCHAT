@@ -88,7 +88,7 @@
     try {
       // 1. Check primary auth.js keys
       if (!email) {
-        email = localStorage.getItem('auth_email') || sessionStorage.getItem('auth_email') || '';
+        email = localStorage.getItem('auth_email') || sessionStorage.getItem('auth_email') || localStorage.getItem('nex_astro_early_access_email') || '';
       }
       if (!name) {
         name = localStorage.getItem('auth_username') || sessionStorage.getItem('auth_username') || localStorage.getItem('username') || '';
@@ -209,8 +209,12 @@
   }
 
   // Send email dispatch request to server
-  async function dispatchEmailAlert({ extensionId, status, extensionName, scopes }) {
-    const { email, name } = getUserDetails();
+  async function dispatchEmailAlert({ extensionId, status, extensionName, scopes, passId, token }) {
+    let { email, name } = getUserDetails();
+    const manualInput = document.getElementById('nexConsentManualEmailInput');
+    if (manualInput && manualInput.value.trim() && manualInput.value.includes('@')) {
+      email = manualInput.value.trim();
+    }
     if (!email || !email.includes('@')) {
       console.warn('[EXTENSION HUB] No authenticated user email found; skipping security email dispatch.');
       return { success: false, skipped: true, reason: 'no_user_email' };
@@ -225,10 +229,12 @@
           type: 'extension_consent',
           toEmail: email,
           data: {
-            username: name,
-            extensionName: extensionName || 'NEX-REELS (CamShot)',
+            username: name || email.split('@')[0],
+            extensionName: extensionName || 'CamShot (Vercel Extension Ecosystem)',
             extensionId: extensionId || 'nex-reels',
             status: status, // 'approved' or 'denied'
+            passId: passId,
+            token: token,
             scopes: scopes || ['read:profile', 'write:media_vault', 'sync:chat_feed', 'security:telemetry'],
             ipAddress: ip,
             clientTime: new Date().toUTCString(),
@@ -382,8 +388,11 @@
         <!-- Security Callout -->
         <div class="nex-consent-security-callout">
           <i class="fa-solid fa-envelope-shield"></i>
-          <div>
-            An automated security notification will be sent to <strong id="nexConsentSecurityEmail">${email || 'your registered sign-in email'}</strong> upon your decision.
+          <div style="flex: 1;">
+            <div>An automated security notification and Verification Pass PIN will be dispatched to:</div>
+            <div style="margin-top: 6px;">
+              <input type="email" id="nexConsentManualEmailInput" placeholder="Enter recipient email address..." value="${email || ''}" style="width: 100%; padding: 6px 12px; background: rgba(3, 7, 13, 0.92); border: 1px solid rgba(0, 242, 255, 0.45); border-radius: 6px; color: #ffffff; font-size: 12px; font-family: monospace; outline: none;">
+            </div>
           </div>
         </div>
 

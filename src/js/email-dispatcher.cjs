@@ -436,8 +436,8 @@ function createDeviceLinkEmail({ username, deviceType, browser, os, ipAddress, r
                         <img src="cid:nexchat-logo" alt="NEXCHAT Logo" width="44" height="44" style="border-radius: 12px; border: 1.5px solid #fe2c55; box-shadow: 0 0 14px rgba(254, 44, 85, 0.4); display: block;" onerror="this.src='https://raw.githubusercontent.com/alexhack235-code/NEXCHAT/main/logo.jpg'" />
                       </td>
                       <td valign="middle">
-                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(254, 44, 85, 0.15); border: 1px solid #fe2c55; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 44px; font-size: 20px;">
-                          🚨
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(254, 44, 85, 0.15); border: 1px solid #fe2c55; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 44px; font-family: monospace; font-size: 11px; font-weight: 800; color: #fe2c55;">
+                          [SEC]
                         </div>
                       </td>
                     </tr>
@@ -611,7 +611,7 @@ function createExtensionConsentEmail({ username, extensionName, extensionId, sta
   const secondaryColor = isApproved ? '#00d4ff' : '#ff758c';
   const statusBadge = isApproved ? 'ACCESS AUTHORIZED &bull; ACTIVE' : 'ACCESS DENIED &bull; BLOCKED';
   const statusText = isApproved ? 'AUTHORIZED // ACTIVE' : 'BLOCKED // FORBIDDEN';
-  const statusIcon = isApproved ? '🛡️' : '🛑';
+  const statusIcon = isApproved ? '[APPROVED]' : '[BLOCKED]';
   const headerGradient = isApproved 
     ? 'linear-gradient(135deg, rgba(6, 24, 18, 0.98), rgba(8, 22, 45, 0.95))'
     : 'linear-gradient(135deg, rgba(34, 8, 16, 0.98), rgba(20, 10, 28, 0.95))';
@@ -626,12 +626,12 @@ function createExtensionConsentEmail({ username, extensionName, extensionId, sta
     else if (scope === 'security:telemetry') scopeDesc = 'End-to-end cryptographic session telemetry';
     else scopeDesc = 'Module ecosystem integration';
 
-    const checkIcon = isApproved ? '✔' : '✖';
+    const checkIcon = isApproved ? '[OK]' : '[NO]';
     const checkColor = isApproved ? '#00f076' : '#fe2c55';
 
     return `
       <tr style="border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-        <td style="padding: 8px 0; vertical-align: top; width: 24px; color: ${checkColor}; font-weight: bold; font-size: 14px;">
+        <td style="padding: 8px 0; vertical-align: top; width: 36px; color: ${checkColor}; font-family: monospace; font-weight: bold; font-size: 11px;">
           ${checkIcon}
         </td>
         <td style="padding: 8px 0; vertical-align: top;">
@@ -774,6 +774,85 @@ function createExtensionConsentEmail({ username, extensionName, extensionId, sta
   `;
 }
 
+/**
+ * AstroShift: Beyond Earth Early Access Whitelist Confirmation Email
+ */
+function createEarlyAccessEmail({ email, queueNumber, gameTitle, registeredAt }) {
+  const publicBase = (CONFIG.APP_BASE_URL || 'https://nexchat-drab.vercel.app').replace(/\/+$/, '');
+  const hubUrl = `${publicBase}/gaminghub.html`;
+
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <title>AstroShift Early Access Reservation Confirmed</title>
+    </head>
+    <body style="margin: 0; padding: 24px 12px; background-color: #03060d; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+      <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 620px; margin: 0 auto; background-color: #070c18; border-radius: 18px; border: 1px solid rgba(0, 242, 255, 0.4); box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 242, 255, 0.15); overflow: hidden;">
+        
+        <!-- Header -->
+        <tr>
+          <td style="background: linear-gradient(135deg, rgba(6, 20, 38, 0.98), rgba(12, 19, 35, 0.95)); padding: 28px 32px; border-bottom: 1px solid rgba(0, 242, 255, 0.3);">
+            <div style="font-family: monospace; font-size: 10px; font-weight: 800; letter-spacing: 2px; color: #00f2ff; text-transform: uppercase; background: rgba(0, 242, 255, 0.12); border: 1px solid rgba(0, 242, 255, 0.4); padding: 4px 12px; border-radius: 9999px; margin-bottom: 10px; display: inline-block;">
+              EARLY ACCESS WHITELIST RESERVATION &bull; BATCH 1
+            </div>
+            <h1 style="margin: 6px 0 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
+              ASTROSHIFT <span style="color: #00f2ff;">//</span> BEYOND EARTH
+            </h1>
+            <p style="margin: 6px 0 0; color: #94a3b8; font-size: 13px;">
+              Your operative reservation has been registered in the priority launch queue.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding: 32px;">
+            <p style="margin: 0 0 16px; font-size: 14.5px; color: #f1f5f9; line-height: 1.6;">
+              Greetings Operative <strong>${email.split('@')[0]}</strong>,
+            </p>
+            <p style="margin: 0 0 20px; font-size: 14px; color: #94a3b8; line-height: 1.6;">
+              Your email <strong>${email}</strong> has been confirmed on the <strong>AstroShift: Beyond Earth</strong> closed development whitelist. You will receive an encrypted dispatch with server access keys the moment public access unlocks.
+            </p>
+
+            <!-- Priority Ticket -->
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" style="background-color: #0b1526; border: 1px solid rgba(0, 242, 255, 0.35); border-radius: 12px; margin-bottom: 24px;">
+              <tr>
+                <td style="padding: 20px; text-align: center;">
+                  <div style="font-family: monospace; font-size: 11px; color: #00f2ff; letter-spacing: 1.5px; margin-bottom: 6px;">PRIORITY QUEUE POSITION</div>
+                  <div style="font-family: monospace; font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: 2px;">
+                    #${queueNumber || '14,893'}
+                  </div>
+                  <div style="margin-top: 10px; font-size: 11.5px; color: #00ff88; font-family: monospace;">
+                    [STATUS: WHITELIST VERIFIED &bull; CLOSED DEVELOPMENT]
+                  </div>
+                </td>
+              </tr>
+            </table>
+
+            <div style="text-align: center; margin-top: 24px;">
+              <a href="${hubUrl}" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #00f2ff 0%, #0099ff 100%); color: #03070d; text-decoration: none; font-weight: 800; font-size: 13px; letter-spacing: 1px; border-radius: 8px; font-family: monospace;">
+                VISIT NEX GAMING HUB
+              </a>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background-color: #040710; padding: 20px 32px; border-top: 1px solid rgba(255, 255, 255, 0.06); text-align: center;">
+            <p style="margin: 0; font-size: 11.5px; color: #64748b;">
+              NEXCHAT Sentinel &bull; AstroShift Closed Development &bull; All Rights Reserved 2026
+            </p>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
 module.exports = {
   sendNotificationEmail,
   sendViaGmailSMTP,
@@ -781,6 +860,7 @@ module.exports = {
   createDeviceLinkEmail,
   createOfflineMessageEmail,
   createExtensionConsentEmail,
+  createEarlyAccessEmail,
   resolvePublicUrl,
   CONFIG,
 };
