@@ -7,21 +7,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
-  /* ─── Primary Brand Palette ─── */
+  /*  Primary Brand Palette  */
   --cs-gold: #E8B84B;
   --cs-gold-soft: #F2D07A;
   --cs-gold-deep: #C9972E;
   --cs-gold-glow: rgba(232, 184, 75, 0.25);
   --cs-gold-mist: rgba(232, 184, 75, 0.08);
 
-  /* ─── Cyber Neon Accents ─── */
+  /*  Cyber Neon Accents  */
   --cs-cyan: #00D2FF;
   --cs-emerald: #00FF66;
   --cs-rose: #FE2C55;
   --cs-violet: #A78BFA;
   --cs-blue: #38BDF8;
 
-  /* ─── Obsidian Dark Surfaces ─── */
+  /*  Obsidian Dark Surfaces  */
   --cs-bg-void: #050608;
   --cs-bg-deepest: #08090D;
   --cs-bg-deep: #0D0F15;
@@ -31,23 +31,23 @@
   --cs-bg-glass: rgba(14, 17, 26, 0.68);
   --cs-bg-glass-hover: rgba(22, 26, 40, 0.85);
 
-  /* ─── Borders & Dividers ─── */
+  /*  Borders & Dividers  */
   --cs-border: rgba(255, 255, 255, 0.08);
   --cs-border-hover: rgba(255, 255, 255, 0.16);
   --cs-border-gold: rgba(232, 184, 75, 0.35);
   --cs-border-cyan: rgba(0, 210, 255, 0.35);
 
-  /* ─── Typography Colors ─── */
+  /*  Typography Colors  */
   --cs-text-primary: #F8FAFC;
   --cs-text-secondary: #94A3B8;
   --cs-text-muted: #64748B;
   --cs-text-dim: #475569;
 
-  /* ─── Fonts ─── */
+  /*  Fonts  */
   --cs-font-display: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
   --cs-font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  /* ─── Radii ─── */
+  /*  Radii  */
   --cs-radius-xs: 6px;
   --cs-radius-sm: 10px;
   --cs-radius-md: 14px;
@@ -55,15 +55,15 @@
   --cs-radius-xl: 28px;
   --cs-radius-pill: 9999px;
 
-  /* ─── Transitions ─── */
+  /*  Transitions  */
   --cs-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --cs-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --cs-duration: 0.24s;
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    GLOBAL RESET & FOUNDATION
-   ══════════════════════════════════════════════════ */
+    */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -101,9 +101,9 @@ body.reels-body {
     radial-gradient(ellipse 700px 600px at 85% 85%, rgba(0, 210, 255, 0.02), transparent 70%);
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    TOP NAVIGATION HEADER — RESTRUCTURED 3-COLUMN LAYOUT
-   ══════════════════════════════════════════════════ */
+    */
 .reels-header {
   position: fixed;
   top: 0;
@@ -318,9 +318,9 @@ body.reels-body {
   transform: scale(0.97);
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    VERTICAL FULLSCREEN FEED & DESKTOP THEATER CANVAS
-   ══════════════════════════════════════════════════ */
+    */
 .reels-feed-container {
   width: 100%;
   max-width: 100%;
@@ -340,9 +340,9 @@ body.reels-body {
   display: none;
 }
 
-/* ══════════════════════════════════════════════════════════════════════
+/* 
    NEXSHOT (CAMSHOT) 3D HOLOGRAPHIC ANAMORPHIC CINE ENGINE LOADER
-   ══════════════════════════════════════════════════════════════════════ */
+    */
 .reels-loading-state {
   position: fixed;
   inset: 0;
@@ -554,9 +554,9 @@ body.reels-body {
   animation: bokehFloat3 3.8s ease-in-out infinite alternate;
 }
 
-/* ══════════════════════════════════════════════════════════════════════
+/* 
    NEXSHOT 3D ANIMATION KEYFRAMES
-   ══════════════════════════════════════════════════════════════════════ */
+    */
 @keyframes cineRigFloating3D {
   0%, 100% { transform: translateY(0px) rotateX(15deg) rotateY(0deg); }
   50% { transform: translateY(-10px) rotateX(-12deg) rotateY(15deg); }
@@ -602,9 +602,9 @@ body.reels-body {
   100% { transform: translateZ(55px) translate(36px, 42px); }
 }
 
-/* ══════════════════════════════════════════════════════════════════════
+/* 
    NEXSHOT CINE HUD TELEMETRY
-   ══════════════════════════════════════════════════════════════════════ */
+    */
 .nexshot-loader-hud {
   display: flex;
   flex-direction: column;
@@ -778,7 +778,7 @@ body.reels-body {
   to { transform: rotate(-360deg); }
 }
 
-/* ─── Reel Card (Desktop Theater Centered & Mobile Immersive) ─── */
+/*  Reel Card (Desktop Theater Centered & Mobile Immersive)  */
 .reel-card {
   width: 100%;
   max-width: 100%;
@@ -811,7 +811,7 @@ body.reels-body {
   transition: opacity 0.4s ease;
 }
 
-/* ─── Reel Stage: Centered Phone-Ratio 9:16 Video Player ─── */
+/*  Reel Stage: Centered Phone-Ratio 9:16 Video Player  */
 .reel-stage {
   position: relative;
   z-index: 10;
@@ -920,9 +920,9 @@ body.reels-body {
   transform: translate(-50%, -50%) scale(1);
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    RIGHT SIDE ACTION COLUMN — RESTRUCTURED & CLEAN
-   ══════════════════════════════════════════════════ */
+    */
 .reel-actions-column {
   position: absolute;
   right: 14px;
@@ -1078,9 +1078,9 @@ body.reels-body {
   100% { transform: translate(18px, -36px) scale(1.1); opacity: 0; }
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    BOTTOM VIDEO METADATA & INLINE COMMENT BAR
-   ══════════════════════════════════════════════════ */
+    */
 .reel-bottom-info {
   position: absolute;
   bottom: calc(max(10px, env(safe-area-inset-bottom, 0px)) + 58px);
@@ -1300,9 +1300,9 @@ body.reels-body {
   transform: scale(1.1);
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    PROGRESS SCRUBBER BAR AT BOTTOM
-   ══════════════════════════════════════════════════ */
+    */
 .reel-progress-container {
   position: absolute;
   bottom: 0;
@@ -1334,9 +1334,9 @@ body.reels-body {
   border-radius: 0 2px 2px 0;
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    DESKTOP SIDE CONTROLS (UP / DOWN CHEVRONS)
-   ══════════════════════════════════════════════════ */
+    */
 .desktop-nav-controls {
   position: fixed;
   right: 32px;
@@ -1379,9 +1379,9 @@ body.reels-body {
   display: none !important;
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    INTERACTIVE CYBER OVERLAYS (POLLS & BOUNTIES)
-   ══════════════════════════════════════════════════ */
+    */
 .camshot-poll-sticker {
   position: absolute;
   top: 32%;
@@ -1489,9 +1489,9 @@ body.reels-body {
   cursor: default;
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    HUD INDICATORS & VISUAL FILTERS RIBBON
-   ══════════════════════════════════════════════════ */
+    */
 .speed-2x-hud-badge {
   position: fixed;
   top: 76px;
@@ -1658,9 +1658,9 @@ body.reels-body {
   gap: 8px;
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    CAMSHOT CREATOR STUDIO PRO — MASSIVELY RESTRUCTURED
-   ══════════════════════════════════════════════════ */
+    */
 .reels-modal {
   position: fixed;
   inset: 0;
@@ -2539,9 +2539,9 @@ body.reels-body {
   box-shadow: 0 8px 26px rgba(0, 255, 102, 0.5);
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    COMMENTS DRAWER — MODERN BOTTOM SHEET
-   ══════════════════════════════════════════════════ */
+    */
 .reels-comments-drawer {
   position: fixed;
   inset: 0;
@@ -2751,9 +2751,9 @@ body.reels-body {
   box-shadow: 0 0 14px rgba(0, 255, 102, 0.4);
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    CREATOR PROFILE DRAWER & OTHER DRAWERS
-   ══════════════════════════════════════════════════ */
+    */
 .creator-profile-drawer,
 .sound-hub-modal,
 .chronex-ai-modal,
@@ -3097,11 +3097,11 @@ body.reels-body {
   }
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    DRAWER & MODAL INNER COMPONENTS
-   ══════════════════════════════════════════════════ */
+    */
 
-/* ─── Comments List & Items ─── */
+/*  Comments List & Items  */
 .comment-item {
   display: flex;
   align-items: flex-start;
@@ -3202,7 +3202,7 @@ body.reels-body {
   transform: scale(1.15);
 }
 
-/* ─── Share Modal Grid ─── */
+/*  Share Modal Grid  */
 .share-options-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -3265,7 +3265,7 @@ body.reels-body {
   outline: none;
 }
 
-/* ─── Sounds Library Drawer ─── */
+/*  Sounds Library Drawer  */
 .sounds-library-tabs {
   display: flex;
   gap: 8px;
@@ -3358,7 +3358,7 @@ body.reels-body {
   cursor: pointer;
 }
 
-/* ─── Profile Media Grids ─── */
+/*  Profile Media Grids  */
 .profile-grid-item {
   position: relative;
   aspect-ratio: 9 / 16;
@@ -3451,7 +3451,7 @@ body.reels-body {
   cursor: pointer;
 }
 
-/* ─── Settings Modal & Cyber Switch ─── */
+/*  Settings Modal & Cyber Switch  */
 .settings-nav-tabs {
   display: flex;
   gap: 8px;
@@ -3594,7 +3594,7 @@ body.reels-body {
   background: #050608;
 }
 
-/* ─── ChronEX AI Drawer ─── */
+/*  ChronEX AI Drawer  */
 .chronex-ai-header {
   display: flex;
   align-items: center;
@@ -3704,7 +3704,7 @@ body.reels-body {
   cursor: pointer;
 }
 
-/* ─── Tip Creator Modal ─── */
+/*  Tip Creator Modal  */
 .tip-recipient-row {
   display: flex;
   align-items: center;
@@ -3776,7 +3776,7 @@ body.reels-body {
   box-shadow: 0 4px 18px rgba(232, 184, 75, 0.4);
 }
 
-/* ─── Buttons Utility ─── */
+/*  Buttons Utility  */
 .reels-btn-primary {
   padding: 10px 20px;
   border-radius: var(--cs-radius-pill);
@@ -3801,11 +3801,11 @@ body.reels-body {
   cursor: pointer;
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    MOBILE-FIRST FEATURE STYLES (DOCK, PIP, EQ, HUD)
-   ══════════════════════════════════════════════════ */
+    */
 
-/* ─── 1. Live Equalizer Waves Inside Vinyl Disc ─── */
+/*  1. Live Equalizer Waves Inside Vinyl Disc  */
 .disc-eq-wave {
   display: flex;
   align-items: flex-end;
@@ -3848,7 +3848,7 @@ body.reels-body {
   100% { height: 12px; }
 }
 
-/* ─── 2. Floating Scrubber Time Bubble HUD ─── */
+/*  2. Floating Scrubber Time Bubble HUD  */
 .scrubber-time-bubble {
   position: fixed;
   bottom: 64px;
@@ -3872,7 +3872,7 @@ body.reels-body {
   animation: cs-fade-in 0.15s ease;
 }
 
-/* ─── 3. Mobile Floating Bottom Dock (TikTok / Instagram Native Island) ─── */
+/*  3. Mobile Floating Bottom Dock (TikTok / Instagram Native Island)  */
 .mobile-bottom-dock {
   display: none; /* Hidden on desktop */
 }
@@ -3988,7 +3988,7 @@ body.reels-body {
   }
 }
 
-/* ─── 4. Clean Screen / Zen Mode & Exit Pill ─── */
+/*  4. Clean Screen / Zen Mode & Exit Pill  */
 .exit-zen-pill {
   position: fixed;
   top: max(16px, env(safe-area-inset-top, 0px) + 12px);
@@ -4036,7 +4036,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   transition: opacity 0.3s ease, transform 0.3s ease !important;
 }
 
-/* ─── 5. Left/Right 10s Skip & Rewind Animated HUD Badges ─── */
+/*  5. Left/Right 10s Skip & Rewind Animated HUD Badges  */
 .seek-ripple-badge {
   position: fixed;
   top: 50%;
@@ -4099,7 +4099,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   }
 }
 
-/* ─── 6. Floating Volume HUD Level Indicator ─── */
+/*  6. Floating Volume HUD Level Indicator  */
 .floating-volume-hud {
   position: fixed;
   top: max(74px, env(safe-area-inset-top, 0px) + 70px);
@@ -4150,7 +4150,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-/* ─── 7. Floating Emoji Reaction Cannon & Particles ─── */
+/*  7. Floating Emoji Reaction Cannon & Particles  */
 .reaction-burst-particle {
   position: fixed;
   pointer-events: none;
@@ -4218,7 +4218,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
 }
 
-/* ─── 8. Playback Speed Selector Pill & Popover ─── */
+/*  8. Playback Speed Selector Pill & Popover  */
 .reel-speed-btn {
   width: 32px;
   height: 32px;
@@ -4286,7 +4286,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   color: var(--cs-gold);
 }
 
-/* ─── 9. Mobile Pull-to-Refresh Indicator ─── */
+/*  9. Mobile Pull-to-Refresh Indicator  */
 .pull-to-refresh-indicator {
   position: fixed;
   top: max(60px, env(safe-area-inset-top, 0px) + 54px);
@@ -4328,7 +4328,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   to { transform: rotate(360deg); }
 }
 
-/* ─── 10. Keyboard Shortcuts Guide Modal ─── */
+/*  10. Keyboard Shortcuts Guide Modal  */
 .reels-shortcuts-card {
   width: min(480px, 92vw);
   background: rgba(13, 17, 26, 0.95);
@@ -4353,7 +4353,7 @@ body.zen-mode-active .floating-create-reel-wrapper {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
 }
 
-/* ─── 11. Digital Wellbeing Sleep Reminder & Settings ─── */
+/*  11. Digital Wellbeing Sleep Reminder & Settings  */
 .sleep-reminder-card {
   width: min(380px, 92vw);
   animation: cs-pop-in 0.3s var(--cs-ease-bounce);
@@ -4380,12 +4380,12 @@ body.zen-mode-active .floating-create-reel-wrapper {
   box-shadow: 0 0 10px rgba(232, 184, 75, 0.2);
 }
 
-/* ─── 12. Share QR Code Wrapper ─── */
+/*  12. Share QR Code Wrapper  */
 .share-qr-wrapper {
   animation: cs-fade-in 0.2s ease;
 }
 
-/* ─── 13. Trending Hashtags & Topics Ribbon ─── */
+/*  13. Trending Hashtags & Topics Ribbon  */
 .trending-tags-ribbon-wrapper {
   position: fixed;
   top: 72px;
@@ -4453,7 +4453,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   pointer-events: none !important;
 }
 
-/* ─── 14. Camera Shutter Snapshot Flash ─── */
+/*  14. Camera Shutter Snapshot Flash  */
 .snapshot-flash-layer {
   position: fixed;
   inset: 0;
@@ -4478,7 +4478,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   transform: scale(1.15);
 }
 
-/* ─── 15. Live Closed Captions (Subtitles) ─── */
+/*  15. Live Closed Captions (Subtitles)  */
 .reel-cc-toggle-btn {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
@@ -4530,7 +4530,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
-/* ─── 16. Sound Hub Live Audio DSP Equalizer Pills ─── */
+/*  16. Sound Hub Live Audio DSP Equalizer Pills  */
 .sound-fx-pills {
   display: flex;
   flex-wrap: wrap;
@@ -4558,7 +4558,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   box-shadow: 0 0 12px rgba(232, 184, 75, 0.25);
 }
 
-/* ─── 17. Snapshot Shutter Flash Effect Layer ─── */
+/*  17. Snapshot Shutter Flash Effect Layer  */
 .snapshot-flash-layer {
   position: fixed;
   inset: 0;
@@ -4574,7 +4574,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   transition: none;
 }
 
-/* ─── 18. Scrubber Hover/Drag Floating Video Preview Box ─── */
+/*  18. Scrubber Hover/Drag Floating Video Preview Box  */
 .scrubber-preview-thumb-box {
   width: 90px;
   height: 120px;
@@ -4596,7 +4596,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   pointer-events: none;
 }
 
-/* ─── 19. Two-Finger Pinch-to-Zoom Reset HUD Pill ─── */
+/*  19. Two-Finger Pinch-to-Zoom Reset HUD Pill  */
 .video-zoom-reset-pill {
   position: absolute;
   top: 70px;
@@ -4626,7 +4626,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   transform: translateX(-50%) scale(1.05);
 }
 
-/* ─── 20. Reel Loop Limiter Pills ─── */
+/*  20. Reel Loop Limiter Pills  */
 .settings-loop-pill {
   padding: 6px 12px;
   border-radius: var(--cs-radius-pill);
@@ -4648,7 +4648,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   box-shadow: 0 0 10px rgba(232, 184, 75, 0.2);
 }
 
-/* ─── 21. Sound Hub Dual Balance Mixer Row ─── */
+/*  21. Sound Hub Dual Balance Mixer Row  */
 .sound-hub-balance-row {
   margin-top: 8px;
   padding: 10px 12px;
@@ -4658,11 +4658,11 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 }
 
 
-/* ══════════════════════════════════════════════════
+/* 
    22. ANTI-OVERLAP LAYOUT LAYER (final override)
    Reserves dedicated zones so header, topic ribbon,
    action rail, metadata, overlays and dock never collide.
-   ══════════════════════════════════════════════════ */
+    */
 
 /* Desktop: stage sits fully below header + topic ribbon */
 @media (min-width: 769px) {
@@ -4888,7 +4888,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   font-size: 11px;
 }
 
-/* ─── Responsive Clean Overlap Fixes (Tablet & Mobile) ─── */
+/*  Responsive Clean Overlap Fixes (Tablet & Mobile)  */
 @media (max-width: 1024px) {
   .desktop-nav-controls {
     display: none !important;
@@ -4913,7 +4913,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   }
 }
 
-/* ─── Mobile (<= 768px) ─── */
+/*  Mobile (<= 768px)  */
 @media (max-width: 768px) {
   .trending-tags-ribbon-wrapper {
     top: 60px;
@@ -4983,7 +4983,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   }
 }
 
-/* ─── Narrow phones (<= 600px): feed tabs get their own dedicated glass row ─── */
+/*  Narrow phones (<= 600px): feed tabs get their own dedicated glass row  */
 @media (max-width: 600px) {
   .reels-header {
     height: 48px !important;
@@ -5177,9 +5177,9 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   min-width: 0 !important;
 }
 
-/* ══════════════════════════════════════════════════
+/* 
    SUPER INTELLIGENCE REELS UI SUITE
-   ══════════════════════════════════════════════════ */
+    */
 
 .ai-neural-match-pill {
   display: inline-flex;
@@ -5324,12 +5324,12 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 }
 
 
-/* ══════════════════════════════════════════════════════════════════════
+/* 
    CAMSHOT PURE CSS DESIGN SYSTEM & UTILITY POLYFILL
    (Resolves all unstyled states, missing utility classes & drawer layouts)
-   ══════════════════════════════════════════════════════════════════════ */
+    */
 
-/* ─── 1. Core Flexbox & Grid Utilities ─── */
+/*  1. Core Flexbox & Grid Utilities  */
 .flex { display: flex !important; }
 .flex-col { flex-direction: column !important; }
 .flex-wrap { flex-wrap: wrap !important; }
@@ -5342,7 +5342,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 .grid { display: grid !important; }
 .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 
-/* ─── 2. Gaps & Dimensions ─── */
+/*  2. Gaps & Dimensions  */
 .gap-0\.5, .gap-0\\.5 { gap: 2px !important; }
 .gap-1 { gap: 4px !important; }
 .gap-1\.5, .gap-1\\.5 { gap: 6px !important; }
@@ -5361,7 +5361,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 .max-w-sm { max-width: 384px !important; }
 .max-w-\[190px\], .max-w-\\[190px\\] { max-width: 190px !important; }
 
-/* ─── 3. Paddings & Margins ─── */
+/*  3. Paddings & Margins  */
 .p-1 { padding: 4px !important; }
 .p-2 { padding: 8px !important; }
 .p-3 { padding: 12px !important; }
@@ -5389,7 +5389,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 .my-2 { margin-top: 8px !important; margin-bottom: 8px !important; }
 .mx-auto { margin-left: auto !important; margin-right: auto !important; }
 
-/* ─── 4. Typography & Font Sizes ─── */
+/*  4. Typography & Font Sizes  */
 .text-xs { font-size: 12px !important; line-height: 16px !important; }
 .text-sm { font-size: 14px !important; line-height: 20px !important; }
 .text-base { font-size: 16px !important; line-height: 24px !important; }
@@ -5423,7 +5423,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 .truncate { overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
 .break-words { overflow-wrap: break-word !important; }
 
-/* ─── 5. Color Palette & Accents ─── */
+/*  5. Color Palette & Accents  */
 .text-white { color: #ffffff !important; }
 .text-white\/70, .text-white\\\/70 { color: rgba(255, 255, 255, 0.7) !important; }
 .text-white\/80, .text-white\\\/80 { color: rgba(255, 255, 255, 0.8) !important; }
@@ -5448,7 +5448,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 .text-\[var\(--cs-gold-soft\)\], .text-\\[var\\(--cs-gold-soft\\)\\] { color: var(--cs-gold-soft, #f5d485) !important; }
 .accent-\[var\(--cs-gold\)\], .accent-\\[var\\(--cs-gold\\)\\] { accent-color: var(--cs-gold, #e8b84b) !important; }
 
-/* ─── 6. Borders & Backgrounds ─── */
+/*  6. Borders & Backgrounds  */
 .border { border: 1px solid rgba(255, 255, 255, 0.1) !important; }
 .border-b { border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important; }
 .border-white\/5, .border-white\\\/5 { border-color: rgba(255, 255, 255, 0.05) !important; }
@@ -5474,7 +5474,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 .bg-zinc-950\/95, .bg-zinc-950\\\/95 { background-color: rgba(9, 9, 11, 0.95) !important; }
 .bg-gradient-to-tr { background-image: linear-gradient(to top right, #030712, #18181b, #000000) !important; }
 
-/* ─── 7. Interactive & Glassmorphism States ─── */
+/*  7. Interactive & Glassmorphism States  */
 .backdrop-blur-md { backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
 .backdrop-blur-2xl { backdrop-filter: blur(40px) !important; -webkit-backdrop-filter: blur(40px) !important; }
 .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75) !important; }
@@ -5507,7 +5507,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 .drop-shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.9\)\], .drop-shadow-\\[0_1px_3px_rgba\\(0\\,0\\,0\\,0\\.9\\)\\] { filter: drop-shadow(0 1px 3px rgba(0,0,0,0.9)) !important; }
 .drop-shadow-\[0_2px_6px_rgba\(0\,0\,0\,0\.9\)\], .drop-shadow-\\[0_2px_6px_rgba\\(0\\,0\\,0\\,0\\.9\\)\\] { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9)) !important; }
 
-/* ─── 8. Floating Create Reel Button ─── */
+/*  8. Floating Create Reel Button  */
 .floating-create-reel-wrapper {
   position: fixed;
   bottom: 24px;
@@ -5552,7 +5552,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   letter-spacing: 1px;
 }
 
-/* ─── 9. Scrubber Time Row & Pull-to-Refresh Text ─── */
+/*  9. Scrubber Time Row & Pull-to-Refresh Text  */
 .scrubber-time-row {
   display: flex;
   align-items: center;
@@ -5576,7 +5576,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   margin-left: 4px;
 }
 
-/* ─── 10. Sound Hub Modal & Drawer ─── */
+/*  10. Sound Hub Modal & Drawer  */
 .sound-hub-modal {
   position: fixed;
   inset: 0;
@@ -5814,7 +5814,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   cursor: pointer;
 }
 
-/* ─── 11. ChronEX AI Intelligence Modal ─── */
+/*  11. ChronEX AI Intelligence Modal  */
 .chronex-ai-body {
   display: flex;
   flex-direction: column;
@@ -5860,7 +5860,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   margin-top: 6px;
 }
 
-/* ─── 12. Tip Creator Token Modal ─── */
+/*  12. Tip Creator Token Modal  */
 .tip-creator-body {
   display: flex;
   flex-direction: column;
@@ -5885,7 +5885,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   z-index: 10000;
 }
 
-/* ─── 13. Settings & Avatar Customization Mode ─── */
+/*  13. Settings & Avatar Customization Mode  */
 .settings-tab-content {
   display: flex;
   flex-direction: column;
@@ -6125,7 +6125,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   padding-top: 16px;
 }
 
-/* ─── 14. Keyboard Shortcuts Modal ─── */
+/*  14. Keyboard Shortcuts Modal  */
 .reels-modal-overlay {
   position: fixed;
   inset: 0;
@@ -6183,7 +6183,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   font-weight: 700;
 }
 
-/* ─── 15. Sleep Reminder Modal ─── */
+/*  15. Sleep Reminder Modal  */
 .sleep-reminder-card {
   width: 100%;
   max-width: 380px;
@@ -6195,7 +6195,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   text-align: center;
 }
 
-/* ─── 16. Video Shaders & Visual Filter FX ─── */
+/*  16. Video Shaders & Visual Filter FX  */
 .reel-video.video-shader-matrix {
   filter: hue-rotate(90deg) contrast(1.4) saturate(1.8) drop-shadow(0 0 8px rgba(0, 255, 102, 0.35));
 }
@@ -6212,7 +6212,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   filter: grayscale(1) contrast(1.4) brightness(0.9);
 }
 
-/* ─── 17. Playback Speed Popover & Voted Stickers ─── */
+/*  17. Playback Speed Popover & Voted Stickers  */
 .reel-speed-wrapper {
   position: relative;
 }
@@ -6281,7 +6281,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   color: #94a3b8;
 }
 
-/* ─── 18. Profile Grids & Media Lightbox ─── */
+/*  18. Profile Grids & Media Lightbox  */
 .profile-avatar-badge {
   position: absolute;
   bottom: 2px;
@@ -6433,7 +6433,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   text-align: center;
 }
 
-/* ─── 19. Comments Badges & Studio Form Details ─── */
+/*  19. Comments Badges & Studio Form Details  */
 .comment-creator-badge {
   background: rgba(232, 184, 75, 0.15);
   border: 1px solid var(--cs-gold, #e8b84b);
@@ -6527,7 +6527,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 }
 
 
-/* ─── 20. Exact Escaped Selectors for HTML & JS Class Names ─── */
+/*  20. Exact Escaped Selectors for HTML & JS Class Names  */
 .create-btn-accent-cyan {
   position: absolute;
   inset: -1px;
@@ -6621,7 +6621,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 .drop-shadow-\[0_1px_3px_rgba\(0\,0\,0\,0\.9\)\] { filter: drop-shadow(0 1px 3px rgba(0,0,0,0.9)) !important; }
 .drop-shadow-\[0_2px_6px_rgba\(0\,0\,0\,0\.9\)\] { filter: drop-shadow(0 2px 6px rgba(0,0,0,0.9)) !important; }
 
-/* ─── 21. Deluxe Double-Tap Heart Burst & Particle Dispersion ─── */
+/*  21. Deluxe Double-Tap Heart Burst & Particle Dispersion  */
 .heart-burst-deluxe {
   position: fixed;
   pointer-events: none;
@@ -6852,9 +6852,9 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 }
 
 
-/* ══════════════════════════════════════════════════════════════════════════
+/* 
    CAMSHOT ZERO-TEXT-OVERLAY ENFORCEMENT & 3-DOT MORE ACTIONS LUXURY SHEET
-   ══════════════════════════════════════════════════════════════════════════ */
+    */
 
 /* 1. Strictly Eliminate All Unwanted Text Overlays on Video & Creator HUD */
 .neon-karaoke-stream,
