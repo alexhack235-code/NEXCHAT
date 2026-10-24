@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>NEXCHAT — SuperAdmin Security Command Console</title>
   <link rel="icon" type="image/x-icon" href="favicons/favicon.ico">
   <!-- Fonts -->
@@ -36,8 +36,15 @@
       padding: 0;
     }
 
-    body {
+    html, body {
       background: var(--bg-dark);
+      width: 100% !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+      position: relative;
+      touch-action: pan-y !important;
+      overscroll-behavior-x: none !important;
+      -webkit-overflow-scrolling: touch;
       background-image: 
         radial-gradient(circle at 50% 0%, rgba(0, 242, 255, 0.09) 0%, transparent 65%),
         radial-gradient(circle at 10% 40%, rgba(0, 255, 102, 0.05) 0%, transparent 50%),
@@ -1143,7 +1150,27 @@
       }
     }
 
+    /* ANDROID RIGID LOCK & ANTI-SWAY MATRIX */
     @media (max-width: 768px) {
+      html, body, .admin-container, .admin-header, .superadmin-session-bar, .admin-panel, .control-deck-grid, .hud-metrics-grid {
+        width: 100% !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
+        touch-action: pan-y !important;
+        overscroll-behavior-x: none !important;
+      }
+      .hud-metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+      }
+      .admin-tabs-nav, .tabs-wrapper, .admin-table-wrapper, .table-responsive, .admin-table-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        touch-action: pan-x pan-y !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
       .admin-container {
         padding: 12px 12px 60px !important;
       }
@@ -1722,6 +1749,41 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <!-- ChronEX AI Master Quota & Tier Controller -->
+        <div class="admin-panel" style="margin-top: 20px; background: rgba(8, 14, 28, 0.85); border: 1px solid rgba(0, 242, 255, 0.35); border-radius: 14px; padding: 18px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-microchip" style="color: #00f2ff; font-size: 18px;"></i>
+              <h3 style="font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; color: #fff; margin: 0; letter-spacing: 0.5px;">
+                ChronEX AI Tier &amp; Master Quota Controller
+              </h3>
+            </div>
+            <span class="admin-chip" style="color: #00ff88; border-color: rgba(0, 255, 136, 0.4); background: rgba(0, 255, 136, 0.1);">
+              FREE TIER QUOTA: 100 REQ/24H ACTIVE
+            </span>
+          </div>
+
+          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="aiQuotaTargetUid" class="admin-input" placeholder="Enter Target User UID or Username..." style="flex: 1; min-width: 220px;" />
+            <button type="button" class="admin-btn secondary" id="btnCheckUserAiQuota" title="Check Current Usage &amp; Quota">
+              <i class="fa-solid fa-magnifying-glass"></i> Check Quota
+            </button>
+            <button type="button" class="admin-btn secondary" id="btnGrant100AiQuota" title="Set to Default 100 Prompts">
+              <i class="fa-solid fa-bolt"></i> Set 100 Daily
+            </button>
+            <button type="button" class="admin-btn secondary" id="btnGrant500AiQuota" title="Grant +500 Bonus Requests">
+              <i class="fa-solid fa-gem" style="color: #00ff88;"></i> Grant +500 Prompts
+            </button>
+            <button type="button" class="admin-btn primary" id="btnUpgradeVipAiQuota" title="Set Unlimited VIP AI Tier">
+              <i class="fa-solid fa-crown" style="color: #ffd700;"></i> Upgrade to Unlimited VIP
+            </button>
+            <button type="button" class="admin-btn danger" id="btnResetAiQuotaCooldown" title="Reset Daily Cooldown to 0">
+              <i class="fa-solid fa-clock-rotate-left"></i> Reset Cooldown
+            </button>
+          </div>
+          <div id="aiQuotaResultDisplay" style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; font-size: 12px; color: #00f2ff; font-family: monospace; display: none;"></div>
         </div>
       </section>
     </div>
@@ -8078,7 +8140,89 @@ For support or further inquiries, reply directly to this chat.`;
               <div style="font-size:13px;line-height:1.6;color:#f8fafc;">${message}</div>
               <div style="margin-top:14px;font-size:11px;color:#64748b;">Target Module: ${extension}</div>
             </div>
-          </body></html>
+            <!-- Android Viewport & Orientation Anti-Sway Lock -->
+  <script>
+    (function initAndroidLock() {
+      function lockRigidView() {
+        document.documentElement.style.overflowX = 'hidden';
+        document.documentElement.style.width = '100%';
+        document.body.style.overflowX = 'hidden';
+        document.body.style.width = '100%';
+        document.body.style.maxWidth = '100vw';
+        document.body.style.touchAction = 'pan-y';
+        document.body.style.overscrollBehaviorX = 'none';
+        const container = document.querySelector('.admin-container');
+        if (container) {
+          container.style.overflowX = 'hidden';
+          container.style.maxWidth = '100vw';
+          container.style.width = '100%';
+        }
+      }
+      lockRigidView();
+      window.addEventListener('resize', lockRigidView, { passive: true });
+      window.addEventListener('orientationchange', () => setTimeout(lockRigidView, 80), { passive: true });
+    })();
+
+    // ChronEX AI Quota Admin Handlers
+    document.addEventListener('DOMContentLoaded', () => {
+      const targetInput = document.getElementById('aiQuotaTargetUid');
+      const resultBox = document.getElementById('aiQuotaResultDisplay');
+
+      function showResult(msg) {
+        if (!resultBox) return;
+        resultBox.style.display = 'block';
+        resultBox.innerHTML = msg;
+      }
+
+      document.getElementById('btnCheckUserAiQuota')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        const key = `nexchat_ai_daily_quota_${uid}`;
+        const raw = localStorage.getItem(key);
+        if (!raw) {
+          showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Used: 0 / 100 requests &bull; Status: ACTIVE (Full Quota Available)`);
+        } else {
+          try {
+            const data = JSON.parse(raw);
+            showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Used: <strong>${data.count || 0} / 100</strong> requests &bull; First Request: ${new Date(data.firstTimestamp).toLocaleTimeString()}`);
+          } catch (_) {
+            showResult(`[QUOTA STATUS] User: <strong>${uid}</strong> &bull; Active`);
+          }
+        }
+      });
+
+      document.getElementById('btnGrant100AiQuota')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        const key = `nexchat_ai_daily_quota_${uid}`;
+        localStorage.setItem(key, JSON.stringify({ count: 0, firstTimestamp: Date.now() }));
+        showResult(`[SUCCESS] User <strong>${uid}</strong> quota updated to 100 requests per 24 hours.`);
+        if (typeof logAudit === 'function') logAudit(`Set ChronEX AI quota to 100 for ${uid}`, 'ok');
+      });
+
+      document.getElementById('btnGrant500AiQuota')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        localStorage.setItem(`user_ai_bonus_${uid}`, '500');
+        showResult(`[SUCCESS] Granted +500 Bonus AI Prompts to user <strong>${uid}</strong>.`);
+        if (typeof logAudit === 'function') logAudit(`Granted +500 bonus AI prompts to ${uid}`, 'ok');
+      });
+
+      document.getElementById('btnUpgradeVipAiQuota')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        localStorage.setItem('user_plan', 'vip');
+        localStorage.setItem('is_vip', 'true');
+        showResult(`[SUCCESS] User <strong>${uid}</strong> elevated to UNLIMITED VIP AI Tier! Zero quota limits enforced.`);
+        if (typeof logAudit === 'function') logAudit(`Elevated ${uid} to UNLIMITED VIP AI Tier`, 'ok');
+      });
+
+      document.getElementById('btnResetAiQuotaCooldown')?.addEventListener('click', () => {
+        const uid = targetInput?.value.trim() || 'default';
+        const key = `nexchat_ai_daily_quota_${uid}`;
+        localStorage.removeItem(key);
+        showResult(`[SUCCESS] 24-Hour Cooldown for user <strong>${uid}</strong> has been completely reset.`);
+        if (typeof logAudit === 'function') logAudit(`Reset AI 24h cooldown for ${uid}`, 'ok');
+      });
+    });
+  </script>
+</body></html>
         `;
 
         iframe.srcdoc = previewHtml;

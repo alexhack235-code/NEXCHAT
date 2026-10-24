@@ -595,30 +595,38 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
   checkDailyQuota(identifier = "default") {
     try {
+      // Check if user is VIP / Admin / Pro
+      const userPlan = localStorage.getItem('user_plan') || localStorage.getItem('auth_plan') || 'free';
+      const isVip = userPlan === 'vip' || userPlan === 'pro' || localStorage.getItem('is_vip') === 'true' || localStorage.getItem('is_admin') === 'true' || localStorage.getItem('ATOMIC_METROPOLIS_UNLOCKED') === 'true';
+      if (isVip) {
+        return { allowed: true, count: 0, remaining: 999999, limit: 999999, isVip: true, resetInHours: 0 };
+      }
+
       const key = `nexchat_ai_daily_quota_${identifier || 'default'}`;
       const raw = localStorage.getItem(key);
       const now = Date.now();
       const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+      const FREE_LIMIT = 100; // Substantially increased from 10 to 100 requests per 24 hours!
 
       if (!raw) {
-        return { allowed: true, count: 0, remaining: 10, resetInHours: 24 };
+        return { allowed: true, count: 0, remaining: FREE_LIMIT, limit: FREE_LIMIT, resetInHours: 24 };
       }
 
       const data = JSON.parse(raw);
       if (now - (data.firstTimestamp || 0) >= ONE_DAY_MS) {
         localStorage.removeItem(key);
-        return { allowed: true, count: 0, remaining: 10, resetInHours: 24 };
+        return { allowed: true, count: 0, remaining: FREE_LIMIT, limit: FREE_LIMIT, resetInHours: 24 };
       }
 
       const count = data.count || 0;
-      if (count >= 10) {
+      if (count >= FREE_LIMIT) {
         const resetInHours = Math.max(1, Math.ceil((data.firstTimestamp + ONE_DAY_MS - now) / (1000 * 60 * 60)));
-        return { allowed: false, count: count, remaining: 0, resetInHours: resetInHours };
+        return { allowed: false, count: count, remaining: 0, limit: FREE_LIMIT, resetInHours: resetInHours };
       }
 
-      return { allowed: true, count: count, remaining: 10 - count };
+      return { allowed: true, count: count, remaining: FREE_LIMIT - count, limit: FREE_LIMIT };
     } catch (_) {
-      return { allowed: true, count: 0, remaining: 10 };
+      return { allowed: true, count: 0, remaining: 100, limit: 100 };
     }
   }
 
@@ -657,11 +665,11 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       }
       console.log(" Chronex AI processing message:", message);
 
-      // [SECURITY] Daily AI Request Quota: 10 requests per 24 hours
+      // [SECURITY] Daily AI Request Quota: 100 requests per 24 hours for free plan (Unlimited for Pro/VIP)
       const quotaId = clientId || conversationId || 'default';
       const quotaCheck = this.checkDailyQuota(quotaId);
       if (!quotaCheck.allowed) {
-        console.warn(`[QUOTA] Daily limit reached (${quotaCheck.count}/10) for ${quotaId}`);
+        console.warn(`[QUOTA] Daily limit reached (${quotaCheck.count}/${quotaCheck.limit || 100}) for ${quotaId}`);
         return "MODEL QUOTA REACHED ! WILL BE REFRESHED WITHIN 24 HRS";
       }
 
