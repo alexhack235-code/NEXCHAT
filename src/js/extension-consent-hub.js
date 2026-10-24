@@ -336,9 +336,9 @@
 
         <!-- Consent Header -->
         <div class="nex-consent-header-text">
-          <h2 class="nex-consent-title" id="nexConsentTitle">Do you want NEXCHAT to access CamShot (Vercel Extension Ecosystem)?</h2>
-          <p class="nex-consent-subtitle">
-            <strong>NEX-REELS (CamShot Pro)</strong> by <span style="color: #00d4ff;">NEXO-TECH</span> wants to link with your account <strong id="nexConsentUserEmail">${email || 'your account'}</strong>.
+          <h2 class="nex-consent-title" id="nexConsentTitle">ALLOW CAMSHOT TO ACCESS NEXCHAT</h2>
+          <p class="nex-consent-subtitle" id="nexConsentSubtitle">
+            <strong>CamShot Pro</strong> requests authorization to link with your NEXCHAT account <strong id="nexConsentUserEmail">${email || 'your account'}</strong>.
           </p>
         </div>
 
@@ -543,6 +543,7 @@
     if (!isApproved) {
       denyBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Blocking...`;
       setExtensionStatus('nex-reels', 'denied');
+      updateCamshotHeaderPill('denied');
       await dispatchEmailAlert({
         extensionId: 'nex-reels',
         status: 'denied',
@@ -660,6 +661,7 @@
         closeConsentModal();
         renderExtensionCards();
         checkReelsDeniedBanner();
+        updateCamshotHeaderPill('approved');
 
         showToast(`<strong>Verification Pass Confirmed!</strong> CamShot Pro is fully unlocked.`, false);
 
@@ -714,11 +716,36 @@
     const securityEmailEl = document.getElementById('nexConsentSecurityEmail');
 
     if (targetName) targetName.textContent = ext.name.split(' ')[0];
-    if (title) title.textContent = `Do you want NEXCHAT to access ${ext.name} (Vercel Extension Ecosystem)?`;
+    if (title) {
+      title.textContent = (targetExtensionId === 'nex-reels')
+        ? 'ALLOW CAMSHOT TO ACCESS NEXCHAT'
+        : `ALLOW ${ext.name.toUpperCase()} TO ACCESS NEXCHAT`;
+    }
+    const subtitle = document.getElementById('nexConsentSubtitle');
+    if (subtitle) {
+      subtitle.innerHTML = (targetExtensionId === 'nex-reels')
+        ? `<strong>CamShot Pro</strong> requests authorization to link with your NEXCHAT account <strong id="nexConsentUserEmail">${email || 'your account'}</strong>.`
+        : `<strong>${ext.name}</strong> requests authorization to link with your NEXCHAT account <strong id="nexConsentUserEmail">${email || 'your account'}</strong>.`;
+    }
     if (userEmailEl) userEmailEl.textContent = email || 'your signed-in account';
     if (securityEmailEl) securityEmailEl.textContent = email || 'your signed-in email address';
 
     document.getElementById('nexConsentModal').classList.add('active');
+  }
+
+  // Update CamShot Header Pill
+  function updateCamshotHeaderPill(status) {
+    const pill = document.getElementById('camshotAllowAccessBtn');
+    if (!pill) return;
+    if (status === 'approved') {
+      pill.className = 'camshot-permission-pill approved';
+      pill.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #00ff88;"></i> <span>NEXCHAT SYNCED</span>';
+      pill.title = 'CamShot is authorized and synchronized with NEXCHAT';
+    } else {
+      pill.className = 'camshot-permission-pill pending';
+      pill.innerHTML = '<i class="fa-solid fa-shield-halved" style="color: #00f2ff;"></i> <span>ALLOW CAMSHOT TO ACCESS NEXCHAT</span>';
+      pill.title = 'Click to allow CamShot to access your NEXCHAT profile and media vault';
+    }
   }
 
   // Close Consent Modal
@@ -732,24 +759,33 @@
     injectDom();
     checkReelsDeniedBanner();
 
+    const isReelsPage = window.location.pathname.includes('reels.html') || window.location.href.includes('reels');
+    const reelsStatus = localStorage.getItem('nex_ext_reels_status');
+
+    // On CAMSHOT (reels.html): update button state and IMMEDIATELY prompt if not approved
+    if (isReelsPage) {
+      updateCamshotHeaderPill(reelsStatus);
+      if (reelsStatus !== 'approved') {
+        setTimeout(() => openConsentModal('nex-reels'), 60);
+      }
+      return;
+    }
+
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('manage_extensions') || urlParams.get('action') === 'manage_extensions') {
       setTimeout(openExtensionHub, 600);
       return;
     }
     if (urlParams.has('authorize_reels')) {
-      setTimeout(() => openConsentModal('nex-reels'), 600);
+      setTimeout(() => openConsentModal('nex-reels'), 200);
       return;
     }
 
     // For new users who haven't made a decision yet:
-    // When visiting chat.html or index.html or reels.html, prompt after brief delay
-    const reelsStatus = localStorage.getItem('nex_ext_reels_status');
+    // When visiting chat.html or index.html, prompt after brief delay
     if (reelsStatus === null) {
-      // Delay so initial interface render is pristine
       const delay = 400; // Primary first popup screen for new users
       setTimeout(() => {
-        // Double check not already open or decided
         const alreadyDecided = localStorage.getItem('nex_ext_reels_status');
         if (alreadyDecided === null) {
           openConsentModal('nex-reels');

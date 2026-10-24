@@ -582,3 +582,247 @@ body {
     padding: 24px 20px;
   }
 }
+
+
+/* ============================================================
+   GAMING HUB LOCKED & EARLY ACCESS EMAIL REGISTRATION STYLES
+   ============================================================ */
+
+.astro-head-tag-banner.locked-state {
+  border-color: rgba(255, 183, 0, 0.45);
+  background: linear-gradient(90deg, rgba(255, 183, 0, 0.12), rgba(3, 7, 13, 0.95), rgba(255, 183, 0, 0.12));
+}
+
+.astro-head-tag-pulse.locked {
+  background: #ffb700;
+  box-shadow: 0 0 10px #ffb700;
+}
+
+.astro-head-tag-chip.locked {
+  background: rgba(255, 183, 0, 0.2);
+  border-color: rgba(255, 183, 0, 0.5);
+  color: #ffb700;
+}
+
+/* Early Access Registration Box */
+.early-access-registration-box {
+  margin: 24px 0 20px 0;
+  background: linear-gradient(180deg, rgba(13, 24, 40, 0.95) 0%, rgba(6, 12, 22, 0.98) 100%);
+  border: 1px solid rgba(0, 242, 255, 0.35);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 24px rgba(0, 242, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.early-access-registration-box.glow-flash {
+  border-color: #00f2ff;
+  box-shadow: 0 0 28px rgba(0, 242, 255, 0.4), inset 0 0 24px rgba(0, 242, 255, 0.15);
+  transform: scale(1.01);
+}
+
+.ea-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.ea-lock-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-orbitron);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #ffb700;
+  background: rgba(255, 183, 0, 0.12);
+  border: 1px solid rgba(255, 183, 0, 0.35);
+  padding: 4px 12px;
+  border-radius: 9999px;
+}
+
+.ea-whitelist-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-orbitron);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--neon-cyan);
+  background: rgba(0, 242, 255, 0.1);
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  padding: 4px 12px;
+  border-radius: 9999px;
+}
+
+.ea-box-title {
+  font-family: var(--font-orbitron);
+  font-size: 18px;
+  letter-spacing: 1.5px;
+  color: #ffffff;
+  margin-bottom: 8px;
+}
+
+.ea-box-desc {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-bottom: 18px;
+}
+
+.ea-form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ea-input-wrapper {
+  flex: 1;
+  min-width: 260px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.ea-input-wrapper i {
+  position: absolute;
+  left: 14px;
+  color: var(--neon-cyan);
+  font-size: 15px;
+  pointer-events: none;
+}
+
+.ea-input-wrapper input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  background: rgba(3, 7, 13, 0.85);
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  border-radius: 10px;
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.ea-input-wrapper input:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 14px rgba(0, 242, 255, 0.35);
+  background: rgba(5, 12, 24, 0.95);
+}
+
+.ea-submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #00f2ff 0%, #0099ff 100%);
+  border: none;
+  border-radius: 10px;
+  color: #03070d;
+  font-family: var(--font-orbitron);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.22s ease;
+  white-space: nowrap;
+}
+
+.ea-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 242, 255, 0.45);
+}
+
+/* Confirmed Card */
+.ea-confirmed-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.ea-confirmed-icon i {
+  color: #00ff88;
+  font-size: 32px;
+}
+
+.ea-confirmed-info h4 {
+  font-family: var(--font-orbitron);
+  font-size: 15px;
+  letter-spacing: 1px;
+  color: #00ff88;
+  margin-bottom: 4px;
+}
+
+.ea-confirmed-info p {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: #d1fae5;
+  margin-bottom: 6px;
+}
+
+.ea-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-orbitron);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: #00ff88;
+}
+
+.ea-dot {
+  width: 6px;
+  height: 6px;
+  background: #00ff88;
+  border-radius: 50%;
+  box-shadow: 0 0 6px #00ff88;
+}
+
+/* Footer Stats */
+.ea-footer-stats {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ea-stat-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-rajdhani);
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.ea-stat-item i {
+  color: var(--neon-cyan);
+}
+
+/* Locked Button States */
+.btn-launch-astro.locked-btn {
+  background: linear-gradient(135deg, rgba(255, 183, 0, 0.2) 0%, rgba(200, 100, 0, 0.25) 100%);
+  border: 1px solid rgba(255, 183, 0, 0.55);
+  color: #ffb700;
+  box-shadow: 0 4px 18px rgba(255, 183, 0, 0.2);
+  cursor: pointer;
+}
+
+.btn-launch-astro.locked-btn:hover {
+  background: linear-gradient(135deg, rgba(255, 183, 0, 0.32) 0%, rgba(200, 100, 0, 0.4) 100%);
+  border-color: #ffb700;
+  box-shadow: 0 6px 24px rgba(255, 183, 0, 0.4);
+  transform: translateY(-2px);
+}

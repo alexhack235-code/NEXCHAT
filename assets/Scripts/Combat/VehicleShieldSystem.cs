@@ -77,6 +77,11 @@ namespace AstroShift.Combat
         {
             lastDamageTime = Time.time;
 
+            if (Audio.ProceduralAudioSynth.Instance != null)
+            {
+                Audio.ProceduralAudioSynth.Instance.PlayShieldImpactAt(hitPoint);
+            }
+
             if (currentShield > 0f)
             {
                 currentShield -= amount;

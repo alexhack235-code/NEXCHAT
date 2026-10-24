@@ -62,6 +62,11 @@ namespace AstroShift.Environment
         {
             isDestroyed = true;
 
+            if (Audio.ProceduralAudioSynth.Instance != null)
+            {
+                Audio.ProceduralAudioSynth.Instance.PlayExplosionAt(transform.position);
+            }
+
             // Visual explosion flash
             GameObject explosion = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             explosion.name = "Drone_Explosion_Flash";

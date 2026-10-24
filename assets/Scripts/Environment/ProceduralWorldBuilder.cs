@@ -92,6 +92,24 @@ namespace AstroShift.Environment
             // 8. Airspace Combat Target Sentry Drones
             BuildTargetSentryDrones();
 
+            // 9. Procedural Audio Synthesizer Engine
+            if (Object.FindAnyObjectByType<Audio.ProceduralAudioSynth>() == null)
+            {
+                GameObject audioRoot = new GameObject("Procedural_Audio_Synth_Engine");
+                audioRoot.transform.parent = transform;
+                audioRoot.AddComponent<Audio.ProceduralAudioSynth>();
+            }
+
+            // 10. Autonomous Metropolis Cyber Traffic System
+            GameObject trafficRoot = new GameObject("Autonomous_Cyber_Traffic_System");
+            trafficRoot.transform.parent = transform;
+            trafficRoot.AddComponent<ProceduralTrafficSystem>();
+
+            // 11. Celestial 24-Hour Day/Night Lighting Cycle
+            GameObject celestialCycle = new GameObject("Celestial_DayNight_Cycle");
+            celestialCycle.transform.parent = transform;
+            celestialCycle.AddComponent<CelestialDayNightCycle>();
+
             Debug.Log("[AstroShift] Complete World Built Successfully!");
         }
 

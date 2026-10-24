@@ -3419,9 +3419,15 @@
 
       <div style="margin: 4px 0;">
         <h1 class="launch-main-title">AstroShift: Beyond Earth</h1>
+        <div style="display: flex; align-items: center; gap: 8px; background: rgba(255, 183, 0, 0.12); border: 1px solid rgba(255, 183, 0, 0.45); padding: 8px 14px; border-radius: 8px; margin: 8px 0; color: #ffb700; font-family: 'Orbitron', sans-serif; font-size: 11px; letter-spacing: 0.5px;">
+          <i class="fa-solid fa-lock"></i> GAMING HUB LOCKED &bull; CLOSED DEVELOPMENT &bull; EARLY ACCESS EMAIL REGISTRATION ONLY
+        </div>
         <p class="launch-sub-desc">
-          Enter operative credentials to deploy into Central Metropolis, Orbital Stargates, and the SpaceX Starship.
+          AstroShift: Beyond Earth is in closed early operative development. Register your email in the Gaming Hub to join the priority early access queue.
         </p>
+        <a href="gaminghub.html" style="display: flex; align-items: center; justify-content: center; gap: 8px; background: rgba(0, 242, 255, 0.15); border: 1px solid #00f2ff; color: #00f2ff; text-decoration: none; padding: 10px 16px; border-radius: 8px; font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 700; margin: 6px 0 10px 0; transition: all 0.2s ease;">
+          <i class="fa-solid fa-envelope"></i> REGISTER EMAIL IN GAMING HUB FOR EARLY ACCESS
+        </a>
       </div>
 
       <!-- Operative Callsign Box -->
@@ -6590,6 +6596,17 @@
     }
 
     function bypassLaunchLock() {
+      const keyInput = document.getElementById('launch-access-key');
+      const enteredKey = keyInput ? keyInput.value.trim() : '';
+      const isDevKey = (enteredKey === 'ASTRO-2026-NEX' || enteredKey === 'IAMATOMICDEVELOPER18@$#');
+      const isRegistered = (localStorage.getItem('nex_astro_early_access_registered') === 'true');
+
+      if (!isRegistered && !isDevKey) {
+        alert('[GAMING HUB LOCKED // EARLY ACCESS ONLY]\n\nAstroShift: Beyond Earth is currently locked in closed early development.\n\nPlease visit the Gaming Hub to register your email down early on the priority whitelist!');
+        window.location.href = 'gaminghub.html';
+        return;
+      }
+
       const input = document.getElementById('launch-callsign-input');
       const callsign = (input && input.value.trim()) ? input.value.trim().toUpperCase() : 'DEMONALEX';
 
@@ -6636,6 +6653,17 @@
     });
 
     function submitLoginAndDeploy() {
+      const keyInput = document.getElementById('launch-access-key');
+      const enteredKey = keyInput ? keyInput.value.trim() : '';
+      const isDevKey = (enteredKey === 'ASTRO-2026-NEX' || enteredKey === 'IAMATOMICDEVELOPER18@$#');
+      const isRegistered = (localStorage.getItem('nex_astro_early_access_registered') === 'true');
+
+      if (!isRegistered && !isDevKey) {
+        alert('[GAMING HUB LOCKED // EARLY ACCESS ONLY]\n\nAstroShift: Beyond Earth is currently locked in closed early development.\n\nPlease visit the Gaming Hub to register your email down early on the priority whitelist!');
+        window.location.href = 'gaminghub.html';
+        return;
+      }
+
       const input = document.getElementById('launch-callsign-input');
       const callsign = (input && input.value.trim()) ? input.value.trim().toUpperCase() : 'DEMONALEX';
 

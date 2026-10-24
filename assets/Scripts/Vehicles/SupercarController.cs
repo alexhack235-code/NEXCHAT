@@ -112,6 +112,13 @@ namespace AstroShift.Vehicles
             }
 
             bool wantsNitro = (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.N)) && throttleInput > 0.1f && nitro > 0;
+            if (wantsNitro && !isBoosting)
+            {
+                if (Audio.ProceduralAudioSynth.Instance != null)
+                {
+                    Audio.ProceduralAudioSynth.Instance.PlayPurgeAt(transform.position);
+                }
+            }
             isBoosting = wantsNitro;
 
             float targetMaxSpeed = isBoosting ? nitroMaxSpeed : maxSpeed;

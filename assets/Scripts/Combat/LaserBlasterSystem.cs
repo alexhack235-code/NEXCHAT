@@ -102,6 +102,12 @@ namespace AstroShift.Combat
 
             SpawnProjectile(activeMuzzle.position, forwardAimDirection);
 
+            // Audio Synthesis Feedback
+            if (Audio.ProceduralAudioSynth.Instance != null)
+            {
+                Audio.ProceduralAudioSynth.Instance.PlayLaserAt(activeMuzzle.position, Random.Range(0.95f, 1.05f));
+            }
+
             // Muzzle flash
             if (muzzleFlashLight != null)
             {

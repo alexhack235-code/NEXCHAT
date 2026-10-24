@@ -43,13 +43,13 @@
       </div>
     </header>
 
-    <!-- PROMINENT HEAD TAG: GET EARLY ACCESS TO ASTRO: SHIFT BEYOND EARTH -->
-    <div class="astro-head-tag-banner" id="astroHeadTagBanner">
+    <!-- PROMINENT HEAD TAG: GAMING HUB LOCKED - REGISTER EMAIL FOR EARLY ACCESS -->
+    <div class="astro-head-tag-banner locked-state" id="astroHeadTagBanner">
       <div class="astro-head-tag-inner">
-        <span class="astro-head-tag-pulse"></span>
-        <i class="fa-solid fa-gamepad" style="color: #00f2ff;"></i>
-        <span class="astro-head-tag-text">GET EARLY ACCESS TO Astro: Shift Beyond Earth</span>
-        <span class="astro-head-tag-chip">PRO-ENCLAVE</span>
+        <span class="astro-head-tag-pulse locked"></span>
+        <i class="fa-solid fa-lock" style="color: #ffb700;"></i>
+        <span class="astro-head-tag-text">GAMING HUB LOCKED &bull; REGISTER YOUR EMAIL FOR EARLY ACCESS ONLY</span>
+        <span class="astro-head-tag-chip locked">CLOSED ENCLAVE</span>
       </div>
     </div>
 
@@ -75,10 +75,69 @@
           </p>
         </div>
 
+        <!-- EARLY ACCESS EMAIL REGISTRATION ENCLAVE -->
+        <div class="early-access-registration-box" id="earlyAccessRegBox">
+          <div class="ea-box-header">
+            <div class="ea-lock-indicator">
+              <i class="fa-solid fa-lock"></i>
+              <span>GAMING HUB ENCLAVE LOCKED</span>
+            </div>
+            <div class="ea-whitelist-badge">
+              <i class="fa-solid fa-envelope-circle-check"></i>
+              <span>EARLY ACCESS EMAIL REGISTRATION</span>
+            </div>
+          </div>
+
+          <h3 class="ea-box-title">REGISTER YOUR EMAIL FOR ASTROSHIFT EARLY ACCESS</h3>
+          <p class="ea-box-desc">
+            The Gaming Hub and AstroShift: Beyond Earth are currently locked in closed early development. Enter your email below to reserve your priority whitelist registration and be the first to receive server activation keys.
+          </p>
+
+          <form id="earlyAccessEmailForm" class="ea-form">
+            <div class="ea-input-wrapper">
+              <i class="fa-solid fa-envelope"></i>
+              <input type="email" id="earlyAccessEmailInput" placeholder="Enter your email to register for early access..." required autocomplete="email">
+            </div>
+            <button type="submit" class="ea-submit-btn" id="btnRegisterEmail">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>REGISTER EMAIL FOR EARLY ACCESS</span>
+            </button>
+          </form>
+
+          <!-- Confirmed Card (shown when user has registered) -->
+          <div id="earlyAccessConfirmedCard" class="ea-confirmed-card" style="display: none;">
+            <div class="ea-confirmed-icon">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="ea-confirmed-info">
+              <h4>EARLY ACCESS EMAIL REGISTERED!</h4>
+              <p>Your email <strong id="confirmedEmailDisplay"></strong> has been reserved in Priority Queue #<strong id="confirmedQueueNum">14,893</strong>.</p>
+              <div class="ea-status-pill">
+                <span class="ea-dot"></span> ENCRYPTED DISPATCH QUEUED &bull; ACCESS PENDING GLOBAL DEPLOY
+              </div>
+            </div>
+          </div>
+
+          <div class="ea-footer-stats">
+            <div class="ea-stat-item">
+              <i class="fa-solid fa-users"></i>
+              <span><strong id="operativesCount">14,892</strong> Operatives Registered</span>
+            </div>
+            <div class="ea-stat-item">
+              <i class="fa-solid fa-id-card"></i>
+              <span>Batch 1 Whitelist Priority</span>
+            </div>
+            <div class="ea-stat-item">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>Zero-Day Exclusive Founder Callsign</span>
+            </div>
+          </div>
+        </div>
+
         <div class="astro-action-row">
-          <a href="game.html" class="btn-launch-astro" id="btnLaunchAstro">
-            <i class="fa-solid fa-play"></i> LAUNCH ASTRO: SHIFT BEYOND EARTH [PLAY NOW]
-          </a>
+          <button type="button" class="btn-launch-astro locked-btn" id="btnLaunchAstro">
+            <i class="fa-solid fa-lock"></i> GAMING HUB LOCKED [REGISTER EMAIL FOR EARLY ACCESS]
+          </button>
           <button type="button" class="btn-specs" id="openSpecsBtn">
             <i class="fa-solid fa-circle-info"></i> SPECIFICATIONS &amp; CONTROLS
           </button>
@@ -179,9 +238,9 @@
           <strong style="color: #ffb700;">Security Clearance:</strong> Atomic Defense Protocol Level 5. The developer override passphrase is <code style="background: rgba(0,242,255,0.15); color: #00f2ff; padding: 2px 6px; border-radius: 4px;">IAMATOMICDEVELOPER18@$#</code>.
         </p>
         <div style="margin-top: 14px;">
-          <a href="game.html" class="btn-launch-astro" style="width: 100%; justify-content: center;">
-            <i class="fa-solid fa-play"></i> LAUNCH ASTRO: SHIFT BEYOND EARTH NOW
-          </a>
+          <button type="button" class="btn-launch-astro locked-btn" id="specsRegisterBtn" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-lock"></i> GAMING HUB LOCKED &bull; REGISTER EMAIL FOR EARLY ACCESS
+          </button>
         </div>
       </div>
     </div>

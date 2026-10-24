@@ -155,6 +155,10 @@ namespace AstroShift.Space
         {
             isWarping = !isWarping;
             throttle = isWarping ? 100f : 50f;
+            if (isWarping && Audio.ProceduralAudioSynth.Instance != null)
+            {
+                Audio.ProceduralAudioSynth.Instance.PlayWarpSound();
+            }
         }
 
         public void EnterStarship(Player.PlayerController player)

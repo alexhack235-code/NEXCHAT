@@ -43,6 +43,12 @@
     </div>
 
     <div class="reels-header-right">
+      <!-- Prominent CamShot Access Permission Pill -->
+      <button type="button" id="camshotAllowAccessBtn" class="camshot-permission-pill pending" title="Allow CamShot to access NEXCHAT" onclick="if(window.NEX_ECOSYSTEM) window.NEX_ECOSYSTEM.openConsentModal('nex-reels');">
+        <i class="fa-solid fa-shield-halved" style="color: #00f2ff;"></i>
+        <span>ALLOW CAMSHOT TO ACCESS NEXCHAT</span>
+      </button>
+
       <button id="zenModeToggleBtn" class="reels-header-icon-btn" title="Clean Screen Mode (Hide UI Overlays)">
         <i class="fa-regular fa-eye-slash"></i>
       </button>
