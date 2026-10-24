@@ -67,6 +67,8 @@
       this.startMessageObserver();
       this.startTelemetryLoop();
       this.startSchedulerWorker();
+      this.initWelcomeStageObserver();
+      this.initErgonomicKeybindings();
       this.initChatHardwareAcceleration();
       this.initSettingsSupercharger();
       this.initGhostAutocomplete();
@@ -369,6 +371,7 @@
       const bindAll = () => {
         const wrappers = messagesArea.querySelectorAll('.message-wrapper:not([data-prof-docked="true"])');
         wrappers.forEach(w => this.attachHoverDock(w));
+        this.updateWelcomeStageVisibility();
       };
 
       bindAll();
@@ -4200,7 +4203,132 @@ ${text}`;
       modal.style.justifyContent = 'center';
     }
 
+    initWelcomeStageObserver() {
+      const messagesArea = document.getElementById('messages-area') || document.querySelector('.messages-area');
+      if (!messagesArea) return;
+
+      this.updateWelcomeStageVisibility();
+
+      const input = document.getElementById('message-input');
+      if (input) {
+        input.addEventListener('input', () => {
+          if (input.value.trim().length > 0) {
+            const stage = document.getElementById('nexWelcomeStage');
+            if (stage) stage.style.display = 'none';
+          }
+        });
+      }
+    }
+
+    updateWelcomeStageVisibility() {
+      const messagesArea = document.getElementById('messages-area') || document.querySelector('.messages-area');
+      if (!messagesArea) return;
+
+      const msgCount = messagesArea.querySelectorAll('.message-wrapper').length;
+      let stage = document.getElementById('nexWelcomeStage');
+
+      if (msgCount === 0) {
+        if (!stage) {
+          stage = document.createElement('div');
+          stage.id = 'nexWelcomeStage';
+          stage.className = 'nex-welcome-stage';
+          stage.innerHTML = `
+            <div class="nex-welcome-shield">
+              <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h3 class="nex-welcome-title">End-to-End Encrypted Quantum Channel</h3>
+            <p class="nex-welcome-subtitle">
+              Protected by hybrid ML-KEM / Kyber-768 &amp; ECDH P-256. Zero logs, zero metadata, client-side cryptographic isolation.
+            </p>
+            <div class="nex-welcome-chips">
+              <button type="button" class="nex-starter-chip" data-starter="greet">
+                <i class="fa-solid fa-hand-peace" style="color: #00ff66;"></i> Say Hello
+              </button>
+              <button type="button" class="nex-starter-chip" data-starter="code">
+                <i class="fa-solid fa-code" style="color: #00f2ff;"></i> Share Code Snippet
+              </button>
+              <button type="button" class="nex-starter-chip" data-starter="prompt">
+                <i class="fa-solid fa-brain" style="color: #c084fc;"></i> Ask ChronEX AI
+              </button>
+              <button type="button" class="nex-starter-chip" data-starter="voice">
+                <i class="fa-solid fa-microphone" style="color: #ffd700;"></i> Voice Memo
+              </button>
+            </div>
+            <div class="nex-welcome-security-footer">
+              <i class="fa-solid fa-lock"></i> Verification Fingerprint: <code>7F9A-4B2E-88D1-C902</code> &bull; 100% Client-Side
+            </div>
+          `;
+
+          stage.querySelectorAll('[data-starter]').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const action = btn.dataset.starter;
+              if (action === 'greet') {
+                const input = document.getElementById('message-input');
+                if (input) {
+                  input.value = "Greetings! Quantum channel active and ready.";
+                  input.focus();
+                  if (stage) stage.style.display = 'none';
+                }
+              } else if (action === 'code') {
+                this.openCodeSnippetModal();
+              } else if (action === 'prompt') {
+                this.openAiPromptsModal();
+              } else if (action === 'voice') {
+                document.getElementById('audio-record-btn')?.click();
+              }
+            });
+          });
+
+          messagesArea.appendChild(stage);
+        } else {
+          stage.style.display = '';
+        }
+      } else {
+        if (stage) {
+          stage.remove();
+        }
+      }
+    }
+
+    initErgonomicKeybindings() {
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f' && !e.shiftKey) {
+          const activeInput = document.activeElement;
+          const isTyping = activeInput && (activeInput.tagName === 'INPUT' || activeInput.tagName === 'TEXTAREA') && activeInput.id !== 'message-input';
+          if (!isTyping) {
+            e.preventDefault();
+            const modal = document.getElementById('nexChatSearchModal');
+            if (modal) {
+              modal.classList.add('active');
+              const searchInput = document.getElementById('nexChatSearchInput');
+              if (searchInput) {
+                searchInput.value = '';
+                searchInput.focus();
+              }
+            } else {
+              document.getElementById('chatSearchToggleBtn')?.click();
+            }
+          }
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+          e.preventDefault();
+          this.openAiPromptsModal();
+        }
+        if (e.key === 'Escape') {
+          document.querySelectorAll('.nex-prof-modal-backdrop.active, .nex-prof-drawer.active').forEach(el => {
+            el.classList.remove('active');
+          });
+          const searchBar = document.getElementById('inChatSearchBar');
+          if (searchBar && searchBar.style.display !== 'none') {
+            document.getElementById('closeChatSearchBtn')?.click();
+          }
+        }
+      });
+    }
   }
+
+  
+
 
   function escapeHtml(str) {
     if (!str) return '';

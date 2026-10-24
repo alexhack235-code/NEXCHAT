@@ -16592,13 +16592,18 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 }
 
 /* ==========================================================================
-   IN-CHAT LIVE SEARCH ENGINE
+   IN-CHAT LIVE SEARCH ENGINE WITH NEXT/PREV NAVIGATION
    ========================================================================== */
+let activeInChatMatches = [];
+let activeInChatMatchIndex = -1;
+
 function setupInChatSearch() {
   const toggleBtn = document.getElementById('chatSearchToggleBtn');
   const searchBar = document.getElementById('inChatSearchBar');
   const searchInput = document.getElementById('inChatSearchInput');
   const closeBtn = document.getElementById('closeChatSearchBtn');
+  const prevBtn = document.getElementById('chatSearchPrevBtn');
+  const nextBtn = document.getElementById('chatSearchNextBtn');
   const matchCount = document.getElementById('chatSearchMatchCount');
 
   if (!toggleBtn || !searchBar || !searchInput || toggleBtn.dataset.searchBound === 'true') return;
@@ -16613,6 +16618,8 @@ function setupInChatSearch() {
   const closeSearch = () => {
     searchBar.style.display = 'none';
     searchInput.value = '';
+    activeInChatMatches = [];
+    activeInChatMatchIndex = -1;
     if (matchCount) matchCount.textContent = '0 found';
     clearInChatSearchHighlights();
   };
@@ -16632,10 +16639,45 @@ function setupInChatSearch() {
     closeSearch();
   });
 
+  const jumpToMatch = (index) => {
+    if (activeInChatMatches.length === 0) return;
+    activeInChatMatchIndex = ((index % activeInChatMatches.length) + activeInChatMatches.length) % activeInChatMatches.length;
+    
+    // Dim other highlights and brighten active
+    document.querySelectorAll('#messages-area .search-current-match').forEach(el => el.classList.remove('search-current-match'));
+    const targetEl = activeInChatMatches[activeInChatMatchIndex];
+    if (targetEl) {
+      targetEl.classList.add('search-current-match');
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    if (matchCount) {
+      matchCount.textContent = `${activeInChatMatchIndex + 1} of ${activeInChatMatches.length}`;
+      matchCount.style.color = '#00ff66';
+    }
+  };
+
+  nextBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    jumpToMatch(activeInChatMatchIndex + 1);
+  });
+
+  prevBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    jumpToMatch(activeInChatMatchIndex - 1);
+  });
+
   searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       e.preventDefault();
       closeSearch();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        jumpToMatch(activeInChatMatchIndex - 1);
+      } else {
+        jumpToMatch(activeInChatMatchIndex + 1);
+      }
     }
   });
 
@@ -16650,6 +16692,10 @@ function clearInChatSearchHighlights() {
     el.classList.remove('search-dimmed');
   });
 
+  document.querySelectorAll('#messages-area .search-current-match').forEach(el => {
+    el.classList.remove('search-current-match');
+  });
+
   document.querySelectorAll('#messages-area mark.search-highlight').forEach(mark => {
     const parent = mark.parentNode;
     if (parent) {
@@ -16662,34 +16708,38 @@ function clearInChatSearchHighlights() {
 function executeInChatSearch(query) {
   clearInChatSearchHighlights();
   const matchCount = document.getElementById('chatSearchMatchCount');
+  activeInChatMatches = [];
+  activeInChatMatchIndex = -1;
 
   if (!query) {
     if (matchCount) matchCount.textContent = '0 found';
     return;
   }
 
-  const messageWrappers = document.querySelectorAll('#messages-area .message-wrapper, #messages-area .message, #messages-area .message-bubble');
-  let matches = 0;
-  let firstMatchEl = null;
-
+  const messageWrappers = document.querySelectorAll('#messages-area .message-wrapper');
   messageWrappers.forEach(wrapper => {
     const text = wrapper.textContent || '';
     if (text.toLowerCase().includes(query)) {
-      matches++;
-      if (!firstMatchEl) firstMatchEl = wrapper;
+      activeInChatMatches.push(wrapper);
       highlightSearchTermInElement(wrapper, query);
     } else {
       wrapper.classList.add('search-dimmed');
     }
   });
 
-  if (matchCount) {
-    matchCount.textContent = `${matches} found`;
-    matchCount.style.color = matches > 0 ? '#00ff66' : '#ff6b6b';
-  }
-
-  if (firstMatchEl) {
-    firstMatchEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  if (activeInChatMatches.length > 0) {
+    activeInChatMatchIndex = 0;
+    activeInChatMatches[0].classList.add('search-current-match');
+    activeInChatMatches[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (matchCount) {
+      matchCount.textContent = `1 of ${activeInChatMatches.length}`;
+      matchCount.style.color = '#00ff66';
+    }
+  } else {
+    if (matchCount) {
+      matchCount.textContent = '0 found';
+      matchCount.style.color = '#ff6b6b';
+    }
   }
 }
 

@@ -9114,3 +9114,173 @@ body.chat-size-extra-large .message-bubble {
     font-size: 13px !important;
   }
 }
+
+/* ========================================================
+   CYBER CHAT PROFESSIONAL SUITE: DOCK & WELCOME STAGE
+   ======================================================== */
+.nex-composer-format-dock {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: rgba(10, 16, 28, 0.75);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  margin: 0 12px 6px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  transition: all 0.25s ease;
+  z-index: 10;
+}
+
+.nex-composer-format-dock::-webkit-scrollbar {
+  display: none;
+}
+
+.nex-composer-format-dock:focus-within,
+.nex-composer-format-dock:hover {
+  border-color: rgba(0, 242, 255, 0.35);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 15px rgba(0, 242, 255, 0.1);
+}
+
+.nex-format-btn {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11.5px;
+  transition: all 0.18s ease;
+}
+
+.nex-format-btn:hover {
+  background: rgba(0, 242, 255, 0.12);
+  border-color: rgba(0, 242, 255, 0.4);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.nex-format-sep {
+  width: 1px;
+  height: 16px;
+  min-width: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 4px;
+}
+
+/* Empty Conversation Welcome Enclave */
+.nex-welcome-stage {
+  max-width: 480px;
+  margin: auto;
+  padding: 36px 20px 24px 20px;
+  text-align: center;
+  background: rgba(10, 16, 28, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  backdrop-filter: blur(14px);
+  animation: nexWelcomeFadeIn 0.35s ease-out;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  user-select: none;
+}
+
+@keyframes nexWelcomeFadeIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.nex-welcome-shield {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  margin: 0 auto 16px auto;
+  background: linear-gradient(135deg, rgba(0, 255, 102, 0.15), rgba(0, 242, 255, 0.15));
+  border: 1px solid rgba(0, 242, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #00f2ff;
+  box-shadow: 0 0 24px rgba(0, 242, 255, 0.2);
+}
+
+.nex-welcome-title {
+  font-family: 'Space Grotesk', 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  letter-spacing: 0.3px;
+}
+
+.nex-welcome-subtitle {
+  font-size: 12px;
+  line-height: 1.55;
+  color: #94a3b8;
+  margin: 0 0 20px 0;
+}
+
+.nex-welcome-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.nex-starter-chip {
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+}
+
+.nex-starter-chip:hover {
+  background: rgba(0, 242, 255, 0.12);
+  border-color: rgba(0, 242, 255, 0.4);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+}
+
+.nex-welcome-security-footer {
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 14px;
+}
+
+.nex-welcome-security-footer code {
+  color: #00ff66;
+  font-family: monospace;
+  background: rgba(0, 255, 102, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.search-current-match {
+  outline: 2px solid #00f2ff !important;
+  box-shadow: 0 0 16px rgba(0, 242, 255, 0.45) !important;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
