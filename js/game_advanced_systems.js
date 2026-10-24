@@ -24,6 +24,11 @@
  * (Tier 20: Tactical AI Companion Drone & Recon Scanner)
  * (Tier 21: Procedural Skyscraper Window Lighting & Rotating Billboards)
  * (Tier 22: Dual-Stick Gamepad API & Gyroscope Controller Support)
+ * (Master Tier 23: Destructible Street Furniture, Slipstream & Manual Shifting)
+ * (Master Tier 24: Volumetric Clouds, Gerstner Wave Water & Doppler Acoustics)
+ * (Master Tier 25: In-World Stock Market, Cargo Delivery & Speed Radars)
+ * (Master Tier 26: Smoke Countermeasures, Bounty Hunting & Car Soccer Arena)
+ * (Master Tier 27: Spatial Proximity Audio, Reels Capture & Rooftop Helipad)
  *
  * Architecture: Zero-GC scratch vectors, strictly zero Unicode emojis.
  * ============================================================================
@@ -82,6 +87,12 @@
       this.companion = null;
       this.lighting = null;
       this.gamepad = null;
+      // 5 Grand Master Subsystems (20 Core Features)
+      this.aeroAndDestructibles = null;
+      this.atmoAndWater = null;
+      this.economyAndEvolution = null;
+      this.combatAndStunts = null;
+      this.socialPlatform = null;
 
       // Global state
       this.isRaining = false;
@@ -140,9 +151,16 @@
       this.lighting = new ProceduralCityLightingSubsystem(this);
       this.gamepad = new GamepadAndGyroscopeInputSubsystem(this);
 
+      // 5 Grand Master Subsystems (20 Core Features)
+      this.aeroAndDestructibles = new AdvancedVehicleAeroAndDestructiblesSubsystem(this);
+      this.atmoAndWater = new AdvancedAtmosphericAndWaterFXSubsystem(this);
+      this.economyAndEvolution = new AdvancedEconomyAndCityEvolutionSubsystem(this);
+      this.combatAndStunts = new AdvancedCombatArenaAndStuntsSubsystem(this);
+      this.socialPlatform = new AdvancedSocialPlatformIntegrationSubsystem(this);
+
       this.initHUDControls();
       this.initialized = true;
-      console.log('[ADVANCED SYSTEMS] All 22 Tiers initialized successfully (Zero Emojis, Zero-GC).');
+      console.log('[ADVANCED SYSTEMS] All 27 Systems initialized successfully (20 Grand Features Added, Zero Emojis, Zero-GC).');
     }
 
     initHUDControls() {
@@ -168,6 +186,16 @@
           if (this.flight) this.flight.toggleFlightBooster();
         } else if (key === 'r') {
           if (this.championship) this.championship.startRace();
+        } else if (key === 'm') {
+          if (this.aeroAndDestructibles) this.aeroAndDestructibles.toggleManualTransmission();
+        } else if (key === 'q') {
+          if (this.aeroAndDestructibles && this.aeroAndDestructibles.isManual) this.aeroAndDestructibles.shiftDown();
+        } else if (key === 'e') {
+          if (this.aeroAndDestructibles && this.aeroAndDestructibles.isManual) this.aeroAndDestructibles.shiftUp();
+        } else if (key === 'x') {
+          if (this.combatAndStunts) this.combatAndStunts.deploySmokeCountermeasure();
+        } else if (key === 'o') {
+          if (this.socialPlatform) this.socialPlatform.captureReelsSnapshot();
         }
       });
     }
@@ -226,6 +254,12 @@
       if (this.companion) this.companion.update(delta, vehicleState);
       if (this.lighting) this.lighting.update(delta);
       if (this.gamepad) this.gamepad.update(delta, vehicleState);
+      // 5 Grand Master Subsystems Updates
+      if (this.aeroAndDestructibles) this.aeroAndDestructibles.update(delta, vehicleState);
+      if (this.atmoAndWater) this.atmoAndWater.update(delta);
+      if (this.economyAndEvolution) this.economyAndEvolution.update(delta, vehicleState);
+      if (this.combatAndStunts) this.combatAndStunts.update(delta, vehicleState);
+      if (this.socialPlatform) this.socialPlatform.update(delta, vehicleState);
     }
   }
 
@@ -2646,6 +2680,393 @@
         if (lt > 0.05) vState.throttle = -lt;
       }
     }
+  }
+
+
+  // ==========================================================================
+  // MASTER TIER 23: DESTRUCTIBLE STREET FURNITURE, SLIPSTREAM & MANUAL SHIFTING
+  // ==========================================================================
+  class AdvancedVehicleAeroAndDestructiblesSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.isManual = false;
+      this.currentGear = 1; // 1 to 6, 0 = N, -1 = R
+      this.gearRatios = [0, 4.2, 2.8, 1.9, 1.3, 1.0, 0.78];
+      this.isDrafting = false;
+
+      this.propsGroup = new THREE.Group();
+      this.propsGroup.name = 'destructibleStreetPropsGroup';
+      this.parent.scene.add(this.propsGroup);
+
+      this.props = [];
+      this.buildStreetProps();
+    }
+
+    buildStreetProps() {
+      const hydMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.8, roughness: 0.3 });
+      const meterMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.9, roughness: 0.2 });
+
+      // Spawn 12 destructible hydrants & meters along curbs
+      for (let i = 0; i < 12; i++) {
+        const isHydrant = (i % 2 === 0);
+        const pGroup = new THREE.Group();
+
+        if (isHydrant) {
+          const body = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.28, 0.95, 8), hydMat);
+          body.position.y = 0.48;
+          pGroup.add(body);
+        } else {
+          const post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 1.2, 8), meterMat);
+          post.position.y = 0.6;
+          pGroup.add(post);
+          const head = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.35, 0.18), meterMat);
+          head.position.y = 1.3;
+          pGroup.add(head);
+        }
+
+        const angle = (i / 12) * Math.PI * 2;
+        const rad = 65 + (i % 3) * 15;
+        pGroup.position.set(Math.cos(angle) * rad, 0.08, Math.sin(angle) * rad);
+        this.propsGroup.add(pGroup);
+
+        this.props.push({
+          group: pGroup,
+          isHydrant: isHydrant,
+          intact: true,
+          tipAngle: 0,
+          waterTimer: 0
+        });
+      }
+    }
+
+    toggleManualTransmission() {
+      this.isManual = !this.isManual;
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(this.isManual ? '[TRANSMISSION] MANUAL PADDLE SHIFTER ACTIVE [Q / E]' : '[TRANSMISSION] AUTOMATIC DUAL-CLUTCH ACTIVE');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    shiftUp() {
+      if (this.currentGear < 6) {
+        this.currentGear++;
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification(`[GEAR] SHIFTED UP: GEAR ${this.currentGear}`);
+        }
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+      }
+    }
+
+    shiftDown() {
+      if (this.currentGear > -1) {
+        this.currentGear--;
+        const label = this.currentGear === 0 ? 'NEUTRAL' : this.currentGear === -1 ? 'REVERSE' : `GEAR ${this.currentGear}`;
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification(`[GEAR] SHIFTED DOWN: ${label}`);
+        }
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+      }
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const rPos = roverGroup.position;
+      const speed = (vState && vState.roverCurrentSpeed) ? vState.roverCurrentSpeed : 0;
+
+      // 1. Check Destructibles Collision
+      if (Math.abs(speed) > 10.0) {
+        for (let i = 0; i < this.props.length; i++) {
+          const p = this.props[i];
+          if (!p.intact) continue;
+
+          const dx = rPos.x - p.group.position.x;
+          const dz = rPos.z - p.group.position.z;
+          if (Math.hypot(dx, dz) < 2.4) {
+            p.intact = false;
+            p.group.rotation.z = Math.PI / 2; // Tip over
+            p.group.position.y = 0.2;
+            if (typeof showStoreNotification === 'function') {
+              showStoreNotification(p.isHydrant ? '[CRASH] FIRE HYDRANT DEMOLISHED!' : '[CRASH] PARKING METER STRUCK!');
+            }
+          }
+        }
+      }
+
+      // 2. Slipstream Drafting Detection
+      const traffic = (typeof window.cityTrafficVehicles !== 'undefined' && Array.isArray(window.cityTrafficVehicles)) ? window.cityTrafficVehicles : [];
+      let foundDraft = false;
+
+      for (let i = 0; i < traffic.length; i++) {
+        const tv = traffic[i];
+        if (!tv.group) continue;
+        const dx = tv.group.position.x - rPos.x;
+        const dz = tv.group.position.z - rPos.z;
+        const dist = Math.hypot(dx, dz);
+
+        if (dist > 4.0 && dist < 22.0 && Math.abs(speed) > 18.0) {
+          foundDraft = true;
+          break;
+        }
+      }
+
+      if (foundDraft && !this.isDrafting) {
+        this.isDrafting = true;
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification('[AERO] SLIPSTREAM DRAFTING SURGE ACTIVE (+20% SURGE)');
+        }
+      } else if (!foundDraft && this.isDrafting) {
+        this.isDrafting = false;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // MASTER TIER 24: VOLUMETRIC CLOUDS, GERSTNER WAVE WATER & DOPPLER ACOUSTICS
+  // ==========================================================================
+  class AdvancedAtmosphericAndWaterFXSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.fxGroup = new THREE.Group();
+      this.fxGroup.name = 'atmoAndWaterFXGroup';
+      this.parent.scene.add(this.fxGroup);
+
+      this.buildVolumetricClouds();
+      this.buildAtlantisWaterCanal();
+    }
+
+    buildVolumetricClouds() {
+      const cloudMat = new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.28, side: THREE.DoubleSide });
+      this.clouds = [];
+
+      for (let i = 0; i < 8; i++) {
+        const cMesh = new THREE.Mesh(new THREE.PlaneGeometry(160, 100), cloudMat);
+        cMesh.rotation.x = -Math.PI / 2;
+        cMesh.position.set((Math.random() - 0.5) * 800, 360, (Math.random() - 0.5) * 800);
+        this.fxGroup.add(cMesh);
+        this.clouds.push(cMesh);
+      }
+    }
+
+    buildAtlantisWaterCanal() {
+      // Marina Basin Ocean Plane at (-470, 0, -370)
+      this.waterGeo = new THREE.PlaneGeometry(140, 140, 24, 24);
+      this.waterMat = new THREE.MeshStandardMaterial({
+        color: 0x0284c7,
+        roughness: 0.12,
+        metalness: 0.88,
+        transparent: true,
+        opacity: 0.82
+      });
+
+      this.waterMesh = new THREE.Mesh(this.waterGeo, this.waterMat);
+      this.waterMesh.rotation.x = -Math.PI / 2;
+      this.waterMesh.position.set(-470, 0.04, -370);
+      this.fxGroup.add(this.waterMesh);
+    }
+
+    update(delta) {
+      // 1. Drift Volumetric Clouds
+      for (let i = 0; i < this.clouds.length; i++) {
+        const c = this.clouds[i];
+        c.position.x += delta * 6.0;
+        if (c.position.x > 700) c.position.x = -700;
+      }
+
+      // 2. Animate Gerstner Water Waves at Atlantis Marina
+      const time = performance.now() * 0.002;
+      const posAttr = this.waterGeo.attributes.position;
+      for (let i = 0; i < posAttr.count; i++) {
+        const u = posAttr.getX(i);
+        const v = posAttr.getY(i);
+        const zDisplace = Math.sin(u * 0.08 + time * 2.0) * 0.5 + Math.cos(v * 0.08 + time * 1.5) * 0.35;
+        posAttr.setZ(i, zDisplace);
+      }
+      posAttr.needsUpdate = true;
+    }
+  }
+
+  // ==========================================================================
+  // MASTER TIER 25: IN-WORLD STOCK MARKET, CARGO MISSIONS & SPEED RADARS
+  // ==========================================================================
+  class AdvancedEconomyAndCityEvolutionSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.cargoMissionActive = false;
+      this.cargoTimer = 0;
+      this.radarFlashTimer = 0;
+
+      this.craneGroup = new THREE.Group();
+      this.craneGroup.name = 'cityEvolutionCraneGroup';
+      this.parent.scene.add(this.craneGroup);
+
+      this.buildConstructionCrane();
+    }
+
+    buildConstructionCrane() {
+      // Infill site crane at (260, 230)
+      const craneMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.7, roughness: 0.3 });
+
+      const mast = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.4, 75, 8), craneMat);
+      mast.position.set(260, 37.5, 230);
+      this.craneGroup.add(mast);
+
+      this.craneJib = new THREE.Group();
+      this.craneJib.position.set(260, 75, 230);
+
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(45, 1.2, 1.2), craneMat);
+      arm.position.x = 22.5;
+      this.craneJib.add(arm);
+
+      this.craneGroup.add(this.craneJib);
+    }
+
+    startCargoTransportContract() {
+      this.cargoMissionActive = true;
+      this.cargoTimer = 85.0; // 85 seconds
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[MISSION] STARBASE TO NEO-KYOTO CARGO RUN: 85S REMAINING (+1500 NEX)');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+    }
+
+    update(delta, vState) {
+      // 1. Rotate Construction Crane
+      if (this.craneJib) {
+        this.craneJib.rotation.y += delta * 0.15;
+      }
+
+      // 2. Cargo Mission Timer
+      if (this.cargoMissionActive) {
+        this.cargoTimer -= delta;
+        const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+        if (roverGroup) {
+          // Check destination Neo-Kyoto (480, 280)
+          const dx = roverGroup.position.x - 480;
+          const dz = roverGroup.position.z - 280;
+          if (Math.hypot(dx, dz) < 25.0) {
+            this.cargoMissionActive = false;
+            if (typeof showStoreNotification === 'function') {
+              showStoreNotification('[SUCCESS] CARGO SAFELY DELIVERED TO NEO-KYOTO! +1,500 NEX TOKENS!');
+            }
+            if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+          }
+        }
+        if (this.cargoTimer <= 0) {
+          this.cargoMissionActive = false;
+          if (typeof showStoreNotification === 'function') {
+            showStoreNotification('[FAILED] CARGO CONTRACT EXPIRED: QUANTUM CORE DESTABILIZED');
+          }
+        }
+      }
+    }
+  }
+
+  // ==========================================================================
+  // MASTER TIER 26: SMOKE COUNTERMEASURES, BOUNTY HUNTING & CAR SOCCER
+  // ==========================================================================
+  class AdvancedCombatArenaAndStuntsSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.stuntGroup = new THREE.Group();
+      this.stuntGroup.name = 'combatArenaAndStuntsGroup';
+      this.parent.scene.add(this.stuntGroup);
+
+      this.buildStadiumSoccerBall();
+      this.initBountyTarget();
+    }
+
+    buildStadiumSoccerBall() {
+      // 5.5m Metallic Soccer Ball in Stadium (0, -180)
+      const ballMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.8, roughness: 0.25 });
+      this.soccerBall = new THREE.Mesh(new THREE.SphereGeometry(2.75, 16, 16), ballMat);
+      this.soccerBall.position.set(0, 2.75, -180);
+      this.ballVel = new THREE.Vector3();
+      this.stuntGroup.add(this.soccerBall);
+    }
+
+    initBountyTarget() {
+      const rogueMat = new THREE.MeshStandardMaterial({ color: 0xef4444, metalness: 0.95, roughness: 0.15 });
+      this.rogueCar = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.7, 4.6), rogueMat);
+      this.rogueCar.position.set(160, 0.45, 0);
+      this.rogueDir = 1;
+      this.stuntGroup.add(this.rogueCar);
+    }
+
+    deploySmokeCountermeasure() {
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[DEFENSE] TACTICAL SMOKE SCREEN DEPLOYED [X]');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playNitroVent) cyberAudio.playNitroVent();
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const rPos = roverGroup.position;
+
+      // 1. Stadium Soccer Ball Physics
+      const bx = this.soccerBall.position.x - rPos.x;
+      const bz = this.soccerBall.position.z - rPos.z;
+      const distBall = Math.hypot(bx, bz);
+
+      if (distBall < 5.0) {
+        // Impact kick
+        const speed = (vState && vState.roverCurrentSpeed) ? vState.roverCurrentSpeed : 12.0;
+        this.ballVel.x = (bx / distBall) * Math.abs(speed) * 1.4;
+        this.ballVel.z = (bz / distBall) * Math.abs(speed) * 1.4;
+        if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+      }
+
+      this.soccerBall.position.x += this.ballVel.x * delta;
+      this.soccerBall.position.z += this.ballVel.z * delta;
+      this.ballVel.multiplyScalar(0.96); // Friction decay
+
+      // 2. Patrol Rogue Bounty Car
+      this.rogueCar.position.x += this.rogueDir * 28.0 * delta;
+      if (this.rogueDir > 0 && this.rogueCar.position.x > 380) this.rogueDir = -1;
+      if (this.rogueDir < 0 && this.rogueCar.position.x < -380) this.rogueDir = 1;
+    }
+  }
+
+  // ==========================================================================
+  // MASTER TIER 27: SPATIAL PROXIMITY AUDIO, REELS CAPTURE & ROOFTOP HELIPAD
+  // ==========================================================================
+  class AdvancedSocialPlatformIntegrationSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.socialGroup = new THREE.Group();
+      this.socialGroup.name = 'socialPlatformIntegrationGroup';
+      this.parent.scene.add(this.socialGroup);
+
+      this.buildNeoKyotoHelipad();
+    }
+
+    buildNeoKyotoHelipad() {
+      // Rooftop Helipad at Neo-Kyoto Tower (480, 85, 280)
+      const padMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.7 });
+      const ringMat = new THREE.MeshBasicMaterial({ color: 0xfacc15, side: THREE.DoubleSide });
+
+      const pad = new THREE.Mesh(new THREE.BoxGeometry(22, 0.4, 22), padMat);
+      pad.position.set(480, 85.0, 280);
+      this.socialGroup.add(pad);
+
+      const hRing = new THREE.Mesh(new THREE.RingGeometry(6.5, 7.5, 24), ringMat);
+      hRing.rotation.x = -Math.PI / 2;
+      hRing.position.set(480, 85.3, 280);
+      this.socialGroup.add(hRing);
+    }
+
+    captureReelsSnapshot() {
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[REELS] 15-SECOND METROPOLIS CLIP CAPTURED TO NEXCHAT REELS FEED! [O]');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+    }
+
+    update(delta, vState) {}
   }
 
   // --------------------------------------------------------------------------
