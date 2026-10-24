@@ -15,6 +15,7 @@ class OfflineMeshSyncEngine {
     this.offlineQueue = [];
     this.initBroadcastChannel();
     this.initNetworkListeners();
+    this.initCRDTEngine();
   }
 
   initBroadcastChannel() {
@@ -68,6 +69,10 @@ class OfflineMeshSyncEngine {
       // Discard duplicate or echo
       if (packet.senderUid === this.localUser?.uid) return;
       this.messageListeners.forEach(cb => cb(packet.message));
+    } else if (packet.type === 'CRDT_MESH_SYNC') {
+      if (packet.senderNodeId !== this.nodeId) {
+        this.mergeCRDTRemoteEntry(packet.entry);
+      }
     }
   }
 
@@ -133,6 +138,90 @@ class OfflineMeshSyncEngine {
       banner.style.display = isOffline ? 'flex' : 'none';
     }
   }
+
+  // --------------------------------------------------------------------------
+  // CRDT (Conflict-Free Replicated Data Type) Engine: Last-Write-Wins (LWW)
+  // --------------------------------------------------------------------------
+  initCRDTEngine() {
+    this.lamportClock = parseInt(localStorage.getItem('nex_lamport_clock') || '0', 10);
+    this.nodeId = 'node_' + Math.random().toString(36).substring(2, 9);
+    this.crdtMap = new Map(); // docId -> { text, status, clock, timestamp, sender, isDeleted }
+    this.loadPersistedCRDT();
+  }
+
+  loadPersistedCRDT() {
+    try {
+      const raw = localStorage.getItem('nex_crdt_state_vector');
+      if (raw) {
+        const obj = JSON.parse(raw);
+        Object.keys(obj).forEach(k => this.crdtMap.set(k, obj[k]));
+      }
+    } catch (_) {}
+  }
+
+  persistCRDT() {
+    try {
+      const obj = {};
+      this.crdtMap.forEach((v, k) => { obj[k] = v; });
+      localStorage.setItem('nex_crdt_state_vector', JSON.stringify(obj));
+      localStorage.setItem('nex_lamport_clock', this.lamportClock.toString());
+    } catch (_) {}
+  }
+
+  recordCRDTChange(docId, messageData, isDeleted = false) {
+    this.lamportClock++;
+    const entry = {
+      docId: docId,
+      text: messageData.text || '',
+      status: messageData.status || 'sent',
+      sender: messageData.from || this.localUser?.uid || this.nodeId,
+      clock: this.lamportClock,
+      timestamp: Date.now(),
+      isDeleted: isDeleted,
+      nodeId: this.nodeId
+    };
+
+    this.crdtMap.set(docId, entry);
+    this.persistCRDT();
+
+    // Broadcast CRDT state vector change to peer mesh
+    if (this.channel) {
+      this.channel.postMessage({
+        type: 'CRDT_MESH_SYNC',
+        senderNodeId: this.nodeId,
+        entry: entry
+      });
+    }
+    return entry;
+  }
+
+  mergeCRDTRemoteEntry(remoteEntry) {
+    if (!remoteEntry || !remoteEntry.docId) return false;
+    const local = this.crdtMap.get(remoteEntry.docId);
+
+    // Update local Lamport clock: max(local, remote) + 1
+    this.lamportClock = Math.max(this.lamportClock, remoteEntry.clock || 0) + 1;
+
+    let shouldOverwrite = false;
+    if (!local) {
+      shouldOverwrite = true;
+    } else if (remoteEntry.clock > local.clock) {
+      shouldOverwrite = true;
+    } else if (remoteEntry.clock === local.clock && remoteEntry.timestamp > local.timestamp) {
+      shouldOverwrite = true;
+    } else if (remoteEntry.clock === local.clock && remoteEntry.timestamp === local.timestamp && (remoteEntry.nodeId || '') > (local.nodeId || '')) {
+      shouldOverwrite = true;
+    }
+
+    if (shouldOverwrite) {
+      this.crdtMap.set(remoteEntry.docId, remoteEntry);
+      this.persistCRDT();
+      console.log(`[CRDT MESH] Converged doc ${remoteEntry.docId} via LWW resolution.`);
+      return true;
+    }
+    return false;
+  }
+
 }
 
 // Global Singleton Export

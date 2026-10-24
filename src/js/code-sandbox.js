@@ -11,6 +11,7 @@
   class CodeSandboxEngine {
     constructor() {
       this.selectedLang = 'javascript';
+      this.initCollabBus();
       this.init();
     }
 
@@ -78,6 +79,10 @@
 
       document.getElementById('codeLangSelect')?.addEventListener('change', (e) => {
         this.selectedLang = e.target.value;
+      });
+
+      document.getElementById('codeSourceInput')?.addEventListener('input', (e) => {
+        this.broadcastCollabCode(e.target.value);
       });
 
       document.getElementById('dispatchCodeSnippetBtn')?.addEventListener('click', () => {
@@ -229,6 +234,32 @@
         if (stdout) stdout.textContent = `[Runtime Error]: ${err.message}`;
         if (typeof window.playCyberSfx === 'function') window.playCyberSfx('zap');
       }
+    }
+
+
+    initCollabBus() {
+      try {
+        this.collabBus = new BroadcastChannel('nex_code_collab_bus');
+        this.collabBus.onmessage = (e) => {
+          if (!e.data || typeof e.data !== 'object') return;
+          if (e.data.type === 'COLLAB_CODE_SYNC') {
+            const area = document.getElementById('codeSourceInput');
+            if (area && area.value !== e.data.code && document.activeElement !== area) {
+              area.value = e.data.code;
+            }
+          }
+        };
+      } catch (_) {}
+    }
+
+    broadcastCollabCode(code) {
+      if (!this.collabBus) return;
+      this.collabBus.postMessage({
+        type: 'COLLAB_CODE_SYNC',
+        sender: window.currentUserName || 'Peer',
+        code: code,
+        timestamp: Date.now()
+      });
     }
 
     escapeHTML(str) {

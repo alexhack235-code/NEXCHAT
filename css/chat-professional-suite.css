@@ -2665,3 +2665,195 @@ body.privacy-shield-active .chat-header {
 .message-bubble p {
   font-size: var(--nex-chat-font-size) !important;
 }
+
+
+/* --------------------------------------------------------------------------
+   39. GHOST AUTOCOMPLETE & VIRTUALIZED WINDOWING
+   -------------------------------------------------------------------------- */
+.nex-ghost-autocomplete-pill {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 14px;
+  background: rgba(10, 16, 30, 0.96);
+  border: 1px solid rgba(0, 242, 255, 0.45);
+  color: #94a3b8;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 242, 255, 0.15);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  animation: nexGhostPillFadeIn 0.15s ease forwards;
+}
+
+.nex-ghost-autocomplete-pill strong {
+  color: #00f2ff;
+}
+
+.nex-ghost-autocomplete-pill .nex-tab-badge {
+  background: rgba(0, 242, 255, 0.18);
+  border: 1px solid rgba(0, 242, 255, 0.35);
+  color: #00f2ff;
+  font-size: 10px;
+  font-family: monospace;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.nex-ghost-autocomplete-pill:hover {
+  border-color: #00ff66;
+  color: #ffffff;
+}
+
+@keyframes nexGhostPillFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nex-virtual-spacer-top,
+.nex-virtual-spacer-bottom {
+  width: 100%;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   40. ZERO-TRACE EPHEMERAL MEDIA CANVAS & WATERMARK SHREDDER
+   -------------------------------------------------------------------------- */
+.nex-zero-trace-canvas-wrap {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 59, 48, 0.4);
+  background: #000000;
+  display: inline-block;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.nex-zero-trace-canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 280px;
+  pointer-events: none;
+}
+
+.nex-zero-trace-banner {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: rgba(239, 68, 68, 0.88);
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  font-family: monospace;
+  padding: 2px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 10;
+}
+
+.nex-zero-trace-timer {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  font-size: 11px;
+  font-family: monospace;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 10;
+}
+
+/* --------------------------------------------------------------------------
+   41. COLLABORATIVE LIVE CODE SANDBOX & CHRONEX CODE REVIEW MODAL
+   -------------------------------------------------------------------------- */
+.nex-code-review-btn {
+  background: rgba(0, 242, 255, 0.12);
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  color: #00f2ff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+.nex-code-review-btn:hover {
+  background: rgba(0, 242, 255, 0.25);
+  border-color: #00f2ff;
+  transform: translateY(-1px);
+}
+
+.nex-review-modal-window {
+  background: #090e1a;
+  border: 1px solid rgba(0, 242, 255, 0.35);
+  border-radius: 16px;
+  width: 90%;
+  max-width: 720px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  animation: nexReviewModalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes nexReviewModalPop {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.nex-review-diff-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+@media (max-width: 680px) {
+  .nex-review-diff-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.nex-diff-pane {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.nex-diff-pane.optimized {
+  border-color: rgba(0, 255, 102, 0.35);
+  background: rgba(0, 255, 102, 0.03);
+}
+
+.nex-diff-pane pre {
+  margin: 0;
+  font-family: 'Fira Code', monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
