@@ -1,0 +1,969 @@
+/* ==========================================================================
+   NEXCHAT - Professional Chat Suite & In-Depth Matrix
+   Ultra-Clean, High-Tech, Corporate & Cyberpunk Hybrid UI
+   STRICTLY 0 UNICODE EMOJIS: Pure FontAwesome 6 vector glyphs and typography.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. TELEMETRY & SECURITY STATUS PILL (In Header)
+   -------------------------------------------------------------------------- */
+.nex-chat-telemetry-bar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(10, 16, 28, 0.75);
+  border: 1px solid rgba(0, 242, 255, 0.2);
+  border-radius: 9999px;
+  padding: 3px 10px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  margin-left: 8px;
+  user-select: none;
+}
+
+.nex-telemetry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #00ff88;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.nex-telemetry-badge.e2ee {
+  color: #00ff88;
+}
+
+.nex-telemetry-badge.e2ee i {
+  font-size: 9px;
+}
+
+.nex-telemetry-divider {
+  width: 1px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.nex-telemetry-ping {
+  color: #00f2ff;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 10px;
+}
+
+@media (max-width: 640px) {
+  .nex-chat-telemetry-bar {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. HEADER ACTION HUB (Secondary Actions Drawer / Modal)
+   -------------------------------------------------------------------------- */
+.chat-header-hub-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.chat-header-hub-btn:hover {
+  background: rgba(0, 242, 255, 0.15);
+  border-color: rgba(0, 242, 255, 0.4);
+  color: #00f2ff;
+  transform: translateY(-1px);
+}
+
+.nex-header-hub-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 280px;
+  background: rgba(12, 18, 32, 0.96);
+  border: 1px solid rgba(0, 242, 255, 0.25);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75), 0 0 20px rgba(0, 242, 255, 0.12);
+  border-radius: 14px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 8px;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  animation: nexMenuFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes nexMenuFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.nex-hub-section-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #64748b;
+  padding: 6px 10px 2px;
+}
+
+.nex-hub-item-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.nex-hub-item-btn:hover {
+  background: rgba(0, 242, 255, 0.1);
+  color: #ffffff;
+  transform: translateX(2px);
+}
+
+.nex-hub-item-btn i {
+  font-size: 14px;
+  width: 18px;
+  text-align: center;
+}
+
+.nex-hub-item-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+/* --------------------------------------------------------------------------
+   3. PINNED MESSAGES BAR (Top of Chat Feed)
+   -------------------------------------------------------------------------- */
+.nex-chat-pinned-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 14px;
+  background: rgba(14, 22, 38, 0.88);
+  border-bottom: 1px solid rgba(0, 242, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 20;
+  transition: all 0.2s ease;
+}
+
+.nex-pinned-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex: 1;
+  min-width: 0;
+}
+
+.nex-pinned-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: rgba(0, 242, 255, 0.12);
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #00f2ff;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.nex-pinned-text-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.nex-pinned-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #00f2ff;
+  line-height: 1.2;
+}
+
+.nex-pinned-preview {
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.nex-pinned-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nex-pinned-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.15s ease;
+}
+
+.nex-pinned-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+}
+
+/* --------------------------------------------------------------------------
+   4. MESSAGE HOVER DOCK (Micro-Actions on Bubbles)
+   -------------------------------------------------------------------------- */
+.message-wrapper {
+  position: relative;
+}
+
+.nex-msg-hover-dock {
+  position: absolute;
+  top: -16px;
+  display: none;
+  align-items: center;
+  gap: 3px;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  border-radius: 9999px;
+  padding: 2px 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 242, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 50;
+  animation: nexDockPop 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.message-wrapper.sent .nex-msg-hover-dock {
+  right: 18px;
+}
+
+.message-wrapper.received .nex-msg-hover-dock {
+  left: 18px;
+}
+
+.message-wrapper:hover .nex-msg-hover-dock {
+  display: inline-flex;
+}
+
+@keyframes nexDockPop {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.nex-dock-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  width: 26px;
+  height: 26px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nex-dock-btn:hover {
+  background: rgba(0, 242, 255, 0.15);
+  color: #00f2ff;
+  transform: scale(1.15);
+}
+
+.nex-dock-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}
+
+.nex-dock-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 2px;
+}
+
+/* --------------------------------------------------------------------------
+   5. QUICK REACTIONS BAR (Vector Glyphs Only - NO EMOJIS)
+   -------------------------------------------------------------------------- */
+.nex-quick-reactions-strip {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.nex-react-glyph-btn {
+  background: transparent;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11px;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #cbd5e1;
+}
+
+.nex-react-glyph-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: scale(1.25);
+}
+
+.nex-react-glyph-btn.react-like:hover { color: #38bdf8; }
+.nex-react-glyph-btn.react-heart:hover { color: #f43f5e; }
+.nex-react-glyph-btn.react-fire:hover { color: #fb923c; }
+.nex-react-glyph-btn.react-rocket:hover { color: #a855f7; }
+.nex-react-glyph-btn.react-check:hover { color: #22c55e; }
+
+/* --------------------------------------------------------------------------
+   6. THREADED REPLIES SLIDE-OVER DRAWER (Slack / Discord Style)
+   -------------------------------------------------------------------------- */
+.nex-thread-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 90vw;
+  background: #0b1120;
+  border-left: 1px solid rgba(0, 242, 255, 0.25);
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.65);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nex-thread-drawer.open {
+  transform: translateX(0);
+}
+
+.nex-thread-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.nex-thread-title-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nex-thread-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.nex-thread-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 15px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nex-thread-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.nex-thread-parent-box {
+  padding: 14px 18px;
+  background: rgba(15, 23, 42, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nex-thread-parent-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.nex-thread-parent-sender {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #00f2ff;
+}
+
+.nex-thread-parent-time {
+  font-size: 10.5px;
+  color: #64748b;
+}
+
+.nex-thread-parent-content {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #f1f5f9;
+}
+
+.nex-thread-messages-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nex-thread-reply-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 8px 12px;
+}
+
+.nex-thread-reply-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.nex-thread-reply-sender {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.nex-thread-reply-time {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.nex-thread-reply-text {
+  font-size: 12.5px;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.nex-thread-composer-box {
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(15, 23, 42, 0.85);
+  display: flex;
+  gap: 8px;
+}
+
+.nex-thread-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  outline: none;
+  resize: none;
+  height: 38px;
+  transition: border-color 0.2s ease;
+}
+
+.nex-thread-input:focus {
+  border-color: #00f2ff;
+}
+
+.nex-thread-send-btn {
+  background: #00f2ff;
+  border: none;
+  border-radius: 8px;
+  color: #0b1120;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.nex-thread-send-btn:hover {
+  background: #38bdf8;
+  transform: scale(1.05);
+}
+
+/* --------------------------------------------------------------------------
+   7. CODE SNIPPET SYNTAX CONTAINER (Within Message Bubbles)
+   -------------------------------------------------------------------------- */
+.nex-code-snippet-box {
+  margin: 6px 0;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #0d1117;
+  border: 1px solid rgba(0, 242, 255, 0.25);
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  max-width: 100%;
+}
+
+.nex-code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px;
+  background: rgba(22, 27, 34, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nex-code-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nex-code-lang-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #00f2ff;
+  background: rgba(0, 242, 255, 0.12);
+  border: 1px solid rgba(0, 242, 255, 0.3);
+  padding: 2px 7px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.nex-code-title {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.nex-code-copy-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 5px;
+  color: #cbd5e1;
+  padding: 3px 8px;
+  font-size: 10.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s ease;
+}
+
+.nex-code-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-color: #00f2ff;
+}
+
+.nex-code-body {
+  padding: 10px 12px;
+  overflow-x: auto;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #e6edf3;
+  margin: 0;
+  white-space: pre;
+}
+
+/* --------------------------------------------------------------------------
+   8. COMPOSER QUICK FORMATTING BAR (Above Textarea)
+   -------------------------------------------------------------------------- */
+.nex-composer-format-dock {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  background: rgba(11, 17, 32, 0.95);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.nex-format-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.nex-format-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #00f2ff;
+}
+
+.nex-format-sep {
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 4px;
+}
+
+/* --------------------------------------------------------------------------
+   9. SCHEDULED MESSAGE CHIP (In Composer)
+   -------------------------------------------------------------------------- */
+.nex-scheduled-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin: 6px 12px 0;
+  font-size: 11.5px;
+  color: #fbbf24;
+  font-family: 'Inter', sans-serif;
+}
+
+.nex-scheduled-cancel-btn {
+  background: transparent;
+  border: none;
+  color: #fbbf24;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+}
+
+.nex-scheduled-cancel-btn:hover {
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   10. STARRED MESSAGES VAULT DRAWER
+   -------------------------------------------------------------------------- */
+.nex-starred-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 380px;
+  max-width: 90vw;
+  background: #0b1120;
+  border-left: 1px solid rgba(255, 215, 0, 0.25);
+  box-shadow: -10px 0 35px rgba(0, 0, 0, 0.65);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nex-starred-drawer.open {
+  transform: translateX(0);
+}
+
+.nex-starred-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.nex-starred-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffd700;
+}
+
+.nex-starred-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nex-starred-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.nex-starred-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 215, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.nex-starred-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 11px;
+}
+
+.nex-starred-card-sender {
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.nex-starred-card-time {
+  color: #64748b;
+}
+
+.nex-starred-card-text {
+  font-size: 12.5px;
+  color: #e2e8f0;
+  line-height: 1.4;
+}
+
+.nex-starred-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.nex-starred-card-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.nex-starred-card-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* --------------------------------------------------------------------------
+   11. PROFESSIONAL MODAL STYLES (Code Snippet & Schedule)
+   -------------------------------------------------------------------------- */
+.nex-prof-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.82);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.nex-prof-modal-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.nex-prof-modal-window {
+  width: 100%;
+  max-width: 580px;
+  background: #0f172a;
+  border: 1px solid rgba(0, 242, 255, 0.25);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 242, 255, 0.1);
+  border-radius: 16px;
+  overflow: hidden;
+  transform: scale(0.96) translateY(8px);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.nex-prof-modal-backdrop.active .nex-prof-modal-window {
+  transform: scale(1) translateY(0);
+}
+
+.nex-prof-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(15, 23, 42, 0.7);
+}
+
+.nex-prof-modal-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nex-prof-modal-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.nex-prof-field-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.nex-prof-input {
+  width: 100%;
+  background: rgba(3, 7, 18, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.nex-prof-input:focus {
+  border-color: #00f2ff;
+}
+
+.nex-prof-code-textarea {
+  width: 100%;
+  height: 180px;
+  background: #0d1117;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #e6edf3;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  outline: none;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.nex-prof-code-textarea:focus {
+  border-color: #00f2ff;
+}
+
+.nex-prof-modal-footer {
+  padding: 14px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  background: rgba(11, 17, 32, 0.6);
+}
+
+.nex-prof-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  border: none;
+}
+
+.nex-prof-btn.secondary {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+}
+
+.nex-prof-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.nex-prof-btn.primary {
+  background: #00f2ff;
+  color: #0b1120;
+}
+
+.nex-prof-btn.primary:hover {
+  background: #38bdf8;
+  transform: translateY(-1px);
+}
