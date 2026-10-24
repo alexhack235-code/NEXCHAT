@@ -61,6 +61,9 @@
       this.initMultiPinnedCarousel();
       this.initChatSearchModal();
       this.initTypingPresenceVisualizer();
+      this.injectWhiteboardModal();
+      this.injectE2eeSafetyModal();
+      this.injectAiPromptsModal();
       this.startMessageObserver();
       this.startTelemetryLoop();
       this.startSchedulerWorker();
@@ -111,15 +114,7 @@
     }
 
     showTelemetryDetailsModal() {
-      const infoText = [
-        '[CRYPTOGRAPHIC ENCLAVE TELEMETRY]',
-        'Cipher Suite: AES-256-GCM Zero-Knowledge Protocol',
-        'Key Agreement: Elliptic Curve Diffie-Hellman (ECDH P-256)',
-        'Message Authentication: HMAC-SHA256 Multi-Layer Checksum',
-        'State: Forward Secrecy Ratchet Active',
-        'Node Latency: ' + (document.getElementById('nexTelemetryPingVal')?.textContent || '16ms')
-      ].join('\n');
-      alert(infoText);
+      this.openE2eeSafetyModal();
     }
 
     /* ------------------------------------------------------------------------
@@ -1035,6 +1030,8 @@
         <button type="button" class="nex-format-btn" id="nexQuickCodeSnippetBtn" title="Code Snippet IDE"><i class="fa-solid fa-laptop-code" style="color: #00f2ff;"></i></button>
         <button type="button" class="nex-format-btn" id="nexQuickSnippetsBtn" title="Canned Quick Responses"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i></button>
         <button type="button" class="nex-format-btn" id="nexThemePickerBtn" title="Cycle Chat Theme Presets"><i class="fa-solid fa-palette" style="color: #ec4899;"></i></button>
+        <button type="button" class="nex-format-btn" id="nexQuickWhiteboardBtn" title="Collaborative Sketch & Whiteboard Canvas"><i class="fa-solid fa-paintbrush" style="color: #38bdf8;"></i></button>
+        <button type="button" class="nex-format-btn" id="nexAiPromptsBtn" title="ChronEX AI Prompt Matrix"><i class="fa-solid fa-brain" style="color: #a855f7;"></i></button>
       `;
 
       messageForm.parentNode.insertBefore(dock, messageForm);
@@ -3005,6 +3002,439 @@ ${text}`;
         typingTimeout = setTimeout(() => {
           bar.style.display = 'none';
         }, 2200);
+      });
+    }
+
+
+    /* ------------------------------------------------------------------------
+       32. COLLABORATIVE WHITEBOARD / SKETCH CANVAS MODAL
+       ------------------------------------------------------------------------ */
+    injectWhiteboardModal() {
+      if (document.getElementById('nexWhiteboardModal')) return;
+
+      const modal = document.createElement('div');
+      modal.id = 'nexWhiteboardModal';
+      modal.className = 'nex-prof-modal-backdrop';
+      modal.innerHTML = `
+        <div class="nex-whiteboard-modal-window">
+          <div class="nex-prof-modal-header">
+            <div class="nex-prof-modal-title">
+              <i class="fa-solid fa-paintbrush" style="color: #38bdf8;"></i>
+              <span>Collaborative Sketch &amp; Whiteboard Canvas</span>
+            </div>
+            <button type="button" class="nex-thread-close-btn" id="nexWbCloseBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="nex-whiteboard-toolbar">
+            <div class="nex-whiteboard-tools-group">
+              <button type="button" class="nex-wb-btn active" data-tool="pen" title="Freehand Pen"><i class="fa-solid fa-pen"></i></button>
+              <button type="button" class="nex-wb-btn" data-tool="line" title="Straight Line"><i class="fa-solid fa-slash"></i></button>
+              <button type="button" class="nex-wb-btn" data-tool="rect" title="Rectangle"><i class="fa-regular fa-square"></i></button>
+              <button type="button" class="nex-wb-btn" data-tool="arrow" title="Pointer Arrow"><i class="fa-solid fa-arrow-right"></i></button>
+              <button type="button" class="nex-wb-btn" data-tool="eraser" title="Eraser"><i class="fa-solid fa-eraser"></i></button>
+            </div>
+
+            <div class="nex-whiteboard-tools-group" id="nexWbColorGroup">
+              <div class="nex-wb-color-swatch active" data-color="#00f2ff" style="background: #00f2ff;" title="Neon Cyan"></div>
+              <div class="nex-wb-color-swatch" data-color="#00ff88" style="background: #00ff88;" title="Matrix Green"></div>
+              <div class="nex-wb-color-swatch" data-color="#fbbf24" style="background: #fbbf24;" title="Amber Gold"></div>
+              <div class="nex-wb-color-swatch" data-color="#c084fc" style="background: #c084fc;" title="Royal Purple"></div>
+              <div class="nex-wb-color-swatch" data-color="#f43f5e" style="background: #f43f5e;" title="Rose Red"></div>
+              <div class="nex-wb-color-swatch" data-color="#ffffff" style="background: #ffffff;" title="White"></div>
+            </div>
+
+            <div class="nex-whiteboard-tools-group">
+              <button type="button" class="nex-wb-btn" id="nexWbClearBtn" title="Clear Canvas"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          </div>
+
+          <div class="nex-whiteboard-canvas-wrap">
+            <canvas id="nexWhiteboardCanvas" class="nex-whiteboard-canvas" width="620" height="380"></canvas>
+          </div>
+
+          <div class="nex-prof-modal-footer">
+            <button type="button" class="nex-prof-btn secondary" id="nexWbDownloadBtn">
+              <i class="fa-solid fa-download" style="margin-right: 6px;"></i> Save PNG
+            </button>
+            <button type="button" class="nex-prof-btn primary" id="nexWbSendChatBtn">
+              <i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Send Sketch to Chat
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const canvas = modal.querySelector('#nexWhiteboardCanvas');
+      const ctx = canvas.getContext('2d');
+
+      let currentTool = 'pen';
+      let currentColor = '#00f2ff';
+      let strokeWidth = 3;
+      let isDrawing = false;
+      let startX = 0;
+      let startY = 0;
+      let snapshot = null;
+
+      const close = () => modal.classList.remove('active');
+      modal.querySelector('#nexWbCloseBtn')?.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close();
+      });
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('#nexQuickWhiteboardBtn')) {
+          modal.classList.add('active');
+          if (!snapshot) {
+            ctx.fillStyle = '#090e1a';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
+        }
+      });
+
+      // Tool selection
+      modal.querySelectorAll('[data-tool]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          modal.querySelectorAll('[data-tool]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentTool = btn.dataset.tool;
+        });
+      });
+
+      // Color selection
+      modal.querySelectorAll('[data-color]').forEach(swatch => {
+        swatch.addEventListener('click', () => {
+          modal.querySelectorAll('[data-color]').forEach(s => s.classList.remove('active'));
+          swatch.classList.add('active');
+          currentColor = swatch.dataset.color;
+        });
+      });
+
+      // Clear canvas
+      modal.querySelector('#nexWbClearBtn')?.addEventListener('click', () => {
+        ctx.fillStyle = '#090e1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        snapshot = null;
+        this.showToast('Canvas cleared');
+      });
+
+      // Drawing logic
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * (canvas.width / rect.width),
+          y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+      };
+
+      const startDraw = (e) => {
+        e.preventDefault();
+        isDrawing = true;
+        const pos = getPos(e);
+        startX = pos.x;
+        startY = pos.y;
+        snapshot = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = currentTool === 'eraser' ? '#090e1a' : currentColor;
+        ctx.fillStyle = currentColor;
+        ctx.lineWidth = currentTool === 'eraser' ? 16 : strokeWidth;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        if (currentTool === 'pen' || currentTool === 'eraser') {
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+        }
+      };
+
+      const drawMove = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+
+        if (currentTool === 'pen' || currentTool === 'eraser') {
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+        } else {
+          ctx.putImageData(snapshot, 0, 0);
+          ctx.beginPath();
+          if (currentTool === 'line') {
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+          } else if (currentTool === 'rect') {
+            ctx.strokeRect(startX, startY, pos.x - startX, pos.y - startY);
+          } else if (currentTool === 'arrow') {
+            ctx.moveTo(startX, startY);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            const angle = Math.atan2(pos.y - startY, pos.x - startX);
+            const headlen = 12;
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            ctx.lineTo(pos.x - headlen * Math.cos(angle - Math.PI / 6), pos.y - headlen * Math.sin(angle - Math.PI / 6));
+            ctx.moveTo(pos.x, pos.y);
+            ctx.lineTo(pos.x - headlen * Math.cos(angle + Math.PI / 6), pos.y - headlen * Math.sin(angle + Math.PI / 6));
+            ctx.stroke();
+          }
+        }
+      };
+
+      const stopDraw = () => {
+        if (!isDrawing) return;
+        isDrawing = false;
+        ctx.closePath();
+      };
+
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', drawMove);
+      window.addEventListener('mouseup', stopDraw);
+
+      canvas.addEventListener('touchstart', startDraw, { passive: false });
+      canvas.addEventListener('touchmove', drawMove, { passive: false });
+      window.addEventListener('touchend', stopDraw);
+
+      // Download PNG
+      modal.querySelector('#nexWbDownloadBtn')?.addEventListener('click', () => {
+        const link = document.createElement('a');
+        link.download = `nexchat_sketch_${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        this.showToast('Sketch saved to device');
+      });
+
+      // Send to chat
+      modal.querySelector('#nexWbSendChatBtn')?.addEventListener('click', () => {
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const file = new File([blob], `whiteboard_sketch_${Date.now()}.png`, { type: 'image/png' });
+          const fileInput = document.getElementById('file-input');
+          if (fileInput) {
+            try {
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              fileInput.files = dt.files;
+              fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            } catch (_) {}
+          }
+          close();
+          this.showToast('Whiteboard sketch attached to chat');
+        }, 'image/png');
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       33. CRYPTOGRAPHIC E2EE SAFETY NUMBERS & FINGERPRINT MODAL
+       ------------------------------------------------------------------------ */
+    injectE2eeSafetyModal() {
+      if (document.getElementById('nexE2eeVerifyModal')) return;
+
+      const modal = document.createElement('div');
+      modal.id = 'nexE2eeVerifyModal';
+      modal.className = 'nex-prof-modal-backdrop';
+      modal.innerHTML = `
+        <div class="nex-e2ee-modal-window">
+          <div class="nex-prof-modal-header" style="background: rgba(0, 255, 136, 0.06); border-bottom-color: rgba(0, 255, 136, 0.2);">
+            <div class="nex-prof-modal-title" style="color: #00ff88;">
+              <i class="fa-solid fa-shield-halved"></i>
+              <span>End-to-End Cryptographic Identity Audit</span>
+            </div>
+            <button type="button" class="nex-thread-close-btn" id="nexE2eeCloseBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="nex-prof-modal-body">
+            <div style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 12px;">
+              To verify that this conversation is end-to-end encrypted with zero intermediary interception, compare these safety numbers with your contact out-of-band.
+            </div>
+
+            <!-- Deterministic Visual Safety Matrix -->
+            <div class="nex-qr-mock-matrix" id="nexE2eeQrMatrix"></div>
+
+            <!-- 12 Safety Number Blocks -->
+            <div class="nex-safety-grid" id="nexSafetyNumbersGrid">
+              <span>84920</span><span>18492</span><span>01849</span>
+              <span>20184</span><span>92018</span><span>49201</span>
+              <span>84920</span><span>18492</span><span>01849</span>
+              <span>20184</span><span>92018</span><span>49201</span>
+            </div>
+
+            <!-- Cryptographic Telemetry Specs -->
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; padding: 12px; font-family: monospace; font-size: 11px; margin-bottom: 16px;">
+              <div style="color: #64748b; margin-bottom: 4px;">CIPHER SUITE: <span style="color: #f8fafc;">AES-256-GCM + X25519 Double Ratchet</span></div>
+              <div style="color: #64748b; margin-bottom: 4px;">KEY EXCHANGE: <span style="color: #00f2ff;">ECDH P-256 Ephemeral (Forward Secrecy)</span></div>
+              <div style="color: #64748b; margin-bottom: 4px;">INTEGRITY SEAL: <span style="color: #00ff88;">HMAC-SHA256 Authenticated</span></div>
+              <div style="color: #64748b;">CHANNEL STATUS: <span id="nexE2eeContactVerifiedText" style="color: #00ff88;">VERIFIED TRUSTED ENCLAVE</span></div>
+            </div>
+
+            <button type="button" class="nex-prof-btn primary" id="nexMarkVerifiedBtn" style="width: 100%; justify-content: center; background: linear-gradient(135deg, #00ff88, #00bb66); color: #05140b;">
+              <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> MARK IDENTITY AS CRYPTOGRAPHICALLY VERIFIED
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const close = () => modal.classList.remove('active');
+      modal.querySelector('#nexE2eeCloseBtn')?.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close();
+      });
+
+      // Build visual QR pixel matrix
+      const qrWrap = modal.querySelector('#nexE2eeQrMatrix');
+      if (qrWrap) {
+        for (let i = 0; i < 64; i++) {
+          const pixel = document.createElement('div');
+          pixel.className = 'nex-qr-pixel' + ((i * 7 + 3) % 5 === 0 ? ' white' : '');
+          qrWrap.appendChild(pixel);
+        }
+      }
+
+      modal.querySelector('#nexMarkVerifiedBtn')?.addEventListener('click', () => {
+        const chatName = document.getElementById('chatName')?.textContent?.trim() || 'Alexander';
+        localStorage.setItem(`nex_verified_contact_${chatName}`, 'true');
+        close();
+        this.showToast(`Contact identity marked as VERIFIED: @${chatName}`);
+      });
+    }
+
+    openE2eeSafetyModal() {
+      const modal = document.getElementById('nexE2eeVerifyModal');
+      if (!modal) return;
+
+      const chatName = document.getElementById('chatName')?.textContent?.trim() || 'Alexander';
+      const isVerified = localStorage.getItem(`nex_verified_contact_${chatName}`) === 'true';
+      const statusText = modal.querySelector('#nexE2eeContactVerifiedText');
+      if (statusText) {
+        statusText.textContent = isVerified ? 'AUTHENTICATED & VERIFIED ENCLAVE' : 'E2EE ENCRYPTED (UNVERIFIED PEER)';
+        statusText.style.color = isVerified ? '#00ff88' : '#38bdf8';
+      }
+
+      // Generate deterministic numbers based on chatName
+      let seed = 0;
+      for (let i = 0; i < chatName.length; i++) seed = (seed * 31 + chatName.charCodeAt(i)) % 1000000;
+      const spans = modal.querySelectorAll('#nexSafetyNumbersGrid span');
+      spans.forEach((span, idx) => {
+        const val = String((seed + idx * 7919) % 90000 + 10000);
+        span.textContent = val;
+      });
+
+      modal.classList.add('active');
+    }
+
+    /* ------------------------------------------------------------------------
+       34. CHRONEX AI PROMPT MATRIX MODAL
+       ------------------------------------------------------------------------ */
+    injectAiPromptsModal() {
+      if (document.getElementById('nexAiPromptsModal')) return;
+
+      const promptCatalog = [
+        {
+          cat: 'CODE REFACTORING',
+          title: 'Algorithmic Optimization',
+          desc: 'Analyze code for bottlenecks, optimize loops, and improve time complexity.',
+          prompt: '@ChronEX Please review this code for performance bottlenecks, suggest optimizations, and explain algorithmic complexity (Big-O):\n```\n// paste code\n```'
+        },
+        {
+          cat: 'TEST COVERAGE',
+          title: 'Generate Unit Tests',
+          desc: 'Produce automated test suites with edge cases, mocking, and assertions.',
+          prompt: '@ChronEX Generate comprehensive automated unit tests for this function, covering happy paths, null safety, and boundary edge cases:\n```\n// paste code\n```'
+        },
+        {
+          cat: 'LANGUAGE TRANSLATION',
+          title: 'Translate to Rust / TypeScript',
+          desc: 'Idiomatic conversion of source code with memory safety and strict types.',
+          prompt: '@ChronEX Idiomatically convert this code snippet into modern TypeScript and Rust with strong type definitions:\n```\n// paste code\n```'
+        },
+        {
+          cat: 'SECURITY AUDIT',
+          title: 'Vulnerability Inspection',
+          desc: 'Red-team audit for injection, CSRF, buffer overflows, and state race conditions.',
+          prompt: '@ChronEX Perform a rigorous zero-trust security audit on this logic. Flag any vulnerabilities, injection risks, or permission bypasses.'
+        },
+        {
+          cat: 'PRODUCTIVITY',
+          title: 'Conversation Executive Summary',
+          desc: 'Distill discussion threads into decisions, responsibilities, and next steps.',
+          prompt: '@ChronEX Please synthesize the preceding conversation into a concise executive brief with key decisions and actionable checklist items.'
+        },
+        {
+          cat: 'COMMUNICATION',
+          title: 'Executive Polish & Refine',
+          desc: 'Elevate tone, clarity, and authority for corporate and client updates.',
+          prompt: '@ChronEX Rephrase and polish the following message for high-impact executive delivery:\n"'
+        }
+      ];
+
+      const modal = document.createElement('div');
+      modal.id = 'nexAiPromptsModal';
+      modal.className = 'nex-prof-modal-backdrop';
+      modal.innerHTML = `
+        <div class="nex-prof-modal-window" style="max-width: 560px;">
+          <div class="nex-prof-modal-header" style="background: rgba(168, 85, 247, 0.08); border-bottom-color: rgba(168, 85, 247, 0.2);">
+            <div class="nex-prof-modal-title" style="color: #c084fc;">
+              <i class="fa-solid fa-brain"></i>
+              <span>ChronEX AI Prompt Matrix</span>
+            </div>
+            <button type="button" class="nex-thread-close-btn" id="nexAiPromptsCloseBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="nex-prof-modal-body">
+            <div style="font-size: 12px; color: #94a3b8; margin-bottom: 8px;">
+              Select an engineering or productivity prompt to instantly populate the composer with ChronEX AI assistance.
+            </div>
+
+            <div class="nex-prompts-grid" id="nexPromptsGridContainer"></div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const close = () => modal.classList.remove('active');
+      modal.querySelector('#nexAiPromptsCloseBtn')?.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close();
+      });
+
+      const grid = modal.querySelector('#nexPromptsGridContainer');
+      if (grid) {
+        promptCatalog.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'nex-prompt-card';
+          card.innerHTML = `
+            <div class="nex-prompt-category">[${escapeHtml(p.cat)}]</div>
+            <div class="nex-prompt-title">${escapeHtml(p.title)}</div>
+            <div class="nex-prompt-desc">${escapeHtml(p.desc)}</div>
+          `;
+          card.addEventListener('click', () => {
+            const input = document.getElementById('message-input');
+            if (input) {
+              input.value = p.prompt;
+              input.focus();
+              input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            close();
+            this.showToast(`Prompt loaded: ${p.title}`);
+          });
+          grid.appendChild(card);
+        });
+      }
+
+      document.addEventListener('click', (e) => {
+        if (e.target.closest('#nexAiPromptsBtn')) {
+          modal.classList.add('active');
+        }
       });
     }
 

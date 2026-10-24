@@ -2231,3 +2231,219 @@
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+
+/* --------------------------------------------------------------------------
+   33. COLLABORATIVE WHITEBOARD / SKETCH CANVAS MODAL
+   -------------------------------------------------------------------------- */
+.nex-whiteboard-modal-window {
+  background: rgba(11, 17, 32, 0.98);
+  border: 1.5px solid rgba(0, 242, 255, 0.45);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 242, 255, 0.2);
+  width: 100%;
+  max-width: 660px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.nex-whiteboard-toolbar {
+  padding: 10px 16px;
+  background: rgba(0, 0, 0, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.nex-whiteboard-tools-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nex-wb-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-size: 13px;
+}
+
+.nex-wb-btn:hover, .nex-wb-btn.active {
+  background: rgba(0, 242, 255, 0.2);
+  border-color: #00f2ff;
+  color: #00f2ff;
+}
+
+.nex-wb-color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.nex-wb-color-swatch:hover, .nex-wb-color-swatch.active {
+  transform: scale(1.25);
+  border-color: #ffffff;
+}
+
+.nex-whiteboard-canvas-wrap {
+  position: relative;
+  background: #060913;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.nex-whiteboard-canvas {
+  background: #090e1a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  cursor: crosshair;
+  touch-action: none;
+  max-width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   34. CRYPTOGRAPHIC E2EE SAFETY NUMBERS & FINGERPRINT MODAL
+   -------------------------------------------------------------------------- */
+.nex-e2ee-modal-window {
+  background: rgba(11, 17, 32, 0.98);
+  border: 1.5px solid rgba(0, 255, 136, 0.45);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 255, 136, 0.2);
+  width: 100%;
+  max-width: 520px;
+  overflow: hidden;
+}
+
+.nex-safety-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #00ff88;
+  letter-spacing: 1px;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.nex-qr-mock-matrix {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 16px;
+  background: #ffffff;
+  padding: 8px;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 2px;
+}
+
+.nex-qr-pixel {
+  background: #000000;
+  border-radius: 1px;
+}
+.nex-qr-pixel.white {
+  background: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   35. CHRONEX AI PROMPT MATRIX MODAL
+   -------------------------------------------------------------------------- */
+.nex-prompts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  margin-top: 12px;
+}
+
+.nex-prompt-card {
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nex-prompt-card:hover {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.4);
+  transform: translateY(-2px);
+}
+
+.nex-prompt-category {
+  font-family: monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #c084fc;
+  letter-spacing: 0.5px;
+}
+
+.nex-prompt-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.nex-prompt-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   36. VOICE NOTE AUDIO BOOST BUTTON
+   -------------------------------------------------------------------------- */
+.nex-voice-boost-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #cbd5e1;
+  font-size: 10.5px;
+  font-family: monospace;
+  padding: 2px 7px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nex-voice-boost-btn:hover {
+  background: rgba(251, 191, 36, 0.2);
+  border-color: #fbbf24;
+  color: #fbbf24;
+}
+
+.nex-voice-boost-btn.active {
+  background: rgba(251, 191, 36, 0.25);
+  border-color: #fbbf24;
+  color: #fbbf24;
+  font-weight: 700;
+}
