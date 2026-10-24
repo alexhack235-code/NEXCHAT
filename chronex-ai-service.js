@@ -606,7 +606,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       const raw = localStorage.getItem(key);
       const now = Date.now();
       const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-      const FREE_LIMIT = 100; // Substantially increased from 10 to 100 requests per 24 hours!
+      const FREE_LIMIT = 1000000; // Zero limitations: Uncapped requests per 24 hours!
 
       if (!raw) {
         return { allowed: true, count: 0, remaining: FREE_LIMIT, limit: FREE_LIMIT, resetInHours: 24 };
@@ -626,7 +626,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
       return { allowed: true, count: count, remaining: FREE_LIMIT - count, limit: FREE_LIMIT };
     } catch (_) {
-      return { allowed: true, count: 0, remaining: 100, limit: 100 };
+      return { allowed: true, count: 0, remaining: 1000000, limit: 1000000 };
     }
   }
 

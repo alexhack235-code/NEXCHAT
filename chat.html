@@ -1748,6 +1748,113 @@
                     </button>
                   </div>
                 </div>
+              
+                <!-- 120 FPS GPU HARDWARE ACCELERATION -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.3); background: rgba(0, 255, 102, 0.03);">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="color: #00ff66; font-size: 14px;"><i class="fa-solid fa-gauge-high"></i> Hardware-Accelerated 120 FPS Chat Engine</strong>
+                      <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Isolates message list into dedicated GPU compositor layers for zero-stutter momentum scrolling and instant optimistic rendering.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="gpuAccelerationToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- CHAT BUBBLE CORNER GEOMETRY -->
+                <div class="settings-card">
+                  <label for="bubbleCornerSelect"><strong>Bubble Corner Geometry &amp; Curvature</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 2px 0 8px 0;">Configure dynamic border-radius geometry across direct and group chat messages.</p>
+                  <select id="bubbleCornerSelect" class="settings-select">
+                    <option value="modern" selected>Modern Curvature (16px / 4px asymmetric) [Default]</option>
+                    <option value="pebble">Smooth Ultra-Pebble (22px round)</option>
+                    <option value="hex">Cyber Hex Angular (4px chamfered)</option>
+                    <option value="classic">Compact Classic (8px rounded)</option>
+                    <option value="terminal">Monolith Terminal (0px square matrix)</option>
+                  </select>
+                </div>
+
+                <!-- DOUBLE-TAP QUICK REACTION -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong><i class="fa-solid fa-bolt" style="color: #ffd700;"></i> Double-Tap Quick Reaction</strong>
+                      <p style="font-size: 12px; color: #94a3b8; margin: 2px 0 0 0;">Instantly send your favorite reaction when double-tapping any message bubble.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="doubleTapReactionToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="margin-top: 10px;">
+                    <label for="doubleTapReactionGlyph" style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">Default Quick Reaction Symbol:</label>
+                    <select id="doubleTapReactionGlyph" class="settings-select">
+                      <option value="heart" selected>[HEART] Luxury Crimson Heart</option>
+                      <option value="fire">[FIRE] Cyber Flame</option>
+                      <option value="thumbs_up">[THUMBS UP] Verified Confirm</option>
+                      <option value="star">[STAR] Golden Star</option>
+                      <option value="check">[CHECK] Matrix Verified Checkmark</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- UNRESTRICTED MEDIA AUTO-DOWNLOAD QUALITY -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 242, 255, 0.25); background: rgba(0, 242, 255, 0.02);">
+                  <div style="margin-bottom: 8px;">
+                    <strong style="color: #00f2ff; font-size: 14px;"><i class="fa-solid fa-photo-film"></i> Unrestricted Media Quality &amp; Auto-Download</strong>
+                    <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Zero compression limits. Deliver full 4K resolutions and pristine audio recordings.</p>
+                  </div>
+                  <label for="mediaDownloadQualitySelect" style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">Download Resolution Tier:</label>
+                  <select id="mediaDownloadQualitySelect" class="settings-select">
+                    <option value="4k" selected>Unrestricted 4K Ultra High-Def (Original Uncompressed) [Recommended]</option>
+                    <option value="1080p">Balanced 1080p WebP</option>
+                    <option value="720p">Data Saver 720p</option>
+                  </select>
+
+                  <div class="luxury-toggle-row" style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);">
+                    <div>
+                      <strong style="font-size: 12.5px;">Unrestricted Cellular Downloads</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Allow 4K original media downloads over mobile data without throttling.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="unrestrictedCellularDataToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="luxury-toggle-row" style="margin-top: 8px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">Predictive Media Preloader</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Pre-buffer next 3 upcoming media nodes in conversation for zero wait playback.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="mediaPreloadNextToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- LOCAL MESSAGE CACHE & STORAGE SUITE -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div>
+                      <strong><i class="fa-solid fa-database" style="color: #10b981;"></i> Message Memory Cache &amp; Storage</strong>
+                      <p style="font-size: 12px; color: #8b949e; margin: 2px 0 0 0;">High-speed RAM buffer and IndexedDB offline cache telemetry.</p>
+                    </div>
+                    <span id="chatCacheSizeBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(16, 185, 129, 0.15); color: #10b981; font-family: monospace; border: 1px solid rgba(16, 185, 129, 0.3);">4.2 MB Cached</span>
+                  </div>
+                  <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                    <button type="button" id="purgeChatCacheBtn" class="btn-secondary" style="flex: 1; font-size: 12px; padding: 7px 12px;">
+                      <i class="fa-solid fa-broom"></i> Purge Transient Cache
+                    </button>
+                    <button type="button" id="exportChatJsonBtn" class="btn-secondary" style="flex: 1; font-size: 12px; padding: 7px 12px;">
+                      <i class="fa-solid fa-file-export"></i> Export Chat Logs (.JSON)
+                    </button>
+                  </div>
+                </div>
+
               </div>
 
               <!-- TAB 3: APPEARANCE & THEMES -->
@@ -1817,6 +1924,84 @@
                     <button id="removeChatBackgroundBtn" class="btn-danger" style="flex: 1;"><i class="fa-solid fa-trash"></i> Clear</button>
                   </div>
                 </div>
+              
+                <!-- 8 BUILT-IN CYBER WALLPAPER PRESETS -->
+                <div class="settings-card" id="nexWallpaperPresetsCard">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <strong style="color: #00ff66;"><i class="fa-solid fa-image"></i> Instant Cyber Wallpaper Presets</strong>
+                    <span style="font-size: 11px; color: var(--text-muted);">1-Tap Live Apply</span>
+                  </div>
+                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">Instant hardware-rendered backgrounds designed for maximum OLED contrast and readability.</p>
+                  
+                  <div class="nex-wallpaper-presets-grid" id="nexWallpaperPresetsGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                    <button type="button" class="nex-wall-preset-btn active" data-preset="nebula" style="background: linear-gradient(135deg, #090d16 0%, #0d1b2a 50%, #001f3f 100%);">
+                      <span>Deep Nebula</span>
+                    </button>
+                    <button type="button" class="nex-wall-preset-btn" data-preset="oled" style="background: #000000; border: 1px solid #333;">
+                      <span>Pure OLED</span>
+                    </button>
+                    <button type="button" class="nex-wall-preset-btn" data-preset="matrix" style="background: radial-gradient(ellipse at bottom, #001a08 0%, #020704 100%);">
+                      <span>Matrix Rain</span>
+                    </button>
+                    <button type="button" class="nex-wall-preset-btn" data-preset="synthwave" style="background: linear-gradient(180deg, #0c0827 0%, #1a0b36 50%, #2e0854 100%);">
+                      <span>Tron Synth</span>
+                    </button>
+                    <button type="button" class="nex-wall-preset-btn" data-preset="carbon" style="background: linear-gradient(135deg, #111418 0%, #0b0d10 100%);">
+                      <span>Carbon Fiber</span>
+                    </button>
+                    <button type="button" class="nex-wall-preset-btn" data-preset="cyberneon" style="background: linear-gradient(135deg, #0a0e17 0%, #160824 100%);">
+                      <span>Cyber Neon</span>
+                    </button>
+                    <button type="button" class="nex-wall-preset-btn" data-preset="aurora" style="background: linear-gradient(135deg, #02181a 0%, #07121b 100%);">
+                      <span>Arctic Aurora</span>
+                    </button>
+                    <button type="button" class="nex-wall-preset-btn" data-preset="obsidian" style="background: linear-gradient(180deg, #12141a 0%, #0b0d11 100%);">
+                      <span>Obsidian Slate</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- WALLPAPER DIMMING & BLUR CONTROLS -->
+                <div class="settings-card">
+                  <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <strong>Wallpaper Darkness / Dimming: <span id="wallpaperDimmingValue" style="color: #00ff66;">40%</span></strong>
+                      <span style="font-size: 11px; color: #8b949e;">Text Contrast</span>
+                    </div>
+                    <input type="range" id="wallpaperDimmingSlider" min="0" max="90" value="40" step="5" class="cyber-range-slider" style="width: 100%; margin-top: 8px;">
+                  </div>
+
+                  <div style="margin-top: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <strong>Wallpaper Ambient Blur: <span id="wallpaperBlurValue" style="color: #00f2ff;">0px</span></strong>
+                      <span style="font-size: 11px; color: #8b949e;">Soft Focus</span>
+                    </div>
+                    <input type="range" id="wallpaperBlurSlider" min="0" max="25" value="0" step="1" class="cyber-range-slider" style="width: 100%; margin-top: 8px;">
+                  </div>
+
+                  <div style="margin-top: 14px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                      <strong>Glassmorphism Frosted Opacity: <span id="glassOpacityValue" style="color: #ffd700;">85%</span></strong>
+                      <span style="font-size: 11px; color: #8b949e;">Header &amp; Nav</span>
+                    </div>
+                    <input type="range" id="glassOpacitySlider" min="40" max="100" value="85" step="5" class="cyber-range-slider" style="width: 100%; margin-top: 8px;">
+                  </div>
+                </div>
+
+                <!-- HIGH-CONTRAST BUBBLE BORDERS -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>High-Contrast Neon Bubble Borders</strong>
+                      <p>Renders a crisp 1px neon accent outline around all message bubbles for maximum readability.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="highContrastBordersToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
               </div>
 
               <!-- TAB 4: SOUNDS & ALERTS -->
@@ -1871,6 +2056,74 @@
                     <option value="skype">Skype Tone</option>
                   </select>
                 </div>
+              
+                <!-- MASTER AUDIO & SOUNDBOARD VOLUME SLIDER -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong>Master Soundboard &amp; FX Volume: <span id="soundVolumeValue" style="color: #00ff66;">85%</span></strong>
+                    <button type="button" id="testVolumePopBtn" class="btn-secondary" style="font-size: 11px; padding: 2px 8px;"><i class="fa-solid fa-volume-high"></i> Pop</button>
+                  </div>
+                  <input type="range" id="soundVolumeSlider" min="0" max="100" value="85" step="5" class="cyber-range-slider" style="width: 100%; margin-top: 8px;">
+                </div>
+
+                <!-- NOTIFICATION CHIME PACK -->
+                <div class="settings-card">
+                  <label for="notifChimeSelect"><strong>Notification Chime Sound Pack</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 2px 0 8px 0;">Synthesized zero-latency Web Audio chime for incoming direct messages.</p>
+                  <div style="display: flex; gap: 8px; align-items: center;">
+                    <select id="notifChimeSelect" class="settings-select" style="flex: 1;">
+                      <option value="cyber_pop" selected>Cyber Pop (Sub-bass Transient Click) [Default]</option>
+                      <option value="sonar_ping">Sonar Ping (High Crystal Resonant)</option>
+                      <option value="laser_pulse">Laser Pulse (Retro Sci-Fi Blip)</option>
+                      <option value="matrix_click">Matrix Keystroke (Tactile Mechanical)</option>
+                      <option value="glass_chime">Luxury Glass (Harmonic Bell)</option>
+                      <option value="silent">Silent (Tactile Vibration Only)</option>
+                    </select>
+                    <button type="button" id="testChimeBtn" class="btn-primary" style="white-space: nowrap; font-size: 12px; padding: 8px 12px;">
+                      <i class="fa-solid fa-play"></i> Preview
+                    </button>
+                  </div>
+                </div>
+
+                <!-- VOICE NOTE AUTO-PLAY NEXT -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="color: #00f2ff;"><i class="fa-solid fa-forward-step"></i> Voice Note Auto-Play Next</strong>
+                      <p>Automatically play consecutive voice notes in conversation history without stopping.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="voiceAutoPlayNextToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- VOICE AUDIO BOOSTER DSP DEFAULT (+6dB GAIN) -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="color: #fbbf24;"><i class="fa-solid fa-bolt"></i> Always-On +6dB Voice Audio Booster</strong>
+                      <p>Engage Web Audio API GainNode pre-amplifier for voice notes automatically to ensure clear voice projection.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="voiceBoostDefaultToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- HAPTIC FEEDBACK INTENSITY -->
+                <div class="settings-card">
+                  <label for="hapticIntensitySelect"><strong>Tactile Haptic Feedback Intensity</strong></label>
+                  <select id="hapticIntensitySelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="medium" selected>Crisp Feedback (Medium Tactile) [Default]</option>
+                    <option value="light">Subtle Click (Light Tactile)</option>
+                    <option value="heavy">High-Impact Pulse (Heavy Haptic)</option>
+                    <option value="off">Haptics Disabled</option>
+                  </select>
+                </div>
+
               </div>
 
 
@@ -2144,6 +2397,58 @@
                     <p style="color: var(--text-muted); text-align: center; padding: 14px;">Loading pending requests...</p>
                   </div>
                 </div>
+              
+                <!-- PRIVACY SCREEN BLUR SHIELD -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(0, 242, 255, 0.03);">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="color: #00f2ff;"><i class="fa-solid fa-eye-slash"></i> Privacy Screen Blur on App Switch</strong>
+                      <p>Instantly obscures chat canvas with Gaussian blur whenever you switch windows, switch tabs, or open task switcher.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="screenBlurShieldToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- PREVENT MESSAGE FORWARDING & COPYING -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong><i class="fa-solid fa-ban" style="color: #ef4444;"></i> Forwarding &amp; Copy Restriction</strong>
+                      <p>Prevent other participants from forwarding your direct messages or saving media to external chats.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="preventForwardingToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- APP INACTIVITY LOCK TIMEOUT -->
+                <div class="settings-card">
+                  <label for="appInactivityLockSelect"><strong>App Inactivity PIN Lock Timeout</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 2px 0 8px 0;">Automatically lock NEXCHAT behind Cipher PIN when left unattended.</p>
+                  <select id="appInactivityLockSelect" class="settings-select">
+                    <option value="never" selected>Never [Default]</option>
+                    <option value="immediate">Immediately on Background</option>
+                    <option value="1m">1 Minute Inactivity</option>
+                    <option value="5m">5 Minutes Inactivity</option>
+                    <option value="15m">15 Minutes Inactivity</option>
+                  </select>
+                </div>
+
+                <!-- PROFILE VISIBILITY RADAR -->
+                <div class="settings-card">
+                  <label for="profileVisibilitySelect"><strong>Profile Avatar &amp; Bio Visibility</strong></label>
+                  <select id="profileVisibilitySelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="everyone" selected>Public (Visible to All Users) [Default]</option>
+                    <option value="contacts">Direct Contacts Only</option>
+                    <option value="nobody">Stealth Enclave (Hidden from Everyone)</option>
+                  </select>
+                </div>
+
               </div>
 
               <!-- TAB 6: REALTIME MESSAGING ENGINE -->
@@ -2205,6 +2510,28 @@
                     </label>
                   </div>
                 </div>
+              
+                <!-- LIVE PHOENIX WEBSOCKET MESH TELEMETRY -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.3); background: rgba(0, 255, 102, 0.04);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <strong style="color: #00ff66;"><i class="fa-solid fa-tower-broadcast"></i> Live Network Telemetry &amp; Mesh Monitor</strong>
+                    <span id="cloudLivePingDisplay" style="font-size: 11px; padding: 2px 8px; border-radius: 6px; background: rgba(0, 255, 102, 0.15); color: #00ff66; font-family: monospace; border: 1px solid rgba(0, 255, 102, 0.3);">12ms Optimal</span>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; margin-bottom: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                      <div style="color: #8b949e; font-size: 11px;">PROTOCOL</div>
+                      <div style="color: #fff; font-weight: 700; margin-top: 2px;">Phoenix WebSocket + E2EE</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.06);">
+                      <div style="color: #8b949e; font-size: 11px;">SESSION DATA</div>
+                      <div id="cloudDataTransferredDisplay" style="color: #00f2ff; font-weight: 700; margin-top: 2px;">2.4 MB Transferred</div>
+                    </div>
+                  </div>
+                  <button type="button" id="btnForceCloudReconnect" class="btn-primary" style="width: 100%; font-size: 12px; padding: 8px;">
+                    <i class="fa-solid fa-arrows-rotate"></i> Force Realtime WebSocket Resync
+                  </button>
+                </div>
+
               </div>
 
               <!-- TAB 7: CHRONEX AI STUDIO -->
@@ -2223,7 +2550,7 @@
                     </div>
                     <div class="telemetry-stat">
                       <span class="telemetry-label">FREE DAILY QUOTA</span>
-                      <span class="telemetry-value text-cyan" id="aiStudioQuotaDisplay">100 / 100 REQUESTS</span>
+                      <span class="telemetry-value text-cyan" id="aiStudioQuotaDisplay">UNLIMITED / UNRESTRICTED</span>
                     </div>
                     <div class="telemetry-stat">
                       <span class="telemetry-label">PIPELINE LATENCY</span>
@@ -2361,6 +2688,61 @@
                     <div id="selfAIUserListItems" style="display: grid; gap: 6px;"></div>
                   </div>
                 </div>
+              
+                <!-- CHRONEX SYSTEM PERSONA & ROLE SELECTOR -->
+                <div class="settings-card">
+                  <label for="aiPersonaRoleSelect"><strong>ChronEX Autonomous Persona &amp; System Role</strong></label>
+                  <p style="font-size: 12px; color: #8b949e; margin: 2px 0 8px 0;">Calibrate how ChronEX structures responses, code patterns, and reasoning.</p>
+                  <select id="aiPersonaRoleSelect" class="settings-select">
+                    <option value="engineer" selected>Senior Software Engineer &amp; Security Architect [Default]</option>
+                    <option value="fullstack">Full-Stack Polyglot &amp; Performance Optimizer</option>
+                    <option value="security">Cybersecurity Penetration Tester &amp; Threat Analyst</option>
+                    <option value="creative">Creative Narrative Genius &amp; Copywriter</option>
+                    <option value="socratic">Ultra-Concise Socratic Tutor</option>
+                    <option value="custom">Custom Autonomous Persona Directive...</option>
+                  </select>
+                  <div id="aiCustomPersonaWrap" style="display: none; margin-top: 10px;">
+                    <textarea id="aiCustomPersonaInput" class="settings-input" rows="3" placeholder="Enter custom system role directive..." style="width: 100%; box-sizing: border-box; resize: vertical; font-family: monospace; font-size: 12px;"></textarea>
+                  </div>
+                </div>
+
+                <!-- MAX TOKEN OUTPUT DEPTH -->
+                <div class="settings-card">
+                  <label for="aiMaxTokensSelect"><strong>Max Token Output Depth (Response Length)</strong></label>
+                  <select id="aiMaxTokensSelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="4096" selected>Unrestricted Maximum (4096 Tokens) [Recommended]</option>
+                    <option value="2048">Deep Exploration (2048 Tokens)</option>
+                    <option value="1024">Standard Flow (1024 Tokens)</option>
+                    <option value="256">Concise &amp; Rapid (256 Tokens)</option>
+                  </select>
+                </div>
+
+                <!-- CODE SYNTAX HIGHLIGHTING THEME -->
+                <div class="settings-card">
+                  <label for="aiCodeThemeSelect"><strong>Code Syntax Highlighting Palette</strong></label>
+                  <select id="aiCodeThemeSelect" class="settings-select" style="margin-top: 6px;">
+                    <option value="emerald" selected>Cyber Matrix Emerald [Default]</option>
+                    <option value="dracula">Dracula Night</option>
+                    <option value="monokai">Monokai Pro</option>
+                    <option value="onedark">One Dark</option>
+                    <option value="nord">Nord Frost</option>
+                  </select>
+                </div>
+
+                <!-- SPEECH SYNTHESIS TTS AUTO-NARRATOR -->
+                <div class="settings-card">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong><i class="fa-solid fa-volume-high" style="color: #67e8f9;"></i> Neural Voice Output (TTS)</strong>
+                      <p>Narrates incoming ChronEX AI responses using browser SpeechSynthesis API in real time.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="aiTtsAutoSpeakToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
               </div>
 
               <!-- TAB: NEURAL PROTOCOLS & MESH -->
@@ -2570,6 +2952,34 @@
                   <button id="openTerminalBtn" class="btn-primary" style="width: 100%; font-weight: 700; margin-bottom: 10px;"><i class="fa-solid fa-terminal"></i> Open NEXCHAT Terminal</button>
                   <button id="fileComplaintBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-envelope"></i> Send Feedback to NEX_DEV</button>
                 </div>
+
+                <!-- DEVELOPER DIAGNOSTICS & BENCHMARK -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 242, 255, 0.3); background: rgba(0, 242, 255, 0.04);">
+                  <div style="margin-bottom: 8px;">
+                    <strong style="color: #00f2ff;"><i class="fa-solid fa-microchip"></i> System Diagnostics &amp; Frame Rate Benchmark</strong>
+                    <p style="font-size: 12px; color: #8b949e; margin: 4px 0 0 0;">Inspect GPU acceleration status, hardware viewport telemetry, and test 120 FPS render loop.</p>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 11.5px; margin-bottom: 10px;">
+                    <div style="background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px;">
+                      <span style="color: #8b949e;">Engine:</span>
+                      <strong style="color: #00ff66; display: block;">v3.4.0 High-Perf</strong>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.4); padding: 8px; border-radius: 6px;">
+                      <span style="color: #8b949e;">GPU Layering:</span>
+                      <strong style="color: #00f2ff; display: block;" id="diagGpuStatus">Active (120 FPS)</strong>
+                    </div>
+                  </div>
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button type="button" id="runFpsBenchmarkBtn" class="btn-secondary" style="flex: 1; font-size: 12px; padding: 8px 12px;">
+                      <i class="fa-solid fa-gauge-simple-high"></i> Run 120 FPS Benchmark
+                    </button>
+                    <button type="button" id="copyDiagnosticsReportBtn" class="btn-secondary" style="flex: 1; font-size: 12px; padding: 8px 12px;">
+                      <i class="fa-solid fa-copy"></i> Copy Diagnostics
+                    </button>
+                  </div>
+                  <div id="benchmarkResultDisplay" style="font-size: 11.5px; margin-top: 8px; font-family: monospace; min-height: 18px; color: #00ff66;"></div>
+                </div>
+
               </div>
 
             </div>

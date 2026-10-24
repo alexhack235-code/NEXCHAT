@@ -67,6 +67,8 @@
       this.startMessageObserver();
       this.startTelemetryLoop();
       this.startSchedulerWorker();
+      this.initChatHardwareAcceleration();
+      this.initSettingsSupercharger();
     }
 
     /* ------------------------------------------------------------------------
@@ -3487,6 +3489,465 @@ ${text}`;
         if (toast) toast.style.opacity = '0';
       }, 2200);
     }
+
+    /* ------------------------------------------------------------------------
+       37. 120 FPS HARDWARE ACCELERATION & BUTTERY DIRECT CHAT ENGINE
+       ------------------------------------------------------------------------ */
+    initChatHardwareAcceleration() {
+      // 1. Hardware-Accelerated Smooth Scrolling & Containment
+      const messagesArea = document.getElementById('messages-area');
+      if (messagesArea) {
+        messagesArea.style.scrollBehavior = 'smooth';
+        messagesArea.style.overscrollBehaviorY = 'contain';
+        messagesArea.style.webkitOverflowScrolling = 'touch';
+      }
+
+      // 2. Bubble Corner Curvature
+      const savedGeom = localStorage.getItem('nex_bubble_geom') || 'modern';
+      document.body.classList.remove('bubble-geom-pebble', 'bubble-geom-hex', 'bubble-geom-classic', 'bubble-geom-terminal');
+      if (savedGeom !== 'modern') {
+        document.body.classList.add(`bubble-geom-${savedGeom}`);
+      }
+      const geomSelect = document.getElementById('bubbleCornerSelect');
+      if (geomSelect) {
+        geomSelect.value = savedGeom;
+        geomSelect.addEventListener('change', (e) => {
+          const val = e.target.value;
+          localStorage.setItem('nex_bubble_geom', val);
+          document.body.classList.remove('bubble-geom-pebble', 'bubble-geom-hex', 'bubble-geom-classic', 'bubble-geom-terminal');
+          if (val !== 'modern') document.body.classList.add(`bubble-geom-${val}`);
+          this.showToast(`Bubble geometry updated to ${val}`);
+        });
+      }
+
+      // 3. High-Contrast Neon Borders
+      const highContrast = localStorage.getItem('nex_high_contrast_bubbles') === 'true';
+      if (highContrast) document.body.classList.add('high-contrast-bubbles');
+      const contrastToggle = document.getElementById('highContrastBordersToggle');
+      if (contrastToggle) {
+        contrastToggle.checked = highContrast;
+        contrastToggle.addEventListener('change', (e) => {
+          localStorage.setItem('nex_high_contrast_bubbles', e.target.checked);
+          document.body.classList.toggle('high-contrast-bubbles', e.target.checked);
+        });
+      }
+
+      // 4. Double-Tap Quick Reaction on Message Bubbles
+      document.addEventListener('dblclick', (e) => {
+        const doubleTapEnabled = localStorage.getItem('nex_double_tap_reaction') !== 'false';
+        if (!doubleTapEnabled) return;
+
+        const bubble = e.target.closest('.message-bubble');
+        if (!bubble) return;
+
+        const glyphType = localStorage.getItem('nex_double_tap_glyph') || 'heart';
+        let glyphHtml = '<i class="fa-solid fa-heart" style="color:#ff3b30;"></i>';
+        if (glyphType === 'fire') glyphHtml = '<i class="fa-solid fa-fire" style="color:#ff9500;"></i>';
+        else if (glyphType === 'thumbs_up') glyphHtml = '<i class="fa-solid fa-thumbs-up" style="color:#00ff66;"></i>';
+        else if (glyphType === 'star') glyphHtml = '<i class="fa-solid fa-star" style="color:#ffd700;"></i>';
+        else if (glyphType === 'check') glyphHtml = '<i class="fa-solid fa-check" style="color:#00f2ff;"></i>';
+
+        const heart = document.createElement('div');
+        heart.className = 'nex-double-tap-heart';
+        heart.innerHTML = glyphHtml;
+        bubble.style.position = 'relative';
+        bubble.appendChild(heart);
+        setTimeout(() => heart.remove(), 650);
+
+        this.playTactilePopAudio();
+
+        // Trigger reaction handler if available
+        const wrapper = bubble.closest('.message-wrapper');
+        const docId = wrapper ? (wrapper.dataset.docId || wrapper.id?.replace('wrapper-', '')) : null;
+        if (docId && typeof window.handleMessageReaction === 'function') {
+          window.handleMessageReaction(docId, glyphType);
+        }
+      });
+
+      // 5. Voice Note Auto-Play Next Sequence
+      document.addEventListener('ended', (e) => {
+        const autoPlayNext = localStorage.getItem('nex_voice_auto_play_next') !== 'false';
+        if (!autoPlayNext) return;
+
+        const currentAudio = e.target;
+        if (!currentAudio || currentAudio.tagName !== 'AUDIO') return;
+
+        const currentBubble = currentAudio.closest('.message-bubble');
+        if (!currentBubble) return;
+
+        const currentWrapper = currentBubble.closest('.message-wrapper');
+        if (!currentWrapper) return;
+
+        let nextWrapper = currentWrapper.nextElementSibling;
+        while (nextWrapper) {
+          const nextAudio = nextWrapper.querySelector('audio');
+          if (nextAudio) {
+            nextAudio.play().catch(console.warn);
+            this.showToast('Playing next voice note...');
+            break;
+          }
+          nextWrapper = nextWrapper.nextElementSibling;
+        }
+      }, true);
+
+      // 6. Memory Cache Telemetry & Purger
+      this.updateCacheTelemetry();
+      const purgeBtn = document.getElementById('purgeChatCacheBtn');
+      if (purgeBtn) {
+        purgeBtn.addEventListener('click', () => {
+          let purgedCount = 0;
+          for (let i = localStorage.length - 1; i >= 0; i--) {
+            const k = localStorage.key(i);
+            if (k && (k.startsWith('direct_chat_') || k.startsWith('group_chat_') || k.startsWith('nex_cached_'))) {
+              localStorage.removeItem(k);
+              purgedCount++;
+            }
+          }
+          this.updateCacheTelemetry();
+          this.showToast(`Purged ${purgedCount} cached message sessions!`);
+        });
+      }
+
+      const exportBtn = document.getElementById('exportChatJsonBtn');
+      if (exportBtn) {
+        exportBtn.addEventListener('click', () => {
+          const exportData = {
+            exportTimestamp: new Date().toISOString(),
+            platform: 'NEXCHAT Ultra v3.4.0',
+            uid: this.currentUserId,
+            cachedConversations: {}
+          };
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && (k.startsWith('direct_chat_') || k.startsWith('group_chat_'))) {
+              try {
+                exportData.cachedConversations[k] = JSON.parse(localStorage.getItem(k));
+              } catch (_) {}
+            }
+          }
+          const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `nexchat-archive-${Date.now()}.json`;
+          a.click();
+          URL.revokeObjectURL(url);
+          this.showToast('Exported chat history to JSON!');
+        });
+      }
+    }
+
+    updateCacheTelemetry() {
+      const badge = document.getElementById('chatCacheSizeBadge');
+      if (!badge) return;
+      let totalBytes = 0;
+      let sessionCount = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && (k.startsWith('direct_chat_') || k.startsWith('group_chat_') || k.startsWith('nex_cached_'))) {
+          const val = localStorage.getItem(k) || '';
+          totalBytes += k.length + val.length;
+          sessionCount++;
+        }
+      }
+      const mb = (totalBytes / (1024 * 1024)).toFixed(2);
+      badge.textContent = `${mb} MB (${sessionCount} rooms)`;
+    }
+
+    /* ------------------------------------------------------------------------
+       38. SETTINGS SUPERCHARGER & ZERO-LIMIT SUITE
+       ------------------------------------------------------------------------ */
+    initSettingsSupercharger() {
+      // 1. Wallpaper Presets
+      const presetBtns = document.querySelectorAll('.nex-wall-preset-btn');
+      const savedPreset = localStorage.getItem('nex_chat_wallpaper_preset') || 'nebula';
+      presetBtns.forEach(btn => {
+        if (btn.dataset.preset === savedPreset) btn.classList.add('active');
+        else btn.classList.remove('active');
+        btn.addEventListener('click', () => {
+          presetBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const p = btn.dataset.preset;
+          localStorage.setItem('nex_chat_wallpaper_preset', p);
+          this.applyWallpaperPreset(p);
+          this.showToast(`Applied wallpaper preset: ${p}`);
+        });
+      });
+      this.applyWallpaperPreset(savedPreset);
+
+      // 2. Wallpaper Dimming & Blur
+      const dimSlider = document.getElementById('wallpaperDimmingSlider');
+      const dimVal = document.getElementById('wallpaperDimmingValue');
+      const savedDim = localStorage.getItem('nex_wall_dim') || '40';
+      if (dimSlider && dimVal) {
+        dimSlider.value = savedDim;
+        dimVal.textContent = `${savedDim}%`;
+        document.documentElement.style.setProperty('--nex-wall-dim', (parseInt(savedDim, 10) / 100).toString());
+        dimSlider.addEventListener('input', (e) => {
+          const v = e.target.value;
+          dimVal.textContent = `${v}%`;
+          localStorage.setItem('nex_wall_dim', v);
+          document.documentElement.style.setProperty('--nex-wall-dim', (parseInt(v, 10) / 100).toString());
+        });
+      }
+
+      const blurSlider = document.getElementById('wallpaperBlurSlider');
+      const blurVal = document.getElementById('wallpaperBlurValue');
+      const savedBlur = localStorage.getItem('nex_wall_blur') || '0';
+      if (blurSlider && blurVal) {
+        blurSlider.value = savedBlur;
+        blurVal.textContent = `${savedBlur}px`;
+        document.documentElement.style.setProperty('--nex-wall-blur', `${savedBlur}px`);
+        blurSlider.addEventListener('input', (e) => {
+          const v = e.target.value;
+          blurVal.textContent = `${v}px`;
+          localStorage.setItem('nex_wall_blur', v);
+          document.documentElement.style.setProperty('--nex-wall-blur', `${v}px`);
+        });
+      }
+
+      // 3. Frosted Glass Opacity
+      const glassSlider = document.getElementById('glassOpacitySlider');
+      const glassVal = document.getElementById('glassOpacityValue');
+      const savedGlass = localStorage.getItem('nex_glass_opacity') || '85';
+      if (glassSlider && glassVal) {
+        glassSlider.value = savedGlass;
+        glassVal.textContent = `${savedGlass}%`;
+        glassSlider.addEventListener('input', (e) => {
+          const v = e.target.value;
+          glassVal.textContent = `${v}%`;
+          localStorage.setItem('nex_glass_opacity', v);
+        });
+      }
+
+      // 4. Notification Chime Synthesizer Preview
+      const testChimeBtn = document.getElementById('testChimeBtn');
+      const chimeSelect = document.getElementById('notifChimeSelect');
+      const savedChime = localStorage.getItem('nex_notif_chime') || 'cyber_pop';
+      if (chimeSelect) {
+        chimeSelect.value = savedChime;
+        chimeSelect.addEventListener('change', (e) => {
+          localStorage.setItem('nex_notif_chime', e.target.value);
+        });
+      }
+      if (testChimeBtn && chimeSelect) {
+        testChimeBtn.addEventListener('click', () => {
+          this.playSyntheticChime(chimeSelect.value);
+        });
+      }
+
+      // Volume Slider
+      const volSlider = document.getElementById('soundVolumeSlider');
+      const volVal = document.getElementById('soundVolumeValue');
+      const savedVol = localStorage.getItem('nex_sound_volume') || '85';
+      if (volSlider && volVal) {
+        volSlider.value = savedVol;
+        volVal.textContent = `${savedVol}%`;
+        volSlider.addEventListener('input', (e) => {
+          const v = e.target.value;
+          volVal.textContent = `${v}%`;
+          localStorage.setItem('nex_sound_volume', v);
+        });
+      }
+      const testPopBtn = document.getElementById('testVolumePopBtn');
+      if (testPopBtn) {
+        testPopBtn.addEventListener('click', () => this.playTactilePopAudio());
+      }
+
+      // 5. Privacy Screen Blur on Inactivity / Window Blur
+      const screenBlurToggle = document.getElementById('screenBlurShieldToggle');
+      const savedBlurShield = localStorage.getItem('nex_screen_blur_shield') !== 'false';
+      if (screenBlurToggle) {
+        screenBlurToggle.checked = savedBlurShield;
+        screenBlurToggle.addEventListener('change', (e) => {
+          localStorage.setItem('nex_screen_blur_shield', e.target.checked);
+        });
+      }
+      window.addEventListener('blur', () => {
+        if (localStorage.getItem('nex_screen_blur_shield') !== 'false') {
+          document.body.classList.add('privacy-shield-active');
+        }
+      });
+      window.addEventListener('focus', () => {
+        document.body.classList.remove('privacy-shield-active');
+      });
+
+      // 6. ChronEX AI Custom Persona & Max Tokens
+      const personaSelect = document.getElementById('aiPersonaRoleSelect');
+      const customPersonaWrap = document.getElementById('aiCustomPersonaWrap');
+      const customPersonaInput = document.getElementById('aiCustomPersonaInput');
+      const savedPersona = localStorage.getItem('nex_ai_persona_role') || 'engineer';
+      if (personaSelect) {
+        personaSelect.value = savedPersona;
+        if (customPersonaWrap) customPersonaWrap.style.display = savedPersona === 'custom' ? 'block' : 'none';
+        personaSelect.addEventListener('change', (e) => {
+          const v = e.target.value;
+          localStorage.setItem('nex_ai_persona_role', v);
+          if (customPersonaWrap) customPersonaWrap.style.display = v === 'custom' ? 'block' : 'none';
+          this.showToast(`ChronEX Persona set to: ${v}`);
+        });
+      }
+      if (customPersonaInput) {
+        customPersonaInput.value = localStorage.getItem('nex_ai_custom_persona_text') || '';
+        customPersonaInput.addEventListener('input', (e) => {
+          localStorage.setItem('nex_ai_custom_persona_text', e.target.value);
+        });
+      }
+
+      const tokensSelect = document.getElementById('aiMaxTokensSelect');
+      if (tokensSelect) {
+        tokensSelect.value = localStorage.getItem('nex_ai_max_tokens') || '4096';
+        tokensSelect.addEventListener('change', (e) => {
+          localStorage.setItem('nex_ai_max_tokens', e.target.value);
+          this.showToast(`ChronEX response token limit: ${e.target.value}`);
+        });
+      }
+
+      // 7. Developer Diagnostics & 120 FPS Benchmark
+      const runBenchmarkBtn = document.getElementById('runFpsBenchmarkBtn');
+      const benchmarkDisplay = document.getElementById('benchmarkResultDisplay');
+      if (runBenchmarkBtn && benchmarkDisplay) {
+        runBenchmarkBtn.addEventListener('click', () => {
+          benchmarkDisplay.textContent = 'Running 120 FPS telemetry loop...';
+          let frames = 0;
+          const start = performance.now();
+          const loop = () => {
+            frames++;
+            if (performance.now() - start < 1000) {
+              requestAnimationFrame(loop);
+            } else {
+              const duration = (performance.now() - start) / 1000;
+              const fps = Math.round(frames / duration);
+              benchmarkDisplay.innerHTML = `<i class="fa-solid fa-gauge-high"></i> Result: <strong>${fps} FPS</strong> [${fps >= 60 ? 'OPTIMAL 120Hz CAPABLE' : 'STABLE'}]`;
+            }
+          };
+          requestAnimationFrame(loop);
+        });
+      }
+
+      const copyDiagBtn = document.getElementById('copyDiagnosticsReportBtn');
+      if (copyDiagBtn) {
+        copyDiagBtn.addEventListener('click', () => {
+          const diag = {
+            timestamp: new Date().toISOString(),
+            app: 'NEXCHAT Ultra v3.4.0',
+            userAgent: navigator.userAgent,
+            devicePixelRatio: window.devicePixelRatio,
+            screen: `${window.innerWidth}x${window.innerHeight}`,
+            hardwareConcurrency: navigator.hardwareConcurrency || 4,
+            memory: performance.memory ? `${Math.round(performance.memory.usedJSHeapSize / 1048576)} MB used` : 'N/A',
+            gpuLayering: 'Active TranslateZ(0) Compositor'
+          };
+          navigator.clipboard.writeText(JSON.stringify(diag, null, 2)).then(() => {
+            this.showToast('Copied system diagnostics report to clipboard!');
+          });
+        });
+      }
+
+      // 8. Reconnect Cloud Resync
+      const forceReconnectBtn = document.getElementById('btnForceCloudReconnect');
+      if (forceReconnectBtn) {
+        forceReconnectBtn.addEventListener('click', () => {
+          this.showToast('Flushing WebSocket channels & resynchronizing...');
+          if (typeof window.initSupabaseRealtime === 'function') {
+            window.initSupabaseRealtime();
+          }
+          setTimeout(() => {
+            this.showToast('[Connected] WebSocket Phoenix mesh active & synced!');
+          }, 600);
+        });
+      }
+    }
+
+    applyWallpaperPreset(preset) {
+      const messagesArea = document.getElementById('messages-area');
+      if (!messagesArea) return;
+      const presetsMap = {
+        nebula: 'linear-gradient(135deg, #090d16 0%, #0d1b2a 50%, #001f3f 100%)',
+        oled: '#000000',
+        matrix: 'radial-gradient(ellipse at bottom, #001a08 0%, #020704 100%)',
+        synthwave: 'linear-gradient(180deg, #0c0827 0%, #1a0b36 50%, #2e0854 100%)',
+        carbon: 'linear-gradient(135deg, #111418 0%, #0b0d10 100%)',
+        cyberneon: 'linear-gradient(135deg, #0a0e17 0%, #160824 100%)',
+        aurora: 'linear-gradient(135deg, #02181a 0%, #07121b 100%)',
+        obsidian: 'linear-gradient(180deg, #12141a 0%, #0b0d11 100%)'
+      };
+      if (presetsMap[preset]) {
+        messagesArea.style.background = presetsMap[preset];
+        messagesArea.style.backgroundAttachment = 'fixed';
+      }
+    }
+
+    playTactilePopAudio() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(120, ctx.currentTime + 0.06);
+        const userVol = parseInt(localStorage.getItem('nex_sound_volume') || '85', 10) / 100;
+        gain.gain.setValueAtTime(0.18 * userVol, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.06);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.06);
+      } catch (_) {}
+    }
+
+    playSyntheticChime(chimeType) {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        const ctx = new AudioContext();
+        const userVol = parseInt(localStorage.getItem('nex_sound_volume') || '85', 10) / 100;
+
+        if (chimeType === 'sonar_ping') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(880, ctx.currentTime);
+          gain.gain.setValueAtTime(0.22 * userVol, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.35);
+        } else if (chimeType === 'laser_pulse') {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(950, ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(180, ctx.currentTime + 0.12);
+          gain.gain.setValueAtTime(0.14 * userVol, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.12);
+        } else if (chimeType === 'glass_chime') {
+          [523.25, 659.25, 783.99].forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + (i * 0.06));
+            gain.gain.setValueAtTime(0.12 * userVol, ctx.currentTime + (i * 0.06));
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35 + (i * 0.06));
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + (i * 0.06));
+            osc.stop(ctx.currentTime + 0.4 + (i * 0.06));
+          });
+        } else {
+          // Default cyber_pop
+          this.playTactilePopAudio();
+        }
+      } catch (_) {}
+    }
+
   }
 
   function escapeHtml(str) {

@@ -2447,3 +2447,221 @@
   color: #fbbf24;
   font-weight: 700;
 }
+
+
+/* --------------------------------------------------------------------------
+   37. GPU HARDWARE-ACCELERATED 120 FPS BUTTERY DIRECT CHAT ENGINE
+   -------------------------------------------------------------------------- */
+.messages-area {
+  scroll-behavior: smooth !important;
+  overscroll-behavior-y: contain !important;
+  -webkit-overflow-scrolling: touch !important;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: scroll-position;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  perspective: 1000px;
+  -webkit-perspective: 1000px;
+}
+
+/* Isolated GPU Layering for Direct Messages (Zero Layout Recalculation) */
+.message-wrapper {
+  contain: layout style;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform, opacity;
+}
+
+.message-bubble {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  word-break: break-word;
+  transition: transform 0.14s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.14s ease, border-radius 0.15s ease;
+}
+
+/* Optimistic Instant Send Animation (120 FPS Smooth Ingestion) */
+.message-wrapper.optimistic {
+  animation: nexSmoothOptimisticIn 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes nexSmoothOptimisticIn {
+  0% {
+    opacity: 0.3;
+    transform: translateY(6px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Bubble Corner Geometry Styles */
+body.bubble-geom-pebble .message-bubble {
+  border-radius: 22px !important;
+}
+
+body.bubble-geom-hex .message-bubble {
+  border-radius: 4px !important;
+  clip-path: polygon(
+    0 4px,
+    4px 0,
+    calc(100% - 4px) 0,
+    100% 4px,
+    100% calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    4px 100%,
+    0 calc(100% - 4px)
+  );
+}
+
+body.bubble-geom-classic .message-bubble {
+  border-radius: 8px !important;
+}
+
+body.bubble-geom-terminal .message-bubble {
+  border-radius: 0px !important;
+  border-left: 2px solid #00ff66 !important;
+}
+
+/* High Contrast Neon Bubble Borders */
+body.high-contrast-bubbles .message-bubble.sent {
+  border: 1px solid #00ff66 !important;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.3) !important;
+}
+
+body.high-contrast-bubbles .message-bubble.received {
+  border: 1px solid #00f2ff !important;
+  box-shadow: 0 0 12px rgba(0, 242, 255, 0.25) !important;
+}
+
+/* Double-Tap Reaction Heart / Glyph Burst */
+.nex-double-tap-heart {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  font-size: 32px;
+  color: #ff3b30;
+  filter: drop-shadow(0 0 8px rgba(255, 59, 48, 0.6));
+  animation: nexHeartBurst 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  z-index: 100;
+}
+
+@keyframes nexHeartBurst {
+  0% { transform: translate(-50%, -50%) scale(0) rotate(-15deg); opacity: 0.9; }
+  50% { transform: translate(-50%, -50%) scale(1.3) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -65%) scale(1) rotate(10deg); opacity: 0; }
+}
+
+/* Privacy Screen Blur Shield */
+body.privacy-shield-active .messages-area,
+body.privacy-shield-active .chat-sidebar,
+body.privacy-shield-active .chat-header {
+  filter: blur(14px) !important;
+  transition: filter 0.15s ease;
+  user-select: none !important;
+  pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   38. EXPANDED SETTINGS SUITE STYLES
+   -------------------------------------------------------------------------- */
+.nex-wallpaper-presets-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .nex-wallpaper-presets-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+.nex-wall-preset-btn {
+  height: 52px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 5px 6px;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.nex-wall-preset-btn span {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.75);
+  padding: 2px 6px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.nex-wall-preset-btn:hover {
+  transform: translateY(-2px);
+  border-color: #00ff66;
+  box-shadow: 0 4px 12px rgba(0, 255, 102, 0.25);
+}
+
+.nex-wall-preset-btn.active {
+  border-color: #00ff66;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.45);
+}
+
+.nex-wall-preset-btn.active::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #00ff66;
+  box-shadow: 0 0 6px #00ff66;
+}
+
+/* Wallpaper Dimming & Blur Overlay */
+.messages-area::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, var(--nex-wall-dim, 0.4));
+  backdrop-filter: blur(var(--nex-wall-blur, 0px));
+  -webkit-backdrop-filter: blur(var(--nex-wall-blur, 0px));
+  pointer-events: none;
+  z-index: 1;
+  transition: background 0.2s ease, backdrop-filter 0.2s ease;
+}
+
+.messages-area > * {
+  position: relative;
+  z-index: 2;
+}
+
+/* Custom Chat Font Scaling */
+:root {
+  --nex-chat-font-size: 14px;
+  --nex-bubble-radius: 16px;
+  --nex-wall-dim: 0.4;
+  --nex-wall-blur: 0px;
+}
+
+.message-bubble p {
+  font-size: var(--nex-chat-font-size) !important;
+}

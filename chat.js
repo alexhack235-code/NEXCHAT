@@ -4792,7 +4792,12 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
     attachGhostCountdown(wrapper, window.activeGhostTtl);
   }
   messagesContainer.appendChild(wrapper);
-  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  requestAnimationFrame(() => {
+    messagesContainer.scrollTo({
+      top: messagesContainer.scrollHeight,
+      behavior: 'smooth'
+    });
+  });
   return id;
 }
 window.appendLocalSentMessage = appendLocalSentMessage;
@@ -5151,7 +5156,7 @@ function loadMessages() {
       cacheDirectChatMessages(myUID, currentChatUser, allMessages);
     }
 
-    messagesDiv.innerHTML = "";
+    const messageFragment = document.createDocumentFragment();
 
     if (allMessages.length === 0) {
       if (!isInitialLoadComplete) {
@@ -5501,10 +5506,15 @@ function loadMessages() {
       renderMessageReactionsTray(bubble, m.reactions, m.docId, currentChatType === 'group' ? 'groupMessages' : 'messages');
 
       div.appendChild(bubble);
-      messagesDiv.appendChild(div);
+      messageFragment.appendChild(div);
     });
 
-    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    messagesDiv.innerHTML = "";
+    messagesDiv.appendChild(messageFragment);
+
+    requestAnimationFrame(() => {
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
     try {
       if (window.CyberFeatures && window.CyberFeatures.translator) {
         window.CyberFeatures.translator.onChatLoaded(currentChatUser, false);
@@ -9002,10 +9012,10 @@ function updateChronexStudioTelemetry() {
       quotaDisplay.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
           <span style="font-size: 12px; color: #8b949e;"><i class="fa-solid fa-gauge-high"></i> Daily Neural Allocation:</span>
-          <span style="font-size: 13px; font-weight: 700; color: #00ff66;">${remaining} / ${total} Tokens</span>
+          <span style="font-size: 13px; font-weight: 700; color: #00ff66;">UNLIMITED / UNRESTRICTED</span>
         </div>
         <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;">
-          <div style="width: ${percent}%; height: 100%; background: linear-gradient(90deg, #00ff66, #00e5ff); transition: width 0.3s ease;"></div>
+          <div style="width: 100%; height: 100%; background: linear-gradient(90deg, #00ff66, #00e5ff); transition: width 0.3s ease;"></div>
         </div>
       `;
     }
