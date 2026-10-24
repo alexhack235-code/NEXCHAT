@@ -1802,6 +1802,7 @@ ${text}`;
             ${barsHtml}
           </div>
           <button type="button" class="nex-voice-speed-pill" title="Toggle Playback Speed">1.0x</button>
+          <button type="button" class="nex-voice-boost-btn" title="Toggle +6dB Audio Booster"><i class="fa-solid fa-volume-high"></i> Boost</button>
         </div>
         <div class="nex-wave-meta-row">
           <span class="nex-wave-timer">0:00 / 0:24</span>
@@ -1868,14 +1869,44 @@ ${text}`;
       });
 
       // Speed Pill
-      const speeds = [1.0, 1.5, 2.0];
+      const speeds = [1.0, 1.25, 1.5, 1.75, 2.0];
       let sIdx = 0;
-      speedPill.addEventListener('click', (e) => {
+      speedPill?.addEventListener('click', (e) => {
         e.stopPropagation();
         sIdx = (sIdx + 1) % speeds.length;
         const s = speeds[sIdx];
         audioEl.playbackRate = s;
-        speedPill.textContent = s.toFixed(1) + 'x';
+        if ('preservesPitch' in audioEl) audioEl.preservesPitch = true;
+        speedPill.textContent = s.toFixed(2).replace(/0$/, '') + 'x';
+        this.showToast(`Playback Speed: ${s}x`);
+      });
+
+      // +6dB Audio Boost DSP via Web Audio GainNode
+      const boostBtn = playerDiv.querySelector('.nex-voice-boost-btn');
+      let isBoosted = false;
+      let gainNode = null;
+      let audioCtx = null;
+
+      boostBtn?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        isBoosted = !isBoosted;
+        boostBtn.classList.toggle('active', isBoosted);
+        try {
+          if (!audioCtx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+              audioCtx = new AudioContext();
+              const source = audioCtx.createMediaElementSource(audioEl);
+              gainNode = audioCtx.createGain();
+              source.connect(gainNode);
+              gainNode.connect(audioCtx.destination);
+            }
+          }
+          if (gainNode) {
+            gainNode.gain.value = isBoosted ? 2.5 : 1.0;
+          }
+        } catch (_) {}
+        this.showToast(isBoosted ? '+6dB Audio Boost Active' : 'Audio Boost Normal');
       });
 
       // Transcribe
