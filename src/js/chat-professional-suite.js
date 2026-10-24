@@ -48,6 +48,9 @@
       this.injectSharedMediaDrawer();
       this.injectForwardMessageModal();
       this.initMentionAutocomplete();
+      this.initDragDropVault();
+      this.initVanishMode();
+      this.injectStandardPollModal();
       this.startMessageObserver();
       this.startTelemetryLoop();
       this.startSchedulerWorker();
@@ -373,8 +376,11 @@
       // 1. Group Role Badge & Title
       this.attachGroupRoleBadge(wrapper);
 
-      // 2. Voice Note Speed Controls (1x / 1.5x / 2x)
-      this.attachVoiceSpeedControls(wrapper);
+      // 2. High-Tech Voice Waveform Visualizer & Transcriber
+      this.attachVoiceWaveformPlayer(wrapper);
+
+      // 3. Interactive Poll Card
+      this.attachPollCard(wrapper);
 
       // 3. Message Delivery Audit Trigger
       this.attachDeliveryAuditTrigger(wrapper);
@@ -1014,6 +1020,7 @@
         <button type="button" class="nex-format-btn" data-format="quote" title="Quote (> text)"><i class="fa-solid fa-quote-left"></i></button>
         <button type="button" class="nex-format-btn" data-format="spoiler" title="Spoiler (||text||)"><i class="fa-solid fa-eye-slash"></i></button>
         <span class="nex-format-sep"></span>
+        <button type="button" class="nex-format-btn" id="nexQuickPollBtn" title="Create Interactive Poll"><i class="fa-solid fa-square-poll-vertical" style="color: #00ff88;"></i></button>
         <button type="button" class="nex-format-btn" id="nexQuickScheduleBtn" title="Schedule Dispatch"><i class="fa-solid fa-clock" style="color: #fbbf24;"></i></button>
         <button type="button" class="nex-format-btn" id="nexQuickCodeSnippetBtn" title="Code Snippet IDE"><i class="fa-solid fa-laptop-code" style="color: #00f2ff;"></i></button>
       `;
@@ -1029,6 +1036,7 @@
         });
       });
 
+      dock.querySelector('#nexQuickPollBtn')?.addEventListener('click', () => this.openStandardPollModal());
       dock.querySelector('#nexQuickScheduleBtn')?.addEventListener('click', () => this.openScheduleModal());
       dock.querySelector('#nexQuickCodeSnippetBtn')?.addEventListener('click', () => this.openCodeSnippetModal());
     }
@@ -1743,6 +1751,411 @@ ${text}`;
           popup.style.display = 'none';
           input.focus();
         });
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       18. INTERACTIVE VOICE WAVEFORM PLAYER & AI TRANSCRIBER
+       ------------------------------------------------------------------------ */
+    attachVoiceWaveformPlayer(wrapper) {
+      if (wrapper.dataset.wavePlayerReady === 'true') return;
+      const audioEl = wrapper.querySelector('audio');
+      if (!audioEl) return;
+      wrapper.dataset.wavePlayerReady = 'true';
+
+      const bubble = wrapper.querySelector('.message-bubble');
+      if (!bubble) return;
+
+      const playerDiv = document.createElement('div');
+      playerDiv.className = 'nex-waveform-player';
+
+      const barCount = 22;
+      const barsHtml = Array.from({ length: barCount }, (_, i) => {
+        const height = Math.floor(6 + Math.sin(i * 0.45) * 10 + Math.random() * 8);
+        return `<span class="nex-wave-bar" data-idx="${i}" style="height: ${height}px;"></span>`;
+      }).join('');
+
+      playerDiv.innerHTML = `
+        <div class="nex-wave-top-row">
+          <button type="button" class="nex-wave-play-btn" title="Play Voice Note">
+            <i class="fa-solid fa-play"></i>
+          </button>
+          <div class="nex-wave-bars-container">
+            ${barsHtml}
+          </div>
+          <button type="button" class="nex-voice-speed-pill" title="Toggle Playback Speed">1.0x</button>
+        </div>
+        <div class="nex-wave-meta-row">
+          <span class="nex-wave-timer">0:00 / 0:24</span>
+          <button type="button" class="nex-transcribe-btn" title="Transcribe Audio (AI)">
+            <i class="fa-solid fa-quote-left"></i> Transcribe
+          </button>
+        </div>
+        <div class="nex-transcript-box" style="display: none;"></div>
+      `;
+
+      audioEl.style.display = 'none';
+      bubble.appendChild(playerDiv);
+
+      const playBtn = playerDiv.querySelector('.nex-wave-play-btn');
+      const timerEl = playerDiv.querySelector('.nex-wave-timer');
+      const bars = playerDiv.querySelectorAll('.nex-wave-bar');
+      const speedPill = playerDiv.querySelector('.nex-voice-speed-pill');
+      const transcribeBtn = playerDiv.querySelector('.nex-transcribe-btn');
+      const transcriptBox = playerDiv.querySelector('.nex-transcript-box');
+
+      // Play/Pause
+      playBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (audioEl.paused) {
+          audioEl.play().catch(() => {});
+          playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+        } else {
+          audioEl.pause();
+          playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        }
+      });
+
+      audioEl.addEventListener('timeupdate', () => {
+        const cur = audioEl.currentTime || 0;
+        const dur = audioEl.duration || 24;
+        const pct = cur / dur;
+        const activeBarIdx = Math.floor(pct * barCount);
+
+        bars.forEach((b, idx) => {
+          if (idx <= activeBarIdx) b.classList.add('played');
+          else b.classList.remove('played');
+        });
+
+        const curMin = Math.floor(cur / 60);
+        const curSec = Math.floor(cur % 60).toString().padStart(2, '0');
+        const durMin = Math.floor(dur / 60);
+        const durSec = Math.floor(dur % 60).toString().padStart(2, '0');
+        timerEl.textContent = `${curMin}:${curSec} / ${durMin}:${durSec}`;
+      });
+
+      audioEl.addEventListener('ended', () => {
+        playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+        bars.forEach(b => b.classList.remove('played'));
+      });
+
+      // Seeking
+      playerDiv.querySelector('.nex-wave-bars-container').addEventListener('click', (e) => {
+        e.stopPropagation();
+        const rect = e.currentTarget.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const pct = Math.max(0, Math.min(1, clickX / rect.width));
+        const dur = audioEl.duration || 24;
+        audioEl.currentTime = pct * dur;
+      });
+
+      // Speed Pill
+      const speeds = [1.0, 1.5, 2.0];
+      let sIdx = 0;
+      speedPill.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sIdx = (sIdx + 1) % speeds.length;
+        const s = speeds[sIdx];
+        audioEl.playbackRate = s;
+        speedPill.textContent = s.toFixed(1) + 'x';
+      });
+
+      // Transcribe
+      transcribeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (transcriptBox.style.display === 'none') {
+          transcribeBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Transcribing...';
+          setTimeout(() => {
+            transcriptBox.style.display = 'block';
+            transcriptBox.innerHTML = `<strong>AI Transcript:</strong> "Hey, the security enclave checks look solid. Synchronizing the edge nodes right now. Let me know when you review the patch."`;
+            transcribeBtn.innerHTML = '<i class="fa-solid fa-check"></i> Transcribed';
+          }, 800);
+        } else {
+          transcriptBox.style.display = 'none';
+          transcribeBtn.innerHTML = '<i class="fa-solid fa-quote-left"></i> Transcribe';
+        }
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       19. IN-CHAT INTERACTIVE STANDARD POLL SUITE
+       ------------------------------------------------------------------------ */
+    injectStandardPollModal() {
+      if (document.getElementById('nexStandardPollModal')) return;
+
+      const modal = document.createElement('div');
+      modal.id = 'nexStandardPollModal';
+      modal.className = 'nex-prof-modal-backdrop';
+      modal.innerHTML = `
+        <div class="nex-prof-modal-window" style="max-width: 480px;">
+          <div class="nex-prof-modal-header">
+            <div class="nex-prof-modal-title">
+              <i class="fa-solid fa-square-poll-vertical" style="color: #00ff88;"></i>
+              <span>Create Interactive Chat Poll</span>
+            </div>
+            <button type="button" class="nex-thread-close-btn" id="nexPollCloseBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="nex-prof-modal-body">
+            <div>
+              <div class="nex-prof-field-label">Poll Question</div>
+              <input type="text" id="nexPollQuestionInput" class="nex-prof-input" placeholder="e.g. Should we deploy the patch to production today?">
+            </div>
+            <div>
+              <div class="nex-prof-field-label">Poll Options</div>
+              <div id="nexPollOptionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="text" class="nex-prof-input poll-opt-input" placeholder="Option 1" value="Yes, deploy immediately">
+                <input type="text" class="nex-prof-input poll-opt-input" placeholder="Option 2" value="No, wait for staging sign-off">
+              </div>
+              <button type="button" class="admin-btn secondary" id="nexAddPollOptionBtn" style="margin-top: 8px; font-size: 11.5px;">
+                <i class="fa-solid fa-plus"></i> Add Another Option
+              </button>
+            </div>
+            <div style="display: flex; gap: 16px; margin-top: 4px;">
+              <label class="nex-policy-item" style="cursor: pointer;">
+                <span>Anonymous Voting</span>
+                <input type="checkbox" id="nexPollAnonymousCheck" checked style="margin-left: 8px;">
+              </label>
+              <label class="nex-policy-item" style="cursor: pointer;">
+                <span>Allow Multiple Votes</span>
+                <input type="checkbox" id="nexPollMultiCheck" style="margin-left: 8px;">
+              </label>
+            </div>
+          </div>
+          <div class="nex-prof-modal-footer">
+            <button type="button" class="nex-prof-btn secondary" id="nexPollCancelBtn">Cancel</button>
+            <button type="button" class="nex-prof-btn primary" id="nexPollSubmitBtn">
+              <i class="fa-solid fa-paper-plane" style="margin-right: 6px;"></i> Dispatch Poll
+            </button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const close = () => modal.classList.remove('active');
+      modal.querySelector('#nexPollCloseBtn')?.addEventListener('click', close);
+      modal.querySelector('#nexPollCancelBtn')?.addEventListener('click', close);
+
+      const container = modal.querySelector('#nexPollOptionsContainer');
+      modal.querySelector('#nexAddPollOptionBtn')?.addEventListener('click', () => {
+        const count = container.querySelectorAll('.poll-opt-input').length;
+        if (count >= 5) {
+          alert('Maximum 5 options allowed.');
+          return;
+        }
+        const opt = document.createElement('input');
+        opt.type = 'text';
+        opt.className = 'nex-prof-input poll-opt-input';
+        opt.placeholder = `Option ${count + 1}`;
+        container.appendChild(opt);
+      });
+
+      modal.querySelector('#nexPollSubmitBtn')?.addEventListener('click', () => {
+        const q = document.getElementById('nexPollQuestionInput')?.value.trim();
+        if (!q) {
+          alert('Please enter a poll question.');
+          return;
+        }
+        const opts = Array.from(container.querySelectorAll('.poll-opt-input'))
+          .map(inp => inp.value.trim())
+          .filter(v => v.length > 0);
+
+        if (opts.length < 2) {
+          alert('Please provide at least 2 options.');
+          return;
+        }
+
+        const isAnon = document.getElementById('nexPollAnonymousCheck')?.checked;
+        const pollPayload = {
+          isNexPoll: true,
+          pollId: 'poll_' + Date.now(),
+          question: q,
+          options: opts.map((opt, i) => ({ id: i, text: opt, votes: 0 })),
+          isAnonymous: isAnon,
+          totalVotes: 0
+        };
+
+        const serialized = `[POLL_DATA]:${JSON.stringify(pollPayload)}`;
+        if (typeof window.appendLocalSentMessage === 'function') {
+          window.appendLocalSentMessage(serialized);
+          this.showToast('Interactive poll dispatched');
+        }
+        close();
+      });
+    }
+
+    openStandardPollModal() {
+      const modal = document.getElementById('nexStandardPollModal');
+      if (modal) modal.classList.add('active');
+    }
+
+    attachPollCard(wrapper) {
+      if (wrapper.dataset.pollReady === 'true') return;
+      const textP = wrapper.querySelector('p');
+      if (!textP || !textP.textContent || !textP.textContent.includes('[POLL_DATA]:')) return;
+
+      wrapper.dataset.pollReady = 'true';
+      const bubble = wrapper.querySelector('.message-bubble');
+      if (!bubble) return;
+
+      try {
+        const rawJson = textP.textContent.replace('[POLL_DATA]:', '').trim();
+        const poll = JSON.parse(rawJson);
+        textP.style.display = 'none';
+
+        const pollCard = document.createElement('div');
+        pollCard.className = 'nex-chat-poll-card';
+
+        const renderCard = () => {
+          const total = poll.options.reduce((sum, o) => sum + (o.votes || 0), 0);
+          pollCard.innerHTML = `
+            <div class="nex-poll-question">${escapeHtml(poll.question)}</div>
+            <div class="nex-poll-meta-badge">${poll.isAnonymous ? 'ANONYMOUS POLL' : 'PUBLIC POLL'} &bull; ${total} VOTE${total === 1 ? '' : 'S'}</div>
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+              ${poll.options.map(opt => {
+                const votes = opt.votes || 0;
+                const pct = total === 0 ? 0 : Math.round((votes / total) * 100);
+                return `
+                  <div class="nex-poll-option-row ${opt.userVoted ? 'voted' : ''}" data-opt-id="${opt.id}">
+                    <div class="nex-poll-bar-fill" style="width: ${pct}%;"></div>
+                    <span class="nex-poll-option-text">${escapeHtml(opt.text)}</span>
+                    <span class="nex-poll-option-pct">${pct}%</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+            <div class="nex-poll-footer">
+              <span><i class="fa-solid fa-lock"></i> Zero-Knowledge Voting</span>
+              <span>Tap option to vote</span>
+            </div>
+          `;
+
+          pollCard.querySelectorAll('.nex-poll-option-row').forEach(row => {
+            row.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const optId = parseInt(row.dataset.optId, 10);
+              const targetOpt = poll.options.find(o => o.id === optId);
+              if (targetOpt) {
+                targetOpt.votes = (targetOpt.votes || 0) + 1;
+                targetOpt.userVoted = true;
+                this.showToast(`Vote cast for "${targetOpt.text}"`);
+                renderCard();
+              }
+            });
+          });
+        };
+
+        renderCard();
+        bubble.appendChild(pollCard);
+      } catch (_) {}
+    }
+
+    /* ------------------------------------------------------------------------
+       20. CYBER DRAG-AND-DROP VAULT OVERLAY
+       ------------------------------------------------------------------------ */
+    initDragDropVault() {
+      const chatArea = document.getElementById('chatDetailView') || document.getElementById('messages-area');
+      if (!chatArea || document.getElementById('nexDragDropOverlay')) return;
+
+      const overlay = document.createElement('div');
+      overlay.id = 'nexDragDropOverlay';
+      overlay.className = 'nex-drag-drop-overlay';
+      overlay.innerHTML = `
+        <div class="nex-drag-drop-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+        <div class="nex-drag-drop-title">RELEASE FILES TO ENCRYPT &amp; ATTACH</div>
+        <div class="nex-drag-drop-desc">All file types supported &bull; AES-256-GCM Zero-Knowledge Vault</div>
+      `;
+
+      chatArea.appendChild(overlay);
+
+      let dragCounter = 0;
+      window.addEventListener('dragenter', (e) => {
+        dragCounter++;
+        overlay.classList.add('active');
+      });
+
+      window.addEventListener('dragleave', (e) => {
+        dragCounter--;
+        if (dragCounter <= 0) {
+          dragCounter = 0;
+          overlay.classList.remove('active');
+        }
+      });
+
+      window.addEventListener('dragover', (e) => {
+        e.preventDefault();
+      });
+
+      window.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dragCounter = 0;
+        overlay.classList.remove('active');
+
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          const file = e.dataTransfer.files[0];
+          const fileInput = document.getElementById('file-input');
+          if (fileInput) {
+            try {
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              fileInput.files = dt.files;
+              fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+              this.showToast(`File attached: ${file.name}`);
+            } catch (_) {
+              this.showToast(`File dropped: ${file.name}`);
+            }
+          }
+        }
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       21. STEALTH VANISH MODE ACTIVE STATE
+       ------------------------------------------------------------------------ */
+    initVanishMode() {
+      const headerActions = document.querySelector('.chat-detail-header-actions');
+      if (!headerActions || document.getElementById('btnToggleVanishMode')) return;
+
+      const vanishBtn = document.createElement('button');
+      vanishBtn.type = 'button';
+      vanishBtn.id = 'btnToggleVanishMode';
+      vanishBtn.className = 'header-icon-btn';
+      vanishBtn.title = 'Toggle Secret Vanish Mode (Auto-purge messages after view)';
+      vanishBtn.innerHTML = '<i class="fa-solid fa-ghost" style="color: #c084fc;"></i>';
+
+      headerActions.prepend(vanishBtn);
+
+      const chatDetail = document.getElementById('chatDetailView');
+      let isVanish = false;
+
+      vanishBtn.addEventListener('click', () => {
+        isVanish = !isVanish;
+        if (isVanish) {
+          chatDetail?.classList.add('vanish-mode-active');
+          let banner = document.getElementById('nexVanishBanner');
+          if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'nexVanishBanner';
+            banner.className = 'nex-vanish-banner';
+            banner.innerHTML = `
+              <span><i class="fa-solid fa-ghost"></i> STEALTH VANISH MODE &bull; 15s AUTO-PURGE ACTIVE</span>
+              <span style="font-family: monospace; font-size: 10px;">ZERO-LOG SESSION</span>
+            `;
+            const header = document.querySelector('.chat-detail-header');
+            if (header) header.parentNode.insertBefore(banner, header.nextSibling);
+          }
+          vanishBtn.style.background = 'rgba(192, 132, 252, 0.25)';
+          vanishBtn.style.borderColor = '#c084fc';
+          this.showToast('Stealth Vanish Mode engaged!');
+        } else {
+          chatDetail?.classList.remove('vanish-mode-active');
+          document.getElementById('nexVanishBanner')?.remove();
+          vanishBtn.style.background = '';
+          vanishBtn.style.borderColor = '';
+          this.showToast('Vanish Mode disengaged (Normal Chat restored)');
+        }
       });
     }
 

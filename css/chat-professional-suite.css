@@ -1513,3 +1513,281 @@
   background: rgba(0, 242, 255, 0.16);
   border-color: #00f2ff;
 }
+
+/* --------------------------------------------------------------------------
+   20. VOICE NOTE WAVEFORM SCRUBBER & TRANSCRIBER
+   -------------------------------------------------------------------------- */
+.nex-waveform-player {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 240px;
+  max-width: 320px;
+  padding: 6px 4px;
+}
+
+.nex-wave-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nex-wave-play-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #00f2ff;
+  border: none;
+  color: #0b1120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 14px rgba(0, 242, 255, 0.35);
+  flex-shrink: 0;
+}
+
+.nex-wave-play-btn:hover {
+  background: #38bdf8;
+  transform: scale(1.08);
+  box-shadow: 0 0 20px rgba(0, 242, 255, 0.55);
+}
+
+.nex-wave-bars-container {
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 28px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.nex-wave-bar {
+  width: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  transition: height 0.1s ease, background-color 0.15s ease;
+}
+
+.nex-wave-bar.played {
+  background: #00f2ff;
+  box-shadow: 0 0 4px rgba(0, 242, 255, 0.5);
+}
+
+.nex-wave-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 0 2px;
+}
+
+.nex-transcribe-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  color: #94a3b8;
+  padding: 2px 7px;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nex-transcribe-btn:hover {
+  background: rgba(0, 242, 255, 0.12);
+  color: #00f2ff;
+  border-color: #00f2ff;
+}
+
+.nex-transcript-box {
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 2px solid #00f2ff;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #e2e8f0;
+  font-style: italic;
+  animation: nexMenuFadeIn 0.2s ease;
+}
+
+/* --------------------------------------------------------------------------
+   21. IN-CHAT INTERACTIVE STANDARD POLL ENGINE
+   -------------------------------------------------------------------------- */
+.nex-chat-poll-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 260px;
+  max-width: 360px;
+  padding: 4px 2px;
+}
+
+.nex-poll-question {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.35;
+}
+
+.nex-poll-meta-badge {
+  font-size: 10.5px;
+  color: #64748b;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.nex-poll-option-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+.nex-poll-option-row:hover {
+  background: rgba(0, 242, 255, 0.08);
+  border-color: rgba(0, 242, 255, 0.3);
+}
+
+.nex-poll-option-row.voted {
+  border-color: #00f2ff;
+  background: rgba(0, 242, 255, 0.12);
+}
+
+.nex-poll-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(0, 242, 255, 0.18);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.nex-poll-option-text {
+  position: relative;
+  z-index: 2;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.nex-poll-option-pct {
+  position: relative;
+  z-index: 2;
+  font-size: 12px;
+  font-weight: 700;
+  color: #00f2ff;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nex-poll-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #64748b;
+  padding-top: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   22. CYBER DRAG-AND-DROP VAULT OVERLAY
+   -------------------------------------------------------------------------- */
+.nex-drag-drop-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(3, 7, 18, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border: 2px dashed #00f2ff;
+  border-radius: 16px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.nex-drag-drop-overlay.active {
+  opacity: 1;
+}
+
+.nex-drag-drop-icon {
+  width: 68px;
+  height: 68px;
+  border-radius: 20px;
+  background: rgba(0, 242, 255, 0.15);
+  border: 1px solid #00f2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #00f2ff;
+  box-shadow: 0 0 30px rgba(0, 242, 255, 0.4);
+  animation: nexPulseGlow 1.8s infinite alternate;
+}
+
+@keyframes nexPulseGlow {
+  0% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 242, 255, 0.3); }
+  100% { transform: scale(1.08); box-shadow: 0 0 40px rgba(0, 242, 255, 0.7); }
+}
+
+.nex-drag-drop-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 1px;
+}
+
+.nex-drag-drop-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* --------------------------------------------------------------------------
+   23. STEALTH VANISH MODE ACTIVE STATE
+   -------------------------------------------------------------------------- */
+.chat-detail-view.vanish-mode-active {
+  background: radial-gradient(circle at 50% 50%, #0d0a1a 0%, #030208 100%) !important;
+  box-shadow: inset 0 0 80px rgba(192, 132, 252, 0.12) !important;
+}
+
+.nex-vanish-banner {
+  background: rgba(192, 132, 252, 0.15);
+  border-bottom: 1px solid rgba(192, 132, 252, 0.35);
+  color: #c084fc;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 6px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 25;
+}
