@@ -427,7 +427,8 @@
           <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
           <button class="filter-tab" data-filter="favorites" title="Favorite chats">Favorites</button>
           <button class="filter-tab" data-filter="groups" title="Group chats">Groups</button>
-          <button class="filter-tab add-chat-tab" id="newChatFromTab" title="New chat"><i class="fa-solid fa-plus"></i></button>
+          <button class="filter-tab add-chat-tab" id="newChatFromTab" title="Start New Direct Chat"><i class="fa-solid fa-plus"></i> Chat</button>
+          <button class="filter-tab add-group-tab" id="newGroupFromTab" title="Create New Group"><i class="fa-solid fa-user-group"></i> +Group</button>
         </div>
 
         <!-- Active Chats Section -->
@@ -939,6 +940,9 @@
             </button>
             <button type="button" id="browse-users-btn" class="search-tab-pill search-tab-refresh" title="Reload network">
               <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+            <button type="button" id="searchModalCreateGroupBtn" class="search-tab-pill search-tab-create-group" style="background: rgba(0, 255, 102, 0.15); color: #00ff66; border-color: rgba(0, 255, 102, 0.4);" title="Create New Group">
+              <i class="fa-solid fa-user-group"></i> Create Group
             </button>
           </div>
 
@@ -5145,6 +5149,51 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/offline-mesh-sync.js"></script>
   <script src="./src/js/creator-escrow-market.js"></script>
   <script src="./src/js/chat-professional-suite.js"></script>
+
+
+    <!-- NEXCHAT APP INSTALLATION & PWA HUB MODAL -->
+    <div id="nexAppInstallModal" class="modal" style="display: none; z-index: 10010;">
+      <div class="modal-content" style="max-width: 500px; padding: 24px; text-align: center; border: 1px solid rgba(0, 255, 102, 0.35); box-shadow: 0 0 35px rgba(0, 255, 102, 0.15);">
+        <span class="close-modal" id="closeAppInstallModalBtn"><i class="fa-solid fa-xmark"></i></span>
+        <div style="width: 64px; height: 64px; margin: 0 auto 16px; border-radius: 16px; overflow: hidden; border: 2px solid #00ff66; box-shadow: 0 0 20px rgba(0, 255, 102, 0.4);">
+          <img src="logo.jpg" alt="NEXCHAT" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <h2 style="font-family: 'Orbitron', monospace; font-size: 20px; color: #00ff66; margin-bottom: 8px;">INSTALL NEXCHAT APP</h2>
+        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
+          Experience NEXCHAT as a true standalone app. Instant startup, zero browser borders, background notifications, and offline memory caching.
+        </p>
+
+        <div id="pwaDirectInstallBox" style="display: none; margin-bottom: 18px;">
+          <button type="button" id="btnExecutePwaInstall" class="btn-primary" style="width: 100%; padding: 14px; font-weight: 700; font-size: 15px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-download"></i> INSTALL APP NOW
+          </button>
+        </div>
+
+        <div class="install-instructions-card" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 16px; text-align: left; margin-bottom: 16px;">
+          <h4 style="color: #fff; font-size: 13px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-mobile-screen" style="color: #00ff66;"></i> HOW TO INSTALL ON YOUR DEVICE:
+          </h4>
+          <div style="font-size: 12.5px; color: #cbd5e1; display: grid; gap: 10px;">
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+              <span style="color: #00ff66; font-weight: bold;">[ANDROID]</span>
+              <span>Tap the <strong>3 dots (menu)</strong> in top-right of your browser &rarr; Tap <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+              <span style="color: #38bdf8; font-weight: bold;">[APPLE iOS]</span>
+              <span>Tap the <strong>Share button</strong> at the bottom of Safari &rarr; Scroll down &amp; tap <strong>"Add to Home Screen"</strong>.</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: flex-start;">
+              <span style="color: #ffd700; font-weight: bold;">[DESKTOP]</span>
+              <span>Click the <strong>Install icon</strong> in your browser's address bar (right side).</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" id="btnDismissAppInstallModal" class="btn-secondary" style="flex: 1;">Maybe Later</button>
+        </div>
+      </div>
+    </div>
 
 </body>
 

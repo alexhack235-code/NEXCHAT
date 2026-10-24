@@ -10013,27 +10013,81 @@ function closeSettingsModal(updateHistory = true) {
   }
 }
 
+// Seed initial root history state to trap abrupt browser exits on back gesture
+try {
+  if (!history.state || !history.state.nexchatRoot) {
+    history.replaceState({ nexchatRoot: true, nexchatView: 'list' }, '');
+  }
+} catch (_) {}
+
 window.addEventListener('popstate', (e) => {
-  const settingsModal = document.getElementById("settingsModal");
-  if (settingsModal && settingsModal.style.display === "flex") {
-    closeSettingsModal(false);
+  // 1. Check and dismiss any open modal/dialog first
+  const openModals = [
+    'createGroupModal',
+    'settingsModal',
+    'statusViewerModal',
+    'createStatusModal',
+    'profilePicModal',
+    'search-overlay',
+    'search-modal',
+    'groupJoinModal',
+    'groupSettingsModal',
+    'pollModal',
+    'mobileMoreSheet',
+    'nexDeleteMessageModal',
+    'ghostPanicModal',
+    'stickerStoreModal',
+    'nexAppInstallModal'
+  ];
+
+  for (const mId of openModals) {
+    const el = document.getElementById(mId);
+    if (el && (el.style.display === 'flex' || el.style.display === 'block' || el.classList.contains('open'))) {
+      if (mId === 'statusViewerModal') {
+        if (typeof storyProgressTimer !== 'undefined') clearInterval(storyProgressTimer);
+        const video = document.getElementById('statusViewerVideo');
+        if (video) video.pause();
+      }
+      el.style.display = 'none';
+      el.classList.remove('open');
+      try {
+        if (!history.state) history.pushState({ nexchatRoot: true, nexchatView: 'list' }, '');
+      } catch (_) {}
+      return;
+    }
+  }
+
+  // 2. If inside a conversation, return smoothly to the chat list view
+  const detailView = document.getElementById('chatDetailView');
+  if (detailView && detailView.style.display === 'flex') {
+    showChatListView();
+    try {
+      if (!history.state) history.pushState({ nexchatRoot: true, nexchatView: 'list' }, '');
+    } catch (_) {}
     return;
   }
 
-  const statusViewer = document.getElementById("statusViewerModal");
-  if (statusViewer && statusViewer.style.display === "flex") {
-    if (typeof storyProgressTimer !== 'undefined') clearInterval(storyProgressTimer);
-    statusViewer.style.display = "none";
-    const video = document.getElementById('statusViewerVideo');
-    if (video) video.pause();
+  // 3. If inside a sub-container (status, groups, announcements), return to chat list
+  const statusContainer = document.getElementById('statusContainer');
+  const groupsContainer = document.getElementById('groupsContainer');
+  const announcementsContainer = document.getElementById('announcementsContainer');
+  const callHistoryContainer = document.getElementById('callHistoryContainer');
+  if ((statusContainer && statusContainer.style.display === 'flex') ||
+      (groupsContainer && groupsContainer.style.display === 'block') ||
+      (announcementsContainer && announcementsContainer.style.display === 'flex') ||
+      (callHistoryContainer && callHistoryContainer.style.display === 'block')) {
+    showChatListView();
+    try {
+      if (!history.state) history.pushState({ nexchatRoot: true, nexchatView: 'list' }, '');
+    } catch (_) {}
     return;
   }
 
-  const createStatusModal = document.getElementById("createStatusModal");
-  if (createStatusModal && createStatusModal.style.display === "block") {
-    createStatusModal.style.display = "none";
-    return;
-  }
+  // 4. At root view: Prevent browser from abruptly quitting or closing the web app
+  showNotif('[EXIT] Press back again or use logout to exit NEXCHAT', 'info', 1800);
+  try {
+    history.pushState({ nexchatRoot: true, nexchatView: 'list' }, '');
+  } catch (_) {}
 });
 
 function applyBubbleTheme(theme) {
@@ -11720,13 +11774,12 @@ const installHeaderBtnEl = document.getElementById("installHeaderBtn");
 if (installHeaderBtnEl) {
   installHeaderBtnEl.addEventListener("click", (e) => {
     e.preventDefault();
-    if (typeof window.promptInstallNexchat === 'function') {
+    if (typeof window.openAppInstallModal === 'function') {
+      window.openAppInstallModal();
+    } else if (typeof window.promptInstallNexchat === 'function') {
       window.promptInstallNexchat();
-    } else {
-      alert('Install support is not available right now. Please refresh or use the browser menu to install NEXCHAT.');
     }
   }, false);
-  console.log("? Header Install button listener attached successfully");
 }
 
 
@@ -12429,7 +12482,13 @@ async function openCreateGroupModal() {
     showNotif('Modal not found', 'error');
     return;
   }
-  modal.style.display = 'block';
+  modal.style.display = 'flex';
+  modal.style.zIndex = '10005';
+  try {
+    if (!history.state || history.state.nexchatModal !== 'createGroup') {
+      history.pushState({ nexchatModal: 'createGroup' }, '');
+    }
+  } catch (_) {}
   const groupCreateResult = document.getElementById('groupCreateResult');
   if (groupCreateResult) groupCreateResult.style.display = 'none';
   try {
@@ -12440,6 +12499,7 @@ async function openCreateGroupModal() {
     showNotif('Failed to load contacts for group', 'error');
   }
 }
+window.openCreateGroupModal = openCreateGroupModal;
 
 function attachGroupMemberButtons() {
   const addAllBtn = document.getElementById('addAllContactsBtn');
@@ -12567,15 +12627,6 @@ async function createGroup(e) {
   try {
     const selectedCheckboxes = document.querySelectorAll('.member-checkbox:checked');
 
-    if (selectedCheckboxes.length === 0) {
-      resultDiv.style.display = 'block';
-      resultDiv.style.background = '#ff6b6b';
-      resultDiv.style.color = '#fff';
-      resultDiv.textContent = '? Select at least one member';
-      showNotif('Please select at least one member', 'error', 2000);
-      return;
-    }
-
     const members = new Set([myUID]);
     selectedCheckboxes.forEach(cb => {
       const uid = cb.dataset.uid;
@@ -12583,7 +12634,7 @@ async function createGroup(e) {
     });
     const membersList = Array.from(members);
 
-    console.log(`?? Creating group "${name}" with ${membersList.length} members`);
+    console.log(`[GROUP] Creating group "${name}" with ${membersList.length} members`);
 
     let profilePicUrl = ''; // Default or empty
 
@@ -12622,30 +12673,23 @@ async function createGroup(e) {
       lastMessageTime: serverTimestamp()
     });
 
-    console.log(`? Group created with ID: ${groupRef.id}`);
-    showNotif(`Group "${name}" created!`, 'success', 2000);
-
-    const groupJoinLink = `${window.location.origin}${window.location.pathname}?joinGroup=${groupRef.id}`;
-
-    if (resultDiv) {
-      resultDiv.style.display = 'block';
-      resultDiv.style.background = '#4CAF50';
-      resultDiv.style.color = '#fff';
-      resultDiv.innerHTML = `
-        <div style="padding: 15px; border-radius: 6px;">
-            <p>? Group "${name}" created successfully!</p>
-            <p style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">Share this link with others to let them join:</p>
-            <div style="background: rgba(0,0,0,0.2); padding: 10px; border-radius: 4px; margin: 10px 0; word-break: break-all; font-size: 0.85rem; max-height: 80px; overflow-y: auto;">
-            ${groupJoinLink}
-            </div>
-            <button type="button" onclick="copyGroupLink('${groupJoinLink}')" style="background: #fff; color: #333; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px;">Copy Link</button>
-        </div>
-        `;
-    }
+    console.log(`[GROUP] Group created with ID: ${groupRef.id}`);
+    showNotif(`Group "${name}" created successfully!`, 'success', 3000);
 
     document.getElementById('createGroupForm')?.reset();
     const createGroupModal = document.getElementById('createGroupModal');
     if (createGroupModal) createGroupModal.style.display = 'none';
+
+    if (typeof loadGroups === 'function') {
+      try { await loadGroups(); } catch (_) {}
+    }
+
+    // Automatically navigate into the newly created group!
+    try {
+      openChat(groupRef.id, name, profilePicUrl || 'logo.jpg', 'group');
+    } catch (openErr) {
+      console.warn('[GROUP] Could not immediately open new group:', openErr);
+    }
 
     if (iconPreview) {
       iconPreview.src = "logo.jpg";
@@ -14929,12 +14973,47 @@ function initializeBasicUI() {
 
   document.getElementById('fullscreen-btn-header')?.addEventListener('click', toggleFullscreen);
 
-  document.getElementById('createNewGroupBtn')?.addEventListener('click', () => {
-    const modal = document.getElementById('createGroupModal');
-    if (modal) {
-      modal.style.display = 'block';
-      if (typeof loadGroupMembersList === 'function') loadGroupMembersList();
+  document.getElementById('createNewGroupBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openCreateGroupModal();
+  });
+  document.getElementById('newGroupFromTab')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openCreateGroupModal();
+  });
+  document.getElementById('searchModalCreateGroupBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeSearch();
+    openCreateGroupModal();
+  });
+  document.getElementById('addMemberBtn')?.addEventListener('click', () => {
+    document.getElementById('infoAddMemberBtn')?.click();
+  });
+  document.getElementById('deleteGroupBtn')?.addEventListener('click', () => {
+    document.getElementById('infoDeleteGroupBtn')?.click();
+  });
+  document.getElementById('ghostPanicLockBtn')?.addEventListener('click', () => {
+    if (window.GhostPanicEngine && typeof window.GhostPanicEngine.openModal === 'function') {
+      window.GhostPanicEngine.openModal();
+    } else {
+      const panicModal = document.getElementById('ghostPanicModal');
+      if (panicModal) panicModal.style.display = 'flex';
     }
+  });
+  document.getElementById('emoji-btn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    if (window.nexStickerStore && typeof window.nexStickerStore.openStoreModal === 'function') {
+      window.nexStickerStore.openStoreModal();
+    } else {
+      const picker = document.getElementById('emoji-picker');
+      if (picker) {
+        picker.style.display = picker.style.display === 'none' ? 'block' : 'none';
+      }
+    }
+  });
+  document.getElementById('close-emoji-btn')?.addEventListener('click', () => {
+    const picker = document.getElementById('emoji-picker');
+    if (picker) picker.style.display = 'none';
   });
 
   const createGroupForm = document.getElementById('createGroupForm');
@@ -15328,8 +15407,9 @@ function initializeBasicUI() {
     });
   });
 
-  document.getElementById("newChatFromTab")?.addEventListener("click", () => {
-    document.getElementById("newChatBtn")?.click();
+  document.getElementById("newChatFromTab")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    openSearch();
   });
 
   const archivedToggle = document.getElementById("archivedToggle");
@@ -15486,9 +15566,10 @@ function setupMobileFeatures() {
     document.getElementById('search-btn-header')?.click();
   });
 
-  // Mobile FAB New Chat button triggers new chat tab
-  document.getElementById('mobileFabNewChat')?.addEventListener('click', () => {
-    document.getElementById('newChatFromTab')?.click();
+  // Mobile FAB New Chat button triggers openSearch directly
+  document.getElementById('mobileFabNewChat')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openSearch();
   });
 
   // Chat Detail Header Video Call & Voice Call buttons
@@ -15588,6 +15669,11 @@ function showChatDetailView() {
       chatDetailView.classList.remove('entering');
     });
   }
+  try {
+    if (!history.state || history.state.nexchatView !== 'conversation') {
+      history.pushState({ nexchatView: 'conversation' }, '');
+    }
+  } catch (_) {}
   if (bottomNav) {
     bottomNav.style.display = 'none';
   }

@@ -130,14 +130,56 @@ async function handleInstall() {
   removeInstallPrompt();
 }
 
+function openAppInstallModal() {
+  const modal = document.getElementById('nexAppInstallModal');
+  if (!modal) {
+    if (deferredPrompt) return handleInstall();
+    return;
+  }
+  modal.style.display = 'flex';
+  const directBox = document.getElementById('pwaDirectInstallBox');
+  if (directBox) {
+    directBox.style.display = deferredPrompt ? 'block' : 'none';
+  }
+}
+
 function promptInstallNexchat() {
   if (deferredPrompt) {
     return handleInstall();
   }
-  alert('Install option not available yet. Please refresh or use the browser menu to install NEXCHAT.');
+  openAppInstallModal();
 }
 
+window.openAppInstallModal = openAppInstallModal;
 window.promptInstallNexchat = promptInstallNexchat;
+
+function setupAppInstallModalListeners() {
+  const modal = document.getElementById('nexAppInstallModal');
+  if (!modal || modal.dataset.bound) return;
+  modal.dataset.bound = 'true';
+
+  const closeBtn = document.getElementById('closeAppInstallModalBtn');
+  const dismissBtn = document.getElementById('btnDismissAppInstallModal');
+  const execBtn = document.getElementById('btnExecutePwaInstall');
+
+  const hide = () => { modal.style.display = 'none'; };
+  if (closeBtn) closeBtn.onclick = hide;
+  if (dismissBtn) dismissBtn.onclick = hide;
+  modal.onclick = (e) => { if (e.target === modal) hide(); };
+
+  if (execBtn) {
+    execBtn.onclick = () => {
+      hide();
+      handleInstall();
+    };
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', setupAppInstallModalListeners);
+} else {
+  setupAppInstallModalListeners();
+}
 
 function dismissInstall() {
   const dismissTime = Date.now();
