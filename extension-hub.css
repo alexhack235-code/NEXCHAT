@@ -832,10 +832,16 @@
 }
 
 @media (max-width: 768px) {
-  .camshot-permission-pill span {
-    display: none;
-  }
   .camshot-permission-pill {
-    padding: 6px 10px;
+    padding: 5px 10px;
+    font-size: 10px;
+  }
+  .camshot-permission-pill span {
+    display: inline-block;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10px;
   }
 }

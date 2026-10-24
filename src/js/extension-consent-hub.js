@@ -748,8 +748,8 @@
     if (!pill) return;
     if (status === 'approved') {
       pill.className = 'camshot-permission-pill approved';
-      pill.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #00ff88;"></i> <span>NEXCHAT SYNCED</span>';
-      pill.title = 'CamShot is authorized and synchronized with NEXCHAT';
+      pill.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #00ff88;"></i> <span>CAMSHOT LINKED &bull; REVIEW</span>';
+      pill.title = 'CamShot is authorized. Click to review or manage NEXCHAT access permissions.';
     } else {
       pill.className = 'camshot-permission-pill pending';
       pill.innerHTML = '<i class="fa-solid fa-shield-halved" style="color: #00f2ff;"></i> <span>ALLOW CAMSHOT TO ACCESS NEXCHAT</span>';
@@ -759,6 +759,7 @@
 
   // Close Consent Modal
   function closeConsentModal() {
+    sessionStorage.setItem('nex_reels_consent_dismissed', 'true');
     const modal = document.getElementById('nexConsentModal');
     if (modal) modal.classList.remove('active');
   }
@@ -770,17 +771,19 @@
 
     const isReelsPage = window.location.pathname.includes('reels.html') || window.location.href.includes('reels');
     const reelsStatus = localStorage.getItem('nex_ext_reels_status');
+    const urlParams = new URLSearchParams(window.location.search);
 
-    // On CAMSHOT (reels.html): update button state and IMMEDIATELY prompt if not approved
+    // On CAMSHOT (reels.html): update button state and IMMEDIATELY prompt on load
     if (isReelsPage) {
       updateCamshotHeaderPill(reelsStatus);
-      if (reelsStatus !== 'approved') {
-        setTimeout(() => openConsentModal('nex-reels'), 60);
+      const dismissed = sessionStorage.getItem('nex_reels_consent_dismissed');
+      // If user hasn't explicitly dismissed this session, OR status is not approved, OR prompt requested:
+      if (!dismissed || reelsStatus !== 'approved' || urlParams.has('authorize_reels') || urlParams.has('prompt')) {
+        setTimeout(() => openConsentModal('nex-reels'), 30);
       }
       return;
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.has('manage_extensions') || urlParams.get('action') === 'manage_extensions') {
       setTimeout(openExtensionHub, 600);
       return;
@@ -813,11 +816,11 @@
       });
     });
 
-    // Intercept reels button if permission has not been granted yet
-    const reelsHeaderBtn = document.getElementById('reels-btn-header');
-    if (reelsHeaderBtn) {
-      reelsHeaderBtn.removeAttribute('onclick');
-      reelsHeaderBtn.addEventListener('click', (e) => {
+    // Intercept reels buttons across desktop and mobile headers
+    const reelsTriggers = document.querySelectorAll('#reels-btn-header, #mobileReelsBtn, [data-action="open-camshot"]');
+    reelsTriggers.forEach(btn => {
+      btn.removeAttribute('onclick');
+      btn.addEventListener('click', (e) => {
         e.preventDefault();
         const status = getExtensionStatus('nex-reels');
         if (status === 'approved') {
@@ -827,7 +830,7 @@
           openConsentModal('nex-reels');
         }
       });
-    }
+    });
   }
 
   // Initialize on DOMContentLoaded or immediate
