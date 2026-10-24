@@ -377,6 +377,9 @@
     openDeleteMessageModal(msg, isOwn, onComplete) {
       if (!msg) return;
 
+      const currentUid = (window.currentUser && window.currentUser.uid) || window.myUID || (typeof myUID !== 'undefined' ? myUID : null) || (typeof myUid !== 'undefined' ? myUid : null);
+      const effectiveIsOwn = Boolean(isOwn || (currentUid && (msg.from === currentUid || msg.senderId === currentUid || msg.sender === currentUid)));
+
       let modal = document.getElementById('nexDeleteMessageModal');
       if (!modal) {
         modal = document.createElement('div');
@@ -402,12 +405,12 @@
           </div>
 
           <div class="nex-delete-preview-box">
-            <span class="preview-author">${isOwn ? 'You' : 'Sender'}:</span>
+            <span class="preview-author">${effectiveIsOwn ? 'You' : 'Sender'}:</span>
             <span class="preview-text">"${this.escapeHtml(snippet)}"</span>
           </div>
 
           <div class="nex-delete-actions">
-            ${isOwn ? `
+            ${effectiveIsOwn ? `
               <button type="button" class="btn-delete-opt btn-delete-everyone" id="btnConfirmDeleteEveryone">
                 <i class="fa-solid fa-users"></i>
                 <div class="btn-text">
@@ -469,12 +472,11 @@
      * Executes Delete for Everyone: Purges Firestore doc or marks it recalled tombstone.
      */
     async executeDeleteForEveryone(msg) {
-      if (!msg || !msg.docId) {
+      const docId = (msg && (msg.docId || msg.id)) || (typeof msg === 'string' ? msg : null);
+      if (!docId) {
         if (typeof window.showNotif === 'function') window.showNotif('Unable to resolve message ID', 'error');
         return;
       }
-
-      const docId = msg.docId;
       const isGroup = window.currentChatType === 'group';
       const collectionName = isGroup ? 'groupMessages' : 'messages';
 
@@ -528,9 +530,8 @@
      * Executes Delete for Me: Adds user UID to deletedFor array.
      */
     async executeDeleteForMe(msg) {
-      if (!msg || !msg.docId) return;
-
-      const docId = msg.docId;
+      const docId = (msg && (msg.docId || msg.id)) || (typeof msg === 'string' ? msg : null);
+      if (!docId) return;
       const isGroup = window.currentChatType === 'group';
       const collectionName = isGroup ? 'groupMessages' : 'messages';
 
@@ -558,10 +559,17 @@
           }
         } catch (_) {}
 
-        // Dispatch delete request to chat.js listener
-        document.dispatchEvent(new CustomEvent('nexDeleteMessageRequest', {
-          detail: { docId, collectionName, forEveryone: false }
-        }));
+        if (typeof window.evictMessageFromCache === 'function') {
+          window.evictMessageFromCache(docId);
+        }
+
+        if (typeof window.deleteMessageFromFirestore === 'function') {
+          await window.deleteMessageFromFirestore(collectionName, docId, false);
+        } else {
+          document.dispatchEvent(new CustomEvent('nexDeleteMessageRequest', {
+            detail: { docId, collectionName, forEveryone: false }
+          }));
+        }
 
         if (typeof window.showNotif === 'function') window.showNotif('Message removed for you', 'success', 1500);
       } catch (err) {

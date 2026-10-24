@@ -1150,28 +1150,7 @@
         </div>
       </div>
 
-      <!-- STATUS VIEWER MODAL (Legacy profile pic viewer) -->
-      <div id="legacyProfileStatusViewerModal" class="modal" style="display: none;">
-        <div class="status-viewer-content">
-          <button id="closeStatusViewerBtn" class="close-modal"
-            style="position: absolute; top: 16px; right: 16px;"><i class="fa-solid fa-xmark"></i></button>
-          <div class="status-viewer-image-container" id="statusViewerMediaContainer">
-            <img id="statusViewerImage" src="" alt="Status" class="status-viewer-image" style="display:none;">
-            <video id="statusViewerVideo" class="status-viewer-video" controls style="display:none; max-width:100%; max-height:100%; border-radius:8px;"></video>
-            <div id="statusViewerFallbackText" class="status-viewer-fallback" style="display:none; color:var(--accent-primary); text-align:center; padding:24px; font-size:16px;"></div>
-          </div>
-          <div class="status-viewer-info">
-            <div class="status-viewer-header">
-              <img id="statusViewerAvatar" src="" alt="user" class="status-viewer-avatar">
-              <div class="status-viewer-text">
-                <h3 id="statusViewerName">User Name</h3>
-                <p id="statusViewerTime">Just now</p>
-              </div>
-            </div>
-            <p id="statusViewerCaption" class="status-viewer-caption">Caption text goes here</p>
-          </div>
-        </div>
-      </div>
+
 
       <!-- NEW PROFILE PIC MODAL -->
       <div id="profilePicModal" class="modal" style="display: none;">
@@ -1288,7 +1267,7 @@
           </div>
 
           <div class="settings-section">
-            <h3>Members (<span id="infoMemberCount">0</span>)</h3>
+            <h3>Members (<span id="infoMemberHeaderCount" class="info-member-count">0</span>)</h3>
             <div id="infoMembersList" class="contact-scroll-box">
               <!-- Members will be populated here -->
             </div>
@@ -1315,9 +1294,9 @@
               </div>
             </div>
 
-            <div class="settings-section" id="groupPendingRequestsSection" style="margin-top: 16px; display: none;">
+            <div class="settings-section" id="groupSettingsPendingRequestsSection" style="margin-top: 16px; display: none;">
               <h3><i class="fa-solid fa-clock"></i> Pending Join Requests</h3>
-              <div id="groupPendingRequestsList" class="contact-scroll-box">
+              <div id="groupSettingsPendingRequestsList" class="contact-scroll-box">
                 <p style="color: var(--text-muted); text-align: center; padding: 20px;">No pending requests</p>
               </div>
             </div>

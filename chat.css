@@ -9284,3 +9284,70 @@ body.chat-size-extra-large .message-bubble {
   border-radius: 12px;
   transition: all 0.2s ease;
 }
+
+/* ========================================================
+   LOW-END DEVICE ACCELERATION & ZERO-LAG CONTAINMENT
+   ======================================================== */
+.message-wrapper {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 54px;
+}
+
+#messages-area {
+  will-change: scroll-position;
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Action Trigger Buttons inside Message Hover Dock */
+.msg-delete-trigger-btn,
+.msg-reply-trigger-btn,
+.msg-report-trigger-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  padding: 0;
+  margin: 0 1px;
+}
+
+.msg-delete-trigger-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.5);
+  transform: scale(1.15);
+}
+
+.msg-reply-trigger-btn:hover {
+  background: rgba(0, 242, 255, 0.25);
+  color: #00f2ff;
+  border-color: rgba(0, 242, 255, 0.5);
+  transform: scale(1.15);
+}
+
+.msg-report-trigger-btn:hover {
+  background: rgba(234, 179, 8, 0.25);
+  color: #eab308;
+  border-color: rgba(234, 179, 8, 0.5);
+  transform: scale(1.15);
+}
+
+/* Mobile Touch Actions Reveal */
+@media (max-width: 768px) {
+  .message-wrapper.active-touch-actions .message-hover-actions {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) !important;
+    visibility: visible !important;
+  }
+}

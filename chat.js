@@ -3789,6 +3789,13 @@ async function sendMessage() {
       }
       const addedDoc = await addDoc(collection(db, "messages"), messageData);
       updateLocalSentMessageStatus(clientMsgId, 'sent');
+      const sentWrapper = document.getElementById(`wrapper-${clientMsgId}`);
+      if (sentWrapper && addedDoc?.id) {
+        sentWrapper.id = `msg-wrapper-${addedDoc.id}`;
+        sentWrapper.dataset.docId = addedDoc.id;
+        const b = sentWrapper.querySelector('.message-bubble');
+        if (b) b.dataset.docId = addedDoc.id;
+      }
       if (window.activeGhostTtl > 0 && typeof attachGhostCountdown === 'function') {
         const optimisticWrapper = document.getElementById(`wrapper-${clientMsgId}`);
         if (optimisticWrapper) attachGhostCountdown(optimisticWrapper, window.activeGhostTtl, addedDoc?.id);
@@ -4956,6 +4963,13 @@ window.evictMessageFromCache = function(docId) {
         }
       }
     }
+    if (typeof groupChatMessageCache !== 'undefined' && groupChatMessageCache.entries) {
+      for (const [key, val] of groupChatMessageCache.entries()) {
+        if (val && Array.isArray(val.messages)) {
+          val.messages = val.messages.filter(m => m.docId !== docId && m.id !== docId);
+        }
+      }
+    }
   } catch (_) {}
 };
 
@@ -4978,6 +4992,20 @@ window.deleteMessageFromFirestore = async function(collectionName, docId, forEve
   // Evict locally and hide immediately
   window.evictMessageFromCache(docId);
   window.hideMessageLocally(docId);
+
+  // Immediate 0ms optimistic removal from active DOM
+  const targets = [
+    document.getElementById(`msg-wrapper-${docId}`),
+    document.getElementById(`wrapper-${docId}`),
+    document.querySelector(`[data-doc-id="${docId}"]`)
+  ].filter(Boolean);
+
+  targets.forEach(wrapper => {
+    wrapper.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+    wrapper.style.opacity = '0';
+    wrapper.style.transform = 'scale(0.9)';
+    setTimeout(() => wrapper.remove(), 210);
+  });
 
   try {
     if (forEveryone) {
@@ -5485,20 +5513,44 @@ function loadMessages() {
         bubble.appendChild(actionsBar);
       }
 
-      // Mobile Touch Long-Press Support for Delete & Actions
+      // Mobile Touch Long-Press Support for Delete & Actions (with movement tolerance)
       if (!isDeletedTombstone) {
         let touchTimer = null;
-        bubble.addEventListener('touchstart', () => {
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        bubble.addEventListener('click', () => {
+          if (window.innerWidth <= 768) {
+            const wasActive = div.classList.contains('active-touch-actions');
+            document.querySelectorAll('.message-wrapper.active-touch-actions').forEach(el => el.classList.remove('active-touch-actions'));
+            if (!wasActive) div.classList.add('active-touch-actions');
+          }
+        });
+
+        bubble.addEventListener('touchstart', (e) => {
+          if (e.touches && e.touches[0]) {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+          }
           touchTimer = setTimeout(() => {
             if (window.NexChatFileManager && typeof window.NexChatFileManager.openDeleteMessageModal === 'function') {
               window.NexChatFileManager.openDeleteMessageModal(m, isOwn, () => {
                 if (typeof debouncedUpdateMessages === 'function') debouncedUpdateMessages();
               });
             }
-          }, 450);
+          }, 380);
         }, { passive: true });
+
         bubble.addEventListener('touchend', () => { if (touchTimer) clearTimeout(touchTimer); });
-        bubble.addEventListener('touchmove', () => { if (touchTimer) clearTimeout(touchTimer); });
+        bubble.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) {
+            const dx = Math.abs(e.touches[0].clientX - touchStartX);
+            const dy = Math.abs(e.touches[0].clientY - touchStartY);
+            if (Math.hypot(dx, dy) > 12) {
+              if (touchTimer) clearTimeout(touchTimer);
+            }
+          }
+        }, { passive: true });
       }
 
       // Render Active Reactions Tray (Strictly 1 Reaction Per User with Live Toggle & Switch)
@@ -7857,6 +7909,7 @@ document.getElementById("nav-status")?.addEventListener("click", () => {
     document.getElementById("nav-messages")?.classList.remove("active");
     document.getElementById("nav-status")?.classList.add("active");
     showNotif("NEX-STATUS", "info", 800);
+    try { loadStatusFeed(); } catch (_) {}
   } else {
     statusContainer.style.display = "none";
     if (app) app.dataset.activeSection = "chats";
@@ -9659,14 +9712,16 @@ async function loadGroupPendingRequests(groupId) {
               <small style="color: #aaa;">${timeAgo}</small>
             </div>
             <div style="display: flex; gap: 8px;">
-              <button onclick="acceptGroupJoinRequest('${requestId}', '${groupId}')" style="flex: 1; padding: 8px; background: #00ff66; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">? Accept</button>
-              <button onclick="declineGroupJoinRequest('${requestId}')" style="flex: 1; padding: 8px; background: #ff6b6b; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">? Decline</button>
+              <button onclick="acceptGroupJoinRequest('${requestId}', '${groupId}')" style="flex: 1; padding: 8px; background: #00ff66; color: #000; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;"><i class="fa-solid fa-check"></i> Accept</button>
+              <button onclick="declineGroupJoinRequest('${requestId}')" style="flex: 1; padding: 8px; background: #ff6b6b; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;"><i class="fa-solid fa-xmark"></i> Decline</button>
             </div>
           </div>
         `;
 
         html += requestHtml;
         listEl.innerHTML = html;
+        const modalListEl = document.getElementById('groupSettingsPendingRequestsList');
+        if (modalListEl) modalListEl.innerHTML = html;
       }).catch(err => {
         console.error('Error getting user data:', err);
       });
@@ -13798,6 +13853,15 @@ async function loadStatusFeed() {
       });
     }
 
+    const myAddBadge = document.getElementById('myStatusAddBadge');
+    if (myAddBadge && !myAddBadge.dataset.hasListener) {
+      myAddBadge.dataset.hasListener = 'true';
+      myAddBadge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCreateStatusModal('media');
+      });
+    }
+
     const fileInput = document.getElementById('statusImageInput');
     if (fileInput && !fileInput.dataset.hasListener) {
       fileInput.dataset.hasListener = 'true';
@@ -14361,11 +14425,42 @@ function setupCreateStatusModal() {
   document.getElementById('statusTabTextBtn')?.addEventListener('click', () => switchStatusModalTab('text'));
 
   const fileInput = document.getElementById('statusMediaModalFileInput');
+  const dropZone = document.getElementById('statusMediaDropZone');
   const previewBox = document.getElementById('statusMediaPreviewBox');
   const dropPlaceholder = document.getElementById('statusDropPlaceholder');
   const imgPreview = document.getElementById('statusModalImgPreview');
   const videoPreview = document.getElementById('statusModalVideoPreview');
   const removeBtn = document.getElementById('removeStatusMediaPreviewBtn');
+
+  if (dropZone && !dropZone.dataset.clickBound) {
+    dropZone.dataset.clickBound = 'true';
+    dropZone.addEventListener('click', (e) => {
+      if (e.target !== removeBtn && !removeBtn?.contains(e.target)) {
+        fileInput?.click();
+      }
+    });
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#00ff88';
+      dropZone.style.background = 'rgba(0, 255, 136, 0.1)';
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.borderColor = 'rgba(0, 255, 136, 0.4)';
+      dropZone.style.background = 'rgba(0, 255, 136, 0.03)';
+    });
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'rgba(0, 255, 136, 0.4)';
+      dropZone.style.background = 'rgba(0, 255, 136, 0.03)';
+      const file = e.dataTransfer?.files?.[0];
+      if (file && fileInput) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  }
 
   fileInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
@@ -15063,7 +15158,7 @@ function initializeBasicUI() {
           messageInput.value = '';
           autoResize();
           updateSendButtons();
-          showNotif('⌨️ Enter to Send • Shift+Enter for Newline • / for Slash Hub', 'info', 4000);
+          showNotif('[KEYS] Enter to Send • Shift+Enter for Newline • / for Slash Hub', 'info', 4000);
         }
       }
     ];
@@ -15179,14 +15274,17 @@ function initializeBasicUI() {
   const messagesArea = document.getElementById('messages-area');
   const scrollDownBtn = document.getElementById('chatScrollDownBtn');
   if (messagesArea && scrollDownBtn) {
+    let scrollTicking = false;
     messagesArea.addEventListener('scroll', () => {
-      const distFromBottom = messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight;
-      if (distFromBottom > 150) {
-        scrollDownBtn.style.display = 'flex';
-      } else {
-        scrollDownBtn.style.display = 'none';
+      if (!scrollTicking) {
+        window.requestAnimationFrame(() => {
+          const distFromBottom = messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight;
+          scrollDownBtn.style.display = distFromBottom > 150 ? 'flex' : 'none';
+          scrollTicking = false;
+        });
+        scrollTicking = true;
       }
-    });
+    }, { passive: true });
 
     scrollDownBtn.addEventListener('click', () => {
       messagesArea.scrollTo({ top: messagesArea.scrollHeight, behavior: 'smooth' });
@@ -17477,7 +17575,7 @@ export default async function handler(req, res) {
       footerRunBtn.style.background = 'linear-gradient(135deg, #00ff66, #00bb44)';
     }
 
-    appendTermLog(`<br/><span style="color:#ff6b6b;">[${new Date().toLocaleTimeString()}] ⏹️ [RUNNER] Extension stopped. Listener unmounted.</span>`);
+    appendTermLog(`<br/><span style="color:#ff6b6b;">[${new Date().toLocaleTimeString()}] [STOPPED] [RUNNER] Extension stopped. Listener unmounted.</span>`);
 
     showNotif('Bot Extension stopped.', 'info', 1800);
   };

@@ -368,15 +368,48 @@
       const messagesArea = document.getElementById('messages-area') || document.querySelector('.messages-area');
       if (!messagesArea) return;
 
+      let scheduled = false;
       const bindAll = () => {
-        const wrappers = messagesArea.querySelectorAll('.message-wrapper:not([data-prof-docked="true"])');
-        wrappers.forEach(w => this.attachHoverDock(w));
-        this.updateWelcomeStageVisibility();
+        if (scheduled) return;
+        scheduled = true;
+        window.requestAnimationFrame(() => {
+          scheduled = false;
+          const wrappers = messagesArea.querySelectorAll('.message-wrapper:not([data-prof-docked="true"])');
+          wrappers.forEach(w => {
+            this.attachHoverDock(w);
+            this.attachCodeReviewBtn(w);
+          });
+          this.updateWelcomeStageVisibility();
+        });
       };
 
       bindAll();
-      const observer = new MutationObserver(bindAll);
-      observer.observe(messagesArea, { childList: true, subtree: true });
+      const observer = new MutationObserver((mutations) => {
+        let hasWrapperChange = false;
+        for (let i = 0; i < mutations.length; i++) {
+          const added = mutations[i].addedNodes;
+          for (let j = 0; j < added.length; j++) {
+            if (added[j].nodeType === 1 && (added[j].classList?.contains('message-wrapper') || added[j].id === 'messages-area')) {
+              hasWrapperChange = true;
+              break;
+            }
+          }
+          if (hasWrapperChange) break;
+          const removed = mutations[i].removedNodes;
+          for (let j = 0; j < removed.length; j++) {
+            if (removed[j].nodeType === 1 && removed[j].classList?.contains('message-wrapper')) {
+              hasWrapperChange = true;
+              break;
+            }
+          }
+          if (hasWrapperChange) break;
+        }
+        if (hasWrapperChange) {
+          bindAll();
+        }
+      });
+      // Observe ONLY direct message wrapper childList changes without subtree thrashing
+      observer.observe(messagesArea, { childList: true });
     }
 
     attachHoverDock(wrapper) {
@@ -4038,76 +4071,38 @@ ${text}`;
     initMessageVirtualization() {
       const messagesArea = document.getElementById('messages-area');
       if (!messagesArea) return;
-
-      let isVirtualizing = false;
-      const VIRTUAL_THRESHOLD = 80;
-
-      const checkVirtualization = () => {
-        const wrappers = messagesArea.querySelectorAll('.message-wrapper');
-        if (wrappers.length < VIRTUAL_THRESHOLD) return;
-
-        const scrollTop = messagesArea.scrollTop;
-        const viewHeight = messagesArea.clientHeight;
-        const buffer = 1400; // 1400px above and below
-
-        wrappers.forEach(wrap => {
-          const top = wrap.offsetTop;
-          const h = wrap.offsetHeight || 50;
-          const isVisible = (top + h >= scrollTop - buffer) && (top <= scrollTop + viewHeight + buffer);
-
-          if (!isVisible) {
-            wrap.style.containIntrinsicSize = `auto ${h}px`;
-            wrap.style.contentVisibility = 'auto';
-          } else {
-            wrap.style.contentVisibility = 'visible';
-          }
-        });
-      };
-
-      messagesArea.addEventListener('scroll', () => {
-        if (!isVirtualizing) {
-          window.requestAnimationFrame(() => {
-            checkVirtualization();
-            isVirtualizing = false;
-          });
-          isVirtualizing = true;
-        }
-      }, { passive: true });
+      // Pure GPU layout and paint containment without synchronous offsetTop thrashing
+      messagesArea.style.contain = 'layout style';
     }
 
     /* ------------------------------------------------------------------------
        41. CHRONEX AI LIVE CODE REVIEW & AUTO-FIXER MODAL
        ------------------------------------------------------------------------ */
     initCodeReviewAndFix() {
-      // Attach review button to any code blocks in chat
-      const attachReviewButtons = () => {
-        const codeBlocks = document.querySelectorAll('.messages-area pre code, .messages-area .nex-code-output-console');
-        codeBlocks.forEach(block => {
-          if (block.dataset.reviewBound) return;
-          block.dataset.reviewBound = 'true';
+      // Integrated directly into single-pass message observer to eliminate layout thrashing
+    }
 
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'nex-code-review-btn';
-          btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX Review';
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.openCodeReviewModal(block.textContent || '');
-          });
+    attachCodeReviewBtn(wrapper) {
+      if (!wrapper) return;
+      const codeBlocks = wrapper.querySelectorAll('pre code, .nex-code-output-console');
+      codeBlocks.forEach(block => {
+        if (block.dataset.reviewBound) return;
+        block.dataset.reviewBound = 'true';
 
-          const pre = block.closest('pre') || block;
-          if (pre.parentElement) {
-            pre.parentElement.appendChild(btn);
-          }
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'nex-code-review-btn';
+        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX Review';
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.openCodeReviewModal(block.textContent || '');
         });
-      };
 
-      const observer = new MutationObserver(() => attachReviewButtons());
-      const messagesArea = document.getElementById('messages-area');
-      if (messagesArea) {
-        observer.observe(messagesArea, { childList: true, subtree: true });
-      }
-      attachReviewButtons();
+        const pre = block.closest('pre') || block;
+        if (pre.parentElement && !pre.parentElement.querySelector('.nex-code-review-btn')) {
+          pre.parentElement.appendChild(btn);
+        }
+      });
     }
 
     openCodeReviewModal(codeSnippet) {
@@ -4225,6 +4220,8 @@ ${text}`;
       if (!messagesArea) return;
 
       const msgCount = messagesArea.querySelectorAll('.message-wrapper').length;
+      if (this._lastMsgCount === msgCount) return;
+      this._lastMsgCount = msgCount;
       let stage = document.getElementById('nexWelcomeStage');
 
       if (msgCount === 0) {
