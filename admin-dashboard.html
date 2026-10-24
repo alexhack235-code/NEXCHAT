@@ -8019,8 +8019,8 @@ For support or further inquiries, reply directly to this chat.`;
           let payload = {};
 
           if (templateType === 'test_email') {
-            endpoint = '/api/test-email';
-            payload = { toEmail: recipient };
+            endpoint = '/api/send-email-alert';
+            payload = { type: 'test_email', toEmail: recipient };
           } else if (templateType === 'password_reset') {
             const pin = Math.floor(100000 + Math.random() * 900000).toString();
             payload = {

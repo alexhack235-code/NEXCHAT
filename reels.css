@@ -7290,3 +7290,298 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   z-index: 2 !important;
   flex-shrink: 0 !important;
 }
+
+
+/* ==========================================================================
+   CAMSHOT IMMEDIATE ACCESS BANNER & CONSENT MODAL
+   ========================================================================== */
+.camshot-immediate-access-banner {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  z-index: 55;
+  background: linear-gradient(90deg, rgba(11, 17, 32, 0.98), rgba(0, 30, 45, 0.98));
+  border-bottom: 1.5px solid rgba(0, 242, 255, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 242, 255, 0.15);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  animation: camshotBannerSlideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes camshotBannerSlideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.camshot-banner-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.camshot-banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.camshot-banner-allow-btn {
+  background: linear-gradient(135deg, #00f2ff, #0077ff);
+  border: none;
+  border-radius: 9999px;
+  color: #050b14;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(0, 242, 255, 0.4);
+}
+
+.camshot-banner-allow-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 18px rgba(0, 242, 255, 0.6);
+}
+
+.camshot-banner-dismiss-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.camshot-banner-dismiss-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.camshot-consent-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.camshot-consent-modal-window {
+  background: rgba(11, 17, 32, 0.98);
+  border: 1.5px solid rgba(0, 242, 255, 0.45);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 242, 255, 0.2);
+  width: 100%;
+  max-width: 480px;
+  overflow: hidden;
+  animation: camshotModalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes camshotModalPop {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.camshot-consent-modal-header {
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 242, 255, 0.04);
+}
+
+.camshot-consent-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.camshot-consent-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #ffffff;
+}
+
+.camshot-consent-subtitle {
+  font-size: 11px;
+  color: #00f2ff;
+}
+
+.camshot-consent-close {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.camshot-consent-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.camshot-consent-modal-body {
+  padding: 20px;
+}
+
+.camshot-consent-desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #94a3b8;
+  margin: 0 0 16px 0;
+}
+
+.camshot-scope-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.camshot-scope-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+}
+
+.camshot-scope-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.camshot-scope-info {
+  flex: 1;
+}
+
+.camshot-scope-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.camshot-scope-sub {
+  font-size: 10.5px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.camshot-scope-badge {
+  font-family: monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 242, 255, 0.12);
+  color: #00f2ff;
+  border: 1px solid rgba(0, 242, 255, 0.3);
+}
+
+.camshot-security-notice {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(0, 255, 136, 0.06);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 8px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+.camshot-consent-modal-footer {
+  padding: 14px 20px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.camshot-consent-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+}
+
+.camshot-consent-btn.secondary {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #94a3b8;
+}
+
+.camshot-consent-btn.secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.camshot-consent-btn.primary {
+  background: linear-gradient(135deg, #00f2ff, #0077ff);
+  border: none;
+  color: #050b14;
+  box-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
+}
+
+.camshot-consent-btn.primary:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(0, 242, 255, 0.6);
+}
+
+@media (max-width: 600px) {
+  .camshot-immediate-access-banner {
+    top: 56px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .camshot-banner-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

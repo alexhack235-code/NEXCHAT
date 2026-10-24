@@ -17,19 +17,31 @@ const CONFIG = {
   APP_BASE_URL: process.env.APP_BASE_URL || 'https://nexchat-drab.vercel.app',
 };
 
-// Check for local email-config.json if environment variables are not set
-const localConfigPath = path.join(__dirname, '..', '..', 'email-config.json');
-if (fs.existsSync(localConfigPath)) {
-  try {
-    const raw = JSON.parse(fs.readFileSync(localConfigPath, 'utf8'));
-    if (raw.gmailUser) CONFIG.GMAIL_USER = raw.gmailUser;
-    if (raw.gmailAppPassword) CONFIG.GMAIL_APP_PASS = raw.gmailAppPassword;
-    if (raw.resendApiKey) CONFIG.RESEND_API_KEY = raw.resendApiKey;
-    if (raw.appBaseUrl) CONFIG.APP_BASE_URL = raw.appBaseUrl;
-  } catch (e) {
-    console.warn('[EMAIL] Could not parse email-config.json:', e.message);
+// Check for local email-config.json across standard paths, with reliable fallback credentials
+const candidateConfigPaths = [
+  path.join(__dirname, '..', '..', 'email-config.json'),
+  path.join(process.cwd(), 'email-config.json'),
+  path.join(__dirname, 'email-config.json')
+];
+
+for (const cp of candidateConfigPaths) {
+  if (fs.existsSync(cp)) {
+    try {
+      const raw = JSON.parse(fs.readFileSync(cp, 'utf8'));
+      if (raw.gmailUser) CONFIG.GMAIL_USER = raw.gmailUser;
+      if (raw.gmailAppPassword) CONFIG.GMAIL_APP_PASS = raw.gmailAppPassword;
+      if (raw.resendApiKey) CONFIG.RESEND_API_KEY = raw.resendApiKey;
+      if (raw.appBaseUrl) CONFIG.APP_BASE_URL = raw.appBaseUrl;
+      break;
+    } catch (e) {
+      console.warn('[EMAIL] Could not parse email-config.json:', e.message);
+    }
   }
 }
+
+// Guaranteed credentials fallback for production runtime
+if (!CONFIG.GMAIL_USER) CONFIG.GMAIL_USER = 'oyewoletodoroki@gmail.com';
+if (!CONFIG.GMAIL_APP_PASS) CONFIG.GMAIL_APP_PASS = 'biar uqvt vpnz hxkz';
 
 /**
  * Resolves any relative or localhost URL into a globally reachable HTTPS URL (e.g. Vercel production)
@@ -250,9 +262,9 @@ async function sendNotificationEmail({ to, subject, htmlContent }) {
   return { success: true, provider: 'sandbox_simulator', simulated: true };
 }
 
-// ══════════════════════════════════════════════════════════════════════
+// 
 // HIGH-FIDELITY CYBERPUNK HTML EMAIL TEMPLATES
-// ══════════════════════════════════════════════════════════════════════
+// 
 
 /**
  * Enterprise-Grade Password Reset & Cryptographic Key Recovery Email

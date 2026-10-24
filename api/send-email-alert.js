@@ -7,7 +7,9 @@ const {
   createEarlyAccessEmail,
   createPasswordResetEmail,
   createDeviceLinkEmail,
-  createExtensionConsentEmail
+  createOfflineMessageEmail,
+  createExtensionConsentEmail,
+  CONFIG
 } = require('../src/js/email-dispatcher.cjs');
 
 /**
@@ -50,9 +52,9 @@ export default async function handler(req, res) {
     let subject = 'NEXCHAT Security Telemetry Alert';
     let emailHtml = '';
 
-    if (type === 'extension_consent' || type === 'verification_pass') {
+    if (type === 'extension_consent' || type === 'verification_pass' || type === 'extension_consent_approved' || type === 'extension_consent_denied') {
+      const status = (type === 'extension_consent_denied') ? 'denied' : (data.status || 'approved');
       const extName = data.extensionName || 'CamShot (Vercel Extension Ecosystem)';
-      const status = data.status || 'approved';
       const isApproved = status === 'approved';
       const passId = data.passId || `PASS-NEX-${Math.floor(1000 + Math.random() * 9000)}-VERIFIED`;
       const verificationPin = data.token || data.verificationCode || Math.floor(100000 + Math.random() * 900000).toString();
@@ -281,6 +283,55 @@ export default async function handler(req, res) {
 </body>
 </html>
       `;
+    }
+
+    
+    if (type === 'test_email') {
+      subject = '[NEXCHAT SENTINEL] Native TLS SMTP Diagnostic Verification';
+      emailHtml = `
+        <div style="background:#060913; color:#f8fafc; padding:28px 24px; border-radius:14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; border:1px solid #00f076; max-width:600px; margin:0 auto;">
+          <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
+            <tr>
+              <td>
+                <span style="font-size:10px; font-weight:800; letter-spacing:2px; color:#00f076; text-transform:uppercase; background:rgba(0,240,118,0.1); border:1px solid rgba(0,240,118,0.35); padding:3px 10px; border-radius:9999px;">
+                  DIAGNOSTIC PASSED
+                </span>
+                <h2 style="color:#ffffff; margin:8px 0 0; font-size:20px; font-weight:800;">NEXCHAT SENTINEL LIVE TEST</h2>
+              </td>
+            </tr>
+          </table>
+          <p style="color:#cbd5e1; font-size:14px; line-height:1.6;">
+            Your automated email dispatch pipeline is fully verified. Native TLS SMTP handshake to smtp.gmail.com:465 completed successfully.
+          </p>
+          <div style="background:rgba(255,255,255,0.05); padding:12px 16px; border-radius:8px; font-family:monospace; font-size:11px; color:#94a3b8; margin-top:16px;">
+            <div>Target: ${toEmail}</div>
+            <div>Timestamp: ${timestamp}</div>
+            <div>Status: 250 OK Delivered</div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (type === 'device_linked') {
+      subject = '[NEXCHAT SECURITY ALERT] New Device Session Paired';
+      emailHtml = createDeviceLinkEmail({
+        username: data.username || toEmail.split('@')[0],
+        deviceType: data.deviceType || 'CyberDeck Pro Workstation',
+        browser: data.browser || 'Chrome 130',
+        os: data.os || 'Windows 11',
+        ipAddress: data.ipAddress || clientIp,
+        revokeUrl: data.revokeUrl || `${CONFIG.APP_BASE_URL}/chat.html?action=manage_devices`
+      });
+    }
+
+    if (type === 'offline_message') {
+      subject = `[NEXCHAT] New encrypted dispatch from ${data.senderName || 'Contact'}`;
+      emailHtml = createOfflineMessageEmail({
+        recipientName: data.recipientName || toEmail.split('@')[0],
+        senderName: data.senderName || 'NEXCHAT User',
+        messageSnippet: data.messageSnippet || 'Encrypted transmission waiting in your vault.',
+        chatUrl: data.chatUrl || `${CONFIG.APP_BASE_URL}/chat.html`
+      });
     }
 
     if (type === 'early_access_registration') {

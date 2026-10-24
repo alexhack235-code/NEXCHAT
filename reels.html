@@ -93,6 +93,23 @@
     </div>
   </header>
 
+  <!-- Top Floating CamShot Access Banner (Immediately visible if not granted) -->
+  <div id="camshotImmediateAccessBanner" class="camshot-immediate-access-banner" style="display: none;">
+    <div class="camshot-banner-content">
+      <i class="fa-solid fa-shield-halved" style="color: #00f2ff;"></i>
+      <span>ALLOW CAMSHOT TO ACCESS NEXCHAT &bull; Connect your profile and encrypted media vault</span>
+    </div>
+    <div class="camshot-banner-actions">
+      <button type="button" id="btnBannerAllowCamshot" class="camshot-banner-allow-btn">
+        <i class="fa-solid fa-key"></i> <span>ALLOW ACCESS</span>
+      </button>
+      <button type="button" id="btnBannerDismissCamshot" class="camshot-banner-dismiss-btn" title="Dismiss">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+  </div>
+
+
   <!-- Trending Hashtags & Topic Filter Ribbon -->
   <div class="trending-tags-ribbon-wrapper" id="trendingTagsRibbonWrapper">
     <div class="trending-tags-ribbon" id="trendingTagsRibbon">
@@ -309,9 +326,9 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════
+  <!-- 
        CAMSHOT CREATOR STUDIO PRO
-       ══════════════════════════════════════════════════ -->
+        -->
   <div id="uploadReelModal" class="reels-modal creator-studio-modal" style="display: none;">
     <div class="reels-modal-card creator-studio-card">
       <!-- Studio Header -->
@@ -855,9 +872,9 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════
+  <!-- 
        SOUND HUB DRAWER ("Use This Sound" & Track Details)
-       ══════════════════════════════════════════════════ -->
+        -->
   <div id="soundHubDrawer" class="reels-modal sound-hub-modal" style="display: none;">
     <div class="reels-modal-card sound-hub-card">
       <div class="sound-hub-header">
@@ -931,9 +948,9 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════
+  <!-- 
        CHRONEX AI REEL INTELLIGENCE DRAWER
-       ══════════════════════════════════════════════════ -->
+        -->
   <div id="chronexAiDrawer" class="reels-modal chronex-ai-modal" style="display: none;">
     <div class="reels-modal-card chronex-ai-card">
       <div class="chronex-ai-header">
@@ -985,9 +1002,9 @@
     </div>
   </div>
 
-  <!-- ══════════════════════════════════════════════════
+  <!-- 
        CREATOR TOKEN TIP MODAL (2,000 Starting Token Economy)
-       ══════════════════════════════════════════════════ -->
+        -->
   <!-- CamShot Reels 3-Dot More Actions Bottom Sheet / Popover -->
   <div id="reelMoreModal" class="reels-modal-overlay reel-more-modal" style="display: none;">
     <div class="reels-more-backdrop" id="closeReelMoreBackdrop"></div>
@@ -1532,5 +1549,157 @@
   <script src="./src/js/reels-streamer-tipping.js"></script>
   <script src="./src/js/reels-prediction-engine.js"></script>
   <script src="./src/js/reels-greenscreen.js"></script>
+
+  <!-- =========================================================================
+       CAMSHOT ACCESS CONSENT MODAL & PROMINENT TOP BANNER
+       ========================================================================= -->
+  <div id="camshotAccessConsentModal" class="camshot-consent-modal-backdrop" style="display: none;">
+    <div class="camshot-consent-modal-window">
+      <div class="camshot-consent-modal-header">
+        <div class="camshot-consent-brand">
+          <i class="fa-solid fa-shield-halved" style="color: #00f2ff; font-size: 20px;"></i>
+          <div>
+            <div class="camshot-consent-title">ALLOW CAMSHOT TO ACCESS NEXCHAT</div>
+            <div class="camshot-consent-subtitle">Unified Identity &amp; Cross-Platform Media Sync</div>
+          </div>
+        </div>
+        <button type="button" class="camshot-consent-close" id="closeCamshotConsentModalBtn">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="camshot-consent-modal-body">
+        <p class="camshot-consent-desc">
+          CamShot Pro requires authorization to bridge with your NEXCHAT ecosystem. Granting access enables seamless cross-platform features:
+        </p>
+
+        <div class="camshot-scope-list">
+          <div class="camshot-scope-item">
+            <div class="camshot-scope-icon"><i class="fa-solid fa-user-shield" style="color: #00ff88;"></i></div>
+            <div class="camshot-scope-info">
+              <div class="camshot-scope-title">Profile &amp; Identity Attestation</div>
+              <div class="camshot-scope-sub">Sync your handle, avatar, and verified tier across CamShot Reels.</div>
+            </div>
+            <span class="camshot-scope-badge">[VERIFIED]</span>
+          </div>
+
+          <div class="camshot-scope-item">
+            <div class="camshot-scope-icon"><i class="fa-solid fa-vault" style="color: #00f2ff;"></i></div>
+            <div class="camshot-scope-info">
+              <div class="camshot-scope-title">Encrypted Media Vault</div>
+              <div class="camshot-scope-sub">Direct access to upload and publish 4K clips to your private reel repository.</div>
+            </div>
+            <span class="camshot-scope-badge">[READ/WRITE]</span>
+          </div>
+
+          <div class="camshot-scope-item">
+            <div class="camshot-scope-icon"><i class="fa-solid fa-comments" style="color: #c084fc;"></i></div>
+            <div class="camshot-scope-info">
+              <div class="camshot-scope-title">In-Chat Direct Sharing</div>
+              <div class="camshot-scope-sub">Share interactive reels with contacts and group channels with 1 click.</div>
+            </div>
+            <span class="camshot-scope-badge">[ACTIVE]</span>
+          </div>
+        </div>
+
+        <div class="camshot-security-notice">
+          <i class="fa-solid fa-lock" style="color: #00ff88; margin-right: 6px;"></i>
+          <span>Zero-Trust cryptographic authentication. Tokens can be revoked anytime in Settings.</span>
+        </div>
+      </div>
+
+      <div class="camshot-consent-modal-footer">
+        <button type="button" class="camshot-consent-btn secondary" id="btnCamshotConsentLater">
+          Browse as Guest
+        </button>
+        <button type="button" class="camshot-consent-btn primary" id="btnCamshotConsentGrant">
+          <i class="fa-solid fa-circle-check" style="margin-right: 6px;"></i> ALLOW FULL ACCESS
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function initCamshotAccessEngine() {
+      function checkAndInit() {
+        const isGranted = localStorage.getItem('camshot_nexchat_access_granted') === 'true';
+        const modal = document.getElementById('camshotAccessConsentModal');
+        const banner = document.getElementById('camshotImmediateAccessBanner');
+        const pill = document.getElementById('camshotAllowAccessBtn');
+
+        function updateUiGranted() {
+          if (banner) banner.style.display = 'none';
+          if (pill) {
+            pill.classList.remove('pending');
+            pill.classList.add('granted');
+            pill.style.background = 'rgba(0, 255, 136, 0.15)';
+            pill.style.borderColor = '#00ff88';
+            pill.style.color = '#00ff88';
+            pill.innerHTML = '<i class="fa-solid fa-circle-check" style="color: #00ff88;"></i> <span>CAMSHOT CONNECTED TO NEXCHAT</span>';
+          }
+        }
+
+        function openConsentModal() {
+          if (modal) modal.style.display = 'flex';
+        }
+
+        function grantAccess() {
+          localStorage.setItem('camshot_nexchat_access_granted', 'true');
+          localStorage.setItem('camshot_granted_at', new Date().toISOString());
+          updateUiGranted();
+          if (modal) modal.style.display = 'none';
+          if (typeof window.showToast === 'function') {
+            window.showToast('CamShot granted full access to NEXCHAT ecosystem!');
+          }
+        }
+
+        // Global interface
+        window.NEX_ECOSYSTEM = {
+          openConsentModal: openConsentModal,
+          grantAccess: grantAccess,
+          isAccessGranted: () => localStorage.getItem('camshot_nexchat_access_granted') === 'true'
+        };
+
+        if (isGranted) {
+          updateUiGranted();
+        } else {
+          // Immediately show prompt on load
+          setTimeout(() => {
+            openConsentModal();
+            if (banner) banner.style.display = 'flex';
+          }, 350);
+        }
+
+        document.getElementById('btnCamshotConsentGrant')?.addEventListener('click', grantAccess);
+        document.getElementById('btnBannerAllowCamshot')?.addEventListener('click', openConsentModal);
+        document.getElementById('btnCamshotConsentLater')?.addEventListener('click', () => {
+          if (modal) modal.style.display = 'none';
+        });
+        document.getElementById('closeCamshotConsentModalBtn')?.addEventListener('click', () => {
+          if (modal) modal.style.display = 'none';
+        });
+        document.getElementById('btnBannerDismissCamshot')?.addEventListener('click', () => {
+          if (banner) banner.style.display = 'none';
+        });
+
+        if (pill) {
+          pill.addEventListener('click', () => {
+            if (localStorage.getItem('camshot_nexchat_access_granted') === 'true') {
+              if (typeof window.showToast === 'function') window.showToast('CamShot access is already ACTIVE & VERIFIED');
+            } else {
+              openConsentModal();
+            }
+          });
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', checkAndInit);
+      } else {
+        checkAndInit();
+      }
+    })();
+  </script>
+
 </body>
 </html>
