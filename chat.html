@@ -2382,10 +2382,33 @@
                     Dispatches instant cryptographic alerts to your inbox for password resets, paired secondary devices, and unread offline digests.
                   </p>
 
-                  <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <input type="email" id="settingsTestEmailInput" placeholder="Enter recipient email..." style="flex: 1; font-size: 12px; padding: 8px 12px; border-radius: 8px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); color: #fff;">
-                    <button type="button" id="sendSentinelTestEmailBtn" style="padding: 8px 14px; font-size: 12px; white-space: nowrap; background: linear-gradient(135deg, #00f076, #00d4ff); color: #050608; font-weight: 800; border: none; border-radius: 8px; cursor: pointer;">
-                      <i class="fa-solid fa-paper-plane"></i> Send Test Ping
+                  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                      <span style="font-size: 12px; color: #8b949e;">Protected Alert Destination:</span>
+                      <span id="settingsUserEmailBadge" style="font-size: 12px; font-family: monospace; color: #00f076;">Loading Account Email...</span>
+                    </div>
+                    <div class="luxury-toggle-row" style="margin-top: 4px;">
+                      <div>
+                        <strong style="font-size: 12.5px;">Alert on New Device Pairing</strong>
+                        <p style="font-size: 11px; margin-top: 2px;">Dispatch instant alert if a secondary device links to your session.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="emailDevicePairAlertToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                    <div class="luxury-toggle-row">
+                      <div>
+                        <strong style="font-size: 12.5px;">Alert on Password &amp; Vault Changes</strong>
+                        <p style="font-size: 11px; margin-top: 2px;">Email notification on security credential modifications.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="emailSecurityAlertToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                    <button type="button" id="sendSentinelTestEmailBtn" style="width: 100%; margin-top: 4px; padding: 8px 14px; font-size: 12px; background: rgba(0, 240, 118, 0.12); border: 1px solid #00f076; color: #00f076; font-weight: 700; border-radius: 8px; cursor: pointer;">
+                      <i class="fa-solid fa-paper-plane"></i> Send Verification Ping to My Email
                     </button>
                   </div>
                   <div id="sentinelTestEmailFeedback" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>

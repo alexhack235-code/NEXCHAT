@@ -4,6 +4,11 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const { sendNotificationEmail, CONFIG } = require('../src/js/email-dispatcher.cjs');
 
+// In-Memory Rate Limiter for diagnostic endpoint
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 60 * 1000; // 60 seconds
+const MAX_TEST_DISPATCHES = 3;
+
 /**
  * /api/test-email - Instant Verification Endpoint for TLS SMTP
  * Zero external dependencies. Strictly 0 Unicode emojis.
@@ -14,6 +19,25 @@ export default async function handler(req, res) {
   if (req.method !== 'POST' && req.method !== 'GET') {
     return res.status(405).json({ success: false, error: 'Method not allowed. Use POST or GET.' });
   }
+
+  // Rate Limiting by client IP
+  const clientIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '127.0.0.1';
+  const now = Date.now();
+  const clientRecord = rateLimitMap.get(clientIp) || { count: 0, resetTime: now + RATE_LIMIT_WINDOW };
+
+  if (now > clientRecord.resetTime) {
+    clientRecord.count = 1;
+    clientRecord.resetTime = now + RATE_LIMIT_WINDOW;
+  } else {
+    clientRecord.count += 1;
+    if (clientRecord.count > MAX_TEST_DISPATCHES) {
+      return res.status(429).json({
+        success: false,
+        error: 'Too many diagnostic test requests. Please wait a minute.'
+      });
+    }
+  }
+  rateLimitMap.set(clientIp, clientRecord);
 
   const toEmail = (req.body && (req.body.toEmail || req.body.to)) ||
                   req.query?.to ||

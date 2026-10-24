@@ -9217,14 +9217,18 @@ function setupFortressSecurityListeners() {
 }
 
 function setupSentinelMailerSettings() {
-  const emailInput = document.getElementById('settingsTestEmailInput');
+  const emailBadge = document.getElementById('settingsUserEmailBadge');
   const sendBtn = document.getElementById('sendSentinelTestEmailBtn');
   const feedbackEl = document.getElementById('sentinelTestEmailFeedback');
   const badgeEl = document.getElementById('sentinelMailerBadge');
 
-  if (emailInput && !emailInput.value) {
-    const userEmail = window.myEmail || localStorage.getItem('auth_email') || (typeof auth !== 'undefined' && auth?.currentUser?.email) || '';
-    if (userEmail) emailInput.value = userEmail;
+  const getUserAccountEmail = () => {
+    return window.myEmail || localStorage.getItem('auth_email') || (typeof auth !== 'undefined' && auth?.currentUser?.email) || '';
+  };
+
+  const initialEmail = getUserAccountEmail();
+  if (emailBadge && initialEmail) {
+    emailBadge.textContent = initialEmail;
   }
 
   // Probe status once
@@ -9239,9 +9243,9 @@ function setupSentinelMailerSettings() {
     sendBtn.dataset.bound = 'true';
     sendBtn.addEventListener('click', async (e) => {
       e.preventDefault();
-      const target = emailInput?.value?.trim();
+      const target = getUserAccountEmail();
       if (!target) {
-        if (feedbackEl) feedbackEl.innerHTML = '<span style="color:#fe2c55;">Please enter an email address.</span>';
+        if (feedbackEl) feedbackEl.innerHTML = '<span style="color:#fe2c55;">No account email detected. Please log in with a verified account.</span>';
         return;
       }
 
