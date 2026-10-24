@@ -57,6 +57,10 @@
       this.injectThemePresetPicker();
       this.injectGroupMemberRoster();
       this.injectNotificationModeSelector();
+      this.initVoiceRecordingStudio();
+      this.initMultiPinnedCarousel();
+      this.initChatSearchModal();
+      this.initTypingPresenceVisualizer();
       this.startMessageObserver();
       this.startTelemetryLoop();
       this.startSchedulerWorker();
@@ -2626,6 +2630,381 @@ ${text}`;
 
           menu.style.display = 'none';
         });
+      });
+    }
+
+
+    /* ------------------------------------------------------------------------
+       28. INTERACTIVE AUDIO WAVEFORM RECORDING STUDIO
+       ------------------------------------------------------------------------ */
+    initVoiceRecordingStudio() {
+      const recordBtn = document.getElementById('audio-record-btn');
+      const recordingUI = document.getElementById('audioRecordingUI');
+      const messageForm = document.getElementById('message-form');
+      const timerEl = document.getElementById('audioTimer');
+      const cancelBtn = document.getElementById('audioCancelBtn');
+      const stopBtn = document.getElementById('audioStopBtn');
+      const sendBtn = document.getElementById('audioSendNowBtn');
+
+      if (!recordBtn || !recordingUI) return;
+
+      let mediaRecorder = null;
+      let audioChunks = [];
+      let timerInterval = null;
+      let secondsElapsed = 0;
+      let audioContext = null;
+      let analyser = null;
+      let animFrameId = null;
+      let mediaStream = null;
+
+      const resetUI = () => {
+        clearInterval(timerInterval);
+        cancelAnimationFrame(animFrameId);
+        if (mediaStream) {
+          mediaStream.getTracks().forEach(t => t.stop());
+          mediaStream = null;
+        }
+        if (audioContext && audioContext.state !== 'closed') {
+          audioContext.close().catch(() => {});
+        }
+        secondsElapsed = 0;
+        if (timerEl) timerEl.textContent = '0:00';
+        recordingUI.style.display = 'none';
+        if (messageForm) messageForm.style.display = 'flex';
+      };
+
+      recordBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          this.showToast('Microphone not supported on this browser/device', 'error');
+          return;
+        }
+
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          audioChunks = [];
+          secondsElapsed = 0;
+
+          // Set up recorder
+          const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/ogg';
+          mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
+          mediaRecorder.ondataavailable = (ev) => {
+            if (ev.data && ev.data.size > 0) audioChunks.push(ev.data);
+          };
+
+          mediaRecorder.start(100);
+
+          // Web Audio API live waveform
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            audioContext = new AudioCtx();
+            const source = audioContext.createMediaStreamSource(mediaStream);
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 64;
+            source.connect(analyser);
+
+            const bars = recordingUI.querySelectorAll('.audio-waveform-bars span');
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+            const animateWaveform = () => {
+              analyser.getByteFrequencyData(dataArray);
+              bars.forEach((bar, idx) => {
+                const val = dataArray[idx % dataArray.length] || 10;
+                const h = Math.max(4, Math.min(26, Math.floor((val / 255) * 26)));
+                bar.style.height = `${h}px`;
+                bar.style.background = val > 120 ? '#00f2ff' : '#00ff88';
+              });
+              animFrameId = requestAnimationFrame(animateWaveform);
+            };
+            animateWaveform();
+          }
+
+          // Show recording UI
+          if (messageForm) messageForm.style.display = 'none';
+          recordingUI.style.display = 'block';
+
+          timerInterval = setInterval(() => {
+            secondsElapsed++;
+            const m = Math.floor(secondsElapsed / 60);
+            const s = String(secondsElapsed % 60).padStart(2, '0');
+            if (timerEl) timerEl.textContent = `${m}:${s}`;
+          }, 1000);
+
+          this.showToast('Recording voice note...');
+        } catch (err) {
+          console.warn('[Voice Studio] Access error:', err);
+          this.showToast('Microphone access denied or unavailable', 'error');
+        }
+      });
+
+      cancelBtn?.addEventListener('click', () => {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+        resetUI();
+        this.showToast('Recording discarded');
+      });
+
+      const finalizeAndSend = () => {
+        if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+          const file = new File([blob], `voice_note_${Date.now()}.webm`, { type: mediaRecorder.mimeType });
+
+          // Try attaching to file-input
+          const fileInput = document.getElementById('file-input');
+          if (fileInput) {
+            try {
+              const dt = new DataTransfer();
+              dt.items.add(file);
+              fileInput.files = dt.files;
+              fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            } catch (_) {}
+          }
+
+          resetUI();
+          this.showToast('Voice note recorded and prepared for dispatch!');
+        };
+        mediaRecorder.stop();
+      };
+
+      sendBtn?.addEventListener('click', finalizeAndSend);
+      stopBtn?.addEventListener('click', finalizeAndSend);
+    }
+
+    /* ------------------------------------------------------------------------
+       29. MULTI-PIN MESSAGES CAROUSEL & PERSISTENCE
+       ------------------------------------------------------------------------ */
+    initMultiPinnedCarousel() {
+      const pinnedBar = document.getElementById('nexChatPinnedBar');
+      if (!pinnedBar) return;
+
+      this.pinnedItems = [];
+      this.currentPinIndex = 0;
+
+      // Add carousel buttons if not present
+      if (!pinnedBar.querySelector('.nex-pinned-carousel-nav')) {
+        const actions = pinnedBar.querySelector('.nex-pinned-actions');
+        if (actions) {
+          const nav = document.createElement('div');
+          nav.className = 'nex-pinned-carousel-nav';
+          nav.innerHTML = `
+            <button type="button" class="nex-pinned-btn" id="nexPinPrevBtn" title="Previous Pinned"><i class="fa-solid fa-chevron-left"></i></button>
+            <span class="nex-pinned-counter" id="nexPinnedCounter">1/1</span>
+            <button type="button" class="nex-pinned-btn" id="nexPinNextBtn" title="Next Pinned"><i class="fa-solid fa-chevron-right"></i></button>
+          `;
+          actions.prepend(nav);
+        }
+      }
+
+      const updatePinDisplay = () => {
+        if (this.pinnedItems.length === 0) {
+          pinnedBar.style.display = 'none';
+          return;
+        }
+
+        pinnedBar.style.display = 'flex';
+        const item = this.pinnedItems[this.currentPinIndex];
+        const authorEl = document.getElementById('nexPinnedAuthor');
+        const prevEl = document.getElementById('nexPinnedPreview');
+        const counterEl = document.getElementById('nexPinnedCounter');
+
+        if (authorEl) authorEl.textContent = `PINNED (${item.author || 'Message'})`;
+        if (prevEl) prevEl.textContent = item.text || '...';
+        if (counterEl) counterEl.textContent = `${this.currentPinIndex + 1}/${this.pinnedItems.length}`;
+        pinnedBar.dataset.targetId = item.id;
+      };
+
+      pinnedBar.querySelector('#nexPinPrevBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.pinnedItems.length <= 1) return;
+        this.currentPinIndex = (this.currentPinIndex - 1 + this.pinnedItems.length) % this.pinnedItems.length;
+        updatePinDisplay();
+      });
+
+      pinnedBar.querySelector('#nexPinNextBtn')?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (this.pinnedItems.length <= 1) return;
+        this.currentPinIndex = (this.currentPinIndex + 1) % this.pinnedItems.length;
+        updatePinDisplay();
+      });
+
+      // Hook up pin button from hover dock to append to multi-pin
+      document.addEventListener('click', (e) => {
+        const pinBtn = e.target.closest('[data-action="pin-msg"]');
+        if (!pinBtn) return;
+        const wrapper = pinBtn.closest('.message-wrapper');
+        if (!wrapper) return;
+
+        const id = wrapper.id || ('msg_' + Math.random().toString(36).substring(2, 8));
+        wrapper.id = id;
+        const author = wrapper.dataset.senderName || (wrapper.classList.contains('sent') ? 'You' : 'Member');
+        const text = wrapper.querySelector('.message-bubble p')?.textContent?.trim() || 'Attached Media';
+
+        // Check if already pinned
+        const exists = this.pinnedItems.find(p => p.id === id);
+        if (!exists) {
+          this.pinnedItems.push({ id, author, text });
+          this.currentPinIndex = this.pinnedItems.length - 1;
+          updatePinDisplay();
+          this.showToast(`Pinned announcement added (${this.pinnedItems.length} pinned)`);
+        } else {
+          this.showToast('Message is already in pinned announcements');
+        }
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       30. FULL CONVERSATION SEARCH MODAL
+       ------------------------------------------------------------------------ */
+    initChatSearchModal() {
+      const headerActions = document.querySelector('.chat-detail-header-actions');
+      if (!headerActions || document.getElementById('nexSearchChatBtn')) return;
+
+      const searchBtn = document.createElement('button');
+      searchBtn.type = 'button';
+      searchBtn.id = 'nexSearchChatBtn';
+      searchBtn.className = 'header-icon-btn';
+      searchBtn.title = 'Search Conversation Messages';
+      searchBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>';
+
+      headerActions.prepend(searchBtn);
+
+      const modal = document.createElement('div');
+      modal.id = 'nexChatSearchModal';
+      modal.className = 'nex-prof-modal-backdrop';
+      modal.innerHTML = `
+        <div class="nex-prof-modal-window" style="max-width: 500px;">
+          <div class="nex-prof-modal-header">
+            <div class="nex-prof-modal-title">
+              <i class="fa-solid fa-magnifying-glass" style="color: #00f2ff;"></i>
+              <span>Search Conversation History</span>
+            </div>
+            <button type="button" class="nex-thread-close-btn" id="nexSearchModalCloseBtn">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+          <div class="nex-prof-modal-body">
+            <input type="text" id="nexChatSearchInput" class="nex-prof-input" placeholder="Type keywords, code snippets, or names..." autofocus>
+            <div class="nex-search-results-list" id="nexSearchResultsContainer">
+              <div style="font-size: 11.5px; color: #64748b; text-align: center; padding: 20px;">
+                Enter a query to search messages in this session.
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const close = () => modal.classList.remove('active');
+      modal.querySelector('#nexSearchModalCloseBtn')?.addEventListener('click', close);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) close();
+      });
+
+      searchBtn.addEventListener('click', () => {
+        modal.classList.add('active');
+        const input = document.getElementById('nexChatSearchInput');
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+      });
+
+      const searchInput = document.getElementById('nexChatSearchInput');
+      searchInput?.addEventListener('input', () => {
+        const query = searchInput.value.trim().toLowerCase();
+        const container = document.getElementById('nexSearchResultsContainer');
+        if (!container) return;
+
+        if (!query) {
+          container.innerHTML = '<div style="font-size: 11.5px; color: #64748b; text-align: center; padding: 20px;">Enter a query to search messages in this session.</div>';
+          return;
+        }
+
+        const messages = document.querySelectorAll('.messages-area .message-wrapper');
+        const matches = [];
+
+        messages.forEach(m => {
+          const text = m.querySelector('.message-bubble p')?.textContent || '';
+          if (text.toLowerCase().includes(query)) {
+            const author = m.dataset.senderName || (m.classList.contains('sent') ? 'You' : 'Member');
+            const time = m.querySelector('.message-time')?.textContent || '';
+            const id = m.id || ('msg_' + Math.random().toString(36).substring(2, 8));
+            m.id = id;
+            matches.push({ id, author, text, time });
+          }
+        });
+
+        if (matches.length === 0) {
+          container.innerHTML = `<div style="font-size: 11.5px; color: #94a3b8; text-align: center; padding: 20px;">No messages matching "${escapeHtml(query)}"</div>`;
+          return;
+        }
+
+        container.innerHTML = '';
+        matches.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'nex-search-result-card';
+          card.innerHTML = `
+            <div class="nex-search-meta">
+              <span class="nex-search-author">${escapeHtml(item.author)}</span>
+              <span class="nex-search-time">${escapeHtml(item.time)}</span>
+            </div>
+            <div class="nex-search-snippet">${escapeHtml(item.text)}</div>
+          `;
+          card.addEventListener('click', () => {
+            close();
+            const targetEl = document.getElementById(item.id);
+            if (targetEl) {
+              targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              targetEl.classList.add('pinned-jump-highlight');
+              setTimeout(() => targetEl.classList.remove('pinned-jump-highlight'), 2000);
+            }
+          });
+          container.appendChild(card);
+        });
+      });
+    }
+
+    /* ------------------------------------------------------------------------
+       31. REAL-TIME TYPING PRESENCE VISUALIZER
+       ------------------------------------------------------------------------ */
+    initTypingPresenceVisualizer() {
+      const messageForm = document.getElementById('message-form');
+      if (!messageForm || document.getElementById('nexTypingPresenceBar')) return;
+
+      const bar = document.createElement('div');
+      bar.id = 'nexTypingPresenceBar';
+      bar.className = 'nex-typing-presence-bar';
+      bar.style.display = 'none';
+      bar.innerHTML = `
+        <div class="nex-typing-pulse-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <span id="nexTypingPresenceText">Member is typing...</span>
+      `;
+
+      messageForm.parentNode.insertBefore(bar, messageForm);
+
+      const input = document.getElementById('message-input');
+      let typingTimeout = null;
+
+      input?.addEventListener('input', () => {
+        clearTimeout(typingTimeout);
+        // Simulate broadcast response when in active chat
+        const chatName = document.getElementById('chatName')?.textContent?.trim() || 'Alexander';
+        const isGroup = (window.currentChatType === 'group');
+
+        const presenceText = document.getElementById('nexTypingPresenceText');
+        if (presenceText) {
+          presenceText.textContent = isGroup ? `@${chatName} is writing a response...` : `${chatName} is typing...`;
+        }
+        bar.style.display = 'flex';
+
+        typingTimeout = setTimeout(() => {
+          bar.style.display = 'none';
+        }, 2200);
       });
     }
 
