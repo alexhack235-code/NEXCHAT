@@ -1,10 +1,15 @@
 /**
  * ============================================================================
  * NEXCHAT 3D METROPOLIS - ADVANCED SYSTEMS ENGINE
+ * ----------------------------------------------------------------------------
  * (Tier 1: SSR Rain Wetness & Optical Neon Bloom)
  * (Tier 2: 4-Wheel Spring Suspension, Drift Skid Ribbons & Exhaust Flames)
  * (Tier 3: 3D Holographic GPS Roadway Projector & Smart Traffic Lights AI)
  * (Tier 4: Multiplayer Spatial Presence Engine & Ghost Rivals)
+ * (Tier 5: Dynamic Celestial 24-Hr Cycle & Volumetric Atmospheric Scattering)
+ * (Tier 6: 1P Cockpit Interior Camera, 3D Gauge Cluster & Steering Wheel)
+ * (Tier 7: Vehicle Damage Physics, Collision Spark Shards & 5 Pit-Stop Bays)
+ * (Tier 8: Operational Elevated Maglev Monorail Transit Network & Fast-Travel)
  *
  * Architecture: Zero-GC scratch vectors, strictly zero Unicode emojis.
  * ============================================================================
@@ -43,6 +48,12 @@
       this.trafficSignals = null;
       this.multiplayer = null;
 
+      // New Grand Expansion Subsystems
+      this.celestial = null;
+      this.cockpit = null;
+      this.damageAndPitstop = null;
+      this.maglev = null;
+
       // Global state
       this.isRaining = false;
       this.activeDestinationIndex = 0;
@@ -69,7 +80,7 @@
         return;
       }
 
-      // Initialize all 4 tiers
+      // Initialize all 8 Subsystems
       this.wetness = new RainWetnessSubsystem(this);
       this.suspension = new SuspensionDynamicsSubsystem(this);
       this.skidmarks = new SkidmarkRibbonSubsystem(this);
@@ -78,13 +89,19 @@
       this.trafficSignals = new SmartTrafficIntersectionSubsystem(this);
       this.multiplayer = new SpatialMultiplayerPresenceSubsystem(this);
 
+      // Expansion Subsystems
+      this.celestial = new CelestialAtmosphereSubsystem(this);
+      this.cockpit = new CockpitInteriorDashboardSubsystem(this);
+      this.damageAndPitstop = new VehicleDamageAndRepairBaySubsystem(this);
+      this.maglev = new ElevatedMaglevTransitSubsystem(this);
+
       this.initHUDControls();
       this.initialized = true;
-      console.log('[ADVANCED SYSTEMS] All 4 Tiers initialized successfully (Zero Emojis, Zero-GC).');
+      console.log('[ADVANCED SYSTEMS] All 8 Tiers initialized successfully (Zero Emojis, Zero-GC).');
     }
 
     initHUDControls() {
-      // Hotkey listener: [G] for GPS cycle destination, [J] for Rain toggle
+      // Hotkey listeners: [G] GPS, [J] Rain, [K] Celestial Time, [C] / [V] Cockpit
       window.addEventListener('keydown', (e) => {
         if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
         const key = e.key.toLowerCase();
@@ -92,6 +109,8 @@
           this.cycleGPSDestination();
         } else if (key === 'j') {
           this.toggleWetWeather();
+        } else if (key === 'k') {
+          if (this.celestial) this.celestial.advanceTimeOfDay(4.0);
         }
       });
     }
@@ -129,6 +148,12 @@
       if (this.gps) this.gps.update(delta, vehicleState);
       if (this.trafficSignals) this.trafficSignals.update(delta);
       if (this.multiplayer) this.multiplayer.update(delta, vehicleState);
+
+      // Expansion Subsystems Updates
+      if (this.celestial) this.celestial.update(delta);
+      if (this.cockpit) this.cockpit.update(delta, vehicleState);
+      if (this.damageAndPitstop) this.damageAndPitstop.update(delta, vehicleState);
+      if (this.maglev) this.maglev.update(delta);
     }
   }
 
@@ -229,7 +254,7 @@
       for (let i = 0; i < this.cachedMaterials.length; i++) {
         const item = this.cachedMaterials[i];
         if (item.mat) {
-          // As asphalt gets wet, roughness drops from 0.88 -> 0.12 (mirror puddle sheen)
+          // As asphalt gets wet, roughness drops from 0.88 -> 0.14 (mirror puddle sheen)
           item.mat.roughness = THREE.MathUtils.lerp(item.baseRoughness, 0.14, factor);
           // Metalness increases to create high specular reflections
           item.mat.metalness = THREE.MathUtils.lerp(item.baseMetalness, 0.82, factor);
@@ -289,12 +314,12 @@
   class SkidmarkRibbonSubsystem {
     constructor(parent) {
       this.parent = parent;
-      this.maxPoints = 140; // 140 segments = 70 quads
+      this.maxPoints = 140;
       this.pointIndex = 0;
       this.emitTimer = 0;
 
       this.skidGeo = new THREE.BufferGeometry();
-      this.positions = new Float32Array(this.maxPoints * 3 * 2); // 2 tracks (Left & Right)
+      this.positions = new Float32Array(this.maxPoints * 3 * 2);
       this.opacities = new Float32Array(this.maxPoints * 2);
       this.skidGeo.setAttribute('position', new THREE.BufferAttribute(this.positions, 3));
 
@@ -325,7 +350,6 @@
         const cosY = Math.cos(rYaw);
         const sinY = Math.sin(rYaw);
 
-        // Rear left & rear right tire contact points
         const lx = rPos.x + (-1.05 * cosY - 1.65 * sinY);
         const lz = rPos.z + (1.05 * sinY - 1.65 * cosY);
         const rx = rPos.x + (1.05 * cosY - 1.65 * sinY);
@@ -336,7 +360,7 @@
         const idxR = (this.maxPoints + this.pointIndex) * 3;
 
         this.positions[idxL] = lx;
-        this.positions[idxL + 1] = 0.082; // Just above road deck
+        this.positions[idxL + 1] = 0.082;
         this.positions[idxL + 2] = lz;
 
         this.positions[idxR] = rx;
@@ -361,7 +385,6 @@
       this.flameGroup.name = 'exhaustBackfireFlames';
       this.parent.scene.add(this.flameGroup);
 
-      // Inner cyan flame & outer amber flame geometry
       const innerGeo = new THREE.ConeGeometry(0.18, 0.9, 8);
       innerGeo.rotateX(Math.PI / 2);
       const innerMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.95 });
@@ -381,11 +404,9 @@
     }
 
     triggerBackfire() {
-      this.flameTimer = 0.16; // 160ms flash
+      this.flameTimer = 0.16;
       this.flameActive = true;
       this.flameGroup.visible = true;
-
-      // Play Web Audio backfire pop
       this.playBackfireAudio();
     }
 
@@ -394,7 +415,6 @@
         const audioCtx = (typeof cyberAudio !== 'undefined' && cyberAudio.ctx) ? cyberAudio.ctx : (THREE.AudioContext ? THREE.AudioContext.getContext() : null);
         if (!audioCtx) return;
 
-        // Pop pulse: filtered noise burst + punchy low-frequency resonance
         const bufferSize = audioCtx.sampleRate * 0.12;
         const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
         const output = noiseBuffer.getChannelData(0);
@@ -419,9 +439,7 @@
         gainNode.connect(audioCtx.destination);
 
         whiteNoise.start();
-      } catch (e) {
-        // Fallback or mute
-      }
+      } catch (e) {}
     }
 
     update(delta, vState) {
@@ -430,7 +448,6 @@
       const throttle = vState.throttle || 0;
       const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
 
-      // Detect lift-off over-run: throttle dropping from 1.0 to 0.0 at high speed (> 20 m/s)
       if (this.lastThrottle > 0.8 && throttle < 0.2 && Math.abs(speed) > 18.0) {
         this.triggerBackfire();
       }
@@ -442,7 +459,6 @@
           this.flameActive = false;
           this.flameGroup.visible = false;
         } else if (roverGroup) {
-          // Align flames to car exhaust tips
           const rPos = roverGroup.position;
           const rYaw = roverGroup.rotation.y;
           const cosY = Math.cos(rYaw);
@@ -482,11 +498,9 @@
       this.gpsGroup.name = 'holographicGPSGroup';
       this.parent.scene.add(this.gpsGroup);
 
-      // 1. Towering Skyward Holographic Destination Beacon
       this.beaconGroup = new THREE.Group();
       this.gpsGroup.add(this.beaconGroup);
 
-      // Light beam pillar
       const beamGeo = new THREE.CylinderGeometry(0.8, 1.8, 220, 16, 1, true);
       beamGeo.translate(0, 110, 0);
       const beamMat = new THREE.MeshBasicMaterial({
@@ -499,7 +513,6 @@
       this.beaconBeam = new THREE.Mesh(beamGeo, beamMat);
       this.beaconGroup.add(this.beaconBeam);
 
-      // Concentric rotating radar rings
       this.beaconRing = new THREE.Mesh(
         new THREE.RingGeometry(2.5, 3.8, 24),
         new THREE.MeshBasicMaterial({ color: this.activeTarget.color, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
@@ -508,7 +521,6 @@
       this.beaconRing.position.y = 1.2;
       this.beaconGroup.add(this.beaconRing);
 
-      // 2. Roadway Chevrons (18 animated holographic arrows leading from player to destination)
       this.chevronCount = 18;
       this.chevronGroup = new THREE.Group();
       this.gpsGroup.add(this.chevronGroup);
@@ -601,7 +613,6 @@
       const pPos = (this.parent.player && this.parent.player.pos) ? this.parent.player.pos : null;
       if (!pPos) return;
 
-      // Animate beacon rotation
       if (this.beaconRing) this.beaconRing.rotation.z += delta * 1.5;
 
       const dx = this.activeTarget.x - pPos.x;
@@ -610,13 +621,11 @@
       const speed = Math.max(8.0, Math.abs((vState && vState.roverCurrentSpeed) ? vState.roverCurrentSpeed : 12.0));
       const eta = Math.round(dist / speed);
 
-      // Update HUD metrics
       const metricsEl = document.getElementById('gps-hud-metrics');
       if (metricsEl && Math.random() < 0.1) {
         metricsEl.textContent = `DISTANCE: ${Math.round(dist)}M · ETA: ${eta}S`;
       }
 
-      // Animate holographic chevrons streaming toward destination along the road
       this.arrowPhase = (this.arrowPhase + delta * 2.8) % 1.0;
       const angle = Math.atan2(dx, dz);
 
@@ -628,7 +637,7 @@
         if (arrowDist < dist) {
           chv.position.set(
             pPos.x + Math.sin(angle) * arrowDist,
-            0.24, // Hovering over road
+            0.24,
             pPos.z + Math.cos(angle) * arrowDist
           );
           chv.rotation.y = angle;
@@ -649,7 +658,6 @@
       this.signalsGroup.name = 'smartTrafficSignals';
       this.parent.scene.add(this.signalsGroup);
 
-      // Define 4 major arterial intersections
       this.intersections = [
         { id: 'central', x: 0, z: 0, state: 'NS_GREEN', timer: 14.0 },
         { id: 'north_artery', x: 0, z: 180, state: 'EW_GREEN', timer: 14.0 },
@@ -668,7 +676,6 @@
         const gantry = new THREE.Group();
         gantry.position.set(inter.x, 0, inter.z);
 
-        // Mast arm
         const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.28, 8.5, 8), poleMat);
         pole.position.set(-10, 4.25, -10);
         gantry.add(pole);
@@ -677,7 +684,6 @@
         mastArm.position.set(0, 8.2, -10);
         gantry.add(mastArm);
 
-        // Signal Heads (North-South & East-West)
         inter.lightMeshes = {};
         ['NS', 'EW'].forEach((dir, dIdx) => {
           const sBox = new THREE.Mesh(new THREE.BoxGeometry(0.65, 1.8, 0.5), housingMat);
@@ -704,7 +710,6 @@
     }
 
     update(delta) {
-      // Advance intersection state machine
       this.intersections.forEach(inter => {
         inter.timer -= delta;
         if (inter.timer <= 0) {
@@ -725,7 +730,6 @@
         }
       });
 
-      // Hook AI Traffic stopping at red lights
       this.updateAITrafficIntersectionBehavior();
     }
 
@@ -738,12 +742,10 @@
       const isEWGreen = inter.state === 'EW_GREEN';
       const isEWAmber = inter.state === 'EW_AMBER';
 
-      // NS Signal
       lights.NS.green.material.color.setHex(isNSGreen ? 0x00ff88 : 0x003311);
       lights.NS.amber.material.color.setHex(isNSAmber ? 0xffaa00 : 0x332200);
       lights.NS.red.material.color.setHex((!isNSGreen && !isNSAmber) ? 0xff2244 : 0x330000);
 
-      // EW Signal
       lights.EW.green.material.color.setHex(isEWGreen ? 0x00ff88 : 0x003311);
       lights.EW.amber.material.color.setHex(isEWAmber ? 0xffaa00 : 0x332200);
       lights.EW.red.material.color.setHex((!isEWGreen && !isEWAmber) ? 0xff2244 : 0x330000);
@@ -757,7 +759,6 @@
         const veh = traffic[i];
         if (!veh.group || veh.isHover) continue;
 
-        // Check distance to Central Intersection (0, 0)
         const vPos = veh.group.position;
         const distToCenter = Math.sqrt(vPos.x * vPos.x + vPos.z * vPos.z);
 
@@ -767,10 +768,8 @@
           const isRed = isNS ? (centralInter.state.startsWith('EW')) : (centralInter.state.startsWith('NS'));
 
           if (isRed) {
-            // Decelerate smoothly to stop line
             veh.speed = THREE.MathUtils.lerp(veh.speed, 0.0, 0.15);
           } else {
-            // Accelerate back up to road cruise speed
             veh.speed = THREE.MathUtils.lerp(veh.speed, 28.0, 0.08);
           }
         }
@@ -819,7 +818,6 @@
         console.warn('[MULTIPLAYER] BroadcastChannel fallback engaged.');
       }
 
-      // Local storage fallback for cross-process tab sync
       window.addEventListener('storage', (e) => {
         if (e.key === 'nexchat_spatial_peer_event' && e.newValue) {
           try {
@@ -833,7 +831,6 @@
     }
 
     initGhostRivals() {
-      // 3 Autonomous High-Speed Ghost Rivals that guarantee an active multiplayer atmosphere
       const rivalConfigs = [
         {
           id: 'rival_spectre',
@@ -899,25 +896,21 @@
       const darkMat = new THREE.MeshStandardMaterial({ color: 0x090d14, roughness: 0.3, metalness: 0.8 });
       const glassMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, roughness: 0.1, metalness: 0.9, transparent: true, opacity: 0.75 });
 
-      // Chassis
       const body = new THREE.Mesh(new THREE.BoxGeometry(2.1, 0.65, 4.6), carMat);
       body.position.y = 0.6;
       body.castShadow = true;
       vGroup.add(body);
 
-      // Cabin
       const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.52, 2.3), glassMat);
       cabin.position.set(0, 1.05, -0.2);
       vGroup.add(cabin);
 
-      // Underglow Neon
       const glowMat = new THREE.MeshBasicMaterial({ color: color, transparent: true, opacity: 0.85 });
       const underglow = new THREE.Mesh(new THREE.PlaneGeometry(2.4, 4.8), glowMat);
       underglow.rotation.x = -Math.PI / 2;
       underglow.position.y = 0.088;
       vGroup.add(underglow);
 
-      // 3D Floating Callsign HUD Tag
       const hudCanvas = document.createElement('canvas');
       hudCanvas.width = 380;
       hudCanvas.height = 70;
@@ -968,7 +961,6 @@
       bubbleSprite.position.y = 3.6;
       vGroup.add(bubbleSprite);
 
-      // Auto-remove speech bubble after 6.5 seconds
       setTimeout(() => {
         vGroup.remove(bubbleSprite);
       }, 6500);
@@ -979,7 +971,6 @@
 
       let p = this.remotePlayers.get(data.senderId);
       if (!p) {
-        // Spawn remote player car
         const car = this.createMultiplayerVehicleMesh(data.color || 0x00f2ff, data.callsign || 'REMOTE_PILOT');
         this.multiGroup.add(car);
         p = { group: car, targetPos: new THREE.Vector3(), targetYaw: 0 };
@@ -999,7 +990,6 @@
     }
 
     update(delta, vState) {
-      // 1. Broadcast Local Player Telemetry at 10 Hz
       const pPos = (this.parent.player && this.parent.player.pos) ? this.parent.player.pos : null;
       const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
 
@@ -1019,13 +1009,11 @@
         }
       }
 
-      // 2. Smoothly Lerp Remote Players
       this.remotePlayers.forEach((p) => {
         p.group.position.lerp(p.targetPos, delta * 8.0);
         p.group.rotation.y = THREE.MathUtils.lerp(p.group.rotation.y, p.targetYaw, delta * 8.0);
       });
 
-      // 3. Animate Autonomous Ghost Rivals
       this.ghostRivals.forEach((rival) => {
         const cfg = rival.config;
         if (cfg.patrolAxis === 'z') {
@@ -1040,7 +1028,6 @@
           if (cfg.dir < 0 && rival.group.position.x < cfg.minB) cfg.dir = 1;
         }
 
-        // Periodic Rival Tactical Chatter in 3D Speech Bubbles
         rival.chatTimer -= delta;
         if (rival.chatTimer <= 0) {
           rival.chatTimer = 18.0 + Math.random() * 24.0;
@@ -1055,6 +1042,527 @@
           this.display3DSpeechBubble(rival.group, text);
         }
       });
+    }
+  }
+
+  // ==========================================================================
+  // TIER 5: DYNAMIC CELESTIAL DAY/NIGHT & VOLUMETRIC ATMOSPHERE SCATTERING
+  // ==========================================================================
+  class CelestialAtmosphereSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.timeOfDay = 14.5; // Starts at 2:30 PM
+      this.timeSpeed = 0.06; // ~7 minutes per full 24-hr cycle
+      this.temperature = 2; // Celsius
+      this.iceGripFactor = 1.0;
+
+      this.celestialGroup = new THREE.Group();
+      this.celestialGroup.name = 'celestialAtmosphereGroup';
+      this.parent.scene.add(this.celestialGroup);
+
+      // Sun mesh
+      const sunGeo = new THREE.SphereGeometry(35, 16, 16);
+      const sunMat = new THREE.MeshBasicMaterial({ color: 0xfff0aa });
+      this.sunMesh = new THREE.Mesh(sunGeo, sunMat);
+      this.celestialGroup.add(this.sunMesh);
+
+      // Moon mesh
+      const moonGeo = new THREE.SphereGeometry(26, 16, 16);
+      const moonMat = new THREE.MeshBasicMaterial({ color: 0xc2d6f0 });
+      this.moonMesh = new THREE.Mesh(moonGeo, moonMat);
+      this.celestialGroup.add(this.moonMesh);
+
+      // Dedicated Directional Sun/Moon Celestial Light
+      this.celestialLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      this.celestialLight.position.set(200, 400, 200);
+      this.celestialGroup.add(this.celestialLight);
+
+      this.createHUDClock();
+    }
+
+    createHUDClock() {
+      const existing = document.getElementById('celestial-clock-hud');
+      if (existing) existing.remove();
+
+      const hud = document.createElement('div');
+      hud.id = 'celestial-clock-hud';
+      hud.style.cssText = `
+        position: absolute;
+        top: 20px;
+        left: 200px;
+        background: rgba(10, 15, 24, 0.85);
+        border: 1px solid rgba(0, 242, 255, 0.4);
+        border-radius: 8px;
+        padding: 5px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Rajdhani', sans-serif;
+        color: #fff;
+        z-index: 100;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        user-select: none;
+      `;
+      hud.title = 'Click or press [K] to advance celestial time';
+      hud.onclick = () => { this.advanceTimeOfDay(4.0); };
+      hud.innerHTML = `
+        <i class="fa-solid fa-clock" style="color: #38bdf8;"></i>
+        <span id="celestial-time-label" style="font-weight: 800; font-size: 11px; color: #38bdf8; font-family: monospace;">14:30 · +2°C</span>
+      `;
+      document.body.appendChild(hud);
+    }
+
+    advanceTimeOfDay(hours) {
+      this.timeOfDay = (this.timeOfDay + hours) % 24.0;
+      if (typeof showStoreNotification === 'function') {
+        const todLabel = this.timeOfDay >= 6 && this.timeOfDay < 18 ? 'DAYTIME' : 'NIGHT';
+        showStoreNotification(`[TIME] CELESTIAL ADVANCED: ${Math.floor(this.timeOfDay)}:00 (${todLabel})`);
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    update(delta) {
+      this.timeOfDay = (this.timeOfDay + delta * this.timeSpeed) % 24.0;
+
+      // Celestial Angle
+      const ang = (this.timeOfDay / 24.0) * Math.PI * 2 - Math.PI / 2;
+      const radius = 1350;
+      const pPos = (this.parent.player && this.parent.player.pos) ? this.parent.player.pos : { x: 0, z: 0 };
+
+      const sx = pPos.x + Math.cos(ang) * radius;
+      const sy = Math.sin(ang) * radius;
+      const sz = pPos.z + Math.cos(ang * 0.5) * 350;
+
+      this.sunMesh.position.set(sx, sy, sz);
+      this.moonMesh.position.set(pPos.x - (sx - pPos.x), -sy, pPos.z - (sz - pPos.z));
+
+      // Calculate Temperature
+      this.temperature = Math.round(Math.sin((this.timeOfDay - 9) * Math.PI / 12) * 16 - 8);
+      this.iceGripFactor = this.temperature < -10 ? 0.76 : 1.0;
+
+      // Light Color & Intensity Transitions
+      const isDay = sy > 0;
+      const tNorm = Math.max(0, sy / radius);
+
+      if (isDay) {
+        this.celestialLight.position.set(sx, sy, sz);
+        this.celestialLight.color.setHex(sy < 300 ? 0xf97316 : 0xffffff);
+        this.celestialLight.intensity = THREE.MathUtils.lerp(0.3, 1.35, tNorm);
+      } else {
+        this.celestialLight.position.set(this.moonMesh.position.x, Math.abs(sy), this.moonMesh.position.z);
+        this.celestialLight.color.setHex(0x38bdf8);
+        this.celestialLight.intensity = 0.28;
+      }
+
+      // Update Fog in Scene
+      if (this.parent.scene && this.parent.scene.fog) {
+        if (sy < 150 && sy > -150) {
+          this.parent.scene.fog.color.setHex(0x271638); // Twilight purple
+        } else if (isDay) {
+          this.parent.scene.fog.color.setHex(0x0e1b2e); // Daytime blue
+        } else {
+          this.parent.scene.fog.color.setHex(0x040812); // Night obsidian
+        }
+      }
+
+      // Update Clock HUD
+      const clockEl = document.getElementById('celestial-time-label');
+      if (clockEl) {
+        const hrs = Math.floor(this.timeOfDay);
+        const mins = Math.floor((this.timeOfDay % 1) * 60);
+        const hh = hrs < 10 ? '0' + hrs : hrs;
+        const mm = mins < 10 ? '0' + mins : mins;
+        const tempSign = this.temperature > 0 ? '+' : '';
+        const iceTag = this.temperature < -10 ? ' [FROST]' : '';
+        clockEl.textContent = `${hh}:${mm} · ${tempSign}${this.temperature}°C${iceTag}`;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 6: 1P FIRST-PERSON COCKPIT CAMERA & FUNCTIONAL 3D DASHBOARD
+  // ==========================================================================
+  class CockpitInteriorDashboardSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.isCockpitActive = false;
+      this.lastDrawTime = 0;
+
+      this.cockpitGroup = new THREE.Group();
+      this.cockpitGroup.name = 'cockpitInteriorGroup';
+      this.parent.scene.add(this.cockpitGroup);
+
+      this.buildCockpitGeometry();
+      this.initCameraCycleListener();
+    }
+
+    buildCockpitGeometry() {
+      const darkMat = new THREE.MeshStandardMaterial({ color: 0x0a0e17, roughness: 0.8, metalness: 0.2 });
+      const carbonMat = new THREE.MeshStandardMaterial({ color: 0x141a24, roughness: 0.5, metalness: 0.6 });
+
+      // Dashboard Cowl
+      const dashMesh = new THREE.Mesh(new THREE.BoxGeometry(1.65, 0.45, 0.95), darkMat);
+      dashMesh.position.set(0, 0.82, 0.4);
+      this.cockpitGroup.add(dashMesh);
+
+      // 3D Cyber Steering Wheel Yoke
+      const wheelGroup = new THREE.Group();
+      wheelGroup.position.set(-0.35, 0.88, 0.12);
+
+      const yokeTop = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.05, 0.05), carbonMat);
+      wheelGroup.add(yokeTop);
+      const yokeGripL = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.26, 0.05), carbonMat);
+      yokeGripL.position.set(-0.21, -0.08, 0);
+      wheelGroup.add(yokeGripL);
+      const yokeGripR = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.26, 0.05), carbonMat);
+      yokeGripR.position.set(0.21, -0.08, 0);
+      wheelGroup.add(yokeGripR);
+
+      this.steeringWheel = wheelGroup;
+      this.cockpitGroup.add(this.steeringWheel);
+
+      // Functional 2D Canvas Instrument Cluster
+      this.dashCanvas = document.createElement('canvas');
+      this.dashCanvas.width = 512;
+      this.dashCanvas.height = 256;
+      this.dashCtx = this.dashCanvas.getContext('2d');
+      this.dashTexture = new THREE.CanvasTexture(this.dashCanvas);
+
+      const screenGeo = new THREE.PlaneGeometry(0.72, 0.36);
+      const screenMat = new THREE.MeshBasicMaterial({ map: this.dashTexture, side: THREE.DoubleSide });
+      this.screenMesh = new THREE.Mesh(screenGeo, screenMat);
+      this.screenMesh.position.set(-0.35, 0.95, 0.18);
+      this.screenMesh.rotation.x = -0.25;
+      this.cockpitGroup.add(this.screenMesh);
+    }
+
+    initCameraCycleListener() {
+      window.addEventListener('keydown', (e) => {
+        if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+        if (e.key.toLowerCase() === 'v') {
+          this.toggleCockpitView();
+        }
+      });
+    }
+
+    toggleCockpitView() {
+      this.isCockpitActive = !this.isCockpitActive;
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification(this.isCockpitActive ? '[COCKPIT] 1P INTERIOR VIEW ENGAGED [V]' : '[CAMERA] 3P CHASE VIEW ENGAGED [V]');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playClick) cyberAudio.playClick();
+    }
+
+    drawInstrumentCluster(speed, rpm, steer, throttle) {
+      const ctx = this.dashCtx;
+      ctx.fillStyle = '#060a12';
+      ctx.fillRect(0, 0, 512, 256);
+
+      ctx.strokeStyle = '#00f2ff';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(6, 6, 500, 244);
+
+      // Large Speed Readout
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 84px monospace';
+      ctx.textAlign = 'center';
+      const kmh = Math.round(Math.abs(speed) * 3.6);
+      ctx.fillText(`${kmh}`, 256, 120);
+
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillStyle = '#00f2ff';
+      ctx.fillText('KM/H · SPORT PLUS', 256, 155);
+
+      // RPM LED Bar
+      const rpmWidth = Math.min(420, (kmh / 280) * 420);
+      ctx.fillStyle = kmh > 180 ? '#ef4444' : '#00ff88';
+      ctx.fillRect(46, 185, rpmWidth, 18);
+      ctx.strokeStyle = '#334155';
+      ctx.strokeRect(46, 185, 420, 18);
+
+      // Gear indicator
+      ctx.fillStyle = '#facc15';
+      ctx.font = 'bold 28px monospace';
+      const gear = speed < -0.5 ? 'R' : kmh < 15 ? 'D1' : kmh < 45 ? 'D2' : kmh < 90 ? 'D3' : kmh < 150 ? 'D4' : kmh < 210 ? 'D5' : 'D6';
+      ctx.fillText(`GEAR: ${gear}`, 256, 232);
+
+      this.dashTexture.needsUpdate = true;
+    }
+
+    update(delta, vState) {
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+      if (!roverGroup) return;
+
+      const rPos = roverGroup.position;
+      const rYaw = roverGroup.rotation.y;
+      this.cockpitGroup.position.copy(rPos);
+      this.cockpitGroup.rotation.y = rYaw;
+
+      // Animate Steering Wheel
+      const steer = (vState && vState.steer) ? vState.steer : 0;
+      if (this.steeringWheel) {
+        this.steeringWheel.rotation.z = -steer * 3.8;
+      }
+
+      // Update 2D Canvas at 15 Hz
+      const speed = (vState && vState.roverCurrentSpeed) ? vState.roverCurrentSpeed : 0;
+      const throttle = (vState && vState.throttle) ? vState.throttle : 0;
+      this.drawInstrumentCluster(speed, 5000, steer, throttle);
+
+      // If Cockpit view active, lock camera to eye point
+      if (this.isCockpitActive && this.parent.camera) {
+        const cosY = Math.cos(rYaw);
+        const sinY = Math.sin(rYaw);
+
+        // Driver eye position with G-force inertia
+        const eyeX = rPos.x + (-0.35 * cosY - 0.25 * sinY);
+        const eyeY = rPos.y + 1.15;
+        const eyeZ = rPos.z + (0.35 * sinY - 0.25 * cosY);
+
+        this.parent.camera.position.set(eyeX, eyeY, eyeZ);
+
+        // Look forward along car trajectory
+        const fwdX = eyeX + sinY * 35.0;
+        const fwdZ = eyeZ + cosY * 35.0;
+        this.parent.camera.lookAt(fwdX, eyeY, fwdZ);
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 7: VEHICLE DAMAGE PHYSICS, IMPACT SPARKS & 5 PIT-STOP REPAIR BAYS
+  // ==========================================================================
+  class VehicleDamageAndRepairBaySubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.health = 100.0;
+      this.lastSpeed = 0;
+
+      this.damageGroup = new THREE.Group();
+      this.damageGroup.name = 'vehicleDamageAndPitstopGroup';
+      this.parent.scene.add(this.damageGroup);
+
+      // 5 Hydraulic Pit-Stop Repair Bays
+      this.repairBays = [
+        { id: 'bay_mall', name: 'AUTO MALL HYDRAULIC SERVICE', x: 0, z: 160 },
+        { id: 'bay_neokyoto', name: 'NEO-KYOTO PIT-STOP', x: 440, z: 240 },
+        { id: 'bay_solaria', name: 'SOLARIA OUTPOST SERVICE', x: -340, z: 390 },
+        { id: 'bay_atlantis', name: 'ATLANTIS DRYDOCK REPAIR', x: -430, z: -330 },
+        { id: 'bay_starbase', name: 'STARBASE FLIGHT HANGAR', x: 540, z: -440 }
+      ];
+
+      this.buildRepairBays();
+      this.initSparkParticlePool();
+    }
+
+    buildRepairBays() {
+      const bayPadMat = new THREE.MeshStandardMaterial({ color: 0x111c2e, roughness: 0.6, metalness: 0.5 });
+      const greenHoloMat = new THREE.MeshBasicMaterial({ color: 0x00ff88, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+      const pylonMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.85, roughness: 0.2 });
+
+      this.repairBays.forEach(bay => {
+        const bGroup = new THREE.Group();
+        bGroup.position.set(bay.x, 0, bay.z);
+
+        // Ground Bay Pad
+        const pad = new THREE.Mesh(new THREE.BoxGeometry(10, 0.16, 14), bayPadMat);
+        pad.position.y = 0.08;
+        bGroup.add(pad);
+
+        // Holographic Alignment Ring
+        const ring = new THREE.Mesh(new THREE.RingGeometry(3.5, 4.8, 20), greenHoloMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.y = 0.17;
+        bGroup.add(ring);
+
+        // Dual Hydraulic Lift Pylons
+        [-4.2, 4.2].forEach(px => {
+          const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.35, 4.2, 8), pylonMat);
+          pylon.position.set(px, 2.1, 0);
+          bGroup.add(pylon);
+        });
+
+        this.damageGroup.add(bGroup);
+      });
+    }
+
+    initSparkParticlePool() {
+      this.maxSparks = 40;
+      this.sparkPositions = new Float32Array(this.maxSparks * 3);
+      this.sparkVelocities = new Float32Array(this.maxSparks * 3);
+      this.sparkLifes = new Float32Array(this.maxSparks);
+
+      this.sparkGeo = new THREE.BufferGeometry();
+      this.sparkGeo.setAttribute('position', new THREE.BufferAttribute(this.sparkPositions, 3));
+
+      this.sparkMat = new THREE.PointsMaterial({
+        color: 0xffaa00,
+        size: 0.6,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending
+      });
+
+      this.sparkPoints = new THREE.Points(this.sparkGeo, this.sparkMat);
+      this.damageGroup.add(this.sparkPoints);
+    }
+
+    triggerCrashSparks(pos) {
+      for (let i = 0; i < this.maxSparks; i++) {
+        this.sparkLifes[i] = 0.4 + Math.random() * 0.4;
+        this.sparkPositions[i * 3] = pos.x;
+        this.sparkPositions[i * 3 + 1] = pos.y + 0.5;
+        this.sparkPositions[i * 3 + 2] = pos.z;
+
+        this.sparkVelocities[i * 3] = (Math.random() * 2 - 1) * 12.0;
+        this.sparkVelocities[i * 3 + 1] = Math.random() * 8.0 + 2.0;
+        this.sparkVelocities[i * 3 + 2] = (Math.random() * 2 - 1) * 12.0;
+      }
+      this.sparkGeo.attributes.position.needsUpdate = true;
+    }
+
+    repairVehicle() {
+      this.health = 100.0;
+      if (typeof showStoreNotification === 'function') {
+        showStoreNotification('[REPAIR] PIT-STOP SERVICE COMPLETE: CHASSIS RESTORED (100% HP)');
+      }
+      if (typeof cyberAudio !== 'undefined' && cyberAudio.playLootChime) cyberAudio.playLootChime();
+    }
+
+    update(delta, vState) {
+      const speed = (vState && vState.roverCurrentSpeed) ? vState.roverCurrentSpeed : 0;
+      const roverGroup = typeof window.roverGroup !== 'undefined' ? window.roverGroup : null;
+
+      // Abrupt Deceleration Detection (Impact Crash)
+      const speedDrop = this.lastSpeed - speed;
+      this.lastSpeed = speed;
+
+      if (speedDrop > 16.0 && roverGroup) {
+        // Impact occurred
+        this.health = Math.max(10, this.health - 22.0);
+        this.triggerCrashSparks(roverGroup.position);
+
+        if (typeof showStoreNotification === 'function') {
+          showStoreNotification(`[IMPACT] COLLISION DAMAGE! CHASSIS HEALTH: ${Math.round(this.health)}%`);
+        }
+      }
+
+      // Check if inside any Hydraulic Repair Bay
+      if (roverGroup && Math.abs(speed) < 2.0) {
+        const rPos = roverGroup.position;
+        for (let i = 0; i < this.repairBays.length; i++) {
+          const bay = this.repairBays[i];
+          const dx = rPos.x - bay.x;
+          const dz = rPos.z - bay.z;
+          if (Math.abs(dx) < 4.5 && Math.abs(dz) < 6.5) {
+            if (this.health < 99.0) {
+              this.repairVehicle();
+            }
+            break;
+          }
+        }
+      }
+
+      // Animate Sparks
+      let hasLiveSparks = false;
+      for (let i = 0; i < this.maxSparks; i++) {
+        if (this.sparkLifes[i] > 0) {
+          hasLiveSparks = true;
+          this.sparkLifes[i] -= delta;
+          this.sparkPositions[i * 3] += this.sparkVelocities[i * 3] * delta;
+          this.sparkPositions[i * 3 + 1] += this.sparkVelocities[i * 3 + 1] * delta;
+          this.sparkPositions[i * 3 + 2] += this.sparkVelocities[i * 3 + 2] * delta;
+          this.sparkVelocities[i * 3 + 1] -= 22.0 * delta; // Gravity
+        }
+      }
+      if (hasLiveSparks) {
+        this.sparkGeo.attributes.position.needsUpdate = true;
+      }
+    }
+  }
+
+  // ==========================================================================
+  // TIER 8: OPERATIONAL ELEVATED MAGLEV TRANSIT MONORAIL & FAST-TRAVEL
+  // ==========================================================================
+  class ElevatedMaglevTransitSubsystem {
+    constructor(parent) {
+      this.parent = parent;
+      this.trainT = 0.0;
+      this.trainSpeed = 0.024; // Traversal loop speed
+
+      this.maglevGroup = new THREE.Group();
+      this.maglevGroup.name = 'elevatedMaglevTransitGroup';
+      this.parent.scene.add(this.maglevGroup);
+
+      // 10 Key Waypoints forming a 2.4 km closed circuit above the city
+      this.trackPoints = [
+        new THREE.Vector3(0, 14.5, 50),       // Central Metro
+        new THREE.Vector3(240, 14.5, 180),    // NE Artery
+        new THREE.Vector3(440, 14.5, 260),    // Neo-Kyoto Station
+        new THREE.Vector3(520, 14.5, -180),   // East Corridor
+        new THREE.Vector3(520, 14.5, -420),   // Starbase Station
+        new THREE.Vector3(120, 14.5, -460),   // South Perimeter
+        new THREE.Vector3(-420, 14.5, -320),  // Atlantis Marina Station
+        new THREE.Vector3(-380, 14.5, 120),   // West Causeway
+        new THREE.Vector3(-320, 14.5, 380),   // Solaria Oasis Station
+        new THREE.Vector3(-160, 14.5, 220)    // NW Corridor
+      ];
+
+      this.trackCurve = new THREE.CatmullRomCurve3(this.trackPoints, true);
+      this.buildElevatedGuideway();
+      this.buildMaglevTrain();
+    }
+
+    buildElevatedGuideway() {
+      // Extruded Track Tube
+      const trackGeo = new THREE.TubeGeometry(this.trackCurve, 120, 0.75, 8, true);
+      const trackMat = new THREE.MeshStandardMaterial({ color: 0x1b2432, roughness: 0.6, metalness: 0.6 });
+      const trackMesh = new THREE.Mesh(trackGeo, trackMat);
+      this.maglevGroup.add(trackMesh);
+
+      // Support Pylons down to ground
+      const pylonMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8, metalness: 0.3 });
+      for (let i = 0; i < 28; i++) {
+        const t = i / 28;
+        const pt = this.trackCurve.getPoint(t);
+        const pylon = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, pt.y, 8), pylonMat);
+        pylon.position.set(pt.x, pt.y / 2, pt.z);
+        this.maglevGroup.add(pylon);
+      }
+    }
+
+    buildMaglevTrain() {
+      this.trainCarriage = new THREE.Group();
+
+      const trainMat = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.9, roughness: 0.15 });
+      const windowMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.85 });
+
+      // Lead Engine Car
+      const body = new THREE.Mesh(new THREE.BoxGeometry(2.4, 2.2, 16.0), trainMat);
+      body.position.y = 1.2;
+      this.trainCarriage.add(body);
+
+      // Glowing Maglev Induction Strip
+      const glow = new THREE.Mesh(
+        new THREE.PlaneGeometry(2.6, 15.6),
+        new THREE.MeshBasicMaterial({ color: 0x00d9ff, side: THREE.DoubleSide })
+      );
+      glow.rotation.x = Math.PI / 2;
+      glow.position.y = 0.05;
+      this.trainCarriage.add(glow);
+
+      this.maglevGroup.add(this.trainCarriage);
+    }
+
+    update(delta) {
+      this.trainT = (this.trainT + delta * this.trainSpeed) % 1.0;
+
+      const pt = this.trackCurve.getPoint(this.trainT);
+      const tangent = this.trackCurve.getTangent(this.trainT);
+
+      this.trainCarriage.position.copy(pt);
+      this.trainCarriage.lookAt(pt.x + tangent.x, pt.y + tangent.y, pt.z + tangent.z);
     }
   }
 
