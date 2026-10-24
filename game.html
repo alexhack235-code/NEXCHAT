@@ -15832,6 +15832,7 @@
         try { if (typeof buildTransCanadaGateway === 'function') buildTransCanadaGateway(); } catch (e) { console.warn(e); }
         try { if (typeof buildMetropolisConnectingArteriesAndInfill === 'function') buildMetropolisConnectingArteriesAndInfill(); } catch (e) { console.warn(e); }
         try { if (typeof buildPerimeterMountainHorizon === 'function') buildPerimeterMountainHorizon(); } catch (e) { console.warn(e); }
+        try { if (typeof initAdvancedSystems === 'function') initAdvancedSystems({ scene, camera, renderer, player }); } catch (e) { console.warn(e); }
         try { if (typeof load3DAssetsAndEnhancements === 'function') load3DAssetsAndEnhancements(); } catch (e) { console.warn(e); }
         try { if (typeof initCityTraffic === 'function') initCityTraffic(); } catch (e) { console.warn(e); }
         try { if (typeof initCityCitizens === 'function') initCityCitizens(); } catch (e) { console.warn(e); }
@@ -15869,6 +15870,8 @@
   <script src="js/game_hyper_realism.js"></script>
   <!-- Canadian Military Base, HMCS Calgary Carrier & Aviation Defense Engine -->
   <script src="js/game_military_aviation.js"></script>
+  <!-- Advanced 4-Tier Realism: SSR Wetness, Suspension, Holographic GPS & Spatial Multiplayer -->
+  <script src="js/game_advanced_systems.js"></script>
   <script>
 
     // ============================================================
@@ -20337,6 +20340,13 @@
 
         // High-Speed Drift Tire Smoke, Skid Sparks & Screech Audio (Zero-GC)
         const isDrifting = Math.abs(steer) > 0.22 && Math.abs(roverCurrentSpeed) > 8.5;
+        window._latestVehicleState = {
+          roverCurrentSpeed: roverCurrentSpeed,
+          roverSteerAngle: roverSteerAngle,
+          throttle: throttle,
+          steer: steer,
+          isDrifting: isDrifting
+        };
         if (isDrifting) {
           const driftIntensity = Math.min(1.0, (Math.abs(roverCurrentSpeed) - 8.5) / 16.0);
           if (typeof window.spawnTireSmoke === 'function') {
@@ -20870,6 +20880,9 @@
       }
       if (window.HyperRealismEngine) {
         window.HyperRealismEngine.update(delta, now);
+      }
+      if (typeof window.updateAdvancedSystems === 'function') {
+        window.updateAdvancedSystems(delta, window._latestVehicleState || null);
       }
 
       // Camera Shake Decay (consumed per frame for smooth rumble)
