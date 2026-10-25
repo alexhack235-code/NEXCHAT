@@ -202,8 +202,8 @@
 
         <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
         <div class="header-right mobile-header-actions">
-          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="CamShot & Camera" onclick="window.location.href='reels.html'">
-            <i class="fa-solid fa-camera"></i>
+          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="CamShot Reels" onclick="window.location.href='reels.html'">
+            <i class="fa-solid fa-clapperboard"></i>
           </button>
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -235,22 +235,7 @@
           </div>
         </div>
 
-        <div class="status-appbar-actions terminal-actions">
-          <!-- Big Obvious Upload Button in Header -->
-          <button type="button" id="statusHeaderCameraBtn" class="terminal-upload-pill-btn" title="Deploy Photo / Video Status">
-            <i class="fa-solid fa-camera"></i>
-            <span>+ UPLOAD</span>
-          </button>
-          <!-- Text Story Creator Button in Header -->
-          <button type="button" id="statusHeaderTextBtn" class="terminal-text-pill-btn" title="Transmit Encrypted Text Story">
-            <i class="fa-solid fa-terminal"></i>
-            <span>Aa TRANSMIT</span>
-          </button>
-          <!-- Terminal Launcher Icon -->
-          <button type="button" onclick="window.open('terminal.html','_blank')" class="status-icon-btn terminal-quick-btn" title="Launch Full Hacker Terminal">
-            <i class="fa-solid fa-code"></i>
-          </button>
-        </div>
+        <div class="status-appbar-actions terminal-actions" style="display: none;"></div>
       </div>
 
       <!-- Hidden file input for status media upload -->
@@ -259,7 +244,7 @@
       <!-- Status Sub-header Telemetry Bar -->
       <div class="terminal-telemetry-banner">
         <span class="telemetry-stream-label"><i class="fa-solid fa-satellite-dish fa-fade"></i> ACTIVE_NODES_FEED</span>
-        <span class="telemetry-vault-mode"><i class="fa-solid fa-server"></i> VAULTS: MULTI-BLOB (1-5)</span>
+        <span class="telemetry-vault-mode"><i class="fa-solid fa-shield-halved"></i> 24H EPHEMERAL</span>
       </div>
 
       <!-- Status Horizontal List (Hacker Cyber Nodes Stream) -->
@@ -304,13 +289,9 @@
         </div>
       </div>
 
-      <!-- Floating Action Buttons: Always-visible Terminal Cyber FABs with Glowing Ring -->
+      <!-- Floating Action Button: Clean, Single Camera FAB -->
       <div class="status-fab-container terminal-fab-container">
-        <button type="button" id="statusFabText" class="status-fab-mini terminal-fab-btn" title="Create Terminal Text Story">
-          <i class="fa-solid fa-terminal"></i>
-          <span class="fab-hover-tip">TEXT</span>
-        </button>
-        <button type="button" id="statusFabCamera" class="status-fab-main terminal-fab-main-btn" title="Deploy Status Photo / Video">
+        <button type="button" id="statusFabCamera" class="status-fab-main terminal-fab-main-btn" title="Add Status Update">
           <i class="fa-solid fa-camera"></i>
           <span class="fab-pulse-ring"></span>
         </button>
