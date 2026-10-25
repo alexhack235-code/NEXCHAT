@@ -57,6 +57,7 @@ chrome_test_profile*/
 .system_generated/
 *.backup.*
 logo_legacy_backup.jpg
+logo_legacy_backup_old.jpg
 .backup_clean/
 *.tsbuildinfo
 cloudflared.exe
