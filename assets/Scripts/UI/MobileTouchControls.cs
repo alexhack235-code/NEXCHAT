@@ -84,7 +84,7 @@ namespace AstroShift.UI
                     Screen.height - (touchStartPos.y + joystickInput.y * 35f) - 22f,
                     44f, 44f
                 );
-                GUI.Box(thumbRect, "●");
+                GUI.Box(thumbRect, "O");
             }
             else
             {

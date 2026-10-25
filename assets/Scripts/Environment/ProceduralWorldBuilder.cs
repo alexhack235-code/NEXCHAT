@@ -349,6 +349,12 @@ namespace AstroShift.Environment
             cockCam.transform.localPosition = new Vector3(-0.4f, 1.15f, 0.1f);
             supercar.cockpitCamPivot = cockCam.transform;
 
+            // Chase Camera Pivot
+            GameObject chaseCam = new GameObject("Chase_Cam_Pivot");
+            chaseCam.transform.parent = car.transform;
+            chaseCam.transform.localPosition = new Vector3(0f, 2.6f, -6.8f);
+            supercar.chaseCamPivot = chaseCam.transform;
+
             // Seated Driver Avatar
             GameObject driver = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             driver.name = "Seated_Driver";
@@ -449,8 +455,38 @@ namespace AstroShift.Environment
             player.transform.parent = transform;
             player.transform.position = spawnPos;
 
+            // First-person eye anchor & third-person pivot
+            GameObject fpAnchor = new GameObject("FP_Eye_Anchor");
+            fpAnchor.transform.parent = player.transform;
+            fpAnchor.transform.localPosition = new Vector3(0f, 1.65f, 0.1f);
+
+            GameObject tpPivot = new GameObject("TP_Camera_Pivot");
+            tpPivot.transform.parent = player.transform;
+            tpPivot.transform.localPosition = new Vector3(0f, 1.45f, 0f);
+
+            Camera mainCam = Camera.main;
+            if (mainCam == null)
+            {
+                GameObject camObj = new GameObject("Main Camera");
+                mainCam = camObj.AddComponent<Camera>();
+                camObj.tag = "MainCamera";
+                camObj.AddComponent<AudioListener>();
+            }
+
+            var followCam = mainCam.GetComponent<Vehicles.CinematicFollowCamera>();
+            if (followCam == null)
+            {
+                followCam = mainCam.gameObject.AddComponent<Vehicles.CinematicFollowCamera>();
+            }
+
             var pCtrl = player.AddComponent<Player.PlayerController>();
             pCtrl.thirdPersonModel = player;
+            pCtrl.firstPersonAnchor = fpAnchor.transform;
+            pCtrl.thirdPersonPivot = tpPivot.transform;
+            pCtrl.playerCamera = mainCam;
+
+            followCam.SetTarget(player.transform, null, fpAnchor.transform);
+            followCam.SetProfile(Vehicles.CinematicFollowCamera.CameraProfile.Player);
 
             // Attach HUD & Mobile Touch Controls
             player.AddComponent<UI.GameHUD>();

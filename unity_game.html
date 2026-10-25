@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#02060b">
+  <meta name="description" content="NEXCHAT AstroShift: Beyond Earth - Modern Unity WebGL and High-Performance 3D Game Container">
+  <title>NEXCHAT // AstroShift: Beyond Earth [Unity WebGL &amp; 3D Container]</title>
+  
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Local Three.js r128 engine with automatic CDN fallback for seamless 3D fallback mode -->
+  <script src="js/three.min.js"></script>
+  <script>if (typeof THREE === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');</script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    :root {
+      --cyber-cyan: #00f2ff;
+      --cyber-cyan-dim: rgba(0, 242, 255, 0.25);
+      --cyber-green: #00ff88;
+      --cyber-green-dim: rgba(0, 255, 136, 0.2);
+      --cyber-amber: #ffaa00;
+      --cyber-red: #ff3366;
+      --cyber-bg: #02060b;
+      --hud-glass: rgba(6, 14, 24, 0.82);
+      --hud-border: rgba(0, 242, 255, 0.3);
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--cyber-bg);
+      color: #e2e8f0;
+      font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    /* Fullscreen Game Container */
+    #unity-container {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #091728 0%, #02060b 80%);
+    }
+
+    /* WebGL Canvas */
+    #unity-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      outline: none;
+      touch-action: none;
+      z-index: 1;
+    }
+
+    /* =========================================================================
+       FUTURISTIC CYBERPUNK HUD OVERLAY
+       ========================================================================= */
+    #cyber-hud {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Top Navigation & Status Bar */
+    .hud-top-bar {
+      width: 100%;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: auto;
+      background: linear-gradient(180deg, rgba(2, 6, 11, 0.85) 0%, rgba(2, 6, 11, 0) 100%);
+    }
+
+    .hud-left-group, .hud-center-group, .hud-right-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Glassmorphic Brand Logo */
+    .hud-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--hud-glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--hud-border);
+      border-radius: 8px;
+      padding: 6px 14px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), inset 0 0 12px rgba(0, 242, 255, 0.1);
+    }
+
+    .hud-brand-icon {
+      color: var(--cyber-cyan);
+      font-size: 16px;
+      animation: pulseBrand 2.4s infinite alternate;
+    }
+
+    @keyframes pulseBrand {
+      0% { text-shadow: 0 0 4px var(--cyber-cyan); transform: scale(0.96); }
+      100% { text-shadow: 0 0 14px var(--cyber-cyan), 0 0 24px var(--cyber-cyan); transform: scale(1.04); }
+    }
+
+    .hud-brand-text {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 1.5px;
+      color: #ffffff;
+      text-transform: uppercase;
+    }
+
+    .hud-brand-text span {
+      color: var(--cyber-cyan);
+    }
+
+    /* Interactive HUD Buttons */
+    .hud-btn {
+      background: var(--hud-glass);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--hud-border);
+      border-radius: 6px;
+      color: #94a3b8;
+      padding: 7px 12px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+    }
+
+    .hud-btn:hover {
+      background: rgba(0, 242, 255, 0.18);
+      color: #ffffff;
+      border-color: var(--cyber-cyan);
+      box-shadow: 0 0 15px rgba(0, 242, 255, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .hud-btn:active {
+      transform: translateY(1px);
+    }
+
+    .hud-btn.accent {
+      color: var(--cyber-cyan);
+      border-color: rgba(0, 242, 255, 0.5);
+    }
+
+    .hud-btn.accent:hover {
+      background: var(--cyber-cyan);
+      color: #02060b;
+      box-shadow: 0 0 20px var(--cyber-cyan);
+    }
+
+    .hud-btn-icon {
+      background: var(--hud-glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--hud-border);
+      border-radius: 6px;
+      color: #94a3b8;
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .hud-btn-icon:hover {
+      background: rgba(0, 242, 255, 0.2);
+      color: #ffffff;
+      border-color: var(--cyber-cyan);
+      box-shadow: 0 0 12px rgba(0, 242, 255, 0.3);
+    }
+
+    /* Status Badges */
+    .hud-badge {
+      background: rgba(10, 20, 32, 0.78);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #cbd5e1;
+      font-family: 'Orbitron', monospace;
+    }
+
+    .hud-badge i {
+      color: var(--cyber-cyan);
+    }
+
+    .hud-badge.green i {
+      color: var(--cyber-green);
+    }
+
+    .hud-badge.amber i {
+      color: var(--cyber-amber);
+    }
+
+    /* Sound Volume Controls */
+    .hud-volume-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--hud-glass);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--hud-border);
+      border-radius: 6px;
+      padding: 3px 8px;
+    }
+
+    .hud-range {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 70px;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .hud-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--cyber-cyan);
+      cursor: pointer;
+      box-shadow: 0 0 8px var(--cyber-cyan);
+      transition: transform 0.15s ease;
+    }
+
+    .hud-range::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+    }
+
+    .volume-val {
+      font-size: 11px;
+      font-family: 'Orbitron', monospace;
+      color: #cbd5e1;
+      min-width: 32px;
+      text-align: right;
+    }
+
+    /* Bottom Control & Keymap Ribbon */
+    .hud-bottom-bar {
+      width: 100%;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+      background: linear-gradient(0deg, rgba(2, 6, 11, 0.85) 0%, rgba(2, 6, 11, 0) 100%);
+    }
+
+    .keymap-ribbon {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      background: rgba(6, 14, 24, 0.85);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(0, 242, 255, 0.25);
+      border-radius: 24px;
+      padding: 6px 20px;
+      font-size: 11px;
+      color: #94a3b8;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.7);
+    }
+
+    .keymap-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .key-badge {
+      background: rgba(0, 242, 255, 0.15);
+      border: 1px solid var(--cyber-cyan);
+      color: var(--cyber-cyan);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-family: 'Orbitron', monospace;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    /* Proximity Interaction Prompt */
+    #actionPrompt {
+      display: none;
+      position: absolute;
+      top: 60%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(4, 14, 26, 0.9);
+      backdrop-filter: blur(10px);
+      border: 2px solid var(--cyber-cyan);
+      border-radius: 8px;
+      padding: 10px 24px;
+      color: #ffffff;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      box-shadow: 0 0 30px rgba(0, 242, 255, 0.45);
+      pointer-events: none;
+      z-index: 150;
+      animation: pulsePrompt 1.2s infinite alternate;
+    }
+
+    @keyframes pulsePrompt {
+      0% { transform: translate(-50%, -50%) scale(0.98); box-shadow: 0 0 20px rgba(0, 242, 255, 0.35); }
+      100% { transform: translate(-50%, -50%) scale(1.02); box-shadow: 0 0 35px rgba(0, 242, 255, 0.6); }
+    }
+
+    /* Toast Notification */
+    #hud-toast {
+      position: absolute;
+      top: 74px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(6, 14, 24, 0.94);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--cyber-cyan);
+      border-radius: 6px;
+      padding: 8px 18px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+      z-index: 200;
+      opacity: 0;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #hud-toast.show {
+      opacity: 1;
+      transform: translate(-50%, 4px);
+    }
+
+    /* =========================================================================
+       CUSTOM FUTURISTIC CYBERPUNK LOADING SCREEN
+       ========================================================================= */
+    #unity-loading-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 500;
+      background: #02060b;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .loader-card {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(6, 14, 26, 0.92);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(0, 242, 255, 0.35);
+      border-radius: 14px;
+      padding: 32px 28px;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 242, 255, 0.15);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loader-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 200%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyber-cyan), transparent);
+      animation: scanTop 3s linear infinite;
+    }
+
+    @keyframes scanTop {
+      0% { left: -100%; }
+      100% { left: 100%; }
+    }
+
+    .loader-holo-ring {
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 20px auto;
+      border: 3px solid rgba(0, 242, 255, 0.18);
+      border-top-color: var(--cyber-cyan);
+      border-right-color: var(--cyber-green);
+      border-radius: 50%;
+      animation: spinHolo 1s linear infinite;
+      box-shadow: 0 0 25px rgba(0, 242, 255, 0.4);
+    }
+
+    @keyframes spinHolo {
+      to { transform: rotate(360deg); }
+    }
+
+    .loader-title {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #ffffff;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .loader-title span {
+      color: var(--cyber-cyan);
+    }
+
+    .loader-subtitle {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+      text-transform: uppercase;
+    }
+
+    /* Cyber Loading Progress Track */
+    .loader-track {
+      width: 100%;
+      height: 12px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(0, 242, 255, 0.35);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 14px;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+    }
+
+    #loading-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #00f2ff 0%, #00ff88 100%);
+      border-radius: 6px;
+      box-shadow: 0 0 14px #00f2ff;
+      transition: width 0.2s ease-out;
+    }
+
+    .loader-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'Orbitron', monospace;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 18px;
+    }
+
+    #loading-percentage-text {
+      color: var(--cyber-cyan);
+      font-weight: 700;
+    }
+
+    #loading-status-text {
+      font-size: 10px;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 280px;
+      text-align: left;
+    }
+
+    /* Loader Fallback Trigger Button */
+    .btn-loader-bypass {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px dashed rgba(0, 242, 255, 0.4);
+      border-radius: 6px;
+      color: var(--cyber-cyan);
+      padding: 8px 16px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-loader-bypass:hover {
+      background: rgba(0, 242, 255, 0.15);
+      border-color: var(--cyber-cyan);
+      color: #ffffff;
+    }
+
+    /* =========================================================================
+       MOBILE TOUCH VIRTUAL DUAL THUMBSTICKS & BUTTONS
+       ========================================================================= */
+    #mobile-touch-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 120;
+      display: none; /* Displayed on touch devices or toggled */
+    }
+
+    /* Left Thumbstick (Move / Strafe) */
+    .virtual-stick-zone {
+      position: absolute;
+      bottom: 24px;
+      width: 130px;
+      height: 130px;
+      pointer-events: auto;
+      touch-action: none;
+    }
+
+    #stick-left-zone {
+      left: 20px;
+    }
+
+    #stick-right-zone {
+      right: 20px;
+    }
+
+    .stick-base {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(6, 14, 26, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border: 2px solid rgba(0, 242, 255, 0.35);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 242, 255, 0.1);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #stick-right-zone .stick-base {
+      border-color: rgba(255, 170, 0, 0.4);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(255, 170, 0, 0.1);
+    }
+
+    /* Cardinal direction indicators on base */
+    .stick-tick {
+      position: absolute;
+      width: 6px;
+      height: 2px;
+      background: rgba(0, 242, 255, 0.4);
+    }
+
+    .stick-tick.north { top: 6px; left: calc(50% - 3px); transform: rotate(90deg); }
+    .stick-tick.south { bottom: 6px; left: calc(50% - 3px); transform: rotate(90deg); }
+    .stick-tick.west { left: 6px; top: calc(50% - 1px); }
+    .stick-tick.east { right: 6px; top: calc(50% - 1px); }
+
+    .stick-knob {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #00f2ff 0%, #007799 80%);
+      box-shadow: 0 0 16px rgba(0, 242, 255, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+      position: absolute;
+      top: calc(50% - 26px);
+      left: calc(50% - 26px);
+      transform: translate3d(0, 0, 0);
+      transition: box-shadow 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #02060b;
+    }
+
+    #stick-right-zone .stick-knob {
+      background: radial-gradient(circle at 35% 35%, #ffaa00 0%, #aa6600 80%);
+      box-shadow: 0 0 16px rgba(255, 170, 0, 0.7), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+    }
+
+    /* Mobile Action Buttons Cluster */
+    #mobile-actions-cluster {
+      position: absolute;
+      bottom: 165px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      pointer-events: auto;
+    }
+
+    .mobile-touch-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 50%;
+      background: rgba(6, 14, 26, 0.82);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 2px solid rgba(0, 242, 255, 0.4);
+      color: #ffffff;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      cursor: pointer;
+      touch-action: none;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+      transition: all 0.1s ease;
+    }
+
+    .mobile-touch-btn i {
+      font-size: 14px;
+      color: var(--cyber-cyan);
+    }
+
+    .mobile-touch-btn:active, .mobile-touch-btn.pressed {
+      transform: scale(0.92);
+      background: rgba(0, 242, 255, 0.35);
+      border-color: #00f2ff;
+      box-shadow: 0 0 20px rgba(0, 242, 255, 0.7);
+    }
+
+    .mobile-touch-btn.jump-btn i { color: #00ff88; }
+    .mobile-touch-btn.jump-btn { border-color: rgba(0, 255, 136, 0.45); }
+    .mobile-touch-btn.boost-btn i { color: #ffaa00; }
+    .mobile-touch-btn.boost-btn { border-color: rgba(255, 170, 0, 0.45); }
+    .mobile-touch-btn.interact-btn i { color: #00f2ff; }
+    .mobile-touch-btn.cam-btn i { color: #e2e8f0; }
+
+    /* Media query adjustments for smaller screens */
+    @media (max-width: 768px) {
+      .hud-brand-text { display: none; }
+      .keymap-ribbon { display: none; }
+      .hud-top-bar { padding: 8px 12px; gap: 6px; }
+      .hud-btn span { display: none; }
+      .hud-badge#hud-res-badge { display: none; }
+      .hud-range { width: 50px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Fullscreen WebGL Container -->
+  <div id="unity-container">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
+
+    <!-- Custom Futuristic Loading Screen -->
+    <div id="unity-loading-screen">
+      <div class="loader-card">
+        <div class="loader-holo-ring"></div>
+        <h1 class="loader-title">NEXCHAT // <span>ASTROSHIFT</span></h1>
+        <p class="loader-subtitle">UNITY 6 WEBGL ARCHITECTURE &bull; 60FPS SHADER PIPELINE</p>
+
+        <!-- Cyberpunk Segmented Loading Track -->
+        <div class="loader-track">
+          <div id="loading-progress-bar"></div>
+        </div>
+
+        <div class="loader-meta">
+          <span id="loading-status-text">PROBING BUILDS/WEBGL/BUILD/ASTROSHIFT.LOADER.JS...</span>
+          <span id="loading-percentage-text">00.0%</span>
+        </div>
+
+        <button type="button" class="btn-loader-bypass" id="btn-bypass-loading" title="Play Immediately with NEXCHAT High-Performance 3D Engine">
+          <i class="fa-solid fa-bolt"></i> <span>ENGAGE LOCAL 3D ENGINE IMMEDIATELY</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Futuristic Cyberpunk HUD Overlay -->
+    <div id="cyber-hud">
+      <!-- Top Navigation & Controls Header -->
+      <header class="hud-top-bar">
+        <div class="hud-left-group">
+          <!-- Brand Badge -->
+          <div class="hud-brand">
+            <i class="fa-solid fa-cube hud-brand-icon"></i>
+            <div class="hud-brand-text">NEXCHAT // <span>ASTROSHIFT</span></div>
+          </div>
+
+          <!-- Navigation Back to Chat and Gaming Hub -->
+          <a href="chat.html" class="hud-btn" title="Return to NEXCHAT Live Messaging">
+            <i class="fa-solid fa-arrow-left"></i> <span>CHAT</span>
+          </a>
+          <a href="gaminghub.html" class="hud-btn" title="Return to ARCADE Matrix Gaming Hub">
+            <i class="fa-solid fa-gamepad"></i> <span>HUB</span>
+          </a>
+          <a href="game_module.html" class="hud-btn" title="Launch Calgary Metropolis Regional Aviation">
+            <i class="fa-solid fa-plane"></i> <span>CALGARY</span>
+          </a>
+        </div>
+
+        <!-- Center Telemetry Badges -->
+        <div class="hud-center-group">
+          <div class="hud-badge green" id="hud-engine-badge">
+            <i class="fa-solid fa-microchip"></i> <span id="hud-engine-name">PROBING ENGINE...</span>
+          </div>
+          <div class="hud-badge" id="hud-fps-badge">
+            <i class="fa-solid fa-gauge-high"></i> <span id="hud-fps-val">60 FPS</span>
+          </div>
+          <div class="hud-badge" id="hud-res-badge">
+            <i class="fa-solid fa-display"></i> <span id="hud-res-val">1080P (2.0x)</span>
+          </div>
+        </div>
+
+        <!-- Right Control Enclave -->
+        <div class="hud-right-group">
+          <!-- DPI Scaling Toggle -->
+          <button type="button" class="hud-btn" id="btn-toggle-dpi" title="Toggle Canvas Scaling: 2x Crisp Retina vs 1x Battery Performance">
+            <i class="fa-solid fa-sliders"></i> <span id="dpi-btn-text">DPI: 2X</span>
+          </button>
+
+          <!-- Audio Volume Slider -->
+          <div class="hud-volume-wrap">
+            <button type="button" class="hud-btn-icon" id="btn-mute-toggle" title="Mute / Unmute Audio">
+              <i class="fa-solid fa-volume-high" id="volume-icon"></i>
+            </button>
+            <input type="range" id="volume-slider" min="0" max="100" value="80" class="hud-range" title="Master Volume">
+            <span class="volume-val" id="volume-percent">80%</span>
+          </div>
+
+          <!-- Mobile Virtual Sticks Toggle -->
+          <button type="button" class="hud-btn-icon" id="btn-toggle-touch" title="Toggle Mobile Virtual Dual Sticks">
+            <i class="fa-solid fa-mobile-screen"></i>
+          </button>
+
+          <!-- Fullscreen Toggle -->
+          <button type="button" class="hud-btn-icon" id="btn-toggle-fullscreen" title="Toggle Fullscreen Canvas">
+            <i class="fa-solid fa-expand" id="fs-icon"></i>
+          </button>
+
+          <!-- Force Engine Switcher -->
+          <button type="button" class="hud-btn accent" id="btn-engine-switch" title="Switch between Unity 6 WebGL and Local 3D Fallback">
+            <i class="fa-solid fa-rotate"></i> <span id="engine-switch-label">FORCE LOCAL 3D</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Center Interaction Prompt -->
+      <div id="actionPrompt">PRESS [E] TO PILOT ARMED ROVER</div>
+
+      <!-- Toast Alert Notification -->
+      <div id="hud-toast"><i class="fa-solid fa-circle-info"></i> <span id="hud-toast-msg">NOTIFICATION</span></div>
+
+      <!-- Bottom Keymap Ribbon -->
+      <footer class="hud-bottom-bar">
+        <div class="keymap-ribbon">
+          <span class="keymap-item"><span class="key-badge">WASD</span> Move</span>
+          <span class="keymap-item"><span class="key-badge">MOUSE</span> Look</span>
+          <span class="keymap-item"><span class="key-badge">SPACE</span> Jetpack / Jump</span>
+          <span class="keymap-item"><span class="key-badge">SHIFT</span> Sprint / Boost</span>
+          <span class="keymap-item"><span class="key-badge">E</span> Pilot Rover / Ship</span>
+          <span class="keymap-item"><span class="key-badge">V</span> 1st/3rd Camera</span>
+          <span class="keymap-item"><span class="key-badge">ESC</span> Release Pointer</span>
+        </div>
+      </footer>
+    </div>
+
+    <!-- Mobile Touch Overlay (Dual Virtual Thumbsticks + Action Cluster) -->
+    <div id="mobile-touch-overlay">
+      <!-- Left Virtual Thumbstick (Movement / Strafe) -->
+      <div class="virtual-stick-zone" id="stick-left-zone">
+        <div class="stick-base" id="stick-left-base">
+          <span class="stick-tick north"></span>
+          <span class="stick-tick south"></span>
+          <span class="stick-tick west"></span>
+          <span class="stick-tick east"></span>
+          <div class="stick-knob" id="stick-left-knob"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>
+        </div>
+      </div>
+
+      <!-- Right Virtual Thumbstick (Camera Look / Aim) -->
+      <div class="virtual-stick-zone" id="stick-right-zone">
+        <div class="stick-base" id="stick-right-base">
+          <span class="stick-tick north"></span>
+          <span class="stick-tick south"></span>
+          <span class="stick-tick west"></span>
+          <span class="stick-tick east"></span>
+          <div class="stick-knob" id="stick-right-knob"><i class="fa-solid fa-crosshairs"></i></div>
+        </div>
+      </div>
+
+      <!-- Mobile Action Buttons Cluster -->
+      <div id="mobile-actions-cluster">
+        <button type="button" class="mobile-touch-btn jump-btn" id="btn-touch-jump" title="Jump / Jetpack [SPACE]">
+          <i class="fa-solid fa-angles-up"></i>
+          <span>JUMP</span>
+        </button>
+        <button type="button" class="mobile-touch-btn boost-btn" id="btn-touch-boost" title="Sprint / Nitro Boost [SHIFT]">
+          <i class="fa-solid fa-bolt"></i>
+          <span>BOOST</span>
+        </button>
+        <button type="button" class="mobile-touch-btn interact-btn" id="btn-touch-interact" title="Interact / Pilot [E]">
+          <i class="fa-solid fa-car"></i>
+          <span>ENTER</span>
+        </button>
+        <button type="button" class="mobile-touch-btn cam-btn" id="btn-touch-cam" title="Switch Camera View [V]">
+          <i class="fa-solid fa-eye"></i>
+          <span>CAM</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Container Orchestrator Script -->
+  <script>
+    // =========================================================================
+    // NEXCHAT // Modern Unity WebGL & 3D Container Engine Orchestrator
+    // =========================================================================
+
+    (function () {
+      'use strict';
+
+      // 1. Audio Engine (Web Audio API Synthesizer)
+      class CyberAudioEngine {
+        constructor() {
+          this.ctx = null;
+          this.masterGain = null;
+          this.volume = 0.8;
+          this.isMuted = false;
+        }
+
+        init() {
+          if (!this.ctx) {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+              this.ctx = new AudioCtx();
+              this.masterGain = this.ctx.createGain();
+              this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.volume, this.ctx.currentTime);
+              this.masterGain.connect(this.ctx.destination);
+            }
+          }
+          if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+          }
+        }
+
+        setVolume(val) {
+          this.volume = Math.max(0, Math.min(1, val));
+          if (this.masterGain && this.ctx) {
+            this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.volume, this.ctx.currentTime);
+          }
+        }
+
+        setMuted(muted) {
+          this.isMuted = !!muted;
+          if (this.masterGain && this.ctx) {
+            this.masterGain.gain.setValueAtTime(this.isMuted ? 0 : this.volume, this.ctx.currentTime);
+          }
+        }
+
+        playChime() {
+          this.init();
+          if (!this.ctx || this.isMuted) return;
+          try {
+            const freqs = [587.33, 880.00, 1174.66]; // D5, A5, D6
+            freqs.forEach((f, idx) => {
+              const osc = this.ctx.createOscillator();
+              const g = this.ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(f, this.ctx.currentTime + idx * 0.06);
+              g.gain.setValueAtTime(0.08, this.ctx.currentTime + idx * 0.06);
+              g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.06 + 0.25);
+              osc.connect(g);
+              g.connect(this.masterGain);
+              osc.start(this.ctx.currentTime + idx * 0.06);
+              osc.stop(this.ctx.currentTime + idx * 0.06 + 0.25);
+            });
+          } catch (_) {}
+        }
+
+        playJetpackThrust(active) {
+          this.init();
+          if (!this.ctx || this.isMuted) return;
+          if (active && !this._jetOsc) {
+            try {
+              this._jetOsc = this.ctx.createOscillator();
+              this._jetGain = this.ctx.createGain();
+              this._jetOsc.type = 'triangle';
+              this._jetOsc.frequency.setValueAtTime(95, this.ctx.currentTime);
+              this._jetGain.gain.setValueAtTime(0.01, this.ctx.currentTime);
+              this._jetGain.gain.linearRampToValueAtTime(0.08, this.ctx.currentTime + 0.1);
+              this._jetOsc.connect(this._jetGain);
+              this._jetGain.connect(this.masterGain);
+              this._jetOsc.start();
+            } catch (_) {}
+          } else if (!active && this._jetOsc) {
+            try {
+              this._jetGain.gain.linearRampToValueAtTime(0.001, this.ctx.currentTime + 0.1);
+              setTimeout(() => {
+                if (this._jetOsc) {
+                  this._jetOsc.stop();
+                  this._jetOsc.disconnect();
+                  this._jetOsc = null;
+                  this._jetGain = null;
+                }
+              }, 120);
+            } catch (_) {
+              this._jetOsc = null;
+            }
+          }
+        }
+      }
+
+      const audio = new CyberAudioEngine();
+      window.cyberAudio = audio;
+
+      // 2. State & DOM references
+      const container = document.getElementById('unity-container');
+      const canvas = document.getElementById('unity-canvas');
+      const loadingScreen = document.getElementById('unity-loading-screen');
+      const progressBar = document.getElementById('loading-progress-bar');
+      const percentText = document.getElementById('loading-percentage-text');
+      const statusText = document.getElementById('loading-status-text');
+      const btnBypass = document.getElementById('btn-bypass-loading');
+
+      // Top HUD references
+      const hudEngineName = document.getElementById('hud-engine-name');
+      const hudEngineBadge = document.getElementById('hud-engine-badge');
+      const hudFpsVal = document.getElementById('hud-fps-val');
+      const hudResVal = document.getElementById('hud-res-val');
+      const btnToggleDpi = document.getElementById('btn-toggle-dpi');
+      const dpiBtnText = document.getElementById('dpi-btn-text');
+      const btnMuteToggle = document.getElementById('btn-mute-toggle');
+      const volumeIcon = document.getElementById('volume-icon');
+      const volumeSlider = document.getElementById('volume-slider');
+      const volumePercent = document.getElementById('volume-percent');
+      const btnToggleTouch = document.getElementById('btn-toggle-touch');
+      const btnToggleFs = document.getElementById('btn-toggle-fullscreen');
+      const fsIcon = document.getElementById('fs-icon');
+      const btnEngineSwitch = document.getElementById('btn-engine-switch');
+      const engineSwitchLabel = document.getElementById('engine-switch-label');
+      const actionPrompt = document.getElementById('actionPrompt');
+      const toastEl = document.getElementById('hud-toast');
+      const toastMsg = document.getElementById('hud-toast-msg');
+
+      // Mobile Touch references
+      const mobileOverlay = document.getElementById('mobile-touch-overlay');
+      const stickLeftZone = document.getElementById('stick-left-zone');
+      const stickLeftKnob = document.getElementById('stick-left-knob');
+      const stickRightZone = document.getElementById('stick-right-zone');
+      const stickRightKnob = document.getElementById('stick-right-knob');
+      const btnTouchJump = document.getElementById('btn-touch-jump');
+      const btnTouchBoost = document.getElementById('btn-touch-boost');
+      const btnTouchInteract = document.getElementById('btn-touch-interact');
+      const btnTouchCam = document.getElementById('btn-touch-cam');
+
+      let currentMode = 'detecting'; // 'unity' | 'local_fallback'
+      let currentDprMode = localStorage.getItem('nex_game_dpr_mode') || '2x'; // '2x' | '1x'
+      let unityInstance = null;
+      let localEngine = null;
+      let toastTimer = null;
+
+      // Telemetry
+      let frameCount = 0;
+      let lastFpsTime = performance.now();
+      let currentFps = 60;
+
+      // Mobile Virtual Joystick State
+      const virtualInput = {
+        moveX: 0,
+        moveY: 0,
+        lookX: 0,
+        lookY: 0,
+        isJumping: false,
+        isBoosting: false
+      };
+      window.virtualInput = virtualInput;
+
+      function showToast(msg) {
+        if (!toastEl || !toastMsg) return;
+        toastMsg.textContent = msg;
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+      }
+
+      // =======================================================================
+      // DYNAMIC CANVAS RESIZE & DPI ANTI-BLUR ENGINE
+      // =======================================================================
+      function getActiveDPR() {
+        if (currentDprMode === '1x') return 1.0;
+        return Math.min(window.devicePixelRatio || 1.0, 2.0);
+      }
+
+      function updateCanvasDimensions() {
+        const dpr = getActiveDPR();
+        const rect = container.getBoundingClientRect();
+        const targetWidth = Math.max(1, Math.floor(rect.width * dpr));
+        const targetHeight = Math.max(1, Math.floor(rect.height * dpr));
+
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
+        }
+
+        // Keep CSS dimensions responsive
+        canvas.style.width = '100%';
+        canvas.style.height = '100%';
+
+        if (hudResVal) {
+          hudResVal.textContent = `${Math.round(rect.width)}x${Math.round(rect.height)} (${dpr.toFixed(1)}x)`;
+        }
+
+        // Notify local Three.js engine if running
+        if (localEngine && localEngine.onResize) {
+          localEngine.onResize(rect.width, rect.height, dpr);
+        }
+      }
+
+      const resizeObserver = new ResizeObserver(() => {
+        updateCanvasDimensions();
+      });
+      resizeObserver.observe(container);
+      window.addEventListener('resize', updateCanvasDimensions);
+      window.addEventListener('orientationchange', () => {
+        setTimeout(updateCanvasDimensions, 200);
+      });
+
+      // Toggle DPI resolution
+      if (btnToggleDpi) {
+        btnToggleDpi.addEventListener('click', () => {
+          currentDprMode = (currentDprMode === '2x') ? '1x' : '2x';
+          localStorage.setItem('nex_game_dpr_mode', currentDprMode);
+          dpiBtnText.textContent = `DPI: ${currentDprMode.toUpperCase()}`;
+          updateCanvasDimensions();
+          showToast(`Canvas Resolution: ${currentDprMode === '2x' ? '2.0x Retina Sharp' : '1.0x Battery Saver'}`);
+        });
+        dpiBtnText.textContent = `DPI: ${currentDprMode.toUpperCase()}`;
+      }
+
+      // =======================================================================
+      // SOUND & VOLUME INTEGRATION
+      // =======================================================================
+      function syncVolumeUI(vol, muted) {
+        if (volumeSlider) volumeSlider.value = Math.round(vol * 100);
+        if (volumePercent) volumePercent.textContent = `${Math.round(vol * 100)}%`;
+        if (volumeIcon) {
+          volumeIcon.className = (muted || vol === 0) ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
+        }
+      }
+
+      const savedVol = parseFloat(localStorage.getItem('nex_game_volume') || '0.8');
+      const savedMuted = localStorage.getItem('nex_game_muted') === 'true';
+      audio.setVolume(savedVol);
+      audio.setMuted(savedMuted);
+      syncVolumeUI(savedVol, savedMuted);
+
+      if (volumeSlider) {
+        volumeSlider.addEventListener('input', (e) => {
+          const val = parseFloat(e.target.value) / 100;
+          audio.setVolume(val);
+          audio.setMuted(false);
+          localStorage.setItem('nex_game_volume', val.toString());
+          localStorage.setItem('nex_game_muted', 'false');
+          syncVolumeUI(val, false);
+        });
+      }
+
+      if (btnMuteToggle) {
+        btnMuteToggle.addEventListener('click', () => {
+          const newMuted = !audio.isMuted;
+          audio.setMuted(newMuted);
+          localStorage.setItem('nex_game_muted', newMuted ? 'true' : 'false');
+          syncVolumeUI(audio.volume, newMuted);
+          showToast(newMuted ? 'Sound Muted' : 'Sound Restored');
+        });
+      }
+
+      // =======================================================================
+      // FULLSCREEN & TOUCH TOGGLE
+      // =======================================================================
+      if (btnToggleFs) {
+        btnToggleFs.addEventListener('click', () => {
+          if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(() => {});
+            if (fsIcon) fsIcon.className = 'fa-solid fa-compress';
+          } else {
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+            if (fsIcon) fsIcon.className = 'fa-solid fa-expand';
+          }
+        });
+      }
+
+      document.addEventListener('fullscreenchange', () => {
+        if (fsIcon) {
+          fsIcon.className = document.fullscreenElement ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+        }
+      });
+
+      // Mobile Touch Detection
+      const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || window.matchMedia('(pointer: coarse)').matches;
+      let touchOverlayVisible = isTouch;
+
+      function updateTouchOverlay() {
+        if (mobileOverlay) {
+          mobileOverlay.style.display = touchOverlayVisible ? 'block' : 'none';
+        }
+      }
+      updateTouchOverlay();
+
+      if (btnToggleTouch) {
+        btnToggleTouch.addEventListener('click', () => {
+          touchOverlayVisible = !touchOverlayVisible;
+          updateTouchOverlay();
+          showToast(touchOverlayVisible ? 'Mobile Virtual Sticks: ACTIVE' : 'Mobile Virtual Sticks: HIDDEN');
+        });
+      }
+
+      // =======================================================================
+      // MOBILE VIRTUAL DUAL THUMBSTICKS IMPLEMENTATION
+      // =======================================================================
+      function setupVirtualJoystick(zoneEl, knobEl, onMove, onEnd) {
+        if (!zoneEl || !knobEl) return;
+        let activeTouchId = null;
+        let center = { x: 0, y: 0 };
+        const maxRadius = 46;
+
+        function handleStart(e) {
+          e.preventDefault();
+          if (activeTouchId !== null) return;
+          const touch = e.changedTouches ? e.changedTouches[0] : e;
+          activeTouchId = (touch.identifier !== undefined) ? touch.identifier : 'mouse';
+          const rect = zoneEl.getBoundingClientRect();
+          center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+          handleMove(e);
+        }
+
+        function handleMove(e) {
+          if (activeTouchId === null) return;
+          let touch = null;
+          if (e.changedTouches) {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+              if (e.changedTouches[i].identifier === activeTouchId) {
+                touch = e.changedTouches[i];
+                break;
+              }
+            }
+          } else if (activeTouchId === 'mouse') {
+            touch = e;
+          }
+          if (!touch) return;
+
+          const dx = touch.clientX - center.x;
+          const dy = touch.clientY - center.y;
+          const dist = Math.hypot(dx, dy);
+          const angle = Math.atan2(dy, dx);
+          const clampedDist = Math.min(dist, maxRadius);
+
+          const knobX = Math.cos(angle) * clampedDist;
+          const knobY = Math.sin(angle) * clampedDist;
+
+          knobEl.style.transform = `translate3d(${knobX}px, ${knobY}px, 0)`;
+
+          const normX = knobX / maxRadius;
+          const normY = knobY / maxRadius;
+          onMove(normX, normY);
+        }
+
+        function handleEnd(e) {
+          if (activeTouchId === null) return;
+          let shouldEnd = false;
+          if (e.changedTouches) {
+            for (let i = 0; i < e.changedTouches.length; i++) {
+              if (e.changedTouches[i].identifier === activeTouchId) {
+                shouldEnd = true;
+                break;
+              }
+            }
+          } else if (activeTouchId === 'mouse') {
+            shouldEnd = true;
+          }
+
+          if (shouldEnd) {
+            activeTouchId = null;
+            knobEl.style.transform = 'translate3d(0, 0, 0)';
+            onEnd();
+          }
+        }
+
+        zoneEl.addEventListener('touchstart', handleStart, { passive: false });
+        window.addEventListener('touchmove', handleMove, { passive: false });
+        window.addEventListener('touchend', handleEnd, { passive: false });
+        window.addEventListener('touchcancel', handleEnd, { passive: false });
+      }
+
+      // Left Thumbstick: Movement (WASD)
+      setupVirtualJoystick(
+        stickLeftZone,
+        stickLeftKnob,
+        (nx, ny) => {
+          virtualInput.moveX = nx;
+          virtualInput.moveY = -ny; // Up is positive forward
+          dispatchSyntheticKey('KeyW', virtualInput.moveY > 0.25);
+          dispatchSyntheticKey('KeyS', virtualInput.moveY < -0.25);
+          dispatchSyntheticKey('KeyD', virtualInput.moveX > 0.25);
+          dispatchSyntheticKey('KeyA', virtualInput.moveX < -0.25);
+        },
+        () => {
+          virtualInput.moveX = 0;
+          virtualInput.moveY = 0;
+          dispatchSyntheticKey('KeyW', false);
+          dispatchSyntheticKey('KeyS', false);
+          dispatchSyntheticKey('KeyD', false);
+          dispatchSyntheticKey('KeyA', false);
+        }
+      );
+
+      // Right Thumbstick: Camera Look
+      setupVirtualJoystick(
+        stickRightZone,
+        stickRightKnob,
+        (nx, ny) => {
+          virtualInput.lookX = nx;
+          virtualInput.lookY = ny;
+          // Dispatch synthetic mouse movement to Unity canvas
+          try {
+            const evt = new MouseEvent('mousemove', {
+              movementX: nx * 14,
+              movementY: ny * 14,
+              bubbles: true,
+              cancelable: true
+            });
+            canvas.dispatchEvent(evt);
+          } catch (_) {}
+        },
+        () => {
+          virtualInput.lookX = 0;
+          virtualInput.lookY = 0;
+        }
+      );
+
+      // Mobile Action Buttons
+      function bindActionButton(btn, keyCode, codeStr, onStateChange) {
+        if (!btn) return;
+        const trigger = (pressed) => {
+          if (pressed) {
+            btn.classList.add('pressed');
+            if (navigator.vibrate) navigator.vibrate(10);
+          } else {
+            btn.classList.remove('pressed');
+          }
+          dispatchSyntheticKey(codeStr, pressed, keyCode);
+          if (onStateChange) onStateChange(pressed);
+        };
+
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); trigger(true); }, { passive: false });
+        btn.addEventListener('touchend', (e) => { e.preventDefault(); trigger(false); }, { passive: false });
+        btn.addEventListener('touchcancel', (e) => { e.preventDefault(); trigger(false); }, { passive: false });
+      }
+
+      bindActionButton(btnTouchJump, 32, 'Space', (down) => {
+        virtualInput.isJumping = down;
+        audio.playJetpackThrust(down);
+      });
+      bindActionButton(btnTouchBoost, 16, 'ShiftLeft', (down) => {
+        virtualInput.isBoosting = down;
+      });
+      bindActionButton(btnTouchInteract, 69, 'KeyE', (down) => {
+        if (down && localEngine && localEngine.handleInteract) {
+          localEngine.handleInteract();
+        }
+      });
+      bindActionButton(btnTouchCam, 86, 'KeyV', (down) => {
+        if (down && localEngine && localEngine.toggleCamera) {
+          localEngine.toggleCamera();
+        }
+      });
+
+      // Synthetic Keyboard Event Dispatcher
+      const activeKeys = {};
+      function dispatchSyntheticKey(code, isDown, keyCode) {
+        if (activeKeys[code] === isDown) return;
+        activeKeys[code] = isDown;
+        const type = isDown ? 'keydown' : 'keyup';
+        const kc = keyCode || (code === 'KeyW' ? 87 : code === 'KeyS' ? 83 : code === 'KeyA' ? 65 : code === 'KeyD' ? 68 : 0);
+        const event = new KeyboardEvent(type, {
+          code: code,
+          key: code.replace('Key', ''),
+          keyCode: kc,
+          which: kc,
+          bubbles: true,
+          cancelable: true
+        });
+        canvas.dispatchEvent(event);
+        window.dispatchEvent(event);
+      }
+
+      // =======================================================================
+      // HIGH-PERFORMANCE UNITY 6 WEBGL LOADER ENGINE
+      // =======================================================================
+      const UNITY_BUILD_DIR = 'Builds/WebGL/Build';
+      const UNITY_LOADER_URL = `${UNITY_BUILD_DIR}/AstroShift.loader.js`;
+
+      async function attemptUnityLoad() {
+        updateProgress(15, 'PROBING BUILDS/WEBGL/BUILD/ASTROSHIFT.LOADER.JS...');
+        
+        try {
+          const resp = await fetch(UNITY_LOADER_URL, { method: 'HEAD' });
+          if (!resp.ok) {
+            throw new Error(`Unity loader not found (HTTP ${resp.status})`);
+          }
+
+          updateProgress(35, 'LOADING UNITY 6 WEBASSEMBLY RUNTIME SCRIPT...');
+          
+          const script = document.createElement('script');
+          script.src = UNITY_LOADER_URL;
+          script.onload = () => {
+            if (typeof createUnityInstance !== 'function') {
+              throw new Error('createUnityInstance not exposed by loader script.');
+            }
+
+            const config = {
+              dataUrl: `${UNITY_BUILD_DIR}/AstroShift.data`,
+              frameworkUrl: `${UNITY_BUILD_DIR}/AstroShift.framework.js`,
+              codeUrl: `${UNITY_BUILD_DIR}/AstroShift.wasm`,
+              streamingAssetsUrl: 'StreamingAssets',
+              companyName: 'NEXCHAT',
+              productName: 'AstroShift: Beyond Earth',
+              productVersion: '2.6.0',
+              showBanner: (msg, type) => {
+                showToast(`[UNITY] ${msg}`);
+              },
+              devicePixelRatio: getActiveDPR()
+            };
+
+            updateProgress(55, 'INITIALIZING WEBASSEMBLY GRAPHICS PIPELINE...');
+            createUnityInstance(canvas, config, (progress) => {
+              const p = Math.round(55 + progress * 40);
+              updateProgress(p, `STREAMING GAME MEMORY: ${Math.round(progress * 100)}%`);
+            }).then((instance) => {
+              unityInstance = instance;
+              window.unityInstance = instance;
+              currentMode = 'unity';
+              finishLoading('UNITY 6 WEBGL ACTIVE');
+            }).catch((err) => {
+              console.warn('[Unity WebGL Error, engaging Local 3D Fallback]:', err);
+              engageLocal3DFallback();
+            });
+          };
+
+          script.onerror = () => {
+            engageLocal3DFallback();
+          };
+
+          document.body.appendChild(script);
+        } catch (err) {
+          // Unity build files not yet present in Builds/WebGL
+          console.info('[Unity WebGL Standby]:', err.message);
+          engageLocal3DFallback();
+        }
+      }
+
+      function updateProgress(percent, status) {
+        if (progressBar) progressBar.style.width = `${percent}%`;
+        if (percentText) percentText.textContent = `${percent.toFixed(1)}%`;
+        if (statusText && status) statusText.textContent = status;
+      }
+
+      function finishLoading(engineName) {
+        updateProgress(100, 'ENGINE READY');
+        setTimeout(() => {
+          if (loadingScreen) {
+            loadingScreen.style.opacity = '0';
+            setTimeout(() => loadingScreen.style.display = 'none', 800);
+          }
+        }, 300);
+
+        if (hudEngineName) hudEngineName.textContent = engineName;
+        if (hudEngineBadge) {
+          hudEngineBadge.className = 'hud-badge green';
+        }
+        if (engineSwitchLabel) {
+          engineSwitchLabel.textContent = currentMode === 'unity' ? 'SWITCH TO LOCAL 3D' : 'PROBE UNITY 6';
+        }
+        audio.playChime();
+        showToast(`${engineName} ENGAGED &bull; 60FPS READY`);
+      }
+
+      // Manual Bypass button
+      if (btnBypass) {
+        btnBypass.addEventListener('click', () => {
+          engageLocal3DFallback();
+        });
+      }
+
+      // Switch Engine Button
+      if (btnEngineSwitch) {
+        btnEngineSwitch.addEventListener('click', () => {
+          if (currentMode === 'local_fallback') {
+            showToast('Probing Builds/WebGL for Unity 6 build...');
+            attemptUnityLoad();
+          } else {
+            engageLocal3DFallback();
+          }
+        });
+      }
+
+      // =======================================================================
+      // HIGH-PERFORMANCE LOCAL WEBGL 3D FALLBACK ENGINE (THREE.JS R128)
+      // =======================================================================
+      function engageLocal3DFallback() {
+        if (currentMode === 'local_fallback' && localEngine) return;
+        currentMode = 'local_fallback';
+        updateProgress(85, 'ACTIVATING HIGH-PERFORMANCE NEXCHAT LOCAL 3D ENGINE...');
+
+        setTimeout(() => {
+          try {
+            initLocal3DEngine();
+            finishLoading('LOCAL 3D ENGINE (ACTIVE)');
+          } catch (e) {
+            console.error('Failed to init local 3D engine:', e);
+            finishLoading('ENGINE READY');
+          }
+        }, 200);
+      }
+
+      function initLocal3DEngine() {
+        if (typeof THREE === 'undefined') {
+          console.error('Three.js library is missing!');
+          return;
+        }
+
+        const clock = new THREE.Clock();
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x020712);
+        scene.fog = new THREE.FogExp2(0x030b18, 0.0035);
+
+        const camera = new THREE.PerspectiveCamera(65, container.clientWidth / container.clientHeight, 0.2, 3000);
+        camera.position.set(0, 4, 12);
+
+        const renderer = new THREE.WebGLRenderer({
+          canvas: canvas,
+          antialias: true,
+          powerPreference: 'high-performance'
+        });
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+        // Ambient & Directional Lighting
+        const hemiLight = new THREE.HemisphereLight(0x00f2ff, 0x050c18, 0.65);
+        scene.add(hemiLight);
+
+        const sunLight = new THREE.DirectionalLight(0xffffff, 1.3);
+        sunLight.position.set(60, 100, 40);
+        sunLight.castShadow = true;
+        sunLight.shadow.mapSize.width = 2048;
+        sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 1;
+        sunLight.shadow.camera.far = 400;
+        sunLight.shadow.camera.left = -80;
+        sunLight.shadow.camera.right = 80;
+        sunLight.shadow.camera.top = 80;
+        sunLight.shadow.camera.bottom = -80;
+        scene.add(sunLight);
+
+        // Starfield
+        const starCount = 1800;
+        const starGeo = new THREE.BufferGeometry();
+        const starPos = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount * 3; i += 3) {
+          starPos[i] = (Math.random() - 0.5) * 1200;
+          starPos[i + 1] = Math.random() * 500 + 10;
+          starPos[i + 2] = (Math.random() - 0.5) * 1200;
+        }
+        starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+        const starMat = new THREE.PointsMaterial({ color: 0x00f2ff, size: 1.2, transparent: true, opacity: 0.8 });
+        const starfield = new THREE.Points(starGeo, starMat);
+        scene.add(starfield);
+
+        // Cyber Grid Terrain Ground
+        const gridHelper = new THREE.GridHelper(400, 80, 0x00f2ff, 0x072844);
+        gridHelper.position.y = 0.02;
+        scene.add(gridHelper);
+
+        const groundGeo = new THREE.PlaneGeometry(600, 600);
+        const groundMat = new THREE.MeshStandardMaterial({
+          color: 0x030a16,
+          roughness: 0.6,
+          metalness: 0.85
+        });
+        const ground = new THREE.Mesh(groundGeo, groundMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Futuristic Sci-Fi Skyscrapers & Landing Pad
+        const cityGroup = new THREE.Group();
+        const bMat = new THREE.MeshStandardMaterial({ color: 0x091c33, roughness: 0.3, metalness: 0.8 });
+        const winMat = new THREE.MeshBasicMaterial({ color: 0x00f2ff, wireframe: true });
+
+        for (let bx = -140; bx <= 140; bx += 35) {
+          for (let bz = -140; bz <= 140; bz += 35) {
+            if (Math.abs(bx) < 30 && Math.abs(bz) < 30) continue; // Keep center clear
+            const h = Math.random() * 60 + 25;
+            const bMesh = new THREE.Mesh(new THREE.BoxGeometry(16, h, 16), bMat);
+            bMesh.position.set(bx, h / 2, bz);
+            bMesh.castShadow = true;
+            bMesh.receiveShadow = true;
+            cityGroup.add(bMesh);
+
+            const winMesh = new THREE.Mesh(new THREE.BoxGeometry(16.1, h, 16.1), winMat);
+            winMesh.position.copy(bMesh.position);
+            cityGroup.add(winMesh);
+          }
+        }
+        scene.add(cityGroup);
+
+        // SpaceX Starship Landing Pad (Nearby at z = -45)
+        const padGeo = new THREE.CylinderGeometry(20, 20, 1.2, 32);
+        const padMat = new THREE.MeshStandardMaterial({ color: 0x112233, metalness: 0.9, roughness: 0.2 });
+        const pad = new THREE.Mesh(padGeo, padMat);
+        pad.position.set(0, 0.6, -45);
+        pad.receiveShadow = true;
+        scene.add(pad);
+
+        // 120m SpaceX Starship Model
+        const shipGroup = new THREE.Group();
+        const shipMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.15 });
+        const darkMat = new THREE.MeshStandardMaterial({ color: 0x0a101d, metalness: 0.9, roughness: 0.3 });
+
+        const shipBody = new THREE.Mesh(new THREE.CylinderGeometry(3.2, 3.2, 38, 24), shipMat);
+        shipBody.position.y = 20;
+        shipBody.castShadow = true;
+        shipGroup.add(shipBody);
+
+        const noseCone = new THREE.Mesh(new THREE.ConeGeometry(3.2, 10, 24), darkMat);
+        noseCone.position.y = 44;
+        noseCone.castShadow = true;
+        shipGroup.add(noseCone);
+
+        // Starship Flaps
+        const flapGeo = new THREE.BoxGeometry(0.4, 6, 2.5);
+        const fL = new THREE.Mesh(flapGeo, darkMat);
+        fL.position.set(-3.5, 38, 0);
+        shipGroup.add(fL);
+        const fR = new THREE.Mesh(flapGeo, darkMat);
+        fR.position.set(3.5, 38, 0);
+        shipGroup.add(fR);
+
+        shipGroup.position.set(0, 0.6, -45);
+        scene.add(shipGroup);
+
+        // Armed Cyber Rover Model (Nearby at x = 12, z = 8)
+        const roverGroup = new THREE.Group();
+        const roverBody = new THREE.Mesh(new THREE.BoxGeometry(4.2, 1.4, 6.4), new THREE.MeshStandardMaterial({ color: 0x00f2ff, metalness: 0.8, roughness: 0.2 }));
+        roverBody.position.y = 1.3;
+        roverBody.castShadow = true;
+        roverGroup.add(roverBody);
+
+        const roverCabin = new THREE.Mesh(new THREE.BoxGeometry(3.2, 1.2, 3.2), new THREE.MeshStandardMaterial({ color: 0x061426, metalness: 0.9, roughness: 0.1 }));
+        roverCabin.position.set(0, 2.3, -0.6);
+        roverGroup.add(roverCabin);
+
+        // Rover 6 Heavy Wheels
+        const wheelGeo = new THREE.CylinderGeometry(0.85, 0.85, 0.7, 16);
+        wheelGeo.rotateZ(Math.PI / 2);
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.9 });
+        [-1.8, 0, 1.8].forEach((wz) => {
+          [-2.2, 2.2].forEach((wx) => {
+            const wheel = new THREE.Mesh(wheelGeo, wheelMat);
+            wheel.position.set(wx, 0.85, wz);
+            wheel.castShadow = true;
+            roverGroup.add(wheel);
+          });
+        });
+        roverGroup.position.set(12, 0, 8);
+        scene.add(roverGroup);
+
+        // Operative Player Rig
+        const playerGroup = new THREE.Group();
+        const pMat = new THREE.MeshStandardMaterial({ color: 0x0e243a, metalness: 0.85, roughness: 0.2 });
+        const visorMat = new THREE.MeshStandardMaterial({ color: 0x00f2ff, emissive: 0x00f2ff, emissiveIntensity: 0.6, roughness: 0.1 });
+
+        const pTorso = new THREE.Mesh(new THREE.BoxGeometry(1.2, 1.4, 0.7), pMat);
+        pTorso.position.y = 1.6;
+        pTorso.castShadow = true;
+        playerGroup.add(pTorso);
+
+        const pHead = new THREE.Mesh(new THREE.SphereGeometry(0.48, 16, 16), pMat);
+        pHead.position.y = 2.6;
+        pHead.castShadow = true;
+        playerGroup.add(pHead);
+
+        const pVisor = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.22, 0.35), visorMat);
+        pVisor.position.set(0, 2.6, 0.36);
+        playerGroup.add(pVisor);
+
+        // Jetpack
+        const jetGeo = new THREE.BoxGeometry(0.8, 0.9, 0.35);
+        const jetMesh = new THREE.Mesh(jetGeo, new THREE.MeshStandardMaterial({ color: 0x00ff88, metalness: 0.9 }));
+        jetMesh.position.set(0, 1.6, -0.48);
+        playerGroup.add(jetMesh);
+
+        playerGroup.position.set(0, 0, 0);
+        scene.add(playerGroup);
+
+        // Player physics state
+        const playerState = {
+          pos: playerGroup.position,
+          vel: new THREE.Vector3(),
+          yaw: 0,
+          pitch: 0,
+          speed: 8.5,
+          sprintSpeed: 17.0,
+          isGrounded: true,
+          inVehicle: false,
+          isFirstPerson: false,
+          jetpackFuel: 100
+        };
+
+        // Desktop Keyboard Controls
+        const keys = {};
+        window.addEventListener('keydown', (e) => {
+          keys[e.code] = true;
+          if (e.code === 'KeyV') toggleCamera();
+          if (e.code === 'KeyE') handleInteract();
+        });
+        window.addEventListener('keyup', (e) => {
+          keys[e.code] = false;
+        });
+
+        // Mouse look with pointer lock
+        canvas.addEventListener('click', () => {
+          if (!document.pointerLockElement) {
+            canvas.requestPointerLock().catch(() => {});
+          }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+          if (document.pointerLockElement === canvas) {
+            playerState.yaw -= e.movementX * 0.0024;
+            playerState.pitch -= e.movementY * 0.0024;
+            playerState.pitch = Math.max(-1.3, Math.min(1.3, playerState.pitch));
+          }
+        });
+
+        function toggleCamera() {
+          playerState.isFirstPerson = !playerState.isFirstPerson;
+          showToast(playerState.isFirstPerson ? 'Camera: 1st Person Cockpit' : 'Camera: 3rd Person Follow');
+        }
+
+        function handleInteract() {
+          const distRover = playerState.pos.distanceTo(roverGroup.position);
+          const distShip = playerState.pos.distanceTo(shipGroup.position);
+
+          if (distRover < 8.0) {
+            playerState.inVehicle = !playerState.inVehicle;
+            showToast(playerState.inVehicle ? 'Piloting Armed Cyber Rover' : 'Exited Cyber Rover');
+            audio.playChime();
+          } else if (distShip < 16.0) {
+            showToast('Starship Cockpit: Hyperspace Coordinates Calibrated');
+            audio.playChime();
+          }
+        }
+
+        // Check Proximity Action Prompt
+        function checkInteractables() {
+          if (!actionPrompt) return;
+          const distRover = playerState.pos.distanceTo(roverGroup.position);
+          const distShip = playerState.pos.distanceTo(shipGroup.position);
+
+          if (distRover < 8.0 && !playerState.inVehicle) {
+            actionPrompt.textContent = 'PRESS [E] TO PILOT ARMED ROVER';
+            actionPrompt.style.display = 'block';
+          } else if (distShip < 16.0) {
+            actionPrompt.textContent = 'PRESS [E] TO BOARD SPACEX STARSHIP';
+            actionPrompt.style.display = 'block';
+          } else {
+            actionPrompt.style.display = 'none';
+          }
+        }
+
+        // Animation Loop
+        function animate() {
+          requestAnimationFrame(animate);
+          const dt = Math.min(clock.getDelta(), 0.05);
+
+          // Telemetry
+          frameCount++;
+          const now = performance.now();
+          if (now - lastFpsTime >= 500) {
+            currentFps = Math.round((frameCount * 1000) / (now - lastFpsTime));
+            frameCount = 0;
+            lastFpsTime = now;
+            if (hudFpsVal) hudFpsVal.textContent = `${currentFps} FPS`;
+          }
+
+          // Mobile Right Stick Look
+          if (Math.abs(virtualInput.lookX) > 0.05 || Math.abs(virtualInput.lookY) > 0.05) {
+            playerState.yaw -= virtualInput.lookX * 2.2 * dt;
+            playerState.pitch -= virtualInput.lookY * 2.0 * dt;
+            playerState.pitch = Math.max(-1.3, Math.min(1.3, playerState.pitch));
+          }
+
+          // Locomotion Input (WASD + Virtual Left Stick)
+          let inputX = (keys['KeyD'] ? 1 : 0) - (keys['KeyA'] ? 1 : 0) + virtualInput.moveX;
+          let inputZ = (keys['KeyW'] ? 1 : 0) - (keys['KeyS'] ? 1 : 0) + virtualInput.moveY;
+          inputX = Math.max(-1, Math.min(1, inputX));
+          inputZ = Math.max(-1, Math.min(1, inputZ));
+
+          const isSprinting = (keys['ShiftLeft'] || keys['ShiftRight'] || virtualInput.isBoosting);
+          const currentSpeed = isSprinting ? playerState.sprintSpeed : playerState.speed;
+
+          // Forward & Strafe vectors based on yaw
+          const fwd = new THREE.Vector3(-Math.sin(playerState.yaw), 0, -Math.cos(playerState.yaw));
+          const side = new THREE.Vector3(Math.cos(playerState.yaw), 0, -Math.sin(playerState.yaw));
+
+          if (Math.hypot(inputX, inputZ) > 0.1) {
+            const moveDir = fwd.clone().multiplyScalar(inputZ).add(side.clone().multiplyScalar(inputX)).normalize();
+            playerState.pos.addScaledVector(moveDir, currentSpeed * dt);
+          }
+
+          // Jetpack & Jump physics
+          const isJumping = keys['Space'] || virtualInput.isJumping;
+          if (isJumping && playerState.jetpackFuel > 5) {
+            playerState.vel.y = Math.min(playerState.vel.y + 36 * dt, 14);
+            playerState.jetpackFuel -= 28 * dt;
+          } else {
+            playerState.vel.y -= 26 * dt; // Gravity
+            playerState.jetpackFuel = Math.min(playerState.jetpackFuel + 22 * dt, 100);
+          }
+
+          playerState.pos.y += playerState.vel.y * dt;
+          if (playerState.pos.y <= 0) {
+            playerState.pos.y = 0;
+            playerState.vel.y = 0;
+            playerState.isGrounded = true;
+          } else {
+            playerState.isGrounded = false;
+          }
+
+          // Update operative mesh rotation
+          playerGroup.rotation.y = playerState.yaw;
+
+          // Camera placement
+          if (playerState.isFirstPerson) {
+            camera.position.set(playerState.pos.x, playerState.pos.y + 2.6, playerState.pos.z);
+            const targetLook = camera.position.clone().add(
+              new THREE.Vector3(
+                -Math.sin(playerState.yaw) * Math.cos(playerState.pitch),
+                Math.sin(playerState.pitch),
+                -Math.cos(playerState.yaw) * Math.cos(playerState.pitch)
+              )
+            );
+            camera.lookAt(targetLook);
+            playerGroup.visible = false;
+          } else {
+            playerGroup.visible = true;
+            const camDist = 7.5;
+            const camH = 3.6;
+            const targetCamPos = playerState.pos.clone().add(
+              new THREE.Vector3(
+                Math.sin(playerState.yaw) * camDist,
+                camH - playerState.pitch * 2,
+                Math.cos(playerState.yaw) * camDist
+              )
+            );
+            camera.position.lerp(targetCamPos, 0.2);
+            camera.lookAt(playerState.pos.x, playerState.pos.y + 1.8, playerState.pos.z);
+          }
+
+          checkInteractables();
+          renderer.render(scene, camera);
+        }
+
+        localEngine = {
+          onResize: (w, h, dpr) => {
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h, false);
+            renderer.setPixelRatio(dpr);
+          },
+          toggleCamera: toggleCamera,
+          handleInteract: handleInteract
+        };
+
+        requestAnimationFrame(animate);
+      }
+
+      // 3. Initiate Load Sequence
+      window.addEventListener('DOMContentLoaded', () => {
+        updateCanvasDimensions();
+        attemptUnityLoad();
+      });
+    })();
+  </script>
+</body>
+</html>

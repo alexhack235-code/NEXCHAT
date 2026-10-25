@@ -12,6 +12,8 @@ namespace AstroShift.Audio
         private AudioClip explosionClip;
         private AudioClip boostPurgeClip;
         private AudioClip warpSweepClip;
+        private AudioClip engineMotorClip;
+        private AudioClip rocketRumbleClip;
 
         private AudioSource sfxAudioSource;
 
@@ -36,6 +38,8 @@ namespace AstroShift.Audio
             explosionClip = CreateExplosionClip();
             boostPurgeClip = CreatePurgeClip();
             warpSweepClip = CreateWarpSweepClip();
+            engineMotorClip = CreateEngineMotorClip();
+            rocketRumbleClip = CreateRocketRumbleClip();
         }
 
         AudioClip CreateLaserClip()
@@ -148,6 +152,62 @@ namespace AstroShift.Audio
             AudioClip clip = AudioClip.Create("Proc_WarpSweep", sampleCount, 1, sampleRate, false);
             clip.SetData(samples, 0);
             return clip;
+        }
+
+        AudioClip CreateEngineMotorClip()
+        {
+            int sampleRate = 44100;
+            float duration = 1.0f;
+            int sampleCount = (int)(sampleRate * duration);
+            float[] samples = new float[sampleCount];
+
+            for (int i = 0; i < sampleCount; i++)
+            {
+                float t = (float)i / sampleRate;
+                float baseTone = Mathf.Sin(2f * Mathf.PI * 75f * t) * 0.45f;
+                float electricWhine = Mathf.Sin(2f * Mathf.PI * 320f * t) * 0.25f;
+                float subTone = Mathf.Sin(2f * Mathf.PI * 37.5f * t) * 0.2f;
+                float noise = (Random.value * 2f - 1f) * 0.08f;
+                samples[i] = Mathf.Clamp(baseTone + electricWhine + subTone + noise, -1f, 1f);
+            }
+
+            AudioClip clip = AudioClip.Create("Proc_EngineMotorLoop", sampleCount, 1, sampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        AudioClip CreateRocketRumbleClip()
+        {
+            int sampleRate = 44100;
+            float duration = 1.5f;
+            int sampleCount = (int)(sampleRate * duration);
+            float[] samples = new float[sampleCount];
+
+            float filter = 0f;
+            for (int i = 0; i < sampleCount; i++)
+            {
+                float t = (float)i / sampleRate;
+                float white = Random.value * 2f - 1f;
+                filter = Mathf.Lerp(filter, white, 0.08f);
+                float sub = Mathf.Sin(2f * Mathf.PI * 42f * t) * 0.35f;
+                samples[i] = Mathf.Clamp(filter * 0.75f + sub, -1f, 1f);
+            }
+
+            AudioClip clip = AudioClip.Create("Proc_RocketRumbleLoop", sampleCount, 1, sampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        public AudioClip GetEngineMotorLoopClip()
+        {
+            if (engineMotorClip == null) engineMotorClip = CreateEngineMotorClip();
+            return engineMotorClip;
+        }
+
+        public AudioClip GetRocketRumbleLoopClip()
+        {
+            if (rocketRumbleClip == null) rocketRumbleClip = CreateRocketRumbleClip();
+            return rocketRumbleClip;
         }
 
         public void PlayLaserAt(Vector3 position, float pitch = 1f)

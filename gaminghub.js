@@ -200,17 +200,11 @@
     });
   }
 
-  // Intercept Launch Button clicks — Gaming Hub is locked!
+  // Launch AstroShift Unity 3D Game directly
   if (btnLaunchAstro) {
     btnLaunchAstro.addEventListener('click', (e) => {
-      e.preventDefault();
-      const isRegistered = localStorage.getItem('nex_astro_early_access_registered') === 'true';
-      if (!isRegistered) {
-        highlightRegistrationBox();
-      } else {
-        hubAudio.playClick();
-        alert('[GAMING HUB LOCKED // CLOSED DEVELOPMENT]\n\nYour early access pass is confirmed! The servers are currently closed for pre-launch calibration. Priority launch keys will be dispatched to your registered email upon public launch.');
-      }
+      hubAudio.playClick();
+      window.location.href = 'unity_game.html';
     });
   }
 

@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>NEXCHAT // Calgary Metropolis & Regional Aviation [Module Edition]</title>
   <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
     body, html {
@@ -109,6 +110,9 @@
 
   <!-- Top Header -->
   <div id="topHeader">
+    <a href="chat.html" class="hud-btn" style="text-decoration: none;" title="Back to NEXCHAT"><i class="fa-solid fa-arrow-left"></i> CHAT</a>
+    <a href="gaminghub.html" class="hud-btn" style="text-decoration: none;" title="Gaming Hub"><i class="fa-solid fa-gamepad"></i> ARCADE</a>
+    <a href="unity_game.html" class="hud-btn" style="text-decoration: none; color: #00f2ff; border-color: #00f2ff;" title="AstroShift Unity 3D Engine"><i class="fa-solid fa-cube"></i> ASTROSHIFT 3D</a>
     <h1>Calgary Metropolis</h1>
     <span class="badge">MODULE ARCHITECTURE</span>
     <span style="font-size:12px; color:#94a3b8;">Alberta Regional Hub</span>
@@ -591,14 +595,14 @@
 
       // Banff Hot Springs
       if (player.pos.distanceTo(new THREE.Vector3(-120, 0, -40)) <= 14) {
-        prompt.innerText = `♨️ BANFF HOT SPRINGS: RESTORING WARMTH & HEALTH`;
+        prompt.innerText = `[HOT SPRINGS] BANFF: RESTORING WARMTH & HEALTH`;
         prompt.style.display = 'block';
         return;
       }
 
       // Sugar Shack
       if (player.pos.distanceTo(new THREE.Vector3(-60, 0, 110)) <= 12) {
-        prompt.innerText = `🍁 SUGAR SHACK: HOT MAPLE TAFFY AVAILABLE`;
+        prompt.innerText = `[SUGAR SHACK]: HOT MAPLE TAFFY AVAILABLE`;
         prompt.style.display = 'block';
         return;
       }
