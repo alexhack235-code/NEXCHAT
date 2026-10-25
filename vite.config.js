@@ -36,7 +36,7 @@ function vercelApiDevPlugin() {
             return this;
           };
         }
-        const { default: uploadHandler } = await import('./api/upload.js');
+        const uploadMod = './api/upload.js'; const { default: uploadHandler } = await import(/* @vite-ignore */ uploadMod);
         await uploadHandler(req, res);
       } catch (err) {
         console.error('[Vite Dev API] /api/upload error:', err);
@@ -64,7 +64,7 @@ function vercelApiDevPlugin() {
             return this;
           };
         }
-        const { default: serveBlobHandler } = await import('./api/serve-blob.js');
+        const serveBlobMod = './api/serve-blob.js'; const { default: serveBlobHandler } = await import(/* @vite-ignore */ serveBlobMod);
         await serveBlobHandler(req, res);
       } catch (err) {
         console.error('[Vite Dev API] /api/serve-blob error:', err);
@@ -100,7 +100,7 @@ function vercelApiDevPlugin() {
           const rawBody = Buffer.concat(buffers).toString();
           try { req.body = JSON.parse(rawBody); } catch (_) { req.body = {}; }
         }
-        const { default: reelsHandler } = await import('./api/reels.js');
+        const reelsMod = './api/reels.js'; const { default: reelsHandler } = await import(/* @vite-ignore */ reelsMod);
         await reelsHandler(req, res);
       } catch (err) {
         console.error('[Vite Dev API] /api/reels error:', err);
@@ -136,7 +136,7 @@ function vercelApiDevPlugin() {
           const rawBody = Buffer.concat(buffers).toString();
           try { req.body = JSON.parse(rawBody); } catch (_) { req.body = {}; }
         }
-        const { default: emailAlertHandler } = await import('./api/send-email-alert.js');
+        const emailAlertMod = './api/send-email-alert.js'; const { default: emailAlertHandler } = await import(/* @vite-ignore */ emailAlertMod);
         await emailAlertHandler(req, res);
       } catch (err) {
         console.error('[Vite Dev API] /api/send-email-alert error:', err);

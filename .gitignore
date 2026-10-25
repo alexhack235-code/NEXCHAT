@@ -6,6 +6,8 @@ node_modules/
 # Production build output
 dist/
 dist-ssr/
+dist-apk/
+*.apk
 
 # Vite temporary / cache files
 .vite/

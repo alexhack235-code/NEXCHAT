@@ -1,0 +1,55 @@
+@echo off
+setlocal enabledelayedexpansion
+
+echo ===================================================
+echo [NEXCHAT] Android APK Build Automation
+echo ===================================================
+
+echo [1/4] Syncing web assets to dist directory...
+python scripts/prepare_dist.py
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Failed to prepare dist directory.
+    exit /b %ERRORLEVEL%
+)
+
+echo [2/4] Syncing Capacitor Android assets...
+node ./node_modules/@capacitor/cli/bin/capacitor sync android
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Capacitor sync failed.
+    exit /b %ERRORLEVEL%
+)
+
+echo [3/4] Checking build environment...
+if not exist "android\gradlew.bat" (
+    echo [ERROR] Android project folder not found at android/
+    exit /b 1
+)
+
+where java >nul 2>&1
+if %ERRORLEVEL% NEQ 0 (
+    echo [WARNING] Java JDK not found in PATH.
+    echo Please install OpenJDK 17 or Android Studio to compile the APK locally.
+    echo You can also open the project in Android Studio:
+    echo   File -^> Open -^> Select "android" folder
+    exit /b 0
+)
+
+echo [4/4] Assembling Debug APK via Gradle wrapper...
+cd android
+call gradlew.bat assembleDebug
+set GRADLE_EXIT=!ERRORLEVEL!
+cd ..
+
+if !GRADLE_EXIT! EQU 0 (
+    echo ===================================================
+    echo [SUCCESS] APK built successfully!
+    if not exist "dist-apk" mkdir "dist-apk"
+    copy /y "android\app\build\outputs\apk\debug\app-debug.apk" "dist-apk\NEXCHAT-debug.apk"
+    echo [OUTPUT] APK location: dist-apk\NEXCHAT-debug.apk
+    echo ===================================================
+) else (
+    echo [ERROR] Gradle build failed with code !GRADLE_EXIT!.
+    echo Open android/ folder in Android Studio for detailed diagnostics.
+)
+
+endlocal

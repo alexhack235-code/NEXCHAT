@@ -3216,6 +3216,14 @@
           <button id="closeMoreSheetBtn" class="close-sheet-btn"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="more-sheet-grid">
+          <button type="button" class="sheet-grid-item" onclick="window.openAppInstallModal(); document.getElementById('mobileMoreSheet')?.classList.remove('open');">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, #00ff66, #00bb44); color: #000; box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);"><i class="fa-solid fa-download"></i></div>
+            <span>Install App</span>
+          </button>
+          <button type="button" class="sheet-grid-item" onclick="window.openCreateGroupModal(); document.getElementById('mobileMoreSheet')?.classList.remove('open');">
+            <div class="sheet-icon-box" style="background: linear-gradient(135deg, #00f2fe, #4facfe); color: #000; box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);"><i class="fa-solid fa-user-group"></i></div>
+            <span>New Group</span>
+          </button>
           <button type="button" class="sheet-grid-item" onclick="window.location.href='reels.html'">
             <div class="sheet-icon-box reels-gradient"><i class="fa-solid fa-clapperboard"></i></div>
             <span>CamShot</span>
@@ -5185,6 +5193,10 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
             <div style="display: flex; gap: 8px; align-items: flex-start;">
               <span style="color: #ffd700; font-weight: bold;">[DESKTOP]</span>
               <span>Click the <strong>Install icon</strong> in your browser's address bar (right side).</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: flex-start; padding-top: 8px; border-top: 1px dashed rgba(255, 255, 255, 0.12);">
+              <span style="color: #a855f7; font-weight: bold;">[NATIVE APK]</span>
+              <span>Android users can also build or run the native standalone APK from the <code>android/</code> Capacitor project folder.</span>
             </div>
           </div>
         </div>
