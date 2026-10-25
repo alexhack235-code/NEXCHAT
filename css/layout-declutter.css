@@ -381,3 +381,315 @@
   border-radius: 16px !important;
   margin-bottom: 0 !important;
 }
+
+
+/* --------------------------------------------------------------------------
+   8. NEXBOT STUDIO & CYBER MODAL OVERFLOW ELIMINATION
+   Guarantees 0 card overflow, clean responsive wrapping, and elimination
+   of floating action buttons on all viewport widths down to 320px.
+   -------------------------------------------------------------------------- */
+
+/* Modal Root Enclosure */
+.nexbot-studio-modal {
+  padding: 8px !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 600px) {
+  .nexbot-studio-modal {
+    padding: 0 !important;
+  }
+}
+
+.nexbot-modal-container {
+  width: 100% !important;
+  max-width: min(96vw, 1220px) !important;
+  height: 94vh !important;
+  max-height: 94vh !important;
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 600px) {
+  .nexbot-modal-container {
+    max-width: 100vw !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+  }
+}
+
+/* Studio Header Clean Stacking */
+@media (max-width: 768px) {
+  .nexbot-studio-header {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 14px !important;
+    gap: 10px !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+  }
+
+  .nexbot-header-left {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    gap: 10px !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+
+  .nexbot-header-left > div {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  .nexbot-header-title {
+    font-size: 15px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 180px !important;
+  }
+
+  .nexbot-header-subtitle {
+    font-size: 9.5px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 180px !important;
+  }
+
+  .nexbot-header-right {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .nexbot-mobile-view-toggle {
+    order: 3 !important;
+    width: 100% !important;
+    display: flex !important;
+    justify-content: stretch !important;
+    margin-top: 2px !important;
+    box-sizing: border-box !important;
+  }
+
+  .nexbot-view-toggle-btn {
+    flex: 1 !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 8px 10px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* Config Column & Zero Horizontal Shift */
+.nexbot-config-col {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  padding: 14px !important;
+}
+
+/* AI Prompt Bar & Action Button Containment */
+.nexbot-ai-prompt-bar {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  padding: 14px !important;
+  margin-bottom: 16px !important;
+}
+
+.nexbot-prompt-header {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 12px !important;
+  width: 100% !important;
+}
+
+.nexbot-prompt-badge {
+  font-size: 10px !important;
+  white-space: normal !important;
+  text-align: right !important;
+  max-width: 100% !important;
+  flex-shrink: 0 !important;
+}
+
+/* Responsive Prompt Input & Button Stacking */
+.nexbot-prompt-input-row {
+  display: flex !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 680px) {
+  .nexbot-prompt-input-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+}
+
+.nexbot-prompt-input {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  padding: 10px 14px !important;
+  font-size: 13px !important;
+}
+
+#nexbotGenerateAiBotBtn,
+.nexbot-btn.primary {
+  width: auto !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 680px) {
+  #nexbotGenerateAiBotBtn,
+  .nexbot-btn.primary {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 12px 16px !important;
+    font-size: 13.5px !important;
+    white-space: normal !important;
+    text-align: center !important;
+  }
+}
+
+/* Quick Prompt Pills Clean Wrap */
+.nexbot-quick-prompts {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin-top: 10px !important;
+}
+
+.quick-prompt-pill {
+  white-space: normal !important;
+  text-align: left !important;
+  font-size: 11px !important;
+  padding: 6px 10px !important;
+  line-height: 1.3 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Nav Tabs Horizontal Scroll Without Outer Expansion */
+.nexbot-nav-tabs {
+  display: flex !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 16px !important;
+  scrollbar-width: none !important;
+  gap: 8px !important;
+}
+
+.nexbot-nav-tabs::-webkit-scrollbar {
+  display: none !important;
+}
+
+.nexbot-nav-tab {
+  flex-shrink: 0 !important;
+  white-space: nowrap !important;
+  padding: 7px 12px !important;
+  font-size: 12px !important;
+}
+
+/* Form Groups & Inputs Zero-Blowout Containment */
+.nexbot-form-group {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin-bottom: 16px !important;
+}
+
+.nexbot-label-row {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+  width: 100% !important;
+  margin-bottom: 6px !important;
+}
+
+.nexbot-label {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+}
+
+.nexbot-input-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+.nexbot-input,
+.nexbot-textarea,
+.nexbot-select {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  font-size: 13px !important;
+  padding: 10px 12px !important;
+}
+
+.nexbot-input-icon + .nexbot-input {
+  padding-left: 36px !important;
+}
+
+/* Archetype Grid Responsive Fitting */
+.nexbot-archetype-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.archetype-btn {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 10px 8px !important;
+}
+
+/* Universal Cyber Modal Card Containment */
+.cipher-modal-container,
+.radar-modal-container,
+.cyberdrop-modal-container,
+.audio-spaces-modal-container,
+.geo-modal-container,
+.escrow-market-modal-content,
+.broadcast-modal-container,
+.matrix-modal-content {
+  width: 100% !important;
+  max-width: min(96vw, 1100px) !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
