@@ -7243,10 +7243,12 @@ function showCallUI(isVideo = false, callStatus = 'active') {
   }
 
   const endBtn = document.getElementById('end-call-btn');
-  endBtn.addEventListener('click', () => {
-    endCall();
-    callOverlay.remove();
-  });
+  if (endBtn) {
+    endBtn.addEventListener('click', () => {
+      endCall();
+      callOverlay.remove();
+    });
+  }
 
   let cameraEnabled = true;
   let micEnabled = true;
@@ -8909,14 +8911,17 @@ async function loadLinkedDevices() {
         </button>
       `;
 
-      item.querySelector('.unlink-device-btn').addEventListener('click', async (e) => {
-        e.stopPropagation();
-        if (confirm(`Log out from ${dev.label || 'this device'}?`)) {
-          await unlinkDevice(myUID, dev.sessionId);
-          showNotif('Device unlinked and logged out.', 'info', 2000);
-          loadLinkedDevices();
-        }
-      });
+      const unlinkBtn = item.querySelector('.unlink-device-btn');
+      if (unlinkBtn) {
+        unlinkBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          if (confirm(`Log out from ${dev.label || 'this device'}?`)) {
+            await unlinkDevice(myUID, dev.sessionId);
+            showNotif('Device unlinked and logged out.', 'info', 2000);
+            loadLinkedDevices();
+          }
+        });
+      }
 
       listEl.appendChild(item);
     });
@@ -10266,10 +10271,9 @@ function handleWhatsAppBackAction() {
     if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App) {
       window.Capacitor.Plugins.App.exitApp();
     } else {
-      showNotif('Exiting NEXCHAT...', 'info', 1000);
-      setTimeout(() => {
-        try { window.close(); } catch (_) {}
-      }, 300);
+      // In web browser mode: maintain smooth SPA experience without abruptly closing or blanking window
+      showNotif('Already at main chats overview', 'info', 1500);
+      pushNavHistoryTrap();
     }
     return false;
   } else {
@@ -14845,9 +14849,9 @@ function setupCreateStatusModal() {
       const expiresAtMs = now + 86400000;
 
       const statusDoc = {
-        userId: myUID || auth?.currentUser?.uid || 'user',
-        username: myUsername || auth?.currentUser?.displayName || 'User',
-        profilePic: myProfilePic || auth?.currentUser?.photoURL || 'logo.jpg',
+        userId: auth?.currentUser?.uid || myUID || 'user',
+        username: auth?.currentUser?.displayName || myUsername || 'User',
+        profilePic: auth?.currentUser?.photoURL || myProfilePic || 'logo.jpg',
         content: contentText || '',
         imageUrl: uploadedUrl || null,
         mediaType: isMedia ? (fileType.startsWith('video/') ? 'video' : 'image') : 'text',
@@ -15302,13 +15306,7 @@ function initializeBasicUI() {
     });
   });
 
-  document.getElementById('logout-btn')?.addEventListener('click', () => {
-    if (confirm('Are you sure you want to logout?')) {
-      signOut(auth).then(() => {
-        window.location.href = 'index.html';
-      });
-    }
-  });
+  // logout-btn is cleanly handled by primary logoutUser listener to avoid duplicate triggers
 
   console.log("? All header button listeners attached");
 
@@ -15336,9 +15334,16 @@ function initializeBasicUI() {
     const audioRecBtn = document.getElementById('audio-record-btn');
     const audioSendBtn = document.getElementById('audio-send-btn');
     const inlinePolishBtn = document.getElementById('aiPolishInputBtn');
+    const form = document.getElementById('message-form') || (input ? input.closest('form') : null);
+
+    if (form) {
+      form.classList.toggle('has-text', hasText);
+      form.classList.toggle('has-draft', hasText);
+    }
 
     if (inlinePolishBtn) {
-      inlinePolishBtn.style.display = hasText ? 'inline-flex' : 'none';
+      inlinePolishBtn.classList.toggle('visible', hasText);
+      inlinePolishBtn.style.setProperty('display', hasText ? 'inline-flex' : 'none', 'important');
     }
 
     if (typeof selectedFile !== 'undefined' && selectedFile) {
@@ -20308,7 +20313,7 @@ if (typeof document !== 'undefined') {
    WHATSAPP POLISH SUITE: SWIPE-TO-REPLY, 22-HUB ACTIONS & AI POLISH WAND
    ========================================================================== */
 
-// Swipe to Reply Implementation
+// Swipe to Reply Implementation (Universal Touch + Pointer Drag with Dynamic Alignment)
 function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
   if (!wrapper || !bubble) return;
   if (bubble.dataset.swipeBound === 'true') return;
@@ -20322,61 +20327,78 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
     wrapper.appendChild(replyIndicator);
   }
 
+  // Align indicator dynamically based on message origin (sent vs received)
+  if (isOwn) {
+    replyIndicator.style.setProperty('left', 'auto', 'important');
+    replyIndicator.style.setProperty('right', '12px', 'important');
+  } else {
+    replyIndicator.style.setProperty('left', '12px', 'important');
+    replyIndicator.style.setProperty('right', 'auto', 'important');
+  }
+
   let startX = 0;
   let startY = 0;
   let isSwiping = false;
   let isLockedHorizontal = false;
   let hasTriggeredHaptic = false;
-  const THRESHOLD = 46;
+  const THRESHOLD = 38;
 
-  const onTouchStart = (e) => {
-    const touch = e.touches ? e.touches[0] : e;
-    startX = touch.clientX;
-    startY = touch.clientY;
+  const onDragStart = (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    startX = clientX;
+    startY = clientY;
     isSwiping = true;
     isLockedHorizontal = false;
     hasTriggeredHaptic = false;
   };
 
-  const onTouchMove = (e) => {
+  const onDragMove = (e) => {
     if (!isSwiping) return;
-    const touch = e.touches ? e.touches[0] : e;
-    const dx = touch.clientX - startX;
-    const dy = touch.clientY - startY;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const rawDx = clientX - startX;
+    const dy = clientY - startY;
 
     if (!isLockedHorizontal) {
-      if (Math.abs(dy) > Math.abs(dx)) {
+      if (Math.abs(dy) > Math.abs(rawDx) + 4) {
         isSwiping = false;
         return;
       }
-      if (dx > 7) {
+      if (Math.abs(rawDx) > 5) {
         isLockedHorizontal = true;
       }
     }
 
-    if (isLockedHorizontal && dx > 0) {
-      if (e.cancelable) e.preventDefault();
-      const translate = Math.min(65, Math.pow(dx, 0.85));
-      bubble.style.transform = `translateX(${translate}px)`;
-      bubble.style.transition = 'none';
+    if (isLockedHorizontal) {
+      // In WhatsApp: sent messages swipe left, received messages swipe right
+      const dx = isOwn ? (rawDx < 0 ? -rawDx : rawDx * 0.4) : rawDx;
+      if (dx > 0) {
+        if (e.cancelable) e.preventDefault();
+        const translate = Math.min(65, Math.pow(dx, 0.85));
+        const dir = (isOwn && rawDx < 0) ? -1 : 1;
+        bubble.style.transform = `translateX(${dir * translate}px)`;
+        bubble.style.transition = 'none';
 
-      const progress = Math.min(1, translate / THRESHOLD);
-      replyIndicator.style.opacity = String(progress);
-      replyIndicator.style.transform = `translateY(-50%) scale(${0.5 + progress * 0.5})`;
+        const progress = Math.min(1, translate / THRESHOLD);
+        replyIndicator.style.opacity = String(progress);
+        replyIndicator.style.transform = `translateY(-50%) scale(${0.5 + progress * 0.5})`;
 
-      if (translate >= THRESHOLD && !hasTriggeredHaptic) {
-        hasTriggeredHaptic = true;
-        replyIndicator.classList.add('active');
-        if (navigator.vibrate) navigator.vibrate(20);
-        if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
-      } else if (translate < THRESHOLD && hasTriggeredHaptic) {
-        hasTriggeredHaptic = false;
-        replyIndicator.classList.remove('active');
+        if (translate >= THRESHOLD && !hasTriggeredHaptic) {
+          hasTriggeredHaptic = true;
+          replyIndicator.classList.add('active');
+          if (navigator.vibrate) navigator.vibrate(20);
+          if (typeof playCyberSfx === 'function') playCyberSfx('sonar');
+        } else if (translate < THRESHOLD && hasTriggeredHaptic) {
+          hasTriggeredHaptic = false;
+          replyIndicator.classList.remove('active');
+        }
       }
     }
   };
 
-  const onTouchEnd = () => {
+  const onDragEnd = () => {
     if (!isSwiping && !isLockedHorizontal) return;
     isSwiping = false;
     isLockedHorizontal = false;
@@ -20385,12 +20407,25 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
     bubble.style.transform = 'translateX(0px)';
 
     if (hasTriggeredHaptic) {
+      const senderTitle = isOwn ? 'You' : (currentChatName || 'Friend');
+      const snippet = msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : 'Message');
+
       if (window.messagingFeatures && typeof window.messagingFeatures.setReplyingToMessage === 'function') {
         window.messagingFeatures.setReplyingToMessage({
-          text: msg.text || (msg.attachment ? (msg.attachment.fileName || 'Attachment') : ''),
-          senderName: isOwn ? 'You' : (currentChatName || 'Friend')
+          text: snippet,
+          senderName: senderTitle
         });
+      } else {
+        const preview = document.getElementById('replyPreview');
+        const nameEl = document.getElementById('replyFromName');
+        const msgEl = document.getElementById('replyMessage');
+        if (preview && nameEl && msgEl) {
+          nameEl.textContent = senderTitle;
+          msgEl.textContent = snippet.length > 80 ? snippet.substring(0, 80) + '...' : snippet;
+          preview.style.display = 'flex';
+        }
       }
+
       const messageInput = document.getElementById('message-input');
       if (messageInput) {
         messageInput.focus();
@@ -20404,10 +20439,15 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
     }, 200);
   };
 
-  bubble.addEventListener('touchstart', onTouchStart, { passive: true });
-  bubble.addEventListener('touchmove', onTouchMove, { passive: false });
-  bubble.addEventListener('touchend', onTouchEnd, { passive: true });
-  bubble.addEventListener('touchcancel', onTouchEnd, { passive: true });
+  bubble.addEventListener('touchstart', onDragStart, { passive: true });
+  bubble.addEventListener('touchmove', onDragMove, { passive: false });
+  bubble.addEventListener('touchend', onDragEnd, { passive: true });
+  bubble.addEventListener('touchcancel', onDragEnd, { passive: true });
+
+  bubble.addEventListener('pointerdown', onDragStart, { passive: true });
+  bubble.addEventListener('pointermove', onDragMove, { passive: false });
+  bubble.addEventListener('pointerup', onDragEnd, { passive: true });
+  bubble.addEventListener('pointercancel', onDragEnd, { passive: true });
 }
 
 // AI Polish Wand Functionality
