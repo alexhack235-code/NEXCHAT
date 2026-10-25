@@ -13994,59 +13994,8 @@ async function loadStatusFeed() {
       console.warn('[NEX-STATUS] Live Firestore query notice:', fsErr);
     }
 
-    // Realistic statuses fallback matching user context
-    if (statusesData.length === 0) {
-      statusesData = [
-        {
-          id: 'status-alex-1',
-          userId: 'alexander-id',
-          userName: 'ALEXANDER',
-          avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&h=200&q=80',
-          mediaUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1080&q=85',
-          mediaType: 'image',
-          caption: 'Multi-vault Cloudinary cloud storage is active for high-speed media delivery.',
-          timestamp: now - 35 * 60 * 1000,
-          expiresAtMs: now + 21 * 3600 * 1000,
-          isViewed: false
-        },
-        {
-          id: 'status-sun-1',
-          userId: 'sunnmisola-id',
-          userName: 'Sunnmisola',
-          avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&h=200&q=80',
-          mediaUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1080&q=85',
-          mediaType: 'image',
-          caption: 'Building next-generation messaging interface with zero bugs.',
-          timestamp: now - 55 * 60 * 1000,
-          expiresAtMs: now + 22 * 3600 * 1000,
-          isViewed: false
-        },
-        {
-          id: 'status-demon-1',
-          userId: 'demon-alex-id',
-          userName: 'DemonAlex',
-          avatarUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&h=200&q=80',
-          mediaUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1080&q=85',
-          mediaType: 'image',
-          caption: 'Zero emoji policy enforced across NEX core engines.',
-          timestamp: now - 120 * 60 * 1000,
-          expiresAtMs: now + 19 * 3600 * 1000,
-          isViewed: false
-        },
-        {
-          id: 'status-elena-1',
-          userId: 'elena-id',
-          userName: 'Elena_Vance',
-          avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80',
-          mediaUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1080&q=85',
-          mediaType: 'image',
-          caption: 'Quantum neural encryption mesh v2.6 operational across all nodes.',
-          timestamp: now - 240 * 60 * 1000,
-          expiresAtMs: now + 15 * 3600 * 1000,
-          isViewed: false
-        }
-      ];
-    }
+    // Strictly real user statuses only - no demo fallbacks
+    // If statusesData is empty, an authentic empty state is rendered.
 
     // Group statuses by user
     const userGroupsMap = new Map();
@@ -14134,7 +14083,7 @@ async function loadStatusFeed() {
       });
 
       if (!hasRecent && recentList) {
-        recentList.innerHTML = '<p style="color: #8696A0; font-size: 12px; font-family: \'JetBrains Mono\', monospace; padding: 12px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); border-radius: 8px;">[NO_ACTIVE_NODES_IN_MESH] &bull; DEPLOY_NEW_STATUS_ABOVE</p>';
+        recentList.innerHTML = '<div style="padding: 32px 16px; text-align: center; color: var(--text-muted);"><i class="fa-regular fa-clock" style="font-size: 24px; color: #64748b; margin-bottom: 8px; display: block;"></i><p style="font-size: 13px; font-weight: 600; color: #cbd5e1; margin: 0;">No status updates yet</p><p style="font-size: 11.5px; color: #64748b; margin-top: 4px;">Tap your node above or the camera button to share a 24-hour update.</p></div>';
       }
 
       if (viewedSection) {

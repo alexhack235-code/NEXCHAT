@@ -101,6 +101,10 @@
 
     <!-- Center Live Telemetry Chips -->
     <div class="hidden xl:flex items-center gap-2.5 text-[11px]">
+      <span id="termCloudBadge" class="px-2.5 py-1 rounded bg-black/50 border border-white/20 text-white/60 flex items-center gap-1.5" title="Linode Cloud Bridge Connection Status">
+        <span id="termCloudDot" class="w-2 h-2 rounded-full bg-white/40"></span>
+        <span id="termCloudText">CLOUD: STANDBY</span>
+      </span>
       <span class="px-2.5 py-1 rounded bg-black/50 border border-[#00FF88]/30 text-[#00FF88] flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-[#00FF88] animate-ping"></span>
         PORT 8080 ACTIVE
@@ -173,7 +177,7 @@
 
       <!-- Active Command Input Line -->
       <form id="termForm" onsubmit="handleTermSubmit(event)" class="flex items-center gap-2 pt-3">
-        <span class="text-[#00FF88] font-extrabold flex-shrink-0 drop-shadow-[0_0_8px_rgba(0,255,136,0.6)]">
+        <span id="termPromptPrefix" class="text-[#00FF88] font-extrabold flex-shrink-0 drop-shadow-[0_0_8px_rgba(0,255,136,0.6)]">
           root@nexchat-mainframe:~$
         </span>
         <input
@@ -194,6 +198,7 @@
         <i class="fa-solid fa-bolt text-[#00FF88]"></i> Quick:
       </span>
       <button type="button" onclick="runCommand('help')" class="px-2.5 py-1 bg-[#00FF88]/10 hover:bg-[#00FF88]/20 border border-[#00FF88]/30 rounded text-[#00FF88] font-semibold transition-all">help</button>
+      <button type="button" onclick="runCommand('cloud status')" class="px-2.5 py-1 bg-[#00FF88]/15 hover:bg-[#00FF88]/30 border border-[#00FF88]/40 rounded text-[#00FF88] font-bold transition-all"><i class="fa-solid fa-server mr-1"></i>cloud</button>
       <button type="button" onclick="runCommand('iplist')" class="px-2.5 py-1 bg-[#00F2FF]/10 hover:bg-[#00F2FF]/20 border border-[#00F2FF]/30 rounded text-[#00F2FF] font-semibold transition-all">iplist</button>
       <button type="button" onclick="runCommand('ipdetect')" class="px-2.5 py-1 bg-[#00F2FF]/10 hover:bg-[#00F2FF]/20 border border-[#00F2FF]/30 rounded text-[#00F2FF] font-semibold transition-all">ipdetect</button>
       <button type="button" onclick="runCommand('ipsync')" class="px-2.5 py-1 bg-[#00F2FF]/10 hover:bg-[#00F2FF]/20 border border-[#00F2FF]/30 rounded text-[#00F2FF] font-semibold transition-all">ipsync</button>
@@ -314,6 +319,104 @@
         document.getElementById('termInputField')?.focus();
       };
 
+
+      // ─── CLOUD TERMINAL BRIDGE (LINODE VPS / REAL SHELL) ───
+      let cloudSocket = null;
+      let isCloudConnected = false;
+      let cloudTargetUrl = localStorage.getItem('nex_cloud_terminal_url') || 'ws://localhost:7070?token=NEX_ATOMIC_SUPERADMIN_SECRET_2026';
+
+      function updateCloudBadge(status, text) {
+        const badge = document.getElementById('termCloudBadge');
+        const dot = document.getElementById('termCloudDot');
+        const txt = document.getElementById('termCloudText');
+        const prefix = document.getElementById('termPromptPrefix');
+        if (!badge || !dot || !txt) return;
+
+        if (status === 'connected') {
+          badge.className = 'px-2.5 py-1 rounded bg-[#00FF88]/15 border border-[#00FF88]/50 text-[#00FF88] flex items-center gap-1.5';
+          dot.className = 'w-2 h-2 rounded-full bg-[#00FF88] animate-ping';
+          txt.textContent = text || 'LINODE CLOUD PTY ACTIVE';
+          if (prefix) prefix.textContent = 'linode@cloud-pty:~$ ';
+        } else if (status === 'connecting') {
+          badge.className = 'px-2.5 py-1 rounded bg-[#FFD700]/15 border border-[#FFD700]/50 text-[#FFD700] flex items-center gap-1.5';
+          dot.className = 'w-2 h-2 rounded-full bg-[#FFD700] animate-pulse';
+          txt.textContent = 'CONNECTING TO CLOUD...';
+        } else {
+          badge.className = 'px-2.5 py-1 rounded bg-black/50 border border-white/20 text-white/60 flex items-center gap-1.5';
+          dot.className = 'w-2 h-2 rounded-full bg-white/40';
+          txt.textContent = 'CLOUD: STANDBY';
+          if (prefix) prefix.textContent = 'root@nexchat-mainframe:~$ ';
+        }
+      }
+
+      function connectCloudTerminal(url) {
+        if (cloudSocket) {
+          try { cloudSocket.close(); } catch (_) {}
+          cloudSocket = null;
+        }
+
+        const wsUrl = url || cloudTargetUrl;
+        cloudTargetUrl = wsUrl;
+        localStorage.setItem('nex_cloud_terminal_url', wsUrl);
+
+        updateCloudBadge('connecting');
+        logTerminal(`[CLOUD BRIDGE] Initiating secure WebSocket bridge to: ${wsUrl}...`, 'info');
+
+        try {
+          cloudSocket = new WebSocket(wsUrl);
+        } catch (err) {
+          updateCloudBadge('disconnected');
+          logTerminal(`[CLOUD ERROR] Failed to instantiate WebSocket: ${err.message}`, 'error');
+          return;
+        }
+
+        cloudSocket.onopen = function() {
+          isCloudConnected = true;
+          updateCloudBadge('connected', 'LINODE PTY CONNECTED');
+          logTerminal('[CLOUD BRIDGE] Connected to remote host!', 'success');
+          logTerminal('[CLOUD BRIDGE] Remote /bin/bash interactive session ready. All commands execute live on VPS.', 'success');
+          logTerminal('[CLOUD BRIDGE] Type "cloud disconnect" or "exit" to close remote bridge session.', 'warn');
+        };
+
+        cloudSocket.onmessage = function(event) {
+          const raw = typeof event.data === 'string' ? event.data : '';
+          formatAndPrintRemoteStream(raw);
+        };
+
+        cloudSocket.onerror = function(event) {
+          logTerminal('[CLOUD ERROR] WebSocket connection error. Verify Linode host IP, port 7070, and security token.', 'error');
+        };
+
+        cloudSocket.onclose = function(event) {
+          isCloudConnected = false;
+          cloudSocket = null;
+          updateCloudBadge('disconnected');
+          logTerminal(`[CLOUD BRIDGE] Disconnected from remote host (Code: ${event.code}). Returned to local root shell.`, 'warn');
+        };
+      }
+
+      function disconnectCloudTerminal() {
+        if (cloudSocket) {
+          cloudSocket.close(1000, 'User disconnect');
+          cloudSocket = null;
+        }
+        isCloudConnected = false;
+        updateCloudBadge('disconnected');
+        logTerminal('[CLOUD BRIDGE] Remote session closed. Local SuperAdmin shell active.', 'info');
+      }
+
+      function formatAndPrintRemoteStream(raw) {
+        if (!raw) return;
+        // Strip ANSI escape sequences: \x1b\[[0-9;]*[a-zA-Z]
+        const clean = raw.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '').replace(/\x1b\([0-9;]*[a-zA-Z]/g, '');
+        const lines = clean.split(/\r?\n/);
+        for (const line of lines) {
+          if (line.trim().length > 0) {
+            logTerminal(line, 'info');
+          }
+        }
+      }
+
       // ─── COMMAND PARSER & DISPATCHER ───
       window.handleTermSubmit = function(e) {
         if (e) e.preventDefault();
@@ -325,7 +428,37 @@
 
         commandHistory.push(raw);
         historyIdx = commandHistory.length;
-        logTerminal(`root@nexchat-mainframe:~$ ${raw}`, 'warn');
+
+        const currentPrompt = isCloudConnected ? 'linode@cloud-pty:~$' : 'root@nexchat-mainframe:~$';
+        logTerminal(`${currentPrompt} ${raw}`, 'warn');
+
+        const parts = raw.split(/\s+/);
+        const main = parts[0].toLowerCase();
+
+        // Let local 'cloud' commands intercept even during remote sessions
+        if (main === 'cloud') {
+          runCommand(raw);
+          return;
+        }
+
+        if (isCloudConnected) {
+          if (main === 'exit' || main === 'logout' || main === 'disconnect') {
+            disconnectCloudTerminal();
+            return;
+          }
+          if (main === 'clear') {
+            clearTerminal();
+            return;
+          }
+          try {
+            cloudSocket.send(raw + '\n');
+          } catch (err) {
+            logTerminal(`[CLOUD SEND ERROR] ${err.message}`, 'error');
+            disconnectCloudTerminal();
+          }
+          return;
+        }
+
         runCommand(raw);
       };
 
@@ -349,7 +482,7 @@
         } else if (e.key === 'Tab') {
           e.preventDefault();
           const val = e.target.value.toLowerCase().trim();
-          const allCmds = ['help', 'iplist', 'ipadd', 'ipdel', 'ipdetect', 'ipsync', 'scan', 'pentest', 'crypto', 'sentinel', 'firewall', 'rules', 'email', 'sysinfo', 'netstat', 'ping', 'theme', 'matrix', 'clear', 'chat', 'reels'];
+          const allCmds = ['help', 'cloud', 'iplist', 'ipadd', 'ipdel', 'ipdetect', 'ipsync', 'scan', 'pentest', 'crypto', 'sentinel', 'firewall', 'rules', 'email', 'sysinfo', 'netstat', 'ping', 'theme', 'matrix', 'clear', 'chat', 'reels'];
           const match = allCmds.find(c => c.startsWith(val));
           if (match) e.target.value = match;
         }
@@ -365,6 +498,12 @@
 =============================================================================
                   NEXCHAT ZERO-TRUST MASTER COMMAND MATRIX
 =============================================================================
+[ LIVE LINODE CLOUD TERMINAL BRIDGE ]
+  cloud status               Display live remote bridge connection telemetry
+  cloud connect [ws_url]     Open live WebSocket /bin/bash shell to Linode VPS
+  cloud disconnect           Disconnect from Linode and return to local root
+  cloud linode               View Linode VPS deployment blueprint
+
 [ FIRESTORE 4-IP ACCESS CONTROL ]
   iplist                     List verified SuperAdmin IP quota slots (max 4)
   ipadd <ip> [label]         Register & bind an IP slot (strictly <= 4 enforced)
@@ -394,6 +533,64 @@
   reels                      Launch CamShot Short-Form Video Stream
 =============================================================================
           `, 'info');
+        }
+        else if (main === 'cloud') {
+          const action = (parts[1] || 'status').toLowerCase();
+          if (action === 'status') {
+            logTerminal(`
+=============================================================================
+                  NEXCHAT CLOUD TERMINAL BRIDGE STATUS
+=============================================================================
+  State:         ${isCloudConnected ? 'ONLINE (ACTIVE LINODE PTY SESSION)' : 'OFFLINE (STANDBY)'}
+  Target Node:   ${cloudTargetUrl}
+  Protocol:      Native WebSocket PTY (/bin/bash)
+  Linode Daemon: node server/cloud-terminal-bridge.js (Port 7070)
+  Auth Secret:   Configured via TERMINAL_SECRET environment variable
+=============================================================================
+Commands:
+  cloud connect [ws://HOST:7070?token=SECRET]
+  cloud disconnect
+  cloud linode (View 2-minute Linode deployment guide)
+=============================================================================
+            `, isCloudConnected ? 'success' : 'info');
+          }
+          else if (action === 'connect') {
+            const urlArg = parts.slice(2).join(' ').trim();
+            connectCloudTerminal(urlArg);
+          }
+          else if (action === 'disconnect') {
+            disconnectCloudTerminal();
+          }
+          else if (action === 'linode' || action === 'setup' || action === 'help') {
+            logTerminal(`
+=============================================================================
+          HOW TO RUN REAL LINODE CLOUD TERMINAL IN 3 STEPS
+=============================================================================
+1. CREATE A LINODE VPS (Ubuntu 24.04 LTS or Debian, Nanode $5/mo):
+   SSH into your Linode server:
+     ssh root@YOUR_LINODE_IP
+
+2. INSTALL NODE.JS & CLOUD BRIDGE:
+   Run these commands on your Linode:
+     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+     sudo apt-get install -y nodejs build-essential python3
+     npm install -g pm2
+     mkdir -p /opt/nexchat-terminal && cd /opt/nexchat-terminal
+     # Upload server/cloud-terminal-bridge.js or clone repository
+     npm install ws node-pty
+     PORT=7070 TERMINAL_SECRET=NEX_ATOMIC_SUPERADMIN_SECRET_2026 pm2 start server/cloud-terminal-bridge.js --name "nex-cloud-terminal"
+
+3. CONNECT FROM NEXCHAT TERMINAL:
+   In this terminal window, type:
+     cloud connect ws://YOUR_LINODE_IP:7070?token=NEX_ATOMIC_SUPERADMIN_SECRET_2026
+
+   Once connected, all typed commands (ls, top, docker, git, python, etc.)
+   execute directly on your live Linode cloud server!
+=============================================================================
+            `, 'success');
+          } else {
+            logTerminal('Usage: cloud [connect <url> | disconnect | status | linode]', 'warn');
+          }
         }
         else if (main === 'iplist' || (main === 'ip' && (!parts[1] || parts[1]?.toLowerCase() === 'list'))) {
           const ips = getTerminalIps();
@@ -434,7 +631,7 @@
 
           // STRICT FIRESTORE QUOTA RULE: MAX 4 IPS
           if (currentIps.length >= MAX_TERMINAL_IPS) {
-            logTerminal(`[FIRESTORE REJECTION] ❌ Database quota exceeded (request.resource.data.ipAddresses.size() <= 4).`, 'error');
+            logTerminal(`[FIRESTORE REJECTION] [REJECTED] Database quota exceeded (request.resource.data.ipAddresses.size() <= 4).`, 'error');
             logTerminal(`  All 4/4 slots are currently occupied. Cannot register "${ip}".`, 'error');
             logTerminal(`  To free a slot, run: ipdel <slot_number>`, 'info');
             return;
@@ -456,7 +653,7 @@
           });
 
           saveTerminalIps(currentIps);
-          logTerminal(`[FIRESTORE IP SYNC] ✅ Successfully bound IP "${ip}" to Slot #${currentIps.length}/4!`, 'success');
+          logTerminal(`[FIRESTORE IP SYNC] [VERIFIED] Successfully bound IP "${ip}" to Slot #${currentIps.length}/4!`, 'success');
           logTerminal(`  Label: ${label} | Verified: ${now}`, 'success');
           logTerminal(`  Firestore Security Rule validation: PASSED (size <= 4).`, 'info');
         }
@@ -481,7 +678,7 @@
           if (targetIndex >= 0 && targetIndex < currentIps.length) {
             const removed = currentIps.splice(targetIndex, 1)[0];
             saveTerminalIps(currentIps);
-            logTerminal(`[FIRESTORE IP REVOCATION] ⚠️ Successfully revoked IP "${removed.ip}" (${removed.label}).`, 'success');
+            logTerminal(`[FIRESTORE IP REVOCATION] [WARNING] Successfully revoked IP "${removed.ip}" (${removed.label}).`, 'success');
             logTerminal(`  Slot #${targetIndex + 1} is now available (Active Slots: ${currentIps.length}/4).`, 'info');
           } else {
             logTerminal(`[ERROR] No active verified IP found matching "${targetArg}". Run "iplist" to view slots.`, 'error');
@@ -506,7 +703,7 @@
           logTerminal('[FIRESTORE IP SYNC] Pulling verified SuperAdmin whitelist registry from Cloud Firestore...', 'info');
           const ips = getTerminalIps();
           setTimeout(() => {
-            logTerminal(`[FIRESTORE IP SYNC] ✅ Registry synchronized. 0 discrepancies.`, 'success');
+            logTerminal(`[FIRESTORE IP SYNC] [VERIFIED] Registry synchronized. 0 discrepancies.`, 'success');
             logTerminal(`  Current slots: ${ips.length} / ${MAX_TERMINAL_IPS} active. Firestore rule bound: MAX 4.`, 'info');
           }, 350);
         }
@@ -549,7 +746,7 @@
 
           setTimeout(() => {
             logTerminal('=============================================================', 'success');
-            logTerminal('🛡️ PENTEST SUMMARY: 5/5 ATTACK VECTORS NEUTRALIZED. SCORE: 100/100.', 'success');
+            logTerminal('[DEFENSE] PENTEST SUMMARY: 5/5 ATTACK VECTORS NEUTRALIZED. SCORE: 100/100.', 'success');
             logTerminal('=============================================================', 'success');
           }, 3000);
         }
