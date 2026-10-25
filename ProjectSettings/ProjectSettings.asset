@@ -569,7 +569,7 @@ PlayerSettings:
   webGLShowDiagnostics: 0
   webGLDataCaching: 1
   webGLDebugSymbols: 0
-  webGLEmscriptenArgs: 
+  webGLEmscriptenArgs: --bind
   webGLModulesDirectory: 
   webGLTemplate: PROJECT:AstroShiftResponsive
   webGLAnalyzeBuildSize: 0

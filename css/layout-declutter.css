@@ -7,55 +7,127 @@
 /* --------------------------------------------------------------------------
    1. Desktop Main Header Decluttering & Breathing Room
    -------------------------------------------------------------------------- */
-.header-right-scroll {
-  overflow-x: visible !important;
-  scrollbar-width: none !important;
-  max-width: 100% !important;
+@media (min-width: 900px) {
+  .header-right-scroll {
+    overflow-x: visible !important;
+    scrollbar-width: none !important;
+    max-width: 100% !important;
+  }
+
+  .header-right-scroll::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .desktop-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  /* Secondary cyber tools are grouped inside the Cyber Suite Hub */
+  .desktop-header-actions .cyber-sub-tool {
+    display: none !important;
+  }
+
+  /* Cyber Hub Trigger Button */
+  .cyber-suite-hub-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 7px !important;
+    padding: 0 12px !important;
+    height: 38px !important;
+    border-radius: 10px !important;
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.12), rgba(0, 242, 255, 0.12)) !important;
+    border: 1px solid rgba(0, 255, 102, 0.35) !important;
+    color: #00ff66 !important;
+    font-family: 'Orbitron', monospace !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1px !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    white-space: nowrap !important;
+    box-shadow: 0 0 12px rgba(0, 255, 102, 0.15) !important;
+  }
+
+  .cyber-suite-hub-btn:hover {
+    background: linear-gradient(135deg, rgba(0, 255, 102, 0.25), rgba(0, 242, 255, 0.25)) !important;
+    border-color: #00f2ff !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 0 18px rgba(0, 242, 255, 0.35) !important;
+  }
 }
 
-.header-right-scroll::-webkit-scrollbar {
-  display: none !important;
-}
+/* Hard Mobile Header Strict Protection (<= 899px) */
+@media (max-width: 899px) {
+  .desktop-header-actions,
+  .desktop-only-header,
+  .desktop-only-nav,
+  .cyber-suite-hub-btn,
+  .header-center.desktop-only-header {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
 
-.desktop-header-actions {
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-  flex-wrap: nowrap !important;
-}
+  .header-right-scroll {
+    overflow: visible !important;
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+  }
 
-/* Secondary cyber tools are grouped inside the Cyber Suite Hub */
-.desktop-header-actions .cyber-sub-tool {
-  display: none !important;
-}
+  .mobile-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-left: auto !important;
+  }
 
-/* Cyber Hub Trigger Button */
-.cyber-suite-hub-btn {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 7px !important;
-  padding: 0 12px !important;
-  height: 38px !important;
-  border-radius: 10px !important;
-  background: linear-gradient(135deg, rgba(0, 255, 102, 0.12), rgba(0, 242, 255, 0.12)) !important;
-  border: 1px solid rgba(0, 255, 102, 0.35) !important;
-  color: #00ff66 !important;
-  font-family: 'Orbitron', monospace !important;
-  font-size: 11.5px !important;
-  font-weight: 700 !important;
-  letter-spacing: 1px !important;
-  cursor: pointer !important;
-  transition: all 0.25s ease !important;
-  white-space: nowrap !important;
-  box-shadow: 0 0 12px rgba(0, 255, 102, 0.15) !important;
-}
+  .top-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 0 12px !important;
+    overflow: hidden !important;
+  }
 
-.cyber-suite-hub-btn:hover {
-  background: linear-gradient(135deg, rgba(0, 255, 102, 0.25), rgba(0, 242, 255, 0.25)) !important;
-  border-color: #00f2ff !important;
-  color: #fff !important;
-  transform: translateY(-1px) !important;
-  box-shadow: 0 0 18px rgba(0, 242, 255, 0.35) !important;
+  .header-left {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+
+  .active-chat-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+  }
+
+  .active-chat-info {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+  }
+
+  .active-chat-name {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+  }
 }
 
 .cyber-hub-badge-pill {
@@ -177,6 +249,78 @@
   .message-form {
     gap: 8px !important;
   }
+}
+
+/* AI Polish Inline Wand Button (Active when text is typed) */
+.ai-polish-inline-btn {
+  background: none !important;
+  border: none !important;
+  color: #00ff66 !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  font-size: 15px !important;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  margin-right: 4px !important;
+}
+
+.ai-polish-inline-btn:hover {
+  transform: scale(1.15) !important;
+  color: #00f2ff !important;
+  box-shadow: 0 0 10px rgba(0, 242, 255, 0.4) !important;
+}
+
+.ai-polish-inline-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.ai-polish-inline-btn.polishing i {
+  animation: fa-spin 1s linear infinite !important;
+  color: #ffd700 !important;
+}
+
+/* WhatsApp-Style Swipe to Reply Visual Feedback */
+.message-wrapper {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.swipe-reply-indicator {
+  position: absolute !important;
+  left: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) scale(0.6) !important;
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 50% !important;
+  background: rgba(0, 255, 102, 0.15) !important;
+  border: 1px solid rgba(0, 255, 102, 0.4) !important;
+  color: #00ff66 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.15s ease, transform 0.15s ease, background 0.15s ease !important;
+  z-index: 5 !important;
+}
+
+.swipe-reply-indicator.active {
+  background: rgba(0, 255, 102, 0.3) !important;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.5) !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+.message-bubble {
+  touch-action: pan-y !important;
+  user-select: text !important;
 }
 
 /* --------------------------------------------------------------------------

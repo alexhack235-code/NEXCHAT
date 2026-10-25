@@ -250,11 +250,11 @@
       <!-- Status Horizontal List (Hacker Cyber Nodes Stream) -->
       <div class="status-horizontal-list scrollbar-hide" id="statusHorizontalList">
         <!-- 1. My Status Node -->
-        <div class="status-circle-item my-status-item terminal-node-card" id="myStatusCircleItem">
+        <div class="status-circle-item my-status-item terminal-node-card" id="myStatusCircleItem" onclick="if(window.openCreateStatusModal) window.openCreateStatusModal('media');">
           <div class="status-avatar-wrapper terminal-avatar-wrapper" id="myStatusAvatarWrapper">
             <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
             <span class="terminal-node-beacon"></span>
-            <button type="button" id="myStatusAddBadge" class="status-plus-badge terminal-plus-badge" title="Deploy Status Node">+</button>
+            <button type="button" id="myStatusAddBadge" class="status-plus-badge terminal-plus-badge" title="Deploy Status Node" onclick="event.stopPropagation(); if(window.openCreateStatusModal) window.openCreateStatusModal('media');">+</button>
           </div>
           <span class="status-item-copy">
             <span class="status-item-label terminal-node-name">[MY_NODE]</span>
@@ -291,7 +291,7 @@
 
       <!-- Floating Action Button: Clean, Single Camera FAB -->
       <div class="status-fab-container terminal-fab-container">
-        <button type="button" id="statusFabCamera" class="status-fab-main terminal-fab-main-btn" title="Add Status Update">
+        <button type="button" id="statusFabCamera" class="status-fab-main terminal-fab-main-btn" title="Add Status Update" onclick="if(window.openCreateStatusModal) window.openCreateStatusModal('media');">
           <i class="fa-solid fa-camera"></i>
           <span class="fab-pulse-ring"></span>
         </button>
@@ -660,7 +660,7 @@
                 <i class="fa-solid fa-thumbs-up"></i> <span>Appreciate update.</span>
               </button>
             </div>
-            <button type="button" id="aiPolishBtn" class="smart-polish-action-btn" title="AI Polish: Elevate rough draft with ChronEX AI">
+            <button type="button" id="aiPolishBtn" class="smart-polish-action-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;">
               <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Polish</span>
             </button>
           </div>
@@ -802,6 +802,7 @@
             <button type="button" id="sticker-btn" class="input-btn sticker-toggle-btn" title="WhatsApp-style Stickers &amp; Sticker Store" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
             <div class="message-input-wrapper">
               <textarea id="message-input" class="message-input" placeholder="Write a message..." autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
+              <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
               <button type="button" id="attach-btn" class="input-inline-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
             </div>
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />

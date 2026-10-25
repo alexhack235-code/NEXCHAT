@@ -81,6 +81,12 @@ namespace AstroShift.Editor
             // 7. GPU Power Preference: High Performance
             PlayerSettings.WebGL.powerPreference = WebGLPowerPreference.HighPerformance;
 
+            // 8. Emscripten Linker Flags: Enforce --bind for embind runtime symbols
+            string currentEmscriptenArgs = PlayerSettings.WebGL.emscriptenArgs ?? "";
+            if (!currentEmscriptenArgs.Contains("--bind"))
+            {
+                PlayerSettings.WebGL.emscriptenArgs = string.IsNullOrEmpty(currentEmscriptenArgs) ? "--bind" : currentEmscriptenArgs + " --bind";
+            }
 
             // Save Project Settings Asset changes
             AssetDatabase.SaveAssets();
