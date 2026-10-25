@@ -6,60 +6,41 @@
  * context menu (long-press/right-click), and swipe-to-reply gesture.
  */
 
-/**
- * @typedef {Object} MessageAttachment
- * @property {string} downloadURL
- * @property {string} fileName
- * @property {string} fileType
- * @property {number} fileSize
- */
+// Distinct vibrant WhatsApp-grade group sender colors
+export const SENDER_COLORS = [
+  '#00f0ff', // Electric Cyan
+  '#ff8a00', // Vibrant Orange
+  '#2ecc71', // Bright Lime
+  '#c084fc', // Neon Purple
+  '#ffd166', // Golden Yellow
+  '#f43f5e', // Vibrant Rose
+  '#38bdf8', // Sky Blue
+  '#a3e635', // Lime Light
+  '#fb7185', // Soft Coral
+  '#e879f9', // Orchid
+  '#34d399', // Emerald
+  '#f59e0b'  // Amber
+];
 
 /**
- * @typedef {Object} MessageReplyTo
- * @property {string} messageId
- * @property {string} text
- * @property {string} senderId
- * @property {string} senderName
+ * Deterministically maps a user ID or display name to a vibrant sender color
+ * @param {string} idOrName 
+ * @returns {string} Hex color string
  */
+export function getSenderColor(idOrName) {
+  if (!idOrName) return SENDER_COLORS[0];
+  let hash = 0;
+  const str = String(idOrName);
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % SENDER_COLORS.length;
+  return SENDER_COLORS[index];
+}
 
 /**
- * @typedef {Object} Message
- * @property {string} id
- * @property {string} from
- * @property {string} text
- * @property {Object|Date} timestamp
- * @property {boolean} [edited]
- * @property {MessageAttachment} [attachment]
- * @property {MessageReplyTo} [replyTo]
- * @property {Object.<string, string[]>} [reactions]
- * @property {string[]} [readBy]
- * @property {boolean} [isPoll]
- * @property {string} [pollId]
- * @property {Object|Date} [expiresAt]
- * @property {string[]} [mentionedUserIds]
- */
-
-/**
- * @typedef {Object} RenderOptions
- * @property {boolean} isOwn
- * @property {string} senderName
- * @property {string} senderAvatar
- * @property {string} [senderRole]
- * @property {string} currentUid
- * @property {number} totalMembers
- * @property {Function} [onReply]
- * @property {Function} [onReact]
- * @property {Function} [onPin]
- * @property {Function} [onDelete]
- * @property {Function} [onCopy]
- * @property {Function} [onForward]
- * @property {Function} [onQuoteClick]
- * @property {Function} [onTickClick]
- * @property {Function} [onReactionClick]
- */
-
-/**
- * Formats a timestamp into a readable string (e.g., "12:34 PM" or "Yesterday 12:34 PM")
+ * Formats a timestamp into a readable string (e.g., '12:34 PM' or 'Yesterday 12:34 PM')
  * @param {Object|Date|number} timestamp 
  * @returns {string}
  */
@@ -87,9 +68,9 @@ export function formatTimestamp(timestamp) {
   const timeStr = date.toLocaleTimeString([], timeOptions);
 
   if (isToday) return timeStr;
-  if (isYesterday) return `Yesterday ${timeStr}`;
+  if (isYesterday) return 'Yesterday ' + timeStr;
   
-  return `${date.toLocaleDateString()} ${timeStr}`;
+  return date.toLocaleDateString() + ' ' + timeStr;
 }
 
 /**
@@ -108,11 +89,7 @@ export function highlightMentions(text, mentionedUserIds, currentUid) {
     return container;
   }
 
-  // Basic mention parser (assuming @username format)
-  // In a real app, we might need a map of uid -> username to properly highlight.
-  // For now, we'll just wrap @words.
   const words = text.split(/(\s+)/);
-  
   words.forEach(word => {
     if (word.startsWith('@') && word.length > 1) {
       const span = document.createElement('span');
@@ -128,60 +105,115 @@ export function highlightMentions(text, mentionedUserIds, currentUid) {
 }
 
 /**
- * Renders a complete message bubble
- * @param {Message} message 
+ * Renders a complete message bubble matching WhatsApp Group specifications
+ * @param {Object} message 
  * @param {HTMLElement} container 
- * @param {RenderOptions} options 
+ * @param {Object} options 
  */
-export function renderMessageBubble(message, container, options) {
+export function renderMessageBubble(message, container, options = {}) {
   try {
     const wrapper = document.createElement('div');
-    wrapper.className = `nex-msg-wrapper ${options.isOwn ? 'sent' : 'received'}`;
+    wrapper.className = 'nex-msg-wrapper ' + (options.isOwn ? 'sent' : 'received');
     wrapper.dataset.messageId = message.id;
 
-    // Context menu handlers
+    // Context menu handler
     const handleContextMenu = (e) => {
       e.preventDefault();
-      // Implementation would show a custom context menu
       if (options.onCopy) console.log('Show context menu for message', message.id);
     };
     wrapper.addEventListener('contextmenu', handleContextMenu);
-    
-    // Avatar (received only)
+
+    const senderColor = getSenderColor(message.from || options.senderName || 'user');
+
+    // 1. Mini circular sender avatar next to received message bubbles
     if (!options.isOwn) {
-      const avatar = document.createElement('img');
-      avatar.className = 'nex-msg-avatar';
-      avatar.src = options.senderAvatar || 'default-avatar.png';
-      avatar.alt = options.senderName || 'User';
-      wrapper.appendChild(avatar);
+      const avatarWrap = document.createElement('div');
+      avatarWrap.className = 'nex-msg-avatar-wrap';
+
+      const initialChar = (options.senderName || 'U')
+        .trim()
+        .replace(/^~\s*/, '')
+        .trim()
+        .charAt(0)
+        .toUpperCase() || 'U';
+
+      const initialCircle = document.createElement('div');
+      initialCircle.className = 'nex-msg-avatar nex-msg-avatar-fallback';
+      initialCircle.style.backgroundColor = senderColor;
+      initialCircle.textContent = initialChar;
+
+      const hasCustomPic = options.senderAvatar &&
+        options.senderAvatar !== 'default-avatar.png' &&
+        options.senderAvatar !== 'favicon.png' &&
+        options.senderAvatar !== 'logo.jpg';
+
+      if (hasCustomPic) {
+        const avatarImg = document.createElement('img');
+        avatarImg.className = 'nex-msg-avatar';
+        avatarImg.src = options.senderAvatar;
+        avatarImg.alt = options.senderName || 'User';
+        avatarImg.onerror = function() {
+          this.style.display = 'none';
+          initialCircle.style.display = 'flex';
+        };
+        initialCircle.style.display = 'none';
+        avatarWrap.appendChild(avatarImg);
+        avatarWrap.appendChild(initialCircle);
+      } else {
+        avatarWrap.appendChild(initialCircle);
+      }
+
+      wrapper.appendChild(avatarWrap);
     }
 
     const contentArea = document.createElement('div');
     contentArea.className = 'nex-msg-content-area';
 
-    // Sender Info (received only)
+    const bubble = document.createElement('div');
+    bubble.className = 'nex-msg-bubble ' + (options.isOwn ? 'sent' : 'received');
+
+    // 2. WhatsApp Group Identity: Sender's name at top of bubble in unique vibrant color with '~ ' prefix
     if (!options.isOwn && options.senderName) {
       const senderDiv = document.createElement('div');
       senderDiv.className = 'nex-msg-sender';
-      senderDiv.textContent = options.senderName;
-      
-      if (options.senderRole) {
+      senderDiv.style.color = senderColor;
+
+      const cleanName = String(options.senderName).trim().replace(/^~\s*/, '');
+      const senderNameSpan = document.createElement('span');
+      senderNameSpan.className = 'nex-msg-sender-name';
+      senderNameSpan.textContent = '~ ' + cleanName;
+      senderDiv.appendChild(senderNameSpan);
+
+      if (options.senderRole && options.senderRole !== 'member') {
         const badge = document.createElement('span');
-        badge.className = 'nex-role-badge';
+        badge.className = 'nex-role-badge ' + options.senderRole;
         badge.textContent = options.senderRole;
         senderDiv.appendChild(badge);
       }
-      contentArea.appendChild(senderDiv);
+      bubble.appendChild(senderDiv);
     }
 
-    const bubble = document.createElement('div');
-    bubble.className = 'nex-msg-bubble';
-
-    // Quoted reply
+    // 3. Quoted reply with left bar tinted to match quoted sender's assigned color
     if (message.replyTo) {
       const quoteBlock = document.createElement('div');
       quoteBlock.className = 'nex-msg-quote';
-      quoteBlock.innerHTML = `<strong>${message.replyTo.senderName}</strong><div>${message.replyTo.text || 'Attachment'}</div>`;
+
+      const quotedSenderId = message.replyTo.senderId || message.replyTo.from || message.replyTo.senderName || 'user';
+      const quotedSenderColor = getSenderColor(quotedSenderId);
+      quoteBlock.style.borderLeftColor = quotedSenderColor;
+
+      const quoteSenderEl = document.createElement('div');
+      quoteSenderEl.className = 'nex-msg-quote-sender';
+      quoteSenderEl.style.color = quotedSenderColor;
+      const qRawName = String(message.replyTo.senderName || 'Member').trim().replace(/^~\s*/, '');
+      quoteSenderEl.textContent = '~ ' + qRawName;
+      quoteBlock.appendChild(quoteSenderEl);
+
+      const quoteTextEl = document.createElement('div');
+      quoteTextEl.className = 'nex-msg-quote-text';
+      quoteTextEl.textContent = message.replyTo.text || 'Attachment';
+      quoteBlock.appendChild(quoteTextEl);
+
       if (options.onQuoteClick) {
         quoteBlock.style.cursor = 'pointer';
         quoteBlock.addEventListener('click', () => options.onQuoteClick(message.replyTo.messageId));
@@ -189,12 +221,12 @@ export function renderMessageBubble(message, container, options) {
       bubble.appendChild(quoteBlock);
     }
 
-    // Attachment
+    // 4. Attachments (image / video / audio / document)
     if (message.attachment) {
       const attDiv = document.createElement('div');
       attDiv.className = 'nex-msg-attachment';
       const type = message.attachment.fileType;
-      
+
       if (type && type.startsWith('image/')) {
         const img = document.createElement('img');
         img.src = message.attachment.downloadURL;
@@ -209,13 +241,19 @@ export function renderMessageBubble(message, container, options) {
       } else {
         const doc = document.createElement('div');
         doc.className = 'nex-attachment-doc';
-        doc.innerHTML = `<span> ${message.attachment.fileName || 'Document'}</span>`;
+        const docIcon = document.createElement('i');
+        docIcon.className = 'fa-solid fa-file-lines';
+        docIcon.style.marginRight = '6px';
+        const docText = document.createElement('span');
+        docText.textContent = message.attachment.fileName || 'Document';
+        doc.appendChild(docIcon);
+        doc.appendChild(docText);
         attDiv.appendChild(doc);
       }
       bubble.appendChild(attDiv);
     }
 
-    // Text Content
+    // 5. Message Text
     if (message.text) {
       const textDiv = document.createElement('div');
       textDiv.className = 'nex-msg-text';
@@ -223,10 +261,10 @@ export function renderMessageBubble(message, container, options) {
       bubble.appendChild(textDiv);
     }
 
-    // Meta row (timestamp + read receipt)
+    // 6. Meta row (timestamp + read receipt)
     const metaRow = document.createElement('div');
     metaRow.className = 'nex-msg-meta';
-    
+
     const timeSpan = document.createElement('span');
     timeSpan.className = 'nex-msg-time';
     timeSpan.textContent = formatTimestamp(message.timestamp);
@@ -239,26 +277,38 @@ export function renderMessageBubble(message, container, options) {
       metaRow.appendChild(editSpan);
     }
 
-    // Read receipts
+    // Read receipt ticks (FontAwesome icons)
     if (options.isOwn) {
       const tickSpan = document.createElement('span');
       tickSpan.className = 'nex-msg-tick';
-      
-      let tickIcon = ''; // Sent
+
+      let isRead = false;
+      let isReadAll = false;
       if (message.readBy && message.readBy.length > 0) {
-        tickIcon = ''; // Read by at least one
-        if (message.readBy.length >= options.totalMembers - 1) {
-          tickSpan.classList.add('read-all'); // Read by all
+        isRead = true;
+        if (message.readBy.length >= (options.totalMembers || 1) - 1) {
+          isReadAll = true;
         }
       }
-      tickSpan.textContent = tickIcon;
+
+      if (isReadAll) {
+        tickSpan.classList.add('read-all');
+        tickSpan.innerHTML = '<i class="fa-solid fa-check-double"></i>';
+      } else if (isRead) {
+        tickSpan.classList.add('read');
+        tickSpan.innerHTML = '<i class="fa-solid fa-check-double"></i>';
+      } else {
+        tickSpan.classList.add('sent');
+        tickSpan.innerHTML = '<i class="fa-solid fa-check"></i>';
+      }
+
       if (options.onTickClick) {
         tickSpan.style.cursor = 'pointer';
         tickSpan.addEventListener('click', () => options.onTickClick(message.id));
       }
       metaRow.appendChild(tickSpan);
     }
-    
+
     bubble.appendChild(metaRow);
     contentArea.appendChild(bubble);
 
@@ -266,12 +316,12 @@ export function renderMessageBubble(message, container, options) {
     if (message.reactions && Object.keys(message.reactions).length > 0) {
       const reactionsRow = document.createElement('div');
       reactionsRow.className = 'nex-reactions-row';
-      
+
       Object.entries(message.reactions).forEach(([emoji, users]) => {
         if (users && users.length > 0) {
           const pill = document.createElement('div');
           pill.className = 'nex-reaction-pill';
-          pill.textContent = `${emoji} ${users.length}`;
+          pill.textContent = emoji + ' ' + users.length;
           if (users.includes(options.currentUid)) {
             pill.classList.add('active');
           }
@@ -284,7 +334,7 @@ export function renderMessageBubble(message, container, options) {
       contentArea.appendChild(reactionsRow);
     }
 
-    // Expires / Disappearing message with Live Countdown & Progress Bar
+    // Disappearing / Ephemeral Countdown
     if (message.expiresAt) {
       const expDate = message.expiresAt.toDate ? message.expiresAt.toDate() : new Date(message.expiresAt);
       const expireDiv = document.createElement('div');
@@ -325,20 +375,20 @@ export function renderMessageBubble(message, container, options) {
 
         let formatted = '';
         if (remDays > 0) {
-          formatted = `${remDays}d ${remHours % 24}h`;
+          formatted = remDays + 'd ' + (remHours % 24) + 'h';
         } else if (remHours > 0) {
-          formatted = `${remHours}h ${remMin % 60}m`;
+          formatted = remHours + 'h ' + (remMin % 60) + 'm';
         } else if (remMin > 0) {
           const s = remSec % 60;
-          formatted = `${remMin}m ${s < 10 ? '0' : ''}${s}s`;
+          formatted = remMin + 'm ' + (s < 10 ? '0' : '') + s + 's';
         } else {
-          formatted = `${remSec}s`;
+          formatted = remSec + 's';
         }
 
         if (timerVal) timerVal.textContent = formatted;
         if (progressFill) {
           const pct = Math.max(0, Math.min(100, (remainingMs / totalDurationMs) * 100));
-          progressFill.style.width = `${pct}%`;
+          progressFill.style.width = pct + '%';
           if (pct < 20 || remainingMs < 60000) {
             expireDiv.classList.add('critical-urgency');
           }
@@ -358,16 +408,40 @@ export function renderMessageBubble(message, container, options) {
 }
 
 /**
- * Renders a system message (e.g., member joined)
+ * Renders a system message / announcement centered in a subtle rounded pill badge
  * @param {string} text 
  * @param {HTMLElement} container 
  */
 export function renderSystemMessage(text, container) {
   if (!text || !container) return;
-  const sysDiv = document.createElement('div');
-  sysDiv.className = 'nex-system-message';
-  sysDiv.textContent = text;
-  container.appendChild(sysDiv);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'nex-msg-wrapper system';
+
+  const pill = document.createElement('div');
+  pill.className = 'nex-system-pill';
+
+  let iconClass = 'fa-solid fa-circle-info';
+  const lower = String(text).toLowerCase();
+  if (lower.includes('encrypt') || lower.includes('security') || lower.includes('lock')) {
+    iconClass = 'fa-solid fa-lock';
+  } else if (lower.includes('joined') || lower.includes('added') || lower.includes('welcome')) {
+    iconClass = 'fa-solid fa-user-plus';
+  } else if (lower.includes('left') || lower.includes('removed')) {
+    iconClass = 'fa-solid fa-arrow-right-from-bracket';
+  } else if (lower.includes('topic') || lower.includes('title') || lower.includes('pinned')) {
+    iconClass = 'fa-solid fa-pen';
+  }
+
+  const icon = document.createElement('i');
+  icon.className = iconClass;
+  pill.appendChild(icon);
+
+  const span = document.createElement('span');
+  span.textContent = text;
+  pill.appendChild(span);
+
+  wrapper.appendChild(pill);
+  container.appendChild(wrapper);
 }
 
 /**
@@ -379,6 +453,6 @@ export function renderDateSeparator(date, container) {
   if (!date || !container) return;
   const sepDiv = document.createElement('div');
   sepDiv.className = 'nex-date-separator';
-  sepDiv.textContent = typeof date === 'string' ? date : formatTimestamp(date).split(' ')[0]; // Fallback
+  sepDiv.textContent = typeof date === 'string' ? date : formatTimestamp(date).split(' ')[0];
   container.appendChild(sepDiv);
 }

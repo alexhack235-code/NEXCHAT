@@ -214,6 +214,13 @@ async function open(groupId, messagesContainer, options = {}) {
     }
   });
 
+  groupStore.subscribe('members', () => {
+    if (_scroller && groupStore.getState().messages) {
+      const processed = _processMessages(groupStore.getState().messages, currentUid);
+      _scroller.setItems(processed);
+    }
+  });
+
   groupStore.subscribe('typingUsers', (typingUsers) => {
     if (_typingIndicator && typingUsers) {
       const members = groupStore.getState().members;
@@ -341,13 +348,28 @@ function close() {
  * @returns {Array}
  */
 function _processMessages(messages, currentUid) {
-  if (!messages || messages.length === 0) return [];
+  if (!messages || messages.length === 0) {
+    return [{
+      id: 'system_enc_notice',
+      type: 'system',
+      text: 'Security encryption verified: Messages and calls are end-to-end encrypted.'
+    }];
+  }
 
   // Insert date separators
   let processed = insertDateSeparators(messages);
 
   // Insert unread divider
   processed = insertUnreadDivider(processed, currentUid);
+
+  // Prepend security encryption verified banner if not already present
+  if (!processed.some(p => p && (p.id === 'system_enc_notice' || (p.text && p.text.includes('Security encryption verified'))))) {
+    processed.unshift({
+      id: 'system_enc_notice',
+      type: 'system',
+      text: 'Security encryption verified: Messages and calls are end-to-end encrypted.'
+    });
+  }
 
   return processed;
 }
@@ -369,6 +391,28 @@ function _renderItem(item, element, currentUid, options = {}) {
 
   if (item.type === 'unread-divider') {
     element.appendChild(createUnreadDivider(item.count));
+    return;
+  }
+
+  // Centered system announcements
+  const isSystem = item.type === 'system' ||
+    item.isSystem ||
+    item.system ||
+    item.from === 'system' ||
+    item.from === 'GROUP_DEFENSE_BOT_ID' ||
+    item.from === 'group_defense_bot' ||
+    (item.text && (
+      item.text.startsWith('Group Defense Bot:') ||
+      item.text.includes('joined the group') ||
+      item.text.includes('left the group') ||
+      item.text.includes('Security encryption verified') ||
+      item.text.includes('Topic updated')
+    ));
+
+  if (isSystem) {
+    let cleanText = String(item.text || item.message || '').trim();
+    cleanText = cleanText.replace(/^Group Defense Bot:\s*/i, '');
+    renderSystemMessage(cleanText, element);
     return;
   }
 

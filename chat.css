@@ -496,82 +496,122 @@ html, body {
   border-right: 1px solid var(--border-subtle);
 }
 
-/* Search Bar */
+/* WhatsApp-Style Search Bar Pill */
+.chat-search-container,
 .search-container {
-  padding: 12px 18px;
-  background: transparent;
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 10px 16px;
+  background: #0b141a;
+  border-bottom: none;
 }
 
+.chat-search-pill-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 42px;
+  background: #202c33;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0 16px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.chat-search-pill-wrapper:focus-within {
+  border-color: rgba(0, 168, 132, 0.5);
+  background: #232f38;
+}
+
+.chat-search-pill-icon {
+  color: #8696a0;
+  font-size: 15px;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.chat-search-pill-input,
 .search-bar {
   width: 100%;
-  padding: 11px 18px 11px 40px;
-  background: var(--bg-surface-elevated);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: 14px center;
-  background-size: 16px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
-  color: var(--text-primary);
-  font-size: 13.5px;
+  padding: 0;
+  background: transparent;
+  background-image: none;
+  border: none;
+  color: #e9edef;
+  font-size: 14.5px;
   font-family: inherit;
   outline: none;
   transition: var(--transition-fast);
 }
 
-.search-bar:focus {
-  border-color: var(--border-accent);
-  box-shadow: 0 0 0 3px var(--accent-primary-dim);
-  background-color: var(--bg-surface-hover);
+.chat-search-pill-input::placeholder,
+.search-bar::placeholder {
+  color: #8696a0;
+  opacity: 1;
 }
 
-/* Filter Tabs */
+.search-bar:focus {
+  border-color: transparent;
+  box-shadow: none;
+  background-color: transparent;
+}
+
+/* WhatsApp-Style Horizontal Category Filter Tabs */
+.chat-filter-tabs,
 .filter-tabs {
   display: flex;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 4px 16px 12px 16px;
   overflow-x: auto;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: none;
   scrollbar-width: none;
+  background: #0b141a;
 }
 
+.chat-filter-tabs::-webkit-scrollbar,
 .filter-tabs::-webkit-scrollbar {
   display: none;
 }
 
 .filter-tab {
-  padding: 7px 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
+  height: 32px;
+  padding: 0 16px;
+  background: #202c33;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  color: #8696a0;
+  font-size: 13.5px;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
   transition: var(--transition-fast);
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .filter-tab:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text-primary);
+  background: #27343d;
+  color: #d1d7db;
 }
 
 .filter-tab.active {
-  background: var(--accent-primary-dim);
-  border-color: var(--border-accent);
-  color: var(--accent-primary);
-  box-shadow: 0 0 12px var(--accent-primary-glow);
+  background: #103529;
+  border-color: rgba(37, 211, 102, 0.35);
+  color: #25d366;
+  font-weight: 600;
+  box-shadow: none;
 }
 
 .filter-tab.add-chat-tab {
-  padding: 7px 14px;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
-  color: #000;
-  border: none;
-  font-weight: 800;
+  width: 32px;
+  min-width: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background: #202c33;
+  color: #8696a0;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-weight: 600;
 }
 
 /* Active Chats List */
@@ -986,22 +1026,24 @@ html, body {
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* Sent Messages (Current User) */
-.message.sent, .my-message {
+/* Sent Messages (WhatsApp cyber dark emerald) */
+.message.sent, .my-message, .message-bubble.sent {
   align-self: flex-end;
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  background: linear-gradient(135deg, #005c4b 0%, #059669 100%);
   color: #ffffff;
-  border-bottom-right-radius: 4px;
-  box-shadow: 0 4px 16px rgba(5, 150, 105, 0.3);
+  border-radius: 12px 2px 12px 12px;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-/* Received Messages */
-.message.received, .other-message {
+/* Received Messages (WhatsApp dark obsidian) */
+.message.received, .other-message, .message-bubble.received {
   align-self: flex-start;
-  background: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-  border-bottom-left-radius: 4px;
+  background: #1f2c34;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e9edef;
+  border-radius: 2px 12px 12px 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .message-time {
@@ -1216,16 +1258,18 @@ html, body {
   z-index: 30;
 }
 
-/* Reply preview banner */
+/* Reply preview banner (WhatsApp style) */
 .reply-preview {
-  background: var(--bg-surface-elevated);
-  border-left: 3px solid var(--accent-primary);
-  border-radius: var(--radius-sm);
+  background: #1f2c34;
+  border-left: 4px solid #00a884;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px 10px 0 0;
   padding: 8px 14px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .reply-preview-content {
@@ -1357,22 +1401,26 @@ html, body {
 
 .mic-action-btn,
 .send-btn, 
-.audio-send-btn {
-  width: 44px;
-  height: 44px;
+.audio-send-btn,
+.fab-circle-btn {
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
+  min-height: 46px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+  background: #00a884;
   border: none;
-  color: #000;
+  color: #0b141a;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-size: 18px;
   font-weight: 700;
-  transition: var(--transition-fast);
-  box-shadow: 0 4px 16px var(--accent-primary-glow);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
   flex-shrink: 0;
+  align-self: flex-end;
 }
 
 .mic-action-btn:hover,
@@ -1531,11 +1579,9 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  background: var(--bg-glass-heavy);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
-  border-top: 1px solid var(--border-subtle);
-  padding: 0 10px;
+  background: #0b141a;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0 4px;
   position: relative;
   z-index: 100;
   overflow-x: auto;
@@ -1551,35 +1597,59 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: #8696a0;
   font-size: 17px;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
+  padding: 6px 0;
+  border-radius: 0;
   transition: var(--transition-fast);
-  min-width: 54px;
+  min-width: 58px;
   flex-shrink: 0;
 }
 
-.nav-item .nav-label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
+.nav-item .nav-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  min-width: 58px;
+  padding: 0 16px;
+  border-radius: 16px;
+  color: #8696a0;
+  transition: all 0.2s ease;
 }
 
-.nav-item:hover {
-  color: var(--text-secondary);
+.nav-item .nav-label {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  color: #8696a0;
+}
+
+.nav-item:hover .nav-icon-wrapper {
+  color: #d1d7db;
   background: rgba(255, 255, 255, 0.04);
 }
 
 .nav-item.active {
-  color: var(--accent-primary);
-  background: var(--accent-primary-dim);
-  border: 1px solid var(--border-accent);
-  box-shadow: 0 0 16px var(--accent-primary-glow);
+  color: #25d366;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.nav-item.active .nav-icon-wrapper {
+  background: #103529;
+  color: #25d366;
+}
+
+.nav-item.active .nav-label {
+  color: #e9edef;
+  font-weight: 700;
 }
 
 .nav-item.logout:hover {
@@ -1592,8 +1662,7 @@ html, body {
    -------------------------------------------------------------------------- */
 .nex-status-container,
 .groups-container,
-.announcements-container,
-.call-history-container {
+.announcements-container {
   width: 100%;
   height: 100%;
   overflow-y: auto;
@@ -4171,11 +4240,18 @@ html, body {
   scrollbar-width: none !important;
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   HACKER TERMINAL STATUS VAULT — SYSTEM ARCHITECTURE
-   OLED Black • Cyber Neon Green (#00FF88) • Cyan (#00D4FF) • Monospace HUD
-   ══════════════════════════════════════════════════════════════════ */
-.nex-status-container {
+/* ==================================================================
+   WHATSAPP UPDATES & STATUS VAULT INTERFACE (PIXEL-PERFECT WHATSAPP)
+   Clean, sleek native WhatsApp Updates UI:
+   - Top App Bar with 'Updates' heading, Search & 3-dots Menu
+   - Status Horizontal Story Cards Stream (My Status & Contact Cards)
+   - Colored Status Rings (Green for unviewed, muted for viewed)
+   - Channels & Broadcasts Section with Verified Badges & Explore
+   - Vertical FAB stack: Pencil above Camera
+   ================================================================== */
+
+.nex-status-container,
+.whatsapp-updates-container {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -4183,22 +4259,25 @@ html, body {
   height: 100%;
   min-height: 0;
   padding: 0;
-  background: #0A0E13;
-  color: #F8FAFC;
-  font-family: 'JetBrains Mono', 'Inter', monospace;
-  overflow-y: auto;
+  background: #0b141a;
+  color: #e9edef;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
   position: relative;
   box-sizing: border-box;
 }
 
-.hacker-terminal-status {
-  background: radial-gradient(circle at 50% 0%, rgba(0, 255, 136, 0.04) 0%, transparent 60%),
-              linear-gradient(180deg, #0A0E13 0%, #06090D 100%);
+/* Light Theme Support */
+body:not(.dark-mode) .nex-status-container,
+body:not(.dark-mode) .whatsapp-updates-container {
+  background: #f0f2f5;
+  color: #111b21;
 }
 
 .app[data-active-section="updates"] > .top-header,
-.app[data-active-section="status"] > .top-header {
-  display: none;
+.app[data-active-section="status"] > .top-header,
+.app[data-active-section="calls"] > .top-header {
+  display: none !important;
 }
 
 .app[data-active-section="updates"] .chat-main,
@@ -4210,232 +4289,127 @@ html, body {
   display: none !important;
 }
 
-.terminal-status-header-brand {
+/* --- Top App Bar --- */
+.status-top-appbar.updates-top-appbar {
+  height: 60px;
+  min-height: 60px;
+  background: #0b141a;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+body:not(.dark-mode) .status-top-appbar.updates-top-appbar {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.updates-appbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.updates-appbar-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #e9edef;
+  letter-spacing: -0.3px;
+  margin: 0;
+  font-family: inherit;
+}
+
+body:not(.dark-mode) .updates-appbar-title {
+  color: #111b21;
+}
+
+.updates-appbar-actions {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.terminal-back-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: rgba(0, 255, 136, 0.08);
-  border: 1px solid rgba(0, 255, 136, 0.3);
-  color: #00FF88;
+.updates-header-icon-btn {
+  background: transparent;
+  border: none;
+  color: #aebac1;
+  font-size: 18px;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
-}
-
-.terminal-back-btn:hover {
-  background: rgba(0, 255, 136, 0.2);
-  border-color: #00FF88;
-  transform: translateX(-2px);
-}
-
-/* ─── Top Terminal Status AppBar ─── */
-.status-top-appbar.terminal-status-appbar {
-  height: 64px;
-  min-height: 64px;
-  background: rgba(17, 27, 33, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 18px;
-  box-sizing: border-box;
-  border-bottom: 1px solid rgba(0, 255, 136, 0.18);
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(0, 255, 136, 0.1);
-}
-
-.terminal-status-header-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.terminal-status-brand-line {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.terminal-prompt-prefix {
-  color: #00FF88;
-  font-weight: 800;
-  font-size: 16px;
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.6);
-}
-
-.terminal-hud-title {
-  font-size: 17px;
-  font-weight: 800;
-  font-family: 'Orbitron', 'JetBrains Mono', sans-serif;
-  color: #00FF88;
-  letter-spacing: 1.2px;
-  margin: 0;
-  line-height: 1.2;
-  text-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
-}
-
-.terminal-telemetry-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 10px;
-  color: #8696A0;
-}
-
-.telemetry-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 9.5px;
-}
-
-.telemetry-badge.active-mesh {
-  color: #00FF88;
-  border-color: rgba(0, 255, 136, 0.3);
-  background: rgba(0, 255, 136, 0.06);
-}
-
-.telemetry-badge.cipher-badge {
-  color: #00D4FF;
-  border-color: rgba(0, 212, 255, 0.3);
-  background: rgba(0, 212, 255, 0.06);
-}
-
-/* ─── Header Action Buttons (Upload & Transmit) ─── */
-.terminal-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.terminal-upload-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  background: linear-gradient(135deg, rgba(0, 255, 136, 0.22), rgba(0, 255, 136, 0.1));
-  border: 1.5px solid #00FF88;
-  color: #00FF88;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px;
-  font-weight: 800;
-  padding: 8px 15px;
-  border-radius: 9999px;
-  cursor: pointer;
-  box-shadow: 0 0 16px rgba(0, 255, 136, 0.3);
-  transition: all 0.2s ease;
-  letter-spacing: 0.5px;
-}
-
-.terminal-upload-pill-btn:hover {
-  background: #00FF88;
-  color: #000;
-  box-shadow: 0 0 24px rgba(0, 255, 136, 0.7);
-  transform: translateY(-1px);
-}
-
-.terminal-text-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: rgba(0, 212, 255, 0.12);
-  border: 1px solid rgba(0, 212, 255, 0.4);
-  color: #00D4FF;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11.5px;
-  font-weight: 700;
-  padding: 7px 13px;
-  border-radius: 9999px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.terminal-text-pill-btn:hover {
-  background: #00D4FF;
-  color: #000;
-  box-shadow: 0 0 18px rgba(0, 212, 255, 0.6);
-  transform: translateY(-1px);
-}
-
-.terminal-quick-btn {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #8696A0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
 }
 
-.terminal-quick-btn:hover {
-  color: #00FF88;
-  border-color: #00FF88;
-  background: rgba(0, 255, 136, 0.1);
+body:not(.dark-mode) .updates-header-icon-btn {
+  color: #54656f;
 }
 
-/* ─── Telemetry Sub-header Banner ─── */
-.terminal-telemetry-banner {
+.updates-header-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #e9edef;
+}
+
+body:not(.dark-mode) .updates-header-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #111b21;
+}
+
+/* --- Scrollable Updates Viewport --- */
+.updates-scroll-viewport {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding-bottom: 120px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.updates-scroll-viewport::-webkit-scrollbar {
+  display: none;
+}
+
+/* Section Header Titles */
+.updates-section-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 18px;
-  background: rgba(10, 14, 19, 0.9);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  font-size: 10.5px;
-  font-family: 'JetBrains Mono', monospace;
-  color: #8696A0;
-  flex-shrink: 0 !important;
+  padding: 16px 16px 12px 16px;
 }
 
-.telemetry-stream-label {
-  color: #00FF88;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
+.updates-section-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #e9edef;
+  letter-spacing: -0.2px;
+  margin: 0;
 }
 
-.telemetry-vault-mode {
-  color: #00D4FF;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+body:not(.dark-mode) .updates-section-title {
+  color: #111b21;
 }
 
-/* ─── Status Horizontal List (Hacker Cyber Nodes Stream) ─── */
+/* --- Status Stream: Horizontal List --- */
 .status-horizontal-list {
   display: flex !important;
-  align-items: flex-start;
-  gap: 16px;
+  align-items: stretch;
+  gap: 10px;
   overflow-x: auto;
-  padding: 18px 16px 14px 16px;
-  background: rgba(17, 27, 33, 0.7);
-  border-bottom: 1px solid rgba(0, 255, 136, 0.12);
+  padding: 0 16px 16px 16px;
   box-sizing: border-box;
   width: 100%;
-  min-height: 126px !important;
-  flex-shrink: 0 !important;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
 }
 
 .status-horizontal-list::-webkit-scrollbar {
@@ -4444,58 +4418,82 @@ html, body {
 
 .status-horizontal-items {
   display: flex !important;
-  align-items: flex-start;
-  gap: 16px;
-  flex-shrink: 0 !important;
+  align-items: stretch;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
-/* Cyber Node Items */
-.status-circle-item {
+/* --- WhatsApp-Style Portrait Story Card --- */
+.status-story-card {
   position: relative;
+  width: 104px;
+  min-width: 104px;
+  height: 160px;
+  border-radius: 16px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 76px;
-  min-width: 76px;
-  flex-shrink: 0 !important;
-  cursor: pointer;
-  user-select: none;
-  transition: transform 0.18s ease;
-}
-
-.status-circle-item:hover {
-  transform: translateY(-2px);
-}
-
-.status-circle-item:active {
-  transform: scale(0.95);
-}
-
-/* My Status Node */
-.terminal-avatar-wrapper {
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  position: relative;
-  padding: 2.5px;
-  background: linear-gradient(135deg, rgba(0, 255, 136, 0.8), rgba(0, 212, 255, 0.8));
-  box-shadow: 0 0 16px rgba(0, 255, 136, 0.45);
+  justify-content: space-between;
+  padding: 8px;
   box-sizing: border-box;
-  overflow: visible;
+  cursor: pointer;
+  background: #1f2c34;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  flex-shrink: 0;
+  user-select: none;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.terminal-node-beacon {
+body:not(.dark-mode) .status-story-card {
+  background: #e9edef;
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.status-story-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.status-story-card:active {
+  transform: scale(0.97);
+}
+
+/* Story Card Backdrop Image & Gradient */
+.status-story-card-backdrop {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 10px;
-  height: 10px;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  background: #111b21;
+}
+
+.status-card-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: brightness(0.72);
+}
+
+.status-card-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.05) 45%, rgba(0, 0, 0, 0.85) 100%);
+  pointer-events: none;
+}
+
+/* My Status Card: Avatar with Green Plus Badge */
+.my-status-avatar-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  background: #00FF88;
-  border: 2px solid #0A0E13;
-  box-shadow: 0 0 8px #00FF88;
-  animation: cs-breathe 2s infinite ease-in-out;
-  z-index: 3;
+  flex-shrink: 0;
 }
 
 .status-avatar-img {
@@ -4504,304 +4502,453 @@ html, body {
   border-radius: 50%;
   object-fit: cover;
   display: block;
-  border: 2px solid #0A0E13;
+  border: 2px solid #0b141a;
+  background: #202c33;
 }
 
-.terminal-plus-badge {
+.status-plus-badge {
   position: absolute;
-  bottom: 0px;
-  right: 0px;
+  bottom: -2px;
+  right: -2px;
   width: 20px;
   height: 20px;
-  background: #00FF88;
-  color: #000;
   border-radius: 50%;
+  background: #25d366;
+  color: #0b141a;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid #0A0E13;
-  font-size: 13px;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 0 8px rgba(0, 255, 136, 0.7);
-  transition: transform 0.15s ease;
-  z-index: 5;
-}
-
-.terminal-plus-badge:hover {
-  transform: scale(1.15) rotate(90deg);
-}
-
-.status-item-copy {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin-top: 10px;
-  text-align: center;
-}
-
-.terminal-node-name {
-  font-family: 'JetBrains Mono', monospace;
   font-size: 11px;
-  color: #00FF88;
-  margin-top: 0;
-  line-height: 1.3;
-  width: 100%;
-  text-align: center;
-  white-space: nowrap;
-  font-weight: 700;
-  text-shadow: 0 0 6px rgba(0, 255, 136, 0.4);
+  font-weight: 800;
+  border: 2px solid #0b141a;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  transition: transform 0.15s ease;
+  z-index: 3;
 }
 
-.status-item-hint {
-  font-size: 9.5px;
-  color: #8696A0;
-  text-align: center;
-  white-space: nowrap;
-  margin-top: 2px;
+.status-plus-badge:hover {
+  transform: scale(1.15);
 }
 
-/* Other Stories: Rings */
-.status-ring-container {
-  width: 62px;
-  height: 62px;
+/* Contact Story Card: Avatar with Colored Ring */
+.status-card-avatar-wrap {
+  position: relative;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  padding: 2.5px;
   box-sizing: border-box;
-  transition: all 0.2s ease;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.status-ring-container.unread {
-  background: linear-gradient(135deg, #00FF88, #00D4FF);
-  box-shadow: 0 0 16px rgba(0, 255, 136, 0.55);
+.status-card-avatar-wrap.unread {
+  border: 2.5px solid #25d366;
+  padding: 1.5px;
+  box-shadow: 0 0 10px rgba(37, 211, 102, 0.35);
 }
 
-.status-ring-container.viewed {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+.status-card-avatar-wrap.viewed {
+  border: 2px solid #8696a0;
+  padding: 1.5px;
+  opacity: 0.85;
 }
 
-.status-ring-container .status-inner-img {
+.status-card-avatar-img {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  border: 2px solid #0A0E13;
   object-fit: cover;
   display: block;
+  border: 1.5px solid #0b141a;
 }
 
-/* ─── Recent & Viewed Telemetry Stream Section ─── */
-.terminal-feed-body {
+/* Card Bottom Text */
+.status-card-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+}
+
+.status-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+.status-card-subtext,
+.status-card-time {
+  font-size: 10.5px;
+  color: #d1d7db;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+}
+
+/* --- Channels Section --- */
+.updates-channels-section {
+  margin-top: 6px;
+  box-sizing: border-box;
+}
+
+.channels-header-row {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.channels-explore-pill-btn {
+  border-radius: 9999px;
+  background: #202c33;
+  color: #e9edef;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.15s ease;
+}
+
+body:not(.dark-mode) .channels-explore-pill-btn {
+  background: #e9edef;
+  color: #111b21;
+}
+
+.channels-explore-pill-btn:hover {
+  background: #2a3942;
+  transform: translateY(-1px);
+}
+
+body:not(.dark-mode) .channels-explore-pill-btn:hover {
+  background: #d1d7db;
+}
+
+/* Channels List */
+.channels-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.channel-list-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.channel-list-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body:not(.dark-mode) .channel-list-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.channel-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.channel-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #ffffff;
+  background: #202c33;
+  overflow: hidden;
+}
+
+.channel-avatar.uefa-avatar {
+  background: #001e4a;
+  color: #ffffff;
+}
+
+.channel-avatar.fabrizio-avatar {
+  background: #3b281f;
+  color: #f6d2b5;
+}
+
+.channel-avatar.localhost-avatar {
+  background: #0d1e16;
+  color: #00ff88;
+}
+
+.channel-avatar.aemilst-avatar {
+  background: #271d2b;
+  color: #e2b4f5;
+}
+
+.channel-avatar-ring {
+  padding: 2px;
+  border: 2px solid #25d366;
+  border-radius: 50%;
+  display: inline-flex;
+}
+
+.channel-info-wrap {
   flex: 1;
-  padding: 20px 18px 100px 18px;
-  background: transparent;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.terminal-section-heading {
+.channel-title-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.channel-name {
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #e9edef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body:not(.dark-mode) .channel-name {
+  color: #111b21;
+}
+
+.verified-badge {
+  color: #25d366;
+  font-size: 14px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.channel-snippet-row {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 12px;
+  font-size: 13.5px;
+  color: #8696a0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.heading-bracket {
-  color: #00FF88;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 800;
-  font-size: 13px;
+.channel-snippet-icon {
+  font-size: 12px;
+  color: #8696a0;
+  flex-shrink: 0;
 }
 
-.status-section-header {
-  font-size: 12.5px;
-  font-weight: 800;
-  font-family: 'JetBrains Mono', monospace;
-  color: #00FF88;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin: 0;
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.4);
+.channel-snippet-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.heading-divider-line {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(0, 255, 136, 0.3) 0%, transparent 100%);
-  margin-left: 8px;
-}
-
-.terminal-card-list {
+.channel-meta-wrap {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-/* Hacker Telemetry Cards */
-.status-row-item {
+.channel-timestamp {
+  font-size: 12px;
+  color: #8696a0;
+  white-space: nowrap;
+}
+
+.channel-timestamp.channel-unread-time {
+  color: #25d366;
+  font-weight: 500;
+}
+
+.channel-unread-badge {
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #25d366;
+  color: #0b141a;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+/* Find Channels to Follow Sub-section */
+.channels-discovery-section {
+  padding: 24px 16px 20px 16px;
+}
+
+.channels-discovery-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #8696a0;
+  margin: 0 0 12px 0;
+}
+
+.channel-follow-card {
   display: flex;
   align-items: center;
   gap: 14px;
   padding: 12px 14px;
   border-radius: 12px;
-  cursor: pointer;
-  background: rgba(17, 27, 33, 0.6);
-  border: 1px solid rgba(0, 255, 136, 0.12);
-  transition: all 0.2s ease;
-  backdrop-filter: blur(8px);
+  background: #182229;
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.status-row-item:hover {
-  background: rgba(17, 27, 33, 0.95);
-  border-color: rgba(0, 255, 136, 0.45);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(0, 255, 136, 0.15);
-  transform: translateX(4px);
+body:not(.dark-mode) .channel-follow-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-.status-row-avatar {
-  width: 50px;
-  height: 50px;
+.pl-avatar {
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
-  padding: 2px;
-  box-sizing: border-box;
+  background: #38003c;
+  color: #00ff87;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
   flex-shrink: 0;
-  position: relative;
 }
 
-.status-row-avatar.unread {
-  background: linear-gradient(135deg, #00FF88, #00D4FF);
-  box-shadow: 0 0 12px rgba(0, 255, 136, 0.45);
-}
-
-.status-row-avatar.viewed {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.status-row-avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  border: 2px solid #0A0E13;
-  object-fit: cover;
-}
-
-.status-row-info {
+.channel-follow-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.status-row-name {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 14.5px;
-  font-weight: 700;
-  color: #F8FAFC;
-  margin: 0 0 4px 0;
+.channel-followers-count {
+  font-size: 12px;
+  color: #8696a0;
+}
+
+.channel-follow-btn {
+  border-radius: 9999px;
+  background: rgba(0, 168, 132, 0.16);
+  color: #00a884;
+  border: 1px solid rgba(0, 168, 132, 0.35);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 18px;
+  cursor: pointer;
+  transition: all 0.15s ease;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
-.status-row-time {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: #8696A0;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+.channel-follow-btn:hover {
+  background: rgba(0, 168, 132, 0.28);
 }
 
-.status-payload-badge {
-  font-size: 9.5px;
-  font-weight: 700;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(0, 255, 136, 0.1);
-  color: #00FF88;
-  border: 1px solid rgba(0, 255, 136, 0.25);
-  font-family: 'JetBrains Mono', monospace;
+.channel-follow-btn.following {
+  background: #202c33;
+  color: #8696a0;
+  border-color: transparent;
 }
 
-/* ─── Floating Action Buttons (Always Visible on Status) ─── */
-.terminal-fab-container {
+body:not(.dark-mode) .channel-follow-btn.following {
+  background: #e9edef;
+  color: #54656f;
+}
+
+/* --- Floating Action Buttons (WhatsApp FABs) --- */
+.status-fab-container.updates-fab-container {
   position: fixed !important;
-  bottom: calc(var(--bottom-nav-height, 62px) + 20px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom: calc(var(--bottom-nav-height, 62px) + 16px + env(safe-area-inset-bottom, 0px)) !important;
   right: 18px !important;
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 14px !important;
   z-index: 999 !important;
   pointer-events: auto !important;
 }
 
-.terminal-fab-btn {
-  width: 44px !important;
-  height: 44px !important;
+/* Secondary Small Pencil FAB */
+.status-fab-secondary.text-fab-btn {
+  width: 42px !important;
+  height: 42px !important;
   border-radius: 50% !important;
-  background: rgba(17, 27, 33, 0.95);
-  color: #00D4FF;
-  border: 1.5px solid rgba(0, 212, 255, 0.4);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6), 0 0 12px rgba(0, 212, 255, 0.3);
+  background: #202c33 !important;
+  color: #e9edef !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(12px);
-  padding: 0 !important;
-  overflow: hidden !important;
-  position: relative !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  transition: transform 0.18s ease, background 0.15s ease !important;
 }
 
-.terminal-fab-btn .fab-hover-tip,
-.fab-hover-tip {
-  display: none !important;
+body:not(.dark-mode) .status-fab-secondary.text-fab-btn {
+  background: #e9edef !important;
+  color: #54656f !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15) !important;
 }
 
-.terminal-fab-btn:hover {
-  background: #00D4FF;
-  color: #000;
-  transform: scale(1.1);
-  box-shadow: 0 8px 26px rgba(0, 212, 255, 0.6);
+.status-fab-secondary.text-fab-btn:hover {
+  background: #2a3942 !important;
+  color: #ffffff !important;
+  transform: scale(1.08) !important;
 }
 
-.terminal-fab-main-btn {
-  width: 58px;
-  height: 58px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #00FF88, #00D4FF);
-  color: #000;
-  border: 2px solid #00FF88;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 255, 136, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  cursor: pointer;
-  position: relative;
-  transition: all 0.2s ease;
-  animation: cs-fab-glow-pulse 2.5s infinite ease-in-out;
+body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
+  background: #d1d7db !important;
+  color: #111b21 !important;
 }
 
-.terminal-fab-main-btn:hover {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 10px 36px rgba(0, 255, 136, 0.85);
+/* Primary Green Camera FAB */
+.status-fab-main.camera-fab-btn {
+  width: 56px !important;
+  height: 56px !important;
+  border-radius: 16px !important;
+  background: #25d366 !important;
+  color: #0b141a !important;
+  border: none !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 2px 10px rgba(37, 211, 102, 0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 22px !important;
+  cursor: pointer !important;
+  transition: transform 0.18s ease, box-shadow 0.18s ease !important;
 }
 
-@keyframes cs-fab-glow-pulse {
-  0%, 100% {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 18px rgba(0, 255, 136, 0.5);
-  }
-  50% {
-    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.7), 0 0 32px rgba(0, 212, 255, 0.7);
-  }
+.status-fab-main.camera-fab-btn:hover {
+  transform: scale(1.06) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(37, 211, 102, 0.55) !important;
 }
 
+.status-fab-main.camera-fab-btn:active {
+  transform: scale(0.96) !important;
+}
 /* ══════════════════════════════════════════════════════════════════
    HACKER TERMINAL STATUS VIEWER (FULL-SCREEN HUD)
    ══════════════════════════════════════════════════════════════════ */
@@ -9370,4 +9517,987 @@ body.chat-size-extra-large .message-bubble {
   background: rgba(0, 242, 254, 0.25);
   border-color: #00f2fe;
   box-shadow: 0 0 12px rgba(0, 242, 254, 0.3);
+}
+
+
+/* --------------------------------------------------------------------------
+   WHATSAPP CALLS INTERFACE (PIXEL-PERFECT RECREATION)
+   -------------------------------------------------------------------------- */
+.call-history-container {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 0 110px 0 !important;
+  background: #0b141a !important;
+  position: relative;
+  z-index: 15;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* WhatsApp Angled Arrows */
+.fa-arrow-up-right,
+.fa-arrow-down-left {
+  display: inline-block;
+  font-family: "Font Awesome 6 Free", "FontAwesome" !important;
+  font-weight: 900 !important;
+  font-style: normal;
+  line-height: 1;
+}
+
+.fa-arrow-up-right::before {
+  content: "\f061";
+  display: inline-block;
+  transform: rotate(-45deg);
+}
+
+.fa-arrow-down-left::before {
+  content: "\f061";
+  display: inline-block;
+  transform: rotate(135deg);
+}
+
+/* 1. Top App Bar */
+.calls-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(11, 20, 26, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.calls-top-left {
+  display: flex;
+  align-items: center;
+}
+
+.calls-heading {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: -0.3px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.calls-top-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.calls-icon-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calls-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+}
+
+.calls-icon-btn:active {
+  transform: scale(0.92);
+}
+
+/* 3-dots Dropdown Menu */
+.calls-menu-wrapper {
+  position: relative;
+}
+
+.calls-dropdown-menu {
+  position: absolute;
+  top: 46px;
+  right: 0;
+  background: #1e293b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+  min-width: 175px;
+  z-index: 60;
+  animation: fadeInCallsMenu 0.15s ease-out;
+}
+
+@keyframes fadeInCallsMenu {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.calls-dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  font-size: 14px;
+  text-align: left;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.calls-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+/* Expandable Search Bar */
+.calls-search-expand {
+  padding: 10px 20px 12px;
+  background: #0b141a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  animation: slideDownSearch 0.2s ease;
+}
+
+@keyframes slideDownSearch {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.calls-search-inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 8px 16px;
+}
+
+.search-field-icon {
+  color: #64748b;
+  font-size: 15px;
+}
+
+.calls-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f1f5f9;
+  font-size: 14.5px;
+}
+
+.calls-search-clear-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+}
+
+.calls-search-clear-btn:hover {
+  color: #f1f5f9;
+}
+
+/* 2. Top Quick Action Circles Row */
+.calls-quick-actions-row {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding: 18px 16px 14px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.calls-quick-action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.2s ease;
+  flex: 1;
+  max-width: 90px;
+}
+
+.calls-quick-action-item:hover {
+  transform: translateY(-2px);
+}
+
+.calls-quick-action-item:active {
+  transform: scale(0.95);
+}
+
+.calls-action-circle {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f1f5f9;
+  font-size: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: all 0.25s ease;
+}
+
+.calls-quick-action-item:hover .calls-action-circle {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(34, 197, 94, 0.45);
+  color: #22c55e;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+}
+
+.calls-action-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #94a3b8;
+  letter-spacing: 0.2px;
+  transition: color 0.2s ease;
+}
+
+.calls-quick-action-item:hover .calls-action-label {
+  color: #f1f5f9;
+}
+
+/* 3. 'Recent' Call Log Section */
+.calls-recent-section {
+  padding: 0 16px;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.calls-recent-header {
+  padding: 12px 6px 8px;
+}
+
+.calls-recent-title {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.3px;
+}
+
+.call-history-feed.call-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.call-history-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  user-select: none;
+}
+
+.call-history-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.call-history-item:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.call-avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.call-avatar-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #1e293b;
+  display: block;
+}
+
+.call-info-col {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.call-contact-name {
+  font-size: 15.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.call-name-missed {
+  color: #ef4444 !important;
+}
+
+.call-name-answered {
+  color: #f1f5f9 !important;
+}
+
+.call-status-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.call-arrow-missed {
+  color: #ef4444;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.call-arrow-answered {
+  color: #22c55e;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.call-timestamp {
+  color: #94a3b8;
+  font-size: 13.5px;
+}
+
+.call-status-separator {
+  color: #475569;
+  font-size: 10px;
+}
+
+.call-status-subtitle {
+  color: #94a3b8;
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.call-action-col {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.call-callback-btn {
+  background: transparent;
+  border: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: #22c55e;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.call-callback-btn:hover {
+  background: rgba(34, 197, 94, 0.12);
+  color: #00ff66;
+  transform: scale(1.1);
+}
+
+.call-callback-btn:active {
+  transform: scale(0.95);
+}
+
+/* 4. Floating Action Button */
+.calls-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 84px;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #0b141a;
+  border: none;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.45), 0 2px 8px rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 95;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.calls-fab:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 12px 28px rgba(34, 197, 94, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.calls-fab:active {
+  transform: scale(0.95);
+}
+
+.calls-fab-icon-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  color: #0b141a;
+}
+
+.calls-fab-plus-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #0b141a;
+}
+
+/* Modals */
+.calls-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+  animation: fadeInModal 0.2s ease;
+}
+
+@keyframes fadeInModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.calls-keypad-card,
+.calls-schedule-card,
+.calls-picker-card {
+  background: #111b21;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 380px;
+  padding: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  box-sizing: border-box;
+  animation: scaleUpModal 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleUpModal {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.calls-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.calls-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.calls-modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calls-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.calls-keypad-screen {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 16px;
+}
+
+.calls-dial-display {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f1f5f9;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-family: monospace;
+}
+
+.calls-dial-backspace {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.calls-dial-backspace:hover {
+  color: #ef4444;
+}
+
+.calls-keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.calls-dial-key {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.calls-dial-key:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.calls-dial-key:active {
+  background: rgba(34, 197, 94, 0.25);
+  transform: scale(0.92);
+}
+
+.calls-dial-key .key-digit {
+  font-size: 20px;
+  font-weight: 600;
+  color: #f1f5f9;
+  line-height: 1;
+}
+
+.calls-dial-key .key-sub {
+  font-size: 9px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+.calls-keypad-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.calls-dial-call-btn,
+.calls-dial-video-btn {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calls-dial-call-btn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #0b141a;
+  box-shadow: 0 6px 18px rgba(34, 197, 94, 0.4);
+}
+
+.calls-dial-video-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #22c55e;
+}
+
+.calls-dial-call-btn:hover,
+.calls-dial-video-btn:hover {
+  transform: scale(1.08);
+}
+
+/* Schedule Form */
+.calls-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.calls-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+
+.calls-form-group label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #94a3b8;
+}
+
+.calls-form-group input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: #f1f5f9;
+  font-size: 14px;
+  outline: none;
+}
+
+.calls-form-group input:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.25);
+}
+
+.calls-form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.calls-type-toggle {
+  display: flex;
+  gap: 12px;
+}
+
+.calls-radio-label {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #cbd5e1;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calls-radio-label input[type="radio"] {
+  display: none;
+}
+
+.calls-radio-label:has(input:checked) {
+  background: rgba(34, 197, 94, 0.15);
+  border-color: #22c55e;
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.calls-modal-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.calls-cancel-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.calls-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #f1f5f9;
+}
+
+.calls-submit-btn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  border: none;
+  color: #0b141a;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.calls-submit-btn:hover {
+  opacity: 0.92;
+}
+
+/* Contact Picker */
+.calls-picker-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+}
+
+.calls-picker-search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #f1f5f9;
+  font-size: 14px;
+}
+
+.calls-picker-list {
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calls-picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  transition: background 0.15s ease;
+}
+
+.calls-picker-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.picker-contact-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.picker-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.picker-name {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.picker-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.picker-call-btn {
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.picker-call-btn:hover {
+  background: #22c55e;
+  color: #0b141a;
+}
+
+
+/* ==========================================================================
+   WhatsApp Pixel-Perfect Group Chat Header & Layout Overrides
+   ========================================================================== */
+.chat-detail-view.group-chat .chat-header-profile #statusText,
+.chat-detail-header.group-chat .chat-header-profile #statusText,
+.chat-detail-view.group-chat #statusText,
+.active-chat-header.group-chat .active-chat-status {
+  color: #8696a0 !important;
+  font-size: 12.5px !important;
+  font-weight: 400 !important;
+  max-width: clamp(140px, 45vw, 420px) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  display: block !important;
+  line-height: 1.3 !important;
+}
+
+.chat-detail-view.group-chat .chat-header-profile #statusText::before,
+.chat-detail-header.group-chat .chat-header-profile #statusText::before,
+.chat-detail-view.group-chat #statusText::before,
+.active-chat-header.group-chat .active-chat-status::before {
+  display: none !important;
+}
+
+.chat-detail-view.group-chat .chat-header-profile .header-avatar-online-dot,
+.chat-detail-header.group-chat .chat-header-profile .header-avatar-online-dot {
+  display: none !important;
+}
+
+.chat-detail-view.group-chat .header-avatar,
+.chat-detail-header.group-chat .header-avatar {
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  object-fit: cover !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+.chat-detail-view.group-chat #chatName,
+.chat-detail-header.group-chat #chatName {
+  font-weight: 700 !important;
+  font-size: 16px !important;
+  color: #e9edef !important;
+  line-height: 1.25 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: clamp(140px, 40vw, 360px) !important;
+}
+
+/* Streamlined group action buttons: Video call, Phone call, Menu */
+.chat-detail-view.group-chat .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn),
+.chat-detail-header.group-chat .chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn) {
+  display: none !important;
+}
+
+.chat-detail-view.group-chat #headerVideoBtn,
+.chat-detail-view.group-chat #headerCallBtn,
+.chat-detail-view.group-chat #menuBtn,
+.chat-detail-header.group-chat #headerVideoBtn,
+.chat-detail-header.group-chat #headerCallBtn,
+.chat-detail-header.group-chat #menuBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  border: none !important;
+  color: #aebac1 !important;
+  font-size: 17px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.chat-detail-view.group-chat #headerVideoBtn:hover,
+.chat-detail-view.group-chat #headerCallBtn:hover,
+.chat-detail-view.group-chat #menuBtn:hover,
+.chat-detail-header.group-chat #headerVideoBtn:hover,
+.chat-detail-header.group-chat #headerCallBtn:hover,
+.chat-detail-header.group-chat #menuBtn:hover {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #00ff66 !important;
+}
+
+/* Centered System Announcement Badges in Chat Stream */
+.nex-msg-wrapper.system,
+.message-wrapper.system-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 10px 0 !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+.nex-system-pill,
+.system-pill-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  background: rgba(18, 27, 34, 0.92) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 8px !important;
+  padding: 5px 12px !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #ffd279 !important;
+  text-align: center !important;
+  max-width: min(88%, 520px) !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0.15px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.nex-system-pill i,
+.system-pill-badge i {
+  font-size: 11px !important;
+  opacity: 0.85 !important;
+  color: #ffd279 !important;
 }

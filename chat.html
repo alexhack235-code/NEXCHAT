@@ -107,10 +107,10 @@
         <!-- Header shows NEXCHAT logo by default, contact name when in chat -->
         <div id="headerLogoContainer">
           <div class="nex-logo" id="headerLogoImg">
-            <img src="logo.jpg" alt="NEXCHAT & CAMSHOT" class="nex-header-logo-badge" style="width: 28px; height: 28px; border-radius: 7px; object-fit: cover; border: 1.5px solid rgba(0, 255, 102, 0.4); box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);">
-            <div style="display: flex; flex-direction: column; line-height: 1.1;">
-              <span class="nex-text" style="font-size: 17px; font-weight: 800; letter-spacing: 1.5px;">NEXCHAT</span>
-              <span style="font-family: 'Outfit', sans-serif; font-size: 8px; font-weight: 800; letter-spacing: 2px; color: #00D2FF; text-transform: uppercase;">CAMSHOT ENGINE</span>
+            <img src="logo.jpg" alt="NEXCHAT" class="nex-header-logo-badge" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(0, 255, 102, 0.4); box-shadow: 0 0 10px rgba(0, 255, 102, 0.2);">
+            <div class="nex-header-brand-wrap" style="display: flex; align-items: center; gap: 8px;">
+              <span class="nex-text nex-brand-title" style="font-size: 21px; font-weight: 700; letter-spacing: 0.4px; color: #e9edef;">NEXCHAT</span>
+              <span class="camshot-header-pill" style="font-family: 'Outfit', sans-serif; font-size: 8.5px; font-weight: 800; letter-spacing: 1.5px; color: #00ff66; background: rgba(0, 255, 102, 0.12); border: 1px solid rgba(0, 255, 102, 0.35); border-radius: 4px; padding: 1.5px 5px; text-transform: uppercase;">CAMSHOT</span>
             </div>
             <span class="nex-online-pulse"></span>
           </div>
@@ -202,8 +202,8 @@
 
         <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
         <div class="header-right mobile-header-actions">
-          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="CamShot Reels" onclick="window.location.href='reels.html'">
-            <i class="fa-solid fa-clapperboard"></i>
+          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="Camera / CamShot" onclick="window.location.href='reels.html'">
+            <i class="fa-solid fa-camera"></i>
           </button>
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -215,85 +215,198 @@
       </div>
     </header>
 
-    <!-- NEXCHAT CYBER HACKER TERMINAL STATUS VAULT SECTION -->
-    <div class="nex-status-container hacker-terminal-status" id="statusContainer" style="display: none;">
-      <!-- Terminal Status HUD Header -->
-      <div class="status-top-appbar terminal-status-appbar">
-        <div class="terminal-status-brand-wrap">
-          <button type="button" id="statusBackBtn" class="terminal-back-btn" onclick="if(window.showChatListView) window.showChatListView(); else window.handleNavigation('chats');" title="Back to Chats">
-            <i class="fa-solid fa-arrow-left"></i>
-          </button>
-          <div class="terminal-status-header-brand">
-            <div class="terminal-status-brand-line">
-              <span class="terminal-prompt-prefix">&gt;</span>
-              <h2 class="status-appbar-title terminal-hud-title">STATUS_VAULT<span class="term-cursor-blink">_</span></h2>
-            </div>
-            <div class="terminal-telemetry-meta">
-              <span class="telemetry-badge active-mesh"><i class="fa-solid fa-signal"></i> MESH: ONLINE</span>
-              <span class="telemetry-badge cipher-badge"><i class="fa-solid fa-shield-halved"></i> 24H_EPHEMERAL</span>
-            </div>
-          </div>
+    <!-- WHATSAPP UPDATES & STATUS VAULT SECTION -->
+    <div class="nex-status-container whatsapp-updates-container" id="statusContainer" style="display: none;">
+      <!-- Clean Top App Bar: 'Updates' heading on the left, search icon and 3-dots menu icon on the right -->
+      <div class="status-top-appbar updates-top-appbar">
+        <div class="updates-appbar-left">
+          <h2 class="updates-appbar-title">Updates</h2>
         </div>
-
-        <div class="status-appbar-actions terminal-actions" style="display: none;"></div>
+        <div class="updates-appbar-actions">
+          <button type="button" id="updatesSearchBtn" class="updates-header-icon-btn" title="Search" onclick="if(window.openSearch) window.openSearch();">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <button type="button" id="updatesMenuBtn" class="updates-header-icon-btn" title="More options" onclick="if(window.toggleMobileDropdownMenu) window.toggleMobileDropdownMenu(event);">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Hidden file input for status media upload -->
       <input type="file" id="statusImageInput" style="display: none;" accept="image/*,video/*" />
 
-      <!-- Status Sub-header Telemetry Bar -->
-      <div class="terminal-telemetry-banner">
-        <span class="telemetry-stream-label"><i class="fa-solid fa-satellite-dish fa-fade"></i> ACTIVE_NODES_FEED</span>
-        <span class="telemetry-vault-mode"><i class="fa-solid fa-shield-halved"></i> 24H EPHEMERAL</span>
-      </div>
-
-      <!-- Status Horizontal List (Hacker Cyber Nodes Stream) -->
-      <div class="status-horizontal-list scrollbar-hide" id="statusHorizontalList">
-        <!-- 1. My Status Node -->
-        <div class="status-circle-item my-status-item terminal-node-card" id="myStatusCircleItem" onclick="if(window.openCreateStatusModal) window.openCreateStatusModal('media');">
-          <div class="status-avatar-wrapper terminal-avatar-wrapper" id="myStatusAvatarWrapper">
-            <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
-            <span class="terminal-node-beacon"></span>
-            <button type="button" id="myStatusAddBadge" class="status-plus-badge terminal-plus-badge" title="Deploy Status Node" onclick="event.stopPropagation(); if(window.openCreateStatusModal) window.openCreateStatusModal('media');">+</button>
+      <!-- Scrollable Updates Viewport -->
+      <div class="updates-scroll-viewport">
+        <!-- Status Section -->
+        <section class="updates-status-section" aria-label="Status updates">
+          <div class="updates-section-header-row">
+            <h3 class="updates-section-title">Status</h3>
           </div>
-          <span class="status-item-copy">
-            <span class="status-item-label terminal-node-name">[MY_NODE]</span>
-            <span class="status-item-hint">Tap to deploy</span>
-          </span>
+
+          <!-- Status updates stream: WhatsApp-style rounded portrait cards / horizontal story items -->
+          <div class="status-horizontal-list scrollbar-hide" id="statusHorizontalList">
+            <!-- 1. My status card -->
+            <div class="status-circle-item my-status-item status-story-card my-status-story-card" id="myStatusCircleItem" onclick="if(window.openCreateStatusModal) window.openCreateStatusModal('media');" title="My status">
+              <div class="status-story-card-backdrop" id="myStatusBackdrop">
+                <img id="myStatusBgPreview" src="logo.jpg" alt="Status preview" class="status-card-bg-img" />
+                <div class="status-card-gradient-overlay"></div>
+              </div>
+              <div class="status-avatar-wrapper my-status-avatar-wrapper" id="myStatusAvatarWrapper">
+                <img id="myStatusPic" src="logo.jpg" alt="My status" class="status-avatar-img">
+                <button type="button" id="myStatusAddBadge" class="status-plus-badge" title="Add status update" onclick="event.stopPropagation(); if(window.openCreateStatusModal) window.openCreateStatusModal('media');">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
+              <div class="status-card-copy">
+                <span class="status-item-label status-card-name">My status</span>
+                <span class="status-item-hint status-card-subtext">Tap to add status update</span>
+              </div>
+            </div>
+
+            <!-- 2. Other Statuses rendered horizontally here -->
+            <div id="statusHorizontalFeed" class="status-horizontal-items"></div>
+          </div>
+        </section>
+
+        <!-- Hidden / Backwards-Compatible Recent & Viewed Updates List (kept for seamless code integrity) -->
+        <div class="status-updates-body terminal-feed-body" style="display: none;">
+          <div id="statusRecentSection" class="status-section-block">
+            <div id="statusRecentList" class="status-vertical-list"></div>
+          </div>
+          <div id="statusViewedSection" class="status-section-block" style="display: none;">
+            <div id="statusViewedList" class="status-vertical-list"></div>
+          </div>
         </div>
 
-        <!-- 2. Other Statuses rendered horizontally here -->
-        <div id="statusHorizontalFeed" class="status-horizontal-items"></div>
+        <!-- Channels / Broadcasts Section -->
+        <section class="updates-channels-section" id="updatesChannelsSection" aria-label="Channels">
+          <div class="updates-section-header-row channels-header-row">
+            <h3 class="updates-section-title">Channels</h3>
+            <button type="button" class="channels-explore-pill-btn" id="channelsExploreBtn" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();" title="Explore channels">
+              Explore
+            </button>
+          </div>
+
+          <!-- Verified Channels List -->
+          <div class="channels-list" id="channelsList">
+            <!-- Channel Item 1: Champions League -->
+            <div class="channel-list-item" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();">
+              <div class="channel-avatar-wrap">
+                <div class="channel-avatar uefa-avatar">
+                  <i class="fa-solid fa-trophy"></i>
+                </div>
+              </div>
+              <div class="channel-info-wrap">
+                <div class="channel-title-row">
+                  <span class="channel-name">Champions League</span>
+                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
+                </div>
+                <div class="channel-snippet-row">
+                  <i class="fa-solid fa-image channel-snippet-icon"></i>
+                  <span class="channel-snippet-text">Cole Palmer's red card against Tot...</span>
+                </div>
+              </div>
+              <div class="channel-meta-wrap">
+                <span class="channel-timestamp">14:54</span>
+              </div>
+            </div>
+
+            <!-- Channel Item 2: Miles | Fabrizio Romano -->
+            <div class="channel-list-item" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();">
+              <div class="channel-avatar-wrap">
+                <div class="channel-avatar fabrizio-avatar">
+                  <i class="fa-solid fa-user-tie"></i>
+                </div>
+              </div>
+              <div class="channel-info-wrap">
+                <div class="channel-title-row">
+                  <span class="channel-name">Miles | Fabrizio Romano</span>
+                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
+                </div>
+                <div class="channel-snippet-row">
+                  <i class="fa-solid fa-camera channel-snippet-icon"></i>
+                  <span class="channel-snippet-text">Tottenham beat Chelsea...</span>
+                </div>
+              </div>
+              <div class="channel-meta-wrap">
+                <span class="channel-timestamp channel-unread-time">12:37</span>
+                <span class="channel-unread-badge">11</span>
+              </div>
+            </div>
+
+            <!-- Channel Item 3: LOCALHOST -->
+            <div class="channel-list-item" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();">
+              <div class="channel-avatar-wrap">
+                <div class="channel-avatar-ring">
+                  <div class="channel-avatar localhost-avatar">
+                    <i class="fa-solid fa-terminal"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="channel-info-wrap">
+                <div class="channel-title-row">
+                  <span class="channel-name">LOCALHOST</span>
+                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
+                </div>
+                <div class="channel-snippet-row">
+                  <i class="fa-solid fa-image channel-snippet-icon"></i>
+                  <span class="channel-snippet-text">Photo</span>
+                </div>
+              </div>
+              <div class="channel-meta-wrap">
+                <span class="channel-timestamp">11:13</span>
+              </div>
+            </div>
+
+            <!-- Channel Item 4: aemilst -->
+            <div class="channel-list-item" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();">
+              <div class="channel-avatar-wrap">
+                <div class="channel-avatar aemilst-avatar">
+                  <i class="fa-solid fa-user"></i>
+                </div>
+              </div>
+              <div class="channel-info-wrap">
+                <div class="channel-title-row">
+                  <span class="channel-name">aemilst</span>
+                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
+                </div>
+                <div class="channel-snippet-row">
+                  <span class="channel-snippet-text">You followed the channel 'aemilst'</span>
+                </div>
+              </div>
+              <div class="channel-meta-wrap">
+                <span class="channel-timestamp">Yesterday</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Find Channels To Follow Section -->
+          <div class="channels-discovery-section">
+            <h4 class="channels-discovery-title">Find channels to follow</h4>
+            <div class="channel-follow-card">
+              <div class="channel-follow-avatar pl-avatar">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div class="channel-follow-info">
+                <div class="channel-title-row">
+                  <span class="channel-name">PREMIER LEAGUE</span>
+                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
+                </div>
+                <span class="channel-followers-count">48.2M followers</span>
+              </div>
+              <button type="button" class="channel-follow-btn" onclick="this.textContent = (this.textContent === 'Follow' ? 'Following' : 'Follow'); this.classList.toggle('following');">Follow</button>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <!-- Recent & Viewed Updates List (Hacker Telemetry Stream) -->
-      <div class="status-updates-body terminal-feed-body">
-        <div id="statusRecentSection" class="status-section-block">
-          <div class="terminal-section-heading">
-            <span class="heading-bracket">[//</span>
-            <h3 class="status-section-header">LIVE_TELEMETRY_STREAM</h3>
-            <span class="heading-bracket">]</span>
-            <div class="heading-divider-line"></div>
-          </div>
-          <div id="statusRecentList" class="status-vertical-list terminal-card-list"></div>
-        </div>
-
-        <div id="statusViewedSection" class="status-section-block" style="display: none;">
-          <div class="terminal-section-heading">
-            <span class="heading-bracket">[//</span>
-            <h3 class="status-section-header">ARCHIVED_STREAM_NODES</h3>
-            <span class="heading-bracket">]</span>
-            <div class="heading-divider-line"></div>
-          </div>
-          <div id="statusViewedList" class="status-vertical-list terminal-card-list"></div>
-        </div>
-      </div>
-
-      <!-- Floating Action Button: Clean, Single Camera FAB -->
-      <div class="status-fab-container terminal-fab-container">
-        <button type="button" id="statusFabCamera" class="status-fab-main terminal-fab-main-btn" title="Add Status Update" onclick="if(window.openCreateStatusModal) window.openCreateStatusModal('media');">
+      <!-- Floating Action Buttons: Secondary small pencil/text FAB above primary green Camera FAB at bottom right -->
+      <div class="status-fab-container updates-fab-container">
+        <button type="button" id="statusFabText" class="status-fab-secondary text-fab-btn" title="Create text status" onclick="if(window.openCreateStatusModal) window.openCreateStatusModal('text');">
+          <i class="fa-solid fa-pencil"></i>
+        </button>
+        <button type="button" id="statusFabCamera" class="status-fab-main camera-fab-btn" title="Add status update" onclick="if(window.openCreateStatusModal) window.openCreateStatusModal('media');">
           <i class="fa-solid fa-camera"></i>
-          <span class="fab-pulse-ring"></span>
         </button>
       </div>
     </div>
@@ -355,68 +468,247 @@
       </div>
     </div>
 
-    <!-- CALL HISTORY SECTION -->
+    <!-- CALL HISTORY SECTION (WhatsApp Sleek Calls View) -->
     <div class="call-history-container" id="callHistoryContainer" style="display: none;">
-      <div class="call-history-header" style="
-        padding: 20px;
-        background: rgba(0, 255, 102, 0.1);
-        border-bottom: 2px solid #00ff66;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      ">
-        <h3 style="margin: 0; color: #00ff66; font-size: 22px;">
-          Call History
-        </h3>
-        <button id="clearCallHistoryBtn" style="
-          padding: 8px 16px;
-          background: rgba(255,68,68,0.2);
-          border: 1px solid #ff4444;
-          border-radius: 6px;
-          color: #ff4444;
-          cursor: pointer;
-          font-size: 12px;
-          font-weight: bold;
-          transition: all 0.2s;
-        ">Clear All</button>
-      </div>
-
-      <div id="callHistoryFeed" class="call-history-feed" style="
-        padding: 15px;
-        overflow-y: auto;
-        max-height: calc(100vh - 200px);
-      ">
-        <!-- Call history items will be populated here -->
-        <div class="call-history-empty-state" style="
-          text-align: center;
-          padding: 60px 20px;
-          color: #888;
-        ">
-          <div style="font-size: 64px; margin-bottom: 20px;">Call</div>
-          <p style="font-size: 18px; color: #aaa; margin-bottom: 10px;">No Calls Yet</p>
-          <p style="font-size: 14px; color: #666;">Your call history will appear here</p>
+      <!-- 1. Top App Bar: 'Calls' heading on the left, search icon and 3-dots menu icon on the right -->
+      <div class="calls-top-bar" id="callsTopBar">
+        <div class="calls-top-left">
+          <h1 class="calls-heading">Calls</h1>
+        </div>
+        <div class="calls-top-right">
+          <button type="button" class="calls-icon-btn" id="callsSearchToggleBtn" title="Search calls" aria-label="Search calls">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+          <div class="calls-menu-wrapper">
+            <button type="button" class="calls-icon-btn" id="callsMenuBtn" title="More options" aria-label="More options">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+            </button>
+            <div class="calls-dropdown-menu" id="callsDropdownMenu" style="display: none;">
+              <button type="button" class="calls-dropdown-item" id="clearCallHistoryBtn">
+                <i class="fa-solid fa-trash-can"></i>
+                <span>Clear call log</span>
+              </button>
+              <button type="button" class="calls-dropdown-item" id="callsSettingsBtn">
+                <i class="fa-solid fa-gear"></i>
+                <span>Call settings</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- Expandable Search Bar -->
+      <div class="calls-search-expand" id="callsSearchExpand" style="display: none;">
+        <div class="calls-search-inner">
+          <i class="fa-solid fa-magnifying-glass search-field-icon"></i>
+          <input type="text" id="callsSearchInput" class="calls-search-input" placeholder="Search calls..." autocomplete="off">
+          <button type="button" id="callsSearchClearBtn" class="calls-search-clear-btn" title="Clear search">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Top Quick Action Circles Row (4 circular glassmorphic buttons) -->
+      <div class="calls-quick-actions-row">
+        <!-- Action 1: Call (phone icon) -->
+        <div class="calls-quick-action-item" id="callsActionNewCall" role="button" tabindex="0" title="Start Call">
+          <div class="calls-action-circle">
+            <i class="fa-solid fa-phone"></i>
+          </div>
+          <span class="calls-action-label">Call</span>
+        </div>
+
+        <!-- Action 2: Schedule (calendar icon) -->
+        <div class="calls-quick-action-item" id="callsActionSchedule" role="button" tabindex="0" title="Schedule Call">
+          <div class="calls-action-circle">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <span class="calls-action-label">Schedule</span>
+        </div>
+
+        <!-- Action 3: Keypad (dialpad icon) -->
+        <div class="calls-quick-action-item" id="callsActionKeypad" role="button" tabindex="0" title="Dial Keypad">
+          <div class="calls-action-circle">
+            <i class="fa-solid fa-table-cells"></i>
+          </div>
+          <span class="calls-action-label">Keypad</span>
+        </div>
+
+        <!-- Action 4: Favourites (heart icon) -->
+        <div class="calls-quick-action-item" id="callsActionFavourites" role="button" tabindex="0" title="Favourites">
+          <div class="calls-action-circle">
+            <i class="fa-solid fa-heart"></i>
+          </div>
+          <span class="calls-action-label">Favourites</span>
+        </div>
+      </div>
+
+      <!-- 3. 'Recent' Call Log Section -->
+      <div class="calls-recent-section">
+        <div class="calls-recent-header">
+          <span class="calls-recent-title">Recent</span>
+        </div>
+
+        <div id="callHistoryFeed" class="call-history-feed call-log-list">
+          <!-- Call history items populated dynamically via loadCallHistory() -->
+        </div>
+      </div>
+
+      <!-- 4. Floating Action Button: Rounded green call FAB with phone '+' at bottom right -->
+      <button type="button" class="calls-fab" id="callsFab" title="Start new call" aria-label="Start new call">
+        <div class="calls-fab-icon-box">
+          <i class="fa-solid fa-phone"></i>
+          <span class="calls-fab-plus-badge"><i class="fa-solid fa-plus"></i></span>
+        </div>
+      </button>
+
+      <!-- Keypad Dialpad Glassmorphic Modal -->
+      <div class="calls-modal-backdrop" id="callsKeypadModal" style="display: none;">
+        <div class="calls-keypad-card">
+          <div class="calls-modal-head">
+            <span class="calls-modal-title"><i class="fa-solid fa-table-cells" style="color: #22c55e; margin-right: 8px;"></i>Dial Keypad</span>
+            <button type="button" class="calls-modal-close-btn" id="closeCallsKeypadBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="calls-keypad-screen">
+            <input type="text" id="callsDialNumberDisplay" class="calls-dial-display" placeholder="Enter number or ID" readonly>
+            <button type="button" id="callsDialBackspaceBtn" class="calls-dial-backspace" title="Delete"><i class="fa-solid fa-delete-left"></i></button>
+          </div>
+          <div class="calls-keypad-grid">
+            <button type="button" class="calls-dial-key" data-key="1"><span class="key-digit">1</span><span class="key-sub">&nbsp;</span></button>
+            <button type="button" class="calls-dial-key" data-key="2"><span class="key-digit">2</span><span class="key-sub">ABC</span></button>
+            <button type="button" class="calls-dial-key" data-key="3"><span class="key-digit">3</span><span class="key-sub">DEF</span></button>
+            <button type="button" class="calls-dial-key" data-key="4"><span class="key-digit">4</span><span class="key-sub">GHI</span></button>
+            <button type="button" class="calls-dial-key" data-key="5"><span class="key-digit">5</span><span class="key-sub">JKL</span></button>
+            <button type="button" class="calls-dial-key" data-key="6"><span class="key-digit">6</span><span class="key-sub">MNO</span></button>
+            <button type="button" class="calls-dial-key" data-key="7"><span class="key-digit">7</span><span class="key-sub">PQRS</span></button>
+            <button type="button" class="calls-dial-key" data-key="8"><span class="key-digit">8</span><span class="key-sub">TUV</span></button>
+            <button type="button" class="calls-dial-key" data-key="9"><span class="key-digit">9</span><span class="key-sub">WXYZ</span></button>
+            <button type="button" class="calls-dial-key" data-key="*"><span class="key-digit">*</span><span class="key-sub">&nbsp;</span></button>
+            <button type="button" class="calls-dial-key" data-key="0"><span class="key-digit">0</span><span class="key-sub">+</span></button>
+            <button type="button" class="calls-dial-key" data-key="#"><span class="key-digit">#</span><span class="key-sub">&nbsp;</span></button>
+          </div>
+          <div class="calls-keypad-actions">
+            <button type="button" id="callsDialVoiceBtn" class="calls-dial-call-btn" title="Voice Call"><i class="fa-solid fa-phone"></i></button>
+            <button type="button" id="callsDialVideoBtn" class="calls-dial-video-btn" title="Video Call"><i class="fa-solid fa-video"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Schedule Call Modal -->
+      <div class="calls-modal-backdrop" id="callsScheduleModal" style="display: none;">
+        <div class="calls-schedule-card">
+          <div class="calls-modal-head">
+            <span class="calls-modal-title"><i class="fa-solid fa-calendar-days" style="color: #22c55e; margin-right: 8px;"></i>Schedule a Call</span>
+            <button type="button" class="calls-modal-close-btn" id="closeCallsScheduleBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <form id="callsScheduleForm" class="calls-modal-form">
+            <div class="calls-form-group">
+              <label for="scheduleCallTitle">Call Title</label>
+              <input type="text" id="scheduleCallTitle" placeholder="e.g., Project Discussion" required>
+            </div>
+            <div class="calls-form-group">
+              <label for="scheduleCallContact">Participant / Username</label>
+              <input type="text" id="scheduleCallContact" placeholder="Enter username or email" required>
+            </div>
+            <div class="calls-form-row">
+              <div class="calls-form-group">
+                <label for="scheduleCallDate">Date</label>
+                <input type="date" id="scheduleCallDate" required>
+              </div>
+              <div class="calls-form-group">
+                <label for="scheduleCallTime">Time</label>
+                <input type="time" id="scheduleCallTime" required>
+              </div>
+            </div>
+            <div class="calls-form-group">
+              <label>Call Type</label>
+              <div class="calls-type-toggle">
+                <label class="calls-radio-label">
+                  <input type="radio" name="scheduleCallType" value="audio" checked>
+                  <span><i class="fa-solid fa-phone"></i> Voice</span>
+                </label>
+                <label class="calls-radio-label">
+                  <input type="radio" name="scheduleCallType" value="video">
+                  <span><i class="fa-solid fa-video"></i> Video</span>
+                </label>
+              </div>
+            </div>
+            <div class="calls-modal-foot">
+              <button type="button" class="calls-cancel-btn" id="cancelCallsScheduleBtn">Cancel</button>
+              <button type="submit" class="calls-submit-btn">Schedule Call</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- New Call / Contact Picker Modal -->
+      <div class="calls-modal-backdrop" id="callsNewCallModal" style="display: none;">
+        <div class="calls-picker-card">
+          <div class="calls-modal-head">
+            <span class="calls-modal-title"><i class="fa-solid fa-phone" style="color: #22c55e; margin-right: 8px;"></i>New Call</span>
+            <button type="button" class="calls-modal-close-btn" id="closeCallsNewCallBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="calls-picker-search">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="callsNewCallSearch" placeholder="Search contacts...">
+          </div>
+          <div class="calls-picker-list" id="callsNewCallList">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
     </div>
 
     <!-- MAIN CHAT LIST -->
     <main class="chat-main" data-layout="list">
       <!-- CHAT LIST VIEW -->
       <div id="chatListView" class="chat-list-view">
-        <!-- Search Bar -->
-        <div class="search-container">
-          <input type="text" id="searchInput" class="search-bar" placeholder="Search chats..." autocomplete="off" />
+        <!-- WhatsApp-Style Full-Width Rounded Search Pill Container -->
+        <div id="chatSearchContainer" class="chat-search-container search-container">
+          <div class="chat-search-pill-wrapper">
+            <i class="fa-solid fa-magnifying-glass chat-search-pill-icon"></i>
+            <input type="text" id="searchInput" class="search-bar chat-search-pill-input" placeholder="Search chats or ask ChronEX AI..." autocomplete="off" />
+          </div>
         </div>
 
-        <!-- Filter Tabs -->
-        <div class="filter-tabs">
+        <!-- WhatsApp-Style Category Filter Tabs -->
+        <div id="chatFilterTabs" class="chat-filter-tabs filter-tabs">
           <button class="filter-tab active" data-filter="all" title="All chats">All</button>
           <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
-          <button class="filter-tab" data-filter="favorites" title="Favorite chats">Favorites</button>
+          <button class="filter-tab" data-filter="favourites" title="Favourite chats">Favourites</button>
           <button class="filter-tab" data-filter="groups" title="Group chats">Groups</button>
-          <button class="filter-tab add-chat-tab" id="newChatFromTab" title="Start New Direct Chat"><i class="fa-solid fa-plus"></i> Chat</button>
-          <button class="filter-tab add-group-tab" id="newGroupFromTab" title="Create New Group"><i class="fa-solid fa-user-group"></i> +Group</button>
+          <button class="filter-tab" data-filter="ai-bots" title="ChronEX AI Bots">AI Bots</button>
+          <button class="filter-tab add-chat-tab" id="newChatFromTab" title="Start New Direct Chat"><i class="fa-solid fa-plus"></i></button>
         </div>
+
+        <!-- WhatsApp-Style System Action Rows: Locked chats & Archived -->
+        <div class="chat-system-action-rows" id="chatSystemRows">
+          <div class="system-action-row locked-chats-row" id="lockedChatsRow" title="Locked chats (Ghost Vault)" onclick="if(window.CyberFeatures && window.CyberFeatures.ghostVault) window.CyberFeatures.ghostVault.show();">
+            <div class="system-row-icon">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <div class="system-row-body">
+              <span class="system-row-label">Locked chats</span>
+            </div>
+          </div>
+          <div class="system-action-row archived-chats-row" id="archivedToggleRow" title="Archived chats">
+            <div class="system-row-icon">
+              <i class="fa-solid fa-box-archive"></i>
+            </div>
+            <div class="system-row-body">
+              <span class="system-row-label">Archived</span>
+              <span class="system-row-count-badge" id="archivedCount">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Archived Chats Collapsible List -->
+        <ul id="archivedList" class="chat-list archived-list" style="display: none;">
+          <li class="empty-state" style="padding: 16px;">
+            <p>No archived chats</p>
+          </li>
+        </ul>
 
         <!-- Active Chats Section -->
         <div class="chats-section">
@@ -428,21 +720,16 @@
           </ul>
         </div>
 
-        <!-- Mobile Floating Action Button (FAB) -->
-        <button id="mobileFabNewChat" class="mobile-fab" title="New Chat" aria-label="New Chat">
-          <i class="fa-solid fa-message"></i>
-        </button>
-
-        <!-- Archived Section -->
-        <div class="archived-section">
-          <button class="archived-header" id="archivedToggle">
-            <i class="fa-solid fa-box-archive"></i> Archived Chats <span id="archivedCount" style="font-size: 12px; margin-left: 8px;">0</span>
+        <!-- WhatsApp Floating Action Buttons Cluster (ChronEX AI + WhatsApp Emerald Chat FAB) -->
+        <div class="chat-fab-cluster" id="chatFabCluster">
+          <button type="button" id="chronexAiFabBtn" class="chronex-ai-fab" title="Ask ChronEX AI" aria-label="Ask ChronEX AI" onclick="if(typeof openChat === 'function') openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');">
+            <div class="ai-conic-ring">
+              <i class="fa-solid fa-circle-nodes"></i>
+            </div>
           </button>
-          <ul id="archivedList" class="chat-list archived-list" style="display: none;">
-            <li class="empty-state" style="padding: 16px;">
-              <p>No archived chats</p>
-            </li>
-          </ul>
+          <button type="button" id="mobileFabNewChat" class="mobile-fab whatsapp-chat-fab" title="New Chat" aria-label="New Chat">
+            <i class="fa-solid fa-comment-medical"></i>
+          </button>
         </div>
       </div>
 
@@ -456,13 +743,16 @@
       <div id="chatDetailView" class="chat-detail-view" style="display: none;">
         <!-- Chat Header -->
         <div class="chat-detail-header">
-          <button id="backBtn" class="back-btn" title="Back to chats"><i class="fa-solid fa-chevron-left"></i></button>
+          <button id="backBtn" class="back-btn" title="Back to chats"><i class="fa-solid fa-arrow-left"></i></button>
           <div class="chat-header-profile" id="chatHeaderProfile" style="cursor: pointer; position: relative;"
             title="Click to open group settings">
-            <img id="chatProfilePic" src="logo.jpg" alt="Profile" class="header-avatar" onerror="this.onerror=null;this.src='logo.jpg';">
+            <div class="header-avatar-container" style="position: relative; display: inline-flex; flex-shrink: 0;">
+              <img id="chatProfilePic" src="logo.jpg" alt="Profile" class="header-avatar" onerror="this.onerror=null;this.src='logo.jpg';">
+              <span id="chatOnlineIndicator" class="header-avatar-online-dot"></span>
+            </div>
             <div class="header-text">
               <h3 id="chatName">User</h3>
-              <p id="statusText" class="status-dot">Online</p>
+              <p id="statusText" class="status-subtitle">Online</p>
             </div>
           </div>
           <div class="chat-detail-header-actions">
@@ -618,7 +908,7 @@
               <p class="reply-from">Replying to <span id="replyFromName"></span></p>
               <p class="reply-message" id="replyMessage"></p>
             </div>
-            <button type="button" id="cancelReplyBtn" class="cancel-reply-btn" title="Cancel reply">Cancel</button>
+            <button type="button" id="cancelReplyBtn" class="cancel-reply-btn" title="Cancel reply"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
 
@@ -798,21 +1088,22 @@
           </div>
 
           <form id="message-form" class="message-form">
-            <button type="button" id="emoji-btn" class="input-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
-            <button type="button" id="sticker-btn" class="input-btn sticker-toggle-btn" title="WhatsApp-style Stickers &amp; Sticker Store" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
             <div class="message-input-wrapper">
-              <textarea id="message-input" class="message-input" placeholder="Write a message..." autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
+              <button type="button" id="emoji-btn" class="input-inline-btn emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
+              <button type="button" id="sticker-btn" class="input-inline-btn sticker-toggle-btn" title="Stickers" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
+              <textarea id="message-input" class="message-input" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
               <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
               <button type="button" id="attach-btn" class="input-inline-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+              <button type="button" id="camera-btn" class="input-inline-btn camera-input-btn" title="Camera"><i class="fa-solid fa-camera"></i></button>
             </div>
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
             <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
-            <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX"><i class="fa-solid fa-volume-high"></i></button>
-            <button type="button" id="cyberScribeWandBtn" class="input-btn cyber-scribe-wand-btn" title="Cyber Scribe AI: Polish or Translate Draft"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-            <button type="button" id="ghostWhisperDockBtn" class="input-btn ghost-whisper-dock-btn" title="Send 1-View Ghost Whisper"><i class="fa-solid fa-ghost"></i></button>
-            <button type="button" id="audio-record-btn" class="mic-action-btn" title="Record voice message"><i class="fa-solid fa-microphone"></i></button>
-            <button type="button" id="audio-send-btn" class="audio-send-btn" title="Send audio" style="display: none;"><i class="fa-solid fa-play"></i></button>
-            <button type="button" class="send-btn" id="sendBtn" title="Send message" style="display: none;"><i class="fa-solid fa-paper-plane"></i></button>
+            <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX" style="display: none;"><i class="fa-solid fa-volume-high"></i></button>
+            <button type="button" id="cyberScribeWandBtn" class="input-btn cyber-scribe-wand-btn" title="Cyber Scribe AI: Polish or Translate Draft" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+            <button type="button" id="ghostWhisperDockBtn" class="input-btn ghost-whisper-dock-btn" title="Send 1-View Ghost Whisper" style="display: none;"><i class="fa-solid fa-ghost"></i></button>
+            <button type="button" id="audio-record-btn" class="fab-circle-btn mic-action-btn" title="Record voice message"><i class="fa-solid fa-microphone"></i></button>
+            <button type="button" id="audio-send-btn" class="audio-send-btn fab-circle-btn" title="Send audio" style="display: none;"><i class="fa-solid fa-play"></i></button>
+            <button type="button" class="send-btn fab-circle-btn" id="sendBtn" title="Send message" style="display: none;"><i class="fa-solid fa-paper-plane"></i></button>
           </form>
 
           <!-- Audio Recording UI -->
@@ -3294,32 +3585,34 @@
 
     <!-- BOTTOM NAVIGATION -->
     <nav class="bottom-nav">
-      <!-- 4 Core Tabs for Mobile + 1 Discover Tab -->
-      <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chat">
+      <!-- 4 Core WhatsApp Tabs with WhatsApp Active Indicator & Badges -->
+      <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chats">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-comments"></i>
+          <span class="nav-pill-badge" id="navChatsCountBadge" style="display: none;">2</span>
         </div>
         <span class="nav-label">Chats</span>
       </button>
-      <button id="nav-status" class="nav-item" data-nav="updates" title="Status">
+      <button id="nav-status" class="nav-item" data-nav="updates" title="Updates">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-circle-notch"></i>
+          <span class="nav-status-beacon"></span>
         </div>
         <span class="nav-label">Updates</span>
       </button>
-      <button id="nav-groups" class="nav-item" data-nav="communities" title="Groups">
+      <button id="nav-groups" class="nav-item" data-nav="communities" title="Communities">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-users"></i>
         </div>
         <span class="nav-label">Communities</span>
       </button>
-      <button id="nav-calls" class="nav-item" data-nav="calls" title="Call History">
+      <button id="nav-calls" class="nav-item" data-nav="calls" title="Calls">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-phone"></i>
         </div>
         <span class="nav-label">Calls</span>
       </button>
-      <button id="nav-more" class="nav-item mobile-only-nav" data-nav="more" title="More Features">
+      <button id="nav-more" class="nav-item desktop-only-nav" data-nav="more" title="More Features">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-ellipsis"></i>
         </div>
