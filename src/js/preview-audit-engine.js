@@ -423,78 +423,20 @@
 
     const feed = document.getElementById('statusHorizontalFeed');
     if (feed) {
-      const mockStatuses = [
-        { name: 'ChronEX AI', time: '5m ago', unread: true, avatar: 'chronex-ai.jpg' },
-        { name: 'NEXCHAT Official', time: '22m ago', unread: true, avatar: 'logo.jpg' },
-        { name: 'Security Enclave', time: '1h ago', unread: false, avatar: 'logo.jpg' },
-        { name: 'Cyber Hub', time: '3h ago', unread: false, avatar: 'logo.jpg' }
-      ];
-
-      feed.innerHTML = mockStatuses.map(s => `
-        <div class="status-circle-item status-story-card" style="cursor: pointer;">
-          <div class="status-story-card-backdrop">
-            <img src="${s.avatar}" alt="${s.name}" class="status-card-bg-img" style="filter: brightness(0.65);">
-            <div class="status-card-gradient-overlay"></div>
-          </div>
-          <div class="status-avatar-wrapper" style="position: relative;">
-            <img src="${s.avatar}" alt="${s.name}" class="status-avatar-img" style="border: 2px solid ${s.unread ? '#25d366' : '#8696a0'};">
-          </div>
-          <div class="status-card-copy">
-            <span class="status-item-label status-card-name">${s.name}</span>
-            <span class="status-item-hint status-card-subtext">${s.time}</span>
-          </div>
-        </div>
-      `).join('');
+      feed.innerHTML = ''; // Only user status should be seen
     }
 
-    // Ensure channels feed is populated
-    const channelsFeed = document.getElementById('statusChannelsFeed');
-    if (channelsFeed) {
-      const mockChannels = [
-        {
-          name: 'NEXCHAT Official',
-          subtext: 'Version 2.4 update is now live across all platforms!',
-          time: '08:00 AM',
-          verified: true,
-          unread: 1,
-          avatar: 'logo.jpg'
-        },
-        {
-          name: 'Tech Radar Cyber',
-          subtext: 'Next-gen WebGL and WebAssembly breakthroughs revealed.',
-          time: 'Yesterday',
-          verified: true,
-          unread: 0,
-          avatar: 'logo.jpg'
-        },
-        {
-          name: 'Space & AI News',
-          subtext: 'MetropolisSpaceRealm realm expanded with new hyperspace physics.',
-          time: '14 Oct',
-          verified: true,
-          unread: 0,
-          avatar: 'logo.jpg'
-        }
-      ];
-
-      channelsFeed.innerHTML = mockChannels.map(c => `
-        <div class="status-channel-item" style="display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); cursor: pointer;">
-          <img src="${c.avatar}" alt="${c.name}" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover; margin-right: 14px; border: 1.5px solid rgba(0, 255, 102, 0.3);">
-          <div style="flex: 1; min-width: 0;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px;">
-              <span style="font-size: 15px; font-weight: 600; color: #e9edef; display: flex; align-items: center; gap: 5px;">
-                ${c.name}
-                <i class="fa-solid fa-circle-check" style="color: #00ff66; font-size: 12px;"></i>
-              </span>
-              <span style="font-size: 11.5px; color: ${c.unread > 0 ? '#25d366' : '#8696a0'};">${c.time}</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="font-size: 13px; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${c.subtext}</span>
-              ${c.unread > 0 ? '<span style="background: #25d366; color: #000; font-size: 11px; font-weight: 700; min-width: 18px; height: 18px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; padding: 0 5px; margin-left: 8px;">1</span>' : ''}
-            </div>
-          </div>
+    // Ensure channels list displays authentic empty state (no fake/demo channels)
+    const channelsList = document.getElementById('channelsList');
+    if (channelsList) {
+      channelsList.innerHTML = `
+        <div class="channels-empty-state" style="padding: 28px 16px; text-align: center; color: #8696a0;">
+          <i class="fa-solid fa-tower-broadcast" style="font-size: 34px; margin-bottom: 12px; color: #334155; display: block;"></i>
+          <p style="font-size: 14.5px; font-weight: 600; color: #cbd5e1; margin: 0 0 6px 0;">Stay updated on topics you care about</p>
+          <p style="font-size: 12px; color: #64748b; margin: 0 0 16px 0; line-height: 1.4;">Find channels to follow or explore public broadcast wires</p>
+          <button type="button" class="channels-explore-pill-btn" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();" style="display: inline-flex; margin: 0 auto; padding: 7px 18px; font-size: 12px;">Explore Channels</button>
         </div>
-      `).join('');
+      `;
     }
   }
 

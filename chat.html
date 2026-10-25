@@ -289,112 +289,11 @@
 
           <!-- Verified Channels List -->
           <div class="channels-list" id="channelsList">
-            <!-- Channel Item 1: Champions League -->
-            <div class="channel-list-item" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();">
-              <div class="channel-avatar-wrap">
-                <div class="channel-avatar uefa-avatar">
-                  <i class="fa-solid fa-trophy"></i>
-                </div>
-              </div>
-              <div class="channel-info-wrap">
-                <div class="channel-title-row">
-                  <span class="channel-name">Champions League</span>
-                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
-                </div>
-                <div class="channel-snippet-row">
-                  <i class="fa-solid fa-image channel-snippet-icon"></i>
-                  <span class="channel-snippet-text">Cole Palmer's red card against Tot...</span>
-                </div>
-              </div>
-              <div class="channel-meta-wrap">
-                <span class="channel-timestamp">14:54</span>
-              </div>
-            </div>
-
-            <!-- Channel Item 2: Miles | Fabrizio Romano -->
-            <div class="channel-list-item" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();">
-              <div class="channel-avatar-wrap">
-                <div class="channel-avatar fabrizio-avatar">
-                  <i class="fa-solid fa-user-tie"></i>
-                </div>
-              </div>
-              <div class="channel-info-wrap">
-                <div class="channel-title-row">
-                  <span class="channel-name">Miles | Fabrizio Romano</span>
-                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
-                </div>
-                <div class="channel-snippet-row">
-                  <i class="fa-solid fa-camera channel-snippet-icon"></i>
-                  <span class="channel-snippet-text">Tottenham beat Chelsea...</span>
-                </div>
-              </div>
-              <div class="channel-meta-wrap">
-                <span class="channel-timestamp channel-unread-time">12:37</span>
-                <span class="channel-unread-badge">11</span>
-              </div>
-            </div>
-
-            <!-- Channel Item 3: LOCALHOST -->
-            <div class="channel-list-item" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();">
-              <div class="channel-avatar-wrap">
-                <div class="channel-avatar-ring">
-                  <div class="channel-avatar localhost-avatar">
-                    <i class="fa-solid fa-terminal"></i>
-                  </div>
-                </div>
-              </div>
-              <div class="channel-info-wrap">
-                <div class="channel-title-row">
-                  <span class="channel-name">LOCALHOST</span>
-                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
-                </div>
-                <div class="channel-snippet-row">
-                  <i class="fa-solid fa-image channel-snippet-icon"></i>
-                  <span class="channel-snippet-text">Photo</span>
-                </div>
-              </div>
-              <div class="channel-meta-wrap">
-                <span class="channel-timestamp">11:13</span>
-              </div>
-            </div>
-
-            <!-- Channel Item 4: aemilst -->
-            <div class="channel-list-item" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();">
-              <div class="channel-avatar-wrap">
-                <div class="channel-avatar aemilst-avatar">
-                  <i class="fa-solid fa-user"></i>
-                </div>
-              </div>
-              <div class="channel-info-wrap">
-                <div class="channel-title-row">
-                  <span class="channel-name">aemilst</span>
-                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
-                </div>
-                <div class="channel-snippet-row">
-                  <span class="channel-snippet-text">You followed the channel 'aemilst'</span>
-                </div>
-              </div>
-              <div class="channel-meta-wrap">
-                <span class="channel-timestamp">Yesterday</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Find Channels To Follow Section -->
-          <div class="channels-discovery-section">
-            <h4 class="channels-discovery-title">Find channels to follow</h4>
-            <div class="channel-follow-card">
-              <div class="channel-follow-avatar pl-avatar">
-                <i class="fa-solid fa-shield-halved"></i>
-              </div>
-              <div class="channel-follow-info">
-                <div class="channel-title-row">
-                  <span class="channel-name">PREMIER LEAGUE</span>
-                  <i class="fa-solid fa-circle-check verified-badge" title="Verified channel"></i>
-                </div>
-                <span class="channel-followers-count">48.2M followers</span>
-              </div>
-              <button type="button" class="channel-follow-btn" onclick="this.textContent = (this.textContent === 'Follow' ? 'Following' : 'Follow'); this.classList.toggle('following');">Follow</button>
+            <div class="channels-empty-state" style="padding: 28px 16px; text-align: center; color: #8696a0;">
+              <i class="fa-solid fa-tower-broadcast" style="font-size: 34px; margin-bottom: 12px; color: #334155; display: block;"></i>
+              <p style="font-size: 14.5px; font-weight: 600; color: #cbd5e1; margin: 0 0 6px 0;">Stay updated on topics you care about</p>
+              <p style="font-size: 12px; color: #64748b; margin: 0 0 16px 0; line-height: 1.4;">Find channels to follow or explore public broadcast wires</p>
+              <button type="button" class="channels-explore-pill-btn" onclick="if(window.broadcastChannelsEngine?.openModal) window.broadcastChannelsEngine.openModal();" style="display: inline-flex; margin: 0 auto; padding: 7px 18px; font-size: 12px;">Explore Channels</button>
             </div>
           </div>
         </section>
