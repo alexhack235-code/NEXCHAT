@@ -4,20 +4,20 @@
 class CanadianCodexSystem {
   constructor() {
     this.provinces = [
-      { id: 'alberta', name: 'Alberta', capital: 'Edmonton / Calgary Hub', file: 'province-alberta.html', icon: '🏔️', landmark: 'Banff Rockies & Calgary Tower', stamp: true },
-      { id: 'bc', name: 'British Columbia', capital: 'Victoria / Vancouver', file: 'province-british-columbia.html', icon: '🌲', landmark: 'Pacific Rim & Sea-to-Sky', stamp: false },
-      { id: 'saskatchewan', name: 'Saskatchewan', capital: 'Regina', file: 'province-saskatchewan.html', icon: '🌾', landmark: 'Wascana Centre & Grain Elevators', stamp: false },
-      { id: 'manitoba', name: 'Manitoba', capital: 'Winnipeg', file: 'province-manitoba.html', icon: '🐻', landmark: 'The Forks & Churchill Polar Coast', stamp: false },
-      { id: 'ontario', name: 'Ontario', capital: 'Toronto', file: 'province-ontario.html', icon: '🏙️', landmark: 'CN Tower & Algonquin Wilderness', stamp: false },
-      { id: 'quebec', name: 'Quebec', capital: 'Quebec City', file: 'province-quebec.html', icon: '⚜️', landmark: 'Château Frontenac & Mont Tremblant', stamp: false },
-      { id: 'nb', name: 'New Brunswick', capital: 'Fredericton', file: 'province-new-brunswick.html', icon: '🌊', landmark: 'Hopewell Rocks & Bay of Fundy', stamp: false },
-      { id: 'ns', name: 'Nova Scotia', capital: 'Halifax', file: 'province-nova-scotia.html', icon: '⚓', landmark: "Peggy's Cove Lighthouse & Citadel", stamp: false },
-      { id: 'pei', name: 'Prince Edward Island', capital: 'Charlottetown', file: 'province-prince-edward-island.html', icon: '🏖️', landmark: 'Green Gables & Red Sandstone Shores', stamp: false },
-      { id: 'nl', name: 'Newfoundland & Labrador', capital: "St. John's", file: 'province-newfoundland.html', icon: '🧊', landmark: 'Signal Hill & Gros Morne Fjords', stamp: false },
-      { id: 'yukon', name: 'Yukon', capital: 'Whitehorse', file: 'province-yukon.html', icon: '⛏️', landmark: 'Miles Canyon & Klondike Gold Trail', stamp: false },
-      { id: 'nwt', name: 'Northwest Territories', capital: 'Yellowknife', file: 'province-northwest-territories.html', icon: '✨', landmark: 'Aurora Capital & Great Slave Lake', stamp: false },
-      { id: 'nunavut', name: 'Nunavut', capital: 'Iqaluit', file: 'province-nunavut.html', icon: '❄️', landmark: 'Frobisher Bay & Arctic Inuksuk Trails', stamp: false },
-      { id: 'ncr', name: 'National Capital Region', capital: 'Ottawa-Gatineau', file: 'province-national-capital.html', icon: '🏛️', landmark: 'Parliament Peace Tower & Rideau Canal', stamp: false }
+      { id: 'alberta', name: 'Alberta', capital: 'Edmonton / Calgary Hub', file: 'province-alberta.html', icon: '', landmark: 'Banff Rockies & Calgary Tower', stamp: true },
+      { id: 'bc', name: 'British Columbia', capital: 'Victoria / Vancouver', file: 'province-british-columbia.html', icon: 'fa-tree', landmark: 'Pacific Rim & Sea-to-Sky', stamp: false },
+      { id: 'saskatchewan', name: 'Saskatchewan', capital: 'Regina', file: 'province-saskatchewan.html', icon: 'fa-wheat-awn', landmark: 'Wascana Centre & Grain Elevators', stamp: false },
+      { id: 'manitoba', name: 'Manitoba', capital: 'Winnipeg', file: 'province-manitoba.html', icon: 'fa-paw', landmark: 'The Forks & Churchill Polar Coast', stamp: false },
+      { id: 'ontario', name: 'Ontario', capital: 'Toronto', file: 'province-ontario.html', icon: '', landmark: 'CN Tower & Algonquin Wilderness', stamp: false },
+      { id: 'quebec', name: 'Quebec', capital: 'Quebec City', file: 'province-quebec.html', icon: '', landmark: 'Château Frontenac & Mont Tremblant', stamp: false },
+      { id: 'nb', name: 'New Brunswick', capital: 'Fredericton', file: 'province-new-brunswick.html', icon: 'fa-water', landmark: 'Hopewell Rocks & Bay of Fundy', stamp: false },
+      { id: 'ns', name: 'Nova Scotia', capital: 'Halifax', file: 'province-nova-scotia.html', icon: 'fa-anchor', landmark: "Peggy's Cove Lighthouse & Citadel", stamp: false },
+      { id: 'pei', name: 'Prince Edward Island', capital: 'Charlottetown', file: 'province-prince-edward-island.html', icon: '', landmark: 'Green Gables & Red Sandstone Shores', stamp: false },
+      { id: 'nl', name: 'Newfoundland & Labrador', capital: "St. John's", file: 'province-newfoundland.html', icon: 'fa-icicles', landmark: 'Signal Hill & Gros Morne Fjords', stamp: false },
+      { id: 'yukon', name: 'Yukon', capital: 'Whitehorse', file: 'province-yukon.html', icon: '', landmark: 'Miles Canyon & Klondike Gold Trail', stamp: false },
+      { id: 'nwt', name: 'Northwest Territories', capital: 'Yellowknife', file: 'province-northwest-territories.html', icon: 'fa-star', landmark: 'Aurora Capital & Great Slave Lake', stamp: false },
+      { id: 'nunavut', name: 'Nunavut', capital: 'Iqaluit', file: 'province-nunavut.html', icon: '', landmark: 'Frobisher Bay & Arctic Inuksuk Trails', stamp: false },
+      { id: 'ncr', name: 'National Capital Region', capital: 'Ottawa-Gatineau', file: 'province-national-capital.html', icon: '', landmark: 'Parliament Peace Tower & Rideau Canal', stamp: false }
     ];
 
     this.loadState();
@@ -127,7 +127,7 @@ class CanadianCodexSystem {
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
             <span style="font-size:18px;">${p.icon}</span>
             <span style="font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; background:${p.stamp ? 'rgba(0,255,204,0.15)' : 'rgba(255,255,255,0.06)'}; color:${p.stamp ? '#00ffcc' : '#888'};">
-              ${p.stamp ? '✓ DISCOVERED' : 'LOCKED'}
+              ${p.stamp ? '[VERIFIED] DISCOVERED' : 'LOCKED'}
             </span>
           </div>
           <div style="font-weight:700; color:#fff; font-size:13px; margin-bottom:2px;">${p.name}</div>
@@ -145,7 +145,7 @@ class CanadianCodexSystem {
         <div style="padding:16px 20px; border-bottom:1px solid rgba(0,229,255,0.3); display:flex; justify-content:space-between; align-items:center;">
           <div>
             <h2 style="margin:0; font-size:18px; color:#00e5ff; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
-              🍁 CANADIAN HERITAGE CODEX & PASSPORT
+              <i class="fa-brands fa-canadian-maple-leaf"></i> CANADIAN HERITAGE CODEX & PASSPORT
             </h2>
             <div style="font-size:12px; color:#aaa; margin-top:2px;">
               Documenting all 10 Provinces & 3 Territories of the Great White North
@@ -166,7 +166,7 @@ class CanadianCodexSystem {
         <div style="padding:12px 20px; border-top:1px solid rgba(255,255,255,0.1); background:rgba(6,12,20,0.8); display:flex; justify-content:space-between; align-items:center; font-size:12px;">
           <span style="color:#888;">Press [F] to close codex | Press [H] for Trans-Canada Highway Warp</span>
           <span style="color:${allCompleted ? '#00ffcc' : '#ffaa00'}; font-weight:bold;">
-            ${allCompleted ? '🏆 GRAND MASTER CANADIAN EXPLORER UNLOCKED (+5,000 NEX)' : 'Explore all realms to unlock Aurora Borealis Quantum Exosuit'}
+            ${allCompleted ? '[TROPHY] GRAND MASTER CANADIAN EXPLORER UNLOCKED (+5,000 NEX)' : 'Explore all realms to unlock Aurora Borealis Quantum Exosuit'}
           </span>
         </div>
       </div>
@@ -184,7 +184,7 @@ class CanadianCodexSystem {
           </div>
         </div>
         <a href="${p.file}" style="padding:6px 14px; background:#00e5ff; color:#0a101a; text-decoration:none; font-weight:bold; font-size:11px; border-radius:4px; letter-spacing:0.5px; white-space:nowrap;">
-          HYPER-WARP 🚀
+          HYPER-WARP <i class="fa-solid fa-rocket"></i>
         </a>
       </div>
     `).join('');
@@ -194,7 +194,7 @@ class CanadianCodexSystem {
         <div style="padding:16px 20px; border-bottom:1px solid rgba(0,229,255,0.3); display:flex; justify-content:space-between; align-items:center;">
           <div>
             <h2 style="margin:0; font-size:18px; color:#00e5ff; letter-spacing:1px; display:flex; align-items:center; gap:8px;">
-              🛣️ TRANS-CANADA HIGHWAY HYPERSPACE PORTAL [H]
+              <i class="fa-solid fa-road"></i> TRANS-CANADA HIGHWAY HYPERSPACE PORTAL [H]
             </h2>
             <div style="font-size:12px; color:#aaa; margin-top:2px;">
               7,821 km Coast-to-Coast High-Speed Gravitational Transit Network

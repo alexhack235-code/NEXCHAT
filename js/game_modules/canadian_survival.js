@@ -90,7 +90,7 @@ class CanadianSurvivalSystem {
           <span>[C] THERMOS: <strong id="thermosCount" style="color:#ffdd59;">3/3</strong></span>
         </div>
         <div id="warmthPrompt" style="display:none; margin-top:6px; padding:4px 6px; background:rgba(255,165,0,0.2); border:1px solid #ffa500; border-radius:4px; font-size:11px; color:#ffd32a; text-align:center;">
-          🔥 Near Warmth: Campfire (+Warmth)
+          <i class="fa-solid fa-fire"></i> Near Warmth: Campfire (+Warmth)
         </div>
       `;
       document.body.appendChild(hud);
@@ -189,7 +189,7 @@ class CanadianSurvivalSystem {
 
       if (this.warmthPrompt) {
         this.warmthPrompt.style.display = 'block';
-        this.warmthPrompt.innerHTML = `🔥 Warmth Zone: <strong>${nearSource.name}</strong> (+Warmth/Healing)`;
+        this.warmthPrompt.innerHTML = `<i class="fa-solid fa-fire"></i> Warmth Zone: <strong>${nearSource.name}</strong> (+Warmth/Healing)`;
       }
     } else {
       this.isNearWarmthSource = false;

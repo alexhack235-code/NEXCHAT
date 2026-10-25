@@ -2701,7 +2701,7 @@ function handleNavigation(section) {
       break;
     case "astroshift":
       console.log("[NEXCHAT] Launching Cyber Arcade Arena");
-      window.location.href = "game.html";
+      window.location.href = "unity_game.html";
       break;
     case "marketplace":
       console.log("[NEXCHAT] Opening Marketplace");
