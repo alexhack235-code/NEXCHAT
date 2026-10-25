@@ -81,8 +81,6 @@ namespace AstroShift.Editor
             // 7. GPU Power Preference: High Performance
             PlayerSettings.WebGL.powerPreference = WebGLPowerPreference.HighPerformance;
 
-            // 8. Static and Dynamic Batching for WebGL
-            PlayerSettings.SetBatchingForPlatform(BuildTarget.WebGL, 1, 1);
 
             // Save Project Settings Asset changes
             AssetDatabase.SaveAssets();

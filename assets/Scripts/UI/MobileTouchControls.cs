@@ -8,6 +8,7 @@ namespace AstroShift.UI
 
         [Header("Virtual Joystick State")]
         public Vector2 joystickInput = Vector2.zero;
+        public Vector2 lookDelta = Vector2.zero;
         public bool isTouchDevice = false;
 
         private Vector2 touchStartPos;
@@ -33,6 +34,7 @@ namespace AstroShift.UI
         void HandleTouchInput()
         {
             joystickInput = Vector2.zero;
+            lookDelta = Vector2.zero;
 
             for (int i = 0; i < Input.touchCount; i++)
             {
@@ -62,6 +64,10 @@ namespace AstroShift.UI
                             joystickInput = Vector2.zero;
                         }
                     }
+                }
+                else if (t.position.x >= Screen.width * 0.45f && t.phase == TouchPhase.Moved)
+                {
+                    lookDelta = t.deltaPosition;
                 }
             }
         }
