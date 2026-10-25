@@ -103,6 +103,11 @@ service cloud.firestore {
     //   - text: string (required, 1 to 1000 chars)
     // Subcollection: likes/{likeId}
     //   - userId: string (required, liker UID)
+    // Subcollection: prediction_bets/{betId}
+    //   - userId: string (required, betting user UID)
+    //   - option: string (optional, chosen outcome or prediction target)
+    //   - amount: number (optional, wager amount)
+    //   - status: string (optional, bet status)
     //
     // Collection: nexbot_configs
     // Document ID: {configId} (Auto-generated)
@@ -194,6 +199,61 @@ service cloud.firestore {
     //   - description: string (optional, max 5000 chars)
     //   - status: string (optional, default 'pending')
     //   - timestamp: timestamp/string (optional)
+    //
+    // Collection: system_announcements
+    // Document ID: {announcementId} (Auto-generated)
+    // Fields:
+    //   - text / message / title: string
+    //   - active / status: bool or string
+    //   - createdAt / timestamp: timestamp or string
+    //
+    // Collection: ip_registrations
+    // Document ID: {ipKey} (Sanitized IP representation or hash)
+    // Fields:
+    //   - ip: string (IPv4 or IPv6 address)
+    //   - count: number (registration count per IP, max 2 allowed)
+    //   - accountUids: list of strings (registered user UIDs)
+    //   - accountEmails: list of strings (registered user emails)
+    //   - lastRegisteredAt: timestamp or number or string
+    //   - lastUsername: string
+    //   - country: string
+    //   - city: string
+    //   - isp: string
+    //   - blocked: bool (IP blocked flag)
+    //   - exempt: bool (IP exempt flag)
+    //
+    // Collection: groupStages
+    // Document ID: {stageId} (Auto-generated or custom stage ID)
+    // Fields:
+    //   - hostUid: string (required on delete, host user UID)
+    //   - title / name: string (optional, stage title)
+    //   - status: string (optional, 'live' | 'ended' | 'scheduled')
+    //   - participants / speakers: list (optional)
+    //
+    // Collection: p2pSignaling
+    // Document ID: {channelId} (Auto-generated or channel ID)
+    // Fields:
+    //   - type: string (optional, signal message type)
+    //   - signal / sdp: string or map (optional, WebRTC signaling payload)
+    //   - callerUid / senderId: string (optional)
+    //   - recipientUid / receiverId: string (optional)
+    //   - timestamp: timestamp/number (optional)
+    //
+    // Collection: system_settings
+    // Document ID: {settingId} ('global_lockdown', 'reels_state', 'chat_state')
+    // Fields:
+    //   - active / readOnly: bool (optional)
+    //   - activatedAt / updatedAt: string/timestamp (optional)
+    //   - activatedBy / updatedBy: string (optional)
+    //
+    // Collection: admin_audit_logs
+    // Document ID: {logId} (Auto-generated)
+    // Fields:
+    //   - action: string ('FULFILLMENT_TOKEN_CREDIT', 'FULFILLMENT_BADGE_GRANT', etc.)
+    //   - targetUid: string (target user UID)
+    //   - targetUsername: string (target username)
+    //   - amount / tier / certHash / reason / paymentRef / operator: string or number
+    //   - timestamp: timestamp/string
     // ===============================================================
 
     // ===============================================================
@@ -213,9 +273,9 @@ service cloud.firestore {
     // 3. Super Admin Verification (Bootstrap email, token claim, or admins collection)
     function isSuperAdmin() {
       return isAuthenticated() && (
-        (request.auth.token.email == 'demonalexander526@gmail.com' && request.auth.token.email_verified == true) ||
+        (request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com']) ||
         request.auth.token.admin == true ||
-        request.auth.uid == 'demonalexander526' ||
+        request.auth.uid in ['demonalexander526', 'alexhack235'] ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
       );
     }
@@ -951,6 +1011,14 @@ service cloud.firestore {
           isSuperAdmin()
         );
       }
+
+      // Reels Prediction Pools & Bets Subcollection
+      match /prediction_bets/{betId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+        allow update: if isSuperAdmin() || (isAuthenticated() && request.auth.uid == resource.data.userId);
+        allow delete: if isSuperAdmin();
+      }
     }
 
     // ===============================================================
@@ -1485,6 +1553,12 @@ service cloud.firestore {
                       isValidIpList('knownIps', 4);
     }
 
+    // System Settings (Global Lockdown, Reels State, Chat State toggled from Admin Dashboard)
+    match /system_settings/{settingId} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+    }
+
     match /adminLogs/{logId} {
       allow read, write: if isSuperAdmin() &&
                             isValidOptionalString('ipAddress', 0, 45) &&
@@ -1499,6 +1573,11 @@ service cloud.firestore {
                             isValidOptionalString('lastIp', 0, 45) &&
                             isValidIpList('ipAddresses', 4) &&
                             isValidIpList('verifiedIps', 4);
+    }
+
+    // Admin Audit Logs (Fulfillment actions, badge grants, token credits recorded by Admin Dashboard)
+    match /admin_audit_logs/{logId} {
+      allow read, write: if isSuperAdmin();
     }
 
     match /adminSecurityLogs/{logId} {
@@ -1574,6 +1653,16 @@ service cloud.firestore {
     match /userRegistrations/{regId} {
       allow create: if isAuthenticated();
       allow read, write: if isSuperAdmin();
+    }
+
+    // IP Registration Rate Limiting (Used to limit account creation to max 2 accounts per IP and monitor Sybil accounts in Admin Dashboard)
+    match /ip_registrations/{ipKey} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['ip', 'count', 'accountUids', 'accountEmails', 'lastRegisteredAt', 'lastUsername', 'country', 'city', 'isp', 'blocked', 'exempt']);
+      allow update: if isSuperAdmin() || (
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count', 'accountUids', 'accountEmails', 'lastRegisteredAt', 'lastUsername', 'country', 'city', 'isp'])
+      );
+      allow delete: if isSuperAdmin();
     }
 
     match /videoActivity/{vidActId} {
@@ -1653,6 +1742,12 @@ service cloud.firestore {
     // ===============================================================
     match /announcements/{announcementId} {
       allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
+    }
+
+    // System Announcements (public & authenticated can read system announcements from admin dashboard)
+    match /system_announcements/{announcementId} {
+      allow read: if true;
       allow write: if isSuperAdmin();
     }
 
@@ -2247,7 +2342,24 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // 21. ZERO-TRUST DEFAULT DENY BARRIER
+    // 21. GROUP AUDIO STAGES
+    // ===============================================================
+    match /groupStages/{stageId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isSuperAdmin() || (isAuthenticated() && resource.data.hostUid == request.auth.uid);
+    }
+
+    // ===============================================================
+    // 22. P2P SIGNALING CHANNELS
+    // ===============================================================
+    match /p2pSignaling/{channelId} {
+      allow read, write: if isAuthenticated();
+      allow delete: if isAuthenticated();
+    }
+
+    // ===============================================================
+    // 23. ZERO-TRUST DEFAULT DENY BARRIER
     // ===============================================================
     match /{document=**} {
       allow read, write: if false;

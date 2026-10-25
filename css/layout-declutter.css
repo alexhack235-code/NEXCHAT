@@ -2049,7 +2049,7 @@
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: clamp(140px, 40vw, 360px) !important;
+  max-width: clamp(185px, 60vw, 420px) !important;
 }
 
 /* Streamlined group action buttons: Video call, Phone call, Menu */
@@ -2531,4 +2531,181 @@ body.mobile-preview[data-active-section="chat"] .top-header {
   height: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
+}
+
+
+/* Strictly contain conversation viewport and eliminate message cut-off */
+.chat-detail-view,
+.messages-area,
+.messages-container,
+.messages-list {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+}
+
+body.mobile-preview .chat-detail-view {
+  max-width: 390px !important;
+  width: 390px !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+body.mobile-preview .messages-area,
+body.mobile-preview .messages-container {
+  max-width: 390px !important;
+  width: 390px !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+body.mobile-preview .messages-area::-webkit-scrollbar,
+body.mobile-preview .messages-container::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+body.mobile-preview .messages-list {
+  max-width: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+  overflow-x: hidden !important;
+}
+
+@media (max-width: 899px) {
+  .messages-area,
+  .messages-container {
+    padding: 12px 14px !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .messages-area::-webkit-scrollbar,
+  .messages-container::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .messages-list {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .message-wrapper {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 3px 0 !important;
+    margin: 3px 0 !important;
+  }
+
+  .message-wrapper.sent {
+    display: flex !important;
+    justify-content: flex-end !important;
+    padding: 3px 0 !important;
+    margin: 3px 0 !important;
+  }
+
+  .message-bubble {
+    max-width: 82% !important;
+    box-sizing: border-box !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  .message-bubble.sent {
+    margin-right: 0 !important;
+    border-radius: 12px 2px 12px 12px !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35) !important;
+  }
+}
+
+
+/* Strictly eliminate any obscuring filter or vignette */
+.drm-obscure-active {
+  filter: none !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  user-select: text !important;
+}
+
+/* Ensure active conversation header title breathes fully without clipping */
+.chat-detail-view.group-chat #chatName,
+.chat-detail-header.group-chat #chatName,
+.chat-detail-header #chatName,
+#chatName {
+  max-width: clamp(160px, 60vw, 420px) !important;
+  font-size: 15.5px !important;
+}
+
+/* WhatsApp Emerald Sent Bubble - 100% Solid & Crisp with Zero Edge Cut */
+.message-bubble.sent,
+.message.sent,
+.my-message {
+  background: #005c4b !important;
+  background-color: #005c4b !important;
+  color: #ffffff !important;
+  border-radius: 12px 2px 12px 12px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+/* Strictly eliminate off-screen drawer box-shadow bleed (Zero Cut Artifact) */
+.nex-thread-drawer:not(.open),
+.nex-starred-drawer:not(.open),
+.nex-group-admin-drawer:not(.open),
+.nex-shared-media-drawer:not(.open) {
+  box-shadow: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+
+/* Responsive breathing room for conversation header on mobile */
+@media (max-width: 899px) {
+  .chat-detail-header {
+    padding: 0 8px !important;
+  }
+  .chat-header-profile {
+    gap: 8px !important;
+    margin-left: 4px !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+  .header-avatar {
+    width: 38px !important;
+    height: 38px !important;
+  }
+  #chatName,
+  .chat-detail-view.group-chat #chatName,
+  .chat-detail-header.group-chat #chatName {
+    font-size: 15px !important;
+    letter-spacing: -0.2px !important;
+    max-width: 100% !important;
+  }
+  .status-subtitle,
+  #statusText,
+  .chat-detail-view.group-chat #statusText {
+    font-size: 11.5px !important;
+    max-width: 100% !important;
+  }
+  .chat-detail-header-actions {
+    gap: 4px !important;
+  }
+  .chat-detail-header-actions .header-icon-btn,
+  .chat-detail-header-actions .chat-action-call,
+  .chat-detail-header-actions .three-dots-menu {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 16px !important;
+  }
 }

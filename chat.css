@@ -10423,7 +10423,7 @@ body.chat-size-extra-large .message-bubble {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: clamp(140px, 40vw, 360px) !important;
+  max-width: clamp(185px, 60vw, 420px) !important;
 }
 
 /* Streamlined group action buttons: Video call, Phone call, Menu */

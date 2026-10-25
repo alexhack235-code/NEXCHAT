@@ -29,6 +29,9 @@
   } catch (_) {}
 
   function cleanOverlays() {
+    const messagesArea = document.getElementById('messages-area');
+    if (messagesArea) messagesArea.classList.remove('drm-obscure-active');
+
     const shield = document.getElementById('nexSecurityShield');
     if (shield) shield.remove();
 
@@ -248,15 +251,14 @@
     if (!messagesList) return;
 
     messagesList.innerHTML = `
-      <div style="text-align: center; margin: 14px 0 18px 0;">
-        <span style="background: rgba(17, 24, 39, 0.85); color: #8696a0; font-size: 11.5px; padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">
-          <i class="fa-solid fa-lock" style="font-size: 9.5px; color: #00ff66;"></i>
-          Messages and calls are end-to-end encrypted. No one outside of this chat can read or listen to them.
+      <div style="text-align: center; margin: 8px auto 14px auto; max-width: 90%; width: 100%; box-sizing: border-box;">
+        <span style="background: rgba(17, 24, 39, 0.85); color: #8696a0; font-size: 11px; padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); display: inline-block; line-height: 1.45; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+          <i class="fa-solid fa-lock" style="font-size: 9.5px; color: #00ff66; margin-right: 4px;"></i>Messages and calls are end-to-end encrypted. No one outside of this chat can read or listen to them.
         </span>
       </div>
 
       <!-- Received Message from ChronEX AI -->
-      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; margin: 6px 0; padding: 0 12px;">
+      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; margin: 6px 0; padding: 0 4px; width: 100%; box-sizing: border-box;">
         <div class="message-bubble received" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
           <div class="message-text-content" style="margin: 0;">Greetings operative! Quantum neural matrix is calibrated and all secure vaults are synchronized.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #8696a0;">
@@ -266,8 +268,8 @@
       </div>
 
       <!-- Sent Message (Emerald #005c4b) -->
-      <div class="message-wrapper sent" style="display: flex; justify-content: flex-end; margin: 6px 0; padding: 0 12px;">
-        <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: linear-gradient(135deg, #005c4b 0%, #059669 100%); color: #ffffff; font-size: 14px; line-height: 1.45;">
+      <div class="message-wrapper sent" style="display: flex; justify-content: flex-end; margin: 6px 0; padding: 0 4px; width: 100%; box-sizing: border-box;">
+        <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 76%; word-wrap: break-word; box-sizing: border-box; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #005c4b !important; color: #ffffff; font-size: 14px; line-height: 1.45;">
           <div class="message-text-content" style="margin: 0;">Excellent! The WhatsApp interface pass and 4-tab bottom navigation with Market Hub are completely seamless.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: rgba(255, 255, 255, 0.75);">
             <span>10:32 AM</span>
@@ -277,7 +279,7 @@
       </div>
 
       <!-- Received Message from ChronEX AI -->
-      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; margin: 6px 0; padding: 0 12px;">
+      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; margin: 6px 0; padding: 0 4px; width: 100%; box-sizing: border-box;">
         <div class="message-bubble received" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
           <div class="message-text-content" style="margin: 0;">How does the contextual reply quote styling render in this channel?</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #8696a0;">
@@ -287,8 +289,8 @@
       </div>
 
       <!-- Sent Message with Reply Quote -->
-      <div class="message-wrapper sent" style="display: flex; justify-content: flex-end; margin: 6px 0; padding: 0 12px;">
-        <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: linear-gradient(135deg, #005c4b 0%, #059669 100%); color: #ffffff; font-size: 14px; line-height: 1.45;">
+      <div class="message-wrapper sent" style="display: flex; justify-content: flex-end; margin: 6px 0; padding: 0 4px; width: 100%; box-sizing: border-box;">
+        <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 76%; word-wrap: break-word; box-sizing: border-box; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #005c4b !important; color: #ffffff; font-size: 14px; line-height: 1.45;">
           <div class="reply-quote" style="background: rgba(0, 0, 0, 0.22); border-left: 3.5px solid #25d366; padding: 6px 10px; margin-bottom: 6px; border-radius: 6px; font-size: 12px; line-height: 1.35;">
             <strong style="color: #bbf7d0; display: block; font-weight: 700; margin-bottom: 2px; font-size: 12px;">
               <i class="fa-solid fa-reply" style="font-size: 9.5px; margin-right: 5px; opacity: 0.85;"></i>ChronEX AI
@@ -341,15 +343,14 @@
     if (!messagesList) return;
 
     messagesList.innerHTML = `
-      <div style="text-align: center; margin: 14px 0 18px 0;">
-        <span style="background: rgba(17, 24, 39, 0.85); color: #8696a0; font-size: 11.5px; padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">
-          <i class="fa-solid fa-shield-halved" style="font-size: 9.5px; color: #00ff66;"></i>
-          Alpha Nexus Core created by NEXCHAT System. End-to-end encrypted.
+      <div style="text-align: center; margin: 8px auto 14px auto; max-width: 90%; width: 100%; box-sizing: border-box;">
+        <span style="background: rgba(17, 24, 39, 0.85); color: #8696a0; font-size: 11px; padding: 5px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); display: inline-block; line-height: 1.45; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+          <i class="fa-solid fa-shield-halved" style="font-size: 9.5px; color: #00ff66; margin-right: 4px;"></i>Alpha Nexus Core created by NEXCHAT System. End-to-end encrypted.
         </span>
       </div>
 
       <!-- Received Message from ChronEX AI (Cyan #06b6d4) -->
-      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 12px; gap: 8px;">
+      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 4px; gap: 8px; width: 100%; box-sizing: border-box;">
         <img src="chronex-ai.jpg" alt="ChronEX AI" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #06b6d4; flex-shrink: 0; margin-bottom: 2px;">
         <div class="message-bubble received" style="position: relative; padding: 6px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
           <div style="font-size: 12px; font-weight: 700; color: #06b6d4; margin-bottom: 3px; letter-spacing: 0.3px;">~ ChronEX AI</div>
@@ -361,7 +362,7 @@
       </div>
 
       <!-- Received Message from Security Enclave (Magenta #ec4899) with Quote -->
-      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 12px; gap: 8px;">
+      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 4px; width: 100%; box-sizing: border-box; gap: 8px;">
         <img src="logo.jpg" alt="Security Enclave" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #ec4899; flex-shrink: 0; margin-bottom: 2px;">
         <div class="message-bubble received" style="position: relative; padding: 6px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
           <div style="font-size: 12px; font-weight: 700; color: #ec4899; margin-bottom: 3px; letter-spacing: 0.3px;">~ Security Enclave</div>
@@ -377,7 +378,7 @@
       </div>
 
       <!-- Received Message from Support Node (Amber #f59e0b) -->
-      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 12px; gap: 8px;">
+      <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 4px; width: 100%; box-sizing: border-box; gap: 8px;">
         <img src="logo.jpg" alt="NEXCHAT Support" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #f59e0b; flex-shrink: 0; margin-bottom: 2px;">
         <div class="message-bubble received" style="position: relative; padding: 6px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
           <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 3px; letter-spacing: 0.3px;">~ NEXCHAT Support</div>
@@ -389,8 +390,8 @@
       </div>
 
       <!-- Sent Message from You (Emerald #005c4b) -->
-      <div class="message-wrapper sent" style="display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 12px;">
-        <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: linear-gradient(135deg, #005c4b 0%, #059669 100%); color: #ffffff; font-size: 14px; line-height: 1.45;">
+      <div class="message-wrapper sent" style="display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 4px; width: 100%; box-sizing: border-box;">
+        <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 76%; word-wrap: break-word; box-sizing: border-box; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #005c4b !important; color: #ffffff; font-size: 14px; line-height: 1.45;">
           <div class="message-text-content" style="margin: 0;">Verified! Taking comprehensive audit screenshots now.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: rgba(255, 255, 255, 0.75);">
             <span>09:24 AM</span>

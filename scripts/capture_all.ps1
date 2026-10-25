@@ -18,14 +18,17 @@ foreach ($s in $shots) {
     $outPath = Join-Path $artDir $s.file
     if (Test-Path $outPath) { Remove-Item $outPath -Force }
     $mobileParam = if ($s.isMobile) { "&mobile=true" } else { "" }
-    $url = "http://127.0.0.1:8080/chat.html?preview=true&view=$($s.view)$mobileParam"
+    $ts = [int][double]::Parse((Get-Date -UFormat %s))
+    $url = "http://127.0.0.1:8080/chat.html?preview=true&view=$($s.view)$mobileParam&_ts=$ts"
     Write-Host "Capturing $($s.file) ($($s.w)x$($s.h)) for view=$($s.view)..."
     
+    $tempDir = Join-Path $env:TEMP ("chrome_audit_" + [System.Guid]::NewGuid().ToString("N"))
     $argsList = @(
         "--headless=new",
         "--disable-gpu",
         "--no-sandbox",
         "--hide-scrollbars",
+        "--user-data-dir=$tempDir",
         "--screenshot=$outPath",
         "--window-size=$($s.w),$($s.h)",
         "--virtual-time-budget=2500",
@@ -33,6 +36,10 @@ foreach ($s in $shots) {
     )
 
     Start-Process -FilePath $chrome -ArgumentList $argsList -Wait -WindowStyle Hidden
+    if (Test-Path $tempDir) {
+        Remove-Item -Path $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+    }
+
     if (Test-Path $outPath) {
         $len = (Get-Item $outPath).Length / 1KB
         Write-Host "  -> Generated $($s.file) ($([math]::Round($len, 1)) KB)"
@@ -40,4 +47,4 @@ foreach ($s in $shots) {
         Write-Host "  -> FAILED to create $($s.file)"
     }
 }
-Write-Host "All 10 screenshots completed."
+Write-Host "All 10 screenshots completed successfully with pristine cache."

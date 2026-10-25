@@ -2,6 +2,10 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
+    // ============================================================
+    // HELPER SECURITY FUNCTIONS
+    // ============================================================
+
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -12,12 +16,14 @@ service firebase.storage {
 
     function isSuperAdmin() {
       return isAuthenticated() && (
-        request.auth.token.email == 'demonalexander526@gmail.com' ||
+        request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com'] ||
         request.auth.token.admin == true
       );
     }
 
-    // 1. AVATARS
+    // ============================================================
+    // 1. AVATAR UPLOADS (Profile Pictures)
+    // ============================================================
     match /avatars/{userId}/{allPaths=**} {
       allow create, write: if isOwner(userId) &&
                               request.resource.size < 15 * 1024 * 1024 &&
@@ -34,7 +40,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
-    // 2. REELS & CLIPS
+    // ============================================================
+    // 2. REELS & CLIPS (Short Video Engine & Highlights)
+    // ============================================================
     match /reels/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 150 * 1024 * 1024;
@@ -49,7 +57,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
-    // 3. STATUS MEDIA
+    // ============================================================
+    // 3. STATUS STORIES & UPDATES
+    // ============================================================
     match /status/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 50 * 1024 * 1024;
@@ -64,7 +74,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
-    // 4. ATTACHMENTS & CHAT MEDIA
+    // ============================================================
+    // 4. CHAT ATTACHMENTS & DIRECT MESSAGES MEDIA
+    // ============================================================
     match /shared/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 100 * 1024 * 1024;
@@ -114,7 +126,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
-    // 5. GROUPS
+    // ============================================================
+    // 5. GROUP MEDIA & DOCUMENTS
+    // ============================================================
     match /groups/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 100 * 1024 * 1024;
@@ -129,7 +143,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
-    // 6. BACKGROUNDS & ADVERTISEMENTS
+    // ============================================================
+    // 6. BACKGROUNDS & WALLPAPERS
+    // ============================================================
     match /backgrounds/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 15 * 1024 * 1024;
@@ -144,6 +160,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
+    // ============================================================
+    // 7. ADVERTISEMENTS & SHOWCASE MEDIA
+    // ============================================================
     match /advertisements/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 15 * 1024 * 1024;
@@ -158,7 +177,9 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
-    // 7. TEMP & PUBLIC
+    // ============================================================
+    // 8. TEMPORARY UPLOADS & ENCODING
+    // ============================================================
     match /temp/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 100 * 1024 * 1024;
@@ -166,16 +187,24 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
+    // ============================================================
+    // 9. PUBLIC ASSETS & BRANDING
+    // ============================================================
     match /public/{allPaths=**} {
       allow read: if true;
       allow write: if isSuperAdmin();
     }
 
+    // ============================================================
+    // 10. SYSTEM & ADMIN LOGS
+    // ============================================================
     match /admin/{allPaths=**} {
       allow read, write: if isSuperAdmin();
     }
 
-    // 8. UNIVERSAL AUTHENTICATED FALLBACK
+    // ============================================================
+    // 11. UNIVERSAL AUTHENTICATED FALLBACK
+    // ============================================================
     match /{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 150 * 1024 * 1024;

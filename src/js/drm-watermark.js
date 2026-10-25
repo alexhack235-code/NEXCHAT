@@ -124,13 +124,7 @@
     }
 
     bindWindowVisibilityShield() {
-      window.addEventListener('blur', () => {
-        if (this.enabled) {
-          const area = document.getElementById('messages-area');
-          if (area) area.classList.add('drm-obscure-active');
-        }
-      });
-
+      // Window blur obscuring intentionally neutralized to prevent chat fading/cutting on mobile and focus loss
       window.addEventListener('focus', () => {
         const area = document.getElementById('messages-area');
         if (area) area.classList.remove('drm-obscure-active');
@@ -145,7 +139,7 @@
       }
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(`🛡️ DRM Enclave: ${reason}! Message contents shielded.`, 'warning', 3000);
+        window.showNotif(`️ DRM Enclave: ${reason}! Message contents shielded.`, 'warning', 3000);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('zap');
     }
