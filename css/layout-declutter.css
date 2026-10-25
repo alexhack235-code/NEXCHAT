@@ -2127,3 +2127,408 @@
   opacity: 0.85 !important;
   color: #ffd279 !important;
 }
+/* --------------------------------------------------------------------------
+   WHATSAPP PIXEL-PERFECT AUDIT ENFORCEMENT & MOBILE DECLUTTER
+   -------------------------------------------------------------------------- */
+
+/* 1. Global Overlay Banner Dismissal & Clean Header Alignment */
+#pwa-install-banner,
+.pwa-banner,
+#nexSecurityShield,
+#nexAppInstallModal,
+#networkStatusPill,
+#btnOpenGroupStage {
+  display: none !important;
+}
+
+/* 2. WhatsApp 2-Part Input Bar: Eliminate extraneous micro-docks & extra buttons */
+#nexComposerFormatDock,
+.nex-composer-format-dock,
+#nextgenPredictiveBar,
+.nextgen-predictive-bar,
+#smartReplyBar,
+#soundboardDock,
+#predictiveWordBar,
+#voiceDictateBtn,
+#soundboardToggleBtn,
+#audio-send-btn,
+.message-form > .input-btn:not(.fab-circle-btn) {
+  display: none !important;
+}
+
+.message-input-area {
+  padding: 6px 8px 8px 8px !important;
+  background: #0b141a !important;
+  border-top: none !important;
+}
+
+.message-form {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
+.message-input-wrapper {
+  flex: 1 1 auto !important;
+  min-height: 44px !important;
+  background: #1f2c34 !important;
+  border-radius: 24px !important;
+  border: none !important;
+  padding: 4px 10px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.message-input-wrapper .message-input {
+  flex: 1 1 auto !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #e9edef !important;
+  font-size: 15px !important;
+  font-family: inherit !important;
+  padding: 8px 4px !important;
+  max-height: 120px !important;
+}
+
+.message-form .fab-circle-btn {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 50% !important;
+  background: #25d366 !important;
+  color: #0b141a !important;
+  border: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  font-size: 18px !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Ensure only the active FAB displays (Mic when empty, Send when drafting) */
+#audio-record-btn {
+  display: flex !important;
+}
+#audio-send-btn,
+#sendBtn {
+  display: none !important;
+}
+.message-form.has-text #audio-record-btn,
+.message-form.has-draft #audio-record-btn {
+  display: none !important;
+}
+.message-form.has-text #sendBtn,
+.message-form.has-draft #sendBtn {
+  display: flex !important;
+}
+
+/* Hide AI Polish wand when draft is empty; show dynamically when typing */
+#aiPolishInputBtn {
+  display: none !important;
+}
+.message-form.has-text #aiPolishInputBtn,
+.message-form.has-draft #aiPolishInputBtn,
+#aiPolishInputBtn.visible {
+  display: inline-flex !important;
+}
+
+/* 3. Bottom Navigation: Precise 4-Tab Equal Flex Distribution */
+@media (max-width: 899px) {
+  .bottom-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    width: 100% !important;
+    padding: 0 4px env(safe-area-inset-bottom, 0px) !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .bottom-nav .nav-item {
+    flex: 1 1 0 !important;
+    max-width: 84px !important;
+    min-width: 0 !important;
+    padding: 6px 2px !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+  }
+
+  .bottom-nav .nav-item .nav-icon-wrapper {
+    width: 52px !important;
+    height: 28px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 14px !important;
+  }
+
+  .bottom-nav .nav-item .nav-label {
+    font-size: 11px !important;
+    line-height: 1 !important;
+  }
+}
+
+/* 4. Calls History Quick Action Circles: Perfect 4-Pill Alignment */
+.calls-quick-actions-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  padding: 12px 12px 8px 12px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  gap: 6px !important;
+}
+
+.calls-quick-action-item {
+  flex: 1 1 25% !important;
+  min-width: 0 !important;
+  max-width: 25% !important;
+  width: 25% !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.calls-action-circle {
+  width: 46px !important;
+  height: 46px !important;
+  min-width: 46px !important;
+  font-size: 16.5px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+}
+
+.calls-action-label {
+  font-size: 11px !important;
+  color: #8696a0 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+}
+/* Hide generic top header on Updates and Calls views so only the clean Updates/Calls App Bar shows */
+.app[data-active-section="updates"] .top-header,
+.app[data-active-section="status"] .top-header,
+.app[data-active-section="calls"] .top-header {
+  display: none !important;
+}
+
+/* 5. WhatsApp Clean Mobile Overrides & Preview Strictness */
+body[data-active-section="updates"] .top-header,
+body[data-active-section="status"] .top-header,
+body[data-active-section="calls"] .top-header,
+.app[data-active-section="updates"] .top-header,
+.app[data-active-section="status"] .top-header,
+.app[data-active-section="calls"] .top-header {
+  display: none !important;
+}
+
+.bottom-nav .nav-label {
+  font-size: 11px !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+html.mobile-preview,
+body.mobile-preview,
+body.mobile-preview .app {
+  width: 390px !important;
+  max-width: 390px !important;
+  min-width: 390px !important;
+  margin: 0 !important;
+  overflow-x: hidden !important;
+}
+
+body.mobile-preview .top-header,
+body.mobile-preview .chat-detail-header,
+body.mobile-preview .chat-list-view,
+body.mobile-preview .call-history-container,
+body.mobile-preview .status-container,
+body.mobile-preview .bottom-nav,
+body.mobile-preview .message-input-area,
+body.mobile-preview .chat-main {
+  width: 390px !important;
+  max-width: 390px !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.mobile-preview .chat-fab-cluster,
+body.mobile-preview .calls-fab,
+body.mobile-preview .updates-fab-container {
+  left: 318px !important;
+  right: auto !important;
+}
+
+.message-wrapper.sent {
+  padding-right: 6px !important;
+}
+.message-bubble.sent {
+  margin-right: 4px !important;
+}
+
+/* ==========================================================================
+   WHATSAPP 100% REFINEMENTS (Zero Overlap, Clean 4 Tabs, Pristine Inputs)
+   ========================================================================== */
+
+/* 1. Strictly hide desktop navigation items on mobile & mobile preview */
+.bottom-nav .desktop-only-nav,
+.bottom-nav .nav-item.desktop-only-nav,
+body.mobile-preview .bottom-nav .desktop-only-nav,
+body.mobile-preview .bottom-nav .nav-item.desktop-only-nav {
+  display: none !important;
+  visibility: hidden !important;
+  position: absolute !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+@media (max-width: 899px) {
+  .bottom-nav .desktop-only-nav,
+  .bottom-nav .nav-item.desktop-only-nav {
+    display: none !important;
+    visibility: hidden !important;
+    position: absolute !important;
+    pointer-events: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #camshotPill,
+  .camshot-badge,
+  .camshot-pill {
+    display: none !important;
+  }
+
+  .header-left {
+    gap: 8px !important;
+  }
+}
+
+body.mobile-preview #camshotPill,
+body.mobile-preview .camshot-badge {
+  display: none !important;
+}
+
+/* 2. Hide Bottom Nav completely inside conversation views on mobile */
+body.mobile-preview .chat-main[data-layout="conversation"] ~ .bottom-nav,
+body.mobile-preview .chat-detail-view:not([style*="display: none"]) ~ .bottom-nav,
+body[data-active-section="chat"] .bottom-nav,
+.app[data-active-section="chat"] .bottom-nav {
+  display: none !important;
+}
+
+@media (max-width: 899px) {
+  .chat-main[data-layout="conversation"] ~ .bottom-nav,
+  .chat-detail-view:not(.hidden):not([style*="display: none"]) ~ .bottom-nav,
+  body.in-conversation .bottom-nav,
+  body[data-active-section="chat"] .bottom-nav,
+  .app[data-active-section="chat"] .bottom-nav {
+    display: none !important;
+  }
+}
+
+/* 3. Perfect 4-Tab Bottom Nav on Mobile */
+body.mobile-preview .bottom-nav {
+  display: flex !important;
+  justify-content: space-around !important;
+  align-items: center !important;
+  width: 390px !important;
+  max-width: 390px !important;
+  padding: 0 4px env(safe-area-inset-bottom, 0px) !important;
+  box-sizing: border-box !important;
+}
+
+body.mobile-preview .bottom-nav .nav-item {
+  flex: 1 1 25% !important;
+  max-width: 25% !important;
+  width: 25% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  padding: 6px 2px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+body.mobile-preview .bottom-nav .nav-item .nav-label {
+  font-size: 11px !important;
+  color: #8696a0 !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  text-align: center !important;
+  line-height: 1.2 !important;
+}
+
+body.mobile-preview .bottom-nav .nav-item.active .nav-label {
+  color: #e9edef !important;
+  font-weight: 700 !important;
+}
+
+/* 4. Conversation 2-Part Input Bar & Sent Bubble Margins */
+#sticker-btn {
+  display: none !important;
+}
+
+.message-input-wrapper {
+  gap: 8px !important;
+  padding: 6px 14px !important;
+}
+
+.message-input-wrapper .message-input {
+  font-size: 15px !important;
+  line-height: 20px !important;
+  min-height: 20px !important;
+  height: 24px !important;
+  padding: 2px 4px !important;
+}
+
+.message-wrapper.sent {
+  padding-right: 14px !important;
+}
+
+.message-bubble.sent {
+  margin-right: 4px !important;
+}
+
+/* Hide top-header on direct & group conversations */
+body[data-active-section="chat"] .top-header,
+.app[data-active-section="chat"] .top-header,
+body.mobile-preview[data-active-section="chat"] .top-header {
+  display: none !important;
+}
+
+/* Strictly eliminate injected dock buttons next to the WhatsApp input action FAB */
+#groupLuckyDropBtn,
+#groupSoundboardBtn,
+.group-tool-dock-btn {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
