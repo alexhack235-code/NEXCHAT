@@ -2582,7 +2582,7 @@ ${text}`;
 
         const sampleMembers = [
           { name: 'Alex Hack', role: 'owner', status: 'Online - Building NEXCHAT' },
-          { name: 'Sarah Sentinel', role: 'admin', status: 'Online - Monitoring' },
+          { name: 'Security Sentinel', role: 'admin', status: 'Online - Monitoring' },
           { name: 'Dev Swarm', role: 'vip', status: 'In voice conference' },
           { name: 'System Moderator', role: 'mod', status: 'Active Sentinel' },
           { name: 'Guest Operative', role: 'member', status: 'Idle' }

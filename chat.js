@@ -16882,62 +16882,6 @@ async function loadCallHistory() {
       });
     }
 
-    // Default sample calls matching WhatsApp reference layout (media_1792902876552_20f913d3.jpg)
-    const sampleCalls = [
-      {
-        id: 'sample-1',
-        contactId: 'sarah_jenkins',
-        name: 'Sarah Jenkins',
-        profilePic: 'logo.jpg',
-        isOutgoing: false,
-        isMissed: true,
-        isVideo: false,
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-        timestampStr: 'Today, 02:56',
-        statusSubtitle: 'Silenced by Do Not Disturb',
-        isFavourite: true
-      },
-      {
-        id: 'sample-2',
-        contactId: 'alex_rivera',
-        name: 'Alex Rivera',
-        profilePic: 'logo.jpg',
-        isOutgoing: true,
-        isMissed: false,
-        isVideo: true,
-        timestamp: new Date(Date.now() - 26 * 60 * 60 * 1000),
-        timestampStr: 'Yesterday, 15:30',
-        statusSubtitle: '14 mins',
-        isFavourite: true
-      },
-      {
-        id: 'sample-3',
-        contactId: 'vip_trading_desk',
-        name: 'Crypto Alpha VIP',
-        profilePic: 'logo.jpg',
-        isOutgoing: false,
-        isMissed: false,
-        isVideo: false,
-        timestamp: new Date(new Date().getFullYear(), 9, 16, 14, 18),
-        timestampStr: '16 October, 14:18',
-        statusSubtitle: '42 mins',
-        isFavourite: false
-      },
-      {
-        id: 'sample-4',
-        contactId: 'elena_rostova',
-        name: 'Elena Rostova',
-        profilePic: 'logo.jpg',
-        isOutgoing: false,
-        isMissed: true,
-        isVideo: true,
-        timestamp: new Date(new Date().getFullYear(), 9, 15, 9, 12),
-        timestampStr: '15 October, 09:12',
-        statusSubtitle: 'Silenced by Do Not Disturb',
-        isFavourite: false
-      }
-    ];
-
     let renderedCalls = [];
 
     if (uniqueCalls.length > 0) {
@@ -16967,9 +16911,6 @@ async function loadCallHistory() {
           isFavourite: false
         });
       }
-    } else {
-      // If no calls in Firestore or fresh account, populate with clean WhatsApp sample entries
-      renderedCalls = sampleCalls;
     }
 
     if (renderedCalls.length === 0) {
@@ -16977,8 +16918,7 @@ async function loadCallHistory() {
         <div class="call-history-empty-state" style="text-align: center; padding: 60px 20px; color: #888;">
           <div style="font-size: 52px; margin-bottom: 16px; color: #334155;"><i class="fa-solid fa-phone-slash"></i></div>
           <p style="font-size: 17px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">No Recent Calls</p>
-          <p style="font-size: 13px; color: #64748b; margin-bottom: 18px;">Your voice and video call logs will appear here</p>
-          <button type="button" class="calls-submit-btn" onclick="window.restoreSampleCalls()" style="font-size: 12.5px; padding: 7px 16px;">Restore Sample Log</button>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 18px;">To start calling contacts who have NEXCHAT, tap the phone button below.</p>
         </div>
       `;
       return;
@@ -17359,33 +17299,64 @@ function setupNewCallModal() {
   }
 }
 
-function openNewCallModal() {
+async function openNewCallModal() {
   const modal = document.getElementById('callsNewCallModal');
   const list = document.getElementById('callsNewCallList');
   if (!modal) return;
 
   if (list) {
-    const contacts = [
-      { id: 'sarah_jenkins', name: 'Sarah Jenkins', pic: 'logo.jpg' },
-      { id: 'alex_rivera', name: 'Alex Rivera', pic: 'logo.jpg' },
-      { id: 'vip_trading_desk', name: 'Crypto Alpha VIP', pic: 'logo.jpg' },
-      { id: 'elena_rostova', name: 'Elena Rostova', pic: 'logo.jpg' },
-      { id: 'david_chen', name: 'David Chen', pic: 'logo.jpg' },
-      { id: 'marcus_vance', name: 'Marcus Vance', pic: 'logo.jpg' }
-    ];
+    list.innerHTML = '<div style="padding: 24px; text-align: center; color: #8696a0; font-size: 13px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Loading contacts...</div>';
 
-    list.innerHTML = contacts.map(c => `
-      <div class="calls-picker-item" data-name="${escapeCallHtml(c.name)}">
-        <div class="picker-contact-meta">
-          <img src="${c.pic}" alt="${escapeCallHtml(c.name)}" class="picker-avatar" onerror="this.src='logo.jpg'">
-          <span class="picker-name">${escapeCallHtml(c.name)}</span>
+    let contacts = [];
+    try {
+      if (Array.isArray(window.cachedUsers) && window.cachedUsers.length > 0) {
+        contacts = window.cachedUsers.map(u => ({
+          id: u.uid || u.id,
+          name: u.name || u.displayName || u.username || 'NEXCHAT User',
+          pic: u.profilePic || u.profilePicUrl || 'logo.jpg'
+        }));
+      } else if (typeof db !== 'undefined' && typeof collection === 'function') {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, limit(30));
+        const snap = await getDocs(q);
+        snap.forEach(docSnap => {
+          const u = docSnap.data();
+          const uid = docSnap.id;
+          if (uid !== myUID) {
+            contacts.push({
+              id: uid,
+              name: u.name || u.displayName || u.username || 'NEXCHAT User',
+              pic: u.profilePic || u.profilePicUrl || 'logo.jpg'
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.warn('Could not load contacts for call modal:', e);
+    }
+
+    if (contacts.length === 0) {
+      list.innerHTML = `
+        <div style="padding: 30px 16px; text-align: center; color: #8696a0;">
+          <i class="fa-solid fa-user-slash" style="font-size: 32px; margin-bottom: 10px; color: #475569; display: block;"></i>
+          <p style="font-size: 14px; font-weight: 500; margin: 0 0 4px 0; color: #cbd5e1;">No Contacts Found</p>
+          <p style="font-size: 12px; margin: 0; color: #64748b;">Invite friends or search users to start a call</p>
         </div>
-        <div class="picker-btns">
-          <button type="button" class="picker-call-btn" title="Voice call" onclick="document.getElementById('callsNewCallModal').style.display='none'; window.quickCallback('${c.id}', '${escapeCallHtml(c.name)}', '${c.pic}', false);"><i class="fa-solid fa-phone"></i></button>
-          <button type="button" class="picker-call-btn" title="Video call" onclick="document.getElementById('callsNewCallModal').style.display='none'; window.quickCallback('${c.id}', '${escapeCallHtml(c.name)}', '${c.pic}', true);"><i class="fa-solid fa-video"></i></button>
+      `;
+    } else {
+      list.innerHTML = contacts.map(c => `
+        <div class="calls-picker-item" data-name="${escapeCallHtml(c.name)}">
+          <div class="picker-contact-meta">
+            <img src="${c.pic}" alt="${escapeCallHtml(c.name)}" class="picker-avatar" onerror="this.src='logo.jpg'">
+            <span class="picker-name">${escapeCallHtml(c.name)}</span>
+          </div>
+          <div class="picker-btns">
+            <button type="button" class="picker-call-btn" title="Voice call" onclick="document.getElementById('callsNewCallModal').style.display='none'; window.quickCallback('${c.id}', '${escapeCallHtml(c.name)}', '${c.pic}', false);"><i class="fa-solid fa-phone"></i></button>
+            <button type="button" class="picker-call-btn" title="Video call" onclick="document.getElementById('callsNewCallModal').style.display='none'; window.quickCallback('${c.id}', '${escapeCallHtml(c.name)}', '${c.pic}', true);"><i class="fa-solid fa-video"></i></button>
+          </div>
         </div>
-      </div>
-    `).join('');
+      `).join('');
+    }
   }
 
   modal.style.display = 'flex';
@@ -17421,9 +17392,6 @@ function filterCallsFavourites(showFavouritesOnly) {
 
 window.restoreSampleCalls = function() {
   loadCallHistory();
-  if (typeof showNotif === 'function') {
-    showNotif('Restored sample call history log', 'success');
-  }
 };
 
 async function getContactInfo(contactId) {
@@ -17488,8 +17456,7 @@ async function clearCallHistory() {
         <div class="call-history-empty-state" style="text-align: center; padding: 60px 20px; color: #888;">
           <div style="font-size: 52px; margin-bottom: 16px; color: #334155;"><i class="fa-solid fa-phone-slash"></i></div>
           <p style="font-size: 17px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">No Recent Calls</p>
-          <p style="font-size: 13px; color: #64748b; margin-bottom: 18px;">Your call history has been cleared</p>
-          <button type="button" class="calls-submit-btn" onclick="window.restoreSampleCalls()" style="font-size: 12.5px; padding: 7px 16px;">Restore Sample Log</button>
+          <p style="font-size: 13px; color: #64748b; margin-bottom: 18px;">Your call history has been cleared.</p>
         </div>
       `;
     }
@@ -18946,7 +18913,7 @@ function initNeuralRadar() {
 
   const RADAR_NODES = [
     { id: 'node_1', name: 'Operative_Kaelen', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '120m', latency: '14ms', signal: '-38 dBm', desc: 'Fullstack Dev & Crypto Researcher. Node active.', r: 55, deg: 35 },
-    { id: 'node_2', name: 'Elena_Valkyrie', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '340m', latency: '18ms', signal: '-49 dBm', desc: 'UI/UX Architect & Cyber Artist. Node active.', r: 95, deg: 110 },
+    { id: 'node_2', name: 'Valkyrie_Node', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '340m', latency: '18ms', signal: '-49 dBm', desc: 'UI/UX Architect & Cyber Artist. Node active.', r: 95, deg: 110 },
     { id: 'node_3', name: 'CyberMarcus', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '850m', latency: '22ms', signal: '-62 dBm', desc: 'Penetration Tester & Mesh Builder.', r: 130, deg: 215 },
     { id: 'node_4', name: 'CipherZero', type: 'peer', typeLabel: 'PEER OPERATIVE', dist: '1.4km', latency: '29ms', signal: '-74 dBm', desc: 'Autonomous systems architect.', r: 160, deg: 310 },
     { id: 'node_5', name: 'ApexSupport_Bot_01', type: 'bot', typeLabel: 'NEXBOT AUTONOMOUS', dist: '220m', latency: '9ms', signal: '-41 dBm', desc: 'Autonomous WhatsApp customer support node.', r: 75, deg: 280 },

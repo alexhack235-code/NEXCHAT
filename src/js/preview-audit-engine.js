@@ -129,49 +129,41 @@
 
     const mockChats = [
       {
-        name: 'Alice Johnson',
-        avatar: 'logo.jpg',
-        message: 'Check out the new design! It is so clean.',
+        name: 'ChronEX AI',
+        avatar: 'chronex-ai.jpg',
+        message: 'Quantum neural link calibrated at 99.8% precision.',
         time: '10:45 AM',
-        unread: 2,
+        unread: 1,
         status: 'delivered'
       },
       {
         name: 'Alpha Nexus Core',
         avatar: 'logo.jpg',
-        message: '~ Marcus: Pull request has been merged into main.',
+        message: '~ ChronEX AI: Pull request has been merged into main.',
         time: '10:20 AM',
-        unread: 5,
+        unread: 3,
         isGroup: true
       },
       {
-        name: 'David Chen',
+        name: 'NEXCHAT Support',
         avatar: 'logo.jpg',
-        message: 'Voice call (3 mins)',
+        message: 'Your quantum security enclave has been activated.',
         time: 'Yesterday',
         unread: 0,
         status: 'read'
       },
       {
-        name: 'ChronEX AI',
-        avatar: 'chronex-ai.jpg',
-        message: 'Quantum neural link calibrated at 99.8% precision.',
-        time: 'Yesterday',
-        unread: 0,
-        status: 'read'
-      },
-      {
-        name: 'Sarah Jenkins',
+        name: 'Security & Enclave Alerts',
         avatar: 'logo.jpg',
-        message: 'Shared a photo update in the vault.',
-        time: '16/10/2026',
+        message: 'Biometric authorization active on this device.',
+        time: 'Yesterday',
         unread: 0,
         status: 'read'
       },
       {
         name: 'Cyber Defense Guild',
         avatar: 'logo.jpg',
-        message: '~ Alexander: Security enclave verified.',
+        message: '~ Security Enclave: Network protected by quantum firewall.',
         time: '15/10/2026',
         unread: 0,
         isGroup: true
@@ -244,13 +236,13 @@
     if (header) header.classList.remove('group-chat');
 
     const chatName = document.getElementById('chatName');
-    if (chatName) chatName.textContent = 'Alice Johnson';
+    if (chatName) chatName.textContent = 'ChronEX AI';
 
     const statusText = document.getElementById('statusText');
-    if (statusText) statusText.textContent = 'Online';
+    if (statusText) statusText.textContent = 'Online • Quantum Neural Assistant';
 
     const chatPic = document.getElementById('chatProfilePic');
-    if (chatPic) chatPic.src = 'logo.jpg';
+    if (chatPic) chatPic.src = 'chronex-ai.jpg';
 
     const messagesList = document.querySelector('.messages-list');
     if (!messagesList) return;
@@ -263,10 +255,10 @@
         </span>
       </div>
 
-      <!-- Received Message -->
+      <!-- Received Message from ChronEX AI -->
       <div class="message-wrapper received" style="display: flex; justify-content: flex-start; margin: 6px 0; padding: 0 12px;">
         <div class="message-bubble received" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
-          <div class="message-text-content" style="margin: 0;">Hey Alice! Did you see the new WhatsApp layout pass on NEXCHAT?</div>
+          <div class="message-text-content" style="margin: 0;">Greetings operative! Quantum neural matrix is calibrated and all secure vaults are synchronized.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #8696a0;">
             <span>10:30 AM</span>
           </div>
@@ -276,7 +268,7 @@
       <!-- Sent Message (Emerald #005c4b) -->
       <div class="message-wrapper sent" style="display: flex; justify-content: flex-end; margin: 6px 0; padding: 0 12px;">
         <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: linear-gradient(135deg, #005c4b 0%, #059669 100%); color: #ffffff; font-size: 14px; line-height: 1.45;">
-          <div class="message-text-content" style="margin: 0;">Yes! The top header, bubbles, swipe-to-reply, and media cards are pixel-perfect now.</div>
+          <div class="message-text-content" style="margin: 0;">Excellent! The WhatsApp interface pass and 4-tab bottom navigation with Market Hub are completely seamless.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: rgba(255, 255, 255, 0.75);">
             <span>10:32 AM</span>
             <i class="fa-solid fa-check-double" style="color: #53bdeb; font-size: 10px; margin-left: 2px;" title="Read"></i>
@@ -284,10 +276,10 @@
         </div>
       </div>
 
-      <!-- Received Message -->
+      <!-- Received Message from ChronEX AI -->
       <div class="message-wrapper received" style="display: flex; justify-content: flex-start; margin: 6px 0; padding: 0 12px;">
         <div class="message-bubble received" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
-          <div class="message-text-content" style="margin: 0;">That is incredible. And how does the reply quote styling look?</div>
+          <div class="message-text-content" style="margin: 0;">How does the contextual reply quote styling render in this channel?</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #8696a0;">
             <span>10:34 AM</span>
           </div>
@@ -299,11 +291,11 @@
         <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: linear-gradient(135deg, #005c4b 0%, #059669 100%); color: #ffffff; font-size: 14px; line-height: 1.45;">
           <div class="reply-quote" style="background: rgba(0, 0, 0, 0.22); border-left: 3.5px solid #25d366; padding: 6px 10px; margin-bottom: 6px; border-radius: 6px; font-size: 12px; line-height: 1.35;">
             <strong style="color: #bbf7d0; display: block; font-weight: 700; margin-bottom: 2px; font-size: 12px;">
-              <i class="fa-solid fa-reply" style="font-size: 9.5px; margin-right: 5px; opacity: 0.85;"></i>Alice Johnson
+              <i class="fa-solid fa-reply" style="font-size: 9.5px; margin-right: 5px; opacity: 0.85;"></i>ChronEX AI
             </strong>
-            <span style="font-style: italic; color: #d1d7db; font-size: 11.5px;">That is incredible. And how does the reply quote styling look?</span>
+            <span style="font-style: italic; color: #d1d7db; font-size: 11.5px;">How does the contextual reply quote styling render in this channel?</span>
           </div>
-          <div class="message-text-content" style="margin: 0;">Like this! Clean left border, italicized preview, and distinct sender name.</div>
+          <div class="message-text-content" style="margin: 0;">Like this! Crisp emerald border, italicized preview snippet, and responsive touch gestures.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: rgba(255, 255, 255, 0.75);">
             <span>10:35 AM</span>
             <i class="fa-solid fa-check-double" style="color: #53bdeb; font-size: 10px; margin-left: 2px;" title="Read"></i>
@@ -340,7 +332,7 @@
     if (chatName) chatName.textContent = 'Alpha Nexus Core';
 
     const statusText = document.getElementById('statusText');
-    if (statusText) statusText.textContent = 'You, Alexander, Sarah, David, Marcus, Elena';
+    if (statusText) statusText.textContent = 'You, ChronEX AI, Security Enclave, NEXCHAT Support';
 
     const chatPic = document.getElementById('chatProfilePic');
     if (chatPic) chatPic.src = 'logo.jpg';
@@ -352,44 +344,44 @@
       <div style="text-align: center; margin: 14px 0 18px 0;">
         <span style="background: rgba(17, 24, 39, 0.85); color: #8696a0; font-size: 11.5px; padding: 6px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.08); display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.3);">
           <i class="fa-solid fa-shield-halved" style="font-size: 9.5px; color: #00ff66;"></i>
-          Alpha Nexus Core created by Alexander. End-to-end encrypted.
+          Alpha Nexus Core created by NEXCHAT System. End-to-end encrypted.
         </span>
       </div>
 
-      <!-- Received Message from Alexander (Cyan #06b6d4) -->
+      <!-- Received Message from ChronEX AI (Cyan #06b6d4) -->
       <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 12px; gap: 8px;">
-        <img src="logo.jpg" alt="Alexander" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #06b6d4; flex-shrink: 0; margin-bottom: 2px;">
+        <img src="chronex-ai.jpg" alt="ChronEX AI" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #06b6d4; flex-shrink: 0; margin-bottom: 2px;">
         <div class="message-bubble received" style="position: relative; padding: 6px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
-          <div style="font-size: 12px; font-weight: 700; color: #06b6d4; margin-bottom: 3px; letter-spacing: 0.3px;">~ Alexander</div>
-          <div class="message-text-content" style="margin: 0;">Good morning team! Today we are deploying the WhatsApp clean layout pass.</div>
+          <div style="font-size: 12px; font-weight: 700; color: #06b6d4; margin-bottom: 3px; letter-spacing: 0.3px;">~ ChronEX AI</div>
+          <div class="message-text-content" style="margin: 0;">Good morning operatives! The WhatsApp layout pass and 4-tab bottom navigation with Market Hub are deployed.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #8696a0;">
             <span>09:15 AM</span>
           </div>
         </div>
       </div>
 
-      <!-- Received Message from Sarah (Magenta #ec4899) with Quote -->
+      <!-- Received Message from Security Enclave (Magenta #ec4899) with Quote -->
       <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 12px; gap: 8px;">
-        <img src="logo.jpg" alt="Sarah" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #ec4899; flex-shrink: 0; margin-bottom: 2px;">
+        <img src="logo.jpg" alt="Security Enclave" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #ec4899; flex-shrink: 0; margin-bottom: 2px;">
         <div class="message-bubble received" style="position: relative; padding: 6px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
-          <div style="font-size: 12px; font-weight: 700; color: #ec4899; margin-bottom: 3px; letter-spacing: 0.3px;">~ Sarah</div>
+          <div style="font-size: 12px; font-weight: 700; color: #ec4899; margin-bottom: 3px; letter-spacing: 0.3px;">~ Security Enclave</div>
           <div class="reply-quote" style="background: rgba(0, 0, 0, 0.32); border-left: 3.5px solid #06b6d4; padding: 5px 8px; margin-bottom: 5px; border-radius: 6px; font-size: 11.5px; line-height: 1.35;">
-            <strong style="color: #06b6d4; display: block; font-weight: 700; font-size: 11px; margin-bottom: 1px;">~ Alexander</strong>
-            <span style="font-style: italic; color: #94a3b8; font-size: 11px;">Good morning team! Today we are deploying the WhatsApp clean layout pass.</span>
+            <strong style="color: #06b6d4; display: block; font-weight: 700; font-size: 11px; margin-bottom: 1px;">~ ChronEX AI</strong>
+            <span style="font-style: italic; color: #94a3b8; font-size: 11px;">Good morning operatives! The WhatsApp layout pass and 4-tab bottom navigation with Market Hub are deployed.</span>
           </div>
-          <div class="message-text-content" style="margin: 0;">All 5 views have been checked and verified against reference designs!</div>
+          <div class="message-text-content" style="margin: 0;">Audit completed: zero demo names remain and all 4 navigation tabs are aligned perfectly.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #8696a0;">
             <span>09:18 AM</span>
           </div>
         </div>
       </div>
 
-      <!-- Received Message from Marcus (Amber #f59e0b) -->
+      <!-- Received Message from Support Node (Amber #f59e0b) -->
       <div class="message-wrapper received" style="display: flex; justify-content: flex-start; align-items: flex-end; margin: 8px 0; padding: 0 12px; gap: 8px;">
-        <img src="logo.jpg" alt="Marcus" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #f59e0b; flex-shrink: 0; margin-bottom: 2px;">
+        <img src="logo.jpg" alt="NEXCHAT Support" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid #f59e0b; flex-shrink: 0; margin-bottom: 2px;">
         <div class="message-bubble received" style="position: relative; padding: 6px 11px 5px 11px; border-radius: 2px 12px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: #1f2c34; border: 1px solid rgba(255, 255, 255, 0.05); color: #e9edef; font-size: 14px; line-height: 1.45;">
-          <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 3px; letter-spacing: 0.3px;">~ Marcus</div>
-          <div class="message-text-content" style="margin: 0;">Desktop and mobile responsiveness are both pixel-perfect and zero overlap.</div>
+          <div style="font-size: 12px; font-weight: 700; color: #f59e0b; margin-bottom: 3px; letter-spacing: 0.3px;">~ NEXCHAT Support</div>
+          <div class="message-text-content" style="margin: 0;">Desktop and mobile responsive viewports render with zero overlay or colliding buttons.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: #8696a0;">
             <span>09:21 AM</span>
           </div>
@@ -399,7 +391,7 @@
       <!-- Sent Message from You (Emerald #005c4b) -->
       <div class="message-wrapper sent" style="display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 12px;">
         <div class="message-bubble sent" style="position: relative; padding: 7px 11px 5px 11px; border-radius: 12px 2px 12px 12px; max-width: 72%; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35); background: linear-gradient(135deg, #005c4b 0%, #059669 100%); color: #ffffff; font-size: 14px; line-height: 1.45;">
-          <div class="message-text-content" style="margin: 0;">Fantastic work everyone! Committing and taking audit photos now.</div>
+          <div class="message-text-content" style="margin: 0;">Verified! Taking comprehensive audit screenshots now.</div>
           <div style="font-size: 10px; margin-top: 4px; opacity: 0.85; display: flex; align-items: center; justify-content: flex-end; gap: 4px; color: rgba(255, 255, 255, 0.75);">
             <span>09:24 AM</span>
             <i class="fa-solid fa-check-double" style="color: #53bdeb; font-size: 10px; margin-left: 2px;" title="Read"></i>
@@ -432,10 +424,10 @@
     const feed = document.getElementById('statusHorizontalFeed');
     if (feed) {
       const mockStatuses = [
-        { name: 'Sarah Jenkins', time: '5m ago', unread: true, avatar: 'logo.jpg' },
-        { name: 'David Chen', time: '22m ago', unread: true, avatar: 'logo.jpg' },
-        { name: 'Alexander Vance', time: '1h ago', unread: false, avatar: 'logo.jpg' },
-        { name: 'Marcus Brody', time: '3h ago', unread: false, avatar: 'logo.jpg' }
+        { name: 'ChronEX AI', time: '5m ago', unread: true, avatar: 'chronex-ai.jpg' },
+        { name: 'NEXCHAT Official', time: '22m ago', unread: true, avatar: 'logo.jpg' },
+        { name: 'Security Enclave', time: '1h ago', unread: false, avatar: 'logo.jpg' },
+        { name: 'Cyber Hub', time: '3h ago', unread: false, avatar: 'logo.jpg' }
       ];
 
       feed.innerHTML = mockStatuses.map(s => `
@@ -531,43 +523,27 @@
 
     const mockCalls = [
       {
-        name: 'Sarah Jenkins',
-        type: 'missed',
-        time: 'Today, 14:22',
-        subtitle: 'Missed',
-        video: false,
-        avatar: 'logo.jpg'
-      },
-      {
-        name: 'Alexander Vance',
+        name: 'ChronEX AI',
         type: 'outgoing',
-        time: 'Yesterday, 19:40',
+        time: 'Today, 14:22',
         subtitle: '(14 mins)',
         video: true,
-        avatar: 'logo.jpg'
+        avatar: 'chronex-ai.jpg'
       },
       {
-        name: 'David Chen',
-        type: 'missed',
-        time: '16 October, 11:05',
-        subtitle: 'Silenced by Do Not Disturb',
-        video: false,
-        avatar: 'logo.jpg'
-      },
-      {
-        name: 'Elena Rostova',
+        name: 'NEXCHAT Support',
         type: 'incoming',
-        time: '15 October, 09:12',
+        time: 'Yesterday, 19:40',
         subtitle: '(4 mins)',
         video: false,
         avatar: 'logo.jpg'
       },
       {
-        name: 'Marcus Brody',
+        name: 'Security Dispatch',
         type: 'missed',
-        time: '12 October, 18:30',
-        subtitle: 'Missed',
-        video: true,
+        time: '16 October, 11:05',
+        subtitle: 'Silenced by Do Not Disturb',
+        video: false,
         avatar: 'logo.jpg'
       }
     ];

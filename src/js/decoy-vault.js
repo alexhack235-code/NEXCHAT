@@ -20,8 +20,8 @@
   const DECOY_CONTACTS = [
     {
       id: 'decoy_c1',
-      name: 'Sarah Jenkins',
-      role: 'Project Coordinator',
+      name: 'Logistics Coordinator',
+      role: 'Project Operations',
       avatar: 'favicons/favicon.ico',
       lastMessage: 'The Q3 logistics breakdown has been verified.',
       lastTime: '10:42 AM',
@@ -30,7 +30,7 @@
     },
     {
       id: 'decoy_c2',
-      name: 'David Miller',
+      name: 'Accounts Dispatch',
       role: 'Finance & Accounts',
       avatar: 'favicons/favicon.ico',
       lastMessage: 'Invoice #4829 has been processed via wire transfer.',
@@ -40,7 +40,7 @@
     },
     {
       id: 'decoy_c3',
-      name: 'Elena Rostova',
+      name: 'Architecture Node',
       role: 'UX Architecture',
       avatar: 'favicons/favicon.ico',
       lastMessage: 'Wireframes for client dashboard uploaded to shared drive.',
@@ -50,7 +50,7 @@
     },
     {
       id: 'decoy_c4',
-      name: 'Liam Baker',
+      name: 'Quality Assurance',
       role: 'Quality Assurance',
       avatar: 'favicons/favicon.ico',
       lastMessage: 'All staging deployment smoke tests completed cleanly.',

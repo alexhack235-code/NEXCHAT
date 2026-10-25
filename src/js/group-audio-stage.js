@@ -17,8 +17,8 @@
     groupId: null,
     topic: 'Global Cyber Intelligence & Staging',
     speakers: [
-      { uid: 's1', name: 'Commander Alex', avatar: 'logo.jpg', isSpeaking: true, tips: 1450 },
-      { uid: 's2', name: 'Elena Rostova', avatar: 'favicons/favicon.ico', isSpeaking: false, tips: 820 }
+      { uid: 's1', name: 'ChronEX Lead', avatar: 'logo.jpg', isSpeaking: true, tips: 1450 },
+      { uid: 's2', name: 'Security Operative', avatar: 'favicons/favicon.ico', isSpeaking: false, tips: 820 }
     ],
     listeners: [
       { uid: 'l1', name: 'Cipher_99' },

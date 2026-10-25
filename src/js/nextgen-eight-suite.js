@@ -802,7 +802,7 @@
       { id: 'p1', name: 'Alexander Hacker', x: 260, y: 190, isSelf: true, avatar: 'logo.jpg' },
       { id: 'p2', name: 'Sunnmisola', x: 120, y: 100, isSelf: false, avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&h=200&q=80' },
       { id: 'p3', name: 'DemonAlex', x: 380, y: 120, isSelf: false, avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&h=200&q=80' },
-      { id: 'p4', name: 'Elena Vance', x: 180, y: 290, isSelf: false, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80' }
+      { id: 'p4', name: 'Operative Vance', x: 180, y: 290, isSelf: false, avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80' }
     ],
 
     openModal() {
