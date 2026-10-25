@@ -32,6 +32,7 @@
   <link rel="stylesheet" href="css/cyber-suite.css">
   <link rel="stylesheet" href="css/nextgen-suite.css">
   <link rel="stylesheet" href="css/chat-professional-suite.css">
+  <link rel="stylesheet" href="css/layout-declutter.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
@@ -168,29 +169,34 @@
           <button id="search-btn-header" class="header-icon-btn search-btn-header" title="Search">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
-          <button id="locationDiscoveryBtnHeader" class="header-icon-btn" title="Location Discovery &amp; People In Your Location" onclick="window.CyberFeatures.geoDiscovery?.show()"><i class="fa-solid fa-location-crosshairs" style="color: #00f3ff;"></i></button>
-          <button id="radarBtnHeader" class="header-icon-btn" title="Neural Radar Scanner"><i class="fa-solid fa-satellite-dish"></i></button>
-          <button id="nexbotStudioBtnHeader" class="header-icon-btn" title="NEXBOT Studio &amp; WhatsApp Architect"><i class="fa-solid fa-robot"></i></button>
-          <button id="vipVaultBtnHeader" class="header-icon-btn" title="VIP Token Vault &amp; Licenses"><i class="fa-solid fa-crown"></i></button>
-          <button id="cyberStreakBtnHeader" class="header-icon-btn" title="Daily Cyber Streak Matrix"><i class="fa-solid fa-bolt" style="color: #ffd700;"></i></button>
-          <button id="audioSpacesBtnHeader" class="header-icon-btn" title="Live Neural Audio Spaces"><i class="fa-solid fa-podcast"></i></button>
-          <button id="cyberDropBtnHeader" class="header-icon-btn" title="P2P CyberDrop Direct File Beam"><i class="fa-solid fa-share-nodes"></i></button>
-          <button id="cipherVaultBtnHeader" class="header-icon-btn" title="Cipher Vault &amp; Secret Rooms"><i class="fa-solid fa-key"></i></button>
-          <button id="terminal-btn-header" class="header-icon-btn" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
+          <button id="locationDiscoveryBtnHeader" class="header-icon-btn cyber-sub-tool" title="Location Discovery &amp; People In Your Location" onclick="window.CyberFeatures.geoDiscovery?.show()"><i class="fa-solid fa-location-crosshairs" style="color: #00f3ff;"></i></button>
+          <button id="radarBtnHeader" class="header-icon-btn cyber-sub-tool" title="Neural Radar Scanner"><i class="fa-solid fa-satellite-dish"></i></button>
+          <button id="nexbotStudioBtnHeader" class="header-icon-btn cyber-sub-tool" title="NEXBOT Studio &amp; WhatsApp Architect"><i class="fa-solid fa-robot"></i></button>
+          <button id="vipVaultBtnHeader" class="header-icon-btn cyber-sub-tool" title="VIP Token Vault &amp; Licenses"><i class="fa-solid fa-crown"></i></button>
+          <button id="cyberStreakBtnHeader" class="header-icon-btn cyber-sub-tool" title="Daily Cyber Streak Matrix"><i class="fa-solid fa-bolt" style="color: #ffd700;"></i></button>
+          <button id="audioSpacesBtnHeader" class="header-icon-btn cyber-sub-tool" title="Live Neural Audio Spaces"><i class="fa-solid fa-podcast"></i></button>
+          <button id="cyberDropBtnHeader" class="header-icon-btn cyber-sub-tool" title="P2P CyberDrop Direct File Beam"><i class="fa-solid fa-share-nodes"></i></button>
+          <button id="cipherVaultBtnHeader" class="header-icon-btn cyber-sub-tool" title="Cipher Vault &amp; Secret Rooms"><i class="fa-solid fa-key"></i></button>
+          <button id="terminal-btn-header" class="header-icon-btn cyber-sub-tool" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
           <button id="ghostPanicLockBtn" class="header-icon-btn ghost-lock-btn" title="Ghost Panic Shield (Ctrl+Shift+L)"><i class="fa-solid fa-shield-virus"></i></button>
-          <button id="holoAvatarBtnHeader" class="header-icon-btn" title="3D Holographic Avatar Studio" onclick="window.holographicAvatarsEngine?.openModal()"><i class="fa-solid fa-cube text-[#00ff66]"></i></button>
-          <button id="broadcastChannelsBtnHeader" class="header-icon-btn" title="Tactical Broadcast Channels" onclick="window.broadcastChannelsEngine?.openModal()"><i class="fa-solid fa-tower-broadcast text-[#00f3ff]"></i></button>
-          <button id="cyberMatrixBtnHeader" class="header-icon-btn" title="100 Cyber Feature Matrix Toggles" onclick="window.cyberFeatureMatrix?.openModal()"><i class="fa-solid fa-sliders text-[#00f3ff]"></i></button>
-          <button id="qrPairingBtnHeader" class="header-icon-btn" title="Dynamic QR Node Pairing" onclick="window.qrPairingEngine?.openModal()"><i class="fa-solid fa-qrcode text-[#00f3ff]"></i></button>
-          <button id="escrowMarketBtnHeader" class="header-icon-btn" title="Creator Collectibles &amp; Multi-Sig P2P Escrow Market" onclick="window.NexEscrowMarket?.openMarketModal()"><i class="fa-solid fa-gem text-[#00f2ff]"></i></button>
-          <button id="ambassadorBtnHeader" class="header-icon-btn" title="Viral Ambassador &amp; Affiliate Protocol" onclick="window.NexReferralEngine?.openReferralModal()"><i class="fa-solid fa-bullhorn" style="color: #00ff66;"></i></button>
-          <button id="dailyStreakDropBtnHeader" class="header-icon-btn" title="7-Day Cyber Login Streak Rewards" onclick="window.NexDailyStreakEngine?.openStreakModal()"><i class="fa-solid fa-gift" style="color: #ffd700;"></i></button>
-          <button id="tacticalCanvasBtnHeader" class="header-icon-btn" title="NEX-CANVAS Tactical Whiteboard" onclick="window.CyberFeatures.canvas?.show()"><i class="fa-solid fa-pen-ruler"></i></button>
-          <button id="steganoBtnHeader" class="header-icon-btn" title="NEX-STEGANO Pixel Enclave" onclick="window.CyberFeatures.stegano?.show()"><i class="fa-solid fa-user-secret"></i></button>
-          <button id="sandboxBtnHeader" class="header-icon-btn" title="NEX-SANDBOX Code Runner" onclick="window.CyberFeatures.sandbox?.show()"><i class="fa-solid fa-microchip"></i></button>
-          <button id="translateBtnHeader" class="header-icon-btn" title="ChronEX Babel Neural Translator" onclick="window.CyberFeatures.translator?.show()"><i class="fa-solid fa-language"></i></button>
-          <button id="ghostVaultBtnHeader" class="header-icon-btn" title="Ghost Vault &amp; Hidden Chats (Alt+H)" onclick="window.CyberFeatures.ghostVault?.show()"><i class="fa-solid fa-ghost"></i></button>
-          <button id="themeStudioBtnHeader" class="header-icon-btn" title="Cyber-HUD Theme Studio" onclick="window.CyberFeatures.themeStudio?.show()"><i class="fa-solid fa-palette"></i></button>
+          <button id="holoAvatarBtnHeader" class="header-icon-btn cyber-sub-tool" title="3D Holographic Avatar Studio" onclick="window.holographicAvatarsEngine?.openModal()"><i class="fa-solid fa-cube text-[#00ff66]"></i></button>
+          <button id="broadcastChannelsBtnHeader" class="header-icon-btn cyber-sub-tool" title="Tactical Broadcast Channels" onclick="window.broadcastChannelsEngine?.openModal()"><i class="fa-solid fa-tower-broadcast text-[#00f3ff]"></i></button>
+          <button id="cyberMatrixBtnHeader" class="header-icon-btn cyber-sub-tool" title="100 Cyber Feature Matrix Toggles" onclick="window.cyberFeatureMatrix?.openModal()"><i class="fa-solid fa-sliders text-[#00f3ff]"></i></button>
+          <button id="qrPairingBtnHeader" class="header-icon-btn cyber-sub-tool" title="Dynamic QR Node Pairing" onclick="window.qrPairingEngine?.openModal()"><i class="fa-solid fa-qrcode text-[#00f3ff]"></i></button>
+          <button id="escrowMarketBtnHeader" class="header-icon-btn cyber-sub-tool" title="Creator Collectibles &amp; Multi-Sig P2P Escrow Market" onclick="window.NexEscrowMarket?.openMarketModal()"><i class="fa-solid fa-gem text-[#00f2ff]"></i></button>
+          <button id="ambassadorBtnHeader" class="header-icon-btn cyber-sub-tool" title="Viral Ambassador &amp; Affiliate Protocol" onclick="window.NexReferralEngine?.openReferralModal()"><i class="fa-solid fa-bullhorn" style="color: #00ff66;"></i></button>
+          <button id="dailyStreakDropBtnHeader" class="header-icon-btn cyber-sub-tool" title="7-Day Cyber Login Streak Rewards" onclick="window.NexDailyStreakEngine?.openStreakModal()"><i class="fa-solid fa-gift" style="color: #ffd700;"></i></button>
+          <button id="tacticalCanvasBtnHeader" class="header-icon-btn cyber-sub-tool" title="NEX-CANVAS Tactical Whiteboard" onclick="window.CyberFeatures.canvas?.show()"><i class="fa-solid fa-pen-ruler"></i></button>
+          <button id="steganoBtnHeader" class="header-icon-btn cyber-sub-tool" title="NEX-STEGANO Pixel Enclave" onclick="window.CyberFeatures.stegano?.show()"><i class="fa-solid fa-user-secret"></i></button>
+          <button id="sandboxBtnHeader" class="header-icon-btn cyber-sub-tool" title="NEX-SANDBOX Code Runner" onclick="window.CyberFeatures.sandbox?.show()"><i class="fa-solid fa-microchip"></i></button>
+          <button id="translateBtnHeader" class="header-icon-btn cyber-sub-tool" title="ChronEX Babel Neural Translator" onclick="window.CyberFeatures.translator?.show()"><i class="fa-solid fa-language"></i></button>
+          <button id="ghostVaultBtnHeader" class="header-icon-btn cyber-sub-tool" title="Ghost Vault &amp; Hidden Chats (Alt+H)" onclick="window.CyberFeatures.ghostVault?.show()"><i class="fa-solid fa-ghost"></i></button>
+          <button id="themeStudioBtnHeader" class="header-icon-btn cyber-sub-tool" title="Cyber-HUD Theme Studio" onclick="window.CyberFeatures.themeStudio?.show()"><i class="fa-solid fa-palette"></i></button>
+                    <button type="button" id="headerCyberHubBtn" class="cyber-suite-hub-btn" title="NEX Cyber Ecosystem Suite (22 Applications)" onclick="window.toggleCyberHubModal();">
+            <i class="fa-solid fa-shapes"></i>
+            <span>CYBER SUITE</span>
+            <span class="cyber-hub-badge-pill">22 APPS</span>
+          </button>
           <button id="settings-btn-header" class="header-icon-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
         </div>
 
@@ -5158,6 +5164,202 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/creator-escrow-market.js"></script>
   <script src="./src/js/chat-professional-suite.js"></script>
 
+
+        <!-- NEXCHAT CYBER ECOSYSTEM SUITE MODAL -->
+    <div id="nexCyberHubModal" class="cyber-hub-modal" style="display: none;">
+      <div class="cyber-hub-modal-content">
+        <div class="cyber-hub-header">
+          <div class="cyber-hub-title">
+            <i class="fa-solid fa-shapes"></i>
+            <span>NEX CYBER ECOSYSTEM SUITE</span>
+          </div>
+          <button type="button" class="close-modal" id="closeCyberHubModalBtn" onclick="window.toggleCyberHubModal(false);"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="cyber-hub-body">
+          <!-- 1. Security & Tactical Enclaves -->
+          <div>
+            <div class="cyber-hub-section-title"><i class="fa-solid fa-shield-halved" style="color: #00ff66;"></i> Tactical Security &amp; Enclaves</div>
+            <div class="cyber-hub-grid">
+              <div class="cyber-hub-card" onclick="window.CyberFeatures.ghostVault?.show(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(192, 132, 252, 0.15); color: #c084fc;"><i class="fa-solid fa-ghost"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Ghost Vault</div>
+                  <div class="cyber-hub-card-desc">Hidden decoy vault &amp; stealth chats</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="document.getElementById('cipherVaultBtnHeader')?.click(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(0, 242, 255, 0.15); color: #00f2ff;"><i class="fa-solid fa-key"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Cipher Rooms</div>
+                  <div class="cyber-hub-card-desc">PIN-locked encrypted enclaves</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.CyberFeatures.stegano?.show(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(236, 72, 153, 0.15); color: #ec4899;"><i class="fa-solid fa-user-secret"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Stegano Enclave</div>
+                  <div class="cyber-hub-card-desc">Encode cipher text inside images</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="document.getElementById('ghostPanicLockBtn')?.click(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;"><i class="fa-solid fa-shield-virus"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Panic Shield</div>
+                  <div class="cyber-hub-card-desc">1-click decoy screen &amp; lock</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Communication & P2P -->
+          <div>
+            <div class="cyber-hub-section-title"><i class="fa-solid fa-satellite-dish" style="color: #00f2ff;"></i> Communication &amp; P2P Streaming</div>
+            <div class="cyber-hub-grid">
+              <div class="cyber-hub-card" onclick="document.getElementById('audioSpacesBtnHeader')?.click(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8;"><i class="fa-solid fa-podcast"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Live Audio Spaces</div>
+                  <div class="cyber-hub-card-desc">Interactive voice stages &amp; broadcast</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="document.getElementById('cyberDropBtnHeader')?.click(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(0, 255, 102, 0.15); color: #00ff66;"><i class="fa-solid fa-share-nodes"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">CyberDrop Beam</div>
+                  <div class="cyber-hub-card-desc">Zero-cloud direct P2P file beam</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.broadcastChannelsEngine?.openModal(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;"><i class="fa-solid fa-tower-broadcast"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Broadcast Channels</div>
+                  <div class="cyber-hub-card-desc">1-to-many subscriber streams</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.qrPairingEngine?.openModal(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;"><i class="fa-solid fa-qrcode"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Dynamic QR Pairing</div>
+                  <div class="cyber-hub-card-desc">Scan-to-link node sessions</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="document.getElementById('radarBtnHeader')?.click(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(20, 184, 166, 0.15); color: #14b8a6;"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Neural Radar</div>
+                  <div class="cyber-hub-card-desc">Proximity beacon &amp; active scan</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.CyberFeatures.geoDiscovery?.show(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;"><i class="fa-solid fa-location-crosshairs"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Location Discovery</div>
+                  <div class="cyber-hub-card-desc">Explore local mesh &amp; communities</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. AI & Creative Studios -->
+          <div>
+            <div class="cyber-hub-section-title"><i class="fa-solid fa-wand-magic-sparkles" style="color: #ffd700;"></i> AI &amp; Creative Studios</div>
+            <div class="cyber-hub-grid">
+              <div class="cyber-hub-card" onclick="window.CyberFeatures.translator?.show(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(0, 242, 255, 0.15); color: #00f2ff;"><i class="fa-solid fa-language"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">ChronEX Translator</div>
+                  <div class="cyber-hub-card-desc">Babel neural 50+ language bridge</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.holographicAvatarsEngine?.openModal(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(0, 255, 102, 0.15); color: #00ff66;"><i class="fa-solid fa-cube"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">3D Avatar Studio</div>
+                  <div class="cyber-hub-card-desc">WebGL holographic operative skins</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.CyberFeatures.canvas?.show(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(244, 63, 94, 0.15); color: #f43f5e;"><i class="fa-solid fa-pen-ruler"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Tactical Whiteboard</div>
+                  <div class="cyber-hub-card-desc">Collaborative drawing &amp; strategy canvas</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.CyberFeatures.sandbox?.show(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981;"><i class="fa-solid fa-microchip"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Code Sandbox</div>
+                  <div class="cyber-hub-card-desc">In-chat JavaScript &amp; Python runner</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.CyberFeatures.themeStudio?.show(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(139, 92, 246, 0.15); color: #8b5cf6;"><i class="fa-solid fa-palette"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">HUD Theme Studio</div>
+                  <div class="cyber-hub-card-desc">Custom cyber colors &amp; glow gradients</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="document.getElementById('terminal-btn-header')?.click(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8;"><i class="fa-solid fa-terminal"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Terminal Console</div>
+                  <div class="cyber-hub-card-desc">Command-line debug &amp; socket stream</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Economy & Matrix -->
+          <div>
+            <div class="cyber-hub-section-title"><i class="fa-solid fa-gem" style="color: #00ff66;"></i> Economy, Matrix &amp; Automation</div>
+            <div class="cyber-hub-grid">
+              <div class="cyber-hub-card" onclick="window.NexEscrowMarket?.openMarketModal(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(0, 242, 255, 0.15); color: #00f2ff;"><i class="fa-solid fa-gem"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Escrow Marketplace</div>
+                  <div class="cyber-hub-card-desc">Multi-sig trade &amp; creator collectibles</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.NexDailyStreakEngine?.openStreakModal(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(251, 191, 36, 0.15); color: #fbbf24;"><i class="fa-solid fa-gift"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Login Streak Drops</div>
+                  <div class="cyber-hub-card-desc">7-day cyber token multiplier bonuses</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="document.getElementById('vipVaultBtnHeader')?.click(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(234, 179, 8, 0.15); color: #eab308;"><i class="fa-solid fa-crown"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">VIP Token Vault</div>
+                  <div class="cyber-hub-card-desc">Tier licenses &amp; staking rewards</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.NexReferralEngine?.openReferralModal(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(34, 197, 94, 0.15); color: #22c55e;"><i class="fa-solid fa-bullhorn"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Ambassador Network</div>
+                  <div class="cyber-hub-card-desc">Affiliate revenue &amp; viral protocol</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="document.getElementById('nexbotStudioBtnHeader')?.click(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"><i class="fa-solid fa-robot"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">NEXBOT Studio</div>
+                  <div class="cyber-hub-card-desc">AI webhook &amp; WhatsApp bridge automation</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.cyberFeatureMatrix?.openModal(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9;"><i class="fa-solid fa-sliders"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Feature Matrix</div>
+                  <div class="cyber-hub-card-desc">100 modular feature toggle switches</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- NEXCHAT APP INSTALLATION & PWA HUB MODAL -->
     <div id="nexAppInstallModal" class="modal" style="display: none; z-index: 10010;">
