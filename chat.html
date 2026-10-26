@@ -1848,6 +1848,33 @@
                   </div>
                 </div>
 
+                <!-- Auto-Translate Voice Notes (Speech-to-Text & Neural Translation) -->
+                <div class="settings-card" id="voiceNoteTranslateSettingsCard">
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="color: #00ff66; font-size: 14px;"><i class="fa-solid fa-microphone-lines"></i> Auto-Translate Voice Notes</strong>
+                      <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Automatically transcribe spoken audio while recording and generate instant translated text subtitles for your voice notes.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="autoVoiceNoteTranslateToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  
+                  <div id="voiceNoteTranslateOptionsWrap" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="luxury-toggle-row">
+                      <div>
+                        <span style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Attach Subtitle Bubble to Voice Note</span>
+                        <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Displays a transcribed and translated subtitle card directly beneath the voice waveform player in chat.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="voiceNoteAttachSubtitleToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
                 <!-- Country CDN & Regional Routing Engine -->
                 <div class="settings-card" id="countryCdnSettingsCard">
                   <div class="luxury-toggle-row">

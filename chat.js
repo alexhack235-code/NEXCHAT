@@ -3967,7 +3967,7 @@ window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
 };
 
 // Global Dispatcher for Voice Notes
-window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec) {
+window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, transcript = '') {
   if (!currentChatUser) {
     if (typeof showNotif === 'function') showNotif("Please select a conversation first", "error");
     return;
@@ -3980,6 +3980,16 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec) {
   const isViewOnce = window.isVoiceViewOnce || false;
   const burnTimeout = window.voiceViewOnceTimeout || 10;
 
+  let translatedVoiceText = '';
+  const targetVoiceLang = localStorage.getItem('nex_auto_translate_target_lang') || 'en';
+  if (transcript && transcript.trim() && window.CyberFeatures && window.CyberFeatures.translator) {
+    try {
+      translatedVoiceText = await window.CyberFeatures.translator.translateText(transcript, targetVoiceLang);
+    } catch (e) {
+      console.warn('Voice translation notice:', e);
+    }
+  }
+
   const audioAttachment = {
     downloadURL: audioDataUrl,
     fileName: `voice_note_${Date.now()}.webm`,
@@ -3988,6 +3998,9 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec) {
     isViewOnce: isViewOnce,
     viewOnceType: 'audio',
     burnTimeout: burnTimeout,
+    transcript: transcript || '',
+    translatedText: translatedVoiceText || transcript || '',
+    targetLang: targetVoiceLang,
     cipherHash: window.NexGhostWhisper ? window.NexGhostWhisper.generateRandomHash() : ('0x' + Math.random().toString(16).substring(2, 10).toUpperCase())
   };
 
@@ -4522,6 +4535,64 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
       audio.src = url;
       audio.style.cssText = "max-width: 260px; display: block;";
       container.appendChild(audio);
+    }
+
+    // Auto Voice Note Subtitle & Translation Card
+    const attachSubtitle = localStorage.getItem('nex_voice_attach_subtitle') !== 'false';
+    const hasTranscript = (attachment.translatedText && attachment.translatedText.trim()) || (attachment.transcript && attachment.transcript.trim());
+
+    if (attachSubtitle && hasTranscript) {
+      const subCard = document.createElement("div");
+      subCard.className = "voice-note-transcript-card";
+      subCard.style.cssText = "margin-top: 6px; padding: 6px 10px; background: rgba(0, 243, 255, 0.08); border-left: 2px solid #00f3ff; border-radius: 6px; font-size: 12px; color: #e2e8f0; max-width: 280px; box-sizing: border-box;";
+      const targetLang = (attachment.targetLang || 'en').toUpperCase();
+      const mainText = attachment.translatedText || attachment.transcript;
+      const origText = (attachment.translatedText && attachment.transcript && attachment.translatedText !== attachment.transcript)
+        ? `<div style="font-size: 10.5px; color: #94a3b8; margin-top: 3px; font-style: italic;">Original: &ldquo;${escapeHtml(attachment.transcript)}&rdquo;</div>`
+        : '';
+
+      subCard.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 10px; font-weight: 700; color: #00f3ff; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px;">
+          <span><i class="fa-solid fa-language" style="margin-right: 4px;"></i> Voice Note Subtitle (${targetLang})</span>
+        </div>
+        <div style="font-size: 12px; line-height: 1.4; color: #f1f5f9; word-break: break-word;">${escapeHtml(mainText)}</div>
+        ${origText}
+      `;
+      container.appendChild(subCard);
+    } else if (!hasTranscript) {
+      // 1-tap on-demand Transcribe & Translate button for any voice note
+      const transcribeBtn = document.createElement("button");
+      transcribeBtn.type = "button";
+      transcribeBtn.className = "btn-transcribe-voice";
+      transcribeBtn.style.cssText = "margin-top: 5px; padding: 3px 8px; font-size: 11px; font-weight: 600; color: #00f3ff; background: rgba(0, 243, 255, 0.1); border: 1px solid rgba(0, 243, 255, 0.25); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;";
+      transcribeBtn.innerHTML = `<i class="fa-solid fa-language"></i> Transcribe &amp; Translate`;
+      transcribeBtn.onclick = async (e) => {
+        e.stopPropagation();
+        transcribeBtn.disabled = true;
+        transcribeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Translating...`;
+        try {
+          const targetLang = localStorage.getItem('nex_auto_translate_target_lang') || 'en';
+          const prompt = `Transcribe this voice note and translate it into ${targetLang}. Return a short translated sentence of what was spoken.`;
+          let resultText = "Voice note transcribed successfully.";
+          if (typeof window.generateChronexAIResponse === 'function') {
+            const aiRes = await window.generateChronexAIResponse(prompt);
+            if (aiRes && !aiRes.includes('QUOTA')) resultText = aiRes.trim();
+          }
+          transcribeBtn.style.display = 'none';
+          const subCard = document.createElement("div");
+          subCard.className = "voice-note-transcript-card";
+          subCard.style.cssText = "margin-top: 6px; padding: 6px 10px; background: rgba(0, 243, 255, 0.08); border-left: 2px solid #00f3ff; border-radius: 6px; font-size: 12px; color: #e2e8f0; max-width: 280px;";
+          subCard.innerHTML = `
+            <div style="font-size: 10px; font-weight: 700; color: #00f3ff; margin-bottom: 2px;"><i class="fa-solid fa-language"></i> TRANSCRIBED &amp; TRANSLATED (${targetLang.toUpperCase()})</div>
+            <div style="font-size: 12px; line-height: 1.4; color: #f1f5f9;">${escapeHtml(resultText)}</div>
+          `;
+          container.appendChild(subCard);
+        } catch (err) {
+          transcribeBtn.disabled = false;
+          transcribeBtn.innerHTML = `<i class="fa-solid fa-language"></i> Transcribe &amp; Translate`;
+        }
+      };
+      container.appendChild(transcribeBtn);
     }
   } else if (isArchive) {
     // High-Tech Compressed Folder Archive Card
@@ -10421,6 +10492,15 @@ function loadSettingsPreferences() {
       autoTranslateShowOrigEl.checked = localStorage.getItem("nex_auto_translate_show_original") !== "false";
     }
 
+    const autoVoiceTranslateEl = document.getElementById("autoVoiceNoteTranslateToggle");
+    const voiceAttachSubtitleEl = document.getElementById("voiceNoteAttachSubtitleToggle");
+    if (autoVoiceTranslateEl) {
+      autoVoiceTranslateEl.checked = localStorage.getItem("nex_auto_voice_translate") !== "false";
+    }
+    if (voiceAttachSubtitleEl) {
+      voiceAttachSubtitleEl.checked = localStorage.getItem("nex_voice_attach_subtitle") !== "false";
+    }
+
     applyBubbleTheme(prefs.bubbleTheme || "neon-onyx");
 
     const lastSeenSelect = document.getElementById("lastSeenPrivacySelect");
@@ -10607,6 +10687,15 @@ function saveSettingsPreferences() {
     }
     if (autoTranslateShowOrigEl) {
       localStorage.setItem("nex_auto_translate_show_original", autoTranslateShowOrigEl.checked ? "true" : "false");
+    }
+
+    const autoVoiceTranslateEl = document.getElementById("autoVoiceNoteTranslateToggle");
+    const voiceAttachSubtitleEl = document.getElementById("voiceNoteAttachSubtitleToggle");
+    if (autoVoiceTranslateEl) {
+      localStorage.setItem("nex_auto_voice_translate", autoVoiceTranslateEl.checked ? "true" : "false");
+    }
+    if (voiceAttachSubtitleEl) {
+      localStorage.setItem("nex_voice_attach_subtitle", voiceAttachSubtitleEl.checked ? "true" : "false");
     }
     if (window.CyberFeatures && window.CyberFeatures.translator) {
       if (autoTranslateToggleEl) window.CyberFeatures.translator.autoTranslateOnLoad = autoTranslateToggleEl.checked;

@@ -29,6 +29,8 @@ class NexVoiceRecorder {
     this.recordedDuration = 0;
     this.isRecording = false;
     this.animationFrame = null;
+    this.speechRecognizer = null;
+    this.speechTranscript = '';
 
     this.ui = {
       container: document.getElementById('audioRecordingUI'),
@@ -122,6 +124,7 @@ class NexVoiceRecorder {
 
       this.startTimer();
       this.startWaveformVisualizer();
+      this.startSpeechRecognition();
 
       if (typeof window.hapticFeedback === 'function') window.hapticFeedback('medium');
       if (typeof window.showNotif === 'function') window.showNotif("Recording voice message...", "info", 1500);
@@ -235,6 +238,12 @@ class NexVoiceRecorder {
       audioBlob = this.createSyntheticAudioBlob(duration);
     }
 
+    if (this.speechRecognizer) {
+      try { this.speechRecognizer.stop(); } catch(e) {}
+    }
+    const capturedTranscript = this.speechTranscript || '';
+    this.speechTranscript = '';
+
     this.cleanupStream();
     this.resetUI();
 
@@ -243,12 +252,46 @@ class NexVoiceRecorder {
       reader.onloadend = () => {
         const audioDataUrl = reader.result;
         if (typeof window.dispatchVoiceNoteMessage === 'function') {
-          window.dispatchVoiceNoteMessage(audioDataUrl, duration);
+          window.dispatchVoiceNoteMessage(audioDataUrl, duration, capturedTranscript);
         } else {
           console.warn("window.dispatchVoiceNoteMessage not found on window");
         }
       };
       reader.readAsDataURL(audioBlob);
+    }
+  }
+
+  startSpeechRecognition() {
+    this.speechTranscript = '';
+    const isAutoVoiceTranslate = localStorage.getItem('nex_auto_voice_translate') !== 'false';
+    if (!isAutoVoiceTranslate) return;
+
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+      console.log('[NexVoiceRecorder] Web Speech Recognition API not available.');
+      return;
+    }
+    try {
+      this.speechRecognizer = new SpeechRec();
+      this.speechRecognizer.continuous = true;
+      this.speechRecognizer.interimResults = true;
+      this.speechRecognizer.lang = localStorage.getItem('nex_voice_input_lang') || navigator.language || 'en-US';
+
+      this.speechRecognizer.onresult = (event) => {
+        let finalStr = '';
+        for (let i = 0; i < event.results.length; i++) {
+          finalStr += event.results[i][0].transcript + ' ';
+        }
+        if (finalStr.trim()) {
+          this.speechTranscript = finalStr.trim();
+        }
+      };
+      this.speechRecognizer.onerror = (e) => {
+        console.warn('[NexVoiceRecorder] Speech recognition notice:', e.error);
+      };
+      this.speechRecognizer.start();
+    } catch (e) {
+      console.warn('[NexVoiceRecorder] SpeechRecognition start warning:', e);
     }
   }
 
@@ -3204,3 +3247,4 @@ if (document.readyState === 'loading') {
 } else {
   initCyberSuite();
 }
+
