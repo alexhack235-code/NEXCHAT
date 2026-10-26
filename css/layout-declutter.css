@@ -1127,11 +1127,12 @@ right: 2px !important;
 width: 12px !important;
 height: 12px !important;
 border-radius: 50% !important;
-background: #25d366 !important;
-border: 2.5px solid #0b141a !important;
+background: #00FFC6 !important;
+border: 2px solid #0A0F1E !important;
 display: block !important;
 z-index: 2 !important;
-box-shadow: 0 0 6px rgba(37, 211, 102, 0.4) !important;
+box-shadow: 0 0 8px rgba(0, 255, 198, 0.8) !important;
+animation: nexCyanPulse 2s infinite ease-in-out !important;
 }
 
 /* Contact Name & Last Message Snippet */
@@ -1317,9 +1318,10 @@ box-shadow: 0 0 10px rgba(0, 243, 255, 0.3) !important;
 width: 56px !important;
 height: 56px !important;
 border-radius: 16px !important;
-background: #25d366 !important;
-border: none !important;
-color: #0b141a !important;
+background: linear-gradient(135deg, #00FFC6 0%, #0088FF 100%) !important;
+border: 1.5px solid rgba(0, 255, 198, 0.4) !important;
+color: #0A0F1E !important;
+box-shadow: 0 8px 26px rgba(0, 255, 198, 0.45) !important;
 font-size: 21px !important;
 display: flex !important;
 align-items: center !important;
@@ -1399,13 +1401,15 @@ box-sizing: border-box !important;
 }
 
 /* Active WhatsApp Tab Pill Indicator */
-.bottom-nav .nav-item.active .nav-icon-wrapper {
-background: #103529 !important;
-color: #25d366 !important;
+.bottom-nav .nav-item.active .nav-icon-wrapper:not(.super-app-icon-wrapper) {
+background: rgba(0, 255, 198, 0.15) !important;
+color: #00FFC6 !important;
+border: 1px solid rgba(0, 255, 198, 0.35) !important;
+box-shadow: 0 0 10px rgba(0, 255, 198, 0.25) !important;
 }
 
 .bottom-nav .nav-item.active .nav-label {
-color: #e9edef !important;
+color: #00FFC6 !important;
 font-weight: 700 !important;
 }
 

@@ -299,8 +299,8 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
           ${replyHtml}
           <div class="message-content" style="margin:0;">${bodyText}</div>
           <div class="message-time-row" style="font-size:10.5px; margin-top:4px; opacity:0.85; display:flex; align-items:center; justify-content:flex-end; gap:6px;">
-            <span class="e2ee-secure-badge" style="display:inline-flex; align-items:center; opacity:0.55; margin-right:auto;"><i class="fa-solid fa-lock" style="font-size:8.5px;"></i></span>
-            <span class="message-time-text" style="display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:${isOwn ? 'rgba(255,255,255,0.75)' : '#8696a0'};">
+            <span class="e2ee-secure-badge nex-sealed-badge" style="display:inline-flex; align-items:center; opacity:0.85; margin-right:auto; gap:3px;"><span style="color:#00FFC6; font-size:10px;">&#x25CD;</span><span style="font-size:9.5px; color:#00FFC6; font-weight:600; letter-spacing:0.3px;">NEX Sealed</span></span>
+            <span class="message-time-text" style="display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:#00FFC6;">
               <span>${escapeHtml(formattedTime)}</span>${checkmarkHtml}
             </span>
           </div>
@@ -4955,7 +4955,7 @@ function appendLocalSentMessage(text, attachment = null, showHeader = false, sta
   const e2eeBadge = document.createElement("span");
   e2eeBadge.className = "e2ee-secure-badge";
   e2eeBadge.style.cssText = "display:inline-flex; align-items:center; opacity:0.55; margin-right:auto; cursor:pointer;";
-  e2eeBadge.innerHTML = '<i class="fa-solid fa-lock" style="font-size:8.5px;"></i>';
+  e2eeBadge.innerHTML = '<span style="color:#00FFC6; font-size:10px; margin-right:3px;">&#x25CD;</span><span style="font-size:9.5px; color:#00FFC6; font-weight:600; letter-spacing:0.3px;">NEX Sealed</span>';
   e2eeBadge.title = "End-to-End Encrypted (AES-256-GCM Zero-Knowledge)";
   e2eeBadge.addEventListener('click', (ev) => {
     ev.stopPropagation();
@@ -5577,7 +5577,7 @@ function loadMessages() {
       const e2eeBadge = document.createElement("span");
       e2eeBadge.className = "e2ee-secure-badge";
       e2eeBadge.style.cssText = `display:inline-flex; align-items:center; opacity:0.55; margin-right:auto; cursor:pointer;`;
-      e2eeBadge.innerHTML = '<i class="fa-solid fa-lock" style="font-size:8.5px;"></i>';
+      e2eeBadge.innerHTML = '<span style="color:#00FFC6; font-size:10px; margin-right:3px;">&#x25CD;</span><span style="font-size:9.5px; color:#00FFC6; font-weight:600; letter-spacing:0.3px;">NEX Sealed</span>';
       e2eeBadge.title = "AES-256-GCM Zero-Knowledge Enclave Encrypted. Click to inspect ciphertext.";
       e2eeBadge.addEventListener('click', (ev) => {
         ev.stopPropagation();
@@ -8216,6 +8216,10 @@ document.getElementById("nav-calls")?.addEventListener("click", () => {
 
 document.getElementById("nav-more")?.addEventListener("click", () => {
   handleNavigation("more");
+});
+
+document.getElementById("nav-ai")?.addEventListener("click", () => {
+  if (typeof openChat === 'function') openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');
 });
 
 document.getElementById("nav-marketplace")?.addEventListener("click", () => {
@@ -16187,14 +16191,15 @@ function applyFilter(filterType) {
       const unreadBadge = item.querySelector(".unread-badge");
       const isUnread = item.classList.contains("unread") || (unreadBadge && unreadBadge.textContent.trim() !== "");
       if (isUnread) shouldShow = true;
-    } else if (filterType === 'favorites' || filterType === 'favourites') {
-      shouldShow = item.dataset.favorite === 'true' || item.classList.contains('favorite') || item.querySelector('.favourite-icon') !== null;
-    } else if (filterType === 'groups') {
+    } else if (filterType === 'syndicates' || filterType === 'groups') {
       const isGroup = item.classList.contains('group-item') || item.querySelector(".group-avatar") || (item.getAttribute('data-chat-id')?.length > 20 && !item.classList.contains('chronex-ai-item'));
       if (isGroup) shouldShow = true;
     } else if (filterType === 'ai-bots' || filterType === 'ai') {
       const isAi = item.classList.contains('chronex-ai-item') || item.getAttribute('data-chat-id') === 'chronex-ai' || item.getAttribute('data-chat-type') === 'ai';
       if (isAi) shouldShow = true;
+    } else if (filterType === 'market') {
+      const isMarket = item.classList.contains('market-item') || item.getAttribute('data-chat-type') === 'marketplace';
+      if (isMarket) shouldShow = true;
     }
 
     item.style.display = shouldShow ? "flex" : "none";

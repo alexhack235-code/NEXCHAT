@@ -1,0 +1,184 @@
+/**
+ * NEXCHAT v2 Master Theme - Anti-WhatsApp Fingerprints
+ * 
+ * Brand Colors:
+ * - Primary: NEXCHAT Cyan #00FFC6
+ * - Surface / Deep Navy: #0A0F1E
+ * - Accents: Cyber Blue #0088FF, Neon Purple #8A2BE2
+ * 
+ * STRICTLY ZERO EMOJIS: FontAwesome 6 vector icons and cyberpunk styling only.
+ */
+
+:root {
+  --primary: #00FFC6;
+  --primary-rgb: 0, 255, 198;
+  --primary-hover: #00e0ae;
+  --primary-glow: rgba(0, 255, 198, 0.45);
+  --primary-subtle: rgba(0, 255, 198, 0.12);
+  --primary-gradient: linear-gradient(135deg, #00FFC6 0%, #0088FF 100%);
+  --bg-navy: #0A0F1E;
+  --bg-navy-light: #111827;
+  --bg-navy-card: #0e1526;
+  --border-cyan-glow: 1px solid rgba(0, 255, 198, 0.35);
+  --shadow-cyan-glow: 0 0 14px rgba(0, 255, 198, 0.25);
+  --text-main: #e9edef;
+  --text-muted: #8696a0;
+  --text-cyan: #00FFC6;
+  --bubble-sent-bg: linear-gradient(135deg, #0b253a 0%, #0d3b4f 100%);
+  --bubble-received-bg: #0A0F1E;
+  --bubble-radius-sent: 14px 14px 2px 14px;
+  --bubble-radius-received: 14px 14px 14px 2px;
+}
+
+/* Base Body Deep Navy Override */
+body.dark-mode,
+body {
+  background-color: var(--bg-navy) !important;
+  color: var(--text-main);
+}
+
+/* Pulsing NEXCHAT Cyan Online Beacon */
+@keyframes nexCyanPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(0, 255, 198, 0.8);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 0 14px rgba(0, 255, 198, 1);
+  }
+}
+
+.chat-online-beacon,
+.nex-online-pulse {
+  background: var(--primary) !important;
+  border: 2px solid var(--bg-navy) !important;
+  box-shadow: 0 0 8px var(--primary-glow) !important;
+  animation: nexCyanPulse 2s infinite ease-in-out !important;
+}
+
+/* NEXCHAT Cyan FAB (Gradient Cyan -> Blue) */
+.whatsapp-chat-fab,
+.mobile-fab,
+.calls-fab {
+  background: var(--primary-gradient) !important;
+  color: var(--bg-navy) !important;
+  border: 1.5px solid rgba(0, 255, 198, 0.4) !important;
+  box-shadow: 0 8px 26px rgba(0, 255, 198, 0.45) !important;
+}
+
+.whatsapp-chat-fab:hover,
+.mobile-fab:hover,
+.calls-fab:hover {
+  transform: scale(1.08) !important;
+  box-shadow: 0 10px 32px rgba(0, 255, 198, 0.65) !important;
+}
+
+/* NEXCHAT Super-App Centered Market Hub */
+.bottom-nav .nav-item.nav-item-center-super {
+  position: relative !important;
+  transform: translateY(-8px) scale(1.18) !important;
+  z-index: 10 !important;
+}
+
+.bottom-nav .super-app-icon-wrapper {
+  background: var(--primary-gradient) !important;
+  color: var(--bg-navy) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 0 18px rgba(0, 255, 198, 0.55) !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  min-width: 44px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.bottom-nav .super-app-label {
+  font-weight: 800 !important;
+  color: var(--primary) !important;
+  font-size: 11px !important;
+  letter-spacing: 0.5px !important;
+}
+
+/* NEXCHAT Filter Pills with Border Glow */
+.chat-filter-tabs .filter-tab {
+  border: 1px solid rgba(0, 255, 198, 0.35) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 198, 0.15) !important;
+  background: rgba(10, 15, 30, 0.75) !important;
+  color: var(--text-muted) !important;
+  border-radius: 20px !important;
+  font-weight: 600 !important;
+}
+
+.chat-filter-tabs .filter-tab:hover {
+  border-color: var(--primary) !important;
+  color: var(--primary) !important;
+  box-shadow: 0 0 14px var(--primary-glow) !important;
+}
+
+.chat-filter-tabs .filter-tab.active {
+  background: linear-gradient(135deg, rgba(0, 255, 198, 0.25), rgba(0, 136, 255, 0.25)) !important;
+  border: 1.5px solid var(--primary) !important;
+  color: var(--primary) !important;
+  box-shadow: 0 0 16px var(--primary-glow) !important;
+  font-weight: 700 !important;
+}
+
+/* Asymmetric Anti-Clone Message Bubbles */
+.message-bubble.sent {
+  border-radius: var(--bubble-radius-sent) !important;
+  background: var(--bubble-sent-bg) !important;
+  border: 1px solid rgba(0, 255, 198, 0.28) !important;
+  box-shadow: 0 4px 14px rgba(0, 255, 198, 0.12) !important;
+  color: #f1f5f9 !important;
+}
+
+.message-bubble.received {
+  border-radius: var(--bubble-radius-received) !important;
+  background: var(--bubble-received-bg) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+}
+
+.message-time-row,
+.message-time-text {
+  color: var(--primary) !important;
+  opacity: 0.9 !important;
+}
+
+.nex-sealed-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 9.5px !important;
+  color: var(--primary) !important;
+  opacity: 0.85 !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.3px !important;
+}
+
+/* Prominent Top CAMS Button */
+.top-cams-hero-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  background: linear-gradient(135deg, rgba(0, 255, 198, 0.2), rgba(0, 136, 255, 0.2)) !important;
+  border: 1.5px solid var(--primary) !important;
+  color: var(--primary) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  box-shadow: 0 0 14px var(--primary-glow) !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.top-cams-hero-btn:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 0 20px rgba(0, 255, 198, 0.65) !important;
+}

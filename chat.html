@@ -28,6 +28,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&family=Rajdhani:wght@500;600;700&family=Noto+Color+Emoji&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles/theme.css">
   <link rel="stylesheet" href="chat.css">
   <link rel="stylesheet" href="chat2.css">
   <link rel="stylesheet" href="src/features/group/group-chat.css">
@@ -132,7 +133,10 @@
       </div>
 
       <!-- Center Token Pill (Desktop only) -->
-      <div class="header-center desktop-only-header">
+      <div class="header-center desktop-only-header" style="display:flex; align-items:center; gap:12px;">
+        <button type="button" id="topHeaderCamsBtnDesktop" class="top-cams-hero-btn" onclick="window.location.href='reels.html'" title="NEX CAMS & Reels">
+          <i class="fa-solid fa-clapperboard"></i> <span>CAMS</span>
+        </button>
         <div id="tokenDisplay" class="token-display" title="Your tokens">
           <span class="token-label">Tokens</span>
           <span id="tokenCount">0</span>
@@ -204,9 +208,9 @@
         </div>
 
         <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
-        <div class="header-right mobile-header-actions">
-          <button id="mobileReelsBtn" class="header-icon-btn mobile-action-btn" title="Camera / CamShot" onclick="window.location.href='reels.html'">
-            <i class="fa-solid fa-camera"></i>
+        <div class="header-right mobile-header-actions" style="display:flex; align-items:center; gap:8px;">
+          <button type="button" id="topHeaderCamsBtnMobile" class="top-cams-hero-btn" onclick="window.location.href='reels.html'" title="NEX CAMS & Reels">
+            <i class="fa-solid fa-clapperboard"></i> <span>CAMS</span>
           </button>
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
             <i class="fa-solid fa-magnifying-glass"></i>
@@ -576,10 +580,10 @@
         <!-- WhatsApp-Style Category Filter Tabs -->
         <div id="chatFilterTabs" class="chat-filter-tabs filter-tabs">
           <button class="filter-tab active" data-filter="all" title="All chats">All</button>
-          <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
-          <button class="filter-tab" data-filter="favourites" title="Favourite chats">Favourites</button>
-          <button class="filter-tab" data-filter="groups" title="Group chats">Groups</button>
+          <button class="filter-tab" data-filter="syndicates" title="Syndicates & Guilds">Syndicates</button>
           <button class="filter-tab" data-filter="ai-bots" title="ChronEX AI Bots">AI Bots</button>
+          <button class="filter-tab" data-filter="market" title="Market Hub Messages">Market</button>
+          <button class="filter-tab" data-filter="unread" title="Unread messages">Unread</button>
           <button class="filter-tab add-chat-tab" id="newChatFromTab" title="Start New Direct Chat"><i class="fa-solid fa-plus"></i></button>
         </div>
 
@@ -629,7 +633,7 @@
             </div>
           </button>
           <button type="button" id="mobileFabNewChat" class="mobile-fab whatsapp-chat-fab" title="New Chat" aria-label="New Chat">
-            <i class="fa-solid fa-comment-medical"></i>
+            <span class="nex-fab-n" style="font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:24px; color:#0A0F1E; line-height:1;">N</span>
           </button>
         </div>
       </div>
@@ -3525,30 +3529,30 @@
 
     <!-- BOTTOM NAVIGATION -->
     <nav class="bottom-nav">
-      <!-- 4 Core WhatsApp Tabs with WhatsApp Active Indicator & Badges -->
+      <!-- NEXCHAT Super-App Nav: Chats / ChronEX AI / [Market Hub (Center + 20% Bigger)] / Calls -->
       <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chats">
         <div class="nav-icon-wrapper">
-          <i class="fa-solid fa-comments"></i>
+          <i class="fa-solid fa-comment-dots"></i>
           <span class="nav-pill-badge" id="navChatsCountBadge" style="display: none;">2</span>
         </div>
         <span class="nav-label">Chats</span>
       </button>
-      <button id="nav-status" class="nav-item" data-nav="updates" title="Updates">
+      <button id="nav-ai" class="nav-item" data-nav="ai" title="ChronEX AI Assistant">
         <div class="nav-icon-wrapper">
-          <i class="fa-solid fa-circle-notch"></i>
-          <span class="nav-status-beacon"></span>
+          <i class="fa-solid fa-microchip"></i>
+          <span class="nav-status-beacon" style="background:#00FFC6;"></span>
         </div>
-        <span class="nav-label">Updates</span>
+        <span class="nav-label">ChronEX AI</span>
       </button>
-      <button id="nav-marketplace" class="nav-item" data-nav="marketplace" title="Market Hub">
-        <div class="nav-icon-wrapper">
-          <i class="fa-solid fa-shop"></i>
+      <button id="nav-marketplace" class="nav-item nav-item-center-super" data-nav="marketplace" title="Market Hub">
+        <div class="nav-icon-wrapper super-app-icon-wrapper">
+          <i class="fa-solid fa-store"></i>
         </div>
-        <span class="nav-label">Market Hub</span>
+        <span class="nav-label super-app-label">Market</span>
       </button>
       <button id="nav-calls" class="nav-item" data-nav="calls" title="Calls">
         <div class="nav-icon-wrapper">
-          <i class="fa-solid fa-phone"></i>
+          <i class="fa-solid fa-headset"></i>
         </div>
         <span class="nav-label">Calls</span>
       </button>
