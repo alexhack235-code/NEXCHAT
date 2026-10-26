@@ -19853,13 +19853,17 @@ function initAudioSpaces() {
   if (!modal) return;
 
   const openModal = () => {
-    modal.style.display = 'flex';
+    modal.classList.add('active');
+    modal.classList.remove('hidden');
+    modal.style.setProperty('display', 'flex', 'important');
     playCyberSfx('sonar');
     if (navigator.vibrate) navigator.vibrate(25);
   };
 
   const closeModal = () => {
-    modal.style.display = 'none';
+    modal.classList.remove('active');
+    modal.classList.add('hidden');
+    modal.style.setProperty('display', 'none', 'important');
   };
 
   if (headerBtn) headerBtn.addEventListener('click', openModal);
@@ -20381,7 +20385,11 @@ function initMeshSettings() {
     openAudioSpacesBtn.addEventListener('click', () => {
       if (typeof closeSettingsModal === 'function') closeSettingsModal();
       const modal = document.getElementById('audioSpacesModal');
-      if (modal) modal.style.display = 'flex';
+      if (modal) {
+        modal.classList.add('active');
+        modal.classList.remove('hidden');
+        modal.style.setProperty('display', 'flex', 'important');
+      }
       playCyberSfx('sonar');
     });
   }

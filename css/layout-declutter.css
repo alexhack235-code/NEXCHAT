@@ -2825,11 +2825,29 @@ Solves All Left Clipping, Role Badge Stacking, and Grid Overflows
 position: fixed !important;
 inset: 0 !important;
 z-index: 10010 !important;
-display: flex !important;
 align-items: center !important;
 justify-content: center !important;
 padding: 12px !important;
 box-sizing: border-box !important;
+}
+
+/* Modal visibility states */
+.audio-spaces-modal:not(.active):not([style*="display: flex"]):not([style*="display:flex"]) {
+display: none !important;
+}
+
+.audio-spaces-modal.active,
+.audio-spaces-modal[style*="display: flex"],
+.audio-spaces-modal[style*="display:flex"] {
+display: flex !important;
+}
+
+.audio-spaces-modal.hidden,
+.audio-spaces-modal[style*="display: none"],
+.audio-spaces-modal[style*="display:none"],
+#audioSpacesModal[style*="display: none"],
+#audioSpacesModal[style*="display:none"] {
+display: none !important;
 }
 
 .spaces-modal-backdrop {
