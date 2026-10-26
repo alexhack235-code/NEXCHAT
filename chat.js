@@ -15751,6 +15751,9 @@ function initializeBasicUI() {
     });
   }
 
+  // WhatsApp-Style Pull-to-Reveal for Locked Chats & Archived
+  setupWhatsAppLockedChatsPullToReveal();
+
   // Master click delegation for chat lists: contactList, groupsList, archivedList
   const bindChatListDelegation = (listEl) => {
     if (!listEl || listEl._hasMasterChatDelegation) return;
@@ -20863,4 +20866,81 @@ if (typeof document !== 'undefined') {
   } else {
     initPolishedFeatures();
   }
+}
+
+// WhatsApp-Style Pull-Down Reveal Engine for Locked Chats & Archived Rows
+function setupWhatsAppLockedChatsPullToReveal() {
+  const systemRows = document.getElementById('chatSystemRows');
+  const chatsSection = document.querySelector('.chats-section') || document.getElementById('chatsSection');
+  const chatListView = document.getElementById('chatListView');
+  if (!systemRows || (!chatsSection && !chatListView)) return;
+
+  const scrollTarget = chatsSection || chatListView;
+  if (scrollTarget._hasPullToRevealBound) return;
+  scrollTarget._hasPullToRevealBound = true;
+
+  let touchStartY = 0;
+  let isTrackingPull = false;
+
+  // Touch handlers for mobile pull-down at top of chat list
+  scrollTarget.addEventListener('touchstart', (e) => {
+    if (scrollTarget.scrollTop <= 2 && e.touches.length === 1) {
+      touchStartY = e.touches[0].clientY;
+      isTrackingPull = true;
+    } else {
+      isTrackingPull = false;
+    }
+  }, { passive: true });
+
+  scrollTarget.addEventListener('touchmove', (e) => {
+    if (!isTrackingPull || e.touches.length !== 1) return;
+    const currentY = e.touches[0].clientY;
+    const deltaY = currentY - touchStartY;
+
+    // When pulling downwards past threshold at the very top of chat list
+    if (deltaY > 35 && scrollTarget.scrollTop <= 2) {
+      if (!systemRows.classList.contains('revealed')) {
+        systemRows.classList.add('revealed');
+        if (navigator.vibrate) {
+          try { navigator.vibrate(12); } catch (_) { }
+        }
+      }
+    }
+  }, { passive: true });
+
+  scrollTarget.addEventListener('touchend', () => {
+    isTrackingPull = false;
+  }, { passive: true });
+
+  // Auto-collapse when user scrolls down through active conversations
+  scrollTarget.addEventListener('scroll', () => {
+    if (scrollTarget.scrollTop > 24) {
+      if (systemRows.classList.contains('revealed')) {
+        systemRows.classList.remove('revealed');
+      }
+    }
+  }, { passive: true });
+
+  // Mouse wheel support for desktop / laptop trackpad
+  scrollTarget.addEventListener('wheel', (e) => {
+    if (scrollTarget.scrollTop <= 0 && e.deltaY < -12) {
+      if (!systemRows.classList.contains('revealed')) {
+        systemRows.classList.add('revealed');
+      }
+    } else if (scrollTarget.scrollTop > 24 && e.deltaY > 12) {
+      if (systemRows.classList.contains('revealed')) {
+        systemRows.classList.remove('revealed');
+      }
+    }
+  }, { passive: true });
+
+  // Programmatic helper to toggle or force-show for UI testing / preview
+  window.toggleWhatsAppSystemRows = function(force) {
+    if (typeof force === 'boolean') {
+      systemRows.classList.toggle('revealed', force);
+    } else {
+      systemRows.classList.toggle('revealed');
+    }
+    return systemRows.classList.contains('revealed');
+  };
 }

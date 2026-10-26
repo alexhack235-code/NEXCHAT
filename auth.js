@@ -1086,12 +1086,7 @@ function initNexshotFusionIntro() {
   const phaseBadge = document.getElementById('introConsolePhaseBadge');
   const progressBar = document.getElementById('introProgressBar');
 
-  const phasePills = [
-    document.getElementById('introPhasePill1'),
-    document.getElementById('introPhasePill2'),
-    document.getElementById('introPhasePill3'),
-    document.getElementById('introPhasePill4')
-  ];
+
 
   const CINEMATIC_PHRASES = [
     "HAVE YOU EVER FELT LIKE YOUR PRIVACY WAS NEVER TRULY YOURS?",
@@ -1211,17 +1206,7 @@ function initNexshotFusionIntro() {
     animationTimers = [];
   }
 
-  function setPillsState(activeIdx, completedUpTo = -1) {
-    phasePills.forEach((p, idx) => {
-      if (!p) return;
-      p.classList.remove('active', 'completed');
-      if (idx === activeIdx) {
-        p.classList.add('active');
-      } else if (idx <= completedUpTo) {
-        p.classList.add('completed');
-      }
-    });
-  }
+
 
   function typeIntroCharacter() {
     if (!isIntroActive) return;
@@ -1249,7 +1234,6 @@ function initNexshotFusionIntro() {
       animationTimers.push(timer);
     } else {
       // Finished typing current phrase
-      setPillsState(currentPhraseIdx, currentPhraseIdx);
 
       if (currentPhraseIdx < CINEMATIC_PHRASES.length - 1) {
         // Pause between phrases (~600ms)
@@ -1259,14 +1243,12 @@ function initNexshotFusionIntro() {
           currentCharIdx = 0;
           if (typewriterText) typewriterText.textContent = '';
           if (phaseBadge) phaseBadge.textContent = `PHASE ${currentPhraseIdx + 1}/4`;
-          setPillsState(currentPhraseIdx, currentPhraseIdx - 1);
           typeIntroCharacter();
         }, 650);
         animationTimers.push(pauseTimer);
       } else {
         // All 4 phases finished! Access granted final seal
         if (progressBar) progressBar.style.width = '100%';
-        setPillsState(-1, 3);
         const finalTimer = setTimeout(() => {
           if (!isIntroActive) return;
           if (typewriterText) {
@@ -1298,7 +1280,6 @@ function initNexshotFusionIntro() {
     if (typewriterText) typewriterText.textContent = '';
     if (phaseBadge) phaseBadge.textContent = 'PHASE 1/4';
     if (progressBar) progressBar.style.width = '0%';
-    setPillsState(0, -1);
 
     initParticleCanvas();
 
