@@ -8212,11 +8212,12 @@ document.getElementById("cancelReplyBtn")?.addEventListener("click", () => {
   window.replyMessageId = null;
 });
 
-document.getElementById("quickAutocorrectBtn")?.addEventListener("click", () => {
-  const input = document.getElementById("messageInput") || document.getElementById("message-input");
-  if (input && input.value) {
-    input.value = input.value.trim().replace(/\s+/g, ' ');
-    showNotif("Input sanitized and formatted.", "info", 1000);
+document.getElementById("quickAutocorrectBtn")?.addEventListener("click", (e) => {
+  e.preventDefault();
+  if (window.predictiveInputEngine && typeof window.predictiveInputEngine.applyAutoCorrection === "function") {
+    window.predictiveInputEngine.applyAutoCorrection();
+  } else if (typeof triggerAiPolishDraft === "function") {
+    triggerAiPolishDraft();
   }
 });
 
@@ -19752,49 +19753,12 @@ function initSmartReplyAndPolish() {
     }
   };
 
-  // AI Polish Console Handler
+    // AI Polish Console Handler
   if (polishBtn && messageInput) {
-    polishBtn.addEventListener('click', async () => {
-      const rawText = messageInput.value.trim();
-      if (!rawText) {
-        showNotif('Type a draft message first to polish with ChronEX AI', 'info', 2500);
-        messageInput.focus();
-        return;
-      }
-
-      polishBtn.disabled = true;
-      polishBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Polishing...</span>';
-
-      try {
-        let polished = rawText;
-        if (chronexAI && typeof chronexAI.chat === 'function') {
-          const prompt = `Rewrite the following message draft into a crisp, articulate, high-clarity professional tone. Keep it concise, natural, and polite. Return ONLY the rewritten text without commentary, quotes, or markdown:\n\n"${rawText}"`;
-          try {
-            const aiResp = await chronexAI.chat(prompt, myUID || 'default');
-            if (aiResp && aiResp.trim().length > 0) {
-              polished = aiResp.replace(/^["']|["']$/g, '').trim();
-            }
-          } catch (_) {
-            polished = rawText.charAt(0).toUpperCase() + rawText.slice(1);
-            if (!/[.!?]$/.test(polished)) polished += '.';
-          }
-        } else {
-          polished = rawText.charAt(0).toUpperCase() + rawText.slice(1);
-          if (!/[.!?]$/.test(polished)) polished += '.';
-        }
-
-        messageInput.value = polished;
-        messageInput.style.borderColor = 'var(--accent-primary)';
-        setTimeout(() => { messageInput.style.borderColor = ''; }, 1200);
-
-        if (sendBtn) sendBtn.style.display = 'flex';
-        playCyberSfx('chime');
-        showNotif('Draft polished with ChronEX AI', 'success', 2000);
-      } catch (err) {
-        showNotif('Polish error: ' + err.message, 'error');
-      } finally {
-        polishBtn.disabled = false;
-        polishBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Polish</span>';
+    polishBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof triggerAiPolishDraft === 'function') {
+        triggerAiPolishDraft();
       }
     });
   }
@@ -20673,7 +20637,7 @@ function attachSwipeToReply(wrapper, bubble, msg, isOwn) {
   bubble.addEventListener('pointercancel', onDragEnd, { passive: true });
 }
 
-// AI Polish Wand Functionality
+// AI Polish Wand Functionality (Ultra-Fast 0ms Local + Asynchronous Cloud AI)
 async function triggerAiPolishDraft() {
   const messageInput = document.getElementById('message-input');
   const polishBtn = document.getElementById('aiPolishInputBtn') || document.getElementById('aiPolishBtn');
@@ -20688,38 +20652,50 @@ async function triggerAiPolishDraft() {
     return;
   }
 
+  // TIER 1: Sub-millisecond (0ms) instant local neural grammar & typo auto-correct
+  let instant = rawText;
+  if (window.predictiveInputEngine && typeof window.predictiveInputEngine.instantPolish === 'function') {
+    instant = window.predictiveInputEngine.instantPolish(rawText);
+  } else {
+    instant = rawText.charAt(0).toUpperCase() + rawText.slice(1);
+    if (!/[.!?]$/.test(instant)) instant += '.';
+  }
+
+  // Apply instantly to input field with visual highlight
+  messageInput.value = instant;
+  messageInput.style.borderColor = 'var(--accent-primary, #00ff66)';
+  setTimeout(() => { if (messageInput) messageInput.style.borderColor = ''; }, 1200);
+
+  if (sendBtn) sendBtn.style.display = 'flex';
+  if (typeof playCyberSfx === 'function') playCyberSfx('chime');
+  if (typeof showNotif === 'function') showNotif('Draft Auto-Corrected Instantly [0ms]', 'success', 1800);
+
+  // TIER 2: Fast Asynchronous AI Polish in background (never blocks UI)
   if (polishBtn) {
     polishBtn.disabled = true;
     polishBtn.classList.add('polishing');
   }
 
   try {
-    let polished = rawText;
-    if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.chat === 'function') {
-      const prompt = `Rewrite the following message draft into a crisp, articulate, high-clarity professional tone. Keep it concise, natural, and polite. Return ONLY the rewritten text without commentary, quotes, or markdown:\n\n"${rawText}"`;
-      try {
-        const aiResp = await chronexAI.chat(prompt, (typeof myUID !== 'undefined' ? myUID : 'default'));
-        if (aiResp && aiResp.trim().length > 0) {
-          polished = aiResp.replace(/^[\"\']|[\"\']$/g, '').trim();
-        }
-      } catch (_) {
-        polished = rawText.charAt(0).toUpperCase() + rawText.slice(1);
-        if (!/[.!?]$/.test(polished)) polished += '.';
-      }
-    } else {
-      polished = rawText.charAt(0).toUpperCase() + rawText.slice(1);
-      if (!/[.!?]$/.test(polished)) polished += '.';
+    let cloudPolished = null;
+    if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.fastPolish === 'function') {
+      cloudPolished = await chronexAI.fastPolish(instant);
+    } else if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.chat === 'function') {
+      const prompt = `Rewrite into a crisp, articulate professional tone. Return ONLY the polished text:\n"${instant}"`;
+      cloudPolished = await chronexAI.chat(prompt, 'fast_polish');
     }
 
-    messageInput.value = polished;
-    messageInput.style.borderColor = 'var(--accent-primary)';
-    setTimeout(() => { messageInput.style.borderColor = ''; }, 1200);
-
-    if (sendBtn) sendBtn.style.display = 'flex';
-    if (typeof playCyberSfx === 'function') playCyberSfx('chime');
-    if (typeof showNotif === 'function') showNotif('Draft polished with ChronEX AI', 'success', 2000);
-  } catch (err) {
-    if (typeof showNotif === 'function') showNotif('Polish error: ' + err.message, 'error');
+    if (cloudPolished && cloudPolished.trim().length > 0 && cloudPolished.trim() !== instant) {
+      const clean = cloudPolished.replace(/^["']|["']$/g, '').trim();
+      // Seamlessly upgrade only if user hasn't typed new text
+      if (messageInput.value === instant) {
+        messageInput.value = clean;
+        messageInput.style.borderColor = '#38bdf8';
+        setTimeout(() => { if (messageInput) messageInput.style.borderColor = ''; }, 1200);
+      }
+    }
+  } catch (_) {
+    // Keep local 0ms instant polish intact
   } finally {
     if (polishBtn) {
       polishBtn.disabled = false;

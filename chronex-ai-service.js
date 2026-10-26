@@ -734,6 +734,9 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
   async saveConversation(userMessage, aiResponse, conversationId, clientId = null) {
     try {
       if (!this.uid) return;
+      if (conversationId === 'scribe_transform' || (typeof conversationId === 'string' && (conversationId.startsWith('polish') || conversationId.startsWith('fast_')))) {
+        return; // Skip saving transient polish/autocorrect drafts to Firestore
+      }
 
       await addDoc(collection(db, "messages"), {
         from: this.uid,
@@ -807,6 +810,90 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
   updateConfig(newConfig) {
     this.config = { ...this.config, ...newConfig };
+  }
+
+  /**
+   * Ultra-Fast AI Message Polish & Grammar Correction
+   * Low-latency, short-token generation, bypasses history & database writes
+   */
+  async fastPolish(rawText) {
+    if (!rawText || !rawText.trim()) return rawText;
+    const cacheKey = "fast_polish:" + rawText.trim().toLowerCase();
+    const cached = this.getFromCache(cacheKey);
+    if (cached) return cached;
+
+    const prompt = `Rewrite this draft into a clear, natural, high-clarity professional message. Return ONLY the rewritten text without quotes, markdown, or commentary:\n"${rawText}"`;
+
+    // 1. Fast Vercel Edge Serverless Gateway (/api/ai) with aggressive 2.2s timeout
+    if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+      try {
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timeoutTimer = controller ? setTimeout(() => controller.abort(), 2200) : null;
+
+        const serverResp = await fetch('/api/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: prompt, history: [] }),
+          signal: controller?.signal
+        });
+
+        if (timeoutTimer) clearTimeout(timeoutTimer);
+
+        if (serverResp.ok) {
+          const serverData = await serverResp.json();
+          if (serverData?.success && serverData?.response) {
+            const clean = serverData.response.replace(/^["']|["']$/g, '').trim();
+            if (clean && clean.length > 0) {
+              this.cacheResponse(cacheKey, clean);
+              return clean;
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 2. Direct client-side Gemini Flash Lite call with short timeout (2000ms)
+    const pool = this.config.backends.gemini?.pool;
+    if (pool && pool.getTotalKeys() > 0) {
+      try {
+        const keyInfo = pool.getNextKey();
+        if (keyInfo && keyInfo.key) {
+          const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+          const fetchTimer = controller ? setTimeout(() => controller.abort(), 2000) : null;
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${keyInfo.key}`;
+
+          const resp = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: 'user', parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.2,
+                maxOutputTokens: 120,
+                topP: 0.9
+              }
+            }),
+            signal: controller?.signal
+          });
+
+          if (fetchTimer) clearTimeout(fetchTimer);
+
+          if (resp.ok) {
+            const data = await resp.json();
+            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (text) {
+              const clean = text.replace(/^["']|["']$/g, '').trim();
+              if (clean && clean.length > 0) {
+                this.cacheResponse(cacheKey, clean);
+                return clean;
+              }
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    return null;
   }
 
   // ===== GOOGLE GEMINI INTEGRATION WITH SMART KEY POOL =====
