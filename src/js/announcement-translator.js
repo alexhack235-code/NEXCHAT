@@ -574,7 +574,7 @@
         else timeText = Math.floor(diffSec / 86400) + 'd ago';
       }
 
-      let levelColor = '#00FFC6';
+      let levelColor = '#00C896';
       let levelIcon = 'fa-bolt';
 
       if (level === 'critical') {
@@ -612,7 +612,7 @@
             </div>
 
             <div class="announcement-tags-wrap">
-              ${isPinned ? '<span class="announcement-badge level-pinned" style="border-color:#00FFC6;color:#00FFC6;background:rgba(0,255,198,0.15);"><i class="fa-solid fa-thumbtack"></i> PINNED</span>' : ''}
+              ${isPinned ? '<span class="announcement-badge level-pinned" style="border-color:#00C896;color:#00C896;background:rgba(0,200,150,0.15);"><i class="fa-solid fa-thumbtack"></i> PINNED</span>' : ''}
               <span class="announcement-badge level-${level}" style="border-color:${levelColor};color:${levelColor};">
                 <i class="fa-solid ${levelIcon}"></i> ${level.toUpperCase()}
               </span>

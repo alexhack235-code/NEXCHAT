@@ -2,7 +2,7 @@
  * NEXCHAT v2 Master Theme - Anti-WhatsApp Fingerprints
  * 
  * Brand Colors:
- * - Primary: NEXCHAT Cyan #00FFC6
+ * - Primary: NEXCHAT Cyan #00C896
  * - Surface / Deep Navy: #0A0F1E
  * - Accents: Cyber Blue #0088FF, Neon Purple #8A2BE2
  * 
@@ -10,20 +10,20 @@
  */
 
 :root {
-  --primary: #00FFC6;
-  --primary-rgb: 0, 255, 198;
-  --primary-hover: #00e0ae;
-  --primary-glow: rgba(0, 255, 198, 0.45);
-  --primary-subtle: rgba(0, 255, 198, 0.12);
-  --primary-gradient: linear-gradient(135deg, #00FFC6 0%, #0088FF 100%);
+  --primary: #00C896;
+  --primary-rgb: 0, 200, 150;
+  --primary-hover: #00b084;
+  --primary-glow: rgba(0, 200, 150, 0.45);
+  --primary-subtle: rgba(0, 200, 150, 0.12);
+  --primary-gradient: linear-gradient(135deg, #00C896 0%, #0088FF 100%);
   --bg-navy: #0A0F1E;
   --bg-navy-light: #111827;
   --bg-navy-card: #0e1526;
-  --border-cyan-glow: 1px solid rgba(0, 255, 198, 0.35);
-  --shadow-cyan-glow: 0 0 14px rgba(0, 255, 198, 0.25);
+  --border-cyan-glow: 1px solid rgba(0, 200, 150, 0.35);
+  --shadow-cyan-glow: 0 0 14px rgba(0, 200, 150, 0.25);
   --text-main: #e9edef;
   --text-muted: #8696a0;
-  --text-cyan: #00FFC6;
+  --text-cyan: #00C896;
   --bubble-sent-bg: linear-gradient(135deg, #0b253a 0%, #0d3b4f 100%);
   --bubble-received-bg: #0A0F1E;
   --bubble-radius-sent: 14px 14px 2px 14px;
@@ -41,11 +41,11 @@ body {
 @keyframes nexCyanPulse {
   0%, 100% {
     transform: scale(1);
-    box-shadow: 0 0 8px rgba(0, 255, 198, 0.8);
+    box-shadow: 0 0 8px rgba(0, 200, 150, 0.8);
   }
   50% {
     transform: scale(1.15);
-    box-shadow: 0 0 14px rgba(0, 255, 198, 1);
+    box-shadow: 0 0 14px rgba(0, 200, 150, 1);
   }
 }
 
@@ -63,21 +63,21 @@ body {
 .calls-fab {
   background: var(--primary-gradient) !important;
   color: var(--bg-navy) !important;
-  border: 1.5px solid rgba(0, 255, 198, 0.4) !important;
-  box-shadow: 0 8px 26px rgba(0, 255, 198, 0.45) !important;
+  border: 1.5px solid rgba(0, 200, 150, 0.4) !important;
+  box-shadow: 0 8px 26px rgba(0, 200, 150, 0.45) !important;
 }
 
 .whatsapp-chat-fab:hover,
 .mobile-fab:hover,
 .calls-fab:hover {
   transform: scale(1.08) !important;
-  box-shadow: 0 10px 32px rgba(0, 255, 198, 0.65) !important;
+  box-shadow: 0 10px 32px rgba(0, 200, 150, 0.65) !important;
 }
 
 /* NEXCHAT Super-App Centered Market Hub */
 .bottom-nav .nav-item.nav-item-center-super {
   position: relative !important;
-  transform: translateY(-8px) scale(1.18) !important;
+  transform: none !important;
   z-index: 10 !important;
 }
 
@@ -85,7 +85,7 @@ body {
   background: var(--primary-gradient) !important;
   color: var(--bg-navy) !important;
   border: 2px solid rgba(255, 255, 255, 0.2) !important;
-  box-shadow: 0 0 18px rgba(0, 255, 198, 0.55) !important;
+  box-shadow: 0 0 18px rgba(0, 200, 150, 0.55) !important;
   width: 44px !important;
   height: 44px !important;
   border-radius: 50% !important;
@@ -105,8 +105,8 @@ body {
 
 /* NEXCHAT Filter Pills with Border Glow */
 .chat-filter-tabs .filter-tab {
-  border: 1px solid rgba(0, 255, 198, 0.35) !important;
-  box-shadow: 0 0 10px rgba(0, 255, 198, 0.15) !important;
+  border: 1px solid rgba(0, 200, 150, 0.35) !important;
+  box-shadow: 0 0 10px rgba(0, 200, 150, 0.15) !important;
   background: rgba(10, 15, 30, 0.75) !important;
   color: var(--text-muted) !important;
   border-radius: 20px !important;
@@ -120,7 +120,7 @@ body {
 }
 
 .chat-filter-tabs .filter-tab.active {
-  background: linear-gradient(135deg, rgba(0, 255, 198, 0.25), rgba(0, 136, 255, 0.25)) !important;
+  background: linear-gradient(135deg, rgba(0, 200, 150, 0.25), rgba(0, 136, 255, 0.25)) !important;
   border: 1.5px solid var(--primary) !important;
   color: var(--primary) !important;
   box-shadow: 0 0 16px var(--primary-glow) !important;
@@ -131,8 +131,8 @@ body {
 .message-bubble.sent {
   border-radius: var(--bubble-radius-sent) !important;
   background: var(--bubble-sent-bg) !important;
-  border: 1px solid rgba(0, 255, 198, 0.28) !important;
-  box-shadow: 0 4px 14px rgba(0, 255, 198, 0.12) !important;
+  border: 1px solid rgba(0, 200, 150, 0.28) !important;
+  box-shadow: 0 4px 14px rgba(0, 200, 150, 0.12) !important;
   color: #f1f5f9 !important;
 }
 
@@ -167,7 +167,7 @@ body {
   gap: 6px !important;
   padding: 6px 14px !important;
   border-radius: 20px !important;
-  background: linear-gradient(135deg, rgba(0, 255, 198, 0.2), rgba(0, 136, 255, 0.2)) !important;
+  background: linear-gradient(135deg, rgba(0, 200, 150, 0.2), rgba(0, 136, 255, 0.2)) !important;
   border: 1.5px solid var(--primary) !important;
   color: var(--primary) !important;
   font-size: 13px !important;
@@ -180,7 +180,7 @@ body {
 
 .top-cams-hero-btn:hover {
   transform: scale(1.05) !important;
-  box-shadow: 0 0 20px rgba(0, 255, 198, 0.65) !important;
+  box-shadow: 0 0 20px rgba(0, 200, 150, 0.65) !important;
 }
 
 /* Interactive Auto-Correct Floating Undo Pill */
@@ -193,9 +193,9 @@ body {
   background: rgba(10, 15, 30, 0.94) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(0, 255, 198, 0.35) !important;
+  border: 1px solid rgba(0, 200, 150, 0.35) !important;
   border-radius: 9999px !important;
-  box-shadow: 0 4px 16px rgba(0, 255, 198, 0.15) !important;
+  box-shadow: 0 4px 16px rgba(0, 200, 150, 0.15) !important;
   margin: 4px 12px !important;
   font-size: 11.5px !important;
   color: #e9edef !important;
@@ -206,9 +206,9 @@ body {
   display: inline-flex !important;
   align-items: center !important;
   gap: 4px !important;
-  background: rgba(0, 255, 198, 0.15) !important;
-  border: 1px solid rgba(0, 255, 198, 0.4) !important;
-  color: #00FFC6 !important;
+  background: rgba(0, 200, 150, 0.15) !important;
+  border: 1px solid rgba(0, 200, 150, 0.4) !important;
+  color: #00C896 !important;
   font-size: 11px !important;
   font-weight: 700 !important;
   border-radius: 9999px !important;
@@ -218,7 +218,7 @@ body {
 }
 
 .undo-pill-btn:hover {
-  background: rgba(0, 255, 198, 0.3) !important;
+  background: rgba(0, 200, 150, 0.3) !important;
   transform: scale(1.05) !important;
 }
 
@@ -230,7 +230,7 @@ body {
   height: 64px !important;
   min-height: 64px !important;
   background: #0A0F1E !important;
-  border-top: 1px solid rgba(0, 255, 198, 0.2) !important;
+  border-top: 1px solid rgba(0, 200, 150, 0.2) !important;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6) !important;
   display: flex !important;
   align-items: center !important;
@@ -290,10 +290,10 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .bottom-nav .nav-item.active .nav-icon-wrapper:not(.super-app-icon-wrapper) {
-  background: rgba(0, 255, 198, 0.14) !important;
-  color: #00FFC6 !important;
-  border: 1px solid rgba(0, 255, 198, 0.35) !important;
-  box-shadow: 0 0 10px rgba(0, 255, 198, 0.25) !important;
+  background: rgba(0, 200, 150, 0.14) !important;
+  color: #00C896 !important;
+  border: 1px solid rgba(0, 200, 150, 0.35) !important;
+  box-shadow: 0 0 10px rgba(0, 200, 150, 0.25) !important;
 }
 
 .bottom-nav .nav-label {
@@ -312,24 +312,24 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .bottom-nav .nav-item.active .nav-label {
-  color: #00FFC6 !important;
+  color: #00C896 !important;
   font-weight: 700 !important;
 }
 
 /* Center Super-App Market Button */
 .bottom-nav .nav-item.nav-item-center-super {
   position: relative !important;
-  transform: translateY(-8px) scale(1.1) !important;
+  transform: none !important;
   z-index: 10 !important;
   flex: 1 1 0 !important;
   max-width: 58px !important;
 }
 
 .bottom-nav .super-app-icon-wrapper {
-  background: linear-gradient(135deg, #00FFC6 0%, #0088FF 100%) !important;
+  background: linear-gradient(135deg, #00C896 0%, #0088FF 100%) !important;
   color: #0A0F1E !important;
   border: 2px solid rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 0 16px rgba(0, 255, 198, 0.5) !important;
+  box-shadow: 0 0 16px rgba(0, 200, 150, 0.5) !important;
   width: 42px !important;
   height: 42px !important;
   border-radius: 50% !important;
@@ -344,7 +344,7 @@ body.mobile-preview .bottom-nav .nav-item {
 
 .bottom-nav .super-app-label {
   font-weight: 800 !important;
-  color: #00FFC6 !important;
+  color: #00C896 !important;
   font-size: 10px !important;
   letter-spacing: 0.3px !important;
 }
@@ -364,7 +364,7 @@ body.mobile-preview .bottom-nav .nav-item {
   position: absolute !important;
   top: -3px !important;
   right: -4px !important;
-  background: #00FFC6 !important;
+  background: #00C896 !important;
   color: #0A0F1E !important;
   font-size: 9.5px !important;
   font-weight: 800 !important;
@@ -379,7 +379,7 @@ body.mobile-preview .bottom-nav .nav-item {
    NEX PROTOCOL ANNOUNCEMENT DASHBOARD (DISPATCHES MODULE)
    ========================================================================== */
 .announcements-container {
-  display: flex !important;
+  display: none;
   flex-direction: column !important;
   width: 100% !important;
   height: 100% !important;
@@ -402,7 +402,7 @@ body.mobile-preview .bottom-nav .nav-item {
   background: rgba(10, 15, 30, 0.95) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(0, 255, 198, 0.18) !important;
+  border-bottom: 1px solid rgba(0, 200, 150, 0.18) !important;
   box-sizing: border-box !important;
   gap: 8px !important;
   flex-shrink: 0 !important;
@@ -433,9 +433,9 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcements-header-btn:hover {
-  background: rgba(0, 255, 198, 0.15) !important;
-  color: #00FFC6 !important;
-  border-color: rgba(0, 255, 198, 0.4) !important;
+  background: rgba(0, 200, 150, 0.15) !important;
+  color: #00C896 !important;
+  border-color: rgba(0, 200, 150, 0.4) !important;
 }
 
 .announcements-branding {
@@ -456,8 +456,8 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcements-icon-accent {
-  color: #00FFC6 !important;
-  filter: drop-shadow(0 0 6px rgba(0, 255, 198, 0.5)) !important;
+  color: #00C896 !important;
+  filter: drop-shadow(0 0 6px rgba(0, 200, 150, 0.5)) !important;
 }
 
 .announcements-live-beacon {
@@ -466,7 +466,7 @@ body.mobile-preview .bottom-nav .nav-item {
   gap: 5px !important;
   font-size: 10px !important;
   font-weight: 700 !important;
-  color: #00FFC6 !important;
+  color: #00C896 !important;
   letter-spacing: 0.8px !important;
   margin-top: 1px !important;
 }
@@ -475,8 +475,8 @@ body.mobile-preview .bottom-nav .nav-item {
   width: 6px !important;
   height: 6px !important;
   border-radius: 50% !important;
-  background: #00FFC6 !important;
-  box-shadow: 0 0 8px #00FFC6 !important;
+  background: #00C896 !important;
+  box-shadow: 0 0 8px #00C896 !important;
   animation: beaconPulse 1.8s infinite !important;
 }
 
@@ -503,9 +503,9 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcements-action-btn:hover {
-  background: rgba(0, 255, 198, 0.12) !important;
-  color: #00FFC6 !important;
-  border-color: rgba(0, 255, 198, 0.35) !important;
+  background: rgba(0, 200, 150, 0.12) !important;
+  color: #00C896 !important;
+  border-color: rgba(0, 200, 150, 0.35) !important;
 }
 
 .announcement-lang-picker {
@@ -513,7 +513,7 @@ body.mobile-preview .bottom-nav .nav-item {
   align-items: center !important;
   gap: 4px !important;
   background: rgba(13, 20, 35, 0.9) !important;
-  border: 1px solid rgba(0, 255, 198, 0.25) !important;
+  border: 1px solid rgba(0, 200, 150, 0.25) !important;
   border-radius: 8px !important;
   padding: 3px 6px !important;
   height: 34px !important;
@@ -548,7 +548,7 @@ body.mobile-preview .bottom-nav .nav-item {
   align-items: center !important;
   gap: 8px !important;
   background: rgba(15, 23, 42, 0.85) !important;
-  border: 1px solid rgba(0, 255, 198, 0.25) !important;
+  border: 1px solid rgba(0, 200, 150, 0.25) !important;
   border-radius: 10px !important;
   padding: 6px 12px !important;
 }
@@ -640,15 +640,15 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .dispatch-filter-pill:hover {
-  border-color: rgba(0, 255, 198, 0.4) !important;
+  border-color: rgba(0, 200, 150, 0.4) !important;
   color: #f1f5f9 !important;
 }
 
 .dispatch-filter-pill.active {
-  background: rgba(0, 255, 198, 0.15) !important;
-  border-color: #00FFC6 !important;
-  color: #00FFC6 !important;
-  box-shadow: 0 0 10px rgba(0, 255, 198, 0.25) !important;
+  background: rgba(0, 200, 150, 0.15) !important;
+  border-color: #00C896 !important;
+  color: #00C896 !important;
+  box-shadow: 0 0 10px rgba(0, 200, 150, 0.25) !important;
   font-weight: 700 !important;
 }
 
@@ -667,7 +667,7 @@ body.mobile-preview .bottom-nav .nav-item {
   width: 4px !important;
 }
 .announcements-feed::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 198, 0.3) !important;
+  background: rgba(0, 200, 150, 0.3) !important;
   border-radius: 4px !important;
 }
 
@@ -688,13 +688,13 @@ body.mobile-preview .bottom-nav .nav-item {
 .announcement-item.dynamic-announcement:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6) !important;
-  border-color: rgba(0, 255, 198, 0.3) !important;
+  border-color: rgba(0, 200, 150, 0.3) !important;
 }
 
 .announcement-item.pinned-dispatch {
-  border-color: rgba(0, 255, 198, 0.45) !important;
-  background: linear-gradient(145deg, rgba(0, 255, 198, 0.06) 0%, rgba(10, 15, 30, 0.95) 100%) !important;
-  box-shadow: 0 0 20px rgba(0, 255, 198, 0.15) !important;
+  border-color: rgba(0, 200, 150, 0.45) !important;
+  background: linear-gradient(145deg, rgba(0, 200, 150, 0.06) 0%, rgba(10, 15, 30, 0.95) 100%) !important;
+  box-shadow: 0 0 20px rgba(0, 200, 150, 0.15) !important;
 }
 
 .announcement-header {
@@ -731,7 +731,7 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcement-meta-sub .admin-verified {
-  color: #00FFC6 !important;
+  color: #00C896 !important;
   font-weight: 700 !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -819,9 +819,9 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcement-card-action-btn:hover {
-  background: rgba(0, 255, 198, 0.15) !important;
-  border-color: rgba(0, 255, 198, 0.4) !important;
-  color: #00FFC6 !important;
+  background: rgba(0, 200, 150, 0.15) !important;
+  border-color: rgba(0, 200, 150, 0.4) !important;
+  color: #00C896 !important;
 }
 
 .announcement-card-action-btn.acknowledged {

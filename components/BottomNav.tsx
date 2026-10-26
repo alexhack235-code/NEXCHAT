@@ -22,7 +22,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
     <nav className="bottom-nav" style={{
       height: '64px',
       backgroundColor: '#0A0F1E',
-      borderTop: '1px solid rgba(0, 255, 198, 0.2)',
+      borderTop: '1px solid rgba(0, 200, 150, 0.2)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-around',
@@ -44,13 +44,13 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         style={{ flex: '1 1 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'center', padding: '4px 1px' }}
       >
         <div className="nav-icon-wrapper" style={{ position: 'relative', margin: '0 auto', width: '38px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <i className="fa-solid fa-comment-dots" style={{ color: activeTab === 'chats' ? '#00FFC6' : '#8696a0', fontSize: '16px' }} />
+          <i className="fa-solid fa-comment-dots" style={{ color: activeTab === 'chats' ? '#00C896' : '#8696a0', fontSize: '16px' }} />
           {unreadCount > 0 && (
             <span className="nav-pill-badge" style={{
               position: 'absolute',
               top: '-3px',
               right: '-4px',
-              background: '#00FFC6',
+              background: '#00C896',
               color: '#0A0F1E',
               fontSize: '9.5px',
               fontWeight: 800,
@@ -63,7 +63,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             </span>
           )}
         </div>
-        <span className="nav-label" style={{ color: activeTab === 'chats' ? '#00FFC6' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
+        <span className="nav-label" style={{ color: activeTab === 'chats' ? '#00C896' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
           Chats
         </span>
       </button>
@@ -78,7 +78,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         style={{ flex: '1 1 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'center', padding: '4px 1px' }}
       >
         <div className="nav-icon-wrapper" style={{ position: 'relative', margin: '0 auto', width: '38px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <i className="fa-solid fa-circle-notch" style={{ color: activeTab === 'updates' ? '#00FFC6' : '#8696a0', fontSize: '16px' }} />
+          <i className="fa-solid fa-circle-notch" style={{ color: activeTab === 'updates' ? '#00C896' : '#8696a0', fontSize: '16px' }} />
           <span style={{
             position: 'absolute',
             top: '1px',
@@ -86,11 +86,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             width: '6px',
             height: '6px',
             borderRadius: '50%',
-            backgroundColor: '#00FFC6',
-            boxShadow: '0 0 6px #00FFC6'
+            backgroundColor: '#00C896',
+            boxShadow: '0 0 6px #00C896'
           }} />
         </div>
-        <span className="nav-label" style={{ color: activeTab === 'updates' ? '#00FFC6' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
+        <span className="nav-label" style={{ color: activeTab === 'updates' ? '#00C896' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
           Updates
         </span>
       </button>
@@ -105,53 +105,26 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         style={{ flex: '1 1 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'center', padding: '4px 1px' }}
       >
         <div className="nav-icon-wrapper" style={{ position: 'relative', margin: '0 auto', width: '38px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <i className="fa-solid fa-clapperboard" style={{ color: activeTab === 'reels' ? '#00FFC6' : '#8696a0', fontSize: '16px' }} />
+          <i className="fa-solid fa-clapperboard" style={{ color: activeTab === 'reels' ? '#00C896' : '#8696a0', fontSize: '16px' }} />
         </div>
-        <span className="nav-label" style={{ color: activeTab === 'reels' ? '#00FFC6' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
+        <span className="nav-label" style={{ color: activeTab === 'reels' ? '#00C896' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
           Reels
         </span>
       </button>
 
-      {/* 4. Market Hub (Center Elevated Super-App Signal) */}
+      {/* 4. Market Hub */}
       <button
         type="button"
         id="nav-marketplace"
-        className={`nav-item nav-item-center-super ${activeTab === 'marketplace' ? 'active' : ''}`}
+        className={`nav-item ${activeTab === 'marketplace' ? 'active' : ''}`}
         onClick={() => onTabChange('marketplace')}
         title="NEX Market Hub"
-        style={{
-          transform: 'translateY(-8px) scale(1.1)',
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          textAlign: 'center',
-          zIndex: 10,
-          flex: '1 1 0',
-          maxWidth: '58px'
-        }}
+        style={{ flex: '1 1 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'center', padding: '4px 1px' }}
       >
-        <div className="super-app-icon-wrapper" style={{
-          width: '42px',
-          height: '42px',
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, #00FFC6 0%, #0088FF 100%)',
-          color: '#0A0F1E',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          boxShadow: '0 0 16px rgba(0, 255, 198, 0.5)',
-          border: '2px solid rgba(255, 255, 255, 0.25)',
-          margin: '0 auto'
-        }}>
-          <i className="fa-solid fa-store" style={{ fontSize: '17px' }} />
+        <div className="nav-icon-wrapper" style={{ position: 'relative', margin: '0 auto', width: '38px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <i className="fa-solid fa-store" style={{ color: activeTab === 'marketplace' ? '#00C896' : '#8696a0', fontSize: '16px' }} />
         </div>
-        <span className="super-app-label" style={{
-          color: '#00FFC6',
-          fontSize: '10px',
-          fontWeight: 800,
-          letterSpacing: '0.3px',
-          display: 'block'
-        }}>
+        <span className="nav-label" style={{ color: activeTab === 'marketplace' ? '#00C896' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
           Market
         </span>
       </button>
@@ -166,7 +139,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         style={{ flex: '1 1 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'center', padding: '4px 1px' }}
       >
         <div className="nav-icon-wrapper" style={{ position: 'relative', margin: '0 auto', width: '38px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <i className="fa-solid fa-bullhorn" style={{ color: activeTab === 'announcements' ? '#00FFC6' : '#8696a0', fontSize: '16px' }} />
+          <i className="fa-solid fa-bullhorn" style={{ color: activeTab === 'announcements' ? '#00C896' : '#8696a0', fontSize: '16px' }} />
           <span style={{
             position: 'absolute',
             top: '1px',
@@ -178,7 +151,7 @@ export const BottomNav: React.FC<BottomNavProps> = ({
             boxShadow: '0 0 6px #00f3ff'
           }} />
         </div>
-        <span className="nav-label" style={{ color: activeTab === 'announcements' ? '#00FFC6' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
+        <span className="nav-label" style={{ color: activeTab === 'announcements' ? '#00C896' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
           Alerts
         </span>
       </button>
@@ -193,9 +166,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         style={{ flex: '1 1 0', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'center', padding: '4px 1px' }}
       >
         <div className="nav-icon-wrapper" style={{ position: 'relative', margin: '0 auto', width: '38px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <i className="fa-solid fa-headset" style={{ color: activeTab === 'calls' ? '#00FFC6' : '#8696a0', fontSize: '16px' }} />
+          <i className="fa-solid fa-headset" style={{ color: activeTab === 'calls' ? '#00C896' : '#8696a0', fontSize: '16px' }} />
         </div>
-        <span className="nav-label" style={{ color: activeTab === 'calls' ? '#00FFC6' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
+        <span className="nav-label" style={{ color: activeTab === 'calls' ? '#00C896' : '#8696a0', fontSize: '10px', fontWeight: 600, display: 'block', marginTop: '1px' }}>
           Calls
         </span>
       </button>

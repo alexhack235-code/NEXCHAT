@@ -969,7 +969,7 @@ overflow: hidden !important;
 padding: 0 !important;
 margin: 0 !important;
 pointer-events: none !important;
-transform: translateY(-8px) scaleY(0.96) !important;
+transform: none !important;
 transform-origin: top center !important;
 transition: max-height 0.32s cubic-bezier(0.16, 1, 0.3, 1),
 opacity 0.22s ease,
@@ -1127,11 +1127,11 @@ right: 2px !important;
 width: 12px !important;
 height: 12px !important;
 border-radius: 50% !important;
-background: #00FFC6 !important;
+background: #00C896 !important;
 border: 2px solid #0A0F1E !important;
 display: block !important;
 z-index: 2 !important;
-box-shadow: 0 0 8px rgba(0, 255, 198, 0.8) !important;
+box-shadow: 0 0 8px rgba(0, 200, 150, 0.8) !important;
 animation: nexCyanPulse 2s infinite ease-in-out !important;
 }
 
@@ -1307,9 +1307,9 @@ display: flex !important;
 align-items: center !important;
 justify-content: center !important;
 font-size: 13px !important;
-color: #00f3ff !important;
+color: #00C896 !important;
 background: linear-gradient(135deg, rgba(0, 255, 102, 0.25), rgba(0, 243, 255, 0.25)) !important;
-border: 1.5px solid #00f3ff !important;
+border: 1.5px solid #00C896 !important;
 box-shadow: 0 0 10px rgba(0, 243, 255, 0.3) !important;
 }
 
@@ -1318,10 +1318,10 @@ box-shadow: 0 0 10px rgba(0, 243, 255, 0.3) !important;
 width: 56px !important;
 height: 56px !important;
 border-radius: 16px !important;
-background: linear-gradient(135deg, #00FFC6 0%, #0088FF 100%) !important;
-border: 1.5px solid rgba(0, 255, 198, 0.4) !important;
+background: linear-gradient(135deg, #00C896 0%, #0088FF 100%) !important;
+border: 1.5px solid rgba(0, 200, 150, 0.4) !important;
 color: #0A0F1E !important;
-box-shadow: 0 8px 26px rgba(0, 255, 198, 0.45) !important;
+box-shadow: 0 8px 26px rgba(0, 200, 150, 0.45) !important;
 font-size: 21px !important;
 display: flex !important;
 align-items: center !important;
@@ -1402,14 +1402,14 @@ box-sizing: border-box !important;
 
 /* Active WhatsApp Tab Pill Indicator */
 .bottom-nav .nav-item.active .nav-icon-wrapper:not(.super-app-icon-wrapper) {
-background: rgba(0, 255, 198, 0.15) !important;
-color: #00FFC6 !important;
-border: 1px solid rgba(0, 255, 198, 0.35) !important;
-box-shadow: 0 0 10px rgba(0, 255, 198, 0.25) !important;
+background: rgba(0, 200, 150, 0.15) !important;
+color: #00C896 !important;
+border: 1px solid rgba(0, 200, 150, 0.35) !important;
+box-shadow: 0 0 10px rgba(0, 200, 150, 0.25) !important;
 }
 
 .bottom-nav .nav-item.active .nav-label {
-color: #00FFC6 !important;
+color: #00C896 !important;
 font-weight: 700 !important;
 }
 
@@ -3150,7 +3150,7 @@ color: #000000 !important;
 }
 
 .speaker-role-badge.ai {
-background: linear-gradient(135deg, #00f3ff, #3b82f6) !important;
+background: linear-gradient(135deg, #00C896, #3b82f6) !important;
 color: #000000 !important;
 }
 
@@ -3456,7 +3456,7 @@ font-weight: 600 !important;
 border-radius: 9999px !important;
 background: rgba(0, 243, 255, 0.12) !important;
 border: 1px solid rgba(0, 243, 255, 0.35) !important;
-color: #00f3ff !important;
+color: #00C896 !important;
 cursor: pointer !important;
 white-space: nowrap !important;
 transition: all 0.2s ease !important;
@@ -3466,7 +3466,7 @@ box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
 .voice-transcribe-pill:hover,
 .btn-transcribe-voice:hover {
 background: rgba(0, 243, 255, 0.22) !important;
-border-color: #00f3ff !important;
+border-color: #00C896 !important;
 color: #ffffff !important;
 }
 
@@ -3582,7 +3582,7 @@ font-size: 11.5px !important;
   height: 64px !important;
   min-height: 64px !important;
   background: #0A0F1E !important;
-  border-top: 1px solid rgba(0, 255, 198, 0.2) !important;
+  border-top: 1px solid rgba(0, 200, 150, 0.2) !important;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6) !important;
   display: flex !important;
   align-items: center !important;
@@ -3642,10 +3642,10 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .bottom-nav .nav-item.active .nav-icon-wrapper:not(.super-app-icon-wrapper) {
-  background: rgba(0, 255, 198, 0.14) !important;
-  color: #00FFC6 !important;
-  border: 1px solid rgba(0, 255, 198, 0.35) !important;
-  box-shadow: 0 0 10px rgba(0, 255, 198, 0.25) !important;
+  background: rgba(0, 200, 150, 0.14) !important;
+  color: #00C896 !important;
+  border: 1px solid rgba(0, 200, 150, 0.35) !important;
+  box-shadow: 0 0 10px rgba(0, 200, 150, 0.25) !important;
 }
 
 .bottom-nav .nav-label {
@@ -3664,24 +3664,24 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .bottom-nav .nav-item.active .nav-label {
-  color: #00FFC6 !important;
+  color: #00C896 !important;
   font-weight: 700 !important;
 }
 
 /* Center Super-App Market Button */
 .bottom-nav .nav-item.nav-item-center-super {
   position: relative !important;
-  transform: translateY(-8px) scale(1.1) !important;
+  transform: none !important;
   z-index: 10 !important;
   flex: 1 1 0 !important;
   max-width: 58px !important;
 }
 
 .bottom-nav .super-app-icon-wrapper {
-  background: linear-gradient(135deg, #00FFC6 0%, #0088FF 100%) !important;
+  background: linear-gradient(135deg, #00C896 0%, #0088FF 100%) !important;
   color: #0A0F1E !important;
   border: 2px solid rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 0 16px rgba(0, 255, 198, 0.5) !important;
+  box-shadow: 0 0 16px rgba(0, 200, 150, 0.5) !important;
   width: 42px !important;
   height: 42px !important;
   border-radius: 50% !important;
@@ -3696,7 +3696,7 @@ body.mobile-preview .bottom-nav .nav-item {
 
 .bottom-nav .super-app-label {
   font-weight: 800 !important;
-  color: #00FFC6 !important;
+  color: #00C896 !important;
   font-size: 10px !important;
   letter-spacing: 0.3px !important;
 }
@@ -3716,7 +3716,7 @@ body.mobile-preview .bottom-nav .nav-item {
   position: absolute !important;
   top: -3px !important;
   right: -4px !important;
-  background: #00FFC6 !important;
+  background: #00C896 !important;
   color: #0A0F1E !important;
   font-size: 9.5px !important;
   font-weight: 800 !important;
@@ -3731,7 +3731,7 @@ body.mobile-preview .bottom-nav .nav-item {
    NEX PROTOCOL ANNOUNCEMENT DASHBOARD (DISPATCHES MODULE)
    ========================================================================== */
 .announcements-container {
-  display: flex !important;
+  display: none;
   flex-direction: column !important;
   width: 100% !important;
   height: 100% !important;
@@ -3754,7 +3754,7 @@ body.mobile-preview .bottom-nav .nav-item {
   background: rgba(10, 15, 30, 0.95) !important;
   backdrop-filter: blur(12px) !important;
   -webkit-backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(0, 255, 198, 0.18) !important;
+  border-bottom: 1px solid rgba(0, 200, 150, 0.18) !important;
   box-sizing: border-box !important;
   gap: 8px !important;
   flex-shrink: 0 !important;
@@ -3785,9 +3785,9 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcements-header-btn:hover {
-  background: rgba(0, 255, 198, 0.15) !important;
-  color: #00FFC6 !important;
-  border-color: rgba(0, 255, 198, 0.4) !important;
+  background: rgba(0, 200, 150, 0.15) !important;
+  color: #00C896 !important;
+  border-color: rgba(0, 200, 150, 0.4) !important;
 }
 
 .announcements-branding {
@@ -3808,8 +3808,8 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcements-icon-accent {
-  color: #00FFC6 !important;
-  filter: drop-shadow(0 0 6px rgba(0, 255, 198, 0.5)) !important;
+  color: #00C896 !important;
+  filter: drop-shadow(0 0 6px rgba(0, 200, 150, 0.5)) !important;
 }
 
 .announcements-live-beacon {
@@ -3818,7 +3818,7 @@ body.mobile-preview .bottom-nav .nav-item {
   gap: 5px !important;
   font-size: 10px !important;
   font-weight: 700 !important;
-  color: #00FFC6 !important;
+  color: #00C896 !important;
   letter-spacing: 0.8px !important;
   margin-top: 1px !important;
 }
@@ -3827,8 +3827,8 @@ body.mobile-preview .bottom-nav .nav-item {
   width: 6px !important;
   height: 6px !important;
   border-radius: 50% !important;
-  background: #00FFC6 !important;
-  box-shadow: 0 0 8px #00FFC6 !important;
+  background: #00C896 !important;
+  box-shadow: 0 0 8px #00C896 !important;
   animation: beaconPulse 1.8s infinite !important;
 }
 
@@ -3855,9 +3855,9 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcements-action-btn:hover {
-  background: rgba(0, 255, 198, 0.12) !important;
-  color: #00FFC6 !important;
-  border-color: rgba(0, 255, 198, 0.35) !important;
+  background: rgba(0, 200, 150, 0.12) !important;
+  color: #00C896 !important;
+  border-color: rgba(0, 200, 150, 0.35) !important;
 }
 
 .announcement-lang-picker {
@@ -3865,7 +3865,7 @@ body.mobile-preview .bottom-nav .nav-item {
   align-items: center !important;
   gap: 4px !important;
   background: rgba(13, 20, 35, 0.9) !important;
-  border: 1px solid rgba(0, 255, 198, 0.25) !important;
+  border: 1px solid rgba(0, 200, 150, 0.25) !important;
   border-radius: 8px !important;
   padding: 3px 6px !important;
   height: 34px !important;
@@ -3900,7 +3900,7 @@ body.mobile-preview .bottom-nav .nav-item {
   align-items: center !important;
   gap: 8px !important;
   background: rgba(15, 23, 42, 0.85) !important;
-  border: 1px solid rgba(0, 255, 198, 0.25) !important;
+  border: 1px solid rgba(0, 200, 150, 0.25) !important;
   border-radius: 10px !important;
   padding: 6px 12px !important;
 }
@@ -3992,15 +3992,15 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .dispatch-filter-pill:hover {
-  border-color: rgba(0, 255, 198, 0.4) !important;
+  border-color: rgba(0, 200, 150, 0.4) !important;
   color: #f1f5f9 !important;
 }
 
 .dispatch-filter-pill.active {
-  background: rgba(0, 255, 198, 0.15) !important;
-  border-color: #00FFC6 !important;
-  color: #00FFC6 !important;
-  box-shadow: 0 0 10px rgba(0, 255, 198, 0.25) !important;
+  background: rgba(0, 200, 150, 0.15) !important;
+  border-color: #00C896 !important;
+  color: #00C896 !important;
+  box-shadow: 0 0 10px rgba(0, 200, 150, 0.25) !important;
   font-weight: 700 !important;
 }
 
@@ -4019,7 +4019,7 @@ body.mobile-preview .bottom-nav .nav-item {
   width: 4px !important;
 }
 .announcements-feed::-webkit-scrollbar-thumb {
-  background: rgba(0, 255, 198, 0.3) !important;
+  background: rgba(0, 200, 150, 0.3) !important;
   border-radius: 4px !important;
 }
 
@@ -4040,13 +4040,13 @@ body.mobile-preview .bottom-nav .nav-item {
 .announcement-item.dynamic-announcement:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6) !important;
-  border-color: rgba(0, 255, 198, 0.3) !important;
+  border-color: rgba(0, 200, 150, 0.3) !important;
 }
 
 .announcement-item.pinned-dispatch {
-  border-color: rgba(0, 255, 198, 0.45) !important;
-  background: linear-gradient(145deg, rgba(0, 255, 198, 0.06) 0%, rgba(10, 15, 30, 0.95) 100%) !important;
-  box-shadow: 0 0 20px rgba(0, 255, 198, 0.15) !important;
+  border-color: rgba(0, 200, 150, 0.45) !important;
+  background: linear-gradient(145deg, rgba(0, 200, 150, 0.06) 0%, rgba(10, 15, 30, 0.95) 100%) !important;
+  box-shadow: 0 0 20px rgba(0, 200, 150, 0.15) !important;
 }
 
 .announcement-header {
@@ -4083,7 +4083,7 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcement-meta-sub .admin-verified {
-  color: #00FFC6 !important;
+  color: #00C896 !important;
   font-weight: 700 !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -4171,9 +4171,9 @@ body.mobile-preview .bottom-nav .nav-item {
 }
 
 .announcement-card-action-btn:hover {
-  background: rgba(0, 255, 198, 0.15) !important;
-  border-color: rgba(0, 255, 198, 0.4) !important;
-  color: #00FFC6 !important;
+  background: rgba(0, 200, 150, 0.15) !important;
+  border-color: rgba(0, 200, 150, 0.4) !important;
+  color: #00C896 !important;
 }
 
 .announcement-card-action-btn.acknowledged {
