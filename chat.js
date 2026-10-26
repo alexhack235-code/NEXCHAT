@@ -5046,6 +5046,27 @@ async function generateChronexAIResponse(text) {
 }
 window.generateChronexAIResponse = generateChronexAIResponse;
 
+function formatTimeAgo(date) {
+  if (!date) return 'Just now';
+  try {
+    const d = (date instanceof Date) ? date : (date.toDate ? date.toDate() : new Date(date));
+    if (isNaN(d.getTime())) return 'Just now';
+    const now = new Date();
+    const diffMs = now - d;
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) {
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  } catch (_) {
+    return 'Just now';
+  }
+}
+window.formatTimeAgo = formatTimeAgo;
+
 function formatAiMarkdown(rawText) {
   if (!rawText) return '';
   if (window.ChronexxLayoutEngine) {

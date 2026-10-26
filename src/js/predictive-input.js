@@ -763,10 +763,18 @@
       const cleanWord = rawWord.toLowerCase();
 
       let replacement = null;
-      if (TYPO_MAP[cleanWord]) {
-        replacement = applyCasePattern(rawWord, TYPO_MAP[cleanWord]);
-      } else if (cleanWord === 'i') {
-        replacement = 'I';
+      if (window.autoCorrectEngine && typeof window.autoCorrectEngine.correctWord === 'function') {
+        const candidate = window.autoCorrectEngine.correctWord(rawWord);
+        if (candidate && candidate.toLowerCase() !== cleanWord) {
+          replacement = candidate;
+        }
+      }
+      if (!replacement) {
+        if (TYPO_MAP[cleanWord]) {
+          replacement = applyCasePattern(rawWord, TYPO_MAP[cleanWord]);
+        } else if (cleanWord === 'i') {
+          replacement = 'I';
+        }
       }
 
       if (!replacement || replacement === rawWord) return false;
@@ -872,6 +880,16 @@
           text: fixed,
           isCorrection: true,
           label: `Fix: ${fixed}`
+        });
+      }
+
+      // 1.5 30k Fuzzy candidates
+      if (cleanWord && cleanWord.length >= 3 && window.fuzzyMatcher && typeof window.fuzzyMatcher.findSuggestions === 'function') {
+        const fuzzySuggestions = window.fuzzyMatcher.findSuggestions(cleanWord, 3);
+        fuzzySuggestions.forEach(f => {
+          if (!suggestions.some(s => s.text.toLowerCase() === f.text.toLowerCase())) {
+            suggestions.push({ text: applyCasePattern(currentWord, f.text), isCorrection: f.isCorrection, isCompletion: f.isCompletion });
+          }
         });
       }
 
@@ -1016,6 +1034,9 @@
      */
     instantPolish(rawText) {
       if (!rawText || !rawText.trim()) return rawText;
+      if (window.autoCorrectEngine && typeof window.autoCorrectEngine.instantPolish === 'function') {
+        return window.autoCorrectEngine.instantPolish(rawText);
+      }
       let text = rawText;
 
       // 1. Spacing around punctuation
