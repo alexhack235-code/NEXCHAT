@@ -1273,9 +1273,12 @@ function loadChatApprovalSettings() {
 }
 
 function isDirectChatAllowed(targetUid) {
+  if (targetUid === 'chronex-ai') return true;
   if (directChatAutoAccept) return true;
   if (!targetUid) return false;
-  return approvedChatUsers.includes(targetUid);
+  if (approvedChatUsers.includes(targetUid)) return true;
+  if (window.myContacts && Array.isArray(window.myContacts) && window.myContacts.includes(targetUid)) return true;
+  return false;
 }
 
 function setUserApprovedForChat(targetUid) {
@@ -2468,44 +2471,51 @@ function showChatListView() {
   const bottomNav = document.querySelector(".bottom-nav");
   const chatMain = document.querySelector(".chat-main");
   if (chatMain) {
-    chatMain.style.display = "flex";
+    chatMain.style.setProperty("display", "flex", "important");
     chatMain.dataset.layout = "list";
   }
   const app = document.querySelector(".app");
-  if (app) app.dataset.activeSection = "chats";
+  if (app) {
+    app.dataset.activeSection = "chats";
+    delete app.dataset.subview;
+  }
+  document.body.classList.remove('in-conversation');
+
   if (listView) {
     listView.classList.remove("hidden");
-    listView.style.display = "flex";
+    listView.style.setProperty("display", "flex", "important");
     listView.style.zIndex = "10";
   }
   if (detailView) {
     detailView.classList.add("hidden");
     detailView.classList.remove("visible", "entering");
-    detailView.style.display = "none";
+    detailView.style.setProperty("display", "none", "important");
     detailView.style.zIndex = "0";
   }
   if (groupsContainer) {
-    groupsContainer.style.display = "none";
+    groupsContainer.style.setProperty("display", "none", "important");
   }
   if (announcementsContainer) {
-    announcementsContainer.style.display = "none";
+    announcementsContainer.style.setProperty("display", "none", "important");
   }
   if (callHistoryContainer) {
-    callHistoryContainer.style.display = "none";
+    callHistoryContainer.style.setProperty("display", "none", "important");
   }
   if (statusContainer) {
-    statusContainer.style.display = "none";
+    statusContainer.style.setProperty("display", "none", "important");
   }
   if (bottomNav) {
-    bottomNav.style.display = "flex";
+    bottomNav.style.setProperty("display", "flex", "important");
   }
   const activeChatHeader = document.getElementById('activeChatHeader');
   const headerLogoContainer = document.getElementById('headerLogoContainer');
-  if (activeChatHeader) activeChatHeader.style.display = 'none';
-  if (headerLogoContainer) headerLogoContainer.style.display = 'flex';
+  if (activeChatHeader) activeChatHeader.style.setProperty('display', 'none', 'important');
+  if (headerLogoContainer) headerLogoContainer.style.setProperty('display', 'flex', 'important');
 
   const fab = document.getElementById('mobileFabNewChat');
-  if (fab) fab.style.display = 'flex';
+  if (fab) fab.style.removeProperty('display');
+  const chatFabCluster = document.getElementById('chatFabCluster');
+  if (chatFabCluster) chatFabCluster.style.removeProperty('display');
   hideTypingIndicator();
   clearTypingStatus();
   if (typingStatusUnsubscribe) {
@@ -5947,6 +5957,8 @@ function hideChatProfileDisplay() {
 }
 
 async function openChat(uid, username, profilePic, chatType = 'direct') {
+  if (!uid) return;
+
   if (chatType === 'direct' && uid !== myUID && !isDirectChatAllowed(uid)) {
     if (pendingChatRequests[uid]) {
       showNotif('Chat request already pending for this user', 'info');
@@ -5965,9 +5977,11 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   currentChatName = username;
   window.currentChatName = username;
   window.currentChatAvatar = profilePic || 'logo.jpg';
+
   if (window.cyberStreaksEngine) {
     window.cyberStreaksEngine.renderStreakBadge();
   }
+
   const chatDetailView = document.getElementById('chatDetailView');
   const chatDetailHeader = document.querySelector('.chat-detail-header');
   if (chatDetailView) {
@@ -5978,6 +5992,75 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
     chatDetailHeader.classList.toggle('group-chat', chatType === 'group');
     chatDetailHeader.classList.toggle('ai-chat', chatType === 'ai');
   }
+
+  // Populate header profile data immediately for instant responsive UI
+  const chatNameEl = document.getElementById("chatName");
+  if (chatNameEl) chatNameEl.textContent = username;
+
+  const chatProfilePicEl = document.getElementById("chatProfilePic");
+  if (chatProfilePicEl) {
+    if (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.'))) {
+      chatProfilePicEl.src = profilePic;
+    } else {
+      chatProfilePicEl.src = 'logo.jpg';
+    }
+  }
+
+  const activeChatName = document.getElementById("activeChatName");
+  if (activeChatName) activeChatName.textContent = username;
+
+  const activeChatAvatar = document.getElementById("activeChatAvatar");
+  if (activeChatAvatar) {
+    activeChatAvatar.src = (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.')))
+      ? profilePic
+      : 'logo.jpg';
+  }
+
+  const infoNameEl = document.getElementById("infoName");
+  if (infoNameEl) infoNameEl.textContent = username;
+
+  const infoPicEl = document.getElementById("infoPic");
+  if (infoPicEl) {
+    if (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.'))) {
+      infoPicEl.src = profilePic;
+    } else {
+      infoPicEl.src = 'logo.jpg';
+    }
+  }
+
+  updateChatProfileDisplay(username, profilePic, chatType === 'ai' ? 'AI Ready' : (chatType === 'group' ? 'Group' : 'Connecting...'));
+
+  // Switch view INSTANTLY before network roundtrips
+  showChatDetailView();
+
+  // Configure action buttons immediately
+  const pollBtn = document.getElementById('poll-btn');
+  const chronexControls = document.getElementById('chronexHeaderControls');
+  const headerVideoBtn = document.getElementById('headerVideoBtn');
+  const headerCallBtn = document.getElementById('headerCallBtn');
+
+  if (chatType === 'group') {
+    if (pollBtn) pollBtn.style.display = 'block';
+  } else {
+    if (pollBtn) pollBtn.style.display = 'none';
+    setTimeout(() => updateBlockUnblockUI(), 100);
+  }
+
+  if (chatType === 'ai') {
+    if (chronexControls) {
+      chronexControls.style.display = 'flex';
+      initChronexHeaderControls();
+      syncChronexHeaderModelDisplay();
+    }
+    if (headerVideoBtn) headerVideoBtn.style.display = 'none';
+    if (headerCallBtn) headerCallBtn.style.display = 'none';
+  } else {
+    if (chronexControls) chronexControls.style.display = 'none';
+    if (headerVideoBtn) headerVideoBtn.style.display = '';
+    if (headerCallBtn) headerCallBtn.style.display = '';
+  }
+
+  // Setup typing & presence
   subscribeTypingIndicator(uid, chatType);
   if (chatType === 'direct') {
     try { GroupChat.close(); } catch(e) {}
@@ -5997,243 +6080,140 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
     localAiMessages = [];
   }
 
-  updateChatProfileDisplay(username, profilePic, "Loading...");
-
-
-  const chatNameEl = document.getElementById("chatName");
-  if (chatNameEl) chatNameEl.textContent = username;
-
-  const chatProfilePicEl = document.getElementById("chatProfilePic");
-  if (chatProfilePicEl) {
-    if (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.'))) {
-      chatProfilePicEl.src = profilePic;
-    } else {
-      chatProfilePicEl.src = 'logo.jpg';
-    }
+  // Load messages immediately
+  if (chatType === 'group') {
+    loadGroupMessages(uid);
+    loadChatBackground(uid, chatType).catch(() => {});
+  } else {
+    loadMessages();
+    loadChatBackground(uid, chatType).catch(() => {});
   }
 
-  const infoNameEl = document.getElementById("infoName");
-  if (infoNameEl) infoNameEl.textContent = username;
+  // Background metadata, user profile, verification badge & contacts sync
+  (async () => {
+    try {
+      if (chatType === 'group') {
+        const groupDoc = await getDoc(doc(db, "groups", uid));
+        if (groupDoc.exists()) {
+          const groupData = groupDoc.data();
+          const memberIds = Array.isArray(groupData.members) ? groupData.members : [];
+          const infoEmailEl = document.getElementById("infoEmail");
+          if (infoEmailEl) infoEmailEl.textContent = `Members: ${memberIds.length}`;
 
-  const infoPicEl = document.getElementById("infoPic");
-  if (infoPicEl) {
-    if (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.'))) {
-      infoPicEl.src = profilePic;
-    } else {
-      infoPicEl.src = 'logo.jpg';
-    }
-  }
+          const statusTextEl = document.getElementById("statusText");
+          const infoStatusEl = document.getElementById("infoStatus");
 
-  try {
-    if (chatType === 'group') {
-      const groupDoc = await getDoc(doc(db, "groups", uid));
-      if (groupDoc.exists()) {
-        const groupData = groupDoc.data();
-        const memberIds = Array.isArray(groupData.members) ? groupData.members : [];
+          const tempSubtitle = memberIds.includes(myUID)
+            ? `You, and ${Math.max(0, memberIds.length - 1)} others`
+            : `${memberIds.length} members`;
+          if (statusTextEl) statusTextEl.textContent = tempSubtitle;
+          if (infoStatusEl) infoStatusEl.textContent = tempSubtitle;
+
+          updateChatProfileDisplay(username, profilePic, tempSubtitle);
+
+          if (memberIds.length > 0) {
+            resolveGroupParticipantSubtitle(memberIds, uid);
+          }
+        }
+      } else if (chatType === 'ai') {
         const infoEmailEl = document.getElementById("infoEmail");
-        if (infoEmailEl) infoEmailEl.textContent = `Members: ${memberIds.length}`;
+        if (infoEmailEl) infoEmailEl.textContent = "Advanced AI Assistant";
 
         const statusTextEl = document.getElementById("statusText");
+        if (statusTextEl) statusTextEl.textContent = "AI Ready";
+
         const infoStatusEl = document.getElementById("infoStatus");
+        if (infoStatusEl) infoStatusEl.textContent = "AI Ready";
 
-        // Temporary participant count while resolving names
-        const tempSubtitle = memberIds.includes(myUID)
-          ? (memberIds.length > 1 ? `You, ${memberIds.length - 1} others` : 'You')
-          : (memberIds.length ? `${memberIds.length} members` : 'Group');
-        if (statusTextEl) statusTextEl.textContent = tempSubtitle;
-        if (infoStatusEl) infoStatusEl.textContent = tempSubtitle;
-        updateChatProfileDisplay(username, profilePic, tempSubtitle);
+        updateChatProfileDisplay(username, profilePic, "AI Ready");
 
-        if (memberIds.length > 0) {
-          const memberDocs = await Promise.all(memberIds.map(async (memberId) => {
-            try {
-              if (memberId === myUID) {
-                return { uid: myUID, username: 'You', name: 'You' };
-              }
-              const memberSnap = await getDoc(doc(db, 'users', memberId));
-              if (memberSnap.exists()) {
-                const memberData = memberSnap.data();
-                return {
-                  uid: memberId,
-                  username: memberData.username || memberData.name || memberData.email || 'Member',
-                  name: memberData.name || memberData.username || memberData.email || 'Member'
-                };
-              }
-            } catch (e) {
-              console.warn('Error loading group member:', memberId, e);
+        const infoDescEl = document.getElementById("infoDesc");
+        const infoBrandLogo = document.getElementById("infoBrandLogo");
+        if (infoDescEl) infoDescEl.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
+        if (infoBrandLogo) infoBrandLogo.style.display = 'block';
+
+        showNotif("ChronEX AI Neural Interface Active", "info", 2000);
+      } else {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        let userData = {};
+
+        if (userDoc.exists()) {
+          userData = userDoc.data();
+          const infoEmail = document.getElementById("infoEmail");
+          if (infoEmail) infoEmail.textContent = userData.email || "";
+
+          const statusText = getUserPresenceStatus(userData);
+          const statusTextEl = document.getElementById("statusText");
+          if (statusTextEl) statusTextEl.textContent = statusText;
+
+          const infoStatusEl = document.getElementById("infoStatus");
+          if (infoStatusEl) infoStatusEl.textContent = statusText;
+
+          updateChatProfileDisplay(username, profilePic, statusText);
+          if (window.NexPresenceEngine && typeof window.NexPresenceEngine.syncActiveChatPartner === 'function') {
+            window.NexPresenceEngine.syncActiveChatPartner(uid, username);
+          }
+
+          const badgeTier = userData.verificationBadge || (userData.isVerified ? 'TIER_PRO' : 'NONE');
+          if (window.NexVerificationCatalog && badgeTier && badgeTier !== 'NONE') {
+            const badgeHtml = window.NexVerificationCatalog.renderVerificationBadgeHtml(badgeTier, { fontSize: '13px' });
+            const activeChatName = document.getElementById("activeChatName");
+            if (activeChatName) {
+              activeChatName.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
             }
-            return { uid: memberId, username: 'Member', name: 'Member' };
-          }));
-          groupMembers = memberDocs.filter(Boolean);
-        } else {
-          groupMembers = [];
-        }
-
-        // WhatsApp Style: 'You, Alice, Bob, Charlie...'
-        const participantNames = [];
-        const hasMe = memberIds.includes(myUID);
-        if (hasMe) participantNames.push('You');
-        groupMembers.forEach(m => {
-          if (m && m.uid !== myUID) {
-            const raw = String(m.username || m.name || 'Member').trim().replace(/^~\s*/, '');
-            if (!participantNames.includes(raw)) {
-              participantNames.push(raw);
+            const chatNameEl = document.getElementById("chatName");
+            if (chatNameEl) {
+              chatNameEl.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
             }
           }
-        });
-        const participantSubtitle = participantNames.length > 0
-          ? participantNames.join(', ')
-          : (memberIds.length ? `${memberIds.length} members` : 'Group');
+        } else {
+          console.warn("User document not found in database, but proceeding with UID:", uid);
+          const infoEmail = document.getElementById("infoEmail");
+          if (infoEmail) infoEmail.textContent = "Profile pending...";
 
-        if (statusTextEl) {
-          statusTextEl.textContent = participantSubtitle;
-          statusTextEl.title = participantSubtitle;
-        }
-        if (infoStatusEl) {
-          infoStatusEl.textContent = participantSubtitle;
-        }
-        updateChatProfileDisplay(username, profilePic, participantSubtitle);
+          const statusTextEl = document.getElementById("statusText");
+          if (statusTextEl) statusTextEl.textContent = "Pending";
 
-        setTimeout(() => setupMentionInput(), 100);
+          const infoStatusEl = document.getElementById("infoStatus");
+          if (infoStatusEl) infoStatusEl.textContent = "Pending";
+
+          updateChatProfileDisplay(username, profilePic, "Pending");
+        }
       }
-    } else if (chatType === 'ai') {
-      const infoEmailEl = document.getElementById("infoEmail");
-      if (infoEmailEl) infoEmailEl.textContent = "Advanced AI Assistant";
-
-      const statusTextEl = document.getElementById("statusText");
-      if (statusTextEl) statusTextEl.textContent = "AI Ready";
-
-      const infoStatusEl = document.getElementById("infoStatus");
-      if (infoStatusEl) infoStatusEl.textContent = "AI Ready";
-
-      updateChatProfileDisplay(username, profilePic, "AI Ready");
 
       const infoDescEl = document.getElementById("infoDesc");
       const infoBrandLogo = document.getElementById("infoBrandLogo");
-      if (infoDescEl) infoDescEl.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
-      if (infoBrandLogo) infoBrandLogo.style.display = 'block';
-
-      showNotif("ChronEX AI Neural Interface Active", "info", 2000);
-    } else {
-      const userDoc = await getDoc(doc(db, "users", uid));
-      let userData = {};
-
-      if (userDoc.exists()) {
-        userData = userDoc.data();
-        const infoEmail = document.getElementById("infoEmail");
-        if (infoEmail) infoEmail.textContent = userData.email || "";
-
-        const statusText = getUserPresenceStatus(userData);
-        const statusTextEl = document.getElementById("statusText");
-        if (statusTextEl) statusTextEl.textContent = statusText;
-
-        const infoStatusEl = document.getElementById("infoStatus");
-        if (infoStatusEl) infoStatusEl.textContent = statusText;
-
-        updateChatProfileDisplay(username, profilePic, statusText);
-        if (window.NexPresenceEngine && typeof window.NexPresenceEngine.syncActiveChatPartner === 'function') {
-          window.NexPresenceEngine.syncActiveChatPartner(uid, username);
-        }
-
-        const badgeTier = userData.verificationBadge || (userData.isVerified ? 'TIER_PRO' : 'NONE');
-        if (window.NexVerificationCatalog && badgeTier && badgeTier !== 'NONE') {
-          const badgeHtml = window.NexVerificationCatalog.renderVerificationBadgeHtml(badgeTier, { fontSize: '13px' });
-          const activeChatName = document.getElementById("activeChatName");
-          if (activeChatName) {
-            activeChatName.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
-          }
-          const chatNameEl = document.getElementById("chatName");
-          if (chatNameEl) {
-            chatNameEl.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
-          }
-        }
+      if (chatType === 'ai') {
+        if (infoDescEl) infoDescEl.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
+        if (infoBrandLogo) infoBrandLogo.style.display = 'block';
       } else {
-        console.warn("User document not found in database, but proceeding with UID:", uid);
-        const infoEmail = document.getElementById("infoEmail");
-        if (infoEmail) infoEmail.textContent = "Profile pending...";
-
-        const statusTextEl = document.getElementById("statusText");
-        if (statusTextEl) statusTextEl.textContent = "Pending";
-
-        const infoStatusEl = document.getElementById("infoStatus");
-        if (infoStatusEl) infoStatusEl.textContent = "Pending";
-
-        updateChatProfileDisplay(username, profilePic, "Pending");
+        if (infoDescEl) infoDescEl.textContent = "";
+        if (infoBrandLogo) infoBrandLogo.style.display = 'none';
       }
-    }
 
-    const infoDescEl = document.getElementById("infoDesc");
-    const infoBrandLogo = document.getElementById("infoBrandLogo");
-    if (chatType === 'ai') {
-      if (infoDescEl) infoDescEl.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
-      if (infoBrandLogo) infoBrandLogo.style.display = 'block';
-    } else {
-      if (infoDescEl) infoDescEl.textContent = "";
-      if (infoBrandLogo) infoBrandLogo.style.display = 'none';
-    }
+      if (chatType === 'direct' && myUID && uid !== myUID) {
+        try {
+          const myUserRef = doc(db, "users", myUID);
+          const myUserDoc = await getDoc(myUserRef);
+          const myContacts = myUserDoc.data()?.contacts || [];
 
-    if (chatType === 'direct' && myUID && uid !== myUID) {
-      try {
-        const myUserRef = doc(db, "users", myUID);
-        const myUserDoc = await getDoc(myUserRef);
-        const myContacts = myUserDoc.data()?.contacts || [];
+          if (!myContacts.includes(uid)) {
+            myContacts.push(uid);
+            await updateDoc(myUserRef, { contacts: myContacts });
+            console.log("Added user to contacts");
 
-        if (!myContacts.includes(uid)) {
-          myContacts.push(uid);
-          await updateDoc(myUserRef, { contacts: myContacts });
-          console.log("? Added user to contacts");
-
-          setTimeout(() => {
-            if (typeof loadContacts === 'function') loadContacts();
-          }, 300);
+            setTimeout(() => {
+              if (typeof loadContacts === 'function') loadContacts();
+            }, 300);
+          }
+        } catch (contactErr) {
+          console.warn("Could not update contacts:", contactErr);
         }
-      } catch (contactErr) {
-        console.warn("Could not update contacts:", contactErr);
       }
+    } catch (bgErr) {
+      console.warn("Background chat metadata resolution warning:", bgErr);
     }
-
-    showChatDetailView();
-
-    if (chatType === 'group') {
-      loadGroupMessages(uid);
-      await loadChatBackground(uid, chatType);
-    } else {
-      loadMessages();
-      await loadChatBackground(uid, chatType);
-    }
-
-    const pollBtn = document.getElementById('poll-btn');
-    const chronexControls = document.getElementById('chronexHeaderControls');
-    const headerVideoBtn = document.getElementById('headerVideoBtn');
-    const headerCallBtn = document.getElementById('headerCallBtn');
-
-    if (chatType === 'group') {
-      if (pollBtn) pollBtn.style.display = 'block';
-    } else {
-      if (pollBtn) pollBtn.style.display = 'none';
-      setTimeout(() => updateBlockUnblockUI(), 100);
-    }
-
-    if (chatType === 'ai') {
-      if (chronexControls) {
-        chronexControls.style.display = 'flex';
-        initChronexHeaderControls();
-        syncChronexHeaderModelDisplay();
-      }
-      if (headerVideoBtn) headerVideoBtn.style.display = 'none';
-      if (headerCallBtn) headerCallBtn.style.display = 'none';
-    } else {
-      if (chronexControls) chronexControls.style.display = 'none';
-      if (headerVideoBtn) headerVideoBtn.style.display = '';
-      if (headerCallBtn) headerCallBtn.style.display = '';
-    }
-
-  } catch (err) {
-    console.error("Error loading chat info:", err);
-    showNotif("Error loading chat info: " + err.message, "error");
-    currentChatUser = null;
-    return;
-  }
+  })();
 
   initAiModelSelection();
 }
@@ -15682,6 +15662,28 @@ function initializeBasicUI() {
     });
   }
 
+  // Master click delegation for chat lists: contactList, groupsList, archivedList
+  const bindChatListDelegation = (listEl) => {
+    if (!listEl || listEl._hasMasterChatDelegation) return;
+    listEl._hasMasterChatDelegation = true;
+
+    listEl.addEventListener('click', (e) => {
+      if (e.target.closest('.chat-menu-btn, button, input, textarea, a')) return;
+      const item = e.target.closest('.chat-item, .chat-list-item');
+      if (!item) return;
+      const uid = item.getAttribute('data-chat-id');
+      if (!uid) return;
+      const type = item.getAttribute('data-chat-type') || (uid === 'chronex-ai' ? 'ai' : (item.classList.contains('group-item') ? 'group' : 'direct'));
+      const name = item.querySelector('.chat-name')?.textContent?.trim() || item.querySelector('h4')?.textContent?.trim() || 'User';
+      const pic = item.querySelector('img.chat-avatar')?.src || 'logo.jpg';
+      openChat(uid, name, pic, type);
+    });
+  };
+
+  bindChatListDelegation(document.getElementById('contactList'));
+  bindChatListDelegation(document.getElementById('groupsList'));
+  bindChatListDelegation(document.getElementById('archivedList'));
+
   const navItems = document.querySelectorAll(".nav-item");
   navItems.forEach(item => {
     item.addEventListener("click", (e) => {
@@ -15910,20 +15912,28 @@ function showChatDetailView() {
   
   sections.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    if (el) {
+      el.style.setProperty('display', 'none', 'important');
+      el.classList.add('hidden');
+    }
   });
   
   const chatDetailView = document.getElementById('chatDetailView');
   const bottomNav = document.querySelector('.bottom-nav');
   const chatMain = document.querySelector('.chat-main');
   if (chatMain) {
-    chatMain.style.display = "flex";
+    chatMain.style.setProperty('display', 'flex', 'important');
     chatMain.dataset.layout = 'conversation';
   }
   const app = document.querySelector('.app');
-  if (app) app.dataset.activeSection = 'chats';
+  if (app) {
+    app.dataset.activeSection = 'chats';
+    app.dataset.subview = 'conversation';
+  }
+  document.body.classList.add('in-conversation');
+
   if (chatDetailView) {
-    chatDetailView.style.display = 'flex';
+    chatDetailView.style.setProperty('display', 'flex', 'important');
     chatDetailView.classList.remove('hidden');
     chatDetailView.classList.add('entering');
     requestAnimationFrame(() => {
@@ -15937,16 +15947,18 @@ function showChatDetailView() {
     }
   } catch (_) {}
   if (bottomNav) {
-    bottomNav.style.display = 'none';
+    bottomNav.style.setProperty('display', 'none', 'important');
   }
   
   const activeChatHeader = document.getElementById('activeChatHeader');
   const headerLogoContainer = document.getElementById('headerLogoContainer');
-  if (activeChatHeader) activeChatHeader.style.display = 'flex';
-  if (headerLogoContainer) headerLogoContainer.style.display = 'none';
+  if (activeChatHeader) activeChatHeader.style.setProperty('display', 'flex', 'important');
+  if (headerLogoContainer) headerLogoContainer.style.setProperty('display', 'none', 'important');
 
   const fab = document.getElementById('mobileFabNewChat');
-  if (fab) fab.style.display = 'none';
+  if (fab) fab.style.setProperty('display', 'none', 'important');
+  const chatFabCluster = document.getElementById('chatFabCluster');
+  if (chatFabCluster) chatFabCluster.style.setProperty('display', 'none', 'important');
 }
 
 
@@ -16190,35 +16202,48 @@ async function loadGroups() {
         <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
       `;
 
-      li.addEventListener("click", async () => {
-        await openChat(groupId, group.name, group.profilePic || "logo.jpg", "group");
-        if (typeof showChatDetailView === 'function') showChatDetailView();
+      let groupLongPressTimer = null;
+      let groupTouchMoved = false;
+      let groupLongPressFired = false;
+
+      li.addEventListener("click", () => {
+        if (groupLongPressFired) {
+          groupLongPressFired = false;
+          return;
+        }
+        openChat(groupId, group.name, group.profilePic || "logo.jpg", "group");
       });
       li.addEventListener("contextmenu", (e) => {
         e.preventDefault();
         if (typeof showChatContextMenu === 'function') showChatContextMenu(e, groupId);
       });
-      let longPressTimer;
-      let touchMoved = false;
       li.addEventListener("touchstart", (event) => {
-        touchMoved = false;
-        longPressTimer = setTimeout(() => {
-          if (!touchMoved) {
+        groupTouchMoved = false;
+        groupLongPressFired = false;
+        groupLongPressTimer = setTimeout(() => {
+          if (!groupTouchMoved) {
+            groupLongPressFired = true;
             const touchEvent = new MouseEvent('contextmenu', {
               clientX: event.touches?.[0]?.clientX || 0,
               clientY: event.touches?.[0]?.clientY || 0
             });
             if (typeof showChatContextMenu === 'function') showChatContextMenu(touchEvent, groupId);
           }
-        }, 250);
-      });
+        }, 600);
+      }, { passive: true });
       li.addEventListener("touchmove", () => {
-        touchMoved = true;
-        clearTimeout(longPressTimer);
-      });
+        groupTouchMoved = true;
+        if (groupLongPressTimer) {
+          clearTimeout(groupLongPressTimer);
+          groupLongPressTimer = null;
+        }
+      }, { passive: true });
       li.addEventListener("touchend", () => {
-        clearTimeout(longPressTimer);
-      });
+        if (groupLongPressTimer) {
+          clearTimeout(groupLongPressTimer);
+          groupLongPressTimer = null;
+        }
+      }, { passive: true });
 
       const menuBtn = li.querySelector(".chat-menu-btn");
       if (menuBtn) {
@@ -16280,11 +16305,10 @@ async function loadContacts() {
       <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
     `;
 
-    chronexLi.addEventListener("click", async (e) => {
+    chronexLi.addEventListener("click", (e) => {
       e.stopPropagation();
       if (myUID) chronexAI.setUserId(myUID);
-      await openChat("chronex-ai", "Chronex AI", "chronex-ai.jpg", "ai");
-      if (typeof showChatDetailView === 'function') showChatDetailView();
+      openChat("chronex-ai", "Chronex AI", "chronex-ai.jpg", "ai");
     });
 
     const myUserDoc = await getDoc(doc(db, "users", myUID));
@@ -16486,9 +16510,16 @@ async function loadContacts() {
         <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
       `;
 
-      li.addEventListener("click", async () => {
-        await openChat(uid, name, pic, "direct");
-        if (typeof showChatDetailView === 'function') showChatDetailView();
+      let longPressTimer = null;
+      let touchMoved = false;
+      let longPressFired = false;
+
+      li.addEventListener("click", (e) => {
+        if (longPressFired) {
+          longPressFired = false;
+          return;
+        }
+        openChat(uid, name, pic, "direct");
       });
 
       li.addEventListener("contextmenu", (e) => {
@@ -16496,27 +16527,35 @@ async function loadContacts() {
         if (typeof showChatContextMenu === 'function') showChatContextMenu(e, uid);
       });
 
-      let longPressTimer;
-      let touchMoved = false;
       li.addEventListener("touchstart", (event) => {
         touchMoved = false;
+        longPressFired = false;
         longPressTimer = setTimeout(() => {
           if (!touchMoved) {
+            longPressFired = true;
             const touchEvent = new MouseEvent('contextmenu', {
               clientX: event.touches?.[0]?.clientX || 0,
               clientY: event.touches?.[0]?.clientY || 0
             });
             if (typeof showChatContextMenu === 'function') showChatContextMenu(touchEvent, uid);
           }
-        }, 250);
-      });
+        }, 600);
+      }, { passive: true });
+
       li.addEventListener("touchmove", () => {
         touchMoved = true;
-        clearTimeout(longPressTimer);
-      });
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      }, { passive: true });
+
       li.addEventListener("touchend", () => {
-        clearTimeout(longPressTimer);
-      });
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      }, { passive: true });
 
       const menuBtn = li.querySelector(".chat-menu-btn");
       if (menuBtn) {
@@ -16551,6 +16590,22 @@ async function loadContacts() {
     const groupCount = await appendGroupsToContactList(contactList);
     if (contactDataList.length === 0 && groupCount === 0) {
       contactList.innerHTML += `<li class="empty-state"><p>No chats yet. Start a conversation!</p></li>`;
+    }
+
+    // Master event delegation on contactList ensuring zero missed clicks on mobile & desktop
+    if (!contactList._hasChatDelegation) {
+      contactList._hasChatDelegation = true;
+      contactList.addEventListener('click', (e) => {
+        if (e.target.closest('.chat-menu-btn, button, input, textarea, a')) return;
+        const item = e.target.closest('.chat-item, .chat-list-item');
+        if (!item) return;
+        const uid = item.getAttribute('data-chat-id');
+        if (!uid) return;
+        const type = item.getAttribute('data-chat-type') || (uid === 'chronex-ai' ? 'ai' : (item.classList.contains('group-item') ? 'group' : 'direct'));
+        const name = item.querySelector('.chat-name')?.textContent?.trim() || item.querySelector('h4')?.textContent?.trim() || 'User';
+        const pic = item.querySelector('img.chat-avatar')?.src || 'logo.jpg';
+        openChat(uid, name, pic, type);
+      });
     }
 
   } catch (err) {
@@ -16608,9 +16663,8 @@ async function appendGroupsToContactList(contactList) {
         <button class="chat-menu-btn" title="Group options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
       `;
 
-      li.addEventListener('click', async () => {
-        await openChat(groupId, groupName, group.profilePic || 'logo.jpg', 'group');
-        if (typeof showChatDetailView === 'function') showChatDetailView();
+      li.addEventListener('click', () => {
+        openChat(groupId, groupName, group.profilePic || 'logo.jpg', 'group');
       });
 
       li.addEventListener('contextmenu', (e) => {

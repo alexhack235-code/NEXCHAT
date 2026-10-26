@@ -817,9 +817,14 @@
   background: #0b141a !important;
   width: 100% !important;
   height: 100% !important;
-  display: flex !important;
+  display: flex;
   flex-direction: column !important;
   border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+.chat-list-view.hidden,
+.chat-list-view[style*="display: none"] {
+  display: none !important;
 }
 
 /* WhatsApp-Style Search Pill Container */
@@ -2429,11 +2434,37 @@ body.mobile-preview .camshot-badge {
   display: none !important;
 }
 
-/* 2. Hide Bottom Nav completely inside conversation views on mobile */
+/* 2. Hide Bottom Nav & isolate conversation views on mobile */
 body.mobile-preview .chat-main[data-layout="conversation"] ~ .bottom-nav,
 body.mobile-preview .chat-detail-view:not([style*="display: none"]) ~ .bottom-nav,
+body.mobile-preview.in-conversation .bottom-nav,
 body[data-active-section="chat"] .bottom-nav,
 .app[data-active-section="chat"] .bottom-nav {
+  display: none !important;
+}
+
+body.mobile-preview .chat-main[data-layout="conversation"] .chat-list-view,
+body.mobile-preview.in-conversation .chat-list-view,
+body.mobile-preview[data-active-section="chats"][data-subview="conversation"] .chat-list-view {
+  display: none !important;
+}
+
+body.mobile-preview .chat-main[data-layout="conversation"] .chat-detail-view,
+body.mobile-preview.in-conversation .chat-detail-view,
+body.mobile-preview[data-active-section="chats"][data-subview="conversation"] .chat-detail-view {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: absolute !important;
+  inset: 0 !important;
+  width: 390px !important;
+  max-width: 390px !important;
+  z-index: 500 !important;
+}
+
+body.mobile-preview.in-conversation .top-header,
+body.mobile-preview .chat-main[data-layout="conversation"] .top-header,
+body.mobile-preview .chat-main[data-layout="conversation"] .chat-fab-cluster {
   display: none !important;
 }
 
@@ -2443,6 +2474,31 @@ body[data-active-section="chat"] .bottom-nav,
   body.in-conversation .bottom-nav,
   body[data-active-section="chat"] .bottom-nav,
   .app[data-active-section="chat"] .bottom-nav {
+    display: none !important;
+  }
+
+  .chat-main[data-layout="conversation"] .chat-list-view,
+  body.in-conversation .chat-list-view,
+  body[data-active-section="chats"][data-subview="conversation"] .chat-list-view {
+    display: none !important;
+  }
+
+  .chat-main[data-layout="conversation"] .chat-detail-view,
+  body.in-conversation .chat-detail-view,
+  body[data-active-section="chats"][data-subview="conversation"] .chat-detail-view {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 500 !important;
+  }
+
+  body.in-conversation .top-header,
+  .chat-main[data-layout="conversation"] .top-header,
+  .chat-main[data-layout="conversation"] .chat-fab-cluster {
     display: none !important;
   }
 }
@@ -2516,7 +2572,11 @@ body.mobile-preview .bottom-nav .nav-item.active .nav-label {
 /* Hide top-header on direct & group conversations */
 body[data-active-section="chat"] .top-header,
 .app[data-active-section="chat"] .top-header,
-body.mobile-preview[data-active-section="chat"] .top-header {
+body.in-conversation .top-header,
+.app.in-conversation .top-header,
+body[data-subview="conversation"] .top-header,
+body.mobile-preview[data-active-section="chat"] .top-header,
+body.mobile-preview.in-conversation .top-header {
   display: none !important;
 }
 

@@ -5,8 +5,8 @@
 ```text
 ========================================================================================
  PROJECT           : NEXCHAT - Encrypted Social & Messaging Platform
- TOTAL SOURCE LINES: 390,038 Lines
- TOTAL FILES       : 628 Tracked Text Files (82 Binary Files Excluded)
+ TOTAL SOURCE LINES: 448,402 Lines
+ TOTAL FILES       : 811 Tracked Text Files (92 Binary Files Excluded)
  ARCHITECTURE      : Zero-Jitter Multi-Subsystem (Chat, Reels, Terminal, Status Vault)
  CRYPTOGRAPHY      : Zero-Knowledge End-to-End Encryption & Ephemeral Ghost Protocol
  VERIFICATION      : WCAG AAA Compliant / 60 FPS Frame Budget / Zero Layout Shift
@@ -73,12 +73,12 @@ flowchart TD
 
 ## 2. Repository Line Count
 
-The total counts lines in the 628 Git-tracked text files. The 82 Git-tracked binary files are excluded.
+The total counts lines in the 811 Git-tracked text files. The 92 Git-tracked binary files are excluded.
 
 ```mermaid
 flowchart LR
-    ROOT["NEXCHAT Codebase<br/>390,038 Lines"] --> TEXT["Tracked Text Files<br/>628"]
-    ROOT --> BINARY["Tracked Binary Files<br/>82 (excluded from line count)"]
+    ROOT["NEXCHAT Codebase<br/>448,402 Lines"] --> TEXT["Tracked Text Files<br/>811"]
+    ROOT --> BINARY["Tracked Binary Files<br/>92 (excluded from line count)"]
 ```
 
 ---
@@ -116,9 +116,9 @@ The current repository-wide count is:
 
 | Subsystem Domain | Primary Files | File Count | Total Lines | Percentage | Architectural Role |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Tracked text files** | All Git-tracked text files | **628** | **390,038** | **100.0%** | Included in the line count |
-| **Tracked binary files** | All Git-tracked binary files | **82** | -- | -- | Excluded from the line count |
-| **TOTALS** | -- | **710** | **390,038** | **100.0%** | Full Git-tracked repository footprint |
+| **Tracked text files** | All Git-tracked text files | **811** | **448,402** | **100.0%** | Included in the line count |
+| **Tracked binary files** | All Git-tracked binary files | **92** | -- | -- | Excluded from the line count |
+| **TOTALS** | -- | **903** | **448,402** | **100.0%** | Full Git-tracked repository footprint |
 
 ---
 
@@ -128,15 +128,17 @@ An audit of the highest-volume anchor files governing the core behavior of NEXCH
 
 | File Path | Total Lines | Language / Format | Primary Responsibilities |
 | :--- | :---: | :--- | :--- |
-| `game.html` | 23,877 | HTML5 / JS / Three.js | Central metropolis, flight gameplay, and province navigation |
-| `chat.js` | 14,750 | JavaScript (ESM) | Master chat controller, event bus, settings modal suite, ghost protocol, status viewer |
-| `chat.css` | 9,170 | CSS3 | Master application styling, status vault HUD, floating FABs, responsive media queries |
-| `reels.js` | 4,540 | JavaScript (ESM) | Reels feed swiper, video playback controller, creator studio, interactions |
-| `landing.css` | 4,152 | CSS3 | High-performance landing page styling, luxury animations, cyber aesthetics |
-| `reels.css` | 4,028 | CSS3 | Zero-collision 9:16 layout, overlay cards, comments drawer, reactions stack |
-| `chat.html` | 3,071 | HTML5 | Application DOM shell, settings tabs, cyber status vault, modal dialogs |
-| `nex-3d-studio.html` | 1,693 | HTML5 / JS / Three.js | 3D studio interface and interactive scene tools |
-| `terminal.html` | 1,229 | HTML5 / JS / Tailwind | Responsive 3-panel hacker terminal, CLI command interpreter, 1:1 call screens |
+| `game.html` | 23,918 | HTML5 / JS / Three.js | Central metropolis, flight gameplay, and province navigation |
+| `chat.js` | 20,755 | JavaScript (ESM) | Master chat controller, event bus, settings modal suite, ghost protocol, status viewer |
+| `chat.css` | 10,503 | CSS3 | Master application styling, status vault HUD, floating FABs, responsive media queries |
+| `reels.js` | 5,700 | JavaScript (ESM) | Reels feed swiper, video playback controller, creator studio, interactions |
+| `landing.css` | 4,723 | CSS3 | High-performance landing page styling, luxury animations, cyber aesthetics |
+| `reels.css` | 7,587 | CSS3 | Zero-collision 9:16 layout, overlay cards, comments drawer, reactions stack |
+| `chat.html` | 5,590 | HTML5 | Application DOM shell, settings tabs, cyber status vault, modal dialogs |
+| `nex-3d-studio.html` | 1,692 | HTML5 / JS / Three.js | 3D studio interface and interactive scene tools |
+| `terminal.html` | 1,005 | HTML5 / JS / Tailwind | Responsive 3-panel hacker terminal, CLI command interpreter, 1:1 call screens |
+| `assets/WebGLTemplates/AstroShiftResponsive/index.html` | 90 | HTML5 | AstroShift responsive WebGL template entry page |
+| `crates/nex-3d-core/src/r3f_compiler.rs` | 177 | Rust | R3F compilation logic for the 3D core |
 
 ---
 
