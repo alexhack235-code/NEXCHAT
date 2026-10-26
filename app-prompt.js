@@ -7,7 +7,9 @@ function initializeAppPrompt() {
   
   const isProfileSetupPage = window.location.pathname.includes('profile-upload');
   
-  if (!isMobile || isDismissed || isInstalledApp || isProfileSetupPage) {
+  const isPreviewMode = window.location.search.includes('preview=true');
+
+  if (!isMobile || isDismissed || isInstalledApp || isProfileSetupPage || isPreviewMode) {
     return;
   }
 
@@ -22,8 +24,9 @@ function initializeAppPrompt() {
       top: 0;
       left: 0;
       right: 0;
-      background: linear-gradient(135deg, #00ff66 0%, #00cc52 100%);
-      color: #000;
+      background: linear-gradient(135deg, rgba(14, 24, 40, 0.98) 0%, rgba(6, 12, 22, 0.98) 100%);
+      border-bottom: 1.5px solid rgba(0, 255, 102, 0.4);
+      color: #fff;
       padding: 12px 16px;
       z-index: 9999;
       display: flex;
@@ -165,8 +168,9 @@ function initializeAppPrompt() {
     }
 
     .app-modal-btn-primary {
-      background: linear-gradient(135deg, #00ff66 0%, #00cc52 100%);
-      color: #000;
+      background: linear-gradient(135deg, rgba(14, 24, 40, 0.98) 0%, rgba(6, 12, 22, 0.98) 100%);
+      border-bottom: 1.5px solid rgba(0, 255, 102, 0.4);
+      color: #fff;
     }
 
     .app-modal-btn-primary:active {
@@ -245,7 +249,7 @@ function initializeAppPrompt() {
   banner.className = 'app-smart-banner';
   banner.innerHTML = `
     <div class="app-banner-content">
-      <div class="app-banner-icon"><img src="/favicons/icon-192.png" alt="NEX" style="width:28px;height:28px;border-radius:6px;display:block;" /></div>
+      <div class="app-banner-icon"><img src="/favicons/icon-192.png" alt="NEXCHAT" style="width:34px;height:34px;border-radius:9px;display:block;border:1.5px solid rgba(0,255,102,0.4);box-shadow:0 0 12px rgba(0,255,102,0.3);object-fit:cover;" /></div>
       <div class="app-banner-text">
         <h3>Get NEXCHAT App</h3>
         <p>Faster & offline support</p>
@@ -261,7 +265,7 @@ function initializeAppPrompt() {
   modal.className = 'app-download-modal hidden';
   modal.innerHTML = `
     <div class="app-modal-content">
-      <img src="/favicons/icon-192.png" alt="NEXCHAT" style="width:64px;height:64px;border-radius:16px;margin:0 auto 14px auto;display:block;box-shadow:0 8px 24px rgba(124,58,237,0.35);border:1px solid rgba(124,58,237,0.4);" />
+      <img src="/favicons/icon-512.png" alt="NEXCHAT" style="width:72px;height:72px;border-radius:18px;margin:0 auto 14px auto;display:block;box-shadow:0 0 24px rgba(0,255,102,0.45);border:2px solid #00ff66;object-fit:cover;" />
       <h2>DOWNLOAD NEXCHAT</h2>
       <p>Get app for your phone. For you better experience.</p>
       <div class="app-modal-buttons">

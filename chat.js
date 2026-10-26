@@ -20943,4 +20943,8 @@ function setupWhatsAppLockedChatsPullToReveal() {
     }
     return systemRows.classList.contains('revealed');
   };
+
+  if (new URLSearchParams(window.location.search).get('revealed') === 'true') {
+    systemRows.classList.add('revealed');
+  }
 }
