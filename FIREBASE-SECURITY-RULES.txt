@@ -254,6 +254,26 @@ service cloud.firestore {
     //   - targetUsername: string (target username)
     //   - amount / tier / certHash / reason / paymentRef / operator: string or number
     //   - timestamp: timestamp/string
+    //
+    // Collection: channels
+    // Document ID: {channelId} (Auto-generated or custom channel ID)
+    // Fields:
+    //   - creatorId: string (required, creator UID, immutable)
+    //   - name: string (required, 1 to 100 chars)
+    //   - description: string (optional, max 1000 chars)
+    //   - isPublic: bool (optional, controls public read access)
+    //   - isVerified: bool (optional, privileged verification badge, only modifiable by superAdmin)
+    //   - subscribersCount / subscriberCount: number (optional)
+    //   - postsCount: number (optional)
+    //   - createdAt: timestamp/string/number (optional)
+    //   - updatedAt: timestamp/string/number (optional)
+    // Subcollection: posts/{postId}
+    //   - text: string (required, 1 to 10000 chars)
+    //   - author / authorId: string (optional)
+    //   - createdAt / timestamp: timestamp/string/number (optional)
+    // Subcollection: subscribers/{userId}
+    //   - userId: string (required, subscriber UID)
+    //   - subscribedAt: timestamp/string/number (optional)
     // ===============================================================
 
     // ===============================================================
@@ -2359,7 +2379,45 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // 23. ZERO-TRUST DEFAULT DENY BARRIER
+    // 23. BROADCAST CHANNELS & SUBSCRIBERS
+    // ===============================================================
+    match /channels/{channelId} {
+      // Authenticated users can read channels; unauthenticated allowed if channel is public
+      allow read: if isAuthenticated() || (resource.data.isPublic == true);
+
+      // Channel creation requires authentication, owner match, valid name length, and restricted isVerified flag
+      allow create: if isAuthenticated() &&
+                       request.resource.data.creatorId == request.auth.uid &&
+                       validStringLength('name', 1, 100) &&
+                       (!('isVerified' in request.resource.data) || request.resource.data.isVerified == false || isSuperAdmin());
+
+      // Channel update restricted to creator or SuperAdmin, protects creatorId and restricts verification edits
+      allow update: if isAuthenticated() &&
+                       (resource.data.creatorId == request.auth.uid || isSuperAdmin()) &&
+                       request.resource.data.creatorId == resource.data.creatorId &&
+                       (!('isVerified' in request.resource.data) || request.resource.data.isVerified == resource.data.isVerified || isSuperAdmin());
+
+      // Deletion restricted to channel creator or SuperAdmin
+      allow delete: if isAuthenticated() && (resource.data.creatorId == request.auth.uid || isSuperAdmin());
+
+      // Subcollection: match /channels/{channelId}/posts/{postId}
+      match /posts/{postId} {
+        allow read: if isAuthenticated();
+        allow create, update, delete: if isAuthenticated() && (
+          get(/databases/$(database)/documents/channels/$(channelId)).data.creatorId == request.auth.uid ||
+          isSuperAdmin()
+        ) && validStringLength('text', 1, 10000);
+      }
+
+      // Subcollection: match /channels/{channelId}/subscribers/{userId}
+      match /subscribers/{userId} {
+        allow read: if isAuthenticated();
+        allow create, delete: if isAuthenticated() && request.auth.uid == userId;
+      }
+    }
+
+    // ===============================================================
+    // 24. ZERO-TRUST DEFAULT DENY BARRIER
     // ===============================================================
     match /{document=**} {
       allow read, write: if false;
