@@ -45,6 +45,7 @@ chrome_test_profile*/
 /scratch/
 *.png
 !assets/*.png
+!android/**/*.png
 *.log
 .vscode/*
 !.vscode/extensions.json
