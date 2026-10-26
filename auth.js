@@ -1071,8 +1071,8 @@ if (document.readyState === 'loading') {
 }
 
 /* ============================================================
-   NEXSHOT FUSION CINEMATIC INTRO CONTROLLER
-   NEXCHAT × CAMSHOT = NEXSHOT // "THE FUTURE IS RIGHT HERE"
+   NEXCHAT QUANTUM CINEMATIC INTRO CONTROLLER
+   True 3D Rotating Cyber Cube + Quantum Decryption Typewriter
    ============================================================ */
 function initNexshotFusionIntro() {
   const overlay = document.getElementById('nexshotFusionOverlay');
@@ -1082,15 +1082,31 @@ function initNexshotFusionIntro() {
   const skipBtn = document.getElementById('fusionSkipBtn');
   const audioBtn = document.getElementById('fusionAudioBtn');
   const replayBtn = document.getElementById('replayFusionBtn');
-  const streams = document.getElementById('fusionStreams');
-  const singularity = document.getElementById('fusionSingularity');
-  const reveal = document.getElementById('fusionReveal');
-  const progressBar = document.getElementById('fusionProgressBar');
+  const typewriterText = document.getElementById('introTypewriterText');
+  const phaseBadge = document.getElementById('introConsolePhaseBadge');
+  const progressBar = document.getElementById('introProgressBar');
+
+  const phasePills = [
+    document.getElementById('introPhasePill1'),
+    document.getElementById('introPhasePill2'),
+    document.getElementById('introPhasePill3'),
+    document.getElementById('introPhasePill4')
+  ];
+
+  const CINEMATIC_PHRASES = [
+    "HAVE YOU EVER FELT LIKE YOUR PRIVACY WAS NEVER TRULY YOURS?",
+    "IN A WORLD OF TOTAL SURVEILLANCE, TRUE FREEDOM LIES IN THE ENCLAVE.",
+    "BEYOND THE HORIZON // ENTER THE ZERO-KNOWLEDGE FRONTIER.",
+    "COMMUNICATION EVOLVED. ZERO TRACE. ABSOLUTE AUTONOMY."
+  ];
 
   let animationTimers = [];
   let isMuted = false;
   let audioCtx = null;
   let canvasAnimId = null;
+  let isIntroActive = false;
+  let currentPhraseIdx = 0;
+  let currentCharIdx = 0;
 
   function getAudio() {
     if (!audioCtx) {
@@ -1121,25 +1137,6 @@ function initNexshotFusionIntro() {
     } catch (_) { }
   }
 
-  function playCollisionBoom() {
-    if (isMuted) return;
-    try {
-      const ctx = getAudio();
-      if (!ctx) return;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(140, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(38, ctx.currentTime + 0.8);
-      gain.gain.setValueAtTime(0.28, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.9);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.9);
-    } catch (_) { }
-  }
-
   function playMajesticChord() {
     if (isMuted) return;
     // Harmonious quantum chord: C4, G4, C5, E5, G5
@@ -1165,15 +1162,15 @@ function initNexshotFusionIntro() {
     });
 
     const particles = [];
-    const count = 70;
+    const count = 75;
     for (let i = 0; i < count; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 1.2,
-        vy: (Math.random() - 0.5) * 1.2,
+        vx: (Math.random() - 0.5) * 1.0,
+        vy: (Math.random() - 0.5) * 1.0,
         size: Math.random() * 2 + 0.8,
-        color: Math.random() > 0.5 ? '#00f076' : '#fbbf24',
+        color: Math.random() > 0.5 ? '#00f0ff' : '#00ff66',
         alpha: Math.random() * 0.6 + 0.2
       });
     }
@@ -1214,100 +1211,123 @@ function initNexshotFusionIntro() {
     animationTimers = [];
   }
 
+  function setPillsState(activeIdx, completedUpTo = -1) {
+    phasePills.forEach((p, idx) => {
+      if (!p) return;
+      p.classList.remove('active', 'completed');
+      if (idx === activeIdx) {
+        p.classList.add('active');
+      } else if (idx <= completedUpTo) {
+        p.classList.add('completed');
+      }
+    });
+  }
+
+  function typeIntroCharacter() {
+    if (!isIntroActive) return;
+
+    const currentPhrase = CINEMATIC_PHRASES[currentPhraseIdx];
+    if (currentCharIdx < currentPhrase.length) {
+      if (typewriterText) {
+        typewriterText.textContent = currentPhrase.slice(0, currentCharIdx + 1);
+      }
+
+      // Progress calculation across phrases
+      if (progressBar) {
+        const charRatio = (currentCharIdx + 1) / currentPhrase.length;
+        const totalProgress = ((currentPhraseIdx + charRatio) / CINEMATIC_PHRASES.length) * 100;
+        progressBar.style.width = `${totalProgress}%`;
+      }
+
+      // Soft cyber click every few characters
+      if (currentCharIdx % 3 === 0) {
+        playSynthTone(1300 + (currentCharIdx * 8) % 400, 'sine', 0.03, 0.015);
+      }
+
+      currentCharIdx++;
+      const timer = setTimeout(typeIntroCharacter, 24);
+      animationTimers.push(timer);
+    } else {
+      // Finished typing current phrase
+      setPillsState(currentPhraseIdx, currentPhraseIdx);
+
+      if (currentPhraseIdx < CINEMATIC_PHRASES.length - 1) {
+        // Pause between phrases (~600ms)
+        const pauseTimer = setTimeout(() => {
+          if (!isIntroActive) return;
+          currentPhraseIdx++;
+          currentCharIdx = 0;
+          if (typewriterText) typewriterText.textContent = '';
+          if (phaseBadge) phaseBadge.textContent = `PHASE ${currentPhraseIdx + 1}/4`;
+          setPillsState(currentPhraseIdx, currentPhraseIdx - 1);
+          typeIntroCharacter();
+        }, 650);
+        animationTimers.push(pauseTimer);
+      } else {
+        // All 4 phases finished! Access granted final seal
+        if (progressBar) progressBar.style.width = '100%';
+        setPillsState(-1, 3);
+        const finalTimer = setTimeout(() => {
+          if (!isIntroActive) return;
+          if (typewriterText) {
+            typewriterText.textContent = "[NEXCHAT QUANTUM CORE ENGAGED // ACCESS GRANTED]";
+          }
+          if (phaseBadge) phaseBadge.textContent = "CORE SEALED";
+          playMajesticChord();
+
+          // Auto-transition to login
+          const exitTimer = setTimeout(() => {
+            dismissOverlay();
+          }, 1400);
+          animationTimers.push(exitTimer);
+        }, 400);
+        animationTimers.push(finalTimer);
+      }
+    }
+  }
+
   function startAnimation(forced = false) {
     clearAllTimers();
     overlay.style.display = 'flex';
     overlay.classList.remove('fusion-completed');
 
-    // Reset streams & reveal
-    if (streams) {
-      streams.style.opacity = '1';
-      streams.style.transform = 'scale(1)';
-      streams.style.filter = 'blur(0px)';
-    }
-    if (singularity) {
-      singularity.style.opacity = '0';
-    }
-    if (reveal) {
-      reveal.style.opacity = '0';
-      reveal.style.transform = 'translate(-50%, -50%) scale(0.85)';
-    }
-    if (progressBar) {
-      progressBar.style.transition = 'none';
-      progressBar.style.width = '0%';
-    }
+    isIntroActive = true;
+    currentPhraseIdx = 0;
+    currentCharIdx = 0;
+
+    if (typewriterText) typewriterText.textContent = '';
+    if (phaseBadge) phaseBadge.textContent = 'PHASE 1/4';
+    if (progressBar) progressBar.style.width = '0%';
+    setPillsState(0, -1);
 
     initParticleCanvas();
 
-    // Step 1: Initial chime at start
-    animationTimers.push(setTimeout(() => {
-      playSynthTone(523.25, 'sine', 0.6, 0.1);
-    }, 150));
+    // Subtle initial chime
+    playSynthTone(523.25, 'sine', 0.5, 0.08);
 
-    // Step 2: Streams surge & converge (T = 1.7s)
-    animationTimers.push(setTimeout(() => {
-      if (streams) {
-        streams.style.transition = 'all 0.55s cubic-bezier(0.55, 0.055, 0.675, 0.19)';
-        streams.style.transform = 'scale(0.15)';
-        streams.style.opacity = '0';
-        streams.style.filter = 'blur(10px)';
-      }
-    }, 1650));
-
-    // Step 3: Singularity Collision Supernova (T = 2.1s)
-    animationTimers.push(setTimeout(() => {
-      if (singularity) {
-        singularity.style.opacity = '1';
-        const shock = singularity.querySelector('.singularity-shockwave');
-        const flash = singularity.querySelector('.singularity-flash');
-        if (shock) {
-          shock.style.transition = 'all 0.6s ease-out';
-          shock.style.transform = 'translate(-50%, -50%) scale(5)';
-          shock.style.opacity = '0';
-        }
-        if (flash) {
-          flash.style.transition = 'all 0.4s ease-out';
-          flash.style.opacity = '1';
-          flash.style.transform = 'translate(-50%, -50%) scale(3)';
-          setTimeout(() => { flash.style.opacity = '0'; }, 350);
-        }
-      }
-      playCollisionBoom();
-    }, 2100));
-
-    // Step 4: Manifestation of NEXSHOT Master Brand (T = 2.45s)
-    animationTimers.push(setTimeout(() => {
-      if (reveal) {
-        reveal.style.opacity = '1';
-        reveal.style.transform = 'translate(-50%, -50%) scale(1)';
-      }
-      if (progressBar) {
-        progressBar.style.transition = 'width 2.1s linear';
-        progressBar.style.width = '100%';
-      }
-      playMajesticChord();
-    }, 2450));
-
-    // Step 5: Smooth exit into Login Screen (T = 4.7s)
-    animationTimers.push(setTimeout(() => {
-      dismissOverlay();
-    }, 4700));
+    // Start typing after brief 250ms warmup
+    const startTimer = setTimeout(() => {
+      typeIntroCharacter();
+    }, 250);
+    animationTimers.push(startTimer);
   }
 
   function dismissOverlay() {
+    isIntroActive = false;
     clearAllTimers();
     overlay.classList.add('fusion-completed');
     try { sessionStorage.setItem('nexshot_fusion_seen', 'true'); } catch (_) { }
     setTimeout(() => {
       overlay.style.display = 'none';
       if (canvasAnimId) cancelAnimationFrame(canvasAnimId);
-    }, 700);
+    }, 650);
   }
 
   // Event Listeners
   if (skipBtn) {
     skipBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       dismissOverlay();
     });
   }
@@ -1315,6 +1335,7 @@ function initNexshotFusionIntro() {
   if (audioBtn) {
     audioBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      e.stopPropagation();
       isMuted = !isMuted;
       audioBtn.innerHTML = isMuted
         ? '<i class="fa-solid fa-volume-xmark" style="color: #ef4444;"></i>'
@@ -1334,6 +1355,14 @@ function initNexshotFusionIntro() {
     if (e.key === 'Escape' && !overlay.classList.contains('fusion-completed')) {
       dismissOverlay();
     }
+  });
+
+  // Clicking on background overlay outside console/buttons allows instant pass-through
+  overlay.addEventListener('click', (e) => {
+    if (e.target.closest('#introTypewriterConsole') || e.target.closest('.fusion-topbar')) {
+      return;
+    }
+    dismissOverlay();
   });
 
   // Check if previously seen in this session

@@ -792,245 +792,133 @@ input[type="password"]:focus {
 }
 
 /* ══════════════════════════════════════════════════════════════════════
-   NEXCHAT 3D QUANTUM GYROSCOPIC CRYPTOGRAPHIC CORE
+   PROMINENT TRUE 3D ROTATING CYBER CUBE
    ══════════════════════════════════════════════════════════════════════ */
-.nexchat-3d-quantum-scene {
-  position: relative;
-  width: 140px;
-  height: 140px;
-  margin-bottom: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  perspective: 800px;
-  transform-style: preserve-3d;
-  will-change: transform;
+.nexchat-3d-cube-viewport {
+  width: 170px !important;
+  height: 170px !important;
+  margin: 0 auto 16px auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  perspective: 900px !important;
+  position: relative !important;
 }
 
-.quantum-gyro-core {
-  width: 120px;
-  height: 120px;
-  position: relative;
-  transform-style: preserve-3d;
-  animation: gyroFloating3D 5s ease-in-out infinite;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Concentric 3D Gimbal Rings */
-.gyro-gimbal {
-  position: absolute;
-  border-radius: 50%;
-  transform-style: preserve-3d;
-  pointer-events: none;
-  box-sizing: border-box;
-}
-
-.gimbal-spark {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  top: -3px;
-  left: 50%;
-  transform: translateX(-50%);
-  box-shadow: 0 0 10px currentColor;
-  background: #ffffff;
-}
-
-.gyro-gimbal.gimbal-x {
-  width: 120px;
-  height: 120px;
-  border: 1.5px solid rgba(0, 240, 118, 0.45);
-  box-shadow: 0 0 20px rgba(0, 240, 118, 0.25), inset 0 0 14px rgba(0, 240, 118, 0.15);
-  color: #00f076;
-  animation: spinGimbalX 6.5s linear infinite;
-}
-
-.gyro-gimbal.gimbal-y {
-  width: 96px;
-  height: 96px;
-  border: 1.5px dashed rgba(0, 212, 255, 0.55);
-  box-shadow: 0 0 18px rgba(0, 212, 255, 0.25), inset 0 0 12px rgba(0, 212, 255, 0.15);
-  color: #00d4ff;
-  animation: spinGimbalY 4.8s linear infinite reverse;
-}
-
-.gyro-gimbal.gimbal-z {
-  width: 72px;
-  height: 72px;
-  border: 1.5px solid rgba(232, 184, 75, 0.5);
-  box-shadow: 0 0 14px rgba(232, 184, 75, 0.3);
-  color: #e8b84b;
-  animation: spinGimbalZ 3.2s linear infinite;
-}
-
-/* 3D Rotating Cyber Cube (Isometric cryptographic core) */
-.quantum-cube-3d {
-  width: 38px;
-  height: 38px;
-  position: absolute;
-  transform-style: preserve-3d;
-  animation: rotateCyberCube3D 8s linear infinite;
-}
-
-.cube-face {
-  position: absolute;
-  width: 38px;
-  height: 38px;
-  background: rgba(6, 14, 28, 0.78);
-  border: 1.5px solid var(--accent-emerald);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: var(--accent-emerald);
-  box-shadow: inset 0 0 12px rgba(0, 240, 118, 0.25), 0 0 10px rgba(0, 240, 118, 0.35);
-  text-shadow: 0 0 8px var(--accent-emerald);
-  backface-visibility: visible;
-  box-sizing: border-box;
-}
-
-.cube-front { transform: translateZ(19px); }
-.cube-back { transform: rotateY(180deg) translateZ(19px); color: var(--accent-cyan); border-color: var(--accent-cyan); text-shadow: 0 0 8px var(--accent-cyan); }
-.cube-right { transform: rotateY(90deg) translateZ(19px); }
-.cube-left { transform: rotateY(-90deg) translateZ(19px); color: var(--accent-cyan); border-color: var(--accent-cyan); }
-.cube-top { transform: rotateX(90deg) translateZ(19px); }
-.cube-bottom { transform: rotateX(-90deg) translateZ(19px); }
-
-.cube-node-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #ffffff;
-  box-shadow: 0 0 8px #00f076;
-}
-
-/* Central Glowing Quantum Singularity */
-.quantum-singularity {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #ffffff 10%, #00f076 50%, #00d4ff 90%);
-  box-shadow: 0 0 20px #00f076, 0 0 35px #00d4ff, 0 0 50px rgba(0, 240, 118, 0.5);
-  transform: translateZ(0);
-  animation: singularityPulse 1.8s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-/* Orbiting 3D Data Sparks */
-.orbital-spark {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.orbital-spark.spark-1 {
-  width: 5px;
-  height: 5px;
-  background: #00f076;
-  box-shadow: 0 0 10px #00f076;
-  animation: orbitSpark1 3.2s linear infinite;
-}
-
-.orbital-spark.spark-2 {
-  width: 4px;
-  height: 4px;
-  background: #00d4ff;
-  box-shadow: 0 0 10px #00d4ff;
-  animation: orbitSpark2 4.2s linear infinite reverse;
-}
-
-.orbital-spark.spark-3 {
-  width: 4px;
-  height: 4px;
-  background: #ffd700;
-  box-shadow: 0 0 10px #ffd700;
-  animation: orbitSpark3 2.6s linear infinite;
-}
-
-/* Holographic Laser Scan Plane */
-.holo-scan-plane {
-  position: absolute;
-  width: 56px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(0, 240, 118, 0.85), transparent);
-  box-shadow: 0 0 12px #00f076;
-  transform-style: preserve-3d;
-  animation: scanLaserPlane 2.2s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-/* ══════════════════════════════════════════════════════════════════════
-   DARK OBSIDIAN ROLLING 3D TESSERACT CUBE & TYPEWRITER CONSOLE
-   ══════════════════════════════════════════════════════════════════════ */
-.rolling-tesseract-cube {
-  width: 44px !important;
-  height: 44px !important;
-  position: absolute !important;
+.cube-scene-perspective {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
   transform-style: preserve-3d !important;
-  animation: rollTesseractCube3D 5.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite !important;
-  box-shadow: 0 0 25px rgba(0, 240, 255, 0.35);
 }
 
-.rolling-tesseract-cube .cube-face {
-  width: 44px !important;
-  height: 44px !important;
-  background: radial-gradient(circle at center, rgba(13, 24, 40, 0.92) 0%, rgba(4, 8, 16, 0.98) 100%) !important;
-  border: 1.5px solid #00f0ff !important;
-  box-shadow: inset 0 0 14px rgba(0, 240, 255, 0.3), 0 0 12px rgba(0, 240, 255, 0.35) !important;
+/* Hero 76px 3D Rotating Cube */
+.hero-3d-rotating-cube {
+  width: 76px !important;
+  height: 76px !important;
+  position: relative !important;
+  transform-style: preserve-3d !important;
+  animation: rotate3DCubeHero 6.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite !important;
+  will-change: transform !important;
+}
+
+.hero-cube-face {
+  position: absolute !important;
+  width: 76px !important;
+  height: 76px !important;
+  background: radial-gradient(circle at center, rgba(14, 26, 44, 0.94) 0%, rgba(5, 10, 20, 0.98) 100%) !important;
+  border: 2px solid #00f0ff !important;
+  border-radius: 8px !important;
+  box-shadow: inset 0 0 20px rgba(0, 240, 255, 0.35), 0 0 16px rgba(0, 240, 255, 0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   color: #00f0ff !important;
+  font-size: 26px !important;
+  text-shadow: 0 0 12px #00f0ff !important;
+  backface-visibility: visible !important;
+  box-sizing: border-box !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
 }
 
-.rolling-tesseract-cube .cube-front  { transform: translateZ(22px) !important; }
-.rolling-tesseract-cube .cube-back   { transform: rotateY(180deg) translateZ(22px) !important; border-color: #00ff66 !important; color: #00ff66 !important; box-shadow: inset 0 0 14px rgba(0, 255, 102, 0.3), 0 0 12px rgba(0, 255, 102, 0.35) !important; }
-.rolling-tesseract-cube .cube-right  { transform: rotateY(90deg) translateZ(22px) !important; }
-.rolling-tesseract-cube .cube-left   { transform: rotateY(-90deg) translateZ(22px) !important; border-color: #00ff66 !important; color: #00ff66 !important; }
-.rolling-tesseract-cube .cube-top    { transform: rotateX(90deg) translateZ(22px) !important; }
-.rolling-tesseract-cube .cube-bottom { transform: rotateX(-90deg) translateZ(22px) !important; border-color: #00ff66 !important; }
+.hero-face-front  { transform: translateZ(38px) !important; }
+.hero-face-back   { transform: rotateY(180deg) translateZ(38px) !important; border-color: #00ff66 !important; color: #00ff66 !important; text-shadow: 0 0 12px #00ff66 !important; box-shadow: inset 0 0 20px rgba(0, 255, 102, 0.35), 0 0 16px rgba(0, 255, 102, 0.4) !important; }
+.hero-face-right  { transform: rotateY(90deg) translateZ(38px) !important; }
+.hero-face-left   { transform: rotateY(-90deg) translateZ(38px) !important; border-color: #00ff66 !important; color: #00ff66 !important; text-shadow: 0 0 12px #00ff66 !important; box-shadow: inset 0 0 20px rgba(0, 255, 102, 0.35), 0 0 16px rgba(0, 255, 102, 0.4) !important; }
+.hero-face-top    { transform: rotateX(90deg) translateZ(38px) !important; }
+.hero-face-bottom { transform: rotateX(-90deg) translateZ(38px) !important; border-color: #00ff66 !important; color: #00ff66 !important; }
 
-/* Inner Counter-Rotating Hypercube Tesseract */
-.inner-tesseract-hypercube {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  top: 11px;
-  left: 11px;
-  transform-style: preserve-3d;
-  animation: counterSpinTesseract 3.8s linear infinite reverse;
+.face-grid-cross {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background: 
+    linear-gradient(90deg, transparent 48%, rgba(255, 255, 255, 0.08) 50%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(255, 255, 255, 0.08) 50%, transparent 52%) !important;
 }
 
-.tesseract-face {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  background: rgba(0, 255, 102, 0.12);
-  border: 1px dashed rgba(0, 255, 102, 0.75);
-  box-shadow: 0 0 8px rgba(0, 255, 102, 0.4);
+.hero-cube-core-singularity {
+  position: absolute !important;
+  width: 20px !important;
+  height: 20px !important;
+  top: 28px !important;
+  left: 28px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, #ffffff 10%, #00f0ff 50%, #00ff66 90%) !important;
+  box-shadow: 0 0 25px #00f0ff, 0 0 45px #00ff66 !important;
+  transform: translateZ(0) !important;
+  animation: corePulse3D 2s ease-in-out infinite alternate !important;
+  pointer-events: none !important;
 }
 
-.tesseract-face.tf-front  { transform: translateZ(11px); }
-.tesseract-face.tf-back   { transform: rotateY(180deg) translateZ(11px); }
-.tesseract-face.tf-right  { transform: rotateY(90deg) translateZ(11px); }
-.tesseract-face.tf-left   { transform: rotateY(-90deg) translateZ(11px); }
-.tesseract-face.tf-top    { transform: rotateX(90deg) translateZ(11px); }
-.tesseract-face.tf-bottom { transform: rotateX(-90deg) translateZ(11px); }
+.hero-cube-ground-shadow {
+  position: absolute !important;
+  width: 96px !important;
+  height: 18px !important;
+  bottom: 8px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.5) 0%, rgba(0, 0, 0, 0.9) 50%, transparent 80%) !important;
+  filter: blur(6px) !important;
+  animation: shadowPulse3D 6.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite !important;
+  pointer-events: none !important;
+}
 
-/* Dynamic Ground Contact Shadow */
-.cube-ground-shadow {
-  position: absolute;
-  width: 52px;
-  height: 12px;
-  bottom: 12px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.4) 0%, rgba(0, 0, 0, 0.8) 50%, transparent 75%);
-  filter: blur(4px);
-  animation: groundShadowPulse 5.5s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
-  pointer-events: none;
+@keyframes rotate3DCubeHero {
+  0% {
+    transform: rotateX(-22deg) rotateY(0deg) rotateZ(0deg);
+  }
+  25% {
+    transform: rotateX(-35deg) rotateY(90deg) rotateZ(12deg);
+  }
+  50% {
+    transform: rotateX(22deg) rotateY(180deg) rotateZ(0deg);
+  }
+  75% {
+    transform: rotateX(35deg) rotateY(270deg) rotateZ(-12deg);
+  }
+  100% {
+    transform: rotateX(-22deg) rotateY(360deg) rotateZ(0deg);
+  }
+}
+
+@keyframes corePulse3D {
+  0% { transform: scale(0.85); opacity: 0.8; box-shadow: 0 0 20px #00f0ff, 0 0 35px #00ff66; }
+  100% { transform: scale(1.25); opacity: 1; box-shadow: 0 0 35px #00f0ff, 0 0 60px #00ff66; }
+}
+
+@keyframes shadowPulse3D {
+  0%, 50%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  25%, 75% {
+    transform: scale(0.72);
+    opacity: 0.45;
+  }
 }
 
 /* Quantum Typewriter Console Container */
@@ -1462,6 +1350,9 @@ input[type="password"]:focus {
 .nexshot-fusion-overlay {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
   z-index: 99999;
   background: #030611;
   display: flex;
@@ -1469,6 +1360,7 @@ input[type="password"]:focus {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  box-sizing: border-box;
   transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), filter 0.7s ease;
   user-select: none;
 }
@@ -1520,6 +1412,7 @@ input[type="password"]:focus {
   justify-content: space-between;
   align-items: center;
   padding: 24px 32px;
+  box-sizing: border-box;
   z-index: 10;
 }
 
@@ -1600,6 +1493,7 @@ input[type="password"]:focus {
   width: 100%;
   max-width: 960px;
   padding: 20px;
+  box-sizing: border-box;
   min-height: 480px;
 }
 
@@ -2090,3 +1984,582 @@ input[type="password"]:focus {
 }
 
 
+
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   NEXCHAT GRAND TRUE 3D ROTATING CYBER CUBE & TYPEWRITER TERMINAL
+   ══════════════════════════════════════════════════════════════════════ */
+.intro-stage-container {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: clamp(16px, 3vh, 32px) !important;
+  width: 100% !important;
+  max-width: 820px !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+/* Grand 3D Rotating Cube Viewport */
+.grand-3d-cube-stage {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 180px !important;
+  perspective: 1100px !important;
+  -webkit-perspective: 1100px !important;
+  position: relative !important;
+}
+
+.grand-3d-perspective {
+  position: relative !important;
+  width: 104px !important;
+  height: 104px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transform-style: preserve-3d !important;
+  -webkit-transform-style: preserve-3d !important;
+}
+
+.grand-3d-cube {
+  position: relative !important;
+  width: 104px !important;
+  height: 104px !important;
+  transform-style: preserve-3d !important;
+  -webkit-transform-style: preserve-3d !important;
+  animation: rotate3DCubeGrand 7s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite !important;
+  will-change: transform !important;
+}
+
+/* 6 True 3D Cube Faces */
+.grand-face {
+  position: absolute !important;
+  width: 104px !important;
+  height: 104px !important;
+  background: radial-gradient(circle at center, rgba(16, 32, 54, 0.96) 0%, rgba(3, 8, 18, 0.98) 100%) !important;
+  border: 2px solid #00f0ff !important;
+  border-radius: 12px !important;
+  box-shadow: inset 0 0 24px rgba(0, 240, 255, 0.35), 0 0 20px rgba(0, 240, 255, 0.45) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #00f0ff !important;
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+  box-sizing: border-box !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  user-select: none !important;
+}
+
+.grand-face i {
+  font-size: 32px !important;
+  filter: drop-shadow(0 0 10px currentColor) !important;
+}
+
+.grand-face .face-tag {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  margin-top: 6px !important;
+  opacity: 0.9 !important;
+}
+
+.grand-face-front {
+  transform: translateZ(52px) !important;
+}
+
+.grand-face-back {
+  transform: rotateY(180deg) translateZ(52px) !important;
+  border-color: #00ff66 !important;
+  color: #00ff66 !important;
+  box-shadow: inset 0 0 24px rgba(0, 255, 102, 0.35), 0 0 20px rgba(0, 255, 102, 0.45) !important;
+}
+
+.grand-face-right {
+  transform: rotateY(90deg) translateZ(52px) !important;
+}
+
+.grand-face-left {
+  transform: rotateY(-90deg) translateZ(52px) !important;
+  border-color: #00ff66 !important;
+  color: #00ff66 !important;
+  box-shadow: inset 0 0 24px rgba(0, 255, 102, 0.35), 0 0 20px rgba(0, 255, 102, 0.45) !important;
+}
+
+.grand-face-top {
+  transform: rotateX(90deg) translateZ(52px) !important;
+}
+
+.grand-face-bottom {
+  transform: rotateX(-90deg) translateZ(52px) !important;
+  border-color: #00ff66 !important;
+  color: #00ff66 !important;
+  box-shadow: inset 0 0 24px rgba(0, 255, 102, 0.35), 0 0 20px rgba(0, 255, 102, 0.45) !important;
+}
+
+/* Face Grid Crosshairs */
+.face-grid-cross {
+  position: absolute !important;
+  inset: 0 !important;
+  pointer-events: none !important;
+  background: 
+    linear-gradient(90deg, transparent 48%, rgba(255, 255, 255, 0.1) 50%, transparent 52%),
+    linear-gradient(0deg, transparent 48%, rgba(255, 255, 255, 0.1) 50%, transparent 52%) !important;
+  border-radius: 10px !important;
+}
+
+/* Radiant Central Singularity Inside 3D Cube */
+.grand-cube-singularity {
+  position: absolute !important;
+  width: 28px !important;
+  height: 28px !important;
+  top: 38px !important;
+  left: 38px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, #ffffff 15%, #00f0ff 55%, #00ff66 90%) !important;
+  box-shadow: 0 0 35px #00f0ff, 0 0 65px #00ff66 !important;
+  transform: translateZ(0) !important;
+  animation: grandCorePulse 2s ease-in-out infinite alternate !important;
+  pointer-events: none !important;
+}
+
+/* Dynamic Ground Contact Tumbling Perspective Shadow */
+.grand-cube-shadow {
+  position: absolute !important;
+  width: 130px !important;
+  height: 22px !important;
+  bottom: -40px !important;
+  border-radius: 50% !important;
+  background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.6) 0%, rgba(0, 0, 0, 0.95) 55%, transparent 85%) !important;
+  filter: blur(8px) !important;
+  animation: grandShadowPulse 7s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite !important;
+  pointer-events: none !important;
+}
+
+/* Orbiting Quantum Sparks in 3D Depth */
+.grand-spark {
+  position: absolute !important;
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #00f0ff !important;
+  box-shadow: 0 0 12px #00f0ff, 0 0 20px #00ff66 !important;
+  pointer-events: none !important;
+}
+
+.spark-orbit-1 {
+  animation: grandSparkOrbit1 4s linear infinite !important;
+}
+
+.spark-orbit-2 {
+  animation: grandSparkOrbit2 5.5s linear infinite reverse !important;
+  background: #00ff66 !important;
+}
+
+.spark-orbit-3 {
+  animation: grandSparkOrbit3 6.8s linear infinite !important;
+}
+
+/* Grand 3D Cube Rotation Keyframes */
+@keyframes rotate3DCubeGrand {
+  0% {
+    transform: rotateX(-24deg) rotateY(0deg) rotateZ(0deg);
+  }
+  25% {
+    transform: rotateX(-38deg) rotateY(90deg) rotateZ(14deg);
+  }
+  50% {
+    transform: rotateX(24deg) rotateY(180deg) rotateZ(0deg);
+  }
+  75% {
+    transform: rotateX(38deg) rotateY(270deg) rotateZ(-14deg);
+  }
+  100% {
+    transform: rotateX(-24deg) rotateY(360deg) rotateZ(0deg);
+  }
+}
+
+@keyframes grandCorePulse {
+  0% { transform: translateZ(0) scale(0.85); opacity: 0.8; box-shadow: 0 0 25px #00f0ff, 0 0 45px #00ff66; }
+  100% { transform: translateZ(0) scale(1.3); opacity: 1; box-shadow: 0 0 45px #00f0ff, 0 0 80px #00ff66; }
+}
+
+@keyframes grandShadowPulse {
+  0%, 50%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  25%, 75% {
+    transform: scale(0.7);
+    opacity: 0.45;
+  }
+}
+
+@keyframes grandSparkOrbit1 {
+  0% { transform: rotateY(0deg) translateZ(80px) rotateX(15deg); }
+  100% { transform: rotateY(360deg) translateZ(80px) rotateX(15deg); }
+}
+
+@keyframes grandSparkOrbit2 {
+  0% { transform: rotateX(0deg) translateZ(90px) rotateY(-20deg); }
+  100% { transform: rotateX(360deg) translateZ(90px) rotateY(-20deg); }
+}
+
+@keyframes grandSparkOrbit3 {
+  0% { transform: rotateZ(0deg) translateX(85px) rotateY(30deg); }
+  100% { transform: rotateZ(360deg) translateX(85px) rotateY(30deg); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   QUANTUM DECRYPTION TYPEWRITER TERMINAL CONSOLE
+   ══════════════════════════════════════════════════════════════════════ */
+.intro-typewriter-console {
+  width: 100% !important;
+  max-width: 660px !important;
+  background: linear-gradient(160deg, rgba(10, 18, 30, 0.94) 0%, rgba(4, 8, 16, 0.98) 100%) !important;
+  border: 1.5px solid rgba(0, 240, 255, 0.3) !important;
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.75), 0 0 35px rgba(0, 240, 255, 0.15), inset 0 0 20px rgba(0, 240, 255, 0.05) !important;
+  border-radius: 18px !important;
+  padding: 20px 24px !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+.intro-console-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  padding-bottom: 10px !important;
+}
+
+.intro-console-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-family: 'Orbitron', monospace !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  color: #94a3b8 !important;
+}
+
+.intro-console-badge .beacon-pulse {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: #00ff66 !important;
+  box-shadow: 0 0 10px #00ff66 !important;
+  animation: pulseBeacon 1.4s infinite alternate !important;
+}
+
+.intro-console-phase {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+  color: #00f0ff !important;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6) !important;
+}
+
+.intro-console-body {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 10px !important;
+  min-height: 58px !important;
+  padding: 4px 0 !important;
+}
+
+.intro-console-prompt {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  color: #00f0ff !important;
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6) !important;
+  flex-shrink: 0 !important;
+}
+
+.intro-typewriter-text {
+  font-family: 'Orbitron', monospace !important;
+  font-size: clamp(13px, 2.7vw, 16px) !important;
+  font-weight: 700 !important;
+  color: #f1f5f9 !important;
+  letter-spacing: 1.2px !important;
+  line-height: 1.45 !important;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.3) !important;
+}
+
+.intro-typewriter-cursor {
+  display: inline-block !important;
+  width: 9px !important;
+  height: 17px !important;
+  background: #00f0ff !important;
+  box-shadow: 0 0 10px #00f0ff !important;
+  margin-left: 2px !important;
+  vertical-align: middle !important;
+  animation: blinkCursor 0.8s steps(2, start) infinite !important;
+}
+
+@keyframes blinkCursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* 4 Phase Progress Indicators */
+.intro-phase-indicators {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+}
+
+.intro-phase-pill {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 6px 8px !important;
+  border-radius: 9999px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  font-family: 'Orbitron', monospace !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  color: #64748b !important;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.intro-phase-pill .pip {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: #64748b !important;
+  transition: all 0.35s ease !important;
+}
+
+.intro-phase-pill.active {
+  background: rgba(0, 240, 255, 0.14) !important;
+  border-color: #00f0ff !important;
+  color: #00f0ff !important;
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.4) !important;
+}
+
+.intro-phase-pill.active .pip {
+  background: #00f0ff !important;
+  box-shadow: 0 0 8px #00f0ff !important;
+  animation: pulseBeacon 1s infinite alternate !important;
+}
+
+.intro-phase-pill.completed {
+  background: rgba(0, 255, 102, 0.12) !important;
+  border-color: rgba(0, 255, 102, 0.6) !important;
+  color: #00ff66 !important;
+}
+
+.intro-phase-pill.completed .pip {
+  background: #00ff66 !important;
+  box-shadow: 0 0 8px #00ff66 !important;
+}
+
+/* Progress Track & Fill */
+.intro-progress-bar-wrap {
+  width: 100% !important;
+  height: 4px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-radius: 9999px !important;
+  overflow: hidden !important;
+  position: relative !important;
+  margin-top: 2px !important;
+}
+
+.intro-progress-bar-fill {
+  width: 0% !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, #00f0ff 0%, #00ff66 100%) !important;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.8) !important;
+  border-radius: 9999px !important;
+  transition: width 0.25s linear !important;
+}
+
+@media (max-width: 640px) {
+  .fusion-topbar {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    padding: 12px 14px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 6px !important;
+    z-index: 25 !important;
+  }
+  .fusion-sys-badge {
+    padding: 4px 8px !important;
+    font-size: 8.5px !important;
+    max-width: 125px !important;
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    overflow: hidden !important;
+    border-radius: 9999px !important;
+  }
+  .fusion-sys-title {
+    max-width: 90px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    display: inline-block !important;
+  }
+  .fusion-top-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+  .fusion-action-btn {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+    border-radius: 9999px !important;
+  }
+  .fusion-skip-chip {
+    padding: 5px 8px !important;
+    font-size: 10px !important;
+    gap: 4px !important;
+  }
+  .fusion-skip-chip span {
+    font-size: 10px !important;
+  }
+  .fusion-stage,
+  .intro-stage-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 8px 0 !important;
+    box-sizing: border-box !important;
+    gap: 14px !important;
+    min-height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    overflow: hidden !important;
+  }
+  .grand-3d-cube-stage {
+    min-height: 130px !important;
+  }
+  .grand-3d-cube {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  .grand-3d-perspective {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  .grand-face {
+    width: 70px !important;
+    height: 70px !important;
+    border-radius: 10px !important;
+  }
+  .grand-face i {
+    font-size: 20px !important;
+  }
+  .grand-face .face-tag {
+    font-size: 6.5px !important;
+    letter-spacing: 1px !important;
+  }
+  .grand-face-front  { transform: translateZ(35px) !important; }
+  .grand-face-back   { transform: rotateY(180deg) translateZ(35px) !important; }
+  .grand-face-right  { transform: rotateY(90deg) translateZ(35px) !important; }
+  .grand-face-left   { transform: rotateY(-90deg) translateZ(35px) !important; }
+  .grand-face-top    { transform: rotateX(90deg) translateZ(35px) !important; }
+  .grand-face-bottom { transform: rotateX(-90deg) translateZ(35px) !important; }
+  .grand-cube-singularity {
+    width: 16px !important;
+    height: 16px !important;
+    top: 27px !important;
+    left: 27px !important;
+  }
+  .grand-cube-shadow {
+    width: 80px !important;
+    bottom: -24px !important;
+  }
+  .intro-typewriter-console {
+    width: calc(100% - 28px) !important;
+    max-width: 362px !important;
+    margin: 0 auto !important;
+    padding: 12px 14px !important;
+    border-radius: 14px !important;
+    box-sizing: border-box !important;
+    gap: 10px !important;
+    min-width: 0 !important;
+  }
+  .intro-console-header {
+    padding-bottom: 6px !important;
+  }
+  .intro-console-badge {
+    font-size: 8.5px !important;
+    letter-spacing: 0.6px !important;
+  }
+  .intro-console-phase {
+    font-size: 9px !important;
+  }
+  .intro-console-body {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: baseline !important;
+    gap: 4px 6px !important;
+    min-height: 48px !important;
+    padding: 2px 0 !important;
+    min-width: 0 !important;
+  }
+  .intro-console-prompt {
+    font-size: 11px !important;
+    flex-shrink: 0 !important;
+  }
+  .intro-typewriter-text {
+    font-size: 11.5px !important;
+    letter-spacing: 0.4px !important;
+    line-height: 1.35 !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    flex: 1 1 140px !important;
+    min-width: 0 !important;
+  }
+  .intro-phase-indicators {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .intro-phase-pill {
+    padding: 5px 6px !important;
+    font-size: 7.5px !important;
+    letter-spacing: 0.4px !important;
+    min-width: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+  .intro-phase-pill span:last-child {
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+}
