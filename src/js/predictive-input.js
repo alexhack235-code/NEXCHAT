@@ -761,10 +761,13 @@
 
       const rawWord = match[1];
       const cleanWord = rawWord.toLowerCase();
+      const beforeWord = textBefore.slice(0, textBefore.length - rawWord.length).trim();
+      const prevTokens = beforeWord.split(/\s+/);
+      const prevWord = prevTokens[prevTokens.length - 1] || '';
 
       let replacement = null;
       if (window.autoCorrectEngine && typeof window.autoCorrectEngine.correctWord === 'function') {
-        const candidate = window.autoCorrectEngine.correctWord(rawWord);
+        const candidate = window.autoCorrectEngine.correctWord(rawWord, prevWord);
         if (candidate && candidate.toLowerCase() !== cleanWord) {
           replacement = candidate;
         }
@@ -807,14 +810,67 @@
     }
 
     flashCorrectionFeedback(original, replacement) {
-      if (!this.autocorrectBtn) return;
-      this.autocorrectBtn.style.display = 'inline-flex';
-      this.autocorrectBtn.innerHTML = `<i class="fa-solid fa-check text-[#00ff66]"></i> <span>Fixed: ${escapeText(original)} &rarr; ${escapeText(replacement)}</span>`;
-      setTimeout(() => {
-        if (this.autocorrectBtn && !this.activeCorrection) {
-          this.autocorrectBtn.style.display = 'none';
+      if (this.autocorrectBtn) {
+        this.autocorrectBtn.style.display = 'inline-flex';
+        this.autocorrectBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-[#00FFC6]"></i> <span>Fixed: ${escapeText(original)} &rarr; ${escapeText(replacement)}</span>`;
+      }
+
+      // Render floating interactive undo pill
+      let pill = document.getElementById('autocorrectUndoPill');
+      if (!pill) {
+        pill = document.createElement('div');
+        pill.id = 'autocorrectUndoPill';
+        pill.className = 'autocorrect-undo-pill';
+        const form = document.getElementById('message-form');
+        if (form && form.parentNode) {
+          form.parentNode.insertBefore(pill, form);
         }
-      }, 1500);
+      }
+
+      if (pill) {
+        pill.style.display = 'flex';
+        pill.innerHTML = `
+          <div class="undo-pill-text">
+            <i class="fa-solid fa-sparkles" style="color: #00FFC6; font-size: 11px;"></i>
+            <span>Fixed: <strong>${escapeText(original)}</strong> &rarr; <strong style="color: #00FFC6;">${escapeText(replacement)}</strong></span>
+          </div>
+          <button type="button" class="undo-pill-btn" id="btnUndoAutoCorrect">
+            <i class="fa-solid fa-rotate-left"></i> <span>Undo</span>
+          </button>
+        `;
+
+        const undoBtn = pill.querySelector('#btnUndoAutoCorrect');
+        if (undoBtn) {
+          undoBtn.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.undoLastInlineFix();
+          };
+        }
+
+        clearTimeout(this.undoPillTimer);
+        this.undoPillTimer = setTimeout(() => {
+          if (pill) pill.style.display = 'none';
+        }, 3200);
+      }
+    }
+
+    undoLastInlineFix() {
+      if (!this.lastInlineFix || !this.input) return;
+      const val = this.input.value;
+      const fix = this.lastInlineFix;
+      const cursorPos = this.input.selectionStart;
+      const fixStart = cursorPos - fix.replacement.length - fix.separator.length;
+      if (fixStart >= 0) {
+        const reverted = val.slice(0, fixStart) + fix.original + fix.separator + val.slice(cursorPos);
+        this.input.value = reverted;
+        const newPos = fixStart + fix.original.length + fix.separator.length;
+        this.input.setSelectionRange(newPos, newPos);
+        this.lastInlineFix = null;
+        this.input.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      const pill = document.getElementById('autocorrectUndoPill');
+      if (pill) pill.style.display = 'none';
     }
 
     /**

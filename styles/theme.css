@@ -182,3 +182,42 @@ body {
   transform: scale(1.05) !important;
   box-shadow: 0 0 20px rgba(0, 255, 198, 0.65) !important;
 }
+
+/* Interactive Auto-Correct Floating Undo Pill */
+.autocorrect-undo-pill {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 5px 14px !important;
+  background: rgba(10, 15, 30, 0.94) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(0, 255, 198, 0.35) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 4px 16px rgba(0, 255, 198, 0.15) !important;
+  margin: 4px 12px !important;
+  font-size: 11.5px !important;
+  color: #e9edef !important;
+  z-index: 50 !important;
+}
+
+.undo-pill-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: rgba(0, 255, 198, 0.15) !important;
+  border: 1px solid rgba(0, 255, 198, 0.4) !important;
+  color: #00FFC6 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  border-radius: 9999px !important;
+  padding: 2px 8px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.undo-pill-btn:hover {
+  background: rgba(0, 255, 198, 0.3) !important;
+  transform: scale(1.05) !important;
+}
