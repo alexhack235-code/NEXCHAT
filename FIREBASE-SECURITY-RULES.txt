@@ -353,8 +353,10 @@ service cloud.firestore {
     // 9. URL Format Validation
     function isValidUrl(url) {
       return url is string &&
-             url.size() <= 2048 &&
-             (url.matches("^https?://.*") || url.matches("^data:image/.*") || url == "");
+             (
+               (url.size() <= 2048 && (url.matches("^https?://.*") || url.matches("^/.*") || url == "")) ||
+               (url.size() <= 1048576 && (url.matches("^data:image/.*") || url.matches("^data:video/.*") || url.matches("^blob:.*")))
+             );
     }
 
     // 10. Optional URL Validation
@@ -925,17 +927,20 @@ service cloud.firestore {
                        request.resource.data.userId == request.auth.uid &&
                        (
                          !('expiresAtMs' in request.resource.data) ||
-                         (request.resource.data.expiresAtMs is int &&
-                          request.resource.data.expiresAtMs <= request.time.toMillis() + 86400000 + 300000 &&
-                          request.resource.data.expiresAtMs >= request.time.toMillis() - 300000)
+                         (
+                           (request.resource.data.expiresAtMs is int || request.resource.data.expiresAtMs is number) &&
+                           request.resource.data.expiresAtMs <= request.time.toMillis() + 172800000 &&
+                           request.resource.data.expiresAtMs >= request.time.toMillis() - 86400000
+                         )
                        ) &&
                        (
                          !('expiresAt' in request.resource.data) ||
+                         request.resource.data.expiresAt == null ||
                          request.resource.data.expiresAt is timestamp ||
                          request.resource.data.expiresAt is string
                        ) &&
-                       isValidOptionalString('content', 0, 2000) &&
-                       isValidOptionalString('caption', 0, 2000) &&
+                       isValidOptionalString('content', 0, 5000) &&
+                       isValidOptionalString('caption', 0, 5000) &&
                        isValidOptionalUrl('imageUrl') &&
                        isValidOptionalUrl('mediaUrl');
 
