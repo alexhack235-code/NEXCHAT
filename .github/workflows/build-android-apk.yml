@@ -55,7 +55,18 @@ jobs:
         run: |
           cd android
           chmod +x ./gradlew
-          ./gradlew assembleDebug --stacktrace
+          ./gradlew assembleDebug --stacktrace --no-daemon > ../gradle_build.log 2>&1 || exit 1
+
+      - name: Publish Gradle Error Diagnostics
+        if: failure()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -B debug-log
+          cp gradle_build.log gradle_build.txt
+          git add -f gradle_build.txt
+          git commit -m "ci: capture gradle build log"
+          git push -f origin debug-log
 
       - name: Rename APK for Distribution
         run: |
