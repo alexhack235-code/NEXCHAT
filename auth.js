@@ -562,6 +562,83 @@ const loginForm = document.getElementById('loginForm');
 
 let loaderWatchdog = null;
 
+// ============================================================================
+// NEXCHAT QUANTUM DECRYPTION CINEMATIC INTRO ENGINE
+// Combines 4 progressive philosophical phrases while 3D tesseract rolls
+// ============================================================================
+const NEX_CINEMATIC_PHRASES = [
+  "WHAT IF PRIVACY WAS NOT A PRIVILEGE, BUT ABSOLUTE POWER?",
+  "IN A WORLD OF TOTAL SURVEILLANCE, TRUE FREEDOM LIES IN THE ENCLAVE.",
+  "BEYOND THE HORIZON // ENTER THE ZERO-KNOWLEDGE FRONTIER.",
+  "COMMUNICATION EVOLVED. ZERO TRACE. ABSOLUTE AUTONOMY."
+];
+
+let cinematicTypewriterTimer = null;
+let currentPhraseIndex = 0;
+let currentCharIndex = 0;
+let isCinematicActive = false;
+
+function startCinematicTypewriter() {
+  const textEl = document.getElementById('quantumTypewriterText');
+  if (!textEl) return;
+
+  isCinematicActive = true;
+  currentPhraseIndex = 0;
+  currentCharIndex = 0;
+  textEl.textContent = '';
+  updatePhasePills(0);
+
+  function typeNextChar() {
+    if (!isCinematicActive) return;
+
+    const phrase = NEX_CINEMATIC_PHRASES[currentPhraseIndex];
+    if (currentCharIndex < phrase.length) {
+      textEl.textContent += phrase.charAt(currentCharIndex);
+      currentCharIndex++;
+      cinematicTypewriterTimer = setTimeout(typeNextChar, 25);
+    } else {
+      updatePhasePills(currentPhraseIndex, true);
+      cinematicTypewriterTimer = setTimeout(() => {
+        if (!isCinematicActive) return;
+        currentPhraseIndex = (currentPhraseIndex + 1) % NEX_CINEMATIC_PHRASES.length;
+        currentCharIndex = 0;
+        textEl.textContent = '';
+        updatePhasePills(currentPhraseIndex);
+        typeNextChar();
+      }, 550);
+    }
+  }
+
+  typeNextChar();
+}
+
+function updatePhasePills(activeIndex, markPreviousCompleted = false) {
+  for (let i = 1; i <= 4; i++) {
+    const pill = document.getElementById(`phasePill${i}`);
+    if (!pill) continue;
+    const pillIndex = i - 1;
+    pill.classList.remove('active', 'completed');
+    if (pillIndex === activeIndex) {
+      pill.classList.add('active');
+    } else if (pillIndex < activeIndex || (markPreviousCompleted && pillIndex <= activeIndex)) {
+      pill.classList.add('completed');
+    }
+  }
+}
+
+function stopCinematicTypewriter(finalSeal = true) {
+  isCinematicActive = false;
+  if (cinematicTypewriterTimer) {
+    clearTimeout(cinematicTypewriterTimer);
+    cinematicTypewriterTimer = null;
+  }
+  const textEl = document.getElementById('quantumTypewriterText');
+  if (textEl && finalSeal) {
+    textEl.textContent = "QUANTUM CORE ENGAGED // ACCESS GRANTED";
+    updatePhasePills(3, true);
+  }
+}
+
 function showLoginLoader(message = 'Preparing secure login...', subtext = 'Authenticating your account and loading your workspace.') {
   if (loaderWatchdog) clearTimeout(loaderWatchdog);
   const overlay = document.getElementById('loginLoaderOverlay');
@@ -572,6 +649,7 @@ function showLoginLoader(message = 'Preparing secure login...', subtext = 'Authe
     if (titleEl) titleEl.textContent = message;
     if (textEl) textEl.textContent = subtext;
   }
+  startCinematicTypewriter();
   document.body.classList.add('login-loading');
   const activeSubmitBtn = document.querySelector('form button[type="submit"]');
   if (activeSubmitBtn) {
@@ -587,6 +665,7 @@ function showLoginLoader(message = 'Preparing secure login...', subtext = 'Authe
 }
 
 function hideLoginLoader() {
+  stopCinematicTypewriter(false);
   if (loaderWatchdog) {
     clearTimeout(loaderWatchdog);
     loaderWatchdog = null;
@@ -1276,4 +1355,5 @@ window.checkIpRegistrationLimit = checkIpRegistrationLimit;
 window.recordIpRegistration = recordIpRegistration;
 window.detectIPAndVPN = detectIPAndVPN;
 window.sanitizeIpKey = sanitizeIpKey;
+
 
