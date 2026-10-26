@@ -14940,19 +14940,21 @@ function setupCreateStatusModal() {
       const now = Date.now();
       const expiresAtMs = now + 86400000;
 
+      const effectiveUid = auth?.currentUser?.uid || (typeof getAuth === 'function' ? getAuth()?.currentUser?.uid : null) || myUID;
       const statusDoc = {
-        userId: auth?.currentUser?.uid || myUID || 'user',
+        userId: effectiveUid || 'user',
         username: auth?.currentUser?.displayName || myUsername || 'User',
         profilePic: auth?.currentUser?.photoURL || myProfilePic || 'logo.jpg',
         content: contentText || '',
         imageUrl: uploadedUrl || null,
+        mediaUrl: uploadedUrl || null,
         mediaType: isMedia ? (fileType.startsWith('video/') ? 'video' : 'image') : 'text',
         gradient: isTextTab ? selectedStatusGradient : null,
         timestamp: serverTimestamp(),
         createdAt: serverTimestamp(),
         createdAtMs: now,
         expiresAt: new Date(expiresAtMs),
-        expiresAtMs: expiresAtMs
+        expiresAtMs: Math.round(expiresAtMs)
       };
 
       if (db) {
@@ -16296,9 +16298,9 @@ async function loadGroups() {
 
       let avatarHtml;
       if (group.profilePic) {
-        avatarHtml = `<img src="${group.profilePic}" class="chat-avatar group-avatar" style="object-fit:cover;" onerror="this.style.display='none';this.parentElement.querySelector('.avatar-placeholder').style.display='flex';">`;
+        avatarHtml = `<img src="${group.profilePic}" class="chat-avatar group-avatar" style="object-fit:cover;" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${groupInit}</div>`;
       } else {
-        avatarHtml = `<div class="chat-avatar avatar-placeholder">${groupInit}</div>`;
+        avatarHtml = `<div class="chat-avatar avatar-placeholder" style="display:flex !important;">${groupInit}</div>`;
       }
 
       li.innerHTML = `
@@ -16552,8 +16554,8 @@ async function loadContacts() {
       li.setAttribute('data-chat-id', uid);
 
       let avatar = (pic && (pic.startsWith('http') || pic.startsWith('data:') || pic.includes('.')))
-        ? `<img src="${pic}" class="chat-avatar" onerror="this.style.display='none';this.parentElement.querySelector('.avatar-placeholder').style.display='flex';">` + `<div class="chat-avatar avatar-placeholder" style="display:none; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
-        : `<div class="chat-avatar avatar-placeholder" style="background:#202c33; color:#e9edef; display:flex; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`;
+        ? `<img src="${pic}" class="chat-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
+        : `<div class="chat-avatar avatar-placeholder" style="background:#202c33; color:#e9edef; display:flex !important; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`;
 
       let lastMessageSnippet = "No messages yet";
       let lastMessageTime = "";
@@ -16754,9 +16756,9 @@ async function appendGroupsToContactList(contactList) {
 
       let avatarHtml;
       if (group.profilePic) {
-        avatarHtml = `<img src="${group.profilePic}" class="chat-avatar group-avatar" onerror="this.style.display='none';this.parentElement.querySelector('.avatar-placeholder').style.display='flex';">`;
+        avatarHtml = `<img src="${group.profilePic}" class="chat-avatar group-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${gInit}</div>`;
       } else {
-        avatarHtml = `<div class="chat-avatar avatar-placeholder">${gInit}</div>`;
+        avatarHtml = `<div class="chat-avatar avatar-placeholder" style="display:flex !important;">${gInit}</div>`;
       }
 
       const li = document.createElement('li');

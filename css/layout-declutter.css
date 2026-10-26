@@ -1105,13 +1105,19 @@ display: block !important;
 }
 
 .avatar-placeholder {
-display: flex !important;
+display: flex;
 align-items: center !important;
 justify-content: center !important;
 background: #202c33 !important;
 color: #e9edef !important;
 font-weight: 700 !important;
 font-size: 18px !important;
+}
+
+.avatar-placeholder[style*="display:none"],
+.avatar-placeholder[style*="display: none"],
+.avatar-placeholder.hidden {
+display: none !important;
 }
 
 .chat-online-beacon {
