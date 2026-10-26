@@ -269,22 +269,44 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
   if (!messagesDiv || !messages || !messages.length) return;
   const html = messages.map((m) => {
     const isOwn = m.from === myUID;
-    const senderText = isOwn ? 'You' : escape(currentChatName || 'Friend');
-    const timestamp = formatChatTimestamp(m.time?.toDate?.() || new Date(m.time || Date.now()));
-    const bubbleColor = isOwn ? '#00ff66' : '#333';
-    const textColor = isOwn ? '#000' : '#fff';
+    const msgDate = m.time?.toDate?.() || new Date(m.time || Date.now());
+    const formattedTime = (typeof formatTime === 'function') ? formatTime(msgDate) : msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const isDeletedTombstone = !!(m.isDeleted || m.deletedForEveryone);
+
+    // Exact WhatsApp bubble styling matching updateMessages
+    const bubbleBg = isOwn ? 'linear-gradient(135deg, #005c4b 0%, #059669 100%)' : '#1f2c34';
+    const bubbleRadius = isOwn ? '12px 2px 12px 12px' : '2px 12px 12px 12px';
+    const bubbleColor = isOwn ? '#ffffff' : '#e9edef';
     const align = isOwn ? 'flex-end' : 'flex-start';
+
+    let replyHtml = '';
+    if (m.replyTo) {
+      const replySender = escapeHtml(m.replyTo.senderName || 'User');
+      const replySnippet = escapeHtml(m.replyTo.text ? (m.replyTo.text.length > 80 ? m.replyTo.text.substring(0, 80) + '...' : m.replyTo.text) : '');
+      replyHtml = `
+        <div class="reply-quote" style="background:${isOwn ? 'rgba(0,0,0,0.22)' : 'rgba(0,0,0,0.32)'};border-left:3.5px solid ${isOwn ? '#25d366' : '#00a884'};padding:6px 10px;margin-bottom:6px;border-radius:6px;font-size:12px;line-height:1.35;">
+          <strong class="reply-quote-sender" style="color:${isOwn ? '#bbf7d0' : '#00ff66'};display:block;font-weight:700;margin-bottom:2px;font-size:12px;"><i class="fa-solid fa-reply" style="font-size:9.5px;margin-right:5px;opacity:0.85;"></i>${replySender}</strong>
+          <span class="reply-quote-snippet" style="font-style:italic;color:#d1d7db;font-size:11.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">${replySnippet}</span>
+        </div>`;
+    }
+
+    const checkmarkHtml = isOwn ? '<i class="fa-solid fa-check-double tick-read" style="color:#53bdeb;font-size:10px;margin-left:3px;" title="Read"></i>' : '';
+    const bodyText = isDeletedTombstone ? '<em style="opacity:0.75;"><i class="fa-solid fa-ban" style="margin-right:4px;"></i>This message was deleted</em>' : escapeHtml(m.text || m.message || '');
+
     return `
-      <div style="display:flex; justify-content:${align}; margin:8px 0; padding:0 12px; flex-direction: column; align-items: ${align};">
-        <div style="font-size:11px; color:${isOwn ? '#00ff66' : '#aaa'}; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.4px;">
-          ${escape(senderText)} · ${escape(timestamp)}
-        </div>
-        <div class="message-bubble" style="background:${bubbleColor}; color:${textColor}; padding:12px 14px; border-radius:14px; max-width:75%; word-wrap:break-word;">
-          ${escape(m.text || m.message || '')}
+      <div class="message-wrapper ${isOwn ? 'sent' : 'received'}" style="display:flex; justify-content:${align}; margin:6px 0; padding:0 12px;">
+        <div class="message-bubble ${isOwn ? 'sent' : 'received'}" style="position:relative; padding:7px 11px 5px 11px; border-radius:${bubbleRadius}; max-width:72%; word-wrap:break-word; box-shadow:0 1px 2px rgba(0,0,0,0.35); background:${bubbleBg}; border:${isOwn ? 'none' : '1px solid rgba(255,255,255,0.05)'}; color:${bubbleColor}; font-size:14.5px; line-height:1.45;">
+          ${replyHtml}
+          <div class="message-content" style="margin:0;">${bodyText}</div>
+          <div class="message-time-row" style="font-size:10.5px; margin-top:4px; opacity:0.85; display:flex; align-items:center; justify-content:flex-end; gap:6px;">
+            <span class="e2ee-secure-badge" style="display:inline-flex; align-items:center; opacity:0.55; margin-right:auto;"><i class="fa-solid fa-lock" style="font-size:8.5px;"></i></span>
+            <span class="message-time-text" style="display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:${isOwn ? 'rgba(255,255,255,0.75)' : '#8696a0'};">
+              <span>${escapeHtml(formattedTime)}</span>${checkmarkHtml}
+            </span>
+          </div>
         </div>
       </div>`;
   }).join('');
-
   messagesDiv.innerHTML = html;
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
@@ -4526,7 +4548,8 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     container.appendChild(video);
   } else if (isAudio) {
     const durationVal = parseFloat(attachment.duration) || 0;
-    if (window.messagingFeatures && typeof window.messagingFeatures.createAudioPlayerElement === "function") {
+    const hasCustomAudio = window.messagingFeatures && typeof window.messagingFeatures.createAudioPlayerElement === "function";
+    if (hasCustomAudio) {
       const audioEl = window.messagingFeatures.createAudioPlayerElement(url, durationVal);
       container.appendChild(audioEl);
     } else {
@@ -4559,8 +4582,8 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
         ${origText}
       `;
       container.appendChild(subCard);
-    } else if (!hasTranscript) {
-      // 1-tap on-demand Transcribe & Translate button for any voice note
+    } else if (!hasTranscript && !hasCustomAudio) {
+      // 1-tap on-demand fallback transcribe button only if custom audio player is not used
       const transcribeBtn = document.createElement("button");
       transcribeBtn.type = "button";
       transcribeBtn.className = "btn-transcribe-voice";
