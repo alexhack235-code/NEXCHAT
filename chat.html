@@ -3,21 +3,24 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#00ff66">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="description" content="NEXCHAT - Secure and fast messaging web app with group chat, AI assistant, and real-time status updates.">
-  <meta name="keywords" content="NEXCHAT, chat app, real-time messaging, group chat, AI assistant, Firebase chat">
-  <meta property="og:title" content="NEXCHAT - Messages" />
-  <meta property="og:description" content="NEXCHAT messaging web app with AI assistant and advanced group management." />
+  <meta name="description" content="NEXCHAT - Next-Gen Messaging Architecture with ChronEX AI, live audio spaces, broadcast channels, and zero-knowledge enclaves.">
+  <meta property="og:title" content="NEXCHAT - Next-Gen Enterprise Messaging" />
+  <meta property="og:description" content="Ultra-secure real-time messaging with ChronEX AI, live audio spaces, broadcast channels, and zero-knowledge enclaves." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://yourdomain.com/chat.html" />
-  <meta property="og:image" content="https://yourdomain.com/logo.jpg" />
+  <meta property="og:url" content="https://t-drab.vercel.app/" />
+  <meta property="og:image" content="https://t-drab.vercel.app/logo.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="NEXCHAT Brand Logo" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="NEXCHAT - Messages" />
-  <meta name="twitter:description" content="Secure messaging with AI support and enhanced group creation." />
+  <meta name="twitter:title" content="NEXCHAT - Next-Gen Enterprise Messaging" />
+  <meta name="twitter:description" content="Ultra-secure real-time messaging with ChronEX AI, live audio spaces, broadcast channels, and zero-knowledge enclaves." />
+  <meta name="twitter:image" content="https://t-drab.vercel.app/logo.jpg" />
   <meta name="apple-mobile-web-app-title" content="NEXCHAT">
   <meta name="format-detection" content="telephone=no">
   <meta name="x-apple-disable-message-reformatting" content="yes">
@@ -2991,9 +2994,9 @@
                 <!-- Cipher Vault Master PIN & Security Preferences -->
                 <div class="settings-card">
                   <label><strong>Cipher Vault Master Security PIN</strong></label>
-                  <p style="font-size: 11.5px; color: #8b949e; margin: 4px 0 10px;">Customize your 4-digit numeric vault PIN to access hidden rooms and zero-knowledge enclaves (Default: 1337).</p>
+                  <p style="font-size: 11.5px; color: #8b949e; margin: 4px 0 10px;">Set your private 4-to-6 digit numeric vault PIN to access hidden rooms and zero-knowledge enclaves.</p>
                   <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                    <input type="password" id="settingsCipherPinInput" maxlength="4" placeholder="1337" class="settings-input" style="width: 130px; font-family: 'Orbitron', monospace; letter-spacing: 4px; text-align: center;">
+                    <input type="password" id="settingsCipherPinInput" maxlength="6" placeholder="Enter PIN" class="settings-input" style="width: 130px; font-family: 'Orbitron', monospace; letter-spacing: 4px; text-align: center;">
                     <button type="button" id="saveCipherPinBtn" class="btn-primary" style="white-space: nowrap;"><i class="fa-solid fa-key"></i> Update PIN</button>
                     <button type="button" id="openCipherFromSettingsBtn" class="btn-secondary" style="white-space: nowrap;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open Vault</button>
                   </div>
@@ -3163,6 +3166,18 @@
                 <div class="settings-card">
                   <button id="openTerminalBtn" class="btn-primary" style="width: 100%; font-weight: 700; margin-bottom: 10px;"><i class="fa-solid fa-terminal"></i> Open NEXCHAT Terminal</button>
                   <button id="fileComplaintBtn" class="btn-secondary" style="width: 100%;"><i class="fa-solid fa-envelope"></i> Send Feedback to NEX_DEV</button>
+                </div>
+
+                <!-- LEGAL, PRIVACY & SECURITY COMPLIANCE -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.25); background: rgba(0, 255, 102, 0.04);">
+                  <div style="margin-bottom: 8px;">
+                    <strong style="color: #00ff66;"><i class="fa-solid fa-scale-balanced"></i> Legal &amp; Security Compliance</strong>
+                    <p style="font-size: 12px; color: #8b949e; margin: 4px 0 0 0;">Review our verified zero-knowledge privacy architecture, user rights, and terms of service.</p>
+                  </div>
+                  <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                    <a href="privacy.html" target="_blank" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px;"><i class="fa-solid fa-shield-halved"></i> Privacy Policy</a>
+                    <a href="terms.html" target="_blank" class="btn-secondary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 12px;"><i class="fa-solid fa-file-contract"></i> Terms of Service</a>
+                  </div>
                 </div>
 
                 <!-- DEVELOPER DIAGNOSTICS & BENCHMARK -->
@@ -4672,7 +4687,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <div class="cipher-lock-screen" id="cipherLockScreen">
         <div class="lock-shield-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <h3 class="lock-screen-title">ENTER CIPHER SECURITY PIN</h3>
-        <p class="lock-screen-desc">Access to encrypted invisible rooms requires vault master PIN (Default: 1337)</p>
+        <p class="lock-screen-desc">Access to encrypted invisible rooms requires your secret vault PIN. Set or update anytime in Settings.</p>
 
         <!-- PIN Dots -->
         <div class="pin-dots-row" id="pinDotsRow">
@@ -4813,7 +4828,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
           <span style="color: #8b949e;">96-bit IV (Hex):</span>
-          <span style="color: #f1f5f9; font-size: 10.5px;" id="e2eeModalIv">7f 4a c9 12 8b e4 31 99 04 df 23 18</span>
+          <span style="color: #00f3ff; font-size: 10.5px;" id="e2eeModalIv">Dynamic 96-bit Random IV (Per-Message)</span>
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
           <span style="color: #8b949e;">Auth Tag:</span>
@@ -4830,7 +4845,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
           Raw Ciphertext Hex Dump
         </div>
         <div id="e2eeModalCiphertextDump" style="background: rgba(0, 0, 0, 0.7); border: 1px solid rgba(0, 242, 255, 0.2); border-radius: 8px; padding: 10px; font-family: 'Consolas', monospace; font-size: 11px; color: #67e8f9; word-break: break-all; max-height: 100px; overflow-y: auto;">
-          4a 8f 1c 3e 99 b2 04 71 d8 e3 a1 55 c7 f2 90 3a ...
+          Select any encrypted message in chat to inspect live cryptographic telemetry.
         </div>
       </div>
 

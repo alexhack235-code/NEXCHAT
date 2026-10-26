@@ -20135,7 +20135,8 @@ function initCipherVault() {
   if (!modal) return;
 
   let currentPin = '';
-  const MASTER_PIN = '1337';
+  let failedPinAttempts = 0;
+  let pinLockoutUntil = 0;
 
   const updatePinDots = (state = 'normal') => {
     if (!pinDotsRow) return;
@@ -20217,15 +20218,39 @@ function initCipherVault() {
         if (navigator.vibrate) navigator.vibrate(15);
 
         if (currentPin.length === 4) {
-          const masterPin = localStorage.getItem('nexchat_cipher_pin') || '1337';
-          if (currentPin === masterPin) {
+          const savedPin = localStorage.getItem('nexchat_cipher_pin');
+          if (!savedPin) {
+            localStorage.setItem('nexchat_cipher_pin', currentPin);
+            playCyberSfx('affirm');
+            if (navigator.vibrate) navigator.vibrate([40, 80]);
+            showNotif('Vault PIN initialized and saved! Your vault is now secured.', 'success', 3000);
+            setTimeout(unlockVault, 180);
+            return;
+          }
+
+          const now = Date.now();
+          if (now < pinLockoutUntil) {
+            const remainingSec = Math.ceil((pinLockoutUntil - now) / 1000);
+            showNotif(`Too many failed attempts. Locked for ${remainingSec}s.`, 'error', 2500);
+            currentPin = '';
+            updatePinDots('error');
+            return;
+          }
+
+          if (currentPin === savedPin) {
+            failedPinAttempts = 0;
             setTimeout(unlockVault, 180);
           } else {
-            // Error shake
+            failedPinAttempts++;
+            if (failedPinAttempts >= 5) {
+              pinLockoutUntil = Date.now() + 30000;
+              showNotif('5 incorrect PIN attempts. Security lockout for 30s.', 'error', 3000);
+            } else {
+              showNotif('Invalid Security PIN. Access denied.', 'error', 2500);
+            }
             updatePinDots('error');
             playCyberSfx('glitch');
             if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
-            showNotif(`Invalid Security PIN. (Default: ${masterPin})`, 'error', 2500);
             setTimeout(() => {
               currentPin = '';
               updatePinDots('normal');
@@ -20308,20 +20333,25 @@ function initMeshSettings() {
 
   // Load existing PIN into settings
   if (cipherPinInput) {
-    const savedPin = localStorage.getItem('nexchat_cipher_pin') || '1337';
-    cipherPinInput.value = savedPin;
+    cipherPinInput.value = '';
   }
 
   // Save new PIN
   if (saveCipherPinBtn && cipherPinInput) {
     saveCipherPinBtn.addEventListener('click', () => {
       const pin = cipherPinInput.value.trim();
-      if (!/^\d{4}$/.test(pin)) {
-        showNotif('PIN must be exactly 4 digits (e.g. 1337)', 'error', 2500);
+      if (!/^\d{4,6}$/.test(pin)) {
+        showNotif('PIN must be 4 to 6 numeric digits', 'error', 2500);
+        cipherPinInput.focus();
+        return;
+      }
+      if (['0000', '1234', '1111', '9999'].includes(pin)) {
+        showNotif('PIN is too weak. Please choose a more secure PIN.', 'error', 2500);
         cipherPinInput.focus();
         return;
       }
       localStorage.setItem('nexchat_cipher_pin', pin);
+      cipherPinInput.value = '';
       playCyberSfx('affirm');
       if (navigator.vibrate) navigator.vibrate(30);
       showNotif('Cipher Vault master PIN updated successfully!', 'success', 2500);
@@ -20432,7 +20462,16 @@ window.openE2eeInspector = async function(text, envelope = null) {
 
   if (protocolEl) protocolEl.textContent = env?.protocol || 'NEX-E2EE-v4.8';
   if (algoEl) algoEl.textContent = 'AES-256-GCM (256-bit Key / NIST P-256)';
-  if (ivEl) ivEl.textContent = env?.iv ? env.iv.substring(0, 32) : '7f 4a c9 12 8b e4 31 99 04 df 23 18';
+  const generateRandomIvHex = () => {
+    try {
+      const bytes = crypto.getRandomValues(new Uint8Array(12));
+      return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+    } catch (_) {
+      return '00 00 00 00 00 00 00 00 00 00 00 00';
+    }
+  };
+
+  if (ivEl) ivEl.textContent = env?.iv ? env.iv.substring(0, 35) : generateRandomIvHex();
   if (authTagEl) authTagEl.textContent = '128-bit GCM MAC (Zero-Knowledge Verified)';
 
   let hexDump = '';
@@ -20444,7 +20483,12 @@ window.openE2eeInspector = async function(text, envelope = null) {
       hexDump = env.ciphertext;
     }
   } else {
-    hexDump = '4a 8f 1c 3e 99 b2 04 71 d8 e3 a1 55 c7 f2 90 3a f1 09 88 ee 4d 3b 1a 9f 02 77 bb';
+    try {
+      const dummyBytes = crypto.getRandomValues(new Uint8Array(28));
+      hexDump = Array.from(dummyBytes).map(b => b.toString(16).padStart(2, '0')).join(' ');
+    } catch (_) {
+      hexDump = 'Secured zero-knowledge encrypted message packet.';
+    }
   }
 
   if (dumpEl) dumpEl.textContent = hexDump;

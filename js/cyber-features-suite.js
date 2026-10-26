@@ -1241,8 +1241,14 @@ class NexPanicLock {
 
   attemptUnlock() {
     const pin = this.pinInput ? this.pinInput.value.trim() : '';
-    // PIN 1337 or user session PIN
-    if (pin === '1337' || pin === '0000' || pin.length >= 4) {
+    const savedPin = localStorage.getItem('nexchat_cipher_pin') || localStorage.getItem('nexchat_panic_pin');
+    if (!savedPin && pin.length >= 4) {
+      localStorage.setItem('nexchat_panic_pin', pin);
+      this.unlock();
+      if (typeof window.showNotif === 'function') window.showNotif("Panic Lock PIN Initialized", "success");
+      return;
+    }
+    if (savedPin && pin === savedPin) {
       this.unlock();
     } else {
       if (this.pinInput) {
@@ -2448,7 +2454,16 @@ class NexGhostVault {
 
   attemptUnlock() {
     const pin = this.pinInput ? this.pinInput.value.trim() : '';
-    if (pin === '1337' || pin === '0000' || pin.length >= 4) {
+    const savedPin = localStorage.getItem('nexchat_cipher_pin') || localStorage.getItem('nexchat_ghost_pin');
+    if (!savedPin && pin.length >= 4) {
+      localStorage.setItem('nexchat_ghost_pin', pin);
+      if (this.authSection) this.authSection.style.display = 'none';
+      if (this.contentSection) this.contentSection.style.display = 'block';
+      this.renderList();
+      if (typeof window.showNotif === 'function') window.showNotif("Ghost Vault PIN Initialized & Unlocked", "success");
+      return;
+    }
+    if (savedPin && pin === savedPin) {
       if (this.authSection) this.authSection.style.display = 'none';
       if (this.contentSection) this.contentSection.style.display = 'block';
       this.renderList();

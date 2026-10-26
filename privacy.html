@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#00ff66">
+  <title>Privacy Policy - NEXCHAT Enterprise Architecture</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
+  <style>
+    :root {
+      --bg: #060913;
+      --card-bg: rgba(14, 20, 36, 0.75);
+      --border: rgba(0, 255, 102, 0.22);
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #00ff66;
+      --cyan: #00f3ff;
+      --purple: #c084fc;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.65;
+      padding: 32px 16px 64px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 820px;
+      margin: 0 auto;
+    }
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(0, 255, 102, 0.2), rgba(0, 243, 255, 0.2));
+      border: 1px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      font-size: 18px;
+    }
+    .brand-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .back-btn:hover {
+      background: rgba(0, 255, 102, 0.15);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .title-section {
+      margin-bottom: 28px;
+    }
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .effective-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .legal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      backdrop-filter: blur(14px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+    h2 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--cyan);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    p {
+      color: #cbd5e1;
+      font-size: 14.5px;
+      margin-bottom: 12px;
+    }
+    p:last-child { margin-bottom: 0; }
+    ul {
+      margin: 10px 0 14px 20px;
+      color: #cbd5e1;
+      font-size: 14px;
+    }
+    li { margin-bottom: 6px; }
+    strong { color: #fff; }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: rgba(0, 255, 102, 0.12);
+      border: 1px solid rgba(0, 255, 102, 0.35);
+      border-radius: 6px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 12px;
+      color: var(--text-muted);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 20px;
+    }
+    .footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+    .footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-bar">
+      <div class="brand-wrap">
+        <div class="brand-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <span class="brand-title">NEXCHAT</span>
+      </div>
+      <a href="chat.html" class="back-btn"><i class="fa-solid fa-arrow-left"></i> Return to Chat</a>
+    </div>
+
+    <div class="title-section">
+      <h1>PRIVACY POLICY</h1>
+      <div class="effective-date">Effective Date: October 26, 2026 &bull; Architecture v2.6</div>
+    </div>
+
+    <div class="legal-card">
+      <h2><i class="fa-solid fa-fingerprint"></i> 1. Information We Collect</h2>
+      <p>NEXCHAT is engineered with privacy and high-resilience cryptography at its core. We only collect the minimal information necessary to deliver real-time communication services:</p>
+      <ul>
+        <li><strong>Account Information:</strong> When you register, we collect your email address, chosen username, and user UID generated via Firebase Authentication.</li>
+        <li><strong>Messages &amp; Media:</strong> Text messages, voice recordings, and media files are transmitted across encrypted transport layers (TLS 1.3) and stored with per-message access control rules.</li>
+        <li><strong>Presence &amp; Ephemeral Telemetry:</strong> Online presence, typing indicators, and call signaling are processed in memory and ephemeral realtime websockets.</li>
+      </ul>
+    </div>
+
+    <div class="legal-card">
+      <h2><i class="fa-solid fa-lock"></i> 2. Cryptographic Enclaves &amp; Storage</h2>
+      <p>NEXCHAT protects user communications through multi-tiered cryptographic layers:</p>
+      <ul>
+        <li><strong>Cipher Vaults &amp; Ghost Protocols:</strong> Private zero-knowledge storage is unlocked solely by client-side PINs. Server backends cannot inspect unencrypted vault content without client authentication.</li>
+        <li><strong>Randomized Initialization Vectors (IV):</strong> In client-encrypted payloads, a unique 96-bit cryptographic IV is generated per transmission via the standard Web Cryptography API (`crypto.getRandomValues`).</li>
+        <li><strong>Cloud Datastores:</strong> Backend services (Cloud Firestore, Supabase Realtime, and Cloudinary media delivery) operate under strict access control rules and Row-Level Security (RLS) policies.</li>
+      </ul>
+    </div>
+
+    <div class="legal-card">
+      <h2><i class="fa-solid fa-camera"></i> 3. Device Permissions</h2>
+      <p>NEXCHAT requests runtime device permissions strictly when you activate specific features:</p>
+      <ul>
+        <li><strong>Microphone:</strong> Required for recording voice notes, live audio spaces, and voice/video calling.</li>
+        <li><strong>Camera:</strong> Required for CamShot short video reels, video calling, and QR device pairing.</li>
+        <li><strong>Storage / Media:</strong> Required to attach photos, documents, and cache chat history locally.</li>
+      </ul>
+      <p>Permissions can be revoked at any time through your operating system or browser settings.</p>
+    </div>
+
+    <div class="legal-card">
+      <h2><i class="fa-solid fa-trash-can"></i> 4. Data Retention &amp; User Rights</h2>
+      <p>Under GDPR, CCPA/CPRA, and international privacy standards, you maintain absolute control over your personal data:</p>
+      <ul>
+        <li><strong>Ghost Protocol Timers:</strong> Self-destruct messages and ephemeral status stories automatically expire and are purged from database records upon expiration.</li>
+        <li><strong>Right to Erasure (Account Deletion):</strong> You may request full account termination and data purge at any time in Settings or by contacting our security team.</li>
+        <li><strong>Right to Data Portability:</strong> You may export your conversation logs and contacts directly from your device.</li>
+      </ul>
+    </div>
+
+    <div class="legal-card">
+      <h2><i class="fa-solid fa-envelope-shield"></i> 5. Contact &amp; Security Disclosures</h2>
+      <p>If you have any questions regarding this Privacy Policy or wish to report a security disclosure, please contact our engineering security office:</p>
+      <p><strong>Security Office:</strong> <a href="mailto:security@nexchat.io" style="color:var(--cyan);text-decoration:none;">security@nexchat.io</a></p>
+      <p><strong>Official Web Portal:</strong> <a href="https://t-drab.vercel.app/" style="color:var(--accent);text-decoration:none;">https://t-drab.vercel.app/</a></p>
+    </div>
+
+    <div class="footer">
+      <p>&copy; 2026 NEXCHAT Inc. All rights reserved. &bull; <a href="terms.html">Terms of Service</a> &bull; <a href="chat.html">Messenger</a></p>
+    </div>
+  </div>
+</body>
+</html>
