@@ -8226,6 +8226,10 @@ document.getElementById("nav-marketplace")?.addEventListener("click", () => {
   handleNavigation("marketplace");
 });
 
+document.getElementById("nav-reels")?.addEventListener("click", () => {
+  handleNavigation("reels");
+});
+
 document.getElementById("nav-games")?.addEventListener("click", () => {
   handleNavigation("games");
 });
@@ -15037,6 +15041,11 @@ async function loadAnnouncements() {
           }
         } catch (_) {}
 
+        if (window.NexTranslator && typeof window.NexTranslator.renderSeedDispatches === 'function') {
+          window.NexTranslator.renderSeedDispatches(announcementsFeed);
+          return;
+        }
+
         announcementsFeed.innerHTML = `
           <div class="announcements-empty-state" id="announcementsEmptyState">
             <i class="fa-solid fa-tower-broadcast" style="font-size: 32px; color: #475569; margin-bottom: 12px;"></i>
@@ -15064,6 +15073,10 @@ async function loadAnnouncementsFallback(feed) {
     renderAnnouncementsFromSnapshot(snap, feed);
   } catch (_) {
     if (feed) {
+      if (window.NexTranslator && typeof window.NexTranslator.renderSeedDispatches === 'function') {
+        window.NexTranslator.renderSeedDispatches(feed);
+        return;
+      }
       feed.innerHTML = `
         <div class="announcements-empty-state">
           <i class="fa-solid fa-tower-broadcast" style="font-size: 32px; color: #475569; margin-bottom: 12px;"></i>
@@ -15110,6 +15123,15 @@ function renderAnnouncementsFromSnapshot(snapshot, feed) {
       feed.appendChild(announceDiv);
     }
   });
+
+  if (window.NexTranslator) {
+    if (typeof window.NexTranslator.updateCountBadge === 'function') {
+      window.NexTranslator.updateCountBadge(announcements.length);
+    }
+    if (typeof window.NexTranslator.setupControls === 'function') {
+      window.NexTranslator.setupControls();
+    }
+  }
 
   // If client language is not English, auto-translate!
   if (window.NexTranslator && window.NexTranslator.currentLang && window.NexTranslator.currentLang !== 'en') {

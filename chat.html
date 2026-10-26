@@ -331,40 +331,124 @@
       </ul>
     </div>
 
-    <!-- ANNOUNCEMENTS SECTION (LIVE FROM ADMIN DASHBOARD + AUTO-TRANSLATION) -->
+    <!-- ANNOUNCEMENTS & PROTOCOL DISPATCHES SECTION (LIVE STREAM + AUTO-TRANSLATOR) -->
     <div class="announcements-container" id="announcementsContainer" style="display: none;">
-      <div class="announcements-header">
-        <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; flex-wrap: wrap; gap: 10px;">
-          <h3 style="margin: 0; display: flex; align-items: center; gap: 8px; font-size: 18px;">
-            <i class="fa-solid fa-bullhorn" style="color: #00f3ff;"></i> System Announcements
-          </h3>
-          <div class="announcement-controls-bar">
-            <div class="announcement-lang-picker">
-              <i class="fa-solid fa-language" style="color: #c084fc;"></i>
-              <select id="announcementLangSelect" class="announcement-lang-select" title="Auto-Translate Language">
-                <option value="auto">Auto (Device Lang)</option>
-                <option value="en">English (US)</option>
-                <option value="es">Español (Spanish)</option>
-                <option value="fr">Français (French)</option>
-                <option value="de">Deutsch (German)</option>
-                <option value="zh"> (Chinese)</option>
-                <option value="ja"> (Japanese)</option>
-                <option value="ru">Русский (Russian)</option>
-                <option value="ar">العربية (Arabic)</option>
-                <option value="pt">Português (Portuguese)</option>
-                <option value="hi">हिन्दी (Hindi)</option>
-              </select>
+      <!-- 1. Sleek Super-App App Bar -->
+      <div class="announcements-top-bar" id="announcementsTopBar">
+        <div class="announcements-bar-left">
+          <button type="button" class="announcements-header-btn" id="announcementsBackBtn" title="Back to Chats" onclick="window.handleNavigation('chats')">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div class="announcements-branding">
+            <h2 class="announcements-heading">
+              <i class="fa-solid fa-bullhorn announcements-icon-accent"></i>
+              <span>Dispatches</span>
+            </h2>
+            <div class="announcements-live-beacon">
+              <span class="beacon-dot"></span>
+              <span class="beacon-label">LIVE SYNC</span>
             </div>
-            <button type="button" id="btnAutoTranslateAll" class="btn-auto-translate" title="Auto-Translate all announcements">
-              <i class="fa-solid fa-globe"></i>
-              <span>Auto-Translate</span>
-            </button>
-            <button type="button" id="refreshAnnouncementsBtn" class="announcement-refresh-btn" title="Refresh Announcements">
-              <i class="fa-solid fa-rotate"></i>
-            </button>
           </div>
         </div>
+
+        <div class="announcements-bar-right">
+          <!-- Multi-Language Selector Pill -->
+          <div class="announcement-lang-picker" title="Auto-Translate Language">
+            <i class="fa-solid fa-language lang-picker-icon"></i>
+            <select id="announcementLangSelect" class="announcement-lang-select" title="Auto-Translate Language">
+              <option value="auto">Auto (Device)</option>
+              <option value="en">English (US)</option>
+              <option value="es">Español (Spanish)</option>
+              <option value="fr">Français (French)</option>
+              <option value="de">Deutsch (German)</option>
+              <option value="zh">Chinese</option>
+              <option value="ja">Japanese</option>
+              <option value="ru">Russian</option>
+              <option value="ar">Arabic</option>
+              <option value="pt">Português (Portuguese)</option>
+              <option value="hi">Hindi</option>
+            </select>
+          </div>
+
+          <!-- Quick Translate All Button -->
+          <button type="button" id="btnAutoTranslateAll" class="announcements-action-btn btn-auto-translate" title="Auto-Translate all dispatches">
+            <i class="fa-solid fa-globe"></i>
+          </button>
+
+          <!-- Search Toggle Button -->
+          <button type="button" id="announcementsSearchToggleBtn" class="announcements-action-btn" title="Search Dispatches">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </button>
+
+          <!-- Refresh Button -->
+          <button type="button" id="refreshAnnouncementsBtn" class="announcements-action-btn announcement-refresh-btn" title="Refresh Dispatches">
+            <i class="fa-solid fa-rotate"></i>
+          </button>
+
+          <!-- SuperAdmin Compose Button -->
+          <button type="button" id="btnNewAnnouncementModal" class="announcements-action-btn admin-broadcast-btn" title="Publish New Dispatch" style="display: none;">
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
       </div>
+
+      <!-- 2. Expandable Search Bar -->
+      <div class="announcements-search-bar" id="announcementsSearchBar" style="display: none;">
+        <div class="announcements-search-inner">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input type="text" id="announcementsSearchInput" class="announcements-search-input" placeholder="Search dispatches by title, tag, or sender..." autocomplete="off">
+          <button type="button" id="announcementsSearchClearBtn" class="announcements-search-clear" title="Clear Search">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Network Telemetry Strip -->
+      <div class="announcements-telemetry-strip">
+        <div class="telemetry-pill">
+          <i class="fa-solid fa-tower-broadcast"></i>
+          <span>PROTOCOL v2.4</span>
+        </div>
+        <div class="telemetry-pill">
+          <i class="fa-solid fa-shield-halved" style="color: #00FFC6;"></i>
+          <span>SEALED</span>
+        </div>
+        <div class="telemetry-pill" id="announcementsCountBadge">
+          <i class="fa-solid fa-newspaper"></i>
+          <span id="announcementsCountText">Official Bulletins</span>
+        </div>
+      </div>
+
+      <!-- 4. Category Filter Pills Row -->
+      <div class="announcements-filter-bar">
+        <div class="announcements-filter-scroll">
+          <button type="button" class="dispatch-filter-pill active" data-filter="all">
+            <i class="fa-solid fa-layer-group"></i> All
+          </button>
+          <button type="button" class="dispatch-filter-pill" data-filter="critical">
+            <i class="fa-solid fa-triangle-exclamation"></i> Critical
+          </button>
+          <button type="button" class="dispatch-filter-pill" data-filter="update">
+            <i class="fa-solid fa-bolt"></i> Updates
+          </button>
+          <button type="button" class="dispatch-filter-pill" data-filter="security">
+            <i class="fa-solid fa-shield-halved"></i> Security
+          </button>
+          <button type="button" class="dispatch-filter-pill" data-filter="community">
+            <i class="fa-solid fa-users"></i> Community
+          </button>
+        </div>
+      </div>
+
+      <!-- 5. Main Dispatches Feed -->
+      <div id="announcementsFeed" class="announcements-feed">
+        <div class="announcements-empty-state" id="announcementsEmptyState">
+          <i class="fa-solid fa-tower-broadcast" style="font-size: 32px; color: #475569; margin-bottom: 12px;"></i>
+          <p>Connecting to NEX Protocol Network...</p>
+          <p class="hint">Dispatches and live bulletins from the SuperAdmin Dashboard will synchronize here.</p>
+        </div>
+      </div>
+    </div>
       <div id="announcementsFeed" class="announcements-feed">
         <div class="announcements-empty-state" id="announcementsEmptyState">
           <i class="fa-solid fa-tower-broadcast" style="font-size: 32px; color: #475569; margin-bottom: 12px;"></i>
@@ -3527,34 +3611,66 @@
       </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION -->
+    <!-- BOTTOM NAVIGATION (SUPER-APP 6-TAB BALANCED LAYOUT) -->
     <nav class="bottom-nav">
-      <!-- NEXCHAT Super-App Nav: Chats / ChronEX AI / [Market Hub (Center + 20% Bigger)] / Calls -->
+      <!-- 1. Chats -->
       <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chats">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-comment-dots"></i>
-          <span class="nav-pill-badge" id="navChatsCountBadge" style="display: none;">2</span>
+          <span class="nav-pill-badge" id="navChatsCountBadge" style="display: none;">0</span>
         </div>
         <span class="nav-label">Chats</span>
       </button>
-      <button id="nav-ai" class="nav-item" data-nav="ai" title="ChronEX AI Assistant">
+
+      <!-- 2. Updates / Status Vault -->
+      <button id="nav-status" class="nav-item" data-nav="updates" title="Status Updates">
         <div class="nav-icon-wrapper">
-          <i class="fa-solid fa-microchip"></i>
+          <i class="fa-solid fa-circle-notch"></i>
           <span class="nav-status-beacon" style="background:#00FFC6;"></span>
         </div>
-        <span class="nav-label">ChronEX AI</span>
+        <span class="nav-label">Updates</span>
       </button>
+
+      <!-- 3. Reels (CamShot Video Feed) -->
+      <button id="nav-reels" class="nav-item" data-nav="reels" title="CamShot Video Reels">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-clapperboard"></i>
+        </div>
+        <span class="nav-label">Reels</span>
+      </button>
+
+      <!-- 4. Market Hub (Center Elevated Super-App Signal) -->
       <button id="nav-marketplace" class="nav-item nav-item-center-super" data-nav="marketplace" title="Market Hub">
         <div class="nav-icon-wrapper super-app-icon-wrapper">
           <i class="fa-solid fa-store"></i>
         </div>
         <span class="nav-label super-app-label">Market</span>
       </button>
+
+      <!-- 5. Announcements / Dispatches -->
+      <button id="nav-announcements" class="nav-item" data-nav="announcements" title="System Announcements">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-bullhorn"></i>
+          <span class="nav-status-beacon" style="background:#00f3ff;"></span>
+        </div>
+        <span class="nav-label">Alerts</span>
+      </button>
+
+      <!-- 6. Calls -->
       <button id="nav-calls" class="nav-item" data-nav="calls" title="Calls">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-headset"></i>
         </div>
         <span class="nav-label">Calls</span>
+      </button>
+
+      <!-- Desktop Extra Tabs (visible only on desktop >= 900px) -->
+      <button id="nav-ai" class="nav-item desktop-only-nav" data-nav="ai" title="ChronEX AI Assistant">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-microchip"></i>
+          <span class="nav-status-beacon" style="background:#00FFC6;"></span>
+        </div>
+        <span class="nav-label">ChronEX AI</span>
       </button>
       <button id="nav-groups" class="nav-item desktop-only-nav" data-nav="communities" title="Communities">
         <div class="nav-icon-wrapper">
@@ -3562,28 +3678,28 @@
         </div>
         <span class="nav-label">Communities</span>
       </button>
+      <button id="nav-games" class="nav-item desktop-only-nav" data-nav="games" title="Cyber Arcade">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-gamepad"></i>
+        </div>
+        <span class="nav-label">Arcade</span>
+      </button>
+      <button id="nav-terminal" class="nav-item desktop-only-nav" data-nav="terminal" title="Terminal">
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-terminal"></i>
+        </div>
+        <span class="nav-label">Terminal</span>
+      </button>
       <button id="nav-more" class="nav-item desktop-only-nav" data-nav="more" title="More Features">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-ellipsis"></i>
         </div>
         <span class="nav-label">More</span>
       </button>
-
-      <!-- Desktop Extra Tabs (visible only on desktop >= 900px) -->
-      <button id="nav-announcements" class="nav-item desktop-only-nav" data-nav="announcements" title="Announcements">
-        <i class="fa-solid fa-bullhorn"></i>
-        <span class="nav-label">News</span>
-      </button>
-      <button id="nav-games" class="nav-item desktop-only-nav" data-nav="games" title="Cyber Arcade">
-        <i class="fa-solid fa-gamepad"></i>
-        <span class="nav-label">Arcade</span>
-      </button>
-      <button id="nav-terminal" class="nav-item desktop-only-nav" data-nav="terminal" title="Terminal">
-        <i class="fa-solid fa-terminal"></i>
-        <span class="nav-label">Terminal</span>
-      </button>
       <button id="logout-btn" class="nav-item desktop-only-nav logout" title="Logout">
-        <i class="fa-solid fa-right-from-bracket"></i>
+        <div class="nav-icon-wrapper">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
         <span class="nav-label">Logout</span>
       </button>
     </nav>

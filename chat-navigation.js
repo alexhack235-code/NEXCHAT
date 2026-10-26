@@ -67,6 +67,8 @@ window.handleNavigation = function (navSection) {
         if (typeof window.loadStatusFeed === 'function') window.loadStatusFeed();
     } else if (normalized === 'groups' || normalized === 'communities') {
         if (typeof window.loadGroups === 'function') window.loadGroups();
+    } else if (normalized === 'announcements' || normalized === 'news' || normalized === 'alerts') {
+        if (typeof window.loadAnnouncements === 'function') window.loadAnnouncements();
     }
 
     // Update active tab styling
