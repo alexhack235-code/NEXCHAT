@@ -162,6 +162,11 @@ function vercelApiDevPlugin() {
 }
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      'lenis': resolve(rootDir, 'src/js/lenis-esm.js')
+    }
+  },
   root: '.',
   base: './',
   plugins: [

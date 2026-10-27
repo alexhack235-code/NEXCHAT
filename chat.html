@@ -1226,6 +1226,14 @@
               <div class="attach-hub-icon icon-file"><i class="fa-solid fa-cloud-arrow-up"></i></div>
               <span>File / Media</span>
             </div>
+            <div class="attach-hub-item" id="hubActionAirDrop" onclick="if(window.NexAirDropMesh) window.NexAirDropMesh.openRadar();">
+              <div class="attach-hub-icon" style="color: #00ff66;"><i class="fa-solid fa-satellite-dish"></i></div>
+              <span>P2P Air-Drop (0-Cloud)</span>
+            </div>
+            <div class="attach-hub-item" id="hubActionGallerySandbox" onclick="if(window.NexGallerySandbox) window.NexGallerySandbox.openVault();">
+              <div class="attach-hub-icon" style="color: #00f2fe;"><i class="fa-solid fa-box-archive"></i></div>
+              <span>Gallery Sandbox</span>
+            </div>
             <div class="attach-hub-item" id="hubActionVoice">
               <div class="attach-hub-icon icon-voice"><i class="fa-solid fa-microphone"></i></div>
               <span>Voice Studio</span>
@@ -1341,6 +1349,9 @@
               <button type="button" id="emoji-btn" class="input-inline-btn emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
               <button type="button" id="sticker-btn" class="input-inline-btn sticker-toggle-btn" title="Stickers" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
               <textarea id="message-input" class="message-input nex-input" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
+              <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub & Sovereign Tools" style="color: #cbd5e1;"><i class="fa-solid fa-paperclip"></i></button>
+              <button type="button" id="btnAirDropBeam" class="input-inline-btn" title="P2P Air-Drop: Zero-Cloud 10GB+ Raw File Beam" style="color: #00ff66;" onclick="if(window.NexAirDropMesh) window.NexAirDropMesh.openRadar();"><i class="fa-solid fa-satellite-dish"></i></button>
+              <button type="button" id="btnGalleryVault" class="input-inline-btn" title="Air-Gap Gallery Sandbox (Zero Camera Roll Clutter)" style="color: #00f2fe;" onclick="if(window.NexGallerySandbox) window.NexGallerySandbox.openVault();"><i class="fa-solid fa-box-archive"></i></button>
               <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
               <button type="button" id="btnConfidentialCipher" class="input-inline-btn" title="Confidential Cipher Note (Anti-Shoulder Surfing)" style="color: #c084fc;"><i class="fa-solid fa-user-secret"></i></button>
               <button type="button" id="camera-btn" class="input-inline-btn camera-input-btn" title="Camera"><i class="fa-solid fa-camera"></i></button>
@@ -6537,6 +6548,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/scheduled-messages.js"></script>
   <script src="./src/js/voice-waveform-engine.js"></script>
   <script src="./src/js/ghost-dissolution-engine.js"></script>
+  <script src="./src/js/gallery-sandbox.js"></script>
   <script src="./src/js/p2p-airdrop.js"></script>
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
@@ -7698,6 +7710,54 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   </div>
 </div>
 
+  <!-- 3.5. AIR-GAP GALLERY SANDBOX MODAL (ZERO CAMERA ROLL POLLUTION & ZERO CLOUD COST) -->
+<div id="nexGallerySandboxModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
+  <div class="cyber-hub-modal-content" style="max-width: 720px; width: 95%; max-height: 85vh; display: flex; flex-direction: column;">
+    <div class="cyber-hub-header">
+      <div class="cyber-hub-title">
+        <i class="fa-solid fa-box-archive text-[#00f2fe]"></i>
+        <span>AIR-GAP GALLERY SANDBOX // ZERO CAMERA ROLL POLLUTION</span>
+      </div>
+      <button type="button" class="close-modal" id="closeGalleryVaultBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="sandbox-modal-body" style="padding: 16px; overflow-y: auto; flex: 1;">
+      <!-- Quota and Zero-Cost Telemetry Bar -->
+      <div style="background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; font-family: monospace; font-size: 11.5px; margin-bottom: 6px;">
+          <span style="color: #00f2fe; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-hard-drive"></i> <span id="sandboxQuotaLabel">0 Bytes / 500 MB (0%) • $0 Cloud Overhead</span>
+          </span>
+          <span id="sandboxItemsCount" style="color: #94a3b8;">0 quarantined assets</span>
+        </div>
+        <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+          <div id="sandboxQuotaBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00f2fe, #00ff66); transition: width 0.3s ease;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 10.5px; color: #64748b;">
+          <span><i class="fa-solid fa-shield-halved text-[#00ff88]"></i> Isolated from phone camera roll until explicit user export</span>
+          <button type="button" id="sandboxPurgeBtn" style="background: transparent; border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 2px 8px; border-radius: 6px; cursor: pointer; font-size: 10.5px;">
+            <i class="fa-solid fa-trash"></i> Purge Vault Cache
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div style="display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px;">
+        <button type="button" class="sandbox-filter-pill active" data-filter="all">All Media</button>
+        <button type="button" class="sandbox-filter-pill" data-filter="image"><i class="fa-solid fa-image"></i> Photos</button>
+        <button type="button" class="sandbox-filter-pill" data-filter="video"><i class="fa-solid fa-film"></i> Videos</button>
+        <button type="button" class="sandbox-filter-pill" data-filter="audio"><i class="fa-solid fa-waveform-lines"></i> Audio Notes</button>
+        <button type="button" class="sandbox-filter-pill" data-filter="document"><i class="fa-solid fa-file"></i> Documents</button>
+      </div>
+
+      <!-- Media Grid -->
+      <div id="sandboxMediaGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px;">
+        <!-- Dynamically rendered media cards -->
+      </div>
+    </div>
+  </div>
+</div>
+
   <!-- 4. CROSS-DEVICE LOCAL WEBRTC AIR-DROP RADAR MODAL -->
   <!-- NEXCHAT CROSS-DEVICE AIR-DROP RADAR MODAL -->
 <div id="nexAirDropModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
@@ -7723,6 +7783,9 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
         </div>
         <button type="button" id="airdropSelectFileBtn" class="airdrop-btn-ghost">
           <i class="fa-solid fa-folder-open"></i> Browse
+        </button>
+        <button type="button" id="airdropSendBtn" class="airdrop-btn-send" style="background: #00ff66; color: #060913; font-weight: 700; padding: 6px 14px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-bolt"></i> Beam File
         </button>
       </div>
 

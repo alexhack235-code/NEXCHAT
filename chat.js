@@ -22483,6 +22483,12 @@ function initAttachmentHubActions() {
     hubActionFile: () => {
       document.getElementById('file-input')?.click();
     },
+    hubActionAirDrop: () => {
+      if (window.NexAirDropMesh) window.NexAirDropMesh.openRadar();
+    },
+    hubActionGallerySandbox: () => {
+      if (window.NexGallerySandbox) window.NexGallerySandbox.openVault();
+    },
     hubActionVoice: () => {
       document.getElementById('audio-record-btn')?.click();
     },
@@ -22641,6 +22647,22 @@ function initAttachmentHubActions() {
           console.warn('Hub action execution error for ' + actionId, err);
         }
       });
+    }
+  });
+
+  // Wire Paperclip Toggle Button for Attachment Hub
+  const toggleBtn = document.getElementById('btnToggleAttachmentHub');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      hub.style.display = (hub.style.display === 'flex' || hub.style.display === 'grid') ? 'none' : 'grid';
+    });
+  }
+
+  // Dismiss attachment hub when clicking outside
+  document.addEventListener('click', (e) => {
+    if (hub && hub.style.display !== 'none' && !hub.contains(e.target) && e.target !== toggleBtn) {
+      hub.style.display = 'none';
     }
   });
 }
