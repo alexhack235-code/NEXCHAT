@@ -9705,3 +9705,334 @@ body.crt-phosphor-active::after {
   0% { box-shadow: 0 0 10px rgba(0, 255, 102, 0.4); border-color: rgba(0, 255, 102, 0.6); }
   100% { box-shadow: 0 0 28px rgba(0, 255, 102, 0.95); border-color: #00ff66; }
 }
+
+/* ==========================================================================
+   NEXCHAT - LOCKED CHATS VAULT & AUTHENTICATION OVERLAY
+   ========================================================================== */
+.nex-locked-auth-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 8, 17, 0.94);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 10010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.nex-locked-auth-card {
+  background: #0b141a;
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 340px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 24px rgba(0, 255, 136, 0.2);
+  animation: authCardPop 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes authCardPop {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.auth-shield-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: rgba(0, 255, 136, 0.12);
+  border: 1.5px solid #00ff88;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #00ff88;
+  margin-bottom: 12px;
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.35);
+}
+
+.auth-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+  font-family: 'Space Grotesk', sans-serif;
+  text-align: center;
+}
+
+.auth-subtitle {
+  font-size: 11.5px;
+  color: #8b949e;
+  text-align: center;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.auth-pin-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 20px 0 12px;
+}
+
+.auth-pin-dots .pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 255, 136, 0.4);
+  background: transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-pin-dots .pin-dot.filled {
+  background: #00ff88;
+  border-color: #00ff88;
+  box-shadow: 0 0 10px #00ff88;
+  transform: scale(1.15);
+}
+
+.auth-error-msg {
+  font-size: 11.5px;
+  color: #ef4444;
+  margin-bottom: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.auth-keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.keypad-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.keypad-btn:active, .keypad-btn:hover {
+  background: rgba(0, 255, 136, 0.15);
+  border-color: #00ff88;
+  color: #00ff88;
+  transform: scale(0.96);
+}
+
+.keypad-btn.action-key {
+  font-size: 16px;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+}
+
+.keypad-btn.action-key:hover {
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+}
+
+.auth-card-footer {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.auth-cancel-btn {
+  width: 100%;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #8b949e;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.auth-cancel-btn:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+/* ==========================================================================
+   NEXCHAT - LOCKED CHATS VAULT VIEW MODAL
+   ========================================================================== */
+.nex-locked-vault-overlay {
+  position: fixed;
+  inset: 0;
+  background: #0b141a;
+  z-index: 10008;
+  display: flex;
+  flex-direction: column;
+}
+
+.nex-locked-vault-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #0b141a;
+}
+
+.vault-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #111b21;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.vault-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.vault-back-btn {
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  font-size: 17px;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+
+.vault-back-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.vault-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vault-subtitle {
+  font-size: 11px;
+  color: #8b949e;
+  margin-top: 1px;
+}
+
+.vault-action-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.vault-action-btn:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.vault-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #111b21;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vault-search-bar input {
+  flex: 1;
+  background: #202c33;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 13px;
+  color: #fff;
+  outline: none;
+}
+
+.vault-search-bar input:focus {
+  border-color: #00ff88;
+}
+
+.vault-chat-list {
+  flex: 1;
+  overflow-y: auto;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.vault-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+
+.vault-item:hover {
+  background: rgba(0, 255, 136, 0.04);
+}
+
+.locked-vault-badge {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 255, 136, 0.15);
+  color: #00ff88;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  letter-spacing: 0.5px;
+}
+
+.vault-unlock-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  color: #00ff88;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.vault-unlock-btn:hover {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: #00ff88;
+}

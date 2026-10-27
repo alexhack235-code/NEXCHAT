@@ -2967,12 +2967,50 @@ async function showChatContextMenu(event, chatId) {
   };
   menu.appendChild(wallpaperBtn);
 
-  const archiveBtn = createMenuBtn('<i class="fa-solid fa-box-archive" style="width:16px;"></i> Archive', "#00ff66", true);
+  // Dynamic Archive / Unarchive Button
+  const isArchived = (window.NexArchivedChats && window.NexArchivedChats.isChatArchived(chatId));
+  const archiveBtn = createMenuBtn(
+    isArchived
+      ? '<i class="fa-solid fa-arrow-up-from-bracket" style="width:16px;"></i> Unarchive Chat'
+      : '<i class="fa-solid fa-box-archive" style="width:16px;"></i> Archive Chat',
+    isArchived ? "#00f2fe" : "#00ff66",
+    true
+  );
   archiveBtn.onclick = async () => {
-    await archiveChat(chatId);
     menu.remove();
+    if (window.NexArchivedChats) {
+      if (isArchived) {
+        await window.NexArchivedChats.unarchiveChat(chatId);
+      } else {
+        await window.NexArchivedChats.archiveChat(chatId);
+      }
+    } else {
+      if (isArchived) await unarchiveChat(chatId);
+      else await archiveChat(chatId);
+    }
   };
   menu.appendChild(archiveBtn);
+
+  // Dynamic Lock / Unlock Button
+  const isLocked = (window.NexLockedChats && window.NexLockedChats.isChatLocked(chatId));
+  const lockBtn = createMenuBtn(
+    isLocked
+      ? '<i class="fa-solid fa-lock-open" style="width:16px;"></i> Unlock Chat'
+      : '<i class="fa-solid fa-lock" style="width:16px;"></i> Lock Chat',
+    isLocked ? "#00ff66" : "#ff0055",
+    true
+  );
+  lockBtn.onclick = async () => {
+    menu.remove();
+    if (window.NexLockedChats) {
+      if (isLocked) {
+        await window.NexLockedChats.unlockChat(chatId);
+      } else {
+        await window.NexLockedChats.lockChat(chatId);
+      }
+    }
+  };
+  menu.appendChild(lockBtn);
 
   const deleteBtn = createMenuBtn('<i class="fa-solid fa-trash-can" style="width:16px;"></i> Delete Chat', "#ff6b6b", true);
   deleteBtn.onclick = async () => {
@@ -18021,13 +18059,23 @@ async function loadContacts() {
     });
 
     const myUserDoc = await getDoc(doc(db, "users", myUID));
-    let rawContacts = myUserDoc.data()?.contacts || [];
+    const myUserData = myUserDoc.exists() ? (myUserDoc.data() || {}) : {};
+    let rawContacts = myUserData.contacts || [];
+    const archivedChats = myUserData.archivedChats || [];
+    const lockedChats = myUserData.lockedChats || [];
+
+    // Synchronize In-Memory Enclaves
+    if (window.NexArchivedChats) window.NexArchivedChats.setArchivedIds(archivedChats);
+    if (window.NexLockedChats && Array.isArray(lockedChats)) {
+      lockedChats.forEach(id => window.NexLockedChats.lockedChatIds.add(id));
+      window.NexLockedChats.updateLockedChatsBadge();
+    }
 
     let top10Contacts = [];
     try {
       const messagesRef = collection(db, "messages");
-      const qIn = query(messagesRef, where("to", "==", myUID), orderBy("timestamp", "desc"), limit(25));
-      const qOut = query(messagesRef, where("from", "==", myUID), orderBy("timestamp", "desc"), limit(25));
+      const qIn = query(messagesRef, where("to", "==", myUID), orderBy("timestamp", "desc"), limit(35));
+      const qOut = query(messagesRef, where("from", "==", myUID), orderBy("timestamp", "desc"), limit(35));
 
       const [snapIn, snapOut] = await Promise.all([getDocs(qIn), getDocs(qOut)]);
 
@@ -18035,15 +18083,19 @@ async function loadContacts() {
       snapIn.forEach(docSnap => {
         const d = docSnap.data();
         if (d.from && d.from !== myUID) {
-          const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
-          if (!partnerMap.has(d.from) || ts > partnerMap.get(d.from)) partnerMap.set(d.from, ts);
+          if (!archivedChats.includes(d.from) && !lockedChats.includes(d.from)) {
+            const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
+            if (!partnerMap.has(d.from) || ts > partnerMap.get(d.from)) partnerMap.set(d.from, ts);
+          }
         }
       });
       snapOut.forEach(docSnap => {
         const d = docSnap.data();
         if (d.to && d.to !== myUID) {
-          const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
-          if (!partnerMap.has(d.to) || ts > partnerMap.get(d.to)) partnerMap.set(d.to, ts);
+          if (!archivedChats.includes(d.to) && !lockedChats.includes(d.to)) {
+            const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
+            if (!partnerMap.has(d.to) || ts > partnerMap.get(d.to)) partnerMap.set(d.to, ts);
+          }
         }
       });
 
@@ -18054,12 +18106,17 @@ async function loadContacts() {
         .slice(0, 10);
 
       if (top10Contacts.length < 10) {
-        const otherContacts = [...rawContacts].reverse().filter(uid => !top10Contacts.includes(uid) && uid !== 'chronex-ai');
+        const otherContacts = [...rawContacts].reverse().filter(uid => 
+          !top10Contacts.includes(uid) && 
+          uid !== 'chronex-ai' &&
+          !archivedChats.includes(uid) &&
+          !lockedChats.includes(uid)
+        );
         top10Contacts.push(...otherContacts.slice(0, 10 - top10Contacts.length));
       }
     } catch (err) {
       console.warn("Recent conversations optimization failed, falling back to simplified list:", err);
-      top10Contacts = [...rawContacts].reverse().slice(0, 10);
+      top10Contacts = [...rawContacts].reverse().filter(uid => !archivedChats.includes(uid) && !lockedChats.includes(uid)).slice(0, 10);
     }
 
     const myContacts = top10Contacts;
@@ -18301,6 +18358,17 @@ async function loadContacts() {
       contactList.innerHTML += `<li class="empty-state"><p>No chats yet. Start a conversation!</p></li>`;
     }
 
+    // Synchronize Archived & Locked Chats UI
+    if (window.NexArchivedChats) {
+      window.NexArchivedChats.updateBadge();
+      if (window.NexArchivedChats.isExpanded) {
+        window.NexArchivedChats.populateArchivedList();
+      }
+    }
+    if (window.NexLockedChats) {
+      window.NexLockedChats.updateLockedChatsBadge();
+    }
+
     // Master event delegation on contactList ensuring zero missed clicks on mobile & desktop
     if (!contactList._hasChatDelegation) {
       contactList._hasChatDelegation = true;
@@ -18341,6 +18409,8 @@ async function appendGroupsToContactList(contactList) {
     snapshot.forEach(docSnap => {
       const group = docSnap.data();
       const groupId = docSnap.id;
+      if (window.NexLockedChats && window.NexLockedChats.isChatLocked(groupId)) return;
+      if (window.NexArchivedChats && window.NexArchivedChats.isChatArchived(groupId)) return;
       const groupName = group.name || 'Group';
       let lastMessage = group.lastMessage || 'No messages yet';
       if (lastMessage.length > 40) lastMessage = lastMessage.substring(0, 40) + '...';

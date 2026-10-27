@@ -682,26 +682,33 @@
 
         <!-- WhatsApp-Style System Action Rows: Locked chats & Archived -->
         <div class="chat-system-action-rows" id="chatSystemRows">
-          <div class="system-action-row locked-chats-row" id="lockedChatsRow" title="Locked chats (Ghost Vault)" onclick="if(window.CyberFeatures && window.CyberFeatures.ghostVault) window.CyberFeatures.ghostVault.show();">
+          <div class="system-action-row locked-chats-row" id="lockedChatsRow" title="Locked chats (Biometric Vault)" onclick="if(window.NexLockedChats) window.NexLockedChats.openVault();">
             <div class="system-row-icon">
               <i class="fa-solid fa-lock"></i>
             </div>
             <div class="system-row-body">
               <span class="system-row-label">Locked chats</span>
+              <span class="system-row-count-badge" id="lockedChatsCount" style="display: none;">0</span>
             </div>
           </div>
-          <div class="system-action-row archived-chats-row" id="archivedToggleRow" title="Archived chats">
+          <div class="system-action-row archived-chats-row" id="archivedToggleRow" title="Archived chats" role="button" tabindex="0" aria-expanded="false">
             <div class="system-row-icon">
               <i class="fa-solid fa-box-archive"></i>
             </div>
             <div class="system-row-body">
               <span class="system-row-label">Archived</span>
-              <span class="system-row-count-badge" id="archivedCount">0</span>
+              <div class="archived-badges-cluster" style="margin-left: auto; display: flex; align-items: center; gap: 6px;">
+                <span class="system-row-count-badge" id="archivedCount">0</span>
+                <span class="archived-unread-beacon" id="archivedUnreadBeacon" style="display: none;" title="Unread archived messages"></span>
+              </div>
+            </div>
+            <div class="system-row-trailing" style="margin-left: 8px;">
+              <i class="fa-solid fa-chevron-down archived-accordion-chevron" id="archivedChevron" style="font-size: 11px; color: #8b949e; transition: transform 0.25s;"></i>
             </div>
           </div>
         </div>
 
-        <!-- Archived Chats Collapsible List -->
+        <!-- Archived Chats Collapsible List Container -->
         <ul id="archivedList" class="chat-list archived-list" style="display: none;">
           <li class="empty-state" style="padding: 16px;">
             <p>No archived chats</p>
@@ -6513,6 +6520,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 <script type="module" src="./src/js/decoy-vault-system.js"></script>
 <script src="./src/js/tactical-pinboard-matrix.js"></script>
 <script src="./src/js/nex-status-audio-studio.js"></script>
+<script src="./src/js/locked-chats-manager.js"></script>
+<script src="./src/js/archived-chats-engine.js"></script>
 
 
         <!-- NEXCHAT CYBER ECOSYSTEM SUITE MODAL -->
