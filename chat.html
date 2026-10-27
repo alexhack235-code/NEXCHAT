@@ -44,6 +44,8 @@
   <link rel="stylesheet" href="css/shredder-core.css">
   <link rel="stylesheet" href="css/p2p-airdrop.css">
   <link rel="stylesheet" href="css/tactile-audio-equalizer.css">
+  <link rel="stylesheet" href="css/thread-side-rail.css">
+  <link rel="stylesheet" href="css/quantum-airgap.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
@@ -192,6 +194,13 @@
           <button id="cyberDropBtnHeader" class="header-icon-btn cyber-sub-tool" title="P2P CyberDrop Direct File Beam"><i class="fa-solid fa-share-nodes"></i></button>
           <button id="cipherVaultBtnHeader" class="header-icon-btn cyber-sub-tool" title="Cipher Vault &amp; Secret Rooms"><i class="fa-solid fa-key"></i></button>
           <button id="terminal-btn-header" class="header-icon-btn cyber-sub-tool" title="Terminal"><i class="fa-solid fa-terminal"></i></button>
+          <button type="button" id="stealthGhostToggleBtn" class="header-icon-btn stealth-ghost-toggle-btn" title="Quantum Stealth Ghost Mode: Freeze presence &amp; read receipts (Ctrl+Shift+G)" aria-label="Toggle Stealth Ghost Mode" data-stealth-active="false">
+            <div class="stealth-icon-container">
+              <i class="fa-solid fa-ghost stealth-ghost-icon"></i>
+              <span class="stealth-status-beacon" id="stealthStatusBeacon"></span>
+            </div>
+            <span class="stealth-btn-label">GHOST</span>
+          </button>
           <button id="ghostPanicLockBtn" class="header-icon-btn ghost-lock-btn" title="Ghost Panic Shield (Ctrl+Shift+L)"><i class="fa-solid fa-shield-virus"></i></button>
           <button id="holoAvatarBtnHeader" class="header-icon-btn cyber-sub-tool" title="3D Holographic Avatar Studio" onclick="window.holographicAvatarsEngine?.openModal()"><i class="fa-solid fa-cube text-[#00ff66]"></i></button>
           <button id="broadcastChannelsBtnHeader" class="header-icon-btn cyber-sub-tool" title="Tactical Broadcast Channels" onclick="window.broadcastChannelsEngine?.openModal()"><i class="fa-solid fa-tower-broadcast text-[#00f3ff]"></i></button>
@@ -216,6 +225,9 @@
 
         <!-- Mobile Header Actions (visible on mobile < 900px: Camera, Search, 3-dots Menu) -->
         <div class="header-right mobile-header-actions" style="display:flex; align-items:center; gap:8px;">
+          <button type="button" id="stealthGhostBtnMobile" class="header-icon-btn mobile-action-btn stealth-ghost-toggle-btn" title="Stealth Ghost Mode" aria-label="Toggle Stealth Ghost Mode" data-stealth-active="false">
+            <i class="fa-solid fa-ghost"></i>
+          </button>
           <button type="button" id="topHeaderCamsBtnMobile" class="top-cams-hero-btn" onclick="window.location.href='reels.html'" title="NEX CAMS & Reels">
             <i class="fa-solid fa-clapperboard"></i> <span>CAMS</span>
           </button>
@@ -902,6 +914,73 @@
             <button type="button" id="cancelReplyBtn" class="cancel-reply-btn" title="Cancel reply"><i class="fa-solid fa-xmark"></i></button>
           </div>
         </div>
+        <!-- ========================================================================= -->
+        <!-- NEXCHAT SMART THREAD ANCHORS & COLLAPSIBLE SIDE-RAIL                     -->
+        <!-- ========================================================================= -->
+        <aside id="nexThreadSideRail" class="nex-thread-siderail" aria-hidden="true">
+          <div class="thread-siderail-scrim" id="threadRailScrim"></div>
+          <div class="thread-drawer-panel">
+            <header class="thread-drawer-header">
+              <div class="thread-header-title-wrap">
+                <div class="thread-header-icon-box"><i class="fa-solid fa-code-fork"></i></div>
+                <div class="thread-header-copy">
+                  <h3 class="thread-title">Thread Discussion</h3>
+                  <span class="thread-subtitle" id="threadRailSubtitle">Isolated Micro-Rail Enclave</span>
+                </div>
+              </div>
+              <div class="thread-header-actions">
+                <button type="button" id="btnThreadSynthesize" class="thread-action-btn synth-btn" title="ChronEX: Summarize &amp; Merge outcome to main stream">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>Summarize &amp; Merge</span>
+                </button>
+                <button type="button" id="btnCloseThreadRail" class="thread-action-btn close-btn" title="Close Thread (Esc)">
+                  <i class="fa-solid fa-xmark"></i>
+                </button>
+              </div>
+            </header>
+            <section class="thread-root-anchor-section">
+              <div class="thread-root-card">
+                <div class="thread-root-header">
+                  <img id="threadRootAvatar" src="logo.jpg" alt="Author" class="thread-root-avatar" onerror="this.src=\'logo.jpg\';">
+                  <div class="thread-root-meta">
+                    <span id="threadRootSender" class="thread-root-name">User</span>
+                    <span id="threadRootTime" class="thread-root-timestamp">12:00 PM</span>
+                  </div>
+                  <span class="thread-root-pill"><i class="fa-solid fa-anchor"></i> ROOT</span>
+                </div>
+                <div id="threadRootBody" class="thread-root-text">Original topic message will appear here.</div>
+              </div>
+            </section>
+            <div id="threadMessagesArea" class="thread-messages-viewport">
+              <div id="threadLoadingState" class="thread-state-box" style="display: none;">
+                <i class="fa-solid fa-circle-notch fa-spin thread-state-icon"></i>
+                <span>Connecting to thread enclave...</span>
+              </div>
+              <div id="threadEmptyState" class="thread-state-box">
+                <i class="fa-solid fa-comments thread-state-icon"></i>
+                <span class="thread-state-title">No replies in this thread yet</span>
+                <span class="thread-state-hint">Start a targeted discussion without cluttering the main conversation stream.</span>
+              </div>
+              <div id="threadRepliesList" class="thread-replies-feed"></div>
+            </div>
+            <footer class="thread-composer-footer">
+              <form id="threadComposerForm" class="thread-composer-form" autocomplete="off">
+                <div class="thread-input-shell">
+                  <textarea id="threadComposerInput" class="thread-composer-textarea" placeholder="Reply to thread... (Enter to send, Shift+Enter for newline)" rows="1" maxlength="1000"></textarea>
+                  <div class="thread-composer-controls">
+                    <button type="button" id="btnThreadAttach" class="thread-icon-btn" title="Attach Document / Media">
+                      <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                    <input type="file" id="threadFileInput" style="display: none;">
+                    <button type="submit" id="btnThreadSend" class="thread-send-btn" title="Send Reply (Enter)">
+                      <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </footer>
+          </div>
+        </aside>
 
         <!-- Message Input -->
         <div class="message-input-area">
@@ -6232,6 +6311,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/quorum-milestone-matrix.js"></script>
   <script src="./src/js/shredder-core.js"></script>
   <script type="module" src="./src/js/p2p-airdrop-engine.js"></script>
+<script src="./src/js/smart-threads-engine.js"></script>
+<script type="module" src="./src/js/quantum-airgap.js"></script>
 
 
         <!-- NEXCHAT CYBER ECOSYSTEM SUITE MODAL -->

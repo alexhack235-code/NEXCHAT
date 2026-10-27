@@ -141,7 +141,7 @@
   };
 
   const TECH_WORD_SET = new Set(TECH_WORDS.map(w => w.toLowerCase()));
-  const TECH_TRIGGER_SET = new Set([
+    const TECH_TRIGGER_SET = new Set([
     "async", "await", "function", "const", "let", "var", "import", "export",
     "docker", "kubernetes", "k8s", "kubectl", "git", "commit", "push", "pull",
     "github", "gitlab", "repo", "npm", "pnpm", "yarn", "pip", "cargo",
@@ -151,7 +151,10 @@
     "aws", "s3", "ec2", "lambda", "vercel", "cloudflare", "terraform", "ci/cd",
     "crypto", "bitcoin", "btc", "ethereum", "eth", "solana", "sol", "web3", "defi",
     "smartcontract", "gwei", "sats", "metamask", "hodl", "wagmi", "fomo", "airdrop",
-    "sha256", "e2ee", "aes", "jwt", "oauth", "passkey", "sudo", "chmod", "ssh", "curl"
+    "sha256", "e2ee", "aes", "jwt", "oauth", "passkey", "sudo", "chmod", "ssh", "curl",
+    // Selective high-confidence Wave 2 triggers (No collisions with Italian/Spanish/French words)
+    "zksnark", "zkstark", "groth16", "spl-token", "solana-program", "lamports", "firedancer",
+    "hitbox", "respawn", "tickrate", "prefire", "crosshair"
   ]);
 
   // Radix 4-Character Prefix Table

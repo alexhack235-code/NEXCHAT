@@ -1,0 +1,672 @@
+/* ==========================================================================
+   NEXCHAT SMART THREAD ANCHORS & COLLAPSIBLE SIDE-RAILS
+   Theme: Deep Obsidian (#060913), Cyber-Emerald (#00ff66), Quantum Cyan (#00f2fe)
+   Strictly ZERO Unicode Emojis: FontAwesome 6 Vector Glyphs Only
+   ========================================================================== */
+
+/* 1. Message Bubble Thread Anchor Badge */
+.thread-anchor-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 4px 10px;
+  background: rgba(0, 255, 102, 0.08);
+  border: 1px solid rgba(0, 255, 102, 0.22);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  max-width: 100%;
+}
+
+.thread-anchor-badge:hover {
+  background: rgba(0, 255, 102, 0.16);
+  border-color: rgba(0, 255, 102, 0.45);
+  transform: translateY(-1px);
+}
+
+.thread-anchor-avatars {
+  display: flex;
+  align-items: center;
+  margin-right: 2px;
+}
+
+.thread-avatar-tiny {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid #060913;
+  margin-left: -5px;
+}
+
+.thread-avatar-tiny:first-child {
+  margin-left: 0;
+}
+
+.thread-anchor-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.thread-anchor-count {
+  color: #00ff66;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.thread-anchor-time {
+  color: #8b949e;
+  font-size: 10px;
+}
+
+.thread-anchor-arrow {
+  color: rgba(0, 255, 102, 0.6);
+  font-size: 9px;
+  margin-left: 2px;
+}
+
+/* In-Stream Root Pill Under Parent Messages */
+.nex-thread-root-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 6px;
+  padding: 4px 12px;
+  background: rgba(0, 255, 102, 0.06);
+  border: 1px solid rgba(0, 255, 102, 0.25);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.nex-thread-root-pill:hover {
+  background: rgba(0, 255, 102, 0.14);
+  border-color: #00ff66;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.2);
+  transform: translateY(-1px);
+}
+
+.nex-thread-root-pill-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #00ff66;
+  font-weight: 600;
+}
+
+.nex-thread-root-pill-sep {
+  color: #475569;
+  font-size: 10px;
+}
+
+.nex-thread-root-pill-time {
+  color: #94a3b8;
+  font-size: 10.5px;
+  font-weight: 400;
+}
+
+.nex-thread-root-pill-arrow {
+  color: rgba(0, 255, 102, 0.6);
+  font-size: 9px;
+}
+
+/* 2. Side-Rail Drawer Container */
+.nex-thread-siderail {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 1200;
+  pointer-events: none;
+  visibility: hidden;
+  transition: visibility 0.3s ease;
+}
+
+.nex-thread-siderail.open {
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* Scrim Backdrop for Mobile Overlay */
+.thread-siderail-scrim {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.nex-thread-siderail.open .thread-siderail-scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sliding Glass Panel */
+.thread-drawer-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: #060913;
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-left: 1px solid rgba(0, 242, 254, 0.22);
+  box-shadow: -14px 0 45px rgba(0, 0, 0, 0.85), 0 0 25px rgba(0, 242, 254, 0.08);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.nex-thread-siderail.open .thread-drawer-panel {
+  transform: translateX(0);
+}
+
+/* 3. Header Bar */
+.thread-drawer-header {
+  padding: 14px 18px;
+  background: rgba(11, 17, 26, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.thread-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.thread-header-icon-box {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(0, 255, 102, 0.12);
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  color: #00ff66;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.thread-title {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #f1f5f9;
+  letter-spacing: 0.2px;
+}
+
+.thread-subtitle {
+  font-size: 10.5px;
+  color: #8b949e;
+  display: block;
+}
+
+.thread-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.thread-action-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  transition: all 0.2s ease;
+}
+
+.thread-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.thread-action-btn.synth-btn {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  color: #00f2fe;
+}
+
+.thread-action-btn.synth-btn:hover {
+  background: rgba(0, 242, 254, 0.22);
+  border-color: #00f2fe;
+  box-shadow: 0 0 14px rgba(0, 242, 254, 0.3);
+}
+
+.thread-action-btn.close-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* 4. Root Anchor Message Section */
+.thread-root-anchor-section {
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-left: 3px solid #00ff66;
+  flex-shrink: 0;
+}
+
+.thread-root-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(0, 255, 102, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.thread-root-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.thread-root-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #00ff66;
+}
+
+.thread-root-meta {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.thread-root-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #00ff66;
+}
+
+.thread-root-timestamp {
+  font-size: 10.5px;
+  color: #8b949e;
+}
+
+.thread-root-pill {
+  font-size: 9px;
+  font-weight: 800;
+  color: #00ff66;
+  background: rgba(0, 255, 102, 0.12);
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.thread-root-text {
+  font-size: 13px;
+  line-height: 1.45;
+  color: #cbd5e1;
+  word-break: break-word;
+  max-height: 85px;
+  overflow-y: auto;
+}
+
+/* 5. Messages Viewport */
+.thread-messages-viewport {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.thread-state-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  color: #8b949e;
+  gap: 8px;
+}
+
+.thread-state-icon {
+  font-size: 30px;
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.thread-state-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.thread-state-hint {
+  font-size: 11.5px;
+  line-height: 1.4;
+  max-width: 260px;
+}
+
+.thread-replies-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Individual Thread Reply Card */
+.thread-msg-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.thread-msg-item.sent {
+  flex-direction: row-reverse;
+}
+
+.thread-msg-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.thread-msg-bubble {
+  max-width: 82%;
+  padding: 8px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.45;
+  word-wrap: break-word;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
+.thread-msg-item.received .thread-msg-bubble {
+  background: #111a24;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-top-left-radius: 2px;
+}
+
+.thread-msg-item.sent .thread-msg-bubble {
+  background: linear-gradient(135deg, #005c4b 0%, #059669 100%);
+  color: #ffffff;
+  border-top-right-radius: 2px;
+}
+
+.thread-msg-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 3px;
+  font-size: 10.5px;
+}
+
+.thread-msg-sender {
+  font-weight: 700;
+  color: #00f2fe;
+}
+
+.thread-msg-item.sent .thread-msg-sender {
+  color: #bbf7d0;
+}
+
+.thread-msg-time {
+  opacity: 0.7;
+}
+
+/* 6. Composer Shell */
+.thread-composer-footer {
+  padding: 12px 16px;
+  background: #060913;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.thread-composer-form {
+  margin: 0;
+}
+
+.thread-input-shell {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 102, 0.22);
+  border-radius: 10px;
+  padding: 8px 12px;
+  transition: border-color 0.2s ease;
+}
+
+.thread-input-shell:focus-within {
+  border-color: #00ff66;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.2);
+}
+
+.thread-composer-textarea {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  resize: none;
+  max-height: 90px;
+  padding: 0;
+}
+
+.thread-composer-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.thread-icon-btn {
+  background: none;
+  border: none;
+  color: #8b949e;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  transition: color 0.15s ease;
+}
+
+.thread-icon-btn:hover {
+  color: #00ff66;
+}
+
+.thread-send-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #00ff66;
+  border: none;
+  color: #060913;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.thread-send-btn:hover {
+  transform: scale(1.1);
+}
+
+/* 7. Synthesized Consensus Card in Main Feed */
+.thread-synthesis-wrapper {
+  margin: 14px 0 !important;
+  justify-content: center !important;
+}
+
+.thread-synthesis-card {
+  background: linear-gradient(135deg, rgba(11, 25, 38, 0.95) 0%, rgba(13, 37, 30, 0.95) 100%) !important;
+  border: 1px solid rgba(0, 242, 254, 0.35) !important;
+  border-radius: 14px !important;
+  padding: 14px 18px !important;
+  max-width: 82% !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 242, 254, 0.15) !important;
+}
+
+.synthesis-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.synthesis-header-badge {
+  font-size: 11px;
+  font-weight: 800;
+  color: #00f2fe;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  letter-spacing: 0.5px;
+}
+
+.synthesis-time {
+  font-size: 10.5px;
+  color: #8b949e;
+}
+
+.synthesis-anchor-ref {
+  font-size: 12px;
+  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.3);
+  border-left: 2px solid #00f2fe;
+  padding: 6px 10px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.synthesis-content-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.synthesis-bullet-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #e2e8f0;
+}
+
+.synthesis-bullet-item i {
+  color: #00ff66;
+  margin-top: 3px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.synthesis-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 10px;
+}
+
+.synthesis-stats-pill {
+  font-size: 11px;
+  color: #8b949e;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-jump-to-thread {
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  color: #00f2fe;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-jump-to-thread:hover {
+  background: rgba(0, 242, 254, 0.25);
+  border-color: #00f2fe;
+}
+
+/* 8. Responsive Breakpoints */
+@media (max-width: 640px) {
+  .nex-thread-siderail {
+    width: 100vw;
+  }
+
+  .thread-drawer-panel {
+    border-left: none;
+  }
+
+  .thread-synthesis-card {
+    max-width: 95% !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .nex-thread-siderail {
+    width: 420px;
+  }
+}

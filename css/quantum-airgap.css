@@ -1,0 +1,486 @@
+/* =============================================================================
+   NEXCHAT - QUANTUM AIR-GAP & STEALTH GHOST MODE (OBSIDIAN GLASSMORPHISM)
+   STRICTLY ZERO UNICODE EMOJIS - Vector Typography & 3D Hardware Perspective
+   ============================================================================= */
+
+:root {
+  --stealth-cyan: #00f2fe;
+  --stealth-cyan-glow: rgba(0, 242, 254, 0.4);
+  --stealth-emerald: #00C896;
+  --stealth-emerald-glow: rgba(0, 200, 150, 0.4);
+  --stealth-obsidian: #060913;
+  --stealth-glass-bg: rgba(10, 16, 28, 0.88);
+  --stealth-border-glass: rgba(0, 242, 254, 0.28);
+}
+
+/* 1. TOP APP-BAR STEALTH GHOST TOGGLE BUTTON */
+.stealth-ghost-toggle-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 6px 12px !important;
+  border-radius: 9999px !important;
+  background: rgba(14, 22, 38, 0.8) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  font-family: 'Rajdhani', 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  position: relative !important;
+  user-select: none !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+.stealth-ghost-toggle-btn:hover {
+  background: rgba(0, 242, 254, 0.1) !important;
+  border-color: rgba(0, 242, 254, 0.35) !important;
+  color: #f1f5f9 !important;
+  transform: translateY(-1px) !important;
+}
+
+.stealth-icon-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stealth-ghost-icon {
+  font-size: 12px;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.stealth-status-beacon {
+  position: absolute;
+  top: -2px;
+  right: -3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #64748b;
+  border: 1px solid var(--stealth-obsidian);
+  transition: all 0.3s ease;
+}
+
+/* ACTIVE STEALTH GHOST MODE STATE */
+.stealth-ghost-toggle-btn.active {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.18) 0%, rgba(0, 200, 150, 0.12) 100%) !important;
+  border-color: var(--stealth-cyan) !important;
+  color: var(--stealth-cyan) !important;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.35), inset 0 0 8px rgba(0, 242, 254, 0.15) !important;
+}
+
+.stealth-ghost-toggle-btn.active .stealth-ghost-icon {
+  color: var(--stealth-cyan);
+  filter: drop-shadow(0 0 6px var(--stealth-cyan));
+  transform: scale(1.1);
+  animation: ghostAuraPulse 2.4s infinite ease-in-out;
+}
+
+.stealth-ghost-toggle-btn.active .stealth-status-beacon {
+  background: var(--stealth-cyan);
+  box-shadow: 0 0 8px var(--stealth-cyan);
+}
+
+@keyframes ghostAuraPulse {
+  0%, 100% { transform: scale(1.1); opacity: 0.9; }
+  50% { transform: scale(1.22); opacity: 1; filter: drop-shadow(0 0 10px #00f2fe); }
+}
+
+/* 2. HUD TELEMETRY BANNER IN CHAT VIEW */
+.stealth-ghost-hud-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 14px;
+  background: linear-gradient(90deg, rgba(0, 242, 254, 0.16) 0%, rgba(10, 16, 28, 0.95) 50%, rgba(0, 200, 150, 0.16) 100%);
+  border-bottom: 1px solid rgba(0, 242, 254, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--stealth-cyan);
+  animation: slideInDown 0.25s ease;
+  z-index: 95;
+}
+
+.stealth-hud-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stealth-hud-indicator {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--stealth-cyan);
+  box-shadow: 0 0 8px var(--stealth-cyan);
+  animation: nexCyanPulse 1.8s infinite;
+}
+
+.stealth-hud-restore-btn {
+  background: none;
+  border: none;
+  color: var(--stealth-cyan);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-decoration: underline;
+  padding: 4px 8px;
+  min-height: 32px;
+}
+
+/* 3. QUANTUM AIR-GAP 3D SNEAK PEEK OVERLAY */
+.quantum-peek-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  z-index: 100050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 1200px;
+  overflow: hidden;
+}
+
+.quantum-peek-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(3, 7, 18, 0.78);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  opacity: 0;
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quantum-peek-overlay.open .quantum-peek-backdrop {
+  opacity: 1;
+}
+
+/* 4. 3D FROSTED LENS CASING WITH HARDWARE ACCELERATION */
+.quantum-peek-lens-container {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  padding: 16px;
+  box-sizing: border-box;
+  transform-style: preserve-3d;
+  will-change: transform, opacity;
+  z-index: 2;
+}
+
+.quantum-peek-lens {
+  position: relative;
+  background: linear-gradient(160deg, rgba(14, 23, 42, 0.94) 0%, rgba(6, 10, 20, 0.98) 100%);
+  border: 1px solid var(--stealth-border-glass);
+  box-shadow: 0 28px 65px rgba(0, 0, 0, 0.85), 
+              0 0 35px rgba(0, 242, 254, 0.22),
+              inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  border-radius: 22px;
+  overflow: hidden;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  transform: scale(0.88) translateY(24px) rotateX(12deg);
+  opacity: 0;
+  transition: transform 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
+  transform-style: preserve-3d;
+}
+
+.quantum-peek-overlay.open .quantum-peek-lens {
+  transform: scale(1) translateY(0) rotateX(0deg);
+  opacity: 1;
+}
+
+/* OPTICAL SCANLINE & GLASS REFLECTION */
+.quantum-lens-glare {
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 200%;
+  height: 45%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 80%);
+  transform: rotate(-18deg);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.quantum-lens-scanline {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 242, 254, 0.025) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+  background-size: 100% 3px, 6px 100%;
+  pointer-events: none;
+  z-index: 9;
+}
+
+/* 5. LENS HEADER SPECIFICATION */
+.quantum-peek-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: rgba(10, 16, 28, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 12;
+}
+
+.peek-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.peek-avatar-wrapper {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+
+.peek-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--stealth-cyan);
+  box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+}
+
+.peek-status-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #00C896;
+  border: 2px solid var(--stealth-obsidian);
+  box-shadow: 0 0 6px #00C896;
+}
+
+.peek-identity-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.peek-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.peek-chat-name {
+  font-family: 'Rajdhani', 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.3px;
+}
+
+.peek-telemetry-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.peek-airgap-tag {
+  color: #00C896;
+  font-weight: 800;
+  font-size: 9.5px;
+  letter-spacing: 0.5px;
+  background: rgba(0, 200, 150, 0.12);
+  border: 1px solid rgba(0, 200, 150, 0.3);
+  padding: 1px 6px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.peek-time-label {
+  color: #94a3b8;
+  font-family: monospace;
+  font-size: 10px;
+}
+
+.peek-unread-pill {
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  color: var(--stealth-cyan);
+  font-family: monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+/* 6. STREAM PREVIEW BODY */
+.quantum-peek-body {
+  max-height: 380px;
+  min-height: 220px;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(4, 7, 14, 0.6);
+  position: relative;
+  z-index: 12;
+}
+
+.peek-loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--stealth-cyan);
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  padding: 40px 0;
+}
+
+.peek-message-bubble {
+  max-width: 82%;
+  padding: 8px 12px;
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  word-wrap: break-word;
+  position: relative;
+}
+
+.peek-message-bubble.incoming {
+  align-self: flex-start;
+  background: rgba(18, 27, 45, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #e2e8f0;
+  border-bottom-left-radius: 2px;
+}
+
+.peek-message-bubble.outgoing {
+  align-self: flex-end;
+  background: linear-gradient(135deg, #0b342a 0%, #064e3b 100%);
+  border: 1px solid rgba(0, 200, 150, 0.3);
+  color: #ffffff;
+  border-bottom-right-radius: 2px;
+}
+
+.peek-bubble-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 9.5px;
+  opacity: 0.75;
+  margin-top: 4px;
+  font-family: monospace;
+}
+
+/* 7. TACTICAL QUICK ACTION DOCK */
+.quantum-peek-dock {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(10, 16, 28, 0.9);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  z-index: 12;
+}
+
+.peek-dock-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  font-family: 'Inter', sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 44px;
+}
+
+.peek-dock-btn i {
+  font-size: 13px;
+  color: #94a3b8;
+  transition: color 0.2s;
+}
+
+.peek-dock-btn:hover {
+  background: rgba(0, 242, 254, 0.12);
+  border-color: rgba(0, 242, 254, 0.3);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.peek-dock-btn:hover i {
+  color: var(--stealth-cyan);
+}
+
+.peek-dock-btn.highlight-stealth {
+  background: rgba(0, 242, 254, 0.1);
+  border-color: rgba(0, 242, 254, 0.28);
+  color: var(--stealth-cyan);
+}
+
+.peek-dock-btn.peek-dismiss-btn {
+  padding: 8px 12px;
+  color: #ef4444;
+}
+
+.peek-dock-btn.peek-dismiss-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* 8. MOBILE VIEWPORT CONSTRAINTS */
+@media (max-width: 640px) {
+  .quantum-peek-lens-container {
+    max-width: 95vw;
+    padding: 10px;
+  }
+  .quantum-peek-body {
+    max-height: 52vh;
+  }
+  .peek-dock-btn span {
+    font-size: 9.5px;
+  }
+}

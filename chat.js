@@ -5565,6 +5565,42 @@ function loadMessages() {
       // 1. Filter out messages deleted for current user
       if (m.deletedFor && Array.isArray(m.deletedFor) && m.deletedFor.includes(myUID)) return;
       if (window.NexChatFileManager && window.NexChatFileManager.isMessageHiddenLocally(m.docId)) return;
+      // --- CHRONEX THREAD SYNTHESIS CARD BRANCH ---
+      if (m.isThreadSynthesis) {
+        const synthDiv = document.createElement("div");
+        synthDiv.className = "message-wrapper thread-synthesis-wrapper";
+        synthDiv.style.cssText = "display: flex; justify-content: center; margin: 12px 0; padding: 0 12px; width: 100%;";
+        const formattedSummary = window.formatAiMarkdown ? window.formatAiMarkdown(m.summaryText) : escape(m.summaryText).replace(/\n/g, '<br>');
+        synthDiv.innerHTML = `
+          <div class="message-bubble thread-synthesis-card">
+            <div class="synthesis-card-header">
+              <div class="synthesis-header-badge">
+                <i class="fa-solid fa-bolt"></i>
+                <span>THREAD SYNTHESIS &bull; CHRONEX NEURAL</span>
+              </div>
+              <span class="synthesis-time">${formatTime(m.time?.toDate?.() || new Date())}</span>
+            </div>
+            <div class="synthesis-anchor-ref">
+              <i class="fa-solid fa-quote-left"></i>
+              <span class="synthesis-root-preview">Topic: &ldquo;${escape(m.rootSnippet || 'Micro-discussion')}&rdquo;</span>
+            </div>
+            <div class="synthesis-content-body">
+              ${formattedSummary}
+            </div>
+            <div class="synthesis-card-footer">
+              <span class="synthesis-stats-pill">
+                <i class="fa-solid fa-users"></i> ${m.participantCount || 2} Participants &bull; ${m.replyCount || 0} Replies
+              </span>
+              <button type="button" class="btn-jump-to-thread" data-thread-id="${escape(m.sourceThreadId || '')}">
+                <span>Inspect Thread</span>
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        messagesDiv.appendChild(synthDiv);
+        return;
+      }
 
       let isOwn = m.from === myUID;
       const isAI = m.from === 'chronex-ai' || m.isAiResponse;
@@ -5787,6 +5823,15 @@ function loadMessages() {
         });
         actionsBar.appendChild(emoBtn);
       });
+
+      // --- NEX-THREADS HOVER ACTION HOOK ---
+      const threadHoverBtn = document.createElement("button");
+      threadHoverBtn.type = "button";
+      threadHoverBtn.className = "reaction-quick-btn msg-thread-trigger-btn";
+      threadHoverBtn.dataset.action = "open-thread";
+      threadHoverBtn.title = "Reply in Thread";
+      threadHoverBtn.innerHTML = '<i class="fa-solid fa-comments"></i>';
+      actionsBar.appendChild(threadHoverBtn);
 
       // Reply Button
       const replyBtn = document.createElement("button");
@@ -6335,7 +6380,11 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   }
 
   // Setup typing & presence
-  subscribeTypingIndicator(uid, chatType);
+  if (window.NexStealthPrivacy?.AirGap?.isStealthActive) {
+    console.log('[NEX-AIRGAP] Active chat entered under Stealth Ghost Shield (presence untracked).');
+  } else {
+    subscribeTypingIndicator(uid, chatType);
+  }
   if (chatType === 'direct') {
     try { GroupChat.close(); } catch(e) {}
     subscribeUserPresence(uid);
