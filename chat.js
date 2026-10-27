@@ -13411,9 +13411,36 @@ function updateDriveStatusUI() {
 }
 
 // Status UI event listeners are cleanly managed in setupEventListeners()
+['click', 'touchstart'].forEach(evt => {
+  document.getElementById("closeStatusViewerBtn")?.addEventListener(evt, (e) => {
+    e.stopPropagation();
+    const modal = document.getElementById("statusViewerModal");
+    if (modal) {
+      modal.classList.remove('active', 'open', 'status-held');
+      modal.style.display = "none";
+    }
+    if (typeof storyProgressTimer !== 'undefined') clearInterval(storyProgressTimer);
+    const video = document.getElementById('statusViewerVideo');
+    if (video) video.pause();
+  }, { passive: true });
+
+  document.getElementById("statusViewerCloseIcon")?.addEventListener(evt, (e) => {
+    e.stopPropagation();
+    const modal = document.getElementById("statusViewerModal");
+    if (modal) {
+      modal.classList.remove('active', 'open', 'status-held');
+      modal.style.display = "none";
+    }
+    if (typeof storyProgressTimer !== 'undefined') clearInterval(storyProgressTimer);
+    const video = document.getElementById('statusViewerVideo');
+    if (video) video.pause();
+  }, { passive: true });
+});
+
 document.getElementById("closeStatusViewerBtn")?.addEventListener("click", () => {
   const modal = document.getElementById("statusViewerModal");
   if (modal) {
+    modal.classList.remove('active', 'open', 'status-held');
     modal.style.display = "none";
   }
   const video = document.getElementById('statusViewerVideo');
@@ -15384,12 +15411,18 @@ function showCurrentStorySlide() {
   const viewCountEl = document.getElementById('statusViewCount');
 
   if (isOwn) {
-    if (ownControls) ownControls.style.display = 'flex';
+    if (ownControls) {
+      ownControls.classList.add('visible');
+      ownControls.style.display = 'flex';
+    }
     if (replyRow) replyRow.style.display = 'none';
     if (quickReactions) quickReactions.style.display = 'none';
     if (viewCountEl) viewCountEl.textContent = currentSlide.viewCount || currentSlide.views || 0;
   } else {
-    if (ownControls) ownControls.style.display = 'none';
+    if (ownControls) {
+      ownControls.classList.remove('visible');
+      ownControls.style.display = 'none';
+    }
     if (replyRow) replyRow.style.display = 'flex';
     if (quickReactions) quickReactions.style.display = 'flex';
     const replyInput = document.getElementById('statusViewerReplyInput');
@@ -15425,6 +15458,7 @@ function showCurrentStorySlide() {
     pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
   }
 
+  modal.classList.add('active', 'open');
   modal.style.display = 'flex';
   try {
     if (!history.state || history.state.nexchatModal !== 'statusViewer') {
@@ -15455,8 +15489,8 @@ function setupViewerControls() {
   const closeViewer = () => {
     clearInterval(storyProgressTimer);
     if (modal) {
+      modal.classList.remove('active', 'open', 'status-held');
       modal.style.display = 'none';
-      modal.classList.remove('status-held');
     }
     const video = document.getElementById('statusViewerVideo');
     if (video) video.pause();

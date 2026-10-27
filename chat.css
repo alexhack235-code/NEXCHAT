@@ -4968,13 +4968,20 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   height: 100dvh;
   background: #06090e;
   z-index: 99999;
-  display: flex;
+  display: none !important;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
   user-select: none;
   box-sizing: border-box;
   animation: storyModalEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.status-viewer-modal.active,
+.status-viewer-modal.open,
+.terminal-viewer-modal.active,
+.terminal-viewer-modal.open {
+  display: flex !important;
 }
 
 @keyframes storyModalEnter {
@@ -5404,13 +5411,17 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
 
 /* Own Status Controls */
 .status-viewer-own-controls {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  gap: 12px;
+}
+
+.status-viewer-own-controls.visible {
   display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  width: 100% !important;
-  max-width: 480px !important;
-  margin: 0 auto !important;
-  gap: 12px !important;
 }
 
 .status-views-badge {
