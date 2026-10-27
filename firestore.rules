@@ -317,7 +317,10 @@ service cloud.firestore {
     // 3. Super Admin Verification (Bootstrap email, token claim, or admins collection)
     function isSuperAdmin() {
       return isAuthenticated() && (
-        (request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com']) ||
+        (
+          request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com'] &&
+          request.auth.token.email_verified == true
+        ) ||
         request.auth.token.admin == true ||
         request.auth.uid in ['demonalexander526', 'alexhack235'] ||
         exists(/databases/$(database)/documents/admins/$(request.auth.uid))
@@ -463,7 +466,11 @@ service cloud.firestore {
              get(/databases/$(database)/documents/chats/$(chatId)).data.creatorId == request.auth.uid)
           )
         ) ||
-        chatId.matches('.*' + request.auth.uid + '.*') ||
+        chatId == request.auth.uid ||
+        chatId.matches('^' + request.auth.uid + '_[^_]+$') ||
+        chatId.matches('^[^_]+_' + request.auth.uid + '$') ||
+        chatId.matches('^' + request.auth.uid + '-[^-]+$') ||
+        chatId.matches('^[^-]+-' + request.auth.uid + '$') ||
         isSuperAdmin()
       );
     }
@@ -746,10 +753,8 @@ service cloud.firestore {
       // Creation restricted to owner with anti-privilege escalation & payload bounds
       allow create: if isOwner(uid) && isValidUserCreate(request.resource.data);
 
-      // Updates restricted to owner or SuperAdmin, protecting privileged flags; allows contact approvals
-      allow update: if (isOwner(uid) && isValidUserUpdate(request.resource.data, resource.data)) ||
-                       (isAuthenticated() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['approvedChatUsers']) && isValidOptionalList('approvedChatUsers', 1000)) ||
-                       isSuperAdmin();
+      // Updates restricted to owner or SuperAdmin, protecting privileged flags
+      allow update: if (isOwner(uid) && isValidUserUpdate(request.resource.data, resource.data)) || isSuperAdmin();
 
       // Account deletion restricted to SuperAdmin
       allow delete: if isSuperAdmin();
@@ -1569,7 +1574,7 @@ service cloud.firestore {
     // 12. DEVICE PAIRING QR SESSIONS
     // ===============================================================
     match /link_sessions/{sessionId} {
-      allow read: if true;
+      allow read: if isAuthenticated();
 
       allow create: if request.resource.data.status == 'pending' &&
                        request.resource.data.sessionId == sessionId;

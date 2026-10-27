@@ -11,8 +11,8 @@ const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
 const MAX_REQUESTS_PER_WINDOW = 60; // Max 60 requests/min per IP
 
-// Periodic memory cleanup every 5 minutes
-setInterval(() => {
+// Periodic memory cleanup every 5 minutes (unref prevents blocking serverless process exit)
+const cleanupTimer = setInterval(() => {
   const now = Date.now();
   for (const [ip, record] of rateLimitMap.entries()) {
     if (now > record.resetAt) {
@@ -20,6 +20,9 @@ setInterval(() => {
     }
   }
 }, 5 * 60 * 1000);
+if (cleanupTimer && typeof cleanupTimer.unref === 'function') {
+  cleanupTimer.unref();
+}
 
 /**
  * Extracts client IP address accurately from standard proxy headers.
@@ -140,10 +143,24 @@ export function validatePathname(pathname) {
  * @returns {boolean} true if preflight OPTIONS was handled and terminated
  */
 export function handleCors(req, res) {
-  const allowedOrigins = ['https://nexchat-drab.vercel.app'];
+  const allowedOrigins = [
+    'https://nexchat-drab.vercel.app',
+    'capacitor://localhost',
+    'ionic://localhost',
+    'http://localhost',
+    'https://localhost'
+  ];
   const origin = req.headers.origin;
 
-  if (origin && (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+  const isAllowed = origin && (
+    allowedOrigins.includes(origin) ||
+    origin.startsWith('http://localhost:') ||
+    origin.startsWith('https://localhost:') ||
+    origin.startsWith('http://127.0.0.1:') ||
+    origin.startsWith('https://127.0.0.1:')
+  );
+
+  if (isAllowed) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');

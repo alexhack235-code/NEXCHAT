@@ -1,4 +1,4 @@
-import { enforceRateLimit, applySecurityHeaders, verifyFirebaseIdToken } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, verifyFirebaseIdToken, handleCors } from './_security.js';
 
 /**
  * /api/reels - Create and manage Reels
@@ -9,6 +9,7 @@ import { enforceRateLimit, applySecurityHeaders, verifyFirebaseIdToken } from '.
  */
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (handleCors(req, res)) return;
 
   if (!enforceRateLimit(req, res)) {
     return;

@@ -9,7 +9,8 @@
   class E2EECryptoVault {
     constructor() {
       this.keyPair = null;
-      this.sharedKeys = new Map(); // peerId -> CryptoKey
+      this.sharedKeys = new Map();
+      this.consumedIVs = new Set(); // peerId -> CryptoKey
       this.defaultMasterKey = null;
       this.initialized = false;
     }
@@ -130,18 +131,7 @@
 
       const key = (peerId && this.sharedKeys.get(peerId)) || this.defaultMasterKey;
       if (!key) {
-        // Fallback simulation if SubtleCrypto is unavailable
-        return {
-          isEncrypted: true,
-          protocol: 'NEX-E2EE-v4.8',
-          algo: 'AES-256-GCM',
-        quantumTier: 'HYBRID_POST_QUANTUM_KYBER768_X25519',
-          iv: 'simulated_iv',
-          ciphertext: btoa(plainText),
-          authTag: 'simulated_tag',
-          plainTextSnippet: plainText.substring(0, 3) + '***',
-          timestamp: Date.now()
-        };
+        throw new Error('[E2EE_FATAL] Encryption failed: No verified shared key or master key available.');
       }
 
       // Generate 96-bit (12-byte) random initialization vector (NIST recommendation)
@@ -177,9 +167,24 @@
 
       try {
         const key = (peerId && this.sharedKeys.get(peerId)) || this.defaultMasterKey;
-        if (!key || envelope.iv === 'simulated_iv') {
-          return atob(envelope.ciphertext);
+        if (!key) {
+          throw new Error('[E2EE_FATAL] Decryption failed: Missing cryptographic key.');
         }
+        if (envelope.iv === 'simulated_iv') {
+          throw new Error('[E2EE_SECURITY] Insecure simulated ciphertext rejected.');
+        }
+
+        // Anti-Replay IV validation
+        if (!this.consumedIVs) this.consumedIVs = new Set();
+        const replayKey = `${peerId || 'direct'}:${envelope.iv}`;
+        if (this.consumedIVs.has(replayKey)) {
+          throw new Error('[E2EE_SECURITY] Replay attack detected: IV previously consumed.');
+        }
+        if (this.consumedIVs.size >= 10000) {
+          const first = this.consumedIVs.values().next().value;
+          this.consumedIVs.delete(first);
+        }
+        this.consumedIVs.add(replayKey);
 
         const ivBuffer = this.base64ToBuffer(envelope.iv);
         const cipherBuffer = this.base64ToBuffer(envelope.ciphertext);

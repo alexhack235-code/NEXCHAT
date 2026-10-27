@@ -1,4 +1,4 @@
-import { enforceRateLimit, applySecurityHeaders } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
@@ -24,6 +24,7 @@ const {
  */
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (handleCors(req, res)) return;
 
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, error: 'Method not allowed. Use POST.' });

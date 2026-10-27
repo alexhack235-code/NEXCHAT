@@ -55,6 +55,19 @@
     }
   ];
 
+    // Timing-safe constant-time string comparison to defeat side-channel timing attacks
+  function timingSafeEqual(a, b) {
+    if (typeof a !== 'string' || typeof b !== 'string') return false;
+    let mismatch = a.length === b.length ? 0 : 1;
+    const len = Math.max(a.length, b.length);
+    for (let i = 0; i < len; i++) {
+      const charA = i < a.length ? a.charCodeAt(i) : 0;
+      const charB = i < b.charCodeAt(i) ? b.charCodeAt(i) : 0;
+      mismatch |= charA ^ charB;
+    }
+    return mismatch === 0;
+  }
+
   class DecoyVaultSystem {
     constructor() {
       this.isLocked = true;
@@ -115,10 +128,10 @@
       const primaryHash = localStorage.getItem('nex_primary_pin_hash');
       const duressHash = localStorage.getItem('nex_duress_pin_hash');
 
-      if (enteredHash === primaryHash) {
+      if (timingSafeEqual(enteredHash, primaryHash)) {
         // Genuine unlock
         this.unlockGenuineProfile();
-      } else if (enteredHash === duressHash) {
+      } else if (timingSafeEqual(enteredHash, duressHash)) {
         // Coercion panic unlock
         this.triggerDuressPanicUnlock();
       } else {

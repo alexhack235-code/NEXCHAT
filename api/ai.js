@@ -1,4 +1,4 @@
-import { enforceRateLimit, applySecurityHeaders } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
 
 /**
  * NEXCHAT /api/ai - Serverless AI Gateway for ChronEX AI
@@ -66,6 +66,7 @@ Core instructions:
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
+  if (handleCors(req, res)) return;
 
   if (!enforceRateLimit(req, res)) {
     return;
