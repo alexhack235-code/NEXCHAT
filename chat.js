@@ -3601,6 +3601,9 @@ function goBack() {
 
 function goBackToDashboard() {
   currentChatUser = null;
+  if (window.scheduledMessageEngine) {
+    window.scheduledMessageEngine.updateComposerBanner(null);
+  }
   if (typeof showChatListView === 'function') {
     showChatListView();
   }
@@ -4219,6 +4222,79 @@ window.dispatchTokenRain = async function(dropAttachment) {
   }
 
   if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+};
+
+
+
+// =============================================================================
+// DIRECT BACKGROUND DISPATCH WITHOUT COMPOSER INTERFERENCE
+// Used by Quantum Scheduled Message Engine to deliver due timers in the background
+// =============================================================================
+window.sendMessageDirectWithoutComposer = async function(targetId, text, chatType = 'direct', options = {}) {
+  if (!myUID || !targetId || !text) return;
+  const clientMsgId = 'sched_msg_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
+
+  // E2EE
+  let e2eeEnvelope = null;
+  if (window.NexE2EEVault && text && chatType !== 'group') {
+    try {
+      e2eeEnvelope = await window.NexE2EEVault.encryptMessage(text, targetId);
+    } catch (_) {}
+  }
+
+  // 1. Send via Supabase Realtime
+  if (typeof sendSupabaseMessage === 'function') {
+    sendSupabaseMessage({
+      from: myUID,
+      to: chatType === 'group' ? null : targetId,
+      groupId: chatType === 'group' ? targetId : null,
+      text: text || '',
+      attachment: null,
+      envelope: e2eeEnvelope,
+      isEncrypted: !!e2eeEnvelope,
+      chatType: chatType || 'direct',
+      isSilent: !!options.isSilent,
+      isScheduledDelivery: true
+    }).catch(() => {});
+  }
+
+  // 2. Dual-layer Firestore persistence
+  try {
+    if (chatType === 'group') {
+      await addDoc(collection(db, 'groups', targetId, 'messages'), {
+        senderId: myUID,
+        senderName: currentUsername || 'Me',
+        text: text || '',
+        timestamp: serverTimestamp(),
+        type: 'text',
+        clientMsgId,
+        isScheduledDelivery: true,
+        isSilent: !!options.isSilent
+      });
+    } else {
+      await addDoc(collection(db, 'messages'), {
+        from: myUID,
+        to: targetId,
+        text: text || '',
+        time: serverTimestamp(),
+        read: false,
+        status: 'sent',
+        type: 'text',
+        clientMsgId,
+        isEncrypted: !!e2eeEnvelope,
+        isScheduledDelivery: true,
+        isSilent: !!options.isSilent,
+        ...(e2eeEnvelope ? { envelope: e2eeEnvelope } : {})
+      });
+    }
+  } catch (err) {
+    console.warn('[ScheduledEngine] Firestore fallback notice:', err);
+  }
+
+  // 3. If the user currently has this exact chat open, append sent bubble
+  if (currentChatUser === targetId && typeof appendLocalSentMessage === 'function') {
+    appendLocalSentMessage(text, null, false, 'sent', clientMsgId, e2eeEnvelope);
+  }
 };
 
 
@@ -6095,6 +6171,10 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
 
   if (window.cyberStreaksEngine) {
     window.cyberStreaksEngine.renderStreakBadge();
+  }
+
+  if (window.scheduledMessageEngine) {
+    window.scheduledMessageEngine.updateComposerBanner(uid);
   }
 
   const chatDetailView = document.getElementById('chatDetailView');
