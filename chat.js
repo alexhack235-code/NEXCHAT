@@ -17499,7 +17499,9 @@ function initializeBasicUI() {
   const lockedChatsRow = document.getElementById("lockedChatsRow");
   if (lockedChatsRow) {
     lockedChatsRow.addEventListener("click", () => {
-      if (window.CyberFeatures && window.CyberFeatures.ghostVault) {
+      if (window.NexLockedChats) {
+        window.NexLockedChats.openVault();
+      } else if (window.CyberFeatures && window.CyberFeatures.ghostVault) {
         window.CyberFeatures.ghostVault.show();
       }
     });

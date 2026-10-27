@@ -19,14 +19,20 @@ export const TICK_STATES = {
  * @returns {string} The TICK_STATES value
  */
 export function getTickState(message, totalGroupMembers) {
-  if (!message.id || message.pending) return TICK_STATES.PENDING;
+  if (!message.id || message.pending || message._pending || message._optimistic) {
+    return TICK_STATES.PENDING;
+  }
   
-  const readByCount = message.readBy ? message.readBy.length : 0;
-  
-  if (readByCount === 0) return TICK_STATES.SENT;
-  // -1 to exclude the sender from total group members expecting to read
-  if (readByCount >= totalGroupMembers - 1) return TICK_STATES.READ_ALL;
-  
+  const readers = Array.isArray(message.readBy) ? message.readBy : [];
+  const otherReaders = readers.filter(uid => uid !== message.from);
+  const targetOtherMembers = Math.max(1, (totalGroupMembers || 2) - 1);
+
+  if (otherReaders.length === 0) {
+    return TICK_STATES.SENT;
+  }
+  if (otherReaders.length >= targetOtherMembers) {
+    return TICK_STATES.READ_ALL;
+  }
   return TICK_STATES.READ;
 }
 
@@ -58,19 +64,19 @@ export function updateTickElement(element, newState) {
   
   switch (newState) {
     case TICK_STATES.PENDING:
-      element.innerHTML = '';
+      element.innerHTML = '<i class="fa-solid fa-clock" style="font-size:10px;opacity:0.75;"></i>';
       element.style.color = 'rgba(255,255,255,0.5)';
       break;
     case TICK_STATES.SENT:
-      element.innerHTML = '';
-      element.style.color = 'rgba(255,255,255,0.5)';
+      element.innerHTML = '<i class="fa-solid fa-check" style="font-size:10px;"></i>';
+      element.style.color = 'rgba(255,255,255,0.7)';
       break;
     case TICK_STATES.READ:
-      element.innerHTML = '';
-      element.style.color = 'rgba(255,255,255,0.5)';
+      element.innerHTML = '<i class="fa-solid fa-check-double" style="font-size:10px;"></i>';
+      element.style.color = 'rgba(255,255,255,0.7)';
       break;
     case TICK_STATES.READ_ALL:
-      element.innerHTML = '';
+      element.innerHTML = '<i class="fa-solid fa-check-double" style="font-size:10px;"></i>';
       element.style.color = '#00ff66';
       break;
   }
@@ -235,15 +241,15 @@ export function hideReadByModal() {
  * @param {Object} db Firestore database instance
  * @param {string} groupId The group ID (needed for document path)
  */
-export async function batchMarkAsRead(messageIds, uid, db, groupId) {
-  if (!messageIds || messageIds.length === 0 || !uid || !db || !groupId) return;
+export async function batchMarkAsRead(messageIds, uid, db, groupId = null) {
+  if (!messageIds || messageIds.length === 0 || !uid || !db) return;
   
   try {
     const batch = writeBatch(db);
     const now = Timestamp.now();
     
     messageIds.forEach(msgId => {
-      const msgRef = doc(db, 'groups', groupId, 'messages', msgId);
+      const msgRef = doc(db, 'groupMessages', msgId);
       batch.update(msgRef, {
         readBy: arrayUnion(uid),
         [`readAt.${uid}`]: now

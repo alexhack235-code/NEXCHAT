@@ -326,7 +326,10 @@ export default function NexchatStatusPage() {
   useEffect(() => {
     if (!isViewerOpen || isPaused || !currentSlide) return;
 
-    const SLIDE_DURATION = 5000; // 5 seconds per slide
+    // For video slides, progress and advancement are driven by video timeupdate and onEnded
+    if (currentSlide.mediaType === 'video') return;
+
+    const SLIDE_DURATION = 5000; // 5 seconds per photo/text slide
     const INTERVAL_MS = 50;
     const increment = (INTERVAL_MS / SLIDE_DURATION) * 100;
 
@@ -851,7 +854,19 @@ export default function NexchatStatusPage() {
                 src={currentSlide.mediaUrl}
                 autoPlay
                 playsInline
-                muted
+                controls={false}
+                onTimeUpdate={(e) => {
+                  const v = e.currentTarget;
+                  const dur = v.duration;
+                  if (dur && !isNaN(dur) && isFinite(dur) && dur > 0) {
+                    const pct = Math.min(100, Math.max(0, (v.currentTime / dur) * 100));
+                    setSlideProgress(pct);
+                  }
+                }}
+                onEnded={() => {
+                  setSlideProgress(100);
+                  handleNextSlide();
+                }}
                 className="max-h-full max-w-full object-contain"
               />
             ) : (
@@ -863,25 +878,20 @@ export default function NexchatStatusPage() {
             )}
           </div>
 
-          {/* Bottom Caption & Old Info Overlay (time "03:56 AM", expires, caption) */}
-          <div className="relative z-30 pb-5 pt-3 px-4 bg-gradient-to-t from-black/90 via-black/50 to-transparent flex flex-col gap-2">
-            {currentSlide.caption && currentSlide.mediaType !== 'text' && (
-              <div className="bg-black/40 backdrop-blur-md rounded-2xl p-3 border border-white/10 text-center mx-auto max-w-xl w-full">
-                <p className="text-[14.5px] text-[#E9EDEF] font-medium leading-relaxed">
+          {/* Sleek Minimalist Caption Pill (Decluttered view) */}
+          {currentSlide.caption && currentSlide.mediaType !== 'text' && (
+            <div className="relative z-30 pb-4 pt-1 px-4 flex justify-center">
+              <div className="bg-black/60 backdrop-blur-md rounded-full px-5 py-2 border border-white/10 text-center max-w-lg shadow-lg flex items-center justify-center gap-3">
+                <p className="text-[13.5px] text-[#E9EDEF] font-medium leading-snug truncate">
                   {currentSlide.caption}
                 </p>
-                <div className="flex items-center justify-center gap-3 mt-2 text-[11.5px] text-[#8696A0]">
-                  <span className="flex items-center gap-1">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {currentSlide.timeFormatted}
-                  </span>
-                  <span>•</span>
-                  <span className="text-[#25D366] font-semibold">{currentSlide.expiresIn}</span>
-                </div>
+                <span className="text-[11px] text-[#25D366] shrink-0 font-medium">
+                  {currentSlide.expiresIn}
+                </span>
               </div>
-            )}
+            </div>
+          )}
+          <div className="relative z-30 pb-2 px-4 flex flex-col gap-2">
 
             {/* Quick Reply Bar (WhatsApp Android Style) */}
             <div className="flex items-center gap-2 max-w-xl mx-auto w-full mt-1">
