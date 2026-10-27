@@ -5833,6 +5833,25 @@ function loadMessages() {
       threadHoverBtn.innerHTML = '<i class="fa-solid fa-comments"></i>';
       actionsBar.appendChild(threadHoverBtn);
 
+      // --- TACTICAL PIN MATRIX TRIGGER HOOK ---
+      const pinMatrixBtn = document.createElement("button");
+      pinMatrixBtn.type = "button";
+      pinMatrixBtn.className = "reaction-quick-btn pin-matrix-trigger-btn";
+      pinMatrixBtn.title = "Pin to Tactical Matrix";
+      pinMatrixBtn.innerHTML = '<i class="fa-solid fa-thumbtack"></i>';
+      pinMatrixBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (window.NexPinboardMatrix) {
+          window.NexPinboardMatrix.openPinModal({
+            id: m.docId || m.id,
+            text: m.text || (m.attachment ? m.attachment.fileName : "[Attachment]"),
+            senderName: isOwn ? "You" : (currentChatName || "User"),
+            senderUid: m.from || "anon"
+          });
+        }
+      });
+      actionsBar.appendChild(pinMatrixBtn);
+
       // Reply Button
       const replyBtn = document.createElement("button");
       replyBtn.type = "button";
@@ -6299,6 +6318,11 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
 
   if (window.scheduledMessageEngine) {
     window.scheduledMessageEngine.updateComposerBanner(uid);
+  }
+
+  // --- TACTICAL PINBOARD MATRIX MOUNT HOOK ---
+  if (window.NexPinboardMatrix) {
+    window.NexPinboardMatrix.loadPinsForChat(uid, chatType);
   }
 
   const chatDetailView = document.getElementById('chatDetailView');
@@ -13109,6 +13133,27 @@ const modalEl = document.getElementById("settingsModal");
 if (modalEl) {
   observer.observe(modalEl, { attributes: true, attributeFilter: ["style"] });
 }
+
+// --- BIOMETRIC DECOY VAULT CONFIG HOOK ---
+document.getElementById("saveDecoyVaultConfigBtn")?.addEventListener("click", () => {
+  const primaryPin = document.getElementById("settingPrimaryPinInput")?.value?.trim();
+  const duressPin = document.getElementById("settingDuressPinInput")?.value?.trim();
+  const autoLockMinutes = parseInt(document.getElementById("settingAutoLockSelect")?.value || "15", 10);
+
+  if (window.decoyVaultSystem) {
+    window.decoyVaultSystem.configureVault({
+      primaryPin: primaryPin || "1337",
+      duressPin: duressPin || "9999",
+      autoLockMinutes: autoLockMinutes
+    });
+  } else if (window.NexStealthPrivacy && window.NexStealthPrivacy.DecoyVault) {
+    window.NexStealthPrivacy.DecoyVault.configureVault({
+      primaryPin: primaryPin || "1337",
+      duressPin: duressPin || "9999",
+      autoLockMinutes: autoLockMinutes
+    });
+  }
+});
 
 document.getElementById("changePasswordBtn")?.addEventListener("click", async () => {
   if (isAndroid && navigator.vibrate) {

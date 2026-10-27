@@ -1,0 +1,510 @@
+/* ==========================================================================
+   NEXCHAT TACTICAL MULTI-MESSAGE PINBOARD MATRIX
+   Theme: Deep Obsidian (#060913), Cyber-Emerald (#00ff66), Quantum Cyan (#00f2fe)
+   Strictly ZERO Unicode Emojis: FontAwesome 6 Vector Icons Only
+   ========================================================================== */
+
+/* 1. Root Container */
+.nex-pinboard-root-wrapper {
+  position: relative;
+  z-index: 85;
+  background: #060913;
+  border-bottom: 1px solid rgba(0, 242, 254, 0.22);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s ease;
+}
+
+/* 2. Top Summary Bar */
+.nex-pinboard-summary-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 16px;
+  background: rgba(11, 17, 26, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  gap: 12px;
+}
+
+.pinboard-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.pinboard-icon-badge {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  color: #00f2fe;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.pinboard-summary-left:hover .pinboard-icon-badge {
+  background: rgba(0, 255, 102, 0.15);
+  border-color: #00ff66;
+  color: #00ff66;
+}
+
+.pinboard-summary-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.pinboard-summary-title {
+  font-family: 'Orbitron', 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: #f1f5f9;
+}
+
+.pinboard-summary-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  color: #00ff66;
+}
+
+/* Task Completion Progress Dock */
+.pinboard-progress-dock {
+  flex: 1;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pinboard-progress-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+}
+
+.progress-label {
+  color: #8b949e;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.progress-percent {
+  color: #00ff66;
+  font-weight: 800;
+}
+
+.pinboard-progress-track {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.pinboard-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00d4ff, #00ff66);
+  box-shadow: 0 0 8px #00ff66;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pinboard-summary-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pinboard-summary-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pinboard-summary-btn:hover {
+  background: rgba(0, 242, 254, 0.2);
+  border-color: #00f2fe;
+  color: #00f2fe;
+}
+
+/* 3. Slide-Down Glass Command Card Deck */
+.nex-pinboard-deck {
+  padding: 12px 16px;
+  background: rgba(6, 9, 19, 0.98);
+  backdrop-filter: blur(25px);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 480px;
+  animation: nexDeckSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes nexDeckSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Filter Toolbar */
+.pinboard-deck-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  overflow-x: auto;
+}
+
+.pinboard-filter-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+}
+
+.pin-filter-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #8b949e;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.pin-filter-pill:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+}
+
+.pin-filter-pill.active {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: #00f2fe;
+  color: #00f2fe;
+  font-weight: 700;
+}
+
+.pin-filter-pill.urgent.active { background: rgba(239, 68, 68, 0.18); border-color: #ef4444; color: #f87171; }
+.pin-filter-pill.task.active { background: rgba(0, 242, 254, 0.18); border-color: #00f2fe; color: #38bdf8; }
+.pin-filter-pill.secret.active { background: rgba(192, 132, 252, 0.18); border-color: #c084fc; color: #d8b4fe; }
+.pin-filter-pill.finance.active { background: rgba(255, 215, 0, 0.18); border-color: #ffd700; color: #fde047; }
+.pin-filter-pill.deadline.active { background: rgba(245, 158, 11, 0.18); border-color: #f59e0b; color: #fbbf24; }
+
+.pinboard-ctrl-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8b949e;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pinboard-ctrl-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* Cards Viewport & Grid */
+.pinboard-cards-viewport {
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  padding-right: 4px;
+}
+
+/* Pinned Tactical Card */
+.pin-tactical-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.pin-tactical-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Color-coded Category Banners */
+.pin-tactical-card.cat-urgent { border-left: 3.5px solid #ef4444; background: rgba(239, 68, 68, 0.04); }
+.pin-tactical-card.cat-task { border-left: 3.5px solid #00f2fe; background: rgba(0, 242, 254, 0.04); }
+.pin-tactical-card.cat-secret { border-left: 3.5px solid #c084fc; background: rgba(192, 132, 252, 0.04); }
+.pin-tactical-card.cat-finance { border-left: 3.5px solid #ffd700; background: rgba(255, 215, 0, 0.04); }
+.pin-tactical-card.cat-deadline { border-left: 3.5px solid #f59e0b; background: rgba(245, 158, 11, 0.04); }
+
+.pin-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.pin-category-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pin-category-badge.urgent { color: #f87171; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); }
+.pin-category-badge.task { color: #38bdf8; background: rgba(0, 242, 254, 0.15); border: 1px solid rgba(0, 242, 254, 0.3); }
+.pin-category-badge.secret { color: #d8b4fe; background: rgba(192, 132, 252, 0.15); border: 1px solid rgba(192, 132, 252, 0.3); }
+.pin-category-badge.finance { color: #fde047; background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3); }
+.pin-category-badge.deadline { color: #fbbf24; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); }
+
+.pin-author-meta {
+  font-size: 10.5px;
+  color: #8b949e;
+}
+
+/* Card Body & Interactive Checkbox */
+.pin-card-body {
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: #cbd5e1;
+  word-break: break-word;
+}
+
+.pin-task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pin-task-check {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1.5px solid #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: transparent;
+  font-size: 9.5px;
+  transition: all 0.15s ease;
+}
+
+.pin-tactical-card.completed .pin-task-check {
+  border-color: #00ff66;
+  background: #00ff66;
+  color: #060913;
+}
+
+.pin-tactical-card.completed .pin-card-body {
+  text-decoration: line-through;
+  opacity: 0.65;
+}
+
+/* Audit Stamp */
+.pin-audit-stamp {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: #00ff66;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+/* Live Countdown Ticker */
+.pin-deadline-ticker {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #f59e0b;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 4px;
+  padding: 3px 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* Card Footer Actions */
+.pin-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 6px;
+}
+
+.pin-act-btn {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-size: 12px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pin-act-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #00f2fe;
+}
+
+.pin-act-btn.delete:hover {
+  color: #ef4444;
+}
+
+/* 4. Category Selector Modal */
+.pin-selector-dialog {
+  max-width: 480px !important;
+}
+
+.pin-modal-body {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pin-preview-box {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.preview-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #8b949e;
+}
+
+.preview-text {
+  font-size: 12px;
+  color: #cbd5e1;
+  margin: 3px 0 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pin-field-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+}
+
+.pin-category-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pin-cat-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.pin-cat-opt:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pin-cat-opt.active {
+  background: rgba(0, 242, 254, 0.12);
+  border-color: #00f2fe;
+}
+
+.pin-cat-opt i {
+  font-size: 16px;
+  width: 20px;
+  text-align: center;
+}
+
+.opt-copy {
+  display: flex;
+  flex-direction: column;
+}
+
+.opt-copy strong {
+  font-size: 12.5px;
+  color: #f1f5f9;
+}
+
+.opt-copy small {
+  font-size: 10.5px;
+  color: #8b949e;
+}
+
+.pin-deadline-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11.5px;
+  color: #cbd5e1;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .pinboard-progress-dock {
+    display: none !important;
+  }
+  .pinboard-cards-viewport {
+    grid-template-columns: 1fr;
+  }
+}

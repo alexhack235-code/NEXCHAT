@@ -96,6 +96,10 @@
     // 2. AUDIO VOICE STORIES (Playback & Live Spectrum Visualization)
     // -------------------------------------------------------------------------
     playVoiceSlide(audioUrl, canvasEl, timerEl, onEndCallback) {
+      if (window.NexStatusAudioStudio) {
+        window.NexStatusAudioStudio.playVoiceSlide(audioUrl, canvasEl, timerEl, onEndCallback);
+        return;
+      }
       this.stopVoiceSlide();
       if (!audioUrl) return;
 
@@ -195,6 +199,9 @@
     }
 
     stopVoiceSlide() {
+      if (window.NexStatusAudioStudio) {
+        window.NexStatusAudioStudio.stopPlayback();
+      }
       if (this.animFrameId) {
         cancelAnimationFrame(this.animFrameId);
         this.animFrameId = null;
@@ -216,6 +223,9 @@
     // 3. VOICE RECORDING STUDIO (Creation Pane)
     // -------------------------------------------------------------------------
     bindVoiceStoryCreator() {
+      if (window.NexStatusAudioStudio) {
+        window.NexStatusAudioStudio.bindRecordingStudio();
+      }
       const micBtn = document.getElementById('statusVoiceRecordBtn');
       const timerEl = document.getElementById('statusVoiceTimerDisplay');
       const hintEl = document.getElementById('statusVoiceHintText');
@@ -287,10 +297,17 @@
     }
 
     getRecordedAudioBlob() {
+      if (window.NexStatusAudioStudio) {
+        const studioData = window.NexStatusAudioStudio.getRecordedAudioData();
+        if (studioData && studioData.blob) return studioData.blob;
+      }
       return this.recordedAudioBlob;
     }
 
     clearRecordedVoice() {
+      if (window.NexStatusAudioStudio) {
+        window.NexStatusAudioStudio.clearRecording();
+      }
       this.recordedAudioBlob = null;
       this.recordedAudioUrl = null;
       this.voiceDuration = 0;

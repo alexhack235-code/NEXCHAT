@@ -1,0 +1,211 @@
+/* ==========================================================================
+   NEXCHAT - Status Voice Waveform & Ephemeral Audio Studio Styling
+   Luxury Cyberpunk Emerald & Cyan Aesthetics. FontAwesome 6 glyphs only.
+   ========================================================================== */
+
+/* 1. Recording Studio Card in Status Creation Modal */
+.nex-audio-studio-wrap {
+  width: 100%;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.nex-audio-studio-card {
+  width: 100%;
+  background: rgba(10, 16, 26, 0.95);
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  border-radius: 14px;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6), 0 0 24px rgba(0, 255, 136, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.nex-audio-studio-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.studio-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.12);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 6px;
+  padding: 3px 8px;
+  letter-spacing: 0.5px;
+}
+
+.studio-timer-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #e2e8f0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+
+/* 2. Waveform Canvas Stage */
+.studio-canvas-container {
+  position: relative;
+  width: 100%;
+  height: 72px;
+  background: rgba(6, 10, 16, 0.7);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.studio-waveform-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.studio-live-beacon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  padding: 2px 8px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: #ef4444;
+}
+
+.studio-live-beacon .pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+  animation: studioRecBlink 1s infinite alternate;
+}
+
+@keyframes studioRecBlink {
+  from { opacity: 0.3; }
+  to { opacity: 1; }
+}
+
+/* 3. Controls Row & Master Recording Button */
+.studio-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 12px;
+}
+
+.studio-master-btn {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(0, 255, 136, 0.15);
+  border: 2px solid #00ff88;
+  color: #00ff88;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.35);
+}
+
+.studio-master-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 28px rgba(0, 255, 136, 0.6);
+}
+
+.studio-master-btn.recording {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+  box-shadow: 0 0 32px rgba(239, 68, 68, 0.6) !important;
+  animation: studioPulseRecord 1.2s infinite ease-in-out;
+}
+
+@keyframes studioPulseRecord {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+.studio-master-btn.preview {
+  background: linear-gradient(135deg, #00ff88, #00f2fe);
+  color: #060913;
+  border-color: transparent;
+  box-shadow: 0 0 24px rgba(0, 255, 136, 0.5);
+}
+
+.studio-circle-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.studio-circle-btn.danger {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.studio-circle-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  transform: scale(1.08);
+}
+
+.studio-circle-btn.primary {
+  color: #00ff88;
+  border-color: rgba(0, 255, 136, 0.4);
+  background: rgba(0, 255, 136, 0.12);
+}
+
+.studio-hint-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #8b949e;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* 4. Story Viewer Audio Stage Enhancement */
+.status-audio-timer .countdown-badge {
+  font-size: 11px;
+  color: #00f2fe;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  border-radius: 4px;
+  padding: 1px 5px;
+  margin-left: 6px;
+}

@@ -1,0 +1,287 @@
+/* =============================================================================
+   NEXCHAT - BIOMETRIC DECOY VAULT & PANIC DURESS PIN SYSTEM (v1.0)
+   STRICTLY ZERO UNICODE EMOJIS - Vector Typography & Obsidian Glassmorphism
+   Format: Pure Windows CRLF Line Endings
+   ============================================================================= */
+
+:root {
+  --decoy-obsidian: #060913;
+  --decoy-glass-card: rgba(12, 18, 32, 0.96);
+  --decoy-border: rgba(0, 242, 254, 0.28);
+  --decoy-cyan: #00f2fe;
+  --decoy-cyan-glow: rgba(0, 242, 254, 0.4);
+  --decoy-emerald: #00ff66;
+  --decoy-crimson: #ef4444;
+}
+
+/* 1. KEYPAD LOCK SCREEN MODAL OVERLAY */
+.decoy-lock-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: radial-gradient(circle at center, rgba(10, 16, 28, 0.98) 0%, rgba(3, 6, 14, 0.99) 100%);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  z-index: 100099;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.decoy-lock-container {
+  width: 100%;
+  max-width: 380px;
+  background: var(--decoy-glass-card);
+  border: 1px solid var(--decoy-border);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.9), 0 0 30px rgba(0, 242, 254, 0.15);
+  border-radius: 24px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.decoy-lock-glare {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 60%);
+  transform: rotate(-25deg);
+  pointer-events: none;
+}
+
+/* LOCK SCREEN TELEMETRY HEADER */
+.decoy-lock-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.decoy-shield-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1.5px solid var(--decoy-cyan);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 16px var(--decoy-cyan-glow);
+}
+
+.decoy-shield-icon-wrapper i {
+  font-size: 22px;
+  color: var(--decoy-cyan);
+}
+
+.decoy-lock-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 19px;
+  color: #f8fafc;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.decoy-lock-subtitle {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* PIN DOTS INDICATOR */
+.decoy-pin-dots-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.decoy-pin-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.decoy-pin-dot.filled {
+  background: var(--decoy-cyan);
+  border-color: var(--decoy-cyan);
+  box-shadow: 0 0 12px var(--decoy-cyan);
+  transform: scale(1.15);
+}
+
+.decoy-pin-dot.error {
+  background: var(--decoy-crimson);
+  border-color: var(--decoy-crimson);
+  box-shadow: 0 0 12px var(--decoy-crimson);
+}
+
+/* NUMERIC TACTICAL KEYPAD GRID */
+.decoy-keypad-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  width: 100%;
+}
+
+.decoy-keypad-btn {
+  height: 60px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.16s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.decoy-keypad-sub {
+  font-size: 9px;
+  color: #64748b;
+  letter-spacing: 1.5px;
+  margin-top: -2px;
+}
+
+.decoy-keypad-btn:hover {
+  background: rgba(0, 242, 254, 0.12);
+  border-color: rgba(0, 242, 254, 0.35);
+  transform: translateY(-1px);
+}
+
+.decoy-keypad-btn:active {
+  transform: scale(0.94);
+  background: rgba(0, 242, 254, 0.22);
+}
+
+.decoy-keypad-btn.action-btn {
+  font-size: 16px;
+  color: #94a3b8;
+}
+
+.decoy-keypad-btn.action-btn:hover {
+  color: var(--decoy-cyan);
+}
+
+/* 2. DECOY VAULT SETTINGS PANEL */
+.decoy-settings-card {
+  background: rgba(10, 16, 28, 0.85);
+  border: 1px solid rgba(0, 242, 254, 0.2);
+  border-radius: 14px;
+  padding: 18px;
+  margin-top: 14px;
+}
+
+.decoy-settings-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+}
+
+.decoy-settings-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f8fafc;
+  letter-spacing: 0.5px;
+}
+
+.decoy-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.decoy-field-label {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.decoy-input-box {
+  width: 100%;
+  height: 44px;
+  background: rgba(4, 7, 14, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0 12px;
+  color: #f1f5f9;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.decoy-input-box:focus {
+  border-color: var(--decoy-cyan);
+  outline: none;
+  box-shadow: 0 0 10px var(--decoy-cyan-glow);
+}
+
+.decoy-save-btn {
+  height: 44px;
+  width: 100%;
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.2) 0%, rgba(0, 200, 150, 0.2) 100%);
+  border: 1px solid var(--decoy-cyan);
+  border-radius: 8px;
+  color: var(--decoy-cyan);
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.decoy-save-btn:hover {
+  background: var(--decoy-cyan);
+  color: #000;
+}
+
+/* 3. STERILE DECOY ENVIRONMENT BADGE */
+.decoy-active-hud-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(148, 163, 184, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+}

@@ -46,6 +46,9 @@
   <link rel="stylesheet" href="css/tactile-audio-equalizer.css">
   <link rel="stylesheet" href="css/thread-side-rail.css">
   <link rel="stylesheet" href="css/quantum-airgap.css">
+  <link rel="stylesheet" href="css/decoy-vault.css">
+  <link rel="stylesheet" href="css/tactical-pinboard.css">
+  <link rel="stylesheet" href="css/nex-status-audio.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
@@ -860,7 +863,159 @@
             <span class="chat-reload-status">Downloading chat...</span>
           </div>
         </div>
-        <div id="pinnedMessagesBar" class="nex-pin-bar-container" style="display: none;"></div>
+        <!-- ========================================================================= -->
+<!-- NEXCHAT TACTICAL MULTI-MESSAGE PINBOARD MATRIX (NEX-PINBOARD)              -->
+<!-- ========================================================================= -->
+<div id="pinnedMessagesBar" class="nex-pinboard-root-wrapper" style="display: none;">
+  <!-- 1. Top Compact Summary Bar -->
+  <div class="nex-pinboard-summary-bar" id="nexPinboardSummaryBar">
+    <div class="pinboard-summary-left" id="nexPinboardToggleTrigger">
+      <div class="pinboard-icon-badge">
+        <i class="fa-solid fa-thumbtack"></i>
+      </div>
+      <div class="pinboard-summary-meta">
+        <span class="pinboard-summary-title">TACTICAL PINBOARD MATRIX</span>
+        <span class="pinboard-summary-count" id="pinboardSummaryCountText">0 PINNED</span>
+      </div>
+    </div>
+
+    <!-- Center: Interactive Task Completion Progress Bar -->
+    <div class="pinboard-progress-dock" id="pinboardProgressDock" style="display: none;">
+      <div class="pinboard-progress-meta">
+        <span class="progress-label"><i class="fa-solid fa-list-check"></i> TASKS</span>
+        <span class="progress-percent" id="pinboardProgressPercent">0%</span>
+      </div>
+      <div class="pinboard-progress-track">
+        <div class="pinboard-progress-fill" id="pinboardProgressFill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Right: Expand / Actions -->
+    <div class="pinboard-summary-actions">
+      <button type="button" class="pinboard-summary-btn" id="nexPinboardToggleBtn" title="Expand / Collapse Pinboard Deck">
+        <i class="fa-solid fa-chevron-down" id="nexPinboardChevronIcon"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- 2. Slide-Down Glass Command Card Deck -->
+  <div class="nex-pinboard-deck" id="nexTacticalPinboardDeck" style="display: none;">
+    <!-- Deck Filter & Search Toolbar -->
+    <div class="pinboard-deck-toolbar">
+      <div class="pinboard-filter-pills" id="pinboardFilterPills">
+        <button type="button" class="pin-filter-pill active" data-filter="all">
+          <i class="fa-solid fa-layer-group"></i> All (<span id="countFilterAll">0</span>)
+        </button>
+        <button type="button" class="pin-filter-pill urgent" data-filter="urgent">
+          <i class="fa-solid fa-triangle-exclamation"></i> Urgent (<span id="countFilterUrgent">0</span>)
+        </button>
+        <button type="button" class="pin-filter-pill task" data-filter="task">
+          <i class="fa-solid fa-list-check"></i> Tasks (<span id="countFilterTask">0</span>)
+        </button>
+        <button type="button" class="pin-filter-pill secret" data-filter="secret">
+          <i class="fa-solid fa-key"></i> Secrets (<span id="countFilterSecret">0</span>)
+        </button>
+        <button type="button" class="pin-filter-pill finance" data-filter="finance">
+          <i class="fa-solid fa-coins"></i> Wire (<span id="countFilterFinance">0</span>)
+        </button>
+        <button type="button" class="pin-filter-pill deadline" data-filter="deadline">
+          <i class="fa-solid fa-hourglass-half"></i> Deadlines (<span id="countFilterDeadline">0</span>)
+        </button>
+      </div>
+
+      <div class="pinboard-deck-controls">
+        <button type="button" class="pinboard-ctrl-btn" id="btnPinboardClearCompleted" title="Purge Completed Tasks">
+          <i class="fa-solid fa-broom"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Scrollable Cards Deck Grid -->
+    <div class="pinboard-cards-viewport" id="pinboardCardsViewport">
+      <!-- Populated dynamically via window.NexPinboardMatrix -->
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tactical Pin Category Selector -->
+<div id="nexPinSelectorModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
+  <div class="cyber-hub-modal-content pin-selector-dialog">
+    <div class="cyber-hub-header">
+      <div class="cyber-hub-title">
+        <i class="fa-solid fa-thumbtack text-[#00ff66]"></i>
+        <span>PIN TO TACTICAL PINBOARD MATRIX</span>
+      </div>
+      <button type="button" class="close-modal" id="closePinModalBtn"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="pin-modal-body">
+      <div class="pin-preview-box">
+        <span class="preview-label">MESSAGE PAYLOAD:</span>
+        <p id="pinModalMessagePreview" class="preview-text">...</p>
+      </div>
+
+      <label class="pin-field-label">SELECT TACTICAL CLASSIFICATION TAG:</label>
+      <div class="pin-category-grid">
+        <button type="button" class="pin-cat-opt active" data-cat="task">
+          <i class="fa-solid fa-list-check text-[#00f2fe]"></i>
+          <div class="opt-copy">
+            <strong>Task Action Item</strong>
+            <small>Interactive check-off & progress tracking</small>
+          </div>
+        </button>
+
+        <button type="button" class="pin-cat-opt" data-cat="urgent">
+          <i class="fa-solid fa-triangle-exclamation text-[#ef4444]"></i>
+          <div class="opt-copy">
+            <strong>Urgent Action</strong>
+            <small>Critical priority directive</small>
+          </div>
+        </button>
+
+        <button type="button" class="pin-cat-opt" data-cat="secret">
+          <i class="fa-solid fa-key text-[#c084fc]"></i>
+          <div class="opt-copy">
+            <strong>Server Secret</strong>
+            <small>Credentials, hashes & addresses</small>
+          </div>
+        </button>
+
+        <button type="button" class="pin-cat-opt" data-cat="finance">
+          <i class="fa-solid fa-coins text-[#ffd700]"></i>
+          <div class="opt-copy">
+            <strong>Financial Wire</strong>
+            <small>Escrow, tokens & transaction ledger</small>
+          </div>
+        </button>
+
+        <button type="button" class="pin-cat-opt" data-cat="deadline">
+          <i class="fa-solid fa-hourglass-half text-[#f59e0b]"></i>
+          <div class="opt-copy">
+            <strong>Deadline Countdown</strong>
+            <small>Synchronized T-Minus countdown clock</small>
+          </div>
+        </button>
+      </div>
+
+      <!-- Optional Deadline Hours Picker (Shown if deadline is selected) -->
+      <div id="pinDeadlinePickerRow" class="pin-deadline-picker" style="display: none;">
+        <label for="pinDeadlineHoursSelect">T-Minus Target Countdown:</label>
+        <select id="pinDeadlineHoursSelect" class="settings-select">
+          <option value="1">1 Hour T-Minus</option>
+          <option value="4">4 Hours T-Minus</option>
+          <option value="12">12 Hours T-Minus</option>
+          <option value="24" selected>24 Hours T-Minus</option>
+          <option value="48">48 Hours T-Minus</option>
+          <option value="168">7 Days Sprint</option>
+        </select>
+      </div>
+
+      <button type="button" id="btnConfirmPinMessage" class="btn-primary w-full mt-3">
+        <i class="fa-solid fa-thumbtack"></i> Confirm &amp; Pin to Matrix
+      </button>
+    </div>
+  </div>
+</div>
         <div class="messages-area" id="messages-area">
           <div class="messages-list">
             <div class="empty-state">
@@ -2906,6 +3061,49 @@
 
               <!-- TAB 5: PRIVACY & SECURITY -->
               <div class="settings-tab-pane" id="tab-privacy">
+
+<!-- BIOMETRIC DECOY VAULT & DURESS PIN CONFIGURATION PANEL -->
+<div class="decoy-settings-card" id="decoyVaultSettingsCard">
+  <div class="decoy-settings-header">
+    <i class="fa-solid fa-shield-halved text-[#00f2fe]"></i>
+    <span class="decoy-settings-title">SECURITY ENCLAVE &amp; DURESS SHIELD</span>
+  </div>
+
+  <div class="decoy-field-group">
+    <label class="decoy-field-label" for="settingPrimaryPinInput">
+      <span>PRIMARY UNLOCK PIN</span>
+      <span class="text-xs text-gray-500">(Default: 1337)</span>
+    </label>
+    <input type="password" id="settingPrimaryPinInput" class="decoy-input-box" maxlength="6" placeholder="Enter 4-6 digit master PIN" />
+  </div>
+
+  <div class="decoy-field-group">
+    <label class="decoy-field-label" for="settingDuressPinInput">
+      <span>PANIC / DURESS PIN</span>
+      <span class="text-xs text-[#ef4444]">(Silently purges memory &amp; opens decoy)</span>
+    </label>
+    <input type="password" id="settingDuressPinInput" class="decoy-input-box" maxlength="6" placeholder="Enter panic duress PIN (e.g. 9999)" />
+  </div>
+
+  <div class="decoy-field-group">
+    <label class="decoy-field-label" for="settingAutoLockSelect">
+      <span>AUTO-LOCK INACTIVITY TIMEOUT</span>
+    </label>
+    <select id="settingAutoLockSelect" class="decoy-input-box">
+      <option value="1">1 Minute</option>
+      <option value="5">5 Minutes</option>
+      <option value="15" selected>15 Minutes</option>
+      <option value="60">1 Hour</option>
+      <option value="0">Disabled</option>
+    </select>
+  </div>
+
+  <button type="button" class="decoy-save-btn mt-2" id="saveDecoyVaultConfigBtn">
+    <i class="fa-solid fa-floppy-disk"></i>
+    <span>SAVE ENCLAVE CONFIGURATION</span>
+  </button>
+</div>
+
                 <div class="settings-pane-header">
                   <h3><i class="fa-solid fa-shield-halved"></i> Privacy & Security</h3>
                   <p>Control presence visibility, read receipts, and incoming requests.</p>
@@ -6313,6 +6511,9 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script type="module" src="./src/js/p2p-airdrop-engine.js"></script>
 <script src="./src/js/smart-threads-engine.js"></script>
 <script type="module" src="./src/js/quantum-airgap.js"></script>
+<script type="module" src="./src/js/decoy-vault-system.js"></script>
+<script src="./src/js/tactical-pinboard-matrix.js"></script>
+<script src="./src/js/nex-status-audio-studio.js"></script>
 
 
         <!-- NEXCHAT CYBER ECOSYSTEM SUITE MODAL -->
