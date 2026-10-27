@@ -4956,8 +4956,9 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   transform: scale(0.96) !important;
 }
 /* ══════════════════════════════════════════════════════════════════
-   HACKER TERMINAL STATUS VIEWER (FULL-SCREEN HUD)
+   WORLD-CLASS IMMERSIVE STATUS & STORY VIEWER (SUPER-APP SPECIFICATION)
    ══════════════════════════════════════════════════════════════════ */
+.status-viewer-modal,
 .terminal-viewer-modal {
   position: fixed;
   inset: 0;
@@ -4965,165 +4966,212 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   max-width: 100%;
   height: 100%;
   height: 100dvh;
-  background: #05080C;
+  background: #06090e;
   z-index: 99999;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   overflow: hidden;
   user-select: none;
-  font-family: 'JetBrains Mono', monospace;
+  box-sizing: border-box;
+  animation: storyModalEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.terminal-viewer-scanlines {
+@keyframes storyModalEnter {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Hide HUD elements when user is holding down to inspect media cleanly */
+.status-viewer-modal.status-held .status-viewer-scrim-top,
+.status-viewer-modal.status-held .status-viewer-bottom-bar,
+.status-viewer-modal.status-held .status-viewer-caption-card,
+.status-viewer-modal.status-held .terminal-caption-console {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* 1. Top Scrim & Progress Bars */
+.status-viewer-scrim-top {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-              linear-gradient(90deg, rgba(0, 255, 136, 0.02), rgba(0, 212, 255, 0.01));
-  background-size: 100% 4px, 6px 100%;
-  pointer-events: none;
-  z-index: 25;
-  opacity: 0.8;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 12px 14px 28px;
+  background: linear-gradient(180deg, rgba(6, 9, 14, 0.95) 0%, rgba(6, 9, 14, 0.6) 65%, transparent 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: opacity 0.2s ease;
+  pointer-events: auto;
 }
 
-/* Laser progress indicators */
+.status-viewer-progress-container,
 .terminal-progress-container {
   display: flex;
-  gap: 6px;
-  padding: 12px 14px 4px 14px;
+  align-items: center;
+  gap: 4px;
   width: 100%;
   box-sizing: border-box;
-  z-index: 30;
 }
 
 .status-progress-segment {
-  height: 3px;
-  flex: 1;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 999px;
+  height: 2.5px;
+  flex: 1 1 auto;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 99px;
   overflow: hidden;
+  position: relative;
 }
 
 .status-progress-fill {
   height: 100%;
-  background: #00FF88;
-  box-shadow: 0 0 10px #00FF88;
+  background: #00C896;
+  border-radius: 99px;
+  box-shadow: 0 0 8px rgba(0, 200, 150, 0.6);
   width: 0%;
-  transition: width 0.08s linear;
+  transition: width 0.05s linear;
 }
 
-/* Header */
+/* Top App Bar */
+.status-viewer-top-bar,
 .terminal-viewer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 8px 16px;
-  z-index: 30;
-  background: linear-gradient(180deg, rgba(5, 8, 12, 0.95) 0%, transparent 100%);
-  border-bottom: 1px solid rgba(0, 255, 136, 0.15);
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
 }
 
+.status-viewer-user-info,
 .terminal-viewer-user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0 !important;
 }
 
+.status-viewer-icon-btn,
 .terminal-viewer-nav-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #00FF88;
-  font-size: 16px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
 }
 
+.status-viewer-icon-btn:hover,
 .terminal-viewer-nav-btn:hover {
-  background: #00FF88;
-  color: #000;
-  box-shadow: 0 0 14px rgba(0, 255, 136, 0.6);
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #00C896 !important;
+  transform: scale(1.06) !important;
 }
 
+.status-viewer-avatar-wrap,
 .terminal-viewer-avatar-wrap {
-  width: 42px;
-  height: 42px;
+  position: relative;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   padding: 2px;
-  background: linear-gradient(135deg, #00FF88, #00D4FF);
-  box-shadow: 0 0 12px rgba(0, 255, 136, 0.5);
+  background: linear-gradient(135deg, #00C896, #00b4d8);
+  box-shadow: 0 0 10px rgba(0, 200, 150, 0.4);
+  flex-shrink: 0;
 }
 
+.status-viewer-avatar,
 .terminal-avatar-ring {
   width: 100%;
   height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  border: 1.5px solid #05080C;
+  border: 2px solid #06090e;
+  display: block;
 }
 
-.terminal-node-title {
-  font-family: 'Orbitron', 'JetBrains Mono', sans-serif;
-  font-size: 14.5px;
-  font-weight: 800;
-  color: #00FF88;
-  letter-spacing: 0.5px;
-  text-shadow: 0 0 8px rgba(0, 255, 136, 0.5);
+.status-avatar-live-dot {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #00C896;
+  border: 2px solid #06090e;
+  box-shadow: 0 0 6px #00C896;
 }
 
-.terminal-cipher-chip {
-  font-size: 9.5px;
-  font-weight: 700;
-  color: #00D4FF;
-  padding: 1px 6px;
-  border-radius: 3px;
-  background: rgba(0, 212, 255, 0.12);
-  border: 1px solid rgba(0, 212, 255, 0.3);
+.status-viewer-meta,
+.terminal-viewer-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
 }
 
-.terminal-hud-status-badge {
-  font-size: 10.5px;
-  font-weight: 700;
-  color: #00FF88;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(0, 255, 136, 0.08);
-  border: 1px solid rgba(0, 255, 136, 0.25);
-}
-
-.terminal-terminate-btn {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #ef4444;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  font-weight: 800;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  display: inline-flex;
+.status-viewer-name-row {
+  display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.2s ease;
 }
 
-.terminal-terminate-btn:hover {
-  background: #ef4444;
-  color: #fff;
-  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+.status-viewer-name,
+.terminal-node-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  color: #f8fafc !important;
+  letter-spacing: -0.2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 160px !important;
+  text-shadow: none !important;
 }
 
-/* Media Stage with Reticles */
+.status-verified-chip {
+  color: #00C896;
+  font-size: 12px;
+}
+
+.status-viewer-sub-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.status-sub-sep {
+  color: #64748b;
+  font-size: 10px;
+}
+
+.status-viewer-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 2. Media Stage */
+.status-viewer-media-stage,
 .terminal-media-stage {
-  flex: 1;
+  flex: 1 1 auto;
   position: relative;
   display: flex;
   align-items: center;
@@ -5131,140 +5179,296 @@ body:not(.dark-mode) .status-fab-secondary.text-fab-btn:hover {
   overflow: hidden;
   width: 100%;
   height: 100%;
-  background: #000;
+  background: #05080c;
 }
 
-.terminal-corner {
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  pointer-events: none;
-  z-index: 22;
+.status-media-content {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100dvh;
+  object-fit: contain;
+  display: block;
 }
 
-.terminal-corner.tl { top: 20px; left: 20px; border-top: 2px solid #00FF88; border-left: 2px solid #00FF88; }
-.terminal-corner.tr { top: 20px; right: 20px; border-top: 2px solid #00FF88; border-right: 2px solid #00FF88; }
-.terminal-corner.bl { bottom: 20px; left: 20px; border-bottom: 2px solid #00FF88; border-left: 2px solid #00FF88; }
-.terminal-corner.br { bottom: 20px; right: 20px; border-bottom: 2px solid #00FF88; border-right: 2px solid #00FF88; }
-
+.status-viewer-text-slide,
 .terminal-text-slide {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 40px 24px;
   box-sizing: border-box;
   text-align: center;
-  color: #00FF88;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 26px;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 22px;
   font-weight: 700;
-  line-height: 1.6;
-  text-shadow: 0 0 14px rgba(0, 255, 136, 0.6);
+  line-height: 1.5;
+  word-break: break-word;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  text-shadow: none;
 }
 
-/* Bottom Console Caption & Reply */
+/* Tap Zones */
+.status-tap-zone {
+  position: absolute;
+  top: 70px;
+  bottom: 120px;
+  z-index: 40;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.status-tap-zone.left-zone {
+  left: 0;
+  width: 35%;
+}
+
+.status-tap-zone.right-zone {
+  right: 0;
+  width: 65%;
+}
+
+/* 3. Bottom Bar & Quick Reactions */
+.status-viewer-bottom-bar,
 .terminal-viewer-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 20px 16px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: linear-gradient(0deg, rgba(6, 9, 14, 0.96) 0%, rgba(6, 9, 14, 0.65) 70%, transparent 100%);
   display: flex;
   flex-direction: column;
   gap: 12px;
-  padding: 14px 20px 24px 20px;
-  z-index: 30;
-  background: linear-gradient(0deg, rgba(5, 8, 12, 0.98) 0%, rgba(5, 8, 12, 0.75) 60%, transparent 100%);
-  border-top: 1px solid rgba(0, 255, 136, 0.15);
+  transition: opacity 0.2s ease;
+  pointer-events: auto;
+  border: none !important;
 }
 
+/* Floating Glassmorphic Caption Card */
+.status-viewer-caption-card,
 .terminal-caption-console {
-  background: rgba(10, 14, 19, 0.85);
-  border: 1px solid rgba(0, 255, 136, 0.25);
-  border-radius: 10px;
-  padding: 10px 16px;
-  max-width: 680px;
-  margin: 0 auto;
-  width: 100%;
-  box-sizing: border-box;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+  position: relative !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  background: rgba(15, 23, 42, 0.78) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 14px !important;
+  padding: 8px 14px !important;
+  box-sizing: border-box !important;
+  z-index: 45 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 3px !important;
+  transition: opacity 0.2s ease !important;
 }
 
-.terminal-console-header {
+.status-viewer-caption-text,
+.terminal-console-body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-size: 14.5px !important;
+  color: #f8fafc !important;
+  line-height: 1.45 !important;
+  margin: 0 !important;
+  font-weight: 500 !important;
+  text-align: center !important;
+}
+
+.status-caption-timestamp,
+.terminal-console-time {
+  font-size: 10.5px !important;
+  color: #94a3b8 !important;
+  text-align: center !important;
+}
+
+.status-quick-reactions-tray {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 6px;
-  font-size: 11px;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
 }
 
-.terminal-console-prompt {
-  color: #00FF88;
-  font-weight: 700;
+.status-quick-react-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
-.terminal-console-time {
-  color: #8696A0;
+.status-quick-react-btn:hover {
+  transform: scale(1.2) translateY(-4px);
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 4px 14px rgba(0, 200, 150, 0.3);
 }
 
-.terminal-console-body {
-  font-size: 14.5px;
-  color: #F8FAFC;
-  line-height: 1.5;
-  margin: 0;
-  font-weight: 500;
+.status-quick-react-btn:active {
+  transform: scale(0.9);
 }
 
+/* Reply Row */
+.status-viewer-reply-row,
 .terminal-reply-row {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 480px !important;
+  margin: 0 auto !important;
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+.status-reply-pill {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   gap: 8px;
-  max-width: 680px;
-  margin: 0 auto;
-  width: 100%;
-  background: rgba(16, 26, 36, 0.9);
-  border: 1.5px solid rgba(0, 255, 136, 0.35);
-  border-radius: 8px;
-  padding: 4px 12px;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 26px;
+  padding: 4px 6px 4px 14px;
   box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.terminal-reply-prompt {
-  color: #00FF88;
-  font-weight: 800;
-  font-size: 14px;
+.status-reply-pill:focus-within {
+  border-color: #00C896;
+  box-shadow: 0 0 12px rgba(0, 200, 150, 0.25);
+  background: rgba(30, 41, 59, 0.9);
 }
 
+.status-reply-icon {
+  color: #94a3b8;
+  font-size: 15px;
+}
+
+.status-reply-input,
 .terminal-reply-input {
-  flex: 1;
-  background: transparent;
-  border: none;
-  color: #F8FAFC;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 13.5px;
-  outline: none;
-  padding: 8px 4px;
+  flex: 1 1 auto !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #f8fafc !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-size: 14.5px !important;
+  padding: 8px 2px !important;
 }
 
+.status-reply-input::placeholder,
+.terminal-reply-input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.status-reply-send-btn,
 .terminal-reply-send-btn {
-  background: linear-gradient(135deg, #00FF88, #00D4FF);
-  color: #000;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-family: 'JetBrains Mono', monospace;
-  font-weight: 800;
-  font-size: 12px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow: 0 0 12px rgba(0, 255, 136, 0.4);
-  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #00C896, #00b4d8) !important;
+  border: none !important;
+  color: #000 !important;
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  flex-shrink: 0 !important;
+  box-shadow: 0 0 10px rgba(0, 200, 150, 0.3) !important;
 }
 
+.status-reply-send-btn:hover,
 .terminal-reply-send-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 0 18px rgba(0, 255, 136, 0.7);
+  transform: scale(1.08) !important;
+  box-shadow: 0 0 14px rgba(0, 200, 150, 0.5) !important;
 }
 
+/* Own Status Controls */
+.status-viewer-own-controls {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  max-width: 480px !important;
+  margin: 0 auto !important;
+  gap: 12px !important;
+}
+
+.status-views-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 20px !important;
+  padding: 8px 16px !important;
+  color: #f1f5f9 !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+}
+
+.status-delete-btn {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #ef4444 !important;
+  border-radius: 20px !important;
+  padding: 8px 18px !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+.status-delete-btn:hover {
+  background: #ef4444 !important;
+  color: #fff !important;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.5) !important;
+}
+
+/* Floating Reaction Particle Animation */
+.status-reaction-burst-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 60;
+  overflow: hidden;
+}
+
+.status-burst-particle {
+  position: absolute;
+  bottom: 90px;
+  font-size: 32px;
+  animation: burstParticleFloat 1.2s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+  pointer-events: none;
+}
+
+@keyframes burstParticleFloat {
+  0% { transform: translateY(0) scale(0.6); opacity: 1; }
+  50% { transform: translateY(-80px) scale(1.4); }
+  100% { transform: translateY(-180px) scale(1.8); opacity: 0; }
+}
 /* ══════════════════════════════════════════════════════════════════
    HACKER TERMINAL STATUS VAULT — RESPONSIVE COLLISION PREVENTION
    ══════════════════════════════════════════════════════════════════ */

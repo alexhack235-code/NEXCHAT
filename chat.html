@@ -3696,75 +3696,118 @@
     </nav>
   </div>
 
-  <!-- NEXCHAT HACKER TERMINAL STATUS VIEWER FULL-SCREEN MODAL -->
+  <!-- ==========================================================================
+       WORLD-CLASS IMMERSIVE STATUS & STORY VIEWER (SUPER-APP SPECIFICATION)
+       ========================================================================== -->
   <div id="statusViewerModal" class="status-viewer-modal terminal-viewer-modal" style="display: none;">
-    <!-- CRT Matrix Scanlines & HUD Vignette -->
-    <div class="terminal-viewer-scanlines" aria-hidden="true"></div>
+    <!-- Top Gradient Scrim & Progress Bars -->
+    <div class="status-viewer-scrim-top">
+      <div id="statusViewerProgressBars" class="status-viewer-progress-container terminal-progress-container"></div>
 
-    <!-- Top Laser Progress Bars (Segmented Story Indicators) -->
-    <div id="statusViewerProgressBars" class="status-viewer-progress-container terminal-progress-container"></div>
+      <!-- Sleek Top Header Bar -->
+      <div class="status-viewer-top-bar" id="statusViewerTopBar">
+        <div class="status-viewer-user-info">
+          <button type="button" id="closeStatusViewerBtn" class="status-viewer-icon-btn" title="Back (Esc)" aria-label="Close status viewer">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+          <div class="status-viewer-avatar-wrap">
+            <img id="statusViewerAvatar" src="logo.jpg" alt="Avatar" class="status-viewer-avatar">
+            <span class="status-avatar-live-dot"></span>
+          </div>
+          <div class="status-viewer-meta">
+            <div class="status-viewer-name-row">
+              <span id="statusViewerName" class="status-viewer-name">User</span>
+              <span class="status-verified-chip" id="statusVerifiedChip" title="NEX Sealed Status"><i class="fa-solid fa-shield-halved"></i></span>
+            </div>
+            <div class="status-viewer-sub-row">
+              <span id="statusViewerTime" class="status-viewer-time">Just now</span>
+              <span class="status-sub-sep">&bull;</span>
+              <span id="statusViewerDetailsExpires" class="status-expires-text">Expires in 24h</span>
+            </div>
+          </div>
+        </div>
 
-    <!-- Top Header: Avatar + Name + Telemetry + Terminate button -->
-    <div class="status-viewer-top-bar terminal-viewer-header">
-      <div class="status-viewer-user-info terminal-viewer-user">
-        <button type="button" id="closeStatusViewerBtn" class="status-viewer-back-btn terminal-viewer-nav-btn" title="Back (Esc)">
-          <i class="fa-solid fa-arrow-left"></i>
-        </button>
-        <div class="terminal-viewer-avatar-wrap">
-          <img id="statusViewerAvatar" src="logo.jpg" alt="Avatar" class="status-viewer-avatar terminal-avatar-ring">
+        <!-- Top Right Action Controls: Volume, Pause/Play, Close -->
+        <div class="status-viewer-top-actions">
+          <button type="button" id="statusViewerMuteBtn" class="status-viewer-icon-btn video-mute-toggle" title="Toggle Sound" style="display: none;">
+            <i class="fa-solid fa-volume-high"></i>
+          </button>
+          <button type="button" id="statusViewerPauseBtn" class="status-viewer-icon-btn" title="Pause / Play (Space)">
+            <i class="fa-solid fa-pause"></i>
+          </button>
+          <button type="button" id="statusViewerCloseIcon" class="status-viewer-icon-btn" title="Close (Esc)" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
         </div>
-        <div class="status-viewer-meta terminal-viewer-meta">
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <span id="statusViewerName" class="status-viewer-name terminal-node-title">NODE://USER</span>
-            <span class="terminal-cipher-chip">[AES_GCM_256]</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00FF88;">
-            <span id="statusViewerTime" class="status-viewer-time">T-00:00:00</span>
-            <span class="status-bullet">&bull;</span>
-            <span id="statusViewerDetailsExpires" class="status-expires-text">TTL: 24h</span>
-          </div>
-        </div>
-      </div>
-      <div style="display: flex; align-items: center; gap: 10px;">
-        <span class="terminal-hud-status-badge"><i class="fa-solid fa-circle text-[8px] animate-pulse"></i> LIVE_STREAM</span>
-        <button type="button" id="statusViewerCloseIcon" class="status-viewer-close-btn terminal-terminate-btn" title="Terminate Stream (Esc)">
-          <i class="fa-solid fa-xmark"></i> <span>[TERMINATE]</span>
-        </button>
       </div>
     </div>
 
-    <!-- Center Media Container with Tap Left/Right Controls and HUD Reticles -->
-    <div class="status-viewer-media-stage terminal-media-stage" id="statusViewerStage">
-      <!-- HUD Reticle Corner Brackets -->
-      <div class="terminal-corner tl"></div>
-      <div class="terminal-corner tr"></div>
-      <div class="terminal-corner bl"></div>
-      <div class="terminal-corner br"></div>
+    <!-- Center Media Stage with Tap Left/Right Zones -->
+    <div class="status-viewer-media-stage" id="statusViewerStage">
+      <!-- Interactive Tap Zones: Left 35% (Prev), Right 65% (Next) -->
+      <div class="status-tap-zone left-zone" id="statusTapPrev" title="Previous Slide"></div>
+      <div class="status-tap-zone right-zone" id="statusTapNext" title="Next Slide"></div>
 
-      <div class="status-tap-zone left-zone" id="statusTapPrev" title="Previous Status Slide (Left Arrow)"></div>
-      <div class="status-tap-zone right-zone" id="statusTapNext" title="Next Status Slide (Right Arrow)"></div>
+      <!-- Media Elements -->
+      <img id="statusViewerImage" src="" alt="Status" class="status-media-content" style="display: none;">
+      <video id="statusViewerVideo" src="" class="status-media-content" playsinline autoplay muted style="display: none;"></video>
+      <div id="statusViewerFallbackText" class="status-viewer-text-slide" style="display: none;"></div>
 
-      <img id="statusViewerImage" src="" alt="Status" style="display: none;">
-      <video id="statusViewerVideo" src="" playsinline autoplay muted style="display: none;"></video>
-      <div id="statusViewerFallbackText" class="status-viewer-text-slide terminal-text-slide" style="display: none;"></div>
+      <!-- Floating Particle Burst Anchor for Quick Reactions -->
+      <div id="statusReactionBurstContainer" class="status-reaction-burst-container" aria-hidden="true"></div>
+
     </div>
 
-    <!-- Bottom Caption Console & Terminal Transmitter Row -->
-    <div class="status-viewer-bottom-bar terminal-viewer-bottom">
-      <div id="statusViewerCaptionBox" class="status-viewer-caption-card terminal-caption-console">
-        <div class="terminal-console-header">
-          <span class="terminal-console-prompt">root@nexchat/status:~$ cat payload.txt</span>
-          <span id="statusViewerDetailsTime" class="terminal-console-time"><i class="fa-regular fa-clock"></i> 03:56 AM</span>
-        </div>
-        <p id="statusViewerCaption" class="status-viewer-caption-text terminal-console-body"></p>
+    <!-- Bottom Action Console & Quick Reactions Row -->
+    <div class="status-viewer-bottom-bar" id="statusViewerBottomBar">
+      <!-- Floating Glassmorphic Caption Card -->
+      <div id="statusViewerCaptionBox" class="status-viewer-caption-card" style="display: none;">
+        <p id="statusViewerCaption" class="status-viewer-caption-text"></p>
+        <span id="statusViewerDetailsTime" class="status-caption-timestamp"></span>
+      </div>
+      <!-- Quick Reactions Row (Strictly Vector FontAwesome Icons) -->
+      <div class="status-quick-reactions-tray" id="statusQuickReactionsTray">
+        <button type="button" class="status-quick-react-btn" data-reaction="heart" title="Love">
+          <i class="fa-solid fa-heart" style="color: #ef4444;"></i>
+        </button>
+        <button type="button" class="status-quick-react-btn" data-reaction="fire" title="Fire">
+          <i class="fa-solid fa-fire" style="color: #f97316;"></i>
+        </button>
+        <button type="button" class="status-quick-react-btn" data-reaction="clap" title="Applause">
+          <i class="fa-solid fa-hands-clapping" style="color: #eab308;"></i>
+        </button>
+        <button type="button" class="status-quick-react-btn" data-reaction="laugh" title="Haha">
+          <i class="fa-solid fa-face-laugh-squint" style="color: #facc15;"></i>
+        </button>
+        <button type="button" class="status-quick-react-btn" data-reaction="wow" title="Wow">
+          <i class="fa-solid fa-face-surprise" style="color: #06b6d4;"></i>
+        </button>
+        <button type="button" class="status-quick-react-btn" data-reaction="bolt" title="Electric">
+          <i class="fa-solid fa-bolt" style="color: #00C896;"></i>
+        </button>
       </div>
 
-      <div class="status-viewer-reply-row terminal-reply-row">
-        <span class="terminal-reply-prompt">&gt;</span>
-        <input type="text" id="statusViewerReplyInput" class="status-reply-input terminal-reply-input" placeholder="Transmit encrypted reply to operative..." autocomplete="off" />
-        <button type="button" id="statusViewerReplySend" class="status-reply-btn terminal-reply-send-btn" title="Transmit Reply">
-          <i class="fa-solid fa-paper-plane"></i>
-          <span>[TRANSMIT]</span>
+      <!-- Reply Input Capsule (Shown for other users' statuses) -->
+      <div class="status-viewer-reply-row" id="statusViewerReplyRow">
+        <div class="status-reply-pill">
+          <i class="fa-regular fa-comment-dots status-reply-icon"></i>
+          <input type="text" id="statusViewerReplyInput" class="status-reply-input" placeholder="Reply..." autocomplete="off" />
+          <button type="button" id="statusViewerReplySend" class="status-reply-send-btn" title="Send Reply">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Own Status Controls (Shown when viewing your own status) -->
+      <div class="status-viewer-own-controls" id="statusViewerOwnControls" style="display: none;">
+        <div class="status-views-badge" id="statusViewerViewsBadge">
+          <i class="fa-solid fa-eye"></i>
+          <span id="statusViewCount">0</span>
+          <span>views</span>
+        </div>
+        <button type="button" class="status-delete-btn" id="statusViewerDeleteBtn" title="Delete status update">
+          <i class="fa-solid fa-trash-can"></i>
+          <span>Delete</span>
         </button>
       </div>
     </div>

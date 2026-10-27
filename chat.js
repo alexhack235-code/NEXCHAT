@@ -14435,6 +14435,8 @@ function viewStatusGroup(groupIndex) {
   currentStorySlideIndex = 0;
   showCurrentStorySlide();
 }
+window.viewStatusGroup = viewStatusGroup;
+window.showCurrentStorySlide = showCurrentStorySlide;
 
 function showCurrentStorySlide() {
   const modal = document.getElementById('statusViewerModal');
@@ -14456,20 +14458,37 @@ function showCurrentStorySlide() {
   const captionBox = document.getElementById('statusViewerCaptionBox');
   const detailsTime = document.getElementById('statusViewerDetailsTime');
   const detailsExpires = document.getElementById('statusViewerDetailsExpires');
+  const muteBtn = document.getElementById('statusViewerMuteBtn');
+  const pauseBtn = document.getElementById('statusViewerPauseBtn');
 
-  // Format time & expiration
-  const dateObj = new Date(currentSlide.timestamp || Date.now());
-  const timeFormatted = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const remainingMs = Math.max(0, (currentSlide.expiresAtMs || (Date.now() + 86400000)) - Date.now());
+  // Format relative time & expiration in clean human readable style
+  const now = Date.now();
+  const slideTime = currentSlide.timestamp || now;
+  const diffMs = Math.max(0, now - slideTime);
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+
+  let relativeTimeLabel = 'Just now';
+  if (diffMins >= 1 && diffMins < 60) {
+    relativeTimeLabel = `${diffMins}m ago`;
+  } else if (diffHours >= 1 && diffHours < 24) {
+    relativeTimeLabel = `${diffHours}h ago`;
+  } else if (diffHours >= 24) {
+    const d = new Date(slideTime);
+    relativeTimeLabel = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+
+  const remainingMs = Math.max(0, (currentSlide.expiresAtMs || (now + 86400000)) - now);
   const remHours = Math.floor(remainingMs / (1000 * 60 * 60));
   const remMins = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
   const expiresInLabel = remHours > 0 ? `Expires in ${remHours}h` : `Expires in ${remMins}m`;
 
   if (avatar) avatar.src = currentGrp.avatarUrl || 'logo.jpg';
   if (name) name.textContent = currentGrp.userName || 'User';
-  if (time) time.textContent = `${timeFormatted}, Today`;
+  if (time) time.textContent = relativeTimeLabel;
+  if (detailsExpires) detailsExpires.textContent = expiresInLabel;
 
-  // Media
+  // Media Rendering
   if (currentSlide.mediaType === 'video' && currentSlide.mediaUrl) {
     if (img) img.style.display = 'none';
     if (textSlide) textSlide.style.display = 'none';
@@ -14478,11 +14497,16 @@ function showCurrentStorySlide() {
       video.src = currentSlide.mediaUrl;
       video.play().catch(() => {});
     }
+    if (muteBtn) {
+      muteBtn.style.display = 'flex';
+      muteBtn.innerHTML = (video && !video.muted) ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
+    }
   } else if (currentSlide.mediaUrl) {
     if (video) {
       video.pause();
       video.style.display = 'none';
     }
+    if (muteBtn) muteBtn.style.display = 'none';
     if (textSlide) textSlide.style.display = 'none';
     if (img) {
       img.style.display = 'block';
@@ -14490,23 +14514,55 @@ function showCurrentStorySlide() {
     }
   } else {
     if (video) video.style.display = 'none';
+    if (muteBtn) muteBtn.style.display = 'none';
     if (img) img.style.display = 'none';
     if (textSlide) {
       textSlide.style.display = 'flex';
       textSlide.textContent = currentSlide.caption || 'No content';
-      textSlide.style.background = currentSlide.gradient || 'linear-gradient(135deg, #0a0e13, #111b21)';
+      textSlide.style.background = currentSlide.gradient || 'linear-gradient(135deg, #0f172a, #1e293b)';
     }
   }
 
-  // Caption card inside viewer
+  // Floating Caption Card
   if (caption && captionBox) {
     if (currentSlide.caption && currentSlide.mediaType !== 'text') {
-      captionBox.style.display = 'block';
+      captionBox.style.display = 'flex';
       caption.textContent = currentSlide.caption;
-      if (detailsTime) detailsTime.innerHTML = `<i class="fa-regular fa-clock"></i> ${timeFormatted}`;
-      if (detailsExpires) detailsExpires.textContent = `TTL: ${expiresInLabel}`;
+      if (detailsTime) {
+        const dObj = new Date(slideTime);
+        detailsTime.textContent = dObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
     } else {
       captionBox.style.display = 'none';
+    }
+  }
+
+  // Own Status vs Other User Status Controls
+  const isOwn = (typeof myUID !== 'undefined' && myUID && currentGrp.userId === myUID);
+  const ownControls = document.getElementById('statusViewerOwnControls');
+  const replyRow = document.getElementById('statusViewerReplyRow');
+  const quickReactions = document.getElementById('statusQuickReactionsTray');
+  const viewCountEl = document.getElementById('statusViewCount');
+
+  if (isOwn) {
+    if (ownControls) ownControls.style.display = 'flex';
+    if (replyRow) replyRow.style.display = 'none';
+    if (quickReactions) quickReactions.style.display = 'none';
+    if (viewCountEl) viewCountEl.textContent = currentSlide.viewCount || currentSlide.views || 0;
+  } else {
+    if (ownControls) ownControls.style.display = 'none';
+    if (replyRow) replyRow.style.display = 'flex';
+    if (quickReactions) quickReactions.style.display = 'flex';
+    const replyInput = document.getElementById('statusViewerReplyInput');
+    if (replyInput) replyInput.placeholder = `Reply to ${currentGrp.userName || 'User'}...`;
+
+    // Record view in Firestore asynchronously
+    if (currentSlide.id && typeof db !== 'undefined' && typeof myUID !== 'undefined' && myUID) {
+      try {
+        updateDoc(doc(db, 'statuses', currentSlide.id), {
+          viewCount: increment(1)
+        }).catch(() => {});
+      } catch (_) {}
     }
   }
 
@@ -14526,6 +14582,10 @@ function showCurrentStorySlide() {
     });
   }
 
+  if (pauseBtn) {
+    pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+  }
+
   modal.style.display = 'flex';
   try {
     if (!history.state || history.state.nexchatModal !== 'statusViewer') {
@@ -14533,7 +14593,7 @@ function showCurrentStorySlide() {
     }
   } catch (_) {}
 
-  // Set up listeners for tapping left/right, keys, and close
+  // Set up listeners for tapping left/right, keys, hold-to-pause, and close
   setupViewerControls();
 
   // Start progress bar animation
@@ -14548,10 +14608,17 @@ function setupViewerControls() {
   const tapNext = document.getElementById('statusTapNext');
   const replyInput = document.getElementById('statusViewerReplyInput');
   const replySend = document.getElementById('statusViewerReplySend');
+  const pauseBtn = document.getElementById('statusViewerPauseBtn');
+  const muteBtn = document.getElementById('statusViewerMuteBtn');
+  const deleteBtn = document.getElementById('statusViewerDeleteBtn');
+  const stage = document.getElementById('statusViewerStage');
 
   const closeViewer = () => {
     clearInterval(storyProgressTimer);
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+      modal.style.display = 'none';
+      modal.classList.remove('status-held');
+    }
     const video = document.getElementById('statusViewerVideo');
     if (video) video.pause();
   };
@@ -14573,14 +14640,75 @@ function setupViewerControls() {
     };
   }
 
-  // Pause on pointer down / touch down
-  if (modal && !modal.dataset.hasPauseListeners) {
-    modal.dataset.hasPauseListeners = 'true';
-    modal.addEventListener('pointerdown', () => { isStoryPaused = true; });
-    modal.addEventListener('pointerup', () => { isStoryPaused = false; });
+  // Play / Pause Button Toggle
+  if (pauseBtn && !pauseBtn.dataset.hasListener) {
+    pauseBtn.dataset.hasListener = 'true';
+    pauseBtn.onclick = (e) => {
+      e.stopPropagation();
+      isStoryPaused = !isStoryPaused;
+      pauseBtn.innerHTML = isStoryPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
+    };
   }
 
-  // Terminal keyboard hotkeys (ArrowLeft, ArrowRight, Space, Escape)
+  // Video Sound Toggle
+  if (muteBtn && !muteBtn.dataset.hasListener) {
+    muteBtn.dataset.hasListener = 'true';
+    muteBtn.onclick = (e) => {
+      e.stopPropagation();
+      const video = document.getElementById('statusViewerVideo');
+      if (video) {
+        video.muted = !video.muted;
+        muteBtn.innerHTML = video.muted ? '<i class="fa-solid fa-volume-xmark"></i>' : '<i class="fa-solid fa-volume-high"></i>';
+      }
+    };
+  }
+
+  // Delete status update (Own status)
+  if (deleteBtn && !deleteBtn.dataset.hasListener) {
+    deleteBtn.dataset.hasListener = 'true';
+    deleteBtn.onclick = async (e) => {
+      e.stopPropagation();
+      if (!confirm('Are you sure you want to delete this status update?')) return;
+      const currentGrp = activeStoriesList[currentStoryGroupIndex];
+      const slideToDelete = currentGrp?.slides?.[currentStorySlideIndex];
+      if (!slideToDelete || !slideToDelete.id) return;
+      try {
+        await deleteDoc(doc(db, 'statuses', slideToDelete.id));
+        showNotif('Status update deleted', 'success', 2200);
+        currentGrp.slides.splice(currentStorySlideIndex, 1);
+        if (currentGrp.slides.length > 0) {
+          currentStorySlideIndex = Math.min(currentStorySlideIndex, currentGrp.slides.length - 1);
+          showCurrentStorySlide();
+        } else {
+          closeViewer();
+        }
+        if (typeof loadStatusFeed === 'function') loadStatusFeed();
+      } catch (err) {
+        console.error('Delete status error:', err);
+        showNotif('Could not delete status update', 'error', 3000);
+      }
+    };
+  }
+
+  // Press & Hold on media stage: Pauses progress and hides HUD for pure full-screen photo viewing
+  if (stage && !stage.dataset.hasHoldListener) {
+    stage.dataset.hasHoldListener = 'true';
+    const onHoldStart = (e) => {
+      if (e.target.closest('button, input, textarea')) return;
+      isStoryPaused = true;
+      if (modal) modal.classList.add('status-held');
+    };
+    const onHoldEnd = () => {
+      isStoryPaused = false;
+      if (modal) modal.classList.remove('status-held');
+    };
+    stage.addEventListener('pointerdown', onHoldStart);
+    stage.addEventListener('pointerup', onHoldEnd);
+    stage.addEventListener('pointercancel', onHoldEnd);
+    stage.addEventListener('pointerleave', onHoldEnd);
+  }
+
+  // Keyboard hotkeys (ArrowLeft, ArrowRight, Space, Escape)
   if (modal && !modal.dataset.hasKeyListeners) {
     modal.dataset.hasKeyListeners = 'true';
     window.addEventListener('keydown', (e) => {
@@ -14598,19 +14726,52 @@ function setupViewerControls() {
       } else if (e.key === ' ') {
         e.preventDefault();
         isStoryPaused = !isStoryPaused;
+        if (pauseBtn) {
+          pauseBtn.innerHTML = isStoryPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
+        }
       }
     });
   }
 
-  // Reply Transmission
+  // Quick Reactions Tray
+  const reactionButtons = document.querySelectorAll('.status-quick-react-btn');
+  reactionButtons.forEach(btn => {
+    if (btn.dataset.hasListener === 'true') return;
+    btn.dataset.hasListener = 'true';
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const burstContainer = document.getElementById('statusReactionBurstContainer');
+      if (burstContainer) {
+        const particle = document.createElement('div');
+        particle.className = 'status-burst-particle';
+        particle.style.left = `${Math.floor(20 + Math.random() * 60)}%`;
+        particle.innerHTML = btn.innerHTML;
+        burstContainer.appendChild(particle);
+        setTimeout(() => particle.remove(), 1200);
+      }
+      const currentGrp = activeStoriesList[currentStoryGroupIndex];
+      showNotif(`Sent reaction to ${currentGrp?.userName || 'User'}!`, 'success', 2200);
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+    };
+  });
+
+  // Reply Input Pause on Focus & Send Transmission
+  if (replyInput && !replyInput.dataset.hasPauseFocus) {
+    replyInput.dataset.hasPauseFocus = 'true';
+    replyInput.addEventListener('focus', () => { isStoryPaused = true; });
+    replyInput.addEventListener('blur', () => { isStoryPaused = false; });
+  }
+
   if (replySend && !replySend.dataset.hasListener) {
     replySend.dataset.hasListener = 'true';
     const sendReply = () => {
       const txt = replyInput?.value.trim();
       if (!txt) return;
       const currentGrp = activeStoriesList[currentStoryGroupIndex];
-      showNotif(`[TRANSMIT] Encrypted response sent to ${currentGrp?.userName || 'operative'}: "${txt.substring(0, 30)}"`, 'success', 3500);
+      showNotif(`Reply sent to ${currentGrp?.userName || 'User'}: "${txt.substring(0, 30)}"`, 'success', 3000);
       if (replyInput) replyInput.value = '';
+      isStoryPaused = false;
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
     };
     replySend.onclick = sendReply;
     replyInput?.addEventListener('keydown', (e) => {
