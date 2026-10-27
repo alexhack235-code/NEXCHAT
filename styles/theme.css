@@ -916,3 +916,24 @@ body[data-active-section="updates"] .chat-main,
 body[data-active-section="updates"] .top-header {
   display: none !important;
 }
+
+/* ==========================================================================
+   NEX-INPUT MULTILINE WHATSAPP-STYLE GROWTH
+   ========================================================================== */
+.nex-input {
+  font-size: 15.2px !important; /* 15.2 on Android, 16 on iOS - use 15.2 to avoid iOS zoom */
+  line-height: 20px !important;
+  font-weight: 400 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  
+  /* the key to next-line growth */
+  min-height: 20px !important;      /* one line */
+  max-height: 100px !important;     /* ~5 lines then scroll, like WhatsApp */
+  overflow-y: auto !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  
+  padding: 9px 12px !important;
+  border-radius: 21px !important;
+  box-sizing: border-box !important;
+}

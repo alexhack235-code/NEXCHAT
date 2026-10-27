@@ -3902,7 +3902,7 @@ async function sendMessage() {
     }
     if (messageText) {
       messageText.value = "";
-      messageText.style.height = "42px";
+      messageText.style.height = "auto";
     }
     if (typeof removeAttachment === 'function') removeAttachment();
 
@@ -15452,8 +15452,10 @@ function initializeBasicUI() {
     const autoResize = () => {
       messageInput.style.height = 'auto';
       const scrollHeight = messageInput.scrollHeight;
-      messageInput.style.height = Math.min(Math.max(scrollHeight, 42), 120) + 'px';
+      // Clamped to WhatsApp style: min 38px (single line with 9px padding), max 100px (~5 lines then scroll)
+      messageInput.style.height = Math.min(Math.max(scrollHeight, 38), 100) + 'px';
     };
+    window.adjustTextareaHeight = autoResize;
 
     // NEXCHAT SLASH COMMANDS HUB 
     const slashMenu = document.getElementById('slashCommandsMenu');

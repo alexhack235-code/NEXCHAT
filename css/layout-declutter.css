@@ -2231,16 +2231,25 @@ align-items: center !important;
 gap: 4px !important;
 }
 
-.message-input-wrapper .message-input {
-flex: 1 1 auto !important;
-background: transparent !important;
-border: none !important;
-outline: none !important;
-color: #e9edef !important;
-font-size: 15px !important;
-font-family: inherit !important;
-padding: 8px 4px !important;
-max-height: 120px !important;
+.message-input-wrapper .message-input,
+.message-input-wrapper .nex-input {
+  flex: 1 1 auto !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #e9edef !important;
+  font-size: 15.2px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-weight: 400 !important;
+  line-height: 20px !important;
+  min-height: 20px !important;
+  max-height: 100px !important;
+  padding: 9px 12px !important;
+  border-radius: 21px !important;
+  overflow-y: auto !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  box-sizing: border-box !important;
 }
 
 .message-form .fab-circle-btn {
@@ -2607,12 +2616,24 @@ gap: 8px !important;
 padding: 6px 14px !important;
 }
 
-.message-input-wrapper .message-input {
-font-size: 15px !important;
-line-height: 20px !important;
-min-height: 20px !important;
-height: 24px !important;
-padding: 2px 4px !important;
+.message-input-wrapper .message-input,
+.message-input-wrapper .nex-input,
+.nex-input {
+  font-size: 15.2px !important; /* 15.2 on Android, 16 on iOS - use 15.2 to avoid iOS zoom */
+  line-height: 20px !important;
+  font-weight: 400 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  
+  /* the key to next-line growth */
+  min-height: 20px !important;      /* one line */
+  max-height: 100px !important;     /* ~5 lines then scroll, like WhatsApp */
+  overflow-y: auto !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  
+  padding: 9px 12px !important;
+  border-radius: 21px !important;
+  box-sizing: border-box !important;
 }
 
 .message-wrapper.sent {

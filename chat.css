@@ -1357,21 +1357,27 @@ html, body {
   background: var(--bg-surface-hover);
 }
 
-.message-input-wrapper .message-input {
+.message-input-wrapper .message-input,
+.message-input-wrapper .nex-input {
   flex: 1;
-  min-height: 42px;
-  max-height: 120px;
-  padding: 10px 14px;
+  min-height: 20px;
+  max-height: 100px;
+  padding: 9px 12px;
   background: transparent !important;
   border: none !important;
-  border-radius: 0 !important;
+  border-radius: 21px !important;
   box-shadow: none !important;
   color: var(--text-primary);
-  font-size: 14.5px;
-  font-family: inherit;
+  font-size: 15.2px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 400;
   outline: none;
   resize: none;
-  line-height: 1.4;
+  line-height: 20px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  box-sizing: border-box;
 }
 
 .message-input::placeholder {
