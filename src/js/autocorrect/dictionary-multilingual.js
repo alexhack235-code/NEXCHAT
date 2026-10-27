@@ -2157,4 +2157,7 @@
   window.DE_SUBDIRECTORY = multiSuite.de;
   window.IT_SUBDIRECTORY = multiSuite.it;
   window.MULTILINGUAL_SUITE = multiSuite;
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = multiSuite;
+  }
 })();

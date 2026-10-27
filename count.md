@@ -5,8 +5,8 @@
 ```text
 ========================================================================================
  PROJECT           : NEXCHAT - Encrypted Social & Messaging Platform
- TOTAL SOURCE LINES: 538,636 Lines
- TOTAL FILES       : 867 Tracked Text Files (114 Binary Files Excluded)
+ TOTAL SOURCE LINES: 539,057 Lines
+ TOTAL FILES       : 867 Tracked Text Files (118 Binary Files Excluded)
  ARCHITECTURE      : Zero-Jitter Multi-Subsystem (Chat, Reels, Terminal, Status Vault)
  CRYPTOGRAPHY      : Zero-Knowledge End-to-End Encryption & Ephemeral Ghost Protocol
  VERIFICATION      : WCAG AAA Compliant / 60 FPS Frame Budget / Zero Layout Shift
@@ -73,12 +73,12 @@ flowchart TD
 
 ## 2. Repository Line Count
 
-The total counts lines in the 867 Git-tracked text files. The 114 Git-tracked binary files are excluded.
+The total counts lines in the 867 Git-tracked text files. The 118 Git-tracked binary files are excluded.
 
 ```mermaid
 flowchart LR
-    ROOT["NEXCHAT Codebase<br/>538,636 Lines"] --> TEXT["Tracked Text Files<br/>867"]
-    ROOT --> BINARY["Tracked Binary Files<br/>114 (excluded from line count)"]
+    ROOT["NEXCHAT Codebase<br/>539,057 Lines"] --> TEXT["Tracked Text Files<br/>867"]
+    ROOT --> BINARY["Tracked Binary Files<br/>118 (excluded from line count)"]
 ```
 
 ---
@@ -116,9 +116,9 @@ The current repository-wide count is:
 
 | Subsystem Domain | Primary Files | File Count | Total Lines | Percentage | Architectural Role |
 | :--- | :--- | :---: | :---: | :---: | :--- |
-| **Tracked text files** | All Git-tracked text files | **867** | **538,636** | **100.0%** | Included in the line count |
-| **Tracked binary files** | All Git-tracked binary files | **114** | -- | -- | Excluded from the line count |
-| **TOTALS** | -- | **981** | **538,636** | **100.0%** | Full Git-tracked repository footprint |
+| **Tracked text files** | All Git-tracked text files | **867** | **539,057** | **100.0%** | Included in the line count |
+| **Tracked binary files** | All Git-tracked binary files | **118** | -- | -- | Excluded from the line count |
+| **TOTALS** | -- | **985** | **539,057** | **100.0%** | Full Git-tracked repository footprint |
 
 ---
 

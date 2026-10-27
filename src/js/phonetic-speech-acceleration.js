@@ -18,7 +18,9 @@
   if (typeof define === 'function' && define.amd) {
     define([], factory);
   } else if (typeof module === 'object' && module.exports) {
-    module.exports = factory();
+    const instance = factory();
+    module.exports = instance;
+    module.exports.default = instance;
   } else {
     root.NexPhoneticSpeechEngine = factory();
   }
@@ -78,12 +80,16 @@
     "regex": "reg-ex",
     "RESTful": "rest-full",
     "UUID": "U-U-I-D",
-    "uuid": "U-U-I-D",
-    "===": "is strictly equal to",
-    "!==": "is strictly not equal to",
-    "=>": "arrow",
-    "&&": "and",
-    "||": "or"
+    "uuid": "U-U-I-D"
+  });
+
+  // 1b. Distinct Code Operators (Literal replacement without word-boundary regex)
+  const CODE_OPERATOR_MAP = Object.freeze({
+    "===": " is strictly equal to ",
+    "!==": " is strictly not equal to ",
+    "=>": " arrow ",
+    "&&": " and ",
+    "||": " or "
   });
 
   // 2. Arabizi Numeral & Middle Eastern Phonetic Table
@@ -311,6 +317,7 @@
 
   class NexPhoneticSpeechEngine {
     constructor() {
+      this.codeOpMap = CODE_OPERATOR_MAP;
       this.techMap = TECH_PRONUNCIATION_MAP;
       this.arabiziMap = ARABIZI_PHONETIC_MAP;
       this.pidginMap = PIDGIN_PHONETIC_MAP;
@@ -420,7 +427,7 @@
         }
       };
 
-      if (document.readyState === 'loading') {
+      if (typeof document !== 'undefined' && document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', patch);
       } else {
         patch();

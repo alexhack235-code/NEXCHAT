@@ -77,6 +77,16 @@
     "moon", "pump", "dump", "whitelist", "mint", "bridge", "layer2", "zkrollup", "optimistic",
     "dao", "dex", "amm", "uniswap", "metamask", "phantom", "ledger", "trezor",
 
+    // AI, Machine Learning & LLM Engineering
+    "transformers", "vllm", "sglang", "ollama", "dspy", "lora", "qlora", "rag", "mcp",
+    "pgvector", "langchain", "llamaindex", "embedding", "tokenizer", "finetune", "quantization",
+    "gguf", "safetensors", "gemini", "deepseek", "mistral", "claude", "chatgpt", "anthropic",
+    "openai", "pytorch", "tensorflow", "jax", "onnx", "tensorrt", "cuda", "huggingface",
+
+    // Post-Quantum Cryptography & Zero-Knowledge
+    "kyber", "dilithium", "falcon", "sphincs", "zksnark", "zkstark", "groth16", "plonk",
+    "bulletproofs", "poseidon", "halo2", "circom", "snarkjs", "halo", "starknet",
+
     // CS Fundamentals
     "algorithm", "array", "stack", "queue", "heap", "hashmap", "binarytree", "graph",
     "recursion", "concurrency", "parallelism", "multithreading", "async", "await", "deadlock",
@@ -124,7 +134,10 @@
     "chmod": "chmod", "chown": "chown", "sudo": "sudo", "props": "props", "repo": "repo",
     "yaml": "yaml", "toml": "toml", "json": "json", "gwei": "gwei", "k8s": "k8s",
     "wasm": "wasm", "evm": "evm", "zkp": "zkp", "e2ee": "e2ee", "jwt": "jwt",
-    "grpc": "grpc", "trpc": "trpc", "vite": "vite", "rust": "rust", "redis": "redis"
+    "grpc": "grpc", "trpc": "trpc", "vite": "vite", "rust": "rust", "redis": "redis",
+    "rag": "rag", "mcp": "mcp", "llm": "llm", "lora": "lora", "vllm": "vllm", "gguf": "gguf",
+    "dspy": "dspy", "cuda": "cuda", "onnx": "onnx", "zod": "zod", "deno": "deno",
+    "bun": "bun", "sol": "sol", "eth": "eth", "btc": "btc", "evm": "evm"
   };
 
   const TECH_WORD_SET = new Set(TECH_WORDS.map(w => w.toLowerCase()));
@@ -221,5 +234,8 @@
     window.TECH_WORD_SET = TECH_WORD_SET;
     window.TECH_PREFIX_TABLE = TECH_PREFIX_TABLE;
     window.TECH_SUBDIRECTORY = techSubDir;
+  }
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = techSubDir;
   }
 })();
