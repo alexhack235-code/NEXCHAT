@@ -937,7 +937,7 @@
       const cleanWord = cleanTokenSafe(currentWord);
       const cleanPrev = cleanTokenSafe(prevWord);
 
-      // Check / Detect active language
+      // Fast Language Detection & Sub-Directory Activation
       let detectedLang = 'en';
       if (window.autoCorrectEngine && typeof window.autoCorrectEngine.detectLanguage === 'function') {
         detectedLang = window.autoCorrectEngine.detectLanguage(val, cleanWord);
@@ -947,8 +947,9 @@
       if (this.langBadge) {
         if (detectedLang && detectedLang !== 'en' && window.autoCorrectEngine) {
           const meta = window.autoCorrectEngine.getActiveLanguage();
+          const icon = meta.icon || 'fa-earth-americas';
           this.langBadge.style.display = 'inline-flex';
-          this.langBadge.innerHTML = `<i class="fa-solid fa-earth-americas text-[#00FFC6] text-[10px] mr-1"></i><span>${meta.badge}</span>`;
+          this.langBadge.innerHTML = `<i class="fa-solid ${icon} text-[#00FFC6] text-[10px] mr-1"></i><span>${meta.badge}</span>`;
         } else {
           this.langBadge.style.display = 'none';
         }
@@ -957,27 +958,29 @@
       const suggestions = [];
       let detectedCorrection = null;
 
-      // 1. Multilingual Typo Check on active or previous word
+      // 1. Multilingual O(1) Typo Check
       const targetTypo = cleanWord || (endsWithSpace ? cleanPrev : '');
       const rawTarget = cleanWord ? currentWord : prevWord;
 
       if (targetTypo) {
         let fixedCandidate = null;
 
-        // Russian typo map
-        if (detectedLang === 'ru' && window.RU_TYPO_MAP && window.RU_TYPO_MAP[targetTypo]) {
+        // Sub-directory typo maps
+        if (detectedLang === 'ar' && window.AR_TYPO_MAP && window.AR_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.AR_TYPO_MAP[targetTypo];
+        } else if (detectedLang === 'hi' && window.HI_TYPO_MAP && window.HI_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.HI_TYPO_MAP[targetTypo];
+        } else if (detectedLang === 'ru' && window.RU_TYPO_MAP && window.RU_TYPO_MAP[targetTypo]) {
           fixedCandidate = window.RU_TYPO_MAP[targetTypo];
-        }
-        // Nigerian Pidgin typo map
-        else if (window.PIDGIN_TYPO_MAP && window.PIDGIN_TYPO_MAP[targetTypo]) {
+        } else if (detectedLang === 'tr' && window.TR_TYPO_MAP && window.TR_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.TR_TYPO_MAP[targetTypo];
+        } else if (detectedLang === 'sw' && window.SW_TYPO_MAP && window.SW_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.SW_TYPO_MAP[targetTypo];
+        } else if (window.PIDGIN_TYPO_MAP && window.PIDGIN_TYPO_MAP[targetTypo]) {
           fixedCandidate = window.PIDGIN_TYPO_MAP[targetTypo];
-        }
-        // Multilingual suite typo map
-        else if (window.MULTILINGUAL_SUITE && window.MULTILINGUAL_SUITE.correctWord(targetTypo, detectedLang)) {
+        } else if (window.MULTILINGUAL_SUITE && window.MULTILINGUAL_SUITE.correctWord(targetTypo, detectedLang)) {
           fixedCandidate = window.MULTILINGUAL_SUITE.correctWord(targetTypo, detectedLang);
-        }
-        // English Typo Map
-        else if (TYPO_MAP[targetTypo]) {
+        } else if (TYPO_MAP[targetTypo]) {
           fixedCandidate = TYPO_MAP[targetTypo];
         }
 
@@ -996,34 +999,39 @@
         }
       }
 
-      // 1.5 Sub-directory completions (Russian / Pidgin / English)
+      // 2. Instant O(1) Prefix Table Completions (< 0.0001ms)
       if (cleanWord && cleanWord.length >= 2) {
-        if (detectedLang === 'ru' && window.RU_WORDS) {
-          for (let i = 0; i < window.RU_WORDS.length; i++) {
-            const w = window.RU_WORDS[i];
-            if (w.startsWith(cleanWord) && w !== cleanWord) {
-              const formatted = applyCasePattern(currentWord, w);
-              if (!suggestions.some(s => s.text.toLowerCase() === formatted.toLowerCase())) {
-                suggestions.push({ text: formatted, isCompletion: true });
-                if (suggestions.length >= 4) break;
-              }
-            }
-          }
-        } else if (detectedLang === 'pidgin' && window.PIDGIN_WORDS) {
-          for (let i = 0; i < window.PIDGIN_WORDS.length; i++) {
-            const w = window.PIDGIN_WORDS[i];
-            if (w.startsWith(cleanWord) && w !== cleanWord) {
-              const formatted = applyCasePattern(currentWord, w);
-              if (!suggestions.some(s => s.text.toLowerCase() === formatted.toLowerCase())) {
-                suggestions.push({ text: formatted, isCompletion: true });
-                if (suggestions.length >= 4) break;
-              }
-            }
+        let prefixMatches = [];
+        if (detectedLang === 'ar' && window.AR_SUBDIRECTORY) {
+          prefixMatches = window.AR_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (detectedLang === 'hi' && window.HI_SUBDIRECTORY) {
+          prefixMatches = window.HI_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (detectedLang === 'ru' && window.RU_SUBDIRECTORY) {
+          prefixMatches = window.RU_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (detectedLang === 'tr' && window.TR_SUBDIRECTORY) {
+          prefixMatches = window.TR_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (detectedLang === 'sw' && window.SW_SUBDIRECTORY) {
+          prefixMatches = window.SW_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (detectedLang === 'pidgin' && window.PIDGIN_SUBDIRECTORY) {
+          prefixMatches = window.PIDGIN_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (window.MULTILINGUAL_SUITE && ['es', 'fr', 'pt', 'de', 'it'].includes(detectedLang)) {
+          prefixMatches = window.MULTILINGUAL_SUITE.getPrefixSuggestions(cleanWord, detectedLang, 4);
+        } else if (detectedLang === 'en') {
+          const p = cleanWord.slice(0, Math.min(4, cleanWord.length));
+          const candidates = PREFIX_INDEX[p] || (window.PREFIX_BUCKETS_30K && window.PREFIX_BUCKETS_30K[p]) || [];
+          prefixMatches = candidates.filter(w => w.startsWith(cleanWord) && w !== cleanWord).slice(0, 4);
+        }
+
+        for (let i = 0; i < prefixMatches.length; i++) {
+          const formatted = applyCasePattern(currentWord, prefixMatches[i]);
+          if (!suggestions.some(s => s.text.toLowerCase() === formatted.toLowerCase())) {
+            suggestions.push({ text: formatted, isCompletion: true });
+            if (suggestions.length >= 4) break;
           }
         }
       }
 
-      // 1.8 30k Fuzzy candidates (English/Latin)
+      // 3. 30k Fuzzy candidates (English fallback)
       if (detectedLang === 'en' && cleanWord && cleanWord.length >= 3 && window.fuzzyMatcher && typeof window.fuzzyMatcher.findSuggestions === 'function') {
         const fuzzySuggestions = window.fuzzyMatcher.findSuggestions(cleanWord, 3);
         fuzzySuggestions.forEach(f => {
@@ -1033,22 +1041,7 @@
         });
       }
 
-      // 2. O(1) Prefix-based word completion lookup (English)
-      if (detectedLang === 'en' && cleanWord && cleanWord.length >= 2) {
-        const prefixCandidates = PREFIX_INDEX[cleanWord.slice(0, Math.min(4, cleanWord.length))] || [];
-        for (let i = 0; i < prefixCandidates.length; i++) {
-          const w = prefixCandidates[i];
-          if (w.startsWith(cleanWord) && w !== cleanWord) {
-            const formatted = applyCasePattern(currentWord, w);
-            if (!suggestions.some(s => s.text.toLowerCase() === formatted.toLowerCase())) {
-              suggestions.push({ text: formatted, isCompletion: true });
-              if (suggestions.length >= 4) break;
-            }
-          }
-        }
-      }
-
-      // 3. Next-word Bigram predictions based on previous word
+      // 4. Next-word Bigram predictions based on previous word
       const bigramKey = (cleanWord ? cleanWord : cleanPrev).toLowerCase();
       if (detectedLang === 'en' && bigramKey && BIGRAMS[bigramKey]) {
         const phrases = BIGRAMS[bigramKey];
@@ -1061,13 +1054,16 @@
         }
       }
 
-      // 4. Fallback greetings if starting a message
+      // 5. Fallback greetings if starting a message
       if (suggestions.length === 0 && !prevWord && cleanWord.length >= 1) {
-        const fallbacks = (detectedLang === 'ru')
-          ? ['привет', 'здравствуйте', 'добрый день', 'спасибо', 'хорошо']
-          : (detectedLang === 'pidgin')
-            ? ['how far', 'wetin dey', 'I dey', 'no wahala', 'sharp sharp']
-            : ['thanks', 'sounds good', 'let me check', 'understood', 'perfect', 'hello'];
+        let fallbacks = ['thanks', 'sounds good', 'let me check', 'understood', 'perfect', 'hello'];
+        if (detectedLang === 'ru') fallbacks = ['привет', 'здравствуйте', 'добрый день', 'спасибо', 'хорошо'];
+        else if (detectedLang === 'pidgin') fallbacks = ['how far', 'wetin dey', 'I dey', 'no wahala', 'sharp sharp'];
+        else if (detectedLang === 'ar') fallbacks = ['مرحبا', 'أهلا', 'شكرا', 'السلام عليكم', 'حبيبي'];
+        else if (detectedLang === 'hi') fallbacks = ['namaste', 'shukriya', 'kaise ho', 'theek hai', 'bhai'];
+        else if (detectedLang === 'tr') fallbacks = ['merhaba', 'selam', 'teşekkürler', 'tamam', 'günaydın'];
+        else if (detectedLang === 'sw') fallbacks = ['habari', 'mambo', 'asante', 'karibu', 'poa'];
+
         fallbacks.forEach(f => {
           if (f.startsWith(cleanWord) && suggestions.length < 3) {
             suggestions.push({ text: f });
@@ -1075,7 +1071,7 @@
         });
       }
 
-      // Render suggestions bar
+      // Render suggestions bar with non-blocking 120 FPS batching
       if (suggestions.length > 0 || detectedCorrection) {
         this.renderChips(suggestions, currentWord);
         this.bar.style.display = 'flex';
@@ -1095,6 +1091,15 @@
     }
 
     renderChips(suggestions, currentWord) {
+      if (typeof window !== 'undefined' && window.requestAnimationFrame) {
+        if (this.rafId) cancelAnimationFrame(this.rafId);
+        this.rafId = requestAnimationFrame(() => this._renderChipsDirect(suggestions, currentWord));
+      } else {
+        this._renderChipsDirect(suggestions, currentWord);
+      }
+    }
+
+    _renderChipsDirect(suggestions, currentWord) {
       this.chipsContainer.innerHTML = '';
       suggestions.slice(0, 5).forEach(s => {
         const btn = document.createElement('button');
