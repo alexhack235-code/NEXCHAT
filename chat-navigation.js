@@ -73,12 +73,14 @@ window.handleNavigation = function (navSection) {
             if (chatMain) chatMain.style.setProperty('display', 'flex', 'important');
             const element = document.getElementById(target);
             if (element) element.style.setProperty('display', 'flex', 'important');
+            element.style.setProperty('flex-direction', 'column', 'important');
         }
     } else {
         if (chatMain) chatMain.style.setProperty('display', 'none', 'important');
         const element = document.getElementById(target);
         if (element) {
             element.style.setProperty('display', 'flex', 'important');
+            element.style.setProperty('flex-direction', 'column', 'important');
         }
     }
 

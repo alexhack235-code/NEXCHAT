@@ -2015,7 +2015,10 @@ display: none;
 }
 
 .app[data-active-section="calls"] .call-history-container {
-display: block !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 @media (max-width: 600px) {
@@ -4221,6 +4224,9 @@ body[data-active-section="chats"] .top-header {
 .app[data-active-section="announcements"] .announcements-container,
 body[data-active-section="announcements"] .announcements-container {
   display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .app[data-active-section="announcements"] .chat-main,
@@ -4234,6 +4240,9 @@ body[data-active-section="announcements"] .top-header {
 .app[data-active-section="calls"] .call-history-container,
 body[data-active-section="calls"] .call-history-container {
   display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .app[data-active-section="calls"] .chat-main,
@@ -4251,6 +4260,9 @@ body[data-active-section="updates"] .nex-status-container,
 .app[data-active-section="updates"] .whatsapp-updates-container,
 body[data-active-section="updates"] .whatsapp-updates-container {
   display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .app[data-active-section="updates"] .chat-main,
@@ -4258,4 +4270,48 @@ body[data-active-section="updates"] .chat-main,
 .app[data-active-section="updates"] .top-header,
 body[data-active-section="updates"] .top-header {
   display: none !important;
+}
+
+/* WhatsApp Calls Layout Strict Vertical Hierarchy */
+.call-history-container {
+  display: none !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.calls-top-bar {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  min-height: 56px !important;
+  height: auto !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 40 !important;
+}
+
+.calls-quick-actions-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: space-around !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  max-width: 520px !important;
+  margin: 0 auto !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.calls-recent-section {
+  display: block !important;
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  box-sizing: border-box !important;
 }

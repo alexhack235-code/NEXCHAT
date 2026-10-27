@@ -869,6 +869,9 @@ body[data-active-section="chats"] .top-header {
 .app[data-active-section="announcements"] .announcements-container,
 body[data-active-section="announcements"] .announcements-container {
   display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .app[data-active-section="announcements"] .chat-main,
@@ -882,6 +885,9 @@ body[data-active-section="announcements"] .top-header {
 .app[data-active-section="calls"] .call-history-container,
 body[data-active-section="calls"] .call-history-container {
   display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .app[data-active-section="calls"] .chat-main,
@@ -899,6 +905,9 @@ body[data-active-section="updates"] .nex-status-container,
 .app[data-active-section="updates"] .whatsapp-updates-container,
 body[data-active-section="updates"] .whatsapp-updates-container {
   display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .app[data-active-section="updates"] .chat-main,
