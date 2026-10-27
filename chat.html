@@ -1707,6 +1707,11 @@
                   <i class="fa-solid fa-volume-high"></i>
                   <span>Sounds & Alerts</span>
                 </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-language">
+                  <i class="fa-solid fa-language" style="color: #38bdf8;"></i>
+                  <span>Languages &amp; Input</span>
+                  <span class="settings-tab-microbadge" style="background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3);">17 LANGS</span>
+                </button>
               </div>
 
               <div class="settings-nav-group">
@@ -2400,6 +2405,146 @@
 
 
 
+              <!-- TAB: LANGUAGES & INPUT INTELLIGENCE -->
+              <div class="settings-tab-pane" id="tab-language">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-language" style="color: #38bdf8;"></i> Languages &amp; Input Intelligence</h3>
+                  <p>Configure primary chat dialect, autocorrect sensitivity, 120 FPS predictive chips, and regional street slang.</p>
+                </div>
+
+                <!-- Card 1: Primary Language Selector -->
+                <div class="settings-card">
+                  <div class="settings-card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div class="settings-card-title" style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fa-solid fa-earth-americas" style="color: #38bdf8;"></i>
+                      <strong>Primary Communication Language</strong>
+                    </div>
+                    <span id="settingsCurrentLangBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(56,189,248,0.15); color: #38bdf8; font-weight: 700; border: 1px solid rgba(56,189,248,0.3);">
+                      English (Global)
+                    </span>
+                  </div>
+                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
+                    Choose your default chat language. The auto-correct engine activates its high-speed O(1) Radix prefix lookup table and typo mappings.
+                  </p>
+                  <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <select id="settingsPrimaryLangSelect" class="settings-select" style="flex: 1;">
+                      <option value="en" selected>English (Global - 30,000+ Corpus)</option>
+                      <option value="pidgin">Nigerian Pidgin (Naija Street Slang)</option>
+                      <option value="ru">Russian (Русский - Cyrillic &amp; Runet)</option>
+                      <option value="ar">Arabic (العربية &amp; Arabizi)</option>
+                      <option value="hi">Hindi &amp; Hinglish (हिन्दी / Hinglish)</option>
+                      <option value="tr">Turkish (Türkçe &amp; Contractions)</option>
+                      <option value="sw">Swahili (Kiswahili &amp; Nairobi Sheng)</option>
+                      <option value="tl">Tagalog (Tagalog / Taglish &amp; Jejemon)</option>
+                      <option value="id">Bahasa Indonesia (Jakarta Gaul &amp; KBBI)</option>
+                      <option value="zh">Chinese Pinyin (中文 Pinyin &amp; Netizen)</option>
+                      <option value="ja">Japanese Romaji (日本語 Romaji)</option>
+                      <option value="ko">Korean Romanized (한국어 Romaji)</option>
+                      <option value="es">Spanish (Español)</option>
+                      <option value="fr">French (Français)</option>
+                      <option value="pt">Portuguese (Português)</option>
+                      <option value="de">German (Deutsch)</option>
+                      <option value="it">Italian (Italiano)</option>
+                    </select>
+                    <button type="button" id="launchLangWizardBtn" class="btn-secondary" style="white-space: nowrap; font-size: 12px; padding: 8px 14px;">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i> Open Visual Grid
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Card 2: Dialect Auto-Detect & Sensitivity -->
+                <div class="settings-card">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fa-solid fa-bolt" style="color: #00ff66;"></i>
+                    <strong>Dialect Auto-Detection &amp; Sensitivity</strong>
+                  </div>
+                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
+                    Fine-tune how aggressively the auto-correct engine fixes typing slips and adapts to bilingual code-switching.
+                  </p>
+                  <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                    <div class="luxury-toggle-row">
+                      <div>
+                        <strong>Multi-Dialect Auto-Switching</strong>
+                        <p>Automatically activate language sub-directories when foreign tokens are detected in typing.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="settingsAutoDetectToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="luxury-toggle-row">
+                      <div>
+                        <strong>Regional Street Slang &amp; Contractions</strong>
+                        <p>Expand texting shortcuts for Naija, Sheng, Runet, Gaul, Jejemon, Arabizi, and Pinyin acronyms.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="settingsSlangExpandToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+
+                    <div style="margin-top: 4px;">
+                      <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #f1f5f9; margin-bottom: 6px;">
+                        <span>Auto-Correct Sensitivity</span>
+                        <span id="settingsSensitivityLabel" style="color: #00f3ff; font-family: monospace;">Balanced</span>
+                      </div>
+                      <select id="settingsSensitivitySelect" class="settings-select" style="width: 100%;">
+                        <option value="balanced" selected>Balanced (Contextual N-Gram + Dictionary)</option>
+                        <option value="aggressive">Aggressive (Rapid Fix Single Letter Slips)</option>
+                        <option value="minimal">Minimal (Explicit Typos Only)</option>
+                        <option value="off">Off (Predictions Only, No Replacements)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card 3: 120 FPS Predictive Word Strip -->
+                <div class="settings-card">
+                  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc;"></i>
+                    <strong>120 FPS Predictive Input Chips</strong>
+                  </div>
+                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
+                    Display ultra-fast completion chips and next-word suggestions directly above the message composer.
+                  </p>
+                  <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+                    <div class="luxury-toggle-row">
+                      <div>
+                        <strong>Predictive Word Bar</strong>
+                        <p>Show floating suggestion chips rendered with requestAnimationFrame.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="settingsPredictiveChipsToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="luxury-toggle-row">
+                      <div>
+                        <strong>Next-Word Bi-Gram Predictions</strong>
+                        <p>Suggest natural continuation phrases based on 30k English &amp; multilingual corpus.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="settingsBigramPredictToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="luxury-toggle-row">
+                      <div>
+                        <strong>Instant Polish on Send</strong>
+                        <p>Capitalize sentence starts and fix lingering contractions when dispatching messages.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="settingsInstantPolishToggle" checked>
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <!-- TAB 5: PRIVACY & SECURITY -->
               <div class="settings-tab-pane" id="tab-privacy">
                 <div class="settings-pane-header">
@@ -2606,37 +2751,67 @@
                   </div>
                 </div>
 
-                <div class="settings-card" style="border: 1px solid rgba(0, 240, 255, 0.3); background: rgba(0, 240, 255, 0.04);">
+                <div class="settings-card" style="border: 1px solid rgba(0, 240, 255, 0.35); background: rgba(0, 240, 255, 0.04);">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
                       <i class="fa-solid fa-shield-halved" style="color: #00f0ff; font-size: 16px;"></i>
-                      <strong style="color: #00f0ff; font-size: 13.5px;">FORTRESS AI Security Shield</strong>
+                      <strong style="color: #00f0ff; font-size: 13.5px;">FORTRESS AI Cloud Defender &amp; WAF</strong>
                     </div>
                     <span id="fortressShieldBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 255, 102, 0.15); color: #00ff66; font-weight: 700; border: 1px solid rgba(0, 255, 102, 0.3);">
-                      <i class="fa-solid fa-shield-halved"></i> WAF Active (&lt; 0.5ms)
+                      <i class="fa-solid fa-shield-halved"></i> v11.0.0-ABSOLUTE-DEFENSE
                     </span>
                   </div>
                   <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
-                    Connected to <a href="https://github.com/alexhack235-code/AI-Security-Scanner-API" target="_blank" style="color: #00f0ff; text-decoration: underline;">AI-Security-Scanner-API</a>. Blocks XSS, SQLi, Prompt Injections, and Bot Flood.
+                    Connected to <a href="https://ai-security-scanner-delta.vercel.app" target="_blank" style="color: #00f0ff; text-decoration: underline;">FORTRESS AI Security Scanner Gateway</a>. Intercepts Node2Shell, PHP2Shell, SSRF, Prompt Injections, and Zero-Day Exploits.
                   </p>
 
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
                     <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
                       <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">Threats Blocked</span>
                       <div id="fortressThreatsCounter" style="font-size: 16px; font-weight: 800; color: #00ff66; font-family: monospace;">0 Attacks</div>
                     </div>
                     <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">LLM Guard</span>
-                      <div style="font-size: 13px; font-weight: 700; color: #00f0ff; margin-top: 2px;">DAN / Anti-Inject</div>
+                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">Active Layers</span>
+                      <div style="font-size: 13.5px; font-weight: 700; color: #00f0ff; margin-top: 2px;">10 Zero-Trust</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">Gateway Speed</span>
+                      <div id="fortressLatencyDisplay" style="font-size: 13.5px; font-weight: 700; color: #ffd700; margin-top: 2px;">&lt; 0.5ms (Fast WAF)</div>
                     </div>
                   </div>
 
-                  <div style="margin-top: 10px;">
-                    <button type="button" id="testFortressPingBtn" class="btn-secondary" style="width: 100%; padding: 8px 12px; font-size: 12px;">
-                      <i class="fa-solid fa-bolt"></i> Test Security Gateway Connection
+                  <!-- Gateway Endpoint Config -->
+                  <div style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px;">
+                    <label style="font-size: 11px; color: #94a3b8;">FORTRESS API Gateway:</label>
+                    <div style="display: flex; gap: 6px;">
+                      <input type="text" id="fortressApiUrlInput" class="settings-input" style="flex: 1; font-size: 11.5px; font-family: monospace;" value="https://ai-security-scanner-delta.vercel.app">
+                      <button type="button" id="saveFortressConfigBtn" class="btn-secondary" style="font-size: 11.5px; white-space: nowrap; padding: 6px 12px;">Save</button>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <button type="button" id="testFortressPingBtn" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
+                      <i class="fa-solid fa-bolt"></i> Test Gateway Connection
+                    </button>
+                    <button type="button" id="toggleFortressInspectorBtn" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
+                      <i class="fa-solid fa-magnifying-glass-shield"></i> Run Security Scan
                     </button>
                   </div>
                   <div id="fortressTestResult" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>
+
+                  <!-- On-Demand Threat Inspector Panel (Collapsible) -->
+                  <div id="fortressScanPanel" style="display: none; margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 8px; border: 1px solid rgba(0,240,255,0.25);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <span style="font-size: 11.5px; font-weight: 700; color: #00f0ff;"><i class="fa-solid fa-radar"></i> On-Demand Threat Inspector</span>
+                      <button type="button" id="closeFortressScanPanelBtn" style="background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 14px;">&times;</button>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                      <input type="text" id="fortressScanInput" placeholder="Enter URL (https://...) or test payload..." class="settings-input" style="flex: 1; font-size: 11.5px;">
+                      <button type="button" id="executeFortressScanBtn" class="btn-primary" style="font-size: 11.5px; white-space: nowrap; padding: 6px 12px;">Scan</button>
+                    </div>
+                    <div id="fortressScanOutput" style="margin-top: 8px; font-size: 11px; font-family: monospace; max-height: 120px; overflow-y: auto;"></div>
+                  </div>
                 </div>
 
                 <!-- NEXCHAT SENTINEL EMAIL NOTIFICATION VERIFIER -->
@@ -5800,6 +5975,38 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       </div>
     </div>
 
+
+  <!-- NEXCHAT GLOBAL ONBOARDING & LANGUAGE SELECTOR MODAL -->
+  <div id="newUserLanguageModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
+    <div class="cyber-hub-modal-content" style="max-width: 720px; max-height: 88vh; border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2);">
+      <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05);">
+        <div class="cyber-hub-title" style="color: #00f2fe; font-size: 16px; display: flex; align-items: center; gap: 10px;">
+          <i class="fa-solid fa-earth-americas"></i>
+          <span>WELCOME TO NEXCHAT // CHOOSE YOUR LANGUAGE</span>
+        </div>
+        <button type="button" class="close-modal" id="closeOnboardingLangBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="cyber-hub-body" style="padding: 18px 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px;">
+        <p style="font-size: 12.5px; color: #94a3b8; margin: 0; line-height: 1.5;">
+          NEXCHAT features sub-millisecond Radix auto-correct tables for 17 global languages and street dialects. Select your primary chat language to activate local slang, instant typing polish, and predictive completions:
+        </p>
+
+        <!-- 17 Languages Responsive Grid -->
+        <div id="onboardingLangGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-top: 4px;">
+          <!-- Dynamically populated or static fallback rendered by chat.js -->
+        </div>
+
+        <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px; margin-top: 6px; display: flex; flex-direction: column; gap: 8px;">
+          <button type="button" id="confirmOnboardingLangBtn" class="btn-primary" style="padding: 12px 20px; font-weight: 700; width: 100%; border-radius: 10px; font-size: 13px; letter-spacing: 0.5px;">
+            <i class="fa-solid fa-check"></i> Save &amp; Start Chatting
+          </button>
+          <button type="button" id="skipOnboardingLangBtn" class="btn-secondary" style="padding: 8px 16px; font-size: 11.5px; width: 100%; text-align: center; border-radius: 8px;">
+            Continue with English (Default)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

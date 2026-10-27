@@ -79,8 +79,8 @@ export const DECOY_LEADS = [
  */
 export class AISecurityScanner {
   constructor() {
-    this.version = "10.5.0-ENTERPRISE";
-    this.codename = "Apex-Shield";
+    this.version = "11.0.0-ABSOLUTE-DEFENSE";
+    this.codename = "Apex-Absolute-Shield";
     this.enabled = true;
     this.realTimeDefenderActive = true;
     this.metrics = this.loadMetrics();

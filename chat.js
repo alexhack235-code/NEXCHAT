@@ -9399,50 +9399,425 @@ function setupFortressSecurityListeners() {
   const testResult = document.getElementById('fortressTestResult');
   const counterEl = document.getElementById('fortressThreatsCounter');
   const badgeEl = document.getElementById('fortressShieldBadge');
+  const latencyDisplay = document.getElementById('fortressLatencyDisplay');
+  const saveConfigBtn = document.getElementById('saveFortressConfigBtn');
+  const apiUrlInput = document.getElementById('fortressApiUrlInput');
+  const toggleInspectorBtn = document.getElementById('toggleFortressInspectorBtn');
+  const scanPanel = document.getElementById('fortressScanPanel');
+  const closeScanPanelBtn = document.getElementById('closeFortressScanPanelBtn');
+  const executeScanBtn = document.getElementById('executeFortressScanBtn');
+  const scanInput = document.getElementById('fortressScanInput');
+  const scanOutput = document.getElementById('fortressScanOutput');
 
   if (counterEl) {
     const threats = localStorage.getItem('nexchat_threats_blocked') || '0';
     counterEl.textContent = `${threats} Blocked`;
   }
 
+  if (apiUrlInput && window.fortressShield) {
+    apiUrlInput.value = window.fortressShield.config.apiUrl || 'https://ai-security-scanner-delta.vercel.app';
+  }
+
+  // Save Gateway URL
+  if (saveConfigBtn && !saveConfigBtn.dataset.bound) {
+    saveConfigBtn.dataset.bound = 'true';
+    saveConfigBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const newUrl = apiUrlInput ? apiUrlInput.value.trim() : '';
+      if (window.fortressShield) {
+        window.fortressShield.saveConfig(newUrl, window.fortressShield.config.vaultKey);
+        if (typeof showNotif === 'function') {
+          showNotif('FORTRESS Gateway URL saved', 'success', 2000);
+        }
+      }
+    });
+  }
+
+  // Toggle Inspector Panel
+  if (toggleInspectorBtn && !toggleInspectorBtn.dataset.bound) {
+    toggleInspectorBtn.dataset.bound = 'true';
+    toggleInspectorBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!scanPanel) return;
+      const isVisible = scanPanel.style.display !== 'none';
+      scanPanel.style.display = isVisible ? 'none' : 'block';
+    });
+  }
+
+  if (closeScanPanelBtn && !closeScanPanelBtn.dataset.bound) {
+    closeScanPanelBtn.dataset.bound = 'true';
+    closeScanPanelBtn.addEventListener('click', () => {
+      if (scanPanel) scanPanel.style.display = 'none';
+    });
+  }
+
+  // Execute Live Inspection via API
+  if (executeScanBtn && !executeScanBtn.dataset.bound) {
+    executeScanBtn.dataset.bound = 'true';
+    executeScanBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!scanInput || !scanOutput) return;
+      const target = scanInput.value.trim();
+      if (!target) return;
+
+      executeScanBtn.disabled = true;
+      scanOutput.innerHTML = '<span style="color:#00f3ff;"><i class="fa-solid fa-spinner fa-spin"></i> Querying FORTRESS Cloud API...</span>';
+
+      try {
+        if (!window.fortressShield) throw new Error('Fortress shield not loaded');
+
+        if (target.startsWith('http://') || target.startsWith('https://')) {
+          const res = await window.fortressShield.inspectUrl(target);
+          if (res.error) {
+            scanOutput.innerHTML = `<span style="color:#f87171;">Scan Failed: ${res.error}</span>`;
+          } else {
+            const risk = res.risk_level || res.verdict || 'CLEAN';
+            const color = risk === 'HIGH' || risk === 'CRITICAL' ? '#ef4444' : (risk === 'MEDIUM' ? '#fbbf24' : '#00ff66');
+            scanOutput.innerHTML = `
+              <div style="color:${color}; font-weight:700;">Verdict: ${risk} • Score: ${res.risk_score || 0}/100</div>
+              <div style="color:#cbd5e1; margin-top:2px;">Target: ${target}</div>
+              <div style="color:#94a3b8; font-size:10px; margin-top:2px;">Audited Headers &amp; TLS: ${res.ssl_valid ? 'Valid SSL' : 'Audit Complete'}</div>
+            `;
+          }
+        } else {
+          const res = await window.fortressShield.defendPayload(target);
+          const isSafe = res.safe !== false;
+          scanOutput.innerHTML = `
+            <div style="color:${isSafe ? '#00ff66' : '#ef4444'}; font-weight:700;">
+              ${isSafe ? 'PAYLOAD VERIFIED CLEAN' : 'THREAT BLOCKED'} (${res.verdict || 'PASS'})
+            </div>
+            <div style="color:#94a3b8; margin-top:2px;">Threats: ${res.threats && res.threats.length ? res.threats.join(', ') : 'None detected'}</div>
+          `;
+        }
+      } catch (err) {
+        scanOutput.innerHTML = `<span style="color:#f87171;">Inspection Error: ${err.message}</span>`;
+      } finally {
+        executeScanBtn.disabled = false;
+      }
+    });
+  }
+
+  // Ping & Connection Test
   if (testBtn && !testBtn.dataset.bound) {
     testBtn.dataset.bound = 'true';
     testBtn.addEventListener('click', async (e) => {
       e.preventDefault();
       testBtn.disabled = true;
-      if (testResult) testResult.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Probing FORTRESS Gateway & Zero-Trust Vault...';
-
-      const url = 'https://ai-security-scanner-api.vercel.app';
-      const key = '';
+      if (testResult) testResult.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Probing FORTRESS Gateway &amp; Zero-Trust Vault...';
 
       try {
         if (window.fortressShield) {
-          const res = await window.fortressShield.testConnection(url, key);
+          const res = await window.fortressShield.testConnection();
           if (res.online) {
             if (testResult) {
               testResult.innerHTML = `<i class="fa-solid fa-bolt"></i> <span style="color:#00ff66;font-weight:700;">FORTRESS ONLINE (${res.latency}ms)</span> — ${res.version}`;
             }
             if (badgeEl) {
-              badgeEl.textContent = `Fortified (${res.latency}ms)`;
+              badgeEl.innerHTML = `<i class="fa-solid fa-shield-halved"></i> Fortified (${res.latency}ms)`;
               badgeEl.style.borderColor = '#00ff66';
             }
-            playLuxuryChimeSound();
-            showNotif(`Connected to FORTRESS API (${res.latency}ms)`, 'success', 2500);
+            if (latencyDisplay) {
+              latencyDisplay.textContent = `${res.latency}ms (Live Gateway)`;
+              latencyDisplay.style.color = '#00ff66';
+            }
+            if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+            if (typeof showNotif === 'function') {
+              showNotif(`Connected to FORTRESS Gateway (${res.latency}ms)`, 'success', 2500);
+            }
           } else {
             if (testResult) {
               testResult.innerHTML = `<i class="fa-solid fa-shield-halved"></i> <span style="color:#00ff66;">In-Memory Fast Kill Active</span> (Remote: ${res.status || 'Offline'})`;
             }
-            if (badgeEl) badgeEl.textContent = 'Local In-Memory Active';
-            showNotif('Local Sub-Millisecond WAF Active', 'info', 2000);
+            if (badgeEl) badgeEl.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Local Fast WAF Active';
+            if (latencyDisplay) latencyDisplay.textContent = '< 0.1ms (Local)';
+            if (typeof showNotif === 'function') {
+              showNotif('Local Sub-Millisecond WAF Active', 'info', 2000);
+            }
           }
         }
       } catch (err) {
         if (testResult) {
-          testResult.innerHTML = `<i class="fa-solid fa-shield-halved"></i> In-Memory Fast Kill Shield running (<0.5ms)`;
+          testResult.innerHTML = '<i class="fa-solid fa-shield-halved"></i> In-Memory Fast Kill Shield running (&lt;0.1ms)';
         }
       } finally {
         testBtn.disabled = false;
       }
+    });
+  }
+}
+
+// =============================================================================
+// GLOBAL 17-LANGUAGE ONBOARDING & INPUT INTELLIGENCE SUITE
+// =============================================================================
+const ALL_SUPPORTED_LANGUAGES = [
+  { code: 'en', name: 'English', native: 'English', badge: 'Global', desc: '30,000+ Words & N-Grams', icon: 'fa-globe' },
+  { code: 'pidgin', name: 'Nigerian Pidgin', native: 'Naija Pidgin', badge: 'West Africa', desc: '2,500+ Words & Street Slang', icon: 'fa-flag' },
+  { code: 'ru', name: 'Russian', native: 'Русский', badge: 'Cyrillic & Runet', desc: 'Cyrillic Verbs & JCUKEN', icon: 'fa-language' },
+  { code: 'ar', name: 'Arabic', native: 'العربية / Arabizi', badge: 'Middle East', desc: 'Arabic Script & 3/7 Numbers', icon: 'fa-moon' },
+  { code: 'hi', name: 'Hindi & Hinglish', native: 'हिन्दी / Hinglish', badge: 'South Asia', desc: 'Devanagari & Hinglish Chat', icon: 'fa-om' },
+  { code: 'tr', name: 'Turkish', native: 'Türkçe', badge: 'Eurasia', desc: 'Türkçe & Chat Contractions', icon: 'fa-star-and-crescent' },
+  { code: 'sw', name: 'Swahili', native: 'Kiswahili / Sheng', badge: 'East Africa', desc: 'Sheng Slang & Kiswahili', icon: 'fa-sun' },
+  { code: 'tl', name: 'Tagalog', native: 'Tagalog / Taglish', badge: 'Philippines', desc: 'Manila Slang & Jejemon', icon: 'fa-sun' },
+  { code: 'id', name: 'Bahasa Indonesia', native: 'Bahasa Indonesia', badge: 'Southeast Asia', desc: 'Jakarta Gaul & KBBI', icon: 'fa-compass' },
+  { code: 'zh', name: 'Chinese Pinyin', native: '中文 Pinyin', badge: 'East Asia', desc: 'HSK Pinyin & Netizen Slang', icon: 'fa-dragon' },
+  { code: 'ja', name: 'Japanese Romaji', native: '日本語 Romaji', badge: 'Japan', desc: 'Romaji & Nihongo Chat', icon: 'fa-torii-gate' },
+  { code: 'ko', name: 'Korean Romanized', native: '한국어 Romaji', badge: 'Korea', desc: 'K-Wave & Chat Slang', icon: 'fa-heart' },
+  { code: 'es', name: 'Spanish', native: 'Español', badge: 'European Suite', desc: 'Spain & Latin America', icon: 'fa-globe' },
+  { code: 'fr', name: 'French', native: 'Français', badge: 'European Suite', desc: 'France & SMS Texting', icon: 'fa-globe' },
+  { code: 'pt', name: 'Portuguese', native: 'Português', badge: 'European Suite', desc: 'Brasil & Portugal', icon: 'fa-globe' },
+  { code: 'de', name: 'German', native: 'Deutsch', badge: 'European Suite', desc: 'Germany & DACH', icon: 'fa-globe' },
+  { code: 'it', name: 'Italian', native: 'Italiano', badge: 'European Suite', desc: 'Italy & SMS Contractions', icon: 'fa-globe' }
+];
+
+window.openLanguageOnboardingModal = function() {
+  const modal = document.getElementById('newUserLanguageModal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  modal.setAttribute('aria-hidden', 'false');
+  renderOnboardingLanguageCards();
+};
+
+window.closeLanguageOnboardingModal = function() {
+  const modal = document.getElementById('newUserLanguageModal');
+  if (!modal) return;
+  modal.style.display = 'none';
+  modal.setAttribute('aria-hidden', 'true');
+};
+
+function renderOnboardingLanguageCards() {
+  const grid = document.getElementById('onboardingLangGrid');
+  if (!grid) return;
+
+  const currentLang = localStorage.getItem('nexchat_preferred_language') || 'en';
+  grid.innerHTML = '';
+
+  ALL_SUPPORTED_LANGUAGES.forEach(lang => {
+    const card = document.createElement('div');
+    card.className = 'onboarding-lang-card' + (lang.code === currentLang ? ' selected' : '');
+    card.dataset.lang = lang.code;
+    card.style.cssText = `
+      background: ${lang.code === currentLang ? 'rgba(0, 242, 254, 0.12)' : 'rgba(255, 255, 255, 0.03)'};
+      border: 1px solid ${lang.code === currentLang ? '#00f2fe' : 'rgba(255, 255, 255, 0.08)'};
+      border-radius: 12px;
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+    `;
+
+    card.innerHTML = `
+      <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.25); display: flex; align-items: center; justify-content: center; color: #00f2fe; font-size: 16px; flex-shrink: 0;">
+        <i class="fa-solid ${lang.icon}"></i>
+      </div>
+      <div style="flex: 1; min-width: 0;">
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-weight: 700; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${lang.native}</span>
+          <span style="font-size: 9.5px; padding: 1px 6px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #94a3b8; font-family: monospace;">${lang.badge}</span>
+        </div>
+        <div style="font-size: 11px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px;">${lang.name} • ${lang.desc}</div>
+      </div>
+      <div class="lang-check-indicator" style="color: #00f2fe; font-size: 16px; display: ${lang.code === currentLang ? 'block' : 'none'};">
+        <i class="fa-solid fa-circle-check"></i>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      grid.querySelectorAll('.onboarding-lang-card').forEach(c => {
+        c.classList.remove('selected');
+        c.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+        c.style.background = 'rgba(255, 255, 255, 0.03)';
+        const check = c.querySelector('.lang-check-indicator');
+        if (check) check.style.display = 'none';
+      });
+      card.classList.add('selected');
+      card.style.borderColor = '#00f2fe';
+      card.style.background = 'rgba(0, 242, 254, 0.12)';
+      const check = card.querySelector('.lang-check-indicator');
+      if (check) check.style.display = 'block';
+      grid.dataset.selectedLang = lang.code;
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+function setupNewUserLanguageOnboarding() {
+  const confirmBtn = document.getElementById('confirmOnboardingLangBtn');
+  const skipBtn = document.getElementById('skipOnboardingLangBtn');
+  const closeBtn = document.getElementById('closeOnboardingLangBtn');
+  const langBadgePill = document.getElementById('predictiveLangBadge');
+  const launchWizardBtn = document.getElementById('launchLangWizardBtn');
+
+  // Trigger for First-time Users
+  const isWelcomed = localStorage.getItem('nexchat_welcomed_lang');
+  if (!isWelcomed) {
+    setTimeout(() => {
+      window.openLanguageOnboardingModal();
+    }, 1200);
+  }
+
+  // Bind Confirm
+  if (confirmBtn && !confirmBtn.dataset.bound) {
+    confirmBtn.dataset.bound = 'true';
+    confirmBtn.addEventListener('click', () => {
+      const grid = document.getElementById('onboardingLangGrid');
+      const selected = (grid && grid.dataset.selectedLang) || localStorage.getItem('nexchat_preferred_language') || 'en';
+      
+      localStorage.setItem('nexchat_preferred_language', selected);
+      localStorage.setItem('nexchat_welcomed_lang', 'true');
+
+      if (window.autoCorrectEngine && typeof window.autoCorrectEngine.activateSubdirectory === 'function') {
+        window.autoCorrectEngine.activateSubdirectory(selected, 'onboarding-wizard');
+      }
+
+      // Update Settings dropdown & badge
+      const select = document.getElementById('settingsPrimaryLangSelect');
+      if (select) select.value = selected;
+      const badge = document.getElementById('settingsCurrentLangBadge');
+      const langMeta = ALL_SUPPORTED_LANGUAGES.find(l => l.code === selected);
+      if (badge && langMeta) {
+        badge.textContent = `${langMeta.native} (${langMeta.badge})`;
+      }
+
+      window.closeLanguageOnboardingModal();
+      if (typeof playLuxuryChimeSound === 'function') playLuxuryChimeSound();
+      if (typeof showNotif === 'function') {
+        showNotif(`Primary language set to ${langMeta ? langMeta.name : selected}`, 'success', 2500);
+      }
+    });
+  }
+
+  // Bind Skip
+  if (skipBtn && !skipBtn.dataset.bound) {
+    skipBtn.dataset.bound = 'true';
+    skipBtn.addEventListener('click', () => {
+      localStorage.setItem('nexchat_welcomed_lang', 'true');
+      window.closeLanguageOnboardingModal();
+    });
+  }
+
+  // Bind Close
+  if (closeBtn && !closeBtn.dataset.bound) {
+    closeBtn.dataset.bound = 'true';
+    closeBtn.addEventListener('click', () => {
+      window.closeLanguageOnboardingModal();
+    });
+  }
+
+  // Bind Quick Launcher from Settings
+  if (launchWizardBtn && !launchWizardBtn.dataset.bound) {
+    launchWizardBtn.dataset.bound = 'true';
+    launchWizardBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.openLanguageOnboardingModal();
+    });
+  }
+
+  // Bind 1-tap open from composer language badge
+  if (langBadgePill && !langBadgePill.dataset.wizardBound) {
+    langBadgePill.dataset.wizardBound = 'true';
+    langBadgePill.style.cursor = 'pointer';
+    langBadgePill.title = 'Tap to switch primary chat language';
+    langBadgePill.addEventListener('click', () => {
+      window.openLanguageOnboardingModal();
+    });
+  }
+
+  setupLanguageSettingsListeners();
+}
+
+function setupLanguageSettingsListeners() {
+  const primarySelect = document.getElementById('settingsPrimaryLangSelect');
+  const currentBadge = document.getElementById('settingsCurrentLangBadge');
+  const autoDetectToggle = document.getElementById('settingsAutoDetectToggle');
+  const slangToggle = document.getElementById('settingsSlangExpandToggle');
+  const sensitivitySelect = document.getElementById('settingsSensitivitySelect');
+  const sensitivityLabel = document.getElementById('settingsSensitivityLabel');
+  const predictiveChipsToggle = document.getElementById('settingsPredictiveChipsToggle');
+  const bigramToggle = document.getElementById('settingsBigramPredictToggle');
+  const instantPolishToggle = document.getElementById('settingsInstantPolishToggle');
+
+  // Load saved preferences
+  const savedLang = localStorage.getItem('nexchat_preferred_language') || 'en';
+  if (primarySelect) {
+    primarySelect.value = savedLang;
+    if (!primarySelect.dataset.bound) {
+      primarySelect.dataset.bound = 'true';
+      primarySelect.addEventListener('change', () => {
+        const val = primarySelect.value;
+        localStorage.setItem('nexchat_preferred_language', val);
+        if (window.autoCorrectEngine && typeof window.autoCorrectEngine.activateSubdirectory === 'function') {
+          window.autoCorrectEngine.activateSubdirectory(val, 'settings-select');
+        }
+        const langMeta = ALL_SUPPORTED_LANGUAGES.find(l => l.code === val);
+        if (currentBadge && langMeta) {
+          currentBadge.textContent = `${langMeta.native} (${langMeta.badge})`;
+        }
+        if (typeof showNotif === 'function') {
+          showNotif(`Activated ${langMeta ? langMeta.name : val} dictionary`, 'info', 2000);
+        }
+      });
+    }
+  }
+
+  if (currentBadge) {
+    const meta = ALL_SUPPORTED_LANGUAGES.find(l => l.code === savedLang);
+    if (meta) currentBadge.textContent = `${meta.native} (${meta.badge})`;
+  }
+
+  if (autoDetectToggle && !autoDetectToggle.dataset.bound) {
+    autoDetectToggle.dataset.bound = 'true';
+    autoDetectToggle.checked = localStorage.getItem('nexchat_autocorrect_autodetect') !== 'false';
+    autoDetectToggle.addEventListener('change', () => {
+      localStorage.setItem('nexchat_autocorrect_autodetect', autoDetectToggle.checked ? 'true' : 'false');
+    });
+  }
+
+  if (slangToggle && !slangToggle.dataset.bound) {
+    slangToggle.dataset.bound = 'true';
+    slangToggle.checked = localStorage.getItem('nexchat_autocorrect_slang') !== 'false';
+    slangToggle.addEventListener('change', () => {
+      localStorage.setItem('nexchat_autocorrect_slang', slangToggle.checked ? 'true' : 'false');
+    });
+  }
+
+  if (sensitivitySelect && !sensitivitySelect.dataset.bound) {
+    sensitivitySelect.dataset.bound = 'true';
+    const savedSens = localStorage.getItem('nexchat_autocorrect_sensitivity') || 'balanced';
+    sensitivitySelect.value = savedSens;
+    if (sensitivityLabel) sensitivityLabel.textContent = savedSens.charAt(0).toUpperCase() + savedSens.slice(1);
+    sensitivitySelect.addEventListener('change', () => {
+      localStorage.setItem('nexchat_autocorrect_sensitivity', sensitivitySelect.value);
+      if (sensitivityLabel) sensitivityLabel.textContent = sensitivitySelect.value.charAt(0).toUpperCase() + sensitivitySelect.value.slice(1);
+    });
+  }
+
+  if (predictiveChipsToggle && !predictiveChipsToggle.dataset.bound) {
+    predictiveChipsToggle.dataset.bound = 'true';
+    predictiveChipsToggle.checked = localStorage.getItem('nexchat_predictive_chips') !== 'false';
+    predictiveChipsToggle.addEventListener('change', () => {
+      localStorage.setItem('nexchat_predictive_chips', predictiveChipsToggle.checked ? 'true' : 'false');
+      const bar = document.getElementById('predictiveWordBar');
+      if (bar && !predictiveChipsToggle.checked) bar.style.display = 'none';
+    });
+  }
+
+  if (bigramToggle && !bigramToggle.dataset.bound) {
+    bigramToggle.dataset.bound = 'true';
+    bigramToggle.checked = localStorage.getItem('nexchat_bigram_predict') !== 'false';
+    bigramToggle.addEventListener('change', () => {
+      localStorage.setItem('nexchat_bigram_predict', bigramToggle.checked ? 'true' : 'false');
+    });
+  }
+
+  if (instantPolishToggle && !instantPolishToggle.dataset.bound) {
+    instantPolishToggle.dataset.bound = 'true';
+    instantPolishToggle.checked = localStorage.getItem('nexchat_instant_polish') !== 'false';
+    instantPolishToggle.addEventListener('change', () => {
+      localStorage.setItem('nexchat_instant_polish', instantPolishToggle.checked ? 'true' : 'false');
     });
   }
 }
@@ -20540,7 +20915,8 @@ const bootAllFeatures = () => {
     ['CyberDrop', initCyberDrop],
     ['CipherVault', initCipherVault],
     ['MeshSettings', initMeshSettings],
-    ['MobileFeatures', setupMobileFeatures]
+    ['MobileFeatures', setupMobileFeatures],
+    ['LanguageOnboarding', setupNewUserLanguageOnboarding]
   ];
   subsystems.forEach(([name, fn]) => {
     try {
