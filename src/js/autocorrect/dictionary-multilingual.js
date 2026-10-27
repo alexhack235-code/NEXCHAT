@@ -1,5 +1,5 @@
 /**
- * NEXCHAT Multilingual Sub-Directory: Spanish, French, Portuguese, German & Italian
+ * NEXCHAT Multilingual Sub-Directory: Spanish, French, Portuguese, German & Italian (Deepened)
  * High-Speed O(1) Prefix-Indexed European Suite
  * 
  * STRICTLY ZERO EMOJIS: FontAwesome 6 vector icons and cyberpunk styling only.
@@ -10,1733 +10,2122 @@
 
   const ES_WORDS = [
   "hola",
-  "gracias",
-  "por favor",
-  "amigo",
   "buenos",
   "días",
   "noches",
-  "tardes",
+  "gracias",
+  "por favor",
+  "amigo",
   "cómo",
   "estás",
   "bien",
   "dónde",
   "cuándo",
+  "porque",
   "hacer",
   "tiempo",
   "ahora",
-  "siempre",
-  "nunca",
-  "también",
-  "después",
   "mensaje",
   "trabajo",
-  "familia",
   "casa",
-  "vida",
-  "mundo",
-  "nuevo",
-  "porque",
-  "pero",
-  "mucho",
-  "poco",
-  "todo",
-  "nada",
-  "bueno",
-  "malo",
-  "grande",
-  "pequeño",
-  "estar",
-  "haber",
-  "tener",
-  "poder",
-  "decir",
-  "ir"
+  "comida",
+  "agua",
+  "café",
+  "xq",
+  "dnd",
+  "tqm",
+  "xfa",
+  "bn",
+  "tb",
+  "hago",
+  "haces",
+  "hace",
+  "hacemos",
+  "hacen",
+  "hice",
+  "tengo",
+  "tienes",
+  "tiene",
+  "tenemos",
+  "tienen",
+  "voy",
+  "vas",
+  "va",
+  "vamos",
+  "van",
+  "fui",
+  "estoy",
+  "está",
+  "estamos",
+  "están",
+  "soy",
+  "eres",
+  "es",
+  "somos",
+  "son",
+  "puedo",
+  "puedes",
+  "puede",
+  "podemos",
+  "pueden",
+  "quiero",
+  "quieres",
+  "quiere",
+  "queremos",
+  "quieren"
 ];
   const FR_WORDS = [
   "bonjour",
   "bonsoir",
+  "salut",
   "merci",
   "s'il vous plaît",
+  "svp",
   "comment",
-  "allez-vous",
-  "très",
-  "bien",
   "oui",
   "non",
   "ami",
-  "toujours",
-  "jamais",
-  "aujourd'hui",
-  "demain",
-  "hier",
+  "où",
+  "quand",
+  "pourquoi",
   "faire",
   "temps",
   "maintenant",
-  "après",
   "message",
   "travail",
-  "famille",
   "maison",
-  "monde",
-  "nouveau",
-  "pourquoi",
-  "mais",
-  "beaucoup",
-  "tout"
+  "eau",
+  "café",
+  "mdr",
+  "ptdr",
+  "stp",
+  "bjr",
+  "bsr",
+  "slt",
+  "mrc",
+  "pk",
+  "fais",
+  "fait",
+  "faisons",
+  "faites",
+  "font",
+  "suis",
+  "es",
+  "est",
+  "sommes",
+  "êtes",
+  "sont",
+  "ai",
+  "as",
+  "a",
+  "avons",
+  "avez",
+  "ont",
+  "vais",
+  "vas",
+  "va",
+  "allons",
+  "allez",
+  "vont",
+  "peux",
+  "peut",
+  "pouvons",
+  "pouvez",
+  "peuvent",
+  "veux",
+  "veut",
+  "voulons",
+  "voulez",
+  "veulent"
 ];
   const PT_WORDS = [
   "olá",
+  "oi",
+  "bom dia",
+  "boa noite",
   "obrigado",
-  "obrigada",
   "por favor",
-  "como",
-  "você",
-  "está",
-  "tudo",
-  "bom",
-  "bem",
-  "sim",
-  "não",
   "amigo",
-  "sempre",
-  "nunca",
-  "hoje",
-  "amanhã",
-  "ontem",
+  "tudo bem",
+  "como você está",
+  "onde",
+  "quando",
+  "porque",
   "fazer",
   "tempo",
   "agora",
-  "depois",
   "mensagem",
   "trabalho",
-  "família",
   "casa",
-  "mundo",
-  "novo",
-  "porque",
-  "mas",
-  "muito",
-  "pouco",
-  "nada",
-  "grande"
+  "água",
+  "café",
+  "vc",
+  "tb",
+  "obg",
+  "pfv",
+  "blz",
+  "vlw",
+  "dps",
+  "pq",
+  "faço",
+  "faz",
+  "fazemos",
+  "fazem",
+  "fiz",
+  "tenho",
+  "tem",
+  "temos",
+  "têm",
+  "tive",
+  "vou",
+  "vai",
+  "vamos",
+  "vão",
+  "fui",
+  "estou",
+  "está",
+  "estamos",
+  "estão",
+  "sou",
+  "é",
+  "somos",
+  "são",
+  "posso",
+  "pode",
+  "podemos",
+  "podem",
+  "quero",
+  "quer",
+  "queremos",
+  "querem"
 ];
   const DE_WORDS = [
   "hallo",
+  "guten morgen",
+  "guten tag",
+  "gute nacht",
   "danke",
   "bitte",
-  "guten",
-  "morgen",
-  "tag",
-  "abend",
-  "nacht",
-  "wie",
-  "geht",
-  "gut",
-  "schön",
-  "ja",
-  "nein",
   "freund",
-  "immer",
-  "nie",
-  "heute",
-  "morgen",
-  "gestern",
+  "wie geht es dir",
+  "gut",
+  "wo",
+  "wann",
+  "warum",
+  "weil",
   "machen",
   "zeit",
   "jetzt",
-  "später",
   "nachricht",
   "arbeit",
-  "familie",
   "haus",
-  "welt",
-  "neu",
-  "warum",
-  "aber",
-  "sehr",
-  "viel"
+  "wasser",
+  "kaffee",
+  "lg",
+  "mfg",
+  "cu",
+  "vllt",
+  "ka",
+  "mache",
+  "machst",
+  "macht",
+  "machte",
+  "habe",
+  "hast",
+  "hat",
+  "haben",
+  "hatte",
+  "bin",
+  "bist",
+  "ist",
+  "sind",
+  "war",
+  "gehe",
+  "gehst",
+  "geht",
+  "gehen",
+  "ging",
+  "kann",
+  "kannst",
+  "können",
+  "konnte",
+  "will",
+  "willst",
+  "wollen",
+  "wollte"
 ];
   const IT_WORDS = [
   "ciao",
-  "grazie",
-  "per favore",
-  "prego",
   "buongiorno",
   "buonasera",
-  "buonanotte",
-  "arrivederci",
+  "grazie",
+  "per favore",
+  "amico",
   "come stai",
   "bene",
-  "male",
-  "sì",
-  "no",
-  "amico",
-  "amica",
-  "famiglia",
-  "casa",
-  "lavoro",
+  "dove",
+  "quando",
+  "perché",
+  "fare",
   "tempo",
   "adesso",
-  "oggi",
-  "domani",
-  "ieri",
-  "sempre",
-  "mai",
-  "molto",
-  "poco",
-  "tutto",
-  "niente",
-  "bello",
-  "grande",
-  "piccolo",
-  "nuovo",
-  "vecchio",
-  "fare",
-  "andare",
-  "venire",
-  "dire",
-  "sapere",
-  "potere",
-  "volere",
-  "dovere",
-  "vedere"
+  "messaggio",
+  "lavoro",
+  "casa",
+  "acqua",
+  "caffè",
+  "cmq",
+  "xk",
+  "risp",
+  "tvb",
+  "nn",
+  "sn",
+  "faccio",
+  "fai",
+  "fa",
+  "facciamo",
+  "fanno",
+  "fatto",
+  "ho",
+  "hai",
+  "ha",
+  "abbiamo",
+  "hanno",
+  "avuto",
+  "sono",
+  "sei",
+  "è",
+  "siamo",
+  "vado",
+  "vai",
+  "va",
+  "andiamo",
+  "vanno",
+  "andato",
+  "posso",
+  "puoi",
+  "può",
+  "possiamo",
+  "possono",
+  "voglio",
+  "vuoi",
+  "vuole",
+  "vogliamo",
+  "vogliono"
 ];
 
-  const ES_TYPO_MAP = {
-    'ola': 'hola', 'q': 'que', 'k': 'que', 'pq': 'porque', 'xq': 'por qué',
-    'tmb': 'también', 'tb': 'también', 'dsp': 'después', 'xfa': 'por favor',
-    'muxo': 'mucho', 'bno': 'bueno', 'aki': 'aquí', 'sta': 'está', 'toy': 'estoy',
-    'bn': 'bien', 'ns': 'no sé', 'ntp': 'no te preocupes', 'd': 'de', 'cm': 'cómo'
-  };
-
-  const FR_TYPO_MAP = {
-    'bjr': 'bonjour', 'bsr': 'bonsoir', 'mrc': 'merci', 'stp': 's\'il te plaît',
-    'svp': 's\'il vous plaît', 'pk': 'pourquoi', 'bcp': 'beaucoup', 'tlm': 'tout le monde',
-    'jpp': 'je n\'en peux plus', 'mdr': 'mort de rire', 'slt': 'salut', 'cb': 'combien',
-    'tkt': 't\'inquiète', 'cv': 'ça va', 'jsp': 'je ne sais pas', 'dsl': 'désolé'
-  };
-
-  const PT_TYPO_MAP = {
-    'ola': 'olá', 'vc': 'você', 'vcs': 'vocês', 'obg': 'obrigado', 'pfv': 'por favor',
-    'tbm': 'também', 'tb': 'também', 'blz': 'beleza', 'oq': 'o que', 'kd': 'cadê',
-    'ctz': 'certeza', 'dps': 'depois', 'nd': 'nada', 'pq': 'porque', 'hj': 'hoje',
-    'flw': 'falou', 'tmj': 'estamos juntos', 'bjo': 'beijo', 'vdd': 'verdade', 'agr': 'agora'
-  };
-
-  const DE_TYPO_MAP = {
-    'hlo': 'hallo', 'vg': 'viele grüße', 'lg': 'liebe grüße', 'mfg': 'mit freundlichen grüßen',
-    'garnicht': 'gar nicht', 'warscheinlich': 'wahrscheinlich', 'thx': 'danke', 'pls': 'bitte',
-    'bd': 'bis dann', 'bb': 'bis bald', 'ka': 'keine ahnung', 'kp': 'kein plan', 'vllt': 'vielleicht'
-  };
-
-  const IT_TYPO_MAP = {
-  "grz": "grazie",
-  "cmq": "comunque",
-  "nn": "non",
-  "pk": "perché",
-  "xke": "perché",
-  "salve": "salve",
-  "prg": "prego",
-  "dop": "dopo"
-};
   const MULTI_PREFIX_TABLE = {
-  "es": {
+    es: {
     "ho": [
-      "hola"
+        "hola"
     ],
     "hol": [
-      "hola"
+        "hola"
     ],
     "hola": [
-      "hola"
-    ],
-    "gr": [
-      "gracias",
-      "grande"
-    ],
-    "gra": [
-      "gracias",
-      "grande"
-    ],
-    "grac": [
-      "gracias"
-    ],
-    "po": [
-      "por favor",
-      "porque",
-      "poco",
-      "poder"
-    ],
-    "por": [
-      "por favor",
-      "porque"
-    ],
-    "por ": [
-      "por favor"
-    ],
-    "am": [
-      "amigo"
-    ],
-    "ami": [
-      "amigo"
-    ],
-    "amig": [
-      "amigo"
+        "hola"
     ],
     "bu": [
-      "buenos",
-      "bueno"
+        "buenos"
     ],
     "bue": [
-      "buenos",
-      "bueno"
+        "buenos"
     ],
     "buen": [
-      "buenos",
-      "bueno"
+        "buenos"
     ],
     "dí": [
-      "días"
+        "días"
     ],
     "día": [
-      "días"
+        "días"
     ],
     "días": [
-      "días"
+        "días"
     ],
     "no": [
-      "noches"
+        "noches"
     ],
     "noc": [
-      "noches"
+        "noches"
     ],
     "noch": [
-      "noches"
+        "noches"
     ],
-    "ta": [
-      "tardes",
-      "también"
+    "gr": [
+        "gracias"
     ],
-    "tar": [
-      "tardes"
+    "gra": [
+        "gracias"
     ],
-    "tard": [
-      "tardes"
-    ],
-    "có": [
-      "cómo"
-    ],
-    "cóm": [
-      "cómo"
-    ],
-    "cómo": [
-      "cómo"
-    ],
-    "es": [
-      "estás",
-      "estar"
-    ],
-    "est": [
-      "estás",
-      "estar"
-    ],
-    "está": [
-      "estás"
-    ],
-    "bi": [
-      "bien"
-    ],
-    "bie": [
-      "bien"
-    ],
-    "bien": [
-      "bien"
-    ],
-    "dó": [
-      "dónde"
-    ],
-    "dón": [
-      "dónde"
-    ],
-    "dónd": [
-      "dónde"
-    ],
-    "cu": [
-      "cuándo"
-    ],
-    "cuá": [
-      "cuándo"
-    ],
-    "cuán": [
-      "cuándo"
-    ],
-    "ha": [
-      "hacer",
-      "haber"
-    ],
-    "hac": [
-      "hacer"
-    ],
-    "hace": [
-      "hacer"
-    ],
-    "ti": [
-      "tiempo"
-    ],
-    "tie": [
-      "tiempo"
-    ],
-    "tiem": [
-      "tiempo"
-    ],
-    "ah": [
-      "ahora"
-    ],
-    "aho": [
-      "ahora"
-    ],
-    "ahor": [
-      "ahora"
-    ],
-    "si": [
-      "siempre"
-    ],
-    "sie": [
-      "siempre"
-    ],
-    "siem": [
-      "siempre"
-    ],
-    "nu": [
-      "nunca",
-      "nuevo"
-    ],
-    "nun": [
-      "nunca"
-    ],
-    "nunc": [
-      "nunca"
-    ],
-    "tam": [
-      "también"
-    ],
-    "tamb": [
-      "también"
-    ],
-    "de": [
-      "después",
-      "decir"
-    ],
-    "des": [
-      "después"
-    ],
-    "desp": [
-      "después"
-    ],
-    "me": [
-      "mensaje"
-    ],
-    "men": [
-      "mensaje"
-    ],
-    "mens": [
-      "mensaje"
-    ],
-    "tr": [
-      "trabajo"
-    ],
-    "tra": [
-      "trabajo"
-    ],
-    "trab": [
-      "trabajo"
-    ],
-    "fa": [
-      "familia"
-    ],
-    "fam": [
-      "familia"
-    ],
-    "fami": [
-      "familia"
-    ],
-    "ca": [
-      "casa"
-    ],
-    "cas": [
-      "casa"
-    ],
-    "casa": [
-      "casa"
-    ],
-    "vi": [
-      "vida"
-    ],
-    "vid": [
-      "vida"
-    ],
-    "vida": [
-      "vida"
-    ],
-    "mu": [
-      "mundo",
-      "mucho"
-    ],
-    "mun": [
-      "mundo"
-    ],
-    "mund": [
-      "mundo"
-    ],
-    "nue": [
-      "nuevo"
-    ],
-    "nuev": [
-      "nuevo"
-    ],
-    "porq": [
-      "porque"
-    ],
-    "pe": [
-      "pero",
-      "pequeño"
-    ],
-    "per": [
-      "pero"
-    ],
-    "pero": [
-      "pero"
-    ],
-    "muc": [
-      "mucho"
-    ],
-    "much": [
-      "mucho"
-    ],
-    "poc": [
-      "poco"
-    ],
-    "poco": [
-      "poco"
-    ],
-    "to": [
-      "todo"
-    ],
-    "tod": [
-      "todo"
-    ],
-    "todo": [
-      "todo"
-    ],
-    "na": [
-      "nada"
-    ],
-    "nad": [
-      "nada"
-    ],
-    "nada": [
-      "nada"
-    ],
-    "ma": [
-      "malo"
-    ],
-    "mal": [
-      "malo"
-    ],
-    "malo": [
-      "malo"
-    ],
-    "gran": [
-      "grande"
-    ],
-    "peq": [
-      "pequeño"
-    ],
-    "pequ": [
-      "pequeño"
-    ],
-    "esta": [
-      "estar"
-    ],
-    "hab": [
-      "haber"
-    ],
-    "habe": [
-      "haber"
-    ],
-    "te": [
-      "tener"
-    ],
-    "ten": [
-      "tener"
-    ],
-    "tene": [
-      "tener"
-    ],
-    "pod": [
-      "poder"
-    ],
-    "pode": [
-      "poder"
-    ],
-    "dec": [
-      "decir"
-    ],
-    "deci": [
-      "decir"
-    ],
-    "ir": [
-      "ir"
-    ]
-  },
-  "fr": {
-    "bo": [
-      "bonjour",
-      "bonsoir"
-    ],
-    "bon": [
-      "bonjour",
-      "bonsoir"
-    ],
-    "bonj": [
-      "bonjour"
-    ],
-    "bons": [
-      "bonsoir"
-    ],
-    "me": [
-      "merci",
-      "message"
-    ],
-    "mer": [
-      "merci"
-    ],
-    "merc": [
-      "merci"
-    ],
-    "s'": [
-      "s'il vous plaît"
-    ],
-    "s'i": [
-      "s'il vous plaît"
-    ],
-    "s'il": [
-      "s'il vous plaît"
-    ],
-    "co": [
-      "comment"
-    ],
-    "com": [
-      "comment"
-    ],
-    "comm": [
-      "comment"
-    ],
-    "al": [
-      "allez-vous"
-    ],
-    "all": [
-      "allez-vous"
-    ],
-    "alle": [
-      "allez-vous"
-    ],
-    "tr": [
-      "très",
-      "travail"
-    ],
-    "trè": [
-      "très"
-    ],
-    "très": [
-      "très"
-    ],
-    "bi": [
-      "bien"
-    ],
-    "bie": [
-      "bien"
-    ],
-    "bien": [
-      "bien"
-    ],
-    "ou": [
-      "oui"
-    ],
-    "oui": [
-      "oui"
-    ],
-    "no": [
-      "non",
-      "nouveau"
-    ],
-    "non": [
-      "non"
+    "grac": [
+        "gracias"
     ],
     "am": [
-      "ami"
+        "amigo"
     ],
     "ami": [
-      "ami"
-    ],
-    "to": [
-      "toujours",
-      "tout"
-    ],
-    "tou": [
-      "toujours",
-      "tout"
-    ],
-    "touj": [
-      "toujours"
-    ],
-    "ja": [
-      "jamais"
-    ],
-    "jam": [
-      "jamais"
-    ],
-    "jama": [
-      "jamais"
-    ],
-    "au": [
-      "aujourd'hui"
-    ],
-    "auj": [
-      "aujourd'hui"
-    ],
-    "aujo": [
-      "aujourd'hui"
-    ],
-    "de": [
-      "demain"
-    ],
-    "dem": [
-      "demain"
-    ],
-    "dema": [
-      "demain"
-    ],
-    "hi": [
-      "hier"
-    ],
-    "hie": [
-      "hier"
-    ],
-    "hier": [
-      "hier"
-    ],
-    "fa": [
-      "faire",
-      "famille"
-    ],
-    "fai": [
-      "faire"
-    ],
-    "fair": [
-      "faire"
-    ],
-    "te": [
-      "temps"
-    ],
-    "tem": [
-      "temps"
-    ],
-    "temp": [
-      "temps"
-    ],
-    "ma": [
-      "maintenant",
-      "maison",
-      "mais"
-    ],
-    "mai": [
-      "maintenant",
-      "maison",
-      "mais"
-    ],
-    "main": [
-      "maintenant"
-    ],
-    "ap": [
-      "après"
-    ],
-    "apr": [
-      "après"
-    ],
-    "aprè": [
-      "après"
-    ],
-    "mes": [
-      "message"
-    ],
-    "mess": [
-      "message"
-    ],
-    "tra": [
-      "travail"
-    ],
-    "trav": [
-      "travail"
-    ],
-    "fam": [
-      "famille"
-    ],
-    "fami": [
-      "famille"
-    ],
-    "mais": [
-      "maison",
-      "mais"
-    ],
-    "mo": [
-      "monde"
-    ],
-    "mon": [
-      "monde"
-    ],
-    "mond": [
-      "monde"
-    ],
-    "nou": [
-      "nouveau"
-    ],
-    "nouv": [
-      "nouveau"
-    ],
-    "po": [
-      "pourquoi"
-    ],
-    "pou": [
-      "pourquoi"
-    ],
-    "pour": [
-      "pourquoi"
-    ],
-    "be": [
-      "beaucoup"
-    ],
-    "bea": [
-      "beaucoup"
-    ],
-    "beau": [
-      "beaucoup"
-    ],
-    "tout": [
-      "tout"
-    ]
-  },
-  "pt": {
-    "ol": [
-      "olá"
-    ],
-    "olá": [
-      "olá"
-    ],
-    "ob": [
-      "obrigado",
-      "obrigada"
-    ],
-    "obr": [
-      "obrigado",
-      "obrigada"
-    ],
-    "obri": [
-      "obrigado",
-      "obrigada"
-    ],
-    "po": [
-      "por favor",
-      "porque",
-      "pouco"
-    ],
-    "por": [
-      "por favor",
-      "porque"
-    ],
-    "por ": [
-      "por favor"
-    ],
-    "co": [
-      "como"
-    ],
-    "com": [
-      "como"
-    ],
-    "como": [
-      "como"
-    ],
-    "vo": [
-      "você"
-    ],
-    "voc": [
-      "você"
-    ],
-    "você": [
-      "você"
-    ],
-    "es": [
-      "está"
-    ],
-    "est": [
-      "está"
-    ],
-    "está": [
-      "está"
-    ],
-    "tu": [
-      "tudo"
-    ],
-    "tud": [
-      "tudo"
-    ],
-    "tudo": [
-      "tudo"
-    ],
-    "bo": [
-      "bom"
-    ],
-    "bom": [
-      "bom"
-    ],
-    "be": [
-      "bem"
-    ],
-    "bem": [
-      "bem"
-    ],
-    "si": [
-      "sim"
-    ],
-    "sim": [
-      "sim"
-    ],
-    "nã": [
-      "não"
-    ],
-    "não": [
-      "não"
-    ],
-    "am": [
-      "amigo",
-      "amanhã"
-    ],
-    "ami": [
-      "amigo"
+        "amigo"
     ],
     "amig": [
-      "amigo"
+        "amigo"
     ],
-    "se": [
-      "sempre"
+    "có": [
+        "cómo"
     ],
-    "sem": [
-      "sempre"
+    "cóm": [
+        "cómo"
     ],
-    "semp": [
-      "sempre"
+    "cómo": [
+        "cómo"
     ],
-    "nu": [
-      "nunca"
+    "es": [
+        "estás",
+        "estoy",
+        "está",
+        "estamos",
+        "están",
+        "es"
     ],
-    "nun": [
-      "nunca"
+    "est": [
+        "estás",
+        "estoy",
+        "está",
+        "estamos",
+        "están"
     ],
-    "nunc": [
-      "nunca"
-    ],
-    "ho": [
-      "hoje"
-    ],
-    "hoj": [
-      "hoje"
-    ],
-    "hoje": [
-      "hoje"
-    ],
-    "ama": [
-      "amanhã"
-    ],
-    "aman": [
-      "amanhã"
-    ],
-    "on": [
-      "ontem"
-    ],
-    "ont": [
-      "ontem"
-    ],
-    "onte": [
-      "ontem"
-    ],
-    "fa": [
-      "fazer",
-      "família"
-    ],
-    "faz": [
-      "fazer"
-    ],
-    "faze": [
-      "fazer"
-    ],
-    "te": [
-      "tempo"
-    ],
-    "tem": [
-      "tempo"
-    ],
-    "temp": [
-      "tempo"
-    ],
-    "ag": [
-      "agora"
-    ],
-    "ago": [
-      "agora"
-    ],
-    "agor": [
-      "agora"
-    ],
-    "de": [
-      "depois"
-    ],
-    "dep": [
-      "depois"
-    ],
-    "depo": [
-      "depois"
-    ],
-    "me": [
-      "mensagem"
-    ],
-    "men": [
-      "mensagem"
-    ],
-    "mens": [
-      "mensagem"
-    ],
-    "tr": [
-      "trabalho"
-    ],
-    "tra": [
-      "trabalho"
-    ],
-    "trab": [
-      "trabalho"
-    ],
-    "fam": [
-      "família"
-    ],
-    "famí": [
-      "família"
-    ],
-    "ca": [
-      "casa"
-    ],
-    "cas": [
-      "casa"
-    ],
-    "casa": [
-      "casa"
-    ],
-    "mu": [
-      "mundo",
-      "muito"
-    ],
-    "mun": [
-      "mundo"
-    ],
-    "mund": [
-      "mundo"
-    ],
-    "no": [
-      "novo"
-    ],
-    "nov": [
-      "novo"
-    ],
-    "novo": [
-      "novo"
-    ],
-    "porq": [
-      "porque"
-    ],
-    "ma": [
-      "mas"
-    ],
-    "mas": [
-      "mas"
-    ],
-    "mui": [
-      "muito"
-    ],
-    "muit": [
-      "muito"
-    ],
-    "pou": [
-      "pouco"
-    ],
-    "pouc": [
-      "pouco"
-    ],
-    "na": [
-      "nada"
-    ],
-    "nad": [
-      "nada"
-    ],
-    "nada": [
-      "nada"
-    ],
-    "gr": [
-      "grande"
-    ],
-    "gra": [
-      "grande"
-    ],
-    "gran": [
-      "grande"
-    ]
-  },
-  "de": {
-    "ha": [
-      "hallo",
-      "haus"
-    ],
-    "hal": [
-      "hallo"
-    ],
-    "hall": [
-      "hallo"
-    ],
-    "da": [
-      "danke"
-    ],
-    "dan": [
-      "danke"
-    ],
-    "dank": [
-      "danke"
+    "está": [
+        "estás",
+        "está",
+        "están"
     ],
     "bi": [
-      "bitte"
+        "bien"
     ],
-    "bit": [
-      "bitte"
+    "bie": [
+        "bien"
     ],
-    "bitt": [
-      "bitte"
+    "bien": [
+        "bien"
     ],
-    "gu": [
-      "guten",
-      "gut"
+    "dó": [
+        "dónde"
     ],
-    "gut": [
-      "guten",
-      "gut"
+    "dón": [
+        "dónde"
     ],
-    "gute": [
-      "guten"
+    "dónd": [
+        "dónde"
     ],
-    "mo": [
-      "morgen"
+    "cu": [
+        "cuándo"
     ],
-    "mor": [
-      "morgen"
+    "cuá": [
+        "cuándo"
     ],
-    "morg": [
-      "morgen"
-    ],
-    "ta": [
-      "tag"
-    ],
-    "tag": [
-      "tag"
-    ],
-    "ab": [
-      "abend",
-      "aber"
-    ],
-    "abe": [
-      "abend",
-      "aber"
-    ],
-    "aben": [
-      "abend"
-    ],
-    "na": [
-      "nacht",
-      "nachricht"
-    ],
-    "nac": [
-      "nacht",
-      "nachricht"
-    ],
-    "nach": [
-      "nacht",
-      "nachricht"
-    ],
-    "wi": [
-      "wie"
-    ],
-    "wie": [
-      "wie"
-    ],
-    "ge": [
-      "geht",
-      "gestern"
-    ],
-    "geh": [
-      "geht"
-    ],
-    "geht": [
-      "geht"
-    ],
-    "sc": [
-      "schön"
-    ],
-    "sch": [
-      "schön"
-    ],
-    "schö": [
-      "schön"
-    ],
-    "ja": [
-      "ja"
-    ],
-    "ne": [
-      "nein",
-      "neu"
-    ],
-    "nei": [
-      "nein"
-    ],
-    "nein": [
-      "nein"
-    ],
-    "fr": [
-      "freund"
-    ],
-    "fre": [
-      "freund"
-    ],
-    "freu": [
-      "freund"
-    ],
-    "im": [
-      "immer"
-    ],
-    "imm": [
-      "immer"
-    ],
-    "imme": [
-      "immer"
-    ],
-    "ni": [
-      "nie"
-    ],
-    "nie": [
-      "nie"
-    ],
-    "he": [
-      "heute"
-    ],
-    "heu": [
-      "heute"
-    ],
-    "heut": [
-      "heute"
-    ],
-    "ges": [
-      "gestern"
-    ],
-    "gest": [
-      "gestern"
-    ],
-    "ma": [
-      "machen"
-    ],
-    "mac": [
-      "machen"
-    ],
-    "mach": [
-      "machen"
-    ],
-    "ze": [
-      "zeit"
-    ],
-    "zei": [
-      "zeit"
-    ],
-    "zeit": [
-      "zeit"
-    ],
-    "je": [
-      "jetzt"
-    ],
-    "jet": [
-      "jetzt"
-    ],
-    "jetz": [
-      "jetzt"
-    ],
-    "sp": [
-      "später"
-    ],
-    "spä": [
-      "später"
-    ],
-    "spät": [
-      "später"
-    ],
-    "ar": [
-      "arbeit"
-    ],
-    "arb": [
-      "arbeit"
-    ],
-    "arbe": [
-      "arbeit"
-    ],
-    "fa": [
-      "familie"
-    ],
-    "fam": [
-      "familie"
-    ],
-    "fami": [
-      "familie"
-    ],
-    "hau": [
-      "haus"
-    ],
-    "haus": [
-      "haus"
-    ],
-    "we": [
-      "welt"
-    ],
-    "wel": [
-      "welt"
-    ],
-    "welt": [
-      "welt"
-    ],
-    "neu": [
-      "neu"
-    ],
-    "wa": [
-      "warum"
-    ],
-    "war": [
-      "warum"
-    ],
-    "waru": [
-      "warum"
-    ],
-    "aber": [
-      "aber"
-    ],
-    "se": [
-      "sehr"
-    ],
-    "seh": [
-      "sehr"
-    ],
-    "sehr": [
-      "sehr"
-    ],
-    "vi": [
-      "viel"
-    ],
-    "vie": [
-      "viel"
-    ],
-    "viel": [
-      "viel"
-    ]
-  },
-  "it": {
-    "ci": [
-      "ciao"
-    ],
-    "cia": [
-      "ciao"
-    ],
-    "ciao": [
-      "ciao"
-    ],
-    "gr": [
-      "grazie",
-      "grande"
-    ],
-    "gra": [
-      "grazie",
-      "grande"
-    ],
-    "graz": [
-      "grazie"
-    ],
-    "pe": [
-      "per favore"
-    ],
-    "per": [
-      "per favore"
-    ],
-    "per ": [
-      "per favore"
-    ],
-    "pr": [
-      "prego"
-    ],
-    "pre": [
-      "prego"
-    ],
-    "preg": [
-      "prego"
-    ],
-    "bu": [
-      "buongiorno",
-      "buonasera",
-      "buonanotte"
-    ],
-    "buo": [
-      "buongiorno",
-      "buonasera",
-      "buonanotte"
-    ],
-    "buon": [
-      "buongiorno",
-      "buonasera",
-      "buonanotte"
-    ],
-    "ar": [
-      "arrivederci"
-    ],
-    "arr": [
-      "arrivederci"
-    ],
-    "arri": [
-      "arrivederci"
-    ],
-    "co": [
-      "come stai"
-    ],
-    "com": [
-      "come stai"
-    ],
-    "come": [
-      "come stai"
-    ],
-    "be": [
-      "bene",
-      "bello"
-    ],
-    "ben": [
-      "bene"
-    ],
-    "bene": [
-      "bene"
-    ],
-    "ma": [
-      "male",
-      "mai"
-    ],
-    "mal": [
-      "male"
-    ],
-    "male": [
-      "male"
-    ],
-    "sì": [
-      "sì"
-    ],
-    "no": [
-      "no"
-    ],
-    "am": [
-      "amico",
-      "amica"
-    ],
-    "ami": [
-      "amico",
-      "amica"
-    ],
-    "amic": [
-      "amico",
-      "amica"
-    ],
-    "fa": [
-      "famiglia",
-      "fare"
-    ],
-    "fam": [
-      "famiglia"
-    ],
-    "fami": [
-      "famiglia"
-    ],
-    "ca": [
-      "casa"
-    ],
-    "cas": [
-      "casa"
-    ],
-    "casa": [
-      "casa"
-    ],
-    "la": [
-      "lavoro"
-    ],
-    "lav": [
-      "lavoro"
-    ],
-    "lavo": [
-      "lavoro"
-    ],
-    "te": [
-      "tempo"
-    ],
-    "tem": [
-      "tempo"
-    ],
-    "temp": [
-      "tempo"
-    ],
-    "ad": [
-      "adesso"
-    ],
-    "ade": [
-      "adesso"
-    ],
-    "ades": [
-      "adesso"
-    ],
-    "og": [
-      "oggi"
-    ],
-    "ogg": [
-      "oggi"
-    ],
-    "oggi": [
-      "oggi"
-    ],
-    "do": [
-      "domani",
-      "dovere"
-    ],
-    "dom": [
-      "domani"
-    ],
-    "doma": [
-      "domani"
-    ],
-    "ie": [
-      "ieri"
-    ],
-    "ier": [
-      "ieri"
-    ],
-    "ieri": [
-      "ieri"
-    ],
-    "se": [
-      "sempre"
-    ],
-    "sem": [
-      "sempre"
-    ],
-    "semp": [
-      "sempre"
-    ],
-    "mai": [
-      "mai"
-    ],
-    "mo": [
-      "molto"
-    ],
-    "mol": [
-      "molto"
-    ],
-    "molt": [
-      "molto"
+    "cuán": [
+        "cuándo"
     ],
     "po": [
-      "poco",
-      "potere"
+        "porque",
+        "podemos"
     ],
-    "poc": [
-      "poco"
+    "por": [
+        "porque"
     ],
-    "poco": [
-      "poco"
+    "porq": [
+        "porque"
     ],
-    "tu": [
-      "tutto"
+    "ha": [
+        "hacer",
+        "hago",
+        "haces",
+        "hace",
+        "hacemos",
+        "hacen"
     ],
-    "tut": [
-      "tutto"
+    "hac": [
+        "hacer",
+        "haces",
+        "hace",
+        "hacemos",
+        "hacen"
     ],
-    "tutt": [
-      "tutto"
+    "hace": [
+        "hacer",
+        "haces",
+        "hace",
+        "hacemos",
+        "hacen"
     ],
-    "ni": [
-      "niente"
+    "ti": [
+        "tiempo",
+        "tienes",
+        "tiene",
+        "tienen"
     ],
-    "nie": [
-      "niente"
+    "tie": [
+        "tiempo",
+        "tienes",
+        "tiene",
+        "tienen"
     ],
-    "nien": [
-      "niente"
+    "tiem": [
+        "tiempo"
     ],
-    "bel": [
-      "bello"
+    "ah": [
+        "ahora"
     ],
-    "bell": [
-      "bello"
+    "aho": [
+        "ahora"
     ],
-    "gran": [
-      "grande"
+    "ahor": [
+        "ahora"
     ],
-    "pi": [
-      "piccolo"
+    "me": [
+        "mensaje"
     ],
-    "pic": [
-      "piccolo"
+    "men": [
+        "mensaje"
     ],
-    "picc": [
-      "piccolo"
+    "mens": [
+        "mensaje"
     ],
-    "nu": [
-      "nuovo"
+    "tr": [
+        "trabajo"
     ],
-    "nuo": [
-      "nuovo"
+    "tra": [
+        "trabajo"
     ],
-    "nuov": [
-      "nuovo"
+    "trab": [
+        "trabajo"
     ],
-    "ve": [
-      "vecchio",
-      "venire",
-      "vedere"
+    "ca": [
+        "casa",
+        "café"
     ],
-    "vec": [
-      "vecchio"
+    "cas": [
+        "casa"
     ],
-    "vecc": [
-      "vecchio"
+    "casa": [
+        "casa"
     ],
-    "far": [
-      "fare"
+    "co": [
+        "comida"
     ],
-    "fare": [
-      "fare"
+    "com": [
+        "comida"
     ],
-    "an": [
-      "andare"
+    "comi": [
+        "comida"
     ],
-    "and": [
-      "andare"
+    "ag": [
+        "agua"
     ],
-    "anda": [
-      "andare"
+    "agu": [
+        "agua"
     ],
-    "ven": [
-      "venire"
+    "agua": [
+        "agua"
     ],
-    "veni": [
-      "venire"
+    "caf": [
+        "café"
     ],
-    "di": [
-      "dire"
+    "café": [
+        "café"
     ],
-    "dir": [
-      "dire"
+    "xq": [
+        "xq"
     ],
-    "dire": [
-      "dire"
+    "dn": [
+        "dnd"
     ],
-    "sa": [
-      "sapere"
+    "dnd": [
+        "dnd"
     ],
-    "sap": [
-      "sapere"
+    "tq": [
+        "tqm"
     ],
-    "sape": [
-      "sapere"
+    "tqm": [
+        "tqm"
     ],
-    "pot": [
-      "potere"
+    "xf": [
+        "xfa"
     ],
-    "pote": [
-      "potere"
+    "xfa": [
+        "xfa"
+    ],
+    "bn": [
+        "bn"
+    ],
+    "tb": [
+        "tb"
+    ],
+    "hag": [
+        "hago"
+    ],
+    "hago": [
+        "hago"
+    ],
+    "hi": [
+        "hice"
+    ],
+    "hic": [
+        "hice"
+    ],
+    "hice": [
+        "hice"
+    ],
+    "te": [
+        "tengo",
+        "tenemos"
+    ],
+    "ten": [
+        "tengo",
+        "tenemos"
+    ],
+    "teng": [
+        "tengo"
+    ],
+    "tien": [
+        "tienes",
+        "tiene",
+        "tienen"
+    ],
+    "tene": [
+        "tenemos"
     ],
     "vo": [
-      "volere"
+        "voy"
     ],
-    "vol": [
-      "volere"
+    "voy": [
+        "voy"
     ],
-    "vole": [
-      "volere"
+    "va": [
+        "vas",
+        "va",
+        "vamos",
+        "van"
+    ],
+    "vas": [
+        "vas"
+    ],
+    "vam": [
+        "vamos"
+    ],
+    "vamo": [
+        "vamos"
+    ],
+    "van": [
+        "van"
+    ],
+    "fu": [
+        "fui"
+    ],
+    "fui": [
+        "fui"
+    ],
+    "esto": [
+        "estoy"
+    ],
+    "esta": [
+        "estamos"
+    ],
+    "so": [
+        "soy",
+        "somos",
+        "son"
+    ],
+    "soy": [
+        "soy"
+    ],
+    "er": [
+        "eres"
+    ],
+    "ere": [
+        "eres"
+    ],
+    "eres": [
+        "eres"
+    ],
+    "som": [
+        "somos"
+    ],
+    "somo": [
+        "somos"
+    ],
+    "son": [
+        "son"
+    ],
+    "pu": [
+        "puedo",
+        "puedes",
+        "puede",
+        "pueden"
+    ],
+    "pue": [
+        "puedo",
+        "puedes",
+        "puede",
+        "pueden"
+    ],
+    "pued": [
+        "puedo",
+        "puedes",
+        "puede",
+        "pueden"
+    ],
+    "pod": [
+        "podemos"
+    ],
+    "pode": [
+        "podemos"
+    ],
+    "qu": [
+        "quiero",
+        "quieres",
+        "quiere",
+        "queremos",
+        "quieren"
+    ],
+    "qui": [
+        "quiero",
+        "quieres",
+        "quiere",
+        "quieren"
+    ],
+    "quie": [
+        "quiero",
+        "quieres",
+        "quiere",
+        "quieren"
+    ],
+    "que": [
+        "queremos"
+    ],
+    "quer": [
+        "queremos"
+    ]
+},
+    fr: {
+    "bo": [
+        "bonjour",
+        "bonsoir"
+    ],
+    "bon": [
+        "bonjour",
+        "bonsoir"
+    ],
+    "bonj": [
+        "bonjour"
+    ],
+    "bons": [
+        "bonsoir"
+    ],
+    "sa": [
+        "salut"
+    ],
+    "sal": [
+        "salut"
+    ],
+    "salu": [
+        "salut"
+    ],
+    "me": [
+        "merci",
+        "message"
+    ],
+    "mer": [
+        "merci"
+    ],
+    "merc": [
+        "merci"
+    ],
+    "sv": [
+        "svp"
+    ],
+    "svp": [
+        "svp"
+    ],
+    "co": [
+        "comment"
+    ],
+    "com": [
+        "comment"
+    ],
+    "comm": [
+        "comment"
+    ],
+    "ou": [
+        "oui"
+    ],
+    "oui": [
+        "oui"
+    ],
+    "no": [
+        "non"
+    ],
+    "non": [
+        "non"
+    ],
+    "am": [
+        "ami"
+    ],
+    "ami": [
+        "ami"
+    ],
+    "où": [
+        "où"
+    ],
+    "qu": [
+        "quand"
+    ],
+    "qua": [
+        "quand"
+    ],
+    "quan": [
+        "quand"
+    ],
+    "po": [
+        "pourquoi",
+        "pouvons",
+        "pouvez"
+    ],
+    "pou": [
+        "pourquoi",
+        "pouvons",
+        "pouvez"
+    ],
+    "pour": [
+        "pourquoi"
+    ],
+    "fa": [
+        "faire",
+        "fais",
+        "fait",
+        "faisons",
+        "faites"
+    ],
+    "fai": [
+        "faire",
+        "fais",
+        "fait",
+        "faisons",
+        "faites"
+    ],
+    "fair": [
+        "faire"
+    ],
+    "te": [
+        "temps"
+    ],
+    "tem": [
+        "temps"
+    ],
+    "temp": [
+        "temps"
+    ],
+    "ma": [
+        "maintenant",
+        "maison"
+    ],
+    "mai": [
+        "maintenant",
+        "maison"
+    ],
+    "main": [
+        "maintenant"
+    ],
+    "mes": [
+        "message"
+    ],
+    "mess": [
+        "message"
+    ],
+    "tr": [
+        "travail"
+    ],
+    "tra": [
+        "travail"
+    ],
+    "trav": [
+        "travail"
+    ],
+    "mais": [
+        "maison"
+    ],
+    "ea": [
+        "eau"
+    ],
+    "eau": [
+        "eau"
+    ],
+    "ca": [
+        "café"
+    ],
+    "caf": [
+        "café"
+    ],
+    "café": [
+        "café"
+    ],
+    "md": [
+        "mdr"
+    ],
+    "mdr": [
+        "mdr"
+    ],
+    "pt": [
+        "ptdr"
+    ],
+    "ptd": [
+        "ptdr"
+    ],
+    "ptdr": [
+        "ptdr"
+    ],
+    "st": [
+        "stp"
+    ],
+    "stp": [
+        "stp"
+    ],
+    "bj": [
+        "bjr"
+    ],
+    "bjr": [
+        "bjr"
+    ],
+    "bs": [
+        "bsr"
+    ],
+    "bsr": [
+        "bsr"
+    ],
+    "sl": [
+        "slt"
+    ],
+    "slt": [
+        "slt"
+    ],
+    "mr": [
+        "mrc"
+    ],
+    "mrc": [
+        "mrc"
+    ],
+    "pk": [
+        "pk"
+    ],
+    "fais": [
+        "fais",
+        "faisons"
+    ],
+    "fait": [
+        "fait",
+        "faites"
+    ],
+    "fo": [
+        "font"
+    ],
+    "fon": [
+        "font"
+    ],
+    "font": [
+        "font"
+    ],
+    "su": [
+        "suis"
+    ],
+    "sui": [
+        "suis"
+    ],
+    "suis": [
+        "suis"
+    ],
+    "es": [
+        "es",
+        "est"
+    ],
+    "est": [
+        "est"
+    ],
+    "so": [
+        "sommes",
+        "sont"
+    ],
+    "som": [
+        "sommes"
+    ],
+    "somm": [
+        "sommes"
+    ],
+    "êt": [
+        "êtes"
+    ],
+    "ête": [
+        "êtes"
+    ],
+    "êtes": [
+        "êtes"
+    ],
+    "son": [
+        "sont"
+    ],
+    "sont": [
+        "sont"
+    ],
+    "ai": [
+        "ai"
+    ],
+    "as": [
+        "as"
+    ],
+    "av": [
+        "avons",
+        "avez"
+    ],
+    "avo": [
+        "avons"
+    ],
+    "avon": [
+        "avons"
+    ],
+    "ave": [
+        "avez"
+    ],
+    "avez": [
+        "avez"
+    ],
+    "on": [
+        "ont"
+    ],
+    "ont": [
+        "ont"
+    ],
+    "va": [
+        "vais",
+        "vas",
+        "va"
+    ],
+    "vai": [
+        "vais"
+    ],
+    "vais": [
+        "vais"
+    ],
+    "vas": [
+        "vas"
+    ],
+    "al": [
+        "allons",
+        "allez"
+    ],
+    "all": [
+        "allons",
+        "allez"
+    ],
+    "allo": [
+        "allons"
+    ],
+    "alle": [
+        "allez"
+    ],
+    "vo": [
+        "vont",
+        "voulons",
+        "voulez"
+    ],
+    "von": [
+        "vont"
+    ],
+    "vont": [
+        "vont"
+    ],
+    "pe": [
+        "peux",
+        "peut",
+        "peuvent"
+    ],
+    "peu": [
+        "peux",
+        "peut",
+        "peuvent"
+    ],
+    "peux": [
+        "peux"
+    ],
+    "peut": [
+        "peut"
+    ],
+    "pouv": [
+        "pouvons",
+        "pouvez"
+    ],
+    "peuv": [
+        "peuvent"
+    ],
+    "ve": [
+        "veux",
+        "veut",
+        "veulent"
+    ],
+    "veu": [
+        "veux",
+        "veut",
+        "veulent"
+    ],
+    "veux": [
+        "veux"
+    ],
+    "veut": [
+        "veut"
+    ],
+    "vou": [
+        "voulons",
+        "voulez"
+    ],
+    "voul": [
+        "voulons",
+        "voulez"
+    ],
+    "veul": [
+        "veulent"
+    ]
+},
+    pt: {
+    "ol": [
+        "olá"
+    ],
+    "olá": [
+        "olá"
+    ],
+    "oi": [
+        "oi"
+    ],
+    "ob": [
+        "obrigado",
+        "obg"
+    ],
+    "obr": [
+        "obrigado"
+    ],
+    "obri": [
+        "obrigado"
+    ],
+    "am": [
+        "amigo"
+    ],
+    "ami": [
+        "amigo"
+    ],
+    "amig": [
+        "amigo"
+    ],
+    "on": [
+        "onde"
+    ],
+    "ond": [
+        "onde"
+    ],
+    "onde": [
+        "onde"
+    ],
+    "qu": [
+        "quando",
+        "quero",
+        "quer",
+        "queremos",
+        "querem"
+    ],
+    "qua": [
+        "quando"
+    ],
+    "quan": [
+        "quando"
+    ],
+    "po": [
+        "porque",
+        "posso",
+        "pode",
+        "podemos",
+        "podem"
+    ],
+    "por": [
+        "porque"
+    ],
+    "porq": [
+        "porque"
+    ],
+    "fa": [
+        "fazer",
+        "faço",
+        "faz",
+        "fazemos",
+        "fazem"
+    ],
+    "faz": [
+        "fazer",
+        "faz",
+        "fazemos",
+        "fazem"
+    ],
+    "faze": [
+        "fazer",
+        "fazemos",
+        "fazem"
+    ],
+    "te": [
+        "tempo",
+        "tenho",
+        "tem",
+        "temos"
+    ],
+    "tem": [
+        "tempo",
+        "tem",
+        "temos"
+    ],
+    "temp": [
+        "tempo"
+    ],
+    "ag": [
+        "agora"
+    ],
+    "ago": [
+        "agora"
+    ],
+    "agor": [
+        "agora"
+    ],
+    "me": [
+        "mensagem"
+    ],
+    "men": [
+        "mensagem"
+    ],
+    "mens": [
+        "mensagem"
+    ],
+    "tr": [
+        "trabalho"
+    ],
+    "tra": [
+        "trabalho"
+    ],
+    "trab": [
+        "trabalho"
+    ],
+    "ca": [
+        "casa",
+        "café"
+    ],
+    "cas": [
+        "casa"
+    ],
+    "casa": [
+        "casa"
+    ],
+    "ág": [
+        "água"
+    ],
+    "águ": [
+        "água"
+    ],
+    "água": [
+        "água"
+    ],
+    "caf": [
+        "café"
+    ],
+    "café": [
+        "café"
+    ],
+    "vc": [
+        "vc"
+    ],
+    "tb": [
+        "tb"
+    ],
+    "obg": [
+        "obg"
+    ],
+    "pf": [
+        "pfv"
+    ],
+    "pfv": [
+        "pfv"
+    ],
+    "bl": [
+        "blz"
+    ],
+    "blz": [
+        "blz"
+    ],
+    "vl": [
+        "vlw"
+    ],
+    "vlw": [
+        "vlw"
+    ],
+    "dp": [
+        "dps"
+    ],
+    "dps": [
+        "dps"
+    ],
+    "pq": [
+        "pq"
+    ],
+    "faç": [
+        "faço"
+    ],
+    "faço": [
+        "faço"
+    ],
+    "fi": [
+        "fiz"
+    ],
+    "fiz": [
+        "fiz"
+    ],
+    "ten": [
+        "tenho"
+    ],
+    "tenh": [
+        "tenho"
+    ],
+    "temo": [
+        "temos"
+    ],
+    "tê": [
+        "têm"
+    ],
+    "têm": [
+        "têm"
+    ],
+    "ti": [
+        "tive"
+    ],
+    "tiv": [
+        "tive"
+    ],
+    "tive": [
+        "tive"
+    ],
+    "vo": [
+        "vou"
+    ],
+    "vou": [
+        "vou"
+    ],
+    "va": [
+        "vai",
+        "vamos"
+    ],
+    "vai": [
+        "vai"
+    ],
+    "vam": [
+        "vamos"
+    ],
+    "vamo": [
+        "vamos"
+    ],
+    "vã": [
+        "vão"
+    ],
+    "vão": [
+        "vão"
+    ],
+    "fu": [
+        "fui"
+    ],
+    "fui": [
+        "fui"
+    ],
+    "es": [
+        "estou",
+        "está",
+        "estamos",
+        "estão"
+    ],
+    "est": [
+        "estou",
+        "está",
+        "estamos",
+        "estão"
+    ],
+    "esto": [
+        "estou"
+    ],
+    "está": [
+        "está"
+    ],
+    "esta": [
+        "estamos"
+    ],
+    "estã": [
+        "estão"
+    ],
+    "so": [
+        "sou",
+        "somos"
+    ],
+    "sou": [
+        "sou"
+    ],
+    "som": [
+        "somos"
+    ],
+    "somo": [
+        "somos"
+    ],
+    "sã": [
+        "são"
+    ],
+    "são": [
+        "são"
+    ],
+    "pos": [
+        "posso"
+    ],
+    "poss": [
+        "posso"
+    ],
+    "pod": [
+        "pode",
+        "podemos",
+        "podem"
+    ],
+    "pode": [
+        "pode",
+        "podemos",
+        "podem"
+    ],
+    "que": [
+        "quero",
+        "quer",
+        "queremos",
+        "querem"
+    ],
+    "quer": [
+        "quero",
+        "quer",
+        "queremos",
+        "querem"
+    ]
+},
+    de: {
+    "ha": [
+        "hallo",
+        "haus",
+        "habe",
+        "hast",
+        "hat",
+        "haben",
+        "hatte"
+    ],
+    "hal": [
+        "hallo"
+    ],
+    "hall": [
+        "hallo"
+    ],
+    "da": [
+        "danke"
+    ],
+    "dan": [
+        "danke"
+    ],
+    "dank": [
+        "danke"
+    ],
+    "bi": [
+        "bitte",
+        "bin",
+        "bist"
+    ],
+    "bit": [
+        "bitte"
+    ],
+    "bitt": [
+        "bitte"
+    ],
+    "fr": [
+        "freund"
+    ],
+    "fre": [
+        "freund"
+    ],
+    "freu": [
+        "freund"
+    ],
+    "gu": [
+        "gut"
+    ],
+    "gut": [
+        "gut"
+    ],
+    "wo": [
+        "wo",
+        "wollen",
+        "wollte"
+    ],
+    "wa": [
+        "wann",
+        "warum",
+        "wasser",
+        "war"
+    ],
+    "wan": [
+        "wann"
+    ],
+    "wann": [
+        "wann"
+    ],
+    "war": [
+        "warum",
+        "war"
+    ],
+    "waru": [
+        "warum"
+    ],
+    "we": [
+        "weil"
+    ],
+    "wei": [
+        "weil"
+    ],
+    "weil": [
+        "weil"
+    ],
+    "ma": [
+        "machen",
+        "mache",
+        "machst",
+        "macht",
+        "machte"
+    ],
+    "mac": [
+        "machen",
+        "mache",
+        "machst",
+        "macht",
+        "machte"
+    ],
+    "mach": [
+        "machen",
+        "mache",
+        "machst",
+        "macht",
+        "machte"
+    ],
+    "ze": [
+        "zeit"
+    ],
+    "zei": [
+        "zeit"
+    ],
+    "zeit": [
+        "zeit"
+    ],
+    "je": [
+        "jetzt"
+    ],
+    "jet": [
+        "jetzt"
+    ],
+    "jetz": [
+        "jetzt"
+    ],
+    "na": [
+        "nachricht"
+    ],
+    "nac": [
+        "nachricht"
+    ],
+    "nach": [
+        "nachricht"
+    ],
+    "ar": [
+        "arbeit"
+    ],
+    "arb": [
+        "arbeit"
+    ],
+    "arbe": [
+        "arbeit"
+    ],
+    "hau": [
+        "haus"
+    ],
+    "haus": [
+        "haus"
+    ],
+    "was": [
+        "wasser"
+    ],
+    "wass": [
+        "wasser"
+    ],
+    "ka": [
+        "kaffee",
+        "ka",
+        "kann",
+        "kannst"
+    ],
+    "kaf": [
+        "kaffee"
+    ],
+    "kaff": [
+        "kaffee"
+    ],
+    "lg": [
+        "lg"
+    ],
+    "mf": [
+        "mfg"
+    ],
+    "mfg": [
+        "mfg"
+    ],
+    "cu": [
+        "cu"
+    ],
+    "vl": [
+        "vllt"
+    ],
+    "vll": [
+        "vllt"
+    ],
+    "vllt": [
+        "vllt"
+    ],
+    "hab": [
+        "habe",
+        "haben"
+    ],
+    "habe": [
+        "habe",
+        "haben"
+    ],
+    "has": [
+        "hast"
+    ],
+    "hast": [
+        "hast"
+    ],
+    "hat": [
+        "hat",
+        "hatte"
+    ],
+    "hatt": [
+        "hatte"
+    ],
+    "bin": [
+        "bin"
+    ],
+    "bis": [
+        "bist"
+    ],
+    "bist": [
+        "bist"
+    ],
+    "is": [
+        "ist"
+    ],
+    "ist": [
+        "ist"
+    ],
+    "si": [
+        "sind"
+    ],
+    "sin": [
+        "sind"
+    ],
+    "sind": [
+        "sind"
+    ],
+    "ge": [
+        "gehe",
+        "gehst",
+        "geht",
+        "gehen"
+    ],
+    "geh": [
+        "gehe",
+        "gehst",
+        "geht",
+        "gehen"
+    ],
+    "gehe": [
+        "gehe",
+        "gehen"
+    ],
+    "gehs": [
+        "gehst"
+    ],
+    "geht": [
+        "geht"
+    ],
+    "gi": [
+        "ging"
+    ],
+    "gin": [
+        "ging"
+    ],
+    "ging": [
+        "ging"
+    ],
+    "kan": [
+        "kann",
+        "kannst"
+    ],
+    "kann": [
+        "kann",
+        "kannst"
+    ],
+    "kö": [
+        "können"
+    ],
+    "kön": [
+        "können"
+    ],
+    "könn": [
+        "können"
+    ],
+    "ko": [
+        "konnte"
+    ],
+    "kon": [
+        "konnte"
+    ],
+    "konn": [
+        "konnte"
+    ],
+    "wi": [
+        "will",
+        "willst"
+    ],
+    "wil": [
+        "will",
+        "willst"
+    ],
+    "will": [
+        "will",
+        "willst"
+    ],
+    "wol": [
+        "wollen",
+        "wollte"
+    ],
+    "woll": [
+        "wollen",
+        "wollte"
+    ]
+},
+    it: {
+    "ci": [
+        "ciao"
+    ],
+    "cia": [
+        "ciao"
+    ],
+    "ciao": [
+        "ciao"
+    ],
+    "bu": [
+        "buongiorno",
+        "buonasera"
+    ],
+    "buo": [
+        "buongiorno",
+        "buonasera"
+    ],
+    "buon": [
+        "buongiorno",
+        "buonasera"
+    ],
+    "gr": [
+        "grazie"
+    ],
+    "gra": [
+        "grazie"
+    ],
+    "graz": [
+        "grazie"
+    ],
+    "am": [
+        "amico"
+    ],
+    "ami": [
+        "amico"
+    ],
+    "amic": [
+        "amico"
+    ],
+    "be": [
+        "bene"
+    ],
+    "ben": [
+        "bene"
+    ],
+    "bene": [
+        "bene"
+    ],
+    "do": [
+        "dove"
     ],
     "dov": [
-      "dovere"
+        "dove"
     ],
     "dove": [
-      "dovere"
+        "dove"
     ],
-    "ved": [
-      "vedere"
+    "qu": [
+        "quando"
     ],
-    "vede": [
-      "vedere"
+    "qua": [
+        "quando"
+    ],
+    "quan": [
+        "quando"
+    ],
+    "pe": [
+        "perché"
+    ],
+    "per": [
+        "perché"
+    ],
+    "perc": [
+        "perché"
+    ],
+    "fa": [
+        "fare",
+        "faccio",
+        "fai",
+        "fa",
+        "facciamo",
+        "fanno",
+        "fatto"
+    ],
+    "far": [
+        "fare"
+    ],
+    "fare": [
+        "fare"
+    ],
+    "te": [
+        "tempo"
+    ],
+    "tem": [
+        "tempo"
+    ],
+    "temp": [
+        "tempo"
+    ],
+    "ad": [
+        "adesso"
+    ],
+    "ade": [
+        "adesso"
+    ],
+    "ades": [
+        "adesso"
+    ],
+    "me": [
+        "messaggio"
+    ],
+    "mes": [
+        "messaggio"
+    ],
+    "mess": [
+        "messaggio"
+    ],
+    "la": [
+        "lavoro"
+    ],
+    "lav": [
+        "lavoro"
+    ],
+    "lavo": [
+        "lavoro"
+    ],
+    "ca": [
+        "casa",
+        "caffè"
+    ],
+    "cas": [
+        "casa"
+    ],
+    "casa": [
+        "casa"
+    ],
+    "ac": [
+        "acqua"
+    ],
+    "acq": [
+        "acqua"
+    ],
+    "acqu": [
+        "acqua"
+    ],
+    "caf": [
+        "caffè"
+    ],
+    "caff": [
+        "caffè"
+    ],
+    "cm": [
+        "cmq"
+    ],
+    "cmq": [
+        "cmq"
+    ],
+    "xk": [
+        "xk"
+    ],
+    "ri": [
+        "risp"
+    ],
+    "ris": [
+        "risp"
+    ],
+    "risp": [
+        "risp"
+    ],
+    "tv": [
+        "tvb"
+    ],
+    "tvb": [
+        "tvb"
+    ],
+    "nn": [
+        "nn"
+    ],
+    "sn": [
+        "sn"
+    ],
+    "fac": [
+        "faccio",
+        "facciamo"
+    ],
+    "facc": [
+        "faccio",
+        "facciamo"
+    ],
+    "fai": [
+        "fai"
+    ],
+    "fan": [
+        "fanno"
+    ],
+    "fann": [
+        "fanno"
+    ],
+    "fat": [
+        "fatto"
+    ],
+    "fatt": [
+        "fatto"
+    ],
+    "ho": [
+        "ho"
+    ],
+    "ha": [
+        "hai",
+        "ha",
+        "hanno"
+    ],
+    "hai": [
+        "hai"
+    ],
+    "ab": [
+        "abbiamo"
+    ],
+    "abb": [
+        "abbiamo"
+    ],
+    "abbi": [
+        "abbiamo"
+    ],
+    "han": [
+        "hanno"
+    ],
+    "hann": [
+        "hanno"
+    ],
+    "av": [
+        "avuto"
+    ],
+    "avu": [
+        "avuto"
+    ],
+    "avut": [
+        "avuto"
+    ],
+    "so": [
+        "sono"
+    ],
+    "son": [
+        "sono"
+    ],
+    "sono": [
+        "sono"
+    ],
+    "se": [
+        "sei"
+    ],
+    "sei": [
+        "sei"
+    ],
+    "si": [
+        "siamo"
+    ],
+    "sia": [
+        "siamo"
+    ],
+    "siam": [
+        "siamo"
+    ],
+    "va": [
+        "vado",
+        "vai",
+        "va",
+        "vanno"
+    ],
+    "vad": [
+        "vado"
+    ],
+    "vado": [
+        "vado"
+    ],
+    "vai": [
+        "vai"
+    ],
+    "an": [
+        "andiamo",
+        "andato"
+    ],
+    "and": [
+        "andiamo",
+        "andato"
+    ],
+    "andi": [
+        "andiamo"
+    ],
+    "van": [
+        "vanno"
+    ],
+    "vann": [
+        "vanno"
+    ],
+    "anda": [
+        "andato"
+    ],
+    "po": [
+        "posso",
+        "possiamo",
+        "possono"
+    ],
+    "pos": [
+        "posso",
+        "possiamo",
+        "possono"
+    ],
+    "poss": [
+        "posso",
+        "possiamo",
+        "possono"
+    ],
+    "pu": [
+        "puoi",
+        "può"
+    ],
+    "puo": [
+        "puoi"
+    ],
+    "puoi": [
+        "puoi"
+    ],
+    "può": [
+        "può"
+    ],
+    "vo": [
+        "voglio",
+        "vogliamo",
+        "vogliono"
+    ],
+    "vog": [
+        "voglio",
+        "vogliamo",
+        "vogliono"
+    ],
+    "vogl": [
+        "voglio",
+        "vogliamo",
+        "vogliono"
+    ],
+    "vu": [
+        "vuoi",
+        "vuole"
+    ],
+    "vuo": [
+        "vuoi",
+        "vuole"
+    ],
+    "vuoi": [
+        "vuoi"
+    ],
+    "vuol": [
+        "vuole"
     ]
-  }
-};
-
-  const ES_SET = new Set(ES_WORDS.map(w => w.toLowerCase()));
-  const FR_SET = new Set(FR_WORDS.map(w => w.toLowerCase()));
-  const PT_SET = new Set(PT_WORDS.map(w => w.toLowerCase()));
-  const DE_SET = new Set(DE_WORDS.map(w => w.toLowerCase()));
-  const IT_SET = new Set(IT_WORDS.map(w => w.toLowerCase()));
+}
+  };
 
   class MultilingualSuite {
     constructor() {
-      this.es = { name: 'Spanish', badge: 'Español', words: ES_SET, typos: ES_TYPO_MAP };
-      this.fr = { name: 'French', badge: 'Français', words: FR_SET, typos: FR_TYPO_MAP };
-      this.pt = { name: 'Portuguese', badge: 'Português', words: PT_SET, typos: PT_TYPO_MAP };
-      this.de = { name: 'German', badge: 'Deutsch', words: DE_SET, typos: DE_TYPO_MAP };
-      this.it = { name: 'Italian', badge: 'Italiano', words: IT_SET, typos: IT_TYPO_MAP };
       this.prefixTable = MULTI_PREFIX_TABLE;
+      this.es = { code: 'es', name: 'Spanish', badge: 'Español', words: new Set(ES_WORDS) };
+      this.fr = { code: 'fr', name: 'French', badge: 'Français', words: new Set(FR_WORDS) };
+      this.pt = { code: 'pt', name: 'Portuguese', badge: 'Português', words: new Set(PT_WORDS) };
+      this.de = { code: 'de', name: 'German', badge: 'Deutsch', words: new Set(DE_WORDS) };
+      this.it = { code: 'it', name: 'Italian', badge: 'Italiano', words: new Set(IT_WORDS) };
+    }
+
+    correctWord(cleanWord) {
+      if (!cleanWord) return null;
+      const typoMap = {
+        "xq": "porque", "dnd": "dónde", "tqm": "te quiero mucho", "tkm": "te quiero mucho",
+        "xfa": "por favor", "bn": "bien", "tb": "también", "pq": "porque",
+        "mdr": "mort de rire", "ptdr": "pété de rire", "stp": "s'il te plaît",
+        "svp": "s'il vous plaît", "bjr": "bonjour", "bsr": "bonsoir", "slt": "salut",
+        "mrc": "merci", "pk": "pourquoi",
+        "vc": "você", "obg": "obrigado", "pfv": "por favor", "blz": "beleza",
+        "vlw": "valeu", "dps": "depois", "tmj": "tamo junto",
+        "lg": "liebe grüße", "mfg": "mit freundlichen grüßen", "cu": "bis später",
+        "vllt": "vielleicht", "ka": "keine ahnung",
+        "cmq": "comunque", "xk": "perché", "risp": "rispondi", "tvb": "ti voglio bene",
+        "nn": "non", "sn": "sono"
+      };
+      return typoMap[cleanWord.toLowerCase()] || null;
     }
 
     detect(text) {
       if (!text || typeof text !== 'string') return null;
       const lower = text.toLowerCase();
-      if (/[¿¡ñáéíóú]/.test(lower) || /\b(hola|gracias|estás|amigo|bueno|cómo)\b/.test(lower)) return 'es';
-      if (/[çœæàèêëîïôùû]/.test(lower) || /\b(bonjour|merci|s'il|vous|plaît|très|avec)\b/.test(lower)) return 'fr';
-      if (/[ãõ]/.test(lower) || /\b(olá|obrigado|você|tudo|bom|beleza)\b/.test(lower)) return 'pt';
-      if (/[äöüß]/.test(lower) || /\b(hallo|danke|bitte|guten|morgen|nicht|haben)\b/.test(lower)) return 'de';
-      if (/\b(ciao|grazie|prego|buongiorno|arrivederci|come stai)\b/.test(lower)) return 'it';
+      if (/\b(hola|gracias|por favor|buenos|amigo|dónde|hacer|estás|xq|tqm)\b/i.test(lower)) return 'es';
+      if (/\b(bonjour|merci|salut|s'il vous plaît|oui|non|faire|svp|mdr|ptdr)\b/i.test(lower)) return 'fr';
+      if (/\b(olá|obrigado|por favor|tudo bem|você|fazer|agora|vc|obg|blz)\b/i.test(lower)) return 'pt';
+      if (/\b(hallo|danke|bitte|guten|morgen|zeit|jetzt|mfg|vllt)\b/i.test(lower)) return 'de';
+      if (/\b(ciao|grazie|per favore|buongiorno|stai|fare|adesso|cmq|xk|tvb)\b/i.test(lower)) return 'it';
       return null;
     }
 
-    correctWord(cleanWord, lang) {
-      if (!cleanWord) return null;
-      if (lang && this[lang]) return this[lang].typos[cleanWord] || null;
-      if (this.es.typos[cleanWord]) return this.es.typos[cleanWord];
-      if (this.fr.typos[cleanWord]) return this.fr.typos[cleanWord];
-      if (this.pt.typos[cleanWord]) return this.pt.typos[cleanWord];
-      if (this.de.typos[cleanWord]) return this.de.typos[cleanWord];
-      if (this.it.typos[cleanWord]) return this.it.typos[cleanWord];
-      return null;
-    }
-
-    hasWord(cleanWord, lang) {
-      if (!cleanWord) return false;
+    hasWord(word, lang) {
+      if (!word) return false;
+      const cleanWord = word.toLowerCase().trim();
       if (lang && this[lang]) return this[lang].words.has(cleanWord);
       return this.es.words.has(cleanWord) ||
              this.fr.words.has(cleanWord) ||

@@ -976,6 +976,12 @@
           fixedCandidate = window.TR_TYPO_MAP[targetTypo];
         } else if (detectedLang === 'sw' && window.SW_TYPO_MAP && window.SW_TYPO_MAP[targetTypo]) {
           fixedCandidate = window.SW_TYPO_MAP[targetTypo];
+        } else if (detectedLang === 'tl' && window.TL_TYPO_MAP && window.TL_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.TL_TYPO_MAP[targetTypo];
+        } else if (detectedLang === 'id' && window.ID_TYPO_MAP && window.ID_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.ID_TYPO_MAP[targetTypo];
+        } else if (detectedLang === 'zh' && window.ZH_TYPO_MAP && window.ZH_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.ZH_TYPO_MAP[targetTypo];
         } else if (window.PIDGIN_TYPO_MAP && window.PIDGIN_TYPO_MAP[targetTypo]) {
           fixedCandidate = window.PIDGIN_TYPO_MAP[targetTypo];
         } else if (window.MULTILINGUAL_SUITE && window.MULTILINGUAL_SUITE.correctWord(targetTypo, detectedLang)) {
@@ -1012,6 +1018,12 @@
           prefixMatches = window.TR_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
         } else if (detectedLang === 'sw' && window.SW_SUBDIRECTORY) {
           prefixMatches = window.SW_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (detectedLang === 'tl' && window.TL_SUBDIRECTORY) {
+          prefixMatches = window.TL_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (detectedLang === 'id' && window.ID_SUBDIRECTORY) {
+          prefixMatches = window.ID_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
+        } else if (detectedLang === 'zh' && window.ZH_SUBDIRECTORY) {
+          prefixMatches = window.ZH_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
         } else if (detectedLang === 'pidgin' && window.PIDGIN_SUBDIRECTORY) {
           prefixMatches = window.PIDGIN_SUBDIRECTORY.getPrefixSuggestions(cleanWord, 4);
         } else if (window.MULTILINGUAL_SUITE && ['es', 'fr', 'pt', 'de', 'it'].includes(detectedLang)) {
@@ -1063,6 +1075,11 @@
         else if (detectedLang === 'hi') fallbacks = ['namaste', 'shukriya', 'kaise ho', 'theek hai', 'bhai'];
         else if (detectedLang === 'tr') fallbacks = ['merhaba', 'selam', 'teşekkürler', 'tamam', 'günaydın'];
         else if (detectedLang === 'sw') fallbacks = ['habari', 'mambo', 'asante', 'karibu', 'poa'];
+        else if (detectedLang === 'tl') fallbacks = ['kamusta', 'salamat', 'ingat', 'tara', 'magandang umaga'];
+        else if (detectedLang === 'id') fallbacks = ['halo', 'terima kasih', 'apa kabar', 'makasih', 'santai'];
+        else if (detectedLang === 'zh') fallbacks = ['nihao', 'xiexie', 'zaijian', 'haode', 'dajia'];
+        else if (detectedLang === 'ja') fallbacks = ['konnichiwa', 'arigatou', 'ohayou', 'daijoubu', 'otsukare'];
+        else if (detectedLang === 'ko') fallbacks = ['annyeong', 'gamsahamnida', 'daebak', 'fighting', 'saranghae'];
 
         fallbacks.forEach(f => {
           if (f.startsWith(cleanWord) && suggestions.length < 3) {

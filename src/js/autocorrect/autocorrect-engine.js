@@ -98,6 +98,11 @@
       this.hiSubDir = window.HI_SUBDIRECTORY || null;
       this.trSubDir = window.TR_SUBDIRECTORY || null;
       this.swSubDir = window.SW_SUBDIRECTORY || null;
+      this.tlSubDir = window.TL_SUBDIRECTORY || null;
+      this.idSubDir = window.ID_SUBDIRECTORY || null;
+      this.zhSubDir = window.ZH_SUBDIRECTORY || null;
+      this.jaSubDir = window.JA_SUBDIRECTORY || null;
+      this.koSubDir = window.KO_SUBDIRECTORY || null;
       this.multiSuite = window.MULTILINGUAL_SUITE || null;
 
       // Active languages registry
@@ -139,6 +144,21 @@
       if (!this.swSubDir && window.SW_SUBDIRECTORY) {
         this.swSubDir = window.SW_SUBDIRECTORY;
       }
+      if (!this.tlSubDir && window.TL_SUBDIRECTORY) {
+        this.tlSubDir = window.TL_SUBDIRECTORY;
+      }
+      if (!this.idSubDir && window.ID_SUBDIRECTORY) {
+        this.idSubDir = window.ID_SUBDIRECTORY;
+      }
+      if (!this.zhSubDir && window.ZH_SUBDIRECTORY) {
+        this.zhSubDir = window.ZH_SUBDIRECTORY;
+      }
+      if (!this.jaSubDir && window.JA_SUBDIRECTORY) {
+        this.jaSubDir = window.JA_SUBDIRECTORY;
+      }
+      if (!this.koSubDir && window.KO_SUBDIRECTORY) {
+        this.koSubDir = window.KO_SUBDIRECTORY;
+      }
       if (!this.multiSuite && window.MULTILINGUAL_SUITE) {
         this.multiSuite = window.MULTILINGUAL_SUITE;
       }
@@ -159,6 +179,11 @@
       else if (langKey === 'hi' && this.hiSubDir) this.hiSubDir.activate();
       else if (langKey === 'tr' && this.trSubDir) this.trSubDir.activate();
       else if (langKey === 'sw' && this.swSubDir) this.swSubDir.activate();
+      else if (langKey === 'tl' && this.tlSubDir) this.tlSubDir.activate();
+      else if (langKey === 'id' && this.idSubDir) this.idSubDir.activate();
+      else if (langKey === 'zh' && this.zhSubDir) this.zhSubDir.activate();
+      else if (langKey === 'ja' && this.jaSubDir) this.jaSubDir.activate();
+      else if (langKey === 'ko' && this.koSubDir) this.koSubDir.activate();
 
       if (!wasActive) {
         this.dispatchLanguageEvent(langKey, triggerSource);
@@ -178,6 +203,11 @@
       else if (langKey === 'hi' && this.hiSubDir) this.hiSubDir.deactivate();
       else if (langKey === 'tr' && this.trSubDir) this.trSubDir.deactivate();
       else if (langKey === 'sw' && this.swSubDir) this.swSubDir.deactivate();
+      else if (langKey === 'tl' && this.tlSubDir) this.tlSubDir.deactivate();
+      else if (langKey === 'id' && this.idSubDir) this.idSubDir.deactivate();
+      else if (langKey === 'zh' && this.zhSubDir) this.zhSubDir.deactivate();
+      else if (langKey === 'ja' && this.jaSubDir) this.jaSubDir.deactivate();
+      else if (langKey === 'ko' && this.koSubDir) this.koSubDir.deactivate();
 
       if (this.currentPrimaryLanguage === langKey) {
         this.currentPrimaryLanguage = 'en';
@@ -204,6 +234,16 @@
           return { code: 'tr', name: 'Turkish', badge: 'Türkçe', icon: 'fa-star-and-crescent' };
         case 'sw':
           return { code: 'sw', name: 'Swahili', badge: 'Kiswahili', icon: 'fa-sun' };
+        case 'tl':
+          return { code: 'tl', name: 'Tagalog / Taglish', badge: 'Tagalog', icon: 'fa-sun' };
+        case 'id':
+          return { code: 'id', name: 'Bahasa Indonesia', badge: 'Indonesia', icon: 'fa-compass' };
+        case 'zh':
+          return { code: 'zh', name: 'Chinese Pinyin', badge: 'Pinyin', icon: 'fa-dragon' };
+        case 'ja':
+          return { code: 'ja', name: 'Japanese Romaji', badge: '日本語 Romaji', icon: 'fa-torii-gate' };
+        case 'ko':
+          return { code: 'ko', name: 'Korean Romanized', badge: '한국어 Romaji', icon: 'fa-heart' };
         case 'es':
           return { code: 'es', name: 'Spanish', badge: 'Español', icon: 'fa-globe' };
         case 'fr':
@@ -265,7 +305,27 @@
       else if (this.swSubDir && this.swSubDir.detect(sample)) {
         detected = 'sw';
       }
-      // 7. European Suite (es, fr, pt, de, it)
+      // 7. Tagalog detection
+      else if (this.tlSubDir && this.tlSubDir.detect(sample)) {
+        detected = 'tl';
+      }
+      // 8. Bahasa Indonesia detection
+      else if (this.idSubDir && this.idSubDir.detect(sample)) {
+        detected = 'id';
+      }
+      // 9. Chinese Pinyin detection
+      else if (this.zhSubDir && this.zhSubDir.detect(sample)) {
+        detected = 'zh';
+      }
+      // 9b. Japanese Romaji
+      else if (this.jaSubDir && this.jaSubDir.detect(sample)) {
+        detected = 'ja';
+      }
+      // 9c. Korean Romanized
+      else if (this.koSubDir && this.koSubDir.detect(sample)) {
+        detected = 'ko';
+      }
+      // 10. European Suite (es, fr, pt, de, it)
       else if (this.multiSuite) {
         const multi = this.multiSuite.detect(sample);
         if (multi) detected = multi;
@@ -292,6 +352,11 @@
       if (this.ruSubDir && this.ruSubDir.hasWord(clean)) return true;
       if (this.trSubDir && this.trSubDir.hasWord(clean)) return true;
       if (this.swSubDir && this.swSubDir.hasWord(clean)) return true;
+      if (this.tlSubDir && this.tlSubDir.hasWord(clean)) return true;
+      if (this.idSubDir && this.idSubDir.hasWord(clean)) return true;
+      if (this.zhSubDir && this.zhSubDir.hasWord(clean)) return true;
+      if (this.jaSubDir && this.jaSubDir.hasWord(clean)) return true;
+      if (this.koSubDir && this.koSubDir.hasWord(clean)) return true;
       if (this.pidginSubDir && this.pidginSubDir.hasWord(clean)) return true;
       if (this.multiSuite && this.multiSuite.hasWord(clean)) return true;
       if (clean.includes("'")) return true;
@@ -325,6 +390,32 @@
       }
 
       let result = null;
+
+      // 2b. Active Primary Language Fast-Path Priority
+      const primary = this.currentPrimaryLanguage;
+      if (primary && primary !== 'en') {
+        let activeDir = null;
+        if (primary === 'pidgin') activeDir = this.pidginSubDir;
+        else if (primary === 'ru') activeDir = this.ruSubDir;
+        else if (primary === 'ar') activeDir = this.arSubDir;
+        else if (primary === 'hi') activeDir = this.hiSubDir;
+        else if (primary === 'tr') activeDir = this.trSubDir;
+        else if (primary === 'sw') activeDir = this.swSubDir;
+        else if (primary === 'tl') activeDir = this.tlSubDir;
+        else if (primary === 'id') activeDir = this.idSubDir;
+        else if (primary === 'zh') activeDir = this.zhSubDir;
+        else if (primary === 'ja') activeDir = this.jaSubDir;
+        else if (primary === 'ko') activeDir = this.koSubDir;
+
+        if (activeDir) {
+          const directFix = activeDir.correctWord(clean);
+          if (directFix) {
+            result = directFix;
+          } else if (activeDir.hasWord(clean)) {
+            result = rawWord;
+          }
+        }
+      }
 
       // 3. Arabic Sub-Directory
       if (!result && this.arSubDir) {
@@ -392,6 +483,71 @@
             this.activateSubdirectory('sw', 'swahili-token');
             result = swFix;
           } else if (this.swSubDir.hasWord(clean)) {
+            result = rawWord;
+          }
+        }
+      }
+
+      // 7b. Tagalog Sub-Directory
+      if (!result && this.tlSubDir) {
+        if (this.currentPrimaryLanguage === 'tl' || this.tlSubDir.correctWord(clean)) {
+          const tlFix = this.tlSubDir.correctWord(clean);
+          if (tlFix) {
+            this.activateSubdirectory('tl', 'tagalog-token');
+            result = tlFix;
+          } else if (this.tlSubDir.hasWord(clean)) {
+            result = rawWord;
+          }
+        }
+      }
+
+      // 7c. Bahasa Indonesia Sub-Directory
+      if (!result && this.idSubDir) {
+        if (this.currentPrimaryLanguage === 'id' || this.idSubDir.correctWord(clean)) {
+          const idFix = this.idSubDir.correctWord(clean);
+          if (idFix) {
+            this.activateSubdirectory('id', 'indonesia-token');
+            result = idFix;
+          } else if (this.idSubDir.hasWord(clean)) {
+            result = rawWord;
+          }
+        }
+      }
+
+      // 7d. Chinese Pinyin Sub-Directory
+      if (!result && this.zhSubDir) {
+        if (this.currentPrimaryLanguage === 'zh' || this.zhSubDir.correctWord(clean)) {
+          const zhFix = this.zhSubDir.correctWord(clean);
+          if (zhFix) {
+            this.activateSubdirectory('zh', 'chinese-token');
+            result = zhFix;
+          } else if (this.zhSubDir.hasWord(clean)) {
+            result = rawWord;
+          }
+        }
+      }
+
+      // 7e. Japanese Romaji Sub-Directory
+      if (!result && this.jaSubDir) {
+        if (this.currentPrimaryLanguage === 'ja' || this.jaSubDir.correctWord(clean)) {
+          const jaFix = this.jaSubDir.correctWord(clean);
+          if (jaFix) {
+            this.activateSubdirectory('ja', 'japanese-token');
+            result = jaFix;
+          } else if (this.jaSubDir.hasWord(clean)) {
+            result = rawWord;
+          }
+        }
+      }
+
+      // 7f. Korean Romanized Sub-Directory
+      if (!result && this.koSubDir) {
+        if (this.currentPrimaryLanguage === 'ko' || this.koSubDir.correctWord(clean)) {
+          const koFix = this.koSubDir.correctWord(clean);
+          if (koFix) {
+            this.activateSubdirectory('ko', 'korean-token');
+            result = koFix;
+          } else if (this.koSubDir.hasWord(clean)) {
             result = rawWord;
           }
         }

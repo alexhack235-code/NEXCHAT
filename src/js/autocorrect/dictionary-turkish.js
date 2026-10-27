@@ -1,6 +1,6 @@
 /**
- * NEXCHAT Multilingual Sub-Directory: Turkish (Türkçe)
- * High-Speed O(1) Prefix-Indexed Turkish Lexicon & Slang
+ * NEXCHAT Multilingual Sub-Directory: Turkish (Türkçe) & Slang (Deepened)
+ * High-Speed O(1) Prefix-Indexed Radix Engine
  * 
  * STRICTLY ZERO EMOJIS: FontAwesome 6 vector icons and cyberpunk styling only.
  */
@@ -11,81 +11,403 @@
   const TR_WORDS = [
   "merhaba",
   "selam",
-  "teşekkürler",
-  "sağol",
-  "lütfen",
-  "nasılsın",
-  "iyiyim",
   "günaydın",
   "iyi akşamlar",
   "iyi geceler",
+  "nasılsın",
+  "iyiyim",
+  "teşekkürler",
+  "sağol",
+  "lütfen",
+  "hoşça kal",
   "görüşürüz",
   "tamam",
+  "oldu",
+  "peki",
   "evet",
   "hayır",
+  "yok",
+  "var",
+  "belki",
+  "kesinlikle",
+  "tabii",
   "bilmiyorum",
+  "anladım",
   "harika",
   "güzel",
   "kolay gelsin",
-  "hoşça kal",
   "afiyet olsun",
   "inşallah",
   "eyvallah",
   "kardeşim",
   "dostum",
+  "kanka",
   "arkadaş",
-  "yardım",
-  "sorun",
+  "canım",
+  "anne",
+  "baba",
+  "çocuk",
+  "aile",
   "zaman",
   "şimdi",
+  "hemen",
+  "sonra",
   "bugün",
   "yarın",
   "dün",
-  "ev",
-  "iş",
+  "sabah",
+  "akşam",
+  "gece",
+  "ofis",
+  "okul",
+  "hastane",
+  "şehir",
   "para",
-  "yemek",
-  "su",
-  "çay",
-  "kahve",
+  "fiyat",
   "mesaj",
   "telefon",
   "araba",
   "yol",
-  "ne",
+  "yemek",
+  "çay",
+  "kahve",
+  "ekmek",
   "nasıl",
   "neden",
   "nerede",
   "kim",
   "kaç",
   "çok",
-  "az",
-  "biraz",
   "büyük",
   "küçük",
   "yeni",
   "eski",
-  "doğru",
-  "yanlış",
-  "hızlı",
-  "yavaş"
+  "iyi",
+  "mrb",
+  "slm",
+  "tsk",
+  "kib",
+  "aeo",
+  "tmm",
+  "nbr",
+  "nslsn",
+  "cnm",
+  "krdsm",
+  "knk",
+  "eyw",
+  "geldi",
+  "geldim",
+  "geldin",
+  "geldik",
+  "geldiler",
+  "geliyor",
+  "geliyorum",
+  "geliyorsun",
+  "geliyoruz",
+  "gelecek",
+  "geleceğim",
+  "geleceksin",
+  "gelmek",
+  "gelme",
+  "gitdi",
+  "gitdim",
+  "gitdin",
+  "gitdik",
+  "gitdiler",
+  "gitiyor",
+  "gitiyorum",
+  "gitiyorsun",
+  "gitiyoruz",
+  "gitecek",
+  "giteceğim",
+  "giteceksin",
+  "gitmek",
+  "gitme",
+  "yapdi",
+  "yapdim",
+  "yapdin",
+  "yapdik",
+  "yapdiler",
+  "yapiyor",
+  "yapiyorum",
+  "yapiyorsun",
+  "yapiyoruz",
+  "yapecek",
+  "yapeceğim",
+  "yapeceksin",
+  "yapmek",
+  "yapme",
+  "gördi",
+  "gördim",
+  "gördin",
+  "gördik",
+  "gördiler",
+  "göriyor",
+  "göriyorum",
+  "göriyorsun",
+  "göriyoruz",
+  "görecek",
+  "göreceğim",
+  "göreceksin",
+  "görmek",
+  "görme",
+  "bakdi",
+  "bakdim",
+  "bakdin",
+  "bakdik",
+  "bakdiler",
+  "bakiyor",
+  "bakiyorum",
+  "bakiyorsun",
+  "bakiyoruz",
+  "bakecek",
+  "bakeceğim",
+  "bakeceksin",
+  "bakmek",
+  "bakme",
+  "aldi",
+  "aldim",
+  "aldin",
+  "aldik",
+  "aldiler",
+  "aliyor",
+  "aliyorum",
+  "aliyorsun",
+  "aliyoruz",
+  "alecek",
+  "aleceğim",
+  "aleceksin",
+  "almek",
+  "alme",
+  "verdi",
+  "verdim",
+  "verdin",
+  "verdik",
+  "verdiler",
+  "veriyor",
+  "veriyorum",
+  "veriyorsun",
+  "veriyoruz",
+  "verecek",
+  "vereceğim",
+  "vereceksin",
+  "vermek",
+  "verme",
+  "bildi",
+  "bildim",
+  "bildin",
+  "bildik",
+  "bildiler",
+  "biliyor",
+  "biliyorum",
+  "biliyorsun",
+  "biliyoruz",
+  "bilecek",
+  "bileceğim",
+  "bileceksin",
+  "bilmek",
+  "bilme",
+  "istedi",
+  "istedim",
+  "istedin",
+  "istedik",
+  "istediler",
+  "isteiyor",
+  "isteiyorum",
+  "isteiyorsun",
+  "isteiyoruz",
+  "isteecek",
+  "isteeceğim",
+  "isteeceksin",
+  "istemek",
+  "isteme",
+  "sevdi",
+  "sevdim",
+  "sevdin",
+  "sevdik",
+  "sevdiler",
+  "seviyor",
+  "seviyorum",
+  "seviyorsun",
+  "seviyoruz",
+  "sevecek",
+  "seveceğim",
+  "seveceksin",
+  "sevmek",
+  "sevme",
+  "duydi",
+  "duydim",
+  "duydin",
+  "duydik",
+  "duydiler",
+  "duyiyor",
+  "duyiyorum",
+  "duyiyorsun",
+  "duyiyoruz",
+  "duyecek",
+  "duyeceğim",
+  "duyeceksin",
+  "duymek",
+  "duyme",
+  "konuşdi",
+  "konuşdim",
+  "konuşdin",
+  "konuşdik",
+  "konuşdiler",
+  "konuşiyor",
+  "konuşiyorum",
+  "konuşiyorsun",
+  "konuşiyoruz",
+  "konuşecek",
+  "konuşeceğim",
+  "konuşeceksin",
+  "konuşmek",
+  "konuşme",
+  "yazdi",
+  "yazdim",
+  "yazdin",
+  "yazdik",
+  "yazdiler",
+  "yaziyor",
+  "yaziyorum",
+  "yaziyorsun",
+  "yaziyoruz",
+  "yazecek",
+  "yazeceğim",
+  "yazeceksin",
+  "yazmek",
+  "yazme",
+  "okudi",
+  "okudim",
+  "okudin",
+  "okudik",
+  "okudiler",
+  "okuiyor",
+  "okuiyorum",
+  "okuiyorsun",
+  "okuiyoruz",
+  "okuecek",
+  "okueceğim",
+  "okueceksin",
+  "okumek",
+  "okume",
+  "çalışdi",
+  "çalışdim",
+  "çalışdin",
+  "çalışdik",
+  "çalışdiler",
+  "çalışiyor",
+  "çalışiyorum",
+  "çalışiyorsun",
+  "çalışiyoruz",
+  "çalışecek",
+  "çalışeceğim",
+  "çalışeceksin",
+  "çalışmek",
+  "çalışme",
+  "yedi",
+  "yedim",
+  "yedin",
+  "yedik",
+  "yediler",
+  "yeiyor",
+  "yeiyorum",
+  "yeiyorsun",
+  "yeiyoruz",
+  "yeecek",
+  "yeeceğim",
+  "yeeceksin",
+  "yeme",
+  "içdi",
+  "içdim",
+  "içdin",
+  "içdik",
+  "içdiler",
+  "içiyor",
+  "içiyorum",
+  "içiyorsun",
+  "içiyoruz",
+  "içecek",
+  "içeceğim",
+  "içeceksin",
+  "içmek",
+  "içme",
+  "durdi",
+  "durdim",
+  "durdin",
+  "durdik",
+  "durdiler",
+  "duriyor",
+  "duriyorum",
+  "duriyorsun",
+  "duriyoruz",
+  "durecek",
+  "dureceğim",
+  "dureceksin",
+  "durmek",
+  "durme",
+  "oturdi",
+  "oturdim",
+  "oturdin",
+  "oturdik",
+  "oturdiler",
+  "oturiyor",
+  "oturiyorum",
+  "oturiyorsun",
+  "oturiyoruz",
+  "oturecek",
+  "otureceğim",
+  "otureceksin",
+  "oturmek",
+  "oturme",
+  "kaldi",
+  "kaldim",
+  "kaldin",
+  "kaldik",
+  "kaldiler",
+  "kaliyor",
+  "kaliyorum",
+  "kaliyorsun",
+  "kaliyoruz",
+  "kalecek",
+  "kaleceğim",
+  "kaleceksin",
+  "kalmek",
+  "kalme"
 ];
   const TR_TYPO_MAP = {
   "mrb": "merhaba",
   "slm": "selam",
+  "tsk": "teşekkürler",
   "tşk": "teşekkürler",
-  "tşkler": "teşekkürler",
-  "nslsn": "nasılsın",
-  "iym": "iyiyim",
-  "tmm": "tamam",
-  "grsrz": "görüşürüz",
-  "eyw": "eyvallah",
-  "nbr": "ne haber",
-  "ii": "iyi",
+  "tskler": "teşekkürler",
   "kib": "kendine iyi bak",
-  "hoscakal": "hoşça kal",
+  "aeo": "allaha emanet ol",
+  "tmm": "tamam",
+  "tm": "tamam",
+  "nbr": "ne haber",
+  "nslsn": "nasılsın",
+  "cnm": "canım",
+  "krdsm": "kardeşim",
+  "knk": "kanka",
+  "eyw": "eyvallah",
+  "grsz": "görüşürüz",
+  "grsrk": "görüşmek üzere",
+  "naptn": "ne yaptın",
+  "napıyon": "ne yapıyorsun",
+  "hll": "helal",
+  "thx": "teşekkürler",
+  "ty": "teşekkürler",
+  "merhba": "merhaba",
+  "tesekkurler": "teşekkürler",
+  "nasilsin": "nasılsın",
+  "iyym": "iyiyim",
   "gunaydin": "günaydın",
-  "tesekkur": "teşekkürler"
+  "sagol": "sağol",
+  "lutfen": "lütfen",
+  "hoscakal": "hoşça kal",
+  "gorusuruz": "görüşürüz",
+  "kardesim": "kardeşim"
 };
   const TR_PREFIX_TABLE = {
   "me": [
@@ -99,13 +421,60 @@
     "merhaba"
   ],
   "se": [
-    "selam"
+    "selam",
+    "sevdi",
+    "sevdim",
+    "sevdin",
+    "sevdik",
+    "sevdiler",
+    "seviyor",
+    "seviyorum",
+    "seviyorsun",
+    "seviyoruz",
+    "sevecek",
+    "seveceğim",
+    "seveceksin",
+    "sevmek",
+    "sevme"
   ],
   "sel": [
     "selam"
   ],
   "sela": [
     "selam"
+  ],
+  "gü": [
+    "günaydın",
+    "güzel"
+  ],
+  "gün": [
+    "günaydın"
+  ],
+  "güna": [
+    "günaydın"
+  ],
+  "na": [
+    "nasılsın",
+    "nasıl"
+  ],
+  "nas": [
+    "nasılsın",
+    "nasıl"
+  ],
+  "nası": [
+    "nasılsın",
+    "nasıl"
+  ],
+  "iy": [
+    "iyiyim",
+    "iyi"
+  ],
+  "iyi": [
+    "iyiyim",
+    "iyi"
+  ],
+  "iyiy": [
+    "iyiyim"
   ],
   "te": [
     "teşekkürler",
@@ -118,7 +487,8 @@
     "teşekkürler"
   ],
   "sa": [
-    "sağol"
+    "sağol",
+    "sabah"
   ],
   "sağ": [
     "sağol"
@@ -135,56 +505,46 @@
   "lütf": [
     "lütfen"
   ],
-  "na": [
-    "nasılsın",
-    "nasıl"
-  ],
-  "nas": [
-    "nasılsın",
-    "nasıl"
-  ],
-  "nası": [
-    "nasılsın",
-    "nasıl"
-  ],
-  "iy": [
-    "iyiyim",
-    "iyi akşamlar",
-    "iyi geceler"
-  ],
-  "iyi": [
-    "iyiyim",
-    "iyi akşamlar",
-    "iyi geceler"
-  ],
-  "iyiy": [
-    "iyiyim"
-  ],
-  "gü": [
-    "günaydın",
-    "güzel"
-  ],
-  "gün": [
-    "günaydın"
-  ],
-  "güna": [
-    "günaydın"
-  ],
-  "iyi ": [
-    "iyi akşamlar",
-    "iyi geceler"
-  ],
   "gö": [
-    "görüşürüz"
+    "görüşürüz",
+    "gördi",
+    "gördim",
+    "gördin",
+    "gördik",
+    "gördiler",
+    "göriyor",
+    "göriyorum",
+    "göriyorsun",
+    "göriyoruz",
+    "görecek",
+    "göreceğim",
+    "göreceksin",
+    "görmek",
+    "görme"
   ],
   "gör": [
-    "görüşürüz"
+    "görüşürüz",
+    "gördi",
+    "gördim",
+    "gördin",
+    "gördik",
+    "gördiler",
+    "göriyor",
+    "göriyorum",
+    "göriyorsun",
+    "göriyoruz",
+    "görecek",
+    "göreceğim",
+    "göreceksin",
+    "görmek",
+    "görme"
   ],
   "görü": [
     "görüşürüz"
   ],
   "ta": [
-    "tamam"
+    "tamam",
+    "tabii"
   ],
   "tam": [
     "tamam"
@@ -192,9 +552,26 @@
   "tama": [
     "tamam"
   ],
+  "ol": [
+    "oldu"
+  ],
+  "old": [
+    "oldu"
+  ],
+  "oldu": [
+    "oldu"
+  ],
+  "pe": [
+    "peki"
+  ],
+  "pek": [
+    "peki"
+  ],
+  "peki": [
+    "peki"
+  ],
   "ev": [
-    "evet",
-    "ev"
+    "evet"
   ],
   "eve": [
     "evet"
@@ -204,7 +581,8 @@
   ],
   "ha": [
     "hayır",
-    "harika"
+    "harika",
+    "hastane"
   ],
   "hay": [
     "hayır"
@@ -212,15 +590,91 @@
   "hayı": [
     "hayır"
   ],
+  "yo": [
+    "yok",
+    "yol"
+  ],
+  "yok": [
+    "yok"
+  ],
+  "va": [
+    "var"
+  ],
+  "var": [
+    "var"
+  ],
+  "be": [
+    "belki"
+  ],
+  "bel": [
+    "belki"
+  ],
+  "belk": [
+    "belki"
+  ],
+  "ke": [
+    "kesinlikle"
+  ],
+  "kes": [
+    "kesinlikle"
+  ],
+  "kesi": [
+    "kesinlikle"
+  ],
+  "tab": [
+    "tabii"
+  ],
+  "tabi": [
+    "tabii"
+  ],
   "bi": [
     "bilmiyorum",
-    "biraz"
+    "bildi",
+    "bildim",
+    "bildin",
+    "bildik",
+    "bildiler",
+    "biliyor",
+    "biliyorum",
+    "biliyorsun",
+    "biliyoruz",
+    "bilecek",
+    "bileceğim",
+    "bileceksin",
+    "bilmek",
+    "bilme"
   ],
   "bil": [
-    "bilmiyorum"
+    "bilmiyorum",
+    "bildi",
+    "bildim",
+    "bildin",
+    "bildik",
+    "bildiler",
+    "biliyor",
+    "biliyorum",
+    "biliyorsun",
+    "biliyoruz",
+    "bilecek",
+    "bileceğim",
+    "bileceksin",
+    "bilmek",
+    "bilme"
   ],
   "bilm": [
-    "bilmiyorum"
+    "bilmiyorum",
+    "bilmek",
+    "bilme"
+  ],
+  "an": [
+    "anladım",
+    "anne"
+  ],
+  "anl": [
+    "anladım"
+  ],
+  "anla": [
+    "anladım"
   ],
   "har": [
     "harika"
@@ -234,33 +688,6 @@
   "güze": [
     "güzel"
   ],
-  "ko": [
-    "kolay gelsin"
-  ],
-  "kol": [
-    "kolay gelsin"
-  ],
-  "kola": [
-    "kolay gelsin"
-  ],
-  "ho": [
-    "hoşça kal"
-  ],
-  "hoş": [
-    "hoşça kal"
-  ],
-  "hoşç": [
-    "hoşça kal"
-  ],
-  "af": [
-    "afiyet olsun"
-  ],
-  "afi": [
-    "afiyet olsun"
-  ],
-  "afiy": [
-    "afiyet olsun"
-  ],
   "in": [
     "inşallah"
   ],
@@ -271,7 +698,8 @@
     "inşallah"
   ],
   "ey": [
-    "eyvallah"
+    "eyvallah",
+    "eyw"
   ],
   "eyv": [
     "eyvallah"
@@ -281,8 +709,20 @@
   ],
   "ka": [
     "kardeşim",
+    "kanka",
     "kahve",
-    "kaç"
+    "kaç",
+    "kaldi",
+    "kaldim",
+    "kaldin",
+    "kaldik",
+    "kaldiler",
+    "kaliyor",
+    "kaliyorum",
+    "kaliyorsun",
+    "kaliyoruz",
+    "kalecek",
+    "kaleceğim"
   ],
   "kar": [
     "kardeşim"
@@ -291,14 +731,19 @@
     "kardeşim"
   ],
   "do": [
-    "dostum",
-    "doğru"
+    "dostum"
   ],
   "dos": [
     "dostum"
   ],
   "dost": [
     "dostum"
+  ],
+  "kan": [
+    "kanka"
+  ],
+  "kank": [
+    "kanka"
   ],
   "ar": [
     "arkadaş",
@@ -310,27 +755,62 @@
   "arka": [
     "arkadaş"
   ],
-  "ya": [
-    "yardım",
-    "yarın",
-    "yanlış",
-    "yavaş"
+  "ca": [
+    "canım"
   ],
-  "yar": [
-    "yardım",
-    "yarın"
+  "can": [
+    "canım"
   ],
-  "yard": [
-    "yardım"
+  "canı": [
+    "canım"
   ],
-  "so": [
-    "sorun"
+  "ann": [
+    "anne"
   ],
-  "sor": [
-    "sorun"
+  "anne": [
+    "anne"
   ],
-  "soru": [
-    "sorun"
+  "ba": [
+    "baba",
+    "bakdi",
+    "bakdim",
+    "bakdin",
+    "bakdik",
+    "bakdiler",
+    "bakiyor",
+    "bakiyorum",
+    "bakiyorsun",
+    "bakiyoruz",
+    "bakecek",
+    "bakeceğim",
+    "bakeceksin",
+    "bakmek",
+    "bakme"
+  ],
+  "bab": [
+    "baba"
+  ],
+  "baba": [
+    "baba"
+  ],
+  "ço": [
+    "çocuk",
+    "çok"
+  ],
+  "çoc": [
+    "çocuk"
+  ],
+  "çocu": [
+    "çocuk"
+  ],
+  "ai": [
+    "aile"
+  ],
+  "ail": [
+    "aile"
+  ],
+  "aile": [
+    "aile"
   ],
   "za": [
     "zaman"
@@ -350,6 +830,24 @@
   "şimd": [
     "şimdi"
   ],
+  "he": [
+    "hemen"
+  ],
+  "hem": [
+    "hemen"
+  ],
+  "heme": [
+    "hemen"
+  ],
+  "so": [
+    "sonra"
+  ],
+  "son": [
+    "sonra"
+  ],
+  "sonr": [
+    "sonra"
+  ],
   "bu": [
     "bugün"
   ],
@@ -358,6 +856,26 @@
   ],
   "bugü": [
     "bugün"
+  ],
+  "ya": [
+    "yarın",
+    "yapdi",
+    "yapdim",
+    "yapdin",
+    "yapdik",
+    "yapdiler",
+    "yapiyor",
+    "yapiyorum",
+    "yapiyorsun",
+    "yapiyoruz",
+    "yapecek",
+    "yapeceğim",
+    "yapeceksin",
+    "yapmek",
+    "yapme"
+  ],
+  "yar": [
+    "yarın"
   ],
   "yarı": [
     "yarın"
@@ -368,8 +886,104 @@
   "dün": [
     "dün"
   ],
-  "iş": [
-    "iş"
+  "sab": [
+    "sabah"
+  ],
+  "saba": [
+    "sabah"
+  ],
+  "ak": [
+    "akşam"
+  ],
+  "akş": [
+    "akşam"
+  ],
+  "akşa": [
+    "akşam"
+  ],
+  "ge": [
+    "gece",
+    "geldi",
+    "geldim",
+    "geldin",
+    "geldik",
+    "geldiler",
+    "geliyor",
+    "geliyorum",
+    "geliyorsun",
+    "geliyoruz",
+    "gelecek",
+    "geleceğim",
+    "geleceksin",
+    "gelmek",
+    "gelme"
+  ],
+  "gec": [
+    "gece"
+  ],
+  "gece": [
+    "gece"
+  ],
+  "of": [
+    "ofis"
+  ],
+  "ofi": [
+    "ofis"
+  ],
+  "ofis": [
+    "ofis"
+  ],
+  "ok": [
+    "okul",
+    "okudi",
+    "okudim",
+    "okudin",
+    "okudik",
+    "okudiler",
+    "okuiyor",
+    "okuiyorum",
+    "okuiyorsun",
+    "okuiyoruz",
+    "okuecek",
+    "okueceğim",
+    "okueceksin",
+    "okumek",
+    "okume"
+  ],
+  "oku": [
+    "okul",
+    "okudi",
+    "okudim",
+    "okudin",
+    "okudik",
+    "okudiler",
+    "okuiyor",
+    "okuiyorum",
+    "okuiyorsun",
+    "okuiyoruz",
+    "okuecek",
+    "okueceğim",
+    "okueceksin",
+    "okumek",
+    "okume"
+  ],
+  "okul": [
+    "okul"
+  ],
+  "has": [
+    "hastane"
+  ],
+  "hast": [
+    "hastane"
+  ],
+  "şe": [
+    "şehir"
+  ],
+  "şeh": [
+    "şehir"
+  ],
+  "şehi": [
+    "şehir"
   ],
   "pa": [
     "para"
@@ -380,30 +994,14 @@
   "para": [
     "para"
   ],
-  "ye": [
-    "yemek",
-    "yeni"
+  "fi": [
+    "fiyat"
   ],
-  "yem": [
-    "yemek"
+  "fiy": [
+    "fiyat"
   ],
-  "yeme": [
-    "yemek"
-  ],
-  "su": [
-    "su"
-  ],
-  "ça": [
-    "çay"
-  ],
-  "çay": [
-    "çay"
-  ],
-  "kah": [
-    "kahve"
-  ],
-  "kahv": [
-    "kahve"
+  "fiya": [
+    "fiyat"
   ],
   "mes": [
     "mesaj"
@@ -423,14 +1021,70 @@
   "arab": [
     "araba"
   ],
-  "yo": [
-    "yol"
-  ],
   "yol": [
     "yol"
   ],
+  "ye": [
+    "yemek",
+    "yeni",
+    "yedi",
+    "yedim",
+    "yedin",
+    "yedik",
+    "yediler",
+    "yeiyor",
+    "yeiyorum",
+    "yeiyorsun",
+    "yeiyoruz",
+    "yeecek",
+    "yeeceğim",
+    "yeeceksin",
+    "yeme"
+  ],
+  "yem": [
+    "yemek",
+    "yeme"
+  ],
+  "yeme": [
+    "yemek",
+    "yeme"
+  ],
+  "ça": [
+    "çay",
+    "çalışdi",
+    "çalışdim",
+    "çalışdin",
+    "çalışdik",
+    "çalışdiler",
+    "çalışiyor",
+    "çalışiyorum",
+    "çalışiyorsun",
+    "çalışiyoruz",
+    "çalışecek",
+    "çalışeceğim",
+    "çalışeceksin",
+    "çalışmek",
+    "çalışme"
+  ],
+  "çay": [
+    "çay"
+  ],
+  "kah": [
+    "kahve"
+  ],
+  "kahv": [
+    "kahve"
+  ],
+  "ek": [
+    "ekmek"
+  ],
+  "ekm": [
+    "ekmek"
+  ],
+  "ekme": [
+    "ekmek"
+  ],
   "ne": [
-    "ne",
     "neden",
     "nerede"
   ],
@@ -447,7 +1101,8 @@
     "nerede"
   ],
   "ki": [
-    "kim"
+    "kim",
+    "kib"
   ],
   "kim": [
     "kim"
@@ -455,20 +1110,8 @@
   "kaç": [
     "kaç"
   ],
-  "ço": [
-    "çok"
-  ],
   "çok": [
     "çok"
-  ],
-  "az": [
-    "az"
-  ],
-  "bir": [
-    "biraz"
-  ],
-  "bira": [
-    "biraz"
   ],
   "bü": [
     "büyük"
@@ -503,42 +1146,910 @@
   "eski": [
     "eski"
   ],
-  "doğ": [
-    "doğru"
+  "mr": [
+    "mrb"
   ],
-  "doğr": [
-    "doğru"
+  "mrb": [
+    "mrb"
   ],
-  "yan": [
-    "yanlış"
+  "sl": [
+    "slm"
   ],
-  "yanl": [
-    "yanlış"
+  "slm": [
+    "slm"
   ],
-  "hı": [
-    "hızlı"
+  "ts": [
+    "tsk"
   ],
-  "hız": [
-    "hızlı"
+  "tsk": [
+    "tsk"
   ],
-  "hızl": [
-    "hızlı"
+  "kib": [
+    "kib"
   ],
-  "yav": [
-    "yavaş"
+  "ae": [
+    "aeo"
   ],
-  "yava": [
-    "yavaş"
+  "aeo": [
+    "aeo"
+  ],
+  "tm": [
+    "tmm"
+  ],
+  "tmm": [
+    "tmm"
+  ],
+  "nb": [
+    "nbr"
+  ],
+  "nbr": [
+    "nbr"
+  ],
+  "ns": [
+    "nslsn"
+  ],
+  "nsl": [
+    "nslsn"
+  ],
+  "nsls": [
+    "nslsn"
+  ],
+  "cn": [
+    "cnm"
+  ],
+  "cnm": [
+    "cnm"
+  ],
+  "kr": [
+    "krdsm"
+  ],
+  "krd": [
+    "krdsm"
+  ],
+  "krds": [
+    "krdsm"
+  ],
+  "kn": [
+    "knk"
+  ],
+  "knk": [
+    "knk"
+  ],
+  "eyw": [
+    "eyw"
+  ],
+  "gel": [
+    "geldi",
+    "geldim",
+    "geldin",
+    "geldik",
+    "geldiler",
+    "geliyor",
+    "geliyorum",
+    "geliyorsun",
+    "geliyoruz",
+    "gelecek",
+    "geleceğim",
+    "geleceksin",
+    "gelmek",
+    "gelme"
+  ],
+  "geld": [
+    "geldi",
+    "geldim",
+    "geldin",
+    "geldik",
+    "geldiler"
+  ],
+  "geli": [
+    "geliyor",
+    "geliyorum",
+    "geliyorsun",
+    "geliyoruz"
+  ],
+  "gele": [
+    "gelecek",
+    "geleceğim",
+    "geleceksin"
+  ],
+  "gelm": [
+    "gelmek",
+    "gelme"
+  ],
+  "gi": [
+    "gitdi",
+    "gitdim",
+    "gitdin",
+    "gitdik",
+    "gitdiler",
+    "gitiyor",
+    "gitiyorum",
+    "gitiyorsun",
+    "gitiyoruz",
+    "gitecek",
+    "giteceğim",
+    "giteceksin",
+    "gitmek",
+    "gitme"
+  ],
+  "git": [
+    "gitdi",
+    "gitdim",
+    "gitdin",
+    "gitdik",
+    "gitdiler",
+    "gitiyor",
+    "gitiyorum",
+    "gitiyorsun",
+    "gitiyoruz",
+    "gitecek",
+    "giteceğim",
+    "giteceksin",
+    "gitmek",
+    "gitme"
+  ],
+  "gitd": [
+    "gitdi",
+    "gitdim",
+    "gitdin",
+    "gitdik",
+    "gitdiler"
+  ],
+  "giti": [
+    "gitiyor",
+    "gitiyorum",
+    "gitiyorsun",
+    "gitiyoruz"
+  ],
+  "gite": [
+    "gitecek",
+    "giteceğim",
+    "giteceksin"
+  ],
+  "gitm": [
+    "gitmek",
+    "gitme"
+  ],
+  "yap": [
+    "yapdi",
+    "yapdim",
+    "yapdin",
+    "yapdik",
+    "yapdiler",
+    "yapiyor",
+    "yapiyorum",
+    "yapiyorsun",
+    "yapiyoruz",
+    "yapecek",
+    "yapeceğim",
+    "yapeceksin",
+    "yapmek",
+    "yapme"
+  ],
+  "yapd": [
+    "yapdi",
+    "yapdim",
+    "yapdin",
+    "yapdik",
+    "yapdiler"
+  ],
+  "yapi": [
+    "yapiyor",
+    "yapiyorum",
+    "yapiyorsun",
+    "yapiyoruz"
+  ],
+  "yape": [
+    "yapecek",
+    "yapeceğim",
+    "yapeceksin"
+  ],
+  "yapm": [
+    "yapmek",
+    "yapme"
+  ],
+  "görd": [
+    "gördi",
+    "gördim",
+    "gördin",
+    "gördik",
+    "gördiler"
+  ],
+  "göri": [
+    "göriyor",
+    "göriyorum",
+    "göriyorsun",
+    "göriyoruz"
+  ],
+  "göre": [
+    "görecek",
+    "göreceğim",
+    "göreceksin"
+  ],
+  "görm": [
+    "görmek",
+    "görme"
+  ],
+  "bak": [
+    "bakdi",
+    "bakdim",
+    "bakdin",
+    "bakdik",
+    "bakdiler",
+    "bakiyor",
+    "bakiyorum",
+    "bakiyorsun",
+    "bakiyoruz",
+    "bakecek",
+    "bakeceğim",
+    "bakeceksin",
+    "bakmek",
+    "bakme"
+  ],
+  "bakd": [
+    "bakdi",
+    "bakdim",
+    "bakdin",
+    "bakdik",
+    "bakdiler"
+  ],
+  "baki": [
+    "bakiyor",
+    "bakiyorum",
+    "bakiyorsun",
+    "bakiyoruz"
+  ],
+  "bake": [
+    "bakecek",
+    "bakeceğim",
+    "bakeceksin"
+  ],
+  "bakm": [
+    "bakmek",
+    "bakme"
+  ],
+  "al": [
+    "aldi",
+    "aldim",
+    "aldin",
+    "aldik",
+    "aldiler",
+    "aliyor",
+    "aliyorum",
+    "aliyorsun",
+    "aliyoruz",
+    "alecek",
+    "aleceğim",
+    "aleceksin",
+    "almek",
+    "alme"
+  ],
+  "ald": [
+    "aldi",
+    "aldim",
+    "aldin",
+    "aldik",
+    "aldiler"
+  ],
+  "aldi": [
+    "aldi",
+    "aldim",
+    "aldin",
+    "aldik",
+    "aldiler"
+  ],
+  "ali": [
+    "aliyor",
+    "aliyorum",
+    "aliyorsun",
+    "aliyoruz"
+  ],
+  "aliy": [
+    "aliyor",
+    "aliyorum",
+    "aliyorsun",
+    "aliyoruz"
+  ],
+  "ale": [
+    "alecek",
+    "aleceğim",
+    "aleceksin"
+  ],
+  "alec": [
+    "alecek",
+    "aleceğim",
+    "aleceksin"
+  ],
+  "alm": [
+    "almek",
+    "alme"
+  ],
+  "alme": [
+    "almek",
+    "alme"
+  ],
+  "ve": [
+    "verdi",
+    "verdim",
+    "verdin",
+    "verdik",
+    "verdiler",
+    "veriyor",
+    "veriyorum",
+    "veriyorsun",
+    "veriyoruz",
+    "verecek",
+    "vereceğim",
+    "vereceksin",
+    "vermek",
+    "verme"
+  ],
+  "ver": [
+    "verdi",
+    "verdim",
+    "verdin",
+    "verdik",
+    "verdiler",
+    "veriyor",
+    "veriyorum",
+    "veriyorsun",
+    "veriyoruz",
+    "verecek",
+    "vereceğim",
+    "vereceksin",
+    "vermek",
+    "verme"
+  ],
+  "verd": [
+    "verdi",
+    "verdim",
+    "verdin",
+    "verdik",
+    "verdiler"
+  ],
+  "veri": [
+    "veriyor",
+    "veriyorum",
+    "veriyorsun",
+    "veriyoruz"
+  ],
+  "vere": [
+    "verecek",
+    "vereceğim",
+    "vereceksin"
+  ],
+  "verm": [
+    "vermek",
+    "verme"
+  ],
+  "bild": [
+    "bildi",
+    "bildim",
+    "bildin",
+    "bildik",
+    "bildiler"
+  ],
+  "bili": [
+    "biliyor",
+    "biliyorum",
+    "biliyorsun",
+    "biliyoruz"
+  ],
+  "bile": [
+    "bilecek",
+    "bileceğim",
+    "bileceksin"
+  ],
+  "is": [
+    "istedi",
+    "istedim",
+    "istedin",
+    "istedik",
+    "istediler",
+    "isteiyor",
+    "isteiyorum",
+    "isteiyorsun",
+    "isteiyoruz",
+    "isteecek",
+    "isteeceğim",
+    "isteeceksin",
+    "istemek",
+    "isteme"
+  ],
+  "ist": [
+    "istedi",
+    "istedim",
+    "istedin",
+    "istedik",
+    "istediler",
+    "isteiyor",
+    "isteiyorum",
+    "isteiyorsun",
+    "isteiyoruz",
+    "isteecek",
+    "isteeceğim",
+    "isteeceksin",
+    "istemek",
+    "isteme"
+  ],
+  "iste": [
+    "istedi",
+    "istedim",
+    "istedin",
+    "istedik",
+    "istediler",
+    "isteiyor",
+    "isteiyorum",
+    "isteiyorsun",
+    "isteiyoruz",
+    "isteecek",
+    "isteeceğim",
+    "isteeceksin",
+    "istemek",
+    "isteme"
+  ],
+  "sev": [
+    "sevdi",
+    "sevdim",
+    "sevdin",
+    "sevdik",
+    "sevdiler",
+    "seviyor",
+    "seviyorum",
+    "seviyorsun",
+    "seviyoruz",
+    "sevecek",
+    "seveceğim",
+    "seveceksin",
+    "sevmek",
+    "sevme"
+  ],
+  "sevd": [
+    "sevdi",
+    "sevdim",
+    "sevdin",
+    "sevdik",
+    "sevdiler"
+  ],
+  "sevi": [
+    "seviyor",
+    "seviyorum",
+    "seviyorsun",
+    "seviyoruz"
+  ],
+  "seve": [
+    "sevecek",
+    "seveceğim",
+    "seveceksin"
+  ],
+  "sevm": [
+    "sevmek",
+    "sevme"
+  ],
+  "du": [
+    "duydi",
+    "duydim",
+    "duydin",
+    "duydik",
+    "duydiler",
+    "duyiyor",
+    "duyiyorum",
+    "duyiyorsun",
+    "duyiyoruz",
+    "duyecek",
+    "duyeceğim",
+    "duyeceksin",
+    "duymek",
+    "duyme",
+    "durdi"
+  ],
+  "duy": [
+    "duydi",
+    "duydim",
+    "duydin",
+    "duydik",
+    "duydiler",
+    "duyiyor",
+    "duyiyorum",
+    "duyiyorsun",
+    "duyiyoruz",
+    "duyecek",
+    "duyeceğim",
+    "duyeceksin",
+    "duymek",
+    "duyme"
+  ],
+  "duyd": [
+    "duydi",
+    "duydim",
+    "duydin",
+    "duydik",
+    "duydiler"
+  ],
+  "duyi": [
+    "duyiyor",
+    "duyiyorum",
+    "duyiyorsun",
+    "duyiyoruz"
+  ],
+  "duye": [
+    "duyecek",
+    "duyeceğim",
+    "duyeceksin"
+  ],
+  "duym": [
+    "duymek",
+    "duyme"
+  ],
+  "ko": [
+    "konuşdi",
+    "konuşdim",
+    "konuşdin",
+    "konuşdik",
+    "konuşdiler",
+    "konuşiyor",
+    "konuşiyorum",
+    "konuşiyorsun",
+    "konuşiyoruz",
+    "konuşecek",
+    "konuşeceğim",
+    "konuşeceksin",
+    "konuşmek",
+    "konuşme"
+  ],
+  "kon": [
+    "konuşdi",
+    "konuşdim",
+    "konuşdin",
+    "konuşdik",
+    "konuşdiler",
+    "konuşiyor",
+    "konuşiyorum",
+    "konuşiyorsun",
+    "konuşiyoruz",
+    "konuşecek",
+    "konuşeceğim",
+    "konuşeceksin",
+    "konuşmek",
+    "konuşme"
+  ],
+  "konu": [
+    "konuşdi",
+    "konuşdim",
+    "konuşdin",
+    "konuşdik",
+    "konuşdiler",
+    "konuşiyor",
+    "konuşiyorum",
+    "konuşiyorsun",
+    "konuşiyoruz",
+    "konuşecek",
+    "konuşeceğim",
+    "konuşeceksin",
+    "konuşmek",
+    "konuşme"
+  ],
+  "yaz": [
+    "yazdi",
+    "yazdim",
+    "yazdin",
+    "yazdik",
+    "yazdiler",
+    "yaziyor",
+    "yaziyorum",
+    "yaziyorsun",
+    "yaziyoruz",
+    "yazecek",
+    "yazeceğim",
+    "yazeceksin",
+    "yazmek",
+    "yazme"
+  ],
+  "yazd": [
+    "yazdi",
+    "yazdim",
+    "yazdin",
+    "yazdik",
+    "yazdiler"
+  ],
+  "yazi": [
+    "yaziyor",
+    "yaziyorum",
+    "yaziyorsun",
+    "yaziyoruz"
+  ],
+  "yaze": [
+    "yazecek",
+    "yazeceğim",
+    "yazeceksin"
+  ],
+  "yazm": [
+    "yazmek",
+    "yazme"
+  ],
+  "okud": [
+    "okudi",
+    "okudim",
+    "okudin",
+    "okudik",
+    "okudiler"
+  ],
+  "okui": [
+    "okuiyor",
+    "okuiyorum",
+    "okuiyorsun",
+    "okuiyoruz"
+  ],
+  "okue": [
+    "okuecek",
+    "okueceğim",
+    "okueceksin"
+  ],
+  "okum": [
+    "okumek",
+    "okume"
+  ],
+  "çal": [
+    "çalışdi",
+    "çalışdim",
+    "çalışdin",
+    "çalışdik",
+    "çalışdiler",
+    "çalışiyor",
+    "çalışiyorum",
+    "çalışiyorsun",
+    "çalışiyoruz",
+    "çalışecek",
+    "çalışeceğim",
+    "çalışeceksin",
+    "çalışmek",
+    "çalışme"
+  ],
+  "çalı": [
+    "çalışdi",
+    "çalışdim",
+    "çalışdin",
+    "çalışdik",
+    "çalışdiler",
+    "çalışiyor",
+    "çalışiyorum",
+    "çalışiyorsun",
+    "çalışiyoruz",
+    "çalışecek",
+    "çalışeceğim",
+    "çalışeceksin",
+    "çalışmek",
+    "çalışme"
+  ],
+  "yed": [
+    "yedi",
+    "yedim",
+    "yedin",
+    "yedik",
+    "yediler"
+  ],
+  "yedi": [
+    "yedi",
+    "yedim",
+    "yedin",
+    "yedik",
+    "yediler"
+  ],
+  "yei": [
+    "yeiyor",
+    "yeiyorum",
+    "yeiyorsun",
+    "yeiyoruz"
+  ],
+  "yeiy": [
+    "yeiyor",
+    "yeiyorum",
+    "yeiyorsun",
+    "yeiyoruz"
+  ],
+  "yee": [
+    "yeecek",
+    "yeeceğim",
+    "yeeceksin"
+  ],
+  "yeec": [
+    "yeecek",
+    "yeeceğim",
+    "yeeceksin"
+  ],
+  "iç": [
+    "içdi",
+    "içdim",
+    "içdin",
+    "içdik",
+    "içdiler",
+    "içiyor",
+    "içiyorum",
+    "içiyorsun",
+    "içiyoruz",
+    "içecek",
+    "içeceğim",
+    "içeceksin",
+    "içmek",
+    "içme"
+  ],
+  "içd": [
+    "içdi",
+    "içdim",
+    "içdin",
+    "içdik",
+    "içdiler"
+  ],
+  "içdi": [
+    "içdi",
+    "içdim",
+    "içdin",
+    "içdik",
+    "içdiler"
+  ],
+  "içi": [
+    "içiyor",
+    "içiyorum",
+    "içiyorsun",
+    "içiyoruz"
+  ],
+  "içiy": [
+    "içiyor",
+    "içiyorum",
+    "içiyorsun",
+    "içiyoruz"
+  ],
+  "içe": [
+    "içecek",
+    "içeceğim",
+    "içeceksin"
+  ],
+  "içec": [
+    "içecek",
+    "içeceğim",
+    "içeceksin"
+  ],
+  "içm": [
+    "içmek",
+    "içme"
+  ],
+  "içme": [
+    "içmek",
+    "içme"
+  ],
+  "dur": [
+    "durdi",
+    "durdim",
+    "durdin",
+    "durdik",
+    "durdiler",
+    "duriyor",
+    "duriyorum",
+    "duriyorsun",
+    "duriyoruz",
+    "durecek",
+    "dureceğim",
+    "dureceksin",
+    "durmek",
+    "durme"
+  ],
+  "durd": [
+    "durdi",
+    "durdim",
+    "durdin",
+    "durdik",
+    "durdiler"
+  ],
+  "duri": [
+    "duriyor",
+    "duriyorum",
+    "duriyorsun",
+    "duriyoruz"
+  ],
+  "dure": [
+    "durecek",
+    "dureceğim",
+    "dureceksin"
+  ],
+  "durm": [
+    "durmek",
+    "durme"
+  ],
+  "ot": [
+    "oturdi",
+    "oturdim",
+    "oturdin",
+    "oturdik",
+    "oturdiler",
+    "oturiyor",
+    "oturiyorum",
+    "oturiyorsun",
+    "oturiyoruz",
+    "oturecek",
+    "otureceğim",
+    "otureceksin",
+    "oturmek",
+    "oturme"
+  ],
+  "otu": [
+    "oturdi",
+    "oturdim",
+    "oturdin",
+    "oturdik",
+    "oturdiler",
+    "oturiyor",
+    "oturiyorum",
+    "oturiyorsun",
+    "oturiyoruz",
+    "oturecek",
+    "otureceğim",
+    "otureceksin",
+    "oturmek",
+    "oturme"
+  ],
+  "otur": [
+    "oturdi",
+    "oturdim",
+    "oturdin",
+    "oturdik",
+    "oturdiler",
+    "oturiyor",
+    "oturiyorum",
+    "oturiyorsun",
+    "oturiyoruz",
+    "oturecek",
+    "otureceğim",
+    "otureceksin",
+    "oturmek",
+    "oturme"
+  ],
+  "kal": [
+    "kaldi",
+    "kaldim",
+    "kaldin",
+    "kaldik",
+    "kaldiler",
+    "kaliyor",
+    "kaliyorum",
+    "kaliyorsun",
+    "kaliyoruz",
+    "kalecek",
+    "kaleceğim",
+    "kaleceksin",
+    "kalmek",
+    "kalme"
+  ],
+  "kald": [
+    "kaldi",
+    "kaldim",
+    "kaldin",
+    "kaldik",
+    "kaldiler"
+  ],
+  "kali": [
+    "kaliyor",
+    "kaliyorum",
+    "kaliyorsun",
+    "kaliyoruz"
+  ],
+  "kale": [
+    "kalecek",
+    "kaleceğim",
+    "kaleceksin"
+  ],
+  "kalm": [
+    "kalmek",
+    "kalme"
   ]
 };
-
-  const TR_WORD_SET = new Set(TR_WORDS.map(w => w.toLowerCase()));
+  const TR_WORD_SET = new Set(TR_WORDS);
 
   class TurkishSubDirectory {
     constructor() {
       this.name = 'Turkish (Türkçe)';
       this.code = 'tr';
       this.badge = 'Türkçe';
+      this.icon = 'fa-star-and-crescent';
       this.wordSet = TR_WORD_SET;
       this.typoMap = TR_TYPO_MAP;
       this.prefixTable = TR_PREFIX_TABLE;
@@ -565,8 +2076,12 @@
     detect(text) {
       if (!text || typeof text !== 'string') return false;
       const lower = text.toLowerCase();
-      if (/[çğıöşü]/.test(lower)) return true;
-      return /\b(merhaba|nasılsın|teşekkürler|tamam|evet|hayır|görüşürüz|eyvallah)\b/i.test(lower);
+      const tokens = lower.split(/\s+|[.,!?;:()]+/);
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i].trim();
+        if (this.typoMap[t]) return true;
+      }
+      return /\b(merhaba|selam|teşekkürler|nasılsın|günaydın|görüşürüz|kolay gelsin|kardeşim|eyvallah|inşallah|sağol|tamam|güzel)\b/i.test(lower);
     }
 
     activate() {

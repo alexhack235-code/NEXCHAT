@@ -1,6 +1,6 @@
 /**
- * NEXCHAT Multilingual Sub-Directory: Hindi & Hinglish (हिन्दी / Hinglish)
- * Script: Devanagari ([\u0900-\u097F]) & Hinglish Roman Transliteration
+ * NEXCHAT Multilingual Sub-Directory: Hindi & Hinglish (हिन्दी / Hinglish) (Deepened)
+ * High-Speed O(1) Prefix-Indexed Radix Engine
  * 
  * STRICTLY ZERO EMOJIS: FontAwesome 6 vector icons and cyberpunk styling only.
  */
@@ -50,27 +50,41 @@
   "आओ",
   "जाओ",
   "करो",
+  "रुको",
+  "देखो",
+  "बोलो",
+  "समझो",
+  "माता",
+  "पिता",
+  "बहन",
+  "परिवार",
   "namaste",
   "shukriya",
+  "dhanyawad",
+  "haan",
+  "nahi",
+  "nhi",
   "kya",
+  "kyu",
   "kyun",
   "kaha",
+  "kidhar",
   "kab",
   "kaise",
   "kaisa",
-  "kaun",
   "bhai",
   "bhaiya",
-  "yaar",
+  "bro",
   "dost",
+  "yaar",
   "achha",
   "accha",
   "bahut",
+  "bohot",
   "theek",
   "thik",
   "sab",
   "kuch",
-  "koi",
   "aaj",
   "kal",
   "abhi",
@@ -80,48 +94,228 @@
   "kaam",
   "ghar",
   "khana",
-  "paani",
-  "pyaar",
-  "khushi",
+  "pani",
+  "chai",
+  "pyar",
   "baat",
   "batao",
   "suno",
   "chalo",
+  "chal",
   "aao",
   "jao",
   "karo",
-  "pata",
-  "samjha",
-  "arre",
-  "ab",
+  "ruko",
+  "dekho",
   "bolo",
-  "sahi",
-  "mast",
-  "jugaad",
-  "bindaas",
+  "samajh",
+  "pata",
   "pakka",
+  "sach",
+  "sahi",
+  "bilkul",
+  "shayad",
+  "zaroor",
+  "mast",
+  "bindas",
+  "jugaad",
+  "bakwaas",
+  "shanti",
+  "tension",
+  "pagal",
+  "sundar",
+  "kharab",
+  "jaldi",
+  "dheere",
+  "thoda",
+  "zyada",
+  "theek hai",
   "chalega",
-  "badiya",
-  "zordaar",
-  "ekdum"
+  "arre",
+  "oye",
+  "karta",
+  "karti",
+  "karte",
+  "karna",
+  "karke",
+  "karega",
+  "karegi",
+  "karenge",
+  "karraha",
+  "karrahi",
+  "karrahe",
+  "dekhta",
+  "dekhti",
+  "dekhte",
+  "dekhna",
+  "dekhke",
+  "dekhega",
+  "dekhegi",
+  "dekhenge",
+  "dekhraha",
+  "dekhrahi",
+  "dekhrahe",
+  "bolta",
+  "bolti",
+  "bolte",
+  "bolna",
+  "bolke",
+  "bolega",
+  "bolegi",
+  "bolenge",
+  "bolraha",
+  "bolrahi",
+  "bolrahe",
+  "sunta",
+  "sunti",
+  "sunte",
+  "sunna",
+  "sunke",
+  "sunega",
+  "sunegi",
+  "sunenge",
+  "sunraha",
+  "sunrahi",
+  "sunrahe",
+  "jata",
+  "jati",
+  "jate",
+  "jana",
+  "jake",
+  "jaega",
+  "jaegi",
+  "jaenge",
+  "jaraha",
+  "jarahi",
+  "jarahe",
+  "aata",
+  "aati",
+  "aate",
+  "aana",
+  "aake",
+  "aaega",
+  "aaegi",
+  "aaenge",
+  "aaraha",
+  "aarahi",
+  "aarahe",
+  "rehta",
+  "rehti",
+  "rehte",
+  "rehna",
+  "rehke",
+  "rehega",
+  "rehegi",
+  "rehenge",
+  "rehraha",
+  "rehrahi",
+  "rehrahe",
+  "lagta",
+  "lagti",
+  "lagte",
+  "lagna",
+  "lagke",
+  "lagega",
+  "lagegi",
+  "lagenge",
+  "lagraha",
+  "lagrahi",
+  "lagrahe",
+  "milta",
+  "milti",
+  "milte",
+  "milna",
+  "milke",
+  "milega",
+  "milegi",
+  "milenge",
+  "milraha",
+  "milrahi",
+  "milrahe",
+  "samajhta",
+  "samajhti",
+  "samajhte",
+  "samajhna",
+  "samajhke",
+  "samajhega",
+  "samajhegi",
+  "samajhenge",
+  "samajhraha",
+  "samajhrahi",
+  "samajhrahe",
+  "batata",
+  "batati",
+  "batate",
+  "batana",
+  "batake",
+  "bataega",
+  "bataegi",
+  "bataenge",
+  "bataraha",
+  "batarahi",
+  "batarahe",
+  "rakhta",
+  "rakhti",
+  "rakhte",
+  "rakhna",
+  "rakhke",
+  "rakhega",
+  "rakhegi",
+  "rakhenge",
+  "rakhraha",
+  "rakhrahi",
+  "rakhrahe",
+  "leta",
+  "leti",
+  "lete",
+  "lena",
+  "leke",
+  "leega",
+  "leegi",
+  "leenge",
+  "leraha",
+  "lerahi",
+  "lerahe",
+  "deta",
+  "deti",
+  "dete",
+  "dena",
+  "deke",
+  "deega",
+  "deegi",
+  "deenge",
+  "deraha",
+  "derahi",
+  "derahe"
 ];
   const HI_TYPO_MAP = {
-  "kyu": "kyun",
+  "bcz": "because",
+  "plz": "please",
+  "thx": "shukriya",
+  "ty": "dhanyawad",
+  "hru": "kaise ho",
+  "wbu": "aur aap",
+  "bta": "batao",
+  "btao": "batao",
+  "kya chalra": "kya chal raha hai",
+  "kch": "kuch",
   "nhi": "nahi",
   "hn": "haan",
+  "accha": "achha",
+  "bhot": "bahut",
   "thk": "theek",
-  "yr": "yaar",
-  "smjh": "samjha",
-  "btao": "batao",
+  "thnx": "dhanyawad",
+  "bhaiya": "bhai",
+  "yarr": "yaar",
+  "kyu": "kyun",
+  "kaha": "kahan",
   "namste": "namaste",
   "shukriyaa": "shukriya",
-  "bdiya": "badiya",
-  "achaa": "achha",
-  "km": "kaam",
-  "ghr": "ghar",
-  "bhejo": "bhejo",
-  "dhnyavad": "धन्यवाद",
-  "nmste": "नमस्ते"
+  "dhnyawad": "dhanyawad",
+  "theekh": "theek",
+  "bilkull": "bilkul",
+  "zarur": "zaroor",
+  "bindass": "bindaas"
 };
   const HI_PREFIX_TABLE = {
   "नम": [
@@ -246,7 +440,8 @@
     "अच्छा"
   ],
   "बह": [
-    "बहुत"
+    "बहुत",
+    "बहन"
   ],
   "बहु": [
     "बहुत"
@@ -306,7 +501,8 @@
     "वहाँ"
   ],
   "सम": [
-    "समय"
+    "समय",
+    "समझो"
   ],
   "समय": [
     "समय"
@@ -401,8 +597,72 @@
   "करो": [
     "करो"
   ],
+  "रु": [
+    "रुको"
+  ],
+  "रुक": [
+    "रुको"
+  ],
+  "रुको": [
+    "रुको"
+  ],
+  "दे": [
+    "देखो"
+  ],
+  "देख": [
+    "देखो"
+  ],
+  "देखो": [
+    "देखो"
+  ],
+  "बो": [
+    "बोलो"
+  ],
+  "बोल": [
+    "बोलो"
+  ],
+  "बोलो": [
+    "बोलो"
+  ],
+  "समझ": [
+    "समझो"
+  ],
+  "समझो": [
+    "समझो"
+  ],
+  "मा": [
+    "माता"
+  ],
+  "मात": [
+    "माता"
+  ],
+  "माता": [
+    "माता"
+  ],
+  "पि": [
+    "पिता"
+  ],
+  "पित": [
+    "पिता"
+  ],
+  "पिता": [
+    "पिता"
+  ],
+  "बहन": [
+    "बहन"
+  ],
+  "पर": [
+    "परिवार"
+  ],
+  "परि": [
+    "परिवार"
+  ],
+  "परिव": [
+    "परिवार"
+  ],
   "na": [
-    "namaste"
+    "namaste",
+    "nahi"
   ],
   "nam": [
     "namaste"
@@ -411,7 +671,9 @@
     "namaste"
   ],
   "sh": [
-    "shukriya"
+    "shukriya",
+    "shayad",
+    "shanti"
   ],
   "shu": [
     "shukriya"
@@ -419,14 +681,47 @@
   "shuk": [
     "shukriya"
   ],
+  "dh": [
+    "dhanyawad",
+    "dheere"
+  ],
+  "dha": [
+    "dhanyawad"
+  ],
+  "dhan": [
+    "dhanyawad"
+  ],
+  "ha": [
+    "haan"
+  ],
+  "haa": [
+    "haan"
+  ],
+  "haan": [
+    "haan"
+  ],
+  "nah": [
+    "nahi"
+  ],
+  "nahi": [
+    "nahi"
+  ],
+  "nh": [
+    "nhi"
+  ],
+  "nhi": [
+    "nhi"
+  ],
   "ky": [
     "kya",
+    "kyu",
     "kyun"
   ],
   "kya": [
     "kya"
   ],
   "kyu": [
+    "kyu",
     "kyun"
   ],
   "kyun": [
@@ -437,13 +732,32 @@
     "kab",
     "kaise",
     "kaisa",
-    "kaun"
+    "kal",
+    "kaam",
+    "karo",
+    "karta",
+    "karti",
+    "karte",
+    "karna",
+    "karke",
+    "karega",
+    "karegi",
+    "karenge"
   ],
   "kah": [
     "kaha"
   ],
   "kaha": [
     "kaha"
+  ],
+  "ki": [
+    "kidhar"
+  ],
+  "kid": [
+    "kidhar"
+  ],
+  "kidh": [
+    "kidhar"
   ],
   "kab": [
     "kab"
@@ -455,12 +769,6 @@
   "kais": [
     "kaise",
     "kaisa"
-  ],
-  "kau": [
-    "kaun"
-  ],
-  "kaun": [
-    "kaun"
   ],
   "bh": [
     "bhai",
@@ -474,15 +782,11 @@
     "bhai",
     "bhaiya"
   ],
-  "ya": [
-    "yaar",
-    "yaha"
+  "br": [
+    "bro"
   ],
-  "yaa": [
-    "yaar"
-  ],
-  "yaar": [
-    "yaar"
+  "bro": [
+    "bro"
   ],
   "do": [
     "dost"
@@ -492,6 +796,16 @@
   ],
   "dost": [
     "dost"
+  ],
+  "ya": [
+    "yaar",
+    "yaha"
+  ],
+  "yaa": [
+    "yaar"
+  ],
+  "yaar": [
+    "yaar"
   ],
   "ac": [
     "achha",
@@ -513,7 +827,18 @@
     "bahut",
     "baat",
     "batao",
-    "badiya"
+    "bakwaas",
+    "batata",
+    "batati",
+    "batate",
+    "batana",
+    "batake",
+    "bataega",
+    "bataegi",
+    "bataenge",
+    "bataraha",
+    "batarahi",
+    "batarahe"
   ],
   "bah": [
     "bahut"
@@ -521,9 +846,31 @@
   "bahu": [
     "bahut"
   ],
+  "bo": [
+    "bohot",
+    "bolo",
+    "bolta",
+    "bolti",
+    "bolte",
+    "bolna",
+    "bolke",
+    "bolega",
+    "bolegi",
+    "bolenge",
+    "bolraha",
+    "bolrahi",
+    "bolrahe"
+  ],
+  "boh": [
+    "bohot"
+  ],
+  "boho": [
+    "bohot"
+  ],
   "th": [
     "theek",
-    "thik"
+    "thik",
+    "thoda"
   ],
   "the": [
     "theek"
@@ -540,8 +887,19 @@
   "sa": [
     "sab",
     "samay",
-    "samjha",
-    "sahi"
+    "samajh",
+    "sach",
+    "sahi",
+    "samajhta",
+    "samajhti",
+    "samajhte",
+    "samajhna",
+    "samajhke",
+    "samajhega",
+    "samajhegi",
+    "samajhenge",
+    "samajhraha",
+    "samajhrahi"
   ],
   "sab": [
     "sab"
@@ -555,15 +913,20 @@
   "kuch": [
     "kuch"
   ],
-  "ko": [
-    "koi"
-  ],
-  "koi": [
-    "koi"
-  ],
   "aa": [
     "aaj",
-    "aao"
+    "aao",
+    "aata",
+    "aati",
+    "aate",
+    "aana",
+    "aake",
+    "aaega",
+    "aaegi",
+    "aaenge",
+    "aaraha",
+    "aarahi",
+    "aarahe"
   ],
   "aaj": [
     "aaj"
@@ -572,8 +935,7 @@
     "kal"
   ],
   "ab": [
-    "abhi",
-    "ab"
+    "abhi"
   ],
   "abh": [
     "abhi"
@@ -598,10 +960,33 @@
   ],
   "sam": [
     "samay",
-    "samjha"
+    "samajh",
+    "samajhta",
+    "samajhti",
+    "samajhte",
+    "samajhna",
+    "samajhke",
+    "samajhega",
+    "samajhegi",
+    "samajhenge",
+    "samajhraha",
+    "samajhrahi",
+    "samajhrahe"
   ],
   "sama": [
-    "samay"
+    "samay",
+    "samajh",
+    "samajhta",
+    "samajhti",
+    "samajhte",
+    "samajhna",
+    "samajhke",
+    "samajhega",
+    "samajhegi",
+    "samajhenge",
+    "samajhraha",
+    "samajhrahi",
+    "samajhrahe"
   ],
   "kaa": [
     "kaam"
@@ -620,39 +1005,50 @@
   ],
   "kh": [
     "khana",
-    "khushi"
+    "kharab"
   ],
   "kha": [
-    "khana"
+    "khana",
+    "kharab"
   ],
   "khan": [
     "khana"
   ],
   "pa": [
-    "paani",
+    "pani",
     "pata",
-    "pakka"
+    "pakka",
+    "pagal"
   ],
-  "paa": [
-    "paani"
+  "pan": [
+    "pani"
   ],
-  "paan": [
-    "paani"
+  "pani": [
+    "pani"
+  ],
+  "ch": [
+    "chai",
+    "chalo",
+    "chal",
+    "chalega"
+  ],
+  "cha": [
+    "chai",
+    "chalo",
+    "chal",
+    "chalega"
+  ],
+  "chai": [
+    "chai"
   ],
   "py": [
-    "pyaar"
+    "pyar"
   ],
   "pya": [
-    "pyaar"
+    "pyar"
   ],
-  "pyaa": [
-    "pyaar"
-  ],
-  "khu": [
-    "khushi"
-  ],
-  "khus": [
-    "khushi"
+  "pyar": [
+    "pyar"
   ],
   "baa": [
     "baat"
@@ -661,46 +1057,180 @@
     "baat"
   ],
   "bat": [
-    "batao"
+    "batao",
+    "batata",
+    "batati",
+    "batate",
+    "batana",
+    "batake",
+    "bataega",
+    "bataegi",
+    "bataenge",
+    "bataraha",
+    "batarahi",
+    "batarahe"
   ],
   "bata": [
-    "batao"
+    "batao",
+    "batata",
+    "batati",
+    "batate",
+    "batana",
+    "batake",
+    "bataega",
+    "bataegi",
+    "bataenge",
+    "bataraha",
+    "batarahi",
+    "batarahe"
   ],
   "su": [
-    "suno"
+    "suno",
+    "sundar",
+    "sunta",
+    "sunti",
+    "sunte",
+    "sunna",
+    "sunke",
+    "sunega",
+    "sunegi",
+    "sunenge",
+    "sunraha",
+    "sunrahi",
+    "sunrahe"
   ],
   "sun": [
-    "suno"
+    "suno",
+    "sundar",
+    "sunta",
+    "sunti",
+    "sunte",
+    "sunna",
+    "sunke",
+    "sunega",
+    "sunegi",
+    "sunenge",
+    "sunraha",
+    "sunrahi",
+    "sunrahe"
   ],
   "suno": [
     "suno"
   ],
-  "ch": [
-    "chalo",
-    "chalega"
-  ],
-  "cha": [
-    "chalo",
-    "chalega"
-  ],
   "chal": [
     "chalo",
+    "chal",
     "chalega"
   ],
   "aao": [
     "aao"
   ],
   "ja": [
-    "jao"
+    "jao",
+    "jaldi",
+    "jata",
+    "jati",
+    "jate",
+    "jana",
+    "jake",
+    "jaega",
+    "jaegi",
+    "jaenge",
+    "jaraha",
+    "jarahi",
+    "jarahe"
   ],
   "jao": [
     "jao"
   ],
   "kar": [
-    "karo"
+    "karo",
+    "karta",
+    "karti",
+    "karte",
+    "karna",
+    "karke",
+    "karega",
+    "karegi",
+    "karenge",
+    "karraha",
+    "karrahi",
+    "karrahe"
   ],
   "karo": [
     "karo"
+  ],
+  "ru": [
+    "ruko"
+  ],
+  "ruk": [
+    "ruko"
+  ],
+  "ruko": [
+    "ruko"
+  ],
+  "de": [
+    "dekho",
+    "dekhta",
+    "dekhti",
+    "dekhte",
+    "dekhna",
+    "dekhke",
+    "dekhega",
+    "dekhegi",
+    "dekhenge",
+    "dekhraha",
+    "dekhrahi",
+    "dekhrahe",
+    "deta",
+    "deti",
+    "dete"
+  ],
+  "dek": [
+    "dekho",
+    "dekhta",
+    "dekhti",
+    "dekhte",
+    "dekhna",
+    "dekhke",
+    "dekhega",
+    "dekhegi",
+    "dekhenge",
+    "dekhraha",
+    "dekhrahi",
+    "dekhrahe",
+    "deke"
+  ],
+  "dekh": [
+    "dekho",
+    "dekhta",
+    "dekhti",
+    "dekhte",
+    "dekhna",
+    "dekhke",
+    "dekhega",
+    "dekhegi",
+    "dekhenge",
+    "dekhraha",
+    "dekhrahi",
+    "dekhrahe"
+  ],
+  "bol": [
+    "bolo",
+    "bolta",
+    "bolti",
+    "bolte",
+    "bolna",
+    "bolke",
+    "bolega",
+    "bolegi",
+    "bolenge",
+    "bolraha",
+    "bolrahi",
+    "bolrahe"
+  ],
+  "bolo": [
+    "bolo"
   ],
   "pat": [
     "pata"
@@ -708,32 +1238,49 @@
   "pata": [
     "pata"
   ],
-  "samj": [
-    "samjha"
+  "pak": [
+    "pakka"
   ],
-  "ar": [
-    "arre"
+  "pakk": [
+    "pakka"
   ],
-  "arr": [
-    "arre"
+  "sac": [
+    "sach"
   ],
-  "arre": [
-    "arre"
-  ],
-  "bo": [
-    "bolo"
-  ],
-  "bol": [
-    "bolo"
-  ],
-  "bolo": [
-    "bolo"
+  "sach": [
+    "sach"
   ],
   "sah": [
     "sahi"
   ],
   "sahi": [
     "sahi"
+  ],
+  "bi": [
+    "bilkul",
+    "bindas"
+  ],
+  "bil": [
+    "bilkul"
+  ],
+  "bilk": [
+    "bilkul"
+  ],
+  "sha": [
+    "shayad",
+    "shanti"
+  ],
+  "shay": [
+    "shayad"
+  ],
+  "za": [
+    "zaroor"
+  ],
+  "zar": [
+    "zaroor"
+  ],
+  "zaro": [
+    "zaroor"
   ],
   "ma": [
     "mast"
@@ -744,6 +1291,12 @@
   "mast": [
     "mast"
   ],
+  "bin": [
+    "bindas"
+  ],
+  "bind": [
+    "bindas"
+  ],
   "ju": [
     "jugaad"
   ],
@@ -753,55 +1306,534 @@
   "juga": [
     "jugaad"
   ],
-  "bi": [
-    "bindaas"
+  "bak": [
+    "bakwaas"
   ],
-  "bin": [
-    "bindaas"
+  "bakw": [
+    "bakwaas"
   ],
-  "bind": [
-    "bindaas"
+  "shan": [
+    "shanti"
   ],
-  "pak": [
-    "pakka"
+  "te": [
+    "tension"
   ],
-  "pakk": [
-    "pakka"
+  "ten": [
+    "tension"
   ],
-  "bad": [
-    "badiya"
+  "tens": [
+    "tension"
   ],
-  "badi": [
-    "badiya"
+  "pag": [
+    "pagal"
   ],
-  "zo": [
-    "zordaar"
+  "paga": [
+    "pagal"
   ],
-  "zor": [
-    "zordaar"
+  "sund": [
+    "sundar"
   ],
-  "zord": [
-    "zordaar"
+  "khar": [
+    "kharab"
   ],
-  "ek": [
-    "ekdum"
+  "jal": [
+    "jaldi"
   ],
-  "ekd": [
-    "ekdum"
+  "jald": [
+    "jaldi"
   ],
-  "ekdu": [
-    "ekdum"
+  "dhe": [
+    "dheere"
+  ],
+  "dhee": [
+    "dheere"
+  ],
+  "tho": [
+    "thoda"
+  ],
+  "thod": [
+    "thoda"
+  ],
+  "zy": [
+    "zyada"
+  ],
+  "zya": [
+    "zyada"
+  ],
+  "zyad": [
+    "zyada"
+  ],
+  "ar": [
+    "arre"
+  ],
+  "arr": [
+    "arre"
+  ],
+  "arre": [
+    "arre"
+  ],
+  "oy": [
+    "oye"
+  ],
+  "oye": [
+    "oye"
+  ],
+  "kart": [
+    "karta",
+    "karti",
+    "karte"
+  ],
+  "karn": [
+    "karna"
+  ],
+  "kark": [
+    "karke"
+  ],
+  "kare": [
+    "karega",
+    "karegi",
+    "karenge"
+  ],
+  "karr": [
+    "karraha",
+    "karrahi",
+    "karrahe"
+  ],
+  "bolt": [
+    "bolta",
+    "bolti",
+    "bolte"
+  ],
+  "boln": [
+    "bolna"
+  ],
+  "bolk": [
+    "bolke"
+  ],
+  "bole": [
+    "bolega",
+    "bolegi",
+    "bolenge"
+  ],
+  "bolr": [
+    "bolraha",
+    "bolrahi",
+    "bolrahe"
+  ],
+  "sunt": [
+    "sunta",
+    "sunti",
+    "sunte"
+  ],
+  "sunn": [
+    "sunna"
+  ],
+  "sunk": [
+    "sunke"
+  ],
+  "sune": [
+    "sunega",
+    "sunegi",
+    "sunenge"
+  ],
+  "sunr": [
+    "sunraha",
+    "sunrahi",
+    "sunrahe"
+  ],
+  "jat": [
+    "jata",
+    "jati",
+    "jate"
+  ],
+  "jata": [
+    "jata"
+  ],
+  "jati": [
+    "jati"
+  ],
+  "jate": [
+    "jate"
+  ],
+  "jan": [
+    "jana"
+  ],
+  "jana": [
+    "jana"
+  ],
+  "jak": [
+    "jake"
+  ],
+  "jake": [
+    "jake"
+  ],
+  "jae": [
+    "jaega",
+    "jaegi",
+    "jaenge"
+  ],
+  "jaeg": [
+    "jaega",
+    "jaegi"
+  ],
+  "jaen": [
+    "jaenge"
+  ],
+  "jar": [
+    "jaraha",
+    "jarahi",
+    "jarahe"
+  ],
+  "jara": [
+    "jaraha",
+    "jarahi",
+    "jarahe"
+  ],
+  "aat": [
+    "aata",
+    "aati",
+    "aate"
+  ],
+  "aata": [
+    "aata"
+  ],
+  "aati": [
+    "aati"
+  ],
+  "aate": [
+    "aate"
+  ],
+  "aan": [
+    "aana"
+  ],
+  "aana": [
+    "aana"
+  ],
+  "aak": [
+    "aake"
+  ],
+  "aake": [
+    "aake"
+  ],
+  "aae": [
+    "aaega",
+    "aaegi",
+    "aaenge"
+  ],
+  "aaeg": [
+    "aaega",
+    "aaegi"
+  ],
+  "aaen": [
+    "aaenge"
+  ],
+  "aar": [
+    "aaraha",
+    "aarahi",
+    "aarahe"
+  ],
+  "aara": [
+    "aaraha",
+    "aarahi",
+    "aarahe"
+  ],
+  "re": [
+    "rehta",
+    "rehti",
+    "rehte",
+    "rehna",
+    "rehke",
+    "rehega",
+    "rehegi",
+    "rehenge",
+    "rehraha",
+    "rehrahi",
+    "rehrahe"
+  ],
+  "reh": [
+    "rehta",
+    "rehti",
+    "rehte",
+    "rehna",
+    "rehke",
+    "rehega",
+    "rehegi",
+    "rehenge",
+    "rehraha",
+    "rehrahi",
+    "rehrahe"
+  ],
+  "reht": [
+    "rehta",
+    "rehti",
+    "rehte"
+  ],
+  "rehn": [
+    "rehna"
+  ],
+  "rehk": [
+    "rehke"
+  ],
+  "rehe": [
+    "rehega",
+    "rehegi",
+    "rehenge"
+  ],
+  "rehr": [
+    "rehraha",
+    "rehrahi",
+    "rehrahe"
+  ],
+  "la": [
+    "lagta",
+    "lagti",
+    "lagte",
+    "lagna",
+    "lagke",
+    "lagega",
+    "lagegi",
+    "lagenge",
+    "lagraha",
+    "lagrahi",
+    "lagrahe"
+  ],
+  "lag": [
+    "lagta",
+    "lagti",
+    "lagte",
+    "lagna",
+    "lagke",
+    "lagega",
+    "lagegi",
+    "lagenge",
+    "lagraha",
+    "lagrahi",
+    "lagrahe"
+  ],
+  "lagt": [
+    "lagta",
+    "lagti",
+    "lagte"
+  ],
+  "lagn": [
+    "lagna"
+  ],
+  "lagk": [
+    "lagke"
+  ],
+  "lage": [
+    "lagega",
+    "lagegi",
+    "lagenge"
+  ],
+  "lagr": [
+    "lagraha",
+    "lagrahi",
+    "lagrahe"
+  ],
+  "mi": [
+    "milta",
+    "milti",
+    "milte",
+    "milna",
+    "milke",
+    "milega",
+    "milegi",
+    "milenge",
+    "milraha",
+    "milrahi",
+    "milrahe"
+  ],
+  "mil": [
+    "milta",
+    "milti",
+    "milte",
+    "milna",
+    "milke",
+    "milega",
+    "milegi",
+    "milenge",
+    "milraha",
+    "milrahi",
+    "milrahe"
+  ],
+  "milt": [
+    "milta",
+    "milti",
+    "milte"
+  ],
+  "miln": [
+    "milna"
+  ],
+  "milk": [
+    "milke"
+  ],
+  "mile": [
+    "milega",
+    "milegi",
+    "milenge"
+  ],
+  "milr": [
+    "milraha",
+    "milrahi",
+    "milrahe"
+  ],
+  "ra": [
+    "rakhta",
+    "rakhti",
+    "rakhte",
+    "rakhna",
+    "rakhke",
+    "rakhega",
+    "rakhegi",
+    "rakhenge",
+    "rakhraha",
+    "rakhrahi",
+    "rakhrahe"
+  ],
+  "rak": [
+    "rakhta",
+    "rakhti",
+    "rakhte",
+    "rakhna",
+    "rakhke",
+    "rakhega",
+    "rakhegi",
+    "rakhenge",
+    "rakhraha",
+    "rakhrahi",
+    "rakhrahe"
+  ],
+  "rakh": [
+    "rakhta",
+    "rakhti",
+    "rakhte",
+    "rakhna",
+    "rakhke",
+    "rakhega",
+    "rakhegi",
+    "rakhenge",
+    "rakhraha",
+    "rakhrahi",
+    "rakhrahe"
+  ],
+  "le": [
+    "leta",
+    "leti",
+    "lete",
+    "lena",
+    "leke",
+    "leega",
+    "leegi",
+    "leenge",
+    "leraha",
+    "lerahi",
+    "lerahe"
+  ],
+  "let": [
+    "leta",
+    "leti",
+    "lete"
+  ],
+  "leta": [
+    "leta"
+  ],
+  "leti": [
+    "leti"
+  ],
+  "lete": [
+    "lete"
+  ],
+  "len": [
+    "lena"
+  ],
+  "lena": [
+    "lena"
+  ],
+  "lek": [
+    "leke"
+  ],
+  "leke": [
+    "leke"
+  ],
+  "lee": [
+    "leega",
+    "leegi",
+    "leenge"
+  ],
+  "leeg": [
+    "leega",
+    "leegi"
+  ],
+  "leen": [
+    "leenge"
+  ],
+  "ler": [
+    "leraha",
+    "lerahi",
+    "lerahe"
+  ],
+  "lera": [
+    "leraha",
+    "lerahi",
+    "lerahe"
+  ],
+  "det": [
+    "deta",
+    "deti",
+    "dete"
+  ],
+  "deta": [
+    "deta"
+  ],
+  "deti": [
+    "deti"
+  ],
+  "dete": [
+    "dete"
+  ],
+  "den": [
+    "dena"
+  ],
+  "dena": [
+    "dena"
+  ],
+  "deke": [
+    "deke"
+  ],
+  "dee": [
+    "deega",
+    "deegi",
+    "deenge"
+  ],
+  "deeg": [
+    "deega",
+    "deegi"
+  ],
+  "deen": [
+    "deenge"
+  ],
+  "der": [
+    "deraha",
+    "derahi",
+    "derahe"
+  ],
+  "dera": [
+    "deraha",
+    "derahi",
+    "derahe"
   ]
 };
+  const HI_WORD_SET = new Set(HI_WORDS);
 
-  const HI_WORD_SET = new Set(HI_WORDS.map(w => w.toLowerCase()));
   const DEVANAGARI_REGEX = /[\u0900-\u097F]/;
 
   class HinglishSubDirectory {
     constructor() {
-      this.name = 'Hindi / Hinglish';
+      this.name = 'Hindi & Hinglish (हिन्दी)';
       this.code = 'hi';
       this.badge = 'Hinglish';
+      this.icon = 'fa-om';
       this.wordSet = HI_WORD_SET;
       this.typoMap = HI_TYPO_MAP;
       this.prefixTable = HI_PREFIX_TABLE;
@@ -829,7 +1861,13 @@
     detect(text) {
       if (!text || typeof text !== 'string') return false;
       if (DEVANAGARI_REGEX.test(text)) return true;
-      return /\b(namaste|shukriya|kaise|theek|achha|bhai|yaar|dost|kya|nahi|batao)\b/i.test(text);
+      const lower = text.toLowerCase();
+      const tokens = lower.split(/\s+|[.,!?;:()]+/);
+      for (let i = 0; i < tokens.length; i++) {
+        const t = tokens[i].trim();
+        if (this.typoMap[t]) return true;
+      }
+      return /\b(namaste|shukriya|dhanyawad|kaise|kaisa|kaisi|bhai|yaar|dost|theek|achha|accha|bohot|bahut|kya|kyun|kaha|mast|bindas)\b/i.test(lower);
     }
 
     activate() {
