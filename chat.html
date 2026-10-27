@@ -1712,6 +1712,11 @@
                   <span>Languages &amp; Input</span>
                   <span class="settings-tab-microbadge" style="background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3);">17 LANGS</span>
                 </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-storage">
+                  <i class="fa-solid fa-hard-drive" style="color: #10b981;"></i>
+                  <span>Storage &amp; Data</span>
+                  <span class="settings-tab-microbadge" style="background: rgba(16,185,129,0.15); color: #10b981; border: 1px solid rgba(16,185,129,0.3);">CACHE &amp; NET</span>
+                </button>
               </div>
 
               <div class="settings-nav-group">
@@ -2343,6 +2348,58 @@
                   <input type="range" id="soundVolumeSlider" min="0" max="100" value="85" step="5" class="cyber-range-slider" style="width: 100%; margin-top: 8px;">
                 </div>
 
+                <!-- IN-APP BANNERS & CONVERSATION TONES -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 242, 254, 0.25); background: rgba(0, 242, 254, 0.02);">
+                  <div style="margin-bottom: 10px;">
+                    <strong style="color: #00f2fe; font-size: 13.5px;"><i class="fa-solid fa-bell"></i> Message Alerts &amp; Preview Privacy</strong>
+                    <p style="font-size: 12px; color: #8b949e; margin: 2px 0 0 0;">Control how incoming notifications and in-chat audio effects behave.</p>
+                  </div>
+
+                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">In-App Floating Banner Alerts</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Display top banner when a new message arrives while viewing another room.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="inAppBannersToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">Message Content Preview in Alerts</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Show sender name and message snippet in push banner notifications.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="messagePreviewInNotifsToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">In-Chat Conversation Tones</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Play subtle mechanical clicks when sending and receiving inside active chat.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="conversationTonesToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="font-size: 12.5px;">Reaction Audio Pops &amp; Haptics</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Play tactile feedback pop when an emoji reaction is tapped or received.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="reactionAudioHapticsToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
                 <!-- NOTIFICATION CHIME PACK -->
                 <div class="settings-card">
                   <label for="notifChimeSelect"><strong>Notification Chime Sound Pack</strong></label>
@@ -2545,11 +2602,262 @@
                 </div>
               </div>
 
+              <!-- TAB: STORAGE, NETWORK & MEDIA DATA -->
+              <div class="settings-tab-pane" id="tab-storage">
+                <div class="settings-pane-header">
+                  <h3><i class="fa-solid fa-hard-drive" style="color: #10b981;"></i> Storage &amp; Network Data</h3>
+                  <p>Manage offline cache, granular media auto-downloads, and call data saver modes.</p>
+                </div>
+
+                <!-- STORAGE USAGE BREAKDOWN METER -->
+                <div class="settings-card" style="border: 1px solid rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.03);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div>
+                      <strong style="color: #10b981; font-size: 14px;"><i class="fa-solid fa-database"></i> Device Storage Meter</strong>
+                      <p style="font-size: 12px; color: #94a3b8; margin: 2px 0 0 0;">Dynamic RAM buffer, IndexedDB message vault, and media blob storage.</p>
+                    </div>
+                    <span id="storageTotalUsedBadge" style="font-size: 12px; font-weight: 700; color: #10b981; padding: 3px 10px; border-radius: 8px; background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); font-family: monospace;">Calculating...</span>
+                  </div>
+
+                  <!-- Visual Storage Bar -->
+                  <div style="height: 12px; border-radius: 6px; background: rgba(255,255,255,0.06); display: flex; overflow: hidden; margin: 12px 0 10px 0; border: 1px solid rgba(255,255,255,0.08);">
+                    <div id="storageBarMessages" style="width: 25%; background: #10b981; transition: width 0.3s;" title="Messages &amp; Text"></div>
+                    <div id="storageBarMedia" style="width: 45%; background: #00f2fe; transition: width 0.3s;" title="Photos &amp; Video Clips"></div>
+                    <div id="storageBarAudio" style="width: 15%; background: #fbbf24; transition: width 0.3s;" title="Voice Notes &amp; Audio"></div>
+                    <div id="storageBarCache" style="width: 15%; background: #c084fc; transition: width 0.3s;" title="Transient Blobs &amp; Cache"></div>
+                  </div>
+
+                  <!-- Legend -->
+                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; font-size: 11px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 5px; color: #cbd5e1;">
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block;"></span>
+                      <span>Chats: <strong id="storageSizeChats">~3.2 MB</strong></span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px; color: #cbd5e1;">
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: #00f2fe; display: inline-block;"></span>
+                      <span>Media: <strong id="storageSizeMedia">~8.5 MB</strong></span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px; color: #cbd5e1;">
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: #fbbf24; display: inline-block;"></span>
+                      <span>Audio: <strong id="storageSizeAudio">~1.8 MB</strong></span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 5px; color: #cbd5e1;">
+                      <span style="width: 8px; height: 8px; border-radius: 50%; background: #c084fc; display: inline-block;"></span>
+                      <span>Cache: <strong id="storageSizeCache">~1.3 MB</strong></span>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div style="display: flex; gap: 8px;">
+                    <button type="button" id="btnCleanStorageCache" class="btn-primary" style="flex: 1; font-size: 12px; padding: 8px 12px; background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #10b981;">
+                      <i class="fa-solid fa-broom"></i> Clean Transient Cache
+                    </button>
+                    <button type="button" id="btnRecalculateStorage" class="btn-secondary" style="flex: 1; font-size: 12px; padding: 8px 12px;">
+                      <i class="fa-solid fa-rotate"></i> Recalculate Storage
+                    </button>
+                  </div>
+                </div>
+
+                <!-- MEDIA AUTO-DOWNLOAD PROFILES -->
+                <div class="settings-card">
+                  <div style="margin-bottom: 12px;">
+                    <strong style="color: #fff; font-size: 13.5px;"><i class="fa-solid fa-cloud-arrow-down" style="color: #00f2fe;"></i> Media Auto-Download Policy</strong>
+                    <p style="font-size: 12px; color: #8b949e; margin: 2px 0 0 0;">Customize which media categories auto-fetch based on your network connection.</p>
+                  </div>
+
+                  <!-- When on Mobile Data -->
+                  <div style="background: rgba(0,0,0,0.25); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                      <strong style="font-size: 12.5px; color: #cbd5e1;"><i class="fa-solid fa-signal" style="color: #fbbf24; margin-right: 6px;"></i> When Using Mobile Data</strong>
+                      <span style="font-size: 10.5px; color: #8b949e;">Cellular Metered</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 12px;">
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8;">
+                        <input type="checkbox" id="autoDownloadMobilePhotos" checked> Photos
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8;">
+                        <input type="checkbox" id="autoDownloadMobileAudio" checked> Audio
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8;">
+                        <input type="checkbox" id="autoDownloadMobileVideos"> Videos
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8;">
+                        <input type="checkbox" id="autoDownloadMobileDocs"> Documents
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- When on Wi-Fi -->
+                  <div style="background: rgba(0,0,0,0.25); border-radius: 8px; padding: 12px; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 10px;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                      <strong style="font-size: 12.5px; color: #cbd5e1;"><i class="fa-solid fa-wifi" style="color: #00ff66; margin-right: 6px;"></i> When Connected to Wi-Fi</strong>
+                      <span style="font-size: 10.5px; color: #8b949e;">Unmetered High-Speed</span>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; font-size: 12px;">
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8;">
+                        <input type="checkbox" id="autoDownloadWifiPhotos" checked> Photos
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8;">
+                        <input type="checkbox" id="autoDownloadWifiAudio" checked> Audio
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8;">
+                        <input type="checkbox" id="autoDownloadWifiVideos" checked> Videos
+                      </label>
+                      <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #94a3b8;">
+                        <input type="checkbox" id="autoDownloadWifiDocs" checked> Documents
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- When Roaming -->
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="font-size: 12.5px;"><i class="fa-solid fa-globe" style="color: #c084fc; margin-right: 4px;"></i> Block All Auto-Downloads When Roaming</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Prevents unexpected cellular carrier roaming charges by requiring tap-to-download.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="autoDownloadRoamingPause" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- CALL DATA SAVER & VOICE DSP OPTIMIZATION -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 242, 254, 0.25); background: rgba(0, 242, 254, 0.02);">
+                  <div style="margin-bottom: 10px;">
+                    <strong style="color: #00f2fe; font-size: 13.5px;"><i class="fa-solid fa-phone-volume"></i> Calls &amp; Voice Quality Intelligence</strong>
+                    <p style="font-size: 12px; color: #8b949e; margin: 2px 0 0 0;">Adaptive WebRTC codecs, neural noise cancellation, and mobile bandwidth savings.</p>
+                  </div>
+
+                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">Low Data Usage for Calls</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Reduces audio and video bitrate on cellular networks to conserve up to 60% data.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="callLowDataModeToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="luxury-toggle-row" style="margin-bottom: 8px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">AI Neural Voice Noise Cancellation</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Suppresses background environmental noise (traffic, wind, room echo) via real-time Web Audio DSP.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="callNoiseSuppressionToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="font-size: 12.5px;">48kHz Studio Hi-Fi Call Audio Mode</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Preserves wide dynamic range for music and clear speech when on Wi-Fi.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="callHiFiAudioToggle" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- NETWORK DATA USAGE TELEMETRY -->
+                <div class="settings-card">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <div>
+                      <strong style="font-size: 13px;"><i class="fa-solid fa-chart-pie" style="color: #ffd700; margin-right: 6px;"></i> Network Telemetry Counter</strong>
+                      <p style="font-size: 12px; color: #8b949e; margin: 2px 0 0 0;">Lifetime data traffic transferred through NEXCHAT encrypted socket pipeline.</p>
+                    </div>
+                    <button type="button" id="btnResetNetworkStats" class="btn-secondary" style="font-size: 11px; padding: 4px 10px;">
+                      <i class="fa-solid fa-clock-rotate-left"></i> Reset Stats
+                    </button>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                      <div style="color: #8b949e; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-arrow-up" style="color: #00ff66;"></i> TOTAL SENT
+                      </div>
+                      <div id="telemetryDataSent" style="font-size: 15px; font-weight: 700; color: #fff; margin-top: 4px; font-family: monospace;">12.4 MB</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);">
+                      <div style="color: #8b949e; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-arrow-down" style="color: #00f2fe;"></i> TOTAL RECEIVED
+                      </div>
+                      <div id="telemetryDataReceived" style="font-size: 15px; font-weight: 700; color: #fff; margin-top: 4px; font-family: monospace;">48.7 MB</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
               <!-- TAB 5: PRIVACY & SECURITY -->
               <div class="settings-tab-pane" id="tab-privacy">
                 <div class="settings-pane-header">
                   <h3><i class="fa-solid fa-shield-halved"></i> Privacy & Security</h3>
                   <p>Control presence visibility, read receipts, and incoming requests.</p>
+                </div>
+
+                <!-- BIOMETRIC WEBAUTHN & HARDWARE FINGERPRINT ENCLAVE -->
+                <div class="settings-card" style="border: 1px solid rgba(0, 255, 102, 0.35); background: rgba(0, 255, 102, 0.04);">
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <i class="fa-solid fa-fingerprint" style="color: #00ff66; font-size: 16px;"></i>
+                      <strong style="color: #00ff66; font-size: 13.5px;">Biometric Enclave &amp; Hardware Lock</strong>
+                    </div>
+                    <span id="biometricSupportBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 255, 102, 0.15); color: #00ff66; font-weight: 700; border: 1px solid rgba(0, 255, 102, 0.3);">
+                      <i class="fa-solid fa-microchip"></i> WebAuthn Ready
+                    </span>
+                  </div>
+                  <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
+                    Lock NEXCHAT behind Windows Hello, Touch ID, Face ID, or your physical cryptographic security key with zero-knowledge fallback PIN.
+                  </p>
+
+                  <div class="luxury-toggle-row" style="margin-bottom: 10px;">
+                    <div>
+                      <strong style="font-size: 12.5px;">Require Biometric Unlock on Resume</strong>
+                      <p style="font-size: 11px; margin-top: 2px;">Prompts biometric sensor or security PIN whenever returning to NEXCHAT.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="biometricLockToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div style="margin-bottom: 10px;">
+                    <label for="biometricTimeoutSelect" style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">Auto-Lock Inactivity Grace Period:</label>
+                    <select id="biometricTimeoutSelect" class="settings-select">
+                      <option value="0">Immediately on Background</option>
+                      <option value="60">1 Minute</option>
+                      <option value="120" selected>2 Minutes [Default]</option>
+                      <option value="300">5 Minutes</option>
+                      <option value="900">15 Minutes</option>
+                      <option value="3600">1 Hour</option>
+                    </select>
+                  </div>
+
+                  <!-- Live Hardware GPU & Canvas Fingerprint Telemetry -->
+                  <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px; border: 1px solid rgba(255,255,255,0.06); font-size: 11px; font-family: monospace; color: #94a3b8; margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span>GPU Hardware:</span>
+                      <span id="hardwareGpuDisplay" style="color: #00f2fe; font-weight: 700;">Scanning...</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span>Anti-Hijack Signature:</span>
+                      <span id="hardwareSigDisplay" style="color: #00ff66;">Verified Bound Node</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <span>CPU Concurrency:</span>
+                      <span id="hardwareCoresDisplay" style="color: #ffd700;">Detecting...</span>
+                    </div>
+                  </div>
+
+                  <button type="button" id="testBiometricSensorBtn" class="btn-secondary" style="width: 100%; font-size: 12px; padding: 7px 12px;">
+                    <i class="fa-solid fa-fingerprint"></i> Test Hardware Biometric Authenticator
+                  </button>
+                  <div id="biometricTestResult" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>
                 </div>
 
                 <div class="settings-card">
@@ -3340,22 +3648,62 @@
                 </div>
 
                 <div class="settings-card">
-                  <button id="openLinkDeviceModalBtn" class="btn-primary" type="button" style="width: 100%; font-weight: 700;">
-                    <i class="fa-solid fa-qrcode"></i> Link New Device via QR Code
-                  </button>
-                  <div id="linkedDevicesContainer" style="margin-top: 14px;">
-                    <div class="setting-item" style="border-left: 3px solid #00ff66; padding: 10px; background: rgba(0,255,102,0.06); border-radius: 8px;">
-                      <div style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fa-solid fa-mobile-screen" style="font-size: 20px; color: #00ff66;"></i>
+                  <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <button id="openLinkDeviceModalBtn" class="btn-primary" type="button" style="flex: 1; font-weight: 700;">
+                      <i class="fa-solid fa-qrcode"></i> Link via QR Code
+                    </button>
+                    <button id="openLinkCodeModalBtn" class="btn-secondary" type="button" style="flex: 1; font-weight: 700;">
+                      <i class="fa-solid fa-hashtag"></i> Link with Code
+                    </button>
+                  </div>
+
+                  <div id="linkedDevicesContainer" style="margin-top: 10px;">
+                    <!-- Active Primary Session Card -->
+                    <div class="setting-item" style="border-left: 3px solid #00ff66; padding: 12px; background: rgba(0,255,102,0.06); border-radius: 8px; display: flex; align-items: center; justify-content: space-between;">
+                      <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(0,255,102,0.12); display: flex; align-items: center; justify-content: center; color: #00ff66; font-size: 18px;">
+                          <i id="currentDeviceIcon" class="fa-solid fa-laptop"></i>
+                        </div>
                         <div>
-                          <strong style="color: #fff; font-size: 13px;">This Device (Active)</strong>
-                          <p id="currentDeviceLabel" style="margin: 2px 0 0 0; color: #8b949e; font-size: 11px;">Current Web Session</p>
+                          <div style="display: flex; align-items: center; gap: 6px;">
+                            <strong style="color: #fff; font-size: 13px;" id="currentDeviceName">Current Device</strong>
+                            <span style="font-size: 9.5px; padding: 1px 6px; border-radius: 6px; background: rgba(0,255,102,0.18); color: #00ff66; font-weight: 700;">ONLINE</span>
+                          </div>
+                          <p id="currentDeviceLabel" style="margin: 2px 0 0 0; color: #8b949e; font-size: 11.5px;">Detecting browser &amp; platform...</p>
                         </div>
                       </div>
+                      <span style="font-size: 11px; color: #8b949e; font-family: monospace;">This Device</span>
                     </div>
-                    <div id="otherLinkedDevicesList" style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;"></div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin: 14px 0 8px 0;">
+                      <span style="font-size: 12px; font-weight: 700; color: #cbd5e1; text-transform: uppercase; letter-spacing: 0.5px;">Linked Remote Sessions</span>
+                      <span id="linkedSessionsCountBadge" style="font-size: 10.5px; color: #8b949e;">0 Active</span>
+                    </div>
+
+                    <div id="otherLinkedDevicesList" style="margin-top: 6px; display: flex; flex-direction: column; gap: 8px;">
+                      <div style="text-align: center; padding: 14px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px dashed rgba(255,255,255,0.08); color: #8b949e; font-size: 12px;">
+                        No other devices linked to this account.
+                      </div>
+                    </div>
+
+                    <!-- Revoke All Other Sessions -->
+                    <div style="margin-top: 14px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
+                      <div style="margin-bottom: 10px;">
+                        <label for="linkedDeviceExpirySelect" style="font-size: 12px; color: #cbd5e1; display: block; margin-bottom: 4px;">Auto-Logout Inactive Linked Devices:</label>
+                        <select id="linkedDeviceExpirySelect" class="settings-select">
+                          <option value="7">After 7 Days Inactivity</option>
+                          <option value="14">After 14 Days Inactivity</option>
+                          <option value="30" selected>After 30 Days Inactivity [Default]</option>
+                          <option value="never">Never (Persistent Linked Device)</option>
+                        </select>
+                      </div>
+
+                      <button type="button" id="btnRevokeAllOtherSessions" class="btn-danger" style="width: 100%; font-size: 12px; padding: 8px 12px;">
+                        <i class="fa-solid fa-power-off"></i> Log Out From All Other Devices
+                      </button>
+                    </div>
                   </div>
-                </div>
+                </div></div>
               </div>
 
               <!-- TAB 10: INSTALL APP -->
