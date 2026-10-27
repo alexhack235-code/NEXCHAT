@@ -755,12 +755,19 @@
       if (cursorPos === null || cursorPos === undefined || cursorPos === 0) return false;
 
       const textBefore = val.slice(0, cursorPos);
-      // Match the trailing word (letters, digits, or apostrophe)
-      const match = textBefore.match(/([a-zA-Z0-9']+)\s*$/);
+      // Match the trailing word (Unicode letters, digits, apostrophe, or hyphens)
+      let match = null;
+      try {
+        match = textBefore.match(/([\p{L}\p{N}'-]+)\s*$/u);
+      } catch (_) {
+        match = textBefore.match(/([a-zA-Z0-9'\u00C0-\u024F\u0400-\u04FF-]+)\s*$/);
+      }
       if (!match) return false;
 
       const rawWord = match[1];
-      const cleanWord = rawWord.toLowerCase();
+      const cleanWord = cleanTokenSafe(rawWord);
+      if (!cleanWord) return false;
+
       const beforeWord = textBefore.slice(0, textBefore.length - rawWord.length).trim();
       const prevTokens = beforeWord.split(/\s+/);
       const prevWord = prevTokens[prevTokens.length - 1] || '';
@@ -775,7 +782,7 @@
       if (!replacement) {
         if (TYPO_MAP[cleanWord]) {
           replacement = applyCasePattern(rawWord, TYPO_MAP[cleanWord]);
-        } else if (cleanWord === 'i') {
+        } else if (cleanWord === 'i' && (!window.autoCorrectEngine || window.autoCorrectEngine.currentPrimaryLanguage !== 'ru')) {
           replacement = 'I';
         }
       }
@@ -810,9 +817,19 @@
     }
 
     flashCorrectionFeedback(original, replacement) {
+      let langBadgeText = '';
+      let langBadgeHtml = '';
+      if (window.autoCorrectEngine && typeof window.autoCorrectEngine.getActiveLanguage === 'function') {
+        const meta = window.autoCorrectEngine.getActiveLanguage();
+        if (meta && meta.code !== 'en') {
+          langBadgeText = ` [${meta.badge}]`;
+          langBadgeHtml = ` <span class="undo-pill-lang-badge">${escapeText(meta.badge)}</span>`;
+        }
+      }
+
       if (this.autocorrectBtn) {
         this.autocorrectBtn.style.display = 'inline-flex';
-        this.autocorrectBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-[#00FFC6]"></i> <span>Fixed: ${escapeText(original)} &rarr; ${escapeText(replacement)}</span>`;
+        this.autocorrectBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles text-[#00FFC6]"></i> <span>Fixed: ${escapeText(original)} &rarr; ${escapeText(replacement)}${langBadgeText}</span>`;
       }
 
       // Render floating interactive undo pill
@@ -832,7 +849,7 @@
         pill.innerHTML = `
           <div class="undo-pill-text">
             <i class="fa-solid fa-sparkles" style="color: #00FFC6; font-size: 11px;"></i>
-            <span>Fixed: <strong>${escapeText(original)}</strong> &rarr; <strong style="color: #00FFC6;">${escapeText(replacement)}</strong></span>
+            <span>Fixed: <strong>${escapeText(original)}</strong> &rarr; <strong style="color: #00FFC6;">${escapeText(replacement)}</strong>${langBadgeHtml}</span>
           </div>
           <button type="button" class="undo-pill-btn" id="btnUndoAutoCorrect">
             <i class="fa-solid fa-rotate-left"></i> <span>Undo</span>
@@ -890,6 +907,7 @@
         if (this.bar) this.bar.style.display = 'none';
         this.chipsContainer.innerHTML = '';
         if (this.autocorrectBtn) this.autocorrectBtn.style.display = 'none';
+        if (this.langBadge) this.langBadge.style.display = 'none';
         this.activeCorrection = null;
         return;
       }
@@ -916,31 +934,97 @@
         prevWord = tokens[tokens.length - 1] || '';
       }
 
-      const cleanWord = currentWord.replace(/[^\w']/g, '').toLowerCase();
-      const cleanPrev = prevWord.replace(/[^\w']/g, '').toLowerCase();
+      const cleanWord = cleanTokenSafe(currentWord);
+      const cleanPrev = cleanTokenSafe(prevWord);
+
+      // Check / Detect active language
+      let detectedLang = 'en';
+      if (window.autoCorrectEngine && typeof window.autoCorrectEngine.detectLanguage === 'function') {
+        detectedLang = window.autoCorrectEngine.detectLanguage(val, cleanWord);
+      }
+
+      // Update predictive language badge
+      if (this.langBadge) {
+        if (detectedLang && detectedLang !== 'en' && window.autoCorrectEngine) {
+          const meta = window.autoCorrectEngine.getActiveLanguage();
+          this.langBadge.style.display = 'inline-flex';
+          this.langBadge.innerHTML = `<i class="fa-solid fa-earth-americas text-[#00FFC6] text-[10px] mr-1"></i><span>${meta.badge}</span>`;
+        } else {
+          this.langBadge.style.display = 'none';
+        }
+      }
 
       const suggestions = [];
       let detectedCorrection = null;
 
-      // 1. Direct typo check on active word
+      // 1. Multilingual Typo Check on active or previous word
       const targetTypo = cleanWord || (endsWithSpace ? cleanPrev : '');
-      if (targetTypo && TYPO_MAP[targetTypo]) {
-        const rawTarget = cleanWord ? currentWord : prevWord;
-        const fixed = applyCasePattern(rawTarget, TYPO_MAP[targetTypo]);
-        detectedCorrection = {
-          original: rawTarget,
-          replacement: fixed,
-          fullText: val.replace(new RegExp(`\\b${rawTarget}\\b`), fixed)
-        };
-        suggestions.push({
-          text: fixed,
-          isCorrection: true,
-          label: `Fix: ${fixed}`
-        });
+      const rawTarget = cleanWord ? currentWord : prevWord;
+
+      if (targetTypo) {
+        let fixedCandidate = null;
+
+        // Russian typo map
+        if (detectedLang === 'ru' && window.RU_TYPO_MAP && window.RU_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.RU_TYPO_MAP[targetTypo];
+        }
+        // Nigerian Pidgin typo map
+        else if (window.PIDGIN_TYPO_MAP && window.PIDGIN_TYPO_MAP[targetTypo]) {
+          fixedCandidate = window.PIDGIN_TYPO_MAP[targetTypo];
+        }
+        // Multilingual suite typo map
+        else if (window.MULTILINGUAL_SUITE && window.MULTILINGUAL_SUITE.correctWord(targetTypo, detectedLang)) {
+          fixedCandidate = window.MULTILINGUAL_SUITE.correctWord(targetTypo, detectedLang);
+        }
+        // English Typo Map
+        else if (TYPO_MAP[targetTypo]) {
+          fixedCandidate = TYPO_MAP[targetTypo];
+        }
+
+        if (fixedCandidate) {
+          const fixed = applyCasePattern(rawTarget, fixedCandidate);
+          detectedCorrection = {
+            original: rawTarget,
+            replacement: fixed,
+            fullText: val.replace(new RegExp(`\\b${escapeRegExp(rawTarget)}\\b`), fixed)
+          };
+          suggestions.push({
+            text: fixed,
+            isCorrection: true,
+            label: `Fix: ${fixed}`
+          });
+        }
       }
 
-      // 1.5 30k Fuzzy candidates
-      if (cleanWord && cleanWord.length >= 3 && window.fuzzyMatcher && typeof window.fuzzyMatcher.findSuggestions === 'function') {
+      // 1.5 Sub-directory completions (Russian / Pidgin / English)
+      if (cleanWord && cleanWord.length >= 2) {
+        if (detectedLang === 'ru' && window.RU_WORDS) {
+          for (let i = 0; i < window.RU_WORDS.length; i++) {
+            const w = window.RU_WORDS[i];
+            if (w.startsWith(cleanWord) && w !== cleanWord) {
+              const formatted = applyCasePattern(currentWord, w);
+              if (!suggestions.some(s => s.text.toLowerCase() === formatted.toLowerCase())) {
+                suggestions.push({ text: formatted, isCompletion: true });
+                if (suggestions.length >= 4) break;
+              }
+            }
+          }
+        } else if (detectedLang === 'pidgin' && window.PIDGIN_WORDS) {
+          for (let i = 0; i < window.PIDGIN_WORDS.length; i++) {
+            const w = window.PIDGIN_WORDS[i];
+            if (w.startsWith(cleanWord) && w !== cleanWord) {
+              const formatted = applyCasePattern(currentWord, w);
+              if (!suggestions.some(s => s.text.toLowerCase() === formatted.toLowerCase())) {
+                suggestions.push({ text: formatted, isCompletion: true });
+                if (suggestions.length >= 4) break;
+              }
+            }
+          }
+        }
+      }
+
+      // 1.8 30k Fuzzy candidates (English/Latin)
+      if (detectedLang === 'en' && cleanWord && cleanWord.length >= 3 && window.fuzzyMatcher && typeof window.fuzzyMatcher.findSuggestions === 'function') {
         const fuzzySuggestions = window.fuzzyMatcher.findSuggestions(cleanWord, 3);
         fuzzySuggestions.forEach(f => {
           if (!suggestions.some(s => s.text.toLowerCase() === f.text.toLowerCase())) {
@@ -949,8 +1033,8 @@
         });
       }
 
-      // 2. O(1) Prefix-based word completion lookup
-      if (cleanWord && cleanWord.length >= 2) {
+      // 2. O(1) Prefix-based word completion lookup (English)
+      if (detectedLang === 'en' && cleanWord && cleanWord.length >= 2) {
         const prefixCandidates = PREFIX_INDEX[cleanWord.slice(0, Math.min(4, cleanWord.length))] || [];
         for (let i = 0; i < prefixCandidates.length; i++) {
           const w = prefixCandidates[i];
@@ -966,7 +1050,7 @@
 
       // 3. Next-word Bigram predictions based on previous word
       const bigramKey = (cleanWord ? cleanWord : cleanPrev).toLowerCase();
-      if (bigramKey && BIGRAMS[bigramKey]) {
+      if (detectedLang === 'en' && bigramKey && BIGRAMS[bigramKey]) {
         const phrases = BIGRAMS[bigramKey];
         for (let i = 0; i < phrases.length; i++) {
           const phrase = phrases[i];
@@ -979,7 +1063,11 @@
 
       // 4. Fallback greetings if starting a message
       if (suggestions.length === 0 && !prevWord && cleanWord.length >= 1) {
-        const fallbacks = ['thanks', 'sounds good', 'let me check', 'understood', 'perfect', 'hello'];
+        const fallbacks = (detectedLang === 'ru')
+          ? ['привет', 'здравствуйте', 'добрый день', 'спасибо', 'хорошо']
+          : (detectedLang === 'pidgin')
+            ? ['how far', 'wetin dey', 'I dey', 'no wahala', 'sharp sharp']
+            : ['thanks', 'sounds good', 'let me check', 'understood', 'perfect', 'hello'];
         fallbacks.forEach(f => {
           if (f.startsWith(cleanWord) && suggestions.length < 3) {
             suggestions.push({ text: f });

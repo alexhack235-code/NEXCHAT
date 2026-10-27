@@ -74,8 +74,9 @@
      * Scans DOM contact list to automatically whitelist all contacts
      */
     scanContacts() {
-      if (typeof document === 'undefined') return;
+      if (typeof document === 'undefined' || typeof document.querySelectorAll !== 'function') return;
       const scan = () => {
+        if (typeof document.querySelectorAll !== 'function') return;
         const names = document.querySelectorAll('.chat-name, .contact-name, .chat-list-item[data-chat-name]');
         names.forEach(el => {
           const name = el.textContent || el.getAttribute('data-chat-name') || '';

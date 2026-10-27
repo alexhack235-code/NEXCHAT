@@ -965,6 +965,7 @@
 
           <!-- Predictive Word & Auto-Correct Strip -->
           <div id="predictiveWordBar" class="predictive-word-bar" style="display: none;">
+            <div id="predictiveLangBadge" class="predictive-lang-badge" style="display: none;"></div>
             <div class="predictive-chips-scroll" id="predictiveChipsScroll"></div>
             <button type="button" id="quickAutocorrectBtn" class="quick-autocorrect-btn" style="display: none;" title="Apply Instant Grammar & Spelling Fix">
               <i class="fa-solid fa-sparkles"></i> <span>Auto-Correct</span>
@@ -5484,8 +5485,11 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
-  <!-- Expanded 30,000+ Word Master Auto-Correct Suite -->
+  <!-- Expanded Multilingual 30,000+ Word Master Auto-Correct Suite -->
   <script src="./src/js/autocorrect/dictionary-30k.js"></script>
+  <script src="./src/js/autocorrect/dictionary-pidgin.js"></script>
+  <script src="./src/js/autocorrect/dictionary-ru.js"></script>
+  <script src="./src/js/autocorrect/dictionary-multilingual.js"></script>
   <script src="./src/js/autocorrect/personal-vocab.js"></script>
   <script src="./src/js/autocorrect/ngram-context.js"></script>
   <script src="./src/js/autocorrect/fuzzy-matcher.js"></script>

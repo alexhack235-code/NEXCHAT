@@ -222,6 +222,39 @@ body {
   transform: scale(1.05) !important;
 }
 
+/* Multilingual Predictive & Undo Badges */
+.predictive-lang-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: rgba(0, 200, 150, 0.15) !important;
+  border: 1px solid rgba(0, 200, 150, 0.4) !important;
+  color: #00C896 !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border-radius: 9999px !important;
+  padding: 3px 8px !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.undo-pill-lang-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(0, 200, 150, 0.2) !important;
+  border: 1px solid rgba(0, 200, 150, 0.5) !important;
+  color: #00C896 !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  border-radius: 4px !important;
+  padding: 1px 5px !important;
+  margin-left: 6px !important;
+}
+
 
 /* ==========================================================================
    NEXCHAT SUPER-APP 6-TAB RESPONSIVE BOTTOM NAVIGATION (ANTI-CLUTTER SYSTEM)
