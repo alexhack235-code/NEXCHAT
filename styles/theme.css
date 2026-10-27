@@ -829,3 +829,81 @@ body.mobile-preview .bottom-nav .nav-item {
   border-color: #10b981 !important;
   color: #10b981 !important;
 }
+
+
+/* ==========================================================================
+   BULLETPROOF ROUTE VISIBILITY & SECTION ISOLATION
+   ========================================================================== */
+/* Hide non-active containers by default */
+.announcements-container {
+  display: none !important;
+}
+
+.call-history-container {
+  display: none !important;
+}
+
+.status-container,
+.nex-status-container,
+.whatsapp-updates-container {
+  display: none !important;
+}
+
+/* 1. Chats Route Active */
+.app[data-active-section="chats"] .chat-main,
+body[data-active-section="chats"] .chat-main {
+  display: flex !important;
+}
+
+.app[data-active-section="chats"] #chatListView,
+body[data-active-section="chats"] #chatListView {
+  display: flex !important;
+}
+
+.app[data-active-section="chats"] .top-header,
+body[data-active-section="chats"] .top-header {
+  display: flex !important;
+}
+
+/* 2. Announcements / Alerts Route Active */
+.app[data-active-section="announcements"] .announcements-container,
+body[data-active-section="announcements"] .announcements-container {
+  display: flex !important;
+}
+
+.app[data-active-section="announcements"] .chat-main,
+body[data-active-section="announcements"] .chat-main,
+.app[data-active-section="announcements"] .top-header,
+body[data-active-section="announcements"] .top-header {
+  display: none !important;
+}
+
+/* 3. Calls Route Active */
+.app[data-active-section="calls"] .call-history-container,
+body[data-active-section="calls"] .call-history-container {
+  display: flex !important;
+}
+
+.app[data-active-section="calls"] .chat-main,
+body[data-active-section="calls"] .chat-main,
+.app[data-active-section="calls"] .top-header,
+body[data-active-section="calls"] .top-header {
+  display: none !important;
+}
+
+/* 4. Updates Route Active */
+.app[data-active-section="updates"] .status-container,
+body[data-active-section="updates"] .status-container,
+.app[data-active-section="updates"] .nex-status-container,
+body[data-active-section="updates"] .nex-status-container,
+.app[data-active-section="updates"] .whatsapp-updates-container,
+body[data-active-section="updates"] .whatsapp-updates-container {
+  display: flex !important;
+}
+
+.app[data-active-section="updates"] .chat-main,
+body[data-active-section="updates"] .chat-main,
+.app[data-active-section="updates"] .top-header,
+body[data-active-section="updates"] .top-header {
+  display: none !important;
+}

@@ -12,6 +12,7 @@ window.handleNavigation = function (navSection) {
         communities: 'groupsContainer',
         announcements: 'announcementsContainer',
         news: 'announcementsContainer',
+        alerts: 'announcementsContainer',
         calls: 'callHistoryContainer',
         call: 'callHistoryContainer',
         marketplace: 'advertisement.html',
@@ -36,8 +37,12 @@ window.handleNavigation = function (navSection) {
 
     const target = sections[normalized];
     if (!target) {
-        const chatList = document.getElementById('chatListView');
-        if (chatList) chatList.style.display = 'flex';
+        if (typeof window.showChatListView === 'function') {
+            window.showChatListView();
+        } else {
+            const chatList = document.getElementById('chatListView');
+            if (chatList) chatList.style.display = 'flex';
+        }
         return;
     }
 
@@ -50,14 +55,31 @@ window.handleNavigation = function (navSection) {
     const moreSheet = document.getElementById('mobileMoreSheet');
     if (moreSheet) moreSheet.classList.remove('open');
 
+    const chatMain = document.querySelector('.chat-main');
+    const app = document.querySelector('.app');
+    if (app) {
+        app.dataset.activeSection = (normalized === 'chat' || normalized === 'messages') ? 'chats' : normalized;
+    }
+
     // Hide all subviews
-    document.querySelectorAll('.chat-list-view, .nex-status-container, .groups-container, .announcements-container, .call-history-container').forEach((section) => {
-        section.style.display = 'none';
+    document.querySelectorAll('.chat-list-view, .nex-status-container, .whatsapp-updates-container, .status-container, .groups-container, .announcements-container, .call-history-container').forEach((section) => {
+        section.style.setProperty('display', 'none', 'important');
     });
 
-    const element = document.getElementById(target);
-    if (element) {
-        element.style.display = 'block';
+    if (normalized === 'chats' || normalized === 'chat' || normalized === 'messages') {
+        if (typeof window.showChatListView === 'function') {
+            window.showChatListView();
+        } else {
+            if (chatMain) chatMain.style.setProperty('display', 'flex', 'important');
+            const element = document.getElementById(target);
+            if (element) element.style.setProperty('display', 'flex', 'important');
+        }
+    } else {
+        if (chatMain) chatMain.style.setProperty('display', 'none', 'important');
+        const element = document.getElementById(target);
+        if (element) {
+            element.style.setProperty('display', 'flex', 'important');
+        }
     }
 
     // Trigger section-specific live data fetchers
@@ -84,4 +106,3 @@ window.handleNavigation = function (navSection) {
 
 window.__nexchatNavigationReady = true;
 export const handleNavigation = window.handleNavigation;
-

@@ -8121,88 +8121,18 @@ window.logoutUser = async function () {
 document.getElementById("logout-btn")?.addEventListener("click", logoutUser);
 
 document.getElementById("nav-messages")?.addEventListener("click", () => {
-  showChatListView();
+  handleNavigation("chats");
   showNotif("Messages", "info", 800);
 });
 
 document.getElementById("nav-status")?.addEventListener("click", () => {
-  const statusContainer = document.getElementById("statusContainer");
-  const chatListView = document.getElementById("chatListView");
-  const chatDetailView = document.getElementById("chatDetailView");
-  const chatMain = document.querySelector(".chat-main");
-  const app = document.querySelector(".app");
-
-  if (!statusContainer) return;
-  if (statusContainer.style.display === "none") {
-    if (chatListView) chatListView.style.display = "none";
-    if (chatDetailView) chatDetailView.style.display = "none";
-    if (chatMain) {
-      chatMain.style.display = "none";
-      chatMain.dataset.layout = "section";
-    }
-    statusContainer.style.display = "flex";
-    if (app) app.dataset.activeSection = "updates";
-    document.getElementById("nav-messages")?.classList.remove("active");
-    document.getElementById("nav-status")?.classList.add("active");
-    showNotif("NEX-STATUS", "info", 800);
-    try { loadStatusFeed(); } catch (_) {}
-  } else {
-    statusContainer.style.display = "none";
-    if (app) app.dataset.activeSection = "chats";
-    if (chatMain) {
-      chatMain.style.display = "flex";
-      chatMain.dataset.layout = "list";
-    }
-    if (chatListView) chatListView.style.display = "flex";
-    if (chatMain) chatMain.dataset.layout = "list";
-    document.getElementById("nav-status")?.classList.remove("active");
-    document.getElementById("nav-messages")?.classList.add("active");
-    showNotif("Messages", "info", 800);
-  }
+  handleNavigation("updates");
+  showNotif("Updates", "info", 800);
 });
 
 document.getElementById("nav-announcements")?.addEventListener("click", () => {
-  const announcementsContainer = document.getElementById("announcementsContainer");
-  const chatListView = document.getElementById("chatListView");
-  const statusContainer = document.getElementById("statusContainer");
-  const groupsContainer = document.getElementById("groupsContainer");
-  const chatDetailView = document.getElementById("chatDetailView");
-  const chatMain = document.querySelector(".chat-main");
-  const app = document.querySelector(".app");
-
-  if (!announcementsContainer) return;
-  if (announcementsContainer.style.display === "none") {
-    if (chatListView) chatListView.style.display = "none";
-    if (statusContainer) statusContainer.style.display = "none";
-    if (groupsContainer) groupsContainer.style.display = "none";
-    if (chatDetailView) chatDetailView.style.display = "none";
-    if (chatMain) {
-      chatMain.style.display = "none";
-      chatMain.dataset.layout = "section";
-    }
-    if (app) app.dataset.activeSection = "announcements";
-    announcementsContainer.style.display = "flex";
-
-    document.getElementById("nav-messages")?.classList.remove("active");
-    document.getElementById("nav-status")?.classList.remove("active");
-    document.getElementById("nav-groups")?.classList.remove("active");
-    document.getElementById("nav-announcements")?.classList.add("active");
-
-    loadAnnouncements();
-    showNotif("Announcements", "info", 800);
-  } else {
-    announcementsContainer.style.display = "none";
-    if (app) app.dataset.activeSection = "chats";
-    if (chatMain) {
-      chatMain.style.display = "flex";
-      chatMain.dataset.layout = "list";
-    }
-    if (chatListView) chatListView.style.display = "flex";
-    if (chatMain) chatMain.dataset.layout = "list";
-    document.getElementById("nav-announcements")?.classList.remove("active");
-    document.getElementById("nav-messages")?.classList.add("active");
-    showNotif("Messages", "info", 800);
-  }
+  handleNavigation("announcements");
+  showNotif("Dispatches", "info", 800);
 });
 
 
