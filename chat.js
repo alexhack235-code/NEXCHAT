@@ -7033,7 +7033,7 @@ function showCallUI(isVideo = false, callStatus = 'active') {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    z-index: 200000;
     padding: 20px;
     backdrop-filter: blur(10px);
     `;
@@ -7986,7 +7986,7 @@ async function showIncomingCallPrompt(callId, callData) {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    z-index: 10000;
+    z-index: 200000;
     gap: 20px;
     padding: 20px;
   `;

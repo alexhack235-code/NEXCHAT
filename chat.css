@@ -10761,3 +10761,16 @@ body.chat-size-extra-large .message-bubble {
   width: 100%;
   height: 100%;
 }
+
+
+/* =============================================================================
+   CALL & DIALER TOP-TIER UI STRATUM ISOLATION (Z-INDEX 200000)
+   Guarantees active calls & dialers are always topmost over any open modal
+   ============================================================================= */
+#call-overlay,
+#incoming-call-overlay,
+.calls-modal-backdrop,
+#callsKeypadModal {
+  z-index: 200000 !important;
+  isolation: isolate !important;
+}
