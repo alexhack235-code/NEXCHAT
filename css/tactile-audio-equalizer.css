@@ -1,0 +1,334 @@
+/* ==========================================================================
+   NEXCHAT - 32-BAND TACTICAL ACOUSTIC SPECTRUM & EQUALIZER SUITE
+   Obsidian Glassmorphic Acoustic Calibration Rack & Calibrated Decibel Meters
+   Colorway: Deep Obsidian (#060913) | Cyber-Emerald (#00ff66) | Quantum Cyan (#00f2fe)
+             Amber Alert (#f59e0b) | Threat Red (#ef4444)
+   STRICTLY 0 UNICODE EMOJIS: Pure FontAwesome 6 vector glyphs and typography.
+   ========================================================================== */
+
+.call-spectrum-wrap {
+  width: 100%;
+  max-width: 680px;
+  margin: 8px auto;
+  background: rgba(6, 9, 19, 0.94);
+  border: 1px solid rgba(0, 255, 102, 0.3);
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.75), 0 0 16px rgba(0, 255, 102, 0.12);
+  user-select: none;
+  animation: spectrumSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+@keyframes spectrumSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.spectrum-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.spectrum-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.spectrum-brand i {
+  color: #00ff66;
+  font-size: 13px;
+}
+
+.spectrum-label {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #f1f5f9;
+}
+
+.spectrum-db-cluster {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.spectrum-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #94a3b8;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.spectrum-pill.rms strong {
+  color: #00f2fe;
+}
+
+.spectrum-pill.peak strong {
+  color: #00ff66;
+}
+
+.spectrum-pill.clip-beacon {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  transition: all 0.1s ease;
+}
+
+.spectrum-pill.clip-beacon.active {
+  background: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 12px #ef4444;
+}
+
+.spectrum-canvas-container {
+  width: 100%;
+  height: 90px;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.call-spectrum-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.spectrum-freq-legend {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 8.5px;
+  color: #64748b;
+  padding: 0 4px;
+}
+
+/* Modal window for Neural Voice Synth */
+.voice-synth-modal-window {
+  max-width: 500px;
+  width: calc(100vw - 32px);
+}
+
+.voice-synth-tag {
+  background: rgba(0, 255, 102, 0.12);
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  color: #00ff66;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.voice-synth-field {
+  margin-bottom: 10px;
+}
+
+.voice-synth-label {
+  display: block;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #cbd5e1;
+  margin-bottom: 4px;
+}
+
+.voice-synth-text-area {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.voice-synth-text-area:focus {
+  border-color: #00ff66;
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.2);
+}
+
+.voice-profiles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .voice-profiles-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.voice-profile-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.voice-profile-card:hover {
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.voice-profile-card.active {
+  background: rgba(0, 255, 102, 0.12);
+  border-color: #00ff66;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.15);
+}
+
+.voice-synth-preview-btn {
+  flex: 1;
+  background: rgba(0, 212, 255, 0.15);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: #00d4ff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.voice-synth-preview-btn:hover {
+  background: rgba(0, 212, 255, 0.28);
+}
+
+.voice-synth-dispatch-btn {
+  flex: 1.2;
+  background: rgba(0, 255, 102, 0.18);
+  border: 1px solid #00ff66;
+  color: #00ff66;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.voice-synth-dispatch-btn:hover {
+  background: #00ff66;
+  color: #000000;
+  box-shadow: 0 0 14px rgba(0, 255, 102, 0.4);
+}
+
+.synth-voice-bubble-card {
+  background: rgba(6, 9, 19, 0.85);
+  border: 1px solid rgba(0, 255, 102, 0.25);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin: 4px 0;
+  max-width: 320px;
+}
+
+.synth-voice-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.synth-voice-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #94a3b8;
+}
+
+.synth-profile-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  border: 1px solid;
+}
+
+.synth-voice-transcript {
+  font-size: 12px;
+  color: #f1f5f9;
+  line-height: 1.4;
+  font-style: italic;
+  margin: 6px 0;
+}
+
+.synth-playback-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.synth-play-trigger-btn {
+  background: rgba(0, 255, 102, 0.15);
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  color: #00ff66;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 10.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.synth-play-trigger-btn:hover {
+  background: #00ff66;
+  color: #000000;
+}
+
+.synth-duration-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: #64748b;
+}

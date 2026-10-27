@@ -70,6 +70,10 @@
         this.activeRecognizer.interimResults = true;
         this.activeRecognizer.lang = 'en-US';
 
+        const initialInputValue = input ? input.value : '';
+        const initialPrefix = initialInputValue ? initialInputValue.trim() + ' ' : '';
+        let finalAccumulated = '';
+
         this.activeRecognizer.onstart = () => {
           this.isDictating = true;
           if (btn) btn.classList.add('dictating');
@@ -80,12 +84,17 @@
         };
 
         this.activeRecognizer.onresult = (e) => {
-          let transcript = '';
+          let interimTranscript = '';
           for (let i = e.resultIndex; i < e.results.length; ++i) {
-            transcript += e.results[i][0].transcript;
+            const piece = e.results[i][0].transcript;
+            if (e.results[i].isFinal) {
+              finalAccumulated += piece + ' ';
+            } else {
+              interimTranscript += piece;
+            }
           }
           if (input) {
-            input.value = (input.value ? input.value + ' ' : '') + transcript;
+            input.value = initialPrefix + finalAccumulated + interimTranscript;
             input.dispatchEvent(new Event('input', { bubbles: true }));
           }
         };

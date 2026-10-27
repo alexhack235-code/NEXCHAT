@@ -18,9 +18,15 @@ class CyberAudioDSPEngine {
   ensureContext() {
     if (!this.audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      this.audioCtx = new AudioContextClass();
+      if (AudioContextClass) {
+        try {
+          this.audioCtx = new AudioContextClass({ sampleRate: 48000, latencyHint: 'interactive' });
+        } catch (_) {
+          this.audioCtx = new AudioContextClass();
+        }
+      }
     }
-    if (this.audioCtx.state === 'suspended') {
+    if (this.audioCtx && this.audioCtx.state === 'suspended') {
       this.audioCtx.resume();
     }
     return this.audioCtx;
@@ -52,9 +58,14 @@ class CyberAudioDSPEngine {
     const ctx = this.ensureContext();
     this.currentPreset = preset;
 
-    // Disconnect any existing node chain
+    // Disconnect any existing node chain and stop active oscillators
     this.activeNodes.forEach(node => {
-      try { node.disconnect(); } catch {}
+      try {
+        if (typeof node.stop === 'function') {
+          node.stop();
+        }
+        node.disconnect();
+      } catch {}
     });
     this.activeNodes = [];
 
@@ -183,9 +194,8 @@ class CyberAudioDSPEngine {
   enableNoiseSuppression(mediaStream) {
     if (!mediaStream) return mediaStream;
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return mediaStream;
-      const ctx = new AudioCtx();
+      const ctx = this.ensureContext();
+      if (!ctx) return mediaStream;
       const source = ctx.createMediaStreamSource(mediaStream);
 
       // 1. 85Hz High-Pass Filter (eliminates desk bumps, A/C hum, air pressure rumble)
@@ -237,9 +247,8 @@ class CyberAudioDSPEngine {
    */
   createSpatialVoicePanner(participantIndex, totalParticipants = 5) {
     try {
-      const AudioCtx = window.AudioContext || window.webkitAudioContext;
-      if (!AudioCtx) return null;
-      const ctx = new AudioCtx();
+      const ctx = this.ensureContext();
+      if (!ctx) return null;
 
       if (ctx.createStereoPanner) {
         const panner = ctx.createStereoPanner();

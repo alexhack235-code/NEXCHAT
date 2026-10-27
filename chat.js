@@ -4381,7 +4381,7 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
   // 1. Neural Voice Synthesizer
   if (attachment.isNeuralVoiceNote || attachment.voiceData) {
     if (window.neuralVoiceSynthEngine && typeof window.neuralVoiceSynthEngine.renderVoiceBubble === 'function') {
-      const voiceEl = window.neuralVoiceSynthEngine.renderVoiceBubble(attachment.voiceData);
+      const voiceEl = window.neuralVoiceSynthEngine.renderVoiceBubble(attachment.voiceData || attachment);
       container.appendChild(voiceEl);
       return container;
     }
@@ -6712,6 +6712,10 @@ document.getElementById("deleteBtn")?.addEventListener("click", async () => {
     });
 
     await Promise.all(batch);
+    if (typeof getDirectChatCacheKey === 'function' && typeof directChatMessageCache !== 'undefined' && directChatMessageCache.delete) {
+      const directKey = getDirectChatCacheKey(myUID, currentChatUser);
+      directChatMessageCache.delete(directKey);
+    }
     showNotif("Chat deleted", "success");
     goBack();
   } catch (err) {
@@ -8229,6 +8233,10 @@ document.getElementById("infoDeleteBtn")?.addEventListener("click", async () => 
     });
 
     await Promise.all(batch);
+    if (typeof getDirectChatCacheKey === 'function' && typeof directChatMessageCache !== 'undefined' && directChatMessageCache.delete) {
+      const directKey = getDirectChatCacheKey(myUID, currentChatUser);
+      directChatMessageCache.delete(directKey);
+    }
     showNotif("Chat deleted", "success");
     goBack();
   } catch (err) {
