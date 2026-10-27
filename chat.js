@@ -15275,7 +15275,7 @@ async function loadStatusFeed() {
             userName: d.username || d.userName || '@User',
             avatarUrl: d.profilePic || d.userAvatar || 'logo.jpg',
             mediaUrl: d.imageUrl || d.mediaUrl || '',
-            mediaType: (d.mediaType === 'video' || (d.mediaType && d.mediaType.startsWith('video/'))) ? 'video' : (d.imageUrl ? 'image' : 'text'),
+            mediaType: (d.mediaType === 'video' || (d.mediaType && d.mediaType.startsWith('video/'))) ? 'video' : ((d.mediaType === 'audio' || (d.mediaType && d.mediaType.startsWith('audio/'))) ? 'audio' : (d.mediaType === 'code' ? 'code' : (d.imageUrl ? 'image' : 'text'))),
             gradient: d.gradient || null,
             caption: d.content || d.text || d.caption || '',
             timestamp: d.createdAtMs || (d.timestamp?.toMillis ? d.timestamp.toMillis() : now),
@@ -15523,9 +15523,7 @@ function showCurrentStorySlide() {
   const codeStage = document.getElementById('statusViewerCodeStage');
   const interactiveContainer = document.getElementById('statusViewerInteractiveContainer');
 
-  if (window.NexStatusEliteSuite) {
-    window.NexStatusEliteSuite.stopVoiceSlide();
-  }
+  cleanupStorySlide();
 
   // Preload next slide media
   const nextSlide = currentGrp.slides?.[currentStorySlideIndex + 1];
@@ -15548,6 +15546,8 @@ function showCurrentStorySlide() {
       if (avatar) avatar.src = currentGrp.avatarUrl || 'logo.jpg';
       if (window.NexStatusEliteSuite) {
         window.NexStatusEliteSuite.playVoiceSlide(currentSlide.mediaUrl, canvas, timer, () => {
+          const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
+          if (fill) fill.style.width = '100%';
           if (typeof nextStorySlide === 'function') nextStorySlide();
         });
       }
@@ -15568,8 +15568,8 @@ function showCurrentStorySlide() {
     if (textSlide) textSlide.style.display = 'none';
     if (video) {
       video.style.display = 'block';
+      video.currentTime = 0;
       video.src = currentSlide.mediaUrl;
-      video.play().catch(() => {});
     }
     if (muteBtn) {
       muteBtn.style.display = 'flex';
@@ -15701,6 +15701,85 @@ function showCurrentStorySlide() {
   startStoryProgress();
 }
 
+let activeAudioTimeUpdate = null;
+
+function cleanupStorySlide() {
+  if (storyProgressTimer) {
+    clearInterval(storyProgressTimer);
+    clearTimeout(storyProgressTimer);
+    storyProgressTimer = null;
+  }
+  storyProgressValue = 0;
+
+  const video = document.getElementById('statusViewerVideo');
+  if (video) {
+    video.ontimeupdate = null;
+    video.onended = null;
+    video.onerror = null;
+    video.pause();
+  }
+
+  if (activeAudioTimeUpdate && activeAudioTimeUpdate.el) {
+    try {
+      activeAudioTimeUpdate.el.removeEventListener('timeupdate', activeAudioTimeUpdate.fn);
+    } catch (_) {}
+    activeAudioTimeUpdate = null;
+  }
+
+  if (window.NexStatusEliteSuite) {
+    window.NexStatusEliteSuite.stopVoiceSlide();
+  }
+  if (window.NexStatusAudioStudio) {
+    window.NexStatusAudioStudio.stopPlayback();
+  }
+}
+
+function setStoryPaused(paused) {
+  isStoryPaused = !!paused;
+
+  const pauseBtn = document.getElementById('statusViewerPauseBtn');
+  if (pauseBtn) {
+    pauseBtn.innerHTML = isStoryPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
+  }
+
+  const currentGrp = activeStoriesList[currentStoryGroupIndex];
+  const currentSlide = currentGrp?.slides?.[currentStorySlideIndex];
+  if (!currentSlide) return;
+
+  // 1. Video slide pause / resume
+  if (currentSlide.mediaType === 'video') {
+    const video = document.getElementById('statusViewerVideo');
+    if (video) {
+      if (isStoryPaused) {
+        video.pause();
+      } else {
+        video.play().catch(() => {});
+      }
+    }
+  }
+
+  // 2. Audio slide pause / resume
+  if (currentSlide.mediaType === 'audio') {
+    const audioEl = window.NexStatusAudioStudio?.persistentAudioEl || window.NexStatusEliteSuite?.persistentAudioEl;
+    if (audioEl) {
+      if (isStoryPaused) {
+        audioEl.pause();
+        if (window.NexStatusAudioStudio) {
+          window.NexStatusAudioStudio.playbackState = 'paused';
+          window.NexStatusAudioStudio.updateViewerPlayButton(false);
+        }
+      } else {
+        audioEl.play().catch(() => {});
+        if (window.NexStatusAudioStudio) {
+          window.NexStatusAudioStudio.playbackState = 'playing';
+          window.NexStatusAudioStudio.updateViewerPlayButton(true);
+          window.NexStatusAudioStudio.startViewerSpectrumAnimation();
+        }
+      }
+    }
+  }
+}
+
 function setupViewerControls() {
   const modal = document.getElementById('statusViewerModal');
   const closeBtn = document.getElementById('closeStatusViewerBtn');
@@ -15715,15 +15794,19 @@ function setupViewerControls() {
   const stage = document.getElementById('statusViewerStage');
 
   const closeViewer = () => {
-    clearInterval(storyProgressTimer);
+    cleanupStorySlide();
     if (modal) {
       modal.classList.remove('active', 'open', 'status-held');
       modal.style.display = 'none';
     }
     const video = document.getElementById('statusViewerVideo');
-    if (video) video.pause();
+    if (video) {
+      video.pause();
+      video.currentTime = 0;
+      video.removeAttribute('src');
+      video.load();
+    }
     if (window.NexStatusEliteSuite) {
-      window.NexStatusEliteSuite.stopVoiceSlide();
       window.NexStatusEliteSuite.closeViewersDrawer();
     }
   };
@@ -15750,8 +15833,7 @@ function setupViewerControls() {
     pauseBtn.dataset.hasListener = 'true';
     pauseBtn.onclick = (e) => {
       e.stopPropagation();
-      isStoryPaused = !isStoryPaused;
-      pauseBtn.innerHTML = isStoryPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
+      setStoryPaused(!isStoryPaused);
     };
   }
 
@@ -15795,16 +15877,16 @@ function setupViewerControls() {
     };
   }
 
-  // Press & Hold on media stage: Pauses progress and hides HUD for pure full-screen photo viewing
+  // Press & Hold on media stage: Pauses progress and hides HUD for pure full-screen viewing
   if (stage && !stage.dataset.hasHoldListener) {
     stage.dataset.hasHoldListener = 'true';
     const onHoldStart = (e) => {
       if (e.target.closest('button, input, textarea')) return;
-      isStoryPaused = true;
+      setStoryPaused(true);
       if (modal) modal.classList.add('status-held');
     };
     const onHoldEnd = () => {
-      isStoryPaused = false;
+      setStoryPaused(false);
       if (modal) modal.classList.remove('status-held');
     };
     stage.addEventListener('pointerdown', onHoldStart);
@@ -15830,10 +15912,7 @@ function setupViewerControls() {
         closeViewer();
       } else if (e.key === ' ') {
         e.preventDefault();
-        isStoryPaused = !isStoryPaused;
-        if (pauseBtn) {
-          pauseBtn.innerHTML = isStoryPaused ? '<i class="fa-solid fa-play"></i>' : '<i class="fa-solid fa-pause"></i>';
-        }
+        setStoryPaused(!isStoryPaused);
       }
     });
   }
@@ -15863,8 +15942,8 @@ function setupViewerControls() {
   // Reply Input Pause on Focus & Send Transmission
   if (replyInput && !replyInput.dataset.hasPauseFocus) {
     replyInput.dataset.hasPauseFocus = 'true';
-    replyInput.addEventListener('focus', () => { isStoryPaused = true; });
-    replyInput.addEventListener('blur', () => { isStoryPaused = false; });
+    replyInput.addEventListener('focus', () => { setStoryPaused(true); });
+    replyInput.addEventListener('blur', () => { setStoryPaused(false); });
   }
 
   if (replySend && !replySend.dataset.hasListener) {
@@ -15875,7 +15954,7 @@ function setupViewerControls() {
       const currentGrp = activeStoriesList[currentStoryGroupIndex];
       showNotif(`Reply sent to ${currentGrp?.userName || 'User'}: "${txt.substring(0, 30)}"`, 'success', 3000);
       if (replyInput) replyInput.value = '';
-      isStoryPaused = false;
+      setStoryPaused(false);
       if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
     };
     replySend.onclick = sendReply;
@@ -15889,13 +15968,84 @@ function setupViewerControls() {
 }
 
 function startStoryProgress() {
-  clearInterval(storyProgressTimer);
-  storyProgressValue = 0;
+  cleanupStorySlide();
   isStoryPaused = false;
 
-  const SLIDE_DURATION = 5000; // 5 seconds per story
+  const pauseBtn = document.getElementById('statusViewerPauseBtn');
+  if (pauseBtn) {
+    pauseBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+  }
+
+  const currentGrp = activeStoriesList[currentStoryGroupIndex];
+  if (!currentGrp) return;
+  const currentSlide = currentGrp.slides[currentStorySlideIndex];
+  if (!currentSlide) return;
+
+  const currentFill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
+  if (currentFill) currentFill.style.width = '0%';
+
+  // 1. VIDEO SLIDE: Driven purely by HTML5 video timeupdate and onended (supports any length: 30s, 1m, 2m, 3m, 4m)
+  if (currentSlide.mediaType === 'video' && currentSlide.mediaUrl) {
+    const video = document.getElementById('statusViewerVideo');
+    if (!video) {
+      startStaticStoryTimer(7000);
+      return;
+    }
+
+    video.ontimeupdate = () => {
+      if (isStoryPaused) return;
+      if (video.duration && !isNaN(video.duration) && isFinite(video.duration) && video.duration > 0) {
+        const pct = Math.min(100, Math.max(0, (video.currentTime / video.duration) * 100));
+        const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
+        if (fill) fill.style.width = `${pct}%`;
+      }
+    };
+
+    video.onended = () => {
+      const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
+      if (fill) fill.style.width = '100%';
+      nextStorySlide();
+    };
+
+    video.onerror = (e) => {
+      console.warn('[STATUS VIEWER] Video failed to load or decode:', e);
+      storyProgressTimer = setTimeout(() => {
+        nextStorySlide();
+      }, 3000);
+    };
+
+    video.play().catch(err => {
+      console.warn('[STATUS VIEWER] Autoplay deferred:', err);
+    });
+    return;
+  }
+
+  // 2. AUDIO SLIDE: Driven by voice story audio playback
+  if (currentSlide.mediaType === 'audio' && currentSlide.mediaUrl) {
+    const audioEl = window.NexStatusAudioStudio?.persistentAudioEl || window.NexStatusEliteSuite?.persistentAudioEl;
+    if (audioEl) {
+      const onAudioTimeUpdate = () => {
+        if (isStoryPaused) return;
+        if (audioEl.duration && !isNaN(audioEl.duration) && isFinite(audioEl.duration) && audioEl.duration > 0) {
+          const pct = Math.min(100, Math.max(0, (audioEl.currentTime / audioEl.duration) * 100));
+          const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
+          if (fill) fill.style.width = `${pct}%`;
+        }
+      };
+      audioEl.addEventListener('timeupdate', onAudioTimeUpdate);
+      activeAudioTimeUpdate = { el: audioEl, fn: onAudioTimeUpdate };
+    }
+    return;
+  }
+
+  // 3. STATIC SLIDES (Image, Text, Code): Default 7-second timer
+  startStaticStoryTimer(7000);
+}
+
+function startStaticStoryTimer(durationMs = 7000) {
   const INTERVAL_MS = 50;
-  const increment = (INTERVAL_MS / SLIDE_DURATION) * 100;
+  const increment = (INTERVAL_MS / durationMs) * 100;
+  storyProgressValue = 0;
 
   storyProgressTimer = setInterval(() => {
     if (isStoryPaused) return;
@@ -15908,13 +16058,14 @@ function startStoryProgress() {
 
     if (storyProgressValue >= 100) {
       clearInterval(storyProgressTimer);
+      storyProgressTimer = null;
       nextStorySlide();
     }
   }, INTERVAL_MS);
 }
 
 function nextStorySlide() {
-  clearInterval(storyProgressTimer);
+  cleanupStorySlide();
   const currentGrp = activeStoriesList[currentStoryGroupIndex];
   if (!currentGrp) return;
 
@@ -15931,15 +16082,26 @@ function nextStorySlide() {
     } else {
       // Close viewer
       const modal = document.getElementById('statusViewerModal');
-      if (modal) modal.style.display = 'none';
+      if (modal) {
+        modal.classList.remove('active', 'open', 'status-held');
+        modal.style.display = 'none';
+      }
       const video = document.getElementById('statusViewerVideo');
-      if (video) video.pause();
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+        video.removeAttribute('src');
+        video.load();
+      }
+      if (window.NexStatusEliteSuite) {
+        window.NexStatusEliteSuite.closeViewersDrawer();
+      }
     }
   }
 }
 
 function prevStorySlide() {
-  clearInterval(storyProgressTimer);
+  cleanupStorySlide();
   if (currentStorySlideIndex > 0) {
     currentStorySlideIndex--;
     showCurrentStorySlide();
@@ -16036,6 +16198,8 @@ function setupCreateStatusModal() {
   document.getElementById('closeCreateStatusModalBtn')?.addEventListener('click', closeCreateStatusModal);
   document.getElementById('statusTabMediaBtn')?.addEventListener('click', () => switchStatusModalTab('media'));
   document.getElementById('statusTabTextBtn')?.addEventListener('click', () => switchStatusModalTab('text'));
+  document.getElementById('statusTabAudioBtn')?.addEventListener('click', () => switchStatusModalTab('audio'));
+  document.getElementById('statusTabCodeBtn')?.addEventListener('click', () => switchStatusModalTab('code'));
 
   const fileInput = document.getElementById('statusMediaModalFileInput');
   const dropZone = document.getElementById('statusMediaDropZone');

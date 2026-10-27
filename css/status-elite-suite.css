@@ -640,3 +640,96 @@
   resize: vertical;
   line-height: 1.5;
 }
+/* ==========================================================================
+   STATUS CREATOR MODAL 2-ROW HEADER & TABS ARCHITECTURE
+   ========================================================================== */
+.create-status-modal .create-status-header.terminal-modal-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin-bottom: 14px !important;
+  padding-bottom: 12px !important;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.2) !important;
+}
+
+.create-status-modal .create-status-tabs {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-bottom: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.terminal-tab-btn {
+  flex: 1 1 0% !important;
+  min-height: 40px !important;
+  padding: 8px 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  font-family: 'JetBrains Mono', -apple-system, monospace !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  background: rgba(16, 24, 36, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #8696a0 !important;
+  box-sizing: border-box !important;
+  text-decoration: none !important;
+  user-select: none !important;
+}
+
+.terminal-tab-btn i {
+  font-size: 13px !important;
+  flex-shrink: 0 !important;
+}
+
+.terminal-tab-btn:hover {
+  background: rgba(0, 255, 136, 0.08) !important;
+  border-color: rgba(0, 255, 136, 0.3) !important;
+  color: #e2e8f0 !important;
+}
+
+.terminal-tab-btn.active,
+.terminal-tab-btn.btn-primary {
+  background: rgba(0, 255, 136, 0.16) !important;
+  border-color: rgba(0, 255, 136, 0.5) !important;
+  color: #00ff88 !important;
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.22) !important;
+}
+
+/* Mobile Responsiveness for Status Creator Tabs (< 480px) */
+@media (max-width: 480px) {
+  .create-status-modal .create-status-content.terminal-modal-box {
+    padding: 16px 14px !important;
+    width: 95vw !important;
+  }
+  .create-status-modal .create-status-tabs {
+    gap: 6px !important;
+    margin-bottom: 12px !important;
+  }
+  .terminal-tab-btn {
+    min-height: 40px !important;
+    padding: 6px 4px !important;
+    font-size: 11px !important;
+    gap: 5px !important;
+  }
+  .terminal-tab-btn i {
+    font-size: 11.5px !important;
+  }
+}
+
+/* Defensive rule ensuring CAMS button remains completely hidden */
+#topHeaderCamsBtnDesktop,
+#topHeaderCamsBtnMobile,
+.top-cams-hero-btn {
+  display: none !important;
+}

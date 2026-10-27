@@ -146,9 +146,7 @@
 
       <!-- Center Token Pill (Desktop only) -->
       <div class="header-center desktop-only-header" style="display:flex; align-items:center; gap:12px;">
-        <button type="button" id="topHeaderCamsBtnDesktop" class="top-cams-hero-btn" onclick="window.location.href='reels.html'" title="NEX CAMS & Reels">
-          <i class="fa-solid fa-clapperboard"></i> <span>CAMS</span>
-        </button>
+
         <div id="tokenDisplay" class="token-display" title="Your tokens">
           <span class="token-label">Tokens</span>
           <span id="tokenCount">0</span>
@@ -231,9 +229,7 @@
           <button type="button" id="stealthGhostBtnMobile" class="header-icon-btn mobile-action-btn stealth-ghost-toggle-btn" title="Stealth Ghost Mode" aria-label="Toggle Stealth Ghost Mode" data-stealth-active="false">
             <i class="fa-solid fa-ghost"></i>
           </button>
-          <button type="button" id="topHeaderCamsBtnMobile" class="top-cams-hero-btn" onclick="window.location.href='reels.html'" title="NEX CAMS & Reels">
-            <i class="fa-solid fa-clapperboard"></i> <span>CAMS</span>
-          </button>
+
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
@@ -4162,29 +4158,32 @@
       <!-- CREATE STATUS MODAL (NEXCHAT HACKER TERMINAL STORY TRANSMITTER) -->
       <div id="createStatusModal" class="modal create-status-modal terminal-create-modal" style="display: none;">
         <div class="modal-content create-status-content terminal-modal-box" style="max-width: 540px; padding: 22px;">
-          <div class="create-status-header terminal-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding-bottom: 12px;">
+          <!-- Row 1: Modal Header (Title + Close Button) -->
+          <div class="create-status-header terminal-modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(0, 255, 136, 0.2); padding-bottom: 10px;">
             <div style="display: flex; flex-direction: column; gap: 2px;">
               <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 800;">[NEX//TRANSMITTER]</span>
+                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 13.5px; font-weight: 800; letter-spacing: 0.5px;">[NEX//TRANSMITTER]</span>
                 <span class="term-cursor-blink" style="color: #00FF88;">_</span>
               </div>
-              <span style="font-size: 10.5px; color: #8696A0; font-family: 'JetBrains Mono', monospace;">EPHEMERAL_24H_BROADCAST_NODE</span>
+              <span style="font-size: 10px; color: #8696A0; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.4px;">EPHEMERAL 24H BROADCAST NODE</span>
             </div>
-            <div class="create-status-tabs" style="display: flex; gap: 8px;">
-              <button type="button" class="btn-primary terminal-tab-btn active" id="statusTabMediaBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
-                <i class="fa-solid fa-photo-film"></i> [MEDIA_NODE]
-              </button>
-              <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabTextBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
-                <i class="fa-solid fa-font"></i> [TEXT_CIPHER]
-              </button>
-              <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabAudioBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
-                <i class="fa-solid fa-microphone"></i> [VOICE_STORY]
-              </button>
-              <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabCodeBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
-                <i class="fa-solid fa-code"></i> [CODE_SNIPPET]
-              </button>
-            </div>
-            <button type="button" class="close-btn terminal-modal-close" id="closeCreateStatusModalBtn" title="Close" style="position: static; width: 30px; height: 30px; font-size: 14px;"><i class="fa-solid fa-xmark"></i></button>
+            <button type="button" class="close-btn terminal-modal-close" id="closeCreateStatusModalBtn" title="Close" style="position: static; width: 32px; height: 32px; font-size: 14px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+
+          <!-- Row 2: Dedicated Full-Width Tabs Pill Bar -->
+          <div class="create-status-tabs" style="display: flex; gap: 6px; width: 100%; margin-bottom: 16px; background: rgba(6, 10, 16, 0.7); padding: 4px; border-radius: 10px; border: 1px solid rgba(0, 255, 136, 0.15); box-sizing: border-box;">
+            <button type="button" class="btn-primary terminal-tab-btn active" id="statusTabMediaBtn" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; border-radius: 8px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <i class="fa-solid fa-photo-film"></i> <span>Media</span>
+            </button>
+            <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabTextBtn" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; border-radius: 8px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <i class="fa-solid fa-font"></i> <span>Text</span>
+            </button>
+            <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabAudioBtn" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; border-radius: 8px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <i class="fa-solid fa-microphone"></i> <span>Voice</span>
+            </button>
+            <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabCodeBtn" style="flex: 1; padding: 8px 6px; font-size: 12px; font-weight: 700; border-radius: 8px; font-family: 'JetBrains Mono', monospace; white-space: nowrap; display: flex; align-items: center; justify-content: center; gap: 6px;">
+              <i class="fa-solid fa-code"></i> <span>Code</span>
+            </button>
           </div>
 
           <!-- TAB 1: Media Story (Photo/Video + Caption) -->

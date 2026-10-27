@@ -4336,3 +4336,48 @@ body[data-active-section="updates"] .top-header {
   flex: 1 1 auto !important;
   box-sizing: border-box !important;
 }
+/* ==========================================================================
+   RESPONSIVE DISPATCHES / ANNOUNCEMENTS HEADER FIX (< 640px / 320px - 390px)
+   Prevents horizontal collision/overlay between Dispatches branding and action toolbar
+   ========================================================================== */
+@media (max-width: 640px) {
+  .announcements-top-bar {
+    flex-wrap: wrap !important;
+    padding: 10px 14px !important;
+    gap: 10px !important;
+    height: auto !important;
+  }
+
+  .announcements-bar-left {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  .announcements-bar-right {
+    flex: 1 1 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    padding-top: 8px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-sizing: border-box !important;
+  }
+
+  .announcement-lang-picker {
+    max-width: 125px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .announcements-heading {
+    font-size: 16px !important;
+  }
+
+  .announcements-branding {
+    min-width: 0 !important;
+  }
+}
