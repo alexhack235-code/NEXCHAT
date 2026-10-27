@@ -81,14 +81,32 @@ if not FPS_ASSET_DIR.exists():
 if FPS_ASSET_DIR.exists():
     app.mount("/fps-assets", StaticFiles(directory=str(FPS_ASSET_DIR)), name="fps-assets")
 
-# CORS configuration
+# Strict CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://nexchat-drab.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Zero-Trust Air-Gap Guard: Reject direct backend calls without x-internal-auth header
+@app.middleware("http")
+async def enforce_internal_auth(request: Request, call_next):
+    if request.method == "OPTIONS":
+        return await call_next(request)
+    
+    internal_secret = os.getenv("INTERNAL_SECRET", "d0caa6a4b13a2c24c4d7267d2a99a39f3d6e9b9a9506199f545d4043b8e975b4")
+    incoming_secret = request.headers.get("x-internal-auth")
+    
+    if not incoming_secret or incoming_secret != internal_secret:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=403,
+            content={"error": "Forbidden: Direct backend access prohibited. All requests must route through Fortress Cloud Defender Proxy."}
+        )
+    
+    return await call_next(request)
 
 # Root endpoint: Returns Master Launch Deck for browser, or JSON for API clients
 @app.get("/")
@@ -228,7 +246,7 @@ async def root(request: Request):
             <!-- NEXCHAT Workstation -->
             <a href="/chat" class="card">
                 <div>
-                    <div class="card-icon" style="background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3);">💬</div>
+                    <div class="card-icon" style="background: rgba(0, 240, 255, 0.15); border: 1px solid rgba(0, 240, 255, 0.3);"></div>
                     <h2>NEXCHAT Web Creation Engine</h2>
                     <p>The primary full-stack development workstation with autonomous file synthesis, Code Doctor diagnostic tools, and live terminal interaction.</p>
                 </div>
@@ -241,7 +259,7 @@ async def root(request: Request):
             <!-- NEX 3D Studio -->
             <a href="/studio" class="card">
                 <div>
-                    <div class="card-icon" style="background: rgba(254, 44, 85, 0.15); border: 1px solid rgba(254, 44, 85, 0.3);">⚡</div>
+                    <div class="card-icon" style="background: rgba(254, 44, 85, 0.15); border: 1px solid rgba(254, 44, 85, 0.3);"></div>
                     <h2>NEX 3D Studio</h2>
                     <p>Prompt-to-3D website generator in &lt;3 seconds. React Three Fiber, WebGL shaders, OrbitControls, and 3 Midjourney-style 3D variants.</p>
                 </div>
@@ -254,7 +272,7 @@ async def root(request: Request):
             <!-- App Forge -->
             <a href="/chat" class="card">
                 <div>
-                    <div class="card-icon" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3);">🛠️</div>
+                    <div class="card-icon" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.3);">️</div>
                     <h2>NEX App Forge</h2>
                     <p>v0 + Bolt.new style in-browser app creator with virtual WebContainer memory filesystem, multi-file code editor, and 1-click deployment.</p>
                 </div>
@@ -267,7 +285,7 @@ async def root(request: Request):
             <!-- Game Dev Lab -->
             <a href="/studio" class="card">
                 <div>
-                    <div class="card-icon" style="background: rgba(0, 255, 136, 0.15); border: 1px solid rgba(0, 255, 136, 0.3);">🎮</div>
+                    <div class="card-icon" style="background: rgba(0, 255, 136, 0.15); border: 1px solid rgba(0, 255, 136, 0.3);"></div>
                     <h2>Game Dev Lab</h2>
                     <p>Unreal Engine 5 impossible animations in browser: inverted gravity (-9.8 m/s²), 0.05x bullet time, and 10k particle NEX logo assembly.</p>
                 </div>
@@ -280,7 +298,7 @@ async def root(request: Request):
             <!-- 3D Reels Feed -->
             <a href="/chat" class="card">
                 <div>
-                    <div class="card-icon" style="background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3);">📱</div>
+                    <div class="card-icon" style="background: rgba(255, 215, 0, 0.15); border: 1px solid rgba(255, 215, 0, 0.3);"></div>
                     <h2>NEX Reels 3D Feed</h2>
                     <p>TikTok-style vertical snap-scrolling 3D feed with Paystack tipping jar, interactive sound waves, and 1-swipe lab remixing.</p>
                 </div>
@@ -293,7 +311,7 @@ async def root(request: Request):
             <!-- NEX-CODER 3.8 HIGH Coding Agent -->
             <a href="/api/coder/status" class="card">
                 <div>
-                    <div class="card-icon" style="background: rgba(0, 255, 136, 0.15); border: 1px solid rgba(0, 255, 136, 0.3);">🤖</div>
+                    <div class="card-icon" style="background: rgba(0, 255, 136, 0.15); border: 1px solid rgba(0, 255, 136, 0.3);"></div>
                     <h2>NEX-CODER 3.8 HIGH Superintelligence</h2>
                     <p>Autonomous coding agent with AST symbol search, compile check, pytest runner, recursive self-repair, atomic diff patching, and UE5 architecture validation.</p>
                 </div>
@@ -306,7 +324,7 @@ async def root(request: Request):
             <!-- Swagger OpenAPI Docs -->
             <a href="/docs" class="card">
                 <div>
-                    <div class="card-icon" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);">📖</div>
+                    <div class="card-icon" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);"></div>
                     <h2>REST & SSE API Docs</h2>
                     <p>Interactive OpenAPI documentation for all 3D compilation, Web Factory, Autonomous Mind, and Code Doctor endpoints.</p>
                 </div>
@@ -318,7 +336,7 @@ async def root(request: Request):
         </div>
 
         <footer>
-            NEXIUM-AI • Powered by Rust SIMD Core + Ollama + Three.js • Lagos Senior Dev Grade ⚡
+            NEXIUM-AI • Powered by Rust SIMD Core + Ollama + Three.js • Lagos Senior Dev Grade 
         </footer>
     </div>
 </body>

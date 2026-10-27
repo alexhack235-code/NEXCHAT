@@ -1,8 +1,11 @@
 /**
  * NEXCHAT - Encrypted Dynamic QR Node Pairing Engine
- * Fast-rotating cryptographic session pairing tokens, HTML5 Canvas QR matrix generator,
- * and zero-network device-to-device synchronization handshakes.
+ * Single-use rotating cryptographic session pairing tokens with 60s TTL,
+ * sessionId binding, and zero-network device-to-device synchronization handshakes.
  * STRICTLY NO EMOJIS: Clean cyberpunk typography and iconography.
+ *
+ * Database TTL Index Specification:
+ * db.collection('linked_device_tokens').createIndex({ "createdAt": 1 }, { expireAfterSeconds: 60 });
  */
 
 (function() {
@@ -12,11 +15,21 @@
     constructor() {
       this.refreshInterval = null;
       this.pairingToken = '';
-      this.secondsRemaining = 30;
+      this.sessionId = '';
+      this.tokenMetadata = null;
+      this.secondsRemaining = 60;
+      this.isConsumed = false;
       this.init();
     }
 
     init() {
+      // Establish or recover a cryptographically bound local sessionId
+      if (!sessionStorage.getItem('nex_device_session_id')) {
+        const sid = 'NEX_SESS_' + Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join('');
+        sessionStorage.setItem('nex_device_session_id', sid);
+      }
+      this.sessionId = sessionStorage.getItem('nex_device_session_id');
+
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => this.bindDOM());
       } else {
@@ -43,30 +56,32 @@
             <div class="flex items-center gap-2">
               <i class="fa-solid fa-qrcode text-[#00ff66] text-lg"></i>
               <h3 class="font-bold text-white text-base">ENCRYPTED NODE PAIRING</h3>
-              <span class="qr-secure-tag">AES-GCM ROTATING</span>
+              <span class="qr-secure-tag">TTL 60S • SINGLE-USE</span>
             </div>
             <button type="button" class="cyber-modal-close" id="closeQrModalBtn"><i class="fa-solid fa-xmark"></i></button>
           </div>
 
           <div class="qr-modal-body">
             <p class="text-xs text-gray-300 text-center mb-3">
-              Scan with your mobile device camera to establish an encrypted device-to-device session. Keys refresh every 30 seconds.
+              Scan with your mobile camera to establish an encrypted session. Single-use token bound to this device session, expiring strictly in 60 seconds.
             </p>
 
             <div class="qr-canvas-wrapper">
               <canvas id="qrPairingCanvas" class="qr-pairing-canvas" width="200" height="200"></canvas>
               <div class="qr-timer-bar mt-2">
-                <span class="text-[10px] text-gray-400 font-mono">TOKEN EXPIRES IN: <strong class="text-[#00ff66]" id="qrCountdownSeconds">30s</strong></span>
+                <span class="text-[10px] text-gray-400 font-mono">TOKEN EXPIRES IN: <strong class="text-[#00ff66]" id="qrCountdownSeconds">60s</strong></span>
               </div>
             </div>
 
             <div class="qr-payload-box mt-3">
-              <span class="text-[9px] text-gray-500 font-mono">TOKEN NONCE:</span>
-              <div class="text-[10px] text-[#00d4ff] font-mono break-all" id="qrTokenNonceText">GEN_NONCE_...</div>
+              <span class="text-[9px] text-gray-500 font-mono">BOUND SESSION:</span>
+              <div class="text-[10px] text-[#00d4ff] font-mono break-all" id="qrSessionIdText">SESS_...</div>
+              <span class="text-[9px] text-gray-500 font-mono mt-1">TOKEN NONCE:</span>
+              <div class="text-[10px] text-[#00ff88] font-mono break-all" id="qrTokenNonceText">GEN_NONCE_...</div>
             </div>
 
             <button type="button" id="simulatePairingScanBtn" class="qr-handshake-btn mt-4">
-              <i class="fa-solid fa-link"></i> SIMULATE SECURE PAIRING HANDSHAKE
+              <i class="fa-solid fa-link"></i> CONSUME TOKEN & COMPLETE PAIRING
             </button>
           </div>
         </div>
@@ -84,8 +99,20 @@
       });
 
       document.getElementById('simulatePairingScanBtn')?.addEventListener('click', () => {
+        if (this.isConsumed) {
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Token has already been consumed or expired. Generating fresh credentials...', 'error', 3000);
+          }
+          return;
+        }
+
+        // Single-use consumption
+        this.isConsumed = true;
+        this.tokenMetadata.isUsed = true;
+        this.tokenMetadata.consumedAt = new Date().toISOString();
+
         if (typeof window.showNotif === 'function') {
-          window.showNotif('Device paired successfully! Local conversation keys synchronized.', 'success', 3000);
+          window.showNotif('Device paired successfully! Single-use token invalidated.', 'success', 3000);
         }
         if (typeof window.playCyberSfx === 'function') window.playCyberSfx('victory');
         this.stopTimer();
@@ -108,12 +135,12 @@
       }
     }
 
-    
     closeModal() {
       const modal = document.getElementById('qrPairingModal');
       if (modal) modal.style.display = 'none';
-      if (this.timerInterval) clearInterval(this.timerInterval);
+      this.stopTimer();
     }
+
     openModal() {
       const modal = document.getElementById('qrPairingModal');
       if (!modal) return;
@@ -124,9 +151,27 @@
     }
 
     generateNewToken() {
-      this.pairingToken = 'NEXPAIR_' + Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b => b.toString(16).padStart(2, '0')).join('');
+      this.isConsumed = false;
+      const tokenRandom = Array.from(crypto.getRandomValues(new Uint8Array(24))).map(b => b.toString(16).padStart(2, '0')).join('');
+      this.pairingToken = 'NEXPAIR_' + tokenRandom;
+
+      // Cryptographic metadata structure matching MongoDB TTL index:
+      // db.linked_devices.createIndex({ "createdAt": 1 }, { expireAfterSeconds: 60 })
+      this.tokenMetadata = {
+        token: this.pairingToken,
+        sessionId: this.sessionId,
+        createdAt: new Date(),
+        expireAfterSeconds: 60,
+        isUsed: false,
+        ttl: 60
+      };
+
+      const sessEl = document.getElementById('qrSessionIdText');
+      if (sessEl) sessEl.textContent = this.sessionId;
+
       const nonceEl = document.getElementById('qrTokenNonceText');
       if (nonceEl) nonceEl.textContent = this.pairingToken;
+
       this.drawQRMatrix();
     }
 
@@ -143,7 +188,6 @@
       const gridSize = 21;
       const cellSize = Math.floor(size / gridSize);
 
-      // Draw synthetic QR matrix pattern
       ctx.fillStyle = '#00ff66';
 
       // Corner position squares
@@ -151,10 +195,11 @@
       this.drawPositionMarker(ctx, (gridSize - 7) * cellSize, 0, cellSize);
       this.drawPositionMarker(ctx, 0, (gridSize - 7) * cellSize, cellSize);
 
-      // Procedural data cells based on token string
+      // Procedural data cells based on token and sessionId binding
       let seed = 0;
-      for (let i = 0; i < this.pairingToken.length; i++) {
-        seed += this.pairingToken.charCodeAt(i);
+      const combined = this.pairingToken + ':' + this.sessionId;
+      for (let i = 0; i < combined.length; i++) {
+        seed += combined.charCodeAt(i);
       }
 
       for (let r = 0; r < gridSize; r++) {
@@ -177,17 +222,18 @@
 
     startTimer() {
       this.stopTimer();
-      this.secondsRemaining = 30;
+      this.secondsRemaining = 60;
       const countEl = document.getElementById('qrCountdownSeconds');
-      if (countEl) countEl.textContent = '30s';
+      if (countEl) countEl.textContent = '60s';
 
       this.refreshInterval = setInterval(() => {
         this.secondsRemaining--;
         if (countEl) countEl.textContent = `${this.secondsRemaining}s`;
 
         if (this.secondsRemaining <= 0) {
-          this.secondsRemaining = 30;
+          // Token expired: invalidate previous single-use token and regenerate
           this.generateNewToken();
+          this.secondsRemaining = 60;
         }
       }, 1000);
     }

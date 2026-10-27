@@ -323,7 +323,7 @@
       // ─── CLOUD TERMINAL BRIDGE (LINODE VPS / REAL SHELL) ───
       let cloudSocket = null;
       let isCloudConnected = false;
-      let cloudTargetUrl = localStorage.getItem('nex_cloud_terminal_url') || 'ws://localhost:7070?token=NEX_ATOMIC_SUPERADMIN_SECRET_2026';
+      let cloudTargetUrl = localStorage.getItem('nex_cloud_terminal_url') || '';
 
       function updateCloudBadge(status, text) {
         const badge = document.getElementById('termCloudBadge');

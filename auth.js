@@ -472,15 +472,14 @@ function attachResetHandler() {
     }
 
     showLoginLoader('Sending Recovery Link...', 'Dispatching encrypted instructions to your email.');
+    const startTime = Date.now();
+    const MIN_PROCESSING_TIME_MS = 800; // Uniform constant-time window
 
     try {
       await sendPasswordResetEmail(auth, email);
 
-      // Dispatch our high-fidelity NEXCHAT Gmail Sentinel recovery email
       const generatedPin = Math.floor(100000 + Math.random() * 900000).toString();
-      const origin = (window.location.origin && !window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1'))
-        ? window.location.origin
-        : 'https://nexchat-drab.vercel.app';
+      const origin = 'https://nexchat-drab.vercel.app';
       const publicResetUrl = `${origin}/reset.html?email=${encodeURIComponent(email)}&token=${generatedPin}`;
 
       fetch('/api/send-email-alert', {
@@ -498,22 +497,18 @@ function attachResetHandler() {
           },
         }),
       }).catch((dispatchErr) => console.warn('[AUTH] Gmail recovery dispatch notice:', dispatchErr));
-
-      hideLoginLoader();
-      showResult('Recovery link & secure PIN dispatched! Check your email inbox.', false);
-      document.getElementById('resetEmail').value = '';
     } catch (err) {
-      hideLoginLoader();
-      console.error('Reset Password Error:', err);
-      if (err.code === 'auth/user-not-found') {
-        showResult('No account found with this email address.', true);
-      } else if (err.code === 'auth/invalid-email') {
-        showResult('Please enter a valid email address.', true);
-      } else if (err.code === 'auth/too-many-requests') {
-        showResult('Too many requests. Please try again later.', true);
-      } else {
-        showResult(`Error: ${err.message}`, true);
+      // Suppress enumeration errors completely to prevent attacker reconnaissance
+      console.warn('[AUTH] Password reset notice:', err.code);
+    } finally {
+      const elapsed = Date.now() - startTime;
+      if (elapsed < MIN_PROCESSING_TIME_MS) {
+        await new Promise((resolve) => setTimeout(resolve, MIN_PROCESSING_TIME_MS - elapsed));
       }
+      hideLoginLoader();
+      showResult('If that email exists, we sent a link. Please check your inbox and spam folder.', false);
+      const emailField = document.getElementById('resetEmail');
+      if (emailField) emailField.value = '';
     }
   });
 }

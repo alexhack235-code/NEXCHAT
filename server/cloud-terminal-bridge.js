@@ -16,7 +16,11 @@ const os = require('os');
 const path = require('path');
 
 const PORT = process.env.PORT || 7070;
-const AUTH_SECRET = process.env.TERMINAL_SECRET || 'NEX_ATOMIC_SUPERADMIN_SECRET_2026';
+const AUTH_SECRET = process.env.TERMINAL_SECRET;
+if (!AUTH_SECRET || AUTH_SECRET.length < 32) {
+  console.error('[SECURITY FATAL] TERMINAL_SECRET environment variable is missing or shorter than 32 characters.');
+  process.exit(1);
+}
 
 // Detect shell: Linux/Linode defaults to /bin/bash; Windows defaults to powershell.exe
 const isWindows = os.platform() === 'win32';

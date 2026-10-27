@@ -140,11 +140,15 @@ export function validatePathname(pathname) {
  * @returns {boolean} true if preflight OPTIONS was handled and terminated
  */
 export function handleCors(req, res) {
-  const origin = req.headers.origin || '*';
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Filename, X-Upload-Type, X-Vault-Index, X-Access-Mode, Range');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  const allowedOrigins = ['https://nexchat-drab.vercel.app'];
+  const origin = req.headers.origin;
+
+  if (origin && (allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Filename, X-Upload-Type, X-Vault-Index, X-Access-Mode, Range');
+  }
 
   if (req.method === 'OPTIONS') {
     res.status(204).end();

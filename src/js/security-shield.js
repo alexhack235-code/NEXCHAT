@@ -18,7 +18,7 @@
 const DEFAULT_FORTRESS_CONFIG = {
   enabled: true,
   apiUrl: localStorage.getItem('nexchat_fortress_url') || 'https://ai-security-scanner-delta.vercel.app',
-  vaultKey: localStorage.getItem('nexchat_fortress_key') || 'nexo_vault_master_key_8007764cc3e74268951a991248d88ca15e9653957e2a47bcadc111c23b2f6fe7',
+  vaultKey: localStorage.getItem('nexchat_fortress_key') || '',
   mode: localStorage.getItem('nexchat_fortress_mode') || 'active', // 'active' | 'offline_only'
   blockPromptInjection: true,
   blockXSS: true,
