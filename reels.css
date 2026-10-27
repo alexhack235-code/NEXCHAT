@@ -3931,8 +3931,8 @@ body.reels-body {
   /* Center Glowing Create Button in Mobile Dock */
   .mobile-dock-create-btn {
     position: relative;
-    width: 44px;
-    height: 32px;
+    width: 48px;
+    height: 44px;
     border-radius: 10px;
     background: linear-gradient(135deg, var(--cs-emerald), var(--cs-cyan));
     border: none;

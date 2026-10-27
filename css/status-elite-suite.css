@@ -1,0 +1,642 @@
+/* ==========================================================================
+   NEXCHAT NEXT-GEN STATUS ELITE SUITE
+   Audio Voice Stories, Interactive Polls/AMAs, Code Snippets, Stealth Ghost Peeking,
+   Viewers Analytics Drawer, and Pre-Fetch Pipeline.
+   STRICTLY 0 UNICODE EMOJIS: FontAwesome 6 vector icons and cyberpunk styling only.
+   ========================================================================== */
+
+/* 1. Header Stealth Toggle Button */
+.status-viewer-icon-btn.stealth-mode-toggle {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #8b949e;
+  border-radius: 50%;
+}
+
+.status-viewer-icon-btn.stealth-mode-toggle.active {
+  color: #00ff88 !important;
+  background: rgba(0, 255, 136, 0.15) !important;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.45) !important;
+  border-color: rgba(0, 255, 136, 0.5) !important;
+}
+
+/* 2. Voice Audio Story Stage */
+.status-viewer-audio-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(circle at center, #0f1c24 0%, #060913 100%);
+  z-index: 10;
+}
+
+.status-audio-visualizer-card {
+  width: 100%;
+  max-width: 380px;
+  background: rgba(13, 21, 32, 0.88);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 255, 136, 0.15);
+}
+
+.status-audio-avatar-halo {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  margin-bottom: 20px;
+}
+
+.status-audio-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #00ff88;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+  position: relative;
+  z-index: 2;
+}
+
+.status-audio-pulse-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px dashed rgba(0, 255, 136, 0.5);
+  animation: statusAudioSpin 12s linear infinite;
+  z-index: 1;
+}
+
+@keyframes statusAudioSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.status-audio-meta-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.status-audio-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.12);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 6px;
+  padding: 3px 8px;
+  letter-spacing: 0.5px;
+}
+
+.status-audio-timer {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.status-audio-spectrum-canvas {
+  width: 100%;
+  height: 60px;
+  border-radius: 8px;
+  background: rgba(6, 10, 16, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 24px;
+}
+
+.status-audio-play-ctrl {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00ff88, #00d4ff);
+  color: #060913;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+}
+
+.status-audio-play-ctrl:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 26px rgba(0, 255, 136, 0.7);
+}
+
+/* 3. Code Snippet Stage */
+.status-viewer-code-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: radial-gradient(circle at center, #0a1017 0%, #040609 100%);
+  z-index: 10;
+}
+
+.status-code-window-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(10, 15, 23, 0.94);
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(0, 255, 136, 0.15);
+}
+
+.status-code-window-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(16, 24, 36, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.status-code-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.status-code-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-code-dots .dot.red { background: #ff5f56; }
+.status-code-dots .dot.yellow { background: #ffbd2e; }
+.status-code-dots .dot.green { background: #27c93f; }
+
+.status-code-lang-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: #00ff88;
+  letter-spacing: 1px;
+}
+
+.status-code-copy-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 11px;
+  font-family: 'JetBrains Mono', monospace;
+  padding: 3px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.status-code-copy-btn:hover {
+  background: rgba(0, 255, 136, 0.2);
+  color: #00ff88;
+  border-color: rgba(0, 255, 136, 0.4);
+}
+
+.status-code-pre {
+  margin: 0;
+  padding: 18px;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: #00ff88;
+  overflow-x: auto;
+  max-height: 380px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* 4. Interactive Overlay Widgets (Polls & AMAs) */
+.status-viewer-interactive-container {
+  position: absolute;
+  bottom: 110px;
+  left: 20px;
+  right: 20px;
+  display: flex;
+  justify-content: center;
+  z-index: 15;
+  pointer-events: auto;
+}
+
+.status-poll-card {
+  width: 100%;
+  max-width: 320px;
+  background: rgba(10, 16, 26, 0.92);
+  border: 1px solid rgba(0, 255, 136, 0.4);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+}
+
+.status-poll-question {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 10px 0;
+  text-align: center;
+}
+
+.status-poll-options {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.status-poll-option-btn {
+  position: relative;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: #ffffff;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.status-poll-option-btn:hover {
+  border-color: rgba(0, 255, 136, 0.5);
+}
+
+.status-poll-progress-fill {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 255, 136, 0.22);
+  border-right: 2px solid #00ff88;
+  z-index: 1;
+  transition: width 0.4s ease;
+}
+
+.status-poll-option-label {
+  position: relative;
+  z-index: 2;
+}
+
+.status-poll-option-pct {
+  position: relative;
+  z-index: 2;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #00ff88;
+  font-weight: 700;
+}
+
+/* AMA Sticker */
+.status-ama-card {
+  width: 100%;
+  max-width: 320px;
+  background: rgba(13, 20, 30, 0.92);
+  border: 1px solid rgba(0, 242, 254, 0.4);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  text-align: center;
+}
+
+.status-ama-badge {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 800;
+  color: #00f2fe;
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  border-radius: 5px;
+  padding: 2px 7px;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+
+.status-ama-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 10px 0;
+}
+
+.status-ama-form {
+  display: flex;
+  gap: 6px;
+}
+
+.status-ama-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 7px;
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 10px;
+  outline: none;
+}
+
+.status-ama-input:focus {
+  border-color: #00f2fe;
+}
+
+.status-ama-send-btn {
+  background: #00f2fe;
+  color: #040609;
+  border: none;
+  border-radius: 7px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* 5. Slide-Up Viewers Analytics Drawer */
+.status-viewers-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: auto;
+}
+
+.status-viewers-drawer-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.status-viewers-drawer-content {
+  position: relative;
+  z-index: 2;
+  background: #0a0f17;
+  border-top: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 20px 20px 0 0;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
+  animation: statusDrawerSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes statusDrawerSlideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.status-viewers-drawer-handle {
+  width: 36px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin: 10px auto 4px auto;
+}
+
+.status-viewers-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.status-viewers-drawer-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.status-viewers-count-chip {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 800;
+  color: #00ff88;
+  background: rgba(0, 255, 136, 0.1);
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid rgba(0, 255, 136, 0.25);
+}
+
+.status-viewers-close-btn {
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: color 0.2s;
+}
+
+.status-viewers-close-btn:hover {
+  color: #fff;
+}
+
+.status-viewers-search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 20px 8px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 7px 12px;
+}
+
+.status-viewers-search-box i {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.status-viewers-search-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 13px;
+  width: 100%;
+}
+
+.status-viewers-list-container {
+  overflow-y: auto;
+  padding: 8px 20px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 180px;
+}
+
+.status-viewer-row-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.2s;
+}
+
+.status-viewer-row-item:hover {
+  background: rgba(0, 255, 136, 0.04);
+  border-color: rgba(0, 255, 136, 0.15);
+}
+
+.status-viewer-row-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-viewer-row-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(0, 255, 136, 0.4);
+}
+
+.status-viewer-row-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.status-viewer-row-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.status-viewer-row-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.status-viewer-row-reaction {
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-viewers-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 12px;
+  color: #64748b;
+  text-align: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.status-viewers-empty i {
+  font-size: 28px;
+  color: #475569;
+}
+
+/* 6. Audio Creation Pane Styling */
+.status-voice-recorder-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  background: rgba(0, 255, 136, 0.03);
+  border: 2px dashed rgba(0, 255, 136, 0.4);
+  border-radius: 10px;
+  text-align: center;
+}
+
+.status-voice-mic-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0, 255, 136, 0.15);
+  border: 2px solid #00ff88;
+  color: #00ff88;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 16px rgba(0, 255, 136, 0.3);
+  margin-bottom: 12px;
+}
+
+.status-voice-mic-btn.recording {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+  box-shadow: 0 0 24px rgba(239, 68, 68, 0.6) !important;
+  animation: statusVoicePulse 1.2s infinite ease-in-out;
+}
+
+@keyframes statusVoicePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.status-voice-timer-display {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 16px;
+  font-weight: 700;
+  color: #00ff88;
+  margin-bottom: 6px;
+}
+
+.status-voice-hint-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: #8b949e;
+}
+
+.status-code-textarea {
+  width: 100%;
+  min-height: 140px;
+  background: rgba(6, 10, 16, 0.85);
+  border: 1px solid rgba(0, 255, 136, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  color: #00ff88;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  resize: vertical;
+  line-height: 1.5;
+}

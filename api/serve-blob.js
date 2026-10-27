@@ -1,5 +1,5 @@
 import { get } from '@vercel/blob';
-import { enforceRateLimit, applySecurityHeaders, validatePathname } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, validatePathname, handleCors } from './_security.js';
 
 // Primary Storage Tokens
 const readBlobToken = (name, fallback = '') => process.env[name] || fallback;
@@ -40,6 +40,7 @@ const STATUS_VAULT_TOKENS = {
 const DANGEROUS_EXTENSIONS = /\.(html?|php\d?|phtml|exe|bat|cmd|sh|cgi|pl|py|js|ts|jsx|tsx|jar|msi|vbs|svg|asp|aspx|jsp)$/i;
 
 export default async function handler(req, res) {
+  if (handleCors(req, res)) return;
   applySecurityHeaders(res);
   if (!enforceRateLimit(req, res)) return;
 

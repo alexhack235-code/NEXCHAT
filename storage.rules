@@ -203,13 +203,10 @@ service firebase.storage {
     }
 
     // ============================================================
-    // 11. UNIVERSAL AUTHENTICATED FALLBACK
+    // 11. DEFAULT DENY UNMATCHED PATHS
     // ============================================================
     match /{allPaths=**} {
-      allow create, write: if isAuthenticated() &&
-                              request.resource.size < 150 * 1024 * 1024;
-      allow read: if isAuthenticated();
-      allow delete: if isAuthenticated() || isSuperAdmin();
+      allow read, write, delete: if isSuperAdmin();
     }
   }
 }

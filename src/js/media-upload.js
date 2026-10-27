@@ -64,7 +64,8 @@ export async function uploadMediaBlob(file, options = {}) {
         if (e.lengthComputable) {
           const percent = Math.round((e.loaded / e.total) * 100);
           const loadedMb = (e.loaded / (1024 * 1024)).toFixed(2);
-          options.onProgress(percent, `${loadedMb} / ${fileSizeMb} MB`);
+          const totalMb = (e.total / (1024 * 1024)).toFixed(2);
+          options.onProgress(percent, `${loadedMb} / ${totalMb} MB`);
         }
       };
     }

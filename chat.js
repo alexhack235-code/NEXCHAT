@@ -3572,6 +3572,9 @@ function searchUser(e) {
 
 function goBack() {
   try { GroupChat.close(); } catch(e) {}
+  if (window.NexWarRoomEngine && typeof window.NexWarRoomEngine.unmountWarRoom === 'function') {
+    try { window.NexWarRoomEngine.unmountWarRoom(); } catch (e) {}
+  }
   currentChatUser = null;
   const messages = document.getElementById("messages-area");
   if (messages) {
@@ -3596,6 +3599,17 @@ function goBack() {
   if (messageListener2) {
     messageListener2();
     messageListener2 = null;
+  }
+  if (userStatusUnsubscribe) {
+    try { userStatusUnsubscribe(); } catch (_) {}
+    userStatusUnsubscribe = null;
+  }
+  if (supabaseRoomUnsubscribe) {
+    try { supabaseRoomUnsubscribe(); } catch (_) {}
+    supabaseRoomUnsubscribe = null;
+  }
+  if (typeof unsubscribeChatPresence === 'function') {
+    try { unsubscribeChatPresence(); } catch (_) {}
   }
 }
 
@@ -3838,6 +3852,7 @@ async function sendMessage() {
         to: currentChatUser,
         text: text || "",
         time: serverTimestamp(),
+        timestamp: serverTimestamp(),
         read: false,
         status: "sent",
         type: "text",
@@ -3877,8 +3892,8 @@ async function sendMessage() {
         if (b) b.dataset.docId = addedDoc.id;
       }
       if (window.activeGhostTtl > 0 && typeof attachGhostCountdown === 'function') {
-        const optimisticWrapper = document.getElementById(`wrapper-${clientMsgId}`);
-        if (optimisticWrapper) attachGhostCountdown(optimisticWrapper, window.activeGhostTtl, addedDoc?.id);
+        const targetWrapper = sentWrapper || document.getElementById(`msg-wrapper-${addedDoc?.id}`) || document.getElementById(`wrapper-${clientMsgId}`);
+        if (targetWrapper) attachGhostCountdown(targetWrapper, window.activeGhostTtl, addedDoc?.id);
       }
 
       await updateDoc(userRef, {
@@ -4319,6 +4334,10 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
   const container = document.createElement("div");
   container.className = "message-attachment-container";
   container.style.cssText = "margin-bottom: 6px; border-radius: 12px; overflow: hidden; max-width: 100%;";
+
+  if (window.NexStealthPrivacy && window.NexStealthPrivacy.WatermarkTrap) {
+    try { window.NexStealthPrivacy.WatermarkTrap.protectMediaNode(container); } catch (e) {}
+  }
 
   // 0. View-Once Ephemeral Media & Audio (Photo, Audio Voice Note, Secret Text)
   if (attachment.isViewOnce || attachment.viewOnce || attachment.fileType === 'view_once' || attachment.viewOnceData) {
@@ -5464,10 +5483,24 @@ function loadMessages() {
       return !isDuplicate;
     });
 
-    const allMessages = [...uniqueDbMessages, ...uniqueLocalAiMessages].sort((a, b) => {
-      const timeA = a.time?.toDate?.() || new Date(0);
-      const timeB = b.time?.toDate?.() || new Date(0);
-      return timeA - timeB;
+    const resolveMsgTime = (m) => {
+      if (!m) return 0;
+      if (m.time?.toMillis) return m.time.toMillis();
+      if (m.timestamp?.toMillis) return m.timestamp.toMillis();
+      if (m.time?.toDate) return m.time.toDate().getTime();
+      if (m.timestamp?.toDate) return m.timestamp.toDate().getTime();
+      if (m.time instanceof Date) return m.time.getTime();
+      if (m.timestamp instanceof Date) return m.timestamp.getTime();
+      if (typeof m.time === 'number') return m.time;
+      if (typeof m.timestamp === 'number') return m.timestamp;
+      if (m.status === 'sending' || m.status === 'sent' || m.time === null || m.timestamp === null) {
+        return m._localTimestamp || Date.now();
+      }
+      return 0;
+    };
+    const localAiPayload = currentChatType === 'ai' ? uniqueLocalAiMessages : [];
+    const allMessages = [...uniqueDbMessages, ...localAiPayload].sort((a, b) => {
+      return resolveMsgTime(a) - resolveMsgTime(b);
     });
 
     if (currentChatType === 'direct' && myUID && currentChatUser) {
@@ -5673,14 +5706,15 @@ function loadMessages() {
       const editedDiffBadge = (m.edited || hasDiffRevisions) ? `<span class="message-edited-badge" data-msg-id="${escapeHtml(m.id || m.docId || '')}" style="cursor:pointer;color:#00ffc6;text-decoration:underline;margin-left:3px;font-size:10px;" title="Click to view full revision audit diff">(edited)</span>` : '';
       let checkmarkHTML = '';
       if (isOwn) {
+        const tickIdAttr = m.clientMsgId ? `id="tick-${escapeHtml(m.clientMsgId)}"` : (m.docId || m.id ? `id="tick-${escapeHtml(m.docId || m.id)}"` : '');
         if (m.status === 'sending' || m.status === 'pending') {
-          checkmarkHTML = '<i class="fa-solid fa-clock tick-pending" style="opacity:0.75;font-size:9.5px;margin-left:3px;" title="Sending..."></i>';
+          checkmarkHTML = `<i ${tickIdAttr} class="fa-solid fa-clock tick-pending" style="opacity:0.75;font-size:9.5px;margin-left:3px;" title="Sending..."></i>`;
         } else if (m.status === 'read' || m.read) {
-          checkmarkHTML = '<i class="fa-solid fa-check-double tick-read" style="color:#53bdeb;font-size:10px;margin-left:3px;" title="Read"></i>';
+          checkmarkHTML = `<i ${tickIdAttr} class="fa-solid fa-check-double tick-read" style="color:#53bdeb;font-size:10px;margin-left:3px;" title="Read"></i>`;
         } else if (m.status === 'delivered') {
-          checkmarkHTML = '<i class="fa-solid fa-check-double tick-delivered" style="color:rgba(255,255,255,0.7);font-size:10px;margin-left:3px;" title="Delivered"></i>';
+          checkmarkHTML = `<i ${tickIdAttr} class="fa-solid fa-check-double tick-delivered" style="color:rgba(255,255,255,0.7);font-size:10px;margin-left:3px;" title="Delivered"></i>`;
         } else {
-          checkmarkHTML = '<i class="fa-solid fa-check tick-sent" style="color:rgba(255,255,255,0.7);font-size:10px;margin-left:3px;" title="Sent"></i>';
+          checkmarkHTML = `<i ${tickIdAttr} class="fa-solid fa-check tick-sent" style="color:rgba(255,255,255,0.7);font-size:10px;margin-left:3px;" title="Sent"></i>`;
         }
       }
       const timeTextNode = document.createElement('span');
@@ -5947,6 +5981,18 @@ function loadMessages() {
     subscribeToSupabaseRoom(roomId, {
       onNewMessage: (incoming) => {
         if (!incoming || incoming.from === myUID) return;
+        const msgCorrelationId = incoming.clientMsgId || incoming.client_msg_id || incoming.docId || incoming.id;
+        if (msgCorrelationId && window._nexProcessedRealtimeIds && window._nexProcessedRealtimeIds.has(msgCorrelationId)) {
+          return; // Drop duplicate CDC/broadcast event immediately
+        }
+        if (msgCorrelationId) {
+          if (!window._nexProcessedRealtimeIds) window._nexProcessedRealtimeIds = new Set();
+          window._nexProcessedRealtimeIds.add(msgCorrelationId);
+          if (window._nexProcessedRealtimeIds.size > 300) {
+            const first = window._nexProcessedRealtimeIds.values().next().value;
+            window._nexProcessedRealtimeIds.delete(first);
+          }
+        }
         // Live real-time event interceptors
         if (incoming.attachment) {
           if (incoming.attachment.isSoundboardPing) {
@@ -7128,25 +7174,25 @@ function showCallUI(isVideo = false, callStatus = 'active') {
             <div style="display: flex; align-items: center; gap: 12px;">
               ${isVideo ? `
                 <button id="toggle-camera-btn" class="call-control-btn-professional" title="Toggle Camera" style="background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));">
-                  <span class="control-icon"></span>
+                  <span class="control-icon"><i class="fa-solid fa-video"></i></span>
                   <span class="control-label">Camera</span>
                 </button>
                 <button id="switch-camera-btn" class="call-control-btn-professional" title="Switch Camera" style="background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));">
-                  <span class="control-icon"></span>
+                  <span class="control-icon"><i class="fa-solid fa-camera-rotate"></i></span>
                   <span class="control-label">Switch</span>
                 </button>
               ` : ``}
               <button id="toggle-mic-btn" class="call-control-btn-professional" title="Toggle Microphone" style="background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));">
-                <span class="control-icon"></span>
+                <span class="control-icon"><i class="fa-solid fa-microphone"></i></span>
                 <span class="control-label">Mic</span>
               </button>
               <button id="toggle-speaker-btn" class="call-control-btn-professional" title="Toggle Speaker" style="background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));">
-                <span class="control-icon"></span>
+                <span class="control-icon"><i class="fa-solid fa-volume-high"></i></span>
                 <span class="control-label">Speaker</span>
               </button>
             </div>
             <button id="end-call-btn" class="end-call-btn-professional" title="End Call">
-              <span class="end-icon"></span>
+              <span class="end-icon"><i class="fa-solid fa-phone-slash"></i></span>
               <span class="end-text">End Call</span>
             </button>
           ` : `
@@ -14323,6 +14369,9 @@ async function removeAllGroupMembers(groupId) {
 
 async function loadGroupMessages(groupId) {
   const messagesDiv = document.getElementById('messages-area');
+  if (window.NexWarRoomEngine && typeof window.NexWarRoomEngine.mountGroupWarRoom === 'function') {
+    try { window.NexWarRoomEngine.mountGroupWarRoom(groupId); } catch (e) {}
+  }
   
   // VIP Gated Channel Access Sentinel
   try {
@@ -14369,9 +14418,20 @@ async function loadGroupMessages(groupId) {
     messageListener();
     messageListener = null;
   }
+  if (messageListener2) {
+    messageListener2();
+    messageListener2 = null;
+  }
+  if (userStatusUnsubscribe) {
+    try { userStatusUnsubscribe(); } catch (_) {}
+    userStatusUnsubscribe = null;
+  }
   if (supabaseRoomUnsubscribe) {
     try { supabaseRoomUnsubscribe(); } catch (_) {}
     supabaseRoomUnsubscribe = null;
+  }
+  if (typeof unsubscribeChatPresence === 'function') {
+    try { unsubscribeChatPresence(); } catch (_) {}
   }
 
   try {
@@ -15354,8 +15414,54 @@ function showCurrentStorySlide() {
   if (time) time.textContent = relativeTimeLabel;
   if (detailsExpires) detailsExpires.textContent = expiresInLabel;
 
-  // Media Rendering
-  if (currentSlide.mediaType === 'video' && currentSlide.mediaUrl) {
+  // Set currentStatusSlide on window for analytics inspection
+  window.currentStatusSlide = currentSlide;
+
+  const audioStage = document.getElementById('statusViewerAudioStage');
+  const codeStage = document.getElementById('statusViewerCodeStage');
+  const interactiveContainer = document.getElementById('statusViewerInteractiveContainer');
+
+  if (window.NexStatusEliteSuite) {
+    window.NexStatusEliteSuite.stopVoiceSlide();
+  }
+
+  // Preload next slide media
+  const nextSlide = currentGrp.slides?.[currentStorySlideIndex + 1];
+  if (nextSlide && window.NexStatusEliteSuite) {
+    window.NexStatusEliteSuite.preloadNextSlide(nextSlide);
+  }
+
+  // Media Rendering (Image, Video, Audio Voice Story, Code Snippet, Text)
+  if (currentSlide.mediaType === 'audio' && currentSlide.mediaUrl) {
+    if (img) img.style.display = 'none';
+    if (video) { video.pause(); video.style.display = 'none'; }
+    if (textSlide) textSlide.style.display = 'none';
+    if (codeStage) codeStage.style.display = 'none';
+    if (muteBtn) muteBtn.style.display = 'none';
+    if (audioStage) {
+      audioStage.style.display = 'flex';
+      const canvas = document.getElementById('statusAudioSpectrumCanvas');
+      const timer = document.getElementById('statusViewerAudioTimer');
+      const avatar = document.getElementById('statusViewerAudioAvatar');
+      if (avatar) avatar.src = currentGrp.avatarUrl || 'logo.jpg';
+      if (window.NexStatusEliteSuite) {
+        window.NexStatusEliteSuite.playVoiceSlide(currentSlide.mediaUrl, canvas, timer, () => {
+          if (typeof nextStorySlide === 'function') nextStorySlide();
+        });
+      }
+    }
+  } else if (currentSlide.mediaType === 'code') {
+    if (img) img.style.display = 'none';
+    if (video) { video.pause(); video.style.display = 'none'; }
+    if (textSlide) textSlide.style.display = 'none';
+    if (audioStage) audioStage.style.display = 'none';
+    if (muteBtn) muteBtn.style.display = 'none';
+    if (codeStage && window.NexStatusEliteSuite) {
+      window.NexStatusEliteSuite.renderCodeSlide(currentSlide, codeStage);
+    }
+  } else if (currentSlide.mediaType === 'video' && currentSlide.mediaUrl) {
+    if (audioStage) audioStage.style.display = 'none';
+    if (codeStage) codeStage.style.display = 'none';
     if (img) img.style.display = 'none';
     if (textSlide) textSlide.style.display = 'none';
     if (video) {
@@ -15368,6 +15474,8 @@ function showCurrentStorySlide() {
       muteBtn.innerHTML = (video && !video.muted) ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark"></i>';
     }
   } else if (currentSlide.mediaUrl) {
+    if (audioStage) audioStage.style.display = 'none';
+    if (codeStage) codeStage.style.display = 'none';
     if (video) {
       video.pause();
       video.style.display = 'none';
@@ -15379,6 +15487,8 @@ function showCurrentStorySlide() {
       img.src = currentSlide.mediaUrl;
     }
   } else {
+    if (audioStage) audioStage.style.display = 'none';
+    if (codeStage) codeStage.style.display = 'none';
     if (video) video.style.display = 'none';
     if (muteBtn) muteBtn.style.display = 'none';
     if (img) img.style.display = 'none';
@@ -15387,6 +15497,11 @@ function showCurrentStorySlide() {
       textSlide.textContent = currentSlide.caption || 'No content';
       textSlide.style.background = currentSlide.gradient || 'linear-gradient(135deg, #0f172a, #1e293b)';
     }
+  }
+
+  // Interactive Widgets Sticker Overlay (Polls & AMAs)
+  if (interactiveContainer && window.NexStatusEliteSuite) {
+    window.NexStatusEliteSuite.renderInteractiveWidgets(currentSlide, interactiveContainer);
   }
 
   // Floating Caption Card
@@ -15428,13 +15543,24 @@ function showCurrentStorySlide() {
     const replyInput = document.getElementById('statusViewerReplyInput');
     if (replyInput) replyInput.placeholder = `Reply to ${currentGrp.userName || 'User'}...`;
 
-    // Record view in Firestore asynchronously
+    // Record view in Firestore asynchronously (neutralized if Stealth Peeking is enabled)
     if (currentSlide.id && typeof db !== 'undefined' && typeof myUID !== 'undefined' && myUID) {
-      try {
-        updateDoc(doc(db, 'statuses', currentSlide.id), {
-          viewCount: increment(1)
-        }).catch(() => {});
-      } catch (_) {}
+      if (!window.NexStatusEliteSuite || !window.NexStatusEliteSuite.isStealthActive()) {
+        try {
+          updateDoc(doc(db, 'statuses', currentSlide.id), {
+            viewCount: increment(1)
+          }).catch(() => {});
+          const viewerData = {
+            uid: myUID,
+            username: myUsername || 'User',
+            avatarUrl: myProfilePic || 'logo.jpg',
+            viewedAt: Date.now()
+          };
+          if (typeof setDoc === 'function') {
+            setDoc(doc(db, 'statuses', currentSlide.id, 'views', myUID), viewerData, { merge: true }).catch(() => {});
+          }
+        } catch (_) {}
+      }
     }
   }
 
@@ -15494,6 +15620,10 @@ function setupViewerControls() {
     }
     const video = document.getElementById('statusViewerVideo');
     if (video) video.pause();
+    if (window.NexStatusEliteSuite) {
+      window.NexStatusEliteSuite.stopVoiceSlide();
+      window.NexStatusEliteSuite.closeViewersDrawer();
+    }
   };
 
   if (closeBtn) closeBtn.onclick = closeViewer;
@@ -15755,25 +15885,44 @@ function closeCreateStatusModal() {
 
   const progressBox = document.getElementById('statusUploadProgressContainer');
   if (progressBox) progressBox.style.display = 'none';
+  if (window.NexStatusEliteSuite) { window.NexStatusEliteSuite.clearRecordedVoice(); }
+  const codeInput = document.getElementById('statusCodeStoryInput');
+  if (codeInput) codeInput.value = '';
+  const audioCaption = document.getElementById('statusAudioCaptionInput');
+  if (audioCaption) audioCaption.value = '';
 }
 
 function switchStatusModalTab(tab) {
   const mediaBtn = document.getElementById('statusTabMediaBtn');
   const textBtn = document.getElementById('statusTabTextBtn');
+  const audioBtn = document.getElementById('statusTabAudioBtn');
+  const codeBtn = document.getElementById('statusTabCodeBtn');
+
   const mediaPane = document.getElementById('statusTabMediaPane');
   const textPane = document.getElementById('statusTabTextPane');
+  const audioPane = document.getElementById('statusTabAudioPane');
+  const codePane = document.getElementById('statusTabCodePane');
+
+  const allBtns = [mediaBtn, textBtn, audioBtn, codeBtn];
+  const allPanes = [mediaPane, textPane, audioPane, codePane];
+
+  allBtns.forEach(b => { if (b) b.className = 'btn-secondary terminal-tab-btn'; });
+  allPanes.forEach(p => { if (p) p.style.display = 'none'; });
 
   if (tab === 'text') {
-    if (mediaBtn) { mediaBtn.className = 'btn-secondary'; }
-    if (textBtn) { textBtn.className = 'btn-primary'; }
-    if (mediaPane) mediaPane.style.display = 'none';
+    if (textBtn) textBtn.className = 'btn-primary terminal-tab-btn active';
     if (textPane) textPane.style.display = 'block';
     setTimeout(() => document.getElementById('statusTextStoryInput')?.focus(), 100);
+  } else if (tab === 'audio') {
+    if (audioBtn) audioBtn.className = 'btn-primary terminal-tab-btn active';
+    if (audioPane) audioPane.style.display = 'block';
+  } else if (tab === 'code') {
+    if (codeBtn) codeBtn.className = 'btn-primary terminal-tab-btn active';
+    if (codePane) codePane.style.display = 'block';
+    setTimeout(() => document.getElementById('statusCodeStoryInput')?.focus(), 100);
   } else {
-    if (mediaBtn) { mediaBtn.className = 'btn-primary'; }
-    if (textBtn) { textBtn.className = 'btn-secondary'; }
+    if (mediaBtn) mediaBtn.className = 'btn-primary terminal-tab-btn active';
     if (mediaPane) mediaPane.style.display = 'block';
-    if (textPane) textPane.style.display = 'none';
   }
 }
 
@@ -15874,17 +16023,41 @@ function setupCreateStatusModal() {
   document.getElementById('publishStatusBtn')?.addEventListener('click', async () => {
     const publishBtn = document.getElementById('publishStatusBtn');
     const mediaPane = document.getElementById('statusTabMediaPane');
-    const isTextTab = mediaPane && mediaPane.style.display === 'none';
+    const textPane = document.getElementById('statusTabTextPane');
+    const audioPane = document.getElementById('statusTabAudioPane');
+    const codePane = document.getElementById('statusTabCodePane');
+
+    let activeTab = 'media';
+    if (textPane && textPane.style.display !== 'none') activeTab = 'text';
+    else if (audioPane && audioPane.style.display !== 'none') activeTab = 'audio';
+    else if (codePane && codePane.style.display !== 'none') activeTab = 'code';
 
     let contentText = '';
     let isMedia = false;
+    let codeContent = '';
+    let codeLang = 'javascript';
 
-    if (isTextTab) {
+    if (activeTab === 'text') {
       contentText = document.getElementById('statusTextStoryInput')?.value.trim();
       if (!contentText) {
         showNotif('Please type a status message first', 'error');
         return;
       }
+    } else if (activeTab === 'audio') {
+      const voiceBlob = window.NexStatusEliteSuite ? window.NexStatusEliteSuite.getRecordedAudioBlob() : null;
+      if (!voiceBlob) {
+        showNotif('Please record a voice story before transmitting', 'error');
+        return;
+      }
+      contentText = document.getElementById('statusAudioCaptionInput')?.value.trim() || 'Voice Story';
+    } else if (activeTab === 'code') {
+      codeContent = document.getElementById('statusCodeStoryInput')?.value.trim();
+      codeLang = document.getElementById('statusCodeLangSelect')?.value || 'javascript';
+      if (!codeContent) {
+        showNotif('Please enter code snippet before transmitting', 'error');
+        return;
+      }
+      contentText = codeContent.slice(0, 100);
     } else {
       contentText = document.getElementById('statusMediaCaptionInput')?.value.trim();
       isMedia = !!selectedStatusMediaFile;
@@ -15905,13 +16078,40 @@ function setupCreateStatusModal() {
     let fileType = 'text';
 
     try {
-      if (isMedia && selectedStatusMediaFile) {
+      if (activeTab === 'audio') {
+        const voiceBlob = window.NexStatusEliteSuite.getRecordedAudioBlob();
+        const voiceFile = new File([voiceBlob], `voice_status_${Date.now()}.webm`, { type: 'audio/webm' });
         if (progressBox) progressBox.style.display = 'block';
-        if (progressStatus) progressStatus.textContent = 'Uploading to Multi-Vault Cloud...';
-        fileType = selectedStatusMediaFile.type || 'image/jpeg';
+        if (progressStatus) progressStatus.textContent = 'Uploading voice story to vault...';
+        fileType = 'audio/webm';
 
         try {
-          const res = await uploadStatusMedia(selectedStatusMediaFile, {
+          const res = await uploadStatusMedia(voiceFile, {
+            uid: myUID,
+            onProgress: (pct, msg) => {
+              if (progressPercent) progressPercent.textContent = `${pct}%`;
+              if (progressBar) progressBar.style.width = `${pct}%`;
+            }
+          });
+          uploadedUrl = res.url || res.downloadUrl;
+        } catch (vErr) {
+          const upRes = await uploadAnyMedia(voiceFile, { folder: 'status', uid: myUID });
+          uploadedUrl = upRes.url || upRes.downloadUrl;
+        }
+      } else if (isMedia && selectedStatusMediaFile) {
+        if (progressBox) progressBox.style.display = 'block';
+        if (progressStatus) progressStatus.textContent = 'Optimizing & uploading to vault...';
+
+        let fileToUpload = selectedStatusMediaFile;
+        if (window.NexStatusEliteSuite && fileToUpload.type && fileToUpload.type.startsWith('image/')) {
+          try {
+            fileToUpload = await window.NexStatusEliteSuite.optimizeImage(fileToUpload);
+          } catch (_) {}
+        }
+        fileType = fileToUpload.type || 'image/jpeg';
+
+        try {
+          const res = await uploadStatusMedia(fileToUpload, {
             uid: myUID,
             onProgress: (pct, msg) => {
               if (progressPercent) progressPercent.textContent = `${pct}%`;
@@ -15922,7 +16122,7 @@ function setupCreateStatusModal() {
           uploadedUrl = res.url || res.downloadUrl;
         } catch (vaultErr) {
           console.warn('[STATUS] Vault cascade fallback:', vaultErr);
-          const upRes = await uploadAnyMedia(selectedStatusMediaFile, { folder: 'status', uid: myUID });
+          const upRes = await uploadAnyMedia(fileToUpload, { folder: 'status', uid: myUID });
           uploadedUrl = upRes.url || upRes.downloadUrl;
         }
       }
@@ -15942,8 +16142,10 @@ function setupCreateStatusModal() {
         content: contentText || '',
         imageUrl: uploadedUrl || null,
         mediaUrl: uploadedUrl || null,
-        mediaType: isMedia ? (fileType.startsWith('video/') ? 'video' : 'image') : 'text',
-        gradient: isTextTab ? selectedStatusGradient : null,
+        mediaType: activeTab === 'audio' ? 'audio' : (activeTab === 'code' ? 'code' : (isMedia ? (fileType.startsWith('video/') ? 'video' : 'image') : 'text')),
+        gradient: activeTab === 'text' ? selectedStatusGradient : null,
+        codeContent: activeTab === 'code' ? codeContent : null,
+        codeLanguage: activeTab === 'code' ? codeLang : null,
         timestamp: serverTimestamp(),
         createdAt: serverTimestamp(),
         createdAtMs: now,
@@ -16498,6 +16700,45 @@ function initializeBasicUI() {
     let activeSlashIndex = 0;
 
     const SLASH_COMMANDS = [
+      {
+        cmd: '/attach',
+        name: 'Attach File',
+        desc: 'Upload document, media, or archive file',
+        action: () => {
+          messageInput.value = '';
+          autoResize();
+          updateSendButtons();
+          document.getElementById('file-input')?.click();
+        }
+      },
+      {
+        cmd: '/confidential',
+        name: 'Confidential Cipher',
+        desc: 'Compose a zero-knowledge confidential encrypted note',
+        action: () => {
+          messageInput.value = '';
+          autoResize();
+          updateSendButtons();
+          if (window.NexEliteConfidentialScratchpad) {
+            window.NexEliteConfidentialScratchpad.openModal();
+          } else {
+            document.getElementById('btnConfidentialCipher')?.click();
+          }
+        }
+      },
+      {
+        cmd: '/timer',
+        name: 'Schedule Send',
+        desc: 'Set an automatic delivery timer countdown for message',
+        action: () => {
+          messageInput.value = '';
+          autoResize();
+          updateSendButtons();
+          if (window.NexScheduledMessages) {
+            window.NexScheduledMessages.openSchedulerModal();
+          }
+        }
+      },
       {
         cmd: '/summarize',
         name: 'Summarize Chat',

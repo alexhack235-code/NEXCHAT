@@ -1,0 +1,311 @@
+/* ==========================================================================
+   NEXCHAT CROSS-DEVICE AIR-DROP RADAR MESH STYLES (V4.0)
+   Strictly Zero Unicode Emojis • Deep Obsidian, Emerald, Cyan & Amber
+   ========================================================================== */
+
+.nex-airdrop-modal-content {
+  max-width: 620px !important;
+  max-height: 90vh;
+  background: rgba(6, 9, 19, 0.96) !important;
+  border: 1px solid rgba(0, 242, 254, 0.35) !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 242, 254, 0.2) !important;
+  display: flex;
+  flex-direction: column;
+}
+.airdrop-modal-body {
+  padding: 16px 20px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Staging Bar */
+.airdrop-file-staging {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(0, 242, 254, 0.4);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+.staging-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+.staging-info strong {
+  display: block;
+  font-size: 13.5px;
+  color: #f8fafc;
+}
+.staging-info span {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.airdrop-btn-ghost {
+  background: rgba(0, 242, 254, 0.12);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  color: #00f2fe;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.airdrop-btn-ghost:hover {
+  background: rgba(0, 242, 254, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Radial Sonar Radar Screen */
+.airdrop-radar-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 10px 0;
+}
+.sonar-screen {
+  position: relative;
+  width: 290px;
+  height: 290px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 242, 254, 0.05) 0%, rgba(6, 9, 19, 0.9) 70%);
+  border: 2px solid rgba(0, 255, 102, 0.4);
+  box-shadow: 0 0 30px rgba(0, 255, 102, 0.15), inset 0 0 25px rgba(0, 242, 254, 0.1);
+  overflow: hidden;
+}
+.sonar-sweep-line {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 145px;
+  height: 145px;
+  transform-origin: top left;
+  background: linear-gradient(135deg, rgba(0, 255, 102, 0.4) 0%, transparent 60%);
+  border-right: 1.5px solid #00ff66;
+  border-radius: 0 100% 0 0;
+  animation: radarSweep 3.2s linear infinite;
+  pointer-events: none;
+}
+@keyframes radarSweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.sonar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(0, 242, 254, 0.18);
+  pointer-events: none;
+}
+.sonar-ring.ring-1 { width: 90px; height: 90px; }
+.sonar-ring.ring-2 { width: 175px; height: 175px; }
+.sonar-ring.ring-3 { width: 255px; height: 255px; }
+.sonar-center-node {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #00ff66;
+  font-size: 14px;
+}
+.sonar-center-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 8px;
+  font-weight: 800;
+  color: #00ff66;
+  letter-spacing: 0.5px;
+}
+.sonar-blips-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+.radar-node-blip {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.radar-node-blip:hover {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+.blip-core {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(0, 255, 102, 0.2);
+  border: 1.5px solid #00ff66;
+  color: #00ff66;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+}
+.blip-label {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #f1f5f9;
+  white-space: nowrap;
+  background: rgba(6, 9, 19, 0.85);
+  padding: 1px 4px;
+  border-radius: 4px;
+  margin-top: 2px;
+}
+.sonar-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* Velocity Speedometer HUD */
+.airdrop-transfer-hud {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 14px;
+}
+.hud-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.hud-target-label {
+  font-size: 10px;
+  color: #94a3b8;
+  font-family: monospace;
+}
+.hud-target-info strong {
+  display: block;
+  font-size: 13.5px;
+  color: #00f2fe;
+}
+.hud-speed-gauge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #00ff66;
+}
+.hud-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.hud-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #00f2fe, #00ff66);
+  border-radius: 4px;
+  transition: width 0.15s linear;
+}
+.hud-stats-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.hud-pct-badge {
+  color: #00ff66;
+  font-weight: 800;
+  font-family: monospace;
+}
+
+/* Receiver Slide-up Tray */
+.airdrop-receiver-tray {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(245, 158, 11, 0.5);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), 0 0 20px rgba(245, 158, 11, 0.2);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 14px;
+  animation: slideUp 0.25s ease;
+}
+.receiver-tray-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #f59e0b;
+}
+.receiver-source-badge {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+.receiver-file-preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.receiver-file-meta strong {
+  display: block;
+  font-size: 13px;
+  color: #f8fafc;
+}
+.receiver-file-meta span {
+  font-size: 11px;
+  color: #94a3b8;
+}
+.receiver-actions {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 8px;
+}
+.airdrop-btn-accept {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #fff;
+  border: none;
+  padding: 9px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.airdrop-btn-decline {
+  background: rgba(255, 255, 255, 0.06);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 9px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}

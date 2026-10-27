@@ -6,6 +6,12 @@
         ".write": "auth != null && (auth.uid === $uid || auth.token.email === 'demonalexander526@gmail.com' || auth.token.email === 'alexhack235@gmail.com')"
       }
     },
+    "conversations": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
     "presence": {
       "$uid": {
         ".read": "auth != null",
@@ -14,8 +20,8 @@
     },
     "typing": {
       "$chatId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "auth != null && $chatId.contains(auth.uid)",
+        ".write": "auth != null && $chatId.contains(auth.uid)"
       }
     },
     "status": {
@@ -26,8 +32,8 @@
     },
     "calls": {
       "$callId": {
-        ".read": "auth != null",
-        ".write": "auth != null"
+        ".read": "auth != null && (data.child('callerUid').val() === auth.uid || data.child('recipientUid').val() === auth.uid || $callId.contains(auth.uid))",
+        ".write": "auth != null && (data.child('callerUid').val() === auth.uid || data.child('recipientUid').val() === auth.uid || $callId.contains(auth.uid) || !data.exists())"
       }
     }
   }

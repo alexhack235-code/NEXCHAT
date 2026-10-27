@@ -1,5 +1,5 @@
 import { put } from '@vercel/blob';
-import { enforceRateLimit, applySecurityHeaders, validatePathname, verifyFirebaseIdToken } from './_security.js';
+import { enforceRateLimit, applySecurityHeaders, validatePathname, verifyFirebaseIdToken, handleCors } from './_security.js';
 
 // Primary Storage Tokens
 const readBlobToken = (name, fallback = '') => process.env[name] || fallback;
@@ -56,6 +56,7 @@ const ALLOWED_MIME_PREFIXES = [
 ];
 
 export default async function handler(req, res) {
+  if (handleCors(req, res)) return;
   applySecurityHeaders(res);
   if (!enforceRateLimit(req, res)) return;
 

@@ -104,6 +104,7 @@
       this.jaSubDir = window.JA_SUBDIRECTORY || null;
       this.koSubDir = window.KO_SUBDIRECTORY || null;
       this.multiSuite = window.MULTILINGUAL_SUITE || null;
+      this.techSubDir = window.TECH_SUBDIRECTORY || null;
 
       // Active languages registry
       this.activeSubdirectories = new Set(['en']);
@@ -162,6 +163,12 @@
       if (!this.multiSuite && window.MULTILINGUAL_SUITE) {
         this.multiSuite = window.MULTILINGUAL_SUITE;
       }
+      if (!this.techSubDir && window.TECH_SUBDIRECTORY) {
+        this.techSubDir = window.TECH_SUBDIRECTORY;
+      }
+      if (window.NexAsianMidEastLexicon) {
+        window.NexAsianMidEastLexicon.integrateIntoEngine(this);
+      }
     }
 
     /**
@@ -184,6 +191,7 @@
       else if (langKey === 'zh' && this.zhSubDir) this.zhSubDir.activate();
       else if (langKey === 'ja' && this.jaSubDir) this.jaSubDir.activate();
       else if (langKey === 'ko' && this.koSubDir) this.koSubDir.activate();
+      else if (langKey === 'tech' && this.techSubDir) this.techSubDir.activate();
 
       if (!wasActive) {
         this.dispatchLanguageEvent(langKey, triggerSource);
@@ -208,6 +216,7 @@
       else if (langKey === 'zh' && this.zhSubDir) this.zhSubDir.deactivate();
       else if (langKey === 'ja' && this.jaSubDir) this.jaSubDir.deactivate();
       else if (langKey === 'ko' && this.koSubDir) this.koSubDir.deactivate();
+      else if (langKey === 'tech' && this.techSubDir) this.techSubDir.deactivate();
 
       if (this.currentPrimaryLanguage === langKey) {
         this.currentPrimaryLanguage = 'en';
@@ -244,6 +253,8 @@
           return { code: 'ja', name: 'Japanese Romaji', badge: '日本語 Romaji', icon: 'fa-torii-gate' };
         case 'ko':
           return { code: 'ko', name: 'Korean Romanized', badge: '한국어 Romaji', icon: 'fa-heart' };
+        case 'tech':
+          return { code: 'tech', name: 'Cyber Tech & Crypto', badge: 'Dev & Cyber', icon: 'fa-code' };
         case 'es':
           return { code: 'es', name: 'Spanish', badge: 'Español', icon: 'fa-globe' };
         case 'fr':
@@ -325,6 +336,10 @@
       else if (this.koSubDir && this.koSubDir.detect(sample)) {
         detected = 'ko';
       }
+      // 9d. Cyber Tech & Dev
+      else if (this.techSubDir && this.techSubDir.detect(sample)) {
+        detected = 'tech';
+      }
       // 10. European Suite (es, fr, pt, de, it)
       else if (this.multiSuite) {
         const multi = this.multiSuite.detect(sample);
@@ -345,6 +360,7 @@
     isValidWord(word) {
       if (!word) return false;
       const clean = cleanToken(word);
+      if (window.NexPrefixTrie && window.NexPrefixTrie.hasWord(clean)) return true;
 
       if (this.personal && this.personal.hasWord(clean)) return true;
       if (this.arSubDir && this.arSubDir.hasWord(clean)) return true;
@@ -359,6 +375,7 @@
       if (this.koSubDir && this.koSubDir.hasWord(clean)) return true;
       if (this.pidginSubDir && this.pidginSubDir.hasWord(clean)) return true;
       if (this.multiSuite && this.multiSuite.hasWord(clean)) return true;
+      if (this.techSubDir && this.techSubDir.hasWord(clean)) return true;
       if (clean.includes("'")) return true;
 
       return this.dict.has(clean) || clean.length <= 1;
@@ -391,6 +408,15 @@
 
       let result = null;
 
+      // 2b-slip. Dynamic Layout Slip Detection (QWERTY <-> JCUKEN, Arabizi)
+      if (!result && window.NexLayoutSlipCorrector) {
+        const slip = window.NexLayoutSlipCorrector.correctSlip(clean, window.NexPrefixTrie);
+        if (slip && slip.corrected) {
+          if (slip.targetLang) this.activateSubdirectory(slip.targetLang, 'layout-slip');
+          result = slip.corrected;
+        }
+      }
+
       // 2b. Active Primary Language Fast-Path Priority
       const primary = this.currentPrimaryLanguage;
       if (primary && primary !== 'en') {
@@ -406,6 +432,7 @@
         else if (primary === 'zh') activeDir = this.zhSubDir;
         else if (primary === 'ja') activeDir = this.jaSubDir;
         else if (primary === 'ko') activeDir = this.koSubDir;
+        else if (primary === 'tech') activeDir = this.techSubDir;
 
         if (activeDir) {
           const directFix = activeDir.correctWord(clean);

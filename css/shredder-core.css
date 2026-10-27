@@ -1,0 +1,178 @@
+/* ==========================================================================
+   NEXCHAT ADVANCED SHREDDER CORE & SELF-DESTRUCT STYLES
+   Colorway: Deep Obsidian (#060913), Threat Crimson (#ef4444), Amber (#f59e0b)
+   Strictly Zero Unicode Emojis (FontAwesome 6 Only)
+   ========================================================================== */
+
+.shredder-core-card {
+  background: linear-gradient(135deg, rgba(6, 9, 19, 0.95) 0%, rgba(15, 23, 42, 0.85) 100%) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(239, 68, 68, 0.05) !important;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.shredder-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.shredder-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shredder-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid #ef4444;
+  color: #ef4444;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+}
+
+.shredder-heading {
+  font-family: 'Orbitron', monospace;
+  font-size: 14.5px;
+  font-weight: 800;
+  color: #ffffff;
+  display: block;
+  letter-spacing: 0.5px;
+}
+
+.shredder-subheading {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin: 3px 0 0 0;
+  line-height: 1.4;
+}
+
+.shredder-status-badge {
+  font-family: monospace;
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Telemetry Strip */
+.shredder-telemetry-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+@media (max-width: 600px) {
+  .shredder-telemetry-strip {
+    grid-template-columns: 1fr;
+  }
+}
+
+.shredder-telemetry-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.telemetry-label {
+  color: #64748b;
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.telemetry-val {
+  color: #f1f5f9;
+  font-weight: 700;
+}
+
+.text-emerald { color: #10b981 !important; }
+.text-crimson { color: #ef4444 !important; }
+.text-amber { color: #f59e0b !important; }
+
+/* Toggles Matrix */
+.shredder-controls-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shredder-toggle-title {
+  font-size: 12.5px;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+}
+
+.shredder-toggle-desc {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 3px 0 0 0;
+  line-height: 1.35;
+}
+
+/* Emergency Button */
+.shredder-emergency-bar {
+  margin-top: 10px;
+  padding-top: 14px;
+  border-top: 1px dashed rgba(239, 68, 68, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-danger-shredder {
+  width: 100%;
+  background: linear-gradient(135deg, #b91c1c 0%, #ef4444 100%);
+  color: #ffffff;
+  border: 1px solid #ef4444;
+  border-radius: 10px;
+  padding: 12px 18px;
+  font-family: 'Orbitron', monospace;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.4);
+  transition: all 0.2s ease;
+}
+
+.btn-danger-shredder:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 28px rgba(239, 68, 68, 0.6);
+  background: linear-gradient(135deg, #dc2626 0%, #f87171 100%);
+}
+
+.shredder-warn-text {
+  font-size: 10.5px;
+  color: #f59e0b;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

@@ -416,6 +416,11 @@ service cloud.firestore {
       return val == null || val is timestamp || val is string || val is int || val is float || val is number;
     }
 
+    // 17. Resource Existence Helper
+    function resourceExists() {
+      return resource != null;
+    }
+
     // ===============================================================
     // DOMAIN VALIDATORS (Validator Function Pattern)
     // ===============================================================
@@ -952,7 +957,7 @@ service cloud.firestore {
           isValidOptionalString('content', 0, 2000) &&
           isValidOptionalString('caption', 0, 2000)
         ) ||
-        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'viewCount', 'viewsCount'])) ||
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views', 'viewCount', 'viewsCount', 'pollData'])) ||
         isSuperAdmin()
       );
 
@@ -965,7 +970,11 @@ service cloud.firestore {
 
       match /views/{viewId} {
         allow read: if isAuthenticated() && (isOwner(get(/databases/$(database)/documents/statuses/$(statusId)).data.userId) || isSuperAdmin());
-        allow create: if isAuthenticated() && (request.resource.data.viewerId == request.auth.uid || request.resource.data.userId == request.auth.uid);
+        allow create, update: if isAuthenticated() && (
+          request.resource.data.uid == request.auth.uid ||
+          request.resource.data.viewerId == request.auth.uid ||
+          request.resource.data.userId == request.auth.uid
+        );
       }
     }
 
@@ -1682,12 +1691,7 @@ service cloud.firestore {
 
     // IP Registration Rate Limiting (Used to limit account creation to max 2 accounts per IP and monitor Sybil accounts in Admin Dashboard)
     match /ip_registrations/{ipKey} {
-      allow read: if true;
-      allow create: if request.resource.data.keys().hasOnly(['ip', 'count', 'accountUids', 'accountEmails', 'lastRegisteredAt', 'lastUsername', 'country', 'city', 'isp', 'blocked', 'exempt']);
-      allow update: if isSuperAdmin() || (
-        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['count', 'accountUids', 'accountEmails', 'lastRegisteredAt', 'lastUsername', 'country', 'city', 'isp'])
-      );
-      allow delete: if isSuperAdmin();
+      allow read, write: if isSuperAdmin();
     }
 
     match /videoActivity/{vidActId} {
@@ -2379,8 +2383,25 @@ service cloud.firestore {
     // 22. P2P SIGNALING CHANNELS
     // ===============================================================
     match /p2pSignaling/{channelId} {
-      allow read, write: if isAuthenticated();
-      allow delete: if isAuthenticated();
+      allow read: if isAuthenticated() && (
+        resource.data.from == request.auth.uid ||
+        resource.data.to == request.auth.uid ||
+        resource.data.initiator == request.auth.uid ||
+        resource.data.peer == request.auth.uid ||
+        isSuperAdmin()
+      );
+      allow create: if isAuthenticated() && (
+        request.resource.data.from == request.auth.uid ||
+        request.resource.data.initiator == request.auth.uid ||
+        isSuperAdmin()
+      );
+      allow update, delete: if isAuthenticated() && (
+        resource.data.from == request.auth.uid ||
+        resource.data.to == request.auth.uid ||
+        resource.data.initiator == request.auth.uid ||
+        resource.data.peer == request.auth.uid ||
+        isSuperAdmin()
+      );
     }
 
     // ===============================================================

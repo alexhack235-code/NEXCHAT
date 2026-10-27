@@ -7,7 +7,6 @@ export const SUPABASE_DEFAULTS = {
   url: 'https://ohsrsevoudwttudpvtpu.supabase.co',
   anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oc3JzZXZvdWR3dHR1ZHB2dHB1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyODgyMTUsImV4cCI6MjEwNjg2NDIxNX0.j5xCe7U2NCqVAEEPc6d40WIGKpbfRFj81RVueDkO4IU',
   publishableKey: 'sb_publishable_nYCpNXPPn6irP_fe4sYPww_-246rL81',
-  serviceKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9oc3JzZXZvdWR3dHR1ZHB2dHB1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc5MTI4ODIxNSwiZXhwIjoyMTA2ODY0MjE1fQ.j5EbODk5vW60ufPcaxoi12TKJCm3Suiq6RJ3yzRcxhE',
 };
 
 export function getActiveSupabaseSettings() {

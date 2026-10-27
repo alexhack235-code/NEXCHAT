@@ -131,3 +131,24 @@ export function validatePathname(pathname) {
 
   return { valid: true };
 }
+
+
+/**
+ * Universal CORS and Preflight handler for web and Capacitor native clients.
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ * @returns {boolean} true if preflight OPTIONS was handled and terminated
+ */
+export function handleCors(req, res) {
+  const origin = req.headers.origin || '*';
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Filename, X-Upload-Type, X-Vault-Index, X-Access-Mode, Range');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return true;
+  }
+  return false;
+}

@@ -6,7 +6,7 @@
  * - Zero-billing ephemeral broadcast for typing indicators and presence
  * - PostgreSQL relational storage with instant indexing and full-text search
  * - Optimistic UI message dispatch with instant DOM rendering
- * - Multi-tier delivery indicators (Pending 🕒 -> Sent ✓ -> Delivered ✓✓ -> Read ✓✓)
+ * - Multi-tier delivery indicators (Pending clock -> Sent check -> Delivered double-check -> Read double-check)
  */
 
 const DEFAULT_CONFIG = {
@@ -176,6 +176,7 @@ export async function sendSupabaseMessage({
         sender_id: from,
         recipient_id: chatType === 'direct' ? to : null,
         group_id: chatType === 'group' ? to : null,
+        client_msg_id: clientMsgId,
         text,
         attachment: attachment ? JSON.stringify(attachment) : null,
         reply_to: replyTo ? JSON.stringify(replyTo) : null,
@@ -398,9 +399,13 @@ function normalizeSupabaseMessage(raw) {
     try { reactions = JSON.parse(reactions); } catch {}
   }
 
+  const clientCorrelationId = raw.client_msg_id || raw.clientMsgId || null;
+  const canonicalDocId = clientCorrelationId || String(raw.id || 'supa_' + Date.now());
   return {
-    docId: String(raw.id || raw.clientMsgId),
-    id: String(raw.id || raw.clientMsgId),
+    docId: canonicalDocId,
+    id: canonicalDocId,
+    clientMsgId: clientCorrelationId,
+    dbId: raw.id ? String(raw.id) : null,
     from: raw.sender_id || raw.from,
     to: raw.recipient_id || raw.group_id || raw.to,
     text: raw.text || '',

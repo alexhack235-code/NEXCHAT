@@ -135,7 +135,7 @@
         toggleBtn.type = 'button';
         toggleBtn.id = 'clipModeToggleBtn';
         toggleBtn.className = 'input-btn clip-mode-toggle-btn';
-        toggleBtn.title = 'Switch: Voice Note ↔ Circular Video Note';
+        toggleBtn.title = 'Switch: Voice Note / Circular Video Note';
         toggleBtn.innerHTML = '<i class="fa-solid fa-video" style="font-size: 14px;"></i>';
 
         // Insert right before the record button

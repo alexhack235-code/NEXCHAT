@@ -50,6 +50,11 @@
         return placeholder;
       });
 
+      // Sanitize raw text to prevent Stored XSS before applying Markdown formatting
+      text = escapeHtml(text);
+      // Restore blockquote indicator &gt; at line start for callout parser
+      text = text.replace(/^&gt;/gm, '>');
+
       // B. Parse Markdown Tables
       text = this.parseTables(text);
 

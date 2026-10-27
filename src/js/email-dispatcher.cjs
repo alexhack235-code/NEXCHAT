@@ -40,8 +40,8 @@ for (const cp of candidateConfigPaths) {
 }
 
 // Guaranteed credentials fallback for production runtime
-if (!CONFIG.GMAIL_USER) CONFIG.GMAIL_USER = 'oyewoletodoroki@gmail.com';
-if (!CONFIG.GMAIL_APP_PASS) CONFIG.GMAIL_APP_PASS = 'biar uqvt vpnz hxkz';
+if (!CONFIG.GMAIL_USER) CONFIG.GMAIL_USER = process.env.GMAIL_USER || '';
+if (!CONFIG.GMAIL_APP_PASS) CONFIG.GMAIL_APP_PASS = (process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_APP_PASS || '').replace(/\s+/g, '');
 
 /**
  * Resolves any relative or localhost URL into a globally reachable HTTPS URL (e.g. Vercel production)

@@ -15,8 +15,8 @@ for ext in extensions:
             shutil.copy2(file, os.path.join(dist_dir, os.path.basename(file)))
             copied_count += 1
 
-# Copy directories: src, assets, favicons, js, css, api if present
-for folder in ['src', 'assets', 'favicons', 'js', 'css']:
+# Copy directories: src, assets, favicons, js, css, styles, api if present
+for folder in ['src', 'assets', 'favicons', 'js', 'css', 'styles']:
     if os.path.exists(folder) and os.path.isdir(folder):
         shutil.copytree(folder, os.path.join(dist_dir, folder), dirs_exist_ok=True)
         print(f"Copied folder: {folder}")

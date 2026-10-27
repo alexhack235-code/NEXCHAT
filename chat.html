@@ -37,6 +37,12 @@
   <link rel="stylesheet" href="css/nextgen-suite.css">
   <link rel="stylesheet" href="css/chat-professional-suite.css">
   <link rel="stylesheet" href="css/layout-declutter.css">
+  <link rel="stylesheet" href="css/status-elite-suite.css">
+  <link rel="stylesheet" href="css/stealth-forensics-suite.css">
+  <link rel="stylesheet" href="css/tactical-war-room.css">
+  <link rel="stylesheet" href="css/quorum-milestone.css">
+  <link rel="stylesheet" href="css/shredder-core.css">
+  <link rel="stylesheet" href="css/p2p-airdrop.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
   <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png">
@@ -1097,13 +1103,11 @@
               <button type="button" id="emoji-btn" class="input-inline-btn emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
               <button type="button" id="sticker-btn" class="input-inline-btn sticker-toggle-btn" title="Stickers" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
               <textarea id="message-input" class="message-input nex-input" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
-              <button type="button" id="scheduleSendTriggerBtn" class="input-inline-btn" title="Schedule Message (Send on Timer)" style="color: #00f2fe;"><i class="fa-solid fa-clock"></i></button>
-              <button type="button" id="btnConfidentialCipher" class="input-inline-btn" title="Confidential Cipher Note (Anti-Shoulder Surfing)" style="color: #c084fc;"><i class="fa-solid fa-user-secret"></i></button>
-              <button type="button" id="btnCodeSandboxComposer" class="input-inline-btn" title="Code Sandbox &amp; Runner" style="color: #10b981;"><i class="fa-solid fa-code"></i></button>
               <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-              <button type="button" id="attach-btn" class="input-inline-btn" title="Attach file"><i class="fa-solid fa-paperclip"></i></button>
+              <button type="button" id="btnConfidentialCipher" class="input-inline-btn" title="Confidential Cipher Note (Anti-Shoulder Surfing)" style="color: #c084fc;"><i class="fa-solid fa-user-secret"></i></button>
               <button type="button" id="camera-btn" class="input-inline-btn camera-input-btn" title="Camera"><i class="fa-solid fa-camera"></i></button>
             </div>
+            <button type="button" id="attach-btn" style="display: none !important;" aria-hidden="true"></button>
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
             <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
             <button type="button" id="soundboardToggleBtn" class="input-btn soundboard-toggle-btn" title="Tactile Soundboard FX" style="display: none;"><i class="fa-solid fa-volume-high"></i></button>
@@ -3895,6 +3899,12 @@
               <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabTextBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
                 <i class="fa-solid fa-font"></i> [TEXT_CIPHER]
               </button>
+              <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabAudioBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
+                <i class="fa-solid fa-microphone"></i> [VOICE_STORY]
+              </button>
+              <button type="button" class="btn-secondary terminal-tab-btn" id="statusTabCodeBtn" style="padding: 7px 14px; font-size: 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;">
+                <i class="fa-solid fa-code"></i> [CODE_SNIPPET]
+              </button>
             </div>
             <button type="button" class="close-btn terminal-modal-close" id="closeCreateStatusModalBtn" title="Close" style="position: static; width: 30px; height: 30px; font-size: 14px;"><i class="fa-solid fa-xmark"></i></button>
           </div>
@@ -3937,6 +3947,40 @@
               <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #4c0519, #e11d48)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #E11D48;" title="Purge Crimson"></button>
               <button type="button" class="gradient-swatch" data-gradient="linear-gradient(135deg, #3b0764, #9333ea)" style="width: 24px; height: 24px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.3); background: #9333EA;" title="Neon Violet"></button>
             </div>
+          </div>
+
+          <!-- TAB 3: Voice Audio Story (60s Voice Note + Spectrum) -->
+          <div class="create-status-tab-pane" id="statusTabAudioPane" style="display: none;">
+            <div class="status-voice-recorder-box">
+              <button type="button" id="statusVoiceRecordBtn" class="status-voice-mic-btn" title="Tap to Record / Stop">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+              <div id="statusVoiceTimerDisplay" class="status-voice-timer-display">0:00</div>
+              <div id="statusVoiceHintText" class="status-voice-hint-text">Tap the microphone to record up to 60s voice story</div>
+            </div>
+            <div style="margin-top: 14px;">
+              <div style="display: flex; align-items: center; gap: 6px; background: rgba(16, 26, 36, 0.95); border: 1px solid rgba(0, 255, 136, 0.25); border-radius: 8px; padding: 4px 12px;">
+                <span style="color: #00FF88; font-family: 'JetBrains Mono', monospace; font-size: 12px;">&gt;</span>
+                <input type="text" id="statusAudioCaptionInput" placeholder="Add voice story topic or caption..." class="settings-input" style="width: 100%; border: none; background: transparent; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 13px; padding: 8px 0; outline: none;">
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB 4: Code Snippet Story -->
+          <div class="create-status-tab-pane" id="statusTabCodePane" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #00ff88; font-weight: 700;">LANGUAGE_SYNTAX:</span>
+              <select id="statusCodeLangSelect" style="background: rgba(16, 24, 36, 0.95); color: #00ff88; border: 1px solid rgba(0, 255, 136, 0.3); border-radius: 6px; padding: 4px 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; outline: none;">
+                <option value="javascript">JavaScript / TypeScript</option>
+                <option value="python">Python</option>
+                <option value="rust">Rust</option>
+                <option value="solidity">Solidity / Web3</option>
+                <option value="html">HTML / CSS</option>
+                <option value="sql">SQL / Postgres</option>
+                <option value="bash">Bash / Shell</option>
+              </select>
+            </div>
+            <textarea id="statusCodeStoryInput" class="status-code-textarea" placeholder="// Paste or type code snippet to broadcast to the network..."></textarea>
           </div>
 
           <!-- Status Post Footer -->
@@ -4283,6 +4327,9 @@
           <button type="button" id="statusViewerMuteBtn" class="status-viewer-icon-btn video-mute-toggle" title="Toggle Sound" style="display: none;">
             <i class="fa-solid fa-volume-high"></i>
           </button>
+          <button type="button" id="statusViewerStealthBtn" class="status-viewer-icon-btn stealth-mode-toggle" title="Stealth Peeking: View without notifying creator" aria-label="Stealth mode">
+            <i class="fa-solid fa-eye-slash"></i>
+          </button>
           <button type="button" id="statusViewerPauseBtn" class="status-viewer-icon-btn" title="Pause / Play (Space)">
             <i class="fa-solid fa-pause"></i>
           </button>
@@ -4303,6 +4350,39 @@
       <img id="statusViewerImage" src="" alt="Status" class="status-media-content" style="display: none;">
       <video id="statusViewerVideo" src="" class="status-media-content" playsinline autoplay muted style="display: none;"></video>
       <div id="statusViewerFallbackText" class="status-viewer-text-slide" style="display: none;"></div>
+
+      <!-- Voice Audio Story Visualizer Stage -->
+      <div id="statusViewerAudioStage" class="status-viewer-audio-stage" style="display: none;">
+        <div class="status-audio-visualizer-card">
+          <div class="status-audio-avatar-halo">
+            <img id="statusViewerAudioAvatar" src="logo.jpg" alt="Voice" class="status-audio-avatar" onerror="this.src='logo.jpg'">
+            <span class="status-audio-pulse-ring"></span>
+          </div>
+          <div class="status-audio-meta-info">
+            <span class="status-audio-tag"><i class="fa-solid fa-microphone"></i> VOICE STORY</span>
+            <span id="statusViewerAudioTimer" class="status-audio-timer">0:00 / 0:30</span>
+          </div>
+          <canvas id="statusAudioSpectrumCanvas" class="status-audio-spectrum-canvas" width="280" height="60"></canvas>
+          <button type="button" id="statusViewerAudioPlayBtn" class="status-audio-play-ctrl" title="Play / Pause Voice"><i class="fa-solid fa-play"></i></button>
+        </div>
+      </div>
+
+      <!-- Code Snippet Window Stage -->
+      <div id="statusViewerCodeStage" class="status-viewer-code-stage" style="display: none;">
+        <div class="status-code-window-card">
+          <div class="status-code-window-header">
+            <div class="status-code-dots">
+              <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            </div>
+            <span id="statusViewerCodeLang" class="status-code-lang-tag">TYPESCRIPT</span>
+            <button type="button" id="statusViewerCopyCodeBtn" class="status-code-copy-btn" title="Copy code to clipboard"><i class="fa-solid fa-copy"></i> Copy</button>
+          </div>
+          <pre id="statusViewerCodePre" class="status-code-pre"><code id="statusViewerCodeContent"></code></pre>
+        </div>
+      </div>
+
+      <!-- Interactive Widget Sticker (Polls / AMAs) -->
+      <div id="statusViewerInteractiveContainer" class="status-viewer-interactive-container" style="display: none;"></div>
 
       <!-- Floating Particle Burst Anchor for Quick Reactions -->
       <div id="statusReactionBurstContainer" class="status-reaction-burst-container" aria-hidden="true"></div>
@@ -4364,8 +4444,31 @@
     </div>
   </div>
 
+  <!-- SLIDE-UP VIEWERS ANALYTICS DRAWER -->
+  <div id="statusViewersDrawer" class="status-viewers-drawer" style="display: none;">
+    <div class="status-viewers-drawer-scrim" id="statusViewersDrawerScrim"></div>
+    <div class="status-viewers-drawer-content">
+      <div class="status-viewers-drawer-handle"></div>
+      <div class="status-viewers-drawer-header">
+        <div class="status-viewers-drawer-title">
+          <i class="fa-solid fa-chart-simple" style="color: #00ff88;"></i>
+          <span>Viewer Analytics</span>
+          <span id="statusViewersDrawerCount" class="status-viewers-count-chip">0 Views</span>
+        </div>
+        <button type="button" id="closeStatusViewersDrawerBtn" class="status-viewers-close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="status-viewers-search-box">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="statusViewersSearchInput" placeholder="Filter viewers..." autocomplete="off" />
+      </div>
+      <div id="statusViewersListContainer" class="status-viewers-list-container">
+        <div class="status-viewers-empty"><i class="fa-regular fa-eye-slash"></i><p>No views recorded yet</p></div>
+      </div>
+    </div>
+  </div>
+
   <!-- GIFT RECEIVE DRAWER -->
-  <div id="giftReceiveDrawer" class="bottom-drawer" aria-hidden="true"></div>
+  <div id="giftReceiveDrawer" class="bottom-drawer" style="display: none;" aria-hidden="true"></div>
 
   <!-- CINEMATIC MEDIA LIGHTBOX MODAL -->
   <div id="mediaLightboxModal" class="media-lightbox-modal" style="display: none;">
@@ -6044,6 +6147,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
+  <script src="./src/js/status-elite-suite.js"></script>
   <!-- Expanded Multilingual 30,000+ Word Master Auto-Correct Suite -->
   <script src="./src/js/autocorrect/dictionary-30k.js"></script>
   <script src="./src/js/autocorrect/dictionary-pidgin.js"></script>
@@ -6058,9 +6162,13 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/autocorrect/dictionary-japanese.js"></script>
   <script src="./src/js/autocorrect/dictionary-korean.js"></script>
   <script src="./src/js/autocorrect/dictionary-multilingual.js"></script>
+  <script src="./src/js/autocorrect/dictionary-tech.js"></script>
+  <script src="./src/js/autocorrect/asian-middle-eastern-lexicon.js"></script>
   <script src="./src/js/autocorrect/personal-vocab.js"></script>
   <script src="./src/js/autocorrect/ngram-context.js"></script>
   <script src="./src/js/autocorrect/fuzzy-matcher.js"></script>
+  <script src="./src/js/autocorrect/prefix-trie-engine.js"></script>
+  <script src="./src/js/autocorrect/layout-slip-corrector.js"></script>
   <script src="./src/js/autocorrect/autocorrect-engine.js"></script>
   <script src="./src/js/predictive-input.js"></script>
   <script src="./src/js/sticker-store.js"></script>
@@ -6113,6 +6221,13 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/creator-escrow-market.js"></script>
   <script src="./src/js/chat-professional-suite.js"></script>
   <script src="./src/js/preview-audit-engine.js"></script>
+  <script src="./src/js/status-elite-suite.js"></script>
+  <script type="module" src="./src/js/anti-forensic-watermark.js"></script>
+  <script type="module" src="./src/js/zk-delivery-receipts.js"></script>
+  <script src="./src/js/tactical-war-room.js"></script>
+  <script src="./src/js/quorum-milestone-matrix.js"></script>
+  <script src="./src/js/shredder-core.js"></script>
+  <script type="module" src="./src/js/p2p-airdrop-engine.js"></script>
 
 
         <!-- NEXCHAT CYBER ECOSYSTEM SUITE MODAL -->
@@ -6177,6 +6292,20 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                 <div class="cyber-hub-card-info">
                   <div class="cyber-hub-card-name">CyberDrop Beam</div>
                   <div class="cyber-hub-card-desc">Zero-cloud direct P2P file beam</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.NexMeshSync?.AirDrop?.openRadarModal(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(0, 242, 254, 0.15); color: #00f2fe;"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Local AirDrop Radar</div>
+                  <div class="cyber-hub-card-desc">Decentralized LAN sonar & 256KB chunk stream</div>
+                </div>
+              </div>
+              <div class="cyber-hub-card" onclick="window.NexWarRoomEngine?.openBriefingRail(); window.toggleCyberHubModal(false);">
+                <div class="cyber-hub-card-icon" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="cyber-hub-card-info">
+                  <div class="cyber-hub-card-name">Tactical War Room</div>
+                  <div class="cyber-hub-card-desc">Synchronized briefing rail & auto-destruct</div>
                 </div>
               </div>
               <div class="cyber-hub-card" onclick="window.broadcastChannelsEngine?.openModal(); window.toggleCyberHubModal(false);">
@@ -6362,7 +6491,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- NEXCHAT GLOBAL ONBOARDING & LANGUAGE SELECTOR MODAL -->
   <div id="newUserLanguageModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 720px; max-height: 88vh; border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2);">
+    <div class="cyber-hub-modal-content" style="max-width: 720px; max-height: min(88dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2);">
       <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05);">
         <div class="cyber-hub-title" style="color: #00f2fe; font-size: 16px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-earth-americas"></i>
@@ -6393,7 +6522,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   </div>
   <!-- QUANTUM DISPATCH SCHEDULER (SEND ON TIMER MODAL) -->
   <div id="scheduledDispatchModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 580px; max-height: 90vh; border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); overflow-y: auto;">
+    <div class="cyber-hub-modal-content" style="max-width: 580px; max-height: min(90dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); overflow-y: auto;">
       <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05); position: sticky; top: 0; z-index: 10;">
         <div class="cyber-hub-title" style="color: #00f2fe; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-clock-rotate-left"></i>
@@ -6518,7 +6647,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- SCHEDULED MESSAGES VAULT / QUEUE MODAL -->
   <div id="scheduledQueueModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 640px; max-height: 88vh; border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); display: flex; flex-direction: column;">
+    <div class="cyber-hub-modal-content" style="max-width: 640px; max-height: min(88dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); display: flex; flex-direction: column;">
       <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05); flex-shrink: 0;">
         <div class="cyber-hub-title" style="color: #00f2fe; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-list-check"></i>
@@ -6639,7 +6768,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- MESSAGE REVISION HISTORY & GIT-STYLE DIFF MODAL -->
   <div id="messageDiffModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 620px; max-height: 88vh; border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); overflow-y: auto;">
+    <div class="cyber-hub-modal-content" style="max-width: 620px; max-height: min(88dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 242, 254, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 242, 254, 0.2); overflow-y: auto;">
       <div class="cyber-hub-header" style="background: rgba(0, 242, 254, 0.05); position: sticky; top: 0; z-index: 10;">
         <div class="cyber-hub-title" style="color: #00f2fe; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-code-compare"></i>
@@ -6671,7 +6800,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- ANTI-SHOULDER-SURFING CONFIDENTIAL CIPHER MODAL -->
   <div id="confidentialNoteModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 520px; max-height: 85vh; border: 1px solid rgba(192, 132, 252, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(192, 132, 252, 0.2);">
+    <div class="cyber-hub-modal-content" style="max-width: 520px; max-height: min(85dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(192, 132, 252, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(192, 132, 252, 0.2);">
       <div class="cyber-hub-header" style="background: rgba(192, 132, 252, 0.05);">
         <div class="cyber-hub-title" style="color: #c084fc; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-user-secret"></i>
@@ -6696,7 +6825,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- CRYPTOGRAPHIC SAFETY NUMBERS MODAL -->
   <div id="safetyNumberModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
-    <div class="cyber-hub-modal-content" style="max-width: 560px; max-height: 88vh; border: 1px solid rgba(0, 255, 102, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 102, 0.2);">
+    <div class="cyber-hub-modal-content" style="max-width: 560px; max-height: min(88dvh, calc(var(--visual-viewport-height, 100dvh) - 32px)); border: 1px solid rgba(0, 255, 102, 0.4); box-shadow: 0 20px 60px rgba(0,0,0,0.8), 0 0 30px rgba(0, 255, 102, 0.2);">
       <div class="cyber-hub-header" style="background: rgba(0, 255, 102, 0.05);">
         <div class="cyber-hub-title" style="color: #00ff66; font-size: 15px; display: flex; align-items: center; gap: 10px;">
           <i class="fa-solid fa-shield-halved"></i>
@@ -6719,6 +6848,555 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       </div>
     </div>
   </div>
+
+  <!-- ========================================================================= -->
+  <!-- SQUAD 2 NEXT-GEN ARCHITECTURAL SUITES: MODALS, HUDS & DRAWERS             -->
+  <!-- ========================================================================= -->
+
+  <!-- 1. TACTICAL WAR ROOM CONTAINER & EPHEMERAL BRIEFINGS -->
+  <!-- ========================================================================= -->
+<!-- NEXCHAT TACTICAL WAR ROOM CONTAINER & HUD OVERLAY                          -->
+<!-- ========================================================================= -->
+<section id="nexWarRoomContainer" class="nex-war-room-container" style="display: none;" aria-label="Tactical War Room">
+  <!-- Top Scanline Scrim Overlay -->
+  <div class="war-room-scanlines"></div>
+
+  <!-- HUD Control Matrix -->
+  <div class="war-room-hud-bar">
+    <!-- Left: Codename & Mission Phase Pipeline -->
+    <div class="war-room-hud-left">
+      <div class="war-room-code-badge">
+        <i class="fa-solid fa-shield-virus"></i>
+        <span id="warRoomCodenameDisplay">OP: BLACKOUT</span>
+      </div>
+
+      <div class="war-room-phase-pipeline">
+        <span class="phase-pill active" data-phase="BRIEFING">
+          <i class="fa-solid fa-file-shield"></i> BRIEFING
+        </span>
+        <span class="phase-connector"><i class="fa-solid fa-chevron-right"></i></span>
+        <span class="phase-pill" data-phase="ACTIVE_OP">
+          <i class="fa-solid fa-crosshairs"></i> ACTIVE OP
+        </span>
+        <span class="phase-connector"><i class="fa-solid fa-chevron-right"></i></span>
+        <span class="phase-pill" data-phase="EXTRACTION">
+          <i class="fa-solid fa-person-running"></i> EXTRACTION
+        </span>
+        <span class="phase-connector"><i class="fa-solid fa-chevron-right"></i></span>
+        <span class="phase-pill danger" data-phase="SELF_DESTRUCT">
+          <i class="fa-solid fa-skull"></i> DESTRUCT
+        </span>
+      </div>
+    </div>
+
+    <!-- Center: Server-Authoritative High-Precision Countdown Clock -->
+    <div class="war-room-hud-center">
+      <div class="war-room-clock-shell" title="Synchronized Ephemeral Mission Clock">
+        <span class="clock-label">T-MINUS</span>
+        <span id="warRoomCountdownClock" class="clock-digits">15:00:00.000</span>
+        <span class="clock-sync-beacon" title="Firestore Atomic Clock Synchronized"></span>
+      </div>
+    </div>
+
+    <!-- Right: Threat Level Badge & Micro-Rail Briefing Toggle -->
+    <div class="war-room-hud-right">
+      <div class="defcon-matrix-badge" id="warRoomDefconBadge" data-defcon="DEFCON_1">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <span id="warRoomDefconLabel">DEFCON 1</span>
+      </div>
+
+      <button type="button" id="btnToggleBriefingRail" class="war-room-action-btn primary" title="Open Ephemeral Directives Micro-Rail">
+        <i class="fa-solid fa-folder-tree"></i>
+        <span>Briefing Rail</span>
+      </button>
+
+      <button type="button" id="btnAdvanceWarRoomPhase" class="war-room-action-btn warning" title="Advance Operational Phase (Commander Only)">
+        <i class="fa-solid fa-forward-step"></i>
+      </button>
+
+      <button type="button" id="btnAbortWarRoom" class="war-room-action-btn danger" title="Emergency Self-Destruct Protocol">
+        <i class="fa-solid fa-power-off"></i>
+      </button>
+    </div>
+  </div>
+</section>
+  <!-- ========================================================================= -->
+<!-- EPHEMERAL BRIEFINGS MICRO-RAIL DRAWER                                     -->
+<!-- ========================================================================= -->
+<aside id="nexBriefingMicroRail" class="nex-briefing-microrail" aria-hidden="true">
+  <div class="briefing-rail-backdrop" id="closeBriefingRailBackdrop"></div>
+
+  <div class="briefing-rail-panel">
+    <!-- Header -->
+    <header class="briefing-rail-header">
+      <div class="briefing-header-title">
+        <i class="fa-solid fa-user-secret" style="color: #00ff66;"></i>
+        <span>EPHEMERAL OPERATIONAL BRIEFING</span>
+      </div>
+      <button type="button" id="btnCloseBriefingRail" class="briefing-close-btn" title="Close Rail">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="briefing-tabs-nav">
+      <button type="button" class="briefing-tab-btn active" data-tab="directives">
+        <i class="fa-solid fa-list-check"></i> Directives
+      </button>
+      <button type="button" class="briefing-tab-btn" data-tab="threat-intel">
+        <i class="fa-solid fa-radar"></i> Threat Intel
+      </button>
+      <button type="button" class="briefing-tab-btn" data-tab="objectives">
+        <i class="fa-solid fa-bullseye"></i> Objectives
+      </button>
+      <button type="button" class="briefing-tab-btn" data-tab="roster">
+        <i class="fa-solid fa-users-viewfinder"></i> Roster
+      </button>
+    </nav>
+
+    <!-- Tab Content Panes -->
+    <div class="briefing-tab-body">
+      <!-- 1. Directives Pane -->
+      <section class="briefing-pane active" id="paneDirectives">
+        <div class="briefing-card">
+          <div class="briefing-card-title"><i class="fa-solid fa-terminal"></i> OPERATIONAL DIRECTIVES</div>
+          <div id="briefingDirectivesContent" class="briefing-prose">
+            1. Zero RF or network emissions outside encrypted loop.<br>
+            2. All mission chat logs disintegrate irrevocably upon zero countdown.<br>
+            3. Extraction rendezvous point: Sector 7 air-gapped relay.
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Threat Intel (Rules of Engagement) -->
+      <section class="briefing-pane" id="paneThreatIntel">
+        <div class="briefing-card threat-card">
+          <div class="briefing-card-title"><i class="fa-solid fa-shield-halved"></i> RULES OF ENGAGEMENT</div>
+          <ul id="briefingRoeList" class="briefing-list">
+            <li><i class="fa-solid fa-caret-right"></i> Strict zero-knowledge peer identity cloaking active.</li>
+            <li><i class="fa-solid fa-caret-right"></i> Ephemeral buffers flushed every 120 seconds.</li>
+            <li><i class="fa-solid fa-caret-right"></i> Packet sniffers neutralized via ChaCha20-Poly1305 obfuscation.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- 3. Operational Objectives (Live Synced Checkboxes) -->
+      <section class="briefing-pane" id="paneObjectives">
+        <div class="briefing-card">
+          <div class="briefing-card-title"><i class="fa-solid fa-bullseye"></i> MISSION OBJECTIVES</div>
+          <div id="briefingObjectivesList" class="objectives-interactive-feed">
+            <!-- Dynamically populated interactive checkboxes -->
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Active Operative Roster -->
+      <section class="briefing-pane" id="paneRoster">
+        <div class="briefing-card">
+          <div class="briefing-card-title"><i class="fa-solid fa-users"></i> CLEARED OPERATIVES</div>
+          <div id="briefingRosterList" class="roster-grid">
+            <!-- Operative status badges -->
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</aside>
+  <!-- Hardware Accelerated Ash Canvas -->
+<canvas id="nexAshCanvas" class="nex-ash-canvas" style="display: none;"></canvas>
+
+<!-- Cryptographic Tombstone Card -->
+<div id="nexTombstoneTemplate" style="display: none;">
+  <div class="message-wrapper war-room-tombstone-wrapper">
+    <div class="message-bubble war-room-tombstone-card">
+      <div class="tombstone-header">
+        <i class="fa-solid fa-skull"></i>
+        <span>OPERATION PURGED // ENCLAVE SELF-DESTRUCTED</span>
+      </div>
+      <p class="tombstone-desc">
+        Mission countdown reached zero epoch. All ephemeral transmissions, voice notes, attachments, and directive buffers have been irrevocably vaporized.
+      </p>
+      <div class="tombstone-seal-box">
+        <div class="seal-row">
+          <span class="seal-label">CRYPTOGRAPHIC SEAL:</span>
+          <span class="seal-val" id="tombstoneHashDisplay">SHA256: 0x8FA9...C0DE</span>
+        </div>
+        <div class="seal-row">
+          <span class="seal-label">INTEGRITY AUDIT:</span>
+          <span class="seal-verified"><i class="fa-solid fa-circle-check"></i> 100% DISINTEGRATED</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- 2. LIVE QUORUM CONSENSUS & MILESTONE HUD -->
+  <!-- LIVE QUORUM CONSENSUS & MILESTONE HUD -->
+<div id="nexQuorumHud" class="nex-quorum-hud" style="display: none;">
+  
+  <!-- 1. WAR ROOM QUORUM CONSENSUS BAR -->
+  <div class="quorum-consensus-card">
+    <div class="quorum-card-head">
+      <div class="quorum-head-left">
+        <span class="quorum-live-beacon">
+          <i class="fa-solid fa-circle-dot"></i>
+          <span>LIVE QUORUM</span>
+        </span>
+        <span class="quorum-mission-tag" id="quorumMissionCodename">OP: BLACKOUT PROTOCOL</span>
+        <span class="quorum-status-pill pending" id="quorumStatusBadge">VOTING ACTIVE</span>
+      </div>
+      <div class="quorum-head-right">
+        <span class="quorum-threshold-spec">
+          <i class="fa-solid fa-scale-balanced"></i>
+          <span>THRESHOLD: <strong id="quorumThresholdLabel">66% SUPERMAJORITY</strong></span>
+        </span>
+        <button type="button" class="quorum-opt-btn" id="btnToggleQuorumDetails" title="Toggle Consensus Details">
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Consensus Progress Bar: Dynamic Yes vs No Ratio -->
+    <div class="quorum-progress-wrapper">
+      <div class="quorum-ratio-bar">
+        <div class="ratio-fill affirmative" id="ratioFillAffirmative" style="width: 0%;"></div>
+        <div class="ratio-fill negative" id="ratioFillNegative" style="width: 0%;"></div>
+      </div>
+      <div class="quorum-ratio-labels">
+        <span class="ratio-stat affirmative">
+          <i class="fa-solid fa-thumbs-up"></i>
+          <span id="statAffirmativeCount">0 YES (0%)</span>
+        </span>
+        <span class="ratio-target-marker" id="ratioTargetMarker" style="left: 66.6%;" title="Consensus Threshold Ceiling">
+          <i class="fa-solid fa-flag"></i> 66%
+        </span>
+        <span class="ratio-stat negative">
+          <i class="fa-solid fa-thumbs-down"></i>
+          <span id="statNegativeCount">0 NO (0%)</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Interactive Voting Ballot Controls -->
+    <div class="quorum-action-strip">
+      <div class="quorum-vote-buttons" id="quorumVoteButtonGroup">
+        <button type="button" class="quorum-vote-btn vote-yes" data-vote="AFFIRMATIVE">
+          <i class="fa-solid fa-check"></i> <span>APPROVE (YES)</span>
+        </button>
+        <button type="button" class="quorum-vote-btn vote-no" data-vote="NEGATIVE">
+          <i class="fa-solid fa-xmark"></i> <span>REJECT (NO)</span>
+        </button>
+        <button type="button" class="quorum-vote-btn vote-abstain" data-vote="ABSTAIN">
+          <i class="fa-solid fa-minus"></i> <span>ABSTAIN</span>
+        </button>
+      </div>
+      <div class="quorum-crypto-seal" id="quorumBallotSealBadge">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>BALLOT SEAL: <strong id="ballotSealHash">NOT CAST</strong></span>
+      </div>
+    </div>
+
+    <!-- Expanded Ballot Roster Accordion (Hidden by default) -->
+    <div class="quorum-ballots-roster" id="quorumBallotsRoster" style="display: none;">
+      <div class="roster-header">
+        <span>VERIFIED OPERATIVE BALLOTS</span>
+        <span id="rosterCountText">0 / 0 PARTICIPATING</span>
+      </div>
+      <div class="roster-grid" id="quorumRosterGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. MISSION MILESTONE TRACKING MATRIX -->
+  <div class="mission-milestones-track">
+    <div class="milestones-track-head">
+      <div class="milestones-track-title">
+        <i class="fa-solid fa-crosshairs"></i>
+        <span>TACTICAL MILESTONE PIPELINE</span>
+      </div>
+      <div class="milestones-track-stats" id="milestonesTrackStats">PHASE 1 OF 3 ACTIVE</div>
+    </div>
+
+    <!-- Milestones Progress Stepper -->
+    <div class="milestones-stepper-row" id="milestonesStepperRow">
+      <!-- Step 1 -->
+      <div class="milestone-step-card active" data-phase="1">
+        <div class="step-badge">
+          <span class="step-num">01</span>
+          <i class="fa-solid fa-angles-right"></i>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Infiltration</div>
+          <div class="step-status">IN PROGRESS</div>
+        </div>
+      </div>
+
+      <div class="milestone-connector active"></div>
+
+      <!-- Step 2 -->
+      <div class="milestone-step-card locked" data-phase="2">
+        <div class="step-badge">
+          <span class="step-num">02</span>
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Intel Extraction</div>
+          <div class="step-status">LOCKED</div>
+        </div>
+      </div>
+
+      <div class="milestone-connector"></div>
+
+      <!-- Step 3 -->
+      <div class="milestone-step-card locked" data-phase="3">
+        <div class="step-badge">
+          <span class="step-num">03</span>
+          <i class="fa-solid fa-lock"></i>
+        </div>
+        <div class="step-body">
+          <div class="step-title">Safe Exfiltration</div>
+          <div class="step-status">LOCKED</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Milestone Tasks Checklist -->
+    <div class="milestone-tasks-container" id="milestoneTasksContainer">
+      <div class="tasks-checklist-title">
+        <i class="fa-solid fa-list-check"></i>
+        <span>PHASE 1 VERIFICATION TASKS</span>
+      </div>
+      <div class="tasks-checklist" id="milestoneTasksList">
+        <!-- Injected dynamically via JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- 3. RAM ZEROING & HARDWARE SELF-DESTRUCT HUD -->
+  <!-- ==========================================================================
+     NEXCHAT ADVANCED RAM-ZEROING & SHREDDER CORE CONTROL PANEL
+     Colorway: Deep Obsidian (#060913), Threat Crimson (#ef4444), Amber (#f59e0b)
+     Strictly 0 Unicode Emojis (FontAwesome 6 Icons Only)
+     ========================================================================== -->
+<div class="settings-card shredder-core-card" id="shredderCoreSettingsCard">
+  <div class="shredder-card-header">
+    <div class="shredder-title-group">
+      <div class="shredder-icon-box">
+        <i class="fa-solid fa-radiation"></i>
+      </div>
+      <div>
+        <strong class="shredder-heading">RAM-Zeroing &amp; Irrevocable Self-Destruct Engine</strong>
+        <p class="shredder-subheading">Anti-forensic micro-shredder, heap pressure GC eviction, and cold-boot wipe triggers.</p>
+      </div>
+    </div>
+    <span class="shredder-status-badge" id="shredderStatusBadge">
+      <i class="fa-solid fa-microchip"></i> ARMED &amp; WATCHING
+    </span>
+  </div>
+
+  <!-- Telemetry Bar -->
+  <div class="shredder-telemetry-strip">
+    <div class="shredder-telemetry-item">
+      <span class="telemetry-label">Active Protected Buffers:</span>
+      <span class="telemetry-val" id="shredderBufferCountDisplay">0 Pointers</span>
+    </div>
+    <div class="shredder-telemetry-item">
+      <span class="telemetry-label">V8 GC Pressure Engine:</span>
+      <span class="telemetry-val text-emerald">READY (128MB Pool)</span>
+    </div>
+    <div class="shredder-telemetry-item">
+      <span class="telemetry-label">Irrevocable Wipe Mode:</span>
+      <span class="telemetry-val text-crimson">IndexedDB + Master Salt</span>
+    </div>
+  </div>
+
+  <div class="shredder-controls-matrix">
+    <!-- Toggle 1: Deep Memory Zeroing -->
+    <div class="luxury-toggle-row">
+      <div>
+        <strong class="shredder-toggle-title">
+          <i class="fa-solid fa-memory" style="color: #00f3ff; margin-right: 6px;"></i>
+          Recursive TypedArray &amp; AudioBuffer Shredding
+        </strong>
+        <p class="shredder-toggle-desc">
+          Executes 3-pass cryptographic overwrite across all registered memory buffers, decrypted PCM voice notes, and canvas elements.
+        </p>
+      </div>
+      <label class="luxury-switch">
+        <input type="checkbox" id="toggleRecursiveShredding" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Toggle 2: V8 Heap Pressure GC Induction -->
+    <div class="luxury-toggle-row">
+      <div>
+        <strong class="shredder-toggle-title">
+          <i class="fa-solid fa-recycle" style="color: #10b981; margin-right: 6px;"></i>
+          V8 Memory Pressure Force-GC Cycle
+        </strong>
+        <p class="shredder-toggle-desc">
+          Simulates transient allocation pressure during wipe to force browser garbage collection of dereferenced key handles.
+        </p>
+      </div>
+      <label class="luxury-switch">
+        <input type="checkbox" id="toggleGcPressureLoop" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Toggle 3: Multi-Failed PIN Self-Destruct Trigger -->
+    <div class="luxury-toggle-row">
+      <div>
+        <strong class="shredder-toggle-title">
+          <i class="fa-solid fa-skull-crossbones" style="color: #ef4444; margin-right: 6px;"></i>
+          5-Strike Failed PIN Self-Destruct Burn
+        </strong>
+        <p class="shredder-toggle-desc">
+          Irrevocably deletes all local IndexedDB vaults, caches, and encryption salts after 5 consecutive failed unlock attempts.
+        </p>
+      </div>
+      <label class="luxury-switch">
+        <input type="checkbox" id="toggleFiveStrikeSelfDestruct" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Toggle 4: Window Blur / Tab Unload Sanitization -->
+    <div class="luxury-toggle-row">
+      <div>
+        <strong class="shredder-toggle-title">
+          <i class="fa-solid fa-eye-slash" style="color: #f59e0b; margin-right: 6px;"></i>
+          Background Tab Blur Micro-Sanitization
+        </strong>
+        <p class="shredder-toggle-desc">
+          Automatically scrambles in-flight ephemeral key buffers whenever the browser tab is minimized or hidden.
+        </p>
+      </div>
+      <label class="luxury-switch">
+        <input type="checkbox" id="toggleBlurSanitization" checked />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <!-- Manual Self-Destruct Trigger Bar -->
+    <div class="shredder-emergency-bar">
+      <button type="button" id="btnManualEmergencyBurn" class="btn-danger-shredder">
+        <i class="fa-solid fa-radiation"></i> MANUAL EMERGENCY SELF-DESTRUCT BURN
+      </button>
+      <span class="shredder-warn-text">
+        <i class="fa-solid fa-triangle-exclamation"></i> WARNING: This action is permanent and irrevocably obliterates all local session keys and transcripts.
+      </span>
+    </div>
+  </div>
+</div>
+
+  <!-- 4. CROSS-DEVICE LOCAL WEBRTC AIR-DROP RADAR MODAL -->
+  <!-- NEXCHAT CROSS-DEVICE AIR-DROP RADAR MODAL -->
+<div id="nexAirDropModal" class="cyber-hub-modal" style="display: none;" aria-hidden="true">
+  <div class="cyber-hub-modal-content nex-airdrop-modal-content">
+    <div class="cyber-hub-header">
+      <div class="cyber-hub-title">
+        <i class="fa-solid fa-satellite-dish text-[#00ff66]"></i>
+        <span>P2P AIR-DROP RADAR // LOCAL SUBNET BEAM</span>
+      </div>
+      <button type="button" class="close-modal" id="closeAirDropModalBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="airdrop-modal-body">
+      <!-- Top File Staging Bar -->
+      <div class="airdrop-file-staging" id="airdropFileStaging">
+        <input type="file" id="airdropFileInput" style="display: none;" />
+        <div class="staging-info" id="airdropStagingClick">
+          <i class="fa-solid fa-file-arrow-up text-[#00f2fe]"></i>
+          <div>
+            <strong id="airdropSelectedFileName">No file selected</strong>
+            <span id="airdropSelectedFileSize">Tap or drop file to beam (up to 4GB+)</span>
+          </div>
+        </div>
+        <button type="button" id="airdropSelectFileBtn" class="airdrop-btn-ghost">
+          <i class="fa-solid fa-folder-open"></i> Browse
+        </button>
+      </div>
+
+      <!-- Radial Sonar Radar Screen -->
+      <div class="airdrop-radar-stage" id="airdropRadarStage">
+        <div class="sonar-screen">
+          <div class="sonar-sweep-line"></div>
+          <div class="sonar-ring ring-1"></div>
+          <div class="sonar-ring ring-2"></div>
+          <div class="sonar-ring ring-3"></div>
+          <div class="sonar-center-node">
+            <i class="fa-solid fa-tower-broadcast"></i>
+            <span class="sonar-center-label">YOU</span>
+          </div>
+
+          <!-- Dynamic Peer Blips Container -->
+          <div id="airdropRadarBlipsContainer" class="sonar-blips-container">
+            <!-- Dynamically rendered nearby peer blips -->
+          </div>
+        </div>
+        <div class="sonar-legend">
+          <span><i class="fa-solid fa-circle text-[#00ff66]"></i> Active Subnet Peer</span>
+          <span><i class="fa-solid fa-shield-halved text-[#00f2fe]"></i> E2EE Direct Channel</span>
+        </div>
+      </div>
+
+      <!-- Live Transfer Velocity HUD & Speedometer (Visible during beam) -->
+      <div class="airdrop-transfer-hud" id="airdropTransferHud" style="display: none;">
+        <div class="hud-meta-row">
+          <div class="hud-target-info">
+            <span class="hud-target-label">BEAMING TO:</span>
+            <strong id="airdropHudTargetNode">Node Alpha</strong>
+          </div>
+          <div class="hud-speed-gauge">
+            <i class="fa-solid fa-gauge-high text-[#00ff66]"></i>
+            <span id="airdropTransferVelocity">0.0 MB/s</span>
+          </div>
+        </div>
+
+        <div class="hud-progress-track">
+          <div id="airdropProgressBar" class="hud-progress-fill" style="width: 0%;"></div>
+        </div>
+
+        <div class="hud-stats-row">
+          <span>Transferred: <strong id="airdropTransferredBytes">0 MB</strong> / <span id="airdropTotalBytes">0 MB</span></span>
+          <span id="airdropEtaCounter">ETA: Calculating...</span>
+          <span id="airdropPercentBadge" class="hud-pct-badge">0%</span>
+        </div>
+      </div>
+
+      <!-- Receiver Slide-up Tray -->
+      <div class="airdrop-receiver-tray" id="airdropReceiverTray" style="display: none;">
+        <div class="receiver-tray-header">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-inbox text-[#f59e0b]"></i>
+            <span>INCOMING AIR-DROP BEAM</span>
+          </div>
+          <span class="receiver-source-badge" id="airdropIncomingSender">@PeerNode</span>
+        </div>
+        <div class="receiver-file-preview">
+          <i class="fa-solid fa-file-zipper text-2xl text-[#00f2fe]"></i>
+          <div class="receiver-file-meta">
+            <strong id="airdropIncomingFileName">bundle.zip</strong>
+            <span id="airdropIncomingFileSize">145 MB &bull; Direct LAN WebRTC</span>
+          </div>
+        </div>
+        <div class="receiver-actions">
+          <button type="button" id="airdropAcceptBtn" class="airdrop-btn-accept">
+            <i class="fa-solid fa-download"></i> Accept & Stream
+          </button>
+          <button type="button" id="airdropDeclineBtn" class="airdrop-btn-decline">
+            <i class="fa-solid fa-xmark"></i> Decline
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 
 </html>
