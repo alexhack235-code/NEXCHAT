@@ -2522,7 +2522,109 @@
                     <input type="range" id="wallpaperDimmingSlider" min="0" max="90" value="40" step="5" class="cyber-range-slider" style="width: 100%; margin-top: 8px;">
                   </div>
 
-                  <div style="margin-top: 14px;">
+                  
+            <!-- NEX-TRANSMITTER INTELLIGENT VIDEO TRIMMER & STATUS CHAIN COMPONENT -->
+            <div id="nexTransmitterTrimmerCard" class="nex-transmitter-trimmer-card" style="display: none;">
+              <!-- Card Header -->
+              <div class="trimmer-card-header">
+                <div class="trimmer-header-brand">
+                  <span class="trimmer-brand-tag">[NEX//TRANSMITTER]</span>
+                  <span class="trimmer-cursor-blink">_</span>
+                </div>
+                <div class="trimmer-header-meta">
+                  <span id="trimmerDurationDetected">TTL: 24H &bull; 0s DETECTED</span>
+                </div>
+              </div>
+
+              <!-- Warning Banner -->
+              <div class="trimmer-warning-banner">
+                <div class="trimmer-warning-left">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  <span id="trimmerWarningText">0:00 detected &mdash; Status capped at 2:00</span>
+                </div>
+                <span class="trimmer-chain-parts-badge" id="trimmerChainCountBadge">1 part</span>
+              </div>
+
+              <!-- Video Preview Stage with Live Scrubhead -->
+              <div class="trimmer-preview-stage">
+                <video id="trimmerVideoPreview" playsinline preload="auto"></video>
+                <!-- Video Scrim Overlay -->
+                <div class="trimmer-preview-scrim">
+                  <button type="button" class="trimmer-play-toggle-btn" id="trimmerPlayToggleBtn" title="Play / Pause">
+                    <i class="fa-solid fa-play"></i>
+                  </button>
+                  <div class="trimmer-preview-timer" id="trimmerLiveTimerBadge">0:00 / 0:00</div>
+                </div>
+              </div>
+
+              <!-- Filmstrip Timeline Track with Interactive 2-Min Selection Overlay -->
+              <div class="trimmer-timeline-container">
+                <div class="trimmer-timeline-label-row">
+                  <span><i class="fa-solid fa-film"></i> TIMELINE SELECTION (2-MINUTE CAP)</span>
+                  <span id="trimmerWindowTimeReadout" class="trimmer-window-readout">0:00 &mdash; 2:00 (120s selected)</span>
+                </div>
+
+                <div class="trimmer-timeline-track" id="trimmerTimelineTrack">
+                  <!-- Real Video Filmstrip Thumbnail Strip -->
+                  <div class="trimmer-filmstrip-strip" id="trimmerFilmstripStrip"></div>
+
+                  <!-- Playback Playhead Position Indicator -->
+                  <div class="trimmer-playhead" id="trimmerPlayhead" style="left: 0%;"></div>
+
+                  <!-- Interactive 2-Minute Selection Window Overlay -->
+                  <div class="trimmer-window-overlay" id="trimmerWindowOverlay" style="left: 0%; width: 50%;">
+                    <div class="trimmer-handle trimmer-handle-left" id="trimmerHandleLeft">
+                      <i class="fa-solid fa-grip-lines-vertical"></i>
+                    </div>
+                    <div class="trimmer-window-center-grip">
+                      <span class="trimmer-window-pill">2:00 WINDOW</span>
+                    </div>
+                    <div class="trimmer-handle trimmer-handle-right" id="trimmerHandleRight">
+                      <i class="fa-solid fa-grip-lines-vertical"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Range Slider Scrubber Control -->
+              <div class="trimmer-range-control-row">
+                <input type="range" id="trimmerRangeSlider" class="trimmer-range-slider" min="0" max="100" value="0" step="0.1" />
+              </div>
+
+              <!-- AI Best Moment Auto-Badge -->
+              <div class="trimmer-ai-badge" id="trimmerAiBadge">
+                <div class="trimmer-ai-info">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span id="trimmerAiBadgeText">Auto-best moment: 0:42-2:42 detected by AI</span>
+                </div>
+                <button type="button" class="trimmer-apply-ai-btn" id="trimmerApplyAiBtn">
+                  <i class="fa-solid fa-check"></i> Apply
+                </button>
+              </div>
+
+              <!-- Mode Switcher Buttons (TRIM vs CHAIN) -->
+              <div class="trimmer-mode-switcher">
+                <button type="button" class="trimmer-mode-btn active" id="trimmerModeTrimBtn" data-mode="TRIM">
+                  <i class="fa-solid fa-scissors"></i>
+                  <span>Trim to 2:00</span>
+                </button>
+                <button type="button" class="trimmer-mode-btn" id="trimmerModeChainBtn" data-mode="CHAIN">
+                  <i class="fa-solid fa-link"></i>
+                  <span id="trimmerChainModeLabel">Split into 2 x 2-min chain (Status Thread)</span>
+                </button>
+              </div>
+
+              <!-- Chain Parts Preview Breakdown (Displayed when Mode == CHAIN) -->
+              <div class="trimmer-chain-breakdown" id="trimmerChainBreakdown" style="display: none;">
+                <div class="trimmer-chain-title">
+                  <i class="fa-solid fa-layer-group"></i>
+                  <span>STATUS THREAD TRANSMISSION SCHEDULE:</span>
+                </div>
+                <div class="trimmer-chain-parts-grid" id="trimmerChainPartsGrid"></div>
+              </div>
+            </div>
+
+            <div style="margin-top: 14px;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                       <strong>Wallpaper Ambient Blur: <span id="wallpaperBlurValue" style="color: #00f2ff;">0px</span></strong>
                       <span style="font-size: 11px; color: #8b949e;">Soft Focus</span>
@@ -4597,6 +4699,11 @@
             <div class="status-viewer-name-row">
               <span id="statusViewerName" class="status-viewer-name">User</span>
               <span class="status-verified-chip" id="statusVerifiedChip" title="NEX Sealed Status"><i class="fa-solid fa-shield-halved"></i></span>
+              <span id="statusViewerChainBadge" class="status-chain-badge" style="display: none;">
+                <i class="fa-solid fa-link"></i>
+                <span id="statusViewerChainText">Part 1 of 12</span>
+                <span class="status-chain-pulse"></span>
+              </span>
             </div>
             <div class="status-viewer-sub-row">
               <span id="statusViewerTime" class="status-viewer-time">Just now</span>
@@ -6522,6 +6629,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 <script src="./src/js/nex-status-audio-studio.js"></script>
 <script src="./src/js/locked-chats-manager.js"></script>
 <script src="./src/js/archived-chats-engine.js"></script>
+    <script src="./src/js/nex-status-trimmer.js"></script>
 
 
         <!-- NEXCHAT CYBER ECOSYSTEM SUITE MODAL -->

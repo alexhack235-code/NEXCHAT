@@ -15217,6 +15217,10 @@ function validateStatusMediaDuration(file, callback) {
   mediaEl.onloadedmetadata = () => {
     const dur = mediaEl.duration;
     if (dur && !isNaN(dur) && isFinite(dur) && dur > 120.5) {
+      if (window.NexTransmitterTrimmer && file.type.startsWith('video/')) {
+        window.NexTransmitterTrimmer.activateTrimmer(file, dur);
+        return finish(true, dur);
+      }
       const m = Math.floor(dur / 60);
       const s = Math.floor(dur % 60);
       const formatted = `${m}:${s < 10 ? '0' : ''}${s}`;
@@ -15370,7 +15374,15 @@ async function loadStatusFeed() {
             caption: d.content || d.text || d.caption || '',
             timestamp: d.createdAtMs || (d.timestamp?.toMillis ? d.timestamp.toMillis() : now),
             expiresAtMs: expTime,
-            isViewed: false
+            isViewed: false,
+            mode: d.mode || null,
+            threadId: d.threadId || null,
+            chainIndex: d.chainIndex || null,
+            chainTotal: d.chainTotal || null,
+            timeWindow: d.timeWindow || null,
+            trimStart: (typeof d.trimStart === 'number') ? d.trimStart : (d.timeWindow?.start != null ? d.timeWindow.start : null),
+            trimEnd: (typeof d.trimEnd === 'number') ? d.trimEnd : (d.timeWindow?.end != null ? d.timeWindow.end : null),
+            duration: d.duration || null
           });
         }
       });
@@ -15398,6 +15410,15 @@ async function loadStatusFeed() {
         grp.slides.push(st);
         if (st.timestamp > grp.lastUpdated) grp.lastUpdated = st.timestamp;
       }
+    });
+
+    userGroupsMap.forEach((grp) => {
+      grp.slides.sort((a, b) => {
+        if (a.threadId && b.threadId && a.threadId === b.threadId) {
+          return (a.chainIndex || 1) - (b.chainIndex || 1);
+        }
+        return (a.timestamp || 0) - (b.timestamp || 0);
+      });
     });
 
     // Update My Status Avatar & Backdrop Preview
@@ -15606,6 +15627,17 @@ function showCurrentStorySlide() {
   if (time) time.textContent = relativeTimeLabel;
   if (detailsExpires) detailsExpires.textContent = expiresInLabel;
 
+  const chainBadge = document.getElementById('statusViewerChainBadge');
+  const chainText = document.getElementById('statusViewerChainText');
+  if (currentSlide.chainTotal && currentSlide.chainTotal > 1) {
+    if (chainBadge && chainText) {
+      chainText.textContent = `Part ${currentSlide.chainIndex || 1} of ${currentSlide.chainTotal}`;
+      chainBadge.style.display = 'inline-flex';
+    }
+  } else if (chainBadge) {
+    chainBadge.style.display = 'none';
+  }
+
   // Set currentStatusSlide on window for analytics inspection
   window.currentStatusSlide = currentSlide;
 
@@ -15658,7 +15690,10 @@ function showCurrentStorySlide() {
     if (textSlide) textSlide.style.display = 'none';
     if (video) {
       video.style.display = 'block';
-      video.currentTime = 0;
+      const winStart = (currentSlide.timeWindow?.start != null)
+        ? currentSlide.timeWindow.start
+        : (typeof currentSlide.trimStart === 'number' ? currentSlide.trimStart : 0);
+      video.currentTime = winStart;
       video.src = currentSlide.mediaUrl;
     }
     if (muteBtn) {
@@ -16074,7 +16109,7 @@ function startStoryProgress() {
   const currentFill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
   if (currentFill) currentFill.style.width = '0%';
 
-  // 1. VIDEO SLIDE: Driven purely by HTML5 video timeupdate and onended (supports any length: 30s, 1m, 2m, 3m, 4m)
+  // 1. VIDEO SLIDE: Driven purely by HTML5 video timeupdate and onended with trim & chain boundaries
   if (currentSlide.mediaType === 'video' && currentSlide.mediaUrl) {
     const video = document.getElementById('statusViewerVideo');
     if (!video) {
@@ -16082,16 +16117,33 @@ function startStoryProgress() {
       return;
     }
 
+    const winStart = (currentSlide.timeWindow?.start != null)
+      ? currentSlide.timeWindow.start
+      : (typeof currentSlide.trimStart === 'number' ? currentSlide.trimStart : 0);
+    const winEnd = (currentSlide.timeWindow?.end != null)
+      ? currentSlide.timeWindow.end
+      : ((typeof currentSlide.trimEnd === 'number' && currentSlide.trimEnd > winStart) ? currentSlide.trimEnd : null);
+    const totalDuration = (winEnd != null) ? Math.max(0.1, winEnd - winStart) : (video.duration || 120);
+
     video.ontimeupdate = () => {
       if (isStoryPaused) return;
-      if (video.duration && !isNaN(video.duration) && isFinite(video.duration) && video.duration > 0) {
-        const pct = Math.min(100, Math.max(0, (video.currentTime / video.duration) * 100));
+
+      if (winEnd != null && video.currentTime >= (winEnd - 0.12)) {
+        video.ontimeupdate = null;
         const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
-        if (fill) fill.style.width = `${pct}%`;
+        if (fill) fill.style.width = '100%';
+        nextStorySlide();
+        return;
       }
+
+      const elapsed = Math.max(0, video.currentTime - winStart);
+      const pct = Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+      const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
+      if (fill) fill.style.width = `${pct}%`;
     };
 
     video.onended = () => {
+      video.ontimeupdate = null;
       const fill = document.getElementById(`statusProgressFill_${currentStorySlideIndex}`);
       if (fill) fill.style.width = '100%';
       nextStorySlide();
@@ -16225,6 +16277,9 @@ function closeCreateStatusModal() {
   document.body.style.overflow = '';
 
   selectedStatusMediaFile = null;
+  if (window.NexTransmitterTrimmer) {
+    window.NexTransmitterTrimmer.hideTrimmer();
+  }
   const fileInput = document.getElementById('statusMediaModalFileInput');
   if (fileInput) fileInput.value = '';
   const captionInput = document.getElementById('statusMediaCaptionInput');
@@ -16345,6 +16400,10 @@ function setupCreateStatusModal() {
       }
 
       selectedStatusMediaFile = file;
+      if (file.type.startsWith('video/') && window.NexTransmitterTrimmer && window.NexTransmitterTrimmer.activeFile) {
+        // Handled by NexTransmitterTrimmer
+        return;
+      }
       const fileUrl = URL.createObjectURL(file);
     if (dropPlaceholder) dropPlaceholder.style.display = 'none';
     if (previewBox) previewBox.style.display = 'block';
@@ -16371,6 +16430,7 @@ function setupCreateStatusModal() {
   removeBtn?.addEventListener('click', (e) => {
     e.stopPropagation();
     selectedStatusMediaFile = null;
+    if (window.NexTransmitterTrimmer) window.NexTransmitterTrimmer.hideTrimmer();
     if (fileInput) fileInput.value = '';
     if (previewBox) previewBox.style.display = 'none';
     if (dropPlaceholder) dropPlaceholder.style.display = 'block';
@@ -16528,7 +16588,47 @@ function setupCreateStatusModal() {
       };
 
       if (db) {
-        await addDoc(collection(db, 'statuses'), statusDoc);
+        const trimmerPayload = window.NexTransmitterTrimmer?.getTrimmingPayload();
+        if (trimmerPayload && trimmerPayload.mode === 'CHAIN' && trimmerPayload.parts && trimmerPayload.parts.length > 0) {
+          const threadId = `thread_${now}_${Math.random().toString(36).substring(2, 8)}`;
+          for (let i = 0; i < trimmerPayload.parts.length; i++) {
+            const pt = trimmerPayload.parts[i];
+            const partDoc = {
+              ...statusDoc,
+              content: contentText ? `${contentText} (Part ${pt.index}/${pt.total})` : `(Part ${pt.index}/${pt.total})`,
+              mode: 'CHAIN',
+              threadId: threadId,
+              chainIndex: pt.index,
+              chainTotal: pt.total,
+              timeWindow: {
+                start: pt.start,
+                end: pt.end,
+                duration: pt.duration
+              },
+              trimStart: pt.start,
+              trimEnd: pt.end,
+              duration: Math.round(pt.duration),
+              createdAtMs: now + (i * 50)
+            };
+            await addDoc(collection(db, 'statuses'), partDoc);
+          }
+        } else if (trimmerPayload && trimmerPayload.mode === 'TRIM') {
+          const trimDoc = {
+            ...statusDoc,
+            mode: 'TRIM',
+            trimStart: trimmerPayload.startTime,
+            trimEnd: trimmerPayload.endTime,
+            timeWindow: {
+              start: trimmerPayload.startTime,
+              end: trimmerPayload.endTime,
+              duration: trimmerPayload.duration
+            },
+            duration: trimmerPayload.duration
+          };
+          await addDoc(collection(db, 'statuses'), trimDoc);
+        } else {
+          await addDoc(collection(db, 'statuses'), statusDoc);
+        }
       }
 
       const myCircle = document.getElementById('myStatusCircleItem');
