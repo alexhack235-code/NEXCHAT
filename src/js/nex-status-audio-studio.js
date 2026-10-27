@@ -3,7 +3,7 @@
  * NEXCHAT - Status Voice Waveform & Ephemeral Audio Studio (NEX-STATUS-AUDIO)
  * =============================================================================
  * Capabilities:
- * 1. Voice Status Recording Studio: 30s capture with live canvas visualizer feedback.
+ * 1. Voice Status Recording Studio: 2-min capture with live canvas visualizer feedback.
  * 2. Web Audio DSP Playback: Interactive waveform scrubber with frequency peaks,
  *    live spectrum reaction, time countdown, +3dB speech presence filter, and scrub seeking.
  * 3. Decoupled module with zero external dependencies; couples cleanly into status-elite-suite.
@@ -16,7 +16,7 @@
 (function () {
   'use strict';
 
-  const MAX_RECORDING_SECONDS = 30;
+  const MAX_RECORDING_SECONDS = 120;
   const SAMPLE_RATE = 48000;
 
   class NexStatusAudioStudioEngine {
@@ -96,7 +96,7 @@
     }
 
     // =========================================================================
-    // 1. VOICE STATUS RECORDING STUDIO (30-Second Ephemeral Capture)
+    // 1. VOICE STATUS RECORDING STUDIO (2-Minute Ephemeral Capture)
     // =========================================================================
     bindRecordingStudio(containerEl = null) {
       const container = containerEl || document.getElementById('statusTabAudioPane');
@@ -109,8 +109,8 @@
             <!-- Recording & Waveform Card -->
             <div class="nex-audio-studio-card">
               <div class="nex-audio-studio-header">
-                <span class="studio-badge"><i class="fa-solid fa-microphone-lines"></i> 30S VOICE STUDIO</span>
-                <span id="nexAudioStudioTimer" class="studio-timer-pill">0:00 / 0:30</span>
+                <span class="studio-badge"><i class="fa-solid fa-microphone-lines"></i> 2-MIN VOICE STUDIO</span>
+                <span id="nexAudioStudioTimer" class="studio-timer-pill">0:00 / 2:00</span>
               </div>
 
               <!-- Live Waveform Visualizer Canvas during recording & preview -->
@@ -141,7 +141,7 @@
               </div>
 
               <div id="nexAudioStudioHint" class="studio-hint-text">
-                Tap microphone to begin 30-second tactical voice broadcast
+                Tap microphone to begin 2-minute tactical voice broadcast
               </div>
             </div>
           </div>
@@ -248,7 +248,7 @@
         this.recordingState = 'recording';
         this.updateStudioUI();
 
-        // 30-Second Countdown Timer
+        // 2-Minute Countdown Timer
         this.recordingDuration = 0;
         clearInterval(this.recordingTimerInterval);
         this.recordingTimerInterval = setInterval(() => {
@@ -440,8 +440,8 @@
         if (discardBtn) discardBtn.style.display = 'none';
         if (previewBtn) previewBtn.style.display = 'none';
         if (liveBeacon) liveBeacon.style.display = 'none';
-        if (timerEl) timerEl.textContent = '0:00 / 0:30';
-        if (hintEl) hintEl.textContent = 'Tap microphone to begin 30-second tactical voice broadcast';
+        if (timerEl) timerEl.textContent = '0:00 / 2:00';
+        if (hintEl) hintEl.textContent = 'Tap microphone to begin 2-minute tactical voice broadcast';
 
       } else if (this.recordingState === 'recording') {
         if (masterBtn) {
@@ -452,7 +452,7 @@
         if (discardBtn) discardBtn.style.display = 'none';
         if (previewBtn) previewBtn.style.display = 'none';
         if (liveBeacon) liveBeacon.style.display = 'flex';
-        if (hintEl) hintEl.textContent = 'Recording live telemetry... (30s maximum limit)';
+        if (hintEl) hintEl.textContent = 'Recording live telemetry... (2m maximum limit)';
 
       } else if (this.recordingState === 'preview') {
         const isPlaying = this.previewAudioEl && !this.previewAudioEl.paused;

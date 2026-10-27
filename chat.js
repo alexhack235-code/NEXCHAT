@@ -15153,6 +15153,52 @@ async function postStatus(textContent = '', imageUrl = null, mediaType = null) {
 }
 
 // State for full-screen WhatsApp Story Viewer
+function validateStatusMediaDuration(file, callback) {
+  if (!file) return callback(true);
+  if (!file.type.startsWith('video/') && !file.type.startsWith('audio/')) {
+    return callback(true);
+  }
+
+  const mediaEl = document.createElement(file.type.startsWith('video/') ? 'video' : 'audio');
+  mediaEl.preload = 'metadata';
+  const objectUrl = URL.createObjectURL(file);
+  mediaEl.src = objectUrl;
+
+  let hasResponded = false;
+  const finish = (isValid, duration) => {
+    if (hasResponded) return;
+    hasResponded = true;
+    try {
+      URL.revokeObjectURL(objectUrl);
+      mediaEl.removeAttribute('src');
+      mediaEl.load();
+    } catch (_) {}
+    callback(isValid, duration);
+  };
+
+  mediaEl.onloadedmetadata = () => {
+    const dur = mediaEl.duration;
+    if (dur && !isNaN(dur) && isFinite(dur) && dur > 120.5) {
+      const m = Math.floor(dur / 60);
+      const s = Math.floor(dur % 60);
+      const formatted = `${m}:${s < 10 ? '0' : ''}${s}`;
+      showNotif(`Status upload limit exceeded: Media is ${formatted}. Status uploads are capped at 2 minutes (120s max). Please trim your file.`, 'error', 5000);
+      return finish(false, dur);
+    }
+    return finish(true, dur);
+  };
+
+  mediaEl.onerror = () => {
+    // If browser cannot parse metadata, allow upload to proceed gracefully
+    finish(true, 0);
+  };
+
+  // Timeout guard in case metadata hangs
+  setTimeout(() => {
+    if (!hasResponded) finish(true, 0);
+  }, 3500);
+}
+
 let activeStoriesList = [];
 let currentStoryGroupIndex = 0;
 let currentStorySlideIndex = 0;
@@ -15206,8 +15252,13 @@ async function loadStatusFeed() {
       fileInput.addEventListener('change', (e) => {
         const file = e.target.files?.[0];
         if (file) {
-          openCreateStatusModal('media');
-          selectedStatusMediaFile = file;
+          validateStatusMediaDuration(file, (isValid) => {
+            if (!isValid) {
+              fileInput.value = '';
+              return;
+            }
+            openCreateStatusModal('media');
+            selectedStatusMediaFile = file;
           const fileUrl = URL.createObjectURL(file);
           const dropPlaceholder = document.getElementById('statusDropPlaceholder');
           const previewBox = document.getElementById('statusMediaPreviewBox');
@@ -15222,6 +15273,7 @@ async function loadStatusFeed() {
             if (videoPreview) { videoPreview.pause(); videoPreview.style.display = 'none'; }
             if (imgPreview) { imgPreview.style.display = 'block'; imgPreview.src = fileUrl; }
           }
+          });
         }
       });
     }
@@ -16242,9 +16294,20 @@ function setupCreateStatusModal() {
   fileInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    selectedStatusMediaFile = file;
 
-    const fileUrl = URL.createObjectURL(file);
+    validateStatusMediaDuration(file, (isValid) => {
+      if (!isValid) {
+        selectedStatusMediaFile = null;
+        if (fileInput) fileInput.value = '';
+        if (previewBox) previewBox.style.display = 'none';
+        if (dropPlaceholder) dropPlaceholder.style.display = 'block';
+        if (videoPreview) { videoPreview.pause(); videoPreview.src = ''; }
+        if (imgPreview) { imgPreview.src = ''; }
+        return;
+      }
+
+      selectedStatusMediaFile = file;
+      const fileUrl = URL.createObjectURL(file);
     if (dropPlaceholder) dropPlaceholder.style.display = 'none';
     if (previewBox) previewBox.style.display = 'block';
 
@@ -16264,6 +16327,7 @@ function setupCreateStatusModal() {
         imgPreview.src = fileUrl;
       }
     }
+    });
   });
 
   removeBtn?.addEventListener('click', (e) => {
@@ -16330,6 +16394,12 @@ function setupCreateStatusModal() {
       if (!isMedia && !contentText) {
         showNotif('Please select a photo/video or add text', 'error');
         return;
+      }
+      if (isMedia && selectedStatusMediaFile && (selectedStatusMediaFile.type.startsWith('video/') || selectedStatusMediaFile.type.startsWith('audio/'))) {
+        const isValid = await new Promise((res) => validateStatusMediaDuration(selectedStatusMediaFile, res));
+        if (!isValid) {
+          return;
+        }
       }
     }
 

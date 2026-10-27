@@ -16,14 +16,16 @@
 (function () {
   'use strict';
 
-  // Google Global STUN Server Cluster
+  // Triple-Cluster Global STUN Server Configuration (Google, Cloudflare, Mozilla)
   const GOOGLE_ICE_CONFIG = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:stun1.l.google.com:19302' },
       { urls: 'stun:stun2.l.google.com:19302' },
       { urls: 'stun:stun3.l.google.com:19302' },
-      { urls: 'stun:stun4.l.google.com:19302' }
+      { urls: 'stun:stun4.l.google.com:19302' },
+      { urls: 'stun:stun.cloudflare.com:3478' },
+      { urls: 'stun:stun.services.mozilla.com:3478' }
     ],
     iceCandidatePoolSize: 10
   };
@@ -65,6 +67,21 @@
       this.savedCameraTrack = null;
       this.screenStream = null;
       this.studioNoiseGateActive = false;
+
+      // Front/Rear Camera State
+      this.currentFacingMode = 'user';
+
+      // Floating Draggable Call Mini-Dock Multitasking State
+      this.isCallMinimized = false;
+      this.miniDockDragData = { isDragging: false, startX: 0, startY: 0, initialLeft: 0, initialTop: 0 };
+
+      // Web Audio DSP Speech Presence & Clarity Filter
+      this.remoteAudioDspActive = true;
+      this.remoteAudioSourceNode = null;
+      this.remoteAudioFilterNode = null;
+      this.remoteAudioHpFilter = null;
+      this.speakingAnalyser = null;
+      this.speakingInterval = null;
 
       this.init();
     }
@@ -328,6 +345,13 @@
               <span id="callQualityText">HD 1080p &bull; 18ms &bull; 0% Loss</span>
             </div>
 
+            <!-- Call Top Actions (Minimize to Floating Dock) -->
+            <div style="position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 10px; z-index: 45;">
+              <button type="button" id="minimizeCallOverlayBtn" class="call-hud-action-btn" title="Minimize Call to Floating Dock" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(0, 255, 102, 0.4); border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; color: #00ff66; cursor: pointer; transition: all 0.2s; backdrop-filter: blur(10px); box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                <i class="fa-solid fa-down-left-and-up-right-to-center"></i>
+              </button>
+            </div>
+
             <!-- Remote Video (Full Screen Background) -->
             <video id="remoteCallVideo" class="remote-call-video" autoplay playsinline style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1; display: none; background: #000;"></video>
             
@@ -362,6 +386,9 @@
               <button type="button" id="toggleCallCamBtn" class="call-dock-btn active" title="Enable/Disable Camera" style="display: none;">
                 <i class="fa-solid fa-video"></i>
               </button>
+              <button type="button" id="toggleCameraFlipBtn" class="call-dock-btn" title="Flip Camera (Front/Rear)" style="display: none;">
+                <i class="fa-solid fa-camera-rotate"></i>
+              </button>
               <button type="button" id="toggleCallScreenBtn" class="call-dock-btn" title="Share Screen (Desktop/Window)">
                 <i class="fa-solid fa-desktop"></i>
               </button>
@@ -370,6 +397,9 @@
               </button>
               <button type="button" id="toggleCallBlurBtn" class="call-dock-btn" title="Studio Audio Isolation Gate">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
+              </button>
+              <button type="button" id="toggleCallSpeechClarityBtn" class="call-dock-btn active" title="HD Voice Presence & Clarity Boost (+3.5dB)" style="color: #00ff66; border-color: rgba(0, 255, 102, 0.4);">
+                <i class="fa-solid fa-waveform"></i>
               </button>
               
               <!-- Cyber Audio Voice DSP Masker -->
@@ -403,6 +433,40 @@
           </div>
         `;
         document.body.appendChild(overlay);
+      }
+
+      // 4. Floating Draggable Call Mini-Dock for In-App Multitasking
+      if (!document.getElementById('nexFloatingCallMiniDock')) {
+        const miniDock = document.createElement('div');
+        miniDock.id = 'nexFloatingCallMiniDock';
+        miniDock.className = 'nex-floating-call-dock';
+        miniDock.style.display = 'none';
+        miniDock.innerHTML = `
+          <div class="mini-dock-inner">
+            <div class="mini-dock-media" id="miniDockMediaWrap">
+              <video id="miniDockVideo" class="mini-dock-video" autoplay playsinline muted style="display: none;"></video>
+              <img id="miniDockAvatar" src="logo.jpg" class="mini-dock-avatar" alt="Calling Avatar" onerror="this.src='logo.jpg'">
+              <span class="mini-dock-live-dot"></span>
+            </div>
+            <div class="mini-dock-info">
+              <div class="mini-dock-peer-name" id="miniDockPeerName">Peer</div>
+              <div class="mini-dock-timer" id="miniDockTimer">0:00</div>
+            </div>
+            <div class="mini-dock-actions">
+              <button type="button" id="miniDockMicBtn" class="mini-dock-btn" title="Toggle Mic">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+              <button type="button" id="miniDockExpandBtn" class="mini-dock-btn expand-btn" title="Expand Call to Fullscreen">
+                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+              </button>
+              <button type="button" id="miniDockHangupBtn" class="mini-dock-btn hangup-btn" title="End Call">
+                <i class="fa-solid fa-phone-slash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(miniDock);
+        this.bindMiniDockDraggable(miniDock);
       }
     }
 
@@ -462,6 +526,24 @@
 
       const camBtn = document.getElementById('toggleCallCamBtn');
       if (camBtn) camBtn.addEventListener('click', () => this.toggleCam());
+
+      const flipBtn = document.getElementById('toggleCameraFlipBtn');
+      if (flipBtn) flipBtn.addEventListener('click', () => this.flipCamera());
+
+      const clarityBtn = document.getElementById('toggleCallSpeechClarityBtn');
+      if (clarityBtn) clarityBtn.addEventListener('click', () => this.toggleSpeechClarity());
+
+      const minimizeBtn = document.getElementById('minimizeCallOverlayBtn');
+      if (minimizeBtn) minimizeBtn.addEventListener('click', () => this.minimizeCallToDock());
+
+      const expandBtn = document.getElementById('miniDockExpandBtn');
+      if (expandBtn) expandBtn.addEventListener('click', () => this.expandCallFromDock());
+
+      const miniMicBtn = document.getElementById('miniDockMicBtn');
+      if (miniMicBtn) miniMicBtn.addEventListener('click', () => this.toggleMic());
+
+      const miniHangupBtn = document.getElementById('miniDockHangupBtn');
+      if (miniHangupBtn) miniHangupBtn.addEventListener('click', () => this.endCall(true));
 
       const hangupBtn = document.getElementById('hangupCallBtn');
       if (hangupBtn) hangupBtn.addEventListener('click', () => this.endCall(true));
@@ -1044,6 +1126,7 @@
         remoteAud.muted = false;
         remoteAud.volume = 1.0;
         remoteAud.play().catch(e => console.warn('[WebRTC] remote audio play warning:', e));
+        this.setupRemoteAudioDSP(this.remoteStream);
       }
 
       if (event.track) {
@@ -1145,7 +1228,12 @@
       const localVid = document.getElementById('localCallVideo');
       const localPlaceholder = document.getElementById('localVideoOffPlaceholder');
       const camBtn = document.getElementById('toggleCallCamBtn');
+      const flipBtn = document.getElementById('toggleCameraFlipBtn');
       const timerEl = document.getElementById('activeCallDuration');
+      const miniName = document.getElementById('miniDockPeerName');
+      const miniAvatar = document.getElementById('miniDockAvatar');
+      if (miniName) miniName.textContent = peerName;
+      if (miniAvatar) miniAvatar.src = peerAvatar || 'logo.jpg';
 
       if (overlay) overlay.style.display = 'flex';
       if (nameEl) nameEl.textContent = peerName;
@@ -1162,9 +1250,11 @@
         if (localPlaceholder) localPlaceholder.style.display = 'none';
         localVid.play().catch(e => console.warn('[WebRTC] Local video play error:', e));
         if (camBtn) camBtn.style.display = 'inline-flex';
+        if (flipBtn) flipBtn.style.display = 'inline-flex';
       } else {
         if (pipContainer) pipContainer.style.display = 'none';
         if (camBtn) camBtn.style.display = 'none';
+        if (flipBtn) flipBtn.style.display = 'none';
       }
 
       this.updateRemoteVideoDisplay();
@@ -1175,11 +1265,14 @@
       if (this.callTimerInterval) clearInterval(this.callTimerInterval);
       this.callStartTime = Date.now();
       const timerEl = document.getElementById('activeCallDuration');
+      const miniTimer = document.getElementById('miniDockTimer');
       this.callTimerInterval = setInterval(() => {
         const elapsed = Math.floor((Date.now() - this.callStartTime) / 1000);
         const m = Math.floor(elapsed / 60);
         const s = elapsed % 60;
-        if (timerEl) timerEl.textContent = `${m}:${s < 10 ? '0' : ''}${s}`;
+        const timeFormatted = `${m}:${s < 10 ? '0' : ''}${s}`;
+        if (timerEl) timerEl.textContent = timeFormatted;
+        if (miniTimer) miniTimer.textContent = timeFormatted;
       }, 1000);
     }
 
@@ -1197,6 +1290,11 @@
           btn.innerHTML = isEnabled ? '<i class="fa-solid fa-microphone"></i>' : '<i class="fa-solid fa-microphone-slash"></i>';
           btn.style.color = isEnabled ? '#fff' : '#ef4444';
           btn.style.borderColor = isEnabled ? 'rgba(255,255,255,0.14)' : '#ef4444';
+        }
+        const miniMicBtn = document.getElementById('miniDockMicBtn');
+        if (miniMicBtn) {
+          miniMicBtn.innerHTML = isEnabled ? '<i class="fa-solid fa-microphone"></i>' : '<i class="fa-solid fa-microphone-slash"></i>';
+          miniMicBtn.style.color = isEnabled ? '#e2e8f0' : '#ef4444';
         }
 
         if (this.activeCallId) {
@@ -1539,9 +1637,33 @@
       if (localVid) localVid.srcObject = null;
       if (remoteAud) remoteAud.srcObject = null;
 
-      // Close overlays
+      // Close overlays and floating dock
       const overlay = document.getElementById('activeWebRTCCallOverlay');
       if (overlay) overlay.style.display = 'none';
+
+      const miniDock = document.getElementById('nexFloatingCallMiniDock');
+      if (miniDock) miniDock.style.display = 'none';
+      this.isCallMinimized = false;
+
+      // Purge Audio DSP & Analysers
+      if (this.speakingInterval) {
+        clearInterval(this.speakingInterval);
+        this.speakingInterval = null;
+      }
+      if (this.remoteAudioSourceNode) {
+        try { this.remoteAudioSourceNode.disconnect(); } catch (_) {}
+        this.remoteAudioSourceNode = null;
+      }
+      if (this.remoteAudioFilterNode) {
+        try { this.remoteAudioFilterNode.disconnect(); } catch (_) {}
+        this.remoteAudioFilterNode = null;
+      }
+      if (this.remoteAudioHpFilter) {
+        try { this.remoteAudioHpFilter.disconnect(); } catch (_) {}
+        this.remoteAudioHpFilter = null;
+      }
+      const miniVid = document.getElementById('miniDockVideo');
+      if (miniVid) miniVid.srcObject = null;
 
       const incoming = document.getElementById('incomingCallModal');
       if (incoming) incoming.style.display = 'none';
@@ -1558,6 +1680,291 @@
           this.handleIncomingCall(callId, callData);
         }
       });
+    }
+
+    // =========================================================================
+    // CAMERA FLIP (Front / Rear Facing Camera Toggle)
+    // =========================================================================
+    async flipCamera() {
+      if (!this.callActive || !this.peerConnection || !this.localStream) return;
+      if (this.callType !== 'video') return;
+
+      const oldVideoTrack = this.localStream.getVideoTracks()[0];
+      if (!oldVideoTrack) return;
+
+      this.currentFacingMode = this.currentFacingMode === 'user' ? 'environment' : 'user';
+
+      try {
+        let newStream;
+        try {
+          newStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: { exact: this.currentFacingMode }, width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: false
+          });
+        } catch (exactErr) {
+          // Fallback if exact facingMode constraint is not accepted
+          newStream = await navigator.mediaDevices.getUserMedia({
+            video: { facingMode: this.currentFacingMode, width: { ideal: 1280 }, height: { ideal: 720 } },
+            audio: false
+          });
+        }
+
+        const newVideoTrack = newStream.getVideoTracks()[0];
+        if (!newVideoTrack) return;
+
+        // Replace track in active WebRTC peer connection
+        const senders = this.peerConnection.getSenders();
+        const videoSender = senders.find(s => s.track && s.track.kind === 'video');
+        if (videoSender) {
+          await videoSender.replaceTrack(newVideoTrack);
+        }
+
+        // Replace in local stream
+        this.localStream.removeTrack(oldVideoTrack);
+        oldVideoTrack.stop();
+        this.localStream.addTrack(newVideoTrack);
+
+        // Update local PIP video
+        const localVid = document.getElementById('localCallVideo');
+        if (localVid) {
+          localVid.srcObject = this.localStream;
+          localVid.style.transform = this.currentFacingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
+        }
+
+        // Flash flip button feedback
+        const flipBtn = document.getElementById('toggleCameraFlipBtn');
+        if (flipBtn) {
+          flipBtn.style.color = '#00ff66';
+          flipBtn.style.borderColor = '#00ff66';
+          setTimeout(() => {
+            flipBtn.style.color = '';
+            flipBtn.style.borderColor = '';
+          }, 1000);
+        }
+
+        if (window.showNotif) {
+          window.showNotif(`Camera switched: ${this.currentFacingMode === 'user' ? 'Front' : 'Rear'} camera active`, 'success');
+        }
+      } catch (err) {
+        console.warn('[WebRTC] Camera flip error:', err);
+        if (window.showNotif) {
+          window.showNotif('Unable to flip camera on this device', 'info');
+        }
+      }
+    }
+
+    // =========================================================================
+    // FLOATING CALL MINI-DOCK (Draggable In-App Multitasking)
+    // =========================================================================
+    minimizeCallToDock() {
+      if (!this.callActive) return;
+      this.isCallMinimized = true;
+
+      const overlay = document.getElementById('activeWebRTCCallOverlay');
+      const miniDock = document.getElementById('nexFloatingCallMiniDock');
+
+      if (overlay) overlay.style.display = 'none';
+      if (miniDock) {
+        miniDock.style.display = 'flex';
+        this.updateMiniDockMedia();
+      }
+    }
+
+    expandCallFromDock() {
+      if (!this.callActive) return;
+      this.isCallMinimized = false;
+
+      const overlay = document.getElementById('activeWebRTCCallOverlay');
+      const miniDock = document.getElementById('nexFloatingCallMiniDock');
+
+      if (miniDock) miniDock.style.display = 'none';
+      if (overlay) overlay.style.display = 'flex';
+    }
+
+    updateMiniDockMedia() {
+      const miniVid = document.getElementById('miniDockVideo');
+      const miniAvatar = document.getElementById('miniDockAvatar');
+      if (!miniVid || !miniAvatar) return;
+
+      const hasRemoteVideo = this.remoteStream &&
+        this.remoteStream.getVideoTracks().length > 0 &&
+        this.remoteStream.getVideoTracks().some(t => t.enabled && t.readyState === 'live') &&
+        this.callType === 'video' &&
+        this.remoteVideoEnabled !== false;
+
+      if (hasRemoteVideo) {
+        miniVid.srcObject = this.remoteStream;
+        miniVid.style.display = 'block';
+        miniAvatar.style.display = 'none';
+      } else {
+        miniVid.srcObject = null;
+        miniVid.style.display = 'none';
+        miniAvatar.style.display = 'block';
+      }
+    }
+
+    bindMiniDockDraggable(miniDock) {
+      if (!miniDock) return;
+
+      let isDragging = false;
+      let startX = 0;
+      let startY = 0;
+      let initialLeft = 0;
+      let initialTop = 0;
+
+      const onPointerDown = (e) => {
+        // Ignore if clicking action buttons
+        if (e.target.closest('.mini-dock-btn')) return;
+
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+
+        const rect = miniDock.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+
+        miniDock.style.right = 'auto';
+        miniDock.style.bottom = 'auto';
+        miniDock.style.left = `${initialLeft}px`;
+        miniDock.style.top = `${initialTop}px`;
+
+        miniDock.setPointerCapture(e.pointerId);
+      };
+
+      const onPointerMove = (e) => {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
+
+        // Viewport bounds clamping
+        const maxLeft = window.innerWidth - miniDock.offsetWidth - 10;
+        const maxTop = window.innerHeight - miniDock.offsetHeight - 10;
+
+        newLeft = Math.max(10, Math.min(newLeft, maxLeft));
+        newTop = Math.max(10, Math.min(newTop, maxTop));
+
+        miniDock.style.left = `${newLeft}px`;
+        miniDock.style.top = `${newTop}px`;
+      };
+
+      const onPointerUp = (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        try { miniDock.releasePointerCapture(e.pointerId); } catch (_) {}
+      };
+
+      miniDock.addEventListener('pointerdown', onPointerDown);
+      miniDock.addEventListener('pointermove', onPointerMove);
+      miniDock.addEventListener('pointerup', onPointerUp);
+      miniDock.addEventListener('pointercancel', onPointerUp);
+    }
+
+    // =========================================================================
+    // WEB AUDIO DSP VOICE CLARITY & PRESENCE FILTER (+3.5dB at 2.8kHz)
+    // =========================================================================
+    setupRemoteAudioDSP(stream) {
+      if (!stream || stream.getAudioTracks().length === 0) return;
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+
+        if (!this.audioCtx || this.audioCtx.state === 'closed') {
+          this.audioCtx = new AudioContextClass();
+        }
+        if (this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume().catch(() => {});
+        }
+
+        // Clean previous nodes if re-attaching
+        if (this.remoteAudioSourceNode) {
+          try { this.remoteAudioSourceNode.disconnect(); } catch (_) {}
+        }
+        if (this.remoteAudioFilterNode) {
+          try { this.remoteAudioFilterNode.disconnect(); } catch (_) {}
+        }
+        if (this.remoteAudioHpFilter) {
+          try { this.remoteAudioHpFilter.disconnect(); } catch (_) {}
+        }
+
+        this.remoteAudioSourceNode = this.audioCtx.createMediaStreamSource(stream);
+
+        // 1. High-Pass Filter: Cuts sub-rumble, wind, mic thumps (< 85 Hz)
+        this.remoteAudioHpFilter = this.audioCtx.createBiquadFilter();
+        this.remoteAudioHpFilter.type = 'highpass';
+        this.remoteAudioHpFilter.frequency.setValueAtTime(85, this.audioCtx.currentTime);
+
+        // 2. Speech Presence Peaking Filter: Boosts vocal clarity (+3.5 dB at 2800 Hz, Q: 1.2)
+        this.remoteAudioFilterNode = this.audioCtx.createBiquadFilter();
+        this.remoteAudioFilterNode.type = 'peaking';
+        this.remoteAudioFilterNode.frequency.setValueAtTime(2800, this.audioCtx.currentTime);
+        this.remoteAudioFilterNode.Q.setValueAtTime(1.2, this.audioCtx.currentTime);
+        this.remoteAudioFilterNode.gain.setValueAtTime(this.remoteAudioDspActive ? 3.5 : 0, this.audioCtx.currentTime);
+
+        // 3. Audio Level Meter / Speaking Analyser
+        this.speakingAnalyser = this.audioCtx.createAnalyser();
+        this.speakingAnalyser.fftSize = 64;
+
+        // Connect Chain: Source -> HP Filter -> Presence Filter -> Analyser -> Destination
+        this.remoteAudioSourceNode.connect(this.remoteAudioHpFilter);
+        this.remoteAudioHpFilter.connect(this.remoteAudioFilterNode);
+        this.remoteAudioFilterNode.connect(this.speakingAnalyser);
+        this.speakingAnalyser.connect(this.audioCtx.destination);
+
+        // Start live speaking halo detector
+        this.startSpeakingHaloDetector();
+      } catch (e) {
+        console.warn('[WebRTC DSP] Web Audio DSP routing warning, using direct audio pipeline:', e);
+      }
+    }
+
+    toggleSpeechClarity() {
+      this.remoteAudioDspActive = !this.remoteAudioDspActive;
+      const btn = document.getElementById('toggleCallSpeechClarityBtn');
+      if (this.remoteAudioFilterNode && this.audioCtx) {
+        const targetGain = this.remoteAudioDspActive ? 3.5 : 0;
+        this.remoteAudioFilterNode.gain.setTargetAtTime(targetGain, this.audioCtx.currentTime, 0.05);
+      }
+      if (btn) {
+        btn.classList.toggle('active', this.remoteAudioDspActive);
+        btn.style.color = this.remoteAudioDspActive ? '#00ff66' : '#94a3b8';
+        btn.style.borderColor = this.remoteAudioDspActive ? 'rgba(0,255,102,0.4)' : 'rgba(255,255,255,0.14)';
+      }
+      if (window.showNotif) {
+        window.showNotif(`HD Voice Presence: ${this.remoteAudioDspActive ? 'ENABLED (+3.5dB Boost)' : 'BYPASS'}`, 'info');
+      }
+    }
+
+    startSpeakingHaloDetector() {
+      if (this.speakingInterval) clearInterval(this.speakingInterval);
+      if (!this.speakingAnalyser) return;
+
+      const dataArray = new Uint8Array(this.speakingAnalyser.frequencyBinCount);
+      const avatarEl = document.getElementById('activeCallRemoteAvatar');
+      const miniAvatarWrap = document.getElementById('miniDockMediaWrap');
+
+      this.speakingInterval = setInterval(() => {
+        if (!this.speakingAnalyser || !this.callActive) return;
+        this.speakingAnalyser.getByteFrequencyData(dataArray);
+
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) {
+          sum += dataArray[i];
+        }
+        const avg = sum / dataArray.length;
+
+        // If average frequency energy > threshold, activate speaking halo
+        const isSpeaking = avg > 14;
+        if (avatarEl) {
+          avatarEl.classList.toggle('speaking-halo', isSpeaking);
+        }
+        if (miniAvatarWrap) {
+          miniAvatarWrap.classList.toggle('speaking-halo', isSpeaking);
+        }
+      }, 150);
     }
   }
 
