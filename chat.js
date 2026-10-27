@@ -4640,6 +4640,11 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     const attachSubtitle = localStorage.getItem('nex_voice_attach_subtitle') !== 'false';
     const hasTranscript = (attachment.translatedText && attachment.translatedText.trim()) || (attachment.transcript && attachment.transcript.trim());
 
+    // Elite Neural Voice Intelligence & Waveform
+    if (window.eliteVoiceIntelligence && typeof window.eliteVoiceIntelligence.enhanceVoiceBubble === 'function') {
+      window.eliteVoiceIntelligence.enhanceVoiceBubble(container, url, attachment.words || []);
+    }
+
     if (attachSubtitle && hasTranscript) {
       const subCard = document.createElement("div");
       subCard.className = "voice-note-transcript-card";
@@ -5663,7 +5668,9 @@ function loadMessages() {
       });
       timeSpan.appendChild(e2eeBadge);
 
-      const formattedTime = escapeHtml(formatTime(msgDate) + (m.edited ? " (edited)" : ""));
+      const hasDiffRevisions = window.eliteRevisionDiffEngine && typeof window.eliteRevisionDiffEngine.getRevisions === 'function' && window.eliteRevisionDiffEngine.getRevisions(m.id || m.docId);
+      const formattedTime = escapeHtml(formatTime(msgDate));
+      const editedDiffBadge = (m.edited || hasDiffRevisions) ? `<span class="message-edited-badge" data-msg-id="${escapeHtml(m.id || m.docId || '')}" style="cursor:pointer;color:#00ffc6;text-decoration:underline;margin-left:3px;font-size:10px;" title="Click to view full revision audit diff">(edited)</span>` : '';
       let checkmarkHTML = '';
       if (isOwn) {
         if (m.status === 'sending' || m.status === 'pending') {
@@ -5683,7 +5690,7 @@ function loadMessages() {
       timeTextNode.style.gap = '3px';
       timeTextNode.style.fontSize = '10.5px';
       timeTextNode.style.color = isOwn ? 'rgba(255, 255, 255, 0.75)' : '#8696a0';
-      timeTextNode.innerHTML = '<span>' + formattedTime + '</span>' + checkmarkHTML;
+      timeTextNode.innerHTML = '<span>' + formattedTime + '</span>' + editedDiffBadge + checkmarkHTML;
       timeSpan.appendChild(timeTextNode);
 
       // Only append bottom timeSpan if not a standalone image/sticker (where badge overlay is already rendered)
@@ -5763,6 +5770,32 @@ function loadMessages() {
         }
       });
       actionsBar.appendChild(replyBtn);
+
+      // Edit Message Action Button (Audit Trail Diff)
+      if (isOwn && !isDeletedTombstone && m.text && !m.attachment) {
+        const editMsgBtn = document.createElement("button");
+        editMsgBtn.type = "button";
+        editMsgBtn.className = "msg-edit-trigger-btn";
+        editMsgBtn.title = "Edit Message (Audit Trail Diff)";
+        editMsgBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+        editMsgBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const oldText = m.text;
+          const newText = prompt("Edit message (audit revision will be recorded):", oldText);
+          if (newText !== null && newText.trim() && newText.trim() !== oldText.trim()) {
+            const trimmedNew = newText.trim();
+            const msgId = m.id || m.docId || `msg_${Date.now()}`;
+            if (window.eliteRevisionDiffEngine && typeof window.eliteRevisionDiffEngine.recordRevision === 'function') {
+              window.eliteRevisionDiffEngine.recordRevision(msgId, oldText, trimmedNew, currentUserId || 'self');
+            }
+            m.text = trimmedNew;
+            m.edited = true;
+            if (content) content.textContent = trimmedNew;
+            if (typeof showNotif === 'function') showNotif("Message edited and recorded in audit vault.", "success", 2000);
+          }
+        });
+        actionsBar.appendChild(editMsgBtn);
+      }
 
       // Delete Message Action Button
       if (!isDeletedTombstone) {
