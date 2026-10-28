@@ -43,25 +43,26 @@
     }
 
     injectSubtitlesOverlay() {
-      const callContainer = document.querySelector('.active-call-container') || document.getElementById('activeCallOverlay') || document.body;
+      const callContainer = document.getElementById('call-overlay') || document.querySelector('.active-call-container') || document.getElementById('activeCallOverlay') || document.body;
       if (callContainer && !document.getElementById('liveCallSubtitlesBox')) {
         const subBox = document.createElement('div');
         subBox.id = 'liveCallSubtitlesBox';
         subBox.className = 'live-call-subtitles-box';
         subBox.style.cssText = `
           display: none;
-          position: absolute;
-          bottom: 90px;
+          position: fixed;
+          bottom: calc(130px + env(safe-area-inset-bottom, 0px));
           left: 50%;
           transform: translateX(-50%);
           width: 92%;
           max-width: 680px;
-          background: rgba(10, 15, 29, 0.92);
+          background: rgba(10, 15, 29, 0.95);
           backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
           border: 1px solid rgba(0, 242, 255, 0.35);
           border-radius: 12px;
-          box-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 0 16px rgba(0, 242, 255, 0.2);
-          z-index: 1000;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.8), 0 0 16px rgba(0, 242, 255, 0.2);
+          z-index: 200050;
           padding: 10px 14px;
           box-sizing: border-box;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -76,12 +77,12 @@
               <span class="live-pulse-dot" style="width: 7px; height: 7px; background: #00ff66; border-radius: 50%; display: inline-block; box-shadow: 0 0 8px #00ff66;"></span>
             </div>
             <div class="sub-controls-row" style="display: flex; align-items: center; gap: 8px;">
-              <button type="button" id="toggleBabelSpeechVoiceBtn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; font-size: 10px; padding: 2px 7px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+              <button type="button" id="toggleBabelSpeechVoiceBtn" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; font-size: 10px; min-height: 38px; padding: 6px 12px; border-radius: 6px; touch-action: manipulation; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                 <i class="fa-solid fa-volume-xmark"></i> Voice Output
               </button>
               <div class="sub-lang-picker" style="display: flex; align-items: center; gap: 4px;">
                 <span style="font-size: 10px; color: #94a3b8; font-weight: 700;">TO:</span>
-                <select id="subTargetLangSelect" class="sub-lang-select" style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.3); color: #00f2ff; font-size: 10.5px; font-weight: 700; border-radius: 6px; padding: 2px 5px; cursor: pointer; outline: none;">
+                <select id="subTargetLangSelect" class="sub-lang-select" style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.3); color: #00f2ff; font-size: 10.5px; font-weight: 700; border-radius: 6px; min-height: 38px; padding: 6px 10px; cursor: pointer; touch-action: manipulation; outline: none;">
                   <option value="EN" selected>English (EN)</option>
                   <option value="ES">Spanish (ES)</option>
                   <option value="PIDGIN">Nigerian Pidgin</option>

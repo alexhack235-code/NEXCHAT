@@ -131,6 +131,18 @@
       });
     }
 
+    bindWindowVisibilityShield() {
+      const removeObscure = () => {
+        const area = document.getElementById('messages-area');
+        if (area) area.classList.remove('drm-obscure-active');
+      };
+      window.addEventListener('focus', removeObscure);
+      window.addEventListener('touchstart', removeObscure, { passive: true });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') removeObscure();
+      });
+    }
+
     triggerScreenshotDefense(reason) {
       const area = document.getElementById('messages-area');
       if (area) {
@@ -139,7 +151,7 @@
       }
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(`️ DRM Enclave: ${reason}! Message contents shielded.`, 'warning', 3000);
+        window.showNotif(`[SECURITY] DRM Enclave: ${reason}! Message contents shielded.`, 'warning', 3000);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('zap');
     }

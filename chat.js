@@ -5074,14 +5074,14 @@ async function handleInlineMessageTranslate(bubble, m) {
         <i class="fa-solid fa-language"></i>
         <span class="inline-trans-label">Translated (${activeTargetLang.toUpperCase()})</span>
       </div>
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <button type="button" class="inline-trans-speak-btn" title="Speak translation" style="background: none; border: none; color: #00f2ff; cursor: pointer; padding: 0 3px; font-size: 11px;">
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <button type="button" class="inline-trans-speak-btn" title="Speak translation" style="background: rgba(0, 242, 255, 0.1); border: 1px solid rgba(0, 242, 255, 0.2); color: #00f2ff; cursor: pointer; min-width: 36px; min-height: 36px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; touch-action: manipulation;">
           <i class="fa-solid fa-volume-high"></i>
         </button>
-        <button type="button" class="inline-trans-copy-btn" title="Copy translated text" style="background: none; border: none; color: #cbd5e1; cursor: pointer; padding: 0 3px; font-size: 11px;">
+        <button type="button" class="inline-trans-copy-btn" title="Copy translated text" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15); color: #cbd5e1; cursor: pointer; min-width: 36px; min-height: 36px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; touch-action: manipulation;">
           <i class="fa-solid fa-copy"></i>
         </button>
-        <button type="button" class="inline-trans-close-btn" title="Dismiss" style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0 3px; font-size: 11px;">
+        <button type="button" class="inline-trans-close-btn" title="Dismiss" style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.15); color: #94a3b8; cursor: pointer; min-width: 36px; min-height: 36px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; touch-action: manipulation;">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -5090,14 +5090,14 @@ async function handleInlineMessageTranslate(bubble, m) {
       <i class="fa-solid fa-spinner fa-spin"></i> Translating...
     </div>
     <div class="inline-trans-pills" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap;">
-      <button type="button" class="trans-pill ${activeTargetLang === 'en' ? 'active' : ''}" data-lang="en" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">EN</button>
-      <button type="button" class="trans-pill ${activeTargetLang === 'es' ? 'active' : ''}" data-lang="es" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">ES</button>
-      <button type="button" class="trans-pill ${activeTargetLang === 'pidgin' ? 'active' : ''}" data-lang="pidgin" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">PIDGIN</button>
-      <button type="button" class="trans-pill ${activeTargetLang === 'fr' ? 'active' : ''}" data-lang="fr" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">FR</button>
-      <button type="button" class="trans-pill ${activeTargetLang === 'de' ? 'active' : ''}" data-lang="de" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">DE</button>
-      <button type="button" class="trans-pill ${activeTargetLang === 'zh' ? 'active' : ''}" data-lang="zh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">ZH</button>
-      <button type="button" class="trans-pill ${activeTargetLang === 'ar' ? 'active' : ''}" data-lang="ar" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">AR</button>
-      <button type="button" class="trans-pill ${activeTargetLang === 'ru' ? 'active' : ''}" data-lang="ru" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">RU</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'en' ? 'active' : ''}" data-lang="en" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; min-height: 34px; min-width: 36px; padding: 6px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; touch-action: manipulation;">EN</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'es' ? 'active' : ''}" data-lang="es" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; min-height: 34px; min-width: 36px; padding: 6px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; touch-action: manipulation;">ES</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'pidgin' ? 'active' : ''}" data-lang="pidgin" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; min-height: 34px; min-width: 36px; padding: 6px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; touch-action: manipulation;">PIDGIN</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'fr' ? 'active' : ''}" data-lang="fr" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; min-height: 34px; min-width: 36px; padding: 6px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; touch-action: manipulation;">FR</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'de' ? 'active' : ''}" data-lang="de" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; min-height: 34px; min-width: 36px; padding: 6px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; touch-action: manipulation;">DE</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'zh' ? 'active' : ''}" data-lang="zh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; min-height: 34px; min-width: 36px; padding: 6px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; touch-action: manipulation;">ZH</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'ar' ? 'active' : ''}" data-lang="ar" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; min-height: 34px; min-width: 36px; padding: 6px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; touch-action: manipulation;">AR</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'ru' ? 'active' : ''}" data-lang="ru" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; min-height: 34px; min-width: 36px; padding: 6px 10px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; touch-action: manipulation;">RU</button>
     </div>
   `;
 
@@ -7234,6 +7234,7 @@ function showCallUI(isVideo = false, callStatus = 'active') {
 
   const callOverlay = document.createElement('div');
   callOverlay.id = 'call-overlay';
+    callOverlay.className = 'active-call-container';
   callOverlay.style.cssText = `
     position: fixed;
     top: 0;

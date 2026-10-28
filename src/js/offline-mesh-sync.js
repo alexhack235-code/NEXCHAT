@@ -13,6 +13,8 @@ class OfflineMeshSyncEngine {
     this.peerHeartbeats = new Map();
     this.messageListeners = [];
     this.offlineQueue = [];
+    this.seenNonces = new Set();
+    this.maxNonceCache = 1000;
     this.initBroadcastChannel();
     this.initNetworkListeners();
     this.initCRDTEngine();
@@ -66,8 +68,29 @@ class OfflineMeshSyncEngine {
         this.peerHeartbeats.set(packet.sender, packet.timestamp);
       }
     } else if (packet.type === 'OFFGRID_CHAT_MESSAGE') {
-      // Discard duplicate or echo
+      // Discard duplicate, echo, or replayed packets
       if (packet.senderUid === this.localUser?.uid) return;
+      
+      // Timestamp sliding-window validation (reject packets older than 120s)
+      const now = Date.now();
+      if (packet.timestamp && Math.abs(now - packet.timestamp) > 120000) {
+        console.warn('[OFFLINE MESH] Dropped expired packet outside 120s sliding window.');
+        return;
+      }
+
+      // Nonce replay check
+      if (packet.nonce) {
+        if (this.seenNonces.has(packet.nonce)) {
+          console.warn('[OFFLINE MESH] Dropped duplicate replayed packet with nonce:', packet.nonce);
+          return;
+        }
+        this.seenNonces.add(packet.nonce);
+        if (this.seenNonces.size > this.maxNonceCache) {
+          const firstKey = this.seenNonces.values().next().value;
+          this.seenNonces.delete(firstKey);
+        }
+      }
+
       this.messageListeners.forEach(cb => cb(packet.message));
     } else if (packet.type === 'CRDT_MESH_SYNC') {
       if (packet.senderNodeId !== this.nodeId) {
@@ -86,14 +109,19 @@ class OfflineMeshSyncEngine {
   }
 
   sendOffGridMessage(chatMessage) {
+    const packetTime = Date.now();
+    const packetNonce = 'nonce_' + packetTime + '_' + Math.random().toString(36).substring(2, 10);
     const payload = {
       type: 'OFFGRID_CHAT_MESSAGE',
       senderUid: this.localUser?.uid || 'anonymous_peer',
+      timestamp: packetTime,
+      nonce: packetNonce,
       message: {
         ...chatMessage,
-        id: 'offgrid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6),
+        id: 'offgrid_' + packetTime + '_' + Math.random().toString(36).substr(2, 6),
         isOffGrid: true,
-        timestamp: Date.now()
+        timestamp: packetTime,
+        nonce: packetNonce
       }
     };
 
@@ -199,8 +227,10 @@ class OfflineMeshSyncEngine {
     if (!remoteEntry || !remoteEntry.docId) return false;
     const local = this.crdtMap.get(remoteEntry.docId);
 
-    // Update local Lamport clock: max(local, remote) + 1
-    this.lamportClock = Math.max(this.lamportClock, remoteEntry.clock || 0) + 1;
+    // Update local Lamport clock with delta bounds protection (max step 10 to defeat clock wipe attacks)
+    const remoteClock = remoteEntry.clock || 0;
+    const boundedClock = Math.min(remoteClock, this.lamportClock + 10);
+    this.lamportClock = Math.max(this.lamportClock, boundedClock) + 1;
 
     let shouldOverwrite = false;
     if (!local) {
