@@ -22764,6 +22764,13 @@ function initAttachmentHubActions() {
     });
   }
 
+  // Auto-dismiss hub on action item click
+  hub.querySelectorAll('.attach-hub-item').forEach(item => {
+    item.addEventListener('click', () => {
+      hub.style.display = 'none';
+    });
+  });
+
   // Dismiss attachment hub when clicking outside
   document.addEventListener('click', (e) => {
     if (hub && hub.style.display !== 'none' && !hub.contains(e.target) && e.target !== toggleBtn) {

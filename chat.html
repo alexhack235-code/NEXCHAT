@@ -1222,6 +1222,10 @@
 
           <!-- Attachment Hub Popup Menu -->
           <div id="attachmentPopupHub" class="attachment-popup-hub" style="display: none;">
+            <div class="attach-hub-item" id="hubActionCamera" onclick="const fi = document.getElementById('file-input'); if(fi){ fi.accept = 'image/*,video/*'; fi.click(); }">
+              <div class="attach-hub-icon" style="color: #f43f5e;"><i class="fa-solid fa-camera"></i></div>
+              <span>Camera</span>
+            </div>
             <div class="attach-hub-item" id="hubActionFile">
               <div class="attach-hub-icon icon-file"><i class="fa-solid fa-cloud-arrow-up"></i></div>
               <span>File / Media</span>
@@ -1349,13 +1353,14 @@
               <button type="button" id="emoji-btn" class="input-inline-btn emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
               <button type="button" id="sticker-btn" class="input-inline-btn sticker-toggle-btn" title="Stickers" style="display: none;"><i class="fa-solid fa-note-sticky"></i></button>
               <textarea id="message-input" class="message-input nex-input" placeholder="Message" autocomplete="on" autocorrect="on" autocapitalize="sentences" spellcheck="true" maxlength="1000" rows="1"></textarea>
-              <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub & Sovereign Tools" style="color: #cbd5e1;"><i class="fa-solid fa-paperclip"></i></button>
-              <button type="button" id="btnAirDropBeam" class="input-inline-btn" title="P2P Air-Drop: Zero-Cloud 10GB+ Raw File Beam" style="color: #00ff66;" onclick="if(window.NexAirDropMesh) window.NexAirDropMesh.openRadar();"><i class="fa-solid fa-satellite-dish"></i></button>
-              <button type="button" id="btnGalleryVault" class="input-inline-btn" title="Air-Gap Gallery Sandbox (Zero Camera Roll Clutter)" style="color: #00f2fe;" onclick="if(window.NexGallerySandbox) window.NexGallerySandbox.openVault();"><i class="fa-solid fa-box-archive"></i></button>
+              <button type="button" id="btnToggleAttachmentHub" class="input-inline-btn" title="Attachment Hub" style="color: #cbd5e1;"><i class="fa-solid fa-paperclip"></i></button>
               <button type="button" id="aiPolishInputBtn" class="input-inline-btn ai-polish-inline-btn" title="AI Polish: Elevate rough draft with ChronEX AI" style="display: none;"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
-              <button type="button" id="btnConfidentialCipher" class="input-inline-btn" title="Confidential Cipher Note (Anti-Shoulder Surfing)" style="color: #c084fc;"><i class="fa-solid fa-user-secret"></i></button>
-              <button type="button" id="camera-btn" class="input-inline-btn camera-input-btn" title="Camera"><i class="fa-solid fa-camera"></i></button>
             </div>
+            <!-- Non-intrusive Hidden Hooks for Existing JS / Hotkeys -->
+            <button type="button" id="btnAirDropBeam" style="display: none !important;" aria-hidden="true" onclick="if(window.NexAirDropMesh) window.NexAirDropMesh.openRadar();"></button>
+            <button type="button" id="btnGalleryVault" style="display: none !important;" aria-hidden="true" onclick="if(window.NexGallerySandbox) window.NexGallerySandbox.openVault();"></button>
+            <button type="button" id="btnConfidentialCipher" style="display: none !important;" aria-hidden="true"></button>
+            <button type="button" id="camera-btn" style="display: none !important;" aria-hidden="true"></button>
             <button type="button" id="attach-btn" style="display: none !important;" aria-hidden="true"></button>
             <input type="file" id="file-input" style="display: none;" accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.json,.zip,.rar,.7z,.tar,.gz,.bz2" />
             <button type="button" id="poll-btn" class="input-btn" title="Create Poll" style="display: none;"><i class="fa-solid fa-square-poll-vertical"></i></button>
