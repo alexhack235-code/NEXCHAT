@@ -3787,6 +3787,55 @@ async function sendMessage() {
           }
         }
 
+        // Cache and client-compress staged image BEFORE removing attachment UI
+        const stagedFile = typeof selectedFile !== 'undefined' ? selectedFile : null;
+        let aiImagePayload = null;
+
+        if (stagedFile && stagedFile.type && stagedFile.type.startsWith('image/')) {
+          try {
+            // Compress client-side to max 1600px JPEG quality 0.82 to avoid Vercel 4.5MB HTTP 413 limits
+            aiImagePayload = await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                  const maxDim = 1600;
+                  let w = img.width;
+                  let h = img.height;
+                  if (w > maxDim || h > maxDim) {
+                    if (w > h) {
+                      h = Math.round((h * maxDim) / w);
+                      w = maxDim;
+                    } else {
+                      w = Math.round((w * maxDim) / h);
+                      w = maxDim;
+                    }
+                  }
+                  const canvas = document.createElement('canvas');
+                  canvas.width = w;
+                  canvas.height = h;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0, w, h);
+                  const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                  const b64 = dataUrl.includes('base64,') ? dataUrl.split('base64,')[1] : dataUrl;
+                  resolve({ data: b64, mimeType: 'image/jpeg', name: stagedFile.name, previewUrl: dataUrl });
+                };
+                img.onerror = () => {
+                  const s = String(e.target.result);
+                  const b64 = s.includes('base64,') ? s.split('base64,')[1] : s;
+                  resolve({ data: b64, mimeType: stagedFile.type, name: stagedFile.name, previewUrl: s });
+                };
+                img.src = e.target.result;
+              };
+              reader.onerror = () => resolve(null);
+              reader.readAsDataURL(stagedFile);
+            });
+          } catch (_) {}
+        } else if (attachment && (attachment.fileUrl || attachment.url || attachment.downloadURL)) {
+          const imgUrl = attachment.fileUrl || attachment.url || attachment.downloadURL;
+          aiImagePayload = { url: imgUrl, mimeType: attachment.type || 'image/jpeg', name: attachment.name || 'image.jpg' };
+        }
+
         if (messageText) messageText.value = "";
         if (typeof removeAttachment === 'function') removeAttachment();
 
@@ -3798,26 +3847,6 @@ async function sendMessage() {
           tokens: increment(-1),
           lastMessageSentAt: serverTimestamp()
         });
-
-        // Capture attached image for ChronEX AI Multimodal Vision
-        let aiImagePayload = null;
-        if (selectedFile && selectedFile.type && selectedFile.type.startsWith('image/')) {
-          try {
-            const b64 = await new Promise((res, rej) => {
-              const r = new FileReader();
-              r.onload = () => {
-                const s = String(r.result);
-                res(s.includes('base64,') ? s.split('base64,')[1] : s);
-              };
-              r.onerror = rej;
-              r.readAsDataURL(selectedFile);
-            });
-            aiImagePayload = { data: b64, mimeType: selectedFile.type, name: selectedFile.name };
-          } catch (_) {}
-        } else if (attachment && (attachment.fileUrl || attachment.url || attachment.downloadURL)) {
-          const imgUrl = attachment.fileUrl || attachment.url || attachment.downloadURL;
-          aiImagePayload = { url: imgUrl, mimeType: attachment.type || 'image/jpeg', name: attachment.name || 'image.jpg' };
-        }
 
         if (typeof displayChronexAIUserMessage === 'function') {
           displayChronexAIUserMessage(text, aiImagePayload || attachment);
@@ -5311,18 +5340,19 @@ function displayChronexAIResponse(response, stream = true) {
   const chunkSize = Math.max(3, Math.floor(rawText.length / 60));
   const streamTimer = setInterval(() => {
     charIdx += chunkSize;
+    const isNearBottom = (messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight) < 160;
     if (charIdx >= rawText.length) {
       charIdx = rawText.length;
       clearInterval(streamTimer);
       if (contentEl) contentEl.innerHTML = formatAiMarkdown(rawText);
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      if (isNearBottom) messagesContainer.scrollTop = messagesContainer.scrollHeight;
     } else {
       const partial = rawText.substring(0, charIdx);
       if (contentEl) {
         contentEl.innerHTML = formatAiMarkdown(partial);
         contentEl.appendChild(cursor);
       }
-      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      if (isNearBottom) messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
   }, 16);
 }
@@ -6067,7 +6097,7 @@ function loadMessages() {
     messagesDiv.appendChild(messageFragment);
 
     const isNearBottom = (messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight) < 160;
-    if (isNearBottom || messages.length <= 5) {
+    if (isNearBottom || (typeof allMessages !== 'undefined' && allMessages.length <= 5)) {
       requestAnimationFrame(() => {
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
       });

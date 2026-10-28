@@ -116,6 +116,10 @@
         modal.style.display = 'none';
         modal.setAttribute('aria-hidden', 'true');
       }
+      if (this.activeBlobUrls) {
+        this.activeBlobUrls.forEach(url => URL.revokeObjectURL(url));
+        this.activeBlobUrls.clear();
+      }
     }
 
     /**
@@ -265,7 +269,9 @@
         let previewHtml = '';
         if (item.type === 'image' && item.blob) {
           const imgUrl = URL.createObjectURL(item.blob);
-          previewHtml = `<img src=\"${imgUrl}\" alt=\"${item.name}\" class=\"sandbox-card-thumb\" onload=\"URL.revokeObjectURL('${imgUrl}')\" />`;
+          if (!this.activeBlobUrls) this.activeBlobUrls = new Set();
+          this.activeBlobUrls.add(imgUrl);
+          previewHtml = `<img src=\"${imgUrl}\" alt=\"${item.name}\" class=\"sandbox-card-thumb\" loading=\"lazy\" />`;
         } else if (item.type === 'video') {
           previewHtml = `<div class=\"sandbox-card-icon\"><i class=\"fa-solid fa-film text-[#00f2fe]\"></i></div>`;
         } else if (item.type === 'audio') {

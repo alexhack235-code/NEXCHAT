@@ -659,11 +659,12 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
   async chat(message, conversationId = "default", clientId = null, imagePayload = null) {
     try {
-      if (!message || message.trim() === "") {
+      if ((!message || message.trim() === "") && !imagePayload) {
         console.warn("[WARN] Chronex AI: Received empty message directive");
-        return "I'm ready when you are. Please provide a data packet or directive to process.";
+        return "I'm ready when you are. Please provide a data packet, directive, or image to process.";
       }
-      console.log(" Chronex AI processing message:", message);
+      const promptText = message && message.trim() ? message.trim() : (imagePayload ? "Analyze and describe this image in detail." : "");
+      console.log(" Chronex AI processing message:", promptText, imagePayload ? "[Vision Payload Attached]" : "");
 
       // [SECURITY] Daily AI Request Quota: 100 requests per 24 hours for free plan (Unlimited for Pro/VIP)
       const quotaId = clientId || conversationId || 'default';
@@ -685,7 +686,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       // Tier 1: Google Gemini API (with 6-key rotation and auto-failover)
       if (this.config.backends.gemini?.enabled) {
         console.log(" Routing request to Google Gemini API (Multi-Key Pool)...");
-        aiResponse = await this.callGemini(message, this.conversationHistory, imagePayload);
+        aiResponse = await this.callGemini(promptText, this.conversationHistory, imagePayload);
       }
 
       // Tier 2: OpenAI ChatGPT (if configured)
