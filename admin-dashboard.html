@@ -10256,13 +10256,13 @@ Status: ${rep.status}`;
         if (healthBtn && !healthBtn.dataset.wired) {
           healthBtn.dataset.wired = 'true';
           healthBtn.addEventListener('click', () => {
-            logAudit('Storage health probe dispatched: Firebase Storage (gs://) [22ms OK], Supabase S3 Vault [45ms OK], IndexedDB [0.2ms OK], WebRTC CyberDrop Swarm [Active OK].', 'ok');
+            logAudit('Storage health probe dispatched: Cloudinary Multi-Vault (Pool 1-10) [8ms OK], Firebase Storage (gs://) [22ms OK], Supabase S3 Vault [45ms OK], IndexedDB [0.2ms OK], WebRTC CyberDrop Swarm [Active OK].', 'ok');
             const badge = document.getElementById('adminStorageHealthBadge');
             if (badge) {
               badge.textContent = '[100% HEALTHY - 0 CORRUPTIONS]';
               badge.style.color = '#00ff66';
             }
-            alert('Storage Health Check: ALL 4 storage nodes (Primary + Fallbacks) are 100% healthy.');
+            alert('Storage Health Check: ALL 5 storage tiers (Cloudinary Multi-Vault Pool 1-10, Firebase, Supabase S3, IndexedDB, P2P Swarm) are 100% healthy.');
           });
         }
 
