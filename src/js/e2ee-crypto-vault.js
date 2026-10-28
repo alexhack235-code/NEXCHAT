@@ -283,7 +283,7 @@
       wrap.appendChild(canvas);
       container.appendChild(wrap);
 
-      const img = new Image();
+      let img = new Image();
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         canvas.width = img.naturalWidth || 400;
@@ -293,10 +293,25 @@
 
         ctx.drawImage(img, 0, 0);
 
-        // Overlay microscopic anti-capture steganographic watermark
-        ctx.fillStyle = 'rgba(0, 242, 255, 0.04)';
-        ctx.font = '10px monospace';
-        ctx.fillText(`NEX-VAULT-ID-${Date.now().toString(36).toUpperCase()}`, 10, canvas.height - 10);
+        // Immediate Blob URL revocation to purge unencrypted bytes from browser memory
+        if (typeof imageUrl === 'string' && imageUrl.startsWith('blob:')) {
+          URL.revokeObjectURL(imageUrl);
+        }
+        img.src = '';
+        img = null;
+
+        // Diagonal Forensic Anti-Capture Watermark Matrix
+        ctx.save();
+        ctx.rotate(-22 * Math.PI / 180);
+        ctx.fillStyle = 'rgba(0, 242, 255, 0.055)';
+        ctx.font = 'bold 11px monospace';
+        const sessionMark = `NEX-NODE//${Date.now().toString(36).toUpperCase()}`;
+        for (let x = -canvas.width; x < canvas.width * 2; x += 190) {
+          for (let y = -canvas.height; y < canvas.height * 2; y += 75) {
+            ctx.fillText(`${sessionMark} [ZERO-TRACE]`, x, y);
+          }
+        }
+        ctx.restore();
 
         let remaining = burnTimeoutSec;
         const interval = setInterval(() => {
@@ -305,13 +320,18 @@
             timerBadge.textContent = `${remaining}s`;
           } else {
             clearInterval(interval);
-            // Hardware zeroize canvas pixels
+            // 3-Pass Hardware memory zeroization
             try {
               const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
               this.zeroizeMemory(imgData.data);
               ctx.putImageData(imgData, 0, 0);
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-            } catch (_) {}
+            } catch (err) {
+              console.warn('[E2EE] Direct pixel zeroization warning:', err);
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.width = 0;
+            canvas.height = 0;
+            canvas.remove();
             wrap.innerHTML = '<div style="padding:16px 22px; color:#ef4444; font-family:monospace; font-size:11.5px; font-weight:700;"><i class="fa-solid fa-fire"></i> [VAPORIZED] Memory Shredded &amp; Zeroized</div>';
             if (typeof onVaporized === 'function') onVaporized();
           }
