@@ -4780,8 +4780,8 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
         ${origText}
       `;
       container.appendChild(subCard);
-    } else if (!hasTranscript && !hasCustomAudio) {
-      // 1-tap on-demand fallback transcribe button only if custom audio player is not used
+    } else if (!hasTranscript) {
+      // 1-tap on-demand fallback transcribe button
       const transcribeBtn = document.createElement("button");
       transcribeBtn.type = "button";
       transcribeBtn.className = "btn-transcribe-voice";
@@ -5046,6 +5046,125 @@ function renderMessageReactionsTray(bubbleElement, rawReactions, docId, targetCo
   });
 }
 window.renderMessageReactionsTray = renderMessageReactionsTray;
+
+// Inline 1-Click Babel Neural Translation for Any Message Bubble
+async function handleInlineMessageTranslate(bubble, m) {
+  if (!bubble) return;
+  let card = bubble.querySelector('.inline-msg-translation-card');
+  if (card) {
+    card.style.display = (card.style.display === 'none') ? 'block' : 'none';
+    return;
+  }
+
+  const rawText = m.text || (m.attachment && (m.attachment.transcript || m.attachment.translatedText)) || (bubble.querySelector('.message-text-content, .message-text, .nex-msg-text')?.textContent || '').trim();
+  if (!rawText) {
+    if (typeof showNotif === 'function') showNotif("No translatable text in this message.", "info");
+    return;
+  }
+
+  card = document.createElement("div");
+  card.className = "inline-msg-translation-card";
+  card.style.cssText = "margin-top: 6px; padding: 7px 10px; background: rgba(0, 242, 255, 0.08); border-left: 2px solid #00f2ff; border-radius: 6px; font-size: 12px; color: #e2e8f0; max-width: 100%; box-sizing: border-box;";
+
+  let activeTargetLang = localStorage.getItem('nex_auto_translate_target_lang') || localStorage.getItem('nex_user_lang') || 'en';
+
+  card.innerHTML = `
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 6px; margin-bottom: 4px; font-size: 10.5px; font-weight: 700; color: #00f2ff; text-transform: uppercase;">
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <i class="fa-solid fa-language"></i>
+        <span class="inline-trans-label">Translated (${activeTargetLang.toUpperCase()})</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <button type="button" class="inline-trans-speak-btn" title="Speak translation" style="background: none; border: none; color: #00f2ff; cursor: pointer; padding: 0 3px; font-size: 11px;">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+        <button type="button" class="inline-trans-copy-btn" title="Copy translated text" style="background: none; border: none; color: #cbd5e1; cursor: pointer; padding: 0 3px; font-size: 11px;">
+          <i class="fa-solid fa-copy"></i>
+        </button>
+        <button type="button" class="inline-trans-close-btn" title="Dismiss" style="background: none; border: none; color: #94a3b8; cursor: pointer; padding: 0 3px; font-size: 11px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+    <div class="inline-trans-content" style="font-size: 12.5px; line-height: 1.45; color: #f8fafc; word-break: break-word;">
+      <i class="fa-solid fa-spinner fa-spin"></i> Translating...
+    </div>
+    <div class="inline-trans-pills" style="margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap;">
+      <button type="button" class="trans-pill ${activeTargetLang === 'en' ? 'active' : ''}" data-lang="en" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">EN</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'es' ? 'active' : ''}" data-lang="es" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">ES</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'pidgin' ? 'active' : ''}" data-lang="pidgin" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">PIDGIN</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'fr' ? 'active' : ''}" data-lang="fr" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">FR</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'de' ? 'active' : ''}" data-lang="de" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">DE</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'zh' ? 'active' : ''}" data-lang="zh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">ZH</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'ar' ? 'active' : ''}" data-lang="ar" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">AR</button>
+      <button type="button" class="trans-pill ${activeTargetLang === 'ru' ? 'active' : ''}" data-lang="ru" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; font-size: 9.5px; padding: 2px 6px; border-radius: 4px; cursor: pointer;">RU</button>
+    </div>
+  `;
+
+  const insertBeforeEl = bubble.querySelector('.message-hover-actions, .time-span') || bubble.lastElementChild;
+  if (insertBeforeEl && insertBeforeEl.parentNode === bubble) {
+    bubble.insertBefore(card, insertBeforeEl);
+  } else {
+    bubble.appendChild(card);
+  }
+
+  let currentTranslatedText = '';
+
+  const doTranslate = async (target) => {
+    activeTargetLang = target;
+    const contentEl = card.querySelector('.inline-trans-content');
+    const labelEl = card.querySelector('.inline-trans-label');
+    if (contentEl) contentEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating...';
+    if (labelEl) labelEl.textContent = `Translated (${target.toUpperCase()})`;
+
+    try {
+      if (window.CyberFeatures && window.CyberFeatures.translator) {
+        currentTranslatedText = await window.CyberFeatures.translator.translateText(rawText, target);
+      } else if (typeof window.generateChronexAIResponse === 'function') {
+        const prompt = `Translate this message into ${target}. Return ONLY the translation:\n"${rawText}"`;
+        const res = await window.generateChronexAIResponse(prompt);
+        currentTranslatedText = res ? res.trim() : rawText;
+      } else {
+        currentTranslatedText = rawText;
+      }
+      if (contentEl) contentEl.textContent = currentTranslatedText;
+    } catch (e) {
+      if (contentEl) contentEl.textContent = "Translation temporarily unavailable.";
+    }
+  };
+
+  doTranslate(activeTargetLang);
+
+  card.querySelector('.inline-trans-speak-btn')?.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    if (currentTranslatedText && window.CyberFeatures && window.CyberFeatures.translator) {
+      window.CyberFeatures.translator.speakText(currentTranslatedText, activeTargetLang);
+    }
+  });
+
+  card.querySelector('.inline-trans-copy-btn')?.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    if (currentTranslatedText && navigator.clipboard) {
+      navigator.clipboard.writeText(currentTranslatedText);
+      if (typeof showNotif === 'function') showNotif("Translated text copied to clipboard.", "success", 1500);
+    }
+  });
+
+  card.querySelector('.inline-trans-close-btn')?.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    card.remove();
+  });
+
+  card.querySelectorAll('.trans-pill').forEach(pill => {
+    pill.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      card.querySelectorAll('.trans-pill').forEach(p => p.style.borderColor = 'rgba(255,255,255,0.15)');
+      pill.style.borderColor = '#00f2ff';
+      doTranslate(pill.dataset.lang);
+    });
+  });
+}
+window.handleInlineMessageTranslate = handleInlineMessageTranslate;
 
 function handleMessageReaction(docId, targetKey, bubbleElement, collectionName = null) {
   playLuxuryPopSound();
@@ -5963,6 +6082,20 @@ function loadMessages() {
         }
       });
       actionsBar.appendChild(pinMatrixBtn);
+
+      // --- BABEL NEURAL TRANSLATE HOVER ACTION HOOK ---
+      if (!isDeletedTombstone && (m.text || (m.attachment && (m.attachment.transcript || m.attachment.translatedText)))) {
+        const translateHoverBtn = document.createElement("button");
+        translateHoverBtn.type = "button";
+        translateHoverBtn.className = "reaction-quick-btn msg-translate-btn";
+        translateHoverBtn.title = "Translate Message (Babel Neural AI)";
+        translateHoverBtn.innerHTML = '<i class="fa-solid fa-language" style="color: #00f2ff;"></i>';
+        translateHoverBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          handleInlineMessageTranslate(bubble, m);
+        });
+        actionsBar.appendChild(translateHoverBtn);
+      }
 
       // Reply Button
       const replyBtn = document.createElement("button");

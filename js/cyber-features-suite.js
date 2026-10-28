@@ -1565,7 +1565,8 @@ class NexTranslator {
       'ms': 'Malay',
       'yo': 'Yoruba',
       'ig': 'Igbo',
-      'ha': 'Hausa'
+      'ha': 'Hausa',
+      'pidgin': 'Nigerian Pidgin'
     };
 
     // Comprehensive multi-directional lexicon for instantaneous local translation
@@ -1752,7 +1753,22 @@ class NexTranslator {
         // Igbo -> English
         'ndewo': 'Hello',
         'kedu': 'How are you?',
-        'daalu': 'Thank you'
+        'daalu': 'Thank you',
+        // Nigerian Pidgin -> English
+        'how you dey': 'How are you?',
+        'how body': 'How are you doing?',
+        'wetin dey happen': 'What is happening?',
+        'wetin dey sup': 'What is going on?',
+        'no wahala': 'No problem',
+        'no issue': 'No problem',
+        'i dey': 'I am fine',
+        'i dey fine': 'I am doing well',
+        'i dey kampe': 'I am doing great',
+        'make we go': 'Let us go',
+        'abeg': 'Please',
+        'oya': 'Come on / Let\'s go',
+        'na so': 'That is true / Exactly',
+        'na true': 'It is true'
       },
       'es': {
         'hello': '¡Hola!',
@@ -1794,6 +1810,24 @@ class NexTranslator {
         'welcome to the group': 'Willkommen in der Gruppe',
         'thank you': 'Danke',
         'quantum': 'Quanten'
+      },
+      'pidgin': {
+        'hello': 'How you dey',
+        'hello!': 'How you dey!',
+        'how are you': 'How you dey?',
+        'how are you?': 'How you dey?',
+        'what is happening': 'Wetin dey happen?',
+        'what is happening?': 'Wetin dey happen?',
+        'no problem': 'No wahala',
+        'i am fine': 'I dey kampe',
+        'please': 'Abeg',
+        'thank you': 'Thank you well well',
+        'welcome': 'You welcome well well',
+        'good morning': 'Good morning, how body?',
+        'good night': 'Good night',
+        'let us go': 'Make we go',
+        'yes': 'Yes na',
+        'no': 'No be so'
       }
     };
 
@@ -1938,6 +1972,18 @@ class NexTranslator {
     }
     if (label) {
       label.textContent = `Auto-Translate This Chat: ${isActive ? 'ON' : 'OFF'}`;
+    }
+    const headerBtn = document.getElementById('headerBabelTranslateBtn');
+    if (headerBtn) {
+      if (isActive) {
+        headerBtn.style.color = '#00ff66';
+        headerBtn.style.boxShadow = '0 0 10px rgba(0, 255, 102, 0.4)';
+        headerBtn.title = `Auto-Translate Active (${langName}) - Click to toggle`;
+      } else {
+        headerBtn.style.color = '#00f2ff';
+        headerBtn.style.boxShadow = 'none';
+        headerBtn.title = 'Babel Neural Translation (Toggle Auto-Translate)';
+      }
     }
   }
 
@@ -2290,14 +2336,14 @@ class NexTimeCapsule {
     };
 
     if (typeof window.appendLocalSentMessage === 'function') {
-      window.appendLocalSentMessage("⏳ [QUANTUM TIME CAPSULE: Sealed with Temporal Cryptography]", capsuleAttachment, false, 'sending', clientMsgId, null);
+      window.appendLocalSentMessage("[TIME-CAPSULE] [QUANTUM TIME CAPSULE: Sealed with Temporal Cryptography]", capsuleAttachment, false, 'sending', clientMsgId, null);
     }
 
     if (typeof window.sendSupabaseMessage === 'function' && window.currentChatUser) {
       window.sendSupabaseMessage({
         from: window.myUID,
         to: window.currentChatUser,
-        text: "⏳ [QUANTUM TIME CAPSULE: Sealed with Temporal Cryptography]",
+        text: "[TIME-CAPSULE] [QUANTUM TIME CAPSULE: Sealed with Temporal Cryptography]",
         attachment: capsuleAttachment,
         chatType: window.currentChatType || 'direct'
       }).catch(console.warn);

@@ -25,8 +25,8 @@ gap: 10px !important;
 flex-wrap: nowrap !important;
 }
 
-/* Secondary cyber tools are grouped inside the Cyber Suite Hub */
-.desktop-header-actions .cyber-sub-tool {
+/* Secondary cyber tools are grouped inside the Cyber Suite Hub, preserving primary translator access */
+.desktop-header-actions .cyber-sub-tool:not(#translateBtnHeader) {
 display: none !important;
 }
 
