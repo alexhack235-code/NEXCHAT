@@ -657,7 +657,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     }
   }
 
-  async chat(message, conversationId = "default", clientId = null) {
+  async chat(message, conversationId = "default", clientId = null, imagePayload = null) {
     try {
       if (!message || message.trim() === "") {
         console.warn("[WARN] Chronex AI: Received empty message directive");
@@ -685,7 +685,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       // Tier 1: Google Gemini API (with 6-key rotation and auto-failover)
       if (this.config.backends.gemini?.enabled) {
         console.log(" Routing request to Google Gemini API (Multi-Key Pool)...");
-        aiResponse = await this.callGemini(message, this.conversationHistory);
+        aiResponse = await this.callGemini(message, this.conversationHistory, imagePayload);
       }
 
       // Tier 2: OpenAI ChatGPT (if configured)
@@ -898,7 +898,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
   // ===== GOOGLE GEMINI INTEGRATION WITH SMART KEY POOL =====
   // ===== GOOGLE GEMINI INTEGRATION WITH SMART KEY POOL & VERCEL ENDPOINT =====
-  async callGemini(message, conversationHistory = []) {
+  async callGemini(message, conversationHistory = [], imagePayload = null) {
     if (!this.config.backends.gemini || !this.config.backends.gemini.enabled) {
       return null;
     }
@@ -912,7 +912,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
         const serverResp = await fetch('/api/ai', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, history: conversationHistory }),
+          body: JSON.stringify({ message, history: conversationHistory, image: imagePayload?.data || (typeof imagePayload === 'string' ? imagePayload : null), imageMimeType: imagePayload?.mimeType || 'image/jpeg' }),
           signal: controller?.signal
         });
 
@@ -931,10 +931,10 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
     }
 
     // 2. Client-side Smart Key Pool (8 keys with round-robin rotation & cooldown failover)
-    return await this.callGeminiDirect(message, conversationHistory);
+    return await this.callGeminiDirect(message, conversationHistory, imagePayload);
   }
 
-  async callGeminiDirect(message, conversationHistory = []) {
+  async callGeminiDirect(message, conversationHistory = [], imagePayload = null) {
     const pool = this.config.backends.gemini.pool;
     const geminiConfig = this.config.backends.gemini.config;
     const totalKeys = pool ? pool.getTotalKeys() : 0;
@@ -957,10 +957,42 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       }
     }
 
-    // Append current user message
+    // Append current user message (Multimodal Vision Supported)
+    const userParts = [];
+    if (imagePayload) {
+      let base64Data = '';
+      let mime = imagePayload.mimeType || 'image/jpeg';
+      if (typeof imagePayload === 'string') {
+        if (imagePayload.startsWith('data:')) {
+          const matches = imagePayload.match(/^data:([^;]+);base64,(.+)$/);
+          base64Data = matches ? matches[2] : imagePayload;
+          if (matches) mime = matches[1];
+        } else {
+          base64Data = imagePayload;
+        }
+      } else if (imagePayload.data) {
+        base64Data = imagePayload.data;
+        if (imagePayload.mimeType) mime = imagePayload.mimeType;
+      }
+
+      if (base64Data) {
+        userParts.push({
+          inlineData: {
+            mimeType: mime,
+            data: base64Data
+          }
+        });
+      }
+    }
+
+    const textPart = message && message.trim() ? String(message).trim() : (imagePayload ? 'Analyze this image in detail and describe what you see.' : '');
+    if (textPart) {
+      userParts.push({ text: textPart });
+    }
+
     contents.push({
       role: 'user',
-      parts: [{ text: String(message) }]
+      parts: userParts
     });
 
     const payload = {
@@ -971,7 +1003,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       generationConfig: geminiConfig.generationConfig
     };
 
-    const models = geminiConfig.models || ['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest'];
+    const models = geminiConfig.models || ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
 
     // Try keys with auto-failover across the pool
     for (let attempt = 0; attempt < totalKeys; attempt++) {

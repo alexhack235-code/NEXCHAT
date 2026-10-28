@@ -3799,8 +3799,28 @@ async function sendMessage() {
           lastMessageSentAt: serverTimestamp()
         });
 
+        // Capture attached image for ChronEX AI Multimodal Vision
+        let aiImagePayload = null;
+        if (selectedFile && selectedFile.type && selectedFile.type.startsWith('image/')) {
+          try {
+            const b64 = await new Promise((res, rej) => {
+              const r = new FileReader();
+              r.onload = () => {
+                const s = String(r.result);
+                res(s.includes('base64,') ? s.split('base64,')[1] : s);
+              };
+              r.onerror = rej;
+              r.readAsDataURL(selectedFile);
+            });
+            aiImagePayload = { data: b64, mimeType: selectedFile.type, name: selectedFile.name };
+          } catch (_) {}
+        } else if (attachment && (attachment.fileUrl || attachment.url || attachment.downloadURL)) {
+          const imgUrl = attachment.fileUrl || attachment.url || attachment.downloadURL;
+          aiImagePayload = { url: imgUrl, mimeType: attachment.type || 'image/jpeg', name: attachment.name || 'image.jpg' };
+        }
+
         if (typeof displayChronexAIUserMessage === 'function') {
-          displayChronexAIUserMessage(text);
+          displayChronexAIUserMessage(text, aiImagePayload || attachment);
         }
 
         const messagesDiv = document.getElementById("messages-area");
@@ -3822,7 +3842,7 @@ async function sendMessage() {
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
-        const aiResponse = await generateChronexAIResponse(text);
+        const aiResponse = await generateChronexAIResponse(text, aiImagePayload);
 
         const loadingEl = document.getElementById("chronex-ai-loading");
         if (loadingEl) loadingEl.remove();
@@ -5153,7 +5173,7 @@ function updateLocalSentMessageStatus(clientMsgId, status) {
 }
 
 
-async function generateChronexAIResponse(text) {
+async function generateChronexAIResponse(text, imagePayload = null) {
   // FORTRESS LLM Guard: Protect against jailbreaks and DAN prompt injections
   if (text && window.fortressShield) {
     const guard = window.fortressShield.guardAIPrompt(text);
@@ -5174,7 +5194,7 @@ async function generateChronexAIResponse(text) {
 
   try {
     if (chronexAI && typeof chronexAI.chat === 'function') {
-      return await chronexAI.chat(text, myUID || 'default');
+      return await chronexAI.chat(text, myUID || 'default', null, imagePayload);
     }
   } catch (err) {
     console.warn("Direct chronexAI.chat error:", err);
@@ -5213,7 +5233,7 @@ function formatAiMarkdown(rawText) {
   return escape(rawText).replace(/\n/g, '<br>');
 }
 
-function displayChronexAIUserMessage(message) {
+function displayChronexAIUserMessage(message, attachment = null) {
   const messagesContainer = document.getElementById("messages-area");
   if (!messagesContainer) return;
 
@@ -5224,9 +5244,22 @@ function displayChronexAIUserMessage(message) {
   div.className = "message-wrapper sent";
   div.style.cssText = "display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 12px;";
 
+  let mediaHtml = '';
+  if (attachment) {
+    const src = attachment.data ? `data:${attachment.mimeType || 'image/jpeg'};base64,${attachment.data}` : (attachment.url || attachment.fileUrl || attachment.downloadURL);
+    if (src) {
+      mediaHtml = `
+        <div style="margin-bottom: 8px; border-radius: 12px; overflow: hidden; max-height: 220px; border: 1px solid rgba(255,255,255,0.2);">
+          <img src="${src}" alt="Attached Image" style="width: 100%; height: auto; max-height: 220px; object-fit: contain; display: block;" />
+        </div>
+      `;
+    }
+  }
+
   div.innerHTML = `
     <div class="message-bubble chronex-user-bubble" style="background: linear-gradient(135deg, #059669 0%, #10b981 100%); color: #ffffff; padding: 11px 16px; border-radius: 18px 18px 4px 18px; max-width: 75%; word-wrap: break-word; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.45; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);">
-      <p style="margin: 0; white-space: pre-wrap;">${escape(message)}</p>
+      ${mediaHtml}
+      ${message ? `<p style="margin: 0; white-space: pre-wrap;">${escape(message)}</p>` : ''}
       <div style="font-size: 10.5px; margin-top: 5px; opacity: 0.85; text-align: right; color: rgba(255,255,255,0.9);">${formatTimeAgo(new Date())}</div>
     </div>
   `;
@@ -6033,9 +6066,12 @@ function loadMessages() {
     messagesDiv.innerHTML = "";
     messagesDiv.appendChild(messageFragment);
 
-    requestAnimationFrame(() => {
-      messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
+    const isNearBottom = (messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight) < 160;
+    if (isNearBottom || messages.length <= 5) {
+      requestAnimationFrame(() => {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      });
+    }
     try {
       if (window.CyberFeatures && window.CyberFeatures.translator) {
         window.CyberFeatures.translator.onChatLoaded(currentChatUser, false);
@@ -6043,14 +6079,16 @@ function loadMessages() {
     } catch (_) {}
   };
 
+  // Ultra-Fast 0ms rAF Coalesced Message Rendering (< 16ms frame commit)
+  let renderRafLock = false;
   const debouncedUpdateMessages = () => {
-    if (updateMessagesTimeout) clearTimeout(updateMessagesTimeout);
-    const timeSinceLastUpdate = Date.now() - (window.lastUpdateTime || 0);
-    const adaptiveDelay = timeSinceLastUpdate < 30000 ? 200 : 600; // 0.2s if recent activity, 0.6s otherwise
-    updateMessagesTimeout = setTimeout(() => {
+    if (renderRafLock) return;
+    renderRafLock = true;
+    requestAnimationFrame(() => {
       updateMessages();
+      renderRafLock = false;
       window.lastUpdateTime = Date.now();
-    }, adaptiveDelay);
+    });
   };
 
   messageListener = onSnapshot(q, (snap) => {
@@ -17109,36 +17147,62 @@ function initializeBasicUI() {
     });
   }
 
-  function updateSendButtons() {
-    const input = document.getElementById('message-input');
-    const hasText = input && input.value.trim().length > 0;
-    const sendBtn = document.getElementById('sendBtn') || document.querySelector('.send-btn');
-    const audioRecBtn = document.getElementById('audio-record-btn');
-    const audioSendBtn = document.getElementById('audio-send-btn');
-    const inlinePolishBtn = document.getElementById('aiPolishInputBtn');
-    const form = document.getElementById('message-form') || (input ? input.closest('form') : null);
+  // High-Speed Cached DOM Registry for 0ms Input Response
+  let cachedInputElements = null;
+  let lastHasTextState = null;
+  let lastHasFileState = null;
 
+  function getCachedInputElements() {
+    if (!cachedInputElements) {
+      const input = document.getElementById('message-input');
+      cachedInputElements = {
+        input,
+        sendBtn: document.getElementById('sendBtn') || document.querySelector('.send-btn'),
+        audioRecBtn: document.getElementById('audio-record-btn'),
+        audioSendBtn: document.getElementById('audio-send-btn'),
+        inlinePolishBtn: document.getElementById('aiPolishInputBtn'),
+        form: document.getElementById('message-form') || (input ? input.closest('form') : null)
+      };
+    }
+    return cachedInputElements;
+  }
+
+  function updateSendButtons(force = false) {
+    const el = getCachedInputElements();
+    const input = el.input || document.getElementById('message-input');
+    const hasText = Boolean(input && input.value.trim().length > 0);
+    const hasFile = Boolean(typeof selectedFile !== 'undefined' && selectedFile);
+
+    // Guard: Skip redundant DOM recalculations if state has not transitioned
+    if (!force && hasText === lastHasTextState && hasFile === lastHasFileState) {
+      return;
+    }
+    lastHasTextState = hasText;
+    lastHasFileState = hasFile;
+
+    const form = el.form;
     if (form) {
       form.classList.toggle('has-text', hasText);
       form.classList.toggle('has-draft', hasText);
     }
 
+    const inlinePolishBtn = el.inlinePolishBtn;
     if (inlinePolishBtn) {
       inlinePolishBtn.classList.toggle('visible', hasText);
       inlinePolishBtn.style.setProperty('display', hasText ? 'inline-flex' : 'none', 'important');
     }
 
-    if (typeof selectedFile !== 'undefined' && selectedFile) {
+    const sendBtn = el.sendBtn;
+    const audioSendBtn = el.audioSendBtn;
+    const audioRecBtn = el.audioRecBtn;
+
+    if (hasFile || hasText) {
       if (sendBtn) sendBtn.style.display = 'flex';
       if (audioSendBtn) audioSendBtn.style.display = 'none';
-      if (audioRecBtn) audioRecBtn.style.display = 'none';
-    } else if (hasText) {
-      if (audioSendBtn) audioSendBtn.style.display = 'none';
-      if (sendBtn) sendBtn.style.display = 'flex';
       if (audioRecBtn) audioRecBtn.style.display = 'none';
     } else {
-      if (audioSendBtn) audioSendBtn.style.display = 'none';
       if (sendBtn) sendBtn.style.display = 'none';
+      if (audioSendBtn) audioSendBtn.style.display = 'none';
       if (audioRecBtn) audioRecBtn.style.display = 'flex';
     }
   }
@@ -17159,11 +17223,22 @@ function initializeBasicUI() {
   }
   const messageInput = document.getElementById('message-input');
   if (messageInput) {
+    // Ultra-Fast RAF Throttled AutoResize (Zero Keypress Latency)
+    let autoResizeRafLock = false;
+    let lastComputedInputHeight = 0;
     const autoResize = () => {
-      messageInput.style.height = 'auto';
-      const scrollHeight = messageInput.scrollHeight;
-      // Clamped to WhatsApp style: min 38px (single line with 9px padding), max 100px (~5 lines then scroll)
-      messageInput.style.height = Math.min(Math.max(scrollHeight, 38), 100) + 'px';
+      if (autoResizeRafLock) return;
+      autoResizeRafLock = true;
+      requestAnimationFrame(() => {
+        autoResizeRafLock = false;
+        if (!messageInput) return;
+        const currentScroll = messageInput.scrollHeight;
+        if (currentScroll === lastComputedInputHeight && messageInput.value.length > 0) return;
+        messageInput.style.height = 'auto';
+        const newHeight = Math.min(Math.max(messageInput.scrollHeight, 38), 100);
+        messageInput.style.height = newHeight + 'px';
+        lastComputedInputHeight = newHeight;
+      });
     };
     window.adjustTextareaHeight = autoResize;
 

@@ -1,16 +1,17 @@
 import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
 
 /**
- * NEXCHAT /api/ai - Serverless AI Gateway for ChronEX AI
+ * NEXCHAT /api/ai - Serverless AI Gateway for ChronEX AI (Multimodal Vision Enabled)
  * 
  * Supports:
+ * - Text & Multimodal Image Vision (inlineData base64 JPEG/PNG/WebP)
  * - Environment variables on Vercel:
  *   - GEMINI_API_KEY_1
  *   - GEMINI_API_KEY_2
  *   - GEMINI_API_KEYS (comma separated)
  *   - GEMINI_API_KEY
  * - Embedded fallback Pro keys for zero-configuration uptime
- * - Smart multi-model rotation: gemini-3.5-flash -> gemini-3.6-flash -> gemini-3.1-flash-lite
+ * - Smart multi-model rotation: gemini-2.5-flash -> gemini-2.0-flash -> gemini-1.5-flash -> gemini-3.5-flash
  */
 
 const FALLBACK_PRO_KEYS = [
@@ -50,10 +51,10 @@ function getApiKeys() {
 }
 
 const CANDIDATE_MODELS = [
-  'gemini-3.5-flash',
-  'gemini-3.6-flash',
-  'gemini-3.1-flash-lite',
-  'gemini-flash-latest'
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash',
+  'gemini-1.5-pro'
 ];
 
 const SYSTEM_INSTRUCTION = `You are CHRONEX AI, the advanced neural AI assistant created by NEXCHAT.
@@ -62,6 +63,7 @@ Core instructions:
 - Provide clean, modern code with clear explanations.
 - Keep responses friendly, sharp, concise, and structured in clean Markdown.
 - Solve math, algorithmic, and logic queries step-by-step.
+- Inspect and analyze any provided images, diagrams, mockups, or photos in high detail.
 - Uphold safe, ethical computing standards.`;
 
 export default async function handler(req, res) {
@@ -77,10 +79,11 @@ export default async function handler(req, res) {
     return res.status(200).json({
       status: 'online',
       service: 'CHRONEX AI Serverless Gateway',
-      version: '2.5.0-pro',
+      version: '2.5.0-pro-vision',
       availableKeysCount: keys.length,
       primaryModel: CANDIDATE_MODELS[0],
-      supportedModels: CANDIDATE_MODELS
+      supportedModels: CANDIDATE_MODELS,
+      multimodalVision: true
     });
   }
 
@@ -88,9 +91,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { message, history = [] } = req.body || {};
-  if (!message || typeof message !== 'string' || !message.trim()) {
-    return res.status(400).json({ error: 'Message cannot be empty' });
+  const { message, history = [], image = null, imageMimeType = 'image/jpeg' } = req.body || {};
+  if ((!message || typeof message !== 'string' || !message.trim()) && !image) {
+    return res.status(400).json({ error: 'Message or image cannot be empty' });
   }
 
   const keys = getApiKeys();
@@ -111,9 +114,59 @@ export default async function handler(req, res) {
     }
   }
 
+  // Multimodal user parts
+  const userParts = [];
+  const rawImage = image || req.body?.imageUrl;
+  if (rawImage) {
+    let base64Data = '';
+    let mime = imageMimeType || 'image/jpeg';
+    if (typeof rawImage === 'string') {
+      if (rawImage.startsWith('http://') || rawImage.startsWith('https://')) {
+        try {
+          const fetchRes = await fetch(rawImage);
+          if (fetchRes.ok) {
+            const cType = fetchRes.headers.get('content-type');
+            if (cType) mime = cType.split(';')[0].trim();
+            const buffer = await fetchRes.arrayBuffer();
+            base64Data = Buffer.from(buffer).toString('base64');
+          }
+        } catch (fetchErr) {
+          console.warn('[AI Gateway] Failed to fetch image URL:', fetchErr.message);
+        }
+      } else if (rawImage.startsWith('data:')) {
+        const matches = rawImage.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches) {
+          mime = matches[1];
+          base64Data = matches[2];
+        } else {
+          base64Data = rawImage.split(',')[1] || rawImage;
+        }
+      } else {
+        base64Data = rawImage;
+      }
+    } else if (rawImage.data) {
+      base64Data = rawImage.data;
+      if (rawImage.mimeType) mime = rawImage.mimeType;
+    }
+
+    if (base64Data) {
+      userParts.push({
+        inlineData: {
+          mimeType: mime,
+          data: base64Data.trim().replace(/\r?\n|\r/g, '')
+        }
+      });
+    }
+  }
+
+  const textPrompt = message && typeof message === 'string' && message.trim() ? message.trim() : (image ? 'Analyze and describe this image in detail.' : '');
+  if (textPrompt) {
+    userParts.push({ text: textPrompt });
+  }
+
   contents.push({
     role: 'user',
-    parts: [{ text: String(message) }]
+    parts: userParts
   });
 
   const payload = {
@@ -149,7 +202,8 @@ export default async function handler(req, res) {
               success: true,
               response: candidateText,
               model: model,
-              keyIndex: kIdx
+              keyIndex: kIdx,
+              multimodal: Boolean(image)
             });
           }
         }

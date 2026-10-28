@@ -992,13 +992,34 @@ html, body {
   flex-direction: column;
   gap: 10px;
   background-color: var(--bg-app);
-  scroll-behavior: smooth;
+  scroll-behavior: auto !important; /* Eliminate animation frame thrashing during programmatic stream */
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  will-change: scroll-position;
+  /* Hardware Accelerated GPU Compositing Layer */
+  transform: translate3d(0, 0, 0);
+  -webkit-transform: translate3d(0, 0, 0);
+  will-change: transform;
   backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Touch Latency Elimination (300ms mobile delay removal) */
+#message-input,
+.message-form,
+.input-btn,
+.input-inline-btn,
+.send-btn,
+.ai-polish-inline-btn {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Off-screen rendering containment and layout isolation */
+.message-wrapper {
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 54px;
+  transform: translateZ(0);
 }
 
 .messages-list {
