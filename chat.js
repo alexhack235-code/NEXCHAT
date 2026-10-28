@@ -4754,7 +4754,7 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     }
 
     // Auto Voice Note Subtitle & Translation Card
-    const attachSubtitle = localStorage.getItem('nex_voice_attach_subtitle') !== 'false';
+    const attachSubtitle = localStorage.getItem('nex_voice_attach_subtitle') === 'true';
     const hasTranscript = (attachment.translatedText && attachment.translatedText.trim()) || (attachment.transcript && attachment.transcript.trim());
 
     // Elite Neural Voice Intelligence & Waveform
@@ -10142,13 +10142,8 @@ function setupNewUserLanguageOnboarding() {
   const langBadgePill = document.getElementById('predictiveLangBadge');
   const launchWizardBtn = document.getElementById('launchLangWizardBtn');
 
-  // Trigger for First-time Users
+  // Language Onboarding Wizard: Available on demand via launchLangWizardBtn ('Open Visual Grid') without unsolicited automatic popups
   const isWelcomed = localStorage.getItem('nexchat_welcomed_lang');
-  if (!isWelcomed) {
-    setTimeout(() => {
-      window.openLanguageOnboardingModal();
-    }, 1200);
-  }
 
   // Bind Confirm
   if (confirmBtn && !confirmBtn.dataset.bound) {
@@ -11704,10 +11699,10 @@ function loadSettingsPreferences() {
     const autoVoiceTranslateEl = document.getElementById("autoVoiceNoteTranslateToggle");
     const voiceAttachSubtitleEl = document.getElementById("voiceNoteAttachSubtitleToggle");
     if (autoVoiceTranslateEl) {
-      autoVoiceTranslateEl.checked = localStorage.getItem("nex_auto_voice_translate") !== "false";
+      autoVoiceTranslateEl.checked = localStorage.getItem("nex_auto_voice_translate") === "true";
     }
     if (voiceAttachSubtitleEl) {
-      voiceAttachSubtitleEl.checked = localStorage.getItem("nex_voice_attach_subtitle") !== "false";
+      voiceAttachSubtitleEl.checked = localStorage.getItem("nex_voice_attach_subtitle") === "true";
     }
 
     applyBubbleTheme(prefs.bubbleTheme || "neon-onyx");
@@ -13128,7 +13123,6 @@ document.getElementById("settings-btn-header")?.addEventListener("click", (e) =>
 }, false);
 
 document.getElementById("closeSettingsBtn")?.addEventListener("click", () => {
-  saveSettingsPreferences();
   closeSettingsModal();
 }, false);
 
@@ -13279,13 +13273,12 @@ if (installHeaderBtnEl) {
 
 document.getElementById("settingsModal")?.addEventListener("click", (e) => {
   if (e.target.id === "settingsModal") {
-    saveSettingsPreferences();
     closeSettingsModal();
   }
 }, false);
 
 const setupSettingsListeners = () => {
-  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle"];
+  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle", "autoVoiceNoteTranslateToggle", "voiceNoteAttachSubtitleToggle"];
 
   toggles.forEach(id => {
     const el = document.getElementById(id);
@@ -17203,7 +17196,6 @@ function initializeBasicUI() {
     openSettingsModal();
   });
   document.getElementById('closeSettingsBtn')?.addEventListener('click', () => {
-    saveSettingsPreferences();
     closeSettingsModal();
   });
 

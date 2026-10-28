@@ -263,7 +263,7 @@ class NexVoiceRecorder {
 
   startSpeechRecognition() {
     this.speechTranscript = '';
-    const isAutoVoiceTranslate = localStorage.getItem('nex_auto_voice_translate') !== 'false';
+    const isAutoVoiceTranslate = localStorage.getItem('nex_auto_voice_translate') === 'true';
     if (!isAutoVoiceTranslate) return;
 
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;

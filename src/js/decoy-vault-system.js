@@ -70,11 +70,11 @@
 
   class DecoyVaultSystem {
     constructor() {
-      this.isLocked = true;
+      this.isLocked = false;
       this.isDecoyActive = false;
       this.enteredPin = '';
       this.pinLength = 4;
-      this.autoLockMinutes = parseInt(localStorage.getItem('nex_vault_autolock') || '15', 10);
+      this.autoLockMinutes = parseInt(localStorage.getItem('nex_vault_autolock') || '0', 10);
       this.autoLockTimer = null;
 
       this.init();

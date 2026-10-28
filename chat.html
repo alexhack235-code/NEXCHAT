@@ -2236,7 +2236,7 @@
                       <p style="font-size: 12px; color: #94a3b8; margin: 4px 0 0 0;">Automatically transcribe spoken audio while recording and generate instant translated text subtitles for your voice notes.</p>
                     </div>
                     <label class="luxury-switch">
-                      <input type="checkbox" id="autoVoiceNoteTranslateToggle" checked>
+                      <input type="checkbox" id="autoVoiceNoteTranslateToggle">
                       <span class="slider"></span>
                     </label>
                   </div>
@@ -2248,7 +2248,7 @@
                         <p style="font-size: 11px; color: #64748b; margin: 2px 0 0 0;">Displays a transcribed and translated subtitle card directly beneath the voice waveform player in chat.</p>
                       </div>
                       <label class="luxury-switch">
-                        <input type="checkbox" id="voiceNoteAttachSubtitleToggle" checked>
+                        <input type="checkbox" id="voiceNoteAttachSubtitleToggle">
                         <span class="slider"></span>
                       </label>
                     </div>
@@ -3215,9 +3215,11 @@
     <select id="settingAutoLockSelect" class="decoy-input-box">
       <option value="1">1 Minute</option>
       <option value="5">5 Minutes</option>
-      <option value="15" selected>15 Minutes</option>
+      <option value="0" selected>Disabled (Default)</option>
+      <option value="1">1 Minute</option>
+      <option value="5">5 Minutes</option>
+      <option value="15">15 Minutes</option>
       <option value="60">1 Hour</option>
-      <option value="0">Disabled</option>
     </select>
   </div>
 

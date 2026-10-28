@@ -312,7 +312,7 @@
       strikes += 1;
       sessionStorage.setItem(CORE_CONFIG.FAIL_COUNT_KEY, strikes.toString());
 
-      const strikeDestructEnabled = localStorage.getItem(CORE_CONFIG.STRIKE_DESTRUCT_KEY) !== 'false';
+      const strikeDestructEnabled = localStorage.getItem(CORE_CONFIG.STRIKE_DESTRUCT_KEY) === 'true';
 
       if (strikes >= CORE_CONFIG.MAX_STRIKES && strikeDestructEnabled) {
         // Strike threshold reached -> execute irrevocable wipe
