@@ -302,7 +302,7 @@
 
                 <!-- Drag and Drop Storybook Upload Box -->
                 <div id="dropZone" onclick="document.getElementById('fileUploadInput').click()" style="border: 2px dashed rgba(0, 240, 255, 0.35); border-radius: 12px; padding: 18px; text-align: center; background: rgba(0, 240, 255, 0.04); cursor: pointer; margin-bottom: 14px; transition: all 0.2s;">
-                    <div style="font-size: 26px; margin-bottom: 6px;">📂</div>
+                    <div style="font-size: 26px; margin-bottom: 6px;"><i class="fa-solid fa-folder-open" style="color: #00f2ff;"></i></div>
                     <div id="uploadTitle" style="font-size: 13px; font-weight: 700; color: var(--cyan);">Click to Upload Storybook File or Drag & Drop Here</div>
                     <div id="uploadSub" style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Supports .txt, .md, novel text files (or paste below)</div>
                     <input type="file" id="fileUploadInput" accept=".txt,.md,.text" style="display:none;" onchange="handleFileSelect(event)">
@@ -311,7 +311,7 @@
                 <textarea id="chapterInput" placeholder="Or paste novel chapter / storybook text here directly..."></textarea>
 
                 <button id="synthBtn" onclick="synthesizeFromVault()" class="btn btn-primary" style="width:100%; padding:13px; font-size:13px; margin-bottom:15px; cursor:pointer;">
-                    ⚡ Convert Storybook to 9:16 Viral Video
+                    <i class="fa-solid fa-bolt" style="color: #ffd700;"></i> Convert Storybook to 9:16 Viral Video
                 </button>
 
                 <div class="progress-box" id="progressBox">

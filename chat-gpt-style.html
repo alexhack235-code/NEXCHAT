@@ -296,10 +296,10 @@
         // Preset Models
         const MODEL_REGISTRY = [
             { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", engine: "Cloud Key Pool", tag: "<300MS ACCEL" },
-            { id: "gemini-4.0-preview", name: "Gemini 4.0 Next-Gen", engine: "Cloud Key Pool", tag: "⚡ READY HOOK" },
-            { id: "gemini-4.0-flash", name: "Gemini 4.0 Flash", engine: "Cloud Key Pool", tag: "⚡ READY HOOK" },
+            { id: "gemini-4.0-preview", name: "Gemini 4.0 Next-Gen", engine: "Cloud Key Pool", tag: "[READY] READY HOOK" },
+            { id: "gemini-4.0-flash", name: "Gemini 4.0 Flash", engine: "Cloud Key Pool", tag: "[READY] READY HOOK" },
             { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro", engine: "Cloud Key Pool", tag: "REASONING" },
-            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B (Local PC)", engine: "Local Host PC", tag: "🟢 ON YOUR PC" },
+            { id: "qwen2.5:3b-instruct", name: "Qwen 2.5 3B (Local PC)", engine: "Local Host PC", tag: "[LOCAL] ON YOUR PC" },
             { id: "deepseek-r1:latest", name: "DeepSeek R1", engine: "Reasoning Core", tag: "REASONING" },
             { id: "llama3.3:latest", name: "Llama 3.3 70B", engine: "Local Ollama", tag: "HIGH PERFORMANCE" },
             { id: "cloud-gpt4o", name: "GPT-4o Omni", engine: "Cloud API", tag: "CLOUD PROXY" }
@@ -1847,7 +1847,7 @@ Your query has been preserved in your session history.`;
                         console.log("[NEXIUM] Gemini Multi-Key Pool active:", data);
                         MODEL_REGISTRY.forEach(m => {
                             if (m.id.includes("gemini")) {
-                                m.tag = `⚡ ${data.pool_size || 6} KEYS ACTIVE`;
+                                m.tag = `[ACTIVE] ${data.pool_size || 6} KEYS ACTIVE`;
                             }
                         });
                         const savedModel = localStorage.getItem("nexium_selected_model");

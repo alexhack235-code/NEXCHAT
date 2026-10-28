@@ -86,7 +86,7 @@
             <div class="schedule-field-group mt-3">
               <label class="schedule-label flex items-center gap-2">
                 <input type="checkbox" id="selfDestructBurnCheckbox" />
-                <span class="text-amber-400 font-bold">🔥 Attach Laser Self-Destruct Burn Timer (30s)</span>
+                <span class="text-amber-400 font-bold"><i class="fa-solid fa-fire"></i> Attach Laser Self-Destruct Burn Timer (30s)</span>
               </label>
             </div>
 
@@ -185,7 +185,7 @@
 
       if (typeof window.showNotif === 'function') {
         const dueFormatted = new Date(dueTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        window.showNotif(`⏰ Message scheduled for delivery at ${dueFormatted}!`, 'success', 2500);
+        window.showNotif(`[SCHEDULED] Message scheduled for delivery at ${dueFormatted}!`, 'success', 2500);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('affirm');
     }
@@ -224,7 +224,7 @@
       }
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(`🚀 Scheduled transmission delivered to ${item.targetUser}!`, 'success', 2000);
+        window.showNotif(`[DELIVERED] Scheduled transmission delivered to ${item.targetUser}!`, 'success', 2000);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
     }

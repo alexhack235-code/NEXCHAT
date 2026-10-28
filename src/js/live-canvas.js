@@ -360,7 +360,7 @@
 
       expCtx.fillStyle = '#00f0ff';
       expCtx.font = 'bold 12px monospace';
-      expCtx.fillText('🎨 NEXCHAT CO-DOODLE • SYNCHRONIZED CANVAS', 16, this.canvas.height + 25);
+      expCtx.fillText('[CO-DOODLE] NEXCHAT CO-DOODLE - SYNCHRONIZED CANVAS', 16, this.canvas.height + 25);
 
       const artworkDataUrl = exportCanvas.toDataURL('image/png');
 
@@ -372,7 +372,7 @@
       };
 
       if (typeof window.appendLocalSentMessage === 'function') {
-        window.appendLocalSentMessage('🎨 Created a live Co-Doodle together!', attachment, false, 'sent');
+        window.appendLocalSentMessage('[CO-DOODLE] Created a live Co-Doodle together!', attachment, false, 'sent');
       }
 
       if (typeof window.sendSupabaseMessage === 'function') {
@@ -381,7 +381,7 @@
           window.sendSupabaseMessage({
             from: window.myUID || 'u_current',
             to: partnerId,
-            text: '🎨 Created a live Co-Doodle together!',
+            text: '[CO-DOODLE] Created a live Co-Doodle together!',
             attachment: attachment,
             chatType: window.currentChatType || 'direct'
           }).catch(console.warn);
@@ -391,7 +391,7 @@
       this.closeModal();
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif('🎨 Co-Doodle sent to chat!', 'success', 2000);
+        window.showNotif('[CO-DOODLE] Co-Doodle sent to chat!', 'success', 2000);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
     }

@@ -92,8 +92,8 @@
             <div class="poll-field-group mt-3">
               <label class="poll-label">CHOICE OPTIONS (MIN 2):</label>
               <div class="poll-options-inputs-list" id="pollOptionsInputsList">
-                <input type="text" class="poll-text-input poll-opt-input mb-2" placeholder="Option 1 (e.g. Yes, to the moon 🚀)" maxlength="50" />
-                <input type="text" class="poll-text-input poll-opt-input mb-2" placeholder="Option 2 (e.g. No, dip first 📉)" maxlength="50" />
+                <input type="text" class="poll-text-input poll-opt-input mb-2" placeholder="Option 1 (e.g. Yes, upward surge)" maxlength="50" />
+                <input type="text" class="poll-text-input poll-opt-input mb-2" placeholder="Option 2 (e.g. No, market dip first)" maxlength="50" />
               </div>
               <button type="button" id="addPollOptionBtn" class="poll-add-opt-btn">
                 <i class="fa-solid fa-plus"></i> Add Choice Option
@@ -103,10 +103,10 @@
             <div class="poll-field-group mt-3">
               <label class="poll-label">STAKE PER VOTE:</label>
               <div class="poll-wager-pills-row">
-                <button type="button" class="poll-wager-pill" data-wager="0">Free (0 🪙)</button>
-                <button type="button" class="poll-wager-pill active" data-wager="50">50 🪙</button>
-                <button type="button" class="poll-wager-pill" data-wager="100">100 🪙</button>
-                <button type="button" class="poll-wager-pill" data-wager="250">250 🪙</button>
+                <button type="button" class="poll-wager-pill" data-wager="0">Free (0 Tokens)</button>
+                <button type="button" class="poll-wager-pill active" data-wager="50">50 Tokens</button>
+                <button type="button" class="poll-wager-pill" data-wager="100">100 Tokens</button>
+                <button type="button" class="poll-wager-pill" data-wager="250">250 Tokens</button>
               </div>
             </div>
 
@@ -254,7 +254,7 @@
       };
 
       if (typeof window.appendLocalSentMessage === 'function') {
-        window.appendLocalSentMessage(`📊 Launched Prediction Market: "${question}"`, pollAttachment, false, 'sent');
+        window.appendLocalSentMessage(`[PREDICTION MARKET] Launched Prediction Market: "${question}"`, pollAttachment, false, 'sent');
       }
 
       if (typeof window.sendSupabaseMessage === 'function') {
@@ -273,7 +273,7 @@
       this.closeModal();
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(`⚡ Prediction Market launched with ${this.selectedWager} 🪙 stakes!`, 'success', 2500);
+        window.showNotif(`[PREDICTION MARKET] Launched with ${this.selectedWager} Tokens stakes!`, 'success', 2500);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('affirm');
     }
@@ -332,7 +332,7 @@
       this.broadcastPollEvent(poll, 'vote');
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(`✅ Vote placed on "${opt.text}"! (${poll.wager > 0 ? poll.wager + ' 🪙 Staked' : 'Free'})`, 'success', 2500);
+        window.showNotif(`[VOTE PLACED] Vote placed on "${opt.text}"! (${poll.wager > 0 ? poll.wager + ' Tokens Staked' : 'Free'})`, 'success', 2500);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
     }
@@ -356,7 +356,7 @@
           const curBal = this.getUserTokens();
           this.setUserTokens(curBal + payoutPerWinner);
           if (typeof window.showNotif === 'function') {
-            window.showNotif(`🏆 MARKET WON! Claimed +${payoutPerWinner} NEX Tokens!`, 'success', 3500);
+            window.showNotif(`[MARKET WON] Claimed +${payoutPerWinner} NEX Tokens!`, 'success', 3500);
           }
         }
       }
@@ -396,7 +396,7 @@
           </div>
           <div class="poll-pot-badge">
             <i class="fa-solid fa-coins text-amber-400"></i>
-            <strong id="pollPotVal_${pollId}">${activePoll.totalPot.toLocaleString()} 🪙</strong>
+            <strong id="pollPotVal_${pollId}">${activePoll.totalPot.toLocaleString()}  Tokens</strong>
           </div>
         </div>
 
@@ -465,7 +465,7 @@
             <div class="poll-option-bar" style="width: ${pct}%;"></div>
             <div class="poll-option-content">
               <span class="poll-option-text">
-                ${isWinner ? '👑 ' : ''}${opt.text} ${isUserChoice ? '<span class="voted-tag">YOUR VOTE</span>' : ''}
+                ${isWinner ? '[WINNER] ' : ''}${opt.text} ${isUserChoice ? '<span class="voted-tag">YOUR VOTE</span>' : ''}
               </span>
               <div class="flex items-center gap-2">
                 <strong class="poll-option-pct">${pct}%</strong>
@@ -491,7 +491,7 @@
       const userVotedOpt = poll.options.find(opt => opt.voters && opt.voters.some(v => v.uid === currentUid));
 
       const potVal = document.getElementById(`pollPotVal_${pollId}`);
-      if (potVal) potVal.textContent = `${poll.totalPot.toLocaleString()} 🪙`;
+      if (potVal) potVal.textContent = `${poll.totalPot.toLocaleString()}  Tokens`;
 
       const grid = document.getElementById(`pollOptionsGrid_${pollId}`);
       if (grid) {

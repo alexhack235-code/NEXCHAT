@@ -2,7 +2,7 @@
  * NEXCHAT CYBER STREAKS & DAILY LOOTBOX CRATES ENGINE
  * 
  * Capabilities:
- * - Real-time daily streak calculation (🔥 Streak Count, Level, & Milestones)
+ * - Real-time daily streak calculation (Streak Count, Level, & Milestones)
  * - Anti-break Streak Freeze Shield system
  * - Streak status & countdown HUD with 1-click "Streak Nudge"
  * - Daily 24-Hour Encrypted Cyber Crate with particle animations & rewards
@@ -87,7 +87,7 @@
         streak.count += 1;
         streak.lastDate = todayStr;
         if (window.showNotif) {
-          window.showNotif(`🔥 Cyber Streak increased! ${streak.count} Days with partner!`, 'success', 2500);
+          window.showNotif(`[STREAK] Cyber Streak increased! ${streak.count} Days with partner!`, 'success', 2500);
         }
       } else if (diffDays > 1) {
         // Check if user has streak freeze
@@ -96,7 +96,7 @@
           localStorage.setItem(STREAK_FREEZE_KEY, String(this.freezes));
           streak.lastDate = todayStr;
           if (window.showNotif) {
-            window.showNotif(`🛡️ Streak Freeze Shield activated! Streak saved at ${streak.count} Days!`, 'info', 3000);
+            window.showNotif(`[SHIELD] Streak Freeze Shield activated! Streak saved at ${streak.count} Days!`, 'info', 3000);
           }
         } else {
           // Streak broken, reset to 1
@@ -311,13 +311,13 @@
       if (tierEl) {
         const c = streak.count || 0;
         if (c >= 30) {
-          tierEl.textContent = '👑 Quantum Legend';
+          tierEl.textContent = '[LEGEND] Quantum Legend';
           tierEl.style.color = '#facc15';
         } else if (c >= 7) {
-          tierEl.textContent = '⚡ Neon Spark';
+          tierEl.textContent = '[SPARK] Neon Spark';
           tierEl.style.color = '#00d4ff';
         } else {
-          tierEl.textContent = '🔥 Bronze Enclave';
+          tierEl.textContent = '[BRONZE] Bronze Enclave';
           tierEl.style.color = '#fb923c';
         }
       }
@@ -329,7 +329,7 @@
     sendStreakNudge() {
       const partnerName = window.currentChatName || 'Friend';
       const streak = this.getStreak(window.currentChatUserId || window.currentChatUser);
-      const text = `🔥 **CYBER STREAK NUDGE!**\nHey ${partnerName}, keep our ${streak.count || 1}-day streak alive! Send a quick reply before today ends! ⚡`;
+      const text = `[CYBER STREAK NUDGE]\nHey ${partnerName}, keep our ${streak.count || 1}-day streak alive! Send a quick reply before today ends!`;
 
       const input = document.getElementById('message-input');
       if (input) {
@@ -415,7 +415,7 @@
       setTimeout(() => {
         // Calculate random rewards
         const tokenReward = Math.floor(Math.random() * (250 - 75 + 1)) + 75; // 75 - 250 tokens
-        const badges = ['⚡ Cyber Phantom', '🛡️ Enclave Sentinel', '🔥 Firestarter', '👑 Quantum Pioneer'];
+        const badges = ['[CYBER] Cyber Phantom', '[SHIELD] Enclave Sentinel', '[FIRE] Firestarter', '[LEGEND] Quantum Pioneer'];
         const randomBadge = badges[Math.floor(Math.random() * badges.length)];
 
         // Credit Tokens
@@ -465,7 +465,7 @@
 
         if (rewardsWrap) rewardsWrap.style.display = 'block';
 
-        if (window.showNotif) window.showNotif(`🎉 Unboxed ${tokenReward} Tokens & ${randomBadge}!`, 'success', 3500);
+        if (window.showNotif) window.showNotif(`[REWARD] Unboxed ${tokenReward} Tokens & ${randomBadge}!`, 'success', 3500);
 
       }, 1400);
     }

@@ -297,11 +297,11 @@
           fileSize: totalBytes,
           downloadURL: URL.createObjectURL(this.selectedFile)
         };
-        window.appendLocalSentMessage(`⚡ Direct P2P Beam Complete: ${this.selectedFile.name} (${totalMB} MB in ${elapsedSec}s)`, beamAttachment, false, 'sent');
+        window.appendLocalSentMessage(`[P2P-BEAM] Direct P2P Beam Complete: ${this.selectedFile.name} (${totalMB} MB in ${elapsedSec}s)`, beamAttachment, false, 'sent');
       }
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(`🎉 P2P Beam Complete: Transferred ${totalMB} MB in ${elapsedSec}s!`, 'success', 3000);
+        window.showNotif(`[TRANSFER COMPLETE] P2P Beam Complete: Transferred ${totalMB} MB in ${elapsedSec}s!`, 'success', 3000);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
 
@@ -329,7 +329,7 @@
 
         if (tracker.receivedCount >= tracker.totalChunks) {
           if (typeof window.showNotif === 'function') {
-            window.showNotif(`⚡ Received P2P Data Beam: ${tracker.fileName} (${(tracker.totalSize / (1024 * 1024)).toFixed(1)} MB)!`, 'success', 3500);
+            window.showNotif(`[P2P-BEAM] Received P2P Data Beam: ${tracker.fileName} (${(tracker.totalSize / (1024 * 1024)).toFixed(1)} MB)!`, 'success', 3500);
           }
           if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
           delete this.receivedChunks[chunkMeta.fileId];

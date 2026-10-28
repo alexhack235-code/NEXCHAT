@@ -53,11 +53,11 @@
         bar.innerHTML = `
           <span class="morpher-label"><i class="fa-solid fa-wand-magic-sparkles"></i> VOICE FX:</span>
           <div class="morpher-pills-wrap">
-            <button type="button" class="morpher-pill active" data-mode="normal">🎙️ Normal</button>
-            <button type="button" class="morpher-pill" data-mode="cyberborg">🤖 Cyberborg</button>
-            <button type="button" class="morpher-pill" data-mode="shadow">🕶️ Shadow</button>
-            <button type="button" class="morpher-pill" data-mode="glitch">⚡ Glitch</button>
-            <button type="button" class="morpher-pill" data-mode="helium">🎈 Helium</button>
+            <button type="button" class="morpher-pill active" data-mode="normal"><i class="fa-solid fa-microphone"></i> Normal</button>
+            <button type="button" class="morpher-pill" data-mode="cyberborg"><i class="fa-solid fa-robot"></i> Cyberborg</button>
+            <button type="button" class="morpher-pill" data-mode="shadow"><i class="fa-solid fa-glasses"></i> Shadow</button>
+            <button type="button" class="morpher-pill" data-mode="glitch"><i class="fa-solid fa-bolt"></i> Glitch</button>
+            <button type="button" class="morpher-pill" data-mode="helium"><i class="fa-solid fa-cloud"></i> Helium</button>
           </div>
         `;
 
@@ -83,7 +83,7 @@
           glitch: 'Overclocked Glitch (Hacker Bitcrusher FX)',
           helium: 'Micro-Drone (High Frequency Chirp)'
         };
-        window.showNotif(`🎙️ Voice Filter: ${names[mode] || mode}`, 'info', 1800);
+        window.showNotif(`[VOICE FILTER]: ${names[mode] || mode}`, 'info', 1800);
       }
       this.playSfx('zap');
     }
@@ -240,35 +240,35 @@
 
             <div class="soundboard-grid mt-4">
               <button type="button" class="soundboard-pad-btn" data-sfx="airhorn">
-                <span class="pad-emoji">🎺</span>
+                <span class="pad-emoji"><i class="fa-solid fa-bullhorn"></i></span>
                 <span class="pad-name">AIRHORN</span>
               </button>
               <button type="button" class="soundboard-pad-btn" data-sfx="glitch">
-                <span class="pad-emoji">⚡</span>
+                <span class="pad-emoji"><i class="fa-solid fa-bolt"></i></span>
                 <span class="pad-name">GLITCH</span>
               </button>
               <button type="button" class="soundboard-pad-btn" data-sfx="bassdrop">
-                <span class="pad-emoji">💥</span>
+                <span class="pad-emoji"><i class="fa-solid fa-burst"></i></span>
                 <span class="pad-name">808 DROP</span>
               </button>
               <button type="button" class="soundboard-pad-btn" data-sfx="victory">
-                <span class="pad-emoji">🏆</span>
+                <span class="pad-emoji"><i class="fa-solid fa-trophy"></i></span>
                 <span class="pad-name">VICTORY</span>
               </button>
               <button type="button" class="soundboard-pad-btn" data-sfx="buzzer">
-                <span class="pad-emoji">❌</span>
+                <span class="pad-emoji"><i class="fa-solid fa-xmark"></i></span>
                 <span class="pad-name">BRUH / BUZZ</span>
               </button>
               <button type="button" class="soundboard-pad-btn" data-sfx="complete">
-                <span class="pad-emoji">✨</span>
+                <span class="pad-emoji"><i class="fa-solid fa-sparkles"></i></span>
                 <span class="pad-name">MISSION OK</span>
               </button>
               <button type="button" class="soundboard-pad-btn" data-sfx="heartbeat">
-                <span class="pad-emoji">💓</span>
+                <span class="pad-emoji"><i class="fa-solid fa-heart-pulse"></i></span>
                 <span class="pad-name">HEARTBEAT</span>
               </button>
               <button type="button" class="soundboard-pad-btn" data-sfx="zap">
-                <span class="pad-emoji">🔫</span>
+                <span class="pad-emoji"><i class="fa-solid fa-gun"></i></span>
                 <span class="pad-name">LASER ZAP</span>
               </button>
             </div>
@@ -494,7 +494,7 @@
         if (!data || !data.soundType) return;
         this.playSfx(data.soundType);
         if (typeof window.showNotif === 'function') {
-          window.showNotif(`🔊 ${data.senderName || 'Partner'} played: [${data.soundType.toUpperCase()}]`, 'info', 2000);
+          window.showNotif(`[AUDIO] ${data.senderName || 'Partner'} played: [${data.soundType.toUpperCase()}]`, 'info', 2000);
         }
       });
     }

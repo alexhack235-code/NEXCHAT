@@ -80,7 +80,7 @@
         this.isOnlineState = true;
         this.updateStatusPill();
         if (typeof window.showNotif === 'function') {
-          window.showNotif('📶 Connection re-established. Synchronizing queue...', 'info', 2000);
+          window.showNotif('[ONLINE] Connection re-established. Synchronizing queue...', 'info', 2000);
         }
         this.flushQueue();
       });
@@ -89,7 +89,7 @@
         this.isOnlineState = false;
         this.updateStatusPill();
         if (typeof window.showNotif === 'function') {
-          window.showNotif('📡 Offline Mode Engaged. Outgoing transmissions will be queued.', 'warning', 3000);
+          window.showNotif('[OFFLINE] Offline Mode Engaged. Outgoing transmissions will be queued.', 'warning', 3000);
         }
       });
     }
@@ -142,7 +142,7 @@
       this.refreshQueueCount();
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif('Transmission securely queued in offline IndexedDB 🕒', 'info', 1800);
+        window.showNotif('Transmission securely queued in offline IndexedDB [QUEUED]', 'info', 1800);
       }
     }
 
@@ -227,7 +227,7 @@
 
       if (successCount > 0) {
         if (typeof window.showNotif === 'function') {
-          window.showNotif(`🎉 Synchronized ${successCount} queued offline transmissions!`, 'success', 2500);
+          window.showNotif(`[SYNCED] Synchronized ${successCount} queued offline transmissions!`, 'success', 2500);
         }
         if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
       }

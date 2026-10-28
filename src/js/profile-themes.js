@@ -13,7 +13,7 @@
   const THEMES = {
     emerald: {
       name: 'Cyber Emerald',
-      icon: '🟢',
+      icon: '<i class="fa-solid fa-circle" style="color: #00ff66;"></i>',
       gradient: 'linear-gradient(135deg, #059669 0%, #10b981 100%)',
       border: '1px solid rgba(16, 185, 129, 0.4)',
       shadow: '0 4px 14px rgba(5, 150, 105, 0.35)',
@@ -21,7 +21,7 @@
     },
     matrix: {
       name: 'Matrix Terminal',
-      icon: '🌐',
+      icon: '<i class="fa-solid fa-globe" style="color: #00f2fe;"></i>',
       gradient: 'linear-gradient(135deg, #052e16 0%, #14532d 100%)',
       border: '1px solid #00ff66',
       shadow: '0 0 15px rgba(0, 255, 102, 0.3)',
@@ -29,7 +29,7 @@
     },
     synthwave: {
       name: 'Synthwave Sunset',
-      icon: '🌆',
+      icon: '<i class="fa-solid fa-city" style="color: #a855f7;"></i>',
       gradient: 'linear-gradient(135deg, #7c3aed 0%, #db2777 100%)',
       border: '1px solid rgba(219, 39, 119, 0.5)',
       shadow: '0 4px 18px rgba(219, 39, 119, 0.4)',
@@ -37,7 +37,7 @@
     },
     crimson: {
       name: 'Crimson Overdrive',
-      icon: '🔴',
+      icon: '<i class="fa-solid fa-circle" style="color: #ef4444;"></i>',
       gradient: 'linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%)',
       border: '1px solid rgba(239, 68, 68, 0.6)',
       shadow: '0 4px 16px rgba(220, 38, 38, 0.45)',
@@ -45,7 +45,7 @@
     },
     gold: {
       name: 'Obsidian Gold',
-      icon: '👑',
+      icon: '<i class="fa-solid fa-crown" style="color: #ffd700;"></i>',
       gradient: 'linear-gradient(135deg, #18181b 0%, #27272a 100%)',
       border: '1px solid #fbbf24',
       shadow: '0 0 18px rgba(251, 191, 36, 0.35)',
@@ -121,7 +121,7 @@
                     <div class="holo-identity-info">
                       <h3 class="holo-username" id="holoCardUsername">Operative</h3>
                       <span class="holo-uid-badge" id="holoCardUid">ID: u_404</span>
-                      <span class="holo-title-pill" id="holoCardTitle">👑 Quantum Pioneer</span>
+                      <span class="holo-title-pill" id="holoCardTitle"><i class="fa-solid fa-crown" style="color: #ffd700;"></i> Quantum Pioneer</span>
                     </div>
                   </div>
 
@@ -204,7 +204,7 @@
               <div class="theme-preview-card">
                 <span class="preview-label">LIVE PREVIEW:</span>
                 <div class="preview-message-bubble" id="themePreviewBubble">
-                  <p>Cyber security protocols verified. All transmissions encrypted via NEX-Enclave. 🚀</p>
+                  <p>Cyber security protocols verified. All transmissions encrypted via NEX-Enclave.</p>
                   <span class="preview-time">12:00 PM • You <i class="fa-solid fa-check-double text-cyan-400"></i></span>
                 </div>
               </div>
@@ -260,7 +260,7 @@
           this.applyCurrentTheme(themeKey);
           themeModal.style.display = 'none';
           if (typeof window.showNotif === 'function') {
-            window.showNotif(`🎨 Applied theme: ${THEMES[themeKey].name}!`, 'success', 2000);
+            window.showNotif(`[THEME] Applied theme: ${THEMES[themeKey].name}!`, 'success', 2000);
           }
           if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
         });
@@ -316,7 +316,7 @@
       }
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(enabled ? '✨ 3D Holographic Display Enabled' : '🛡️ Flat 2D Mode Enabled', 'info', 1800);
+        window.showNotif(enabled ? '[3D-HUD] 3D Holographic Display Enabled' : '[2D-HUD] Flat 2D Mode Enabled', 'info', 1800);
       }
     }
 

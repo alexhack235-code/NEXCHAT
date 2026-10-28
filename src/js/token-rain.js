@@ -92,10 +92,10 @@
 
             <div class="wager-selector-title mt-3">SELECT TOTAL BOUNTY POT:</div>
             <div class="drop-pot-pills-row">
-              <button type="button" class="drop-pot-pill" data-pot="100">100 🪙</button>
-              <button type="button" class="drop-pot-pill active" data-pot="250">250 🪙</button>
-              <button type="button" class="drop-pot-pill" data-pot="500">500 🪙</button>
-              <button type="button" class="drop-pot-pill" data-pot="1000">1,000 🪙</button>
+              <button type="button" class="drop-pot-pill" data-pot="100">100 Tokens</button>
+              <button type="button" class="drop-pot-pill active" data-pot="250">250 Tokens</button>
+              <button type="button" class="drop-pot-pill" data-pot="500">500 Tokens</button>
+              <button type="button" class="drop-pot-pill" data-pot="1000">1,000 Tokens</button>
             </div>
 
             <div class="wager-selector-title mt-4">MAX LUCKY CLAIMANTS:</div>
@@ -111,7 +111,7 @@
             </div>
 
             <button type="button" id="confirmDispatchDropBtn" class="token-drop-dispatch-btn mt-4">
-              <i class="fa-solid fa-bolt"></i> LAUNCH TOKEN RAIN (<span id="dispatchBtnPotVal">250</span> 🪙)
+              <i class="fa-solid fa-bolt"></i> LAUNCH TOKEN RAIN (<span id="dispatchBtnPotVal">250</span> Tokens)
             </button>
           </div>
         </div>
@@ -227,14 +227,14 @@
       if (typeof window.dispatchTokenRain === 'function') {
         window.dispatchTokenRain(dropAttachment);
       } else if (typeof window.appendLocalSentMessage === 'function') {
-        window.appendLocalSentMessage(`🪙 Dropped a ${this.selectedPot} NEX Token Rain!`, dropAttachment, false, 'sent');
+        window.appendLocalSentMessage(`[TOKEN-RAIN] Dropped a ${this.selectedPot} NEX Token Rain!`, dropAttachment, false, 'sent');
       }
 
       this.broadcastDropEvent(dropPayload, 'create');
       this.closeModal();
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(`⚡ Dispatched ${this.selectedPot} NEX Token Rain!`, 'success', 2500);
+        window.showNotif(`[TOKEN-RAIN] Dispatched ${this.selectedPot} NEX Token Rain!`, 'success', 2500);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('affirm');
     }
@@ -307,7 +307,7 @@
       this.broadcastDropEvent(drop, 'claim');
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif(`🎉 JACKPOT! Claimed +${share} NEX Credits!`, 'success', 3000);
+        window.showNotif(`[JACKPOT] Claimed +${share} NEX Credits!`, 'success', 3000);
       }
       if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
     }
@@ -335,7 +335,7 @@
             <i class="fa-solid fa-box-archive"></i>
           </div>
           <div class="token-rain-info">
-            <div class="token-rain-tag">⚡ CYBER TOKEN RAIN</div>
+            <div class="token-rain-tag">CYBER TOKEN RAIN</div>
             <h4 class="token-rain-pot">${activeDrop.totalPot.toLocaleString()} NEX CREDITS</h4>
             <span class="token-rain-memo">${activeDrop.memo || 'Bounty dropped!'}</span>
           </div>
@@ -377,7 +377,7 @@
         <div class="token-winner-row">
           <span class="winner-rank">#${idx + 1}</span>
           <span class="winner-name">${c.name || 'Operative'}</span>
-          <strong class="winner-amount">+${c.amount} 🪙</strong>
+          <strong class="winner-amount">+${c.amount} Tokens</strong>
         </div>
       `).join('');
     }
@@ -422,7 +422,7 @@
       for (let i = 0; i < 16; i++) {
         const coin = document.createElement('div');
         coin.className = 'floating-coin-particle';
-        coin.innerHTML = '🪙';
+        coin.innerHTML = '<i class="fa-solid fa-coins" style="color: #ffd700;"></i>';
         coin.style.left = `${Math.random() * 80 + 10}vw`;
         coin.style.bottom = '20vh';
         coin.style.animationDelay = `${Math.random() * 0.3}s`;

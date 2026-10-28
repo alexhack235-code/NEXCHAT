@@ -65,13 +65,13 @@
           <div class="theater-presets-row">
             <span class="text-xs text-gray-400 font-semibold mr-1">PRESETS:</span>
             <button type="button" class="theater-preset-pill" data-url="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4">
-              🐰 Cyber Bunny HD
+              <i class="fa-solid fa-film"></i> Cyber Bunny HD
             </button>
             <button type="button" class="theater-preset-pill" data-url="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4">
-              🐘 Neon Dream Sci-Fi
+              <i class="fa-solid fa-video"></i> Neon Dream Sci-Fi
             </button>
             <button type="button" class="theater-preset-pill" data-url="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4">
-              🤖 Tears of Steel (VFX)
+              <i class="fa-solid fa-robot"></i> Tears of Steel (VFX)
             </button>
           </div>
 
@@ -93,12 +93,12 @@
           <div class="theater-reaction-dock">
             <div class="reaction-dock-label">TAP TO FIRE REACTION:</div>
             <div class="reaction-buttons-grid">
-              <button type="button" class="theater-react-btn" data-emoji="🔥">🔥</button>
-              <button type="button" class="theater-react-btn" data-emoji="💀">💀</button>
-              <button type="button" class="theater-react-btn" data-emoji="🚀">🚀</button>
-              <button type="button" class="theater-react-btn" data-emoji="❤️">❤️</button>
-              <button type="button" class="theater-react-btn" data-emoji="🤯">🤯</button>
-              <button type="button" class="theater-react-btn" data-emoji="😂">😂</button>
+              <button type="button" class="theater-react-btn" data-emoji="fire"><i class="fa-solid fa-fire" style="color: #f97316;"></i></button>
+              <button type="button" class="theater-react-btn" data-emoji="skull"><i class="fa-solid fa-skull"></i></button>
+              <button type="button" class="theater-react-btn" data-emoji="rocket"><i class="fa-solid fa-rocket" style="color: #38bdf8;"></i></button>
+              <button type="button" class="theater-react-btn" data-emoji="heart"><i class="fa-solid fa-heart" style="color: #ef4444;"></i></button>
+              <button type="button" class="theater-react-btn" data-emoji="mindblown"><i class="fa-solid fa-burst" style="color: #eab308;"></i></button>
+              <button type="button" class="theater-react-btn" data-emoji="laugh"><i class="fa-solid fa-face-laugh" style="color: #22c55e;"></i></button>
             </div>
             <button type="button" id="shareTheaterInviteBtn" class="theater-share-btn" title="Invite active chat partner">
               <i class="fa-solid fa-share-nodes"></i> Share Link in Chat
@@ -250,7 +250,7 @@
         window.sendSupabaseMessage({
           from: window.myUID,
           to: partnerId,
-          text: `🎬 Sync: ${action}`,
+          text: `[THEATER] Sync: ${action}`,
           isWatchPartySync: true,
           syncAction: action,
           syncTime: time,
@@ -300,7 +300,7 @@
 
     shareInviteToChat() {
       const partnerName = window.currentChatName || 'Friend';
-      const text = `🍿 **WATCH TOGETHER INVITATION**\nHey ${partnerName}, I've opened a synchronized watch theater! Click "Watch Together" in the attachment menu to sync screens and stream together! 🎬✨`;
+      const text = `[WATCH TOGETHER INVITATION]\nHey ${partnerName}, I've opened a synchronized watch theater! Click "Watch Together" in the attachment menu to sync screens and stream together!`;
 
       const input = document.getElementById('message-input');
       if (input) {
