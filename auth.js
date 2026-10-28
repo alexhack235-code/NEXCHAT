@@ -460,7 +460,7 @@ function attachRegisterHandler() {
 
 function attachResetHandler() {
   const resetForm = document.getElementById('resetForm');
-  if (!resetForm) return;
+  if (!resetForm || window.__resetPageCustomHandler) return;
 
   resetForm.addEventListener('submit', async e => {
     e.preventDefault();

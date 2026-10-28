@@ -79,7 +79,7 @@ const server = http.createServer((req, res) => {
 
     const detectedCountryCode = isLocal ? 'NG' : 'US';
     const countryNames = { 'NG': 'Nigeria', 'US': 'United States', 'GB': 'United Kingdom', 'IN': 'India', 'DE': 'Germany', 'FR': 'France' };
-    const countryFlags = { 'NG': '🇳🇬', 'US': '🇺🇸', 'GB': '🇬🇧', 'IN': '🇮🇳', 'DE': '🇩🇪', 'FR': '🇫🇷', 'JP': '🇯🇵', 'BR': '🇧🇷', 'CA': '🇨🇦' };
+    const countryFlags = { 'NG': '[NG]', 'US': '[US]', 'GB': '[GB]', 'IN': '[IN]', 'DE': '[DE]', 'FR': '[FR]', 'JP': '[JP]', 'BR': '[BR]', 'CA': '[CA]' };
 
     const cdnNode = cdnMap[detectedCountryCode] || cdnMap['US'];
 
@@ -89,7 +89,7 @@ const server = http.createServer((req, res) => {
       isLocalhost: isLocal,
       country: countryNames[detectedCountryCode] || 'Nigeria',
       countryCode: detectedCountryCode,
-      flag: countryFlags[detectedCountryCode] || '🌍',
+      flag: countryFlags[detectedCountryCode] || '[GLOBAL]',
       city: detectedCountryCode === 'NG' ? 'Lagos' : 'New York',
       region: detectedCountryCode === 'NG' ? 'Lagos State' : 'New York',
       timezone: detectedCountryCode === 'NG' ? 'Africa/Lagos' : 'America/New_York',
@@ -143,7 +143,7 @@ const server = http.createServer((req, res) => {
 
     sendNotificationEmail({
       to: toEmail,
-      subject: '⚡ NEXCHAT Gmail Notification Test: SUCCESS',
+      subject: '[TEST] NEXCHAT Gmail Notification Test: SUCCESS',
       htmlContent: `
         <div style="background:#060913; color:#f8fafc; padding:28px 24px; border-radius:14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; border:1px solid #00f076; max-width:600px; margin:0 auto;">
           <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
@@ -202,20 +202,20 @@ const server = http.createServer((req, res) => {
         let htmlContent = '';
 
         if (type === 'device_linked') {
-          subject = '⚠️ NEXCHAT Security Alert: New Device Linked';
+          subject = '[NEXCHAT SECURITY ALERT] New Device Linked';
           htmlContent = createDeviceLinkEmail(data || {});
         } else if (type === 'password_reset') {
-          subject = '🔐 NEXCHAT: Password Recovery & Security Key Reset';
+          subject = '[NEXCHAT SECURITY] Password Recovery & Security Key Reset';
           htmlContent = createPasswordResetEmail(data || {});
         } else if (type === 'offline_message') {
-          subject = `💬 NEXCHAT: New message from ${data?.senderName || 'Contact'}`;
+          subject = `[NEXCHAT] New message from ${data?.senderName || 'Contact'}`;
           htmlContent = createOfflineMessageEmail(data || {});
         } else if (type === 'extension_consent') {
           const isApproved = (data?.status === 'approved' || data?.status === 'granted' || data?.status === 'yes');
           const extName = data?.extensionName || 'NEX-REELS';
           subject = isApproved
-            ? `🛡️ NEX-ECOSYSTEM: Access GRANTED to ${extName}`
-            : `🛑 NEX-ECOSYSTEM: Access BLOCKED for ${extName}`;
+            ? `[GRANTED] NEX-ECOSYSTEM: Access GRANTED to ${extName}`
+            : `[BLOCKED] NEX-ECOSYSTEM: Access BLOCKED for ${extName}`;
           htmlContent = createExtensionConsentEmail(data || {});
         } else {
           htmlContent = parsed.htmlContent || `<p>${parsed.message || 'Notification from NEXCHAT'}</p>`;
@@ -244,7 +244,7 @@ const server = http.createServer((req, res) => {
         try {
           const result = await sendNotificationEmail({
             to: toEmail,
-            subject: '⚡ NEXCHAT Gmail Notification Test: SUCCESS',
+            subject: '[TEST] NEXCHAT Gmail Notification Test: SUCCESS',
             htmlContent: `
               <div style="background:#060913; color:#f8fafc; padding:28px 24px; border-radius:14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; border:1px solid #00f076; max-width:600px; margin:0 auto;">
                 <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:16px;">
@@ -345,11 +345,11 @@ const server = http.createServer((req, res) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`============================================================`);
-  console.log(`🚀 NEXCHAT PREVIEW SERVER & EMAIL DISPATCHER ACTIVE ON PORT ${PORT}`);
-  console.log(`📧 POST /api/send-email-alert  (Gmail Security & Offline Alerts)`);
-  console.log(`⚡ POST /api/test-email        (Instant Verification Endpoint)`);
-  console.log(`🔗 Central Metropolis: http://localhost:${PORT}/game.html?dev=1&autostart=1`);
-  console.log(`🔗 App & Chat:         http://localhost:${PORT}/index.html`);
-  console.log(`🔗 Link Device:        http://localhost:${PORT}/link-device.html`);
+  console.log(`[LAUNCH] NEXCHAT PREVIEW SERVER & EMAIL DISPATCHER ACTIVE ON PORT ${PORT}`);
+  console.log(`[EMAIL] POST /api/send-email-alert  (Gmail Security & Offline Alerts)`);
+  console.log(`[TEST] POST /api/test-email        (Instant Verification Endpoint)`);
+  console.log(`[LINK] Central Metropolis: http://localhost:${PORT}/game.html?dev=1&autostart=1`);
+  console.log(`[LINK] App & Chat:         http://localhost:${PORT}/index.html`);
+  console.log(`[LINK] Link Device:        http://localhost:${PORT}/link-device.html`);
   console.log(`============================================================`);
 });

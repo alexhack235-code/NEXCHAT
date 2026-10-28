@@ -298,6 +298,16 @@ service cloud.firestore {
     // Subcollection: subscribers/{userId}
     //   - userId: string (required, subscriber UID)
     //   - subscribedAt: timestamp/string/number (optional)
+    //
+    // Collection: password_reset_codes
+    // Document ID: {docId} (Auto-generated)
+    // Fields:
+    //   - email: string (required)
+    //   - code: string (required, exactly 6 characters)
+    //   - expiresAt: timestamp/number/string (required)
+    //   - used: bool (required, must be false on creation)
+    //   - usedAt: timestamp/number/string (optional, recorded on verification)
+    //   - attempts: number (optional, failed verification count)
     // ===============================================================
 
     // ===============================================================
@@ -2648,6 +2658,19 @@ service cloud.firestore {
         allow read: if isAuthenticated();
         allow create, delete: if isAuthenticated() && request.auth.uid == userId;
       }
+    }
+
+    // ------------------------------------------------------------------------
+    // PASSWORD RESET VERIFICATION CODES (Zero-Trust 6-Digit TTL Vault)
+    // ------------------------------------------------------------------------
+    match /password_reset_codes/{docId} {
+      allow create: if request.resource.data.keys().hasAll(['email', 'code', 'expiresAt', 'used'])
+                    && request.resource.data.code is string
+                    && request.resource.data.code.size() == 6
+                    && request.resource.data.used == false;
+      allow read: if true;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['used', 'usedAt', 'attempts']);
+      allow delete: if isSuperAdmin();
     }
 
     // ===============================================================

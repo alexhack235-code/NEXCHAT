@@ -26,6 +26,7 @@
 import "./src/js/security-guard.js";
 import { fortressShield } from "./src/js/security-shield.js";
 import { GroupChat } from "./src/features/group/index.js";
+import { applyUiTranslations } from "./src/js/i18n.js";
 import { auth, db, rtdb } from "./firebase-config.js";
 import { chronexAI } from "./chronex-ai-service.js";
 import {
@@ -10028,6 +10029,9 @@ function setupNewUserLanguageOnboarding() {
       if (window.autoCorrectEngine && typeof window.autoCorrectEngine.activateSubdirectory === 'function') {
         window.autoCorrectEngine.activateSubdirectory(selected, 'onboarding-wizard');
       }
+      if (typeof applyUiTranslations === 'function') {
+        applyUiTranslations(selected);
+      }
 
       // Update Settings dropdown & badge
       const select = document.getElementById('settingsPrimaryLangSelect');
@@ -10098,6 +10102,9 @@ function setupLanguageSettingsListeners() {
 
   // Load saved preferences
   const savedLang = localStorage.getItem('nexchat_preferred_language') || 'en';
+  if (typeof applyUiTranslations === 'function') {
+    applyUiTranslations(savedLang);
+  }
   if (primarySelect) {
     primarySelect.value = savedLang;
     if (!primarySelect.dataset.bound) {
@@ -10107,6 +10114,9 @@ function setupLanguageSettingsListeners() {
         localStorage.setItem('nexchat_preferred_language', val);
         if (window.autoCorrectEngine && typeof window.autoCorrectEngine.activateSubdirectory === 'function') {
           window.autoCorrectEngine.activateSubdirectory(val, 'settings-select');
+        }
+        if (typeof applyUiTranslations === 'function') {
+          applyUiTranslations(val);
         }
         const langMeta = ALL_SUPPORTED_LANGUAGES.find(l => l.code === val);
         if (currentBadge && langMeta) {

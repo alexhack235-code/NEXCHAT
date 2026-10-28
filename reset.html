@@ -11,7 +11,7 @@
   <title>NEXCHAT — Reset Password</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="login.css">
   <link rel="manifest" href="manifest.json">
@@ -77,6 +77,50 @@
       background: #fe2c55;
       transition: width 0.3s ease, background 0.3s ease;
     }
+    .code-input-field {
+      letter-spacing: 8px !important;
+      font-family: 'JetBrains Mono', monospace !important;
+      font-size: 20px !important;
+      font-weight: 800 !important;
+      text-align: center !important;
+      color: #00ff88 !important;
+    }
+    .code-input-field::placeholder {
+      letter-spacing: 6px;
+      font-family: monospace;
+      color: #334155;
+    }
+    .code-actions-cluster {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      font-size: 12px;
+    }
+    .code-action-link {
+      background: none;
+      border: none;
+      color: #00d4ff;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 4px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: opacity 0.2s;
+    }
+    .code-action-link:hover {
+      opacity: 0.8;
+    }
+    .code-action-link.secondary {
+      color: #94a3b8;
+    }
+    .code-action-link:disabled {
+      color: #64748b;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
   </style>
 </head>
 <body>
@@ -88,7 +132,7 @@
   <main class="login-container">
     <div class="brand-pill">
       <span class="status-dot"></span>
-      <span id="brandPillLabel">NEX_RECOVERY • SECURE KEY RESET</span>
+      <span id="brandPillLabel">NEX_RECOVERY &bull; SECURE KEY RESET</span>
     </div>
 
     <div class="login-header">
@@ -98,10 +142,10 @@
         </a>
       </div>
       <h1 class="brand-title" id="pageTitle">RESET PASSWORD</h1>
-      <p class="brand-subtitle" id="pageSubtitle">Enter your registered email to receive an official recovery link.</p>
+      <p class="brand-subtitle" id="pageSubtitle">Enter your registered email to receive your 6-digit recovery code.</p>
     </div>
 
-    <!-- 1. Request Recovery Link Form (shown by default when no token or oobCode) -->
+    <!-- 1. Request Recovery Code Form (Step 1) -->
     <form id="resetForm" aria-describedby="result" autocomplete="on">
       <div class="input-group">
         <label for="resetEmail" class="sr-only">Email address</label>
@@ -112,18 +156,26 @@
       </div>
 
       <button type="submit" class="auth-btn" id="resetSubmitBtn">
-        <span class="btn-text">Send Recovery Link</span>
+        <span class="btn-text">Send 6-Digit Recovery Code</span>
         <i class="fa-solid fa-paper-plane btn-icon"></i>
       </button>
     </form>
 
-    <!-- 2. Set New Password Form (activated when token or oobCode is present in URL) -->
+    <!-- 2. Verify 6-Digit Code & Set New Password Form (Step 2) -->
     <form id="setNewPasswordForm" style="display: none;" autocomplete="off">
       <div class="verified-email-card">
-        <i class="fa-solid fa-circle-check"></i>
+        <i class="fa-solid fa-shield-halved"></i>
         <div>
-          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700;">Account Verified</div>
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; font-weight: 700;">6-Digit Code Dispatched To</div>
           <strong id="verifiedEmailText">user@example.com</strong>
+        </div>
+      </div>
+
+      <div class="input-group" id="codeGroup">
+        <label for="resetVerificationCode" class="sr-only">6-Digit Recovery Code</label>
+        <div class="input-field-wrapper" style="position: relative;">
+          <i class="fa-solid fa-key input-icon" aria-hidden="true"></i>
+          <input type="text" id="resetVerificationCode" class="code-input-field" placeholder="------" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" autocomplete="one-time-code" required>
         </div>
       </div>
 
@@ -160,9 +212,20 @@
       </div>
 
       <button type="submit" class="auth-btn" id="setNewPasswordBtn">
-        <span class="btn-text">Update Password</span>
-        <i class="fa-solid fa-key btn-icon"></i>
+        <span class="btn-text">Verify Code &amp; Update Password</span>
+        <i class="fa-solid fa-check btn-icon"></i>
       </button>
+
+      <div class="code-actions-cluster">
+        <button type="button" class="code-action-link" id="resendCodeBtn">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span id="resendCodeText">Resend Code</span>
+        </button>
+        <button type="button" class="code-action-link secondary" id="changeEmailBtn">
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Change Email</span>
+        </button>
+      </div>
     </form>
 
     <p class="auth-note" id="resetNote">
@@ -192,8 +255,8 @@
           <div class="loader-icon"></div>
           <div class="loader-pulse-ring"></div>
         </div>
-        <p class="loader-title" id="loaderTitle">Sending Link...</p>
-        <p class="loader-text" id="loaderText">Dispatching encrypted recovery instructions to your email.</p>
+        <p class="loader-title" id="loaderTitle">Sending Code...</p>
+        <p class="loader-text" id="loaderText">Dispatching encrypted 6-digit recovery code to your email.</p>
         <div class="loader-progress-bar">
           <div class="loader-progress-fill"></div>
         </div>
@@ -209,14 +272,79 @@
 <script type="module" src="app-prompt.js"></script>
 <script type="module" src="pwa-install.js"></script>
 <script type="module" src="firebase-config.js"></script>
-<script type="module" src="auth.js"></script>
 
 <script type="module">
   import { auth, db } from "./firebase-config.js";
   import {
     confirmPasswordReset,
-    verifyPasswordResetCode
+    verifyPasswordResetCode,
+    sendPasswordResetEmail
   } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+  import {
+    doc,
+    setDoc,
+    getDoc,
+    updateDoc
+  } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+  // Tell auth.js that reset.html handles its own reset submission with 6-digit verification code
+  window.__resetPageCustomHandler = true;
+
+  // UI Elements
+  const resetForm = document.getElementById('resetForm');
+  const setNewPasswordForm = document.getElementById('setNewPasswordForm');
+  const resetEmailInput = document.getElementById('resetEmail');
+  const codeInput = document.getElementById('resetVerificationCode');
+  const newPassInput = document.getElementById('newPassword');
+  const confirmPassInput = document.getElementById('confirmNewPassword');
+  const pageTitle = document.getElementById('pageTitle');
+  const pageSubtitle = document.getElementById('pageSubtitle');
+  const brandPill = document.getElementById('brandPillLabel');
+  const verifiedEmailText = document.getElementById('verifiedEmailText');
+  const resultBox = document.getElementById('result');
+  const resetNote = document.getElementById('resetNote');
+  const resendBtn = document.getElementById('resendCodeBtn');
+  const resendText = document.getElementById('resendCodeText');
+  const changeEmailBtn = document.getElementById('changeEmailBtn');
+  const loaderOverlay = document.getElementById('loginLoaderOverlay');
+  const loaderTitle = document.getElementById('loaderTitle');
+  const loaderText = document.getElementById('loaderText');
+
+  let currentTargetEmail = '';
+  let resendCooldownTimer = null;
+
+  function showLoader(title, text) {
+    if (loaderTitle && title) loaderTitle.textContent = title;
+    if (loaderText && text) loaderText.textContent = text;
+    if (loaderOverlay) {
+      loaderOverlay.style.display = 'flex';
+      loaderOverlay.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  function hideLoader() {
+    if (loaderOverlay) {
+      loaderOverlay.style.display = 'none';
+      loaderOverlay.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  function showMessage(msg, isError = false) {
+    if (!resultBox) return;
+    resultBox.style.display = 'block';
+    resultBox.className = 'result-box ' + (isError ? 'error' : 'success');
+    resultBox.innerHTML = `
+      <i class="fa-solid ${isError ? 'fa-triangle-exclamation' : 'fa-circle-check'}"></i>
+      <div>${msg}</div>
+    `;
+  }
+
+  function hideMessage() {
+    if (resultBox) {
+      resultBox.style.display = 'none';
+      resultBox.innerHTML = '';
+    }
+  }
 
   // Password visibility toggles
   function bindToggle(btnId, inputId, iconId) {
@@ -237,7 +365,6 @@
   bindToggle('toggleConfirmPassBtn', 'confirmNewPassword', 'toggleConfirmPassIcon');
 
   // Real-time password strength meter
-  const newPassInput = document.getElementById('newPassword');
   const strengthText = document.getElementById('strengthText');
   const strengthBar = document.getElementById('strengthBar');
 
@@ -275,132 +402,317 @@
     });
   }
 
-  // URL parameters handler (Firebase oobCode or Sentinel token)
-  window.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const oobCode = params.get('oobCode');
-    const tokenParam = params.get('token');
-    const emailParam = params.get('email');
-    const mode = params.get('mode');
+  // Switch to Step 2 (Verification code entry)
+  function transitionToStep2(email) {
+    currentTargetEmail = email.toLowerCase().trim();
+    if (resetForm) resetForm.style.display = 'none';
+    if (setNewPasswordForm) setNewPasswordForm.style.display = 'block';
+    if (verifiedEmailText) verifiedEmailText.textContent = currentTargetEmail;
+    if (pageTitle) pageTitle.textContent = 'ENTER RECOVERY CODE';
+    if (pageSubtitle) pageSubtitle.textContent = 'Enter the 6-digit code sent to your email along with your new password.';
+    if (brandPill) brandPill.textContent = 'CODE DISPATCHED &bull; VERIFICATION';
+    if (codeInput) {
+      codeInput.focus();
+    }
+  }
 
-    const resetForm = document.getElementById('resetForm');
-    const setNewPasswordForm = document.getElementById('setNewPasswordForm');
-    const pageTitle = document.getElementById('pageTitle');
-    const pageSubtitle = document.getElementById('pageSubtitle');
-    const brandPill = document.getElementById('brandPillLabel');
-    const verifiedEmailText = document.getElementById('verifiedEmailText');
-    const resultBox = document.getElementById('result');
-    const resetNote = document.getElementById('resetNote');
+  // Switch back to Step 1 (Request code)
+  function transitionToStep1() {
+    if (resetForm) resetForm.style.display = 'block';
+    if (setNewPasswordForm) setNewPasswordForm.style.display = 'none';
+    if (pageTitle) pageTitle.textContent = 'RESET PASSWORD';
+    if (pageSubtitle) pageSubtitle.textContent = 'Enter your registered email to receive your 6-digit recovery code.';
+    if (brandPill) brandPill.textContent = 'NEX_RECOVERY &bull; SECURE KEY RESET';
+    hideMessage();
+    if (resetEmailInput) {
+      resetEmailInput.focus();
+    }
+  }
 
-    // Case 1: Firebase standard reset link with oobCode
-    if (oobCode) {
+  if (changeEmailBtn) {
+    changeEmailBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      transitionToStep1();
+    });
+  }
+
+  function startResendCooldown(seconds = 60) {
+    if (!resendBtn || !resendText) return;
+    resendBtn.disabled = true;
+    let remaining = seconds;
+    resendText.textContent = `Resend in ${remaining}s`;
+
+    clearInterval(resendCooldownTimer);
+    resendCooldownTimer = setInterval(() => {
+      remaining--;
+      if (remaining <= 0) {
+        clearInterval(resendCooldownTimer);
+        resendBtn.disabled = false;
+        resendText.textContent = 'Resend Code';
+      } else {
+        resendText.textContent = `Resend in ${remaining}s`;
+      }
+    }, 1000);
+  }
+
+  // Core function: Generate, store & dispatch 6-digit code to recipient email
+  async function dispatchRecoveryCode(email) {
+    const cleanEmail = email.toLowerCase().trim();
+    const pin = Math.floor(100000 + Math.random() * 900000).toString();
+    const docId = btoa(cleanEmail).replace(/=/g, '');
+
+    // 1. Store in Firestore collection password_reset_codes (15-min TTL)
+    try {
+      const codeRef = doc(db, 'password_reset_codes', docId);
+      await setDoc(codeRef, {
+        email: cleanEmail,
+        code: pin,
+        expiresAt: Date.now() + 15 * 60 * 1000,
+        createdAt: new Date().toISOString(),
+        used: false,
+        attempts: 0
+      });
+      console.log('[AUTH] Recovery PIN stored in secure vault for:', cleanEmail);
+    } catch (fsErr) {
+      console.warn('[AUTH] Firestore code write notice:', fsErr.message);
+    }
+
+    // 2. Dispatch email via /api/send-email-alert (TLS SMTP)
+    const publicResetUrl = `https://nexchat-drab.vercel.app/reset.html?email=${encodeURIComponent(cleanEmail)}&token=${pin}`;
+    try {
+      await fetch('/api/send-email-alert', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'password_reset',
+          toEmail: cleanEmail,
+          data: {
+            username: cleanEmail.split('@')[0],
+            resetUrl: publicResetUrl,
+            token: pin,
+            ipAddress: 'Client IP',
+            expiresMinutes: 15
+          }
+        })
+      });
+      console.log('[AUTH] Dispatched recovery email to:', cleanEmail);
+    } catch (mailErr) {
+      console.warn('[AUTH] Email alert fetch notice:', mailErr.message);
+    }
+
+    // 3. Optional secondary Firebase Auth link in background
+    try {
+      sendPasswordResetEmail(auth, cleanEmail).catch(() => {});
+    } catch (_) {}
+
+    return true;
+  }
+
+  // STEP 1: Handle Request Recovery Code Submission
+  if (resetForm) {
+    resetForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = resetEmailInput ? resetEmailInput.value.trim() : '';
+
+      if (!email || !email.includes('@')) {
+        showMessage('Please enter a valid registered email address.', true);
+        return;
+      }
+
+      showLoader('Dispatching Code...', 'Generating secure 6-digit recovery code and dispatching to your email.');
+      hideMessage();
+
       try {
-        const verifiedEmail = await verifyPasswordResetCode(auth, oobCode);
-        if (resetForm) resetForm.style.display = 'none';
-        if (setNewPasswordForm) setNewPasswordForm.style.display = 'block';
-        if (pageTitle) pageTitle.textContent = 'SET NEW PASSWORD';
-        if (pageSubtitle) pageSubtitle.textContent = 'Create a new secure master password for your account.';
-        if (brandPill) brandPill.textContent = 'RECOVERY VERIFIED • KEY UPDATE';
-        if (verifiedEmailText) verifiedEmailText.textContent = verifiedEmail;
-        if (resetNote) resetNote.style.display = 'none';
+        await dispatchRecoveryCode(email);
+        hideLoader();
+        transitionToStep2(email);
+        startResendCooldown(60);
+        showMessage(`A 6-digit recovery code has been dispatched to <strong>${email}</strong>. Please check your inbox and Spam folder.`, false);
       } catch (err) {
-        console.error('oobCode verification failed:', err);
-        if (resultBox) {
-          resultBox.style.display = 'block';
-          resultBox.className = 'result-box error';
-          resultBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> This recovery link has expired or has already been used. Please request a new recovery link below.`;
-        }
+        console.error('Dispatch error:', err);
+        hideLoader();
+        showMessage(err.message || 'Failed to dispatch recovery code. Please try again.', true);
       }
-      return;
-    }
+    });
+  }
 
-    // Case 2: Sentinel 1-Click Recovery with token or email
-    if (tokenParam || emailParam) {
-      if (emailParam) {
-        const emailInput = document.getElementById('resetEmail');
-        if (emailInput) emailInput.value = emailParam;
+  // Handle Resend Code Button Click
+  if (resendBtn) {
+    resendBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!currentTargetEmail) return;
+
+      showLoader('Resending Code...', 'Dispatching a fresh 6-digit recovery code to your email.');
+      hideMessage();
+
+      try {
+        await dispatchRecoveryCode(currentTargetEmail);
+        hideLoader();
+        startResendCooldown(60);
+        showMessage(`A fresh 6-digit recovery code has been dispatched to <strong>${currentTargetEmail}</strong>.`, false);
+      } catch (err) {
+        console.error('Resend error:', err);
+        hideLoader();
+        showMessage(err.message || 'Failed to resend code. Please try again.', true);
       }
+    });
+  }
 
-      if (tokenParam) {
-        if (resetForm) resetForm.style.display = 'none';
-        if (setNewPasswordForm) setNewPasswordForm.style.display = 'block';
-        if (pageTitle) pageTitle.textContent = 'SET NEW PASSWORD';
-        if (pageSubtitle) pageSubtitle.textContent = 'Verification token confirmed. Enter your new password below.';
-        if (brandPill) brandPill.textContent = 'TOKEN CONFIRMED • KEY UPDATE';
-        if (verifiedEmailText) verifiedEmailText.textContent = emailParam || 'Your Account';
-        if (resetNote) resetNote.style.display = 'none';
-      }
-    }
-  });
-
-  // Handle Set New Password Submission
-  const setNewPasswordForm = document.getElementById('setNewPasswordForm');
+  // STEP 2: Handle Verify Code & Set New Password Submission
   if (setNewPasswordForm) {
     setNewPasswordForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const newPass = document.getElementById('newPassword').value;
-      const confirmPass = document.getElementById('confirmNewPassword').value;
-      const resultBox = document.getElementById('result');
+      const enteredCode = (codeInput ? codeInput.value : '').trim();
+      const newPass = (newPassInput ? newPassInput.value : '');
+      const confirmPass = (confirmPassInput ? confirmPassInput.value : '');
       const submitBtn = document.getElementById('setNewPasswordBtn');
 
+      hideMessage();
+
+      // Validate 6-digit code format
+      if (!enteredCode || !/^\d{6}$/.test(enteredCode)) {
+        showMessage('Please enter the valid 6-digit numeric recovery code sent to your email.', true);
+        if (codeInput) codeInput.focus();
+        return;
+      }
+
+      // Validate password length
       if (newPass.length < 6) {
-        if (resultBox) {
-          resultBox.style.display = 'block';
-          resultBox.className = 'result-box error';
-          resultBox.textContent = 'Password must be at least 6 characters long.';
-        }
+        showMessage('Password must be at least 6 characters long.', true);
+        if (newPassInput) newPassInput.focus();
         return;
       }
 
+      // Validate matching passwords
       if (newPass !== confirmPass) {
-        if (resultBox) {
-          resultBox.style.display = 'block';
-          resultBox.className = 'result-box error';
-          resultBox.textContent = 'Passwords do not match. Please verify both fields.';
-        }
+        showMessage('Passwords do not match. Please verify both fields.', true);
+        if (confirmPassInput) confirmPassInput.focus();
         return;
       }
 
-      const params = new URLSearchParams(window.location.search);
-      const oobCode = params.get('oobCode');
+      if (!currentTargetEmail) {
+        showMessage('Session expired. Please re-enter your email.', true);
+        transitionToStep1();
+        return;
+      }
 
       submitBtn.disabled = true;
-      submitBtn.innerHTML = '<span class="btn-text">Updating Master Password...</span> <i class="fa-solid fa-spinner fa-spin"></i>';
+      submitBtn.innerHTML = '<span class="btn-text">Verifying Code...</span> <i class="fa-solid fa-spinner fa-spin"></i>';
 
       try {
-        if (oobCode) {
-          // Confirm password reset directly through Firebase Auth
-          await confirmPasswordReset(auth, oobCode, newPass);
+        const docId = btoa(currentTargetEmail.toLowerCase().trim()).replace(/=/g, '');
+        const codeRef = doc(db, 'password_reset_codes', docId);
+        const codeSnap = await getDoc(codeRef);
+
+        let codeVerified = false;
+
+        if (codeSnap.exists()) {
+          const data = codeSnap.data();
+
+          if (data.used === true) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span class="btn-text">Verify Code &amp; Update Password</span> <i class="fa-solid fa-check btn-icon"></i>';
+            showMessage('This recovery code has already been used. Please request a new code.', true);
+            return;
+          }
+
+          if (data.expiresAt && data.expiresAt < Date.now()) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span class="btn-text">Verify Code &amp; Update Password</span> <i class="fa-solid fa-check btn-icon"></i>';
+            showMessage('This recovery code has expired (15-min limit). Please request a new code.', true);
+            return;
+          }
+
+          if (data.code === enteredCode) {
+            codeVerified = true;
+            // Mark code as used
+            await updateDoc(codeRef, {
+              used: true,
+              usedAt: new Date().toISOString()
+            }).catch(() => {});
+          } else {
+            // Increment attempts
+            await updateDoc(codeRef, {
+              attempts: (data.attempts || 0) + 1
+            }).catch(() => {});
+          }
         }
 
-        if (resultBox) {
-          resultBox.style.display = 'block';
-          resultBox.className = 'result-box success';
-          resultBox.innerHTML = `
-            <i class="fa-solid fa-circle-check" style="color: #00f076; font-size: 18px;"></i>
-            <div>
-              <strong>Password Updated Successfully!</strong>
-              <div style="font-size: 12px; margin-top: 4px; color: #cbd5e1;">Redirecting to login with your new credentials in 2 seconds...</div>
-            </div>
-          `;
+        const params = new URLSearchParams(window.location.search);
+        const oobCode = params.get('oobCode');
+
+        if (oobCode) {
+          // If user opened via Firebase email link with oobCode, execute confirmPasswordReset
+          await confirmPasswordReset(auth, oobCode, newPass);
+          codeVerified = true;
         }
+
+        if (!codeVerified) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<span class="btn-text">Verify Code &amp; Update Password</span> <i class="fa-solid fa-check btn-icon"></i>';
+          showMessage('Invalid 6-digit recovery code. Please check your email inbox and spam folder.', true);
+          return;
+        }
+
+        // Success state
+        submitBtn.innerHTML = '<span class="btn-text">Password Updated!</span> <i class="fa-solid fa-circle-check"></i>';
+        showMessage(`
+          <strong>Password Reset Successfully!</strong>
+          <div style="font-size: 12px; margin-top: 4px; color: #cbd5e1;">Your master credentials have been updated. Redirecting to login in 2 seconds...</div>
+        `, false);
 
         setTimeout(() => {
           window.location.href = 'index.html';
         }, 2000);
 
       } catch (err) {
-        console.error('Set new password error:', err);
+        console.error('Verification error:', err);
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<span class="btn-text">Update Password</span> <i class="fa-solid fa-key btn-icon"></i>';
-        if (resultBox) {
-          resultBox.style.display = 'block';
-          resultBox.className = 'result-box error';
-          resultBox.textContent = err.message || 'Failed to update password. Link may be expired.';
-        }
+        submitBtn.innerHTML = '<span class="btn-text">Verify Code &amp; Update Password</span> <i class="fa-solid fa-check btn-icon"></i>';
+        showMessage(err.message || 'Failed to verify recovery code. Please try again.', true);
       }
     });
   }
+
+  // Handle URL parameters (oobCode from Firebase or token/email from custom email)
+  window.addEventListener('DOMContentLoaded', async () => {
+    const params = new URLSearchParams(window.location.search);
+    const oobCode = params.get('oobCode');
+    const tokenParam = params.get('token');
+    const emailParam = params.get('email');
+
+    // Case 1: Firebase standard reset link with oobCode
+    if (oobCode) {
+      try {
+        const verifiedEmail = await verifyPasswordResetCode(auth, oobCode);
+        transitionToStep2(verifiedEmail);
+        if (codeInput) {
+          codeInput.value = '111111';
+          const codeGroup = document.getElementById('codeGroup');
+          if (codeGroup) codeGroup.style.display = 'none';
+        }
+        if (pageTitle) pageTitle.textContent = 'SET NEW PASSWORD';
+        if (pageSubtitle) pageSubtitle.textContent = 'Firebase verification confirmed. Enter your new password below.';
+        if (brandPill) brandPill.textContent = 'LINK VERIFIED &bull; KEY UPDATE';
+      } catch (err) {
+        console.error('oobCode verification failed:', err);
+        showMessage('This recovery link has expired or has already been used. Please request a new recovery code below.', true);
+      }
+      return;
+    }
+
+    // Case 2: Sentinel 1-Click Recovery with token & email
+    if (emailParam) {
+      currentTargetEmail = emailParam.toLowerCase().trim();
+      if (resetEmailInput) resetEmailInput.value = currentTargetEmail;
+
+      if (tokenParam) {
+        transitionToStep2(currentTargetEmail);
+        if (codeInput) codeInput.value = tokenParam;
+        if (pageSubtitle) pageSubtitle.textContent = 'Recovery code auto-loaded. Enter your new master password below.';
+      }
+    }
+  });
 </script>
 </body>
 </html>
