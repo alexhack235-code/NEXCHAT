@@ -801,9 +801,9 @@ html, body {
 
 .app[data-custom-bg="true"] .messages-area,
 .messages-area.has-custom-wallpaper {
-  background-color: rgba(6, 10, 20, 0.45) !important;
-  backdrop-filter: blur(1.5px);
-  -webkit-backdrop-filter: blur(1.5px);
+  background-color: rgba(6, 10, 20, 0.75) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 .app[data-custom-bg="true"] .nex-virtual-scroller {
@@ -992,15 +992,13 @@ html, body {
   flex-direction: column;
   gap: 10px;
   background-color: var(--bg-app);
-  scroll-behavior: auto !important; /* Eliminate animation frame thrashing during programmatic stream */
+  scroll-behavior: auto !important;
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
-  /* Hardware Accelerated GPU Compositing Layer */
   transform: translate3d(0, 0, 0);
   -webkit-transform: translate3d(0, 0, 0);
-  will-change: transform;
+  isolation: isolate;
   backface-visibility: hidden;
-  perspective: 1000px;
 }
 
 /* Touch Latency Elimination (300ms mobile delay removal) */
@@ -1098,23 +1096,32 @@ html, body {
 
 /* Deluxe Hover Popover on Messages */
 .message-hover-actions {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 3px;
   position: absolute;
   top: -16px;
-  background: rgba(15, 20, 30, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #111b21 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
   border-radius: 9999px;
   padding: 3px 6px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s ease;
-  transform: translateY(4px);
+  transition: opacity 0.12s ease, transform 0.12s ease;
+  transform: translateY(2px);
   z-index: 10;
+}
+
+.message-wrapper:hover .message-hover-actions,
+.message-bubble:hover .message-hover-actions,
+.message-wrapper.active-touch-actions .message-hover-actions {
+  display: flex !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  transform: translateY(0) !important;
 }
 
 .message-wrapper:hover .message-hover-actions,
@@ -9685,8 +9692,9 @@ body.chat-size-extra-large .message-bubble {
    LOW-END DEVICE ACCELERATION & ZERO-LAG CONTAINMENT
    ======================================================== */
 .message-wrapper {
+  contain: layout paint style;
   content-visibility: auto;
-  contain-intrinsic-size: auto 54px;
+  contain-intrinsic-size: 0 72px;
 }
 
 #messages-area {
@@ -10794,4 +10802,20 @@ body.chat-size-extra-large .message-bubble {
 #callsKeypadModal {
   z-index: 200000 !important;
   isolation: isolate !important;
+}
+
+/* Contact and Conversation List virtualization */
+#contactList li,
+.chat-item {
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 72px;
+}
+
+/* Call history row virtualization */
+#callHistoryFeed .call-log-item,
+.call-log-card {
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: 0 68px;
 }

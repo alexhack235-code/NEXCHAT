@@ -3724,6 +3724,16 @@ async function sendMessage() {
 
   hapticFeedback('light');
 
+  // Synchronous Frame 0 Reset (< 4ms): instantaneous native WhatsApp/Telegram feel
+  const stagedSendText = text;
+  const stagedSendAttachment = selectedFile;
+  if (messageText) {
+    messageText.value = "";
+    messageText.style.height = "auto";
+  }
+  if (typeof removeAttachment === 'function') removeAttachment();
+  if (typeof updateSendButtons === 'function') updateSendButtons();
+
   try {
     const userRef = doc(db, "users", myUID);
 
@@ -17255,20 +17265,41 @@ function initializeBasicUI() {
   if (messageInput) {
     // Ultra-Fast RAF Throttled AutoResize (Zero Keypress Latency)
     let autoResizeRafLock = false;
-    let lastComputedInputHeight = 0;
+    let lastTextLength = 0;
+    let cachedLineHeight = 0;
+    let lastAssignedHeight = 38;
+
     const autoResize = () => {
-      if (autoResizeRafLock) return;
-      autoResizeRafLock = true;
-      requestAnimationFrame(() => {
-        autoResizeRafLock = false;
-        if (!messageInput) return;
-        const currentScroll = messageInput.scrollHeight;
-        if (currentScroll === lastComputedInputHeight && messageInput.value.length > 0) return;
-        messageInput.style.height = 'auto';
-        const newHeight = Math.min(Math.max(messageInput.scrollHeight, 38), 100);
-        messageInput.style.height = newHeight + 'px';
-        lastComputedInputHeight = newHeight;
-      });
+      if (!messageInput) return;
+      const text = messageInput.value;
+      const len = text.length;
+
+      if (len === 0) {
+        if (lastAssignedHeight !== 38) {
+          messageInput.style.height = '38px';
+          lastAssignedHeight = 38;
+        }
+        lastTextLength = 0;
+        return;
+      }
+
+      if (!cachedLineHeight) {
+        const computed = window.getComputedStyle(messageInput);
+        cachedLineHeight = parseFloat(computed.lineHeight) || 20;
+      }
+
+      if (len < lastTextLength) {
+        messageInput.style.height = '38px';
+      }
+      lastTextLength = len;
+
+      const scrollH = messageInput.scrollHeight;
+      const clampedHeight = Math.min(Math.max(scrollH, 38), 100);
+
+      if (clampedHeight !== lastAssignedHeight) {
+        messageInput.style.height = `${clampedHeight}px`;
+        lastAssignedHeight = clampedHeight;
+      }
     };
     window.adjustTextareaHeight = autoResize;
 
@@ -17461,20 +17492,29 @@ function initializeBasicUI() {
       slashMenu.style.display = 'block';
     }
 
+    let slashFilterTimeout = null;
     messageInput.addEventListener('input', () => {
       autoResize();
       updateSendButtons();
-      handleTypingInputEvent();
 
+      // Offload typing presence to microtask queue
+      queueMicrotask(() => {
+        handleTypingInputEvent();
+      });
+
+      // Debounce slash command processing by 60ms
+      if (slashFilterTimeout) clearTimeout(slashFilterTimeout);
       const val = messageInput.value.trim();
       if (val.startsWith('/')) {
-        const query = val.toLowerCase();
-        const matches = SLASH_COMMANDS.filter(c => c.cmd.toLowerCase().startsWith(query) || c.name.toLowerCase().includes(query.slice(1)));
-        renderSlashMenu(matches);
+        slashFilterTimeout = setTimeout(() => {
+          const query = messageInput.value.trim().toLowerCase();
+          const matches = SLASH_COMMANDS.filter(c => c.cmd.toLowerCase().startsWith(query) || c.name.toLowerCase().includes(query.slice(1)));
+          renderSlashMenu(matches);
+        }, 60);
       } else {
         hideSlashMenu();
       }
-    });
+    }, { passive: true });
 
     messageInput.addEventListener('keydown', (e) => {
       const isMenuVisible = slashMenu && slashMenu.style.display !== 'none' && currentSlashMatches.length > 0;
@@ -22551,10 +22591,58 @@ async function triggerAiPolishDraft() {
 
   try {
     let cloudPolished = null;
+    const SUPPORTED_LANG_NAMES = {
+      pidgin: 'Nigerian Pidgin (Naija Pidgin)',
+      ru: 'Russian (Русский)',
+      ar: 'Arabic (العربية / Arabizi)',
+      hi: 'Hindi & Hinglish',
+      tr: 'Turkish (Türkçe)',
+      sw: 'Swahili (Kiswahili)',
+      tl: 'Tagalog / Taglish (Filipino)',
+      id: 'Bahasa Indonesia',
+      zh: 'Chinese Pinyin',
+      ja: 'Japanese Romaji',
+      ko: 'Korean Romanized',
+      es: 'Spanish (Español)',
+      fr: 'French (Français)',
+      pt: 'Portuguese (Português)',
+      de: 'German (Deutsch)',
+      it: 'Italian (Italiano)',
+      tech: 'Cyber Tech & Crypto Developer Dialect',
+      en: 'English'
+    };
+
+    let targetLangCode = 'en';
+    const engineForPolish = window.autoCorrectEngine || window.predictiveInputEngine;
+    if (engineForPolish && typeof engineForPolish.detectLanguage === 'function') {
+      targetLangCode = engineForPolish.detectLanguage(instant);
+    }
+
+    const targetLangName = SUPPORTED_LANG_NAMES[targetLangCode] || 'English';
+
+    let prompt;
+    if (targetLangCode === 'pidgin') {
+      prompt = `You are an elite native master editor of Nigerian Pidgin (Naija Pidgin). Polish this Nigerian Pidgin message by correcting typos, punctuation, and street slang spelling.
+STRICT MANDATE:
+1. PRESERVE 100% AUTHENTIC NIGERIAN PIDGIN GRAMMAR, SLANG, AND VOCABULARY.
+2. DO NOT TRANSLATE TO STANDARD ENGLISH OR QUEEN'S ENGLISH UNDER ANY CIRCUMSTANCES.
+3. Keep natural Pidgin expressions intact (e.g., "how you dey", "wetin dey happen", "no vex", "na so e be", "make we go", "abeg wait", "oya enter").
+4. Return ONLY the polished Nigerian Pidgin text without quotes or explanations:
+"${instant}"`;
+    } else if (targetLangCode !== 'en') {
+      prompt = `You are an expert native editor of ${targetLangName}. Polish this message by correcting spelling, grammar, and punctuation while strictly preserving the original language and dialect (${targetLangName}).
+STRICT MANDATE:
+1. STRICTLY PRESERVE THE NATIVE LANGUAGE (${targetLangName}).
+2. DO NOT TRANSLATE TO ENGLISH OR ANY OTHER LANGUAGE UNDER ANY CIRCUMSTANCES.
+3. Return ONLY the polished text in ${targetLangName} without quotes or explanations:
+"${instant}"`;
+    } else {
+      prompt = `Rewrite into a crisp, articulate professional tone. Fix typos and grammar. Return ONLY the polished text:\n"${instant}"`;
+    }
+
     if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.fastPolish === 'function') {
       cloudPolished = await chronexAI.fastPolish(instant);
     } else if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.chat === 'function') {
-      const prompt = `Rewrite into a crisp, articulate professional tone. Return ONLY the polished text:\n"${instant}"`;
       cloudPolished = await chronexAI.chat(prompt, 'fast_polish');
     }
 

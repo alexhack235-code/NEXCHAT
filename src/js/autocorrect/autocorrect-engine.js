@@ -23,6 +23,10 @@
 (function () {
   'use strict';
 
+  const PIDGIN_PHRASE_REGEX = /\b(how\s+you\s+dey|how\s+far|wetin\s+dey|wetin\s+happen|no\s+vex|na\s+so(\s+e\s+be)?|make\s+we|no\s+wahala|no\s+yawa|i\s+dey|you\s+dey|dem\s+dey|we\s+dey|e\s+don|no\s+be|na\s+lie|sharp\s+sharp|abeg\s+wait|kuku\s+kill|comot\s+here|wetin\s+be\s+dis)\b/i;
+
+
+
   /**
    * High-Speed LRU Cache (Capacity: 2000 entries)
    */
@@ -309,7 +313,7 @@
         detected = 'tr';
       }
       // 5. Nigerian Pidgin detection
-      else if (this.pidginSubDir && this.pidginSubDir.detect(sample)) {
+      else if ((this.pidginSubDir && this.pidginSubDir.detect(sample)) || (typeof PIDGIN_PHRASE_REGEX !== 'undefined' && PIDGIN_PHRASE_REGEX.test(sample))) {
         detected = 'pidgin';
       }
       // 6. Swahili detection
@@ -384,7 +388,7 @@
     /**
      * Sub-millisecond (0.00005ms) Multi-Tier Auto-Correct Word Pipeline
      */
-    correctWord(rawWord, prevWord = '', nextWord = '') {
+    correctWord(rawWord, prevWord = '', nextWord = '', overrideLang = null) {
       if (!rawWord || rawWord.length < 2) {
         if (rawWord === 'i' && this.currentPrimaryLanguage !== 'ru') return 'I';
         return rawWord;
@@ -418,7 +422,7 @@
       }
 
       // 2b. Active Primary Language Fast-Path Priority
-      const primary = this.currentPrimaryLanguage;
+      const primary = overrideLang || this.currentPrimaryLanguage;
       if (primary && primary !== 'en') {
         let activeDir = null;
         if (primary === 'pidgin') activeDir = this.pidginSubDir;
@@ -433,12 +437,25 @@
         else if (primary === 'ja') activeDir = this.jaSubDir;
         else if (primary === 'ko') activeDir = this.koSubDir;
         else if (primary === 'tech') activeDir = this.techSubDir;
+        else if (['es', 'fr', 'pt', 'de', 'it'].includes(primary)) activeDir = this.multiSuite;
 
         if (activeDir) {
-          const directFix = activeDir.correctWord(clean);
+          const directFix = (activeDir === this.multiSuite)
+            ? activeDir.correctWord(clean)
+            : (typeof activeDir.correctWord === 'function' ? activeDir.correctWord(clean) : null);
           if (directFix) {
             result = directFix;
-          } else if (activeDir.hasWord(clean)) {
+          } else if (activeDir === this.multiSuite ? activeDir.hasWord(clean, primary) : (typeof activeDir.hasWord === 'function' && activeDir.hasWord(clean))) {
+            result = rawWord;
+          } else if (primary === 'pidgin' && this.dict && this.dict.has(clean)) {
+            // Nigerian Pidgin creole: shared English words are 100% valid!
+            result = rawWord;
+          } else if (typeof activeDir.findFuzzyMatch === 'function') {
+            const inLangFuzzy = activeDir.findFuzzyMatch(clean);
+            if (inLangFuzzy && inLangFuzzy !== clean) result = inLangFuzzy;
+          }
+          // STRICT LANGUAGE ISOLATION: Non-English primary languages must NEVER drop into English Step 10
+          if (!result) {
             result = rawWord;
           }
         }
@@ -580,15 +597,26 @@
         }
       }
 
-      // 8. Nigerian Pidgin Sub-Directory
+      // 8. Nigerian Pidgin Sub-Directory (Preserves Creolized English Lexicon)
       if (!result && this.pidginSubDir) {
+        const isPidginContext = this.isSubdirectoryActive('pidgin') || (overrideLang === 'pidgin') || (this.currentPrimaryLanguage === 'pidgin') || this.pidginSubDir.detect((prevWord + ' ' + rawWord).trim()) || (typeof PIDGIN_PHRASE_REGEX !== 'undefined' && PIDGIN_PHRASE_REGEX.test(prevWord + ' ' + rawWord));
         if (this.pidginSubDir.correctWord(clean)) {
           this.activateSubdirectory('pidgin', 'pidgin-typo-trigger');
           result = this.pidginSubDir.correctWord(clean);
-        } else if (this.isSubdirectoryActive('pidgin') || this.pidginSubDir.detect((prevWord + ' ' + rawWord).trim())) {
+        } else if (isPidginContext) {
           this.activateSubdirectory('pidgin', 'pidgin-context');
           if (this.pidginSubDir.hasWord(clean)) {
             result = rawWord;
+          } else if (this.dict && this.dict.has(clean)) {
+            // Shared English-lexified words (how, you, for, help, me, we, etc.) are 100% valid in Pidgin!
+            result = rawWord;
+          } else {
+            const pidginFuzzy = this.pidginSubDir.findFuzzyMatch(clean);
+            if (pidginFuzzy && pidginFuzzy !== clean) {
+              result = pidginFuzzy;
+            } else {
+              result = rawWord;
+            }
           }
         }
       }
@@ -606,7 +634,22 @@
       }
 
             // 10. English 30,000+ Lexicon & Contextual N-Gram Pipeline
-      if (!result) {
+      const activeLangForStep10 = overrideLang || this.currentPrimaryLanguage || 'en';
+      const isForeignActive = activeLangForStep10 !== 'en' ||
+        this.isSubdirectoryActive('pidgin') ||
+        this.isSubdirectoryActive('ru') ||
+        this.isSubdirectoryActive('ar') ||
+        this.isSubdirectoryActive('hi') ||
+        this.isSubdirectoryActive('tr') ||
+        this.isSubdirectoryActive('sw') ||
+        this.isSubdirectoryActive('tl') ||
+        this.isSubdirectoryActive('id') ||
+        this.isSubdirectoryActive('zh') ||
+        this.isSubdirectoryActive('ja') ||
+        this.isSubdirectoryActive('ko') ||
+        ['es', 'fr', 'pt', 'de', 'it'].some(l => this.isSubdirectoryActive(l));
+
+      if (!result && !isForeignActive) {
         // N-Gram disambiguation
         if (this.ngram) {
           const contextual = this.ngram.disambiguate(rawWord, prevWord, nextWord);
@@ -653,8 +696,8 @@
       text = text.replace(/([,;:.!?])([A-Za-z\u0400-\u04FF\u0600-\u06FF\u0900-\u097F])/g, '$1 $2');
       text = text.replace(/\s+/g, ' ');
 
-      // Phase 2: Contextual N-Gram Disambiguation (Latin mode)
-      if (detectedLang !== 'ru' && detectedLang !== 'ar' && this.ngram) {
+      // Phase 2: Contextual N-Gram Disambiguation (ONLY for pure English mode)
+      if (detectedLang === 'en' && this.ngram) {
         text = this.ngram.polishContext(text);
       }
 
@@ -667,7 +710,7 @@
         const prevToken = (i > 1) ? tokens[i - 2] : '';
         const nextToken = (i < tokens.length - 2) ? tokens[i + 2] : '';
 
-        const fixed = this.correctWord(token, prevToken, nextToken);
+        const fixed = this.correctWord(token, prevToken, nextToken, detectedLang);
         if (fixed && fixed !== token) {
           tokens[i] = fixed;
         }
@@ -677,8 +720,8 @@
       // Phase 4: Sentence capitalization across Latin and Cyrillic
       text = text.replace(/(^|[.!?]\s+)([a-z\u0430-\u044f])/g, (match, prefix, letter) => prefix + letter.toUpperCase());
 
-      // Phase 5: Capitalize standalone 'I' in Latin contexts
-      if (detectedLang !== 'ru' && detectedLang !== 'ar') {
+      // Phase 5: Capitalize standalone 'I' in pure English contexts
+      if (detectedLang === 'en') {
         text = text.replace(/\bi\b/g, 'I');
       }
 

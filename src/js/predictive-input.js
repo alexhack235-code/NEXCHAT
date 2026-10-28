@@ -780,10 +780,22 @@
         }
       }
       if (!replacement) {
-        if (TYPO_MAP[cleanWord]) {
-          replacement = applyCasePattern(rawWord, TYPO_MAP[cleanWord]);
-        } else if (cleanWord === 'i' && (!window.autoCorrectEngine || window.autoCorrectEngine.currentPrimaryLanguage !== 'ru')) {
-          replacement = 'I';
+        const isEnglishActive = !window.autoCorrectEngine ||
+          (window.autoCorrectEngine.currentPrimaryLanguage === 'en' &&
+           !window.autoCorrectEngine.isSubdirectoryActive('pidgin') &&
+           !window.autoCorrectEngine.isSubdirectoryActive('ru') &&
+           !window.autoCorrectEngine.isSubdirectoryActive('ar') &&
+           !window.autoCorrectEngine.isSubdirectoryActive('hi') &&
+           !window.autoCorrectEngine.isSubdirectoryActive('sw') &&
+           !window.autoCorrectEngine.isSubdirectoryActive('tl') &&
+           !window.autoCorrectEngine.isSubdirectoryActive('id'));
+
+        if (isEnglishActive) {
+          if (TYPO_MAP[cleanWord]) {
+            replacement = applyCasePattern(rawWord, TYPO_MAP[cleanWord]);
+          } else if (cleanWord === 'i') {
+            replacement = 'I';
+          }
         }
       }
 

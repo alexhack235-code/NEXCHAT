@@ -4071,6 +4071,52 @@
   ];
 
   const PIDGIN_TYPO_MAP = {
+  "dhey": "dey",
+  "deyy": "dey",
+  "dei": "dey",
+  "dy": "dey",
+  "deh": "dey",
+  "wtn": "wetin",
+  "watn": "wetin",
+  "whtn": "wetin",
+  "wetn": "wetin",
+  "weting": "wetin",
+  "hwfr": "how far",
+  "hfar": "how far",
+  "abg": "abeg",
+  "abbeg": "abeg",
+  "ebeg": "abeg",
+  "whala": "wahala",
+  "wahla": "wahala",
+  "wahalla": "wahala",
+  "wala": "wahala",
+  "hpen": "happen",
+  "hapn": "happen",
+  "nvx": "no vex",
+  "novex": "no vex",
+  "pikn": "pikin",
+  "pickin": "pikin",
+  "pkin": "pikin",
+  "sbabi": "sabi",
+  "sabii": "sabi",
+  "sbai": "sabi",
+  "cmot": "comot",
+  "commot": "comot",
+  "kmot": "comot",
+  "chpp": "chop",
+  "chp": "chop",
+  "chopp": "chop",
+  "nwa": "na wa",
+  "oyaa": "oya",
+  "oyya": "oya",
+  "kloo": "kolo",
+  "klo": "kolo",
+  "mumuu": "mumu",
+  "muumu": "mumu",
+  "gbegeh": "gbege",
+  "yawwa": "yawa",
+  "shakaraa": "shakara",
+  "jaraa": "jara",
   "plava": "palava",
   "sndaza": "send aza",
   "drpaza": "drop aza",
@@ -10780,7 +10826,11 @@
       if (!word || word.length < 3) return null;
       const clean = word.toLowerCase().trim();
       const p = clean.slice(0, 2);
-      const candidates = this.prefixTable[p] || [];
+      let candidates = this.prefixTable[p] || [];
+      if (candidates.length === 0 && clean.length >= 3) {
+        const p1 = clean.slice(0, 1);
+        candidates = this.prefixTable[p1] || [];
+      }
       let bestMatch = null;
       let minDistance = maxDistance + 1;
       for (let i = 0; i < candidates.length; i++) {
@@ -10791,6 +10841,17 @@
           minDistance = dist;
           bestMatch = cand;
           if (dist === 1) break;
+        }
+      }
+      if (!bestMatch && this.triggers) {
+        for (const trig of this.triggers) {
+          if (Math.abs(trig.length - clean.length) > maxDistance) continue;
+          const dist = this._levenshtein(clean, trig);
+          if (dist <= maxDistance && dist < minDistance) {
+            minDistance = dist;
+            bestMatch = trig;
+            if (dist === 1) break;
+          }
         }
       }
       return bestMatch;
