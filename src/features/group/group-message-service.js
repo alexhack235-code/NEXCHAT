@@ -272,7 +272,7 @@ export async function sendMessage(params = {}) {
     edited: false,
     readBy: [uid],
     readAt: {},
-    reactions: {},
+    reactions: [],
     mentionedUserIds: mentionResult.mentionedUserIds || []
   };
 
@@ -336,10 +336,14 @@ export async function sendMessage(params = {}) {
     });
 
     // Update group lastMessage
-    await updateDoc(doc(db, 'groups', groupId), {
-      lastMessage: text || (attachment ? ' Attachment' : ''),
-      lastMessageTime: serverTimestamp()
-    });
+    try {
+      await updateDoc(doc(db, 'groups', groupId), {
+        lastMessage: text || (attachment ? ' Attachment' : ''),
+        lastMessageTime: serverTimestamp()
+      });
+    } catch (groupUpErr) {
+      console.warn('[GroupMsg] Group metadata update notice:', groupUpErr);
+    }
 
     // Log activity (non-blocking)
     addDoc(collection(db, 'messageActivity'), {

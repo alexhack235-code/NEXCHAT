@@ -2026,7 +2026,7 @@ async function showGroupInfoPanel(groupId) {
 
     const groupData = groupDoc.data();
     const members = groupData.members || [];
-    const infoPic = groupData.groupPic || 'logo.jpg';
+    const infoPic = groupData.profilePic || groupData.groupPic || groupData.icon || groupData.photoURL || 'logo.jpg';
 
     const infoNameEl = document.getElementById('infoName');
     const infoPicEl = document.getElementById('infoPic');
@@ -7229,7 +7229,18 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
           if (statusTextEl) statusTextEl.textContent = tempSubtitle;
           if (infoStatusEl) infoStatusEl.textContent = tempSubtitle;
 
-          updateChatProfileDisplay(username, profilePic, tempSubtitle);
+          const realGroupPic = groupData.profilePic || groupData.groupPic || groupData.icon || groupData.photoURL || profilePic;
+          if (realGroupPic && realGroupPic !== 'logo.jpg') {
+            const cpEl = document.getElementById("chatProfilePic");
+            const acEl = document.getElementById("activeChatAvatar");
+            const ipEl = document.getElementById("infoPic");
+            if (cpEl) cpEl.src = realGroupPic;
+            if (acEl) acEl.src = realGroupPic;
+            if (ipEl) ipEl.src = realGroupPic;
+            window.currentChatAvatar = realGroupPic;
+          }
+
+          updateChatProfileDisplay(username, realGroupPic || profilePic, tempSubtitle);
 
           if (memberIds.length > 0) {
             resolveGroupParticipantSubtitle(memberIds, uid);
@@ -14985,17 +14996,26 @@ async function createGroup(e) {
           const upRes = await uploadAnyMedia(file, { folder: 'group-icons', uid: myUID });
           profilePicUrl = upRes.url || upRes.downloadUrl;
         } catch (upErr) {
-          const storageRefPath = `groups/${Date.now()}_${file.name}`;
+          const safeName = (file.name || 'group_icon.jpg').replace(/[^a-zA-Z0-9._-]/g, '_');
+          const storageRefPath = `groups/${Date.now()}_${safeName}`;
           const imgRef = storageRef(storage, storageRefPath);
           const snapshot = await uploadBytes(imgRef, file);
           profilePicUrl = await getDownloadURL(snapshot.ref);
         }
       } catch (uploadErr) {
         console.error("Error uploading group icon:", uploadErr);
-        showNotif('Failed to upload icon, using default', 'warning');
+        if (iconPreview && iconPreview.src && iconPreview.src.startsWith('data:image/')) {
+          profilePicUrl = iconPreview.src;
+          console.log('[GROUP] Used inline canvas image fallback for group icon');
+        } else {
+          showNotif('Failed to upload icon, using default', 'warning');
+        }
       }
-    } else if (iconPreview && iconPreview.getAttribute('data-generated') === 'true') {
-      profilePicUrl = iconPreview.src;
+    }
+    if (!profilePicUrl && iconPreview && iconPreview.src) {
+      if (iconPreview.getAttribute('data-generated') === 'true' || iconPreview.src.startsWith('data:image/') || iconPreview.src.startsWith('http')) {
+        profilePicUrl = iconPreview.src;
+      }
     }
 
     const groupRef = await addDoc(collection(db, 'groups'), {
@@ -15007,6 +15027,8 @@ async function createGroup(e) {
       members: membersList,
       admins: [myUID], // Creator is default admin
       profilePic: profilePicUrl,
+      groupPic: profilePicUrl,
+      icon: profilePicUrl,
       createdAt: serverTimestamp(),
       lastMessage: '',
       lastMessageTime: serverTimestamp()
@@ -19191,9 +19213,12 @@ async function loadGroups() {
 
       const unreadBadgeHTML = unreadCount > 0 ? `<span class="unread-badge">${unreadCount > 99 ? '99+' : unreadCount}</span>` : '';
 
+      const groupPic = group.profilePic || group.groupPic || group.icon || group.photoURL || '';
+      const groupInit = (group.name || 'G').charAt(0).toUpperCase();
+
       let avatarHtml;
-      if (group.profilePic) {
-        avatarHtml = `<img src="${group.profilePic}" class="chat-avatar group-avatar" style="object-fit:cover;" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${groupInit}</div>`;
+      if (groupPic) {
+        avatarHtml = `<img src="${groupPic}" class="chat-avatar group-avatar" style="object-fit:cover;" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${groupInit}</div>`;
       } else {
         avatarHtml = `<div class="chat-avatar avatar-placeholder" style="display:flex !important;">${groupInit}</div>`;
       }
@@ -19223,7 +19248,7 @@ async function loadGroups() {
           groupLongPressFired = false;
           return;
         }
-        openChat(groupId, group.name, group.profilePic || "logo.jpg", "group");
+        openChat(groupId, group.name, groupPic || "logo.jpg", "group");
       });
       li.addEventListener("contextmenu", (e) => {
         e.preventDefault();
@@ -19723,9 +19748,10 @@ async function appendGroupsToContactList(contactList) {
       if (lastMessage.length > 40) lastMessage = lastMessage.substring(0, 40) + '...';
       const lastMessageTime = group.lastMessageTime ? formatChatTimestamp(group.lastMessageTime) : '';
 
+      const gPic = group.profilePic || group.groupPic || group.icon || group.photoURL || '';
       let avatarHtml;
-      if (group.profilePic) {
-        avatarHtml = `<img src="${group.profilePic}" class="chat-avatar group-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${gInit}</div>`;
+      if (gPic) {
+        avatarHtml = `<img src="${gPic}" class="chat-avatar group-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}"><div class="chat-avatar avatar-placeholder hidden" style="display:none !important;">${gInit}</div>`;
       } else {
         avatarHtml = `<div class="chat-avatar avatar-placeholder" style="display:flex !important;">${gInit}</div>`;
       }
@@ -19750,7 +19776,7 @@ async function appendGroupsToContactList(contactList) {
       `;
 
       li.addEventListener('click', () => {
-        openChat(groupId, groupName, group.profilePic || 'logo.jpg', 'group');
+        openChat(groupId, groupName, gPic || 'logo.jpg', 'group');
       });
 
       li.addEventListener('contextmenu', (e) => {

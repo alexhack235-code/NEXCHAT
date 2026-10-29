@@ -349,12 +349,16 @@ service cloud.firestore {
       );
     }
 
-    // 4. Group Membership Verification (Safely checks existence and members array)
+    // 4. Group Membership Verification (Safely checks existence, members array, or group creator)
     function isGroupMember(groupId) {
       return isAuthenticated() &&
              exists(/databases/$(database)/documents/groups/$(groupId)) &&
-             'members' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
-             request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members;
+             (
+               ('members' in get(/databases/$(database)/documents/groups/$(groupId)).data &&
+                request.auth.uid in get(/databases/$(database)/documents/groups/$(groupId)).data.members) ||
+               request.auth.uid == get(/databases/$(database)/documents/groups/$(groupId)).data.creatorId ||
+               isSuperAdmin()
+             );
     }
 
     // 5. Group Admin Verification (Admins list, group creator, or SuperAdmin)
@@ -425,6 +429,14 @@ service cloud.firestore {
       return !(field in request.resource.data) ||
              request.resource.data[field] == null ||
              isValidList(request.resource.data[field], maxSize);
+    }
+
+    // 12b. Optional Reactions Validation Helper (Supports both array [] and map/object {} representations up to 100 items)
+    function isValidOptionalReactions(field) {
+      return !(field in request.resource.data) ||
+             request.resource.data[field] == null ||
+             (request.resource.data[field] is list && request.resource.data[field].size() <= 100) ||
+             (request.resource.data[field] is map && request.resource.data[field].size() <= 100);
     }
 
     // 13. IP Address List Validation Helper (Enforces array/list cap: max 4 IP addresses, each max 45 chars string)
@@ -575,7 +587,7 @@ service cloud.firestore {
              ) &&
              isValidOptionalString('text', 0, 10000) &&
              isValidOptionalString('content', 0, 10000) &&
-             isValidOptionalList('reactions', 100);
+             isValidOptionalReactions('reactions');
     }
 
     // Thread Message Validator (/chats/{chatId}/threads/{threadId}/messages/{msgId})
@@ -593,7 +605,7 @@ service cloud.firestore {
       isValidOptionalUrl('mediaUrl') &&
       isValidOptionalUrl('attachmentUrl') &&
       isValidOptionalUrl('imageUrl') &&
-      isValidOptionalList('reactions', 100) &&
+      isValidOptionalReactions('reactions') &&
       isValidOptionalList('deletedFor', 500);
     }
 
@@ -850,13 +862,13 @@ service cloud.firestore {
           areImmutableFieldsUnchanged(['from', 'to', 'senderId', 'receiverId', 'createdAt', 'timestamp']) &&
           isValidOptionalString('text', 0, 10000) &&
           isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalList('reactions', 100) &&
+          isValidOptionalReactions('reactions') &&
           isValidOptionalList('deletedFor', 500)
         ) ||
         (
           (request.auth.uid == resource.data.to || ('receiverId' in resource.data && request.auth.uid == resource.data.receiverId)) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'read', 'readAt', 'delivered', 'deliveredAt', 'reactions', 'deletedFor']) &&
-          isValidOptionalList('reactions', 100) &&
+          isValidOptionalReactions('reactions') &&
           isValidOptionalList('deletedFor', 500)
         ) ||
         (
@@ -969,7 +981,7 @@ service cloud.firestore {
               isChatParticipant(chatId) &&
               areImmutableFieldsUnchanged(['senderId', 'userId', 'from', 'authorId', 'chatId', 'threadId', 'createdAt', 'timestamp']) &&
               request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'read', 'readBy', 'readAt', 'delivered', 'deliveredAt', 'status', 'deletedFor']) &&
-              isValidOptionalList('reactions', 100) &&
+              isValidOptionalReactions('reactions') &&
               isValidOptionalList('deletedFor', 500)
             ) ||
             (
@@ -1009,7 +1021,7 @@ service cloud.firestore {
                        (request.resource.data.from == request.auth.uid || request.resource.data.senderId == request.auth.uid) &&
                        isValidOptionalString('text', 0, 10000) &&
                        isValidOptionalString('content', 0, 10000) &&
-                       isValidOptionalList('reactions', 100);
+                       isValidOptionalReactions('reactions');
 
       // Sender can edit text/reactions; group members can update reactions/readBy/deletedFor; sender/moderator can update tombstone fields
       allow update: if isAuthenticated() && (
@@ -1018,7 +1030,7 @@ service cloud.firestore {
           areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
           isValidOptionalString('text', 0, 10000) &&
           isValidOptionalString('content', 0, 10000) &&
-          isValidOptionalList('reactions', 100) &&
+          isValidOptionalReactions('reactions') &&
           isValidOptionalList('deletedFor', 500)
         ) ||
         (
@@ -1043,7 +1055,7 @@ service cloud.firestore {
         (
           isGroupMember(resource.data.groupId) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor']) &&
-          isValidOptionalList('reactions', 100) &&
+          isValidOptionalReactions('reactions') &&
           isValidOptionalList('deletedFor', 500)
         ) ||
         isSuperAdmin()
@@ -1097,14 +1109,14 @@ service cloud.firestore {
                          (request.resource.data.senderId == request.auth.uid || request.resource.data.from == request.auth.uid) &&
                          isValidOptionalString('text', 0, 10000) &&
                          isValidOptionalString('content', 0, 10000) &&
-                         isValidOptionalList('reactions', 100);
+                         isValidOptionalReactions('reactions');
         allow update: if isAuthenticated() && (
           (
             (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.from) &&
             areImmutableFieldsUnchanged(['senderId', 'from', 'createdAt', 'timestamp']) &&
             isValidOptionalString('text', 0, 10000) &&
             isValidOptionalString('content', 0, 10000) &&
-            isValidOptionalList('reactions', 100) &&
+            isValidOptionalReactions('reactions') &&
             isValidOptionalList('deletedFor', 500)
           ) ||
           (
@@ -1129,7 +1141,7 @@ service cloud.firestore {
           (
             isGroupMember(groupId) &&
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reactions', 'readBy', 'readAt', 'deletedFor']) &&
-            isValidOptionalList('reactions', 100) &&
+            isValidOptionalReactions('reactions') &&
             isValidOptionalList('deletedFor', 500)
           ) ||
           isSuperAdmin()
@@ -2672,11 +2684,17 @@ service cloud.firestore {
                        validStringLength('name', 1, 100) &&
                        (!('isVerified' in request.resource.data) || request.resource.data.isVerified == false || isSuperAdmin());
 
-      // Channel update restricted to creator or SuperAdmin, protects creatorId and restricts verification edits
-      allow update: if isAuthenticated() &&
-                       (resource.data.creatorId == request.auth.uid || isSuperAdmin()) &&
-                       request.resource.data.creatorId == resource.data.creatorId &&
-                       (!('isVerified' in request.resource.data) || request.resource.data.isVerified == resource.data.isVerified || isSuperAdmin());
+      // Channel update restricted to creator or SuperAdmin, protects creatorId and restricts verification edits; allows subscriber/follower counts and lastPost updates
+      allow update: if isAuthenticated() && (
+                       (
+                         (resource.data.creatorId == request.auth.uid || isSuperAdmin()) &&
+                         request.resource.data.creatorId == resource.data.creatorId &&
+                         (!('isVerified' in request.resource.data) || request.resource.data.isVerified == resource.data.isVerified || isSuperAdmin())
+                       ) ||
+                       (
+                         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['subscriberCount', 'followerCount', 'lastPostSnippet', 'lastPostTime'])
+                       )
+                     );
 
       // Deletion restricted to channel creator or SuperAdmin
       allow delete: if isAuthenticated() && (resource.data.creatorId == request.auth.uid || isSuperAdmin());
@@ -2684,10 +2702,21 @@ service cloud.firestore {
       // Subcollection: match /channels/{channelId}/posts/{postId}
       match /posts/{postId} {
         allow read: if isAuthenticated();
-        allow create, update, delete: if isAuthenticated() && (
-          get(/databases/$(database)/documents/channels/$(channelId)).data.creatorId == request.auth.uid ||
+        allow create, update: if isAuthenticated() && (
+          (exists(/databases/$(database)/documents/channels/$(channelId)) &&
+           get(/databases/$(database)/documents/channels/$(channelId)).data.creatorId == request.auth.uid) ||
+          request.resource.data.authorId == request.auth.uid ||
           isSuperAdmin()
-        ) && validStringLength('text', 1, 10000);
+        ) && (
+          isValidOptionalString('text', 0, 10000) ||
+          isValidOptionalString('content', 0, 10000)
+        );
+        allow delete: if isAuthenticated() && (
+          (exists(/databases/$(database)/documents/channels/$(channelId)) &&
+           get(/databases/$(database)/documents/channels/$(channelId)).data.creatorId == request.auth.uid) ||
+          resource.data.authorId == request.auth.uid ||
+          isSuperAdmin()
+        );
       }
 
       // Subcollection: match /channels/{channelId}/subscribers/{userId}

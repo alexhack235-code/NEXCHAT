@@ -136,6 +136,27 @@ service firebase.storage {
       allow delete: if isAuthenticated() || isSuperAdmin();
     }
 
+    match /group-icons/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 15 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /channel-icons/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 15 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
+    match /channels/{allPaths=**} {
+      allow create, write: if isAuthenticated() &&
+                              request.resource.size < 50 * 1024 * 1024;
+      allow read: if true;
+      allow delete: if isAuthenticated() || isSuperAdmin();
+    }
+
     match /groupdocs/{allPaths=**} {
       allow create, write: if isAuthenticated() &&
                               request.resource.size < 50 * 1024 * 1024;
@@ -203,13 +224,10 @@ service firebase.storage {
     }
 
     // ============================================================
-    // 11. UNIVERSAL AUTHENTICATED FALLBACK
+    // 11. DEFAULT DENY UNMATCHED PATHS
     // ============================================================
     match /{allPaths=**} {
-      allow create, write: if isAuthenticated() &&
-                              request.resource.size < 150 * 1024 * 1024;
-      allow read: if isAuthenticated();
-      allow delete: if isAuthenticated() || isSuperAdmin();
+      allow read, write, delete: if isSuperAdmin();
     }
   }
 }
