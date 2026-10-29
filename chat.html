@@ -890,7 +890,7 @@
 
 
         <!-- Messages Area -->
-        <div id="chatReloadOverlay" class="chat-reload-overlay" aria-hidden="true">
+        <div id="chatReloadOverlay" class="chat-reload-overlay" aria-hidden="true" style="display: none;">
           <div class="chat-reload-pill">
             <span class="chat-reload-progress"></span>
             <span class="chat-reload-dot"></span>
@@ -2067,6 +2067,24 @@
             <button id="closeSettingsBtn" class="close-btn" title="Close"><i class="fa-solid fa-xmark"></i></button>
           </div>
 
+          <!-- Verified User Profile Hero -->
+          <div class="settings-profile-hero" id="settingsProfileHero">
+            <div class="settings-profile-avatar-wrap">
+              <img id="settingsProfilePic" class="settings-profile-avatar" src="logo.jpg" alt="Profile" onerror="this.onerror=null;this.src='logo.jpg';">
+              <div class="avatar-achievement-badge" title="Verified NEX Operative">
+                <i class="fa-solid fa-shield-halved"></i> <span>Verified NEX User</span>
+              </div>
+            </div>
+            <div class="settings-profile-info">
+              <div class="settings-profile-name-row">
+                <span class="settings-profile-name" id="settingsProfileName">NEX Operative</span>
+                <span class="tg-verified-badge" title="Cryptographically Verified"><i class="fa-solid fa-circle-check"></i></span>
+              </div>
+              <div class="settings-profile-handle" id="settingsProfileHandle">@nexchat_user</div>
+              <div class="settings-profile-status"><span class="status-online-dot"></span> Active &bull; Tier-1 High Security</div>
+            </div>
+          </div>
+
           <div class="settings-layout">
             <!-- Sidebar Navigation Tabs -->
             <nav class="settings-sidebar" id="settingsSidebar">
@@ -2180,6 +2198,25 @@
                 <div class="settings-pane-header">
                   <h3><i class="fa-solid fa-user-astronaut"></i> Profile & Identity</h3>
                   <p>Manage your account credentials, public card, and security status.</p>
+                </div>
+
+                <div class="settings-card">
+                  <div class="settings-profile-hero" style="background: transparent; border-bottom: none; padding: 0;">
+                    <div class="settings-profile-avatar-wrap">
+                      <img id="tabProfilePic" class="settings-profile-avatar" src="logo.jpg" alt="Profile" onerror="this.onerror=null;this.src='logo.jpg';">
+                      <div class="avatar-achievement-badge" title="Verified NEX Operative">
+                        <i class="fa-solid fa-shield-halved"></i> <span>Verified NEX User</span>
+                      </div>
+                    </div>
+                    <div class="settings-profile-info">
+                      <div class="settings-profile-name-row">
+                        <span class="settings-profile-name" id="tabProfileName">NEX Operative</span>
+                        <span class="tg-verified-badge" title="Cryptographically Verified"><i class="fa-solid fa-circle-check"></i></span>
+                      </div>
+                      <div class="settings-profile-handle" id="tabProfileHandle">@nexchat_user</div>
+                      <div class="settings-profile-status"><span class="status-online-dot"></span> Active &bull; Cryptographically Verified</div>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="settings-card">
@@ -7075,7 +7112,6 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/stealth-hardware-sensors.js"></script>
   <script src="./src/js/math-cloak-engine.js"></script>
   <script src="./src/js/system-crash-decoy.js"></script>
-  <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
   <script src="./src/js/status-elite-suite.js"></script>
@@ -8576,6 +8612,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <div id="crashSecretEscapeZone" class="crash-escape-hotspot" title="Escape Hatch"></div>
 </div>
 
+<script type="module" src="chat.js"></script>
 </body>
 
 </html>

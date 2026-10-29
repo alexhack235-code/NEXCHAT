@@ -1,4 +1,4 @@
-﻿
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getFirestore, disableNetwork, enableNetwork } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
@@ -18,7 +18,7 @@ enableNetwork(db)
     console.log('[OK] Firestore network enabled');
   })
   .catch((err) => {
-    console.error('âŒ Failed to enable Firestore network:', err);
+    console.error('[ERROR] Failed to enable Firestore network:', err);
   });
 
 window.auth = auth;

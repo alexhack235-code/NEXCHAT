@@ -1714,6 +1714,7 @@ function showChatReloadOverlay(statusText = 'Loading chat...') {
   const overlay = document.getElementById('chatReloadOverlay');
   if (!overlay) return;
 
+  overlay.style.display = 'flex';
   overlay.classList.add('visible');
   overlay.setAttribute('aria-hidden', 'false');
   overlay.dataset.status = 'loading';
@@ -1766,6 +1767,10 @@ function completeChatReloadOverlay() {
     clearTimeout(chatLoadSafetyTimer);
     chatLoadSafetyTimer = null;
   }
+  // Auto-dismiss within 300ms so loading bar is NEVER stuck on screen
+  setTimeout(() => {
+    hideChatReloadOverlay();
+  }, 300);
 }
 
 function cancelChatLoadFeedback() {
@@ -1799,6 +1804,7 @@ function hideChatReloadOverlay() {
   if (!overlay) return;
   overlay.classList.remove('visible');
   overlay.setAttribute('aria-hidden', 'true');
+  overlay.style.display = 'none';
   if (chatLoadSafetyTimer) {
     clearTimeout(chatLoadSafetyTimer);
     chatLoadSafetyTimer = null;
@@ -4098,9 +4104,9 @@ function renderSearchResults(itemsToRender, isPrivacyPrompt = false) {
     const targetUid = item.uid || item.id;
     const rawName = item.name || item.username || (isGroup ? 'Unnamed Group' : (isAi ? 'Chronex AI' : 'Cyber User'));
     const displayName = escapeHtml(rawName);
-    const badgeTierKey = item.verificationBadge || (item.isVerified ? 'TIER_PRO' : null);
-    const badgeHtml = (!isGroup && !isAi && window.NexVerificationCatalog && badgeTierKey && badgeTierKey !== 'NONE')
-      ? window.NexVerificationCatalog.renderVerificationBadgeHtml(badgeTierKey, { fontSize: '12px' })
+    const isVerifiedUser = !isGroup && !isAi && Boolean(item.isVerified || (item.verificationBadge && item.verificationBadge !== 'NONE'));
+    const badgeHtml = isVerifiedUser
+      ? `<span class="nex-verified-badge tg-verified-badge" title="Verified NEX User" style="display: inline-flex; align-items: center; margin-left: 4px;"><i class="fa-solid fa-circle-check" style="color: #00ff66; font-size: 12px;"></i></span>`
       : '';
     const handle = isGroup
       ? `Group · ${item.members?.length || 0} members`
@@ -4574,7 +4580,8 @@ async function sendMessage() {
 
       await updateDoc(userRef, {
         tokens: increment(-1),
-        lastMessageSentAt: serverTimestamp()
+        lastMessageSentAt: serverTimestamp(),
+        contacts: arrayUnion(currentChatUser)
       });
 
       try {
@@ -7392,9 +7399,9 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
             window.NexPresenceEngine.syncActiveChatPartner(uid, username);
           }
 
-          const badgeTier = userData.verificationBadge || (userData.isVerified ? 'TIER_PRO' : 'NONE');
-          if (window.NexVerificationCatalog && badgeTier && badgeTier !== 'NONE') {
-            const badgeHtml = window.NexVerificationCatalog.renderVerificationBadgeHtml(badgeTier, { fontSize: '13px' });
+          const isVerifiedUser = Boolean(userData.isVerified || (userData.verificationBadge && userData.verificationBadge !== 'NONE'));
+          if (isVerifiedUser) {
+            const badgeHtml = `<span class="nex-verified-badge tg-verified-badge" title="Verified NEX User" style="display: inline-flex; align-items: center; margin-left: 6px;"><i class="fa-solid fa-circle-check" style="color: #00ff66; font-size: 13px;"></i></span>`;
             const activeChatName = document.getElementById("activeChatName");
             if (activeChatName) {
               activeChatName.innerHTML = `${escapeHtml(username)} ${badgeHtml}`;
@@ -10453,6 +10460,10 @@ function setupSettingsTabNavigation() {
         targetPane.classList.add('active');
       }
 
+      try {
+        tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      } catch (_) {}
+
       if (isAndroid && navigator.vibrate) {
         navigator.vibrate(25);
       }
@@ -11487,6 +11498,23 @@ function openSettingsModal() {
   if (modal) {
     modal.style.display = "flex";
     document.body.style.overflow = "hidden";
+
+    // Synchronize Verified User Profile Hero
+    const currentName = window.myUsername || (window.auth && window.auth.currentUser && window.auth.currentUser.displayName) || 'NEX Operative';
+    const currentPic = window.myProfilePic || (window.auth && window.auth.currentUser && window.auth.currentUser.photoURL) || 'logo.jpg';
+    const currentHandle = '@' + currentName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+    const heroPic = document.getElementById('settingsProfilePic');
+    const heroName = document.getElementById('settingsProfileName');
+    const heroHandle = document.getElementById('settingsProfileHandle');
+    if (heroPic && currentPic) heroPic.src = currentPic;
+    if (heroName) heroName.textContent = currentName;
+    if (heroHandle) heroHandle.textContent = currentHandle;
+    const tabPic = document.getElementById('tabProfilePic');
+    const tabName = document.getElementById('tabProfileName');
+    const tabHandle = document.getElementById('tabProfileHandle');
+    if (tabPic && currentPic) tabPic.src = currentPic;
+    if (tabName) tabName.textContent = currentName;
+    if (tabHandle) tabHandle.textContent = currentHandle;
     try {
       if (!history.state || history.state.nexchatModal !== 'settings') {
         history.pushState({ nexchatModal: 'settings' }, '');
@@ -19531,10 +19559,12 @@ async function loadContacts() {
       <div class="chat-avatar-container" style="position: relative;">
         <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
         <span class="chat-online-beacon" style="display: block;"></span>
+        <span class="avatar-achievement-badge" style="background: linear-gradient(135deg, #00ff66, #00d4ff); color: #041019; box-shadow: 0 0 10px rgba(0,255,102,0.5);"><i class="fa-solid fa-bolt"></i><span>AI</span></span>
       </div>
       <div class="chat-item-content">
         <div class="chat-item-header">
           <span class="chat-name" style="font-family: 'Space Grotesk', sans-serif;">Chronex AI</span>
+          <span class="tg-verified-badge green nex-verified-badge" title="Verified AI Assistant"><i class="fa-solid fa-circle-check"></i></span>
           <span class="chronex-vip-pill"><i class="fa-solid fa-bolt"></i> NEURAL CORE</span>
         </div>
         <p class="chat-preview" style="color: #25d366; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
@@ -19669,33 +19699,77 @@ async function loadContacts() {
           const user = userDoc.data();
           const name = user.username || user.name || "User";
           const pic = user.profilePic || null;
+          const isVerified = Boolean(user.isVerified || user.verified || user.isNexVerified || (user.verificationBadge && user.verificationBadge !== 'NONE'));
+          const verificationBadge = user.verificationBadge || (isVerified ? 'VERIFIED' : null);
 
           const messagesRef = collection(db, "messages");
 
           const lastMsgPromise = (async () => {
-            const q1 = query(messagesRef, where("to", "==", uid), where("from", "==", myUID), orderBy("timestamp", "desc"), limit(1));
-            const q2 = query(messagesRef, where("from", "==", uid), where("to", "==", myUID), orderBy("timestamp", "desc"), limit(1));
-            const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+            let snap1 = { empty: true, docs: [] };
+            let snap2 = { empty: true, docs: [] };
+
+            try {
+              const q1 = query(messagesRef, where("to", "==", uid), where("from", "==", myUID), orderBy("timestamp", "desc"), limit(1));
+              snap1 = await getDocs(q1);
+            } catch (_) {
+              try {
+                const q1Fb = query(messagesRef, where("to", "==", uid), where("from", "==", myUID), limit(10));
+                snap1 = await getDocs(q1Fb);
+              } catch (_) {}
+            }
+
+            try {
+              const q2 = query(messagesRef, where("from", "==", uid), where("to", "==", myUID), orderBy("timestamp", "desc"), limit(1));
+              snap2 = await getDocs(q2);
+            } catch (_) {
+              try {
+                const q2Fb = query(messagesRef, where("from", "==", uid), where("to", "==", myUID), limit(10));
+                snap2 = await getDocs(q2Fb);
+              } catch (_) {}
+            }
 
             let latestMsg = null;
             let latestTime = null;
 
+            const getMs = (t) => {
+              if (!t) return 0;
+              if (typeof t.toMillis === 'function') return t.toMillis();
+              if (typeof t.toDate === 'function') return t.toDate().getTime();
+              if (t instanceof Date) return t.getTime();
+              if (typeof t === 'number') return t;
+              return 0;
+            };
+
             if (!snap1.empty) {
-              latestMsg = snap1.docs[0].data();
-              latestTime = latestMsg.timestamp;
+              snap1.docs.forEach(d => {
+                const data = d.data();
+                const t = data.timestamp || data.time;
+                if (!latestMsg || getMs(t) > getMs(latestTime)) {
+                  latestMsg = data;
+                  latestTime = t;
+                }
+              });
             }
             if (!snap2.empty) {
-              const msg2 = snap2.docs[0].data();
-              const time2 = msg2.timestamp;
-              if (!latestTime || (time2 && time2 > latestTime)) { // Use time2 directly if latestTime is null
-                latestMsg = msg2;
-                latestTime = time2;
-              }
+              snap2.docs.forEach(d => {
+                const data = d.data();
+                const t = data.timestamp || data.time;
+                if (!latestMsg || getMs(t) > getMs(latestTime)) {
+                  latestMsg = data;
+                  latestTime = t;
+                }
+              });
             }
             return { latestMsg, latestTime };
           })();
 
-          const unreadPromise = getDocs(query(messagesRef, where("from", "==", uid), where("to", "==", myUID), where("read", "==", false)));
+          const unreadPromise = (async () => {
+            try {
+              return await getDocs(query(messagesRef, where("from", "==", uid), where("to", "==", myUID), where("read", "==", false)));
+            } catch (_) {
+              return { size: 0, empty: true, docs: [] };
+            }
+          })();
 
           const [msgData, unreadSnap] = await Promise.all([lastMsgPromise, unreadPromise]);
           const { latestMsg, latestTime } = msgData;
@@ -19707,7 +19781,9 @@ async function loadContacts() {
             pic,
             latestMsg,
             latestTime,
-            unreadCount
+            unreadCount,
+            isVerified,
+            verificationBadge
           };
         } catch (e) {
           console.error("Error loading contact", uid, e);
@@ -19730,11 +19806,20 @@ async function loadContacts() {
     window.loadedContactData = contactDataList;
 
     contactDataList.forEach(data => {
-      const { uid, name, pic, latestMsg, latestTime, unreadCount } = data;
+      const { uid, name, pic, latestMsg, latestTime, unreadCount, isVerified, verificationBadge } = data;
 
       const li = document.createElement("li");
       li.className = "chat-list-item chat-item";
       li.setAttribute('data-chat-id', uid);
+
+      const isUserVerified = Boolean(isVerified || (verificationBadge && verificationBadge !== 'NONE'));
+      let userAvatarBadgeHtml = '';
+      let userVerifiedBadgeHtml = '';
+
+      if (isUserVerified) {
+        userAvatarBadgeHtml = `<span class="avatar-achievement-badge verified" title="Verified NEX User"><i class="fa-solid fa-check"></i><span>VERIFIED</span></span>`;
+        userVerifiedBadgeHtml = `<span class="nex-verified-badge tg-verified-badge" title="Verified NEX User"><i class="fa-solid fa-circle-check"></i></span>`;
+      }
 
       let avatar = (pic && (pic.startsWith('http') || pic.startsWith('data:') || pic.includes('.')))
         ? `<img src="${pic}" class="chat-avatar" onerror="this.style.setProperty('display','none','important');const ph=this.parentElement.querySelector('.avatar-placeholder');if(ph){ph.style.setProperty('display','flex','important');ph.classList.remove('hidden');}">` + `<div class="chat-avatar avatar-placeholder hidden" style="display:none !important; background:#202c33; color:#e9edef; align-items:center; justify-content:center; font-weight:700; border-radius:50%;">${name.charAt(0).toUpperCase()}</div>`
@@ -19801,10 +19886,11 @@ async function loadContacts() {
         <div class="chat-avatar-container" style="position: relative;">
           ${avatar}
           <span class="chat-online-beacon"></span>
+          ${userAvatarBadgeHtml}
         </div>
         <div class="chat-item-content ${unreadCount > 0 ? 'unread' : ''}">
           <div class="chat-item-header">
-            <span class="chat-name">${escape(name)}</span>${(window.NexChatVanish && window.NexChatVanish.isChatVanished(uid)) ? '<span class="vanish-chat-badge" title="Vanished Chat (Active Stealth Reveal)"><i class="fa-solid fa-ghost"></i></span>' : ''}
+            <span class="chat-name">${escape(name)}</span>${userVerifiedBadgeHtml}${(window.NexChatVanish && window.NexChatVanish.isChatVanished(uid)) ? '<span class="vanish-chat-badge" title="Vanished Chat (Active Stealth Reveal)"><i class="fa-solid fa-ghost"></i></span>' : ''}
           </div>
           <p class="chat-preview">${lastMessageSnippet}</p>
         </div>
