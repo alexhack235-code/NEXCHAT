@@ -475,11 +475,13 @@ html, body {
    -------------------------------------------------------------------------- */
 .chat-main {
   flex: 1;
+  min-height: 0;
   display: flex;
   position: relative;
   overflow: hidden;
   height: calc(100vh - var(--header-height) - var(--bottom-nav-height));
   height: calc(100dvh - var(--header-height) - var(--bottom-nav-height));
+  max-height: calc(100dvh - var(--header-height) - var(--bottom-nav-height));
 }
 
 /* --------------------------------------------------------------------------
@@ -617,8 +619,13 @@ html, body {
 /* Active Chats List */
 .chats-section {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   padding: 8px 0;
+  padding-bottom: calc(var(--bottom-nav-height, 66px) + 50px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
 }
 
 .chat-list {
@@ -10807,9 +10814,8 @@ body.chat-size-extra-large .message-bubble {
 /* Contact and Conversation List virtualization */
 #contactList li,
 .chat-item {
-  contain: layout style paint;
-  content-visibility: auto;
-  contain-intrinsic-size: 0 72px;
+  contain: none !important;
+  content-visibility: visible !important;
 }
 
 /* Call history row virtualization */

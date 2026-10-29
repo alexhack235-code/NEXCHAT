@@ -229,7 +229,7 @@ export class VirtualScroller {
     const totalHeight = this._getTotalHeight();
     this._content.style.height = `${totalHeight}px`;
 
-    const viewportHeight = this._container.clientHeight;
+    const viewportHeight = this._container.clientHeight || window.innerHeight || 800;
     const scrollTop = this._scrollTop;
 
     // Find visible range

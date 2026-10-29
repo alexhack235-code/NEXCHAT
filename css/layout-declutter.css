@@ -1045,15 +1045,21 @@ background: rgba(255, 255, 255, 0.06) !important;
 .chats-section {
 background: #0b141a !important;
 flex: 1 1 auto !important;
+min-height: 0 !important;
 overflow-y: auto !important;
+-webkit-overflow-scrolling: touch !important;
+overscroll-behavior-y: contain !important;
 padding: 0 !important;
+padding-bottom: calc(var(--bottom-nav-height, 66px) + 50px + env(safe-area-inset-bottom, 0px)) !important;
 width: 100% !important;
+box-sizing: border-box !important;
 }
 
 .chat-list {
 list-style: none !important;
 margin: 0 !important;
 padding: 0 !important;
+padding-bottom: 20px !important;
 }
 
 .chat-item,

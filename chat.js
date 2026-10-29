@@ -3956,20 +3956,7 @@ function renderSearchResults(itemsToRender, isPrivacyPrompt = false) {
 
   container.innerHTML = '';
 
-  if (isPrivacyPrompt) {
-    const noticeEl = document.createElement('div');
-    noticeEl.className = 'search-privacy-notice';
-    noticeEl.style.cssText = 'margin-bottom: 14px; padding: 12px 16px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 12px; display: flex; align-items: center; gap: 12px;';
-    noticeEl.innerHTML = `
-      <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(0, 255, 102, 0.12); display: flex; align-items: center; justify-content: center; color: #00ff66; flex-shrink: 0; font-size: 16px;">
-        <i class="fa-solid fa-shield-halved"></i>
-      </div>
-      <div style="flex: 1; font-size: 12.5px; color: #cbd5e1; line-height: 1.45;">
-        <strong style="color: #fff;">Telegram-Style Privacy Mode:</strong> Only your saved contacts and joined groups are displayed. Type an <strong>@username</strong> or group name (min 2 letters) to search across NEXCHAT.
-      </div>
-    `;
-    container.appendChild(noticeEl);
-  }
+
 
   if (!itemsToRender || itemsToRender.length === 0) {
     const emptyEl = document.createElement('div');

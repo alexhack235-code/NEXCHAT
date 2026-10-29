@@ -57,14 +57,24 @@ export async function openGroupChat(groupId) {
 
   // 2. Fetch from Firestore
   try {
-    const q = query(
-      collection(db, 'groupMessages'),
-      where('groupId', '==', groupId),
-      orderBy('timestamp', 'desc'),
-      limit(PAGE_SIZE)
-    );
+    let snapshot;
+    try {
+      const q = query(
+        collection(db, 'groupMessages'),
+        where('groupId', '==', groupId),
+        orderBy('timestamp', 'desc'),
+        limit(PAGE_SIZE)
+      );
+      snapshot = await getDocs(q);
+    } catch (indexErr) {
+      console.warn('[GroupMsg] Indexed query fallback triggered:', indexErr?.message);
+      const fallbackQ = query(
+        collection(db, 'groupMessages'),
+        where('groupId', '==', groupId)
+      );
+      snapshot = await getDocs(fallbackQ);
+    }
 
-    const snapshot = await getDocs(q);
     const messages = [];
 
     for (const docSnap of snapshot.docs) {
@@ -73,7 +83,6 @@ export async function openGroupChat(groupId) {
       if (data.expiresAt) {
         const expiresAt = data.expiresAt.toDate ? data.expiresAt.toDate() : new Date(data.expiresAt);
         if (expiresAt <= new Date()) {
-          // Delete expired message asynchronously
           deleteDoc(doc(db, 'groupMessages', docSnap.id)).catch(() => {});
           continue;
         }
@@ -81,8 +90,8 @@ export async function openGroupChat(groupId) {
       messages.push({ id: docSnap.id, ...data, _docSnap: docSnap });
     }
 
-    // Reverse to chronological order (asc)
-    messages.reverse();
+    // Sort chronologically ascending
+    messages.sort((a, b) => _getTimestampMs(a.timestamp) - _getTimestampMs(b.timestamp));
 
     // Resolve user profiles
     await _resolveUserProfiles(messages);
@@ -109,6 +118,7 @@ export async function openGroupChat(groupId) {
   } catch (error) {
     console.error('[GroupMsg] Initial load failed:', error);
     groupStore.setState({ isLoadingMessages: false });
+    _attachRealtimeListener(groupId, null);
   }
 }
 
@@ -148,15 +158,23 @@ export async function loadOlderMessages() {
     // Query messages older than the oldest loaded, in desc order
     // Then we create a Firestore query with the timestamp
     // We need a reference snapshot for startAfter - use the timestamp directly
-    const q = query(
-      collection(db, 'groupMessages'),
-      where('groupId', '==', groupId),
-      orderBy('timestamp', 'desc'),
-      startAfter(oldestTimestamp),
-      limit(PAGE_SIZE)
-    );
-
-    const snapshot = await getDocs(q);
+    let snapshot;
+    try {
+      const q = query(
+        collection(db, 'groupMessages'),
+        where('groupId', '==', groupId),
+        orderBy('timestamp', 'desc'),
+        startAfter(oldestTimestamp),
+        limit(PAGE_SIZE)
+      );
+      snapshot = await getDocs(q);
+    } catch (e) {
+      const fallbackQ = query(
+        collection(db, 'groupMessages'),
+        where('groupId', '==', groupId)
+      );
+      snapshot = await getDocs(fallbackQ);
+    }
     const olderMessages = [];
 
     for (const docSnap of snapshot.docs) {
@@ -493,24 +511,11 @@ function _attachRealtimeListener(groupId, newestMessage) {
     _realtimeUnsubscribe();
   }
 
-  let q;
-  if (newestMessage && newestMessage.timestamp) {
-    let ts = newestMessage.timestamp;
-    if (ts instanceof Date) ts = Timestamp.fromDate(ts);
-    
-    q = query(
-      collection(db, 'groupMessages'),
-      where('groupId', '==', groupId),
-      orderBy('timestamp', 'asc'),
-      startAfter(ts)
-    );
-  } else {
-    q = query(
-      collection(db, 'groupMessages'),
-      where('groupId', '==', groupId),
-      orderBy('timestamp', 'asc')
-    );
-  }
+  // Listen directly on groupId so it never requires composite indexes and is resilient to index build delays
+  const q = query(
+    collection(db, 'groupMessages'),
+    where('groupId', '==', groupId)
+  );
 
   _realtimeUnsubscribe = onSnapshot(q, async (snapshot) => {
     const currentState = groupStore.getState();

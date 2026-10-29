@@ -1010,10 +1010,7 @@ service cloud.firestore {
     // 3. GROUP MESSAGES (Top-Level & Nested Subcollections)
     // ===============================================================
     match /groupMessages/{messageId} {
-      allow read: if isAuthenticated() && (
-        isGroupMember(resource.data.groupId) ||
-        isSuperAdmin()
-      );
+      allow read: if isAuthenticated();
 
       allow create: if isAuthenticated() &&
                        request.resource.data.groupId is string &&
