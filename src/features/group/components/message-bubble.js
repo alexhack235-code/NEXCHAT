@@ -197,8 +197,23 @@ export function renderMessageBubble(message, container, options = {}) {
       if (options.senderRole && options.senderRole !== 'member') {
         const badge = document.createElement('span');
         badge.className = 'nex-role-badge ' + options.senderRole;
-        badge.textContent = options.senderRole;
+        if (options.senderRole === 'creator' || options.senderRole === 'owner') {
+          badge.innerHTML = '<i class="fa-solid fa-crown"></i> OWNER';
+        } else if (options.senderRole === 'admin') {
+          badge.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ADMIN';
+        } else if (options.senderRole === 'moderator' || options.senderRole === 'mod') {
+          badge.innerHTML = '<i class="fa-solid fa-bolt"></i> MOD';
+        } else {
+          badge.textContent = options.senderRole.toUpperCase();
+        }
         senderDiv.appendChild(badge);
+      }
+      if (options.isVerified) {
+        const verBadge = document.createElement('span');
+        verBadge.className = 'nex-role-badge verified';
+        verBadge.title = 'Verified NEX User';
+        verBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> VERIFIED';
+        senderDiv.appendChild(verBadge);
       }
       bubble.appendChild(senderDiv);
     }

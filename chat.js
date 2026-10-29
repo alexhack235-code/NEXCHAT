@@ -4263,7 +4263,16 @@ async function sendMessage() {
   }
 
   const messageText = document.getElementById("message-input");
-  const text = messageText?.value.trim();
+  let text = messageText?.value.trim();
+
+  // Instant 0ms Multilingual Auto-Correct & Typo Synthesizer (Works in Direct & Group Chats)
+  if (text && localStorage.getItem('nexchat_instant_polish') !== 'false') {
+    if (window.predictiveInputEngine && typeof window.predictiveInputEngine.instantPolish === 'function') {
+      text = window.predictiveInputEngine.instantPolish(text);
+    } else if (window.autoCorrectEngine && typeof window.autoCorrectEngine.instantPolish === 'function') {
+      text = window.autoCorrectEngine.instantPolish(text);
+    }
+  }
 
   if (!text && !selectedFile) {
     showNotif("[Error] Message or file attachment required", "error");
@@ -7360,7 +7369,9 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
           const tempSubtitle = memberIds.includes(myUID)
             ? `You, and ${Math.max(0, memberIds.length - 1)} others`
             : `${memberIds.length} members`;
-          if (statusTextEl) statusTextEl.textContent = tempSubtitle;
+          if (statusTextEl) {
+            statusTextEl.innerHTML = `<span class="group-header-meta-cluster"><span class="group-meta-pill"><i class="fa-solid fa-users"></i> ${memberIds.length} members</span><span class="group-meta-pill group-online-pill"><i class="fa-solid fa-circle"></i> Active</span><span class="group-meta-pill group-hq-pill" title="Tap for Group Intelligence HQ"><i class="fa-solid fa-gear"></i> HQ</span></span>`;
+          }
           if (infoStatusEl) infoStatusEl.textContent = tempSubtitle;
 
           const realGroupPic = groupData.profilePic || groupData.groupPic || groupData.icon || groupData.photoURL || profilePic;
