@@ -3349,40 +3349,147 @@ let cachedSearchItems = [];
 let currentSearchFilter = 'all';
 let searchDebounceTimer = null;
 let searchListenersAttached = false;
+let isFetchingSearchUsers = false;
+let lastOpenSearchTimestamp = 0;
+
+function harvestLocalSearchItems() {
+  const localItems = [];
+  const seenIds = new Set();
+
+  // 1. Chronex AI bot (instant access)
+  seenIds.add('chronex-ai');
+  localItems.push({
+    uid: 'chronex-ai',
+    id: 'chronex-ai',
+    name: 'Chronex AI',
+    username: 'chronex',
+    email: 'ai@nexchat.io',
+    profilePic: 'chronex-ai.jpg',
+    online: true,
+    isGroup: false,
+    type: 'ai'
+  });
+
+  // 2. In-memory contact data from loadContacts
+  if (Array.isArray(window.loadedContactData)) {
+    window.loadedContactData.forEach(c => {
+      const cid = c.uid || c.id;
+      if (!cid || seenIds.has(cid) || cid === myUID) return;
+      seenIds.add(cid);
+      localItems.push({
+        uid: cid,
+        id: cid,
+        name: c.name || 'User',
+        username: (c.username || c.name || '').toLowerCase().replace(/\s+/g, '_'),
+        email: c.email || '',
+        profilePic: c.pic || '',
+        online: !!c.online,
+        isGroup: false,
+        type: 'user'
+      });
+    });
+  }
+
+  // 3. Harvest rendered contacts from DOM #contactList
+  document.querySelectorAll('#contactList .chat-item, #contactList .chat-list-item').forEach(el => {
+    const cid = el.getAttribute('data-chat-id');
+    if (!cid || seenIds.has(cid) || cid === myUID) return;
+    seenIds.add(cid);
+    const nameEl = el.querySelector('.chat-name, h4');
+    const name = nameEl ? nameEl.textContent.trim() : 'User';
+    const imgEl = el.querySelector('img.chat-avatar');
+    const pic = imgEl ? imgEl.src : '';
+    const isOnline = !!el.querySelector('.online-indicator, .status-dot.online, .status-online, .chat-online-beacon');
+    localItems.push({
+      uid: cid,
+      id: cid,
+      name: name,
+      username: name.toLowerCase().replace(/\s+/g, '_'),
+      email: '',
+      profilePic: pic,
+      online: isOnline,
+      isGroup: false,
+      type: 'user'
+    });
+  });
+
+  // 4. Harvest rendered groups from DOM #groupsList
+  document.querySelectorAll('#groupsList .chat-item, #groupsList .group-item').forEach(el => {
+    const gid = el.getAttribute('data-chat-id');
+    if (!gid || seenIds.has(gid)) return;
+    seenIds.add(gid);
+    const nameEl = el.querySelector('.chat-name, h4');
+    const name = nameEl ? nameEl.textContent.trim() : 'Group';
+    const imgEl = el.querySelector('img.chat-avatar');
+    const pic = imgEl ? imgEl.src : 'logo.jpg';
+    localItems.push({
+      uid: gid,
+      id: gid,
+      name: name,
+      username: '',
+      description: 'Group conversation',
+      profilePic: pic,
+      isGroup: true,
+      type: 'group'
+    });
+  });
+
+  return { localItems, seenIds };
+}
 
 function openSearch() {
-  const overlay = document.getElementById("search-overlay");
-  const modal = document.getElementById("search-modal");
-  const input = document.getElementById("search-input");
+  const now = Date.now();
+  if (now - lastOpenSearchTimestamp < 250) return;
+  lastOpenSearchTimestamp = now;
+
+  const overlay = document.getElementById('search-overlay');
+  const modal = document.getElementById('search-modal');
+  const input = document.getElementById('search-input');
 
   if (!overlay || !modal || !input) {
-    showNotif("Search currently unavailable", "error");
+    showNotif('Search currently unavailable', 'error');
     return;
   }
 
-  overlay.style.display = "flex";
-  modal.style.display = "flex";
+  overlay.style.display = 'flex';
+  modal.style.display = 'flex';
 
   if (!searchListenersAttached) {
     setupSearchListeners();
     searchListenersAttached = true;
   }
 
-  input.value = "";
-  const clearBtn = document.getElementById("clear-search-btn");
-  if (clearBtn) clearBtn.style.display = "none";
+  input.value = '';
+  const clearBtn = document.getElementById('clear-search-btn');
+  if (clearBtn) clearBtn.style.display = 'none';
 
-  // Reset category tabs to 'all'
+  // Reset category tabs to all
   currentSearchFilter = 'all';
   document.querySelectorAll('.search-tab-pill[data-filter]').forEach(tab => {
     tab.classList.toggle('active', tab.getAttribute('data-filter') === 'all');
   });
 
-  if (cachedSearchItems.length === 0) {
-    loadAllUsers();
-  } else {
+  // 1. Immediately harvest & display local contacts/groups (0ms instant response)
+  const { localItems } = harvestLocalSearchItems();
+  const existingMap = new Map();
+  localItems.forEach(item => existingMap.set(item.uid || item.id, item));
+  cachedSearchItems.forEach(item => {
+    const id = item.uid || item.id;
+    if (!existingMap.has(id)) existingMap.set(id, item);
+  });
+  cachedSearchItems = Array.from(existingMap.values());
+
+  if (cachedSearchItems.length > 0) {
     filterSearchResults();
+  } else {
+    const resultsDiv = document.getElementById('search-results');
+    if (resultsDiv) {
+      resultsDiv.innerHTML = '<div style="padding: 24px; text-align: center; color: #00ff66; font-size: 13.5px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Discovering NEXCHAT network...</div>';
+    }
   }
+
+  // 2. Refresh directory from network asynchronously without hanging
+  loadAllUsers();
 
   setTimeout(() => {
     input.focus();
@@ -3390,14 +3497,14 @@ function openSearch() {
 }
 
 function closeSearch() {
-  const overlay = document.getElementById("search-overlay");
-  const modal = document.getElementById("search-modal");
-  const input = document.getElementById("search-input");
+  const overlay = document.getElementById('search-overlay');
+  const modal = document.getElementById('search-modal');
+  const input = document.getElementById('search-input');
 
-  if (overlay) overlay.style.display = "none";
-  if (modal) modal.style.display = "none";
+  if (overlay) overlay.style.display = 'none';
+  if (modal) modal.style.display = 'none';
   if (input) {
-    input.value = "";
+    input.value = '';
     input.blur();
   }
 }
@@ -3406,36 +3513,36 @@ window.openSearch = openSearch;
 window.closeSearch = closeSearch;
 
 function setupSearchListeners() {
-  const input = document.getElementById("search-input");
-  const clearBtn = document.getElementById("clear-search-btn");
-  const closeBtn = document.getElementById("close-search-btn");
-  const overlay = document.getElementById("search-overlay");
-  const refreshBtn = document.getElementById("browse-users-btn");
+  const input = document.getElementById('search-input');
+  const clearBtn = document.getElementById('clear-search-btn');
+  const closeBtn = document.getElementById('close-search-btn');
+  const overlay = document.getElementById('search-overlay');
+  const refreshBtn = document.getElementById('browse-users-btn');
 
   if (input) {
-    input.addEventListener("input", (e) => {
+    input.addEventListener('input', (e) => {
       const val = e.target.value;
       if (clearBtn) {
-        clearBtn.style.display = val.length > 0 ? "flex" : "none";
+        clearBtn.style.display = val.length > 0 ? 'flex' : 'none';
       }
       if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
       searchDebounceTimer = setTimeout(() => {
         filterSearchResults();
-      }, 120);
+      }, 100);
     });
 
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
         closeSearch();
       }
     });
   }
 
   if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
+    clearBtn.addEventListener('click', () => {
       if (input) {
-        input.value = "";
-        clearBtn.style.display = "none";
+        input.value = '';
+        clearBtn.style.display = 'none';
         input.focus();
         filterSearchResults();
       }
@@ -3443,11 +3550,11 @@ function setupSearchListeners() {
   }
 
   if (closeBtn) {
-    closeBtn.addEventListener("click", closeSearch);
+    closeBtn.addEventListener('click', closeSearch);
   }
 
   if (overlay) {
-    overlay.addEventListener("click", (e) => {
+    overlay.addEventListener('click', (e) => {
       if (e.target === overlay) {
         closeSearch();
       }
@@ -3455,9 +3562,9 @@ function setupSearchListeners() {
   }
 
   if (refreshBtn) {
-    refreshBtn.addEventListener("click", (e) => {
+    refreshBtn.addEventListener('click', (e) => {
       e.preventDefault();
-      loadAllUsers();
+      loadAllUsers(true);
     });
   }
 
@@ -3471,83 +3578,43 @@ function setupSearchListeners() {
   });
 }
 
-async function loadAllUsers() {
-  const resultsDiv = document.getElementById("search-results");
-  if (resultsDiv) {
+async function loadAllUsers(forceRefresh = false) {
+  if (isFetchingSearchUsers) return;
+  isFetchingSearchUsers = true;
+
+  const resultsDiv = document.getElementById('search-results');
+  if (forceRefresh && resultsDiv && cachedSearchItems.length === 0) {
     resultsDiv.innerHTML = '<div style="padding: 24px; text-align: center; color: #00ff66; font-size: 13.5px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Discovering NEXCHAT network...</div>';
   }
 
+  const timeoutPromise = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
+
   try {
-    let combinedItems = [];
-    const seenUids = new Set();
+    const { localItems } = harvestLocalSearchItems();
+    const combinedMap = new Map();
+    localItems.forEach(i => combinedMap.set(i.uid || i.id, i));
+    cachedSearchItems.forEach(i => combinedMap.set(i.uid || i.id, i));
 
-    // 1. Fetch Firestore users
+    // 1. Fetch Firestore users with 3s timeout
     try {
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, limit(60));
-      const snap = await getDocs(q);
-      snap.forEach(docSnap => {
-        const u = docSnap.data();
-        const uid = docSnap.id;
-        if (uid !== myUID) {
-          seenUids.add(uid);
-          combinedItems.push({
-            uid: uid,
-            id: uid,
-            name: u.name || u.displayName || '',
-            username: u.username || '',
-            email: u.email || '',
-            profilePic: u.profilePic || u.profilePicUrl || u.avatar || '',
-            online: u.online === true,
-            isGroup: false,
-            type: 'user'
-          });
-        }
-      });
-    } catch (usersErr) {
-      console.warn("Could not fetch Firestore users:", usersErr);
-    }
-
-    // 2. Fetch Firestore groups
-    try {
-      const groupsRef = collection(db, "groups");
-      const groupsSnap = await getDocs(query(groupsRef, limit(30)));
-      groupsSnap.forEach(docSnap => {
-        const g = docSnap.data();
-        const gid = docSnap.id;
-        combinedItems.push({
-          uid: gid,
-          id: gid,
-          name: g.name || 'Unnamed Group',
-          username: '',
-          description: g.description || '',
-          members: g.members || [],
-          profilePic: g.icon || g.photoURL || 'logo.jpg',
-          isGroup: true,
-          type: 'group'
-        });
-      });
-    } catch (groupErr) {
-      console.warn("Could not fetch Firestore groups:", groupErr);
-    }
-
-    // 3. Fallback: Realtime Database users
-    try {
-      if (typeof rtdb !== 'undefined' && rtdb) {
-        const rtdbSnap = await get(ref(rtdb, 'users'));
-        if (rtdbSnap.exists()) {
-          const rtdbUsers = rtdbSnap.val();
-          Object.entries(rtdbUsers).forEach(([uid, u]) => {
-            if (uid !== myUID && !seenUids.has(uid)) {
-              seenUids.add(uid);
-              combinedItems.push({
+      if (typeof db !== 'undefined' && typeof collection === 'function') {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, limit(60));
+        const snap = await Promise.race([getDocs(q), timeoutPromise(3000)]);
+        if (snap && snap.forEach) {
+          snap.forEach(docSnap => {
+            const u = docSnap.data();
+            const uid = docSnap.id;
+            if (uid !== myUID) {
+              const existing = combinedMap.get(uid) || {};
+              combinedMap.set(uid, {
                 uid: uid,
                 id: uid,
-                name: u.name || u.displayName || '',
-                username: u.username || '',
-                email: u.email || '',
-                profilePic: u.profilePic || u.avatar || '',
-                online: u.online === true,
+                name: u.name || u.displayName || existing.name || 'NEXCHAT User',
+                username: u.username || existing.username || '',
+                email: u.email || existing.email || '',
+                profilePic: u.profilePic || u.profilePicUrl || u.avatar || existing.profilePic || '',
+                online: u.online === true || existing.online === true,
                 isGroup: false,
                 type: 'user'
               });
@@ -3555,23 +3622,51 @@ async function loadAllUsers() {
           });
         }
       }
-    } catch (rtdbErr) {
-      console.warn("RTDB users notice:", rtdbErr);
+    } catch (usersErr) {
+      console.warn('Firestore users query skipped or timed out:', usersErr);
     }
 
-    cachedSearchItems = combinedItems;
+    // 2. Fetch Firestore groups with 2.5s timeout
+    try {
+      if (typeof db !== 'undefined' && typeof collection === 'function') {
+        const groupsRef = collection(db, 'groups');
+        const groupsSnap = await Promise.race([getDocs(query(groupsRef, limit(30))), timeoutPromise(2500)]);
+        if (groupsSnap && groupsSnap.forEach) {
+          groupsSnap.forEach(docSnap => {
+            const g = docSnap.data();
+            const gid = docSnap.id;
+            const existing = combinedMap.get(gid) || {};
+            combinedMap.set(gid, {
+              uid: gid,
+              id: gid,
+              name: g.name || existing.name || 'Unnamed Group',
+              username: '',
+              description: g.description || existing.description || '',
+              members: g.members || existing.members || [],
+              profilePic: g.icon || g.photoURL || existing.profilePic || 'logo.jpg',
+              isGroup: true,
+              type: 'group'
+            });
+          });
+        }
+      }
+    } catch (groupErr) {
+      console.warn('Firestore groups query skipped or timed out:', groupErr);
+    }
+
+    cachedSearchItems = Array.from(combinedMap.values());
     filterSearchResults();
   } catch (err) {
-    console.error("Error loading network users:", err);
-    if (resultsDiv) {
-      resultsDiv.innerHTML = '<div style="padding: 20px; text-align: center; color: #ff5555; font-size: 13px;"><i class="fa-solid fa-circle-exclamation" style="margin-right: 6px;"></i>Failed to load user directory</div>';
-    }
+    console.error('Error loading network users:', err);
+    filterSearchResults();
+  } finally {
+    isFetchingSearchUsers = false;
   }
 }
 
 function filterSearchResults() {
-  const input = document.getElementById("search-input");
-  const queryText = (input?.value || "").trim().toLowerCase();
+  const input = document.getElementById('search-input');
+  const queryText = (input?.value || '').trim().toLowerCase();
 
   let filtered = cachedSearchItems.filter(item => {
     // 1. Filter by category pill
@@ -3581,10 +3676,10 @@ function filterSearchResults() {
     // 2. Filter by search query
     if (!queryText) return true;
 
-    const name = (item.name || "").toLowerCase();
-    const username = (item.username || "").toLowerCase();
-    const email = (item.email || "").toLowerCase();
-    const desc = (item.description || "").toLowerCase();
+    const name = (item.name || '').toLowerCase();
+    const username = (item.username || '').toLowerCase();
+    const email = (item.email || '').toLowerCase();
+    const desc = (item.description || '').toLowerCase();
 
     return name.includes(queryText) || username.includes(queryText) || email.includes(queryText) || desc.includes(queryText);
   });
@@ -3593,7 +3688,7 @@ function filterSearchResults() {
 }
 
 function renderSearchResults(itemsToRender) {
-  const container = document.getElementById("search-results");
+  const container = document.getElementById('search-results');
   if (!container) return;
 
   if (!itemsToRender || itemsToRender.length === 0) {
@@ -3607,21 +3702,24 @@ function renderSearchResults(itemsToRender) {
     return;
   }
 
-  container.innerHTML = "";
+  container.innerHTML = '';
   itemsToRender.forEach(item => {
-    const card = document.createElement("div");
-    card.className = "search-result-card";
+    const card = document.createElement('div');
+    card.className = 'search-result-card';
 
     const isGroup = !!item.isGroup;
-    const rawName = item.name || item.username || (isGroup ? 'Unnamed Group' : 'Cyber User');
+    const isAi = item.type === 'ai' || item.uid === 'chronex-ai';
+    const rawName = item.name || item.username || (isGroup ? 'Unnamed Group' : (isAi ? 'Chronex AI' : 'Cyber User'));
     const displayName = escapeHtml(rawName);
     const badgeTierKey = item.verificationBadge || (item.isVerified ? 'TIER_PRO' : null);
-    const badgeHtml = (!isGroup && window.NexVerificationCatalog && badgeTierKey && badgeTierKey !== 'NONE')
+    const badgeHtml = (!isGroup && !isAi && window.NexVerificationCatalog && badgeTierKey && badgeTierKey !== 'NONE')
       ? window.NexVerificationCatalog.renderVerificationBadgeHtml(badgeTierKey, { fontSize: '12px' })
       : '';
-    const handle = isGroup ? `Group · ${item.members?.length || 0} members` : (item.username ? `@${escapeHtml(item.username)}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User'));
-    const profilePic = item.profilePic || item.profilePicUrl || item.avatar || (isGroup ? 'logo.jpg' : '/favicons/favicon.ico');
-    const isOnline = item.online === true;
+    const handle = isGroup
+      ? `Group · ${item.members?.length || 0} members`
+      : (isAi ? 'Neural Assistant · Online' : (item.username ? `@${escapeHtml(item.username)}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User')));
+    const profilePic = item.profilePic || item.profilePicUrl || item.avatar || (isGroup ? 'logo.jpg' : (isAi ? 'chronex-ai.jpg' : '/favicons/favicon.ico'));
+    const isOnline = item.online === true || isAi;
 
     const avatarHTML = (profilePic && (profilePic.startsWith('http') || profilePic.startsWith('data:') || profilePic.includes('.')))
       ? `<img src="${escapeHtml(profilePic)}" alt="${displayName}" class="search-card-avatar" onerror="this.src='logo.jpg'">`
@@ -3638,37 +3736,40 @@ function renderSearchResults(itemsToRender) {
         <div class="search-card-header-row">
           <span class="search-card-name">${displayName}</span>
           ${badgeHtml}
-          ${isGroup ? '<span class="search-badge group-badge"><i class="fa-solid fa-users"></i></span>' : (isOnline ? '<span class="search-badge verified-badge"><i class="fa-solid fa-circle-check"></i></span>' : '')}
+          ${isGroup ? '<span class="search-badge group-badge"><i class="fa-solid fa-users"></i></span>' : (isAi ? '<span class="search-badge ai-badge" style="color: #00ff66;"><i class="fa-solid fa-brain"></i></span>' : (isOnline ? '<span class="search-badge verified-badge"><i class="fa-solid fa-circle-check"></i></span>' : ''))}
         </div>
         <div class="search-card-handle">${handle}</div>
       </div>
       <div class="search-card-action">
         <button type="button" class="search-action-btn-modern ${isGroup ? 'btn-group' : 'btn-user'}">
           <i class="fa-solid ${isGroup ? 'fa-arrow-right-to-bracket' : 'fa-paper-plane'}"></i>
-          <span>${isGroup ? 'Open' : 'Message'}</span>
+          <span>${isGroup ? 'Open' : (isAi ? 'Chat' : 'Message')}</span>
         </button>
       </div>
     `;
 
-    card.addEventListener("click", async () => {
+    card.addEventListener('click', async () => {
       try {
         if (isGroup) {
-          await handleGroupJoinLink(item.uid || item.id);
+          if (typeof handleGroupJoinLink === 'function') {
+            await handleGroupJoinLink(item.uid || item.id);
+          } else {
+            await openChat(item.uid || item.id, item.name || displayName, profilePic, 'group');
+          }
         } else {
-          await openChat(item.uid, item.username || item.name || displayName, profilePic, 'direct');
+          await openChat(item.uid || item.id, item.username || item.name || displayName, profilePic, isAi ? 'ai' : 'direct');
         }
         closeSearch();
         showChatDetailView();
       } catch (chatErr) {
-        console.error("Error opening chat from search:", chatErr);
-        showNotif("Could not open chat: " + chatErr.message, "error");
+        console.error('Error opening chat from search:', chatErr);
+        showNotif('Could not open chat: ' + (chatErr?.message || chatErr), 'error');
       }
     });
 
     container.appendChild(card);
   });
 }
-
 function browseAllUsers() {
   loadAllUsers();
 }
@@ -18542,7 +18643,7 @@ async function handleStatusPost(text, file) {
 
 
 function filterChats(query) {
-  const chatItems = document.querySelectorAll("#contactList .chat-list-item");
+  const chatItems = document.querySelectorAll("#contactList .chat-list-item, #contactList .chat-item");
   query = query.toLowerCase();
 
   chatItems.forEach(item => {
@@ -18990,6 +19091,7 @@ async function loadContacts() {
 
     contactList.innerHTML = "";
     contactList.appendChild(chronexLi);
+    window.loadedContactData = contactDataList;
 
     contactDataList.forEach(data => {
       const { uid, name, pic, latestMsg, latestTime, unreadCount } = data;
