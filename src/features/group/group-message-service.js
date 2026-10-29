@@ -93,10 +93,7 @@ export async function openGroupChat(groupId) {
     // Sort chronologically ascending
     messages.sort((a, b) => _getTimestampMs(a.timestamp) - _getTimestampMs(b.timestamp));
 
-    // Resolve user profiles
-    await _resolveUserProfiles(messages);
-
-    // Update store
+    // Update store immediately for instant 0ms visual render
     const hasOlder = snapshot.docs.length >= PAGE_SIZE;
     const oldest = messages.length > 0 ? messages[0] : null;
     const newest = messages.length > 0 ? messages[messages.length - 1] : null;
@@ -108,6 +105,9 @@ export async function openGroupChat(groupId) {
       oldestLoadedTimestamp: oldest?.timestamp || null,
       newestLoadedTimestamp: newest?.timestamp || null
     });
+
+    // Resolve user profiles concurrently in the background (non-blocking)
+    _resolveUserProfiles(messages).catch(console.warn);
 
     // Cache messages
     cacheMessages(groupId, messages.map(m => ({ ...m, _docSnap: undefined }))).catch(() => {});
@@ -621,16 +621,17 @@ async function _resolveUserProfiles(messages) {
     // Ignore cache failures
   }
 
-  // Fetch remaining from Firestore
-  for (const uid of unknownUids) {
+  // Fetch remaining from Firestore concurrently with 2s timeout guard
+  const remaining = Array.from(unknownUids);
+  await Promise.all(remaining.map(async (uid) => {
     if (uid === 'group_defense_bot') {
       _userProfileCache.set(uid, { username: 'Group Defense Bot', avatar: 'favicon.png' });
-      continue;
+      return;
     }
-
     try {
-      const userDoc = await getDoc(doc(db, 'users', uid));
-      if (userDoc.exists()) {
+      const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 2000));
+      const userDoc = await Promise.race([getDoc(doc(db, 'users', uid)), timeoutPromise]);
+      if (userDoc && userDoc.exists()) {
         const data = userDoc.data();
         const profile = {
           uid,
@@ -639,15 +640,14 @@ async function _resolveUserProfiles(messages) {
           email: data.email || ''
         };
         _userProfileCache.set(uid, profile);
-        // Cache to IndexedDB
         cacheUserProfile(uid, profile).catch(() => {});
       } else {
         _userProfileCache.set(uid, { uid, username: 'Unknown User', avatar: 'favicon.png' });
       }
-    } catch (e) {
+    } catch (_) {
       _userProfileCache.set(uid, { uid, username: 'Unknown User', avatar: 'favicon.png' });
     }
-  }
+  }));
 
   // Update store members map
   groupStore.setState({ members: new Map(_userProfileCache) });

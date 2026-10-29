@@ -1781,6 +1781,7 @@ function cancelChatLoadFeedback() {
     clearTimeout(chatLoadSafetyTimer);
     chatLoadSafetyTimer = null;
   }
+  hideChatReloadOverlay();
 }
 
 function queueChatLoadFeedback(statusText = 'Loading chat...') {
@@ -15776,13 +15777,22 @@ async function loadGroupMessages(groupId) {
     const pinnedBarContainer = document.getElementById('pinnedMessagesBar');
     const typingContainer = document.getElementById('typingIndicator');
 
-    await GroupChat.open(groupId, messagesDiv, {
-      inputElement: messageInput,
-      pinnedBarContainer: pinnedBarContainer,
-      typingContainer: typingContainer,
-      currentUid: myUID,
-      onNotify: (msg, type) => showNotif(msg, type)
-    });
+    try {
+      await Promise.race([
+        GroupChat.open(groupId, messagesDiv, {
+          inputElement: messageInput,
+          pinnedBarContainer: pinnedBarContainer,
+          typingContainer: typingContainer,
+          currentUid: myUID,
+          onNotify: (msg, type) => showNotif(msg, type)
+        }),
+        new Promise(resolve => setTimeout(resolve, 2500))
+      ]);
+    } finally {
+      completeChatReloadOverlay();
+      cancelChatLoadFeedback();
+      hideChatReloadOverlay();
+    }
 
     // Supabase Realtime Phoenix Channel subscription for Group (Sub-15ms broadcast sync)
     if (groupId) {
@@ -15810,6 +15820,7 @@ async function loadGroupMessages(groupId) {
     } catch (_) {}
   } catch (error) {
     cancelChatLoadFeedback();
+    hideChatReloadOverlay();
     console.error('Error loading group messages:', error);
     messagesDiv.innerHTML = `<p style="color: #ff6b6b; padding: 20px; text-align: center;">Error loading messages: ${error.message}</p>`;
   }
