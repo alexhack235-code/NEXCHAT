@@ -27,6 +27,7 @@
   const STORAGE_KEY_HORIZON_ENABLED = 'nex_horizon_lock_enabled';
   const STORAGE_KEY_HORIZON_ANGLE = 'nex_horizon_target_angle';
   const STORAGE_KEY_HORIZON_TOLERANCE = 'nex_horizon_tolerance';
+  const STORAGE_KEY_POCKET_BLACKOUT_ENABLED = 'nex_pocket_blackout_enabled';
 
   const DEFAULT_KNOCK_THRESHOLD = 160; // m/s^3 jerk vector
   const DEFAULT_TARGET_PITCH = 42;    // 42 degrees reading angle
@@ -47,6 +48,9 @@
       this._touchBound = false;
       this._scrambleActive = false;
       this._desktopBypass = false;
+      this._pocketBlackoutActive = false;
+      this._blackoutOverlay = null;
+      this._pocketGuardBound = false;
 
       this.init();
     }
@@ -62,6 +66,10 @@
 
       if (this.isHorizonLockEnabled()) {
         this.startOrientationSensor();
+      }
+
+      if (this.isPocketBlackoutEnabled()) {
+        this.initPocketAndFaceDownGuard();
       }
 
       if (document.readyState === 'loading') {
@@ -409,6 +417,122 @@
       }
     }
 
+        // ------------------------------------------------------------------------
+    // POCKET & FACE-DOWN BLACKOUT GUARD
+    // ------------------------------------------------------------------------
+    isPocketBlackoutEnabled() {
+      try {
+        return localStorage.getItem(STORAGE_KEY_POCKET_BLACKOUT_ENABLED) === 'true';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    setPocketBlackoutEnabled(val) {
+      try {
+        localStorage.setItem(STORAGE_KEY_POCKET_BLACKOUT_ENABLED, val ? 'true' : 'false');
+      } catch (_) {}
+      if (val) {
+        this.initPocketAndFaceDownGuard();
+      } else {
+        this.deactivatePocketBlackout();
+      }
+      this.updatePocketToggleUI();
+    }
+
+    updatePocketToggleUI() {
+      const toggle = document.getElementById('settingPocketBlackoutToggle');
+      if (toggle) toggle.checked = this.isPocketBlackoutEnabled();
+    }
+
+    initPocketAndFaceDownGuard() {
+      if (this._pocketGuardBound) return;
+      this._pocketGuardBound = true;
+      this.ensureBlackoutOverlay();
+
+      window.addEventListener('deviceorientation', (e) => {
+        if (!this.isPocketBlackoutEnabled()) return;
+        const beta = e.beta;
+        if (typeof beta === 'number') {
+          if (Math.abs(beta) > 155) {
+            this.activatePocketBlackout('FACE_DOWN');
+          } else if (Math.abs(beta) < 130 && this._pocketBlackoutActive) {
+            this.deactivatePocketBlackout();
+          }
+        }
+      }, { passive: true });
+
+      window.addEventListener('userproximity', (e) => {
+        if (!this.isPocketBlackoutEnabled()) return;
+        if (e.near) {
+          this.activatePocketBlackout('POCKET_PROXIMITY');
+        } else if (this._pocketBlackoutActive) {
+          this.deactivatePocketBlackout();
+        }
+      }, { passive: true });
+
+      if ('AmbientLightSensor' in window) {
+        try {
+          const sensor = new window.AmbientLightSensor();
+          sensor.onreading = () => {
+            if (!this.isPocketBlackoutEnabled()) return;
+            if (sensor.illuminance < 1.5 && this._lastAccel && this._lastAccel.z < -6) {
+              this.activatePocketBlackout('POCKET_DARKNESS');
+            } else if (sensor.illuminance > 5.0 && this._pocketBlackoutActive) {
+              this.deactivatePocketBlackout();
+            }
+          };
+          sensor.start();
+        } catch (_) {}
+      }
+    }
+
+    ensureBlackoutOverlay() {
+      if (this._blackoutOverlay || document.getElementById('pocketBlackoutOverlay')) {
+        this._blackoutOverlay = this._blackoutOverlay || document.getElementById('pocketBlackoutOverlay');
+        return;
+      }
+      const el = document.createElement('div');
+      el.id = 'pocketBlackoutOverlay';
+      el.className = 'pocket-blackout-overlay';
+      el.style.display = 'none';
+      el.innerHTML = `
+        <div class="pocket-blackout-inner">
+          <div class="pocket-blackout-icon"><i class="fa-solid fa-moon"></i></div>
+          <span class="pocket-blackout-text">STEALTH BLACKOUT ENGAGED</span>
+          <span class="pocket-blackout-sub">Lift phone upright or tap to dismiss</span>
+        </div>
+      `;
+      document.body.appendChild(el);
+      this._blackoutOverlay = el;
+
+      el.addEventListener('click', () => {
+        this.deactivatePocketBlackout();
+      });
+    }
+
+    activatePocketBlackout(reason = 'FACE_DOWN') {
+      if (this._pocketBlackoutActive) return;
+      this._pocketBlackoutActive = true;
+      this.ensureBlackoutOverlay();
+      if (this._blackoutOverlay) {
+        this._blackoutOverlay.style.display = 'flex';
+        this._blackoutOverlay.classList.add('active');
+      }
+      try {
+        if (navigator.vibrate) navigator.vibrate(25);
+      } catch (_) {}
+      console.log(`[POCKET SENSOR] Instant stealth blackout engaged: ${reason}`);
+    }
+
+    deactivatePocketBlackout() {
+      this._pocketBlackoutActive = false;
+      if (this._blackoutOverlay) {
+        this._blackoutOverlay.classList.remove('active');
+        this._blackoutOverlay.style.display = 'none';
+      }
+    }
+
     bindDOM() {
       // Wire Desktop HUD click to toggle temporary bypass
       const hud = document.getElementById('horizonReticleHud');
@@ -439,6 +563,21 @@
       });
 
       this.updateHudVisibility(this.isHorizonLockEnabled());
+      this.updatePocketToggleUI();
+      const pocketToggle = document.getElementById('settingPocketBlackoutToggle');
+      if (pocketToggle) {
+        pocketToggle.checked = this.isPocketBlackoutEnabled();
+        pocketToggle.addEventListener('change', (e) => {
+          this.setPocketBlackoutEnabled(e.target.checked);
+        });
+      }
+      const testBlackoutBtn = document.getElementById('btnTestPocketBlackout');
+      if (testBlackoutBtn) {
+        testBlackoutBtn.addEventListener('click', () => {
+          this.activatePocketBlackout('TEST');
+          setTimeout(() => this.deactivatePocketBlackout(), 3000);
+        });
+      }
     }
   }
 

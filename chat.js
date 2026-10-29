@@ -4284,15 +4284,35 @@ async function sendMessage() {
     });
   }
 
-  // Autonomous Offline IndexedDB Queue Routing
-  if (!navigator.onLine && window.offlineQueueEngine) {
-    window.offlineQueueEngine.enqueue({
+  // Autonomous Offline P2P Mesh Dispatch & IndexedDB Queue Routing
+  if (!navigator.onLine) {
+    const clientMsgId = `offgrid_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const offgridMsg = {
       text: text || '',
-      attachment: null,
-      targetUser: currentChatUser,
-      chatType: currentChatType || 'direct'
-    });
+      attachment: selectedFile ? { fileName: selectedFile.name, fileType: selectedFile.type } : null,
+      from: myUID,
+      to: currentChatUser,
+      chatType: currentChatType || 'direct',
+      time: Date.now(),
+      status: 'mesh_relayed',
+      clientMsgId: clientMsgId
+    };
+
+    if (window.NexOfflineMesh && typeof window.NexOfflineMesh.sendOffGridMessage === 'function') {
+      window.NexOfflineMesh.sendOffGridMessage(offgridMsg);
+    }
+    if (window.offlineQueueEngine) {
+      window.offlineQueueEngine.enqueue(offgridMsg);
+    }
+    if (typeof appendLocalSentMessage === 'function') {
+      appendLocalSentMessage(text || '', offgridMsg.attachment, false, 'mesh_relayed', clientMsgId, null);
+    }
+    const meshBanner = document.getElementById('tacticalMeshBanner');
+    if (meshBanner) meshBanner.style.display = 'flex';
     if (messageText) messageText.value = '';
+    playLuxuryPopSound();
+    hapticFeedback('success');
+    showNotif('Message routed via Local P2P Mesh (Zero-Cloud)', 'info', 3000);
     return;
   }
 

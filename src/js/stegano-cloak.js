@@ -370,7 +370,48 @@
 
       return wrap;
     }
+    revealInBubble(triggerEl) {
+      if (!triggerEl) return;
+      const card = triggerEl.closest('.stegano-cloak-card') || triggerEl.closest('.message-bubble');
+      if (!card) return;
+
+      const img = card.querySelector('img');
+      const holoCard = card.querySelector('.stegano-hologram-card');
+      const holoText = card.querySelector('.stegano-holo-text');
+
+      if (!img || !holoCard) return;
+
+      if (holoCard.style.display !== 'none') {
+        holoCard.style.display = 'none';
+        return;
+      }
+
+      holoCard.style.display = 'block';
+      if (holoText) holoText.textContent = 'Decoding LSB pixel matrix...';
+
+      const cachedPayload = card.dataset.cloakPayload;
+      if (cachedPayload) {
+        if (holoText) holoText.textContent = cachedPayload;
+        try {
+          if (navigator.vibrate) navigator.vibrate([30, 50]);
+          if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
+        } catch (_) {}
+        return;
+      }
+
+      this.decodeImageSrc(img.src, (extracted) => {
+        if (holoText) {
+          holoText.textContent = extracted;
+          card.dataset.cloakPayload = extracted;
+        }
+        try {
+          if (navigator.vibrate) navigator.vibrate([30, 50]);
+          if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
+        } catch (_) {}
+      });
+    }
   }
 
   window.steganoCloakEngine = new SteganoCloakEngine();
+  window.NexSteganoCloak = window.steganoCloakEngine;
 })();

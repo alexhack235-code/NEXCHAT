@@ -3978,6 +3978,16 @@
                       <span class="slider"></span>
                     </label>
                   </div>
+                  <div class="luxury-toggle-row" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div>
+                      <strong>Instant Pocket &amp; Face-Down Blackout</strong>
+                      <p>Flipping phone face-down or sliding into pocket engages 0% OLED blackout screen to instantly conceal active chats.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingPocketBlackoutToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
                   <div id="knuckleKnockPanel" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                       <label style="font-size: 11.5px; color: #cbd5e1;">Required Chassis Knocks:</label>
@@ -4051,47 +4061,40 @@
                   </div>
                 </div>
 
-                <!-- CARD 6: PANIC CAMOUFLAGE & DECOY SCREENS -->
+                <!-- CARD 6: PERIMETER PEEKER AI SENTINEL (ANTI-SHOULDER SURFING) -->
                 <div class="stealth-enclave-card">
                   <div class="stealth-enclave-header">
                     <div class="stealth-enclave-header-title">
-                      <i class="fa-solid fa-calculator" style="color: #ffd700;"></i>
-                      <span>PANIC CAMOUFLAGE &amp; DECOY SCREENS</span>
+                      <i class="fa-solid fa-eye-slash" style="color: #00ff66;"></i>
+                      <span>PERIMETER PEEKER AI SENTINEL</span>
                     </div>
-                    <span class="settings-tab-microbadge" style="background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.35);">
-                      CAMOUFLAGE
+                    <span class="settings-tab-microbadge" style="background: rgba(0, 255, 102, 0.15); color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.35);">
+                      ZERO-CLOUD AI
+                    </span>
+                  </div>
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Enable Perimeter Peeker Sentinel</strong>
+                      <p>On-device AI uses front camera to detect anyone peering over your shoulder. Screen instantly frosts with obsidian privacy shield.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingPeekerSentinelToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+
+                  <div style="margin-top: 10px; background: rgba(0, 0, 0, 0.35); padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06); display: flex; align-items: center; justify-content: space-between;">
+                    <span style="font-size: 11.5px; color: #94a3b8;">Sentinel Status:</span>
+                    <span id="peekerSentinelStatusReadout" style="font-family: monospace; font-size: 11px; font-weight: 700;">
+                      <span style="color: #94a3b8;"><i class="fa-solid fa-shield-slash"></i> STANDBY (DISABLED)</span>
                     </span>
                   </div>
 
-                  <!-- Math Cloak -->
-                  <div class="luxury-toggle-row">
-                    <div>
-                      <strong style="font-size: 12.5px;"><i class="fa-solid fa-calculator" style="color: #ffd700;"></i> Math Cloak (Scientific Calculator)</strong>
-                      <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Morphs NEXCHAT into a real scientific calculator. Unlock formula: <strong>7331=</strong> or hotkey Ctrl+Shift+X.</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="settingMathCloakToggle">
-                      <span class="slider"></span>
-                    </label>
+                  <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button type="button" id="btnTestPeekerShield" class="btn-secondary" style="flex: 1; font-size: 12px; padding: 7px 12px; border-color: rgba(0, 255, 102, 0.3); color: #00ff66;">
+                      <i class="fa-solid fa-bolt"></i> Test Privacy Blur Shield
+                    </button>
                   </div>
-                  <button type="button" id="btnLaunchMathCloakTest" class="btn-secondary" style="width: 100%; margin-top: 6px; margin-bottom: 12px; font-size: 11.5px; padding: 6px 12px; border-color: rgba(255, 215, 0, 0.3); color: #ffd700;">
-                    <i class="fa-solid fa-calculator"></i> Launch Calculator Decoy
-                  </button>
-
-                  <!-- System Crash Decoy -->
-                  <div class="luxury-toggle-row" style="padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-                    <div>
-                      <strong style="font-size: 12.5px;"><i class="fa-brands fa-android" style="color: #60a5fa;"></i> System Crash &amp; OS Update Decoy</strong>
-                      <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Simulates Android OS update freeze. 4-finger touch or Ctrl+Alt+K. Escape: 3 rapid clicks top-right corner.</p>
-                    </div>
-                    <label class="luxury-switch">
-                      <input type="checkbox" id="settingCrashDecoyToggle">
-                      <span class="slider"></span>
-                    </label>
-                  </div>
-                  <button type="button" id="btnLaunchCrashDecoyTest" class="btn-secondary" style="width: 100%; margin-top: 6px; font-size: 11.5px; padding: 6px 12px; border-color: rgba(96, 165, 250, 0.3); color: #60a5fa;">
-                    <i class="fa-brands fa-android"></i> Launch System Update Decoy
-                  </button>
                 </div>
 
                 <!-- CARD 7: SILENT GHOST RECALL (ZERO-TOMBSTONE MESSAGE DELETION) -->
@@ -7092,8 +7095,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/chat-passcode-gate.js"></script>
   <script src="./src/js/chat-vanish-engine.js"></script>
   <script src="./src/js/stealth-hardware-sensors.js"></script>
-  <script src="./src/js/math-cloak-engine.js"></script>
   <script src="./src/js/system-crash-decoy.js"></script>
+  <script src="./src/js/perimeter-peeker-sentinel.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
   <script src="./src/js/status-elite-suite.js"></script>
@@ -8518,58 +8521,6 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   </div>
 </div>
 
-
-<!-- ========================================================================= -->
-<!-- MATH CLOAK: 100% OPERATIONAL SCIENTIFIC CALCULATOR DECOY (PANIC CAMOUFLAGE)-->
-<!-- ========================================================================= -->
-<div id="mathCloakOverlay" class="math-cloak-container" style="display: none !important;" aria-hidden="true">
-  <div class="calculator-chassis">
-    <div class="calc-status-bar">
-      <span class="calc-mode-indicator"><i class="fa-solid fa-calculator"></i> DEG</span>
-      <span class="calc-app-title">Scientific Calculator v4.2</span>
-    </div>
-
-    <div class="calc-screen">
-      <div id="calcHistoryTape" class="calc-history-row"></div>
-      <div id="calcMainDisplay" class="calc-main-row">0</div>
-    </div>
-
-    <div class="calc-scientific-bar">
-      <button type="button" class="calc-sci-btn" data-fn="sin">sin</button>
-      <button type="button" class="calc-sci-btn" data-fn="cos">cos</button>
-      <button type="button" class="calc-sci-btn" data-fn="tan">tan</button>
-      <button type="button" class="calc-sci-btn" data-fn="sqrt"><i class="fa-solid fa-square-root-variable"></i></button>
-      <button type="button" class="calc-sci-btn" data-fn="pow">x^y</button>
-      <button type="button" class="calc-sci-btn" data-fn="pi">π</button>
-    </div>
-
-    <div class="calc-keypad-grid">
-      <button type="button" class="calc-key-btn calc-op-clear" data-act="clear">AC</button>
-      <button type="button" class="calc-key-btn calc-op-util" data-act="neg">+/-</button>
-      <button type="button" class="calc-key-btn calc-op-util" data-act="percent">%</button>
-      <button type="button" class="calc-key-btn calc-op-math" data-act="/">÷</button>
-
-      <button type="button" class="calc-key-btn calc-num" data-num="7">7</button>
-      <button type="button" class="calc-key-btn calc-num" data-num="8">8</button>
-      <button type="button" class="calc-key-btn calc-num" data-num="9">9</button>
-      <button type="button" class="calc-key-btn calc-op-math" data-act="*">×</button>
-
-      <button type="button" class="calc-key-btn calc-num" data-num="4">4</button>
-      <button type="button" class="calc-key-btn calc-num" data-num="5">5</button>
-      <button type="button" class="calc-key-btn calc-num" data-num="6">6</button>
-      <button type="button" class="calc-key-btn calc-op-math" data-act="-">−</button>
-
-      <button type="button" class="calc-key-btn calc-num" data-num="1">1</button>
-      <button type="button" class="calc-key-btn calc-num" data-num="2">2</button>
-      <button type="button" class="calc-key-btn calc-num" data-num="3">3</button>
-      <button type="button" class="calc-key-btn calc-op-math" data-act="+">+</button>
-
-      <button type="button" class="calc-key-btn calc-num calc-zero" data-num="0">0</button>
-      <button type="button" class="calc-key-btn calc-num" data-act="dot">.</button>
-      <button type="button" class="calc-key-btn calc-op-eval" id="calcEqualsBtn" data-act="=">=</button>
-    </div>
-  </div>
-</div>
 
 <!-- ========================================================================= -->
 <!-- FAKE SYSTEM UPDATE & CRASH DECOY (4-FINGER PANIC TOUCH)                  -->

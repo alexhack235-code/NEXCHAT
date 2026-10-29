@@ -11287,3 +11287,278 @@ body.chat-size-extra-large .message-bubble {
   box-shadow: 0 0 6px #00ff66 !important;
   display: inline-block !important;
 }
+
+
+/* =========================================================================
+   NEXCHAT ADVANCED SUITE: PEEKER SENTINEL, POCKET BLACKOUT, STEGANO & MESH
+   ========================================================================= */
+
+/* 1. Perimeter Peeker AI Sentinel */
+.peeker-shield-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 198000 !important;
+  background: rgba(4, 8, 16, 0.88) !important;
+  backdrop-filter: blur(28px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.peeker-shield-overlay.visible {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.peeker-shield-banner {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1.5px solid rgba(0, 255, 102, 0.5) !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 0 24px rgba(0, 255, 102, 0.3) !important;
+  border-radius: 16px !important;
+  padding: 18px 24px !important;
+  max-width: 90% !important;
+  box-sizing: border-box !important;
+}
+
+.peeker-shield-icon {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: rgba(0, 255, 102, 0.15) !important;
+  border: 1px solid #00ff66 !important;
+  color: #00ff66 !important;
+  font-size: 22px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+}
+
+.peeker-shield-meta {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.peeker-shield-title {
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  letter-spacing: 0.5px !important;
+}
+
+.peeker-shield-desc {
+  font-size: 11.5px !important;
+  color: #94a3b8 !important;
+  margin: 0 !important;
+}
+
+.peeker-shield-dismiss-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #cbd5e1 !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+}
+
+.peeker-blurred {
+  filter: blur(16px) !important;
+  transition: filter 0.25s ease !important;
+  user-select: none !important;
+}
+
+/* 2. Pocket & Face-Down Instant Blackout */
+.pocket-blackout-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483647 !important;
+  background: #000000 !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: none !important;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease !important;
+}
+
+.pocket-blackout-overlay.active {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+.pocket-blackout-inner {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 10px !important;
+  opacity: 0.2 !important;
+}
+
+.pocket-blackout-icon {
+  font-size: 28px !important;
+  color: #ffffff !important;
+}
+
+.pocket-blackout-text {
+  font-family: monospace !important;
+  font-size: 11px !important;
+  letter-spacing: 1.5px !important;
+  color: #ffffff !important;
+}
+
+.pocket-blackout-sub {
+  font-size: 10px !important;
+  color: #888888 !important;
+}
+
+/* 3. Steganographic Pixel Cloak (Ghost Carrier) */
+.stegano-cloak-card {
+  position: relative !important;
+  display: inline-block !important;
+  max-width: 280px !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  border: 1.5px solid rgba(0, 255, 102, 0.4) !important;
+  background: #061325 !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(0, 255, 102, 0.2) !important;
+}
+
+.stegano-carrier-thumb {
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  object-fit: cover !important;
+}
+
+.stego-ghost-pill {
+  position: absolute !important;
+  bottom: 8px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: rgba(11, 20, 26, 0.92) !important;
+  border: 1px solid #00ff66 !important;
+  color: #00ff66 !important;
+  padding: 4px 12px !important;
+  border-radius: 9999px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.6px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6), 0 0 8px rgba(0, 255, 102, 0.4) !important;
+  backdrop-filter: blur(8px) !important;
+  white-space: nowrap !important;
+  transition: transform 0.15s ease, background 0.15s ease !important;
+}
+
+.stego-ghost-pill:active {
+  transform: translateX(-50%) scale(0.95) !important;
+}
+
+.stegano-hologram-card {
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(6, 19, 37, 0.94) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  padding: 14px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  animation: stegoHoloFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes stegoHoloFadeIn {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.stego-holo-header {
+  font-family: 'Space Grotesk', monospace !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  color: #00ff66 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-bottom: 6px !important;
+  letter-spacing: 0.8px !important;
+}
+
+.stego-holo-text {
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+  color: #f1f5f9 !important;
+  word-break: break-word !important;
+  max-height: 160px !important;
+  overflow-y: auto !important;
+  background: rgba(0, 0, 0, 0.35) !important;
+  border: 1px dashed rgba(0, 255, 102, 0.3) !important;
+  padding: 8px 10px !important;
+  border-radius: 8px !important;
+  font-family: 'Fira Code', monospace !important;
+}
+
+/* 4. Tactical Off-Grid P2P Mesh Banner & Indicator */
+.tactical-mesh-banner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  background: linear-gradient(90deg, rgba(0, 242, 254, 0.15) 0%, rgba(0, 255, 102, 0.12) 100%) !important;
+  border-bottom: 1px solid rgba(0, 242, 254, 0.35) !important;
+  padding: 6px 14px !important;
+  box-sizing: border-box !important;
+  animation: meshBannerSlideDown 0.3s ease !important;
+}
+
+@keyframes meshBannerSlideDown {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.mesh-banner-inner {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  color: #00f2fe !important;
+  letter-spacing: 0.6px !important;
+}
+
+.mesh-relay-indicator {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  color: #00f2fe !important;
+  background: rgba(0, 242, 254, 0.12) !important;
+  border: 1px solid rgba(0, 242, 254, 0.35) !important;
+  border-radius: 4px !important;
+  padding: 1px 5px !important;
+  margin-left: 6px !important;
+  vertical-align: middle !important;
+}
