@@ -182,7 +182,40 @@
       return { success: true };
     }
 
+    isFeatureEnabled() {
+      try {
+        return localStorage.getItem('nex_enable_chat_passcode_gate') !== 'false';
+      } catch (_) {
+        return true;
+      }
+    }
+
+    setFeatureEnabled(enabled) {
+      try {
+        localStorage.setItem('nex_enable_chat_passcode_gate', enabled ? 'true' : 'false');
+      } catch (_) {}
+      this.updateHeaderButtonUI(this.activeChatId || window.currentChatUser);
+      if (!enabled) {
+        this.dismountGate();
+      }
+    }
+
+    isDuressEnabled() {
+      try {
+        return localStorage.getItem('nex_enable_duress_pin') !== 'false';
+      } catch (_) {
+        return true;
+      }
+    }
+
+    setDuressEnabled(enabled) {
+      try {
+        localStorage.setItem('nex_enable_duress_pin', enabled ? 'true' : 'false');
+      } catch (_) {}
+    }
+
     isChatLocked(chatId) {
+      if (!this.isFeatureEnabled()) return false;
       if (!chatId) return false;
       const isRegistered = this.lockedChatIds.has(chatId) ||
         (window.NexLockedChats && typeof window.NexLockedChats.isChatLocked === 'function' && window.NexLockedChats.isChatLocked(chatId));
@@ -236,6 +269,12 @@
     }
 
     toggleActiveChatLock() {
+      if (!this.isFeatureEnabled()) {
+        if (typeof window.safeShowNotification === 'function') {
+          window.safeShowNotification('Passcode Gate is disabled in Settings -> Privacy', 'info');
+        }
+        return;
+      }
       const chatId = this.activeChatId || window.currentChatUser;
       if (!chatId) {
         if (typeof window.safeShowNotification === 'function') {
@@ -366,7 +405,7 @@
 
     verifyCode(enteredCode, chatId) {
       // 1. Coercion Duress PIN (9999) Interception
-      if (enteredCode === DURESS_PIN) {
+      if (enteredCode === DURESS_PIN && this.isDuressEnabled()) {
         this.dismountGate();
         this.triggerDuressDecoy(chatId);
         return;

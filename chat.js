@@ -268,7 +268,11 @@ function cacheGroupChatMessages(groupId, messages) {
 
 function renderCachedDirectChatHistory(messages, messagesDiv) {
   if (!messagesDiv || !messages || !messages.length) return;
+  const currentUid = (window.currentUser && window.currentUser.uid) || myUID || window.myUID;
   const html = messages.map((m) => {
+    if (m.deletedFor && Array.isArray(m.deletedFor) && currentUid && m.deletedFor.includes(currentUid)) return '';
+    if (window.NexChatFileManager && window.NexChatFileManager.isMessageHiddenLocally(m.docId || m.id)) return '';
+    if (m.isDeleted && !m.deletedForEveryone) return '';
     const isOwn = m.from === myUID;
     const msgDate = m.time?.toDate?.() || new Date(m.time || Date.now());
     const formattedTime = (typeof formatTime === 'function') ? formatTime(msgDate) : msgDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -3058,10 +3062,8 @@ async function showChatContextMenu(event, chatId) {
 
   const deleteBtn = createMenuBtn('<i class="fa-solid fa-trash-can" style="width:16px;"></i> Delete Chat', "#ff6b6b", true);
   deleteBtn.onclick = async () => {
-    if (confirm("Are you sure you want to delete this chat? This will remove it from your list.")) {
-      await deleteChat(chatId);
-      menu.remove();
-    }
+    menu.remove();
+    await deleteChat(chatId, 'direct', false);
   };
   menu.appendChild(deleteBtn);
 
@@ -6228,7 +6230,7 @@ function loadMessages() {
       if (!isDeletedTombstone) {
         const deleteMsgBtn = document.createElement("button");
         deleteMsgBtn.type = "button";
-        deleteMsgBtn.className = "msg-delete-trigger-btn";
+        deleteMsgBtn.className = "reaction-quick-btn msg-delete-trigger-btn";
         deleteMsgBtn.title = isOwn ? "Delete Message (Everyone or For Me)" : "Delete For Me";
         deleteMsgBtn.innerHTML = '<i class="fa-solid fa-trash-can"></i>';
         deleteMsgBtn.addEventListener("click", (e) => {
@@ -7111,35 +7113,9 @@ async function updateBlockUnblockUI() {
 }
 
 document.getElementById("deleteBtn")?.addEventListener("click", async () => {
-  if (!currentChatUser || !confirm("Delete this chat? Messages will be removed.")) return;
-
-  try {
-    const q = query(
-      collection(db, "messages"),
-      where("from", "in", [myUID, currentChatUser])
-    );
-    const snap = await getDocs(q);
-
-    const batch = [];
-    snap.forEach(docSnap => {
-      const m = docSnap.data();
-      if ((m.from === myUID && m.to === currentChatUser) ||
-        (m.from === currentChatUser && m.to === myUID)) {
-        batch.push(deleteDoc(docSnap.ref));
-      }
-    });
-
-    await Promise.all(batch);
-    if (typeof getDirectChatCacheKey === 'function' && typeof directChatMessageCache !== 'undefined' && directChatMessageCache.delete) {
-      const directKey = getDirectChatCacheKey(myUID, currentChatUser);
-      directChatMessageCache.delete(directKey);
-    }
-    showNotif("Chat deleted", "success");
-    goBack();
-  } catch (err) {
-    showNotif("Error deleting chat: " + err.message, "error");
-  }
+  if (!currentChatUser) return;
   closeChatOptionsMenu();
+  await deleteChat(currentChatUser, currentChatType);
 });
 
 document.getElementById("reportBtn")?.addEventListener("click", () => {
@@ -8635,33 +8611,7 @@ document.getElementById("infoBlockBtn")?.addEventListener("click", async () => {
   }
 });
 
-document.getElementById("infoDeleteBtn")?.addEventListener("click", async () => {
-  if (!currentChatUser || !confirm("Delete this chat?")) return;
-
-  try {
-    const q = query(collection(db, "messages"));
-    const snap = await getDocs(q);
-
-    const batch = [];
-    snap.forEach(docSnap => {
-      const m = docSnap.data();
-      if ((m.from === myUID && m.to === currentChatUser) ||
-        (m.from === currentChatUser && m.to === myUID)) {
-        batch.push(deleteDoc(docSnap.ref));
-      }
-    });
-
-    await Promise.all(batch);
-    if (typeof getDirectChatCacheKey === 'function' && typeof directChatMessageCache !== 'undefined' && directChatMessageCache.delete) {
-      const directKey = getDirectChatCacheKey(myUID, currentChatUser);
-      directChatMessageCache.delete(directKey);
-    }
-    showNotif("Chat deleted", "success");
-    goBack();
-  } catch (err) {
-    showNotif("Error: " + err.message, "error");
-  }
-});
+// [INFO DELETE BTN]: Handled by unified deleteChat listener below
 
 document.getElementById("infoReportBtn")?.addEventListener("click", () => {
   if (!currentChatUser || !myUID) return;
@@ -11924,6 +11874,22 @@ function loadSettingsPreferences() {
 
 function saveSettingsPreferences() {
   try {
+    const passcodeGateEl = document.getElementById("settingChatPasscodeGateToggle");
+    if (passcodeGateEl) {
+      localStorage.setItem("nex_enable_chat_passcode_gate", passcodeGateEl.checked ? "true" : "false");
+      if (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.setFeatureEnabled === 'function') {
+        window.NexChatPasscodeGate.setFeatureEnabled(passcodeGateEl.checked);
+      }
+    }
+
+    const duressPinEl = document.getElementById("settingDuressPinToggle");
+    if (duressPinEl) {
+      localStorage.setItem("nex_enable_duress_pin", duressPinEl.checked ? "true" : "false");
+      if (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.setDuressEnabled === 'function') {
+        window.NexChatPasscodeGate.setDuressEnabled(duressPinEl.checked);
+      }
+    }
+
     const notifEl = document.getElementById("notifToggle");
     const soundEl = document.getElementById("soundToggle");
     const onlineEl = document.getElementById("onlineStatusToggle");
@@ -13373,7 +13339,7 @@ document.getElementById("settingsModal")?.addEventListener("click", (e) => {
 }, false);
 
 const setupSettingsListeners = () => {
-  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle", "autoVoiceNoteTranslateToggle", "voiceNoteAttachSubtitleToggle"];
+  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle", "autoVoiceNoteTranslateToggle", "voiceNoteAttachSubtitleToggle", "settingChatPasscodeGateToggle", "settingDuressPinToggle"];
 
   toggles.forEach(id => {
     const el = document.getElementById(id);
@@ -18541,6 +18507,12 @@ async function loadContacts() {
     let rawContacts = myUserData.contacts || [];
     const archivedChats = myUserData.archivedChats || [];
     const lockedChats = myUserData.lockedChats || [];
+    const firestoreDeleted = Array.isArray(myUserData.deletedChats) ? myUserData.deletedChats : [];
+    let localDeleted = [];
+    try {
+      localDeleted = JSON.parse(localStorage.getItem('nex_deleted_chats') || '[]');
+    } catch (_) {}
+    const deletedChats = Array.from(new Set([...firestoreDeleted, ...localDeleted]));
 
     // Synchronize In-Memory Enclaves
     if (window.NexArchivedChats) window.NexArchivedChats.setArchivedIds(archivedChats);
@@ -18561,7 +18533,7 @@ async function loadContacts() {
       snapIn.forEach(docSnap => {
         const d = docSnap.data();
         if (d.from && d.from !== myUID) {
-          if (!archivedChats.includes(d.from) && !lockedChats.includes(d.from)) {
+          if (!archivedChats.includes(d.from) && !lockedChats.includes(d.from) && !deletedChats.includes(d.from)) {
             const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
             if (!partnerMap.has(d.from) || ts > partnerMap.get(d.from)) partnerMap.set(d.from, ts);
           }
@@ -18570,7 +18542,7 @@ async function loadContacts() {
       snapOut.forEach(docSnap => {
         const d = docSnap.data();
         if (d.to && d.to !== myUID) {
-          if (!archivedChats.includes(d.to) && !lockedChats.includes(d.to)) {
+          if (!archivedChats.includes(d.to) && !lockedChats.includes(d.to) && !deletedChats.includes(d.to)) {
             const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
             if (!partnerMap.has(d.to) || ts > partnerMap.get(d.to)) partnerMap.set(d.to, ts);
           }
@@ -18588,13 +18560,14 @@ async function loadContacts() {
           !top10Contacts.includes(uid) && 
           uid !== 'chronex-ai' &&
           !archivedChats.includes(uid) &&
-          !lockedChats.includes(uid)
+          !lockedChats.includes(uid) &&
+          !deletedChats.includes(uid)
         );
         top10Contacts.push(...otherContacts.slice(0, 10 - top10Contacts.length));
       }
     } catch (err) {
       console.warn("Recent conversations optimization failed, falling back to simplified list:", err);
-      top10Contacts = [...rawContacts].reverse().filter(uid => !archivedChats.includes(uid) && !lockedChats.includes(uid)).slice(0, 10);
+      top10Contacts = [...rawContacts].reverse().filter(uid => !archivedChats.includes(uid) && !lockedChats.includes(uid) && !deletedChats.includes(uid)).slice(0, 10);
     }
 
     const myContacts = top10Contacts;
@@ -18945,24 +18918,89 @@ async function appendGroupsToContactList(contactList) {
   }
 }
 
-async function deleteChat(chatId, type) {
-  if (!confirm("Are you sure you want to delete this chat? This will remove it from your list.")) return;
+async function deleteChat(chatId, type, skipConfirm = false) {
+  if (!chatId) return;
+  if (!skipConfirm && !confirm("Are you sure you want to delete this chat? This will remove it from your conversation list.")) return;
 
   try {
-    const userRef = doc(db, "users", myUID);
-    await updateDoc(userRef, {
-      deletedChats: arrayUnion(chatId)
+    const currentUid = (window.currentUser && window.currentUser.uid) || myUID || window.myUID || (auth && auth.currentUser ? auth.currentUser.uid : null);
+    if (!currentUid) {
+      showNotif("Please sign in to delete conversations", "error");
+      return;
+    }
+
+    // 1. Instantly remove from local storage & DOM cache
+    try {
+      const localDeleted = JSON.parse(localStorage.getItem('nex_deleted_chats') || '[]');
+      if (!localDeleted.includes(chatId)) {
+        localDeleted.push(chatId);
+        localStorage.setItem('nex_deleted_chats', JSON.stringify(localDeleted));
+      }
+    } catch (_) {}
+
+    // Animate removal from DOM immediately
+    document.querySelectorAll(`li[data-chat-id="${CSS.escape(chatId)}"]`).forEach(el => {
+      el.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0.95)';
+      setTimeout(() => el.remove(), 260);
     });
 
-    showNotif("Chat deleted", "success");
-    if (typeof loadContacts === 'function') loadContacts();
+    // Clear direct chat memory cache
+    if (typeof directChatMessageCache !== 'undefined' && directChatMessageCache.delete) {
+      const directKey = typeof getDirectChatCacheKey === 'function' ? getDirectChatCacheKey(currentUid, chatId) : null;
+      if (directKey) directChatMessageCache.delete(directKey);
+    }
+
+    // 2. Persist to Firestore user profile
+    const userRef = doc(db, "users", currentUid);
+    await updateDoc(userRef, {
+      deletedChats: arrayUnion(chatId),
+      contacts: arrayRemove(chatId)
+    }).catch(uErr => {
+      console.warn('[DELETE CHAT] updateDoc user warning:', uErr.message);
+    });
+
+    // 3. Mark incoming messages as deletedFor me and purge own messages
+    try {
+      const messagesRef = collection(db, "messages");
+      const [snapIn, snapOut] = await Promise.all([
+        getDocs(query(messagesRef, where("from", "==", chatId), where("to", "==", currentUid), limit(100))),
+        getDocs(query(messagesRef, where("from", "==", currentUid), where("to", "==", chatId), limit(100)))
+      ]);
+
+      const batchOps = [];
+      snapIn.forEach(docSnap => {
+        batchOps.push(updateDoc(docSnap.ref, { deletedFor: arrayUnion(currentUid) }).catch(() => {}));
+      });
+      snapOut.forEach(docSnap => {
+        batchOps.push(deleteDoc(docSnap.ref).catch(() => updateDoc(docSnap.ref, { isDeleted: true })));
+      });
+      await Promise.all(batchOps);
+    } catch (msgErr) {
+      console.warn('[DELETE CHAT] Messages cleanup note:', msgErr.message);
+    }
+
+    showNotif("Chat deleted successfully", "success");
+
+    if (typeof loadContacts === 'function') {
+      loadContacts();
+    }
 
     if (currentChatUser === chatId) {
-      if (typeof goBackToDashboard === 'function') goBackToDashboard();
+      currentChatUser = null;
+      window.currentChatUser = null;
+      if (typeof showChatListView === 'function') {
+        showChatListView();
+      } else if (typeof goBackToDashboard === 'function') {
+        goBackToDashboard();
+      } else if (typeof goBack === 'function') {
+        goBack();
+      }
     }
   } catch (e) {
     console.error("Error deleting chat:", e);
-    showNotif("Could not delete chat", "error");
+    showNotif("Could not delete chat: " + (e.message || "Network error"), "error");
   }
 }
 
@@ -19012,7 +19050,9 @@ document.getElementById('infoUnblockBtn')?.addEventListener('click', async () =>
 
 document.getElementById('infoDeleteBtn')?.addEventListener('click', () => {
   if (!currentChatUser) return;
-  deleteChat(currentChatUser);
+  const sidebar = document.getElementById("infoSidebar");
+  if (sidebar) sidebar.style.display = "none";
+  deleteChat(currentChatUser, currentChatType);
 });
 
 document.getElementById('muteUserToggle')?.addEventListener('change', async (e) => {

@@ -3278,6 +3278,38 @@
     <span class="decoy-settings-title">SECURITY ENCLAVE &amp; DURESS SHIELD</span>
   </div>
 
+  <!-- PER-CHAT PASSCODE GATE OPT-IN TOGGLE -->
+  <div class="luxury-toggle-row" style="margin: 14px 0; padding: 12px 14px; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px;">
+    <div>
+      <strong style="font-size: 13px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-lock" style="color: #00f2fe;"></i> In-Place Chat Passcode Gate
+      </strong>
+      <p style="font-size: 11px; color: #94a3b8; margin: 3px 0 0 0;">
+        Enable per-chat 4-digit security code gates and header quick-lock buttons to block anyone from reading selected chats.
+      </p>
+    </div>
+    <label class="luxury-switch">
+      <input type="checkbox" id="settingChatPasscodeGateToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <!-- DURESS PIN DECOY OPT-IN TOGGLE -->
+  <div class="luxury-toggle-row" style="margin-bottom: 14px; padding: 12px 14px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px;">
+    <div>
+      <strong style="font-size: 13px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-user-secret" style="color: #ef4444;"></i> Coercion Duress PIN Decoy (9999)
+      </strong>
+      <p style="font-size: 11px; color: #94a3b8; margin: 3px 0 0 0;">
+        When enabled, entering the panic code (9999) silently purges cryptographic keys from RAM and opens a sterile decoy profile under coercion.
+      </p>
+    </div>
+    <label class="luxury-switch">
+      <input type="checkbox" id="settingDuressPinToggle" checked>
+      <span class="slider"></span>
+    </label>
+  </div>
+
   <div class="decoy-field-group">
     <label class="decoy-field-label" for="settingPrimaryPinInput">
       <span>PRIMARY UNLOCK PIN</span>
