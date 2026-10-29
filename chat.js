@@ -11786,7 +11786,7 @@ function loadSettingsPreferences() {
     const vanishTapCount = document.getElementById("settingVanishTapCount");
     const vanishTapTarget = document.getElementById("settingVanishTapTarget");
     const vanishRequirePin = document.getElementById("settingVanishRequirePinToggle");
-    const vanishAutoTimeout = document.getElementById("settingVanishAutoTimeoutSelect");
+    const vanishAutoTimeout = document.getElementById("settingVanishAutoTimeoutSelect", "settingVanishTriggerMethod", "settingVanishFlipPanic");
     const vanishPanel = document.getElementById("vanishConfigurationPanel");
 
     if (chatVanishToggle) {

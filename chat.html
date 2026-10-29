@@ -3373,8 +3373,37 @@
     </div>
 
     <div class="decoy-field-group">
+      <label class="decoy-field-label" for="settingVanishTriggerMethod">
+        <span>SECRET TRIGGER GESTURE</span>
+        <span class="text-xs text-purple-400">(How to reveal vanished chats)</span>
+      </label>
+      <select id="settingVanishTriggerMethod" class="decoy-input-box">
+        <option value="hybrid" selected>Hybrid All-in-One (Shake, 2-Finger Pull, or Tap)</option>
+        <option value="shake">Continuous Phone Shake (3 Rapid Shakes)</option>
+        <option value="twoFinger">Two-Finger Stealth Pull Down</option>
+        <option value="tap">Screen Multi-Tap Sequence</option>
+        <option value="hold">3-Second App Logo Tactical Hold</option>
+      </select>
+    </div>
+
+    <div class="luxury-toggle-row" style="margin-top: 10px; margin-bottom: 10px;">
+      <div>
+        <strong style="font-size: 12px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-mobile-screen" style="color: #c084fc;"></i> Emergency Flip-to-Vanish
+        </strong>
+        <p style="font-size: 10.5px; color: #94a3b8; margin: 2px 0 0 0;">
+          Immediately vaporizes visible chats back into concealment when phone is turned face-down.
+        </p>
+      </div>
+      <label class="luxury-switch">
+        <input type="checkbox" id="settingVanishFlipPanic" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="decoy-field-group">
       <label class="decoy-field-label" for="settingVanishTapTarget">
-        <span>SECRET TAP ZONE</span>
+        <span>SECRET TAP ZONE (FOR TAP MODE)</span>
         <span class="text-xs text-purple-400">(Where to tap on screen)</span>
       </label>
       <select id="settingVanishTapTarget" class="decoy-input-box">
@@ -6761,6 +6790,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/aegis-privacy-shield.js"></script>
   <script src="./src/js/chat-passcode-gate.js"></script>
   <script src="./src/js/chat-vanish-engine.js"></script>
+  <script src="./src/js/math-cloak-engine.js"></script>
+  <script src="./src/js/system-crash-decoy.js"></script>
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
@@ -8185,6 +8216,82 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
       <div class="vanish-manage-list" id="vanishManageList"></div>
     </div>
   </div>
+</div>
+
+
+<!-- ========================================================================= -->
+<!-- MATH CLOAK: 100% OPERATIONAL SCIENTIFIC CALCULATOR DECOY (PANIC CAMOUFLAGE)-->
+<!-- ========================================================================= -->
+<div id="mathCloakOverlay" class="math-cloak-container" style="display: none !important;" aria-hidden="true">
+  <div class="calculator-chassis">
+    <div class="calc-status-bar">
+      <span class="calc-mode-indicator"><i class="fa-solid fa-calculator"></i> DEG</span>
+      <span class="calc-app-title">Scientific Calculator v4.2</span>
+    </div>
+
+    <div class="calc-screen">
+      <div id="calcHistoryTape" class="calc-history-row"></div>
+      <div id="calcMainDisplay" class="calc-main-row">0</div>
+    </div>
+
+    <div class="calc-scientific-bar">
+      <button type="button" class="calc-sci-btn" data-fn="sin">sin</button>
+      <button type="button" class="calc-sci-btn" data-fn="cos">cos</button>
+      <button type="button" class="calc-sci-btn" data-fn="tan">tan</button>
+      <button type="button" class="calc-sci-btn" data-fn="sqrt"><i class="fa-solid fa-square-root-variable"></i></button>
+      <button type="button" class="calc-sci-btn" data-fn="pow">x^y</button>
+      <button type="button" class="calc-sci-btn" data-fn="pi">π</button>
+    </div>
+
+    <div class="calc-keypad-grid">
+      <button type="button" class="calc-key-btn calc-op-clear" data-act="clear">AC</button>
+      <button type="button" class="calc-key-btn calc-op-util" data-act="neg">+/-</button>
+      <button type="button" class="calc-key-btn calc-op-util" data-act="percent">%</button>
+      <button type="button" class="calc-key-btn calc-op-math" data-act="/">÷</button>
+
+      <button type="button" class="calc-key-btn calc-num" data-num="7">7</button>
+      <button type="button" class="calc-key-btn calc-num" data-num="8">8</button>
+      <button type="button" class="calc-key-btn calc-num" data-num="9">9</button>
+      <button type="button" class="calc-key-btn calc-op-math" data-act="*">×</button>
+
+      <button type="button" class="calc-key-btn calc-num" data-num="4">4</button>
+      <button type="button" class="calc-key-btn calc-num" data-num="5">5</button>
+      <button type="button" class="calc-key-btn calc-num" data-num="6">6</button>
+      <button type="button" class="calc-key-btn calc-op-math" data-act="-">−</button>
+
+      <button type="button" class="calc-key-btn calc-num" data-num="1">1</button>
+      <button type="button" class="calc-key-btn calc-num" data-num="2">2</button>
+      <button type="button" class="calc-key-btn calc-num" data-num="3">3</button>
+      <button type="button" class="calc-key-btn calc-op-math" data-act="+">+</button>
+
+      <button type="button" class="calc-key-btn calc-num calc-zero" data-num="0">0</button>
+      <button type="button" class="calc-key-btn calc-num" data-act="dot">.</button>
+      <button type="button" class="calc-key-btn calc-op-eval" id="calcEqualsBtn" data-act="=">=</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- FAKE SYSTEM UPDATE & CRASH DECOY (4-FINGER PANIC TOUCH)                  -->
+<!-- ========================================================================= -->
+<div id="systemCrashDecoyOverlay" class="system-crash-overlay" style="display: none !important;" aria-hidden="true">
+  <div id="decoyAndroidUpdate" class="crash-mode-card">
+    <div class="android-robot-spinner">
+      <i class="fa-solid fa-gear fa-spin android-gear-glyph"></i>
+    </div>
+    <h2 class="android-update-title">Installing system update...</h2>
+    <div class="android-progress-track">
+      <div id="androidProgressBar" class="android-progress-fill" style="width: 14%;"></div>
+    </div>
+    <div class="android-telemetry-row">
+      <span id="androidProgressPercent">14%</span>
+      <span>Optimizing system storage...</span>
+    </div>
+    <p class="android-warning-label">Do not turn off your phone. This operation will finish automatically.</p>
+  </div>
+
+  <!-- Covert Tri-Tap Escape Hotspot (Top-Right 54x54px invisible corner) -->
+  <div id="crashSecretEscapeZone" class="crash-escape-hotspot" title="Escape Hatch"></div>
 </div>
 
 </body>

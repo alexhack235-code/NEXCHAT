@@ -397,3 +397,249 @@
   margin-left: 6px !important;
   letter-spacing: 0.4px !important;
 }
+
+/* --------------------------------------------------------------------------
+   5. MATH CLOAK: 100% OPERATIONAL SCIENTIFIC CALCULATOR DECOY
+   -------------------------------------------------------------------------- */
+.math-cloak-container {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  background: #060913 !important;
+  z-index: 100065 !important;
+  display: none;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.math-cloak-container.active {
+  display: flex !important;
+}
+
+.calculator-chassis {
+  width: 100% !important;
+  max-width: 360px !important;
+  background: rgba(15, 23, 42, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 28px !important;
+  padding: 24px 20px !important;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.9) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+}
+
+.calc-status-bar {
+  display: flex !important;
+  justify-content: space-between !important;
+  font-size: 11px !important;
+  color: #64748b !important;
+  font-family: ui-monospace, SFMono-Regular, monospace !important;
+  margin-bottom: 12px !important;
+}
+
+.calc-screen {
+  background: rgba(0, 0, 0, 0.45) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 16px !important;
+  padding: 14px 18px !important;
+  text-align: right !important;
+  margin-bottom: 16px !important;
+}
+
+.calc-history-row {
+  min-height: 18px !important;
+  font-size: 13px !important;
+  color: #94a3b8 !important;
+  font-family: ui-monospace, SFMono-Regular, monospace !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.calc-main-row {
+  font-size: 34px !important;
+  font-weight: 700 !important;
+  color: #f8fafc !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.calc-scientific-bar {
+  display: grid !important;
+  grid-template-columns: repeat(6, 1fr) !important;
+  gap: 6px !important;
+  margin-bottom: 12px !important;
+}
+
+.calc-sci-btn {
+  background: rgba(0, 243, 255, 0.08) !important;
+  border: 1px solid rgba(0, 243, 255, 0.22) !important;
+  color: #00f3ff !important;
+  border-radius: 10px !important;
+  padding: 8px 0 !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.calc-sci-btn:active {
+  background: rgba(0, 243, 255, 0.2) !important;
+  transform: scale(0.95) !important;
+}
+
+.calc-keypad-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 10px !important;
+}
+
+.calc-key-btn {
+  height: 52px !important;
+  border-radius: 26px !important;
+  border: none !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #f8fafc !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: background 0.12s ease, transform 0.1s ease !important;
+}
+
+.calc-key-btn:active {
+  transform: scale(0.92) !important;
+}
+
+.calc-op-clear { background: rgba(239, 68, 68, 0.2) !important; color: #ef4444 !important; }
+.calc-op-util { background: rgba(255, 255, 255, 0.14) !important; color: #cbd5e1 !important; }
+.calc-op-math { background: rgba(245, 158, 11, 0.25) !important; color: #f59e0b !important; }
+.calc-op-eval { background: #f59e0b !important; color: #000000 !important; font-weight: 800 !important; }
+.calc-zero { grid-column: span 2 !important; border-radius: 26px !important; justify-content: flex-start !important; padding-left: 22px !important; }
+
+/* --------------------------------------------------------------------------
+   6. FAKE ANDROID OS FIRMWARE UPDATE CRASH DECOY
+   -------------------------------------------------------------------------- */
+.system-crash-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  background: #000000 !important;
+  z-index: 100075 !important;
+  display: none;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+  box-sizing: border-box !important;
+  cursor: none !important;
+  touch-action: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.system-crash-overlay.active {
+  display: flex !important;
+}
+
+.crash-mode-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  max-width: 380px !important;
+}
+
+.android-gear-glyph {
+  font-size: 56px !important;
+  color: #3ddc84 !important;
+  margin-bottom: 28px !important;
+  filter: drop-shadow(0 0 16px rgba(61, 220, 132, 0.35)) !important;
+}
+
+.android-update-title {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 500 !important;
+  color: #ffffff !important;
+  margin: 0 0 20px 0 !important;
+  letter-spacing: 0.3px !important;
+}
+
+.android-progress-track {
+  width: 100% !important;
+  max-width: 300px !important;
+  height: 6px !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 3px !important;
+  overflow: hidden !important;
+  margin-bottom: 12px !important;
+}
+
+.android-progress-fill {
+  height: 100% !important;
+  background: #3ddc84 !important;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.android-telemetry-row {
+  width: 100% !important;
+  max-width: 300px !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 12.5px !important;
+  color: #9e9e9e !important;
+  margin-bottom: 20px !important;
+}
+
+.android-warning-label {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 11.5px !important;
+  color: #757575 !important;
+  line-height: 1.5 !important;
+  margin: 0 !important;
+}
+
+/* Invisible Covert Escape Hotspot in Top-Right Corner */
+.crash-escape-hotspot {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 54px !important;
+  height: 54px !important;
+  background: transparent !important;
+  z-index: 100076 !important;
+  cursor: default !important;
+}
+
+/* Header Panic Trigger Button Styling */
+.panic-cloak-btn {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1px solid rgba(245, 158, 11, 0.3) !important;
+  color: #f59e0b !important;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  transition: all 0.15s ease !important;
+}
+
+.panic-cloak-btn:hover {
+  background: rgba(245, 158, 11, 0.25) !important;
+  border-color: #f59e0b !important;
+}

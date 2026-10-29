@@ -28,6 +28,10 @@
   const STORAGE_KEY_TAP_TARGET = 'nex_vanish_tap_target';
   const STORAGE_KEY_REQUIRE_PIN = 'nex_vanish_require_pin';
   const STORAGE_KEY_TIMEOUT = 'nex_vanish_auto_timeout';
+  const STORAGE_KEY_TRIGGER_METHOD = 'nex_vanish_trigger_method';
+  const STORAGE_KEY_FLIP_PANIC = 'nex_vanish_flip_panic';
+
+  const DEFAULT_TRIGGER_METHOD = 'hybrid'; // 'hybrid' | 'shake' | 'twoFinger' | 'tap' | 'hold'
 
   const DEFAULT_TAP_COUNT = 3;
   const DEFAULT_TAP_TARGET = 'header';
@@ -295,6 +299,8 @@
 
     handlePointerTap(e) {
       if (!this.isEnabled()) return;
+      const method = this.getTriggerMethod();
+      if (method !== 'hybrid' && method !== 'tap') return;
 
       // If PIN modal or management modal is currently active, ignore taps
       const pinModal = document.getElementById('vanishSecretPinModal');
@@ -346,6 +352,133 @@
       if (this.tapHistory.length >= requiredTaps) {
         this.tapHistory = [];
         this.triggerRevealSequence();
+      }
+    }
+
+    handleDeviceMotion(event) {
+      if (!this.isEnabled()) return;
+      const method = this.getTriggerMethod();
+      if (method !== 'hybrid' && method !== 'shake') return;
+
+      const acc = event.accelerationIncludingGravity || event.acceleration;
+      if (!acc) return;
+
+      const curX = acc.x || 0;
+      const curY = acc.y || 0;
+      const curZ = acc.z || 0;
+
+      if (this._lastAccel.x !== null) {
+        const deltaX = Math.abs(curX - this._lastAccel.x);
+        const deltaY = Math.abs(curY - this._lastAccel.y);
+        const deltaZ = Math.abs(curZ - this._lastAccel.z);
+        const deltaSpeed = deltaX + deltaY + deltaZ;
+
+        // Shake threshold: 19 m/s^2 delta
+        if (deltaSpeed > 19) {
+          const now = Date.now();
+          if (now - this._lastShakeTime > 220) {
+            this._shakeCount++;
+            this._lastShakeTime = now;
+
+            // If already revealed: an emergency 2-shake triggers immediate panic conceal!
+            if (this.isStealthRevealed && this._shakeCount >= 2) {
+              this._shakeCount = 0;
+              this.concealChats();
+              return;
+            }
+
+            // If not revealed: 3 continuous shakes trigger reveal sequence!
+            if (this._shakeCount >= 3) {
+              this._shakeCount = 0;
+              if (!this.isStealthRevealed) {
+                this.triggerRevealSequence();
+              }
+            }
+          }
+        }
+      }
+
+      this._lastAccel = { x: curX, y: curY, z: curZ };
+
+      // Decay shake count if idle for > 1400ms
+      if (Date.now() - this._lastShakeTime > 1400) {
+        this._shakeCount = 0;
+      }
+    }
+
+    handleDeviceOrientation(event) {
+      if (!this.isEnabled() || !this.isStealthRevealed || !this.isFlipPanicEnabled()) return;
+
+      const beta = event.beta;
+      const gamma = event.gamma;
+
+      // Face-down phone orientation: beta > 155 or beta < -155, or gamma rolled flat
+      if (beta !== null && (Math.abs(beta) > 155 || Math.abs(gamma) > 80)) {
+        this.concealChats();
+      }
+    }
+
+    handleTouchStart(e) {
+      if (!this.isEnabled()) return;
+      const method = this.getTriggerMethod();
+      if (method !== 'hybrid' && method !== 'twoFinger') return;
+
+      if (e.touches && e.touches.length === 2) {
+        this._twoFingerStartY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        this._twoFingerStartTime = Date.now();
+      } else {
+        this._twoFingerStartY = null;
+      }
+    }
+
+    handleTouchEnd(e) {
+      if (!this.isEnabled() || this._twoFingerStartY === null) return;
+      const method = this.getTriggerMethod();
+      if (method !== 'hybrid' && method !== 'twoFinger') return;
+
+      if (e.changedTouches && e.changedTouches.length >= 1) {
+        const endY = e.changedTouches[0].clientY;
+        const deltaY = endY - this._twoFingerStartY;
+        const duration = Date.now() - this._twoFingerStartTime;
+
+        // Two fingers dragged downwards by at least 65px within 700ms
+        if (deltaY > 65 && duration < 700) {
+          this._twoFingerStartY = null;
+          this.triggerRevealSequence();
+        }
+      }
+    }
+
+    handlePointerHoldStart(e) {
+      if (!this.isEnabled()) return;
+      const method = this.getTriggerMethod();
+      if (method !== 'hybrid' && method !== 'hold') return;
+
+      const target = e.target;
+      if (!target) return;
+
+      const isBrandTarget = Boolean(
+        target.closest('#chatHeader') ||
+        target.closest('.app-header') ||
+        target.closest('.chat-brand') ||
+        target.closest('.nav-brand')
+      );
+
+      if (!isBrandTarget) return;
+
+      this._holdTimer = setTimeout(() => {
+        this._holdTimer = null;
+        if (typeof navigator !== 'undefined' && navigator.vibrate) {
+          try { navigator.vibrate([30, 40, 30]); } catch (_) {}
+        }
+        this.triggerRevealSequence();
+      }, 2500); // 2.5-second tactical hold
+    }
+
+    handlePointerHoldEnd() {
+      if (this._holdTimer) {
+        clearTimeout(this._holdTimer);
+        this._holdTimer = null;
       }
     }
 
