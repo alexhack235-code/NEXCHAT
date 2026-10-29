@@ -49,6 +49,7 @@
   <link rel="stylesheet" href="css/decoy-vault.css">
   <link rel="stylesheet" href="css/tactical-pinboard.css">
   <link rel="stylesheet" href="css/aegis-omni-cloak.css">
+  <link rel="stylesheet" href="css/chat-passcode-gate.css">
   <link rel="stylesheet" href="css/nex-status-audio.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
@@ -136,7 +137,14 @@
         <div id="activeChatHeader" class="active-chat-header" style="display: none;">
           <img id="activeChatAvatar" src="logo.jpg" alt="Contact" class="active-chat-avatar" style="cursor: pointer;" onerror="this.onerror=null;this.src='logo.jpg';">
           <div class="active-chat-info">
-            <div id="activeChatName" class="active-chat-name">Contact Name</div>
+            <div class="chat-title-lock-row">
+              <div id="activeChatName" class="active-chat-name">Contact Name</div>
+              <button type="button" id="btnQuickLockChatTop" class="btn-header-chat-lock" title="Lock chat with passcode" aria-label="Lock conversation">
+                <i class="fa-solid fa-lock-open lock-state-unlocked"></i>
+                <i class="fa-solid fa-lock lock-state-locked" style="display: none;"></i>
+                <span class="lock-status-dot"></span>
+              </button>
+            </div>
             <div style="display: flex; align-items: center; gap: 4px;">
               <div id="activeChatStatus" class="active-chat-status">Online</div>
               <span id="headerAutoTranslateBadge" class="auto-translate-header-pill" style="display: none;" title="Auto-Translate On Load Active"><i class="fa-solid fa-language"></i> TRANSLATED</span>
@@ -764,7 +772,14 @@
               <span id="chatOnlineIndicator" class="header-avatar-online-dot"></span>
             </div>
             <div class="header-text">
-              <h3 id="chatName">User</h3>
+              <div class="chat-title-lock-row">
+                <h3 id="chatName">User</h3>
+                <button type="button" id="btnQuickLockChat" class="btn-header-chat-lock" title="Lock chat with passcode (Prevent unauthorized reading)" aria-label="Lock conversation">
+                  <i class="fa-solid fa-lock-open lock-state-unlocked"></i>
+                  <i class="fa-solid fa-lock lock-state-locked" style="display: none;"></i>
+                  <span class="lock-status-dot" id="headerLockDot"></span>
+                </button>
+              </div>
               <p id="statusText" class="status-subtitle">Online</p>
             </div>
           </div>
@@ -1028,6 +1043,69 @@
     </div>
   </div>
 </div>
+        <!-- ========================================================================= -->
+        <!-- CHAT PASSCODE BLOCKER GATE OVERLAY (OBSIDIAN GLASS)                       -->
+        <!-- ========================================================================= -->
+        <div id="chatPasscodeGateOverlay" class="chat-passcode-gate-overlay" style="display: none;" aria-hidden="true">
+          <div class="passcode-gate-scrim"></div>
+          <div class="passcode-gate-card" id="chatPasscodeGateCard">
+            <div class="passcode-gate-icon-halo">
+              <div class="passcode-halo-pulse"></div>
+              <i class="fa-solid fa-shield-halved passcode-shield-icon"></i>
+              <i class="fa-solid fa-lock passcode-lock-badge"></i>
+            </div>
+
+            <h3 class="passcode-gate-title">CONFIDENTIAL CHAT ENCLAVE</h3>
+            <div class="passcode-target-badge" id="passcodeGateTargetBadge">
+              <i class="fa-solid fa-user-lock"></i>
+              <span id="passcodeGateTargetName">Confidential Contact</span>
+            </div>
+            <p class="passcode-gate-subtitle">Enter your 4-digit security code to reveal conversation stream.</p>
+
+            <div class="passcode-dots-row" id="passcodeGateDots">
+              <span class="passcode-dot" data-idx="0"></span>
+              <span class="passcode-dot" data-idx="1"></span>
+              <span class="passcode-dot" data-idx="2"></span>
+              <span class="passcode-dot" data-idx="3"></span>
+            </div>
+
+            <div class="passcode-gate-feedback" id="passcodeGateFeedback" style="display: none;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span id="passcodeGateFeedbackText">Incorrect passcode. Try again.</span>
+            </div>
+
+            <div class="passcode-keypad-matrix" id="passcodeKeypadMatrix">
+              <button type="button" class="passcode-key" data-digit="1"><span class="key-num">1</span><span class="key-sub">&bull;</span></button>
+              <button type="button" class="passcode-key" data-digit="2"><span class="key-num">2</span><span class="key-sub">ABC</span></button>
+              <button type="button" class="passcode-key" data-digit="3"><span class="key-num">3</span><span class="key-sub">DEF</span></button>
+              <button type="button" class="passcode-key" data-digit="4"><span class="key-num">4</span><span class="key-sub">GHI</span></button>
+              <button type="button" class="passcode-key" data-digit="5"><span class="key-num">5</span><span class="key-sub">JKL</span></button>
+              <button type="button" class="passcode-key" data-digit="6"><span class="key-num">6</span><span class="key-sub">MNO</span></button>
+              <button type="button" class="passcode-key" data-digit="7"><span class="key-num">7</span><span class="key-sub">PQRS</span></button>
+              <button type="button" class="passcode-key" data-digit="8"><span class="key-num">8</span><span class="key-sub">TUV</span></button>
+              <button type="button" class="passcode-key" data-digit="9"><span class="key-num">9</span><span class="key-sub">WXYZ</span></button>
+              <button type="button" class="passcode-key action-key" id="btnGateBiometric" title="Use Biometrics">
+                <i class="fa-solid fa-fingerprint"></i>
+                <span class="key-sub">BIO</span>
+              </button>
+              <button type="button" class="passcode-key" data-digit="0"><span class="key-num">0</span><span class="key-sub">+</span></button>
+              <button type="button" class="passcode-key action-key" id="btnGateBackspace" title="Delete Last Digit">
+                <i class="fa-solid fa-delete-left"></i>
+                <span class="key-sub">DEL</span>
+              </button>
+            </div>
+
+            <div class="passcode-gate-footer">
+              <button type="button" class="passcode-gate-btn-link" id="btnGateLeaveChat">
+                <i class="fa-solid fa-arrow-left"></i> Back to Chats
+              </button>
+              <span class="passcode-gate-sep">&bull;</span>
+              <button type="button" class="passcode-gate-btn-link" id="btnGateChangeCode">
+                <i class="fa-solid fa-key"></i> Setup Code
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="messages-area" id="messages-area">
           <div class="messages-list">
             <div class="empty-state">
@@ -6569,6 +6647,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/gallery-sandbox.js"></script>
   <script src="./src/js/p2p-airdrop.js"></script>
   <script src="./src/js/aegis-privacy-shield.js"></script>
+  <script src="./src/js/chat-passcode-gate.js"></script>
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
@@ -7886,6 +7965,49 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 </div>
 
 <script type="module" src="chat.js"></script>
+<div id="chatPasscodeSetupModal" class="chat-passcode-setup-modal" style="display: none;" aria-hidden="true">
+  <div class="chat-passcode-setup-card">
+    <div class="setup-card-header">
+      <div class="setup-card-title">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>LOCK CONVERSATION WITH CODE</span>
+      </div>
+      <button type="button" class="setup-card-close-btn" id="closePasscodeSetupBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div class="setup-card-body">
+      <div class="setup-field-group">
+        <label class="setup-field-label" for="setupPasscodeInput">Enter 4-Digit Security Passcode:</label>
+        <input type="password" id="setupPasscodeInput" class="setup-passcode-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+      </div>
+
+      <div class="setup-field-group">
+        <label class="setup-field-label" for="setupPasscodeConfirmInput">Confirm Passcode:</label>
+        <input type="password" id="setupPasscodeConfirmInput" class="setup-passcode-input" maxlength="4" placeholder="••••" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+      </div>
+
+      <div class="setup-toggle-row">
+        <div>
+          <strong style="font-size: 12px; color: #f1f5f9; display: block;">Auto-Lock When Leaving Chat</strong>
+          <span style="font-size: 10.5px; color: #8b949e;">Automatically engages the lock curtain whenever you switch chats.</span>
+        </div>
+        <label class="luxury-switch">
+          <input type="checkbox" id="setupAutoLockToggle" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <div class="setup-card-footer">
+      <button type="button" id="btnRemoveChatPasscode" class="btn-setup-remove" style="display: none;">
+        <i class="fa-solid fa-unlock"></i> Remove Code
+      </button>
+      <button type="button" id="btnSaveChatPasscode" class="btn-setup-save">
+        <i class="fa-solid fa-lock"></i> Set Code & Lock
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 
 </html>

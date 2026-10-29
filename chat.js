@@ -6645,6 +6645,11 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
     chatDetailHeader.classList.toggle('ai-chat', chatType === 'ai');
   }
 
+  // Trigger Passcode Gate Check if Chat is Locked Behind Code
+  if (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.onChatOpened === 'function') {
+    window.NexChatPasscodeGate.onChatOpened(uid);
+  }
+
   // Populate header profile data immediately for instant responsive UI
   const chatNameEl = document.getElementById("chatName");
   if (chatNameEl) chatNameEl.textContent = username;

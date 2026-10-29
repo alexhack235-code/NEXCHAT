@@ -1,0 +1,574 @@
+/* =============================================================================
+   NEXCHAT - CHAT PASSCODE BLOCKER & OBSIDIAN GLASS GATE
+   Strictly ZERO Unicode Emojis: FontAwesome 6 vector glyphs only.
+   Pure CRLF line endings. Zero Cumulative Layout Shift (CLS = 0).
+   ============================================================================= */
+
+/* --------------------------------------------------------------------------
+   1. 1-CLICK 'LOCK WITH CODE' HEADER BUTTON (Desktop & Mobile)
+   -------------------------------------------------------------------------- */
+.chat-title-lock-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.btn-header-chat-lock {
+  position: relative !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  min-height: 32px !important;
+  border-radius: 8px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 13px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  flex-shrink: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  touch-action: manipulation !important;
+}
+
+/* 44px x 44px Touch Target Expansion via Pseudo-Element (WCAG 2.5.5 / Apple HIG) */
+.btn-header-chat-lock::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: -6px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  border-radius: 12px !important;
+}
+
+.btn-header-chat-lock:hover {
+  background: rgba(0, 255, 102, 0.15) !important;
+  border-color: rgba(0, 255, 102, 0.4) !important;
+  color: #00ff66 !important;
+  transform: scale(1.06) !important;
+}
+
+.btn-header-chat-lock.is-locked {
+  background: rgba(239, 68, 68, 0.18) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  color: #ef4444 !important;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.35) !important;
+  animation: nexLockBeaconPulse 2s infinite ease-in-out !important;
+}
+
+@keyframes nexLockBeaconPulse {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6)); }
+  50% { opacity: 0.75; filter: drop-shadow(0 0 1px rgba(239, 68, 68, 0.2)); }
+}
+
+.btn-header-chat-lock .lock-status-dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #00ff66;
+  box-shadow: 0 0 6px #00ff66;
+}
+
+.btn-header-chat-lock.is-locked .lock-status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 6px #ef4444;
+}
+
+/* --------------------------------------------------------------------------
+   2. OBSIDIAN GLASS PASSCODE GATE OVERLAY
+   -------------------------------------------------------------------------- */
+.chat-passcode-gate-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 95 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+  animation: nexGateFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes nexGateFadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.passcode-gate-scrim {
+  position: absolute !important;
+  inset: 0 !important;
+  background: radial-gradient(120% 100% at 50% 10%, rgba(15, 23, 42, 0.94) 0%, rgba(4, 7, 15, 0.98) 100%) !important;
+  backdrop-filter: blur(28px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(190%) !important;
+  z-index: 1 !important;
+}
+
+.passcode-gate-card {
+  position: relative !important;
+  z-index: 2 !important;
+  width: 100% !important;
+  max-width: 400px !important;
+  background: linear-gradient(155deg, rgba(17, 24, 39, 0.95) 0%, rgba(9, 13, 24, 0.98) 100%) !important;
+  border: 1px solid rgba(0, 242, 255, 0.25) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(0, 242, 255, 0.12), inset 0 0 30px rgba(0, 0, 0, 0.6) !important;
+  padding: 24px 20px 20px 20px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  color: #f1f5f9 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+}
+
+/* Icon & Quantum Halo */
+.passcode-gate-icon-halo {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(0, 242, 255, 0.08);
+  border: 1.5px solid rgba(0, 242, 255, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  box-shadow: 0 0 24px rgba(0, 242, 255, 0.2);
+}
+
+.passcode-halo-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px dashed rgba(0, 255, 102, 0.4);
+  animation: nexHaloRotate 12s linear infinite;
+}
+
+@keyframes nexHaloRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.passcode-shield-icon {
+  font-size: 26px;
+  color: #00f2fe;
+}
+
+.passcode-lock-badge {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #0f172a;
+  border: 1.5px solid #00ff66;
+  color: #00ff66;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
+}
+
+/* Titles & Badges */
+.passcode-gate-title {
+  margin: 0 0 6px 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.passcode-target-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background: rgba(0, 242, 255, 0.08);
+  border: 1px solid rgba(0, 242, 255, 0.25);
+  border-radius: 9999px;
+  font-size: 11px;
+  color: #67e8f9;
+  font-weight: 600;
+  margin-bottom: 8px;
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.passcode-gate-subtitle {
+  margin: 0 0 16px 0;
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   3. PIN DIGIT INDICATORS (4 DOTS)
+   -------------------------------------------------------------------------- */
+.passcode-dots-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.passcode-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  box-sizing: border-box;
+}
+
+.passcode-dot.filled {
+  background: #00ff66 !important;
+  border-color: #00ff66 !important;
+  box-shadow: 0 0 12px #00ff66 !important;
+  transform: scale(1.2) !important;
+}
+
+.passcode-dot.error {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 12px #ef4444 !important;
+}
+
+/* Error Shake Animation */
+.passcode-gate-card.shake {
+  animation: nexPasscodeShake 0.4s ease-in-out !important;
+}
+
+@keyframes nexPasscodeShake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-8px); }
+  40%, 80% { transform: translateX(8px); }
+}
+
+.passcode-gate-feedback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: #ef4444;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   4. RESPONSIVE TACTICAL KEYPAD (< 900px & Mobile Hardened)
+   -------------------------------------------------------------------------- */
+.passcode-keypad-matrix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  width: 100%;
+  max-width: 290px;
+  margin: 0 auto 16px auto;
+}
+
+.passcode-key {
+  min-width: 64px !important;
+  min-height: 52px !important;
+  height: 52px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+  cursor: pointer !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  touch-action: manipulation !important;
+  padding: 0 !important;
+}
+
+.passcode-key:hover {
+  background: rgba(0, 242, 255, 0.12) !important;
+  border-color: rgba(0, 242, 255, 0.35) !important;
+  color: #00f2fe !important;
+  transform: translateY(-1px) !important;
+}
+
+.passcode-key:active {
+  background: rgba(0, 255, 102, 0.22) !important;
+  border-color: #00ff66 !important;
+  color: #00ff66 !important;
+  transform: scale(0.92) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.4) !important;
+}
+
+.passcode-key .key-num {
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.passcode-key .key-sub {
+  font-size: 8.5px;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  margin-top: 1px;
+}
+
+.passcode-key.action-key {
+  background: rgba(0, 0, 0, 0.35) !important;
+}
+
+.passcode-key.action-key i {
+  font-size: 16px;
+  color: #94a3b8;
+}
+
+.passcode-key.action-key:hover i {
+  color: #00f2fe;
+}
+
+/* --------------------------------------------------------------------------
+   5. PASSCODE GATE FOOTER & ACTIONS
+   -------------------------------------------------------------------------- */
+.passcode-gate-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.passcode-gate-btn-link {
+  min-height: 44px !important;
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 0 8px !important;
+  transition: all 0.15s ease !important;
+  touch-action: manipulation !important;
+}
+
+.passcode-gate-btn-link:hover {
+  color: #00ff66 !important;
+}
+
+.passcode-gate-sep {
+  color: #334155;
+  font-size: 11px;
+}
+
+/* --------------------------------------------------------------------------
+   6. PASSCODE SETUP & CONFIGURATION MODAL
+   -------------------------------------------------------------------------- */
+.chat-passcode-setup-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 100060 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(3, 7, 18, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.chat-passcode-setup-card {
+  width: 100% !important;
+  max-width: 440px !important;
+  background: linear-gradient(155deg, rgba(14, 22, 38, 0.96) 0%, rgba(6, 9, 19, 0.98) 100%) !important;
+  border: 1px solid rgba(0, 242, 254, 0.35) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 242, 254, 0.15) !important;
+  overflow: hidden !important;
+  color: #f1f5f9 !important;
+}
+
+.setup-card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 20px !important;
+  background: rgba(10, 16, 28, 0.9) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.setup-card-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  color: #00f2fe !important;
+}
+
+.setup-card-close-btn {
+  min-width: 44px !important;
+  min-height: 44px !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+  transition: all 0.15s ease !important;
+}
+
+.setup-card-close-btn:hover {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #ef4444 !important;
+}
+
+.setup-card-body {
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+
+.setup-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setup-field-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #cbd5e1;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.setup-passcode-input {
+  width: 100% !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  border: 1px solid rgba(0, 242, 254, 0.3) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  color: #00ff66 !important;
+  font-family: inherit !important;
+  font-size: 24px !important;
+  font-weight: 800 !important;
+  letter-spacing: 12px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.setup-passcode-input:focus {
+  border-color: #00ff66 !important;
+  box-shadow: 0 0 16px rgba(0, 255, 102, 0.3) !important;
+}
+
+.setup-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+}
+
+.setup-card-footer {
+  padding: 14px 20px !important;
+  background: rgba(10, 16, 28, 0.9) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  gap: 10px !important;
+}
+
+.btn-setup-save {
+  flex: 1 !important;
+  min-height: 44px !important;
+  background: linear-gradient(135deg, #00ff66, #00f2fe) !important;
+  color: #050811 !important;
+  font-weight: 800 !important;
+  font-size: 13.5px !important;
+  border-radius: 10px !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 255, 102, 0.35) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-setup-save:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 20px rgba(0, 255, 102, 0.5) !important;
+}
+
+.btn-setup-remove {
+  min-height: 44px !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #ef4444 !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+  border-radius: 10px !important;
+  padding: 0 16px !important;
+  cursor: pointer !important;
+}
+
+/* --------------------------------------------------------------------------
+   7. MOBILE ADAPTATIONS (< 480px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 480px) {
+  .passcode-gate-card {
+    padding: 18px 14px 14px 14px !important;
+    max-width: 340px !important;
+  }
+  .passcode-keypad-matrix {
+    gap: 8px !important;
+    max-width: 270px !important;
+  }
+  .passcode-key {
+    height: 48px !important;
+    min-height: 48px !important;
+  }
+  .passcode-key .key-num {
+    font-size: 18px !important;
+  }
+}
