@@ -22,6 +22,7 @@
   'use strict';
 
   const STORAGE_KEY_EQUATION = 'nex_math_cloak_code';
+  const STORAGE_KEY_ENABLED = 'nex_math_cloak_enabled';
   const DEFAULT_EQUATION_CODE = '7331';
   const DURESS_EQUATION_CODE = '9999';
 
@@ -44,6 +45,20 @@
       } else {
         this.bindDOM();
       }
+    }
+
+    isEnabled() {
+      try {
+        return localStorage.getItem(STORAGE_KEY_ENABLED) === 'true';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    setEnabled(enabled) {
+      try {
+        localStorage.setItem(STORAGE_KEY_ENABLED, enabled ? 'true' : 'false');
+      } catch (_) {}
     }
 
     getSecretCode() {
@@ -118,6 +133,7 @@
       // 3. Global Hotkey Listeners (Ctrl+Shift+X or Alt+C)
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey && e.shiftKey && e.code === 'KeyX') || (e.altKey && e.code === 'KeyC')) {
+          if (!this.isEnabled()) return;
           e.preventDefault();
           if (this.isCloakEngaged) {
             // Hotkey does not uncloak directly to prevent snoopers from finding it; equation required
@@ -131,7 +147,8 @@
       });
     }
 
-    engageCloak() {
+    engageCloak(force = false) {
+      if (!force && !this.isEnabled()) return;
       if (this.isCloakEngaged) return;
       this.isCloakEngaged = true;
 

@@ -20,6 +20,8 @@
 (function (global) {
   'use strict';
 
+  const STORAGE_KEY_ENABLED = 'nex_crash_decoy_enabled';
+
   class SystemCrashDecoyEngine {
     constructor() {
       this.isCrashEngaged = false;
@@ -43,12 +45,27 @@
       }
     }
 
+    isEnabled() {
+      try {
+        return localStorage.getItem(STORAGE_KEY_ENABLED) === 'true';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    setEnabled(enabled) {
+      try {
+        localStorage.setItem(STORAGE_KEY_ENABLED, enabled ? 'true' : 'false');
+      } catch (_) {}
+    }
+
     bindDOM() {
       if (this._hasBoundEvents) return;
       this._hasBoundEvents = true;
 
       // 1. 4-Finger Touch Detector
       window.addEventListener('touchstart', (e) => {
+        if (!this.isEnabled()) return;
         if (e.touches && e.touches.length === 4) {
           this.fourFingerTimer = setTimeout(() => {
             this.engageCrashDecoy();
@@ -95,6 +112,7 @@
       // 4. Global Hotkey: Ctrl + Alt + K
       window.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.altKey && e.code === 'KeyK') {
+          if (!this.isEnabled()) return;
           e.preventDefault();
           if (this.isCrashEngaged) {
             this.disengageCrashDecoy();
@@ -105,7 +123,8 @@
       });
     }
 
-    engageCrashDecoy() {
+    engageCrashDecoy(force = false) {
+      if (!force && !this.isEnabled()) return;
       if (this.isCrashEngaged) return;
       this.isCrashEngaged = true;
 

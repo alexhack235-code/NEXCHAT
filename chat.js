@@ -11771,7 +11771,7 @@ function loadSettingsPreferences() {
       voiceAttachSubtitleEl.checked = localStorage.getItem("nex_voice_attach_subtitle") === "true";
     }
 
-    // Chat Passcode Gate and Duress PIN (OFF by default)
+    // Stealth & Sensors Enclave Preferences (Strictly OFF by default)
     const passcodeGateEl = document.getElementById("settingChatPasscodeGateToggle");
     const duressPinEl = document.getElementById("settingDuressPinToggle");
     if (passcodeGateEl) {
@@ -11781,12 +11781,13 @@ function loadSettingsPreferences() {
       duressPinEl.checked = localStorage.getItem("nex_enable_duress_pin") === "true";
     }
 
-    // Chat Vanish & Secret Screen Tap Reveal Settings (OFF by default)
     const chatVanishToggle = document.getElementById("settingChatVanishToggle");
     const vanishTapCount = document.getElementById("settingVanishTapCount");
     const vanishTapTarget = document.getElementById("settingVanishTapTarget");
     const vanishRequirePin = document.getElementById("settingVanishRequirePinToggle");
-    const vanishAutoTimeout = document.getElementById("settingVanishAutoTimeoutSelect", "settingVanishTriggerMethod", "settingVanishFlipPanic");
+    const vanishAutoTimeout = document.getElementById("settingVanishAutoTimeoutSelect");
+    const vanishTriggerMethod = document.getElementById("settingVanishTriggerMethod");
+    const vanishFlipPanic = document.getElementById("settingVanishFlipPanic");
     const vanishPanel = document.getElementById("vanishConfigurationPanel");
 
     if (chatVanishToggle) {
@@ -11794,17 +11795,45 @@ function loadSettingsPreferences() {
       chatVanishToggle.checked = isVanishOn;
       if (vanishPanel) vanishPanel.style.display = isVanishOn ? "block" : "none";
     }
-    if (vanishTapCount) {
-      vanishTapCount.value = localStorage.getItem("nex_vanish_tap_count") || "3";
+    if (vanishTapCount) vanishTapCount.value = localStorage.getItem("nex_vanish_tap_count") || "3";
+    if (vanishTapTarget) vanishTapTarget.value = localStorage.getItem("nex_vanish_tap_target") || "header";
+    if (vanishRequirePin) vanishRequirePin.checked = localStorage.getItem("nex_vanish_require_pin") === "true";
+    if (vanishAutoTimeout) vanishAutoTimeout.value = localStorage.getItem("nex_vanish_auto_timeout") || "2";
+    if (vanishTriggerMethod) vanishTriggerMethod.value = localStorage.getItem("nex_vanish_trigger_method") || "hybrid";
+    if (vanishFlipPanic) vanishFlipPanic.checked = localStorage.getItem("nex_vanish_flip_panic") === "true";
+
+    const knuckleToggle = document.getElementById("settingKnuckleKnockToggle");
+    const knuckleCount = document.getElementById("settingKnuckleCountSelect");
+    const knucklePanel = document.getElementById("knuckleKnockPanel");
+    if (knuckleToggle) {
+      const isKnockOn = localStorage.getItem("nex_knuckle_knock_enabled") === "true";
+      knuckleToggle.checked = isKnockOn;
+      if (knucklePanel) knucklePanel.style.display = isKnockOn ? "block" : "none";
     }
-    if (vanishTapTarget) {
-      vanishTapTarget.value = localStorage.getItem("nex_vanish_tap_target") || "header";
+    if (knuckleCount) knuckleCount.value = localStorage.getItem("nex_knuckle_knock_count") || "3";
+
+    const horizonToggle = document.getElementById("settingHorizonLockToggle");
+    const horizonSlider = document.getElementById("settingHorizonTargetAngle");
+    const horizonAngleVal = document.getElementById("horizonTargetAngleVal");
+    const horizonPanel = document.getElementById("horizonLockPanel");
+    if (horizonToggle) {
+      const isHorizonOn = localStorage.getItem("nex_horizon_lock_enabled") === "true";
+      horizonToggle.checked = isHorizonOn;
+      if (horizonPanel) horizonPanel.style.display = isHorizonOn ? "block" : "none";
     }
-    if (vanishRequirePin) {
-      vanishRequirePin.checked = localStorage.getItem("nex_vanish_require_pin") !== "false";
+    if (horizonSlider) {
+      const savedAngle = localStorage.getItem("nex_horizon_target_angle") || "42";
+      horizonSlider.value = savedAngle;
+      if (horizonAngleVal) horizonAngleVal.textContent = savedAngle + "°";
     }
-    if (vanishAutoTimeout) {
-      vanishAutoTimeout.value = localStorage.getItem("nex_vanish_auto_timeout") || "2";
+
+    const mathCloakToggle = document.getElementById("settingMathCloakToggle");
+    if (mathCloakToggle) {
+      mathCloakToggle.checked = localStorage.getItem("nex_math_cloak_enabled") === "true";
+    }
+    const crashDecoyToggle = document.getElementById("settingCrashDecoyToggle");
+    if (crashDecoyToggle) {
+      crashDecoyToggle.checked = localStorage.getItem("nex_crash_decoy_enabled") === "true";
     }
 
     applyBubbleTheme(prefs.bubbleTheme || "neon-onyx");
@@ -11944,6 +11973,75 @@ function saveSettingsPreferences() {
       localStorage.setItem("nex_enable_duress_pin", duressPinEl.checked ? "true" : "false");
       if (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.setDuressEnabled === 'function') {
         window.NexChatPasscodeGate.setDuressEnabled(duressPinEl.checked);
+      }
+    }
+
+    const chatVanishToggle = document.getElementById("settingChatVanishToggle");
+    const vanishPanel = document.getElementById("vanishConfigurationPanel");
+    if (chatVanishToggle) {
+      localStorage.setItem("nex_chat_vanish_enabled", chatVanishToggle.checked ? "true" : "false");
+      if (vanishPanel) vanishPanel.style.display = chatVanishToggle.checked ? "block" : "none";
+    }
+    const vanishTapCount = document.getElementById("settingVanishTapCount");
+    if (vanishTapCount) localStorage.setItem("nex_vanish_tap_count", vanishTapCount.value);
+    const vanishTapTarget = document.getElementById("settingVanishTapTarget");
+    if (vanishTapTarget) localStorage.setItem("nex_vanish_tap_target", vanishTapTarget.value);
+    const vanishRequirePin = document.getElementById("settingVanishRequirePinToggle");
+    if (vanishRequirePin) localStorage.setItem("nex_vanish_require_pin", vanishRequirePin.checked ? "true" : "false");
+    const vanishAutoTimeout = document.getElementById("settingVanishAutoTimeoutSelect");
+    if (vanishAutoTimeout) localStorage.setItem("nex_vanish_auto_timeout", vanishAutoTimeout.value);
+    const vanishTriggerMethod = document.getElementById("settingVanishTriggerMethod");
+    if (vanishTriggerMethod) localStorage.setItem("nex_vanish_trigger_method", vanishTriggerMethod.value);
+    const vanishFlipPanic = document.getElementById("settingVanishFlipPanic");
+    if (vanishFlipPanic) localStorage.setItem("nex_vanish_flip_panic", vanishFlipPanic.checked ? "true" : "false");
+
+    const knuckleToggle = document.getElementById("settingKnuckleKnockToggle");
+    const knucklePanel = document.getElementById("knuckleKnockPanel");
+    if (knuckleToggle) {
+      localStorage.setItem("nex_knuckle_knock_enabled", knuckleToggle.checked ? "true" : "false");
+      if (knucklePanel) knucklePanel.style.display = knuckleToggle.checked ? "block" : "none";
+      if (window.NexStealthSensors && typeof window.NexStealthSensors.setKnuckleKnockEnabled === 'function') {
+        window.NexStealthSensors.setKnuckleKnockEnabled(knuckleToggle.checked);
+      }
+    }
+    const knuckleCount = document.getElementById("settingKnuckleCountSelect");
+    if (knuckleCount) {
+      localStorage.setItem("nex_knuckle_knock_count", knuckleCount.value);
+      if (window.NexStealthSensors && typeof window.NexStealthSensors.setKnockCountRequired === 'function') {
+        window.NexStealthSensors.setKnockCountRequired(parseInt(knuckleCount.value, 10));
+      }
+    }
+
+    const horizonToggle = document.getElementById("settingHorizonLockToggle");
+    const horizonPanel = document.getElementById("horizonLockPanel");
+    if (horizonToggle) {
+      localStorage.setItem("nex_horizon_lock_enabled", horizonToggle.checked ? "true" : "false");
+      if (horizonPanel) horizonPanel.style.display = horizonToggle.checked ? "block" : "none";
+      if (window.NexStealthSensors && typeof window.NexStealthSensors.setHorizonLockEnabled === 'function') {
+        window.NexStealthSensors.setHorizonLockEnabled(horizonToggle.checked);
+      }
+    }
+    const horizonSlider = document.getElementById("settingHorizonTargetAngle");
+    if (horizonSlider) {
+      localStorage.setItem("nex_horizon_target_angle", horizonSlider.value);
+      if (window.NexStealthSensors && typeof window.NexStealthSensors.setTargetPitchAngle === 'function') {
+        window.NexStealthSensors.setTargetPitchAngle(parseFloat(horizonSlider.value));
+      }
+    }
+
+    const mathCloakToggle = document.getElementById("settingMathCloakToggle");
+    if (mathCloakToggle) {
+      localStorage.setItem("nex_math_cloak_enabled", mathCloakToggle.checked ? "true" : "false");
+      if (window.NexMathCloak && typeof window.NexMathCloak.setEnabled === 'function') {
+        window.NexMathCloak.setEnabled(mathCloakToggle.checked);
+      }
+    }
+
+    const crashDecoyToggle = document.getElementById("settingCrashDecoyToggle");
+    if (crashDecoyToggle) {
+      localStorage.setItem("nex_crash_decoy_enabled", crashDecoyToggle.checked ? "true" : "false");
+      if (window.NexCrashDecoy && typeof window.NexCrashDecoy.setEnabled === 'function') {
+        window.NexCrashDecoy.setEnabled(crashDecoyToggle.checked);
       }
     }
 
@@ -13396,7 +13494,18 @@ document.getElementById("settingsModal")?.addEventListener("click", (e) => {
 }, false);
 
 const setupSettingsListeners = () => {
-  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle", "autoVoiceNoteTranslateToggle", "voiceNoteAttachSubtitleToggle", "settingChatPasscodeGateToggle", "settingDuressPinToggle", "settingChatVanishToggle", "settingVanishTapCount", "settingVanishTapTarget", "settingVanishRequirePinToggle", "settingVanishAutoTimeoutSelect"];
+  const toggles = [
+    "notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle",
+    "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle",
+    "autoVoiceNoteTranslateToggle", "voiceNoteAttachSubtitleToggle",
+    "settingChatPasscodeGateToggle", "settingDuressPinToggle",
+    "settingChatVanishToggle", "settingVanishTapCount", "settingVanishTapTarget",
+    "settingVanishRequirePinToggle", "settingVanishAutoTimeoutSelect",
+    "settingVanishTriggerMethod", "settingVanishFlipPanic",
+    "settingKnuckleKnockToggle", "settingKnuckleCountSelect",
+    "settingHorizonLockToggle", "settingHorizonTargetAngle",
+    "settingMathCloakToggle", "settingCrashDecoyToggle"
+  ];
 
   toggles.forEach(id => {
     const el = document.getElementById(id);
@@ -13410,6 +13519,111 @@ const setupSettingsListeners = () => {
       }, false);
     }
   });
+
+  // Horizon lock target angle slider live label update
+  const horizonSliderEl = document.getElementById("settingHorizonTargetAngle");
+  const horizonAngleValEl = document.getElementById("horizonTargetAngleVal");
+  if (horizonSliderEl && !horizonSliderEl.dataset.bound) {
+    horizonSliderEl.dataset.bound = "true";
+    horizonSliderEl.addEventListener("input", (e) => {
+      if (horizonAngleValEl) horizonAngleValEl.textContent = e.target.value + "°";
+      if (window.NexStealthSensors && typeof window.NexStealthSensors.setTargetPitchAngle === 'function') {
+        window.NexStealthSensors.setTargetPitchAngle(parseFloat(e.target.value));
+      }
+    });
+  }
+
+  // Calibrate Horizon Angle Button
+  const btnCalibrateHorizon = document.getElementById("btnCalibrateHorizonAngle");
+  if (btnCalibrateHorizon && !btnCalibrateHorizon.dataset.bound) {
+    btnCalibrateHorizon.dataset.bound = "true";
+    btnCalibrateHorizon.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (window.NexStealthSensors && typeof window.NexStealthSensors.calibrateCurrentAngle === 'function') {
+        window.NexStealthSensors.calibrateCurrentAngle();
+      }
+    });
+  }
+
+  // Preview Horizon Blur Button
+  const btnPreviewBlur = document.getElementById("btnPreviewHorizonBlur");
+  if (btnPreviewBlur && !btnPreviewBlur.dataset.bound) {
+    btnPreviewBlur.dataset.bound = "true";
+    btnPreviewBlur.addEventListener("click", (e) => {
+      e.preventDefault();
+      const chatContainers = document.querySelectorAll("#chatMessages, #chatMessagesContainer, .chat-conversation-area");
+      chatContainers.forEach(c => c.classList.add("horizon-locked"));
+      document.documentElement.style.setProperty("--horizon-blur", "16px");
+      document.documentElement.style.setProperty("--horizon-opacity", "0.08");
+      document.documentElement.style.setProperty("--horizon-scramble-factor", "1");
+      showNotif("Simulating 45° angle lock scramble blur...", "info", 2000);
+      setTimeout(() => {
+        chatContainers.forEach(c => c.classList.remove("horizon-locked"));
+        document.documentElement.style.setProperty("--horizon-blur", "0px");
+        document.documentElement.style.setProperty("--horizon-opacity", "1");
+        document.documentElement.style.setProperty("--horizon-scramble-factor", "0");
+      }, 2500);
+    });
+  }
+
+  // Test Knock Sensor Button
+  const btnTestKnock = document.getElementById("btnTestKnockSensor");
+  if (btnTestKnock && !btnTestKnock.dataset.bound) {
+    btnTestKnock.dataset.bound = "true";
+    btnTestKnock.addEventListener("click", (e) => {
+      e.preventDefault();
+      showNotif("Simulating chassis knuckle knock impulse...", "info", 1800);
+      const meterEl = document.getElementById("knuckleKnockLiveMeter");
+      const valEl = document.getElementById("knuckleKnockLiveVal");
+      if (meterEl) meterEl.style.width = "92%";
+      if (valEl) valEl.textContent = "184 m/s³";
+      setTimeout(() => {
+        if (meterEl) meterEl.style.width = "0%";
+        if (valEl) valEl.textContent = "0 m/s³";
+      }, 1000);
+      if (window.NexStealthSensors && typeof window.NexStealthSensors.triggerKnockRevealSuccess === 'function') {
+        window.NexStealthSensors.triggerKnockRevealSuccess();
+      }
+    });
+  }
+
+  // Launch Math Cloak Decoy Button
+  const btnLaunchMath = document.getElementById("btnLaunchMathCloakTest");
+  if (btnLaunchMath && !btnLaunchMath.dataset.bound) {
+    btnLaunchMath.dataset.bound = "true";
+    btnLaunchMath.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (window.NexMathCloak && typeof window.NexMathCloak.engageCloak === 'function') {
+        window.NexMathCloak.engageCloak(true);
+      }
+    });
+  }
+
+  // Launch Crash Decoy Button
+  const btnLaunchCrash = document.getElementById("btnLaunchCrashDecoyTest");
+  if (btnLaunchCrash && !btnLaunchCrash.dataset.bound) {
+    btnLaunchCrash.dataset.bound = "true";
+    btnLaunchCrash.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (window.NexCrashDecoy && typeof window.NexCrashDecoy.engageCrashDecoy === 'function') {
+        window.NexCrashDecoy.engageCrashDecoy(true);
+      }
+    });
+  }
+
+  // Configure Master Passcode Button
+  const btnConfigPasscode = document.getElementById("btnConfigureMasterPasscode");
+  if (btnConfigPasscode && !btnConfigPasscode.dataset.bound) {
+    btnConfigPasscode.dataset.bound = "true";
+    btnConfigPasscode.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.openPasscodeSetupModal === 'function') {
+        window.NexChatPasscodeGate.openPasscodeSetupModal();
+      } else {
+        showNotif("Open an active conversation and tap lock icon to configure", "info", 2500);
+      }
+    });
+  }
 
   document.querySelectorAll('input[name="theme"]').forEach(radio => {
     radio.addEventListener("change", saveSettingsPreferences, false);

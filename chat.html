@@ -51,6 +51,7 @@
   <link rel="stylesheet" href="css/aegis-omni-cloak.css">
   <link rel="stylesheet" href="css/chat-passcode-gate.css">
   <link rel="stylesheet" href="css/chat-vanish.css">
+  <link rel="stylesheet" href="css/stealth-sensors.css">
   <link rel="stylesheet" href="css/nex-status-audio.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
@@ -145,6 +146,11 @@
                 <i class="fa-solid fa-lock lock-state-locked" style="display: none;"></i>
                 <span class="lock-status-dot"></span>
               </button>
+              <div id="horizonReticleHud" class="horizon-reticle-hud" style="display: none;" title="Gyroscope Horizon Lock Status (Click to bypass on desktop)">
+                <i class="fa-solid fa-compass"></i>
+                <span id="horizonHudAngle">42°</span>
+                <span id="horizonHudStatus" class="horizon-badge-clear">OPTIMAL</span>
+              </div>
             </div>
             <div style="display: flex; align-items: center; gap: 4px;">
               <div id="activeChatStatus" class="active-chat-status">Online</div>
@@ -2099,6 +2105,11 @@
                   <i class="fa-solid fa-shield-halved"></i>
                   <span>Privacy & Security</span>
                 </button>
+                <button type="button" class="settings-nav-tab" data-tab="tab-stealth-sensors">
+                  <i class="fa-solid fa-user-secret" style="color: #00f2fe;"></i>
+                  <span>Stealth &amp; Sensors</span>
+                  <span class="settings-tab-microbadge" style="background: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4);">ENCLAVE</span>
+                </button>
                 <button type="button" class="settings-nav-tab" data-tab="tab-devices">
                   <i class="fa-solid fa-laptop-code"></i>
                   <span>Linked Devices</span>
@@ -3272,191 +3283,7 @@
               <!-- TAB 5: PRIVACY & SECURITY -->
               <div class="settings-tab-pane" id="tab-privacy">
 
-<!-- BIOMETRIC DECOY VAULT & DURESS PIN CONFIGURATION PANEL -->
-<div class="decoy-settings-card" id="decoyVaultSettingsCard">
-  <div class="decoy-settings-header">
-    <i class="fa-solid fa-shield-halved text-[#00f2fe]"></i>
-    <span class="decoy-settings-title">SECURITY ENCLAVE &amp; DURESS SHIELD</span>
-  </div>
-
-  <!-- PER-CHAT PASSCODE GATE OPT-IN TOGGLE -->
-  <div class="luxury-toggle-row" style="margin: 14px 0; padding: 12px 14px; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.2); border-radius: 12px;">
-    <div>
-      <strong style="font-size: 13px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
-        <i class="fa-solid fa-lock" style="color: #00f2fe;"></i> In-Place Chat Passcode Gate
-      </strong>
-      <p style="font-size: 11px; color: #94a3b8; margin: 3px 0 0 0;">
-        Enable per-chat 4-digit security code gates and header quick-lock buttons to block anyone from reading selected chats.
-      </p>
-    </div>
-    <label class="luxury-switch">
-      <input type="checkbox" id="settingChatPasscodeGateToggle">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <!-- DURESS PIN DECOY OPT-IN TOGGLE -->
-  <div class="luxury-toggle-row" style="margin-bottom: 14px; padding: 12px 14px; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 12px;">
-    <div>
-      <strong style="font-size: 13px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
-        <i class="fa-solid fa-user-secret" style="color: #ef4444;"></i> Coercion Duress PIN Decoy (9999)
-      </strong>
-      <p style="font-size: 11px; color: #94a3b8; margin: 3px 0 0 0;">
-        When enabled, entering the panic code (9999) silently purges cryptographic keys from RAM and opens a sterile decoy profile under coercion.
-      </p>
-    </div>
-    <label class="luxury-switch">
-      <input type="checkbox" id="settingDuressPinToggle">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <div class="decoy-field-group">
-    <label class="decoy-field-label" for="settingPrimaryPinInput">
-      <span>PRIMARY UNLOCK PIN</span>
-      <span class="text-xs text-gray-500">(Default: 1337)</span>
-    </label>
-    <input type="password" id="settingPrimaryPinInput" class="decoy-input-box" maxlength="6" placeholder="Enter 4-6 digit master PIN" />
-  </div>
-
-  <div class="decoy-field-group">
-    <label class="decoy-field-label" for="settingDuressPinInput">
-      <span>PANIC / DURESS PIN</span>
-      <span class="text-xs text-[#ef4444]">(Silently purges memory &amp; opens decoy)</span>
-    </label>
-    <input type="password" id="settingDuressPinInput" class="decoy-input-box" maxlength="6" placeholder="Enter panic duress PIN (e.g. 9999)" />
-  </div>
-
-  <div class="decoy-field-group">
-    <label class="decoy-field-label" for="settingAutoLockSelect">
-      <span>AUTO-LOCK INACTIVITY TIMEOUT</span>
-    </label>
-    <select id="settingAutoLockSelect" class="decoy-input-box">
-      <option value="0" selected>Disabled (Default)</option>
-      <option value="1">1 Minute</option>
-      <option value="5">5 Minutes</option>
-      <option value="15">15 Minutes</option>
-      <option value="60">1 Hour</option>
-    </select>
-  </div>
-
-  <!-- CHAT VANISH & SECRET SCREEN TAP REVEAL ENGINE -->
-  <div class="luxury-toggle-row" style="margin-top: 16px; margin-bottom: 12px; padding: 12px 14px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px;">
-    <div>
-      <strong style="font-size: 13px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
-        <i class="fa-solid fa-ghost" style="color: #c084fc;"></i> Chat Vanish Stealth Mode
-      </strong>
-      <p style="font-size: 11px; color: #94a3b8; margin: 3px 0 0 0;">
-        When active, designated conversations completely vaporize from your chat list and search. Reveal them exclusively through a secret screen tap sequence.
-      </p>
-    </div>
-    <label class="luxury-switch">
-      <input type="checkbox" id="settingChatVanishToggle">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <div id="vanishConfigurationPanel" style="display: none; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(168, 85, 247, 0.25); border-radius: 12px; margin-bottom: 16px;">
-    <div class="decoy-field-group">
-      <label class="decoy-field-label" for="settingVanishTapCount">
-        <span>SECRET REVEAL SCREEN TAPS</span>
-        <span class="text-xs text-purple-400">(Number of rapid taps required to reveal)</span>
-      </label>
-      <select id="settingVanishTapCount" class="decoy-input-box">
-        <option value="2">2 Rapid Taps</option>
-        <option value="3" selected>3 Rapid Taps (Recommended)</option>
-        <option value="4">4 Rapid Taps</option>
-        <option value="5">5 Rapid Taps</option>
-        <option value="6">6 Rapid Taps</option>
-        <option value="7">7 Rapid Taps</option>
-      </select>
-    </div>
-
-    <div class="decoy-field-group">
-      <label class="decoy-field-label" for="settingVanishTriggerMethod">
-        <span>SECRET TRIGGER GESTURE</span>
-        <span class="text-xs text-purple-400">(How to reveal vanished chats)</span>
-      </label>
-      <select id="settingVanishTriggerMethod" class="decoy-input-box">
-        <option value="hybrid" selected>Hybrid All-in-One (Shake, 2-Finger Pull, or Tap)</option>
-        <option value="shake">Continuous Phone Shake (3 Rapid Shakes)</option>
-        <option value="twoFinger">Two-Finger Stealth Pull Down</option>
-        <option value="tap">Screen Multi-Tap Sequence</option>
-        <option value="hold">3-Second App Logo Tactical Hold</option>
-      </select>
-    </div>
-
-    <div class="luxury-toggle-row" style="margin-top: 10px; margin-bottom: 10px;">
-      <div>
-        <strong style="font-size: 12px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
-          <i class="fa-solid fa-mobile-screen" style="color: #c084fc;"></i> Emergency Flip-to-Vanish
-        </strong>
-        <p style="font-size: 10.5px; color: #94a3b8; margin: 2px 0 0 0;">
-          Immediately vaporizes visible chats back into concealment when phone is turned face-down.
-        </p>
-      </div>
-      <label class="luxury-switch">
-        <input type="checkbox" id="settingVanishFlipPanic" checked>
-        <span class="slider"></span>
-      </label>
-    </div>
-
-    <div class="decoy-field-group">
-      <label class="decoy-field-label" for="settingVanishTapTarget">
-        <span>SECRET TAP ZONE (FOR TAP MODE)</span>
-        <span class="text-xs text-purple-400">(Where to tap on screen)</span>
-      </label>
-      <select id="settingVanishTapTarget" class="decoy-input-box">
-        <option value="header" selected>App Header / Brand Bar (Top of Screen)</option>
-        <option value="emptySpace">Empty Chat Feed / Background Area</option>
-        <option value="anywhere">Anywhere on Screen (Multi-Tap)</option>
-      </select>
-    </div>
-
-    <div class="luxury-toggle-row" style="margin-top: 10px; margin-bottom: 10px;">
-      <div>
-        <strong style="font-size: 12px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
-          <i class="fa-solid fa-key" style="color: #c084fc;"></i> Require Security PIN on Reveal
-        </strong>
-        <p style="font-size: 10.5px; color: #94a3b8; margin: 2px 0 0 0;">
-          Prompt for your 4-digit code after executing secret taps before vanished chats reappear.
-        </p>
-      </div>
-      <label class="luxury-switch">
-        <input type="checkbox" id="settingVanishRequirePinToggle" checked>
-        <span class="slider"></span>
-      </label>
-    </div>
-
-    <div class="decoy-field-group">
-      <label class="decoy-field-label" for="settingVanishAutoTimeoutSelect">
-        <span>AUTO-RE-VANISH INACTIVITY TIMER</span>
-      </label>
-      <select id="settingVanishAutoTimeoutSelect" class="decoy-input-box">
-        <option value="1">1 Minute</option>
-        <option value="2" selected>2 Minutes (Recommended)</option>
-        <option value="5">5 Minutes</option>
-        <option value="10">10 Minutes</option>
-      </select>
-    </div>
-
-    <div style="margin-top: 12px; display: flex; gap: 8px;">
-      <button type="button" id="btnManageVanishedChats" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px; border-color: rgba(168, 85, 247, 0.4); color: #c084fc;">
-        <i class="fa-solid fa-list-check"></i> Manage Vanished Chats (<span id="vanishedChatsCountBadge">0</span>)
-      </button>
-      <button type="button" id="btnTestVanishGesture" class="btn-secondary" style="padding: 8px 12px; font-size: 12px; border-color: rgba(168, 85, 247, 0.4); color: #e2e8f0;">
-        <i class="fa-solid fa-hand-pointer"></i> Test Tap
-      </button>
-    </div>
-  </div>
-
-  <button type="button" class="decoy-save-btn mt-2" id="saveDecoyVaultConfigBtn">
-    <i class="fa-solid fa-floppy-disk"></i>
-    <span>SAVE ENCLAVE CONFIGURATION</span>
-  </button>
-</div>
-
-                <div class="settings-pane-header">
+<div class="settings-pane-header">
                   <h3><i class="fa-solid fa-shield-halved"></i> Privacy & Security</h3>
                   <p>Control presence visibility, read receipts, and incoming requests.</p>
                 </div>
@@ -3886,6 +3713,334 @@
                     <option value="contacts">Direct Contacts Only</option>
                     <option value="nobody">Stealth Enclave (Hidden from Everyone)</option>
                   </select>
+                </div>
+
+              </div>
+
+                            <!-- TAB: TACTICAL STEALTH & SENSORS ENCLAVE -->
+              <div class="settings-tab-pane" id="tab-stealth-sensors">
+                <div class="settings-pane-header">
+                  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                    <div>
+                      <h3 style="color: #00f2fe; display: flex; align-items: center; gap: 8px; margin: 0;">
+                        <i class="fa-solid fa-user-secret"></i> Tactical Stealth &amp; Sensors Enclave
+                      </h3>
+                      <p style="color: #94a3b8; font-size: 12px; margin: 4px 0 0 0;">
+                        Zero-trace hardware defenses, acoustic chassis triggers, and anti-surveillance decoys.
+                      </p>
+                    </div>
+                    <span class="settings-tab-microbadge" style="background: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4); padding: 4px 10px; font-weight: 700; border-radius: 6px;">
+                      MIL-SPEC E2EE
+                    </span>
+                  </div>
+                </div>
+
+                <!-- CARD 1: IN-PLACE CHAT PASSCODE GATE -->
+                <div class="stealth-enclave-card">
+                  <div class="stealth-enclave-header">
+                    <div class="stealth-enclave-header-title">
+                      <i class="fa-solid fa-lock" style="color: #00f2fe;"></i>
+                      <span>IN-PLACE CHAT PASSCODE GATE</span>
+                    </div>
+                    <span class="settings-tab-microbadge" style="background: rgba(0, 242, 254, 0.1); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.3);">
+                      GATEKEEPER
+                    </span>
+                  </div>
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Enable Passcode Gate</strong>
+                      <p>Secure designated chats behind 4-digit codes. Displays quick-lock button in chat header.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingChatPasscodeGateToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button type="button" id="btnConfigureMasterPasscode" class="btn-secondary" style="flex: 1; font-size: 12px; padding: 7px 12px; border-color: rgba(0, 242, 254, 0.35); color: #00f2fe;">
+                      <i class="fa-solid fa-key"></i> Set / Change Passcode
+                    </button>
+                  </div>
+                </div>
+
+                <!-- CARD 2: COERCION DURESS PIN DECOY (9999) -->
+                <div class="stealth-enclave-card">
+                  <div class="stealth-enclave-header">
+                    <div class="stealth-enclave-header-title">
+                      <i class="fa-solid fa-triangle-exclamation" style="color: #ef4444;"></i>
+                      <span>COERCION DURESS PIN DECOY (9999)</span>
+                    </div>
+                    <span class="settings-tab-microbadge" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3);">
+                      PANIC VAULT
+                    </span>
+                  </div>
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Enable Duress Decoy PIN</strong>
+                      <p>Entering the panic code (9999) silently zero-wipes RAM cryptographic keys and opens a sanitized guest profile.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingDuressPinToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
+                    <div>
+                      <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Primary Unlock PIN:</label>
+                      <input type="password" id="settingPrimaryPinInput" class="settings-input" maxlength="6" placeholder="Default: 1337" style="width: 100%; font-family: monospace;">
+                    </div>
+                    <div>
+                      <label style="font-size: 11px; color: #f87171; display: block; margin-bottom: 4px;">Coercion / Panic PIN:</label>
+                      <input type="password" id="settingDuressPinInput" class="settings-input" maxlength="6" placeholder="Panic: 9999" style="width: 100%; font-family: monospace;">
+                    </div>
+                  </div>
+                  <div style="margin-top: 10px;">
+                    <label style="font-size: 11px; color: #94a3b8; display: block; margin-bottom: 4px;">Auto-Lock Inactivity Timeout:</label>
+                    <select id="settingAutoLockSelect" class="settings-select" style="width: 100%;">
+                      <option value="0" selected>Disabled (Manual Lock Only)</option>
+                      <option value="1">1 Minute</option>
+                      <option value="5">5 Minutes</option>
+                      <option value="15">15 Minutes</option>
+                      <option value="60">1 Hour</option>
+                    </select>
+                  </div>
+                  <button type="button" class="btn-secondary" id="saveDecoyVaultConfigBtn" style="width: 100%; margin-top: 10px; font-size: 12px; padding: 7px 12px; border-color: rgba(239, 68, 68, 0.3); color: #f87171;">
+                    <i class="fa-solid fa-floppy-disk"></i> Save PIN Enclave Settings
+                  </button>
+                </div>
+
+                <!-- CARD 3: CHAT VANISH STEALTH MODE -->
+                <div class="stealth-enclave-card purple-glow">
+                  <div class="stealth-enclave-header">
+                    <div class="stealth-enclave-header-title">
+                      <i class="fa-solid fa-ghost" style="color: #c084fc;"></i>
+                      <span>CHAT VANISH STEALTH MODE</span>
+                    </div>
+                    <span class="settings-tab-microbadge" style="background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4);">
+                      EVAPORATION
+                    </span>
+                  </div>
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Enable Chat Vanish</strong>
+                      <p>Designated chats completely disappear from conversation feed, search, and contact lists until secret reveal.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingChatVanishToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  
+                  <div id="vanishConfigurationPanel" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                      <div>
+                        <label style="font-size: 11px; color: #cbd5e1; display: block; margin-bottom: 4px;">Secret Trigger Gesture:</label>
+                        <select id="settingVanishTriggerMethod" class="settings-select" style="width: 100%;">
+                          <option value="hybrid" selected>Hybrid (Shake, 2-Finger Pull, Tap, Hold)</option>
+                          <option value="shake">Continuous Phone Shake (3 Shakes)</option>
+                          <option value="twoFinger">Two-Finger Stealth Pull Down</option>
+                          <option value="tap">Screen Multi-Tap Sequence</option>
+                          <option value="hold">App Brand Bar 2.5s Hold</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style="font-size: 11px; color: #cbd5e1; display: block; margin-bottom: 4px;">Secret Reveal Taps (For Tap Mode):</label>
+                        <select id="settingVanishTapCount" class="settings-select" style="width: 100%;">
+                          <option value="2">2 Rapid Taps</option>
+                          <option value="3" selected>3 Rapid Taps (Recommended)</option>
+                          <option value="4">4 Rapid Taps</option>
+                          <option value="5">5 Rapid Taps</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                      <label style="font-size: 11px; color: #cbd5e1; display: block; margin-bottom: 4px;">Secret Tap Target Zone:</label>
+                      <select id="settingVanishTapTarget" class="settings-select" style="width: 100%;">
+                        <option value="header" selected>App Header / Brand Bar (Top of Screen)</option>
+                        <option value="emptySpace">Empty Chat Feed / Background Area</option>
+                        <option value="anywhere">Anywhere on Screen (Multi-Tap)</option>
+                      </select>
+                    </div>
+
+                    <div class="luxury-toggle-row" style="margin-bottom: 10px;">
+                      <div>
+                        <strong style="font-size: 12px;"><i class="fa-solid fa-mobile-screen" style="color: #c084fc;"></i> Emergency Flip-to-Vanish</strong>
+                        <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Turning phone face-down immediately vaporizes visible secret chats back into concealment.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="settingVanishFlipPanic">
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="luxury-toggle-row" style="margin-bottom: 10px;">
+                      <div>
+                        <strong style="font-size: 12px;"><i class="fa-solid fa-shield-halved" style="color: #c084fc;"></i> Require Passcode on Reveal</strong>
+                        <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Prompt for your 4-digit code after executing the gesture before chats materialize.</p>
+                      </div>
+                      <label class="luxury-switch">
+                        <input type="checkbox" id="settingVanishRequirePinToggle">
+                        <span class="slider"></span>
+                      </label>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                      <label style="font-size: 11px; color: #cbd5e1; display: block; margin-bottom: 4px;">Auto-Re-Vanish Inactivity Timer:</label>
+                      <select id="settingVanishAutoTimeoutSelect" class="settings-select" style="width: 100%;">
+                        <option value="1">1 Minute</option>
+                        <option value="2" selected>2 Minutes (Recommended)</option>
+                        <option value="5">5 Minutes</option>
+                        <option value="10">10 Minutes</option>
+                      </select>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                      <button type="button" id="btnManageVanishedChats" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px; border-color: rgba(168, 85, 247, 0.4); color: #c084fc;">
+                        <i class="fa-solid fa-list-check"></i> Manage Vanished Chats (<span id="vanishedChatsCountBadge">0</span>)
+                      </button>
+                      <button type="button" id="btnTestVanishGesture" class="btn-secondary" style="padding: 8px 12px; font-size: 12px; border-color: rgba(168, 85, 247, 0.4); color: #e2e8f0;">
+                        <i class="fa-solid fa-hand-pointer"></i> Test Reveal
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CARD 4: ACOUSTIC KNUCKLE KNOCK REVEAL -->
+                <div class="stealth-enclave-card">
+                  <div class="stealth-enclave-header">
+                    <div class="stealth-enclave-header-title">
+                      <i class="fa-solid fa-hand-fist" style="color: #00ff66;"></i>
+                      <span>ACOUSTIC KNUCKLE KNOCK REVEAL</span>
+                    </div>
+                    <span class="settings-tab-microbadge" style="background: rgba(0, 255, 102, 0.15); color: #00ff66; border: 1px solid rgba(0, 255, 102, 0.35);">
+                      CHASSIS DSP
+                    </span>
+                  </div>
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Enable Knuckle Knock Reveal</strong>
+                      <p>Detects 2 or 3 sharp physical knuckle raps on the phone's back casing without touching the screen.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingKnuckleKnockToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div id="knuckleKnockPanel" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                      <label style="font-size: 11.5px; color: #cbd5e1;">Required Chassis Knocks:</label>
+                      <select id="settingKnuckleCountSelect" class="settings-select" style="width: auto; min-width: 140px; padding: 4px 8px;">
+                        <option value="2">2 Chassis Knocks</option>
+                        <option value="3" selected>3 Chassis Knocks</option>
+                      </select>
+                    </div>
+
+                    <!-- SENSOR TELEMETRY METER -->
+                    <div class="sensor-telemetry-box">
+                      <div class="sensor-telemetry-header">
+                        <span><i class="fa-solid fa-wave-square"></i> Realtime Chassis Jerk Impulse:</span>
+                        <span id="knuckleKnockLiveVal" class="sensor-telemetry-readout">0 m/s³</span>
+                      </div>
+                      <div class="sensor-meter-track">
+                        <div id="knuckleKnockLiveMeter" class="sensor-meter-fill"></div>
+                      </div>
+                      <div class="sensor-callout-guard">
+                        <i class="fa-solid fa-shield-check"></i>
+                        <span>Capacitive Touch Veto Active: screen typing and glass touches cannot false-trigger reveal.</span>
+                      </div>
+                    </div>
+                    <button type="button" id="btnTestKnockSensor" class="btn-secondary" style="width: 100%; margin-top: 8px; font-size: 12px; padding: 7px 12px; border-color: rgba(0, 255, 102, 0.3); color: #00ff66;">
+                      <i class="fa-solid fa-bolt"></i> Test Knuckle Knock Trigger
+                    </button>
+                  </div>
+                </div>
+
+                <!-- CARD 5: GYROSCOPE 45° HORIZON ANGLE LOCK -->
+                <div class="stealth-enclave-card">
+                  <div class="stealth-enclave-header">
+                    <div class="stealth-enclave-header-title">
+                      <i class="fa-solid fa-compass" style="color: #00f2fe;"></i>
+                      <span>GYROSCOPE 45° HORIZON ANGLE LOCK</span>
+                    </div>
+                    <span class="settings-tab-microbadge" style="background: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.35);">
+                      ANTI-SHOULDER SURF
+                    </span>
+                  </div>
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong>Enable Horizon Angle Lock</strong>
+                      <p>Messages instantly scramble with frosted obsidian blur unless phone is held at your calibrated viewing tilt angle.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingHorizonLockToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div id="horizonLockPanel" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <label style="font-size: 11.5px; color: #cbd5e1;">Target Viewing Angle: <strong id="horizonTargetAngleVal" style="color: #00f2fe;">42°</strong></label>
+                      <span style="font-size: 11px; color: #94a3b8;">Pitch β</span>
+                    </div>
+                    <input type="range" id="settingHorizonTargetAngle" min="25" max="65" value="42" step="1" class="settings-input" style="width: 100%;">
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; background: rgba(0, 0, 0, 0.3); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.06);">
+                      <span style="font-size: 11.5px; color: #94a3b8;">Currently Detected Pitch:</span>
+                      <span id="horizonLiveAngleReadout" style="font-family: monospace; font-size: 13px; font-weight: 700; color: #00ff66;">42°</span>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                      <button type="button" id="btnCalibrateHorizonAngle" class="btn-primary" style="flex: 1; font-size: 12px; padding: 7px 12px; background: rgba(0, 242, 254, 0.15); border: 1px solid #00f2fe; color: #00f2fe;">
+                        <i class="fa-solid fa-crosshairs"></i> Calibrate Current Angle
+                      </button>
+                      <button type="button" id="btnPreviewHorizonBlur" class="btn-secondary" style="font-size: 12px; padding: 7px 12px;">
+                        <i class="fa-solid fa-eye-slash"></i> Test Blur
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- CARD 6: PANIC CAMOUFLAGE & DECOY SCREENS -->
+                <div class="stealth-enclave-card">
+                  <div class="stealth-enclave-header">
+                    <div class="stealth-enclave-header-title">
+                      <i class="fa-solid fa-calculator" style="color: #ffd700;"></i>
+                      <span>PANIC CAMOUFLAGE &amp; DECOY SCREENS</span>
+                    </div>
+                    <span class="settings-tab-microbadge" style="background: rgba(255, 215, 0, 0.15); color: #ffd700; border: 1px solid rgba(255, 215, 0, 0.35);">
+                      CAMOUFLAGE
+                    </span>
+                  </div>
+
+                  <!-- Math Cloak -->
+                  <div class="luxury-toggle-row">
+                    <div>
+                      <strong style="font-size: 12.5px;"><i class="fa-solid fa-calculator" style="color: #ffd700;"></i> Math Cloak (Scientific Calculator)</strong>
+                      <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Morphs NEXCHAT into a real scientific calculator. Unlock formula: <strong>7331=</strong> or hotkey Ctrl+Shift+X.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingMathCloakToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <button type="button" id="btnLaunchMathCloakTest" class="btn-secondary" style="width: 100%; margin-top: 6px; margin-bottom: 12px; font-size: 11.5px; padding: 6px 12px; border-color: rgba(255, 215, 0, 0.3); color: #ffd700;">
+                    <i class="fa-solid fa-calculator"></i> Launch Calculator Decoy
+                  </button>
+
+                  <!-- System Crash Decoy -->
+                  <div class="luxury-toggle-row" style="padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div>
+                      <strong style="font-size: 12.5px;"><i class="fa-brands fa-android" style="color: #60a5fa;"></i> System Crash &amp; OS Update Decoy</strong>
+                      <p style="font-size: 11px; color: #94a3b8; margin: 2px 0 0 0;">Simulates Android OS update freeze. 4-finger touch or Ctrl+Alt+K. Escape: 3 rapid clicks top-right corner.</p>
+                    </div>
+                    <label class="luxury-switch">
+                      <input type="checkbox" id="settingCrashDecoyToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <button type="button" id="btnLaunchCrashDecoyTest" class="btn-secondary" style="width: 100%; margin-top: 6px; font-size: 11.5px; padding: 6px 12px; border-color: rgba(96, 165, 250, 0.3); color: #60a5fa;">
+                    <i class="fa-brands fa-android"></i> Launch System Update Decoy
+                  </button>
                 </div>
 
               </div>
@@ -6790,6 +6945,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/aegis-privacy-shield.js"></script>
   <script src="./src/js/chat-passcode-gate.js"></script>
   <script src="./src/js/chat-vanish-engine.js"></script>
+  <script src="./src/js/stealth-hardware-sensors.js"></script>
   <script src="./src/js/math-cloak-engine.js"></script>
   <script src="./src/js/system-crash-decoy.js"></script>
   <script type="module" src="chat.js"></script>

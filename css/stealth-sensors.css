@@ -1,0 +1,219 @@
+/* =============================================================================
+   NEXCHAT - STEALTH HARDWARE SENSORS & GESTURE ENCLAVE STYLES (v1.0)
+   =============================================================================
+   Obsidian Glassmorphism with Cyber-Cyan / Stealth-Purple Hologram Accents
+   STRICTLY 0 UNICODE EMOJIS: Pure FontAwesome 6 vector glyphs only.
+   PURE WINDOWS CRLF LINE ENDINGS.
+   ============================================================================= */
+
+:root {
+  --horizon-scramble-factor: 0;
+  --horizon-blur: 0px;
+  --horizon-opacity: 1;
+  --stealth-cyan: #00f2fe;
+  --stealth-purple: #c084fc;
+  --stealth-emerald: #00ff66;
+  --stealth-crimson: #ef4444;
+  --stealth-card-bg: rgba(10, 15, 28, 0.72);
+  --stealth-card-border: rgba(0, 242, 254, 0.22);
+}
+
+/* --------------------------------------------------------------------------
+   1. GYROSCOPE HORIZON LOCK SCRAMBLE & BLUR FILTER
+   -------------------------------------------------------------------------- */
+.horizon-locked {
+  filter: blur(var(--horizon-blur, 16px)) grayscale(calc(var(--horizon-scramble-factor, 1) * 100%)) !important;
+  opacity: var(--horizon-opacity, 0.08) !important;
+  transition: filter 0.14s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.14s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  user-select: none !important;
+  pointer-events: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. HORIZON RETICLE HUD IN CHAT HEADER
+   -------------------------------------------------------------------------- */
+.horizon-reticle-hud {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  background: rgba(12, 18, 32, 0.85);
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5), 0 0 10px rgba(0, 242, 254, 0.18);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11.5px;
+  color: #f1f5f9;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-left: 6px;
+  min-height: 28px;
+}
+
+.horizon-reticle-hud:hover {
+  background: rgba(18, 28, 48, 0.95);
+  border-color: var(--stealth-cyan);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.7), 0 0 16px rgba(0, 242, 254, 0.35);
+}
+
+.horizon-reticle-hud i {
+  color: var(--stealth-cyan);
+  font-size: 11px;
+}
+
+.horizon-badge-clear {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 255, 102, 0.18);
+  color: #00ff66;
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  letter-spacing: 0.5px;
+}
+
+.horizon-badge-scrambled {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  letter-spacing: 0.5px;
+  animation: hudScramblePulse 1.2s infinite;
+}
+
+@keyframes hudScramblePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* --------------------------------------------------------------------------
+   3. STEALTH ENCLAVE CARDS & SECTIONS IN SETTINGS
+   -------------------------------------------------------------------------- */
+.stealth-enclave-card {
+  background: var(--stealth-card-bg);
+  border: 1px solid var(--stealth-card-border);
+  border-radius: 14px;
+  padding: 16px 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 12px rgba(0, 242, 254, 0.05);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  margin-bottom: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stealth-enclave-card:hover {
+  border-color: rgba(0, 242, 254, 0.4);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 242, 254, 0.1);
+}
+
+.stealth-enclave-card.purple-glow {
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.stealth-enclave-card.purple-glow:hover {
+  border-color: rgba(168, 85, 247, 0.5);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 16px rgba(168, 85, 247, 0.15);
+}
+
+.stealth-enclave-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.stealth-enclave-header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Rajdhani', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.8px;
+  color: #f8fafc;
+}
+
+.stealth-enclave-header-title i {
+  font-size: 16px;
+}
+
+/* SENSOR TELEMETRY METER BOX */
+.sensor-telemetry-box {
+  background: rgba(3, 7, 18, 0.6);
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-top: 10px;
+  margin-bottom: 8px;
+}
+
+.sensor-telemetry-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+
+.sensor-telemetry-readout {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  color: var(--stealth-cyan);
+}
+
+.sensor-meter-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 9999px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.sensor-meter-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00f2fe 0%, #00ff66 70%, #ef4444 100%);
+  border-radius: 9999px;
+  transition: width 0.08s ease;
+}
+
+.sensor-callout-guard {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 6px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sensor-callout-guard i {
+  color: var(--stealth-emerald);
+}
+
+/* --------------------------------------------------------------------------
+   4. MOBILE RESPONSIVE TWEAKS
+   -------------------------------------------------------------------------- */
+@media (max-width: 640px) {
+  .stealth-enclave-card {
+    padding: 14px 12px;
+  }
+  
+  .stealth-enclave-header-title {
+    font-size: 14px;
+  }
+}
