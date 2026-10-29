@@ -92,11 +92,15 @@
   left: 0 !important;
   right: 0 !important;
   z-index: 95 !important;
-  display: flex !important;
+  display: none !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 16px !important;
   box-sizing: border-box !important;
+}
+
+.chat-passcode-gate-overlay.active {
+  display: flex !important;
   animation: nexGateFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
 }
 
@@ -394,7 +398,7 @@
   position: fixed !important;
   inset: 0 !important;
   z-index: 100060 !important;
-  display: flex !important;
+  display: none !important;
   align-items: center !important;
   justify-content: center !important;
   background: rgba(3, 7, 18, 0.85) !important;
@@ -402,6 +406,10 @@
   -webkit-backdrop-filter: blur(20px) !important;
   padding: 16px !important;
   box-sizing: border-box !important;
+}
+
+.chat-passcode-setup-modal.active {
+  display: flex !important;
 }
 
 .chat-passcode-setup-card {

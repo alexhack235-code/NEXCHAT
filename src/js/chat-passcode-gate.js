@@ -69,6 +69,8 @@
     bindDOM() {
       if (this._hasBoundEvents) return;
       this._hasBoundEvents = true;
+      this.dismountGate();
+      this.closeSetupModal();
 
       // 1. Bind Header Lock Toggle Buttons (Desktop & Top Bar)
       const bindLockBtn = (btnId) => {
@@ -184,9 +186,9 @@
 
     isFeatureEnabled() {
       try {
-        return localStorage.getItem('nex_enable_chat_passcode_gate') !== 'false';
+        return localStorage.getItem('nex_enable_chat_passcode_gate') === 'true';
       } catch (_) {
-        return true;
+        return false;
       }
     }
 
@@ -202,9 +204,9 @@
 
     isDuressEnabled() {
       try {
-        return localStorage.getItem('nex_enable_duress_pin') !== 'false';
+        return localStorage.getItem('nex_enable_duress_pin') === 'true';
       } catch (_) {
-        return true;
+        return false;
       }
     }
 
@@ -333,7 +335,8 @@
         messagesDiv.innerHTML = '';
       }
 
-      overlay.style.display = 'flex';
+      overlay.classList.add('active');
+      overlay.style.setProperty('display', 'flex', 'important');
       overlay.setAttribute('aria-hidden', 'false');
 
       // Bind physical keyboard
@@ -371,7 +374,8 @@
 
       const overlay = document.getElementById('chatPasscodeGateOverlay');
       if (overlay) {
-        overlay.style.display = 'none';
+        overlay.classList.remove('active');
+        overlay.style.setProperty('display', 'none', 'important');
         overlay.setAttribute('aria-hidden', 'true');
       }
 
@@ -525,7 +529,8 @@
         removeBtn.style.display = isRegistered ? 'inline-flex' : 'none';
       }
 
-      modal.style.display = 'flex';
+      modal.classList.add('active');
+      modal.style.setProperty('display', 'flex', 'important');
       modal.setAttribute('aria-hidden', 'false');
       if (inputPin) inputPin.focus();
     }
@@ -533,7 +538,8 @@
     closeSetupModal() {
       const modal = document.getElementById('chatPasscodeSetupModal');
       if (modal) {
-        modal.style.display = 'none';
+        modal.classList.remove('active');
+        modal.style.setProperty('display', 'none', 'important');
         modal.setAttribute('aria-hidden', 'true');
       }
     }

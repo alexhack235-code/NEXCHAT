@@ -3039,6 +3039,27 @@ async function showChatContextMenu(event, chatId) {
   };
   menu.appendChild(archiveBtn);
 
+  // Dynamic Vanish / Unvanish Chat (Secret Screen Tap Engine)
+  if (window.NexChatVanish && typeof window.NexChatVanish.isChatVanished === 'function') {
+    const isVanished = window.NexChatVanish.isChatVanished(chatId);
+    const vanishBtn = createMenuBtn(
+      isVanished
+        ? '<i class="fa-solid fa-eye" style="width:16px;"></i> Unvanish Chat'
+        : '<i class="fa-solid fa-ghost" style="width:16px;"></i> Vanish Chat (Stealth)',
+      isVanished ? "#00f2fe" : "#c084fc",
+      true
+    );
+    vanishBtn.onclick = () => {
+      menu.remove();
+      if (isVanished) {
+        window.NexChatVanish.unvanishChat(chatId);
+      } else {
+        window.NexChatVanish.vanishChat(chatId);
+      }
+    };
+    menu.appendChild(vanishBtn);
+  }
+
   // Dynamic Lock / Unlock Button
   const isLocked = (window.NexLockedChats && window.NexLockedChats.isChatLocked(chatId));
   const lockBtn = createMenuBtn(
@@ -11750,6 +11771,42 @@ function loadSettingsPreferences() {
       voiceAttachSubtitleEl.checked = localStorage.getItem("nex_voice_attach_subtitle") === "true";
     }
 
+    // Chat Passcode Gate and Duress PIN (OFF by default)
+    const passcodeGateEl = document.getElementById("settingChatPasscodeGateToggle");
+    const duressPinEl = document.getElementById("settingDuressPinToggle");
+    if (passcodeGateEl) {
+      passcodeGateEl.checked = localStorage.getItem("nex_enable_chat_passcode_gate") === "true";
+    }
+    if (duressPinEl) {
+      duressPinEl.checked = localStorage.getItem("nex_enable_duress_pin") === "true";
+    }
+
+    // Chat Vanish & Secret Screen Tap Reveal Settings (OFF by default)
+    const chatVanishToggle = document.getElementById("settingChatVanishToggle");
+    const vanishTapCount = document.getElementById("settingVanishTapCount");
+    const vanishTapTarget = document.getElementById("settingVanishTapTarget");
+    const vanishRequirePin = document.getElementById("settingVanishRequirePinToggle");
+    const vanishAutoTimeout = document.getElementById("settingVanishAutoTimeoutSelect");
+    const vanishPanel = document.getElementById("vanishConfigurationPanel");
+
+    if (chatVanishToggle) {
+      const isVanishOn = localStorage.getItem("nex_chat_vanish_enabled") === "true";
+      chatVanishToggle.checked = isVanishOn;
+      if (vanishPanel) vanishPanel.style.display = isVanishOn ? "block" : "none";
+    }
+    if (vanishTapCount) {
+      vanishTapCount.value = localStorage.getItem("nex_vanish_tap_count") || "3";
+    }
+    if (vanishTapTarget) {
+      vanishTapTarget.value = localStorage.getItem("nex_vanish_tap_target") || "header";
+    }
+    if (vanishRequirePin) {
+      vanishRequirePin.checked = localStorage.getItem("nex_vanish_require_pin") !== "false";
+    }
+    if (vanishAutoTimeout) {
+      vanishAutoTimeout.value = localStorage.getItem("nex_vanish_auto_timeout") || "2";
+    }
+
     applyBubbleTheme(prefs.bubbleTheme || "neon-onyx");
 
     const lastSeenSelect = document.getElementById("lastSeenPrivacySelect");
@@ -13339,7 +13396,7 @@ document.getElementById("settingsModal")?.addEventListener("click", (e) => {
 }, false);
 
 const setupSettingsListeners = () => {
-  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle", "autoVoiceNoteTranslateToggle", "voiceNoteAttachSubtitleToggle", "settingChatPasscodeGateToggle", "settingDuressPinToggle"];
+  const toggles = ["notifToggle", "soundToggle", "onlineStatusToggle", "readReceiptsToggle", "selfAIAutoResponderToggle", "autoTranslateOnLoadToggle", "autoTranslateShowOriginalToggle", "autoVoiceNoteTranslateToggle", "voiceNoteAttachSubtitleToggle", "settingChatPasscodeGateToggle", "settingDuressPinToggle", "settingChatVanishToggle", "settingVanishTapCount", "settingVanishTapTarget", "settingVanishRequirePinToggle", "settingVanishAutoTimeoutSelect"];
 
   toggles.forEach(id => {
     const el = document.getElementById(id);
@@ -18533,7 +18590,7 @@ async function loadContacts() {
       snapIn.forEach(docSnap => {
         const d = docSnap.data();
         if (d.from && d.from !== myUID) {
-          if (!archivedChats.includes(d.from) && !lockedChats.includes(d.from) && !deletedChats.includes(d.from)) {
+          if (!archivedChats.includes(d.from) && !lockedChats.includes(d.from) && !deletedChats.includes(d.from) && !vanishedChats.includes(d.from)) {
             const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
             if (!partnerMap.has(d.from) || ts > partnerMap.get(d.from)) partnerMap.set(d.from, ts);
           }
@@ -18542,7 +18599,7 @@ async function loadContacts() {
       snapOut.forEach(docSnap => {
         const d = docSnap.data();
         if (d.to && d.to !== myUID) {
-          if (!archivedChats.includes(d.to) && !lockedChats.includes(d.to) && !deletedChats.includes(d.to)) {
+          if (!archivedChats.includes(d.to) && !lockedChats.includes(d.to) && !deletedChats.includes(d.to) && !vanishedChats.includes(d.to)) {
             const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
             if (!partnerMap.has(d.to) || ts > partnerMap.get(d.to)) partnerMap.set(d.to, ts);
           }
@@ -18561,13 +18618,14 @@ async function loadContacts() {
           uid !== 'chronex-ai' &&
           !archivedChats.includes(uid) &&
           !lockedChats.includes(uid) &&
-          !deletedChats.includes(uid)
+          !deletedChats.includes(uid) &&
+          !vanishedChats.includes(uid)
         );
         top10Contacts.push(...otherContacts.slice(0, 10 - top10Contacts.length));
       }
     } catch (err) {
       console.warn("Recent conversations optimization failed, falling back to simplified list:", err);
-      top10Contacts = [...rawContacts].reverse().filter(uid => !archivedChats.includes(uid) && !lockedChats.includes(uid) && !deletedChats.includes(uid)).slice(0, 10);
+      top10Contacts = [...rawContacts].reverse().filter(uid => !archivedChats.includes(uid) && !lockedChats.includes(uid) && !deletedChats.includes(uid) && !vanishedChats.includes(uid)).slice(0, 10);
     }
 
     const myContacts = top10Contacts;
@@ -18721,7 +18779,7 @@ async function loadContacts() {
         </div>
         <div class="chat-item-content ${unreadCount > 0 ? 'unread' : ''}">
           <div class="chat-item-header">
-            <span class="chat-name">${escape(name)}</span>
+            <span class="chat-name">${escape(name)}</span>${(window.NexChatVanish && window.NexChatVanish.isChatVanished(uid)) ? '<span class="vanish-chat-badge" title="Vanished Chat (Active Stealth Reveal)"><i class="fa-solid fa-ghost"></i></span>' : ''}
           </div>
           <p class="chat-preview">${lastMessageSnippet}</p>
         </div>
@@ -23267,3 +23325,10 @@ function setupWhatsAppLockedChatsPullToReveal() {
     systemRows.classList.add('revealed');
   }
 }
+
+// Re-render contact list whenever Vanish state changes (reveal, conceal, vanish, unvanish)
+window.addEventListener('nex:vanish:stateChanged', () => {
+  if (typeof loadContacts === 'function') {
+    loadContacts();
+  }
+});

@@ -1,0 +1,399 @@
+/**
+ * =============================================================================
+ * NEXCHAT - CHAT VANISH & SECRET SCREEN TAP REVEAL STYLES (v1.0)
+ * =============================================================================
+ * Pure Obsidian Glassmorphism with Cyber-Purple Stealth Accents (#c084fc / #a855f7)
+ * STRICTLY 0 UNICODE EMOJIS: Pure FontAwesome 6 vector glyphs only.
+ * PURE WINDOWS CRLF LINE ENDINGS.
+ * =============================================================================
+ */
+
+/* --------------------------------------------------------------------------
+   1. FLOATING STEALTH REVEAL BANNER
+   -------------------------------------------------------------------------- */
+.vanish-stealth-banner {
+  position: fixed !important;
+  top: 12px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 99990 !important;
+  display: none;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 8px 16px !important;
+  background: rgba(15, 12, 28, 0.94) !important;
+  border: 1px solid rgba(168, 85, 247, 0.45) !important;
+  border-radius: 9999px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75), 0 0 16px rgba(168, 85, 247, 0.25) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  color: #f1f5f9 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  animation: vanishBannerSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+.vanish-stealth-banner.active {
+  display: flex !important;
+}
+
+@keyframes vanishBannerSlideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.vanish-banner-pulse-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: #a855f7 !important;
+  box-shadow: 0 0 8px #c084fc !important;
+  animation: vanishDotPulse 1.4s infinite !important;
+}
+
+@keyframes vanishDotPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.4;
+    transform: scale(0.75);
+  }
+}
+
+.vanish-banner-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: #e2e8f0 !important;
+  letter-spacing: 0.5px !important;
+  text-transform: uppercase !important;
+  font-size: 11px !important;
+}
+
+.vanish-banner-timer {
+  color: #c084fc !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 12px !important;
+  background: rgba(168, 85, 247, 0.15) !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(168, 85, 247, 0.25) !important;
+}
+
+.btn-vanish-now {
+  min-height: 36px !important;
+  min-width: 44px !important;
+  padding: 4px 12px !important;
+  border-radius: 9999px !important;
+  border: 1px solid rgba(239, 68, 68, 0.4) !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.15s ease !important;
+}
+
+.btn-vanish-now:hover, .btn-vanish-now:active {
+  background: rgba(239, 68, 68, 0.3) !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+}
+
+/* --------------------------------------------------------------------------
+   2. SECRET REVEAL PIN MODAL
+   -------------------------------------------------------------------------- */
+.vanish-pin-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 100070 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(4, 7, 15, 0.88) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.vanish-pin-modal.active {
+  display: flex !important;
+  animation: vanishModalFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+}
+
+@keyframes vanishModalFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.vanish-pin-card {
+  width: 100% !important;
+  max-width: 360px !important;
+  background: linear-gradient(160deg, rgba(20, 16, 36, 0.98) 0%, rgba(8, 6, 18, 0.99) 100%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.4) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 24px rgba(168, 85, 247, 0.2) !important;
+  padding: 24px 20px !important;
+  box-sizing: border-box !important;
+  text-align: center !important;
+  color: #f1f5f9 !important;
+  position: relative !important;
+}
+
+.vanish-pin-halo {
+  width: 54px !important;
+  height: 54px !important;
+  margin: 0 auto 14px auto !important;
+  border-radius: 50% !important;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.25) 0%, rgba(168, 85, 247, 0.05) 70%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 24px !important;
+  color: #c084fc !important;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.3) !important;
+}
+
+.vanish-pin-title {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  color: #ffffff !important;
+  margin: 0 0 4px 0 !important;
+  text-transform: uppercase !important;
+}
+
+.vanish-pin-subtitle {
+  font-size: 11.5px !important;
+  color: #94a3b8 !important;
+  margin: 0 0 18px 0 !important;
+}
+
+.vanish-pin-dots {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  margin: 0 auto 20px auto !important;
+}
+
+.vanish-pin-dot {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  border: 2px solid rgba(168, 85, 247, 0.4) !important;
+  background: transparent !important;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.vanish-pin-dot.filled {
+  background: #c084fc !important;
+  border-color: #c084fc !important;
+  box-shadow: 0 0 10px #c084fc !important;
+  transform: scale(1.15) !important;
+}
+
+.vanish-pin-dot.error {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 10px #ef4444 !important;
+}
+
+.vanish-keypad-matrix {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
+  max-width: 270px !important;
+  margin: 0 auto 12px auto !important;
+}
+
+.vanish-keypad-btn {
+  min-height: 50px !important;
+  min-width: 50px !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.12s ease !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+.vanish-keypad-btn:hover, .vanish-keypad-btn:active {
+  background: rgba(168, 85, 247, 0.2) !important;
+  border-color: rgba(168, 85, 247, 0.5) !important;
+  color: #c084fc !important;
+}
+
+.vanish-pin-feedback {
+  font-size: 11px !important;
+  color: #ef4444 !important;
+  margin: 6px 0 !important;
+  min-height: 16px !important;
+  display: none;
+}
+
+.vanish-pin-feedback.visible {
+  display: block !important;
+}
+
+.vanish-pin-close-btn {
+  position: absolute !important;
+  top: 12px !important;
+  right: 12px !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  background: transparent !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 14px !important;
+  transition: color 0.15s !important;
+}
+
+.vanish-pin-close-btn:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* --------------------------------------------------------------------------
+   3. VANISH MANAGEMENT MODAL
+   -------------------------------------------------------------------------- */
+.vanish-manage-modal {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 100065 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(3, 7, 18, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+.vanish-manage-modal.active {
+  display: flex !important;
+}
+
+.vanish-manage-card {
+  width: 100% !important;
+  max-width: 480px !important;
+  max-height: 85vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: linear-gradient(155deg, rgba(16, 20, 36, 0.98) 0%, rgba(6, 8, 18, 0.99) 100%) !important;
+  border: 1px solid rgba(168, 85, 247, 0.35) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 24px rgba(168, 85, 247, 0.15) !important;
+  overflow: hidden !important;
+  color: #f1f5f9 !important;
+}
+
+.vanish-manage-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 16px 20px !important;
+  background: rgba(12, 16, 28, 0.9) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.vanish-manage-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-size: 13.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.6px !important;
+  color: #ffffff !important;
+}
+
+.vanish-manage-body {
+  padding: 16px 20px !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
+}
+
+.vanish-manage-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+}
+
+.vanish-manage-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 10px 14px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 12px !important;
+  transition: all 0.15s ease !important;
+}
+
+.vanish-manage-item:hover {
+  background: rgba(168, 85, 247, 0.08) !important;
+  border-color: rgba(168, 85, 247, 0.25) !important;
+}
+
+.vanish-item-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.vanish-item-name {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #f8fafc !important;
+}
+
+.vanish-item-status {
+  font-size: 10.5px !important;
+  color: #94a3b8 !important;
+}
+
+/* --------------------------------------------------------------------------
+   4. CHAT LIST STEALTH BADGE
+   -------------------------------------------------------------------------- */
+.vanish-chat-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  color: #c084fc !important;
+  background: rgba(168, 85, 247, 0.15) !important;
+  border: 1px solid rgba(168, 85, 247, 0.3) !important;
+  border-radius: 6px !important;
+  padding: 2px 6px !important;
+  margin-left: 6px !important;
+  letter-spacing: 0.4px !important;
+}

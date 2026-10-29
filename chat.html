@@ -50,6 +50,7 @@
   <link rel="stylesheet" href="css/tactical-pinboard.css">
   <link rel="stylesheet" href="css/aegis-omni-cloak.css">
   <link rel="stylesheet" href="css/chat-passcode-gate.css">
+  <link rel="stylesheet" href="css/chat-vanish.css">
   <link rel="stylesheet" href="css/nex-status-audio.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
@@ -1046,7 +1047,7 @@
         <!-- ========================================================================= -->
         <!-- CHAT PASSCODE BLOCKER GATE OVERLAY (OBSIDIAN GLASS)                       -->
         <!-- ========================================================================= -->
-        <div id="chatPasscodeGateOverlay" class="chat-passcode-gate-overlay" style="display: none;" aria-hidden="true">
+        <div id="chatPasscodeGateOverlay" class="chat-passcode-gate-overlay" style="display: none !important;" aria-hidden="true">
           <div class="passcode-gate-scrim"></div>
           <div class="passcode-gate-card" id="chatPasscodeGateCard">
             <div class="passcode-gate-icon-halo">
@@ -3289,7 +3290,7 @@
       </p>
     </div>
     <label class="luxury-switch">
-      <input type="checkbox" id="settingChatPasscodeGateToggle" checked>
+      <input type="checkbox" id="settingChatPasscodeGateToggle">
       <span class="slider"></span>
     </label>
   </div>
@@ -3305,7 +3306,7 @@
       </p>
     </div>
     <label class="luxury-switch">
-      <input type="checkbox" id="settingDuressPinToggle" checked>
+      <input type="checkbox" id="settingDuressPinToggle">
       <span class="slider"></span>
     </label>
   </div>
@@ -3331,14 +3332,93 @@
       <span>AUTO-LOCK INACTIVITY TIMEOUT</span>
     </label>
     <select id="settingAutoLockSelect" class="decoy-input-box">
-      <option value="1">1 Minute</option>
-      <option value="5">5 Minutes</option>
       <option value="0" selected>Disabled (Default)</option>
       <option value="1">1 Minute</option>
       <option value="5">5 Minutes</option>
       <option value="15">15 Minutes</option>
       <option value="60">1 Hour</option>
     </select>
+  </div>
+
+  <!-- CHAT VANISH & SECRET SCREEN TAP REVEAL ENGINE -->
+  <div class="luxury-toggle-row" style="margin-top: 16px; margin-bottom: 12px; padding: 12px 14px; background: rgba(168, 85, 247, 0.08); border: 1px solid rgba(168, 85, 247, 0.3); border-radius: 12px;">
+    <div>
+      <strong style="font-size: 13px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-ghost" style="color: #c084fc;"></i> Chat Vanish Stealth Mode
+      </strong>
+      <p style="font-size: 11px; color: #94a3b8; margin: 3px 0 0 0;">
+        When active, designated conversations completely vaporize from your chat list and search. Reveal them exclusively through a secret screen tap sequence.
+      </p>
+    </div>
+    <label class="luxury-switch">
+      <input type="checkbox" id="settingChatVanishToggle">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div id="vanishConfigurationPanel" style="display: none; padding: 12px 14px; background: rgba(15, 23, 42, 0.6); border: 1px dashed rgba(168, 85, 247, 0.25); border-radius: 12px; margin-bottom: 16px;">
+    <div class="decoy-field-group">
+      <label class="decoy-field-label" for="settingVanishTapCount">
+        <span>SECRET REVEAL SCREEN TAPS</span>
+        <span class="text-xs text-purple-400">(Number of rapid taps required to reveal)</span>
+      </label>
+      <select id="settingVanishTapCount" class="decoy-input-box">
+        <option value="2">2 Rapid Taps</option>
+        <option value="3" selected>3 Rapid Taps (Recommended)</option>
+        <option value="4">4 Rapid Taps</option>
+        <option value="5">5 Rapid Taps</option>
+        <option value="6">6 Rapid Taps</option>
+        <option value="7">7 Rapid Taps</option>
+      </select>
+    </div>
+
+    <div class="decoy-field-group">
+      <label class="decoy-field-label" for="settingVanishTapTarget">
+        <span>SECRET TAP ZONE</span>
+        <span class="text-xs text-purple-400">(Where to tap on screen)</span>
+      </label>
+      <select id="settingVanishTapTarget" class="decoy-input-box">
+        <option value="header" selected>App Header / Brand Bar (Top of Screen)</option>
+        <option value="emptySpace">Empty Chat Feed / Background Area</option>
+        <option value="anywhere">Anywhere on Screen (Multi-Tap)</option>
+      </select>
+    </div>
+
+    <div class="luxury-toggle-row" style="margin-top: 10px; margin-bottom: 10px;">
+      <div>
+        <strong style="font-size: 12px; color: #f1f5f9; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-key" style="color: #c084fc;"></i> Require Security PIN on Reveal
+        </strong>
+        <p style="font-size: 10.5px; color: #94a3b8; margin: 2px 0 0 0;">
+          Prompt for your 4-digit code after executing secret taps before vanished chats reappear.
+        </p>
+      </div>
+      <label class="luxury-switch">
+        <input type="checkbox" id="settingVanishRequirePinToggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="decoy-field-group">
+      <label class="decoy-field-label" for="settingVanishAutoTimeoutSelect">
+        <span>AUTO-RE-VANISH INACTIVITY TIMER</span>
+      </label>
+      <select id="settingVanishAutoTimeoutSelect" class="decoy-input-box">
+        <option value="1">1 Minute</option>
+        <option value="2" selected>2 Minutes (Recommended)</option>
+        <option value="5">5 Minutes</option>
+        <option value="10">10 Minutes</option>
+      </select>
+    </div>
+
+    <div style="margin-top: 12px; display: flex; gap: 8px;">
+      <button type="button" id="btnManageVanishedChats" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px; border-color: rgba(168, 85, 247, 0.4); color: #c084fc;">
+        <i class="fa-solid fa-list-check"></i> Manage Vanished Chats (<span id="vanishedChatsCountBadge">0</span>)
+      </button>
+      <button type="button" id="btnTestVanishGesture" class="btn-secondary" style="padding: 8px 12px; font-size: 12px; border-color: rgba(168, 85, 247, 0.4); color: #e2e8f0;">
+        <i class="fa-solid fa-hand-pointer"></i> Test Tap
+      </button>
+    </div>
   </div>
 
   <button type="button" class="decoy-save-btn mt-2" id="saveDecoyVaultConfigBtn">
@@ -6680,6 +6760,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/p2p-airdrop.js"></script>
   <script src="./src/js/aegis-privacy-shield.js"></script>
   <script src="./src/js/chat-passcode-gate.js"></script>
+  <script src="./src/js/chat-vanish-engine.js"></script>
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
@@ -7997,7 +8078,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 </div>
 
 <script type="module" src="chat.js"></script>
-<div id="chatPasscodeSetupModal" class="chat-passcode-setup-modal" style="display: none;" aria-hidden="true">
+<div id="chatPasscodeSetupModal" class="chat-passcode-setup-modal" style="display: none !important;" aria-hidden="true">
   <div class="chat-passcode-setup-card">
     <div class="setup-card-header">
       <div class="setup-card-title">
@@ -8040,6 +8121,72 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
     </div>
   </div>
 </div>
+
+<!-- FLOATING STEALTH REVEAL BANNER -->
+<div id="vanishStealthBanner" class="vanish-stealth-banner" aria-live="polite">
+  <div class="vanish-banner-pulse-dot"></div>
+  <div class="vanish-banner-title">
+    <i class="fa-solid fa-ghost" style="color: #c084fc;"></i>
+    <span>STEALTH REVEAL ACTIVE</span>
+  </div>
+  <span id="vanishBannerCountdown" class="vanish-banner-timer">2:00</span>
+  <button type="button" id="btnVanishNow" class="btn-vanish-now">
+    <i class="fa-solid fa-eye-slash"></i> Vanish Now
+  </button>
+</div>
+
+<!-- SECRET REVEAL PIN MODAL -->
+<div id="vanishSecretPinModal" class="vanish-pin-modal" style="display: none !important;" aria-hidden="true">
+  <div class="vanish-pin-card">
+    <button type="button" class="vanish-pin-close-btn" id="closeVanishPinBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+    <div class="vanish-pin-halo">
+      <i class="fa-solid fa-ghost"></i>
+    </div>
+    <h3 class="vanish-pin-title">STEALTH REVEAL</h3>
+    <p class="vanish-pin-subtitle">Enter security passcode to unveil vanished chats</p>
+    
+    <div class="vanish-pin-dots" id="vanishPinDots">
+      <div class="vanish-pin-dot"></div>
+      <div class="vanish-pin-dot"></div>
+      <div class="vanish-pin-dot"></div>
+      <div class="vanish-pin-dot"></div>
+    </div>
+
+    <div class="vanish-pin-feedback" id="vanishPinFeedback"></div>
+
+    <div class="vanish-keypad-matrix">
+      <button type="button" class="vanish-keypad-btn" data-digit="1">1</button>
+      <button type="button" class="vanish-keypad-btn" data-digit="2">2</button>
+      <button type="button" class="vanish-keypad-btn" data-digit="3">3</button>
+      <button type="button" class="vanish-keypad-btn" data-digit="4">4</button>
+      <button type="button" class="vanish-keypad-btn" data-digit="5">5</button>
+      <button type="button" class="vanish-keypad-btn" data-digit="6">6</button>
+      <button type="button" class="vanish-keypad-btn" data-digit="7">7</button>
+      <button type="button" class="vanish-keypad-btn" data-digit="8">8</button>
+      <button type="button" class="vanish-keypad-btn" data-digit="9">9</button>
+      <div style="visibility: hidden;"></div>
+      <button type="button" class="vanish-keypad-btn" data-digit="0">0</button>
+      <button type="button" class="vanish-keypad-btn" id="btnVanishPinBackspace" title="Backspace"><i class="fa-solid fa-delete-left"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- VANISHED CHATS MANAGEMENT MODAL -->
+<div id="vanishManagementModal" class="vanish-manage-modal" style="display: none !important;" aria-hidden="true">
+  <div class="vanish-manage-card">
+    <div class="vanish-manage-header">
+      <div class="vanish-manage-title">
+        <i class="fa-solid fa-ghost" style="color: #c084fc;"></i>
+        <span>MANAGE VANISHED CHATS</span>
+      </div>
+      <button type="button" class="setup-card-close-btn" id="closeVanishManageBtn" title="Close"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="vanish-manage-body">
+      <div class="vanish-manage-list" id="vanishManageList"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 
 </html>
