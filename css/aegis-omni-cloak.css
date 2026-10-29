@@ -1,0 +1,153 @@
+/* =============================================================================
+   NEXCHAT - AEGIS-SPECTRE ANTI-SHOULDER SURFING PRIVACY SHIELD (v2.6)
+   Obsidian Glassmorphism & Optical Stealth Defense
+   STRICTLY 0 UNICODE EMOJIS - FontAwesome 6 Vector Icons Only
+   Format: Pure Windows CRLF (\r\n) Line Endings
+   ============================================================================= */
+
+:root {
+  --aegis-cyan: #00f3ff;
+  --aegis-cyan-glow: rgba(0, 243, 255, 0.4);
+  --aegis-emerald: #00ff66;
+  --aegis-crimson: #ff0055;
+  --aegis-obsidian: #060913;
+  --aegis-blur-strength: 8.5px;
+}
+
+/* 1. AEGIS SHIELD ENGAGED: OBFUSCATE ALL MESSAGE CONTENT */
+body.aegis-shield-active .message-bubble,
+body.aegis-shield-active .message-text,
+body.aegis-shield-active .cached-voice-attachment,
+body.aegis-shield-active .voice-note-transcript-card,
+body.aegis-shield-active .voice-message-player,
+body.aegis-shield-active .chat-image-preview,
+body.aegis-shield-active .cached-attachment-preview,
+body.aegis-shield-active .message-content > div:not(.message-time-row) {
+  filter: blur(var(--aegis-blur-strength)) brightness(0.4) saturate(0.3) !important;
+  opacity: 0.28 !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  transition: filter 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: filter, opacity, transform;
+}
+
+/* 2. SPOTLIGHT / HOVER REVEAL: ONLY UNVEIL THE TARGET BUBBLE UNDER CURSOR/TOUCH */
+body.aegis-shield-active .message-bubble:hover,
+body.aegis-shield-active .message-bubble:focus-within,
+body.aegis-shield-active .message-bubble.aegis-touch-revealed {
+  filter: blur(0px) brightness(1) saturate(1) !important;
+  opacity: 1 !important;
+  transform: scale(1.012) !important;
+  z-index: 50 !important;
+  box-shadow: 0 8px 30px rgba(0, 243, 255, 0.28), 0 0 1px rgba(0, 243, 255, 0.8) !important;
+}
+
+body.aegis-shield-active .message-bubble:hover .message-text,
+body.aegis-shield-active .message-bubble:hover .cached-voice-attachment,
+body.aegis-shield-active .message-bubble:hover .voice-note-transcript-card,
+body.aegis-shield-active .message-bubble:hover .voice-message-player,
+body.aegis-shield-active .message-bubble:hover .chat-image-preview,
+body.aegis-shield-active .message-bubble:hover .cached-attachment-preview,
+body.aegis-shield-active .message-bubble:hover .message-content > div,
+body.aegis-shield-active .message-bubble.aegis-touch-revealed .message-text,
+body.aegis-shield-active .message-bubble.aegis-touch-revealed .cached-voice-attachment,
+body.aegis-shield-active .message-bubble.aegis-touch-revealed .voice-note-transcript-card,
+body.aegis-shield-active .message-bubble.aegis-touch-revealed .voice-message-player,
+body.aegis-shield-active .message-bubble.aegis-touch-revealed .chat-image-preview,
+body.aegis-shield-active .message-bubble.aegis-touch-revealed .cached-attachment-preview,
+body.aegis-shield-active .message-bubble.aegis-touch-revealed .message-content > div {
+  filter: blur(0px) brightness(1) saturate(1) !important;
+  opacity: 1 !important;
+  user-select: auto !important;
+  -webkit-user-select: auto !important;
+}
+
+/* 3. FLOATING AEGIS STATUS HUD BANNER */
+.aegis-privacy-hud {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  position: sticky;
+  top: 8px;
+  margin: 6px auto 10px auto;
+  padding: 6px 16px;
+  background: rgba(6, 9, 19, 0.94);
+  border: 1px solid rgba(0, 243, 255, 0.45);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 243, 255, 0.22);
+  border-radius: 30px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: var(--aegis-cyan);
+  z-index: 80;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: aegisFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+  max-width: 90%;
+  width: fit-content;
+}
+
+body.aegis-shield-active .aegis-privacy-hud {
+  display: flex !important;
+}
+
+.aegis-hud-beacon {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--aegis-cyan);
+  box-shadow: 0 0 8px var(--aegis-cyan);
+  animation: aegisPulse 1.8s infinite;
+}
+
+@keyframes aegisPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.4; }
+}
+
+@keyframes aegisFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 4. HEADER ACTION BUTTON STYLING */
+.aegis-privacy-toggle-btn {
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.aegis-privacy-toggle-btn[data-aegis-active="true"] {
+  background: rgba(0, 243, 255, 0.18) !important;
+  border-color: var(--aegis-cyan) !important;
+  color: var(--aegis-cyan) !important;
+  box-shadow: 0 0 16px rgba(0, 243, 255, 0.4) !important;
+}
+
+.aegis-privacy-toggle-btn[data-aegis-active="true"] i {
+  color: var(--aegis-cyan) !important;
+  transform: scale(1.1);
+}
+
+.aegis-btn-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: #00f3ff;
+}
+
+/* 5. SILENT GHOST MESSAGE RETRACTION COLLAPSE */
+.ghost-recalled-collapse {
+  transform: scaleY(0) scaleX(0.7) !important;
+  opacity: 0 !important;
+  max-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}

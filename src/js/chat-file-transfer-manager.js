@@ -411,10 +411,17 @@
 
           <div class="nex-delete-actions">
             ${effectiveIsOwn ? `
+              <button type="button" class="btn-delete-opt btn-delete-ghost" id="btnConfirmGhostRecall" style="border: 1px solid rgba(0, 243, 255, 0.45); background: rgba(0, 243, 255, 0.08); box-shadow: 0 0 12px rgba(0, 243, 255, 0.15); margin-bottom: 8px;">
+                <i class="fa-solid fa-ghost" style="color: #00f3ff;"></i>
+                <div class="btn-text">
+                  <strong style="color: #00f3ff;">Silent Ghost Recall</strong>
+                  <small style="color: #cbd5e1;">Evaporates with ZERO "This message was deleted" tombstone</small>
+                </div>
+              </button>
               <button type="button" class="btn-delete-opt btn-delete-everyone" id="btnConfirmDeleteEveryone">
                 <i class="fa-solid fa-users"></i>
                 <div class="btn-text">
-                  <strong>Delete for Everyone</strong>
+                  <strong>Standard Delete for Everyone</strong>
                   <small>Erases this message for all participants</small>
                 </div>
               </button>
@@ -446,6 +453,23 @@
       };
 
       modal.querySelector('#btnCancelDeleteMessage')?.addEventListener('click', closeModal);
+
+      // Handle Silent Ghost Recall (Zero-Tombstone Disappearance)
+      const ghostRecallBtn = modal.querySelector('#btnConfirmGhostRecall');
+      if (ghostRecallBtn) {
+        ghostRecallBtn.addEventListener('click', async () => {
+          closeModal();
+          const docId = (msg && (msg.docId || msg.id)) || (typeof msg === 'string' ? msg : null);
+          if (window.NexAegisShield && typeof window.NexAegisShield.executeSilentGhostRecall === 'function') {
+            await window.NexAegisShield.executeSilentGhostRecall(docId);
+          }
+          await this.executeDeleteForEveryone(msg);
+          if (typeof window.showCustomNotification === 'function') {
+            window.showCustomNotification('<i class="fa-solid fa-ghost" style="color:#00f3ff;margin-right:6px;"></i> Message evaporated with zero trace or tombstone', 3000);
+          }
+          if (typeof onComplete === 'function') onComplete();
+        });
+      }
 
       // Handle Delete for Everyone
       const everyoneBtn = modal.querySelector('#btnConfirmDeleteEveryone');

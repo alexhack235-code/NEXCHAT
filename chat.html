@@ -48,6 +48,7 @@
   <link rel="stylesheet" href="css/quantum-airgap.css">
   <link rel="stylesheet" href="css/decoy-vault.css">
   <link rel="stylesheet" href="css/tactical-pinboard.css">
+  <link rel="stylesheet" href="css/aegis-omni-cloak.css">
   <link rel="stylesheet" href="css/nex-status-audio.css">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/x-icon" href="/favicons/favicon.ico">
@@ -202,6 +203,10 @@
             </div>
             <span class="stealth-btn-label">GHOST</span>
           </button>
+          <button type="button" id="aegisPrivacyShieldBtn" class="header-icon-btn aegis-privacy-toggle-btn" title="Aegis Privacy Shield: Anti-Shoulder Surfing Blur (Ctrl+Shift+P)" aria-label="Toggle Aegis Privacy Shield" data-aegis-active="false">
+            <i class="fa-solid fa-user-secret" style="color: #00f3ff;"></i>
+            <span class="aegis-btn-label">AEGIS</span>
+          </button>
           <button id="ghostPanicLockBtn" class="header-icon-btn ghost-lock-btn" title="Ghost Panic Shield (Ctrl+Shift+L)"><i class="fa-solid fa-shield-virus"></i></button>
           <button id="holoAvatarBtnHeader" class="header-icon-btn cyber-sub-tool" title="3D Holographic Avatar Studio" onclick="window.holographicAvatarsEngine?.openModal()"><i class="fa-solid fa-cube text-[#00ff66]"></i></button>
           <button id="broadcastChannelsBtnHeader" class="header-icon-btn cyber-sub-tool" title="Tactical Broadcast Channels" onclick="window.broadcastChannelsEngine?.openModal()"><i class="fa-solid fa-tower-broadcast text-[#00f3ff]"></i></button>
@@ -230,6 +235,9 @@
             <i class="fa-solid fa-ghost"></i>
           </button>
 
+          <button type="button" id="aegisPrivacyBtnMobile" class="header-icon-btn mobile-action-btn aegis-privacy-toggle-btn" title="Aegis Privacy Shield (Anti-Shoulder Surfing)" aria-label="Toggle Aegis Privacy Shield" data-aegis-active="false">
+            <i class="fa-solid fa-user-secret" style="color: #00f3ff;"></i>
+          </button>
           <button id="mobileSearchBtn" class="header-icon-btn mobile-action-btn" title="Search Chats">
             <i class="fa-solid fa-magnifying-glass"></i>
           </button>
@@ -6560,6 +6568,7 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/ghost-dissolution-engine.js"></script>
   <script src="./src/js/gallery-sandbox.js"></script>
   <script src="./src/js/p2p-airdrop.js"></script>
+  <script src="./src/js/aegis-privacy-shield.js"></script>
   <script type="module" src="chat.js"></script>
   <script type="module" src="button-setup.js"></script>
   <script src="./src/js/extension-consent-hub.js"></script>
