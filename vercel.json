@@ -32,6 +32,10 @@
         {
           "key": "Access-Control-Allow-Origin",
           "value": "https://nexchat-drab.vercel.app"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
         }
       ]
     }

@@ -250,7 +250,8 @@ export async function sendMessage(params = {}) {
   const groupData = groupDoc.data();
 
   // Permission checks
-  if (!groupData.members || !groupData.members.includes(uid)) {
+  const isMember = (Array.isArray(groupData.members) && groupData.members.includes(uid)) || groupData.creatorId === uid;
+  if (!isMember) {
     throw new Error('You are not a member of this group');
   }
 

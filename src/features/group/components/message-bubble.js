@@ -1,3 +1,13 @@
+
+const reactionIconMap = {
+  heart: '<i class="fa-solid fa-heart" style="color:#ef4444;font-size:11px;"></i>',
+  thumbs_up: '<i class="fa-solid fa-thumbs-up" style="color:#3b82f6;font-size:11px;"></i>',
+  fire: '<i class="fa-solid fa-fire" style="color:#f97316;font-size:11px;"></i>',
+  star: '<i class="fa-solid fa-star" style="color:#eab308;font-size:11px;"></i>',
+  check: '<i class="fa-solid fa-circle-check" style="color:#22c55e;font-size:11px;"></i>',
+  bolt: '<i class="fa-solid fa-bolt" style="color:#a855f7;font-size:11px;"></i>'
+};
+import { getReactionSummary } from './message-reactions.js';
 /**
  * @fileoverview MessageBubble - Renders a single chat message bubble
  * 
@@ -229,12 +239,12 @@ export function renderMessageBubble(message, container, options = {}) {
 
       if (type && type.startsWith('image/')) {
         const img = document.createElement('img');
-        img.src = message.attachment.downloadURL;
+        img.src = (message.attachment.downloadURL || message.attachment.url || message.attachment.fileUrl || "");
         img.className = 'nex-attachment-img';
         attDiv.appendChild(img);
       } else if (type && type.startsWith('video/')) {
         const vid = document.createElement('video');
-        vid.src = message.attachment.downloadURL;
+        vid.src = (message.attachment.downloadURL || message.attachment.url || message.attachment.fileUrl || "");
         vid.controls = true;
         vid.className = 'nex-attachment-video';
         attDiv.appendChild(vid);
@@ -257,7 +267,16 @@ export function renderMessageBubble(message, container, options = {}) {
     if (message.text) {
       const textDiv = document.createElement('div');
       textDiv.className = 'nex-msg-text';
-      textDiv.appendChild(highlightMentions(message.text, message.mentionedUserIds, options.currentUid));
+      try {
+        const mentionResult = highlightMentions(String(message.text), message.mentionedUserIds, options.currentUid);
+        if (mentionResult instanceof Node) {
+          textDiv.appendChild(mentionResult);
+        } else {
+          textDiv.innerHTML = String(mentionResult || escapeHtml(message.text));
+        }
+      } catch (_) {
+        textDiv.textContent = String(message.text);
+      }
       bubble.appendChild(textDiv);
     }
 
@@ -284,9 +303,10 @@ export function renderMessageBubble(message, container, options = {}) {
 
       let isRead = false;
       let isReadAll = false;
-      if (message.readBy && message.readBy.length > 0) {
+      const readCount = Array.isArray(message.readBy) ? message.readBy.length : (message.readBy && typeof message.readBy === 'object' ? Object.keys(message.readBy).length : 0);
+      if (readCount > 0) {
         isRead = true;
-        if (message.readBy.length >= (options.totalMembers || 1) - 1) {
+        if (readCount >= (options.totalMembers || 1) - 1) {
           isReadAll = true;
         }
       }
@@ -313,25 +333,33 @@ export function renderMessageBubble(message, container, options = {}) {
     contentArea.appendChild(bubble);
 
     // Reactions
-    if (message.reactions && Object.keys(message.reactions).length > 0) {
-      const reactionsRow = document.createElement('div');
-      reactionsRow.className = 'nex-reactions-row';
+    if (message.reactions) {
+      try {
+        const summary = getReactionSummary(message.reactions);
+        if (summary && summary.length > 0) {
+          const reactionsRow = document.createElement('div');
+          reactionsRow.className = 'nex-reactions-row';
 
-      Object.entries(message.reactions).forEach(([emoji, users]) => {
-        if (users && users.length > 0) {
-          const pill = document.createElement('div');
-          pill.className = 'nex-reaction-pill';
-          pill.textContent = emoji + ' ' + users.length;
-          if (users.includes(options.currentUid)) {
-            pill.classList.add('active');
-          }
-          if (options.onReactionClick) {
-            pill.addEventListener('click', () => options.onReactionClick(message.id, emoji));
-          }
-          reactionsRow.appendChild(pill);
+          summary.forEach(({ emoji, count, uids }) => {
+            if (count > 0) {
+              const pill = document.createElement('div');
+              pill.className = 'nex-reaction-pill';
+              const iconHtml = reactionIconMap[emoji] || `<span style="font-size:11px;font-weight:700;">${escapeHtml(emoji)}</span>`;
+              pill.innerHTML = `${iconHtml} <span class="reaction-count" style="margin-left:3px;font-size:10px;font-weight:700;">${count}</span>`;
+              if (Array.isArray(uids) && uids.includes(options.currentUid)) {
+                pill.classList.add('active');
+              }
+              if (options.onReactionClick) {
+                pill.addEventListener('click', () => options.onReactionClick(message.id, emoji));
+              }
+              reactionsRow.appendChild(pill);
+            }
+          });
+          contentArea.appendChild(reactionsRow);
         }
-      });
-      contentArea.appendChild(reactionsRow);
+      } catch (reactionErr) {
+        console.warn('[MessageBubble] Reactions render notice:', reactionErr);
+      }
     }
 
     // Disappearing / Ephemeral Countdown

@@ -14,7 +14,7 @@ export function createUnreadDivider(count) {
   
   const label = document.createElement('div');
   label.className = 'nex-unread-divider-label';
-  label.innerHTML = `<span>↓</span> <span class="nex-unread-count">${count}</span> unread messages`;
+  label.innerHTML = `<i class="fa-solid fa-arrow-down" style="margin-right: 4px;"></i> <span class="nex-unread-count">${count}</span> unread messages`;
   
   container.appendChild(label);
   return container;

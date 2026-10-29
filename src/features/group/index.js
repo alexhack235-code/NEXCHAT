@@ -97,6 +97,7 @@ let _pinnedBar = null;
 let _container = null;
 let _inputElement = null;
 let _initialized = false;
+let _storeUnsubs = [];
 
 /**
  * Initialize the group chat system
@@ -335,6 +336,11 @@ function close() {
   _pinnedBar = null;
   _container = null;
   _inputElement = null;
+
+  if (Array.isArray(_storeUnsubs)) {
+    _storeUnsubs.forEach(u => { try { u(); } catch (_) {} });
+    _storeUnsubs = [];
+  }
 
   groupStore.resetState();
 }

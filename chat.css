@@ -10825,3 +10825,37 @@ body.chat-size-extra-large .message-bubble {
   content-visibility: auto;
   contain-intrinsic-size: 0 68px;
 }
+
+/* NEXCHAT Mobile Chat List Scroll Lock Fix */
+@media (max-width: 899px) {
+  .chat-main {
+    height: 100% !important;
+    max-height: calc(100dvh - var(--header-height, 60px) - var(--bottom-nav-height, 62px)) !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .chat-list-view {
+    height: 100% !important;
+    max-height: 100% !important;
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .chats-section {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-y: contain !important;
+    padding-bottom: calc(var(--bottom-nav-height, 62px) + 95px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  #contactList {
+    padding-bottom: 30px !important;
+  }
+}

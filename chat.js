@@ -3588,6 +3588,7 @@ let searchDebounceTimer = null;
 let searchListenersAttached = false;
 let isFetchingSearchUsers = false;
 let lastOpenSearchTimestamp = 0;
+let liveServerSearchTimer = null;
 
 function harvestLocalSearchItems() {
   const localItems = [];
@@ -3667,6 +3668,7 @@ function harvestLocalSearchItems() {
       description: 'Group conversation',
       profilePic: pic,
       isGroup: true,
+      isJoined: true,
       type: 'group'
     });
   });
@@ -3716,16 +3718,10 @@ function openSearch() {
   });
   cachedSearchItems = Array.from(existingMap.values());
 
-  if (cachedSearchItems.length > 0) {
-    filterSearchResults();
-  } else {
-    const resultsDiv = document.getElementById('search-results');
-    if (resultsDiv) {
-      resultsDiv.innerHTML = '<div style="padding: 24px; text-align: center; color: #00ff66; font-size: 13.5px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Discovering NEXCHAT network...</div>';
-    }
-  }
+  // Render initial list with zero infinite loading
+  filterSearchResults();
 
-  // 2. Refresh directory from network asynchronously without hanging
+  // 2. Refresh directory from network asynchronously in the background
   loadAllUsers();
 
   setTimeout(() => {
@@ -3755,6 +3751,7 @@ function setupSearchListeners() {
   const closeBtn = document.getElementById('close-search-btn');
   const overlay = document.getElementById('search-overlay');
   const refreshBtn = document.getElementById('browse-users-btn');
+  const nearbyBtn = document.getElementById('searchPeopleNearbyBtn');
 
   if (input) {
     input.addEventListener('input', (e) => {
@@ -3765,12 +3762,15 @@ function setupSearchListeners() {
       if (searchDebounceTimer) clearTimeout(searchDebounceTimer);
       searchDebounceTimer = setTimeout(() => {
         filterSearchResults();
-      }, 100);
+      }, 80);
     });
 
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         closeSearch();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        filterSearchResults(true);
       }
     });
   }
@@ -3805,6 +3805,17 @@ function setupSearchListeners() {
     });
   }
 
+  if (nearbyBtn) {
+    nearbyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (typeof window.openPeopleNearby === 'function') {
+        window.openPeopleNearby();
+      } else if (window.CyberFeatures?.geoDiscovery) {
+        window.CyberFeatures.geoDiscovery.show();
+      }
+    });
+  }
+
   document.querySelectorAll('.search-tab-pill[data-filter]').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.search-tab-pill[data-filter]').forEach(t => t.classList.remove('active'));
@@ -3818,11 +3829,6 @@ function setupSearchListeners() {
 async function loadAllUsers(forceRefresh = false) {
   if (isFetchingSearchUsers) return;
   isFetchingSearchUsers = true;
-
-  const resultsDiv = document.getElementById('search-results');
-  if (forceRefresh && resultsDiv && cachedSearchItems.length === 0) {
-    resultsDiv.innerHTML = '<div style="padding: 24px; text-align: center; color: #00ff66; font-size: 13.5px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Discovering NEXCHAT network...</div>';
-  }
 
   const timeoutPromise = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
 
@@ -3860,7 +3866,7 @@ async function loadAllUsers(forceRefresh = false) {
         }
       }
     } catch (usersErr) {
-      console.warn('Firestore users query skipped or timed out:', usersErr);
+      console.warn('Firestore users query notice:', usersErr?.message);
     }
 
     // 2. Fetch Firestore groups with 2.5s timeout
@@ -3882,13 +3888,14 @@ async function loadAllUsers(forceRefresh = false) {
               members: g.members || existing.members || [],
               profilePic: g.icon || g.photoURL || existing.profilePic || 'logo.jpg',
               isGroup: true,
+              isJoined: Array.isArray(g.members) && g.members.includes(myUID),
               type: 'group'
             });
           });
         }
       }
     } catch (groupErr) {
-      console.warn('Firestore groups query skipped or timed out:', groupErr);
+      console.warn('Firestore groups query notice:', groupErr?.message);
     }
 
     cachedSearchItems = Array.from(combinedMap.values());
@@ -3901,11 +3908,116 @@ async function loadAllUsers(forceRefresh = false) {
   }
 }
 
-function filterSearchResults() {
+async function performLiveServerSearch(queryText) {
+  const clean = queryText.toLowerCase().replace(/^@+/, '').trim();
+  if (!clean || clean.length < 2) return;
+
+  try {
+    const combinedMap = new Map();
+    cachedSearchItems.forEach(i => combinedMap.set(i.uid || i.id, i));
+    let hasNew = false;
+
+    // Search users by username prefix
+    if (typeof db !== 'undefined' && typeof collection === 'function') {
+      try {
+        const usersRef = collection(db, 'users');
+        const qPrefix = query(
+          usersRef,
+          where('username', '>=', clean),
+          where('username', '<=', clean + '\uf8ff'),
+          limit(20)
+        );
+        const snap = await getDocs(qPrefix);
+        snap.forEach(docSnap => {
+          const u = docSnap.data();
+          const uid = docSnap.id;
+          if (uid !== myUID && !combinedMap.has(uid)) {
+            combinedMap.set(uid, {
+              uid: uid,
+              id: uid,
+              name: u.name || u.displayName || 'NEXCHAT User',
+              username: u.username || '',
+              email: u.email || '',
+              profilePic: u.profilePic || u.profilePicUrl || u.avatar || '',
+              online: u.online === true,
+              isGroup: false,
+              type: 'user'
+            });
+            hasNew = true;
+          }
+        });
+      } catch (prefixErr) {
+        // Fallback exact username search
+        try {
+          const qExact = query(collection(db, 'users'), where('username', '==', clean), limit(5));
+          const snapExact = await getDocs(qExact);
+          snapExact.forEach(docSnap => {
+            const u = docSnap.data();
+            const uid = docSnap.id;
+            if (uid !== myUID && !combinedMap.has(uid)) {
+              combinedMap.set(uid, {
+                uid: uid,
+                id: uid,
+                name: u.name || u.displayName || 'NEXCHAT User',
+                username: u.username || '',
+                email: u.email || '',
+                profilePic: u.profilePic || u.profilePicUrl || u.avatar || '',
+                online: u.online === true,
+                isGroup: false,
+                type: 'user'
+              });
+              hasNew = true;
+            }
+          });
+        } catch (_) {}
+      }
+
+      // Search groups by name
+      try {
+        const groupsRef = collection(db, 'groups');
+        const qGroups = query(
+          groupsRef,
+          where('name', '>=', queryText),
+          where('name', '<=', queryText + '\uf8ff'),
+          limit(15)
+        );
+        const snapGroups = await getDocs(qGroups);
+        snapGroups.forEach(docSnap => {
+          const g = docSnap.data();
+          const gid = docSnap.id;
+          if (!combinedMap.has(gid)) {
+            combinedMap.set(gid, {
+              uid: gid,
+              id: gid,
+              name: g.name || 'Unnamed Group',
+              username: '',
+              description: g.description || '',
+              members: g.members || [],
+              profilePic: g.icon || g.photoURL || 'logo.jpg',
+              isGroup: true,
+              isJoined: Array.isArray(g.members) && g.members.includes(myUID),
+              type: 'group'
+            });
+            hasNew = true;
+          }
+        });
+      } catch (_) {}
+    }
+
+    if (hasNew) {
+      cachedSearchItems = Array.from(combinedMap.values());
+      filterSearchResults(false, true);
+    }
+  } catch (liveErr) {
+    console.warn('[SEARCH] Live server search notice:', liveErr?.message);
+  }
+}
+
+function filterSearchResults(immediateLiveQuery = false, skipLiveDispatch = false) {
   const input = document.getElementById('search-input');
   const rawQuery = (input?.value || '').trim();
   const queryText = rawQuery.toLowerCase();
-  const cleanQuery = queryText.replace(/^@/, '');
+  const cleanQuery = queryText.replace(/^@+/, '');
 
   const container = document.getElementById('search-results');
   if (!container) return;
@@ -3913,14 +4025,14 @@ function filterSearchResults() {
   const savedContactSet = new Set(Array.isArray(window.myContacts) ? window.myContacts : []);
 
   // Telegram-Style Search Privacy:
-  // If query < 2 characters, DO NOT dump all users! Show only Chronex AI, saved contacts, and joined groups with privacy banner.
+  // If query < 2 characters: DO NOT dump all users! Show only Chronex AI, saved contacts, and joined groups with clear header.
   if (!cleanQuery || cleanQuery.length < 2) {
     let localOnly = cachedSearchItems.filter(item => {
       if (item.type === 'ai' || item.uid === 'chronex-ai') return true;
       if (item.isGroup) {
-        return Array.isArray(item.members) && item.members.includes(myUID);
+        return item.isJoined || (Array.isArray(item.members) && item.members.includes(myUID));
       }
-      return savedContactSet.has(item.uid || item.id);
+      return savedContactSet.has(item.uid || item.id) || (Array.isArray(window.loadedContactData) && window.loadedContactData.some(c => (c.uid || c.id) === (item.uid || item.id)));
     });
 
     if (currentSearchFilter === 'users') localOnly = localOnly.filter(i => !i.isGroup);
@@ -3930,14 +4042,14 @@ function filterSearchResults() {
     return;
   }
 
-  // When query has >= 2 characters, filter network users by matching username or display name
+  // When query has >= 2 characters, filter network users by matching username, name, or group name
   let filtered = cachedSearchItems.filter(item => {
     if (currentSearchFilter === 'users' && item.isGroup) return false;
     if (currentSearchFilter === 'groups' && !item.isGroup) return false;
     if (item.uid === myUID) return false;
 
     const name = (item.name || '').toLowerCase();
-    const username = (item.username || '').toLowerCase().replace(/^@/, '');
+    const username = (item.username || '').toLowerCase().replace(/^@+/, '');
     const desc = (item.description || '').toLowerCase();
 
     if (item.isGroup) {
@@ -3948,6 +4060,14 @@ function filterSearchResults() {
   });
 
   renderSearchResults(filtered, false);
+
+  // Dispatch background live server search so users beyond local cache are found
+  if (!skipLiveDispatch) {
+    if (liveServerSearchTimer) clearTimeout(liveServerSearchTimer);
+    liveServerSearchTimer = setTimeout(() => {
+      performLiveServerSearch(rawQuery);
+    }, immediateLiveQuery ? 0 : 250);
+  }
 }
 
 function renderSearchResults(itemsToRender, isPrivacyPrompt = false) {
@@ -3955,8 +4075,6 @@ function renderSearchResults(itemsToRender, isPrivacyPrompt = false) {
   if (!container) return;
 
   container.innerHTML = '';
-
-
 
   if (!itemsToRender || itemsToRender.length === 0) {
     const emptyEl = document.createElement('div');
@@ -3985,7 +4103,7 @@ function renderSearchResults(itemsToRender, isPrivacyPrompt = false) {
       : '';
     const handle = isGroup
       ? `Group · ${item.members?.length || 0} members`
-      : (isAi ? 'Neural Assistant · Online' : (item.username ? `@${escapeHtml(item.username.replace(/^@/, ''))}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User')));
+      : (isAi ? 'Neural Assistant · Online' : (item.username ? `@${escapeHtml(item.username.replace(/^@+/, ''))}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User')));
     const profilePic = item.profilePic || item.profilePicUrl || item.avatar || (isGroup ? 'logo.jpg' : (isAi ? 'chronex-ai.jpg' : '/favicons/favicon.ico'));
     const isOnline = item.online === true || isAi;
 
@@ -4058,6 +4176,7 @@ function renderSearchResults(itemsToRender, isPrivacyPrompt = false) {
     container.appendChild(card);
   });
 }
+
 function browseAllUsers() {
   loadAllUsers();
 }
@@ -19292,7 +19411,95 @@ async function loadGroups() {
   }
 }
 
+
+// ══════════════════════════════════════════════════════════════════════
+// GLOBAL REALTIME INCOMING MESSAGES LISTENER (Instant Fresh Chat Display)
+// ══════════════════════════════════════════════════════════════════════
+let globalIncomingMessagesUnsub = null;
+let globalIncomingInitialLoadDone = false;
+
+function setupGlobalIncomingMessageListener() {
+  if (!myUID) return;
+  if (typeof globalIncomingMessagesUnsub === 'function') {
+    try { globalIncomingMessagesUnsub(); } catch (_) {}
+    globalIncomingMessagesUnsub = null;
+  }
+
+  try {
+    const messagesRef = collection(db, 'messages');
+    // Listen to incoming messages destined for this user
+    const q = query(messagesRef, where('to', '==', myUID));
+    globalIncomingInitialLoadDone = false;
+
+    globalIncomingMessagesUnsub = onSnapshot(q, async (snapshot) => {
+      if (!globalIncomingInitialLoadDone) {
+        globalIncomingInitialLoadDone = true;
+        return; // Skip initial sync to avoid spurious chimes
+      }
+
+      for (const change of snapshot.docChanges()) {
+        if (change.type === 'added') {
+          const msg = change.doc.data();
+          const senderId = msg.from;
+          if (!senderId || senderId === myUID) continue;
+
+          // If the chat with this sender is already open, the active chat handles rendering
+          if (currentChatType === 'direct' && currentChatUser === senderId) {
+            continue;
+          }
+
+          // Fresh new chat or incoming message for another conversation!
+          playLuxuryPopSound();
+          hapticFeedback('light');
+
+          const textPreview = msg.text ? (msg.text.length > 50 ? msg.text.substring(0, 50) + '...' : msg.text) : 'Attachment';
+          showNotif(`New message from ${msg.senderName || 'user'}: "${textPreview}"`, 'info', 4000);
+
+          // Update chat list dynamically
+          const contactList = document.getElementById('contactList');
+          if (contactList) {
+            const existingLi = contactList.querySelector(`li[data-chat-id="${senderId}"]`);
+            if (existingLi) {
+              const previewEl = existingLi.querySelector('.chat-preview');
+              if (previewEl) previewEl.innerHTML = `<span class="preview-text">${escape(textPreview)}</span>`;
+              const timeEl = existingLi.querySelector('.chat-item-time');
+              if (timeEl) timeEl.textContent = 'Just now';
+              let badgeEl = existingLi.querySelector('.unread-badge');
+              if (badgeEl) {
+                const count = parseInt(badgeEl.textContent, 10) || 0;
+                badgeEl.textContent = count + 1 > 99 ? '99+' : count + 1;
+              } else {
+                const timeContainer = existingLi.querySelector('.chat-time-container');
+                if (timeContainer) {
+                  const badge = document.createElement('div');
+                  badge.className = 'unread-badge';
+                  badge.textContent = '1';
+                  timeContainer.appendChild(badge);
+                }
+              }
+              // Prepend to top of contact list (right after Chronex AI)
+              const firstChat = contactList.querySelector('.chat-item:not(.chronex-ai-item)');
+              if (firstChat && firstChat !== existingLi) {
+                contactList.insertBefore(existingLi, firstChat);
+              }
+            } else {
+              // Fresh new chat from someone not yet on list -> reload contacts immediately!
+              loadContacts().catch(console.warn);
+            }
+          }
+        }
+      }
+    }, (err) => {
+      console.warn('[GLOBAL INCOMING] Listener notice:', err?.message);
+    });
+  } catch (err) {
+    console.warn('[GLOBAL INCOMING] Setup notice:', err);
+  }
+}
+window.setupGlobalIncomingMessageListener = setupGlobalIncomingMessageListener;
+
 async function loadContacts() {
+  setupGlobalIncomingMessageListener();
   const contactList = document.getElementById("contactList");
   if (!contactList || !myUID) return;
 
@@ -19363,17 +19570,41 @@ async function loadContacts() {
     let top10Contacts = [];
     try {
       const messagesRef = collection(db, "messages");
-      const qIn = query(messagesRef, where("to", "==", myUID), orderBy("timestamp", "desc"), limit(35));
-      const qOut = query(messagesRef, where("from", "==", myUID), orderBy("timestamp", "desc"), limit(35));
+      
+      // Resilient Query: Try indexed query with timestamp desc; if composite index missing, fallback to single-field query
+      let snapIn, snapOut;
+      try {
+        const qIn = query(messagesRef, where("to", "==", myUID), orderBy("timestamp", "desc"), limit(50));
+        snapIn = await getDocs(qIn);
+      } catch (inErr) {
+        try {
+          const qInTime = query(messagesRef, where("to", "==", myUID), orderBy("time", "desc"), limit(50));
+          snapIn = await getDocs(qInTime);
+        } catch (_) {
+          const qInFallback = query(messagesRef, where("to", "==", myUID), limit(50));
+          snapIn = await getDocs(qInFallback);
+        }
+      }
 
-      const [snapIn, snapOut] = await Promise.all([getDocs(qIn), getDocs(qOut)]);
+      try {
+        const qOut = query(messagesRef, where("from", "==", myUID), orderBy("timestamp", "desc"), limit(50));
+        snapOut = await getDocs(qOut);
+      } catch (outErr) {
+        try {
+          const qOutTime = query(messagesRef, where("from", "==", myUID), orderBy("time", "desc"), limit(50));
+          snapOut = await getDocs(qOutTime);
+        } catch (_) {
+          const qOutFallback = query(messagesRef, where("from", "==", myUID), limit(50));
+          snapOut = await getDocs(qOutFallback);
+        }
+      }
 
       const partnerMap = new Map();
       snapIn.forEach(docSnap => {
         const d = docSnap.data();
         if (d.from && d.from !== myUID) {
           if (!archivedChats.includes(d.from) && !lockedChats.includes(d.from) && !deletedChats.includes(d.from) && !vanishedChats.includes(d.from)) {
-            const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
+            const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.time?.toMillis ? d.time.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : (d.time instanceof Date ? d.time.getTime() : 0)));
             if (!partnerMap.has(d.from) || ts > partnerMap.get(d.from)) partnerMap.set(d.from, ts);
           }
         }
@@ -19382,32 +19613,32 @@ async function loadContacts() {
         const d = docSnap.data();
         if (d.to && d.to !== myUID) {
           if (!archivedChats.includes(d.to) && !lockedChats.includes(d.to) && !deletedChats.includes(d.to) && !vanishedChats.includes(d.to)) {
-            const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : 0);
+            const ts = d.timestamp?.toMillis ? d.timestamp.toMillis() : (d.time?.toMillis ? d.time.toMillis() : (d.timestamp instanceof Date ? d.timestamp.getTime() : (d.time instanceof Date ? d.time.getTime() : 0)));
             if (!partnerMap.has(d.to) || ts > partnerMap.get(d.to)) partnerMap.set(d.to, ts);
           }
         }
       });
 
+      // Keep up to 40 recent partners so fresh incoming chats are NEVER dropped
       top10Contacts = Array.from(partnerMap.entries())
         .sort((a, b) => b[1] - a[1])
         .map(e => e[0])
         .filter(uid => uid !== 'chronex-ai')
-        .slice(0, 10);
+        .slice(0, 40);
 
-      if (top10Contacts.length < 10) {
-        const otherContacts = [...rawContacts].reverse().filter(uid => 
-          !top10Contacts.includes(uid) && 
-          uid !== 'chronex-ai' &&
-          !archivedChats.includes(uid) &&
-          !lockedChats.includes(uid) &&
-          !deletedChats.includes(uid) &&
-          !vanishedChats.includes(uid)
-        );
-        top10Contacts.push(...otherContacts.slice(0, 10 - top10Contacts.length));
-      }
+      // Append any other saved contacts not already in recent chats
+      const otherContacts = [...rawContacts].reverse().filter(uid => 
+        !top10Contacts.includes(uid) && 
+        uid !== 'chronex-ai' &&
+        !archivedChats.includes(uid) &&
+        !lockedChats.includes(uid) &&
+        !deletedChats.includes(uid) &&
+        !vanishedChats.includes(uid)
+      );
+      top10Contacts.push(...otherContacts);
     } catch (err) {
-      console.warn("Recent conversations optimization failed, falling back to simplified list:", err);
-      top10Contacts = [...rawContacts].reverse().filter(uid => !archivedChats.includes(uid) && !lockedChats.includes(uid) && !deletedChats.includes(uid) && !vanishedChats.includes(uid)).slice(0, 10);
+      console.warn("Recent conversations optimization notice, using simplified list:", err);
+      top10Contacts = [...rawContacts].reverse().filter(uid => !archivedChats.includes(uid) && !lockedChats.includes(uid) && !deletedChats.includes(uid) && !vanishedChats.includes(uid)).slice(0, 20);
     }
 
     const myContacts = top10Contacts;
