@@ -714,7 +714,9 @@ async function handleAdSubmit(e) {
     const expiresAt = new Date(Date.now() + plan.hours * 60 * 60 * 1000);
 
     const adData = {
+      title: productName,
       productName: productName,
+      description: productDescription,
       productDescription: productDescription,
       productPrice: productPrice,
       productCategory: productCategory,
