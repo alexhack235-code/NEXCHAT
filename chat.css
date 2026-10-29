@@ -6978,6 +6978,11 @@ body.chat-size-extra-large .message-bubble {
     grid-area: title !important;
     padding-left: 4px !important;
     min-width: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .settings-title-desktop {
+    display: none !important;
   }
 
   .settings-header-left h2 {
@@ -11201,4 +11206,84 @@ body.chat-size-extra-large .message-bubble {
   position: relative !important;
   bottom: auto !important;
   right: auto !important;
+}
+
+
+/* Settings Profile Hero & Avatar Constraints (Profile Tab) */
+.settings-profile-hero {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  padding: 8px 4px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.settings-profile-avatar-wrap {
+  position: relative !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-shrink: 0 !important;
+  width: 68px !important;
+  height: 68px !important;
+}
+
+.settings-profile-avatar {
+  width: 64px !important;
+  height: 64px !important;
+  max-width: 64px !important;
+  max-height: 64px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+  border: 2px solid rgba(0, 255, 102, 0.4) !important;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.25) !important;
+  display: block !important;
+}
+
+.settings-profile-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+
+.settings-profile-name-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  min-width: 0 !important;
+}
+
+.settings-profile-name {
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.settings-profile-handle {
+  font-size: 12.5px !important;
+  color: #00f2fe !important;
+  font-family: 'Fira Code', monospace !important;
+}
+
+.settings-profile-status {
+  font-size: 11.5px !important;
+  color: #94a3b8 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.status-online-dot {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background: #00ff66 !important;
+  box-shadow: 0 0 6px #00ff66 !important;
+  display: inline-block !important;
 }

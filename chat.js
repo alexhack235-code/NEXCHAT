@@ -11499,16 +11499,10 @@ function openSettingsModal() {
     modal.style.display = "flex";
     document.body.style.overflow = "hidden";
 
-    // Synchronize Verified User Profile Hero
+    // Synchronize Verified User Profile in Profile Tab
     const currentName = window.myUsername || (window.auth && window.auth.currentUser && window.auth.currentUser.displayName) || 'NEX Operative';
     const currentPic = window.myProfilePic || (window.auth && window.auth.currentUser && window.auth.currentUser.photoURL) || 'logo.jpg';
     const currentHandle = '@' + currentName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
-    const heroPic = document.getElementById('settingsProfilePic');
-    const heroName = document.getElementById('settingsProfileName');
-    const heroHandle = document.getElementById('settingsProfileHandle');
-    if (heroPic && currentPic) heroPic.src = currentPic;
-    if (heroName) heroName.textContent = currentName;
-    if (heroHandle) heroHandle.textContent = currentHandle;
     const tabPic = document.getElementById('tabProfilePic');
     const tabName = document.getElementById('tabProfileName');
     const tabHandle = document.getElementById('tabProfileHandle');
