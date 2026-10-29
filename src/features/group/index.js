@@ -362,13 +362,45 @@ function _processMessages(messages, currentUid) {
     }];
   }
 
-  // Insert date separators
+  // 1. Tag consecutive messages within 3-minute threshold (180,000ms)
+  const CONSECUTIVE_THRESHOLD_MS = 180000;
+  for (let i = 0; i < messages.length; i++) {
+    const current = messages[i];
+    const prev = i > 0 ? messages[i - 1] : null;
+
+    if (
+      prev &&
+      !prev.type &&
+      !prev.isSystem &&
+      prev.from === current.from
+    ) {
+      const curTime = current.timestamp?.toMillis ? current.timestamp.toMillis() : (current.timestamp?.toDate ? current.timestamp.toDate().getTime() : (typeof current.timestamp === 'number' ? current.timestamp : 0));
+      const prevTime = prev.timestamp?.toMillis ? prev.timestamp.toMillis() : (prev.timestamp?.toDate ? prev.timestamp.toDate().getTime() : (typeof prev.timestamp === 'number' ? prev.timestamp : 0));
+      const timeDiff = Math.abs(curTime - prevTime);
+
+      if (timeDiff < CONSECUTIVE_THRESHOLD_MS) {
+        current.isConsecutive = true;
+        current.hideSenderHeader = true;
+        current.hideAvatar = true;
+      } else {
+        current.isConsecutive = false;
+        current.hideSenderHeader = false;
+        current.hideAvatar = false;
+      }
+    } else {
+      current.isConsecutive = false;
+      current.hideSenderHeader = false;
+      current.hideAvatar = false;
+    }
+  }
+
+  // 2. Insert date separators
   let processed = insertDateSeparators(messages);
 
-  // Insert unread divider
+  // 3. Insert unread divider
   processed = insertUnreadDivider(processed, currentUid);
 
-  // Prepend security encryption verified banner if not already present
+  // 4. Prepend security encryption verified banner if not already present
   if (!processed.some(p => p && (p.id === 'system_enc_notice' || (p.text && p.text.includes('Security encryption verified'))))) {
     processed.unshift({
       id: 'system_enc_notice',
@@ -437,6 +469,9 @@ function _renderItem(item, element, currentUid, options = {}) {
     senderRole,
     currentUid,
     totalMembers,
+    isConsecutive: !!item.isConsecutive,
+    hideSenderHeader: !!item.hideSenderHeader,
+    hideAvatar: !!item.hideAvatar,
     onReply: (msg) => {
       showReplyPreview(msg, senderProfile.username, () => hideReplyPreview());
       groupStore.setState({ replyingTo: msg });

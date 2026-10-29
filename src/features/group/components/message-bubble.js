@@ -45,7 +45,7 @@ export function getSenderColor(idOrName) {
     hash = ((hash << 5) - hash) + str.charCodeAt(i);
     hash |= 0;
   }
-  const index = Math.abs(hash) % SENDER_COLORS.length;
+  const index = (Math.abs(hash) >>> 0) % SENDER_COLORS.length;
   return SENDER_COLORS[index];
 }
 
@@ -124,6 +124,9 @@ export function renderMessageBubble(message, container, options = {}) {
   try {
     const wrapper = document.createElement('div');
     wrapper.className = 'nex-msg-wrapper ' + (options.isOwn ? 'sent' : 'received');
+    if (options.isConsecutive) {
+      wrapper.classList.add('consecutive');
+    }
     wrapper.dataset.messageId = message.id;
 
     // Context menu handler
@@ -133,12 +136,18 @@ export function renderMessageBubble(message, container, options = {}) {
     };
     wrapper.addEventListener('contextmenu', handleContextMenu);
 
-    const senderColor = getSenderColor(message.from || options.senderName || 'user');
+    const senderColor = getSenderColor(message.from || message.senderId || options.senderName || 'user');
 
     // 1. Mini circular sender avatar next to received message bubbles
     if (!options.isOwn) {
       const avatarWrap = document.createElement('div');
       avatarWrap.className = 'nex-msg-avatar-wrap';
+
+      if (options.hideAvatar) {
+        avatarWrap.style.width = '28px';
+        avatarWrap.style.height = '0';
+        avatarWrap.style.visibility = 'hidden';
+      } else {
 
       const initialChar = (options.senderName || 'U')
         .trim()
@@ -172,6 +181,7 @@ export function renderMessageBubble(message, container, options = {}) {
       } else {
         avatarWrap.appendChild(initialCircle);
       }
+      }
 
       wrapper.appendChild(avatarWrap);
     }
@@ -181,6 +191,9 @@ export function renderMessageBubble(message, container, options = {}) {
 
     const bubble = document.createElement('div');
     bubble.className = 'nex-msg-bubble ' + (options.isOwn ? 'sent' : 'received');
+    if (options.isConsecutive) {
+      bubble.classList.add('consecutive');
+    }
 
     // 2. WhatsApp Group Identity: Sender's name at top of bubble in unique vibrant color with '~ ' prefix
     if (!options.isOwn && options.senderName) {

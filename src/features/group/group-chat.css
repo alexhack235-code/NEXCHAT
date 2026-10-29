@@ -1127,3 +1127,18 @@
   white-space: nowrap;
   text-align: center;
 }
+
+
+/* Consecutive Message Spacing & Radius Reduction */
+.nex-msg-wrapper.consecutive {
+  margin-bottom: 2px !important;
+  margin-top: 0px !important;
+}
+
+.nex-msg-bubble.received.consecutive {
+  border-radius: 8px !important;
+}
+
+.nex-msg-bubble.sent.consecutive {
+  border-radius: 8px !important;
+}

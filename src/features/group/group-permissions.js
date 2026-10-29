@@ -67,9 +67,28 @@ export const ROLE_PERMISSIONS = {
  */
 export function getUserRole(groupData, uid) {
   if (!groupData || !uid) return ROLES.MEMBER;
-  if (groupData.creatorId === uid) return ROLES.CREATOR;
+
+  // 1. Check Creator / Owner across all schema variants
+  if (
+    groupData.creatorId === uid ||
+    groupData.createdBy === uid ||
+    groupData.ownerId === uid
+  ) {
+    return ROLES.CREATOR;
+  }
+
+  // 2. Check explicit roles map (if present)
+  if (groupData.roles && typeof groupData.roles === 'object' && groupData.roles[uid]) {
+    const r = String(groupData.roles[uid]).toLowerCase();
+    if (r === 'creator' || r === 'owner') return ROLES.CREATOR;
+    if (r === 'admin') return ROLES.ADMIN;
+    if (r === 'moderator' || r === 'mod') return ROLES.MODERATOR;
+  }
+
+  // 3. Check legacy array memberships
   if (Array.isArray(groupData.admins) && groupData.admins.includes(uid)) return ROLES.ADMIN;
   if (Array.isArray(groupData.moderators) && groupData.moderators.includes(uid)) return ROLES.MODERATOR;
+
   return ROLES.MEMBER;
 }
 

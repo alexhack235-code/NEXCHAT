@@ -625,6 +625,19 @@
     })[m]);
   }
 
+  function cleanTokenSafe(w) {
+    if (!w) return '';
+    try {
+      return String(w).toLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, '');
+    } catch (_) {
+      return String(w).toLowerCase().replace(/^[^a-zA-Z0-9]+|[^a-zA-Z0-9]+$/g, '');
+    }
+  }
+
+  function escapeRegExp(s) {
+    return String(s || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
   class PredictiveInputEngine {
     constructor() {
       this.input = null;

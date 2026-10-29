@@ -4319,6 +4319,8 @@ async function sendMessage() {
     const meshBanner = document.getElementById('tacticalMeshBanner');
     if (meshBanner) meshBanner.style.display = 'flex';
     if (messageText) messageText.value = '';
+    if (window.predictiveInputEngine?.bar) window.predictiveInputEngine.bar.style.display = 'none';
+    if (window.predictiveInputEngine?.autocorrectBtn) window.predictiveInputEngine.autocorrectBtn.style.display = 'none';
     playLuxuryPopSound();
     hapticFeedback('success');
     showNotif('Message routed via Local P2P Mesh (Zero-Cloud)', 'info', 3000);

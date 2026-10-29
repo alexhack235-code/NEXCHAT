@@ -2080,7 +2080,7 @@
             <nav class="settings-sidebar" id="settingsSidebar">
               <div class="settings-nav-group">
                 <span class="settings-nav-group-title">STEALTH &amp; SECURITY</span>
-                <button type="button" class="settings-nav-tab active" data-tab="tab-stealth-sensors">
+                <button type="button" class="settings-nav-tab" data-tab="tab-stealth-sensors">
                   <i class="fa-solid fa-user-secret" style="color: #00f2fe;"></i>
                   <span>Stealth &amp; Sensors</span>
                   <span class="settings-tab-microbadge" style="background: rgba(0, 242, 254, 0.15); color: #00f2fe; border: 1px solid rgba(0, 242, 254, 0.4);">ENCLAVE</span>
@@ -2093,7 +2093,7 @@
 
               <div class="settings-nav-group">
                 <span class="settings-nav-group-title">IDENTITY &amp; ASSETS</span>
-                <button type="button" class="settings-nav-tab" data-tab="tab-profile">
+                <button type="button" class="settings-nav-tab active" data-tab="tab-profile">
                   <i class="fa-solid fa-user-astronaut"></i>
                   <span>Profile &amp; Identity</span>
                 </button>
@@ -2184,7 +2184,7 @@
             <div class="settings-pane-container" id="settingsPaneContainer">
               
               <!-- TAB 1: PROFILE & IDENTITY -->
-              <div class="settings-tab-pane" id="tab-profile">
+              <div class="settings-tab-pane active" id="tab-profile">
                 <div class="settings-pane-header">
                   <h3><i class="fa-solid fa-user-astronaut"></i> Profile & Identity</h3>
                   <p>Manage your account credentials, public card, and security status.</p>
@@ -3777,7 +3777,7 @@
               </div>
 
                             <!-- TAB: TACTICAL STEALTH & SENSORS ENCLAVE -->
-              <div class="settings-tab-pane active" id="tab-stealth-sensors">
+              <div class="settings-tab-pane" id="tab-stealth-sensors">
                 <div class="settings-pane-header">
                   <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                     <div>
@@ -8554,6 +8554,20 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 </div>
 
 <script type="module" src="chat.js"></script>
+<script>
+  if (new URLSearchParams(window.location.search).has('settings')) {
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (typeof window.openSettingsModal === 'function') {
+          window.openSettingsModal();
+        } else {
+          const m = document.getElementById('settingsModal');
+          if (m) m.style.display = 'flex';
+        }
+      }, 500);
+    });
+  }
+</script>
 </body>
 
 </html>

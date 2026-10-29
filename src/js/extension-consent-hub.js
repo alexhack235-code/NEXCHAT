@@ -794,8 +794,8 @@
     }
 
     // For new users who haven't made a decision yet:
-    // When visiting chat.html or index.html, prompt after brief delay
-    if (reelsStatus === null) {
+    // Prompt only on reels.html or when explicit prompt query is present
+    if (isReelsPage && reelsStatus === null) {
       const delay = 400; // Primary first popup screen for new users
       setTimeout(() => {
         const alreadyDecided = localStorage.getItem('nex_ext_reels_status');
