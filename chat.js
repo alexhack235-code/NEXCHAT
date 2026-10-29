@@ -872,6 +872,21 @@ function notifyNewMessage(message, senderName) {
     vibrate([120, 60, 120]);
   }
 
+  const senderId = message.from || message.senderId;
+  const isSenderLocked = (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.isChatLocked === 'function' && window.NexChatPasscodeGate.isChatLocked(senderId)) ||
+                         (window.NexLockedChats && typeof window.NexLockedChats.isChatLocked === 'function' && window.NexLockedChats.isChatLocked(senderId));
+
+  if (isSenderLocked) {
+    safeShowNotification(`Confidential message from ${senderName}`, 'info', 3000);
+    showBrowserNotification(
+      'NEXCHAT - Confidential Message',
+      `${senderName}: [Confidential Locked Message]`,
+      'logo.jpg',
+      'new-message'
+    );
+    return;
+  }
+
   safeShowNotification(`New message from ${senderName}`, 'info', 3000);
 
   showBrowserNotification(
@@ -5711,6 +5726,12 @@ function loadMessages() {
     return;
   }
 
+  const isPasscodeLocked = (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.isChatLocked === 'function' && window.NexChatPasscodeGate.isChatLocked(currentChatUser));
+  if (isPasscodeLocked) {
+    messagesDiv.innerHTML = "";
+    return;
+  }
+
   let cachedDirectMessages = null;
   if (currentChatType === 'direct' && myUID && currentChatUser) {
     cachedDirectMessages = getCachedDirectChatMessages(myUID, currentChatUser);
@@ -5744,6 +5765,10 @@ function loadMessages() {
   let loaded2 = false;
 
   const updateMessages = () => {
+    const isPasscodeLocked = (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.isChatLocked === 'function' && window.NexChatPasscodeGate.isChatLocked(currentChatUser));
+    if (isPasscodeLocked) {
+      return;
+    }
     const isInitialLoadComplete = loaded1 && loaded2;
     console.log("?? Message progress - loaded1:", loaded1, "loaded2:", loaded2, "messages1:", messages1.length, "messages2:", messages2.length);
 
@@ -6741,13 +6766,19 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
     localAiMessages = [];
   }
 
-  // Load messages immediately
-  if (chatType === 'group') {
-    loadGroupMessages(uid);
-    loadChatBackground(uid, chatType).catch(() => {});
+  // Load messages immediately if not locked behind passcode
+  const isPasscodeLocked = (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.isChatLocked === 'function' && window.NexChatPasscodeGate.isChatLocked(uid));
+  if (!isPasscodeLocked) {
+    if (chatType === 'group') {
+      loadGroupMessages(uid);
+      loadChatBackground(uid, chatType).catch(() => {});
+    } else {
+      loadMessages();
+      loadChatBackground(uid, chatType).catch(() => {});
+    }
   } else {
-    loadMessages();
-    loadChatBackground(uid, chatType).catch(() => {});
+    const messagesDiv = document.getElementById("messages-area");
+    if (messagesDiv) messagesDiv.innerHTML = "";
   }
 
   // Background metadata, user profile, verification badge & contacts sync
@@ -18667,7 +18698,12 @@ async function loadContacts() {
           }
         }
 
-        if (latestMsg.text) {
+        const isLockedContact = (window.NexChatPasscodeGate && typeof window.NexChatPasscodeGate.isChatLocked === 'function' && window.NexChatPasscodeGate.isChatLocked(uid)) ||
+                                (window.NexLockedChats && typeof window.NexLockedChats.isChatLocked === 'function' && window.NexLockedChats.isChatLocked(uid));
+
+        if (isLockedContact) {
+          lastMessageSnippet = `<span class="preview-text" style="color: #00f3ff; font-weight: 600;"><i class="fa-solid fa-lock" style="font-size: 11px; margin-right: 4px;"></i> Locked Conversation</span>`;
+        } else if (latestMsg.text) {
           const textSnippet = latestMsg.text.length > 36 ? latestMsg.text.substring(0, 36) + "..." : latestMsg.text;
           const prefix = isFromMe ? "You: " : "";
           lastMessageSnippet = `${deliveryTickHtml}<span class="preview-text">${prefix}${escape(textSnippet)}</span>`;

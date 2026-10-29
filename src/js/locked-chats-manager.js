@@ -31,6 +31,7 @@
   class NexLockedChatsManager {
     constructor() {
       this.lockedChatIds = new Set();
+      this.unlockedChatSessions = new Map();
       this.isUnlocked = false;
       this.autoLockTimer = null;
       this.inactivityTimeoutMs = 120000; // 2 minutes
@@ -419,8 +420,42 @@
       this.populateVaultList();
     }
 
+    isChatSessionUnlocked(chatId) {
+      if (!chatId) return false;
+      const expiry = this.unlockedChatSessions.get(chatId);
+      if (!expiry) return false;
+      if (Date.now() > expiry) {
+        this.unlockedChatSessions.delete(chatId);
+        return false;
+      }
+      return true;
+    }
+
+    unlockChatSession(chatId, ttlMs = 120000) {
+      if (!chatId) return;
+      this.unlockedChatSessions.set(chatId, Date.now() + ttlMs);
+      if (window.NexChatPasscodeGate && window.NexChatPasscodeGate.sessionUnlockedChats) {
+        window.NexChatPasscodeGate.sessionUnlockedChats.add(chatId);
+      }
+    }
+
+    relockChatSession(chatId) {
+      if (!chatId) return;
+      this.unlockedChatSessions.delete(chatId);
+      if (window.NexChatPasscodeGate && window.NexChatPasscodeGate.sessionUnlockedChats) {
+        window.NexChatPasscodeGate.sessionUnlockedChats.delete(chatId);
+      }
+    }
+
+    touchActivity(chatId) {
+      if (this.isChatSessionUnlocked(chatId)) {
+        this.unlockChatSession(chatId);
+      }
+    }
+
     isChatLocked(chatId) {
       if (!chatId) return false;
+      if (this.isChatSessionUnlocked(chatId)) return false;
       return this.lockedChatIds.has(chatId);
     }
 
@@ -591,6 +626,10 @@
 
         li.addEventListener('click', (e) => {
           if (e.target.closest('.vault-unlock-btn')) return;
+          this.unlockChatSession(id, 120000);
+          if (window.NexChatPasscodeGate && window.NexChatPasscodeGate.sessionUnlockedChats) {
+            window.NexChatPasscodeGate.sessionUnlockedChats.add(id);
+          }
           this.closeVault();
           if (typeof window.openChat === 'function') {
             window.openChat(id, name, pic, 'direct');
