@@ -3402,6 +3402,9 @@ function closeSearch() {
   }
 }
 
+window.openSearch = openSearch;
+window.closeSearch = closeSearch;
+
 function setupSearchListeners() {
   const input = document.getElementById("search-input");
   const clearBtn = document.getElementById("clear-search-btn");
@@ -6946,13 +6949,16 @@ document.getElementById('poll-btn')?.addEventListener('click', () => {
   }
 });
 
-document.getElementById("menuBtn")?.addEventListener("click", (e) => {
-  e.stopPropagation();
+const toggleChatOptionsMenu = (e) => {
+  if (e) {
+    e.stopPropagation();
+    e.preventDefault();
+  }
   const menu = document.getElementById("chatOptionsMenu");
   const menuBtn = document.getElementById("menuBtn");
 
   if (menu) {
-    const isVisible = menu.style.display !== "none";
+    const isVisible = window.getComputedStyle(menu).display !== "none";
 
     if (!isVisible) {
       menu.style.display = "block";
@@ -6979,7 +6985,14 @@ document.getElementById("menuBtn")?.addEventListener("click", (e) => {
       groupLeaveBtn.style.display = currentChatType === 'group' ? 'block' : 'none';
     }
   }
-});
+};
+window.toggleChatOptionsMenu = toggleChatOptionsMenu;
+
+const menuBtnEl = document.getElementById("menuBtn");
+if (menuBtnEl) {
+  menuBtnEl.addEventListener("click", toggleChatOptionsMenu);
+  menuBtnEl.addEventListener("touchend", toggleChatOptionsMenu);
+}
 
 document.addEventListener("click", (e) => {
   const menu = document.getElementById("chatOptionsMenu");
@@ -11835,6 +11848,14 @@ function loadSettingsPreferences() {
     if (crashDecoyToggle) {
       crashDecoyToggle.checked = localStorage.getItem("nex_crash_decoy_enabled") === "true";
     }
+    const ghostRecallToggle = document.getElementById("settingGhostRecallToggle");
+    if (ghostRecallToggle) {
+      ghostRecallToggle.checked = localStorage.getItem("nex_ghost_recall_enabled") !== "false";
+    }
+    const aegisShieldToggle = document.getElementById("settingAegisShieldToggle");
+    if (aegisShieldToggle) {
+      aegisShieldToggle.checked = localStorage.getItem("nex_aegis_shield_enabled") !== "false";
+    }
 
     applyBubbleTheme(prefs.bubbleTheme || "neon-onyx");
 
@@ -12042,6 +12063,19 @@ function saveSettingsPreferences() {
       localStorage.setItem("nex_crash_decoy_enabled", crashDecoyToggle.checked ? "true" : "false");
       if (window.NexCrashDecoy && typeof window.NexCrashDecoy.setEnabled === 'function') {
         window.NexCrashDecoy.setEnabled(crashDecoyToggle.checked);
+      }
+    }
+
+    const ghostRecallToggle = document.getElementById("settingGhostRecallToggle");
+    if (ghostRecallToggle) {
+      localStorage.setItem("nex_ghost_recall_enabled", ghostRecallToggle.checked ? "true" : "false");
+    }
+
+    const aegisShieldToggle = document.getElementById("settingAegisShieldToggle");
+    if (aegisShieldToggle) {
+      localStorage.setItem("nex_aegis_shield_enabled", aegisShieldToggle.checked ? "true" : "false");
+      if (window.NexAegisShield && typeof window.NexAegisShield.setEnabled === 'function') {
+        window.NexAegisShield.setEnabled(aegisShieldToggle.checked);
       }
     }
 
@@ -13504,7 +13538,8 @@ const setupSettingsListeners = () => {
     "settingVanishTriggerMethod", "settingVanishFlipPanic",
     "settingKnuckleKnockToggle", "settingKnuckleCountSelect",
     "settingHorizonLockToggle", "settingHorizonTargetAngle",
-    "settingMathCloakToggle", "settingCrashDecoyToggle"
+    "settingMathCloakToggle", "settingCrashDecoyToggle",
+    "settingGhostRecallToggle", "settingAegisShieldToggle"
   ];
 
   toggles.forEach(id => {
@@ -14578,12 +14613,15 @@ async function createGroup(e) {
 }
 
 async function deleteGroup(groupId) {
+  if (!groupId) return;
   if (!confirm("Are you sure you want to DELETE this group? This action cannot be undone and will remove the group for ALL members.")) return;
 
   try {
-    const groupMessagesSnapshot = await getDocs(query(collection(db, 'groupMessages'), where('groupId', '==', groupId)));
-    await Promise.all(groupMessagesSnapshot.docs.map(docSnap => deleteDoc(docSnap.ref)));
-    await deleteDoc(doc(db, "groups", groupId));
+    try {
+      const groupMessagesSnapshot = await getDocs(query(collection(db, 'groupMessages'), where('groupId', '==', groupId)));
+      await Promise.all(groupMessagesSnapshot.docs.map(docSnap => deleteDoc(docSnap.ref).catch(() => {})));
+    } catch (_) {}
+    await deleteDoc(doc(db, "groups", groupId)).catch(() => {});
     showNotif("Group deleted successfully", "success");
     const groupInfoModal = document.getElementById('groupInfoModal');
     if (groupInfoModal) groupInfoModal.style.display = 'none';
@@ -17608,10 +17646,7 @@ function initializeBasicUI() {
     await handleStatusPost(text, file);
   });
 
-  document.getElementById('menuBtn')?.addEventListener('click', () => {
-    const menu = document.getElementById('chatOptionsMenu');
-    if (menu) menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
-  });
+  // [MENU BTN]: Single-source listener handled by window.toggleChatOptionsMenu
 
   document.getElementById('attach-btn')?.addEventListener('click', () => {
     document.getElementById('file-input')?.click();
@@ -18072,6 +18107,20 @@ function initializeBasicUI() {
       const query = e.target.value.toLowerCase().trim();
       filterChats(query);
     });
+    searchInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const query = e.target.value.trim();
+        if (query && typeof openSearch === 'function') {
+          openSearch();
+          const modalInp = document.getElementById("search-input");
+          if (modalInp) {
+            modalInp.value = query;
+            if (typeof filterSearchResults === 'function') filterSearchResults();
+          }
+        }
+      }
+    });
   }
 
   const filterTabs = document.querySelectorAll(".filter-tab");
@@ -18286,10 +18335,27 @@ function setupMobileFeatures() {
     });
   }
 
-  // Mobile Search Button triggers main search overlay
-  document.getElementById('mobileSearchBtn')?.addEventListener('click', () => {
-    document.getElementById('search-btn-header')?.click();
-  });
+  // Mobile Search Button triggers main search overlay directly
+  const triggerGlobalSearch = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (typeof openSearch === 'function') {
+      openSearch();
+    }
+  };
+
+  const mobileSearchBtnEl = document.getElementById('mobileSearchBtn');
+  if (mobileSearchBtnEl) {
+    mobileSearchBtnEl.addEventListener('click', triggerGlobalSearch);
+    mobileSearchBtnEl.addEventListener('touchend', triggerGlobalSearch);
+  }
+
+  const desktopSearchBtnEl = document.getElementById('search-btn-header');
+  if (desktopSearchBtnEl) {
+    desktopSearchBtnEl.addEventListener('click', triggerGlobalSearch);
+  }
 
   // Mobile FAB New Chat button triggers openSearch directly
   document.getElementById('mobileFabNewChat')?.addEventListener('click', (e) => {
@@ -18339,9 +18405,10 @@ function setupMobileFeatures() {
     }
   });
 
-  document.getElementById('mobileSettingsBtn')?.addEventListener('click', () => {
+  document.getElementById('mobileSettingsBtn')?.addEventListener('click', (e) => {
+    if (e) e.preventDefault();
     if (mobileDropdownMenu) mobileDropdownMenu.style.display = 'none';
-    document.getElementById('settings-btn-header')?.click();
+    if (typeof openSettingsModal === 'function') openSettingsModal();
   });
 
   document.getElementById('mobileLogoutBtn')?.addEventListener('click', () => {
@@ -18734,6 +18801,7 @@ async function loadContacts() {
   const contactList = document.getElementById("contactList");
   if (!contactList || !myUID) return;
 
+  let chronexLi = null;
   contactList.innerHTML = '<li style="text-align:center; padding:10px;">Loading chats...</li>';
   try {
     if (typeof contactsListener === 'function') {
@@ -18742,7 +18810,7 @@ async function loadContacts() {
 
     const tempContainer = document.createElement("div");
 
-    const chronexLi = document.createElement("li");
+    chronexLi = document.createElement("li");
     chronexLi.className = "chat-list-item chat-item chronex-ai-item";
     chronexLi.setAttribute('data-chat-id', 'chronex-ai');
     chronexLi.setAttribute('data-chat-type', 'ai');
@@ -18791,6 +18859,11 @@ async function loadContacts() {
       lockedChats.forEach(id => window.NexLockedChats.lockedChatIds.add(id));
       window.NexLockedChats.updateLockedChatsBadge();
     }
+
+    // Vanished chats filter list
+    const vanishedChats = (window.NexChatVanish && typeof window.NexChatVanish.getVanishedChatsForFilter === 'function')
+      ? window.NexChatVanish.getVanishedChatsForFilter()
+      : [];
 
     let top10Contacts = [];
     try {
@@ -19115,7 +19188,18 @@ async function loadContacts() {
 
   } catch (err) {
     console.error("Contacts error", err);
-    contactList.innerHTML = `<li style="text-align:center; padding:10px; color: #ff6b6b;">Error loading contacts</li>`;
+    if (contactList && chronexLi) {
+      contactList.innerHTML = "";
+      contactList.appendChild(chronexLi);
+      contactList.innerHTML += `<li style="text-align:center; padding:16px 10px; color: #94a3b8; font-size: 13px;">
+        <span style="color: #ff6b6b; display: block; margin-bottom: 6px;">Error loading contacts</span>
+        <button type="button" onclick="loadContacts()" style="padding: 4px 14px; background: rgba(0, 255, 102, 0.12); border: 1px solid #00ff66; border-radius: 6px; color: #00ff66; font-size: 12px; cursor: pointer;">
+          <i class="fa-solid fa-arrows-rotate"></i> Retry
+        </button>
+      </li>`;
+    } else if (contactList) {
+      contactList.innerHTML = `<li style="text-align:center; padding:10px; color: #ff6b6b;">Error loading contacts <button type="button" onclick="loadContacts()" style="margin-left:8px; padding:2px 8px; background:transparent; border:1px solid #ff6b6b; color:#ff6b6b; border-radius:4px; font-size:11px; cursor: pointer;">Retry</button></li>`;
+    }
   }
 }
 
@@ -19123,14 +19207,24 @@ async function appendGroupsToContactList(contactList) {
   if (!contactList || !myUID) return 0;
 
   try {
-    const groupsQuery = query(
-      collection(db, "groups"),
-      where("members", "array-contains", myUID),
-      orderBy("lastMessageTime", "desc"),
-      limit(10)
-    );
-
-    const snapshot = await getDocs(groupsQuery);
+    let snapshot;
+    try {
+      const groupsQuery = query(
+        collection(db, "groups"),
+        where("members", "array-contains", myUID),
+        orderBy("lastMessageTime", "desc"),
+        limit(15)
+      );
+      snapshot = await getDocs(groupsQuery);
+    } catch (idxErr) {
+      console.warn("Groups ordered query fallback to simple query:", idxErr.message);
+      const simpleQuery = query(
+        collection(db, "groups"),
+        where("members", "array-contains", myUID),
+        limit(20)
+      );
+      snapshot = await getDocs(simpleQuery);
+    }
     if (snapshot.empty) return 0;
 
     let groupCount = 0;
@@ -19140,6 +19234,7 @@ async function appendGroupsToContactList(contactList) {
       if (window.NexLockedChats && window.NexLockedChats.isChatLocked(groupId)) return;
       if (window.NexArchivedChats && window.NexArchivedChats.isChatArchived(groupId)) return;
       const groupName = group.name || 'Group';
+      const gInit = (groupName || 'G').charAt(0).toUpperCase();
       let lastMessage = group.lastMessage || 'No messages yet';
       if (lastMessage.length > 40) lastMessage = lastMessage.substring(0, 40) + '...';
       const lastMessageTime = group.lastMessageTime ? formatChatTimestamp(group.lastMessageTime) : '';
@@ -19190,9 +19285,12 @@ async function appendGroupsToContactList(contactList) {
   }
 }
 
-async function deleteChat(chatId, type, skipConfirm = false) {
+async function deleteChat(chatId, type = 'direct', skipConfirm = false) {
   if (!chatId) return;
-  if (!skipConfirm && !confirm("Are you sure you want to delete this chat? This will remove it from your conversation list.")) return;
+  if (!skipConfirm) {
+    const ok = window.confirm("Are you sure you want to delete this chat? This will remove it from your conversation list.");
+    if (!ok) return;
+  }
 
   try {
     const currentUid = (window.currentUser && window.currentUser.uid) || myUID || window.myUID || (auth && auth.currentUser ? auth.currentUser.uid : null);
@@ -19225,32 +19323,42 @@ async function deleteChat(chatId, type, skipConfirm = false) {
     }
 
     // 2. Persist to Firestore user profile
-    const userRef = doc(db, "users", currentUid);
-    await updateDoc(userRef, {
-      deletedChats: arrayUnion(chatId),
-      contacts: arrayRemove(chatId)
-    }).catch(uErr => {
-      console.warn('[DELETE CHAT] updateDoc user warning:', uErr.message);
-    });
-
-    // 3. Mark incoming messages as deletedFor me and purge own messages
     try {
-      const messagesRef = collection(db, "messages");
-      const [snapIn, snapOut] = await Promise.all([
-        getDocs(query(messagesRef, where("from", "==", chatId), where("to", "==", currentUid), limit(100))),
-        getDocs(query(messagesRef, where("from", "==", currentUid), where("to", "==", chatId), limit(100)))
-      ]);
+      const userRef = doc(db, "users", currentUid);
+      await updateDoc(userRef, {
+        deletedChats: arrayUnion(chatId),
+        contacts: arrayRemove(chatId)
+      }).catch(uErr => {
+        console.warn('[DELETE CHAT] updateDoc user warning:', uErr.message);
+      });
+    } catch (uErr) {
+      console.warn('[DELETE CHAT] User ref update warning:', uErr.message);
+    }
 
-      const batchOps = [];
-      snapIn.forEach(docSnap => {
-        batchOps.push(updateDoc(docSnap.ref, { deletedFor: arrayUnion(currentUid) }).catch(() => {}));
-      });
-      snapOut.forEach(docSnap => {
-        batchOps.push(deleteDoc(docSnap.ref).catch(() => updateDoc(docSnap.ref, { isDeleted: true })));
-      });
-      await Promise.all(batchOps);
-    } catch (msgErr) {
-      console.warn('[DELETE CHAT] Messages cleanup note:', msgErr.message);
+    // 3. Mark incoming messages as deletedFor me and purge own messages (for direct chat)
+    if (type !== 'group') {
+      try {
+        const messagesRef = collection(db, "messages");
+        const [snapIn, snapOut] = await Promise.all([
+          getDocs(query(messagesRef, where("from", "==", chatId), where("to", "==", currentUid), limit(100))).catch(() => ({ forEach: () => {} })),
+          getDocs(query(messagesRef, where("from", "==", currentUid), where("to", "==", chatId), limit(100))).catch(() => ({ forEach: () => {} }))
+        ]);
+
+        const batchOps = [];
+        if (snapIn && snapIn.forEach) {
+          snapIn.forEach(docSnap => {
+            batchOps.push(updateDoc(docSnap.ref, { deletedFor: arrayUnion(currentUid) }).catch(() => {}));
+          });
+        }
+        if (snapOut && snapOut.forEach) {
+          snapOut.forEach(docSnap => {
+            batchOps.push(deleteDoc(docSnap.ref).catch(() => updateDoc(docSnap.ref, { isDeleted: true }).catch(() => {})));
+          });
+        }
+        await Promise.all(batchOps);
+      } catch (msgErr) {
+        console.warn('[DELETE CHAT] Messages cleanup note:', msgErr.message);
+      }
     }
 
     showNotif("Chat deleted successfully", "success");

@@ -452,44 +452,56 @@
         if (e.target === modal) closeModal();
       };
 
-      modal.querySelector('#btnCancelDeleteMessage')?.addEventListener('click', closeModal);
+      const bindAction = (selector, action) => {
+        const btn = modal.querySelector(selector);
+        if (!btn) return;
+        let isHandling = false;
+        const trigger = async (e) => {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          if (isHandling) return;
+          isHandling = true;
+          try {
+            await action();
+          } finally {
+            setTimeout(() => { isHandling = false; }, 350);
+          }
+        };
+        btn.addEventListener('click', trigger);
+        btn.addEventListener('touchend', trigger);
+      };
+
+      bindAction('#btnCancelDeleteMessage', closeModal);
 
       // Handle Silent Ghost Recall (Zero-Tombstone Disappearance)
-      const ghostRecallBtn = modal.querySelector('#btnConfirmGhostRecall');
-      if (ghostRecallBtn) {
-        ghostRecallBtn.addEventListener('click', async () => {
-          closeModal();
-          const docId = (msg && (msg.docId || msg.id)) || (typeof msg === 'string' ? msg : null);
-          if (window.NexAegisShield && typeof window.NexAegisShield.executeSilentGhostRecall === 'function') {
-            await window.NexAegisShield.executeSilentGhostRecall(docId);
-          }
-          await this.executeDeleteForEveryone(msg);
-          if (typeof window.showCustomNotification === 'function') {
-            window.showCustomNotification('<i class="fa-solid fa-ghost" style="color:#00f3ff;margin-right:6px;"></i> Message evaporated with zero trace or tombstone', 3000);
-          }
-          if (typeof onComplete === 'function') onComplete();
-        });
-      }
+      bindAction('#btnConfirmGhostRecall', async () => {
+        closeModal();
+        const docId = (msg && (msg.docId || msg.id)) || (typeof msg === 'string' ? msg : null);
+        if (window.NexAegisShield && typeof window.NexAegisShield.executeSilentGhostRecall === 'function') {
+          await window.NexAegisShield.executeSilentGhostRecall(docId);
+        }
+        await this.executeDeleteForEveryone(msg);
+        if (typeof window.showCustomNotification === 'function') {
+          window.showCustomNotification('<i class="fa-solid fa-ghost" style="color:#00f3ff;margin-right:6px;"></i> Message evaporated with zero trace or tombstone', 3000);
+        }
+        if (typeof onComplete === 'function') onComplete();
+      });
 
       // Handle Delete for Everyone
-      const everyoneBtn = modal.querySelector('#btnConfirmDeleteEveryone');
-      if (everyoneBtn) {
-        everyoneBtn.addEventListener('click', async () => {
-          closeModal();
-          await this.executeDeleteForEveryone(msg);
-          if (typeof onComplete === 'function') onComplete();
-        });
-      }
+      bindAction('#btnConfirmDeleteEveryone', async () => {
+        closeModal();
+        await this.executeDeleteForEveryone(msg);
+        if (typeof onComplete === 'function') onComplete();
+      });
 
       // Handle Delete for Me
-      const forMeBtn = modal.querySelector('#btnConfirmDeleteForMe');
-      if (forMeBtn) {
-        forMeBtn.addEventListener('click', async () => {
-          closeModal();
-          await this.executeDeleteForMe(msg);
-          if (typeof onComplete === 'function') onComplete();
-        });
-      }
+      bindAction('#btnConfirmDeleteForMe', async () => {
+        closeModal();
+        await this.executeDeleteForMe(msg);
+        if (typeof onComplete === 'function') onComplete();
+      });
     }
 
     /**
