@@ -1669,3 +1669,69 @@
     gap: 4px !important;
   }
 }
+
+
+/* ─── NEX Radar Visibility Switch & Badges ─── */
+.radar-switch input:checked + .radar-slider {
+  background-color: #00f3ff !important;
+}
+
+.radar-switch input:checked + .radar-slider:before {
+  transform: translateX(20px);
+  background-color: #000 !important;
+}
+
+.radar-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+/* Contact Toggle Button on Search Result Cards & Roster */
+.search-contact-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 255, 102, 0.35);
+  background: rgba(0, 255, 102, 0.08);
+  color: #00ff66;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-contact-toggle-btn:hover {
+  background: rgba(0, 255, 102, 0.2);
+  border-color: #00ff66;
+  transform: scale(1.03);
+}
+
+.search-contact-toggle-btn.is-contact {
+  background: rgba(0, 255, 102, 0.2);
+  color: #00ff66;
+  border-color: #00ff66;
+}
+
+.search-contact-toggle-btn.is-contact:hover {
+  background: rgba(255, 75, 75, 0.15);
+  color: #ff4b4b;
+  border-color: #ff4b4b;
+}
+
+.search-privacy-notice {
+  animation: fadeInNotice 0.3s ease-out forwards;
+}
+
+@keyframes fadeInNotice {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}

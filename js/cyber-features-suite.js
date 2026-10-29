@@ -3090,7 +3090,7 @@ class NexGeoLocation {
 }
 
 /* ============================================================================
-   26. NEX-LOCATION DISCOVERY // REGIONAL OPERATIVES RECOMMENDATION HUB
+   26. NEX-LOCATION DISCOVERY // PRODUCTION-GRADE PEOPLE NEARBY & RADAR
    ============================================================================ */
 class NexLocationDiscovery {
   constructor() {
@@ -3101,9 +3101,23 @@ class NexLocationDiscovery {
     this.searchInput = document.getElementById('locationOperativesSearchInput');
     this.grid = document.getElementById('locationOperativesGrid');
     this.countryLabel = document.getElementById('geoDetectedCountryLabel');
+    this.accuracyBadge = document.getElementById('radarGpsAccuracyBadge');
+    this.accuracyText = document.getElementById('radarGpsAccuracyText');
+    this.peersCountBadge = document.getElementById('radarActivePeersBadge');
+    this.visibilityToggle = document.getElementById('radarVisibilityToggle');
+    this.permissionPromptCard = document.getElementById('radarPermissionPromptCard');
+    this.permissionDeniedBanner = document.getElementById('radarPermissionDeniedBanner');
+    this.grantPermissionBtn = document.getElementById('grantRadarPermissionBtn');
+    this.dismissPermissionBtn = document.getElementById('dismissRadarPermissionBtn');
+    this.retryPermissionBtn = document.getElementById('retryRadarPermissionBtn');
 
-    this.activeTab = 'country';
+    this.activeTab = 'nearby';
+    this.myCoords = null;
     this.operativesPool = [];
+    this.radarUnsubscribe = null;
+    this.locationWatchId = null;
+    this.refreshTimer = null;
+    this.isVisibleOnRadar = localStorage.getItem('nex_radar_visible') === 'true';
 
     this.init();
   }
@@ -3112,156 +3126,366 @@ class NexLocationDiscovery {
     if (this.modal) {
       this.closeBtn?.addEventListener('click', () => this.hide());
       this.backdrop?.addEventListener('click', () => this.hide());
-      this.refreshBtn?.addEventListener('click', () => {
-        window.CyberFeatures?.geo?.fetchLocation().then(() => {
-          window.CyberFeatures?.vpnShield?.runFullAudit(true);
-          this.loadOperatives();
-        });
-      });
-
+      this.refreshBtn?.addEventListener('click', () => this.refreshRadar(true));
       this.searchInput?.addEventListener('input', () => this.renderGrid());
 
       document.querySelectorAll('.loc-tab-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
+        btn.addEventListener('click', () => {
           document.querySelectorAll('.loc-tab-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
           this.activeTab = btn.dataset.tab;
           this.renderGrid();
         });
       });
+
+      if (this.visibilityToggle) {
+        this.visibilityToggle.checked = this.isVisibleOnRadar;
+        this.visibilityToggle.addEventListener('change', (e) => {
+          this.handleVisibilityToggle(e.target.checked);
+        });
+      }
+
+      this.grantPermissionBtn?.addEventListener('click', () => {
+        this.requestLocationPermission(true);
+      });
+
+      this.dismissPermissionBtn?.addEventListener('click', () => {
+        if (this.permissionPromptCard) this.permissionPromptCard.style.display = 'none';
+      });
+
+      this.retryPermissionBtn?.addEventListener('click', () => {
+        this.requestLocationPermission(true);
+      });
     }
 
     document.getElementById('locationDiscoveryBtnHeader')?.addEventListener('click', () => this.show());
+
+    // Clean up visibility status when unloading page
+    window.addEventListener('beforeunload', () => {
+      this.cleanupEphemeralPresence();
+    });
   }
 
-  show() {
+  async show() {
     if (!this.modal) return;
     this.modal.style.display = 'flex';
     this.modal.setAttribute('aria-hidden', 'false');
-    this.loadOperatives();
+
+    await this.evaluatePermissionAndBoot();
   }
 
   hide() {
     if (!this.modal) return;
     this.modal.style.display = 'none';
     this.modal.setAttribute('aria-hidden', 'true');
+
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
+    }
   }
 
-  async loadOperatives() {
-    const geo = window.CyberFeatures?.geo?.currentLocation || { country: 'Nigeria', countryCode: 'NG', city: 'Lagos', flag: '[NG]' };
-    if (this.countryLabel) {
-      this.countryLabel.textContent = `[WAYPOINT] ${geo.city}, ${geo.country} [${geo.countryCode}] ${geo.flag}`;
+  async evaluatePermissionAndBoot() {
+    if (!('geolocation' in navigator)) {
+      if (this.countryLabel) this.countryLabel.textContent = 'GPS Hardware Unavailable';
+      this.renderFallbackEmptyState('Geolocation hardware is not supported on this browser or platform.');
+      return;
     }
 
-    this.operativesPool = [
-      {
-        uid: 'op_regional_01',
-        name: 'Alexander V.',
-        handle: '@alex_nex',
-        country: geo.country,
-        countryCode: geo.countryCode,
-        flag: geo.flag,
-        city: geo.city,
-        role: 'Quantum Protocol Architect',
-        distance: '1.8 km away',
-        avatar: 'logo.jpg',
-        verified: true,
-        isSameCity: true,
-        isSameCountry: true
-      },
-      {
-        uid: 'op_regional_02',
-        name: 'Chioma Adeyemi',
-        handle: '@chioma_sec',
-        country: geo.country,
-        countryCode: geo.countryCode,
-        flag: geo.flag,
-        city: geo.city,
-        role: 'Cyber Intelligence Analyst',
-        distance: '3.4 km away',
-        avatar: 'camshot-logo.png',
-        verified: true,
-        isSameCity: true,
-        isSameCountry: true
-      },
-      {
-        uid: 'op_regional_03',
-        name: 'Tunde Babatunde',
-        handle: '@tunde_dev',
-        country: geo.country,
-        countryCode: geo.countryCode,
-        flag: geo.flag,
-        city: geo.countryCode === 'NG' ? 'Abuja' : geo.city,
-        role: 'Full-Stack Edge Engineer',
-        distance: 'In your country',
-        avatar: 'chronex-ai.jpg',
-        verified: true,
-        isSameCity: false,
-        isSameCountry: true
-      },
-      {
-        uid: 'op_regional_04',
-        name: 'Elena Rostova',
-        handle: '@elena_berlin',
-        country: 'Germany',
-        countryCode: 'DE',
-        flag: '[DE]',
-        city: 'Berlin',
-        role: 'ChronEX Neural Specialist',
-        distance: 'International Peer',
-        avatar: 'logo.jpg',
-        verified: true,
-        isSameCity: false,
-        isSameCountry: false
-      },
-      {
-        uid: 'op_regional_05',
-        name: 'Kenji Takahashi',
-        handle: '@kenji_tokyo',
-        country: 'Japan',
-        countryCode: 'JP',
-        flag: '[JP]',
-        city: 'Tokyo',
-        role: 'Zero-Knowledge Cryptographer',
-        distance: 'International Peer',
-        avatar: 'chronex-ai.jpg',
-        verified: true,
-        isSameCity: false,
-        isSameCountry: false
-      },
-      {
-        uid: 'op_regional_06',
-        name: 'Marcus Thorne',
-        handle: '@thorne_uk',
-        country: 'United Kingdom',
-        countryCode: 'GB',
-        flag: '[UK]',
-        city: 'London',
-        role: 'Tactical Recon Specialist',
-        distance: 'International Peer',
-        avatar: 'camshot-logo.png',
-        verified: true,
-        isSameCity: false,
-        isSameCountry: false
-      }
-    ];
+    try {
+      if (navigator.permissions && navigator.permissions.query) {
+        const permissionStatus = await navigator.permissions.query({ name: 'geolocation' });
+        this.applyPermissionStatus(permissionStatus.state);
 
+        permissionStatus.onchange = () => {
+          this.applyPermissionStatus(permissionStatus.state);
+        };
+
+        if (permissionStatus.state === 'granted') {
+          this.acquireCurrentPosition();
+        } else if (permissionStatus.state === 'prompt') {
+          if (this.permissionPromptCard) this.permissionPromptCard.style.display = 'block';
+          if (this.permissionDeniedBanner) this.permissionDeniedBanner.style.display = 'none';
+        } else if (permissionStatus.state === 'denied') {
+          if (this.permissionPromptCard) this.permissionPromptCard.style.display = 'none';
+          if (this.permissionDeniedBanner) this.permissionDeniedBanner.style.display = 'block';
+        }
+      } else {
+        this.acquireCurrentPosition();
+      }
+    } catch (e) {
+      this.acquireCurrentPosition();
+    }
+  }
+
+  applyPermissionStatus(state) {
+    if (state === 'granted') {
+      if (this.permissionPromptCard) this.permissionPromptCard.style.display = 'none';
+      if (this.permissionDeniedBanner) this.permissionDeniedBanner.style.display = 'none';
+    } else if (state === 'denied') {
+      if (this.permissionPromptCard) this.permissionPromptCard.style.display = 'none';
+      if (this.permissionDeniedBanner) this.permissionDeniedBanner.style.display = 'block';
+      if (this.visibilityToggle) this.visibilityToggle.checked = false;
+    }
+  }
+
+  requestLocationPermission(triggerWatch = false) {
+    if (!navigator.geolocation) return;
+
+    if (this.countryLabel) this.countryLabel.textContent = 'Acquiring GPS Fix...';
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        this.onLocationSuccess(pos);
+        if (triggerWatch && this.isVisibleOnRadar) {
+          this.publishPresence(pos);
+        }
+      },
+      (err) => {
+        this.onLocationError(err);
+      },
+      { enableHighAccuracy: true, timeout: 12000, maximumAge: 30000 }
+    );
+  }
+
+  acquireCurrentPosition() {
+    this.requestLocationPermission(false);
+  }
+
+  onLocationSuccess(pos) {
+    this.myCoords = {
+      latitude: pos.coords.latitude,
+      longitude: pos.coords.longitude,
+      accuracy: Math.round(pos.coords.accuracy || 0)
+    };
+
+    if (this.permissionPromptCard) this.permissionPromptCard.style.display = 'none';
+    if (this.permissionDeniedBanner) this.permissionDeniedBanner.style.display = 'none';
+
+    if (this.countryLabel) {
+      this.countryLabel.textContent = `GPS Fix Acquired (${this.myCoords.accuracy}m accuracy)`;
+    }
+
+    if (this.accuracyText) {
+      this.accuracyText.textContent = `GPS: ±${this.myCoords.accuracy}m`;
+    }
+
+    if (this.isVisibleOnRadar) {
+      this.publishPresence(pos);
+    }
+
+    this.subscribeToNearbyRadar();
+
+    if (!this.refreshTimer) {
+      this.refreshTimer = setInterval(() => {
+        this.refreshRadar(false);
+      }, 150000); // 2.5 minutes
+    }
+  }
+
+  onLocationError(err) {
+    console.warn('[RADAR] Geolocation query failed:', err.message);
+    if (err.code === 1) { // PERMISSION_DENIED
+      if (this.permissionPromptCard) this.permissionPromptCard.style.display = 'none';
+      if (this.permissionDeniedBanner) this.permissionDeniedBanner.style.display = 'block';
+      if (this.countryLabel) this.countryLabel.textContent = 'Location Permission Denied';
+    } else {
+      if (this.countryLabel) this.countryLabel.textContent = 'GPS Signal Weak / Unavailable';
+    }
     this.renderGrid();
+  }
+
+  async handleVisibilityToggle(checked) {
+    this.isVisibleOnRadar = checked;
+    localStorage.setItem('nex_radar_visible', checked ? 'true' : 'false');
+
+    if (checked) {
+      if (!this.myCoords) {
+        this.requestLocationPermission(true);
+      } else {
+        await this.publishPresence({ coords: this.myCoords });
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('[RADAR] You are now visible to nearby NEX operatives!', 'success', 2500);
+        }
+      }
+    } else {
+      await this.unpublishPresence();
+      if (typeof window.showNotif === 'function') {
+        window.showNotif('[RADAR] You are now hidden from the Proximity Radar.', 'info', 2000);
+      }
+    }
+  }
+
+  async publishPresence(pos) {
+    const myUid = window.myUID || (window.firebaseAuth && window.firebaseAuth.currentUser ? window.firebaseAuth.currentUser.uid : null);
+    if (!myUid || !window.nexFirestore) return;
+
+    const { db, doc, setDoc, serverTimestamp } = window.nexFirestore;
+
+    try {
+      const radarRef = doc(db, 'nearby_radar', myUid);
+      const myUsername = window.myUsername || (window.myUserData?.username) || 'operative';
+      const myDisplayName = window.myDisplayName || (window.myUserData?.displayName || window.myUserData?.name) || 'Operative';
+      const myProfilePic = window.myProfilePic || (window.myUserData?.profilePic) || 'logo.jpg';
+
+      await setDoc(radarRef, {
+        uid: myUid,
+        displayName: myDisplayName,
+        username: myUsername,
+        profilePic: myProfilePic,
+        latitude: pos.coords.latitude,
+        longitude: pos.coords.longitude,
+        accuracy: Math.round(pos.coords.accuracy || 0),
+        active: true,
+        updatedAt: serverTimestamp(),
+        lastActiveTimestamp: Date.now()
+      }, { merge: true });
+    } catch (e) {
+      console.warn('[RADAR] Failed to publish ephemeral presence:', e);
+    }
+  }
+
+  async unpublishPresence() {
+    const myUid = window.myUID || (window.firebaseAuth && window.firebaseAuth.currentUser ? window.firebaseAuth.currentUser.uid : null);
+    if (!myUid || !window.nexFirestore) return;
+
+    const { db, doc, updateDoc, serverTimestamp } = window.nexFirestore;
+
+    try {
+      const radarRef = doc(db, 'nearby_radar', myUid);
+      await updateDoc(radarRef, {
+        active: false,
+        updatedAt: serverTimestamp(),
+        lastActiveTimestamp: Date.now()
+      });
+    } catch (e) {
+      console.warn('[RADAR] Failed to deactivate radar presence:', e);
+    }
+  }
+
+  cleanupEphemeralPresence() {
+    if (this.isVisibleOnRadar) {
+      this.unpublishPresence();
+    }
+  }
+
+  subscribeToNearbyRadar() {
+    if (this.radarUnsubscribe) {
+      this.radarUnsubscribe();
+      this.radarUnsubscribe = null;
+    }
+
+    if (!window.nexFirestore || !window.nexFirestore.db) return;
+    const { db, collection, query, where, onSnapshot } = window.nexFirestore;
+
+    try {
+      const q = query(collection(db, 'nearby_radar'), where('active', '==', true));
+      this.radarUnsubscribe = onSnapshot(q, (snapshot) => {
+        const myUid = window.myUID || (window.firebaseAuth && window.firebaseAuth.currentUser ? window.firebaseAuth.currentUser.uid : null);
+        const now = Date.now();
+        const thirtyMins = 30 * 60 * 1000;
+        const liveOperatives = [];
+
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
+          if (data.uid === myUid) return; // Skip own device
+
+          // Inactivity TTL Check (discard older than 30 mins)
+          let time = data.lastActiveTimestamp;
+          if (!time && data.updatedAt && typeof data.updatedAt.toMillis === 'function') {
+            time = data.updatedAt.toMillis();
+          }
+          if (time && (now - time > thirtyMins)) return;
+
+          if (this.myCoords && typeof data.latitude === 'number' && typeof data.longitude === 'number') {
+            const distMeters = NexLocationDiscovery.calculateHaversine(
+              this.myCoords.latitude,
+              this.myCoords.longitude,
+              data.latitude,
+              data.longitude
+            );
+
+            liveOperatives.push({
+              uid: data.uid,
+              name: data.displayName || data.username || 'Operative',
+              handle: `@${String(data.username || 'operative').replace(/^@/, '')}`,
+              avatar: data.profilePic || 'logo.jpg',
+              accuracy: data.accuracy || 0,
+              distanceMeters: distMeters,
+              distanceFormatted: NexLocationDiscovery.formatDistance(distMeters)
+            });
+          }
+        });
+
+        // Proximity Sort (Nearest first)
+        liveOperatives.sort((a, b) => a.distanceMeters - b.distanceMeters);
+        this.operativesPool = liveOperatives;
+
+        if (this.peersCountBadge) {
+          this.peersCountBadge.textContent = `${liveOperatives.length} Operative${liveOperatives.length === 1 ? '' : 's'} Near`;
+        }
+
+        this.renderGrid();
+      }, (err) => {
+        console.warn('[RADAR] Live snapshot query error:', err);
+      });
+    } catch (e) {
+      console.warn('[RADAR] Unable to establish Firestore snapshot listener:', e);
+    }
+  }
+
+  static calculateHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; // Earth radius in meters
+    const phi1 = (lat1 * Math.PI) / 180;
+    const phi2 = (lat2 * Math.PI) / 180;
+    const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
+    const deltaLambda = ((lon2 - lon1) * Math.PI) / 180;
+
+    const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
+              Math.cos(phi1) * Math.cos(phi2) *
+              Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // Distance in meters
+  }
+
+  static formatDistance(meters) {
+    if (meters < 50) return 'Within 50m';
+    if (meters < 1000) return `${Math.round(meters)}m away`;
+    return `${(meters / 1000).toFixed(1)}km away`;
+  }
+
+  refreshRadar(manual = false) {
+    if (manual && typeof window.playLuxuryPopSound === 'function') {
+      window.playLuxuryPopSound();
+    }
+    this.requestLocationPermission(true);
+    if (manual && typeof window.showNotif === 'function') {
+      window.showNotif('[RADAR] Scanning frequency spectrum for nearby peers...', 'info', 1800);
+    }
   }
 
   renderGrid() {
     if (!this.grid) return;
     const search = (this.searchInput?.value || '').toLowerCase().trim();
 
+    if (!this.myCoords) {
+      this.grid.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #94a3b8;">
+          <i class="fa-solid fa-location-crosshairs" style="font-size: 32px; color: #f59e0b; margin-bottom: 12px; display: block;"></i>
+          <p style="font-size: 13.5px; font-weight: 700; color: #e2e8f0; margin: 0 0 4px 0;">GPS Location Sensor Standby</p>
+          <p style="font-size: 12px; margin: 0;">Grant geolocation permission above or toggle visibility to calibrate your sensor.</p>
+        </div>
+      `;
+      return;
+    }
+
     const filtered = this.operativesPool.filter(op => {
-      if (this.activeTab === 'city' && !op.isSameCity) return false;
-      if (this.activeTab === 'country' && !op.isSameCountry) return false;
+      if (this.activeTab === 'immediate' && op.distanceMeters > 1000) return false;
+      if (this.activeTab === 'city' && op.distanceMeters > 30000) return false;
 
       if (search) {
-        return op.name.toLowerCase().includes(search) ||
-               op.handle.toLowerCase().includes(search) ||
-               op.role.toLowerCase().includes(search) ||
-               op.city.toLowerCase().includes(search);
+        return op.name.toLowerCase().includes(search) || op.handle.toLowerCase().includes(search);
       }
       return true;
     });
@@ -3269,61 +3493,102 @@ class NexLocationDiscovery {
     if (filtered.length === 0) {
       this.grid.innerHTML = `
         <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #94a3b8;">
-          <i class="fa-solid fa-radar" style="font-size: 28px; color: #00f3ff; margin-bottom: 10px; display: block;"></i>
-          <p style="font-size: 13px; margin: 0;">No operatives found matching the active filter in this sector.</p>
+          <i class="fa-solid fa-satellite-dish" style="font-size: 32px; color: #00f3ff; margin-bottom: 12px; display: block;"></i>
+          <p style="font-size: 13.5px; font-weight: 700; color: #e2e8f0; margin: 0 0 4px 0;">No Operatives in Active Sector</p>
+          <p style="font-size: 12px; margin: 0;">No other users with active visibility detected within this range.</p>
         </div>
       `;
       return;
     }
 
-    this.grid.innerHTML = filtered.map(op => `
-      <div class="operative-card">
-        <div class="operative-header">
-          <div class="operative-avatar-wrap">
-            <img src="${op.avatar}" alt="${op.name}" class="operative-avatar" onerror="this.src='logo.jpg'">
-            <div class="operative-beacon" title="Online in your region"></div>
+    const myContacts = (window.myContacts && Array.isArray(window.myContacts)) ? window.myContacts : [];
+
+    this.grid.innerHTML = filtered.map(op => {
+      const isAlreadyContact = myContacts.includes(op.uid);
+      const safeName = String(op.name).replace(/"/g, '&quot;');
+      const safeHandle = String(op.handle).replace(/"/g, '&quot;');
+      return `
+        <div class="operative-card">
+          <div class="operative-header">
+            <div class="operative-avatar-wrap">
+              <img src="${op.avatar}" alt="${safeName}" class="operative-avatar" onerror="this.src='logo.jpg'">
+              <div class="operative-beacon" title="Online Nearby"></div>
+            </div>
+            <div class="operative-info">
+              <h4>${safeName}</h4>
+              <p>${safeHandle}</p>
+            </div>
           </div>
-          <div class="operative-info">
-            <h4>${op.name}</h4>
-            <p>${op.handle}</p>
+          <div class="operative-badges-row">
+            <span class="operative-badge-dist"><i class="fa-solid fa-location-arrow" style="margin-right: 3px;"></i> ${op.distanceFormatted}</span>
+            <span class="operative-badge-loc"><i class="fa-solid fa-crosshairs" style="margin-right: 3px;"></i> ±${op.accuracy}m</span>
+          </div>
+          <div class="operative-actions">
+            ${isAlreadyContact ? `
+              <button type="button" class="op-btn" style="background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1);" disabled>
+                <i class="fa-solid fa-check"></i> Saved
+              </button>
+            ` : `
+              <button type="button" class="op-btn" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399;" onclick="window.CyberFeatures.geoDiscovery?.saveOperativeContact('${op.uid}', '${safeName}', this)">
+                <i class="fa-solid fa-user-plus"></i> Save Contact
+              </button>
+            `}
+            <button type="button" class="op-btn op-btn-chat" onclick="window.CyberFeatures.geoDiscovery?.startChat('${op.uid}', '${safeName}', '${op.avatar}')">
+              <i class="fa-solid fa-paper-plane"></i> Message
+            </button>
           </div>
         </div>
-        <div class="operative-badges-row">
-          <span class="operative-badge-loc">${op.flag} ${op.city}, ${op.countryCode}</span>
-          <span class="operative-badge-dist">${op.distance}</span>
-          <span style="font-size: 10px; color: #94a3b8; margin-left: auto;">${op.role}</span>
-        </div>
-        <div class="operative-actions">
-          <button type="button" class="op-btn op-btn-wave" onclick="window.CyberFeatures.geoDiscovery?.sendWave('${op.uid}', '${op.name}')">
-            <i class="fa-solid fa-hand"></i> Wave
-          </button>
-          <button type="button" class="op-btn op-btn-chat" onclick="window.CyberFeatures.geoDiscovery?.startChat('${op.uid}', '${op.name}', '${op.avatar}')">
-            <i class="fa-solid fa-message"></i> Direct Chat
-          </button>
-        </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   }
 
-  sendWave(uid, name) {
-    if (typeof window.playLuxuryPopSound === 'function') window.playLuxuryPopSound();
-    if (typeof window.showNotif === 'function') {
-      window.showNotif(`[SIGNAL] You waved at operative ${name} in your region!`, 'success', 2500);
+  renderFallbackEmptyState(msg) {
+    if (!this.grid) return;
+    this.grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #94a3b8;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 30px; color: #ef4444; margin-bottom: 10px; display: block;"></i>
+        <p style="font-size: 13px; margin: 0;">${msg}</p>
+      </div>
+    `;
+  }
+
+  async saveOperativeContact(uid, name, btnEl) {
+    if (typeof window.saveUserToContacts === 'function') {
+      const success = await window.saveUserToContacts(uid, { name: name });
+      if (success && btnEl) {
+        btnEl.disabled = true;
+        btnEl.style.background = 'rgba(255, 255, 255, 0.05)';
+        btnEl.style.color = '#94a3b8';
+        btnEl.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+        btnEl.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
+      }
+    } else if (typeof window.saveContactToNEX === 'function') {
+      const success = await window.saveContactToNEX(uid);
+      if (success && btnEl) {
+        btnEl.disabled = true;
+        btnEl.style.background = 'rgba(255, 255, 255, 0.05)';
+        btnEl.style.color = '#94a3b8';
+        btnEl.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+        btnEl.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
+      }
+    } else {
+      if (typeof window.showNotif === 'function') {
+        window.showNotif(`[RADAR] Added ${name} to your contacts!`, 'success', 2500);
+      }
+      if (btnEl) {
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<i class="fa-solid fa-check"></i> Saved';
+      }
     }
   }
 
   startChat(uid, name, avatar) {
     this.hide();
     if (typeof window.openChat === 'function') {
-      window.openChat(uid, name, avatar);
-    } else {
-      if (typeof window.showNotif === 'function') {
-        window.showNotif(`Opening direct session with ${name}...`, 'info', 2000);
-      }
+      window.openChat(uid, name, avatar, 'direct');
     }
   }
 }
-
 
 function initCyberSuite() {
   window.CyberFeatures.voice = new NexVoiceRecorder();

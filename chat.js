@@ -81,7 +81,9 @@ if (typeof window !== 'undefined') {
     query,
     where,
     onSnapshot,
-    serverTimestamp
+    serverTimestamp,
+    arrayUnion,
+    arrayRemove
   };
 }
 
@@ -109,6 +111,184 @@ function vibrate(duration = 10) {
     navigator.vibrate(duration);
   }
 }
+
+// ============================================================================
+// TELEGRAM-STYLE CONTACT MANAGEMENT & GROUP PRIVACY API
+// ============================================================================
+window.isUserInContacts = function (uid) {
+  if (!uid || uid === myUID) return false;
+  return Array.isArray(window.myContacts) && window.myContacts.includes(uid);
+};
+
+window.saveUserToContacts = async function (uid, userData = {}) {
+  if (!myUID) {
+    if (typeof showNotif === 'function') showNotif('Please log in to manage contacts', 'error');
+    return false;
+  }
+  if (!uid || uid === myUID || uid === 'chronex-ai') {
+    if (typeof showNotif === 'function') showNotif('Cannot add yourself or AI assistant to contacts', 'warning');
+    return false;
+  }
+
+  try {
+    const myUserRef = doc(db, 'users', myUID);
+    await updateDoc(myUserRef, {
+      contacts: arrayUnion(uid)
+    });
+
+    if (!Array.isArray(window.myContacts)) window.myContacts = [];
+    if (!window.myContacts.includes(uid)) window.myContacts.push(uid);
+
+    const displayName = userData.username ? `@${String(userData.username).replace(/^@/, '')}` : (userData.name || userData.displayName || 'User');
+    if (typeof showNotif === 'function') {
+      showNotif(`Saved ${displayName} to contacts! You can now add them to group chats.`, 'success', 3500);
+    }
+    if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+
+    if (typeof safeLoadContacts === 'function') {
+      safeLoadContacts();
+    } else if (typeof loadContacts === 'function') {
+      loadContacts();
+    }
+
+    // Refresh Search buttons if present
+    document.querySelectorAll(`.search-contact-toggle-btn[data-uid="${uid}"]`).forEach(btn => {
+      btn.classList.add('is-contact');
+      btn.innerHTML = '<i class="fa-solid fa-user-check"></i><span>Saved</span>';
+      btn.title = 'In your contacts (Click to remove)';
+    });
+
+    // Refresh Info Sidebar if open
+    const saveContactBtn = document.getElementById('infoSaveContactBtn');
+    const saveContactRow = document.getElementById('infoSaveContactRow');
+    const removeContactRow = document.getElementById('infoRemoveContactRow');
+    if (saveContactBtn) {
+      const icon = document.getElementById('infoSaveContactIcon');
+      const label = document.getElementById('infoSaveContactLabel');
+      if (icon) icon.className = 'fa-solid fa-user-check';
+      if (label) label.textContent = 'Saved';
+      saveContactBtn.style.color = '#00ff66';
+    }
+    if (saveContactRow) saveContactRow.style.display = 'none';
+    if (removeContactRow) removeContactRow.style.display = 'flex';
+
+    return true;
+  } catch (err) {
+    console.error('Error saving user to contacts:', err);
+    if (typeof showNotif === 'function') showNotif('Failed to save contact: ' + (err.message || err), 'error');
+    return false;
+  }
+};
+
+window.removeUserFromContacts = async function (uid) {
+  if (!myUID || !uid) return false;
+
+  try {
+    const myUserRef = doc(db, 'users', myUID);
+    await updateDoc(myUserRef, {
+      contacts: arrayRemove(uid)
+    });
+
+    if (Array.isArray(window.myContacts)) {
+      window.myContacts = window.myContacts.filter(id => id !== uid);
+    }
+
+    if (typeof showNotif === 'function') showNotif('Removed user from contacts', 'info', 2500);
+
+    if (typeof safeLoadContacts === 'function') {
+      safeLoadContacts();
+    } else if (typeof loadContacts === 'function') {
+      loadContacts();
+    }
+
+    // Refresh Search buttons if present
+    document.querySelectorAll(`.search-contact-toggle-btn[data-uid="${uid}"]`).forEach(btn => {
+      btn.classList.remove('is-contact');
+      btn.innerHTML = '<i class="fa-solid fa-user-plus"></i><span>Save</span>';
+      btn.title = 'Save to contacts';
+    });
+
+    // Refresh Info Sidebar if open
+    const saveContactBtn = document.getElementById('infoSaveContactBtn');
+    const saveContactRow = document.getElementById('infoSaveContactRow');
+    const removeContactRow = document.getElementById('infoRemoveContactRow');
+    if (saveContactBtn) {
+      const icon = document.getElementById('infoSaveContactIcon');
+      const label = document.getElementById('infoSaveContactLabel');
+      if (icon) icon.className = 'fa-solid fa-user-plus';
+      if (label) label.textContent = 'Contact';
+      saveContactBtn.style.color = '';
+    }
+    if (saveContactRow) saveContactRow.style.display = 'flex';
+    if (removeContactRow) removeContactRow.style.display = 'none';
+
+    return true;
+  } catch (err) {
+    console.error('Error removing contact:', err);
+    if (typeof showNotif === 'function') showNotif('Failed to remove contact: ' + (err.message || err), 'error');
+    return false;
+  }
+};
+
+window.toggleSaveContact = async function (uid, name, username, profilePic) {
+  if (window.isUserInContacts(uid)) {
+    return await window.removeUserFromContacts(uid);
+  } else {
+    return await window.saveUserToContacts(uid, { name, username, profilePic });
+  }
+};
+
+window.saveContactByUsername = async function (username) {
+  if (!myUID) {
+    if (typeof showNotif === 'function') showNotif('Please log in to add contacts', 'error');
+    return null;
+  }
+
+  let targetUsername = username;
+  if (!targetUsername) {
+    targetUsername = prompt('Enter NEXCHAT @username to save to contacts:');
+  }
+
+  if (!targetUsername) return null;
+  const cleanUsername = String(targetUsername).trim().replace(/^@+/, '').toLowerCase();
+  if (!cleanUsername) {
+    if (typeof showNotif === 'function') showNotif('Username cannot be empty', 'warning');
+    return null;
+  }
+
+  try {
+    if (typeof showNotif === 'function') showNotif(`Searching for @${cleanUsername}...`, 'info', 1500);
+    const usersRef = collection(db, 'users');
+    const q = query(usersRef, where('username', '==', cleanUsername), limit(1));
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      if (typeof showNotif === 'function') showNotif(`No user found with username @${cleanUsername}`, 'error', 3500);
+      return null;
+    }
+
+    const targetDoc = snap.docs[0];
+    const targetUid = targetDoc.id;
+    const targetData = targetDoc.data();
+
+    if (targetUid === myUID) {
+      if (typeof showNotif === 'function') showNotif('You cannot add yourself to contacts', 'warning');
+      return null;
+    }
+
+    const success = await window.saveUserToContacts(targetUid, targetData);
+    return success ? targetUid : null;
+  } catch (err) {
+    console.error('Error looking up username for contacts:', err);
+    if (typeof showNotif === 'function') showNotif('Error looking up username: ' + (err.message || err), 'error');
+    return null;
+  }
+};
+
+window.saveContactToNEX = async function (targetUid) {
+  return await window.saveUserToContacts(targetUid, {});
+};
+
 
 function hapticFeedback(intensity = 'medium') {
   if (!navigator.vibrate) return;
@@ -1833,6 +2013,10 @@ function announceIncomingMessage(contactName) {
 }
 
 async function showGroupInfoPanel(groupId) {
+  const contactSection = document.getElementById('infoContactSection');
+  if (contactSection) contactSection.style.display = 'none';
+  const saveContactBtn = document.getElementById('infoSaveContactBtn');
+  if (saveContactBtn) saveContactBtn.style.display = 'none';
   try {
     const groupDoc = await getDoc(doc(db, 'groups', groupId));
     if (!groupDoc.exists()) {
@@ -2138,9 +2322,12 @@ async function showUserInfoPanel(userId) {
           const myData = myDoc.data();
           const blockedUsers = myData.blockedUsers || [];
           const mutedUsers = myData.mutedUsers || [];
+          const myContacts = myData.contacts || [];
+          window.myContacts = myContacts;
 
           const isBlocked = blockedUsers.includes(userId);
           const isMuted = mutedUsers.includes(userId);
+          const isContact = myContacts.includes(userId);
 
           const blockBtn = document.getElementById('infoBlockBtn');
           const unblockBtn = document.getElementById('infoUnblockBtn');
@@ -2158,6 +2345,56 @@ async function showUserInfoPanel(userId) {
 
           if (muteToggle) {
             muteToggle.checked = isMuted;
+          }
+
+          // Telegram-Style Contact Action Button
+          const saveContactBtn = document.getElementById('infoSaveContactBtn');
+          if (saveContactBtn) {
+            if (!userId || userId === myUID || userId === 'chronex-ai') {
+              saveContactBtn.style.display = 'none';
+            } else {
+              saveContactBtn.style.display = 'flex';
+              const icon = document.getElementById('infoSaveContactIcon');
+              const label = document.getElementById('infoSaveContactLabel');
+              if (isContact) {
+                if (icon) icon.className = 'fa-solid fa-user-check';
+                if (label) label.textContent = 'Saved';
+                saveContactBtn.style.color = '#00ff66';
+              } else {
+                if (icon) icon.className = 'fa-solid fa-address-book';
+                if (label) label.textContent = 'Contact';
+                saveContactBtn.style.color = '';
+              }
+              saveContactBtn.onclick = async () => {
+                await window.toggleSaveContact(userId, userData.name, userData.username, userData.profilePic);
+                showUserInfoPanel(userId);
+              };
+            }
+          }
+
+          // Contact Section in infoSidebar body
+          const contactSection = document.getElementById('infoContactSection');
+          const saveContactRow = document.getElementById('infoSaveContactRow');
+          const removeContactRow = document.getElementById('infoRemoveContactRow');
+
+          if (contactSection && saveContactRow && removeContactRow) {
+            if (!userId || userId === myUID || userId === 'chronex-ai') {
+              contactSection.style.display = 'none';
+            } else {
+              contactSection.style.display = 'block';
+              saveContactRow.style.display = isContact ? 'none' : 'flex';
+              removeContactRow.style.display = isContact ? 'flex' : 'none';
+
+              saveContactRow.onclick = async () => {
+                await window.saveUserToContacts(userId, userData);
+                showUserInfoPanel(userId);
+              };
+
+              removeContactRow.onclick = async () => {
+                await window.removeUserFromContacts(userId);
+                showUserInfoPanel(userId);
+              };
+            }
           }
         }
       } catch (e) {
@@ -3666,49 +3903,93 @@ async function loadAllUsers(forceRefresh = false) {
 
 function filterSearchResults() {
   const input = document.getElementById('search-input');
-  const queryText = (input?.value || '').trim().toLowerCase();
+  const rawQuery = (input?.value || '').trim();
+  const queryText = rawQuery.toLowerCase();
+  const cleanQuery = queryText.replace(/^@/, '');
 
-  let filtered = cachedSearchItems.filter(item => {
-    // 1. Filter by category pill
-    if (currentSearchFilter === 'users' && item.isGroup) return false;
-    if (currentSearchFilter === 'groups' && !item.isGroup) return false;
-
-    // 2. Filter by search query
-    if (!queryText) return true;
-
-    const name = (item.name || '').toLowerCase();
-    const username = (item.username || '').toLowerCase();
-    const email = (item.email || '').toLowerCase();
-    const desc = (item.description || '').toLowerCase();
-
-    return name.includes(queryText) || username.includes(queryText) || email.includes(queryText) || desc.includes(queryText);
-  });
-
-  renderSearchResults(filtered);
-}
-
-function renderSearchResults(itemsToRender) {
   const container = document.getElementById('search-results');
   if (!container) return;
 
-  if (!itemsToRender || itemsToRender.length === 0) {
-    container.innerHTML = `
-      <div class="search-empty-state">
-        <i class="fa-solid fa-user-slash search-empty-icon"></i>
-        <p class="search-empty-title">No matching profiles or groups</p>
-        <p class="search-empty-subtitle">Try adjusting your keywords or category filter.</p>
-      </div>
-    `;
+  const savedContactSet = new Set(Array.isArray(window.myContacts) ? window.myContacts : []);
+
+  // Telegram-Style Search Privacy:
+  // If query < 2 characters, DO NOT dump all users! Show only Chronex AI, saved contacts, and joined groups with privacy banner.
+  if (!cleanQuery || cleanQuery.length < 2) {
+    let localOnly = cachedSearchItems.filter(item => {
+      if (item.type === 'ai' || item.uid === 'chronex-ai') return true;
+      if (item.isGroup) {
+        return Array.isArray(item.members) && item.members.includes(myUID);
+      }
+      return savedContactSet.has(item.uid || item.id);
+    });
+
+    if (currentSearchFilter === 'users') localOnly = localOnly.filter(i => !i.isGroup);
+    if (currentSearchFilter === 'groups') localOnly = localOnly.filter(i => i.isGroup);
+
+    renderSearchResults(localOnly, true);
     return;
   }
 
+  // When query has >= 2 characters, filter network users by matching username or display name
+  let filtered = cachedSearchItems.filter(item => {
+    if (currentSearchFilter === 'users' && item.isGroup) return false;
+    if (currentSearchFilter === 'groups' && !item.isGroup) return false;
+    if (item.uid === myUID) return false;
+
+    const name = (item.name || '').toLowerCase();
+    const username = (item.username || '').toLowerCase().replace(/^@/, '');
+    const desc = (item.description || '').toLowerCase();
+
+    if (item.isGroup) {
+      return name.includes(cleanQuery) || desc.includes(cleanQuery);
+    } else {
+      return username.includes(cleanQuery) || name.includes(cleanQuery);
+    }
+  });
+
+  renderSearchResults(filtered, false);
+}
+
+function renderSearchResults(itemsToRender, isPrivacyPrompt = false) {
+  const container = document.getElementById('search-results');
+  if (!container) return;
+
   container.innerHTML = '';
+
+  if (isPrivacyPrompt) {
+    const noticeEl = document.createElement('div');
+    noticeEl.className = 'search-privacy-notice';
+    noticeEl.style.cssText = 'margin-bottom: 14px; padding: 12px 16px; background: rgba(0, 255, 102, 0.05); border: 1px solid rgba(0, 255, 102, 0.2); border-radius: 12px; display: flex; align-items: center; gap: 12px;';
+    noticeEl.innerHTML = `
+      <div style="width: 34px; height: 34px; border-radius: 8px; background: rgba(0, 255, 102, 0.12); display: flex; align-items: center; justify-content: center; color: #00ff66; flex-shrink: 0; font-size: 16px;">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      <div style="flex: 1; font-size: 12.5px; color: #cbd5e1; line-height: 1.45;">
+        <strong style="color: #fff;">Telegram-Style Privacy Mode:</strong> Only your saved contacts and joined groups are displayed. Type an <strong>@username</strong> or group name (min 2 letters) to search across NEXCHAT.
+      </div>
+    `;
+    container.appendChild(noticeEl);
+  }
+
+  if (!itemsToRender || itemsToRender.length === 0) {
+    const emptyEl = document.createElement('div');
+    emptyEl.className = 'search-empty-state';
+    emptyEl.innerHTML = `
+      <i class="fa-solid fa-user-slash search-empty-icon"></i>
+      <p class="search-empty-title">No matching profiles or groups</p>
+      <p class="search-empty-subtitle">${isPrivacyPrompt ? 'Search by entering a specific @username or group name above.' : 'Try adjusting your keywords or category filter.'}</p>
+    `;
+    container.appendChild(emptyEl);
+    return;
+  }
+
   itemsToRender.forEach(item => {
     const card = document.createElement('div');
     card.className = 'search-result-card';
 
     const isGroup = !!item.isGroup;
     const isAi = item.type === 'ai' || item.uid === 'chronex-ai';
+    const targetUid = item.uid || item.id;
     const rawName = item.name || item.username || (isGroup ? 'Unnamed Group' : (isAi ? 'Chronex AI' : 'Cyber User'));
     const displayName = escapeHtml(rawName);
     const badgeTierKey = item.verificationBadge || (item.isVerified ? 'TIER_PRO' : null);
@@ -3717,7 +3998,7 @@ function renderSearchResults(itemsToRender) {
       : '';
     const handle = isGroup
       ? `Group · ${item.members?.length || 0} members`
-      : (isAi ? 'Neural Assistant · Online' : (item.username ? `@${escapeHtml(item.username)}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User')));
+      : (isAi ? 'Neural Assistant · Online' : (item.username ? `@${escapeHtml(item.username.replace(/^@/, ''))}` : (item.email ? escapeHtml(item.email.split('@')[0]) : 'User')));
     const profilePic = item.profilePic || item.profilePicUrl || item.avatar || (isGroup ? 'logo.jpg' : (isAi ? 'chronex-ai.jpg' : '/favicons/favicon.ico'));
     const isOnline = item.online === true || isAi;
 
@@ -3726,6 +4007,7 @@ function renderSearchResults(itemsToRender) {
       : `<div class="search-card-avatar-fallback ${isGroup ? 'is-group' : ''}">${escapeHtml(displayName.charAt(0).toUpperCase())}</div>`;
 
     const statusDotClass = isGroup ? 'status-group' : (isOnline ? 'status-online' : 'status-offline');
+    const isSavedContact = Array.isArray(window.myContacts) && window.myContacts.includes(targetUid);
 
     card.innerHTML = `
       <div class="search-avatar-wrapper">
@@ -3740,13 +4022,32 @@ function renderSearchResults(itemsToRender) {
         </div>
         <div class="search-card-handle">${handle}</div>
       </div>
-      <div class="search-card-action">
+      <div class="search-card-action" style="display: flex; align-items: center; gap: 8px;">
+        ${!isGroup && !isAi && targetUid !== myUID ? `
+          <button type="button" class="search-contact-toggle-btn ${isSavedContact ? 'is-contact' : ''}" data-uid="${targetUid}" title="${isSavedContact ? 'In your contacts (Click to remove)' : 'Save to contacts'}">
+            <i class="fa-solid ${isSavedContact ? 'fa-user-check' : 'fa-user-plus'}"></i>
+            <span>${isSavedContact ? 'Saved' : 'Save'}</span>
+          </button>
+        ` : ''}
         <button type="button" class="search-action-btn-modern ${isGroup ? 'btn-group' : 'btn-user'}">
           <i class="fa-solid ${isGroup ? 'fa-arrow-right-to-bracket' : 'fa-paper-plane'}"></i>
           <span>${isGroup ? 'Open' : (isAi ? 'Chat' : 'Message')}</span>
         </button>
       </div>
     `;
+
+    const contactToggleBtn = card.querySelector('.search-contact-toggle-btn');
+    if (contactToggleBtn) {
+      contactToggleBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const currentlySaved = Array.isArray(window.myContacts) && window.myContacts.includes(targetUid);
+        if (currentlySaved) {
+          await window.removeUserFromContacts(targetUid);
+        } else {
+          await window.saveUserToContacts(targetUid, item);
+        }
+      });
+    }
 
     card.addEventListener('click', async () => {
       try {
@@ -7012,21 +7313,14 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
 
       if (chatType === 'direct' && myUID && uid !== myUID) {
         try {
+          // Telegram Privacy: Sync saved contacts without auto-adding strangers
           const myUserRef = doc(db, "users", myUID);
           const myUserDoc = await getDoc(myUserRef);
-          const myContacts = myUserDoc.data()?.contacts || [];
-
-          if (!myContacts.includes(uid)) {
-            myContacts.push(uid);
-            await updateDoc(myUserRef, { contacts: myContacts });
-            console.log("Added user to contacts");
-
-            setTimeout(() => {
-              if (typeof loadContacts === 'function') loadContacts();
-            }, 300);
+          if (myUserDoc.exists()) {
+            window.myContacts = myUserDoc.data()?.contacts || [];
           }
         } catch (contactErr) {
-          console.warn("Could not update contacts:", contactErr);
+          console.warn("Could not sync contacts:", contactErr);
         }
       }
     } catch (bgErr) {
@@ -13309,21 +13603,9 @@ async function setupInitialization() {
 
             if (!myUserDoc.exists()) return;
 
-            const myContacts = myUserDoc.data()?.contacts || [];
-            let updated = false;
-
-            for (const senderUID of newSenders) {
-              if (!myContacts.includes(senderUID)) {
-                myContacts.push(senderUID);
-                updated = true;
-                console.log("? Auto-added", senderUID, "to contacts");
-              }
-            }
-
-            if (updated) {
-              await updateDoc(myUserRef, { contacts: myContacts });
-              if (typeof loadContacts === 'function') loadContacts();
-            }
+            // Telegram Privacy: Sync contacts without silently auto-adding senders
+            window.myContacts = myUserDoc.data()?.contacts || [];
+            if (typeof loadContacts === 'function') loadContacts();
           } catch (err) {
             console.warn("Could not auto-add sender to contacts:", err);
           }
@@ -14529,44 +14811,83 @@ function attachGroupMemberButtons() {
 
 async function loadGroupMembersList() {
   const membersList = document.getElementById('groupMembersList');
-  if (!membersList) {
-    console.error('Members list container not found');
+  if (!membersList) return;
+
+  if (!myUID) {
+    membersList.innerHTML = '<p style="color: #888; text-align: center; padding: 14px;">Please log in to load contacts.</p>';
     return;
   }
-  membersList.innerHTML = '<p style="color: #888; text-align: center; padding: 10px;">Loading contacts...</p>';
+
+  membersList.innerHTML = '<p style="color: #888; text-align: center; padding: 14px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Loading saved contacts...</p>';
 
   try {
-    const contactsSnap = await getDocs(collection(db, 'users'));
+    const myUserDoc = await getDoc(doc(db, 'users', myUID));
+    const myUserData = myUserDoc.exists() ? (myUserDoc.data() || {}) : {};
+    const contactIds = Array.isArray(myUserData.contacts) ? myUserData.contacts : [];
+    window.myContacts = contactIds;
+
+    const validContactIds = contactIds.filter(id => id && id !== myUID && id !== 'chronex-ai');
+
+    if (validContactIds.length === 0) {
+      membersList.innerHTML = `
+        <div style="text-align: center; padding: 24px 16px; color: var(--text-muted);">
+          <div style="width: 44px; height: 44px; margin: 0 auto 10px; border-radius: 50%; background: rgba(0, 255, 102, 0.1); display: flex; align-items: center; justify-content: center; color: var(--accent-primary); font-size: 20px;">
+            <i class="fa-solid fa-address-book"></i>
+          </div>
+          <p style="font-weight: 700; color: #fff; margin-bottom: 6px; font-size: 14px;">No Saved Contacts</p>
+          <p style="font-size: 12.5px; line-height: 1.45; max-width: 340px; margin: 0 auto 12px auto; color: #94a3b8;">
+            For privacy & anti-spam, you can only add people to a group chat if they are already in your saved contacts roster.
+          </p>
+          <button type="button" class="btn-secondary" style="padding: 6px 14px; font-size: 12px; border-radius: 6px;" onclick="document.getElementById('createGroupModal').style.display='none'; if(window.openSearch) window.openSearch();">
+            <i class="fa-solid fa-magnifying-glass" style="margin-right: 6px;"></i> Find &amp; Save Contacts
+          </button>
+        </div>
+      `;
+      return;
+    }
+
     let contactsHtml = '';
     let contactCount = 0;
 
-    contactsSnap.forEach(doc => {
-      const user = doc.data();
-      if (doc.id !== myUID && !user.blocked?.includes(myUID)) {
-        const username = user.username || user.email || 'Unknown';
-        const safeUsername = String(username).replace(/"/g, '&quot;');
-        const uniqueId = `member-${doc.id}`;
-        contactsHtml += `
-          <div style="padding: 10px; border-bottom: 1px solid #333; display: flex; align-items: center; cursor: pointer;" onclick="document.getElementById('${uniqueId}').click();">
-            <input type="checkbox" id="${uniqueId}" class="member-checkbox" data-uid="${doc.id}" data-username="${safeUsername}" style="margin-right: 10px; cursor: pointer;">
-            <label for="${uniqueId}" style="flex: 1; cursor: pointer;">${safeUsername}</label>
+    const contactDocs = await Promise.all(validContactIds.map(cid => getDoc(doc(db, 'users', cid)).catch(() => null)));
+
+    contactDocs.forEach(cDoc => {
+      if (!cDoc || !cDoc.exists()) return;
+      const user = cDoc.data();
+      const cid = cDoc.id;
+      if (user.blocked?.includes(myUID) || user.blockedUsers?.includes(myUID)) return;
+
+      const rawUsername = user.username ? `@${String(user.username).replace(/^@/, '')}` : (user.displayName || user.name || user.email || 'User');
+      const safeUsername = String(rawUsername).replace(/"/g, '&quot;');
+      const displayName = user.displayName || user.name || user.username || 'User';
+      const avatarUrl = user.profilePic || user.profilePicUrl || 'logo.jpg';
+      const uniqueId = `member-${cid}`;
+
+      contactsHtml += `
+        <div style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="const cb=document.getElementById('${uniqueId}'); if(cb){ cb.checked = !cb.checked; }">
+          <input type="checkbox" id="${uniqueId}" class="member-checkbox" data-uid="${cid}" data-username="${safeUsername}" style="cursor: pointer; width: 16px; height: 16px; accent-color: #00ff66;" onclick="event.stopPropagation();">
+          <img src="${avatarUrl}" onerror="this.src='logo.jpg'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(displayName)}</div>
+            <div style="color: #00ff66; font-size: 11.5px;">${safeUsername}</div>
           </div>
-        `;
-        contactCount++;
-      }
+          <span style="font-size: 11px; color: var(--accent-primary); background: rgba(0,255,102,0.1); padding: 2px 7px; border-radius: 10px; border: 1px solid rgba(0,255,102,0.25);">
+            <i class="fa-solid fa-user-check"></i> Contact
+          </span>
+        </div>
+      `;
+      contactCount++;
     });
 
     if (contactCount > 0) {
       membersList.innerHTML = contactsHtml;
       attachGroupMemberButtons();
     } else {
-      membersList.innerHTML = '<p style="color: #888; text-align: center; padding: 10px;">No contacts available</p>';
-      showNotif('No contacts to add', 'info', 2000);
+      membersList.innerHTML = '<p style="color: #888; text-align: center; padding: 14px;">No valid contacts available to add</p>';
     }
   } catch (error) {
-    console.error('? Error loading members:', error);
-    membersList.innerHTML = `<p style="color: #ff6b6b; text-align: center; padding: 10px;">? Error: ${error.message}</p>`;
-    showNotif(`Error loading contacts: ${error.message}`, 'error', 3000);
+    console.error('Error loading group members list:', error);
+    membersList.innerHTML = `<p style="color: #ff6b6b; text-align: center; padding: 14px;">Error: ${error.message}</p>`;
   }
 }
 
@@ -14628,11 +14949,28 @@ async function createGroup(e) {
   try {
     const selectedCheckboxes = document.querySelectorAll('.member-checkbox:checked');
 
+    // SECURITY CHECK: Only users in the creator's saved contacts can be added
+    const myUserDoc = await getDoc(doc(db, 'users', myUID));
+    const savedContactList = myUserDoc.exists() ? (myUserDoc.data()?.contacts || []) : [];
+    const savedContactSet = new Set(savedContactList);
+
     const members = new Set([myUID]);
+    let rejectedCount = 0;
+
     selectedCheckboxes.forEach(cb => {
       const uid = cb.dataset.uid;
-      if (uid) members.add(uid);
+      if (!uid || uid === myUID) return;
+      if (savedContactSet.has(uid)) {
+        members.add(uid);
+      } else {
+        rejectedCount++;
+      }
     });
+
+    if (rejectedCount > 0 && typeof showNotif === 'function') {
+      showNotif(`Notice: ${rejectedCount} user(s) were excluded because they are not in your contacts roster.`, 'warning', 3500);
+    }
+
     const membersList = Array.from(members);
 
     console.log(`[GROUP] Creating group "${name}" with ${membersList.length} members`);
@@ -14939,17 +15277,19 @@ async function openAddGroupMembersModal(groupId) {
 
 async function loadAddGroupMembersList(groupId) {
   const list = document.getElementById('addGroupMembersList');
-  if (!list) {
-    console.error('Add members list container not found');
+  if (!list) return;
+
+  if (!myUID) {
+    list.innerHTML = '<p style="color: #888; text-align: center; padding: 14px;">Please log in.</p>';
     return;
   }
 
-  list.innerHTML = '<p style="color: #888; text-align: center; padding: 12px;">Loading contacts...</p>';
+  list.innerHTML = '<p style="color: #888; text-align: center; padding: 14px;"><i class="fa-solid fa-spinner fa-spin" style="margin-right: 8px;"></i>Loading saved contacts...</p>';
 
   try {
     const groupDoc = await getDoc(doc(db, 'groups', groupId));
     if (!groupDoc.exists()) {
-      list.innerHTML = '<p style="color: #ff6b6b; text-align: center; padding: 12px;">Group not found</p>';
+      list.innerHTML = '<p style="color: #ff6b6b; text-align: center; padding: 14px;">Group not found</p>';
       showNotif('Group not found', 'error');
       return;
     }
@@ -14958,23 +15298,54 @@ async function loadAddGroupMembersList(groupId) {
     const existingMembers = new Set(groupData.members || []);
     existingMembers.add(myUID);
 
-    const contactsSnap = await getDocs(collection(db, 'users'));
+    const myUserDoc = await getDoc(doc(db, 'users', myUID));
+    const savedContacts = (myUserDoc.exists() ? (myUserDoc.data()?.contacts || []) : []).filter(cid => cid && cid !== myUID && cid !== 'chronex-ai');
+    window.myContacts = savedContacts;
+
+    const eligibleContactIds = savedContacts.filter(cid => !existingMembers.has(cid));
+
+    if (eligibleContactIds.length === 0) {
+      list.innerHTML = `
+        <div style="text-align: center; padding: 24px 16px; color: var(--text-muted);">
+          <div style="width: 44px; height: 44px; margin: 0 auto 10px; border-radius: 50%; background: rgba(0, 255, 102, 0.1); display: flex; align-items: center; justify-content: center; color: var(--accent-primary); font-size: 20px;">
+            <i class="fa-solid fa-user-check"></i>
+          </div>
+          <p style="font-weight: 700; color: #fff; margin-bottom: 6px; font-size: 14px;">No Available Contacts</p>
+          <p style="font-size: 12.5px; line-height: 1.45; color: #94a3b8;">
+            All of your saved contacts are already members of this group, or you have not saved any contacts yet.<br>Save users to contacts first via Search or Profile.
+          </p>
+        </div>
+      `;
+      return;
+    }
+
+    const contactDocs = await Promise.all(eligibleContactIds.map(cid => getDoc(doc(db, 'users', cid)).catch(() => null)));
     let html = '';
     let contactCount = 0;
 
-    contactsSnap.forEach(userDoc => {
+    contactDocs.forEach(userDoc => {
+      if (!userDoc || !userDoc.exists()) return;
       const user = userDoc.data();
-      if (!user || !userDoc.id || existingMembers.has(userDoc.id)) return;
-      if (user.blocked?.includes(myUID)) return;
+      const cid = userDoc.id;
+      if (user.blocked?.includes(myUID) || user.blockedUsers?.includes(myUID)) return;
 
-      const username = user.username || user.name || user.email || 'Unknown';
-      const safeUsername = String(username).replace(/"/g, '&quot;');
-      const uniqueId = `add-group-member-${userDoc.id}`;
+      const rawUsername = user.username ? `@${String(user.username).replace(/^@/, '')}` : (user.displayName || user.name || user.email || 'User');
+      const safeUsername = String(rawUsername).replace(/"/g, '&quot;');
+      const displayName = user.displayName || user.name || user.username || 'User';
+      const avatarUrl = user.profilePic || user.profilePicUrl || 'logo.jpg';
+      const uniqueId = `add-group-member-${cid}`;
 
       html += `
-        <div style="padding: 10px; border-bottom: 1px solid #222; display: flex; align-items: center; cursor: pointer;" onclick="document.getElementById('${uniqueId}')?.click();">
-          <input type="checkbox" id="${uniqueId}" class="member-checkbox" data-uid="${userDoc.id}" data-username="${safeUsername}" style="margin-right: 10px; cursor: pointer;">
-          <label for="${uniqueId}" style="flex: 1; color: #fff; cursor: pointer;">${safeUsername}</label>
+        <div style="padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; cursor: pointer;" onclick="const cb=document.getElementById('${uniqueId}'); if(cb){ cb.checked = !cb.checked; }">
+          <input type="checkbox" id="${uniqueId}" class="member-checkbox" data-uid="${cid}" data-username="${safeUsername}" style="cursor: pointer; width: 16px; height: 16px; accent-color: #00ff66;" onclick="event.stopPropagation();">
+          <img src="${avatarUrl}" onerror="this.src='logo.jpg'" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+          <div style="flex: 1; min-width: 0;">
+            <div style="color: #fff; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(displayName)}</div>
+            <div style="color: #00ff66; font-size: 11.5px;">${safeUsername}</div>
+          </div>
+          <span style="font-size: 11px; color: var(--accent-primary); background: rgba(0,255,102,0.1); padding: 2px 7px; border-radius: 10px; border: 1px solid rgba(0,255,102,0.25);">
+            <i class="fa-solid fa-user-check"></i> Contact
+          </span>
         </div>
       `;
       contactCount++;
@@ -14984,12 +15355,11 @@ async function loadAddGroupMembersList(groupId) {
       list.innerHTML = html;
       attachAddGroupMemberButtons();
     } else {
-      list.innerHTML = '<p style="color: #888; text-align: center; padding: 12px;">No available contacts found to add.</p>';
-      showNotif('No contacts available to add', 'info');
+      list.innerHTML = '<p style="color: #888; text-align: center; padding: 14px;">No eligible contacts found.</p>';
     }
   } catch (err) {
     console.error('Error loading add-member contacts:', err);
-    list.innerHTML = `<p style="color: #ff6b6b; text-align: center; padding: 12px;">Error loading contacts</p>`;
+    list.innerHTML = `<p style="color: #ff6b6b; text-align: center; padding: 14px;">Error: ${err.message}</p>`;
     showNotif(`Error loading contacts: ${err.message}`, 'error');
   }
 }
@@ -15022,13 +15392,25 @@ async function addSelectedGroupMembersToGroup(groupId) {
     return;
   }
 
-  const userIds = selectedCheckboxes.map(cb => cb.getAttribute('data-uid')).filter(Boolean);
-  if (!userIds.length) {
+  const rawUserIds = selectedCheckboxes.map(cb => cb.getAttribute('data-uid')).filter(Boolean);
+  if (!rawUserIds.length) {
     showNotif('No valid contacts selected', 'error');
     return;
   }
 
   try {
+    const myUserDoc = await getDoc(doc(db, 'users', myUID));
+    const savedContacts = new Set(myUserDoc.exists() ? (myUserDoc.data()?.contacts || []) : []);
+
+    const userIds = rawUserIds.filter(uid => savedContacts.has(uid));
+    if (userIds.length === 0) {
+      showNotif('Security Alert: You can only add users who are in your saved contacts roster.', 'error', 3500);
+      return;
+    }
+    if (userIds.length < rawUserIds.length) {
+      showNotif(`Skipped ${rawUserIds.length - userIds.length} user(s) who are not in your saved contacts.`, 'warning', 3500);
+    }
+
     const groupRef = doc(db, 'groups', groupId);
     await updateDoc(groupRef, {
       members: arrayUnion(...userIds)

@@ -308,6 +308,18 @@ service cloud.firestore {
     //   - used: bool (required, must be false on creation)
     //   - usedAt: timestamp/number/string (optional, recorded on verification)
     //   - attempts: number (optional, failed verification count)
+    //
+    // Collection: nearby_radar
+    // Document ID: {uid} (Firebase Auth UID)
+    // Fields:
+    //   - uid: string (required, must equal request.auth.uid, immutable)
+    //   - username: string (required, 1 to 64 chars)
+    //   - displayName: string (optional, max 100 chars)
+    //   - profilePic: string (optional URL or path, max 2048 chars)
+    //   - latitude: number (required, -90 to 90)
+    //   - longitude: number (required, -180 to 180)
+    //   - updatedAt: timestamp or request.time (optional/update timestamp)
+    //   - active: bool (required, radar visibility status)
     // ===============================================================
 
     // ===============================================================
@@ -751,6 +763,18 @@ service cloud.firestore {
              isValidOptionalString('callType', 0, 50) &&
              isValidOptionalString('status', 0, 50) &&
              isValidOptionalList('participants', 50);
+    }
+
+    // Telegram-Style "People Nearby" (Radar) Validator: nearby_radar/{uid}
+    function isValidNearbyRadar(data, uid) {
+      return ('uid' in data && data.uid is string && data.uid == uid && data.uid == request.auth.uid) &&
+             ('username' in data && data.username is string && data.username.size() >= 1 && data.username.size() <= 64) &&
+             isValidOptionalString('displayName', 0, 100) &&
+             isValidOptionalString('profilePic', 0, 2048) &&
+             ('latitude' in data && (data.latitude is number || data.latitude is float || data.latitude is int) && data.latitude >= -90 && data.latitude <= 90) &&
+             ('longitude' in data && (data.longitude is number || data.longitude is float || data.longitude is int) && data.longitude >= -180 && data.longitude <= 180) &&
+             (!('updatedAt' in data) || data.updatedAt is timestamp || data.updatedAt == request.time || isValidTimestampOrNumber(data.updatedAt)) &&
+             ('active' in data && data.active is bool);
     }
 
     // ===============================================================
@@ -2400,6 +2424,19 @@ service cloud.firestore {
     // ===============================================================
     // 20. SOCIAL FEATURES, STORIES & LIVE STREAMS
     // ===============================================================
+    // Telegram-Style "People Nearby" (Radar): Authenticated users can discover active nearby users
+    match /nearby_radar/{uid} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() &&
+                               isOwner(uid) &&
+                               request.resource.data.uid == request.auth.uid &&
+                               isValidNearbyRadar(request.resource.data, uid);
+      allow delete: if isAuthenticated() && (
+        isOwner(uid) ||
+        isSuperAdmin()
+      );
+    }
+
     match /socialFeatures/{featureId} {
       allow read: if isAuthenticated();
       allow write: if isSuperAdmin();
