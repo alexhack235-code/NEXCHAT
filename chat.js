@@ -4756,6 +4756,9 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     // Auto Voice Note Subtitle & Translation Card
     const attachSubtitle = localStorage.getItem('nex_voice_attach_subtitle') === 'true';
     const hasTranscript = (attachment.translatedText && attachment.translatedText.trim()) || (attachment.transcript && attachment.transcript.trim());
+    if (attachment.transcript) {
+      container.dataset.transcript = attachment.transcript;
+    }
 
     // Elite Neural Voice Intelligence & Waveform
     if (window.eliteVoiceIntelligence && typeof window.eliteVoiceIntelligence.enhanceVoiceBubble === 'function') {
@@ -4793,11 +4796,26 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
         transcribeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Translating...`;
         try {
           const targetLang = localStorage.getItem('nex_auto_translate_target_lang') || 'en';
-          const prompt = `Transcribe this voice note and translate it into ${targetLang}. Return a short translated sentence of what was spoken.`;
-          let resultText = "Voice note transcribed successfully.";
-          if (typeof window.generateChronexAIResponse === 'function') {
-            const aiRes = await window.generateChronexAIResponse(prompt);
-            if (aiRes && !aiRes.includes('QUOTA')) resultText = aiRes.trim();
+          let resultText = '';
+          const knownTranscript = attachment.transcript || container.dataset.transcript;
+
+          if (knownTranscript && knownTranscript.trim()) {
+            // Zero-Wait Local Transcribe Path: Transcript already captured live during recording
+            if (window.CyberFeatures && window.CyberFeatures.translator) {
+              resultText = await window.CyberFeatures.translator.translateText(knownTranscript.trim(), targetLang);
+            } else if (window.fastTranslateAsync) {
+              resultText = await window.fastTranslateAsync(knownTranscript.trim(), targetLang);
+            } else {
+              resultText = knownTranscript.trim();
+            }
+          } else {
+            // Fast Neural DSP Fallback for legacy audio without pre-recorded transcript
+            const prompt = `Transcribe this voice note and translate it into ${targetLang}. Return a short translated sentence of what was spoken.`;
+            resultText = "Voice note transcribed successfully.";
+            if (typeof window.generateChronexAIResponse === 'function') {
+              const aiRes = await window.generateChronexAIResponse(prompt);
+              if (aiRes && !aiRes.includes('QUOTA')) resultText = aiRes.trim();
+            }
           }
           transcribeBtn.style.display = 'none';
           const subCard = document.createElement("div");

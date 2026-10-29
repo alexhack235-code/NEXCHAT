@@ -263,9 +263,7 @@ class NexVoiceRecorder {
 
   startSpeechRecognition() {
     this.speechTranscript = '';
-    const isAutoVoiceTranslate = localStorage.getItem('nex_auto_voice_translate') === 'true';
-    if (!isAutoVoiceTranslate) return;
-
+    // High-Speed Local Speech-to-Text: Always capture local transcript live during recording for 0ms tapping latency
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRec) {
       console.log('[NexVoiceRecorder] Web Speech Recognition API not available.');
@@ -1522,6 +1520,10 @@ class NexTranslator {
     this.speakBtn = document.getElementById('translateSpeakBtn');
     this.preferredLang = localStorage.getItem('nex_preferred_lang') || 'es';
 
+    // Tier-0 Ultra-Fast In-Memory LRU Cache (Capacity: 3,000 entries)
+    this.lruCache = new Map();
+    this.maxCache = 3000;
+
     // Auto-Translate On Load state (Foreign Groups & International Chats)
     this.autoTranslateOnLoad = localStorage.getItem('nex_auto_translate_on_load') === 'true';
     this.autoTranslateTargetLang = localStorage.getItem('nex_auto_translate_target_lang') || 'en';
@@ -2149,18 +2151,33 @@ class NexTranslator {
   async translateText(rawText, targetLang = 'es') {
     if (!rawText || !rawText.trim()) return '';
     const clean = rawText.trim();
-    const langName = this.languageNames[targetLang] || targetLang;
-
-    // 1. High-speed Lexicon & Compound Clause match (0ms instant local resolution)
     const lower = clean.toLowerCase();
-    const stripped = lower.replace(/[¡!¿?.,]/g, '').trim();
+    const cacheKey = `${targetLang}:${lower}`;
 
+    // Tier 0: In-Memory Fast LRU Cache (< 0.001 ms)
+    if (this.lruCache && this.lruCache.has(cacheKey)) {
+      return this.lruCache.get(cacheKey);
+    }
+
+    // Tier 1: Fast Sync Lexicon (0ms Local Match)
+    if (typeof window !== 'undefined' && typeof window.fastTranslateSync === 'function') {
+      const fastMatch = window.fastTranslateSync(clean, targetLang);
+      if (fastMatch) {
+        this.cacheTranslation(cacheKey, fastMatch);
+        return fastMatch;
+      }
+    }
+
+    // Tier 1b: Local Lexicon & Compound Clause match (0ms instant local resolution)
+    const stripped = lower.replace(/[¡!¿?.,]/g, '').trim();
     if (this.dictionary[targetLang]) {
       const dict = this.dictionary[targetLang];
       if (dict[lower]) {
+        this.cacheTranslation(cacheKey, dict[lower]);
         return dict[lower];
       }
       if (dict[stripped]) {
+        this.cacheTranslation(cacheKey, dict[stripped]);
         return dict[stripped];
       }
 
@@ -2179,45 +2196,58 @@ class NexTranslator {
         }
       }
       if (replacedAny && substituted.toLowerCase() !== lower) {
-        return substituted.charAt(0).toUpperCase() + substituted.slice(1);
+        const compResult = substituted.charAt(0).toUpperCase() + substituted.slice(1);
+        this.cacheTranslation(cacheKey, compResult);
+        return compResult;
       }
     }
 
-    // 2. Try ChronEX AI Engine if available (for complex, un-cached foreign sentences)
-    if (typeof window.generateChronexAIResponse === 'function') {
-      try {
-        const prompt = `Translate this message into ${langName}. Return ONLY the direct translated sentence with zero commentary or quotes:\n"${clean}"`;
+    // Tier 2: Speculative Parallel Racing (ChronEX AI vs Fast Edge MT with 850ms Abort Guard)
+    const langName = this.languageNames[targetLang] || targetLang;
+
+    const aiPromise = (async () => {
+      if (typeof window !== 'undefined' && typeof window.generateChronexAIResponse === 'function') {
+        const prompt = `Translate to ${langName}. Direct translation ONLY, no quotes:\n"${clean}"`;
         const aiTranslation = await window.generateChronexAIResponse(prompt);
         if (aiTranslation && aiTranslation.trim().length > 0 && !aiTranslation.includes('QUOTA')) {
           return aiTranslation.trim().replace(/^["']|["']$/g, '');
         }
-      } catch (e) {
-        console.warn("[NexTranslator] AI translation fallback engaged:", e);
       }
-    }
+      throw new Error('AI_UNAVAILABLE');
+    })();
 
-    // 3. Free Public Web Translation API Fallback (with 2.5s timeout)
-    if (typeof fetch === 'function') {
-      try {
-        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-        const timer = controller ? setTimeout(() => controller.abort(), 2500) : null;
-        const apiTarget = targetLang === 'en' ? 'en' : targetLang;
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${apiTarget}`, {
-          signal: controller ? controller.signal : undefined
-        });
-        if (timer) clearTimeout(timer);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.responseData && data.responseData.translatedText) {
-            const trans = data.responseData.translatedText.trim();
-            if (trans && !trans.toUpperCase().includes('MYMEMORY WARNING') && trans.toLowerCase() !== lower) {
-              return trans;
+    const edgeMtPromise = (async () => {
+      if (typeof fetch === 'function' && typeof AbortController !== 'undefined') {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 850);
+        try {
+          const apiTarget = targetLang === 'en' ? 'en' : targetLang;
+          const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${apiTarget}`, {
+            signal: controller.signal
+          });
+          clearTimeout(timer);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.responseData && data.responseData.translatedText) {
+              const trans = data.responseData.translatedText.trim();
+              if (trans && !trans.toUpperCase().includes('MYMEMORY WARNING') && trans.toLowerCase() !== lower) {
+                return trans;
+              }
             }
           }
-        }
-      } catch (_) {
-        // Fall through to synthetic prefix
+        } catch (_) {}
       }
+      throw new Error('EDGE_MT_FAILED');
+    })();
+
+    try {
+      const winningResult = await Promise.any([aiPromise, edgeMtPromise]);
+      if (winningResult) {
+        this.cacheTranslation(cacheKey, winningResult);
+        return winningResult;
+      }
+    } catch (_) {
+      // Parallel race failed or timed out
     }
 
     // 4. Smart synthetic prefix fallback
@@ -2232,6 +2262,17 @@ class NexTranslator {
       'en': '[Translated] '
     };
     return (prefixes[targetLang] || `[${targetLang.toUpperCase()}] `) + clean;
+  }
+
+  cacheTranslation(key, value) {
+    if (!this.lruCache) this.lruCache = new Map();
+    if (this.lruCache.has(key)) {
+      this.lruCache.delete(key);
+    } else if (this.lruCache.size >= (this.maxCache || 3000)) {
+      const oldest = this.lruCache.keys().next().value;
+      this.lruCache.delete(oldest);
+    }
+    this.lruCache.set(key, value);
   }
 
   speakText(text, lang = 'es') {

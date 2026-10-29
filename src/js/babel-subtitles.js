@@ -240,6 +240,18 @@
       if (!transEl || !text || !text.trim()) return;
       const target = this.targetLang.toLowerCase();
 
+      // Instant 0ms Sync Check
+      if (typeof window !== 'undefined' && typeof window.fastTranslateSync === 'function') {
+        const instantHit = window.fastTranslateSync(text, target);
+        if (instantHit) {
+          transEl.textContent = `"${instantHit}"`;
+          if (this.voiceOutputEnabled && instantHit !== this.lastSpokenText) {
+            this.speakTranslatedText(instantHit, target);
+          }
+          return;
+        }
+      }
+
       try {
         let translated = text;
         if (window.CyberFeatures && window.CyberFeatures.translator) {

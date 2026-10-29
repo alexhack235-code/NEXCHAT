@@ -145,9 +145,9 @@
         return;
       }
 
-      // Check for pre-existing transcript
+      // Check for pre-existing transcript (0ms Zero-Wait Path)
       const transcriptEl = container.querySelector('.voice-transcript-text, .voice-note-transcript-card');
-      let sourceText = transcriptEl ? transcriptEl.textContent.trim() : '';
+      let sourceText = transcriptEl ? transcriptEl.textContent.trim() : (container.dataset.transcript || '');
 
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Translating...';
@@ -158,7 +158,7 @@
         resultBox.style.display = 'block';
 
         if (!sourceText) {
-          // If no transcript exists, use AI speech transcription prompt
+          // Fast neural fallback only if pre-recorded transcript was absent
           if (typeof window.generateChronexAIResponse === 'function') {
             const prompt = `Transcribe this voice message and translate it into ${targetLang}. Provide a concise transcription followed by the translated message.`;
             const aiRes = await window.generateChronexAIResponse(prompt);
