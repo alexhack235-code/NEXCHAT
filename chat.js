@@ -294,11 +294,39 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
     const checkmarkHtml = isOwn ? '<i class="fa-solid fa-check-double tick-read" style="color:#53bdeb;font-size:10px;margin-left:3px;" title="Read"></i>' : '';
     const bodyText = isDeletedTombstone ? '<em style="opacity:0.75;"><i class="fa-solid fa-ban" style="margin-right:4px;"></i>This message was deleted</em>' : escapeHtml(m.text || m.message || '');
 
+    let attachmentHtml = '';
+    if (m.attachment && !isDeletedTombstone) {
+      const att = m.attachment;
+      const isAudio = att.fileType === 'audio/webm' || att.fileType === 'audio' || att.viewOnceType === 'audio' || att.isNeuralVoiceNote;
+      if (isAudio) {
+        const transcriptText = att.translatedText || att.transcript || '';
+        const hasTranscript = Boolean(transcriptText.trim());
+        const durationSec = att.duration ? Math.round(att.duration) + 's' : '';
+        attachmentHtml = '';
+        attachmentHtml += '<div class="cached-voice-attachment" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px;min-width:210px;">';
+        attachmentHtml += '<div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.22);padding:7px 10px;border-radius:8px;">';
+        attachmentHtml += '<i class="fa-solid fa-microphone" style="color:#00f3ff;font-size:13px;"></i>';
+        attachmentHtml += '<span style="font-size:12px;font-weight:600;color:#e2e8f0;">Voice Note</span>';
+        attachmentHtml += '<span style="font-size:11px;color:#94a3b8;margin-left:auto;">' + escapeHtml(durationSec) + '</span></div>';
+        if (hasTranscript) {
+          attachmentHtml += '<div class="voice-note-transcript-card" style="padding:6px 9px;background:rgba(0,243,255,0.08);border-left:2px solid #00f3ff;border-radius:5px;font-size:11.5px;color:#f1f5f9;line-height:1.35;">';
+          attachmentHtml += '<div style="font-size:9.5px;font-weight:700;color:#00f3ff;text-transform:uppercase;margin-bottom:2px;"><i class="fa-solid fa-language"></i> Transcript</div>';
+          attachmentHtml += '<div>' + escapeHtml(transcriptText) + '</div></div>';
+        }
+        attachmentHtml += '</div>';
+      } else {
+        attachmentHtml = '<div class="cached-attachment-preview" style="display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:12px;color:#cbd5e1;background:rgba(0,0,0,0.22);padding:6px 10px;border-radius:8px;"><i class="fa-solid fa-paperclip" style="color:#00f3ff;"></i><span>' + escapeHtml(att.fileName || 'Attachment') + '</span></div>';
+      }
+    }
+
     return `
       <div class="message-wrapper ${isOwn ? 'sent' : 'received'}" style="display:flex; justify-content:${align}; margin:6px 0; padding:0 12px;">
         <div class="message-bubble ${isOwn ? 'sent' : 'received'}" style="position:relative; padding:7px 11px 5px 11px; border-radius:${bubbleRadius}; max-width:72%; word-wrap:break-word; box-shadow:0 1px 2px rgba(0,0,0,0.35); background:${bubbleBg}; border:${isOwn ? 'none' : '1px solid rgba(255,255,255,0.05)'}; color:${bubbleColor}; font-size:14.5px; line-height:1.45;">
           ${replyHtml}
-          <div class="message-content" style="margin:0;">${bodyText}</div>
+          <div class="message-content" style="margin:0;">
+            ${attachmentHtml}
+            ${bodyText ? `<div>${bodyText}</div>` : ''}
+          </div>
           <div class="message-time-row" style="font-size:10.5px; margin-top:4px; opacity:0.85; display:flex; align-items:center; justify-content:flex-end; gap:6px;">
             <span class="e2ee-secure-badge nex-sealed-badge" style="display:inline-flex; align-items:center; opacity:0.85; margin-right:auto; gap:3px;"><span style="color:#00FFC6; font-size:10px;">&#x25CD;</span><span style="font-size:9.5px; color:#00FFC6; font-weight:600; letter-spacing:0.3px;">NEX Sealed</span></span>
             <span class="message-time-text" style="display:inline-flex; align-items:center; gap:3px; font-size:10.5px; color:#00FFC6;">
@@ -4184,6 +4212,19 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, tran
       clientMsgId: clientMsgId,
       ...(isViewOnce ? { isViewOnce: true, viewOnceType: 'audio', burnTimeout: burnTimeout } : {})
     };
+
+    // Optimistic directChatMessageCache synchronization for instant navigation resilience
+    if (typeof getCachedDirectChatMessages === 'function' && typeof cacheDirectChatMessages === 'function' && currentChatUser) {
+      const currentCached = getCachedDirectChatMessages(myUID, currentChatUser, 600000) || [];
+      const optimisticCacheEntry = {
+        ...messageData,
+        id: clientMsgId,
+        docId: clientMsgId,
+        time: { toDate: () => new Date(), toMillis: () => Date.now() }
+      };
+      cacheDirectChatMessages(myUID, currentChatUser, [...currentCached, optimisticCacheEntry]);
+    }
+
     await addDoc(collection(db, "messages"), messageData);
     if (typeof updateLocalSentMessageStatus === 'function') {
       updateLocalSentMessageStatus(clientMsgId, 'sent');
@@ -4765,7 +4806,7 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
       window.eliteVoiceIntelligence.enhanceVoiceBubble(container, url, attachment.words || []);
     }
 
-    if (attachSubtitle && hasTranscript) {
+    if (hasTranscript) {
       const subCard = document.createElement("div");
       subCard.className = "voice-note-transcript-card";
       subCard.style.cssText = "margin-top: 6px; padding: 6px 10px; background: rgba(0, 243, 255, 0.08); border-left: 2px solid #00f3ff; border-radius: 6px; font-size: 12px; color: #e2e8f0; max-width: 280px; box-sizing: border-box;";
