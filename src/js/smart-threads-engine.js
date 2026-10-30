@@ -305,6 +305,12 @@
       const text = input.value.trim();
       if (!text) return;
 
+      // [FORTRESS AI Cloud Defender: Smart Thread Reply Ingress Guard]
+      if (window.fortressGuard) {
+        const inspection = window.fortressGuard(text, 'Smart Thread Reply');
+        if (!inspection.safe) return;
+      }
+
       const threadId = this.activeThreadId;
       if (!threadId) return;
 

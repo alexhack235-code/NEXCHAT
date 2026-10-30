@@ -172,6 +172,12 @@
      * Schedules a new message into queue
      */
     scheduleMessage(data) {
+      // [FORTRESS AI Cloud Defender: Scheduled Message Ingress Guard]
+      if (data && data.text && window.fortressGuard) {
+        const inspection = window.fortressGuard(data.text, 'Scheduled Message');
+        if (!inspection.safe) return false;
+      }
+
       const id = 'sched_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
       const entry = {
         id,

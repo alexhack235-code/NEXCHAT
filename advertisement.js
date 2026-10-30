@@ -3,6 +3,7 @@ import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/fi
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js';
 import { uploadAnyMedia } from './src/js/media-upload.js';
+import { fortressShield } from './src/js/security-shield.js';
 
 let currentUser = null;
 let currentView = 'browse'; // 'browse' (default), 'upload', 'myads', 'cart', 'detail'
@@ -659,6 +660,22 @@ async function handleAdSubmit(e) {
   if (!productName || productName.length < 3) {
     showNotification('Product title must be at least 3 characters.', 'error');
     return;
+  }
+
+  // [FORTRESS AI Cloud Defender: Marketplace Ad Listing Guard]
+  if (window.fortressGuard) {
+    const nameCheck = window.fortressGuard(productName, 'Marketplace Product Title');
+    if (!nameCheck.safe) {
+      showNotification('Product title blocked by FORTRESS: ' + nameCheck.threats.join(', '), 'error');
+      return;
+    }
+    if (productDescription) {
+      const descCheck = window.fortressGuard(productDescription, 'Marketplace Product Description');
+      if (!descCheck.safe) {
+        showNotification('Product description blocked by FORTRESS: ' + descCheck.threats.join(', '), 'error');
+        return;
+      }
+    }
   }
 
   if (isNaN(productPrice) || productPrice < 0) {

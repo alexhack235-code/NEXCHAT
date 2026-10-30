@@ -10757,6 +10757,16 @@ function setupSettingsProfileIdentityControls() {
         return;
       }
 
+      // [FORTRESS AI Cloud Defender: Username Identity Ingress Guard]
+      if (window.fortressGuard) {
+        const inspection = window.fortressGuard(cleanName, 'Profile Username');
+        if (!inspection.safe) {
+          saveNameBtn.disabled = false;
+          saveNameBtn.innerHTML = originalBtnHtml;
+          return;
+        }
+      }
+
       const uid = (auth && auth.currentUser && auth.currentUser.uid) || window.myUID;
       if (!uid) {
         showNotif('User authentication required to update username', 'error');
@@ -15415,6 +15425,28 @@ async function createGroup(e) {
   const privacy = privacyInput?.value || 'public';
   const approval = approvalInput?.value || 'auto';
 
+  // [FORTRESS AI Cloud Defender: Group Creation Guard]
+  if (window.fortressGuard) {
+    const nameCheck = window.fortressGuard(name, 'Group Creation - Name');
+    if (!nameCheck.safe) {
+      resultDiv.style.display = 'block';
+      resultDiv.style.background = '#ff6b6b';
+      resultDiv.style.color = '#fff';
+      resultDiv.textContent = 'Blocked by FORTRESS: ' + nameCheck.threats.join(', ');
+      return;
+    }
+    if (description) {
+      const descCheck = window.fortressGuard(description, 'Group Creation - Description');
+      if (!descCheck.safe) {
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#ff6b6b';
+        resultDiv.style.color = '#fff';
+        resultDiv.textContent = 'Blocked by FORTRESS: ' + descCheck.threats.join(', ');
+        return;
+      }
+    }
+  }
+
   if (!name || name.length < 1) {
     resultDiv.style.display = 'block';
     resultDiv.style.background = '#ff6b6b';
@@ -16196,6 +16228,12 @@ async function loadGroupMessages(groupId) {
 async function sendGroupMessage(groupId, text, attachment) {
   if ((!text || !text.trim()) && !attachment) return;
 
+  // [FORTRESS AI Cloud Defender: Group Message Ingress Guard]
+  if (text && window.fortressGuard) {
+    const inspection = window.fortressGuard(text, 'Group Chat');
+    if (!inspection.safe) return;
+  }
+
   if (tokens < 1) {
     tokens = 100;
     try {
@@ -16721,6 +16759,12 @@ async function postStatus(textContent = '', imageUrl = null, mediaType = null) {
   if (!textContent && !imageUrl) {
     showNotif('Please add text or select media for your status', 'error');
     return;
+  }
+
+  // [FORTRESS AI Cloud Defender: Status & Story Ingress Guard]
+  if (textContent && window.fortressGuard) {
+    const inspection = window.fortressGuard(textContent, 'Status Story');
+    if (!inspection.safe) return;
   }
 
   try {

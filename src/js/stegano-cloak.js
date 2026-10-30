@@ -133,6 +133,12 @@
           return;
         }
 
+        // [FORTRESS AI Cloud Defender: Steganography Ingress Guard]
+        if (window.fortressGuard) {
+          const inspection = window.fortressGuard(text, 'Steganography Cloak');
+          if (!inspection.safe) return;
+        }
+
         this.generateCloakedAttachment(text);
         if (modal) modal.style.display = 'none';
         if (textInput) textInput.value = '';

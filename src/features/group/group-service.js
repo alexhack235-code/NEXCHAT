@@ -26,6 +26,18 @@ export async function createGroup(params) {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error('User must be logged in to create a group');
 
+    // [FORTRESS AI Cloud Defender: Group Service Creation Guard]
+    if (window.fortressGuard) {
+      if (params.name) {
+        const check = window.fortressGuard(params.name, 'Group Service Name');
+        if (!check.safe) throw new Error('Group name blocked by FORTRESS Security: ' + check.threats.join(', '));
+      }
+      if (params.description) {
+        const check = window.fortressGuard(params.description, 'Group Service Description');
+        if (!check.safe) throw new Error('Group description blocked by FORTRESS Security: ' + check.threats.join(', '));
+      }
+    }
+
     const uids = new Set(params.memberUids || []);
     uids.add(currentUser.uid); // Ensure creator is included
     const memberArray = Array.from(uids);
@@ -108,6 +120,18 @@ export async function updateGroupInfo(groupId, updates) {
 
     const hasPerm = await hasPermission(groupId, currentUser.uid, PERMISSIONS.MANAGE_SETTINGS);
     if (!hasPerm) throw new Error('Insufficient permissions to update group info');
+
+    // [FORTRESS AI Cloud Defender: Update Group Info Guard]
+    if (window.fortressGuard) {
+      if (updates.name) {
+        const check = window.fortressGuard(updates.name, 'Group Update Name');
+        if (!check.safe) throw new Error('Group name blocked by FORTRESS Security: ' + check.threats.join(', '));
+      }
+      if (updates.description) {
+        const check = window.fortressGuard(updates.description, 'Group Update Description');
+        if (!check.safe) throw new Error('Group description blocked by FORTRESS Security: ' + check.threats.join(', '));
+      }
+    }
 
     const groupRef = doc(db, 'groups', groupId);
     await updateDoc(groupRef, {

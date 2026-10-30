@@ -45,6 +45,20 @@ export async function createPoll(db, groupId, creatorId, question, optionTexts) 
     throw new Error('Poll question is required');
   }
 
+  // [FORTRESS AI Cloud Defender: Poll Creation Guard]
+  if (window.fortressGuard) {
+    const qCheck = window.fortressGuard(question, 'Poll Question');
+    if (!qCheck.safe) throw new Error('Poll question blocked by FORTRESS Security: ' + qCheck.threats.join(', '));
+    if (Array.isArray(optionTexts)) {
+      for (const opt of optionTexts) {
+        if (opt) {
+          const optCheck = window.fortressGuard(opt, 'Poll Option');
+          if (!optCheck.safe) throw new Error('Poll option blocked by FORTRESS Security: ' + optCheck.threats.join(', '));
+        }
+      }
+    }
+  }
+
   if (!optionTexts || optionTexts.length < 2) {
     throw new Error('At least 2 options are required');
   }

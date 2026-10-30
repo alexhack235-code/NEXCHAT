@@ -1783,6 +1783,16 @@
 
       const description = descInput?.value?.trim() || 'Welcome to ' + name + ' official broadcast.';
 
+      // [FORTRESS AI Cloud Defender: Channel Creation Guard]
+      if (window.fortressGuard) {
+        const nameCheck = window.fortressGuard(name, 'Channel Creation - Name');
+        if (!nameCheck.safe) return;
+        if (descInput?.value) {
+          const descCheck = window.fortressGuard(descInput.value, 'Channel Creation - Description');
+          if (!descCheck.safe) return;
+        }
+      }
+
       const user = this.getCurrentUser();
 
       const avatarPreview = document.getElementById('newChannelAvatarPreview');
@@ -2408,6 +2418,12 @@
       const text = input?.value?.trim();
 
       if (!text) return;
+
+      // [FORTRESS AI Cloud Defender: Broadcast Feed Post Ingress Guard]
+      if (window.fortressGuard) {
+        const inspection = window.fortressGuard(text, 'Broadcast Channels');
+        if (!inspection.safe) return;
+      }
 
       const channel = this.channels.find(c => c.id === this.activeFeedChannelId);
 

@@ -242,6 +242,14 @@ export async function sendMessage(params = {}) {
     throw new Error('Message cannot be empty');
   }
 
+  // [FORTRESS AI Cloud Defender: Group Service Ingress Guard]
+  if (text && window.fortressGuard) {
+    const inspection = window.fortressGuard(text, 'Group Service Dispatch');
+    if (!inspection.safe) {
+      throw new Error('Blocked by FORTRESS Security: ' + inspection.threats.join(', '));
+    }
+  }
+
   const uid = currentUser.uid;
 
   // Fetch group data for permission checks
@@ -473,6 +481,14 @@ export async function deleteMessage(messageId) {
 export async function editMessage(messageId, newText) {
   const uid = auth.currentUser?.uid;
   if (!uid || !messageId) return;
+
+  // [FORTRESS AI Cloud Defender: Edit Message Guard]
+  if (newText && window.fortressGuard) {
+    const inspection = window.fortressGuard(newText, 'Group Message Edit');
+    if (!inspection.safe) {
+      throw new Error('Blocked by FORTRESS Security: ' + inspection.threats.join(', '));
+    }
+  }
 
   const msgRef = doc(db, 'groupMessages', messageId);
   const msgSnap = await getDoc(msgRef);

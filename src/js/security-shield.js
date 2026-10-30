@@ -15,11 +15,25 @@
  * STRICTLY ZERO EMOJIS: FontAwesome 6 vector icons and cyberpunk styling only.
  */
 
+const getStorageItem = (k, def = '') => {
+  try {
+    return (typeof localStorage !== 'undefined' && localStorage.getItem(k)) || def;
+  } catch (e) {
+    return def;
+  }
+};
+
+const setStorageItem = (k, v) => {
+  try {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(k, v);
+  } catch (e) {}
+};
+
 const DEFAULT_FORTRESS_CONFIG = {
   enabled: true,
-  apiUrl: localStorage.getItem('nexchat_fortress_url') || 'https://ai-security-scanner-delta.vercel.app',
-  vaultKey: localStorage.getItem('nexchat_fortress_key') || '',
-  mode: localStorage.getItem('nexchat_fortress_mode') || 'active', // 'active' | 'offline_only'
+  apiUrl: getStorageItem('nexchat_fortress_url', 'https://ai-security-scanner-delta.vercel.app'),
+  vaultKey: getStorageItem('nexchat_fortress_key', ''),
+  mode: getStorageItem('nexchat_fortress_mode', 'active'), // 'active' | 'offline_only'
   blockPromptInjection: true,
   blockXSS: true,
   blockSQLi: true,
@@ -32,7 +46,7 @@ class FortressSecurityShield {
     this.version = '11.0.0-ABSOLUTE-DEFENSE';
     this.codename = 'Apex-Absolute-Shield';
     this.config = { ...DEFAULT_FORTRESS_CONFIG, ...config };
-    this.threatCount = parseInt(localStorage.getItem('nexchat_threats_blocked') || '0', 10);
+    this.threatCount = parseInt(getStorageItem('nexchat_threats_blocked', '0'), 10);
     this.cachedStatus = null;
     this.lastHealthCheck = 0;
 
@@ -173,7 +187,7 @@ class FortressSecurityShield {
 
     if (threats.length > 0) {
       this.threatCount++;
-      localStorage.setItem('nexchat_threats_blocked', this.threatCount);
+      setStorageItem('nexchat_threats_blocked', this.threatCount);
       return {
         safe: false,
         threats,
@@ -408,15 +422,47 @@ class FortressSecurityShield {
     }
   }
 
+  /**
+   * Universal Module Input Guard
+   * Intercepts threats, logs alerts, and surfaces luxury error toasts
+   */
+  guardInput(text, moduleName = 'General') {
+    if (!text || typeof text !== 'string') {
+      return { safe: true, threats: [], sanitizedText: text };
+    }
+    const res = this.inspectText(text);
+    if (!res.safe) {
+      console.warn(`[FORTRESS INTERCEPTED @ ${moduleName}]`, res.threats);
+      const msg = `Blocked by FORTRESS Security [${moduleName}]: ${res.threats.join(', ')}`;
+      if (typeof window.showNotif === 'function') {
+        window.showNotif(msg, 'error', 4500);
+      } else if (typeof window.showToast === 'function') {
+        window.showToast(msg);
+      }
+      if (typeof window.playLuxuryPopSound === 'function') {
+        window.playLuxuryPopSound();
+      }
+    }
+    return res;
+  }
+
   saveConfig(apiUrl, vaultKey, mode = 'active') {
     this.config.apiUrl = apiUrl || this.config.apiUrl;
     this.config.vaultKey = vaultKey || '';
     this.config.mode = mode;
-    localStorage.setItem('nexchat_fortress_url', this.config.apiUrl);
-    localStorage.setItem('nexchat_fortress_key', this.config.vaultKey);
-    localStorage.setItem('nexchat_fortress_mode', this.config.mode);
+    setStorageItem('nexchat_fortress_url', this.config.apiUrl);
+    setStorageItem('nexchat_fortress_key', this.config.vaultKey);
+    setStorageItem('nexchat_fortress_mode', this.config.mode);
   }
 }
 
 export const fortressShield = new FortressSecurityShield();
-window.fortressShield = fortressShield;
+if (typeof window !== 'undefined') {
+  window.fortressShield = fortressShield;
+  window.fortressGuard = (text, moduleName) => {
+    if (window.fortressShield) {
+      return window.fortressShield.guardInput(text, moduleName);
+    }
+    return { safe: true, threats: [], sanitizedText: text };
+  };
+}

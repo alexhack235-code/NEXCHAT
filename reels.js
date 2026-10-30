@@ -3,6 +3,7 @@
  * Cinematic Luxury • Warm Gold #E8B84B • Frosted Glass • Pure Elegance
  */
 import "./src/js/security-guard.js";
+import { fortressShield } from "./src/js/security-shield.js";
 import { auth, db } from './firebase-config.js';
 import {
   collection, doc, getDoc, setDoc, addDoc, getDocs, onSnapshot, query, orderBy, limit,
@@ -3431,6 +3432,12 @@ commentForm.addEventListener('submit', async (e) => {
   const text = commentTextInput.value.trim();
   if (!text || !activeReelId) return;
 
+  // [FORTRESS AI Cloud Defender: Reel Comment Ingress Guard]
+  if (window.fortressGuard) {
+    const inspection = window.fortressGuard(text, "Reels Comment");
+    if (!inspection.safe) return;
+  }
+
   const user = getEffectiveUser();
   commentTextInput.value = '';
 
@@ -4301,6 +4308,12 @@ uploadReelForm.addEventListener('submit', async (e) => {
   }
 
   const caption = document.getElementById('reelCaptionInput').value.trim() || 'Testing NEX vault';
+
+  // [FORTRESS AI Cloud Defender: Reel Caption Ingress Guard]
+  if (caption && window.fortressGuard) {
+    const inspection = window.fortressGuard(caption, 'Reel Upload Caption');
+    if (!inspection.safe) return;
+  }
   const soundTrackName = document.getElementById('reelSoundTitle').value || `Original Audio — @${myUsername}`;
   const customAudioUrl = document.getElementById('reelSoundUrl').value || '';
 
