@@ -208,12 +208,13 @@ async function open(groupId, messagesContainer, options = {}) {
   }
 
   // Subscribe to store changes
-  groupStore.subscribe('messages', (messages) => {
+  const msgSub = groupStore.subscribe('messages', (messages) => {
     if (_scroller && messages) {
       const processed = _processMessages(messages, currentUid);
       _scroller.setItems(processed);
     }
   });
+  _storeUnsubs.push(msgSub);
 
   groupStore.subscribe('members', () => {
     if (_scroller && groupStore.getState().messages) {
@@ -283,13 +284,18 @@ async function send(params = {}) {
     }
   }
 
-  const msgId = await sendMessage(params);
-  hideReplyPreview();
+  // Ensure groupId is passed
+  if (!params.groupId) {
+    params.groupId = groupStore.getState().currentGroupId;
+  }
 
-  // Scroll to bottom after sending
+  // Scroll to bottom immediately upon sending (0ms feel)
   requestAnimationFrame(() => {
     _scroller?.scrollToBottom(true);
   });
+
+  const msgId = await sendMessage(params);
+  hideReplyPreview();
 
   return msgId;
 }

@@ -27,6 +27,11 @@
   gap: 10px;
   width: calc(100vw - 32px);
   max-width: 390px;
+  max-height: min(480px, 68vh) !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+  touch-action: pan-y !important;
   box-sizing: border-box;
   z-index: 999;
   animation: cyberSlideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -301,6 +306,9 @@
 }
 
 .stegano-container {
+  position: relative !important;
+  z-index: 10 !important;
+  pointer-events: auto !important;
   background: linear-gradient(135deg, #0d1527 0%, #080d1a 100%);
   border: 1px solid rgba(139, 92, 246, 0.4);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 35px rgba(139, 92, 246, 0.25);

@@ -16234,6 +16234,13 @@ async function sendGroupMessage(groupId, text, attachment) {
     if (!inspection.safe) return;
   }
 
+  // Fallback: If messages-area is present but VirtualScroller is not active, render immediately into container
+  const messagesDiv = document.getElementById('messages-area');
+  const hasVirtualScroller = messagesDiv && messagesDiv.querySelector('.nex-virtual-scroller-content');
+  if (messagesDiv && !hasVirtualScroller && typeof appendLocalSentMessage === 'function') {
+    appendLocalSentMessage(text || '', attachment, false, 'sending');
+  }
+
   if (tokens < 1) {
     tokens = 100;
     try {

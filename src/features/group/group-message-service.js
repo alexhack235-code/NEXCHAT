@@ -230,7 +230,7 @@ export async function loadOlderMessages() {
  */
 export async function sendMessage(params = {}) {
   const state = groupStore.getState();
-  const groupId = state.currentGroupId;
+  const groupId = params.groupId || state.currentGroupId;
   const currentUser = auth.currentUser;
 
   if (!groupId || !currentUser) {
@@ -252,19 +252,66 @@ export async function sendMessage(params = {}) {
 
   const uid = currentUser.uid;
 
-  // Fetch group data for permission checks
-  const groupDoc = await getDoc(doc(db, 'groups', groupId));
-  if (!groupDoc.exists()) throw new Error('Group not found');
-  const groupData = groupDoc.data();
+  // 1. Parse mentions synchronously
+  const members = state.members ? Array.from(state.members.values()) : [];
+  const mentionResult = parseMentions(text || '', members);
+
+  // 2. Optimistic UI — add to store immediately (0ms instant render in container)
+  const optimisticId = `optimistic_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const optimisticMessage = {
+    id: optimisticId,
+    groupId,
+    from: uid,
+    text: mentionResult.text || (text || '').trim(),
+    timestamp: new Date(),
+    edited: false,
+    readBy: [uid],
+    readAt: {},
+    reactions: [],
+    mentionedUserIds: mentionResult.mentionedUserIds || [],
+    ...(attachment ? { attachment } : {}),
+    ...(replyTo ? {
+      replyTo: {
+        messageId: replyTo.messageId,
+        text: (replyTo.text || '').substring(0, 200),
+        senderId: replyTo.senderId,
+        senderName: replyTo.senderName
+      }
+    } : {}),
+    _optimistic: true,
+    _pending: true
+  };
+
+  const currentMessages = groupStore.getState().messages || [];
+  groupStore.setState({
+    messages: [...currentMessages, optimisticMessage],
+    replyingTo: null // Clear reply state
+  });
+
+  // Fetch group data for permission & slow mode validation
+  let groupData = state.currentGroup;
+  if (!groupData || groupData.id !== groupId) {
+    const groupDoc = await getDoc(doc(db, 'groups', groupId));
+    if (!groupDoc.exists()) {
+      const msgs = groupStore.getState().messages.filter(m => m.id !== optimisticId);
+      groupStore.setState({ messages: msgs });
+      throw new Error('Group not found');
+    }
+    groupData = groupDoc.data();
+  }
 
   // Permission checks
   const isMember = (Array.isArray(groupData.members) && groupData.members.includes(uid)) || groupData.creatorId === uid;
   if (!isMember) {
+    const msgs = groupStore.getState().messages.filter(m => m.id !== optimisticId);
+    groupStore.setState({ messages: msgs });
     throw new Error('You are not a member of this group');
   }
 
   // Check suspension
   if (groupData.suspendedMembers && groupData.suspendedMembers.includes(uid)) {
+    const msgs = groupStore.getState().messages.filter(m => m.id !== optimisticId);
+    groupStore.setState({ messages: msgs });
     throw new Error('You are suspended from this group');
   }
 
@@ -273,6 +320,8 @@ export async function sendMessage(params = {}) {
     const muteExpiry = groupData.mutedMembers[uid];
     const expiryDate = muteExpiry.toDate ? muteExpiry.toDate() : new Date(muteExpiry);
     if (expiryDate > new Date()) {
+      const msgs = groupStore.getState().messages.filter(m => m.id !== optimisticId);
+      groupStore.setState({ messages: msgs });
       throw new Error('You are muted in this group');
     }
   }
@@ -282,15 +331,13 @@ export async function sendMessage(params = {}) {
     const cooldown = state.slowModeCooldownEnd;
     if (cooldown && Date.now() < cooldown) {
       const remaining = Math.ceil((cooldown - Date.now()) / 1000);
+      const msgs = groupStore.getState().messages.filter(m => m.id !== optimisticId);
+      groupStore.setState({ messages: msgs });
       throw new Error(`Slow mode: wait ${remaining}s before sending again`);
     }
   }
 
-  // Parse mentions
-  const members = state.members ? Array.from(state.members.values()) : [];
-  const mentionResult = parseMentions(text || '', members);
-
-  // Build message data
+  // Build message data for Firestore
   const messageData = {
     groupId,
     from: uid,
@@ -325,22 +372,6 @@ export async function sendMessage(params = {}) {
       senderName: replyTo.senderName
     };
   }
-
-  // Optimistic UI — add to store immediately with pending state
-  const optimisticId = `optimistic_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  const optimisticMessage = {
-    id: optimisticId,
-    ...messageData,
-    timestamp: new Date(),
-    _optimistic: true,
-    _pending: true
-  };
-
-  const currentMessages = groupStore.getState().messages;
-  groupStore.setState({
-    messages: [...currentMessages, optimisticMessage],
-    replyingTo: null // Clear reply state
-  });
 
   // Set slow mode cooldown
   if (groupData.slowMode && groupData.slowMode.enabled) {

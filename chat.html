@@ -115,6 +115,14 @@
     .chronex-neural-dot { width: 5px; height: 5px; border-radius: 50%; background: #00ff66; box-shadow: 0 0 6px #00ff66; animation: pulseDot 1.2s infinite; }
     @keyframes pulseDot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
     @keyframes burstFloatUp { 0% { transform: translateY(0) scale(0.6); opacity: 1; } 100% { transform: translateY(-120px) scale(1.4); opacity: 0; } }
+    .stegano-container {
+      position: relative !important;
+      z-index: 10 !important;
+      pointer-events: auto !important;
+    }
+    .more-sheet-backdrop {
+      z-index: 1 !important;
+    }
   </style>
 </head>
 
@@ -7230,7 +7238,6 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <script src="./src/js/creator-escrow-market.js"></script>
   <script src="./src/js/chat-professional-suite.js"></script>
   <script src="./src/js/preview-audit-engine.js"></script>
-  <script src="./src/js/status-elite-suite.js"></script>
   <script type="module" src="./src/js/anti-forensic-watermark.js"></script>
   <script type="module" src="./src/js/zk-delivery-receipts.js"></script>
   <script src="./src/js/tactical-war-room.js"></script>

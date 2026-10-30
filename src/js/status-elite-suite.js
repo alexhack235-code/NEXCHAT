@@ -232,37 +232,97 @@
       if (!micBtn || micBtn.dataset.bound === 'true') return;
       micBtn.dataset.bound = 'true';
 
+      this.voiceState = 'idle'; // 'idle' | 'recording' | 'preview'
+      this.audioPreview = null;
       let stream = null;
       let chunks = [];
 
-      micBtn.addEventListener('click', async () => {
-        if (!this.mediaRecorder || this.mediaRecorder.state === 'inactive') {
-          // Start Recording
+      const setAudioBlob = (blob) => {
+        this.recordedAudioBlob = blob;
+        this.recordedAudioUrl = blob ? URL.createObjectURL(blob) : null;
+        if (typeof window !== 'undefined') {
+          if (window.NexStatusEliteSuite) {
+            window.NexStatusEliteSuite.recordedAudioBlob = blob;
+          }
+          if (window.NexStatusAudioStudio) {
+            window.NexStatusAudioStudio.recordedBlob = blob;
+            window.NexStatusAudioStudio.recordedAudioBlob = blob;
+          }
+        }
+      };
+
+      const updateUI = () => {
+        if (!micBtn) return;
+        if (this.voiceState === 'idle') {
+          micBtn.classList.remove('recording', 'preview-playing', 'preview-paused');
+          micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+          micBtn.title = 'Start Voice Recording';
+          if (hintEl) hintEl.textContent = 'Tap microphone to start voice story';
+          if (timerEl) timerEl.textContent = '0:00';
+        } else if (this.voiceState === 'recording') {
+          micBtn.classList.add('recording');
+          micBtn.classList.remove('preview-playing', 'preview-paused');
+          micBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+          micBtn.title = 'Stop Recording';
+          if (hintEl) hintEl.textContent = 'Recording live... (Max 60s)';
+        } else if (this.voiceState === 'preview') {
+          micBtn.classList.remove('recording');
+          const isPlaying = this.audioPreview && !this.audioPreview.paused;
+          if (isPlaying) {
+            micBtn.classList.add('preview-playing');
+            micBtn.classList.remove('preview-paused');
+            micBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+            micBtn.title = 'Pause Preview';
+            if (hintEl) hintEl.textContent = 'Auditioning voice preview... Tap pause or transmit.';
+          } else {
+            micBtn.classList.add('preview-paused');
+            micBtn.classList.remove('preview-playing');
+            micBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+            micBtn.title = 'Play Preview';
+            if (hintEl) hintEl.textContent = 'Voice note recorded successfully! Tap play to preview or transmit below.';
+          }
+        }
+      };
+
+      const stopRecording = () => {
+        clearInterval(this.voiceTimerInterval);
+        if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+          this.mediaRecorder.stop();
+        }
+        if (stream) {
+          stream.getTracks().forEach(t => { try { t.stop(); } catch (_) {} });
+          stream = null;
+        }
+      };
+
+      micBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        // 1. START RECORDING (Idle -> Recording)
+        if (this.voiceState === 'idle') {
           try {
             stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            this.mediaRecorder = new MediaRecorder(stream);
             chunks = [];
+            const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+              ? 'audio/webm;codecs=opus'
+              : (MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : 'audio/webm');
+            this.mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
 
-            this.mediaRecorder.ondataavailable = (e) => {
-              if (e.data.size > 0) chunks.push(e.data);
+            this.mediaRecorder.ondataavailable = (ev) => {
+              if (ev.data && ev.data.size > 0) chunks.push(ev.data);
             };
 
             this.mediaRecorder.onstop = () => {
-              this.recordedAudioBlob = new Blob(chunks, { type: 'audio/webm' });
-              this.recordedAudioUrl = URL.createObjectURL(this.recordedAudioBlob);
-              if (stream) stream.getTracks().forEach(t => t.stop());
-
-              if (hintEl) hintEl.textContent = 'Voice note recorded successfully! Tap transmit below.';
-              if (micBtn) {
-                micBtn.classList.remove('recording');
-                micBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
-              }
+              const mime = this.mediaRecorder?.mimeType || 'audio/webm';
+              const blob = new Blob(chunks, { type: mime });
+              setAudioBlob(blob);
+              this.voiceState = 'preview';
+              updateUI();
             };
 
-            this.mediaRecorder.start();
-            micBtn.classList.add('recording');
-            micBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
-            if (hintEl) hintEl.textContent = 'Recording live... (Max 60s)';
+            this.mediaRecorder.start(100);
+            this.voiceState = 'recording';
+            updateUI();
 
             this.voiceDuration = 0;
             clearInterval(this.voiceTimerInterval);
@@ -270,21 +330,48 @@
               this.voiceDuration++;
               if (timerEl) timerEl.textContent = this.formatTime(this.voiceDuration);
               if (this.voiceDuration >= 60) {
-                this.stopVoiceRecording();
+                stopRecording();
               }
             }, 1000);
 
           } catch (err) {
             console.error('[STATUS VOICE RECORD]', err);
+            this.voiceState = 'idle';
+            updateUI();
             if (window.showNotif) window.showNotif('Microphone access denied: ' + err.message, 'error');
           }
-        } else if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
-          // Stop Recording
-          this.stopVoiceRecording();
-        } else if (this.recordedAudioUrl) {
-          // Playback preview
-          const testAudio = new Audio(this.recordedAudioUrl);
-          testAudio.play();
+
+        // 2. STOP RECORDING (Recording -> Preview)
+        } else if (this.voiceState === 'recording') {
+          stopRecording();
+
+        // 3. PREVIEW AUDIO (Preview -> Play/Pause Audition)
+        } else if (this.voiceState === 'preview') {
+          if (!this.recordedAudioUrl && this.recordedAudioBlob) {
+            this.recordedAudioUrl = URL.createObjectURL(this.recordedAudioBlob);
+          }
+          if (this.recordedAudioUrl) {
+            if (!this.audioPreview || this.audioPreview.src !== this.recordedAudioUrl) {
+              if (this.audioPreview) {
+                this.audioPreview.pause();
+                this.audioPreview = null;
+              }
+              this.audioPreview = new Audio(this.recordedAudioUrl);
+              this.audioPreview.onended = () => {
+                updateUI();
+              };
+              this.audioPreview.onerror = () => {
+                updateUI();
+              };
+            }
+
+            if (this.audioPreview.paused) {
+              this.audioPreview.play().then(() => updateUI()).catch(() => updateUI());
+            } else {
+              this.audioPreview.pause();
+              updateUI();
+            }
+          }
         }
       });
     }
@@ -298,26 +385,61 @@
 
     getRecordedAudioBlob() {
       if (window.NexStatusAudioStudio) {
-        const studioData = window.NexStatusAudioStudio.getRecordedAudioData();
-        if (studioData && studioData.blob) return studioData.blob;
+        const studioData = typeof window.NexStatusAudioStudio.getRecordedAudioData === 'function'
+          ? window.NexStatusAudioStudio.getRecordedAudioData()
+          : null;
+        const studioBlob = window.NexStatusAudioStudio.recordedAudioBlob ||
+          window.NexStatusAudioStudio.recordedBlob ||
+          studioData?.blob;
+        if (studioBlob) {
+          this.recordedAudioBlob = studioBlob;
+          if (window.NexStatusEliteSuite) {
+            window.NexStatusEliteSuite.recordedAudioBlob = studioBlob;
+          }
+          return studioBlob;
+        }
       }
       return this.recordedAudioBlob;
     }
 
     clearRecordedVoice() {
-      if (window.NexStatusAudioStudio) {
-        window.NexStatusAudioStudio.clearRecording();
+      if (this.audioPreview) {
+        try {
+          this.audioPreview.pause();
+          this.audioPreview = null;
+        } catch (_) {}
+      }
+      if (this.recordedAudioUrl) {
+        try { URL.revokeObjectURL(this.recordedAudioUrl); } catch (_) {}
+        this.recordedAudioUrl = null;
       }
       this.recordedAudioBlob = null;
-      this.recordedAudioUrl = null;
+      this.voiceState = 'idle';
       this.voiceDuration = 0;
       clearInterval(this.voiceTimerInterval);
+
+      if (typeof window !== 'undefined') {
+        if (window.NexStatusEliteSuite) {
+          window.NexStatusEliteSuite.recordedAudioBlob = null;
+        }
+        if (window.NexStatusAudioStudio) {
+          window.NexStatusAudioStudio.recordedBlob = null;
+          window.NexStatusAudioStudio.recordedAudioBlob = null;
+          if (typeof window.NexStatusAudioStudio.clearRecording === 'function') {
+            window.NexStatusAudioStudio.clearRecording();
+          }
+        }
+      }
+
       const timerEl = document.getElementById('statusVoiceTimerDisplay');
       if (timerEl) timerEl.textContent = '0:00';
+      const hintEl = document.getElementById('statusVoiceHintText');
+      if (hintEl) hintEl.textContent = 'Tap microphone to begin voice story';
       const micBtn = document.getElementById('statusVoiceRecordBtn');
       if (micBtn) {
-        micBtn.classList.remove('recording');
+        micBtn.classList.remove('recording', 'preview-playing', 'preview-paused');
         micBtn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+        micBtn.title = 'Start Voice Recording';
       }
     }
 

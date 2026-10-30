@@ -298,6 +298,10 @@
     handleRecordingComplete() {
       const mime = this.mediaRecorder?.mimeType || 'audio/webm';
       this.recordedBlob = new Blob(this.recordedChunks, { type: mime });
+      this.recordedAudioBlob = this.recordedBlob;
+      if (typeof window !== 'undefined' && window.NexStatusEliteSuite) {
+        window.NexStatusEliteSuite.recordedAudioBlob = this.recordedBlob;
+      }
       if (this.recordedUrl) URL.revokeObjectURL(this.recordedUrl);
       this.recordedUrl = URL.createObjectURL(this.recordedBlob);
 
@@ -412,6 +416,10 @@
         this.recordedUrl = null;
       }
       this.recordedBlob = null;
+      this.recordedAudioBlob = null;
+      if (typeof window !== 'undefined' && window.NexStatusEliteSuite) {
+        window.NexStatusEliteSuite.recordedAudioBlob = null;
+      }
       this.recordedChunks = [];
       this.recordingDuration = 0;
       this.waveformPeaks = [];

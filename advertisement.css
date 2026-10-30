@@ -227,14 +227,16 @@ html, body {
   color: var(--accent-primary);
 }
 
+#cartHeaderBtn,
+.cart-btn-top,
 .cart-header-btn {
+  background: rgba(0, 240, 118, 0.12) !important;
+  border: 1px solid rgba(0, 240, 118, 0.45) !important;
+  color: #00f076 !important;
+  box-shadow: 0 0 14px rgba(0, 240, 118, 0.35) !important;
+  border-radius: 10px !important;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-primary);
-  font-size: 15px;
   position: relative;
   display: flex;
   align-items: center;
@@ -243,10 +245,35 @@ html, body {
   transition: all 0.2s ease;
 }
 
-.cart-header-btn:hover, .cart-header-btn:active {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-  background: var(--accent-dim);
+#cartHeaderBtn:hover,
+#cartHeaderBtn:active,
+.cart-btn-top:hover,
+.cart-btn-top:active,
+.cart-header-btn:hover,
+.cart-header-btn:active {
+  background: rgba(0, 240, 118, 0.22) !important;
+  border-color: rgba(0, 240, 118, 0.75) !important;
+  color: #00ff88 !important;
+  box-shadow: 0 0 18px rgba(0, 240, 118, 0.55) !important;
+}
+
+#cartHeaderBtn .badge-count,
+.cart-btn-top .badge-count,
+.cart-header-btn .badge-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #00f076 !important;
+  color: #000000 !important;
+  font-size: 10px;
+  font-weight: 800;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 10px rgba(0, 240, 118, 0.8) !important;
 }
 
 .badge-count {
