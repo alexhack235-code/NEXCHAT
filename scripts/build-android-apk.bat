@@ -12,6 +12,9 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
 )
 
+echo [1.5/4] Generating Android launcher icons and splash screens...
+powershell -ExecutionPolicy Bypass -File scripts\generate_android_icons.ps1
+
 echo [2/4] Syncing Capacitor Android assets...
 node ./node_modules/@capacitor/cli/bin/capacitor sync android
 if %ERRORLEVEL% NEQ 0 (
