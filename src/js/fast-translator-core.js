@@ -601,6 +601,31 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
     throw new Error('AI_UNAVAILABLE');
   })();
 
+  // Runner Gamma: Ultra-Fast Direct Neural GTX Engine (< 150ms)
+  const gtxRunner = (async () => {
+    if (typeof fetch === 'function') {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 1800);
+      try {
+        const apiTarget = targetLang === 'en' ? 'en' : targetLang;
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(apiTarget)}&dt=t&q=${encodeURIComponent(clean)}`, {
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && Array.isArray(data[0])) {
+            const trans = data[0].map(item => item[0]).filter(Boolean).join('').trim();
+            if (trans && trans.toLowerCase() !== clean.toLowerCase()) {
+              return trans;
+            }
+          }
+        }
+      } catch (_) {}
+    }
+    throw new Error('GTX_FAILED');
+  })();
+
   // Runner Beta: Fast Edge MT Endpoint with 800ms Abort Controller
   const edgeMtRunner = (async () => {
     if (typeof fetch === 'function' && typeof AbortController !== 'undefined') {
@@ -626,7 +651,7 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
 
   try {
     // Race both runners - whichever resolves first wins!
-    const winningResult = await Promise.any([aiRunner, edgeMtRunner]);
+    const winningResult = await Promise.any([gtxRunner, edgeMtRunner, aiRunner]);
     if (winningResult) {
       translationLRU.set(cacheKey, winningResult);
       translationLRU.saveSessionEntries();

@@ -2083,7 +2083,7 @@ class NexTranslator {
 
     bubble.dataset.autoTranslated = 'true';
 
-    const targetLang = this.autoTranslateTargetLang || 'en';
+    const targetLang = localStorage.getItem('nexchat_preferred_language') || localStorage.getItem('nex_auto_translate_target_lang') || this.autoTranslateTargetLang || 'en';
     const langName = this.languageNames[targetLang] || targetLang;
 
     this.translateText(rawText, targetLang).then(translated => {
@@ -2202,18 +2202,30 @@ class NexTranslator {
       }
     }
 
-    // Tier 2: Speculative Parallel Racing (ChronEX AI vs Fast Edge MT with 850ms Abort Guard)
+    // Tier 2: Speculative Parallel Racing (Fast Google GTX vs ChronEX AI vs Edge MT)
     const langName = this.languageNames[targetLang] || targetLang;
 
-    const aiPromise = (async () => {
-      if (typeof window !== 'undefined' && typeof window.generateChronexAIResponse === 'function') {
-        const prompt = `Translate to ${langName}. Direct translation ONLY, no quotes:\n"${clean}"`;
-        const aiTranslation = await window.generateChronexAIResponse(prompt);
-        if (aiTranslation && aiTranslation.trim().length > 0 && !aiTranslation.includes('QUOTA')) {
-          return aiTranslation.trim().replace(/^["']|["']$/g, '');
-        }
+    const gtxPromise = (async () => {
+      if (typeof fetch === 'function') {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 2000);
+        try {
+          const apiTarget = targetLang === 'en' ? 'en' : targetLang;
+          const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(apiTarget)}&dt=t&q=${encodeURIComponent(clean)}`;
+          const res = await fetch(url, { signal: controller.signal });
+          clearTimeout(timer);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data) && Array.isArray(data[0])) {
+              const trans = data[0].map(item => item[0]).filter(Boolean).join('').trim();
+              if (trans && trans.toLowerCase() !== lower) {
+                return trans;
+              }
+            }
+          }
+        } catch (_) {}
       }
-      throw new Error('AI_UNAVAILABLE');
+      throw new Error('GTX_FAILED');
     })();
 
     const edgeMtPromise = (async () => {
@@ -2240,8 +2252,19 @@ class NexTranslator {
       throw new Error('EDGE_MT_FAILED');
     })();
 
+    const aiPromise = (async () => {
+      if (typeof window !== 'undefined' && typeof window.generateChronexAIResponse === 'function') {
+        const prompt = `Translate to ${langName}. Direct translation ONLY, no quotes:\n"${clean}"`;
+        const aiTranslation = await window.generateChronexAIResponse(prompt);
+        if (aiTranslation && aiTranslation.trim().length > 0 && !aiTranslation.includes('QUOTA')) {
+          return aiTranslation.trim().replace(/^["']|["']$/g, '');
+        }
+      }
+      throw new Error('AI_UNAVAILABLE');
+    })();
+
     try {
-      const winningResult = await Promise.any([aiPromise, edgeMtPromise]);
+      const winningResult = await Promise.any([gtxPromise, edgeMtPromise, aiPromise]);
       if (winningResult) {
         this.cacheTranslation(cacheKey, winningResult);
         return winningResult;

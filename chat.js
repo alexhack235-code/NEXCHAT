@@ -11110,6 +11110,8 @@ function setupNewUserLanguageOnboarding() {
       const selected = (grid && grid.dataset.selectedLang) || localStorage.getItem('nexchat_preferred_language') || 'en';
       
       localStorage.setItem('nexchat_preferred_language', selected);
+      localStorage.setItem('nex_preferred_lang', selected);
+      localStorage.setItem('nex_auto_translate_target_lang', selected);
       localStorage.setItem('nexchat_welcomed_lang', 'true');
 
       if (window.autoCorrectEngine && typeof window.autoCorrectEngine.activateSubdirectory === 'function') {
@@ -11119,13 +11121,33 @@ function setupNewUserLanguageOnboarding() {
         applyUiTranslations(selected);
       }
 
-      // Update Settings dropdown & badge
+      if (window.CyberFeatures && window.CyberFeatures.translator) {
+        window.CyberFeatures.translator.autoTranslateTargetLang = selected;
+        window.CyberFeatures.translator.preferredLang = selected;
+        if (typeof window.CyberFeatures.translator.updateChatHeaderBadge === 'function') {
+          window.CyberFeatures.translator.updateChatHeaderBadge();
+        }
+        if (typeof window.CyberFeatures.translator.clearAutoTranslateCacheAndRescan === 'function' &&
+            window.CyberFeatures.translator.isAutoTranslateActiveForCurrentChat()) {
+          window.CyberFeatures.translator.clearAutoTranslateCacheAndRescan();
+        }
+      }
+
+      // Update Settings dropdowns & badges
       const select = document.getElementById('settingsPrimaryLangSelect');
       if (select) select.value = selected;
+      const autoTransSelect = document.getElementById('autoTranslateTargetLangSelect');
+      if (autoTransSelect) autoTransSelect.value = selected;
+      const modalSelect = document.getElementById('translateTargetLang');
+      if (modalSelect) modalSelect.value = selected;
       const badge = document.getElementById('settingsCurrentLangBadge');
       const langMeta = ALL_SUPPORTED_LANGUAGES.find(l => l.code === selected);
       if (badge && langMeta) {
         badge.textContent = `${langMeta.native} (${langMeta.badge})`;
+      }
+      const predBadge = document.getElementById('predictiveLangBadge');
+      if (predBadge) {
+        predBadge.textContent = selected.toUpperCase();
       }
 
       window.closeLanguageOnboardingModal();
@@ -11198,15 +11220,36 @@ function setupLanguageSettingsListeners() {
       primarySelect.addEventListener('change', () => {
         const val = primarySelect.value;
         localStorage.setItem('nexchat_preferred_language', val);
+        localStorage.setItem('nex_preferred_lang', val);
+        localStorage.setItem('nex_auto_translate_target_lang', val);
         if (window.autoCorrectEngine && typeof window.autoCorrectEngine.activateSubdirectory === 'function') {
           window.autoCorrectEngine.activateSubdirectory(val, 'settings-select');
         }
         if (typeof applyUiTranslations === 'function') {
           applyUiTranslations(val);
         }
+        if (window.CyberFeatures && window.CyberFeatures.translator) {
+          window.CyberFeatures.translator.autoTranslateTargetLang = val;
+          window.CyberFeatures.translator.preferredLang = val;
+          if (typeof window.CyberFeatures.translator.updateChatHeaderBadge === 'function') {
+            window.CyberFeatures.translator.updateChatHeaderBadge();
+          }
+          if (typeof window.CyberFeatures.translator.clearAutoTranslateCacheAndRescan === 'function' &&
+              window.CyberFeatures.translator.isAutoTranslateActiveForCurrentChat()) {
+            window.CyberFeatures.translator.clearAutoTranslateCacheAndRescan();
+          }
+        }
+        const autoTransSelect = document.getElementById('autoTranslateTargetLangSelect');
+        if (autoTransSelect) autoTransSelect.value = val;
+        const modalSelect = document.getElementById('translateTargetLang');
+        if (modalSelect) modalSelect.value = val;
         const langMeta = ALL_SUPPORTED_LANGUAGES.find(l => l.code === val);
         if (currentBadge && langMeta) {
           currentBadge.textContent = `${langMeta.native} (${langMeta.badge})`;
+        }
+        const predBadge = document.getElementById('predictiveLangBadge');
+        if (predBadge) {
+          predBadge.textContent = val.toUpperCase();
         }
         if (typeof showNotif === 'function') {
           showNotif(`Activated ${langMeta ? langMeta.name : val} dictionary`, 'info', 2000);
@@ -24511,11 +24554,16 @@ STRICT MANDATE:
       prompt = `Rewrite into a crisp, articulate professional tone. Fix typos and grammar. Return ONLY the polished text:\n"${instant}"`;
     }
 
-    if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.fastPolish === 'function') {
-      cloudPolished = await chronexAI.fastPolish(instant);
-    } else if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.chat === 'function') {
-      cloudPolished = await chronexAI.chat(prompt, 'fast_polish');
-    }
+    const cloudTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error('TIMEOUT')), 1200));
+    const aiExecution = (async () => {
+      if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.fastPolish === 'function') {
+        return await chronexAI.fastPolish(instant);
+      } else if (typeof chronexAI !== 'undefined' && chronexAI && typeof chronexAI.chat === 'function') {
+        return await chronexAI.chat(prompt, 'fast_polish');
+      }
+      return null;
+    })();
+    cloudPolished = await Promise.race([aiExecution, cloudTimeout]).catch(() => null);
 
     if (cloudPolished && cloudPolished.trim().length > 0 && cloudPolished.trim() !== instant) {
       const clean = cloudPolished.replace(/^["']|["']$/g, '').trim();
