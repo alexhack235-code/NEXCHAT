@@ -22,10 +22,23 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
 )
 
+powershell -Command "if (Test-Path 'android\app\capacitor.build.gradle') { (Get-Content 'android\app\capacitor.build.gradle') -replace 'VERSION_21', 'VERSION_17' | Set-Content 'android\app\capacitor.build.gradle' }"
+
 echo [3/4] Checking build environment...
 if not exist "android\gradlew.bat" (
     echo [ERROR] Android project folder not found at android/
     exit /b 1
+)
+
+if not defined ANDROID_HOME (
+    if exist "C:\Android\Sdk" (
+        set "ANDROID_HOME=C:\Android\Sdk"
+    )
+)
+if not exist "android\local.properties" (
+    if exist "C:\Android\Sdk" (
+        echo sdk.dir=C\:\\Android\\Sdk> "android\local.properties"
+    )
 )
 
 where java >nul 2>&1
