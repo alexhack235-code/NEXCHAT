@@ -2190,10 +2190,14 @@
                   <p>Manage your account credentials, public card, and security status.</p>
                 </div>
 
-                <div class="settings-card">
-                  <div class="settings-profile-hero" style="background: transparent; border-bottom: none; padding: 0;">
-                    <div class="settings-profile-avatar-wrap">
+                <div class="settings-card settings-profile-card">
+                  <div class="settings-profile-hero">
+                    <div class="settings-profile-avatar-wrap" id="settingsAvatarContainer" title="Click to change profile photo">
                       <img id="tabProfilePic" class="settings-profile-avatar" src="logo.jpg" alt="Profile" onerror="this.onerror=null;this.src='logo.jpg';">
+                      <button type="button" class="settings-avatar-edit-overlay" id="btnSettingsAvatarOverlay" title="Change profile photo" aria-label="Change profile photo">
+                        <i class="fa-solid fa-camera"></i>
+                      </button>
+                      <input type="file" id="settingsProfilePicInput" accept="image/*" style="display: none;" aria-label="Upload profile photo file">
                       <div class="avatar-achievement-badge" title="Verified NEX Operative">
                         <i class="fa-solid fa-shield-halved"></i> <span>Verified NEX User</span>
                       </div>
@@ -2202,9 +2206,50 @@
                       <div class="settings-profile-name-row">
                         <span class="settings-profile-name" id="tabProfileName">NEX Operative</span>
                         <span class="tg-verified-badge" title="Cryptographically Verified"><i class="fa-solid fa-circle-check"></i></span>
+                        <button type="button" class="settings-profile-edit-name-btn" id="btnToggleEditUsername" title="Edit username" aria-label="Edit username">
+                          <i class="fa-solid fa-pen-to-square"></i>
+                        </button>
                       </div>
                       <div class="settings-profile-handle" id="tabProfileHandle">@nexchat_user</div>
                       <div class="settings-profile-status"><span class="status-online-dot"></span> Active &bull; Cryptographically Verified</div>
+                    </div>
+                  </div>
+
+                  <!-- Quick Action Buttons Row -->
+                  <div class="settings-profile-actions-toolbar">
+                    <button type="button" class="settings-profile-btn" id="btnTriggerUploadAvatar">
+                      <i class="fa-solid fa-camera"></i> <span>Change Photo</span>
+                    </button>
+                    <button type="button" class="settings-profile-btn" id="btnTriggerEditUsername">
+                      <i class="fa-solid fa-pen-to-square"></i> <span>Edit Username</span>
+                    </button>
+                    <a href="profile-upload.html" class="settings-profile-btn studio-btn" title="Open Advanced Profile Studio">
+                      <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Full Studio</span>
+                    </a>
+                  </div>
+
+                  <!-- Upload Status Bar (Hidden by default, shown during photo upload) -->
+                  <div id="settingsAvatarUploadStatus" class="settings-avatar-upload-status" style="display: none;">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                    <span id="settingsAvatarUploadStatusText">Uploading profile photo to secure cloud...</span>
+                  </div>
+
+                  <!-- Expandable Username Edit Section (Smooth Slide Down) -->
+                  <div id="settingsEditUsernameSection" class="settings-inline-edit-box" style="display: none;">
+                    <div class="settings-inline-edit-header">
+                      <span class="edit-title"><i class="fa-solid fa-id-card"></i> Change Display Username</span>
+                      <button type="button" class="settings-inline-close-btn" id="btnCancelEditUsername" title="Close"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="settings-inline-edit-body">
+                      <div class="settings-input-group">
+                        <span class="settings-input-prefix">@</span>
+                        <input type="text" id="settingsNewUsernameInput" class="settings-username-input" placeholder="Enter new username" maxlength="30" autocomplete="off" spellcheck="false">
+                      </div>
+                      <div class="settings-input-hint">3-30 characters &bull; Letters, numbers, underscores &amp; spaces</div>
+                      <div class="settings-inline-actions">
+                        <button type="button" class="settings-btn-cancel" id="btnCancelEditUsername2">Cancel</button>
+                        <button type="button" class="settings-btn-save" id="btnSaveNewUsername"><i class="fa-solid fa-check"></i> Save Username</button>
+                      </div>
                     </div>
                   </div>
                 </div>

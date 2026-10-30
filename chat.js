@@ -33,7 +33,8 @@ import {
   collection, doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, setDoc,
   query, where, onSnapshot, serverTimestamp, orderBy, limit, limitToLast, Timestamp, increment, runTransaction, arrayUnion, arrayRemove, deleteField, writeBatch
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { signOut, updatePassword, reauthenticateWithCredential, EmailAuthProvider, onAuthStateChanged, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { signOut, updatePassword, updateProfile, reauthenticateWithCredential, EmailAuthProvider, onAuthStateChanged, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { uploadProfilePicture, saveUserProfile } from "./src/js/profile.js";
 import { ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 import { uploadVideoToCloudinary, uploadImageToCloudinary, uploadDocumentToCloudinary } from "./src/js/cloudinary.js";
@@ -10521,6 +10522,296 @@ function setupSettingsTabNavigation() {
   setupChronexAiStudioSettings();
 }
 
+function setupSettingsProfileIdentityControls() {
+  const avatarWrap = document.getElementById('settingsAvatarContainer');
+  const avatarOverlay = document.getElementById('btnSettingsAvatarOverlay');
+  const fileInput = document.getElementById('settingsProfilePicInput');
+  const btnTriggerUpload = document.getElementById('btnTriggerUploadAvatar');
+  const btnToggleEditName = document.getElementById('btnToggleEditUsername');
+  const btnTriggerEditName = document.getElementById('btnTriggerEditUsername');
+  const editSection = document.getElementById('settingsEditUsernameSection');
+  const cancelBtn1 = document.getElementById('btnCancelEditUsername');
+  const cancelBtn2 = document.getElementById('btnCancelEditUsername2');
+  const saveNameBtn = document.getElementById('btnSaveNewUsername');
+  const nameInput = document.getElementById('settingsNewUsernameInput');
+  const uploadStatus = document.getElementById('settingsAvatarUploadStatus');
+  const uploadStatusText = document.getElementById('settingsAvatarUploadStatusText');
+  const tabPic = document.getElementById('tabProfilePic');
+  const tabName = document.getElementById('tabProfileName');
+  const tabHandle = document.getElementById('tabProfileHandle');
+
+  // Helper: Open File Chooser
+  const openFileChooser = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (fileInput) fileInput.click();
+  };
+
+  if (avatarWrap && !avatarWrap.dataset.bound) {
+    avatarWrap.dataset.bound = 'true';
+    avatarWrap.addEventListener('click', (e) => {
+      if (e.target.closest('.avatar-achievement-badge')) return;
+      openFileChooser(e);
+    });
+  }
+
+  if (avatarOverlay && !avatarOverlay.dataset.bound) {
+    avatarOverlay.dataset.bound = 'true';
+    avatarOverlay.addEventListener('click', openFileChooser);
+  }
+
+  if (btnTriggerUpload && !btnTriggerUpload.dataset.bound) {
+    btnTriggerUpload.dataset.bound = 'true';
+    btnTriggerUpload.addEventListener('click', openFileChooser);
+  }
+
+  // File input change handler (Upload Photo)
+  if (fileInput && !fileInput.dataset.bound) {
+    fileInput.dataset.bound = 'true';
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      if (!file.type || !file.type.startsWith('image/')) {
+        showNotif('Please select a valid image file (JPEG, PNG, WEBP, GIF)', 'error');
+        fileInput.value = '';
+        return;
+      }
+
+      if (file.size > 10 * 1024 * 1024) {
+        showNotif('Image size exceeds 10MB limit. Please select a smaller photo.', 'error');
+        fileInput.value = '';
+        return;
+      }
+
+      const prevSrc = tabPic ? tabPic.src : 'logo.jpg';
+      let objectUrl = '';
+      try {
+        objectUrl = URL.createObjectURL(file);
+        if (tabPic) tabPic.src = objectUrl;
+      } catch (_) {}
+
+      if (uploadStatus) {
+        uploadStatus.style.display = 'flex';
+        if (uploadStatusText) uploadStatusText.textContent = 'Uploading profile photo to secure cloud...';
+      }
+
+      try {
+        const uid = (auth && auth.currentUser && auth.currentUser.uid) || window.myUID;
+        if (!uid) {
+          throw new Error('You must be signed in to change your profile picture.');
+        }
+
+        const downloadUrl = await uploadProfilePicture(file, uid);
+        if (!downloadUrl) throw new Error('Upload service returned empty URL');
+
+        // Persist to Firestore
+        await saveUserProfile(uid, downloadUrl, {
+          photoURL: downloadUrl,
+          avatar: downloadUrl,
+          profilePic: downloadUrl,
+          profilePicUrl: downloadUrl
+        });
+
+        // Update Firebase Auth profile
+        if (auth && auth.currentUser && typeof updateProfile === 'function') {
+          await updateProfile(auth.currentUser, { photoURL: downloadUrl }).catch((err) => {
+            console.warn('[PROFILE] Firebase Auth photoURL sync:', err);
+          });
+        }
+
+        // Synchronize local states
+        window.myProfilePic = downloadUrl;
+        localStorage.setItem('auth_photo', downloadUrl);
+        localStorage.setItem('profilePic', downloadUrl);
+        localStorage.setItem('photoURL', downloadUrl);
+
+        if (tabPic) tabPic.src = downloadUrl;
+
+        // Synchronize across chat DOM
+        const statusImg = document.getElementById('myStatusPic');
+        if (statusImg) statusImg.src = downloadUrl;
+
+        const profileModalImg = document.getElementById('profileModalImg');
+        if (profileModalImg) profileModalImg.src = downloadUrl;
+
+        if (typeof updateProfileSticker === 'function') {
+          updateProfileSticker(downloadUrl, window.myUsername || 'Operative');
+        }
+
+        if (uploadStatus) {
+          uploadStatus.style.display = 'none';
+        }
+
+        showNotif('Profile photo updated successfully!', 'success');
+      } catch (err) {
+        console.error('[PROFILE] Avatar upload error:', err);
+        if (tabPic && prevSrc) tabPic.src = prevSrc;
+        if (uploadStatus) uploadStatus.style.display = 'none';
+        showNotif('Failed to upload photo: ' + (err.message || 'Network error'), 'error');
+      } finally {
+        fileInput.value = '';
+        if (objectUrl) {
+          try {
+            URL.revokeObjectURL(objectUrl);
+          } catch (_) {}
+        }
+      }
+    });
+  }
+
+  // Toggle Edit Username Section
+  const toggleEditSection = (e) => {
+    if (e) e.preventDefault();
+    if (!editSection) return;
+    const isHidden = editSection.style.display === 'none' || !editSection.style.display;
+    if (isHidden) {
+      editSection.style.display = 'flex';
+      const cur = window.myUsername || (auth && auth.currentUser && auth.currentUser.displayName) || '';
+      if (nameInput) {
+        nameInput.value = cur;
+        setTimeout(() => nameInput.focus(), 50);
+      }
+    } else {
+      editSection.style.display = 'none';
+    }
+  };
+
+  const closeEditSection = (e) => {
+    if (e) e.preventDefault();
+    if (editSection) editSection.style.display = 'none';
+  };
+
+  if (btnToggleEditName && !btnToggleEditName.dataset.bound) {
+    btnToggleEditName.dataset.bound = 'true';
+    btnToggleEditName.addEventListener('click', toggleEditSection);
+  }
+
+  if (btnTriggerEditName && !btnTriggerEditName.dataset.bound) {
+    btnTriggerEditName.dataset.bound = 'true';
+    btnTriggerEditName.addEventListener('click', toggleEditSection);
+  }
+
+  if (cancelBtn1 && !cancelBtn1.dataset.bound) {
+    cancelBtn1.dataset.bound = 'true';
+    cancelBtn1.addEventListener('click', closeEditSection);
+  }
+
+  if (cancelBtn2 && !cancelBtn2.dataset.bound) {
+    cancelBtn2.dataset.bound = 'true';
+    cancelBtn2.addEventListener('click', closeEditSection);
+  }
+
+  // Save new username
+  if (saveNameBtn && !saveNameBtn.dataset.bound) {
+    saveNameBtn.dataset.bound = 'true';
+    saveNameBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      if (!nameInput) return;
+      const rawName = nameInput.value || '';
+      const cleanName = rawName.trim();
+
+      if (!cleanName || cleanName.length < 3) {
+        showNotif('Username must be at least 3 characters long', 'error');
+        nameInput.focus();
+        return;
+      }
+
+      if (cleanName.length > 30) {
+        showNotif('Username cannot exceed 30 characters', 'error');
+        nameInput.focus();
+        return;
+      }
+
+      const validPattern = /^[a-zA-Z0-9_\s-]+$/;
+      if (!validPattern.test(cleanName)) {
+        showNotif('Username can only contain letters, numbers, spaces, underscores, and hyphens', 'error');
+        nameInput.focus();
+        return;
+      }
+
+      if (cleanName === window.myUsername) {
+        closeEditSection();
+        return;
+      }
+
+      const uid = (auth && auth.currentUser && auth.currentUser.uid) || window.myUID;
+      if (!uid) {
+        showNotif('User authentication required to update username', 'error');
+        return;
+      }
+
+      saveNameBtn.disabled = true;
+      const originalBtnHtml = saveNameBtn.innerHTML;
+      saveNameBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+      try {
+        // Update Firebase Auth profile
+        if (auth && auth.currentUser && typeof updateProfile === 'function') {
+          await updateProfile(auth.currentUser, { displayName: cleanName }).catch((err) => {
+            console.warn('[PROFILE] Auth displayName sync notice:', err);
+          });
+        }
+
+        // Update Firestore users/{uid}
+        const userRef = doc(db, 'users', uid);
+        await updateDoc(userRef, {
+          displayName: cleanName,
+          username: cleanName,
+          searchUsername: cleanName.toLowerCase(),
+          updatedAt: serverTimestamp()
+        });
+
+        // Update local states
+        window.myUsername = cleanName;
+        localStorage.setItem('auth_username', cleanName);
+        localStorage.setItem('username', cleanName);
+        localStorage.setItem('auth_name', cleanName);
+
+        if (window.NEX_ECOSYSTEM && typeof window.NEX_ECOSYSTEM.updateUser === 'function') {
+          window.NEX_ECOSYSTEM.updateUser(window.myEmail || '', cleanName);
+        }
+
+        // Update DOM
+        if (tabName) tabName.textContent = cleanName;
+        if (tabHandle) tabHandle.textContent = '@' + cleanName.toLowerCase().replace(/[^a-z0-9_]/g, '_');
+
+        const profileModalName = document.getElementById('profileModalName');
+        if (profileModalName) profileModalName.innerText = cleanName;
+
+        if (typeof updateProfileSticker === 'function') {
+          updateProfileSticker(window.myProfilePic, cleanName);
+        }
+
+        closeEditSection();
+        showNotif('Username updated to ' + cleanName + ' successfully!', 'success');
+      } catch (err) {
+        console.error('[PROFILE] Username update error:', err);
+        showNotif('Failed to update username: ' + (err.message || 'Network error'), 'error');
+      } finally {
+        saveNameBtn.disabled = false;
+        saveNameBtn.innerHTML = originalBtnHtml;
+      }
+    });
+
+    // Enter key submits username
+    if (nameInput && !nameInput.dataset.boundEnter) {
+      nameInput.dataset.boundEnter = 'true';
+      nameInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveNameBtn.click();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          closeEditSection();
+        }
+      });
+    }
+  }
+}
+
 function setupFortressSecurityListeners() {
   const testBtn = document.getElementById('testFortressPingBtn');
   const testResult = document.getElementById('fortressTestResult');
@@ -11555,6 +11846,7 @@ function openSettingsModal() {
     setupFortressSecurityListeners();
     setupSentinelMailerSettings();
     setupAiDefenseListeners();
+    setupSettingsProfileIdentityControls();
 
     // Realtime Messaging Engine Status
     const statusText = document.getElementById("supabaseEngineStatusText");

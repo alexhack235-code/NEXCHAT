@@ -11219,26 +11219,293 @@ body.chat-size-extra-large .message-bubble {
   box-sizing: border-box !important;
 }
 
+.settings-profile-card {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  position: relative !important;
+}
+
 .settings-profile-avatar-wrap {
   position: relative !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
-  width: 68px !important;
-  height: 68px !important;
+  width: 72px !important;
+  height: 72px !important;
+  cursor: pointer !important;
 }
 
 .settings-profile-avatar {
-  width: 64px !important;
-  height: 64px !important;
-  max-width: 64px !important;
-  max-height: 64px !important;
+  width: 68px !important;
+  height: 68px !important;
+  max-width: 68px !important;
+  max-height: 68px !important;
   border-radius: 50% !important;
   object-fit: cover !important;
-  border: 2px solid rgba(0, 255, 102, 0.4) !important;
-  box-shadow: 0 0 12px rgba(0, 255, 102, 0.25) !important;
+  border: 2px solid rgba(0, 255, 102, 0.45) !important;
+  box-shadow: 0 0 14px rgba(0, 255, 102, 0.28) !important;
   display: block !important;
+  transition: transform 0.2s ease, filter 0.2s ease !important;
+}
+
+.settings-profile-avatar-wrap:hover .settings-profile-avatar {
+  filter: brightness(0.88);
+  transform: scale(1.02);
+}
+
+.settings-avatar-edit-overlay {
+  position: absolute !important;
+  top: 0 !important;
+  right: 0 !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #00ff66, #00d4ff) !important;
+  color: #041019 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 2px solid #0f172a !important;
+  cursor: pointer !important;
+  font-size: 11px !important;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease !important;
+  z-index: 5 !important;
+  box-shadow: 0 2px 8px rgba(0, 255, 102, 0.45) !important;
+  padding: 0 !important;
+}
+
+.settings-avatar-edit-overlay:hover,
+.settings-avatar-edit-overlay:active {
+  transform: scale(1.18) !important;
+  box-shadow: 0 0 14px rgba(0, 255, 102, 0.7) !important;
+}
+
+.settings-profile-edit-name-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #00f2fe !important;
+  border-radius: 8px !important;
+  width: 28px !important;
+  height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  transition: all 0.2s ease !important;
+  margin-left: 4px !important;
+  padding: 0 !important;
+}
+
+.settings-profile-edit-name-btn:hover {
+  background: rgba(0, 242, 254, 0.2) !important;
+  border-color: rgba(0, 242, 254, 0.4) !important;
+  color: #fff !important;
+  transform: scale(1.08) !important;
+}
+
+.settings-profile-actions-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
+  padding-top: 4px !important;
+}
+
+.settings-profile-btn {
+  flex: 1 1 auto !important;
+  min-width: 100px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 10px !important;
+  color: #e2e8f0 !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  padding: 0 12px !important;
+  text-decoration: none !important;
+}
+
+.settings-profile-btn:hover {
+  background: rgba(0, 255, 102, 0.12) !important;
+  border-color: rgba(0, 255, 102, 0.35) !important;
+  color: #00ff66 !important;
+  transform: translateY(-1px) !important;
+}
+
+.settings-profile-btn.studio-btn:hover {
+  background: rgba(0, 212, 255, 0.12) !important;
+  border-color: rgba(0, 212, 255, 0.35) !important;
+  color: #00d4ff !important;
+}
+
+.settings-avatar-upload-status {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  background: rgba(0, 255, 102, 0.1) !important;
+  border: 1px solid rgba(0, 255, 102, 0.25) !important;
+  color: #00ff66 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  animation: fadeIn 0.2s ease-out !important;
+}
+
+.settings-inline-edit-box {
+  background: rgba(10, 16, 29, 0.94) !important;
+  border: 1px solid rgba(0, 242, 254, 0.28) !important;
+  border-radius: 12px !important;
+  padding: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+  animation: slideDownFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settings-inline-edit-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}
+
+.settings-inline-edit-header .edit-title {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #00f2fe !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.settings-inline-close-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #64748b !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  padding: 4px !important;
+  transition: color 0.15s ease !important;
+}
+
+.settings-inline-close-btn:hover {
+  color: #fff !important;
+}
+
+.settings-input-group {
+  display: flex !important;
+  align-items: center !important;
+  background: rgba(2, 6, 23, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 10px !important;
+  padding: 0 12px !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.settings-input-group:focus-within {
+  border-color: #00ff66 !important;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.25) !important;
+}
+
+.settings-input-prefix {
+  color: #64748b !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  margin-right: 6px !important;
+}
+
+.settings-username-input {
+  flex: 1 1 auto !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  height: 40px !important;
+  padding: 0 !important;
+}
+
+.settings-input-hint {
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+}
+
+.settings-inline-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+}
+
+.settings-btn-cancel {
+  height: 34px !important;
+  padding: 0 14px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px !important;
+  color: #94a3b8 !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.settings-btn-cancel:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  color: #fff !important;
+}
+
+.settings-btn-save {
+  height: 34px !important;
+  padding: 0 16px !important;
+  background: linear-gradient(135deg, #00ff66, #00d4ff) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  color: #041019 !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 10px rgba(0, 255, 102, 0.3) !important;
+}
+
+.settings-btn-save:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 14px rgba(0, 255, 102, 0.5) !important;
+}
+
+.settings-btn-save:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
 }
 
 .settings-profile-info {
