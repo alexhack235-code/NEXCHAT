@@ -3057,7 +3057,8 @@ body.reels-body {
 
   .reels-header {
     padding: 0 10px;
-    height: 52px;
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(52px + env(safe-area-inset-top, 0px));
   }
 
   .reels-header-back-btn span,
@@ -7183,6 +7184,8 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
   }
   .reels-header {
     padding: 0 10px !important;
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    height: calc(52px + env(safe-area-inset-top, 0px)) !important;
     max-width: 100vw !important;
     box-sizing: border-box !important;
     overflow-x: hidden !important;

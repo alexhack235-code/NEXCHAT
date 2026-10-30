@@ -4,7 +4,7 @@
  * with graceful fallback to Vercel Blob and local Data URLs.
  */
 import { db } from '../../firebase-config.js';
-import { doc, setDoc } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { uploadImageToCloudinary } from './cloudinary.js';
 import { storageApiClient } from './storage-api-client.js';
 import { getFirebaseAuthorizationHeaders } from './firebase-auth-header.js';
@@ -76,11 +76,50 @@ export async function uploadProfilePicture(file, uid) {
     console.warn('[PROFILE] Serverless endpoint offline, using local preview fallback:', apiErr.message);
   }
 
-  // 3. Fallback: Base64 Data URL so user is never blocked
+  // 3. Resilient Fallback: Downscaled Canvas Base64 (<35KB, safely below Firestore 1MB document ceiling)
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result);
-    reader.onerror = (e) => reject(new Error('Failed to read image file'));
+    reader.onload = (e) => {
+      try {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const canvas = document.createElement('canvas');
+            const maxDim = 256;
+            let width = img.width || maxDim;
+            let height = img.height || maxDim;
+            if (width > height) {
+              if (width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              }
+            } else {
+              if (height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              }
+            }
+            canvas.width = Math.max(1, width);
+            canvas.height = Math.max(1, height);
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+              resolve(compressedDataUrl);
+              return;
+            }
+            resolve(e.target.result);
+          } catch (canvasErr) {
+            resolve(e.target.result);
+          }
+        };
+        img.onerror = () => resolve(e.target.result);
+        img.src = e.target.result;
+      } catch (_) {
+        resolve(e.target.result);
+      }
+    };
+    reader.onerror = () => reject(new Error('Failed to read image file'));
     reader.readAsDataURL(file);
   });
 }
@@ -100,7 +139,7 @@ export async function saveUserProfile(uid, photoURL, additionalData = {}) {
     avatar: photoURL,
     profilePic: photoURL,
     profilePicUrl: photoURL,
-    updatedAt: new Date(),
+    updatedAt: serverTimestamp(),
     ...additionalData,
   };
 

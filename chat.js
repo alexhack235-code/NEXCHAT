@@ -2834,13 +2834,33 @@ function showChatListView() {
   hideTypingIndicator();
   clearTypingStatus();
   if (typingStatusUnsubscribe) {
-    typingStatusUnsubscribe();
+    try { typingStatusUnsubscribe(); } catch (_) {}
     typingStatusUnsubscribe = null;
   }
   if (userStatusUnsubscribe) {
-    userStatusUnsubscribe();
+    try { userStatusUnsubscribe(); } catch (_) {}
     userStatusUnsubscribe = null;
   }
+  if (messageListener) {
+    try { messageListener(); } catch (_) {}
+    messageListener = null;
+  }
+  if (messageListener2) {
+    try { messageListener2(); } catch (_) {}
+    messageListener2 = null;
+  }
+  if (supabaseRoomUnsubscribe) {
+    try { supabaseRoomUnsubscribe(); } catch (_) {}
+    supabaseRoomUnsubscribe = null;
+  }
+  if (typeof unsubscribeChatPresence === 'function') {
+    try { unsubscribeChatPresence(); } catch (_) {}
+  }
+  if (GroupChat && typeof GroupChat.close === 'function') {
+    try { GroupChat.close(); } catch (_) {}
+  }
+  currentChatUser = null;
+  currentChatType = 'direct';
 
   if (window.loadUserBackground) window.loadUserBackground();
 }
