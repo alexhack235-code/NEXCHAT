@@ -398,6 +398,43 @@ function toggleZenMode(forceState) {
 if (zenBtn) zenBtn.addEventListener('click', () => toggleZenMode());
 if (exitZenPill) exitZenPill.addEventListener('click', () => toggleZenMode(false));
 
+// CamShot Studio Tools Popover Controller
+const studioHubBtn = document.getElementById('reelsStudioHubBtn');
+const studioHubMenu = document.getElementById('reelsStudioHubMenu');
+const closeStudioHubBtn = document.getElementById('closeStudioHubBtn');
+
+if (studioHubBtn && studioHubMenu) {
+  studioHubBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isVisible = studioHubMenu.style.display !== 'none';
+    studioHubMenu.style.display = isVisible ? 'none' : 'block';
+    if (!isVisible && navigator.vibrate) navigator.vibrate(15);
+  });
+
+  closeStudioHubBtn?.addEventListener('click', () => {
+    studioHubMenu.style.display = 'none';
+  });
+
+  // Auto-dismiss menu when any tool inside is clicked
+  studioHubMenu.querySelectorAll('.studio-tool-item').forEach((item) => {
+    item.addEventListener('click', () => {
+      studioHubMenu.style.display = 'none';
+    });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#reelsStudioHubMenu') && !e.target.closest('#reelsStudioHubBtn')) {
+      studioHubMenu.style.display = 'none';
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      studioHubMenu.style.display = 'none';
+    }
+  });
+}
+
 // Sound Toggle Handler
 if (globalSoundToggle) {
   // Sync initial sound icon with setting

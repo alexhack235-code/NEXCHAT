@@ -53,36 +53,80 @@
       <button id="zenModeToggleBtn" class="reels-header-icon-btn" title="Clean Screen Mode (Hide UI Overlays)">
         <i class="fa-regular fa-eye-slash"></i>
       </button>
-      <button id="pipToggleBtn" class="reels-header-icon-btn" title="Picture-in-Picture Mini-Player">
-        <i class="fa-solid fa-clone"></i>
-      </button>
-      <button id="theaterModeToggleBtn" class="reels-header-icon-btn" title="Toggle Widescreen Theater Mode (Shortcut: T)">
-        <i class="fa-solid fa-arrows-left-right-to-line"></i>
-      </button>
-      <button id="toggleFilterBtn" class="reels-header-icon-btn" title="Cinematic Filters">
-        <i class="fa-solid fa-wand-magic-sparkles"></i>
-      </button>
       <button id="globalSoundToggle" class="reels-header-icon-btn" title="Toggle Sound">
         <i class="fa-solid fa-volume-xmark"></i>
       </button>
-      <button id="openBeatSyncBtn" class="reels-header-icon-btn" title="AI Auto-Beat Sync &amp; Soundwave Trimmer" onclick="if(window.NexReelsQuantum) window.NexReelsQuantum.beatSync.openBeatSyncModal();">
-        <i class="fa-solid fa-wave-square" style="color: #00ff88;"></i>
-      </button>
-      <button id="openVoiceoverStudioBtn" class="reels-header-icon-btn" title="Multi-Track Audio &amp; Voiceover DSP Mixer" onclick="if(window.NexReelsQuantum) window.NexReelsQuantum.voiceover.openStudio();">
-        <i class="fa-solid fa-sliders" style="color: #c084fc;"></i>
-      </button>
-      <button id="openGreenScreenBtn" class="reels-header-icon-btn" title="AI Green Screen &amp; Reaction Studio" onclick="window.NexReelsGreenScreen?.openStudio();">
-        <i class="fa-solid fa-camera-retro" style="color: #00f3ff;"></i>
-      </button>
-      <button id="openPredictionPoolBtn" class="reels-header-icon-btn" title="Interactive Prediction Pool &amp; Token Wager" onclick="window.NexReelsPredictionEngine?.renderWidget('reel_default_01', 'reelPredictionOverlayContainer');">
-        <i class="fa-solid fa-chart-line" style="color: #ffd700;"></i>
-      </button>
-      <button id="reelsExtHubBtn" class="reels-header-icon-btn extensions-trigger" title="NEX Ecosystem Extensions (Vercel Hub)">
-        <i class="fa-solid fa-cubes-stacked"></i>
-      </button>
-      <button id="openReelsSettingsBtn" class="reels-header-icon-btn" title="Settings & Preferences">
-        <i class="fa-solid fa-gear"></i>
-      </button>
+
+      <!-- CamShot Studio Power Tools Popover Trigger & Dropdown Menu -->
+      <div class="reels-studio-hub-container">
+        <button type="button" id="reelsStudioHubBtn" class="reels-header-icon-btn reels-studio-hub-btn" title="CamShot Creator Studio & Power Tools">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: #00f2ff;"></i>
+          <span class="studio-hub-badge">STUDIO</span>
+        </button>
+
+        <div id="reelsStudioHubMenu" class="reels-studio-hub-menu" style="display: none;">
+          <div class="studio-menu-header">
+            <span class="studio-menu-title"><i class="fa-solid fa-bolt" style="color: #00f2ff;"></i> CAMSHOT STUDIO TOOLS</span>
+            <button type="button" id="closeStudioHubBtn" class="studio-menu-close" title="Close"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          <div class="studio-tools-grid">
+            <button type="button" id="openBeatSyncBtn" class="studio-tool-item" title="AI Auto-Beat Sync & Soundwave Trimmer" onclick="if(window.NexReelsQuantum) window.NexReelsQuantum.beatSync.openBeatSyncModal();">
+              <div class="studio-tool-icon" style="background: rgba(0, 255, 136, 0.15); color: #00ff88; border-color: rgba(0, 255, 136, 0.35);"><i class="fa-solid fa-wave-square"></i></div>
+              <span class="studio-tool-name">Beat Sync</span>
+              <span class="studio-tool-desc">AI Soundwave</span>
+            </button>
+
+            <button type="button" id="openVoiceoverStudioBtn" class="studio-tool-item" title="Multi-Track Audio & Voiceover DSP Mixer" onclick="if(window.NexReelsQuantum) window.NexReelsQuantum.voiceover.openStudio();">
+              <div class="studio-tool-icon" style="background: rgba(192, 132, 252, 0.15); color: #c084fc; border-color: rgba(192, 132, 252, 0.35);"><i class="fa-solid fa-sliders"></i></div>
+              <span class="studio-tool-name">Voiceover</span>
+              <span class="studio-tool-desc">DSP Mixer</span>
+            </button>
+
+            <button type="button" id="openGreenScreenBtn" class="studio-tool-item" title="AI Green Screen & Reaction Studio" onclick="window.NexReelsGreenScreen?.openStudio();">
+              <div class="studio-tool-icon" style="background: rgba(0, 243, 255, 0.15); color: #00f3ff; border-color: rgba(0, 243, 255, 0.35);"><i class="fa-solid fa-camera-retro"></i></div>
+              <span class="studio-tool-name">Green Screen</span>
+              <span class="studio-tool-desc">AI Reaction</span>
+            </button>
+
+            <button type="button" id="openPredictionPoolBtn" class="studio-tool-item" title="Interactive Prediction Pool & Token Wager" onclick="window.NexReelsPredictionEngine?.renderWidget('reel_default_01', 'reelPredictionOverlayContainer');">
+              <div class="studio-tool-icon" style="background: rgba(255, 215, 0, 0.15); color: #ffd700; border-color: rgba(255, 215, 0, 0.35);"><i class="fa-solid fa-chart-line"></i></div>
+              <span class="studio-tool-name">Prediction</span>
+              <span class="studio-tool-desc">Pool Wager</span>
+            </button>
+
+            <button type="button" id="toggleFilterBtn" class="studio-tool-item" title="Cinematic Filters">
+              <div class="studio-tool-icon" style="background: rgba(232, 184, 75, 0.15); color: #e8b84b; border-color: rgba(232, 184, 75, 0.35);"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+              <span class="studio-tool-name">Filters</span>
+              <span class="studio-tool-desc">Color Grades</span>
+            </button>
+
+            <button type="button" id="pipToggleBtn" class="studio-tool-item" title="Picture-in-Picture Mini-Player">
+              <div class="studio-tool-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.35);"><i class="fa-solid fa-clone"></i></div>
+              <span class="studio-tool-name">Mini Player</span>
+              <span class="studio-tool-desc">Picture-in-Picture</span>
+            </button>
+
+            <button type="button" id="theaterModeToggleBtn" class="studio-tool-item" title="Toggle Widescreen Theater Mode (Shortcut: T)">
+              <div class="studio-tool-icon" style="background: rgba(168, 85, 247, 0.15); color: #a855f7; border-color: rgba(168, 85, 247, 0.35);"><i class="fa-solid fa-arrows-left-right-to-line"></i></div>
+              <span class="studio-tool-name">Theater</span>
+              <span class="studio-tool-desc">Widescreen</span>
+            </button>
+
+            <button type="button" id="reelsExtHubBtn" class="studio-tool-item extensions-trigger" title="NEX Ecosystem Extensions (Vercel Hub)">
+              <div class="studio-tool-icon" style="background: rgba(236, 72, 153, 0.15); color: #ec4899; border-color: rgba(236, 72, 153, 0.35);"><i class="fa-solid fa-cubes-stacked"></i></div>
+              <span class="studio-tool-name">Ecosystem</span>
+              <span class="studio-tool-desc">Extensions Hub</span>
+            </button>
+
+            <button type="button" id="openReelsSettingsBtn" class="studio-tool-item" title="Settings & Preferences">
+              <div class="studio-tool-icon" style="background: rgba(148, 163, 184, 0.15); color: #94a3b8; border-color: rgba(148, 163, 184, 0.35);"><i class="fa-solid fa-gear"></i></div>
+              <span class="studio-tool-name">Settings</span>
+              <span class="studio-tool-desc">Preferences</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <button type="button" id="camshotGoLiveBtn" class="reels-create-main-btn" style="background: linear-gradient(135deg, #ff3366, #ff0055); box-shadow: 0 4px 18px rgba(255, 51, 102, 0.4);" title="Start Live Broadcast Stream" onclick="if(window.NextGenSuite) window.NextGenSuite.liveBroadcast.openModal();">
         <i class="fa-solid fa-tower-broadcast"></i>
         <span>Go Live</span>
