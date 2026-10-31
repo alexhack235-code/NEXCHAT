@@ -192,12 +192,18 @@
   window.CompactPrefixTrieEngine = CompactPrefixTrieEngine;
   window.NexPrefixTrie = engineInstance;
 
-  // Auto-seed when document is ready
+  // Lazy-seed on idle or first composer focus (0ms startup overhead)
+  const scheduleSeed = () => {
+    if (typeof window !== 'undefined' && window.requestIdleCallback) {
+      window.requestIdleCallback(() => engineInstance.seedFromGlobalDictionaries(), { timeout: 10000 });
+    } else {
+      setTimeout(() => engineInstance.seedFromGlobalDictionaries(), 8000);
+    }
+  };
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-      setTimeout(() => engineInstance.seedFromGlobalDictionaries(), 350);
-    });
+    document.addEventListener('DOMContentLoaded', scheduleSeed);
   } else {
-    setTimeout(() => engineInstance.seedFromGlobalDictionaries(), 350);
+    scheduleSeed();
   }
 })(typeof window !== 'undefined' ? window : globalThis);

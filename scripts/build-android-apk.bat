@@ -5,7 +5,14 @@ echo ===================================================
 echo [NEXCHAT] Android APK Build Automation
 echo ===================================================
 
-echo [1/4] Syncing web assets to dist directory...
+echo [1/4] Compiling optimized production bundles via Vite...
+call npm run build
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Vite build failed.
+    exit /b %ERRORLEVEL%
+)
+
+echo [1.2/4] Syncing supplemental assets to dist directory...
 python scripts/prepare_dist.py
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Failed to prepare dist directory.

@@ -12166,3 +12166,46 @@ body.chat-size-extra-large .message-bubble {
   z-index: 10 !important;
   pointer-events: auto !important;
 }
+/* ==========================================================================
+   LOW-END DEVICE & MOBILE GPU ACCELERATION SUITE
+   Replaces expensive multi-pass Gaussian backdrop-filter with zero-lag
+   obsidian glassmorphism, eliminating touch and scroll latency.
+   ========================================================================== */
+@media (max-width: 900px), (hover: none) {
+  * {
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  .top-header,
+  .chat-detail-header,
+  .message-input-area,
+  .modal,
+  .settings-modal,
+  .bottom-drawer .drawer-card,
+  .search-overlay,
+  .info-panel,
+  .chat-options-dropdown,
+  .chat-item,
+  .chat-list-item,
+  .stegano-container,
+  .settings-card,
+  .stealth-enclave-card,
+  .cyber-hub-modal,
+  .message-hover-actions,
+  .chat-scroll-down-btn,
+  .attachment-popup-hub {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background-color: rgba(10, 15, 26, 0.96) !important;
+  }
+
+  /* GPU Compositing layer promotion */
+  .chat-list-view,
+  .chat-detail-view,
+  .messages-area,
+  .settings-pane-container {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform, scroll-position;
+  }
+}

@@ -19976,7 +19976,35 @@ async function loadContacts() {
   if (!contactList || !myUID) return;
 
   let chronexLi = null;
-  contactList.innerHTML = '<li style="text-align:center; padding:10px;">Loading chats...</li>';
+  // Zero-latency instant hydration: render cached contacts immediately (0ms)
+  if (contactList.children.length === 0) {
+    try {
+      const cached = JSON.parse(localStorage.getItem('nex_cached_contacts_' + myUID) || '[]');
+      if (Array.isArray(cached) && cached.length > 0) {
+        contactList.innerHTML = '';
+        cached.forEach(data => {
+          if (data && data.uid && data.name) {
+            const cachedLi = document.createElement("li");
+            cachedLi.className = "chat-list-item chat-item";
+            cachedLi.setAttribute('data-chat-id', data.uid);
+            cachedLi.innerHTML = `
+              <div class="chat-avatar-container" style="position: relative;">
+                <img src="${data.pic || 'logo.jpg'}" class="chat-avatar" onerror="this.src='logo.jpg';">
+              </div>
+              <div class="chat-item-content">
+                <div class="chat-item-header">
+                  <span class="chat-name">${escape(data.name)}</span>
+                </div>
+                <p class="chat-preview">${data.lastMessageSnippet || 'Open chat...'}</p>
+              </div>
+            `;
+            cachedLi.addEventListener("click", () => openChat(data.uid, data.name, data.pic, "direct"));
+            contactList.appendChild(cachedLi);
+          }
+        });
+      }
+    } catch (_) {}
+  }
   try {
     if (typeof contactsListener === 'function') {
       try { contactsListener(); } catch (e) {  }
@@ -20098,7 +20126,7 @@ async function loadContacts() {
         .sort((a, b) => b[1] - a[1])
         .map(e => e[0])
         .filter(uid => uid !== 'chronex-ai')
-        .slice(0, 40);
+        .slice(0, 10);
 
       // Append any other saved contacts not already in recent chats
       const otherContacts = [...rawContacts].reverse().filter(uid => 
@@ -20237,6 +20265,9 @@ async function loadContacts() {
     contactList.innerHTML = "";
     contactList.appendChild(chronexLi);
     window.loadedContactData = contactDataList;
+    try {
+      localStorage.setItem('nex_cached_contacts_' + myUID, JSON.stringify(contactDataList.slice(0, 10)));
+    } catch (_) {}
 
     contactDataList.forEach(data => {
       const { uid, name, pic, latestMsg, latestTime, unreadCount, isVerified, verificationBadge } = data;

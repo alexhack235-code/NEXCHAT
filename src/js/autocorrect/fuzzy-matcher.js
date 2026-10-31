@@ -97,9 +97,16 @@
       this.cache = new Map();
       this.maxCacheSize = 1000;
 
-      // Group words by length
+      // Lazy index placeholders (0ms startup latency)
+      this.wordsByLength = null;
+      this.soundexMap = null;
+      this._isIndexed = false;
+    }
+
+    _ensureIndexed() {
+      if (this._isIndexed) return;
+      this._isIndexed = true;
       this.wordsByLength = Object.create(null);
-      // Group top 5,000 words by Soundex phonetic code for instant phonetic lookup
       this.soundexMap = Object.create(null);
 
       const maxSoundexWords = Math.min(6000, this.wordsList.length);
