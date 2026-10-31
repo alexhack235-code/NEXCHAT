@@ -10,8 +10,12 @@ export const PERMISSIONS = {
   PIN_MESSAGE: 'PIN_MESSAGE',
   DELETE_ANY_MESSAGE: 'DELETE_ANY_MESSAGE',
   MUTE_MEMBER: 'MUTE_MEMBER',
+  MUTE_MEMBERS: 'MUTE_MEMBER',
   SET_SLOW_MODE: 'SET_SLOW_MODE',
   SET_DISAPPEARING: 'SET_DISAPPEARING',
+  MANAGE_SETTINGS: 'EDIT_GROUP_INFO',
+  MANAGE_MEMBERS: 'ADD_MEMBER',
+  MANAGE_ROLES: 'PROMOTE_MODERATOR',
   PROMOTE_MODERATOR: 'PROMOTE_MODERATOR',
   PROMOTE_ADMIN: 'PROMOTE_ADMIN',
   DELETE_GROUP: 'DELETE_GROUP',
@@ -67,6 +71,15 @@ export const ROLE_PERMISSIONS = {
  */
 export function getUserRole(groupData, uid) {
   if (!groupData || !uid) return ROLES.MEMBER;
+
+  if (typeof groupData === 'string') {
+    const storeState = (typeof window !== 'undefined' && window.groupStore?.getState?.()) || null;
+    if (storeState?.currentGroup && (storeState.currentGroup.id === groupData || storeState.currentGroupId === groupData)) {
+      groupData = storeState.currentGroup;
+    } else {
+      return ROLES.MEMBER;
+    }
+  }
 
   // 1. Check Creator / Owner across all schema variants
   if (
@@ -242,7 +255,15 @@ export function getRoleBadgeColor(role) {
  * @returns {{allowed: boolean, remainingSeconds: number}}
  */
 export function checkSlowMode(groupData, uid, lastMessageTime) {
-  if (!groupData || !groupData.slowModeSeconds || groupData.slowModeSeconds <= 0) {
+  if (!groupData) {
+    return { allowed: true, remainingSeconds: 0 };
+  }
+
+  const cooldownSeconds = Number(groupData.slowModeSeconds) ||
+    (groupData.slowMode && groupData.slowMode.enabled ? Number(groupData.slowMode.cooldownSeconds) : 0) ||
+    (groupData.settings?.slowMode?.enabled ? Number(groupData.settings?.slowMode?.cooldownSeconds) : 0) || 0;
+
+  if (cooldownSeconds <= 0) {
     return { allowed: true, remainingSeconds: 0 };
   }
 
@@ -258,7 +279,7 @@ export function checkSlowMode(groupData, uid, lastMessageTime) {
 
   const now = Date.now();
   const timeSinceLastMsg = now - lastMessageTime;
-  const cooldownMs = groupData.slowModeSeconds * 1000;
+  const cooldownMs = cooldownSeconds * 1000;
 
   if (timeSinceLastMsg >= cooldownMs) {
     return { allowed: true, remainingSeconds: 0 };
@@ -266,4 +287,52 @@ export function checkSlowMode(groupData, uid, lastMessageTime) {
 
   const remainingSeconds = Math.ceil((cooldownMs - timeSinceLastMsg) / 1000);
   return { allowed: false, remainingSeconds };
+}
+
+/**
+ * Checks if user is permitted to send a message based on group settings
+ * @param {Object} groupData
+ * @param {string} uid
+ * @param {boolean} [isVerified=false]
+ * @returns {boolean}
+ */
+export function canSendMessage(groupData, uid, isVerified = false) {
+  if (!groupData || !uid) return false;
+  const role = getUserRole(groupData, uid);
+  if (role === ROLES.ADMIN || role === ROLES.CREATOR || role === ROLES.MODERATOR) return true;
+
+  const whoCanSend = groupData.whoCanSend || groupData.settings?.whoCanSend || 'all';
+  if (whoCanSend === 'admins') return false;
+  if (whoCanSend === 'verified' && !isVerified) return false;
+  return true;
+}
+
+/**
+ * Checks if user is permitted to add members based on group settings
+ * @param {Object} groupData
+ * @param {string} uid
+ * @returns {boolean}
+ */
+export function canAddMembers(groupData, uid) {
+  if (!groupData || !uid) return false;
+  const role = getUserRole(groupData, uid);
+  if (role === ROLES.ADMIN || role === ROLES.CREATOR || role === ROLES.MODERATOR) return true;
+
+  const whoCanAdd = groupData.whoCanAdd || groupData.settings?.whoCanAdd || 'all';
+  return whoCanAdd !== 'admins';
+}
+
+/**
+ * Checks if user is permitted to edit group info
+ * @param {Object} groupData
+ * @param {string} uid
+ * @returns {boolean}
+ */
+export function canEditGroupInfo(groupData, uid) {
+  if (!groupData || !uid) return false;
+  const role = getUserRole(groupData, uid);
+  if (role === ROLES.ADMIN || role === ROLES.CREATOR || role === ROLES.MODERATOR) return true;
+
+  const whoCanEdit = groupData.whoCanEdit || groupData.settings?.whoCanEdit || 'admins';
+  return whoCanEdit !== 'admins';
 }

@@ -1,3 +1,4 @@
+import { marketGeoCdn, SUPPORTED_COUNTRIES } from './src/js/market-geo-cdn.js';
 import { auth, db, storage } from './firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc, updateDoc, getDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
@@ -102,6 +103,19 @@ onAuthStateChanged(auth, async (user) => {
 // DOM EVENT LISTENERS
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Initialize Regional Geo-CDN & Privacy Partition
+  try {
+    marketGeoCdn.renderRegionSelectorBar('geoRegionSelectorMount');
+    marketGeoCdn.onRegionChange(() => {
+      renderFilteredAds();
+      updateFormCurrency();
+    });
+    document.getElementById('adCountry')?.addEventListener('change', updateFormCurrency);
+    updateFormCurrency();
+  } catch (err) {
+    console.warn('[GeoCDN] Init warning:', err);
+  }
+
   // Navigation Buttons
   document.getElementById('backBtn')?.addEventListener('click', () => {
     window.location.href = 'chat.html';
@@ -305,6 +319,17 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================
 // VIEW SWITCHING
 // ============================================================
+
+function updateFormCurrency() {
+  const adCountryEl = document.getElementById('adCountry');
+  const selectedCode = adCountryEl ? adCountryEl.value : marketGeoCdn.getActiveCountry();
+  const info = SUPPORTED_COUNTRIES[selectedCode] || marketGeoCdn.getActiveCountryInfo();
+  const labelEl = document.getElementById('adPriceCurrencyLabel');
+  const prefixEl = document.getElementById('adPricePrefix');
+  if (labelEl) labelEl.textContent = `${info.currency} ${info.symbol}`;
+  if (prefixEl) prefixEl.textContent = info.symbol;
+}
+
 function showView(view) {
   currentView = view;
   const sections = {
@@ -409,7 +434,7 @@ async function loadAllAds() {
 // FILTER AND RENDER ADS
 // ============================================================
 function renderFilteredAds() {
-  let filtered = allAds;
+  let filtered = allAds.filter(ad => marketGeoCdn.isAdVisible(ad));
 
   if (selectedCategory) {
     filtered = filtered.filter(ad => (ad.productCategory || '').toLowerCase() === selectedCategory.toLowerCase());
@@ -461,11 +486,15 @@ function displayAds(ads) {
           ${mediaHtml}
           <div class="ad-card-category-badge"><i class="fa-solid ${catInfo.icon || 'fa-box'}"></i> ${catInfo.label}</div>
           <div class="ad-card-expiry-badge"><i class="fa-regular fa-clock"></i> ${hours}h</div>
+          <div class="ad-card-geo-badge">
+            <span class="country-pill-tag"><i class="fa-solid fa-location-dot"></i> ${escapeHtml((ad.country || 'CA').toUpperCase())}</span>
+            ${(ad.shippingScope === 'global' || (ad.country || '').toUpperCase() === 'GLOBAL') ? '<span class="shipping-pill-tag"><i class="fa-solid fa-plane"></i> Global</span>' : ''}
+          </div>
         </div>
         <div class="ad-card-content">
           <div class="ad-card-title">${escapeHtml(ad.productName)}</div>
           <div class="ad-card-price-row">
-            <div class="ad-card-price">$${parseFloat(ad.productPrice || 0).toFixed(2)}</div>
+            <div class="ad-card-price">${escapeHtml(marketGeoCdn.formatPrice(ad.productPrice, ad.country))}</div>
             <div class="ad-card-seller" title="Seller: ${escapeHtml(ad.sellerUsername)}">
               <i class="fa-solid fa-user-check"></i> ${escapeHtml(ad.sellerUsername || 'Seller')}
             </div>
@@ -730,6 +759,10 @@ async function handleAdSubmit(e) {
 
     const expiresAt = new Date(Date.now() + plan.hours * 60 * 60 * 1000);
 
+    const adCountry = document.getElementById('adCountry')?.value || marketGeoCdn.getActiveCountry() || 'CA';
+    const adShippingScope = document.getElementById('adShippingScope')?.value || 'local';
+    const countryInfo = SUPPORTED_COUNTRIES[adCountry] || marketGeoCdn.getActiveCountryInfo();
+
     const adData = {
       title: productName,
       productName: productName,
@@ -737,6 +770,10 @@ async function handleAdSubmit(e) {
       productDescription: productDescription,
       productPrice: productPrice,
       productCategory: productCategory,
+      country: adCountry,
+      shippingScope: adShippingScope,
+      currency: countryInfo.currency || 'USD',
+      currencySymbol: countryInfo.symbol || '$',
       imageURL: url,
       mediaType: imageFile.type.startsWith('video/') ? 'video' : 'image',
       sellerUID: userUID,

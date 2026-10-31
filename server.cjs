@@ -36,15 +36,86 @@ const MIME_TYPES = {
   '.wasm': 'application/wasm'
 };
 
-const server = http.createServer((req, res) => {
-  // CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', '*');
+// ============================================================================
+// FORTRESS ENTERPRISE SECURITY SHIELD & MIRAGE PROTOCOL (server.cjs)
+// ============================================================================
+const ALLOWED_ORIGINS = new Set([
+  'https://nexchat-drab.vercel.app',
+  'https://ai-security-scanner-delta.vercel.app',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:8080'
+]);
+
+function recursiveDecode(str, maxPasses = 5) {
+  if (typeof str !== 'string') return str;
+  let curr = str;
+  for (let i = 0; i < maxPasses; i++) {
+    let next = curr.replace(/%([0-9a-fA-F]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+    if (next === curr) break;
+    curr = next;
+  }
+  return curr;
+}
+
+const SQLI_REGEX = /(\b(union(\s+all|\s+distinct)?\s+select|or\s+1\s*=\s*1|order\s+by\s+\d+|admin'--)\b|--\s*$)/i;
+
+const server = http.createServer(async (req, res) => {
+  // 1. Strict Security Headers
+  res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' https://cdnjs.cloudflare.com; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://ai-security-scanner-delta.vercel.app;"
+  );
+
+  // 2. Strict CORS Locking
+  const origin = req.headers.origin;
+  if (origin && (ALLOWED_ORIGINS.has(origin) || origin.startsWith('http://localhost:'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Vault-Key, X-Defender-Origin-Secret, x-internal-auth');
+  }
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204);
     res.end();
+    return;
+  }
+
+  // 3. Mirage Counter-Deception Honeypot Evaluator
+  const checkUrl = req.url.toLowerCase();
+  if (checkUrl.startsWith('/.env') || checkUrl.startsWith('/.ssh') || checkUrl.startsWith('/wp-login')) {
+    try {
+      if (typeof fetch === 'function') {
+        const mirageCheck = await fetch('https://ai-security-scanner-delta.vercel.app/api/mirage/evaluate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path: req.url, headers: req.headers }),
+          signal: AbortSignal.timeout(1200)
+        });
+        const data = await mirageCheck.json();
+        if (data && data.isAware) {
+          res.writeHead(404, { 'Server': 'nginx/1.24.0', 'Content-Type': 'text/html' });
+          res.end('<html><head><title>404 Not Found</title></head><body><center><h1>404 Not Found</h1></center><hr><center>nginx/1.24.0</center></body></html>');
+          return;
+        }
+      }
+    } catch (_) {}
+    res.writeHead(404, { 'Content-Type': 'text/plain' });
+    res.end('Not Found');
+    return;
+  }
+
+  // 4. SQLi & Injection Guard on URL
+  const decodedUrl = recursiveDecode(req.url).normalize('NFKC');
+  if (SQLI_REGEX.test(decodedUrl)) {
+    res.writeHead(403, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ error: 'MALICIOUS_INJECTION_DETECTED', message: 'Request blocked by application security guard.' }));
     return;
   }
 
@@ -342,6 +413,14 @@ const server = http.createServer((req, res) => {
     }
   });
 });
+
+try {
+  const { Server: SocketServer } = require('socket.io');
+  const io = new SocketServer(server, { cors: { origin: '*' } });
+  const { registerLiveVcSocketHandlers } = require('./server/live-vc-socket.js');
+  registerLiveVcSocketHandlers(io);
+  console.log('[SOCKET] ChronEX Live VC Socket.io relay bound to preview server.');
+} catch (_) {}
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`============================================================`);

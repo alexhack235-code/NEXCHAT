@@ -51,6 +51,9 @@ export class VirtualScroller {
     /** @type {Map<number, number>} Measured heights by index */
     this._measuredHeights = new Map();
 
+    /** @type {Map<string, number>} Measured heights by item ID */
+    this._measuredHeightsById = new Map();
+
     /** @type {Map<string, HTMLElement>} DOM node pool keyed by item ID */
     this._nodePool = new Map();
 
@@ -174,6 +177,10 @@ export class VirtualScroller {
    * @returns {number}
    */
   _getItemHeight(index) {
+    const item = this._items[index];
+    if (item?.id && this._measuredHeightsById.has(item.id)) {
+      return this._measuredHeightsById.get(item.id);
+    }
     return this._measuredHeights.get(index) || this._estimatedHeight;
   }
 
@@ -262,10 +269,17 @@ export class VirtualScroller {
         node.classList.add('nex-vs-item');
         node.dataset.vsIndex = String(i);
         node.dataset.vsId = itemId;
+        node._lastRenderedItem = item;
         this._nodePool.set(itemId, node);
         
         // Render item content
         if (this._renderItem) {
+          this._renderItem(item, node, i);
+        }
+      } else {
+        node.dataset.vsIndex = String(i);
+        if (node._lastRenderedItem !== item && this._renderItem) {
+          node._lastRenderedItem = item;
           this._renderItem(item, node, i);
         }
       }
@@ -297,9 +311,14 @@ export class VirtualScroller {
         const node = this._nodePool.get(itemId);
         if (node) {
           const actualHeight = node.getBoundingClientRect().height;
-          if (actualHeight > 0 && actualHeight !== this._measuredHeights.get(i)) {
-            this._measuredHeights.set(i, actualHeight);
-            heightChanged = true;
+          if (actualHeight > 0) {
+            if (item.id) {
+              this._measuredHeightsById.set(item.id, actualHeight);
+            }
+            if (actualHeight !== this._measuredHeights.get(i)) {
+              this._measuredHeights.set(i, actualHeight);
+              heightChanged = true;
+            }
           }
         }
       }
@@ -340,8 +359,28 @@ export class VirtualScroller {
   setItems(items) {
     this._items = items || [];
     this._measuredHeights.clear();
-    this._nodePool.clear();
-    this._rendered.innerHTML = '';
+
+    // Re-index from _measuredHeightsById
+    for (let i = 0; i < this._items.length; i++) {
+      const id = this._items[i]?.id;
+      if (id && this._measuredHeightsById.has(id)) {
+        this._measuredHeights.set(i, this._measuredHeightsById.get(id));
+      }
+    }
+
+    // Clean up node pool for removed items, preserving reusable nodes without blanking
+    const currentIdSet = new Set();
+    for (let i = 0; i < this._items.length; i++) {
+      const id = this._items[i]?.id;
+      if (id) currentIdSet.add(id);
+    }
+    for (const [id, node] of this._nodePool) {
+      if (!currentIdSet.has(id)) {
+        node.remove();
+        this._nodePool.delete(id);
+      }
+    }
+
     this._scheduleRender();
 
     if (this._isNearBottom) {
@@ -465,15 +504,20 @@ export class VirtualScroller {
    */
   scrollToBottom(smooth = false) {
     if (this._destroyed) return;
-    const totalHeight = this._getTotalHeight();
+    const targetScroll = Math.max(this._getTotalHeight(), this._container.scrollHeight, 100000);
     this._container.scrollTo({
-      top: totalHeight,
+      top: targetScroll,
       behavior: smooth ? 'smooth' : 'auto'
     });
     this._isNearBottom = true;
     if (this._scrollToBottomBtn) {
       this._scrollToBottomBtn.style.display = 'none';
     }
+    requestAnimationFrame(() => {
+      if (!this._destroyed && this._container) {
+        this._container.scrollTop = this._container.scrollHeight;
+      }
+    });
   }
 
   /**
@@ -550,6 +594,7 @@ export class VirtualScroller {
 
     this._items = [];
     this._measuredHeights.clear();
+    this._measuredHeightsById.clear();
     this._nodePool.clear();
     this._rendered.innerHTML = '';
     this._container.innerHTML = '';

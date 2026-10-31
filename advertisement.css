@@ -1684,3 +1684,170 @@ html, body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ==========================================================================
+   REGIONAL GEO-CDN & PRIVACY PARTITION SUITE
+   ========================================================================== */
+.geo-region-selector-mount {
+  margin-bottom: 14px;
+  width: 100%;
+}
+
+.geo-partition-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(14, 20, 36, 0.75);
+  border: 1px solid rgba(0, 240, 118, 0.25);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  flex-wrap: wrap;
+  box-sizing: border-box;
+}
+
+.geo-partition-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.geo-region-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 240, 118, 0.1);
+  border: 1px solid rgba(0, 240, 118, 0.35);
+  color: var(--accent-primary);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.geo-country-label {
+  color: var(--text-muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.geo-country-dropdown {
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+  padding: 2px 4px;
+}
+
+.geo-country-dropdown option {
+  background: #0b1120;
+  color: #fff;
+}
+
+.geo-scope-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.geo-scope-toggle-label input[type="checkbox"] {
+  accent-color: var(--accent-primary);
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.geo-partition-right {
+  display: flex;
+  align-items: center;
+}
+
+.geo-privacy-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-secondary);
+  background: rgba(0, 212, 255, 0.08);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.form-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 600px) {
+  .form-row-2col {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .geo-partition-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .geo-partition-left {
+    justify-content: space-between;
+  }
+  .geo-partition-right {
+    justify-content: flex-end;
+  }
+}
+
+.ad-card-geo-badge {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  z-index: 2;
+}
+
+.country-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(10, 16, 30, 0.88);
+  border: 1px solid rgba(0, 240, 118, 0.4);
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  backdrop-filter: blur(4px);
+}
+
+.shipping-pill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(10, 16, 30, 0.88);
+  border: 1px solid rgba(0, 212, 255, 0.4);
+  color: var(--accent-secondary);
+  backdrop-filter: blur(4px);
+}

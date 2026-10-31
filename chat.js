@@ -25,7 +25,9 @@
 
 import "./src/js/security-guard.js";
 import { fortressShield } from "./src/js/security-shield.js";
-import { GroupChat } from "./src/features/group/index.js";
+import { GroupChat, groupStore } from "./src/features/group/index.js";
+import { chronexBriefEngine } from "./src/js/chronex-brief-engine.js";
+import { chronexLiveVcEngine } from "./src/js/chronex-live-vc-engine.js";
 import { applyUiTranslations } from "./src/js/i18n.js";
 import { auth, db, rtdb } from "./firebase-config.js";
 import { chronexAI } from "./chronex-ai-service.js";
@@ -326,15 +328,22 @@ window.addEventListener('error', (event) => {
 // and eliminates overflowing pixels across Reels, Status & Chat.
 // ─────────────────────────────────────────────────────────────
 function initNexDynamicViewportEngine() {
-  const syncViewport = () => {
+  let lastVh = 0;
+  let syncViewportTicking = false;
+
+  const performSync = () => {
+    syncViewportTicking = false;
     try {
       const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-      document.documentElement.style.setProperty('--visual-viewport-height', `${vh}px`);
+      if (Math.abs(vh - lastVh) > 1) {
+        lastVh = vh;
+        document.documentElement.style.setProperty('--visual-viewport-height', vh + 'px');
+      }
 
-      // Keep active message list anchored when virtual keyboard toggles
+      // Keep active message list anchored when virtual keyboard toggles or viewport resizes
       const messagesArea = document.getElementById('messages-area');
       const messageInput = document.getElementById('message-input');
-      if (messagesArea && document.activeElement === messageInput) {
+      if (messagesArea && (document.activeElement === messageInput || (typeof currentChatType !== 'undefined' && currentChatType === 'ai'))) {
         messagesArea.scrollTop = messagesArea.scrollHeight;
       }
     } catch (err) {
@@ -342,16 +351,24 @@ function initNexDynamicViewportEngine() {
     }
   };
 
+  const syncViewport = () => {
+    if (!syncViewportTicking) {
+      syncViewportTicking = true;
+      requestAnimationFrame(performSync);
+    }
+  };
+
   if (typeof window !== 'undefined') {
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', syncViewport);
-      window.visualViewport.addEventListener('scroll', syncViewport);
+      window.visualViewport.addEventListener('resize', syncViewport, { passive: true });
+      window.visualViewport.addEventListener('scroll', syncViewport, { passive: true });
     }
-    window.addEventListener('resize', syncViewport);
+    window.addEventListener('resize', syncViewport, { passive: true });
     window.addEventListener('orientationchange', () => setTimeout(syncViewport, 120));
-    syncViewport();
+    performSync();
   }
 }
+
 initNexDynamicViewportEngine();
 
 let currentChatUser = null;
@@ -1704,7 +1721,7 @@ function renderChatLoadingSkeleton(chatType = 'direct') {
       <div class="skeleton-bubble outgoing medium"></div>
     </div>
   `;
-  messagesDiv.scrollTop = 0;
+  messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
 let chatReloadAnimationFrame = null;
@@ -2020,6 +2037,340 @@ function announceIncomingMessage(contactName) {
   }
 }
 
+
+// ==========================================================================
+// TACTICAL SLOW MODE & ADVANCED GROUP CONTROLS SUITE
+// ==========================================================================
+window._currentGroupData = null;
+window._currentGroupId = null;
+window._activeGroupSlowMode = null;
+window._slowModeTimerInterval = null;
+
+function applyGroupChatRestrictions(groupData, groupId) {
+  if (!groupData) return;
+  window._currentGroupData = groupData;
+  window._currentGroupId = groupId;
+
+  const currentUid = myUID || (typeof auth !== 'undefined' && auth.currentUser ? auth.currentUser.uid : null);
+  const role = (groupData.creatorId === currentUid || groupData.createdBy === currentUid) 
+    ? 'creator' 
+    : (Array.isArray(groupData.admins) && groupData.admins.includes(currentUid) 
+      ? 'admin' 
+      : (Array.isArray(groupData.moderators) && groupData.moderators.includes(currentUid) 
+        ? 'moderator' 
+        : 'member'));
+  const isStaff = role === 'creator' || role === 'admin' || role === 'moderator';
+
+  // 1. Who can send messages
+  const whoCanSend = groupData.whoCanSend || groupData.settings?.whoCanSend || 'all';
+  const adminOnlyBanner = document.getElementById('groupAdminOnlyBanner');
+  const messageInput = document.getElementById('message-input');
+  const sendBtn = document.getElementById('sendBtn');
+  const audioBtn = document.getElementById('audio-record-btn');
+  const attachBtn = document.getElementById('btnToggleAttachmentHub');
+
+  if (whoCanSend === 'admins' && !isStaff) {
+    if (adminOnlyBanner) adminOnlyBanner.style.display = 'flex';
+    if (messageInput) {
+      messageInput.disabled = true;
+      messageInput.placeholder = 'Only group admins can send messages here';
+    }
+    if (sendBtn) sendBtn.disabled = true;
+    if (audioBtn) audioBtn.style.pointerEvents = 'none';
+    if (attachBtn) attachBtn.style.pointerEvents = 'none';
+  } else {
+    if (adminOnlyBanner) adminOnlyBanner.style.display = 'none';
+    if (messageInput) {
+      messageInput.disabled = false;
+      messageInput.placeholder = 'Message';
+    }
+    if (sendBtn) sendBtn.disabled = false;
+    if (audioBtn) audioBtn.style.pointerEvents = 'auto';
+    if (attachBtn) attachBtn.style.pointerEvents = 'auto';
+  }
+
+  // 2. Slow Mode
+  const slowModeConfig = groupData.slowMode || (groupData.slowModeSeconds > 0 ? { enabled: true, cooldownSeconds: groupData.slowModeSeconds } : null) || groupData.settings?.slowMode;
+  const slowModeSeconds = Number(slowModeConfig?.cooldownSeconds || groupData.slowModeSeconds || 0);
+  const slowModeActive = !!(slowModeConfig?.enabled && slowModeSeconds > 0);
+
+  window._activeGroupSlowMode = (slowModeActive && !isStaff) ? { seconds: slowModeSeconds, groupId } : null;
+
+  // Check if cooldown is still ticking from a previous message in this group
+  resumeSlowModeCountdownIfActive(groupId);
+}
+
+function clearGroupChatRestrictions() {
+  window._currentGroupData = null;
+  window._currentGroupId = null;
+  window._activeGroupSlowMode = null;
+
+  const adminOnlyBanner = document.getElementById('groupAdminOnlyBanner');
+  if (adminOnlyBanner) adminOnlyBanner.style.display = 'none';
+
+  const slowModeCountdownBar = document.getElementById('slowModeCountdownBar');
+  if (slowModeCountdownBar) slowModeCountdownBar.style.display = 'none';
+
+  const messageInput = document.getElementById('message-input');
+  if (messageInput) {
+    messageInput.disabled = false;
+    messageInput.placeholder = 'Message';
+  }
+
+  const sendBtn = document.getElementById('sendBtn');
+  if (sendBtn) {
+    sendBtn.disabled = false;
+    sendBtn.classList.remove('slow-mode-locked');
+  }
+
+  const audioBtn = document.getElementById('audio-record-btn');
+  if (audioBtn) audioBtn.style.pointerEvents = 'auto';
+
+  const attachBtn = document.getElementById('btnToggleAttachmentHub');
+  if (attachBtn) attachBtn.style.pointerEvents = 'auto';
+
+  if (window._slowModeTimerInterval) {
+    clearInterval(window._slowModeTimerInterval);
+    window._slowModeTimerInterval = null;
+  }
+}
+
+function resumeSlowModeCountdownIfActive(groupId) {
+  if (!window._activeGroupSlowMode || window._activeGroupSlowMode.groupId !== groupId) {
+    const slowModeCountdownBar = document.getElementById('slowModeCountdownBar');
+    if (slowModeCountdownBar) slowModeCountdownBar.style.display = 'none';
+    const sendBtn = document.getElementById('sendBtn');
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.classList.remove('slow-mode-locked');
+    }
+    return;
+  }
+
+  const storageKey = 'nex_slowmode_' + groupId;
+  const storedExpiry = parseInt(sessionStorage.getItem(storageKey) || '0', 10);
+  const now = Date.now();
+
+  if (storedExpiry > now) {
+    runSlowModeCountdown(storedExpiry, window._activeGroupSlowMode.seconds, groupId);
+  } else {
+    sessionStorage.removeItem(storageKey);
+    const slowModeCountdownBar = document.getElementById('slowModeCountdownBar');
+    if (slowModeCountdownBar) slowModeCountdownBar.style.display = 'none';
+    const sendBtn = document.getElementById('sendBtn');
+    if (sendBtn) {
+      sendBtn.disabled = false;
+      sendBtn.classList.remove('slow-mode-locked');
+    }
+  }
+}
+
+function startSlowModeCountdown(cooldownSeconds, groupId) {
+  if (!cooldownSeconds || cooldownSeconds <= 0 || !groupId) return;
+  const storageKey = 'nex_slowmode_' + groupId;
+  const expiry = Date.now() + (cooldownSeconds * 1000);
+  sessionStorage.setItem(storageKey, expiry.toString());
+
+  runSlowModeCountdown(expiry, cooldownSeconds, groupId);
+}
+
+function runSlowModeCountdown(expiry, totalSeconds, groupId) {
+  const countdownBar = document.getElementById('slowModeCountdownBar');
+  const secondsLeftEl = document.getElementById('slowModeSecondsLeft');
+  const progressBar = document.getElementById('slowModeProgressBar');
+  const sendBtn = document.getElementById('sendBtn');
+
+  if (countdownBar) countdownBar.style.display = 'flex';
+  if (sendBtn) {
+    sendBtn.disabled = true;
+    sendBtn.classList.add('slow-mode-locked');
+  }
+
+  if (window._slowModeTimerInterval) {
+    clearInterval(window._slowModeTimerInterval);
+  }
+
+  const updateTick = () => {
+    const now = Date.now();
+    const remainingMs = expiry - now;
+    if (remainingMs <= 0) {
+      clearInterval(window._slowModeTimerInterval);
+      window._slowModeTimerInterval = null;
+      sessionStorage.removeItem('nex_slowmode_' + groupId);
+
+      if (countdownBar) countdownBar.style.display = 'none';
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.classList.remove('slow-mode-locked');
+      }
+      return;
+    }
+
+    const remainingSec = Math.ceil(remainingMs / 1000);
+    if (secondsLeftEl) secondsLeftEl.textContent = remainingSec;
+
+    if (progressBar && totalSeconds > 0) {
+      const elapsed = totalSeconds - (remainingMs / 1000);
+      const pct = Math.max(0, Math.min(100, (elapsed / totalSeconds) * 100));
+      progressBar.style.width = (100 - pct) + '%';
+    }
+  };
+
+  updateTick();
+  window._slowModeTimerInterval = setInterval(updateTick, 250);
+}
+
+function setupGroupAdvancedSettingsControls(groupId, groupData) {
+  const slowModeToggle = document.getElementById('groupSlowModeToggle');
+  const slowModeSettingsContainer = document.getElementById('slowModeSettingsContainer');
+  const slowModeDisplay = document.getElementById('slowModeSecondsDisplay');
+  const presetChips = document.querySelectorAll('#slowModePresetChips .slow-mode-chip');
+  const slider = document.getElementById('groupSlowModeSlider');
+  const customInput = document.getElementById('groupSlowModeCustomInput');
+  const whoCanSendSelect = document.getElementById('groupWhoCanSendSelect');
+  const whoCanAddSelect = document.getElementById('groupWhoCanAddSelect');
+  const whoCanEditSelect = document.getElementById('groupWhoCanEditSelect');
+  const antiSpamToggle = document.getElementById('groupAntiSpamToggle');
+  const memberPrivacyToggle = document.getElementById('groupMemberPrivacyToggle');
+  const saveBtn = document.getElementById('btnSaveGroupAdvancedSettings');
+
+  const slowModeConfig = groupData.slowMode || (groupData.slowModeSeconds > 0 ? { enabled: true, cooldownSeconds: groupData.slowModeSeconds } : null) || groupData.settings?.slowMode || { enabled: false, cooldownSeconds: 10 };
+  let currentSlowModeEnabled = !!(slowModeConfig.enabled && (slowModeConfig.cooldownSeconds > 0 || groupData.slowModeSeconds > 0));
+  let currentSlowModeSeconds = Number(slowModeConfig.cooldownSeconds || groupData.slowModeSeconds || 10);
+  if (currentSlowModeSeconds <= 0 && currentSlowModeEnabled) currentSlowModeSeconds = 10;
+
+  if (slowModeToggle) slowModeToggle.checked = currentSlowModeEnabled;
+  if (slowModeSettingsContainer) slowModeSettingsContainer.style.display = currentSlowModeEnabled ? 'flex' : 'none';
+  if (slowModeDisplay) slowModeDisplay.textContent = currentSlowModeEnabled ? (currentSlowModeSeconds + 's') : 'Off';
+  if (slider) slider.value = currentSlowModeSeconds;
+  if (customInput) customInput.value = currentSlowModeSeconds;
+
+  const updateChipActive = (sec) => {
+    presetChips.forEach(chip => {
+      const chipSec = parseInt(chip.dataset.sec, 10);
+      if (chipSec === sec && currentSlowModeEnabled) {
+        chip.classList.add('active');
+      } else {
+        chip.classList.remove('active');
+      }
+    });
+  };
+  updateChipActive(currentSlowModeSeconds);
+
+  if (whoCanSendSelect) whoCanSendSelect.value = groupData.whoCanSend || groupData.settings?.whoCanSend || 'all';
+  if (whoCanAddSelect) whoCanAddSelect.value = groupData.whoCanAdd || groupData.settings?.whoCanAdd || 'all';
+  if (whoCanEditSelect) whoCanEditSelect.value = groupData.whoCanEdit || groupData.settings?.whoCanEdit || 'admins';
+  if (antiSpamToggle) antiSpamToggle.checked = !!(groupData.antiSpam || groupData.settings?.antiSpam);
+  if (memberPrivacyToggle) memberPrivacyToggle.checked = !!(groupData.hideMemberContacts || groupData.settings?.hideMemberContacts);
+
+  // Debounced updater
+  let saveTimer = null;
+  const triggerSave = (silent = false) => {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(async () => {
+      try {
+        const payload = {
+          'settings.slowMode': { enabled: currentSlowModeEnabled, cooldownSeconds: currentSlowModeSeconds },
+          slowMode: { enabled: currentSlowModeEnabled, cooldownSeconds: currentSlowModeSeconds },
+          slowModeSeconds: currentSlowModeEnabled ? currentSlowModeSeconds : 0,
+          whoCanSend: whoCanSendSelect ? whoCanSendSelect.value : 'all',
+          'settings.whoCanSend': whoCanSendSelect ? whoCanSendSelect.value : 'all',
+          whoCanAdd: whoCanAddSelect ? whoCanAddSelect.value : 'all',
+          'settings.whoCanAdd': whoCanAddSelect ? whoCanAddSelect.value : 'all',
+          whoCanEdit: whoCanEditSelect ? whoCanEditSelect.value : 'admins',
+          'settings.whoCanEdit': whoCanEditSelect ? whoCanEditSelect.value : 'admins',
+          antiSpam: antiSpamToggle ? antiSpamToggle.checked : false,
+          'settings.antiSpam': antiSpamToggle ? antiSpamToggle.checked : false,
+          hideMemberContacts: memberPrivacyToggle ? memberPrivacyToggle.checked : false,
+          'settings.hideMemberContacts': memberPrivacyToggle ? memberPrivacyToggle.checked : false
+        };
+
+        await updateDoc(doc(db, 'groups', groupId), payload);
+        if (window._currentGroupData && (window._currentGroupId === groupId || window._currentGroupData.id === groupId)) {
+          Object.assign(window._currentGroupData, payload);
+          applyGroupChatRestrictions(window._currentGroupData, groupId);
+        }
+        if (!silent) {
+          showNotif('Group controls updated successfully', 'success', 2000);
+        }
+      } catch (err) {
+        console.error('Error saving group controls:', err);
+        showNotif('Failed to save group settings: ' + (err.message || err), 'error');
+      }
+    }, 350);
+  };
+
+  if (slowModeToggle) {
+    slowModeToggle.onchange = () => {
+      currentSlowModeEnabled = slowModeToggle.checked;
+      if (currentSlowModeEnabled && currentSlowModeSeconds <= 0) {
+        currentSlowModeSeconds = 10;
+        if (slider) slider.value = 10;
+        if (customInput) customInput.value = 10;
+      }
+      if (slowModeSettingsContainer) slowModeSettingsContainer.style.display = currentSlowModeEnabled ? 'flex' : 'none';
+      if (slowModeDisplay) slowModeDisplay.textContent = currentSlowModeEnabled ? (currentSlowModeSeconds + 's') : 'Off';
+      updateChipActive(currentSlowModeSeconds);
+      triggerSave();
+    };
+  }
+
+  presetChips.forEach(chip => {
+    chip.onclick = (e) => {
+      e.preventDefault();
+      const sec = parseInt(chip.dataset.sec, 10);
+      currentSlowModeSeconds = sec;
+      currentSlowModeEnabled = sec > 0;
+      if (slowModeToggle) slowModeToggle.checked = currentSlowModeEnabled;
+      if (slowModeSettingsContainer) slowModeSettingsContainer.style.display = currentSlowModeEnabled ? 'flex' : 'none';
+      if (slider) slider.value = sec;
+      if (customInput) customInput.value = sec;
+      if (slowModeDisplay) slowModeDisplay.textContent = currentSlowModeEnabled ? (sec + 's') : 'Off';
+      updateChipActive(sec);
+      triggerSave();
+    };
+  });
+
+  if (slider) {
+    slider.oninput = () => {
+      const sec = parseInt(slider.value, 10) || 0;
+      currentSlowModeSeconds = sec;
+      currentSlowModeEnabled = sec > 0;
+      if (slowModeToggle) slowModeToggle.checked = currentSlowModeEnabled;
+      if (customInput) customInput.value = sec;
+      if (slowModeDisplay) slowModeDisplay.textContent = sec > 0 ? (sec + 's') : 'Off';
+      updateChipActive(sec);
+      triggerSave();
+    };
+  }
+
+  if (customInput) {
+    customInput.oninput = () => {
+      const sec = Math.max(0, Math.min(300, parseInt(customInput.value, 10) || 0));
+      currentSlowModeSeconds = sec;
+      currentSlowModeEnabled = sec > 0;
+      if (slowModeToggle) slowModeToggle.checked = currentSlowModeEnabled;
+      if (slider) slider.value = sec;
+      if (slowModeDisplay) slowModeDisplay.textContent = sec > 0 ? (sec + 's') : 'Off';
+      updateChipActive(sec);
+      triggerSave();
+    };
+  }
+
+  if (whoCanSendSelect) whoCanSendSelect.onchange = () => triggerSave();
+  if (whoCanAddSelect) whoCanAddSelect.onchange = () => triggerSave();
+  if (whoCanEditSelect) whoCanEditSelect.onchange = () => triggerSave();
+  if (antiSpamToggle) antiSpamToggle.onchange = () => triggerSave();
+  if (memberPrivacyToggle) memberPrivacyToggle.onchange = () => triggerSave();
+
+  if (saveBtn) {
+    saveBtn.onclick = (e) => {
+      e.preventDefault();
+      triggerSave(false);
+    };
+  }
+}
+
 async function showGroupInfoPanel(groupId) {
   const contactSection = document.getElementById('infoContactSection');
   if (contactSection) contactSection.style.display = 'none';
@@ -2136,9 +2487,16 @@ async function showGroupInfoPanel(groupId) {
     const groupApprovalSection = document.getElementById('groupApprovalSection');
     const approvalStatusText = document.getElementById('approvalStatusText');
     const groupApprovalToggle = document.getElementById('groupApprovalToggle');
+    const groupAdvancedSettingsSection = document.getElementById('groupAdvancedSettingsSection');
 
     if (groupAdminActionsSection) {
       groupAdminActionsSection.style.display = isAdmin ? 'block' : 'none';
+    }
+    if (groupAdvancedSettingsSection) {
+      groupAdvancedSettingsSection.style.display = isAdmin ? 'block' : 'none';
+      if (isAdmin) {
+        setupGroupAdvancedSettingsControls(groupId, groupData);
+      }
     }
     if (groupDisappearingSection) {
       groupDisappearingSection.style.display = isAdmin ? 'block' : 'none';
@@ -2798,8 +3156,9 @@ function showChatListView() {
 
   if (listView) {
     listView.classList.remove("hidden");
+    listView.style.removeProperty("display");
     listView.style.setProperty("display", "flex", "important");
-    listView.style.zIndex = "10";
+    listView.style.removeProperty("z-index");
   }
   if (detailView) {
     detailView.classList.add("hidden");
@@ -3030,23 +3389,70 @@ function handleNavigation(section) {
   const chatMain = document.querySelector(".chat-main");
   const app = document.querySelector(".app");
 
+  if (app) app.dataset.activeSection = section;
+  if (document.body) document.body.dataset.activeSection = section;
+
   if (chatMain) {
+    chatMain.style.removeProperty("display");
     if (section === "chats" || section === "messages") {
-      chatMain.style.display = "flex";
+      chatMain.style.setProperty("display", "flex", "important");
       chatMain.dataset.layout = "list";
     } else {
-      chatMain.style.display = "none";
+      chatMain.style.setProperty("display", "none", "important");
       chatMain.dataset.layout = "section";
     }
   }
-  if (app) app.dataset.activeSection = section;
 
-  if (chatListView) chatListView.style.display = "none";
-  if (statusContainer) statusContainer.style.display = "none";
-  if (groupsContainer) groupsContainer.style.display = "none";
-  if (announcementsContainer) announcementsContainer.style.display = "none";
-  if (chatDetailView) chatDetailView.style.display = "none";
-  if (callHistoryContainer) callHistoryContainer.style.display = "none";
+  if (chatListView) {
+    chatListView.style.removeProperty("display");
+    chatListView.style.removeProperty("z-index");
+    if (section === "chats" || section === "messages") {
+      chatListView.style.setProperty("display", "flex", "important");
+    } else {
+      chatListView.style.setProperty("display", "none", "important");
+    }
+  }
+
+  if (chatDetailView) {
+    chatDetailView.style.removeProperty("display");
+    chatDetailView.style.setProperty("display", "none", "important");
+  }
+
+  if (statusContainer) {
+    statusContainer.style.removeProperty("display");
+    if (section === "status" || section === "updates") {
+      statusContainer.style.setProperty("display", "flex", "important");
+    } else {
+      statusContainer.style.setProperty("display", "none", "important");
+    }
+  }
+
+  if (groupsContainer) {
+    groupsContainer.style.removeProperty("display");
+    if (section === "communities" || section === "groups") {
+      groupsContainer.style.setProperty("display", "block", "important");
+    } else {
+      groupsContainer.style.setProperty("display", "none", "important");
+    }
+  }
+
+  if (announcementsContainer) {
+    announcementsContainer.style.removeProperty("display");
+    if (section === "announcements") {
+      announcementsContainer.style.setProperty("display", "flex", "important");
+    } else {
+      announcementsContainer.style.setProperty("display", "none", "important");
+    }
+  }
+
+  if (callHistoryContainer) {
+    callHistoryContainer.style.removeProperty("display");
+    if (section === "calls") {
+      callHistoryContainer.style.setProperty("display", "block", "important");
+    } else {
+      callHistoryContainer.style.setProperty("display", "none", "important");
+    }
+  }
 
   switch (section) {
     case "more":
@@ -3059,13 +3465,22 @@ function handleNavigation(section) {
     case "chats":
     case "messages":
       console.log("[NEXCHAT] Showing chats list");
-      if (chatMain) chatMain.style.display = "flex";
-      if (chatListView) chatListView.style.display = "flex";
+      if (chatMain) {
+        chatMain.style.removeProperty("display");
+        chatMain.style.setProperty("display", "flex", "important");
+      }
+      if (chatListView) {
+        chatListView.style.removeProperty("display");
+        chatListView.style.setProperty("display", "flex", "important");
+      }
       break;
     case "status":
     case "updates":
       console.log("[NEXCHAT] Showing status updates vault");
-      if (statusContainer) statusContainer.style.display = "flex";
+      if (statusContainer) {
+        statusContainer.style.removeProperty("display");
+        statusContainer.style.setProperty("display", "flex", "important");
+      }
       if (typeof loadStatusFeed === "function") loadStatusFeed();
       break;
     case "reels":
@@ -3076,12 +3491,18 @@ function handleNavigation(section) {
     case "communities":
     case "groups":
       console.log("[NEXCHAT] Showing groups communities");
-      if (groupsContainer) groupsContainer.style.display = "block";
+      if (groupsContainer) {
+        groupsContainer.style.removeProperty("display");
+        groupsContainer.style.setProperty("display", "block", "important");
+      }
       if (typeof loadGroups === "function") loadGroups();
       break;
     case "announcements":
       console.log("[NEXCHAT] Showing announcements");
-      if (announcementsContainer) announcementsContainer.style.display = "flex";
+      if (announcementsContainer) {
+        announcementsContainer.style.removeProperty("display");
+        announcementsContainer.style.setProperty("display", "flex", "important");
+      }
       if (typeof loadAnnouncements === "function") loadAnnouncements();
       break;
     case "games":
@@ -3100,7 +3521,8 @@ function handleNavigation(section) {
     case "calls":
       console.log("[NEXCHAT] Showing call history");
       if (callHistoryContainer) {
-        callHistoryContainer.style.display = "block";
+        callHistoryContainer.style.removeProperty("display");
+        callHistoryContainer.style.setProperty("display", "block", "important");
         if (typeof loadCallHistory === "function") loadCallHistory();
       }
       break;
@@ -4215,6 +4637,7 @@ function searchUser(e) {
 }
 
 function goBack() {
+  clearGroupChatRestrictions();
   try { GroupChat.close(); } catch(e) {}
   if (window.NexWarRoomEngine && typeof window.NexWarRoomEngine.unmountWarRoom === 'function') {
     try { window.NexWarRoomEngine.unmountWarRoom(); } catch (e) {}
@@ -4258,6 +4681,7 @@ function goBack() {
 }
 
 function goBackToDashboard() {
+  clearGroupChatRestrictions();
   currentChatUser = null;
   if (window.scheduledMessageEngine) {
     window.scheduledMessageEngine.updateComposerBanner(null);
@@ -4504,6 +4928,7 @@ async function sendMessage() {
           const aiLoadingDiv = document.createElement("div");
           aiLoadingDiv.id = "chronex-ai-loading";
           aiLoadingDiv.className = "message ai-message loading";
+          aiLoadingDiv.style.cssText = "content-visibility: visible !important; contain: none !important;";
           aiLoadingDiv.innerHTML = `
             <div class="message-content">
               <div class="ai-avatar">
@@ -4516,6 +4941,16 @@ async function sendMessage() {
           `;
           messagesDiv.appendChild(aiLoadingDiv);
           messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          try { aiLoadingDiv.scrollIntoView({ behavior: 'smooth', block: 'end' }); } catch (_) {}
+          requestAnimationFrame(() => {
+            if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          });
+          setTimeout(() => {
+            if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          }, 80);
+          setTimeout(() => {
+            if (messagesDiv) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+          }, 240);
         }
 
         const aiResponse = await generateChronexAIResponse(text, aiImagePayload);
@@ -5194,6 +5629,15 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     if (window.bountyContractsEngine && typeof window.bountyContractsEngine.renderBountyBubble === 'function') {
       const bountyEl = window.bountyContractsEngine.renderBountyBubble(attachment);
       container.appendChild(bountyEl);
+      return container;
+    }
+  }
+
+  // ChronEX Smart Escrow Guardian
+  if (attachment.isEscrowDeal || attachment.fileType === 'chronex_escrow' || attachment.escrowDealData) {
+    if (window.chronexSmartEscrow && typeof window.chronexSmartEscrow.renderEscrowBubble === 'function') {
+      const escrowEl = window.chronexSmartEscrow.renderEscrowBubble(attachment);
+      container.appendChild(escrowEl);
       return container;
     }
   }
@@ -6065,11 +6509,23 @@ function displayChronexAIUserMessage(message, attachment = null) {
   if (!messagesContainer) return;
 
   const welcomeStage = messagesContainer.querySelector('.chronex-welcome-stage');
-  if (welcomeStage) welcomeStage.remove();
+  if (welcomeStage) {
+    welcomeStage.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    welcomeStage.style.opacity = '0';
+    welcomeStage.style.pointerEvents = 'none';
+    setTimeout(() => {
+      try {
+        if (welcomeStage && welcomeStage.parentNode) {
+          welcomeStage.remove();
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+      } catch (_) {}
+    }, 260);
+  }
 
   const div = document.createElement("div");
-  div.className = "message-wrapper sent";
-  div.style.cssText = "display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 12px;";
+  div.className = "message-wrapper sent chronex-user-msg-wrapper";
+  div.style.cssText = "display: flex; justify-content: flex-end; margin: 8px 0; padding: 0 12px; content-visibility: visible !important; contain: none !important;";
 
   let mediaHtml = '';
   if (attachment) {
@@ -6093,6 +6549,7 @@ function displayChronexAIUserMessage(message, attachment = null) {
 
   messagesContainer.appendChild(div);
   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
 function displayChronexAIResponse(response, stream = true) {
@@ -6101,7 +6558,7 @@ function displayChronexAIResponse(response, stream = true) {
 
   const div = document.createElement("div");
   div.className = "message-wrapper received ai-message-bubble-wrapper";
-  div.style.cssText = "display: flex; justify-content: flex-start; align-items: flex-end; margin: 10px 0; padding: 0 12px; gap: 8px;";
+  div.style.cssText = "display: flex; justify-content: flex-start; align-items: flex-end; margin: 10px 0; padding: 0 12px; gap: 8px; content-visibility: visible !important; contain: none !important;";
 
   const voicePlayerMarkup = window.ChronexxVoiceEngine ? window.ChronexxVoiceEngine.renderVoicePlayerBar(response) : '';
 
@@ -6122,37 +6579,123 @@ function displayChronexAIResponse(response, stream = true) {
   const contentEl = div.querySelector('.ai-body-content');
   const rawText = String(response || '');
 
+  // Instant scroll anchoring when AI bubble mounts
+  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
   if (!stream || rawText.length < 20) {
     if (contentEl) contentEl.innerHTML = formatAiMarkdown(rawText);
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    div.scrollIntoView({ behavior: 'smooth', block: 'end' });
     return;
   }
 
-  // Real-time typewriter token streaming
+  // Smart Bottom-Lock Observer: detect intentional manual scroll-up
+  let lockToBottom = true;
+  let touchStartY = 0;
+
+  const handleWheel = (e) => {
+    if (e.deltaY < 0) {
+      lockToBottom = false;
+    } else {
+      const dist = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
+      if (dist < 40) lockToBottom = true;
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    touchStartY = (e.touches && e.touches[0]) ? e.touches[0].clientY : 0;
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches && e.touches[0]) {
+      const currentY = e.touches[0].clientY;
+      if (currentY > touchStartY + 8) {
+        lockToBottom = false;
+      } else {
+        const dist = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
+        if (dist < 40) lockToBottom = true;
+      }
+    }
+  };
+
+  const handleScroll = () => {
+    const dist = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight;
+    if (dist > 60) {
+      lockToBottom = false;
+    } else if (dist <= 20) {
+      lockToBottom = true;
+    }
+  };
+
+  messagesContainer.addEventListener('wheel', handleWheel, { passive: true });
+  messagesContainer.addEventListener('touchstart', handleTouchStart, { passive: true });
+  messagesContainer.addEventListener('touchmove', handleTouchMove, { passive: true });
+  messagesContainer.addEventListener('scroll', handleScroll, { passive: true });
+
+  const cleanupListeners = () => {
+    messagesContainer.removeEventListener('wheel', handleWheel);
+    messagesContainer.removeEventListener('touchstart', handleTouchStart);
+    messagesContainer.removeEventListener('touchmove', handleTouchMove);
+    messagesContainer.removeEventListener('scroll', handleScroll);
+  };
+
+  // 60fps RequestAnimationFrame Streamer with throttled markdown rendering
   let charIdx = 0;
   const cursor = document.createElement('span');
   cursor.className = 'ai-stream-cursor';
   cursor.textContent = '▍';
+  cursor.style.cssText = 'color: #00ff66; animation: blink 0.8s infinite; margin-left: 2px;';
   if (contentEl) contentEl.appendChild(cursor);
 
-  const chunkSize = Math.max(3, Math.floor(rawText.length / 60));
-  const streamTimer = setInterval(() => {
-    charIdx += chunkSize;
-    const isNearBottom = (messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight) < 160;
-    if (charIdx >= rawText.length) {
-      charIdx = rawText.length;
-      clearInterval(streamTimer);
-      if (contentEl) contentEl.innerHTML = formatAiMarkdown(rawText);
-      if (isNearBottom) messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    } else {
+  const totalLen = rawText.length;
+  const chunkSize = Math.max(2, Math.min(8, Math.ceil(totalLen / 100)));
+  let frameCount = 0;
+  let lastRenderedIdx = 0;
+
+  function streamStep() {
+    if (!div.isConnected) {
+      cleanupListeners();
+      return;
+    }
+
+    frameCount++;
+    charIdx = Math.min(totalLen, charIdx + chunkSize);
+    const isDone = charIdx >= totalLen;
+
+    // Throttled markdown rendering: update every 3-4 frames or on token boundaries
+    const isTokenBoundary = isDone || /\s|[.,;:!?\n]/.test(rawText[charIdx - 1]);
+    const shouldRenderMarkdown = isDone || (frameCount % 3 === 0) || (isTokenBoundary && (charIdx - lastRenderedIdx >= 6));
+
+    if (shouldRenderMarkdown && contentEl) {
+      lastRenderedIdx = charIdx;
       const partial = rawText.substring(0, charIdx);
-      if (contentEl) {
-        contentEl.innerHTML = formatAiMarkdown(partial);
+      contentEl.innerHTML = formatAiMarkdown(partial);
+      if (!isDone) {
         contentEl.appendChild(cursor);
       }
-      if (isNearBottom) messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
-  }, 16);
+
+    if (lockToBottom) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    if (isDone) {
+      cleanupListeners();
+      if (contentEl) {
+        contentEl.innerHTML = formatAiMarkdown(rawText);
+      }
+      if (lockToBottom) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      }
+      return;
+    }
+
+    requestAnimationFrame(streamStep);
+  }
+
+  requestAnimationFrame(streamStep);
 }
 
 window.displayChronexAIMessage = displayChronexAIResponse;
@@ -7315,10 +7858,13 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   const headerVideoBtn = document.getElementById('headerVideoBtn');
   const headerCallBtn = document.getElementById('headerCallBtn');
 
+  const chronexGcSuite = document.getElementById('chronexGcHeaderSuite');
   if (chatType === 'group') {
     if (pollBtn) pollBtn.style.display = 'block';
+    if (chronexGcSuite) chronexGcSuite.style.display = 'inline-flex';
   } else {
     if (pollBtn) pollBtn.style.display = 'none';
+    if (chronexGcSuite) chronexGcSuite.style.display = 'none';
     setTimeout(() => updateBlockUnblockUI(), 100);
   }
 
@@ -7382,6 +7928,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
         const groupDoc = await getDoc(doc(db, "groups", uid));
         if (groupDoc.exists()) {
           const groupData = groupDoc.data();
+          applyGroupChatRestrictions(groupData, uid);
           const memberIds = Array.isArray(groupData.members) ? groupData.members : [];
           const infoEmailEl = document.getElementById("infoEmail");
           if (infoEmailEl) infoEmailEl.textContent = `Members: ${memberIds.length}`;
@@ -7415,6 +7962,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
           }
         }
       } else if (chatType === 'ai') {
+        clearGroupChatRestrictions();
         const infoEmailEl = document.getElementById("infoEmail");
         if (infoEmailEl) infoEmailEl.textContent = "Advanced AI Assistant";
 
@@ -7433,6 +7981,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
 
         showNotif("ChronEX AI Neural Interface Active", "info", 2000);
       } else {
+        clearGroupChatRestrictions();
         const userDoc = await getDoc(doc(db, "users", uid));
         let userData = {};
 
@@ -16234,6 +16783,9 @@ async function loadGroupMessages(groupId) {
       completeChatReloadOverlay();
       cancelChatLoadFeedback();
       hideChatReloadOverlay();
+      if (window.ChronexBriefEngine && window.ChronexBriefEngine.isActive) {
+        setTimeout(() => window.ChronexBriefEngine.reprocessAllMessages(), 100);
+      }
     }
 
     // Supabase Realtime Phoenix Channel subscription for Group (Sub-15ms broadcast sync)
@@ -16242,9 +16794,49 @@ async function loadGroupMessages(groupId) {
       subscribeToSupabaseRoom(groupRoomId, {
         onNewMessage: (incoming) => {
           if (!incoming || incoming.from === myUID) return;
+
+          // Optimistically insert into groupStore.getState().messages if not already present (sub-15ms group message render)
+          const store = typeof groupStore !== 'undefined' ? groupStore : (typeof GroupChat !== 'undefined' && GroupChat.getStore ? GroupChat.getStore() : null);
+          if (store) {
+            const currentMessages = store.getState().messages || [];
+            const incomingId = incoming.id || incoming.docId || incoming.clientMsgId || incoming.client_msg_id;
+            const exists = currentMessages.some(m => {
+              if (incomingId && (m.id === incomingId || m.docId === incomingId)) return true;
+              if (m.from === incoming.from && m.text === incoming.text) {
+                const tA = m.timestamp?.toMillis ? m.timestamp.toMillis() : (m.timestamp?.toDate ? m.timestamp.toDate().getTime() : (m.timestamp instanceof Date ? m.timestamp.getTime() : Number(m.timestamp) || 0));
+                const tB = incoming.timestamp?.toMillis ? incoming.timestamp.toMillis() : (incoming.timestamp?.toDate ? incoming.timestamp.toDate().getTime() : (incoming.timestamp instanceof Date ? incoming.timestamp.getTime() : Number(incoming.timestamp || incoming.time) || 0));
+                if (tA && tB && Math.abs(tA - tB) < 5000) return true;
+              }
+              return false;
+            });
+
+            if (!exists) {
+              const incomingMsg = {
+                id: incomingId || `supa_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                groupId: incoming.groupId || groupId,
+                from: incoming.from,
+                text: incoming.text || '',
+                timestamp: incoming.timestamp || incoming.time || new Date(),
+                attachment: incoming.attachment || null,
+                replyTo: incoming.replyTo || null,
+                reactions: incoming.reactions || [],
+                readBy: incoming.readBy || [incoming.from],
+                readAt: incoming.readAt || {},
+                edited: false,
+                ...incoming
+              };
+              store.setState({
+                messages: [...currentMessages, incomingMsg]
+              });
+            }
+          }
+
           playLuxuryPopSound();
           hapticFeedback('light');
           markSupabaseMessagesRead(groupRoomId, myUID);
+          if (window.ChronexBriefEngine && window.ChronexBriefEngine.isActive) {
+            setTimeout(() => window.ChronexBriefEngine.reprocessAllMessages(), 120);
+          }
         }
       }).then(unsub => {
         supabaseRoomUnsubscribe = unsub;
@@ -16293,8 +16885,49 @@ async function sendGroupMessage(groupId, text, attachment) {
     if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(tokens);
   }
 
+  // Local pre-checks for permissions & slow mode
+  if (window._currentGroupData && window._currentGroupId === groupId) {
+    const currentUid = myUID || (typeof auth !== 'undefined' && auth.currentUser ? auth.currentUser.uid : null);
+    const role = (window._currentGroupData.creatorId === currentUid || window._currentGroupData.createdBy === currentUid) 
+      ? 'creator' 
+      : (Array.isArray(window._currentGroupData.admins) && window._currentGroupData.admins.includes(currentUid) 
+        ? 'admin' 
+        : (Array.isArray(window._currentGroupData.moderators) && window._currentGroupData.moderators.includes(currentUid) 
+          ? 'moderator' 
+          : 'member'));
+    const isStaff = role === 'creator' || role === 'admin' || role === 'moderator';
+
+    if (window._currentGroupData.whoCanSend === 'admins' && !isStaff) {
+      showNotif('Only admins can send messages in this group', 'warning');
+      return;
+    }
+
+    if (window._currentGroupData.antiSpam && !isStaff && text) {
+      const urlPattern = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|(t\.me\/[^\s]+)|(discord\.gg\/[^\s]+)/i;
+      if (urlPattern.test(text)) {
+        showNotif('Links are restricted by Fortress Anti-Spam Shield', 'warning');
+        return;
+      }
+    }
+
+    if (window._activeGroupSlowMode && window._activeGroupSlowMode.groupId === groupId && !isStaff) {
+      const storageKey = 'nex_slowmode_' + groupId;
+      const storedExpiry = parseInt(sessionStorage.getItem(storageKey) || '0', 10);
+      if (storedExpiry > Date.now()) {
+        const rem = Math.ceil((storedExpiry - Date.now()) / 1000);
+        showNotif(`Slow mode active: wait ${rem}s before sending`, 'info');
+        return;
+      }
+    }
+  }
+
   try {
     await GroupChat.send({ text, attachment });
+
+    // Trigger zero-lag slow mode countdown HUD
+    if (window._activeGroupSlowMode && window._activeGroupSlowMode.groupId === groupId) {
+      startSlowModeCountdown(window._activeGroupSlowMode.seconds, groupId);
+    }
 
     // Supabase Realtime High-Speed broadcast for Group Members
     if (typeof sendSupabaseMessage === 'function') {
@@ -19977,7 +20610,8 @@ async function loadContacts() {
 
   let chronexLi = null;
   // Zero-latency instant hydration: render cached contacts immediately (0ms)
-  if (contactList.children.length === 0) {
+  const existingRealItems = contactList.querySelectorAll('.chat-item, .chat-list-item');
+  if (existingRealItems.length === 0) {
     try {
       const cached = JSON.parse(localStorage.getItem('nex_cached_contacts_' + myUID) || '[]');
       if (Array.isArray(cached) && cached.length > 0) {

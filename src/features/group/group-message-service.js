@@ -91,7 +91,7 @@ export async function openGroupChat(groupId) {
     }
 
     // Sort chronologically ascending
-    messages.sort((a, b) => _getTimestampMs(a.timestamp) - _getTimestampMs(b.timestamp));
+    _sortMessages(messages);
 
     // Update store immediately for instant 0ms visual render
     const hasOlder = snapshot.docs.length >= PAGE_SIZE;
@@ -326,8 +326,35 @@ export async function sendMessage(params = {}) {
     }
   }
 
-  // Check slow mode
-  if (groupData.slowMode && groupData.slowMode.enabled) {
+  // User role determination for staff permissions
+  const role = (groupData.creatorId === uid || groupData.createdBy === uid) ? 'creator' : (groupData.admins?.includes(uid) ? 'admin' : (groupData.moderators?.includes(uid) ? 'moderator' : 'member'));
+  const isStaff = role === 'creator' || role === 'admin' || role === 'moderator';
+
+  // Check whoCanSend permission
+  const whoCanSend = groupData.whoCanSend || groupData.settings?.whoCanSend || 'all';
+  if (whoCanSend === 'admins' && !isStaff) {
+    const msgs = groupStore.getState().messages.filter(m => m.id !== optimisticId);
+    groupStore.setState({ messages: msgs });
+    throw new Error('Only admins can send messages in this group');
+  }
+
+  // Check Fortress Anti-Spam (block link spam for regular members)
+  const antiSpamEnabled = groupData.antiSpam || groupData.settings?.antiSpam;
+  if (antiSpamEnabled && !isStaff && mentionResult.text) {
+    const urlPattern = /(https?:\/\/[^\s]+)|(www\.[^\s]+)|(t\.me\/[^\s]+)|(discord\.gg\/[^\s]+)/i;
+    if (urlPattern.test(mentionResult.text)) {
+      const msgs = groupStore.getState().messages.filter(m => m.id !== optimisticId);
+      groupStore.setState({ messages: msgs });
+      throw new Error('Links are restricted by Fortress Anti-Spam Shield');
+    }
+  }
+
+  // Check slow mode (Admins & Creator bypass slow mode!)
+  const slowModeConfig = groupData.slowMode || (groupData.slowModeSeconds > 0 ? { enabled: true, cooldownSeconds: groupData.slowModeSeconds } : null) || groupData.settings?.slowMode;
+  const slowModeSeconds = Number(slowModeConfig?.cooldownSeconds || groupData.slowModeSeconds || 0);
+  const slowModeActive = !!(slowModeConfig?.enabled && slowModeSeconds > 0);
+
+  if (slowModeActive && !isStaff) {
     const cooldown = state.slowModeCooldownEnd;
     if (cooldown && Date.now() < cooldown) {
       const remaining = Math.ceil((cooldown - Date.now()) / 1000);
@@ -373,10 +400,10 @@ export async function sendMessage(params = {}) {
     };
   }
 
-  // Set slow mode cooldown
-  if (groupData.slowMode && groupData.slowMode.enabled) {
+  // Set slow mode cooldown (Admins & Creator bypass)
+  if (slowModeActive && !isStaff) {
     groupStore.setState({
-      slowModeCooldownEnd: Date.now() + (groupData.slowMode.cooldownSeconds || 30) * 1000
+      slowModeCooldownEnd: Date.now() + slowModeSeconds * 1000
     });
   }
 
@@ -617,17 +644,14 @@ function _attachRealtimeListener(groupId, newestMessage) {
     }
 
     if (changed) {
-      // Sort by timestamp
-      messages.sort((a, b) => {
-        const tA = _getTimestampMs(a.timestamp);
-        const tB = _getTimestampMs(b.timestamp);
-        return tA - tB;
-      });
+      // Sort chronologically ascending with optimistic/pending strictly at end
+      _sortMessages(messages);
 
-      // Resolve new user profiles
-      await _resolveUserProfiles(messages);
-
+      // Instant 0ms visual render
       groupStore.setState({ messages });
+
+      // Resolve new user profiles non-blocking in background
+      _resolveUserProfiles(messages).catch(console.warn);
 
       // Cache
       const last40 = messages.slice(-PAGE_SIZE);
@@ -706,12 +730,36 @@ async function _resolveUserProfiles(messages) {
  * @returns {number}
  */
 function _getTimestampMs(ts) {
-  if (!ts) return 0;
-  if (ts.toMillis) return ts.toMillis();
-  if (ts.toDate) return ts.toDate().getTime();
-  if (ts instanceof Date) return ts.getTime();
-  if (typeof ts === 'number') return ts;
-  return 0;
+  if (!ts) return Date.now();
+  try {
+    if (ts.toMillis && typeof ts.toMillis === 'function') return ts.toMillis();
+    if (ts.toDate && typeof ts.toDate === 'function') return ts.toDate().getTime();
+    if (ts instanceof Date) return ts.getTime();
+    if (typeof ts === 'number') return ts;
+  } catch (_) {
+    return Date.now();
+  }
+  return Date.now();
+}
+
+/**
+ * Sort messages chronologically with optimistic or pending messages strictly at the end
+ * @param {Array} messages
+ * @returns {Array}
+ */
+function _sortMessages(messages) {
+  if (!Array.isArray(messages)) return messages;
+  messages.sort((a, b) => {
+    const aOpt = Boolean(a && (a._optimistic || a._pending));
+    const bOpt = Boolean(b && (b._optimistic || b._pending));
+    if (aOpt !== bOpt) {
+      return aOpt ? 1 : -1;
+    }
+    const tA = _getTimestampMs(a?.timestamp);
+    const tB = _getTimestampMs(b?.timestamp);
+    return tA - tB;
+  });
+  return messages;
 }
 
 /**

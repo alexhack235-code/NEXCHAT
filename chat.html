@@ -749,7 +749,7 @@
         <!-- Active Chats Section -->
         <div class="chats-section">
           <ul id="contactList" class="chat-list">
-            <li class="empty-state">
+            <li class="empty-state" id="emptyChatState">
               <p>No chats yet</p>
               <p class="hint">Search for friends to start chatting</p>
             </li>
@@ -836,6 +836,22 @@
                   </div>
                 </button>
               </div>
+            </div>
+
+            <!-- ChronEX Group Chat Universal Translator & Brief Suite -->
+            <div id="chronexGcHeaderSuite" class="chronex-gc-header-suite" style="display: none;">
+              <button type="button" id="btnToggleChronexGc" class="header-icon-btn chronex-gc-toggle-btn" title="Toggle ChronEX Universal Auto-Translator">
+                <i class="fa-solid fa-globe"></i>
+                <span class="chronex-gc-status">ChronEX: OFF</span>
+              </button>
+              <button type="button" id="btnChronexGcBrief" class="header-icon-btn chronex-gc-brief-btn" title="ChronEX Brief: Group AI Catch-Up &amp; Executive Summary">
+                <i class="fa-solid fa-bolt" style="color: #ffd700;"></i>
+                <span>Brief</span>
+              </button>
+              <button type="button" id="btnOpenLiveVc" class="header-icon-btn chronex-live-vc-toggle-pill" title="Join ChronEX Live Real-Time Voice Translator">
+                <i class="fa-solid fa-headset" style="color: #00f2ff;"></i>
+                <span>Live VC</span>
+              </button>
             </div>
 
             <button id="chatSearchToggleBtn" class="header-icon-btn" title="Search in Chat"><i class="fa-solid fa-magnifying-glass"></i></button>
@@ -1459,6 +1475,28 @@
             </div>
             <div id="slashCommandsList" style="max-height: 240px; overflow-y: auto; padding: 6px;"></div>
           </div>
+          <!-- Tactical Slow Mode Live Countdown HUD Bar -->
+          <div id="slowModeCountdownBar" class="slow-mode-countdown-bar" style="display: none;">
+            <div class="slow-mode-countdown-content">
+              <div class="slow-mode-icon-pulse">
+                <i class="fa-solid fa-hourglass-half fa-spin-slow"></i>
+              </div>
+              <div class="slow-mode-text-box">
+                <span class="slow-mode-title">Slow Mode Active</span>
+                <span class="slow-mode-subtitle">Wait <b id="slowModeSecondsLeft">10</b>s before sending your next message</span>
+              </div>
+            </div>
+            <div class="slow-mode-track">
+              <div id="slowModeProgressBar" class="slow-mode-bar-fill" style="width: 100%;"></div>
+            </div>
+          </div>
+
+          <!-- Group Admin-Only Sending Notice Banner -->
+          <div id="groupAdminOnlyBanner" class="group-admin-only-banner" style="display: none;">
+            <i class="fa-solid fa-lock"></i>
+            <span>Only group admins and moderators can send messages here</span>
+          </div>
+
           <form id="message-form" class="message-form">
             <div class="message-input-wrapper">
               <button type="button" id="emoji-btn" class="input-inline-btn emoji-btn" title="Emoji"><i class="fa-regular fa-face-smile"></i></button>
@@ -1668,6 +1706,120 @@
               <button id="infoRemoveAllMembersBtn" class="btn-secondary" style="flex: 1; min-width: 140px; color: var(--accent-gold);"><i class="fa-solid fa-users-slash"></i> Remove All</button>
               <button id="infoDeleteGroupBtn" class="btn-danger" style="flex: 1; min-width: 140px;"><i class="fa-solid fa-trash"></i> Delete Group</button>
             </div>
+          </div>
+
+          <!-- Advanced Group Controls & Tactical Slow Mode Suite -->
+          <div class="info-section" id="groupAdvancedSettingsSection" style="display: none;">
+            <div class="section-title"><i class="fa-solid fa-sliders"></i> Group Controls &amp; Slow Mode</div>
+            
+            <!-- Slow Mode (Rate Limiter) Control Card -->
+            <div class="group-control-card">
+              <div class="group-control-header">
+                <div>
+                  <div class="group-control-title">
+                    <i class="fa-solid fa-hourglass-half"></i> Tactical Slow Mode
+                    <span class="slow-mode-pill-badge">COOLDOWN</span>
+                  </div>
+                  <div class="group-control-desc">Limits how frequently members can send messages. Admins and Creator bypass slow mode.</div>
+                </div>
+                <label class="toggle-switch-small">
+                  <input type="checkbox" id="groupSlowModeToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <!-- Cooldown Settings Container (Shown when slow mode is active) -->
+              <div id="slowModeSettingsContainer" class="slow-mode-settings-container" style="display: none;">
+                <div class="slow-mode-delay-header">
+                  <span class="slow-mode-label">Cooldown Delay:</span>
+                  <span id="slowModeSecondsDisplay" class="slow-mode-val-badge">10s</span>
+                </div>
+
+                <!-- Quick Preset Delay Chips -->
+                <div class="slow-mode-chip-row" id="slowModePresetChips">
+                  <button type="button" class="slow-mode-chip" data-sec="5">5s</button>
+                  <button type="button" class="slow-mode-chip active" data-sec="10">10s</button>
+                  <button type="button" class="slow-mode-chip" data-sec="15">15s</button>
+                  <button type="button" class="slow-mode-chip" data-sec="30">30s</button>
+                  <button type="button" class="slow-mode-chip" data-sec="60">60s</button>
+                  <button type="button" class="slow-mode-chip" data-sec="120">2m</button>
+                  <button type="button" class="slow-mode-chip" data-sec="300">5m</button>
+                </div>
+
+                <!-- Custom Range Slider & Numeric Input -->
+                <div class="slow-mode-slider-row">
+                  <input type="range" id="groupSlowModeSlider" class="slow-mode-range" min="1" max="300" step="1" value="10">
+                  <div class="slow-mode-input-wrap">
+                    <input type="number" id="groupSlowModeCustomInput" class="slow-mode-num-input" min="1" max="300" step="1" value="10">
+                    <span class="slow-mode-unit">sec</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Who Can Send Messages Card -->
+            <div class="group-control-card">
+              <div class="group-control-title"><i class="fa-solid fa-paper-plane"></i> Who Can Send Messages</div>
+              <div class="group-control-desc">Select who is permitted to send messages and attachments in this group.</div>
+              <select id="groupWhoCanSendSelect" class="settings-select" style="margin-top: 8px;">
+                <option value="all">All Members</option>
+                <option value="admins">Admins &amp; Moderators Only</option>
+                <option value="verified">Verified Members Only</option>
+              </select>
+            </div>
+
+            <!-- Who Can Add Members Card -->
+            <div class="group-control-card">
+              <div class="group-control-title"><i class="fa-solid fa-user-plus"></i> Who Can Add Members</div>
+              <div class="group-control-desc">Control whether all members or only group admins can invite new members.</div>
+              <select id="groupWhoCanAddSelect" class="settings-select" style="margin-top: 8px;">
+                <option value="all">All Members</option>
+                <option value="admins">Only Admins</option>
+              </select>
+            </div>
+
+            <!-- Who Can Edit Group Info Card -->
+            <div class="group-control-card">
+              <div class="group-control-title"><i class="fa-solid fa-pen-to-square"></i> Who Can Edit Group Info</div>
+              <div class="group-control-desc">Control who can change group name, icon, and description.</div>
+              <select id="groupWhoCanEditSelect" class="settings-select" style="margin-top: 8px;">
+                <option value="admins">Only Admins</option>
+                <option value="all">All Members</option>
+              </select>
+            </div>
+
+            <!-- Fortress Anti-Spam & Link Shield Card -->
+            <div class="group-control-card">
+              <div class="group-control-header">
+                <div>
+                  <div class="group-control-title"><i class="fa-solid fa-shield-virus"></i> Fortress Link &amp; Anti-Spam Shield</div>
+                  <div class="group-control-desc">Automatically block hyperlinks, external invites, and spam floods from non-admins.</div>
+                </div>
+                <label class="toggle-switch-small">
+                  <input type="checkbox" id="groupAntiSpamToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Member Contact Privacy Card -->
+            <div class="group-control-card">
+              <div class="group-control-header">
+                <div>
+                  <div class="group-control-title"><i class="fa-solid fa-user-shield"></i> Member Contact Privacy</div>
+                  <div class="group-control-desc">Conceal member phone numbers and private details from regular members.</div>
+                </div>
+                <label class="toggle-switch-small">
+                  <input type="checkbox" id="groupMemberPrivacyToggle">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Save Feedback / Action Button -->
+            <button type="button" id="btnSaveGroupAdvancedSettings" class="btn-primary" style="width: 100%; margin-top: 4px;">
+              <i class="fa-solid fa-check"></i> Save Group Settings
+            </button>
           </div>
 
           <div class="info-section" id="groupDisappearingSection" style="display: none;">
@@ -2395,12 +2547,12 @@
                       <option value="de">German (Deutsch)</option>
                       <option value="ja">Japanese ()</option>
                       <option value="zh">Chinese ()</option>
-                      <option value="ru">Russian (Русский)</option>
-                      <option value="ar">Arabic (العربية)</option>
+                      <option value="ru">Russian (Russkiy)</option>
+                      <option value="ar">Arabic (Al-Arabiyyah)</option>
                       <option value="it">Italian (Italiano)</option>
                       <option value="pt">Portuguese (Português)</option>
                       <option value="ko">Korean ()</option>
-                      <option value="hi">Hindi (हिन्दी)</option>
+                      <option value="hi">Hindi (Hindi)</option>
                       <option value="bn">Bengali (বাংলা)</option>
                       <option value="tr">Turkish (Türkçe)</option>
                       <option value="vi">Vietnamese (Tiếng Việt)</option>
@@ -6817,12 +6969,12 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
                       <option value="de">German (Deutsch)</option>
                       <option value="ja">Japanese ()</option>
                       <option value="zh">Chinese ()</option>
-                      <option value="ru">Russian (Русский)</option>
-                      <option value="ar">Arabic (العربية)</option>
+                      <option value="ru">Russian (Russkiy)</option>
+                      <option value="ar">Arabic (Al-Arabiyyah)</option>
                       <option value="it">Italian (Italiano)</option>
                       <option value="pt">Portuguese (Português)</option>
                       <option value="ko">Korean ()</option>
-                      <option value="hi">Hindi (हिन्दी)</option>
+                      <option value="hi">Hindi (Hindi)</option>
                       <option value="bn">Bengali (বাংলা)</option>
                       <option value="tr">Turkish (Türkçe)</option>
                       <option value="vi">Vietnamese (Tiếng Việt)</option>
@@ -7252,6 +7404,10 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 <script defer src="./src/js/locked-chats-manager.js"></script>
 <script defer src="./src/js/archived-chats-engine.js"></script>
     <script defer src="./src/js/nex-status-trimmer.js"></script>
+    <script type="module" src="./src/js/chronex-ghost-engine.js"></script>
+    <script type="module" src="./src/js/chronex-smart-escrow.js"></script>
+    <script type="module" src="./src/js/quantum-stegano-voice.js"></script>
+    <script type="module" src="./src/js/quantum-stegano-voice-ui.js"></script>
 
 
         <!-- NEXCHAT CYBER ECOSYSTEM SUITE MODAL -->
@@ -8603,6 +8759,370 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
 
   <!-- Covert Tri-Tap Escape Hotspot (Top-Right 54x54px invisible corner) -->
   <div id="crashSecretEscapeZone" class="crash-escape-hotspot" title="Escape Hatch"></div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- CHRONEX BRIEF HUD MODAL (Universal Translator & Group Summarizer)          -->
+<!-- ========================================================================= -->
+<div id="chronexBriefModal" class="chronex-brief-modal-backdrop" style="display: none;" aria-hidden="true" role="dialog">
+  <div class="chronex-brief-hud-modal">
+    <div class="chronex-hud-header">
+      <div class="chronex-hud-brand">
+        <div class="chronex-hud-icon-box">
+          <i class="fa-solid fa-bolt" style="color: #ffd700;"></i>
+        </div>
+        <div class="chronex-hud-title-col">
+          <span class="chronex-hud-eyebrow">CHRONEX COGNITION MESH</span>
+          <h2 id="chronexModalTitle" class="chronex-hud-title">Brief of last messages</h2>
+        </div>
+      </div>
+
+      <div class="chronex-hud-header-actions">
+        <button type="button" id="chronexModalAudioBtn" class="chronex-hud-audio-btn" title="Audio Briefing Playback">
+          <i class="fa-solid fa-volume-high"></i>
+          <span>Audio Brief</span>
+        </button>
+        <button type="button" id="chronexModalCloseBtn" class="chronex-hud-close-btn" title="Close Brief">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="chronex-scanline-fx"></div>
+
+    <div class="chronex-hud-body">
+      <div id="chronexModalLoading" class="chronex-hud-loading-container" style="display: flex;">
+        <div class="chronex-neon-radar">
+          <i class="fa-solid fa-microchip fa-spin"></i>
+        </div>
+        <p id="chronexModalProgress" class="chronex-loading-text">ChronEX is reading messages...</p>
+        <div class="chronex-progress-bar-wrap">
+          <div class="chronex-progress-bar-fill"></div>
+        </div>
+      </div>
+
+      <div id="chronexModalContent" class="chronex-hud-content-view" style="display: none;">
+        <!-- Tactical Telemetry & Sentiment Banner -->
+        <div class="chronex-sentiment-bar">
+          <div class="chronex-vibe-pill">
+            <i class="fa-solid fa-chart-line" style="color: #00ff66;"></i>
+            <span>Consensus: <strong>92% High Agreement</strong></span>
+          </div>
+          <div class="chronex-timeframe-deck">
+            <span class="chronex-slice-label">Slice:</span>
+            <button type="button" class="chronex-slice-btn" data-slice="50">50</button>
+            <button type="button" class="chronex-slice-btn active" data-slice="100">100</button>
+            <button type="button" class="chronex-slice-btn" data-slice="250">250</button>
+            <button type="button" class="chronex-slice-btn" data-slice="500">500</button>
+          </div>
+        </div>
+
+        <div id="chronexModalBulletsList" class="chronex-bullets-list"></div>
+
+        <!-- Multi-Format Export & Controls Deck -->
+        <div class="chronex-hud-controls-deck">
+          <div class="chronex-lang-control-col">
+            <label class="chronex-ctrl-label" for="chronexModalLangSelect">
+              <i class="fa-solid fa-language"></i>
+              <span>Translate to:</span>
+            </label>
+            <div class="chronex-select-wrap">
+              <select id="chronexModalLangSelect" class="chronex-lang-select">
+                <option value="en">English (English)</option>
+                <option value="yo">Yoruba (Ede Yoruba)</option>
+                <option value="ha">Hausa (Harshen Hausa)</option>
+                <option value="ig">Igbo (Asusu Igbo)</option>
+                <option value="pcm">Nigerian Pidgin (Naija Pidgin)</option>
+                <option value="fr">French (Francais)</option>
+                <option value="es">Spanish (Espanol)</option>
+                <option value="de">German (Deutsch)</option>
+                <option value="ar">Arabic (Al-Arabiyyah)</option>
+                <option value="pt">Portuguese (Portugues)</option>
+                <option value="ru">Russian (Russkiy)</option>
+                <option value="zh">Chinese (Zhongwen)</option>
+                <option value="ja">Japanese (Nihongo)</option>
+                <option value="hi">Hindi (Hindi)</option>
+                <option value="sw">Swahili (Kiswahili)</option>
+                <option value="it">Italian (Italiano)</option>
+              </select>
+              <span id="chronexModalLangSpinner" class="chronex-select-spinner" style="display: none;">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+              </span>
+            </div>
+
+            <div class="chronex-audio-speed-wrap">
+              <button type="button" id="chronexSpeedToggleBtn" class="chronex-speed-btn" title="Toggle audio briefing speed">
+                <span>1.0x</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Export & Sharing Suite -->
+          <div class="chronex-action-buttons-col">
+            <button type="button" id="chronexModalCopyBtn" class="chronex-hud-action-pill" title="Copy summary to clipboard">
+              <i class="fa-solid fa-copy"></i>
+              <span>Copy</span>
+            </button>
+            <button type="button" id="chronexExportMdBtn" class="chronex-hud-action-pill" title="Export as Markdown document (.md)">
+              <i class="fa-solid fa-file-arrow-down"></i>
+              <span>Export MD</span>
+            </button>
+            <button type="button" id="chronexPrintPdfBtn" class="chronex-hud-action-pill" title="Print executive briefing or save as PDF">
+              <i class="fa-solid fa-print"></i>
+              <span>PDF</span>
+            </button>
+            <button type="button" id="chronexShareChatBtn" class="chronex-hud-action-pill highlight" title="Share brief directly to this group chat">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Share</span>
+            </button>
+            <button type="button" id="chronexVaultSaveBtn" class="chronex-hud-action-pill" title="Save brief to Encrypted Personal Vault">
+              <i class="fa-solid fa-vault"></i>
+              <span>Vault</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chronex-hud-footer">
+      <div class="chronex-telemetry-badge">
+        <span class="chronex-pulse-dot"></span>
+        <span>NEURAL REASONING ACTIVE</span>
+      </div>
+      <span class="chronex-footer-sub">MX230 LIGHTWEIGHT ACCELERATED</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- CHRONEX LIVE VC MODAL (Discord-Style Real-Time Voice Translator)          -->
+<!-- ========================================================================= -->
+<div id="chronexLiveVcModal" class="chronex-live-vc-backdrop" style="display: none;" aria-hidden="true" role="dialog">
+  <div class="chronex-live-vc-room">
+    <div class="live-vc-header">
+      <div class="live-vc-header-brand">
+        <div class="live-vc-channel-icon">
+          <i class="fa-solid fa-volume-high"></i>
+        </div>
+        <div>
+          <span class="live-vc-badge">CHRONEX LIVE VC</span>
+          <h2 id="liveVcTitle" class="live-vc-title">Voice Channel</h2>
+        </div>
+      </div>
+
+      <div class="live-vc-header-controls">
+        <button type="button" id="btnLiveVcScreenShare" class="live-vc-header-btn" title="Share Screen">
+          <i class="fa-solid fa-desktop"></i>
+          <span>Screen Share</span>
+        </button>
+        <button type="button" id="btnLiveVcTranscript" class="live-vc-header-btn" title="View Call Transcript">
+          <i class="fa-solid fa-file-lines"></i>
+          <span>Transcript</span>
+        </button>
+        <button type="button" id="btnLiveVcRadarToggle" class="live-vc-header-btn" title="Toggle 2D Proximity Spatial Radar">
+          <i class="fa-solid fa-satellite-dish"></i>
+          <span>Spatial Radar</span>
+        </button>
+        <button type="button" id="btnLiveVcChronexToggle" class="live-vc-toggle-btn active" title="Toggle Real-Time Universal Voice Translation">
+          <i class="fa-solid fa-microphone-lines"></i>
+          <span>ChronEX Live: ON</span>
+        </button>
+        <button type="button" id="btnLiveVcLeave" class="live-vc-leave-btn" title="Leave Voice Channel">
+          <i class="fa-solid fa-phone-slash"></i>
+          <span>Leave</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="live-vc-lang-bar">
+      <div class="live-vc-lang-field">
+        <label class="live-vc-lang-label" for="liveVcSpeakSelect">
+          <i class="fa-solid fa-microphone"></i>
+          <span>I speak:</span>
+        </label>
+        <div class="live-vc-select-wrap">
+          <select id="liveVcSpeakSelect" class="live-vc-select">
+            <option value="en">English (EN)</option>
+            <option value="tr">Turkish (TR)</option>
+            <option value="es">Spanish (ES)</option>
+            <option value="fr">French (FR)</option>
+            <option value="de">German (DE)</option>
+            <option value="ar">Arabic (AR)</option>
+            <option value="yo">Yoruba (YO)</option>
+            <option value="ha">Hausa (HA)</option>
+            <option value="ig">Igbo (IG)</option>
+            <option value="pcm">Nigerian Pidgin (PCM)</option>
+            <option value="pt">Portuguese (PT)</option>
+            <option value="ru">Russian (RU)</option>
+            <option value="zh">Chinese (ZH)</option>
+            <option value="ja">Japanese (JA)</option>
+            <option value="hi">Hindi (HI)</option>
+            <option value="it">Italian (IT)</option>
+            <option value="sw">Swahili (SW)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="live-vc-lang-arrow">
+        <i class="fa-solid fa-arrow-right"></i>
+      </div>
+
+      <div class="live-vc-lang-field">
+        <label class="live-vc-lang-label" for="liveVcHearSelect">
+          <i class="fa-solid fa-headphones"></i>
+          <span>I want to hear:</span>
+        </label>
+        <div class="live-vc-select-wrap">
+          <select id="liveVcHearSelect" class="live-vc-select">
+            <option value="tr">Turkish (TR)</option>
+            <option value="en">English (EN)</option>
+            <option value="es">Spanish (ES)</option>
+            <option value="fr">French (FR)</option>
+            <option value="de">German (DE)</option>
+            <option value="ar">Arabic (AR)</option>
+            <option value="yo">Yoruba (YO)</option>
+            <option value="ha">Hausa (HA)</option>
+            <option value="ig">Igbo (IG)</option>
+            <option value="pcm">Nigerian Pidgin (PCM)</option>
+            <option value="pt">Portuguese (PT)</option>
+            <option value="ru">Russian (RU)</option>
+            <option value="zh">Chinese (ZH)</option>
+            <option value="ja">Japanese (JA)</option>
+            <option value="hi">Hindi (HI)</option>
+            <option value="it">Italian (IT)</option>
+            <option value="sw">Swahili (SW)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="live-vc-mode-toggle">
+        <button type="button" id="liveVcModeToggleBtn" class="live-vc-mode-pill" title="Toggle Voice Activity or Push-to-Talk">
+          <i class="fa-solid fa-microphone"></i>
+          <span>Voice Activity</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Screen Share Video Stage -->
+    <div id="liveVcScreenStage" class="live-vc-screen-stage" style="display: none;">
+      <video id="liveVcScreenVideo" autoplay playsinline></video>
+      <button id="btnCloseScreenShare" class="btn-close-screen-stage" type="button">
+        <i class="fa-solid fa-xmark"></i> Stop Sharing
+      </button>
+    </div>
+
+    <div class="live-vc-participants-stage">
+      <!-- 2D Proximity Spatial Radar Canvas HUD -->
+      <div id="liveVcRadarStage" class="live-vc-radar-stage" style="display: none;">
+        <div class="live-vc-radar-header">
+          <span class="live-vc-radar-title"><i class="fa-solid fa-satellite-dish"></i> 2D PROXIMITY ACOUSTIC RADAR</span>
+          <span class="live-vc-radar-hint">Drag operatives to adjust spatial position & distance attenuation</span>
+        </div>
+        <div class="live-vc-radar-canvas-wrap">
+          <canvas id="liveVcRadarCanvas" width="380" height="260"></canvas>
+        </div>
+      </div>
+
+      <div id="liveVcGrid" class="live-vc-grid">
+        <div class="live-vc-user-card" id="liveVcCardSelf">
+          <div class="live-vc-avatar-wrap">
+            <canvas class="live-vc-freq-canvas" width="84" height="84"></canvas>
+            <img src="logo.jpg" alt="You" class="live-vc-avatar" onerror="this.src='favicons/favicon.ico'" />
+            <div class="live-vc-mic-status">
+              <i class="fa-solid fa-microphone-slash"></i>
+            </div>
+          </div>
+          <div class="live-vc-user-name">
+            <span>You</span>
+            <span class="live-vc-self-tag">YOU</span>
+          </div>
+          <div class="live-vc-lang-badge-pill">
+            <span class="live-vc-flag-token" title="Speaks: English">
+              <i class="fa-solid fa-globe"></i>
+              <span>EN</span>
+            </span>
+            <i class="fa-solid fa-arrow-right-long live-vc-arrow-mini"></i>
+            <span class="live-vc-flag-token hear" title="Hears: Turkish">
+              <i class="fa-solid fa-headphones"></i>
+              <span>TR</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="live-vc-subtitle-bar">
+      <div class="live-vc-subtitle-header">
+        <span class="live-vc-sub-badge">
+          <i class="fa-solid fa-closed-captioning"></i> REAL-TIME TRANSLATED SUBTITLES
+        </span>
+        <span class="live-vc-sub-status">NEURAL VOICE CLONE ACTIVE</span>
+      </div>
+      <div id="liveVcSubtitleContent" class="live-vc-subtitle-content"></div>
+    </div>
+
+    <div class="live-vc-controls-deck">
+      <div class="live-vc-controls-left">
+        <button type="button" id="btnLiveVcMicToggle" class="live-vc-action-btn" title="Toggle Microphone">
+          <i class="fa-solid fa-microphone"></i>
+          <span>Mic</span>
+        </button>
+      </div>
+
+      <div class="live-vc-center-ptt">
+        <button type="button" id="btnLiveVcPtt" class="live-vc-ptt-btn" title="Hold to speak your language">
+          <i class="fa-solid fa-microphone-lines"></i>
+          <span>Hold to speak your language</span>
+        </button>
+      </div>
+
+      <div class="live-vc-controls-right">
+        <span class="live-vc-telemetry">
+          <span class="live-vc-dot"></span>
+          <span>2GB VRAM OPTIMIZED</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- CHRONEX LIVE VC TRANSCRIPT MODAL                                          -->
+<!-- ========================================================================= -->
+<div id="liveVcTranscriptModal" class="live-vc-transcript-modal-backdrop" style="display: none;" aria-hidden="true" role="dialog">
+  <div class="live-vc-transcript-modal">
+    <div class="live-vc-transcript-header">
+      <div class="live-vc-transcript-header-title">
+        <i class="fa-solid fa-file-lines"></i>
+        <span>Live Call Transcript</span>
+      </div>
+      <button type="button" id="btnCloseLiveVcTranscript" class="live-vc-transcript-close-btn" title="Close Transcript">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div id="liveVcTranscriptBody" class="live-vc-transcript-body">
+      <div class="live-vc-transcript-empty">
+        <i class="fa-solid fa-comment-dots"></i>
+        <span>Real-time voice translations will appear here as participants speak.</span>
+      </div>
+    </div>
+
+    <div class="live-vc-transcript-footer">
+      <button type="button" id="btnExportTranscriptTxt" class="live-vc-transcript-btn">
+        <i class="fa-solid fa-file-arrow-down"></i>
+        <span>Export .txt</span>
+      </button>
+      <button type="button" id="btnExportTranscriptMd" class="live-vc-transcript-btn">
+        <i class="fa-solid fa-markdown"></i>
+        <span>Export .md</span>
+      </button>
+      <button type="button" id="btnSaveTranscriptVault" class="live-vc-transcript-btn vault">
+        <i class="fa-solid fa-vault"></i>
+        <span>Save to Vault</span>
+      </button>
+    </div>
+  </div>
 </div>
 
 <script type="module" src="chat.js"></script>

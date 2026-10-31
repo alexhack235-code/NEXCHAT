@@ -4276,7 +4276,7 @@ ${text}`;
             });
           });
 
-          messagesArea.appendChild(stage);
+          messagesArea.prepend(stage);
         } else {
           stage.style.display = '';
         }
@@ -4284,6 +4284,8 @@ ${text}`;
         if (stage) {
           stage.remove();
         }
+        const existingStage = document.getElementById('nexWelcomeStage');
+        if (existingStage) existingStage.remove();
       }
     }
 

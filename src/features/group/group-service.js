@@ -460,12 +460,22 @@ export async function setSlowMode(groupId, enabled, cooldownSeconds = 30) {
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error('Not authenticated');
 
-    const hasPerm = await hasPermission(groupId, currentUser.uid, PERMISSIONS.MANAGE_SETTINGS);
-    if (!hasPerm) throw new Error('Insufficient permissions');
-
     const groupRef = doc(db, 'groups', groupId);
+    const groupDoc = await getDoc(groupRef);
+    if (!groupDoc.exists()) throw new Error('Group not found');
+    const groupData = groupDoc.data();
+
+    const role = getUserRole(groupData, currentUser.uid);
+    if (role !== 'admin' && role !== 'creator') {
+      throw new Error('Insufficient permissions to adjust slow mode');
+    }
+
+    const sec = enabled ? Math.max(0, Math.min(300, parseInt(cooldownSeconds, 10) || 0)) : 0;
+
     await updateDoc(groupRef, {
-      'settings.slowMode': { enabled, cooldownSeconds }
+      'settings.slowMode': { enabled: !!enabled && sec > 0, cooldownSeconds: sec },
+      slowMode: { enabled: !!enabled && sec > 0, cooldownSeconds: sec },
+      slowModeSeconds: sec
     });
   } catch (error) {
     console.error('Error setting slow mode:', error);
@@ -485,16 +495,144 @@ export async function setDisappearingMessages(groupId, enabled, durationMinutes 
     const currentUser = auth.currentUser;
     if (!currentUser) throw new Error('Not authenticated');
 
-    const hasPerm = await hasPermission(groupId, currentUser.uid, PERMISSIONS.MANAGE_SETTINGS);
-    if (!hasPerm) throw new Error('Insufficient permissions');
-
     const groupRef = doc(db, 'groups', groupId);
+    const groupDoc = await getDoc(groupRef);
+    if (!groupDoc.exists()) throw new Error('Group not found');
+    const groupData = groupDoc.data();
+
+    const role = getUserRole(groupData, currentUser.uid);
+    if (role !== 'admin' && role !== 'creator') {
+      throw new Error('Insufficient permissions to set disappearing messages');
+    }
+
+    const dur = parseInt(durationMinutes, 10) || 60;
+
     await updateDoc(groupRef, {
-      'settings.disappearingMessages': { enabled, durationMinutes }
+      'settings.disappearingMessages': { enabled: !!enabled, durationMinutes: dur },
+      disappearingMessages: { enabled: !!enabled, durationMinutes: dur }
     });
   } catch (error) {
     console.error('Error setting disappearing messages:', error);
     throw error;
+  }
+}
+
+/**
+ * Update who can send messages
+ * @param {string} groupId
+ * @param {'all'|'admins'|'verified'} whoCanSend
+ */
+export async function setGroupWhoCanSend(groupId, whoCanSend = 'all') {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('Not authenticated');
+  const groupRef = doc(db, 'groups', groupId);
+  await updateDoc(groupRef, {
+    whoCanSend: whoCanSend,
+    'settings.whoCanSend': whoCanSend
+  });
+}
+
+/**
+ * Update who can add members
+ * @param {string} groupId
+ * @param {'all'|'admins'} whoCanAdd
+ */
+export async function setGroupWhoCanAdd(groupId, whoCanAdd = 'all') {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('Not authenticated');
+  const groupRef = doc(db, 'groups', groupId);
+  await updateDoc(groupRef, {
+    whoCanAdd: whoCanAdd,
+    'settings.whoCanAdd': whoCanAdd
+  });
+}
+
+/**
+ * Update who can edit group info
+ * @param {string} groupId
+ * @param {'all'|'admins'} whoCanEdit
+ */
+export async function setGroupWhoCanEdit(groupId, whoCanEdit = 'admins') {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('Not authenticated');
+  const groupRef = doc(db, 'groups', groupId);
+  await updateDoc(groupRef, {
+    whoCanEdit: whoCanEdit,
+    'settings.whoCanEdit': whoCanEdit
+  });
+}
+
+/**
+ * Update Fortress Anti-Spam & Link Shield
+ * @param {string} groupId
+ * @param {boolean} enabled
+ */
+export async function setGroupAntiSpam(groupId, enabled = true) {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('Not authenticated');
+  const groupRef = doc(db, 'groups', groupId);
+  await updateDoc(groupRef, {
+    antiSpam: !!enabled,
+    'settings.antiSpam': !!enabled
+  });
+}
+
+/**
+ * Update member contact privacy (hide numbers)
+ * @param {string} groupId
+ * @param {boolean} enabled
+ */
+export async function setGroupContactPrivacy(groupId, enabled = true) {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('Not authenticated');
+  const groupRef = doc(db, 'groups', groupId);
+  await updateDoc(groupRef, {
+    hideMemberContacts: !!enabled,
+    'settings.hideMemberContacts': !!enabled
+  });
+}
+
+/**
+ * Batch update all advanced group controls
+ * @param {string} groupId
+ * @param {Object} controls
+ */
+export async function setGroupAdvancedControls(groupId, controls = {}) {
+  const currentUser = auth.currentUser;
+  if (!currentUser) throw new Error('Not authenticated');
+  const groupRef = doc(db, 'groups', groupId);
+  const updatePayload = {};
+
+  if (typeof controls.slowModeEnabled !== 'undefined' || typeof controls.slowModeSeconds !== 'undefined') {
+    const enabled = !!controls.slowModeEnabled;
+    const sec = enabled ? Math.max(0, Math.min(300, parseInt(controls.slowModeSeconds, 10) || 0)) : 0;
+    updatePayload['settings.slowMode'] = { enabled: enabled && sec > 0, cooldownSeconds: sec };
+    updatePayload.slowMode = { enabled: enabled && sec > 0, cooldownSeconds: sec };
+    updatePayload.slowModeSeconds = sec;
+  }
+  if (controls.whoCanSend) {
+    updatePayload.whoCanSend = controls.whoCanSend;
+    updatePayload['settings.whoCanSend'] = controls.whoCanSend;
+  }
+  if (controls.whoCanAdd) {
+    updatePayload.whoCanAdd = controls.whoCanAdd;
+    updatePayload['settings.whoCanAdd'] = controls.whoCanAdd;
+  }
+  if (controls.whoCanEdit) {
+    updatePayload.whoCanEdit = controls.whoCanEdit;
+    updatePayload['settings.whoCanEdit'] = controls.whoCanEdit;
+  }
+  if (typeof controls.antiSpam !== 'undefined') {
+    updatePayload.antiSpam = !!controls.antiSpam;
+    updatePayload['settings.antiSpam'] = !!controls.antiSpam;
+  }
+  if (typeof controls.hideMemberContacts !== 'undefined') {
+    updatePayload.hideMemberContacts = !!controls.hideMemberContacts;
+    updatePayload['settings.hideMemberContacts'] = !!controls.hideMemberContacts;
+  }
+
+  if (Object.keys(updatePayload).length > 0) {
+    await updateDoc(groupRef, updatePayload);
   }
 }
 

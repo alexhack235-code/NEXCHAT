@@ -411,8 +411,12 @@ body {
 
 @media (max-width: 700px) {
   .nav-links { display: none; }
-  .nav-cta { padding: 8px 14px; font-size: 11.5px; }
-  .nav-actions { gap: 10px; }
+  .nav-cta { padding: 8px 12px; font-size: 11px; }
+  .nav-actions { gap: 6px; }
+  .matrix-overdrive-btn { padding: 6px 10px !important; font-size: 10.5px !important; white-space: nowrap !important; }
+  .cyber-sfx-btn { padding: 6px 8px !important; font-size: 10.5px !important; }
+  .theme-toggle-track { width: 44px !important; height: 24px !important; }
+  .theme-toggle-thumb { width: 18px !important; height: 18px !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

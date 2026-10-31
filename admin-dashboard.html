@@ -79,10 +79,10 @@
     .admin-container {
       max-width: 1440px;
       margin: 0 auto;
-      padding: 20px 20px 80px;
+      padding: 20px 20px calc(80px + env(safe-area-inset-bottom, 0px));
     }
 
-    /* Header */
+    /* Header & Mobile Adaptive Bar */
     .admin-header {
       display: flex;
       align-items: center;
@@ -96,12 +96,51 @@
       backdrop-filter: blur(20px);
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 242, 255, 0.05);
       margin-bottom: 20px;
+      position: relative;
+      transition: all 0.25s ease;
+    }
+
+    .admin-header-main-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      flex: 1 1 auto;
+      min-width: 0;
     }
 
     .admin-header-brand {
       display: flex;
       align-items: center;
       gap: 14px;
+      min-width: 0;
+    }
+
+    .admin-brand-text {
+      min-width: 0;
+    }
+
+    .admin-mobile-toggle-btn {
+      display: none;
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      border-radius: 12px;
+      background: rgba(0, 242, 255, 0.1);
+      border: 1px solid var(--border-color);
+      color: var(--neon-cyan);
+      font-size: 18px;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .admin-mobile-toggle-btn:active {
+      transform: scale(0.94);
+      background: rgba(0, 242, 255, 0.2);
     }
 
     .admin-shield-icon {
@@ -269,24 +308,39 @@
       border: 1px solid rgba(0, 242, 255, 0.3);
     }
 
-    /* Tabbed Navigation Bar */
+    /* Tabbed Navigation Bar Carousel */
+    .admin-tabs-carousel-wrapper {
+      position: relative;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
     .admin-tabs-nav {
       display: flex;
       align-items: center;
       gap: 8px;
+      flex-wrap: nowrap;
       overflow-x: auto;
-      padding-bottom: 6px;
-      margin-bottom: 20px;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      padding: 10px 14px;
+      margin-bottom: 6px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       scrollbar-width: none;
       -ms-overflow-style: none;
+      overscroll-behavior-x: contain;
     }
 
     .admin-tabs-nav::-webkit-scrollbar {
       display: none;
+      width: 0;
+      height: 0;
     }
 
     .admin-tab-btn {
+      scroll-snap-align: start;
+      flex: 0 0 auto;
+      min-height: 44px;
       padding: 10px 18px;
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.03);
@@ -301,6 +355,49 @@
       gap: 8px;
       white-space: nowrap;
       transition: all 0.2s ease;
+      touch-action: pan-x;
+    }
+
+    .admin-tabs-carousel-indicator {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 4px 6px;
+      margin-top: 2px;
+    }
+
+    .tabs-scroll-progress-track {
+      flex: 1;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .tabs-scroll-progress-bar {
+      height: 100%;
+      width: 20%;
+      background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(0, 242, 255, 0.6);
+      transition: width 0.15s ease, transform 0.15s ease;
+    }
+
+    .tabs-carousel-hint {
+      font-size: 10.5px;
+      color: var(--text-dim);
+      font-family: 'Space Grotesk', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .tabs-carousel-hint i {
+      color: var(--neon-cyan);
+      font-size: 11px;
     }
 
     .admin-tab-btn:hover {
@@ -323,7 +420,6 @@
       background: rgba(0, 0, 0, 0.5);
       color: var(--neon-cyan);
     }
-
     /* Tab Content Panes */
     .tab-pane {
       display: none;
@@ -1151,61 +1247,832 @@
       }
     }
 
-    /* ANDROID RIGID LOCK & ANTI-SWAY MATRIX */
+    /* Verification Badges */
+    .admin-avatar-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .avatar-achievement-badge {
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 2px 6px;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: linear-gradient(135deg, #0088cc, #00c6ff);
+      color: #ffffff;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      line-height: 1;
+      text-transform: uppercase;
+      z-index: 5;
+      pointer-events: none;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0, 136, 204, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .avatar-achievement-badge i {
+      font-size: 8px;
+    }
+
+    .avatar-achievement-badge.verified {
+      background: linear-gradient(135deg, #00f2fe 0%, #00ff66 100%);
+      color: #041019;
+      border: 1px solid rgba(0, 255, 102, 0.6);
+      box-shadow: 0 2px 8px rgba(0, 255, 102, 0.4);
+    }
+
+    .avatar-achievement-badge.ai {
+      background: linear-gradient(135deg, #00ff66, #00d4ff);
+      color: #041019;
+      border: 1px solid rgba(0, 255, 212, 0.6);
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+    }
+
+    .avatar-achievement-badge.gold {
+      background: linear-gradient(135deg, #f59e0b, #ffd700);
+      color: #041019;
+      border: 1px solid rgba(255, 215, 0, 0.6);
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.45);
+    }
+
+    .avatar-achievement-badge.vip {
+      background: linear-gradient(135deg, #8b5cf6, #d946ef);
+      color: #ffffff;
+      border: 1px solid rgba(217, 70, 239, 0.5);
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.45);
+    }
+
+    .tg-verified-badge,
+    .nex-verified-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #00ff66;
+      font-size: 13.5px;
+      filter: drop-shadow(0 0 6px rgba(0, 255, 102, 0.55));
+      vertical-align: middle;
+      margin-left: 4px;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .tg-verified-badge i,
+    .nex-verified-badge i {
+      font-size: 13.5px;
+    }
+
+    .tg-verified-badge.blue {
+      color: #1d9bf0;
+      filter: drop-shadow(0 0 6px rgba(29, 155, 240, 0.5));
+    }
+
+    .tg-verified-badge.gold {
+      color: #ffd700;
+      filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.55));
+    }
+
+    .tg-verified-badge.grey {
+      color: #94a3b8;
+      filter: drop-shadow(0 0 4px rgba(148, 163, 184, 0.4));
+    }
+
+    /* ======================================================== */
+    /* ANDROID MOBILE LUXURY OBSIDIAN UI ARCHITECTURE           */
+    /* ======================================================== */
+        /* ======================================================== */
+    /* ANDROID MOBILE LUXURY OBSIDIAN UI ARCHITECTURE           */
+    /* Responsive Viewports: 768px, 480px, 412x915, 390x844, 320px */
+    /* ======================================================== */
+
+    /* Standard Grid Utilities Across Dashboard Modules */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .grid-3col {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .switchboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .security-matrix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    /* Universal Horizontal Table Containment & Touch Scrolling */
+    .table-container,
+    .admin-table-wrapper,
+    .admin-table-wrap,
+    .table-responsive,
+    .table-scroll-container,
+    .cyber-table-container {
+      display: block;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
+      overscroll-behavior-x: contain;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      box-sizing: border-box;
+    }
+
+    .table-container::-webkit-scrollbar,
+    .admin-table-wrapper::-webkit-scrollbar,
+    .admin-table-wrap::-webkit-scrollbar,
+    .table-responsive::-webkit-scrollbar,
+    .cyber-table-container::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .table-container::-webkit-scrollbar-thumb,
+    .admin-table-wrapper::-webkit-scrollbar-thumb,
+    .admin-table-wrap::-webkit-scrollbar-thumb,
+    .table-responsive::-webkit-scrollbar-thumb,
+    .cyber-table-container::-webkit-scrollbar-thumb {
+      background: rgba(0, 242, 255, 0.35);
+      border-radius: 3px;
+    }
+
+    /* Tablet and Mobile Breakpoint (<= 768px) */
     @media (max-width: 768px) {
-      html, body, .admin-container, .admin-header, .superadmin-session-bar, .admin-panel, .control-deck-grid, .hud-metrics-grid {
+      /* Root Containment: Zero Horizontal Drift */
+      html, body {
         width: 100% !important;
         max-width: 100vw !important;
         overflow-x: hidden !important;
+        position: relative !important;
         box-sizing: border-box !important;
         touch-action: pan-y !important;
         overscroll-behavior-x: none !important;
-      }
-      .hud-metrics-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 10px !important;
-      }
-      .admin-tabs-nav, .tabs-wrapper, .admin-table-wrapper, .table-responsive, .admin-table-wrap {
-        width: 100% !important;
-        max-width: 100% !important;
-        overflow-x: auto !important;
-        touch-action: pan-x pan-y !important;
         -webkit-overflow-scrolling: touch !important;
       }
-      .admin-container {
-        padding: 12px 12px 60px !important;
+
+      /* Android Gesture Bar Navigation & Safe Areas */
+      .admin-container,
+      .admin-main-container,
+      #adminMainContainer {
+        padding: 10px 10px calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+        width: 100% !important;
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
+        contain: layout style !important;
       }
-      .admin-panel {
-        padding: 16px !important;
+
+      .admin-panel,
+      .tab-pane {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
       }
+
+      /* Adaptive Mobile Header App Bar */
       .admin-header {
-        padding: 14px 16px !important;
-        gap: 12px !important;
+        padding: 12px 14px !important;
+        border-radius: 14px !important;
+        margin-bottom: 14px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 0 !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
       }
-      .admin-title {
-        font-size: 16px !important;
-        letter-spacing: 1px !important;
+
+      .admin-header-main-row {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
       }
+
+      .admin-header-brand {
+        gap: 10px !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+      }
+
       .admin-shield-icon {
         width: 38px !important;
         height: 38px !important;
+        min-width: 38px !important;
         font-size: 18px !important;
+        border-radius: 10px !important;
       }
 
-      #adminReelVideoModal div[style*="grid-template-columns: 280px 1fr"] {
-        grid-template-columns: 1fr !important;
+      .admin-brand-text {
+        min-width: 0 !important;
       }
+
+      .admin-title {
+        font-size: 14px !important;
+        letter-spacing: 0.8px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+      }
+
+      .admin-subtitle {
+        font-size: 9.5px !important;
+        letter-spacing: 0.5px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        opacity: 0.75;
+      }
+
+      .admin-mobile-toggle-btn {
+        display: inline-flex !important;
+      }
+
+      /* Collapsible Quick-Action Menu */
+      .admin-header-actions {
+        display: none !important;
+        width: 100% !important;
+        padding-top: 12px !important;
+        margin-top: 10px !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        gap: 8px !important;
+        flex-direction: column !important;
+      }
+
+      .admin-header-actions.mobile-open {
+        display: flex !important;
+        animation: fadeIn 0.2s ease-out;
+      }
+
+      .admin-header-actions .admin-chip {
+        width: 100% !important;
+        justify-content: center !important;
+        min-height: 38px !important;
+        padding: 6px 12px !important;
+        box-sizing: border-box !important;
+      }
+
+      .admin-header-actions .admin-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        min-height: 44px !important;
+        font-size: 12.5px !important;
+      }
+
+      /* SuperAdmin Session Banner */
+      .superadmin-session-bar {
+        padding: 10px 12px !important;
+        border-radius: 12px !important;
+        margin-bottom: 14px !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .session-info {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        font-size: 11.5px !important;
+      }
+
+      .superadmin-session-bar > div:last-child {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+
+      #sessionTimerText {
+        grid-column: span 2;
+        text-align: center;
+        font-size: 11px !important;
+        padding: 4px 0;
+      }
+
+      .superadmin-session-bar .admin-btn {
+        min-height: 44px !important;
+        justify-content: center !important;
+        padding: 6px 10px !important;
+      }
+
+      /* Fluid Tab Navigation Carousel */
+      .admin-tabs-carousel-wrapper {
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .admin-tabs-nav {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scroll-snap-type: x mandatory !important;
+        padding: 10px 14px !important;
+        gap: 8px !important;
+        margin-bottom: 6px !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+      }
+
+      .admin-tabs-nav::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .admin-tab-btn {
+        flex-shrink: 0 !important;
+        flex: 0 0 auto !important;
+        scroll-snap-align: start !important;
+        white-space: nowrap !important;
+        min-height: 42px !important;
+        padding: 8px 14px !important;
+        font-size: 12px !important;
+      }
+
+      .admin-tabs-carousel-indicator {
+        display: flex !important;
+      }
+
+      /* Telemetry HUD Metrics Grid & Metric Cards */
+      .hud-metrics-grid,
+      .metrics-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        gap: 10px !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .hud-card,
+      .stat-card,
+      .metric-card,
+      .hud-metrics-grid .metric-card,
+      .metrics-grid .metric-card {
+        padding: 12px 10px !important;
+        border-radius: 12px !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+      }
+
+      .hud-metrics-grid .metric-card-title,
+      .metrics-grid .metric-card-title {
+        font-size: 9.5px !important;
+        letter-spacing: 0.5px !important;
+      }
+
+      .hud-metrics-grid .metric-card-value,
+      .metrics-grid .metric-card-value {
+        font-size: clamp(16px, 4vw, 22px) !important;
+        line-height: 1.2 !important;
+        word-break: break-word !important;
+      }
+
+      .hud-metrics-grid .metric-card-footer,
+      .metrics-grid .metric-card-footer {
+        font-size: 9.5px !important;
+        gap: 4px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+
+      /* SuperAdmin Master Cyber Control Deck */
+      .admin-control-deck {
+        padding: 14px 12px !important;
+        border-radius: 14px !important;
+        margin-bottom: 18px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .control-deck-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 14px !important;
+      }
+
+      .control-deck-header > div:last-child {
+        display: flex !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+        width: 100% !important;
+        padding-bottom: 4px !important;
+      }
+
+      .control-deck-header > div:last-child::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .deck-nav-pill,
+      .control-deck-header .admin-btn {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+        min-height: 40px !important;
+        padding: 6px 12px !important;
+      }
+
+      .control-deck-grid,
+      .switchboard-grid,
+      .security-matrix-grid,
+      .grid-2col,
+      .grid-3col,
+      #tab-switchboard div[style*="grid-template-columns"] {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+      }
+
+      .control-unit-card {
+        padding: 14px 12px !important;
+        border-radius: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        box-sizing: border-box !important;
+      }
+
+      .control-unit-title {
+        font-size: 12px !important;
+      }
+
+      .control-unit-desc {
+        font-size: 10.5px !important;
+        margin-bottom: 12px !important;
+      }
+
+      /* Cyber Segmented Controls */
+      .cyber-segmented-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        gap: 4px !important;
+        padding: 4px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .cyber-segmented-group::-webkit-scrollbar {
+        display: none !important;
+      }
+
+      .cyber-seg-btn {
+        flex: 1 0 auto !important;
+        min-height: 40px !important;
+        padding: 6px 10px !important;
+        font-size: 10.5px !important;
+        white-space: nowrap !important;
+      }
+
+      /* Hardware Telemetry Meters */
+      .telemetry-meters-bar {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+        padding: 12px !important;
+        margin-top: 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      /* Panels */
+      .admin-panel {
+        padding: 14px 12px !important;
+        border-radius: 14px !important;
+        margin-bottom: 16px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .panel-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 14px !important;
+      }
+
+      .panel-title {
+        font-size: 14px !important;
+      }
+
+      /* Universal 1-Column Auto-Stack for Multi-Column Grids */
+      div[style*="grid-template-columns: 1fr 1fr"],
+      div[style*="grid-template-columns: 1.2fr 1fr"],
+      div[style*="grid-template-columns: 1fr 1.2fr"],
+      div[style*="grid-template-columns: 1.15fr 0.85fr"],
+      div[style*="grid-template-columns: 1.1fr 0.9fr"],
+      div[style*="grid-template-columns: 1.2fr 0.8fr"],
+      div[style*="grid-template-columns: 280px 1fr"],
+      .tab-pane > div[style*="grid-template-columns"],
+      .admin-panel div[style*="grid-template-columns: 1"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+
+      /* 4-Column Grids -> 2 Columns on Tablets/Phones */
+      div[style*="grid-template-columns: repeat(4, 1fr)"],
+      .metrics-grid[style*="grid-template-columns: repeat(4, 1fr)"],
       #adminReelVideoModal [style*="repeat(4, 1fr)"] {
-        grid-template-columns: repeat(2, 1fr) !important;
-      }
-      #adminReelVideoModal div[style*="grid-template-columns: 1fr 1fr"] {
-        grid-template-columns: 1fr !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 8px !important;
       }
 
-      #adminUserSanctionsModal div[style*="grid-template-columns: 1.2fr 1fr"] {
+      div[style*="grid-template-columns: repeat(auto-fit"],
+      div[style*="grid-template-columns: repeat(auto-fill"],
+      .advanced-stat-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+
+      /* Data Tables Horizontal Touch Scrolling */
+      .admin-table-wrap,
+      .admin-table-wrapper,
+      .table-responsive,
+      .table-scroll-container,
+      .cyber-table-container,
+      .table-container,
+      div[style*="overflow-x: auto"] {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        touch-action: pan-x pan-y !important;
+        border-radius: 10px !important;
+        margin-bottom: 14px !important;
+        box-sizing: border-box !important;
+      }
+
+      .admin-table,
+      table.admin-table,
+      table.cyber-table,
+      table.data-table {
+        min-width: 580px !important;
+        width: 100% !important;
+      }
+
+      .admin-table th,
+      .admin-table td {
+        padding: 9px 10px !important;
+        font-size: 11px !important;
+      }
+
+      /* Modals */
+      .admin-modal-card,
+      .admin-modal-card.wide,
+      .auth-gate-card,
+      #adminAuthGateModal .auth-gate-card,
+      #adminInspectModal .admin-modal-card,
+      #adminReelVideoModal > div,
+      #adminUserSanctionsModal > div,
+      #adminVerificationBadgeModal > div {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        max-height: 92vh !important;
+        padding: 16px 14px !important;
+        border-radius: 16px !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        box-sizing: border-box !important;
+      }
+
+      .admin-modal-header {
+        margin-bottom: 14px !important;
+        padding-bottom: 10px !important;
+      }
+
+      .admin-modal-header h3 {
+        font-size: 14px !important;
+      }
+
+      /* Touch Target Accessibility Minimums (>=44px) */
+      .admin-btn,
+      .admin-tab-btn,
+      .admin-input,
+      .admin-select,
+      .admin-switch,
+      .cyber-range-wrapper,
+      .cyber-range-slider,
+      button,
+      .admin-mobile-toggle-btn {
+        min-height: 44px !important;
+      }
+
+      /* Floating SuperAdmin Quick Dock for Android */
+      .admin-mobile-dock {
+        display: flex !important;
+        position: fixed !important;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        z-index: 1000 !important;
+        background: rgba(10, 16, 30, 0.94) !important;
+        border: 1px solid rgba(0, 242, 255, 0.3) !important;
+        border-radius: 9999px !important;
+        padding: 6px 14px !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 16px rgba(0, 242, 255, 0.15) !important;
+        backdrop-filter: blur(14px) !important;
+        -webkit-backdrop-filter: blur(14px) !important;
+        gap: 14px !important;
+        align-items: center !important;
+      }
+
+      .mobile-dock-btn {
+        background: none !important;
+        border: none !important;
+        color: var(--text-dim) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        gap: 2px !important;
+        font-size: 10px !important;
+        cursor: pointer !important;
+        padding: 4px 6px !important;
+        border-radius: 8px !important;
+        touch-action: manipulation !important;
+        min-height: 44px !important;
+        justify-content: center !important;
+      }
+
+      .mobile-dock-btn i {
+        font-size: 15px !important;
+      }
+
+      .mobile-dock-btn.active {
+        color: var(--neon-cyan) !important;
+      }
+    }
+
+    /* Small Android Phones (<= 480px and down to 320px) */
+    @media (max-width: 480px) {
+      .hud-metrics-grid,
+      .metrics-grid {
+        grid-template-columns: repeat(2, minmax(130px, 1fr)) !important;
+        gap: 8px !important;
+      }
+
+      .hud-card,
+      .stat-card,
+      .metric-card,
+      .hud-metrics-grid .metric-card,
+      .metrics-grid .metric-card {
+        padding: 10px 8px !important;
+      }
+
+      .hud-metrics-grid .metric-card-value,
+      .metrics-grid .metric-card-value {
+        font-size: 17px !important;
+      }
+
+      .admin-header {
+        padding: 10px 12px !important;
+      }
+
+      .admin-title {
+        font-size: 13px !important;
+      }
+
+      .admin-subtitle {
+        display: none !important;
+      }
+
+      .admin-modal-card,
+      .admin-modal-card.wide,
+      .auth-gate-card,
+      #adminAuthGateModal .auth-gate-card,
+      #adminInspectModal .admin-modal-card,
+      #adminReelVideoModal > div,
+      #adminUserSanctionsModal > div,
+      #adminVerificationBadgeModal > div {
+        width: 94vw !important;
+        max-width: 94vw !important;
+        max-height: 90vh !important;
+        padding: 18px 14px !important;
+        border-radius: 16px !important;
+      }
+
+      .auth-gate-card {
+        padding: 22px 16px !important;
+        border-radius: 16px !important;
+      }
+
+      .auth-gate-icon {
+        width: 56px !important;
+        height: 56px !important;
+        font-size: 24px !important;
+      }
+    }
+
+    @media (max-width: 340px) {
+      .hud-metrics-grid,
+      .metrics-grid {
         grid-template-columns: 1fr !important;
       }
     }
+
+    @media (min-width: 769px) {
+      .admin-mobile-dock {
+        display: none !important;
+      }
+    }
+
+    /* ==========================================================================
+       SUPERADMIN CONTROL DECK COLLAPSIBLE ACCORDION
+       ========================================================================== */
+    .admin-control-deck.collapsed .control-deck-grid,
+    .admin-control-deck.collapsed .telemetry-meters-bar {
+      display: none !important;
+    }
+    .admin-control-deck.collapsed {
+      padding: 10px 14px !important;
+      margin-bottom: 12px !important;
+    }
+
+    /* Accessible Typography Standardization (>= 11px) */
+    .hud-metrics-grid .metric-card-title {
+      font-size: 11px !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.5px !important;
+    }
+    .hud-metrics-grid .metric-card-footer {
+      font-size: 11px !important;
+      gap: 5px !important;
+    }
+    .control-unit-desc {
+      font-size: 11.5px !important;
+      line-height: 1.35 !important;
+    }
+    .cyber-seg-btn {
+      font-size: 11px !important;
+      min-height: 38px !important;
+    }
+
+    /* Desktop Tab Navigation Arrow Chevrons */
+    .tabs-carousel-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(10, 16, 30, 0.92);
+      border: 1px solid rgba(0, 242, 255, 0.4);
+      color: #00f2ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+    .tabs-carousel-arrow.prev { left: -12px; }
+    .tabs-carousel-arrow.next { right: -12px; }
+    .tabs-carousel-arrow:hover {
+      background: rgba(0, 242, 255, 0.25);
+      border-color: #00f2ff;
+      box-shadow: 0 0 14px rgba(0, 242, 255, 0.5);
+    }
+    @media (max-width: 768px) {
+      .tabs-carousel-arrow {
+        display: none !important;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -1246,29 +2113,34 @@
   <div class="admin-container" id="adminMainContainer" style="display: none;">
     <!-- Top Header -->
     <header class="admin-header">
-      <div class="admin-header-brand">
-        <div class="admin-shield-icon">
-          <i class="fa-solid fa-shield-halved"></i>
+      <div class="admin-header-main-row">
+        <div class="admin-header-brand">
+          <div class="admin-shield-icon">
+            <i class="fa-solid fa-shield-halved"></i>
+          </div>
+          <div class="admin-brand-text">
+            <h1 class="admin-title">NEXCHAT SECURITY COMMAND</h1>
+            <div class="admin-subtitle">Master Administrative Operations &bull; Real-Time Database Management</div>
+          </div>
         </div>
-        <div>
-          <h1 class="admin-title">NEXCHAT SECURITY COMMAND</h1>
-          <div class="admin-subtitle">Master Administrative Operations &bull; Real-Time Database Management</div>
-        </div>
+        <button type="button" class="admin-mobile-toggle-btn" id="adminHeaderMenuToggle" aria-label="Toggle Quick Actions Menu">
+          <i class="fa-solid fa-bars-staggered"></i>
+        </button>
       </div>
 
-      <div class="admin-header-actions">
+      <div class="admin-header-actions" id="adminHeaderActions">
         <div class="admin-chip" id="threatLevelChip">
           <span class="pulse-dot"></span>
           <span>SYSTEM: NORMAL</span>
         </div>
         <a href="terminal.html" class="admin-btn secondary" title="Hacker Terminal">
-          <i class="fa-solid fa-terminal"></i> CLI Terminal
+          <i class="fa-solid fa-terminal"></i> <span>CLI Terminal</span>
         </a>
         <a href="chat.html" class="admin-btn primary" title="Return to Chat">
-          <i class="fa-solid fa-comment-dots"></i> Public Chat
+          <i class="fa-solid fa-comment-dots"></i> <span>Public Chat</span>
         </a>
         <button type="button" id="lockConsoleBtn" class="admin-btn danger" title="Lock Console Immediately">
-          <i class="fa-solid fa-lock"></i> Lock Console
+          <i class="fa-solid fa-lock"></i> <span>Lock Console</span>
         </button>
       </div>
     </header>
@@ -1631,9 +2503,17 @@
       </div>
     </section>
 
-    <!-- TAB NAVIGATION BAR -->
-    <nav class="admin-tabs-nav">
-      <button type="button" class="admin-tab-btn active" data-tab="tab-users">
+    <!-- TAB NAVIGATION CAROUSEL WRAPPER -->
+    <div class="admin-tabs-carousel-wrapper">
+
+      <button type="button" class="tabs-carousel-arrow prev" id="tabsScrollPrev" aria-label="Scroll tabs left">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button type="button" class="tabs-carousel-arrow next" id="tabsScrollNext" aria-label="Scroll tabs right">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <nav class="admin-tabs-nav" id="adminTabsNav">
+        <button type="button" class="admin-tab-btn active" data-tab="tab-users">
         <i class="fa-solid fa-users-gear"></i> User Management &amp; Moderation
         <span class="tab-count" id="tabUsersCount">...</span>
       </button>
@@ -1713,6 +2593,18 @@
         <span class="tab-count" id="tabKillswitchBadge" style="background: rgba(239, 68, 68, 0.2); color: #ef4444;">SECURITY</span>
       </button>
     </nav>
+
+      <!-- Mobile Touch Carousel Indicators -->
+      <div class="admin-tabs-carousel-indicator">
+        <div class="tabs-scroll-progress-track">
+          <div class="tabs-scroll-progress-bar" id="adminTabsProgressBar"></div>
+        </div>
+        <div class="tabs-carousel-hint">
+          <i class="fa-solid fa-arrows-left-right"></i>
+          <span>Swipe 20+ Modules</span>
+        </div>
+      </div>
+    </div>
 
 
     <!-- ========================================== -->
@@ -4960,10 +5852,14 @@
 
       <!-- Target User Banner -->
       <div style="background: rgba(0, 242, 255, 0.04); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px;">
-        <img id="modalUserAvatar" src="logo.jpg" alt="User Avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--neon-cyan);">
+        <div class="admin-avatar-wrap">
+          <img id="modalUserAvatar" src="logo.jpg" alt="User Avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--neon-cyan);">
+          <span class="avatar-achievement-badge verified" id="modalUserAvatarBadge"><i class="fa-solid fa-check"></i></span>
+        </div>
         <div style="flex: 1;">
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <strong id="modalUserDisplayName" style="font-size: 14px; color: #fff;">User Name</strong>
+            <span class="tg-verified-badge blue" id="modalUserTgBadge"><i class="fa-solid fa-circle-check"></i></span>
             <span id="modalUserHandle" style="font-size: 11px; color: var(--neon-cyan); font-family: monospace;">@user</span>
             <span id="modalUserCurrentBadge" class="badge active">ACTIVE</span>
           </div>
@@ -5094,10 +5990,14 @@
 
       <!-- Target User Meta -->
       <div style="background: rgba(0, 242, 255, 0.04); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px;">
-        <img id="modalBadgeUserAvatar" src="logo.jpg" alt="User Avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--neon-cyan);">
+        <div class="admin-avatar-wrap">
+          <img id="modalBadgeUserAvatar" src="logo.jpg" alt="User Avatar" style="width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--neon-cyan);">
+          <span class="avatar-achievement-badge gold"><i class="fa-solid fa-certificate"></i></span>
+        </div>
         <div style="flex: 1;">
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <strong id="modalBadgeUserDisplayName" style="font-size: 14px; color: #fff;">User</strong>
+            <span class="tg-verified-badge gold"><i class="fa-solid fa-circle-check"></i></span>
             <span id="modalBadgeCurrentTierBadge" class="badge" style="background: rgba(0,242,255,0.15); color: #00f2ff;">UNVERIFIED</span>
           </div>
           <div style="font-size: 11.5px; color: var(--text-dim); margin-top: 2px;" id="modalBadgeUserHandle">@handle</div>
@@ -5454,14 +6354,56 @@
       const tabBtns = document.querySelectorAll('.admin-tab-btn');
       const tabPanes = document.querySelectorAll('.tab-pane');
 
+      // Mobile Adaptive App Bar Header Actions Toggle
+      const adminHeaderToggleBtn = document.getElementById('adminHeaderMenuToggle');
+      const adminHeaderActionsWrap = document.getElementById('adminHeaderActions');
+      if (adminHeaderToggleBtn && adminHeaderActionsWrap) {
+        adminHeaderToggleBtn.addEventListener('click', () => {
+          adminHeaderActionsWrap.classList.toggle('mobile-open');
+          const icon = adminHeaderToggleBtn.querySelector('i');
+          if (icon) {
+            if (adminHeaderActionsWrap.classList.contains('mobile-open')) {
+              icon.className = 'fa-solid fa-xmark';
+            } else {
+              icon.className = 'fa-solid fa-bars-staggered';
+            }
+          }
+        });
+      }
+
+      // Fluid Tab Carousel Scroll Progress Tracker
+      const adminTabsNavEl = document.getElementById('adminTabsNav') || document.querySelector('.admin-tabs-nav');
+      const adminTabsProgressBarEl = document.getElementById('adminTabsProgressBar');
+      function updateTabsIndicator() {
+        if (!adminTabsNavEl || !adminTabsProgressBarEl) return;
+        const maxScroll = adminTabsNavEl.scrollWidth - adminTabsNavEl.clientWidth;
+        if (maxScroll > 0) {
+          const ratio = Math.min(1, Math.max(0, adminTabsNavEl.scrollLeft / maxScroll));
+          const minW = 20;
+          const w = minW + ratio * (100 - minW);
+          adminTabsProgressBarEl.style.width = `${Math.min(100, Math.round(w))}%`;
+        } else {
+          adminTabsProgressBarEl.style.width = '100%';
+        }
+      }
+      if (adminTabsNavEl) {
+        adminTabsNavEl.addEventListener('scroll', updateTabsIndicator, { passive: true });
+        window.addEventListener('resize', updateTabsIndicator, { passive: true });
+        setTimeout(updateTabsIndicator, 150);
+      }
+
       tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
           const targetTabId = btn.getAttribute('data-tab');
           tabBtns.forEach(b => b.classList.remove('active'));
           tabPanes.forEach(p => p.classList.remove('active'));
           btn.classList.add('active');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (_) {}
           const targetPane = document.getElementById(targetTabId);
           if (targetPane) targetPane.classList.add('active');
+          updateTabsIndicator();
           if (targetTabId === 'tab-fulfillment') {
             try { initFulfillmentDesk(); } catch(e) {}
           }
@@ -5485,6 +6427,57 @@
           }
         });
       });
+
+      
+      // Wire Desktop Carousel Chevrons
+      const scrollPrevBtn = document.getElementById('tabsScrollPrev');
+      const scrollNextBtn = document.getElementById('tabsScrollNext');
+      if (scrollPrevBtn && adminTabsNav) {
+        scrollPrevBtn.addEventListener('click', () => {
+          adminTabsNav.scrollBy({ left: -260, behavior: 'smooth' });
+        });
+      }
+      if (scrollNextBtn && adminTabsNav) {
+        scrollNextBtn.addEventListener('click', () => {
+          adminTabsNav.scrollBy({ left: 260, behavior: 'smooth' });
+        });
+      }
+
+      // Wire Collapsible Cyber Control Deck
+      const masterDeckEl = document.getElementById('adminMasterControlDeck');
+      const toggleDeckBtn = document.getElementById('toggleControlDeckBtn');
+      const toggleDeckIcon = document.getElementById('toggleControlDeckIcon');
+      const toggleDeckText = document.getElementById('toggleControlDeckText');
+
+      if (window.innerWidth <= 768 && masterDeckEl) {
+        masterDeckEl.classList.add('collapsed');
+        if (toggleDeckIcon) toggleDeckIcon.className = 'fa-solid fa-chevron-down';
+        if (toggleDeckText) toggleDeckText.textContent = 'Expand Deck';
+      }
+
+      if (toggleDeckBtn && masterDeckEl) {
+        toggleDeckBtn.addEventListener('click', () => {
+          masterDeckEl.classList.toggle('collapsed');
+          const isCollapsed = masterDeckEl.classList.contains('collapsed');
+          if (toggleDeckIcon) toggleDeckIcon.className = isCollapsed ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+          if (toggleDeckText) toggleDeckText.textContent = isCollapsed ? 'Expand Deck' : 'Collapse Deck';
+        });
+      }
+
+      // Auto-scroll active tab into view on initialization
+      try {
+        const initialActiveTab = document.querySelector('.admin-tabs-nav .admin-tab-btn.active');
+        if (initialActiveTab) {
+          setTimeout(() => {
+            const adminNavEl = document.querySelector('.admin-tabs-nav');
+            if (adminNavEl) {
+              const navLeft = adminNavEl.getBoundingClientRect().left;
+              const btnLeft = initialActiveTab.getBoundingClientRect().left;
+              adminNavEl.scrollLeft += (btnLeft - navLeft) - (adminNavEl.clientWidth / 2) + (initialActiveTab.clientWidth / 2);
+            }
+          }, 200);
+        }
+      } catch (_) {}
 
       //  LOAD LIVE DATA & METRICS 
       const SEEDED_ADMIN_USERS = [
@@ -5606,6 +6599,9 @@
           btn.addEventListener('click', () => {
             document.querySelectorAll('#deckUploadLimitGroup .cyber-seg-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (_) {}
             const val = btn.getAttribute('data-val');
             if (uploadLimitBadge) uploadLimitBadge.textContent = val + ' MB';
             logAudit(`Max reel upload file limit set to ${val} MB.`, 'ok');
@@ -5618,6 +6614,9 @@
           btn.addEventListener('click', () => {
             document.querySelectorAll('#deckEdgeClusterGroup .cyber-seg-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (_) {}
             const cluster = btn.getAttribute('data-cluster');
             if (edgeClusterBadge) edgeClusterBadge.textContent = cluster.toUpperCase();
             logAudit(`Edge routing pipeline updated to cluster: [${cluster.toUpperCase()}].`, 'ok');
@@ -5630,6 +6629,9 @@
           btn.addEventListener('click', () => {
             document.querySelectorAll('#deckWmPaceGroup .cyber-seg-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (_) {}
             const pace = btn.getAttribute('data-pace');
             const label = pace === '0' ? 'Static Pinned' : (pace + 's Cadence');
             if (wmPaceBadge) wmPaceBadge.textContent = label;
@@ -5800,10 +6802,16 @@
             if (h === currentAlgoConfig.viralityDecayHours) {
               decayGroup.querySelectorAll('button').forEach(b => b.classList.remove('active'));
               btn.classList.add('active');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (_) {}
             }
             btn.addEventListener('click', () => {
               decayGroup.querySelectorAll('button').forEach(b => b.classList.remove('active'));
               btn.classList.add('active');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (_) {}
               currentAlgoConfig.viralityDecayHours = h;
               if (decayBadge) decayBadge.textContent = `${h}h ${btn.textContent.split(' ')[1] || ''}`;
               if (decayTelemetry) decayTelemetry.textContent = `${h} Hours Standard`;
@@ -5940,6 +6948,9 @@
           btn.addEventListener('click', () => {
             powGroup.querySelectorAll('button').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (_) {}
             const powBits = btn.getAttribute('data-pow');
             localStorage.setItem('nex_pow_difficulty', powBits);
             const powStatus = document.getElementById('telemetryPowStatus');
@@ -6496,6 +7507,9 @@
             btn.addEventListener('click', () => {
               speedBtns.forEach(b => b.classList.remove('active'));
               btn.classList.add('active');
+          try {
+            btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          } catch (_) {}
               replaySpeed = parseInt(btn.getAttribute('data-speed'), 10) || 1;
             });
           });
@@ -7138,14 +8152,28 @@ For support or further inquiries, reply directly to this chat.`;
             statusBadgeHtml = '<span class="badge" style="background: rgba(192, 132, 252, 0.15); border: 1px solid var(--neon-purple); color: var(--neon-purple);"><i class="fa-solid fa-shield-virus"></i> BLOCKED</span>';
           }
 
+          const isVerifiedUser = u.isVerified || u.verified || isSuperAdmin;
+          const verifiedBadgeClass = isSuperAdmin ? 'gold' : 'blue';
+          const officialVerifiedBadge = isVerifiedUser
+            ? `<span class="tg-verified-badge ${verifiedBadgeClass}" title="Cryptographically Verified"><i class="fa-solid fa-circle-check"></i></span>`
+            : '';
+          const achievementBadgeClass = isSuperAdmin ? 'vip' : (isVerifiedUser ? 'verified' : '');
+          const achievementIcon = isSuperAdmin ? 'fa-crown' : 'fa-check';
+          const achievementBadgeHtml = isVerifiedUser
+            ? `<span class="avatar-achievement-badge ${achievementBadgeClass}"><i class="fa-solid ${achievementIcon}"></i></span>`
+            : '';
+
           tr.innerHTML = `
             <td>
               <div style="display: flex; align-items: center; gap: 10px;">
-                <img src="${avatarUrl}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(0,242,255,0.3);" onerror="this.src='logo.jpg'">
+                <div class="admin-avatar-wrap">
+                  <img src="${avatarUrl}" alt="${displayName}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid rgba(0,242,255,0.3);" onerror="this.src='logo.jpg'">
+                  ${achievementBadgeHtml}
+                </div>
                 <div>
                   <div style="display: flex; align-items: center; gap: 6px;">
                     <strong style="color: #fff; font-size: 13px;">${escapeHtml(displayName)}</strong>
-                    ${badgeHtml}
+                    ${badgeHtml || officialVerifiedBadge}
                   </div>
                   <div style="font-size: 10px; color: var(--text-dim); font-family: monospace;">@${escapeHtml(u.username || 'user')}</div>
                 </div>

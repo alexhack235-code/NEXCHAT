@@ -115,6 +115,7 @@ service cloud.firestore {
     //   - videoUrl: string (required URL, max 2048 chars)
     //   - thumbnailUrl: string (optional URL, max 2048 chars)
     //   - sound: string (optional, max 200 chars)
+    //   - country: string (optional, max 10 chars, regional geo-partitioning tag)
     //   - access: string (optional, 'public' | 'private')
     //   - likes / likesCount / commentsCount / views / sharesCount / tokensTipped: interaction fields
     //   - c2paManifest: map or string (optional, C2PA provenance manifest, max 100000 chars if string)
@@ -184,20 +185,50 @@ service cloud.firestore {
     // Fields:
     //   - System configuration attributes (SuperAdmin write only; public or authenticated read for reels_algorithm, maintenance, and client feature flags)
     //
-    // Collection: escrow_contracts
+    // Collection: advertisements
+    // Document ID: {adId} (Auto-generated)
+    // Fields:
+    //   - sellerUID: string (required, seller UID, immutable)
+    //   - title / productName: string (required, 1 to 140 chars)
+    //   - description / productDescription: string (optional, max 2000 chars)
+    //   - country: string (optional, 2 to 10 chars, e.g. 'CA', 'US', 'RU', 'GLOBAL')
+    //   - shippingScope: string (optional, 3 to 20 chars, 'local' | 'global')
+    //   - currency: string (optional, 2 to 10 chars, e.g. 'CAD', 'USD', 'RUB')
+    //   - currencySymbol: string (optional, 1 to 10 chars)
+    //   - productPrice: number (optional, >= 0)
+    //   - productCategory: string (optional, max 100 chars)
+    //   - imageURL: string URL (optional, max 2048 chars)
+    //   - mediaType: string (optional, 'image' | 'video')
+    //   - sellerUsername: string (optional, max 100 chars)
+    //   - sellerEmail: string (optional, max 255 chars)
+    //   - status: string (optional, 'active', 'pending', 'expired', 'paused', max 50 chars)
+    //   - views: number (optional, >= 0)
+    //   - durationHours: number (optional, >= 0)
+    //   - durationTokens: number (optional, >= 0)
+    //   - createdAt: timestamp (optional, immutable)
+    //   - updatedAt: timestamp (optional)
+    //   - expiresAt: timestamp (optional)
+    //
+    // Collection: escrow_contracts (ChronEX Smart Escrow Guardian)
     // Document ID: {contractId} (Auto-generated or escrow_tx_*)
     // Fields:
-    //   - buyer / buyerId / buyerUid: string (required, buyer UID, immutable)
-    //   - seller / sellerId / sellerUid: string (optional, seller UID/handle, immutable)
-    //   - item: string (optional, max 1000 chars)
-    //   - amount: number (optional, escrow token amount >= 0, immutable)
+    //   - buyer / buyerId / buyerUid / buyerUID: string (required, buyer UID, immutable)
+    //   - seller / sellerId / sellerUid / sellerUID: string (optional, seller UID/handle, immutable)
+    //   - item / title: string (optional, max 1000 chars)
+    //   - description: string (optional, max 2000 chars)
+    //   - amount / tokensAmount: number (optional, escrow token amount >= 0, immutable)
     //   - currency: string (optional, max 30 chars, immutable)
-    //   - status: string (required, 'LOCKED' | 'RELEASED' | 'DISPUTED' | 'REFUNDED' | 'SETTLED' | 'CANCELLED')
+    //   - status / dealStatus: string (required, 'PROPOSED' | 'TOKENS_LOCKED' | 'LOCKED' | 'DELIVERABLE_UPLOADED' | 'INSPECTED_RELEASED' | 'RELEASED' | 'SETTLED' | 'DISPUTED' | 'REFUNDED' | 'CANCELLED')
+    //   - deliverableHash: string (optional, SHA-256 deliverable checksum, max 255 chars)
+    //   - deliverableUrl: string (optional URL, max 2048 chars)
+    //   - deliverable: map or string (optional, deliverable payload metadata)
     //   - disputeReason: string (optional, max 2000 chars)
+    //   - disputeStatus: string (optional, max 50 chars)
+    //   - parties: list of strings (optional, participant UIDs, max 10 items)
     //   - multiSigRequirement: string (optional, max 255 chars)
     //   - arbitrationVerdict: string (optional, max 2000 chars)
     //   - createdAt: timestamp/string/number (immutable)
-    //   - releasedAt / disputedAt / updatedAt: timestamp/string/number (optional)
+    //   - releasedAt / settledAt / disputedAt / uploadedAt / lockedAt / updatedAt: timestamp/string/number (optional)
     //
     // Collection: creator_badges
     // Document ID: {badgeId}
@@ -684,7 +715,7 @@ service cloud.firestore {
              isValidOptionalUrl('fileUrl');
     }
 
-    // Reel Short Video Validator: Supports C2PA provenance and synthetic validator fields
+    // Reel Short Video Validator: Supports C2PA provenance, synthetic validator fields, and regional country tag
     function isValidReel(data) {
       return (
                ('authorId' in data && data.authorId == request.auth.uid) ||
@@ -695,6 +726,7 @@ service cloud.firestore {
              isValidOptionalUrl('videoUrl') &&
              isValidOptionalUrl('thumbnailUrl') &&
              isValidOptionalString('sound', 0, 200) &&
+             isValidOptionalString('country', 0, 10) &&
              isValidOptionalList('likes', 10000) &&
              isValidOptionalString('provenanceStatus', 0, 100) &&
              (!('isAuthentic' in data) || data.isAuthentic == null || data.isAuthentic is bool) &&
@@ -703,12 +735,13 @@ service cloud.firestore {
              (!('syntheticMetrics' in data) || data.syntheticMetrics == null || data.syntheticMetrics is map);
     }
 
-    // Escrow Contract Helpers & Validator
+    // Escrow Contract Helpers & ChronEX Smart Escrow Guardian Validator
     function isEscrowBuyer(data) {
       return isAuthenticated() && (
         ('buyer' in data && (data.buyer == request.auth.uid || (request.auth.token.email != null && data.buyer == request.auth.token.email))) ||
         ('buyerId' in data && data.buyerId == request.auth.uid) ||
-        ('buyerUid' in data && data.buyerUid == request.auth.uid)
+        ('buyerUid' in data && data.buyerUid == request.auth.uid) ||
+        ('buyerUID' in data && data.buyerUID == request.auth.uid)
       );
     }
 
@@ -716,7 +749,16 @@ service cloud.firestore {
       return isAuthenticated() && (
         ('seller' in data && (data.seller == request.auth.uid || (request.auth.token.email != null && data.seller == request.auth.token.email))) ||
         ('sellerId' in data && data.sellerId == request.auth.uid) ||
-        ('sellerUid' in data && data.sellerUid == request.auth.uid)
+        ('sellerUid' in data && data.sellerUid == request.auth.uid) ||
+        ('sellerUID' in data && data.sellerUID == request.auth.uid)
+      );
+    }
+
+    function isEscrowParty(data) {
+      return isAuthenticated() && (
+        isEscrowBuyer(data) ||
+        isEscrowSeller(data) ||
+        ('parties' in data && data.parties is list && request.auth.uid in data.parties)
       );
     }
 
@@ -724,7 +766,8 @@ service cloud.firestore {
       return (
                ('buyer' in data && data.buyer is string && data.buyer.size() <= 128) ||
                ('buyerId' in data && data.buyerId is string && data.buyerId.size() <= 128) ||
-               ('buyerUid' in data && data.buyerUid is string && data.buyerUid.size() <= 128)
+               ('buyerUid' in data && data.buyerUid is string && data.buyerUid.size() <= 128) ||
+               ('buyerUID' in data && data.buyerUID is string && data.buyerUID.size() <= 128)
              ) &&
              (
                !('seller' in data) || (data.seller is string && data.seller.size() <= 128)
@@ -736,16 +779,65 @@ service cloud.firestore {
                !('sellerUid' in data) || (data.sellerUid is string && data.sellerUid.size() <= 128)
              ) &&
              (
+               !('sellerUID' in data) || (data.sellerUID is string && data.sellerUID.size() <= 128)
+             ) &&
+             (
                !('amount' in data) || (data.amount is number && data.amount >= 0)
+             ) &&
+             (
+               !('tokensAmount' in data) || (data.tokensAmount is number && data.tokensAmount >= 0)
              ) &&
              (
                !('status' in data) || (data.status is string && data.status.size() <= 50)
              ) &&
+             (
+               !('dealStatus' in data) || (data.dealStatus is string && data.dealStatus.size() <= 50)
+             ) &&
              isValidOptionalString('item', 0, 1000) &&
+             isValidOptionalString('title', 0, 200) &&
+             isValidOptionalString('description', 0, 2000) &&
              isValidOptionalString('currency', 0, 30) &&
+             isValidOptionalString('deliverableHash', 0, 255) &&
+             isValidOptionalUrl('deliverableUrl') &&
              isValidOptionalString('disputeReason', 0, 2000) &&
+             isValidOptionalString('disputeStatus', 0, 50) &&
              isValidOptionalString('multiSigRequirement', 0, 255) &&
-             isValidOptionalString('arbitrationVerdict', 0, 2000);
+             isValidOptionalString('arbitrationVerdict', 0, 2000) &&
+             isValidOptionalList('parties', 10) &&
+             (!('deliverable' in data) || data.deliverable == null || data.deliverable is map || (data.deliverable is string && data.deliverable.size() <= 10000)) &&
+             (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt));
+    }
+
+    // Advertisement & Regional Marketplace Validator: Enforces geo-partitioning fields (country, shippingScope, currency, currencySymbol)
+    function isValidAdvertisement(data) {
+      return (
+               ('sellerUID' in data && data.sellerUID == request.auth.uid) ||
+               isSuperAdmin()
+             ) &&
+             (
+               validStringLength('title', 1, 140) ||
+               validStringLength('productName', 1, 140)
+             ) &&
+             isValidOptionalString('description', 0, 2000) &&
+             isValidOptionalString('productDescription', 0, 2000) &&
+             isValidOptionalString('country', 2, 10) &&
+             isValidOptionalString('shippingScope', 3, 20) &&
+             isValidOptionalString('currency', 2, 10) &&
+             isValidOptionalString('currencySymbol', 1, 10) &&
+             isValidOptionalString('productCategory', 0, 100) &&
+             isValidOptionalString('mediaType', 0, 20) &&
+             isValidOptionalString('sellerUsername', 0, 100) &&
+             isValidOptionalString('sellerEmail', 0, 255) &&
+             isValidOptionalString('status', 0, 50) &&
+             (!('productPrice' in data) || (data.productPrice is number && data.productPrice >= 0)) &&
+             isValidOptionalUrl('imageURL') &&
+             (!('views' in data) || (data.views is number && data.views >= 0)) &&
+             (!('durationHours' in data) || (data.durationHours is number && data.durationHours >= 0)) &&
+             (!('durationTokens' in data) || (data.durationTokens is number && data.durationTokens >= 0)) &&
+             (!('createdAt' in data) || isValidTimestampOrNumber(data.createdAt)) &&
+             (!('updatedAt' in data) || isValidTimestampOrNumber(data.updatedAt)) &&
+             (!('expiresAt' in data) || isValidTimestampOrNumber(data.expiresAt));
     }
 
     // Creator Digital Collectible Badges Validator
@@ -1634,57 +1726,80 @@ service cloud.firestore {
     }
 
     // ===============================================================
-    // 13. ADVERTISEMENTS & MARKETPLACE
+    // 13. ADVERTISEMENTS & MARKETPLACE (Regional Geo-Partitioning Enabled)
     // ===============================================================
     match /advertisements/{adId} {
       allow read: if true;
 
       allow create: if isAuthenticated() &&
                        request.resource.data.sellerUID == request.auth.uid &&
-                       (
-                         validStringLength('title', 1, 140) ||
-                         validStringLength('productName', 1, 140)
-                       ) &&
-                       isValidOptionalString('description', 0, 2000) &&
-                       isValidOptionalString('productDescription', 0, 2000);
+                       isValidAdvertisement(request.resource.data);
 
-      allow update, delete: if isAuthenticated() && (
+      allow update: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (
+          request.auth.uid == resource.data.sellerUID &&
+          areImmutableFieldsUnchanged(['sellerUID', 'createdAt']) &&
+          isValidAdvertisement(request.resource.data)
+        ) ||
+        (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']) &&
+          request.resource.data.views is number &&
+          request.resource.data.views >= resource.data.views
+        )
+      );
+
+      allow delete: if isAuthenticated() && (
         request.auth.uid == resource.data.sellerUID ||
         isSuperAdmin()
       );
     }
 
-    // Multi-Sig P2P Escrow Contracts: Parties or SuperAdmin read, buyer create, buyer/SuperAdmin release, buyer/seller/SuperAdmin dispute
+    // Multi-Sig P2P Escrow Contracts & ChronEX Smart Escrow Guardian
     match /escrow_contracts/{contractId} {
-      // Parties (buyer or seller) or SuperAdmin can read
+      // Parties (buyer, seller, or parties list) or SuperAdmin can read
       allow read: if isAuthenticated() && (
-        isEscrowBuyer(resource.data) ||
-        isEscrowSeller(resource.data) ||
+        isEscrowParty(resource.data) ||
         isSuperAdmin()
       );
 
-      // Buyer can create when authenticated
+      // Buyer or SuperAdmin can create when authenticated
       allow create: if isAuthenticated() &&
                        (isEscrowBuyer(request.resource.data) || isSuperAdmin()) &&
                        isValidEscrowContract(request.resource.data);
 
-      // Status updates:
-      // - Updating status to RELEASED requires buyer or SuperAdmin
-      // - Updating status to DISPUTED allowed by buyer, seller, or SuperAdmin
-      // - SuperAdmin has full arbitration authority
+      // ChronEX Smart Escrow Guardian Lifecycle State Transitions & Updates:
+      // - SuperAdmin arbitration and resolution
+      // - Buyer can lock tokens, release escrow, cancel before lock, or raise dispute
+      // - Seller can upload deliverable or raise dispute
+      // Strict anti-privilege escalation: amounts, buyerUID, sellerUID, createdAt are strictly immutable
       allow update: if isAuthenticated() && (
         isSuperAdmin() ||
         (
           isEscrowBuyer(resource.data) &&
-          areImmutableFieldsUnchanged(['buyer', 'buyerId', 'buyerUid', 'seller', 'sellerId', 'sellerUid', 'amount', 'currency', 'createdAt']) &&
-          request.resource.data.status in ['RELEASED', 'released'] &&
-          isValidEscrowContract(request.resource.data)
+          areImmutableFieldsUnchanged(['buyer', 'buyerId', 'buyerUid', 'buyerUID', 'seller', 'sellerId', 'sellerUid', 'sellerUID', 'amount', 'tokensAmount', 'currency', 'createdAt']) &&
+          isValidEscrowContract(request.resource.data) &&
+          (
+            ('status' in request.resource.data && request.resource.data.status in ['RELEASED', 'released', 'INSPECTED_RELEASED', 'inspected_released', 'SETTLED', 'settled']) ||
+            ('dealStatus' in request.resource.data && request.resource.data.dealStatus in ['RELEASED', 'released', 'INSPECTED_RELEASED', 'inspected_released', 'SETTLED', 'settled']) ||
+            ('status' in request.resource.data && request.resource.data.status in ['TOKENS_LOCKED', 'tokens_locked', 'LOCKED', 'locked']) ||
+            ('dealStatus' in request.resource.data && request.resource.data.dealStatus in ['TOKENS_LOCKED', 'tokens_locked', 'LOCKED', 'locked']) ||
+            ('status' in request.resource.data && request.resource.data.status in ['CANCELLED', 'cancelled']) ||
+            ('dealStatus' in request.resource.data && request.resource.data.dealStatus in ['CANCELLED', 'cancelled']) ||
+            ('status' in request.resource.data && request.resource.data.status in ['DISPUTED', 'disputed']) ||
+            ('dealStatus' in request.resource.data && request.resource.data.dealStatus in ['DISPUTED', 'disputed'])
+          )
         ) ||
         (
-          (isEscrowBuyer(resource.data) || isEscrowSeller(resource.data)) &&
-          areImmutableFieldsUnchanged(['buyer', 'buyerId', 'buyerUid', 'seller', 'sellerId', 'sellerUid', 'amount', 'currency', 'createdAt']) &&
-          request.resource.data.status in ['DISPUTED', 'disputed'] &&
-          isValidEscrowContract(request.resource.data)
+          isEscrowSeller(resource.data) &&
+          areImmutableFieldsUnchanged(['buyer', 'buyerId', 'buyerUid', 'buyerUID', 'seller', 'sellerId', 'sellerUid', 'sellerUID', 'amount', 'tokensAmount', 'currency', 'createdAt']) &&
+          isValidEscrowContract(request.resource.data) &&
+          (
+            ('status' in request.resource.data && request.resource.data.status in ['DELIVERABLE_UPLOADED', 'deliverable_uploaded']) ||
+            ('dealStatus' in request.resource.data && request.resource.data.dealStatus in ['DELIVERABLE_UPLOADED', 'deliverable_uploaded']) ||
+            ('status' in request.resource.data && request.resource.data.status in ['DISPUTED', 'disputed']) ||
+            ('dealStatus' in request.resource.data && request.resource.data.dealStatus in ['DISPUTED', 'disputed'])
+          )
         )
       );
 

@@ -52,6 +52,12 @@ import {
   demoteToMember,
   setSlowMode,
   setDisappearingMessages,
+  setGroupWhoCanSend,
+  setGroupWhoCanAdd,
+  setGroupWhoCanEdit,
+  setGroupAntiSpam,
+  setGroupContactPrivacy,
+  setGroupAdvancedControls,
   muteMember,
   unmuteMember,
   isMemberMuted,
@@ -216,14 +222,14 @@ async function open(groupId, messagesContainer, options = {}) {
   });
   _storeUnsubs.push(msgSub);
 
-  groupStore.subscribe('members', () => {
+  _storeUnsubs.push(groupStore.subscribe('members', () => {
     if (_scroller && groupStore.getState().messages) {
       const processed = _processMessages(groupStore.getState().messages, currentUid);
       _scroller.setItems(processed);
     }
-  });
+  }));
 
-  groupStore.subscribe('typingUsers', (typingUsers) => {
+  _storeUnsubs.push(groupStore.subscribe('typingUsers', (typingUsers) => {
     if (_typingIndicator && typingUsers) {
       const members = groupStore.getState().members;
       const names = typingUsers
@@ -234,22 +240,22 @@ async function open(groupId, messagesContainer, options = {}) {
         });
       _typingIndicator.update(names);
     }
-  });
+  }));
 
-  groupStore.subscribe('pinnedMessages', (pinned) => {
+  _storeUnsubs.push(groupStore.subscribe('pinnedMessages', (pinned) => {
     if (pinned && pinned.length > 0) {
       _updatePinnedBar(pinned, options);
     } else if (_pinnedBar) {
       hidePinnedBar(_pinnedBar);
     }
-  });
+  }));
 
-  // Load the group chat
-  await openGroupChat(groupId);
-
-  // Load group metadata for pinned messages
+  // Load group chat messages and metadata concurrently
   try {
-    const group = await getGroup(groupId);
+    const [, group] = await Promise.all([
+      openGroupChat(groupId),
+      getGroup(groupId)
+    ]);
     if (group) {
       groupStore.setState({
         currentGroup: group,
@@ -380,8 +386,8 @@ function _processMessages(messages, currentUid) {
       !prev.isSystem &&
       prev.from === current.from
     ) {
-      const curTime = current.timestamp?.toMillis ? current.timestamp.toMillis() : (current.timestamp?.toDate ? current.timestamp.toDate().getTime() : (typeof current.timestamp === 'number' ? current.timestamp : 0));
-      const prevTime = prev.timestamp?.toMillis ? prev.timestamp.toMillis() : (prev.timestamp?.toDate ? prev.timestamp.toDate().getTime() : (typeof prev.timestamp === 'number' ? prev.timestamp : 0));
+      const curTime = current.timestamp?.toMillis ? current.timestamp.toMillis() : (current.timestamp?.toDate ? current.timestamp.toDate().getTime() : (current.timestamp instanceof Date ? current.timestamp.getTime() : (typeof current.timestamp === 'number' ? current.timestamp : 0)));
+      const prevTime = prev.timestamp?.toMillis ? prev.timestamp.toMillis() : (prev.timestamp?.toDate ? prev.timestamp.toDate().getTime() : (prev.timestamp instanceof Date ? prev.timestamp.getTime() : (typeof prev.timestamp === 'number' ? prev.timestamp : 0)));
       const timeDiff = Math.abs(curTime - prevTime);
 
       if (timeDiff < CONSECUTIVE_THRESHOLD_MS) {
@@ -600,6 +606,8 @@ async function _getCurrentUid() {
  * GroupChat — Public API facade
  * @namespace
  */
+export { groupStore };
+
 export const GroupChat = {
   // Lifecycle
   init,
@@ -633,6 +641,12 @@ export const GroupChat = {
   // Settings
   setSlowMode,
   setDisappearingMessages,
+  setGroupWhoCanSend,
+  setGroupWhoCanAdd,
+  setGroupWhoCanEdit,
+  setGroupAntiSpam,
+  setGroupContactPrivacy,
+  setGroupAdvancedControls,
   muteMember,
   unmuteMember,
   isMemberMuted,

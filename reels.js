@@ -682,7 +682,7 @@ function getCurrentActiveCard() {
 // ══════════════════════════════════════════════════
 export const SEED_REELS = [
   {
-    id: 'seed-reel-chronex-ai',
+    id: 'seed-reel-chronex-ai', country: 'GLOBAL',
     videoUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/hourglass_timer.mp4',
     thumbnailUrl: 'https://res.cloudinary.com/demo/video/upload/ar_9:16,c_pad,b_auto/hourglass_timer.jpg',
     authorName: 'chronex_ai',
@@ -885,9 +885,13 @@ function rankReelsByAlgorithm(reelsList) {
   const now = Date.now();
   const decayMs = (config.viralityDecayHours || 24) * 3600 * 1000;
 
+  const activeUserCountry = (localStorage.getItem('nex_market_country_code') || 'CA').toUpperCase();
+
   return [...reelsList].sort((a, b) => {
-    const likesA = (a.likesCount || (a.likes ? a.likes.length : 0)) * (config.engagementVelocityWeight || 1.8);
-    const likesB = (b.likesCount || (b.likes ? b.likes.length : 0)) * (config.engagementVelocityWeight || 1.8);
+    const geoBoostA = ((a.country || 'CA').toUpperCase() === activeUserCountry || a.country === 'GLOBAL') ? 1.6 : 1.0;
+    const geoBoostB = ((b.country || 'CA').toUpperCase() === activeUserCountry || b.country === 'GLOBAL') ? 1.6 : 1.0;
+    const likesA = (a.likesCount || (a.likes ? a.likes.length : 0)) * (config.engagementVelocityWeight || 1.8) * geoBoostA;
+    const likesB = (b.likesCount || (b.likes ? b.likes.length : 0)) * (config.engagementVelocityWeight || 1.8) * geoBoostB;
     const viewsA = (a.views || 100) * 0.05 * (config.watchTimeMultiplier || 1.5);
     const viewsB = (b.views || 100) * 0.05 * (config.watchTimeMultiplier || 1.5);
     const commentsA = (a.commentsCount || 10) * 3;
@@ -1061,6 +1065,9 @@ function renderReels(reelsList) {
       <!-- Central Phone-Proportioned Reel Stage (9:16) -->
       <div class="reel-stage">
         <!-- Dual-Layer Video Stage: Full-Sized Video + Ambient Blur Backdrop -->
+        <div class="reel-geo-origin-tag">
+          <i class="fa-solid fa-location-dot"></i> <span>${(reel.country || 'CA').toUpperCase()}</span>
+        </div>
         <div class="reel-video-wrapper">
           <div class="reel-ambient-backdrop" style="background-image: url('${posterUrl}');"></div>
           <video class="reel-video ${filterClass}" src="${reel.videoUrl}" poster="${posterUrl}" playsinline loop preload="metadata"></video>
