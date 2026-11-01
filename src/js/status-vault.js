@@ -169,22 +169,86 @@ export async function uploadStatusMedia(file, options = {}) {
     console.warn('[NEX-STATUS] Cloudinary fallback failed:', cldErr);
   }
 
-  // Fallback 2: Base64 / Local Object URL (ensures client-side flow never blocks)
-  console.warn('[NEX-STATUS] Using client-side Base64 / Object URL fallback.');
+  // Fallback 2: Compressed Base64 / Local Object URL (strictly capped to stay safely under Firestore 1MB limit)
+  console.warn('[NEX-STATUS] Using client-side compressed Base64 / Object URL fallback.');
   return new Promise((resolve) => {
+    if (file && file.type && file.type.startsWith('image/')) {
+      const img = new Image();
+      const objUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        try { URL.revokeObjectURL(objUrl); } catch (_) {}
+        let width = img.width;
+        let height = img.height;
+        const maxDimension = 1080;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        let compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+        if (compressedDataUrl.length > 600000) {
+          compressedDataUrl = canvas.toDataURL('image/jpeg', 0.45);
+        }
+        canvas.width = 0;
+        canvas.height = 0;
+
+        resolve({
+          url: compressedDataUrl,
+          rawBlobUrl: compressedDataUrl,
+          pathname: 'local/status_' + (file.name || 'image.jpg'),
+          vault: 'Local Compressed Vault',
+          vaultIndex: -2,
+          access: 'local',
+          fileName: file.name,
+          fileSize: Math.round(compressedDataUrl.length * 0.75),
+          fileType: 'image/jpeg',
+          mediaType: 'image/jpeg',
+        });
+      };
+      img.onerror = () => {
+        try { URL.revokeObjectURL(objUrl); } catch (_) {}
+        const reader = new FileReader();
+        reader.onload = (e) => resolve({
+          url: e.target.result,
+          rawBlobUrl: e.target.result,
+          pathname: 'local/status_' + (file.name || 'image.jpg'),
+          vault: 'Local Device Vault',
+          vaultIndex: -2,
+          access: 'local',
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type || 'image/jpeg',
+          mediaType: file.type || 'image/jpeg',
+        });
+        reader.readAsDataURL(file);
+      };
+      img.src = objUrl;
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       resolve({
         url: e.target.result,
         rawBlobUrl: e.target.result,
-        pathname: `local/status_${file.name}`,
+        pathname: 'local/status_' + (file.name || 'media'),
         vault: 'Local Device Vault',
         vaultIndex: -2,
         access: 'local',
         fileName: file.name,
         fileSize: file.size,
-        fileType: file.type || 'image/jpeg',
-        mediaType: file.type || 'image/jpeg',
+        fileType: file.type || 'application/octet-stream',
+        mediaType: file.type || 'application/octet-stream',
       });
     };
     reader.onerror = () => {
@@ -192,14 +256,14 @@ export async function uploadStatusMedia(file, options = {}) {
       resolve({
         url: objUrl,
         rawBlobUrl: objUrl,
-        pathname: `local/status_${file.name}`,
+        pathname: 'local/status_' + (file.name || 'media'),
         vault: 'Local Object Vault',
         vaultIndex: -2,
         access: 'local',
         fileName: file.name,
         fileSize: file.size,
-        fileType: file.type || 'image/jpeg',
-        mediaType: file.type || 'image/jpeg',
+        fileType: file.type || 'application/octet-stream',
+        mediaType: file.type || 'application/octet-stream',
       });
     };
     reader.readAsDataURL(file);

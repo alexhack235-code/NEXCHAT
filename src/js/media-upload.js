@@ -155,8 +155,64 @@ export async function uploadAnyMedia(file, options = {}) {
     console.warn('[STORAGE] Vercel Media Blob notice, falling back to local encoding:', err?.message || err);
   }
 
-  // 3. Last Resort Fallback: Local Base64 / Object URL
+  // 3. Last Resort Fallback: Compressed Base64 / Object URL (stays under Firestore 1MB limit)
   return new Promise((resolve) => {
+    if (file && file.type && file.type.startsWith('image/')) {
+      const img = new Image();
+      const objUrl = URL.createObjectURL(file);
+      img.onload = () => {
+        try { URL.revokeObjectURL(objUrl); } catch (_) {}
+        let width = img.width;
+        let height = img.height;
+        const maxDimension = 1080;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        let compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+        if (compressedDataUrl.length > 600000) {
+          compressedDataUrl = canvas.toDataURL('image/jpeg', 0.45);
+        }
+        canvas.width = 0;
+        canvas.height = 0;
+
+        resolve({
+          url: compressedDataUrl,
+          downloadUrl: compressedDataUrl,
+          fileName: file.name || 'attachment.jpg',
+          fileSize: Math.round(compressedDataUrl.length * 0.75),
+          fileType: 'image/jpeg',
+          vault: 'LocalCompressedBase64',
+        });
+      };
+      img.onerror = () => {
+        try { URL.revokeObjectURL(objUrl); } catch (_) {}
+        const reader = new FileReader();
+        reader.onload = (e) => resolve({
+          url: e.target.result,
+          downloadUrl: e.target.result,
+          fileName: file.name || 'attachment',
+          fileSize: file.size,
+          fileType: file.type || 'image/jpeg',
+          vault: 'LocalBase64',
+        });
+        reader.readAsDataURL(file);
+      };
+      img.src = objUrl;
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (e) => {
       resolve({

@@ -18877,6 +18877,37 @@ function setupCreateStatusModal() {
       const now = Date.now();
       const expiresAtMs = now + 86400000;
 
+      // Safeguard against Firestore 1MB property limit:
+      // If uploadedUrl is a data URL (Base64) longer than 500KB, resize and compress it down
+      if (uploadedUrl && typeof uploadedUrl === 'string' && (uploadedUrl.startsWith('data:image/') || uploadedUrl.length > 500000)) {
+        try {
+          uploadedUrl = await new Promise((resComp) => {
+            const compImg = new Image();
+            compImg.onload = () => {
+              let w = compImg.width;
+              let h = compImg.height;
+              const maxDim = 1080;
+              if (w > maxDim || h > maxDim) {
+                if (w > h) { h = Math.round((h * maxDim) / w); w = maxDim; }
+                else { w = Math.round((w * maxDim) / h); h = maxDim; }
+              }
+              const cv = document.createElement('canvas');
+              cv.width = w; cv.height = h;
+              const cx = cv.getContext('2d');
+              cx.drawImage(compImg, 0, 0, w, h);
+              let out = cv.toDataURL('image/jpeg', 0.65);
+              if (out.length > 600000) {
+                out = cv.toDataURL('image/jpeg', 0.45);
+              }
+              cv.width = 0; cv.height = 0;
+              resComp(out);
+            };
+            compImg.onerror = () => resComp(uploadedUrl);
+            compImg.src = uploadedUrl;
+          });
+        } catch (_) {}
+      }
+
       const effectiveUid = auth?.currentUser?.uid || (typeof getAuth === 'function' ? getAuth()?.currentUser?.uid : null) || myUID;
       const statusDoc = {
         userId: effectiveUid || 'user',
@@ -18949,7 +18980,11 @@ function setupCreateStatusModal() {
       loadStatusFeed();
     } catch (err) {
       console.error('[STATUS] Publish error:', err);
-      showNotif('Could not publish status: ' + err.message, 'error');
+      let userMsg = err.message || 'Unknown network error';
+      if (userMsg.includes('longer than') || userMsg.includes('bytes') || userMsg.includes('maximum document size')) {
+        userMsg = 'Photo size exceeds cloud limit. Please choose a photo or video under 10MB.';
+      }
+      showNotif('Could not publish status: ' + userMsg, 'error');
     } finally {
       if (publishBtn) publishBtn.disabled = false;
       if (progressBox) progressBox.style.display = 'none';
