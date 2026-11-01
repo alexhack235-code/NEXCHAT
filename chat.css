@@ -14969,12 +14969,25 @@ body.chat-size-extra-large .message-bubble {
 }
 
 .btn-close-stegano {
-  background: transparent !important;
-  border: none !important;
-  color: #94a3b8 !important;
-  font-size: 16px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 50% !important;
+  color: #f1f5f9 !important;
+  font-size: 18px !important;
   cursor: pointer !important;
-  padding: 6px !important;
+  padding: 10px !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  pointer-events: auto !important;
+  z-index: 99999 !important;
+  touch-action: manipulation !important;
+}
+.btn-close-stegano:active {
+  background: rgba(255, 255, 255, 0.22) !important;
+  transform: scale(0.92) !important;
 }
 
 .quantum-stegano-body {

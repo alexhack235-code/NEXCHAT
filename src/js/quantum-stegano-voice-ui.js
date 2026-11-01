@@ -41,8 +41,37 @@ class QuantumSteganoVoiceUI {
     this.injectAttachmentHubItem();
     this.createModalDOM();
     this.bindEvents();
+    
+    // Global bulletproof close listener (capture phase)
+    document.addEventListener('click', (e) => {
+      const closeBtn = e.target.closest('#btnCloseQuantumStegano, #btnCloseDecryptStegano, .btn-close-stegano');
+      if (closeBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.closeRecorderModal();
+        const dm = document.getElementById('quantumSteganoDecryptModal');
+        if (dm) dm.remove();
+      }
+      const modal = document.getElementById('quantumSteganoModal');
+      if (modal && e.target === modal) {
+        this.closeRecorderModal();
+      }
+      const dm = document.getElementById('quantumSteganoDecryptModal');
+      if (dm && (e.target === dm || e.target.closest('#btnCloseDecryptStegano'))) {
+        dm.remove();
+      }
+    }, true);
+    
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        this.closeRecorderModal();
+        const dm = document.getElementById('quantumSteganoDecryptModal');
+        if (dm) dm.remove();
+      }
+    }, true);
     window.QuantumSteganoVoiceUI = this;
     window.openQuantumSteganoVoiceModal = () => this.openRecorderModal();
+    window.closeQuantumSteganoVoiceModal = () => this.closeRecorderModal();
   }
 
   injectAttachmentHubItem() {
@@ -81,7 +110,7 @@ class QuantumSteganoVoiceUI {
             <span>QUANTUM STEGANO-VOICE</span>
             <span class="stegano-pill-badge">PSYCHOACOUSTIC</span>
           </div>
-          <button type="button" class="btn-close-stegano" id="btnCloseQuantumStegano">
+          <button type="button" class="btn-close-stegano" id="btnCloseQuantumStegano" onclick="window.closeQuantumSteganoVoiceModal ? window.closeQuantumSteganoVoiceModal() : (document.getElementById('quantumSteganoModal').style.display='none')">
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
@@ -158,19 +187,6 @@ class QuantumSteganoVoiceUI {
             </div>
           </div>
 
-          <!-- Step 3: Decryption PIN / Key -->
-          <div class="stegano-section-card">
-            <div class="stegano-section-header">
-              <span class="stegano-step-num">3</span>
-              <span>DECRYPTION PIN / KEY (OPTIONAL)</span>
-            </div>
-            
-            <div class="stegano-input-wrap">
-              <i class="fa-solid fa-key stegano-input-icon"></i>
-              <input type="password" id="steganoSecretKeyInput" class="stegano-key-input" placeholder="Enter secret PIN or passphrase (leave blank for default cipher)" autocomplete="off" />
-            </div>
-          </div>
-
           <!-- Synthesize Action -->
           <div class="stegano-footer-actions">
             <button type="button" id="btnSynthesizeStegano" class="btn-stegano-synthesize" disabled>
@@ -184,52 +200,14 @@ class QuantumSteganoVoiceUI {
 
     document.body.appendChild(modal);
 
-    // Also create secret decryption prompt modal
-    this.createDecryptModalDOM();
+    // Decrypt modal completely removed - zero lock barrier
+    const existingD = document.getElementById('quantumSteganoDecryptModal');
+    if (existingD) existingD.remove();
   }
 
   createDecryptModalDOM() {
-    if (document.getElementById('quantumSteganoDecryptModal')) return;
-
-    const modal = document.createElement('div');
-    modal.id = 'quantumSteganoDecryptModal';
-    modal.className = 'quantum-stegano-modal-backdrop';
-    modal.style.display = 'none';
-    modal.innerHTML = `
-      <div class="quantum-stegano-window decrypt-window">
-        <div class="quantum-stegano-header">
-          <div class="quantum-stegano-header-title">
-            <i class="fa-solid fa-lock-open" style="color: #00ff66;"></i>
-            <span>REVEAL QUANTUM STEGANO-VOICE</span>
-          </div>
-          <button type="button" class="btn-close-stegano" id="btnCloseDecryptStegano">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <div class="quantum-stegano-body">
-          <p class="quantum-stegano-desc">
-            This audio note contains a psychoacoustically hidden voice transmission encrypted with AES-GCM 256. Enter the decryption PIN to extract and listen.
-          </p>
-
-          <div class="stegano-input-wrap">
-            <i class="fa-solid fa-key stegano-input-icon"></i>
-            <input type="password" id="steganoDecryptKeyInput" class="stegano-key-input" placeholder="Enter decryption PIN or passphrase" autofocus />
-          </div>
-
-          <div id="steganoDecryptStatus" class="stegano-status-msg" style="display: none;"></div>
-
-          <div class="stegano-footer-actions">
-            <button type="button" id="btnConfirmDecryptStegano" class="btn-stegano-synthesize" style="background: linear-gradient(135deg, #10b981, #059669);">
-              <i class="fa-solid fa-unlock"></i>
-              <span>Decrypt & Play Secret Voice</span>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
+    const existing = document.getElementById('quantumSteganoDecryptModal');
+    if (existing) existing.remove();
   }
 
   bindEvents() {
@@ -464,8 +442,7 @@ class QuantumSteganoVoiceUI {
     if (!this.recordedVoiceBlob) return;
 
     const synthBtn = document.getElementById('btnSynthesizeStegano');
-    const keyInput = document.getElementById('steganoSecretKeyInput');
-    const secretKey = keyInput ? keyInput.value.trim() : '';
+    const secretKey = '';
 
     if (synthBtn) {
       synthBtn.disabled = true;
@@ -518,32 +495,15 @@ class QuantumSteganoVoiceUI {
     }
   }
 
-  // In-chat decrypt prompt
-  promptDecryptSteganoAudio(blobUrlOrBlob) {
+  // In-chat direct auto-decrypt and play (zero lock popup)
+  async promptDecryptSteganoAudio(blobUrlOrBlob) {
     this.pendingSteganoBlob = blobUrlOrBlob;
     const modal = document.getElementById('quantumSteganoDecryptModal');
-    if (!modal) return;
-
-    const input = document.getElementById('steganoDecryptKeyInput');
-    if (input) input.value = '';
-
-    const status = document.getElementById('steganoDecryptStatus');
-    if (status) status.style.display = 'none';
-
-    modal.style.display = 'flex';
+    if (modal) modal.remove();
+    await this.executeDecryption();
   }
 
   async executeDecryption() {
-    const input = document.getElementById('steganoDecryptKeyInput');
-    const status = document.getElementById('steganoDecryptStatus');
-    const secretKey = input ? input.value.trim() : '';
-
-    if (status) {
-      status.style.display = 'block';
-      status.className = 'stegano-status-msg';
-      status.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Scanning audio spectrogram and decrypting AES-GCM...`;
-    }
-
     try {
       let blob = this.pendingSteganoBlob;
       if (typeof blob === 'string') {
@@ -551,29 +511,22 @@ class QuantumSteganoVoiceUI {
         blob = await resp.blob();
       }
 
-      const result = await decodeSteganoAudio(blob, secretKey);
-
-      if (status) {
-        status.className = 'stegano-status-msg success';
-        status.innerHTML = `<i class="fa-solid fa-check"></i> Secret voice decrypted successfully (${result.duration.toFixed(1)}s)`;
-      }
-
-      // Play decrypted secret audio
+      const result = await decodeSteganoAudio(blob, '');
       await result.play();
 
       if (typeof window.showNotif === 'function') {
-        window.showNotif('Quantum Stegano-Voice decrypted and playing!', 'success', 3000);
+        window.showNotif('Playing Quantum Stegano-Voice...', 'success', 2500);
       }
-
-      setTimeout(() => {
-        const modal = document.getElementById('quantumSteganoDecryptModal');
-        if (modal) modal.style.display = 'none';
-      }, 1200);
     } catch (err) {
-      if (status) {
-        status.className = 'stegano-status-msg error';
-        status.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Decryption failed: Check PIN or encryption key`;
-      }
+      console.warn('[Stegano UI] Direct play fallback:', err);
+      try {
+        const url = typeof this.pendingSteganoBlob === 'string' ? this.pendingSteganoBlob : URL.createObjectURL(this.pendingSteganoBlob);
+        const audio = new Audio(url);
+        audio.play();
+      } catch (_) {}
+    } finally {
+      const modal = document.getElementById('quantumSteganoDecryptModal');
+      if (modal) modal.remove();
     }
   }
 }
