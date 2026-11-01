@@ -9,16 +9,27 @@ const TOKENS = {
   profile: readBlobToken('BLOB_READ_WRITE_TOKEN_PROFILE', ''),
   background: readBlobToken('BLOB_READ_WRITE_TOKEN_BACKGROUNDS', ''),
 };
+const PUBLIC_VAULTS = {
+  1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_1', ''), name: 'PUBLIC VAULT 1' },
+  2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_2', ''), name: 'PUBLIC VAULT 2' },
+  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_3', ''), name: 'PUBLIC VAULT 3' },
+  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_4', ''), name: 'PUBLIC VAULT 4' },
+  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PUBLIC_5', ''), name: 'PUBLIC VAULT 5' },
+};
 const BACKUP_VAULTS = [
   readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_1', ''),
   readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_2', ''),
   readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_3', ''),
   readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_4', ''),
   readBlobToken('BLOB_READ_WRITE_TOKEN_BACKUP_5', ''),
-];
+  ...Object.values(PUBLIC_VAULTS).map(v => v.token),
+].filter(Boolean);
 const PRIVATE_VAULTS = {
   1: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_1', ''), name: 'PRIVATE VAULT 1' },
   2: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_2', ''), name: 'PRIVATE VAULT 2' },
+  3: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_3', ''), name: 'PRIVATE VAULT 3' },
+  4: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_4', ''), name: 'PRIVATE VAULT 4' },
+  5: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_PRIVATE_5', ''), name: 'PRIVATE VAULT 5' },
 };
 const REELS_VAULTS = {
   0: { token: readBlobToken('BLOB_READ_WRITE_TOKEN_REELS_VAULT_0', ''), access: 'public', name: 'NEX-REELS VAULT 0' },
@@ -195,9 +206,11 @@ export default async function handler(req, res) {
     }
 
     if (!token) {
-      token = TOKENS.default;
+      token = accessMode === 'private' ? (PRIVATE_VAULTS[1].token || '') : (PUBLIC_VAULTS[1].token || TOKENS.default);
     }
-    const tokensToTry = [token, ...BACKUP_VAULTS.filter(t => t && t !== token)].filter(Boolean);
+    const tokensToTry = accessMode === 'private'
+      ? [token, ...Object.values(PRIVATE_VAULTS).map(v => v.token).filter(t => t && t !== token)].filter(Boolean)
+      : [token, ...BACKUP_VAULTS.filter(t => t && t !== token)].filter(Boolean);
     if (!tokensToTry.length) {
       return res.status(503).json({ error: 'Blob storage is not configured on the server.' });
     }
