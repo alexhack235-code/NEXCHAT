@@ -2014,9 +2014,24 @@ function playNotificationSound(type = "info") {
   }
 }
 
+let _sharedAudioCtx = null;
+function getSharedAudioContext() {
+  try {
+    if (!_sharedAudioCtx || _sharedAudioCtx.state === 'closed') {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) _sharedAudioCtx = new AudioCtx();
+    }
+    if (_sharedAudioCtx && _sharedAudioCtx.state === 'suspended') {
+      _sharedAudioCtx.resume().catch(() => {});
+    }
+  } catch (_) {}
+  return _sharedAudioCtx;
+}
+
 function playBeep(type) {
   try {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioContext = getSharedAudioContext();
+    if (!audioContext) return;
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
 
@@ -2028,13 +2043,14 @@ function playBeep(type) {
     else oscillator.frequency.value = 500;
 
     oscillator.type = 'sine';
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+    const now = audioContext.currentTime;
+    gainNode.gain.setValueAtTime(0.1, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
 
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.2);
+    oscillator.start(now);
+    oscillator.stop(now + 0.2);
   } catch (e) {
-    console.error("Audio context not supported", e);
+    // Non-critical audio feedback fallback
   }
 }
 
@@ -4729,11 +4745,15 @@ function initializeEmojiPicker() {
 }
 
 let isSendingMessageLock = false;
+let activeClientMsgId = null;
 
 async function sendMessage() {
   if (isSendingMessageLock) return;
   isSendingMessageLock = true;
-  if (!currentChatUser) {
+  activeClientMsgId = null;
+
+  try {
+    if (!currentChatUser) {
     showNotif("[Error] Please select a chat first", "error");
     return;
   }
@@ -4828,8 +4848,7 @@ async function sendMessage() {
   if (typeof removeAttachment === 'function') removeAttachment();
   if (typeof updateSendButtons === 'function') updateSendButtons();
 
-  try {
-    const userRef = doc(db, "users", myUID);
+  const userRef = doc(db, "users", myUID);
 
     if (tokens < 1) {
       tokens = 100;
@@ -5017,7 +5036,8 @@ async function sendMessage() {
       }
 
       console.log("?? Sending direct message to:", currentChatUser);
-      const clientMsgId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      activeClientMsgId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      const clientMsgId = activeClientMsgId;
 
       // Cryptographic E2EE Envelope Encryption (NIST AES-256-GCM / ECDH P-256)
       let e2eeEnvelope = null;
@@ -5084,7 +5104,11 @@ async function sendMessage() {
         messageData.ephemeral = true;
         messageData.ttl = window.activeGhostTtl;
       }
+      window._pendingFailedMessages = window._pendingFailedMessages || new Map();
+      window._pendingFailedMessages.set(clientMsgId, { messageData, text, attachment, chatUser: currentChatUser, chatType: currentChatType });
       const addedDoc = await addDoc(collection(db, "messages"), messageData);
+      window._pendingFailedMessages.delete(clientMsgId);
+      activeClientMsgId = null;
       updateLocalSentMessageStatus(clientMsgId, 'sent');
       const sentWrapper = document.getElementById(`wrapper-${clientMsgId}`);
       if (sentWrapper && addedDoc?.id) {
@@ -5138,9 +5162,13 @@ async function sendMessage() {
   } catch (err) {
     hapticFeedback('heavy');
     console.error("? Critical Send Error:", err);
-    showNotif("Error sending message: " + err.message, "error");
+    if (activeClientMsgId) {
+      updateLocalSentMessageStatus(activeClientMsgId, 'failed');
+    }
+    showNotif("Error sending message: " + (err?.message || "Failed to deliver"), "error");
   } finally {
     isSendingMessageLock = false;
+    activeClientMsgId = null;
   }
 }
 
@@ -6469,14 +6497,72 @@ function updateLocalSentMessageStatus(clientMsgId, status) {
   if (status === 'sent') {
     tickEl.className = 'fa-solid fa-check tick-sent';
     tickEl.title = 'Sent';
+    tickEl.style.color = '';
+    const existingRetry = tickEl.parentNode?.querySelector('.btn-retry-failed-msg');
+    if (existingRetry) existingRetry.remove();
   } else if (status === 'delivered') {
     tickEl.className = 'fa-solid fa-check-double tick-delivered';
     tickEl.title = 'Delivered';
+    tickEl.style.color = '';
   } else if (status === 'read') {
     tickEl.className = 'fa-solid fa-check-double tick-read';
     tickEl.title = 'Read';
+    tickEl.style.color = '';
+  } else if (status === 'sending') {
+    tickEl.className = 'fa-solid fa-clock tick-pending';
+    tickEl.title = 'Sending...';
+    tickEl.style.color = '';
+  } else if (status === 'failed') {
+    tickEl.className = 'fa-solid fa-circle-exclamation tick-failed';
+    tickEl.style.color = '#ef4444';
+    tickEl.title = 'Failed to deliver. Click to retry.';
+    const parentContainer = tickEl.parentNode;
+    if (parentContainer && !parentContainer.querySelector('.btn-retry-failed-msg')) {
+      const retryBtn = document.createElement('button');
+      retryBtn.className = 'btn-retry-failed-msg';
+      retryBtn.type = 'button';
+      retryBtn.style.cssText = 'background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-size: 11px; padding: 2px 7px; border-radius: 6px; cursor: pointer; margin-left: 6px; display: inline-flex; align-items: center; gap: 4px;';
+      retryBtn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Retry';
+      retryBtn.onclick = (e) => {
+        e.stopPropagation();
+        retryBtn.remove();
+        if (typeof window.retryPendingMessage === 'function') {
+          window.retryPendingMessage(clientMsgId);
+        } else if (typeof sendMessage === 'function') {
+          sendMessage();
+        }
+      };
+      parentContainer.appendChild(retryBtn);
+    }
   }
 }
+
+window.retryPendingMessage = async function(clientMsgId) {
+  if (!clientMsgId) return;
+  const pending = window._pendingFailedMessages?.get(clientMsgId);
+  if (!pending) {
+    if (typeof sendMessage === 'function') sendMessage();
+    return;
+  }
+  updateLocalSentMessageStatus(clientMsgId, 'sending');
+  try {
+    const addedDoc = await addDoc(collection(db, "messages"), pending.messageData);
+    updateLocalSentMessageStatus(clientMsgId, 'sent');
+    window._pendingFailedMessages.delete(clientMsgId);
+    const sentWrapper = document.getElementById(`wrapper-${clientMsgId}`);
+    if (sentWrapper && addedDoc?.id) {
+      sentWrapper.id = `msg-wrapper-${addedDoc.id}`;
+      sentWrapper.dataset.docId = addedDoc.id;
+      const b = sentWrapper.querySelector('.message-bubble');
+      if (b) b.dataset.docId = addedDoc.id;
+    }
+    if (typeof showNotif === 'function') showNotif('Message delivered successfully', 'success', 2000);
+  } catch (retryErr) {
+    console.error('Retry failed:', retryErr);
+    updateLocalSentMessageStatus(clientMsgId, 'failed');
+    if (typeof showNotif === 'function') showNotif('Retry failed: ' + (retryErr.message || 'Network error'), 'error');
+  }
+};
 
 
 async function generateChronexAIResponse(text, imagePayload = null) {
@@ -7242,19 +7328,33 @@ function loadMessages() {
     });
 
     const resolveMsgTime = (m) => {
-      if (!m) return 0;
+      if (!m) return Date.now();
       if (m.time?.toMillis) return m.time.toMillis();
       if (m.timestamp?.toMillis) return m.timestamp.toMillis();
       if (m.time?.toDate) return m.time.toDate().getTime();
       if (m.timestamp?.toDate) return m.timestamp.toDate().getTime();
       if (m.time instanceof Date) return m.time.getTime();
       if (m.timestamp instanceof Date) return m.timestamp.getTime();
-      if (typeof m.time === 'number') return m.time;
-      if (typeof m.timestamp === 'number') return m.timestamp;
-      if (m.status === 'sending' || m.status === 'sent' || m.time === null || m.timestamp === null) {
-        return m._localTimestamp || Date.now();
+      if (typeof m.time === 'number' && !isNaN(m.time)) return m.time;
+      if (typeof m.timestamp === 'number' && !isNaN(m.timestamp)) return m.timestamp;
+      if (typeof m.time === 'string') {
+        const parsed = Date.parse(m.time);
+        if (!isNaN(parsed)) return parsed;
       }
-      return 0;
+      if (typeof m.timestamp === 'string') {
+        const parsed = Date.parse(m.timestamp);
+        if (!isNaN(parsed)) return parsed;
+      }
+      if (m.clientTime && typeof m.clientTime === 'number') return m.clientTime;
+      if (m._localTimestamp) return m._localTimestamp;
+      if (m.createdAt) {
+        if (typeof m.createdAt === 'number') return m.createdAt;
+        if (m.createdAt?.toMillis) return m.createdAt.toMillis();
+      }
+      if (m.status === 'sending' || m.status === 'sent' || m.time === null || m.timestamp === null || !m.time) {
+        return m._localTimestamp || m.clientTime || Date.now();
+      }
+      return Date.now();
     };
     const localAiPayload = currentChatType === 'ai' ? uniqueLocalAiMessages : [];
     const allMessages = [...uniqueDbMessages, ...localAiPayload].sort((a, b) => {
@@ -15131,10 +15231,16 @@ async function setupInitialization() {
       }
 
       if (messageListener) {
-        messageListener();
+        try { messageListener(); } catch (_) {}
+        messageListener = null;
+      }
+      if (messageListener2) {
+        try { messageListener2(); } catch (_) {}
+        messageListener2 = null;
       }
       if (contactsListener) {
-        contactsListener();
+        try { contactsListener(); } catch (_) {}
+        contactsListener = null;
       }
       try {
         await updateDoc(doc(db, "users", myUID), {
@@ -20901,18 +21007,23 @@ async function loadGroups() {
 // ══════════════════════════════════════════════════════════════════════
 let globalIncomingMessagesUnsub = null;
 let globalIncomingInitialLoadDone = false;
+let _globalIncomingListenerUID = null;
 
 function setupGlobalIncomingMessageListener() {
   if (!myUID) return;
+  if (globalIncomingMessagesUnsub && _globalIncomingListenerUID === myUID) {
+    return; // Already actively listening for this user, do not thrash
+  }
   if (typeof globalIncomingMessagesUnsub === 'function') {
     try { globalIncomingMessagesUnsub(); } catch (_) {}
     globalIncomingMessagesUnsub = null;
   }
+  _globalIncomingListenerUID = myUID;
 
   try {
     const messagesRef = collection(db, 'messages');
-    // Listen to incoming messages destined for this user
-    const q = query(messagesRef, where('to', '==', myUID));
+    // Listen to incoming messages destined for this user with safety cap
+    const q = query(messagesRef, where('to', '==', myUID), limit(50));
     globalIncomingInitialLoadDone = false;
 
     globalIncomingMessagesUnsub = onSnapshot(q, async (snapshot) => {

@@ -101,17 +101,12 @@ export async function uploadMediaBlob(file, options = {}) {
       }
     };
 
+    xhr.timeout = 60000;
+    xhr.ontimeout = () => {
+      reject(new Error("File upload timed out after 60 seconds"));
+    };
     xhr.onerror = () => {
-      console.warn('Network error reaching /api/upload. Using local Object URL fallback.');
-      const localUrl = URL.createObjectURL(file);
-      resolve({
-        url: localUrl,
-        downloadUrl: localUrl,
-        pathname: filename,
-        fileName: file.name || cleanName,
-        fileSize: file.size,
-        fileType: file.type || 'application/octet-stream',
-      });
+      reject(new Error("Network error occurred during file upload"));
     };
 
     xhr.send(file);

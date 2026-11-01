@@ -81,7 +81,7 @@
    * De-elongates words with 3+ repeated characters (e.g. pleaaase -> please, coool -> cool)
    */
   function collapseRepeatedLetters(str) {
-    if (!str) return str;
+    if (!str || typeof str !== 'string') return ['', ''];
     // Turn 3+ of any letter into 2 and 1
     const two = str.replace(/(.)\1{2,}/g, '$1$1');
     const one = str.replace(/(.)\1{2,}/g, '$1');

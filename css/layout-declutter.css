@@ -4560,3 +4560,42 @@ body[data-active-section="updates"] .top-header {
   background: #2a3942 !important;
   border-radius: 3px !important;
 }
+
+
+/* =========================================================================
+   NEX SENTINEL ENTERPRISE DIAGNOSTIC HUD & FAULT RECOVERY SUITE
+   ========================================================================= */
+#nexSentinelHUD {
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.75) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+#nexSentinelHUD button:hover {
+  filter: brightness(1.15);
+}
+
+.tick-failed {
+  color: #ef4444 !important;
+  cursor: pointer;
+}
+
+.btn-retry-failed-msg {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.35) !important;
+  color: #f87171 !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  padding: 2px 7px !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.btn-retry-failed-msg:hover {
+  background: rgba(239, 68, 68, 0.28) !important;
+  border-color: #ef4444 !important;
+  color: #fff !important;
+}

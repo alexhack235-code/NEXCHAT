@@ -63,8 +63,11 @@
     if (source === source.toUpperCase() && source.length > 1) {
       return target.toUpperCase();
     }
-    if (source[0] === source[0].toUpperCase()) {
-      return target.charAt(0).toUpperCase() + target.slice(1);
+    const targetChars = Array.from(target);
+    const sourceChars = Array.from(source);
+    if (sourceChars.length > 0 && sourceChars[0] === sourceChars[0].toUpperCase()) {
+      targetChars[0] = targetChars[0].toUpperCase();
+      return targetChars.join('');
     }
     return target;
   }
@@ -688,6 +691,10 @@
      */
     instantPolish(rawText) {
       if (!rawText || !rawText.trim()) return rawText;
+      // Guard against UI thread freezing on massive pastes > 3000 chars
+      if (rawText.length > 3000) return rawText;
+      // Skip code snippets, URLs, or markdown fences
+      if (/^(https?:\/\/|```|import |export |function |<)/i.test(rawText.trim())) return rawText;
       let text = rawText;
 
       const detectedLang = this.detectLanguage(text);

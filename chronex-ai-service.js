@@ -791,12 +791,20 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
       const conversationRef = ref(rtdb, `conversations/${this.uid}/${conversationId}`);
       return new Promise((resolve) => {
+        const timer = setTimeout(() => resolve([]), 3500);
         onValue(conversationRef, (snapshot) => {
+          clearTimeout(timer);
           const messages = [];
-          snapshot.forEach((child) => {
-            messages.push(child.val());
-          });
+          if (snapshot && typeof snapshot.forEach === 'function') {
+            snapshot.forEach((child) => {
+              messages.push(child.val());
+            });
+          }
           resolve(messages);
+        }, (err) => {
+          clearTimeout(timer);
+          console.warn("RTDB conversation history error:", err);
+          resolve([]);
         }, { onlyOnce: true });
       });
     } catch (error) {
@@ -1006,13 +1014,16 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
 
     const models = geminiConfig.models || ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
 
-    // Try keys with auto-failover across the pool
-    for (let attempt = 0; attempt < totalKeys; attempt++) {
+    // Try keys with auto-failover across the pool with maximum 12s total budget
+    const overallDeadline = Date.now() + 12000;
+    for (let attempt = 0; attempt < Math.min(3, totalKeys); attempt++) {
+      if (Date.now() >= overallDeadline) break;
       const keyInfo = pool.getNextKey();
       if (!keyInfo || !keyInfo.key) break;
       const { key, index } = keyInfo;
 
       for (const model of models) {
+        if (Date.now() >= overallDeadline) break;
         const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
         const fetchTimer = controller ? setTimeout(() => controller.abort(), 9000) : null;
 
@@ -1094,26 +1105,35 @@ Format all outputs with executive-grade structure:
         { role: "user", content: message }
       ];
 
-      const response = await fetch(this.config.backends.openai.endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: this.config.backends.openai.model,
-          messages: messages,
-          temperature: this.config.model.temperature,
-          max_tokens: this.config.model.maxTokens,
-          top_p: this.config.model.topP,
-          frequency_penalty: this.config.model.frequencyPenalty,
-          presence_penalty: this.config.model.presencePenalty
-        })
-      });
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const fetchTimer = controller ? setTimeout(() => controller.abort(), this.config.backends.openai.timeout || 15000) : null;
+
+      let response;
+      try {
+        response = await fetch(this.config.backends.openai.endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: this.config.backends.openai.model,
+            messages: messages,
+            temperature: this.config.model.temperature,
+            max_tokens: this.config.model.maxTokens,
+            top_p: this.config.model.topP,
+            frequency_penalty: this.config.model.frequencyPenalty,
+            presence_penalty: this.config.model.presencePenalty
+          }),
+          signal: controller?.signal
+        });
+      } finally {
+        if (fetchTimer) clearTimeout(fetchTimer);
+      }
 
       if (!response.ok) {
-        const error = await response.json();
-        console.error(" OpenAI API Error:", error);
+        const errText = await response.text().catch(() => '');
+        console.warn("OpenAI API Error:", response.status, errText.substring(0, 200));
         return null;
       }
 
@@ -1147,25 +1167,36 @@ Format all outputs with executive-grade structure:
       
       prompt += `User: ${message}\nAssistant:`;
 
-      const response = await fetch(this.config.backends.ollama.endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: this.config.backends.ollama.model,
-          prompt: prompt,
-          stream: false,
-          options: {
-            temperature: 0.7,
-            top_p: 0.9,
-            num_predict: 1000
-          }
-        })
-      });
+      const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      const fetchTimer = controller ? setTimeout(() => controller.abort(), this.config.backends.ollama.timeout || 12000) : null;
+
+      let response;
+      try {
+        response = await fetch(this.config.backends.ollama.endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: this.config.backends.ollama.model,
+            prompt: prompt,
+            stream: false,
+            options: {
+              temperature: 0.7,
+              top_p: 0.9,
+              num_predict: 1000
+            }
+          }),
+          signal: controller?.signal
+        });
+      } finally {
+        if (fetchTimer) clearTimeout(fetchTimer);
+      }
 
       if (!response.ok) {
-        throw new Error(`Ollama API error: ${response.status} ${response.statusText}`);
+        const errText = await response.text().catch(() => '');
+        console.warn("Ollama API Error:", response.status, errText.substring(0, 200));
+        return null;
       }
 
       const data = await response.json();

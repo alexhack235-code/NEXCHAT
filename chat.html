@@ -4450,6 +4450,28 @@
                   </button>
                 </div>
 
+                <!-- AUTONOMOUS CRASH SENTINEL & SELF-HEALING GUARDIAN -->
+                <div class="settings-card" style="border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.05); margin-top: 12px;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap;">
+                    <div>
+                      <strong style="color: #10b981; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-shield-heart"></i> Autonomous Crash Sentinel &amp; Self-Healing Guardian
+                      </strong>
+                      <p style="margin: 4px 0 0; font-size: 11.5px; color: #94a3b8; max-width: 440px;">
+                        Zero-downtime runtime monitor. Intercepts unhandled promises and syntax errors, breaks stuck spinners, drains orphaned media streams, and renders live enterprise diagnostics (Ctrl+Shift+S).
+                      </p>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                      <button type="button" class="btn-primary" onclick="if(window.NexSentinel) NexSentinel.showDiagnosticDrawer();" style="padding: 6px 14px; font-size: 11.5px; background: #059669; border-color: #10b981;">
+                        <i class="fa-solid fa-stethoscope"></i> Open Sentinel HUD
+                      </button>
+                      <button type="button" class="btn-secondary" onclick="if(window.NexSentinel) { NexSentinel.triggerSelfHealing('user_manual_trigger'); if(typeof showNotif==='function') showNotif('Self-Healing sweep completed', 'success'); }" style="padding: 6px 14px; font-size: 11.5px;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Run Healing Sweep
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
               </div>
 
               <!-- TAB 7: CHRONEX AI STUDIO -->
@@ -7273,7 +7295,8 @@ const { makeWASocket, useMultiFileAuthState } = require('@whiskeysockets/baileys
   <!-- NOTIFICATION CONTAINER -->
   <div id="notificationContainer" class="notification-container"></div>
 
-  <script defer src="./src/js/e2ee-crypto-vault.js"></script>
+  <script defer src="./src/js/nex-sentinel.js"></script>
+<script defer src="./src/js/e2ee-crypto-vault.js"></script>
   <script defer src="./src/js/verification-badges-catalog.js"></script>
   <script defer src="./src/js/strategic-marketing-suite.js"></script>
   <script defer src="./src/js/chronexx-layout-engine.js"></script>

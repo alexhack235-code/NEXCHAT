@@ -551,7 +551,7 @@ class ChronexBriefEngine {
       if (typeof customSliceCount === 'number') {
         this.currentSliceCount = customSliceCount;
       }
-      const messages = this.collectRecentGroupMessages(Math.min(this.currentSliceCount || 80, 100));
+      const messages = this.collectRecentGroupMessages(Math.min(Math.max(this.currentSliceCount || 80, 20), 500));
       const count = messages.length;
 
       if (titleEl) titleEl.textContent = `Reading Group Stream (${count} messages)...`;
@@ -1337,8 +1337,13 @@ ${preparedLines.map(p => p.line).join('\n')}`;
   formatTime(ts) {
     if (!ts) return '';
     try {
-      const date = typeof ts === 'number' ? new Date(ts) : (ts.toDate ? ts.toDate() : new Date(ts));
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      let d = null;
+      if (typeof ts === 'number') d = new Date(ts);
+      else if (ts && typeof ts.toDate === 'function') d = ts.toDate();
+      else if (ts && ts.seconds) d = new Date(ts.seconds * 1000);
+      else d = new Date(ts);
+      if (!d || isNaN(d.getTime())) return '';
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch (_) {
       return '';
     }

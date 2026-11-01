@@ -157,6 +157,17 @@
 
       } catch (err) {
         console.error('[VoiceRecorder] Mic access error:', err);
+        if (this.stream) {
+          try {
+            this.stream.getTracks().forEach(t => t.stop());
+          } catch (_) {}
+          this.stream = null;
+        }
+        if (this.audioCtx && this.audioCtx.state !== 'closed') {
+          try { this.audioCtx.close(); } catch (_) {}
+          this.audioCtx = null;
+        }
+        this.isRecording = false;
         if (window.showNotif) {
           if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
             window.showNotif('Microphone permission was denied. Please allow mic in browser settings.', 'error', 4000);

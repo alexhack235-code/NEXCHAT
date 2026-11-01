@@ -69,7 +69,7 @@
     },
 
     generateHeuristicSummary(recent, count, authorsStr) {
-      const lastSnippets = recent.slice(-2).map(m => `"${m.text.substring(0, 40)}..."`).join(' and ');
+      const lastSnippets = (recent || []).slice(-2).map(m => m && m.text ? `"${String(m.text).substring(0, 40)}..."` : '').filter(Boolean).join(' and ');
       return {
         title: `ChronEX Group Intelligence Briefing (${count} Messages)`,
         themes: [`Active exchange across ${authorsStr || 'group members'}.`],

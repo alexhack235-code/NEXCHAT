@@ -1102,14 +1102,23 @@ service cloud.firestore {
     // 3. GROUP MESSAGES (Top-Level & Nested Subcollections)
     // ===============================================================
     match /groupMessages/{messageId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (
+        isGroupMember(resource.data.groupId) ||
+        isSuperAdmin()
+      );
 
       allow create: if isAuthenticated() &&
                        request.resource.data.groupId is string &&
                        isGroupMember(request.resource.data.groupId) &&
-                       (request.resource.data.from == request.auth.uid || request.resource.data.senderId == request.auth.uid) &&
+                       (
+                         request.resource.data.from == request.auth.uid ||
+                         request.resource.data.senderId == request.auth.uid ||
+                         (request.resource.data.from == 'group_defense_bot' && isGroupMember(request.resource.data.groupId)) ||
+                         isSuperAdmin()
+                       ) &&
                        isValidOptionalString('text', 0, 10000) &&
                        isValidOptionalString('content', 0, 10000) &&
+                       isValidOptionalString('message', 0, 10000) &&
                        isValidOptionalReactions('reactions');
 
       // Sender can edit text/reactions; group members can update reactions/readBy/deletedFor; sender/moderator can update tombstone fields
@@ -1119,6 +1128,7 @@ service cloud.firestore {
           areImmutableFieldsUnchanged(['from', 'senderId', 'groupId', 'createdAt', 'timestamp']) &&
           isValidOptionalString('text', 0, 10000) &&
           isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalString('message', 0, 10000) &&
           isValidOptionalReactions('reactions') &&
           isValidOptionalList('deletedFor', 500)
         ) ||
@@ -1132,12 +1142,13 @@ service cloud.firestore {
           (
             request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment']) ||
             (
-              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content']) &&
+              request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isDeleted', 'deletedForEveryone', 'deletedAt', 'deletedFor', 'attachment', 'text', 'content', 'message']) &&
               (('isDeleted' in request.resource.data && request.resource.data.isDeleted == true) || ('deletedForEveryone' in request.resource.data && request.resource.data.deletedForEveryone == true))
             )
           ) &&
           isValidOptionalString('text', 0, 10000) &&
           isValidOptionalString('content', 0, 10000) &&
+          isValidOptionalString('message', 0, 10000) &&
           isValidOptionalList('deletedFor', 500)
         ) ||
         isGroupModerator(resource.data.groupId) ||
@@ -1865,7 +1876,10 @@ service cloud.firestore {
     }
 
     match /groupPolls/{pollId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (
+        isGroupMember(resource.data.groupId) ||
+        isSuperAdmin()
+      );
       allow create: if isAuthenticated() && isGroupMember(request.resource.data.groupId);
       allow update, delete: if isAuthenticated() && (
         request.auth.uid == resource.data.creatorId ||
