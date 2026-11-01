@@ -472,31 +472,41 @@ function displayAds(ads) {
   container.innerHTML = ads.map(ad => {
     const exp = ad.expiresAt?.toDate ? ad.expiresAt.toDate() : new Date(ad.expiresAt);
     const hours = Math.max(0, Math.ceil((exp - new Date()) / 3600000));
-    const imageUrl = (ad.imageURL && typeof ad.imageURL === 'string' && ad.imageURL.trim()) ? ad.imageURL.trim() : 'logo.jpg';
-    const isVideo = ad.mediaType === 'video' || imageUrl.includes('.mp4');
-    const catInfo = CATEGORY_MAP[ad.productCategory] || { emoji: '', label: ad.productCategory || 'Other' };
+    let rawImg = (ad.imageURL && typeof ad.imageURL === 'string' && ad.imageURL.trim()) ? ad.imageURL.trim() : 'logo.jpg';
+    const isRealVideo = typeof rawImg === 'string' && /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(rawImg);
+    const catInfo = CATEGORY_MAP[ad.productCategory] || { emoji: '', label: ad.productCategory || 'Other', icon: 'fa-box' };
+    const countryCode = (ad.country || 'CA').toUpperCase();
+    const isGlobal = ad.shippingScope === 'global' || countryCode === 'GLOBAL';
+    const formattedPrice = marketGeoCdn.formatPrice(ad.productPrice, ad.country);
 
-    const mediaHtml = isVideo
-      ? `<video src="${imageUrl}" class="ad-card-image" autoplay muted loop playsinline></video>`
-      : `<img src="${imageUrl}" class="ad-card-image" alt="${escapeHtml(ad.productName)}" loading="lazy" onerror="this.onerror=null;this.src='logo.jpg';">`;
+    const mediaHtml = isRealVideo
+      ? `<video src="${rawImg}" class="ad-card-image" autoplay muted loop playsinline></video>`
+      : `<img src="${rawImg}" class="ad-card-image" alt="${escapeHtml(ad.productName)}" loading="lazy" onerror="this.onerror=null;this.src='logo.jpg';">`;
 
     return `
       <div class="ad-card" onclick="window.viewAdDetail('${ad.id}')">
         <div class="ad-card-media-wrap">
           ${mediaHtml}
-          <div class="ad-card-category-badge"><i class="fa-solid ${catInfo.icon || 'fa-box'}"></i> ${catInfo.label}</div>
-          <div class="ad-card-expiry-badge"><i class="fa-regular fa-clock"></i> ${hours}h</div>
-          <div class="ad-card-geo-badge">
-            <span class="country-pill-tag"><i class="fa-solid fa-location-dot"></i> ${escapeHtml((ad.country || 'CA').toUpperCase())}</span>
-            ${(ad.shippingScope === 'global' || (ad.country || '').toUpperCase() === 'GLOBAL') ? '<span class="shipping-pill-tag"><i class="fa-solid fa-plane"></i> Global</span>' : ''}
+          <div class="ad-card-badges-overlay">
+            <span class="ad-card-category-badge"><i class="fa-solid ${catInfo.icon || 'fa-box'}"></i> ${catInfo.label}</span>
+            <span class="ad-card-expiry-badge"><i class="fa-regular fa-clock"></i> ${hours}h</span>
+            <div class="ad-card-geo-badge">
+              <span class="country-pill-tag"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(countryCode)}</span>
+              ${isGlobal ? '<span class="shipping-pill-tag"><i class="fa-solid fa-plane"></i> Global</span>' : ''}
+            </div>
           </div>
         </div>
         <div class="ad-card-content">
-          <div class="ad-card-title">${escapeHtml(ad.productName)}</div>
+          <div class="ad-card-list-meta">
+            <span class="ad-list-cat-pill"><i class="fa-solid ${catInfo.icon || 'fa-box'}"></i> ${catInfo.label}</span>
+            <span class="ad-list-country-pill"><i class="fa-solid fa-location-dot"></i> ${escapeHtml(countryCode)}</span>
+            <span class="ad-list-time-pill"><i class="fa-regular fa-clock"></i> ${hours}h left</span>
+          </div>
+          <div class="ad-card-title" title="${escapeHtml(ad.productName)}">${escapeHtml(ad.productName)}</div>
           <div class="ad-card-price-row">
-            <div class="ad-card-price">${escapeHtml(marketGeoCdn.formatPrice(ad.productPrice, ad.country))}</div>
-            <div class="ad-card-seller" title="Seller: ${escapeHtml(ad.sellerUsername)}">
-              <i class="fa-solid fa-user-check"></i> ${escapeHtml(ad.sellerUsername || 'Seller')}
+            <div class="ad-card-price">${escapeHtml(formattedPrice)}</div>
+            <div class="ad-card-seller" title="Seller: ${escapeHtml(ad.sellerUsername || 'Seller')}">
+              <i class="fa-solid fa-user-check"></i> <span>${escapeHtml(ad.sellerUsername || 'Seller')}</span>
             </div>
           </div>
           <div class="ad-card-actions">
@@ -546,7 +556,7 @@ async function loadUserAds() {
       const expired = exp <= new Date();
       const hours = Math.max(0, Math.ceil((exp - new Date()) / 3600000));
       const imageUrl = ad.imageURL || 'logo.jpg';
-      const isVideo = ad.mediaType === 'video' || imageUrl.includes('.mp4');
+      const isVideo = typeof imageUrl === 'string' && /\.(mp4|webm|mov|ogg)(\?.*)?$/i.test(imageUrl);
       const catInfo = CATEGORY_MAP[ad.productCategory] || { emoji: '', label: ad.productCategory || 'Other' };
 
       const mediaHtml = isVideo

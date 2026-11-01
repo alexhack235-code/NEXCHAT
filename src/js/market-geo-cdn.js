@@ -168,7 +168,7 @@ class MarketGeoCdnEngine {
   formatPrice(amount, adCountry = null) {
     const num = parseFloat(amount) || 0;
     const countryInfo = (adCountry && SUPPORTED_COUNTRIES[adCountry]) ? SUPPORTED_COUNTRIES[adCountry] : this.getActiveCountryInfo();
-    return `${countryInfo.symbol}${num.toFixed(2)} ${countryInfo.currency}`;
+    return `${countryInfo.symbol}${num.toFixed(2)}`;
   }
 
   /**

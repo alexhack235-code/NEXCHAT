@@ -7762,6 +7762,12 @@ function hideChatProfileDisplay() {
 }
 
 async function openChat(uid, username, profilePic, chatType = 'direct') {
+  /* Ensure Attachment Hub is closed upon opening chat */
+  const initialHub = document.getElementById('attachmentPopupHub');
+  if (initialHub) {
+    initialHub.classList.remove('active', 'is-open');
+    initialHub.style.setProperty('display', 'none', 'important');
+  }
   if (!uid) return;
 
   if (chatType === 'direct' && uid !== myUID && !isDirectChatAllowed(uid)) {
@@ -25431,22 +25437,34 @@ function initAttachmentHubActions() {
   const toggleBtn = document.getElementById('btnToggleAttachmentHub');
   if (toggleBtn) {
     toggleBtn.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
-      hub.style.display = (hub.style.display === 'flex' || hub.style.display === 'grid') ? 'none' : 'grid';
+      const isOpen = hub.classList.contains('active') || hub.classList.contains('is-open') || hub.style.display === 'grid';
+      if (isOpen) {
+        hub.classList.remove('active', 'is-open');
+        hub.style.setProperty('display', 'none', 'important');
+      } else {
+        hub.classList.add('active', 'is-open');
+        hub.style.setProperty('display', 'grid', 'important');
+      }
     });
   }
 
   // Auto-dismiss hub on action item click
   hub.querySelectorAll('.attach-hub-item').forEach(item => {
     item.addEventListener('click', () => {
-      hub.style.display = 'none';
+      hub.classList.remove('active', 'is-open');
+      hub.style.setProperty('display', 'none', 'important');
     });
   });
 
   // Dismiss attachment hub when clicking outside
   document.addEventListener('click', (e) => {
-    if (hub && hub.style.display !== 'none' && !hub.contains(e.target) && e.target !== toggleBtn) {
-      hub.style.display = 'none';
+    if (hub && (hub.classList.contains('active') || hub.classList.contains('is-open') || hub.style.display === 'grid')) {
+      if (!hub.contains(e.target) && e.target !== toggleBtn && (!toggleBtn || !toggleBtn.contains(e.target))) {
+        hub.classList.remove('active', 'is-open');
+        hub.style.setProperty('display', 'none', 'important');
+      }
     }
   });
 }

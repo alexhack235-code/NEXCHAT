@@ -1928,3 +1928,145 @@ html, body {
   width: 100%;
   gap: 8px;
 }
+
+
+/* --------------------------------------------------------------------------
+   LIST VIEW REVOLUTION & CLEAN CARDS
+   -------------------------------------------------------------------------- */
+.ad-card-list-meta {
+  display: none;
+}
+
+.ads-grid.list-view {
+  grid-template-columns: 1fr !important;
+  gap: 12px !important;
+}
+
+.ads-grid.list-view .ad-card {
+  flex-direction: row !important;
+  min-height: 110px !important;
+  height: auto !important;
+  align-items: stretch !important;
+  padding: 10px !important;
+  gap: 12px !important;
+  background: rgba(14, 20, 36, 0.9) !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.ads-grid.list-view .ad-card:hover {
+  border-color: rgba(0, 240, 118, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 240, 118, 0.15) !important;
+}
+
+.ads-grid.list-view .ad-card-media-wrap {
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
+  height: 90px !important;
+  min-height: 90px !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  background: #0c1222 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+
+.ads-grid.list-view .ad-card-badges-overlay {
+  display: none !important;
+}
+
+.ads-grid.list-view .ad-card-list-meta {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 10px !important;
+  color: #94a3b8 !important;
+  margin-bottom: 2px !important;
+  flex-wrap: wrap !important;
+}
+
+.ad-list-cat-pill,
+.ad-list-country-pill,
+.ad-list-time-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #cbd5e1 !important;
+  font-weight: 600 !important;
+}
+
+.ad-list-country-pill {
+  color: #00f076 !important;
+  background: rgba(0, 240, 118, 0.12) !important;
+  border: 1px solid rgba(0, 240, 118, 0.3) !important;
+}
+
+.ad-list-time-pill {
+  color: #38bdf8 !important;
+  background: rgba(56, 189, 248, 0.1) !important;
+}
+
+.ads-grid.list-view .ad-card-content {
+  padding: 0 !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+}
+
+.ads-grid.list-view .ad-card-title {
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.ads-grid.list-view .ad-card-price-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin: 2px 0 !important;
+}
+
+.ads-grid.list-view .ad-card-price {
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  color: #00ff66 !important;
+  white-space: nowrap !important;
+  letter-spacing: 0.5px !important;
+}
+
+.ads-grid.list-view .ad-card-seller {
+  font-size: 11px !important;
+  color: #94a3b8 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  max-width: 120px !important;
+}
+
+.ads-grid.list-view .ad-card-actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin-top: 4px !important;
+  padding-top: 0 !important;
+  border-top: none !important;
+}
+
+.ads-grid.list-view .card-action-btn {
+  flex: 1 !important;
+  padding: 6px 10px !important;
+  font-size: 11.5px !important;
+  border-radius: 8px !important;
+  height: 32px !important;
+}

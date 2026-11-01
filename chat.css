@@ -14734,7 +14734,7 @@ body.chat-size-extra-large .message-bubble {
 
 /* 6. Attachment Hub Matrix (4-Column Responsive Grid) */
 .attachment-popup-hub {
-  display: grid !important;
+  display: none !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
   gap: 6px !important;
   left: 8px !important;
@@ -14756,6 +14756,11 @@ body.chat-size-extra-large .message-bubble {
   border: 1px solid rgba(0, 240, 118, 0.35) !important;
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 240, 118, 0.15) !important;
   z-index: 1000 !important;
+}
+
+.attachment-popup-hub.active,
+.attachment-popup-hub.is-open {
+  display: grid !important;
 }
 
 .attach-hub-item {
