@@ -14919,11 +14919,49 @@ body.chat-size-extra-large .message-bubble {
   bottom: 0 !important;
   background: rgba(5, 8, 16, 0.88) !important;
   z-index: 10500 !important;
-  display: flex !important;
+  display: none !important;
   align-items: center !important;
   justify-content: center !important;
   padding: 16px !important;
   box-sizing: border-box !important;
+}
+
+.quantum-stegano-modal-backdrop.active,
+.quantum-stegano-modal-backdrop.is-open {
+  display: flex !important;
+}
+
+.quantum-stegano-modal-backdrop[style*="display: none"] {
+  display: none !important;
+}
+
+.quantum-stegano-modal-backdrop[style*="display: flex"] {
+  display: flex !important;
+}
+
+.btn-stegano-cancel {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  color: #cbd5e1 !important;
+  border-radius: 12px !important;
+  padding: 12px 18px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin-top: 8px !important;
+  transition: all 0.2s ease !important;
+  touch-action: manipulation !important;
+  pointer-events: auto !important;
+}
+.btn-stegano-cancel:active {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5f9 !important;
+  transform: scale(0.98) !important;
 }
 
 .quantum-stegano-window {

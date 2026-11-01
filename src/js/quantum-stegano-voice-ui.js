@@ -43,24 +43,30 @@ class QuantumSteganoVoiceUI {
     this.bindEvents();
     
     // Global bulletproof close listener (capture phase)
-    document.addEventListener('click', (e) => {
-      const closeBtn = e.target.closest('#btnCloseQuantumStegano, #btnCloseDecryptStegano, .btn-close-stegano');
+    const closeAll = (e) => {
+      const closeBtn = e.target.closest('#btnCloseQuantumStegano, #btnCloseDecryptStegano, #btnCancelSteganoModal, .btn-close-stegano, .btn-stegano-cancel');
       if (closeBtn) {
-        e.preventDefault();
+        if (e.cancelable) e.preventDefault();
         e.stopPropagation();
-        this.closeRecorderModal();
-        const dm = document.getElementById('quantumSteganoDecryptModal');
-        if (dm) dm.remove();
+        window.closeQuantumSteganoVoiceModal();
+        return;
       }
       const modal = document.getElementById('quantumSteganoModal');
       if (modal && e.target === modal) {
-        this.closeRecorderModal();
+        if (e.cancelable) e.preventDefault();
+        e.stopPropagation();
+        window.closeQuantumSteganoVoiceModal();
+        return;
       }
       const dm = document.getElementById('quantumSteganoDecryptModal');
       if (dm && (e.target === dm || e.target.closest('#btnCloseDecryptStegano'))) {
         dm.remove();
       }
-    }, true);
+    };
+
+    document.addEventListener('click', closeAll, true);
+    document.addEventListener('pointerdown', closeAll, true);
+    document.addEventListener('touchstart', closeAll, { capture: true, passive: true });
     
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
@@ -71,7 +77,17 @@ class QuantumSteganoVoiceUI {
     }, true);
     window.QuantumSteganoVoiceUI = this;
     window.openQuantumSteganoVoiceModal = () => this.openRecorderModal();
-    window.closeQuantumSteganoVoiceModal = () => this.closeRecorderModal();
+    window.closeQuantumSteganoVoiceModal = () => {
+      const modal = document.getElementById('quantumSteganoModal');
+      if (modal) {
+        modal.classList.remove('active', 'is-open');
+        modal.style.setProperty('display', 'none', 'important');
+        modal.style.display = 'none';
+      }
+      const dm = document.getElementById('quantumSteganoDecryptModal');
+      if (dm) dm.remove();
+      this.closeRecorderModal();
+    };
   }
 
   injectAttachmentHubItem() {
@@ -193,6 +209,10 @@ class QuantumSteganoVoiceUI {
               <i class="fa-solid fa-fingerprint"></i>
               <span>Synthesize & Send Stegano-Audio</span>
             </button>
+            <button type="button" id="btnCancelSteganoModal" class="btn-stegano-cancel" onclick="window.closeQuantumSteganoVoiceModal()" onpointerdown="window.closeQuantumSteganoVoiceModal()" ontouchstart="window.closeQuantumSteganoVoiceModal()">
+              <i class="fa-solid fa-xmark"></i>
+              <span>Cancel & Close</span>
+            </button>
           </div>
         </div>
       </div>
@@ -265,14 +285,19 @@ class QuantumSteganoVoiceUI {
   openRecorderModal() {
     const modal = document.getElementById('quantumSteganoModal');
     if (!modal) return;
-    modal.style.display = 'flex';
+    modal.classList.add('active', 'is-open');
+    modal.style.setProperty('display', 'flex', 'important');
     this.resetRecording();
     this.previewActive = false;
   }
 
   closeRecorderModal() {
     const modal = document.getElementById('quantumSteganoModal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+      modal.classList.remove('active', 'is-open');
+      modal.style.setProperty('display', 'none', 'important');
+      modal.style.display = 'none';
+    }
     if (this.previewActive) {
       quantumSteganoVoice.stopAmbientPreview();
       this.previewActive = false;
