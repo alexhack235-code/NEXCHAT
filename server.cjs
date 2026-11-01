@@ -58,7 +58,20 @@ function recursiveDecode(str, maxPasses = 5) {
   return curr;
 }
 
-const SQLI_REGEX = /(\b(union(\s+all|\s+distinct)?\s+select|or\s+1\s*=\s*1|order\s+by\s+\d+|admin'--)\b|--\s*$)/i;
+const SQL_INJECTION_PATTERNS = [
+  /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|EXEC|EXECUTE)\b)/i,
+  /(['";])\s*(OR|AND)\s+\d+\s*[=<>]/i,          // ' OR 1=1
+  /(--|#|\/\*|\*\/)/,                              // SQL comments
+  /(\bWAITFOR\b\s+\bDELAY\b)/i,                   // Time-based blind SQLi
+  /(\bBENCHMARK\b\s*\()/i,                         // MySQL benchmark
+  /(\bSLEEP\b\s*\()/i,                             // MySQL sleep
+  /(LOAD_FILE|INTO\s+OUTFILE|INTO\s+DUMPFILE)/i,   // File operations
+  /(\bCHAR\b\s*\()/i,                              // CHAR() encoding bypass
+  /(\bCONCAT\b\s*\()/i,                            // String concatenation attacks
+  /(0x[0-9a-fA-F]+)/,                              // Hex-encoded payloads
+  /(%27|%22|%23|%3B)/i,                            // URL-encoded quotes/semicolons
+  /(\$where|\$regex|\$gt|\$lt|\$ne|\$in|\$nin|\$or|\$and|\$not|\$expr)/i, // NoSQL MongoDB operators
+];
 
 const server = http.createServer(async (req, res) => {
   // 1. Strict Security Headers
@@ -111,12 +124,16 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 4. SQLi & Injection Guard on URL
+  // 4. SQLi & NoSQLi Guard on URL & Request (DEFENSE PROTOCOL 1)
   const decodedUrl = recursiveDecode(req.url).normalize('NFKC');
-  if (SQLI_REGEX.test(decodedUrl)) {
-    res.writeHead(403, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'MALICIOUS_INJECTION_DETECTED', message: 'Request blocked by application security guard.' }));
-    return;
+  const combinedCheck = String(req.url) + " " + String(decodedUrl) + " " + String(req.headers["user-agent"] || "") + " " + String(req.headers["referer"] || "");
+  for (const pattern of SQL_INJECTION_PATTERNS) {
+    pattern.lastIndex = 0;
+    if (pattern.test(combinedCheck)) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Request blocked by security filter', code: 'WAF_VIOLATION' }));
+      return;
+    }
   }
 
   console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);

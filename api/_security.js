@@ -1,7 +1,8 @@
 /**
  * NEXCHAT Server-Side Security Middleware & Anti-Abuse Engine
+ * Upgraded with Protocol 1 (SQLi/NoSQLi WAF) & Protocol 2 (Edge Rate Limiting)
  * Protects serverless functions against DDoS, brute force, path traversal,
- * unauthorized access, and malicious file injection.
+ * unauthorized access, malicious injection, and credential spraying.
  */
 
 import { firebaseConfig } from '../firebase-public-config.js';
@@ -10,6 +11,24 @@ import { firebaseConfig } from '../firebase-public-config.js';
 const rateLimitMap = new Map();
 const RATE_LIMIT_WINDOW_MS = 60 * 1000; // 1 minute window
 const MAX_REQUESTS_PER_WINDOW = 60; // Max 60 requests/min per IP
+
+/**
+ * DEFENSE PROTOCOL 1: SQL Injection & NoSQL Injection Detection Patterns
+ */
+export const sqlInjectionPatterns = [
+  /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|EXEC|EXECUTE)\b)/i,
+  /(['";])\s*(OR|AND)\s+\d+\s*[=<>]/i,          // ' OR 1=1
+  /(--|#|\/\*|\*\/)/,                              // SQL comments
+  /(\bWAITFOR\b\s+\bDELAY\b)/i,                   // Time-based blind SQLi
+  /(\bBENCHMARK\b\s*\()/i,                         // MySQL benchmark
+  /(\bSLEEP\b\s*\()/i,                             // MySQL sleep
+  /(LOAD_FILE|INTO\s+OUTFILE|INTO\s+DUMPFILE)/i,   // File operations
+  /(\bCHAR\b\s*\()/i,                              // CHAR() encoding bypass
+  /(\bCONCAT\b\s*\()/i,                            // String concatenation attacks
+  /(0x[0-9a-fA-F]+)/,                              // Hex-encoded payloads
+  /(%27|%22|%23|%3B)/i,                            // URL-encoded quotes/semicolons
+  /(\$where|\$regex|\$gt|\$lt|\$ne|\$in|\$nin|\$or|\$and|\$not|\$expr)/i, // NoSQL MongoDB operators
+];
 
 // Periodic memory cleanup every 5 minutes (unref prevents blocking serverless process exit)
 const cleanupTimer = setInterval(() => {
@@ -38,8 +57,51 @@ export function getClientIp(req) {
 }
 
 /**
- * Enforces per-IP sliding window rate limiting.
- * Returns true if allowed, false if rate limited.
+ * DEFENSE PROTOCOL 1: WAF Inspector
+ * Intercepts SQLi / NoSQLi injection payloads across URL, query, body, and headers.
+ * Returns true if safe, false if blocked.
+ * @param {import('http').IncomingMessage} req
+ * @param {import('http').ServerResponse} res
+ * @returns {boolean}
+ */
+export function enforceWaf(req, res) {
+  try {
+    const rawUrl = req.url || '';
+    let decodedUrl = rawUrl;
+    try { decodedUrl = decodeURIComponent(rawUrl); } catch (_) {}
+
+    const targets = [
+      rawUrl,
+      decodedUrl,
+      JSON.stringify(req.query || {}),
+      JSON.stringify(req.body || {}),
+      req.headers['user-agent'] || '',
+      req.headers['referer'] || ''
+    ];
+    const combined = targets.join(' ');
+
+    for (const pattern of sqlInjectionPatterns) {
+      pattern.lastIndex = 0;
+      if (pattern.test(combined)) {
+        const ip = getClientIp(req);
+        console.error(`[WAF BLOCK] SQLi/NoSQLi detected from ${ip}: ${combined.slice(0, 160)}`);
+        res.setHeader('Content-Type', 'application/json');
+        res.status(403).json({
+          error: 'Request blocked by security filter',
+          code: 'WAF_VIOLATION'
+        });
+        return false;
+      }
+    }
+  } catch (_) {
+    // Fail safe
+  }
+  return true;
+}
+
+/**
+ * Enforces per-IP sliding window rate limiting + automatic WAF inspection.
+ * Returns true if allowed, false if rate limited or blocked by WAF.
  * 
  * @param {import('http').IncomingMessage} req 
  * @param {import('http').ServerResponse} res 
@@ -47,6 +109,12 @@ export function getClientIp(req) {
  * @returns {boolean}
  */
 export function enforceRateLimit(req, res, maxLimit = MAX_REQUESTS_PER_WINDOW) {
+  // 1. Run WAF inspection first
+  if (!enforceWaf(req, res)) {
+    return false;
+  }
+
+  // 2. Run sliding-window rate limit
   const ip = getClientIp(req);
   const now = Date.now();
 
@@ -62,9 +130,10 @@ export function enforceRateLimit(req, res, maxLimit = MAX_REQUESTS_PER_WINDOW) {
     const retryAfterSec = Math.ceil((record.resetAt - now) / 1000);
     console.warn(`[SECURITY WARNING] Rate limit exceeded for IP: ${ip} (${record.count} reqs).`);
     res.setHeader('Retry-After', String(retryAfterSec));
+    res.setHeader('Content-Type', 'application/json');
     res.status(429).json({
-      error: 'Too Many Requests. Rate limit exceeded. Try again later.',
-      code: 'RATE_LIMIT_EXCEEDED',
+      error: 'Too many requests. Please slow down.',
+      code: 'RATE_LIMITED',
       retryAfterSeconds: retryAfterSec,
     });
     return false;
@@ -134,7 +203,6 @@ export function validatePathname(pathname) {
 
   return { valid: true };
 }
-
 
 /**
  * Universal CORS and Preflight handler for web and Capacitor native clients.
