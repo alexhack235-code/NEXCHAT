@@ -1,0 +1,313 @@
+admin-dashboard.html:2361: <i class="fa-solid fa-robot" style="color: var(--neon-green);"></i> AI Sentinel Auto-Moderation
+app-prompt.js:36: font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+app-prompt.js:117: font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+chat.html:215: <button id="nexbotStudioBtnHeader" class="header-icon-btn cyber-sub-tool" title="NEXBOT Studio &amp; WhatsApp Architect"><i class="fa-solid fa-robot"></i></button>
+chat.html:1405: <div class="attach-hub-icon icon-bot"><i class="fa-solid fa-robot"></i></div>
+chat.html:2270: <i class="fa-solid fa-robot" style="color: #67e8f9;"></i>
+chat.html:4480: <h3><i class="fa-solid fa-robot" style="color: #67e8f9;"></i> ChronEX AI Studio</h3>
+chat.html:5177: <i class="fa-solid fa-robot"></i> <span>NEXBOT Studio</span>
+chat.html:5295: <div class="sheet-icon-box bot-gradient"><i class="fa-solid fa-robot"></i></div>
+chat.html:5640: <div class="nexbot-header-icon"><i class="fa-solid fa-robot"></i></div>
+chat.html:5967: <span style="font-weight: 700; font-size: 12px; color: #f1f5f9;"><i class="fa-solid fa-robot text-purple-400"></i> Chronex AI Engine</span>
+chat.html:6032: <div class="sim-avatar" id="simBotAvatar"><i class="fa-solid fa-robot"></i></div>
+chat.html:6159: <button type="button" class="radar-filter-pill" data-filter="bots"><i class="fa-solid fa-robot"></i> NEXBOTS</button>
+chat.html:6434: <span class="speaker-role-badge ai"><i class="fa-solid fa-robot"></i></span>
+chat.html:6502: <span class="room-host-tag"><i class="fa-solid fa-robot"></i> ChronEX</span>
+chat.html:7443: <script type="module" src="./src/js/quantum-stegano-voice.js"></script>
+chat.html:7444: <script type="module" src="./src/js/quantum-stegano-voice-ui.js"></script>
+chat.html:7638: <div class="cyber-hub-card-icon" style="background: rgba(59, 130, 246, 0.15); color: #3b82f6;"><i class="fa-solid fa-robot"></i></div>
+chat.html:8780: <div class="android-robot-spinner">
+chat.js:5019: <i class="fa-solid fa-robot"></i>
+chat.js:8101: modalDesc.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
+chat.js:8161: modalDesc.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
+chat.js:8423: if (infoDescEl) infoDescEl.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
+chat.js:8479: if (infoDescEl) infoDescEl.textContent = "Official NEX_DEV Neural Assistant. Primary interface for the NEXCHAT ecosystem. Advanced robotic intelligence designed for cross-sector synchronization.";
+chat.js:9071: <div id="call-duration" style="color: #fff; font-size: 24px; font-weight: 300; text-align: center; font-family: 'Roboto', sans-serif;">0:00</div>
+chat.js:9148: <p id="call-duration" style="color: #fff; font-size: 48px; margin: 30px 0; font-weight: 200; font-family: 'Roboto', sans-serif; display: ${callStatus === 'active' ? 'block' : 'none'}; text-shadow: 0 2px 10px rgba(255,255,255,0.1);">0:00</p>
+chat.js:19666: if (modalDesc) modalDesc.textContent = "Elite Robotic Communication Protocol v2.0. Powered by NEX_DEV Neural Engines. The standard in autonomous data exchange.";
+chat.js:22252: showNotif('Call settings: Voice and video calls are end-to-end encrypted.', 'info');
+chat.js:23782: <div style="font-weight: 800; font-size: 13.5px; color: #f1f5f9;"><i class="fa-solid fa-robot"></i> ApexSupport AI (Default)</div>
+chat.js:24112: else if (node.type === 'bot') iconEl.innerHTML = '<i class="fa-solid fa-robot"></i>';
+game.html:4253: <i class="fa-solid fa-robot"></i>
+game.html:4968: <!-- Companion Robot Follow Toggle -->
+game.html:4971: <span class="bs-option-label"><i class="fa-solid fa-robot" style="color: #00f2ff;"></i> Companion Robot Follow</span>
+game.html:4974: <div class="bs-segmented-group" id="group-robot-follow">
+game.html:4975: <button type="button" class="bs-seg-btn active" id="btn-robot-follow-on" onclick="setRobotFollow(true); setSegOption('robot-follow', 0, this);">ON</button>
+game.html:4976: <button type="button" class="bs-seg-btn" id="btn-robot-follow-off" onclick="setRobotFollow(false); setSegOption('robot-follow', 1, this);">OFF</button>
+game.html:5804: <i class="fa-solid fa-robot"></i>
+game.html:5806: <div class="store-card-name">AUTONOMOUS ROBOT COMPANION</div>
+game.html:5809: <button type="button" class="store-card-btn primary" onclick="OnlineAssetManager.equipAsset('robot')">
+game.html:7734: playAlienResonance() {
+game.html:8330: robotFollow: true,
+game.html:8596: let robotCompanionMesh = null;
+game.html:8597: let robotCompanionMixer = null;
+game.html:9281: // 4. Autonomous Animated Robot Companion
+game.html:9282: loadRobotCompanionDrone();
+game.html:9726: function loadRobotCompanionDrone() {
+game.html:9730: loader.load('assets/models/robot_companion.glb', gltf => {
+game.html:9732: robotCompanionMesh = gltf.scene;
+game.html:9734: robotCompanionMesh.position.set(player.pos.x - 2.2, Math.max(0, player.pos.y - 1.2), player.pos.z - 1.6);
+game.html:9736: robotCompanionMesh.position.set(-2.2, 0.0, -1.6);
+game.html:9738: robotCompanionMesh.scale.set(0.24, 0.24, 0.24);
+game.html:9739: robotCompanionMesh.traverse(c => {
+game.html:9745: scene.add(robotCompanionMesh);
+game.html:9748: robotCompanionMixer = new THREE.AnimationMixer(robotCompanionMesh);
+game.html:9753: const act = robotCompanionMixer.clipAction(waveClip);
+game.html:9757: console.log('[OK] [3D ASSET] Autonomous Robot Companion loaded.');
+game.html:9759: console.warn('Robot companion setup warning:', e);
+game.html:9763: console.warn('Robot companion loader warning:', err);
+game.html:10849: } else if (assetId === 'robot') {
+game.html:10850: if (gameState.settings) gameState.settings.robotFollow = !gameState.settings.robotFollow;
+game.html:10852: showStoreNotification(gameState.settings.robotFollow ? '[COMPANION] ROBOT COMPANION: ACTIVE' : '[COMPANION] ROBOT COMPANION: STANDBY');
+game.html:14907: // 2. NEBULA PRIME ENVIRONMENT: PRECURSOR ALIEN SANCTUARY
+game.html:14913: const alienRunicMat = new THREE.MeshStandardMaterial({ color: 0xaa00ff, emissive: 0x7700cc, emissiveIntensity: 0.75, roughness: 0.15, metalness: 0.9 });
+game.html:14914: const alienCyanGlow = new THREE.MeshBasicMaterial({ color: 0x00f2ff });
+game.html:14915: const alienMonolithMat = new THREE.MeshStandardMaterial({ color: 0x0c0617, roughness: 0.2, metalness: 0.95 });
+game.html:14916: const alienGoldMat = new THREE.MeshStandardMaterial({ color: 0xffcc00, emissive: 0xaa8800, emissiveIntensity: 0.45, roughness: 0.2, metalness: 0.9 });
+game.html:14919: const nebPad = new THREE.Mesh(new THREE.CylinderGeometry(26, 28, 3.2, 8), alienMonolithMat);
+game.html:14923: const nebRunicRing = new THREE.Mesh(new THREE.RingGeometry(22, 25.5, 32), alienCyanGlow);
+game.html:14929: // Precursor Warp Pylon & Levitating Alien Launch Matrix (-18, 0, -35)
+game.html:14930: const nebPylon = new THREE.Mesh(new THREE.BoxGeometry(6, 46, 6), alienMonolithMat);
+game.html:14934: const nebCoreSphere = new THREE.Mesh(new THREE.SphereGeometry(3.0, 16, 16), alienRunicMat);
+game.html:14939: // Floating Alien Launch Prism (Interactive Button) (-18, 1.5, -22)
+game.html:14940: const nebPedestal = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 2.2, 1.8, 8), alienMonolithMat);
+game.html:14944: const nebPrismBtn = new THREE.Mesh(new THREE.OctahedronGeometry(0.85, 0), alienRunicMat);
+game.html:14955: const citadelCore = new THREE.Mesh(new THREE.OctahedronGeometry(22, 1), alienMonolithMat);
+game.html:14958: const citadelRing = new THREE.Mesh(new THREE.TorusGeometry(32, 1.2, 8, 32), alienRunicMat);
+game.html:14973: const stepMesh = new THREE.Mesh(new THREE.CylinderGeometry(5.0, 5.5, 1.2, 8), alienMonolithMat);
+game.html:14977: const stepRune = new THREE.Mesh(new THREE.RingGeometry(3.5, 4.8, 16), alienCyanGlow);
+game.html:14993: const gWell = new THREE.Mesh(new THREE.CylinderGeometry(3.5, 4.0, 0.8, 16), alienMonolithMat);
+game.html:15010: const mMesh = new THREE.Mesh(new THREE.BoxGeometry(4.5, 14, 4.5), alienMonolithMat);
+game.html:15014: const glyphRing = new THREE.Mesh(new THREE.TorusGeometry(5.5, 0.35, 8, 24), alienRunicMat);
+game.html:15058: const pCore = new THREE.Mesh(new THREE.OctahedronGeometry(1.6, 0), alienRunicMat);
+game.html:15062: const pRings = new THREE.Mesh(new THREE.TorusGeometry(2.4, 0.18, 6, 24), alienCyanGlow);
+game.html:16216: // Companion Robot / Drone for each Citizen
+game.html:17200: cyberAudio.playAlienResonance();
+game.html:17373: if (robotCompanionMesh) robotCompanionMesh.visible = false;
+game.html:17585: if (robotCompanionMesh) robotCompanionMesh.visible = false;
+game.html:18327: const _robotTargetPos = new THREE.Vector3();
+game.html:18328: const _robotFwdLook = new THREE.Vector3();
+game.html:18426: if (robotCompanionMixer) robotCompanionMixer.update(delta);
+game.html:18497: // Player Companion Robot Follow System (Only visible when on foot)
+game.html:18499: const robotFollowActive = isPlayerOnFoot && (!gameState.settings || gameState.settings.robotFollow !== false);
+game.html:18500: if (robotCompanionMesh) {
+game.html:18501: robotCompanionMesh.visible = robotFollowActive;
+game.html:18502: if (robotFollowActive && player && player.pos) {
+game.html:18505: _robotTargetPos.set(
+game.html:18510: robotCompanionMesh.position.lerp(_robotTargetPos, Math.min(1.0, delta * 4.0));
+game.html:18512: // Companion Robot Building Anti-Clip
+game.html:18514: const nearby = getNearbyCityColliders(robotCompanionMesh.position.x, robotCompanionMesh.position.z);
+game.html:18519: const rdx = robotCompanionMesh.position.x - b.x;
+game.html:18520: const rdz = robotCompanionMesh.position.z - b.z;
+game.html:18526: robotCompanionMesh.position.x = b.x + Math.sign(rdx) * (b.hw + rPad + 0.05);
+game.html:18528: robotCompanionMesh.position.z = b.z + Math.sign(rdz) * (b.hd + rPad + 0.05);
+game.html:18536: _robotFwdLook.set(
+game.html:18537: robotCompanionMesh.position.x - Math.sin(pYaw),
+game.html:18538: robotCompanionMesh.position.y,
+game.html:18539: robotCompanionMesh.position.z - Math.cos(pYaw)
+game.html:18541: robotCompanionMesh.lookAt(_robotFwdLook);
+game.html:20691: cyberAudio.playAlienResonance();
+game.html:21885: const savedRf = localStorage.getItem('ASTRO_ROBOT_FOLLOW');
+game.html:21887: gameState.settings.robotFollow = (savedRf === '1');
+game.html:22183: // Companion Robot Follow Button Sync
+game.html:22184: const rfOn = s.robotFollow !== false;
+game.html:22185: const btnRfOn = document.getElementById('btn-robot-follow-on');
+game.html:22186: const btnRfOff = document.getElementById('btn-robot-follow-off');
+game.html:22319: function setRobotFollow(enable) {
+game.html:22321: gameState.settings.robotFollow = !!enable;
+game.html:22322: try { localStorage.setItem('ASTRO_ROBOT_FOLLOW', enable ? '1' : '0'); } catch (e) {}
+game.html:22323: if (robotCompanionMesh) robotCompanionMesh.visible = !!enable;
+game.html:22327: showStoreNotification(enable ? '[COMPANION] COMPANION ROBOT: FOLLOWING ACTIVE' : '[COMPANION] COMPANION ROBOT: STANDBY / HIDDEN');
+game.html:22331: window.setRobotFollow = setRobotFollow;
+game.html:22629: robotFollow: true,
+game_module.html:14: font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+landing.html:114: End-to-End Encrypted. Authentic Vector Wallpapers. Hacker Terminal CLI. 1:1 Voice Calling & Status Editor. Unstoppable Speed.
+landing.html:986: <div class="feature-icon"><i class="fa-solid fa-robot"></i></div>
+privacy.html:182: <li><strong>Messages &amp; Media:</strong> Text messages, voice recordings, and media files are transmitted across encrypted transport layers (TLS 1.3) and stored with per-message access control rules.</li>
+profile-avatars.html:639: const style = "non-organic ultra-realistic highly polished liquid chrome robot head, 100% mechanical assembly, exposed gears, hydraulic wires, glowing blue optic sensors, industrial style, 8k, cinematic lighting, octane render, machine parts, zero human skin, no organic tissue";
+profile-avatars.html:641: let prompt = `chrome mechanical robot entity, glowing blue sensors, ${style}`;
+profile-avatars.html:645: prompt = `ultra-realistic portrait of a futuristic humanoid robot (synth), sleek white ceramic and silver chrome face structure, glowing cyan intricate circuitry visible through translucent synthetic panels, mechanical eyes with depth, ${style}, elegant but 100% robotic`;
+profile-avatars.html:647: prompt = `futuristic silver-sentinel robotic head, sharp chrome armor, ${style}, aggressive high-tech design`;
+profile-avatars.html:649: prompt = `advanced surveillance robotic entity, chrome skull structure with exposed glowing blue light-wires, ${style}, digital infiltration machine`;
+profile-avatars.html:651: prompt = `heavy core-cyborg head, reinforced chrome plating, ${style}, powerful industrial robotics`;
+profile-avatars.html:661: const fallbackPrompt = 'hyper-realistic silver chrome robot head, glowing blue eyes, highly detailed metal, cinematic, 8k, machine parts';
+profile-upload.html:101: <span class="btn-icon"><i class="fa-solid fa-robot"></i></span>
+reels.html:166: <button type="button" class="tag-filter-pill" data-tag="ai"><i class="fa-solid fa-robot text-pink-400"></i> AI</button>
+reels.html:1003: <i class="fa-solid fa-robot"></i>
+api\send-email-alert.js:293: <div style="background:#060913; color:#f8fafc; padding:28px 24px; border-radius:14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; border:1px solid #00f076; max-width:600px; margin:0 auto;">
+api\test-email.js:52: <div style="background:#060913; color:#f8fafc; padding:28px 24px; border-radius:14px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; border:1px solid #00f076; max-width:600px; margin:0 auto;">
+backend\generated_code\websites\site_042f1fca\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_10cad905\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_14c0ea9a\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
+backend\generated_code\websites\site_2023bbc6\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_29ca3be3\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_33749317\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_34c3987e\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
+backend\generated_code\websites\site_37cdbdf0\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_40522bb5\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_41bfe83e\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_4587b305\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_4da3d2ba\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_59344f7e\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_5c7fca8e\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_5cca80f1\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_5e6f9264\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_6065c5aa\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_6af1b170\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_730c8fe6\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_7ad8924e\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_7e383d67\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_7f726738\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_813a9ab5\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_8267df71\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
+backend\generated_code\websites\site_8442e001\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_858f984d\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
+backend\generated_code\websites\site_8d286433\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_8dbaaa5d\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_8e127b2d\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_963bd11c\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_98c740a3\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
+backend\generated_code\websites\site_99a46ee1\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
+backend\generated_code\websites\site_9f0ac523\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_a3a7ed76\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_a4358f82\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_a52625d4\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_ad238a29\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_b273a8a9\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace; }
+backend\generated_code\websites\site_b9ad5bfc\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_be90998b\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_c5adb768\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_c83f8113\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_c946755d\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_d619cf73\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_dca57f3a\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_dd47d485\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_e8901793\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_ef25a03f\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_f043eed5\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_f631b832\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_f92cd2b2\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+backend\generated_code\websites\site_fc367105\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+backend\generated_code\websites\site_fd3631e3\index.html:18: * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+frontend\public\index.html:20: font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+frontend\src\App.js:1594: fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+js\landing-scroll.js:1108: call <phone_number>      - Launch WebRTC encrypted voice call
+js\game_modules\canadian_codex.js:73: font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+js\game_modules\canadian_codex.js:89: font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+js\game_modules\canadian_survival.js:59: border-radius: 8px; padding: 10px 14px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+src\js\audio-spaces.js:431: ${s.role === 'ai' ? '<span class="speaker-role-badge ai"><i class="fa-solid fa-robot"></i></span>' : ''}
+src\js\babel-subtitles.js:68: font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+src\js\chat-professional-suite.js:1340: <span class="nex-role-badge admin"><i class="fa-solid fa-robot"></i> AI MOD</span>
+src\js\chat-professional-suite.js:1608: <div class="nex-doc-date">Encrypted Voice Recording</div>
+src\js\chat-professional-suite.js:1780: { name: 'ChronEX_AI', role: 'admin', badge: '<span class="nex-role-badge admin"><i class="fa-solid fa-robot"></i> AI MOD</span>' },
+src\js\chronex-brief-engine.js:378: <span class="chronex-voice-text">${this.escapeHtml(initialTranscript || 'Audio encrypted message.')}</span>
+src\js\chronex-brief-engine.js:1014: body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 36px; color: #0f172a; }
+src\js\cyber-audio-dsp.js:3: * Real-time Web Audio API voice transformation, masking, and vocoding pipeline.
+src\js\cyber-audio-dsp.js:38: { id: 'android', name: 'Cyber Android', desc: 'Ring-modulated robotic voice with harmonic distortion.' },
+src\js\cyber-audio-dsp.js:83: osc.frequency.setValueAtTime(54, ctx.currentTime); // 54Hz robotic carrier
+src\js\cyber-feature-matrix.js:63: { id: 43, key: 'voice_disguise_dsp', domain: 'Tactical Audio & Sonar', title: 'Operative Voice Disguise Formant Shifter', desc: 'Real-time Web Audio API DSP formant modulation masking fundamental vocal signatures.', default: true },
+src\js\cyber-feature-matrix.js:68: { id: 48, key: 'stegano_audio_watermark', domain: 'Tactical Audio & Sonar', title: 'Steganographic Audio Watermarking', desc: 'Embeds imperceptible author hashes into recorded voice notes to trace classified leaks.', default: true },
+src\js\digital-twin.js:90: <i class="fa-solid fa-robot text-[#00ff66] text-lg"></i>
+src\js\digital-twin.js:224: btn.innerHTML = `<i class="fa-solid fa-robot ${this.config.enabled ? 'text-[#00ff66]' : 'text-gray-400'}"></i>`;
+src\js\digital-twin.js:233: btn.innerHTML = `<i class="fa-solid fa-robot ${this.config.enabled ? 'text-[#00ff66]' : 'text-gray-400'}"></i>`;
+src\js\extension-consent-hub.js:56: iconFa: 'fa-solid fa-robot',
+src\js\kanban-board.js:135: <span class="text-gray-400"><i class="fa-solid fa-robot"></i> System Sentinel</span>
+src\js\neural-voice-synth.js:171: Compose written text to synthesize into an encrypted tactical voice transmission without speaking aloud.
+src\js\neural-voice-synth.js:484: console.warn('[E2EE] Voice synth encryption notice:', e2eeErr);
+src\js\neural-voice-synth.js:556: window.showNotif('Synthesized voice transmission dispatched (Signed & Encrypted)', 'success', 2500);
+src\js\nextgen-eight-suite.js:115: <i class="fa-solid fa-robot"></i> CYBORG SYNTH
+src\js\nextgen-eight-suite.js:423: <span><i class="fa-solid fa-robot"></i> CHRONEX CO-PILOT</span>
+src\js\nextgen-eight-suite.js:1543: <div class="nextgen-card-icon"><i class="fa-solid fa-robot" style="color: #67e8f9;"></i></div>
+src\js\predictive-input.js:465: 'roaring', 'robot', 'robotic', 'robotics', 'robust', 'rocket', 'rolling', 'romance',
+src\js\quantum-stegano-voice-ui.js:2: * NEXCHAT - Quantum Stegano-Voice Interactive UI & Chat Pipeline
+src\js\quantum-stegano-voice-ui.js:3: * Module: src/js/quantum-stegano-voice-ui.js
+src\js\quantum-stegano-voice-ui.js:6: * 1. Attachment Hub integration: [Quantum Stegano-Voice]
+src\js\quantum-stegano-voice-ui.js:17: import { quantumSteganoVoice, encodeSteganoAudio, decodeSteganoAudio } from './quantum-stegano-voice.js';
+src\js\quantum-stegano-voice-ui.js:19: class QuantumSteganoVoiceUI {
+src\js\quantum-stegano-voice-ui.js:51: window.closeQuantumSteganoVoiceModal();
+src\js\quantum-stegano-voice-ui.js:58: window.closeQuantumSteganoVoiceModal();
+src\js\quantum-stegano-voice-ui.js:78: window.QuantumSteganoVoiceUI = this;
+src\js\quantum-stegano-voice-ui.js:79: window.openQuantumSteganoVoiceModal = () => this.openRecorderModal();
+src\js\quantum-stegano-voice-ui.js:80: window.closeQuantumSteganoVoiceModal = () => {
+src\js\quantum-stegano-voice-ui.js:95: if (!hub || hub.querySelector('#hubActionQuantumSteganoVoice')) return;
+src\js\quantum-stegano-voice-ui.js:99: item.id = 'hubActionQuantumSteganoVoice';
+src\js\quantum-stegano-voice-ui.js:104: <span>Stegano-Voice</span>
+src\js\quantum-stegano-voice-ui.js:126: <span>QUANTUM STEGANO-VOICE</span>
+src\js\quantum-stegano-voice-ui.js:129: <button type="button" class="btn-close-stegano" id="btnCloseQuantumStegano" onclick="window.closeQuantumSteganoVoiceModal ? window.closeQuantumSteganoVoiceModal() : (document.getElementById('quantumSteganoModal').style.display='none')">
+src\js\quantum-stegano-voice-ui.js:212: <button type="button" id="btnCancelSteganoModal" class="btn-stegano-cancel" onclick="window.closeQuantumSteganoVoiceModal()" onpointerdown="window.closeQuantumSteganoVoiceModal()" ontouchstart="window.closeQuantumSteganoVoiceModal()">
+src\js\quantum-stegano-voice-ui.js:247: quantumSteganoVoice.stopAmbientPreview();
+src\js\quantum-stegano-voice-ui.js:248: quantumSteganoVoice.startAmbientPreview(this.activeCoverType);
+src\js\quantum-stegano-voice-ui.js:257: quantumSteganoVoice.stopAmbientPreview();
+src\js\quantum-stegano-voice-ui.js:261: quantumSteganoVoice.startAmbientPreview(this.activeCoverType);
+src\js\quantum-stegano-voice-ui.js:364: quantumSteganoVoice.stopAmbientPreview();
+src\js\quantum-stegano-voice-ui.js:604: const steganoBlob = await encodeSteganoAudio(this.recordedVoiceBlob, this.activeCoverType, secretKey);
+src\js\quantum-stegano-voice-ui.js:613: isSteganoVoice: true,
+src\js\quantum-stegano-voice-ui.js:618: if (typeof window.sendSteganoVoiceMessage === 'function') {
+src\js\quantum-stegano-voice-ui.js:619: await window.sendSteganoVoiceMessage(fileData);
+src\js\quantum-stegano-voice-ui.js:621: await window.sendMessageWithAttachment(steganoBlob, fileData.name, 'audio/wav', { isSteganoVoice: true, coverType: this.activeCoverType });
+src\js\quantum-stegano-voice-ui.js:632: window.showNotif('Quantum Stegano-Voice synthesized & beamed into quantum channel!', 'success', 3500);
+src\js\quantum-stegano-voice-ui.js:669: window.showNotif('Playing Quantum Stegano-Voice...', 'success', 2500);
+src\js\quantum-stegano-voice-ui.js:685: export const quantumSteganoVoiceUI = new QuantumSteganoVoiceUI();
+src\js\quantum-stegano-voice-ui.js:686: export default quantumSteganoVoiceUI;
+src\js\quantum-stegano-voice.js:2: * NEXCHAT - Quantum Steganographic Voice Engine
+src\js\quantum-stegano-voice.js:3: * Module: src/js/quantum-stegano-voice.js
+src\js\quantum-stegano-voice.js:15: *    - encodeSteganoAudio(voiceBlob, coverType, secretKey) -> Playable innocent WAV/Audio Blob.
+src\js\quantum-stegano-voice.js:17: *    - decodeSteganoAudio(steganoBlob, secretKey) -> Decrypted secret voice audio buffer and Blob.
+src\js\quantum-stegano-voice.js:105: * Encrypts arbitrary voice payload using AES-GCM 256-bit with PBKDF2 salt and IV.
+src\js\quantum-stegano-voice.js:114: export async function encryptVoicePayload(voiceArrayBuffer, metadata = {}, secretKey = '') {
+src\js\quantum-stegano-voice.js:117: throw new Error('Web Crypto API is required for steganographic voice encryption');
+src\js\quantum-stegano-voice.js:165: throw new Error('Web Crypto API is required for steganographic voice decryption');
+src\js\quantum-stegano-voice.js:398: * Main Class: QuantumSteganoVoice
+src\js\quantum-stegano-voice.js:401: export class QuantumSteganoVoice {
+src\js\quantum-stegano-voice.js:932: * The secret voice is cryptographically sealed with AES-GCM 256-bit encryption and embedded
+src\js\quantum-stegano-voice.js:940: async encodeSteganoAudio(voiceBlob, coverType = 'rain', secretKey = '') {
+src\js\quantum-stegano-voice.js:942: throw new Error('encodeSteganoAudio requires a voice recording blob or buffer');
+src\js\quantum-stegano-voice.js:986: // 1. Encrypt voice payload using AES-GCM 256-bit
+src\js\quantum-stegano-voice.js:987: const stegPackage = await encryptVoicePayload(voiceArrayBuffer, metadata, secretKey);
+src\js\quantum-stegano-voice.js:1101: console.warn('[Quantum Stegano] AudioContext voice decoding note:', err);
+src\js\quantum-stegano-voice.js:1115: const playCtx = targetAudioCtx || (typeof window !== 'undefined' ? (window.quantumSteganoVoice?.getAudioContext() || new (window.AudioContext || window.webkitAudioContext)()) : null);
+src\js\quantum-stegano-voice.js:1128: export const quantumSteganoVoice = new QuantumSteganoVoice();
+src\js\quantum-stegano-voice.js:1131: export const encodeSteganoAudio = (voiceBlob, coverType, secretKey) =>
+src\js\quantum-stegano-voice.js:1132: quantumSteganoVoice.encodeSteganoAudio(voiceBlob, coverType, secretKey);
+src\js\quantum-stegano-voice.js:1135: quantumSteganoVoice.decodeSteganoAudio(steganoBlob, secretKey);
+src\js\quantum-stegano-voice.js:1139: window.QuantumSteganoVoice = QuantumSteganoVoice;
+src\js\quantum-stegano-voice.js:1140: window.quantumSteganoVoice = quantumSteganoVoice;
+src\js\quantum-stegano-voice.js:1145: export default quantumSteganoVoice;
+src\js\reels-quantum-suite.js:430: <!-- Voice DSP Masker Selection -->
+src\js\reels-quantum-suite.js:433: Voice Masker &amp; Vocoder DSP Engine:
+src\js\report-activity-monitor.js:174: font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+src\js\security-guard.js:99: font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+src\js\voice-soundboard.js:3: * Real-time audio DSP filtering (Robotic, Stealth Shadow, Glitch, Helium)
+src\js\voice-soundboard.js:57: <button type="button" class="morpher-pill" data-mode="cyberborg"><i class="fa-solid fa-robot"></i> Cyberborg</button>
+src\js\voice-soundboard.js:81: cyberborg: 'Neural Cyberborg (Robotic Vocoder FX)',
+src\js\wallpaper-presets.js:25: const SVG_DOODLE_CLASSIC = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="340" height="340" viewBox="0 0 340 340"><rect width="340" height="340" fill="%230b141a"/><g fill="none" stroke="%23ffffff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.075"><!-- Chat Bubble --><path d="M30 40h40a10 10 0 0 1 10 10v20a10 10 0 0 1-10 10h-25l-12 10v-10h-3a10 10 0 0 1-10-10v-20a10 10 0 0 1 10-10z"/><circle cx="50" cy="60" r="2" fill="%23fff"/><circle cx="60" cy="60" r="2" fill="%23fff"/><!-- Coffee Cup --><path d="M140 50h25v18a10 10 0 0 1-10 10h-5a10 10 0 0 1-10-10z"/><path d="M165 54h6a5 5 0 0 1 0 10h-6"/><!-- Camera --><rect x="230" y="45" width="34" height="24" rx="4"/><circle cx="247" cy="57" r="6"/><path d="M242 45l2-5h6l2 5"/><!-- Paper Plane --><path d="M30 150l45 15-20 8 10 15 5-10 18-5z"/><!-- Smartphone --><rect x="130" y="130" width="22" height="40" rx="4"/><line x1="138" y1="164" x2="144" y2="164"/><!-- Heart & Stars --><path d="M240 145a5 5 0 0 0-7 7l7 7 7-7a5 5 0 0 0-7-7z"/><path d="M275 130l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/><!-- Lock --><rect x="40" y="240" width="24" height="18" rx="3"/><path d="M46 240v-8a6 6 0 0 1 12 0v8"/><circle cx="52" cy="249" r="2" fill="%23fff"/><!-- Headphone --><path d="M130 250a16 16 0 0 1 32 0v10h-6v-8h6a10 10 0 0 0-20 0v8h-6z"/><!-- Smiley Face --><circle cx="245" cy="245" r="14"/><circle cx="240" cy="242" r="1.5" fill="%23fff"/><circle cx="250" cy="242" r="1.5" fill="%23fff"/><path d="M239 250a6 6 0 0 0 12 0"/><!-- Robot / Rocket --><path d="M90 300l10-15 10 15-4-2v6h-12v-6z"/><path d="M190 310h20v-10h-20z"/><circle cx="196" cy="305" r="1.5" fill="%23fff"/><circle cx="204" cy="305" r="1.5" fill="%23fff"/></g></svg>`;
+src\js\watch-together.js:74: <i class="fa-solid fa-robot"></i> Tears of Steel (VFX)
+src\js\webrtc-call.js:406: <!-- Cyber Audio Voice DSP Masker -->
+src\js\webrtc-call.js:408: <button type="button" id="toggleVoiceDspBtn" class="call-dock-btn" title="Cyber Voice DSP Masker and Vocoder">
+src\js\webrtc-call.js:409: <i class="fa-solid fa-robot"></i>
+src\js\webrtc-call.js:412: <div style="font-size: 10px; font-weight: 800; color: #00f2ff; margin-bottom: 6px; font-family: monospace;">VOICE DSP MASKER</div>
+src\js\autocorrect\dictionary-30k.js:5279: 'robot',
+src\js\autocorrect\dictionary-30k.js:6046: 'alien',
+src\js\autocorrect\dictionary-30k.js:9769: 'robots',
+src\js\autocorrect\dictionary-30k.js:11611: 'alienage',
+src\js\autocorrect\dictionary-30k.js:11612: 'alienate',
+src\js\autocorrect\dictionary-30k.js:11613: 'aliened',
+src\js\autocorrect\dictionary-30k.js:11614: 'alienee',
+src\js\autocorrect\dictionary-30k.js:11615: 'alienees',
+src\js\autocorrect\dictionary-30k.js:11616: 'aliener',
+src\js\autocorrect\dictionary-30k.js:11617: 'alieners',
+src\js\autocorrect\dictionary-30k.js:11618: 'aliening',
+src\js\autocorrect\dictionary-30k.js:11619: 'alienism',
+src\js\autocorrect\dictionary-30k.js:11620: 'alienist',
+src\js\autocorrect\dictionary-30k.js:11621: 'alienly',
+src\js\autocorrect\dictionary-30k.js:11622: 'alienor',
+src\js\autocorrect\dictionary-30k.js:11623: 'alienors',
+src\js\autocorrect\dictionary-30k.js:11624: 'aliens',
+src\js\autocorrect\dictionary-swahili.js:135: "alienda",
+src\js\autocorrect\dictionary-swahili.js:137: "walienda",
+src\js\autocorrect\dictionary-swahili.js:750: "walienda",
+src\js\autocorrect\dictionary-swahili.js:1194: "alienda",
+src\js\autocorrect\dictionary-swahili.js:1211: "alienda",
+src\js\autocorrect\dictionary-swahili.js:1265: "walienda",
+src\js\autocorrect\dictionary-swahili.js:1282: "walienda",
+src\js\autocorrect\dictionary-swahili.js:1535: "alienda"

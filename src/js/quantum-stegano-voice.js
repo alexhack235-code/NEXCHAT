@@ -1014,7 +1014,15 @@ export class QuantumSteganoVoice {
     }
 
     let steganoArrayBuffer;
-    if (typeof Blob !== 'undefined' && steganoBlob instanceof Blob) {
+    if (typeof steganoBlob === 'string') {
+      try {
+        const resp = await fetch(steganoBlob);
+        const b = await resp.blob();
+        steganoArrayBuffer = await b.arrayBuffer();
+      } catch (fetchErr) {
+        throw new Error('Failed to fetch stegano audio URL: ' + fetchErr.message);
+      }
+    } else if (typeof Blob !== 'undefined' && steganoBlob instanceof Blob) {
       steganoArrayBuffer = await steganoBlob.arrayBuffer();
     } else if (steganoBlob instanceof ArrayBuffer) {
       steganoArrayBuffer = steganoBlob;
