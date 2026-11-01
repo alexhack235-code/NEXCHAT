@@ -1923,7 +1923,31 @@ function removeMaximizedView() {
   }
 }
 
+function isNotificationsMuted() {
+  try {
+    if (localStorage.getItem('nex_mute_in_app_alerts') === 'true') return true;
+    if (localStorage.getItem('nexchat_inapp_banners') === 'false') return true;
+    const prefs = JSON.parse(localStorage.getItem('nexchat_settings') || '{}');
+    if (prefs.notifications === false) return true;
+  } catch (_) {}
+  return false;
+}
+
+function isNotificationSoundMuted() {
+  try {
+    if (localStorage.getItem('nex_mute_in_app_alerts') === 'true') return true;
+    if (localStorage.getItem('nex_mute_notification_sounds') === 'true') return true;
+    const prefs = JSON.parse(localStorage.getItem('nexchat_settings') || '{}');
+    if (prefs.sound === false || prefs.notifications === false) return true;
+  } catch (_) {}
+  return false;
+}
+
 function showNotif(msg, type = "info", duration = 3000) {
+  // If user muted in-app alert popups in Settings, suppress the toast popup
+  if (isNotificationsMuted() && type !== 'error') {
+    return;
+  }
   const container = document.getElementById("notificationContainer");
 
   // Sanitize message to remove any bracket prefixes, corrupted marks, or question marks
@@ -1976,6 +2000,7 @@ function showNotif(msg, type = "info", duration = 3000) {
 }
 
 function playNotificationSound(type = "info") {
+  if (isNotificationSoundMuted()) return;
   try {
     const soundPath = notificationSounds[type];
     if (soundPath) {
@@ -12213,12 +12238,14 @@ function setupEnhancedSoundAlertListeners() {
   const messagePreview = document.getElementById('messagePreviewInNotifsToggle');
   const convoTones = document.getElementById('conversationTonesToggle');
   const reactionHaptics = document.getElementById('reactionAudioHapticsToggle');
+  const muteInAppAlerts = document.getElementById('muteInAppAlertsToggle');
 
   const alerts = [
     { el: inAppBanners, key: 'nexchat_inapp_banners' },
     { el: messagePreview, key: 'nexchat_notif_preview_text' },
     { el: convoTones, key: 'nexchat_conversation_tones' },
-    { el: reactionHaptics, key: 'nexchat_reaction_haptics' }
+    { el: reactionHaptics, key: 'nexchat_reaction_haptics' },
+    { el: muteInAppAlerts, key: 'nex_mute_in_app_alerts' }
   ];
 
   alerts.forEach(item => {
@@ -13251,6 +13278,8 @@ function loadSettingsPreferences() {
 
     if (notifEl) notifEl.checked = prefs.notifications !== false;
     if (soundEl) soundEl.checked = prefs.sound !== false;
+    const muteInAppEl = document.getElementById("muteInAppAlertsToggle");
+    if (muteInAppEl) muteInAppEl.checked = localStorage.getItem("nex_mute_in_app_alerts") === "true";
     if (onlineEl) onlineEl.checked = prefs.onlineStatus !== false;
     if (readEl) readEl.checked = prefs.readReceipts !== false;
     if (antiReloadEl) antiReloadEl.checked = prefs.antiReload === true;
@@ -13601,6 +13630,8 @@ function saveSettingsPreferences() {
     const bubbleSelect = document.getElementById("bubbleStyleSelect");
     const aiModelSelect = document.getElementById("aiModelSelect");
 
+    const muteInAppSaveEl = document.getElementById("muteInAppAlertsToggle");
+    if (muteInAppSaveEl) localStorage.setItem("nex_mute_in_app_alerts", muteInAppSaveEl.checked ? "true" : "false");
     const prefs = {
       notifications: notifEl?.checked ?? true,
       sound: soundEl?.checked ?? true,

@@ -288,7 +288,8 @@
      * Ultra-Fast Language Detector with LRU Memoization
      */
     detectLanguage(text, activeWord = '') {
-      const sample = ((text || '') + ' ' + (activeWord || '')).trim();
+      const recentText = text && text.length > 90 ? text.slice(-90) : (text || '');
+      const sample = (recentText + ' ' + (activeWord || '')).trim();
       if (!sample) return this.currentPrimaryLanguage || 'en';
 
       const cached = this.detectCache.get(sample);

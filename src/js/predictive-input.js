@@ -920,8 +920,8 @@
      */
     handleTyping() {
       clearTimeout(this.debounceTimer);
-      // 8ms micro-debounce ensures 120fps fluid response with zero keystroke delay
-      this.debounceTimer = setTimeout(() => this.computePredictions(), 8);
+      // 35ms fluid coalesce prevents thread congestion and keystroke lag
+      this.debounceTimer = setTimeout(() => this.computePredictions(), 35);
     }
 
     computePredictions(delayOverride) {

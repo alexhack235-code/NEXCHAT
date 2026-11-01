@@ -95,7 +95,11 @@
       this.typoMap = window.TYPO_MAP_30K || {};
       this.prefixBuckets = window.PREFIX_BUCKETS_30K || {};
       this.cache = new Map();
-      this.maxCacheSize = 1000;
+      this.maxCacheSize = 2500;
+      this.suggestionsCache = new Map();
+      this._row0 = new Float32Array(34);
+      this._row1 = new Float32Array(34);
+      this._row2 = new Float32Array(34);
 
       // Lazy index placeholders (0ms startup latency)
       this.wordsByLength = null;
@@ -136,46 +140,46 @@
       const bLen = b.length;
       if (aLen === 0) return bLen;
       if (bLen === 0) return aLen;
-
       if (Math.abs(aLen - bLen) > 2) return 99;
+      if (aLen > 30 || bLen > 30) return 99;
 
-      const d = [];
-      for (let i = 0; i <= aLen; i++) {
-        d[i] = [i];
-      }
-      for (let j = 0; j <= bLen; j++) {
-        d[0][j] = j;
-      }
+      const r0 = this._row0;
+      const r1 = this._row1;
+      const r2 = this._row2;
+
+      for (let j = 0; j <= bLen; j++) r1[j] = j;
 
       for (let i = 1; i <= aLen; i++) {
+        for (let j = 0; j <= bLen; j++) {
+          r0[j] = r1[j];
+          r1[j] = r2[j];
+        }
+        r1[0] = i;
         const aChar = a[i - 1];
+
         for (let j = 1; j <= bLen; j++) {
           const bChar = b[j - 1];
-
           let cost = 1.0;
           if (aChar === bChar) {
             cost = 0;
           } else if (QWERTY_ADJACENT[aChar] && QWERTY_ADJACENT[aChar].includes(bChar)) {
-            // Adjacent QWERTY key hit (fat-finger)
             cost = 0.4;
           }
 
-          d[i][j] = Math.min(
-            d[i - 1][j] + 1.0,      // deletion
-            d[i][j - 1] + 1.0,      // insertion
-            d[i - 1][j - 1] + cost   // substitution
+          let val = Math.min(
+            r1[j - 1] + 1.0,      // insertion
+            r0[j] + 1.0,          // deletion
+            r0[j - 1] + cost      // substitution
           );
 
-          // Transposition of adjacent characters (e.g. teh -> the, wierd -> weird)
-          if (i > 1 && j > 1 &&
-              aChar === b[j - 2] &&
-              a[i - 2] === bChar) {
-            d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 0.6);
+          if (i > 1 && j > 1 && aChar === b[j - 2] && a[i - 2] === bChar) {
+            val = Math.min(val, r2[j - 2] + 0.6);
           }
+          r1[j] = val;
         }
       }
 
-      return d[aLen][bLen];
+      return r1[bLen];
     }
 
     /**
@@ -226,45 +230,69 @@
       let minDistance = maxDistance + 0.1;
       let bestRank = Infinity;
 
-      // 5. QWERTY Spatial candidate search
-      const lengthsToCheck = [wLen, wLen - 1, wLen + 1];
-      if (wLen > 4) lengthsToCheck.push(wLen - 2, wLen + 2);
-
+      // 5. High-Speed Targeted Candidate Search (O(Prefix) instead of O(N))
+      this._ensureIndexed();
       const firstChar = word[0];
       const adjFirst = QWERTY_ADJACENT[firstChar] || [];
+      const candidates = new Set();
+      const p2 = word.slice(0, 2);
 
-      for (let lIdx = 0; lIdx < lengthsToCheck.length; lIdx++) {
-        const len = lengthsToCheck[lIdx];
-        const bucket = this.wordsByLength[len];
-        if (!bucket) continue;
+      // A. Exact 2-letter prefix bucket
+      if (this.prefixBuckets && this.prefixBuckets[p2]) {
+        const list = this.prefixBuckets[p2];
+        const len = list.length;
+        for (let i = 0; i < len; i++) candidates.add(list[i]);
+      }
 
-        const bucketLen = bucket.length;
-        for (let i = 0; i < bucketLen; i++) {
-          const item = bucket[i];
-          const cand = item.word;
+      // B. Transposed first 2 letters (e.g. teh -> prefix 'th')
+      if (wLen >= 2) {
+        const trans = word[1] + word[0];
+        if (this.prefixBuckets && this.prefixBuckets[trans]) {
+          const list = this.prefixBuckets[trans];
+          const len = Math.min(list.length, 30);
+          for (let i = 0; i < len; i++) candidates.add(list[i]);
+        }
+      }
 
-          // Pruning: candidate must start with same letter or adjacent QWERTY key
-          if (cand[0] !== firstChar && !adjFirst.includes(cand[0])) {
-            continue;
-          }
+      // C. Adjacent first letter (fat finger first letter)
+      for (let k = 0; k < adjFirst.length; k++) {
+        const adjP2 = adjFirst[k] + (word[1] || '');
+        if (this.prefixBuckets && this.prefixBuckets[adjP2]) {
+          const list = this.prefixBuckets[adjP2];
+          const take = Math.min(list.length, 25);
+          for (let i = 0; i < take; i++) candidates.add(list[i]);
+        }
+      }
 
-          const dist = this.distance(word, cand);
-
-          if (dist < minDistance) {
-            minDistance = dist;
-            bestCandidate = cand;
-            bestRank = item.rank;
-          } else if (Math.abs(dist - minDistance) < 0.05 && dist <= maxDistance) {
-            // Tie-break by frequency rank
-            if (item.rank < bestRank) {
-              bestCandidate = cand;
-              bestRank = item.rank;
+      // D. Fallback if candidate pool is small (< 10): sample top 60 frequent words of matching length
+      if (candidates.size < 10 && this.wordsByLength) {
+        const bucket = this.wordsByLength[wLen];
+        if (bucket) {
+          const take = Math.min(bucket.length, 60);
+          for (let i = 0; i < take; i++) {
+            const cand = bucket[i].word;
+            if (cand[0] === firstChar || adjFirst.includes(cand[0])) {
+              candidates.add(cand);
             }
           }
+        }
+      }
 
-          if (minDistance <= 0.6 && bestRank < 500) {
-            break;
+      for (const cand of candidates) {
+        if (Math.abs(cand.length - wLen) > 2) continue;
+        const dist = this.distance(word, cand);
+
+        if (dist < minDistance) {
+          minDistance = dist;
+          bestCandidate = cand;
+        } else if (Math.abs(dist - minDistance) < 0.05 && dist <= maxDistance) {
+          if (!bestCandidate || cand.length === wLen) {
+            bestCandidate = cand;
           }
+        }
+
+        if (minDistance <= 0.6) {
+          break; // Ultra-close match found, early exit!
         }
       }
 
@@ -295,6 +323,10 @@
     findSuggestions(rawWord, limit = 5) {
       if (!rawWord || rawWord.length < 1) return [];
       const word = rawWord.toLowerCase();
+      const cacheKey = word + '|' + limit;
+      if (this.suggestionsCache && this.suggestionsCache.has(cacheKey)) {
+        return this.suggestionsCache.get(cacheKey);
+      }
       const suggestions = [];
 
       // 1. Direct typo check
@@ -323,7 +355,15 @@
         }
       }
 
-      return suggestions.slice(0, limit);
+      const result = suggestions.slice(0, limit);
+      if (this.suggestionsCache) {
+        if (this.suggestionsCache.size >= 500) {
+          const first = this.suggestionsCache.keys().next().value;
+          this.suggestionsCache.delete(first);
+        }
+        this.suggestionsCache.set(cacheKey, result);
+      }
+      return result;
     }
   }
 

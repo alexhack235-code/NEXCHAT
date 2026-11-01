@@ -68,7 +68,16 @@
         this.activeRecognizer = new this.SpeechRecognition();
         this.activeRecognizer.continuous = true;
         this.activeRecognizer.interimResults = true;
-        this.activeRecognizer.lang = 'en-US';
+        const langMap = {
+          'en': 'en-US', 'es': 'es-ES', 'fr': 'fr-FR', 'ru': 'ru-RU',
+          'ar': 'ar-SA', 'hi': 'hi-IN', 'tr': 'tr-TR', 'sw': 'sw-KE',
+          'tl': 'fil-PH', 'id': 'id-ID', 'zh': 'zh-CN', 'ja': 'ja-JP',
+          'ko': 'ko-KR', 'de': 'de-DE', 'pt': 'pt-BR', 'it': 'it-IT'
+        };
+        const activeLangKey = (window.autoCorrectEngine && window.autoCorrectEngine.currentPrimaryLanguage) ||
+                              (window.CyberFeatures && window.CyberFeatures.translator && window.CyberFeatures.translator.autoTranslateTargetLang) ||
+                              'en';
+        this.activeRecognizer.lang = langMap[activeLangKey] || 'en-US';
 
         const initialInputValue = input ? input.value : '';
         const initialPrefix = initialInputValue ? initialInputValue.trim() + ' ' : '';
