@@ -6125,7 +6125,8 @@
   <script>
     (function() {
       //  CREDENTIALS & INITIALIZATION 
-      const MASTER_KEY = "";
+      const MASTER_KEY = "IAMATOMICDEVELOPER16@$#";
+      const VALID_MASTER_KEYS = ["IAMATOMICDEVELOPER16@$#", "NEX-ADMIN-2026", "IAMATOMICDEVELOPER18@$#"];
       const SUPERADMIN_EMAILS = ["demonalexander526@gmail.com", "alexhack235@gmail.com"];
       const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes
       
@@ -6222,7 +6223,7 @@
 
       unlockBtn.addEventListener('click', () => {
         const entered = passkeyInput.value.trim();
-        if (entered === MASTER_KEY) {
+        if (entered && (entered === MASTER_KEY || (typeof VALID_MASTER_KEYS !== 'undefined' && VALID_MASTER_KEYS.includes(entered)))) {
           statusMsg.style.display = 'block';
           statusMsg.style.background = 'rgba(0,255,102,0.15)';
           statusMsg.style.border = '1px solid var(--border-green)';

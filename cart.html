@@ -1309,12 +1309,16 @@
       document.getElementById("checkoutModal").classList.add("active");
     };
 
-    window.selectPayment = function(method) {
+    window.selectPayment = function(method, evt) {
       selectedPayment = method;
       document.querySelectorAll(".payment-option").forEach(el => {
         el.classList.remove("active");
       });
-      event.target.closest(".payment-option").classList.add("active");
+      const e = evt || (typeof event !== 'undefined' ? event : null) || window.event;
+      if (e && e.target) {
+        const opt = e.target.closest(".payment-option");
+        if (opt) opt.classList.add("active");
+      }
     };
 
     window.closeModal = function() {
