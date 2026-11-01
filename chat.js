@@ -6531,12 +6531,283 @@ function formatTimeAgo(date) {
 }
 window.formatTimeAgo = formatTimeAgo;
 
+// WhatsApp Meta AI Code Card & Markdown Engine
+function renderWhatsAppCodeCard(rawLang, code) {
+  const lang = (rawLang || '').trim().toLowerCase().replace(/^\./, '');
+  const trimmedCode = (code || '').trim();
+  const escapedCode = escape(trimmedCode);
+
+  let ext = 'txt';
+  let displayTitle = 'Code snippet';
+  let iconClass = 'fa-solid fa-code';
+
+  switch (lang) {
+    case 'css':
+      ext = 'css';
+      displayTitle = 'Css code';
+      iconClass = 'fa-solid fa-code';
+      break;
+    case 'tsx':
+      ext = 'tsx';
+      displayTitle = 'Tsx code';
+      iconClass = 'fa-solid fa-code';
+      break;
+    case 'jsx':
+      ext = 'jsx';
+      displayTitle = 'Jsx code';
+      iconClass = 'fa-solid fa-code';
+      break;
+    case 'ts':
+    case 'typescript':
+      ext = 'ts';
+      displayTitle = 'TypeScript code';
+      iconClass = 'fa-solid fa-code';
+      break;
+    case 'js':
+    case 'javascript':
+      ext = 'js';
+      displayTitle = 'JavaScript code';
+      iconClass = 'fa-brands fa-js';
+      break;
+    case 'py':
+    case 'python':
+      ext = 'py';
+      displayTitle = 'Python code';
+      iconClass = 'fa-brands fa-python';
+      break;
+    case 'rs':
+    case 'rust':
+      ext = 'rs';
+      displayTitle = 'Rust code';
+      iconClass = 'fa-solid fa-gear';
+      break;
+    case 'html':
+      ext = 'html';
+      displayTitle = 'HTML code';
+      iconClass = 'fa-brands fa-html5';
+      break;
+    case 'sql':
+      ext = 'sql';
+      displayTitle = 'SQL query';
+      iconClass = 'fa-solid fa-database';
+      break;
+    case 'json':
+      ext = 'json';
+      displayTitle = 'JSON data';
+      iconClass = 'fa-solid fa-brackets-curly';
+      break;
+    case 'sh':
+    case 'bash':
+    case 'shell':
+      ext = 'sh';
+      displayTitle = 'Shell script';
+      iconClass = 'fa-solid fa-terminal';
+      break;
+    case 'c':
+      ext = 'c';
+      displayTitle = 'C code';
+      iconClass = 'fa-solid fa-code';
+      break;
+    case 'cpp':
+    case 'c++':
+      ext = 'cpp';
+      displayTitle = 'C++ code';
+      iconClass = 'fa-solid fa-code';
+      break;
+    case 'cs':
+    case 'csharp':
+    case 'c#':
+      ext = 'cs';
+      displayTitle = 'C# code';
+      iconClass = 'fa-solid fa-code';
+      break;
+    case 'java':
+      ext = 'java';
+      displayTitle = 'Java code';
+      iconClass = 'fa-brands fa-java';
+      break;
+    case 'go':
+    case 'golang':
+      ext = 'go';
+      displayTitle = 'Go code';
+      iconClass = 'fa-solid fa-code';
+      break;
+    case 'txt':
+    case 'text':
+      ext = 'txt';
+      displayTitle = 'Text document';
+      iconClass = 'fa-regular fa-file-lines';
+      break;
+    default:
+      if (lang) {
+        ext = lang.replace(/[^a-z0-9_-]/g, '') || 'txt';
+        displayTitle = lang.toUpperCase() + ' code';
+      }
+      break;
+  }
+
+  return '<div class="whatsapp-code-card" data-lang="' + escape(lang) + '">' +
+    '<div class="whatsapp-code-header">' +
+      '<div class="code-header-info">' +
+        '<i class="' + iconClass + ' code-lang-icon"></i> ' +
+        '<span class="code-header-title">' + displayTitle + '</span> ' +
+        '<span class="code-ext-pill">.' + ext + '</span>' +
+      '</div>' +
+      '<div class="code-header-actions">' +
+        '<button type="button" class="code-action-btn code-copy-action" onclick="window.copyCodeSnippet(this)" title="Copy code">' +
+          '<i class="fa-regular fa-copy"></i> <span>Copy code</span>' +
+        '</button>' +
+        '<button type="button" class="code-action-btn code-dl-action" onclick="window.downloadCodeSnippet(this, \'' + ext + '\')" title="Download .' + ext + '"><i class="fa-solid fa-download"></i> <span>.' + ext + '</span></button>' +
+          '<i class="fa-solid fa-download"></i> <span>.' + ext + '</span>' +
+        '</button>' +
+      '</div>' +
+    '</div>' +
+    '<pre class="whatsapp-code-body"><code class="language-' + escape(lang) + '">' + escapedCode + '</code></pre>' +
+  '</div>';
+}
+
+function renderWhatsAppAiMarkdown(rawText) {
+  if (!rawText) return '';
+  let text = String(rawText).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+  // 1. Extract and format code blocks into WhatsApp Meta AI Code Cards
+  const codeBlocks = [];
+  text = text.replace(/```([a-zA-Z0-9_+#.-]*)[ \t]*\n?([\s\S]*?)(?:```|$)/g, (match, rawLang, code) => {
+    const placeholder = '__WA_CODE_BLOCK_' + codeBlocks.length + '__';
+    codeBlocks.push(renderWhatsAppCodeCard(rawLang, code));
+    return placeholder;
+  });
+
+  // 2. Escape HTML for non-code text to prevent XSS
+  text = escape(text);
+  // Re-allow quote indicator for blockquotes
+  text = text.replace(/^&gt;/gm, '>');
+
+  // 3. Headers
+  text = text.replace(/^#### (.*$)/gim, '<h4 class="chronex-h4 chronex-h">$1</h4>');
+  text = text.replace(/^### (.*$)/gim, '<h3 class="chronex-h3 chronex-h">$1</h3>');
+  text = text.replace(/^## (.*$)/gim, '<h2 class="chronex-h2 chronex-h">$1</h2>');
+  text = text.replace(/^# (.*$)/gim, '<h1 class="chronex-h1 chronex-h">$1</h1>');
+
+  // 4. Horizontal rules
+  text = text.replace(/^(?:---|\*\*\*|___)\s*$/gim, '<hr class="chronex-hr">');
+
+  // 5. Lists
+  text = text.replace(/^[\*\-]\s+(.+)$/gim, '<li class="chronex-li chronex-bullet-li">$1</li>');
+  text = text.replace(/(<li class="chronex-li chronex-bullet-li">[\s\S]*?<\/li>)+/g, '<ul class="chronex-ul">$&</ul>');
+  text = text.replace(/^\d+\.\s+(.+)$/gim, '<li class="chronex-li chronex-num-li">$1</li>');
+  text = text.replace(/(<li class="chronex-li chronex-num-li">[\s\S]*?<\/li>)+/g, '<ol class="chronex-ol">$&</ol>');
+
+  // 6. Inline code
+  text = text.replace(/`([^`\n]+)`/g, '<code class="chronex-inline-code">$1</code>');
+
+  // 7. Bold and Italic
+  text = text.replace(/\*\*\*([^*]+)\*\*\*/g, '<strong><em>$1</em></strong>');
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong class="ai-bold">$1</strong>');
+  text = text.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+  // 8. Key-Value Tag Pair Highlights (**Key:** Value)
+  text = text.replace(/<strong>([^:<]+):<\/strong>\s+([^<\n]+)/g, '<span class="chronex-kv-pill"><strong class="kv-key">$1:</strong> <span class="kv-val">$2</span></span>');
+
+  // 9. Paragraphs and Line Breaks
+  text = text.replace(/\n\n+/g, '</p><p class="ai-para">');
+  text = text.replace(/\n/g, '<br>');
+  text = '<p class="ai-para">' + text + '</p>';
+
+  // Clean empty paragraphs and wrappers
+  text = text.replace(/<p class="ai-para">\s*<\/p>/g, '');
+  text = text.replace(/<p class="ai-para">\s*(<h[1-4]|<hr|<ul|<ol|<div)/g, '$1');
+  text = text.replace(/(<\/h[1-4]>|<\/div>|<\/hr>|<\/ul>|<\/ol>)\s*<\/p>/g, '$1');
+
+  // 10. Re-inject Protected Code Blocks
+  codeBlocks.forEach((blockHtml, idx) => {
+    text = text.replace('__WA_CODE_BLOCK_' + idx + '__', blockHtml);
+  });
+
+  return text;
+}
+
+window.copyCodeSnippet = function(btn) {
+  try {
+    const card = btn.closest('.whatsapp-code-card') || btn.closest('.chronex-code-card');
+    if (!card) return;
+    const codeEl = card.querySelector('code');
+    const textToCopy = codeEl ? (codeEl.innerText || codeEl.textContent) : '';
+    if (!textToCopy) return;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = textToCopy;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+
+    const origHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-check" style="color: #00ff66;"></i> <span style="color: #00ff66;">Copied!</span>';
+    if (typeof showNotif === 'function') {
+      showNotif('Code copied to clipboard', 'success', 1500);
+    }
+    if (typeof hapticFeedback === 'function') {
+      hapticFeedback('light');
+    }
+    setTimeout(() => {
+      btn.innerHTML = origHtml;
+    }, 2000);
+  } catch (err) {
+    console.error('Failed to copy code snippet:', err);
+  }
+};
+
+window.downloadCodeSnippet = function(btn, ext) {
+  try {
+    const card = btn.closest('.whatsapp-code-card') || btn.closest('.chronex-code-card');
+    if (!card) return;
+    const codeEl = card.querySelector('code');
+    const textContent = codeEl ? (codeEl.innerText || codeEl.textContent) : '';
+    if (!textContent) return;
+
+    const safeExt = (ext || 'txt').replace(/[^a-zA-Z0-9_-]/g, '');
+    const filename = 'nexchat_snippet_' + Date.now() + '.' + safeExt;
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      a.remove();
+      URL.revokeObjectURL(url);
+    }, 100);
+
+    if (typeof showNotif === 'function') {
+      showNotif('Downloaded ' + filename, 'success', 2000);
+    }
+    if (typeof hapticFeedback === 'function') {
+      hapticFeedback('light');
+    }
+  } catch (err) {
+    console.error('Failed to download code snippet:', err);
+  }
+};
+
 function formatAiMarkdown(rawText) {
   if (!rawText) return '';
-  if (window.ChronexxLayoutEngine) {
-    return window.ChronexxLayoutEngine.formatMarkdown(rawText);
+  if (window.ChronexxLayoutEngine && typeof window.ChronexxLayoutEngine.formatMarkdown === 'function') {
+    try {
+      const rendered = window.ChronexxLayoutEngine.formatMarkdown(rawText);
+      if (rendered && typeof rendered === 'string' && rendered.trim().length > 0) {
+        return rendered;
+      }
+    } catch (_) {}
   }
-  return escape(rawText).replace(/\n/g, '<br>');
+  return renderWhatsAppAiMarkdown(rawText);
 }
 
 function displayChronexAIUserMessage(message, attachment = null) {
@@ -25691,15 +25962,8 @@ function setupWhatsAppLockedChatsPullToReveal() {
       }
     }
 
-    // Smooth mobile search bar tuck-away on scroll down for expansive conversation view
-    const isSearchActive = searchInput && (document.activeElement === searchInput || searchInput.value.trim().length > 0);
-    if (searchContainer && isMobile && !isSearchActive) {
-      if (currentScrollTop > 40 && currentScrollTop > lastScrollTop) {
-        searchContainer.classList.add('collapsed');
-      } else if (currentScrollTop < lastScrollTop || currentScrollTop <= 10) {
-        searchContainer.classList.remove('collapsed');
-      }
-    } else if (searchContainer && !isMobile) {
+    // WhatsApp-Style Stable Search Bar: prevent jitter/flapping and retain stable visibility
+    if (searchContainer && searchContainer.classList.contains('collapsed')) {
       searchContainer.classList.remove('collapsed');
     }
 

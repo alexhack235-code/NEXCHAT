@@ -2975,10 +2975,12 @@ html, body {
 .search-category-tabs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   overflow-x: auto;
   scrollbar-width: none;
-  padding-bottom: 2px;
+  padding: 4px 2px;
+  margin: 12px 0 14px 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .search-category-tabs::-webkit-scrollbar {
@@ -2988,16 +2990,18 @@ html, body {
 .search-tab-pill {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  gap: 7px;
+  padding: 8px 16px;
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
   color: #94a3b8;
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 36px;
   transition: all 0.2s ease;
 }
 

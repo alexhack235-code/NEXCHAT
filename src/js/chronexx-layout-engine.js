@@ -44,7 +44,7 @@
 
       // A. Extract and protect code blocks
       const codeBlocks = [];
-      text = text.replace(/```([a-zA-Z0-9_\-\+]*)\n([\s\S]*?)```/g, (match, lang, code) => {
+      text = text.replace(/```([a-zA-Z0-9_+#.-]*)[ \t]*\r?\n?([\s\S]*?)(?:```|$)/g, (match, lang, code) => {
         const placeholder = `__CHRONEX_CODE_BLOCK_${codeBlocks.length}__`;
         codeBlocks.push({ lang: lang || 'code', code: code.trim() });
         return placeholder;
@@ -97,21 +97,89 @@
       // K. Re-inject Protected Code Blocks
       codeBlocks.forEach((item, idx) => {
         const safeCode = escapeHtml(item.code);
-        const safeLang = escapeHtml(item.lang);
+        const safeLang = escapeHtml(item.lang || 'code');
+        let ext = 'txt';
+        let displayTitle = 'Code snippet';
+        let iconClass = 'fa-solid fa-code';
+        const cleanLang = (item.lang || '').trim().toLowerCase().replace(/^\./, '');
+
+        switch (cleanLang) {
+          case 'css':
+            ext = 'css'; displayTitle = 'Css code'; iconClass = 'fa-solid fa-code'; break;
+          case 'tsx':
+            ext = 'tsx'; displayTitle = 'Tsx code'; iconClass = 'fa-solid fa-code'; break;
+          case 'jsx':
+            ext = 'jsx'; displayTitle = 'Jsx code'; iconClass = 'fa-solid fa-code'; break;
+          case 'ts':
+          case 'typescript':
+            ext = 'ts'; displayTitle = 'TypeScript code'; iconClass = 'fa-solid fa-code'; break;
+          case 'js':
+          case 'javascript':
+            ext = 'js'; displayTitle = 'JavaScript code'; iconClass = 'fa-brands fa-js'; break;
+          case 'py':
+          case 'python':
+            ext = 'py'; displayTitle = 'Python code'; iconClass = 'fa-brands fa-python'; break;
+          case 'rs':
+          case 'rust':
+            ext = 'rs'; displayTitle = 'Rust code'; iconClass = 'fa-solid fa-gear'; break;
+          case 'html':
+            ext = 'html'; displayTitle = 'HTML code'; iconClass = 'fa-brands fa-html5'; break;
+          case 'sql':
+            ext = 'sql'; displayTitle = 'SQL query'; iconClass = 'fa-solid fa-database'; break;
+          case 'json':
+            ext = 'json'; displayTitle = 'JSON data'; iconClass = 'fa-solid fa-brackets-curly'; break;
+          case 'sh':
+          case 'bash':
+          case 'shell':
+            ext = 'sh'; displayTitle = 'Shell script'; iconClass = 'fa-solid fa-terminal'; break;
+          case 'c':
+            ext = 'c'; displayTitle = 'C code'; iconClass = 'fa-solid fa-code'; break;
+          case 'cpp':
+            ext = 'cpp'; displayTitle = 'C++ code'; iconClass = 'fa-solid fa-code'; break;
+          case 'cs':
+          case 'csharp':
+          case 'c#':
+            ext = 'cs'; displayTitle = 'C# code'; iconClass = 'fa-solid fa-code'; break;
+          case 'java':
+            ext = 'java'; displayTitle = 'Java code'; iconClass = 'fa-brands fa-java'; break;
+          case 'go':
+          case 'golang':
+            ext = 'go'; displayTitle = 'Go code'; iconClass = 'fa-solid fa-code'; break;
+          case 'txt':
+          case 'text':
+            ext = 'txt'; displayTitle = 'Text document'; iconClass = 'fa-regular fa-file-lines'; break;
+          default:
+            if (cleanLang) {
+              ext = cleanLang.replace(/[^a-z0-9_-]/g, '') || 'txt';
+              displayTitle = cleanLang.toUpperCase() + ' code';
+            }
+            break;
+        }
+
         const cardHtml = `
-          <div class="chronex-code-card">
-            <div class="chronex-code-header">
-              <span class="chronex-code-lang"><i class="fa-solid fa-code"></i> ${safeLang}</span>
-              <div class="chronex-code-actions">
-                <button type="button" class="run-sandbox-chip" onclick="window.CyberFeatures?.sandbox?.show(this.closest('.chronex-code-card').querySelector('code').innerText)">
-                  <i class="fa-solid fa-play"></i> Run in Sandbox
+          <div class="whatsapp-code-card chronex-code-card" data-lang="${safeLang}">
+            <div class="whatsapp-code-header">
+              <div class="code-header-info">
+                <i class="${iconClass} code-lang-icon"></i>
+                <span class="code-header-title">${displayTitle}</span>
+                <span class="code-ext-pill">.${ext}</span>
+              </div>
+              <div class="code-header-actions">
+                <button type="button" class="code-action-btn code-copy-action" onclick="if(window.copyCodeSnippet) window.copyCodeSnippet(this); else navigator.clipboard.writeText(this.closest('.whatsapp-code-card').querySelector('code').innerText);" title="Copy code">
+                  <i class="fa-regular fa-copy"></i>
+                  <span>Copy code</span>
                 </button>
-                <button type="button" class="copy-code-btn" onclick="navigator.clipboard.writeText(this.closest('.chronex-code-card').querySelector('code').innerText); this.innerHTML='<i class=\\'fa-solid fa-check\\'></i> Copied!'; setTimeout(()=>{ this.innerHTML='<i class=\\'fa-regular fa-copy\\'></i> Copy'; }, 2000);">
-                  <i class="fa-regular fa-copy"></i> Copy
+                <button type="button" class="code-action-btn code-dl-action" onclick="if(window.downloadCodeSnippet) window.downloadCodeSnippet(this, '${ext}');" title="Download .${ext}">
+                  <i class="fa-solid fa-download"></i>
+                  <span>.${ext}</span>
+                </button>
+                <button type="button" class="code-action-btn run-sandbox-chip" onclick="if(window.CyberFeatures?.sandbox?.show) window.CyberFeatures.sandbox.show(this.closest('.whatsapp-code-card').querySelector('code').innerText);" title="Run in Sandbox">
+                  <i class="fa-solid fa-play"></i>
+                  <span>Run</span>
                 </button>
               </div>
             </div>
-            <pre class="chronex-code-pre"><code>${safeCode}</code></pre>
+            <pre class="whatsapp-code-body chronex-code-pre"><code class="language-${safeLang}">${safeCode}</code></pre>
           </div>
         `;
         text = text.replace(`__CHRONEX_CODE_BLOCK_${idx}__`, cardHtml);

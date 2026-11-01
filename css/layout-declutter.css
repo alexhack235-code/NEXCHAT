@@ -833,27 +833,23 @@ display: none !important;
 .chat-search-container,
 .search-container {
 width: 100% !important;
-padding: 6px 14px 4px 14px !important;
+padding: 8px 14px 4px 14px !important;
 background: #0b141a !important;
 border-bottom: none !important;
 box-sizing: border-box !important;
-max-height: 56px !important;
+max-height: none !important;
+height: auto !important;
 opacity: 1 !important;
-overflow: hidden !important;
-transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-            opacity 0.22s ease,
-            padding 0.25s ease,
-            margin 0.25s ease !important;
+overflow: visible !important;
+flex-shrink: 0 !important;
 }
 
 .chat-search-container.collapsed,
 .search-container.collapsed {
-max-height: 0 !important;
-opacity: 0 !important;
-padding-top: 0 !important;
-padding-bottom: 0 !important;
-margin: 0 !important;
-pointer-events: none !important;
+max-height: none !important;
+opacity: 1 !important;
+padding: 8px 14px 4px 14px !important;
+pointer-events: auto !important;
 }
 
 .chat-search-pill-wrapper {
@@ -4415,4 +4411,152 @@ body[data-active-section="updates"] .top-header {
   .announcements-branding {
     min-width: 0 !important;
   }
+}
+
+/* WhatsApp Meta AI Bubble De-Cramping & Code Card Suite */
+.message-bubble.chronex-ai-bubble,
+.chronex-ai-bubble,
+.ai-message-bubble-wrapper .message-bubble,
+.message-wrapper.received.ai-message-bubble-wrapper .message-bubble {
+  max-width: min(92%, 780px) !important;
+  padding: 14px 18px !important;
+  border-radius: 16px 16px 16px 4px !important;
+  background: #1f2c34 !important;
+  color: #e9edef !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+  line-height: 1.6 !important;
+}
+
+.ai-message-bubble-wrapper {
+  margin: 12px 0 !important;
+  padding: 2px 14px !important;
+}
+
+.ai-body-content {
+  font-size: 14.5px !important;
+  line-height: 1.6 !important;
+  color: #e9edef !important;
+  word-break: break-word !important;
+}
+
+.ai-body-content p,
+.chronex-p,
+.ai-para {
+  margin: 8px 0 !important;
+  line-height: 1.6 !important;
+}
+
+.ai-body-content strong,
+.ai-bold {
+  color: #5eead4 !important;
+  font-weight: 600 !important;
+}
+
+/* WhatsApp Meta AI Code Card Container */
+.whatsapp-code-card {
+  margin: 14px 0 !important;
+  background: #111b21 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5) !important;
+}
+
+.whatsapp-code-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  background: #182229 !important;
+  padding: 8px 14px !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  gap: 10px !important;
+}
+
+.code-header-info {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #00ff66 !important;
+  letter-spacing: 0.2px !important;
+}
+
+.code-header-info i {
+  font-size: 13px !important;
+  color: #00ff66 !important;
+}
+
+.code-ext-pill {
+  font-family: 'Fira Code', 'Cascadia Code', monospace !important;
+  font-size: 11px !important;
+  padding: 1px 7px !important;
+  border-radius: 6px !important;
+  background: rgba(0, 255, 102, 0.12) !important;
+  border: 1px solid rgba(0, 255, 102, 0.3) !important;
+  color: #00ff66 !important;
+}
+
+.code-header-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.code-action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 8px !important;
+  padding: 5px 11px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #e9edef !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+}
+
+.code-action-btn:hover {
+  background: rgba(0, 255, 102, 0.16) !important;
+  border-color: #00ff66 !important;
+  color: #00ff66 !important;
+  transform: translateY(-1px) !important;
+}
+
+.whatsapp-code-body {
+  margin: 0 !important;
+  padding: 14px 16px !important;
+  background: #111b21 !important;
+  color: #e9edef !important;
+  font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', Consolas, 'Courier New', monospace !important;
+  font-size: 13.5px !important;
+  line-height: 1.55 !important;
+  overflow-x: auto !important;
+  tab-size: 2 !important;
+  white-space: pre !important;
+}
+
+.whatsapp-code-body code {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  color: inherit !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.whatsapp-code-body::-webkit-scrollbar {
+  height: 6px !important;
+}
+
+.whatsapp-code-body::-webkit-scrollbar-track {
+  background: #111b21 !important;
+}
+
+.whatsapp-code-body::-webkit-scrollbar-thumb {
+  background: #2a3942 !important;
+  border-radius: 3px !important;
 }
