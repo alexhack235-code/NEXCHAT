@@ -2087,7 +2087,7 @@ html, body {
 
 .info-action-buttons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   padding: 16px 20px;
   border-bottom: 1px solid var(--border-subtle);
@@ -2675,7 +2675,7 @@ html, body {
 
 .info-action-buttons {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin: 8px 0;
 }
@@ -3881,7 +3881,7 @@ html, body {
 
 .more-sheet-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px 12px;
 }
 
@@ -7592,7 +7592,7 @@ body.chat-size-extra-large .message-bubble {
 /* ChronEX Spark Action Prompts Grid */
 .chronex-spark-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   width: 100%;
 }
@@ -7653,7 +7653,7 @@ body.chat-size-extra-large .message-bubble {
 /* ── 6. Visual AI Model Architecture Cards in Settings Tab 7 ── */
 .ai-model-cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   margin-top: 8px;
 }
@@ -10636,7 +10636,7 @@ body.chat-size-extra-large .message-bubble {
 
 .calls-keypad-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 18px;
 }
@@ -15165,7 +15165,7 @@ body.chat-size-extra-large .message-bubble {
 
 .stegano-cover-grid {
   display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   gap: 8px !important;
 }
 
@@ -15421,4 +15421,13 @@ body.chat-size-extra-large .message-bubble {
   border-color: #00f076 !important;
   color: #00f076 !important;
   box-shadow: 0 0 14px rgba(0, 240, 118, 0.3) !important;
+}
+
+
+/* Dual Pane Split Deck Mobile Responsive */
+@media (max-width: 768px) {
+  .dual-pane-split-deck {
+    width: 100% !important;
+    max-width: 100vw !important;
+  }
 }

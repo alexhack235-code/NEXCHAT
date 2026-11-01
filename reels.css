@@ -2959,7 +2959,7 @@ body.reels-body {
 
 .profile-media-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -3206,7 +3206,7 @@ body.reels-body {
 /*  Share Modal Grid  */
 .share-options-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -3737,7 +3737,7 @@ body.reels-body {
 
 .tip-amount-pills {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 18px;
 }
@@ -5819,7 +5819,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 
 .sound-reels-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -6342,7 +6342,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 
 .profile-pics-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding: 10px 0;
 }
@@ -7252,7 +7252,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 }
 @media (max-width: 400px) {
   .share-options-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
     gap: 8px !important;
   }
   .share-option-btn span {
@@ -7720,7 +7720,7 @@ body.zen-mode-active .trending-tags-ribbon-wrapper {
 
 .studio-tools-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
