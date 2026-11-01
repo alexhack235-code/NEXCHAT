@@ -10138,6 +10138,7 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
 
       // 3. For Folder Archives (.zip, .rar, .tar) and Documents, use Media Blob with fallback to Firebase Storage
       fallbackToMediaBlob();
+      return;
 
       function fallbackToMediaBlob() {
         uploadMediaBlob(file, {
@@ -10200,7 +10201,6 @@ async function uploadFileToStorage(file, chatId, isGroup = false) {
         );
       }
 
-      fallbackToMediaBlob();
       return;
     } catch (error) {
       reject(error);

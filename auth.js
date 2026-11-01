@@ -8,6 +8,7 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signInWithCredential,
+  signInAnonymously,
   GoogleAuthProvider,
   setPersistence,
   browserLocalPersistence
@@ -759,39 +760,61 @@ onAuthStateChanged(auth, user => {
 
 let googleSignInInitialized = false;
 
-window.quickGuestLogin = function () {
-  const guestUid = 'guest_' + Math.floor(100000 + Math.random() * 900000);
-  const guestName = 'Guest Explorer';
-  const guestUser = {
-    uid: guestUid,
-    email: 'guest@nexchat.io',
-    name: guestName,
-    username: 'Guest' + Math.floor(100 + Math.random() * 900),
-    profilePic: 'favicon.png',
-    profilePicUrl: 'favicon.png',
-    tokens: 2000,
-    isGuest: true,
-    online: true,
-    createdAt: new Date().toISOString(),
-    lastLogin: new Date().toISOString()
-  };
-
+window.quickGuestLogin = async function () {
+  showLoginLoader('Setting up guest workspace...', 'Authenticating anonymous session...');
+  showResult('Authenticating guest session...', false);
   try {
-    localStorage.setItem('auth_uid', guestUid);
-    localStorage.setItem('auth_email', guestUser.email);
-    localStorage.setItem('auth_name', guestUser.name);
-    localStorage.setItem('auth_username', guestUser.username);
-    localStorage.setItem('auth_avatar', guestUser.profilePic);
-    localStorage.setItem('currentUser', JSON.stringify(guestUser));
-  } catch (_) { }
+    const cred = await signInAnonymously(auth);
+    const guestUser = cred.user;
+    const guestUid = guestUser.uid;
+    const randomNum = Math.floor(100 + Math.random() * 900);
+    const guestName = 'Guest Explorer';
+    const guestUsername = 'Guest' + randomNum;
+    const avatar = 'favicon.png';
 
-  showResult('Signed in as Guest Explorer! Launching NEXCHAT...', false);
-  showLoginLoader('Setting up guest workspace...');
+    const guestData = {
+      uid: guestUid,
+      email: guestUser.email || ('guest_' + guestUid.slice(0, 6) + '@nexchat.io'),
+      name: guestName,
+      username: guestUsername,
+      profilePic: avatar,
+      profilePicUrl: avatar,
+      tokens: 2000,
+      isGuest: true,
+      online: true,
+      createdAt: new Date().toISOString(),
+      lastLogin: new Date().toISOString()
+    };
 
-  setTimeout(() => {
+    try {
+      await setDoc(doc(db, 'users', guestUid), guestData, { merge: true });
+    } catch (fsErr) {
+      console.warn('Could not write guest doc to Firestore:', fsErr);
+    }
+
+    try {
+      localStorage.setItem('auth_uid', guestUid);
+      localStorage.setItem('auth_email', guestData.email);
+      localStorage.setItem('auth_name', guestData.name);
+      localStorage.setItem('auth_username', guestData.username);
+      localStorage.setItem('auth_avatar', guestData.profilePic);
+      localStorage.setItem('currentUser', JSON.stringify(guestData));
+    } catch (_) { }
+
+    showResult('Signed in as Guest Explorer! Launching NEXCHAT...', false);
+    setTimeout(() => {
+      hideLoginLoader();
+      location.href = 'chat.html';
+    }, 400);
+  } catch (err) {
     hideLoginLoader();
-    location.href = 'chat.html';
-  }, 400);
+    console.error('Anonymous sign-in error:', err);
+    let msg = err.message || 'Unable to sign in as guest.';
+    if (err.code === 'auth/operation-not-allowed') {
+      msg = 'Anonymous sign-in is disabled in Firebase Console. Please enable it in Firebase Console > Authentication > Sign-in method > Anonymous.';
+    }
+    showResult('Guest Login Notice: ' + msg, true);
+  }
 };
 
 window.signInWithRedirectFallback = async function () {

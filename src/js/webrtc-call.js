@@ -282,7 +282,7 @@
                 </div>
                 <div class="call-choice-text">
                   <strong>Direct In-App Call (Google STUN)</strong>
-                  <span>Private encrypted peer-to-peer call inside NEXCHAT</span>
+                  <span>Private encrypted peer-to-peer call (Optimized for WiFi &amp; Broadband)</span>
                 </div>
                 <span class="call-choice-badge">E2EE P2P</span>
               </div>
@@ -294,7 +294,7 @@
                 </div>
                 <div class="call-choice-text">
                   <strong>Instant Google Meet Room</strong>
-                  <span>Launches Google Meet with screen share, AI captions and auto-invite</span>
+                  <span>HD call with AI captions (Recommended for Cellular &amp; Mobile Data)</span>
                 </div>
                 <span class="call-choice-badge google-badge">Google</span>
               </div>
