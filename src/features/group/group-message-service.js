@@ -37,19 +37,21 @@ export async function openGroupChat(groupId) {
   // Clean up previous listeners
   closeGroupChat();
   
-  // Reset store
+  // Reset store with cached messages if available to prevent blank screen flicker
+  const initialCached = (typeof window !== 'undefined' && typeof window.getCachedGroupChatMessages === 'function' ? window.getCachedGroupChatMessages(groupId) : null);
   groupStore.resetState();
   groupStore.setState({
     currentGroupId: groupId,
-    isLoadingMessages: true,
+    messages: initialCached && initialCached.length > 0 ? initialCached : [],
+    isLoadingMessages: !initialCached || initialCached.length === 0,
     hasOlderMessages: true
   });
 
   // 1. Try cache first for instant render
   try {
-    const cached = await getCachedMessages(groupId, PAGE_SIZE);
+    const cached = initialCached || await getCachedMessages(groupId, PAGE_SIZE);
     if (cached && cached.length > 0) {
-      groupStore.setState({ messages: cached });
+      groupStore.setState({ messages: cached, isLoadingMessages: false });
     }
   } catch (e) {
     console.warn('[GroupMsg] Cache read failed:', e);
@@ -110,7 +112,11 @@ export async function openGroupChat(groupId) {
     _resolveUserProfiles(messages).catch(console.warn);
 
     // Cache messages
-    cacheMessages(groupId, messages.map(m => ({ ...m, _docSnap: undefined }))).catch(() => {});
+    const sanitizedGroupMsgs = messages.map(m => ({ ...m, _docSnap: undefined }));
+    cacheMessages(groupId, sanitizedGroupMsgs).catch(() => {});
+    if (typeof window !== 'undefined' && typeof window.cacheGroupChatMessages === 'function') {
+      window.cacheGroupChatMessages(groupId, sanitizedGroupMsgs);
+    }
 
     // 3. Attach realtime listener for NEW messages (after the newest)
     _attachRealtimeListener(groupId, newest);

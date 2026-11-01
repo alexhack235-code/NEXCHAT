@@ -422,12 +422,11 @@ function getDirectChatCacheKey(uidA, uidB) {
   return [uidA, uidB].filter(Boolean).sort().join('|');
 }
 
-function getCachedDirectChatMessages(uidA, uidB, maxAge = 180000) {
+function getCachedDirectChatMessages(uidA, uidB, maxAge = Infinity) {
   const key = getDirectChatCacheKey(uidA, uidB);
   const cached = directChatMessageCache.get(key);
   if (!cached) return null;
-  if (Date.now() - cached.timestamp > maxAge) {
-    directChatMessageCache.delete(key);
+  if (maxAge !== Infinity && (Date.now() - cached.timestamp > maxAge)) {
     return null;
   }
   return cached.messages;
@@ -435,22 +434,25 @@ function getCachedDirectChatMessages(uidA, uidB, maxAge = 180000) {
 
 function cacheDirectChatMessages(uidA, uidB, messages) {
   const key = getDirectChatCacheKey(uidA, uidB);
+  const msgCopy = Array.isArray(messages) ? messages.slice() : [];
   directChatMessageCache.set(key, {
-    messages: Array.isArray(messages) ? messages.slice() : [],
+    messages: msgCopy,
     timestamp: Date.now()
   });
+  if (typeof saveChatHistoryToIndexedDB === 'function') {
+    saveChatHistoryToIndexedDB(key, msgCopy).catch(() => {});
+  }
 }
 
 function getGroupChatCacheKey(groupId) {
   return `group_${groupId}`;
 }
 
-function getCachedGroupChatMessages(groupId, maxAge = 180000) {
+function getCachedGroupChatMessages(groupId, maxAge = Infinity) {
   const key = getGroupChatCacheKey(groupId);
   const cached = groupChatMessageCache.get(key);
   if (!cached) return null;
-  if (Date.now() - cached.timestamp > maxAge) {
-    groupChatMessageCache.delete(key);
+  if (maxAge !== Infinity && (Date.now() - cached.timestamp > maxAge)) {
     return null;
   }
   return cached.messages;
@@ -458,10 +460,14 @@ function getCachedGroupChatMessages(groupId, maxAge = 180000) {
 
 function cacheGroupChatMessages(groupId, messages) {
   const key = getGroupChatCacheKey(groupId);
+  const msgCopy = Array.isArray(messages) ? messages.slice() : [];
   groupChatMessageCache.set(key, {
-    messages: Array.isArray(messages) ? messages.slice() : [],
+    messages: msgCopy,
     timestamp: Date.now()
   });
+  if (typeof saveChatHistoryToIndexedDB === 'function') {
+    saveChatHistoryToIndexedDB(key, msgCopy).catch(() => {});
+  }
 }
 
 function renderCachedDirectChatHistory(messages, messagesDiv) {
@@ -1807,14 +1813,20 @@ function cancelChatLoadFeedback() {
   hideChatReloadOverlay();
 }
 
-function queueChatLoadFeedback(statusText = 'Loading chat...') {
+function queueChatLoadFeedback(statusText = 'Loading chat...', delay = 1000) {
   cancelChatLoadFeedback();
   chatLoadSkeletonTimer = setTimeout(() => {
-    renderChatLoadingSkeleton(currentChatType);
-  }, 100);
+    const area = document.getElementById('messages-area');
+    if (area && area.children.length === 0) {
+      renderChatLoadingSkeleton(currentChatType);
+    }
+  }, Math.max(400, delay - 400));
   chatLoadOverlayTimer = setTimeout(() => {
-    showChatReloadOverlay(statusText);
-  }, 180);
+    const area = document.getElementById('messages-area');
+    if (area && area.children.length === 0) {
+      showChatReloadOverlay(statusText);
+    }
+  }, delay);
 }
 
 function hideChatReloadOverlay() {
@@ -7321,8 +7333,19 @@ function loadMessages() {
     renderCachedDirectChatHistory(cachedDirectMessages, messagesDiv);
     cancelChatLoadFeedback();
   } else {
-    messagesDiv.innerHTML = "";
-    queueChatLoadFeedback('Please wait… loading chat');
+    const targetUid = currentChatUser;
+    const chatKey = getDirectChatCacheKey(myUID, targetUid);
+    if (typeof loadChatHistoryFromIndexedDB === 'function') {
+      loadChatHistoryFromIndexedDB(chatKey).then((idbMessages) => {
+        if (currentChatUser === targetUid && idbMessages && idbMessages.length > 0) {
+          cacheDirectChatMessages(myUID, targetUid, idbMessages);
+          renderCachedDirectChatHistory(idbMessages, messagesDiv);
+          cancelChatLoadFeedback();
+        }
+      }).catch(() => {});
+    }
+    messagesDiv.innerHTML = '';
+    queueChatLoadFeedback('Loading messages...', 1200);
   }
 
   const q = query(
@@ -17250,7 +17273,23 @@ async function loadGroupMessages(groupId) {
   }
 
   try {
-    queueChatLoadFeedback('Opening group chat...');
+    const cachedGroup = getCachedGroupChatMessages(groupId);
+    if (cachedGroup && cachedGroup.length > 0) {
+      renderCachedGroupChatHistory(cachedGroup, messagesDiv);
+      cancelChatLoadFeedback();
+    } else {
+      const chatKey = getGroupChatCacheKey(groupId);
+      if (typeof loadChatHistoryFromIndexedDB === 'function') {
+        loadChatHistoryFromIndexedDB(chatKey).then((idbMsgs) => {
+          if (currentChatUser === groupId && idbMsgs && idbMsgs.length > 0) {
+            cacheGroupChatMessages(groupId, idbMsgs);
+            renderCachedGroupChatHistory(idbMsgs, messagesDiv);
+            cancelChatLoadFeedback();
+          }
+        }).catch(() => {});
+      }
+      queueChatLoadFeedback('Opening group chat...', 1200);
+    }
     const messageInput = document.getElementById('message-input');
     const pinnedBarContainer = document.getElementById('pinnedMessagesBar');
     const typingContainer = document.getElementById('typingIndicator');
@@ -17736,7 +17775,7 @@ async function initOfflineDB() {
       return;
     }
     try {
-      const request = indexedDB.open('NEXCHATOfflineDB', 1);
+      const request = indexedDB.open('NEXCHATOfflineDB', 2);
 
       request.onerror = () => {
         console.error('Failed to open offline DB:', request.error);
@@ -17758,13 +17797,84 @@ async function initOfflineDB() {
         if (!db.objectStoreNames.contains('statuses')) {
           db.createObjectStore('statuses', { keyPath: 'id', autoIncrement: true });
         }
-        console.log('Offline DB schema created');
+        if (!db.objectStoreNames.contains('chatHistory')) {
+          db.createObjectStore('chatHistory', { keyPath: 'chatKey' });
+        }
+        console.log('Offline DB schema created/upgraded with chatHistory store');
       };
     } catch (err) {
       console.error('Exception opening offline DB:', err);
       reject(err);
     }
   });
+}
+
+async function saveChatHistoryToIndexedDB(chatKey, messages) {
+  if (!chatKey || !Array.isArray(messages) || messages.length === 0) return;
+  try {
+    const dbInstance = offlineDB || await initOfflineDB();
+    if (!dbInstance || !dbInstance.objectStoreNames.contains('chatHistory')) return;
+    const tx = dbInstance.transaction(['chatHistory'], 'readwrite');
+    const store = tx.objectStore('chatHistory');
+    const sanitized = messages.slice(-100).map(m => {
+      if (!m) return null;
+      const clone = {};
+      for (const [k, v] of Object.entries(m)) {
+        if (k === '_docSnap' || typeof v === 'function') continue;
+        if (v && typeof v === 'object' && typeof v.toMillis === 'function') {
+          clone[k] = v.toMillis();
+        } else if (v && typeof v === 'object' && typeof v.toDate === 'function') {
+          clone[k] = v.toDate().getTime();
+        } else if (v instanceof Date) {
+          clone[k] = v.getTime();
+        } else {
+          clone[k] = v;
+        }
+      }
+      return clone;
+    }).filter(Boolean);
+
+    store.put({
+      chatKey,
+      messages: sanitized,
+      updatedAt: Date.now()
+    });
+  } catch (err) {
+    console.warn('[NEX-LOCALSTORE] Error persisting chat history to IndexedDB:', err);
+  }
+}
+
+async function loadChatHistoryFromIndexedDB(chatKey) {
+  if (!chatKey) return null;
+  try {
+    const dbInstance = offlineDB || await initOfflineDB();
+    if (!dbInstance || !dbInstance.objectStoreNames.contains('chatHistory')) return null;
+    return new Promise((resolve) => {
+      const tx = dbInstance.transaction(['chatHistory'], 'readonly');
+      const store = tx.objectStore('chatHistory');
+      const req = store.get(chatKey);
+      req.onsuccess = () => {
+        if (req.result && Array.isArray(req.result.messages)) {
+          resolve(req.result.messages);
+        } else {
+          resolve(null);
+        }
+      };
+      req.onerror = () => resolve(null);
+    });
+  } catch (err) {
+    console.warn('[NEX-LOCALSTORE] Error reading chat history from IndexedDB:', err);
+    return null;
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.saveChatHistoryToIndexedDB = saveChatHistoryToIndexedDB;
+  window.loadChatHistoryFromIndexedDB = loadChatHistoryFromIndexedDB;
+  window.getCachedDirectChatMessages = getCachedDirectChatMessages;
+  window.cacheDirectChatMessages = cacheDirectChatMessages;
+  window.getCachedGroupChatMessages = getCachedGroupChatMessages;
+  window.cacheGroupChatMessages = cacheGroupChatMessages;
 }
 
 async function storeOfflineMessage(chatId, message, chatType = 'direct', attachmentUrl = null) {

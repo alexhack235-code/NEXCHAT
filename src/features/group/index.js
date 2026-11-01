@@ -149,6 +149,16 @@ async function open(groupId, messagesContainer, options = {}) {
   const currentUid = options.currentUid || (await _getCurrentUid());
   const onNotify = options.onNotify || (() => {});
 
+  // Pre-seed store with cached messages for 0ms instant mount
+  const initialCached = (typeof window !== 'undefined' && typeof window.getCachedGroupChatMessages === 'function' ? window.getCachedGroupChatMessages(groupId) : null);
+  if (initialCached && initialCached.length > 0) {
+    groupStore.setState({
+      currentGroupId: groupId,
+      messages: initialCached,
+      isLoadingMessages: false
+    });
+  }
+
   // Initialize virtual scroller
   _scroller = new VirtualScroller(messagesContainer, {
     estimatedItemHeight: 80,
@@ -173,6 +183,11 @@ async function open(groupId, messagesContainer, options = {}) {
       // Mark visible messages as read
     }
   });
+
+  if (initialCached && initialCached.length > 0) {
+    const processed = _processMessages(initialCached, currentUid);
+    _scroller.setItems(processed);
+  }
 
   // Initialize read receipt observer
   _readObserver = createReadObserver(messagesContainer, async (messageId) => {
