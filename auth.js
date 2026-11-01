@@ -777,6 +777,7 @@ window.quickGuestLogin = async function () {
       email: guestUser.email || ('guest_' + guestUid.slice(0, 6) + '@nexchat.io'),
       name: guestName,
       username: guestUsername,
+      role: 'guest',
       profilePic: avatar,
       profilePicUrl: avatar,
       tokens: 2000,
