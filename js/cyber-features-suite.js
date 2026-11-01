@@ -2033,11 +2033,34 @@ class NexTranslator {
   scanAndAutoTranslateFeed() {
     if (!this.isAutoTranslateActiveForCurrentChat()) return;
 
-    const bubbles = document.querySelectorAll(
+    const bubbles = Array.from(document.querySelectorAll(
       '#messages-area .message-wrapper.received .message-bubble:not([data-auto-translated="true"]), ' +
       '#messages-area .nex-msg-wrapper.received .nex-msg-bubble:not([data-auto-translated="true"])'
-    );
-    bubbles.forEach(bubble => this.autoTranslateMessageBubble(bubble));
+    ));
+
+    if (!bubbles.length) return;
+
+    // Ultra-Fast Concurrent Worker Queue (Max 3 in parallel with 20ms stagger)
+    const queue = [...bubbles];
+    const CONCURRENCY = 3;
+    let activeWorkers = 0;
+
+    const processNext = () => {
+      if (!this.isAutoTranslateActiveForCurrentChat()) return;
+      while (activeWorkers < CONCURRENCY && queue.length > 0) {
+        const bubble = queue.shift();
+        if (!bubble || !bubble.isConnected || bubble.dataset.autoTranslated === 'true') continue;
+        activeWorkers++;
+        this.autoTranslateMessageBubble(bubble).finally(() => {
+          activeWorkers--;
+          if (queue.length > 0) {
+            setTimeout(processNext, 20);
+          }
+        });
+      }
+    };
+
+    processNext();
   }
 
   clearAutoTranslateCacheAndRescan() {
@@ -2049,8 +2072,8 @@ class NexTranslator {
     }
   }
 
-  autoTranslateMessageBubble(bubble) {
-    if (!bubble || bubble.dataset.autoTranslated === 'true') return;
+  async autoTranslateMessageBubble(bubble) {
+    if (!bubble || !bubble.isConnected || bubble.dataset.autoTranslated === 'true') return;
 
     // Extract message text cleanly
     let rawText = '';
@@ -2082,8 +2105,9 @@ class NexTranslator {
     const targetLang = localStorage.getItem('nexchat_preferred_language') || localStorage.getItem('nex_auto_translate_target_lang') || this.autoTranslateTargetLang || 'en';
     const langName = this.languageNames[targetLang] || targetLang;
 
-    this.translateText(rawText, targetLang).then(translated => {
-      if (!translated || !translated.trim()) return;
+    try {
+      const translated = await this.translateText(rawText, targetLang);
+      if (!translated || !translated.trim() || !bubble.isConnected) return;
       if (translated.trim().toLowerCase() === rawText.toLowerCase()) return;
       if (bubble.querySelector('.auto-translated-card')) return;
 
@@ -2113,9 +2137,9 @@ class NexTranslator {
       } else {
         bubble.appendChild(card);
       }
-    }).catch(err => {
+    } catch (err) {
       console.warn('[NexTranslator] Auto-translation error:', err);
-    });
+    }
   }
 
   escapeMarkup(str) {
@@ -2162,6 +2186,17 @@ class NexTranslator {
         this.cacheTranslation(cacheKey, fastMatch);
         return fastMatch;
       }
+    }
+
+    // Delegate directly to FastTranslator Matrix (unified cache + in-flight deduplication)
+    if (typeof window !== 'undefined' && typeof window.fastTranslateAsync === 'function') {
+      try {
+        const fastRes = await window.fastTranslateAsync(clean, targetLang);
+        if (fastRes && fastRes.toLowerCase() !== lower) {
+          this.cacheTranslation(cacheKey, fastRes);
+          return fastRes;
+        }
+      } catch (_) {}
     }
 
     // Tier 1b: Local Lexicon & Compound Clause match (0ms instant local resolution)

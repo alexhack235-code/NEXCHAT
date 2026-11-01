@@ -12,6 +12,7 @@ class FastTranslationLRUCache {
   constructor(maxSize = 5000) {
     this.maxSize = maxSize;
     this.cache = new Map();
+    this._saveTimer = null;
     this.loadSessionEntries();
   }
 
@@ -44,6 +45,14 @@ class FastTranslationLRUCache {
     } catch (_) {}
   }
 
+  scheduleSessionSave() {
+    if (this._saveTimer) return;
+    this._saveTimer = setTimeout(() => {
+      this._saveTimer = null;
+      this.saveSessionEntries();
+    }, 1500);
+  }
+
   get(key) {
     if (!this.cache.has(key)) return null;
     const value = this.cache.get(key);
@@ -62,6 +71,7 @@ class FastTranslationLRUCache {
       this.cache.delete(firstKey);
     }
     this.cache.set(key, value);
+    this.scheduleSessionSave();
   }
 }
 
@@ -570,6 +580,8 @@ export function fastTranslateSync(rawText, targetLang = 'es') {
 // ---------------------------------------------------------------------------
 // TIER 2: SPECULATIVE PARALLEL RACING (< 300ms FOR NOVEL FOREIGN SENTENCES)
 // ---------------------------------------------------------------------------
+const inFlightTranslations = new Map();
+
 export async function fastTranslateAsync(rawText, targetLang = 'es') {
   if (!rawText || !rawText.trim()) return '';
   const clean = rawText.trim();
@@ -579,34 +591,28 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
   if (syncMatch) return syncMatch;
 
   const cacheKey = `${targetLang}:${clean.toLowerCase()}`;
+  const existingInFlight = inFlightTranslations.get(cacheKey);
+  if (existingInFlight) return existingInFlight;
 
-  // Step 2: Speculative Parallel Multi-Engine Race (ChronEX AI vs Fast MT)
-  const langNameMap = {
-    'en': 'English', 'es': 'Spanish', 'fr': 'French', 'de': 'German',
-    'it': 'Italian', 'pt': 'Portuguese', 'ru': 'Russian', 'ar': 'Arabic',
-    'hi': 'Hindi', 'zh': 'Chinese', 'ja': 'Japanese', 'pidgin': 'Nigerian Pidgin',
-    'tl': 'Tagalog', 'sw': 'Swahili'
-  };
-  const langName = langNameMap[targetLang] || targetLang;
+  const translationPromise = (async () => {
+    // Check LRU again in case it was resolved in another tick
+    const cached = translationLRU.get(cacheKey);
+    if (cached) return cached;
 
-  // Runner Alpha: Fast Direct Neural AI Call (Optimized prompt & low token ceiling)
-  const aiRunner = (async () => {
-    if (typeof window !== 'undefined' && typeof window.generateChronexAIResponse === 'function') {
-      const prompt = `Translate to ${langName}. Direct translation ONLY, no quotes:\n"${clean}"`;
-      const res = await window.generateChronexAIResponse(prompt);
-      if (res && res.trim() && !res.includes('QUOTA')) {
-        return res.trim().replace(/^["']|["']$/g, '');
-      }
-    }
-    throw new Error('AI_UNAVAILABLE');
-  })();
+    const langNameMap = {
+      'en': 'English', 'es': 'Spanish', 'fr': 'French', 'de': 'German',
+      'it': 'Italian', 'pt': 'Portuguese', 'ru': 'Russian', 'ar': 'Arabic',
+      'hi': 'Hindi', 'zh': 'Chinese', 'ja': 'Japanese', 'pidgin': 'Nigerian Pidgin',
+      'pcm': 'Nigerian Pidgin', 'tl': 'Tagalog', 'sw': 'Swahili', 'yo': 'Yoruba',
+      'ha': 'Hausa', 'ig': 'Igbo', 'tr': 'Turkish'
+    };
+    const langName = langNameMap[targetLang] || targetLang;
 
-  // Runner Gamma: Ultra-Fast Direct Neural GTX Engine (< 150ms)
-  const gtxRunner = (async () => {
-    if (typeof fetch === 'function') {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 1800);
+    // Fast Runner 1: Direct Neural Google GTX (< 150ms). Skip for non-ISO codes like pcm/pidgin
+    if (typeof fetch === 'function' && targetLang !== 'pcm' && targetLang !== 'pidgin') {
       try {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 950);
         const apiTarget = targetLang === 'en' ? 'en' : targetLang;
         const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(apiTarget)}&dt=t&q=${encodeURIComponent(clean)}`, {
           signal: controller.signal
@@ -617,23 +623,21 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
           if (Array.isArray(data) && Array.isArray(data[0])) {
             const trans = data[0].map(item => item[0]).filter(Boolean).join('').trim();
             if (trans && trans.toLowerCase() !== clean.toLowerCase()) {
+              translationLRU.set(cacheKey, trans);
               return trans;
             }
           }
         }
       } catch (_) {}
     }
-    throw new Error('GTX_FAILED');
-  })();
 
-  // Runner Beta: Fast Edge MT Endpoint with 800ms Abort Controller
-  const edgeMtRunner = (async () => {
+    // Fast Runner 2: Edge MT Endpoint (MyMemory) fallback
     if (typeof fetch === 'function' && typeof AbortController !== 'undefined') {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 850);
       try {
-        const apiTarget = targetLang === 'en' ? 'en' : targetLang;
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${apiTarget}`, {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 900);
+        const apiTarget = (targetLang === 'pcm' || targetLang === 'pidgin') ? 'en' : targetLang;
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${encodeURIComponent(apiTarget)}`, {
           signal: controller.signal
         });
         clearTimeout(timer);
@@ -641,35 +645,38 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
           const data = await res.json();
           const trans = data?.responseData?.translatedText?.trim();
           if (trans && !trans.toUpperCase().includes('MYMEMORY WARNING') && trans.toLowerCase() !== clean.toLowerCase()) {
+            translationLRU.set(cacheKey, trans);
             return trans;
           }
         }
       } catch (_) {}
     }
-    throw new Error('MT_FAILED');
+
+    // Fast Runner 3: ChronEX AI Gateway (with prompt guard)
+    if (typeof window !== 'undefined' && typeof window.generateChronexAIResponse === 'function') {
+      try {
+        const prompt = `Translate to ${langName}. Direct translation ONLY, no quotes:\n"${clean}"`;
+        const res = await window.generateChronexAIResponse(prompt);
+        if (res && res.trim() && !res.includes('QUOTA') && !res.includes('MODEL QUOTA REACHED')) {
+          const cleanAi = res.trim().replace(/^["']|["']$/g, '');
+          if (cleanAi && cleanAi.toLowerCase() !== clean.toLowerCase()) {
+            translationLRU.set(cacheKey, cleanAi);
+            return cleanAi;
+          }
+        }
+      } catch (_) {}
+    }
+
+    // Clean graceful fallback - return original text without caching failure
+    return clean;
   })();
 
+  inFlightTranslations.set(cacheKey, translationPromise);
   try {
-    // Race both runners - whichever resolves first wins!
-    const winningResult = await Promise.any([gtxRunner, edgeMtRunner, aiRunner]);
-    if (winningResult) {
-      translationLRU.set(cacheKey, winningResult);
-      translationLRU.saveSessionEntries();
-      return winningResult;
-    }
-  } catch (_) {
-    // If both fast runners failed or timed out, attempt sequential fallback
+    return await translationPromise;
+  } finally {
+    inFlightTranslations.delete(cacheKey);
   }
-
-  // Fallback: Return prefixed clean text
-  const prefixes = {
-    'es': 'Traducido: ', 'fr': 'Traduit: ', 'de': 'Übersetzt: ',
-    'it': 'Tradotto: ', 'pt': 'Traduzido: ', 'ru': 'Переведено: ',
-    'ar': 'مترجم: ', 'en': '[Translated] '
-  };
-  const fallbackResult = (prefixes[targetLang] || `[${targetLang.toUpperCase()}] `) + clean;
-  translationLRU.set(cacheKey, fallbackResult);
-  return fallbackResult;
 }
 
 // Global attachment

@@ -19626,9 +19626,24 @@ function initializeBasicUI() {
           } else {
             showNotif('ChronEX AI analyzing recent conversation...', 'info', 2500);
             try {
-              const allMsgs = (messages1 || []).concat(messages2 || []);
-              const recent = allMsgs.slice(-10).map(m => `${m.from === myUID ? 'Me' : 'Peer'}: ${m.text || ''}`).filter(t => t.length > 5).join('\n');
-              const prompt = `Summarize these recent chat messages concisely:\n${recent || 'No recent text messages found.'}`;
+              let allMsgs = [];
+              if (currentChatType === 'group') {
+                const store = typeof groupStore !== 'undefined' ? groupStore : (typeof GroupChat !== 'undefined' && GroupChat.getStore ? GroupChat.getStore() : null);
+                if (store && Array.isArray(store.getState().messages) && store.getState().messages.length > 0) {
+                  allMsgs = store.getState().messages;
+                } else {
+                  const nodes = document.querySelectorAll('#messages-area .nex-msg-wrapper, #messages-area .message-wrapper');
+                  nodes.forEach(n => {
+                    const text = (n.querySelector('.nex-msg-text, .message-content')?.textContent || '').trim();
+                    const sender = (n.querySelector('.nex-msg-sender-name, .message-sender')?.textContent || (n.classList.contains('sent') ? 'Me' : 'Member')).replace(/^~\s*/, '');
+                    if (text) allMsgs.push({ from: sender, senderName: sender, text });
+                  });
+                }
+              } else {
+                allMsgs = (messages1 || []).concat(messages2 || []);
+              }
+              const recent = allMsgs.slice(-15).map(m => `${m.senderName || (m.from === myUID ? 'Me' : (m.from || 'Peer'))}: ${m.text || ''}`).filter(t => t.length > 5).join('\n');
+              const prompt = `Summarize these recent chat messages concisely in 2-3 key bullet points:\n${recent || 'No recent text messages found.'}`;
               const summary = await generateChronexAIResponse(prompt);
               displayChronexAIResponse(summary, true);
               hapticFeedback('success');

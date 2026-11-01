@@ -1,3 +1,4 @@
+let globalKeyCounter = 0;
 import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
 
 /**
@@ -181,8 +182,10 @@ export default async function handler(req, res) {
     }
   };
 
-  // Try keys and models in order
-  for (let kIdx = 0; kIdx < keys.length; kIdx++) {
+  // Load-balance across all Pro/configured keys evenly with round-robin rotation
+  const startIdx = (globalKeyCounter++) % keys.length;
+  for (let step = 0; step < keys.length; step++) {
+    const kIdx = (startIdx + step) % keys.length;
     const key = keys[kIdx];
 
     for (const model of CANDIDATE_MODELS) {

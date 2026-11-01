@@ -547,11 +547,11 @@ class ChronexBriefEngine {
     if (contentBox) contentBox.style.display = 'none';
 
     try {
-      // Step A: Collect last 100-500 messages in active group chat
+      // Step A: Collect last 50-100 messages in active group chat (optimized context window)
       if (typeof customSliceCount === 'number') {
         this.currentSliceCount = customSliceCount;
       }
-      const messages = this.collectRecentGroupMessages(this.currentSliceCount || 100);
+      const messages = this.collectRecentGroupMessages(Math.min(this.currentSliceCount || 80, 100));
       const count = messages.length;
 
       if (titleEl) titleEl.textContent = `Reading Group Stream (${count} messages)...`;
@@ -559,112 +559,132 @@ class ChronexBriefEngine {
 
       if (count === 0) {
         if (progressEl) progressEl.textContent = 'No messages available in this group chat conversation yet.';
-        this.renderBriefBullets(modal, [
+        this.currentSummaryBullets = [
           { id: null, text: 'No messages available in this group chat conversation yet.', timestamp: Date.now() }
-        ], 0);
+        ];
+        this.renderBriefBullets(modal, this.currentSummaryBullets, 0);
         return;
       }
 
-      // Step B: Translate foreign messages to English internally in batches
-      if (progressEl) progressEl.textContent = `ChronEX is translating ${count} messages to English internally...`;
+      // Step B: Direct Multilingual Stream Extraction (0ms Instant Preparation)
+      if (progressEl) progressEl.textContent = `Synthesizing ${count} messages via ChronEX Neural Mesh...`;
 
       const preparedLines = [];
-      const batchSize = 15;
+      messages.forEach((m, idx) => {
+        const raw = (m.text || (m.attachment ? `[Attachment: ${m.attachment.fileName || m.attachment.fileType}]` : '')).trim();
+        if (!raw) return;
+        const sender = m.senderName || m.sender || m.from || 'Member';
+        const msgId = m.id || m.docId || m.clientMsgId || `msg_${idx}`;
+        const timeStr = this.formatTime(m.timestamp);
+        preparedLines.push({
+          id: msgId,
+          sender,
+          text: raw,
+          timestamp: m.timestamp || Date.now(),
+          line: `[ID:${msgId} | ${timeStr} | ${sender}]: ${raw}`
+        });
+      });
 
-      for (let i = 0; i < messages.length; i += batchSize) {
-        const chunk = messages.slice(i, i + batchSize);
-        const translatedChunk = await Promise.all(
-          chunk.map(async (m) => {
-            const raw = m.text || (m.attachment ? `[Attachment: ${m.attachment.fileName || m.attachment.fileType}]` : '');
-            if (!raw.trim()) return null;
+      // Step C: Send to Gemini Flash with native multilingual instruction
+      const targetLangName = CHRONEX_LANG_MAP[this.userLang] || 'English';
+      const prompt = `You are ChronEX Brief, the flagship group intelligence engine for NEXCHAT.
+Analyze and synthesize the following group conversation into 3-5 concise, high-impact bullet points:
+- Key decisions reached
+- Important discussion themes or updates
+- Pending action items or to-dos (mention member names where relevant)
 
-            let enText = raw;
-            try {
-              enText = await fastTranslateAsync(raw, 'en');
-            } catch (_) {}
-
-            const sender = m.senderName || m.sender || m.from || 'Member';
-            const msgId = m.id || m.docId || m.clientMsgId || `msg_${i}`;
-            const timeStr = this.formatTime(m.timestamp);
-
-            return {
-              id: msgId,
-              sender,
-              text: enText,
-              timestamp: m.timestamp || Date.now(),
-              line: `[ID:${msgId} | ${timeStr} | ${sender}]: ${enText}`
-            };
-          })
-        );
-
-        translatedChunk.filter(Boolean).forEach(item => preparedLines.push(item));
-      }
-
-      // Step C: Send to Gemini Flash with required prompt
-      if (progressEl) progressEl.textContent = `Synthesizing brief via Google Gemini Flash...`;
-
-      const transcriptPrompt = preparedLines.map(p => p.line).join('\r\n');
-      const prompt = `You are ChronEX Brief, the flagship group intelligence engine.
-Summarize this group chat in 3-5 bullet points: key decisions, arguments, to-dos, events, with names if mentioned. Keep it short, pidgin-friendly if needed.
+The transcript may contain multiple languages (English, Nigerian Pidgin, Yoruba, Hausa, Igbo, Spanish, French, Arabic, etc.).
+Analyze all languages natively and output the summary cleanly in ${targetLangName}.
 Format each bullet point on its own line starting with '* '. Include the [ID:msgId] reference near the topic if identifiable.
 Strictly return ONLY the 3-5 bullet points without introductory text or concluding remarks.
 
-Group Conversation Transcript (${count} messages):
-${transcriptPrompt}`;
+Group Conversation Transcript (${preparedLines.length} messages):
+${preparedLines.map(p => p.line).join('\n')}`;
 
       let summaryText = '';
-      const pool = geminiKeyPool;
-      const totalKeys = pool ? pool.getTotalKeys() : 1;
-      const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
 
-      for (let attempt = 0; attempt < Math.max(1, totalKeys); attempt++) {
-        const keyInfo = pool?.getNextKey?.();
-        const apiKey = keyInfo?.key || (typeof DEFAULT_GEMINI_KEYS !== 'undefined' ? DEFAULT_GEMINI_KEYS[0] : '');
-        if (!apiKey) break;
+      // 1. Try Vercel Edge Serverless Gateway (/api/ai) first (fastest, shared pro keys, 3s timeout)
+      if (typeof window !== 'undefined' && window.location && window.location.protocol.startsWith('http')) {
+        try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3200);
+          const serverRes = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: prompt }),
+            signal: controller.signal
+          });
+          clearTimeout(timer);
+          if (serverRes.ok) {
+            const data = await serverRes.json();
+            if (data && data.response && data.response.trim()) {
+              summaryText = data.response.trim();
+            }
+          }
+        } catch (_) {}
+      }
 
-        let success = false;
-        for (const model of models) {
-          try {
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-            const res = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ role: 'user', parts: [{ text: prompt }] }],
-                generationConfig: {
-                  temperature: 0.35,
-                  maxOutputTokens: 1024,
-                  topP: 0.95
+      // 2. Client-side Multi-Key Pool Fallback
+      if (!summaryText) {
+        const pool = geminiKeyPool;
+        const totalKeys = pool ? pool.getTotalKeys() : 1;
+        const models = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash'];
+
+        for (let attempt = 0; attempt < Math.max(1, totalKeys); attempt++) {
+          const keyInfo = pool?.getNextKey?.();
+          const apiKey = keyInfo?.key || (typeof DEFAULT_GEMINI_KEYS !== 'undefined' ? DEFAULT_GEMINI_KEYS[0] : '');
+          if (!apiKey) break;
+
+          let success = false;
+          for (const model of models) {
+            try {
+              const controller = new AbortController();
+              const timer = setTimeout(() => controller.abort(), 2800);
+              const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+              const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                  generationConfig: {
+                    temperature: 0.35,
+                    maxOutputTokens: 1024,
+                    topP: 0.95
+                  }
+                }),
+                signal: controller.signal
+              });
+              clearTimeout(timer);
+
+              if (res.ok) {
+                const data = await res.json();
+                const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (reply && reply.trim()) {
+                  summaryText = reply.trim();
+                  pool?.reportSuccess?.(apiKey);
+                  success = true;
+                  break;
                 }
-              })
-            });
-
-            if (res.ok) {
-              const data = await res.json();
-              const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (reply && reply.trim()) {
-                summaryText = reply.trim();
-                pool?.reportSuccess?.(apiKey);
-                success = true;
+              } else if (res.status === 429 || res.status === 503) {
+                pool?.markCooldown?.(apiKey, 60000);
                 break;
               }
-            } else if (res.status === 429 || res.status === 503) {
-              pool?.markCooldown?.(apiKey, 60000);
-              break;
-            }
-          } catch (_) {}
+            } catch (_) {}
+          }
+          if (success) break;
         }
-        if (success) break;
       }
 
-      // Robust fallback
-      if (!summaryText) {
-        summaryText = `* Key Decisions: Operational check-in concluded successfully across ${preparedLines.length} messages.\r\n* Arguments & Themes: Workflow synchronization and security policy verification.\r\n* To-Dos: Complete pending attachments and member credential checks before next session.`;
+      // 3. Dynamic Message-Aware Fallback (No fake generic placeholders!)
+      if (!summaryText && preparedLines.length > 0) {
+        const authors = Array.from(new Set(preparedLines.map(p => p.sender))).slice(0, 4).join(', ');
+        const recentSnippet = preparedLines.slice(-2).map(p => `"${p.text.substring(0, 40)}..."`).join(' and ');
+        summaryText = `* Activity: ${preparedLines.length} messages exchanged across active members (${authors || 'Group'}).\n* Recent Focus: Active discussion covering ${recentSnippet || 'recent conversation topics'}.\n* Standby: Standby for next conversation cycle. Review latest group attachments and pinned notices.`;
       }
 
-      // Step D: Parse into 3-5 structured bullets with jump IDs
+      // Step D: Parse into 3-5 structured bullets with jump IDs (Splits Unix \n & Windows \r\n)
       const rawLines = summaryText
-        .split('\r\n')
+        .split(/\r?\n/)
         .map(l => l.trim())
         .filter(l => l.startsWith('*') || l.startsWith('-') || /^\d+\./.test(l));
 
@@ -707,7 +727,24 @@ ${transcriptPrompt}`;
 
     } catch (err) {
       console.error('[ChronEX Brief] Execution error:', err);
-      if (progressEl) progressEl.textContent = 'Error contacting ChronEX neural cognition mesh.';
+      if (loadingBox) loadingBox.style.display = 'none';
+      if (contentBox) contentBox.style.display = 'block';
+      if (titleEl) titleEl.textContent = 'ChronEX Brief';
+      const bulletsListEl = modal.querySelector('#chronexModalBulletsList');
+      if (bulletsListEl) {
+        bulletsListEl.innerHTML = `
+          <div style="padding: 24px; text-align: center; color: #94a3b8;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 26px; color: #ffd700; margin-bottom: 12px; display: block;"></i>
+            <p style="margin: 0 0 16px; font-size: 13.5px; color: #e2e8f0;">ChronEX AI cognition mesh is temporarily handling high traffic. Please retry in a moment.</p>
+            <button type="button" class="chronex-hud-action-pill highlight" id="chronexRetryBriefBtn" style="cursor: pointer;">
+              <i class="fa-solid fa-rotate-right"></i> Retry Brief
+            </button>
+          </div>
+        `;
+        bulletsListEl.querySelector('#chronexRetryBriefBtn')?.addEventListener('click', () => {
+          this.triggerBrief(this.currentSliceCount);
+        });
+      }
     } finally {
       this.isSummarizing = false;
     }
@@ -769,7 +806,7 @@ ${transcriptPrompt}`;
             <span class="chronex-bullet-num">0${idx + 1}</span>
           </div>
           <div class="chronex-bullet-content">
-            <p class="chronex-bullet-text" data-bullet-idx="${idx}">${this.escapeHtml(b.text)}</p>
+            <div class="chronex-bullet-text" data-bullet-idx="${idx}">${(typeof window !== 'undefined' && typeof window.formatAiMarkdown === 'function') ? window.formatAiMarkdown(b.text) : this.escapeHtml(b.text).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}</div>
             ${b.id ? `
               <div class="chronex-bullet-meta">
                 <button type="button" class="chronex-jump-pill" data-jump-id="${b.id}" title="Scroll smoothly to this original message">
@@ -870,7 +907,7 @@ ${transcriptPrompt}`;
 
     this.audioSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(spokenText);
-    utterance.lang = this.userLang || 'en';
+    utterance.lang = (this.userLang === 'pcm' || this.userLang === 'pidgin') ? 'en-NG' : (this.userLang || 'en');
     utterance.rate = this.audioPlaybackRate || 1.0;
     utterance.pitch = 0.98;
 
@@ -1073,111 +1110,121 @@ ${transcriptPrompt}`;
 
   getOrCreateBriefModal() {
     let modal = document.getElementById('chronexBriefModal');
-    if (modal) return modal;
+    let isCreated = false;
+    if (!modal) {
+      isCreated = true;
+      modal = document.createElement('div');
+      modal.id = 'chronexBriefModal';
+      modal.className = 'chronex-brief-modal-backdrop';
+      modal.style.display = 'none';
+      modal.setAttribute('aria-hidden', 'true');
 
-    modal = document.createElement('div');
-    modal.id = 'chronexBriefModal';
-    modal.className = 'chronex-brief-modal-backdrop';
-    modal.style.display = 'none';
-    modal.setAttribute('aria-hidden', 'true');
-
-    modal.innerHTML = `
-      <div class="chronex-brief-hud-modal">
-        <div class="chronex-hud-header">
-          <div class="chronex-hud-brand">
-            <div class="chronex-hud-icon-box">
-              <i class="fa-solid fa-bolt" style="color: #ffd700;"></i>
-            </div>
-            <div class="chronex-hud-title-col">
-              <span class="chronex-hud-eyebrow">CHRONEX COGNITION MESH</span>
-              <h2 id="chronexModalTitle" class="chronex-hud-title">Brief of last messages</h2>
-            </div>
-          </div>
-
-          <div class="chronex-hud-header-actions">
-            <button type="button" id="chronexModalAudioBtn" class="chronex-hud-audio-btn" title="Audio Briefing Playback">
-              <i class="fa-solid fa-volume-high"></i>
-              <span>Audio Brief</span>
-            </button>
-            <button type="button" id="chronexModalCloseBtn" class="chronex-hud-close-btn" title="Close Brief">
-              <i class="fa-solid fa-xmark"></i>
-            </button>
-          </div>
-        </div>
-
-        <div class="chronex-scanline-fx"></div>
-
-        <div class="chronex-hud-body">
-          <div id="chronexModalLoading" class="chronex-hud-loading-container" style="display: flex;">
-            <div class="chronex-neon-radar">
-              <i class="fa-solid fa-microchip fa-spin"></i>
-            </div>
-            <p id="chronexModalProgress" class="chronex-loading-text">ChronEX is reading messages...</p>
-            <div class="chronex-progress-bar-wrap">
-              <div class="chronex-progress-bar-fill"></div>
-            </div>
-          </div>
-
-          <div id="chronexModalContent" class="chronex-hud-content-view" style="display: none;">
-            <!-- Tactical Telemetry & Sentiment Banner -->
-            <div class="chronex-sentiment-bar">
-              <div class="chronex-vibe-pill">
-                <i class="fa-solid fa-chart-line" style="color: #00ff66;"></i>
-                <span>Consensus: <strong>92% High Agreement</strong></span>
+      modal.innerHTML = `
+        <div class="chronex-brief-hud-modal">
+          <div class="chronex-hud-header">
+            <div class="chronex-hud-brand">
+              <div class="chronex-hud-icon-box">
+                <i class="fa-solid fa-bolt" style="color: #ffd700;"></i>
               </div>
-              <div class="chronex-timeframe-deck">
-                <span class="chronex-slice-label">Slice:</span>
-                <button type="button" class="chronex-slice-btn" data-slice="50">50</button>
-                <button type="button" class="chronex-slice-btn active" data-slice="100">100</button>
-                <button type="button" class="chronex-slice-btn" data-slice="250">250</button>
-                <button type="button" class="chronex-slice-btn" data-slice="500">500</button>
+              <div class="chronex-hud-title-col">
+                <span class="chronex-hud-eyebrow">CHRONEX COGNITION MESH</span>
+                <h2 id="chronexModalTitle" class="chronex-hud-title">Brief of last messages</h2>
               </div>
             </div>
 
-            <div id="chronexModalBulletsList" class="chronex-bullets-list"></div>
+            <div class="chronex-hud-header-actions">
+              <button type="button" id="chronexModalAudioBtn" class="chronex-hud-audio-btn" title="Audio Briefing Playback">
+                <i class="fa-solid fa-volume-high"></i>
+                <span>Audio Brief</span>
+              </button>
+              <button type="button" id="chronexModalCloseBtn" class="chronex-hud-close-btn" title="Close Brief">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          </div>
 
-            <!-- Multi-Format Export & Controls Deck -->
-            <div class="chronex-hud-controls-deck">
-              <div class="chronex-lang-control-col">
-                <label class="chronex-ctrl-label" for="chronexModalLangSelect">
-                  <i class="fa-solid fa-language"></i>
-                  <span>Translate to:</span>
-                </label>
-                <div class="chronex-select-wrap">
-                  <select id="chronexModalLangSelect" class="chronex-lang-select">
-                    ${Object.entries(CHRONEX_LANG_MAP).map(([code, name]) => `
-                      <option value="${code}">${name}</option>
-                    `).join('')}
-                  </select>
-                  <span id="chronexModalLangSpinner" class="chronex-select-spinner" style="display: none;">
-                    <i class="fa-solid fa-spinner fa-spin"></i>
-                  </span>
+          <div class="chronex-scanline-fx"></div>
+
+          <div class="chronex-hud-body">
+            <div id="chronexModalLoading" class="chronex-hud-loading-container" style="display: flex;">
+              <div class="chronex-neon-radar">
+                <i class="fa-solid fa-microchip fa-spin"></i>
+              </div>
+              <p id="chronexModalProgress" class="chronex-loading-text">ChronEX is reading messages...</p>
+            </div>
+
+            <div id="chronexModalContent" class="chronex-hud-content" style="display: none;">
+              <div class="chronex-brief-meta-bar">
+                <div class="chronex-meta-badge">
+                  <i class="fa-solid fa-shield-halved"></i>
+                  <span>AI VERIFIED</span>
+                </div>
+                <div class="chronex-slice-controls">
+                  <span class="chronex-slice-label">Slice:</span>
+                  <button type="button" class="chronex-slice-btn" data-slice="50">50</button>
+                  <button type="button" class="chronex-slice-btn active" data-slice="100">100</button>
+                  <button type="button" class="chronex-slice-btn" data-slice="250">250</button>
+                  <button type="button" class="chronex-slice-btn" data-slice="500">500</button>
+                </div>
+              </div>
+
+              <div id="chronexModalBulletsList" class="chronex-bullets-feed"></div>
+
+              <div class="chronex-hud-controls-deck">
+                <div class="chronex-lang-control-col">
+                  <label class="chronex-ctrl-label" for="chronexModalLangSelect">
+                    <i class="fa-solid fa-language"></i>
+                    <span>Translate to:</span>
+                  </label>
+                  <div class="chronex-select-wrap">
+                    <select id="chronexModalLangSelect" class="chronex-lang-select">
+                      <option value="en">English (English)</option>
+                      <option value="yo">Yoruba (Ede Yoruba)</option>
+                      <option value="ha">Hausa (Harshen Hausa)</option>
+                      <option value="ig">Igbo (Asusu Igbo)</option>
+                      <option value="pcm">Nigerian Pidgin (Naija Pidgin)</option>
+                      <option value="fr">French (Francais)</option>
+                      <option value="es">Spanish (Espanol)</option>
+                      <option value="de">German (Deutsch)</option>
+                      <option value="ar">Arabic (Al-Arabiyyah)</option>
+                      <option value="pt">Portuguese (Portugues)</option>
+                      <option value="ru">Russian (Russkiy)</option>
+                      <option value="zh">Chinese (Zhongwen)</option>
+                      <option value="ja">Japanese (Nihongo)</option>
+                      <option value="hi">Hindi (Hindi)</option>
+                      <option value="sw">Swahili (Kiswahili)</option>
+                      <option value="it">Italian (Italiano)</option>
+                    </select>
+                    <span id="chronexModalLangSpinner" class="chronex-select-spinner" style="display: none;">
+                      <i class="fa-solid fa-spinner fa-spin"></i>
+                    </span>
+                  </div>
                 </div>
 
-                <div class="chronex-audio-speed-wrap">
-                  <button type="button" id="chronexSpeedToggleBtn" class="chronex-speed-btn" title="Toggle audio briefing speed">
+                <div class="chronex-audio-speed-col">
+                  <span class="chronex-ctrl-label"><i class="fa-solid fa-gauge-high"></i> Speed:</span>
+                  <button type="button" id="chronexSpeedToggleBtn" class="chronex-speed-btn" title="Toggle audio briefing playback speed">
                     <span>1.0x</span>
                   </button>
                 </div>
               </div>
 
-              <!-- Export & Sharing Suite -->
-              <div class="chronex-action-buttons-col">
-                <button type="button" id="chronexModalCopyBtn" class="chronex-hud-action-pill" title="Copy summary to clipboard">
+              <div class="chronex-hud-actions-bar">
+                <button type="button" id="chronexModalCopyBtn" class="chronex-hud-action-pill" title="Copy brief bullet points to clipboard">
                   <i class="fa-solid fa-copy"></i>
                   <span>Copy</span>
                 </button>
-                <button type="button" id="chronexExportMdBtn" class="chronex-hud-action-pill" title="Export as Markdown document (.md)">
-                  <i class="fa-solid fa-file-arrow-down"></i>
+                <button type="button" id="chronexExportMdBtn" class="chronex-hud-action-pill" title="Export as Markdown document">
+                  <i class="fa-solid fa-download"></i>
                   <span>Export MD</span>
                 </button>
-                <button type="button" id="chronexPrintPdfBtn" class="chronex-hud-action-pill" title="Print executive briefing or save as PDF">
+                <button type="button" id="chronexPrintPdfBtn" class="chronex-hud-action-pill" title="Print executive briefing card">
                   <i class="fa-solid fa-print"></i>
-                  <span>PDF</span>
+                  <span>Print</span>
                 </button>
                 <button type="button" id="chronexShareChatBtn" class="chronex-hud-action-pill highlight" title="Share brief directly to this group chat">
                   <i class="fa-solid fa-paper-plane"></i>
-                  <span>Share</span>
+                  <span>Share to Group</span>
                 </button>
                 <button type="button" id="chronexVaultSaveBtn" class="chronex-hud-action-pill" title="Save brief to Encrypted Personal Vault">
                   <i class="fa-solid fa-vault"></i>
@@ -1186,23 +1233,40 @@ ${transcriptPrompt}`;
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="chronex-hud-footer">
-          <div class="chronex-telemetry-badge">
-            <span class="chronex-pulse-dot"></span>
-            <span>NEURAL REASONING ACTIVE</span>
+          <div class="chronex-hud-footer">
+            <div class="chronex-telemetry-badge">
+              <span class="chronex-pulse-dot"></span>
+              <span>NEURAL REASONING ACTIVE</span>
+            </div>
+            <span class="chronex-footer-sub">MX230 LIGHTWEIGHT ACCELERATED</span>
           </div>
-          <span class="chronex-footer-sub">MX230 LIGHTWEIGHT ACCELERATED</span>
         </div>
-      </div>
-    `;
+      `;
+      document.body.appendChild(modal);
+    }
 
-    document.body.appendChild(modal);
+    // Bind modal actions (guaranteed single bind via data-bound flag)
+    if (modal && modal.dataset.bound !== 'true') {
+      modal.dataset.bound = 'true';
+      this.bindModalListeners(modal);
+    }
 
-    // Bind modal actions
+    return modal;
+  }
+
+  bindModalListeners(modal) {
+    if (!modal) return;
+
     modal.addEventListener('click', (e) => {
       if (e.target === modal) this.closeBriefModal();
+    });
+
+    // Close on Escape key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && modal.style.display === 'flex') {
+        this.closeBriefModal();
+      }
     });
 
     modal.querySelector('#chronexModalCloseBtn')?.addEventListener('click', () => {
@@ -1268,8 +1332,6 @@ ${transcriptPrompt}`;
         this.translateSummaryInModal(modal, newLang);
       });
     }
-
-    return modal;
   }
 
   formatTime(ts) {

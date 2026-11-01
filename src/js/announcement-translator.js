@@ -441,15 +441,18 @@
         return this.translationCache.get(cacheKey);
       }
 
-      // 1. Try Google Translate REST proxy
+      // 1. Try Google Translate REST proxy with 1200ms abort controller
       try {
-        const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + targetLang + '&dt=t&q=' + encodeURIComponent(text);
-        const res = await fetch(url);
+        const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), 1200) : null;
+        const url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=' + encodeURIComponent(targetLang) + '&dt=t&q=' + encodeURIComponent(text);
+        const res = await fetch(url, controller ? { signal: controller.signal } : {});
+        if (timer) clearTimeout(timer);
         if (res.ok) {
           const json = await res.json();
           if (Array.isArray(json) && Array.isArray(json[0])) {
             const translated = json[0].map(item => item[0]).join('');
-            if (translated && translated.trim()) {
+            if (translated && translated.trim() && translated.trim().toLowerCase() !== text.trim().toLowerCase()) {
               this.translationCache.set(cacheKey, translated);
               return translated;
             }
@@ -494,10 +497,12 @@
       const origTitle = titleEl.dataset.originalText;
       const origContent = contentEl.dataset.originalText;
 
-      if (targetLang === 'en' || cardEl.dataset.isTranslated === 'true') {
+      const currentCardLang = cardEl.dataset.translatedLang;
+      if (targetLang === 'en' || (cardEl.dataset.isTranslated === 'true' && currentCardLang === targetLang)) {
         titleEl.textContent = origTitle;
         contentEl.textContent = origContent;
         cardEl.dataset.isTranslated = 'false';
+        delete cardEl.dataset.translatedLang;
         const badge = cardEl.querySelector('.translated-lang-badge');
         if (badge) badge.remove();
         if (translateBtn) {
@@ -520,6 +525,7 @@
         titleEl.textContent = transTitle;
         contentEl.textContent = transContent;
         cardEl.dataset.isTranslated = 'true';
+        cardEl.dataset.translatedLang = targetLang;
 
         let badge = cardEl.querySelector('.translated-lang-badge');
         if (!badge) {
@@ -547,11 +553,14 @@
     async translateAllAnnouncementsInFeed(targetLang) {
       const feed = document.getElementById('announcementsFeed');
       if (!feed) return;
-      const cards = feed.querySelectorAll('.announcement-item.dynamic-announcement');
+      const cards = Array.from(feed.querySelectorAll('.announcement-item.dynamic-announcement'));
       if (cards.length === 0) return;
 
-      const promises = Array.from(cards).map(c => this.translateAnnouncementCard(c, targetLang));
-      await Promise.all(promises);
+      // Batching: 4 cards at a time to prevent socket pool exhaustion
+      for (let i = 0; i < cards.length; i += 4) {
+        const chunk = cards.slice(i, i + 4);
+        await Promise.all(chunk.map(c => this.translateAnnouncementCard(c, targetLang)));
+      }
     }
 
     renderAnnouncementCardHtml(data, id) {

@@ -16,7 +16,7 @@ const MAX_REQUESTS_PER_WINDOW = 60; // Max 60 requests/min per IP
  * DEFENSE PROTOCOL 1: SQL Injection & NoSQL Injection Detection Patterns
  */
 export const sqlInjectionPatterns = [
-  /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|EXEC|EXECUTE)\b)/i,
+  /(\b(SELECT\s+[\w*`\"'\s,]+FROM|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|DROP\s+(TABLE|DATABASE|VIEW|INDEX)|UNION\s+(ALL\s+)?SELECT|ALTER\s+TABLE|EXEC(UTE)?\s*\(?)\b)/i,
   /(['";])\s*(OR|AND)\s+\d+\s*[=<>]/i,          // ' OR 1=1
   /(--|#|\/\*|\*\/)/,                              // SQL comments
   /(\bWAITFOR\b\s+\bDELAY\b)/i,                   // Time-based blind SQLi

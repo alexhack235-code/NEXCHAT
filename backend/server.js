@@ -254,7 +254,7 @@ if (app) {
   // LAYER 6: WAF - SQL INJECTION & NOSQL INJECTION SHIELD (PROTOCOL 1)
   // ============================================================================
   const SQL_INJECTION_PATTERNS = [
-    /(\b(SELECT|INSERT|UPDATE|DELETE|DROP|UNION|ALTER|CREATE|EXEC|EXECUTE)\b)/i,
+    /(\b(SELECT\s+[\w*`\"'\s,]+FROM|INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|DROP\s+(TABLE|DATABASE|VIEW|INDEX)|UNION\s+(ALL\s+)?SELECT|ALTER\s+TABLE|EXEC(UTE)?\s*\(?)\b)/i,
     /(['";])\s*(OR|AND)\s+\d+\s*[=<>]/i,          // ' OR 1=1
     /(--|#|\/\*|\*\/)/,                              // SQL comments
     /(\bWAITFOR\b\s+\bDELAY\b)/i,                   // Time-based blind SQLi
