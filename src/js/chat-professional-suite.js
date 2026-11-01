@@ -3901,6 +3901,18 @@ ${text}`;
     applyWallpaperPreset(preset) {
       const messagesArea = document.getElementById('messages-area');
       if (!messagesArea) return;
+
+      const hasCustomWallpaper = messagesArea.classList.contains('has-custom-wallpaper') ||
+        (typeof currentChatUser !== 'undefined' && currentChatUser && localStorage.getItem(`chat_bg_${currentChatUser}`)) ||
+        localStorage.getItem('nexchat_background') ||
+        document.querySelector('.app')?.getAttribute('data-custom-bg') === 'true';
+
+      if (hasCustomWallpaper) {
+        messagesArea.style.background = 'transparent';
+        messagesArea.style.backgroundColor = 'rgba(6, 9, 18, 0.45)';
+        return;
+      }
+
       const presetsMap = {
         nebula: 'linear-gradient(135deg, #090d16 0%, #0d1b2a 50%, #001f3f 100%)',
         oled: '#000000',

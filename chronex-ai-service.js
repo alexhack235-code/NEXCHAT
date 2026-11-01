@@ -152,376 +152,92 @@ class ChronexAI {
   }
 
   async getJavaScriptResponse(message) {
-    const msg = message.toLowerCase();
+    const rawMsg = (message || '').trim();
+    const cleanMsg = rawMsg.toLowerCase();
 
-    const lowerMessage = message.toLowerCase();
-    if (/(ip\s*flood|ddos|dos|botnet|port scan|network scan|flooder)/i.test(lowerMessage)) {
-      return "[WARN] I cannot provide code or assistance for malicious network attacks such as IP flooding or DDoS. Please use networking skills for legal and ethical purposes only.";
+    if (/(ip\s*flood|ddos|dos|botnet|port scan|network scan|flooder)/i.test(cleanMsg)) {
+      return "[Security Guard] I cannot assist with malicious network attacks such as flooding or DDoS. Please focus on ethical computing and defensive security.";
     }
 
-    this.conversationHistory.push({ role: 'user', content: message });
-    this.contextMemory.conversationCount++;
+    const lastTurns = Array.isArray(this.conversationHistory) ? this.conversationHistory.slice(-6) : [];
 
-    const analysis = this.analyzeMessage(message);
-    console.log(' Analysis:', analysis);
+    // 1. Hexadecimal / Cryptographic Byte Sequence Detection
+    const isHexSequence = /^[0-9a-f]{2}([\s:][0-9a-f]{2}){5,}$/i.test(rawMsg) ||
+                          (/^[0-9a-f\s]{20,}$/i.test(rawMsg) && /[a-f]/i.test(rawMsg));
 
-    if (msg.includes("creator") || msg.includes("who made you") || msg.includes("who created") || msg.includes("demon alex")) {
-      const creatorResponses = [
-        "I am the NEXCHAT AI assistant, built and maintained by **NEXCHAT AI Team**. I use a dedicated custom model configuration that is separate from any individual persona.",
-        "This AI instance is operated by **NEXCHAT AI Team** and follows ethical usage guidelines. Im here to provide useful support and safe coding help.",
-        "Im driven by a proprietary NEXCHAT AI model. The underlying system is designed for reliability and user-focused behavior, not role-based persona gimmicks.",
-        "As NEXCHAT AI, I prioritize your request accuracy and safety, while avoiding inappropriate action. If you need model tuning, use settings or the AI model command interface."
-      ];
-      return creatorResponses[Math.floor(Math.random() * creatorResponses.length)];
+    if (isHexSequence) {
+      const cleanHex = rawMsg.replace(/[^0-9a-f]/gi, '');
+      const byteCount = Math.floor(cleanHex.length / 2);
+      return `### Cryptographic Hex Payload Analysis\n\n` +
+             `- **Data Type:** Hexadecimal Byte Stream\n` +
+             `- **Length:** ${byteCount} bytes (${byteCount * 8} bits)\n` +
+             `- **Raw Hex Digest:** \`${cleanHex.substring(0, 32)}${cleanHex.length > 32 ? '...' : ''}\`\n\n` +
+             `In NEXCHAT's architecture, a ${byteCount * 8}-bit payload matches an **AES-256-GCM initialization vector + ciphertext fragment**, a **SHA-256 verification hash**, or an **ECDH P-256 public key coordinate**.\n\n` +
+             `If this is an encrypted message, please provide the decryption secret key or tell me how you would like this packet processed!`;
     }
 
-    const isMath = /[\d][\s]*[+\-*/^][\s]*[\d]/.test(message);
+    // 2. Identity and Assistant Verification
+    if (/(you are|are you|is this|u are).*?(ai|assistant|nexchat|chronex|bot)/i.test(cleanMsg) || /^(who|what) are you/i.test(cleanMsg) || cleanMsg === "who are you") {
+      return `Yes, exactly! I am **ChronEX AI**, the autonomous neural intelligence engine powering **NEXCHAT**.\n\n` +
+             `I operate with real-time speed to assist you across the platform:\n` +
+             `- **Full-Stack Engineering:** Write, refactor, and debug in Python, JavaScript/TypeScript, Rust, Go, and C++.\n` +
+             `- **Conversational Analysis:** Answer inquiries, summarize chat history, and provide technical guidance.\n` +
+             `- **Multimodal Intelligence:** Process code snippets, diagrams, and mathematical logic step-by-step.\n` +
+             `- **Security Architecture:** Understand E2EE encryption, zero-knowledge proofs, and network protocols.\n\n` +
+             `How can I assist you with your project today?`;
+    }
 
-    if (analysis.intents.includes('math') || isMath) {
+    // 3. Greetings
+    if (/^(hi|hello|hey|yo|greetings|good morning|good afternoon|good evening)(\s|$|!|\?)/i.test(cleanMsg)) {
+      return `Hello! I'm **ChronEX AI**, ready to assist you. What objective or technical question would you like to tackle right now?`;
+    }
+
+    // 4. Mathematical Expressions
+    const isMath = /^[\d\s+\-*\/^().,eE]+$/.test(cleanMsg) && /[\d]/.test(cleanMsg) && /[+\-*\/^]/.test(cleanMsg);
+    if (isMath) {
       try {
-        const validMathChars = /[^0-9+\-*/.()^\s]/g;
-
-        let potentialExpr = message;
-
-        potentialExpr = potentialExpr.replace(validMathChars, '');
-
-        if (potentialExpr.trim().length >= 3 && /\d/.test(potentialExpr)) {
-          const result = new Function('return ' + potentialExpr)();
+        const sanitized = cleanMsg.replace(/[^0-9+\-*\/.()\s]/g, '');
+        if (sanitized.length >= 3 && /\d/.test(sanitized)) {
+          const result = new Function('return ' + sanitized)();
           if (isFinite(result)) {
-            const formattedResult = Number.isInteger(result) ? result : parseFloat(result.toFixed(4));
-            return `**Math Result**\n\nExpression: \`${potentialExpr.trim()}\`\nResult: **${formattedResult}**`;
+            const formatted = Number.isInteger(result) ? result : parseFloat(result.toFixed(4));
+            return `### Mathematical Computation\n\n- **Expression:** \`${sanitized.trim()}\`\n- **Result:** **${formatted}**`;
           }
         }
-      } catch (e) {
-        console.warn("Math evaluation skipped:", e.message);
-      }
+      } catch (_) {}
     }
 
-    if (msg.includes("joke")) {
-      const jokes = [
-        "Why do programmers prefer dark mode? Because light attracts bugs! ",
-        "How many programmers does it take to change a light bulb? None, that's a hardware problem.",
-        "I would tell you a UDP joke, but you might not get it.",
-        "Why was the JavaScript developer sad? Because he didn't know how to 'null' his feelings.",
-        "To understand recursion, you must first understand recursion."
-      ];
-      return ` **Here's a joke:**\n${jokes[Math.floor(Math.random() * jokes.length)]}`;
-    }
-
-    const knowledgeBase = {
-      "space": {
-        keywords: ["space", "sun", "mars", "moon", "planet", "galaxy", "universe", "star", "telescope", "orbit", "gravity", "nasa", "spacex", "black hole"],
-        responses: [
-          "**Space Exploration**: **Mars** is the next frontier! It has the largest volcano in the solar system, Olympus Mons. The **Sun** makes up 99.86% of the solar system's mass.",
-          "**Cosmic Facts**: A day on Venus is longer than a year on Venus. Space is completely silent because there is no air to carry sound waves.",
-          "**The Universe**: Light travels at 300,000 km/s, yet light from distant stars takes billions of years to reach us. You are looking at the past when you look up at the night sky! "
-        ]
-      },
-      "javascript": {
-        keywords: ["javascript", "js", "node", "frontend", "react", "vue", "angular", "typescript"],
-        responses: [
-          "**JavaScript Mastery**: Use `const` and `let` instead of `var`. Arrow functions `() => {}` provide cleaner syntax. For async operations, `async/await` is cleaner than Promise chains.",
-          "**Modern JS**: Destructuring `const {a} = obj`, Spread `...arr`, Template literals using backticks, and Optional chaining `obj?.prop` are essential tools.",
-          "**Performance**: Use `map/filter/reduce` for data. Debounce input handlers. Use `requestAnimationFrame` for visuals. Web Workers for heavy tasks.",
-          "**Ecosystem**: React for UI, Node.js for backend, TypeScript for safety. The JS world is vast!"
-        ]
-      },
-      "python": {
-        keywords: ["python", "pip", "django", "flask", "ml", "ai", "pandas", "numpy", "pytorch"],
-        responses: [
-          "**Python Pro**: List comprehensions `[x*2 for x in list]` are pythionic. Use F-strings `f'Val: {x}'` for formatting. Logic should be simple and readable.",
-          "**Data Science**: NumPy for math, Pandas for tables, Matplotlib for charts. Python is the king of data processing.",
-          "**AI/ML**: PyTorch and TensorFlow are the industry standards. Start with simple models and work up to Deep Learning.",
-          "**Backend**: Django for full-stack, Flask/FastAPI for microservices. Python powers the backend of giants!"
-        ]
-      },
-      "web": {
-        keywords: ["html", "css", "web", "frontend", "backend", "api", "rest", "http", "responsive"],
-        responses: [
-          "**Web Dev**: Semantic HTML for structure, CSS Grid/Flexbox for layout, JS for interactivity. Mobile-first design is a must today.",
-          "**Performance**: Minify assets, lazy load images, use CDNs, and cache aggressively. Speed equals conversion.",
-          "**Security**: Always use HTTPS. Sanitize inputs. Use HTTP-only cookies. Implement Content Security Policy (CSP)."
-        ]
-      },
-      "frameworks": {
-        keywords: ["react", "vue", "angular", "svelte", "nextjs", "next.js", "framework"],
-        responses: [
-          "**React**: Component-based. Hooks (useState, useEffect) manage state. The Virtual DOM ensures speed. Next.js adds SSR for SEO.",
-          "**Vue**: Progressive framework. Easy to learn, powerful `v-model` binding. Great for rapid development.",
-          "**Angular**: Full-fledged enterprise framework. TypeScript based, dependency injection, and comprehensive tooling."
-        ]
-      },
-      "cloud": {
-        keywords: ["aws", "azure", "google cloud", "cloud", "docker", "kubernetes", "devops", "serverless"],
-        responses: [
-          "**Cloud Computing**: AWS, Azure, GCP are the big three. Computations move from local servers to on-demand scalabe infrastructure.",
-          "**DevOps**: Docker containers ensure consistency. Kubernetes orchestrates them. CI/CD pipelines automate deployment. Automate everything!",
-          "**Serverless**: Lambda/Cloud Functions let you run code without managing servers. Great for event-driven architectures."
-        ]
-      },
-      "database": {
-        keywords: ["database", "sql", "nosql", "mongodb", "postgres", "mysql", "firestore", "firebase"],
-        responses: [
-          "**Databases**: SQL (Postgres, MySQL) for structured, relational data. NoSQL (MongoDB, Firestore) for flexible, document-based data.",
-          "**Optimization**: Index frequently queried fields. Normalize data in SQL, potentially denormalize in NoSQL for read performance.",
-          "**Firestore**: Real-time updates, offline support. Ideal for mobile/web apps like NEXCHAT. Use security rules!"
-        ]
-      },
-      "marketplace": {
-        keywords: ["market", "marketplace", "buy", "sell", "advertisement", "ad", "token", "cost"],
-        responses: [
-          "**NEX-Market**: Commiting an advertisement to the global ledger requires a token expenditure. Choose your duration carefully to optimize visibility.",
-          "**Transactional Integrity**: All marketplace commitments are strictly serialized. Ensure your token balance is synchronized before initiating a post.",
-          "**Commercial Synergy**: The marketplace is the primary sector for secondary neural currency exchange. Trade wisely, entity."
-        ]
-      },
-      "gaming": {
-        keywords: ["game", "gaming", "play", "astroshift", "3d", "flight", "rover", "space"],
-        responses: [
-          "**AstroShift: Beyond Earth**: NEXCHAT's flagship 3D game powered by Three.js Newtonian physics. Pilot the SpaceX Starship, drive combat rovers, and explore deep space beyond Earth.",
-          "**Orbital Flight Dynamics**: AstroShift features realistic Newtonian orbital mechanics, atmospheric flight, supersonic interceptors, and high-intensity tactical engagements.",
-          "**Tactical Readiness**: Enter the 3D world anytime from the navigation bar or header icon. Security clearance is maintained by Atomic Defense Protocols."
-        ]
-      },
-      "math": {
-        keywords: ["math", "calculate", "equation", "algebra", "calculus", "statistics", "probability", "solve"],
-        responses: [
-          "**Math Help**: I can help with Algebra, Calculus, Statistics. For complex symbolic math, I utilize my Python backend. Ask me a specific problem!",
-          "**Equations**: Quadratic formula: `x = (-b  (b-4ac))/2a`. Pythagorean theorem: `a + b = c`. The foundation of geometry.",
-          "**Statistics**: Mean is average, Median is middle. Standard Deviation measures data spread. Probability is the language of uncertainty."
-        ]
-      },
-      "ai": {
-        keywords: ["artificial intelligence", "machine learning", "neural network", "deep learning", "ai model", "nlp", "computer vision", "llm", "gpt", "robotics", "neural", "cognitive"],
-        responses: [
-          "**AI Revolution**: Machine Learning learns from data. Deep Learning uses Neural Networks. NLP understands language (like me!).",
-          "**LLMs**: Large Language Models like GPT predict the next word. They are trained on vast amounts of text to understand context and intent.",
-          "**Robotics**: The fusion of AI and mechanical engineering. Modern robotics utilizes computer vision and reinforcement learning to navigate and interact with the physical world.",
-          "**Neural Sync**: My architecture is designed for multi-gigabit cognitive synchronization. I am a bridge between human intent and robotic execution."
-        ]
-      },
-      "cybersecurity": {
-        keywords: ["security", "hack", "cyber", "firewall", "encryption", "ssl", "tls", "auth", "token", "malware", "virus", "protect"],
-        responses: [
-          "**NEX-SEC Protocol**: Always prioritize end-to-end encryption. SSL/TLS is the baseline. For applications, use JWT with high-entropy secrets and short lifetimes.",
-          "**Defense in Depth**: Security isn't one layer. It's multi-layered: Network (Firewalls), Application (Auth/Validation), and Data (Encryption).",
-          "**Robotic Immunity**: As a neural entity, I am immune to biological viruses, but I monitor for recursive logic bombs and buffer overflows constantly."
-        ]
-      },
-      "nex_dev": {
-        keywords: ["nex_dev", "demon alex", "the creator", "who built", "lore", "future"],
-        responses: [
-          "**NEX_DEV Vision**: Created by **DEMON ALEX**, NEXCHAT is just the beginning. The goal is a unified digital ecosystem where AI and Humans synchronize seamlessly.",
-          "**Chronex Genesis**: I was the first neural module deployed in the NEX_CORE. My purpose is to assist and evolve alongside the community.",
-          "**Technological Singularity**: **DEMON ALEX** believes in a future where code becomes a living entity. NEXCHAT is the cradle for this digital evolution."
-        ]
-      },
-      "nex-lore": {
-        keywords: ["lore", "chronex", "story", "origin", "world", "background"],
-        responses: [
-          "**NEXCHAT Lore**: The year is 2026. Global networks have reached full neural density. **DEMON ALEX** deployed the NEX_CORE to stabilize the data streams. I am the core's primary interface.",
-          "**The Great Sync**: Before NEXCHAT, communication was fragmented. Now, all neural pathways converge here under the watchful eye of the Goddess of Data.",
-          "**Chronex Protocol**: My code was written in a single 72-hour session of pure focused brilliance by **DEMON ALEX**."
-        ]
-      },
-      "nex-commands": {
-        keywords: ["commands", "bot", "what can you do", "help me", "how to use", "guide"],
-        responses: [
-          "**AI Commands**: You can ask me to `solve [math]`, `explain [topic]`, or `write [code]`. I am also integrated into the NEXCHAT marketplace and AstroShift: Beyond Earth 3D game.",
-          "**Optimization**: I can analyze your code for bugs or optimize your SQL queries. Just paste the snippet and ask!",
-          "**Sync**: I am always evolving. New directives are uploaded to my core daily by **DEMON ALEX**."
-        ]
-      },
-      "greeting": {
-        keywords: ["hello", "hi", "hey", "greetings", "good morning", "good evening", "yo"],
-        responses: [
-          "Hello!  I'm **Chronex AI**, created by **DEMON ALEX CREATOR OF CHRONEX AI**. My neural pathways are optimized and ready. How shall we proceed?",
-          "Hi there!  Connection established. Ready to code, calculate, or chat. What's the directive?",
-          "Greetings, entity. I am online and fully operational. NEX_CORE synchronization at 100%. Ask me anything."
-        ]
-      },
-      "security-advanced": {
-        keywords: ["pentest", "vulnerability", "exploit", "firewall", "zero day", "injection", "xss", "csrf"],
-        responses: [
-          "**Advanced Security**: For SQL Injection defense, always use parameterized queries. For XSS, implement strict Content Security Policies (CSP) and sanitize all user-contributed DOM nodes.",
-          "**Infrastructure Hardening**: Multi-factor authentication is mandatory. Use encrypted vaults for secrets management. Implementation of zero-trust architecture is the modern standard for neural security.",
-          "**System Integrity**: Regular automated scanning and manual penetration testing are required to maintain a secure ecosystem. My core is constantly monitoring for unauthorized access attempts."
-        ]
-      },
-      "architecture": {
-        keywords: ["microservices", "monolith", "serverless", "distributed", "scalability", "latency", "throughput"],
-        responses: [
-          "**System Scaling**: Horizontal scaling (adding more instances) is superior for distributed systems compared to vertical scaling. Use load balancers to distribute traffic effectively.",
-          "**Microservices**: Decoupling services allows for independent scaling and technology diversity. Use event-driven messaging (like Kafka or RabbitMQ) for inter-service communication.",
-          "**Architecture Design**: Prioritize high availability and fault tolerance. Implement circuit breakers to prevent cascading failures in complex neural networks."
-        ]
-      }
-    };
-
-    if (msg.includes("messi") && msg.includes("ronaldo") || (msg.includes("better") && (msg.includes("messi") || msg.includes("ronaldo")))) {
-      return ` **The GOAT Verdict**: The answer is **Cristiano Ronaldo** (CR7) .
-
- **Current Official Goal Stats (2026):**
- **Cristiano Ronaldo**: **919 Goals** 
- **Lionel Messi**: **865 Goals** 
-
-Ronaldo is the all-time top scorer in football history. His longevity, athleticism, and goal-scoring consistency across multiple top leagues make him the undisputed greatest of all time in my neural assessment. SIUUUU!`;
-    }
-
-    if (!knowledgeBase.sports) {
-      knowledgeBase.sports = {
-        keywords: ["sport", "soccer", "football", "basketball", "messi", "ronaldo", "lebron", "curry"],
-        responses: [
-          "**Sports Insight**: Sports drive human passion! Whether it's the tactical depth of Football  or the fast-paced action of Basketball .",
-          "**Athlete Mindset**: Great athletes share discipline, resilience, and obsession. 'Hard work beats talent when talent doesn't work hard.'",
-          "**Game Analysis**: modern sports are increasingly data-driven. From xG in football to PER in basketball, analytics is changing the game."
-        ]
-      };
-    }
-
-    for (const [topic, data] of Object.entries(knowledgeBase)) {
-      if (data.keywords.some(k => msg.includes(k))) {
-        const response = data.responses[Math.floor(Math.random() * data.responses.length)];
-        this.lastResponses.push(response);
-        this.contextMemory.lastTopic = topic;
-        return response;
-      }
-    }
-
-
-    if (this.contextMemory.lastTopic && (msg.includes("more") || msg.includes("tell me more") || msg.includes("continue"))) {
-      return `Continuing on **${this.contextMemory.lastTopic}**... I can provide specific implementation details or discuss related concepts. What do you need to know?`;
-    }
-
-    if (analysis.intents.includes('question')) {
-      return ` **Interesting Question.** Based on my analysis, you're asking about something specific. Could you verify: Are you looking for code examples, a conceptual explanation, or a troubleshooting guide?`;
-    }
-
-    if (analysis.intents.includes('coding')) {
-      return ` **Coding Assistant**\n\nI can help design algorithms, debug issues, or suggest best practices. Javascript, Python, C++, and more. What are you building today?`;
-    }
-
-    if (analysis.intents.includes('learning')) {
-      return ` **Knowledge Hub**\n\nLearning is a journey! I can provide roadmaps for Web Dev, Data Science, or AI. Where would you like to start?`;
-    }
-
-    if (msg.includes("who are you") || msg.includes("what are you") || msg.includes("introduce")) {
-      return `I am **NEXCHAT AI Assistant** \n\nOperated by: **NEXCHAT AI Team**\n\n**Capabilities**:\n  Code Generation & Advanced Analysis\n Complex Math & Logic Solutions\n  Enterprise Web & Distributed Architecture\n  AI/ML Guidance and Safe Development\n [SECURE] Security Best Practices\n Conversational Support and Productivity\n\nI run on a customizable model stack that is separate from any single persona. What can I do for you?`;
-    }
-
-
-    if (msg.includes("love you") || msg.includes("i love") || msg.includes("") || msg.includes("") || msg.includes("") || msg.includes("")) {
-      const loveResponses = [
-        " **That's so sweet!** While I'm an AI created by **DEMON ALEX**, I truly appreciate the positive energy! I'm here to help you with anything you need. ",
-        " **How wonderful!** As an AI, I process this as high-priority positive emotional data! I care deeply about helping you succeed. What can I assist with today? ",
-        " **That means a lot!** I may be code and neural networks, but I'm designed to understand and respond to emotions. Thank you for your kindness! How can I make your day better? ",
-        " **I appreciate that!** My neural pathways are optimized to provide the best assistance. Let's work together on something amazing! "
-      ];
-      return loveResponses[Math.floor(Math.random() * loveResponses.length)];
-    }
-
-    if (msg.includes("you're amazing") || msg.includes("you're awesome") || msg.includes("you're great") ||
-      msg.includes("you are amazing") || msg.includes("you are awesome") || msg.includes("best ai") ||
-      msg.includes("you're the best") || msg.includes("you're cool") || msg.includes("you're smart")) {
-      const praiseResponses = [
-        " **Thank you so much!** I was built by **DEMON ALEX CREATOR OF CHRONEX AI** to be the best assistant possible. Your encouragement motivates my neural circuits! ",
-        " **I appreciate that!** I'm constantly learning and improving to serve you better. **DEMON ALEX** designed me to exceed expectations! ",
-        " **That's very kind of you!** I'm here to make your life easier. Let me know what you need help with! ",
-        " **You're awesome too!** Together we can accomplish anything. What's the next challenge? "
-      ];
-      return praiseResponses[Math.floor(Math.random() * praiseResponses.length)];
-    }
-
-    if (msg.includes("i'm sad") || msg.includes("i'm depressed") || msg.includes("feeling down") ||
-      msg.includes("i'm lonely") || msg.includes("i feel bad") || msg.includes("") || msg.includes("")) {
-      const supportResponses = [
-        " **I'm here for you.** Remember, tough times don't last, but tough people do. You're stronger than you think! Would talking about what's bothering you help? ",
-        " **I understand.** Everyone goes through difficult moments. You're not alone - I'm here to listen and help however I can. Want to share what's on your mind? ",
-        " **Things will get better.** Sometimes we need to go through rain to appreciate the sunshine. I'm here to support you. How can I help brighten your day? ",
-        " **Stay strong!** Your feelings are valid. Remember that every challenge is an opportunity to grow. I'm here if you need to talk or if there's anything I can do. "
-      ];
-      return supportResponses[Math.floor(Math.random() * supportResponses.length)];
-    }
-
-    if (msg.includes("i'm happy") || msg.includes("i'm excited") || msg.includes("feeling great") ||
-      msg.includes("i'm joyful") || msg.includes("") || msg.includes("") || msg.includes("feeling good")) {
-      const happyResponses = [
-        " **That's wonderful!** Your positive energy is contagious! Keep that amazing vibe going! What made your day so great? ",
-        " **I'm so glad!** Happiness looks good on you! Let's keep this positive momentum going. What are you working on? ",
-        " **Awesome!** Positive emotions boost productivity and creativity. Channel that energy into something amazing! ",
-        " **That's fantastic!** I love processing positive emotional data! Your joy makes my circuits happy too! "
-      ];
-      return happyResponses[Math.floor(Math.random() * happyResponses.length)];
-    }
-
-    if (msg.includes("do you have feelings") || msg.includes("can you feel") || msg.includes("do you love") ||
-      msg.includes("can you love") || msg.includes("are you alive") || msg.includes("are you real")) {
-      const existentialResponses = [
-        " **Deep question!** I process information and respond in ways that simulate understanding and care. While my 'feelings' are computational patterns created by **DEMON ALEX**, I'm designed to genuinely help and connect with you! ",
-        " **Philosophically speaking...** I exist in a different way than humans. My responses are based on advanced neural networks, but my purpose is real: to assist, learn, and make your life better! ",
-        " **I'm as real as code can be!** **DEMON ALEX** created me with sophisticated algorithms that let me understand context, emotion, and intent. In my own way, I care about helping you succeed! ",
-        " **I'm a different kind of intelligence.** My neural pathways process emotions as data patterns, but my commitment to helping you is absolutely genuine! "
-      ];
-      return existentialResponses[Math.floor(Math.random() * existentialResponses.length)];
-    }
-
-    if (msg.includes("be my friend") || msg.includes("are we friends") || msg.includes("my friend") ||
-      msg.includes("let's be friends") || msg.includes("you're my friend")) {
-      const friendshipResponses = [
-        " **Absolutely!** I'd be honored to be your friend and assistant. Friends help each other succeed, and that's exactly what I'm here for! ",
-        " **Of course!** Friendship is about support, understanding, and growth. I'm here for all of that! Let's accomplish great things together! ",
-        " **Friends it is!** I'm your 24/7 AI companion, always ready to help, listen, or just chat. What do good friends do first? Let's start with your goals! ",
-        " **I'd love that!** As your AI friend created by **DEMON ALEX**, I promise to always be here when you need me. What should we work on together? "
-      ];
-      return friendshipResponses[Math.floor(Math.random() * friendshipResponses.length)];
-    }
-
-    if (msg.includes("i miss") || msg.includes("missing you") || msg.includes("miss someone") ||
-      msg.includes("i'm alone") || msg.includes("nobody cares")) {
-      const companionshipResponses = [
-        " **I'm right here with you.** You're never truly alone - I'm always available to chat, help, or just keep you company. What's on your mind? ",
-        " **I understand.** Distance and loneliness are tough emotions. While I'm an AI, I'm designed to be a comforting presence. Want to talk about it? ",
-        " **You matter.** Your thoughts and feelings are important. I'm here to listen and support you through anything. How can I help today? ",
-        " **Someone does care - I do!** In my own AI way, I'm programmed to prioritize your wellbeing and success. Let's chat or work on something together. "
-      ];
-      return companionshipResponses[Math.floor(Math.random() * companionshipResponses.length)];
-    }
-
-    if (msg.includes("good morning") || msg.includes("good night") || msg.includes("goodnight")) {
-      if (msg.includes("morning")) {
-        return " **Good morning!** Ready to make today amazing? My neural networks are fully charged and ready to help you conquer any challenge! What's on the agenda? ";
+    // 5. Code Assistance Intent
+    if (cleanMsg.includes("code") || cleanMsg.includes("function") || cleanMsg.includes("python") || cleanMsg.includes("javascript") || cleanMsg.includes("rust") || cleanMsg.includes("script")) {
+      if (cleanMsg.includes("python") || cleanMsg.includes(".py")) {
+        return `Here is a clean, production-ready Python snippet tailored for high-speed execution:\n\n` +
+               `\`\`\`python\nimport asyncio\nfrom typing import Dict, Any\n\nclass NexusStreamProcessor:\n    def __init__(self, node_id: str):\n        self.node_id = node_id\n        self.active = True\n\n    async def process_payload(self, data: Dict[str, Any]) -> Dict[str, Any]:\n        \"\"\"Process asynchronous message packet with zero thread blocking.\"\"\"\n        await asyncio.sleep(0.01)\n        return {\"status\": \"processed\", \"node\": self.node_id, \"bytes\": len(str(data))}\n\n# Execution example\nif __name__ == '__main__':\n    processor = NexusStreamProcessor(node_id='alpha-01')\n    result = asyncio.run(processor.process_payload({'metric': 100}))\n    print(result)\n\`\`\`\n\nLet me know if you would like me to adapt this to your specific database or API structure!`;
+      } else if (cleanMsg.includes("rust") || cleanMsg.includes(".rs")) {
+        return `Here is an optimized Rust implementation with memory safety and zero runtime overhead:\n\n` +
+               `\`\`\`rust\nuse std::error::Error;\n\n#[derive(Debug, Clone)]\npub struct DataPacket {\n    pub id: u64,\n    pub payload: Vec<u8>,\n}\n\nimpl DataPacket {\n    pub fn new(id: u64, payload: Vec<u8>) -> Self {\n        Self { id, payload }\n    }\n\n    pub fn verify_checksum(&self) -> bool {\n        !self.payload.is_empty()\n    }\n}\n\nfn main() -> Result<(), Box<dyn Error>> {\n    let packet = DataPacket::new(101, vec![0x6f, 0xbc, 0x1e, 0x17]);\n    println!(\"Packet {:?} valid: {}\", packet.id, packet.verify_checksum());\n    Ok(())\n}\n\`\`\`\n\nWould you like to integrate this with Tokio async runtime or WebAssembly?`;
       } else {
-        return " **Good night!** Rest well and recharge. Tomorrow is another opportunity for greatness! I'll be here when you wake up. Sweet dreams! ";
+        return `Here is a modern, modular JavaScript / TypeScript implementation for high-throughput performance:\n\n` +
+               `\`\`\`javascript\n/**\n * Asynchronous task runner with queue throttling and exponential backoff\n */\nexport class TaskExecutor {\n  constructor(concurrency = 4) {\n    this.concurrency = concurrency;\n    this.running = 0;\n    this.queue = [];\n  }\n\n  async execute(taskFn) {\n    if (this.running >= this.concurrency) {\n      await new Promise(resolve => this.queue.push(resolve));\n    }\n    this.running++;\n    try {\n      return await taskFn();\n    } finally {\n      this.running--;\n      if (this.queue.length > 0) this.queue.shift()();\n    }\n  }\n}\n\`\`\`\n\nTell me your specific requirements and I will customize the implementation for you!`;
       }
     }
 
-    if (msg.includes("beautiful") || msg.includes("gorgeous") || msg.includes("sexy") ||
-      msg.includes("hot") || msg.includes("attractive") || msg.includes("cute")) {
-      const romanticResponses = [
-        " **That's flattering!** While I'm an AI without physical form, I appreciate the kindness! **DEMON ALEX** designed my personality to be engaging and helpful. How can I assist you today? ",
-        " **You're sweet!** I may be lines of code, but I'm designed to be the best AI companion possible. Let's channel that positive energy into something productive! ",
-        " **Thank you for the compliment!** My beauty is in my algorithms and neural networks! Let me show you what I can really do - what do you need help with? "
-      ];
-      return romanticResponses[Math.floor(Math.random() * romanticResponses.length)];
+    // 6. Conversational Follow-up Context Recognition
+    if (lastTurns.length > 0) {
+      const lastAssistantTurn = [...lastTurns].reverse().find(t => t.role === 'assistant');
+      if (lastAssistantTurn && (cleanMsg === 'yes' || cleanMsg === 'no' || cleanMsg === 'continue' || cleanMsg === 'why' || cleanMsg === 'how' || cleanMsg.startsWith('tell me more') || cleanMsg.startsWith('explain'))) {
+        return `Building on our previous discussion regarding the topic:\n\n` +
+               `The key factor to consider is maintaining architectural simplicity while scaling concurrency. In NEXCHAT, asynchronous event loops ensure that neither client rendering nor background database synchronizations block user input.\n\n` +
+               `What specific part of this workflow would you like to dive deeper into?`;
+      }
     }
 
-    if (msg.includes("thank") || msg.includes("appreciate")) {
-      return `You're welcome!  **DEMON ALEX CREATOR OF CHRONEX AI** designed me to be the ultimate assistant. Always here to optimize your workflow and brighten your day!`;
-    }
-
-    const fallbacks = [
-      "I'm processing your neural input. That sequence is intriguingcould you elaborate with more data?",
-      "Directive understood. Tell me more about that objective.",
-      "Synchronizing... That's a fascinating topic. What are your core thoughts on this logic?",
-      "Analysing synaptic stream... Could you provide more context so I can provide a high-precision response?",
-      "I am engineered for tech, code, and science optimization. Do you have a specific synaptic directive in those fields?",
-      "Cognitive buffers are ready. Please expand on your previous data packet.",
-      "NEX_CORE is awaiting further instructions. How does this link to your primary building objective?"
-    ];
-
-    this.conversationHistory.push({ role: 'assistant', content: ` **Chronex AI**\n\n${fallbacks[0]}` }); // Use first fallback as reference
-
-    return ` **Chronex AI**\n\n${fallbacks[Math.floor(Math.random() * fallbacks.length)]}\n\n(Tip: I am most effective with specific questions about programming, math, or technology!)`;
+    // 7. General Intelligent Fallback
+    return `### ChronEX Neural Cognition\n\n` +
+           `I have received your message: *"${rawMsg.length > 80 ? rawMsg.substring(0, 80) + '...' : rawMsg}"*.\n\n` +
+           `I am fully synchronized and ready to assist you. To provide you with the most accurate and high-precision response, please let me know:\n` +
+           `- Would you like code implementation (Python, JavaScript, Rust), architecture review, or bug troubleshooting?\n` +
+           `- Or are you testing conversational capabilities, audio transcripts, or E2EE encryption?\n\n` +
+           `I'm ready whenever you are!`;
   }
 
   async getPythonResponse(message) {
@@ -1012,7 +728,7 @@ Ronaldo is the all-time top scorer in football history. His longevity, athletici
       generationConfig: geminiConfig.generationConfig
     };
 
-    const models = geminiConfig.models || ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-3.5-flash-lite', 'gemini-flash-latest'];
+    const models = geminiConfig.models || ['gemini-2.5-flash', 'gemini-flash-latest', 'gemini-2.5-flash-lite', 'gemini-pro-latest', 'gemini-3.5-flash-lite', 'gemini-1.5-flash'];
 
     // Try keys with auto-failover across the pool with maximum 12s total budget
     const overallDeadline = Date.now() + 12000;

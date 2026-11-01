@@ -4599,3 +4599,31 @@ body[data-active-section="updates"] .top-header {
   border-color: #ef4444 !important;
   color: #fff !important;
 }
+
+
+/* =========================================================================
+   USER VS GROUP INFO SIDEBAR STRICT ISOLATION
+   ========================================================================= */
+#infoSidebar:not(.is-group-info) #groupAdminActionsSection,
+#infoSidebar:not(.is-group-info) #groupAdvancedSettingsSection,
+#infoSidebar:not(.is-group-info) #groupDisappearingSection,
+#infoSidebar:not(.is-group-info) #groupMuteMembersSection,
+#infoSidebar:not(.is-group-info) #groupVipSettingsBox,
+#infoSidebar:not(.is-group-info) #groupActivityTelemetrySection,
+#infoSidebar:not(.is-group-info) [data-group-only="true"] {
+  display: none !important;
+}
+
+
+/* =========================================================================
+   WALLPAPER VISIBILITY & TRANSPARENCY ENFORCEMENT
+   ========================================================================= */
+#messages-area.has-custom-wallpaper,
+.app[data-custom-bg="true"] #messages-area {
+  background: transparent !important;
+  background-color: rgba(6, 9, 18, 0.45) !important;
+}
+
+.app[data-custom-bg="true"] #chatDetailView {
+  background: transparent !important;
+}

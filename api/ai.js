@@ -53,9 +53,12 @@ function getApiKeys() {
 
 const CANDIDATE_MODELS = [
   'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
-  'gemini-1.5-pro'
+  'gemini-flash-latest',
+  'gemini-2.5-flash-lite',
+  'gemini-pro-latest',
+  'gemini-3.5-flash',
+  'gemini-3.5-flash-lite',
+  'gemini-1.5-flash'
 ];
 
 const SYSTEM_INSTRUCTION = `You are CHRONEX AI, the advanced neural AI assistant created by NEXCHAT.

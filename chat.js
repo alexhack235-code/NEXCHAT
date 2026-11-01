@@ -2670,7 +2670,7 @@ async function showGroupInfoPanel(groupId) {
       let groupActivityBox = document.getElementById('groupActivityTelemetrySection');
       if (!groupActivityBox) {
         groupActivityBox = document.createElement('div');
-        groupActivityBox.id = 'groupActivityTelemetrySection';
+        groupActivityBox.id = 'groupActivityTelemetrySection'; groupActivityBox.setAttribute('data-group-only', 'true');
         const actionsSec = document.getElementById('groupAdminActionsSection');
         if (actionsSec && actionsSec.parentNode) {
           actionsSec.parentNode.insertBefore(groupActivityBox, actionsSec);
@@ -2692,7 +2692,7 @@ async function showGroupInfoPanel(groupId) {
 
     const infoSidebarEl = document.getElementById('infoSidebar');
     const membersListEl = document.getElementById('membersList');
-    if (infoSidebarEl) infoSidebarEl.style.display = 'block';
+    if (infoSidebarEl) { infoSidebarEl.classList.add('is-group-info'); infoSidebarEl.style.display = 'block'; }
     if (membersListEl) membersListEl.style.display = 'block';
 
   } catch (error) {
@@ -2701,8 +2701,40 @@ async function showGroupInfoPanel(groupId) {
   }
 }
 
+function resetInfoSidebarMode(isGroup) {
+  const groupAdminActionsSection = document.getElementById('groupAdminActionsSection');
+  const groupAdvancedSettingsSection = document.getElementById('groupAdvancedSettingsSection');
+  const groupDisappearingSection = document.getElementById('groupDisappearingSection');
+  const groupMuteMembersSection = document.getElementById('groupMuteMembersSection');
+  const groupApprovalSection = document.getElementById('groupApprovalSection');
+  const membersListEl = document.getElementById('membersList');
+  const groupVipBox = document.getElementById('groupVipSettingsBox');
+  const groupActivityBox = document.getElementById('groupActivityTelemetrySection');
+  const keptMessagesSection = document.getElementById('keptMessagesValue')?.closest('.info-section');
+
+  if (!isGroup) {
+    if (groupAdminActionsSection) groupAdminActionsSection.style.display = 'none';
+    if (groupAdvancedSettingsSection) groupAdvancedSettingsSection.style.display = 'none';
+    if (groupDisappearingSection) groupDisappearingSection.style.display = 'none';
+    if (groupMuteMembersSection) groupMuteMembersSection.style.display = 'none';
+    if (groupApprovalSection) groupApprovalSection.style.display = 'none';
+    if (membersListEl) membersListEl.style.display = 'none';
+    if (groupVipBox) groupVipBox.style.display = 'none';
+    if (groupActivityBox) groupActivityBox.style.display = 'none';
+    if (keptMessagesSection) keptMessagesSection.style.display = 'none';
+
+    const infoSidebarEl = document.getElementById('infoSidebar');
+    if (infoSidebarEl) {
+      infoSidebarEl.querySelectorAll('.group-only-info, [data-group-only="true"]').forEach(el => el.remove());
+    }
+  } else {
+    if (keptMessagesSection) keptMessagesSection.style.display = 'block';
+  }
+}
+
 async function showUserInfoPanel(userId) {
   try {
+    resetInfoSidebarMode(false);
     const userDoc = await getDoc(doc(db, 'users', userId));
     if (!userDoc.exists()) {
       showNotif('User not found', 'error');
@@ -2810,7 +2842,7 @@ async function showUserInfoPanel(userId) {
     }
 
     const infoSidebarEl = document.getElementById('infoSidebar');
-    if (infoSidebarEl) infoSidebarEl.style.display = 'block';
+    if (infoSidebarEl) { infoSidebarEl.classList.remove('is-group-info'); infoSidebarEl.style.display = 'block'; }
 
   } catch (error) {
     console.error('Error showing user info panel:', error);
@@ -14730,14 +14762,24 @@ async function loadChatBackground(chatId, chatType) {
 
     if (!myUID || !uid) return;
 
-    const bgDocPath = chatType === 'group'
-      ? `groupBackgrounds/${chatId}`
-      : `directMessageBackgrounds/${myUID}_${chatId}`;
+    let bgUrl = null;
+    if (chatType === 'group') {
+      const gDoc = await getDoc(doc(db, 'groupBackgrounds', chatId));
+      if (gDoc.exists() && gDoc.data().backgroundUrl) bgUrl = gDoc.data().backgroundUrl;
+    } else {
+      // Check both sender and recipient direct chat background slots
+      const dDoc1 = await getDoc(doc(db, 'directMessageBackgrounds', `${myUID}_${chatId}`));
+      if (dDoc1.exists() && dDoc1.data().backgroundUrl) {
+        bgUrl = dDoc1.data().backgroundUrl;
+      } else {
+        const dDoc2 = await getDoc(doc(db, 'directMessageBackgrounds', `${chatId}_${myUID}`));
+        if (dDoc2.exists() && dDoc2.data().backgroundUrl) bgUrl = dDoc2.data().backgroundUrl;
+      }
+    }
 
-    const bgDoc = await getDoc(doc(db, bgDocPath.split('/')[0], bgDocPath.split('/')[1]));
-
-    if (bgDoc.exists() && bgDoc.data().backgroundUrl) {
-      applyBackgroundImage(bgDoc.data().backgroundUrl);
+    if (bgUrl) {
+      applyBackgroundImage(bgUrl);
+      try { localStorage.setItem(`chat_bg_${uid}`, bgUrl); } catch (_) {}
     } else {
       loadUserBackground();
     }

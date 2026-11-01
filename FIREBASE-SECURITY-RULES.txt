@@ -367,16 +367,14 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // 3. Super Admin Verification (Bootstrap email, token claim, or admins collection)
+    // 3. Super Admin Verification (Bootstrap email, token claim, admins collection, role, or developer UID)
     function isSuperAdmin() {
       return isAuthenticated() && (
-        (
-          request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com'] &&
-          request.auth.token.email_verified == true
-        ) ||
+        request.auth.token.email in ['demonalexander526@gmail.com', 'alexhack235@gmail.com', 'alexandergamedeveloper74@gmail.com'] ||
         request.auth.token.admin == true ||
-        request.auth.uid in ['demonalexander526', 'alexhack235'] ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        request.auth.uid in ['demonalexander526', 'alexhack235', 'ZhvqSK7NNtQUP1sqszYfo1kzXSb2'] ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'superadmin'])
       );
     }
 

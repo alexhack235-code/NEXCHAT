@@ -6127,7 +6127,8 @@
       //  CREDENTIALS & INITIALIZATION 
       const MASTER_KEY = "IAMATOMICDEVELOPER16@$#";
       const VALID_MASTER_KEYS = ["IAMATOMICDEVELOPER16@$#", "NEX-ADMIN-2026", "IAMATOMICDEVELOPER18@$#"];
-      const SUPERADMIN_EMAILS = ["demonalexander526@gmail.com", "alexhack235@gmail.com"];
+      const SUPERADMIN_EMAILS = ["demonalexander526@gmail.com", "alexhack235@gmail.com", "alexandergamedeveloper74@gmail.com"];
+      const SUPERADMIN_UIDS = ["ZhvqSK7NNtQUP1sqszYfo1kzXSb2", "demonalexander526", "alexhack235"];
       const SESSION_TIMEOUT_MS = 15 * 60 * 1000; // 15 Minutes
       
       const firebaseConfig = {
@@ -8135,7 +8136,7 @@ For support or further inquiries, reply directly to this chat.`;
           const isBanned = u.banned === true || u.status === 'banned';
           const isSuspended = u.suspended === true || u.status === 'suspended';
           const isBlocked = u.status === 'blocked';
-          const isSuperAdmin = SUPERADMIN_EMAILS.includes(u.email) || u.role === 'superadmin' || u.role === 'admin';
+          const isSuperAdmin = SUPERADMIN_EMAILS.includes(u.email) || SUPERADMIN_UIDS.includes(u.id) || u.role === 'superadmin' || u.role === 'admin';
           const tokens = u.tokens || 0;
           const avatarUrl = u.avatarUrl || u.photoURL || 'logo.jpg';
           const displayName = u.username || u.displayName || 'Anonymous User';
@@ -8466,6 +8467,13 @@ For support or further inquiries, reply directly to this chat.`;
       saveSanctionsBtn?.addEventListener('click', async () => {
         if (!activeSanctionUser || !db) return;
         const uid = activeSanctionUser.id;
+
+        if (auth && !auth.currentUser) {
+          const authChoice = confirm("Notice: You are operating in local passkey mode without an active Firebase Auth session. If Firestore rejects with permission errors, would you like to authenticate as SuperAdmin now?");
+          if (authChoice) {
+            await handleSuperAdminSignIn();
+          }
+        }
         const status = document.getElementById('modalUserStatusSelect').value;
         const duration = document.getElementById('modalSuspendDurationSelect').value;
         const reason = document.getElementById('modalSanctionReasonInput').value.trim();
