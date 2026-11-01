@@ -72,6 +72,7 @@
     bindDOM() {
       this.injectModals();
       this.bindSystemRow();
+      this.updateLockedChatsBadge();
     }
 
     bindSystemRow() {

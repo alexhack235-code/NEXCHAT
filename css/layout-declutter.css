@@ -821,6 +821,7 @@ height: 100% !important;
 display: flex;
 flex-direction: column !important;
 border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+overscroll-behavior-y: contain !important;
 }
 
 .chat-list-view.hidden,
@@ -836,6 +837,23 @@ padding: 6px 14px 4px 14px !important;
 background: #0b141a !important;
 border-bottom: none !important;
 box-sizing: border-box !important;
+max-height: 56px !important;
+opacity: 1 !important;
+overflow: hidden !important;
+transition: max-height 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.22s ease,
+            padding 0.25s ease,
+            margin 0.25s ease !important;
+}
+
+.chat-search-container.collapsed,
+.search-container.collapsed {
+max-height: 0 !important;
+opacity: 0 !important;
+padding-top: 0 !important;
+padding-bottom: 0 !important;
+margin: 0 !important;
+pointer-events: none !important;
 }
 
 .chat-search-pill-wrapper {
@@ -955,30 +973,41 @@ background: #27343d !important;
 color: #25d366 !important;
 }
 
-/* WhatsApp System Action Rows: Locked chats & Archived (Natural WhatsApp List Arrangement) */
+/* WhatsApp System Action Rows: Locked chats & Archived (Retracted by default, pull-to-reveal) */
 .chat-system-action-rows {
 display: flex !important;
 flex-direction: column !important;
 background: #0b141a !important;
 width: 100% !important;
 box-sizing: border-box !important;
-max-height: none !important;
-opacity: 1 !important;
-overflow: visible !important;
-padding: 2px 0 4px 0 !important;
-margin: 0 0 4px 0 !important;
-pointer-events: auto !important;
-transform: none !important;
-border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+max-height: 0 !important;
+opacity: 0 !important;
+overflow: hidden !important;
+padding: 0 !important;
+margin: 0 !important;
+pointer-events: none !important;
+transform: translateY(-8px) scaleY(0.96) !important;
+transform-origin: top center !important;
+border-bottom: none !important;
+transition: max-height 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+            opacity 0.22s ease,
+            transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+            padding 0.28s ease,
+            margin 0.28s ease !important;
 }
 
 .chat-system-action-rows.revealed {
-max-height: none !important;
+max-height: 140px !important;
 opacity: 1 !important;
-padding: 2px 0 4px 0 !important;
-margin: 0 0 4px 0 !important;
+padding: 4px 0 6px 0 !important;
+margin: 0 0 2px 0 !important;
 pointer-events: auto !important;
-transform: none !important;
+transform: translateY(0) scaleY(1) !important;
+border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.locked-chats-row .system-row-icon i {
+color: #00ff88 !important;
 }
 
 .system-action-row {

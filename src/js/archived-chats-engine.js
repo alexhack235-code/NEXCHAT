@@ -44,6 +44,7 @@
     bindDOM() {
       this.bindToggleRow();
       this.injectArchiveHeaderUI();
+      this.updateBadge();
     }
 
     bindToggleRow() {
@@ -93,9 +94,13 @@
     }
 
     updateBadge(unreadCount = 0) {
+      const total = this.archivedChatIds ? this.archivedChatIds.size : 0;
+      const row = document.getElementById('archivedToggleRow');
+      if (row) {
+        row.style.display = total > 0 ? 'flex' : 'none';
+      }
       const badge = document.getElementById('archivedCount');
       if (badge) {
-        const total = this.archivedChatIds.size;
         badge.textContent = total;
         badge.style.display = total > 0 ? 'inline-block' : 'none';
 

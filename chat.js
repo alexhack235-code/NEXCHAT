@@ -4142,6 +4142,8 @@ function openSearch() {
 
   overlay.style.display = 'flex';
   modal.style.display = 'flex';
+  const inlineSearchContainer = document.getElementById('chatSearchContainer');
+  if (inlineSearchContainer) inlineSearchContainer.classList.remove('collapsed');
 
   if (!searchListenersAttached) {
     setupSearchListeners();
@@ -25595,22 +25597,26 @@ if (typeof document !== 'undefined') {
   }
 }
 
-// WhatsApp-Style Pull-Down Reveal Engine for Locked Chats & Archived Rows
+// WhatsApp-Style Pull-Down Reveal Engine for Locked Chats & Mobile Responsive Retraction
 function setupWhatsAppLockedChatsPullToReveal() {
   const systemRows = document.getElementById('chatSystemRows');
   const chatsSection = document.querySelector('.chats-section') || document.getElementById('chatsSection');
   const chatListView = document.getElementById('chatListView');
+  const searchContainer = document.getElementById('chatSearchContainer');
+  const searchInput = document.getElementById('searchInput');
   if (!systemRows || (!chatsSection && !chatListView)) return;
 
   const scrollTarget = chatsSection || chatListView;
+  const gestureContainer = chatListView || chatsSection;
   if (scrollTarget._hasPullToRevealBound) return;
   scrollTarget._hasPullToRevealBound = true;
 
   let touchStartY = 0;
   let isTrackingPull = false;
+  let lastScrollTop = 0;
 
   // Touch handlers for mobile pull-down at top of chat list
-  scrollTarget.addEventListener('touchstart', (e) => {
+  gestureContainer.addEventListener('touchstart', (e) => {
     if (scrollTarget.scrollTop <= 2 && e.touches.length === 1) {
       touchStartY = e.touches[0].clientY;
       isTrackingPull = true;
@@ -25619,33 +25625,54 @@ function setupWhatsAppLockedChatsPullToReveal() {
     }
   }, { passive: true });
 
-  scrollTarget.addEventListener('touchmove', (e) => {
+  gestureContainer.addEventListener('touchmove', (e) => {
     if (!isTrackingPull || e.touches.length !== 1) return;
     const currentY = e.touches[0].clientY;
     const deltaY = currentY - touchStartY;
 
     // When pulling downwards past threshold at the very top of chat list
-    if (deltaY > 35 && scrollTarget.scrollTop <= 2) {
+    if (deltaY > 28 && scrollTarget.scrollTop <= 2) {
       if (!systemRows.classList.contains('revealed')) {
         systemRows.classList.add('revealed');
         if (navigator.vibrate) {
           try { navigator.vibrate(12); } catch (_) { }
         }
       }
+    } else if (deltaY < -12 && systemRows.classList.contains('revealed')) {
+      // Swiping upwards retracts the system rows immediately
+      systemRows.classList.remove('revealed');
     }
   }, { passive: true });
 
-  scrollTarget.addEventListener('touchend', () => {
+  gestureContainer.addEventListener('touchend', () => {
     isTrackingPull = false;
   }, { passive: true });
 
   // Auto-collapse when user scrolls down through active conversations
   scrollTarget.addEventListener('scroll', () => {
-    if (scrollTarget.scrollTop > 24) {
+    const currentScrollTop = scrollTarget.scrollTop;
+    const isMobile = window.innerWidth <= 768 || document.body.classList.contains('mobile-preview');
+
+    // Retract system action rows as soon as user begins scrolling down
+    if (currentScrollTop > 14) {
       if (systemRows.classList.contains('revealed')) {
         systemRows.classList.remove('revealed');
       }
     }
+
+    // Smooth mobile search bar tuck-away on scroll down for expansive conversation view
+    const isSearchActive = searchInput && (document.activeElement === searchInput || searchInput.value.trim().length > 0);
+    if (searchContainer && isMobile && !isSearchActive) {
+      if (currentScrollTop > 40 && currentScrollTop > lastScrollTop) {
+        searchContainer.classList.add('collapsed');
+      } else if (currentScrollTop < lastScrollTop || currentScrollTop <= 10) {
+        searchContainer.classList.remove('collapsed');
+      }
+    } else if (searchContainer && !isMobile) {
+      searchContainer.classList.remove('collapsed');
+    }
+
+    lastScrollTop = Math.max(0, currentScrollTop);
   }, { passive: true });
 
   // Mouse wheel support for desktop / laptop trackpad
@@ -25654,7 +25681,7 @@ function setupWhatsAppLockedChatsPullToReveal() {
       if (!systemRows.classList.contains('revealed')) {
         systemRows.classList.add('revealed');
       }
-    } else if (scrollTarget.scrollTop > 24 && e.deltaY > 12) {
+    } else if (scrollTarget.scrollTop > 14 && e.deltaY > 12) {
       if (systemRows.classList.contains('revealed')) {
         systemRows.classList.remove('revealed');
       }
