@@ -359,6 +359,7 @@
     }
 
     spawnFireworks(originX, originY) {
+      if (!this._animRunning) this.animateParticles();
       const colors = ['#00f3ff', '#ffd700', '#00ff66', '#ff0055', '#ffffff'];
       for (let i = 0; i < 60; i++) {
         const angle = Math.random() * Math.PI * 2;
@@ -380,6 +381,11 @@
       if (!ctx) return;
 
       const loop = () => {
+        if (this.particles.length === 0) {
+          ctx.clearRect(0, 0, this.pCanvas.width, this.pCanvas.height);
+          this._animRunning = false;
+          return;
+        }
         ctx.clearRect(0, 0, this.pCanvas.width, this.pCanvas.height);
         for (let i = this.particles.length - 1; i >= 0; i--) {
           const p = this.particles[i];

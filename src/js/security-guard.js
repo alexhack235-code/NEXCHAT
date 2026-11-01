@@ -65,14 +65,18 @@ export function initSecurityGuard() {
     return; // Public entry point
   }
 
-  if (typeof window !== 'undefined' && (
+  const isLocalDev = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.endsWith('.local')
+  );
+
+  if (typeof window !== 'undefined' && isLocalDev && (
     window.authRedirectDisabled ||
     sessionStorage.getItem('disable_auth_redirect') === 'true' ||
-    new URLSearchParams(window.location.search).get('preview') === 'true' ||
-    window.location.search.includes('preview=true') ||
-    window.location.search.includes('audit=true')
+    new URLSearchParams(window.location.search).get('preview') === 'true'
   )) {
-    console.log('[SECURITY GUARD] Auth guard bypassed for preview/test environment.');
+    console.log('[SECURITY GUARD] Auth guard bypassed for local development environment.');
     return;
   }
 

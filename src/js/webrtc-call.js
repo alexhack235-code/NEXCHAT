@@ -52,6 +52,7 @@
       this.incomingListenerUnsubscribe = null;
 
       this.callTimeoutTimer = null;
+      this.reconnectWatchdog = null;
       this.callTimerInterval = null;
       this.qualityInterval = null;
       this.callStartTime = 0;
@@ -788,6 +789,7 @@
             if (this.callTimeoutTimer) {
               clearTimeout(this.callTimeoutTimer);
               this.callTimeoutTimer = null;
+      this.reconnectWatchdog = null;
             }
 
             try {
@@ -1123,7 +1125,8 @@
           remoteAud.srcObject = this.remoteStream;
         }
         remoteAud.autoplay = true;
-        remoteAud.muted = false;
+        // Mute raw audio element when Web Audio DSP delivers clean filtered audio to speakers to prevent reverb flange
+        remoteAud.muted = this.remoteAudioDspActive;
         remoteAud.volume = 1.0;
         remoteAud.play().catch(e => console.warn('[WebRTC] remote audio play warning:', e));
         this.setupRemoteAudioDSP(this.remoteStream);
@@ -1180,6 +1183,7 @@
         if (this.callTimeoutTimer) {
           clearTimeout(this.callTimeoutTimer);
           this.callTimeoutTimer = null;
+      this.reconnectWatchdog = null;
         }
         if (statusBadge) {
           statusBadge.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Connected (E2EE)';
@@ -1196,6 +1200,18 @@
         if (statusBadge) {
           statusBadge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> Reconnecting...';
           statusBadge.style.color = '#ffd700';
+        }
+        if (!this.reconnectWatchdog) {
+          this.reconnectWatchdog = setTimeout(() => {
+            if (this.peerConnection && this.peerConnection.connectionState === 'disconnected') {
+              console.warn('[WebRTC] Peer did not recover within 15s. Hanging up gracefully.');
+              if (typeof window.showNotif === 'function') {
+                window.showNotif('Call disconnected due to peer network loss', 'warning', 4000);
+              }
+              this.endCall(false);
+            }
+            this.reconnectWatchdog = null;
+          }, 15000);
         }
       } else if (state === 'failed') {
         console.warn('[WebRTC] Peer connection failed. Ending call.');
@@ -1562,6 +1578,7 @@
       if (this.callTimeoutTimer) {
         clearTimeout(this.callTimeoutTimer);
         this.callTimeoutTimer = null;
+      this.reconnectWatchdog = null;
       }
       if (this.callTimerInterval) {
         clearInterval(this.callTimerInterval);
@@ -1646,9 +1663,32 @@
       this.isCallMinimized = false;
 
       // Purge Audio DSP & Analysers
+      if (this.reconnectWatchdog) {
+        clearTimeout(this.reconnectWatchdog);
+        this.reconnectWatchdog = null;
+      }
       if (this.speakingInterval) {
         clearInterval(this.speakingInterval);
         this.speakingInterval = null;
+      }
+      if (this.remoteAudioSourceNode) {
+        try { this.remoteAudioSourceNode.disconnect(); } catch (_) {}
+        this.remoteAudioSourceNode = null;
+      }
+      if (this.remoteAudioFilterNode) {
+        try { this.remoteAudioFilterNode.disconnect(); } catch (_) {}
+        this.remoteAudioFilterNode = null;
+      }
+      if (this.remoteAudioHpFilter) {
+        try { this.remoteAudioHpFilter.disconnect(); } catch (_) {}
+        this.remoteAudioHpFilter = null;
+      }
+      if (this.speakingAnalyser) {
+        try { this.speakingAnalyser.disconnect(); } catch (_) {}
+        this.speakingAnalyser = null;
+      }
+      if (this.audioCtx && this.audioCtx.state !== 'closed') {
+        try { this.audioCtx.suspend().catch(() => {}); } catch (_) {}
       }
       if (this.remoteAudioSourceNode) {
         try { this.remoteAudioSourceNode.disconnect(); } catch (_) {}

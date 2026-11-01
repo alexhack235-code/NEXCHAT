@@ -201,8 +201,14 @@ export async function decryptVoicePayload(packagedBytes, secretKey = '') {
   }
 
   const decBytes = new Uint8Array(decryptedBuffer);
+  if (decBytes.byteLength < 4) {
+    throw new Error('Malformed decrypted payload: buffer shorter than 4-byte header length');
+  }
   const dView = new DataView(decBytes.buffer, decBytes.byteOffset, decBytes.byteLength);
   const metaLen = dView.getUint32(0, false);
+  if (decBytes.byteLength < 4 + metaLen) {
+    throw new Error('Malformed decrypted payload: declared metadata length exceeds buffer capacity');
+  }
 
   const dec = new TextDecoder();
   const metaJson = dec.decode(decBytes.slice(4, 4 + metaLen));

@@ -95,6 +95,12 @@
       const video = document.getElementById('tacticalScreenVideo');
       if (video && stream) {
         video.srcObject = stream;
+        const tracks = stream.getVideoTracks ? stream.getVideoTracks() : [];
+        if (tracks.length > 0) {
+          tracks[0].onended = () => {
+            this.stopScreenShare();
+          };
+        }
       }
       this.initTelestratorCanvas();
     },
@@ -234,15 +240,22 @@
         lastY = y;
       };
 
-      window.onmouseup = () => {
+      window.addEventListener('mouseup', () => {
         isDrawing = false;
-      };
+      }, { passive: true });
     },
 
     stopScreenShare() {
       if (screenStream) {
         screenStream.getTracks().forEach(t => t.stop());
         screenStream = null;
+      }
+      const video = document.getElementById('tacticalScreenVideo');
+      if (video) video.srcObject = null;
+      const canvas = document.getElementById('telestratorCanvas');
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
       const modal = document.getElementById('tacticalScreenModal');
       if (modal) modal.style.display = 'none';

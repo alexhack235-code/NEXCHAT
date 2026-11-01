@@ -138,6 +138,7 @@ let isGlobalMuted = reelsSettings.defaultSound ? false : true;
 let activeReelId = null;
 let currentCommentUnsubscribe = null;
 let selectedReelFile = null;
+let activeReelPreviewBlobUrl = null;
 let selectedReelThumbnailBlob = null;
 let selectedReelThumbnailDataUrl = null;
 let selectedSound = { title: 'Original Audio', artist: '', url: '' };
@@ -3850,7 +3851,12 @@ async function handleLiveRecordStop() {
   const recordedFile = new File([recordedBlob], `camshot_studio_${Date.now()}.${ext}`, { type: mimeType });
 
   selectedReelFile = recordedFile;
+  if (activeReelPreviewBlobUrl) {
+    try { URL.revokeObjectURL(activeReelPreviewBlobUrl); } catch (_) {}
+    activeReelPreviewBlobUrl = null;
+  }
   const videoObjUrl = URL.createObjectURL(recordedBlob);
+  activeReelPreviewBlobUrl = videoObjUrl;
 
   reelPreviewVideo.src = videoObjUrl;
   reelPreviewContainer.style.display = 'flex';
@@ -4139,7 +4145,12 @@ reelVideoInput.addEventListener('change', async (e) => {
   selectedReelFile = file;
   reelDropzonePrompt.style.display = 'none';
   reelPreviewContainer.style.display = 'flex';
+  if (activeReelPreviewBlobUrl) {
+    try { URL.revokeObjectURL(activeReelPreviewBlobUrl); } catch (_) {}
+    activeReelPreviewBlobUrl = null;
+  }
   const videoObjUrl = URL.createObjectURL(file);
+  activeReelPreviewBlobUrl = videoObjUrl;
   reelPreviewVideo.src = videoObjUrl;
 
   // Real-time live simulator playback
@@ -4210,8 +4221,13 @@ function resetVideoPicker() {
   selectedReelThumbnailBlob = null;
   selectedReelThumbnailDataUrl = null;
   reelVideoInput.value = '';
+  if (activeReelPreviewBlobUrl) {
+    try { URL.revokeObjectURL(activeReelPreviewBlobUrl); } catch (_) {}
+    activeReelPreviewBlobUrl = null;
+  }
   reelPreviewVideo.pause();
-  reelPreviewVideo.src = '';
+  reelPreviewVideo.removeAttribute('src');
+  reelPreviewVideo.load();
   reelPreviewContainer.style.display = 'none';
 
   // BUG FIX: Reset detected resolution and quality pill states

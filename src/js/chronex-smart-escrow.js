@@ -417,16 +417,36 @@ export class ChronexSmartEscrow {
 
   cancelDeal(dealId) {
     const deal = this.deals[dealId];
-    if (!deal || deal.status !== 'PROPOSED') return false;
+    if (!deal) return false;
 
-    deal.status = 'CANCELLED';
+    const myUid = (typeof window !== 'undefined' && window.myUID) ? window.myUID : 'u_current';
+    const isBuyer = deal.buyerUid === myUid || deal.buyerUid === 'partner_user';
+    const baseTime = deal.lockedAt || deal.createdAt;
+    const isExpired = (Date.now() - baseTime) > (deal.windowHours * 3600000);
+
+    if (deal.status === 'PROPOSED') {
+      deal.status = 'CANCELLED';
+    } else if (deal.status === 'TOKENS_LOCKED' && isExpired && isBuyer) {
+      deal.status = 'REFUNDED';
+      deal.disputeResolution = 'Window expired without seller deliverable. Full refund issued to buyer.';
+      deal.settledAt = Date.now();
+      deal.receiptId = `EXPIRE-REFUND-${dealId.slice(-6).toUpperCase()}`;
+      const curBal = this.getUserTokens();
+      this.setUserTokens(curBal + deal.amount);
+      if (typeof window !== 'undefined' && typeof window.showNotif === 'function') {
+        window.showNotif(`Escrow window expired. ${deal.amount} NEX tokens refunded to your balance.`, 'success', 3500);
+      }
+    } else {
+      return false;
+    }
+
     this.deals[dealId] = deal;
     this.saveDeals();
 
-    this.broadcastDealEvent('DEAL_CANCELLED', dealId, {});
+    this.broadcastDealEvent(deal.status === 'REFUNDED' ? 'ESCROW_REFUNDED' : 'DEAL_CANCELLED', dealId, {});
     this.refreshCardDOM(dealId);
 
-    if (typeof window !== 'undefined' && typeof window.showNotif === 'function') {
+    if (typeof window !== 'undefined' && typeof window.showNotif === 'function' && deal.status !== 'REFUNDED') {
       window.showNotif('Escrow Deal cancelled', 'info', 2000);
     }
     return true;
@@ -520,6 +540,14 @@ export class ChronexSmartEscrow {
             deal.status = 'SETTLED';
             deal.settledAt = att.payload?.settledAt || Date.now();
             deal.receiptId = att.payload?.receiptId;
+            const myUid = (typeof window !== 'undefined' && window.myUID) ? window.myUID : null;
+            if (deal.sellerUid === myUid && !deal.tokensCredited) {
+              this.setUserTokens(this.getUserTokens() + deal.amount);
+              deal.tokensCredited = true;
+              if (typeof window !== 'undefined' && typeof window.showNotif === 'function') {
+                window.showNotif(`Escrow payment received! +${deal.amount} NEX added to your balance.`, 'success', 4000);
+              }
+            }
           } else if (att.action === 'ESCROW_DISPUTED') {
             deal.status = 'DISPUTED';
             deal.disputedAt = att.payload?.disputedAt || Date.now();

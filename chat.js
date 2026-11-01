@@ -4701,7 +4701,11 @@ function initializeEmojiPicker() {
   }
 }
 
+let isSendingMessageLock = false;
+
 async function sendMessage() {
+  if (isSendingMessageLock) return;
+  isSendingMessageLock = true;
   if (!currentChatUser) {
     showNotif("[Error] Please select a chat first", "error");
     return;
@@ -4757,6 +4761,8 @@ async function sendMessage() {
     }
     if (window.offlineQueueEngine) {
       window.offlineQueueEngine.enqueue(offgridMsg);
+    } else if (typeof storeOfflineMessage === 'function') {
+      storeOfflineMessage(currentChatUser, text || '', currentChatType || 'direct', null).catch(() => {});
     }
     if (typeof appendLocalSentMessage === 'function') {
       appendLocalSentMessage(text || '', offgridMsg.attachment, false, 'mesh_relayed', clientMsgId, null);
@@ -4810,13 +4816,13 @@ async function sendMessage() {
 
     let attachment = null;
 
-    if (selectedFile) {
+    if (stagedSendAttachment) {
       showNotif("[Info] Uploading file...", "info");
       try {
-        attachment = await uploadFileToStorage(selectedFile, currentChatUser, currentChatType === 'group');
+        attachment = await uploadFileToStorage(stagedSendAttachment, currentChatUser, currentChatType === 'group');
         if (window.isAttachmentViewOnce) {
           attachment.isViewOnce = true;
-          attachment.viewOnceType = selectedFile.type?.startsWith('image/') ? 'photo' : (selectedFile.type?.startsWith('audio/') ? 'audio' : 'file');
+          attachment.viewOnceType = stagedSendAttachment.type?.startsWith('image/') ? 'photo' : (stagedSendAttachment.type?.startsWith('audio/') ? 'audio' : 'file');
           attachment.burnTimeout = window.attachmentViewOnceTimeout || 10;
           attachment.cipherHash = window.NexGhostWhisper ? window.NexGhostWhisper.generateRandomHash() : ('0x' + Math.random().toString(16).substring(2, 10).toUpperCase());
           attachment.viewed = false;
@@ -4859,7 +4865,7 @@ async function sendMessage() {
         }
 
         // Cache and client-compress staged image BEFORE removing attachment UI
-        const stagedFile = typeof selectedFile !== 'undefined' ? selectedFile : null;
+        const stagedFile = stagedSendAttachment || (typeof selectedFile !== 'undefined' ? selectedFile : null);
         let aiImagePayload = null;
 
         if (stagedFile && stagedFile.type && stagedFile.type.startsWith('image/')) {
@@ -5106,6 +5112,8 @@ async function sendMessage() {
     hapticFeedback('heavy');
     console.error("? Critical Send Error:", err);
     showNotif("Error sending message: " + err.message, "error");
+  } finally {
+    isSendingMessageLock = false;
   }
 }
 
@@ -16904,6 +16912,15 @@ async function sendGroupMessage(groupId, text, attachment) {
           ? 'moderator' 
           : 'member'));
     const isStaff = role === 'creator' || role === 'admin' || role === 'moderator';
+
+    if (window.NexVipSubscriptionEngine && typeof window.NexVipSubscriptionEngine.isChannelGated === 'function') {
+      if (window.NexVipSubscriptionEngine.isChannelGated(window._currentGroupData)) {
+        if (!window.NexVipSubscriptionEngine.hasActiveSubscription(window._currentGroupData, currentUid)) {
+          showNotif('This VIP channel requires an active subscription to post', 'warning');
+          return;
+        }
+      }
+    }
 
     if (window._currentGroupData.whoCanSend === 'admins' && !isStaff) {
       showNotif('Only admins can send messages in this group', 'warning');
