@@ -1429,22 +1429,24 @@ class NexSandboxRunner {
    ============================================================================ */
 class NexAttachHub {
   constructor() {
-    this.attachBtn = document.getElementById('attach-btn');
+    this.attachBtn = document.getElementById('btnToggleAttachmentHub') || document.getElementById('attach-btn');
     this.hub = document.getElementById('attachmentPopupHub');
     this.init();
   }
 
   init() {
-    if (!this.attachBtn || !this.hub) return;
+    if (!this.hub) return;
 
-    this.attachBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      this.toggle();
-    });
+    if (this.attachBtn) {
+      this.attachBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.toggle();
+      });
+    }
 
     document.addEventListener('click', (e) => {
-      if (this.hub && !this.hub.contains(e.target) && e.target !== this.attachBtn) {
+      if (this.hub && !this.hub.contains(e.target) && (!this.attachBtn || !this.attachBtn.contains(e.target))) {
         this.hide();
       }
     });
@@ -1457,17 +1459,17 @@ class NexAttachHub {
 
     document.getElementById('hubActionVoice')?.addEventListener('click', () => {
       this.hide();
-      window.CyberFeatures.voice?.startRecording();
+      window.CyberFeatures?.voice?.startRecording?.();
     });
 
     document.getElementById('hubActionCanvas')?.addEventListener('click', () => {
       this.hide();
-      window.CyberFeatures.canvas?.show();
+      window.CyberFeatures?.canvas?.show?.();
     });
 
     document.getElementById('hubActionStegano')?.addEventListener('click', () => {
       this.hide();
-      window.CyberFeatures.stegano?.show();
+      window.CyberFeatures?.stegano?.show?.();
     });
 
     document.getElementById('hubActionPoll')?.addEventListener('click', () => {
@@ -1482,28 +1484,34 @@ class NexAttachHub {
 
     document.getElementById('hubActionCapsule')?.addEventListener('click', () => {
       this.hide();
-      window.CyberFeatures.capsule?.show();
+      window.CyberFeatures?.capsule?.show?.();
     });
 
     document.getElementById('hubActionTranslate')?.addEventListener('click', () => {
       this.hide();
-      window.CyberFeatures.translator?.show();
+      window.CyberFeatures?.translator?.show?.();
     });
   }
 
   toggle() {
     if (!this.hub) return;
-    const isOpen = this.hub.style.display === 'grid';
+    const isOpen = this.hub.classList.contains('active') || this.hub.classList.contains('is-open') || this.hub.style.display === 'grid';
     if (isOpen) this.hide();
     else this.show();
   }
 
   show() {
-    if (this.hub) this.hub.style.display = 'grid';
+    if (this.hub) {
+      this.hub.classList.add('active', 'is-open');
+      this.hub.style.setProperty('display', 'grid', 'important');
+    }
   }
 
   hide() {
-    if (this.hub) this.hub.style.display = 'none';
+    if (this.hub) {
+      this.hub.classList.remove('active', 'is-open');
+      this.hub.style.setProperty('display', 'none', 'important');
+    }
   }
 }
 
