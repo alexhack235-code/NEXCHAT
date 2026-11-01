@@ -23,9 +23,13 @@
   border-radius: 18px;
   padding: 14px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
-  width: calc(100vw - 32px);
+  width: auto;
+  left: 8px;
+  right: 8px;
+  margin: 0 auto;
+  overflow-x: hidden;
   max-width: 390px;
   max-height: min(480px, 68vh) !important;
   overflow-y: auto !important;

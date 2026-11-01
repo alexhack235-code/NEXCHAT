@@ -14735,19 +14735,22 @@ body.chat-size-extra-large .message-bubble {
 /* 6. Attachment Hub Matrix (4-Column Responsive Grid) */
 .attachment-popup-hub {
   display: grid !important;
-  grid-template-columns: repeat(4, 1fr) !important;
-  gap: 8px !important;
-  width: calc(100vw - 24px) !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  left: 8px !important;
+  right: 8px !important;
+  width: auto !important;
   max-width: 380px !important;
-  max-height: min(440px, 60vh) !important;
-  padding: 12px 10px !important;
+  margin: 0 auto !important;
+  max-height: min(340px, 48vh) !important;
+  padding: 10px 8px !important;
   box-sizing: border-box !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
   -webkit-overflow-scrolling: touch !important;
   overscroll-behavior: contain !important;
   touch-action: pan-y !important;
   bottom: 74px !important;
-  left: 12px !important;
   border-radius: 16px !important;
   background-color: rgba(10, 15, 26, 0.98) !important;
   border: 1px solid rgba(0, 240, 118, 0.35) !important;
@@ -14760,14 +14763,17 @@ body.chat-size-extra-large .message-bubble {
   flex-direction: column !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 5px !important;
-  padding: 8px 4px !important;
+  gap: 4px !important;
+  padding: 6px 2px !important;
   border-radius: 10px !important;
   background: rgba(255, 255, 255, 0.04) !important;
   border: 1px solid rgba(255, 255, 255, 0.07) !important;
-  min-height: 64px !important;
+  min-height: 58px !important;
+  min-width: 0 !important;
+  width: 100% !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
+  overflow: hidden !important;
   transition: transform 0.15s ease, background 0.15s ease !important;
 }
 
@@ -14779,25 +14785,30 @@ body.chat-size-extra-large .message-bubble {
 }
 
 .attach-hub-item .attach-hub-icon {
-  font-size: 18px !important;
-  width: 32px !important;
-  height: 32px !important;
+  font-size: 16px !important;
+  width: 28px !important;
+  height: 28px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   border-radius: 8px !important;
   background: rgba(255, 255, 255, 0.05) !important;
+  flex-shrink: 0 !important;
 }
 
 .attach-hub-item span {
-  font-size: 10.5px !important;
+  font-size: 10px !important;
   font-weight: 500 !important;
   color: #cbd5e1 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 72px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  display: block !important;
   text-align: center !important;
+  padding: 0 2px !important;
+  box-sizing: border-box !important;
 }
 
 /* 7. Accessible Avatar Badges */

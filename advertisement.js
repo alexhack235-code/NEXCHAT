@@ -472,7 +472,7 @@ function displayAds(ads) {
   container.innerHTML = ads.map(ad => {
     const exp = ad.expiresAt?.toDate ? ad.expiresAt.toDate() : new Date(ad.expiresAt);
     const hours = Math.max(0, Math.ceil((exp - new Date()) / 3600000));
-    const imageUrl = ad.imageURL || 'logo.jpg';
+    const imageUrl = (ad.imageURL && typeof ad.imageURL === 'string' && ad.imageURL.trim()) ? ad.imageURL.trim() : 'logo.jpg';
     const isVideo = ad.mediaType === 'video' || imageUrl.includes('.mp4');
     const catInfo = CATEGORY_MAP[ad.productCategory] || { emoji: '', label: ad.productCategory || 'Other' };
 

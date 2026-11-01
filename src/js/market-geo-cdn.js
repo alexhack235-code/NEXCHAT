@@ -196,18 +196,18 @@ class MarketGeoCdnEngine {
             </select>
           </div>
           
-          <label class="geo-scope-toggle-label" title="Show international listings willing to ship to your country">
-            <input type="checkbox" id="geoIncludeGlobalToggle" ${this.includeGlobal ? 'checked' : ''}>
-            <span class="geo-scope-toggle-text">Include Global Shipping</span>
-          </label>
+          <div class="geo-partition-subrow">
+            <label class="geo-scope-toggle-label" title="Show international listings willing to ship to your country">
+              <input type="checkbox" id="geoIncludeGlobalToggle" ${this.includeGlobal ? 'checked' : ''}>
+              <span class="geo-scope-toggle-text">Include Global Shipping</span>
+            </label>
+            <div class="geo-partition-right">
+              <span class="geo-privacy-badge" title="Purchases, carts, and order details are strictly isolated in your local encrypted vault">
+                <i class="fa-solid fa-shield-halved"></i> Privacy Partition Active
+              </span>
+            </div>
+          </div>
         </div>
-
-        <div class="geo-partition-right">
-          <span class="geo-privacy-badge" title="Purchases, carts, and order details are strictly isolated in your local encrypted vault">
-            <i class="fa-solid fa-shield-halved"></i> Privacy Partition Active
-          </span>
-        </div>
-      </div>
     `;
 
     // Bind event listeners

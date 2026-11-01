@@ -299,6 +299,8 @@ html, body {
 .ads-main {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
   padding: 14px 16px;
   padding-bottom: calc(var(--bottom-nav-height) + 24px + env(safe-area-inset-bottom, 0px));
   max-width: 1200px;
@@ -446,8 +448,10 @@ html, body {
    ========================================================================== */
 .ads-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px;
+  width: 100% !important;
+  box-sizing: border-box !important;
   animation: fadeInGrid 0.3s ease;
 }
 
@@ -630,28 +634,91 @@ html, body {
 }
 
 /* List View Variant */
+.ads-grid.list-view {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
 .ads-grid.list-view .ad-card {
-  flex-direction: row;
-  height: 110px;
+  flex-direction: row !important;
+  min-height: 105px !important;
+  height: auto !important;
+  align-items: stretch !important;
 }
 
 .ads-grid.list-view .ad-card-media-wrap {
-  width: 120px;
-  min-width: 120px;
-  height: 100%;
-  aspect-ratio: auto;
+  width: 100px !important;
+  min-width: 100px !important;
+  max-width: 100px !important;
+  height: auto !important;
+  min-height: 100px !important;
+  aspect-ratio: 1 / 1 !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  background: rgba(15, 23, 42, 0.9) !important;
 }
 
 .ads-grid.list-view .ad-card-content {
-  padding: 8px 12px;
-  justify-content: space-between;
+  padding: 8px 10px !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  gap: 4px !important;
+}
+
+.ads-grid.list-view .ad-card-price-row {
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+}
+
+.ads-grid.list-view .ad-card-price {
+  font-size: 14px !important;
+  white-space: nowrap !important;
+}
+
+.ads-grid.list-view .ad-card-seller {
+  font-size: 10.5px !important;
+  max-width: 110px !important;
 }
 
 .ads-grid.list-view .ad-card-actions {
-  display: flex;
-  margin-top: 0;
-  padding-top: 0;
-  border-top: none;
+  display: flex !important;
+  gap: 6px !important;
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+  border-top: 1px solid var(--border-subtle) !important;
+}
+
+.ads-grid.list-view .card-action-btn {
+  flex: 1 !important;
+  padding: 5px 8px !important;
+  font-size: 11.5px !important;
+}
+
+.ads-grid.list-view .ad-card-category-badge {
+  font-size: 9px !important;
+  padding: 2px 4px !important;
+  top: 4px !important;
+  left: 4px !important;
+}
+
+.ads-grid.list-view .ad-card-expiry-badge {
+  font-size: 9px !important;
+  padding: 2px 4px !important;
+  top: 4px !important;
+  right: 4px !important;
+}
+
+.ads-grid.list-view .ad-card-geo-badge {
+  bottom: 4px !important;
+  left: 4px !important;
+}
+
+.ads-grid.list-view .country-pill-tag {
+  font-size: 8.5px !important;
+  padding: 1px 4px !important;
 }
 
 /* Empty State */
@@ -1850,4 +1917,14 @@ html, body {
   border: 1px solid rgba(0, 212, 255, 0.4);
   color: var(--accent-secondary);
   backdrop-filter: blur(4px);
+}
+
+
+/* Geo Partition Subrow for Mobile Viewports */
+.geo-partition-subrow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
 }
