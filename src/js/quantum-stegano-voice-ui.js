@@ -264,10 +264,72 @@ class QuantumSteganoVoiceUI {
       }
     });
 
-    // Recording button
+    // Dual Tap and Hold Recording Engine
     const recordBtn = modal.querySelector('#btnSteganoRecord');
     if (recordBtn) {
-      recordBtn.addEventListener('click', () => this.toggleRecording());
+      let holdTimer = null;
+      let isHolding = false;
+      let pointerDownTime = 0;
+
+      const onPointerDown = (e) => {
+        pointerDownTime = Date.now();
+        isHolding = false;
+
+        if (this.isRecording) {
+          return;
+        }
+
+        holdTimer = setTimeout(async () => {
+          isHolding = true;
+          if (!this.isRecording) {
+            if (navigator.vibrate) navigator.vibrate(40);
+            await this.startRecording();
+            const btnSpan = recordBtn.querySelector('span');
+            if (btnSpan && this.isRecording) {
+              btnSpan.textContent = 'Release to Finish';
+            }
+          }
+        }, 200);
+      };
+
+      const onPointerUp = async (e) => {
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+
+        if (isHolding) {
+          isHolding = false;
+          if (this.isRecording) {
+            if (navigator.vibrate) navigator.vibrate(30);
+            this.stopRecording();
+          }
+        } else {
+          // Tap (< 200ms) toggles recording
+          if (navigator.vibrate) navigator.vibrate(25);
+          if (this.isRecording) {
+            this.stopRecording();
+          } else {
+            await this.startRecording();
+          }
+        }
+      };
+
+      const onPointerCancel = () => {
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        if (isHolding && this.isRecording) {
+          isHolding = false;
+          this.stopRecording();
+        }
+      };
+
+      recordBtn.addEventListener('pointerdown', onPointerDown);
+      recordBtn.addEventListener('pointerup', onPointerUp);
+      recordBtn.addEventListener('pointercancel', onPointerCancel);
+      recordBtn.addEventListener('contextmenu', (e) => e.preventDefault());
     }
 
     modal.querySelector('#btnSteganoPlayPreview')?.addEventListener('click', () => this.playRecordedPreview());
@@ -316,37 +378,96 @@ class QuantumSteganoVoiceUI {
   }
 
   async startRecording() {
+    if (this.isRecording) return;
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      this.mediaRecorder = new MediaRecorder(stream);
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Microphone not supported in this browser.');
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      this.currentStream = stream;
+
+      let mimeType = '';
+      if (typeof MediaRecorder !== 'undefined' && typeof MediaRecorder.isTypeSupported === 'function') {
+        const types = [
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/mp4',
+          'audio/aac',
+          'audio/ogg'
+        ];
+        for (const t of types) {
+          if (MediaRecorder.isTypeSupported(t)) {
+            mimeType = t;
+            break;
+          }
+        }
+      }
+
+      this.mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       this.audioChunks = [];
 
       this.mediaRecorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) this.audioChunks.push(e.data);
+        if (e.data && e.data.size > 0) {
+          this.audioChunks.push(e.data);
+        }
       };
 
       this.mediaRecorder.onstop = () => {
-        this.recordedVoiceBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
-        stream.getTracks().forEach(t => t.stop());
+        const type = (this.mediaRecorder && this.mediaRecorder.mimeType) || mimeType || 'audio/webm';
+        this.recordedVoiceBlob = new Blob(this.audioChunks, { type });
+        if (this.currentStream) {
+          this.currentStream.getTracks().forEach(t => t.stop());
+          this.currentStream = null;
+        }
         this.updateRecordingUIState(false, true);
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('Voice recorded! Tap Synthesize & Send below.', 'success', 2500);
+        }
       };
 
-      this.mediaRecorder.start();
+      this.mediaRecorder.start(100);
       this.isRecording = true;
       this.recordingStartTime = Date.now();
       this.startRecordingTimer();
       this.updateRecordingUIState(true, false);
-      this.initWaveformVisualizer(stream);
-    } catch (err) {
+
+      try {
+        this.initWaveformVisualizer(stream);
+      } catch (visErr) {
+        console.warn('[Stegano UI] Visualizer note:', visErr);
+      }
+
       if (typeof window.showNotif === 'function') {
-        window.showNotif('Microphone access is required to record a secret transmission.', 'error');
+        window.showNotif('Recording... Speak your secret transmission', 'info', 2000);
+      }
+    } catch (err) {
+      console.error('[Stegano UI] Recording error:', err);
+      this.isRecording = false;
+      this.updateRecordingUIState(false, false);
+      if (typeof window.showNotif === 'function') {
+        const msg = (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')
+          ? 'Microphone permission was denied. Please allow microphone access in browser settings.'
+          : 'Microphone error: ' + (err.message || 'Unable to access microphone');
+        window.showNotif(msg, 'error', 4000);
       }
     }
   }
 
   stopRecording() {
     if (this.mediaRecorder && this.isRecording) {
-      this.mediaRecorder.stop();
+      try {
+        if (this.mediaRecorder.state !== 'inactive') {
+          this.mediaRecorder.stop();
+        }
+      } catch (_) {}
       this.isRecording = false;
       this.stopRecordingTimer();
       this.stopWaveformVisualizer();
@@ -409,8 +530,13 @@ class QuantumSteganoVoiceUI {
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const audioCtx = new AudioCtx();
     this.audioContext = audioCtx;
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {});
+    }
     const source = audioCtx.createMediaStreamSource(stream);
     const analyser = audioCtx.createAnalyser();
     analyser.fftSize = 64;
