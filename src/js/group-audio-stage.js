@@ -128,7 +128,7 @@
         panel.id = 'groupAudioStagePanel';
         panel.style.cssText = 'background:rgba(3,7,18,0.92); border:1px solid rgba(0,243,255,0.25); border-radius:12px; margin:10px 14px; padding:14px; box-shadow:0 4px 20px rgba(0,243,255,0.08);';
         
-        const chatView = document.querySelector('.chat-view') || document.querySelector('.chat-container') || document.getElementById('chatMessages');
+        const chatView = document.getElementById('messages-area') || document.querySelector('.messages-list') || document.getElementById('chatDetailView');
         if (chatView && chatView.parentNode) {
           chatView.parentNode.insertBefore(panel, chatView);
         } else {

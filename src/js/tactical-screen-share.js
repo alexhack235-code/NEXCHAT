@@ -19,6 +19,14 @@
   const NexTacticalScreenShare = {
     async startScreenShare() {
       try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Tactical Screen Share is supported on desktop browsers (Chrome/Edge/Firefox). Not supported on mobile browsers.', 'warning', 4500);
+          } else {
+            alert('Tactical Screen Share is supported on desktop browsers (Chrome/Edge/Firefox).');
+          }
+          return;
+        }
         screenStream = await navigator.mediaDevices.getDisplayMedia({
           video: { frameRate: 60 },
           audio: true

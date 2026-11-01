@@ -8136,6 +8136,7 @@ const closeChatOptionsMenu = () => {
   const menu = document.getElementById("chatOptionsMenu");
   if (menu) menu.style.display = "none";
 };
+window.closeChatOptionsMenu = closeChatOptionsMenu;
 
 document.getElementById("groupAdminBtn")?.addEventListener("click", () => {
   if (currentChatType === 'group' && currentChatUser) {
@@ -12997,8 +12998,9 @@ function pushNavHistoryTrap() {
 function handleWhatsAppBackAction() {
   // 1. Check if 22-App Attachment Hub is open
   const hub = document.getElementById('attachmentPopupHub');
-  if (hub && hub.style.display !== 'none') {
-    hub.style.display = 'none';
+  if (hub && (hub.classList.contains('active') || hub.classList.contains('is-open') || (hub.style.display && hub.style.display !== 'none'))) {
+    hub.classList.remove('active', 'is-open');
+    hub.style.setProperty('display', 'none', 'important');
     pushNavHistoryTrap();
     return true;
   }
@@ -25434,20 +25436,33 @@ function initAttachmentHubActions() {
   });
 
   // Wire Paperclip Toggle Button for Attachment Hub
+  window.toggleAttachmentHub = function(e) {
+    if (e) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+    }
+    const hubEl = document.getElementById('attachmentPopupHub');
+    if (!hubEl) return;
+
+    const now = Date.now();
+    if (hubEl._lastToggleTime && (now - hubEl._lastToggleTime < 250)) {
+      return;
+    }
+    hubEl._lastToggleTime = now;
+
+    const isOpen = hubEl.classList.contains('active') || hubEl.classList.contains('is-open') || (hubEl.style.display && hubEl.style.display !== 'none');
+    if (isOpen) {
+      hubEl.classList.remove('active', 'is-open');
+      hubEl.style.setProperty('display', 'none', 'important');
+    } else {
+      hubEl.classList.add('active', 'is-open');
+      hubEl.style.setProperty('display', 'grid', 'important');
+    }
+  };
+
   const toggleBtn = document.getElementById('btnToggleAttachmentHub');
   if (toggleBtn) {
-    toggleBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const isOpen = hub.classList.contains('active') || hub.classList.contains('is-open') || hub.style.display === 'grid';
-      if (isOpen) {
-        hub.classList.remove('active', 'is-open');
-        hub.style.setProperty('display', 'none', 'important');
-      } else {
-        hub.classList.add('active', 'is-open');
-        hub.style.setProperty('display', 'grid', 'important');
-      }
-    });
+    toggleBtn.onclick = (e) => window.toggleAttachmentHub(e);
   }
 
   // Auto-dismiss hub on action item click

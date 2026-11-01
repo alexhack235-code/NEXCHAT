@@ -128,10 +128,13 @@
       const summary = this.summarizeMessages(messages);
       const card = this.renderBriefingCard(summary);
 
-      const container = document.getElementById('messagesContainer') || document.getElementById('chatMessages');
+      const container = document.getElementById('messages-area') || document.querySelector('.messages-list') || document.getElementById('chatDetailView');
       if (container) {
         container.appendChild(card);
         card.scrollIntoView({ behavior: 'smooth' });
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('ChronEX Group Intelligence Briefing generated', 'success', 2500);
+        }
       }
     }
   };

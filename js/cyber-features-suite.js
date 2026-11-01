@@ -1429,27 +1429,12 @@ class NexSandboxRunner {
    ============================================================================ */
 class NexAttachHub {
   constructor() {
-    this.attachBtn = document.getElementById('btnToggleAttachmentHub') || document.getElementById('attach-btn');
     this.hub = document.getElementById('attachmentPopupHub');
     this.init();
   }
 
   init() {
     if (!this.hub) return;
-
-    if (this.attachBtn) {
-      this.attachBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.toggle();
-      });
-    }
-
-    document.addEventListener('click', (e) => {
-      if (this.hub && !this.hub.contains(e.target) && (!this.attachBtn || !this.attachBtn.contains(e.target))) {
-        this.hide();
-      }
-    });
 
     // Item bindings
     document.getElementById('hubActionFile')?.addEventListener('click', () => {
@@ -1494,10 +1479,13 @@ class NexAttachHub {
   }
 
   toggle() {
-    if (!this.hub) return;
-    const isOpen = this.hub.classList.contains('active') || this.hub.classList.contains('is-open') || this.hub.style.display === 'grid';
-    if (isOpen) this.hide();
-    else this.show();
+    if (typeof window.toggleAttachmentHub === 'function') {
+      window.toggleAttachmentHub();
+    } else if (this.hub) {
+      const isOpen = this.hub.classList.contains('active') || this.hub.classList.contains('is-open') || this.hub.style.display === 'grid';
+      if (isOpen) this.hide();
+      else this.show();
+    }
   }
 
   show() {

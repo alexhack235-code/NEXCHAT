@@ -64,7 +64,7 @@
         modal = document.createElement('div');
         modal.id = 'p2pTransferModal';
         modal.className = 'cyber-modal-overlay';
-        modal.style.cssText = 'position:fixed; bottom:20px; right:20px; z-index:99999; width:340px; background:rgba(3,7,18,0.96); border:1px solid #00f3ff; border-radius:12px; padding:16px; box-shadow:0 0 25px rgba(0,243,255,0.25); color:#fff; backdrop-filter:blur(8px);';
+        modal.style.cssText = 'position:fixed; bottom:76px; left:16px; right:16px; margin:0 auto; max-width:360px; width:calc(100vw - 32px); z-index:99999; background:rgba(3,7,18,0.96); border:1px solid #00f3ff; border-radius:12px; padding:16px; box-shadow:0 0 25px rgba(0,243,255,0.25); color:#fff; backdrop-filter:blur(8px); box-sizing:border-box;';
         document.body.appendChild(modal);
       }
 
