@@ -761,6 +761,16 @@ onAuthStateChanged(auth, user => {
 let googleSignInInitialized = false;
 
 window.quickGuestLogin = async function () {
+  // Anti-Automation Cooldown Rate-Limiter (15s cooldown per profile)
+  const lastGuestAttempt = parseInt(localStorage.getItem('nexchat_guest_ts') || '0', 10);
+  const now = Date.now();
+  if (now - lastGuestAttempt < 15000) {
+    const waitSec = Math.ceil((15000 - (now - lastGuestAttempt)) / 1000);
+    showResult('Rate Limit: Please wait ' + waitSec + 's before initiating another guest session.', true);
+    return;
+  }
+  localStorage.setItem('nexchat_guest_ts', String(now));
+
   showLoginLoader('Setting up guest workspace...', 'Authenticating anonymous session...');
   showResult('Authenticating guest session...', false);
   try {
