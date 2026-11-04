@@ -24,6 +24,8 @@
       this.startTime = 0;
       this.durationSec = 0;
       this.isRecording = false;
+      this.speechRecognizer = null;
+      this.speechTranscript = '';
 
       this.recordBtn = null;
       this.recordingUI = null;
@@ -155,6 +157,7 @@
         if (this.messageForm) this.messageForm.style.display = 'none';
         if (this.recordingUI) this.recordingUI.style.display = 'flex';
         this.startTimer();
+        this.startSpeechRecognition();
 
         if (navigator.vibrate) navigator.vibrate(30);
         if (window.playLuxuryPopSound) window.playLuxuryPopSound();
@@ -226,9 +229,46 @@
       this.animFrameId = requestAnimationFrame(renderFrame);
     }
 
+    startSpeechRecognition() {
+      this.speechTranscript = '';
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) {
+        console.log('[VoiceRecorder] Web Speech Recognition API not available.');
+        return;
+      }
+      try {
+        this.speechRecognizer = new SpeechRec();
+        this.speechRecognizer.continuous = true;
+        this.speechRecognizer.interimResults = true;
+        this.speechRecognizer.lang = localStorage.getItem('nex_voice_input_lang') || navigator.language || 'en-US';
+
+        this.speechRecognizer.onresult = (event) => {
+          let finalStr = '';
+          for (let i = 0; i < event.results.length; i++) {
+            finalStr += event.results[i][0].transcript + ' ';
+          }
+          if (finalStr.trim()) {
+            this.speechTranscript = finalStr.trim();
+          }
+        };
+        this.speechRecognizer.onerror = (e) => {
+          console.warn('[VoiceRecorder] Speech recognition notice:', e.error);
+        };
+        this.speechRecognizer.start();
+      } catch (e) {
+        console.warn('[VoiceRecorder] SpeechRecognition start warning:', e);
+      }
+    }
+
     cancelRecording() {
       if (!this.isRecording) return;
       this.isRecording = false;
+
+      if (this.speechRecognizer) {
+        try { this.speechRecognizer.stop(); } catch (e) {}
+        this.speechRecognizer = null;
+      }
+      this.speechTranscript = '';
 
       // Discard recorder without triggering send
       if (this.mediaRecorder) {
@@ -251,6 +291,13 @@
     }
 
     async handleRecordingComplete(mimeType) {
+      if (this.speechRecognizer) {
+        try { this.speechRecognizer.stop(); } catch (e) {}
+        this.speechRecognizer = null;
+      }
+      const capturedTranscript = this.speechTranscript || '';
+      this.speechTranscript = '';
+
       this.cleanupMedia();
       this.resetUI();
 
@@ -272,14 +319,14 @@
       const reader = new FileReader();
       reader.onload = async () => {
         const dataUrl = reader.result;
-        await this.dispatchVoiceMessage(dataUrl, audioBlob, duration);
+        await this.dispatchVoiceMessage(dataUrl, audioBlob, duration, capturedTranscript);
       };
       reader.readAsDataURL(audioBlob);
     }
 
-    async dispatchVoiceMessage(dataUrl, blob, durationSec) {
+    async dispatchVoiceMessage(dataUrl, blob, durationSec, transcript = '') {
       if (typeof window.dispatchVoiceNoteMessage === 'function') {
-        window.dispatchVoiceNoteMessage(dataUrl, durationSec);
+        window.dispatchVoiceNoteMessage(dataUrl, durationSec, transcript);
         return;
       }
 
@@ -305,6 +352,10 @@
     }
 
     cleanupMedia() {
+      if (this.speechRecognizer) {
+        try { this.speechRecognizer.stop(); } catch (e) {}
+        this.speechRecognizer = null;
+      }
       clearInterval(this.timerInterval);
       if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
       if (this.stream) {

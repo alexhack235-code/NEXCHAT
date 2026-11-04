@@ -612,7 +612,7 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
     if (typeof fetch === 'function' && targetLang !== 'pcm' && targetLang !== 'pidgin') {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 950);
+        const timer = setTimeout(() => controller.abort(), 3500);
         const apiTarget = targetLang === 'en' ? 'en' : targetLang;
         const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(apiTarget)}&dt=t&q=${encodeURIComponent(clean)}`, {
           signal: controller.signal
@@ -635,7 +635,7 @@ export async function fastTranslateAsync(rawText, targetLang = 'es') {
     if (typeof fetch === 'function' && typeof AbortController !== 'undefined') {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 900);
+        const timer = setTimeout(() => controller.abort(), 3000);
         const apiTarget = (targetLang === 'pcm' || targetLang === 'pidgin') ? 'en' : targetLang;
         const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${encodeURIComponent(apiTarget)}`, {
           signal: controller.signal

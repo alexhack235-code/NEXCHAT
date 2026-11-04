@@ -1969,6 +1969,9 @@ class NexTranslator {
   onChatLoaded(chatId, isGroup = false) {
     this.currentChatId = chatId;
     this.currentIsGroup = !!isGroup;
+    this.autoTranslateOnLoad = localStorage.getItem('nex_auto_translate_on_load') === 'true';
+    this.autoTranslateTargetLang = localStorage.getItem('nex_auto_translate_target_lang') || this.autoTranslateTargetLang || 'en';
+    this.setupFeedObserver();
     this.updateChatHeaderBadge();
 
     if (this.isAutoTranslateActiveForCurrentChat()) {
@@ -2058,22 +2061,16 @@ class NexTranslator {
 
     // Extract message text cleanly
     let rawText = '';
-    const nexText = bubble.querySelector('.nex-msg-text');
-    const pTag = bubble.querySelector('p');
-    const msgText = bubble.querySelector('.message-text');
-
-    if (nexText) {
-      rawText = nexText.innerText || nexText.textContent || '';
-    } else if (pTag) {
-      rawText = pTag.innerText || pTag.textContent || '';
-    } else if (msgText) {
-      rawText = msgText.innerText || msgText.textContent || '';
+    const textEl = bubble.querySelector('.message-text-content, .ai-body-content, .nex-msg-text, .message-text, p');
+    if (textEl) {
+      rawText = textEl.innerText || textEl.textContent || '';
     } else {
       const clone = bubble.cloneNode(true);
       clone.querySelectorAll(
         '.nex-msg-meta, .message-hover-actions, .message-attachment-container, ' +
         '.message-reaction-badge, .message-reaction-badge-container, .e2ee-secure-badge, ' +
-        '.message-translate-chip, .auto-translated-card, .time-span'
+        '.message-translate-chip, .auto-translated-card, .time-span, .reply-quote, ' +
+        '.message-time-row, .message-time-text'
       ).forEach(el => el.remove());
       rawText = clone.innerText || clone.textContent || '';
     }
@@ -2083,7 +2080,7 @@ class NexTranslator {
 
     bubble.dataset.autoTranslated = 'true';
 
-    const targetLang = localStorage.getItem('nexchat_preferred_language') || localStorage.getItem('nex_auto_translate_target_lang') || this.autoTranslateTargetLang || 'en';
+    const targetLang = localStorage.getItem('nex_auto_translate_target_lang') || this.autoTranslateTargetLang || localStorage.getItem('nexchat_preferred_language') || 'en';
     const langName = this.languageNames[targetLang] || targetLang;
 
     try {
@@ -2112,7 +2109,7 @@ class NexTranslator {
         this.speakText(translated, targetLang);
       });
 
-      const meta = bubble.querySelector('.nex-msg-meta, .message-hover-actions, .time-span') || bubble.lastElementChild;
+      const meta = bubble.querySelector('.message-time-row, .time-span, .nex-msg-meta, .message-hover-actions') || bubble.lastElementChild;
       if (meta && meta.parentNode === bubble) {
         bubble.insertBefore(card, meta);
       } else {
@@ -2220,7 +2217,7 @@ class NexTranslator {
     const gtxPromise = (async () => {
       if (typeof fetch === 'function') {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 2000);
+        const timer = setTimeout(() => controller.abort(), 3500);
         try {
           const apiTarget = targetLang === 'en' ? 'en' : targetLang;
           const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${encodeURIComponent(apiTarget)}&dt=t&q=${encodeURIComponent(clean)}`;
@@ -2243,7 +2240,7 @@ class NexTranslator {
     const edgeMtPromise = (async () => {
       if (typeof fetch === 'function' && typeof AbortController !== 'undefined') {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 850);
+        const timer = setTimeout(() => controller.abort(), 3000);
         try {
           const apiTarget = targetLang === 'en' ? 'en' : targetLang;
           const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=autodetect|${apiTarget}`, {
@@ -2285,18 +2282,8 @@ class NexTranslator {
       // Parallel race failed or timed out
     }
 
-    // 4. Smart synthetic prefix fallback
-    const prefixes = {
-      'es': 'Traducido: ',
-      'fr': 'Traduit: ',
-      'de': 'Übersetzt: ',
-      'ja': '翻訳済み: ',
-      'zh': '翻译: ',
-      'ru': 'Переведено: ',
-      'it': 'Tradotto: ',
-      'en': '[Translated] '
-    };
-    return (prefixes[targetLang] || `[${targetLang.toUpperCase()}] `) + clean;
+    // 4. Clean fallback: return original text if translation endpoints are unavailable
+    return clean;
   }
 
   cacheTranslation(key, value) {

@@ -5295,23 +5295,36 @@ window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
 
 // Global Dispatcher for Voice Notes
 window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, transcript = '') {
-  if (!currentChatUser) {
+  const targetUser = currentChatUser || window.currentChatUser || window.currentGroupId;
+  const senderId = myUID || window.myUID;
+
+  if (!targetUser) {
     if (typeof showNotif === 'function') showNotif("Please select a conversation first", "error");
     return;
   }
-  if (!myUID) {
+  if (!senderId) {
     if (typeof showNotif === 'function') showNotif("Please log in first", "error");
     return;
   }
+  if (!currentChatUser) currentChatUser = targetUser;
+  if (!myUID) myUID = senderId;
 
   const isViewOnce = window.isVoiceViewOnce || false;
   const burnTimeout = window.voiceViewOnceTimeout || 10;
 
   let translatedVoiceText = '';
-  const targetVoiceLang = localStorage.getItem('nex_auto_translate_target_lang') || 'en';
-  if (transcript && transcript.trim() && window.CyberFeatures && window.CyberFeatures.translator) {
+  const targetVoiceLang = localStorage.getItem('nex_auto_translate_target_lang') || localStorage.getItem('nexchat_preferred_language') || 'en';
+  if (transcript && transcript.trim()) {
     try {
-      translatedVoiceText = await window.CyberFeatures.translator.translateText(transcript, targetVoiceLang);
+      if (window.CyberFeatures && window.CyberFeatures.translator) {
+        translatedVoiceText = await window.CyberFeatures.translator.translateText(transcript.trim(), targetVoiceLang);
+      } else if (typeof window.fastTranslateAsync === 'function') {
+        translatedVoiceText = await window.fastTranslateAsync(transcript.trim(), targetVoiceLang);
+      } else if (typeof window.generateChronexAIResponse === 'function') {
+        const prompt = `Translate this voice note transcript into ${targetVoiceLang}. Direct translation ONLY:\n"${transcript.trim()}"`;
+        const aiRes = await window.generateChronexAIResponse(prompt);
+        if (aiRes && !aiRes.includes('QUOTA')) translatedVoiceText = aiRes.trim();
+      }
     } catch (e) {
       console.warn('Voice translation notice:', e);
     }
@@ -5337,6 +5350,20 @@ window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, tran
     if (toggleBtn) toggleBtn.classList.remove('active');
   }
 
+  // Seamless Group Voice Note Routing
+  if (currentChatType === 'group' || window.currentGroupId === targetUser) {
+    try {
+      if (typeof sendGroupMessage === 'function') {
+        await sendGroupMessage(targetUser, isViewOnce ? "[1-VIEW VOICE NOTE]" : "", audioAttachment);
+      }
+      if (typeof playLuxuryPopSound === 'function') playLuxuryPopSound();
+      if (typeof showNotif === 'function') showNotif("Voice note sent to group!", "success", 1500);
+    } catch (grpErr) {
+      console.warn('[VoiceNote] Group dispatch notice:', grpErr);
+      if (typeof showNotif === 'function') showNotif("Failed to send voice note to group: " + grpErr.message, "error");
+    }
+    return;
+  }
   const clientMsgId = `vn_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
   // 1. Instant 0ms Optimistic UI Append
