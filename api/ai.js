@@ -105,17 +105,30 @@ export default async function handler(req, res) {
     return res.status(503).json({ error: 'No active AI API keys configured.' });
   }
 
-  // Prepare Gemini payload
+  // Prepare Gemini payload with strict multiturn validation (alternating user/model, starting with user)
   const contents = [];
-  const recentHistory = Array.isArray(history) ? history.slice(-10) : [];
+  const recentHistory = Array.isArray(history) ? history.slice(-12) : [];
   for (const item of recentHistory) {
+    const text = typeof item.content === 'string' ? item.content.trim() : (item.parts?.[0]?.text || '').trim();
+    if (!text) continue;
     const role = (item.role === 'assistant' || item.role === 'model') ? 'model' : 'user';
-    if (item.content) {
-      contents.push({
-        role,
-        parts: [{ text: String(item.content) }]
-      });
+
+    if (contents.length === 0) {
+      if (role === 'user') {
+        contents.push({ role: 'user', parts: [{ text }] });
+      }
+    } else {
+      const prev = contents[contents.length - 1];
+      if (prev.role === role) {
+        prev.parts[0].text += '\n\n' + text;
+      } else {
+        contents.push({ role, parts: [{ text }] });
+      }
     }
+  }
+
+  if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
+    contents.pop();
   }
 
   // Multimodal user parts

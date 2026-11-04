@@ -38,6 +38,10 @@
     }
 
     init() {
+      if (typeof window !== 'undefined') {
+        window.NexVoiceRecorderActive = true;
+        window.VoiceRecorderController = this;
+      }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => this.bindDOM());
       } else {

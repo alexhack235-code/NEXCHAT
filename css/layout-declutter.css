@@ -4608,8 +4608,14 @@ body[data-active-section="updates"] .top-header {
 #infoSidebar:not(.is-group-info) #groupAdvancedSettingsSection,
 #infoSidebar:not(.is-group-info) #groupDisappearingSection,
 #infoSidebar:not(.is-group-info) #groupMuteMembersSection,
+#infoSidebar:not(.is-group-info) #groupApprovalSection,
+#infoSidebar:not(.is-group-info) #groupPendingRequestsSection,
+#infoSidebar:not(.is-group-info) #membersList,
 #infoSidebar:not(.is-group-info) #groupVipSettingsBox,
+#infoSidebar:not(.is-group-info) #groupVipGateSection,
 #infoSidebar:not(.is-group-info) #groupActivityTelemetrySection,
+#infoSidebar:not(.is-group-info) #keptMessagesSection,
+#infoSidebar:not(.is-group-info) .group-only-info,
 #infoSidebar:not(.is-group-info) [data-group-only="true"] {
   display: none !important;
 }

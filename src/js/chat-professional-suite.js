@@ -2707,6 +2707,10 @@ ${text}`;
        28. INTERACTIVE AUDIO WAVEFORM RECORDING STUDIO
        ------------------------------------------------------------------------ */
     initVoiceRecordingStudio() {
+      if (typeof window !== 'undefined' && (window.NexVoiceRecorderActive || window.VoiceRecorderController)) {
+        console.log('[ChatProfessionalSuite] Primary VoiceRecorderController active, deferring mic UI bindings.');
+        return;
+      }
       const recordBtn = document.getElementById('audio-record-btn');
       const recordingUI = document.getElementById('audioRecordingUI');
       const messageForm = document.getElementById('message-form');

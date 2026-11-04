@@ -373,7 +373,11 @@ class ChronexAI {
     }
   }
 
-  async chat(message, conversationId = "default", clientId = null, imagePayload = null) {
+  async chat(message, conversationId = "default", clientId = null, imagePayload = null, externalHistory = null) {
+    if (Array.isArray(externalHistory) && externalHistory.length > 0) {
+      // Merge external chat history (e.g. from active DOM/Firestore) into conversationHistory
+      this.conversationHistory = externalHistory.slice(-16);
+    }
     try {
       if ((!message || message.trim() === "") && !imagePayload) {
         console.warn("[WARN] Chronex AI: Received empty message directive");
@@ -421,10 +425,13 @@ class ChronexAI {
       if (!aiResponse) {
         console.log(" Cloud/Local LLMs unavailable, engaging built-in offline engine...");
         aiResponse = await this.getJavaScriptResponse(message);
-      } else {
-        // Record turns in conversation history for multi-turn context
-        this.conversationHistory.push({ role: 'user', content: message });
-        this.conversationHistory.push({ role: 'assistant', content: aiResponse });
+      }
+
+      // Record turns in conversation history for all tiers (Gemini, ChatGPT, and Fallback)
+      this.conversationHistory.push({ role: 'user', content: message });
+      this.conversationHistory.push({ role: 'assistant', content: aiResponse });
+      if (this.conversationHistory.length > 30) {
+        this.conversationHistory = this.conversationHistory.slice(-20);
       }
 
       this.recordDailyRequest(quotaId);
@@ -669,17 +676,34 @@ class ChronexAI {
       return null;
     }
 
-    // Format conversation history for Gemini API (roles: 'user' and 'model')
+    // Format conversation history for Gemini API strictly adhering to multiturn rules:
+    // 1) First turn must be 'user'
+    // 2) Consecutive turns must strictly alternate user -> model -> user
+    // 3) Consecutive same-role turns are merged
+    // 4) Turn immediately preceding current user message must be 'model'
     const contents = [];
-    const recentHistory = (conversationHistory || []).slice(-10); // Keep last 10 turns
+    const recentHistory = (conversationHistory || []).slice(-12);
     for (const msg of recentHistory) {
+      const text = typeof msg.content === 'string' ? msg.content.trim() : (msg.parts?.[0]?.text || '').trim();
+      if (!text) continue;
       const role = (msg.role === 'assistant' || msg.role === 'model') ? 'model' : 'user';
-      if (msg.content) {
-        contents.push({
-          role: role,
-          parts: [{ text: String(msg.content) }]
-        });
+
+      if (contents.length === 0) {
+        if (role === 'user') {
+          contents.push({ role: 'user', parts: [{ text }] });
+        }
+      } else {
+        const prev = contents[contents.length - 1];
+        if (prev.role === role) {
+          prev.parts[0].text += '\n\n' + text;
+        } else {
+          contents.push({ role, parts: [{ text }] });
+        }
       }
+    }
+
+    if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
+      contents.pop();
     }
 
     // Append current user message (Multimodal Vision Supported)

@@ -47,6 +47,10 @@ class NexVoiceRecorder {
   }
 
   initListeners() {
+    if (typeof window !== 'undefined' && (window.NexVoiceRecorderActive || window.VoiceRecorderController)) {
+      console.log('[CyberFeaturesSuite] Dedicated VoiceRecorderController active, deferring mic UI handling.');
+      return;
+    }
     if (this.ui.micBtn) {
       this.ui.micBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -232,10 +236,16 @@ class NexVoiceRecorder {
     }
 
     if (this.audioChunks && this.audioChunks.length > 0) {
-      audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+      const mime = this.mediaRecorder?.mimeType || 'audio/webm';
+      audioBlob = new Blob(this.audioChunks, { type: mime });
     } else {
-      // Synthetic fallback audio note (sub-bass / beep chime) so tests & mic-less devices always work
-      audioBlob = this.createSyntheticAudioBlob(duration);
+      console.warn('[CyberFeaturesSuite] No microphone audio chunks captured. Aborting voice note dispatch.');
+      if (typeof window.showNotif === 'function') {
+        window.showNotif("No audio captured from microphone. Voice note not sent.", "info", 2500);
+      }
+      this.cleanupStream();
+      this.resetUI();
+      return;
     }
 
     if (this.speechRecognizer) {

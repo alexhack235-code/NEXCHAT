@@ -1815,18 +1815,7 @@ function cancelChatLoadFeedback() {
 
 function queueChatLoadFeedback(statusText = 'Loading chat...', delay = 1000) {
   cancelChatLoadFeedback();
-  chatLoadSkeletonTimer = setTimeout(() => {
-    const area = document.getElementById('messages-area');
-    if (area && area.children.length === 0) {
-      renderChatLoadingSkeleton(currentChatType);
-    }
-  }, Math.max(400, delay - 400));
-  chatLoadOverlayTimer = setTimeout(() => {
-    const area = document.getElementById('messages-area');
-    if (area && area.children.length === 0) {
-      showChatReloadOverlay(statusText);
-    }
-  }, delay);
+  // WhatsApp Web smooth parity: never pop up full-screen loading bars or destructive skeletons during chat switching
 }
 
 function hideChatReloadOverlay() {
@@ -2714,15 +2703,17 @@ async function showGroupInfoPanel(groupId) {
 }
 
 function resetInfoSidebarMode(isGroup) {
+  const infoSidebarEl = document.getElementById('infoSidebar');
   const groupAdminActionsSection = document.getElementById('groupAdminActionsSection');
   const groupAdvancedSettingsSection = document.getElementById('groupAdvancedSettingsSection');
   const groupDisappearingSection = document.getElementById('groupDisappearingSection');
   const groupMuteMembersSection = document.getElementById('groupMuteMembersSection');
   const groupApprovalSection = document.getElementById('groupApprovalSection');
+  const groupPendingRequestsSection = document.getElementById('groupPendingRequestsSection');
   const membersListEl = document.getElementById('membersList');
-  const groupVipBox = document.getElementById('groupVipSettingsBox');
+  const groupVipBox = document.getElementById('groupVipGateSection') || document.getElementById('groupVipSettingsBox');
   const groupActivityBox = document.getElementById('groupActivityTelemetrySection');
-  const keptMessagesSection = document.getElementById('keptMessagesValue')?.closest('.info-section');
+  const keptMessagesSection = document.getElementById('keptMessagesSection') || document.getElementById('keptMessagesValue')?.closest('.info-section');
 
   if (!isGroup) {
     if (groupAdminActionsSection) groupAdminActionsSection.style.display = 'none';
@@ -2730,16 +2721,22 @@ function resetInfoSidebarMode(isGroup) {
     if (groupDisappearingSection) groupDisappearingSection.style.display = 'none';
     if (groupMuteMembersSection) groupMuteMembersSection.style.display = 'none';
     if (groupApprovalSection) groupApprovalSection.style.display = 'none';
+    if (groupPendingRequestsSection) groupPendingRequestsSection.style.display = 'none';
     if (membersListEl) membersListEl.style.display = 'none';
     if (groupVipBox) groupVipBox.style.display = 'none';
     if (groupActivityBox) groupActivityBox.style.display = 'none';
     if (keptMessagesSection) keptMessagesSection.style.display = 'none';
 
-    const infoSidebarEl = document.getElementById('infoSidebar');
     if (infoSidebarEl) {
-      infoSidebarEl.querySelectorAll('.group-only-info, [data-group-only="true"]').forEach(el => el.remove());
+      infoSidebarEl.classList.remove('is-group-info');
+      infoSidebarEl.querySelectorAll('.group-only-info, [data-group-only="true"]').forEach(el => {
+        el.style.display = 'none';
+      });
     }
   } else {
+    if (infoSidebarEl) {
+      infoSidebarEl.classList.add('is-group-info');
+    }
     if (keptMessagesSection) keptMessagesSection.style.display = 'block';
   }
 }
@@ -6647,9 +6644,30 @@ async function generateChronexAIResponse(text, imagePayload = null) {
     }
   }
 
+  // Extract active conversation history from messages-area so Chronex AI is strictly context-aware
+  let activeHistory = [];
+  try {
+    const messagesDiv = document.getElementById('messages-area');
+    if (messagesDiv) {
+      const bubbles = messagesDiv.querySelectorAll('.message-bubble');
+      const recent = Array.from(bubbles).slice(-12);
+      recent.forEach(b => {
+        const isSent = b.classList.contains('sent');
+        const textEl = b.querySelector('.message-text-content, .ai-body-content') || b;
+        const msgText = (textEl.textContent || '').trim();
+        if (msgText && !msgText.startsWith('Synchronizing') && !msgText.startsWith('Loading')) {
+          activeHistory.push({
+            role: isSent ? 'user' : 'assistant',
+            content: msgText
+          });
+        }
+      });
+    }
+  } catch (_) {}
+
   try {
     if (chronexAI && typeof chronexAI.chat === 'function') {
-      return await chronexAI.chat(text, myUID || 'default', null, imagePayload);
+      return await chronexAI.chat(text, myUID || 'default', null, imagePayload, activeHistory);
     }
   } catch (err) {
     console.warn("Direct chronexAI.chat error:", err);
@@ -7329,23 +7347,29 @@ function loadMessages() {
     cachedDirectMessages = getCachedDirectChatMessages(myUID, currentChatUser);
   }
 
+  const targetUid = currentChatUser;
+  const chatKey = getDirectChatCacheKey(myUID, targetUid);
+  cancelChatLoadFeedback();
+
   if (cachedDirectMessages && cachedDirectMessages.length > 0) {
     renderCachedDirectChatHistory(cachedDirectMessages, messagesDiv);
-    cancelChatLoadFeedback();
+    messagesDiv.dataset.renderedChatKey = chatKey;
   } else {
-    const targetUid = currentChatUser;
-    const chatKey = getDirectChatCacheKey(myUID, targetUid);
     if (typeof loadChatHistoryFromIndexedDB === 'function') {
       loadChatHistoryFromIndexedDB(chatKey).then((idbMessages) => {
         if (currentChatUser === targetUid && idbMessages && idbMessages.length > 0) {
           cacheDirectChatMessages(myUID, targetUid, idbMessages);
-          renderCachedDirectChatHistory(idbMessages, messagesDiv);
-          cancelChatLoadFeedback();
+          if (messagesDiv.dataset.renderedChatKey !== chatKey) {
+            renderCachedDirectChatHistory(idbMessages, messagesDiv);
+            messagesDiv.dataset.renderedChatKey = chatKey;
+          }
         }
       }).catch(() => {});
     }
-    messagesDiv.innerHTML = '';
-    queueChatLoadFeedback('Loading messages...', 1200);
+    if (messagesDiv.dataset.renderedChatKey !== chatKey) {
+      messagesDiv.innerHTML = '';
+      messagesDiv.dataset.renderedChatKey = chatKey;
+    }
   }
 
   const q = query(
@@ -7938,8 +7962,15 @@ function loadMessages() {
       messageFragment.appendChild(div);
     });
 
+    const activeChatKey = getDirectChatCacheKey(myUID, currentChatUser);
+    const newSignature = allMessages.map(m => (m.docId || m.id || m.clientMsgId || '') + ':' + (m.status || '') + ':' + (m.read ? '1' : '0')).join(';');
+    if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === newSignature) {
+      return;
+    }
     messagesDiv.innerHTML = "";
     messagesDiv.appendChild(messageFragment);
+    messagesDiv.dataset.renderedChatKey = activeChatKey;
+    messagesDiv.dataset.currentSignature = newSignature;
 
     const isNearBottom = (messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight) < 160;
     if (isNearBottom || (typeof allMessages !== 'undefined' && allMessages.length <= 5)) {
@@ -10211,8 +10242,16 @@ document.getElementById("infoSearchBtn")?.addEventListener("click", () => {
 
 document.getElementById("infoBtn")?.addEventListener("click", () => {
   const sidebar = document.getElementById("infoSidebar");
-  if (sidebar && currentChatUser) {
-    sidebar.style.display = sidebar.style.display === "none" ? "block" : "none";
+  if (!sidebar || !currentChatUser) return;
+  const isHidden = sidebar.style.display === "none" || !sidebar.style.display;
+  if (isHidden) {
+    if (currentChatType === 'group') {
+      showGroupInfoPanel(currentChatUser);
+    } else {
+      showUserInfoPanel(currentChatUser);
+    }
+  } else {
+    sidebar.style.display = "none";
   }
 });
 
@@ -17294,7 +17333,7 @@ async function loadGroupMessages(groupId) {
           }
         }).catch(() => {});
       }
-      queueChatLoadFeedback('Opening group chat...', 1200);
+      cancelChatLoadFeedback();
     }
     const messageInput = document.getElementById('message-input');
     const pinnedBarContainer = document.getElementById('pinnedMessagesBar');
