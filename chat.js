@@ -14768,6 +14768,12 @@ document.getElementById('quickWallpaperBtn')?.addEventListener('click', () => {
   }
 });
 
+document.getElementById('btnOpenFullWallpaperLibrary')?.addEventListener('click', () => {
+  if (typeof window.openChatWallpaperPicker === 'function') {
+    window.openChatWallpaperPicker(currentChatUser, currentChatName, currentChatType === 'group');
+  }
+});
+
 function updateBackgroundPreview(imageUrl) {
   const preview = document.getElementById("backgroundPreview");
   if (preview) {
