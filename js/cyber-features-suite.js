@@ -319,38 +319,9 @@ class NexVoiceRecorder {
     if (this.ui.timer) this.ui.timer.textContent = '0:00';
   }
 
-  createSyntheticAudioBlob(durationSec = 2) {
-    // Generate a quick valid WAV audio header + sine tone
-    const sampleRate = 8000;
-    const numSamples = sampleRate * Math.min(durationSec, 3);
-    const buffer = new ArrayBuffer(44 + numSamples);
-    const view = new DataView(buffer);
-
-    // RIFF chunk descriptor
-    this.writeString(view, 0, 'RIFF');
-    view.setUint32(4, 36 + numSamples, true);
-    this.writeString(view, 8, 'WAVE');
-    // fmt sub-chunk
-    this.writeString(view, 12, 'fmt ');
-    view.setUint32(16, 16, true);
-    view.setUint16(20, 1, true); // PCM
-    view.setUint16(22, 1, true); // Mono
-    view.setUint32(24, sampleRate, true);
-    view.setUint32(28, sampleRate, true);
-    view.setUint16(32, 1, true);
-    view.setUint16(34, 8, true); // 8-bit
-    // data sub-chunk
-    this.writeString(view, 36, 'data');
-    view.setUint32(40, numSamples, true);
-
-    // Sine tone samples
-    for (let i = 0; i < numSamples; i++) {
-      const freq = 440 + Math.sin(i / 100) * 120;
-      const sample = Math.floor(128 + 90 * Math.sin((2 * Math.PI * freq * i) / sampleRate));
-      view.setUint8(44 + i, sample);
-    }
-
-    return new Blob([buffer], { type: 'audio/wav' });
+  createSyntheticAudioBlob() {
+    // Synthetic fallback permanently disabled to ensure zero alien audio artifacts
+    return null;
   }
 
   writeString(view, offset, string) {

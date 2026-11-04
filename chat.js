@@ -2414,6 +2414,7 @@ function setupGroupAdvancedSettingsControls(groupId, groupData) {
 }
 
 async function showGroupInfoPanel(groupId) {
+  resetInfoSidebarMode(true);
   const contactSection = document.getElementById('infoContactSection');
   if (contactSection) contactSection.style.display = 'none';
   const saveContactBtn = document.getElementById('infoSaveContactBtn');
@@ -2704,6 +2705,10 @@ async function showGroupInfoPanel(groupId) {
 
 function resetInfoSidebarMode(isGroup) {
   const infoSidebarEl = document.getElementById('infoSidebar');
+  const groupTop = document.getElementById('infoGroupTopControls');
+  const groupBottom = document.getElementById('infoGroupBottomControls');
+  const userControls = document.getElementById('infoUserControlsContainer');
+  const keptMessagesSection = document.getElementById('keptMessagesSection');
   const groupAdminActionsSection = document.getElementById('groupAdminActionsSection');
   const groupAdvancedSettingsSection = document.getElementById('groupAdvancedSettingsSection');
   const groupDisappearingSection = document.getElementById('groupDisappearingSection');
@@ -2713,9 +2718,11 @@ function resetInfoSidebarMode(isGroup) {
   const membersListEl = document.getElementById('membersList');
   const groupVipBox = document.getElementById('groupVipGateSection') || document.getElementById('groupVipSettingsBox');
   const groupActivityBox = document.getElementById('groupActivityTelemetrySection');
-  const keptMessagesSection = document.getElementById('keptMessagesSection') || document.getElementById('keptMessagesValue')?.closest('.info-section');
 
   if (!isGroup) {
+    if (groupTop) groupTop.style.display = 'none';
+    if (groupBottom) groupBottom.style.display = 'none';
+    if (keptMessagesSection) keptMessagesSection.style.display = 'none';
     if (groupAdminActionsSection) groupAdminActionsSection.style.display = 'none';
     if (groupAdvancedSettingsSection) groupAdvancedSettingsSection.style.display = 'none';
     if (groupDisappearingSection) groupDisappearingSection.style.display = 'none';
@@ -2725,19 +2732,25 @@ function resetInfoSidebarMode(isGroup) {
     if (membersListEl) membersListEl.style.display = 'none';
     if (groupVipBox) groupVipBox.style.display = 'none';
     if (groupActivityBox) groupActivityBox.style.display = 'none';
-    if (keptMessagesSection) keptMessagesSection.style.display = 'none';
+    if (userControls) userControls.style.display = 'block';
 
     if (infoSidebarEl) {
       infoSidebarEl.classList.remove('is-group-info');
-      infoSidebarEl.querySelectorAll('.group-only-info, [data-group-only="true"]').forEach(el => {
+      infoSidebarEl.setAttribute('data-info-mode', 'user');
+      infoSidebarEl.querySelectorAll('.group-only-container, .group-only-info, [data-group-only="true"]').forEach(el => {
         el.style.display = 'none';
       });
     }
   } else {
+    if (groupTop) groupTop.style.display = 'block';
+    if (groupBottom) groupBottom.style.display = 'block';
+    if (keptMessagesSection) keptMessagesSection.style.display = 'block';
+    if (userControls) userControls.style.display = 'none';
+
     if (infoSidebarEl) {
       infoSidebarEl.classList.add('is-group-info');
+      infoSidebarEl.setAttribute('data-info-mode', 'group');
     }
-    if (keptMessagesSection) keptMessagesSection.style.display = 'block';
   }
 }
 
@@ -7352,16 +7365,20 @@ function loadMessages() {
   cancelChatLoadFeedback();
 
   if (cachedDirectMessages && cachedDirectMessages.length > 0) {
+    const cachedSig = cachedDirectMessages.map(m => (m.docId || m.id || m.clientMsgId || '') + ':' + (m.status || '') + ':' + (m.read ? '1' : '0')).join(';');
     renderCachedDirectChatHistory(cachedDirectMessages, messagesDiv);
     messagesDiv.dataset.renderedChatKey = chatKey;
+    messagesDiv.dataset.currentSignature = cachedSig;
   } else {
     if (typeof loadChatHistoryFromIndexedDB === 'function') {
       loadChatHistoryFromIndexedDB(chatKey).then((idbMessages) => {
         if (currentChatUser === targetUid && idbMessages && idbMessages.length > 0) {
           cacheDirectChatMessages(myUID, targetUid, idbMessages);
           if (messagesDiv.dataset.renderedChatKey !== chatKey) {
+            const idbSig = idbMessages.map(m => (m.docId || m.id || m.clientMsgId || '') + ':' + (m.status || '') + ':' + (m.read ? '1' : '0')).join(';');
             renderCachedDirectChatHistory(idbMessages, messagesDiv);
             messagesDiv.dataset.renderedChatKey = chatKey;
+            messagesDiv.dataset.currentSignature = idbSig;
           }
         }
       }).catch(() => {});
@@ -7369,6 +7386,7 @@ function loadMessages() {
     if (messagesDiv.dataset.renderedChatKey !== chatKey) {
       messagesDiv.innerHTML = '';
       messagesDiv.dataset.renderedChatKey = chatKey;
+      messagesDiv.dataset.currentSignature = '';
     }
   }
 
@@ -7397,6 +7415,13 @@ function loadMessages() {
       return;
     }
     const isInitialLoadComplete = loaded1 && loaded2;
+    const activeChatKey = getDirectChatCacheKey(myUID, currentChatUser);
+    const hasCachedRender = messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.children.length > 0;
+
+    // ROOT FIX: Never replace or disrupt rendered cached conversation with partial (single-stream) data!
+    if (!isInitialLoadComplete && hasCachedRender) {
+      return;
+    }
     console.log("?? Message progress - loaded1:", loaded1, "loaded2:", loaded2, "messages1:", messages1.length, "messages2:", messages2.length);
 
     const dbMessages = [...messages1, ...messages2];
@@ -7962,7 +7987,6 @@ function loadMessages() {
       messageFragment.appendChild(div);
     });
 
-    const activeChatKey = getDirectChatCacheKey(myUID, currentChatUser);
     const newSignature = allMessages.map(m => (m.docId || m.id || m.clientMsgId || '') + ':' + (m.status || '') + ':' + (m.read ? '1' : '0')).join(';');
     if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === newSignature) {
       return;
@@ -21309,6 +21333,31 @@ function setupGlobalIncomingMessageListener() {
 }
 window.setupGlobalIncomingMessageListener = setupGlobalIncomingMessageListener;
 
+async function preWarmRecentChatsFromIndexedDB(chatItems) {
+  if (!myUID || !Array.isArray(chatItems) || chatItems.length === 0) return;
+  const items = chatItems.slice(0, 20);
+  for (const item of items) {
+    const id = typeof item === 'string' ? item : (item.uid || item.id);
+    if (!id || id === myUID) continue;
+    const isGroup = typeof item === 'object' && (item.type === 'group' || item.isGroup);
+    const key = isGroup ? getGroupChatCacheKey(id) : getDirectChatCacheKey(myUID, id);
+    const hasMem = isGroup ? groupChatMessageCache.has(key) : directChatMessageCache.has(key);
+    if (!hasMem && typeof loadChatHistoryFromIndexedDB === 'function') {
+      try {
+        const msgs = await loadChatHistoryFromIndexedDB(key);
+        if (msgs && msgs.length > 0) {
+          if (isGroup) {
+            cacheGroupChatMessages(id, msgs);
+          } else {
+            cacheDirectChatMessages(myUID, id, msgs);
+          }
+        }
+      } catch (_) {}
+    }
+  }
+}
+window.preWarmRecentChatsFromIndexedDB = preWarmRecentChatsFromIndexedDB;
+
 async function loadContacts() {
   setupGlobalIncomingMessageListener();
   const contactList = document.getElementById("contactList");
@@ -21321,6 +21370,7 @@ async function loadContacts() {
     try {
       const cached = JSON.parse(localStorage.getItem('nex_cached_contacts_' + myUID) || '[]');
       if (Array.isArray(cached) && cached.length > 0) {
+        preWarmRecentChatsFromIndexedDB(cached).catch(() => {});
         contactList.innerHTML = '';
         cached.forEach(data => {
           if (data && data.uid && data.name) {

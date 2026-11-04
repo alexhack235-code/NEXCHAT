@@ -1699,6 +1699,8 @@
             </button>
           </div>
 
+          <!-- Group Top Controls Container -->
+          <div id="infoGroupTopControls" class="group-only-container" style="display: none;">
           <div class="info-section" id="groupAdminActionsSection" style="display: none;">
             <div class="section-title"><i class="fa-solid fa-shield-halved"></i> Group Admin Actions</div>
             <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
@@ -1848,6 +1850,7 @@
             <div class="section-title"><i class="fa-solid fa-volume-xmark"></i> Mute Group Members</div>
             <button id="openMuteMembersModalBtn" class="btn-secondary" style="width: 100%; color: var(--accent-gold); font-weight: 700;"><i class="fa-solid fa-user-slash"></i> Select members to mute</button>
           </div>
+          </div><!-- /#infoGroupTopControls -->
 
           <!-- Media Section -->
           <div class="info-section">
@@ -1906,6 +1909,8 @@
             </div>
           </div>
 
+          <!-- Direct User Controls Container -->
+          <div id="infoUserControlsContainer" class="user-only-container" style="display: none;">
           <!-- Mute/Block/Delete Actions -->
           <div class="info-section">
             <div class="section-item" id="muteUserItem" style="cursor: pointer;">
@@ -1961,7 +1966,10 @@
               </div>
             </div>
           </div>
+          </div><!-- /#infoUserControlsContainer -->
 
+          <!-- Group Bottom Controls Container -->
+          <div id="infoGroupBottomControls" class="group-only-container" style="display: none;">
           <!-- Pending Requests Section (for group admins) -->
           <div class="info-section" id="groupPendingRequestsSection" style="display: none;">
             <div class="section-title"><i class="fa-solid fa-hourglass-half"></i> Pending Join Requests</div>
@@ -1977,6 +1985,7 @@
               <!-- Members will be populated here -->
             </div>
           </div>
+          </div><!-- /#infoGroupBottomControls -->
         </div>
       </div>
 
