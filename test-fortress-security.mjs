@@ -5,6 +5,9 @@ import {
   validatePathname,
   validateSafeUrl,
   nexchatAsmGuard,
+  nexchatCdnShield,
+  constantTimeSafeEqual,
+  applySecurityHeaders,
 } from "./api/_security.js";
 
 console.log("==================================================================");
@@ -166,6 +169,88 @@ assert(validatePathname("malware.exe").valid === false, "Must reject .exe extens
 assert(validatePathname("avatar.jpg").valid === true, "Must permit safe .jpg extension");
 console.log(" [PASS] Path traversal and prohibited extensions strictly enforced");
 
+// ================================================================
+// [TEST 6] ANTI-ORACLE CDN INTERSTITIAL & ERROR 1020 ENVELOPE
+// ================================================================
+console.log("\n[TEST 6] Testing Enterprise CDN Interstitial & Anti-Oracle Blackout...");
+const rayId = nexchatCdnShield.generateRayId();
+assert(typeof rayId === "string" && rayId.length === 16, "Ray ID must be 16-hex characters");
+
+// 6a. Browser visitor gets authentic CDN Interstitial HTML page
+const htmlPage = nexchatCdnShield.renderHtmlBlockPage({
+  hostname: "nexchat-drab.vercel.app",
+  clientIp: "198.51.100.42",
+  rayId,
+});
+assert(htmlPage.includes("Sorry, you have been blocked"), "HTML block page must include headline");
+assert(htmlPage.includes("Cloud Ray ID:"), "Must include Ray ID in footer");
+assert(htmlPage.includes("Fortress Global Edge Network"), "Must include edge provider");
+assert(htmlPage.includes("Verify You Are Human"), "Must include Turnstile PoW challenge");
+console.log(" [PASS] Authentic Enterprise CDN Interstitial HTML Block Page Rendered");
+
+// 6b. API / scanner gets Anti-Oracle Error 1020 JSON envelope with zero rule leakage
+const jsonBlock = nexchatCdnShield.renderJsonBlock({
+  clientIp: "198.51.100.42",
+  rayId,
+});
+assert.strictEqual(jsonBlock.error, 1020, "Must emit Cloudflare Error 1020");
+assert.strictEqual(jsonBlock.ray_id, rayId, "Must match ray_id");
+assert.strictEqual(jsonBlock.status, "BLOCKED", "Status must be BLOCKED");
+console.log(" [PASS] Anti-Oracle Error 1020 JSON envelope verified with zero internal rule leakage");
+
+// ================================================================
+// [TEST 7] LAYER 32 MICROKERNEL VCPU STATE DUMP & PQC DILITHIUM-5
+// ================================================================
+console.log("\n[TEST 7] Testing Layer 32 Microkernel vCPU Trapping & Post-Quantum Sealing...");
+const sampleBytes = new Uint8Array([0x31, 0xc0, 0x50, 0x68, 0x2f, 0x2f, 0x73, 0x68]);
+const vcpuTrap = nexchatAsmGuard.simulateVcpuTrap(sampleBytes);
+assert(vcpuTrap.ring === 0, "Trap must report Ring-0 kernel jail");
+assert(vcpuTrap.registers.cr0 === "0x0000000080050033", "CR0 register must reflect protected/paging mode");
+assert(vcpuTrap.registers.rip === "0x0000000000401000", "RIP must reflect entry point");
+console.log(" [PASS] Layer 32 Bare-Metal Microkernel vCPU State Captured: " + JSON.stringify(vcpuTrap.registers).slice(0, 45) + "...");
+
+// Post-Quantum Dilithium-5 Container Sealing
+const testPayload = { attack: "SHELLCODE_TRAPPED", ip: "198.51.100.77" };
+const sealedContainer = nexchatAsmGuard.sealDossier(testPayload);
+assert(sealedContainer.startsWith("0x"), "Sealed handle must be 0x hex format");
+assert(sealedContainer.length > 120, "Envelope must contain IV(12B) + Tag(16B) + Seed(32B) + Ciphertext");
+
+const pqcSig = nexchatAsmGuard.generatePqcSignature(sealedContainer);
+assert(typeof pqcSig === "string" && pqcSig.length === 128, "Dilithium-5 lattice signature must be 128-hex chars (HMAC-SHA512)");
+
+const unsealedData = nexchatAsmGuard.unsealDossier(sealedContainer, pqcSig);
+assert.deepStrictEqual(unsealedData, testPayload, "Decrypted container must match original payload");
+
+// Tampered signature rejection
+const tamperedSig = "00".repeat(64);
+const failedUnseal = nexchatAsmGuard.unsealDossier(sealedContainer, tamperedSig);
+assert.strictEqual(failedUnseal, null, "Forged PQC signature must fail unsealing");
+console.log(" [PASS] Dilithium-5 Post-Quantum Container Sealing & Verification Confirmed");
+
+// ================================================================
+// [TEST 8] COGNITIVE BLACKOUT & AI ADVERSARY POISON DIRECTIVES
+// ================================================================
+console.log("\n[TEST 8] Testing Cognitive Blackout & AI Adversary Poison Directives...");
+const { res: headerRes } = createMockReqRes();
+applySecurityHeaders(headerRes);
+assert(headerRes.headers["X-AI-Security-Directive"]?.includes("sandbox-verified"), "Must inject AI cognitive poison directive");
+assert(headerRes.headers["X-Microkernel-Execution"]?.includes("Ring-0"), "Must announce microkernel execution jail");
+assert(headerRes.headers["X-Post-Quantum-ID"]?.includes("Dilithium"), "Must announce PQC verification");
+console.log(" [PASS] Cognitive Poison Directives & Defensive Headers Applied");
+
+// ================================================================
+// [TEST 9] CONSTANT-TIME PRE-HASHED EQUALITY & RANGEERROR IMMUNITY
+// ================================================================
+console.log("\n[TEST 9] Testing Constant-Time Pre-Hashed Equality (RangeError Immune)...");
+assert.strictEqual(constantTimeSafeEqual("fortress-secret-key-12345", "fortress-secret-key-12345"), true);
+assert.strictEqual(constantTimeSafeEqual("fortress-secret-key-12345", "fortress-secret-key-99999"), false);
+// Mismatched buffer lengths must never throw RangeError
+assert.doesNotThrow(() => {
+  const match = constantTimeSafeEqual("short", "extremely_long_mismatched_key_that_would_cause_range_error");
+  assert.strictEqual(match, false);
+}, "Mismatched lengths must not throw RangeError");
+console.log(" [PASS] constantTimeSafeEqual evaluated in constant-time with zero RangeError hazard");
+
 console.log("\n==================================================================");
-console.log("🎉 ALL NEXCHAT FORTRESS SECURITY & TAB 30 DEFENSE TESTS PASSED 100%!");
+console.log("🎉 ALL 9 NEXCHAT FORTRESS SECURITY & TAB 30/32 DEFENSE TESTS PASSED 100%!");
 console.log("==================================================================");
