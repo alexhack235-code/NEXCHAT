@@ -4884,7 +4884,9 @@ async function sendMessage() {
       appendLocalSentMessage(text || '', offgridMsg.attachment, false, 'mesh_relayed', clientMsgId, null);
     }
     const meshBanner = document.getElementById('tacticalMeshBanner');
-    if (meshBanner) meshBanner.style.display = 'flex';
+    if (meshBanner && currentChatType !== 'direct' && currentChatType !== 'ai') {
+      meshBanner.style.display = 'flex';
+    }
     if (messageText) messageText.value = '';
     if (window.predictiveInputEngine?.bar) window.predictiveInputEngine.bar.style.display = 'none';
     if (window.predictiveInputEngine?.autocorrectBtn) window.predictiveInputEngine.autocorrectBtn.style.display = 'none';
@@ -8509,6 +8511,21 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
     if (pollBtn) pollBtn.style.display = 'none';
     if (chronexGcSuite) chronexGcSuite.style.display = 'none';
     setTimeout(() => updateBlockUnblockUI(), 100);
+  }
+
+  // Enforce suppression of Off-Grid Local P2P Mesh banner in user-to-user (direct) chat
+  const tacticalMeshBanner = document.getElementById('tacticalMeshBanner');
+  if (tacticalMeshBanner) {
+    if (chatType === 'direct' || chatType === 'ai') {
+      tacticalMeshBanner.style.setProperty('display', 'none', 'important');
+      tacticalMeshBanner.classList.add('direct-chat-hidden');
+    } else if (chatType === 'group' && !navigator.onLine) {
+      tacticalMeshBanner.classList.remove('direct-chat-hidden');
+      tacticalMeshBanner.style.display = 'flex';
+    } else {
+      tacticalMeshBanner.classList.remove('direct-chat-hidden');
+      tacticalMeshBanner.style.display = 'none';
+    }
   }
 
   if (chatType === 'ai') {

@@ -186,9 +186,22 @@ class OfflineMeshSyncEngine {
 
   notifyNetworkStateChange(isOffline) {
     console.log(`[OFFLINE MESH] Connection status changed: ${isOffline ? 'OFF-GRID' : 'ONLINE'}`);
-    const banner = document.getElementById('offGridMeshBanner');
+    const banner = document.getElementById('offGridMeshBanner') || document.getElementById('nexOffGridMeshBanner');
     if (banner) {
       banner.style.display = isOffline ? 'flex' : 'none';
+    }
+    const tacticalBanner = document.getElementById('tacticalMeshBanner');
+    if (tacticalBanner) {
+      if (window.currentChatType === 'direct' || window.currentChatType === 'ai') {
+        tacticalBanner.style.setProperty('display', 'none', 'important');
+        tacticalBanner.classList.add('direct-chat-hidden');
+      } else if (isOffline && window.currentChatType === 'group') {
+        tacticalBanner.classList.remove('direct-chat-hidden');
+        tacticalBanner.style.display = 'flex';
+      } else {
+        tacticalBanner.classList.remove('direct-chat-hidden');
+        tacticalBanner.style.display = 'none';
+      }
     }
   }
 
