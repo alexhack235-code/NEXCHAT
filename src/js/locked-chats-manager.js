@@ -537,10 +537,32 @@
     }
 
     updateLockedChatsBadge() {
+      const count = this.lockedChatIds.size;
       const subtitle = document.getElementById('nexLockedVaultCountSubtitle');
       if (subtitle) {
-        const count = this.lockedChatIds.size;
         subtitle.textContent = `${count} confidential conversation${count === 1 ? '' : 's'}`;
+      }
+      const row = document.getElementById('lockedChatsRow');
+      if (row) {
+        row.style.setProperty('display', count > 0 ? 'flex' : 'none', 'important');
+      }
+      const countBadge = document.getElementById('lockedChatsCount');
+      if (countBadge) {
+        countBadge.textContent = count;
+        countBadge.style.display = count > 0 ? 'inline-block' : 'none';
+      }
+      this._syncSystemRowsVisibility();
+    }
+
+    _syncSystemRowsVisibility() {
+      const systemRows = document.getElementById('chatSystemRows');
+      if (!systemRows) return;
+      const lockedCount = this.lockedChatIds.size;
+      const archivedCount = (window.NexArchivedChats && window.NexArchivedChats.archivedIds) ? window.NexArchivedChats.archivedIds.length : 0;
+      if (lockedCount === 0 && archivedCount === 0) {
+        systemRows.style.setProperty('display', 'none', 'important');
+      } else {
+        systemRows.style.setProperty('display', 'flex', 'important');
       }
     }
 

@@ -257,17 +257,24 @@ export async function sendMessage(params = {}) {
   }
 
   const uid = currentUser.uid;
+  const currentSenderName = (typeof window !== 'undefined' && window.myUsername) || currentUser.displayName || 'Member';
+  const currentSenderUsername = (typeof window !== 'undefined' && window.myUsername) || currentUser.displayName || 'user';
+  const currentSenderAvatar = (typeof window !== 'undefined' && window.myProfilePic) || currentUser.photoURL || 'favicon.png';
 
   // 1. Parse mentions synchronously
   const members = state.members ? Array.from(state.members.values()) : [];
   const mentionResult = parseMentions(text || '', members);
 
-  // 2. Optimistic UI — add to store immediately (0ms instant render in container)
+  // 2. Optimistic UI - add to store immediately (0ms instant render in container)
   const optimisticId = `optimistic_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   const optimisticMessage = {
     id: optimisticId,
     groupId,
     from: uid,
+    senderId: uid,
+    senderName: currentSenderName,
+    senderUsername: currentSenderUsername,
+    senderAvatar: currentSenderAvatar,
     text: mentionResult.text || (text || '').trim(),
     timestamp: new Date(),
     edited: false,
@@ -374,6 +381,10 @@ export async function sendMessage(params = {}) {
   const messageData = {
     groupId,
     from: uid,
+    senderId: uid,
+    senderName: currentSenderName,
+    senderUsername: currentSenderUsername,
+    senderAvatar: currentSenderAvatar,
     text: mentionResult.text || '',
     timestamp: serverTimestamp(),
     edited: false,
@@ -623,7 +634,7 @@ function _attachRealtimeListener(groupId, newestMessage) {
         // Check for duplicates and optimistic messages
         const existingIdx = messages.findIndex(m => m.id === msgId);
         const optimisticIdx = messages.findIndex(m =>
-          m._optimistic && m.from === data.from && m.text === data.text
+          m._optimistic && (m.from === data.from || m.senderId === (data.senderId || data.from)) && m.text === data.text
         );
 
         if (existingIdx >= 0) {

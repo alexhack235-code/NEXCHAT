@@ -7443,15 +7443,127 @@ body.chat-size-extra-large .message-bubble {
 
 /* ── 5. ChronEX Neural Welcome Stage (Empty State) ── */
 .chronex-welcome-stage {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 36px 20px 24px;
-  max-width: 680px;
-  margin: auto;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: center !important;
+  padding: 24px 14px 40px !important;
+  max-width: 680px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 auto !important;
+  min-height: min-content !important;
+  position: relative !important;
+  z-index: 0 !important;
   animation: cs-fade-in 0.3s ease;
+}
+
+.chronex-sparks-section {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  margin-top: 18px !important;
+  gap: 12px !important;
+  position: relative !important;
+}
+
+.chronex-sparks-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: 'Orbitron', monospace !important;
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 1px !important;
+  color: #00ff66 !important;
+  margin-bottom: 4px !important;
+}
+
+.chronex-spark-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-width: 640px) {
+  .chronex-spark-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.chronex-spark-card {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  padding: 14px 16px !important;
+  background: rgba(18, 26, 36, 0.92) !important;
+  border: 1px solid rgba(0, 255, 102, 0.18) !important;
+  border-radius: 12px !important;
+  text-align: left !important;
+  cursor: pointer !important;
+  min-height: 96px !important;
+  flex-shrink: 0 !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  color: #f0f6fc !important;
+}
+
+.chronex-spark-card:hover {
+  background: rgba(24, 34, 48, 0.98) !important;
+  border-color: rgba(0, 255, 102, 0.45) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 16px rgba(0, 255, 102, 0.22) !important;
+}
+
+.spark-card-top {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+.spark-card-icon {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 8px !important;
+  background: rgba(0, 255, 102, 0.12) !important;
+  border: 1px solid rgba(0, 255, 102, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #00ff66 !important;
+  font-size: 13px !important;
+  flex-shrink: 0 !important;
+}
+
+.spark-badge {
+  font-family: 'Orbitron', monospace !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.8px !important;
+  color: #00ff66 !important;
+  background: rgba(0, 255, 102, 0.08) !important;
+  padding: 2px 7px !important;
+  border-radius: 4px !important;
+  border: 1px solid rgba(0, 255, 102, 0.25) !important;
+}
+
+.spark-card-title {
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  line-height: 1.3 !important;
+}
+
+.spark-card-desc {
+  font-size: 11.5px !important;
+  color: #94a3b8 !important;
+  line-height: 1.4 !important;
 }
 
 .chronex-neural-core {
@@ -10968,10 +11080,14 @@ body.chat-size-extra-large .message-bubble {
   font-size: 16px !important;
   color: #e9edef !important;
   line-height: 1.25 !important;
-  white-space: nowrap !important;
+  white-space: normal !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2 !important;
+  -webkit-box-orient: vertical !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: clamp(185px, 60vw, 420px) !important;
+  word-break: break-word !important;
+  max-width: clamp(200px, 70vw, 480px) !important;
 }
 
 /* Streamlined group action buttons: Video call, Phone call, Menu */
@@ -11894,10 +12010,14 @@ body.chat-size-extra-large .message-bubble {
   align-items: center !important;
   justify-content: center !important;
   width: 100% !important;
+  max-width: 100vw !important;
   background: linear-gradient(90deg, rgba(0, 242, 254, 0.15) 0%, rgba(0, 255, 102, 0.12) 100%) !important;
   border-bottom: 1px solid rgba(0, 242, 254, 0.35) !important;
-  padding: 6px 14px !important;
+  padding: 6px 12px !important;
   box-sizing: border-box !important;
+  overflow: hidden !important;
+  position: relative !important;
+  z-index: 2 !important;
   animation: meshBannerSlideDown 0.3s ease !important;
 }
 
@@ -11909,12 +12029,24 @@ body.chat-size-extra-large .message-bubble {
 .mesh-banner-inner {
   display: flex !important;
   align-items: center !important;
-  gap: 8px !important;
+  justify-content: center !important;
+  gap: 6px !important;
   font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
-  font-size: 11.5px !important;
+  font-size: clamp(9.5px, 2.7vw, 11px) !important;
   font-weight: 700 !important;
   color: #00f2fe !important;
-  letter-spacing: 0.6px !important;
+  letter-spacing: 0.4px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+
+.mesh-banner-inner span {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  min-width: 0 !important;
 }
 
 .mesh-relay-indicator {

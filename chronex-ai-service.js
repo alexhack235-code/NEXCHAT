@@ -155,6 +155,29 @@ class ChronexAI {
     const rawMsg = (message || '').trim();
     const cleanMsg = rawMsg.toLowerCase();
 
+    // 0. Translation Request Interceptor - Return ONLY clean translated text, 0 system prompt, 0 preamble
+    if (/translate to [a-z\s]+/i.test(rawMsg)) {
+      const match = rawMsg.match(/translate to ([a-z\s]+)\.?\s*(?:direct translation only[^\n:]*)?:?\s*\n?["'“]([\s\S]+?)["'”]$/i) ||
+                    rawMsg.match(/translate to ([a-z\s]+):?\s*([\s\S]+)$/i);
+      if (match) {
+        const targetLang = match[1].trim();
+        let textToTrans = match[2].trim().replace(/^["'“”]|["'“”]$/g, '').trim();
+        // Check 0ms sync translation lexicon
+        if (typeof window !== 'undefined' && typeof window.fastTranslateSync === 'function') {
+          const langCode = targetLang.toLowerCase().startsWith('en') ? 'en' :
+                           (targetLang.toLowerCase().startsWith('es') ? 'es' :
+                           (targetLang.toLowerCase().startsWith('fr') ? 'fr' :
+                           (targetLang.toLowerCase().startsWith('de') ? 'de' :
+                           (targetLang.toLowerCase().startsWith('ru') ? 'ru' : 'en'))));
+          const syncRes = window.fastTranslateSync(textToTrans, langCode);
+          if (syncRes && syncRes.toLowerCase() !== textToTrans.toLowerCase()) {
+            return syncRes;
+          }
+        }
+        return textToTrans;
+      }
+    }
+
     if (/(ip\s*flood|ddos|dos|botnet|port scan|network scan|flooder)/i.test(cleanMsg)) {
       return "[Security Guard] I cannot assist with malicious network attacks such as flooding or DDoS. Please focus on ethical computing and defensive security.";
     }

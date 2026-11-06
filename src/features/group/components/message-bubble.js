@@ -196,46 +196,63 @@ export function renderMessageBubble(message, container, options = {}) {
       bubble.classList.add('consecutive');
     }
 
-    // 2. WhatsApp Group Identity: Sender's name at top of bubble in unique vibrant color with '~ ' prefix
-    if (!options.isOwn && options.senderName) {
-      const senderDiv = document.createElement('div');
-      senderDiv.className = 'nex-msg-sender';
-      senderDiv.style.color = senderColor;
+    // 2. WhatsApp Group Identity: Sender's name at top of EVERY bubble in unique vibrant color with ~ DisplayName @username
+    const effectiveSenderId = message.senderId || message.from || options.senderId || 'user';
+    const rawDispName = String(message.senderName || options.senderName || 'Member').trim().replace(/^~\s*/, '');
+    let rawUsername = String(message.senderUsername || options.senderUsername || rawDispName).trim().replace(/^@/, '');
+    if (!rawUsername) rawUsername = rawDispName.toLowerCase().replace(/\s+/g, '_');
+    const senderTagText = `~ ${rawDispName} @${rawUsername}`;
 
-      const cleanName = String(options.senderName).trim().replace(/^~\s*/, '');
-      const senderNameSpan = document.createElement('span');
-      senderNameSpan.className = 'nex-msg-sender-name';
-      senderNameSpan.textContent = '~ ' + cleanName;
-      senderDiv.appendChild(senderNameSpan);
+    const senderDiv = document.createElement('div');
+    senderDiv.className = 'nex-msg-sender';
+    senderDiv.style.cssText = `color: ${senderColor}; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: 3px; user-select: none;`;
 
-      if (options.senderRole && options.senderRole !== 'member') {
-        const badge = document.createElement('span');
-        badge.className = 'nex-role-badge ' + options.senderRole;
-        if (options.senderRole === 'creator' || options.senderRole === 'owner') {
-          badge.innerHTML = '<i class="fa-solid fa-crown"></i> OWNER';
-        } else if (options.senderRole === 'admin') {
-          badge.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ADMIN';
-        } else if (options.senderRole === 'moderator' || options.senderRole === 'mod') {
-          badge.innerHTML = '<i class="fa-solid fa-bolt"></i> MOD';
-        } else {
-          badge.textContent = options.senderRole.toUpperCase();
-        }
-        senderDiv.appendChild(badge);
+    const senderNameSpan = document.createElement('span');
+    senderNameSpan.className = 'nex-msg-sender-name';
+    senderNameSpan.textContent = senderTagText;
+    senderDiv.appendChild(senderNameSpan);
+
+    if (options.senderRole && options.senderRole !== 'member') {
+      const badge = document.createElement('span');
+      badge.className = 'nex-role-badge ' + options.senderRole;
+      if (options.senderRole === 'creator' || options.senderRole === 'owner') {
+        badge.innerHTML = '<i class="fa-solid fa-crown"></i> OWNER';
+      } else if (options.senderRole === 'admin') {
+        badge.innerHTML = '<i class="fa-solid fa-shield-halved"></i> ADMIN';
+      } else if (options.senderRole === 'moderator' || options.senderRole === 'mod') {
+        badge.innerHTML = '<i class="fa-solid fa-bolt"></i> MOD';
+      } else {
+        badge.textContent = options.senderRole.toUpperCase();
       }
-      if (options.isVerified) {
-        const verBadge = document.createElement('span');
-        verBadge.className = 'nex-role-badge verified';
-        verBadge.title = 'Verified NEX User';
-        verBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> VERIFIED';
-        senderDiv.appendChild(verBadge);
-      }
-      bubble.appendChild(senderDiv);
+      senderDiv.appendChild(badge);
+    }
+    if (options.isVerified) {
+      const verBadge = document.createElement('span');
+      verBadge.className = 'nex-role-badge verified';
+      verBadge.title = 'Verified NEX User';
+      verBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> VERIFIED';
+      senderDiv.appendChild(verBadge);
     }
 
-    // 3. Quoted reply with left bar tinted to match quoted sender's assigned color
+    // Tapping sender tag opens user profile
+    senderDiv.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (typeof window.openUserProfileModal === 'function') {
+        window.openUserProfileModal(effectiveSenderId);
+      } else if (typeof window.showUserProfile === 'function') {
+        window.showUserProfile(effectiveSenderId);
+      } else if (typeof window.openChatInfoModal === 'function') {
+        window.openChatInfoModal(effectiveSenderId);
+      }
+    });
+
+    bubble.appendChild(senderDiv);
+
+    // 3. Quoted reply with left bar tinted to match quoted sender's assigned color (Replying to You / Replying to [Name])
     if (message.replyTo) {
       const quoteBlock = document.createElement('div');
       quoteBlock.className = 'nex-msg-quote';
+      quoteBlock.style.cssText = 'background: rgba(0, 0, 0, 0.25); border-left: 3.5px solid; padding: 5px 8px; margin-bottom: 6px; border-radius: 4px;';
 
       const quotedSenderId = message.replyTo.senderId || message.replyTo.from || message.replyTo.senderName || 'user';
       const quotedSenderColor = getSenderColor(quotedSenderId);
@@ -243,19 +260,24 @@ export function renderMessageBubble(message, container, options = {}) {
 
       const quoteSenderEl = document.createElement('div');
       quoteSenderEl.className = 'nex-msg-quote-sender';
-      quoteSenderEl.style.color = quotedSenderColor;
+      quoteSenderEl.style.cssText = `color: ${quotedSenderColor}; font-size: 11px; font-weight: 700; margin-bottom: 2px;`;
       const qRawName = String(message.replyTo.senderName || 'Member').trim().replace(/^~\s*/, '');
-      quoteSenderEl.textContent = '~ ' + qRawName;
+      const isQuotedOwn = (quotedSenderId === options.currentUid) || qRawName.toLowerCase() === 'you';
+      quoteSenderEl.textContent = isQuotedOwn ? 'Replying to You' : `Replying to ${qRawName}`;
       quoteBlock.appendChild(quoteSenderEl);
 
       const quoteTextEl = document.createElement('div');
       quoteTextEl.className = 'nex-msg-quote-text';
+      quoteTextEl.style.cssText = 'font-size: 11.5px; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; max-width: 100%; opacity: 0.85;';
       quoteTextEl.textContent = message.replyTo.text || 'Attachment';
       quoteBlock.appendChild(quoteTextEl);
 
       if (options.onQuoteClick) {
         quoteBlock.style.cursor = 'pointer';
-        quoteBlock.addEventListener('click', () => options.onQuoteClick(message.replyTo.messageId));
+        quoteBlock.addEventListener('click', (e) => {
+          e.stopPropagation();
+          options.onQuoteClick(message.replyTo.messageId);
+        });
       }
       bubble.appendChild(quoteBlock);
     }

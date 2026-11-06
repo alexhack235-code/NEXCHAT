@@ -285,6 +285,13 @@ async function open(groupId, messagesContainer, options = {}) {
   requestAnimationFrame(() => {
     _scroller?.scrollToBottom(false);
   });
+
+  // Trigger Auto-Translate on load for Group Chat
+  try {
+    if (typeof window !== 'undefined' && window.CyberFeatures && window.CyberFeatures.translator) {
+      window.CyberFeatures.translator.onChatLoaded(groupId, true);
+    }
+  } catch (_) {}
 }
 
 /**
@@ -484,15 +491,21 @@ function _renderItem(item, element, currentUid, options = {}) {
   // Regular message
   const members = groupStore.getState().members;
   const group = groupStore.getState().currentGroup;
-  const senderProfile = members?.get(item.from) || { username: 'Unknown', avatar: 'favicon.png' };
-  const isOwn = item.from === currentUid;
-  const senderRole = group ? getUserRole(group, item.from) : 'member';
+  const senderId = item.senderId || item.from;
+  const isOwn = !!(currentUid && (senderId === currentUid || item.from === currentUid));
+  const senderProfile = (senderId ? members?.get(senderId) : null) || (item.from ? members?.get(item.from) : null) || { username: 'Unknown', avatar: 'favicon.png' };
+  const senderName = item.senderName || senderProfile.displayName || senderProfile.username || 'Member';
+  const senderUsername = item.senderUsername || senderProfile.username || senderName;
+  const senderAvatar = item.senderAvatar || senderProfile.avatar || 'favicon.png';
+  const senderRole = group ? getUserRole(group, senderId) : 'member';
   const totalMembers = group?.members?.length || 1;
 
   renderMessageBubble(item, element, {
     isOwn,
-    senderName: senderProfile.username,
-    senderAvatar: senderProfile.avatar,
+    senderId,
+    senderName,
+    senderUsername,
+    senderAvatar,
     senderRole,
     currentUid,
     totalMembers,

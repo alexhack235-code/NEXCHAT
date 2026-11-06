@@ -2057,7 +2057,10 @@ class NexTranslator {
   }
 
   async autoTranslateMessageBubble(bubble) {
-    if (!bubble || !bubble.isConnected || bubble.dataset.autoTranslated === 'true') return;
+    if (!bubble || !bubble.isConnected) return;
+    if (bubble.dataset.autoTranslated === 'true' || bubble.dataset.isTranslated === 'true') return;
+    if (bubble.querySelector('.auto-translated-card') || bubble.querySelector('.auto-trans-badge')) return;
+    if (bubble.closest('.thread-synthesis-wrapper') || bubble.closest('.chronex-ai-item')) return;
 
     // Extract message text cleanly
     let rawText = '';
@@ -2078,43 +2081,71 @@ class NexTranslator {
     rawText = (rawText || '').trim();
     if (!rawText || rawText.length < 2) return;
 
+    // Guard against re-translating translated text or system prompt leaks
+    if (rawText.includes('### ChronEX') || rawText.includes('AUTO-TRANSLATED') || rawText.includes('ChronEX Neural Cognition')) {
+      bubble.dataset.autoTranslated = 'true';
+      bubble.dataset.isTranslated = 'true';
+      return;
+    }
+
     bubble.dataset.autoTranslated = 'true';
+    bubble.dataset.isTranslated = 'true';
 
     const targetLang = localStorage.getItem('nex_auto_translate_target_lang') || this.autoTranslateTargetLang || localStorage.getItem('nexchat_preferred_language') || 'en';
-    const langName = this.languageNames[targetLang] || targetLang;
+    const langName = (this.languageNames[targetLang] || targetLang).toUpperCase();
 
     try {
       const translated = await this.translateText(rawText, targetLang);
       if (!translated || !translated.trim() || !bubble.isConnected) return;
-      if (translated.trim().toLowerCase() === rawText.toLowerCase()) return;
-      if (bubble.querySelector('.auto-translated-card')) return;
 
-      const card = document.createElement('div');
-      card.className = 'auto-translated-card';
+      let cleanTrans = String(translated).trim();
+      // Strict system prompt filter: NEVER render system prompt leaks
+      if (cleanTrans.includes('ChronEX Neural Cognition') ||
+          cleanTrans.includes('I have received your message') ||
+          cleanTrans.includes('I am fully synchronized') ||
+          cleanTrans.includes('Translate to') ||
+          cleanTrans.startsWith('#')) {
+        return;
+      }
+
+      cleanTrans = cleanTrans
+        .replace(/^["'“”]|["'“”]$/g, '')
+        .replace(/###[\s\S]*?\n/g, '')
+        .replace(/I have received your message:?[\s\S]*?\n/gi, '')
+        .trim();
+
+      if (!cleanTrans || cleanTrans.toLowerCase() === rawText.toLowerCase()) return;
+
+      // Deduplicate: check message bubble for existing card and update in place
+      let card = bubble.querySelector('.auto-translated-card');
       const showOrig = this.autoTranslateShowOriginal !== false;
+
+      if (!card) {
+        card = document.createElement('div');
+        card.className = 'auto-translated-card';
+        const meta = bubble.querySelector('.message-time-row, .time-span, .nex-msg-meta, .message-hover-actions') || bubble.lastElementChild;
+        if (meta && meta.parentNode === bubble) {
+          bubble.insertBefore(card, meta);
+        } else {
+          bubble.appendChild(card);
+        }
+      }
 
       card.innerHTML = `
         <div class="auto-trans-badge">
-          <i class="fa-solid fa-language"></i> Auto-Translated (${this.escapeMarkup(langName)})
+          <i class="fa-solid fa-language"></i> AUTO-TRANSLATED (${this.escapeMarkup(langName)})
           <button type="button" class="auto-trans-speak-btn" title="Pronounce" style="background:none;border:none;color:#00f3ff;cursor:pointer;margin-left:6px;padding:0 3px;">
             <i class="fa-solid fa-volume-high"></i>
           </button>
         </div>
-        <div class="auto-trans-text" style="color: #f8fafc; font-size: 13.5px; line-height: 1.45;">${this.escapeMarkup(translated)}</div>
+        <div class="auto-trans-text" style="color: #f8fafc; font-size: 13.5px; line-height: 1.45;">${this.escapeMarkup(cleanTrans)}</div>
         <div class="auto-trans-original" style="display: ${showOrig ? 'block' : 'none'};">Original: "${this.escapeMarkup(rawText)}"</div>
       `;
 
       card.querySelector('.auto-trans-speak-btn')?.addEventListener('click', (ev) => {
         ev.stopPropagation();
-        this.speakText(translated, targetLang);
+        this.speakText(cleanTrans, targetLang);
       });
-
-      const meta = bubble.querySelector('.message-time-row, .time-span, .nex-msg-meta, .message-hover-actions') || bubble.lastElementChild;
-      if (meta && meta.parentNode === bubble) {
-        bubble.insertBefore(card, meta);
-      } else {
-        bubble.appendChild(card);
-      }
     } catch (err) {
       console.warn('[NexTranslator] Auto-translation error:', err);
     }

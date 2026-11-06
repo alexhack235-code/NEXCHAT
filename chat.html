@@ -712,8 +712,8 @@
         </div>
 
         <!-- WhatsApp-Style System Action Rows: Locked chats & Archived -->
-        <div class="chat-system-action-rows" id="chatSystemRows">
-          <div class="system-action-row locked-chats-row" id="lockedChatsRow" title="Locked chats (Biometric Vault)" onclick="if(window.NexLockedChats) window.NexLockedChats.openVault();">
+        <div class="chat-system-action-rows" id="chatSystemRows" style="display: none !important;">
+          <div class="system-action-row locked-chats-row" id="lockedChatsRow" style="display: none !important;" title="Locked chats (Biometric Vault)" onclick="if(window.NexLockedChats) window.NexLockedChats.openVault();">
             <div class="system-row-icon">
               <i class="fa-solid fa-lock"></i>
             </div>
@@ -722,7 +722,7 @@
               <span class="system-row-count-badge" id="lockedChatsCount" style="display: none;">0</span>
             </div>
           </div>
-          <div class="system-action-row archived-chats-row" id="archivedToggleRow" title="Archived chats" role="button" tabindex="0" aria-expanded="false">
+          <div class="system-action-row archived-chats-row" id="archivedToggleRow" style="display: none !important;" title="Archived chats" role="button" tabindex="0" aria-expanded="false">
             <div class="system-row-icon">
               <i class="fa-solid fa-box-archive"></i>
             </div>

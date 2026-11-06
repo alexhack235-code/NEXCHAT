@@ -97,7 +97,7 @@
       const total = this.archivedChatIds ? this.archivedChatIds.size : 0;
       const row = document.getElementById('archivedToggleRow');
       if (row) {
-        row.style.display = total > 0 ? 'flex' : 'none';
+        row.style.setProperty('display', total > 0 ? 'flex' : 'none', 'important');
       }
       const badge = document.getElementById('archivedCount');
       if (badge) {
@@ -112,6 +112,15 @@
           badge.style.background = 'rgba(255,255,255,0.15)';
           badge.style.color = '#e2e8f0';
           badge.style.boxShadow = 'none';
+        }
+      }
+      const systemRows = document.getElementById('chatSystemRows');
+      if (systemRows) {
+        const lockedCount = (window.NexLockedChats && window.NexLockedChats.lockedChatIds) ? window.NexLockedChats.lockedChatIds.size : 0;
+        if (total === 0 && lockedCount === 0) {
+          systemRows.style.setProperty('display', 'none', 'important');
+        } else {
+          systemRows.style.setProperty('display', 'flex', 'important');
         }
       }
     }
