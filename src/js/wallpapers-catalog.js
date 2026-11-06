@@ -1,9 +1,449 @@
 /**
- * NEXCHAT Vercel Blob High-Resolution Wallpaper Catalog
- * Auto-generated with 76 curated high-res wallpapers
+ * NEXCHAT High-Resolution Wallpaper Catalog
+ * Auto-generated with 133 curated high-res wallpapers including Hacker Style
  */
 
 export const VERCEL_BLOB_WALLPAPERS = [
+  {
+    "id": "wp_hacker_style_1",
+    "name": "Cyber Infiltration",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_01.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_01.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_01.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00ff66"
+  },
+  {
+    "id": "wp_hacker_style_2",
+    "name": "Kernel Phantom",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_02.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_02.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_02.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00f3ff"
+  },
+  {
+    "id": "wp_hacker_style_3",
+    "name": "Zero-Day Exploit",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_03.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_03.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_03.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#38bdf8"
+  },
+  {
+    "id": "wp_hacker_style_4",
+    "name": "Binary Singularity",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_04.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_04.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_04.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#a855f7"
+  },
+  {
+    "id": "wp_hacker_style_5",
+    "name": "Neural Overdrive",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_05.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_05.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_05.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#ef4444"
+  },
+  {
+    "id": "wp_hacker_style_6",
+    "name": "Quantum Decryption",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_06.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_06.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_06.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#fbbf24"
+  },
+  {
+    "id": "wp_hacker_style_7",
+    "name": "Shadow Mesh",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_07.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_07.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_07.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#34d399"
+  },
+  {
+    "id": "wp_hacker_style_8",
+    "name": "Dark Sentinel",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_08.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_08.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_08.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00ff66"
+  },
+  {
+    "id": "wp_hacker_style_9",
+    "name": "Terminal Matrix",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_09.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_09.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_09.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00f3ff"
+  },
+  {
+    "id": "wp_hacker_style_10",
+    "name": "Hex Breach",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_10.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_10.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_10.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#38bdf8"
+  },
+  {
+    "id": "wp_hacker_style_11",
+    "name": "Subnet Specter",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_11.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_11.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_11.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#a855f7"
+  },
+  {
+    "id": "wp_hacker_style_12",
+    "name": "Mainframe Override",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_12.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_12.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_12.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#ef4444"
+  },
+  {
+    "id": "wp_hacker_style_13",
+    "name": "Logic Bomb",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_13.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_13.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_13.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#fbbf24"
+  },
+  {
+    "id": "wp_hacker_style_14",
+    "name": "Rootkit Vanguard",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_14.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_14.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_14.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#34d399"
+  },
+  {
+    "id": "wp_hacker_style_15",
+    "name": "Cybernetic Core",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_15.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_15.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_15.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00ff66"
+  },
+  {
+    "id": "wp_hacker_style_16",
+    "name": "Fiber Optic Void",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_16.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_16.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_16.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00f3ff"
+  },
+  {
+    "id": "wp_hacker_style_17",
+    "name": "Glitch Protocol",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_17.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_17.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_17.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#38bdf8"
+  },
+  {
+    "id": "wp_hacker_style_18",
+    "name": "Deep Packet Probe",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_18.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_18.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_18.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#a855f7"
+  },
+  {
+    "id": "wp_hacker_style_19",
+    "name": "Firewall Bypass",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_19.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_19.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_19.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#ef4444"
+  },
+  {
+    "id": "wp_hacker_style_20",
+    "name": "Cyberpunk Alley",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_20.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_20.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_20.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#fbbf24"
+  },
+  {
+    "id": "wp_hacker_style_21",
+    "name": "Silicon Enclave",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_21.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_21.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_21.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#34d399"
+  },
+  {
+    "id": "wp_hacker_style_22",
+    "name": "Autonomous Daemon",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_22.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_22.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_22.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00ff66"
+  },
+  {
+    "id": "wp_hacker_style_23",
+    "name": "Offshore Server Farm",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_23.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_23.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_23.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00f3ff"
+  },
+  {
+    "id": "wp_hacker_style_24",
+    "name": "Neon Terminal",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_24.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_24.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_24.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#38bdf8"
+  },
+  {
+    "id": "wp_hacker_style_25",
+    "name": "Reverse Engineering",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_25.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_25.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_25.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#a855f7"
+  },
+  {
+    "id": "wp_hacker_style_26",
+    "name": "Packet Storm",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_26.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_26.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_26.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#ef4444"
+  },
+  {
+    "id": "wp_hacker_style_27",
+    "name": "Cryptographic Anarchy",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_27.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_27.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_27.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#fbbf24"
+  },
+  {
+    "id": "wp_hacker_style_28",
+    "name": "Ghost Protocol",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_28.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_28.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_28.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#34d399"
+  },
+  {
+    "id": "wp_hacker_style_29",
+    "name": "Buffer Overflow",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_29.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_29.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_29.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00ff66"
+  },
+  {
+    "id": "wp_hacker_style_30",
+    "name": "Air-Gapped Bunker",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_30.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_30.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_30.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00f3ff"
+  },
+  {
+    "id": "wp_hacker_style_31",
+    "name": "Cyber Warfare",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_31.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_31.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_31.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#38bdf8"
+  },
+  {
+    "id": "wp_hacker_style_32",
+    "name": "Command & Control",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_32.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_32.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_32.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#a855f7"
+  },
+  {
+    "id": "wp_hacker_style_33",
+    "name": "Decryption Matrix",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_33.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_33.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_33.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#ef4444"
+  },
+  {
+    "id": "wp_hacker_style_34",
+    "name": "Optical Intercept",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_34.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_34.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_34.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#fbbf24"
+  },
+  {
+    "id": "wp_hacker_style_35",
+    "name": "Hardware Keylogger",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_35.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_35.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_35.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#34d399"
+  },
+  {
+    "id": "wp_hacker_style_36",
+    "name": "Algorithmic Drift",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_36.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_36.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_36.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00ff66"
+  },
+  {
+    "id": "wp_hacker_style_37",
+    "name": "Synthetic Persona",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_37.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_37.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_37.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#00f3ff"
+  },
+  {
+    "id": "wp_hacker_style_38",
+    "name": "Black Hat Recon",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_38.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_38.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_38.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#38bdf8"
+  },
+  {
+    "id": "wp_hacker_style_39",
+    "name": "Zero-Trust Perimeter",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_39.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_39.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_39.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#a855f7"
+  },
+  {
+    "id": "wp_hacker_style_40",
+    "name": "Quantum Supremacy",
+    "genre": "hacker_style",
+    "category": "Hacker Style",
+    "filename": "hacker_40.jpg",
+    "url": "/assets/wallpapers/hacker_style/hacker_40.jpg",
+    "thumbnailUrl": "/assets/wallpapers/hacker_style/thumbs/thumb_hacker_40.jpg",
+    "previewBg": "#050811",
+    "accentColor": "#ef4444"
+  },
   {
     "id": "wp_space_fight_1_1934777_jpg",
     "name": "Orbital Interceptor",

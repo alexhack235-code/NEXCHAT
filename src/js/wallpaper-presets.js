@@ -311,6 +311,7 @@ export function openWallpaperModal(options = {}) {
 
   const GENRES_LIST = [
     { id: 'all', label: 'All Themes', icon: 'fa-shapes', count: SAFE_WALLPAPER_PRESETS.length },
+    { id: 'hacker_style', label: 'Hacker Style', icon: 'fa-user-secret', count: 40 },
     { id: 'space_fight', label: 'Space Fight', icon: 'fa-shuttle-space', count: 17 },
     { id: 'oled_minimal', label: 'OLED Minimal', icon: 'fa-moon', count: 5 },
     { id: 'cyberpunk', label: 'Cyberpunk', icon: 'fa-bolt', count: 16 },

@@ -11884,6 +11884,88 @@ function setupSettingsProfileIdentityControls() {
     btnTriggerUpload.addEventListener('click', openFileChooser);
   }
 
+  // Open NEX Avatar & Wallpaper Vault Library Modal
+  const btnOpenVault = document.getElementById('btnOpenNEXAvatarLibrary');
+  if (btnOpenVault && !btnOpenVault.dataset.bound) {
+    btnOpenVault.dataset.bound = 'true';
+    btnOpenVault.addEventListener('click', (e) => {
+      e.preventDefault();
+      const width = 1100;
+      const height = 820;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+      window.open('profile-avatars.html', 'NEXAvatarVault', `width=${width},height=${height},top=${top},left=${left},scrollbars=yes,resizable=yes`);
+    });
+  }
+
+  // Handle Avatar Chosen from profile-avatars.html
+  if (!window._avatarVaultListenerRegistered) {
+    window._avatarVaultListenerRegistered = true;
+    window.addEventListener('message', async (event) => {
+      if (event.data && event.data.type === 'avatarSelected') {
+        const avatar = event.data.avatar;
+        const newPhotoUrl = avatar.url || avatar.thumbnailUrl;
+        if (!newPhotoUrl) return;
+
+        if (uploadStatus) {
+          uploadStatus.style.display = 'flex';
+          if (uploadStatusText) uploadStatusText.textContent = `Applying avatar "${avatar.name || 'Selected'}"...`;
+        }
+
+        try {
+          const uid = (auth && auth.currentUser && auth.currentUser.uid) || window.myUID;
+          if (!uid) {
+            throw new Error('Please sign in to update your profile avatar.');
+          }
+
+          // Persist to Firestore user profile
+          if (typeof saveUserProfile === 'function') {
+            await saveUserProfile(uid, newPhotoUrl, {
+              photoURL: newPhotoUrl,
+              avatar: newPhotoUrl,
+              profilePic: newPhotoUrl,
+              profilePicUrl: newPhotoUrl
+            });
+          }
+
+          // Update Firebase Auth profile
+          if (auth && auth.currentUser && typeof updateProfile === 'function') {
+            await updateProfile(auth.currentUser, { photoURL: newPhotoUrl }).catch(console.warn);
+          }
+
+          // Synchronize local states
+          window.myProfilePic = newPhotoUrl;
+          localStorage.setItem('auth_photo', newPhotoUrl);
+          localStorage.setItem('profilePic', newPhotoUrl);
+          localStorage.setItem('photoURL', newPhotoUrl);
+
+          if (tabPic) tabPic.src = newPhotoUrl;
+          const statusImg = document.getElementById('myStatusPic');
+          if (statusImg) statusImg.src = newPhotoUrl;
+          const profileModalImg = document.getElementById('profileModalImg');
+          if (profileModalImg) profileModalImg.src = newPhotoUrl;
+          const chatProfilePic = document.getElementById('chatProfilePic');
+          if (chatProfilePic) chatProfilePic.src = newPhotoUrl;
+
+          if (typeof updateProfileSticker === 'function') {
+            updateProfileSticker(newPhotoUrl, window.myUsername || 'Operative');
+          }
+
+          if (uploadStatus) uploadStatus.style.display = 'none';
+          if (typeof showNotif === 'function') {
+            showNotif(`NEX Avatar "${avatar.name || 'Selected'}" applied successfully!`, 'success');
+          }
+        } catch (err) {
+          console.error('[PROFILE] Avatar selection sync error:', err);
+          if (uploadStatus) uploadStatus.style.display = 'none';
+          if (typeof showNotif === 'function') {
+            showNotif('Failed to set avatar: ' + (err.message || 'Error'), 'error');
+          }
+        }
+      }
+    });
+  }
+
   // File input change handler (Upload Photo)
   if (fileInput && !fileInput.dataset.bound) {
     fileInput.dataset.bound = 'true';

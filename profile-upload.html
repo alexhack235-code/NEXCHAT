@@ -448,6 +448,29 @@
       if (cachedName && dispInput && !dispInput.value) {
         dispInput.value = cachedName;
       }
+
+      // Check if user selected an avatar from Avatar Vault
+      const cachedAvatarStr = localStorage.getItem('nexchat_selected_avatar');
+      if (cachedAvatarStr) {
+        const cachedAvatar = JSON.parse(cachedAvatarStr);
+        if (cachedAvatar && (cachedAvatar.url || cachedAvatar.thumbnailUrl)) {
+          selectedAvatarUrl = cachedAvatar.url || cachedAvatar.thumbnailUrl;
+          profileData.avatar = selectedAvatarUrl;
+          if (previewImage) previewImage.src = selectedAvatarUrl;
+          if (previewContainer) {
+            previewContainer.setAttribute('aria-hidden', 'false');
+            previewContainer.style.display = 'flex';
+          }
+          const statusEl = document.getElementById('profileSelectStatus');
+          if (statusEl) statusEl.textContent = `NEX Avatar selected: ${cachedAvatar.name || 'Custom'}`;
+          showMessage(result, `NEX Avatar applied: ${cachedAvatar.name || 'Selected'}`, 'success');
+          const nextBtn = document.getElementById('nextToStep2');
+          if (nextBtn) {
+            nextBtn.innerHTML = 'Continue to details <i class="fa-solid fa-arrow-right"></i>';
+            nextBtn.style.background = 'linear-gradient(135deg, #00d4ff, #00ff66)';
+          }
+        }
+      }
     } catch (_) {}
 
     showStep(1);
