@@ -509,19 +509,49 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
       if (isAudio) {
         const transcriptText = att.translatedText || att.transcript || '';
         const hasTranscript = Boolean(transcriptText.trim());
-        const durationSec = att.duration ? Math.round(att.duration) + 's' : '';
-        attachmentHtml = '';
-        attachmentHtml += '<div class="cached-voice-attachment" style="display:flex;flex-direction:column;gap:5px;margin-bottom:6px;min-width:210px;">';
-        attachmentHtml += '<div style="display:flex;align-items:center;gap:8px;background:rgba(0,0,0,0.22);padding:7px 10px;border-radius:8px;">';
-        attachmentHtml += '<i class="fa-solid fa-microphone" style="color:#00f3ff;font-size:13px;"></i>';
-        attachmentHtml += '<span style="font-size:12px;font-weight:600;color:#e2e8f0;">Voice Note</span>';
-        attachmentHtml += '<span style="font-size:11px;color:#94a3b8;margin-left:auto;">' + escapeHtml(durationSec) + '</span></div>';
-        if (hasTranscript) {
-          attachmentHtml += '<div class="voice-note-transcript-card" style="padding:6px 9px;background:rgba(0,243,255,0.08);border-left:2px solid #00f3ff;border-radius:5px;font-size:11.5px;color:#f1f5f9;line-height:1.35;">';
-          attachmentHtml += '<div style="font-size:9.5px;font-weight:700;color:#00f3ff;text-transform:uppercase;margin-bottom:2px;"><i class="fa-solid fa-language"></i> Transcript</div>';
-          attachmentHtml += '<div>' + escapeHtml(transcriptText) + '</div></div>';
-        }
-        attachmentHtml += '</div>';
+        const durationNum = parseFloat(att.duration) || 0;
+        const audioSrc = att.downloadURL || att.url || '';
+        const durationDisplay = (durationNum > 0)
+          ? (Math.floor(durationNum / 60) + ':' + String(Math.floor(durationNum % 60)).padStart(2, '0'))
+          : '0:05';
+
+        attachmentHtml = `
+          <div class="nex-voice-card-wrapper" data-audio-url="${escapeHtml(audioSrc)}" style="margin-bottom:6px;min-width:220px;max-width:100%;">
+            <div class="custom-audio-player nex-waveform-player" style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(15,23,42,0.78);border:1px solid rgba(255,255,255,0.12);border-radius:14px;height:48px;box-sizing:border-box;">
+              <button type="button" class="waveform-play-btn" data-audio-src="${escapeHtml(audioSrc)}" aria-label="Play voice note" style="width:32px;height:32px;min-width:32px;border-radius:50%;border:none;background:linear-gradient(135deg,#00ff66,#00d4ff);color:#050a14;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;">
+                <i class="fa-solid fa-play" style="font-size:11px;margin-left:2px;"></i>
+              </button>
+              <div class="waveform-info" style="display:flex;flex-direction:column;flex:1;min-width:0;gap:2px;justify-content:center;">
+                <div class="waveform-bars-container" style="height:18px;display:flex;align-items:center;gap:2px;cursor:pointer;">
+                  <div class="waveform-bars" style="display:flex;align-items:center;gap:2px;height:100%;">
+                    <span style="width:2px;height:6px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:12px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:16px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:10px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:15px;background:#00f2fe;border-radius:1px;"></span>
+                    <span style="width:2px;height:8px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:14px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:11px;background:#00f2fe;border-radius:1px;"></span>
+                    <span style="width:2px;height:13px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:7px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:12px;background:#00ff66;border-radius:1px;"></span>
+                    <span style="width:2px;height:9px;background:#00f2fe;border-radius:1px;"></span>
+                  </div>
+                </div>
+                <div class="waveform-time-row" style="display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#94a3b8;line-height:1;">
+                  <span class="waveform-time">0:00 / ${escapeHtml(durationDisplay)}</span>
+                  <button type="button" class="nex-transcribe-btn" style="background:transparent;border:none;color:#00f3ff;font-size:10px;padding:0;cursor:pointer;display:inline-flex;align-items:center;gap:3px;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            ${hasTranscript ? `
+              <div class="voice-note-transcript-card" style="margin-top:6px;padding:6px 9px;background:rgba(0,243,255,0.08);border-left:2px solid #00f3ff;border-radius:5px;font-size:11.5px;color:#f1f5f9;line-height:1.35;">
+                <div style="font-size:9.5px;font-weight:700;color:#00f3ff;text-transform:uppercase;margin-bottom:2px;"><i class="fa-solid fa-language"></i> Voice Note Subtitle</div>
+                <div>${escapeHtml(transcriptText)}</div>
+              </div>` : ''}
+          </div>`;
       } else {
         attachmentHtml = '<div class="cached-attachment-preview" style="display:flex;align-items:center;gap:7px;margin-bottom:6px;font-size:12px;color:#cbd5e1;background:rgba(0,0,0,0.22);padding:6px 10px;border-radius:8px;"><i class="fa-solid fa-paperclip" style="color:#00f3ff;"></i><span>' + escapeHtml(att.fileName || 'Attachment') + '</span></div>';
       }
@@ -545,6 +575,39 @@ function renderCachedDirectChatHistory(messages, messagesDiv) {
       </div>`;
   }).join('');
   messagesDiv.innerHTML = html;
+  messagesDiv.dataset.isCachedPreview = 'true';
+
+  // Hydrate cached waveform audio players with interactive play/pause controls
+  messagesDiv.querySelectorAll('.waveform-play-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const audioSrc = btn.dataset.audioSrc;
+      if (!audioSrc) return;
+      if (btn._audioInstance) {
+        if (btn._audioInstance.paused) {
+          btn._audioInstance.play();
+          btn.classList.add('playing');
+          btn.innerHTML = '<i class="fa-solid fa-pause" style="font-size:11px;"></i>';
+        } else {
+          btn._audioInstance.pause();
+          btn.classList.remove('playing');
+          btn.innerHTML = '<i class="fa-solid fa-play" style="font-size:11px;margin-left:2px;"></i>';
+        }
+      } else {
+        const aud = new Audio(audioSrc);
+        aud.preservesPitch = true;
+        aud.addEventListener('ended', () => {
+          btn.classList.remove('playing');
+          btn.innerHTML = '<i class="fa-solid fa-play" style="font-size:11px;margin-left:2px;"></i>';
+        });
+        aud.play().catch(console.warn);
+        btn._audioInstance = aud;
+        btn.classList.add('playing');
+        btn.innerHTML = '<i class="fa-solid fa-pause" style="font-size:11px;"></i>';
+      }
+    });
+  });
+
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
@@ -8109,13 +8172,14 @@ function loadMessages() {
     });
 
     const newSignature = allMessages.map(m => (m.docId || m.id || m.clientMsgId || '') + ':' + (m.status || '') + ':' + (m.read ? '1' : '0')).join(';');
-    if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === newSignature) {
+    if (messagesDiv.dataset.renderedChatKey === activeChatKey && messagesDiv.dataset.currentSignature === newSignature && messagesDiv.dataset.isCachedPreview !== 'true') {
       return;
     }
     messagesDiv.innerHTML = "";
     messagesDiv.appendChild(messageFragment);
     messagesDiv.dataset.renderedChatKey = activeChatKey;
     messagesDiv.dataset.currentSignature = newSignature;
+    messagesDiv.dataset.isCachedPreview = 'false';
 
     const isNearBottom = (messagesDiv.scrollHeight - messagesDiv.scrollTop - messagesDiv.clientHeight) < 160;
     if (isNearBottom || (typeof allMessages !== 'undefined' && allMessages.length <= 5)) {
@@ -8418,6 +8482,11 @@ function hideChatProfileDisplay() {
 }
 
 async function openChat(uid, username, profilePic, chatType = 'direct') {
+  // Ensure voice recording is cancelled cleanly when navigating to any chat
+  if (window.voiceRecorderController && typeof window.voiceRecorderController.cancelRecording === 'function') {
+    window.voiceRecorderController.cancelRecording();
+  }
+
   /* Ensure Attachment Hub is closed upon opening chat */
   const initialHub = document.getElementById('attachmentPopupHub');
   if (initialHub) {

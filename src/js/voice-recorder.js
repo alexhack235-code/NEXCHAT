@@ -3,6 +3,9 @@
  * 
  * Capabilities:
  * - HTML5 MediaRecorder voice capture (WebM / Ogg / MP4)
+ * - Strict user-gesture hold-to-record only (0 background / auto recording)
+ * - 2-second minimum duration guard (discards accidental taps)
+ * - Immediate microphone track revocation upon stop or cancel
  * - Real-time AudioContext frequency analyser driving waveform visualizer
  * - Elapsed recording timer (0:00 -> 0:01...)
  * - Instant upload & dispatch as custom waveform audio message
@@ -24,6 +27,12 @@
       this.startTime = 0;
       this.durationSec = 0;
       this.isRecording = false;
+      this.isStarting = false;
+      this.isPressedOnMic = false;
+      this.isCancelled = false;
+      this.holdTimer = null;
+      this.startX = 0;
+      this.pointerDownTime = 0;
       this.speechRecognizer = null;
       this.speechTranscript = '';
 
@@ -34,6 +43,7 @@
       this.cancelBtn = null;
       this.stopBtn = null;
       this.sendBtn = null;
+      this.audioSendBtn = null;
       this.messageForm = null;
 
       this.init();
@@ -48,6 +58,16 @@
         document.addEventListener('DOMContentLoaded', () => this.bindDOM());
       } else {
         this.bindDOM();
+      }
+
+      // Cleanup on page unload or navigation
+      if (typeof window !== 'undefined') {
+        window.addEventListener('beforeunload', () => {
+          this.cancelRecording();
+        });
+        window.addEventListener('pagehide', () => {
+          this.cancelRecording();
+        });
       }
     }
 
@@ -70,33 +90,42 @@
       this.recordBtn.style.touchAction = 'none';
       this.recordBtn.addEventListener('contextmenu', (e) => e.preventDefault());
 
-      let holdTimer = null;
-      let isHolding = false;
-      let startX = 0;
-      let pointerDownTime = 0;
-
       const handlePointerDown = (e) => {
-        pointerDownTime = Date.now();
-        startX = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) || 0;
-        isHolding = false;
+        // Strict guard: Only left-click or touch initiates recording
+        if (e.button && e.button !== 0) return;
+        this.isPressedOnMic = true;
+        this.isCancelled = false;
+        this.pointerDownTime = Date.now();
+        this.startX = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) || 0;
 
-        if (holdTimer) clearTimeout(holdTimer);
-        holdTimer = setTimeout(() => {
-          isHolding = true;
-          if (!this.isRecording) {
+        if (this.holdTimer) {
+          clearTimeout(this.holdTimer);
+          this.holdTimer = null;
+        }
+
+        // Guard against duplicate start
+        if (this.isRecording || this.isStarting) return;
+
+        // Tactile hold threshold (250ms). Must maintain press to start.
+        this.holdTimer = setTimeout(() => {
+          if (this.isPressedOnMic && !this.isRecording && !this.isStarting) {
             this.startRecording();
           }
-        }, 280);
+        }, 250);
       };
 
       const handlePointerMove = (e) => {
-        if (!isHolding || !this.isRecording) return;
+        // Guard: Only process slide-to-cancel if user is actively holding the mic
+        if (!this.isPressedOnMic) return;
         const currentX = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) || 0;
-        const deltaX = startX - currentX;
-        // Slide left by > 50px cancels recording (WhatsApp tactile slide-to-cancel)
+        const deltaX = this.startX - currentX;
+        // Slide left by > 50px cancels recording
         if (deltaX > 50) {
-          isHolding = false;
-          if (holdTimer) clearTimeout(holdTimer);
+          this.isPressedOnMic = false;
+          if (this.holdTimer) {
+            clearTimeout(this.holdTimer);
+            this.holdTimer = null;
+          }
           this.cancelRecording();
           if (typeof window.showNotif === 'function') {
             window.showNotif('Slide to cancel: Voice note cancelled', 'info', 1500);
@@ -105,40 +134,59 @@
       };
 
       const handlePointerUp = (e) => {
-        const pressDuration = Date.now() - pointerDownTime;
-        if (holdTimer) {
-          clearTimeout(holdTimer);
-          holdTimer = null;
+        if (this.holdTimer) {
+          clearTimeout(this.holdTimer);
+          this.holdTimer = null;
         }
 
-        if (isHolding) {
-          isHolding = false;
-          if (this.isRecording) {
-            if (pressDuration >= 280) {
-              this.stopAndSendRecording();
-            } else {
-              this.cancelRecording();
-            }
+        // STRICT GUARD: If this release event is NOT from active mic press, ignore completely!
+        if (!this.isPressedOnMic) return;
+        this.isPressedOnMic = false;
+
+        // Quick tap without holding (< 250ms): show guidance and discard
+        if (!this.isRecording && !this.isStarting) {
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Hold mic button to record voice note', 'info', 1600);
           }
-        } else {
-          // Quick tap (< 280ms): toggle recording in locked hands-free mode
-          if (this.isRecording) {
-            this.stopAndSendRecording();
-          } else {
-            this.startRecording();
+          return;
+        }
+
+        // Minimum duration check: Less than 2 seconds -> discard
+        const elapsedMs = Date.now() - this.startTime;
+        if (elapsedMs < 2000) {
+          this.cancelRecording();
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Voice note too short (< 2s) - discarded', 'info', 1800);
           }
+          return;
+        }
+
+        // Valid voice note duration (>= 2s)
+        this.stopAndSendRecording();
+      };
+
+      const handlePointerLeave = (e) => {
+        // If finger glides off button before hold threshold, cancel hold
+        if (this.isPressedOnMic && !this.isRecording) {
+          if (this.holdTimer) {
+            clearTimeout(this.holdTimer);
+            this.holdTimer = null;
+          }
+          this.isPressedOnMic = false;
         }
       };
 
       // Pointer events for modern touch and mouse
       if (window.PointerEvent) {
         this.recordBtn.addEventListener('pointerdown', handlePointerDown);
+        this.recordBtn.addEventListener('pointerleave', handlePointerLeave);
         window.addEventListener('pointermove', handlePointerMove);
         window.addEventListener('pointerup', handlePointerUp);
         window.addEventListener('pointercancel', handlePointerUp);
       } else {
         // Fallback touch and mouse events
         this.recordBtn.addEventListener('touchstart', handlePointerDown, { passive: true });
+        this.recordBtn.addEventListener('mouseleave', handlePointerLeave);
         window.addEventListener('touchmove', handlePointerMove, { passive: true });
         window.addEventListener('touchend', handlePointerUp);
         window.addEventListener('touchcancel', handlePointerUp);
@@ -158,7 +206,7 @@
         });
       }
 
-      // Stop button (finishes recording & sends)
+      // Stop button (finishes recording & sends if duration criteria met)
       if (this.stopBtn) {
         this.stopBtn.addEventListener('click', (e) => {
           e.preventDefault();
@@ -184,9 +232,21 @@
     }
 
     async startRecording() {
-      if (this.isRecording) return;
+      // 1. Strict guard: never double start, never start unless mic button is actively held
+      if (this.isRecording || this.isStarting) {
+        console.log('[VoiceRecorder] Guard: Already recording or starting, ignoring duplicate call.');
+        return;
+      }
+      if (!this.isPressedOnMic) {
+        console.log('[VoiceRecorder] Guard: Not triggered by active mic press, ignoring.');
+        return;
+      }
+
+      this.isStarting = true;
+      this.isCancelled = false;
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        this.isStarting = false;
         if (window.showNotif) window.showNotif('Microphone access requires HTTPS or a modern browser', 'error');
         return;
       }
@@ -199,6 +259,19 @@
             autoGainControl: true
           }
         });
+
+        // Re-check after async getUserMedia: if user released button or cancelled during prompt, abort
+        if (!this.isPressedOnMic || this.isCancelled) {
+          console.log('[VoiceRecorder] User released mic before stream ready. Stopping tracks immediately.');
+          if (this.stream) {
+            try {
+              this.stream.getTracks().forEach(t => t.stop());
+            } catch (_) {}
+            this.stream = null;
+          }
+          this.isStarting = false;
+          return;
+        }
 
         // Determine best supported mimeType
         let mimeType = 'audio/webm;codecs=opus';
@@ -240,6 +313,7 @@
 
         this.mediaRecorder.start(100);
         this.isRecording = true;
+        this.isStarting = false;
         this.startTime = Date.now();
 
         // UI transitions
@@ -264,6 +338,8 @@
           this.audioCtx = null;
         }
         this.isRecording = false;
+        this.isStarting = false;
+        this.isPressedOnMic = false;
         if (window.showNotif) {
           if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
             window.showNotif('Microphone permission was denied. Please allow mic in browser settings.', 'error', 4000);
@@ -322,7 +398,6 @@
       this.speechTranscript = '';
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRec) {
-        console.log('[VoiceRecorder] Web Speech Recognition API not available.');
         return;
       }
       try {
@@ -350,8 +425,14 @@
     }
 
     cancelRecording() {
-      if (!this.isRecording) return;
+      this.isCancelled = true;
       this.isRecording = false;
+      this.isStarting = false;
+      this.isPressedOnMic = false;
+      if (this.holdTimer) {
+        clearTimeout(this.holdTimer);
+        this.holdTimer = null;
+      }
 
       if (this.speechRecognizer) {
         try { this.speechRecognizer.stop(); } catch (e) {}
@@ -362,47 +443,92 @@
       // Discard recorder without triggering send
       if (this.mediaRecorder) {
         this.mediaRecorder.onstop = null;
-        try { this.mediaRecorder.stop(); } catch (e) {}
+        this.mediaRecorder.ondataavailable = null;
+        try {
+          if (this.mediaRecorder.state !== 'inactive') {
+            this.mediaRecorder.stop();
+          }
+        } catch (e) {}
+        this.mediaRecorder = null;
       }
 
+      this.audioChunks = [];
       this.cleanupMedia();
       this.resetUI();
-      if (window.showNotif) window.showNotif('Voice note cancelled', 'info', 1500);
     }
 
     stopAndSendRecording() {
-      if (!this.isRecording) return;
-      this.isRecording = false;
+      if (this.holdTimer) {
+        clearTimeout(this.holdTimer);
+        this.holdTimer = null;
+      }
+      this.isPressedOnMic = false;
 
+      if (!this.isRecording && !this.isStarting) return;
+      this.isStarting = false;
+
+      // Minimum duration: less than 2 seconds -> discard completely
+      const elapsedMs = Date.now() - this.startTime;
+      if (elapsedMs < 2000) {
+        console.log('[VoiceRecorder] Discarding recording (< 2s):', elapsedMs, 'ms');
+        this.isCancelled = true;
+        this.cancelRecording();
+        if (window.showNotif) window.showNotif('Voice note too short (< 2s) - discarded', 'info', 1800);
+        return;
+      }
+
+      this.isRecording = false;
       if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
         this.mediaRecorder.stop();
+      } else {
+        this.cleanupMedia();
+        this.resetUI();
       }
     }
 
     async handleRecordingComplete(mimeType) {
-      if (this.speechRecognizer) {
-        try { this.speechRecognizer.stop(); } catch (e) {}
-        this.speechRecognizer = null;
+      if (this.isCancelled) {
+        console.log('[VoiceRecorder] Recording was cancelled. Discarding audio.');
+        this.audioChunks = [];
+        this.cleanupMedia();
+        this.resetUI();
+        return;
       }
+
+      const elapsedMs = Date.now() - this.startTime;
+      const elapsedSec = Math.floor(elapsedMs / 1000);
+
+      // Minimum duration requirement: strictly at least 2 seconds
+      if (elapsedMs < 2000 || elapsedSec < 2) {
+        console.log('[VoiceRecorder] Discarding recording (< 2s):', elapsedMs, 'ms');
+        this.audioChunks = [];
+        this.cleanupMedia();
+        this.resetUI();
+        if (window.showNotif) window.showNotif('Voice note too short (< 2s) - discarded', 'info', 1800);
+        return;
+      }
+
       const capturedTranscript = this.speechTranscript || '';
       this.speechTranscript = '';
 
       this.cleanupMedia();
       this.resetUI();
 
-      if (this.audioChunks.length === 0) {
-        if (window.showNotif) window.showNotif('No audio captured', 'error');
+      if (!this.audioChunks || this.audioChunks.length === 0) {
+        console.warn('[VoiceRecorder] No audio chunks captured. Aborting.');
         return;
       }
 
       const audioBlob = new Blob(this.audioChunks, { type: mimeType });
-      const duration = Math.max(1, this.durationSec || 1);
+      this.audioChunks = [];
 
-      // Verify minimum duration (at least 0.5s to prevent accidental tap)
-      if (audioBlob.size < 500) {
-        if (window.showNotif) window.showNotif('Audio too short (hold to record)', 'info');
+      // Check minimum valid blob size
+      if (audioBlob.size < 1000) {
+        console.warn('[VoiceRecorder] Audio blob size too small (< 1KB). Discarding.');
         return;
       }
+
+      const duration = Math.max(2, elapsedSec);
 
       // Read audio blob as Data URL for 100% offline-ready zero-delay playback
       const reader = new FileReader();
@@ -445,16 +571,29 @@
         try { this.speechRecognizer.stop(); } catch (e) {}
         this.speechRecognizer = null;
       }
-      clearInterval(this.timerInterval);
-      if (this.animFrameId) cancelAnimationFrame(this.animFrameId);
+      if (this.timerInterval) {
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+      }
+      if (this.animFrameId) {
+        cancelAnimationFrame(this.animFrameId);
+        this.animFrameId = null;
+      }
       if (this.stream) {
-        this.stream.getTracks().forEach(t => t.stop());
+        try {
+          this.stream.getTracks().forEach(t => {
+            try { t.stop(); } catch (_) {}
+          });
+        } catch (_) {}
         this.stream = null;
       }
       if (this.audioCtx && this.audioCtx.state !== 'closed') {
-        try { this.audioCtx.close(); } catch (e) {}
+        try { this.audioCtx.close(); } catch (_) {}
         this.audioCtx = null;
       }
+      this.isRecording = false;
+      this.isStarting = false;
+      this.isPressedOnMic = false;
     }
 
     resetUI() {
