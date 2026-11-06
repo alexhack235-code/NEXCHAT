@@ -1,35 +1,40 @@
 /**
  * =============================================================================
- * NEXCHAT CROSS-DEVICE LOCAL WEBRTC AIR-DROP MESH ENGINE (v4.0)
+ * NEXCHAT UNIFIED CROSS-DEVICE WEBRTC AIR-DROP RADAR MESH ENGINE (v6.0)
  * Module: src/js/p2p-airdrop-engine.js
- * Namespace: window.NexMeshSync.AirDrop
- * Architecture: Zero-Cloud LAN Radar • Dynamic 128KB/256KB Chunks • SHA-256 Checksums
- * Colorway: Deep Obsidian (#060913) | Cyber-Emerald (#00ff66) | Quantum Cyan (#00f2fe) | Amber (#f59e0b)
+ * Namespaces: window.NexMeshSync.AirDrop & window.NexAirDropMesh
+ * Architecture: Zero-Cloud LAN Radar • WebRTC DataChannel • SHA-256 Integrity
+ * Colorway: Deep Obsidian (#060913) | Cyber-Emerald (#00ff66) | Quantum Cyan (#00f2fe)
  * Strictly ZERO Unicode Emojis (FontAwesome 6 Icon Matrix Only)
  * =============================================================================
  */
 
-(function(window) {
+(function(global) {
   'use strict';
 
   // Dynamic Chunking Bounds
   const CHUNK_MIN = 64 * 1024;       // 64 KB
   const CHUNK_DEFAULT = 128 * 1024;   // 128 KB
   const CHUNK_MAX = 256 * 1024;       // 256 KB
+  const BACKPRESSURE_LIMIT = 4 * 1024 * 1024; // 4 MB throttle guard
 
   class NexAirDropEngine {
     constructor() {
-      this.nodeId = 'airdrop_' + Math.random().toString(36).substring(2, 9);
+      this.nodeId = 'node_' + Math.random().toString(36).substring(2, 9);
       this.localUser = null;
       this.radarChannelName = 'nex_airdrop_radar_channel';
       this.radarChannel = null;
-      this.discoveredPeers = new Map(); // peerNodeId -> { nodeId, uid, username, coords, lastSeen }
-      this.activeTransfers = new Map();
+      this.discoveredPeers = new Map(); // peerNodeId -> peer data
+      this.selectedPeerId = null;
       this.selectedFile = null;
+      this.stagedFile = null;
       this.peerConnections = new Map(); // peerNodeId -> RTCPeerConnection
       this.dataChannels = new Map();    // peerNodeId -> RTCDataChannel
       this.isTransferring = false;
       this.currentTransferStats = { bytesSent: 0, totalBytes: 0, startTime: 0, speedBps: 0 };
+      this.currentReceiverContext = null;
+      this.incomingOffer = null;
+      this.beaconTimer = null;
 
       this.initBroadcastRadar();
       this.initDOM();
@@ -43,16 +48,17 @@
         this.radarChannel = new BroadcastChannel(this.radarChannelName);
         this.radarChannel.onmessage = (event) => this.handleRadarSignal(event.data);
         this.broadcastPresenceBeacon();
-        setInterval(() => this.broadcastPresenceBeacon(), 3500);
+        if (this.beaconTimer) clearInterval(this.beaconTimer);
+        this.beaconTimer = setInterval(() => this.broadcastPresenceBeacon(), 3500);
       } catch (err) {
-        console.warn('[AIR-DROP] BroadcastChannel unavailable for radar:', err);
+        console.warn('[NEX-AIRDROP] BroadcastChannel unavailable for radar:', err);
       }
     }
 
     broadcastPresenceBeacon() {
       if (!this.radarChannel) return;
-      const uid = this.localUser?.uid || window.myUID || this.nodeId;
-      const username = this.localUser?.username || window.myUsername || 'Local_Peer';
+      const uid = this.localUser?.uid || global.myUID || this.nodeId;
+      const username = this.localUser?.username || global.myUsername || 'Local_Peer';
 
       this.radarChannel.postMessage({
         type: 'RADAR_BEACON',
@@ -89,7 +95,7 @@
         });
 
         if (isNew) {
-          window.dispatchEvent(new CustomEvent('nex:mesh:peer_discovered', {
+          global.dispatchEvent(new CustomEvent('nex:mesh:peer_discovered', {
             detail: { peerId: signal.senderNodeId, timestamp: signal.timestamp }
           }));
         }
@@ -109,8 +115,9 @@
       const now = Date.now();
       let changed = false;
       this.discoveredPeers.forEach((peer, key) => {
-        if (now - peer.lastSeen > 12000) {
+        if (!peer.isActiveChat && now - peer.lastSeen > 14000) {
           this.discoveredPeers.delete(key);
+          if (this.selectedPeerId === key) this.selectedPeerId = null;
           changed = true;
         }
       });
@@ -125,14 +132,46 @@
     }
 
     // -------------------------------------------------------------------------
-    // 2. WebRTC Peer Connection (Direct Host LAN)
+    // 2. Active Chat Peer Auto-Detection
+    // -------------------------------------------------------------------------
+    populateActiveChatPeer() {
+      const activeContact = global.currentChatContact || global.activeChatUser || null;
+      const activeChatName = global.activeChatTitle || (activeContact ? activeContact.username || activeContact.displayName : null);
+      const activeChatId = global.activeChatId || (activeContact ? activeContact.id || activeContact.uid : null);
+
+      if (activeChatId && activeChatName) {
+        const virtualNodeId = 'peer_active_' + String(activeChatId).substring(0, 8);
+        this.discoveredPeers.set(virtualNodeId, {
+          nodeId: virtualNodeId,
+          uid: activeChatId,
+          username: activeChatName,
+          deviceType: 'mobile',
+          lastSeen: Date.now() + 600000,
+          isActiveChat: true,
+          radarPos: { x: 50, y: 18 } // Top 12 o'clock polar position
+        });
+
+        if (!this.selectedPeerId) {
+          this.selectPeer(virtualNodeId);
+        }
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. WebRTC Peer Connection (Host LAN + STUN Fallback)
     // -------------------------------------------------------------------------
     createPeerConnection(targetNodeId) {
       if (this.peerConnections.has(targetNodeId)) {
-        return this.peerConnections.get(targetNodeId);
+        const existingPc = this.peerConnections.get(targetNodeId);
+        if (existingPc.signalingState !== 'closed') return existingPc;
       }
 
-      const pc = new RTCPeerConnection({ iceServers: [] });
+      const pc = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ]
+      });
       this.peerConnections.set(targetNodeId, pc);
 
       pc.onicecandidate = (e) => {
@@ -179,12 +218,13 @@
     }
 
     // -------------------------------------------------------------------------
-    // 3. Sender Pipeline: Adaptive Dynamic Chunking & SHA-256
+    // 4. Sender Pipeline: Dynamic Chunks, Backpressure & SHA-256 Checksums
     // -------------------------------------------------------------------------
     async initiateBeamToNode(targetNodeId) {
-      if (!this.selectedFile) {
-        if (typeof window.showNotif === 'function') {
-          window.showNotif('Please select a file to beam first', 'error');
+      const file = this.selectedFile || this.stagedFile;
+      if (!file) {
+        if (typeof global.showNotif === 'function') {
+          global.showNotif('Please select or drop a file to beam first.', 'warning');
         }
         return;
       }
@@ -216,18 +256,18 @@
         sessionId: sessionId,
         targetNodeId: targetNodeId,
         senderNodeId: this.nodeId,
-        senderUsername: this.localUser?.username || window.myUsername || 'Peer Node',
+        senderUsername: this.localUser?.username || global.myUsername || 'Peer Node',
         meta: {
-          name: this.selectedFile.name,
-          size: this.selectedFile.size,
-          type: this.selectedFile.type || 'application/octet-stream',
-          lastModified: this.selectedFile.lastModified
+          name: file.name,
+          size: file.size,
+          type: file.type || 'application/octet-stream',
+          lastModified: file.lastModified
         }
       });
 
-      this.showTransferHUD(targetName, this.selectedFile.size);
-      if (typeof window.showNotif === 'function') {
-        window.showNotif(`Air-Drop beam proposed to ${targetName}...`, 'info', 2500);
+      this.showTransferHUD(targetName, file.size);
+      if (typeof global.showNotif === 'function') {
+        global.showNotif('Beam proposal sent to ' + targetName + '...', 'info', 2500);
       }
     }
 
@@ -235,7 +275,7 @@
       const dc = this.dataChannels.get(targetNodeId);
       if (!dc) return;
 
-      const file = this.selectedFile;
+      const file = this.selectedFile || this.stagedFile;
       if (!file) return;
 
       this.isTransferring = true;
@@ -252,20 +292,20 @@
 
       const transmitNext = async () => {
         if (!this.isTransferring || offset >= totalBytes) {
-          if (offset >= totalBytes) this.finalizeSenderTransfer(dc, sessionId);
+          if (offset >= totalBytes) this.finalizeSenderTransfer(dc, sessionId, file);
           return;
         }
 
         // Dynamic Sizing based on WebRTC buffer headroom
         let chunkSize = CHUNK_DEFAULT;
         if (dc.bufferedAmount < 1024 * 1024) {
-          chunkSize = CHUNK_MAX; // Headroom available: saturate with 256KB
+          chunkSize = CHUNK_MAX; // Headroom available: 256KB
         } else if (dc.bufferedAmount > 3 * 1024 * 1024) {
-          chunkSize = CHUNK_MIN; // Pressure detected: back off to 64KB
+          chunkSize = CHUNK_MIN; // Back off to 64KB
         }
 
-        // Backpressure Guard: Pause stream when queue exceeds 4MB
-        if (dc.bufferedAmount > 4 * 1024 * 1024) {
+        // Backpressure Guard: Pause stream when queue exceeds threshold
+        if (dc.bufferedAmount > BACKPRESSURE_LIMIT) {
           dc.onbufferedamountlow = () => {
             dc.onbufferedamountlow = null;
             transmitNext();
@@ -307,7 +347,7 @@
       }
     }
 
-    finalizeSenderTransfer(dc, sessionId) {
+    async finalizeSenderTransfer(dc, sessionId, file) {
       this.isTransferring = false;
       dc.send(JSON.stringify({ type: 'AIRDROP_STREAM_EOF', sessionId: sessionId }));
       
@@ -316,14 +356,43 @@
       if (hudProgress) hudProgress.style.width = '100%';
       if (hudPct) hudPct.textContent = '100% COMPLETE';
 
-      if (typeof window.showNotif === 'function') {
-        window.showNotif('Air-Drop transmission complete!', 'success', 3500);
+      // Save sender copy to local air-gap sandbox ($0 cloud bandwidth)
+      if (global.NexGallerySandbox && typeof global.NexGallerySandbox.saveMediaItem === 'function') {
+        try {
+          await global.NexGallerySandbox.saveMediaItem({
+            name: file.name,
+            type: global.NexGallerySandbox.detectMediaType(file.type, file.name),
+            mimeType: file.type,
+            blob: file,
+            size: file.size,
+            chatId: global.activeChatId || 'p2p_airdrop',
+            senderName: 'You (P2P Beam)'
+          });
+        } catch (_) {}
       }
-      if (typeof window.playLuxuryChimeSound === 'function') window.playLuxuryChimeSound();
+
+      if (typeof global.showNotif === 'function') {
+        global.showNotif('Air-Drop beam of "' + file.name + '" completed!', 'success', 3500);
+      }
+      if (typeof global.playLuxuryChimeSound === 'function') global.playLuxuryChimeSound();
+
+      setTimeout(() => {
+        const hud = document.getElementById('airdropTransferHud');
+        if (hud) hud.style.display = 'none';
+      }, 3000);
+    }
+
+    handleTransferDeclined(signal) {
+      this.isTransferring = false;
+      const hud = document.getElementById('airdropTransferHud');
+      if (hud) hud.style.display = 'none';
+      if (typeof global.showNotif === 'function') {
+        global.showNotif('Peer declined the Air-Drop transfer.', 'warning');
+      }
     }
 
     // -------------------------------------------------------------------------
-    // 4. Receiver Pipeline: Assembly, Verification & Blob Reconstruction
+    // 5. Receiver Pipeline: Assembly, Verification & Blob Reconstruction
     // -------------------------------------------------------------------------
     setupReceiverChannel(senderNodeId, dc) {
       dc.binaryType = 'arraybuffer';
@@ -369,7 +438,7 @@
           totalReceivedBytes += payloadData.byteLength;
           this.updateReceiverTrayProgress(totalReceivedBytes, incomingMeta?.size || totalReceivedBytes);
         } else {
-          console.warn(`[AIR-DROP] Checksum failure on chunk #${chunkIndex}`);
+          console.warn('[NEX-AIRDROP] Checksum failure on chunk #' + chunkIndex);
         }
       };
 
@@ -380,14 +449,15 @@
     }
 
     handleIncomingTransferOffer(signal) {
+      this.incomingOffer = signal;
       const tray = document.getElementById('airdropReceiverTray');
       const senderEl = document.getElementById('airdropIncomingSender');
       const fileEl = document.getElementById('airdropIncomingFileName');
       const sizeEl = document.getElementById('airdropIncomingFileSize');
 
-      if (senderEl) senderEl.textContent = `@${signal.senderUsername || signal.senderNodeId}`;
+      if (senderEl) senderEl.textContent = '@' + (signal.senderUsername || signal.senderNodeId);
       if (fileEl) fileEl.textContent = signal.meta.name;
-      if (sizeEl) sizeEl.textContent = `${(signal.meta.size / (1024 * 1024)).toFixed(2)} MB • Direct WebRTC`;
+      if (sizeEl) sizeEl.textContent = this.formatBytes(signal.meta.size) + ' • Direct WebRTC';
 
       if (this.currentReceiverContext) {
         this.currentReceiverContext.setMeta(signal.meta);
@@ -397,6 +467,8 @@
       const declineBtn = document.getElementById('airdropDeclineBtn');
 
       if (acceptBtn) {
+        acceptBtn.disabled = false;
+        acceptBtn.innerHTML = '<i class="fa-solid fa-download"></i> Accept & Stream';
         acceptBtn.onclick = () => {
           this.radarChannel.postMessage({
             type: 'AIRDROP_TRANSFER_ACCEPT',
@@ -418,15 +490,16 @@
             senderNodeId: this.nodeId
           });
           if (tray) tray.style.display = 'none';
+          this.incomingOffer = null;
         };
       }
 
       if (tray) tray.style.display = 'block';
       this.openModal();
-      if (typeof window.playLuxuryChimeSound === 'function') window.playLuxuryChimeSound();
+      if (typeof global.playLuxuryChimeSound === 'function') global.playLuxuryChimeSound();
     }
 
-    saveReceivedBlob(blob, filename) {
+    async saveReceivedBlob(blob, filename) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -439,14 +512,30 @@
       const tray = document.getElementById('airdropReceiverTray');
       if (tray) tray.style.display = 'none';
 
-      if (typeof window.showNotif === 'function') {
-        window.showNotif(`Received [${filename}] via Air-Drop!`, 'success', 4000);
+      // Automatically quarantine into Air-Gap Gallery Sandbox
+      if (global.NexGallerySandbox && typeof global.NexGallerySandbox.saveMediaItem === 'function') {
+        try {
+          await global.NexGallerySandbox.saveMediaItem({
+            name: filename,
+            type: global.NexGallerySandbox.detectMediaType(blob.type, filename),
+            mimeType: blob.type,
+            blob: blob,
+            size: blob.size,
+            chatId: global.activeChatId || 'p2p_airdrop',
+            senderName: this.incomingOffer?.senderUsername || 'AirDrop Peer'
+          });
+        } catch (_) {}
       }
-      if (typeof window.playLuxuryChimeSound === 'function') window.playLuxuryChimeSound();
+
+      if (typeof global.showNotif === 'function') {
+        global.showNotif('Received "' + filename + '" via Air-Drop!', 'success', 4000);
+      }
+      if (typeof global.playLuxuryChimeSound === 'function') global.playLuxuryChimeSound();
+      this.incomingOffer = null;
     }
 
     // -------------------------------------------------------------------------
-    // 5. UI Rendering & DOM Synchronizers
+    // 6. UI Rendering & DOM Synchronizers
     // -------------------------------------------------------------------------
     initDOM() {
       if (document.readyState === 'loading') {
@@ -457,33 +546,99 @@
     }
 
     bindUIEvents() {
-      document.getElementById('closeAirDropModalBtn')?.addEventListener('click', () => this.closeModal());
-      
+      const closeBtn = document.getElementById('closeAirDropModalBtn');
+      if (closeBtn) closeBtn.onclick = () => this.closeModal();
+
       const fileInput = document.getElementById('airdropFileInput');
       const stagingClick = document.getElementById('airdropStagingClick');
       const browseBtn = document.getElementById('airdropSelectFileBtn');
+      const sendBtn = document.getElementById('airdropSendBtn');
+      const dropZone = document.getElementById('airdropRadarStage');
+      const stagingBar = document.getElementById('airdropFileStaging');
 
-      [stagingClick, browseBtn].forEach(el => el?.addEventListener('click', () => fileInput?.click()));
+      const triggerFilePick = () => fileInput && fileInput.click();
+      if (stagingClick) stagingClick.onclick = triggerFilePick;
+      if (browseBtn) browseBtn.onclick = triggerFilePick;
 
-      fileInput?.addEventListener('change', (e) => {
-        if (e.target.files && e.target.files.length > 0) {
-          this.stageSelectedFile(e.target.files[0]);
-        }
+      if (fileInput) {
+        fileInput.onchange = (e) => {
+          if (e.target.files && e.target.files.length > 0) {
+            this.stageSelectedFile(e.target.files[0]);
+          }
+        };
+      }
+
+      if (sendBtn) {
+        sendBtn.onclick = () => this.handleSendBtnClick();
+      }
+
+      // Drag and Drop support
+      [dropZone, stagingBar].forEach((el) => {
+        if (!el) return;
+        el.ondragover = (e) => {
+          e.preventDefault();
+          el.classList.add('drag-active');
+        };
+        el.ondragleave = () => el.classList.remove('drag-active');
+        el.ondrop = (e) => {
+          e.preventDefault();
+          el.classList.remove('drag-active');
+          const file = e.dataTransfer?.files?.[0];
+          if (file) this.stageSelectedFile(file);
+        };
       });
+    }
+
+    handleSendBtnClick() {
+      if (!this.selectedFile && !this.stagedFile) {
+        if (typeof global.showNotif === 'function') {
+          global.showNotif('Please select or drop a file to beam first.', 'warning');
+        }
+        return;
+      }
+
+      if (!this.selectedPeerId) {
+        const firstKey = this.discoveredPeers.keys().next().value;
+        if (firstKey) {
+          this.selectPeer(firstKey);
+        } else {
+          if (typeof global.showNotif === 'function') {
+            global.showNotif('Scanning radar for nearby peers... Tap a blip to beam.', 'info');
+          }
+          return;
+        }
+      }
+
+      this.initiateBeamToNode(this.selectedPeerId);
     }
 
     stageSelectedFile(file) {
       this.selectedFile = file;
+      this.stagedFile = file;
       const nameEl = document.getElementById('airdropSelectedFileName');
       const sizeEl = document.getElementById('airdropSelectedFileSize');
-      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const sendBtn = document.getElementById('airdropSendBtn');
 
       if (nameEl) nameEl.textContent = file.name;
-      if (sizeEl) sizeEl.textContent = `${sizeMB} MB • Tap a nearby radar node to beam`;
-
-      if (typeof window.showNotif === 'function') {
-        window.showNotif(`Staged [${file.name}]. Select node on radar to beam.`, 'info', 2500);
+      if (sizeEl) sizeEl.textContent = this.formatBytes(file.size) + ' • Ready to beam';
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        sendBtn.style.opacity = '1';
       }
+
+      if (typeof global.showNotif === 'function') {
+        global.showNotif('Staged "' + file.name + '" (' + this.formatBytes(file.size) + '). Tap node on radar to beam.', 'info', 2500);
+      }
+    }
+
+    selectPeer(peerId) {
+      this.selectedPeerId = peerId;
+      const peer = this.discoveredPeers.get(peerId);
+      const targetLabel = document.getElementById('airdropHudTargetNode');
+      if (targetLabel && peer) {
+        targetLabel.textContent = peer.username + ' [' + peer.nodeId.substring(0, 8) + ']';
+      }
+      this.renderRadarBlips();
     }
 
     renderRadarBlips() {
@@ -491,22 +646,29 @@
       if (!container) return;
 
       container.innerHTML = '';
-      this.discoveredPeers.forEach((peer) => {
+      this.discoveredPeers.forEach((peer, peerId) => {
         const blip = document.createElement('div');
-        blip.className = 'radar-node-blip';
-        blip.style.left = `${peer.radarPos.x}%`;
-        blip.style.top = `${peer.radarPos.y}%`;
-        blip.title = `Tap to beam to @${peer.username} (${peer.deviceType})`;
+        const isSelected = this.selectedPeerId === peerId;
+        const isActiveChat = !!peer.isActiveChat;
 
-        const iconClass = peer.deviceType === 'mobile' ? 'fa-mobile-screen' : (peer.deviceType === 'tablet' ? 'fa-tablet-screen-button' : 'fa-laptop');
+        blip.className = 'radar-node-blip' + (isSelected ? ' is-selected' : '') + (isActiveChat ? ' is-active-chat' : '');
+        blip.style.left = peer.radarPos.x + '%';
+        blip.style.top = peer.radarPos.y + '%';
+        blip.title = (isActiveChat ? '[Active Chat] ' : '') + '@' + peer.username + ' (' + peer.deviceType + ') - Tap to select / beam';
 
-        blip.innerHTML = `
-          <div class="blip-core"><i class="fa-solid ${iconClass}"></i></div>
-          <span class="blip-label">${peer.username}</span>
-        `;
+        const iconClass = isActiveChat ? 'fa-user-astronaut' : (peer.deviceType === 'mobile' ? 'fa-mobile-screen' : (peer.deviceType === 'tablet' ? 'fa-tablet-screen-button' : 'fa-laptop'));
+
+        blip.innerHTML = 
+          '<div class="blip-core"><i class="fa-solid ' + iconClass + '"></i></div>' +
+          '<span class="blip-label">' + peer.username + '</span>';
 
         blip.addEventListener('click', () => {
-          this.initiateBeamToNode(peer.nodeId);
+          this.selectPeer(peerId);
+        });
+
+        blip.addEventListener('dblclick', () => {
+          this.selectPeer(peerId);
+          this.handleSendBtnClick();
         });
 
         container.appendChild(blip);
@@ -519,7 +681,7 @@
       const totalEl = document.getElementById('airdropTotalBytes');
 
       if (targetEl) targetEl.textContent = targetName;
-      if (totalEl) totalEl.textContent = `${(totalBytes / (1024 * 1024)).toFixed(2)} MB`;
+      if (totalEl) totalEl.textContent = this.formatBytes(totalBytes);
       if (hud) hud.style.display = 'block';
     }
 
@@ -538,19 +700,27 @@
       const pctEl = document.getElementById('airdropPercentBadge');
       const etaEl = document.getElementById('airdropEtaCounter');
 
-      if (bar) bar.style.width = `${pct}%`;
-      if (speedEl) speedEl.textContent = `${speedMBps} MB/s`;
-      if (transEl) transEl.textContent = `${(stats.bytesSent / (1024 * 1024)).toFixed(2)} MB`;
-      if (pctEl) pctEl.textContent = `${pct}%`;
-      if (etaEl) etaEl.textContent = `ETA: ${etaSec}s remaining`;
+      if (bar) bar.style.width = pct + '%';
+      if (speedEl) speedEl.textContent = speedMBps + ' MB/s';
+      if (transEl) transEl.textContent = this.formatBytes(stats.bytesSent);
+      if (pctEl) pctEl.textContent = pct + '%';
+      if (etaEl) etaEl.textContent = 'ETA: ' + etaSec + 's';
     }
 
     updateReceiverTrayProgress(receivedBytes, totalBytes) {
       const pct = Math.min(100, Math.round((receivedBytes / totalBytes) * 100));
       const acceptBtn = document.getElementById('airdropAcceptBtn');
       if (acceptBtn) {
-        acceptBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Streaming ${pct}% (${(receivedBytes / (1024 * 1024)).toFixed(1)}MB)`;
+        acceptBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Streaming ' + pct + '% (' + this.formatBytes(receivedBytes) + ')';
       }
+    }
+
+    formatBytes(bytes) {
+      if (!bytes || bytes <= 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     openModal() {
@@ -559,6 +729,17 @@
         modal.style.display = 'flex';
         modal.setAttribute('aria-hidden', 'false');
       }
+      this.populateActiveChatPeer();
+      this.broadcastPresenceBeacon();
+      this.renderRadarBlips();
+    }
+
+    openRadar() {
+      this.openModal();
+    }
+
+    openRadarModal() {
+      this.openModal();
     }
 
     closeModal() {
@@ -569,10 +750,20 @@
       }
       this.isTransferring = false;
     }
+
+    stageFile(file) {
+      this.stageSelectedFile(file);
+    }
+
+    initiateTransfer() {
+      this.handleSendBtnClick();
+    }
   }
 
-  // Bind to Global Master Namespace
-  if (!window.NexMeshSync) window.NexMeshSync = {};
-  window.NexMeshSync.AirDrop = new NexAirDropEngine();
+  // Bind to Global Master Namespaces
+  const airdropEngine = new NexAirDropEngine();
+  if (!global.NexMeshSync) global.NexMeshSync = {};
+  global.NexMeshSync.AirDrop = airdropEngine;
+  global.NexAirDropMesh = airdropEngine;
 
-})(window);
+})(typeof window !== 'undefined' ? window : globalThis);

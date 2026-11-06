@@ -145,6 +145,30 @@
 .radar-node-blip:hover {
   transform: translate(-50%, -50%) scale(1.2);
 }
+.radar-node-blip.is-selected {
+  transform: translate(-50%, -50%) scale(1.22);
+  z-index: 25;
+}
+.radar-node-blip.is-selected .blip-core {
+  background: rgba(0, 242, 254, 0.28);
+  border-color: #00f2fe;
+  color: #00f2fe;
+  box-shadow: 0 0 16px rgba(0, 242, 254, 0.8), inset 0 0 8px rgba(0, 242, 254, 0.4);
+}
+.radar-node-blip.is-selected .blip-label {
+  border: 1px solid #00f2fe;
+  color: #00f2fe;
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.4);
+}
+.radar-node-blip.is-active-chat .blip-core {
+  border-color: #00ff88;
+  color: #00ff88;
+  box-shadow: 0 0 14px rgba(0, 255, 136, 0.6);
+}
+.radar-node-blip.is-active-chat .blip-label {
+  border: 1px solid rgba(0, 255, 136, 0.5);
+  color: #00ff88;
+}
 .blip-core {
   width: 28px;
   height: 28px;
