@@ -679,7 +679,22 @@ export function enforceWaf(req, res) {
     try { decodedUrl = decodeURIComponent(rawUrl); } catch (_) {}
 
     const queryStr = JSON.stringify(req.query || {});
-    const bodyStr = JSON.stringify(req.body || {});
+    
+    // Safely sanitize media payloads (base64 audio/images) to prevent false-positive ASM/NOP shellcode alarms
+    let sanitizedBody = req.body;
+    if (sanitizedBody && typeof sanitizedBody === "object") {
+      sanitizedBody = { ...sanitizedBody };
+      if (sanitizedBody.audio) sanitizedBody.audio = "[AUDIO_MEDIA_PAYLOAD]";
+      if (sanitizedBody.image) sanitizedBody.image = "[IMAGE_MEDIA_PAYLOAD]";
+      if (sanitizedBody.imageUrl && typeof sanitizedBody.imageUrl === "string" && sanitizedBody.imageUrl.startsWith("data:")) {
+        sanitizedBody.imageUrl = "[DATA_IMAGE_PAYLOAD]";
+      }
+      if (sanitizedBody.audioUrl && typeof sanitizedBody.audioUrl === "string" && sanitizedBody.audioUrl.startsWith("data:")) {
+        sanitizedBody.audioUrl = "[DATA_AUDIO_PAYLOAD]";
+      }
+      if (sanitizedBody.fileData) sanitizedBody.fileData = "[FILE_DATA_PAYLOAD]";
+    }
+    const bodyStr = JSON.stringify(sanitizedBody || {});
     const combinedTargets = [rawUrl, decodedUrl, queryStr, bodyStr, req.headers["user-agent"] || "", req.headers["referer"] || ""].join(" ");
     const normalized = normalizeUnicode(combinedTargets);
 
@@ -932,6 +947,8 @@ export function handleCors(req, res) {
 
   const isAllowed = origin && (
     allowedOrigins.includes(origin) ||
+    origin.endsWith(".vercel.app") ||
+    origin.includes("nexchat") ||
     origin.startsWith("http://localhost:") ||
     origin.startsWith("https://localhost:") ||
     origin.startsWith("http://127.0.0.1:") ||

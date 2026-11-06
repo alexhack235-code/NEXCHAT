@@ -299,14 +299,16 @@ Audio is not clear enough to be translated.
           let candidateText = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
 
           if (isTranscribeMode) {
-            // Strict anti-hallucination guard: if model output code or greetings, reject it
+            // Strict anti-hallucination guard: only reject genuine code dumps or markdown fences, never natural human greetings!
             if (
               !candidateText ||
               candidateText.includes('```') ||
-              /^(?:###|\*\*|Hello|Hi\b|I am|Tell me your specific|Here is a|Would you like)/i.test(candidateText) ||
               /\b(?:class\s+\w+|import\s+|export\s+|function\s*\(|const\s+\w+\s*=)/.test(candidateText)
             ) {
               candidateText = "Audio is not clear enough to be translated.";
+            } else {
+              // Strip AI conversational preambles if model added any (e.g. "Here is the transcription:")
+              candidateText = candidateText.replace(/^(?:(?:sure,?\s*)?(?:here is (?:the|your) (?:audio )?(?:transcript|transcription|translation):?|transcript:?|transcription:?)\s*)/i, '').trim();
             }
           }
 

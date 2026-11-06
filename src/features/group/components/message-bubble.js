@@ -75,12 +75,8 @@ export function formatTimestamp(timestamp) {
   const isYesterday = date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear();
 
   const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
-  const timeStr = date.toLocaleTimeString([], timeOptions);
-
-  if (isToday) return timeStr;
-  if (isYesterday) return 'Yesterday ' + timeStr;
-  
-  return date.toLocaleDateString() + ' ' + timeStr;
+  const timeStr = date.toLocaleTimeString([], timeOptions).toLowerCase();
+  return timeStr;
 }
 
 /**
@@ -300,38 +296,33 @@ export function renderMessageBubble(message, container, options = {}) {
         vid.className = 'nex-attachment-video';
         attDiv.appendChild(vid);
       } else if (type && (type.startsWith('audio/') || message.attachment.viewOnceType === 'audio' || (message.attachment.fileName && message.attachment.fileName.startsWith('voice_note_')))) {
-        const audioSrc = (message.attachment.downloadURL || message.attachment.url || message.attachment.fileUrl || "");
-        const voiceWrap = document.createElement('div');
-        voiceWrap.className = 'cached-voice-attachment nex-voice-card-wrapper';
-        voiceWrap.style.cssText = 'display:flex; flex-direction:column; gap:6px; min-width:220px;';
-        
-        const audioHeader = document.createElement('div');
-        audioHeader.style.cssText = 'display:flex; align-items:center; gap:8px; background:rgba(0,0,0,0.25); padding:8px 12px; border-radius:10px;';
-        audioHeader.innerHTML = `
-          <i class="fa-solid fa-microphone" style="color:#00f2ff; font-size:14px;"></i>
-          <span style="font-size:12.5px; font-weight:700; color:#e2e8f0;">Voice Note</span>
-          <span style="font-size:11px; color:#94a3b8; margin-left:auto;">${escapeHtml(message.attachment.duration ? Math.round(message.attachment.duration) + 's' : '')}</span>
-        `;
-        voiceWrap.appendChild(audioHeader);
+        if (typeof window.renderUnifiedVoiceNotePlayer === 'function') {
+          const unifiedPlayer = window.renderUnifiedVoiceNotePlayer(message.attachment, message, isOwn);
+          attDiv.appendChild(unifiedPlayer);
+        } else {
+          const audioSrc = (message.attachment.downloadURL || message.attachment.url || message.attachment.fileUrl || "");
+          const voiceWrap = document.createElement('div');
+          voiceWrap.className = 'cached-voice-attachment nex-voice-card-wrapper';
+          voiceWrap.style.cssText = 'display:flex; flex-direction:column; gap:6px; min-width:220px;';
 
-        const nativeAudio = document.createElement('audio');
-        nativeAudio.src = audioSrc;
-        nativeAudio.controls = true;
-        nativeAudio.preload = 'metadata';
-        nativeAudio.style.cssText = 'width: 100%; height: 36px; border-radius: 6px; margin-top: 4px;';
-        voiceWrap.appendChild(nativeAudio);
+          const nativeAudio = document.createElement('audio');
+          nativeAudio.src = audioSrc;
+          nativeAudio.controls = true;
+          nativeAudio.preload = 'metadata';
+          nativeAudio.style.cssText = 'width: 100%; height: 36px; border-radius: 6px; margin-top: 4px;';
+          voiceWrap.appendChild(nativeAudio);
 
-        if (message.attachment.transcript) {
-          const transBox = document.createElement('div');
-          transBox.className = 'voice-note-transcript-card';
-          transBox.innerHTML = `
-            <div style="font-size:9.5px; font-weight:700; color:#00f2ff; text-transform:uppercase; margin-bottom:2px;"><i class="fa-solid fa-language"></i> Transcript</div>
-            <div class="transcript-text">${escapeHtml(message.attachment.transcript)}</div>
-          `;
-          voiceWrap.appendChild(transBox);
+          if (message.attachment.transcript) {
+            const transBox = document.createElement('div');
+            transBox.className = 'voice-note-transcript-card';
+            transBox.innerHTML = `
+              <div style="font-size:9.5px; font-weight:700; color:#00f2ff; text-transform:uppercase; margin-bottom:2px;"><i class="fa-solid fa-language"></i> Transcript</div>
+              <div class="transcript-text">${escapeHtml(message.attachment.transcript)}</div>
+            `;
+            voiceWrap.appendChild(transBox);
+          }
+          attDiv.appendChild(voiceWrap);
         }
-
-        attDiv.appendChild(voiceWrap);
       } else {
         const doc = document.createElement('div');
         doc.className = 'nex-attachment-doc';

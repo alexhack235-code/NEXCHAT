@@ -6119,6 +6119,7 @@ window.runVoiceAISummary = async function({ audioUrl, audioEl, msgId, container,
 };
 
 function renderUnifiedVoiceNotePlayer(attachment, parentMsg = null, isOwn = false) {
+  window.renderUnifiedVoiceNotePlayer = renderUnifiedVoiceNotePlayer;
   const container = document.createElement("div");
   container.className = "message-attachment-container nex-unified-voice-wrapper";
   container.style.cssText = "margin-bottom: 6px; border-radius: 14px; overflow: hidden; max-width: 100%; min-width: 240px;";

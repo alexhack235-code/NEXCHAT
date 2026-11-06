@@ -218,6 +218,19 @@
         e.stopPropagation();
       });
 
+      // Background / tab-switch sentinel: cancel recording and revoke tracks if page is hidden
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && (this.isRecording || this.isStarting)) {
+          console.log('[VoiceRecorder] Page hidden while recording: cancelling and releasing microphone.');
+          this.cancelRecording();
+        }
+      });
+      window.addEventListener('pagehide', () => {
+        if (this.isRecording || this.isStarting) {
+          this.cancelRecording();
+        }
+      });
+
       // Cancel button
       if (this.cancelBtn) {
         this.cancelBtn.addEventListener('click', (e) => {

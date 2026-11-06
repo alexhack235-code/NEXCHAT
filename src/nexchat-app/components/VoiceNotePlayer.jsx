@@ -112,6 +112,10 @@ export default function VoiceNotePlayer({
     if (!audioRef.current) return;
     try {
       if (isPlaying) {
+        if (synthIntervalRef.current) {
+          clearInterval(synthIntervalRef.current);
+          synthIntervalRef.current = null;
+        }
         audioRef.current.pause();
         setIsPlaying(false);
         onLog?.(`[AUDIO] Voice note paused (${msg.duration || formatTime(duration)})`);
@@ -132,16 +136,20 @@ export default function VoiceNotePlayer({
     }
   };
 
+  const synthIntervalRef = useRef(null);
+
   // Synthesized audio fallback for mock data
   const playSynthesizedAudio = () => {
+    if (synthIntervalRef.current) clearInterval(synthIntervalRef.current);
     setIsPlaying(true);
     const totalSec = duration || 12;
     let elapsed = 0;
-    const interval = setInterval(() => {
+    synthIntervalRef.current = setInterval(() => {
       elapsed += 0.25;
       setCurrentTime(elapsed);
       if (elapsed >= totalSec) {
-        clearInterval(interval);
+        clearInterval(synthIntervalRef.current);
+        synthIntervalRef.current = null;
         setIsPlaying(false);
         setCurrentTime(0);
       }
