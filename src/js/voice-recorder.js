@@ -59,14 +59,95 @@
       this.cancelBtn = document.getElementById('audioCancelBtn');
       this.stopBtn = document.getElementById('audioStopBtn');
       this.sendBtn = document.getElementById('audioSendNowBtn');
+      this.audioSendBtn = document.getElementById('audio-send-btn');
       this.messageForm = document.getElementById('message-form');
 
       if (!this.recordBtn) return;
 
-      // Click microphone button to start recording
+      // Touch and pointer prevention for tactile hold-to-record
+      this.recordBtn.style.userSelect = 'none';
+      this.recordBtn.style.webkitUserSelect = 'none';
+      this.recordBtn.style.touchAction = 'none';
+      this.recordBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+
+      let holdTimer = null;
+      let isHolding = false;
+      let startX = 0;
+      let pointerDownTime = 0;
+
+      const handlePointerDown = (e) => {
+        pointerDownTime = Date.now();
+        startX = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) || 0;
+        isHolding = false;
+
+        if (holdTimer) clearTimeout(holdTimer);
+        holdTimer = setTimeout(() => {
+          isHolding = true;
+          if (!this.isRecording) {
+            this.startRecording();
+          }
+        }, 280);
+      };
+
+      const handlePointerMove = (e) => {
+        if (!isHolding || !this.isRecording) return;
+        const currentX = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) || 0;
+        const deltaX = startX - currentX;
+        // Slide left by > 50px cancels recording (WhatsApp tactile slide-to-cancel)
+        if (deltaX > 50) {
+          isHolding = false;
+          if (holdTimer) clearTimeout(holdTimer);
+          this.cancelRecording();
+          if (typeof window.showNotif === 'function') {
+            window.showNotif('Slide to cancel: Voice note cancelled', 'info', 1500);
+          }
+        }
+      };
+
+      const handlePointerUp = (e) => {
+        const pressDuration = Date.now() - pointerDownTime;
+        if (holdTimer) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+
+        if (isHolding) {
+          isHolding = false;
+          if (this.isRecording) {
+            if (pressDuration >= 280) {
+              this.stopAndSendRecording();
+            } else {
+              this.cancelRecording();
+            }
+          }
+        } else {
+          // Quick tap (< 280ms): toggle recording in locked hands-free mode
+          if (this.isRecording) {
+            this.stopAndSendRecording();
+          } else {
+            this.startRecording();
+          }
+        }
+      };
+
+      // Pointer events for modern touch and mouse
+      if (window.PointerEvent) {
+        this.recordBtn.addEventListener('pointerdown', handlePointerDown);
+        window.addEventListener('pointermove', handlePointerMove);
+        window.addEventListener('pointerup', handlePointerUp);
+        window.addEventListener('pointercancel', handlePointerUp);
+      } else {
+        // Fallback touch and mouse events
+        this.recordBtn.addEventListener('touchstart', handlePointerDown, { passive: true });
+        window.addEventListener('touchmove', handlePointerMove, { passive: true });
+        window.addEventListener('touchend', handlePointerUp);
+        window.addEventListener('touchcancel', handlePointerUp);
+        this.recordBtn.addEventListener('mousedown', handlePointerDown);
+        window.addEventListener('mouseup', handlePointerUp);
+      }
+
       this.recordBtn.addEventListener('click', (e) => {
         e.preventDefault();
-        this.startRecording();
       });
 
       // Cancel button
@@ -85,9 +166,17 @@
         });
       }
 
-      // Send Now button
+      // Send Now button (#audioSendNowBtn)
       if (this.sendBtn) {
         this.sendBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.stopAndSendRecording();
+        });
+      }
+
+      // Send Audio button (#audio-send-btn)
+      if (this.audioSendBtn) {
+        this.audioSendBtn.addEventListener('click', (e) => {
           e.preventDefault();
           this.stopAndSendRecording();
         });

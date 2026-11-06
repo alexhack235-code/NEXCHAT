@@ -99,10 +99,20 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
+// Initialize cart from localStorage immediately during script init or DOMContentLoaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', loadCartFromLocalStorage);
+} else {
+  loadCartFromLocalStorage();
+}
+
 // ============================================================
 // DOM EVENT LISTENERS
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Load cached cart for guest/unauthenticated users without waiting for Firebase Auth
+  loadCartFromLocalStorage();
+
   // Initialize Regional Geo-CDN & Privacy Partition
   try {
     marketGeoCdn.renderRegionSelectorBar('geoRegionSelectorMount');
@@ -965,11 +975,14 @@ function loadCartFromLocalStorage() {
   if (s) {
     try {
       cartItems = JSON.parse(s);
-      updateCartBadges();
+      if (!Array.isArray(cartItems)) cartItems = [];
     } catch (e) {
       cartItems = [];
     }
+  } else {
+    cartItems = [];
   }
+  updateCartBadges();
 }
 
 // ============================================================

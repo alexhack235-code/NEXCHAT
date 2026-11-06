@@ -537,7 +537,10 @@ const videoObserver = new IntersectionObserver((entries) => {
     const customAudio = entry.target._customAudio;
     if (!video) return;
 
-    if (entry.isIntersecting && entry.intersectionRatio >= 0.65) {
+    if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+      if (video.dataset.userPaused === 'true') {
+        return;
+      }
       video.muted = isGlobalMuted;
       video.play().then(() => {
         if (disc) disc.style.animationPlayState = 'running';
@@ -576,9 +579,12 @@ const videoObserver = new IntersectionObserver((entries) => {
       if (customAudio) {
         customAudio.pause();
       }
+      if (!entry.isIntersecting || entry.intersectionRatio === 0) {
+        video.dataset.userPaused = 'false';
+      }
     }
   });
-}, { threshold: [0.65] });
+}, { threshold: [0.5, 0.65] });
 
 // Desktop Prev/Next Buttons
 if (prevReelBtn) {
@@ -611,9 +617,11 @@ window.addEventListener('keydown', (e) => {
       const v = currentCard.querySelector('.reel-video');
       const pi = currentCard.querySelector('.reel-play-indicator');
       if (v.paused) {
+        v.dataset.userPaused = 'false';
         v.play();
         showPlayIndicator(pi, 'fa-play');
       } else {
+        v.dataset.userPaused = 'true';
         v.pause();
         showPlayIndicator(pi, 'fa-pause');
       }
@@ -1094,7 +1102,7 @@ function renderReels(reelsList) {
             <button type="button" class="like-btn text-white transition-transform active:scale-125 focus:outline-none" data-reel-id="${reel.id}" title="Like">
               <i class="fa-solid fa-heart text-[28px] ${isLiked ? 'text-[#fe2c55]' : 'text-white'} drop-shadow-[0_2px_5px_rgba(0,0,0,0.85)]"></i>
             </button>
-            <span class="like-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]">${formatNumber(likeCount)}</span>
+            <span class="like-count text-xs font-bold text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.95)]" data-raw-count="${likeCount}">${formatNumber(likeCount)}</span>
           </div>
 
           <!-- Comment -->
@@ -1760,11 +1768,13 @@ function renderReels(reelsList) {
         }
 
         if (videoEl.paused) {
+          videoEl.dataset.userPaused = 'false';
           videoEl.play().catch(() => {});
           showPlayIndicator(playIndicator, 'fa-play');
           if (discEl) discEl.style.animationPlayState = 'running';
           if (card._customAudio) card._customAudio.play().catch(() => {});
         } else {
+          videoEl.dataset.userPaused = 'true';
           videoEl.pause();
           showPlayIndicator(playIndicator, 'fa-pause');
           if (discEl) discEl.style.animationPlayState = 'paused';
@@ -2255,6 +2265,24 @@ async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
     // Synchronize in-memory reel object in allLoadedReels
     const reelObj = Array.isArray(allLoadedReels) ? allLoadedReels.find(r => r.id === reelId) : null;
 
+    // Safely resolve raw like count without collapsing formatted numbers (e.g. 48.2K, 1.5M)
+    let rawCount = 0;
+    if (countSpan && countSpan.dataset.rawCount !== undefined && countSpan.dataset.rawCount !== '') {
+      rawCount = parseInt(countSpan.dataset.rawCount, 10);
+    } else if (reelObj && typeof reelObj.likesCount === 'number') {
+      rawCount = reelObj.likesCount;
+    } else if (countSpan) {
+      const textVal = countSpan.textContent.trim();
+      if (/k$/i.test(textVal)) {
+        rawCount = Math.round(parseFloat(textVal) * 1000);
+      } else if (/m$/i.test(textVal)) {
+        rawCount = Math.round(parseFloat(textVal) * 1000000);
+      } else {
+        rawCount = parseInt(textVal.replace(/[^0-9]/g, '') || '0', 10);
+      }
+    }
+    if (isNaN(rawCount) || rawCount < 0) rawCount = 0;
+
     if (currentlyLiked && !forceLike) {
       // UNLIKE
       heartIcon.classList.remove('text-[#fe2c55]');
@@ -2262,14 +2290,17 @@ async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
       likedReelsSet.delete(reelId);
       localStorage.setItem('camshot_liked_reels', JSON.stringify([...likedReelsSet]));
 
-      const current = Math.max(0, parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '1', 10) - 1);
-      countSpan.textContent = formatNumber(current);
+      rawCount = Math.max(0, rawCount - 1);
+      if (countSpan) {
+        countSpan.dataset.rawCount = String(rawCount);
+        countSpan.textContent = formatNumber(rawCount);
+      }
 
       if (reelObj) {
         if (Array.isArray(reelObj.likes)) {
           reelObj.likes = reelObj.likes.filter(u => u !== currentUid);
         }
-        reelObj.likesCount = Math.max(0, (reelObj.likesCount || 1) - 1);
+        reelObj.likesCount = rawCount;
       }
 
       if (currentUid && !currentUid.startsWith('guest_')) {
@@ -2288,13 +2319,16 @@ async function handleLikeToggle(reelId, likeBtn, countSpan, forceLike = false) {
       likedReelsSet.add(reelId);
       localStorage.setItem('camshot_liked_reels', JSON.stringify([...likedReelsSet]));
 
-      const current = parseInt(countSpan.textContent.replace(/[^0-9]/g, '') || '0', 10) + 1;
-      countSpan.textContent = formatNumber(current);
+      rawCount = rawCount + 1;
+      if (countSpan) {
+        countSpan.dataset.rawCount = String(rawCount);
+        countSpan.textContent = formatNumber(rawCount);
+      }
 
       if (reelObj) {
         if (!Array.isArray(reelObj.likes)) reelObj.likes = [];
         if (!reelObj.likes.includes(currentUid)) reelObj.likes.push(currentUid);
-        reelObj.likesCount = (reelObj.likesCount || 0) + 1;
+        reelObj.likesCount = rawCount;
       }
 
       if (currentUid && !currentUid.startsWith('guest_')) {

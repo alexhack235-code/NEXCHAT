@@ -6118,6 +6118,10 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     archiveCard.target = "_blank";
     archiveCard.rel = "noopener noreferrer";
     archiveCard.download = attachment.fileName || "archive.zip";
+    archiveCard.addEventListener('click', (e) => {
+      e.preventDefault();
+      downloadMediaAttachment(url, attachment.fileName || "archive.zip");
+    });
     archiveCard.style.cssText = "display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(16, 185, 129, 0.08) 100%); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; color: inherit; text-decoration: none; max-width: 310px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);";
 
     const iconWrap = document.createElement("div");
@@ -6156,6 +6160,10 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     docCard.target = "_blank";
     docCard.rel = "noopener noreferrer";
     docCard.download = attachment.fileName || "document";
+    docCard.addEventListener('click', (e) => {
+      e.preventDefault();
+      downloadMediaAttachment(url, attachment.fileName || "document");
+    });
     docCard.style.cssText = "display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(0, 240, 118, 0.22); border-radius: 12px; color: inherit; text-decoration: none; max-width: 310px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);";
 
     let iconClass = "fa-solid fa-file-lines";
@@ -7936,7 +7944,22 @@ function loadMessages() {
             }
             m.text = trimmedNew;
             m.edited = true;
+            m.isEdited = true;
+            m.editedAt = new Date().toISOString();
             if (content) content.textContent = trimmedNew;
+            (async () => {
+              try {
+                const targetCol = currentChatType === 'group' ? 'groupMessages' : 'messages';
+                const msgDocRef = doc(db, targetCol, msgId);
+                await updateDoc(msgDocRef, {
+                  text: trimmedNew,
+                  isEdited: true,
+                  editedAt: serverTimestamp()
+                });
+              } catch (updateErr) {
+                console.warn('[EditMessage] Cloud sync notice:', updateErr);
+              }
+            })();
             if (typeof showNotif === 'function') showNotif("Message edited and recorded in audit vault.", "success", 2000);
           }
         });
@@ -10524,6 +10547,9 @@ document.getElementById("cancelReplyBtn")?.addEventListener("click", () => {
   if (preview) preview.style.display = "none";
   window.currentReplyTo = null;
   window.replyMessageId = null;
+  if (window.messagingFeatures && typeof window.messagingFeatures.hideReplyPreview === 'function') {
+    window.messagingFeatures.hideReplyPreview();
+  }
 });
 
 document.getElementById("quickAutocorrectBtn")?.addEventListener("click", (e) => {
@@ -13673,6 +13699,7 @@ function handleWhatsAppBackAction() {
 
   // 3. Check and dismiss any open modal/dialog first
   const openModals = [
+    'groupInfoModal',
     'createGroupModal',
     'settingsModal',
     'statusViewerModal',
@@ -16673,8 +16700,11 @@ async function loadGroupMembersList() {
 document.getElementById('generateGroupAvatarBtn')?.addEventListener('click', () => {
   const randomString = Math.random().toString(36).substring(7);
   const avatarUrl = `https://robohash.org/${randomString}?set=set1&size=200x200`;
-  document.getElementById('groupIconPreview').src = avatarUrl;
-  document.getElementById('groupIconPreview').setAttribute('data-generated', 'true');
+  const icon = document.getElementById('groupIconPreview');
+  if (icon) {
+    icon.src = avatarUrl;
+    icon.setAttribute('data-generated', 'true');
+  }
 });
 
 async function createGroup(e) {
@@ -17701,16 +17731,33 @@ async function handleGroupJoinLink(groupId) {
 
     console.log(`?? Attempting to join group: ${groupId}`);
 
-    const groupRef = doc(db, 'groups', groupId);
-    const groupSnap = await getDoc(groupRef);
+    let groupRef = doc(db, 'groups', groupId);
+    let groupSnap = await getDoc(groupRef);
+    let effectiveGroupId = groupId;
 
     if (!groupSnap.exists()) {
-      showNotif('Group not found', 'error', 3000);
+      // Fallback: check if groupId is an 8-character invite code
+      try {
+        const codeQuery = query(collection(db, 'groups'), where('inviteCode', '==', groupId));
+        const codeSnap = await getDocs(codeQuery);
+        if (!codeSnap.empty) {
+          groupSnap = codeSnap.docs[0];
+          effectiveGroupId = groupSnap.id;
+          groupRef = doc(db, 'groups', effectiveGroupId);
+        }
+      } catch (codeErr) {
+        console.warn('Invite code lookup notice:', codeErr);
+      }
+    }
+
+    if (!groupSnap.exists()) {
+      showNotif('Group not found or link expired', 'error', 3000);
       console.error('Group not found:', groupId);
       return;
     }
 
     const groupData = groupSnap.data();
+    groupId = effectiveGroupId;
 
     if (groupData.members && groupData.members.includes(myUID)) {
       console.log('? User already a member of this group');
@@ -18279,6 +18326,10 @@ async function postStatus(textContent = '', imageUrl = null, mediaType = null) {
 }
 
 // State for full-screen WhatsApp Story Viewer
+// Top-level hoisted status media state
+let selectedStatusMediaFile = null; // Top-level hoisted
+let selectedStatusGradient = 'linear-gradient(135deg, #059669, #10b981)';
+
 function validateStatusMediaDuration(file, callback) {
   if (!file) return callback(true);
   if (!file.type.startsWith('video/') && !file.type.startsWith('audio/')) {
@@ -19343,8 +19394,7 @@ function prevStorySlide() {
   }
 }
 
-let selectedStatusMediaFile = null;
-let selectedStatusGradient = 'linear-gradient(135deg, #059669, #10b981)';
+// Status media state hoisted above
 
 function openCreateStatusModal(tab = 'media') {
   setupCreateStatusModal();
@@ -23288,7 +23338,30 @@ function setupMediaLightbox() {
     }
   });
 
-  window.openMediaLightbox = function({ type, url, title }) {
+  
+// Universal Cross-Origin Media & Document Downloader
+async function downloadMediaAttachment(url, fileName = 'attachment') {
+  if (!url) return;
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+  } catch (err) {
+    console.warn('[Downloader] Direct blob fetch failed, falling back to window.open:', err);
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+}
+window.downloadMediaAttachment = downloadMediaAttachment;
+
+window.openMediaLightbox = function({ type, url, title }) {
     if (!url) return;
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
@@ -23297,6 +23370,10 @@ function setupMediaLightbox() {
     if (downloadBtn) {
       downloadBtn.href = url;
       downloadBtn.download = `nexchat-media-${Date.now()}`;
+      downloadBtn.onclick = (e) => {
+        e.preventDefault();
+        downloadMediaAttachment(url, `nexchat-media-${Date.now()}`);
+      };
     }
 
     if (type === 'video') {

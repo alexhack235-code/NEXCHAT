@@ -52,7 +52,7 @@ export function updatePinnedBar(element, pinnedMessages, currentIndex = 0, onNav
   element.dataset.index = safeIndex.toString();
 
   const iconContainer = document.createElement('div');
-  iconContainer.innerHTML = '';
+  iconContainer.innerHTML = '<i class="fa-solid fa-thumbtack" style="color: #00ff66;"></i>';
   iconContainer.style.marginRight = '12px';
   iconContainer.style.fontSize = '18px';
 

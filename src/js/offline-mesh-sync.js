@@ -42,7 +42,24 @@ class OfflineMeshSyncEngine {
     window.addEventListener('online', () => {
       this.isOffGridActive = false;
       this.notifyNetworkStateChange(false);
-      this.flushOfflineQueue();
+      this.flushOfflineQueue(async (item) => {
+        try {
+          if (window.db && window.addDoc && window.collection) {
+            const col = item.isGroup ? 'groupMessages' : 'messages';
+            await window.addDoc(window.collection(window.db, col), item);
+          } else if (typeof window.sendSupabaseMessage === 'function') {
+            await window.sendSupabaseMessage({
+              from: item.sender || window.myUID || 'u_current',
+              to: item.targetUser || item.recipient || '',
+              text: item.text,
+              attachment: item.attachment,
+              chatType: item.isGroup ? 'group' : 'direct'
+            });
+          }
+        } catch (e) {
+          console.warn('[OFFLINE MESH] Failed to sync item:', e);
+        }
+      });
     });
   }
 
@@ -142,17 +159,25 @@ class OfflineMeshSyncEngine {
     } catch {}
   }
 
-  flushOfflineQueue(onCloudUploadCb) {
+  async flushOfflineQueue(onCloudUploadCb) {
     try {
       const q = JSON.parse(localStorage.getItem('nex_offline_sync_queue') || '[]');
       if (q.length > 0) {
         console.log(`[OFFLINE MESH] Reconnected to cloud. Flushing ${q.length} off-grid messages.`);
         if (typeof onCloudUploadCb === 'function') {
-          q.forEach(msg => onCloudUploadCb(msg));
+          for (const msg of q) {
+            try {
+              await onCloudUploadCb(msg);
+            } catch (err) {
+              console.warn('[OFFLINE MESH] Item upload warning:', err);
+            }
+          }
         }
         localStorage.removeItem('nex_offline_sync_queue');
       }
-    } catch {}
+    } catch (e) {
+      console.warn('[OFFLINE MESH] flush error:', e);
+    }
   }
 
   onMessage(callback) {

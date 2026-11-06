@@ -234,6 +234,10 @@ async function open(groupId, messagesContainer, options = {}) {
       const processed = _processMessages(messages, currentUid);
       _scroller.setItems(processed);
     }
+    const pinned = groupStore.getState().pinnedMessages;
+    if (_pinnedBar && pinned && pinned.length > 0) {
+      _updatePinnedBar(pinned, options);
+    }
   });
   _storeUnsubs.push(msgSub);
 
@@ -614,7 +618,7 @@ function _updatePinnedBar(pinnedMessageIds, options) {
     });
     container.insertBefore(_pinnedBar, container.firstChild);
   } else {
-    updatePinnedBar(_pinnedBar, pinnedMessages, 0);
+    updatePinnedBar(_pinnedBar, pinnedMessages, 0, (msgId) => { _scroller?.scrollToItem(msgId); }, () => { hidePinnedBar(_pinnedBar); });
   }
 
   showPinnedBar(_pinnedBar);

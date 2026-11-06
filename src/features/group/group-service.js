@@ -1,4 +1,4 @@
-import { doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, where, serverTimestamp, arrayUnion, arrayRemove } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
+import { doc, getDoc, getDocs, addDoc, updateDoc, deleteDoc, collection, query, where, serverTimestamp, arrayUnion, arrayRemove, deleteField } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js';
 import { db, auth } from '../../../firebase-config.js';
 import { getUserRole, hasPermission, PERMISSIONS } from './group-permissions.js';
 import { cacheGroup, getCachedGroup } from './group-cache.js';
@@ -249,21 +249,22 @@ export async function removeMember(groupId, uid) {
     }
 
     const groupRef = doc(db, 'groups', groupId);
-    await updateDoc(groupRef, {
+    const updates = {
       members: arrayRemove(uid),
       admins: arrayRemove(uid),
       moderators: arrayRemove(uid)
-      // Note: we might want to clean up roles[uid] but Firestore updateDoc requires dynamic keys
-    });
-    
-    // Clean up role map and muted status map
-    const updates = {};
-    updates[`roles.${uid}`] = deleteField();
-    updates[`mutedMembers.${uid}`] = deleteField();
-    
-    // Use an alternative way if deleteField fails or isn't imported
-    // We don't have deleteField imported, so we will fetch and manually set
-    // For now, removing from arrays is sufficient for access control.
+    };
+
+    if (typeof deleteField === 'function') {
+      try {
+        updates[`roles.${uid}`] = deleteField();
+        updates[`mutedMembers.${uid}`] = deleteField();
+      } catch (err) {
+        console.warn('deleteField warning:', err);
+      }
+    }
+
+    await updateDoc(groupRef, updates);
   } catch (error) {
     console.error('Error removing member:', error);
     throw error;
@@ -929,7 +930,8 @@ export async function regenerateInviteLink(groupId) {
     if (!hasPerm) throw new Error('Insufficient permissions to regenerate invite link');
 
     const newCode = Math.random().toString(36).substring(2, 10);
-    const inviteLink = `${window.location.origin}?joinGroup=${newCode}`;
+    const pathname = window.location.pathname.replace(/\/[^/]*$/, '/');
+    const inviteLink = `${window.location.origin}${pathname}chat.html?joinGroup=${encodeURIComponent(groupId)}&code=${newCode}`;
 
     const groupRef = doc(db, 'groups', groupId);
     await updateDoc(groupRef, {
