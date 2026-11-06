@@ -99,7 +99,7 @@
     .chronex-code-pre { margin: 0; padding: 12px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 12.5px; line-height: 1.5; color: #e2e8f0; }
     .chronex-voice-player-bar { display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(0, 255, 102, 0.3); border-radius: 12px; padding: 8px 12px; margin: 8px 0; transition: all 0.25s ease; }
     .chronex-voice-player-bar:hover { border-color: #00ff66; background: rgba(0, 255, 102, 0.05); }
-    .chronex-voice-play-btn { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #00ff66 0%, #00d4ff 100%); border: none; color: #000; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 0 10px rgba(0, 255, 102, 0.4); transition: transform 0.15s ease; }
+    .chronex-voice-play-btn { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #00ff66 0%, #00d4ff 100%); border: none; color: #000; font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; box-shadow: 0 0 5px rgba(0, 255, 102, 0.2); transition: transform 0.15s ease; }
     .chronex-voice-play-btn:hover { transform: scale(1.08); }
     .chronex-voice-track { flex: 1; display: flex; flex-direction: column; gap: 4px; }
     .chronex-voice-waveform { display: flex; align-items: center; gap: 2.5px; height: 16px; }
@@ -112,7 +112,7 @@
     .chronex-voice-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #94a3b8; font-family: monospace; }
     .voice-speed-chip { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #00f2ff; border-radius: 4px; padding: 1px 5px; cursor: pointer; font-weight: 700; font-size: 9.5px; }
     .chronex-voice-core-pill { font-size: 9.5px; font-weight: 800; color: #00ff66; background: rgba(0, 255, 102, 0.12); border: 1px solid #00ff66; border-radius: 10px; padding: 2px 8px; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
-    .chronex-neural-dot { width: 5px; height: 5px; border-radius: 50%; background: #00ff66; box-shadow: 0 0 6px #00ff66; animation: pulseDot 1.2s infinite; }
+    .chronex-neural-dot { width: 5px; height: 5px; border-radius: 50%; background: #00ff66; box-shadow: 0 0 3px rgba(0, 255, 102, 0.35); animation: pulseDot 1.2s infinite; }
     @keyframes pulseDot { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
     @keyframes burstFloatUp { 0% { transform: translateY(0) scale(0.6); opacity: 1; } 100% { transform: translateY(-120px) scale(1.4); opacity: 0; } }
     .stegano-container {
@@ -2032,7 +2032,7 @@
       <!-- PEER-TO-PEER OFFLINE LOCAL MESH BANNER -->
       <div id="nexOffGridMeshBanner" style="display: none; background: linear-gradient(135deg, rgba(0, 242, 255, 0.12), rgba(0, 255, 136, 0.12)); border: 1px solid #00f2ff; border-radius: 8px; margin: 8px 16px; padding: 10px 14px; align-items: center; justify-content: space-between; z-index: 100;">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <div style="width: 10px; height: 10px; border-radius: 50%; background: #00ff88; box-shadow: 0 0 10px #00ff88;"></div>
+          <div style="width: 10px; height: 10px; border-radius: 50%; background: #00e575; box-shadow: 0 0 4px rgba(0, 229, 117, 0.3);"></div>
           <div>
             <strong style="font-size: 11.5px; color: #fff; display: block;">OFF-GRID LOCAL P2P MESH ACTIVE</strong>
             <span style="font-size: 10px; color: #94a3b8;">Local BroadcastChannel sync with <span id="nexMeshPeerCount">1</span> nearby peer node(s). Messages sync to cloud upon reconnect.</span>
@@ -5147,7 +5147,7 @@
                 <span id="statusUploadPercent">0%</span>
               </div>
               <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
-                <div id="statusUploadProgressBar" style="height: 100%; width: 0%; background: #00ff88; box-shadow: 0 0 10px #00ff88; transition: width 0.2s;"></div>
+                <div id="statusUploadProgressBar" style="height: 100%; width: 0%; background: #00e575; box-shadow: 0 0 5px rgba(0, 229, 117, 0.25); transition: width 0.2s;"></div>
               </div>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">

@@ -241,7 +241,7 @@ height: 11px !important;
 border-radius: 50% !important;
 background: #00ff66 !important;
 border: 2px solid #111b21 !important;
-box-shadow: 0 0 6px rgba(0, 255, 102, 0.6) !important;
+box-shadow: 0 0 3px rgba(0, 255, 102, 0.25) !important;
 z-index: 2 !important;
 }
 
@@ -526,7 +526,7 @@ z-index: 5 !important;
 
 .swipe-reply-indicator.active {
 background: rgba(0, 255, 102, 0.3) !important;
-box-shadow: 0 0 12px rgba(0, 255, 102, 0.5) !important;
+box-shadow: 0 0 5px rgba(0, 255, 102, 0.2) !important;
 transform: translateY(-50%) scale(1.1) !important;
 }
 
@@ -1162,7 +1162,7 @@ background: #00C896 !important;
 border: 2px solid #0A0F1E !important;
 display: block !important;
 z-index: 2 !important;
-box-shadow: 0 0 8px rgba(0, 200, 150, 0.8) !important;
+box-shadow: 0 0 4px rgba(0, 200, 150, 0.25) !important;
 animation: nexCyanPulse 2s infinite ease-in-out !important;
 }
 
@@ -3180,7 +3180,7 @@ display: block !important;
 
 .podium-speaker.active-speaking .speaker-avatar {
 border-color: #00ff66 !important;
-box-shadow: 0 0 14px rgba(0, 255, 102, 0.5) !important;
+box-shadow: 0 0 6px rgba(0, 255, 102, 0.25) !important;
 }
 
 /* THE CRUCIAL BADGE PINNING: Prevents text overlap! */
@@ -3736,7 +3736,7 @@ body.mobile-preview .bottom-nav .nav-item {
   background: linear-gradient(135deg, #00C896 0%, #0088FF 100%) !important;
   color: #0A0F1E !important;
   border: 2px solid rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 0 16px rgba(0, 200, 150, 0.5) !important;
+  box-shadow: 0 0 6px rgba(0, 200, 150, 0.25) !important;
   width: 42px !important;
   height: 42px !important;
   border-radius: 50% !important;
@@ -3864,7 +3864,7 @@ body.mobile-preview .bottom-nav .nav-item {
 
 .announcements-icon-accent {
   color: #00C896 !important;
-  filter: drop-shadow(0 0 6px rgba(0, 200, 150, 0.5)) !important;
+  filter: drop-shadow(0 0 2px rgba(0, 200, 150, 0.25)) !important;
 }
 
 .announcements-live-beacon {
