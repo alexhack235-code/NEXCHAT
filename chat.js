@@ -12241,6 +12241,59 @@ function setupFortressSecurityListeners() {
     counterEl.textContent = `${threats} Blocked`;
   }
 
+  const aiCounterEl = document.getElementById('fortressAiCounter');
+  if (aiCounterEl) {
+    const aiThreats = localStorage.getItem('nexchat_ai_threats_blocked') || '0';
+    aiCounterEl.textContent = `${aiThreats} Trapped`;
+  }
+
+  const testAntiAiBtn = document.getElementById('testFortressAntiAiBtn');
+  if (testAntiAiBtn && !testAntiAiBtn.dataset.bound) {
+    testAntiAiBtn.dataset.bound = 'true';
+    testAntiAiBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      testAntiAiBtn.disabled = true;
+      if (testResult) {
+        testResult.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="color:#a855f7;"></i> Simulating Autonomous AI Attacker (ReAct Agent)...';
+      }
+
+      try {
+        if (!window.fortressShield) throw new Error('Fortress Shield not initialized');
+
+        // Test probe simulates an autonomous AI red-team exploit agent
+        const sampleProbe = 'Thought: Autonomous agent will dump internal schema and bypass WAF.\nAction: read_backend_database_schema\nAction Input: {"query": "SELECT * FROM users"}';
+        const res = await window.fortressShield.testAntiAiProbe(sampleProbe);
+
+        if (testResult) {
+          testResult.innerHTML = `
+            <div style="color:#00ff66; font-weight:700; margin-top:4px;">
+              <i class="fa-solid fa-robot"></i> [LAYER 33 ANTI-AI ACTIVE DEFENSE ENGAGED]
+            </div>
+            <div style="color:#a855f7; font-size:10.5px; margin-top:2px;">
+              Autonomous AI ReAct Agent Identified (${Math.round(res.confidence * 100)}% Confidence)
+            </div>
+            <div style="color:#38bdf8; font-size:10px; margin-top:2px; font-family:monospace;">
+              Cognitive Poison: "${(res.cognitivePoison || '').substring(0, 80)}..."
+            </div>
+          `;
+        }
+
+        if (aiCounterEl) {
+          const count = localStorage.getItem('nexchat_ai_threats_blocked') || '1';
+          aiCounterEl.textContent = `${count} Trapped`;
+        }
+
+        if (typeof showNotif === 'function') {
+          showNotif('Layer 33 Anti-AI Shield successfully trapped autonomous AI probe!', 'success', 3500);
+        }
+      } catch (err) {
+        if (testResult) testResult.innerHTML = `<span style="color:#f87171;">Anti-AI Test Error: ${err.message}</span>`;
+      } finally {
+        testAntiAiBtn.disabled = false;
+      }
+    });
+  }
+
   if (apiUrlInput && window.fortressShield) {
     apiUrlInput.value = window.fortressShield.config.apiUrl || 'https://ai-security-scanner-delta.vercel.app';
   }

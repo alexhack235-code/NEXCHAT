@@ -3840,29 +3840,33 @@
                 <div class="settings-card" style="border: 1px solid rgba(0, 240, 255, 0.35); background: rgba(0, 240, 255, 0.04);">
                   <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
                     <div style="display: flex; align-items: center; gap: 8px;">
-                      <i class="fa-solid fa-shield-halved" style="color: #00f0ff; font-size: 16px;"></i>
-                      <strong style="color: #00f0ff; font-size: 13.5px;">FORTRESS AI Cloud Defender &amp; WAF</strong>
+                      <i class="fa-solid fa-shield-virus" style="color: #00f0ff; font-size: 16px;"></i>
+                      <strong style="color: #00f0ff; font-size: 13.5px;">FORTRESS Enterprise Defender &amp; Cognitive Shield</strong>
                     </div>
                     <span id="fortressShieldBadge" style="font-size: 11px; padding: 2px 8px; border-radius: 12px; background: rgba(0, 255, 102, 0.15); color: #00ff66; font-weight: 700; border: 1px solid rgba(0, 255, 102, 0.3);">
-                      <i class="fa-solid fa-shield-halved"></i> v11.0.0-ABSOLUTE-DEFENSE
+                      <i class="fa-solid fa-shield-halved"></i> v12.0.0-COGNITIVE-ANTI-AI
                     </span>
                   </div>
                   <p style="font-size: 12px; color: #8b949e; margin: 0 0 10px 0;">
-                    Connected to <a href="https://ai-security-scanner-delta.vercel.app" target="_blank" style="color: #00f0ff; text-decoration: underline;">FORTRESS AI Security Scanner Gateway</a>. Intercepts Node2Shell, PHP2Shell, SSRF, Prompt Injections, and Zero-Day Exploits.
+                    Connected to <a href="https://ai-security-scanner-delta.vercel.app" target="_blank" style="color: #00f0ff; text-decoration: underline;">FORTRESS AI Security Scanner Gateway</a>. Enforces <strong>Layer 33 Anti-AI Cognitive Countermeasures</strong>, ReAct loop interception, procedural semantic labyrinths, and post-quantum lattice cryptography.
                   </p>
 
-                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px;">
-                    <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">Threats Blocked</span>
-                      <div id="fortressThreatsCounter" style="font-size: 16px; font-weight: 800; color: #00ff66; font-family: monospace;">0 Attacks</div>
+                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 9.5px; color: #8b949e; text-transform: uppercase;">Threats Blocked</span>
+                      <div id="fortressThreatsCounter" style="font-size: 15px; font-weight: 800; color: #00ff66; font-family: monospace;">0 Attacks</div>
                     </div>
-                    <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">Active Layers</span>
-                      <div style="font-size: 13.5px; font-weight: 700; color: #00f0ff; margin-top: 2px;">10 Zero-Trust</div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 9.5px; color: #8b949e; text-transform: uppercase;">AI Probes Trapped</span>
+                      <div id="fortressAiCounter" style="font-size: 15px; font-weight: 800; color: #a855f7; font-family: monospace;">0 Trapped</div>
                     </div>
-                    <div style="background: rgba(0,0,0,0.3); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border-subtle);">
-                      <span style="font-size: 10.5px; color: #8b949e; text-transform: uppercase;">Gateway Speed</span>
-                      <div id="fortressLatencyDisplay" style="font-size: 13.5px; font-weight: 700; color: #ffd700; margin-top: 2px;">&lt; 0.5ms (Fast WAF)</div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 9.5px; color: #8b949e; text-transform: uppercase;">Defense Layers</span>
+                      <div style="font-size: 12.5px; font-weight: 700; color: #00f0ff; margin-top: 2px;">33 Cognitive</div>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 7px 8px; border-radius: 6px; border: 1px solid var(--border-subtle);">
+                      <span style="font-size: 9.5px; color: #8b949e; text-transform: uppercase;">Active Posture</span>
+                      <div id="fortressLatencyDisplay" style="font-size: 12px; font-weight: 700; color: #ffd700; margin-top: 2px;">ANTI-AI ARMED</div>
                     </div>
                   </div>
 
@@ -3876,12 +3880,15 @@
                   </div>
 
                   <!-- Actions -->
-                  <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <button type="button" id="testFortressPingBtn" class="btn-secondary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
-                      <i class="fa-solid fa-bolt"></i> Test Gateway Connection
+                  <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <button type="button" id="testFortressPingBtn" class="btn-secondary" style="flex: 1; padding: 8px 10px; font-size: 11px;">
+                      <i class="fa-solid fa-bolt"></i> Test Gateway
                     </button>
-                    <button type="button" id="toggleFortressInspectorBtn" class="btn-primary" style="flex: 1; padding: 8px 12px; font-size: 12px;">
-                      <i class="fa-solid fa-magnifying-glass-shield"></i> Run Security Scan
+                    <button type="button" id="testFortressAntiAiBtn" class="btn-secondary" style="flex: 1; padding: 8px 10px; font-size: 11px; color: #a855f7; border-color: rgba(168,85,247,0.35);">
+                      <i class="fa-solid fa-robot"></i> Anti-AI Test
+                    </button>
+                    <button type="button" id="toggleFortressInspectorBtn" class="btn-primary" style="flex: 1; padding: 8px 10px; font-size: 11px;">
+                      <i class="fa-solid fa-magnifying-glass-shield"></i> Run Scan
                     </button>
                   </div>
                   <div id="fortressTestResult" style="font-size: 11px; margin-top: 6px; min-height: 16px; font-family: monospace;"></div>
