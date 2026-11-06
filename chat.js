@@ -5955,8 +5955,26 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     img.addEventListener("mouseenter", () => { img.style.transform = "scale(1.02)"; });
     img.addEventListener("mouseleave", () => { img.style.transform = "scale(1)"; });
     img.addEventListener("click", () => {
-      window.open(url, "_blank");
+      if (typeof window.openMediaLightbox === 'function') {
+        window.openMediaLightbox({
+          type: 'image',
+          url: url,
+          title: attachment.fileName || 'Photo Attachment'
+        });
+      } else {
+        window.open(url, "_blank");
+      }
     });
+    img.onerror = () => {
+      img.style.display = 'none';
+      if (!imgWrap.querySelector('.img-error-placeholder')) {
+        const errBox = document.createElement('div');
+        errBox.className = 'img-error-placeholder';
+        errBox.style.cssText = 'padding: 24px 16px; text-align: center; background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.15); border-radius: 10px; color: #94a3b8; font-size: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;';
+        errBox.innerHTML = `<i class="fa-solid fa-image-slash" style="font-size: 22px; color: #64748b;"></i><span>Image preview unavailable</span><a href="${url}" target="_blank" rel="noopener noreferrer" style="color: #00f3ff; font-size: 11px; text-decoration: none;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open link</a>`;
+        imgWrap.appendChild(errBox);
+      }
+    };
     imgWrap.appendChild(img);
 
     // Transparent Timestamp Badge Overlay
@@ -6088,14 +6106,39 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
             } else {
               resultText = knownTranscript.trim();
             }
-          } else {
-            // Fast Neural DSP Fallback for legacy audio without pre-recorded transcript
-            const prompt = `Transcribe this voice note and translate it into ${targetLang}. Return a short translated sentence of what was spoken.`;
-            resultText = "Voice note transcribed successfully.";
-            if (typeof window.generateChronexAIResponse === 'function') {
-              const aiRes = await window.generateChronexAIResponse(prompt);
-              if (aiRes && !aiRes.includes('QUOTA')) resultText = aiRes.trim();
+          } else if (url) {
+            // Real Multimodal Audio Speech-to-Text via /api/ai
+            try {
+              const aiResp = await fetch('/api/ai', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  mode: 'transcribe',
+                  audio: url,
+                  targetLang: targetLang
+                })
+              });
+              if (aiResp.ok) {
+                const aiData = await aiResp.json();
+                resultText = aiData.response || "Audio is not clear enough to be translated.";
+              } else {
+                resultText = "Audio is not clear enough to be translated.";
+              }
+            } catch (_) {
+              resultText = "Audio is not clear enough to be translated.";
             }
+          } else {
+            resultText = "Audio is not clear enough to be translated.";
+          }
+
+          // Anti-hallucination filter: strictly strip any code, AI greetings, or markdown headers
+          if (
+            !resultText ||
+            resultText.includes('```') ||
+            /^(?:###|\*\*|Hello|Hi\b|I am|Tell me your specific|Here is a|Would you like)/i.test(resultText.trim()) ||
+            /\b(?:class\s+\w+|import\s+|export\s+|function\s*\(|const\s+\w+\s*=)/.test(resultText)
+          ) {
+            resultText = "Audio is not clear enough to be translated.";
           }
           transcribeBtn.style.display = 'none';
           const subCard = document.createElement("div");
@@ -23406,8 +23449,14 @@ window.openMediaLightbox = function({ type, url, title }) {
         videoEl.style.display = 'none';
       }
       if (imgEl) {
-        imgEl.src = url;
         imgEl.style.display = 'block';
+        imgEl.style.opacity = '0.4';
+        imgEl.src = url;
+        imgEl.onload = () => { imgEl.style.opacity = '1'; };
+        imgEl.onerror = () => {
+          imgEl.style.display = 'none';
+          if (titleEl) titleEl.textContent = 'Image could not be loaded';
+        };
       }
     }
   };

@@ -2,10 +2,11 @@ let globalKeyCounter = 0;
 import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
 
 /**
- * NEXCHAT /api/ai - Serverless AI Gateway for ChronEX AI (Multimodal Vision Enabled)
+ * NEXCHAT /api/ai - Serverless AI Gateway for ChronEX AI (Multimodal Vision & Speech Audio Enabled)
  * 
  * Supports:
  * - Text & Multimodal Image Vision (inlineData base64 JPEG/PNG/WebP)
+ * - Multimodal Speech Audio Transcription (audio/webm, audio/mp3, audio/ogg, audio/wav)
  * - Environment variables on Vercel:
  *   - GEMINI_API_KEY_1
  *   - GEMINI_API_KEY_2
@@ -83,11 +84,12 @@ export default async function handler(req, res) {
     return res.status(200).json({
       status: 'online',
       service: 'CHRONEX AI Serverless Gateway',
-      version: '2.5.0-pro-vision',
+      version: '2.5.0-pro-vision-audio',
       availableKeysCount: keys.length,
       primaryModel: CANDIDATE_MODELS[0],
       supportedModels: CANDIDATE_MODELS,
-      multimodalVision: true
+      multimodalVision: true,
+      multimodalAudio: true
     });
   }
 
@@ -95,44 +97,65 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { message, history = [], image = null, imageMimeType = 'image/jpeg' } = req.body || {};
-  if ((!message || typeof message !== 'string' || !message.trim()) && !image) {
-    return res.status(400).json({ error: 'Message or image cannot be empty' });
+  const {
+    message,
+    history = [],
+    image = null,
+    imageMimeType = 'image/jpeg',
+    audio = null,
+    audioMimeType = 'audio/webm',
+    mode = 'chat',
+    targetLang = 'en'
+  } = req.body || {};
+
+  const isTranscribeMode = mode === 'transcribe' || Boolean(audio);
+
+  if ((!message || typeof message !== 'string' || !message.trim()) && !image && !audio && !isTranscribeMode) {
+    return res.status(400).json({ error: 'Message, image, or audio cannot be empty' });
   }
 
   const keys = getApiKeys();
   if (keys.length === 0) {
+    if (isTranscribeMode) {
+      return res.status(200).json({ success: true, response: "Audio is not clear enough to be translated." });
+    }
     return res.status(503).json({ error: 'No active AI API keys configured.' });
   }
 
-  // Prepare Gemini payload with strict multiturn validation (alternating user/model, starting with user)
+  // Prepare Gemini payload
   const contents = [];
-  const recentHistory = Array.isArray(history) ? history.slice(-12) : [];
-  for (const item of recentHistory) {
-    const text = typeof item.content === 'string' ? item.content.trim() : (item.parts?.[0]?.text || '').trim();
-    if (!text) continue;
-    const role = (item.role === 'assistant' || item.role === 'model') ? 'model' : 'user';
 
-    if (contents.length === 0) {
-      if (role === 'user') {
-        contents.push({ role: 'user', parts: [{ text }] });
-      }
-    } else {
-      const prev = contents[contents.length - 1];
-      if (prev.role === role) {
-        prev.parts[0].text += '\n\n' + text;
+  // For chat mode, maintain multi-turn history. For transcribe mode, NO conversation history is used to prevent prompt bleeding.
+  if (!isTranscribeMode) {
+    const recentHistory = Array.isArray(history) ? history.slice(-12) : [];
+    for (const item of recentHistory) {
+      const text = typeof item.content === 'string' ? item.content.trim() : (item.parts?.[0]?.text || '').trim();
+      if (!text) continue;
+      const role = (item.role === 'assistant' || item.role === 'model') ? 'model' : 'user';
+
+      if (contents.length === 0) {
+        if (role === 'user') {
+          contents.push({ role: 'user', parts: [{ text }] });
+        }
       } else {
-        contents.push({ role, parts: [{ text }] });
+        const prev = contents[contents.length - 1];
+        if (prev.role === role) {
+          prev.parts[0].text += '\n\n' + text;
+        } else {
+          contents.push({ role, parts: [{ text }] });
+        }
       }
     }
-  }
 
-  if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
-    contents.pop();
+    if (contents.length > 0 && contents[contents.length - 1].role === 'user') {
+      contents.pop();
+    }
   }
 
   // Multimodal user parts
   const userParts = [];
+
+  // 1. Process Multimodal Image
   const rawImage = image || req.body?.imageUrl;
   if (rawImage) {
     let base64Data = '';
@@ -176,7 +199,66 @@ export default async function handler(req, res) {
     }
   }
 
-  const textPrompt = message && typeof message === 'string' && message.trim() ? message.trim() : (image ? 'Analyze and describe this image in detail.' : '');
+  // 2. Process Multimodal Audio (Voice Note / Audio Attachment)
+  const rawAudio = audio || req.body?.audioUrl;
+  if (rawAudio) {
+    let base64Audio = '';
+    let aMime = audioMimeType || 'audio/webm';
+    if (typeof rawAudio === 'string') {
+      if (rawAudio.startsWith('http://') || rawAudio.startsWith('https://')) {
+        try {
+          const fetchRes = await fetch(rawAudio);
+          if (fetchRes.ok) {
+            const cType = fetchRes.headers.get('content-type');
+            if (cType) aMime = cType.split(';')[0].trim();
+            const buffer = await fetchRes.arrayBuffer();
+            base64Audio = Buffer.from(buffer).toString('base64');
+          }
+        } catch (fetchErr) {
+          console.warn('[AI Gateway] Failed to fetch audio URL:', fetchErr.message);
+        }
+      } else if (rawAudio.startsWith('data:')) {
+        const matches = rawAudio.match(/^data:([^;]+);base64,(.+)$/);
+        if (matches) {
+          aMime = matches[1];
+          base64Audio = matches[2];
+        } else {
+          base64Audio = rawAudio.split(',')[1] || rawAudio;
+        }
+      } else {
+        base64Audio = rawAudio;
+      }
+    }
+
+    if (base64Audio) {
+      userParts.push({
+        inlineData: {
+          mimeType: aMime,
+          data: base64Audio.trim().replace(/\r?\n|\r/g, '')
+        }
+      });
+    }
+  }
+
+  // 3. System Instruction & Prompt Tuning
+  let currentSystemInstruction = SYSTEM_INSTRUCTION;
+  let textPrompt = '';
+
+  if (isTranscribeMode) {
+    currentSystemInstruction = `You are a dedicated, high-fidelity audio transcriber and speech translator.
+Your ONLY role is to listen to the provided audio and transcribe the spoken words accurately into ${targetLang || 'English'}.
+STRICT OUTPUT RULES:
+- If clear spoken words are audible, output ONLY the exact spoken transcript.
+- If there is no speech, if the audio is silent, or if the speech is inaudible or unintelligible, output EXACTLY AND ONLY:
+Audio is not clear enough to be translated.
+- NEVER output code, programming language syntax, JavaScript/Python templates, markdown code fences, greetings, or conversational remarks.
+- NEVER output conversational preamble like "I have received your message" or "Here is a modern implementation".`;
+
+    textPrompt = `Listen to this audio note and transcribe it into ${targetLang || 'English'}. Return only the spoken words or "Audio is not clear enough to be translated."`;
+  } else {
+    textPrompt = message && typeof message === 'string' && message.trim() ? message.trim() : (image ? 'Analyze and describe this image in detail.' : '');
+  }
+
   if (textPrompt) {
     userParts.push({ text: textPrompt });
   }
@@ -189,12 +271,12 @@ export default async function handler(req, res) {
   const payload = {
     contents,
     systemInstruction: {
-      parts: [{ text: SYSTEM_INSTRUCTION }]
+      parts: [{ text: currentSystemInstruction }]
     },
     generationConfig: {
-      temperature: 0.7,
-      maxOutputTokens: 2048,
-      topP: 0.95
+      temperature: isTranscribeMode ? 0.1 : 0.7,
+      maxOutputTokens: isTranscribeMode ? 512 : 2048,
+      topP: isTranscribeMode ? 0.8 : 0.95
     }
   };
 
@@ -215,14 +297,27 @@ export default async function handler(req, res) {
 
         if (geminiResp.ok) {
           const data = await geminiResp.json();
-          const candidateText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          let candidateText = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
+
+          if (isTranscribeMode) {
+            // Strict anti-hallucination guard: if model output code or greetings, reject it
+            if (
+              !candidateText ||
+              candidateText.includes('```') ||
+              /^(?:###|\*\*|Hello|Hi\b|I am|Tell me your specific|Here is a|Would you like)/i.test(candidateText) ||
+              /\b(?:class\s+\w+|import\s+|export\s+|function\s*\(|const\s+\w+\s*=)/.test(candidateText)
+            ) {
+              candidateText = "Audio is not clear enough to be translated.";
+            }
+          }
+
           if (candidateText) {
             return res.status(200).json({
               success: true,
               response: candidateText,
               model: model,
               keyIndex: kIdx,
-              multimodal: Boolean(image)
+              multimodal: Boolean(image || audio)
             });
           }
         }
@@ -242,6 +337,13 @@ export default async function handler(req, res) {
         break;
       }
     }
+  }
+
+  if (isTranscribeMode) {
+    return res.status(200).json({
+      success: true,
+      response: "Audio is not clear enough to be translated."
+    });
   }
 
   return res.status(502).json({

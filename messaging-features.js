@@ -473,28 +473,37 @@ export const messagingFeatures = {
 
         let transcriptText = '';
 
-        if (typeof window.generateChronexAIResponse === 'function') {
+        const container = transcribeBtn.closest('.message-attachment-container') || transcribeBtn.closest('.message-bubble');
+        const audioEl = container?.querySelector('audio');
+        const audioUrl = audioEl?.src || '';
 
-          transcriptText = await window.generateChronexAIResponse(`Transcribe this voice note and translate it into ${targetLang}. Return a short concise transcript in one sentence.`);
-
+        if (audioUrl) {
+          try {
+            const aiResp = await fetch('/api/ai', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mode: 'transcribe', audio: audioUrl, targetLang: targetLang })
+            });
+            if (aiResp.ok) {
+              const aiData = await aiResp.json();
+              transcriptText = aiData.response || "Audio is not clear enough to be translated.";
+            } else {
+              transcriptText = "Audio is not clear enough to be translated.";
+            }
+          } catch (_) {
+            transcriptText = "Audio is not clear enough to be translated.";
+          }
+        } else {
+          transcriptText = "Audio is not clear enough to be translated.";
         }
 
-        if (!transcriptText || transcriptText.trim().length === 0) {
-
-          const sampleTranscripts = [
-
-            'Operational telemetry confirmed. Coordinates synchronized for orbital insertion.',
-
-            'Voice report: All security enclaves online with zero intrusion vectors detected across the cluster.',
-
-            'Message audio received: Requesting encrypted clearance token for level 4 vault access.',
-
-            'Voice note: The quantum hash algorithm passed simulation with 99.8% precision.'
-
-          ];
-
-          transcriptText = sampleTranscripts[Math.floor(Math.random() * sampleTranscripts.length)];
-
+        if (
+          !transcriptText ||
+          transcriptText.includes('```') ||
+          /^(?:###|\*\*|Hello|Hi\b|I am|Tell me your specific|Here is a|Would you like)/i.test(transcriptText.trim()) ||
+          /\b(?:class\s+\w+|import\s+|export\s+|function\s*\(|const\s+\w+\s*=)/.test(transcriptText)
+        ) {
+          transcriptText = "Audio is not clear enough to be translated.";
         }
 
 
