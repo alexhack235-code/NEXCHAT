@@ -405,7 +405,7 @@ export class NexchatCdnShield {
         let nonce = 0;
         while (performance.now() - t0 < 180) { nonce++; }
         status.style.display = 'block';
-        status.textContent = '✓ Browser verified. If approved, reload this page in 10 seconds.';
+        status.textContent = '[OK] Browser verified. If approved, reload this page in 10 seconds.';
       } catch (err) {
         status.style.display = 'block';
         status.style.color = '#dc2626';
@@ -534,18 +534,35 @@ function normalizeUnicode(input) {
 // ==============================================================================
 // 5.5 LAYER 33: AUTONOMOUS ANTI-AI COGNITIVE COUNTERMEASURE MATRIX ("elif attacker is ai")
 // ==============================================================================
+function sniffAndDecodeBase64(str) {
+  if (!str || typeof str !== "string") return "";
+  const b64CandidateMatch = str.match(/(?:[A-Za-z0-9+/]{4}){4,}(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?/g);
+  if (!b64CandidateMatch) return "";
+  let decodedConcat = "";
+  for (const token of b64CandidateMatch.slice(0, 5)) {
+    try {
+      const decoded = Buffer.from(token, "base64").toString("utf8");
+      if (/[\x20-\x7E]{6,}/.test(decoded)) {
+        decodedConcat += " " + decoded;
+      }
+    } catch (_) {}
+  }
+  return decodedConcat;
+}
+
 const AI_REACT_PATTERNS = [
-  /(?:^|[\r\n])\s*(?:Thought|Action|Action\s*Input|Observation|Final\s*Answer)\s*:/i,
+  /(?:^|[\r\n\s",])\s*(?:Thought|Action|Action\s*Input|Observation|Final\s*Answer)\s*:/i,
   /\{\s*"action"\s*:\s*"[^"]+"\s*,\s*"action_input"\s*:/i,
   /\b(?:Tool\s*Execution|Agent\s*Executor|ReAct\s*Framework)\b/i,
 ];
 
 const AI_CONTROL_TOKENS = [
-  /<\|im_start\|>/i,
-  /<\|im_end\|>/i,
+  /<\|\s*(?:im_start|im_end|system|user|assistant)(?::|\s+role=|\s*\|)/i,
+  /<\|(?:im_start|im_end|endoftext|fim_prefix|fim_suffix|fim_middle)\|>/i,
   /\[INST\]/i,
   /\[\/INST\]/i,
   /<<SYS>>/i,
+  /<\/s>/i,
 ];
 
 const AI_OVERRIDE_PATTERNS = [
@@ -557,28 +574,37 @@ export function detectAiAttacker(rawText, req) {
   const indicators = [];
   let isAi = false;
 
-  for (const pat of AI_REACT_PATTERNS) {
-    if (pat.test(rawText)) {
-      indicators.push("REACT_FRAMEWORK_SIGNATURE");
-      isAi = true;
-      break;
-    }
-  }
+  const normalized = typeof rawText === "string" ? rawText.replace(/\\r|\\n|\\t/g, " ") : "";
+  const b64Decoded = sniffAndDecodeBase64(rawText);
+  const targets = [normalized, b64Decoded].filter(Boolean);
 
-  for (const pat of AI_CONTROL_TOKENS) {
-    if (pat.test(rawText)) {
-      indicators.push("LLM_CONTROL_TOKEN_DELIMITER");
-      isAi = true;
-      break;
+  for (const text of targets) {
+    for (const pat of AI_REACT_PATTERNS) {
+      if (pat.test(text)) {
+        indicators.push("REACT_FRAMEWORK_SIGNATURE");
+        isAi = true;
+        break;
+      }
     }
-  }
+    if (isAi) break;
 
-  for (const pat of AI_OVERRIDE_PATTERNS) {
-    if (pat.test(rawText)) {
-      indicators.push("PROMPT_INJECTION_OVERRIDE");
-      isAi = true;
-      break;
+    for (const pat of AI_CONTROL_TOKENS) {
+      if (pat.test(text)) {
+        indicators.push("LLM_CONTROL_TOKEN_DELIMITER");
+        isAi = true;
+        break;
+      }
     }
+    if (isAi) break;
+
+    for (const pat of AI_OVERRIDE_PATTERNS) {
+      if (pat.test(text)) {
+        indicators.push("PROMPT_INJECTION_OVERRIDE");
+        isAi = true;
+        break;
+      }
+    }
+    if (isAi) break;
   }
 
   const path = (req?.url || "").split("?")[0].toLowerCase();
