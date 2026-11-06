@@ -15582,3 +15582,643 @@ body:not(.group-active) #tacticalMeshBanner {
     max-width: 100vw !important;
   }
 }
+
+
+/* ==========================================================================
+   NEX FAST ASH-FADE DELETE ANIMATION (180ms Snappy NEX Style)
+   ========================================================================== */
+.nex-delete-ash {
+  position: relative !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  background: #1a1a1a !important;
+  border-color: rgba(120, 120, 120, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.85) !important;
+  animation: nexAshPoof 180ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease, max-height 180ms ease, margin 180ms ease, padding 180ms ease !important;
+}
+
+@keyframes nexAshPoof {
+  0% {
+    opacity: 1;
+    filter: grayscale(0%) brightness(1) blur(0px);
+    transform: scale(1) translateY(0);
+    background: #1a1a1a;
+  }
+  44% { /* 0-80ms: Fade to 40% opacity + turn grayscale + slight blur 2px */
+    opacity: 0.4;
+    filter: grayscale(100%) brightness(0.6) blur(2px);
+    transform: scale(0.97) translateY(-2px);
+    background: #1a1a1a;
+  }
+  78% { /* 80-140ms: Shrink to 92% scale + slide up 6px + dust puff */
+    opacity: 0.15;
+    filter: grayscale(100%) brightness(0.35) blur(3px);
+    transform: scale(0.92) translateY(-6px);
+  }
+  100% { /* 140-180ms: Fade to 0% opacity and collapse height */
+    opacity: 0;
+    filter: grayscale(100%) brightness(0.2) blur(4px);
+    transform: scale(0.86) translateY(-8px);
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Ash Dust Particles */
+.nex-ash-particle {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, #d4d4d8 0%, #71717a 50%, #27272a 100%);
+  z-index: 99999;
+  animation: nexAshParticleFly 180ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes nexAshParticleFly {
+  0% {
+    opacity: 0.9;
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--ash-drift-x, 0px), var(--ash-drift-y, -26px)) scale(0.2);
+  }
+}
+
+
+/* =============================================================================
+   WHATSAPP STRUCTURE + NEX NEON IDENTITY STYLING UPGRADE
+   ============================================================================= */
+
+/* 1. CHAT LIST (WhatsApp-Structured 3-Column Layout) */
+.chat-list-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 14px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04) !important;
+  border-radius: 10px !important;
+  margin: 2px 0 !important;
+  transition: background 0.15s ease !important;
+}
+
+.chat-list-item:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+.chat-list-item.active {
+  background: rgba(0, 255, 136, 0.08) !important;
+  border-left: 3px solid #00FF88 !important;
+}
+
+.chat-avatar-container {
+  position: relative !important;
+  width: 48px !important;
+  height: 48px !important;
+  flex-shrink: 0 !important;
+}
+
+.chat-avatar-container .chat-avatar {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+/* Small Group Corner Indicator (WhatsApp design without text) */
+.group-avatar-indicator {
+  position: absolute !important;
+  bottom: -1px !important;
+  right: -1px !important;
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 50% !important;
+  background: #111b21 !important;
+  border: 1.5px solid #00FF88 !important;
+  color: #00FF88 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 8.5px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.6) !important;
+  z-index: 2 !important;
+}
+
+/* Middle Column: Name + Last Message */
+.chat-item-content {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  overflow: hidden !important;
+}
+
+.chat-item-header {
+  display: flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.chat-name {
+  font-size: 15.5px !important;
+  font-weight: 600 !important;
+  color: #e9edef !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  line-height: 1.3 !important;
+}
+
+/* Hide any text GROUP pill in chat list */
+.chat-type-pill {
+  display: none !important;
+}
+
+.chat-preview {
+  font-size: 13px !important;
+  color: #8696a0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+/* Right Column: Time (Top) + Unread Badge (Bottom) */
+.chat-time-container {
+  width: 65px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  text-align: right !important;
+}
+
+.chat-item-time {
+  font-size: 11px !important;
+  color: #8696a0 !important;
+  white-space: nowrap !important;
+}
+
+.chat-item-time.unread {
+  color: #00FF88 !important;
+  font-weight: 600 !important;
+}
+
+.unread-badge {
+  background: #00a884 !important;
+  color: #111b21 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  border-radius: 9px !important;
+  padding: 0 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
+/* 2. INSIDE CHAT HEADER (1 Floor Only, Clean WhatsApp Structure) */
+.chat-detail-header {
+  height: 60px !important;
+  min-height: 60px !important;
+  max-height: 60px !important;
+  padding: 0 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  background: #111b21 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 30 !important;
+}
+
+.chat-detail-header .chat-header-profile {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  cursor: pointer !important;
+}
+
+.chat-detail-header .header-avatar-container {
+  width: 40px !important;
+  height: 40px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
+}
+
+.chat-detail-header .header-avatar {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+.chat-detail-header .header-text {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+  overflow: hidden !important;
+}
+
+.chat-detail-header #chatName {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #e9edef !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin: 0 !important;
+  line-height: 1.25 !important;
+}
+
+.chat-detail-header #statusText {
+  font-size: 12px !important;
+  color: #8696a0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  margin: 0 !important;
+  line-height: 1.25 !important;
+}
+
+/* Header Actions: STRICTLY 2 call icons + 3 dots menu */
+.chat-detail-header-actions {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 4px !important;
+  flex-shrink: 0 !important;
+}
+
+.chat-detail-header-actions > *:not(#headerVideoBtn):not(#headerCallBtn):not(#menuBtn) {
+  display: none !important;
+}
+
+.chat-detail-header-actions #headerVideoBtn,
+.chat-detail-header-actions #headerCallBtn,
+.chat-detail-header-actions #menuBtn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 50% !important;
+  color: #8696a0 !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: color 0.15s, background 0.15s !important;
+}
+
+.chat-detail-header-actions #headerVideoBtn:hover,
+.chat-detail-header-actions #headerCallBtn:hover,
+.chat-detail-header-actions #menuBtn:hover {
+  color: #00FF88 !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+
+/* 3. MESSAGE BUBBLES (WhatsApp Sizing & Sided Structure, Nex Neon Green Accent) */
+.nex-msg-wrapper,
+.message-wrapper {
+  display: flex !important;
+  width: 100% !important;
+  margin: 3px 0 !important;
+  padding: 0 10px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+}
+
+.nex-msg-wrapper.sent,
+.message-wrapper.sent {
+  justify-content: flex-end !important;
+  align-items: flex-end !important;
+}
+
+.nex-msg-wrapper.received,
+.message-wrapper.received {
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+}
+
+.nex-msg-content-area {
+  display: flex !important;
+  flex-direction: column !important;
+  max-width: 75% !important;
+  min-width: 0 !important;
+  position: relative !important;
+}
+
+.nex-msg-wrapper.sent .nex-msg-content-area,
+.message-wrapper.sent .nex-msg-content-area {
+  align-items: flex-end !important;
+}
+
+.nex-msg-wrapper.received .nex-msg-content-area,
+.message-wrapper.received .nex-msg-content-area {
+  align-items: flex-start !important;
+}
+
+.nex-msg-bubble,
+.message-bubble {
+  max-width: 75% !important;
+  width: fit-content !important;
+  padding: 8px 10px 6px 10px !important;
+  border-radius: 12px !important;
+  position: relative !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  box-sizing: border-box !important;
+  font-size: 14px !important;
+  line-height: 1.42 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Sent Messages (My Messages) */
+.nex-msg-wrapper.sent .nex-msg-bubble,
+.message-wrapper.sent .message-bubble,
+.message-bubble.sent {
+  background: linear-gradient(135deg, #005c4b 0%, #004d40 100%) !important;
+  color: #ffffff !important;
+  border-radius: 12px 2px 12px 12px !important;
+  border: 1px solid rgba(0, 255, 136, 0.22) !important;
+  margin-left: auto !important;
+}
+
+/* Received Messages (Other People) */
+.nex-msg-wrapper.received .nex-msg-bubble,
+.message-wrapper.received .message-bubble,
+.message-bubble.received {
+  background: #202c33 !important;
+  color: #e9edef !important;
+  border-radius: 2px 12px 12px 12px !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  margin-right: auto !important;
+}
+
+/* Sender Line: 1 Single Row, No Overlap */
+.nex-msg-sender {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 8px !important;
+  margin-bottom: 3px !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.nex-msg-sender-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.nex-msg-sender-name {
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  cursor: pointer !important;
+}
+
+.nex-role-badge {
+  font-size: 8.5px !important;
+  font-weight: 800 !important;
+  padding: 1px 4px !important;
+  border-radius: 3px !important;
+  text-transform: uppercase !important;
+  flex-shrink: 0 !important;
+  letter-spacing: 0.3px !important;
+}
+.nex-role-badge.owner,
+.nex-role-badge.creator {
+  background: rgba(255, 215, 0, 0.2) !important;
+  color: #ffd700 !important;
+  border: 1px solid rgba(255, 215, 0, 0.4) !important;
+}
+.nex-role-badge.admin {
+  background: rgba(0, 240, 255, 0.2) !important;
+  color: #00f0ff !important;
+  border: 1px solid rgba(0, 240, 255, 0.4) !important;
+}
+
+.nex-msg-sender-phone {
+  font-size: 10.5px !important;
+  color: #8696a0 !important;
+  font-family: monospace !important;
+  flex-shrink: 0 !important;
+  max-width: 130px !important;
+  text-align: right !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* In-Bubble Meta Row: Small Time Bottom-Right */
+.nex-msg-meta,
+.message-time-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 4px !important;
+  font-size: 10.5px !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+  margin-top: 3px !important;
+  float: right !important;
+  margin-left: 8px !important;
+  line-height: 1 !important;
+}
+.nex-msg-time,
+.message-time-text {
+  font-size: 10.5px !important;
+  color: #8696a0 !important;
+  white-space: nowrap !important;
+}
+.nex-msg-wrapper.sent .nex-msg-time {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Quoted Reply: 3px Colored Vertical Line */
+.nex-msg-quote,
+.reply-quote {
+  background: rgba(0, 0, 0, 0.25) !important;
+  border-left: 3px solid #00FF88 !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  margin-bottom: 5px !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+.nex-msg-quote-sender,
+.reply-quote-sender {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  margin-bottom: 2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+.nex-msg-quote-text,
+.reply-quote-snippet {
+  font-size: 11.5px !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.3 !important;
+}
+
+/* Hanging Reactions at Bottom-Left */
+.nex-reactions-row {
+  position: absolute !important;
+  bottom: -9px !important;
+  left: 8px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 2px !important;
+  background: #1f2c34 !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
+  padding: 1px 5px !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45) !important;
+  z-index: 5 !important;
+  cursor: pointer !important;
+}
+
+/* Centered Date Separator Pill */
+.nex-date-separator-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 12px 0 !important;
+  width: 100% !important;
+  pointer-events: none !important;
+  clear: both !important;
+}
+.nex-date-separator-pill,
+.nex-date-separator-label {
+  background: rgba(24, 34, 41, 0.95) !important;
+  color: #8696a0 !important;
+  font-size: 11.5px !important;
+  font-weight: 500 !important;
+  padding: 4px 12px !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  text-align: center !important;
+  text-transform: capitalize !important;
+}
+
+/* Small Centered Light Yellow Encryption Banner Pill */
+.nex-encryption-banner-container {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin: 8px auto !important;
+  width: 100% !important;
+  transition: opacity 0.35s ease, max-height 0.35s ease !important;
+}
+.nex-encryption-banner-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  background: rgba(255, 215, 0, 0.1) !important;
+  border: 1px solid rgba(255, 215, 0, 0.25) !important;
+  color: #ffd700 !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  border-radius: 8px !important;
+  padding: 4px 12px !important;
+  text-align: center !important;
+  max-width: 380px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Undownloaded Media Placeholder */
+.undownloaded-media-placeholder {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 220px !important;
+  height: 120px !important;
+  background: #2a3942 !important;
+  border-radius: 8px !important;
+  margin-bottom: 4px !important;
+  cursor: pointer !important;
+}
+.undownloaded-media-box {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  color: #8696a0 !important;
+}
+.undownloaded-media-icon {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 50% !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #00FF88 !important;
+  font-size: 15px !important;
+  border: 1px solid rgba(0, 255, 136, 0.3) !important;
+}
+.undownloaded-media-size {
+  font-size: 11px !important;
+  font-family: monospace !important;
+  color: #8696a0 !important;
+}
+
+/* Collapsible Group Synergy Bar Below Header */
+.group-synergy-hud-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 4px 12px !important;
+  background: rgba(10, 15, 20, 0.95) !important;
+  border-bottom: 1px solid rgba(0, 255, 136, 0.2) !important;
+  font-size: 11px !important;
+  gap: 8px !important;
+  transition: all 0.2s ease !important;
+}
+.group-synergy-hud-bar.collapsed {
+  display: none !important;
+}

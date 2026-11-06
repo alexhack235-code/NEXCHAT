@@ -145,7 +145,7 @@ export const INITIAL_CHATS = [
   },
   {
     id: "cyber-squad-elite",
-    name: " CYBER SQUAD ELITE ",
+    name: "CYBER SQUAD ELITE",
     avatar: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=150",
     isOnline: true,
     isGroup: true,
@@ -229,7 +229,7 @@ export const INITIAL_CHATS = [
   },
   {
     id: "cipher-ops",
-    name: "Cipher Ops Group",
+    name: "Cipher Ops",
     avatar: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=150",
     isOnline: true,
     isGroup: true,

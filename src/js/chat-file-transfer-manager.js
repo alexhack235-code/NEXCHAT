@@ -527,10 +527,14 @@
         ].filter(Boolean);
 
         targets.forEach(wrapper => {
-          wrapper.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
-          wrapper.style.opacity = '0';
-          wrapper.style.transform = 'scale(0.9)';
-          setTimeout(() => wrapper.remove(), 230);
+          if (typeof window.triggerAshDeleteAnimation === 'function') {
+            window.triggerAshDeleteAnimation(wrapper);
+          } else {
+            wrapper.style.transition = 'opacity 180ms ease, transform 180ms ease';
+            wrapper.style.opacity = '0';
+            wrapper.style.transform = 'scale(0.88) translateY(-6px)';
+            setTimeout(() => wrapper.remove(), 180);
+          }
         });
 
         // 2. Cache locally in hidden list so it remains erased immediately
@@ -580,10 +584,14 @@
         ].filter(Boolean);
 
         targets.forEach(wrapper => {
-          wrapper.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
-          wrapper.style.opacity = '0';
-          wrapper.style.transform = 'scale(0.9)';
-          setTimeout(() => wrapper.remove(), 230);
+          if (typeof window.triggerAshDeleteAnimation === 'function') {
+            window.triggerAshDeleteAnimation(wrapper);
+          } else {
+            wrapper.style.transition = 'opacity 180ms ease, transform 180ms ease';
+            wrapper.style.opacity = '0';
+            wrapper.style.transform = 'scale(0.88) translateY(-6px)';
+            setTimeout(() => wrapper.remove(), 180);
+          }
         });
 
         // Cache locally in localStorage so it stays hidden even offline

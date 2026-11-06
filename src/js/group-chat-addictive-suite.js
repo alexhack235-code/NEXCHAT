@@ -309,6 +309,13 @@
 
       const pct = Math.min(100, Math.floor((data.xp / data.targetXp) * 100));
 
+      const isCollapsed = localStorage.getItem('nex_group_synergy_collapsed') === 'true';
+      if (isCollapsed) {
+        bar.classList.add('collapsed');
+      } else {
+        bar.classList.remove('collapsed');
+      }
+
       bar.innerHTML = `
         <div class="synergy-level-badge">
           <i class="fa-solid fa-shield-halved" style="color: #00ff66;"></i>
@@ -322,8 +329,11 @@
           <i class="fa-solid fa-fire" style="color: #f97316;"></i>
           <span>${data.streakDays}d Streak</span>
         </div>
-        <button type="button" class="btn-group-hall-of-fame" onclick="window.NexGroupChatSuite.openHallOfFameModal()">
+        <button type="button" class="btn-group-hall-of-fame" onclick="window.NexGroupChatSuite.openHallOfFameModal()" title="Hall of Fame">
           <i class="fa-solid fa-trophy" style="color: #ffd700;"></i>
+        </button>
+        <button type="button" class="btn-group-synergy-toggle" style="background:transparent;border:none;color:#8696a0;cursor:pointer;padding:2px 4px;" title="Hide synergy bar" onclick="localStorage.setItem('nex_group_synergy_collapsed', 'true'); document.getElementById('groupSynergyHudBar')?.classList.add('collapsed');">
+          <i class="fa-solid fa-xmark"></i>
         </button>
       `;
     }

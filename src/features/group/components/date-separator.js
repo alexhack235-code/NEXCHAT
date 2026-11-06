@@ -69,7 +69,7 @@ export function createDateSeparator(date) {
   container.className = 'nex-date-separator-container';
   
   const label = document.createElement('div');
-  label.className = 'nex-date-separator-label';
+  label.className = 'nex-date-separator-pill';
   label.textContent = formatDateLabel(date);
   
   container.appendChild(label);

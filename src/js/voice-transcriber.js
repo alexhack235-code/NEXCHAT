@@ -164,12 +164,12 @@
       });
     }
 
-    async handleTranscribeClick(btn) {
+        async handleTranscribeClick(btn) {
       const parent = btn.closest('.nex-voice-card-wrapper') || btn.closest('.message-attachment-container') || btn.closest('.message-bubble');
       if (!parent) return;
 
       let resultBox = parent.querySelector('.voice-transcript-result, .voice-transcribed-box');
-      if (resultBox && resultBox.style.display === 'block') {
+      if (resultBox && resultBox.style.display === 'block' && !btn.classList.contains('retry-needed')) {
         resultBox.style.display = 'none';
         return;
       }
@@ -180,66 +180,139 @@
         parent.appendChild(resultBox);
       }
 
+      const audioEl = parent.querySelector('audio');
+      const audioUrl = audioEl ? (audioEl.currentSrc || audioEl.src) : '';
+      const msgId = parent.dataset.msgId || parent.getAttribute('data-id') || (audioUrl ? audioUrl.slice(-24) : 'voice-' + Date.now());
+
+      if (!audioUrl) {
+        resultBox.innerHTML = `
+          <div class="transcript-header">
+            <span class="transcript-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX TRANSCRIPT</span>
+          </div>
+          <p class="transcript-text" style="color:#ffaa44;">"Audio too short to translate"</p>
+        `;
+        resultBox.style.display = 'block';
+        return;
+      }
+
       btn.classList.add('transcribing');
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Transcribing...</span>`;
+      btn.classList.remove('retry-needed');
+
+      const setStatus = (label) => {
+        btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>${label}</span>`;
+      };
+
+      setStatus('Loading audio...');
 
       try {
-        let transcriptText = '';
-        const audioEl = parent.querySelector('audio');
-        const audioUrl = audioEl?.src || '';
-
-        if (audioUrl) {
-          try {
-            const aiResp = await fetch('/api/ai', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ mode: 'transcribe', audio: audioUrl, targetLang: 'en' })
-            });
-            if (aiResp.ok) {
-              const aiData = await aiResp.json();
-              transcriptText = aiData.response || "Audio is not clear enough to be translated.";
-            } else {
-              transcriptText = "Audio is not clear enough to be translated.";
-            }
-          } catch (_) {
-            transcriptText = "Audio is not clear enough to be translated.";
-          }
+        let result = null;
+        if (typeof window.runBestEffortVoiceTranscribeAndTranslate === 'function') {
+          result = await window.runBestEffortVoiceTranscribeAndTranslate(audioUrl, 'en', setStatus, msgId);
         } else {
-          transcriptText = "Audio is not clear enough to be translated.";
+          // Direct best-effort fallback implementation
+          let audioPayload = audioUrl;
+          if (audioUrl.startsWith('blob:')) {
+            try {
+              const bRes = await fetch(audioUrl);
+              const bBlob = await bRes.blob();
+              if (bBlob.size < 800) {
+                result = { success: false, shortAudio: true, error: 'Audio too short to translate' };
+              } else {
+                audioPayload = await new Promise((resolve, reject) => {
+                  const reader = new FileReader();
+                  reader.onloadend = () => resolve(reader.result);
+                  reader.onerror = reject;
+                  reader.readAsDataURL(bBlob);
+                });
+              }
+            } catch (bErr) {
+              console.warn('[VOICE] Blob conversion fallback failed:', bErr);
+            }
+          }
+
+          if (!result && audioPayload) {
+            let tries = 0;
+            const maxTries = 3;
+            while (tries < maxTries && !result?.success) {
+              tries++;
+              setStatus(tries > 1 ? `Translating (retry ${tries}/3)...` : 'Translating...');
+              try {
+                const ctl = new AbortController();
+                const timeoutId = setTimeout(() => ctl.abort(), 15000);
+                const resp = await fetch('/api/ai', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ mode: 'transcribe', audio: audioPayload, targetLang: 'en' }),
+                  signal: ctl.signal
+                });
+                clearTimeout(timeoutId);
+                if (resp.ok) {
+                  const data = await resp.json();
+                  const text = (data && (data.response || data.transcript)) ? (data.response || data.transcript).trim() : '';
+                  if (text && !text.toLowerCase().includes('not clear enough')) {
+                    result = { success: true, transcript: text, translated: text };
+                    break;
+                  }
+                }
+              } catch (err) {
+                console.warn(`[VOICE] Try ${tries} failed:`, err);
+              }
+              if (tries < maxTries) {
+                await new Promise(r => setTimeout(r, 2000));
+              }
+            }
+          }
         }
 
-        if (
-          !transcriptText ||
-          transcriptText.includes('```') ||
-          /^(?:###|\*\*|Hello|Hi\b|I am|Tell me your specific|Here is a|Would you like)/i.test(transcriptText.trim()) ||
-          /\b(?:class\s+\w+|import\s+|export\s+|function\s*\(|const\s+\w+\s*=)/.test(transcriptText)
-        ) {
-          transcriptText = "Audio is not clear enough to be translated.";
+        if (result && result.success && (result.translated || result.transcript)) {
+          const finalOutput = result.translated || result.transcript;
+          resultBox.innerHTML = `
+            <div class="transcript-header">
+              <span class="transcript-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX TRANSCRIPT</span>
+              <button type="button" class="copy-transcript-btn" title="Copy text"><i class="fa-regular fa-copy"></i></button>
+            </div>
+            <p class="transcript-text">"${finalOutput}"</p>
+          `;
+          resultBox.style.display = 'block';
+
+          btn.classList.remove('transcribing');
+          btn.classList.add('transcribed');
+          btn.innerHTML = `<i class="fa-solid fa-check text-[#00ff66]"></i> <span>Transcribed</span>`;
+          if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
+        } else if (result && result.shortAudio) {
+          resultBox.innerHTML = `
+            <div class="transcript-header">
+              <span class="transcript-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX TRANSCRIPT</span>
+            </div>
+            <p class="transcript-text" style="color:#ffaa44;">"Audio too short to translate"</p>
+          `;
+          resultBox.style.display = 'block';
+          btn.classList.remove('transcribing');
+          btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>`;
+        } else {
+          resultBox.innerHTML = `
+            <div class="transcript-header">
+              <span class="transcript-tag"><i class="fa-solid fa-triangle-exclamation" style="color:#ff4444;"></i> STATUS</span>
+            </div>
+            <p class="transcript-text" style="color:#ffaa44;">Could not translate after 3 tries. Tap to retry</p>
+          `;
+          resultBox.style.display = 'block';
+          btn.classList.remove('transcribing');
+          btn.classList.add('retry-needed');
+          btn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> <span>Retry Translate</span>`;
         }
-
-        resultBox.innerHTML = `
-          <div class="transcript-header">
-            <span class="transcript-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX TRANSCRIPT</span>
-            <button type="button" class="copy-transcript-btn" title="Copy text"><i class="fa-regular fa-copy"></i></button>
-          </div>
-          <p class="transcript-text">"${transcriptText}"</p>
-        `;
-        resultBox.style.display = 'block';
-
-        btn.classList.remove('transcribing');
-        btn.classList.add('transcribed');
-        btn.innerHTML = `<i class="fa-solid fa-check text-[#00ff66]"></i> <span>Transcribed</span>`;
-        if (typeof window.playCyberSfx === 'function') window.playCyberSfx('chime');
       } catch (err) {
+        console.warn('[VOICE] Final transcript error:', err);
         resultBox.innerHTML = `
           <div class="transcript-header">
-            <span class="transcript-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> ChronEX TRANSCRIPT</span>
+            <span class="transcript-tag"><i class="fa-solid fa-triangle-exclamation" style="color:#ff4444;"></i> STATUS</span>
           </div>
-          <p class="transcript-text">"Voice message securely transmitted and validated."</p>
+          <p class="transcript-text" style="color:#ffaa44;">Could not translate after 3 tries. Tap to retry</p>
         `;
         resultBox.style.display = 'block';
         btn.classList.remove('transcribing');
-        btn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>`;
+        btn.classList.add('retry-needed');
+        btn.innerHTML = `<i class="fa-solid fa-rotate-right"></i> <span>Retry Translate</span>`;
       }
     }
 

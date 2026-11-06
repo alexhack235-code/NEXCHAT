@@ -84,15 +84,29 @@
 
       if (!this.recordBtn) return;
 
-      // Touch and pointer prevention for tactile hold-to-record
+      // Prevent default contextmenu and unwanted browser touch gestures
       this.recordBtn.style.userSelect = 'none';
       this.recordBtn.style.webkitUserSelect = 'none';
       this.recordBtn.style.touchAction = 'none';
       this.recordBtn.addEventListener('contextmenu', (e) => e.preventDefault());
 
-      const handlePointerDown = (e) => {
-        // Strict guard: Only left-click or touch initiates recording
-        if (e.button && e.button !== 0) return;
+      // STRICT USER GESTURE GUARD:
+      // Recording MUST ONLY start on active user gesture on the mic button.
+      // NEVER start on page load, mount, timer, or programmatic click.
+      this.isUserGestureActive = false;
+      this.isRecordingRef = false;
+
+      const handleUserPressStart = (e) => {
+        // Strict guard: Only primary click (button === 0) or real touch initiates recording
+        if (e.button !== undefined && e.button !== 0) return;
+        
+        // Re-entry guard: If already recording or starting, return immediately
+        if (this.isRecording || this.isStarting || this.isRecordingRef) {
+          console.log('[VoiceRecorder] Guard: Already recording, ignoring press.');
+          return;
+        }
+
+        this.isUserGestureActive = true;
         this.isPressedOnMic = true;
         this.isCancelled = false;
         this.pointerDownTime = Date.now();
@@ -103,24 +117,21 @@
           this.holdTimer = null;
         }
 
-        // Guard against duplicate start
-        if (this.isRecording || this.isStarting) return;
-
-        // Tactile hold threshold (250ms). Must maintain press to start.
+        // Tactile hold threshold (220ms). User must keep pressing to initiate recording.
         this.holdTimer = setTimeout(() => {
-          if (this.isPressedOnMic && !this.isRecording && !this.isStarting) {
+          if (this.isUserGestureActive && this.isPressedOnMic && !this.isRecording && !this.isStarting) {
             this.startRecording();
           }
-        }, 250);
+        }, 220);
       };
 
-      const handlePointerMove = (e) => {
-        // Guard: Only process slide-to-cancel if user is actively holding the mic
-        if (!this.isPressedOnMic) return;
+      const handleUserPressMove = (e) => {
+        if (!this.isUserGestureActive || !this.isPressedOnMic) return;
         const currentX = (e.clientX || (e.touches && e.touches[0] ? e.touches[0].clientX : 0)) || 0;
         const deltaX = this.startX - currentX;
-        // Slide left by > 50px cancels recording
-        if (deltaX > 50) {
+        // Slide left > 45px cancels voice note
+        if (deltaX > 45) {
+          this.isUserGestureActive = false;
           this.isPressedOnMic = false;
           if (this.holdTimer) {
             clearTimeout(this.holdTimer);
@@ -128,22 +139,28 @@
           }
           this.cancelRecording();
           if (typeof window.showNotif === 'function') {
-            window.showNotif('Slide to cancel: Voice note cancelled', 'info', 1500);
+            window.showNotif('Slide to cancel: Voice note discarded', 'info', 1500);
           }
         }
       };
 
-      const handlePointerUp = (e) => {
+      const handleUserPressEnd = (e) => {
         if (this.holdTimer) {
           clearTimeout(this.holdTimer);
           this.holdTimer = null;
         }
 
-        // STRICT GUARD: If this release event is NOT from active mic press, ignore completely!
-        if (!this.isPressedOnMic) return;
+        // STRICT GUARD: If this release event is NOT from active mic press, ignore completely
+        if (!this.isUserGestureActive || !this.isPressedOnMic) {
+          this.isUserGestureActive = false;
+          this.isPressedOnMic = false;
+          return;
+        }
+
+        this.isUserGestureActive = false;
         this.isPressedOnMic = false;
 
-        // Quick tap without holding (< 250ms): show guidance and discard
+        // Quick tap without holding (< 220ms): show guidance and discard
         if (!this.isRecording && !this.isStarting) {
           if (typeof window.showNotif === 'function') {
             window.showNotif('Hold mic button to record voice note', 'info', 1600);
@@ -151,9 +168,10 @@
           return;
         }
 
-        // Minimum duration check: Less than 2 seconds -> discard
+        // Duration guard: Strictly must be at least 2.0 seconds (2000ms)
         const elapsedMs = Date.now() - this.startTime;
         if (elapsedMs < 2000) {
+          console.log('[VoiceRecorder] Audio duration < 2s (' + elapsedMs + 'ms). Discarding completely.');
           this.cancelRecording();
           if (typeof window.showNotif === 'function') {
             window.showNotif('Voice note too short (< 2s) - discarded', 'info', 1800);
@@ -165,37 +183,39 @@
         this.stopAndSendRecording();
       };
 
-      const handlePointerLeave = (e) => {
-        // If finger glides off button before hold threshold, cancel hold
-        if (this.isPressedOnMic && !this.isRecording) {
+      const handleUserPressLeave = (e) => {
+        if (this.isUserGestureActive && !this.isRecording) {
           if (this.holdTimer) {
             clearTimeout(this.holdTimer);
             this.holdTimer = null;
           }
+          this.isUserGestureActive = false;
           this.isPressedOnMic = false;
         }
       };
 
-      // Pointer events for modern touch and mouse
-      if (window.PointerEvent) {
-        this.recordBtn.addEventListener('pointerdown', handlePointerDown);
-        this.recordBtn.addEventListener('pointerleave', handlePointerLeave);
-        window.addEventListener('pointermove', handlePointerMove);
-        window.addEventListener('pointerup', handlePointerUp);
-        window.addEventListener('pointercancel', handlePointerUp);
-      } else {
-        // Fallback touch and mouse events
-        this.recordBtn.addEventListener('touchstart', handlePointerDown, { passive: true });
-        this.recordBtn.addEventListener('mouseleave', handlePointerLeave);
-        window.addEventListener('touchmove', handlePointerMove, { passive: true });
-        window.addEventListener('touchend', handlePointerUp);
-        window.addEventListener('touchcancel', handlePointerUp);
-        this.recordBtn.addEventListener('mousedown', handlePointerDown);
-        window.addEventListener('mouseup', handlePointerUp);
-      }
+      // Direct gesture listeners on mic button (onMouseDown / onTouchStart)
+      this.recordBtn.addEventListener('mousedown', handleUserPressStart);
+      this.recordBtn.addEventListener('touchstart', handleUserPressStart, { passive: false });
 
+      // Stop on onMouseUp / onMouseLeave / onTouchEnd
+      this.recordBtn.addEventListener('mouseup', handleUserPressEnd);
+      this.recordBtn.addEventListener('mouseleave', handleUserPressLeave);
+      this.recordBtn.addEventListener('touchend', handleUserPressEnd, { passive: false });
+      this.recordBtn.addEventListener('touchcancel', handleUserPressEnd, { passive: false });
+
+      // Global window release catchers to ensure mic stops if pointer leaves button while recording
+      window.addEventListener('mouseup', (e) => {
+        if (this.isPressedOnMic) handleUserPressEnd(e);
+      });
+      window.addEventListener('touchend', (e) => {
+        if (this.isPressedOnMic) handleUserPressEnd(e);
+      }, { passive: false });
+
+      // Prevent click from auto-triggering recording
       this.recordBtn.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
       });
 
       // Cancel button
@@ -206,7 +226,7 @@
         });
       }
 
-      // Stop button (finishes recording & sends if duration criteria met)
+      // Stop button
       if (this.stopBtn) {
         this.stopBtn.addEventListener('click', (e) => {
           e.preventDefault();
@@ -214,15 +234,13 @@
         });
       }
 
-      // Send Now button (#audioSendNowBtn)
+      // Send buttons
       if (this.sendBtn) {
         this.sendBtn.addEventListener('click', (e) => {
           e.preventDefault();
           this.stopAndSendRecording();
         });
       }
-
-      // Send Audio button (#audio-send-btn)
       if (this.audioSendBtn) {
         this.audioSendBtn.addEventListener('click', (e) => {
           e.preventDefault();
@@ -429,6 +447,9 @@
       this.isRecording = false;
       this.isStarting = false;
       this.isPressedOnMic = false;
+      this.isUserGestureActive = false;
+      this.isRecordingRef = false;
+
       if (this.holdTimer) {
         clearTimeout(this.holdTimer);
         this.holdTimer = null;
@@ -440,7 +461,6 @@
       }
       this.speechTranscript = '';
 
-      // Discard recorder without triggering send
       if (this.mediaRecorder) {
         this.mediaRecorder.onstop = null;
         this.mediaRecorder.ondataavailable = null;
@@ -488,7 +508,7 @@
 
     async handleRecordingComplete(mimeType) {
       if (this.isCancelled) {
-        console.log('[VoiceRecorder] Recording was cancelled. Discarding audio.');
+        console.log('[VoiceRecorder] Recording cancelled. Discarding audio.');
         this.audioChunks = [];
         this.cleanupMedia();
         this.resetUI();
@@ -497,6 +517,18 @@
 
       const elapsedMs = Date.now() - this.startTime;
       const elapsedSec = Math.floor(elapsedMs / 1000);
+
+      // STRICT 2-SECOND GUARD: Discard if less than 2 seconds, NEVER send or save
+      if (elapsedMs < 2000 || elapsedSec < 2) {
+        console.log('[VoiceRecorder] Discarding voice note: less than 2 seconds (' + elapsedMs + 'ms)');
+        this.audioChunks = [];
+        this.cleanupMedia();
+        this.resetUI();
+        if (typeof window.showNotif === 'function') {
+          window.showNotif('Voice note too short (< 2s) - discarded', 'info', 1800);
+        }
+        return;
+      }
 
       // Minimum duration requirement: strictly at least 2 seconds
       if (elapsedMs < 2000 || elapsedSec < 2) {

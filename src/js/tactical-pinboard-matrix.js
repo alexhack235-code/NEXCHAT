@@ -338,7 +338,11 @@
             </div>
           `;
         } else {
-          bodyMarkup = `<div class="pin-card-body">${this.escapeHtml(item.text)}</div>`;
+          const isVoiceNote = item.isVoice || item.fileType?.startsWith('audio') || (typeof item.text === 'string' && (item.text.includes('voice_note_') || item.text.startsWith('data:audio')));
+        const cleanDisplayText = isVoiceNote
+          ? '<span style="display:inline-flex;align-items:center;gap:5px;color:#00ff66;font-size:12px;"><i class="fa-solid fa-microphone"></i> <span>[Voice Note ' + (item.duration ? item.duration : '') + ']</span></span>'
+          : this.escapeHtml(item.text || '[Media Attachment]');
+        bodyMarkup = `<div class="pin-card-body">${cleanDisplayText}</div>`;
         }
 
         let auditStamp = '';

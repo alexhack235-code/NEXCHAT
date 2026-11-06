@@ -57,3 +57,72 @@ body {
 .glitch-hover:hover {
   animation: nexGlitch 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
+
+
+/* ==========================================================================
+   NEX FAST ASH-FADE DELETE ANIMATION (180ms Snappy NEX Style)
+   ========================================================================== */
+.nex-delete-ash {
+  position: relative !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  background: #1a1a1a !important;
+  border-color: rgba(120, 120, 120, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.85) !important;
+  animation: nexAshPoof 180ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  transition: opacity 180ms ease, filter 180ms ease, transform 180ms ease, max-height 180ms ease, margin 180ms ease, padding 180ms ease !important;
+}
+
+@keyframes nexAshPoof {
+  0% {
+    opacity: 1;
+    filter: grayscale(0%) brightness(1) blur(0px);
+    transform: scale(1) translateY(0);
+    background: #1a1a1a;
+  }
+  44% { /* 0-80ms: Fade to 40% opacity + turn grayscale + slight blur 2px */
+    opacity: 0.4;
+    filter: grayscale(100%) brightness(0.6) blur(2px);
+    transform: scale(0.97) translateY(-2px);
+    background: #1a1a1a;
+  }
+  78% { /* 80-140ms: Shrink to 92% scale + slide up 6px + dust puff */
+    opacity: 0.15;
+    filter: grayscale(100%) brightness(0.35) blur(3px);
+    transform: scale(0.92) translateY(-6px);
+  }
+  100% { /* 140-180ms: Fade to 0% opacity and collapse height */
+    opacity: 0;
+    filter: grayscale(100%) brightness(0.2) blur(4px);
+    transform: scale(0.86) translateY(-8px);
+    max-height: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+}
+
+/* Ash Dust Particles */
+.nex-ash-particle {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, #d4d4d8 0%, #71717a 50%, #27272a 100%);
+  z-index: 99999;
+  animation: nexAshParticleFly 180ms cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes nexAshParticleFly {
+  0% {
+    opacity: 0.9;
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--ash-drift-x, 0px), var(--ash-drift-y, -26px)) scale(0.2);
+  }
+}

@@ -70,6 +70,25 @@ export default function NexchatAppPage() {
     handleUpdateChats(updatedChats);
   };
 
+  // Delete message handler (supports both Delete For Me & Delete For Everyone with deduplication)
+  const handleDeleteMessage = (msgId, forEveryone = false) => {
+    if (!activeChatId) return;
+    const updatedChats = chats.map((chat) => {
+      if (chat.id === activeChatId) {
+        return {
+          ...chat,
+          messages: chat.messages.filter((m) => {
+            const mId = m.id || m.clientMsgId || m.docId || m.timestamp;
+            return mId !== msgId;
+          }),
+        };
+      }
+      return chat;
+    });
+    handleUpdateChats(updatedChats);
+    addLog(`[CHAT] Deleted message ${msgId} (${forEveryone ? 'For Everyone' : 'For Me'})`);
+  };
+
   // Toggle chat status (pin, mute, etc.)
   const handleUpdateChatStatus = (chatId, action) => {
     const updatedChats = chats.map((c) => {
@@ -116,6 +135,7 @@ export default function NexchatAppPage() {
           <CenterChat
             activeChat={activeChat}
             onSendMessage={handleSendMessage}
+            onDeleteMessage={handleDeleteMessage}
             onStartVoiceCall={(target) => {
               setVoiceCallTarget(target || "+1 (218) 296-1795");
               setIsVoiceCallOpen(true);

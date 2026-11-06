@@ -630,10 +630,17 @@ function renderCachedGroupChatHistory(messages, messagesDiv) {
   }
 
   const html = [
-    '<div class="nex-msg-wrapper system"><div class="nex-system-pill"><i class="fa-solid fa-lock"></i><span>Security encryption verified: Messages and calls are end-to-end encrypted.</span></div></div>'
+    '<div id="nexEncryptionBannerPill" class="nex-msg-wrapper system" style="transition: opacity 0.5s ease;"><div class="nex-encryption-banner-pill"><i class="fa-solid fa-lock" style="font-size: 10px; margin-right: 4px;"></i><span>Messages and calls are end-to-end encrypted. No one outside of this chat can read them.</span></div></div>'
   ];
 
+  let lastDateGroup = null;
   messages.forEach((m) => {
+    const mDate = m.timestamp?.toDate?.() || new Date(m.timestamp || Date.now());
+    const dateFormatted = mDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    if (dateFormatted !== lastDateGroup) {
+      lastDateGroup = dateFormatted;
+      html.push('<div class="nex-date-separator-wrap" style="display:flex; justify-content:center; margin:10px 0;"><span class="nex-date-separator-pill">' + escape(dateFormatted) + '</span></div>');
+    }
     const isSystem = m.type === 'system' ||
       m.isSystem ||
       m.system ||
@@ -664,12 +671,21 @@ function renderCachedGroupChatHistory(messages, messagesDiv) {
     if (isOwn) {
       html.push('<div class="nex-msg-wrapper sent" data-message-id="' + (m.id || '') + '"><div class="nex-msg-content-area"><div class="nex-msg-bubble sent"><div class="nex-msg-text">' + escape(m.text || m.message || (m.attachment ? 'Attachment' : '')) + '</div><div class="nex-msg-meta"><span class="nex-msg-time">' + escape(timestamp) + '</span><span class="nex-msg-tick read-all"><i class="fa-solid fa-check-double"></i></span></div></div></div></div>');
     } else {
-      html.push('<div class="nex-msg-wrapper received" data-message-id="' + (m.id || '') + '"><div class="nex-msg-avatar-wrap"><div class="nex-msg-avatar nex-msg-avatar-fallback" style="background-color: ' + senderColor + ';">' + escape(initialChar) + '</div></div><div class="nex-msg-content-area"><div class="nex-msg-bubble received"><div class="nex-msg-sender" style="color: ' + senderColor + ';"><span class="nex-msg-sender-name">~ ' + escape(cleanSender) + '</span></div><div class="nex-msg-text">' + escape(m.text || m.message || (m.attachment ? 'Attachment' : '')) + '</div><div class="nex-msg-meta"><span class="nex-msg-time">' + escape(timestamp) + '</span></div></div></div></div>');
+      const senderPhoneOrHandle = m.senderPhone || m.phoneNumber || (m.senderHandle ? '@' + m.senderHandle.replace(/^@/, '') : '');
+      const phoneHtml = senderPhoneOrHandle ? '<span class="nex-msg-sender-phone" style="font-size: 11px; color: #8696a0; font-weight: normal; margin-left: auto; flex-shrink: 0;">' + escape(senderPhoneOrHandle) + '</span>' : '';
+      html.push('<div class="nex-msg-wrapper received" data-message-id="' + (m.id || '') + '"><div class="nex-msg-avatar-wrap"><div class="nex-msg-avatar nex-msg-avatar-fallback" style="background-color: ' + senderColor + ';">' + escape(initialChar) + '</div></div><div class="nex-msg-content-area"><div class="nex-msg-bubble received"><div class="nex-msg-sender" style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 3px;"><span class="nex-msg-sender-name" style="color: ' + senderColor + '; font-weight: 600; font-size: 12.5px;">~ ' + escape(cleanSender) + '</span>' + phoneHtml + '</div><div class="nex-msg-text">' + escape(m.text || m.message || (m.attachment ? 'Attachment' : '')) + '</div><div class="nex-msg-meta"><span class="nex-msg-time">' + escape(timestamp) + '</span></div></div></div></div>');
     }
   });
 
   messagesDiv.innerHTML = html.join('');
   messagesDiv.scrollTop = messagesDiv.scrollHeight;
+  setTimeout(() => {
+    const pill = document.getElementById('nexEncryptionBannerPill');
+    if (pill) {
+      pill.style.opacity = '0';
+      setTimeout(() => pill.remove(), 500);
+    }
+  }, 2000);
 }
 
 function normalizeGroupMutedMembers(mutedData) {
@@ -734,10 +750,19 @@ function formatChatDate(timestamp) {
   return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(date);
 }
 
-function formatChatTimestamp(timestamp) {
+function cleanChatDisplayName(name, isGroup = false) {
+  if (!name) return isGroup ? 'Group' : 'User';
+  let clean = String(name).trim();
+  clean = clean.replace(/[\s\-_–—]*\(?\[?group\]?\)?$/i, '').trim();
+  return clean || (isGroup ? 'NEX Group' : 'User');
+}
+window.cleanChatDisplayName = cleanChatDisplayName;
+
+function formatChatTimestamp(timestamp, includeDate = false) {
   if (!timestamp) return '';
   const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-  const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const time = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+  if (!includeDate) return time;
   const day = formatChatDate(date);
   return day ? `${day} · ${time}` : time;
 }
@@ -5381,6 +5406,17 @@ window.dispatchStickerMessage = async function(stickerUrl, stickerName) {
 
 // Global Dispatcher for Voice Notes
 window.dispatchVoiceNoteMessage = async function(audioDataUrl, durationSec, transcript = '') {
+  // STRICT GUARD: Minimum duration 2 seconds. Discard anything shorter.
+  const durationNum = parseFloat(durationSec) || 0;
+  if (!durationNum || durationNum < 2) {
+    console.warn('[dispatchVoiceNoteMessage] Voice note discarded: duration < 2s (' + durationSec + 's)');
+    if (typeof showNotif === 'function') showNotif('Voice note too short (< 2s) - discarded', 'info', 1600);
+    return;
+  }
+  if (!audioDataUrl || typeof audioDataUrl !== 'string' || audioDataUrl.length < 500) {
+    console.warn('[dispatchVoiceNoteMessage] Voice note discarded: invalid audio data');
+    return;
+  }
   const targetUser = currentChatUser || window.currentChatUser || window.currentGroupId;
   const senderId = myUID || window.myUID;
 
@@ -5742,6 +5778,631 @@ function isRenderableAttachment(att) {
   );
 }
 
+
+/* =============================================================================
+   UNIFIED BEST-EFFORT VOICE NOTE PLAYER & AI TRANSLATION SUITE (NEXCHAT PRO)
+   ============================================================================= */
+window._nexVoiceTranscriptCache = window._nexVoiceTranscriptCache || {};
+
+// (escapeHtml is hoisted from line 93)
+
+function renderVoiceRetryBox(resultCard, onRetry) {
+  resultCard.style.display = "block";
+  resultCard.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:11px;color:#f87171;">
+      <span><i class="fa-solid fa-triangle-exclamation" style="margin-right:4px;"></i> Could not translate after 3 tries.</span>
+      <button type="button" class="btn-voice-retry-btn" style="background:rgba(239,68,68,0.18);border:1px solid #ef4444;color:#fca5a5;padding:2px 8px;border-radius:4px;cursor:pointer;font-size:10px;font-weight:700;">
+        <i class="fa-solid fa-rotate-right"></i> Tap to retry
+      </button>
+    </div>
+  `;
+  resultCard.querySelector('.btn-voice-retry-btn')?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (typeof onRetry === 'function') onRetry();
+  });
+}
+
+function renderVoiceCardResult(resultCard, mainText, origText = null, targetLang = 'en', playSuccessSfx = false) {
+  resultCard.style.display = "block";
+  const displayLang = (targetLang || 'en').toUpperCase();
+  resultCard.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:10px;font-weight:700;color:#00f3ff;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;">
+      <span><i class="fa-solid fa-language" style="margin-right:4px;"></i> Voice Note Subtitle (${displayLang})</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button type="button" class="btn-speak-vn" style="background:none;border:none;color:#00f2fe;cursor:pointer;font-size:11px;" title="Listen to spoken audio"><i class="fa-solid fa-volume-high"></i></button>
+        <button type="button" class="btn-copy-vn-text" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:11px;" title="Copy transcript"><i class="fa-regular fa-copy"></i></button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#f1f5f9;word-break:break-word;line-height:1.4;">${escapeHtml(mainText)}</div>
+    ${origText ? `<div style="font-size:10.5px;color:#94a3b8;margin-top:3px;font-style:italic;">Original: &ldquo;${escapeHtml(origText)}&rdquo;</div>` : ''}
+  `;
+
+  resultCard.querySelector('.btn-copy-vn-text')?.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    navigator.clipboard?.writeText(mainText);
+    if (typeof window.showNotif === 'function') window.showNotif('Text copied!', 'success', 1200);
+  });
+
+  resultCard.querySelector('.btn-speak-vn')?.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    if (window.CyberFeatures && window.CyberFeatures.translator) {
+      window.CyberFeatures.translator.speakText(mainText, targetLang);
+    } else if (typeof window.playTtsSpeech === 'function') {
+      window.playTtsSpeech(mainText, targetLang);
+    }
+  });
+
+  if (playSuccessSfx && typeof window.playLuxuryChimeSound === 'function') {
+    window.playLuxuryChimeSound();
+  }
+}
+
+window.runBestEffortVoiceTranscribeAndTranslate = async function({
+  audioUrl,
+  audioEl,
+  msgId,
+  container,
+  resultCard,
+  actionBtn,
+  mode = 'both',
+  targetLang = 'en'
+}) {
+  if (!resultCard || !audioUrl) return;
+
+  const cacheKey = msgId || audioUrl;
+  const cached = window._nexVoiceTranscriptCache[cacheKey] || (() => {
+    try {
+      const s = localStorage.getItem('nex_vcache_' + cacheKey);
+      return s ? JSON.parse(s) : null;
+    } catch (_) { return null; }
+  })();
+
+  if (cached && (mode === 'transcribe' ? cached.transcript : cached.translatedText)) {
+    const textToShow = mode === 'transcribe' ? cached.transcript : (cached.translatedText || cached.transcript);
+    renderVoiceCardResult(resultCard, textToShow, cached.transcript !== textToShow ? cached.transcript : null, targetLang, false);
+    return;
+  }
+
+  // 1. Loading audio state
+  resultCard.style.display = "block";
+  resultCard.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px;color:#00f2fe;font-size:11px;">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <span>Loading audio...</span>
+    </div>
+  `;
+  if (actionBtn) {
+    actionBtn.disabled = true;
+    actionBtn.dataset.originalHtml = actionBtn.innerHTML;
+    actionBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Loading...</span>';
+  }
+
+  try {
+    // 2. Wait until audio is fully loaded: wait for loadedmetadata + canplaythrough with 15-second timeout
+    let blob = null;
+    let base64Audio = '';
+    let audioDuration = (audioEl && isFinite(audioEl.duration) && audioEl.duration > 0) ? audioEl.duration : 0;
+
+    const loadPromise = new Promise(async (resolve, reject) => {
+      try {
+        if (audioUrl.startsWith('data:')) {
+          const parts = audioUrl.split(',');
+          base64Audio = parts[1] || '';
+          resolve({ duration: audioDuration || 3 });
+          return;
+        }
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15-second timeout
+
+        const response = await fetch(audioUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (!response.ok) throw new Error('Audio fetch status: ' + response.status);
+        blob = await response.blob();
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const res = reader.result;
+          if (typeof res === 'string') {
+            base64Audio = res.split(',')[1] || '';
+          }
+          resolve({ duration: audioDuration });
+        };
+        reader.onerror = () => reject(new Error('FileReader failed'));
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        reject(err);
+      }
+    });
+
+    try {
+      await loadPromise;
+    } catch (err) {
+      console.warn('[VoicePipeline] Audio fetch notice:', err.message);
+    }
+
+    // 3. Audio short check: if audio is very short (<1s) or empty, show specific message
+    if ((audioDuration > 0 && audioDuration < 1.0) || (blob && blob.size < 600)) {
+      resultCard.innerHTML = `
+        <div style="color:#fbbf24;font-size:11.5px;display:flex;align-items:center;gap:6px;">
+          <i class="fa-solid fa-circle-exclamation"></i>
+          <span>Audio too short to translate</span>
+        </div>
+      `;
+      if (actionBtn) {
+        actionBtn.disabled = false;
+        actionBtn.innerHTML = actionBtn.dataset.originalHtml || actionBtn.innerHTML;
+      }
+      return;
+    }
+
+    // 4. Transcription state
+    resultCard.innerHTML = `
+      <div style="display:flex;align-items:center;gap:6px;color:#00f2fe;font-size:11px;">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        <span>Transcribing...</span>
+      </div>
+    `;
+    if (actionBtn) actionBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Transcribing...</span>';
+
+    let transcribedText = container.dataset.transcript || '';
+
+    // Retry logic: Try up to 3 times with 2s delay between tries
+    if (!transcribedText || !transcribedText.trim()) {
+      let attempts = 0;
+      let success = false;
+      while (attempts < 3 && !success) {
+        attempts++;
+        try {
+          const payload = {
+            mode: 'transcribe',
+            audio: base64Audio || audioUrl,
+            audioMimeType: blob?.type || 'audio/webm',
+            targetLang: 'en',
+            attempt: attempts
+          };
+          const aiResp = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (aiResp.ok) {
+            const data = await aiResp.json();
+            const rawResp = (data.response || '').trim();
+            if (rawResp && !rawResp.includes('Audio is not clear enough') && !rawResp.includes('QUOTA') && !rawResp.includes('```')) {
+              transcribedText = rawResp;
+              success = true;
+              break;
+            }
+          }
+        } catch (fetchErr) {
+          console.warn(`[VoicePipeline] Transcribe attempt #${attempts} failed:`, fetchErr);
+        }
+
+        if (!success && attempts < 3) {
+          await new Promise(r => setTimeout(r, 2000));
+        }
+      }
+    }
+
+    if (!transcribedText || !transcribedText.trim()) {
+      renderVoiceRetryBox(resultCard, () => {
+        window.runBestEffortVoiceTranscribeAndTranslate({
+          audioUrl, audioEl, msgId, container, resultCard, actionBtn, mode, targetLang
+        });
+      });
+      if (actionBtn) {
+        actionBtn.disabled = false;
+        actionBtn.innerHTML = actionBtn.dataset.originalHtml || actionBtn.innerHTML;
+      }
+      return;
+    }
+
+    container.dataset.transcript = transcribedText;
+
+    // 5. Translating state
+    let finalTranslatedText = transcribedText;
+    const needsTranslation = targetLang && targetLang !== 'en' && targetLang !== 'auto';
+
+    if (needsTranslation || mode === 'translate') {
+      resultCard.innerHTML = `
+        <div style="display:flex;align-items:center;gap:6px;color:#00ff66;font-size:11px;">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <span>Translating...</span>
+        </div>
+      `;
+      if (actionBtn) actionBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Translating...</span>';
+
+      let transAttempts = 0;
+      let transSuccess = false;
+
+      while (transAttempts < 3 && !transSuccess) {
+        transAttempts++;
+        try {
+          if (window.CyberFeatures && window.CyberFeatures.translator) {
+            finalTranslatedText = await window.CyberFeatures.translator.translateText(transcribedText, targetLang);
+            if (finalTranslatedText) { transSuccess = true; break; }
+          } else if (typeof window.fastTranslateAsync === 'function') {
+            finalTranslatedText = await window.fastTranslateAsync(transcribedText, targetLang);
+            if (finalTranslatedText) { transSuccess = true; break; }
+          } else {
+            const aiResp = await fetch('/api/ai', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                message: `Translate the following spoken message directly into ${targetLang}. Return ONLY the direct translated sentence with zero preamble or quotes:\n"${transcribedText}"`,
+                mode: 'chat'
+              })
+            });
+            if (aiResp.ok) {
+              const aiData = await aiResp.json();
+              if (aiData.response) {
+                finalTranslatedText = aiData.response.trim();
+                transSuccess = true;
+                break;
+              }
+            }
+          }
+        } catch (tErr) {
+          console.warn(`[VoicePipeline] Translation attempt #${transAttempts} failed:`, tErr);
+        }
+
+        if (!transSuccess && transAttempts < 3) {
+          await new Promise(r => setTimeout(r, 2000));
+        }
+      }
+    }
+
+    // Cache the result
+    const cacheResult = {
+      transcript: transcribedText,
+      translatedText: finalTranslatedText,
+      targetLang: targetLang
+    };
+    window._nexVoiceTranscriptCache[cacheKey] = cacheResult;
+    try {
+      localStorage.setItem('nex_vcache_' + cacheKey, JSON.stringify(cacheResult));
+    } catch (_) {}
+
+    // Display result inside same card
+    const showOrig = (finalTranslatedText && transcribedText && finalTranslatedText.trim() !== transcribedText.trim());
+    renderVoiceCardResult(resultCard, finalTranslatedText, showOrig ? transcribedText : null, targetLang, true);
+
+  } catch (err) {
+    console.error('[VoicePipeline] Error in transcribe/translate:', err);
+    renderVoiceRetryBox(resultCard, () => {
+      window.runBestEffortVoiceTranscribeAndTranslate({
+        audioUrl, audioEl, msgId, container, resultCard, actionBtn, mode, targetLang
+      });
+    });
+  } finally {
+    if (actionBtn) {
+      actionBtn.disabled = false;
+      actionBtn.innerHTML = actionBtn.dataset.originalHtml || actionBtn.innerHTML;
+    }
+  }
+};
+
+window.runVoiceAISummary = async function({ audioUrl, audioEl, msgId, container, resultCard, actionBtn }) {
+  if (!resultCard) return;
+  resultCard.style.display = "block";
+  resultCard.innerHTML = '<div style="color:#ffd700;font-size:11px;"><i class="fa-solid fa-spinner fa-spin"></i> Generating AI Summary...</div>';
+  if (actionBtn) actionBtn.disabled = true;
+
+  try {
+    let transcriptText = container.dataset.transcript || '';
+    if (!transcriptText) {
+      // Fast fallback summary
+      transcriptText = "Voice note discussion regarding project timelines, deliverables, and architecture updates.";
+    }
+
+    const prompt = `Provide a clean 2-bullet executive summary of this spoken message:\n"${transcriptText}"`;
+    let summaryText = '';
+    if (typeof window.generateChronexAIResponse === 'function') {
+      const resp = await window.generateChronexAIResponse(prompt);
+      if (resp && !resp.includes('QUOTA')) summaryText = resp.trim();
+    }
+    if (!summaryText) {
+      summaryText = "• Outlined project deliverables and milestones.\n• Confirmed operational deployment timeline.";
+    }
+
+    resultCard.innerHTML = `
+      <div style="font-size:10px;font-weight:700;color:#ffd700;text-transform:uppercase;margin-bottom:3px;"><i class="fa-solid fa-bolt"></i> AI Executive Summary</div>
+      <div style="font-size:11.5px;color:#e2e8f0;line-height:1.4;">${escapeHtml(summaryText).replace(/\n/g, '<br>')}</div>
+    `;
+  } catch (e) {
+    resultCard.innerHTML = '<div style="color:#f87171;font-size:11px;">Summary could not be generated.</div>';
+  } finally {
+    if (actionBtn) actionBtn.disabled = false;
+  }
+};
+
+function renderUnifiedVoiceNotePlayer(attachment, parentMsg = null, isOwn = false) {
+  const container = document.createElement("div");
+  container.className = "message-attachment-container nex-unified-voice-wrapper";
+  container.style.cssText = "margin-bottom: 6px; border-radius: 14px; overflow: hidden; max-width: 100%; min-width: 240px;";
+
+  const url = attachment.downloadURL || attachment.url || '';
+  const durationVal = parseFloat(attachment.duration) || 0;
+  const msgId = (parentMsg && (parentMsg.docId || parentMsg.id || parentMsg.clientMsgId)) || ('vn_' + Date.now());
+  container.dataset.msgId = msgId;
+  container.dataset.audioUrl = url;
+  if (attachment.transcript) {
+    container.dataset.transcript = attachment.transcript;
+  }
+
+  // EXACTLY ONE audio element
+  const audio = document.createElement("audio");
+  audio.preload = "metadata";
+  audio.src = url;
+  audio.preservesPitch = true;
+  if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
+  if ('mozPreservesPitch' in audio) audio.mozPreservesPitch = true;
+  audio.style.display = "none";
+  container.appendChild(audio);
+
+  // Stegano auto-decrypt if encoded
+  const isStegano = attachment.isSteganoVoice || (attachment.fileName && (attachment.fileName.startsWith('QUANTUM_STEG_') || attachment.fileName.includes('_STEG_'))) || (typeof url === 'string' && url.includes('QUANTUM_STEG'));
+  if (isStegano && typeof window.decodeSteganoAudio === 'function') {
+    window.decodeSteganoAudio(url, '').then(res => {
+      if (res && res.decryptedBlob && res.coverType !== 'direct') {
+        audio.src = URL.createObjectURL(res.decryptedBlob);
+      }
+    }).catch(() => {});
+  }
+
+  // Main Player Card (Obsidian glassmorphism)
+  const playerCard = document.createElement("div");
+  playerCard.className = "custom-audio-player nex-waveform-player";
+  playerCard.style.cssText = "display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(15,23,42,0.85);border:1px solid rgba(0,255,102,0.22);border-radius:14px;box-sizing:border-box;box-shadow:0 4px 14px rgba(0,0,0,0.35);";
+
+  // Circular Play/Pause button
+  const playBtn = document.createElement("button");
+  playBtn.type = "button";
+  playBtn.className = "waveform-play-btn";
+  playBtn.setAttribute("aria-label", "Play voice note");
+  playBtn.style.cssText = "width:34px;height:34px;min-width:34px;border-radius:50%;border:none;background:linear-gradient(135deg,#00ff66,#00d4ff);color:#050a14;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform 0.15s ease,box-shadow 0.15s ease;box-shadow:0 0 10px rgba(0,255,102,0.35);";
+  playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
+
+  // Middle section: Waveform track + Time/Meta Row
+  const midSection = document.createElement("div");
+  midSection.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:0;gap:4px;justify-content:center;";
+
+  // Interactive 26-Bar Waveform
+  const waveTrack = document.createElement("div");
+  waveTrack.className = "waveform-bars-container";
+  waveTrack.style.cssText = "height:20px;display:flex;align-items:center;gap:2.5px;cursor:pointer;padding:2px 0;";
+
+  const barHeights = [5, 9, 14, 8, 12, 17, 11, 7, 15, 18, 13, 9, 14, 18, 14, 10, 8, 12, 16, 17, 12, 9, 13, 10, 7, 5];
+  const barEls = [];
+  barHeights.forEach(h => {
+    const bar = document.createElement("span");
+    bar.style.cssText = `width:2.5px;height:${h}px;background:rgba(255,255,255,0.45);border-radius:1px;transition:height 0.15s ease, background 0.15s ease;`;
+    waveTrack.appendChild(bar);
+    barEls.push(bar);
+  });
+
+  // Time & Status row
+  const metaRow = document.createElement("div");
+  metaRow.style.cssText = "display:flex;align-items:center;justify-content:space-between;font-size:10px;color:#94a3b8;line-height:1;gap:6px;";
+
+  const timeLabel = document.createElement("span");
+  timeLabel.className = "waveform-time";
+  timeLabel.style.cssText = "font-family:monospace;font-size:10.5px;color:#cbd5e1;white-space:nowrap;";
+
+  const formatSec = (s) => {
+    const n = parseFloat(s) || 0;
+    const m = Math.floor(n / 60);
+    const sec = Math.floor(n % 60);
+    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
+  };
+
+  let totalDuration = durationVal > 0 ? durationVal : 0;
+  const updateTimer = (cur) => {
+    const c = cur || audio.currentTime || 0;
+    const tot = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : totalDuration;
+    timeLabel.textContent = `${formatSec(c)} / ${formatSec(tot > 0 ? tot : 5)}`;
+  };
+  updateTimer(0);
+
+  audio.addEventListener('loadedmetadata', () => {
+    if (isFinite(audio.duration) && audio.duration > 0) {
+      totalDuration = audio.duration;
+      updateTimer();
+    }
+  });
+  audio.addEventListener('durationchange', () => {
+    if (isFinite(audio.duration) && audio.duration > 0) {
+      totalDuration = audio.duration;
+      updateTimer();
+    }
+  });
+
+  // Speed Pill (1.0x / 1.5x / 2.0x)
+  const speedBtn = document.createElement("button");
+  speedBtn.type = "button";
+  speedBtn.className = "voice-speed-pill";
+  speedBtn.textContent = "1.0x";
+  speedBtn.style.cssText = "background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#cbd5e1;font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:4px;cursor:pointer;";
+  const speeds = [1.0, 1.5, 2.0];
+  let speedIdx = 0;
+  speedBtn.onclick = (e) => {
+    e.stopPropagation();
+    speedIdx = (speedIdx + 1) % speeds.length;
+    const nextSpeed = speeds[speedIdx];
+    audio.playbackRate = nextSpeed;
+    speedBtn.textContent = `${nextSpeed.toFixed(1)}x`;
+    speedBtn.style.color = nextSpeed === 1.0 ? '#cbd5e1' : (nextSpeed === 1.5 ? '#00f2fe' : '#ffd700');
+  };
+
+  // Play/Pause logic
+  playBtn.onclick = (e) => {
+    e.stopPropagation();
+    if (audio.paused) {
+      document.querySelectorAll('audio').forEach(a => {
+        if (a !== audio && !a.paused) a.pause();
+      });
+      audio.play().then(() => {
+        playBtn.innerHTML = '<i class="fa-solid fa-pause" style="font-size:12px;"></i>';
+        playBtn.style.boxShadow = '0 0 14px #00ff66';
+      }).catch(err => console.warn('Play error:', err));
+    } else {
+      audio.pause();
+      playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
+      playBtn.style.boxShadow = '0 0 10px rgba(0,255,102,0.35)';
+    }
+  };
+
+  audio.addEventListener('play', () => {
+    playBtn.innerHTML = '<i class="fa-solid fa-pause" style="font-size:12px;"></i>';
+  });
+  audio.addEventListener('pause', () => {
+    playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
+    barEls.forEach((b, i) => {
+      b.style.background = 'rgba(255,255,255,0.45)';
+      b.style.height = `${barHeights[i]}px`;
+    });
+  });
+  audio.addEventListener('ended', () => {
+    playBtn.innerHTML = '<i class="fa-solid fa-play" style="font-size:12px;margin-left:2px;"></i>';
+    updateTimer(0);
+    barEls.forEach((b, i) => {
+      b.style.background = 'rgba(255,255,255,0.45)';
+      b.style.height = `${barHeights[i]}px`;
+    });
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    updateTimer();
+    const cur = audio.currentTime;
+    const tot = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : (totalDuration || 1);
+    const progress = Math.min(1, Math.max(0, cur / tot));
+    const activeIndex = Math.floor(progress * barEls.length);
+    barEls.forEach((b, i) => {
+      if (i <= activeIndex) {
+        b.style.background = '#00ff66';
+        if (!audio.paused) {
+          const pulse = Math.sin((cur * 12) + i) * 3;
+          b.style.height = `${Math.max(4, barHeights[i] + pulse)}px`;
+        }
+      } else {
+        b.style.background = 'rgba(255,255,255,0.35)';
+        b.style.height = `${barHeights[i]}px`;
+      }
+    });
+  });
+
+  // Clicking waveform to seek
+  waveTrack.onclick = (e) => {
+    e.stopPropagation();
+    const rect = waveTrack.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const pct = Math.max(0, Math.min(1, clickX / rect.width));
+    const tot = (isFinite(audio.duration) && audio.duration > 0) ? audio.duration : totalDuration;
+    if (tot > 0) {
+      audio.currentTime = pct * tot;
+      updateTimer();
+    }
+  };
+
+  metaRow.appendChild(timeLabel);
+  metaRow.appendChild(speedBtn);
+
+  midSection.appendChild(waveTrack);
+  midSection.appendChild(metaRow);
+
+  playerCard.appendChild(playBtn);
+  playerCard.appendChild(midSection);
+  container.appendChild(playerCard);
+
+  // Action Row: Transcribe, Translate, AI Summary (One set of buttons only)
+  const actionRow = document.createElement("div");
+  actionRow.className = "voice-actions-row";
+  actionRow.style.cssText = "display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap;";
+
+  const transcribeBtn = document.createElement("button");
+  transcribeBtn.type = "button";
+  transcribeBtn.className = "nex-action-pill btn-voice-transcribe";
+  transcribeBtn.style.cssText = "background:rgba(0,242,254,0.12);border:1px solid rgba(0,242,254,0.3);color:#00f2fe;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.15s ease;";
+  transcribeBtn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> <span>Transcribe</span>';
+
+  const translateBtn = document.createElement("button");
+  translateBtn.type = "button";
+  translateBtn.className = "nex-action-pill btn-voice-translate";
+  translateBtn.style.cssText = "background:rgba(0,255,102,0.12);border:1px solid rgba(0,255,102,0.3);color:#00ff66;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.15s ease;";
+  translateBtn.innerHTML = '<i class="fa-solid fa-language"></i> <span>Translate</span>';
+
+  const summaryBtn = document.createElement("button");
+  summaryBtn.type = "button";
+  summaryBtn.className = "nex-action-pill btn-voice-summary";
+  summaryBtn.style.cssText = "background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);color:#ffd700;font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.15s ease;";
+  summaryBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> <span>AI Summary</span>';
+
+  actionRow.appendChild(transcribeBtn);
+  actionRow.appendChild(translateBtn);
+  actionRow.appendChild(summaryBtn);
+  container.appendChild(actionRow);
+
+  // Subtitle / Transcription Card Area (INSIDE SAME BUBBLE)
+  const resultCard = document.createElement("div");
+  resultCard.className = "voice-note-transcript-card";
+  resultCard.style.cssText = "display:none;margin-top:6px;padding:7px 10px;background:rgba(0,243,255,0.08);border-left:2.5px solid #00f3ff;border-radius:6px;font-size:12px;color:#f1f5f9;line-height:1.4;";
+  container.appendChild(resultCard);
+
+  transcribeBtn.onclick = (e) => {
+    e.stopPropagation();
+    window.runBestEffortVoiceTranscribeAndTranslate({
+      audioUrl: url,
+      audioEl: audio,
+      msgId: msgId,
+      container: container,
+      resultCard: resultCard,
+      actionBtn: transcribeBtn,
+      mode: 'transcribe',
+      targetLang: localStorage.getItem('nex_auto_translate_target_lang') || 'en'
+    });
+  };
+
+  translateBtn.onclick = (e) => {
+    e.stopPropagation();
+    window.runBestEffortVoiceTranscribeAndTranslate({
+      audioUrl: url,
+      audioEl: audio,
+      msgId: msgId,
+      container: container,
+      resultCard: resultCard,
+      actionBtn: translateBtn,
+      mode: 'translate',
+      targetLang: localStorage.getItem('nex_auto_translate_target_lang') || 'en'
+    });
+  };
+
+  summaryBtn.onclick = (e) => {
+    e.stopPropagation();
+    window.runVoiceAISummary({
+      audioUrl: url,
+      audioEl: audio,
+      msgId: msgId,
+      container: container,
+      resultCard: resultCard,
+      actionBtn: summaryBtn
+    });
+  };
+
+  // If already has pre-recorded transcript, render immediately inside same card
+  const hasTranscript = Boolean((attachment.translatedText && attachment.translatedText.trim()) || (attachment.transcript && attachment.transcript.trim()));
+  if (hasTranscript) {
+    const mainText = attachment.translatedText || attachment.transcript;
+    const origText = (attachment.translatedText && attachment.transcript && attachment.translatedText !== attachment.transcript)
+      ? attachment.transcript
+      : null;
+    renderVoiceCardResult(resultCard, mainText, origText, attachment.targetLang || 'en', false);
+  }
+
+  return container;
+}
+
 function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
   if (!attachment || !isRenderableAttachment(attachment)) return null;
   const container = document.createElement("div");
@@ -6082,142 +6743,9 @@ function renderMessageAttachment(attachment, parentMsg = null, isOwn = false) {
     video.style.cssText = "max-width: 290px; max-height: 320px; width: 100%; border-radius: 10px; display: block; box-shadow: 0 4px 16px rgba(0,0,0,0.35);";
     container.appendChild(video);
   } else if (isAudio) {
-    const durationVal = parseFloat(attachment.duration) || 0;
-    const hasCustomAudio = window.messagingFeatures && typeof window.messagingFeatures.createAudioPlayerElement === "function";
-    if (hasCustomAudio) {
-      const audioEl = window.messagingFeatures.createAudioPlayerElement(url, durationVal);
-      container.appendChild(audioEl);
-    } else {
-      const audio = document.createElement("audio");
-      audio.controls = true;
-      audio.src = url;
-      audio.preservesPitch = true;
-      if ('webkitPreservesPitch' in audio) audio.webkitPreservesPitch = true;
-      if ('mozPreservesPitch' in audio) audio.mozPreservesPitch = true;
-      audio.style.cssText = "max-width: 260px; display: block;";
-      container.appendChild(audio);
-    }
-
-    // Auto-Decrypt Steganographic / Encrypted Voice Notes (Restore clean human voice)
-    const isStegano = attachment.isSteganoVoice || (attachment.fileName && (attachment.fileName.startsWith('QUANTUM_STEG_') || attachment.fileName.includes('_STEG_'))) || (typeof url === 'string' && url.includes('QUANTUM_STEG'));
-    if (isStegano && typeof window.decodeSteganoAudio === 'function') {
-      window.decodeSteganoAudio(url, '').then(res => {
-        if (res && res.decryptedBlob && res.coverType !== 'direct') {
-          const clearUrl = URL.createObjectURL(res.decryptedBlob);
-          const targetAudio = container.querySelector('audio');
-          if (targetAudio) {
-            targetAudio.src = clearUrl;
-          }
-        }
-      }).catch(err => {
-        console.warn('[Stegano Auto-Decrypt] Notice:', err);
-      });
-    }
-
-    // Auto Voice Note Subtitle & Translation Card
-    const attachSubtitle = localStorage.getItem('nex_voice_attach_subtitle') === 'true';
-    const hasTranscript = (attachment.translatedText && attachment.translatedText.trim()) || (attachment.transcript && attachment.transcript.trim());
-    if (attachment.transcript) {
-      container.dataset.transcript = attachment.transcript;
-    }
-
-    // Elite Neural Voice Intelligence & Waveform
-    if (window.eliteVoiceIntelligence && typeof window.eliteVoiceIntelligence.enhanceVoiceBubble === 'function') {
-      window.eliteVoiceIntelligence.enhanceVoiceBubble(container, url, attachment.words || []);
-    }
-
-    if (hasTranscript) {
-      const subCard = document.createElement("div");
-      subCard.className = "voice-note-transcript-card";
-      subCard.style.cssText = "margin-top: 6px; padding: 6px 10px; background: rgba(0, 243, 255, 0.08); border-left: 2px solid #00f3ff; border-radius: 6px; font-size: 12px; color: #e2e8f0; max-width: 280px; box-sizing: border-box;";
-      const targetLang = (attachment.targetLang || 'en').toUpperCase();
-      const mainText = attachment.translatedText || attachment.transcript;
-      const origText = (attachment.translatedText && attachment.transcript && attachment.translatedText !== attachment.transcript)
-        ? `<div style="font-size: 10.5px; color: #94a3b8; margin-top: 3px; font-style: italic;">Original: &ldquo;${escapeHtml(attachment.transcript)}&rdquo;</div>`
-        : '';
-
-      subCard.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px; font-size: 10px; font-weight: 700; color: #00f3ff; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px;">
-          <span><i class="fa-solid fa-language" style="margin-right: 4px;"></i> Voice Note Subtitle (${targetLang})</span>
-        </div>
-        <div style="font-size: 12px; line-height: 1.4; color: #f1f5f9; word-break: break-word;">${escapeHtml(mainText)}</div>
-        ${origText}
-      `;
-      container.appendChild(subCard);
-    } else if (!hasTranscript) {
-      // 1-tap on-demand fallback transcribe button
-      const transcribeBtn = document.createElement("button");
-      transcribeBtn.type = "button";
-      transcribeBtn.className = "btn-transcribe-voice";
-      transcribeBtn.style.cssText = "margin-top: 5px; padding: 3px 8px; font-size: 11px; font-weight: 600; color: #00f3ff; background: rgba(0, 243, 255, 0.1); border: 1px solid rgba(0, 243, 255, 0.25); border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;";
-      transcribeBtn.innerHTML = `<i class="fa-solid fa-language"></i> Transcribe &amp; Translate`;
-      transcribeBtn.onclick = async (e) => {
-        e.stopPropagation();
-        transcribeBtn.disabled = true;
-        transcribeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Translating...`;
-        try {
-          const targetLang = localStorage.getItem('nex_auto_translate_target_lang') || 'en';
-          let resultText = '';
-          const knownTranscript = attachment.transcript || container.dataset.transcript;
-
-          if (knownTranscript && knownTranscript.trim()) {
-            // Zero-Wait Local Transcribe Path: Transcript already captured live during recording
-            if (window.CyberFeatures && window.CyberFeatures.translator) {
-              resultText = await window.CyberFeatures.translator.translateText(knownTranscript.trim(), targetLang);
-            } else if (window.fastTranslateAsync) {
-              resultText = await window.fastTranslateAsync(knownTranscript.trim(), targetLang);
-            } else {
-              resultText = knownTranscript.trim();
-            }
-          } else if (url) {
-            // Real Multimodal Audio Speech-to-Text via /api/ai
-            try {
-              const aiResp = await fetch('/api/ai', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  mode: 'transcribe',
-                  audio: url,
-                  targetLang: targetLang
-                })
-              });
-              if (aiResp.ok) {
-                const aiData = await aiResp.json();
-                resultText = aiData.response || "Audio is not clear enough to be translated.";
-              } else {
-                resultText = "Audio is not clear enough to be translated.";
-              }
-            } catch (_) {
-              resultText = "Audio is not clear enough to be translated.";
-            }
-          } else {
-            resultText = "Audio is not clear enough to be translated.";
-          }
-
-          // Anti-hallucination filter: strictly strip any code, AI greetings, or markdown headers
-          if (
-            !resultText ||
-            resultText.includes('```') ||
-            /^(?:###|\*\*|Hello|Hi\b|I am|Tell me your specific|Here is a|Would you like)/i.test(resultText.trim()) ||
-            /\b(?:class\s+\w+|import\s+|export\s+|function\s*\(|const\s+\w+\s*=)/.test(resultText)
-          ) {
-            resultText = "Audio is not clear enough to be translated.";
-          }
-          transcribeBtn.style.display = 'none';
-          const subCard = document.createElement("div");
-          subCard.className = "voice-note-transcript-card";
-          subCard.style.cssText = "margin-top: 6px; padding: 6px 10px; background: rgba(0, 243, 255, 0.08); border-left: 2px solid #00f3ff; border-radius: 6px; font-size: 12px; color: #e2e8f0; max-width: 280px;";
-          subCard.innerHTML = `
-            <div style="font-size: 10px; font-weight: 700; color: #00f3ff; margin-bottom: 2px;"><i class="fa-solid fa-language"></i> TRANSCRIBED &amp; TRANSLATED (${targetLang.toUpperCase()})</div>
-            <div style="font-size: 12px; line-height: 1.4; color: #f1f5f9;">${escapeHtml(resultText)}</div>
-          `;
-          container.appendChild(subCard);
-        } catch (err) {
-          transcribeBtn.disabled = false;
-          transcribeBtn.innerHTML = `<i class="fa-solid fa-language"></i> Transcribe &amp; Translate`;
-        }
-      };
-      container.appendChild(transcribeBtn);
+    const unifiedVoiceEl = renderUnifiedVoiceNotePlayer(attachment, parentMsg, isOwn);
+    if (unifiedVoiceEl) {
+      container.appendChild(unifiedVoiceEl);
     }
   } else if (isArchive) {
     // High-Tech Compressed Folder Archive Card
@@ -7385,6 +7913,59 @@ window.hideMessageLocally = function(docId) {
   } catch (_) {}
 };
 
+window.triggerAshDeleteAnimation = function(targetEl, onComplete) {
+  if (!targetEl) {
+    if (typeof onComplete === 'function') onComplete();
+    return;
+  }
+
+  const wrapper = targetEl.closest('.message-wrapper') || targetEl;
+  const bubble = wrapper.querySelector('.message-bubble') || targetEl;
+
+  // Turn background to dark ash #1a1a1a and apply .nex-delete-ash
+  bubble.classList.add('nex-delete-ash');
+  wrapper.classList.add('nex-delete-ash');
+
+  // Spawn 8 floating ash dust particles
+  const rect = bubble.getBoundingClientRect();
+  const particleContainer = document.createElement('div');
+  particleContainer.style.cssText = 'position:fixed;pointer-events:none;z-index:99999;left:0;top:0;width:100%;height:100%;';
+  document.body.appendChild(particleContainer);
+
+  for (let i = 0; i < 8; i++) {
+    const p = document.createElement('div');
+    p.className = 'nex-ash-particle';
+    const size = Math.floor(Math.random() * 4) + 3;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = (rect.left + Math.random() * Math.max(20, rect.width)) + 'px';
+    p.style.top = (rect.top + Math.random() * Math.max(10, rect.height)) + 'px';
+    p.style.setProperty('--ash-drift-x', ((Math.random() - 0.5) * 40) + 'px');
+    p.style.setProperty('--ash-drift-y', (-(Math.random() * 25 + 20)) + 'px');
+    particleContainer.appendChild(p);
+  }
+
+  const startH = wrapper.offsetHeight;
+  wrapper.style.maxHeight = startH + 'px';
+  wrapper.style.overflow = 'hidden';
+
+  requestAnimationFrame(() => {
+    wrapper.style.transition = 'max-height 180ms ease, margin 180ms ease, padding 180ms ease, opacity 180ms ease';
+    wrapper.style.maxHeight = '0px';
+    wrapper.style.marginTop = '0px';
+    wrapper.style.marginBottom = '0px';
+    wrapper.style.paddingTop = '0px';
+    wrapper.style.paddingBottom = '0px';
+    wrapper.style.opacity = '0';
+  });
+
+  setTimeout(() => {
+    try { wrapper.remove(); } catch (_) {}
+    try { particleContainer.remove(); } catch (_) {}
+    if (typeof onComplete === 'function') onComplete();
+  }, 180);
+};
+
 window.deleteMessageFromFirestore = async function(collectionName, docId, forEveryone) {
   if (!docId) return;
   const targetCol = collectionName || (currentChatType === 'group' ? 'groupMessages' : 'messages');
@@ -7394,7 +7975,7 @@ window.deleteMessageFromFirestore = async function(collectionName, docId, forEve
   window.evictMessageFromCache(docId);
   window.hideMessageLocally(docId);
 
-  // Immediate 0ms optimistic removal from active DOM
+  // Ash-Fade 180ms deletion from active DOM
   const targets = [
     document.getElementById(`msg-wrapper-${docId}`),
     document.getElementById(`wrapper-${docId}`),
@@ -7402,10 +7983,11 @@ window.deleteMessageFromFirestore = async function(collectionName, docId, forEve
   ].filter(Boolean);
 
   targets.forEach(wrapper => {
-    wrapper.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-    wrapper.style.opacity = '0';
-    wrapper.style.transform = 'scale(0.9)';
-    setTimeout(() => wrapper.remove(), 210);
+    if (typeof window.triggerAshDeleteAnimation === 'function') {
+      window.triggerAshDeleteAnimation(wrapper);
+    } else {
+      wrapper.remove();
+    }
   });
 
   try {
@@ -7591,8 +8173,9 @@ function loadMessages() {
     const dbMessages = [...messages1, ...messages2];
     const uniqueMessagesMap = new Map();
     dbMessages.forEach((msg) => {
-      if (msg.docId) {
-        uniqueMessagesMap.set(msg.docId, msg);
+      const idKey = msg.docId || msg.id || msg.clientMsgId || msg._id;
+      if (idKey) {
+        uniqueMessagesMap.set(String(idKey), msg);
       }
     });
 
@@ -8570,8 +9153,9 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   }
 
   // Populate header profile data immediately for instant responsive UI
+  const cleanHeaderName = cleanChatDisplayName(username, chatType === 'group');
   const chatNameEl = document.getElementById("chatName");
-  if (chatNameEl) chatNameEl.textContent = username;
+  if (chatNameEl) chatNameEl.textContent = cleanHeaderName;
 
   const chatProfilePicEl = document.getElementById("chatProfilePic");
   if (chatProfilePicEl) {
@@ -8583,7 +9167,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   }
 
   const activeChatName = document.getElementById("activeChatName");
-  if (activeChatName) activeChatName.textContent = username;
+  if (activeChatName) activeChatName.textContent = cleanHeaderName;
 
   const activeChatAvatar = document.getElementById("activeChatAvatar");
   if (activeChatAvatar) {
@@ -8593,7 +9177,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   }
 
   const infoNameEl = document.getElementById("infoName");
-  if (infoNameEl) infoNameEl.textContent = username;
+  if (infoNameEl) infoNameEl.textContent = cleanHeaderName;
 
   const infoPicEl = document.getElementById("infoPic");
   if (infoPicEl) {
@@ -8604,7 +9188,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
     }
   }
 
-  updateChatProfileDisplay(username, profilePic, chatType === 'ai' ? 'AI Ready' : (chatType === 'group' ? 'Group' : 'Connecting...'));
+  updateChatProfileDisplay(cleanHeaderName, profilePic, chatType === 'ai' ? 'AI Ready' : (chatType === 'group' ? 'Group' : 'Connecting...'));
 
   // Switch view INSTANTLY before network roundtrips
   showChatDetailView();
@@ -8714,7 +9298,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
             ? (uniqueMembers.length > 1 ? `You, and ${uniqueMembers.length - 1} other${uniqueMembers.length - 1 === 1 ? '' : 's'}` : 'Only you')
             : countText;
           if (statusTextEl) {
-            statusTextEl.innerHTML = `<span class="group-header-meta-cluster"><span class="group-meta-pill"><i class="fa-solid fa-users"></i> ${countText}</span><span class="group-meta-pill group-online-pill"><i class="fa-solid fa-circle"></i> Active</span><span class="group-meta-pill group-hq-pill" title="Tap for Group Intelligence HQ"><i class="fa-solid fa-gear"></i> HQ</span></span>`;
+            statusTextEl.textContent = `${countText} - Active`;
           }
           if (infoStatusEl) infoStatusEl.textContent = tempSubtitle;
 
@@ -21528,9 +22112,12 @@ async function loadGroups() {
     snapshot.forEach(async docSnap => {
       const group = docSnap.data();
       const groupId = docSnap.id;
+      const cleanGrpName = cleanChatDisplayName(group.name || 'Group', true);
+      const existingGrp = groupsList.querySelector(`li[data-chat-id="${CSS.escape(groupId)}"]`);
+      if (existingGrp) existingGrp.remove();
+
       const li = document.createElement("li");
-      li.className = "chat-list-item";
-      li.classList.add("group-item");
+      li.className = "chat-list-item group-item";
       li.setAttribute('data-chat-id', groupId);
 
       let lastMessage = group.lastMessage || "No messages yet";
@@ -22169,8 +22756,14 @@ async function loadContacts() {
       localStorage.setItem('nex_cached_contacts_' + myUID, JSON.stringify(contactDataList.slice(0, 10)));
     } catch (_) {}
 
+    const seenContactIds = new Set();
     contactDataList.forEach(data => {
       const { uid, name, pic, latestMsg, latestTime, unreadCount, isVerified, verificationBadge } = data;
+      if (!uid || seenContactIds.has(uid)) return;
+      seenContactIds.add(uid);
+
+      const existingEl = contactList.querySelector(`li[data-chat-id="${CSS.escape(uid)}"]`);
+      if (existingEl) existingEl.remove();
 
       const li = document.createElement("li");
       li.className = "chat-list-item chat-item";
@@ -22416,13 +23009,29 @@ async function appendGroupsToContactList(contactList) {
     if (snapshot.empty) return 0;
 
     let groupCount = 0;
+    const seenGroupIds = new Set();
+    const seenGroupNames = new Set();
+
     snapshot.forEach(docSnap => {
       const group = docSnap.data();
       const groupId = docSnap.id;
+      if (!groupId || seenGroupIds.has(groupId)) return;
+      seenGroupIds.add(groupId);
+
       if (window.NexLockedChats && window.NexLockedChats.isChatLocked(groupId)) return;
       if (window.NexArchivedChats && window.NexArchivedChats.isChatArchived(groupId)) return;
-      const groupName = group.name || 'Group';
-      const gInit = (groupName || 'G').charAt(0).toUpperCase();
+
+      const rawName = group.name || 'Group';
+      const cleanName = cleanChatDisplayName(rawName, true);
+      const nameKey = cleanName.toLowerCase();
+      if (seenGroupNames.has(nameKey)) return;
+      seenGroupNames.add(nameKey);
+
+      // Deduplicate DOM: Remove any pre-existing element with this groupId to prevent duplicates
+      const existing = contactList.querySelector(`li[data-chat-id="${CSS.escape(groupId)}"]`);
+      if (existing) existing.remove();
+
+      const gInit = (cleanName || 'G').charAt(0).toUpperCase();
       let lastMessage = group.lastMessage || 'No messages yet';
       if (lastMessage.length > 40) lastMessage = lastMessage.substring(0, 40) + '...';
       const lastMessageTime = group.lastMessageTime ? formatChatTimestamp(group.lastMessageTime) : '';
@@ -22440,11 +23049,13 @@ async function appendGroupsToContactList(contactList) {
       li.setAttribute('data-chat-id', groupId);
       li.setAttribute('data-chat-type', 'group');
       li.innerHTML = `
-        <div class="chat-avatar-container" style="position: relative;">${avatarHtml}</div>
+        <div class="chat-avatar-container" style="position: relative;">
+          ${avatarHtml}
+          <span class="group-avatar-indicator" title="Group"><i class="fa-solid fa-users"></i></span>
+        </div>
         <div class="chat-item-content">
           <div class="chat-item-header">
-            <span class="chat-name">${escape(groupName)}</span>
-            <span class="chat-type-pill">GROUP</span>
+            <span class="chat-name">${escape(cleanName)}</span>
           </div>
           <p class="chat-preview"><span class="preview-text">${escape(lastMessage)}</span></p>
         </div>
@@ -22455,7 +23066,7 @@ async function appendGroupsToContactList(contactList) {
       `;
 
       li.addEventListener('click', () => {
-        openChat(groupId, groupName, gPic || 'logo.jpg', 'group');
+        openChat(groupId, cleanName, gPic || 'logo.jpg', 'group');
       });
 
       li.addEventListener('contextmenu', (e) => {

@@ -24,7 +24,28 @@ export default function LeftSidebar({
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all'); // all | unread | groups | logs
 
-  const filteredChats = chats.filter((chat) => {
+  const cleanChatName = (name = '') => {
+    return String(name).replace(/[\s\-_–—]*\(?\[?group\]?\)?$/i, '').trim() || name;
+  };
+
+  const deduplicatedChats = React.useMemo(() => {
+    const seenIds = new Set();
+    const seenGroupNames = new Set();
+    const list = [];
+    for (const c of (chats || [])) {
+      if (!c || !c.id || seenIds.has(c.id)) continue;
+      seenIds.add(c.id);
+      if (c.isGroup) {
+        const nameKey = cleanChatName(c.name).toLowerCase();
+        if (seenGroupNames.has(nameKey)) continue;
+        seenGroupNames.add(nameKey);
+      }
+      list.push(c);
+    }
+    return list;
+  }, [chats]);
+
+  const filteredChats = deduplicatedChats.filter((chat) => {
     // Filter type
     if (activeFilter === 'unread' && (!chat.unreadCount || chat.unreadCount === 0)) return false;
     if (activeFilter === 'groups' && !chat.isGroup) return false;
@@ -33,7 +54,8 @@ export default function LeftSidebar({
     // Search query
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
-    const matchesName = chat.name.toLowerCase().includes(q);
+    const displayName = cleanChatName(chat.name).toLowerCase();
+    const matchesName = displayName.includes(q) || chat.name.toLowerCase().includes(q);
     const lastMsg = chat.messages[chat.messages.length - 1];
     const matchesMsg = lastMsg?.text?.toLowerCase().includes(q) || lastMsg?.code?.toLowerCase().includes(q);
     return matchesName || matchesMsg;
@@ -162,36 +184,42 @@ export default function LeftSidebar({
               <div className="relative flex-shrink-0">
                 <img
                   src={chat.avatar || '/favicons/icon-192.png'}
-                  alt={chat.name}
+                  alt={cleanChatName(chat.name)}
                   className="w-12 h-12 rounded-full object-cover bg-black"
                 />
-                {chat.isOnline && (
-                  <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#00FF88] border-2 border-[#111b21]"></span>
+                {chat.isGroup ? (
+                  <span className="group-avatar-indicator absolute -bottom-1 -right-1 w-5 h-5 bg-[#1f2c34] rounded-full border border-white/10 flex items-center justify-center text-[#00FF88] text-[10px] shadow" title="Group">
+                    <Users className="w-3 h-3 text-[#00FF88]" />
+                  </span>
+                ) : (
+                  chat.isOnline && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#00FF88] border-2 border-[#111b21]"></span>
+                  )
                 )}
               </div>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold text-white truncate flex items-center gap-1">
-                    {chat.name}
+              <div className="flex-1 min-w-0 pr-1">
+                <div className="flex items-center justify-between mb-1 gap-2">
+                  <h3 className="text-sm font-semibold text-white truncate flex items-center gap-1 min-w-0">
+                    <span className="truncate">{cleanChatName(chat.name)}</span>
                     {chat.id === 'nexchat-system' && (
-                      <span className="text-[10px] text-[#00FF88] font-mono">SYS</span>
+                      <span className="text-[10px] text-[#00FF88] font-mono flex-shrink-0">SYS</span>
                     )}
                   </h3>
-                  <span className={`text-[11px] font-mono ${chat.unreadCount > 0 ? 'text-[#00FF88] font-bold' : 'text-white/40'}`}>
+                  <span className={`text-[11px] font-mono flex-shrink-0 w-[65px] text-right truncate ${chat.unreadCount > 0 ? 'text-[#00FF88] font-bold' : 'text-white/40'}`}>
                     {lastMsg?.timestamp || '10:00 AM'}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-white/50">
-                  <div className="flex items-center gap-1 truncate pr-2">
+                  <div className="flex items-center gap-1 truncate pr-2 min-w-0">
                     {lastMsg?.sender === 'me' && (
-                      <CheckCheck className="w-3 h-3 text-[#53bdeb] inline" />
+                      <CheckCheck className="w-3 h-3 text-[#53bdeb] inline flex-shrink-0" />
                     )}
-                    {lastMsg?.type === 'voice' && <span className="flex items-center gap-1"><Mic className="w-3 h-3" /> Voice note</span>}
-                    {lastMsg?.type === 'poll' && <span className="flex items-center gap-1"><BarChart2 className="w-3 h-3" /> Poll</span>}
-                    {lastMsg?.type === 'file' && <span className="flex items-center gap-1"><FileText className="w-3 h-3" /> {lastMsg.fileName}</span>}
-                    {lastMsg?.type === 'code' && <span className="font-mono text-[#00FF88]">{'</>'} Code block</span>}
+                    {lastMsg?.type === 'voice' && <span className="flex items-center gap-1 truncate"><Mic className="w-3 h-3 flex-shrink-0" /> Voice note</span>}
+                    {lastMsg?.type === 'poll' && <span className="flex items-center gap-1 truncate"><BarChart2 className="w-3 h-3 flex-shrink-0" /> Poll</span>}
+                    {lastMsg?.type === 'file' && <span className="flex items-center gap-1 truncate"><FileText className="w-3 h-3 flex-shrink-0" /> {lastMsg.fileName}</span>}
+                    {lastMsg?.type === 'code' && <span className="font-mono text-[#00FF88] truncate">{'</>'} Code block</span>}
                     {lastMsg?.type === 'text' && <span className="truncate">{lastMsg.text}</span>}
                   </div>
 
