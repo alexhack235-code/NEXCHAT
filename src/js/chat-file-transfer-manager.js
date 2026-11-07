@@ -392,51 +392,25 @@
         ? (msg.text.length > 90 ? msg.text.substring(0, 90) + '...' : msg.text)
         : (msg.attachment ? (msg.attachment.fileName || 'Attachment file') : 'Selected Message');
 
+      const isGroupChat = window.currentChatType === 'group' || !!document.querySelector('.group-chat') || (typeof GroupChat !== 'undefined' && GroupChat.isOpen);
+      const recipientName = isGroupChat ? 'everyone in group' : (window.currentChatName || 'Whyte');
+
       modal.innerHTML = `
-        <div class="nex-delete-modal-card">
-          <div class="nex-delete-header">
-            <div class="nex-delete-icon-halo">
-              <i class="fa-solid fa-trash-can"></i>
-            </div>
-            <div>
-              <h3>Delete Message?</h3>
-              <p>Choose how you want this message removed from the conversation.</p>
-            </div>
+        <div class="nex-delete-modal-card" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.12); border-radius: 14px; padding: 22px 24px; max-width: 330px; width: 90%; box-shadow: 0 12px 36px rgba(0,0,0,0.75); color: #e2e8f0; font-family: inherit; box-sizing: border-box;">
+          <h3 style="margin: 0 0 10px 0; font-size: 17px; font-weight: 700; color: #f8fafc; letter-spacing: -0.2px;">Delete message</h3>
+          <p style="margin: 0 0 16px 0; font-size: 13.5px; color: #94a3b8; line-height: 1.45;">Are you sure you want to delete this message?</p>
+          
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 22px; cursor: pointer;" onclick="const cb=document.getElementById('chkAlsoDeleteForPartner'); if(cb) cb.checked = !cb.checked;">
+            <input type="checkbox" id="chkAlsoDeleteForPartner" ${effectiveIsOwn ? 'checked' : ''} style="width: 17px; height: 17px; accent-color: #00e575; cursor: pointer;" onclick="event.stopPropagation();">
+            <label for="chkAlsoDeleteForPartner" style="font-size: 13px; color: #e2e8f0; cursor: pointer; user-select: none;">Also delete for ${this.escapeHtml(recipientName)}</label>
           </div>
 
-          <div class="nex-delete-preview-box">
-            <span class="preview-author">${effectiveIsOwn ? 'You' : 'Sender'}:</span>
-            <span class="preview-text">"${this.escapeHtml(snippet)}"</span>
-          </div>
-
-          <div class="nex-delete-actions">
-            ${effectiveIsOwn ? `
-              <button type="button" class="btn-delete-opt btn-delete-ghost" id="btnConfirmGhostRecall" style="border: 1px solid rgba(0, 243, 255, 0.45); background: rgba(0, 243, 255, 0.08); box-shadow: 0 0 12px rgba(0, 243, 255, 0.15); margin-bottom: 8px;">
-                <i class="fa-solid fa-ghost" style="color: #00f3ff;"></i>
-                <div class="btn-text">
-                  <strong style="color: #00f3ff;">Silent Ghost Recall</strong>
-                  <small style="color: #cbd5e1;">Evaporates with ZERO "This message was deleted" tombstone</small>
-                </div>
-              </button>
-              <button type="button" class="btn-delete-opt btn-delete-everyone" id="btnConfirmDeleteEveryone">
-                <i class="fa-solid fa-users"></i>
-                <div class="btn-text">
-                  <strong>Standard Delete for Everyone</strong>
-                  <small>Erases this message for all participants</small>
-                </div>
-              </button>
-            ` : ''}
-
-            <button type="button" class="btn-delete-opt btn-delete-forme" id="btnConfirmDeleteForMe">
-              <i class="fa-solid fa-eye-slash"></i>
-              <div class="btn-text">
-                <strong>Delete for Me</strong>
-                <small>Removes this message from your device only</small>
-              </div>
-            </button>
-
-            <button type="button" class="btn-delete-cancel" id="btnCancelDeleteMessage">
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" id="btnCancelDeleteMessage" style="padding: 7px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.16); background: transparent; color: #cbd5e1; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s;">
               Cancel
+            </button>
+            <button type="button" id="btnConfirmDeleteSubmit" style="padding: 7px 18px; border-radius: 8px; border: none; background: #ef4444; color: #ffffff; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 8px rgba(239,68,68,0.4); transition: opacity 0.15s;">
+              Delete
             </button>
           </div>
         </div>
@@ -452,56 +426,22 @@
         if (e.target === modal) closeModal();
       };
 
-      const bindAction = (selector, action) => {
-        const btn = modal.querySelector(selector);
-        if (!btn) return;
-        let isHandling = false;
-        const trigger = async (e) => {
-          if (e) {
-            e.preventDefault();
-            e.stopPropagation();
+      const cancelBtn = modal.querySelector('#btnCancelDeleteMessage');
+      if (cancelBtn) cancelBtn.onclick = closeModal;
+
+      const submitBtn = modal.querySelector('#btnConfirmDeleteSubmit');
+      if (submitBtn) {
+        submitBtn.onclick = async () => {
+          closeModal();
+          const alsoDelete = modal.querySelector('#chkAlsoDeleteForPartner')?.checked;
+          if (alsoDelete && effectiveIsOwn) {
+            await this.executeDeleteForEveryone(msg);
+          } else {
+            await this.executeDeleteForMe(msg);
           }
-          if (isHandling) return;
-          isHandling = true;
-          try {
-            await action();
-          } finally {
-            setTimeout(() => { isHandling = false; }, 350);
-          }
+          if (typeof onComplete === 'function') onComplete();
         };
-        btn.addEventListener('click', trigger);
-        btn.addEventListener('touchend', trigger);
-      };
-
-      bindAction('#btnCancelDeleteMessage', closeModal);
-
-      // Handle Silent Ghost Recall (Zero-Tombstone Disappearance)
-      bindAction('#btnConfirmGhostRecall', async () => {
-        closeModal();
-        const docId = (msg && (msg.docId || msg.id)) || (typeof msg === 'string' ? msg : null);
-        if (window.NexAegisShield && typeof window.NexAegisShield.executeSilentGhostRecall === 'function') {
-          await window.NexAegisShield.executeSilentGhostRecall(docId);
-        }
-        await this.executeDeleteForEveryone(msg);
-        if (typeof window.showCustomNotification === 'function') {
-          window.showCustomNotification('<i class="fa-solid fa-ghost" style="color:#00f3ff;margin-right:6px;"></i> Message evaporated with zero trace or tombstone', 3000);
-        }
-        if (typeof onComplete === 'function') onComplete();
-      });
-
-      // Handle Delete for Everyone
-      bindAction('#btnConfirmDeleteEveryone', async () => {
-        closeModal();
-        await this.executeDeleteForEveryone(msg);
-        if (typeof onComplete === 'function') onComplete();
-      });
-
-      // Handle Delete for Me
-      bindAction('#btnConfirmDeleteForMe', async () => {
-        closeModal();
-        await this.executeDeleteForMe(msg);
-        if (typeof onComplete === 'function') onComplete();
-      });
+      }
     }
 
     /**
@@ -527,7 +467,9 @@
         ].filter(Boolean);
 
         targets.forEach(wrapper => {
-          if (typeof window.nexDeleteAdvanced === 'function') {
+          if (typeof window.nexDeleteUnified === 'function') {
+            window.nexDeleteUnified(wrapper, docId);
+          } else if (typeof window.nexDeleteAdvanced === 'function') {
             window.nexDeleteAdvanced(wrapper, docId);
           } else if (typeof window.triggerAshDeleteAnimation === 'function') {
             window.triggerAshDeleteAnimation(wrapper, docId);

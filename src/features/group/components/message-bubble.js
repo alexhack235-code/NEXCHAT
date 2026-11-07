@@ -222,21 +222,23 @@ export function renderMessageBubble(message, container, options = {}) {
       bubble.classList.add('consecutive');
     }
 
-    // 2. WhatsApp Group Identity: Sender's name at top of EVERY bubble in unique vibrant color with ~ DisplayName @username
+    // 2. WhatsApp Group Identity: 1 single row, Left = DisplayName (~ ALEXANDER), Right = Phone/Username in small grey
     const effectiveSenderId = message.senderId || message.from || options.senderId || 'user';
     const rawDispName = String(message.senderName || options.senderName || 'Member').trim().replace(/^~\s*/, '');
-    let rawUsername = String(message.senderUsername || options.senderUsername || rawDispName).trim().replace(/^@/, '');
-    if (!rawUsername) rawUsername = rawDispName.toLowerCase().replace(/\s+/g, '_');
-    const senderTagText = `~ ${rawDispName} @${rawUsername}`;
+    let rawUsername = String(message.senderUsername || options.senderUsername || '').trim().replace(/^@/, '');
+    const senderPhoneOrHandle = options.senderPhone || (rawUsername ? `@${rawUsername}` : '');
 
     const senderDiv = document.createElement('div');
     senderDiv.className = 'nex-msg-sender';
-    senderDiv.style.cssText = `color: ${senderColor}; font-size: 11.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-bottom: 3px; user-select: none;`;
+
+    const senderLeft = document.createElement('div');
+    senderLeft.className = 'nex-msg-sender-left';
 
     const senderNameSpan = document.createElement('span');
     senderNameSpan.className = 'nex-msg-sender-name';
-    senderNameSpan.textContent = senderTagText;
-    senderDiv.appendChild(senderNameSpan);
+    senderNameSpan.style.color = senderColor;
+    senderNameSpan.textContent = `~ ${rawDispName}`;
+    senderLeft.appendChild(senderNameSpan);
 
     if (options.senderRole && options.senderRole !== 'member') {
       const badge = document.createElement('span');
@@ -250,14 +252,22 @@ export function renderMessageBubble(message, container, options = {}) {
       } else {
         badge.textContent = options.senderRole.toUpperCase();
       }
-      senderDiv.appendChild(badge);
+      senderLeft.appendChild(badge);
     }
     if (options.isVerified) {
       const verBadge = document.createElement('span');
       verBadge.className = 'nex-role-badge verified';
       verBadge.title = 'Verified NEX User';
       verBadge.innerHTML = '<i class="fa-solid fa-circle-check"></i> VERIFIED';
-      senderDiv.appendChild(verBadge);
+      senderLeft.appendChild(verBadge);
+    }
+    senderDiv.appendChild(senderLeft);
+
+    if (senderPhoneOrHandle) {
+      const senderPhoneSpan = document.createElement('span');
+      senderPhoneSpan.className = 'nex-msg-sender-phone';
+      senderPhoneSpan.textContent = senderPhoneOrHandle;
+      senderDiv.appendChild(senderPhoneSpan);
     }
 
     // Tapping sender tag opens user profile

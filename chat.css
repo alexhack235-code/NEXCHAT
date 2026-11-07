@@ -16416,3 +16416,284 @@ body:not(.group-active) #tacticalMeshBanner {
 .avatar-placeholder {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6) !important;
 }
+
+
+/* Media Twists for DM Ash-Fade Pro */
+/* AUDIO: Waveform bars disappear one by one left to right */
+.nex-ash-pro .waveform-bars-container span,
+.nex-ash-pro .audio-waveform-bars span,
+.nex-ash-pro .audio-waveform-bar,
+.nex-ash-pro .waveform-bar {
+  animation: barDisintegrate 180ms cubic-bezier(0.4, 0, 0.2, 1) forwards !important;
+}
+
+@keyframes barDisintegrate {
+  0% { opacity: 1; transform: scaleY(1); }
+  50% { opacity: 0.4; transform: scaleY(0.3) translateY(2px); }
+  100% { opacity: 0; transform: scaleY(0); }
+}
+
+.nex-ash-pro .waveform-play-btn,
+.nex-ash-pro .audio-play-btn,
+.nex-ash-pro .voice-speaker-icon {
+  transition: filter 240ms ease, opacity 260ms ease !important;
+  filter: grayscale(1) brightness(0.2) !important;
+}
+
+/* IMAGE: Burn from 4 corners inward with curling and sepia */
+.nex-ash-pro img:not(.chat-avatar),
+.nex-ash-pro .message-media-img {
+  animation: photoBurnCorners 260ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+}
+
+@keyframes photoBurnCorners {
+  0% {
+    filter: sepia(0.2) contrast(1.1);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    transform: scale(1);
+  }
+  30% {
+    filter: sepia(0.8) contrast(1.35) brightness(0.7);
+    clip-path: polygon(5% 5%, 95% 5%, 95% 95%, 5% 95%);
+    transform: scale(0.98) rotate(-0.5deg);
+    border-radius: 12px 2px 14px 6px;
+  }
+  70% {
+    filter: grayscale(0.8) brightness(0.35) contrast(1.4);
+    clip-path: polygon(18% 18%, 82% 18%, 82% 82%, 18% 82%);
+    transform: scale(0.93) rotate(0.8deg);
+  }
+  100% {
+    filter: grayscale(1) brightness(0.1);
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    opacity: 0;
+    transform: scale(0.88) translateY(-10px);
+  }
+}
+
+/* FILE / DOC: Split into 3 vertical strips like shredder, then turn to ash */
+.nex-ash-file-shred {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+.nex-shred-strip {
+  position: absolute !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 33.33% !important;
+  pointer-events: none !important;
+  background: inherit !important;
+  animation: shredFallAsh 260ms ease-in forwards !important;
+  z-index: 20 !important;
+}
+
+.nex-shred-strip:nth-child(1) { left: 0; --strip-offset: 4px; animation-delay: 15ms; }
+.nex-shred-strip:nth-child(2) { left: 33.33%; --strip-offset: 9px; animation-delay: 45ms; }
+.nex-shred-strip:nth-child(3) { left: 66.66%; --strip-offset: 14px; animation-delay: 30ms; }
+
+@keyframes shredFallAsh {
+  0% { transform: translateY(0); opacity: 1; filter: grayscale(0); }
+  50% { transform: translateY(var(--strip-offset)); opacity: 0.75; filter: grayscale(0.7) brightness(0.5); }
+  100% { transform: translateY(calc(var(--strip-offset) * 3)); opacity: 0; filter: grayscale(1) brightness(0.15); }
+}
+
+/* ==========================================================================
+   GROUP: NEX VOID DISSOLVE - PROFESSIONAL FUTURISTIC (260ms)
+   Phase 1 (0-80ms): Focus scale 0.98, dims, neon blue ring
+   Phase 2 (80-180ms): Collapse from all sides to glowing dot + 8 converging dots
+   Phase 3 (180-260ms): Dot flashes once, ring expands once, vanish to 0
+   ========================================================================== */
+.nex-void-dissolve {
+  position: relative !important;
+  pointer-events: none !important;
+  animation: nexVoid 260ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  z-index: 50 !important;
+}
+
+@keyframes nexVoid {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(0, 229, 255, 0);
+  }
+  30% { /* 0-80ms FOCUS */
+    transform: scale(0.98);
+    filter: brightness(0.85);
+    box-shadow: 0 0 0 2px #00e5ff, 0 0 16px rgba(0, 229, 255, 0.65);
+    opacity: 0.95;
+  }
+  70% { /* 80-180ms COLLAPSE TO DOT */
+    transform: scale(0.08);
+    filter: brightness(1.6) contrast(1.3);
+    box-shadow: 0 0 12px 4px #00e5ff;
+    opacity: 0.9;
+    border-radius: 50% !important;
+  }
+  90% { /* 180-240ms VANISH */
+    transform: scale(0.25);
+    filter: brightness(2.5);
+    box-shadow: 0 0 22px 8px rgba(0, 229, 255, 0.85);
+    opacity: 0.55;
+  }
+  100% { /* 240-260ms opacity to 0 */
+    transform: scale(0);
+    box-shadow: 0 0 0 0 rgba(0, 229, 255, 0);
+    opacity: 0;
+  }
+}
+
+/* 8 Tiny Blue-White dots converging to center */
+.void-converge-dot {
+  position: absolute !important;
+  pointer-events: none !important;
+  width: 4px !important;
+  height: 4px !important;
+  border-radius: 50% !important;
+  background: #00e5ff !important;
+  box-shadow: 0 0 6px #00e5ff, 0 0 10px #ffffff !important;
+  animation: voidConverge 180ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+  z-index: 999999 !important;
+}
+
+@keyframes voidConverge {
+  0% {
+    opacity: 1;
+    transform: translate(var(--void-start-x, 0px), var(--void-start-y, 0px)) scale(1);
+  }
+  80% {
+    opacity: 0.9;
+    transform: translate(0, 0) scale(1.3);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0);
+  }
+}
+
+/* Centered system pill after group delete */
+.nex-system-deleted-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  align-self: center !important;
+  margin: 4px auto !important;
+  padding: 3px 12px !important;
+  border-radius: 12px !important;
+  background: rgba(18, 26, 32, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #8696a0 !important;
+  font-size: 11px !important;
+  font-style: italic !important;
+  animation: nexPillFadeIn 200ms ease forwards !important;
+  transition: opacity 0.4s ease, max-height 0.4s ease !important;
+  max-height: 32px !important;
+  overflow: hidden !important;
+}
+
+@keyframes nexPillFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Input Bar: WhatsApp-Structure Simple 1 Row */
+.message-form {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 10px !important;
+  background: #111b21 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+.message-input-wrapper {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  background: #202c33 !important;
+  border-radius: 24px !important;
+  padding: 4px 12px !important;
+  box-sizing: border-box !important;
+}
+
+.message-input.nex-input {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #e9edef !important;
+  font-size: 15px !important;
+  line-height: 20px !important;
+  max-height: 100px !important;
+  resize: none !important;
+  padding: 6px 4px !important;
+  box-sizing: border-box !important;
+  font-family: inherit !important;
+}
+
+.message-input-wrapper .input-inline-btn {
+  background: transparent !important;
+  border: none !important;
+  color: #8696a0 !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+  transition: color 0.15s ease !important;
+}
+
+.message-input-wrapper .input-inline-btn:hover {
+  color: #00FF88 !important;
+}
+
+#camera-btn.chat-camera-inline-btn {
+  display: inline-flex !important;
+  background: transparent !important;
+  border: none !important;
+  color: #8696a0 !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  padding: 4px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+  transition: color 0.15s ease !important;
+}
+
+#camera-btn.chat-camera-inline-btn:hover {
+  color: #00FF88 !important;
+}
+
+/* Green Mic Circle on Far Right */
+#audio-record-btn.fab-circle-btn.mic-action-btn,
+#sendBtn.send-btn.fab-circle-btn {
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  border-radius: 50% !important;
+  background: #00a884 !important;
+  color: #111b21 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4) !important;
+  flex-shrink: 0 !important;
+  font-size: 17px !important;
+  transition: background 0.15s ease, transform 0.15s ease !important;
+}
+
+#audio-record-btn:hover,
+#sendBtn:hover {
+  background: #00c298 !important;
+  transform: scale(1.05) !important;
+}

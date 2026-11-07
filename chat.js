@@ -751,10 +751,14 @@ function formatChatDate(timestamp) {
 }
 
 function cleanChatDisplayName(name, isGroup = false) {
-  if (!name) return isGroup ? 'Group' : 'User';
+  if (!name) return isGroup ? 'NEX' : 'User';
   let clean = String(name).trim();
-  clean = clean.replace(/[\s\-_–—]*\(?\[?group\]?\)?$/i, '').trim();
-  return clean || (isGroup ? 'NEX Group' : 'User');
+  clean = clean.replace(/\bgroup\b/gi, '')
+               .replace(/[\(\[\{]\s*[\)\]\}]/g, '')
+               .replace(/[\s\-_–—]{2,}/g, ' ')
+               .replace(/^[\s\-_–—]+|[\s\-_–—]+$/g, '')
+               .trim();
+  return clean || (isGroup ? 'NEX' : 'User');
 }
 window.cleanChatDisplayName = cleanChatDisplayName;
 
@@ -7987,6 +7991,35 @@ window.nexDeleteAdvanced = function(targetEl, messageId, onComplete) {
     }
   }, 60);
 
+  // MEDIA TWISTS (DM SPECIAL TWISTS PER MEDIA TYPE)
+  // AUDIO: Waveform bars disappear one by one left to right
+  const waveBars = wrapper.querySelectorAll('.waveform-bars-container span, .audio-waveform-bars span, .audio-waveform-bar');
+  if (waveBars.length > 0) {
+    waveBars.forEach((bar, idx) => {
+      setTimeout(() => {
+        bar.style.opacity = '0';
+        bar.style.transform = 'scaleY(0)';
+      }, idx * 6);
+    });
+  }
+
+  // IMAGE: Burn from 4 corners inward
+  const mediaImages = wrapper.querySelectorAll('img:not(.chat-avatar), .message-media-img');
+  mediaImages.forEach(img => {
+    img.style.animation = 'photoBurnCorners 260ms cubic-bezier(0.2, 0.8, 0.25, 1) forwards';
+  });
+
+  // FILE / DOC: Splits into 3 vertical strips like shredder
+  const fileContainers = wrapper.querySelectorAll('.message-attachment-container a, .file-card');
+  fileContainers.forEach(fc => {
+    fc.classList.add('nex-ash-file-shred');
+    for (let s = 1; s <= 3; s++) {
+      const strip = document.createElement('div');
+      strip.className = 'nex-shred-strip';
+      fc.appendChild(strip);
+    }
+  });
+
   // PHASE 3: 160-260ms ASH FLY + COLLAPSE - Spawn 12 ASH DUST particles flying up with random X
   // Size: 3px, #9a9a9a grey, fly up 22px, move X -10px, rotate 90deg
   setTimeout(() => {
@@ -8013,7 +8046,112 @@ window.nexDeleteAdvanced = function(targetEl, messageId, onComplete) {
   }, 260);
 };
 
-window.triggerAshDeleteAnimation = window.nexDeleteAdvanced;
+// GROUP: NEX VOID DISSOLVE - PROFESSIONAL FUTURISTIC (260ms)
+window.nexDeleteGroup = function(targetEl, messageId, onComplete) {
+  if (!targetEl) {
+    if (typeof onComplete === 'function') onComplete();
+    return;
+  }
+
+  const wrapper = targetEl.closest('.message-wrapper, .nex-msg-wrapper') || targetEl;
+  const bubble = wrapper.querySelector('.message-bubble, .nex-msg-bubble') || targetEl;
+  const effectiveId = messageId || wrapper.dataset.messageId || wrapper.dataset.docId || targetEl.dataset.messageId || targetEl.dataset.docId;
+
+  if (effectiveId) {
+    window.deletedMessageIds = window.deletedMessageIds || new Set();
+    window.deletedMessageIds.add(String(effectiveId));
+    try {
+      const localHidden = JSON.parse(localStorage.getItem('nex_hidden_msg_ids') || '[]');
+      if (!localHidden.includes(String(effectiveId))) {
+        localHidden.push(String(effectiveId));
+        localStorage.setItem('nex_hidden_msg_ids', JSON.stringify(localHidden.slice(-500)));
+      }
+    } catch (_) {}
+  }
+
+  if (bubble.classList.contains('nex-void-dissolve')) return;
+
+  const startHeight = wrapper.offsetHeight || 55;
+  wrapper.style.maxHeight = startHeight + 'px';
+  wrapper.style.overflow = 'hidden';
+
+  // PHASE 1 (0-80ms FOCUS): Bubble scales to 0.98, dims, neon blue ring
+  bubble.classList.add('nex-void-dissolve');
+
+  // Spawn 8 tiny blue-white dots converging to center
+  const rect = bubble.getBoundingClientRect();
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const radius = Math.max(rect.width, rect.height) / 2 + 10;
+
+  const particleContainer = document.createElement('div');
+  particleContainer.className = 'nex-void-particles-overlay';
+  particleContainer.style.cssText = 'position:fixed;pointer-events:none;z-index:999999;left:0;top:0;width:100%;height:100%;';
+  document.body.appendChild(particleContainer);
+
+  for (let i = 0; i < 8; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'void-converge-dot';
+    const angle = i * (Math.PI / 4);
+    dot.style.left = centerX + 'px';
+    dot.style.top = centerY + 'px';
+    dot.style.setProperty('--void-start-x', (Math.cos(angle) * radius) + 'px');
+    dot.style.setProperty('--void-start-y', (Math.sin(angle) * radius) + 'px');
+    particleContainer.appendChild(dot);
+  }
+
+  // PHASE 3 (160-260ms): Collapse height
+  setTimeout(() => {
+    wrapper.classList.add('nex-ash-wrapper-collapse');
+  }, 160);
+
+  // At 260ms: Vanish & Show small system pill
+  setTimeout(() => {
+    try {
+      if (particleContainer && particleContainer.parentNode) {
+        particleContainer.parentNode.removeChild(particleContainer);
+      }
+    } catch (_) {}
+
+    const isOwnMsg = wrapper.classList.contains('sent') || wrapper.classList.contains('own');
+    const pill = document.createElement('div');
+    pill.className = 'nex-system-deleted-pill';
+    pill.innerHTML = '<i class="fa-solid fa-ban" style="font-size:10px;margin-right:4px;"></i> Message deleted by ' + (isOwnMsg ? 'You' : 'Admin');
+
+    if (wrapper.parentNode) {
+      wrapper.parentNode.insertBefore(pill, wrapper.nextSibling);
+      wrapper.remove();
+    }
+
+    setTimeout(() => {
+      pill.style.opacity = '0';
+      pill.style.maxHeight = '0px';
+      setTimeout(() => pill.remove(), 400);
+    }, 3000);
+
+    if (typeof onComplete === 'function') onComplete();
+  }, 260);
+};
+
+// UNIFIED DISPATCHER: Automatically selects Void Dissolve for Groups vs Ash-Fade Pro for DMs
+window.nexDeleteUnified = function(targetEl, messageId, onComplete) {
+  if (!targetEl) {
+    if (typeof onComplete === 'function') onComplete();
+    return;
+  }
+  const isGroup = window.currentChatType === 'group' ||
+                  document.getElementById('chatDetailView')?.classList.contains('group-chat') ||
+                  !!targetEl.closest('.group-chat, .group-item') ||
+                  (typeof GroupChat !== 'undefined' && GroupChat.isOpen);
+
+  if (isGroup && typeof window.nexDeleteGroup === 'function') {
+    return window.nexDeleteGroup(targetEl, messageId, onComplete);
+  }
+  return window.nexDeleteAdvanced(targetEl, messageId, onComplete);
+};
+
+window.nexDeleteMessage = window.nexDeleteUnified;
+window.triggerAshDeleteAnimation = window.nexDeleteUnified;
 
 window.deleteMessageFromFirestore = async function(collectionName, docId, forEveryone) {
   if (!docId) return;
@@ -8344,10 +8482,22 @@ function loadMessages() {
       }
     }
 
+    let lastRenderedDatePill = null;
     allMessages.forEach((m) => {
       // 1. Filter out messages deleted for current user
       if (m.deletedFor && Array.isArray(m.deletedFor) && m.deletedFor.includes(myUID)) return;
       if (window.NexChatFileManager && window.NexChatFileManager.isMessageHiddenLocally(m.docId)) return;
+
+      // Centered Date Separator Pill (WhatsApp structured: "29 October 2026")
+      const mDateObj = m.time?.toDate?.() || new Date(m.time || m.timestamp || Date.now());
+      const datePillText = mDateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+      if (datePillText && datePillText !== lastRenderedDatePill) {
+        lastRenderedDatePill = datePillText;
+        const dateSepDiv = document.createElement("div");
+        dateSepDiv.className = "nex-date-separator-container";
+        dateSepDiv.innerHTML = '<span class="nex-date-separator-pill">' + escapeHtml(datePillText) + '</span>';
+        messageFragment.appendChild(dateSepDiv);
+      }
       // --- CHRONEX THREAD SYNTHESIS CARD BRANCH ---
       if (m.isThreadSynthesis) {
         const synthDiv = document.createElement("div");
@@ -9394,13 +9544,11 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
           const statusTextEl = document.getElementById("statusText");
           const infoStatusEl = document.getElementById("infoStatus");
 
-          const tempSubtitle = uniqueMembers.includes(myUID)
-            ? (uniqueMembers.length > 1 ? `You, and ${uniqueMembers.length - 1} other${uniqueMembers.length - 1 === 1 ? '' : 's'}` : 'Only you')
-            : countText;
+          const activeStatusSubtitle = `${countText} - Active`;
           if (statusTextEl) {
-            statusTextEl.textContent = `${countText} - Active`;
+            statusTextEl.textContent = activeStatusSubtitle;
           }
-          if (infoStatusEl) infoStatusEl.textContent = tempSubtitle;
+          if (infoStatusEl) infoStatusEl.textContent = activeStatusSubtitle;
 
           const realGroupPic = groupData.profilePic || groupData.groupPic || groupData.icon || groupData.photoURL || profilePic;
           if (realGroupPic && realGroupPic !== 'logo.jpg') {

@@ -656,7 +656,11 @@ function _attachRealtimeListener(groupId, newestMessage) {
         }
       } else if (change.type === 'removed' || (data.isDeleted && data.deletedForEveryone)) {
         const target = document.getElementById('msg-' + msgId) || document.querySelector('[data-message-id="' + msgId + '"]');
-        if (target && typeof window.nexDeleteAdvanced === 'function') {
+        if (target && typeof window.nexDeleteUnified === 'function') {
+          window.nexDeleteUnified(target, msgId);
+        } else if (target && typeof window.nexDeleteGroup === 'function') {
+          window.nexDeleteGroup(target, msgId);
+        } else if (target && typeof window.nexDeleteAdvanced === 'function') {
           window.nexDeleteAdvanced(target, msgId);
         }
         messages = messages.filter(m => m.id !== msgId);
