@@ -18135,3 +18135,54 @@ body {
   white-space: nowrap !important;
   flex-shrink: 0 !important;
 }
+
+/* Ensure activeChatHeader is never displayed on chat list view */
+#activeChatHeader {
+  display: none !important;
+}
+
+.chat-main[data-layout="conversation"] #activeChatHeader,
+body.in-conversation #activeChatHeader {
+  display: flex !important;
+}
+
+#headerLogoContainer {
+  display: flex !important;
+}
+
+.chat-main[data-layout="conversation"] #headerLogoContainer,
+body.in-conversation #headerLogoContainer {
+  display: none !important;
+}
+
+/* Ensure Chat FAB cluster is always visible on chat list view */
+#chatFabCluster,
+.chat-fab-cluster {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.chat-main[data-layout="conversation"] #chatFabCluster,
+body.in-conversation #chatFabCluster {
+  display: none !important;
+}
+
+#mobileFabNewChat,
+.mobile-fab {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+#chronexAiFabBtn,
+.chronex-ai-fab {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.nex-fab-n {
+  display: flex !important;
+  visibility: visible !important;
+}
