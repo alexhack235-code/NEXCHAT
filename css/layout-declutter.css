@@ -1471,13 +1471,22 @@ font-weight: 800 !important;
 min-width: 17px !important;
 height: 17px !important;
 border-radius: 9px !important;
-display: inline-flex !important;
 align-items: center !important;
 justify-content: center !important;
 padding: 0 4px !important;
 border: 2px solid #0b141a !important;
 line-height: 1 !important;
 box-sizing: border-box !important;
+}
+
+.nav-pill-badge[style*="display: none"],
+.nav-pill-badge:not(.has-unread),
+.nav-pill-badge:empty {
+display: none !important;
+}
+
+.nav-pill-badge.has-unread {
+display: inline-flex !important;
 }
 
 /* Unread Status Beacon Dot on Updates Tab */
@@ -1490,6 +1499,14 @@ height: 7px !important;
 border-radius: 50% !important;
 background: #25d366 !important;
 border: 1.5px solid #0b141a !important;
+}
+
+.nav-status-beacon[style*="display: none"],
+.nav-status-beacon:not(.has-unread) {
+display: none !important;
+}
+
+.nav-status-beacon.has-unread {
 display: block !important;
 }
 

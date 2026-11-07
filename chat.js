@@ -9567,6 +9567,51 @@ function hideChatProfileDisplay() {
   if (chatUserProfile) chatUserProfile.style.display = 'none';
 }
 
+// Centralized Bottom Navigation Badge & Beacon Controller
+function updateNavChatsBadge(count) {
+  const badge = document.getElementById('navChatsCountBadge');
+  if (!badge) return;
+  const num = parseInt(count, 10) || 0;
+  if (num > 0) {
+    badge.textContent = num > 99 ? '99+' : String(num);
+    badge.dataset.count = String(num);
+    badge.classList.add('has-unread');
+    badge.style.setProperty('display', 'inline-flex', 'important');
+  } else {
+    badge.textContent = '';
+    badge.dataset.count = '0';
+    badge.classList.remove('has-unread');
+    badge.style.setProperty('display', 'none', 'important');
+  }
+}
+window.updateNavChatsBadge = updateNavChatsBadge;
+
+function updateNavUpdatesBeacon(hasUnread) {
+  const beacon = document.getElementById('navUpdatesBeacon');
+  if (!beacon) return;
+  if (hasUnread) {
+    beacon.classList.add('has-unread');
+    beacon.style.setProperty('display', 'block', 'important');
+  } else {
+    beacon.classList.remove('has-unread');
+    beacon.style.setProperty('display', 'none', 'important');
+  }
+}
+window.updateNavUpdatesBeacon = updateNavUpdatesBeacon;
+
+function updateNavAlertsBeacon(hasUnread) {
+  const beacon = document.getElementById('navAlertsBeacon');
+  if (!beacon) return;
+  if (hasUnread) {
+    beacon.classList.add('has-unread');
+    beacon.style.setProperty('display', 'block', 'important');
+  } else {
+    beacon.classList.remove('has-unread');
+    beacon.style.setProperty('display', 'none', 'important');
+  }
+}
+window.updateNavAlertsBeacon = updateNavAlertsBeacon;
+
 async function openChat(uid, username, profilePic, chatType = 'direct') {
   // Ensure voice recording is cancelled cleanly when navigating to any chat
   if (window.voiceRecorderController && typeof window.voiceRecorderController.cancelRecording === 'function') {
@@ -9616,15 +9661,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
   const allBadges = document.querySelectorAll('#contactList .unread-badge');
   let remainingTotal = 0;
   allBadges.forEach(b => { remainingTotal += (parseInt(b.textContent, 10) || 0); });
-  const navChatsBadge = document.getElementById('navChatsCountBadge');
-  if (navChatsBadge) {
-    if (remainingTotal > 0) {
-      navChatsBadge.textContent = remainingTotal > 99 ? '99+' : remainingTotal;
-      navChatsBadge.style.display = 'inline-flex';
-    } else {
-      navChatsBadge.style.display = 'none';
-    }
-  }
+  updateNavChatsBadge(remainingTotal);
 
   if (window.cyberStreaksEngine) {
     window.cyberStreaksEngine.renderStreakBadge();
@@ -11719,11 +11756,13 @@ document.getElementById("nav-messages")?.addEventListener("click", () => {
 
 document.getElementById("nav-status")?.addEventListener("click", () => {
   handleNavigation("updates");
+  if (typeof updateNavUpdatesBeacon === 'function') updateNavUpdatesBeacon(false);
   showNotif("Updates", "info", 800);
 });
 
 document.getElementById("nav-announcements")?.addEventListener("click", () => {
   handleNavigation("announcements");
+  if (typeof updateNavAlertsBeacon === 'function') updateNavAlertsBeacon(false);
   showNotif("Dispatches", "info", 800);
 });
 
@@ -20049,6 +20088,14 @@ async function loadStatusFeed() {
       if (viewedSection) {
         viewedSection.style.display = hasViewed ? 'block' : 'none';
       }
+      try {
+        const hasUnreadStatuses = activeStoriesList
+          .filter(grp => grp.userId !== myUID)
+          .some(grp => !grp.isViewed);
+        if (typeof updateNavUpdatesBeacon === 'function') {
+          updateNavUpdatesBeacon(hasUnreadStatuses);
+        }
+      } catch (_) {}
     }
 
   } catch (error) {
@@ -20705,6 +20752,14 @@ function nextStorySlide() {
   } else {
     // Current user's stories finished -> mark as viewed
     currentGrp.isViewed = true;
+    try {
+      const hasRemaining = activeStoriesList
+        .filter(g => g.userId !== myUID)
+        .some(g => !g.isViewed);
+      if (typeof updateNavUpdatesBeacon === 'function') {
+        updateNavUpdatesBeacon(hasRemaining);
+      }
+    } catch (_) {}
     if (currentStoryGroupIndex < activeStoriesList.length - 1) {
       currentStoryGroupIndex++;
       currentStorySlideIndex = 0;
@@ -21286,6 +21341,15 @@ function renderAnnouncementsFromSnapshot(snapshot, feed) {
     }
   });
 
+  try {
+    const unacknowledged = announcements.filter(item => {
+      return localStorage.getItem('nex_ack_ann_' + item.id) !== 'true';
+    });
+    if (typeof updateNavAlertsBeacon === 'function') {
+      updateNavAlertsBeacon(unacknowledged.length > 0);
+    }
+  } catch (_) {}
+
   if (window.NexTranslator) {
     if (typeof window.NexTranslator.updateCountBadge === 'function') {
       window.NexTranslator.updateCountBadge(announcements.length);
@@ -21358,6 +21422,11 @@ function initializeBasicUI() {
     return;
   }
   basicUIInitialized = true;
+  try {
+    if (typeof updateNavChatsBadge === 'function') updateNavChatsBadge(0);
+    if (typeof updateNavUpdatesBeacon === 'function') updateNavUpdatesBeacon(false);
+    if (typeof updateNavAlertsBeacon === 'function') updateNavAlertsBeacon(false);
+  } catch (_) {}
 
   try {
     const mainLogo = document.getElementById('headerLogoContainer');
@@ -22315,19 +22384,39 @@ function setupMobileFeatures() {
   }
 
   // Mobile Unified FAB: Opens Action Sheet (New Chat, New Channel, Post Reel)
+  let isClosingFabSheet = false;
   const openFabActionSheet = () => {
     const sheet = document.getElementById('fabActionSheet');
-    if (sheet) {
-      sheet.style.display = 'flex';
-      sheet.setAttribute('aria-hidden', 'false');
+    if (!sheet) return;
+    const panel = document.getElementById('fabActionSheetPanel');
+    const backdrop = document.getElementById('fabActionSheetBackdrop');
+    if (panel) {
+      panel.classList.remove('closing');
+      panel.style.transform = '';
     }
+    if (backdrop) backdrop.classList.remove('closing');
+    sheet.style.display = 'flex';
+    sheet.setAttribute('aria-hidden', 'false');
   };
+
   const closeFabActionSheet = () => {
     const sheet = document.getElementById('fabActionSheet');
-    if (sheet) {
+    if (!sheet || sheet.style.display === 'none' || isClosingFabSheet) return;
+    const panel = document.getElementById('fabActionSheetPanel');
+    const backdrop = document.getElementById('fabActionSheetBackdrop');
+    isClosingFabSheet = true;
+    if (panel) panel.classList.add('closing');
+    if (backdrop) backdrop.classList.add('closing');
+    setTimeout(() => {
       sheet.style.display = 'none';
       sheet.setAttribute('aria-hidden', 'true');
-    }
+      if (panel) {
+        panel.classList.remove('closing');
+        panel.style.transform = '';
+      }
+      if (backdrop) backdrop.classList.remove('closing');
+      isClosingFabSheet = false;
+    }, 200);
   };
   window.openFabActionSheet = openFabActionSheet;
   window.closeFabActionSheet = closeFabActionSheet;
@@ -22339,6 +22428,54 @@ function setupMobileFeatures() {
 
   document.getElementById('closeFabActionSheetBtn')?.addEventListener('click', closeFabActionSheet);
   document.getElementById('fabActionSheetBackdrop')?.addEventListener('click', closeFabActionSheet);
+
+  // Drag handle / Touch swipe down to close
+  const fabPanel = document.getElementById('fabActionSheetPanel');
+  if (fabPanel) {
+    let touchStartY = 0;
+    let touchCurrentY = 0;
+    let isSwiping = false;
+
+    fabPanel.addEventListener('touchstart', (e) => {
+      touchStartY = e.touches[0].clientY;
+      touchCurrentY = touchStartY;
+      isSwiping = true;
+    }, { passive: true });
+
+    fabPanel.addEventListener('touchmove', (e) => {
+      if (!isSwiping) return;
+      touchCurrentY = e.touches[0].clientY;
+      const deltaY = touchCurrentY - touchStartY;
+      if (deltaY > 0) {
+        fabPanel.style.transform = `translateY(${deltaY}px)`;
+      }
+    }, { passive: true });
+
+    fabPanel.addEventListener('touchend', () => {
+      if (!isSwiping) return;
+      isSwiping = false;
+      const deltaY = touchCurrentY - touchStartY;
+      if (deltaY > 50) {
+        closeFabActionSheet();
+      } else {
+        fabPanel.style.transform = '';
+      }
+    });
+  }
+
+  // Tapping outside panel closes sheet
+  document.getElementById('fabActionSheet')?.addEventListener('click', (e) => {
+    if (e.target.id === 'fabActionSheet' || e.target.id === 'fabActionSheetBackdrop') {
+      closeFabActionSheet();
+    }
+  });
+
+  // Tapping any bottom nav button closes sheet
+  document.querySelectorAll('.bottom-nav .nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (typeof closeFabActionSheet === 'function') closeFabActionSheet();
+    });
+  });
 
   document.getElementById('fabSheetNewChat')?.addEventListener('click', () => {
     closeFabActionSheet();
@@ -23005,15 +23142,7 @@ function setupGlobalIncomingMessageListener() {
         const badges = document.querySelectorAll('#contactList .unread-badge');
         let total = 0;
         badges.forEach(b => { total += (parseInt(b.textContent, 10) || 0); });
-        const navChatsBadge = document.getElementById('navChatsCountBadge');
-        if (navChatsBadge) {
-          if (total > 0) {
-            navChatsBadge.textContent = total > 99 ? '99+' : total;
-            navChatsBadge.style.display = 'inline-flex';
-          } else {
-            navChatsBadge.style.display = 'none';
-          }
-        }
+        updateNavChatsBadge(total);
       }, 2500);
     }
   } catch (err) {
@@ -23517,15 +23646,7 @@ async function loadContacts() {
 
     // Update Bottom Nav Chats Unread Badge Pill
     const totalUnreadCount = contactDataList.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
-    const navChatsBadge = document.getElementById('navChatsCountBadge');
-    if (navChatsBadge) {
-      if (totalUnreadCount > 0) {
-        navChatsBadge.textContent = totalUnreadCount > 99 ? '99+' : totalUnreadCount;
-        navChatsBadge.style.display = 'inline-flex';
-      } else {
-        navChatsBadge.style.display = 'none';
-      }
-    }
+    updateNavChatsBadge(totalUnreadCount);
 
     const groupCount = await appendGroupsToContactList(contactList);
     if (contactDataList.length === 0 && groupCount === 0) {

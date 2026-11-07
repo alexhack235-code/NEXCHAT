@@ -252,7 +252,7 @@
 
     document.getElementById('nav-messages')?.classList.add('active');
 
-    document.getElementById('navChatsCountBadge')?.setAttribute('style', 'display: inline-flex;');
+    // document.getElementById('navChatsCountBadge')?.setAttribute('style', 'display: inline-flex;');
 
 
 

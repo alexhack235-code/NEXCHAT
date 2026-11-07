@@ -17450,11 +17450,11 @@ body.channel-route-active #chatContainer {
   transform: translateY(-1px) !important;
 }
 
-/* FAB Action Sheet Modal (200ms ease slide-up) */
+/* FAB Action Sheet Modal (200ms ease slide-up, sits ABOVE bottom nav) */
 .fab-action-sheet-overlay {
   position: fixed !important;
   inset: 0 !important;
-  z-index: 100000 !important;
+  z-index: 10000 !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: flex-end !important;
@@ -17463,21 +17463,38 @@ body.channel-route-active #chatContainer {
 .fab-action-sheet-backdrop {
   position: absolute !important;
   inset: 0 !important;
-  background: rgba(0, 0, 0, 0.65) !important;
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   animation: fabFadeIn 200ms ease-out !important;
+  transition: opacity 200ms ease-in !important;
+}
+
+.fab-action-sheet-backdrop.closing {
+  opacity: 0 !important;
 }
 
 .fab-action-sheet-panel {
   position: relative !important;
+  bottom: calc(var(--bottom-nav-height, 62px) + env(safe-area-inset-bottom, 0px)) !important;
+  max-height: 60vh !important;
+  max-height: 60dvh !important;
   background: #111b21 !important;
-  border-radius: 20px 20px 0 0 !important;
-  padding: 12px 18px calc(24px + env(safe-area-inset-bottom, 0px)) 18px !important;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.75) !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 24px 24px 0 0 !important;
+  padding: 12px 18px 18px 18px !important;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.6) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
   animation: fabSlideUp 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1) !important;
   z-index: 2 !important;
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
+}
+
+.fab-action-sheet-panel.closing {
+  transform: translateY(100%) !important;
+  transition: transform 200ms ease-in !important;
 }
 
 @keyframes fabFadeIn {
@@ -17491,21 +17508,23 @@ body.channel-route-active #chatContainer {
 }
 
 .fab-action-sheet-handle {
-  width: 36px !important;
+  width: 38px !important;
   height: 4px !important;
-  background: rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.28) !important;
   border-radius: 2px !important;
-  margin: 0 auto 12px auto !important;
+  margin: 0 auto 10px auto !important;
+  cursor: grab !important;
 }
 
 .fab-action-sheet-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  margin-bottom: 14px !important;
+  margin-bottom: 12px !important;
 }
 
-.fab-action-sheet-header h3 {
+.fab-action-sheet-header h3,
+.fab-action-sheet-title {
   font-size: 16px !important;
   font-weight: 700 !important;
   color: #e9edef !important;
@@ -17513,18 +17532,36 @@ body.channel-route-active #chatContainer {
 }
 
 .fab-action-sheet-close {
-  background: none !important;
-  border: none !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
   color: #8696a0 !important;
-  font-size: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   cursor: pointer !important;
-  padding: 4px !important;
+  padding: 0 !important;
+  transition: background 0.15s ease, transform 0.15s ease !important;
+}
+
+.fab-action-sheet-close:hover,
+.fab-action-sheet-close:active {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  transform: scale(1.05) !important;
+}
+
+.fab-action-sheet-close svg {
+  display: block !important;
+  stroke: #e9edef !important;
 }
 
 .fab-action-sheet-list {
   display: flex !important;
   flex-direction: column !important;
-  gap: 8px !important;
+  gap: 10px !important;
 }
 
 .fab-action-sheet-item {
@@ -17532,44 +17569,51 @@ body.channel-route-active #chatContainer {
   align-items: center !important;
   gap: 14px !important;
   width: 100% !important;
-  padding: 12px 14px !important;
+  padding: 10px 14px !important;
   background: #182229 !important;
-  border: 1px solid rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
   border-radius: 14px !important;
   text-align: left !important;
   cursor: pointer !important;
   transition: background 0.15s ease, transform 0.15s ease !important;
 }
 
-.fab-action-sheet-item:hover {
+.fab-action-sheet-item:hover,
+.fab-action-sheet-item:active {
   background: #202c33 !important;
-  transform: translateX(3px) !important;
+  transform: translateX(2px) !important;
 }
 
 .fab-sheet-item-icon {
-  width: 42px !important;
-  height: 42px !important;
+  width: 48px !important;
+  height: 48px !important;
+  min-width: 48px !important;
+  min-height: 48px !important;
   border-radius: 50% !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  font-size: 18px !important;
   flex-shrink: 0 !important;
 }
 
+.fab-sheet-item-icon svg {
+  display: block !important;
+  stroke: #ffffff !important;
+}
+
 .fab-sheet-item-icon.chat-icon {
-  background: rgba(0, 255, 157, 0.15) !important;
-  color: #00FF9D !important;
+  background: #00FF9D !important;
+  box-shadow: 0 4px 14px rgba(0, 255, 157, 0.3) !important;
 }
 
 .fab-sheet-item-icon.channel-icon {
-  background: rgba(0, 242, 254, 0.15) !important;
-  color: #00f2fe !important;
+  background: #00C2FF !important;
+  box-shadow: 0 4px 14px rgba(0, 194, 255, 0.3) !important;
 }
 
 .fab-sheet-item-icon.reel-icon {
-  background: rgba(254, 44, 85, 0.15) !important;
-  color: #fe2c55 !important;
+  background: #FF3B6B !important;
+  box-shadow: 0 4px 14px rgba(255, 59, 107, 0.3) !important;
 }
 
 .fab-sheet-item-meta {
@@ -17578,7 +17622,7 @@ body.channel-route-active #chatContainer {
 }
 
 .fab-sheet-item-title {
-  font-size: 14.5px !important;
+  font-size: 15px !important;
   font-weight: 600 !important;
   color: #e9edef !important;
 }
@@ -17586,7 +17630,43 @@ body.channel-route-active #chatContainer {
 .fab-sheet-item-sub {
   font-size: 12px !important;
   color: #8696a0 !important;
-  margin-top: 1px !important;
+  margin-top: 2px !important;
+}
+
+/* ==========================================================================
+   BOTTOM NAVIGATION BADGES & BEACONS STRICT HIDE RULES
+   Never display badge or beacon unless unread count > 0!
+   ========================================================================== */
+.bottom-nav {
+  z-index: 10001 !important;
+}
+
+.bottom-nav .nav-pill-badge,
+#navChatsCountBadge,
+#navChatsCountBadge:empty,
+#navChatsCountBadge[data-count="0"],
+.bottom-nav .nav-pill-badge:not(.has-unread) {
+  display: none !important;
+}
+
+.bottom-nav .nav-pill-badge.has-unread,
+#navChatsCountBadge.has-unread {
+  display: inline-flex !important;
+}
+
+.bottom-nav .nav-status-beacon,
+#navUpdatesBeacon,
+#navAlertsBeacon,
+#navAiBeacon,
+.bottom-nav .nav-status-beacon:not(.has-unread) {
+  display: none !important;
+}
+
+.bottom-nav .nav-status-beacon.has-unread,
+#navUpdatesBeacon.has-unread,
+#navAlertsBeacon.has-unread,
+#navAiBeacon.has-unread {
+  display: block !important;
 }
 
 /* Horizontal scroll pills - no wrap */

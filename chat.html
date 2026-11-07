@@ -787,29 +787,53 @@
         <!-- FAB Bottom Action Sheet Modal (200ms ease slide-up) -->
         <div id="fabActionSheet" class="fab-action-sheet-overlay" style="display: none;" aria-hidden="true">
           <div class="fab-action-sheet-backdrop" id="fabActionSheetBackdrop"></div>
-          <div class="fab-action-sheet-panel">
-            <div class="fab-action-sheet-handle"></div>
+          <div class="fab-action-sheet-panel" id="fabActionSheetPanel">
+            <div class="fab-action-sheet-handle" id="fabActionSheetHandle"></div>
             <div class="fab-action-sheet-header">
-              <h3>Create</h3>
-              <button type="button" class="fab-action-sheet-close" id="closeFabActionSheetBtn" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+              <h3 class="fab-action-sheet-title">Create</h3>
+              <button type="button" class="fab-action-sheet-close" id="closeFabActionSheetBtn" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e9edef" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
             <div class="fab-action-sheet-list">
+              <!-- 1. Start New Chat (MessageCircle icon, 48px circle, #00FF9D) -->
               <button type="button" class="fab-action-sheet-item" id="fabSheetNewChat">
-                <div class="fab-sheet-item-icon chat-icon"><i class="fa-solid fa-comment-medical"></i></div>
+                <div class="fab-sheet-item-icon chat-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+                  </svg>
+                </div>
                 <div class="fab-sheet-item-meta">
                   <span class="fab-sheet-item-title">Start New Chat</span>
                   <span class="fab-sheet-item-sub">Search contacts and friends</span>
                 </div>
               </button>
+
+              <!-- 2. New Channel (Megaphone / Broadcast icon, 48px circle, #00C2FF) -->
               <button type="button" class="fab-action-sheet-item" id="fabSheetNewChannel">
-                <div class="fab-sheet-item-icon channel-icon"><i class="fa-solid fa-satellite-dish"></i></div>
+                <div class="fab-sheet-item-icon channel-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m3 11 18-5v12L3 14v-3z"></path>
+                    <path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path>
+                  </svg>
+                </div>
                 <div class="fab-sheet-item-meta">
                   <span class="fab-sheet-item-title">New Channel</span>
                   <span class="fab-sheet-item-sub">Broadcast updates to followers</span>
                 </div>
               </button>
+
+              <!-- 3. Post Reel / CamShot (Video / Clapperboard icon, 48px circle, #FF3B6B) -->
               <button type="button" class="fab-action-sheet-item" id="fabSheetNewReel">
-                <div class="fab-sheet-item-icon reel-icon"><i class="fa-solid fa-clapperboard"></i></div>
+                <div class="fab-sheet-item-icon reel-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m22 8-6 4 6 4V8Z"></path>
+                    <rect width="14" height="12" x="2" y="6" rx="2" ry="2"></rect>
+                  </svg>
+                </div>
                 <div class="fab-sheet-item-meta">
                   <span class="fab-sheet-item-title">Post Reel / CamShot</span>
                   <span class="fab-sheet-item-sub">Share immersive short videos</span>
@@ -5416,7 +5440,7 @@
       <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chats">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-comment-dots"></i>
-          <span class="nav-pill-badge" id="navChatsCountBadge" style="display: none;">0</span>
+          <span class="nav-pill-badge" id="navChatsCountBadge" style="display: none !important;"></span>
         </div>
         <span class="nav-label">Chats</span>
       </button>
@@ -5425,7 +5449,7 @@
       <button id="nav-status" class="nav-item" data-nav="updates" title="Status Updates">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-circle-notch"></i>
-          <span class="nav-status-beacon" id="navUpdatesBeacon" style="display: none; background:#00FF9D;"></span>
+          <span class="nav-status-beacon" id="navUpdatesBeacon" style="display: none !important; background:#00FF9D;"></span>
         </div>
         <span class="nav-label">Updates</span>
       </button>
@@ -5450,7 +5474,7 @@
       <button id="nav-announcements" class="nav-item" data-nav="announcements" title="System Announcements">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-bullhorn"></i>
-          <span class="nav-status-beacon" id="navAlertsBeacon" style="display: none; background:#00FF9D;"></span>
+          <span class="nav-status-beacon" id="navAlertsBeacon" style="display: none !important; background:#00FF9D;"></span>
         </div>
         <span class="nav-label">Alerts</span>
       </button>
@@ -5467,7 +5491,7 @@
       <button id="nav-ai" class="nav-item desktop-only-nav" data-nav="ai" title="ChronEX AI Assistant">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-microchip"></i>
-          <span class="nav-status-beacon" id="navAiBeacon" style="display: none; background:#00FF9D;"></span>
+          <span class="nav-status-beacon" id="navAiBeacon" style="display: none !important; background:#00FF9D;"></span>
         </div>
         <span class="nav-label">ChronEX AI</span>
       </button>
