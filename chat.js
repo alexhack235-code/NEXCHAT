@@ -9589,31 +9589,20 @@ function hideChatProfileDisplay() {
 function updateNavChatsBadge(count) {
   const badge = document.getElementById('navChatsCountBadge');
   if (!badge) return;
-  const num = parseInt(count, 10) || 0;
-  if (num > 0) {
-    badge.textContent = num > 99 ? '99+' : String(num);
-    badge.dataset.count = String(num);
-    badge.classList.add('has-unread');
-    badge.style.setProperty('display', 'inline-flex', 'important');
-  } else {
-    badge.textContent = '';
-    badge.dataset.count = '0';
-    badge.classList.remove('has-unread');
-    badge.style.setProperty('display', 'none', 'important');
-  }
+  const num = parseInt(count, 10);
+  const displayVal = isNaN(num) ? 0 : num;
+  badge.textContent = displayVal > 99 ? '99+' : String(displayVal);
+  badge.dataset.count = String(displayVal);
+  badge.classList.add('has-unread');
+  badge.style.setProperty('display', 'inline-flex', 'important');
 }
 window.updateNavChatsBadge = updateNavChatsBadge;
 
 function updateNavUpdatesBeacon(hasUnread) {
   const beacon = document.getElementById('navUpdatesBeacon');
   if (!beacon) return;
-  if (hasUnread) {
-    beacon.classList.add('has-unread');
-    beacon.style.setProperty('display', 'block', 'important');
-  } else {
-    beacon.classList.remove('has-unread');
-    beacon.style.setProperty('display', 'none', 'important');
-  }
+  beacon.classList.add('has-unread');
+  beacon.style.setProperty('display', 'block', 'important');
 }
 window.updateNavUpdatesBeacon = updateNavUpdatesBeacon;
 
@@ -23725,10 +23714,6 @@ async function loadContacts() {
 
     const groupCount = await appendGroupsToContactList(contactList);
     if (contactDataList.length === 0 && groupCount === 0) {
-      // PRESERVE CHAT VIEW: Never overwrite contactList with empty dead state
-      if (!contactList.querySelector('li[data-chat-id="chronex-ai"]')) {
-        contactList.appendChild(chronexLi);
-      }
       if (typeof window.syncLocalChatsToDOM === 'function') {
         window.syncLocalChatsToDOM();
       }

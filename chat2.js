@@ -161,31 +161,76 @@ export function saveStoredChat(chat) {
  */
 export function createContactListItem(chat) {
   const li = document.createElement('li');
-  li.className = 'chat-item';
+  li.className = 'chat-list-item chat-item' + (chat.uid === 'chronex-ai' ? ' chronex-ai-item' : '');
   li.dataset.chatId = chat.uid;
   li.dataset.uid = chat.uid;
   li.dataset.chatType = chat.type || 'direct';
   li.dataset.name = chat.name || 'User';
 
-  const badgeHtml = chat.badge === 'AI'
-    ? `<span class="verified-badge-pill ai-badge" style="background: rgba(0, 243, 255, 0.2); color: #00f3ff; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; font-weight: 700;"><i class="fa-solid fa-microchip"></i> AI</span>`
-    : (chat.isVerified ? `<span class="verified-badge-pill" style="background: rgba(0, 255, 157, 0.2); color: #00ff9d; font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; font-weight: 700;"><i class="fa-solid fa-shield-check"></i> PRO</span>` : '');
+  let avatarHtml = '';
+  if (chat.uid === 'chronex-ai') {
+    avatarHtml = `
+      <div class="chat-avatar-container" style="position: relative;">
+        <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
+        <span class="chat-online-beacon" style="display: block;"></span>
+        <span class="avatar-achievement-badge" style="background: linear-gradient(135deg, #00ff66, #00d4ff); color: #041019; box-shadow: 0 0 10px rgba(0,255,102,0.5);"><i class="fa-solid fa-bolt"></i><span>AI</span></span>
+      </div>`;
+  } else if (chat.isSmiley || chat.name === '@Daven ★' || chat.uid === 'daven') {
+    avatarHtml = `
+      <div class="chat-avatar-container" style="position: relative;">
+        <svg width="52" height="52" viewBox="0 0 52 52" class="chat-avatar" style="width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);"><circle cx="26" cy="26" r="26" fill="#050a0e"/><circle cx="26" cy="26" r="24" fill="#0e1720"/><path d="M16 19L22 25M22 19L16 25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M30 19L36 25M36 19L30 25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M17 33C20 38 32 38 35 33" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+        <span class="chat-online-beacon" style="display: block;"></span>
+      </div>`;
+  } else if (chat.pic) {
+    avatarHtml = `
+      <div class="chat-avatar-container" style="position: relative;">
+        <img src="${chat.pic}" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">
+        <span class="chat-online-beacon" style="display: block;"></span>
+      </div>`;
+  } else {
+    const letter = chat.letter || (chat.name ? chat.name.charAt(0).toUpperCase() : 'U');
+    avatarHtml = `
+      <div class="chat-avatar-container" style="position: relative;">
+        <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">${letter}</div>
+        <span class="chat-online-beacon" style="display: block;"></span>
+      </div>`;
+  }
+
+  let titleHeaderHtml = '';
+  if (chat.uid === 'chronex-ai') {
+    titleHeaderHtml = `
+      <span class="chat-name" style="font-family: 'Space Grotesk', sans-serif;">Chronex AI</span>
+      <span class="tg-verified-badge green nex-verified-badge" title="Verified AI Assistant"><i class="fa-solid fa-circle-check"></i></span>
+      <span class="chronex-vip-pill"><i class="fa-solid fa-bolt"></i> NEURAL CORE</span>`;
+  } else {
+    titleHeaderHtml = `<span class="chat-name">${escapeHtml(chat.name)}</span>`;
+  }
+
+  let previewHtml = '';
+  if (chat.uid === 'chronex-ai') {
+    previewHtml = `<p class="chat-preview" style="color: #25d366; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 4px;"><i class="fa-solid fa-microchip delivery-icon"></i><span class="preview-text">Ready • Latency 14ms</span></p>`;
+  } else if (chat.lastMsg && chat.lastMsg.startsWith('You: ')) {
+    previewHtml = `<p class="chat-preview"><span class="delivery-tick sent" title="Sent"><i class="fa-solid fa-check"></i></span> <span class="preview-text">${escapeHtml(chat.lastMsg)}</span></p>`;
+  } else {
+    previewHtml = `<p class="chat-preview"><span class="preview-text">${escapeHtml(chat.lastMsg || 'No messages yet')}</span></p>`;
+  }
+
+  let timeHtml = chat.uid === 'chronex-ai'
+    ? `<span class="chat-item-time" style="color: #25d366; font-weight: 600; font-size: 12px;">ONLINE</span>`
+    : `<span class="chat-item-time">${escapeHtml(chat.time || '')}</span>`;
 
   li.innerHTML = `
-    <div class="chat-avatar-container" style="position: relative;">
-      <img src="${chat.pic || 'logo.jpg'}" class="chat-avatar" alt="${escapeHtml(chat.name)}" onerror="this.src='logo.jpg';">
-      <span class="chat-online-beacon"></span>
-    </div>
+    ${avatarHtml}
     <div class="chat-item-content">
       <div class="chat-item-header">
-        <span class="chat-name">${escapeHtml(chat.name)}</span>
-        ${badgeHtml}
+        ${titleHeaderHtml}
       </div>
-      <p class="chat-preview">${escapeHtml(chat.lastMsg || chat.status || 'Tap to chat')}</p>
+      ${previewHtml}
     </div>
     <div class="chat-time-container">
-      <span class="chat-item-time">Active</span>
+      ${timeHtml}
     </div>
+    <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
   `;
 
   li.addEventListener('click', () => {
@@ -207,44 +252,73 @@ export function syncLocalChatsToDOM() {
   const contactList = document.getElementById('contactList');
   if (!contactList) return;
 
-  let chats = getStoredChats();
-  if (chats.length === 0) {
-    chats = [
-      {
-        uid: 'chronex-ai',
-        name: 'ChronEX AI',
-        pic: 'chronex-ai.jpg',
-        type: 'ai',
-        badge: 'AI',
-        isVerified: true,
-        status: 'Autonomous Cyber Intelligence (Online)',
-        lastMsg: 'Tap to chat with ChronEX AI Assistant'
-      },
-      {
-        uid: 'nex-support',
-        name: 'NEXCHAT Concierge',
-        pic: 'logo.jpg',
-        type: 'direct',
-        badge: 'VERIFIED',
-        isVerified: true,
-        status: 'Official VIP System Support',
-        lastMsg: 'Official VIP Support • Tap to connect'
-      },
-      {
-        uid: 'cyber-syndicate',
-        name: 'Cyber Syndicate',
-        pic: 'logo.jpg',
-        type: 'group',
-        badge: 'VERIFIED',
-        isVerified: true,
-        status: 'Decentralized Tech Network',
-        lastMsg: 'Broadcast updates: Neural Translation Active'
-      }
-    ];
-    try {
-      localStorage.setItem(LOCAL_CHATS_STORAGE_KEY, JSON.stringify(chats));
-    } catch (_) {}
-  }
+  const defaultChats = [
+    {
+      uid: 'chronex-ai',
+      name: 'Chronex AI',
+      pic: 'chronex-ai.jpg',
+      type: 'ai',
+      badge: 'AI',
+      isVerified: true,
+      status: 'Ready • Latency 14ms',
+      lastMsg: 'Ready • Latency 14ms'
+    },
+    {
+      uid: 'duty',
+      name: 'DUTY',
+      type: 'direct',
+      letter: 'D',
+      lastMsg: 'You: N n',
+      time: '18h'
+    },
+    {
+      uid: 'home-alone',
+      name: 'Home Alone',
+      type: 'direct',
+      letter: 'H',
+      lastMsg: 'You: Please provide more content for th...',
+      time: '1d'
+    },
+    {
+      uid: 'king-alex001',
+      name: 'king Alex001',
+      pic: 'logo.jpg',
+      type: 'direct',
+      lastMsg: 'You: Bruh',
+      time: '2d'
+    },
+    {
+      uid: 'daven',
+      name: '@Daven ★',
+      type: 'direct',
+      isSmiley: true,
+      lastMsg: 'You: Heyyyyyyyyyyyy.',
+      time: '2d'
+    },
+    {
+      uid: 'demon-alexander',
+      name: 'demon alexander',
+      type: 'direct',
+      letter: 'D',
+      lastMsg: 'No messages yet',
+      time: '2d'
+    },
+    {
+      uid: 'werxcsz',
+      name: 'Werxcsz',
+      type: 'direct',
+      letter: 'W',
+      lastMsg: 'No messages yet',
+      time: '2d'
+    }
+  ];
+
+  let stored = getStoredChats();
+  const hasDuty = Array.isArray(stored) && stored.some(c => c && (c.uid === 'duty' || c.name === 'DUTY'));
+  let chatsToUse = (Array.isArray(stored) && stored.length >= 6 && hasDuty) ? stored : defaultChats;
+  try {
+    localStorage.setItem(LOCAL_CHATS_STORAGE_KEY, JSON.stringify(chatsToUse));
+  } catch (_) {}
 
   // Remove empty state watermark once chats exist
   const emptyState = document.getElementById('emptyChatState');
@@ -252,7 +326,7 @@ export function syncLocalChatsToDOM() {
     emptyState.remove();
   }
 
-  chats.forEach(chat => {
+  chatsToUse.forEach(chat => {
     const existingLi = contactList.querySelector(`li[data-chat-id="${chat.uid}"]`);
     if (!existingLi) {
       contactList.appendChild(createContactListItem(chat));

@@ -749,7 +749,7 @@
         <!-- Active Chats Section -->
         <div class="chats-section">
           <ul id="contactList" class="chat-list">
-            <!-- ChronEX AI Pre-seeded Instant Chat -->
+            <!-- 1. ChronEX AI Pre-seeded Instant Chat -->
             <li class="chat-list-item chat-item chronex-ai-item" data-chat-id="chronex-ai" data-chat-type="ai" data-name="Chronex AI" onclick="if(typeof openChat==='function'){openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai'); if(typeof showChatDetailView==='function')showChatDetailView();}">
               <div class="chat-avatar-container" style="position: relative;">
                 <img src="chronex-ai.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #25d366; box-shadow: 0 0 12px rgba(37, 211, 102, 0.3);">
@@ -764,7 +764,7 @@
                 </div>
                 <p class="chat-preview" style="color: #25d366; font-size: 13.5px; font-weight: 500; display: flex; align-items: center; gap: 4px;">
                   <i class="fa-solid fa-microchip delivery-icon"></i>
-                  <span class="preview-text">Ready • Tap to chat with AI</span>
+                  <span class="preview-text">Ready • Latency 14ms</span>
                 </p>
               </div>
               <div class="chat-time-container">
@@ -773,21 +773,110 @@
               <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
             </li>
 
-            <!-- NEXCHAT Concierge Pre-seeded Instant Chat -->
-            <li class="chat-list-item chat-item" data-chat-id="nex-support" data-chat-type="direct" data-name="NEXCHAT Concierge" onclick="if(typeof openChat==='function'){openChat('nex-support', 'NEXCHAT Concierge', 'logo.jpg', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <!-- 2. DUTY -->
+            <li class="chat-list-item chat-item" data-chat-id="duty" data-chat-type="direct" data-name="DUTY" onclick="if(typeof openChat==='function'){openChat('duty', 'DUTY', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
               <div class="chat-avatar-container" style="position: relative;">
-                <img src="logo.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 12px rgba(0, 255, 157, 0.3);">
+                <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">D</div>
                 <span class="chat-online-beacon" style="display: block;"></span>
               </div>
               <div class="chat-item-content">
                 <div class="chat-item-header">
-                  <span class="chat-name" style="font-family: 'Space Grotesk', sans-serif;">NEXCHAT Concierge</span>
-                  <span class="tg-verified-badge green nex-verified-badge" title="Official VIP Support"><i class="fa-solid fa-circle-check"></i></span>
+                  <span class="chat-name">DUTY</span>
                 </div>
-                <p class="chat-preview" style="color: #8b949e; font-size: 13px;">Official VIP System Support • Tap to connect</p>
+                <p class="chat-preview"><span class="delivery-tick sent" title="Sent"><i class="fa-solid fa-check"></i></span> <span class="preview-text">You: N n</span></p>
               </div>
               <div class="chat-time-container">
-                <span class="chat-item-time" style="color: #8b949e; font-size: 12px;">Active</span>
+                <span class="chat-item-time">18h</span>
+              </div>
+              <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            </li>
+
+            <!-- 3. Home Alone -->
+            <li class="chat-list-item chat-item" data-chat-id="home-alone" data-chat-type="direct" data-name="Home Alone" onclick="if(typeof openChat==='function'){openChat('home-alone', 'Home Alone', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+              <div class="chat-avatar-container" style="position: relative;">
+                <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">H</div>
+                <span class="chat-online-beacon" style="display: block;"></span>
+              </div>
+              <div class="chat-item-content">
+                <div class="chat-item-header">
+                  <span class="chat-name">Home Alone</span>
+                </div>
+                <p class="chat-preview"><span class="delivery-tick sent" title="Sent"><i class="fa-solid fa-check"></i></span> <span class="preview-text">You: Please provide more content for th...</span></p>
+              </div>
+              <div class="chat-time-container">
+                <span class="chat-item-time">1d</span>
+              </div>
+              <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            </li>
+
+            <!-- 4. king Alex001 -->
+            <li class="chat-list-item chat-item" data-chat-id="king-alex001" data-chat-type="direct" data-name="king Alex001" onclick="if(typeof openChat==='function'){openChat('king-alex001', 'king Alex001', 'logo.jpg', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+              <div class="chat-avatar-container" style="position: relative;">
+                <img src="logo.jpg" class="chat-avatar" onerror="this.src='logo.jpg';" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">
+                <span class="chat-online-beacon" style="display: block;"></span>
+              </div>
+              <div class="chat-item-content">
+                <div class="chat-item-header">
+                  <span class="chat-name">king Alex001</span>
+                </div>
+                <p class="chat-preview"><span class="delivery-tick sent" title="Sent"><i class="fa-solid fa-check"></i></span> <span class="preview-text">You: Bruh</span></p>
+              </div>
+              <div class="chat-time-container">
+                <span class="chat-item-time">2d</span>
+              </div>
+              <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            </li>
+
+            <!-- 5. @Daven ★ -->
+            <li class="chat-list-item chat-item" data-chat-id="daven" data-chat-type="direct" data-name="@Daven ★" onclick="if(typeof openChat==='function'){openChat('daven', '@Daven ★', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+              <div class="chat-avatar-container" style="position: relative;">
+                <svg width="52" height="52" viewBox="0 0 52 52" class="chat-avatar" style="width: 52px; height: 52px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);"><circle cx="26" cy="26" r="26" fill="#050a0e"/><circle cx="26" cy="26" r="24" fill="#0e1720"/><path d="M16 19L22 25M22 19L16 25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M30 19L36 25M36 19L30 25" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/><path d="M17 33C20 38 32 38 35 33" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" fill="none"/></svg>
+                <span class="chat-online-beacon" style="display: block;"></span>
+              </div>
+              <div class="chat-item-content">
+                <div class="chat-item-header">
+                  <span class="chat-name">@Daven ★</span>
+                </div>
+                <p class="chat-preview"><span class="delivery-tick sent" title="Sent"><i class="fa-solid fa-check"></i></span> <span class="preview-text">You: Heyyyyyyyyyyyy.</span></p>
+              </div>
+              <div class="chat-time-container">
+                <span class="chat-item-time">2d</span>
+              </div>
+              <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            </li>
+
+            <!-- 6. demon alexander -->
+            <li class="chat-list-item chat-item" data-chat-id="demon-alexander" data-chat-type="direct" data-name="demon alexander" onclick="if(typeof openChat==='function'){openChat('demon-alexander', 'demon alexander', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+              <div class="chat-avatar-container" style="position: relative;">
+                <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">D</div>
+                <span class="chat-online-beacon" style="display: block;"></span>
+              </div>
+              <div class="chat-item-content">
+                <div class="chat-item-header">
+                  <span class="chat-name">demon alexander</span>
+                </div>
+                <p class="chat-preview"><span class="preview-text">No messages yet</span></p>
+              </div>
+              <div class="chat-time-container">
+                <span class="chat-item-time">2d</span>
+              </div>
+              <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+            </li>
+
+            <!-- 7. Werxcsz -->
+            <li class="chat-list-item chat-item" data-chat-id="werxcsz" data-chat-type="direct" data-name="Werxcsz" onclick="if(typeof openChat==='function'){openChat('werxcsz', 'Werxcsz', '', 'direct'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+              <div class="chat-avatar-container" style="position: relative;">
+                <div class="chat-avatar avatar-placeholder" style="width: 52px; height: 52px; background: #0c1813; color: #00ff9d; display: flex !important; align-items: center; justify-content: center; font-weight: 700; font-size: 20px; border-radius: 50%; border: 1.5px solid #00ff9d; box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);">W</div>
+                <span class="chat-online-beacon" style="display: block;"></span>
+              </div>
+              <div class="chat-item-content">
+                <div class="chat-item-header">
+                  <span class="chat-name">Werxcsz</span>
+                </div>
+                <p class="chat-preview"><span class="preview-text">No messages yet</span></p>
+              </div>
+              <div class="chat-time-container">
+                <span class="chat-item-time">2d</span>
               </div>
               <button class="chat-menu-btn" title="Options"><i class="fa-solid fa-ellipsis-vertical"></i></button>
             </li>
@@ -795,9 +884,14 @@
         </div>
 
         <!-- WhatsApp Single 56px Neon Green FAB (New Chat / Channel / Reel Action Sheet) -->
-        <div class="chat-fab-cluster single-fab-cluster" id="chatFabCluster">
-          <button type="button" id="mobileFabNewChat" class="mobile-fab nex-unified-fab" title="New" aria-label="New Actions">
-            <i class="fa-solid fa-plus"></i>
+        <div class="chat-fab-cluster" id="chatFabCluster">
+          <button type="button" id="chronexAiFabBtn" class="chronex-ai-fab" title="Ask ChronEX AI" aria-label="Ask ChronEX AI" onclick="if(typeof openChat==='function'){openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai'); if(typeof showChatDetailView==='function')showChatDetailView();}">
+            <div class="ai-conic-ring">
+              <i class="fa-solid fa-circle-nodes"></i>
+            </div>
+          </button>
+          <button type="button" id="mobileFabNewChat" class="mobile-fab whatsapp-chat-fab nex-unified-fab" title="New Chat" aria-label="New Chat">
+            <span class="nex-fab-n" style="font-family:'Space Grotesk',sans-serif; font-weight:900; font-size:24px; color:#0A0F1E; line-height:1; display:flex; align-items:center; justify-content:center;">N</span>
           </button>
         </div>
 
@@ -5457,7 +5551,7 @@
       <button id="nav-messages" class="nav-item active" data-nav="chats" title="Chats">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-comment-dots"></i>
-          <span class="nav-pill-badge" id="navChatsCountBadge" style="display: none !important;"></span>
+          <span class="nav-pill-badge" id="navChatsCountBadge">0</span>
         </div>
         <span class="nav-label">Chats</span>
       </button>
@@ -5466,7 +5560,7 @@
       <button id="nav-status" class="nav-item" data-nav="updates" title="Status Updates">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-circle-notch"></i>
-          <span class="nav-status-beacon" id="navUpdatesBeacon" style="display: none !important; background:#00FF9D;"></span>
+          <span class="nav-status-beacon" id="navUpdatesBeacon"></span>
         </div>
         <span class="nav-label">Updates</span>
       </button>
@@ -5491,7 +5585,7 @@
       <button id="nav-announcements" class="nav-item" data-nav="announcements" title="System Announcements">
         <div class="nav-icon-wrapper">
           <i class="fa-solid fa-bullhorn"></i>
-          <span class="nav-status-beacon" id="navAlertsBeacon" style="display: none !important; background:#00FF9D;"></span>
+          <span class="nav-status-beacon" id="navAlertsBeacon"></span>
         </div>
         <span class="nav-label">Alerts</span>
       </button>
