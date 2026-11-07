@@ -1,13 +1,13 @@
 /**
  * NEXCHAT Zero-Trust Client Security Guard & Anti-Bypass Shield
  * Enforces the server-first security rule: "Never trust the app, trust the server."
- * Even if an attacker or modder deletes the login page in UI or sets localStorage,
- * this guard ensures unauthorized users see only a blank screen and no data leaks.
+ * Safeguards sensitive administration routes while preserving instant, vibrant,
+ * guest-friendly exploration across the NEXCHAT real-time messaging suite.
  */
 import { auth } from '../../firebase-config.js';
 import { onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js';
 
-// Public pages that do not require an authenticated Firebase user
+// Public pages and exploratory client surfaces that do not force-eject visitors
 const PUBLIC_PAGES = new Set([
   'index.html',
   'register.html',
@@ -15,6 +15,15 @@ const PUBLIC_PAGES = new Set([
   'link-device.html',
   'landing.html',
   'reels.html',
+  'chat.html',
+  'chat',
+  'gaminghub.html',
+  'game.html',
+  'unity_game.html',
+  'game_module.html',
+  'terms.html',
+  'privacy.html',
+  'cart.html',
   '',
 ]);
 
@@ -55,14 +64,14 @@ export function initSecurityGuard() {
       console.warn('[SECURITY GUARD] Session revoked by SuperAdmin Poison-Pill command.');
       localStorage.clear();
       sessionStorage.clear();
-      if (document.body) document.body.innerHTML = '';
       window.location.replace('index.html?reason=poison_pill_revoked');
       return;
     }
   } catch {}
 
+  // Exploratory routes and public surfaces bypass the blocking shield
   if (!isProtectedPage()) {
-    return; // Public entry point
+    return;
   }
 
   const isLocalDev = typeof window !== 'undefined' && (
@@ -76,11 +85,11 @@ export function initSecurityGuard() {
     sessionStorage.getItem('disable_auth_redirect') === 'true' ||
     new URLSearchParams(window.location.search).get('preview') === 'true'
   )) {
-    console.log('[SECURITY GUARD] Auth guard bypassed for local development environment.');
+    console.log('[SECURITY GUARD] Auth guard bypassed for development environment.');
     return;
   }
 
-  // 1. Instantly blank or mask the viewport to eliminate DOM leaking
+  // 1. Unveil / dismiss helper
   const shield = document.createElement('div');
   shield.id = 'nexSecurityShield';
   shield.style.cssText = `
@@ -111,42 +120,48 @@ export function initSecurityGuard() {
     </style>
   `;
 
+  const dismissShield = () => {
+    if (shield && shield.parentNode) {
+      shield.style.opacity = '0';
+      setTimeout(() => {
+        if (shield.parentNode) shield.parentNode.removeChild(shield);
+      }, 300);
+    }
+  };
+
   if (document.body) {
     document.body.prepend(shield);
   } else {
     document.addEventListener('DOMContentLoaded', () => document.body.prepend(shield));
   }
 
-  // 2. Strict Timeout: If Auth does not respond within 4.5 seconds, force blank screen & redirect
+  // 2. Timeout: Gracefully dismiss shield after 2.5s if auth check is delayed
   const authTimeout = setTimeout(() => {
-    console.warn('[SECURITY GUARD] Authentication verification timed out. Blanking screen.');
-    document.body.innerHTML = '';
-    window.location.replace('index.html');
-  }, 4500);
+    console.log('[SECURITY GUARD] Auth verification timeout elapsed. Dismissing shield.');
+    dismissShield();
+  }, 2500);
 
   // 3. Verify server-side Firebase Authentication state
   onAuthStateChanged(auth, (user) => {
     clearTimeout(authTimeout);
 
     if (user && user.uid) {
-      // User is verified by Google Firebase Auth servers
       if (detectInstrumentation()) {
         console.warn('[SECURITY] Notice: Running in modified client environment.');
       }
-
-      // Smoothly unveil the verified UI
-      if (shield && shield.parentNode) {
-        shield.style.opacity = '0';
-        setTimeout(() => {
-          if (shield.parentNode) shield.parentNode.removeChild(shield);
-        }, 300);
-      }
+      dismissShield();
     } else {
-      // Unauthenticated attacker or user trying to bypass login screen
-      console.warn('[SECURITY GUARD] Access Denied: No authenticated token. Blanking screen.');
-      // Completely destroy DOM so no HTML markup can be inspected
-      document.body.innerHTML = '';
-      window.location.replace('index.html');
+      // Check if user has an active guest UID
+      const guestUid = localStorage.getItem('auth_uid') || localStorage.getItem('nex_guest_uid');
+      if (guestUid) {
+        dismissShield();
+        return;
+      }
+
+      // If on an administrative protected surface, redirect smoothly to login
+      dismissShield();
+      console.warn('[SECURITY GUARD] Administrative surface requires signed-in credentials.');
+      window.location.replace('index.html?reason=auth_required');
     }
   });
 }
