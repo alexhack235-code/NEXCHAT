@@ -36,8 +36,59 @@ const MASTER_SECRET = process.env.FORTRESS_API_KEY || process.env.VAULT_MASTER_K
 
 // Sliding-window IP rate limit cache: Map<ip, { count: number, resetAt: number }>
 const rateLimitMap = new Map();
-// IP auto-jail store: Map<ip, { reason: string, jailedAt: number, expiresAt: number }>
-const ipJailMap = new Map();
+// IP auto-jail store with strike-based progressive escalation:
+// Map<ip, { reason: string, jailedAt: number, expiresAt: number, strikes: number, appealed?: boolean }>
+export const ipJailMap = new Map();
+
+/**
+ * Strike-based progressive IP jail escalation (Layer 0 / Layer 34)
+ * Strike 1: 5 mins | Strike 2: 30 mins | Strike 3+: 24 hours
+ */
+export function banIpWithStrikes(ip, reason, explicitDurationMs = null) {
+  if (!ip || ip === "127.0.0.1" || ip === "::1" || ip === "localhost") return;
+  const now = Date.now();
+  const existing = ipJailMap.get(ip);
+  const strikes = (existing ? (existing.strikes || 1) : 0) + 1;
+
+  let durationMs = explicitDurationMs;
+  if (!durationMs) {
+    if (strikes === 1) durationMs = 5 * 60 * 1000;       // 5m
+    else if (strikes === 2) durationMs = 30 * 60 * 1000;  // 30m
+    else durationMs = 24 * 60 * 60 * 1000;                // 24h
+  }
+
+  const record = {
+    ip,
+    reason,
+    strikes,
+    jailedAt: now,
+    expiresAt: now + durationMs,
+    durationHours: durationMs / 3600000,
+  };
+
+  ipJailMap.set(ip, record);
+  return record;
+}
+
+export function isIpBanned(ip) {
+  if (!ip) return false;
+  const rec = ipJailMap.get(ip);
+  if (!rec) return false;
+  if (Date.now() > rec.expiresAt) {
+    ipJailMap.delete(ip);
+    return false;
+  }
+  return true;
+}
+
+export function submitJailAppeal(ip, reason = "") {
+  if (!isIpBanned(ip)) return { appealed: false, message: "IP is not currently banned." };
+  const record = ipJailMap.get(ip);
+  record.appealed = true;
+  record.appealReason = reason;
+  record.appealTimestamp = new Date().toISOString();
+  return { appealed: true, referenceId: record.jailedAt, message: "Appeal submitted for human security review." };
+}
 
 // Periodic cache cleanup every 5 minutes
 const cleanupTimer = setInterval(() => {
@@ -712,11 +763,7 @@ export function enforceWaf(req, res) {
       });
 
       // Auto-jail IP for 24 hours
-      ipJailMap.set(ip, {
-        reason: `ASM_SHELLCODE_ATTACK [Syscalls: ${asmAnalysis.detectedSyscalls.join(", ") || "NOP_SLED"}]`,
-        jailedAt: Date.now(),
-        expiresAt: Date.now() + JAIL_DURATION_MS,
-      });
+      banIpWithStrikes(ip, `ASM_SHELLCODE_ATTACK [Syscalls: ${asmAnalysis.detectedSyscalls.join(", ") || "NOP_SLED"}]`, JAIL_DURATION_MS);
 
       // Report threat to FORTRESS
       reportThreatToFortress({
@@ -844,11 +891,7 @@ export function enforceRateLimit(req, res, maxLimit = MAX_REQUESTS_PER_WINDOW) {
 
     // Repeated rate-limit abuse escalates to jail
     if (record.count > maxLimit * 3) {
-      ipJailMap.set(ip, {
-        reason: "EXCESSIVE_RATE_LIMIT_ABUSE",
-        jailedAt: now,
-        expiresAt: now + JAIL_DURATION_MS,
-      });
+      banIpWithStrikes(ip, "EXCESSIVE_RATE_LIMIT_ABUSE");
     }
 
     res.setHeader("Retry-After", String(retryAfterSec));
@@ -968,3 +1011,638 @@ export function handleCors(req, res) {
   }
   return false;
 }
+
+
+// ==============================================================================
+// 13. CLOUD DEFENSE SENTINEL (FORTRESS LAYER 34)
+// ==============================================================================
+export class CloudDefenseSentinel {
+  constructor() {
+    this.name = "Fortress Cloud Defense Sentinel";
+    this.version = "12.5.0-ENTERPRISE-AGENT";
+
+    // In-memory telemetry sliding windows (LRU / bounded)
+    this.trafficHistory = new Map(); // ip -> array of request records
+    this.loginAttempts = new Map();  // ip/username -> array of login records
+    this.sessionRegistry = new Map(); // token -> session metadata
+    this.incidentLogs = [];          // ring buffer of last 500 incidents
+
+    // Known Datacenter / Cloud ASN & IP prefixes
+    this.knownDatacenterRanges = [
+      "13.0.0.0/8", "52.0.0.0/8", "54.0.0.0/8",   // AWS
+      "34.0.0.0/8", "35.0.0.0/8",                 // GCP
+      "20.0.0.0/8", "40.0.0.0/8",                 // Azure
+      "167.99.0.0/16", "159.203.0.0/16",          // DigitalOcean
+      "88.198.0.0/16", "138.201.0.0/16"           // Hetzner
+    ];
+
+    // Secret extraction signatures
+    this.secretSignatures = [
+      { type: "Gemini API Key", regex: /AQ\.Ab8RN6[A-Za-z0-9_-]{20,}/g, severity: "CRITICAL" },
+      { type: "Google Cloud / Firebase API Key", regex: /AIzaSy[0-9A-Za-z_-]{33}/g, severity: "HIGH" },
+      { type: "OpenAI API Key", regex: /sk-(?:proj-)?[A-Za-z0-9_-]{20,}/g, severity: "CRITICAL" },
+      { type: "Anthropic API Key", regex: /sk-ant-[A-Za-z0-9_-]{20,}/g, severity: "CRITICAL" },
+      { type: "AWS Access Key ID", regex: /AKIA[0-9A-Z]{16}/g, severity: "CRITICAL" },
+      { type: "Vercel Blob RW Token", regex: /vercel_blob_rw_[A-Za-z0-9_]{30,}/g, severity: "CRITICAL" },
+      { type: "GitHub Personal Access Token", regex: /gh[pousr]_[A-Za-z0-9_]{36,}/g, severity: "CRITICAL" },
+      { type: "Generic Private Key", regex: /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/g, severity: "CRITICAL" }
+    ];
+
+    // Debug & sensitive endpoint paths
+    this.debugEndpointPatterns = [
+      /(?:\/|^)(?:\.env|\.git|\.aws|\.docker)/i,
+      /(?:\/|^)(?:debug|actuator|metrics|_profiler|__inspect|\.well-known\/internal)/i,
+      /(?:\/|^)(?:swagger\.json|openapi\.json|\/v[23]\/api-docs|graphql\/(?:schema|introspection))/i,
+      /(?:\.map|\.bak|\.old|\.swp)$/i
+    ];
+  }
+
+  // TASK 1: REVERSE ENGINEERING, SCRAPING & SECRET LEAKAGE DETECTION
+  scanBundleForSecrets(content, filename = "bundle.js") {
+    if (!content || typeof content !== "string") {
+      return { clean: true, findings: [] };
+    }
+
+    const findings = [];
+    for (const sig of this.secretSignatures) {
+      const matches = content.match(sig.regex);
+      if (matches) {
+        for (const token of new Set(matches)) {
+          findings.push({
+            type: sig.type,
+            severity: sig.severity,
+            filename,
+            evidence: `${token.substring(0, 8)}...${token.slice(-4)}`,
+            confidence: 95,
+            actionRequired: "REVOKE_AND_ROTATE"
+          });
+        }
+      }
+    }
+
+    if (filename.endsWith(".map") || filename.includes(".debug.")) {
+      findings.push({
+        type: "Exposed Production Sourcemap / Debug File",
+        severity: "HIGH",
+        filename,
+        evidence: `Directly accessible file: ${filename}`,
+        confidence: 99,
+        actionRequired: "REMOVE_FROM_PUBLIC_WEB_ROOT"
+      });
+    }
+
+    if (findings.length > 0) {
+      this.recordIncident({
+        what_happened: `Hardcoded Secret / Artifact Exposure in ${filename}`,
+        evidence: findings.map(f => `${f.type}: ${f.evidence}`).join("; "),
+        confidence: 95,
+        action_taken: "Flagged for auto-rotation; alerted security team; blocked bundle deployment",
+        follow_up: "Notify secret owner, revoke credentials across provider IAM, enforce pre-commit scan rule."
+      });
+    }
+
+    return {
+      clean: findings.length === 0,
+      totalFindings: findings.length,
+      findings
+    };
+  }
+
+  analyzeRequestTraffic(req) {
+    const ip = req.ip || req.connection?.remoteAddress || req.headers?.["x-forwarded-for"]?.split(",")[0]?.trim() || "127.0.0.1";
+    const path = req.path || req.url || "/";
+    const method = req.method || "GET";
+    const headers = req.headers || {};
+    const ua = headers["user-agent"] || "";
+    const now = Date.now();
+
+    if (!this.trafficHistory.has(ip)) {
+      this.trafficHistory.set(ip, []);
+    }
+    const history = this.trafficHistory.get(ip);
+    history.push({ path, method, headers, timestamp: now });
+
+    const windowStart = now - 300000;
+    while (history.length > 0 && history[0].timestamp < windowStart) history.shift();
+    if (history.length > 200) history.shift();
+
+    let threatScore = 0;
+    const evidenceList = [];
+
+    // 1. Debug / sourcemap probe
+    for (const pat of this.debugEndpointPatterns) {
+      if (pat.test(path)) {
+        threatScore += 50;
+        evidenceList.push(`Probe against debug / internal / sourcemap endpoint: ${path}`);
+        break;
+      }
+    }
+
+    // 2. Sequential ID Walking
+    const idWalk = this.detectSequentialIdWalking(history);
+    if (idWalk.detected) {
+      threatScore += 35;
+      evidenceList.push(`Sequential ID Walking detected: ${idWalk.sequence.slice(0, 4).join(" -> ")}`);
+    }
+
+    // 3. Schema Probing
+    if (path.includes("/graphql") && req.body && JSON.stringify(req.body).includes("__schema")) {
+      threatScore += 45;
+      evidenceList.push("GraphQL introspection probe (__schema query execution)");
+    }
+    if (/(?:openapi\.json|swagger\.json|\/api-docs)/i.test(path)) {
+      threatScore += 40;
+      evidenceList.push(`Schema probe on OpenAPI definition: ${path}`);
+    }
+
+    // 4. Headless browser fingerprinting
+    const headlessCheck = this.detectHeadlessBrowser(headers, ua);
+    if (headlessCheck.isHeadless) {
+      threatScore += headlessCheck.score;
+      evidenceList.push(...headlessCheck.reasons);
+    }
+
+    // 5. Uniform request timing cadence
+    if (history.length >= 8) {
+      const cadence = this.computeTimingCadence(history.slice(-8));
+      if (cadence.isUniform) {
+        threatScore += 30;
+        evidenceList.push(`Uniform machine request interval: stdDev=${cadence.stdDev}ms across 8 requests`);
+      }
+    }
+
+    // 6. High-volume scraping
+    const reqsInLastMinute = history.filter(h => h.timestamp > now - 60000).length;
+    if (reqsInLastMinute > 90) {
+      threatScore += 40;
+      evidenceList.push(`High-volume scraping velocity: ${reqsInLastMinute} requests/min`);
+    }
+
+    const confidence = Math.min(100, threatScore);
+    const decision = this.determineEscalationResponse(confidence, "SCRAPING_ENUMERATION", {
+      ip, path, evidenceList
+    });
+
+    return {
+      ip,
+      confidence,
+      threatScore,
+      action: decision.action,
+      riskLevel: decision.riskLevel,
+      evidence: evidenceList,
+      challengeRequired: decision.challengeRequired
+    };
+  }
+
+  detectSequentialIdWalking(history) {
+    if (history.length < 4) return { detected: false };
+    const idRegex = /\/([0-9]{1,8})(?:\/|\.|$)/;
+    const ids = [];
+
+    for (let i = Math.max(0, history.length - 8); i < history.length; i++) {
+      const match = history[i].path.match(idRegex);
+      if (match) ids.push(parseInt(match[1], 10));
+    }
+
+    if (ids.length >= 4) {
+      let isSequential = true;
+      for (let i = 1; i < ids.length; i++) {
+        if (Math.abs(ids[i] - ids[i - 1]) !== 1) {
+          isSequential = false;
+          break;
+        }
+      }
+      if (isSequential) return { detected: true, sequence: ids };
+    }
+    return { detected: false };
+  }
+
+  detectHeadlessBrowser(headers, ua) {
+    const reasons = [];
+    let score = 0;
+
+    if (/HeadlessChrome|PhantomJS|Puppeteer|Playwright|Selenium|WebDriver/i.test(ua)) {
+      score += 45;
+      reasons.push(`Headless automation user-agent match: '${ua}'`);
+    }
+    if (headers["sec-ch-ua"] && headers["sec-ch-ua"].includes("HeadlessChrome")) {
+      score += 50;
+      reasons.push("Client hints explicit HeadlessChrome disclosure");
+    }
+    if (!headers["accept-language"]) {
+      score += 20;
+      reasons.push("Missing standard Accept-Language header common in programmatic scrapers");
+    }
+    if (headers["x-puppeteer-version"] || headers["x-automation-token"]) {
+      score += 50;
+      reasons.push("Automation framework debugging header discovered");
+    }
+
+    return { isHeadless: score >= 40, score, reasons };
+  }
+
+  computeTimingCadence(recentRequests) {
+    const intervals = [];
+    for (let i = 1; i < recentRequests.length; i++) {
+      intervals.push(recentRequests[i].timestamp - recentRequests[i - 1].timestamp);
+    }
+    const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const variance = intervals.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / intervals.length;
+    const stdDev = Math.sqrt(variance);
+
+    return {
+      isUniform: stdDev < 12 && mean < 2000,
+      stdDev: Math.round(stdDev),
+      mean: Math.round(mean)
+    };
+  }
+
+  checkLookalikeDomain(reportedDomain, officialDomains = ["nexchat-drab.vercel.app", "nexchat.app", "nexchat.io"]) {
+    if (!reportedDomain) return { isCloned: false };
+    const domain = reportedDomain.toLowerCase().trim();
+
+    for (const official of officialDomains) {
+      if (domain === official) return { isCloned: false, official: true };
+      const distance = this.levenshtein(domain, official);
+      if (distance > 0 && distance <= 2) {
+        const incident = {
+          what_happened: `Lookalike Phishing Domain Detected (${domain})`,
+          evidence: `Domain '${domain}' is within edit distance ${distance} of official '${official}'`,
+          confidence: 90,
+          action_taken: "Reported domain to registrar / hosting provider abuse desk for immediate takedown",
+          follow_up: "Blacklist domain in CORS policies and dispatch advisory to authenticated users."
+        };
+        this.recordIncident(incident);
+        return { isCloned: true, target: official, distance, incident };
+      }
+    }
+    return { isCloned: false };
+  }
+
+  levenshtein(a, b) {
+    const matrix = [];
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[b.length][a.length];
+  }
+
+  // TASK 2: AI-DRIVEN ACCOUNT TAKEOVER (ATO) & ANOMALY SENTINEL
+  evaluateLoginAttempt({ username, ip, asn = "UNKNOWN", fingerprint = "default" }) {
+    const now = Date.now();
+    const cleanUser = (username || "unknown").toLowerCase();
+
+    const ipKey = `ip:${ip}`;
+    if (!this.loginAttempts.has(ipKey)) this.loginAttempts.set(ipKey, []);
+    const ipHistory = this.loginAttempts.get(ipKey);
+    ipHistory.push({ username: cleanUser, timestamp: now, asn, fingerprint });
+
+    const tenMinAgo = now - 600000;
+    while (ipHistory.length > 0 && ipHistory[0].timestamp < tenMinAgo) ipHistory.shift();
+
+    const userKey = `user:${cleanUser}`;
+    if (!this.loginAttempts.has(userKey)) this.loginAttempts.set(userKey, []);
+    const userHistory = this.loginAttempts.get(userKey);
+    userHistory.push({ ip, timestamp: now, asn, fingerprint });
+    while (userHistory.length > 0 && userHistory[0].timestamp < tenMinAgo) userHistory.shift();
+
+    let confidence = 0;
+    const evidenceList = [];
+
+    const distinctUsersFromIp = new Set(ipHistory.map(h => h.username)).size;
+    if (distinctUsersFromIp >= 5) {
+      confidence = Math.min(95, 60 + (distinctUsersFromIp * 5));
+      evidenceList.push(`Credential Stuffing: ${distinctUsersFromIp} distinct accounts targeted from IP ${ip} in 10 mins`);
+    }
+
+    const distinctIpsForUser = new Set(userHistory.map(h => h.ip)).size;
+    if (distinctIpsForUser >= 4) {
+      confidence = Math.max(confidence, Math.min(92, 55 + (distinctIpsForUser * 8)));
+      evidenceList.push(`Password Spraying: Account '${cleanUser}' targeted from ${distinctIpsForUser} distributed IPs in 10 mins`);
+    }
+
+    const decision = this.determineEscalationResponse(confidence, "CREDENTIAL_STUFFING_ATO", {
+      username: cleanUser, ip, evidenceList
+    });
+
+    if (decision.action === "HARD_BLOCK") {
+      banIpWithStrikes(ip, `ATO_ATTEMPT: ${evidenceList.join(" | ")}`);
+    }
+
+    return {
+      allowed: decision.action !== "HARD_BLOCK",
+      confidence,
+      action: decision.action,
+      riskLevel: decision.riskLevel,
+      challengeRequired: decision.challengeRequired,
+      evidence: evidenceList
+    };
+  }
+
+  evaluateBehavioralBiometrics({ keystrokeDelays = [], mouseEventsCount = 0, touchEventsCount = 0, captchaSolveDurationMs = 5000, cdpActive = false, isAutofillOrPaste = false }) {
+    let botScore = 0;
+    const evidenceList = [];
+    let keystrokeAnomaly = false;
+
+    if (!isAutofillOrPaste && keystrokeDelays.length >= 6) {
+      const mean = keystrokeDelays.reduce((a, b) => a + b, 0) / keystrokeDelays.length;
+      const variance = keystrokeDelays.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / keystrokeDelays.length;
+      const stdDev = Math.sqrt(variance);
+
+      if (stdDev < 4.0) {
+        keystrokeAnomaly = true;
+        botScore += 35;
+        evidenceList.push(`Inhuman synthetic typing cadence: stdDev=${stdDev.toFixed(2)}ms across ${keystrokeDelays.length} keys`);
+      }
+    }
+
+    if (mouseEventsCount === 0 && touchEventsCount === 0) {
+      botScore += 35;
+      evidenceList.push("Form submitted with zero pointer movement, zero hover entropy, and zero touch events");
+    }
+
+    if (cdpActive) {
+      botScore += 50;
+      evidenceList.push("Chrome DevTools Protocol (CDP) / Automation Runtime detected on client session");
+    }
+
+    if (captchaSolveDurationMs < 650) {
+      botScore += 40;
+      evidenceList.push(`Abnormally fast CAPTCHA completion: ${captchaSolveDurationMs}ms (typical human > 2500ms)`);
+    }
+
+    const otherSignalsCount = (mouseEventsCount === 0 && touchEventsCount === 0 ? 1 : 0) + (cdpActive ? 1 : 0) + (captchaSolveDurationMs < 650 ? 1 : 0);
+    if (keystrokeAnomaly && otherSignalsCount === 0) {
+      botScore = Math.min(30, botScore);
+    }
+
+    const confidence = Math.min(100, botScore);
+    const decision = this.determineEscalationResponse(confidence, "HUMAN_MIMICKING_BOT", { evidenceList });
+
+    return {
+      isBot: confidence >= 40,
+      confidence,
+      action: decision.action,
+      riskLevel: decision.riskLevel,
+      challengeRequired: decision.challengeRequired,
+      evidence: evidenceList
+    };
+  }
+
+  evaluateSessionAnomaly({
+    userId,
+    sessionToken,
+    currentIp,
+    currentCoords,
+    prevIp,
+    prevCoords,
+    prevTimestamp,
+    currentFingerprint,
+    prevFingerprint,
+    actionType = "READ",
+    credentialChanges = []
+  }) {
+    let anomalyScore = 0;
+    const evidenceList = [];
+    const now = Date.now();
+
+    if (currentCoords && prevCoords && prevTimestamp) {
+      const hoursElapsed = Math.max(0.01, (now - prevTimestamp) / 3600000);
+      const distanceKm = this.calculateHaversineDistance(
+        prevCoords.lat, prevCoords.lon,
+        currentCoords.lat, currentCoords.lon
+      );
+      const velocityKmH = distanceKm / hoursElapsed;
+
+      if (velocityKmH > 900 && distanceKm > 300) {
+        const hasSecondSignal = (currentFingerprint && prevFingerprint && currentFingerprint !== prevFingerprint) ||
+          actionType === "SENSITIVE_MUTATION" ||
+          credentialChanges.length > 0 ||
+          (prevIp && currentIp && prevIp !== currentIp);
+
+        if (hasSecondSignal) {
+          anomalyScore += 85;
+          evidenceList.push(`Impossible Travel Confirmed: Moved ${Math.round(distanceKm)} km in ${hoursElapsed.toFixed(2)}h (${Math.round(velocityKmH)} km/h velocity between ${prevIp} and ${currentIp}) with secondary anomaly signal`);
+        } else {
+          anomalyScore += 65;
+          evidenceList.push(`Potential Impossible Travel: Moved ${Math.round(distanceKm)} km in ${hoursElapsed.toFixed(2)}h (${Math.round(velocityKmH)} km/h velocity). Step-up challenge issued to allow for mobile network/VPN error.`);
+        }
+      }
+    }
+
+    if (currentFingerprint && prevFingerprint && currentFingerprint !== prevFingerprint) {
+      anomalyScore += 45;
+      evidenceList.push(`Active session bearer token presented on mismatched hardware fingerprint (${currentFingerprint.substring(0, 8)} vs ${prevFingerprint.substring(0, 8)})`);
+    }
+
+    if (actionType === "SENSITIVE_MUTATION") {
+      if (currentFingerprint !== prevFingerprint) {
+        anomalyScore += 50;
+        evidenceList.push("Sensitive mutation (password/MFA/email update) attempted from an unrecognized new device");
+      }
+      if (credentialChanges.length >= 2) {
+        anomalyScore += 40;
+        evidenceList.push(`Rapid multi-attribute credential tampering: [${credentialChanges.join(", ")}]`);
+      }
+    }
+
+    const confidence = Math.min(100, anomalyScore);
+    const decision = this.determineEscalationResponse(confidence, "SESSION_ANOMALY_ATO", {
+      userId, currentIp, evidenceList, sessionToken
+    });
+
+    return {
+      safe: decision.action !== "HARD_BLOCK",
+      confidence,
+      action: decision.action,
+      riskLevel: decision.riskLevel,
+      evidence: evidenceList,
+      sessionRevocationRequired: decision.action === "HARD_BLOCK"
+    };
+  }
+
+  calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  evaluateSupportSocialEngineering({ transcript = "", audioTelemetry = {} }) {
+    let socialEngScore = 0;
+    const evidenceList = [];
+
+    const socialPatterns = [
+      { regex: /bypass\s+(?:mfa|2fa|authenticator|two-factor)/i, weight: 35, desc: "Direct request to bypass MFA verification" },
+      { regex: /lost\s+(?:all\s+)?backup\s+codes.*urgent/i, weight: 30, desc: "Urgency-driven backup code loss claim" },
+      { regex: /override\s+(?:security|policy|protocol)/i, weight: 40, desc: "Support agent override demand" },
+      { regex: /send\s+(?:the\s+)?reset\s+link\s+to\s+(?:my\s+)?(?:new|different)\s+email/i, weight: 45, desc: "Account hijacking via arbitrary email redirection" },
+      { regex: /temporary\s+password.*right\s+now/i, weight: 30, desc: "Immediate temporary credential pressure" }
+    ];
+
+    for (const pat of socialPatterns) {
+      if (pat.regex.test(transcript)) {
+        socialEngScore += pat.weight;
+        evidenceList.push(pat.desc);
+      }
+    }
+
+    if (audioTelemetry.isVoice) {
+      if (audioTelemetry.syntheticCadence === true) {
+        socialEngScore += 45;
+        evidenceList.push("Audio stream exhibits synthetic AI speech synthesizer prosody artifacts");
+      }
+      if (audioTelemetry.frequencyCutoffAnomaly === true || audioTelemetry.requiresCallbackVerification === true) {
+        socialEngScore += 35;
+        evidenceList.push("Voice authentication flags require out-of-band call-back verification for high-risk account reset");
+      }
+    }
+
+    const confidence = Math.min(100, socialEngScore);
+    const decision = this.determineEscalationResponse(confidence, "SUPPORT_SOCIAL_ENGINEERING", {
+      transcriptPreview: transcript.substring(0, 100),
+      evidenceList
+    });
+
+    return {
+      suspicious: confidence >= 40,
+      confidence,
+      action: decision.action,
+      riskLevel: decision.riskLevel,
+      challengeRequired: decision.challengeRequired,
+      evidence: evidenceList
+    };
+  }
+
+  determineEscalationResponse(confidence, incidentType, metadata) {
+    let action = "LOG_AND_MONITOR";
+    let riskLevel = "LOW";
+    let challengeRequired = false;
+
+    if (confidence >= 80) {
+      action = "HARD_BLOCK";
+      riskLevel = "HIGH";
+      this.recordIncident({
+        what_happened: `HIGH-CONFIDENCE THREAT INTERCEPTED: [${incidentType}]`,
+        evidence: metadata.evidenceList ? metadata.evidenceList.join(" | ") : "Multiple high-severity anomalies",
+        confidence,
+        action_taken: "Session terminated, tokens revoked, sensitive actions frozen, IP jailed in Layer 0, SOC alerted.",
+        follow_up: "Requires human security review and out-of-band identity re-verification before unlock."
+      });
+    } else if (confidence >= 40) {
+      action = "STEP_UP_CHALLENGE";
+      riskLevel = "MEDIUM";
+      challengeRequired = true;
+      this.recordIncident({
+        what_happened: `MEDIUM-CONFIDENCE RISK DETECTED: [${incidentType}]`,
+        evidence: metadata.evidenceList ? metadata.evidenceList.join(" | ") : "Medium-severity anomaly pattern",
+        confidence,
+        action_taken: "Enforced step-up MFA/Passkey challenge and applied strict rate limit.",
+        follow_up: "Escalate to human review if user fails step-up challenge twice."
+      });
+    } else {
+      action = "LOG_AND_MONITOR";
+      riskLevel = "LOW";
+      if (metadata.evidenceList && metadata.evidenceList.length > 0) {
+        this.recordIncident({
+          what_happened: `LOW-CONFIDENCE TELEMETRY EVENT: [${incidentType}]`,
+          evidence: metadata.evidenceList.join(" | "),
+          confidence,
+          action_taken: "Logged to internal telemetry ring buffer; continued active monitoring.",
+          follow_up: "None required unless correlated with subsequent anomaly spikes."
+        });
+      }
+    }
+
+    return { action, riskLevel, challengeRequired };
+  }
+
+  recordIncident({ what_happened, evidence, confidence, action_taken, follow_up }) {
+    const incident = {
+      incident_id: `INC-NEXCHAT-${Date.now()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
+      timestamp: new Date().toISOString(),
+      what_happened,
+      evidence,
+      confidence,
+      action_taken,
+      follow_up
+    };
+
+    this.incidentLogs.unshift(incident);
+    if (this.incidentLogs.length > 500) this.incidentLogs.pop();
+    return incident;
+  }
+
+  getRecentIncidents(limit = 10) {
+    return this.incidentLogs.slice(0, limit);
+  }
+}
+
+export const cloudDefenseSentinel = new CloudDefenseSentinel();
+
+// ==============================================================================
+// 14. OBJECT-LEVEL AUTHORIZATION & BOLA/IDOR SHIELD
+// ==============================================================================
+export class ObjectAuthGuard {
+  /**
+   * Creates an Express/Connect middleware enforcing ownership validation
+   * Core Invariant: Returns 404 (NEVER 403) to prevent IDOR enumeration oracles
+   */
+  static requireOwnership(fetchObjectFn, options = {}) {
+    const getUserId =
+      options.userIdExtractor ||
+      ((req) =>
+        req.user?.id ||
+        req.user?.sub ||
+        req.session?.userId ||
+        (options.allowHeaderFallback === true ? req.headers["x-user-id"] : null));
+
+    return async (req, res, next) => {
+      try {
+        const currentUserId = getUserId(req);
+        if (!currentUserId) {
+          return res.status(401).json({ error: "AUTHENTICATION_REQUIRED" });
+        }
+
+        const resource = await fetchObjectFn(req);
+        const resourceOwner = resource?.ownerId ?? resource?.userId ?? resource?.accountId;
+
+        // Core Invariant: Return 404 whether resource is missing OR not owned by the user
+        if (!resource || resourceOwner === undefined || resourceOwner === null || String(resourceOwner) !== String(currentUserId)) {
+          return res.status(404).json({ error: "NOT_FOUND" });
+        }
+
+        req.authorizedResource = resource;
+        if (typeof next === "function") next();
+      } catch (err) {
+        return res.status(500).json({ error: "AUTHORIZATION_EVALUATION_ERROR" });
+      }
+    };
+  }
+
+  static verifyOwnership(resource, userId) {
+    if (!resource || !userId) return false;
+    const ownerId = resource.ownerId ?? resource.userId ?? resource.accountId;
+    if (ownerId === undefined || ownerId === null) return false;
+    return String(ownerId) === String(userId);
+  }
+}
+
+export const objectAuthGuard = ObjectAuthGuard;

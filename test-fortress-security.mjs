@@ -8,6 +8,11 @@ import {
   nexchatCdnShield,
   constantTimeSafeEqual,
   applySecurityHeaders,
+  cloudDefenseSentinel,
+  objectAuthGuard,
+  banIpWithStrikes,
+  isIpBanned,
+  submitJailAppeal,
 } from "./api/_security.js";
 
 console.log("==================================================================");
@@ -251,6 +256,183 @@ assert.doesNotThrow(() => {
 }, "Mismatched lengths must not throw RangeError");
 console.log(" [PASS] constantTimeSafeEqual evaluated in constant-time with zero RangeError hazard");
 
+// ================================================================
+// [TEST 10] LAYER 34 BUNDLE & SOURCE MAP SECRET LEAKAGE SCANNER
+// ================================================================
+console.log("\n[TEST 10] Testing Layer 34 Bundle Secret Scanning...");
+const mockBundle = `
+  const config = {
+    geminiKey: "AQ.Ab8RN6ABCDEF1234567890abcdef",
+    firebaseKey: "AIzaSyD-1234567890abcdef1234567890abcde",
+    openAiKey: "sk-proj-1234567890abcdef1234567890",
+    awsKey: "AKIAIOSFODNN7EXAMPLE",
+  };
+`;
+const secretScan = cloudDefenseSentinel.scanBundleForSecrets(mockBundle, "dist/main.bundle.js");
+assert.strictEqual(secretScan.clean, false, "Must detect secrets in bundle");
+assert(secretScan.totalFindings >= 4, "Must detect at least 4 secrets");
+const exposedMapScan = cloudDefenseSentinel.scanBundleForSecrets("console.log(1)", "dist/app.js.map");
+assert.strictEqual(exposedMapScan.clean, false, "Must flag exposed source maps");
+console.log(" [PASS] Successfully detected hardcoded secrets and sourcemap exposure");
+
+// ================================================================
+// [TEST 11] SEQUENTIAL ID WALKING & SCRAPING VELOCITY DETECTION
+// ================================================================
+console.log("\n[TEST 11] Testing Sequential ID Walking & Scraping Velocity...");
+const scrapingIp = "198.51.100.88";
+for (let id = 101; id <= 106; id++) {
+  cloudDefenseSentinel.analyzeRequestTraffic({
+    ip: scrapingIp,
+    path: `/api/users/${id}/profile`,
+    method: "GET",
+    headers: { "user-agent": "Mozilla/5.0" }
+  });
+}
+const idWalkAnalysis = cloudDefenseSentinel.analyzeRequestTraffic({
+  ip: scrapingIp,
+  path: `/api/users/107/profile`,
+  method: "GET",
+  headers: { "user-agent": "Mozilla/5.0" }
+});
+assert(idWalkAnalysis.evidence.some(e => e.includes("Sequential ID Walking")), "Must flag sequential ID walking sequence");
+console.log(" [PASS] Sequential ID walking pattern successfully flagged");
+
+// ================================================================
+// [TEST 12] LOOKALIKE PHISHING DOMAIN DETECTION
+// ================================================================
+console.log("\n[TEST 12] Testing Lookalike Phishing Domain Monitor...");
+const officialDomainCheck = cloudDefenseSentinel.checkLookalikeDomain("nexchat.app");
+assert.strictEqual(officialDomainCheck.isCloned, false, "Official domain must not be flagged");
+const phishingDomain = "nexchat-login.app"; // within distance
+const typoCheck = cloudDefenseSentinel.checkLookalikeDomain("nexcaht.app", ["nexchat.app"]);
+assert.strictEqual(typoCheck.isCloned, true, "Typo lookalike must be flagged");
+assert(typoCheck.distance <= 2, "Distance must be <= 2");
+console.log(" [PASS] Phishing lookalike domain detected via Levenshtein distance analysis");
+
+// ================================================================
+// [TEST 13] CREDENTIAL STUFFING & PASSWORD SPRAYING (ATO DEFENSE)
+// ================================================================
+console.log("\n[TEST 13] Testing Credential Stuffing & Password Spraying...");
+// Credential stuffing: 1 IP targets 5 distinct usernames
+const stuffIp = "203.0.113.55";
+let stuffResult;
+for (let i = 1; i <= 6; i++) {
+  stuffResult = cloudDefenseSentinel.evaluateLoginAttempt({
+    username: `user_${i}`,
+    ip: stuffIp
+  });
+}
+assert.strictEqual(stuffResult.action, "HARD_BLOCK", "Credential stuffing must trigger HARD_BLOCK");
+assert(stuffResult.confidence >= 80, "Confidence must be >= 80");
+console.log(" [PASS] Credential stuffing detected: Action=HARD_BLOCK (Confidence: " + stuffResult.confidence + "%)");
+
+// Password spraying: 1 username hit from 4 distinct IPs
+const targetUser = "corporate_admin";
+let sprayResult;
+for (let i = 1; i <= 5; i++) {
+  sprayResult = cloudDefenseSentinel.evaluateLoginAttempt({
+    username: targetUser,
+    ip: `198.51.100.${10 + i}`
+  });
+}
+assert.strictEqual(sprayResult.action, "HARD_BLOCK", "Password spraying must trigger HARD_BLOCK");
+console.log(" [PASS] Password spraying detected: Action=HARD_BLOCK (Confidence: " + sprayResult.confidence + "%)");
+
+// ================================================================
+// [TEST 14] BEHAVIORAL BIOMETRICS & HUMAN-MIMICKING BOT DEFENSE
+// ================================================================
+console.log("\n[TEST 14] Testing Behavioral Biometrics & Keystroke Cadence...");
+const botBiometrics = cloudDefenseSentinel.evaluateBehavioralBiometrics({
+  keystrokeDelays: [120, 121, 120, 121, 120, 121], // Inhuman stdDev < 4ms
+  mouseEventsCount: 0,
+  touchEventsCount: 0,
+  cdpActive: true,
+  captchaSolveDurationMs: 400
+});
+assert.strictEqual(botBiometrics.isBot, true, "Synthetic typing + CDP + fast CAPTCHA must be bot");
+assert.strictEqual(botBiometrics.action, "HARD_BLOCK", "High-confidence bot must trigger HARD_BLOCK");
+console.log(" [PASS] Human-mimicking bot identified with confidence: " + botBiometrics.confidence + "%");
+
+// ================================================================
+// [TEST 15] IMPOSSIBLE TRAVEL VELOCITY & SESSION ANOMALY
+// ================================================================
+console.log("\n[TEST 15] Testing Impossible Travel Velocity Calculation...");
+const travelCheck = cloudDefenseSentinel.evaluateSessionAnomaly({
+  userId: "usr_9912",
+  sessionToken: "tok_secret_session_token",
+  currentIp: "198.51.100.99",
+  currentCoords: { lat: 51.5074, lon: -0.1278 }, // London
+  prevIp: "203.0.113.10",
+  prevCoords: { lat: 40.7128, lon: -74.0060 },  // New York (~5570 km)
+  prevTimestamp: Date.now() - 3600000,          // 1 hour ago (~5570 km/h)
+  currentFingerprint: "fp_mismatch_hardware",
+  prevFingerprint: "fp_original_device",
+  actionType: "SENSITIVE_MUTATION",
+  credentialChanges: ["password", "mfa_reset"]
+});
+assert.strictEqual(travelCheck.safe, false, "Impossible travel with credential mutation must be blocked");
+assert.strictEqual(travelCheck.action, "HARD_BLOCK", "Action must be HARD_BLOCK");
+console.log(" [PASS] Impossible travel flagged: Action=HARD_BLOCK (Confidence: " + travelCheck.confidence + "%)");
+
+// ================================================================
+// [TEST 16] OBJECT-LEVEL AUTHORIZATION GUARD (BOLA/IDOR 404 INVARIANT)
+// ================================================================
+console.log("\n[TEST 16] Testing Object-Level Authorization Guard (BOLA/IDOR 404)...");
+// 16a. Unauthenticated request -> 401
+const mockDb = {
+  "doc_100": { id: "doc_100", ownerId: "user_alice", secret: "confidential" },
+};
+const middleware = objectAuthGuard.requireOwnership(async (req) => mockDb[req.params?.id]);
+
+const unauthReq = { params: { id: "doc_100" } };
+const { res: unauthRes } = createMockReqRes();
+let nextCalled = false;
+await middleware(unauthReq, unauthRes, () => { nextCalled = true; });
+assert.strictEqual(unauthRes.statusCode, 401, "Unauthenticated request must return 401");
+
+// 16b. Authenticated as Bob querying Alice's resource -> MUST RETURN 404 NOT FOUND (NEVER 403)
+const bobReq = { params: { id: "doc_100" }, user: { id: "user_bob" } };
+const { res: bobRes } = createMockReqRes();
+nextCalled = false;
+await middleware(bobReq, bobRes, () => { nextCalled = true; });
+assert.strictEqual(bobRes.statusCode, 404, "Unauthorized query must return 404 (NEVER 403) to prevent IDOR oracle");
+assert.strictEqual(bobRes.body?.error, "NOT_FOUND", "Error code must be NOT_FOUND");
+
+// 16c. Alice queries her own resource -> Allowed, next() invoked
+const aliceReq = { params: { id: "doc_100" }, user: { id: "user_alice" } };
+const { res: aliceRes } = createMockReqRes();
+nextCalled = false;
+await middleware(aliceReq, aliceRes, () => { nextCalled = true; });
+assert.strictEqual(nextCalled, true, "Authorized owner must pass to next()");
+assert.strictEqual(aliceReq.authorizedResource?.ownerId, "user_alice");
+console.log(" [PASS] BOLA/IDOR Guard enforces uniform 404 oracle-neutralization invariant");
+
+// ================================================================
+// [TEST 17] PROGRESSIVE STRIKE-BASED AUTO-JAIL ESCALATION
+// ================================================================
+console.log("\n[TEST 17] Testing Strike-Based Progressive Auto-Jail...");
+const strikeIp = "192.0.2.144";
+// Strike 1 -> 5 min
+const ban1 = banIpWithStrikes(strikeIp, "First minor infraction");
+assert.strictEqual(ban1.strikes, 1);
+assert.strictEqual(ban1.durationHours, 5 / 60);
+assert.strictEqual(isIpBanned(strikeIp), true);
+
+// Strike 2 -> 30 min
+const ban2 = banIpWithStrikes(strikeIp, "Second infraction");
+assert.strictEqual(ban2.strikes, 2);
+assert.strictEqual(ban2.durationHours, 30 / 60);
+
+// Strike 3 -> 24 hours
+const ban3 = banIpWithStrikes(strikeIp, "Third repeated violation");
+assert.strictEqual(ban3.strikes, 3);
+assert.strictEqual(ban3.durationHours, 24);
+
+// Appeal submission
+const appeal = submitJailAppeal(strikeIp, "I believe my IP was flagged due to VPN node rotation");
+assert.strictEqual(appeal.appealed, true);
+console.log(" [PASS] Progressive strike escalation verified: 5m -> 30m -> 24h with human appeal flow");
+
 console.log("\n==================================================================");
-console.log("🎉 ALL 9 NEXCHAT FORTRESS SECURITY & TAB 30/32 DEFENSE TESTS PASSED 100%!");
+console.log("🎉 ALL 17 NEXCHAT FORTRESS SECURITY & TAB 30/32/34 DEFENSE TESTS PASSED 100%!");
 console.log("==================================================================");
