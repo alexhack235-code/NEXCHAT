@@ -92,6 +92,12 @@ function validateSyntaxSafety(code) {
 }
 
 export default async function handler(req, res) {
+  // Consolidated Cloud Defense Sentinel Subsystem
+  if (req.query?.mode === 'cloud-defense' || (req.url && req.url.includes('cloud-defense'))) {
+    const defenseModule = await import('./_cloud-defense.js');
+    return defenseModule.default(req, res);
+  }
+
   applySecurityHeaders(res);
   if (handleCors(req, res)) return;
 
