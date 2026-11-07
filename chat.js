@@ -10018,6 +10018,7 @@ async function openChat(uid, username, profilePic, chatType = 'direct') {
 
   initAiModelSelection();
 }
+window.openChat = openChat;
 
 document.getElementById('poll-btn')?.addEventListener('click', () => {
   if (currentChatType === 'group' && currentChatUser) {

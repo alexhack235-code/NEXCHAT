@@ -139,6 +139,34 @@ class FortressSecurityShield {
     };
   }
 
+  initBiometricsCollector() {
+    if (typeof window === 'undefined') return;
+    try {
+      window.addEventListener('keydown', () => {
+        const now = Date.now();
+        if (this._lastKeyTime > 0) {
+          const delay = now - this._lastKeyTime;
+          if (delay < 5000) this.keystrokeDelays.push(delay);
+          if (this.keystrokeDelays.length > 50) this.keystrokeDelays.shift();
+        }
+        this._lastKeyTime = now;
+      }, { passive: true });
+
+      window.addEventListener('mousemove', () => {
+        this.mouseEventsCount++;
+      }, { passive: true });
+
+      window.addEventListener('touchstart', () => {
+        this.touchEventsCount++;
+      }, { passive: true });
+
+      window.addEventListener('paste', () => {
+        this.isPasteDetected = true;
+      }, { passive: true });
+    } catch (_) {}
+  }
+
+
   /**
    * Layer 33: Autonomous AI Attacker Detection Heuristic
    * Detects when "elif attacker is ai"

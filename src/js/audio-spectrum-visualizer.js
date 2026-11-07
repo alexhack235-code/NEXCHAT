@@ -283,6 +283,7 @@
         </div>
       `;
 
+      const subBox = document.getElementById('liveCallSubtitlesBox');
       if (subBox && subBox.parentNode) {
         subBox.parentNode.insertBefore(wrap, subBox);
       } else if (callContainer) {
