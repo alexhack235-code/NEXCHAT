@@ -799,13 +799,21 @@ export function initChat2() {
       });
     });
 
-    // Enter key sends question to ChronEX AI
+    // Enter key sends question to ChronEX AI or executes commands
     searchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         const q = searchInput.value.trim();
         if (!q) return;
         e.preventDefault();
         searchInput.value = '';
+
+        // Auto-Heal 5-Stage command shortcut
+        if (q.toLowerCase() === '/heal' || q.toLowerCase() === 'heal' || q.toLowerCase() === 'auto-heal') {
+          if (window.nexchatAutoHeal?.openAutoHealHUD) {
+            window.nexchatAutoHeal.openAutoHealHUD();
+            return;
+          }
+        }
 
         // Open ChronEX AI chat view
         createAndOpenChat(PRELOADED_CONTACTS[0]);
