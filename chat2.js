@@ -521,7 +521,7 @@ export async function askChronexAI(promptText) {
 /**
  * Real-Time Neural Translation Handler
  */
-export async function translateMessageElement(bubbleEl) {
+export async function translateMessageElement(bubbleEl, requestedTarget = null) {
   if (!bubbleEl) return;
 
   // Extract raw text
@@ -533,17 +533,22 @@ export async function translateMessageElement(bubbleEl) {
 
   if (!rawText) return;
 
-  // Check if translation box already present
+  // Check if translation box already present and user toggled it off without picking new target
   let box = bubbleEl.querySelector('.nex-translated-box');
-  if (box) {
+  if (box && !requestedTarget) {
     box.remove();
     return;
   }
 
-  box = document.createElement('div');
-  box.className = 'nex-translated-box';
+  if (!box) {
+    box = document.createElement('div');
+    box.className = 'nex-translated-box';
+    bubbleEl.appendChild(box);
+  }
+
   box.innerHTML = `<span class="nex-trans-label"><i class="fa-solid fa-spinner fa-spin"></i> Translating...</span>`;
-  bubbleEl.appendChild(box);
+
+  let targetLang = requestedTarget || window.nexPreferredLang || localStorage.getItem('nex_preferred_lang') || 'English';
 
   try {
     const res = await fetch('/api/translate', {
@@ -554,20 +559,60 @@ export async function translateMessageElement(bubbleEl) {
       },
       body: JSON.stringify({
         text: rawText,
-        targetLang: window.nexPreferredLang || 'English',
+        targetLang: targetLang,
         sourceLang: 'auto'
       })
     });
 
     const data = await res.json();
-    const translated = data.translatedText || data.result || data.response || 'Translation unavailable';
-    const detected = data.detectedLang || 'Auto';
-    const target = data.targetLang || 'English';
+    let translated = data.translatedText || data.result || data.response || 'Translation unavailable';
+    let detected = data.detectedLang || 'Auto';
+    let target = data.targetLang || targetLang;
+
+    // Smart auto-alternate: if detected language matches target (e.g. English -> English), translate to Spanish
+    if (!requestedTarget && (detected.toLowerCase().includes(target.toLowerCase()) || target.toLowerCase().includes(detected.toLowerCase()))) {
+      const alternateTarget = target.toLowerCase().includes('english') ? 'Spanish' : 'English';
+      const resAlt = await fetch('/api/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-nexchat-secret': NEXCHAT_SECRET },
+        body: JSON.stringify({ text: rawText, targetLang: alternateTarget, sourceLang: 'auto' })
+      });
+      const dataAlt = await resAlt.json();
+      if (dataAlt && dataAlt.translatedText) {
+        translated = dataAlt.translatedText;
+        target = dataAlt.targetLang || alternateTarget;
+        detected = dataAlt.detectedLang || detected;
+      }
+    }
 
     box.innerHTML = `
-      <span class="nex-trans-label"><i class="fa-solid fa-language"></i> ${escapeHtml(detected)} → ${escapeHtml(target)}</span>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; gap: 8px;">
+        <span class="nex-trans-label" style="margin: 0;"><i class="fa-solid fa-language"></i> ${escapeHtml(detected)} &rarr; ${escapeHtml(target)}</span>
+        <select class="nex-trans-quick-switch" style="background: rgba(0,0,0,0.45); border: 1px solid rgba(0,255,157,0.3); color: #00ff9d; font-size: 10px; border-radius: 4px; padding: 1px 4px; outline: none; cursor: pointer;">
+          <option value="" disabled selected>Switch Lang</option>
+          <option value="English">English</option>
+          <option value="Spanish">Spanish</option>
+          <option value="French">French</option>
+          <option value="German">German</option>
+          <option value="Russian">Russian</option>
+          <option value="Arabic">Arabic</option>
+          <option value="Nigerian Pidgin">Pidgin</option>
+          <option value="Yoruba">Yoruba</option>
+          <option value="Igbo">Igbo</option>
+          <option value="Hausa">Hausa</option>
+          <option value="Chinese">Chinese</option>
+          <option value="Japanese">Japanese</option>
+        </select>
+      </div>
       <div class="nex-trans-content">${escapeHtml(translated)}</div>
     `;
+
+    box.querySelector('.nex-trans-quick-switch')?.addEventListener('change', (e) => {
+      const nextLang = e.target.value;
+      if (nextLang) {
+        translateMessageElement(bubbleEl, nextLang);
+      }
+    });
   } catch (err) {
     box.innerHTML = `<span style="color: #ff4d4d; font-size: 11px;"><i class="fa-solid fa-triangle-exclamation"></i> Translation failed</span>`;
   }
