@@ -16579,6 +16579,16 @@ async function setupInitialization() {
   initializeBasicUI();
   setupLinkedDeviceListeners();
 
+  // Desktop convenience: Auto-engage Chronex AI so the right conversation view is immediately active
+  if (typeof window !== 'undefined' && window.innerWidth > 768) {
+    setTimeout(() => {
+      if (!currentChatUser && typeof openChat === 'function') {
+        console.log('[NEXCHAT] Auto-engaging Chronex AI on desktop...');
+        openChat('chronex-ai', 'Chronex AI', 'chronex-ai.jpg', 'ai');
+      }
+    }, 500);
+  }
+
   onAuthStateChanged(auth, async (user) => {
     // Clear any pending redirect timers
     if (authRedirectTimer) {
