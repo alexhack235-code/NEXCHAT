@@ -11,17 +11,10 @@ import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.
  * - ZERO database writes, ZERO notifications, ZERO chat messages.
  */
 
-const FALLBACK_PRO_KEYS = [
-  Buffer.from('QVEuQWI4Uk42THhqc0Y2VUEyZU5icmlrcGg0dlpLdU96NXFObVFVa1BQaXVJM0hkcXlaTlE=', 'base64').toString('utf8'),
-  Buffer.from('QVEuQWI4Uk42SVpnQm95RVprZlM1NDk4X3lvMlE1WjE1T3dKall3N2hhdTUtMzlkVlF6b3c=', 'base64').toString('utf8'),
-  Buffer.from('QVEuQWI4Uk42TFEzbEZpNmszcGUxNkxWcmhPVTVjLXMwQlhnNHczUG4tWUdPdHRxWngxSmc=', 'base64').toString('utf8'),
-  Buffer.from('QVEuQWI4Uk42SjBsZ0FiMkVCTUMwQ3JDU2d1YlNDQjByOWY2dVVsdUdMaHo5b2E2aE15UXc=', 'base64').toString('utf8'),
-];
-
-let globalKeyCounter = 0;
-
 function getApiKeys() {
   const keys = [];
+  if (process.env.GEMINI_BACKUP_KEY) keys.push(process.env.GEMINI_BACKUP_KEY.trim());
+  if (process.env.GEMINI_API_KEY) keys.push(process.env.GEMINI_API_KEY.trim());
   if (process.env.GEMINI_API_KEY_1) keys.push(process.env.GEMINI_API_KEY_1.trim());
   if (process.env.GEMINI_API_KEY_2) keys.push(process.env.GEMINI_API_KEY_2.trim());
   if (process.env.GEMINI_API_KEYS) {
@@ -30,21 +23,12 @@ function getApiKeys() {
       if (trimmed && !keys.includes(trimmed)) keys.push(trimmed);
     });
   }
-  if (process.env.GEMINI_API_KEY && !keys.includes(process.env.GEMINI_API_KEY.trim())) {
-    keys.push(process.env.GEMINI_API_KEY.trim());
-  }
-  FALLBACK_PRO_KEYS.forEach(k => {
-    if (!keys.includes(k)) keys.push(k);
-  });
   return keys;
 }
 
 const CANDIDATE_MODELS = [
-  'gemini-2.5-flash',
   'gemini-2.0-flash',
-  'gemini-1.5-flash',
-  'gemini-flash-latest',
-  'gemini-2.5-flash-lite'
+  'gemini-1.5-flash'
 ];
 
 export default async function handler(req, res) {
@@ -158,13 +142,17 @@ Audio is not clear enough to be translated.
     const key = keys[kIdx];
 
     for (const model of CANDIDATE_MODELS) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 5000);
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
         const geminiResp = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(payload),
+          signal: controller.signal
         });
+        clearTimeout(timer);
 
         if (geminiResp.ok) {
           const data = await geminiResp.json();

@@ -1,3 +1,4 @@
+import { getNextKey, markKeyDead, markKeyHealthy, callGroqAI, callGeminiAI } from '../lib/translator.js';
 import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.js';
 
 /**
@@ -9,42 +10,6 @@ import { enforceRateLimit, applySecurityHeaders, handleCors } from './_security.
  * - If speech/content is empty: "No speech to summarize".
  * - ZERO database writes, ZERO notifications, ZERO chat messages.
  */
-
-const FALLBACK_PRO_KEYS = [
-  Buffer.from('QVEuQWI4Uk42THhqc0Y2VUEyZU5icmlrcGg0dlpLdU96NXFObVFVa1BQaXVJM0hkcXlaTlE=', 'base64').toString('utf8'),
-  Buffer.from('QVEuQWI4Uk42SVpnQm95RVprZlM1NDk4X3lvMlE1WjE1T3dKall3N2hhdTUtMzlkVlF6b3c=', 'base64').toString('utf8'),
-  Buffer.from('QVEuQWI4Uk42TFEzbEZpNmszcGUxNkxWcmhPVTVjLXMwQlhnNHczUG4tWUdPdHRxWngxSmc=', 'base64').toString('utf8'),
-  Buffer.from('QVEuQWI4Uk42SjBsZ0FiMkVCTUMwQ3JDU2d1YlNDQjByOWY2dVVsdUdMaHo5b2E2aE15UXc=', 'base64').toString('utf8'),
-];
-
-let globalKeyCounter = 0;
-
-function getApiKeys() {
-  const keys = [];
-  if (process.env.GEMINI_API_KEY_1) keys.push(process.env.GEMINI_API_KEY_1.trim());
-  if (process.env.GEMINI_API_KEY_2) keys.push(process.env.GEMINI_API_KEY_2.trim());
-  if (process.env.GEMINI_API_KEYS) {
-    process.env.GEMINI_API_KEYS.split(',').forEach(k => {
-      const trimmed = k.trim();
-      if (trimmed && !keys.includes(trimmed)) keys.push(trimmed);
-    });
-  }
-  if (process.env.GEMINI_API_KEY && !keys.includes(process.env.GEMINI_API_KEY.trim())) {
-    keys.push(process.env.GEMINI_API_KEY.trim());
-  }
-  FALLBACK_PRO_KEYS.forEach(k => {
-    if (!keys.includes(k)) keys.push(k);
-  });
-  return keys;
-}
-
-const CANDIDATE_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-flash',
-  'gemini-flash-latest',
-  'gemini-2.5-flash-lite'
-];
 
 function sanitizeToTwoBullets(raw) {
   if (!raw) return 'No speech to summarize';
@@ -109,63 +74,50 @@ export default async function handler(req, res) {
     });
   }
 
-  // Hidden System Instruction
   const systemInstruction = `You are an executive voice note summarizer.
-Your ONLY task is to summarize the provided spoken transcript into EXACTLY 2 bullet points.
+Your ONLY task is to summarize the provided transcript into EXACTLY 2 concise bullet points.
 STRICT RULES:
 - Output ONLY 2 bullet points, each starting with "• ".
 - Zero conversational intro, zero greeting, zero pleasantries, zero closing.
 - Do NOT say "I have received", "I am ready", "Here is the summary", or "ChronEX Neural Cognition".
 - If the content has no meaningful speech or is blank, return "No speech to summarize".`;
 
-  const payload = {
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: `Transcript to summarize into 2 bullets:\n"${cleanText}"` }]
-      }
-    ],
-    systemInstruction: {
-      parts: [{ text: systemInstruction }]
-    },
-    generationConfig: {
-      temperature: 0.1,
-      maxOutputTokens: 512
-    }
-  };
+  const userPrompt = `Transcript to summarize into 2 bullets:\n"${cleanText}"`;
 
-  const keys = getApiKeys();
-  const startIdx = (globalKeyCounter++) % (keys.length || 1);
+  // Rotate through keys
+  const maxRetries = 5;
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const active = getNextKey();
 
-  for (let step = 0; step < keys.length; step++) {
-    const kIdx = (startIdx + step) % keys.length;
-    const key = keys[kIdx];
-
-    for (const model of CANDIDATE_MODELS) {
-      try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`;
-        const geminiResp = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+    try {
+      let rawText = '';
+      if (active.provider === 'gemini') {
+        const gem = await callGeminiAI(active.key, systemInstruction, userPrompt);
+        rawText = gem.text;
+      } else {
+        const groq = await callGroqAI(active.key, [
+          { role: 'system', content: systemInstruction },
+          { role: 'user', content: userPrompt }
+        ], {
+          max_tokens: 256,
+          temperature: 0.1
         });
+        rawText = groq.text;
+      }
 
-        if (geminiResp.ok) {
-          const data = await geminiResp.json();
-          let candidateText = (data.candidates?.[0]?.content?.parts?.[0]?.text || '').trim();
-          const cleanSummary = sanitizeToTwoBullets(candidateText);
-
-          if (cleanSummary) {
-            return res.status(200).json({
-              success: true,
-              result: cleanSummary,
-              response: cleanSummary,
-              messageId
-            });
-          }
-        }
-      } catch (_) {
-        break;
+      if (rawText) {
+        const cleanSummary = sanitizeToTwoBullets(rawText);
+        markKeyHealthy(active.key);
+        return res.status(200).json({
+          success: true,
+          result: cleanSummary,
+          response: cleanSummary,
+          messageId
+        });
+      }
+    } catch (err) {
+      if (err.status === 429 || err.status === 401 || err.status === 408) {
+        markKeyDead(active.key, err.status || 500, err.message);
       }
     }
   }
