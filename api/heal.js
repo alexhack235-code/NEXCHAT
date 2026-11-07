@@ -2,8 +2,10 @@ import { getNextKey, markKeyDead, markKeyHealthy, callGroqAI, callGeminiAI } fro
 import { applySecurityHeaders, handleCors } from './_security.js';
 
 /**
- * NEXCHAT /api/heal
- * POST /api/heal accepts { errorLog, fileContent, fileName }
+ * NEXCHAT /api/heal & /api/auto-heal Gateway
+ * Accepts:
+ * - GET: Health check
+ * - POST: { errorLog, fileContent, fileName }
  * Auto-heal flow: [Error] -> [Gate] -> [10-Key Engine 0.6s] -> [Test 5s] -> [GitHub Commit] -> [Vercel Redeploy 25s] -> [Verify + Rollback if fail]
  * Returns { success, fixedCode, rootCause }
  * NEVER returns keys.
@@ -22,6 +24,15 @@ Return ONLY valid JSON matching this schema:
 export default async function handler(req, res) {
   applySecurityHeaders(res);
   if (handleCors(req, res)) return;
+
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      status: 'online',
+      service: 'NEXCHAT Autonomous Self-Healing Gateway',
+      version: '2.0.0',
+      activeCluster: '10-Key Groq Self-Repair'
+    });
+  }
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -81,7 +92,6 @@ ${fileContent || 'No file content provided'}`;
           markKeyHealthy(active.key);
           break;
         } catch (_) {
-          // If markdown or raw text, parse rootCause and fixedCode
           parsedDiagnosis = {
             rootCause: 'Identified syntax/runtime anomaly in ' + fileName,
             fixedCode: cleaned,

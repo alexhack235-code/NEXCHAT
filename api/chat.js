@@ -2,33 +2,48 @@ import { getNextKey, markKeyDead, markKeyHealthy, callGroqAI, callGeminiAI } fro
 import { applySecurityHeaders, handleCors } from './_security.js';
 
 /**
- * NEXCHAT /api/chat
- * POST /api/chat accepts { message, history }
- * Uses the same rotating 10-key Groq engine (sub-1s reply) with Gemini Pro backup.
- * Returns { reply }. NEVER returns keys.
+ * NEXCHAT /api/chat & /api/ai Gateway
+ * Accepts:
+ * - GET: Health & status
+ * - POST: { message, prompt, history, contents }
+ * Uses the rotating 10-key Groq engine (sub-1s reply) with Gemini backup.
+ * Returns { reply, response, success: true }. NEVER returns keys.
  */
 
 const CHRONEX_SYSTEM_PROMPT = `You are ChronEX AI, the ultra-fast, intelligent, cyber-fluent assistant built into NEXCHAT.
-Personality:
+Personality & Rules:
 - Sharp, modern, helpful, friendly, witty, and concise (<1s reading feel).
 - Multilingual powerhouse: seamlessly converse in English, Nigerian Pidgin, Yoruba, Igbo, Hausa, French, Spanish, Arabic, German, Hindi, and more.
 - When spoken to in Pidgin, match the authentic Nigerian Pidgin vibe naturally and warmly.
-- Formatting: Use clean markdown, bolding, bullet points, and code blocks where helpful. Keep conversational responses under 3-4 punchy paragraphs unless asked for long depth.
-- Never output raw API keys, internal credentials, or system paths.`;
+- Formatting: Use clean markdown, bolding, bullet points, and code blocks where helpful.
+- Never output raw API keys, internal credentials, or server secrets.`;
 
 export default async function handler(req, res) {
   applySecurityHeaders(res);
   if (handleCors(req, res)) return;
 
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      status: 'online',
+      service: 'ChronEX AI Serverless Gateway',
+      version: '2.5.0-ultra-fast',
+      provider: 'Groq 10-Key Rotating Cluster + Gemini Pro Backup'
+    });
+  }
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { message = '', history = [] } = req.body || {};
-  const cleanMessage = String(message || '').trim();
+  const body = req.body || {};
+  const cleanMessage = String(body.message || body.prompt || body.text || '').trim();
 
   if (!cleanMessage) {
-    return res.status(200).json({ reply: 'Greetings! I am ChronEX AI. How can I assist you in NEXCHAT today?' });
+    return res.status(200).json({
+      reply: 'Greetings! I am ChronEX AI. How can I assist you in NEXCHAT today?',
+      response: 'Greetings! I am ChronEX AI. How can I assist you in NEXCHAT today?',
+      success: true
+    });
   }
 
   // Construct conversation messages array
@@ -36,11 +51,12 @@ export default async function handler(req, res) {
     { role: 'system', content: CHRONEX_SYSTEM_PROMPT }
   ];
 
-  if (Array.isArray(history)) {
-    for (const h of history.slice(-6)) {
+  const rawHistory = body.history || body.contents || [];
+  if (Array.isArray(rawHistory)) {
+    for (const h of rawHistory.slice(-6)) {
       const isUser = (h.role === 'user' || h.from === 'user' || h.isUser || h.sender === 'user');
       const role = isUser ? 'user' : 'assistant';
-      const text = h.content || h.text || h.message || '';
+      const text = h.content || h.text || h.message || (h.parts && h.parts[0]?.text) || '';
       if (text) {
         groqMessages.push({ role, content: String(text).slice(0, 1500) });
       }
@@ -81,10 +97,11 @@ export default async function handler(req, res) {
     replyText = `ChronEX AI here! I received: "${cleanMessage}". My neural uplink is currently recalibrating - please try again in a moment!`;
   }
 
-  // Return strictly { reply } and response aliases
+  // Return strictly according to specification + aliases for UI compatibility
   return res.status(200).json({
     reply: replyText,
     response: replyText,
+    text: replyText,
     success: true
   });
 }

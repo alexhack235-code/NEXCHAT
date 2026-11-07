@@ -136,6 +136,18 @@
       "destination": "/src/$1"
     },
     {
+      "source": "/api/auto-heal",
+      "destination": "/api/heal"
+    },
+    {
+      "source": "/api/test-email",
+      "destination": "/api/send-email-alert"
+    },
+    {
+      "source": "/api/ai",
+      "destination": "/api/chat"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     }

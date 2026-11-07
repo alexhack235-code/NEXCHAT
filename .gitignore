@@ -73,3 +73,6 @@ NEXCHAT_API_KEYS_FOR_DEVELOPER.txt
 # Logs directory
 logs
 logs/
+
+.vercel
+.env*
