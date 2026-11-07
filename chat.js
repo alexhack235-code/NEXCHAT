@@ -22665,13 +22665,10 @@ function setupMobileFeatures() {
 }
 
 function showChatDetailView() {
-  const sections = [
-    'chatListView',
-    'statusContainer', 
-    'groupsContainer',
-    'announcementsContainer',
-    'callHistoryContainer'
-  ];
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const sections = isMobile
+    ? ['chatListView', 'statusContainer', 'groupsContainer', 'announcementsContainer', 'callHistoryContainer']
+    : ['statusContainer', 'groupsContainer', 'announcementsContainer', 'callHistoryContainer'];
   
   sections.forEach(id => {
     const el = document.getElementById(id);
@@ -22680,6 +22677,14 @@ function showChatDetailView() {
       el.classList.add('hidden');
     }
   });
+
+  if (!isMobile) {
+    const listView = document.getElementById('chatListView');
+    if (listView) {
+      listView.classList.remove('hidden');
+      listView.style.setProperty('display', 'flex', 'important');
+    }
+  }
   
   const chatDetailView = document.getElementById('chatDetailView');
   const bottomNav = document.querySelector('.bottom-nav');
