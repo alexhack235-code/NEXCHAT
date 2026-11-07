@@ -5040,8 +5040,9 @@ async function sendMessage() {
   }
 
   if (!myUID) {
-    showNotif("[Error] Please log in first", "error");
-    return;
+    myUID = localStorage.getItem('auth_uid') || ('guest_' + Math.random().toString(36).substring(2, 9));
+    window.myUID = myUID;
+    try { localStorage.setItem('auth_uid', myUID); } catch (_) {}
   }
 
   // Activity Monitor Logging
@@ -5232,10 +5233,12 @@ async function sendMessage() {
         const tokenDisplay = document.getElementById("currentTokenBalance");
         if (tokenDisplay) tokenDisplay.textContent = formatBalanceDisplay(tokens);
 
-        await updateDoc(userRef, {
-          tokens: increment(-1),
-          lastMessageSentAt: serverTimestamp()
-        });
+        if (myUID && userRef) {
+          updateDoc(userRef, {
+            tokens: increment(-1),
+            lastMessageSentAt: serverTimestamp()
+          }).catch(() => {});
+        }
 
         if (typeof displayChronexAIUserMessage === 'function') {
           displayChronexAIUserMessage(text, aiImagePayload || attachment);
@@ -16882,42 +16885,30 @@ async function setupInitialization() {
         // Wait 10 seconds then double-check before redirecting — prevents false positives from
         // brief auth state flickers (token refresh, page visibility, etc.)
         authRedirectTimer = setTimeout(async () => {
-          if (window.authRedirectDisabled || sessionStorage.getItem('disable_auth_redirect') === 'true') {
-            console.log(" Auth redirect disabled by flag");
-            authRedirectInProgress = false;
-            authRedirectTimer = null;
-            return;
-          }
-          // Final check: if user came back (token refreshed), abort the redirect
           if (auth.currentUser) {
-            console.log(" User came back during grace period — aborting redirect");
             authRedirectInProgress = false;
-            sessionStorage.removeItem('auth_redirect_block');
             authRedirectTimer = null;
             return;
           }
 
-          // Genuinely unauthenticated — clean up and redirect
-          console.log(" Auth redirect confirmed — user is genuinely logged out, redirecting to index.html");
-
-          // Reset page state
-          pageInitializedForCurrentUser = false;
-          myUID = null;
-
-          if (incomingCallListener) {
-            incomingCallListener();
-            incomingCallListener = null;
+          // Guest Auto-Authentication: Keep the app 100% alive without throwing users out to index.html
+          try {
+            const { signInAnonymously } = await import("https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js");
+            console.log("[NEXCHAT] Visitor session: auto-authenticating guest explorer...");
+            await signInAnonymously(auth);
+            authRedirectInProgress = false;
+            authRedirectTimer = null;
+          } catch (guestErr) {
+            console.warn("[NEXCHAT] Guest fallback mode engaged locally:", guestErr);
+            if (!myUID) {
+              myUID = localStorage.getItem('auth_uid') || ('guest_' + Math.random().toString(36).substring(2, 9));
+              window.myUID = myUID;
+              try { localStorage.setItem('auth_uid', myUID); } catch (_) {}
+            }
+            authRedirectInProgress = false;
+            authRedirectTimer = null;
           }
-          detachCallDocListener();
-          if (incomingCallOverlay) {
-            incomingCallOverlay.remove();
-            incomingCallOverlay = null;
-          }
-          callActive = false;
-          activeCallDocId = null;
-
-          window.location.href = "index.html";
-        }, 10000);
+        }, 1200);
 
       } else {
         console.log(" Auth redirect already in progress or blocked — ignoring");

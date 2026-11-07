@@ -1381,7 +1381,7 @@ function initNexshotFusionIntro() {
     alreadySeen = sessionStorage.getItem('nexshot_fusion_seen') === 'true';
   } catch (_) { }
 
-  if (!alreadySeen) {
+  if (!alreadySeen && window.location.search.includes('intro=true')) {
     startAnimation(false);
   } else {
     overlay.classList.add('fusion-completed');
